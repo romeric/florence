@@ -1,0 +1,80 @@
+import numpy as np
+from Core.Supplementary.Tensors.Tensors import *
+# from Core.Supplementary.Tensors.Tensors_Sym import *
+
+# nvar is the sum of dimensions of vectorial field(s) we are solving for.
+# for instance in continuum 2d problems nvar is 2 since we solve for ux and uy
+# for 3d beam problems nvar is 6 since solve for ux, uy, uz, tx, ty and tz
+
+#####################################################################################################
+								# Isotropic AnisotropicMooneyRivlin_1_Electromechanics Model
+#####################################################################################################
+
+
+class AnisotropicMooneyRivlin_1_Electromechanics(object):
+	"""docstring for AnisotropicMooneyRivlin_1_Electromechanics"""
+	def __init__(self, ndim):
+		super(AnisotropicMooneyRivlin_1_Electromechanics, self).__init__()
+		self.ndim = ndim
+	def Get(self):
+		self.nvar = self.ndim+1
+		self.modelname = 'AnisotropicMooneyRivlin_1_Electromechanics'
+		return self.nvar, self.modelname
+
+	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0):
+
+		# Using Einstein summation (using numpy einsum call)
+		d = np.einsum
+
+		# Get material constants (5 in this case)
+		mu = MaterialArgs.mu
+		lamb = MaterialArgs.lamb
+
+		I = StrainTensors.I
+		J = StrainTensors.J
+		b = StrainTensors.b
+		H_ = StrainTensors.H
+		G = np.dot(H_.T,H_)
+		g = np.dot(H_,H_.T)
+
+		# Update Lame constants
+		mu2 = mu - lamb*(J-1.0)
+		lamb2 = lamb*(2.0*J-1.0) - mu
+
+		C_Voigt = Voigt( lamb2*d('ij,kl',I,I)+mu2*(d('ik,jl',I,I)+d('il,jk',I,I)) ,1)
+
+		
+		# Coupled Tensor (e - 3rd order)
+		e_voigt = Voigt( np.zeros((ndim,ndim,ndim)),1)
+			
+		# Dielectric Tensor (Permittivity - 2nd order)
+		Permittivity = np.zeros((ndim,ndim))
+		# Permittivity = MaterialArgs.eps_1* np.eye(ndim,ndim)
+
+		# Build the Hessian
+		factor = -1.
+		H1 = np.concatenate((C_Voigt,factor*e_voigt),axis=1)
+		H2 = np.concatenate((factor*e_voigt.T,Permittivity),axis=1)
+		H_Voigt = np.concatenate((H1,H2),axis=0)
+
+		MaterialArgs.H_VoigtSize = H_Voigt.shape[0]
+
+		return H_Voigt
+
+
+
+	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx):
+
+		b = StrainTensors.b 
+		J = StrainTensors.J
+		I = StrainTensors.I
+
+		mu = MaterialArgs.mu
+		lamb = MaterialArgs.lamb
+
+		return 1.0*mu/J*b+(lamb*(J-1.0)-mu)*I 
+
+
+	def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx):
+		ndim = StrainTensors.I.shape[0]
+		return np.zeros((ndim,1))
