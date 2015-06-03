@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<VTKFile byte_order="LittleEndian" type="UnstructuredGrid" version="0.1">
+<UnstructuredGrid>
+<Piece NumberOfCells="8" NumberOfPoints="27">
+<Points>
+<DataArray Name="vertices" NumberOfComponents="3" format="ascii" type="Float32">2.97897e-05 0.540164 10.064 0 0 0 -6.72247e-05 2.53381 9.90511 0 2 0 1.99997 0.540164 10.064 2 0 0 2.00007 2.53381 9.90511 2 2 0 0.0045895 0.169927 5.05553 3.18669e-06 1.53655 9.98464 -0.00465604 2.16708 4.94071 0 1 0 1.99541 0.169927 5.05553 2 1.53655 9.98464 2.00466 2.16708 4.94071 2 1 0 1 0 0 1 0.539593 10.0644 1 2 0 1 2.53321 9.90472 -3.84791e-05 1.16659 4.99811 2.00004 1.16659 4.99811 1 0.172356 5.05531 1 2.16952 4.94069 1 1 0 1 1.53614 9.98464 1 1.16897 4.99799 </DataArray>
+</Points>
+<Cells>
+<DataArray Name="connectivity" format="ascii" type="Int32">0 9 20 8 17 25 26 22 17 25 26 22 4 13 21 12 9 2 10 20 25 19 23 26 25 19 23 26 13 6 14 21 8 20 11 1 22 26 24 16 22 26 24 16 12 21 15 5 20 10 3 11 26 23 18 24 26 23 18 24 21 14 7 15 </DataArray>
+<DataArray Name="offsets" format="ascii" type="Int32">8 16 24 32 40 48 56 64 </DataArray>
+<DataArray Name="types" format="ascii" type="UInt8">12 12 12 12 12 12 12 12 </DataArray>
+</Cells>
+<PointData>
+<DataArray Name="Uz 0" NumberOfComponents="1" format="ascii" type="Float32">-219434 -225672 -222543 -220930 -220173 -221137 -227190 -220783 -221152 -197.758 -89.798 -181.124 -7.25915 761.852 1.47495 0.49165 831.16 0.29499 -2598.29 -2655.1 -2600.46 44.466 -42.17 44.2509 14.7503 -41.3027 8.85018 </DataArray>
+<DataArray Name="Uz 1" NumberOfComponents="1" format="ascii" type="Float32">-216592 -219434 -225672 -221562 -220930 -215104 -223162 -220007 -220891 89.4387 199.232 91.273 -624.907 8.24245 0.49165 0.49165 0.29499 0.29499 2661.09 2642.55 2699.35 27.7952 -14.9654 14.7503 14.7503 8.85018 8.85018 </DataArray>
+<DataArray Name="Uz 2" NumberOfComponents="1" format="ascii" type="Float32">-222543 -216592 -220173 -221137 -221562 -218724 -220783 -221651 -220757 182.599 -87.9637 -760.869 -0.49165 625.89 0.49165 -830.57 0.29499 0.163883 2644.71 -2616.84 71.6706 -14.7503 1.70538 14.7503 59.003 8.85018 4.91677 </DataArray>
+</PointData>
+<CellData/>
+</Piece>
+</UnstructuredGrid>
+</VTKFile>

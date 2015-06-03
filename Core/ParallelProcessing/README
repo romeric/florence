@@ -1,0 +1,10 @@
+The current parallel processing has no external dependencies.
+parmap is distributed with the packages, so all should be okay:
+
+
+Also check pathos which makes pickling easier (install them from github only):
+	https://github.com/uqfoundation/pathos
+	https://github.com/uqfoundation/dill
+	http://stackoverflow.com/questions/5442910/python-multiprocessing-pool-map-for-multiple-arguments
+	http://stackoverflow.com/questions/8804830/python-multiprocessing-pickling-error
+	http://stackoverflow.com/questions/29121979/python-pathos-multiprocessing-vs-class-methods
