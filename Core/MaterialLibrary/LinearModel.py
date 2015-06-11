@@ -23,7 +23,7 @@ class LinearModel(object):
 		self.modelname = 'LinearModel'
 		return self.nvar, self.modelname
 
-	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0):
+	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 
 		# Using Einstein summation (using numpy einsum call)
 		d = np.einsum
@@ -43,7 +43,7 @@ class LinearModel(object):
 
 
 
-	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx):
+	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 
 
 		strain = StrainTensors.strain

@@ -1,0 +1,3 @@
+from HigherOrderMeshingTri import HighOrderMeshTri, HighOrderMeshTri_UNSTABLE
+from HigherOrderMeshingTet import HighOrderMeshTet, HighOrderMeshTet_UNSTABLE
+from HigherOrderMeshingQuad import HighOrderMeshQuad

@@ -177,7 +177,7 @@ def asmble(elem):
 	B = np.random.rand(n,n)
 	A.dot(B)
 
-from Core.MeshGeneration.HigherOrderConnectivityCoords import *
+
 def vtkWriter1():
 	C=1
 	# fname = '/home/roman/Dropbox/Python/Problems/FiniteElements/Hollow_Arc_Tri/Mesh_Sqaure_Tri_80.dat'
@@ -504,9 +504,42 @@ def unique_floats():
 	# print np.size(A)
 
 
+
+def migakit():
+	from igakit.cad import circle
+	from igakit.plot import plt as iplt
+
+	circle = circle(radius=1, center=None, angle=None)
+	print circle.knots
+	# print circle.reverse
+	print circle.weights
+	print circle.points
+	print circle.array
+
+	help(circle)
+
+	# plt.plot(circle.array[:,0],circle.array[:,1] )
+	# plt.show()
+
+	# iplt.plot(circle,color='b')
+	# iplt.plot(circle,color='g')
+	# iplt.show()
+
+
+from Core.MeshGeneration.HigherOrderMeshing.HigherOrderMeshingTet import duplicate
+a=np.arange(10).reshape(5,2).astype(np.float64)
+a[2,0]=8.0; a[2,1]=9.00001
+a[1,0]=8; a[1,1]=9
+# a[4,1]=8
+print a
+# print np.round(a,decimals=10)
+print duplicate(a,decimals=5)
+
 if __name__ == '__main__':
 
-	unique_floats()
+	# migakit()
+
+	# unique_floats()
 
 	# plotelasticcurves()
 	# animationss()

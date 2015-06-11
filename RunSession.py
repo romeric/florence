@@ -1,11 +1,12 @@
-# THE RunSession ROUTINES RUNS A SPECIFIC SESSION, FOR INSTANCE, A FEM, A BEM OR A COUPLED SESSION.
-# THE ENTIRE CODE IS RUN FROM HERE.
+#!/usr/bin/env pypy
+""" THE RunSession ROUTINE RUNS A SPECIFIC SESSION, FOR INSTANCE, A FEM, A BEM OR A COUPLED SESSION.
+	THE ENTIRE CODE IS EXECUTED FROM HERE."""
 
 
 import imp, os, sys, time, cProfile	
 from datetime import datetime
 import numpy as np
-import scipy as sp 
+# import scipy as sp 
 import multiprocessing as MP
 # from numba.decorators import jit
 # import cython
@@ -28,21 +29,22 @@ class MainData(object):
  	C = 2									# ORDER OF BASIS FUNCTIONS (NOTE THAT C=P-1, WHERE P IS THE POLYNOMIAL DEGREE)
  	norder = 2  							# ORDER/NO OF QUADRATURE POINTS
  	plot = (0,3)							# PLOT FLAG FOR BEM 
- 	nrplot = (0,'last')						# PLOT FLAG FOR NEWTON-RAPHSON CONVERGENCE
- 	write = 1								# FLAG FOR WRITING THE RESULTS IN VTK/MAT/EPS/DAT ETC
+ 	nrplot = (1,'last')						# PLOT FLAG FOR NEWTON-RAPHSON CONVERGENCE
+ 	write = 0								# FLAG FOR WRITING THE RESULTS IN VTK/MAT/EPS/DAT ETC
  	Parallel = True 						# MULTI-PROCESSING 
  	nCPU = MP.cpu_count()					# CPU COUNT FOR MULTI-PROCESSING
- 	# Parallel = False
+ 	Parallel = False
  	# nCPU = 8
- 	
+
+
 
 
 
 # RUN THE APPROPRIATE SESSION
-import Main
+# import Main
 from Main.FiniteElements.MainFEM import main
-import Main.BoundaryElements.Main_BEM3D as BEM3D
-from Core.FiniteElements.ConvergencePlot import ConvergencePlot
+# import Main.BoundaryElements.Main_BEM3D as BEM3D
+# from Core.FiniteElements.ConvergencePlot import ConvergencePlot
 #----------------------------------------------------------------------------------------------------------------------
 
 # FEM SESSION

@@ -23,38 +23,79 @@ class Incrementally_Linearised_NeoHookean(object):
 		self.modelname = 'Incrementally_Linearised_NeoHookean'
 		return self.nvar, self.modelname
 
-	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0):
+	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
+
+		H_Voigt_k = MaterialArgs.H_Voigt[:,:,elem,gcounter]
 
 		# Using Einstein summation (using numpy einsum call)
 		d = np.einsum
 		I = StrainTensors.I
 
-		# Get material constants (5 in this case)
+		# GET MATERIAL CONSTANTS
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
 
-		# Fourth order elasticity tensor
-		H_Voigt = Voigt(lamb*d('ij,kl',I,I)+mu*(d('ik,jl',I,I)+d('il,jk',I,I)) ,1)
+		I = StrainTensors.I
+		J = StrainTensors.J
+
+		# UPDATE MATERIAL CONSTANTS
+		# mu2 = mu - lamb*(J-1.0)
+		# lamb2 = lamb*(2.0*J-1.0) - mu
+
+		# Jk = J 
+		Jk = 1
+		mu2 = Jk*(mu - lamb*(J-1.0))
+		lamb2 = Jk*(lamb*(2.0*J-1.0) - mu)
+
+		# print lamb2, lamb
+
+		# 4TH ORDER ELASTICITY TENSOR
+		H_Voigt = Voigt( lamb2*d('ij,kl',I,I)+mu2*(d('ik,jl',I,I)+d('il,jk',I,I)) ,1)
 
 		MaterialArgs.H_VoigtSize = H_Voigt.shape[0]
 
+		MaterialArgs.H_Voigt[:,:,elem,gcounter] = H_Voigt
 
-		return H_Voigt
+		# return H_Voigt
+		return H_Voigt_k
 
 
 
-	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx):
+	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
+
+		Stress_k = MaterialArgs.Sigma[:,:,elem,gcounter]
+		H_Voigt_k = MaterialArgs.H_Voigt[:,:,elem,gcounter]
 
 
 		strain = StrainTensors.strain
 		I = StrainTensors.I
+		J = StrainTensors.J 
+		b = StrainTensors.b 
 
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
 
 		# return 2*mu*strain + lamb*np.trace(strain)*I 
 		# USE FASTER TRACE FUNCTION
-		return 2*mu*strain + lamb*trace(strain)*I  
+		# return 2*mu*strain + lamb*trace(strain)*I  
+
+		# Jk=J
+		Jk=1
+
+		mu2 = Jk*(mu - lamb*(J-1.0))
+		lamb2 = Jk*(lamb*(2.0*J-1.0) - mu)
+
+		# print strain
+
+		Jk_sigma_k = Jk*(1.0*mu/J*b+(lamb*(J-1.0)-mu)*I)
+		# print Jk_sigma_k
+
+		# STORE THIS VALUE 
+		MaterialArgs.Sigma[:,:,elem,gcounter] = Jk_sigma_k
+
+		# return Jk_sigma_k + lamb2*trace(strain)*I + 2*mu2*strain
+		# REPORT OLD VALUE
+		return np.dot(Stress_k,(I+strain))+ np.dot(H_Voigt_k,Voigt(strain),1)
 		
 
 

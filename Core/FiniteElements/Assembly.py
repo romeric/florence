@@ -2,25 +2,41 @@ import numpy as np
 import scipy as sp
 import numpy.linalg as la
 from scipy.sparse import coo_matrix, csc_matrix 
-import imp, os, sys
-
-pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
-Gett = imp.load_source('MeshGeneration',pwd+'/Core/MeshGeneration/GetInteriorCoordinates.py')
 
 from ElementalMatrices.GetElementalMatrices import *
-from SparseAssembly import SparseAssembly
+from SparseAssembly import SparseAssembly_Step_2
+
+from ElementalMatrices.GetElementalMatricesSmall import *
+from SparseAssemblySmall import SparseAssemblySmall
 
 
 # PARALLEL PROCESSING ROUTINES
 # from multiprocessing import Pool
 import multiprocessing as MP
+import Core.ParallelProcessing.parmap as parmap
 # from pathos.multiprocessing import ProcessingPool as Pool
 # from pathos.multiprocessing import ProcessingPool
 
-import Core.ParallelProcessing.parmap as parmap
 
+#-------------- MAIN ASSEMBLY ROUTINE --------------------#
+#---------------------------------------------------------#
 
 def Assembly(MainData,nmesh,Eulerx,TotalPot):
+	if nmesh.nelem > 100000:
+		stiffness, T, F, mass = AssemblyLarge(MainData,nmesh,Eulerx,TotalPot)
+	else:
+		stiffness, T, F, mass = AssemblySmall(MainData,nmesh,Eulerx,TotalPot)
+		
+
+	return stiffness, T, F, mass
+
+
+
+
+#-------------- ASSEMBLY ROUTINE FOR RELATIVELY LARGER MATRICES (NELEM > 100000)------------------------#
+#-------------------------------------------------------------------------------------------------------#
+
+def AssemblyLarge(MainData,nmesh,Eulerx,TotalPot):
 
 	# GET MESH DETAILS
 	C = MainData.C
@@ -36,40 +52,58 @@ def Assembly(MainData,nmesh,Eulerx,TotalPot):
 	J_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.int64)
 	V_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.float64)
 
-	I_mass=[];J_mass=[];V_mass=[]
+	# THE I & J VECTORS OF LOCAL STIFFNESS MATRIX DO NOT CHANGE, HENCE COMPUTE THEM ONCE
+	I_stiff_elem = np.repeat(np.arange(0,nvar*nodeperelem),nvar*nodeperelem,axis=0)
+	J_stiff_elem = np.tile(np.arange(0,nvar*nodeperelem),nvar*nodeperelem)
+
+	I_mass=[];J_mass=[];V_mass=[]; I_mass_elem = []; J_mass_elem = []
 	if MainData.Analysis !='Static':
 		# ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF MASS MATRIX
 		I_mass=np.zeros((nvar*nodeperelem)**2*nmesh.elements.shape[0],dtype=np.int64)
 		J_mass=np.zeros((nvar*nodeperelem)**2*nmesh.elements.shape[0],dtype=np.int64)
 		V_mass=np.zeros((nvar*nodeperelem)**2*nmesh.elements.shape[0],dtype=np.float64)
 
-	F = np.zeros((nmesh.points.shape[0]*nvar,1)); T =  np.zeros((nmesh.points.shape[0]*nvar,1))  
+		# THE I & J VECTORS OF LOCAL MASS MATRIX DO NOT CHANGE, HENCE COMPUTE THEM ONCE
+		I_mass_elem = np.repeat(np.arange(0,nvar*nodeperelem),nvar*nodeperelem,axis=0)
+		J_mass_elem = np.tile(np.arange(0,nvar*nodeperelem),nvar*nodeperelem)
+
+
+	# ALLOCATE RHS VECTORS
+	F = np.zeros((nmesh.points.shape[0]*nvar,1)); T =  np.zeros((nmesh.points.shape[0]*nvar,1)) 
+	# ASSIGN OTHER NECESSARY MATRICES
+	full_current_row_stiff = []; full_current_column_stiff = []; coeff_stiff = [] 
+	full_current_row_mass = []; full_current_column_mass = []; coeff_mass = []
 	mass = []
-	Tt =  np.zeros((nmesh.points.shape[0]*nvar,1)) 
+
 	if MainData.Parallel:
 		# COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
-		ParallelTuple = parmap.map(GetElementalMatrices,np.arange(0,nelem),MainData,nmesh.elements,nmesh.points,Eulerx,TotalPot,pool=MP.Pool(processes=MainData.nCPU))
+		ParallelTuple = parmap.map(GetElementalMatrices,np.arange(0,nelem),MainData,nmesh.elements,nmesh.points,nodeperelem,
+			Eulerx,TotalPot,I_stiff_elem,J_stiff_elem,I_mass_elem,J_mass_elem,pool=MP.Pool(processes=MainData.nCPU))
 
 	for elem in range(0,nelem):
 
 		if MainData.Parallel:
 			# UNPACK PARALLEL TUPLE VALUES
-			I_stiff_elem = ParallelTuple[elem][0]; J_stiff_elem = ParallelTuple[elem][1]; V_stiff_elem = ParallelTuple[elem][2]
+			full_current_row_stiff = ParallelTuple[elem][0]; full_current_column_stiff = ParallelTuple[elem][1]; coeff_stiff = ParallelTuple[elem][2]
 			t = ParallelTuple[elem][3]; f = ParallelTuple[elem][4]
-			I_mass_elem = ParallelTuple[elem][5]; J_mass_elem = ParallelTuple[elem][6]; V_mass_elem = ParallelTuple[elem][6]
+			full_current_row_mass = ParallelTuple[elem][5]; full_current_column_mass = ParallelTuple[elem][6]; coeff_mass = ParallelTuple[elem][6]
 
 		else:
 			# COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
-			I_stiff_elem, J_stiff_elem, V_stiff_elem, t, f, I_mass_elem, J_mass_elem, V_mass_elem = GetElementalMatrices(elem,MainData,nmesh.elements,nmesh.points,
-				Eulerx,TotalPot)
+			full_current_row_stiff, full_current_column_stiff, coeff_stiff, t, f, full_current_row_mass, full_current_column_mass, coeff_mass = GetElementalMatrices(elem,
+				MainData,nmesh.elements,nmesh.points,nodeperelem,Eulerx,TotalPot,I_stiff_elem,J_stiff_elem,I_mass_elem,J_mass_elem)
 
 		# SPARSE ASSEMBLY - STIFFNESS MATRIX
-		I_stiffness, J_stiffness, V_stiffness = SparseAssembly(I_stiff_elem,J_stiff_elem,V_stiff_elem,I_stiffness,J_stiffness,V_stiffness,
-			elem,nvar,nodeperelem,nmesh.elements)
+		# I_stiffness, J_stiffness, V_stiffness = SparseAssembly_Step_2(I_stiffness,J_stiffness,V_stiffness,full_current_row_stiff,full_current_column_stiff,coeff_stiff,
+		# 	nvar,nodeperelem,elem)
+		I_stiffness[(nvar*nodeperelem)**2*elem:(nvar*nodeperelem)**2*(elem+1)] = full_current_row_stiff
+		J_stiffness[(nvar*nodeperelem)**2*elem:(nvar*nodeperelem)**2*(elem+1)] = full_current_column_stiff
+		V_stiffness[(nvar*nodeperelem)**2*elem:(nvar*nodeperelem)**2*(elem+1)] = coeff_stiff
 
 		if MainData.Analysis != 'Static':
 			# SPARSE ASSEMBLY - MASS MATRIX
-			I_mass, J_mass, V_mass = SparseAssembly(I_mass_elem,J_mass_elem,V_mass_elem,I_mass,J_mass,V_mass,elem,nvar,nodeperelem,nmesh.elements)
+			I_mass, J_mass, V_mass = SparseAssembly_Step_2(I_mass,J_mass,V_mass,full_current_row_mass,full_current_column_mass,coeff_mass,
+				nvar,nodeperelem,elem)
 
 		if MainData.AssemblyParameters.ExternalLoadNature == 'Nonlinear':
 			# RHS ASSEMBLY
@@ -94,6 +128,92 @@ def Assembly(MainData,nmesh,Eulerx,TotalPot):
 
 
 
+
+#-------------- ASSEMBLY ROUTINE FOR RELATIVELY SMALL SIZE MATRICES (NELEM < 100000)--------------------#
+#-------------------------------------------------------------------------------------------------------#
+
+def AssemblySmall(MainData,nmesh,Eulerx,TotalPot):
+
+	# GET MESH DETAILS
+	C = MainData.C
+	nvar = MainData.nvar
+	ndim = MainData.ndim
+
+	# nelem = nmesh.elements.shape[0]
+	nelem = nmesh.nelem
+	nodeperelem = nmesh.elements.shape[1]
+
+	# ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF STIFFNESS MATRIX
+	I_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.int64)
+	J_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.int64)
+	V_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.float64)
+
+	I_mass=[];J_mass=[];V_mass=[]
+	if MainData.Analysis !='Static':
+		# ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF MASS MATRIX
+		I_mass=np.zeros((nvar*nodeperelem)**2*nmesh.elements.shape[0],dtype=np.int64)
+		J_mass=np.zeros((nvar*nodeperelem)**2*nmesh.elements.shape[0],dtype=np.int64)
+		V_mass=np.zeros((nvar*nodeperelem)**2*nmesh.elements.shape[0],dtype=np.float64)
+
+	F = np.zeros((nmesh.points.shape[0]*nvar,1)); T =  np.zeros((nmesh.points.shape[0]*nvar,1))  
+	mass = []
+	if MainData.Parallel:
+		# COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
+		ParallelTuple = parmap.map(GetElementalMatricesSmall,np.arange(0,nelem),MainData,nmesh.elements,nmesh.points,Eulerx,TotalPot,
+			pool=MP.Pool(processes=MainData.nCPU))
+
+	for elem in range(0,nelem):
+
+		if MainData.Parallel:
+			# UNPACK PARALLEL TUPLE VALUES
+			I_stiff_elem = ParallelTuple[elem][0]; J_stiff_elem = ParallelTuple[elem][1]; V_stiff_elem = ParallelTuple[elem][2]
+			t = ParallelTuple[elem][3]; f = ParallelTuple[elem][4]
+			I_mass_elem = ParallelTuple[elem][5]; J_mass_elem = ParallelTuple[elem][6]; V_mass_elem = ParallelTuple[elem][6]
+
+		else:
+			# COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
+			I_stiff_elem, J_stiff_elem, V_stiff_elem, t, f, I_mass_elem, J_mass_elem, V_mass_elem = GetElementalMatricesSmall(elem,MainData,nmesh.elements,nmesh.points,
+				Eulerx,TotalPot)
+
+		# SPARSE ASSEMBLY - STIFFNESS MATRIX
+		I_stiffness, J_stiffness, V_stiffness = SparseAssemblySmall(I_stiff_elem,J_stiff_elem,V_stiff_elem,I_stiffness,J_stiffness,V_stiffness,
+			elem,nvar,nodeperelem,nmesh.elements)
+
+		if MainData.Analysis != 'Static':
+			# SPARSE ASSEMBLY - MASS MATRIX
+			I_mass, J_mass, V_mass = SparseAssemblySmall(I_mass_elem,J_mass_elem,V_mass_elem,I_mass,J_mass,V_mass,elem,nvar,nodeperelem,nmesh.elements)
+
+		if MainData.AssemblyParameters.ExternalLoadNature == 'Nonlinear':
+			# RHS ASSEMBLY
+			for iter in range(0,nvar):
+				F[nmesh.elements[elem,:]*nvar+iter,0]+=f[iter:f.shape[0]:nvar]
+		# INTERNAL TRACTION FORCE ASSEMBLY
+		for iter in range(0,nvar):
+				T[nmesh.elements[elem,:]*nvar+iter,0]+=t[iter:t.shape[0]:nvar,0]
+
+	# CALL BUILT-IN SPARSE ASSEMBLER 
+	stiffness = coo_matrix((V_stiffness,(I_stiffness,J_stiffness)),shape=((nvar*nmesh.points.shape[0],nvar*nmesh.points.shape[0]))).tocsc()
+
+	if MainData.Analysis != 'Static':
+		# CALL BUILT-IN SPARSE ASSEMBLER
+		mass = coo_matrix((V_mass,(I_mass,J_mass)),shape=((nvar*nmesh.points.shape[0],nvar*nmesh.points.shape[0]))).tocsc()
+
+	# GET STORAGE/MEMORY DETAILS
+	MainData.spmat = stiffness.data.nbytes/1024./1024.
+	MainData.ijv = (I_stiffness.nbytes + J_stiffness.nbytes + V_stiffness.nbytes)/1024./1024.
+
+	return stiffness, T, F, mass
+
+
+
+
+
+
+
+
+
+#------------------------------- RHS ASSEMBLY -------------------------------#
+#----------------------------------------------------------------------------#
 
 # PRE-ASSEMBLY - ASSEMBLY FOR RHS ONLY
 def AssemblyForces(MainData,mesh,nmesh,Quadrature,Domain,BoundaryData,Boundary):

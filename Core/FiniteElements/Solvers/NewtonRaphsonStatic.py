@@ -1,7 +1,8 @@
 from time import time
 import numpy as np
-import numpy.linalg as la
-from scipy.sparse.linalg import spsolve  
+import numpy.linalg as la 
+# from scipy.sparse.linalg import spsolve, cg, cgs, bicg, bicgstab, gmres, lgmres, minres
+from scipy.sparse.linalg import spsolve, bicgstab 
 from Core.FiniteElements.ApplyDirichletBoundaryConditions import *
 from Core.FiniteElements.StaticCondensationGlobal import *
 from Core.FiniteElements.PostProcess import *
@@ -22,7 +23,13 @@ def NewtonRaphson(Increment,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nme
 		# APPLY INCREMENTAL DIRICHLET BOUNDARY CONDITIONS
 		K_b, F_b= ApplyIncrementalDirichletBoundaryConditions(K,Residual,columns_in,columns_out,AppliedDirichletInc,Iter,MainData.Minimal,nmesh,M,MainData.Analysis)[:2]
 		# SOLVE THE SYSTEM
-		sol = spsolve(K_b,-F_b)
+
+		if MainData.solve.type == 'direct':
+			sol = spsolve(K_b,-F_b)
+		else:
+			sol = bicgstab(K_b,-F_b,tol=MainData.solve.tol)[0]
+	
+
 		# GET THE TOTAL SOLUTION AND ITS COMPONENTS SUCH AS UX, UY, UZ, PHI ETC
 		dU = PostProcess().TotalComponentSol(MainData,sol,columns_in,columns_out,AppliedDirichletInc,Iter,F.shape[0]) 
 

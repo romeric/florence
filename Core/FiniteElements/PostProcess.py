@@ -377,36 +377,56 @@ class PostProcess(object):
 
 
 
-	def MeshQualityMeasures(self,MainData,mesh,nmesh,TotalDisp,Quadrature):
+	def MeshQualityMeasures(self,MainData,mesh,nmesh,TotalDisp):
 
 
 		Domain = MainData.Domain
 		points = nmesh.points
 		vpoints = np.copy(nmesh.points)
-		vpoints	+= TotalDisp[:,:,-1]
+		# vpoints	+= TotalDisp[:,:,-1]
+		vpoints	= vpoints+ TotalDisp[:,:,-1]
 
 		elements = nmesh.elements
 
-		# MainData.ScaledJacobian = np.zeros(elements.shape[0])
-		MainData.ScaledJacobian = []
-		MainData.ScaledJacobianElem = []
+		MainData.ScaledJacobian = np.zeros(elements.shape[0])
+		# MainData.ScaledJacobian = []
+		# MainData.ScaledJacobianElem = []
 
 		JMax =[]; JMin=[]
 		for elem in range(0,elements.shape[0]):
 			LagrangeElemCoords = points[elements[elem,:],:]
-			ElemCoords = vpoints[elements[elem,:],:]
+			EulerElemCoords = vpoints[elements[elem,:],:]
 			for counter in range(0,Domain.AllGauss.shape[0]):
 				# GRADIENT TENSOR IN PARENT ELEMENT [\nabla_\varepsilon (N)]
 				Jm = Domain.Jm[:,:,counter]
 				# MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-				ParentGradientX=np.dot(Jm,ElemCoords) #
+				ParentGradientX=np.dot(Jm,LagrangeElemCoords) #
+				# MAPPING TENSOR [\partial\vec{x}/ \partial\vec{\varepsilon} (ndim x ndim)]
+				ParentGradientx=np.dot(Jm,EulerElemCoords) #
 
 				# MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
-				# MaterialGradient = np.dot(la.inv(ParentGradientX),Jm)
+				MaterialGradient = np.dot(la.inv(ParentGradientX),Jm)
 				# DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
-				# F = np.dot(EulerELemCoords.T,MaterialGradient.T)
+				F = np.dot(EulerElemCoords.T,MaterialGradient.T)
 
-				Jacobian = np.abs(np.linalg.det(ParentGradientX))
+				detF = np.abs(np.linalg.det(F))
+				H = detF*np.linalg.inv(F).T
+
+				# Jacobian = np.sqrt(np.einsum('ij,ij',H,H))
+				# Jacobian = np.einsum('ij,ij',H,H)
+				# Jacobian = np.einsum('ij,ij',F,F)
+				# Jacobian = np.sqrt(np.einsum('ij,ij',F,F))
+				
+				# Jacobian = np.sqrt(np.sqrt(np.sqrt(np.einsum('ij,ij',F,F))))
+
+				# from scipy.special import cbrt
+				# Jacobian = cbrt(np.einsum('ij,ij',F,F))
+
+				Jacobian = np.abs(np.linalg.det(ParentGradientx))
+				# Jacobian = np.abs(np.linalg.det(F))
+				# if elem==71:
+					# print np.abs(np.linalg.det(ParentGradientx)), np.abs(np.linalg.det(ParentGradientX))
+				
 				if counter==0:
 					JMin=Jacobian; JMax = Jacobian
 
@@ -419,24 +439,25 @@ class PostProcess(object):
 			if np.allclose(1.0,1.0*JMin/JMax,rtol=1e-3):
 				pass
 			else:
+				pass
 				# print 1.0*JMin/JMax
 				# MainData.ScaledJacobian[elem] = 1.0*JMin/JMax
-				MainData.ScaledJacobian = np.append(MainData.ScaledJacobian,1.0*JMin/JMax)
-				MainData.ScaledJacobianElem = np.append(MainData.ScaledJacobianElem,elem)	
+				# MainData.ScaledJacobian = np.append(MainData.ScaledJacobian,1.0*JMin/JMax)
+				# MainData.ScaledJacobianElem = np.append(MainData.ScaledJacobianElem,elem)	
 
-			# MainData.ScaledJacobian[elem] = 1.0*JMin/JMax
+			MainData.ScaledJacobian[elem] = 1.0*JMin/JMax
 			# print JMin, JMax
 		# print MainData.ScaledJacobian.shape, np.unique(elements).shape
 		fig = plt.figure()
 		# plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),MainData.ScaledJacobian,width=1.,color='#FE6F5E',alpha=0.8)
 
-		# plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),MainData.ScaledJacobian,width=1.,alpha=0.4)
-		# plt.xlabel(r'$Elements$',fontsize=18)
-		# plt.ylabel(r'$Scaled\, Jacobian$',fontsize=18)
-
-		plt.bar(np.linspace(0,MainData.ScaledJacobianElem.shape[0]-1,MainData.ScaledJacobianElem.shape[0]),MainData.ScaledJacobian,width=1.,alpha=0.4)
+		plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),MainData.ScaledJacobian,width=1.,alpha=0.4)
 		plt.xlabel(r'$Elements$',fontsize=18)
 		plt.ylabel(r'$Scaled\, Jacobian$',fontsize=18)
+
+		# plt.bar(np.linspace(0,MainData.ScaledJacobianElem.shape[0]-1,MainData.ScaledJacobianElem.shape[0]),MainData.ScaledJacobian,width=1.,alpha=0.4)
+		# plt.xlabel(r'$Elements$',fontsize=18)
+		# plt.ylabel(r'$Scaled\, Jacobian$',fontsize=18)
 
 
 

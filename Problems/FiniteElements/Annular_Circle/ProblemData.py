@@ -16,15 +16,15 @@ def ProblemData(MainData):
 	MainData.Formulation = 1 	# Displacement-Potential based formulation
 	MainData.Analysis = 'Static'
 	# MainData.Analysis = 'Dynamic'
-	# MainData.AnalysisType = 'Linear'
-	MainData.AnalysisType = 'Nonlinear'
+	MainData.AnalysisType = 'Linear'
+	# MainData.AnalysisType = 'Nonlinear'
 
 	class MaterialArgs(object):
 		"""docstring for MaterialArgs"""
 		# Type = 'Steinmann'
 		# Type = 'LinearisedElectromechanics'
-		# Type = 'LinearModel'
-		Type = 'AnisotropicMooneyRivlin_1'
+		Type = 'LinearModel'
+		# Type = 'AnisotropicMooneyRivlin_1'
 		# Type = 'Incrementally_Linearised_NeoHookean'
 		
 
@@ -32,6 +32,8 @@ def ProblemData(MainData):
 		# lamb  = 2.
 		mu    = 0.3571
 		lamb  = 1.4286
+		# lamb = lamb - mu
+		lamb = lamb + mu
 
 		# mu    = 0.090571
 		# lamb  = 1.4286
@@ -62,8 +64,8 @@ def ProblemData(MainData):
 		# FileName = ProblemPath + '/Mesh_Annular_Circle_23365.dat'
 		# FileName = ProblemPath + '/Mesh_Annular_Circle_5716.dat'
 		# FileName = ProblemPath + '/Mesh_Annular_Circle_502.dat'
-		FileName = ProblemPath + '/Mesh_Annular_Circle_312.dat'
-		# FileName = ProblemPath + '/Mesh_Annular_Circle_75.dat'
+		# FileName = ProblemPath + '/Mesh_Annular_Circle_312.dat'
+		FileName = ProblemPath + '/Mesh_Annular_Circle_75.dat'
 
 
 		# MeshType = 'tet'

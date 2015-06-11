@@ -29,7 +29,8 @@ pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
 # 2D
 # Pr = imp.load_source('Nonlinear_2D',pwd+'/Problems/FiniteElements/Hollow_Arc_Tri/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Electromechanics/ProblemData.py')
-Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle/ProblemData.py')
+# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle/ProblemData.py')
+Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Sphere/ProblemData.py')
 
 ########################################################################################################################################################
 # User Imports
@@ -62,6 +63,7 @@ def main(MainData):
 	# print mesh.points
 	# print mesh.edges
 	# print nmesh.edges
+	
 
 	# print nmesh.points.shape
 
@@ -80,13 +82,13 @@ def main(MainData):
 	# CALL THE MAIN ROUTINE
 	TotalDisp = MainSolver(MainData,mesh,nmesh)
 	# print 'Total number of DoFs for the system is', sol.shape[0]
-
+	# np.savetxt('/home/roman/Desktop/disp2.txt', TotalDisp[:,:,-1])
 	# print 'Post-Processing the information...'
 	# Post Process
 	# PostProcess().StressRecovery(MainData,mesh,nmesh,Quadrature)
-	# PostProcess().MeshQualityMeasures(MainData,mesh,nmesh,TotalDisp,Quadrature)
+	# PostProcess().MeshQualityMeasures(MainData,mesh,nmesh,TotalDisp)
 
-	
+	# print TotalDisp[:,:,-1]
 	# Compute Error Norms
 	# L2Norm=0; EnergyNorm=0
 	# L2Norm, EnergyNorm = ComputeErrorNorms(MainData,mesh,nmesh,AnalyticalSolution,Domain,Quadrature,MaterialArgs)
