@@ -1,6 +1,10 @@
 
 from __future__ import division
-import meshpy.triangle as triangle
+try:
+    import meshpy.triangle as triangle
+except ImportError:
+    meshpy = None
+    # print 'meshpy module was not found!'
 import numpy as np
 import numpy.linalg as la
 from NormalDistance import NormalDistance

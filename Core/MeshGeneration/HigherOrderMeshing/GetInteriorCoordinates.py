@@ -27,7 +27,19 @@ def GetInteriorNodesCoordinates(xycoord,MeshType,elem,eps,Neval):
 		for i in range(4,eps.shape[0]):
 			xycoord_higher[i,:] = np.dot(Neval[:,i].reshape(1,Nshape0),xycoord)
 
+			# if elem==0:
+				# print i 
+				# print Neval[:,i]
+				# print Neval.shape
+
 		xycoord_higher[:4,:]=xycoord
+
+		# if elem==0:
+			# print Neval[:,i]
+			# print eps.shape
+
+			# print xycoord_higher
+			# print xycoord
 
 
 	return xycoord_higher

@@ -35,6 +35,8 @@ def StaticSolver(LoadIncrement,MainData,K,F,M,NodalForces,Residual,ResidualNorm,
 			TotalDisp = LinearSolver(Increment,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nmesh,TotalDisp,Eulerx,
 				columns_in,columns_out,AppliedDirichletInc)
 
+	# print np.concatenate((TotalDisp[:,:,0],TotalDisp[:,:,1]),axis=1)
+
 		
 		# sys.exit("STOPPED")
 	return TotalDisp

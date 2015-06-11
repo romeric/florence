@@ -21,7 +21,7 @@ class Steinmann(object):
 		self.modelname = 'Steinmann'
 		return self.nvar, self.modelname
 
-	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0):
+	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 
 		# Using Einstein summation (using numpy einsum call)
 		d = np.einsum
@@ -91,7 +91,7 @@ class Steinmann(object):
 
 
 
-	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx):
+	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 
 		c2 = MaterialArgs.c2
 

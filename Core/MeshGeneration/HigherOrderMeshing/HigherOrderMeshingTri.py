@@ -1,58 +1,19 @@
-import numpy as np 
-from scipy.stats import itemfreq
-import imp, os
-
-pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
-# Gett = imp.load_source('GetInteriorCoordinates','/home/roman/Dropbox/Python/Core/FiniteElements/GetInteriorCoordinates.py')
-Gett = imp.load_source('GetInteriorCoordinates',pwd+'/Core/MeshGeneration/GetInteriorCoordinates.py')
-TwoD = imp.load_source('QuadLagrangeGaussLobatto',pwd+'/Core/InterpolationFunctions/TwoDimensional/Quad/QuadLagrangeGaussLobatto.py')
-# Nodal
-Tri = imp.load_source('hpNodalTri',pwd+'/Core/InterpolationFunctions/TwoDimensional/Tri/hpNodal.py')
-Tet = imp.load_source('hpNodalTet',pwd+'/Core/InterpolationFunctions/ThreeDimensional/Tetrahedral/hpNodal.py')
-
-from Core.NumericalIntegration.FeketePointsTri import *
-from Core.NumericalIntegration.FeketePointsTet import *
-
-import multiprocessing as MP
-import Core.ParallelProcessing.parmap as parmap
-
 from time import time
+import numpy as np 
+# from scipy.stats import itemfreq
+import multiprocessing as MP
+
+import Core.ParallelProcessing.parmap as parmap
+import GetInteriorCoordinates as Gett
+import Core.InterpolationFunctions.TwoDimensional.Tri.hpNodal as Tri 
+from Core.NumericalIntegration.FeketePointsTri import *
+from Core.Supplementary.Where import *
+from Core.Supplementary.Tensors import itemfreq_py
+from NodeLoopTriNPSP_Cython import NodeLoopTriNPSP_Cython 
 
 # import pyximport; pyximport.install()
 # from Core.Supplementary.Where.whereEQ import *
 # from Core.Supplementary.Where.whereLT import *
-
-from Core.Supplementary.Where import *
-from NodeLoopTriNPSP_Cython import NodeLoopTriNPSP_Cython 
-
-def itemfreq_user(arr=None,un_arr=None,inv_arr=None,decimals=None):
-
-	if (arr is None) and (un_arr is None):
-		raise ValueError('No input array to work with. Either the array or its unique with inverse should be provided')
-	if un_arr is None:
-		if decimals is not None:
-			un_arr, inv_arr = np.unique(np.round(arr,decimals=decimals),return_inverse=True)
-		else:
-			un_arr, inv_arr = np.unique(arr,return_inverse=True)
-
-	if arr is not None:
-		if len(arr.shape) > 1:
-			dtype = type(arr[0,0])
-		else:
-			dtype = type(arr[0])
-	else:
-		if len(un_arr.shape) > 1:
-			dtype = type(un_arr[0,0])
-		else:
-			dtype = type(un_arr[0])
-
-	unf_arr = np.zeros((un_arr.shape[0],2),dtype=dtype)
-	unf_arr[:,0] = un_arr
-	unf_arr[:,1] = np.bincount(inv_arr)
-
-	return unf_arr
-
-
 
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
@@ -105,7 +66,7 @@ def NodeLoopTriNPSP_PARMAP(sorted_repoints,Xs,invX,iSortX,duplicates,Decimals,to
 			# MULTIPLICITY CAN BE GREATER THAN 2, IN WHICH CASE FIND MULTIPLICITY OF Ys
 			else:
 				# Ysy=itemfreq(np.round(Ys,decimals=Decimals))
-				Ysy = itemfreq_user(Ys,decimals=Decimals)
+				Ysy = itemfreq_py(Ys,decimals=Decimals)
 				# IF itemfreq GIVES THE SAME LENGTH ARRAY, MEANS ALL VALUES ARE UNIQUE/DISTINCT AND WE DON'T HAVE TO CHECK
 				if Ysy.shape[0]!=Ys.shape[0]:
 					# OTHERWISE LOOP OVER THE ARRAY AND
@@ -139,7 +100,7 @@ def NodeLoopTriNPSP(sorted_repoints,Xs,invX,iSortX,duplicates,Decimals,tol):
 	for i in range(0,Xs.shape[0]):
 		# IF THE MULITPLICITY OF A GIVEN X-VALUE IS 1 THEN INGONRE
 		if Xs[i,1]!=1:
-			# IF THE MULTIPLICITY IS MORE THAN 1, THEN FIND WHERE ALL IN THE SORTED ARRAY THIS X-VALUE THEY OCCURS
+			# IF THE MULTIPLICITY IS MORE THAN 1, THEN FIND WHERE ALL IN THE SORTED ARRAY THIS X-VALUE OCCURS
 			# dups =  np.where(i==invX)[0]
 			dups = np.asarray(whereEQ(invX.reshape(invX.shape[0],1),i)[0])
 
@@ -155,7 +116,7 @@ def NodeLoopTriNPSP(sorted_repoints,Xs,invX,iSortX,duplicates,Decimals,tol):
 			# MULTIPLICITY CAN BE GREATER THAN 2, IN WHICH CASE FIND MULTIPLICITY OF Ys
 			else:
 				# Ysy=itemfreq(np.round(Ys,decimals=Decimals))
-				Ysy = itemfreq_user(Ys,decimals=Decimals)
+				Ysy = itemfreq_py(Ys,decimals=Decimals)
 				# IF itemfreq GIVES THE SAME LENGTH ARRAY, MEANS ALL VALUES ARE UNIQUE/DISTINCT AND WE DON'T HAVE TO CHECK
 				if Ysy.shape[0]!=Ys.shape[0]:
 					# OTHERWISE LOOP OVER THE ARRAY AND
@@ -181,6 +142,12 @@ def NodeLoopTriNPSP(sorted_repoints,Xs,invX,iSortX,duplicates,Decimals,tol):
 
 
 def HighOrderMeshTri_UNSTABLE(C,mesh,info=0,Decimals=10,Parallel=False,nCPU=1):
+
+
+	# SWITCH OFF MULTI-PROCESSING FOR SMALLER PROBLEMS WITHOUT GIVING A MESSAGE
+	if (mesh.elements.shape[0] < 1000) and (C < 8):
+		Parallel = False
+		nCPU = 1
 
 	if mesh.points.shape[1]!=2:
 		raise ValueError('Incompatible mesh coordinates size. mesh.point.shape[1] must be 2')
@@ -213,9 +180,10 @@ def HighOrderMeshTri_UNSTABLE(C,mesh,info=0,Decimals=10,Parallel=False,nCPU=1):
 			Neval,pool=MP.Pool(processes=nCPU))
 
 	# LOOP OVER ELEMENTS
+	maxNode = np.max(reelements)
 	for elem in range(0,mesh.elements.shape[0]):
 		# maxNode = np.max(np.unique(reelements)) # BIGGEST BOTTLENECK
-		maxNode = np.max(reelements)
+		# maxNode = np.max(reelements)
 
 		# GET HIGHER ORDER COORDINATES
 		if Parallel:
@@ -223,8 +191,13 @@ def HighOrderMeshTri_UNSTABLE(C,mesh,info=0,Decimals=10,Parallel=False,nCPU=1):
 		else:
 			# xycoord =  mesh.points[mesh.elements[elem,:],:]
 			xycoord_higher = Gett.GetInteriorNodesCoordinates(mesh.points[mesh.elements[elem,:],:],info.MeshType,elem,eps,Neval)
+	
 		# EXPAND THE ELEMENT CONNECTIVITY
-		reelements[elem,3:] = np.arange(maxNode+1,maxNode+1+left_over_nodes) 	
+		newElements = np.arange(maxNode+1,maxNode+1+left_over_nodes) 
+		# reelements[elem,3:] = np.arange(maxNode+1,maxNode+1+left_over_nodes) 	
+		reelements[elem,3:] = newElements
+		maxNode = newElements[-1]
+		
 		repoints[mesh.points.shape[0]+elem*iesize:mesh.points.shape[0]+(elem+1)*iesize] = xycoord_higher[3:,:]
 
 	telements = time()-telements
@@ -250,7 +223,7 @@ def HighOrderMeshTri_UNSTABLE(C,mesh,info=0,Decimals=10,Parallel=False,nCPU=1):
 	
 	# Xs = np.zeros((unique_repoints.shape[0],2),dtype=np.float64)
 	# Xs[:,0] = unique_repoints; Xs[:,1]=np.bincount(invX)
-	Xs = itemfreq_user(un_arr=unique_repoints,inv_arr=invX)
+	Xs = itemfreq_py(un_arr=unique_repoints,inv_arr=invX)
 	# print np.linalg.norm(Xss -Xs)
 	# print time()-t2
 	
@@ -416,9 +389,11 @@ def HighOrderMeshTri(C,mesh,info=0,Parallel=False,nCPU=1):
 		ParallelTuple1 = parmap.map(ElementLoopTri,np.arange(0,mesh.elements.shape[0]),mesh.elements,mesh.points,info.MeshType,eps,
 			Neval,pool=MP.Pool(processes=nCPU))
 
+	maxNode = np.max(reelements)
 	for elem in range(0,mesh.elements.shape[0]):
 		# maxNode = np.max(np.unique(reelements)) # BIGGEST BOTTLENECK
-		maxNode = np.max(reelements)
+		# maxNode = np.max(reelements) # ALSO BIG BOTTLENECK
+
 
 		# GET HIGHER ORDER COORDINATES
 		if Parallel:
@@ -426,19 +401,24 @@ def HighOrderMeshTri(C,mesh,info=0,Parallel=False,nCPU=1):
 		else:
 			# xycoord =  mesh.points[mesh.elements[elem,:],:]
 			xycoord_higher = Gett.GetInteriorNodesCoordinates(mesh.points[mesh.elements[elem,:],:],info.MeshType,elem,eps,Neval)
+
 		# EXPAND THE ELEMENT CONNECTIVITY
-		reelements[elem,3:] = np.arange(maxNode+1,maxNode+1+left_over_nodes) 	
+		newElements = np.arange(maxNode+1,maxNode+1+left_over_nodes) 
+		# reelements[elem,3:] = np.arange(maxNode+1,maxNode+1+left_over_nodes) 	
+		reelements[elem,3:] = newElements
+		maxNode = newElements[-1]
+
 		repoints[mesh.points.shape[0]+elem*iesize:mesh.points.shape[0]+(elem+1)*iesize] = xycoord_higher[3:,:]
 
 	telements = time()-telements
 	#--------------------------------------------------------------------------------------
 	# LOOP OVER POINTS
 
+	tnodes = time()
+
 	tol = 1e-14
 	# duplicates = np.zeros((1,2))
 	duplicates = -1*np.ones((reelements.shape[0]*reelements.shape[1],2),dtype=np.int64)
-
-	tnodes = time()
 	
 	ParallelTuple2=[]
 	if Parallel:
@@ -449,7 +429,7 @@ def HighOrderMeshTri(C,mesh,info=0,Parallel=False,nCPU=1):
 	for inode in range(pshape0,repshape0): 	# FOR SOME REASON THIS TAKES MORE TIME FOR FINE MESHES
 	
 		if Parallel:
-			j=ParallelTuple2[inode-mesh.points.shape[0]]
+			j = ParallelTuple2[inode-mesh.points.shape[0]]
 
 		else:
 			# difference =  np.linalg.norm( np.repeat(repoints[inode,:].reshape(1,repoints.shape[1]),inode,axis=0) - repoints[:inode,:],axis=1 )
@@ -557,439 +537,3 @@ def HighOrderMeshTri(C,mesh,info=0,Parallel=False,nCPU=1):
 
 	return nmesh
 #---------------------------------------------------------------------------------------------------------------------------------------#
-
-
-
-
-
-
-def HighOrderMeshTet(C,mesh,info=0,Parallel=False,nCPU=1):
-
-
-	eps = FeketePointsTet(C)
-
-	# COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
-	Neval = np.zeros((4,eps.shape[0]),dtype=np.float64)
-	for i in range(4,eps.shape[0]):
-		Neval[:,i] = Tet.hpBases(0,eps[i,0],eps[i,1],eps[i,2])[0]
-
-	nodeperelem = mesh.elements.shape[1]
-	renodeperelem = int((C+2.)*(C+3.)*(C+4.)/6.)
-	left_over_nodes = renodeperelem - nodeperelem
-
-	reelements = -1*np.ones((mesh.elements.shape[0],renodeperelem),dtype=int)
-	reelements[:,:4] = mesh.elements
-	# TOTAL NUMBER OF (INTERIOR+EDGE+FACE) NODES 
-	# iesize = int(C*(C-1)*(C-2)/6. + 6.*C)
-	iesize = int(C*(C-1)*(C-2)/6. + 6.*C + 2*C*(C-1))
-	repoints = np.zeros((mesh.points.shape[0]+iesize*mesh.elements.shape[0],3),dtype=np.float64)
-	repoints[:mesh.points.shape[0],:]=mesh.points
-
-	for elem in range(0,mesh.elements.shape[0]):
-		maxNode = np.max(reelements)
-		xycoord =  mesh.points[mesh.elements[elem,:],:]
-		# GET HIGHER ORDER COORDINATES
-		xycoord_higher = Gett.GetInteriorNodesCoordinates(xycoord,info.MeshType,elem,eps,Neval)
-		# EXPAND THE ELEMENT CONNECTIVITY
-		reelements[elem,4:] = np.linspace(maxNode+1,maxNode+left_over_nodes,left_over_nodes).astype(int)
-		repoints[mesh.points.shape[0]+elem*iesize:mesh.points.shape[0]+(elem+1)*iesize] = xycoord_higher[4:,:]
-
-
-
-	#--------------------------------------------------------------------------------------
-	# LOOP OVER POINTS
-	tol = 1e-14
-	duplicates = np.zeros((1,2))
-	# for inode in range(0,repoints.shape[0]):
-	for inode in range(mesh.points.shape[0],repoints.shape[0]): 	
-		# difference =  np.linalg.norm( np.repeat(repoints[inode,:].reshape(1,repoints.shape[1]),inode,axis=0) - repoints[:inode,:],axis=1 )
-		# j = np.where(difference <tol)[0]
-		
-		difference = np.repeat(repoints[inode,:].reshape(1,repoints.shape[1]),inode,axis=0) - repoints[:inode,:]
-		difference = np.sqrt(difference[:,0]*difference[:,0] + difference[:,1]*difference[:,1] + difference[:,2]*difference[:,2]).reshape(inode,1)
-		j = np.asarray(whereLT(difference, tol)[0])
-
-		if j.shape[0]!=0:
-			# x,y=np.where(reelements==inode)
-			# reelements[x[0],y[0]] = j[0]
-			reelements[reelements==inode] = j[0]
-			# reelements[whereEQ(reelements,inode)] = j[0]
-
-			duplicates = np.concatenate((duplicates,np.array([[j[0],inode]])),axis=0)
-
-	duplicates = (duplicates[1:,:]).astype(int)
-	totalnodes = (np.linspace(0,repoints.shape[0]-1,repoints.shape[0])).astype(int)
-	remainingnodes = np.delete(totalnodes,duplicates[:,1])
-	mapnodes = (np.linspace(0,remainingnodes.shape[0]-1,remainingnodes.shape[0])).astype(int)
-
-	for i in range(mesh.points.shape[0],mapnodes.shape[0]):
-		x,y=np.where(reelements==remainingnodes[i])
-		reelements[x,y] = i
-
-	# REPOINTS
-	repoints = repoints[remainingnodes,:]
-	#------------------------------------------------------------------------------------------
-
-
-
-	#------------------------------------------------------------------------------------------
-	# BUILD EDGES NOW
-	reedges = np.zeros((mesh.edges.shape[0],C+2))
-	reedges[:,:2]=mesh.edges
-	for iedge in range(0,mesh.edges.shape[0]):
-		# TWO NODES OF THE LINEAR MESH REPLICATED REPOINTS.SHAPE[0] NUMBER OF TIMES 
-		node1 = np.repeat(mesh.points[mesh.edges[iedge,0],:].reshape(1,repoints.shape[1]),repoints.shape[0]-mesh.points.shape[0],axis=0)
-		node2 = np.repeat(mesh.points[mesh.edges[iedge,1],:].reshape(1,repoints.shape[1]),repoints.shape[0]-mesh.points.shape[0],axis=0)
-
-		# FIND WHICH NODES LIE ON THIS EDGE BY COMPUTING THE LENGTHS  -   A-----C------B  /IF C LIES ON AB THAN AC+CB=AB 
-		L1 = np.linalg.norm(node1-repoints[mesh.points.shape[0]:,:],axis=1)
-		L2 = np.linalg.norm(node2-repoints[mesh.points.shape[0]:,:],axis=1)
-		L = np.linalg.norm(node1-node2,axis=1)
-
-		j = np.where(np.abs((L1+L2)-L) < tol)[0]
-		if j.shape[0]!=0:
-			reedges[iedge,2:] = j+mesh.points.shape[0]
-	reedges = reedges.astype(int)
-	#------------------------------------------------------------------------------------------
-
-
-	#------------------------------------------------------------------------------------------
-	# BUILD FACES NOW 
-	# A SIMILAR ANALOGY TO FACES IS FOLLOWED
-
-	# C
-	# #
-	#   # 	 	if |area(ABD)+area(ADC)+area(BCD) = area(ABC)| then D lies inside the triangular face
-	#     #
-	#   D   #
-	# A       #
-	# # # # # # # B    
-
-	# ALSO CHECK COPLANARITIES OF 4 POINTS: 	http://mathworld.wolfram.com/Coplanar.html
-	# IF A POINT LIES INSIDE A TRIANGLE IN 2D:  http://mathworld.wolfram.com/TriangleInterior.html
-
-	fsize = int((C+2.)*(C+3.)/2.)
-	refaces = np.zeros((mesh.faces.shape[0],fsize))
-	refaces[:,:3] = mesh.faces
-	# FIND THE UNIT NORMAL VECTOR TO THE FACE
-	for iface in range(0,faces.shape[0]):
-		# FIND THE VECTORS OF TWO EDGES 
-		A = mesh.points[mesh.faces[iface,0],:]
-		B = mesh.points[mesh.faces[iface,1],:]
-		C = mesh.points[mesh.faces[iface,2],:]
-		BA = B - A 		# VECTOR OF EDGE 1
-		CA = C - A 		# VECTOR OF EDGE 2
-		CB = C - B  	# VECTOR OF EDGE 3
-
-		DA = repoints[mesh.points.shape[0]:,:] - np.repeat(A.reshape(1,3),repoints.shape[0] - mesh.points.shape[0],axis=0 )
-		DB = repoints[mesh.points.shape[0]:,:] - np.repeat(B.reshape(1,3),repoints.shape[0] - mesh.points.shape[0],axis=0 )
-		# COMPUTE AREAS 
-		Area = 0.5*np.linalg.norm(np.cross(BA,CA)); Area = Area*np.ones(DA.shape[0])
-		Area1 = 0.5*np.linalg.norm(np.cross(DA, np.repeat(BA.reshape(1,3),DA.shape[0],axis=0)),axis=1 )
-		Area2 = 0.5*np.linalg.norm(np.cross(DA, np.repeat(CA.reshape(1,3),DA.shape[0],axis=0)),axis=1 )
-		Area3 = 0.5*np.linalg.norm(np.cross(DB, np.repeat(CB.reshape(1,3),DB.shape[0],axis=0)),axis=1 )
-		# CHECK THE CONDITION
-		j = np.where(np.abs( Area - (Area1+Area2+Area3) )  < tol)[0]
-		if j.shape[0]!=0:
-			refaces[iface,3:] = j+mesh.points.shape[0]
-	refaces = refaces.astype(int)
-
-
-	class nmesh(object):
-		# """Construct pMesh"""
-		points = repoints
-		elements = reelements
-		edges = reedges
-		faces = refaces
-		nnode = repoints.shape[0]
-		nelem = reelements.shape[0]
-		info = 'tet'
-
-	return nmesh
-
-
-
-
-
-def HighOrderMeshQuad(C,mesh,info=0,Parallel=False,nCPU=1):
-
-	if mesh.points.shape[1]!=2:
-		raise ValueError('Incompatible mesh coordinates size. mesh.point.shape[1] must be 2')
-
-	eps = TwoD.LagrangeGaussLobatto(C,0,0)[1]
-
-	# COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
-	Neval = np.zeros((4,eps.shape[0]),dtype=np.float64)
-	for i in range(0,eps.shape[0]):
-		Neval[:,i] = TwoD.LagrangeGaussLobatto(0,eps[i,0],eps[i,1])[0]
-
-	nodeperelem = mesh.elements.shape[1]
-	renodeperelem = (C+2)**2
-	left_over_nodes = renodeperelem - nodeperelem
-
-	reelements = -1*np.ones((mesh.elements.shape[0],renodeperelem),dtype=int)
-	# reelements[:,:4] = mesh.elements
-	# repoints = np.copy(mesh.points)
-	iesize = 4*C + C**2
-	repoints = np.zeros((mesh.points.shape[0]+iesize*mesh.elements.shape[0],2))
-	repoints[:mesh.points.shape[0],:]=mesh.points[:,:2]
-
-
-	# QUAD NODES ARE ARANGED CONSISTENTLY COUNTER-CLOCKWISE, HENCE WE NEED NODES BELONG TO THE VERTICES
-	vNnodes = (C+1)*np.array([0,1,2,3])
-	ieNodes = np.delete(np.arange(0,renodeperelem),vNnodes)
-
-	for elem in range(0,mesh.elements.shape[0]):
-		maxNode=[]
-		if elem==0:
-			# maxNode = np.max(np.unique(mesh.elements))
-			maxNode = np.max(mesh.elements)
-		else:
-			maxNode = np.max(reelements)
-
-		xycoord =  mesh.points[mesh.elements[elem,:],:]
-		# GET HIGHER ORDER COORDINATES
-		xycoord_higher = Gett.GetInteriorNodesCoordinates(xycoord,info.MeshType,elem,eps)
-		# EXPAND THE ELEMENT CONNECTIVITY
-		# reelements[elem,4:] = np.linspace(maxNode+1,maxNode+left_over_nodes,left_over_nodes).astype(int)
-		reelements[elem,0:reelements.shape[1]-C**2:C+1] = mesh.elements[elem,:]
-		reelements[elem,ieNodes] = np.linspace(maxNode+1,maxNode+left_over_nodes,left_over_nodes).astype(int)
-		# reelements[elem,0:reelements.shape[1]-C**2:C+1] = mesh.elements[elem,:]
-		# repoints = np.concatenate((repoints,xycoord_higher[3:,:]),axis=0)
-		repoints[mesh.points.shape[0]+elem*iesize:mesh.points.shape[0]+(elem+1)*iesize] = xycoord_higher[ieNodes,:]
-
-	#--------------------------------------------------------------------------------------
-	# LOOP OVER POINTS
-	tol = 1e-14
-	duplicates = np.zeros((1,2))
-	# for inode in range(0,repoints.shape[0]):
-	for inode in range(mesh.points.shape[0],repoints.shape[0]): 	# FOR SOME REASON THIS TAKES MORE TIME FOR FINES MESHES
-
-		difference =  np.linalg.norm( np.repeat(repoints[inode,:].reshape(1,repoints.shape[1]),inode,axis=0) - repoints[:inode,:],axis=1 )
-		j = np.where(difference <tol)[0]
-		if j.shape[0]!=0:
-			x,y=np.where(reelements==inode)
-			reelements[x[0],y[0]] = j[0]
-			duplicates = np.concatenate((duplicates,np.array([[j,inode]])),axis=0)
-
-	duplicates = (duplicates[1:,:]).astype(int)
-	totalnodes = (np.linspace(0,repoints.shape[0]-1,repoints.shape[0])).astype(int)
-	remainingnodes = np.delete(totalnodes,duplicates[:,1])
-	mapnodes = (np.linspace(0,remainingnodes.shape[0]-1,remainingnodes.shape[0])).astype(int)
-
-	for i in range(mesh.points.shape[0],mapnodes.shape[0]):
-		x,y=np.where(reelements==remainingnodes[i])
-		reelements[x,y] = i
-
-	# REPOINTS
-	repoints = repoints[remainingnodes,:]
-	#------------------------------------------------------------------------------------------
-
-	#------------------------------------------------------------------------------------------
-	# BUILD EDGES NOW
-	reedges = np.zeros((mesh.edges.shape[0],C+2))
-	reedges[:,:2]= mesh.edges
-	for iedge in range(0,mesh.edges.shape[0]):
-		# TWO NODES OF THE LINEAR MESH REPLICATED REPOINTS.SHAPE[0] NUMBER OF TIMES 
-		node1 = np.repeat(mesh.points[mesh.edges[iedge,0],:].reshape(1,repoints.shape[1]),repoints.shape[0]-mesh.points.shape[0],axis=0)
-		node2 = np.repeat(mesh.points[mesh.edges[iedge,1],:].reshape(1,repoints.shape[1]),repoints.shape[0]-mesh.points.shape[0],axis=0)
-
-		# FIND WHICH NODES LIE ON THIS EDGE BY COMPUTING THE LENGTHS  -   A-----C------B  /IF C LIES ON AB THAN AC+CB=AB 
-		L1 = np.linalg.norm(node1-repoints[mesh.points.shape[0]:],axis=1)
-		L2 = np.linalg.norm(node2-repoints[mesh.points.shape[0]:],axis=1)
-		L = np.linalg.norm(node1-node2,axis=1)
-
-		j = np.where(np.abs((L1+L2)-L) < tol)[0]
-		if j.shape[0]!=0:
-			reedges[iedge,2:] = j+mesh.points.shape[0]
-	reedges = reedges.astype(int)
-	#------------------------------------------------------------------------------------------
-
-
-	class nmesh(object):
-		# """Construct pMesh"""
-		points = repoints
-		elements = reelements
-		edges = reedges
-		faces = []
-		nnode = repoints.shape[0]
-		nelem = reelements.shape[0]
-		info = 'quad'
-
-	return nmesh
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# THIS IS FOR QUADS AND IS REALLY INEFFICIENT - CHECK/REIMPLEMENT
-def HigherOrderConnectivityCoords(C,mesh,mesh_info):
-
-	elements = mesh.elements
-	points = mesh.points
-	edges = mesh.edges
-
-	max_node_number = mesh.nnode
-	nodeperelem = mesh.elements.shape[1]
-	# C = general_data.C
-	renodeperelem = (C+2)**2
-	left_over_nodes = renodeperelem - nodeperelem
-
-	reelements = -1*np.ones((elements.shape[0],renodeperelem))
-	repoints = np.copy(points)
-	# First determine which rows and columns should be condensed out i.e interior and exteriors
-	eps = TwoD.LagrangeGaussLobatto(C,0,0)[1]
-	exterior_nodes = []
-	for i in range(0,eps.shape[0]):
-		if eps[i,0]==-1 and eps[i,1]==-1:
-			exterior_nodes = np.append(exterior_nodes,i)
-		elif eps[i,0]==1 and eps[i,1]==-1:
-			exterior_nodes = np.append(exterior_nodes,i)
-		elif eps[i,0]==1 and eps[i,1]==1:
-			exterior_nodes = np.append(exterior_nodes,i)
-		elif eps[i,0]==-1 and eps[i,1]==1:
-			exterior_nodes = np.append(exterior_nodes,i)
-
-	allnodes = np.linspace(0,eps.shape[0]-1,eps.shape[0])
-	interior_nodes = np.delete(allnodes,exterior_nodes)
-
-	exterior_nodes = np.array(exterior_nodes,dtype=int)
-	interior_nodes = np.array(interior_nodes,dtype=int)
-
-	counter = max_node_number+1
-	for elem in range(0,elements.shape[0]):
-		xycoord = np.zeros((nodeperelem,2))  # SALOME MESH GENERATOR GIVES Z-COORDINATE AS WELL
-		for i in range(0,nodeperelem):
-			xycoord[i,:]= points[elements[elem,i]]
-
-		# Get interior nodes' coordinates - arranged counterclockwise
-		nlayer = int(np.sqrt(mesh.elements.shape[0]))
-		xycoord = Gett.GetInteriorNodesCoordinates(xycoord,C,mesh_info,nlayer,elem)
-		# print np.sqrt(xycoord[:,0]**2+xycoord[:,1]**2)
-		# print xycoord
-		# Assign exterior nodes to the new mesh connectivity
-		reelements[elem,0:reelements.shape[1]-C**2:C+1] = elements[elem,:]
-
-		if elem==0:
-			for i in range(0,renodeperelem):
-				if reelements[elem,i]==-1:
-					reelements[elem,i] = counter
-					counter+=1
-			repoints = np.append(repoints,xycoord[interior_nodes,:],axis=0)
-		else:
-			# Check if the nodes have been assigned - for that you need to check shared edges
-			# An edge node can only be shared between two elements in 2D
-			# Find two nodes which are existent in the previous elements
-			shared_nodes = np.zeros((3,2))
-			re_shared_nodes = np.zeros(2)
-			for j in range(0,elem):
-				count = 0
-				for k in range(0,nodeperelem):
-					x = np.where(elements[j,:]==elements[elem,k])[0]
-					if x.shape[0]!=0:
-						shared_nodes[0,count] = elements[j,x[0]]
-						shared_nodes[1,count] = x[0]
-						shared_nodes[2,count] = k
-						count+=1
-				if count==2:
-					# Get the interior nodes between these two nodes
-					for i in range(0,shared_nodes.shape[1]):
-						re_shared_nodes[i] = np.where(reelements[j,:]==shared_nodes[0,i])[0][0]
-					if shared_nodes[1,0]-shared_nodes[1,1]==1:
-						# Flip
-						reelements[elem,shared_nodes[2,0]+1:shared_nodes[2,1]+C] = reelements[j,re_shared_nodes[0]-1:re_shared_nodes[1]:-1]
-					elif shared_nodes[1,0]-shared_nodes[1,1]==-1:
-						if shared_nodes[2,1]-shared_nodes[2,0]==3:
-							reelements[elem,shared_nodes[2,1]+(3*C+1):shared_nodes[2,1]+(4*C+1)] = reelements[j,re_shared_nodes[1]-1:re_shared_nodes[0]:-1]
-						else:
-							reelements[elem,shared_nodes[2,0]+1:shared_nodes[2,1]+C] = reelements[j,re_shared_nodes[1]+1:re_shared_nodes[0]]
-
-			for i in range(0,renodeperelem):
-				if reelements[elem,i]==-1:
-					reelements[elem,i] = counter
-					repoints = np.append(repoints,xycoord[i,:].reshape(1,xycoord.shape[1]),axis=0)
-					counter+=1
-
-
-	# Build nmesh.edges
-	reedges = np.zeros((1,C+2))
-	for edge in range(0,edges.shape[0]):
-		row1, col1 = np.where(reelements==edges[edge,0])
-		row2, col2 = np.where(reelements==edges[edge,1])
-		if edge==0:
-			# Check if both occur twice
-			if row2.shape[0]>row1.shape[0]:
-				# This is just a check
-				x = np.where(row2==row1)[0]
-				if x.shape[0]!=0:
-					reedges = np.append(reedges,np.fliplr(reelements[row1,col2[x]:col1+1]),axis=0)
-			elif row1.shape[0]>row2.shape[0]:
-				# This is just a check
-				x = np.where(row1==row2)[0]
-				if x.shape[0]!=0:
-					reedges = np.append(reedges,np.fliplr(reelements[row2,col1:col2[x]+1]),axis=0)
-
-		else:
-			if row1.shape[0]==row2.shape[0]:
-				for i in range(0,row1.shape[0]):
-					x = np.where(row2==row1[i])[0]
-					if x.shape[0]!=0:
-						if col2[x][0]<col1[i]:
-							reedges = np.append(reedges,np.fliplr(reelements[row1[i],col2[x]:col1[i]+1].reshape(1,C+2)),axis=0)
-						elif col2[x][0]>col1[i]:
-							if col2[x]==renodeperelem-(C**2+C+1): 	# if its the Last node in old element connectivity
-								dummy = np.append(reelements[row1[i], col2[x]:col2[x]+C+1],reelements[row1[i],col1[i]])
-								reedges = np.append(reedges,np.fliplr(dummy.reshape(1,dummy.shape[0])),axis=0)
-
-			elif row1.shape[0] > row2.shape[0]:
-				x = np.where(row1==row2)[0]
-
-				if x.shape[0]!=0:
-					if col2[0]==renodeperelem-(C**2+C+1):
-						dummy = np.append(reelements[row2,col2:col2+C+1],reelements[row2,col1[x]])
-						reedges = np.append(reedges,np.fliplr(dummy.reshape(1,dummy.shape[0])),axis=0)
-					else:
-						reedges = np.append(reedges,np.fliplr(reelements[row2,col2:col1[x]+1].reshape(1,C+2)),axis=0)
-
-			elif row2.shape[0] > row1.shape[0]:
-				x = np.where(row2==row1)[0]
-				if x.shape[0]!=0:
-					if col2[x]==renodeperelem-(C**2+C+1):
-						dummy = np.append(reelements[row1,col2[x]:col2[x]+C+1],reelements[row1,col1])
-						reedges = np.append(reedges,np.fliplr(dummy.reshape(1,dummy.shape[0])),axis=0)
-					else:
-						reedges = np.append(reedges,np.fliplr(reelements[row1,col2[x]:col1+1]),axis=0)
-
-
-	# Assign
-	class nmesh(object):
-		elements = np.array(reelements,dtype=int)
-		points = repoints
-		edges = np.array(reedges[1:,:],dtype=int)
-
-
-	return nmesh
-
-			
-	

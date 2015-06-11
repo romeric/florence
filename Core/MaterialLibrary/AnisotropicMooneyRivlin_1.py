@@ -21,7 +21,7 @@ class AnisotropicMooneyRivlin_1(object):
 		self.modelname = 'AnisotropicMooneyRivlin_1'
 		return self.nvar, self.modelname
 
-	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0):
+	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 
 		# Using Einstein summation (using numpy einsum call)
 		d = np.einsum
@@ -49,7 +49,7 @@ class AnisotropicMooneyRivlin_1(object):
 
 
 
-	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx):
+	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 
 		b = StrainTensors.b 
 		J = StrainTensors.J

@@ -1,6 +1,5 @@
 import numpy as np 
 
-
 #------------------------------------------------------------------Elemental Matrices-------------------------------------------------------------------------#
 
 def ConstitutiveStiffnessIntegrand(self,B,nvar,ndim,AnalysisType,SpatialGradient,CauchyStressTensor,ElectricDisplacementx,H_Voigt):
@@ -49,7 +48,9 @@ def ConstitutiveStiffnessIntegrand(self,B,nvar,ndim,AnalysisType,SpatialGradient
 
 			TotalTraction = CauchyStressTensor_Voigt
 
+
 	BDB = np.dot(np.dot(B,H_Voigt),B.T)
+	# BDB = np.dot(np.dot(B,H_Voigt),B.T.copy())
 	t=[]
 	if AnalysisType == 'Nonlinear':
 		t = np.dot(B,TotalTraction)
