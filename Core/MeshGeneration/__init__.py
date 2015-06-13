@@ -1,2 +1,1 @@
-from ReadSalomeMesh import ReadMesh
-from MeshGeneration import MeshGeneration
+from Mesh import Mesh

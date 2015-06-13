@@ -2,7 +2,7 @@ import numpy as np
 
 #------------------------------------------------------------------Elemental Matrices-------------------------------------------------------------------------#
 
-def ConstitutiveStiffnessIntegrand(self,B,nvar,ndim,AnalysisType,SpatialGradient,CauchyStressTensor,ElectricDisplacementx,H_Voigt):
+def ConstitutiveStiffnessIntegrand(self,B,nvar,ndim,AnalysisType,Prestress,SpatialGradient,CauchyStressTensor,ElectricDisplacementx,H_Voigt):
 
 	# MATRIX FORM
 	SpatialGradient = SpatialGradient.T
@@ -24,7 +24,7 @@ def ConstitutiveStiffnessIntegrand(self,B,nvar,ndim,AnalysisType,SpatialGradient
 		B[1:B.shape[0]:nvar,3] = SpatialGradient[0,:]
 
 
-		if AnalysisType == 'Nonlinear':
+		if AnalysisType == 'Nonlinear' or Prestress:
 			CauchyStressTensor_Voigt = np.array([
 				CauchyStressTensor[0,0],CauchyStressTensor[1,1],CauchyStressTensor[2,2],
 				CauchyStressTensor[0,1],CauchyStressTensor[0,2],CauchyStressTensor[1,2]
@@ -41,7 +41,7 @@ def ConstitutiveStiffnessIntegrand(self,B,nvar,ndim,AnalysisType,SpatialGradient
 		B[1:B.shape[0]:nvar,2] = SpatialGradient[0,:]
 
 
-		if AnalysisType == 'Nonlinear':
+		if AnalysisType == 'Nonlinear' or Prestress:
 			CauchyStressTensor_Voigt = np.array([
 				CauchyStressTensor[0,0],CauchyStressTensor[1,1],
 				CauchyStressTensor[0,1]]).reshape(3,1)
@@ -52,7 +52,7 @@ def ConstitutiveStiffnessIntegrand(self,B,nvar,ndim,AnalysisType,SpatialGradient
 	BDB = np.dot(np.dot(B,H_Voigt),B.T)
 	# BDB = np.dot(np.dot(B,H_Voigt),B.T.copy())
 	t=[]
-	if AnalysisType == 'Nonlinear':
+	if AnalysisType == 'Nonlinear' or Prestress:
 		t = np.dot(B,TotalTraction)
 
 			

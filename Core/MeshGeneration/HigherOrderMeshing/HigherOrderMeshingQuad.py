@@ -19,7 +19,7 @@ from Core.Supplementary.Tensors import itemfreq_py
 #---------------------------------------------------------------------------------------------------------------------------------------#
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
-def HighOrderMeshQuad(C,mesh,info=0,Parallel=False,nCPU=1):
+def HighOrderMeshQuad(C,mesh,Parallel=False,nCPU=1):
 
 	if mesh.points.shape[1]!=2:
 		raise ValueError('Incompatible mesh coordinates size. mesh.point.shape[1] must be 2')
@@ -57,7 +57,7 @@ def HighOrderMeshQuad(C,mesh,info=0,Parallel=False,nCPU=1):
 
 		xycoord =  mesh.points[mesh.elements[elem,:],:]
 		# GET HIGHER ORDER COORDINATES
-		xycoord_higher = Gett.GetInteriorNodesCoordinates(xycoord,info.MeshType,elem,eps)
+		xycoord_higher = Gett.GetInteriorNodesCoordinates(xycoord,'quad',elem,eps)
 		# EXPAND THE ELEMENT CONNECTIVITY
 		# reelements[elem,4:] = np.linspace(maxNode+1,maxNode+left_over_nodes,left_over_nodes).astype(int)
 		reelements[elem,0:reelements.shape[1]-C**2:C+1] = mesh.elements[elem,:]

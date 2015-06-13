@@ -12,11 +12,17 @@ def LinearSolver(Increment,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nmes
 			columns_in,columns_out,AppliedDirichletInc):
 
 	# GET THE REDUCED ELEMENTAL MATRICES 
-	K_b, F_b, _, _ = ApplyLinearDirichletBoundaryConditions(K,F,columns_in,columns_out,AppliedDirichletInc,MainData.Analysis,M)
+	# print Residual + F 
+	# K_b, F_b, _, _ = ApplyLinearDirichletBoundaryConditions(K,F,columns_in,columns_out,AppliedDirichletInc,MainData.Analysis,M)
+	# print np.linalg.norm(Residual)
+	K_b, F_b= ApplyLinearDirichletBoundaryConditions(K,Residual,columns_in,columns_out,AppliedDirichletInc,MainData.Analysis,M)[:2]
+
+	# CHECK FOR THE CONDITION NUMBER OF THE SYSTEM
+	MainData.solve.condA = np.linalg.cond(K_b.todense())
 
 	# SOLVE THE SYSTEM
 	if MainData.solve.type == 'direct':
-		sol = spsolve(K_b,F_b)
+		sol = spsolve(K_b,-F_b)
 	else:
 		sol = bicgstab(K_b,-F_b,tol=MainData.solve.tol)[0]
 	
@@ -31,7 +37,10 @@ def LinearSolver(Increment,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nmes
 		Eulerx = nmesh.points + TotalDisp[:,:MainData.ndim,Increment]			
 		# RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES (BE CAREFUL ABOUT THE -1 INDEX IN HERE)
 		K, TractionForces = Assembly(MainData,nmesh,Eulerx,TotalDisp[:,MainData.nvar-1,Increment].reshape(TotalDisp.shape[0],1))[:2]
+		# print np.linalg.norm(TractionForces)
+		# FIND THE RESIDUAL
+		Residual[columns_in] = TractionForces[columns_in] - NodalForces[columns_in]
 
-	print 'Load increment', Increment, 'for incrementally linearised'
+	print 'Load increment', Increment, 'for incrementally linearised elastic problem'
 
 	return TotalDisp

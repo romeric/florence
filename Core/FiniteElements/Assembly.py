@@ -22,15 +22,7 @@ import Core.ParallelProcessing.parmap as parmap
 #---------------------------------------------------------#
 
 def Assembly(MainData,nmesh,Eulerx,TotalPot):
-	if nmesh.nelem > 100000:
-		stiffness, T, F, mass = AssemblyLarge(MainData,nmesh,Eulerx,TotalPot)
-	else:
-		stiffness, T, F, mass = AssemblySmall(MainData,nmesh,Eulerx,TotalPot)
-		
-
-	return stiffness, T, F, mass
-
-
+	return AssemblyLarge(MainData,nmesh,Eulerx,TotalPot) if nmesh.nelem > 100000 else AssemblySmall(MainData,nmesh,Eulerx,TotalPot)
 
 
 #-------------- ASSEMBLY ROUTINE FOR RELATIVELY LARGER MATRICES (NELEM > 100000)------------------------#

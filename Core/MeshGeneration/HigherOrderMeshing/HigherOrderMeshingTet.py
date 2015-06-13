@@ -54,7 +54,7 @@ def LoopArangeDuplicates(i,duplicates,Ds):
 
 
 
-def HighOrderMeshTet_UNSTABLE(C,mesh,info=0,Decimals=10,Zerofy=0,Parallel=False,nCPU=1):
+def HighOrderMeshTet_UNSTABLE(C,mesh,Decimals=10,Zerofy=0,Parallel=False,nCPU=1):
 
 	# SWITCH OFF MULTI-PROCESSING FOR SMALLER PROBLEMS WITHOUT GIVING A MESSAGE
 	if (mesh.elements.shape[0] < 500) and (C < 6):
@@ -85,7 +85,7 @@ def HighOrderMeshTet_UNSTABLE(C,mesh,info=0,Decimals=10,Zerofy=0,Parallel=False,
 	xycoord_higher=[]; ParallelTuple1=[]
 	if Parallel:
 		# GET HIGHER ORDER COORDINATES - PARALLEL
-		ParallelTuple1 = parmap.map(ElementLoopTet,np.arange(0,mesh.elements.shape[0]),mesh.elements,mesh.points,info.MeshType,eps,
+		ParallelTuple1 = parmap.map(ElementLoopTet,np.arange(0,mesh.elements.shape[0]),mesh.elements,mesh.points,'tet',eps,
 			Neval,pool=MP.Pool(processes=nCPU))
 	
 	maxNode = np.max(reelements)
@@ -96,7 +96,7 @@ def HighOrderMeshTet_UNSTABLE(C,mesh,info=0,Decimals=10,Zerofy=0,Parallel=False,
 		else:	
 			xycoord =  mesh.points[mesh.elements[elem,:],:]
 			# GET HIGHER ORDER COORDINATES
-			xycoord_higher = Gett.GetInteriorNodesCoordinates(xycoord,info.MeshType,elem,eps,Neval)
+			xycoord_higher = Gett.GetInteriorNodesCoordinates(xycoord,'tet',elem,eps,Neval)
 
 		# EXPAND THE ELEMENT CONNECTIVITY
 		# reelements[elem,4:] = np.linspace(maxNode+1,maxNode+left_over_nodes,left_over_nodes).astype(int)
@@ -368,9 +368,9 @@ def HighOrderMeshTet_UNSTABLE(C,mesh,info=0,Decimals=10,Zerofy=0,Parallel=False,
 		info = 'tet'
 
 
-	print '\npMeshing timing:\n\t\tElement loop 1:\t '+str(telements)+' seconds\n\t\tNode loop:\t\t '+str(tnodes)+\
-	 ' seconds'+'\n\t\tElement loop 2:\t '+str(telements_2)+' seconds\n\t\tEdge loop:\t\t '+str(tedges)+' seconds'+\
-	 '\n\t\tFace loop:\t\t '+str(tfaces)+' seconds\n'
+	# print '\npMeshing timing:\n\t\tElement loop 1:\t '+str(telements)+' seconds\n\t\tNode loop:\t\t '+str(tnodes)+\
+	#  ' seconds'+'\n\t\tElement loop 2:\t '+str(telements_2)+' seconds\n\t\tEdge loop:\t\t '+str(tedges)+' seconds'+\
+	#  '\n\t\tFace loop:\t\t '+str(tfaces)+' seconds\n'
 
 	return nmesh
 
@@ -434,7 +434,7 @@ def LoopFaceTet(iface,points,repoints,faces,tol):
 
 
 
-def HighOrderMeshTet(C,mesh,info=0,Parallel=False,nCPU=1):
+def HighOrderMeshTet(C,mesh,Parallel=False,nCPU=1):
 
 	# SWITCH OFF MULTI-PROCESSING FOR SMALLER PROBLEMS WITHOUT GIVING A MESSAGE
 	if (mesh.elements.shape[0] < 500) and (C < 6):
@@ -465,7 +465,7 @@ def HighOrderMeshTet(C,mesh,info=0,Parallel=False,nCPU=1):
 	xycoord_higher=[]; ParallelTuple1=[]
 	if Parallel:
 		# GET HIGHER ORDER COORDINATES - PARALLEL
-		ParallelTuple1 = parmap.map(ElementLoopTet,np.arange(0,mesh.elements.shape[0]),mesh.elements,mesh.points,info.MeshType,eps,
+		ParallelTuple1 = parmap.map(ElementLoopTet,np.arange(0,mesh.elements.shape[0]),mesh.elements,mesh.points,'tet',eps,
 			Neval,pool=MP.Pool(processes=nCPU))
 
 	maxNode = np.max(reelements)
@@ -476,7 +476,7 @@ def HighOrderMeshTet(C,mesh,info=0,Parallel=False,nCPU=1):
 		else:	
 			xycoord =  mesh.points[mesh.elements[elem,:],:]
 			# GET HIGHER ORDER COORDINATES
-			xycoord_higher = Gett.GetInteriorNodesCoordinates(xycoord,info.MeshType,elem,eps,Neval)
+			xycoord_higher = Gett.GetInteriorNodesCoordinates(xycoord,'tet',elem,eps,Neval)
 		# EXPAND THE ELEMENT CONNECTIVITY
 		# reelements[elem,4:] = np.linspace(maxNode+1,maxNode+left_over_nodes,left_over_nodes).astype(int)
 		# reelements[elem,4:] = np.arange(maxNode+1,maxNode+1+left_over_nodes) 
@@ -654,9 +654,9 @@ def HighOrderMeshTet(C,mesh,info=0,Parallel=False,nCPU=1):
 		info = 'tet'
 
 
-	print '\npMeshing timing:\n\t\tElement loop 1:\t '+str(telements)+' seconds\n\t\tNode loop:\t\t '+str(tnodes)+\
-	 ' seconds'+'\n\t\tElement loop 2:\t '+str(telements_2)+' seconds\n\t\tEdge loop:\t\t '+str(tedges)+' seconds'+\
-	 '\n\t\tFace loop:\t\t '+str(tfaces)+' seconds\n'
+	# print '\npMeshing timing:\n\t\tElement loop 1:\t '+str(telements)+' seconds\n\t\tNode loop:\t\t '+str(tnodes)+\
+	#  ' seconds'+'\n\t\tElement loop 2:\t '+str(telements_2)+' seconds\n\t\tEdge loop:\t\t '+str(tedges)+' seconds'+\
+	#  '\n\t\tFace loop:\t\t '+str(tfaces)+' seconds\n'
 
 	return nmesh
 #---------------------------------------------------------------------------------------------------------------------------------------#

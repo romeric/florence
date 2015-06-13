@@ -83,7 +83,9 @@ def NodeLoopTriNPSP_PARMAP(sorted_repoints,Xs,invX,iSortX,duplicates,Decimals,to
 
 
 	# RE-ASSIGN DUPLICATE
+	t1=time()
 	duplicates = duplicates[:counter,:]
+	print time()-t1
 	# BASED ON THE DUPLICATES OCCURING IN THE SORTED ARRAY sorted_repoints, FIND THE ACTUAL DUPLICATES OCCURING IN repoints
 	duplicates = np.asarray([iSortX[duplicates[:,0]],iSortX[duplicates[:,1]] ]).T
 	# SORT THE ACTUAL DUPLICATE ROW-WISE SO THAT THE FIRST COLUMN IS ALWAYS SMALLER THAN THE SECOND COLUMN
@@ -141,7 +143,7 @@ def NodeLoopTriNPSP(sorted_repoints,Xs,invX,iSortX,duplicates,Decimals,tol):
 	return duplicates
 
 
-def HighOrderMeshTri_UNSTABLE(C,mesh,info=0,Decimals=10,Parallel=False,nCPU=1):
+def HighOrderMeshTri_UNSTABLE(C,mesh,Decimals=10,Parallel=False,nCPU=1):
 
 
 	# SWITCH OFF MULTI-PROCESSING FOR SMALLER PROBLEMS WITHOUT GIVING A MESSAGE
@@ -176,7 +178,7 @@ def HighOrderMeshTri_UNSTABLE(C,mesh,info=0,Decimals=10,Parallel=False,nCPU=1):
 	xycoord_higher=[]; ParallelTuple1=[]
 	if Parallel:
 		# GET HIGHER ORDER COORDINATES - PARALLEL
-		ParallelTuple1 = parmap.map(ElementLoopTri,np.arange(0,mesh.elements.shape[0]),mesh.elements,mesh.points,info.MeshType,eps,
+		ParallelTuple1 = parmap.map(ElementLoopTri,np.arange(0,mesh.elements.shape[0]),mesh.elements,mesh.points,'tri',eps,
 			Neval,pool=MP.Pool(processes=nCPU))
 
 	# LOOP OVER ELEMENTS
@@ -190,7 +192,7 @@ def HighOrderMeshTri_UNSTABLE(C,mesh,info=0,Decimals=10,Parallel=False,nCPU=1):
 			xycoord_higher = ParallelTuple1[elem]
 		else:
 			# xycoord =  mesh.points[mesh.elements[elem,:],:]
-			xycoord_higher = Gett.GetInteriorNodesCoordinates(mesh.points[mesh.elements[elem,:],:],info.MeshType,elem,eps,Neval)
+			xycoord_higher = Gett.GetInteriorNodesCoordinates(mesh.points[mesh.elements[elem,:],:],'tri',elem,eps,Neval)
 	
 		# EXPAND THE ELEMENT CONNECTIVITY
 		newElements = np.arange(maxNode+1,maxNode+1+left_over_nodes) 
@@ -386,7 +388,7 @@ def HighOrderMeshTri(C,mesh,info=0,Parallel=False,nCPU=1):
 	xycoord_higher=[]; ParallelTuple1=[]
 	if Parallel:
 		# GET HIGHER ORDER COORDINATES - PARALLEL
-		ParallelTuple1 = parmap.map(ElementLoopTri,np.arange(0,mesh.elements.shape[0]),mesh.elements,mesh.points,info.MeshType,eps,
+		ParallelTuple1 = parmap.map(ElementLoopTri,np.arange(0,mesh.elements.shape[0]),mesh.elements,mesh.points,'tri',eps,
 			Neval,pool=MP.Pool(processes=nCPU))
 
 	maxNode = np.max(reelements)
@@ -400,7 +402,7 @@ def HighOrderMeshTri(C,mesh,info=0,Parallel=False,nCPU=1):
 			xycoord_higher = ParallelTuple1[elem]
 		else:
 			# xycoord =  mesh.points[mesh.elements[elem,:],:]
-			xycoord_higher = Gett.GetInteriorNodesCoordinates(mesh.points[mesh.elements[elem,:],:],info.MeshType,elem,eps,Neval)
+			xycoord_higher = Gett.GetInteriorNodesCoordinates(mesh.points[mesh.elements[elem,:],:],'tri',elem,eps,Neval)
 
 		# EXPAND THE ELEMENT CONNECTIVITY
 		newElements = np.arange(maxNode+1,maxNode+1+left_over_nodes) 

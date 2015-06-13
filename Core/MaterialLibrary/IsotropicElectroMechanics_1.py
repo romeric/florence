@@ -21,7 +21,7 @@ class IsotropicElectroMechanics_1(object):
 		self.modelname = 'IsotropicElectroMechanics_1'
 		return self.nvar, self.modelname
 
-	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0):
+	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
 		varepsilon_1 = MaterialArgs.eps_1
@@ -84,7 +84,7 @@ class IsotropicElectroMechanics_1(object):
 		return H_Voigt
 
 
-	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx):
+	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 
 		b = StrainTensors.b 
 		J = StrainTensors.J

@@ -1,7 +1,6 @@
 import numpy as np 
 # from Core.Supplementary.Where import *
 
-
 def SparseAssemblySmall(i,j,coeff,I,J,V,elem,nvar,nodeperelem,elements,sort=0):
 
 	# current_row_column = np.zeros((nvar*nodeperelem),dtype=np.int64)
@@ -33,10 +32,16 @@ def SparseAssemblySmall(i,j,coeff,I,J,V,elem,nvar,nodeperelem,elements,sort=0):
 		full_current_row[i==iter]=current_row_column[iter]
 		full_current_column[j==iter]=current_row_column[iter]
 		# print time()-t1
+
+	# t2=time()
 	# STORE INDICES AND COEFFICIENTS IN I, J AND V VECTORS
 	I[(nvar*nodeperelem)**2*elem:(nvar*nodeperelem)**2*(elem+1)] = full_current_row
 	J[(nvar*nodeperelem)**2*elem:(nvar*nodeperelem)**2*(elem+1)] = full_current_column
 	V[(nvar*nodeperelem)**2*elem:(nvar*nodeperelem)**2*(elem+1)] = coeff
+	# print time()-t2
+
+	# temp = np.arange( (nvar*nodeperelem)**2*elem,(nvar*nodeperelem)**2*(elem+1))
+	# I.take(temp,mode='clip')
 
 	return I, J, V
 

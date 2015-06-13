@@ -51,14 +51,16 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 
 		# COMPUTE CAUCHY STRESS TENSOR
 		CauchyStressTensor = []
-		if MainData.AnalysisType == 'Nonlinear' or MainData.Prestress:
+		if MainData.AnalysisType == 'Nonlinear':
 			CauchyStressTensor = MainData.CauchyStress(MainData.MaterialArgs,StrainTensors,ElectricFieldx,elem,counter)
-		# print CauchyStressTensor
+		elif MainData.Prestress:
+			CauchyStressTensor, LastCauchyStressTensor = MainData.CauchyStress(MainData.MaterialArgs,StrainTensors,ElectricFieldx,elem,counter)
+
 		# COMPUTE THE HESSIAN AT THIS GAUSS POINT
 		H_Voigt = MainData.Hessian(MainData.MaterialArgs,ndim,StrainTensors,ElectricFieldx,elem,counter)
 		# COMPUTE THE TANGENT STIFFNESS MATRIX
-		BDB_1, t = MainData().ConstitutiveStiffnessIntegrand(B,nvar,ndim,MainData.AnalysisType,SpatialGradient,CauchyStressTensor,ElectricDisplacementx,H_Voigt)
-			
+		BDB_1, t = MainData().ConstitutiveStiffnessIntegrand(B,nvar,ndim,MainData.AnalysisType,MainData.Prestress,SpatialGradient,CauchyStressTensor,ElectricDisplacementx,H_Voigt)
+
 
 		if MainData.GeometryUpdate:
 			# COMPUTE GEOMETRIC STIFFNESS MATRIX
@@ -75,14 +77,12 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 			# detJ = MainData.Domain.AllGauss[counter,0]*np.abs(la.det(ParentGradientX))*np.abs(StrainTensors.J)
 			if MainData.Prestress:
 				# COMPUTE GEOMETRIC STIFFNESS MATRIX
-				BDB_2 = MainData().GeometricStiffnessIntegrand(SpatialGradient,CauchyStressTensor,nvar,ndim)
-				# print BDB_2
-				# BDB_1 += 1000000000*BDB_2
+				BDB_2 = MainData().GeometricStiffnessIntegrand(SpatialGradient,LastCauchyStressTensor,nvar,ndim)
 				BDB_1 += BDB_2
 				# BDB_1 = BDB_1 + BDB_2
 			# INTEGRATE STIFFNESS
 			stiffness += (BDB_1)*detJ
-			if MainData.AnalysisType == 'Nonlinear':
+			if MainData.AnalysisType == 'Nonlinear' or MainData.Prestress:
 				# INTEGRATE TRACTION FORCE
 				tractionforce += t*detJ
 

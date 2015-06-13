@@ -50,11 +50,12 @@ class Incrementally_Linearised_NeoHookean(object):
 		# print lamb2, lamb
 
 		# 4TH ORDER ELASTICITY TENSOR
-		H_Voigt = Voigt( lamb2*d('ij,kl',I,I)+mu2*(d('ik,jl',I,I)+d('il,jk',I,I)) ,1)
+		# H_Voigt = Voigt( lamb2*d('ij,kl',I,I)+mu2*(d('ik,jl',I,I)+d('il,jk',I,I)) ,1)
+		MaterialArgs.H_Voigt[:,:,elem,gcounter] = Voigt( lamb2*d('ij,kl',I,I)+mu2*(d('ik,jl',I,I)+d('il,jk',I,I)) ,1)
 
-		MaterialArgs.H_VoigtSize = H_Voigt.shape[0]
+		MaterialArgs.H_VoigtSize = H_Voigt_k.shape[0]
 
-		MaterialArgs.H_Voigt[:,:,elem,gcounter] = H_Voigt
+		# MaterialArgs.H_Voigt[:,:,elem,gcounter] = H_Voigt
 
 		# return H_Voigt
 		return H_Voigt_k
@@ -63,7 +64,7 @@ class Incrementally_Linearised_NeoHookean(object):
 
 	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 
-		Stress_k = MaterialArgs.Sigma[:,:,elem,gcounter]
+		Sigma_k = MaterialArgs.Sigma[:,:,elem,gcounter]
 		H_Voigt_k = MaterialArgs.H_Voigt[:,:,elem,gcounter]
 
 
@@ -81,21 +82,19 @@ class Incrementally_Linearised_NeoHookean(object):
 
 		# Jk=J
 		Jk=1
-
 		mu2 = Jk*(mu - lamb*(J-1.0))
 		lamb2 = Jk*(lamb*(2.0*J-1.0) - mu)
+		# COMPUTE THE NEW STRESS AND STORE
+		MaterialArgs.Sigma[:,:,elem,gcounter]  = Jk*(1.0*mu/J*b+(lamb*(J-1.0)-mu)*I)
 
-		# print strain
-
-		Jk_sigma_k = Jk*(1.0*mu/J*b+(lamb*(J-1.0)-mu)*I)
-		# print Jk_sigma_k
 
 		# STORE THIS VALUE 
-		MaterialArgs.Sigma[:,:,elem,gcounter] = Jk_sigma_k
-
+		# MaterialArgs.Sigma[:,:,elem,gcounter] = Jk_sigma_k
 		# return Jk_sigma_k + lamb2*trace(strain)*I + 2*mu2*strain
-		# REPORT OLD VALUE
-		return np.dot(Stress_k,(I+strain))+ np.dot(H_Voigt_k,Voigt(strain),1)
+
+		# COMPUTE INCREMENTALLY LINEARISED STRESS BASED ON STRESS_K AND RETURN 
+		return IncrementallyLinearisedStress(Sigma_k,H_Voigt_k,I,strain,StrainTensors.Gradu), Sigma_k
+
 		
 
 
