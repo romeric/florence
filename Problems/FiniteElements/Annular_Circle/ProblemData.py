@@ -16,24 +16,30 @@ def ProblemData(MainData):
 	MainData.Formulation = 1 	# Displacement-Potential based formulation
 	MainData.Analysis = 'Static'
 	# MainData.Analysis = 'Dynamic'
-	MainData.AnalysisType = 'Linear'
-	# MainData.AnalysisType = 'Nonlinear'
+	# MainData.AnalysisType = 'Linear'
+	MainData.AnalysisType = 'Nonlinear'
 
 	class MaterialArgs(object):
 		"""docstring for MaterialArgs"""
 		# Type = 'Steinmann'
 		# Type = 'LinearisedElectromechanics'
-		Type = 'LinearModel'
-		# Type = 'AnisotropicMooneyRivlin_1'
+		# Type = 'LinearModel'
+		Type = 'AnisotropicMooneyRivlin_1'
 		# Type = 'Incrementally_Linearised_NeoHookean'
 		
 
+		E = 1.0e1
+		nu = 0.2
+		# GET LAME CONSTANTS
+		lamb = E*nu/(1.+nu)/(1.-2.0*nu)
+		mu = E/2./(1+nu)
+
 		# mu = 1.
 		# lamb  = 2.
-		mu    = 0.3571
-		lamb  = 1.4286
+		# mu    = 0.3571
+		# lamb  = 1.4286
 		# lamb = lamb - mu
-		lamb = lamb + mu
+		# lamb = lamb + mu
 
 		# mu    = 0.090571
 		# lamb  = 1.4286
@@ -143,6 +149,18 @@ def ProblemData(MainData):
 					uy = np.sign(y)*abs(abs(Ly)-abs(y))
 
 					b = np.array([ux,uy])
+				else: 
+					b = [None,None]	
+			elif rn < 2.0+tol_radius and rn > 2.0 - tol_radius:
+
+				# print node[0], node[1]
+				theta = np.arctan(node[1]/node[0])
+
+				# Is this node on the edge
+				p = np.where(unedges==inode)[0]
+				if p.shape[0]!=0:
+					# Now we are on the edge
+					b = np.array([0.,0.])
 				else: 
 					b = [None,None]	
 			else:	

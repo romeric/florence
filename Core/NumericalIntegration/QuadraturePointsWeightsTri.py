@@ -718,4 +718,7 @@ def QuadraturePointsWeightsTri(C,Opt=1):
 				[-0.978904561411718,  0.859512343113706 , 0.007147818771900]
 				])
 
+	else:
+		raise ValueError('Unknown option for quadrature rule. Opt must be either 0 or 1')
+
 	return zw

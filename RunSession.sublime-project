@@ -1,18 +1,28 @@
 {
+	"build_systems":
+	[
+		{
+			"cmd":
+			[
+				"python",
+				"-ui",
+				"/home/roman/Dropbox/Python/RunSession.py"
+			],
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"name": "RunSession",
+			"selector": "source.python"
+		},
+		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"name": "Anaconda Python Builder",
+			"selector": "source.python",
+			"shell_cmd": "python -u \"$file\""
+		}
+	],
 	"folders":
 	[
 		{
 			"path": "."
-		}
-	],
-
-	"build_systems":
-	[
-		{
-			"name": "RunSession",
-			"cmd": ["python", "-u", "/home/roman/Dropbox/Python/RunSession.py"],
-			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
-			"selector": "source.python"
 		}
 	]
 }

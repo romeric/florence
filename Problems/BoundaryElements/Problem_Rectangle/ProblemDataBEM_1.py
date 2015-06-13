@@ -2,8 +2,9 @@ import numpy as np
 import numpy.linalg as la
 import matplotlib.pyplot as plt
 from matplotlib import rc
-from Core.MeshGeneration.MeshGeneration import MeshGeneration
-
+# from Core.MeshGeneration.MeshGeneration import MeshGeneration
+# from Core.MeshGeneration.Mesh import MeshPyTri as MeshGeneration
+from Core.MeshGeneration.Mesh import*
 
 #############################################################################################
 # Problem 1 - Rectangular Geometry

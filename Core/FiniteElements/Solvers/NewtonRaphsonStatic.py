@@ -22,13 +22,15 @@ def NewtonRaphson(Increment,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nme
 	while np.abs(la.norm(Residual[columns_in])/NormForces) > Tolerance:
 		# APPLY INCREMENTAL DIRICHLET BOUNDARY CONDITIONS
 		K_b, F_b= ApplyIncrementalDirichletBoundaryConditions(K,Residual,columns_in,columns_out,AppliedDirichletInc,Iter,MainData.Minimal,nmesh,M,MainData.Analysis)[:2]
-		# SOLVE THE SYSTEM
+		
+		# CHECK FOR THE CONDITION NUMBER OF THE SYSTEM
+		# MainData.solve.condA = np.linalg.cond(K_b.todense())
 
+		# SOLVE THE SYSTEM
 		if MainData.solve.type == 'direct':
 			sol = spsolve(K_b,-F_b)
 		else:
 			sol = bicgstab(K_b,-F_b,tol=MainData.solve.tol)[0]
-	
 
 		# GET THE TOTAL SOLUTION AND ITS COMPONENTS SUCH AS UX, UY, UZ, PHI ETC
 		dU = PostProcess().TotalComponentSol(MainData,sol,columns_in,columns_out,AppliedDirichletInc,Iter,F.shape[0]) 

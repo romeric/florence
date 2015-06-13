@@ -14,7 +14,7 @@ from Core.FiniteElements.Solvers.StaticSolver import *
 
 
 
-def MainSolver(MainData,mesh,nmesh):
+def MainSolver(MainData,nmesh):
 
 	# INITIATE DATA FOR NON-LINEAR ANALYSIS
 	NodalForces, Residual = InitiateNonlinearAnalysisData(MainData,nmesh)
@@ -31,8 +31,8 @@ def MainSolver(MainData,mesh,nmesh):
 	print 'Assembling the system and acquiring neccessary information for the analysis...'
 	tAssembly=time()
 	# RHS
-	# F = AssemblyForces(MainData,mesh,nmesh,MainData.Quadrature,Domain,MainData.MaterialArgs,BoundaryData,Boundary)
-	# F = AssemblyForces_Cheap(MainData,mesh,nmesh,Quadrature,Domain,MainData.MaterialArgs,BoundaryData,Boundary)
+	# F = AssemblyForces(MainData,nmesh,MainData.Quadrature,Domain,MainData.MaterialArgs,BoundaryData,Boundary)
+	# F = AssemblyForces_Cheap(MainData,nmesh,Quadrature,Domain,MainData.MaterialArgs,BoundaryData,Boundary)
 	F = np.zeros((nmesh.points.shape[0]*MainData.nvar,1),dtype=np.float64)
 	# LHS
 	M = []

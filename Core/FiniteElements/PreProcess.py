@@ -14,6 +14,7 @@ from Core.NumericalIntegration import GaussQuadrature, QuadraturePointsWeightsTe
 from Core.FiniteElements.GetBases import *
 import Core.Formulations.DisplacementElectricPotentialApproach as DEPB
 import Core.Formulations.DisplacementApproach as DB
+from Core import Mesh
 
 # import cProfile
 from Core.Supplementary.Timing.Timing import timing
@@ -34,34 +35,36 @@ def PreProcess(MainData,Pr,pwd):
 
 	# READ MESH-FILE
 	############################################################################
-	mesh = ReadMesh(MainData.MeshInfo.FileName,MainData.MeshInfo.MeshType,MainData.C)
+	mesh = Mesh()
+	mesh.Read(MainData.MeshInfo.FileName,MainData.MeshInfo.MeshType,MainData.C)
+
 	# sys.exit("STOPPED")
 	# GENERATE pMESHES IF REQUIRED
-	if MainData.C==0:
-		nmesh = mesh
-	else:
-		print 'Generating p = '+str(MainData.C+1)+' mesh based on the linear mesh...'
-		t_mesh = time()
-		# BUILD A NEW MESH BASED ON THE LINEAR MESH
-		if MainData.MeshInfo.MeshType == 'tri':
-			# BUILD A NEW MESH USING THE FEKETE NODAL POINTS FOR TRIANGLES  
-			# nmesh = HighOrderMeshTri(MainData.C,mesh,MainData.MeshInfo,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
-			nmesh = HighOrderMeshTri_UNSTABLE(MainData.C,mesh,MainData.MeshInfo,Decimals=10,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
+	# if MainData.C==0:
+	# 	nmesh = mesh
+	# else:
+	# 	print 'Generating p = '+str(MainData.C+1)+' mesh based on the linear mesh...'
+	# 	t_mesh = time()
+	# 	# BUILD A NEW MESH BASED ON THE LINEAR MESH
+	# 	if MainData.MeshInfo.MeshType == 'tri':
+	# 		# BUILD A NEW MESH USING THE FEKETE NODAL POINTS FOR TRIANGLES  
+	# 		# nmesh = HighOrderMeshTri(MainData.C,mesh,MainData.MeshInfo,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
+	# 		nmesh = HighOrderMeshTri_UNSTABLE(MainData.C,mesh,Decimals=10,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
 
-			# nmesh1 = HighOrderMeshTri(MainData.C,mesh,MainData.MeshInfo,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
-			# nmesh2 = HighOrderMeshTri_UNSTABLE(MainData.C,mesh,MainData.MeshInfo,Decimals=10,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
-		elif MainData.MeshInfo.MeshType == 'tet':
-			# BUILD A NEW MESH USING THE FEKETE NODAL POINTS FOR TETRAHEDRALS
-			# nmesh = HighOrderMeshTet(MainData.C,mesh,MainData.MeshInfo,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
-			nmesh = HighOrderMeshTet_UNSTABLE(MainData.C,mesh,MainData.MeshInfo,Decimals=10,Zerofy=0,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
+	# 		# nmesh1 = HighOrderMeshTri(MainData.C,mesh,MainData.MeshInfo,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
+	# 		# nmesh2 = HighOrderMeshTri_UNSTABLE(MainData.C,mesh,MainData.MeshInfo,Decimals=10,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
+	# 	elif MainData.MeshInfo.MeshType == 'tet':
+	# 		# BUILD A NEW MESH USING THE FEKETE NODAL POINTS FOR TETRAHEDRALS
+	# 		# nmesh = HighOrderMeshTet(MainData.C,mesh,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
+	# 		nmesh = HighOrderMeshTet_UNSTABLE(MainData.C,mesh,Decimals=10,Zerofy=0,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
 
-			# nmesh1 = HighOrderMeshTet(MainData.C,mesh,MainData.MeshInfo,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
-			# nmesh2 = HighOrderMeshTet_UNSTABLE(MainData.C,mesh,MainData.MeshInfo,Decimals=10,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
-		elif MainData.MeshInfo.MeshType == 'quad':
-			# BUILD A NEW MESH USING THE GAUSS-LOBATTO NODAL POINTS FOR QUADS
-			nmesh = HighOrderMeshQuad(MainData.C,mesh,MainData.MeshInfo,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
+	# 		# nmesh1 = HighOrderMeshTet(MainData.C,mesh,MainData.MeshInfo,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
+	# 		# nmesh2 = HighOrderMeshTet_UNSTABLE(MainData.C,mesh,MainData.MeshInfo,Decimals=10,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
+	# 	elif MainData.MeshInfo.MeshType == 'quad':
+	# 		# BUILD A NEW MESH USING THE GAUSS-LOBATTO NODAL POINTS FOR QUADS
+	# 		nmesh = HighOrderMeshQuad(MainData.C,mesh,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
 		
-		print 'Finished generating the high order mesh. Time taken', time()-t_mesh,'sec'
+	# 	print 'Finished generating the high order mesh. Time taken', time()-t_mesh,'sec'
 	############################################################################
 	# index_sort_x = np.argsort(nmesh.points[:,0])
 	# sorted_repoints = nmesh.points[index_sort_x,:]
@@ -78,6 +81,32 @@ def PreProcess(MainData,Pr,pwd):
 	# print '\n',np.max(nmesh.elements)+1, nmesh.points.shape[0]
 	# print 'Number of nodes: ', nmesh.points.shape[0]
 	# np.savetxt('/home/roman/Dropbox/time.dat',np.array([time()-t_mesh, nmesh.points.shape[0]]))
+	
+
+	# Mesh().GetBoundaryEdgesTri(mesh.elements)
+	# mesh = Mesh()
+	# print dir(mesh1)
+	# mesh.Read(MainData.MeshInfo.FileName,MainData.MeshInfo.MeshType,MainData.C)
+	# mesh.edges=[]
+	# mesh.faces=[]
+	# print dir(mesh1)
+	# print mesh.elemtype
+	# print mesh.points
+	# print mesh.elements
+	# mesh.GetBoundaryEdgesTri()
+	# print mesh.faces
+	# mesh.GetBoundaryEdgesTet()
+	# mesh.GetBoundaryFacesTet()
+	# print mesh.faces
+	# print mesh.edges
+	# mesh.WriteVTK()
+	# mesh.WriteVTK(fname='/home/roman/Desktop/toba.vtu',pdata=mesh.points[:,1])
+
+	# print mesh.elements
+	if MainData.C>0:
+		mesh.GetHighOrderMesh(MainData.C,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
+	# print mesh.elements
+
 	# sys.exit("STOPPED")
 
 
@@ -270,13 +299,16 @@ def PreProcess(MainData,Pr,pwd):
 		elif MainData.Fields == 'ElectroMechanics':
 			Hsize = 9 if MainData.ndim == 3 else 5
 		else:
-			raise NotImplementedError('H_Voigt size not give')
+			raise NotImplementedError('H_Voigt size not giveN')
 
 		MainData.MaterialArgs.H_Voigt = np.zeros((Hsize,Hsize,nmesh.nelem,Quadrature.weights.shape[0]),dtype=np.float64)
 		MainData.MaterialArgs.Sigma = np.zeros((MainData.ndim,MainData.ndim,nmesh.nelem,Quadrature.weights.shape[0]),dtype=np.float64)
 
-	
-	# GET THE MEHTOD NAME FOR THE RIGHT MATERIAL
+
+	# CHOOSE AND INITIALISE THE RIGHT MATERIAL MODEL 
+	##############################################################################
+
+	# GET THE MEHTOD NAME FOR THE RIGHT MATERIAL MODEL
 	MaterialFuncName = getattr(MatLib,MainData.MaterialArgs.Type)
 	# INITIATE THE FUNCTIONS FROM THIS MEHTOD
 	MainData.nvar, MainData.MaterialModelName = MaterialFuncName(MainData.ndim).Get()
@@ -287,119 +319,7 @@ def PreProcess(MainData,Pr,pwd):
 	StrainTensors = KinematicMeasures(np.diag(np.ones(MainData.ndim))).Compute(MainData.AnalysisType)
 	MaterialFuncName(MainData.ndim).Hessian(MainData.MaterialArgs,MainData.ndim,StrainTensors,elem=0,gcounter=0)
 
-
-	# #############################################################################
-	# #############################################################################
-
-	# if MainData.MaterialArgs.Type == 'NeoHookean':
-	# 	MainData.nvar, MainData.MaterialModelName = NeoHookean(MainData.ndim).Get()
-	# 	MainData.Hessian = NeoHookean(MainData.ndim).Hessian
-	# 	MainData.CauchyStress = NeoHookean(MainData.ndim).CauchyStress
-
-	# 	# To initialise
-	# 	StrainTensors = KinematicMeasures(np.diag(np.ones(MainData.ndim))).Compute(MainData.AnalysisType)
-	# 	NeoHookean(MainData.ndim).Hessian(MainData.MaterialArgs,MainData.ndim,StrainTensors)
-
-	# elif MainData.MaterialArgs.Type == 'NeoHookean_1':
-	# 	MainData.nvar, MainData.MaterialModelName = NeoHookean_1(MainData.ndim).Get()
-	# 	MainData.Hessian = NeoHookean_1(MainData.ndim).Hessian
-	# 	MainData.CauchyStress = NeoHookean_1(MainData.ndim).CauchyStress
-
-	# 	# To initialise
-	# 	StrainTensors = KinematicMeasures(np.diag(np.ones(MainData.ndim))).Compute(MainData.AnalysisType)
-	# 	NeoHookean_1(MainData.ndim).Hessian(MainData.MaterialArgs,MainData.ndim,StrainTensors)
-
-	# elif MainData.MaterialArgs.Type == 'IsotropicElectroMechanics_1':
-	# 	MainData.nvar, MainData.MaterialModelName = IsotropicElectroMechanics_1(MainData.ndim).Get()
-	# 	MainData.Hessian = IsotropicElectroMechanics_1(MainData.ndim).Hessian
-	# 	MainData.CauchyStress = IsotropicElectroMechanics_1(MainData.ndim).CauchyStress
-	# 	MainData.ElectricDisplacementx = IsotropicElectroMechanics_1(MainData.ndim).ElectricDisplacementx
-
-	# 	# To initialise
-	# 	StrainTensors = KinematicMeasures(np.diag(np.ones(MainData.ndim))).Compute(MainData.AnalysisType)
-	# 	IsotropicElectroMechanics_1(MainData.ndim).Hessian(MainData.MaterialArgs,MainData.ndim,StrainTensors,np.zeros((MainData.ndim,1)))
-
-
-	# elif MainData.MaterialArgs.Type == 'Steinmann':
-	# 	MainData.nvar, MainData.MaterialModelName = Steinmann(MainData.ndim).Get()
-	# 	MainData.Hessian = Steinmann(MainData.ndim).Hessian
-	# 	MainData.CauchyStress = Steinmann(MainData.ndim).CauchyStress
-	# 	MainData.ElectricDisplacementx = Steinmann(MainData.ndim).ElectricDisplacementx
-
-	# 	# To initialise
-	# 	StrainTensors = KinematicMeasures(np.diag(np.ones(MainData.ndim))).Compute(MainData.AnalysisType)
-	# 	Steinmann(MainData.ndim).Hessian(MainData.MaterialArgs,MainData.ndim,StrainTensors,np.zeros((MainData.ndim,1)))
-
-
-	# elif MainData.MaterialArgs.Type == 'AnisotropicMooneyRivlin_1':
-	# 	MainData.nvar, MainData.MaterialModelName = AnisotropicMooneyRivlin_1(MainData.ndim).Get()
-	# 	MainData.Hessian = AnisotropicMooneyRivlin_1(MainData.ndim).Hessian
-	# 	MainData.CauchyStress = AnisotropicMooneyRivlin_1(MainData.ndim).CauchyStress
-	# 	MainData.ElectricDisplacementx = AnisotropicMooneyRivlin_1(MainData.ndim).ElectricDisplacementx 
-
-	# 	# To initialise
-	# 	StrainTensors = KinematicMeasures(np.diag(np.ones(MainData.ndim))).Compute(MainData.AnalysisType)
-	# 	AnisotropicMooneyRivlin_1(MainData.ndim).Hessian(MainData.MaterialArgs,MainData.ndim,StrainTensors,np.zeros((MainData.ndim,1)))
-
-
-	# elif MainData.MaterialArgs.Type == 'AnisotropicMooneyRivlin_1_Electromechanics':
-	# 	MainData.nvar, MainData.MaterialModelName = AnisotropicMooneyRivlin_1_Electromechanics(MainData.ndim).Get()
-	# 	MainData.Hessian = AnisotropicMooneyRivlin_1_Electromechanics(MainData.ndim).Hessian
-	# 	MainData.CauchyStress = AnisotropicMooneyRivlin_1_Electromechanics(MainData.ndim).CauchyStress
-	# 	MainData.ElectricDisplacementx = AnisotropicMooneyRivlin_1_Electromechanics(MainData.ndim).ElectricDisplacementx 
-
-	# 	# To initialise
-	# 	StrainTensors = KinematicMeasures(np.diag(np.ones(MainData.ndim))).Compute(MainData.AnalysisType)
-	# 	AnisotropicMooneyRivlin_1_Electromechanics(MainData.ndim).Hessian(MainData.MaterialArgs,MainData.ndim,StrainTensors,np.zeros((MainData.ndim,1)))
-
-
-	# elif MainData.MaterialArgs.Type == 'Incrementally_Linearised_NeoHookean':
-	# 	MainData.nvar, MainData.MaterialModelName = Incrementally_Linearised_NeoHookean(MainData.ndim).Get()
-	# 	MainData.Hessian = Incrementally_Linearised_NeoHookean(MainData.ndim).Hessian
-	# 	MainData.CauchyStress = Incrementally_Linearised_NeoHookean(MainData.ndim).CauchyStress
-	# 	MainData.ElectricDisplacementx = Incrementally_Linearised_NeoHookean(MainData.ndim).ElectricDisplacementx 
-
-	# 	# To initialise
-	# 	StrainTensors = KinematicMeasures(np.diag(np.ones(MainData.ndim))).Compute(MainData.AnalysisType)
-	# 	Incrementally_Linearised_NeoHookean(MainData.ndim).Hessian(MainData.MaterialArgs,MainData.ndim,StrainTensors,np.zeros((MainData.ndim,1)))
-
-
-
-	# elif MainData.MaterialArgs.Type == 'LinearisedElectromechanics':
-	# 	MainData.nvar, MainData.MaterialModelName = LinearisedElectromechanics(MainData.ndim).Get()
-	# 	MainData.Hessian = LinearisedElectromechanics(MainData.ndim).Hessian
-	# 	MainData.CauchyStress = LinearisedElectromechanics(MainData.ndim).CauchyStress
-	# 	MainData.ElectricDisplacementx = LinearisedElectromechanics(MainData.ndim).ElectricDisplacementx
-
-	# 	# To initialise
-	# 	StrainTensors = KinematicMeasures(np.diag(np.ones(MainData.ndim))).Compute(MainData.AnalysisType)
-	# 	LinearisedElectromechanics(MainData.ndim).Hessian(MainData.MaterialArgs,MainData.ndim,StrainTensors,np.zeros((MainData.ndim,1)))
-
-
-	# elif MainData.MaterialArgs.Type == 'LinearModel':
-	# 	MainData.nvar, MainData.MaterialModelName = LinearModel(MainData.ndim).Get()
-	# 	MainData.Hessian = LinearModel(MainData.ndim).Hessian
-	# 	MainData.CauchyStress = LinearModel(MainData.ndim).CauchyStress
-	# 	MainData.ElectricDisplacementx = LinearModel(MainData.ndim).ElectricDisplacementx
-
-	# 	# To initialise
-	# 	StrainTensors = KinematicMeasures(np.diag(np.ones(MainData.ndim))).Compute(MainData.AnalysisType)
-	# 	LinearModel(MainData.ndim).Hessian(MainData.MaterialArgs,MainData.ndim,StrainTensors,np.zeros((MainData.ndim,1)))
-
-
-	# elif MainData.MaterialArgs.Type == 'LinearModelElectromechanics':
-	# 	MainData.nvar, MainData.MaterialModelName = LinearModelElectromechanics(MainData.ndim).Get()
-	# 	MainData.Hessian = LinearModelElectromechanics(MainData.ndim).Hessian
-	# 	MainData.CauchyStress = LinearModelElectromechanics(MainData.ndim).CauchyStress
-	# 	MainData.ElectricDisplacementx = LinearModelElectromechanics(MainData.ndim).ElectricDisplacementx
-
-	# 	# To initialise
-	# 	StrainTensors = KinematicMeasures(np.diag(np.ones(MainData.ndim))).Compute(MainData.AnalysisType)
-	# 	LinearModelElectromechanics(MainData.ndim).Hessian(MainData.MaterialArgs,MainData.ndim,StrainTensors,np.zeros((MainData.ndim,1)))
-	# #############################################################################
-	# #############################################################################
-
-
+	##############################################################################
 
 
 
@@ -448,7 +368,7 @@ def PreProcess(MainData,Pr,pwd):
 		"""docstring for solve"""
 		tol = 1e-07
 
-	if nmesh.points.shape[0]*MainData.nvar > 300000:
+	if mesh.points.shape[0]*MainData.nvar > 300000:
 		solve.type = 'iterative'
 		print 'Large system of equations. Switching to iterative solver'
 	else:
@@ -456,29 +376,8 @@ def PreProcess(MainData,Pr,pwd):
 
 	MainData.solve = solve 
 			
-	# if 'Solver' in dir(MainData):
-	# 	if MainData.Solver == 'iterative':
-	# 		# from scipy.sparse.linalg import spsolve, cg, cgs, bicg, bicgstab, gmres, lgmres, minres 
-	# 		from scipy.sparse.linalg import bicgstab
-	# 		solve.spsolve = bicgstab
-	# 		solve.type = 'iterative'
-	# 	else:
-	# 		from scipy.sparse.linalg import spsolve 
-	# 		MainData.spsolve = spsolve
-	# 		solve.type = 'direct'
-	# else:
-	# 	if nmesh.points.shape[0]*MainData.nvar > 200000:
-	# 		from scipy.sparse.linalg import bicgstab
-	# 		solve.spsolve = bicgstab
-	# 		solve.type = 'iterative'
-	# 	else:
-	# 		from scipy.sparse.linalg import spsolve 
-	# 		solve.spsolve = spsolve
-	# 		solve.type = 'direct'
 
-	# MainData.solve = solve 
-
-	if nmesh.nelem > 100000:
+	if mesh.nelem > 100000:
 		MainData.AssemblyRoutine = 'Large'
 		print 'Large number of elements. Switching to faster assembly routine'
 	else:
@@ -508,18 +407,19 @@ def PreProcess(MainData,Pr,pwd):
 
 	# DICTIONARY OF SAVED VARIABLES
 	#############################################################################
-	MainData.MainDict = {'ProblemPath': MainData.Path.ProblemResults, 
-	 'MeshPoints':nmesh.points, 'MeshElements':nmesh.elements, 'MeshFaces':nmesh.faces, 'MeshEdges':nmesh.edges,
-	 'Solution':[], 'DeformationGradient':[], 'CauchyStress':[],
-	 'SecondPiolaStress':[], 'ElectricField':[], 'ElectricDisplacement':[]}
+	if MainData.write == 0:
+		MainData.MainDict = {'ProblemPath': MainData.Path.ProblemResults, 
+		 'MeshPoints':mesh.points, 'MeshElements':mesh.elements, 'MeshFaces':mesh.faces, 'MeshEdges':mesh.edges,
+		 'Solution':[], 'DeformationGradient':[], 'CauchyStress':[],
+		 'SecondPiolaStress':[], 'ElectricField':[], 'ElectricDisplacement':[]}
 
 	#############################################################################
 			
 			
-	# PLACE IN MAIN CLASS
+	# PLACE IN MAINDATA
 	MainData.Quadrature = Quadrature
 
-	return mesh, nmesh
+	return mesh
 
 
 

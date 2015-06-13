@@ -1,7 +1,9 @@
 import numpy as np
 import numpy.linalg as la
 import matplotlib.pyplot as plt 								# For plotting
-from Core.MeshGeneration.MeshGeneration import MeshGeneration
+# from Core.MeshGeneration.MeshGeneration import MeshGeneration
+# from Core.MeshGeneration.Mesh import MeshPyTri as MeshGeneration
+from Core.MeshGeneration.Mesh import*
 
 #############################################################################################
 # Problem 2 - Arch Geometry 

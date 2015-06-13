@@ -16,7 +16,7 @@ Tet = imp.load_source('hpNodalTet',pwd+'/Core/InterpolationFunctions/ThreeDimens
 
 
 from ElementalMatrices.KinematicMeasures import *
-from Core.MeshGeneration.PythonMeshScripts import vtk_writer
+from Core.MeshGeneration import vtk_writer
 
 class PostProcess(object):
 	"""docstring for PostProcess"""
@@ -377,7 +377,7 @@ class PostProcess(object):
 
 
 
-	def MeshQualityMeasures(self,MainData,mesh,nmesh,TotalDisp):
+	def MeshQualityMeasures(self,MainData,nmesh,TotalDisp):
 
 
 		Domain = MainData.Domain

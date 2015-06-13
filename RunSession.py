@@ -33,7 +33,7 @@ class MainData(object):
  	write = 0								# FLAG FOR WRITING THE RESULTS IN VTK/MAT/EPS/DAT ETC
  	Parallel = True 						# MULTI-PROCESSING 
  	nCPU = MP.cpu_count()					# CPU COUNT FOR MULTI-PROCESSING
- 	Parallel = False
+ 	# Parallel = False
  	# nCPU = 8
 
 
@@ -73,7 +73,7 @@ elif MainData.session == 'BEM3D':
 
 # import inspect; print(inspect.getsource(numpy.linspace)) # numpy/scipy documenation in a shell
 # import inspect; print(inspect.getsource(np.unique)) # numpy/scipy documenation in a shellnp un
-print u'\u2713'.encode('utf8')
+# print u'\u2713'.encode('utf8')
 
 # "theme": "Elementary Dark.sublime-theme",
 

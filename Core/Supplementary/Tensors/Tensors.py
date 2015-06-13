@@ -152,9 +152,68 @@ def Voigt(A,sym=0):
 	return VoigtA
 
 
+def UnVoigt(v):
+	A = []
+	if len(v.shape)==2:
+		if v.shape[1]>1:
+			pass
+			# DO IT LATER FOR shape>1
+		elif v.shape[1]==1:
+			# VECTORS TO SYMMETRIC 2ND ORDER TENSORS
+			if v.shape[0]==6:
+				A = np.array([
+					[v[0,0],v[3,0],v[4,0]],
+					[v[3,0],v[1,0],v[5,0]],
+					[v[4,0],v[5,0],v[2,0]]
+					])
+			elif v.shape[0]==3:
+				A = np.array([
+					[v[0,0],v[2,0]],
+					[v[2,0],v[1,0]]
+					])
+
+	elif len(v.shape)==1:
+		# VECTORS TO SYMMETRIC 2ND ORDER TENSORS
+		if v.shape[0]==6:
+			A = np.array([
+				[v[0],v[3],v[4]],
+				[v[3],v[1],v[5]],
+				[v[4],v[5],v[2]]
+				])
+		elif v.shape[0]==3:
+			A = np.array([
+				[v[0],v[2]],
+				[v[2],v[1]]
+				])
+
+	return A 
 
 
 
+
+
+
+def IncrementallyLinearisedStress(Stress_k,H_Voigt_k,I,strain,Gradu):
+	# IN PRINCIPLE WE NEED GRADU AND NOT STRAIN FOR V_strain
+	V_strain =  Voigt(strain)
+	# print H_Voigt_k
+	# print V_strain.reshape(Voigt(strain).shape[0],1)
+	# print np.dot(H_Voigt_k,V_strain.reshape(Voigt(strain).shape[0],1))
+	# print np.dot(H_Voigt_k,V_strain.reshape(Voigt(strain).shape[0],1)).shape
+
+					# STRESS 											HESSSIAN 'I_W:GRADU'
+	return np.dot(Stress_k,(I+strain)) + UnVoigt( np.dot(H_Voigt_k,V_strain.reshape(Voigt(strain).shape[0],1)) )
+	
+
+
+
+
+
+
+
+
+
+########################################################################################################
 # Note that these matrices are all symmetrised
 def AijBkl(A,B):
 

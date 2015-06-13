@@ -38,9 +38,9 @@ def ApplyDirichletBoundaryConditions(stiffness,F,nmesh,MainData):
 					if Dirichlet[i] is None:
 						pass
 					else:
-						columns_out = np.append(columns_out,nvar*inode+i)
+						# columns_out = np.append(columns_out,nvar*inode+i) # THIS IS INVALID
 						# ACTIVATE THIS FOR DEBUGGING ELECTROMECHANICAL PROBLEMS
-						# columns_out = np.append(columns_out,nvar*unique_edge_nodes[inode]+i)
+						columns_out = np.append(columns_out,nvar*unique_edge_nodes[inode]+i)
 						AppliedDirichlet = np.append(AppliedDirichlet,Dirichlet[i])
 
 
