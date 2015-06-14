@@ -16,20 +16,20 @@ def ProblemData(MainData):
 	MainData.Formulation = 1 	# Displacement-Potential based formulation
 	MainData.Analysis = 'Static'
 	# MainData.Analysis = 'Dynamic'
-	# MainData.AnalysisType = 'Linear'
-	MainData.AnalysisType = 'Nonlinear'
+	MainData.AnalysisType = 'Linear'
+	# MainData.AnalysisType = 'Nonlinear'
 
 	class MaterialArgs(object):
 		"""docstring for MaterialArgs"""
 		# Type = 'Steinmann'
 		# Type = 'LinearisedElectromechanics'
-		# Type = 'LinearModel'
-		Type = 'AnisotropicMooneyRivlin_1'
+		Type = 'LinearModel'
+		# Type = 'AnisotropicMooneyRivlin_1'
 		# Type = 'Incrementally_Linearised_NeoHookean'
 		
 
 		E = 1.0e1
-		nu = 0.2
+		nu = 0.4
 		# GET LAME CONSTANTS
 		lamb = E*nu/(1.+nu)/(1.-2.0*nu)
 		mu = E/2./(1+nu)
@@ -39,7 +39,8 @@ def ProblemData(MainData):
 		# mu    = 0.3571
 		# lamb  = 1.4286
 		# lamb = lamb - mu
-		# lamb = lamb + mu
+		# mu = 2*mu
+		lamb = lamb + mu
 
 		# mu    = 0.090571
 		# lamb  = 1.4286

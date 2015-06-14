@@ -4,6 +4,8 @@
 
 
 import imp, os, sys, time, cProfile	
+# from pympler import tracker, asizeof, summary, muppy
+# from memory_profiler import profile
 from datetime import datetime
 import numpy as np
 # import scipy as sp 
@@ -50,8 +52,11 @@ from Main.FiniteElements.MainFEM import main
 # FEM SESSION
 if MainData.session == 'FEM':
 	t_FEM = time.time()
+	# tr = tracker.SummaryTracker()
 	# cProfile.run('main(MainData)')
 	main(MainData)	
+	# tr.print_diff()
+	# print asizeof.asizeof(MainData)
 	print 'Time taken for the entire analysis was', time.time()-t_FEM, 'seconds \n'
 	# MEMORY USAGE INFORMATION
 	print 'Global sparse matrix needed', MainData.spmat, 'MB of memory with IJV indices requiring', MainData.ijv, 'MB'

@@ -36,35 +36,16 @@ def PreProcess(MainData,Pr,pwd):
 	# READ MESH-FILE
 	############################################################################
 	mesh = Mesh()
-	mesh.Read(MainData.MeshInfo.FileName,MainData.MeshInfo.MeshType,MainData.C)
+	# mesh.Read(MainData.MeshInfo.FileName,MainData.MeshInfo.MeshType,MainData.C)
+	# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=4,ncirc=12)
+	mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=3,ncirc=7)
 
-	# sys.exit("STOPPED")
-	# GENERATE pMESHES IF REQUIRED
-	# if MainData.C==0:
-	# 	nmesh = mesh
-	# else:
-	# 	print 'Generating p = '+str(MainData.C+1)+' mesh based on the linear mesh...'
-	# 	t_mesh = time()
-	# 	# BUILD A NEW MESH BASED ON THE LINEAR MESH
-	# 	if MainData.MeshInfo.MeshType == 'tri':
-	# 		# BUILD A NEW MESH USING THE FEKETE NODAL POINTS FOR TRIANGLES  
-	# 		# nmesh = HighOrderMeshTri(MainData.C,mesh,MainData.MeshInfo,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
-	# 		nmesh = HighOrderMeshTri_UNSTABLE(MainData.C,mesh,Decimals=10,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
+	# GENERATE pMESHES FOR HIGH C
+	############################################################################
+	if MainData.C>0:
+		mesh.GetHighOrderMesh(MainData.C,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
 
-	# 		# nmesh1 = HighOrderMeshTri(MainData.C,mesh,MainData.MeshInfo,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
-	# 		# nmesh2 = HighOrderMeshTri_UNSTABLE(MainData.C,mesh,MainData.MeshInfo,Decimals=10,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
-	# 	elif MainData.MeshInfo.MeshType == 'tet':
-	# 		# BUILD A NEW MESH USING THE FEKETE NODAL POINTS FOR TETRAHEDRALS
-	# 		# nmesh = HighOrderMeshTet(MainData.C,mesh,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
-	# 		nmesh = HighOrderMeshTet_UNSTABLE(MainData.C,mesh,Decimals=10,Zerofy=0,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
 
-	# 		# nmesh1 = HighOrderMeshTet(MainData.C,mesh,MainData.MeshInfo,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
-	# 		# nmesh2 = HighOrderMeshTet_UNSTABLE(MainData.C,mesh,MainData.MeshInfo,Decimals=10,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
-	# 	elif MainData.MeshInfo.MeshType == 'quad':
-	# 		# BUILD A NEW MESH USING THE GAUSS-LOBATTO NODAL POINTS FOR QUADS
-	# 		nmesh = HighOrderMeshQuad(MainData.C,mesh,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
-		
-	# 	print 'Finished generating the high order mesh. Time taken', time()-t_mesh,'sec'
 	############################################################################
 	# index_sort_x = np.argsort(nmesh.points[:,0])
 	# sorted_repoints = nmesh.points[index_sort_x,:]
@@ -82,31 +63,11 @@ def PreProcess(MainData,Pr,pwd):
 	# print 'Number of nodes: ', nmesh.points.shape[0]
 	# np.savetxt('/home/roman/Dropbox/time.dat',np.array([time()-t_mesh, nmesh.points.shape[0]]))
 	
-
-	# Mesh().GetBoundaryEdgesTri(mesh.elements)
-	# mesh = Mesh()
-	# print dir(mesh1)
-	# mesh.Read(MainData.MeshInfo.FileName,MainData.MeshInfo.MeshType,MainData.C)
-	# mesh.edges=[]
-	# mesh.faces=[]
-	# print dir(mesh1)
-	# print mesh.elemtype
-	# print mesh.points
-	# print mesh.elements
-	# mesh.GetBoundaryEdgesTri()
-	# print mesh.faces
-	# mesh.GetBoundaryEdgesTet()
-	# mesh.GetBoundaryFacesTet()
-	# print mesh.faces
-	# print mesh.edges
-	# mesh.WriteVTK()
-	# mesh.WriteVTK(fname='/home/roman/Desktop/toba.vtu',pdata=mesh.points[:,1])
-
-	# print mesh.elements
-	if MainData.C>0:
-		mesh.GetHighOrderMesh(MainData.C,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
-	# print mesh.elements
-
+	
+	# from matplotlib import pyplot as plt 
+	# plt.triplot(mesh.points[:,0],mesh.points[:,1], mesh.elements[:,:3])
+	# plt.axis('equal')
+	# plt.show()
 	# sys.exit("STOPPED")
 
 
@@ -136,19 +97,21 @@ def PreProcess(MainData,Pr,pwd):
 
 	MainData.Path.ProblemResults = MainData.Path.Problem+'/Results/'
 	MainData.Path.ProblemResultsFileNameMATLAB = 'Results_h'+str(mesh.elements.shape[0])+'_C'+str(MainData.C)+'.mat'
-	# For nonlinear analysis - do not add the extension
+	# FOR NON-LINEAR ANALYSIS - DO NOT ADD THE EXTENSION
 	MainData.Path.ProblemResultsFileNameVTK = 'Results_h'+str(mesh.elements.shape[0])+'_C'+str(MainData.C)
-	# For linear analysis
+	# FOR LINEAR ANALYSIS
 	# MainData.Path.ProblemResultsFileNameVTK = 'Results_h'+str(mesh.elements.shape[0])+'_C'+str(MainData.C)+'.vtu'
 
 	# CONSIDERATION OF MATERAIL MODEL
 	MainData.Path.MaterialModel = MainData.MaterialArgs.Type + '_Model/'
 
-	# Analysis specific directories
+	# ANALYSIS SPECIFIC DIRECTORIES
 	if MainData.Analysis == 'Static':
-		# MainData.Path.LinearStatic = 'LinearStatic'		# One step/increment
+		if MainData.AnalysisType == 'Linear':
+			MainData.Path.Analysis = 'LinearStatic'		# ONE STEP/INCREMENT
 		# MainData.Path.LinearDynamic = 'LinearDynamic'
-		MainData.Path.Analysis = 'NonlinearStatic/' 	# Increments
+		elif MainData.AnalysisType == 'Nonlinear':
+			MainData.Path.Analysis = 'NonlinearStatic/' 		# MANY INCREMENTS
 		# Subdirectories
 		if os.path.isdir(MainData.Path.ProblemResults+MainData.Path.Analysis):
 			if os.path.isdir(MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel):
@@ -301,8 +264,8 @@ def PreProcess(MainData,Pr,pwd):
 		else:
 			raise NotImplementedError('H_Voigt size not giveN')
 
-		MainData.MaterialArgs.H_Voigt = np.zeros((Hsize,Hsize,nmesh.nelem,Quadrature.weights.shape[0]),dtype=np.float64)
-		MainData.MaterialArgs.Sigma = np.zeros((MainData.ndim,MainData.ndim,nmesh.nelem,Quadrature.weights.shape[0]),dtype=np.float64)
+		MainData.MaterialArgs.H_Voigt = np.zeros((Hsize,Hsize,mesh.nelem,Quadrature.weights.shape[0]),dtype=np.float64)
+		MainData.MaterialArgs.Sigma = np.zeros((MainData.ndim,MainData.ndim,mesh.nelem,Quadrature.weights.shape[0]),dtype=np.float64)
 
 
 	# CHOOSE AND INITIALISE THE RIGHT MATERIAL MODEL 
@@ -407,7 +370,7 @@ def PreProcess(MainData,Pr,pwd):
 
 	# DICTIONARY OF SAVED VARIABLES
 	#############################################################################
-	if MainData.write == 0:
+	if MainData.write == 1:
 		MainData.MainDict = {'ProblemPath': MainData.Path.ProblemResults, 
 		 'MeshPoints':mesh.points, 'MeshElements':mesh.elements, 'MeshFaces':mesh.faces, 'MeshEdges':mesh.edges,
 		 'Solution':[], 'DeformationGradient':[], 'CauchyStress':[],
