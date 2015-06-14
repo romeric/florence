@@ -464,4 +464,34 @@ class PostProcess(object):
 
 		# plt.savefig('/home/roman/Desktop/DumpReport/scaled_jacobian_312_'+MainData.AnalysisType+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)
 
-				
+	@staticmethod	
+	def HighOrderPatch(MainData,mesh,TotalDisp):
+		plt.figure()
+		vpoints = np.copy(mesh.points)
+		vpoints[:,0] += TotalDisp[:,0,-1]
+		vpoints[:,1] += TotalDisp[:,1,-1]
+		# plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#ffffee') 
+		plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#F88379') 
+
+		dum1=[]; dum2=[]; dum3 = []; ddum=np.array([0,1,2,0])
+		for i in range(0,MainData.C):
+			dum1=np.append(dum1,i+3)
+			dum2 = np.append(dum2, 2*MainData.C+3 +i*MainData.C -i*(i-1)/2 )
+			dum3 = np.append(dum3,MainData.C+3 +i*(MainData.C+1) -i*(i-1)/2 )
+
+		if MainData.C>0:
+			ddum = (np.append(np.append(np.append(np.append(np.append(np.append(0,dum1),1),dum2),2),np.fliplr(dum3.reshape(1,dum3.shape[0]))),0) ).astype(np.int32)
+
+		for i in range(0,mesh.elements.shape[0]):
+			dum = vpoints[mesh.elements[i,:],:]
+			plt.plot(dum[ddum,0],dum[ddum,1])
+			plt.fill(dum[ddum,0],dum[ddum,1],'#A4DDED')
+			# plt.fill(dum[ddum,0],dum[ddum,1],color=(0.75,MainData.ScaledJacobian[i],0.35))	
+			# plt.fill(dum[ddum,0],dum[ddum,1],color=(MainData.ScaledJacobian[i],0,1-MainData.ScaledJacobian[i]))	
+
+		plt.axis('equal')
+		plt.axis('off')	
+
+
+		# plt.savefig('/home/roman/Desktop/DumpReport/mesh_312_'+MainData.AnalysisType+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)
+
