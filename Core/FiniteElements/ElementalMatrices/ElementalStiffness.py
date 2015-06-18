@@ -7,7 +7,7 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 
 	nvar = MainData.nvar
 	ndim = MainData.ndim
-	w = MainData.Quadrature.weights
+	# w = MainData.Quadrature.weights
 
 	# ALLOCATE
 	stiffness = np.zeros((MainData.Domain.Bases.shape[0]*nvar,MainData.Domain.Bases.shape[0]*nvar))
@@ -47,7 +47,7 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 			# COMPUTE SPATIAL ELECTRIC DISPLACEMENT
 			ElectricDisplacementx = MainData.ElectricDisplacementx(MainData.MaterialArgs,StrainTensors,ElectricFieldx)
 		else:
-			ElectricFieldx = []; ElectricDisplacementx = []
+			ElectricFieldx, ElectricDisplacementx = [],[]
 
 		# COMPUTE CAUCHY STRESS TENSOR
 		CauchyStressTensor = []
@@ -77,8 +77,9 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 			# detJ = MainData.Domain.AllGauss[counter,0]*np.abs(la.det(ParentGradientX))*np.abs(StrainTensors.J)
 			if MainData.Prestress:
 				# COMPUTE GEOMETRIC STIFFNESS MATRIX
-				BDB_2 = MainData().GeometricStiffnessIntegrand(SpatialGradient,LastCauchyStressTensor,nvar,ndim)
-				BDB_1 += BDB_2
+				# BDB_2 = MainData().GeometricStiffnessIntegrand(SpatialGradient,LastCauchyStressTensor,nvar,ndim)
+				# BDB_1 += BDB_2
+				BDB_1 += MainData().GeometricStiffnessIntegrand(SpatialGradient,LastCauchyStressTensor,nvar,ndim)
 				# BDB_1 = BDB_1 + BDB_2
 			# INTEGRATE STIFFNESS
 			stiffness += (BDB_1)*detJ

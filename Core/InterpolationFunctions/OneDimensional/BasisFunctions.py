@@ -1,7 +1,7 @@
 import numpy as np
 import scipy as sp
 import scipy.linalg as la
-from Core.NumericalIntegration import GaussLobattoQuadrature
+from Core.QuadratureRules import GaussLobattoQuadrature
 
 
 def Lagrange(C,xi):

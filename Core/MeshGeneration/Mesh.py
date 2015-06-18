@@ -297,9 +297,18 @@ class Mesh(object):
 
 		
 
-	def Readgmsh(self):
+	def Readgmsh(self,filename):
 		"""Read gmsh (.msh) file. TO DO"""
-		pass
+		from gmsh import Mesh as msh
+		mesh = msh()
+		mesh.read_msh(filename)
+		self.points = mesh.Verts
+		print dir(mesh)
+		self.elements = mesh.Elmts 
+		print self.elements
+		# print mesh.Phys
+
+		
 
 
 	def WriteVTK(self,**kwargs):
@@ -315,7 +324,6 @@ class Mesh(object):
 		elif self.element_type == 'hex':
 			cellflag = 12
 
-		 
 		# CHECK IF THE OUTPUT FILE NAME IS SPECIFIED 
 		FNAME = False
 		for i in kwargs.items():
@@ -358,17 +366,26 @@ class Mesh(object):
 		output:					[Mesh] an instance of the Mesh class  
 		"""
 
+		if np.allclose(inner_radius,0):
+			raise ValueError('inner_radius cannot be zero')
 
 		t = np.linspace(0,2*np.pi,ncirc+1)
 		if isotropic is True:
 			radii = np.linspace(inner_radius,outer_radius,nrad+1)
 		else:
-			base=5
-			# radii = np.logspace(inner_radius,outer_radius,nrad+1,base=base)/base**np.linspace(inner_radius,outer_radius,nrad+1)
-			# radii = np.logspace(inner_radius,outer_radius,nrad+1,base=base)
-			# radii = np.cos(radii)
+			base = 100
+			radii = np.zeros(nrad+1,dtype=np.float64)
+			mm = np.linspace(np.power(inner_radius,1./base),np.power(outer_radius,1./base),nrad+1)
+			for i in range(0,nrad+1):
+				radii[i] = mm[i]**base
 
+		# dd =   np.logspace(inner_radius,outer_radius,nrad+1,base=2)/2**np.linspace(inner_radius,outer_radius,nrad+1)
+		# print dd*np.linspace(inner_radius,outer_radius,nrad+1)
+		# print dd
+		# print np.logspace(0,1.5,nrad+1,base=2)
 		
+
+
 		xy = np.zeros((radii.shape[0]*t.shape[0],2),dtype=np.float64)
 		# cost = np.cos(t)
 		# sint = np.sin(t)

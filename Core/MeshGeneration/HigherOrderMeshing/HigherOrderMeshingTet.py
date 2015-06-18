@@ -7,7 +7,7 @@ import Core.ParallelProcessing.parmap as parmap
 import GetInteriorCoordinates as Gett
 import Core.InterpolationFunctions.TwoDimensional.Quad.QuadLagrangeGaussLobatto as TwoD 
 import Core.InterpolationFunctions.ThreeDimensional.Tetrahedral.hpNodal as Tet 
-from Core.NumericalIntegration.FeketePointsTet import *
+from Core.QuadratureRules.FeketePointsTet import *
 from Core.Supplementary.Where import *
 from Core.Supplementary.Tensors import itemfreq_py, makezero, duplicate
 from TwoLoopNode_Cython import TwoLoopNode_Cython

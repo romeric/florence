@@ -1,11 +1,11 @@
-import imp, os, sys
+# import imp, os, sys
 from Core.FiniteElements.ApplyNeumannBoundaryConditions import *
 from ElementalStiffness import *
 from ElementalMass import *
 from Core.FiniteElements.SparseAssembly import SparseAssembly_Step_1
 
-pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
-St = imp.load_source('FiniteElements',pwd+'/FiniteElements/StaticCondensation.py')
+# pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
+# St = imp.load_source('FiniteElements',pwd+'/FiniteElements/StaticCondensation.py')
 
 def FindIndices(A):
 	# NEW FASTER APPROACH - NO TEMPORARY

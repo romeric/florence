@@ -7,18 +7,21 @@ from Core.Supplementary.Tensors.Tensors import *
 # for 3d beam problems nvar is 6 since solve for ux, uy, uz, tx, ty and tz
 
 #####################################################################################################
-								# Isotropic AnisotropicMooneyRivlin_1 Model
+								# NEARLY INCOMPRESSIBLE NEOHOOKEAN
+								# W = mu/2*C:I + k/2*(J-1)**2								
 #####################################################################################################
 
 
-class AnisotropicMooneyRivlin_1(object):
-	"""docstring for AnisotropicMooneyRivlin_1"""
+class NearlyIncompressibleNeoHookean(object):
+	"""	A nearly incompressible neo-Hookean material model whose energy functional is given by:
+		W = mu/2*C:I + k/2*(J-1)**2
+		"""
 	def __init__(self, ndim):
-		super(AnisotropicMooneyRivlin_1, self).__init__()
+		super(NearlyIncompressibleNeoHookean, self).__init__()
 		self.ndim = ndim
 	def Get(self):
 		self.nvar = self.ndim
-		self.modelname = 'AnisotropicMooneyRivlin_1'
+		self.modelname = 'NearlyIncompressibleNeoHookean'
 		return self.nvar, self.modelname
 
 	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
@@ -33,15 +36,14 @@ class AnisotropicMooneyRivlin_1(object):
 		I = StrainTensors.I
 		J = StrainTensors.J
 		b = StrainTensors.b
-		# H_ = StrainTensors.H
-		# G = np.dot(H_.T,H_)
-		# g = np.dot(H_,H_.T)
+		H_ = StrainTensors.H
+		G = np.dot(H_.T,H_)
+		g = np.dot(H_,H_.T)
 
 		# Update Lame constants
-		mu2 = mu - lamb*(J-1.0)
-		lamb2 = lamb*(2.0*J-1.0) - mu
+		kappa = lamb+2.0*mu/3.0
 
-		H_Voigt = Voigt( lamb2*d('ij,kl',I,I)+mu2*(d('ik,jl',I,I)+d('il,jk',I,I)) ,1)
+		H_Voigt = Voigt( kappa*(2.0*J-1)*d('ij,kl',I,I)-kappa*(J-1)*(d('ik,jl',I,I)+d('il,jk',I,I)) ,1)
 		
 		MaterialArgs.H_VoigtSize = H_Voigt.shape[0]
 
@@ -57,8 +59,9 @@ class AnisotropicMooneyRivlin_1(object):
 
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
+		kappa = lamb+2.0*mu/3.0
 
-		return 1.0*mu/J*b+(lamb*(J-1.0)-mu)*I 
+		return 1.0*mu/J*b+(kappa*(J-1.0))*I 
 
 
 	def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx):

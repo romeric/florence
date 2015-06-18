@@ -448,12 +448,16 @@ class PostProcess(object):
 			MainData.ScaledJacobian[elem] = 1.0*JMin/JMax
 			# print JMin, JMax
 		# print MainData.ScaledJacobian.shape, np.unique(elements).shape
-		fig = plt.figure()
-		# plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),MainData.ScaledJacobian,width=1.,color='#FE6F5E',alpha=0.8)
+
+
+		# fig = plt.figure()
+		# # plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),MainData.ScaledJacobian,width=1.,color='#FE6F5E',alpha=0.8)
 
 		plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),MainData.ScaledJacobian,width=1.,alpha=0.4)
 		plt.xlabel(r'$Elements$',fontsize=18)
 		plt.ylabel(r'$Scaled\, Jacobian$',fontsize=18)
+
+
 
 		# plt.bar(np.linspace(0,MainData.ScaledJacobianElem.shape[0]-1,MainData.ScaledJacobianElem.shape[0]),MainData.ScaledJacobian,width=1.,alpha=0.4)
 		# plt.xlabel(r'$Elements$',fontsize=18)
@@ -467,6 +471,7 @@ class PostProcess(object):
 	@staticmethod	
 	def HighOrderPatch(MainData,mesh,TotalDisp):
 		plt.figure()
+		# print TotalDisp[:,0,-1]
 		vpoints = np.copy(mesh.points)
 		vpoints[:,0] += TotalDisp[:,0,-1]
 		vpoints[:,1] += TotalDisp[:,1,-1]
@@ -484,10 +489,13 @@ class PostProcess(object):
 
 		for i in range(0,mesh.elements.shape[0]):
 			dum = vpoints[mesh.elements[i,:],:]
-			plt.plot(dum[ddum,0],dum[ddum,1])
-			plt.fill(dum[ddum,0],dum[ddum,1],'#A4DDED')
-			# plt.fill(dum[ddum,0],dum[ddum,1],color=(0.75,MainData.ScaledJacobian[i],0.35))	
+			plt.plot(dum[ddum,0],dum[ddum,1],alpha=0.02)
+			# plt.fill(dum[ddum,0],dum[ddum,1],'#A4DDED')
+			plt.fill(dum[ddum,0],dum[ddum,1],color=(0.75,MainData.ScaledJacobian[i],0.35))	
+			# plt.fill(dum[ddum,0],dum[ddum,1],color=(0.75,1.0*i/mesh.elements.shape[0],0.35))	
 			# plt.fill(dum[ddum,0],dum[ddum,1],color=(MainData.ScaledJacobian[i],0,1-MainData.ScaledJacobian[i]))	
+
+			plt.plot(dum[ddum,0],dum[ddum,1],'#000000')
 
 		plt.axis('equal')
 		plt.axis('off')	
