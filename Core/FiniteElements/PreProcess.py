@@ -10,7 +10,7 @@ import Core.MaterialLibrary as MatLib
 from Core.FiniteElements.ElementalMatrices.KinematicMeasures import *
 from Core.MeshGeneration.ReadSalomeMesh import ReadMesh
 from Core.MeshGeneration.HigherOrderMeshing import *
-from Core.NumericalIntegration import GaussQuadrature, QuadraturePointsWeightsTet, QuadraturePointsWeightsTri
+from Core.QuadratureRules import GaussQuadrature, QuadraturePointsWeightsTet, QuadraturePointsWeightsTri
 from Core.FiniteElements.GetBases import *
 import Core.Formulations.DisplacementElectricPotentialApproach as DEPB
 import Core.Formulations.DisplacementApproach as DB
@@ -35,10 +35,22 @@ def PreProcess(MainData,Pr,pwd):
 
 	# READ MESH-FILE
 	############################################################################
+	
 	mesh = Mesh()
 	# mesh.Read(MainData.MeshInfo.FileName,MainData.MeshInfo.MeshType,MainData.C)
 	# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=4,ncirc=12)
-	mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=3,ncirc=7)
+	# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=5,ncirc=7) # isotropic
+	# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=10.,isotropic=False,nrad=7,ncirc=7)
+
+
+	# Ruben's mesh
+	mesh.elements = np.loadtxt('/home/roman/Dropbox/Python/elements_circle.dat',delimiter=',').astype(int) - 1
+	mesh.points = np.loadtxt('/home/roman/Dropbox/Python/points_circle.dat',delimiter=',')
+	mesh.element_type='tri'
+	mesh.edges=None 
+	mesh.GetBoundaryEdgesTri()
+
+
 
 	# GENERATE pMESHES FOR HIGH C
 	############################################################################
@@ -60,7 +72,7 @@ def PreProcess(MainData,Pr,pwd):
 	# print
 	# help(MainData)
 	# print '\n',np.max(nmesh.elements)+1, nmesh.points.shape[0]
-	# print 'Number of nodes: ', nmesh.points.shape[0]
+	# print 'Number of nodes: ', mesh.points.shape[0]
 	# np.savetxt('/home/roman/Dropbox/time.dat',np.array([time()-t_mesh, nmesh.points.shape[0]]))
 	
 	
@@ -68,7 +80,53 @@ def PreProcess(MainData,Pr,pwd):
 	# plt.triplot(mesh.points[:,0],mesh.points[:,1], mesh.elements[:,:3])
 	# plt.axis('equal')
 	# plt.show()
-	# sys.exit("STOPPED")
+	# mesh.Readgmsh(filename='/home/roman/Dropbox/MeshingElasticity/mechanical2D.msh')
+	# mesh.Readgmsh(filename='/home/roman/Dropbox/Python/Core/MeshGeneration/PythonMeshScripts/circflow.msh') # FIX THIS
+	# print np.max(mesh.points), np.min(mesh.points)
+
+	# ##############################################################################
+	from Core.Supplementary.nurbs.nurbs import Nurbs
+	# import Core.Supplementary.nurbs.igakit.cad as iga
+	# import igakit.cad as iga
+	import Core.Supplementary.nurbs.cad as iga 
+	# from igakit.igalib import bsp
+	circle = iga.circle(radius=1, center=None, angle=None)
+
+	dum=np.array([4,3,2,1,0,7,6,5,8])
+	control = circle.control[dum,:]
+	control[-1,0]=-1
+	# print 
+	# print control
+	points = circle.points[dum,:]
+	points[-1,0] = -1
+	# print points
+
+	# nurbs = [{'U':circle.knots,'Pw':circle.control,'start':0,'end':1,'points':circle.points,'weights':circle.weights}]
+	nurbs = [({'U':circle.knots,'Pw':control,'start':0,'end':1,'points':points,'weights':circle.weights,'degree':2})]
+	# print nurbs[0]['U']
+
+	# nurbs = (({'U':circle.knots,'Pw':control,'start':0,'end':1,'points':points,'weights':circle.weights,'degree':2}),) # put the comma at the end
+	# print len(nurbs)	
+			
+
+	# help(circle)
+	# print circle.control 
+	# print circle.array - circle.control
+	# print circle.points
+	# print circle.knots
+	# print circle.spans()
+	# print circle.boundary() 
+	t1=time()
+	DBCmatrix = Nurbs(mesh,nurbs,MainData.BoundaryData)
+	# print DBCmatrix
+	print time()-t1
+
+	# circle = iga.circle(radius=0.5, center=None, angle=None)
+	# print circle.control#[dum,:]
+	##############################################################################
+
+
+	sys.exit("STOPPED")
 
 
 
@@ -156,7 +214,7 @@ def PreProcess(MainData,Pr,pwd):
 		zw = QuadraturePointsWeightsTet.QuadraturePointsWeightsTet(MainData.C+1,QuadratureOpt)
 		z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]; #w = np.repeat(w,MainData.ndim) 
 	elif MainData.MeshInfo.MeshType == 'tri':
-		zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(MainData.C+2,QuadratureOpt) # PUT C+4 OR HIGHER
+		zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(MainData.C+3,QuadratureOpt) # PUT C+4 OR HIGHER
 		z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
 
 	class Quadrature(object):
@@ -298,7 +356,8 @@ def PreProcess(MainData,Pr,pwd):
 			MainData.MassIntegrand =  DEPB.MassIntegrand
 
 		elif MainData.MaterialArgs.Type == 'LinearModel' or MainData.MaterialArgs.Type == 'AnisotropicMooneyRivlin_1' or \
-		MainData.MaterialArgs.Type == 'Incrementally_Linearised_NeoHookean':
+		MainData.MaterialArgs.Type == 'Incrementally_Linearised_NeoHookean' or MainData.MaterialArgs.Type == 'NearlyIncompressibleNeoHookean' or \
+		MainData.MaterialArgs.Type == 'MooneyRivlin':
 			MainData.ConstitutiveStiffnessIntegrand = DB.ConstitutiveStiffnessIntegrand
 			MainData.GeometricStiffnessIntegrand = DB.GeometricStiffnessIntegrand
 			MainData.MassIntegrand =  DB.MassIntegrand

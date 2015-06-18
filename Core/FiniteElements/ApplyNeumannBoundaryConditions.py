@@ -1,5 +1,5 @@
 import numpy as np 
-from Core.NumericalIntegration import GaussQuadrature
+from Core.QuadratureRules import GaussQuadrature
 import imp, os
 from Core.InterpolationFunctions.OneDimensional import LagrangeGaussLobatto
 

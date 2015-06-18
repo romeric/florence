@@ -33,9 +33,9 @@ class AnisotropicMooneyRivlin_1(object):
 		I = StrainTensors.I
 		J = StrainTensors.J
 		b = StrainTensors.b
-		H_ = StrainTensors.H
-		G = np.dot(H_.T,H_)
-		g = np.dot(H_,H_.T)
+		# H_ = StrainTensors.H
+		# G = np.dot(H_.T,H_)
+		# g = np.dot(H_,H_.T)
 
 		# Update Lame constants
 		mu2 = mu - lamb*(J-1.0)

@@ -1,4 +1,4 @@
-#!/usr/bin/env pypy
+#!/usr/bin/env python
 """ THE RunSession ROUTINE RUNS A SPECIFIC SESSION, FOR INSTANCE, A FEM, A BEM OR A COUPLED SESSION.
 	THE ENTIRE CODE IS EXECUTED FROM HERE."""
 
@@ -15,9 +15,10 @@ import multiprocessing as MP
 
 # AVOID WRITING .pyc OR .pyo FILES
 sys.dont_write_bytecode
+# import pypar
 
 # START THE ANALYSIS
-print 'Initiating the routines... Current time is', datetime.now().time()
+print "Initiating the routines... Current time is", datetime.now().time()
 
 # ALLOCATE/BUILD THE GENERAL DATA FOR THE ANALYSIS
 class MainData(object):
@@ -28,7 +29,7 @@ class MainData(object):
  	# session = 'BEM3D'
  	# session = 'Coupled'
 
- 	C = 2									# ORDER OF BASIS FUNCTIONS (NOTE THAT C=P-1, WHERE P IS THE POLYNOMIAL DEGREE)
+ 	C = 1									# ORDER OF BASIS FUNCTIONS (NOTE THAT C=P-1, WHERE P IS THE POLYNOMIAL DEGREE)
  	norder = 2  							# ORDER/NO OF QUADRATURE POINTS
  	plot = (0,3)							# PLOT FLAG FOR BEM 
  	nrplot = (1,'last')						# PLOT FLAG FOR NEWTON-RAPHSON CONVERGENCE
@@ -60,6 +61,7 @@ if MainData.session == 'FEM':
 	print 'Time taken for the entire analysis was', time.time()-t_FEM, 'seconds \n'
 	# MEMORY USAGE INFORMATION
 	print 'Global sparse matrix needed', MainData.spmat, 'MB of memory with IJV indices requiring', MainData.ijv, 'MB'
+	# print sys.getsizeof(MainData)
 
 
 # BEM SESSION

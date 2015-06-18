@@ -9,3 +9,5 @@ from AnisotropicMooneyRivlin_1 import *
 from AnisotropicMooneyRivlin_1_Electromechanics import *
 from LinearModelElectromechanics import *
 from Incrementally_Linearised_NeoHookean import *
+from NearlyIncompressibleNeoHookean import *
+from MooneyRivlin import *

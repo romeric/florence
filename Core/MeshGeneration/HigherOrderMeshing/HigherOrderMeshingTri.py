@@ -6,7 +6,7 @@ import multiprocessing as MP
 import Core.ParallelProcessing.parmap as parmap
 import GetInteriorCoordinates as Gett
 import Core.InterpolationFunctions.TwoDimensional.Tri.hpNodal as Tri 
-from Core.NumericalIntegration.FeketePointsTri import *
+from Core.QuadratureRules.FeketePointsTri import *
 from Core.Supplementary.Where import *
 from Core.Supplementary.Tensors import itemfreq_py
 from NodeLoopTriNPSP_Cython import NodeLoopTriNPSP_Cython 

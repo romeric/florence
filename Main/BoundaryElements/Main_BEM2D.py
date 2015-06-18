@@ -26,7 +26,7 @@ Pr = imp.load_source('Problem_Rectangle','/home/roman/Dropbox/Python/Problems/Bo
 
 ########################################################################################################################################################
 # User Imports
-from Core.NumericalIntegration import GaussQuadrature
+from Core.QuadratureRules import GaussQuadrature
 from Core.BoundaryElements.PreProcessBEM2D import GenerateCoordinates, CoordsJacobianRadiusatGaussPoints, CoordsJacobianRadiusatGaussPoints_LM
 from Core.BoundaryElements.GetBases import GetBases
 from Core.BoundaryElements.Assembly import AssemblyBEM2D, AssemblyBEM2D_Sparse

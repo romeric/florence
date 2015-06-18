@@ -26,6 +26,7 @@ from Core.FiniteElements.PreProcess import PreProcess
 # Pr = imp.load_source('Nonlinear_2D',pwd+'/Problems/FiniteElements/Hollow_Arc_Tri/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Electromechanics/ProblemData.py')
 Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle/ProblemData.py')
+# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/MechanicalComponent2D/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Sphere/ProblemData.py')
 
 ########################################################################################################################################################
@@ -65,14 +66,17 @@ def main(MainData):
 	# sys.exit("STOPPED")
 	# CALL THE MAIN ROUTINE
 	TotalDisp = MainSolver(MainData,mesh)
+	# print TotalDisp[:,0,-1]
 	# print 'Total number of DoFs for the system is', sol.shape[0]
 
 	# print 'Post-Processing the information...'
 	# POST-PROCESS
 	# PostProcess().StressRecovery(MainData,mesh,Quadrature) 
-	PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp)
-	PostProcess.HighOrderPatch(MainData,mesh,TotalDisp)
-	plt.show()
+	# PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp)
+	# PostProcess.HighOrderPatch(MainData,mesh,TotalDisp)
+	# plt.savefig('/home/roman/Desktop/DumpReport/uniform_aniso_mesh_'+MainData.MaterialArgs.Type+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)
+	# plt.show()
+
 
 	# from Core.Supplementary.SuppPlots.MeshNumbering import PlotMeshNumbering
 	# PlotMeshNumbering(mesh)

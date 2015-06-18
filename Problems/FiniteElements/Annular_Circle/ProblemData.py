@@ -24,12 +24,21 @@ def ProblemData(MainData):
 		# Type = 'Steinmann'
 		# Type = 'LinearisedElectromechanics'
 		Type = 'LinearModel'
-		# Type = 'AnisotropicMooneyRivlin_1'
 		# Type = 'Incrementally_Linearised_NeoHookean'
+		# Type = 'AnisotropicMooneyRivlin_1'
+		# Type = 'NearlyIncompressibleNeoHookean'
+		# Type = 'MooneyRivlin'
+		
 		
 
 		E = 1.0e1
-		nu = 0.4
+		# nu = 0.4
+		nu=0.44
+
+		# E = MainData.E 
+		# nu = MainData.nu 
+
+
 		# GET LAME CONSTANTS
 		lamb = E*nu/(1.+nu)/(1.-2.0*nu)
 		mu = E/2./(1+nu)
@@ -40,7 +49,7 @@ def ProblemData(MainData):
 		# lamb  = 1.4286
 		# lamb = lamb - mu
 		# mu = 2*mu
-		lamb = lamb + mu
+		# lamb = lamb + mu
 
 		# mu    = 0.090571
 		# lamb  = 1.4286
@@ -127,10 +136,12 @@ def ProblemData(MainData):
 			inode = DirichArgs.inode
 
 			r  = 0.5
+			# r=1
 			rn = np.sqrt(node[0]**2+node[1]**2)
 			tol_radius = 0.1
 			
-			if rn < 0.5+tol_radius and rn > 0.5 - tol_radius:
+			# if rn < 0.5+tol_radius and rn > 0.5 - tol_radius:
+			if rn < r+tol_radius and rn > r - tol_radius:
 
 				# print node[0], node[1]
 				theta = np.arctan(node[1]/node[0])
@@ -152,23 +163,28 @@ def ProblemData(MainData):
 					b = np.array([ux,uy])
 				else: 
 					b = [None,None]	
-			elif rn < 2.0+tol_radius and rn > 2.0 - tol_radius:
+			# elif rn < 2.0+tol_radius and rn > 2.0 - tol_radius:
 
-				# print node[0], node[1]
-				theta = np.arctan(node[1]/node[0])
+			# 	# print node[0], node[1]
+			# 	theta = np.arctan(node[1]/node[0])
 
-				# Is this node on the edge
-				p = np.where(unedges==inode)[0]
-				if p.shape[0]!=0:
-					# Now we are on the edge
-					b = np.array([0.,0.])
-				else: 
-					b = [None,None]	
+			# 	# Is this node on the edge
+			# 	p = np.where(unedges==inode)[0]
+			# 	if p.shape[0]!=0:
+			# 		# Now we are on the edge
+			# 		b = np.array([0.,0.])
+			# 	else: 
+			# 		b = [None,None]	
 			else:	
 				b = [None,None]	
 			
 		
 			return b
+
+		def bcs(self,x):
+			return np.sqrt(x[:,0]**2 + x[:,1]**2) < 2
+			# MainData.BoundaryData.DirichArgs.bcs = 'np.sqrt(x[:,0]**2 + x[:,1]**2) < 2'
+			# MainData.BoundaryData.DirichArgs.bcs = bcs
 
 
 		

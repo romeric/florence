@@ -1,5 +1,5 @@
 import numpy as np 
-from Core.NumericalIntegration.FeketePointsTet import *
+from Core.QuadratureRules.FeketePointsTet import *
 from Core.JacobiPolynomials.NormalisedJacobi import *
 from Core.InterpolationFunctions.DegenerateMappings import MapXiEtaZeta2RST
 
