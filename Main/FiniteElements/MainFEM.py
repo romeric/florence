@@ -72,10 +72,10 @@ def main(MainData):
 	# print 'Post-Processing the information...'
 	# POST-PROCESS
 	# PostProcess().StressRecovery(MainData,mesh,Quadrature) 
-	# PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp)
-	# PostProcess.HighOrderPatch(MainData,mesh,TotalDisp)
-	# plt.savefig('/home/roman/Desktop/DumpReport/uniform_aniso_mesh_'+MainData.MaterialArgs.Type+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)
-	# plt.show()
+	PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp)
+	PostProcess.HighOrderPatch(MainData,mesh,TotalDisp)
+	# # plt.savefig('/home/roman/Desktop/DumpReport/uniform_aniso_mesh_'+MainData.MaterialArgs.Type+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)
+	plt.show()
 
 
 	# from Core.Supplementary.SuppPlots.MeshNumbering import PlotMeshNumbering

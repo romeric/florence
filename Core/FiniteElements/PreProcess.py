@@ -40,10 +40,10 @@ def PreProcess(MainData,Pr,pwd):
 	# mesh.Read(MainData.MeshInfo.FileName,MainData.MeshInfo.MeshType,MainData.C)
 	# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=4,ncirc=12)
 	# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=5,ncirc=7) # isotropic
-	# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=10.,isotropic=False,nrad=7,ncirc=7)
+	# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=20.,isotropic=False,nrad=7,ncirc=7)
 
 
-	# Ruben's mesh
+	# # Ruben's mesh
 	mesh.elements = np.loadtxt('/home/roman/Dropbox/Python/elements_circle.dat',delimiter=',').astype(int) - 1
 	mesh.points = np.loadtxt('/home/roman/Dropbox/Python/points_circle.dat',delimiter=',')
 	mesh.element_type='tri'
@@ -108,7 +108,6 @@ def PreProcess(MainData,Pr,pwd):
 	# nurbs = (({'U':circle.knots,'Pw':control,'start':0,'end':1,'points':points,'weights':circle.weights,'degree':2}),) # put the comma at the end
 	# print len(nurbs)	
 			
-
 	# help(circle)
 	# print circle.control 
 	# print circle.array - circle.control
@@ -117,8 +116,8 @@ def PreProcess(MainData,Pr,pwd):
 	# print circle.spans()
 	# print circle.boundary() 
 	t1=time()
-	DBCmatrix = Nurbs(mesh,nurbs,MainData.BoundaryData)
-	# print DBCmatrix
+	DBCmatrix = Nurbs(mesh,nurbs,MainData.BoundaryData,MainData.C)
+	# print DBCmatrix[:,1]
 	print time()-t1
 
 	# circle = iga.circle(radius=0.5, center=None, angle=None)

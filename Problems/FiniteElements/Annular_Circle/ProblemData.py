@@ -16,16 +16,16 @@ def ProblemData(MainData):
 	MainData.Formulation = 1 	# Displacement-Potential based formulation
 	MainData.Analysis = 'Static'
 	# MainData.Analysis = 'Dynamic'
-	MainData.AnalysisType = 'Linear'
-	# MainData.AnalysisType = 'Nonlinear'
+	# MainData.AnalysisType = 'Linear'
+	MainData.AnalysisType = 'Nonlinear'
 
 	class MaterialArgs(object):
 		"""docstring for MaterialArgs"""
 		# Type = 'Steinmann'
 		# Type = 'LinearisedElectromechanics'
-		Type = 'LinearModel'
+		# Type = 'LinearModel'
 		# Type = 'Incrementally_Linearised_NeoHookean'
-		# Type = 'AnisotropicMooneyRivlin_1'
+		Type = 'AnisotropicMooneyRivlin_1'
 		# Type = 'NearlyIncompressibleNeoHookean'
 		# Type = 'MooneyRivlin'
 		

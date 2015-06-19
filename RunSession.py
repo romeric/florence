@@ -29,7 +29,7 @@ class MainData(object):
  	# session = 'BEM3D'
  	# session = 'Coupled'
 
- 	C = 1									# ORDER OF BASIS FUNCTIONS (NOTE THAT C=P-1, WHERE P IS THE POLYNOMIAL DEGREE)
+ 	C = 2									# ORDER OF BASIS FUNCTIONS (NOTE THAT C=P-1, WHERE P IS THE POLYNOMIAL DEGREE)
  	norder = 2  							# ORDER/NO OF QUADRATURE POINTS
  	plot = (0,3)							# PLOT FLAG FOR BEM 
  	nrplot = (1,'last')						# PLOT FLAG FOR NEWTON-RAPHSON CONVERGENCE

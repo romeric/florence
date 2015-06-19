@@ -5,7 +5,7 @@
 			"cmd":
 			[
 				"python",
-				"-u",
+				"-ui",
 				"/home/roman/Dropbox/Python/RunSession.py"
 			],
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
