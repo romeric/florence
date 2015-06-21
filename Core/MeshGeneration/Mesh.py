@@ -295,6 +295,49 @@ class Mesh(object):
 			self.GetBoundaryFacesTet()
 			self.GetBoundaryEdgesTet()
 
+
+	def ReadSeparate(self,connectivity_file,coordinates_file,mesh_type,delimiter_connectivity=' ',delimiter_coordinates=' ',
+		ignore_cols_connectivity=None,ignore_cols_coordinates=None,index_style='c'):
+		"""Read meshes when the element connectivity and nodal coordinates are written in separate files
+
+		input:
+
+			connectivity_file:				[str] filename containing element connectivity
+			coordinates_file:				[str] filename containing nodal coordinates
+			mesh_type:						[str] type of mesh tri/tet/quad/hex 
+			delimiter_connectivity:			[str] delimiter for connectivity_file - default is white space/tab
+			delimiter_coordinates:			[str] delimiter for coordinates_file - default is white space/tab
+			ignore_cols_connectivity:		[int] no of columns to be ignored (from the start) in the connectivity_file 
+			ignore_cols_coordinates:		[int] no of columns to be ignored (from the start) in the coordinates_file
+			index_style:					[str] either 'c' C-based (zero based) indexing or 'f' fortran-based
+											  	  (one based) indexing for elements connectivity - default is 'c'
+
+			"""
+
+		index = 0
+		if index_style == 'c':
+			index = 1
+
+		self.elements = np.loadtxt(connectivity_file,dtype=np.int64,delimiter=delimiter_connectivity) - index 
+		self.points = np.loadtxt(coordinates_file,dtype=np.float64,delimiter=delimiter_coordinates)
+
+		if ignore_cols_connectivity != None:
+			self.elements = self.elements[ignore_cols_connectivity:,:]
+		if ignore_cols_coordinates != None:
+			self.points = self.points[ignore_cols_coordinates:,:]
+
+		if (mesh_type == 'tri' or mesh_type == 'quad') and self.points.shape[1]>2:
+			self.points = self.points[:,:2]
+
+
+		self.element_type = mesh_type
+		self.nelem = self.elements.shape[0]
+		self.edges = None 
+		self.GetBoundaryEdgesTri()
+
+
+
+
 		
 
 	def Readgmsh(self,filename):

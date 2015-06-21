@@ -29,14 +29,14 @@ class MainData(object):
  	# session = 'BEM3D'
  	# session = 'Coupled'
 
- 	C = 2									# ORDER OF BASIS FUNCTIONS (NOTE THAT C=P-1, WHERE P IS THE POLYNOMIAL DEGREE)
+ 	C = 1									# ORDER OF BASIS FUNCTIONS (NOTE THAT C=P-1, WHERE P IS THE POLYNOMIAL DEGREE)
  	norder = 2  							# ORDER/NO OF QUADRATURE POINTS
  	plot = (0,3)							# PLOT FLAG FOR BEM 
  	nrplot = (1,'last')						# PLOT FLAG FOR NEWTON-RAPHSON CONVERGENCE
  	write = 0								# FLAG FOR WRITING THE RESULTS IN VTK/MAT/EPS/DAT ETC
  	Parallel = True 						# MULTI-PROCESSING 
  	nCPU = MP.cpu_count()					# CPU COUNT FOR MULTI-PROCESSING
- 	# Parallel = False
+ 	Parallel = False
  	# nCPU = 8
 
 
@@ -81,8 +81,6 @@ elif MainData.session == 'BEM3D':
 # import inspect; print(inspect.getsource(numpy.linspace)) # numpy/scipy documenation in a shell
 # import inspect; print(inspect.getsource(np.unique)) # numpy/scipy documenation in a shellnp un
 # print u'\u2713'.encode('utf8')
-
-# "theme": "Elementary Dark.sublime-theme",
 
 
 

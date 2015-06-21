@@ -44,18 +44,18 @@ def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
 	# edge_coords = mesh.points[np.unique(mesh.edges),:]
 	# print edge_coords
 	# print mesh.edges.shape
-	t1=time()
+	# t1=time()
 	ProjU  = np.zeros((mesh.edges.shape[0],nsd),dtype=np.float64)
 	ProjID = np.zeros((mesh.edges.shape[0],nsd),dtype=np.int64)
 	
-	for kFace in range(mesh.edges.shape[0]):
+	for kFace in xrange(mesh.edges.shape[0]):
 		edge_coords = mesh.points[mesh.edges[kFace,:2],:] # THE LINEAR MESH EDGES
 
-		for iBC in range(1):
+		for iBC in xrange(1):
 			# print np.all(BoundaryData().bcs(edge_coords))
 			# if np.all(BoundaryData().bcs(edge_coords)) == False:
 				# print np.linalg.norm(mesh.points[mesh.edges[kFace],:],axis=1)
-			if np.all(BoundaryData().bcs(edge_coords)) == True:
+			if np.all(BoundaryData().NURBSCondition(edge_coords)) == True:
 				# print np.linalg.norm(mesh.points[mesh.edges[kFace],:],axis=1)
 				listFaces.append(kFace)
 				dirichletFaces[indexFace,:2] = mesh.edges[kFace,:2]
@@ -85,7 +85,7 @@ def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
 	# print mesh.edges[listFaces,:]
 	# print np.linalg.norm(mesh.points[np.unique(mesh.edges[listFaces,:]),:],axis=1)
 
-	print time()-t1
+	# print time()-t1
 
 	# FIX PERIODIC NURBS 2D
 	nOfNurbs = len(nurbs)
@@ -187,49 +187,69 @@ def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
 		# print uEq
 		tt += (time()-t1)
 
+		# from Core.Supplementary.Tensors import makezero
+		# mesh.points = makezero(mesh.points)
+
 		xEq = np.zeros((nOfFaceNodes,2))
-		for i in range(nOfFaceNodes):
+		for i in xrange(nOfFaceNodes):
 			pt = CurvePoint(nurbs[idNurbs],uEq[i])[0]
 			xEq[i,:] = pt[:2]
 		# xOld = mesh.points[nodesDBC[indexNode],:]
 		# displacementDBC(indexNode,:) = xEq - xOld
 		# print xEq,'\n'
-		displacementDBC[indexNode,:] = xEq - mesh.points[nodesDBC[indexNode],:]
-		# print mesh.points[nodesDBC[indexNode],:]
+		xOld = mesh.points[nodesDBC[indexNode],:]
+
+		# displacementDBC[indexNode,:] = xEq - mesh.points[nodesDBC[indexNode],:]
+		# displacementDBC[indexNode,:] = xEq - xOld[[0,-1,1],:]
+		# displacementDBC[indexNode,:] = xEq[[0,-1,1],:] - xOld ##
+		# displacementDBC[indexNode,:] = xEq[[0,-1,1,2],:] - xOld ##
+		# print 
+		displacementDBC[indexNode,:] = xEq[np.append(np.array([0,-1]),np.arange(1,nOfFaceNodes-1)),:] - xOld
+		# displacementDBC[indexNode,:][[0,2],[0,1]] = 0.0
+		# displacementDBC[indexNode,:][:,[0,1]] = 0.0
+		# displacementDBC[nodesDBC[indexNode],:] = xEq - mesh.points[nodesDBC[indexNode],:]
+		# print mesh.points[nodesDBC[indexNode],:],'\n'
+		# print mesh.points[nodesDBC[indexNode],:],'\n' # [[0,-1,range(1,-1)],:]
+		# print np.hstack((mesh.points[nodesDBC[indexNode],:],xEq)),'\n'
 		# print nodesDBC
+		# print displacementDBC[indexNode,:],'\n'
+		# print nodesDBC[indexNode]
+		# print np.linalg.norm(mesh.points[159,:])
 
 
 		indexNode += nOfFaceNodes
-		# print nodesDBC
-	print tt
 	# print nodesDBC
-	# from Core.Supplementary.Tensors import makezero
+	# print tt
+	# print nodesDBC
+	# 
 	# print makezero(mesh.points[nodesDBC,:])
 	# print dir(nodesDBC)
 	# print np.sort(nodesDBC)
 	# posUnique = np.unique(nodesDBC,return_inverse=True,return_index=True)[1]
 	posUnique = np.unique(nodesDBC,return_index=True)[1]
-	nodesDBC = nodesDBC[posUnique]
-	# print nodesDBC
-	uDBC = displacementDBC[posUnique,:]
-	nOfDBCnodes = nodesDBC.shape[0]
-	DBCmatrix = np.zeros((nsd*nOfDBCnodes, 2))
+	# nodesDBC = nodesDBC[posUnique]
+	# # print nodesDBC
+	# uDBC = displacementDBC[posUnique,:]
+	# nOfDBCnodes = nodesDBC.shape[0]
+	# DBCmatrix = np.zeros((nsd*nOfDBCnodes, 2))
 
-	for kNode in range(nOfDBCnodes):
-		iNode = nodesDBC[kNode]
-		displacement = uDBC[kNode,:]
-		DBCmatrix[kNode,:] = [iNode, displacement[0]]
-		DBCmatrix[kNode+nOfDBCnodes,:] = [iNode + mesh.points.shape[0],displacement[1]]
+	# for kNode in range(nOfDBCnodes):
+	# 	iNode = nodesDBC[kNode]
+	# 	displacement = uDBC[kNode,:]
+	# 	DBCmatrix[kNode,:] = [iNode, displacement[0]]
+	# 	DBCmatrix[kNode+nOfDBCnodes,:] = [iNode + mesh.points.shape[0],displacement[1]]
 
-	# print DBCmatrix[:,1]
-
-	# print np.linalg.norm(mesh.points[nodesDBC,:],axis=1)
-	# print uDBC.shape, nodesDBC.shape
-	# print np.linalg.norm(mesh.points[nodesDBC,:]+uDBC,axis=1)
+	# # print DBCmatrix[:,1].astype(int); print 
 	# print uDBC
-	# print DBCmatrix[:,1]
-	return DBCmatrix
 
+	# import sys; sys.exit(0)
+	# return DBCmatrix
+	# displacementDBC *= -1. 
+	# from Core.Supplementary.Tensors import makezero
+	# displacementDBC= makezero(displacementDBC,tol=1e-4)
+	# import sys; sys.exit(0)
+	return nodesDBC[posUnique], displacementDBC[posUnique,:]
+	# return nodesDBC, displacementDBC
 
 
 
@@ -255,7 +275,7 @@ def CurveEquallySpacedPoints_nr(aNurbs, u1, u2, nPoints, lengthTOL=1e-06,BasesOr
 	
 	# print lengthU,h
 	# h=1e-10
-	for iIntPoints in range(nOfIntPoints):
+	for iIntPoints in xrange(nOfIntPoints):
 		currentLength = (iIntPoints+1)*lengthSub
 		a = u1
 		b = u2
@@ -657,7 +677,7 @@ def nurbsCurvePointProjection(nurbs,p):
 		d2Cu = CurveSecondDersPoints(nurbs,u)
 		# print Cu,dCu,d2Cu
 
-		for niter in range(nMaxIter):
+		for niter in xrange(nMaxIter):
 			cond1 = Cu - p 
 			# print cond1
 			if np.linalg.norm(cond1) < tol1:
@@ -700,7 +720,7 @@ def nurbsCurvePointProjection(nurbs,p):
 				dMin = np.linalg.norm(cond1)
 
 		if niter == nMaxIter:
-			warn('Convergence not achieved for point projection')
+			raise StopIteration('Convergence not achieved for point projection')
 
 		U = np.unique(nurbs['U'][0])  # tip: Completely avoid this, it is okay to loop over all knots than finding unique and calling CurvePoint on a loop
 		# print U, dMin

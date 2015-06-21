@@ -1,9 +1,6 @@
 from time import time
 import numpy as np
-import scipy as sp
 import numpy.linalg as la
-import scipy.linalg as sla 
-import scipy.io as io 
 import os, sys, imp
 # GET THE CURRENT DIRECTORY PARTH
 pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
@@ -25,9 +22,12 @@ from Core.FiniteElements.PreProcess import PreProcess
 # 2D
 # Pr = imp.load_source('Nonlinear_2D',pwd+'/Problems/FiniteElements/Hollow_Arc_Tri/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Electromechanics/ProblemData.py')
-Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle/ProblemData.py')
+# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle/ProblemData.py')
+# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Nurbs/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/MechanicalComponent2D/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Sphere/ProblemData.py')
+Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Naca_Isotropic/ProblemData.py')
+# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/RAE2812/ProblemData.py')
 
 ########################################################################################################################################################
 
@@ -72,11 +72,10 @@ def main(MainData):
 	# print 'Post-Processing the information...'
 	# POST-PROCESS
 	# PostProcess().StressRecovery(MainData,mesh,Quadrature) 
-	PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp)
-	PostProcess.HighOrderPatch(MainData,mesh,TotalDisp)
+	# PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp)
+	# PostProcess.HighOrderPatch(MainData,mesh,TotalDisp)
+	# plt.show()
 	# # plt.savefig('/home/roman/Desktop/DumpReport/uniform_aniso_mesh_'+MainData.MaterialArgs.Type+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)
-	plt.show()
-
 
 	# from Core.Supplementary.SuppPlots.MeshNumbering import PlotMeshNumbering
 	# PlotMeshNumbering(mesh)

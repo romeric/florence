@@ -33,7 +33,7 @@ def ProblemData(MainData):
 
 		E = 1.0e1
 		# nu = 0.4
-		nu=0.44
+		nu=0.34
 
 		# E = MainData.E 
 		# nu = MainData.nu 
@@ -75,27 +75,15 @@ def ProblemData(MainData):
 		MeshType = 'tri'
 		Nature = 'straight'
 
-		# FileName = ProblemPath + '/Mesh_Annular_Circle_6135253.dat'
-		# FileName = ProblemPath + '/Mesh_Annular_Circle_382526.dat'
-		# FileName = ProblemPath + '/Mesh_Annular_Circle_23365.dat'
-		# FileName = ProblemPath + '/Mesh_Annular_Circle_5716.dat'
-		# FileName = ProblemPath + '/Mesh_Annular_Circle_502.dat'
-		# FileName = ProblemPath + '/Mesh_Annular_Circle_312.dat'
-		FileName = ProblemPath + '/Mesh_Annular_Circle_75.dat'
-
-
-		# MeshType = 'tet'
-		# FileName = ProblemPath + '/Mesh_Cube_Tet_181.dat'
-		# MeshType = 'quad'
-		# FileName = ProblemPath + '/Mesh_Square_Quad_64.dat'
-		# MeshType = 'hex'
-		# FileName = ProblemPath + '/Rectangular_Beam_Mesh_64.dat'
+		ConnectivityFile = ProblemPath + '/elements_naca.dat'
+		CoordinatesFile = ProblemPath +'/points_naca.dat'
 		
 
 
 	class BoundaryData(object):
-		# Type = 'nurbs'
-		Type = 'straight'
+		# NURBS/NON-NURBS TYPE BOUNDARY CONDITION
+		Type = 'nurbs'
+		# Type = 'straight'
 		# Type = 'mixed'
 		class DirichArgs(object):
 			node = 0
@@ -184,10 +172,14 @@ def ProblemData(MainData):
 		
 			return b
 
-		# def bcs(self,x):
-			# return np.sqrt(x[:,0]**2 + x[:,1]**2) < 2
-			# MainData.BoundaryData.DirichArgs.bcs = 'np.sqrt(x[:,0]**2 + x[:,1]**2) < 2'
-			# MainData.BoundaryData.DirichArgs.bcs = bcs
+
+		def NURBSParameterisation(self):
+			control = np.loadtxt(ProblemPath+'/controls_naca.dat',delimiter=',')
+			knots = np.loadtxt(ProblemPath+'/knots_naca.dat',delimiter=',')
+			return [({'U':(knots,),'Pw':control,'start':0,'end':2.039675505705710,'degree':3})]
+
+		def NURBSCondition(self,x):
+			return np.sqrt(x[:,0]**2 + x[:,1]**2) < 2
 
 
 		

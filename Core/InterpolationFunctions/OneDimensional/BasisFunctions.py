@@ -1,6 +1,6 @@
 import numpy as np
-import scipy as sp
-import scipy.linalg as la
+# import scipy as sp
+# import scipy.linalg as la
 from Core.QuadratureRules import GaussLobattoQuadrature
 
 
@@ -29,7 +29,7 @@ def Lagrange(C,xi):
 		RHS[ishape] = 1.
 
 		# Solve linear system (dense LU)
-		coeff = sp.linalg.solve(A,RHS)
+		coeff = np.linalg.solve(A,RHS)
 		# Build shape functions 
 		for incr in range(0,n):
 			N[ishape] = N[ishape]+coeff[incr]*pow(xi,incr)
@@ -106,7 +106,7 @@ def LagrangeGaussLobatto(C,xi):
 		RHS[ishape] = 1.
 
 		# Solve linear system (dense LU)
-		coeff = sp.linalg.solve(A,RHS)
+		coeff = np.linalg.solve(A,RHS)
 		# Build shape functions 
 		for incr in range(0,n):
 			N[ishape] = N[ishape]+coeff[incr]*pow(xi,incr)

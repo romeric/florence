@@ -16,16 +16,16 @@ def ProblemData(MainData):
 	MainData.Formulation = 1 	# Displacement-Potential based formulation
 	MainData.Analysis = 'Static'
 	# MainData.Analysis = 'Dynamic'
-	# MainData.AnalysisType = 'Linear'
-	MainData.AnalysisType = 'Nonlinear'
+	MainData.AnalysisType = 'Linear'
+	# MainData.AnalysisType = 'Nonlinear'
 
 	class MaterialArgs(object):
 		"""docstring for MaterialArgs"""
 		# Type = 'Steinmann'
 		# Type = 'LinearisedElectromechanics'
-		# Type = 'LinearModel'
+		Type = 'LinearModel'
 		# Type = 'Incrementally_Linearised_NeoHookean'
-		Type = 'AnisotropicMooneyRivlin_1'
+		# Type = 'AnisotropicMooneyRivlin_1'
 		# Type = 'NearlyIncompressibleNeoHookean'
 		# Type = 'MooneyRivlin'
 		
@@ -33,7 +33,7 @@ def ProblemData(MainData):
 
 		E = 1.0e1
 		# nu = 0.4
-		nu=0.44
+		nu=0.24
 
 		# E = MainData.E 
 		# nu = MainData.nu 
@@ -75,27 +75,14 @@ def ProblemData(MainData):
 		MeshType = 'tri'
 		Nature = 'straight'
 
-		# FileName = ProblemPath + '/Mesh_Annular_Circle_6135253.dat'
-		# FileName = ProblemPath + '/Mesh_Annular_Circle_382526.dat'
-		# FileName = ProblemPath + '/Mesh_Annular_Circle_23365.dat'
-		# FileName = ProblemPath + '/Mesh_Annular_Circle_5716.dat'
-		# FileName = ProblemPath + '/Mesh_Annular_Circle_502.dat'
-		# FileName = ProblemPath + '/Mesh_Annular_Circle_312.dat'
-		FileName = ProblemPath + '/Mesh_Annular_Circle_75.dat'
-
-
-		# MeshType = 'tet'
-		# FileName = ProblemPath + '/Mesh_Cube_Tet_181.dat'
-		# MeshType = 'quad'
-		# FileName = ProblemPath + '/Mesh_Square_Quad_64.dat'
-		# MeshType = 'hex'
-		# FileName = ProblemPath + '/Rectangular_Beam_Mesh_64.dat'
-		
+		ConnectivityFile = ProblemPath + '/elements_circle.dat'
+		CoordinatesFile = ProblemPath +'/points_circle.dat'
 
 
 	class BoundaryData(object):
-		# Type = 'nurbs'
-		Type = 'straight'
+		# NURBS/NON-NURBS TYPE BOUNDARY CONDITION
+		Type = 'nurbs'
+		# Type = 'straight'
 		# Type = 'mixed'
 		class DirichArgs(object):
 			node = 0
@@ -184,10 +171,20 @@ def ProblemData(MainData):
 		
 			return b
 
-		# def bcs(self,x):
-			# return np.sqrt(x[:,0]**2 + x[:,1]**2) < 2
-			# MainData.BoundaryData.DirichArgs.bcs = 'np.sqrt(x[:,0]**2 + x[:,1]**2) < 2'
-			# MainData.BoundaryData.DirichArgs.bcs = bcs
+
+		def NURBSParameterisation(self):
+			import Core.Supplementary.nurbs.cad as iga 
+
+			circle = iga.circle(radius=1, center=None, angle=None)
+			dum=np.array([4,3,2,1,0,7,6,5,8])
+			control = circle.control[dum,:]; 	control[-1,0]=-1
+			points = circle.points[dum,:]; 		points[-1,0] = -1
+			# print circle.knots
+			# nurbs = [({'U':circle.knots,'Pw':control,'start':0,'end':1,'points':points,'weights':circle.weights,'degree':2})]
+			return [({'U':circle.knots,'Pw':control,'start':0,'end':1,'points':points,'weights':circle.weights,'degree':2})]
+
+		def NURBSCondition(self,x):
+			return np.sqrt(x[:,0]**2 + x[:,1]**2) < 2
 
 
 		

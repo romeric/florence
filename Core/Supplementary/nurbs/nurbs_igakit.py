@@ -1,6 +1,10 @@
 import numpy as np
-from igakit.transform import transform
-from igakit import igalib as _igalib
+# from igakit.transform import transform
+# from igakit import igalib as _igalib
+
+from transform import transform
+import igalib as _igalib
+
 
 _bsp = _igalib.bsp
 

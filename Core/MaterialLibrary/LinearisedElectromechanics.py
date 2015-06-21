@@ -1,12 +1,11 @@
 import numpy as np
 import numpy.linalg as la
-import scipy.linalg as sla
+# import scipy.linalg as sla
 from Core.Supplementary.Tensors.Tensors import *
 # from Core.Supplementary.Tensors.Tensors_Sym import *
 from Core.LegendreTransform import *
 # import Core.LegendreTransform_IterativeSolver as LGIT 
 
-import matplotlib.pyplot as plt
 
 # nvar is the sum of dimensions of vectorial field(s) we are solving for.
 # for instance in continuum 2d problems nvar is 2 since we solve for ux and uy

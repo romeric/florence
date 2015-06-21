@@ -1,6 +1,8 @@
 import numpy as np
-from igakit.nurbs import NURBS
-from igakit.transform import transform
+# from igakit.nurbs import NURBS
+# from igakit.transform import transform
+from nurbs_igakit import NURBS
+from transform import transform
 
 # -----
 

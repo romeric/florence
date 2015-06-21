@@ -1,5 +1,5 @@
 import numpy as np 
-import scipy as sp 
+# import scipy as sp 
 
 # import InterpolationFunctions.OneDimensional as OneD 
 import OneDimensional as OneD 
