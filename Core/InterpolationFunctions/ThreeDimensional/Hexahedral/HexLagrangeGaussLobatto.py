@@ -3,7 +3,7 @@ PathOneD = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
 OneD = imp.load_source('OneDimensional',PathOneD+'/OneDimensional/BasisFunctions.py')
 
 import numpy as np 
-import scipy as sp 
+# import scipy as sp 
 from Core.FiniteElements.GetCounterClockwiseIndices import GetCounterClockwiseIndices
 
 
