@@ -29,7 +29,7 @@ class LinearisedElectromechanics(object):
 		self.modelname = 'LinearisedElectromechanics'
 		return self.nvar, self.modelname
 
-	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0):
+	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 
 		# Using Einstein summation (using numpy einsum call)
 		d = np.einsum
@@ -41,10 +41,10 @@ class LinearisedElectromechanics(object):
 		c2 = MaterialArgs.c2
 		varepsilon_1 = MaterialArgs.eps_1
 
-		I = StrainTensors.I
+		I = StrainTensors['I']
 
 		# Coupled linearised problem
-		strain = StrainTensors.strain
+		strain = StrainTensors['strain'][gcounter]
 		tre = np.trace(strain)
 		d1 = 2.0*strain - tre*I
 		d2 = I+(1.0 - tre)*d1
@@ -84,11 +84,11 @@ class LinearisedElectromechanics(object):
 
 
 
-	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx):
+	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 
 
-		I = StrainTensors.I
-		strain = StrainTensors.strain
+		I = StrainTensors['I']
+		strain = StrainTensors['strain'][gcounter]
 
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
@@ -113,18 +113,18 @@ class LinearisedElectromechanics(object):
 		return sigma
 
 
-	def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx):
+	def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 		
-		I = StrainTensors.I
+		I = StrainTensors['I']
 		varepsilon_1 = MaterialArgs.eps_1
-		strain = StrainTensors.strain
+		strain = StrainTensors['strain'][gcounter]
 		tre = np.trace(strain)
 		d1 = 2.0*strain - tre*I
 		d2 = I+(1.0 - tre)*d1		
 		
 		E = 1.0*ElectricFieldx; 							Ex=E.reshape(E.shape[0])
 
-		# Direct approach for finding D ---- D is the new D - Don't get confuesed!
+		# Direct approach for finding D ---- D is the new D - Don't get confused!
 		# D = varepsilon_1*np.dot(np.linalg.inv(d2),E); 		Dx=D.reshape(D.shape[0])
 
 		# General Newton-Raphson approach for finding D ---- the permittivity (hessian/derivative) 

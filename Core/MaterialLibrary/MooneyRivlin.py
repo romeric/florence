@@ -36,9 +36,9 @@ class MooneyRivlin(object):
 		alpha = mu/4.0
 		beta = mu/4.0
 
-		I = StrainTensors.I
-		J = StrainTensors.J
-		b = StrainTensors.b
+		I = StrainTensors['I']
+		J = StrainTensors['J'][gcounter]
+		b = StrainTensors['b'][gcounter]
 		# H_ = StrainTensors.H
 		# G = np.dot(H_.T,H_)
 		# g = np.dot(H_,H_.T)
@@ -56,10 +56,9 @@ class MooneyRivlin(object):
 
 	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 
-		b = StrainTensors.b 
-		J = StrainTensors.J
-		I = StrainTensors.I
-		J = StrainTensors.J
+		I = StrainTensors['I']
+		J = StrainTensors['J'][gcounter]
+		b = StrainTensors['b'][gcounter]
 
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
@@ -71,5 +70,5 @@ class MooneyRivlin(object):
 
 
 	def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx):
-		ndim = StrainTensors.I.shape[0]
+		ndim = StrainTensors['I'].shape[0]
 		return np.zeros((ndim,1))

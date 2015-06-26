@@ -33,9 +33,9 @@ class Steinmann(object):
 		c2 = MaterialArgs.c2
 		varepsilon_1 = MaterialArgs.eps_1
 
-		I = StrainTensors.I
-		J = StrainTensors.J
-		b = StrainTensors.b
+		I = StrainTensors['I']
+		J = StrainTensors['J'][gcounter]
+		b = StrainTensors['b'][gcounter]
 
 		# Update Lame constants
 		mu2 = mu - lamb*(J-1.0)
@@ -95,9 +95,9 @@ class Steinmann(object):
 
 		c2 = MaterialArgs.c2
 
-		b = StrainTensors.b 
-		J = StrainTensors.J
-		I = StrainTensors.I
+		I = StrainTensors['I']
+		J = StrainTensors['J'][gcounter]
+		b = StrainTensors['b'][gcounter]
 		E = ElectricFieldx
 
 		mu = MaterialArgs.mu
@@ -110,14 +110,14 @@ class Steinmann(object):
 		(2.0*c2/J)*np.dot(be,be.T)
 
 
-	def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx):
+	def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 		
 		c1 = MaterialArgs.c1
 		c2 = MaterialArgs.c2
 		varepsilon_1 = MaterialArgs.eps_1		
 
-		J = StrainTensors.J
-		b = StrainTensors.b 
+		J = StrainTensors['J'][gcounter]
+		b = StrainTensors['b'][gcounter]
 		bb =  np.dot(b,b)
 		
 		return varepsilon_1*ElectricFieldx -\

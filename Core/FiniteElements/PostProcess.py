@@ -60,24 +60,24 @@ class PostProcess(object):
 
 
 
-	def StressRecovery(self,MainData,mesh,nmesh,MaterialArgs,Quadrature,Domain,Boundary):
+	def StressRecovery(self,MainData,mesh,TotalDisp):
 
 		C = MainData.C
 		nvar = MainData.nvar
 		ndim = MainData.ndim
 		LoadIncrement = MainData.AssemblyParameters.LoadIncrements
-		w = Quadrature.weights
-		z = Quadrature.points
+		w = MainData.Quadrature.weights
+		z = MainData.Quadrature.points
 
 		ns=[]; Basis=[]; gBasisx=[]; gBasisy=[]; gBasisz=[]
-		if mesh.info=='hex':
+		if mesh.element_type=='hex':
 			ns = (C+2)**ndim
 			# GET THE BASES AT NODES INSTEAD OF GAUSS POINTS
 			Basis = np.zeros((ns,w.shape[0]**ndim))
 			gBasisx = np.zeros((ns,w.shape[0]**ndim))
 			gBasisy = np.zeros((ns,w.shape[0]**ndim))
 			gBasisz = np.zeros((ns,w.shape[0]**ndim))
-		elif mesh.info=='tet':
+		elif mesh.element_type=='tet':
 			p=C+1
 			ns = (p+1)*(p+2)*(p+3)/6
 			# GET BASES AT NODES INSTEAD OF GAUSS POINTS
@@ -86,7 +86,7 @@ class PostProcess(object):
 			gBasisx = np.zeros((ns,4))
 			gBasisy = np.zeros((ns,4))
 			gBasisz = np.zeros((ns,4))
-		elif mesh.info =='tri':
+		elif mesh.element_type =='tri':
 			p=C+1
 			ns = (p+1)*(p+2)/2
 			# GET BASES AT NODES INSTEAD OF GAUSS POINTS
@@ -95,8 +95,9 @@ class PostProcess(object):
 			gBasisx = np.zeros((ns,3))
 			gBasisy = np.zeros((ns,3))
 
+
 		eps=[]
-		if mesh.info == 'hex':
+		if mesh.element_type == 'hex':
 			counter = 0
 			eps = ThreeD.LagrangeGaussLobatto(C,0,0,0)[1]
 			for i in range(0,eps.shape[0]):
@@ -107,7 +108,7 @@ class PostProcess(object):
 				gBasisy[:,counter] = dummy[:,1]
 				gBasisz[:,counter] = dummy[:,2]
 				counter+=1
-		elif mesh.info == 'tet':
+		elif mesh.element_type == 'tet':
 			counter = 0
 			eps = np.array([
 				[-1.,-1.,-1.],
@@ -123,7 +124,7 @@ class PostProcess(object):
 				gBasisy[:,counter] = dummy[:,1]
 				gBasisz[:,counter] = dummy[:,2]
 				counter+=1
-		elif mesh.info == 'tri':
+		elif mesh.element_type == 'tri':
 			eps = np.array([
 				[-1.,-1.],
 				[1.,-1.],
@@ -136,10 +137,11 @@ class PostProcess(object):
 				gBasisx[:,i] = dummy[:,0]
 				gBasisy[:,i] = dummy[:,1]
 
-		elements = nmesh.elements
-		points = nmesh.points
-		# elements = mesh.elements
-		# points = mesh.points
+		# elements = mesh.elements[:,:eps.shape[0]]
+		# points = mesh.points[:np.max(elements),:]
+		# TotalDisp = TotalDisp[:np.max(elements),:,:]  # BECAREFUL TOTALDISP IS CHANGING HERE
+		elements = mesh.elements
+		points = mesh.points
 		nelem = elements.shape[0]; npoint = points.shape[0]
 		nodeperelem = elements.shape[1]
 
@@ -172,15 +174,16 @@ class PostProcess(object):
 			# LOOP OVER ELEMENTS
 			for elem in range(0,elements.shape[0]):
 				# GET THE FIELDS AT THE ELEMENT LEVEL
-				Eulerx = points + MainData.TotalDisp[:,:,Increment]
+				Eulerx = points + TotalDisp[:,:,Increment]
 				LagrangeElemCoords = points[elements[elem,:],:]
 				EulerElemCoords = Eulerx[elements[elem,:],:]
-				ElectricPotentialElem =  MainData.TotalPot[elements[elem,:],:,Increment] 
+				# if MainData.Fields == 'ElectroMechanics':
+					# ElectricPotentialElem =  MainData.TotalPot[elements[elem,:],:,Increment] 
 
 				# LOOP OVER ELEMENTS
 				for g in range(0,eps.shape[0]):
 					# GRADIENT TENSOR IN PARENT ELEMENT [\nabla_\varepsilon (N)]
-					Jm = np.zeros((ndim,Domain.Bases.shape[0]))	
+					Jm = np.zeros((ndim,MainData.Domain.Bases.shape[0]))	
 					if ndim==3:
 						Jm[0,:] = gBasisx[:,g]
 						Jm[1,:] = gBasisy[:,g]
@@ -203,16 +206,25 @@ class PostProcess(object):
 						SpatialGradient = np.dot(la.inv(ParentGradientx),Jm).T
 					else:
 						SpatialGradient = MaterialGradient.T
-					# SPATIAL ELECTRIC FIELD
-					ElectricFieldx[:,:,g,elem] = - np.dot(SpatialGradient.T,ElectricPotentialElem)
+
+					if MainData.Fields == 'ElectroMechanics':
+						# SPATIAL ELECTRIC FIELD
+						ElectricFieldx[:,:,g,elem] = - np.dot(SpatialGradient.T,ElectricPotentialElem)
+						# COMPUTE SPATIAL ELECTRIC DISPLACEMENT
+						ElectricDisplacementx[:,:,g,elem] = MainData.ElectricDisplacementx(MaterialArgs,StrainTensors,ElectricFieldx[:,:,g,elem])
+
 					# Compute remaining kinematic/deformation measures
-					StrainTensors = KinematicMeasures(F[:,:,g,elem]).Compute()
-					if ~MainData.GeometryUpdate:
-						strain[:,:,g,elem] = StrainTensors.strain 
+					# StrainTensors = KinematicMeasures(F[:,:,g,elem])
+					StrainTensors = KinematicMeasures_NonVectorised(F[:,:,g,elem],MainData.AnalysisType,MainData.Domain.AllGauss.shape[0])
+					if MainData.GeometryUpdate is False:
+						strain[:,:,g,elem] = StrainTensors['strain'][g]
+
 					# COMPUTE CAUCHY STRESS TENSOR
-					CauchyStressTensor[:,:,g,elem] = MainData.CauchyStress(MaterialArgs,StrainTensors,ElectricFieldx[:,:,g,elem])
-					# COMPUTE SPATIAL ELECTRIC DISPLACEMENT
-					ElectricDisplacementx[:,:,g,elem] = MainData.ElectricDisplacementx(MaterialArgs,StrainTensors,ElectricFieldx[:,:,g,elem])
+					if MainData.Prestress:
+						CauchyStressTensor[:,:,g,elem]= MainData.CauchyStress(MainData.MaterialArgs,StrainTensors,ElectricFieldx[:,:,g,elem])[0] 
+					else:
+						CauchyStressTensor[:,:,g,elem] = MainData.CauchyStress(MainData.MaterialArgs,StrainTensors,ElectricFieldx[:,:,g,elem])
+					
 
 
 			# AVERAGE THE QUANTITIES OVER NODES
@@ -241,12 +253,15 @@ class PostProcess(object):
 
 
 		# FOR PLOTTING PURPOSES ONLY COMPUTE THE EXTERIOR SOLUTION
-		# if C>0:
-		# 	# sigma_node = sigma_node[np.unique(mesh.elements),:]
-		# 	MainData.MainDict['DeformationGradient'] = MainData.MainDict['DeformationGradient'][:,:,np.unique(mesh.elements),:]
-		# 	MainData.MainDict['CauchyStress'] = MainData.MainDict['CauchyStress'][:,:,np.unique(mesh.elements),:]
-		# 	MainData.MainDict['ElectricField'] = MainData.MainDict['ElectricField'][:,:,np.unique(mesh.elements),:]
-		# 	MainData.MainDict['ElectricDisplacement'] = MainData.MainDict['ElectricDisplacement'][:,:,np.unique(mesh.elements),:]
+		if C>0:
+			ns_0 = np.max(elements[:,:eps.shape[0]]) + 1
+			MainData.MainDict['DeformationGradient'] = MainData.MainDict['DeformationGradient'][:,:,:ns_0,:]
+			MainData.MainDict['CauchyStress'] = MainData.MainDict['CauchyStress'][:,:,:ns_0,:]
+			if ~MainData.GeometryUpdate:
+				MainData.MainDict['SmallStrain'] = MainData.MainDict['SmallStrain'][:,:,:ns_0,:]
+			if MainData.Fields == 'ElectroMechanics':
+				MainData.MainDict['ElectricField'] = MainData.MainDict['ElectricField'][:,:,:ns_0,:]
+				MainData.MainDict['ElectricDisplacement'] = MainData.MainDict['ElectricDisplacement'][:,:,:ns_0,:]
 
 
 		# NEWTON-RAPHSON CONVERGENCE PLOT
@@ -287,29 +302,36 @@ class PostProcess(object):
 
 		# WRITE IN VTK FILE 
 		if MainData.write:
-			if mesh.info =='tri':
+			if mesh.element_type =='tri':
 				cellflag = 5
-			elif mesh.info =='quad':
+			elif mesh.element_type =='quad':
 				cellflag = 9
-			if mesh.info =='tet':
+			if mesh.element_type =='tet':
 				cellflag = 10
-			elif mesh.info == 'hex':
+			elif mesh.element_type == 'hex':
 				cellflag = 12
 			for incr in range(0,MainData.AssemblyParameters.LoadIncrements):
 				# PLOTTING ON THE DEFORMED MESH
-				points = np.copy(nmesh.points)
-				points[:,0] += MainData.TotalDisp[:,0,incr] 
-				points[:,1] += MainData.TotalDisp[:,1,incr] 
-				if ndim==3:
-					points[:,2] += MainData.TotalDisp[:,2,incr] 
+				elements = mesh.elements[:,:eps.shape[0]]
+				points = mesh.points[:np.max(elements)+1,:]
+				TotalDisp = TotalDisp[:np.max(elements)+1,:,:] # BECAREFUL TOTALDISP IS CHANGING HERE
+				points[:,:nvar] += TotalDisp[:,:nvar,incr]
+
+				# OLDER APPROACH
+				# points[:,0] += TotalDisp[:,0,incr] 
+				# points[:,1] += TotalDisp[:,1,incr] 
+				# if ndim==3:
+					# points[:,2] += MainData.TotalDisp[:,2,incr] 
 
 				# WRITE DISPLACEMENTS
-				vtk_writer.write_vtu(Verts=points, Cells={cellflag:nmesh.elements}, pdata=MainData.TotalDisp[:,:,incr],
+				vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=TotalDisp[:,:,incr],
 				fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_U_'+str(incr)+'.vtu')
 				
-				# WRITE ELECTRIC POTENTIAL
-				vtk_writer.write_vtu(Verts=points, Cells={cellflag:nmesh.elements}, pdata=MainData.TotalPot[:,:,incr],
-				fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_Phi_'+str(incr)+'.vtu')
+				
+				if MainData.Fields == 'ElectroMechanics':
+					# WRITE ELECTRIC POTENTIAL
+					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.TotalPot[:,:,incr],
+					fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_Phi_'+str(incr)+'.vtu')
 
 			# FOR LINEAR STATIC ANALYSIS
 			# vtk_writer.write_vtu(Verts=vmesh.points, Cells={12:vmesh.elements}, pdata=MainData.TotalDisp[:,:,incr], fname=MainData.Path.ProblemResults+'/Results.vtu')
@@ -317,35 +339,36 @@ class PostProcess(object):
 
 			for incr in range(0,MainData.AssemblyParameters.LoadIncrements):
 				# PLOTTING ON THE DEFORMED MESH
-				points = np.copy(nmesh.points)
-				points[:,0] += MainData.TotalDisp[:,0,incr] 
-				points[:,1] += MainData.TotalDisp[:,1,incr] 
-				if ndim==3:
-					points[:,2] += MainData.TotalDisp[:,2,incr] 
+				elements = mesh.elements[:,:eps.shape[0]]
+				points = mesh.points[:np.max(elements)+1,:]
+				TotalDisp = TotalDisp[:np.max(elements)+1,:,:] # BECAREFUL TOTALDISP IS CHANGING HERE
+				points[:,:nvar] += TotalDisp[:,:nvar,incr]
+				npoint = points.shape[0]
 
 				#---------------------------------------------------------------------------------------------------------------------------------------#
 				# CAUCHY STRESS
-				vtk_writer.write_vtu(Verts=points, Cells={cellflag:nmesh.elements}, pdata=MainData.MainDict['CauchyStress'][:,0,:,incr].reshape(npoint,ndim),
+				vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.MainDict['CauchyStress'][:,0,:,incr].reshape(npoint,ndim),
 					fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_S_i0_'+str(incr)+'.vtu')
 
-				vtk_writer.write_vtu(Verts=points, Cells={cellflag:nmesh.elements}, pdata=MainData.MainDict['CauchyStress'][:,1,:,incr].reshape(npoint,ndim),
+				vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.MainDict['CauchyStress'][:,1,:,incr].reshape(npoint,ndim),
 					fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_S_i1_'+str(incr)+'.vtu')
 
 				if ndim==3:
-					vtk_writer.write_vtu(Verts=points, Cells={cellflag:nmesh.elements}, pdata=MainData.MainDict['CauchyStress'][:,2,:,incr].reshape(npoint,ndim),
+					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.MainDict['CauchyStress'][:,2,:,incr].reshape(npoint,ndim),
 						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_S_i2_'+str(incr)+'.vtu')
 				#---------------------------------------------------------------------------------------------------------------------------------------#
 
 
 				#---------------------------------------------------------------------------------------------------------------------------------------#
-				# ELECTRIC FIELD
-				vtk_writer.write_vtu(Verts=points, Cells={cellflag:nmesh.elements}, pdata=MainData.MainDict['ElectricField'][:,0,:,incr].reshape(npoint,ndim),
-					fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_E_'+str(incr)+'.vtu')
-				#---------------------------------------------------------------------------------------------------------------------------------------#
-				#---------------------------------------------------------------------------------------------------------------------------------------#
-				# ELECTRIC DISPLACEMENT
-				vtk_writer.write_vtu(Verts=points, Cells={cellflag:nmesh.elements}, pdata=MainData.MainDict['ElectricDisplacement'][:,0,:,incr].reshape(npoint,ndim),
-					fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_D_'+str(incr)+'.vtu')
+				if MainData.Fields == 'ElectroMechanics':
+					# ELECTRIC FIELD
+					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.MainDict['ElectricField'][:,0,:,incr].reshape(npoint,ndim),
+						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_E_'+str(incr)+'.vtu')
+					#---------------------------------------------------------------------------------------------------------------------------------------#
+					#---------------------------------------------------------------------------------------------------------------------------------------#
+					# ELECTRIC DISPLACEMENT
+					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.MainDict['ElectricDisplacement'][:,0,:,incr].reshape(npoint,ndim),
+						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_D_'+str(incr)+'.vtu')
 				#---------------------------------------------------------------------------------------------------------------------------------------#
 
 
@@ -353,25 +376,25 @@ class PostProcess(object):
 				# STRAIN/KINEMATICS
 				if ~MainData.GeometryUpdate:
 					# SMALL STRAINS
-					vtk_writer.write_vtu(Verts=points, Cells={cellflag:nmesh.elements}, pdata=MainData.MainDict['SmallStrain'][:,0,:,incr].reshape(npoint,ndim),
+					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.MainDict['SmallStrain'][:,0,:,incr].reshape(npoint,ndim),
 						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_Strain_i0_'+str(incr)+'.vtu')
 
-					vtk_writer.write_vtu(Verts=points, Cells={cellflag:nmesh.elements}, pdata=MainData.MainDict['SmallStrain'][:,1,:,incr].reshape(npoint,ndim),
+					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.MainDict['SmallStrain'][:,1,:,incr].reshape(npoint,ndim),
 						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_Strain_i1_'+str(incr)+'.vtu')
 
 					if ndim==3:
-						vtk_writer.write_vtu(Verts=points, Cells={cellflag:nmesh.elements}, pdata=MainData.MainDict['SmallStrain'][:,2,:,incr].reshape(npoint,ndim),
+						vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.MainDict['SmallStrain'][:,2,:,incr].reshape(npoint,ndim),
 							fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_Strain_i2_'+str(incr)+'.vtu')
 				else:
 					# DEFORMATION GRADIENT
-					vtk_writer.write_vtu(Verts=points, Cells={cellflag:nmesh.elements}, pdata=MainData.MainDict['DeformationGradient'][:,0,:,incr].reshape(npoint,ndim),
+					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.MainDict['DeformationGradient'][:,0,:,incr].reshape(npoint,ndim),
 						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_F_i0_'+str(incr)+'.vtu')
 
-					vtk_writer.write_vtu(Verts=points, Cells={cellflag:nmesh.elements}, pdata=MainData.MainDict['DeformationGradient'][:,1,:,incr].reshape(npoint,ndim),
+					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.MainDict['DeformationGradient'][:,1,:,incr].reshape(npoint,ndim),
 						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_F_i1_'+str(incr)+'.vtu')
 
 					if ndim==3:
-						vtk_writer.write_vtu(Verts=points, Cells={cellflag:nmesh.elements}, pdata=MainData.MainDict['DeformationGradient'][:,2,:,incr].reshape(npoint,ndim),
+						vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.MainDict['DeformationGradient'][:,2,:,incr].reshape(npoint,ndim),
 							fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_F_i2_'+str(incr)+'.vtu')
 				#---------------------------------------------------------------------------------------------------------------------------------------#
 

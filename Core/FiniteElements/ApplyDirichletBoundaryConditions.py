@@ -17,37 +17,17 @@ def ApplyDirichletBoundaryConditions(stiffness,F,nmesh,MainData):
 		# GET THE NURBS CURVE FROM PROBLEMDATA
 		nurbs = MainData.BoundaryData().NURBSParameterisation()
 		# IDENTIFIY DIRICHLET BOUNDARY CONDITIONS BASED ON THE EXACT GEOMETRY
+		# from time import time 
+		# t1=time()
 		nodesDBC, Dirichlet = Nurbs(nmesh,nurbs,MainData.BoundaryData,MainData.C)
-		# print Dirichlet
-		# print nodesDBC
+		# print time()-t1
 
 		nOfDBCnodes = nodesDBC.shape[0]
 		for inode in xrange(nOfDBCnodes):
 			for i in xrange(nvar):
-				# print inode
 				columns_out = np.append(columns_out,nvar*nodesDBC[inode]+i)
-				# AppliedDirichlet = np.append(AppliedDirichlet,Dirichlet[nodesDBC[inode],i])
-				# columns_out = np.append(columns_out,nvar*inode+i)
-				# print i,inode,
 				AppliedDirichlet = np.append(AppliedDirichlet,Dirichlet[inode,i])
 
-		# print columns_out.astype(int)
-		# print
-		# print AppliedDirichlet.shape, columns_out.shape
-		# print AppliedDirichlet, Dirichlet
-		# print AppliedDirichlet
-		# print np.hstack((nmesh.points[nodesDBC,:],Dirichlet))
-		# print np.linalg.norm(nmesh.points[nodesDBC,:],axis=1)
-		# print np.linalg.norm(nmesh.points[nodesDBC,:]+Dirichlet,axis=1)
-		# print nmesh.points[nodesDBC,:]
-		# print nodesDBC
-		# print nmesh.points[nodesDBC,:].shape, Dirichlet.shape
-		# print nodesDBC.shape
-		# for i in range(nmesh.points.shape[0]):
-			# if np.allclose(np.sqrt(nmesh.points[i,0]**2+nmesh.points[i,1]**2),1):# or np.allclose(np.sqrt(nmesh.points[i,0]**2+nmesh.points[i,1]**2),5):
-				# print i
-		# print nodesDBC
-		# print np.max(nmesh.elements), nmesh.points.shape[0]
 		# import sys; sys.exit(0)
 	#----------------------------------------------------------------------------------------------------#
 	#------------------------------------- NON-NURBS BASED SOLUTION -------------------------------------#

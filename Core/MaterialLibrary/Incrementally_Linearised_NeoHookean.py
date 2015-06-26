@@ -29,14 +29,13 @@ class Incrementally_Linearised_NeoHookean(object):
 
 		# Using Einstein summation (using numpy einsum call)
 		d = np.einsum
-		I = StrainTensors.I
 
 		# GET MATERIAL CONSTANTS
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
 
-		I = StrainTensors.I
-		J = StrainTensors.J
+		I = StrainTensors['I']
+		J = StrainTensors['J'][gcounter]
 
 		# UPDATE MATERIAL CONSTANTS
 		# mu2 = mu - lamb*(J-1.0)
@@ -68,10 +67,10 @@ class Incrementally_Linearised_NeoHookean(object):
 		H_Voigt_k = MaterialArgs.H_Voigt[:,:,elem,gcounter]
 
 
-		strain = StrainTensors.strain
-		I = StrainTensors.I
-		J = StrainTensors.J 
-		b = StrainTensors.b 
+		strain = StrainTensors['strain'][gcounter]
+		I = StrainTensors['I']
+		J = StrainTensors['J'][gcounter]
+		b = StrainTensors['b'][gcounter]
 
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
@@ -93,13 +92,11 @@ class Incrementally_Linearised_NeoHookean(object):
 		# return Jk_sigma_k + lamb2*trace(strain)*I + 2*mu2*strain
 
 		# COMPUTE INCREMENTALLY LINEARISED STRESS BASED ON STRESS_K AND RETURN 
-		return IncrementallyLinearisedStress(Sigma_k,H_Voigt_k,I,strain,StrainTensors.Gradu), Sigma_k
+		return IncrementallyLinearisedStress(Sigma_k,H_Voigt_k,I,strain,StrainTensors['Gradu'][gcounter]), Sigma_k
 
 		
 
 
 	def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx):
-
-		ndim = StrainTensors.I.shape[0]
-		
+		ndim = StrainTensors['I'].shape[0]
 		return np.zeros((ndim,1))

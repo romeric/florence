@@ -30,9 +30,10 @@ class AnisotropicMooneyRivlin_1(object):
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
 
-		I = StrainTensors.I
-		J = StrainTensors.J
-		b = StrainTensors.b
+		I = StrainTensors['I']
+		J = StrainTensors['J'][gcounter]
+		b = StrainTensors['b'][gcounter]
+
 		# H_ = StrainTensors.H
 		# G = np.dot(H_.T,H_)
 		# g = np.dot(H_,H_.T)
@@ -51,9 +52,9 @@ class AnisotropicMooneyRivlin_1(object):
 
 	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 
-		b = StrainTensors.b 
-		J = StrainTensors.J
-		I = StrainTensors.I
+		I = StrainTensors['I']
+		J = StrainTensors['J'][gcounter]
+		b = StrainTensors['b'][gcounter]
 
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
@@ -62,5 +63,5 @@ class AnisotropicMooneyRivlin_1(object):
 
 
 	def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx):
-		ndim = StrainTensors.I.shape[0]
+		ndim = StrainTensors['I'].shape[0]
 		return np.zeros((ndim,1))

@@ -22,11 +22,11 @@ class LinearModelElectromechanics(object):
 		self.modelname = 'LinearModelElectromechanics'
 		return self.nvar, self.modelname
 
-	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0):
+	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 
 		# Using Einstein summation (using numpy einsum call)
 		d = np.einsum
-		I = StrainTensors.I
+		I = StrainTensors['I']
 
 		# Get material constants (5 in this case)
 		mu = MaterialArgs.mu
@@ -56,11 +56,11 @@ class LinearModelElectromechanics(object):
 
 
 
-	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx):
+	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 
 
-		strain = StrainTensors.strain
-		I = StrainTensors.I
+		strain = StrainTensors['strain'][gcounter]
+		I = StrainTensors['I']
 
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
@@ -71,8 +71,6 @@ class LinearModelElectromechanics(object):
 		
 
 
-	def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx):
-
-		ndim = StrainTensors.I.shape[0]
-		
+	def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
+		ndim = StrainTensors['I'].shape[0]
 		return np.zeros((ndim,1))

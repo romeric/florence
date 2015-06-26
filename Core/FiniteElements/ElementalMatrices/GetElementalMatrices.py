@@ -26,7 +26,11 @@ def GetElementalMatrices(elem,MainData,elements,points,nodeperelem,Eulerx,TotalP
 		ElectricPotentialElem = []
 
 	# COMPUTE THE STIFFNESS MATRIX
-	stiffnessel, t = Stiffness(MainData,LagrangeElemCoords,EulerElemCoords,ElectricPotentialElem,elem)
+	if MainData.__VECTORISATION__ is True:
+		stiffnessel, t = Stiffness(MainData,LagrangeElemCoords,EulerElemCoords,ElectricPotentialElem,elem)
+	else:
+		stiffnessel, t = Stiffness_NonVectorised(MainData,LagrangeElemCoords,EulerElemCoords,ElectricPotentialElem,elem)
+
 	# FROM THE LOCAL I & J VECTORS GET GLOBAL I & J VECTORS
 	full_current_row_stiff, full_current_column_stiff = SparseAssembly_Step_1(I_stiff_elem,J_stiff_elem,MainData.nvar,nodeperelem,elem,elements)
 

@@ -21,7 +21,7 @@ class AnisotropicMooneyRivlin_1_Electromechanics(object):
 		self.modelname = 'AnisotropicMooneyRivlin_1_Electromechanics'
 		return self.nvar, self.modelname
 
-	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0):
+	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 
 		# Using Einstein summation (using numpy einsum call)
 		d = np.einsum
@@ -30,12 +30,12 @@ class AnisotropicMooneyRivlin_1_Electromechanics(object):
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
 
-		I = StrainTensors.I
-		J = StrainTensors.J
-		b = StrainTensors.b
-		H_ = StrainTensors.H
-		G = np.dot(H_.T,H_)
-		g = np.dot(H_,H_.T)
+		I = StrainTensors['I']
+		J = StrainTensors['J'][gcounter]
+		b = StrainTensors['b'][gcounter]
+		# H_ = StrainTensors.H
+		# G = np.dot(H_.T,H_)
+		# g = np.dot(H_,H_.T)
 
 		# Update Lame constants
 		mu2 = mu - lamb*(J-1.0)
@@ -63,11 +63,11 @@ class AnisotropicMooneyRivlin_1_Electromechanics(object):
 
 
 
-	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx):
+	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 
-		b = StrainTensors.b 
-		J = StrainTensors.J
-		I = StrainTensors.I
+		I = StrainTensors['I']
+		J = StrainTensors['J'][gcounter]
+		b = StrainTensors['b'][gcounter]
 
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
@@ -75,6 +75,6 @@ class AnisotropicMooneyRivlin_1_Electromechanics(object):
 		return 1.0*mu/J*b+(lamb*(J-1.0)-mu)*I 
 
 
-	def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx):
-		ndim = StrainTensors.I.shape[0]
+	def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
+		ndim = StrainTensors['I'].shape[0]
 		return np.zeros((ndim,1))

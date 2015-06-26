@@ -26,12 +26,13 @@ class IsotropicElectroMechanics_1(object):
 		lamb = MaterialArgs.lamb
 		varepsilon_1 = MaterialArgs.eps_1
 
-		detF = StrainTensors.J
+		detF = StrainTensors['J'][gcounter]
+
 
 		mu2 = mu - lamb*(detF-1.0)
 		lamb2 = lamb*(2.0*detF-1.0) - mu
 
-		delta = np.eye(ndim,ndim,dtype=np.float64)
+		delta = StrainTensors['I']
 		E = 1.0*ElectricFieldx
 		
 		Ex = E.reshape(E.shape[0])
@@ -86,9 +87,9 @@ class IsotropicElectroMechanics_1(object):
 
 	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 
-		b = StrainTensors.b 
-		J = StrainTensors.J
-		I = StrainTensors.I
+		I = StrainTensors['I']
+		J = StrainTensors['J'][gcounter]
+		b = StrainTensors['b'][gcounter]
 		E = ElectricFieldx
 
 		mu = MaterialArgs.mu
@@ -101,10 +102,10 @@ class IsotropicElectroMechanics_1(object):
 		# return 1.0*mu/J*b+(lamb*(J-1.0)-mu)*I - (2.0*varepsilon_1/J)*np.dot(be,be.T)
 
 
-	def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx):
+	def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 		
-		J = StrainTensors.J
-		b = StrainTensors.b 
+		J = StrainTensors['J'][gcounter]
+		b = StrainTensors['b'][gcounter]
 		varepsilon_1 = MaterialArgs.eps_1
 
 		bb =  np.dot(b,b)
