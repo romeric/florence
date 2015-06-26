@@ -74,6 +74,7 @@ def ProblemData(MainData):
 	class MeshInfo(object):
 		MeshType = 'tri'
 		Nature = 'straight'
+		Reader = 'ReadSeparate'
 
 		ConnectivityFile = ProblemPath + '/elements_circle.dat'
 		CoordinatesFile = ProblemPath +'/points_circle.dat'
@@ -179,7 +180,7 @@ def ProblemData(MainData):
 			dum=np.array([4,3,2,1,0,7,6,5,8])
 			control = circle.control[dum,:]; 	control[-1,0]=-1
 			points = circle.points[dum,:]; 		points[-1,0] = -1
-			# print circle.knots
+			# print control
 			# nurbs = [({'U':circle.knots,'Pw':control,'start':0,'end':1,'points':points,'weights':circle.weights,'degree':2})]
 			return [({'U':circle.knots,'Pw':control,'start':0,'end':1,'points':points,'weights':circle.weights,'degree':2})]
 

@@ -8,7 +8,7 @@ pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
 # CORE IMPORTS
 from Core.FiniteElements.ComputeErrorNorms import ComputeErrorNorms
 from Core.FiniteElements.PostProcess import *
-from Core.FiniteElements.Solvers.Solver import *
+from Core.FiniteElementslverslver import *
 from Core.FiniteElements.PreProcess import PreProcess
 
 #######################################################################################################################################################
@@ -23,14 +23,13 @@ from Core.FiniteElements.PreProcess import PreProcess
 # Pr = imp.load_source('Nonlinear_2D',pwd+'/Problems/FiniteElements/Hollow_Arc_Tri/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Electromechanics/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle/ProblemData.py')
-# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Nurbs/ProblemData.py')
+Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Nurbs/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/MechanicalComponent2D/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Sphere/ProblemData.py')
-Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Naca_Isotropic/ProblemData.py')
-# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/RAE2812/ProblemData.py')
+# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Naca_Isotropic/ProblemData.py')
+# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/RAE2822/ProblemData.py')
 
 ########################################################################################################################################################
-
 
 
 def main(MainData):
@@ -44,34 +43,23 @@ def main(MainData):
 	# print mesh.points
 	# print mesh.elements 
 	# print mesh.points.shape
-	# print Quadrature.weights
-	# print Quadrature.points
-	# print Domain.Bases 
-	# print Domain.gBasesx
-	# print Domain.gBasesy
 	# print mesh.edges
-	# print mesh.edges
-
-	# print np.sum(Domain.Bases,axis=0)
-	# print np.sum(Domain.gBasesx,axis=0)
-	# print np.sum(Domain.gBasesy,axis=0)
-	# print np.sum(Quadrature.weights)
 
 	# np.savetxt('/home/roman/Desktop/elements.txt', mesh.elements)
 	# np.savetxt('/home/roman/Desktop/points.txt', mesh.points)
-	# np.savetxt('/home/roman/Desktop/edges.txt', mesh.edges)
+	np.savetxt('/home/roman/Desktop/edges_circle.dat', mesh.edges[:,:2],fmt='%d',delimiter=',')
 
 	print 'Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*MainData.nvar
 	
 	# sys.exit("STOPPED")
 	# CALL THE MAIN ROUTINE
 	TotalDisp = MainSolver(MainData,mesh)
-	# print TotalDisp[:,0,-1]
+	# np.savetxt('/home/roman/Desktop/displacements.txt', TotalDisp[:,:,-1])
 	# print 'Total number of DoFs for the system is', sol.shape[0]
 
 	# print 'Post-Processing the information...'
 	# POST-PROCESS
-	# PostProcess().StressRecovery(MainData,mesh,Quadrature) 
+	# PostProcess().StressRecovery(MainData,mesh,TotalDisp) 
 	# PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp)
 	# PostProcess.HighOrderPatch(MainData,mesh,TotalDisp)
 	# plt.show()
@@ -83,6 +71,16 @@ def main(MainData):
 
 	# Compute Error Norms
 	# L2Norm=0; EnergyNorm=0
-	# L2Norm, EnergyNorm = ComputeErrorNorms(MainData,mesh,AnalyticalSolution,Domain,Quadrature,MaterialArgs)
+	# L2Norm, EnergyNorm = ComputeErrorNorms(MainData,mesh)
+
+	if MainData.__NO_DEBUG__ is False:
+		_DEBUG(MainData,mesh,TotalDisp)
+		# CHECK GAUSS POINTS
+		# print np.sum(Domain.Bases,axis=0)
+		# print np.sum(Domain.gBasesx,axis=0)
+		# print np.sum(Domain.gBasesy,axis=0)
+		# print np.sum(Quadrature.weights)
 
 	# sys.exit("STOPPED")
+
+

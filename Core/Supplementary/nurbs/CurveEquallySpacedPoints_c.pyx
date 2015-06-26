@@ -4,7 +4,7 @@ import cython
 import imp, os 
 # pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ )))
 pwd = os.getcwd()
-mod_nurbs = imp.load_source('ProblemData',pwd+'/nurbs.py')
+mod_nurbs = imp.load_source('nurbs',pwd+'/nurbs.py')
 # from nurbs import CurveLengthAdaptive
 
 DTYPE = np.float64

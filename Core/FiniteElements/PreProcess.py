@@ -17,8 +17,8 @@ import Core.Formulations.DisplacementApproach as DB
 from Core import Mesh
 
 # import cProfile
-# from Core.Supplementary.Timing.Timing import timing
-# @timing
+from Core.Supplementary.Timing.Timing import timing
+@timing
 def PreProcess(MainData,Pr,pwd):
 
 	# PARALLEL PROCESSING
@@ -35,20 +35,20 @@ def PreProcess(MainData,Pr,pwd):
 
 	# READ MESH-FILE
 	############################################################################
-	
 	mesh = Mesh()
-	# mesh.Read(MainData.MeshInfo.FileName,MainData.MeshInfo.MeshType,MainData.C)
 
-	# CREATE UNIFORM HOLLOW CIRCULAR MESH
-	# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=4,ncirc=12)
-	# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=5,ncirc=7) # isotropic
-	# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=20.,isotropic=False,nrad=7,ncirc=7)
-
-	# READ MESH FROM SEPARATE FILES FOR CONNECTIVITY AND COORDINATES
-	mesh.ReadSeparate(MainData.MeshInfo.ConnectivityFile,MainData.MeshInfo.CoordinatesFile,MainData.MeshInfo.MeshType,
-		delimiter_connectivity=',',delimiter_coordinates=',')
-
-
+	MeshReader = getattr(mesh,MainData.MeshInfo.Reader,None)
+	if MeshReader is not None:
+		if MainData.MeshInfo.Reader is 'Read':
+			MeshReader(MainData.MeshInfo.FileName,MainData.MeshInfo.MeshType,MainData.C)
+		elif MainData.MeshInfo.Reader is 'ReadSeparate':
+			# READ MESH FROM SEPARATE FILES FOR CONNECTIVITY AND COORDINATES
+			mesh.ReadSeparate(MainData.MeshInfo.ConnectivityFile,MainData.MeshInfo.CoordinatesFile,MainData.MeshInfo.MeshType,
+				delimiter_connectivity=',',delimiter_coordinates=',')
+		elif MainData.MeshInfo.Reader is 'UniformHollowCircle':
+			# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=4,ncirc=12)
+			mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=7,ncirc=7) # isotropic
+			# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=20.,isotropic=False,nrad=7,ncirc=7)
 
 
 	# GENERATE pMESHES FOR HIGH C
@@ -125,7 +125,7 @@ def PreProcess(MainData,Pr,pwd):
 	# ANALYSIS SPECIFIC DIRECTORIES
 	if MainData.Analysis == 'Static':
 		if MainData.AnalysisType == 'Linear':
-			MainData.Path.Analysis = 'LinearStatic'		# ONE STEP/INCREMENT
+			MainData.Path.Analysis = 'LinearStatic/'		# ONE STEP/INCREMENT
 		# MainData.Path.LinearDynamic = 'LinearDynamic'
 		elif MainData.AnalysisType == 'Nonlinear':
 			MainData.Path.Analysis = 'NonlinearStatic/' 		# MANY INCREMENTS
@@ -173,7 +173,7 @@ def PreProcess(MainData,Pr,pwd):
 		zw = QuadraturePointsWeightsTet.QuadraturePointsWeightsTet(MainData.C+1,QuadratureOpt)
 		z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]; #w = np.repeat(w,MainData.ndim) 
 	elif MainData.MeshInfo.MeshType == 'tri':
-		zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(MainData.C+0,QuadratureOpt) # PUT C+4 OR HIGHER
+		zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(MainData.C+3,QuadratureOpt) # PUT C+4 OR HIGHER
 		z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
 
 	class Quadrature(object):
@@ -285,6 +285,20 @@ def PreProcess(MainData,Pr,pwd):
 		MainData.MaterialArgs.Sigma = np.zeros((MainData.ndim,MainData.ndim,mesh.nelem,Quadrature.weights.shape[0]),dtype=np.float64)
 
 
+	
+	# UNDER THE HOOD OPTIMISATIONS
+	#############################################################################
+	if MainData.MaterialArgs.Type == 'LinearModel':
+		if MainData.ndim == 2:
+			MainData.MaterialArgs.H_Voigt = MainData.MaterialArgs.lamb*np.array([[1.,1,0],[1,1.,0],[0,0,0.]]) +\
+			 MainData.MaterialArgs.mu*np.array([[2.,0,0],[0,2.,0],[0,0,1.]])
+		else:
+			block_1 = np.zeros((6,6),dtype=np.float64); block_1[:2,:2] = np.ones((3,3))
+			block_2 = np.eye(6,6); block_2[0,0],block_2[1,1],block_2[2,2]=2.,2.,2.
+			MainData.MaterialArgs.H_Voigt = lamb*block_1 + mu*block_2
+
+
+
 	# CHOOSE AND INITIALISE THE RIGHT MATERIAL MODEL 
 	##############################################################################
 
@@ -296,7 +310,8 @@ def PreProcess(MainData,Pr,pwd):
 	MainData.CauchyStress = MaterialFuncName(MainData.ndim).CauchyStress
 
 	# INITIALISE
-	StrainTensors = KinematicMeasures(np.diag(np.ones(MainData.ndim))).Compute(MainData.AnalysisType)
+	# StrainTensors = KinematicMeasures(np.diag(np.ones(MainData.ndim))).Compute(MainData.AnalysisType)
+	StrainTensors = KinematicMeasures(np.asarray([np.eye(MainData.ndim,MainData.ndim)]*MainData.Domain.AllGauss.shape[0]),MainData.AnalysisType)
 	MaterialFuncName(MainData.ndim).Hessian(MainData.MaterialArgs,MainData.ndim,StrainTensors,elem=0,gcounter=0)
 
 	##############################################################################
@@ -332,7 +347,6 @@ def PreProcess(MainData,Pr,pwd):
 		MainData.GeometryUpdate = 0
 	else:
 		MainData.GeometryUpdate = 1
-
 
 
 
@@ -395,6 +409,7 @@ def PreProcess(MainData,Pr,pwd):
 		 'SecondPiolaStress':[], 'ElectricField':[], 'ElectricDisplacement':[]}
 
 	#############################################################################
+
 			
 			
 	# PLACE IN MAINDATA

@@ -25,7 +25,11 @@ def GetElementalMatricesSmall(elem,MainData,elements,points,Eulerx,TotalPot):
 		ElectricPotentialElem = []
 
 	# COMPUTE THE STIFFNESS MATRIX
-	stiffnessel, t = Stiffness(MainData,LagrangeElemCoords,EulerElemCoords,ElectricPotentialElem,elem)
+	if MainData.__VECTORISATION__ is True:
+		stiffnessel, t = Stiffness(MainData,LagrangeElemCoords,EulerElemCoords,ElectricPotentialElem,elem)
+	else:
+		stiffnessel, t = Stiffness_NonVectorised(MainData,LagrangeElemCoords,EulerElemCoords,ElectricPotentialElem,elem)
+
 	I_mass_elem = []; J_mass_elem = []; V_mass_elem = []
 	if MainData.Analysis != 'Static':
 		# COMPUTE THE MASS MATRIX

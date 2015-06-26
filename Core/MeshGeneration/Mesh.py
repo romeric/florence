@@ -416,19 +416,19 @@ class Mesh(object):
 		if isotropic is True:
 			radii = np.linspace(inner_radius,outer_radius,nrad+1)
 		else:
-			# base = 3
-			# radii = np.zeros(nrad+1,dtype=np.float64)
-			# mm = np.linspace(np.power(inner_radius,1./base),np.power(outer_radius,1./base),nrad+1)
-			# for i in range(0,nrad+1):
-			# 	radii[i] = mm[i]**base
-
-
 			base = 3
-			mm = np.linspace(np.power(inner_radius,1./base),np.power(2.,1./base),nrad+1)
-			mm = np.append(mm,np.linspace(2,outer_radius,nrad+1)) 
-			radii = np.zeros(mm.shape[0],dtype=np.float64)
-			for i in range(0,mm.shape[0]):
+			radii = np.zeros(nrad+1,dtype=np.float64)
+			mm = np.linspace(np.power(inner_radius,1./base),np.power(outer_radius,1./base),nrad+1)
+			for i in range(0,nrad+1):
 				radii[i] = mm[i]**base
+
+
+			# base = 3
+			# mm = np.linspace(np.power(inner_radius,1./base),np.power(2.,1./base),nrad+1)
+			# mm = np.append(mm,np.linspace(2,outer_radius,nrad+1)) 
+			# radii = np.zeros(mm.shape[0],dtype=np.float64)
+			# for i in range(0,mm.shape[0]):
+			# 	radii[i] = mm[i]**base
 
 
 		# dd =   np.logspace(inner_radius,outer_radius,nrad+1,base=2)/2**np.linspace(inner_radius,outer_radius,nrad+1)

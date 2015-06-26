@@ -32,8 +32,8 @@ def ProblemData(MainData):
 		
 
 		E = 1.0e1
-		# nu = 0.4
-		nu=0.05
+		nu = 0.47
+		# nu=0.0001
 
 		# E = MainData.E 
 		# nu = MainData.nu 
@@ -74,6 +74,7 @@ def ProblemData(MainData):
 	class MeshInfo(object):
 		MeshType = 'tri'
 		Nature = 'straight'
+		Reader = 'ReadSeparate'
 
 		ConnectivityFile = ProblemPath + '/elements_rae.dat'
 		CoordinatesFile = ProblemPath +'/points_rae.dat'

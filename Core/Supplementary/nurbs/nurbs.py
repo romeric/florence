@@ -8,19 +8,7 @@ from warnings import warn
 from time import time
 import itertools
 import multiprocessing as mp 
-# from igalib import bsp
-# import igalib
-# print dir(igalib.bsp)
-# import pyximport; pyximport.install()
-# import CurveEquallySpacedPoints_c
-# from CurveEquallySpacedPoints_c import CurveEquallySpacedPoints_c
 
-# print dir(CurveEquallySpacedPoints_c)
-# import imp, os 
-# pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ )))
-# print pwd
-# import os
-# print os.getcwd()
 def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
 
 	# nOfBCstrings = len(bcs)
@@ -30,12 +18,11 @@ def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
 	listFaces  = []
 
 
-	# print mesh.edges
-	nsd=0
+	ndim=0
 	if mesh.element_type == 'tri':
-		nsd = 2 
+		ndim = 2 
 	elif mesh.element_type == 'tet':
-		nsd = 3
+		ndim = 3
 	else:
 		raise NotImplementedError('Boundary indentification with NURBS is only implemented for tris and tets')
 
@@ -45,8 +32,9 @@ def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
 	# print edge_coords
 	# print mesh.edges.shape
 	# t1=time()
-	ProjU  = np.zeros((mesh.edges.shape[0],nsd),dtype=np.float64)
-	ProjID = np.zeros((mesh.edges.shape[0],nsd),dtype=np.int64)
+	t1=0
+	ProjU  = np.zeros((mesh.edges.shape[0],ndim),dtype=np.float64)
+	ProjID = np.zeros((mesh.edges.shape[0],ndim),dtype=np.int64)
 	
 	for kFace in xrange(mesh.edges.shape[0]):
 		edge_coords = mesh.points[mesh.edges[kFace,:2],:] # THE LINEAR MESH EDGES
@@ -62,14 +50,19 @@ def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
 				# print mesh.edges[kFace,:2]
 				indexFace += 1
 				# for i in range(mesh.edges[kFace,:2].shape[0]):
-				for iVertex in range(nsd):
-					# _, uProjI, nurbsProjI = projectNodeNurbsBoundary(edge_coords[iVertex,:],nurbs,nsd) 
-					uProjI, nurbsProjI = projectNodeNurbsBoundary(edge_coords[iVertex,:],nurbs,nsd) 
+				for iVertex in range(ndim):
+					# _, uProjI, nurbsProjI = projectNodeNurbsBoundary(edge_coords[iVertex,:],nurbs,ndim) 
+					# t9=time()
+					uProjI, nurbsProjI = projectNodeNurbsBoundary(edge_coords[iVertex,:],nurbs,ndim) 
+					# t1 += (time()-t9)
 					# print nurbsProj
 					# print xProj
 					ProjU[kFace,iVertex] = uProjI
 					ProjID[kFace,iVertex] = nurbsProjI
 
+					# from OCC.gp import gp_Pnt
+					# from OCC.GeomAPI import GeomAPI_ProjectPointOnCurve
+					# pp=edge_coords[iVertex,:]
 
 					#---------------------------------------------------------------------#
 					#					CORRECT PARAMETER FOR PERIODIC NURBS
@@ -86,6 +79,7 @@ def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
 	# print np.linalg.norm(mesh.points[np.unique(mesh.edges[listFaces,:]),:],axis=1)
 
 	# print time()-t1
+	# print t1
 
 	# FIX PERIODIC NURBS 2D
 	nOfNurbs = len(nurbs)
@@ -231,7 +225,7 @@ def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
 	# # print nodesDBC
 	# uDBC = displacementDBC[posUnique,:]
 	# nOfDBCnodes = nodesDBC.shape[0]
-	# DBCmatrix = np.zeros((nsd*nOfDBCnodes, 2))
+	# DBCmatrix = np.zeros((ndim*nOfDBCnodes, 2))
 
 	# for kNode in range(nOfDBCnodes):
 	# 	iNode = nodesDBC[kNode]
@@ -447,37 +441,11 @@ def TotalCurveLength(c,res=1000):
 	return L
 
 
-def CurveLength_for(c,u1,u2,res=500):
-	"""Length of NURBS curve between parametric points u1 and u2"""
-	
-	u=np.linspace(u1,u2,res)
-	C=np.zeros((u.shape[0],3))
-	L=0.
-	# t1=time()
-	for i in range(u.shape[0]):
-		# C[i,:] =  bsp_local.Evaluate1(c['degree'],c['U'],c['Pw'],u[i])
-		C[i,:] =  CurvePoint(c,u[i])[0][:3]
-	# print time()-t1
-	for i in range(C.shape[0]-1):
-		L += np.linalg.norm(C[i+1,:]-C[i,:])
-
-	return L
-
-
 def CurveLength_Gauss(c,u1,u2,res=500):
 	"""Length of NURBS curve between parametric points u1 and u2 using Gaussian quadrature
 	but does not take into account kinks"""
-	
-	u=np.linspace(u1,u2,res)
-	C=np.zeros((u.shape[0],3))
-	L=0.
-	for i in range(u.shape[0]):
-		# C[i,:] =  bsp_local.Evaluate1(c['degree'],c['U'],c['Pw'],u[i])
-		C[i,:] =  CurvePoint(c,u[i])[0][:3]
-	for i in range(C.shape[0]-1):
-		L += np.linalg.norm(C[i+1,:]-C[i,:])
+	pass
 
-	return L
 
 
 
@@ -496,8 +464,6 @@ def CurveLength(c,u1,u2,res=500):
 	return L
 
 
-# 
-
 def CurveLengthAdaptive(aNurbs,u1,u2,lengthTOL,BasesOrder=1):
 	
 	L=None
@@ -509,8 +475,6 @@ def CurveLengthAdaptive(aNurbs,u1,u2,lengthTOL,BasesOrder=1):
 	# DECREASE LENGTHTOL FOR MORE COMPLEX CURVES
 	L0 = CurveLength(aNurbs,u1,u2,n)
 
-	# print u1, u2,50*np.arange(2,kMax)
-	# L2 = map(CurveLength, itertools.repeat(aNurbs, kMax-2),[u1]*(kMax-2),[u2]*(kMax-2),50*np.arange(2,kMax)) # Map is not a good idea here
 	for k in range(2,kMax):
 		L1 = CurveLength(aNurbs,u1,u2,k*n)
 		errInt = np.abs(1.0*(L1 - L0)/L1)
@@ -522,66 +486,27 @@ def CurveLengthAdaptive(aNurbs,u1,u2,lengthTOL,BasesOrder=1):
 	if k==kMax-1:
 		raise StopIteration('Tolerance has not been achieved')
 		L = L1
-	# print L0, CurveLength(aNurbs,0,0.5)
-
-	return L
-
-
-def CurveDersLength(c,u1,u2,res=500):
-	"""Length of NURBS curve between parametric points u1 and u2"""
-	
-	u=np.linspace(u1,u2,res)
-	C=np.zeros((u.shape[0],3))
-	L=0.
-	for i in range(u.shape[0]):
-		# C[i,:] =  bsp_local.Evaluate1(c['degree'],c['U'],c['Pw'],u[i])
-		C[i,:] =  CurveDersPoints(c,u[i])
-	for i in range(C.shape[0]-1):
-		L += np.linalg.norm(C[i+1,:]-C[i,:])
-
-	return L
-
-
-def CurveDersLengthAdaptive(aNurbs,u1,u2,lengthTOL):
-	
-	L=None
-	kMax = 10
-	# DECREASE LENGTHTOL FOR MORE COMPLEX CURVES
-	L0 = CurveDersLength(aNurbs,u1,u2,200)
-
-	for k in range(2,kMax):
-		L1 = CurveDersLength(aNurbs,u1,u2,k*200)
-		errInt = np.abs(1.0*(L1 - L0)/L1)
-		if errInt < lengthTOL:
-			L = L1
-			break
-		L0 = L1 
-
-	if k==kMax+1:
-		warn('Tolerance has not been achieved')
-		L = L1
-	# print L0, CurveLength(aNurbs,0,0.5)
 
 	return L
 
 
 
-def projectNodeNurbsBoundary(x,nurbs,nsd):
+def projectNodeNurbsBoundary(x,nurbs,ndim):
 	# NO OF NURBS CURVES/SURFACES
 	nOfNurbs = len(nurbs)
 	# print nOfNurbs
 
 	d = 1e10
 	for iNurbs in range(nOfNurbs):
-		if nsd==2:
+		if ndim==2:
 			u,pu = nurbsCurvePointProjection(nurbs[iNurbs], x)
-		elif nsd==3:
+		elif ndim==3:
 			raise NotImplementedError('3D verion not implemented')
-		dist = np.linalg.norm(pu[:nsd]-x)
+		dist = np.linalg.norm(pu[:ndim]-x)
 		# print dist
 		if dist < d:
 			nurbsProj = iNurbs
-			# xProj = pu[:nsd]
+			# xProj = pu[:ndim]
 			uProj = u 
 			d = dist
 
@@ -719,10 +644,11 @@ def nurbsCurvePointProjection(nurbs,p):
 			if np.linalg.norm(cond1) < dMin:
 				dMin = np.linalg.norm(cond1)
 
-		if niter == nMaxIter:
+		if niter == nMaxIter-1:
 			raise StopIteration('Convergence not achieved for point projection')
 
 		U = np.unique(nurbs['U'][0])  # tip: Completely avoid this, it is okay to loop over all knots than finding unique and calling CurvePoint on a loop
+		# U = nurbs['U'][0] # use something like this instead 
 		# print U, dMin
 		# CHECK IF A KNOT IS CLOSER AND WE HAVE NOT CONVERED TO IT (END POINTS OR TOLERANCE)
 		for uu in U:
@@ -752,7 +678,11 @@ def CurvePoint(nurbs,u,homogeneous = True):
 
 	if nurbs['U'][0].shape[0] > 0:
 		# pt = bsp.Evaluate1(nurbs['degree'],nurbs['U'],nurbs['Pw'],u)
+		# print nurbs['U'][0].shape,nurbs['Pw'].shape
 		pt = bsp_local.Evaluate1(nurbs['degree'],nurbs['U'],nurbs['Pw'],u)
+		# if nurbs['degree']==0:
+			# print pt
+			# print nurbs['U'][0].shape,nurbs['Pw'].shape
 		wt = pt[0,-1]
 		if homogeneous:
 			pt = pt[0,:3]/pt[0,-1]
@@ -800,26 +730,3 @@ def CurveDersControlPoints(nurbs):
 	# return  {'U':(nurbs['U'][0][1:-1],),'Pw':(PwDers,),'start':nurbs['U'][0][1],'end':nurbs['U'][0][-1],'degree':p-1}
 	return  {'U':(nurbs['U'][0][1:-1],),'Pw':PwDers,'start':nurbs['U'][0][1],'end':nurbs['U'][0][-1],'degree':p-1}
 	# return  {'U':(nurbs['U'][0][1:-1],),'Pw':PwDers,'start':nurbs['U'][0][1],'end':nurbs['U'][0][-1],'degree':p}
-
-
-
-
-
-# def CurvePoint(nurbs,u):
-# 	# print nurbs['U']
-# 	if len(nurbs['U'][0]) > 0:
-# 		# p = np.where(nurbs['U'][0]==nurbs['U'][0][0])[0].shape[0] - 1 # if p is not known this is how you find it
-# 		p=2
-# 		span = bsp.FindSpan(p,nurbs['U'][0],u) # bsp span is one shorter than Ruben's. maybe a Python 0 indexing thing? becareful though
-# 		N = bsp.EvalBasisFuns(p,nurbs['U'][0],u,span)
-# 		pt = np.zeros(4)
-# 		# print N,u,span
-# 		for i in range(p+1):
-# 			# print nurbs['Pw'][span-p+i,:], N[i]
-# 			pt = pt + N[i]*nurbs['Pw'][span-p+i,:]
-# 	else:
-# 		pt=np.zeros(3)
-
-# 	return pt 
-
-# 	# print 

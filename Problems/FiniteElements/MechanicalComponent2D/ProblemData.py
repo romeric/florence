@@ -73,13 +73,17 @@ def ProblemData(MainData):
 	class MeshInfo(object):
 		MeshType = 'tri'
 		Nature = 'straight'
+		Reader = 'Read'
 
-		# FileName = ProblemPath + '/Mesh_Annular_Circle_75.dat'
-		FileName = ProblemPath + '/MechanicalComponent2D_192.dat'
+		# FileName = ProblemPath + '/MechanicalComponent2D_664.dat'
+		# FileName = ProblemPath + '/MechanicalComponent2D_192.dat'
+		FileName = ProblemPath + '/MechanicalComponent2D_NonSmooth_321.dat'
 		
 
 
 	class BoundaryData(object):
+		# NURBS/NON-NURBS TYPE BOUNDARY CONDITION
+		Type = 'nurbs'
 		class DirichArgs(object):
 			node = 0
 			Applied_at = 'node' 
@@ -164,6 +168,34 @@ def ProblemData(MainData):
 			
 		
 			return b
+
+
+		def NURBSParameterisation(self):
+			import scipy.io as spio 
+			dummy_nurbs, nurbs={}, {}
+			spio.loadmat('/home/roman/Dropbox/2015_HighOrderMeshing/examples/mechanical2d.mat',mdict=dummy_nurbs)
+			nurbs['Pw'] = dummy_nurbs['nurbs']['Pw'][0]
+			nurbs['U'] = dummy_nurbs['nurbs']['U'][0]
+			nurbs['start'] = dummy_nurbs['nurbs']['iniParam'][0]
+			nurbs['end'] = dummy_nurbs['nurbs']['endParam'][0]
+
+			# print len(nurbs['Pw'])
+			# print nurbs['Pw'].size
+			fnurbs=[]
+			from Core.Supplementary.Tensors import itemfreq_py
+			for i in range(0,nurbs['Pw'].shape[0]):
+				degree = np.int64(itemfreq_py(nurbs['U'][i])[-1,-1] - 1)
+				# print degree
+				fnurbs.append(({'U':nurbs['U'][i],'Pw':nurbs['Pw'][i],'start':nurbs['start'][i][0][0],'end':nurbs['end'][i][0][0],'degree':degree}))
+
+			# print len(fnurbs) 
+			# print fnurbs[0]['start']
+			# print dummy_nurbs['nurbs']['iniParam'][0][1][0][0]
+			# import sys;sys.exit(0)
+			return fnurbs 
+
+		def NURBSCondition(self,x):
+			return np.sqrt(x[:,0]**2 + x[:,1]**2) < 0.1
 
 
 		

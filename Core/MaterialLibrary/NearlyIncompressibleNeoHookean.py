@@ -33,12 +33,12 @@ class NearlyIncompressibleNeoHookean(object):
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
 
-		I = StrainTensors.I
-		J = StrainTensors.J
-		b = StrainTensors.b
-		H_ = StrainTensors.H
-		G = np.dot(H_.T,H_)
-		g = np.dot(H_,H_.T)
+		I = StrainTensors['I']
+		J = StrainTensors['J'][gcounter]
+		b = StrainTensors['b'][gcounter]
+		# H_ = StrainTensors.H
+		# G = np.dot(H_.T,H_)
+		# g = np.dot(H_,H_.T)
 
 		# Update Lame constants
 		kappa = lamb+2.0*mu/3.0
@@ -53,9 +53,9 @@ class NearlyIncompressibleNeoHookean(object):
 
 	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 
-		b = StrainTensors.b 
-		J = StrainTensors.J
-		I = StrainTensors.I
+		I = StrainTensors['I']
+		J = StrainTensors['J'][gcounter]
+		b = StrainTensors['b'][gcounter]
 
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
@@ -64,6 +64,6 @@ class NearlyIncompressibleNeoHookean(object):
 		return 1.0*mu/J*b+(kappa*(J-1.0))*I 
 
 
-	def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx):
-		ndim = StrainTensors.I.shape[0]
+	def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
+		ndim = StrainTensors['I'].shape[0]
 		return np.zeros((ndim,1))
