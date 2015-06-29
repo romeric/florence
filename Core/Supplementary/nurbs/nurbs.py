@@ -26,11 +26,7 @@ def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
 	else:
 		raise NotImplementedError('Boundary indentification with NURBS is only implemented for tris and tets')
 
-	# GET COORDINATES OF NODES
-	# unedges = np.unique(mesh[:,:2])
-	# edge_coords = mesh.points[np.unique(mesh.edges),:]
-	# print edge_coords
-	# print mesh.edges.shape
+
 	# t1=time()
 	t1=0
 	ProjU  = np.zeros((mesh.edges.shape[0],ndim),dtype=np.float64)
@@ -75,8 +71,12 @@ def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
 
 	dirichletFaces = dirichletFaces[:indexFace,:]
 	# print dirichletFaces.shape
+	# print dirichletFaces
 	# print mesh.edges[listFaces,:]
 	# print np.linalg.norm(mesh.points[np.unique(mesh.edges[listFaces,:]),:],axis=1)
+	# print ProjID
+	print ProjU
+	# print listFaces
 
 	# print time()-t1
 	# print t1
@@ -142,174 +142,37 @@ def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
 				ProjU[kFace,0] = nurbs[idNurbs]['U'][0][0]
 			elif u1<u2 and np.abs(u2 - uMax[idNurbs]) < 1e-10:
 				ProjU[kFace,1] = nurbs[idNurbs]['U'][0][-1]
-	
+	print 
+	print ProjU
+
 
 	# IDENTIFY HIGHER ORDRE DIRICHLET NODES
 	nOfDirichletFaces = indexFace
 	FaceNodes = np.unique(mesh.edges)
 	nOfFaceNodes = mesh.edges.shape[1]
-	# print nOfFaceNodes
 	# nodesDBC = np.zeros(nOfDirichletFaces*nOfFaceNodes,dtype=np.int64)
 	nodesDBC = mesh.edges[listFaces,:].ravel()
 	displacementDBC = np.zeros((nOfDirichletFaces*nOfFaceNodes, 2),dtype=np.float64)
 	indexNode = np.arange(nOfFaceNodes)
 
-	tt = 0
-	# print dirichletFaces.shape
-	# import CurveEquallySpacedPoints_c
-	# print dirichletFaces
-	# print mesh.edges
-	# print mesh.edges[listFaces,:].ravel() # USE THIS INSTEAD
-	# print mesh.points[dirichletFaces,:]
 	for iDirichletFace in range(nOfDirichletFaces):
-		# print iDirichletFace
-		# print mesh.edges[iDirichletFace,:]
-		# nodesDBC[indexNode] = mesh.edges[listFaces[iDirichletFace],:] # # 
-		# nodesDBC[indexNode] = dirichletFaces[iDirichletFace,:2]
-		# print nodesDBC
+
 		idNurbs = dirichletFaces[iDirichletFace,2]
 		u1 = ProjU[listFaces[iDirichletFace],0]
 		u2 = ProjU[listFaces[iDirichletFace],1]
-		t1=time()
 		uEq = CurveEquallySpacedPoints(nurbs[idNurbs], u1, u2, nOfFaceNodes,1e-06,BasesOrder)
-		# print uEq
-		# uEq = CurveEquallySpacedPoints_v(nurbs[idNurbs], u1, u2, nOfFaceNodes, 1e-06,BasesOrder)
-		# uEq = CurveEquallySpacedPoints_nr(nurbs[idNurbs], u1, u2, nOfFaceNodes, 1e-06,BasesOrder)
-		# print CurveDersLengthAdaptive(nurbs[0],0,1,lengthTOL)
-		# import sys; sys.exit(0)
-		# uEq = CurveEquallySpacedPoints_c.CurveEquallySpacedPoints_c(nurbs[idNurbs], u1, u2, nOfFaceNodes, lengthTOL=1e-06,BasesOrder)
-		# print uEq
-		tt += (time()-t1)
-
-		# from Core.Supplementary.Tensors import makezero
-		# mesh.points = makezero(mesh.points)
-
 		xEq = np.zeros((nOfFaceNodes,2))
 		for i in xrange(nOfFaceNodes):
 			pt = CurvePoint(nurbs[idNurbs],uEq[i])[0]
 			xEq[i,:] = pt[:2]
-		# xOld = mesh.points[nodesDBC[indexNode],:]
-		# displacementDBC(indexNode,:) = xEq - xOld
-		# print xEq,'\n'
+
 		xOld = mesh.points[nodesDBC[indexNode],:]
-
-		# displacementDBC[indexNode,:] = xEq - mesh.points[nodesDBC[indexNode],:]
-		# displacementDBC[indexNode,:] = xEq - xOld[[0,-1,1],:]
-		# displacementDBC[indexNode,:] = xEq[[0,-1,1],:] - xOld ##
-		# displacementDBC[indexNode,:] = xEq[[0,-1,1,2],:] - xOld ##
-		# print 
 		displacementDBC[indexNode,:] = xEq[np.append(np.array([0,-1]),np.arange(1,nOfFaceNodes-1)),:] - xOld
-		# displacementDBC[indexNode,:][[0,2],[0,1]] = 0.0
-		# displacementDBC[indexNode,:][:,[0,1]] = 0.0
-		# displacementDBC[nodesDBC[indexNode],:] = xEq - mesh.points[nodesDBC[indexNode],:]
-		# print mesh.points[nodesDBC[indexNode],:],'\n'
-		# print mesh.points[nodesDBC[indexNode],:],'\n' # [[0,-1,range(1,-1)],:]
-		# print np.hstack((mesh.points[nodesDBC[indexNode],:],xEq)),'\n'
-		# print nodesDBC
-		# print displacementDBC[indexNode,:],'\n'
-		# print nodesDBC[indexNode]
-		# print np.linalg.norm(mesh.points[159,:])
-
-
 		indexNode += nOfFaceNodes
-	# print nodesDBC
-	# print tt
-	# print nodesDBC
-	# 
-	# print makezero(mesh.points[nodesDBC,:])
-	# print dir(nodesDBC)
-	# print np.sort(nodesDBC)
-	# posUnique = np.unique(nodesDBC,return_inverse=True,return_index=True)[1]
+
 	posUnique = np.unique(nodesDBC,return_index=True)[1]
-	# nodesDBC = nodesDBC[posUnique]
-	# # print nodesDBC
-	# uDBC = displacementDBC[posUnique,:]
-	# nOfDBCnodes = nodesDBC.shape[0]
-	# DBCmatrix = np.zeros((ndim*nOfDBCnodes, 2))
 
-	# for kNode in range(nOfDBCnodes):
-	# 	iNode = nodesDBC[kNode]
-	# 	displacement = uDBC[kNode,:]
-	# 	DBCmatrix[kNode,:] = [iNode, displacement[0]]
-	# 	DBCmatrix[kNode+nOfDBCnodes,:] = [iNode + mesh.points.shape[0],displacement[1]]
-
-	# # print DBCmatrix[:,1].astype(int); print 
-	# print uDBC
-
-	# import sys; sys.exit(0)
-	# return DBCmatrix
-	# displacementDBC *= -1. 
-	# from Core.Supplementary.Tensors import makezero
-	# displacementDBC= makezero(displacementDBC,tol=1e-4)
-	# import sys; sys.exit(0)
 	return nodesDBC[posUnique], displacementDBC[posUnique,:]
-	# return nodesDBC, displacementDBC
-
-
-
-def CurveEquallySpacedPoints_nr(aNurbs, u1, u2, nPoints, lengthTOL=1e-06,BasesOrder=1):
-	nOfMaxIterations = 1000
-	uEq = np.zeros(nPoints,dtype=np.float64)
-	uEq[0] = u1
-	uEq[nPoints-1] = u2
-	lengthU = np.abs(u2-u1)
-	# from time import time 
-	# t1=time()
-	length = CurveLengthAdaptive(aNurbs, u1, u2, lengthTOL,BasesOrder)
-	# print length, u1,u2
-	# print time()-t1
-	lengthSub = float(length)/(float(nPoints)-1.0)
-	# print lengthSub
-
-	h=lengthU/100
-	uGuess = np.linspace(u1,u2,nPoints)
-	uGuess_h = np.linspace(u1,u2+h,nPoints)
-	# print uGuess, uGuess_h
-	nOfIntPoints = nPoints-2
-	
-	# print lengthU,h
-	# h=1e-10
-	for iIntPoints in xrange(nOfIntPoints):
-		currentLength = (iIntPoints+1)*lengthSub
-		a = u1
-		b = u2
-		# INITIAL GUESS 
-		uOld = 0.5*(uGuess[iIntPoints] + uGuess[iIntPoints+2])
-		uOld_h = 0.5*(uGuess_h[iIntPoints] + uGuess_h[iIntPoints+2])
-		# print uOld, uOld_h
-		# print uGuess[iIntPoints], uGuess[iIntPoints+2]
-		length = CurveLengthAdaptive(aNurbs, u1 , uOld, lengthTOL,BasesOrder)
-		length_h = CurveLengthAdaptive(aNurbs, u1 , uOld_h, lengthTOL,BasesOrder)
-		# print length, length_h
-		# length_h = CurveDersLengthAdaptive(aNurbs, u1 , uOld_h, lengthTOL,BasesOrder)
-		# dlength = (length_h - length)/h 
-
-		# print uOld,length, dlength
-
-		f = length_h - currentLength
-		# print f
-		while np.abs(f) > lengthTOL:
-
-			uEq[iIntPoints+1] = uOld_h - length_h*(uOld_h - uOld)/(length_h - length)
-			print uOld, uOld_h, uEq[iIntPoints+1]
-
-			# length = CurveLengthAdaptive(aNurbs, u1 , uOld_h, lengthTOL)
-			length = length_h
-			length_h = CurveLengthAdaptive(aNurbs, u1 , uEq[iIntPoints+1], lengthTOL,BasesOrder)
-			# print length_h, length
-			# print length_h - length
-			# dlength = (length_h - length)/h 
-			
-			# dlength = CurveDersLengthAdaptive(aNurbs, u1 , uEq[iIntPoints+1], lengthTOL,BasesOrder)
-
-			# errF = np.abs(currentLength - length)/currentLength
-
-			uOld = uOld_h
-			uOld_h = uEq[iIntPoints+1]
-			f = length_h - currentLength
-
-	return uEq
-
 
 
 
@@ -319,17 +182,12 @@ def CurveEquallySpacedPoints(aNurbs, u1, u2, nPoints, lengthTOL=1e-06,BasesOrder
 	uEq[0] = u1
 	uEq[nPoints-1] = u2
 	lengthU = np.abs(u2-u1)
-	# from time import time 
-	# t1=time()
+
 	length = CurveLengthAdaptive(aNurbs, u1, u2, lengthTOL,BasesOrder)
-	# print length, u1,u2
-	# print time()-t1
 	lengthSub = float(length)/(float(nPoints)-1.0)
-	# print lengthSub
 
 
 	uGuess = np.linspace(u1,u2,nPoints)
-	# print uGuess
 	nOfIntPoints = nPoints-2
 
 	for iIntPoints in range(nOfIntPoints):
@@ -340,14 +198,9 @@ def CurveEquallySpacedPoints(aNurbs, u1, u2, nPoints, lengthTOL=1e-06,BasesOrder
 		uOld = 0.5*(uGuess[iIntPoints] + uGuess[iIntPoints+2])
 		# print uGuess[iIntPoints], uGuess[iIntPoints+2]
 		length = CurveLengthAdaptive(aNurbs, u1 , uOld, lengthTOL,BasesOrder)
-		# print uOld,length
 
 		for niter in range(nOfMaxIterations):
-			# if niter==0:
-			# 	print length, currentLength
 			f = length - currentLength
-			# print f
-			# import sys; sys.exit(0)
 			if np.abs(f) < lengthTOL:
 				uEq[iIntPoints+1] = uOld
 				break
@@ -364,63 +217,6 @@ def CurveEquallySpacedPoints(aNurbs, u1, u2, nPoints, lengthTOL=1e-06,BasesOrder
 			if errU<lengthTOL and errF < lengthTOL:
 				break
 			uOld = uEq[iIntPoints+1]
-			# print niter
-		# print uEq[iIntPoints+1] 
-		# print
-
-	return uEq
-
-
-def CurveEquallySpacedPoints_v(aNurbs, u1, u2, nPoints, lengthTOL=1e-06):
-	nOfMaxIterations = 1000
-	uEq = np.zeros(nPoints,dtype=np.float64)
-	uEq[0] = u1
-	uEq[nPoints-1] = u2
-	lengthU = np.abs(u2-u1)
-
-	nOfIntPoints = nPoints-2
-
-	
-	length = CurveLengthAdaptive(aNurbs, u1, u2, lengthTOL,BasesOrder)
-	lengthSub = float(length)/(float(nPoints)-1.0)
-
-	uGuess = np.linspace(u1,u2,nPoints)
-	
-
-	currentLength = np.arange(1,nOfIntPoints+1)*lengthSub
-	a = u1
-	b = u2
-	# INITIAL GUESS 
-	uOld = [0.5*np.sum(uGuess[i:uGuess.shape[0]:2]) for i in range(nOfIntPoints)]
-	length = map(CurveLengthAdaptive, itertools.repeat(aNurbs, nOfIntPoints),itertools.repeat(u1, nOfIntPoints),uOld,
-	 itertools.repeat(lengthTOL, nOfIntPoints),itertools.repeat(BasesOrder, nOfIntPoints) )
-	# print uOld, length
-
-
-	for niter in range(nOfMaxIterations):
-		# if niter==0:
-			# print length, currentLength
-		f = length - currentLength
-	# 	# print f
-	# 	# import sys; sys.exit(0)
-		if np.linalg.norm(f) < lengthTOL:
-			uEq = uOld
-			break
-		elif np.sum(f)>0.0: # this bit can't be done in a group
-			b=uOld
-		else:
-			a=uOld
-
-		uEq = 0.5*(a+b)
-
-		length = map(CurveLengthAdaptive, itertools.repeat(aNurbs, nOfIntPoints),itertools.repeat(u1, nOfIntPoints),uEq,
-		 itertools.repeat(lengthTOL, nOfIntPoints),itertools.repeat(BasesOrder, nOfIntPoints) )
-		errU = np.linalg.norm(uOld-uEq)/lengthU
-		errF = np.linalg.norm(currentLength - length)/np.linalg.norm(currentLength)
-		if errU<lengthTOL and errF < lengthTOL:
-			break
-		uOld = uEq
-
 
 	return uEq
 
@@ -474,7 +270,7 @@ def CurveLengthAdaptive(aNurbs,u1,u2,lengthTOL,BasesOrder=1):
 		n=10 # CHANGE THIS FOR SPEED
 	# DECREASE LENGTHTOL FOR MORE COMPLEX CURVES
 	L0 = CurveLength(aNurbs,u1,u2,n)
-
+	# print u1,u2
 	for k in range(2,kMax):
 		L1 = CurveLength(aNurbs,u1,u2,k*n)
 		errInt = np.abs(1.0*(L1 - L0)/L1)
@@ -502,8 +298,11 @@ def projectNodeNurbsBoundary(x,nurbs,ndim):
 			u,pu = nurbsCurvePointProjection(nurbs[iNurbs], x)
 		elif ndim==3:
 			raise NotImplementedError('3D verion not implemented')
+
 		dist = np.linalg.norm(pu[:ndim]-x)
-		# print dist
+		# print u,pu
+		# print dist, pu
+		# print x,pu[:ndim]
 		if dist < d:
 			nurbsProj = iNurbs
 			# xProj = pu[:ndim]
@@ -554,53 +353,32 @@ def nurbsCurvePointProjection(nurbs,p):
 		nMaxIter = 1000
 		tol1 = 1e-10
 		tol2 = 1e-10
-		n = 1000#00
+		n = 1000
 
-		# print p
 		# if p.shape[0] == 2:
 			# p[3]=0
 
-		# pIni = nurbsCurvePoint(nurbs, nurbs.iniParam)
-		# CHECK THIS
-		# pIni = nurbs['points'][0]  
-		# pEnd = nurbs['points'][-1]
-		# print dir(bspline)
-		# degree=nurbs['degree'] # SHIFT THIS TO THE MAIN CALL
-		# pIni = bsp.Evaluate1(p,nurbs['U'],nurbs['Pw'],nurbs['start'])[0,:3]
-		# pEnd = bsp.Evaluate1(p,nurbs['U'],nurbs['Pw'],nurbs['end'])[0,:3]
 		pIni = CurvePoint(nurbs,nurbs['start'])[0]
 		pEnd = CurvePoint(nurbs,nurbs['end'])[0]
-		# pIni = bsp.evaluate1(p,nurbs['U'],nurbs['Pw'],nurbs['start'])[0,:3]
-		# pEnd = bsp.evaluate1(p,nurbs['U'],nurbs['Pw'],nurbs['end'])[0,:3]
-		# print pIni, pEnd
 
-		# CurvePoint(nurbs,nurbs['start'])
-		# print len(nurbs)
-		# print pIni, pEnd
 		peroidic = 0
 		if np.linalg.norm(pIni - pEnd) < tol1:
 			peroidic = 1
 
 		d = float('Inf') 
 		us = np.linspace(nurbs['start'], nurbs['end'], n)
-		# print us
-		# print us[-2]
-		for i in range(n):
 
-			# q = bsp.Evaluate1(p,nurbs['U'],nurbs['Pw'],us[i]); 	q = q[0,:3]/q[0,-1] 
+		for i in range(n):
 			q = CurvePoint(nurbs,us[i])[0]
-			# print p,q
 			dNew = np.linalg.norm(p-q)
 			if dNew < d:
 				u = us[i]
 				d = dNew
 
-		# print u 
 		dMin = d
 		Cu = CurvePoint(nurbs, u)[0]
 		dCu = CurveDersPoints(nurbs,u)
 		d2Cu = CurveSecondDersPoints(nurbs,u)
-		# print Cu,dCu,d2Cu
 
 		for niter in xrange(nMaxIter):
 			cond1 = Cu - p 
@@ -612,7 +390,6 @@ def nurbsCurvePointProjection(nurbs,p):
 				break 
 
 			uNew = u - np.dot(dCu,(Cu-p))/(np.dot(d2Cu,(Cu-p))+np.sum(dCu**2))
-			# print uNew, np.sum(dCu**2)
 			# uNew = u - dCu*(Cu-p)'/(d2Cu*(Cu-p)' + sum(dCu.^2));
 			if peroidic == 0:
 				if uNew < nurbs['start']:
@@ -629,17 +406,13 @@ def nurbsCurvePointProjection(nurbs,p):
 					break
 
 			cond3 = np.linalg.norm(np.dot((uNew-u),dCu))
-			# print cond3
 			if cond3 < tol1:
 				break
 			u = uNew
 			Cu = CurvePoint(nurbs, u)[0]
 			dCu = CurveDersPoints(nurbs,u)
 			d2Cu = CurveSecondDersPoints(nurbs,u)
-			# print Cu,dCu,d2Cu
-			# print cond1
-			# if niter==1:
-				# print Cu,p
+
 
 			if np.linalg.norm(cond1) < dMin:
 				dMin = np.linalg.norm(cond1)
@@ -660,11 +433,7 @@ def nurbsCurvePointProjection(nurbs,p):
 
 		Cu = CurvePoint(nurbs, u)[0]
 
-
 		return u,Cu
-
-		# import sys
-		# sys.exit("STOPPED")
 
 	
 

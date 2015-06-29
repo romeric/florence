@@ -38,7 +38,7 @@ class MainData(object):
  	# Parallel = False
  	# nCPU = 8
 
- 	C = 2									# ORDER OF BASIS FUNCTIONS (NOTE THAT C=P-1, WHERE P IS THE POLYNOMIAL DEGREE)
+ 	C = 1									# ORDER OF BASIS FUNCTIONS (NOTE THAT C=P-1, WHERE P IS THE POLYNOMIAL DEGREE)
  	norder = 2  							# ORDER/NO OF QUADRATURE POINTS
  	plot = (0,3)							# PLOT FLAG FOR BEM 
  	nrplot = (0,'last')						# PLOT FLAG FOR NEWTON-RAPHSON CONVERGENCE
@@ -89,9 +89,7 @@ elif MainData.session == 'BEM3D':
 # print u'\u2713'.encode('utf8')
 
 
-
-
-
-
-
+# import numpy.distutils.system_info as sysinfo
+# sysinfo.get_info('atlas')
+# sysinfo.show_all()
 

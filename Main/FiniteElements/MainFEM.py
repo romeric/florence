@@ -8,7 +8,7 @@ pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
 # CORE IMPORTS
 from Core.FiniteElements.ComputeErrorNorms import ComputeErrorNorms
 from Core.FiniteElements.PostProcess import *
-from Core.FiniteElementslverslver import *
+from Core.FiniteElements.Solvers.Solver import *
 from Core.FiniteElements.PreProcess import PreProcess
 
 #######################################################################################################################################################
@@ -43,11 +43,15 @@ def main(MainData):
 	# print mesh.points
 	# print mesh.elements 
 	# print mesh.points.shape
-	# print mesh.edges
+	# print mesh.edges.shape
 
 	# np.savetxt('/home/roman/Desktop/elements.txt', mesh.elements)
 	# np.savetxt('/home/roman/Desktop/points.txt', mesh.points)
-	np.savetxt('/home/roman/Desktop/edges_circle.dat', mesh.edges[:,:2],fmt='%d',delimiter=',')
+	# np.savetxt('/home/roman/Desktop/edges_circle.dat', mesh.edges[:,:2],fmt='%d',delimiter=',')
+
+	# np.savetxt('/home/roman/Desktop/elements_circle_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
+	# np.savetxt('/home/roman/Desktop/points_circle_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%6.4f',delimiter=',')
+	# np.savetxt('/home/roman/Desktop/edges_circle_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
 
 	print 'Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*MainData.nvar
 	
@@ -60,9 +64,9 @@ def main(MainData):
 	# print 'Post-Processing the information...'
 	# POST-PROCESS
 	# PostProcess().StressRecovery(MainData,mesh,TotalDisp) 
-	# PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp)
-	# PostProcess.HighOrderPatch(MainData,mesh,TotalDisp)
-	# plt.show()
+	PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp)
+	PostProcess.HighOrderPatch(MainData,mesh,TotalDisp)
+	plt.show()
 	# # plt.savefig('/home/roman/Desktop/DumpReport/uniform_aniso_mesh_'+MainData.MaterialArgs.Type+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)
 
 	# from Core.Supplementary.SuppPlots.MeshNumbering import PlotMeshNumbering

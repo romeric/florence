@@ -1,7 +1,7 @@
 import os, imp, sys
 from time import time
 import numpy as np
-import scipy as sp 
+# import scipy as sp 
 
 # pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..'))
 
@@ -50,7 +50,8 @@ def PreProcess(MainData,Pr,pwd):
 			mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=7,ncirc=7) # isotropic
 			# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=20.,isotropic=False,nrad=7,ncirc=7)
 
-
+	mesh.points *=1000.
+	# print np.linalg.norm(mesh.points,axis=1)
 	# GENERATE pMESHES FOR HIGH C
 	############################################################################
 	if MainData.C>0:
