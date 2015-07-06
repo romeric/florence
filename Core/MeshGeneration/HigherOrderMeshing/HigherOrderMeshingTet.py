@@ -1,5 +1,5 @@
 import numpy as np 
-from scipy.stats import itemfreq
+# from scipy.stats import itemfreq
 from time import time
 import multiprocessing as MP
 
@@ -8,7 +8,7 @@ import GetInteriorCoordinates as Gett
 import Core.InterpolationFunctions.TwoDimensional.Quad.QuadLagrangeGaussLobatto as TwoD 
 import Core.InterpolationFunctions.ThreeDimensional.Tetrahedral.hpNodal as Tet 
 from Core.QuadratureRules.FeketePointsTet import *
-from Core.Supplementary.Where import *
+# from Core.Supplementary.Where import *
 from Core.Supplementary.Tensors import itemfreq_py, makezero, duplicate
 from TwoLoopNode_Cython import TwoLoopNode_Cython
 
@@ -40,14 +40,17 @@ def TwoLoopNode(duplicates_list,duplicates,dups0,counter):
 
 
 def LoopDuplicates(i,reelements,duplicates):
-	return whereEQ(reelements,duplicates[i,1])
+	# return whereEQ(reelements,duplicates[i,1])
+	return np.where(reelements==duplicates[i,1])
 
 def LoopArangeDuplicates(i,duplicates,Ds):
 	x=None; y=None; x1=None; y1=None; mini=None
 	if Ds[i,1]!=1:
-		x,y = whereEQ(duplicates,Ds[i,0])
+		x,y = np.where(duplicates==Ds[i,0])
+		# x,y = whereEQ(duplicates,Ds[i,0])
 		mini = np.min(duplicates[x,:])
-		x1,y1 = whereEQ(duplicates,mini)
+		x1,y1 = np.where(duplicates==mini)
+		# x1,y1 = whereEQ(duplicates,mini)
 
 	return x,y,x1,y1,mini
 
@@ -202,9 +205,11 @@ def HighOrderMeshTet_UNSTABLE(C,mesh,Decimals=10,Zerofy=0,Parallel=False,nCPU=1)
 					duplicates[x1,y1] = Ds[i,0]
 		else:
 			if Ds[i,1]!=1:
-				x,y = whereEQ(duplicates,Ds[i,0])
+				x,y = np.where(duplicates==Ds[i,0])
+				# x,y = whereEQ(duplicates,Ds[i,0])
 				mini = np.min(duplicates[x,:])
-				x1,y1 = whereEQ(duplicates,mini)
+				# x1,y1 = whereEQ(duplicates,mini)
+				x1,y1 = np.where(duplicates==mini)
 
 				if Ds[i,0]!=mini:
 					duplicates[x,y] = mini
@@ -231,11 +236,12 @@ def HighOrderMeshTet_UNSTABLE(C,mesh,Decimals=10,Zerofy=0,Parallel=False,nCPU=1)
 			y = ParallelTupleDuplicates[i][1]
 			reelements[x,y] = duplicates[i,0]
 		else:
-			reelements[whereEQ(reelements,duplicates[i,1])] = duplicates[i,0]
+			# reelements[whereEQ(reelements,duplicates[i,1])] = duplicates[i,0]
+			reelements[reelements==duplicates[i,1]] = duplicates[i,0]
 	# print time()-t4
 
-	# print duplicates.shape
-	Dx = whereLT(duplicates.astype(np.float64),mesh.points.shape[0])[0]
+	# Dx = whereLT(duplicates.astype(np.float64),mesh.points.shape[0])[0]
+	Dx = np.where(duplicate<mesh.points.shape[0])[0]
 	if np.asarray(Dx).shape[0] != 0:
 		print 'Duplicated points in the original mesh\n', duplicates[Dx,:] 
 		# print itemfreq_py(duplicates[:,0]) # MULTIPLICITY OF EACH POINT
@@ -258,8 +264,8 @@ def HighOrderMeshTet_UNSTABLE(C,mesh,Decimals=10,Zerofy=0,Parallel=False,nCPU=1)
 			x=ParallelTuple3[i-mesh.points.shape[0]][0]; y=ParallelTuple3[i-mesh.points.shape[0]][1]
 			reelements[x,y] = i
 		else:
-			reelements[whereEQ(reelements,remainingnodes[i])] = i 
-			# reelements[reelements==remainingnodes[i]] = i
+			# reelements[whereEQ(reelements,remainingnodes[i])] = i 
+			reelements[reelements==remainingnodes[i]] = i
 
 	telements_2 = time()-telements_2
 
@@ -286,8 +292,8 @@ def HighOrderMeshTet_UNSTABLE(C,mesh,Decimals=10,Zerofy=0,Parallel=False,nCPU=1)
 		L2 = np.linalg.norm(node2-repoints[mesh.points.shape[0]:,:],axis=1)
 		L = np.linalg.norm(node1-node2,axis=1)
 
-		# j = np.where(np.abs((L1+L2)-L) < tol)[0]
-		j = np.asarray( whereLT1d(np.abs((L1+L2)-L), tol) )
+		j = np.where(np.abs((L1+L2)-L) < tol)[0]
+		# j = np.asarray( whereLT1d(np.abs((L1+L2)-L), tol) )
 		if j.shape[0]!=0:
 			reedges[iedge,2:] = j+mesh.points.shape[0]
 	reedges = reedges.astype(int)
@@ -343,8 +349,8 @@ def HighOrderMeshTet_UNSTABLE(C,mesh,Decimals=10,Zerofy=0,Parallel=False,nCPU=1)
 			Area3 = 0.5*np.linalg.norm(np.cross(DB, np.repeat(CB.reshape(1,3),DB.shape[0],axis=0)),axis=1 )
 			# t1 +=( time()-tt)
 			# CHECK THE CONDITION
-			# j = np.where(np.abs( Area - (Area1+Area2+Area3) )  < tol)[0]
-			j = np.asarray(whereLT1d(np.abs( Area - (Area1+Area2+Area3) ),tol)) 
+			j = np.where(np.abs( Area - (Area1+Area2+Area3) )  < tol)[0]
+			# j = np.asarray(whereLT1d(np.abs( Area - (Area1+Area2+Area3) ),tol)) 
 			# j = np.asarray(whereLT(np.abs( Area - (Area1+Area2+Area3) ).reshape(Area.shape[0],1),tol)[0]) 
 		if j.shape[0]!=0:
 			# print mesh.points[mesh.faces[iface,:],:]
@@ -401,7 +407,8 @@ def NodeLoopTet(inode,reelements,repoints,tol):
 
 
 def ElementLoopTet_2(i,reelements,remainingnodes):
-	return whereEQ(reelements,remainingnodes[i])
+	# return whereEQ(reelements,remainingnodes[i])
+	return np.where(reelements==remainingnodes[i])
 
 
 def LoopFaceTet(iface,points,repoints,faces,tol):
@@ -423,9 +430,9 @@ def LoopFaceTet(iface,points,repoints,faces,tol):
 	Area2 = 0.5*np.linalg.norm(np.cross(DA, np.repeat(CA.reshape(1,3),DA.shape[0],axis=0)),axis=1 )
 	Area3 = 0.5*np.linalg.norm(np.cross(DB, np.repeat(CB.reshape(1,3),DB.shape[0],axis=0)),axis=1 )
 	# CHECK THE CONDITION
-	# j = np.where(np.abs( Area - (Area1+Area2+Area3) )  < tol)[0]
+	j = np.where(np.abs( Area - (Area1+Area2+Area3) )  < tol)[0]
 	# j = np.asarray(whereLT(np.abs( Area - (Area1+Area2+Area3) ).reshape(Area.shape[0],1),tol)[0]) 
-	j = np.asarray(whereLT1d(np.abs( Area - (Area1+Area2+Area3) ),tol)) 
+	# j = np.asarray(whereLT1d(np.abs( Area - (Area1+Area2+Area3) ),tol)) 
 
 	return j 
 

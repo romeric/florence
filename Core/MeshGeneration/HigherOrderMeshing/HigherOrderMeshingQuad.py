@@ -1,5 +1,5 @@
 import numpy as np 
-from scipy.stats import itemfreq
+# from scipy.stats import itemfreq
 from time import time
 import multiprocessing as MP
 

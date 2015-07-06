@@ -1,4 +1,5 @@
 import numpy as np 
+from time import time
 
 # ROUTINE FOR APPLYING DIRICHLET BOUNDARY CONDITIONS
 def ApplyDirichletBoundaryConditions(stiffness,F,nmesh,MainData):
@@ -14,13 +15,12 @@ def ApplyDirichletBoundaryConditions(stiffness,F,nmesh,MainData):
 	#----------------------------------------------------------------------------------------------------#
 	if MainData.BoundaryData.Type == 'nurbs':
 		from Core.Supplementary.nurbs.nurbs import Nurbs
+		tCAD = time()
 		# GET THE NURBS CURVE FROM PROBLEMDATA
 		nurbs = MainData.BoundaryData().NURBSParameterisation()
 		# IDENTIFIY DIRICHLET BOUNDARY CONDITIONS BASED ON THE EXACT GEOMETRY
-		# from time import time 
-		# t1=time()
 		nodesDBC, Dirichlet = Nurbs(nmesh,nurbs,MainData.BoundaryData,MainData.C)
-		# print time()-t1
+		print 'Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds'
 
 		nOfDBCnodes = nodesDBC.shape[0]
 		for inode in xrange(nOfDBCnodes):

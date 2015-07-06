@@ -26,9 +26,6 @@ def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
 	else:
 		raise NotImplementedError('Boundary indentification with NURBS is only implemented for tris and tets')
 
-
-	# t1=time()
-	t1=0
 	ProjU  = np.zeros((mesh.edges.shape[0],ndim),dtype=np.float64)
 	ProjID = np.zeros((mesh.edges.shape[0],ndim),dtype=np.int64)
 	
@@ -36,38 +33,14 @@ def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
 		edge_coords = mesh.points[mesh.edges[kFace,:2],:] # THE LINEAR MESH EDGES
 
 		for iBC in xrange(1):
-			# print np.all(BoundaryData().bcs(edge_coords))
-			# if np.all(BoundaryData().bcs(edge_coords)) == False:
-				# print np.linalg.norm(mesh.points[mesh.edges[kFace],:],axis=1)
 			if np.all(BoundaryData().NURBSCondition(edge_coords)) == True:
-				# print np.linalg.norm(mesh.points[mesh.edges[kFace],:],axis=1)
 				listFaces.append(kFace)
 				dirichletFaces[indexFace,:2] = mesh.edges[kFace,:2]
-				# print mesh.edges[kFace,:2]
 				indexFace += 1
-				# for i in range(mesh.edges[kFace,:2].shape[0]):
 				for iVertex in range(ndim):
-					# _, uProjI, nurbsProjI = projectNodeNurbsBoundary(edge_coords[iVertex,:],nurbs,ndim) 
-					# t9=time()
-					uProjI, nurbsProjI = projectNodeNurbsBoundary(edge_coords[iVertex,:],nurbs,ndim) 
-					# t1 += (time()-t9)
-					# print nurbsProj
-					# print xProj
-					ProjU[kFace,iVertex] = uProjI
-					ProjID[kFace,iVertex] = nurbsProjI
+					ProjU[kFace,iVertex], ProjID[kFace,iVertex] = projectNodeNurbsBoundary(edge_coords[iVertex,:],nurbs,ndim)
 
-					# from OCC.gp import gp_Pnt
-					# from OCC.GeomAPI import GeomAPI_ProjectPointOnCurve
-					# pp=edge_coords[iVertex,:]
-
-					#---------------------------------------------------------------------#
-					#					CORRECT PARAMETER FOR PERIODIC NURBS
-					#---------------------------------------------------------------------#
-
-					# idNurbs =  identifyIdNurbs(nurbs,edge_coords) # DON'T NEED THIS FOR 2D 
-				idNurbs = ProjID[kFace,1]
-				dirichletFaces[indexFace,2] = idNurbs
-
+				dirichletFaces[indexFace,2] = ProjID[kFace,1]
 
 	dirichletFaces = dirichletFaces[:indexFace,:]
 	# print dirichletFaces.shape
@@ -75,11 +48,12 @@ def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
 	# print mesh.edges[listFaces,:]
 	# print np.linalg.norm(mesh.points[np.unique(mesh.edges[listFaces,:]),:],axis=1)
 	# print ProjID
+	# ProjU[2,1] =0.
+	# ProjU = np.sort(ProjU,axis=1)
 	print ProjU
 	# print listFaces
 
-	# print time()-t1
-	# print t1
+	
 
 	# FIX PERIODIC NURBS 2D
 	nOfNurbs = len(nurbs)
@@ -92,10 +66,12 @@ def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
 		u1 = ProjU[kFace,0]
 		u2 = ProjU[kFace,1]
 		idNurbs = ProjID[kFace,1]
+		# print uMin
 		uMin[idNurbs] = min([uMin[idNurbs],u1,u2])
 		uMax[idNurbs] = max([uMax[idNurbs],u1,u2])
 
-	# print uMin,uMax
+
+	print uMin,uMax
 	lengthTOL = 1e-10
 	for idNurbs in range(nOfNurbs):
 		aNurbs = nurbs[idNurbs]
@@ -121,9 +97,10 @@ def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
 		else:
 			correctMaxMin[idNurbs] = 1
 
-	indexFace = 0
+	# print Lmin, Lmax
+	import sys; sys.exit(0)
 
-	
+	indexFace = 0
 	for kFace in listFaces:
 		u1 = ProjU[kFace,0]
 		u2 = ProjU[kFace,1]
@@ -142,8 +119,8 @@ def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
 				ProjU[kFace,0] = nurbs[idNurbs]['U'][0][0]
 			elif u1<u2 and np.abs(u2 - uMax[idNurbs]) < 1e-10:
 				ProjU[kFace,1] = nurbs[idNurbs]['U'][0][-1]
-	print 
-	print ProjU
+	# print 
+	# print ProjU
 
 
 	# IDENTIFY HIGHER ORDRE DIRICHLET NODES

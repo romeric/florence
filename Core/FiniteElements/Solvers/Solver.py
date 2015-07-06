@@ -7,9 +7,9 @@ import numpy as np
 from Core.FiniteElements.Assembly import *
 from Core.FiniteElements.ApplyDirichletBoundaryConditions import *
 from Core.FiniteElements.PostProcess import *
-from Core.FiniteElements.StaticCondensationGlobal import *
+# from Core.FiniteElements.StaticCondensationGlobal import *
 from Core.FiniteElements.InitiateNonlinearAnalysisData import *
-from Core.FiniteElements.Solvers.DynamicSolver import *
+# from Core.FiniteElements.Solvers.DynamicSolver import *
 from Core.FiniteElements.Solvers.StaticSolver import *
 
 

@@ -1,16 +1,20 @@
-from time import time
-import numpy as np
-import numpy.linalg as la
+# from time import time
+# import numpy as np
+# import numpy.linalg as la
 import os, sys, imp
 # GET THE CURRENT DIRECTORY PARTH
 pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
+# from mpi4py import MPI
 
 # CORE IMPORTS
-from Core.FiniteElements.ComputeErrorNorms import ComputeErrorNorms
+# from Core.FiniteElements.ComputeErrorNorms import ComputeErrorNorms
+# from time import time
+# t_import=time()
+from Core.FiniteElements.PreProcess import PreProcess
 from Core.FiniteElements.PostProcess import *
 from Core.FiniteElements.Solvers.Solver import *
-from Core.FiniteElements.PreProcess import PreProcess
-
+# print 'TIME',time()-t_import
+# sys.exit(0)
 #######################################################################################################################################################
 # PROBLEM FILE DIRECTORIES
 # Pr = imp.load_source('Square_Piezo',pwd+'/Problems/FiniteElements/MultiPhysics_3D_Cube/ProblemData.py')
@@ -22,23 +26,25 @@ from Core.FiniteElements.PreProcess import PreProcess
 # 2D
 # Pr = imp.load_source('Nonlinear_2D',pwd+'/Problems/FiniteElements/Hollow_Arc_Tri/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Electromechanics/ProblemData.py')
-# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle/ProblemData.py')
-Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Nurbs/ProblemData.py')
+Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle/ProblemData.py')
+# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Nurbs/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/MechanicalComponent2D/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Sphere/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Naca_Isotropic/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/RAE2822/ProblemData.py')
 
 ########################################################################################################################################################
-
-
+# from line_profiler import profile
+# @profile
 def main(MainData):
+
 	# READ PROBLEM DATA FILE
 	Pr.ProblemData(MainData)
 	# print 'The Problem is',MainData.ndim,'Dimensional'
 	# PRE-PROCESS
-	print 'Pre-Processing the information. Getting paths, solution parameters, mesh info, interpolation bases etc...'
+	print 'Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation bases etc...'
 	mesh = PreProcess(MainData,Pr,pwd)
+
 
 	# print mesh.points
 	# print mesh.elements 
@@ -66,6 +72,7 @@ def main(MainData):
 	# PostProcess().StressRecovery(MainData,mesh,TotalDisp) 
 	PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp)
 	PostProcess.HighOrderPatch(MainData,mesh,TotalDisp)
+	import matplotlib.pyplot as plt
 	plt.show()
 	# # plt.savefig('/home/roman/Desktop/DumpReport/uniform_aniso_mesh_'+MainData.MaterialArgs.Type+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)
 

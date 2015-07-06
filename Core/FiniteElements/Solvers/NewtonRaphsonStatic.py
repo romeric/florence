@@ -55,7 +55,7 @@ def NewtonRaphson(Increment,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nme
 		Iter +=1 
 
 		if Iter==MainData.AssemblyParameters.MaxIter:
-			sys.exit("\n\nNewton Raphson did not converge! Maximum number of iterations reached.")
+			raise StopIteration("\n\nNewton Raphson did not converge! Maximum number of iterations reached.")
 
 		# if Iter==1:
 			# sys.exit("STOPPED")

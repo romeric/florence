@@ -24,5 +24,6 @@
 		{
 			"path": "."
 		}
-	]
+	],
+	"virtualenv": "/home/roman/VE/pip_version_python"
 }

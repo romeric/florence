@@ -1,8 +1,6 @@
-import numpy as np 
+# import numpy as np 
 import imp, os
-import matplotlib.pyplot as plt
 import numpy.linalg as la
-from scipy import io 
 
 
 pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
@@ -61,6 +59,10 @@ class PostProcess(object):
 
 
 	def StressRecovery(self,MainData,mesh,TotalDisp):
+
+		# KEEP THE IMPORTS LOCAL AS MATPLOTLIB IMPORT IS SLOW
+		import matplotlib.pyplot as plt
+		from scipy import io 
 
 		C = MainData.C
 		nvar = MainData.nvar
@@ -402,6 +404,7 @@ class PostProcess(object):
 
 	def MeshQualityMeasures(self,MainData,nmesh,TotalDisp):
 
+		import matplotlib.pyplot as plt
 
 		Domain = MainData.Domain
 		points = nmesh.points
@@ -493,6 +496,9 @@ class PostProcess(object):
 
 	@staticmethod	
 	def HighOrderPatch(MainData,mesh,TotalDisp):
+
+		import matplotlib.pyplot as plt
+		
 		plt.figure()
 		# print TotalDisp[:,0,-1]
 		vpoints = np.copy(mesh.points)

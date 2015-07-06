@@ -907,7 +907,7 @@ public:
         Standard_Real lengthTol = 1.0e-10;
         for (unsigned int iedge=0;iedge<this->listedges.size();++iedge)
         {
-            int current_dir_edge = this->listedges[iedge];
+       g     int current_dir_edge = this->listedges[iedge];
             int id_curve = this->dirichlet_edges(iedge,2); // CHECK the row-counter later
             // GET THE CURRENT EDGE
             Eigen::Matrix<double,1,2> current_edge_U = this->projection_U.row(current_dir_edge);

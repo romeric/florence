@@ -1,13 +1,6 @@
 from __future__ import with_statement
 import imp
 import numpy as np 
-from scipy.stats import itemfreq
-try:
-    imp.find_module('pandas')
-    import pandas as pd 
-    FOUND = True
-except ImportError:
-    FOUND = False
 
 from NPFROMFILE_Loop_Cython import NPFROMFILE_LOOP_Cython
 # from Core.Supplementary.Tensors import makezero
@@ -151,6 +144,13 @@ def ReadMesh_NPFROMFILE(filename,MeshType,C=0):
 
 
 def ReadMesh_PANDAS(filename,MeshType,C=0):
+	from scipy.stats import itemfreq
+	try:
+	    imp.find_module('pandas')
+	    import pandas as pd 
+	    FOUND = True
+	except ImportError:
+	    FOUND = False
 	# GENERIC SALOME MESH READER
 	# FILENAME SHOULD BE A STRING
 	class mesh(object):
@@ -216,6 +216,8 @@ def ReadMesh_PANDAS(filename,MeshType,C=0):
 
 
 def ReadMesh_NPLOADTXT(filename,MeshType,C=0):
+	from scipy.stats import itemfreq
+	
 	# GENERIC SALOME MESH READER
 	# FILENAME SHOULD BE A STRING
 	class mesh(object):

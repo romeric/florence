@@ -26,10 +26,10 @@ class MooneyRivlin(object):
 
 	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 
-		# Using Einstein summation (using numpy einsum call)
+		# USING EINSUM
 		d = np.einsum
-
-		# Get material constants (5 in this case)
+		
+		# GET MATERIAL CONSTANTS 
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
 
@@ -39,10 +39,6 @@ class MooneyRivlin(object):
 		I = StrainTensors['I']
 		J = StrainTensors['J'][gcounter]
 		b = StrainTensors['b'][gcounter]
-		# H_ = StrainTensors.H
-		# G = np.dot(H_.T,H_)
-		# g = np.dot(H_,H_.T)
-
 
 		H_Voigt = Voigt( 4.0*beta/J*d('ij,kl',b,b) - 2.0*beta/J*( d('ik,jl',b,b) + d('il,jk',b,b) ) +\
 			(lamb+4.0*beta+4.0*alpha/J)*d('ij,kl',I,I) + 2.0*(lamb*(J-1.0) -4.0*beta -2.0*alpha/J)*d('ij,kl',I,I) -\

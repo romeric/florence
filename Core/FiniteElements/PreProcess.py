@@ -1,23 +1,19 @@
 import os, imp, sys
 from time import time
 import numpy as np
-# import scipy as sp 
 
-# pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..'))
-
+# from Core.MeshGeneration.HigherOrderMeshing import *
 import Core.MaterialLibrary as MatLib 
-# from Core.MaterialLibrary import *
 from Core.FiniteElements.ElementalMatrices.KinematicMeasures import *
 from Core.MeshGeneration.ReadSalomeMesh import ReadMesh
-from Core.MeshGeneration.HigherOrderMeshing import *
 from Core.QuadratureRules import GaussQuadrature, QuadraturePointsWeightsTet, QuadraturePointsWeightsTri
 from Core.FiniteElements.GetBases import *
 import Core.Formulations.DisplacementElectricPotentialApproach as DEPB
 import Core.Formulations.DisplacementApproach as DB
 from Core import Mesh
 
-# import cProfile
 from Core.Supplementary.Timing.Timing import timing
+
 @timing
 def PreProcess(MainData,Pr,pwd):
 
@@ -25,7 +21,8 @@ def PreProcess(MainData,Pr,pwd):
 	############################################################################
 	try:
 		# CHECK IF MULTI-PROCESSING IS ACTIVATED
-		MainData.Parallel
+		MainData.__PARALLEL__
+		MainData.Parallel = MainData.__PARALLEL__
 	except NameError:
 		# IF NOT THEN ASSUME SINGLE PROCESS
 		MainData.Parallel = False
@@ -50,21 +47,23 @@ def PreProcess(MainData,Pr,pwd):
 			mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=7,ncirc=7) # isotropic
 			# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=20.,isotropic=False,nrad=7,ncirc=7)
 
-	mesh.points *=1000.
+	# mesh.CheckNodeNumberingTri()
+	
+	# mesh.points *=1000.
 	# print np.linalg.norm(mesh.points,axis=1)
 	# GENERATE pMESHES FOR HIGH C
 	############################################################################
+	# t_mesh = time()
 	if MainData.C>0:
 		mesh.GetHighOrderMesh(MainData.C,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
-
 
 	############################################################################
 	# index_sort_x = np.argsort(nmesh.points[:,0])
 	# sorted_repoints = nmesh.points[index_sort_x,:]
 	# print
 	# print sorted_repoints
-	# print nmesh.elements
-	# print nmesh.points 
+	# print mesh.elements
+	# print mesh.points 
 	# print np.linalg.norm(nmesh1.points-nmesh2.points)
 	# print np.linalg.norm(nmesh1.elements-nmesh2.elements)
 	# print np.linalg.norm(nmesh1.edges-nmesh2.edges)
@@ -84,9 +83,10 @@ def PreProcess(MainData,Pr,pwd):
 	# mesh.Readgmsh(filename='/home/roman/Dropbox/Python/Core/MeshGeneration/PythonMeshScripts/circflow.msh') # FIX THIS
 	# print np.max(mesh.points), np.min(mesh.points)
 
-	# ##############################################################################
 
-	# sys.exit("STOPPED")
+	# ##############################################################################
+	# np.savetxt('/home/roman/Dropbox/time_2.dat',np.array([time()-t_mesh, mesh.points.shape[0]]))
+	sys.exit("STOPPED")
 
 
 
@@ -358,13 +358,11 @@ def PreProcess(MainData,Pr,pwd):
 
 	# CHOOSING THE SOLVER
 	#############################################################################
-	# MainData.Solver = 'iterative'
-	# MainData.Solver = 'direct'
 	class solve(object):
 		"""docstring for solve"""
 		tol = 1e-07
 
-	if mesh.points.shape[0]*MainData.nvar > 300000:
+	if mesh.points.shape[0]*MainData.nvar > 200000:
 		solve.type = 'iterative'
 		print 'Large system of equations. Switching to iterative solver'
 	else:
