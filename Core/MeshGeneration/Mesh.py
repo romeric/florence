@@ -32,7 +32,8 @@ class Mesh(object):
 	4. Finding bounary edges and faces for tris and tets, in case it is not provided by the mesh generator
 	5. Reading Salome meshes in data (.dat/.txt/etc) format
 	6. Reading gmsh files .msh 
-	7. Writing meshes to unstructured vtk file format (.vtu) based on Luke Olson's script"""
+	7. Checking for node numbering order of elements and fixing it if desired
+	8. Writing meshes to unstructured vtk file format (.vtu) based on Luke Olson's script"""
 
 	def __init__(self):
 		super(Mesh, self).__init__()
@@ -190,7 +191,7 @@ class Mesh(object):
 
 	    	arr_1:			nx2 numpy array of boundary edges
 
-	    Note that this method is useful for finding arbitrary edges"""
+	    Note that this method could be useful for finding arbitrary edges not necessarily lying on the boundary"""
 
 	    # COMPUTE SLOPE OF THE GEOMETRY EDGE
 	    geo_edges = np.array(facets); geo_points = np.array(points)
@@ -230,9 +231,7 @@ class Mesh(object):
 	    return mesh_boundary_edges[1:,:]
 
 
-
-
-
+ 
 
 
 	def GetHighOrderMesh(self,C,**kwargs):
@@ -264,10 +263,6 @@ class Mesh(object):
 		self.element_type = nmesh.info 
 		
 		print 'Finished generating the high order mesh. Time taken', time()-t_mesh,'sec'
-
-
-
-
 
 
 
@@ -337,9 +332,6 @@ class Mesh(object):
 
 
 
-
-		
-
 	def Readgmsh(self,filename):
 		"""Read gmsh (.msh) file. TO DO"""
 		from gmsh import Mesh as msh
@@ -351,7 +343,85 @@ class Mesh(object):
 		print self.elements
 		# print mesh.Phys
 
-		
+
+
+	def CheckNodeNumberingTri(self,change_order_to='retain'):
+		"""Checks for node numbering order of the imported triangular mesh
+
+		input:
+
+			change_order_to:			[str] {'clockwise','anti-clockwise','retain'} changes the order to clockwise, 
+										anti-clockwise or retains the numbering order - default is 'retain' 
+
+		output: 
+
+			original_order:				[str] {'clockwise','anti-clockwise','retain'} returns the original numbering order"""
+
+
+		assert self.elements is not None
+		assert self.points is not None
+
+		# CHECK IF IT IS LINEAR MESH
+		assert self.elements.shape[1]==3
+
+		# C	##
+			# #
+			#  #
+			#   #
+			#    #
+			#     #
+		# A	######## B
+
+		original_order = ''
+
+		points = np.ones((self.points.shape[0],3),dtype=np.float64)
+		points[:,:2]=self.points
+
+		# FIND AREAS OF ALL THE ELEMENTS
+		area = 0.5*np.linalg.det(points[self.elements,:])
+		# CHECK NUMBERING
+		if (area > 0).all():
+			original_order = 'anti-clockwise'
+			if change_order_to == 'clockwise':
+				self.elements = np.fliplr(self.elements)
+		elif (area < 0).all():
+			original_order = 'clockwise'
+			if change_order_to == 'anti-clockwise':
+				self.elements = np.fliplr(self.elements)
+		else:
+			original_order = 'mixed'
+			if change_order_to == 'clockwise':
+				self.elements[area>0,:] = np.fliplr(self.elements[area>0,:])
+			elif change_order_to == 'anti-clockwise':
+				self.elements[area<0,:] = np.fliplr(self.elements[area<0,:])
+
+		# self.PlotMeshNumberingTri()
+
+		return original_order
+
+
+
+	def PlotMeshNumberingTri(self):
+		"""Plots element and node numbers on top of the triangular mesh"""
+
+		import matplotlib.pyplot as plt
+
+		fig = plt.figure()
+		plt.triplot(self.points[:,0],self.points[:,1], self.elements[:,:3])
+		plt.tricontourf(self.points[:,0], self.points[:,1], self.elements[:,:3], np.ones(self.points.shape[0]), 100,alpha=0.3)
+
+		for i in range(0,self.elements.shape[0]):
+			coord = self.points[self.elements[i,:],:]
+			x_avg = np.sum(coord[:,0])/self.elements.shape[1]
+			y_avg = np.sum(coord[:,1])/self.elements.shape[1]
+			plt.text(x_avg,y_avg,str(i),backgroundcolor='#F88379',ha='center')
+
+		for i in range(0,self.points.shape[0]):
+			plt.text(self.points[i,0],self.points[i,1],str(i),backgroundcolor='#0087BD',ha='center')
+
+		plt.axis('equal')
+		plt.show()
+
 
 
 	def WriteVTK(self,**kwargs):

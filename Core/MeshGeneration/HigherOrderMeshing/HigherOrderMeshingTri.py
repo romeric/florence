@@ -7,7 +7,7 @@ import Core.ParallelProcessing.parmap as parmap
 import GetInteriorCoordinates as Gett
 import Core.InterpolationFunctions.TwoDimensional.Tri.hpNodal as Tri 
 from Core.QuadratureRules.FeketePointsTri import *
-from Core.Supplementary.Where import *
+# from Core.Supplementary.Where import *
 from Core.Supplementary.Tensors import itemfreq_py
 from NodeLoopTriNPSP_Cython import NodeLoopTriNPSP_Cython 
 
@@ -25,8 +25,8 @@ def NodeLoopTriNPSP_PARMAP_1(i,sorted_repoints,Xs,invX,tol):
 	flags = None
 	if Xs[i,1]!=1:
 		# IF THE MULTIPLICITY IS MORE THAN 1, THEN FIND WHERE ALL IN THE SORTED ARRAY THIS X-VALUE THEY OCCURS
-		# dups =  np.where(i==invX)[0]
-		dups = np.asarray(whereEQ(invX.reshape(invX.shape[0],1),i)[0])
+		dups = np.where(i==invX)[0]
+		# dups = np.asarray(whereEQ(invX.reshape(invX.shape[0],1),i)[0])
 		# FIND THE Y-COORDINATE VALUES OF THESE MULTIPLICITIES 
 		Ys = sorted_repoints[dups,:][:,1]
 		if Ys.shape[0]==2:
@@ -37,8 +37,8 @@ def NodeLoopTriNPSP_PARMAP_1(i,sorted_repoints,Xs,invX,tol):
 
 
 def DuplicatesLoopTri(i,reelements,duplicates):
-	return whereEQ(reelements,duplicates[i,1])
-	# return np.where(reelements==duplicates[i,1])
+	# return whereEQ(reelements,duplicates[i,1])
+	return np.where(reelements==duplicates[i,1])
 
 
 def NodeLoopTriNPSP_PARMAP(sorted_repoints,Xs,invX,iSortX,duplicates,Decimals,tol,nCPU):
@@ -52,12 +52,6 @@ def NodeLoopTriNPSP_PARMAP(sorted_repoints,Xs,invX,iSortX,duplicates,Decimals,to
 		Ys = ParallelTuple4[i][1]
 		flags = ParallelTuple4[i][2]
 		if dups is not None:
-			# if Ys.shape[0]==2:
-			# 	if np.abs(Ys[1]-Ys[0]) < tol:
-			# 		# IF EQUAL MARK THIS POINT AS DUPLICATE
-			# 		duplicates[counter,:] = dups
-			# 		# INCREASE THE COUNTER
-			# 		counter += 1
 			if flags is not None:
 				# IF EQUAL MARK THIS POINT AS DUPLICATE
 				duplicates[counter,:] = dups
@@ -101,8 +95,8 @@ def NodeLoopTriNPSP(sorted_repoints,Xs,invX,iSortX,duplicates,Decimals,tol):
 		# IF THE MULITPLICITY OF A GIVEN X-VALUE IS 1 THEN INGONRE
 		if Xs[i,1]!=1:
 			# IF THE MULTIPLICITY IS MORE THAN 1, THEN FIND WHERE ALL IN THE SORTED ARRAY THIS X-VALUE OCCURS
-			# dups =  np.where(i==invX)[0]
-			dups = np.asarray(whereEQ(invX.reshape(invX.shape[0],1),i)[0])
+			dups =  np.where(i==invX)[0]
+			# dups = np.asarray(whereEQ(invX.reshape(invX.shape[0],1),i)[0])
 
 			# FIND THE Y-COORDINATE VALUES OF THESE MULTIPLICITIES 
 			Ys = sorted_repoints[dups,:][:,1]
@@ -246,7 +240,8 @@ def HighOrderMeshTri_UNSTABLE(C,mesh,Decimals=10,Parallel=False,nCPU=1):
 			x = ParallelTuple5[i][0]; y = ParallelTuple5[i][1];
 			reelements[x,y] = duplicates[i,0] 
 		else:
-			reelements[whereEQ(reelements,duplicates[i,1])] = duplicates[i,0] 
+			# reelements[whereEQ(reelements,duplicates[i,1])] = duplicates[i,0] 
+			reelements[reelements==duplicates[i,1]] = duplicates[i,0] 
 
 	tnodes = time()-tnodes
 
@@ -329,8 +324,8 @@ def ElementLoopTri(elem,elements,points,MeshType,eps,Neval):
 	return xycoord_higher
 
 def ElementLoopTri_2(i,reelements,remainingnodes):
-	# return np.where(reelements==remainingnodes[i])
-	return whereEQ(reelements,remainingnodes[i])
+	return np.where(reelements==remainingnodes[i])
+	# return whereEQ(reelements,remainingnodes[i])
 
 def NodeLoopTri(inode,reelements,repoints):
 	tol=1.0e-14
