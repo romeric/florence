@@ -88,11 +88,13 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 				tractionforce += t*detJ[counter]
 
 
-	# # CHECK FOR SYMMETRY OF STIFFNESS MATRIX
-	# for i in range(0,stiffness.shape[0]):
-	# 	for j in range(0,stiffness.shape[0]):
-	# 		if ~np.allclose(stiffness[i,j],stiffness[j,i]):
-	# 			print i,j
+	# CHECK FOR SYMMETRY OF STIFFNESS MATRIX
+	# if MainData.__NO_DEBUG__ is False:	
+	# 	for i in range(0,stiffness.shape[0]):
+	# 		for j in range(0,stiffness.shape[0]):
+	# 			if ~np.allclose(stiffness[i,j],stiffness[j,i]):
+	# 				print i,j
+	# 	print 'Elemental stiffness matrix is not symmetric'
 
 
 	return stiffness, tractionforce 
