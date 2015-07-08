@@ -384,6 +384,14 @@
 			}
 		},
 		{
+			"file": "Core/Supplementary/nurbs/nurbs.py",
+			"settings":
+			{
+				"buffer_size": 13478,
+				"line_ending": "Unix"
+			}
+		},
+		{
 			"file": "Core/MeshGeneration/Mesh.py",
 			"settings":
 			{
@@ -461,6 +469,15 @@
 			{
 				"buffer_size": 14684,
 				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "einsum.c",
+			"settings":
+			{
+				"buffer_size": 91969,
+				"line_ending": "Unix",
+				"name": "Skip to content"
 			}
 		},
 		{
@@ -653,6 +670,13 @@
 	],
 	"file_history":
 	[
+		"/home/roman/Dropbox/Python/Core/Supplementary/Tensors/makezero.pyx",
+		"/home/roman/Dropbox/Python/Core/Supplementary/Tensors/trace.pyx",
+		"/home/roman/Dropbox/Python/Core/Supplementary/Tensors/doublecontract.pyx",
+		"/home/roman/Desktop/EquallySpacedPointInversion/setup.py",
+		"/home/roman/Desktop/EquallySpacedPointInversion/CurveEquallySpacedPoints_c.pyx",
+		"/home/roman/Dropbox/Python/Core/MeshGeneration/__init__.py",
+		"/home/roman/Dropbox/Python/Core/ParallelProcessing/parmap.py",
 		"/home/roman/.config/sublime-text-3/Packages/User/Preferences.sublime-settings",
 		"/home/roman/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap",
 		"/home/roman/.config/sublime-text-3/Packages/User/Virtualenv.sublime-settings",
@@ -689,7 +713,6 @@
 		"/home/roman/Dropbox/Python/Core/MeshGeneration/HigherOrderMeshing.py",
 		"/usr/share/applications/freemat.desktop",
 		"/home/roman/Dropbox/Python/Core/MaterialLibrary/__init__.py",
-		"/home/roman/Dropbox/Python/Core/ParallelProcessing/parmap.py",
 		"/home/roman/pypy-2.6.0-linux64/lib_pypy/_ctypes/array.py",
 		"/home/roman/Dropbox/zHandies_Docs/Installing_Working_with_virtualenv",
 		"/home/roman/VE/check.py",
@@ -707,7 +730,6 @@
 		"/home/roman/Dropbox/Python/Core/Supplementary/Timing/Timing.py",
 		"/home/roman/Dropbox/Python/checktri.py",
 		"/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle/ProblemData.py",
-		"/home/roman/Dropbox/Python/Core/Supplementary/Tensors/trace.pyx",
 		"/home/roman/Dropbox/Python/Core/Supplementary/Where/README",
 		"/home/roman/Dropbox/Python/Core/JacobiPolynomials/JacobiPolynomials.py",
 		"/home/roman/Dropbox/zHandies_Docs/Installing_Numba_on_Ubuntu14.04",
@@ -811,7 +833,7 @@
 	"groups":
 	[
 		{
-			"selected": 5,
+			"selected": 28,
 			"sheets":
 			[
 				{
@@ -840,11 +862,40 @@
 						"translation.y": 288.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
 					"buffer": 1,
+					"file": "Core/Supplementary/nurbs/nurbs.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 13478,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4467,
+								4467
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1968.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 8,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
 					"file": "Core/MeshGeneration/Mesh.py",
 					"semi_transient": false,
 					"settings":
@@ -856,8 +907,8 @@
 						"selection":
 						[
 							[
-								0,
-								0
+								1370,
+								1370
 							]
 						],
 						"settings":
@@ -866,14 +917,14 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 240.0,
+						"translation.y": 5280.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 8,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
-					"buffer": 2,
+					"buffer": 3,
 					"file": "Main/FiniteElements/MainFEM.py",
 					"semi_transient": false,
 					"settings":
@@ -898,11 +949,11 @@
 						"translation.y": 545.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 15,
 					"type": "text"
 				},
 				{
-					"buffer": 3,
+					"buffer": 4,
 					"file": "Core/FiniteElements/PreProcess.py",
 					"semi_transient": false,
 					"settings":
@@ -914,8 +965,8 @@
 						"selection":
 						[
 							[
-								0,
-								0
+								1185,
+								1185
 							]
 						],
 						"settings":
@@ -924,14 +975,14 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 1173.0,
+						"translation.y": 336.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 10,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
-					"buffer": 4,
+					"buffer": 5,
 					"file": "Core/FiniteElements/Assembly.py",
 					"semi_transient": false,
 					"settings":
@@ -956,11 +1007,11 @@
 						"translation.y": 136.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 11,
+					"stack_index": 17,
 					"type": "text"
 				},
 				{
-					"buffer": 5,
+					"buffer": 6,
 					"file": "Problems/FiniteElements/MechanicalComponent2D/ProblemData.py",
 					"semi_transient": false,
 					"settings":
@@ -985,11 +1036,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 9,
 					"type": "text"
 				},
 				{
-					"buffer": 6,
+					"buffer": 7,
 					"file": "Problems/FiniteElements/RAE2822/ProblemData.py",
 					"semi_transient": false,
 					"settings":
@@ -1014,11 +1065,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 12,
 					"type": "text"
 				},
 				{
-					"buffer": 7,
+					"buffer": 8,
 					"file": "Problems/FiniteElements/Naca_Isotropic/ProblemData.py",
 					"semi_transient": false,
 					"settings":
@@ -1043,11 +1094,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 10,
 					"type": "text"
 				},
 				{
-					"buffer": 8,
+					"buffer": 9,
 					"file": "Problems/FiniteElements/Annular_Circle_Nurbs/ProblemData.py",
 					"semi_transient": false,
 					"settings":
@@ -1072,11 +1123,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 13,
 					"type": "text"
 				},
 				{
-					"buffer": 9,
+					"buffer": 10,
 					"file": "Problems/FiniteElements/Annular_Circle/ProblemData.py",
 					"semi_transient": false,
 					"settings":
@@ -1101,11 +1152,11 @@
 						"translation.y": 633.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 11,
 					"type": "text"
 				},
 				{
-					"buffer": 10,
+					"buffer": 11,
 					"file": "Core/FiniteElements/ElementalMatrices/ElementalStiffness.py",
 					"semi_transient": false,
 					"settings":
@@ -1117,8 +1168,8 @@
 						"selection":
 						[
 							[
-								0,
-								0
+								1401,
+								1401
 							]
 						],
 						"settings":
@@ -1126,15 +1177,46 @@
 							"syntax": "Packages/Python/Python.tmLanguage",
 							"translate_tabs_to_spaces": false
 						},
+						"translation.x": -0.0,
+						"translation.y": 2016.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 12,
+					"file": "einsum.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 91969,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								24112,
+								24112
+							]
+						],
+						"settings":
+						{
+							"auto_name": "Skip to content",
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 12,
+					"stack_index": 4,
 					"type": "text"
 				},
 				{
-					"buffer": 11,
+					"buffer": 13,
 					"file": "Core/MeshGeneration/GetInteriorCoordinates.py",
 					"semi_transient": false,
 					"settings":
@@ -1159,11 +1241,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 13,
+					"stack_index": 18,
 					"type": "text"
 				},
 				{
-					"buffer": 12,
+					"buffer": 14,
 					"file": "Core/FiniteElements/Solvers/NewtonRaphsonStatic.py",
 					"semi_transient": false,
 					"settings":
@@ -1188,11 +1270,11 @@
 						"translation.y": 181.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 14,
+					"stack_index": 19,
 					"type": "text"
 				},
 				{
-					"buffer": 13,
+					"buffer": 15,
 					"file": "Core/FiniteElements/PostProcess.py",
 					"semi_transient": false,
 					"settings":
@@ -1217,11 +1299,11 @@
 						"translation.y": 6144.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 15,
+					"stack_index": 20,
 					"type": "text"
 				},
 				{
-					"buffer": 14,
+					"buffer": 16,
 					"file": "Core/FiniteElements/Solvers/Solver.py",
 					"semi_transient": false,
 					"settings":
@@ -1246,11 +1328,11 @@
 						"translation.y": 497.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 16,
+					"stack_index": 21,
 					"type": "text"
 				},
 				{
-					"buffer": 15,
+					"buffer": 17,
 					"file": "Core/FiniteElements/Solvers/StaticSolver.py",
 					"semi_transient": false,
 					"settings":
@@ -1275,11 +1357,11 @@
 						"translation.y": 103.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 17,
+					"stack_index": 22,
 					"type": "text"
 				},
 				{
-					"buffer": 16,
+					"buffer": 18,
 					"file": "Core/FiniteElements/Solvers/LinearSolver.py",
 					"semi_transient": false,
 					"settings":
@@ -1304,11 +1386,11 @@
 						"translation.y": 91.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 18,
+					"stack_index": 23,
 					"type": "text"
 				},
 				{
-					"buffer": 17,
+					"buffer": 19,
 					"file": "Core/FiniteElements/InitiateNonlinearAnalysisData.py",
 					"semi_transient": false,
 					"settings":
@@ -1333,11 +1415,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 19,
+					"stack_index": 24,
 					"type": "text"
 				},
 				{
-					"buffer": 18,
+					"buffer": 20,
 					"file": "Core/FiniteElements/ElementalMatrices/KinematicMeasures.py",
 					"semi_transient": false,
 					"settings":
@@ -1349,8 +1431,8 @@
 						"selection":
 						[
 							[
-								0,
-								0
+								1500,
+								1500
 							]
 						],
 						"settings":
@@ -1359,14 +1441,14 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 91.0,
+						"translation.y": 475.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 20,
+					"stack_index": 6,
 					"type": "text"
 				},
 				{
-					"buffer": 19,
+					"buffer": 21,
 					"file": "Core/FiniteElements/ElementalMatrices/GetElementalMatrices.py",
 					"semi_transient": false,
 					"settings":
@@ -1391,11 +1473,11 @@
 						"translation.y": 76.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 14,
 					"type": "text"
 				},
 				{
-					"buffer": 20,
+					"buffer": 22,
 					"file": "Core/FiniteElements/ApplyDirichletBoundaryConditions.py",
 					"semi_transient": false,
 					"settings":
@@ -1420,11 +1502,11 @@
 						"translation.y": 1356.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 21,
+					"stack_index": 25,
 					"type": "text"
 				},
 				{
-					"buffer": 21,
+					"buffer": 23,
 					"file": "Core/MaterialLibrary/Incrementally_Linearised_NeoHookean.py",
 					"semi_transient": false,
 					"settings":
@@ -1449,11 +1531,11 @@
 						"translation.y": 452.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 22,
+					"stack_index": 26,
 					"type": "text"
 				},
 				{
-					"buffer": 22,
+					"buffer": 24,
 					"file": "Core/MaterialLibrary/LinearModel.py",
 					"semi_transient": false,
 					"settings":
@@ -1478,11 +1560,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 23,
+					"stack_index": 27,
 					"type": "text"
 				},
 				{
-					"buffer": 23,
+					"buffer": 25,
 					"file": "Problems/FiniteElements/Sphere/ProblemData.py",
 					"semi_transient": false,
 					"settings":
@@ -1507,11 +1589,11 @@
 						"translation.y": 768.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 9,
+					"stack_index": 16,
 					"type": "text"
 				},
 				{
-					"buffer": 24,
+					"buffer": 26,
 					"file": "Core/MaterialLibrary/AnisotropicMooneyRivlin_1.py",
 					"semi_transient": false,
 					"settings":
@@ -1536,11 +1618,11 @@
 						"translation.y": 52.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 24,
+					"stack_index": 28,
 					"type": "text"
 				},
 				{
-					"buffer": 25,
+					"buffer": 27,
 					"file": "Core/Supplementary/Tensors/Tensors.py",
 					"semi_transient": false,
 					"settings":
@@ -1561,15 +1643,15 @@
 							"syntax": "Packages/Python/Python.tmLanguage",
 							"translate_tabs_to_spaces": false
 						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.x": -0.0,
+						"translation.y": 1584.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 25,
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
-					"buffer": 26,
+					"buffer": 28,
 					"file": "nr.py",
 					"semi_transient": false,
 					"settings":
@@ -1581,8 +1663,8 @@
 						"selection":
 						[
 							[
-								0,
-								0
+								13621,
+								13621
 							]
 						],
 						"settings":
@@ -1591,10 +1673,10 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 7138.0,
+						"translation.y": 8640.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 26,
+					"stack_index": 0,
 					"type": "text"
 				}
 			]
@@ -1633,7 +1715,7 @@
 	"menu_visible": true,
 	"output.exec":
 	{
-		"height": 267.0
+		"height": 422.0
 	},
 	"output.find_results":
 	{
@@ -1656,6 +1738,22 @@
 		"last_filter": "",
 		"selected_items":
 		[
+			[
+				"",
+				"Core/FiniteElements/ElementalMatrices/ElementalStiffness.py"
+			],
+			[
+				"ki",
+				"Core/FiniteElements/ElementalMatrices/KinematicMeasures.py"
+			],
+			[
+				"ele",
+				"Core/FiniteElements/ElementalMatrices/ElementalStiffness.py"
+			],
+			[
+				"nurbs",
+				"Core/Supplementary/nurbs/nurbs.py"
+			],
 			[
 				"problems/finiteelements/m",
 				"Problems/FiniteElements/MechanicalComponent2D/ProblemData.py"
@@ -1707,14 +1805,6 @@
 			[
 				"reads",
 				"Core/MeshGeneration/ReadSalomeMesh.py"
-			],
-			[
-				"ki",
-				"Core/FiniteElements/ElementalMatrices/KinematicMeasures.py"
-			],
-			[
-				"",
-				"Core/MeshGeneration/PythonMeshScripts/bagel.msh"
 			]
 		],
 		"width": 0.0

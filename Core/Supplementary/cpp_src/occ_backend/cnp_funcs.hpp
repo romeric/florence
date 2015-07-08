@@ -9,11 +9,6 @@
 #include <occ_inc.hpp>
 #endif
 
-namespace Eigen {
-/* RowMajor matrix */
-typedef Eigen::Matrix<Standard_Real,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> MatrixXdr;
-}
-
 template<typename T> struct unique_container
 {
     std::vector<T> uniques;

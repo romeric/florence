@@ -4,7 +4,9 @@ CONFIG -= app_bundle
 CONFIG -= qt
 CONFIG += c++11
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    occ_frontend.cpp \
+    py_to_occ_frontend.cpp
 
 QMAKE_CXXFLAGS += -Wno-unused #-O2 -msse -msse2 -fomit-frame-pointer -fno-strict-aliasing
 
@@ -48,5 +50,6 @@ HEADERS += \
     aux_funcs.hpp \
     eigen_inc.hpp \
     occ_frontend.hpp \
-    std_inc.hpp
+    std_inc.hpp \
+    py_to_occ_frontend.hpp
 
