@@ -1,220 +1,19 @@
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <string>
-#include <sstream>
+
+
+//#define NDEBUG
+//#define EIGEN_NO_DEBUG
+
+#include <assert.h>
 #include <stdlib.h>
-#include <stdexcept>
-#include <cstdarg>
-#include <cmath>
-#include <ctime>
-//#include <tuple>
 
-#include <Eigen/Core>
-#include <Eigen/Dense>
-#include<Eigen/StdVector>
-
-
-//#include <Geom_TrimmedCurve.hxx>
-//#include <Geom2dAPI_ProjectPointOnCurve.hxx>
-//#include <Geom2d_BSplineCurve.hxx>
-//#include <Geom2d_TrimmedCurve.hxx>
-//#include <TColgp_Array1OfPnt2d.hxx>
-#include <IGESControl_Reader.hxx>
-#include <IGESControl_Writer.hxx>
-#include <XSControl_Reader.hxx>
-#include <Interface_Static.hxx>
-#include <TopoDS.hxx>
-#include <TopoDS_Shape.hxx>
-#include <TopoDS_Edge.hxx>
-#include <TopoDS_Face.hxx>
-#include <Geom_BSplineCurve.hxx>
-#include <GeomConvert.hxx>
-#include <BRepAdaptor_Curve.hxx>
-#include <TopExp_Explorer.hxx>
-#include <BRep_Tool.hxx>
-#include <BRepBuilderAPI_NurbsConvert.hxx>
-#include <gp_Pnt2d.hxx>
-#include <TColgp_Array1OfPnt.hxx>
-#include <TColStd_Array1OfReal.hxx>
-#include <TColStd_Array1OfInteger.hxx>
-#include <Geom_Circle.hxx>
-#include <gp.hxx>
-#include <gp_Circ.hxx>
-#include <Geom_Line.hxx>
-#include <GeomAPI_ProjectPointOnCurve.hxx>
-#include <GeomAPI_ProjectPointOnSurf.hxx>
-#include <GeomConvert.hxx>
-#include <ShapeAnalysis_Curve.hxx>
-#include <ShapeAnalysis_Surface.hxx>
-#include <GCPnts_AbscissaPoint.hxx>
+#include <occ_frontend.hpp>
 
 
 using namespace std;
-
-namespace Eigen {
-/* RowMajor matrix */
-typedef Eigen::Matrix<Standard_Real,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> MatrixXdr;
-}
-
-// auxilary functions
-// split strings
-inline std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) {
-        elems.push_back(item);
-    }
-    return elems;
-}
-inline std::vector<std::string> split(const std::string &s, char delim) {
-    std::vector<std::string> elems;
-    split(s, delim, elems);
-    return elems;
-}
-
-// print functions
-template<typename Derived> void print(Eigen::MatrixBase<Derived> &A)
-{
-    int rows = A.rows();
-    int cols = A.cols();
-    for(int i=0 ; i<rows;i++)
-    {
-        for (int j=0;j<cols; j++)
-        {
-            cout << A(i,j) << " ";
-        }
-        cout << endl;
-    }
-}
-template<typename Derived> void print(Derived A)
-{
-    std::cout << A << std::endl;
-}
-void print(const char* fmt...)
-{
-    va_list args;
-    va_start(args, fmt);
-
-    while (*fmt != '\0') {
-        if (*fmt == 'd') {
-            int i = va_arg(args, int);
-            std::cout << i << ", ";
-        } else if (*fmt == 'c') {
-            // note automatic conversion to integral type
-            int c = va_arg(args, int);
-            std::cout << static_cast<char>(c) << ", ";
-        } else if (*fmt == 'f') {
-            double d = va_arg(args, double);
-            std::cout << d << ", ";
-        }
-        ++fmt;
-    }
-
-    va_end(args);
-    std::cout << std::endl;
-}
-// end of print functions
-
-
-
-
-// a list of numpy inspired functions, kept inside a namespace just for convenience
-namespace cpp_numpy {
-
-inline Eigen::MatrixXi arange(int a, int b)
-{
-    return Eigen::VectorXi::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
-}
-inline Eigen::MatrixXi arange(int b=1)
-{
-    /* default arange starting from zero and ending at 1.
-     * b is optional and a is always zero
-     */
-    int a = 0;
-    return Eigen::VectorXi::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
-}
-inline Eigen::MatrixXi arange(int &a, int &b)
-{
-    return Eigen::VectorXi::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
-}
-inline Eigen::MatrixXi take(Eigen::MatrixXi& arr, Eigen::MatrixXi &arr_row, Eigen::MatrixXi &arr_col)
-{
-
-    // the template version does not work
-    //template<typename Derived>
-    //Eigen::MatrixBase<Derived> take(Eigen::MatrixBase<Derived>& arr, Eigen::MatrixXi &arr_row, Eigen::MatrixXi &arr_col)
-    //template<typename DerivedA, typename DerivedB>
-    //Eigen::MatrixBase<DerivedA> take(Eigen::MatrixBase<DerivedA>& arr, Eigen::MatrixBase<DerivedB> &arr_row, Eigen::MatrixBase<DerivedB> &arr_col)
-
-//    Eigen::MatrixBase<Derived> arr_reduced = Eigen::MatrixBase<Derived>::Zero(arr_row.rows(),arr_col.rows());
-//    Eigen::MatrixBase<DerivedA> arr_reduced = Eigen::MatrixBase<DerivedA>::Zero(arr_row.rows(),arr_col.rows());
-//    Eigen::MatrixBase<DerivedA> arr_reduced = Eigen::MatrixBase<DerivedA>::Random(arr_row.rows(),arr_col.rows());
-//    Eigen::MatrixBase<DerivedA> arr_reduced(arr_row.rows(),arr_col.rows());
-//    Eigen::MatrixXi arr_reduced(arr_row.rows(),arr_col.rows());
-    Eigen::MatrixXi arr_reduced = Eigen::MatrixXi::Zero(arr_row.rows(),arr_col.rows());
-
-    for (int i=0; i<arr_row.rows();i++)
-    {
-        for (int j=0; j<arr_col.rows();j++)
-        {
-            arr_reduced(i,j) = arr(arr_row(i),arr_col(j));
-        }
-    }
-
-    return arr_reduced;
-}
-inline Eigen::MatrixXd take(Eigen::MatrixXd& arr, Eigen::MatrixXi &arr_row, Eigen::MatrixXi &arr_col)
-{
-    Eigen::MatrixXd arr_reduced = Eigen::MatrixXd::Zero(arr_row.rows(),arr_col.rows());
-
-    for (int i=0; i<arr_row.rows();i++)
-    {
-        for (int j=0; j<arr_col.rows();j++)
-        {
-            arr_reduced(i,j) = arr(arr_row(i),arr_col(j));
-        }
-    }
-
-    return arr_reduced;
-}
-inline Standard_Real length(Handle_Geom_Curve &curve, Standard_Real scale=0.001)
-{
-    // GET LENGTH OF THE CURVE
-    GeomAdaptor_Curve current_curve(curve);
-    Standard_Real curve_length = GCPnts_AbscissaPoint::Length(current_curve);
-    // CHANGE THE SCALE TO 1. IF NEEDED
-    return scale*curve_length;
-}
-
-inline void sort_rows(Eigen::MatrixXdr & arr)
-{
-    /* Sorts a 2D array row by row*/
-
-    for (int i=0; i<arr.rows(); ++i)
-    {
-        std::sort(arr.row(i).data(),arr.row(i).data()+arr.row(i).size());
-    }
-}
-
-//inline void sort_rows(Eigen::MatrixXdr & arr)
-//{
-//    /* Sorts a 2D array row by row*/
-//    for (int i=0; i<arr.rows(); ++i)
-//    {
-//        if (arr(i,0)>arr(i,1))
-//        {
-//            Standard_Real temp = arr(i,1);
-//            arr(i,1) = arr(i,0);
-//            arr(i,0) = temp;
-
-//        }
-//    }
-//}
-}
-// end of namespace
-// a syntactic sugar equivalent to "import to numpy as np"
+// A syntactic sugar equivalent to "import to numpy as np"
 namespace cnp = cpp_numpy;
+
+
 
 // SUBCLASS GEOM_CURVE CLASS
 class PyGeom_Curve: Geom_Curve
@@ -222,8 +21,9 @@ class PyGeom_Curve: Geom_Curve
 public:
     // CONSTRUCTOR
     PyGeom_Curve(){}
+    ~PyGeom_Curve(){}
 
-    // CONVERT FROM Geom_Curve
+    //CONVERT FROM Geom_Curve
     inline Standard_Real length(Standard_Real scale=0.001)
     {
         // GET LENGTH OF THE CURVE
@@ -236,8 +36,11 @@ public:
 };
 // end of PyGeom_Curve
 
+
+
+
 // OCC_Backend CLASS
-class OCC_Backend
+class OCC_FrontEnd
 {
 private:
     Eigen::MatrixXi projection_ID;
@@ -247,11 +50,17 @@ private:
     Eigen::MatrixXi dirichlet_faces;
     std::vector<int> listedges;
     std::vector<int> listfaces;
+    Standard_Integer no_dir_edges;
+    Standard_Integer no_dir_faces;
+    Eigen::MatrixXi unique_edges;
+    Eigen::MatrixXi unique_faces;
+    Eigen::MatrixXd fekete_1d;
+    Eigen::MatrixXi boundary_points_order;
 public:
     // CONSTRUCTOR
-    OCC_Backend() {
+    OCC_FrontEnd() {
     }
-    OCC_Backend(std::string &element_type,int &ndim){
+    OCC_FrontEnd(std::string &element_type,int &ndim){
         this->mesh_element_type = element_type;
         this->ndim = ndim;
         this->condition = 0.;
@@ -261,10 +70,10 @@ public:
     // members of occ_ backend
     std::string mesh_element_type;
     int ndim;
-    Eigen::MatrixXi mesh_elements;
-    Eigen::MatrixXd mesh_points;
-    Eigen::MatrixXi mesh_edges;
-    Eigen::MatrixXi mesh_faces;
+    Eigen::Matrix<int,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> mesh_elements;
+    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> mesh_points;
+    Eigen::Matrix<int,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> mesh_edges;
+    Eigen::Matrix<int,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> mesh_faces;
     TopoDS_Shape imported_shape;
     Standard_Integer no_of_shapes;
     std::vector<Handle_Geom_Curve> geometry_edges;
@@ -273,6 +82,10 @@ public:
     std::vector<Handle_Geom_BSplineSurface> geometry_faces_bspline;
     Standard_Real condition;
     Standard_Real scale;
+    Eigen::MatrixXd displacements_BC;
+    Eigen::MatrixXi index_nodes;
+    std::string projection_methoed;
+
 
     // methods of occ_backend
     void Init(std::string &element_type,int &ndim)
@@ -481,50 +294,17 @@ public:
         this->mesh_faces = arr_read;
     }
 
-    template<typename Derived> Eigen::MatrixBase<Derived> Read_template(std::string &filename, char delim)
+    void ReadUniqueEdges(std::string &filename)
     {
-        /* should work if you move it to the header file */
-        std::vector<std::string> arr;
-        arr.clear();
-        std::string temp;
-
-        std::ifstream datafile;
-        datafile.open(filename.c_str());
-
-        if(!datafile)
-        {
-            cout << "Unable to read file" << endl;
-        }
-        while(datafile)
-        {
-            datafile >> temp;
-            temp += "";
-            arr.push_back(temp);
-        }
-
-        datafile.close();
-
-        std::vector<std::string> elems = split(arr[0], delim);
-
-        const int rows = arr.size();
-        const int cols = elems.size();
-
-        Eigen::MatrixBase<Derived> out_arr = Eigen::MatrixBase<Derived>::Zero(rows,cols);
-
-        for(int i=0 ; i<rows;i++)
-        {
-            elems = split(arr[0], delim);
-            for (unsigned int j=0;j<cols; j++)
-            {
-                out_arr(i,j) = std::atof(elems[j].c_str());
-            }
-        }
-
-        return out_arr;
-
+        this->unique_edges = this->Read(filename);
     }
 
-    Eigen::MatrixXd Read(std::string &filename, char delim)
+    void ReadUniqueFaces(std::string &filename)
+    {
+        this->unique_faces = this->Read(filename);
+    }
+
+    Eigen::MatrixXi Read(std::string &filename)
     {
         std::vector<std::string> arr;
         arr.clear();
@@ -546,20 +326,21 @@ public:
 
         datafile.close();
 
-        std::vector<std::string> elems = split(arr[0], delim);
-
         const int rows = arr.size();
-        const int cols = elems.size();
+        const int cols = 1;
 
-        Eigen::MatrixXd out_arr = Eigen::MatrixXd::Zero(rows,cols);
+        Eigen::MatrixXi out_arr = Eigen::MatrixXi::Zero(rows,cols);
+        //Eigen::MatrixBase<Derived> out_arr = Eigen::MatrixBase<Derived>::Zero(rows,cols);
 
         for(int i=0 ; i<rows;i++)
         {
-            elems = split(arr[0], delim);
-            for (signed int j=0;j<cols; j++)
-            {
-                out_arr(i,j) = std::atof(elems[j].c_str());
-            }
+            out_arr(i) = std::atof(arr[i].c_str());
+        }
+
+        // CHECK IF LAST LINE IS READ CORRECTLY
+        if ( out_arr(out_arr.rows()-2)==out_arr(out_arr.rows()-1) )
+        {
+            out_arr = out_arr.block(0,0,out_arr.rows()-1,1).eval();
         }
 
         return out_arr;
@@ -582,7 +363,9 @@ public:
         }
         if (flag_p == 1)
         {
+//            int d1=0; int d2 =  this->mesh_points.rows()-1;
             Eigen::MatrixXi a_rows = cnp::arange(0,this->mesh_points.rows()-1);
+//            Eigen::MatrixXi a_rows = cnp::arange(d1,d2);
             Eigen::MatrixXi a_cols = cnp::arange(0,this->mesh_points.cols());
             this->mesh_points = cnp::take(this->mesh_points,a_rows,a_cols);
         }
@@ -728,10 +511,12 @@ public:
         }
     }
 
-    void ProjectMeshOnCurve()
+    void ProjectMeshOnCurve(std::string &method)
     {
         //void ProjectMeshOnCurve(std::string &ProjectionAlgorithm ="Geom_Curve")
         /* Projects all the points on the mesh to the boundary of Geom_Curve */
+
+        this->projection_methoed = method;
 
         this->projection_ID = Eigen::MatrixXi::Zero(this->mesh_edges.rows(),this->ndim);
         this->projection_U = Eigen::MatrixXd::Zero(this->mesh_edges.rows(),this->ndim);
@@ -765,22 +550,35 @@ public:
                     gp_Pnt project_this_point = gp_Pnt(x,y,0.0);
                     for (unsigned int kedge=0; kedge<this->geometry_edges.size(); ++kedge)
                     {
-                        GeomAPI_ProjectPointOnCurve proj;
-                        proj.Init(project_this_point,this->geometry_edges[kedge]);
-                        distance = proj.LowerDistance();
+                        Standard_Real parameterU;
+                        if (this->projection_methoed.compare("Newton")==0)
+                        {
+                            gp_Pnt proj;
+                            Standard_Real prec = 0;
+
+                            ShapeAnalysis_Curve proj_curve;
+//                            distance = proj_curve.Project(this->geometry_edges[kedge],project_this_point,prec,proj,parameterU);
+                            GeomAdaptor_Curve curve_adapt(this->geometry_edges[kedge]);
+                            distance = proj_curve.NextProject((double)jedge,curve_adapt,project_this_point,prec,proj,parameterU);
+                        }
+                        else if (this->projection_methoed.compare("bisection")==0)
+                        {
+                            GeomAPI_ProjectPointOnCurve proj;
+                            proj.Init(project_this_point,this->geometry_edges[kedge]);
+                            distance = proj.LowerDistance();
+                            parameterU = proj.LowerDistanceParameter();
+                        }
 
                         // GET LENGTH OF THE CURVE
                         GeomAdaptor_Curve current_curve(this->geometry_edges[kedge]);
                         Standard_Real curve_length = GCPnts_AbscissaPoint::Length(current_curve);
-//                        if (iedge==2)
-//                            cout << 1000*proj.LowerDistanceParameter()/curve_length <<endl;
 
                         if (distance < min_distance)
                         {
                             // STORE ID OF NURBS
                             this->projection_ID(iedge,jedge) = kedge;
                             // STORE PROJECTION POINT PARAMETER ON THE CURVE (NORMALISED)
-                            this->projection_U(iedge,jedge) = this->scale*proj.LowerDistanceParameter()/curve_length;
+                            this->projection_U(iedge,jedge) = this->scale*parameterU/curve_length;
                             min_distance = distance;
                         }
 
@@ -791,12 +589,7 @@ public:
 //                        cout << sqrt(x*x+y*y) << " "<< this->condition <<  endl;
 //                        cout << "["<< proj.NearestPoint().X() << " " << proj.NearestPoint().Y() << "] [" << x << " "<< y <<"]" << endl;
 
-//                        gp_Pnt p2;
-//                        Standard_Real prec = 0;
-//                        Standard_Real param;
 
-//                        ShapeAnalysis_Curve dd;
-//                        Standard_Real distance2 = dd.Project(this->geometry_edges[kedge],project_this_point,prec,p2,param);
 
                         // COMPUTE THE PARAMETER OF A POINT (Ui) AT A GIVEN DISTANCE FROM U0
                         //GCPnts_AbscissaPoint calc( curve, 500.0, 0. );
@@ -901,8 +694,6 @@ public:
             Eigen::Vector3d dum_2; dum_2 << u_max(ID_nurbs), u1, u2;
             u_max(ID_nurbs) = dum_2.maxCoeff();
         }
-//        cout << u_min << " " <<  u_max << endl;
-        //cout << this->projection_U<< endl<<endl;
 
         Standard_Real lengthTol = 1.0e-10;
         for (unsigned int iedge=0;iedge<this->listedges.size();++iedge)
@@ -1097,7 +888,113 @@ public:
             this->geometry_faces_bspline.push_back( GeomConvert::SurfaceToBSplineSurface(this->geometry_faces[isurf]) );
         }
     }
+
+    void MeshPointInversionCurve()
+    {
+        this->no_dir_edges = this->listedges.size();
+        Standard_Real no_edge_nodes = this->mesh_edges.cols();
+        Eigen::MatrixXi arr_row = Eigen::Map<Eigen::VectorXi>(this->listedges.data(),this->listedges.size());
+        Eigen::MatrixXi arr_col = cnp::arange(0,no_edge_nodes);
+        Eigen::Matrix<int,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> nodes_dir = cnp::take(this->mesh_edges,arr_row,arr_col);
+        nodes_dir = cnp::ravel(nodes_dir);
+        this->index_nodes = cnp::arange(no_edge_nodes);
+        this->displacements_BC = Eigen::MatrixXd::Zero(this->no_dir_edges*no_edge_nodes,2);
+
+        this->FeketePoints1D();
+
+        for (int idir=0; idir< this->no_dir_edges; ++idir)
+        {
+            int id_curve = this->dirichlet_edges(idir,2);
+            Standard_Real u1 = this->projection_U(this->listedges[idir],0);
+            Standard_Real u2 = this->projection_U(this->listedges[idir],1);
+            Handle_Geom_Curve current_curve = this->geometry_edges[id_curve];
+            Eigen::MatrixXd fekete_1d_curve = FeketePointsOnCurve(current_curve,u1,u2);
+            Standard_Real length_current_curve = cnp::length(current_curve);
+
+            GeomAdaptor_Curve current_curve_adapt(current_curve);
+            for (int j=0; j<no_edge_nodes;++j)
+            {
+//                int i = no_edge_nodes - j-1;
+                Standard_Real tol =1e-08;
+//                GCPnts_AbscissaPoint inv = GCPnts_AbscissaPoint(tol,current_curve_adapt,fekete_1d_curve(j)*this->scale,0.);
+//                GCPnts_AbscissaPoint inv = GCPnts_AbscissaPoint(tol,current_curve_adapt,fekete_1d_curve(this->boundary_points_order(i))*this->scale,0.);
+//                cout << fekete_1d_curve(this->boundary_points_order(j)) << " " << fekete_1d_curve(j)  << endl;
+                GCPnts_AbscissaPoint inv = GCPnts_AbscissaPoint(tol,current_curve_adapt,fekete_1d_curve( this->boundary_points_order(j) )*this->scale,0.);
+                Standard_Real uEq = inv.Parameter();
+                gp_Pnt xEq;
+                current_curve_adapt.D0(uEq*length_current_curve,xEq);
+//                cout << uEq << endl;
+//                cout << xEq.X()/this->scale << " " << xEq.Y()/this->scale << endl;
+                Eigen::MatrixXd gp_pnt_old = (this->mesh_points.row(nodes_dir(this->index_nodes( j  ))).array()/this->scale);
+//                cout << "[" << gp_pnt_old(0) << "," << gp_pnt_old(1)  << "] ["<< xEq.X()/this->scale << " " << xEq.Y()/this->scale << "]" << endl;
+                //cout << gp_pnt_old(0) << "," << gp_pnt_old(1)  << endl;
+                this->displacements_BC(this->index_nodes(j),0) = (xEq.X()/this->scale - gp_pnt_old(0));
+                this->displacements_BC(this->index_nodes(j),1) = (xEq.Y()/this->scale - gp_pnt_old(1));
+//                cout << this->index_nodes(j) << endl;
+
+            }
+//            cout << this->index_nodes << endl<<endl;
+            this->index_nodes = ((this->index_nodes).array()+no_edge_nodes).eval().matrix();
+//            cout << " " << endl;
+        }
+
+        cout << displacements_BC << endl;
+        // FIND NORMALISED FEKETE POINTS ON THE CURVE [0,1] NOT [0,LENGTH_CURVE]
+
+
+    }
+
+    void MeshPointInversionSurface()
+    {
+
+    }
+
+    void FeketePoints1D()
+    {
+        const int p = this->mesh_edges.cols()-1;
+        Eigen::Matrix<double,3,1> dum;
+
+        if (this->ndim==2)
+        {
+            if (p==2)
+            {
+                dum << -1., 0., 1.;
+            }
+            else if (p==3)
+            {
+                dum << -1.,-0.447213595499957983,0.447213595499957928,1.;
+            }
+            else if (p==4)
+            {
+                dum <<-1.,-0.654653670707977198,0.,0.654653670707977198,1.;
+            }
+        }
+
+        this->fekete_1d = dum;
+        this->boundary_points_order = Eigen::MatrixXi::Zero(this->fekete_1d.rows(),this->fekete_1d.cols());
+//        this->boundary_points_order(1) = this->fekete_1d.rows()-1;
+        this->boundary_points_order(0) = this->fekete_1d.rows()-1;
+        this->boundary_points_order.block(2,0,fekete_1d.rows()-2,1) = cnp::arange(1,fekete_1d.rows()-1);
+        //exit (EXIT_FAILURE);
+    }
+
+    Eigen::MatrixXd FeketePointsOnCurve(Handle_Geom_Curve &curve,Standard_Real &u1,Standard_Real &u2)
+    {
+//        Standard_Real u1 = curve->FirstParameter();
+//        Standard_Real u2 = curve->LastParameter();
+//        this->FeketePoints1D();
+        Eigen::MatrixXd fekete_1d_curve;
+//        std::string type_d = "normalised";
+//        if (std::strcmp(type_p,type_d)==0 )
+//        {
+//            fekete_1d_curve = (((u2-u1)/2.)*this->fekete_1d).eval();
+//        }
+//        fekete_1d_curve = ((1.0/2.0)*((this->fekete_1d).array()+1.).matrix()).eval();
+        fekete_1d_curve = (u1 + (u2-u1)/2.0*((this->fekete_1d).array()+1.)).matrix();
+        return fekete_1d_curve;
+    }
 };
+
 
 
 
@@ -1110,17 +1007,19 @@ int main()
     string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle_Nurbs/elements_circle_p2.dat";
     string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle_Nurbs/points_circle_p2.dat";
     string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle_Nurbs/edges_circle_p2.dat";
+    string unique_edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle_Nurbs/unique_edges_circle_p2.dat";
 
 
     std::string element_type = "tri";
     int ndim = 2;
-    OCC_Backend MainDataCpp = OCC_Backend(element_type,ndim);
+    OCC_FrontEnd MainDataCpp = OCC_FrontEnd(element_type,ndim);
 
     // READ ELEMENT CONNECTIVITY, NODAL COORDINATES, EDGES & FACES
     MainDataCpp.SetElementType(element_type);
     MainDataCpp.ReadMeshConnectivityFile(elem_file,',');
     MainDataCpp.ReadMeshCoordinateFile(point_file,',');
     MainDataCpp.ReadMeshEdgesFile(edge_file,',');
+    MainDataCpp.ReadUniqueEdges(unique_edge_file);
     MainDataCpp.CheckMesh();
 
     Standard_Real condition = 2000.;
@@ -1148,24 +1047,31 @@ int main()
 //    cout << MainDataCpp.geometry_edges.size() << " " << MainDataCpp.geometry_faces.size() << endl;
 
     // PROJECT ALL BOUNDARY POINTS FROM THE MESH TO THE CURVE
-    MainDataCpp.ProjectMeshOnCurve();
+//    std::string method = "Newton";
+    std::string method = "bisection";
+    MainDataCpp.ProjectMeshOnCurve(method);
     // CONVERT CURVES TO BSPLINE CURVES
     MainDataCpp.CurvesToBsplineCurves();
     // FIX IAMGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
     //MainDataCpp.RepairDualProjectedParameters_Old();
     MainDataCpp.RepairDualProjectedParameters();
 
-
+    // PERFORM POINT INVERTION FOR THE INTERIOR POINTS
+    MainDataCpp.MeshPointInversionCurve();
 
 //    enum colors {a=10,b=20,c=30};
 //    colors cc = a;
 //    colors::a;
 //    cout << cc << endl;
 
+//    Geom_Curve xff;
+//    Handle_Geom_Curve yy = xff.getHandle();
+
+
 
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-    cout << endl << "Total time elapsed was: " << elapsed_secs << " seconds" << endl;
+    cout << endl << "Total time elapsed was " << elapsed_secs << " seconds" << endl;
 
     return 0;
 }

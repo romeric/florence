@@ -26,8 +26,8 @@ from Core.FiniteElements.Solvers.Solver import *
 # 2D
 # Pr = imp.load_source('Nonlinear_2D',pwd+'/Problems/FiniteElements/Hollow_Arc_Tri/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Electromechanics/ProblemData.py')
-Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle/ProblemData.py')
-# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Nurbs/ProblemData.py')
+# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle/ProblemData.py')
+Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Nurbs/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/MechanicalComponent2D/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Sphere/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Naca_Isotropic/ProblemData.py')
@@ -58,6 +58,7 @@ def main(MainData):
 	# np.savetxt('/home/roman/Desktop/elements_circle_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
 	# np.savetxt('/home/roman/Desktop/points_circle_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%6.4f',delimiter=',')
 	# np.savetxt('/home/roman/Desktop/edges_circle_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
+	np.savetxt('/home/roman/Desktop/unique_edges_circle_p'+str(MainData.C+1)+'.dat', np.unique(mesh.edges),fmt='%d',delimiter=',')
 
 	print 'Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*MainData.nvar
 	
@@ -70,10 +71,10 @@ def main(MainData):
 	# print 'Post-Processing the information...'
 	# POST-PROCESS
 	# PostProcess().StressRecovery(MainData,mesh,TotalDisp) 
-	PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp)
-	PostProcess.HighOrderPatch(MainData,mesh,TotalDisp)
-	import matplotlib.pyplot as plt
-	plt.show()
+	# PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp)
+	# PostProcess.HighOrderPatch(MainData,mesh,TotalDisp)
+	# import matplotlib.pyplot as plt
+	# plt.show()
 	# # plt.savefig('/home/roman/Desktop/DumpReport/uniform_aniso_mesh_'+MainData.MaterialArgs.Type+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)
 
 	# from Core.Supplementary.SuppPlots.MeshNumbering import PlotMeshNumbering
@@ -86,6 +87,12 @@ def main(MainData):
 
 	if MainData.__NO_DEBUG__ is False:
 		_DEBUG(MainData,mesh,TotalDisp)
+		mesh_node_order = mesh.CheckNodeNumberingTri()
+		if mesh_node_order == 'anti-clockwise':
+			print u'\u2713'.encode('utf8')+' : ','Imported mesh has',mesh_node_order,'node ordering'
+		else:
+			print u'\u2717'.encode('utf8')+' : ','Imported mesh has',mesh_node_order,'node ordering'
+
 		# CHECK GAUSS POINTS
 		# print np.sum(Domain.Bases,axis=0)
 		# print np.sum(Domain.gBasesx,axis=0)

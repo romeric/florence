@@ -7,7 +7,7 @@ import Core.ParallelProcessing.parmap as parmap
 import GetInteriorCoordinates as Gett
 import Core.InterpolationFunctions.TwoDimensional.Tri.hpNodal as Tri 
 from Core.QuadratureRules.FeketePointsTri import *
-# from Core.Supplementary.Where import *
+from Core.Supplementary.Where import *
 from Core.Supplementary.Tensors import itemfreq_py
 from NodeLoopTriNPSP_Cython import NodeLoopTriNPSP_Cython 
 
@@ -25,8 +25,10 @@ def NodeLoopTriNPSP_PARMAP_1(i,sorted_repoints,Xs,invX,tol):
 	flags = None
 	if Xs[i,1]!=1:
 		# IF THE MULTIPLICITY IS MORE THAN 1, THEN FIND WHERE ALL IN THE SORTED ARRAY THIS X-VALUE THEY OCCURS
-		dups = np.where(i==invX)[0]
+		# dups = np.where(i==invX)[0] 
 		# dups = np.asarray(whereEQ(invX.reshape(invX.shape[0],1),i)[0])
+		dups = np.arange(np.sum(np.int64(Xs[:i,1])),np.sum(np.int64(Xs[:i+1,1])))
+		# print np.linalg.norm(dups -  np.where(i==invX)[0])
 		# FIND THE Y-COORDINATE VALUES OF THESE MULTIPLICITIES 
 		Ys = sorted_repoints[dups,:][:,1]
 		if Ys.shape[0]==2:
@@ -37,8 +39,8 @@ def NodeLoopTriNPSP_PARMAP_1(i,sorted_repoints,Xs,invX,tol):
 
 
 def DuplicatesLoopTri(i,reelements,duplicates):
-	# return whereEQ(reelements,duplicates[i,1])
-	return np.where(reelements==duplicates[i,1])
+	return whereEQ(reelements,duplicates[i,1])
+	# return np.where(reelements==duplicates[i,1])
 
 
 def NodeLoopTriNPSP_PARMAP(sorted_repoints,Xs,invX,iSortX,duplicates,Decimals,tol,nCPU):
@@ -95,8 +97,10 @@ def NodeLoopTriNPSP(sorted_repoints,Xs,invX,iSortX,duplicates,Decimals,tol):
 		# IF THE MULITPLICITY OF A GIVEN X-VALUE IS 1 THEN INGONRE
 		if Xs[i,1]!=1:
 			# IF THE MULTIPLICITY IS MORE THAN 1, THEN FIND WHERE ALL IN THE SORTED ARRAY THIS X-VALUE OCCURS
-			dups =  np.where(i==invX)[0]
+			# dups = np.where(i==invX)[0] 
 			# dups = np.asarray(whereEQ(invX.reshape(invX.shape[0],1),i)[0])
+			dups = np.arange(np.sum(np.int64(Xs[:i,1])),np.sum(np.int64(Xs[:i+1,1])))
+			# print np.linalg.norm(dups -  np.where(i==invX)[0])
 
 			# FIND THE Y-COORDINATE VALUES OF THESE MULTIPLICITIES 
 			Ys = sorted_repoints[dups,:][:,1]
@@ -324,8 +328,8 @@ def ElementLoopTri(elem,elements,points,MeshType,eps,Neval):
 	return xycoord_higher
 
 def ElementLoopTri_2(i,reelements,remainingnodes):
-	return np.where(reelements==remainingnodes[i])
-	# return whereEQ(reelements,remainingnodes[i])
+	# return np.where(reelements==remainingnodes[i])
+	return whereEQ(reelements,remainingnodes[i])
 
 def NodeLoopTri(inode,reelements,repoints):
 	tol=1.0e-14

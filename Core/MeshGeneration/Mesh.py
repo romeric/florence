@@ -395,8 +395,6 @@ class Mesh(object):
 			elif change_order_to == 'anti-clockwise':
 				self.elements[area<0,:] = np.fliplr(self.elements[area<0,:])
 
-		# self.PlotMeshNumberingTri()
-
 		return original_order
 
 

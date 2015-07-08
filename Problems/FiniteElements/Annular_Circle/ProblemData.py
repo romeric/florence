@@ -16,18 +16,18 @@ def ProblemData(MainData):
 	MainData.Formulation = 1 	# Displacement-Potential based formulation
 	MainData.Analysis = 'Static'
 	# MainData.Analysis = 'Dynamic'
-	MainData.AnalysisType = 'Linear'
-	# MainData.AnalysisType = 'Nonlinear'
+	# MainData.AnalysisType = 'Linear'
+	MainData.AnalysisType = 'Nonlinear'
 
 	class MaterialArgs(object):
 		"""docstring for MaterialArgs"""
 		# Type = 'Steinmann'
 		# Type = 'LinearisedElectromechanics'
-		Type = 'LinearModel'
+		# Type = 'LinearModel'
 		# Type = 'Incrementally_Linearised_NeoHookean'
 		# Type = 'AnisotropicMooneyRivlin_1'
 		# Type = 'NearlyIncompressibleNeoHookean'
-		# Type = 'MooneyRivlin'
+		Type = 'MooneyRivlin'
 		
 		
 
@@ -79,11 +79,11 @@ def ProblemData(MainData):
 
 		# FileName = ProblemPath + '/Mesh_Annular_Circle_6135253.dat'
 		# FileName = ProblemPath + '/Mesh_Annular_Circle_382526.dat'
-		FileName = ProblemPath + '/Mesh_Annular_Circle_23365.dat'
+		# FileName = ProblemPath + '/Mesh_Annular_Circle_23365.dat'
 		# FileName = ProblemPath + '/Mesh_Annular_Circle_5716.dat'
 		# FileName = ProblemPath + '/Mesh_Annular_Circle_502.dat'
 		# FileName = ProblemPath + '/Mesh_Annular_Circle_312.dat'
-		# FileName = ProblemPath + '/Mesh_Annular_Circle_75.dat'
+		FileName = ProblemPath + '/Mesh_Annular_Circle_75.dat'
 
 
 		# MeshType = 'tet'

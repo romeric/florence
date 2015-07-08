@@ -47,7 +47,11 @@ def PreProcess(MainData,Pr,pwd):
 			mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=7,ncirc=7) # isotropic
 			# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=20.,isotropic=False,nrad=7,ncirc=7)
 
-	# mesh.CheckNodeNumberingTri()
+	# mesh_node_order = mesh.CheckNodeNumberingTri()
+	# if mesh_node_order == 'anti-clockwise':
+	# 	print u'\u2713'.encode('utf8')+' : ','Imported mesh has',mesh_node_order,'node ordering'
+	# else:
+	# 	print u'\u2717'.encode('utf8')+' : ','Imported mesh has',mesh_node_order,'node ordering'
 	
 	# mesh.points *=1000.
 	# print np.linalg.norm(mesh.points,axis=1)
@@ -83,10 +87,10 @@ def PreProcess(MainData,Pr,pwd):
 	# mesh.Readgmsh(filename='/home/roman/Dropbox/Python/Core/MeshGeneration/PythonMeshScripts/circflow.msh') # FIX THIS
 	# print np.max(mesh.points), np.min(mesh.points)
 
-
+	# print np.unique(mesh.edges)
 	# ##############################################################################
-	# np.savetxt('/home/roman/Dropbox/time_2.dat',np.array([time()-t_mesh, mesh.points.shape[0]]))
-	sys.exit("STOPPED")
+	# np.savetxt('/home/roman/Dropbox/time_3.dat',np.array([time()-t_mesh, mesh.points.shape[0]]))
+	# sys.exit("STOPPED")
 
 
 

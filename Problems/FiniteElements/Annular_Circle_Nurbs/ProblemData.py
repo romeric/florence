@@ -176,18 +176,18 @@ def ProblemData(MainData):
 		def NURBSParameterisation(self):
 			import Core.Supplementary.nurbs.cad as iga 
 
-			# circle = iga.circle(radius=1, center=None, angle=None)
-			# dum=np.array([4,3,2,1,0,7,6,5,8])
-			# control = circle.control[dum,:]; 	control[-1,0]=-1
-			# points = circle.points[dum,:]; 		points[-1,0] = -1
+			circle = iga.circle(radius=1, center=None, angle=None)
+			dum=np.array([4,3,2,1,0,7,6,5,8])
+			control = circle.control[dum,:]; 	control[-1,0]=-1
+			points = circle.points[dum,:]; 		points[-1,0] = -1
 
 
-			circle = iga.circle(radius=1000, center=None, angle=None)
+			# circle = iga.circle(radius=1000, center=None, angle=None)
 			# dum=np.array([4,3,2,1,0,7,6,5,8])
 			# control = circle.control[dum,:]; 	control[-1,0]=-1000.
 			# points = circle.points[dum,:]; 		points[-1,0] = -1000.
 
-			control = circle.control; points=circle.points
+			# control = circle.control; points=circle.points
 
 			return [({'U':circle.knots,'Pw':control,'start':0,'end':1,'points':points,'weights':circle.weights,'degree':2})]
 

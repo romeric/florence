@@ -6,7 +6,7 @@ CONFIG += c++11
 
 SOURCES += main.cpp
 
-QMAKE_CXXFLAGS += -Wno-unused #-O2
+QMAKE_CXXFLAGS += -Wno-unused #-O2 -msse -msse2 -fomit-frame-pointer -fno-strict-aliasing
 
 INCLUDEPATH +=/home/roman/Dropbox/Eigen
 #INCLUDEPATH +=/usr/local/inc
@@ -40,4 +40,13 @@ LIBS += -L/usr/local/lib -l:libTKIGES.so.9 -l:libTKXSBase.so.9 -l:libTKBRep.so.9
 
 include(deployment.pri)
 qtcAddDeployment()
+
+HEADERS += \
+    cnp_funcs.hpp \
+    occ_inc.hpp \
+    cnp_funcs.hpp \
+    aux_funcs.hpp \
+    eigen_inc.hpp \
+    occ_frontend.hpp \
+    std_inc.hpp
 
