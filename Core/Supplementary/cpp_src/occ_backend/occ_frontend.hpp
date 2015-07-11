@@ -1,11 +1,12 @@
 #ifndef OCC_FRONTEND_HPP
 #define OCC_FRONTEND_HPP
 
-#include <std_inc.hpp>
+
 #include <eigen_inc.hpp>
 #include <occ_inc.hpp>
 #include <cnp_funcs.hpp>
 #include <aux_funcs.hpp>
+#include <py_numpy_inc.hpp>
 
 
 
@@ -13,24 +14,24 @@
 class OCC_FrontEnd
 {
 private:
-    Eigen::MatrixXi projection_ID;
-    Eigen::MatrixXdr projection_U;
-    Eigen::MatrixXdr projection_V;
-    Eigen::MatrixXi dirichlet_edges;
-    Eigen::MatrixXi dirichlet_faces;
-    std::vector<int> listedges;
-    std::vector<int> listfaces;
+    Eigen::MatrixI projection_ID;
+    Eigen::MatrixR projection_U;
+    Eigen::MatrixR projection_V;
+    Eigen::MatrixI dirichlet_edges;
+    Eigen::MatrixI dirichlet_faces;
+    std::vector<Integer> listedges;
+    std::vector<Integer> listfaces;
     Standard_Integer no_dir_edges;
     Standard_Integer no_dir_faces;
-    Eigen::MatrixXi unique_edges;
-    Eigen::MatrixXi unique_faces;
+    Eigen::MatrixI unique_edges;
+    Eigen::MatrixI unique_faces;
     Eigen::MatrixXd fekete_1d;
-    Eigen::MatrixXi boundary_points_order;
+    Eigen::MatrixI boundary_points_order;
 public:
     // CONSTRUCTOR
     OCC_FrontEnd() {
     }
-    OCC_FrontEnd(std::string &element_type,int64_t &ndim){
+    OCC_FrontEnd(std::string &element_type,Integer &ndim){
         this->mesh_element_type = element_type;
         this->ndim = ndim;
         this->condition = 0.;
@@ -42,10 +43,10 @@ public:
     std::string mesh_element_type;
     int ndim;
 //    Eigen::Matrix<int,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> mesh_elements;
-    Eigen::MatrixXir mesh_elements;
-    Eigen::MatrixXdr mesh_points;
-    Eigen::MatrixXir mesh_edges;
-    Eigen::MatrixXir mesh_faces;
+    Eigen::MatrixI mesh_elements;
+    Eigen::MatrixR mesh_points;
+    Eigen::MatrixI mesh_edges;
+    Eigen::MatrixI mesh_faces;
     TopoDS_Shape imported_shape;
     Standard_Integer no_of_shapes;
     std::vector<Handle_Geom_Curve> geometry_edges;
@@ -54,20 +55,21 @@ public:
     std::vector<Handle_Geom_BSplineSurface> geometry_faces_bspline;
     Standard_Real condition;
     Standard_Real scale;
-    Eigen::MatrixXd displacements_BC;
-    Eigen::MatrixXi index_nodes;
-    std::string projection_methoed;
+    Eigen::MatrixR displacements_BC;
+    Eigen::MatrixI index_nodes;
+    Eigen::MatrixI nodes_dir;
+    std::string projection_method;
 
 
     // methods of occ_backend
-    void Init(std::string &element_type,int &ndim);
-    void SetCondition(Standard_Real &condition);
-    void SetDimension(int &ndim);
+    void Init(std::string &element_type,Integer &ndim);
+    void SetCondition(Real &condition);
+    void SetDimension(Integer &ndim);
     void SetElementType(std::string &type);
-    void SetElements(Eigen::MatrixXir &arr);
-    void SetPoints(Eigen::MatrixXdr &arr);
-    void SetEdges(Eigen::MatrixXir &arr);
-    void SetFaces(Eigen::MatrixXir &arr);
+    void SetElements(Eigen::MatrixI &arr);
+    void SetPoints(Eigen::MatrixR &arr);
+    void SetEdges(Eigen::MatrixI &arr);
+    void SetFaces(Eigen::MatrixI &arr);
     std::string GetElementType();
     void ReadMeshConnectivityFile(std::string &filename, char delim);
     void ReadMeshCoordinateFile(std::string &filename, char delim);
@@ -75,7 +77,9 @@ public:
     void ReadMeshFacesFile(std::string &filename, char delim);
     void ReadUniqueEdges(std::string &filename);
     void ReadUniqueFaces(std::string &filename);
-    Eigen::MatrixXi Read(std::string &filename);
+    void SetUniqueEdges(Eigen::MatrixI &un_arr);
+    void SetUniqueFaces(Eigen::MatrixI &un_arr);
+    Eigen::MatrixI Read(std::string &filename);
     void CheckMesh();
     void ReadIGES(std::string & filename);
     void GetGeomEdges();
@@ -89,7 +93,7 @@ public:
     void MeshPointInversionCurve();
     void MeshPointInversionSurface();
     void FeketePoints1D();
-    Eigen::MatrixXd FeketePointsOnCurve(Handle_Geom_Curve &curve,Standard_Real &u1,Standard_Real &u2);
+    Eigen::MatrixR FeketePointsOnCurve(Handle_Geom_Curve &curve,Standard_Real &u1,Standard_Real &u2);
 };
 
 

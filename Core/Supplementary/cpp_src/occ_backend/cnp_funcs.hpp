@@ -18,26 +18,29 @@ template<typename T> struct unique_container
 // a list of numpy inspired functions, kept inside a namespace just for convenience
 namespace cpp_numpy {
 
-inline Eigen::MatrixXi arange(int a, int b)
+inline Eigen::MatrixI arange(int a, int b)
 {
-    return Eigen::VectorXi::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
+//    return Eigen::VectorXi::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
+    return Eigen::Matrix<Integer,Eigen::Dynamic,1>::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
 }
-inline Eigen::MatrixXi arange(int b=1)
+inline Eigen::MatrixI arange(int b=1)
 {
     /* default arange starting from zero and ending at 1.
      * b is optional and a is always zero
      */
     int a = 0;
-    return Eigen::VectorXi::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
+//    return Eigen::VectorXi::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
+    return Eigen::Matrix<Integer,Eigen::Dynamic,1>::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
 }
-inline Eigen::MatrixXi arange(int &a, int &b)
+inline Eigen::MatrixI arange(int &a, int &b)
 {
-    return Eigen::VectorXi::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
+    //return Eigen::VectorXi::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
+    return Eigen::Matrix<Integer,Eigen::Dynamic,1>::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
 }
 
 template<typename T> Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic,Eigen::ColMajor> take(Eigen::Matrix<T,
                                                                                          Eigen::Dynamic,Eigen::Dynamic,Eigen::ColMajor> &arr,
-                                                                                         Eigen::MatrixXi &arr_row, Eigen::MatrixXi &arr_col)
+                                                                                         Eigen::MatrixI &arr_row, Eigen::MatrixI &arr_col)
 {
     Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic> arr_reduced(arr_row.rows(),arr_col.rows());
 
@@ -54,7 +57,7 @@ template<typename T> Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic,Eigen::ColMaj
 
 template<typename T> inline Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> take(Eigen::Matrix<T,
                                                                                                 Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> &arr,
-                                                                                                Eigen::MatrixXi &arr_row, Eigen::MatrixXi &arr_col)
+                                                                                                Eigen::MatrixI &arr_row, Eigen::MatrixI &arr_col)
 {
     Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic> arr_reduced(arr_row.rows(),arr_col.rows());
 
@@ -78,7 +81,7 @@ inline Standard_Real length(Handle_Geom_Curve &curve, Standard_Real scale=0.001)
     return scale*curve_length;
 }
 
-inline void sort_rows(Eigen::MatrixXdr & arr)
+inline void sort_rows(Eigen::MatrixR & arr)
 {
     /* Sorts a 2D array row by row*/
 

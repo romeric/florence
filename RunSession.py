@@ -14,6 +14,7 @@ import multiprocessing as MP
 # from mpi4py import MPI
 # from numba.decorators import jit
 # import cython
+import pdb
 
 # AVOID WRITING .pyc OR .pyo FILES
 sys.dont_write_bytecode
@@ -36,7 +37,7 @@ class MainData(object):
  	__PARALLEL__ = True 					# ACTIVATE MULTI-PROCESSING 
  	nCPU = MP.cpu_count()					# CPU COUNT FOR MULTI-PROCESSING
  	# __PARALLEL__ = False
- 	# nCPU = 8
+ 	nCPU = 8
  	__MEMORY__ = 'SHARED'					# SHARED OR DISTRIBUTED MEMORY FOR PARALLELISATION (FOR DISTRIBUTED MEMORY THE INTERPRETER NEEDS TO BE INVOKED WITH MPI) 
  	# __MEMORY__ = 'DISTRIBUTED'					
 
@@ -76,12 +77,13 @@ if MainData.session == 'FEM':
 		# main(MainData)	
 	# sp.__config__.show()
 	# sp.test()
+	# pdb.run('main(MainData)')
 	main(MainData)	
 	# tr.print_diff()
 	# print asizeof.asizeof(MainData)
 	print 'Time taken for the entire analysis was', time.time()-t_FEM, 'seconds \n'
 	# MEMORY USAGE INFORMATION
-	print 'Global sparse matrix needed', MainData.spmat, 'MB of memory with IJV indices requiring', MainData.ijv, 'MB'
+	# print 'Global sparse matrix needed', MainData.spmat, 'MB of memory with IJV indices requiring', MainData.ijv, 'MB'
 	# print sys.getsizeof(MainData)
 
 

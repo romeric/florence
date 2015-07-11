@@ -14,7 +14,7 @@
 //#include <tuple>
 
 typedef int64_t Integer;
-typedef double Double;
+typedef double Real;
 
 #endif // STD_INC_HPP
 

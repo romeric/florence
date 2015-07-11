@@ -147,48 +147,14 @@ def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
 			xEq[i,:] = pt[:2]
 
 		xOld = mesh.points[nodesDBC[indexNode],:]
-		# print xOld
-		# print xEq
-		# print xEq[np.append(np.array([0,-1]),np.arange(1,nOfFaceNodes-1)),:]
-		# print np.hstack((xOld,xEq[np.append(np.array([0,-1]),np.arange(1,nOfFaceNodes-1)),:]))
-		# print np.arange(1,nOfFaceNodes-1)
-		# print nodesDBC[indexNode]
 		displacementDBC[indexNode,:] = xEq[np.append(np.array([0,-1]),np.arange(1,nOfFaceNodes-1)),:] - xOld
-		# print indexNode
 		indexNode += nOfFaceNodes
 
 	posUnique = np.unique(nodesDBC,return_index=True)[1]
 
-	print displacementDBC
-	import sys; sys.exit(0)
 
 	return nodesDBC[posUnique], displacementDBC[posUnique,:]
 
-
-
-# def munique(arr):
-# 	posu=[]
-# 	un_arr = []
-# 	# arr = np.sort(arr)
-# 	# for counter in range(arr.shape[0]):
-# 	# 	current_item = arr[counter]
-# 	# 	for i in range(arr.shape[0]):
-# 	# 		if abs(current_item - arr[i]) < 1e-12:
-# 	# 			posu.append(i) 
-# 	# 			break
-# 	for counter in range(arr.shape[0]):
-# 		current_item = arr[counter]
-# 		arr2 = arr - current_item
-# 		for i in range(arr2.shape[0]):
-# 			if arr2[i]==0:
-# 				posu.append(i)
-# 				for j in range(0,i):
-# 					if arr[i]==current_item:
-# 						break
-# 				break
-# 			# print arr2[i]
-
-# 	return posu 
 
 
 def CurveEquallySpacedPoints(aNurbs, u1, u2, nPoints, lengthTOL=1e-06,BasesOrder=1):

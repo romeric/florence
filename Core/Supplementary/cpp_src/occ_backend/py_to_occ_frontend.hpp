@@ -3,7 +3,16 @@
 
 #include <occ_frontend.hpp>
 
-void py_cpp_interface(double* points_array, int points_rows, int points_cols, int *elements_array, int element_rows, int element_cols);
+struct to_python_structs
+{
+    std::vector<Real> displacement_BC_stl;
+    std::vector<Integer> nodes_dir_out_stl;
+    Integer nodes_dir_size;
+};
+
+to_python_structs py_cpp_interface(Real* points_array, Integer points_rows, Integer points_cols, Integer *elements_array, Integer element_rows, Integer element_cols,
+                       Integer *edges_array, Integer edges_rows, Integer edges_cols, Integer *faces_array, Integer faces_rows, Integer faces_cols,
+                       Real *c_displacement_BC, Integer *nodes_dir_out, Integer &nodes_dir_out_size);
 
 #endif // PY_TO_OCC_BACKEND_HPP
 

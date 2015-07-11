@@ -7,18 +7,18 @@ using namespace std;
 
 
 // OCC_FrontEnd class definitions
-void OCC_FrontEnd::Init(std::string &element_type,int &ndim)
+void OCC_FrontEnd::Init(std::string &element_type, Integer &ndim)
 {
     this->mesh_element_type = element_type;
     this->ndim = ndim;
 }
 
-void OCC_FrontEnd::SetCondition(Standard_Real &condition)
+void OCC_FrontEnd::SetCondition(Real &condition)
 {
     this->condition = condition;
 }
 
-void OCC_FrontEnd::SetDimension(int &ndim)
+void OCC_FrontEnd::SetDimension(Integer &ndim)
 {
     this->ndim=ndim;
 }
@@ -28,22 +28,22 @@ void OCC_FrontEnd::SetElementType(std::string &type)
     this->mesh_element_type = type;
 }
 
-void OCC_FrontEnd::SetElements(Eigen::MatrixXir &arr)
+void OCC_FrontEnd::SetElements(Eigen::MatrixI &arr)
 {
     this->mesh_elements=arr;
 }
 
-void OCC_FrontEnd::SetPoints(Eigen::MatrixXdr &arr)
+void OCC_FrontEnd::SetPoints(Eigen::MatrixR &arr)
 {
     this->mesh_points=arr;
 }
 
-void OCC_FrontEnd::SetEdges(Eigen::MatrixXir &arr)
+void OCC_FrontEnd::SetEdges(Eigen::MatrixI &arr)
 {
     this->mesh_edges=arr;
 }
 
-void OCC_FrontEnd::SetFaces(Eigen::MatrixXir &arr)
+void OCC_FrontEnd::SetFaces(Eigen::MatrixI &arr)
 {
     this->mesh_faces=arr;
 }
@@ -78,7 +78,7 @@ void OCC_FrontEnd::ReadMeshConnectivityFile(std::string &filename, char delim)
     std::vector<std::string> elems = split(arr[0], delim);
     const int rows = arr.size();
     const int cols = elems.size();
-    Eigen::MatrixXi arr_read = Eigen::MatrixXi::Zero(rows,cols);
+    Eigen::MatrixI arr_read = Eigen::MatrixI::Zero(rows,cols);
 
     for(int i=0 ; i<rows;i++)
     {
@@ -118,7 +118,7 @@ void OCC_FrontEnd::ReadMeshCoordinateFile(std::string &filename, char delim)
     std::vector<std::string> elems = split(arr[0], delim);
     const int rows = arr.size();
     const int cols = elems.size();
-    Eigen::MatrixXd arr_read = Eigen::MatrixXd::Zero(rows,cols);
+    Eigen::MatrixR arr_read = Eigen::MatrixR::Zero(rows,cols);
 
     for(int i=0 ; i<rows;i++)
     {
@@ -158,7 +158,7 @@ void OCC_FrontEnd::ReadMeshEdgesFile(std::string &filename, char delim)
     std::vector<std::string> elems = split(arr[0], delim);
     const int rows = arr.size();
     const int cols = elems.size();
-    Eigen::MatrixXi arr_read = Eigen::MatrixXi::Zero(rows,cols);
+    Eigen::MatrixI arr_read = Eigen::MatrixI::Zero(rows,cols);
 
     for(int i=0 ; i<rows;i++)
     {
@@ -198,7 +198,7 @@ void OCC_FrontEnd::ReadMeshFacesFile(std::string &filename, char delim)
     std::vector<std::string> elems = split(arr[0], delim);
     const int rows = arr.size();
     const int cols = elems.size();
-    Eigen::MatrixXi arr_read = Eigen::MatrixXi::Zero(rows,cols);
+    Eigen::MatrixI arr_read = Eigen::MatrixI::Zero(rows,cols);
 
     for(int i=0 ; i<rows;i++)
     {
@@ -223,7 +223,17 @@ void OCC_FrontEnd::ReadUniqueFaces(std::string &filename)
     this->unique_faces = this->Read(filename);
 }
 
-Eigen::MatrixXi OCC_FrontEnd::Read(std::string &filename)
+void OCC_FrontEnd::SetUniqueEdges(Eigen::MatrixI &un_arr)
+{
+    this->unique_edges = un_arr;
+}
+
+void OCC_FrontEnd::SetUniqueFaces(Eigen::MatrixI &un_arr)
+{
+    this->unique_faces = un_arr;
+}
+
+Eigen::MatrixI OCC_FrontEnd::Read(std::string &filename)
 {
     std::vector<std::string> arr;
     arr.clear();
@@ -248,7 +258,7 @@ Eigen::MatrixXi OCC_FrontEnd::Read(std::string &filename)
     const int rows = arr.size();
     const int cols = 1;
 
-    Eigen::MatrixXi out_arr = Eigen::MatrixXi::Zero(rows,cols);
+    Eigen::MatrixI out_arr = Eigen::MatrixI::Zero(rows,cols);
     //Eigen::MatrixBase<Derived> out_arr = Eigen::MatrixBase<Derived>::Zero(rows,cols);
 
     for(int i=0 ; i<rows;i++)
@@ -283,9 +293,9 @@ void OCC_FrontEnd::CheckMesh()
     if (flag_p == 1)
     {
 //            int d1=0; int d2 =  this->mesh_points.rows()-1;
-        Eigen::MatrixXi a_rows = cnp::arange(0,this->mesh_points.rows()-1);
-//            Eigen::MatrixXi a_rows = cnp::arange(d1,d2);
-        Eigen::MatrixXi a_cols = cnp::arange(0,this->mesh_points.cols());
+        Eigen::MatrixI a_rows = cnp::arange(0,this->mesh_points.rows()-1);
+//            Eigen::MatrixI a_rows = cnp::arange(d1,d2);
+        Eigen::MatrixI a_cols = cnp::arange(0,this->mesh_points.cols());
         this->mesh_points = cnp::take(this->mesh_points,a_rows,a_cols);
     }
 
@@ -301,8 +311,8 @@ void OCC_FrontEnd::CheckMesh()
     }
     if (flag_e == 1)
     {
-        Eigen::MatrixXi a_rows = cnp::arange(0,this->mesh_elements.rows()-1);
-        Eigen::MatrixXi a_cols = cnp::arange(0,this->mesh_elements.cols());
+        Eigen::MatrixI a_rows = cnp::arange(0,this->mesh_elements.rows()-1);
+        Eigen::MatrixI a_cols = cnp::arange(0,this->mesh_elements.cols());
         this->mesh_elements = cnp::take(this->mesh_elements,a_rows,a_cols);
     }
 
@@ -318,8 +328,8 @@ void OCC_FrontEnd::CheckMesh()
     }
     if (flag_ed == 1)
     {
-        Eigen::MatrixXi a_rows = cnp::arange(0,this->mesh_edges.rows()-1);
-        Eigen::MatrixXi a_cols = cnp::arange(0,this->mesh_edges.cols());
+        Eigen::MatrixI a_rows = cnp::arange(0,this->mesh_edges.rows()-1);
+        Eigen::MatrixI a_cols = cnp::arange(0,this->mesh_edges.cols());
         this->mesh_edges = cnp::take(this->mesh_edges,a_rows,a_cols);
     }
 
@@ -337,8 +347,8 @@ void OCC_FrontEnd::CheckMesh()
         }
         if (flag_f == 1)
         {
-            Eigen::MatrixXi a_rows = cnp::arange(0,this->mesh_faces.rows()-1);
-            Eigen::MatrixXi a_cols = cnp::arange(0,this->mesh_faces.cols());
+            Eigen::MatrixI a_rows = cnp::arange(0,this->mesh_faces.rows()-1);
+            Eigen::MatrixI a_cols = cnp::arange(0,this->mesh_faces.cols());
             this->mesh_faces = cnp::take(this->mesh_faces,a_rows,a_cols);
         }
     }
@@ -435,11 +445,11 @@ void OCC_FrontEnd::ProjectMeshOnCurve(std::string &method)
     //void ProjectMeshOnCurve(std::string &ProjectionAlgorithm ="Geom_Curve")
     /* Projects all the points on the mesh to the boundary of Geom_Curve */
 
-    this->projection_methoed = method;
+    this->projection_method = method;
 
-    this->projection_ID = Eigen::MatrixXi::Zero(this->mesh_edges.rows(),this->ndim);
-    this->projection_U = Eigen::MatrixXd::Zero(this->mesh_edges.rows(),this->ndim);
-    this->dirichlet_edges = Eigen::MatrixXi::Zero(this->mesh_edges.rows(),this->ndim+1);
+    this->projection_ID = Eigen::MatrixI::Zero(this->mesh_edges.rows(),this->ndim);
+    this->projection_U = Eigen::MatrixR::Zero(this->mesh_edges.rows(),this->ndim);
+    this->dirichlet_edges = Eigen::MatrixI::Zero(this->mesh_edges.rows(),this->ndim+1);
 
     this->listedges.clear();
     int index_edge = 0;
@@ -470,7 +480,7 @@ void OCC_FrontEnd::ProjectMeshOnCurve(std::string &method)
                 for (unsigned int kedge=0; kedge<this->geometry_edges.size(); ++kedge)
                 {
                     Standard_Real parameterU;
-                    if (this->projection_methoed.compare("Newton")==0)
+                    if (this->projection_method.compare("Newton")==0)
                     {
                         gp_Pnt proj;
                         Standard_Real prec = 0;
@@ -480,7 +490,7 @@ void OCC_FrontEnd::ProjectMeshOnCurve(std::string &method)
                         GeomAdaptor_Curve curve_adapt(this->geometry_edges[kedge]);
                         distance = proj_curve.NextProject((double)jedge,curve_adapt,project_this_point,prec,proj,parameterU);
                     }
-                    else if (this->projection_methoed.compare("bisection")==0)
+                    else if (this->projection_method.compare("bisection")==0)
                     {
                         GeomAPI_ProjectPointOnCurve proj;
                         proj.Init(project_this_point,this->geometry_edges[kedge]);
@@ -533,8 +543,8 @@ void OCC_FrontEnd::ProjectMeshOnCurve(std::string &method)
         }
     }
 
-    Eigen::MatrixXi arr_rows = cnp::arange(index_edge);
-    Eigen::MatrixXi arr_cols = cnp::arange(ndim+1);
+    Eigen::MatrixI arr_rows = cnp::arange(index_edge);
+    Eigen::MatrixI arr_cols = cnp::arange(ndim+1);
     //cout << this->dirichlet_edges << endl << endl;
     this->dirichlet_edges = cnp::take(this->dirichlet_edges,arr_rows,arr_cols);
     //cout << this->dirichlet_edges << endl;
@@ -547,10 +557,10 @@ void OCC_FrontEnd::ProjectMeshOnCurve(std::string &method)
 void OCC_FrontEnd::ProjectMeshOnSurface()
 {
     /* Projects all the points on the mesh to the boundary of Geom_Curve */
-    this->projection_ID = Eigen::MatrixXi::Zero(this->mesh_edges.rows(),this->ndim);
-    this->projection_U = Eigen::MatrixXd::Zero(this->mesh_edges.rows(),this->ndim);
-    this->projection_V = Eigen::MatrixXd::Zero(this->mesh_edges.rows(),this->ndim);
-    this->dirichlet_faces = Eigen::MatrixXi::Zero(this->mesh_edges.rows(),this->ndim+1);
+    this->projection_ID = Eigen::MatrixI::Zero(this->mesh_edges.rows(),this->ndim);
+    this->projection_U = Eigen::MatrixR::Zero(this->mesh_edges.rows(),this->ndim);
+    this->projection_V = Eigen::MatrixR::Zero(this->mesh_edges.rows(),this->ndim);
+    this->dirichlet_faces = Eigen::MatrixI::Zero(this->mesh_edges.rows(),this->ndim+1);
     this->listfaces.clear();
     int index_face = 0;
 
@@ -597,8 +607,8 @@ void OCC_FrontEnd::RepairDualProjectedParameters()
 {
     // GET MIN AND MAX PARAMETERS OF EACH CURVE
     Standard_Integer no_of_curves = this->geometry_edges.size();
-    Eigen::MatrixXd u_min = Eigen::MatrixXd::Zero(no_of_curves,1);
-    Eigen::MatrixXd u_max = Eigen::MatrixXd::Zero(no_of_curves,1);
+    Eigen::MatrixR u_min = Eigen::MatrixR::Zero(no_of_curves,1);
+    Eigen::MatrixR u_max = Eigen::MatrixR::Zero(no_of_curves,1);
 
     u_min = (u_min.array() + 1.0e10).matrix();
     u_max = (u_max.array() - 1.0e10).matrix();
@@ -672,10 +682,10 @@ void OCC_FrontEnd::RepairDualProjectedParameters_Old()
 {
     //cout << this->projection_U << endl;
     int no_of_curves = this->geometry_edges.size();
-    Eigen::MatrixXd u_min = Eigen::MatrixXd::Zero(no_of_curves,1); //u_min += 1.0e10;
-    Eigen::MatrixXd u_max = Eigen::MatrixXd::Zero(no_of_curves,1); //u_max += -1.0e10;
-    Eigen::MatrixXd L_min = Eigen::MatrixXd::Zero(no_of_curves,1);
-    Eigen::MatrixXd L_max = Eigen::MatrixXd::Zero(no_of_curves,1);
+    Eigen::MatrixR u_min = Eigen::MatrixR::Zero(no_of_curves,1); //u_min += 1.0e10;
+    Eigen::MatrixR u_max = Eigen::MatrixR::Zero(no_of_curves,1); //u_max += -1.0e10;
+    Eigen::MatrixR L_min = Eigen::MatrixR::Zero(no_of_curves,1);
+    Eigen::MatrixR L_max = Eigen::MatrixR::Zero(no_of_curves,1);
 
     u_min = (u_min.array() + 1.0e10).matrix();
     u_max = (u_max.array() - 1.0e10).matrix();
@@ -732,7 +742,7 @@ void OCC_FrontEnd::RepairDualProjectedParameters_Old()
     cout << L_min << " " << L_max << endl;
 
 
-    Eigen::MatrixXd correctMaxMin = -Eigen::MatrixXd::Ones(this->geometry_edges.size(),1);
+    Eigen::MatrixR correctMaxMin = -Eigen::MatrixR::Ones(this->geometry_edges.size(),1);
     for (unsigned icurve=0; icurve<this->geometry_edges.size(); ++icurve)
     {
         if (L_min(icurve) < L_max(icurve))
@@ -812,22 +822,22 @@ void OCC_FrontEnd::MeshPointInversionCurve()
 {
     this->no_dir_edges = this->listedges.size();
     Standard_Real no_edge_nodes = this->mesh_edges.cols();
-    Eigen::MatrixXi arr_row = Eigen::Map<Eigen::VectorXi>(this->listedges.data(),this->listedges.size());
-    Eigen::MatrixXi arr_col = cnp::arange(0,no_edge_nodes);
-    Eigen::Matrix<int,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> nodes_dir = cnp::take(this->mesh_edges,arr_row,arr_col);
-    nodes_dir = cnp::ravel(nodes_dir);
+    Eigen::MatrixI arr_row = Eigen::Map<Eigen::Matrix<Integer,Eigen::Dynamic,1> >(this->listedges.data(),this->listedges.size());
+    Eigen::MatrixI arr_col = cnp::arange(0,no_edge_nodes);
+    this->nodes_dir = cnp::take(this->mesh_edges,arr_row,arr_col);
+    this->nodes_dir = cnp::ravel(this->nodes_dir);
     this->index_nodes = cnp::arange(no_edge_nodes);
-    this->displacements_BC = Eigen::MatrixXd::Zero(this->no_dir_edges*no_edge_nodes,2);
+    this->displacements_BC = Eigen::MatrixR::Zero(this->no_dir_edges*no_edge_nodes,2);
 
     this->FeketePoints1D();
 
-    for (int idir=0; idir< this->no_dir_edges; ++idir)
+    for (Integer idir=0; idir< this->no_dir_edges; ++idir)
     {
         int id_curve = this->dirichlet_edges(idir,2);
         Standard_Real u1 = this->projection_U(this->listedges[idir],0);
         Standard_Real u2 = this->projection_U(this->listedges[idir],1);
         Handle_Geom_Curve current_curve = this->geometry_edges[id_curve];
-        Eigen::MatrixXd fekete_1d_curve = FeketePointsOnCurve(current_curve,u1,u2);
+        Eigen::MatrixR fekete_1d_curve = FeketePointsOnCurve(current_curve,u1,u2);
         Standard_Real length_current_curve = cnp::length(current_curve);
 
         GeomAdaptor_Curve current_curve_adapt(current_curve);
@@ -838,13 +848,13 @@ void OCC_FrontEnd::MeshPointInversionCurve()
 //                GCPnts_AbscissaPoint inv = GCPnts_AbscissaPoint(tol,current_curve_adapt,fekete_1d_curve(j)*this->scale,0.);
 //                GCPnts_AbscissaPoint inv = GCPnts_AbscissaPoint(tol,current_curve_adapt,fekete_1d_curve(this->boundary_points_order(i))*this->scale,0.);
 //                cout << fekete_1d_curve(this->boundary_points_order(j)) << " " << fekete_1d_curve(j)  << endl;
-            GCPnts_AbscissaPoint inv = GCPnts_AbscissaPoint(tol,current_curve_adapt,fekete_1d_curve( this->boundary_points_order(j) )*this->scale,0.);
+            GCPnts_AbscissaPoint inv = GCPnts_AbscissaPoint(tol,current_curve_adapt,fekete_1d_curve(this->boundary_points_order(j))*this->scale,0.);
             Standard_Real uEq = inv.Parameter();
             gp_Pnt xEq;
             current_curve_adapt.D0(uEq*length_current_curve,xEq);
 //                cout << uEq << endl;
 //                cout << xEq.X()/this->scale << " " << xEq.Y()/this->scale << endl;
-            Eigen::MatrixXd gp_pnt_old = (this->mesh_points.row(nodes_dir(this->index_nodes( j  ))).array()/this->scale);
+            Eigen::MatrixR gp_pnt_old = (this->mesh_points.row(this->nodes_dir(this->index_nodes( j ))).array()/this->scale);
 //                cout << "[" << gp_pnt_old(0) << "," << gp_pnt_old(1)  << "] ["<< xEq.X()/this->scale << " " << xEq.Y()/this->scale << "]" << endl;
             //cout << gp_pnt_old(0) << "," << gp_pnt_old(1)  << endl;
             this->displacements_BC(this->index_nodes(j),0) = (xEq.X()/this->scale - gp_pnt_old(0));
@@ -857,7 +867,7 @@ void OCC_FrontEnd::MeshPointInversionCurve()
 //            cout << " " << endl;
     }
 
-    cout << displacements_BC << endl;
+//    cout << displacements_BC << endl;fali
     // FIND NORMALISED FEKETE POINTS ON THE CURVE [0,1] NOT [0,LENGTH_CURVE]
 
 
@@ -871,7 +881,7 @@ void OCC_FrontEnd::MeshPointInversionSurface()
 void OCC_FrontEnd::FeketePoints1D()
 {
     const int p = this->mesh_edges.cols()-1;
-    Eigen::Matrix<double,3,1> dum;
+    Eigen::Matrix<Real,3,1> dum;
 
     if (this->ndim==2)
     {
@@ -890,19 +900,19 @@ void OCC_FrontEnd::FeketePoints1D()
     }
 
     this->fekete_1d = dum;
-    this->boundary_points_order = Eigen::MatrixXi::Zero(this->fekete_1d.rows(),this->fekete_1d.cols());
+    this->boundary_points_order = Eigen::MatrixI::Zero(this->fekete_1d.rows(),this->fekete_1d.cols());
 //        this->boundary_points_order(1) = this->fekete_1d.rows()-1;
     this->boundary_points_order(0) = this->fekete_1d.rows()-1;
     this->boundary_points_order.block(2,0,fekete_1d.rows()-2,1) = cnp::arange(1,fekete_1d.rows()-1);
     //exit (EXIT_FAILURE);
 }
 
-Eigen::MatrixXd OCC_FrontEnd::FeketePointsOnCurve(Handle_Geom_Curve &curve,Standard_Real &u1,Standard_Real &u2)
+Eigen::MatrixR OCC_FrontEnd::FeketePointsOnCurve(Handle_Geom_Curve &curve,Standard_Real &u1,Standard_Real &u2)
 {
 //        Standard_Real u1 = curve->FirstParameter();
 //        Standard_Real u2 = curve->LastParameter();
 
-    Eigen::MatrixXd fekete_1d_curve;
+    Eigen::MatrixR fekete_1d_curve;
 //        std::string type_d = "normalised";
 //        if (std::strcmp(type_p,type_d)==0 )
 //        {
