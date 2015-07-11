@@ -14,12 +14,25 @@ def ApplyDirichletBoundaryConditions(stiffness,F,nmesh,MainData):
 	#-------------------------------------- NURBS BASED SOLUTION ----------------------------------------#
 	#----------------------------------------------------------------------------------------------------#
 	if MainData.BoundaryData.Type == 'nurbs':
-		from Core.Supplementary.nurbs.nurbs import Nurbs
+		from_cad = True 
+		# from_cad = False
 		tCAD = time()
-		# GET THE NURBS CURVE FROM PROBLEMDATA
-		nurbs = MainData.BoundaryData().NURBSParameterisation()
-		# IDENTIFIY DIRICHLET BOUNDARY CONDITIONS BASED ON THE EXACT GEOMETRY
-		nodesDBC, Dirichlet = Nurbs(nmesh,nurbs,MainData.BoundaryData,MainData.C)
+		if from_cad == False:
+			from Core.Supplementary.nurbs.nurbs import Nurbs
+			# GET THE NURBS CURVE FROM PROBLEMDATA
+			nurbs = MainData.BoundaryData().NURBSParameterisation()
+			# IDENTIFIY DIRICHLET BOUNDARY CONDITIONS BASED ON THE EXACT GEOMETRY
+			nodesDBC, Dirichlet = Nurbs(nmesh,nurbs,MainData.BoundaryData,MainData.C)
+		else:
+			from Core.Supplementary.cpp_src.occ_backend.main_interface import main_interface
+			nodesDBC, Dirichlet = main_interface(nmesh.points,nmesh.elements,nmesh.edges,np.zeros((1,4),dtype=np.int64))
+			posUnique = np.unique(nodesDBC,return_index=True)[1]
+			nodesDBC, Dirichlet = nodesDBC[posUnique], Dirichlet[posUnique,:];
+			# print type(nodesDBC[0])
+			# print nodesDBC
+			# print nodesDBC.flags
+			# print nodesDBC[0]
+			# import sys; sys.exit(0);
 		print 'Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds'
 
 		nOfDBCnodes = nodesDBC.shape[0]
