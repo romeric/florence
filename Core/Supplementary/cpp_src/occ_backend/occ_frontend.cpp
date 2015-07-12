@@ -13,14 +13,19 @@ void OCC_FrontEnd::Init(std::string &element_type, Integer &ndim)
     this->ndim = ndim;
 }
 
+void OCC_FrontEnd::SetScale(Real &scale)
+{
+    this->scale = scale;
+}
+
 void OCC_FrontEnd::SetCondition(Real &condition)
 {
     this->condition = condition;
 }
 
-void OCC_FrontEnd::SetDimension(Integer &ndim)
+void OCC_FrontEnd::SetDimension(Integer &dim)
 {
-    this->ndim=ndim;
+    this->ndim=dim;
 }
 
 void OCC_FrontEnd::SetElementType(std::string &type)
@@ -46,6 +51,11 @@ void OCC_FrontEnd::SetEdges(Eigen::MatrixI &arr)
 void OCC_FrontEnd::SetFaces(Eigen::MatrixI &arr)
 {
     this->mesh_faces=arr;
+}
+
+void OCC_FrontEnd::ScaleMesh()
+{
+    this->mesh_points *=this->scale;
 }
 
 std::string OCC_FrontEnd::GetElementType()
@@ -144,7 +154,7 @@ void OCC_FrontEnd::ReadMeshEdgesFile(std::string &filename, char delim)
 
     if(!datafile)
     {
-        cout << "Unable to read file" << endl;
+        std::cout << "Unable to read file" << std::endl;
     }
     while(datafile)
     {
@@ -233,8 +243,38 @@ void OCC_FrontEnd::SetUniqueFaces(Eigen::MatrixI &un_arr)
     this->unique_faces = un_arr;
 }
 
+void OCC_FrontEnd::InferInterpolationPolynomialDegree()
+{
+    /* This is restricted to tris and tets*/
+    if (this->ndim==2)
+    {
+        const Integer p = 1;
+        for (int i=0; i<50;++i)
+        {
+            if ( (p+1)*(p+2)/2 == this->mesh_elements.cols())
+            {
+                this->degree = p;
+                break;
+            }
+        }
+    }
+    else if (this->ndim==3)
+    {
+        const Integer p = 1;
+        for (int i=0; i<50;++i)
+        {
+            if ( (p+1)*(p+2)*(p+3)/6 == this->mesh_elements.cols())
+            {
+                this->degree = p;
+                break;
+            }
+        }
+    }
+}
+
 Eigen::MatrixI OCC_FrontEnd::Read(std::string &filename)
 {
+    /*Reading 1D integer arrays */
     std::vector<std::string> arr;
     arr.clear();
     std::string temp;
@@ -270,6 +310,128 @@ Eigen::MatrixI OCC_FrontEnd::Read(std::string &filename)
     if ( out_arr(out_arr.rows()-2)==out_arr(out_arr.rows()-1) )
     {
         out_arr = out_arr.block(0,0,out_arr.rows()-1,1).eval();
+    }
+
+    return out_arr;
+}
+
+Eigen::MatrixI OCC_FrontEnd::ReadI(std::string &filename, char delim)
+{
+    /*Reading 2D integer row major arrays */
+    std::vector<std::string> arr;
+    arr.clear();
+    std::string temp;
+
+    std::ifstream datafile;
+    datafile.open(filename.c_str());
+
+    if(!datafile)
+    {
+        cout << "Unable to read file" << endl;
+    }
+    while(datafile)
+    {
+        datafile >> temp;
+        temp += "";
+        arr.push_back(temp);
+    }
+
+    datafile.close();
+
+
+    const int rows = arr.size();
+    const int cols = (split(arr[0], delim)).size();
+
+
+    Eigen::MatrixI out_arr = Eigen::MatrixI::Zero(rows,cols);
+
+    for(int i=0 ; i<rows;i++)
+    {
+        std::vector<std::string> elems;
+        elems = split(arr[i], delim);
+        for(int j=0 ; j<cols;j++)
+        {
+            out_arr(i,j) = std::atof(elems[j].c_str());
+        }
+    }
+
+    // CHECK IF LAST LINE IS READ CORRECTLY
+    bool duplicate_rows = Standard_False;
+    for (int j=0; j<cols; ++j)
+    {
+        if ( out_arr(out_arr.rows()-2,j)==out_arr(out_arr.rows()-1,j) )
+        {
+            duplicate_rows = Standard_True;
+        }
+        else
+        {
+            duplicate_rows = Standard_False;
+        }
+    }
+    if (duplicate_rows==Standard_True)
+    {
+        out_arr = out_arr.block(0,0,out_arr.rows()-1,out_arr.cols()).eval();
+    }
+
+    return out_arr;
+}
+
+Eigen::MatrixR OCC_FrontEnd::ReadR(std::string &filename, char delim)
+{
+    /*Reading 2D floating point row major arrays */
+    std::vector<std::string> arr;
+    arr.clear();
+    std::string temp;
+
+    std::ifstream datafile;
+    datafile.open(filename.c_str());
+
+    if(!datafile)
+    {
+        cout << "Unable to read file" << endl;
+    }
+    while(datafile)
+    {
+        datafile >> temp;
+        temp += "";
+        arr.push_back(temp);
+    }
+
+    datafile.close();
+
+
+    const int rows = arr.size();
+    const int cols = (split(arr[0], delim)).size();
+
+
+    Eigen::MatrixR out_arr = Eigen::MatrixR::Zero(rows,cols);
+
+    for(int i=0 ; i<rows;i++)
+    {
+        std::vector<std::string> elems;
+        elems = split(arr[i], delim);
+        for(int j=0 ; j<cols;j++)
+        {
+            out_arr(i,j) = std::atof(elems[j].c_str());
+        }
+    }
+
+    // CHECK IF LAST LINE IS READ CORRECTLY
+    bool duplicate_rows = Standard_False;
+    for (int j=0; j<cols; ++j)
+    {
+        if ( out_arr(out_arr.rows()-2,j)==out_arr(out_arr.rows()-1,j) )
+        {
+            duplicate_rows = Standard_True;
+        }
+        else
+        {
+            duplicate_rows = Standard_False;
+        }
+    }
+    if (duplicate_rows==Standard_True)
+    {
+        out_arr = out_arr.block(0,0,out_arr.rows()-1,out_arr.cols()).eval();
     }
 
     return out_arr;
@@ -366,7 +528,7 @@ void OCC_FrontEnd::CheckMesh()
 
 }
 
-void OCC_FrontEnd::ReadIGES(std::string & filename)
+void OCC_FrontEnd::ReadIGES(const char* filename)
 {
     /* IGES FILE READER BASED ON OCC BACKEND
      * THIS FUNCTION CAN BE EXPANDED FURTHER TO TAKE CURVE/SURFACE CONSISTENY INTO ACCOUNT
@@ -374,7 +536,8 @@ void OCC_FrontEnd::ReadIGES(std::string & filename)
      */
 
     IGESControl_Reader reader;
-    IFSelect_ReturnStatus stat  = reader.ReadFile(filename.c_str());
+    //IFSelect_ReturnStatus stat  = reader.ReadFile(filename.c_str());
+    reader.ReadFile(filename);
     // CHECK FOR IMPORT STATUS
     reader.PrintCheckLoad(Standard_True,IFSelect_GeneralInfo);
     reader.PrintCheckTransfer(Standard_True,IFSelect_ItemsByEntity);
@@ -383,7 +546,7 @@ void OCC_FrontEnd::ReadIGES(std::string & filename)
     Standard_Integer ic =  Interface_Static::IVal("read.iges.bspline.continuity");
     if (ic !=0)
     {
-        cout << "IGES file was not read as-is. The file was not read/transformed correctly";
+        std::cout << "IGES file was not read as-is. The file was not read/transformed correctly";
     }
 
     //Interface_Static::SetIVal("xstep.cascade.unit",0);
@@ -829,15 +992,13 @@ void OCC_FrontEnd::MeshPointInversionCurve()
     this->index_nodes = cnp::arange(no_edge_nodes);
     this->displacements_BC = Eigen::MatrixR::Zero(this->no_dir_edges*no_edge_nodes,2);
 
-    this->FeketePoints1D();
-
     for (Integer idir=0; idir< this->no_dir_edges; ++idir)
     {
         int id_curve = this->dirichlet_edges(idir,2);
         Standard_Real u1 = this->projection_U(this->listedges[idir],0);
         Standard_Real u2 = this->projection_U(this->listedges[idir],1);
         Handle_Geom_Curve current_curve = this->geometry_edges[id_curve];
-        Eigen::MatrixR fekete_1d_curve = FeketePointsOnCurve(current_curve,u1,u2);
+        Eigen::MatrixR fekete_on_curve = FeketePointsOnCurve(current_curve,u1,u2);
         Standard_Real length_current_curve = cnp::length(current_curve);
 
         GeomAdaptor_Curve current_curve_adapt(current_curve);
@@ -848,7 +1009,7 @@ void OCC_FrontEnd::MeshPointInversionCurve()
 //                GCPnts_AbscissaPoint inv = GCPnts_AbscissaPoint(tol,current_curve_adapt,fekete_1d_curve(j)*this->scale,0.);
 //                GCPnts_AbscissaPoint inv = GCPnts_AbscissaPoint(tol,current_curve_adapt,fekete_1d_curve(this->boundary_points_order(i))*this->scale,0.);
 //                cout << fekete_1d_curve(this->boundary_points_order(j)) << " " << fekete_1d_curve(j)  << endl;
-            GCPnts_AbscissaPoint inv = GCPnts_AbscissaPoint(tol,current_curve_adapt,fekete_1d_curve(this->boundary_points_order(j))*this->scale,0.);
+            GCPnts_AbscissaPoint inv = GCPnts_AbscissaPoint(tol,current_curve_adapt,fekete_on_curve(this->boundary_points_order(j))*this->scale,0.);
             Standard_Real uEq = inv.Parameter();
             gp_Pnt xEq;
             current_curve_adapt.D0(uEq*length_current_curve,xEq);
@@ -878,47 +1039,56 @@ void OCC_FrontEnd::MeshPointInversionSurface()
 
 }
 
-void OCC_FrontEnd::FeketePoints1D()
+void OCC_FrontEnd::SetFeketePoints(Eigen::MatrixR &boundary_fekete)
 {
-    const int p = this->mesh_edges.cols()-1;
-    Eigen::Matrix<Real,3,1> dum;
-
-    if (this->ndim==2)
-    {
-        if (p==2)
-        {
-            dum << -1., 0., 1.;
-        }
-        else if (p==3)
-        {
-            dum << -1.,-0.447213595499957983,0.447213595499957928,1.;
-        }
-        else if (p==4)
-        {
-            dum <<-1.,-0.654653670707977198,0.,0.654653670707977198,1.;
-        }
-    }
-
-    this->fekete_1d = dum;
-    this->boundary_points_order = Eigen::MatrixI::Zero(this->fekete_1d.rows(),this->fekete_1d.cols());
-//        this->boundary_points_order(1) = this->fekete_1d.rows()-1;
-    this->boundary_points_order(0) = this->fekete_1d.rows()-1;
-    this->boundary_points_order.block(2,0,fekete_1d.rows()-2,1) = cnp::arange(1,fekete_1d.rows()-1);
-    //exit (EXIT_FAILURE);
+    this->fekete = boundary_fekete;
 }
 
 Eigen::MatrixR OCC_FrontEnd::FeketePointsOnCurve(Handle_Geom_Curve &curve,Standard_Real &u1,Standard_Real &u2)
 {
-//        Standard_Real u1 = curve->FirstParameter();
-//        Standard_Real u2 = curve->LastParameter();
-
-    Eigen::MatrixR fekete_1d_curve;
+    Eigen::MatrixR fekete_on_curve;
 //        std::string type_d = "normalised";
 //        if (std::strcmp(type_p,type_d)==0 )
 //        {
 //            fekete_1d_curve = (((u2-u1)/2.)*this->fekete_1d).eval();
 //        }
 //        fekete_1d_curve = ((1.0/2.0)*((this->fekete_1d).array()+1.).matrix()).eval();
-    fekete_1d_curve = (u1 + (u2-u1)/2.0*((this->fekete_1d).array()+1.)).matrix();
-    return fekete_1d_curve;
+    fekete_on_curve = (u1 + (u2-u1)/2.0*((this->fekete).array()+1.)).matrix();
+    return fekete_on_curve;
 }
+
+void OCC_FrontEnd::GetBoundaryPointsOrder()
+{
+    /*The order of boundary (edge/face) connectivity. Needs the degree to be inferred a priori */
+    if (this->ndim ==2)
+    {
+        this->boundary_points_order = Eigen::MatrixI::Zero(this->fekete.rows(),this->fekete.cols());
+        this->boundary_points_order(0) = this->fekete.rows()-1;
+        this->boundary_points_order.block(2,0,fekete.rows()-2,1) = cnp::arange(1,fekete.rows()-1);
+    }
+    // CHECK THIS
+    else if (this->ndim==3)
+    {
+        assert (this->degree > 1 || this->degree <100);
+        Integer nsize = (this->degree+1)*(this->degree+2)/2;
+        this->boundary_points_order = Eigen::MatrixI::Zero(nsize,1);
+        if (this->degree==1)
+        {
+              this->boundary_points_order << 0,1,2;
+        }
+        else if (this->degree==2)
+        {
+            this->boundary_points_order << 0,3,1,5,2,4;
+        }
+        else if (this->degree==3)
+        {
+            this->boundary_points_order << 0,3,4,1,7,9,2,8,5;
+        }
+        else if (this->degree==4)
+        {
+            this->boundary_points_order << 0,3,4,5,1,9,12,14,2,13,10,6;
+        }
+    }
+}
+
+

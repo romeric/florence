@@ -13,9 +13,6 @@ QMAKE_CXXFLAGS += -Wno-unused #-O2 -msse -msse2 -fomit-frame-pointer -fno-strict
 INCLUDEPATH +=/home/roman/Dropbox/Eigen
 INCLUDEPATH +=/usr/local/include/oce/
 
-INCLUDEPATH +=/usr/include/python2.7
-LIBS += -L/usr/lib/python2.7/ -lpython2.7
-
 LIBS += -L/usr/local/lib -l:libTKIGES.so.9 -l:libTKXSBase.so.9 -l:libTKBRep.so.9 -l:libTKernel.so.9 -l:libTKTopAlgo.so.9 \
      -l:libTKGeomBase.so.9 -l:libTKMath.so.9 -l:libTKHLR.so.9 -l:libTKG2d.so.9 -l:libTKBool.so.9 -l:libTKG3d.so.9 -l:libTKOffset.so.9 \
      -l:libTKG2d.so.9 -l:libTKXMesh.so.9 -l:libTKGeomAlgo.so.9 -l:libTKShHealing.so.9 -l:libTKFeat.so.9 -l:libTKFillet.so.9 \
@@ -53,6 +50,5 @@ HEADERS += \
     eigen_inc.hpp \
     occ_frontend.hpp \
     std_inc.hpp \
-    py_to_occ_frontend.hpp \
-    py_numpy_inc.hpp
+    py_to_occ_frontend.hpp
 

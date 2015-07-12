@@ -10,9 +10,11 @@ struct to_python_structs
     Integer nodes_dir_size;
 };
 
-to_python_structs py_cpp_interface(Real* points_array, Integer points_rows, Integer points_cols, Integer *elements_array, Integer element_rows, Integer element_cols,
-                       Integer *edges_array, Integer edges_rows, Integer edges_cols, Integer *faces_array, Integer faces_rows, Integer faces_cols,
-                       Real *c_displacement_BC, Integer *nodes_dir_out, Integer &nodes_dir_out_size);
+to_python_structs PyCppInterface(const char *iges_filename, Real scale, Real* points_array, Integer points_rows, Integer points_cols,
+                                   Integer *elements_array, Integer element_rows, Integer element_cols,
+                                   Integer *edges_array, Integer edges_rows, Integer edges_cols,
+                                   Integer *faces_array, Integer faces_rows, Integer faces_cols, Real condition,
+                                 Real *boundary_fekete, Integer fekete_rows, Integer fekete_cols);
 
 #endif // PY_TO_OCC_BACKEND_HPP
 

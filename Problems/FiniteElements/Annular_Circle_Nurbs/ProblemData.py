@@ -80,11 +80,14 @@ def ProblemData(MainData):
 		CoordinatesFile = ProblemPath +'/points_circle.dat'
 
 
+
 	class BoundaryData(object):
 		# NURBS/NON-NURBS TYPE BOUNDARY CONDITION
 		Type = 'nurbs'
 		# Type = 'straight'
 		# Type = 'mixed'
+		IGES_File = ProblemPath + '/Circle.igs'
+
 		class DirichArgs(object):
 			node = 0
 			Applied_at = 'node' 

@@ -4,12 +4,32 @@
 		"selected_items":
 		[
 			[
-				"from",
-				"frombuffer"
+				"nodes_",
+				"nodes_dir_size"
 			],
 			[
-				"nodes_",
-				"nodes_dir_out"
+				"stru",
+				"struct_to_python"
+			],
+			[
+				"strcu",
+				"struct_to_python"
+			],
+			[
+				"displa",
+				"displacements_BC_stl"
+			],
+			[
+				"no",
+				"nodes_dir"
+			],
+			[
+				"stu",
+				"struct_to_python"
+			],
+			[
+				"from",
+				"frombuffer"
 			],
 			[
 				"c_",
@@ -26,10 +46,6 @@
 			[
 				"arr",
 				"arr2"
-			],
-			[
-				"no",
-				"nodes_dir_out"
 			],
 			[
 				"p",
@@ -498,22 +514,6 @@
 			[
 				"Para",
 				"ParallelDirichlet"
-			],
-			[
-				"B",
-				"BoundaryData"
-			],
-			[
-				"Jm",
-				"JMin"
-			],
-			[
-				"JM",
-				"JMin"
-			],
-			[
-				"lin",
-				"linalg"
 			]
 		]
 	},
@@ -523,7 +523,7 @@
 			"file": "RunSession.py",
 			"settings":
 			{
-				"buffer_size": 5688,
+				"buffer_size": 5686,
 				"line_ending": "Unix"
 			}
 		},
@@ -531,7 +531,37 @@
 			"file": "Core/FiniteElements/ApplyDirichletBoundaryConditions.py",
 			"settings":
 			{
-				"buffer_size": 5405,
+				"buffer_size": 5646,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Core/Supplementary/nurbs/nurbs.py",
+			"settings":
+			{
+				"buffer_size": 12582,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "# \"\"\"\n# main interface between python and cpp's occ_frontend \n# \"\"\"\n\n# import cython\n# import ctypes\n# from libc.stdlib cimport free\n# from cpython cimport PyObject, Py_INCREF\n\n# import numpy as np\n# cimport numpy as np\n\n# # numpy array must be initialised\n# np.import_array()\n# # np._import_array()\n\n# ctypedef np.int64_t Integer\n# ctypedef np.float64_t Real \n\n\n\n# cdef class ArrayWrapper:\n#     cdef void* data_ptr\n#     cdef Integer size\n \n#     cdef set_data(self, Integer size, void* data_ptr):\n#         \"\"\" Set the data of the array\n\n#         This cannot be done in the constructor as it must recieve C-level\n#         arguments.\n\n#         Parameters:\n#         -----------\n#         size: Integer\n#             Length of the array.\n#         data_ptr: void*\n#             Pointer to the data            \n\n#         \"\"\"\n#         self.data_ptr = data_ptr\n#         self.size = size\n \n#     def __array__(self):\n#         \"\"\" Here we use the __array__ method, that is called when numpy\n#             tries to get an array from the object.\"\"\"\n#         cdef np.npy_intp shape[1]\n#         shape[0] = <np.npy_intp> self.size\n#         # Create a 1D array, of length 'size'\n#         ndarray = np.PyArray_SimpleNewFromData(1, shape,\n#                                                np.NPY_INT64, self.data_ptr)\n#         return ndarray\n \n#     def __dealloc__(self):\n#         \"\"\" Frees the array. This is called by Python when all the\n#         references to the object are gone. \"\"\"\n#         free(<void*>self.data_ptr)\n\n\n\n\n# cdef extern from \"py_to_occ_frontend.hpp\": \n#     Integer *py_cpp_interface (Real* points_array, Integer points_rows, Integer points_cols, Integer* elements_array, Integer element_rows, Integer element_cols,\n#         Integer* edges, Integer edges_rows, Integer edges_cols, Integer* faces, Integer faces_rows, Integer faces_cols, \n#         Real* c_displacement_BC, Integer &nodes_dir_out_size)\n\n\n\n# @cython.boundscheck(False)\n# @cython.wraparound(False)\n# def main_interface(np.ndarray[Real, ndim=2, mode=\"c\"] points not None, np.ndarray[Integer, ndim=2, mode=\"c\"] elements not None,\n#     np.ndarray[Integer, ndim=2, mode=\"c\"] edges not None, np.ndarray[Integer, ndim=2, mode=\"c\"] faces not None):\n#     \"\"\"\n#     wrapper for occ_frontend\n#     \"\"\"\n#     cdef Integer element_rows, points_rows, element_cols, points_cols, edges_rows, edges_cols, faces_rows, faces_cols\n\n#     elements_rows, elements_cols = elements.shape[0], elements.shape[1]\n#     points_rows, points_cols = points.shape[0], points.shape[1]\n#     edges_rows, edges_cols = edges.shape[0], edges.shape[1]\n#     faces_rows, faces_cols = faces.shape[0], faces.shape[1]\n\n#     cdef Integer *nodes_dir_out\n#     cdef Integer nodes_dir_out_size\n#     cdef Real *c_displacement_BC\n\n#     nodes_dir_out = py_cpp_interface (&points[0,0], points_rows, points_cols, &elements[0,0], \n#         elements_rows, elements_cols,&edges[0,0], \n#         edges_rows, edges_cols, &faces[0,0], faces_rows, faces_cols,\n#         c_displacement_BC, nodes_dir_out_size)\n\n\n#     # cdef np.ndarray ndarray\n#     # cdef Integer size=24\n#     # array_wrapper = ArrayWrapper()\n#     # array_wrapper.set_data(size, <void*> nodes_dir_out) \n#     # ndarray = np.array(array_wrapper, copy=False)\n#     # # Assign our object to the 'base' of the ndarray object\n#     # ndarray.base = <PyObject*> array_wrapper\n#     # # Increment the reference count, as the above assignement was done in\n#     # # C, and Python does not know that there is this additional reference\n#     # Py_INCREF(array_wrapper)\n\n#     cdef np.npy_intp dims[1]\n#     dims[0]=24\n#     cdef np.ndarray[Integer, ndim=1, mode=\"c\"] ndarray = np.PyArray_SimpleNewFromData(1, dims, np.NPY_INT64, nodes_dir_out)\n\n#     print ndarray\n#     return ndarray\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\"\"\"\nmain interface between python and cpp's occ_frontend \n\"\"\"\n\nimport cython\nimport ctypes\nfrom libc.stdlib cimport free\nfrom libcpp.vector cimport vector\n# from cpython cimport PyObject, Py_INCREF\n\nimport numpy as np\ncimport numpy as np\n\n# numpy array must be initialised\nnp.import_array()\n# np._import_array()\n\nctypedef np.int64_t Integer\nctypedef np.float64_t Real \n\n\ncdef pointer_to_numpy_array_int64(void * ptr, np.npy_intp size):\n# cdef pointer_to_numpy_array_int64(void * ptr, ssize_t size):\n	'''Convert c pointer to numpy array.\n	The memory will be freed as soon as the ndarray is deallocated.\n	'''\n	cdef extern from \"numpy/arrayobject.h\":\n		# void PyArray_ENABLEFLAGS(np.ndarray arr, int flags)\n		void PyArray_ENABLEFLAGS(np.ndarray arr, Integer flags)\n	cdef np.ndarray[Integer, ndim=1, mode=\"c\"] arr = np.PyArray_SimpleNewFromData(1, &size, np.NPY_INT64, ptr)\n	PyArray_ENABLEFLAGS(arr, np.NPY_OWNDATA)\n	return arr\n\ncdef extern from \"py_to_occ_frontend.hpp\": \n	struct to_python_structs:\n		vector[Real] displacement_BC_stl\n		vector[Integer] nodes_dir_out_stl\n		Integer nodes_dir_size\n\n	to_python_structs py_cpp_interface (Real* points_array, Integer points_rows, Integer points_cols, \n		Integer* elements_array, Integer element_rows, Integer element_cols,\n		Integer* edges, Integer edges_rows, Integer edges_cols, Integer* faces, Integer faces_rows, Integer faces_cols, \n		Real* c_displacement_BC, Integer *nodes_dir_out, Integer &nodes_dir_out_size)\n\n\n\n@cython.boundscheck(False)\n@cython.wraparound(False)\ndef main_interface(np.ndarray[Real, ndim=2, mode=\"c\"] points not None, np.ndarray[Integer, ndim=2, mode=\"c\"] elements not None,\n	np.ndarray[Integer, ndim=2, mode=\"c\"] edges not None, np.ndarray[Integer, ndim=2, mode=\"c\"] faces not None):\n	\"\"\"\n	wrapper for occ_frontend\n	\"\"\"\n\n	cdef Integer element_rows, points_rows, element_cols, points_cols, edges_rows, edges_cols, faces_rows, faces_cols\n\n	elements_rows, elements_cols = elements.shape[0], elements.shape[1]\n	points_rows, points_cols = points.shape[0], points.shape[1]\n	edges_rows, edges_cols = edges.shape[0], edges.shape[1]\n	faces_rows, faces_cols = faces.shape[0], faces.shape[1]\n\n	cdef Integer *nodes_dir_out\n	cdef Integer nodes_dir_out_size\n	cdef Real *c_displacement_BC\n\n	cdef to_python_structs struct_to_python\n\n	struct_to_python = py_cpp_interface (&points[0,0], points_rows, points_cols, &elements[0,0], \n		elements_rows, elements_cols,&edges[0,0], \n		edges_rows, edges_cols, &faces[0,0], faces_rows, faces_cols,\n		c_displacement_BC, nodes_dir_out, nodes_dir_out_size)\n\n	# print nodes_dir_out\n	# print struct_to_python.nodes_dir_size\n	cdef np.ndarray nodes_dir = np.zeros((struct_to_python.nodes_dir_size,1),dtype=np.int64)\n	cdef Integer i \n	for i in range(struct_to_python.nodes_dir_size):\n		nodes_dir[i] = struct_to_python.nodes_dir_out_stl[i]\n	cdef np.ndarray displacements_BC = np.zeros((points_cols*struct_to_python.nodes_dir_size,1),dtype=np.float64) \n	for i in range(points_cols*struct_to_python.nodes_dir_size):\n		displacements_BC[i] = struct_to_python.displacement_BC_stl[i]\n\n	cdef np.npy_intp dims[1]\n	dims[0]=24\n	cdef np.ndarray[Integer, ndim=1, mode=\"c\"] arr = np.PyArray_SimpleNewFromData(1, dims, np.NPY_INT64, nodes_dir_out)\n\n\n	return nodes_dir , displacements_BC.reshape(struct_to_python.nodes_dir_size,points_cols) \n\n	# cdef np.npy_intp dimss[2]\n	# dimss[0]=24\n	# dimss[1]=2\n	# cdef np.ndarray[Real, ndim=2] arr2 = np.PyArray_SimpleNewFromData(2, dimss, np.NPY_FLOAT64, c_displacement_BC)\n	# print arr2\n\n	# cdef np.npy_intp dimss[1]\n	# dimss[0]=24*2\n	# cdef np.ndarray[Real, ndim=1] arr2 = np.PyArray_SimpleNewFromData(1, dimss, np.NPY_FLOAT64, c_displacement_BC)\n	# print arr2\n\n		# cdef np.ndarray[Real,ndim=2] np_displacement_BC = np.asarray(<Real> c_displacement_BC)\n	# cdef np.ndarray[Real,ndim=2] np_displacement_BC = c_displacement_BC\n	# cdef Integer i\n	# for i in range(nodes_dir_out_size):\n	#     print nodes_dir_out[i]\n	# print nodes_dir_out[0]\n	# print nodes_dir_out_size, 'from python'\n	# np.frombuffer(nodes_dir_out,nodes_dir_out_size)\n\n	# ndarray = np.PyArray_SimpleNewFromData(1, (nodes_dir_out_size,sizeof(Integer)),Integer, nodes_dir_out)\n	# numpy_array = np.asarray(<Integer[:nodes_dir_out_size, :2]> nodes_dir_out)\n	# numpy_array = np.asarray(<Integer[:nodes_dir_out_size]> nodes_dir_out)\n\n	# cdef np.ndarray[Integer] view = <Integer[:nodes_dir_out_size]> nodes_dir_out\n\n	# cdef np.ndarray[Integer] arr= pointer_to_numpy_array_int64(nodes_dir_out, (nodes_dir_out_size,1) )\n	# cdef np.ndarray[Integer,ndim=1, mode=\"c\"] arr= pointer_to_numpy_array_int64(nodes_dir_out, nodes_dir_out_size )\n	# free(<void*>nodes_dir_out)\n	# print arr",
+			"file": "Core/Supplementary/cpp_src/occ_backend/main_interface.pyx",
+			"file_size": 8452,
+			"file_write_time": 130810342999831455,
+			"settings":
+			{
+				"buffer_size": 8452,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "#!/bin/sh\n\nrm py_to_occ_frontend.o py_to_occ_frontend.so\nrm occ_frontend.o occ_frontend.so\nrm main_interface.so main_interface.cpp\necho cleaned the build directory\n\ng++ -c -fPIC py_to_occ_frontend.cpp -I. -I/usr/local/include/eigen_3_2_0/ -I/usr/local/include/oce/ -I/usr/include/python2.7/ #-O2\ng++ -shared -o py_to_occ_frontend.so py_to_occ_frontend.o\necho successfully build shared library 1/2\n\ng++ -c -fPIC occ_frontend.cpp -I. -I/usr/local/include/eigen_3_2_0 -I/usr/local/include/oce -I/usr/include/python2.7/  #-O2\ng++ -shared -o occ_frontend.so occ_frontend.o\necho successfully build shared library 2/2\necho DONE\n\npython setup.py build_ext -i\n",
+			"file": "Core/Supplementary/cpp_src/occ_backend/zmake_file.sh",
+			"file_size": 651,
+			"file_write_time": 130810314622510303,
+			"settings":
+			{
+				"buffer_size": 651,
 				"line_ending": "Unix"
 			}
 		},
@@ -548,22 +578,6 @@
 			"settings":
 			{
 				"buffer_size": 1615,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "Core/Supplementary/cpp_src/occ_backend/zmake_file.sh",
-			"settings":
-			{
-				"buffer_size": 651,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "Core/Supplementary/cpp_src/occ_backend/main_interface.pyx",
-			"settings":
-			{
-				"buffer_size": 8478,
 				"line_ending": "Unix"
 			}
 		},
@@ -667,7 +681,7 @@
 			"file": "Problems/FiniteElements/Annular_Circle_Nurbs/ProblemData.py",
 			"settings":
 			{
-				"buffer_size": 6624,
+				"buffer_size": 6668,
 				"line_ending": "Unix"
 			}
 		},
@@ -675,7 +689,7 @@
 			"file": "Problems/FiniteElements/Annular_Circle/ProblemData.py",
 			"settings":
 			{
-				"buffer_size": 6552,
+				"buffer_size": 6550,
 				"line_ending": "Unix"
 			}
 		},
@@ -1153,15 +1167,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 5688,
+						"buffer_size": 5686,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2806,
-								2806
+								1559,
+								1559
 							]
 						],
 						"settings":
@@ -1170,10 +1184,10 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 864.0,
+						"translation.y": 528.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
@@ -1182,15 +1196,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 5405,
+						"buffer_size": 5646,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1342,
-								1342
+								1494,
+								1494
 							]
 						],
 						"settings":
@@ -1202,11 +1216,96 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 4,
 					"type": "text"
 				},
 				{
 					"buffer": 2,
+					"file": "Core/Supplementary/nurbs/nurbs.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 12582,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4589,
+								4589
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": -0.0,
+						"translation.y": 2112.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "Core/Supplementary/cpp_src/occ_backend/main_interface.pyx",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 8452,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6909,
+								6909
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Cython/Cython.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 2928.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "Core/Supplementary/cpp_src/occ_backend/zmake_file.sh",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 651,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								11,
+								11
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/ShellScript/Shell-Unix-Generic.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
 					"file": "/home/roman/Dropbox/EigenTest/NumpyEigen/cpp_backend.cpp",
 					"semi_transient": false,
 					"settings":
@@ -1232,11 +1331,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
-					"buffer": 3,
+					"buffer": 6,
 					"file": "/home/roman/Dropbox/EigenTest/NumpyEigen/numpy_eigen.pyx",
 					"semi_transient": false,
 					"settings":
@@ -1248,8 +1347,8 @@
 						"selection":
 						[
 							[
-								0,
-								0
+								986,
+								986
 							]
 						],
 						"settings":
@@ -1261,67 +1360,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 8,
 					"type": "text"
 				},
 				{
-					"buffer": 4,
-					"file": "Core/Supplementary/cpp_src/occ_backend/zmake_file.sh",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 651,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/ShellScript/Shell-Unix-Generic.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "Core/Supplementary/cpp_src/occ_backend/main_interface.pyx",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 8478,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Cython/Cython.tmLanguage"
-						},
-						"translation.x": -0.0,
-						"translation.y": 2400.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
+					"buffer": 7,
 					"file": "Main/FiniteElements/MainFEM.py",
 					"semi_transient": false,
 					"settings":
@@ -1333,8 +1376,8 @@
 						"selection":
 						[
 							[
-								1677,
-								1677
+								1784,
+								1784
 							]
 						],
 						"settings":
@@ -1342,15 +1385,15 @@
 							"syntax": "Packages/Python/Python.tmLanguage",
 							"translate_tabs_to_spaces": false
 						},
-						"translation.x": 0.0,
+						"translation.x": -0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
-					"buffer": 7,
+					"buffer": 8,
 					"file": "Core/MeshGeneration/HigherOrderMeshing/HigherOrderMeshingTri.py",
 					"semi_transient": false,
 					"settings":
@@ -1375,11 +1418,11 @@
 						"translation.y": 4889.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 10,
+					"stack_index": 12,
 					"type": "text"
 				},
 				{
-					"buffer": 8,
+					"buffer": 9,
 					"file": "Core/MeshGeneration/HigherOrderMeshing/HigherOrderMeshingTet.py",
 					"semi_transient": false,
 					"settings":
@@ -1404,11 +1447,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 17,
+					"stack_index": 18,
 					"type": "text"
 				},
 				{
-					"buffer": 9,
+					"buffer": 10,
 					"file": "Core/MeshGeneration/HigherOrderMeshing/HigherOrderMeshingQuad.py",
 					"semi_transient": false,
 					"settings":
@@ -1433,11 +1476,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 16,
+					"stack_index": 17,
 					"type": "text"
 				},
 				{
-					"buffer": 10,
+					"buffer": 11,
 					"file": "Core/FiniteElements/PostProcess.py",
 					"semi_transient": false,
 					"settings":
@@ -1462,11 +1505,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 9,
+					"stack_index": 11,
 					"type": "text"
 				},
 				{
-					"buffer": 11,
+					"buffer": 12,
 					"file": "Core/ParallelProcessing/parmap.py",
 					"semi_transient": false,
 					"settings":
@@ -1492,11 +1535,11 @@
 						"translation.y": 672.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 20,
+					"stack_index": 21,
 					"type": "text"
 				},
 				{
-					"buffer": 12,
+					"buffer": 13,
 					"file": "Core/ParallelProcessing/mpipool/mpipool.py",
 					"semi_transient": false,
 					"settings":
@@ -1522,11 +1565,11 @@
 						"translation.y": 1344.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 26,
+					"stack_index": 27,
 					"type": "text"
 				},
 				{
-					"buffer": 13,
+					"buffer": 14,
 					"file": "Core/ParallelProcessing/mpi4py_map/mpi4py_map/test.py",
 					"semi_transient": false,
 					"settings":
@@ -1550,11 +1593,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 8,
+					"stack_index": 10,
 					"type": "text"
 				},
 				{
-					"buffer": 14,
+					"buffer": 15,
 					"file": "Core/ParallelProcessing/mpi4py_map/mpi4py_map/mpi4py_map.py",
 					"semi_transient": false,
 					"settings":
@@ -1580,11 +1623,11 @@
 						"translation.y": 48.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 23,
+					"stack_index": 24,
 					"type": "text"
 				},
 				{
-					"buffer": 15,
+					"buffer": 16,
 					"file": "Problems/FiniteElements/MechanicalComponent2D/ProblemData.py",
 					"semi_transient": false,
 					"settings":
@@ -1609,11 +1652,11 @@
 						"translation.y": 2544.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 25,
+					"stack_index": 26,
 					"type": "text"
 				},
 				{
-					"buffer": 16,
+					"buffer": 17,
 					"file": "Problems/FiniteElements/RAE2822/ProblemData.py",
 					"semi_transient": false,
 					"settings":
@@ -1638,11 +1681,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 18,
+					"stack_index": 19,
 					"type": "text"
 				},
 				{
-					"buffer": 17,
+					"buffer": 18,
 					"file": "Problems/FiniteElements/Naca_Isotropic/ProblemData.py",
 					"semi_transient": false,
 					"settings":
@@ -1667,16 +1710,16 @@
 						"translation.y": 2688.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 19,
+					"stack_index": 20,
 					"type": "text"
 				},
 				{
-					"buffer": 18,
+					"buffer": 19,
 					"file": "Problems/FiniteElements/Annular_Circle_Nurbs/ProblemData.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 6624,
+						"buffer_size": 6668,
 						"regions":
 						{
 						},
@@ -1696,24 +1739,24 @@
 						"translation.y": 2592.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 22,
+					"stack_index": 23,
 					"type": "text"
 				},
 				{
-					"buffer": 19,
+					"buffer": 20,
 					"file": "Problems/FiniteElements/Annular_Circle/ProblemData.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 6552,
+						"buffer_size": 6550,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2138,
-								2138
+								2133,
+								2133
 							]
 						],
 						"settings":
@@ -1722,14 +1765,14 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 1248.0,
+						"translation.y": 864.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 11,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
-					"buffer": 20,
+					"buffer": 21,
 					"file": "Core/FiniteElements/ElementalMatrices/ElementalStiffness.py",
 					"semi_transient": false,
 					"settings":
@@ -1754,11 +1797,11 @@
 						"translation.y": 96.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 12,
+					"stack_index": 13,
 					"type": "text"
 				},
 				{
-					"buffer": 21,
+					"buffer": 22,
 					"file": "Core/FiniteElements/ElementalMatrices/KinematicMeasures.py",
 					"semi_transient": false,
 					"settings":
@@ -1783,11 +1826,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 15,
+					"stack_index": 16,
 					"type": "text"
 				},
 				{
-					"buffer": 22,
+					"buffer": 23,
 					"file": "Core/MaterialLibrary/MooneyRivlin.py",
 					"semi_transient": false,
 					"settings":
@@ -1812,11 +1855,11 @@
 						"translation.y": 672.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 31,
+					"stack_index": 32,
 					"type": "text"
 				},
 				{
-					"buffer": 23,
+					"buffer": 24,
 					"file": "Core/MeshGeneration/gmsh.py",
 					"semi_transient": false,
 					"settings":
@@ -1842,11 +1885,11 @@
 						"translation.y": 2400.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 33,
+					"stack_index": 34,
 					"type": "text"
 				},
 				{
-					"buffer": 24,
+					"buffer": 25,
 					"file": "Problems/FiniteElements/Sphere/ProblemData.py",
 					"semi_transient": false,
 					"settings":
@@ -1871,11 +1914,11 @@
 						"translation.y": 816.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 24,
+					"stack_index": 25,
 					"type": "text"
 				},
 				{
-					"buffer": 25,
+					"buffer": 26,
 					"file": "Core/FiniteElements/Assembly.py",
 					"semi_transient": false,
 					"settings":
@@ -1900,11 +1943,11 @@
 						"translation.y": 2448.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 13,
+					"stack_index": 14,
 					"type": "text"
 				},
 				{
-					"buffer": 26,
+					"buffer": 27,
 					"file": "Core/FiniteElements/SparseAssembly.py",
 					"semi_transient": false,
 					"settings":
@@ -1929,11 +1972,11 @@
 						"translation.y": 144.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 35,
+					"stack_index": 36,
 					"type": "text"
 				},
 				{
-					"buffer": 27,
+					"buffer": 28,
 					"file": "Core/FiniteElements/SparseAssemblySmall.py",
 					"semi_transient": false,
 					"settings":
@@ -1958,11 +2001,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 36,
+					"stack_index": 37,
 					"type": "text"
 				},
 				{
-					"buffer": 28,
+					"buffer": 29,
 					"file": "Core/FiniteElements/Solvers/NewtonRaphsonStatic.py",
 					"semi_transient": false,
 					"settings":
@@ -1987,11 +2030,11 @@
 						"translation.y": 298.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 9,
 					"type": "text"
 				},
 				{
-					"buffer": 29,
+					"buffer": 30,
 					"file": "Core/FiniteElements/Solvers/Solver.py",
 					"semi_transient": false,
 					"settings":
@@ -2016,11 +2059,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 21,
+					"stack_index": 22,
 					"type": "text"
 				},
 				{
-					"buffer": 30,
+					"buffer": 31,
 					"file": "Core/FiniteElements/Solvers/StaticSolver.py",
 					"semi_transient": false,
 					"settings":
@@ -2045,11 +2088,11 @@
 						"translation.y": 109.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 37,
+					"stack_index": 38,
 					"type": "text"
 				},
 				{
-					"buffer": 31,
+					"buffer": 32,
 					"file": "Core/FiniteElements/Solvers/LinearSolver.py",
 					"semi_transient": false,
 					"settings":
@@ -2074,11 +2117,11 @@
 						"translation.y": 179.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 14,
+					"stack_index": 15,
 					"type": "text"
 				},
 				{
-					"buffer": 32,
+					"buffer": 33,
 					"file": "Core/FiniteElements/InitiateNonlinearAnalysisData.py",
 					"semi_transient": false,
 					"settings":
@@ -2103,11 +2146,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 29,
+					"stack_index": 30,
 					"type": "text"
 				},
 				{
-					"buffer": 33,
+					"buffer": 34,
 					"file": "Core/FiniteElements/ElementalMatrices/GetElementalMatrices.py",
 					"semi_transient": false,
 					"settings":
@@ -2132,11 +2175,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 28,
+					"stack_index": 29,
 					"type": "text"
 				},
 				{
-					"buffer": 34,
+					"buffer": 35,
 					"file": "Core/MaterialLibrary/Incrementally_Linearised_NeoHookean.py",
 					"semi_transient": false,
 					"settings":
@@ -2161,11 +2204,11 @@
 						"translation.y": 480.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 34,
+					"stack_index": 35,
 					"type": "text"
 				},
 				{
-					"buffer": 35,
+					"buffer": 36,
 					"file": "Core/MaterialLibrary/LinearModel.py",
 					"semi_transient": false,
 					"settings":
@@ -2190,11 +2233,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 32,
+					"stack_index": 33,
 					"type": "text"
 				},
 				{
-					"buffer": 36,
+					"buffer": 37,
 					"file": "Core/MaterialLibrary/AnisotropicMooneyRivlin_1.py",
 					"semi_transient": false,
 					"settings":
@@ -2219,11 +2262,11 @@
 						"translation.y": 362.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 30,
+					"stack_index": 31,
 					"type": "text"
 				},
 				{
-					"buffer": 37,
+					"buffer": 38,
 					"file": "Core/Formulations/DisplacementElectricPotentialApproach.py",
 					"semi_transient": false,
 					"settings":
@@ -2248,11 +2291,11 @@
 						"translation.y": 96.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 39,
+					"stack_index": 40,
 					"type": "text"
 				},
 				{
-					"buffer": 38,
+					"buffer": 39,
 					"file": "Core/Supplementary/Tensors/Tensors.py",
 					"semi_transient": false,
 					"settings":
@@ -2277,11 +2320,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 38,
+					"stack_index": 39,
 					"type": "text"
 				},
 				{
-					"buffer": 39,
+					"buffer": 40,
 					"file": "nr.py",
 					"semi_transient": false,
 					"settings":
@@ -2306,7 +2349,7 @@
 						"translation.y": 10531.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 27,
+					"stack_index": 28,
 					"type": "text"
 				}
 			]
@@ -2369,6 +2412,10 @@
 		"selected_items":
 		[
 			[
+				"nur",
+				"Core/Supplementary/nurbs/nurbs.py"
+			],
+			[
 				"ap",
 				"Core/FiniteElements/ApplyDirichletBoundaryConditions.py"
 			],
@@ -2419,10 +2466,6 @@
 			[
 				"nr",
 				"nr.py"
-			],
-			[
-				"nur",
-				"Core/Supplementary/nurbs/nurbs.py"
 			],
 			[
 				"ani",
