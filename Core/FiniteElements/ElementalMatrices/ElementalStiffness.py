@@ -12,9 +12,9 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 	ndim = MainData.ndim
 
 	# ALLOCATE
-	stiffness = np.zeros((MainData.Domain.Bases.shape[0]*nvar,MainData.Domain.Bases.shape[0]*nvar))
-	tractionforce = np.zeros((MainData.Domain.Bases.shape[0]*nvar,1))
-	B = np.zeros((MainData.Domain.Bases.shape[0]*nvar,MainData.MaterialArgs.H_VoigtSize))
+	stiffness = np.zeros((MainData.Domain.Bases.shape[0]*nvar,MainData.Domain.Bases.shape[0]*nvar),dtype=np.float64)
+	tractionforce = np.zeros((MainData.Domain.Bases.shape[0]*nvar,1),dtype=np.float64)
+	B = np.zeros((MainData.Domain.Bases.shape[0]*nvar,MainData.MaterialArgs.H_VoigtSize),dtype=np.float64)
 
 	
 	# COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)

@@ -24,15 +24,39 @@ def ApplyDirichletBoundaryConditions(stiffness,F,nmesh,MainData):
 			# IDENTIFIY DIRICHLET BOUNDARY CONDITIONS BASED ON THE EXACT GEOMETRY
 			nodesDBC, Dirichlet = Nurbs(nmesh,nurbs,MainData.BoundaryData,MainData.C)
 		else:
-			from Core.Supplementary.cpp_src.occ_backend.main_interface import main_interface
-			nodesDBC, Dirichlet = main_interface(nmesh.points,nmesh.elements,nmesh.edges,np.zeros((1,4),dtype=np.int64))
+			# GET BOUNDARY FEKETE POINTS
+			if MainData.ndim == 2:
+				from Core.QuadratureRules import GaussLobattoQuadrature
+				boundary_fekete = GaussLobattoQuadrature(MainData.C+2)[0]
+				# IT IS IMPORTANT TO ENSURE THAT THE DATA IS C-CONITGUOUS
+				boundary_fekete = boundary_fekete.copy(order="c")
+
+			elif MainData.ndim == 3:
+				from Core.QuadratureRules.FeketePointsTri import FeketePointsTri
+				boundary_fekete = FeketePointsTri(MainData.C)
+
+			scale, condition = 1000., 2000
+
+			from Core.Supplementary.cpp_src.occ_backend.PyInterface_OCC_FrontEnd import PyInterface_OCC_FrontEnd as OCC_FrontEnd
+			# print dir(OCC_Interface)
+			OCC_Interface = OCC_FrontEnd(dimension=MainData.ndim)
+			OCC_Interface.SetMesh(nmesh.points,nmesh.elements,nmesh.edges,np.zeros((1,4),dtype=np.int64))
+			OCC_Interface.SetCADGeometry(MainData.BoundaryData.IGES_File)
+			OCC_Interface.SetScale(scale)
+			OCC_Interface.SetCondition(condition)
+			OCC_Interface.SetBoundaryFeketePoints(boundary_fekete)
+			nodesDBC, Dirichlet = OCC_Interface.ComputeDirichletBoundaryConditions()
+			# import sys; sys.exit(0)
+			# from Core.Supplementary.cpp_src.occ_backend.PyInterface_OCC_FrontEnd import __ComputeDirichletBoundaryConditions__
+			# nodesDBC, Dirichlet = __ComputeDirichletBoundaryConditions__(MainData.BoundaryData.IGES_File, scale,
+				# nmesh.points,nmesh.elements,nmesh.edges,np.zeros((1,4),dtype=np.int64),condition,boundary_fekete)
 			posUnique = np.unique(nodesDBC,return_index=True)[1]
 			nodesDBC, Dirichlet = nodesDBC[posUnique], Dirichlet[posUnique,:];
 			# print type(nodesDBC[0])
 			# print nodesDBC
 			# print nodesDBC.flags
 			# print nodesDBC[0]
-			# import sys; sys.exit(0);
+			# import sys; sys.exit(0)
 		print 'Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds'
 
 		nOfDBCnodes = nodesDBC.shape[0]
