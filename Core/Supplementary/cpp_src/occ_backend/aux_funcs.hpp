@@ -22,6 +22,59 @@ inline std::vector<std::string> split(const std::string &s, char delim) {
     return elems;
 }
 
+
+
+//! print functions
+
+//template<typename Derived> void print()
+//{
+//    std::cout << " " << std::endl;
+//}
+
+
+
+template<typename Derived> void print(Eigen::Matrix<Derived,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> arr)
+{
+    std::cout << std::endl <<  arr << std::endl << std::endl;
+}
+
+template<typename Derived> void print(std::vector<Derived> arr)
+{
+    typeid(arr[0]).name();
+    std::cout << std::endl;
+    for (Integer i=0; i<arr.size();++i)
+    {
+        std::cout <<  arr[i] << std::endl;
+    }
+    std::cout << std::endl;
+}
+
+template<typename Derived> void print(Derived arr)
+{
+//    std::cout << std::endl <<  arr << std::endl << std::endl;
+    std::cout <<  arr << std::endl;
+}
+
+template<typename S, typename T> void print(S a, T b)
+{
+    std::cout << std::endl << a << "  " << b << std::endl << std::endl;
+}
+
+template<typename S, typename T, typename U> void print(S a, T b, U c)
+{
+    std::cout << std::endl << a << "  " << b << "  " << c << std::endl << std::endl;
+}
+
+template<typename S, typename T, typename U, typename V> void print(S a, T b, U c, V d)
+{
+    std::cout << std::endl << a << "  " << b << "  " << c << "  " << d << std::endl << std::endl;
+}
+
+//template<typename Derived> void print(Eigen::MatrixBase<Derived> arr)
+//{
+//    std::cout <<  arr << std::endl;
+//}
+
 //// print functions
 //template<typename Derived> void print(Eigen::MatrixBase<Derived> &A)
 //{

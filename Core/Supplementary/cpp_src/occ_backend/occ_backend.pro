@@ -8,9 +8,10 @@ SOURCES += main.cpp \
     occ_frontend.cpp \
     py_to_occ_frontend.cpp
 
-QMAKE_CXXFLAGS += -Wno-unused #-O2 -msse -msse2 -fomit-frame-pointer -fno-strict-aliasing
+QMAKE_CXXFLAGS += -Wno-unused -std=c++11 #-O2 -msse -msse2 -fomit-frame-pointer -fno-strict-aliasing
 
-INCLUDEPATH +=/home/roman/Dropbox/Eigen
+INCLUDEPATH +=/home/roman/Dropbox/eigen-devel
+#INCLUDEPATH +=/home/roman/Dropbox/eigen
 INCLUDEPATH +=/usr/local/include/oce/
 
 LIBS += -L/usr/local/lib -l:libTKIGES.so.9 -l:libTKXSBase.so.9 -l:libTKBRep.so.9 -l:libTKernel.so.9 -l:libTKTopAlgo.so.9 \

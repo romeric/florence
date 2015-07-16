@@ -97,8 +97,13 @@ def ProblemData(MainData):
 
 	class BoundaryData(object):
 		Type = 'nurbs'
-		Type = 'straight'
+		# Type = 'straight'
 		# Type = 'mixed'
+		IGES_File = ProblemPath + '/Circle.igs'
+
+		condition = 1000.
+		scale = 1000.
+
 		class DirichArgs(object):
 			node = 0
 			Applied_at = 'node' 

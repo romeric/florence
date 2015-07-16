@@ -72,6 +72,26 @@ template<typename T> inline Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic,Eigen:
     return arr_reduced;
 }
 
+template<typename T> inline Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> take(Eigen::Matrix<T,
+                                                                                                Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> &arr,
+                                                                                                Eigen::MatrixI &arr_idx)
+{
+    assert (arr_idx.rows()<=arr.rows());
+    assert (arr_idx.cols()<=arr.cols());
+
+    Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic> arr_reduced(arr_idx.rows(),arr_idx.cols());
+
+    for (int i=0; i<arr_idx.rows();i++)
+    {
+        for (int j=0; j<arr_idx.cols();j++)
+        {
+            arr_reduced(i,j) = arr(arr_idx(i),arr_idx(j));
+        }
+    }
+
+    return arr_reduced;
+}
+
 inline Standard_Real length(Handle_Geom_Curve &curve, Standard_Real scale=0.001)
 {
     // GET LENGTH OF THE CURVE
@@ -81,15 +101,64 @@ inline Standard_Real length(Handle_Geom_Curve &curve, Standard_Real scale=0.001)
     return scale*curve_length;
 }
 
+template <typename T> std::vector<Integer> argsort(const std::vector<T> &v) {
+
+  // initialize original index locations
+  std::vector<Integer> idx(v.size());
+  for (Integer i = 0; i != idx.size(); ++i) idx[i] = i;
+  // sort indices based on comparing values in v
+  std::sort(idx.begin(), idx.end(),[&v](Integer i1, Integer i2) {return v[i1] < v[i2];});
+
+  return idx;
+}
+
 inline void sort_rows(Eigen::MatrixR & arr)
 {
     /* Sorts a 2D array row by row*/
 
-    for (int i=0; i<arr.rows(); ++i)
+    for (Integer i=0; i<arr.rows(); ++i)
     {
         std::sort(arr.row(i).data(),arr.row(i).data()+arr.row(i).size());
     }
 }
+
+template<typename T> inline void sort_rows(Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> & arr,Eigen::MatrixI &indices)
+{
+    /* Sorts a 2D array row by row*/
+
+    for (Integer i=0; i<arr.rows(); ++i)
+    {
+//        std::sort(arr.row(i).data(),arr.row(i).data()+arr.row(i).size());
+        std::vector<Integer> row_indices;
+        std::vector<T> row_arr;
+        row_arr.assign(arr.row(i).data(),arr.row(i).data()+arr.row(i).size());
+        row_indices = argsort(row_arr);
+        indices.block(i,0,1,indices.cols()) = Eigen::Map<Eigen::MatrixI>(row_indices.data(),1,row_indices.size());
+
+        // SORT THE ACTUAL ARRAY NOW
+        std::sort(arr.row(i).data(),arr.row(i).data()+arr.row(i).size());
+    }
+}
+
+template<typename T>
+inline void sort_back_rows(Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> &arr,
+                                                                                     Eigen::MatrixI &idx)
+{
+    /* Sorts back the array row-wise to its original shape given the sort indices idx. No copy involved */
+    assert (idx.rows()==arr.rows() && idx.cols()==arr.cols());
+
+    for (Integer i=0; i<arr.rows(); ++i)
+    {
+        Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> \
+                current_row = Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor>::Zero(1,arr.cols());
+        for (Integer j=0; j<arr.cols(); ++j)
+        {
+            current_row(j) = arr(i,idx(i,j));
+        }
+        arr.block(i,0,1,arr.cols()) = current_row;
+    }
+}
+
 
 template<typename T> inline Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> ravel(Eigen::Matrix<T,
                                                                                                  Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> &arr)
@@ -99,9 +168,9 @@ template<typename T> inline Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic,Eigen:
 
     Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> ravel_arr(arr.rows()*arr.cols(),1);
     int counter =0;
-    for (int i=0; i<arr.rows(); ++i)
+    for (Integer i=0; i<arr.rows(); ++i)
     {
-        for (int j=0; j<arr.cols(); ++j)
+        for (Integer j=0; j<arr.cols(); ++j)
         {
             ravel_arr(counter) = arr(i,j);
             counter += 1;
@@ -109,6 +178,46 @@ template<typename T> inline Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic,Eigen:
     }
 
     return ravel_arr;
+}
+
+template<typename Derived>
+inline std::tuple<Eigen::MatrixI,Eigen::MatrixI > where_eq(Eigen::Matrix<Derived,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> &arr,
+                                                                                      Derived num, Real tolerance=1e-14)
+
+//template<typename Derived>
+//inline std::tuple<Eigen::MatrixI,Eigen::MatrixI > where_eq(Eigen::MatrixBase<Derived> &arr,Derived &num, Real tolerance=1e-14)
+{
+//    Eigen::MatrixBase<Derived> idx_rows;
+//    Eigen::MatrixBase<Derived> idx_cols;
+    std::vector<Integer> idx_rows;
+    std::vector<Integer> idx_cols;
+    idx_rows.clear(); idx_cols.clear();
+    for (Integer i=0; i<arr.rows();++i)
+    {
+        for (Integer j=0; j<arr.cols();++j)
+        {
+            if (abs(arr(i,j)-num)<tolerance)
+            {
+                idx_rows.push_back(i);
+                idx_cols.push_back(j);
+            }
+        }
+    }
+
+    return std::make_tuple( Eigen::Map<Eigen::MatrixI>(idx_rows.data(),idx_rows.size(),1),
+                            Eigen::Map<Eigen::MatrixI>(idx_cols.data(),idx_cols.size(),1));
+}
+
+
+template<typename T>
+Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> \
+append(Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> &arr, T num)
+{
+    Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> arr_pushed(arr.rows()+1,1);
+    arr_pushed.block(0,0,arr.rows(),1) = arr;
+    arr_pushed(arr.rows()) = num;
+
+    return arr_pushed;
 }
 
 //template<typename Derived, typename T> inline unique_container<T> unique(Eigen::MatrixBase<Derived> & arr, T tol=1e-12)

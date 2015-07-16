@@ -11,9 +11,12 @@
 #include <cmath>
 #include <ctime>
 #include <stdint.h>
-//#include <tuple>
+#include <tuple>
+#include <typeinfo>
+#include <chrono>
 
 typedef int64_t Integer;
+typedef uint64_t UInteger;
 typedef double Real;
 
 #endif // STD_INC_HPP

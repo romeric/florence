@@ -14,7 +14,8 @@ extensions = [
         ":libTKHLR.so.9", ":libTKG2d.so.9", ":libTKBool.so.9", ":libTKG3d.so.9", ":libTKOffset.so.9", ":libTKG2d.so.9",
         ":libTKXMesh.so.9", ":libTKGeomAlgo.so.9", ":libTKShHealing.so.9", ":libTKFeat.so.9", ":libTKFillet.so.9",
         ":libTKBO.so.9", ":libTKPrim.so.9"], 
-        library_dirs = ["/home/roman/Dropbox/Python/Core/Supplementary/cpp_src/occ_backend/","/usr/local/lib/"]
+        library_dirs = ["/home/roman/Dropbox/Python/Core/Supplementary/cpp_src/occ_backend/","/usr/local/lib/"],
+        extra_compile_args = ['-std=c++11']
         ),
 ]
 

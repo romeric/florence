@@ -84,8 +84,11 @@ def ProblemData(MainData):
 	class BoundaryData(object):
 		# NURBS/NON-NURBS TYPE BOUNDARY CONDITION
 		Type = 'nurbs'
-		# Type = 'straight'
+		Type = 'straight'
 		# Type = 'mixed'
+		IGES_File = ProblemPath + '/rae2822.igs'
+
+
 		class DirichArgs(object):
 			node = 0
 			Applied_at = 'node' 

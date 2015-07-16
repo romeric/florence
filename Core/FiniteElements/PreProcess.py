@@ -44,8 +44,8 @@ def PreProcess(MainData,Pr,pwd):
 				delimiter_connectivity=',',delimiter_coordinates=',')
 		elif MainData.MeshInfo.Reader is 'UniformHollowCircle':
 			# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=4,ncirc=12)
-			mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=7,ncirc=7) # isotropic
-			# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=20.,isotropic=False,nrad=7,ncirc=7)
+			# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=7,ncirc=7) # isotropic
+			mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=False,nrad=7,ncirc=7)
 
 	# mesh_node_order = mesh.CheckNodeNumberingTri()
 	# if mesh_node_order == 'anti-clockwise':
@@ -53,6 +53,8 @@ def PreProcess(MainData,Pr,pwd):
 	# else:
 	# 	print u'\u2717'.encode('utf8')+' : ','Imported mesh has',mesh_node_order,'node ordering'
 	
+
+	# mesh.PlotMeshNumberingTri()
 	# mesh.points *=1000.
 	# print np.linalg.norm(mesh.points,axis=1)
 	# GENERATE pMESHES FOR HIGH C
@@ -62,27 +64,16 @@ def PreProcess(MainData,Pr,pwd):
 		mesh.GetHighOrderMesh(MainData.C,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
 
 	############################################################################
+	# t1=time()
+	# mesh.GetElementsWithBoundaryEdgesTri()
+	# print time()-t1
+
 	# index_sort_x = np.argsort(nmesh.points[:,0])
 	# sorted_repoints = nmesh.points[index_sort_x,:]
-	# print
-	# print sorted_repoints
-	# print mesh.elements
-	# print mesh.points 
-	# print np.linalg.norm(nmesh1.points-nmesh2.points)
-	# print np.linalg.norm(nmesh1.elements-nmesh2.elements)
-	# print np.linalg.norm(nmesh1.edges-nmesh2.edges)
-	# print np.linalg.norm(nmesh1.faces-nmesh2.faces)
-	# print
-	# help(MainData)
-	# print '\n',np.max(nmesh.elements)+1, nmesh.points.shape[0]
-	# print 'Number of nodes: ', mesh.points.shape[0]
+
 	# np.savetxt('/home/roman/Dropbox/time.dat',np.array([time()-t_mesh, nmesh.points.shape[0]]))
 	
 	
-	# from matplotlib import pyplot as plt 
-	# plt.triplot(mesh.points[:,0],mesh.points[:,1], mesh.elements[:,:3])
-	# plt.axis('equal')
-	# plt.show()
 	# mesh.Readgmsh(filename='/home/roman/Dropbox/MeshingElasticity/mechanical2D.msh')
 	# mesh.Readgmsh(filename='/home/roman/Dropbox/Python/Core/MeshGeneration/PythonMeshScripts/circflow.msh') # FIX THIS
 	# print np.max(mesh.points), np.min(mesh.points)

@@ -141,6 +141,7 @@ def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
 		u1 = ProjU[listFaces[iDirichletFace],0]
 		u2 = ProjU[listFaces[iDirichletFace],1]
 		uEq = CurveEquallySpacedPoints(nurbs[idNurbs], u1, u2, nOfFaceNodes,1e-06,BasesOrder)
+		# print uEq
 		xEq = np.zeros((nOfFaceNodes,2))
 		for i in xrange(nOfFaceNodes):
 			pt = CurvePoint(nurbs[idNurbs],uEq[i])[0]

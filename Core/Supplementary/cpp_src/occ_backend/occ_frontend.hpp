@@ -44,10 +44,12 @@ public:
     Eigen::MatrixR displacements_BC;
     Eigen::MatrixI index_nodes;
     Eigen::MatrixI nodes_dir;
-    std::string projection_method;
+    const char *projection_method;
     Eigen::MatrixR fekete;
     Eigen::MatrixI boundary_points_order;
+    Eigen::MatrixI boundary_edges_order;
     Integer degree;
+    Eigen::MatrixR curve_to_parameter_scale_U;
 
 
     // methods of occ_backend
@@ -78,7 +80,11 @@ public:
     void ReadIGES(const char *filename);
     void GetGeomEdges();
     void GetGeomFaces();
-    void ProjectMeshOnCurve(std::string &method);
+    void GetInternalCurveScale();
+    void GetInternalSurfaceScales();
+    void IdentifyCurveContainingEdge();
+    void ProjectMeshOnCurve(const char *projection_method);
+    void ProjectMeshOnCurve_Old(const char *projection_method);
     void ProjectMeshOnSurface();
     void RepairDualProjectedParameters();
     void RepairDualProjectedParameters_Old();
@@ -87,14 +93,17 @@ public:
     void MeshPointInversionCurve();
     void MeshPointInversionSurface();
     void SetFeketePoints(Eigen::MatrixR &boundary_fekete);
-    Eigen::MatrixR FeketePointsOnCurve(Handle_Geom_Curve &curve,Standard_Real &u1,Standard_Real &u2);
+    Eigen::MatrixR ParametricFeketePoints(Handle_Geom_Curve &curve,Standard_Real &u1,Standard_Real &u2);
+    void GetElementsWithBoundaryEdgesTri();
     void GetBoundaryPointsOrder();
+    void EstimatedParameterUOnMesh();
 
 
 private:
     Eigen::MatrixI projection_ID;
     Eigen::MatrixR projection_U;
     Eigen::MatrixR projection_V;
+    Eigen::MatrixI sorted_projected_indices;
     Eigen::MatrixI dirichlet_edges;
     Eigen::MatrixI dirichlet_faces;
     std::vector<Integer> listedges;
@@ -103,6 +112,8 @@ private:
     Standard_Integer no_dir_faces;
     Eigen::MatrixI unique_edges;
     Eigen::MatrixI unique_faces;
+    Eigen::MatrixR u_of_all_fekete_mesh_edges;
+    Eigen::MatrixI elements_with_boundary_edges;
 };
 
 

@@ -35,16 +35,15 @@ def ApplyDirichletBoundaryConditions(stiffness,F,nmesh,MainData):
 				from Core.QuadratureRules.FeketePointsTri import FeketePointsTri
 				boundary_fekete = FeketePointsTri(MainData.C)
 
-			scale, condition = 1000., 2000
-
 			from Core.Supplementary.cpp_src.occ_backend.PyInterface_OCC_FrontEnd import PyInterface_OCC_FrontEnd as OCC_FrontEnd
 			# print dir(OCC_Interface)
 			OCC_Interface = OCC_FrontEnd(dimension=MainData.ndim)
 			OCC_Interface.SetMesh(nmesh.points,nmesh.elements,nmesh.edges,np.zeros((1,4),dtype=np.int64))
 			OCC_Interface.SetCADGeometry(MainData.BoundaryData.IGES_File)
-			OCC_Interface.SetScale(scale)
-			OCC_Interface.SetCondition(condition)
+			OCC_Interface.SetScale(MainData.BoundaryData.scale)
+			OCC_Interface.SetCondition(MainData.BoundaryData.condition)
 			OCC_Interface.SetBoundaryFeketePoints(boundary_fekete)
+			OCC_Interface.SetProjectionMethod("Bisection")
 			nodesDBC, Dirichlet = OCC_Interface.ComputeDirichletBoundaryConditions()
 			# import sys; sys.exit(0)
 			# from Core.Supplementary.cpp_src.occ_backend.PyInterface_OCC_FrontEnd import __ComputeDirichletBoundaryConditions__

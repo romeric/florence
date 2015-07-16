@@ -15,19 +15,48 @@ namespace cnp = cpp_numpy;
 int main()
 {
 
-    clock_t begin = clock();
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    start = std::chrono::system_clock::now();
 
 
-    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle_Nurbs/elements_circle_p2.dat";
-    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle_Nurbs/points_circle_p2.dat";
-    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle_Nurbs/edges_circle_p2.dat";
+//    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle_Nurbs/elements_circle_p2.dat";
+//    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle_Nurbs/points_circle_p2.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle_Nurbs/edges_circle_p2.dat";
 //    std::string unique_edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle_Nurbs/unique_edges_circle_p2.dat";
+
+//    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle_Nurbs/elements_circle_p3.dat";
+//    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle_Nurbs/points_circle_p3.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle_Nurbs/edges_circle_p3.dat";
+
+//    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle/elements_circle_p2.dat";
+//    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle/points_circle_p2.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle/edges_circle_p2.dat";
+
+//    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle/elements_circle_p3.dat";
+//    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle/points_circle_p3.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle/edges_circle_p3.dat";
+
+//    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle/elements_circle_p4.dat";
+//    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle/points_circle_p4.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle/edges_circle_p4.dat";
+
+//    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/elements_half_circle_p2.dat";
+//    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/points_half_circle_p2.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/edges_half_circle_p2.dat";
+
+    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/elements_twoarcs_p2.dat";
+    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/points_twoarcs_p2.dat";
+    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/edges_twoarcs_p2.dat";
+
 
 //    const char* iges_filename = "/home/roman/Dropbox/Python/Problems/FiniteElements/RAE2822/rae2822.igs";
 //    const char* iges_filename = "/home/roman/Dropbox/2015_HighOrderMeshing/examples/mechanical2d.igs";
 //    const char* iges_filename = "/home/roman/Dropbox/OCC_Geometry_Checks/Line.igs";
 //    const char* iges_filename = "/home/roman/Dropbox/OCC_Geometry_Checks/Sphere.igs";
-    const char* iges_filename = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle_Nurbs/Circle.igs";
+//    const char* iges_filename = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle_Nurbs/Circle.igs";
+//    const char* iges_filename = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle/Circle.igs";
+//    const char* iges_filename = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/Half_Circle.igs";
+    const char* iges_filename = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/Two_Arcs.iges";
 
     // CALL PY_OCC_FRONTEND
     Eigen::MatrixI elements = OCC_FrontEnd::ReadI(elem_file,',');
@@ -36,33 +65,44 @@ int main()
     Eigen::MatrixI faces = Eigen::MatrixI::Zero(1,4);
 //    Eigen::MatrixI unique_edges = Read(unique_edge_file);
     Real scale = 1000.;
-    Real condition = 2000.;
+//    Real condition = 2000.;
+    Real condition = 1000.;
+//    Real condition = 2.0e20;
 
-    Eigen::Matrix<Real,3,1> boundary_fekete;
-    boundary_fekete << -1., 0., 1.;
+//    Eigen::Matrix<Real,3,1> boundary_fekete;
+//    Eigen::Matrix<Real,4,1> boundary_fekete;
+    Eigen::Matrix<Real,5,1> boundary_fekete;
+//    boundary_fekete << -1., 0., 1.;
 //    boundary_fekete << -1.,-0.447213595499957983,0.447213595499957928,1.;
-//    boundary_fekete <<-1.,-0.654653670707977198,0.,0.654653670707977198,1.;
+    boundary_fekete <<-1.,-0.654653670707977198,0.,0.654653670707977198,1.;
 
-//    cout << edges2 << endl;
+//    cout << elements << endl<<endl;
+//    cout << points << endl<<endl;
+//    cout << edges << endl<<endl;
+//    cout << points.block(0,0,100,2) << endl;
 
-//    Integer out[24];
+//    const char *projection_method = "Newton";
+    const char *projection_method = "Bisection";
 
 
+
+//    exit (EXIT_FAILURE);
     to_python_structs struct_to_python;
     struct_to_python = PyCppInterface(iges_filename,scale,points.data(),points.rows(), points.cols(),
                            elements.data(), elements.rows(), elements.cols(),
                            edges.data(), edges.rows(), edges.cols(),
                            faces.data(),  faces.rows(),  faces.cols(),condition,
-                           boundary_fekete.data(), boundary_fekete.rows(), boundary_fekete.cols());
+                           boundary_fekete.data(), boundary_fekete.rows(), boundary_fekete.cols(),
+                           projection_method);
 
 
 //    cout << unique_edges << endl;
 //    cout << struct_to_python.displacement_BC_stl << endl;
 
 
-    clock_t end = clock();
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-    cout << endl << "Total time elapsed was " << elapsed_secs << " seconds" << endl;
+    end = std::chrono::system_clock::now();
+    std::chrono::duration<Real> elapsed_secs = end-start;
+    std::cout << std::endl << "Total time elapsed was " << elapsed_secs.count() << " seconds" << std::endl;
 
     //exit (EXIT_FAILURE);
     return 0;

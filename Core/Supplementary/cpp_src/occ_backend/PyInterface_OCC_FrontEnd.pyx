@@ -20,7 +20,8 @@ cdef extern from "py_to_occ_frontend.hpp":
 
 	to_python_structs PyCppInterface (const char* iges_filename, Real scale, Real* points_array, Integer points_rows, Integer points_cols, 
 		Integer* elements_array, Integer element_rows, Integer element_cols, Integer* edges, Integer edges_rows, Integer edges_cols,
-		Integer* faces, Integer faces_rows, Integer faces_cols, Real condition, Real* boundary_fekete, Integer fekete_rows, Integer fekete_cols)
+		Integer* faces, Integer faces_rows, Integer faces_cols, Real condition, Real* boundary_fekete, Integer fekete_rows, Integer fekete_cols,
+		const char* projection_method)
 
 
 cdef class PyInterface_OCC_FrontEnd:
@@ -39,6 +40,7 @@ cdef class PyInterface_OCC_FrontEnd:
 	cdef Integer[:,:] edges 
 	cdef Integer[:,:] faces 
 	cdef Real[:,:] boundary_fekete 
+	cdef bytes projection_method
 
 	def __init__(self,dimension=2):
 		self.ndim = dimension
@@ -68,12 +70,15 @@ cdef class PyInterface_OCC_FrontEnd:
 	def SetBoundaryFeketePoints(self,np.ndarray[Real, ndim=2, mode="c"] boundary_fekete):
 		self.boundary_fekete = boundary_fekete
 
+	def SetProjectionMethod(self, bytes projection_method):
+		self.projection_method = projection_method
+
 	def ComputeDirichletBoundaryConditions(self):
 		# CALLS STATIC FUNCTION __ComputeDirichletBoundaryConditions__
 		# NOTE THAT np.asarray IS USED TO CONVERT CYTHON'S MEMORY VIEW TO ndarray. 
 		# ALTHOUGH THIS INVOLVES OVERHEAD THIS FUNCTION IS CALLED ONLY ONCE.
 		return __ComputeDirichletBoundaryConditions__(self.iges_filename, self.scale, np.asarray(self.points), np.asarray(self.elements), 
-			np.asarray(self.edges), np.asarray(self.faces), self.condition, np.asarray(self.boundary_fekete))
+			np.asarray(self.edges), np.asarray(self.faces), self.condition, np.asarray(self.boundary_fekete), self.projection_method)
 
 
 
@@ -83,7 +88,8 @@ cdef class PyInterface_OCC_FrontEnd:
 @cython.wraparound(False)
 def __ComputeDirichletBoundaryConditions__(bytes iges_filename not None, Real scale, np.ndarray[Real, ndim=2, mode="c"] points not None, 
 	np.ndarray[Integer, ndim=2, mode="c"] elements not None, np.ndarray[Integer, ndim=2, mode="c"] edges not None, 
-	np.ndarray[Integer, ndim=2, mode="c"] faces not None, Real condition, np.ndarray[Real, ndim=2, mode="c"] boundary_fekete not None):
+	np.ndarray[Integer, ndim=2, mode="c"] faces not None, Real condition, np.ndarray[Real, ndim=2, mode="c"] boundary_fekete not None,
+	bytes projection_method not None):
 	"""
 	Actual wrapper for occ_frontend, kept as a 'static' function for debugging purposes 
 	"""
@@ -107,7 +113,7 @@ def __ComputeDirichletBoundaryConditions__(bytes iges_filename not None, Real sc
 	# CALL CPP ROUTINE
 	struct_to_python = PyCppInterface (<const char*>iges_filename, scale, &points[0,0], points_rows, points_cols, &elements[0,0], 
 		elements_rows, elements_cols,&edges[0,0], edges_rows, edges_cols, &faces[0,0], faces_rows, faces_cols, 
-		condition, &boundary_fekete[0,0], fekete_rows, fekete_cols)
+		condition, &boundary_fekete[0,0], fekete_rows, fekete_cols,<const char*>projection_method)
 
 
 	cdef np.ndarray nodes_dir = np.zeros((struct_to_python.nodes_dir_size,1),dtype=np.int64)

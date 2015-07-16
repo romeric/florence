@@ -398,6 +398,39 @@ class Mesh(object):
 		return original_order
 
 
+	def GetElementsWithBoundaryEdgesTri(self):
+		""" Computes elements which have edges on the boundary. Mesh can be linear or higher order.
+			For triangles each element has only one edge on the boundary.
+
+		output: 
+
+			edge_elements:				[1D array] array containing elements which have edge
+										on the boundary. Row number is edge number"""
+
+
+		assert self.edges is not None or self.elements is not None
+		# CYTHON SOLUTION
+		# from GetElementsWithBoundaryEdgesTri_Cython import GetElementsWithBoundaryEdgesTri_Cython
+		# return GetElementsWithBoundaryEdgesTri_Cython(self.elements,self.edges)
+		
+		from Core.Supplementary.Where import whereEQ
+		edge_elements = np.zeros(self.edges.shape[0],dtype=np.int64)
+		for i in range(self.edges.shape[0]):
+			x = []
+			for j in range(self.edges.shape[1]):
+				# x = np.append(x,np.where(self.elements==self.edges[i,j])[0])
+				x = np.append(x,whereEQ(self.elements,self.edges[i,j])[0])
+			# x = x.astype(np.int64)
+			for k in range(len(x)):
+				y = np.where(x==x[k])[0]
+				# y = np.asarray(whereEQ(np.array([x]),np.int64(x[k]))[0])
+				if y.shape[0]==self.edges.shape[1]:
+					edge_elements[i] = np.int64(x[k])
+					break
+
+		return edge_elements
+
+
 
 	def PlotMeshNumberingTri(self):
 		"""Plots element and node numbers on top of the triangular mesh"""
@@ -466,11 +499,11 @@ class Mesh(object):
 
 		input:
 
-			center:				[tuple] containing the (x,y) coordinates of the circle
+			center:				[tuple] containing the (x,y) coordinates of the center of the circle
 			inner_radius:		[double] radius of inner circle 
 			outer_radius:		[double] radius of outer circle
 			element_type:		[str] tri for triangular mesh and quad for quadrilateral mesh 
-			isotropic:			[Boolean] option for isotropy or anisotropy of the mesh 
+			isotropic:			[boolean] option for isotropy or anisotropy of the mesh 
 			nrad:				[int] number of disrectisation in the radial direction
 			ncirc:				[int] number of disrectisation in the circumferential direction
 

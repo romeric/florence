@@ -10,6 +10,10 @@
 #include <Eigen/Dense>
 #include<Eigen/StdVector>
 
+#ifdef EIGEN_VECTORIZE
+    #define EIGEN_VECTORIZE
+#endif
+
 namespace Eigen {
 /* RowMajor matrix */
 typedef Eigen::Matrix<Real,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> MatrixR;

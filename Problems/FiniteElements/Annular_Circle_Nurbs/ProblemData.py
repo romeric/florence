@@ -87,6 +87,8 @@ def ProblemData(MainData):
 		# Type = 'straight'
 		# Type = 'mixed'
 		IGES_File = ProblemPath + '/Circle.igs'
+		condition = 2000.
+		scale = 1000.
 
 		class DirichArgs(object):
 			node = 0

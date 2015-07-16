@@ -6,7 +6,7 @@ to_python_structs PyCppInterface(const char* iges_filename, Real scale, Real *po
                       Integer *elements_array, Integer element_rows, Integer element_cols,
                       Integer *edges_array, Integer edges_rows, Integer edges_cols,
                       Integer *faces_array, Integer faces_rows, Integer faces_cols, Real condition,
-                      Real *boundary_fekete, Integer fekete_rows, Integer fekete_cols)
+                      Real *boundary_fekete, Integer fekete_rows, Integer fekete_cols, const char* projection_method)
 {
     //Convert to Eigen matrix
     Eigen::MatrixR points_eigen_matrix = Eigen::Map<Eigen::MatrixR>(points_array,points_rows,points_cols);
@@ -50,16 +50,6 @@ to_python_structs PyCppInterface(const char* iges_filename, Real scale, Real *po
     occ_interface.SetFeketePoints(eigen_boundary_fekete);
     occ_interface.GetBoundaryPointsOrder();
 
-//    cout << eigen_boundary_fekete << endl<<endl;
-//    cout <<occ_interface.fekete << endl<<endl;
-
-
-//    Standard_Real condition = 2000.;
-//    Standard_Real condition = 2.;
-//    occ_interface.SetCondition(condition);
-//    occ_interface.mesh_points *= 1000.0;
-//    occ_interface.mesh_points *= scale;
-
     // READ THE GEOMETRY FROM THE IGES FILE
     occ_interface.ReadIGES(iges_filename);
 
@@ -67,46 +57,26 @@ to_python_structs PyCppInterface(const char* iges_filename, Real scale, Real *po
     occ_interface.GetGeomEdges();
     occ_interface.GetGeomFaces();
 
-
+    // FIRST IDENTIFY WHICH CURVES CONTAIN WHICH EDGES
+    occ_interface.IdentifyCurveContainingEdge();
     // PROJECT ALL BOUNDARY POINTS FROM THE MESH TO THE CURVE
-    //std::string method = "Newton";
-    std::string method = "bisection";
-    occ_interface.ProjectMeshOnCurve(method);
-    // FIX IAMGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
+    occ_interface.ProjectMeshOnCurve(projection_method);
+    // FIX IMAGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
     occ_interface.RepairDualProjectedParameters();
-    // PERFORM POINT INVERTION FOR THE INTERIOR POINTS
-    occ_interface.MeshPointInversionCurve();
+//    //PERFORM POINT INVERTION FOR THE INTERIOR POINTS
+//    occ_interface.MeshPointInversionCurve();
 
 
     to_python_structs struct_to_python;
-    struct_to_python.nodes_dir_size = occ_interface.nodes_dir.rows();
-    // COPYLESS CONVERSION FROM EIGEN TO C ARRAY
-    Integer *c_array_nodes_dir;
-    c_array_nodes_dir = occ_interface.nodes_dir.data();
-    // COPYLESS CONVERSION FROM C ARRAY TO STL VECTOR
-    struct_to_python.nodes_dir_out_stl.assign(c_array_nodes_dir,c_array_nodes_dir+struct_to_python.nodes_dir_size);
-    Real *c_array_displacement;
-    c_array_displacement = occ_interface.displacements_BC.data();
-    struct_to_python.displacement_BC_stl.assign(c_array_displacement,c_array_displacement+occ_interface.ndim*struct_to_python.nodes_dir_size);
-
-    for (int i=0; i<48; ++i)
-    {
-        cout << struct_to_python.displacement_BC_stl[i] << endl;
-    }
-
-//    struct_to_python.out = (Integer*) malloc (24);
-//    struct_to_python.out = occ_interface.nodes_dir.data();
-//    Eigen::Map<Eigen::MatrixI>(struct_to_python.out,24,1) = occ_interface.nodes_dir;
-
-
-//    cout << endl;
-//    for (int i=0;i<4;i++)
-//    {
-//        cout << struct_to_python.out[i] << endl;
-////        struct_to_python.out[i] = occ_interface.nodes_dir(i);
-//    }
-//    cout << endl;
-
+//    struct_to_python.nodes_dir_size = occ_interface.nodes_dir.rows();
+//    // COPYLESS CONVERSION FROM EIGEN TO C ARRAY
+//    Integer *c_array_nodes_dir;
+//    c_array_nodes_dir = occ_interface.nodes_dir.data();
+//    // COPYLESS CONVERSION FROM C ARRAY TO STL VECTOR
+//    struct_to_python.nodes_dir_out_stl.assign(c_array_nodes_dir,c_array_nodes_dir+struct_to_python.nodes_dir_size);
+//    Real *c_array_displacement;
+//    c_array_displacement = occ_interface.displacements_BC.data();
+//    struct_to_python.displacement_BC_stl.assign(c_array_displacement,c_array_displacement+occ_interface.ndim*struct_to_python.nodes_dir_size);
 
 
     return struct_to_python;
