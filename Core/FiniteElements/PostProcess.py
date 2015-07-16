@@ -527,7 +527,7 @@ class PostProcess(object):
 			plt.plot(dum[ddum,0],dum[ddum,1],'#000000')
 
 		plt.axis('equal')
-		plt.axis('off')	
+		# plt.axis('off')	
 
 
 		# plt.savefig('/home/roman/Desktop/DumpReport/mesh_312_'+MainData.AnalysisType+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)
