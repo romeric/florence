@@ -75,6 +75,7 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 			BDB_2 = MainData().GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],CauchyStressTensor,nvar,ndim)
 			# INTEGRATE STIFFNESS
 			stiffness += (BDB_1+BDB_2)*detJ[counter]
+			# stiffness += (BDB_1)*detJ[counter]
 			# INTEGRATE TRACTION FORCE
 			tractionforce += t*detJ[counter]
 		else:

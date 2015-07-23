@@ -451,6 +451,7 @@ class Mesh(object):
 			plt.text(self.points[i,0],self.points[i,1],str(i),backgroundcolor='#0087BD',ha='center')
 
 		plt.axis('equal')
+		# plt.show(block=False)
 		plt.show()
 
 
