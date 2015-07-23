@@ -16,23 +16,23 @@ def ProblemData(MainData):
 	MainData.Formulation = 1 	# Displacement-Potential based formulation
 	MainData.Analysis = 'Static'
 	# MainData.Analysis = 'Dynamic'
-	# MainData.AnalysisType = 'Linear'
-	MainData.AnalysisType = 'Nonlinear'
+	MainData.AnalysisType = 'Linear'
+	# MainData.AnalysisType = 'Nonlinear'
 
 	class MaterialArgs(object):
 		"""docstring for MaterialArgs"""
 		# Type = 'Steinmann'
 		# Type = 'LinearisedElectromechanics'
-		# Type = 'LinearModel'
+		Type = 'LinearModel'
 		# Type = 'Incrementally_Linearised_NeoHookean'
 		# Type = 'AnisotropicMooneyRivlin_1'
-		Type = 'NearlyIncompressibleNeoHookean'
+		# Type = 'NearlyIncompressibleNeoHookean'
 		
 		
 
 		E = 1.0e1
 		# nu = 0.4
-		nu=0.46
+		nu=0.36
 
 		# E = MainData.E 
 		# nu = MainData.nu 
@@ -77,13 +77,23 @@ def ProblemData(MainData):
 
 		# FileName = ProblemPath + '/MechanicalComponent2D_664.dat'
 		# FileName = ProblemPath + '/MechanicalComponent2D_192.dat'
-		FileName = ProblemPath + '/MechanicalComponent2D_NonSmooth_321.dat'
+		# FileName = ProblemPath + '/MechanicalComponent2D_NonSmooth_2672.dat'
+		# FileName = ProblemPath + '/MechanicalComponent2D_NonSmooth_321.dat'
+		FileName = ProblemPath + '/MechanicalComponent2D_NonSmooth_236.dat'
 		
 
 
 	class BoundaryData(object):
 		# NURBS/NON-NURBS TYPE BOUNDARY CONDITION
 		Type = 'nurbs'
+
+		# scale = 1000.
+		# condition = 1.0e10
+		scale = 1.
+		condition = 1e10
+
+		IGES_File = ProblemPath + '/mechanical2D.iges'
+
 		class DirichArgs(object):
 			node = 0
 			Applied_at = 'node' 

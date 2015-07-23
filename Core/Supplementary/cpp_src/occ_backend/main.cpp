@@ -44,19 +44,44 @@ int main()
 //    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/points_half_circle_p2.dat";
 //    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/edges_half_circle_p2.dat";
 
-    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/elements_twoarcs_p2.dat";
-    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/points_twoarcs_p2.dat";
-    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/edges_twoarcs_p2.dat";
+//    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/elements_twoarcs_p2.dat";
+//    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/points_twoarcs_p2.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/edges_twoarcs_p2.dat";
+
+//    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/RAE2822/elements_irae2822_p2.dat";
+//    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/RAE2822/points_irae2822_p2.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/RAE2822/edges_irae2822_p2.dat";
+
+//    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/RAE2822/elements_i2rae2822_p2.dat";
+//    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/RAE2822/points_i2rae2822_p2.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/RAE2822/edges_i2rae2822_p2.dat";
+
+//    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/elements_mech2d_seg0_p2.dat";
+//    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/points_mech2d_seg0_p2.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/edges_mech2d_seg0_p2.dat";
+
+    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/elements_mech2d_seg2_p2.dat";
+    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/points_mech2d_seg2_p2.dat";
+    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/edges_mech2d_seg2_p2.dat";
+
+//    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/MechanicalComponent2D/elements_mech2dn_p2.dat";
+//    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/MechanicalComponent2D/points_mech2dn_p2.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/MechanicalComponent2D/edges_mech2dn_p2.dat";
 
 
 //    const char* iges_filename = "/home/roman/Dropbox/Python/Problems/FiniteElements/RAE2822/rae2822.igs";
 //    const char* iges_filename = "/home/roman/Dropbox/2015_HighOrderMeshing/examples/mechanical2d.igs";
+//    const char* iges_filename = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/Mech2D_Seg0.igs";
+    const char* iges_filename = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/Mech2D_Seg2.igs";
 //    const char* iges_filename = "/home/roman/Dropbox/OCC_Geometry_Checks/Line.igs";
 //    const char* iges_filename = "/home/roman/Dropbox/OCC_Geometry_Checks/Sphere.igs";
 //    const char* iges_filename = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle_Nurbs/Circle.igs";
 //    const char* iges_filename = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle/Circle.igs";
 //    const char* iges_filename = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/Half_Circle.igs";
-    const char* iges_filename = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/Two_Arcs.iges";
+//    const char* iges_filename = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/Two_Arcs.iges";
+
+
+
 
     // CALL PY_OCC_FRONTEND
     Eigen::MatrixI elements = OCC_FrontEnd::ReadI(elem_file,',');
@@ -64,22 +89,33 @@ int main()
     Eigen::MatrixI edges = OCC_FrontEnd::ReadI(edge_file,',');
     Eigen::MatrixI faces = Eigen::MatrixI::Zero(1,4);
 //    Eigen::MatrixI unique_edges = Read(unique_edge_file);
-    Real scale = 1000.;
+//    Real scale = 1000.;
 //    Real condition = 2000.;
-    Real condition = 1000.;
+//    Real condition = 1000.;
 //    Real condition = 2.0e20;
 
-//    Eigen::Matrix<Real,3,1> boundary_fekete;
-//    Eigen::Matrix<Real,4,1> boundary_fekete;
-    Eigen::Matrix<Real,5,1> boundary_fekete;
-//    boundary_fekete << -1., 0., 1.;
-//    boundary_fekete << -1.,-0.447213595499957983,0.447213595499957928,1.;
-    boundary_fekete <<-1.,-0.654653670707977198,0.,0.654653670707977198,1.;
+//    Real scale = 1000.;
+//    Real condition = 2.;
+//    Real scale = 1.; // for iso rae
+//    Real condition = 0.6; // for iso rae
+//    Real scale = 1000.; // for half-circle and two-arcs
+//    Real condition = 3000.; // for half-circle and two-arcs
+    Real scale = 1.;
+    Real condition = 1.0e10;
 
-//    cout << elements << endl<<endl;
-//    cout << points << endl<<endl;
-//    cout << edges << endl<<endl;
+    Eigen::Matrix<Real,3,1> boundary_fekete;
+//    Eigen::Matrix<Real,4,1> boundary_fekete;
+//    Eigen::Matrix<Real,5,1> boundary_fekete;
+    boundary_fekete << -1., 0., 1.;
+//    boundary_fekete << -1.,-0.447213595499957983,0.447213595499957928,1.;
+//    boundary_fekete <<-1.,-0.654653670707977198,0.,0.654653670707977198,1.;
+
+//    points = (points.array()/1000.).eval().matrix();
+//    print(elements);
+//    print(points);
+//    print(edges);
 //    cout << points.block(0,0,100,2) << endl;
+
 
 //    const char *projection_method = "Newton";
     const char *projection_method = "Bisection";

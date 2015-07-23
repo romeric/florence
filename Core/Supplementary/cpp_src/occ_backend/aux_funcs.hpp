@@ -70,6 +70,22 @@ template<typename S, typename T, typename U, typename V> void print(S a, T b, U 
     std::cout << std::endl << a << "  " << b << "  " << c << "  " << d << std::endl << std::endl;
 }
 
+//
+template<typename Derived> void println(Derived arr)
+{
+    std::cout <<  arr << std::endl;
+}
+
+template<typename S, typename T> void println(S a, T b)
+{
+    std::cout << a << "  " << b << std::endl;
+}
+
+template<typename S, typename T, typename U> void println(S a, T b, U c)
+{
+    std::cout << a << "  " << b << "  " << c << std::endl;
+}
+
 //template<typename Derived> void print(Eigen::MatrixBase<Derived> arr)
 //{
 //    std::cout <<  arr << std::endl;

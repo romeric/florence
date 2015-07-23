@@ -14,7 +14,7 @@ class OCC_FrontEnd
 {
 public:
     // CONSTRUCTOR
-    OCC_FrontEnd():  mesh_element_type("tri"), ndim(1) {}
+    OCC_FrontEnd():  mesh_element_type("tri"), ndim(2) {}
 
     OCC_FrontEnd(std::string &element_type,Integer &dim) : mesh_element_type(element_type), ndim(dim) {
 //        this->mesh_element_type = element_type;
@@ -35,10 +35,15 @@ public:
     Eigen::MatrixI mesh_faces;
     TopoDS_Shape imported_shape;
     Standard_Integer no_of_shapes;
-    std::vector<Handle_Geom_Curve> geometry_edges;
-    std::vector<Handle_Geom_Surface> geometry_faces;
-    std::vector<Handle_Geom_BSplineCurve> geometry_edges_bspline;
-    std::vector<Handle_Geom_BSplineSurface> geometry_faces_bspline;
+    std::vector<gp_Pnt> geometry_points;
+    std::vector<Handle_Geom_Curve> geometry_curves;
+    std::vector<Handle_Geom_Surface> geometry_surfaces;
+    Eigen::MatrixR geometry_points_on_curves;
+    Eigen::MatrixR geometry_points_on_surfaces;
+    std::vector<Integer> geometry_curves_types;
+    std::vector<Integer> geometry_surfaces_types;
+    std::vector<Handle_Geom_BSplineCurve> geometry_curves_bspline;
+    std::vector<Handle_Geom_BSplineSurface> geometry_surfaces_bspline;
     Real condition;
     Real scale;
     Eigen::MatrixR displacements_BC;
@@ -57,13 +62,13 @@ public:
     void SetScale(Real &scale);
     void SetCondition(Real &condition);
     void SetDimension(Integer &dim);
-    void SetElementType(std::string &type);
-    void SetElements(Eigen::MatrixI &arr);
-    void SetPoints(Eigen::MatrixR &arr);
-    void SetEdges(Eigen::MatrixI &arr);
-    void SetFaces(Eigen::MatrixI &arr);
+    void SetMeshElementType(std::string &type);
+    void SetMeshElements(Eigen::MatrixI &arr);
+    void SetMeshPoints(Eigen::MatrixR &arr);
+    void SetMeshEdges(Eigen::MatrixI &arr);
+    void SetMeshFaces(Eigen::MatrixI &arr);
     void ScaleMesh();
-    std::string GetElementType();
+    std::string GetMeshElementType();
     void ReadMeshConnectivityFile(std::string &filename, char delim);
     void ReadMeshCoordinateFile(std::string &filename, char delim);
     void ReadMeshEdgesFile(std::string &filename, char delim);
@@ -78,11 +83,13 @@ public:
     static Eigen::MatrixR ReadR(std::string &filename, char delim);
     void CheckMesh();
     void ReadIGES(const char *filename);
+    void GetGeomVertices();
     void GetGeomEdges();
     void GetGeomFaces();
+    void GetGeomPointsOnCorrespondingEdges();
     void GetInternalCurveScale();
     void GetInternalSurfaceScales();
-    void IdentifyCurveContainingEdge();
+    void IdentifyCurvesContainingEdges();
     void ProjectMeshOnCurve(const char *projection_method);
     void ProjectMeshOnCurve_Old(const char *projection_method);
     void ProjectMeshOnSurface();

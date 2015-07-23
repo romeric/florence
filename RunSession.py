@@ -137,8 +137,7 @@ elif MainData.session == 'BEM3D':
 
 
 
-
-
+# http://stackoverflow.com/questions/23872946/force-numpy-ndarray-to-take-ownership-of-its-memory-in-cython/
 # http://stackoverflow.com/questions/25830764/numpy-with-atlas-or-openblas
 # http://danielnouri.org/notes/2012/12/19/libblas-and-liblapack-issues-and-speed,-with-scipy-and-ubuntu/
 
@@ -162,3 +161,38 @@ elif MainData.session == 'BEM3D':
 # t = timeit.Timer("numpy.dot(x, x.T)", setup=setup)
 # print("\ndot: %f sec" % (t.timeit(count) / count))
 #------------------------------------------------------------#
+
+# g++ -I/home/roman/Dropbox/eigen-devel/ -I/usr/local/include/oce/ -I. -L/usr/local/lib -l:libTKIGES.so.9 -l:libTKXSBase.so.9 -l:libTKBRep.so.9 \
+# -l:libTKernel.so.9 -l:libTKTopAlgo.so.9 -l:libTKGeomBase.so.9 -l:libTKMath.so.9 -l:libTKHLR.so.9 -l:libTKG2d.so.9 -l:libTKBool.so.9 -l:libTKG3d.so.9 \
+# -l:libTKOffset.so.9 -l:libTKG2d.so.9 -l:libTKXMesh.so.9 -l:libTKGeomAlgo.so.9 -l:libTKShHealing.so.9 -l:libTKFeat.so.9 -l:libTKFillet.so.9 -l:libTKBO.so.9 \
+# -l:libTKPrim.so.9 -std=c++11 -Wno-unused main.cpp occ_frontend.cpp py_to_occ_frontend.cpp -o main
+
+# g++ -I/home/roman/Dropbox/eigen-devel/ -I/usr/local/include/oce/ -I. -L/usr/local/lib /usr/local/lib/libTKIGES.so.9 /usr/local/lib/libTKXSBase.so.9 \
+# /usr/local/lib/libTKBRep.so.9 /usr/local/lib/libTKernel.so.9 /usr/local/lib/libTKTopAlgo.so.9 /usr/local/lib/libTKGeomBase.so.9 /usr/local/lib/libTKMath.so.9 \
+# /usr/local/lib/libTKHLR.so.9 /usr/local/lib/libTKG2d.so.9 /usr/local/lib/libTKBool.so.9 /usr/local/lib/libTKG3d.so.9 /usr/local/lib/libTKOffset.so.9 \
+# /usr/local/lib/libTKG2d.so.9 /usr/local/lib/libTKXMesh.so.9 /usr/local/lib/libTKGeomAlgo.so.9 /usr/local/lib/libTKShHealing.so.9 /usr/local/lib/libTKFeat.so.9 \
+# /usr/local/lib/libTKFillet.so.9 /usr/local/lib/libTKBO.so.9 /usr/local/lib/libTKPrim.so.9 -std=c++11 -Wno-unused \
+# main.cpp occ_frontend.cpp py_to_occ_frontend.cpp -o main
+
+# g++ -I/home/roman/Dropbox/eigen-devel/ -I/usr/local/include/oce/ -I. -L/usr/local/lib -lTKIGES -lTKXSBase \
+# -lTKBRep -lTKernel -lTKTopAlgo -lTKGeomBase -lTKMath -lTKHLR -lTKG2d -lTKBool \
+# -lTKXMesh\
+# -lTKFillet\
+# -lTKGeomBase\
+# -lTKPrim\
+# -lTKOffset\
+# -lTKHLR\
+# -lTKMath\
+# -lTKBO\
+# -lTKG2d\
+# -lTKG3d\
+# -lTKShHealing\
+# -lTKBRep\
+# -lTKBool\
+# -lTKBRep\
+# -lTKTopAlgo\
+# -lTKMesh\
+# -lTKFeat\
+# -lTKGeomAlgo\
+# -std=c++11 -Wno-unused \
+# main.cpp occ_frontend.cpp py_to_occ_frontend.cpp -o main

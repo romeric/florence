@@ -7,7 +7,7 @@ sourcefiles = ['PyInterface_OCC_FrontEnd.pyx', 'py_to_occ_frontend.cpp','occ_fro
 extensions = [
     Extension("PyInterface_OCC_FrontEnd",  sourcefiles,
     	language="c++",
-        include_dirs = ["/home/roman/Dropbox/Python/Core/Supplementary/cpp_src/occ_backend/","/usr/local/include/eigen_3_2_0/",
+        include_dirs = ["/home/roman/Dropbox/Python/Core/Supplementary/cpp_src/occ_backend/","/home/roman/Dropbox/eigen-devel/",
         "/usr/local/include/oce/"],
         libraries=["stdc++",":py_to_occ_frontend.so",":occ_frontend.so",":libTKIGES.so.9",":libTKXSBase.so.9",":libTKBRep.so.9",
         ":libTKernel.so.9",":libTKTopAlgo.so.9",":libTKGeomBase.so.9",":libTKMath.so.9",":libTKHLR.so.9",

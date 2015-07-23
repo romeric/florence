@@ -72,43 +72,27 @@ def main(MainData):
 	# np.savetxt('/home/roman/Desktop/elements_twoarcs_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
 	# np.savetxt('/home/roman/Desktop/points_twoarcs_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%6.4f',delimiter=',')
 	# np.savetxt('/home/roman/Desktop/edges_twoarcs_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
+
+	# np.savetxt('/home/roman/Desktop/elements_i2rae2822_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
+	# np.savetxt('/home/roman/Desktop/points_i2rae2822_p'+str(MainData.C+1)+'.dat', 1000*mesh.points,fmt='%6.4f',delimiter=',')
+	# np.savetxt('/home/roman/Desktop/edges_i2rae2822_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
+
+	# np.savetxt('/home/roman/Desktop/elements_mech2d_seg0_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
+	# np.savetxt('/home/roman/Desktop/points_mech2d_seg0_p'+str(MainData.C+1)+'.dat', 1000*mesh.points,fmt='%6.4f',delimiter=',')
+	# np.savetxt('/home/roman/Desktop/edges_mech2d_seg0_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
+
+	# np.savetxt('/home/roman/Desktop/elements_mech2d_seg2_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
+	# np.savetxt('/home/roman/Desktop/points_mech2d_seg2_p'+str(MainData.C+1)+'.dat', 1000*mesh.points,fmt='%6.4f',delimiter=',')
+	# np.savetxt('/home/roman/Desktop/edges_mech2d_seg2_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
+
+	# np.savetxt('/home/roman/Desktop/elements_mech2dn_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
+	# np.savetxt('/home/roman/Desktop/points_mech2dn_p'+str(MainData.C+1)+'.dat', 1000*mesh.points,fmt='%6.4f',delimiter=',')
+	# np.savetxt('/home/roman/Desktop/edges_mech2dn_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
+
 	# np.savetxt('/home/roman/Desktop/unique_edges_rae2822_p'+str(MainData.C+1)+'.dat', np.unique(mesh.edges),fmt='%d',delimiter=',')
 
 	print 'Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*MainData.nvar
 	
-
-	# import Core.Supplementary.nurbs.cad as iga 
-	# circle = iga.circle(radius=1, center=None, angle=None)
-	# print circle.array
-
-
-	# print edge_elements
-	# print np.asarray(x)
-	# print mesh.edges
-
-	# boundary_node_arrangement = np.zeros((mesh.edges.shape[0],mesh.edges.shape[1]),dtype=np.int64)
-	# for i in range(mesh.edges.shape[0]):
-	# 	co = mesh.points[mesh.edges[i,:],:]
-	# 	right_length = np.linalg.norm(co[1:-1,:] - co[0,:],axis=1)
-	# 	# left_length = np.linalg.norm(co[1:-1,:] - co[-1,:],axis=1)
-	# 	left_length = np.linalg.norm(co[2:,:] - co[1,:],axis=1)
-	# 	# print left_length, right_length
-	# 	length_difference = left_length - right_length
-	# 	# print (length_difference < 0).all()
-	# 	# print length_difference
-	# 	# print left_length
-	# # 	# if i==0:
-	# # 	# 	print co[1:-1,:]
-	# # 	# 	print
-	# # 	# 	print co[0,:]
-	# # 	# 	print 
-	# # 	# 	print co[1:-1,:] - co[0,:]
-	# # 	# 	print 
-	# # 	# 	print right_length
-	# 	if i>17:
-	# 		# print left_length
-	# 		print np.argsort(left_length)+1
-			# print np.argsort(right_length)+1
 
 
 
@@ -127,13 +111,20 @@ def main(MainData):
 	# print mesh.elements.flags
 	# print mesh.points[mesh.edges[22,:],:]
 	# print mesh.edges[18:23,]
-	print mesh.points[9,:]
+	# print mesh.points[5,:]
 
 	# import matplotlib.pyplot as plt
 	# plt.plot(mesh.points[:,0],mesh.points[:,1],'o')
 	# plt.show()
 
-	sys.exit("STOPPED")
+	# print mesh.points[mesh.edges[20:24,:],:]
+	# print mesh.points[mesh.edges[42:46,:],:]
+	# print mesh.elements
+	# print mesh.points
+	# print mesh.edges
+	# print mesh.edges.shape
+
+	# sys.exit("STOPPED")
 	# CALL THE MAIN ROUTINE
 	TotalDisp = MainSolver(MainData,mesh)
 	# np.savetxt('/home/roman/Desktop/displacements.txt', TotalDisp[:,:,-1])

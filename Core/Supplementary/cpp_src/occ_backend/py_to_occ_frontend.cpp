@@ -38,10 +38,10 @@ to_python_structs PyCppInterface(const char* iges_filename, Real scale, Real *po
     }
 
     OCC_FrontEnd occ_interface = OCC_FrontEnd(element_type,ndim);
-    occ_interface.SetElements(elements_eigen_matrix);
-    occ_interface.SetPoints(points_eigen_matrix);
-    occ_interface.SetEdges(edges_eigen_matrix);
-    occ_interface.SetFaces(faces_eigen_matrix);
+    occ_interface.SetMeshElements(elements_eigen_matrix);
+    occ_interface.SetMeshPoints(points_eigen_matrix);
+    occ_interface.SetMeshEdges(edges_eigen_matrix);
+    occ_interface.SetMeshFaces(faces_eigen_matrix);
     occ_interface.SetScale(scale);
     occ_interface.SetCondition(condition);
     occ_interface.ScaleMesh();
@@ -54,29 +54,32 @@ to_python_structs PyCppInterface(const char* iges_filename, Real scale, Real *po
     occ_interface.ReadIGES(iges_filename);
 
     // EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
+    occ_interface.GetGeomVertices();
     occ_interface.GetGeomEdges();
     occ_interface.GetGeomFaces();
 
+    occ_interface.GetGeomPointsOnCorrespondingEdges();
+
     // FIRST IDENTIFY WHICH CURVES CONTAIN WHICH EDGES
-    occ_interface.IdentifyCurveContainingEdge();
+    occ_interface.IdentifyCurvesContainingEdges();
     // PROJECT ALL BOUNDARY POINTS FROM THE MESH TO THE CURVE
     occ_interface.ProjectMeshOnCurve(projection_method);
     // FIX IMAGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
     occ_interface.RepairDualProjectedParameters();
 //    //PERFORM POINT INVERTION FOR THE INTERIOR POINTS
-//    occ_interface.MeshPointInversionCurve();
+    occ_interface.MeshPointInversionCurve();
 
 
     to_python_structs struct_to_python;
-//    struct_to_python.nodes_dir_size = occ_interface.nodes_dir.rows();
-//    // COPYLESS CONVERSION FROM EIGEN TO C ARRAY
-//    Integer *c_array_nodes_dir;
-//    c_array_nodes_dir = occ_interface.nodes_dir.data();
-//    // COPYLESS CONVERSION FROM C ARRAY TO STL VECTOR
-//    struct_to_python.nodes_dir_out_stl.assign(c_array_nodes_dir,c_array_nodes_dir+struct_to_python.nodes_dir_size);
-//    Real *c_array_displacement;
-//    c_array_displacement = occ_interface.displacements_BC.data();
-//    struct_to_python.displacement_BC_stl.assign(c_array_displacement,c_array_displacement+occ_interface.ndim*struct_to_python.nodes_dir_size);
+    struct_to_python.nodes_dir_size = occ_interface.nodes_dir.rows();
+    // COPYLESS CONVERSION FROM EIGEN TO C ARRAY
+    Integer *c_array_nodes_dir;
+    c_array_nodes_dir = occ_interface.nodes_dir.data();
+    // COPYLESS CONVERSION FROM C ARRAY TO STL VECTOR
+    struct_to_python.nodes_dir_out_stl.assign(c_array_nodes_dir,c_array_nodes_dir+struct_to_python.nodes_dir_size);
+    Real *c_array_displacement;
+    c_array_displacement = occ_interface.displacements_BC.data();
+    struct_to_python.displacement_BC_stl.assign(c_array_displacement,c_array_displacement+occ_interface.ndim*struct_to_python.nodes_dir_size);
 
 
     return struct_to_python;

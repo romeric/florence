@@ -74,19 +74,28 @@ def ProblemData(MainData):
 	class MeshInfo(object):
 		MeshType = 'tri'
 		Nature = 'straight'
-		Reader = 'ReadSeparate'
+		# Reader = 'ReadSeparate'
+		Reader = 'Read'
 
 		ConnectivityFile = ProblemPath + '/elements_rae.dat'
 		CoordinatesFile = ProblemPath +'/points_rae.dat'
+		# FileName = ProblemPath +'/RAE2822_Isotropic_90.dat'
+		FileName = ProblemPath +'/RAE2822_Isotropic_414.dat'
 		
 
 
 	class BoundaryData(object):
 		# NURBS/NON-NURBS TYPE BOUNDARY CONDITION
 		Type = 'nurbs'
-		Type = 'straight'
+		# Type = 'straight'
 		# Type = 'mixed'
 		IGES_File = ProblemPath + '/rae2822.igs'
+
+		# condition = 2.
+		# scale = 1000.
+
+		condition = 0.6
+		scale = 1.
 
 
 		class DirichArgs(object):

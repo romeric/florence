@@ -476,7 +476,7 @@ class PostProcess(object):
 		# print MainData.ScaledJacobian.shape, np.unique(elements).shape
 
 
-		# fig = plt.figure()
+		fig = plt.figure()
 		# # plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),MainData.ScaledJacobian,width=1.,color='#FE6F5E',alpha=0.8)
 
 		plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),MainData.ScaledJacobian,width=1.,alpha=0.4)

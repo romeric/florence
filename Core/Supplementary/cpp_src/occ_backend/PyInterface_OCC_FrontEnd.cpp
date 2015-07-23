@@ -11,7 +11,7 @@
         ], 
         "include_dirs": [
             "/home/roman/Dropbox/Python/Core/Supplementary/cpp_src/occ_backend/", 
-            "/usr/local/include/eigen_3_2_0/", 
+            "/home/roman/Dropbox/eigen-devel/", 
             "/usr/local/include/oce/"
         ], 
         "language": "c++", 
