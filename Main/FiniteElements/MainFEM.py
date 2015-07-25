@@ -92,6 +92,7 @@ def main(MainData):
 	# np.savetxt('/home/roman/Desktop/unique_edges_rae2822_p'+str(MainData.C+1)+'.dat', np.unique(mesh.edges),fmt='%d',delimiter=',')
 
 	print 'Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*MainData.nvar
+	print 'Number of mesh edge nodes', np.unique(mesh.edges).shape[0]
 	
 
 
@@ -123,6 +124,7 @@ def main(MainData):
 	# print mesh.points
 	# print mesh.edges
 	# print mesh.edges.shape
+	# print mesh.points[2,:]*1000
 
 	# sys.exit("STOPPED")
 	# CALL THE MAIN ROUTINE

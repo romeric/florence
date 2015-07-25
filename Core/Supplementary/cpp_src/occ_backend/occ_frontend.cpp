@@ -635,29 +635,31 @@ void OCC_FrontEnd::GetGeomFaces()
 
 void OCC_FrontEnd::GetGeomPointsOnCorrespondingEdges()
 {
-    this->geometry_points_on_curves = Eigen::MatrixR::Zero(2*this->geometry_curves.size(),this->ndim+2);
-    Integer counter=0;
-    Real edge_counter=0;
+    this->geometry_points_on_curves.clear();
+//    Real edge_counter=0;
     for (TopExp_Explorer explorer_edge(this->imported_shape,TopAbs_EDGE); explorer_edge.More(); explorer_edge.Next())
     {
         // GET THE EDGES
         TopoDS_Edge current_edge = TopoDS::Edge(explorer_edge.Current());
-        // CONVERT THEM TO GEOM_CURVE
+
+        Eigen::MatrixR current_edge_coords(2,3);
+        Integer counter=0;
         for (TopExp_Explorer explorer_point(current_edge,TopAbs_VERTEX); explorer_point.More(); explorer_point.Next())
         {
             TopoDS_Vertex current_vertex = TopoDS::Vertex(explorer_point.Current());
             gp_Pnt current_vertex_point = BRep_Tool::Pnt(current_vertex);
 
-            geometry_points_on_curves(counter,0) = current_vertex_point.X();
-            geometry_points_on_curves(counter,1) = current_vertex_point.Y();
-            geometry_points_on_curves(counter,2) = current_vertex_point.Z();
-            geometry_points_on_curves(counter,3) = edge_counter;
+            current_edge_coords(counter,0) = current_vertex_point.X();
+            current_edge_coords(counter,1) = current_vertex_point.Y();
+            current_edge_coords(counter,2) = current_vertex_point.Z();
+
             counter++;
         }
-        edge_counter++;
+        this->geometry_points_on_curves.push_back(current_edge_coords);
+//        print(this->geometry_points_on_curves[edge_counter]);
+//        edge_counter++;
     }
-    println(geometry_points_on_curves);
-    exit(EXIT_FAILURE);
+//    exit(EXIT_FAILURE);
 }
 
 void OCC_FrontEnd::GetInternalCurveScale()
@@ -771,28 +773,8 @@ void OCC_FrontEnd::IdentifyCurvesContainingEdges()
 //        cout << current_curve->FirstParameter() << " " << current_curve->LastParameter() << " " << cnp::length(current_curve,1)<< endl;
 //    }
 
-    // print(mesh_points(0,0),mesh_points(0,1)); // -35.2309, -7.7617
-//    gp_Pnt node_to_be_projected = gp_Pnt(-35.2309,-7.7617,0.0);
-//    gp_Pnt node_to_be_projected = gp_Pnt(mesh_points(0,0),mesh_points(0,1),0.0);
 
-//    Real m1 = 1.+1.1e-6;    //Real m2 = 10.;
-//    gp_Pnt node_to_be_projected = gp_Pnt(m1*mesh_points(0,0),m1*mesh_points(0,1),0.0);
-////    Real m1 = 1.-1.1e-5;    //Real m2 = 10.;
-////    gp_Pnt node_to_be_projected = gp_Pnt(m1*mesh_points(1,0),m1*mesh_points(1,1),0.0);
-//    GeomAPI_ProjectPointOnCurve proj;
-//    proj.Init(node_to_be_projected,this->geometry_curves[0]);
-//    Real parameterU = proj.LowerDistanceParameter();
-//    print(parameterU);
-
-
-
-
-
-//    print(this->geometry_curves.size());
 //    exit(EXIT_FAILURE);
-//}
-
-    exit(EXIT_FAILURE);
 }
 
 void OCC_FrontEnd::ProjectMeshOnCurve(const char *projection_method)
@@ -806,24 +788,18 @@ void OCC_FrontEnd::ProjectMeshOnCurve(const char *projection_method)
     // LOOP OVER EDGES
     for (Integer iedge=0; iedge<this->dirichlet_edges.rows(); ++iedge)
     {
-//        this->listedges.push_back(iedge);
         // LOOP OVER THE TWO END NODES OF THIS EDGE (VERTICES OF THE EDGE)
         for (Integer inode=0; inode<this->ndim; ++inode)
         {
             // GET THE COORDINATES OF THE NODE
             Real x = this->mesh_points(this->dirichlet_edges(iedge,inode),0);
             Real y = this->mesh_points(this->dirichlet_edges(iedge,inode),1);
+//            println(x,y);
 
             // GET THE CURVE THAT THIS EDGE HAS TO BE PROJECTED TO
             UInteger icurve = this->dirichlet_edges(iedge,2);
-//            println(icurve);
-//            print(this->geometry_curves_types[icurve]) ;
             // GET THE NODE THAT HAS TO BE PROJECTED TO THE CURVE
             gp_Pnt node_to_be_projected = gp_Pnt(x,y,0.0);
-//            gp_Pnt node_to_be_projected = gp_Pnt(1e-3*x,1e-3*y,0.0);
-//            gp_Pnt node_to_be_projected = gp_Pnt(1.1*x,1.1*y,0.0);
-//            gp_Pnt node_to_be_projected = gp_Pnt(0.9*x,0.9*y,0.0);
-//            gp_Pnt node_to_be_projected = gp_Pnt(1.001*x,1.001*y,0.0);
             // GET CURVE LENGTH
             Real curve_length = cnp::length(this->geometry_curves[icurve],1.);
             // PROJECT THE NODES ON THE CURVE AND GET THE PARAMETER U
@@ -832,33 +808,24 @@ void OCC_FrontEnd::ProjectMeshOnCurve(const char *projection_method)
             {
                 GeomAPI_ProjectPointOnCurve proj;
                 proj.Init(node_to_be_projected,this->geometry_curves[icurve]);
-//                proj.Init(node_to_be_projected,this->geometry_curves[0]);
                 parameterU = proj.LowerDistanceParameter();
             }
             catch (StdFail_NotDone)
             {
                 // CHECK IF THE FAILURE IS DUE TO FLAOTING POINT ARITHMETIC
-                // GET LENGTH OF EDGE
-//                Eigen::Matrix<Integer,1,1,Eigen::RowMajor> arr_rows; arr_rows << iedge;
-//                Eigen::MatrixI arr_rows = this->mesh_edges.row(iedge).transpose();
-//                Eigen::Matrix<Integer,2,1,Eigen::RowMajor>  arr_rows; arr_rows << mesh_edges(iedge,0), mesh_edges(iedge,1);
-                Eigen::MatrixI arr_rows(2,1); arr_rows(0)=mesh_edges(iedge,0); arr_rows(1) = mesh_edges(iedge,1);
-                Eigen::MatrixI arr_cols = cnp::arange(this->ndim);
-                Eigen::MatrixR edge_coords = cnp::take(this->mesh_points,arr_rows,arr_cols);
-//                println(edge_coords);
-                gp_Pnt modified_node_to_be_projected;
-//                Real precision_tolerance =  1.0e-2;
-                Real precision_tolerance =  5.0e-2;
-                if (inode==0)
+                // CHECK IF THIS EDGE POINT IS ALSO A GEOMETRY POINT (IT MOST PROBABLY IS)
+                Real x_curve = this->geometry_points_on_curves[icurve](inode,0);
+                Real y_curve = this->geometry_points_on_curves[icurve](inode,1);
+                Real precision_tolerance = 1.0e-4;
+                if (abs(x_curve-x) < precision_tolerance && abs(y_curve-y) < precision_tolerance)
                 {
-                    Eigen::MatrixR dumm = (edge_coords.row(1) - precision_tolerance*edge_coords.row(0));
-                    modified_node_to_be_projected = gp_Pnt(dumm(0),dumm(1),0.0);
+                    // PROJECT THE CURVE POINT INSTEAD OF THE EDGE POINT
+                    gp_Pnt node_to_be_projected = gp_Pnt(x_curve,y_curve,0.0);
                     try
                     {
                         GeomAPI_ProjectPointOnCurve proj;
-                        proj.Init(modified_node_to_be_projected,this->geometry_curves[icurve]);
+                        proj.Init(node_to_be_projected,this->geometry_curves[icurve]);
                         parameterU = proj.LowerDistanceParameter();
-//                        print(dumm);
 //                        print(parameterU);
                     }
                     catch (StdFail_NotDone)
@@ -866,36 +833,12 @@ void OCC_FrontEnd::ProjectMeshOnCurve(const char *projection_method)
                         std::cerr << "The edge node was not projected to the right curve. Curve number: " << " " << icurve << std::endl;
                     }
                 }
-                else if (inode==1)
-                {
-                    Eigen::MatrixR dumm = (edge_coords.row(1) - precision_tolerance*edge_coords.row(0));
-//                    Eigen::MatrixR dumm = (edge_coords.row(0) - precision_tolerance*edge_coords.row(1));
-                    modified_node_to_be_projected = gp_Pnt(dumm(0),dumm(1),0.0);
-//                    println(edge_coords);
-//                    print(dumm);
-                    try
-                    {
-                        GeomAPI_ProjectPointOnCurve proj;
-                        proj.Init(modified_node_to_be_projected,this->geometry_curves[icurve]);
-                        parameterU = proj.LowerDistanceParameter();
-                        print(parameterU);
-
-                    }
-                    catch (StdFail_NotDone)
-                    {
-                        std::cerr << "The edge node was not projected to the right curve. Curve number: " << " " << icurve << std::endl;
-                    }
-                }
-//                print ((edge_coords.row(1) - 1.0e-6*edge_coords.row(0)) );
-//                print ((edge_coords.row(0) - 1.0e-5*edge_coords.row(1)) );
-                // FIND THE LENGTH OF EDGE (PLANAR EDGE NOT ALONG THE CURVE)
-//                Real edge_length = (edge_coords.row(1) - edge_coords.row(0)).norm();
-//                println( edge_length );
-//                std::cerr << "The edge node was not projected to the right curve. Curve number: " << " " << icurve << std::endl;
-//                println(x,y);
+//                print(x_curve-x,y_curve-y);
+//                print(curve_point_coords);
+//                print(this->geometry_points_on_curves[icurve].block(0,0,2,2));
+//                print(this->geometry_points_on_curves[icurve]);
             }
-//            println(icurve);
-//            println(x,y,parameterU);
+            print(x,y);
             // STORE ID OF NURBS
             this->projection_ID(iedge,inode) = icurve;
             // STORE PROJECTION POINT PARAMETER ON THE CURVE (NORMALISED)
@@ -905,10 +848,19 @@ void OCC_FrontEnd::ProjectMeshOnCurve(const char *projection_method)
 
     // SORT PROJECTED PARAMETERS OF EACH EDGE - MUST INITIALISE SORT INDICES
     this->sorted_projected_indices = Eigen::MatrixI::Zero(this->projection_U.rows(),this->projection_U.cols());
+
+//    print(this->projection_U);
     cnp::sort_rows(this->projection_U,this->sorted_projected_indices);
 //    print(this->projection_U);
+//    print(sorted_projected_indices);
 //    print(this->dirichlet_edges);
 //    print(this->geometry_curves_types);
+
+//    Handle_Geom_Curve dd =  this->geometry_curves[1];
+//    gp_Pnt gg;
+//    dd->D0(dd->LastParameter()/2.,gg);
+//    print(gg.X(),gg.Y());
+
     exit(EXIT_FAILURE);
 }
 
@@ -1123,66 +1075,74 @@ void OCC_FrontEnd::RepairDualProjectedParameters()
 {
     Real lengthTol = 1.0e-10;
 
+    //#pragma omp parallel for
     for (Integer iedge=0;iedge<this->dirichlet_edges.rows();++iedge)
     {
         Integer id_curve = this->dirichlet_edges(iedge,2);
-        // GET THE CURRENT EDGE
-        Eigen::Matrix<Real,1,2> current_edge_U = this->projection_U.row(iedge);
-        // SORT IT
-        std::sort(current_edge_U.data(),current_edge_U.data()+current_edge_U.cols());
-        // GET THE FIRST AND LAST PARAMETERS OF THIS CURVE
-        Real u1 = this->geometry_curves[id_curve]->FirstParameter()/cnp::length(this->geometry_curves[id_curve],1.0/this->scale);
-        Real u2 = this->geometry_curves[id_curve]->LastParameter()/cnp::length(this->geometry_curves[id_curve],1.0/this->scale);
-
-//        Real u1 = this->geometry_curves[id_curve]->FirstParameter()/cnp::length(this->geometry_curves[id_curve],1.);
-//        Real u2 = this->geometry_curves[id_curve]->LastParameter()/cnp::length(this->geometry_curves[id_curve],1.);
-//        cout << u1 << " "<< u2<< endl;
-//        cout << current_edge_U << endl;
-        // IF THE U PARAMETER FOR THE FIRST NODE OF THIS EDGE EQUALS TO THE FIRST PARAMETER
-        if ( abs(current_edge_U(0) - u1) < lengthTol )
+        Handle_Geom_Curve current_curve = this->geometry_curves[id_curve];
+        // DUAL PROJECTION HAPPENS FOR CLOSED CURVES
+        if (current_curve->IsClosed() || current_curve->IsPeriodic())
         {
-             // WE ARE AT THE STARTING PARAMETER - GET THE LENGTH TO uc
-             Real uc = current_edge_U(1);
-//             print(u1,uc,u2);
-             GeomAdaptor_Curve current_adapt_curve(this->geometry_curves[id_curve]);
-             Real l0c = GCPnts_AbscissaPoint::Length(current_adapt_curve,u1,uc)/this->scale;
-             Real l01 = GCPnts_AbscissaPoint::Length(current_adapt_curve,u1,u2)/this->scale;
+            // GET THE CURRENT EDGE
+            Eigen::Matrix<Real,1,2> current_edge_U = this->projection_U.row(iedge);
+            // SORT IT
+            std::sort(current_edge_U.data(),current_edge_U.data()+current_edge_U.cols());
+            // GET THE FIRST AND LAST PARAMETERS OF THIS CURVE
+            Real u1 = current_curve->FirstParameter()/cnp::length(current_curve,1.0/this->scale);
+            Real u2 = current_curve->LastParameter()/cnp::length(current_curve,1.0/this->scale);
 
-//             Real l0c = GCPnts_AbscissaPoint::Length(current_adapt_curve,u1,uc);
-//             Real l01 = GCPnts_AbscissaPoint::Length(current_adapt_curve,u1,u2);
-//             print(l0c,l01);
-//             Real ld = GCPnts_AbscissaPoint::Length(current_adapt_curve,0,0.5)/this->scale;
-//             print(ld,l0c,l01);
-             //if ( (l0c-u1) > (l01-l0c))
-             if ( l0c > (l01-l0c))
-             {
-                 // FIX THE PARAMETER TO LastParameter
-                 this->projection_U(iedge,0)=u2;
-             }
-             //cout << l0c << " " <<  l01 << endl<<endl;
-        }
-        else if ( abs(current_edge_U(1) - u2) < lengthTol )
-        {
-             // WE ARE AT THE END PARAMETER - GET THE LENGTH TO uc
-             Real uc = current_edge_U(0);
-             GeomAdaptor_Curve dum_curve(this->geometry_curves[id_curve]);
-             Real lc1 = GCPnts_AbscissaPoint::Length(dum_curve,uc,u2)/this->scale;
-             Real l0c = GCPnts_AbscissaPoint::Length(dum_curve,u1,uc)/this->scale;
+    //        Real u1 = this->geometry_curves[id_curve]->FirstParameter()/cnp::length(this->geometry_curves[id_curve],1.);
+    //        Real u2 = this->geometry_curves[id_curve]->LastParameter()/cnp::length(this->geometry_curves[id_curve],1.);
+    //        cout << u1 << " "<< u2<< endl;
+    //        cout << current_edge_U << endl;
+    //        println(current_edge_U,u1,u2);
+            // IF THE U PARAMETER FOR THE FIRST NODE OF THIS EDGE EQUALS TO THE FIRST PARAMETER
+            if ( abs(current_edge_U(0) - u1) < lengthTol )
+            {
+                 // WE ARE AT THE STARTING PARAMETER - GET THE LENGTH TO uc
+                 Real uc = current_edge_U(1);
+    //             print(u1,uc,u2);
+                 GeomAdaptor_Curve current_adapt_curve(current_curve);
+                 Real l0c = GCPnts_AbscissaPoint::Length(current_adapt_curve,u1,uc)/this->scale;
+                 Real l01 = GCPnts_AbscissaPoint::Length(current_adapt_curve,u1,u2)/this->scale;
 
-             //if ( (l0c-u1) > (l01-l0c))
-             if ( l0c < lc1 )
-             {
-                 // FIX THE PARAMETER TO FirstParameter
-                 this->projection_U(iedge,1)=u1;
-             }
-             //cout << l0c << " " <<  lc1 << endl<<endl;
+    //             Real l0c = GCPnts_AbscissaPoint::Length(current_adapt_curve,u1,uc);
+    //             Real l01 = GCPnts_AbscissaPoint::Length(current_adapt_curve,u1,u2);
+    //             print(l0c,l01);
+    //             Real ld = GCPnts_AbscissaPoint::Length(current_adapt_curve,0,0.5)/this->scale;
+    //             print(ld,l0c,l01);
+                 //if ( (l0c-u1) > (l01-l0c))
+                 if ( l0c > (l01-l0c))
+                 {
+                     // FIX THE PARAMETER TO LastParameter
+                     this->projection_U(iedge,0) = u2;
+                 }
+                 //cout << l0c << " " <<  l01 << endl<<endl;
+            }
+            else if ( abs(current_edge_U(1) - u2) < lengthTol )
+            {
+                 // WE ARE AT THE END PARAMETER - GET THE LENGTH TO uc
+                 Real uc = current_edge_U(0);
+                 GeomAdaptor_Curve current_adapt_curve(current_curve);
+                 Real lc1 = GCPnts_AbscissaPoint::Length(current_adapt_curve,uc,u2)/this->scale;
+                 Real l0c = GCPnts_AbscissaPoint::Length(current_adapt_curve,u1,uc)/this->scale;
+
+                 //if ( (l0c-u1) > (l01-l0c))
+                 if ( l0c < lc1 )
+                 {
+                     // FIX THE PARAMETER TO FirstParameter
+                     this->projection_U(iedge,1) = u1;
+                 }
+                 //cout << l0c << " " <<  lc1 << endl<<endl;
+            }
         }
     }
     // SORT projection_U AGAIN
 //    print(this->projection_U);
     cnp::sort_back_rows(this->projection_U,this->sorted_projected_indices);
-//    print(this->projection_U);
-//    exit(EXIT_FAILURE);
+//    print(sorted_projected_indices);
+    print(this->projection_U);
+    exit(EXIT_FAILURE);
 
 }
 
@@ -1375,11 +1335,12 @@ void OCC_FrontEnd::MeshPointInversionCurve()
 
             this->displacements_BC(this->index_nodes(j),0) = (xEq.X()/this->scale - gp_pnt_old(0));
             this->displacements_BC(this->index_nodes(j),1) = (xEq.Y()/this->scale - gp_pnt_old(1));
+            //this->displacements_BC(this->index_nodes(j),2) = (xEq.Z()/this->scale - gp_pnt_old(2)); // USEFULL FOR 3D CURVES
 
 //            print( internal_scale*this->u_of_all_fekete_mesh_edges(idir, this->boundary_edges_order(this->listedges[idir],j))*scale );
 //            print(this->u_of_all_fekete_mesh_edges(idir, this->boundary_edges_order(this->listedges[idir],j))*scale );
 //            print( this->boundary_edges_order(this->listedges[idir],j) );
-
+//           print(this->u_of_all_fekete_mesh_edges(idir,this->boundary_edges_order(this->listedges[idir],j))*this->scale);
 //            print(uEq);
 //            print(current_curve_adapt.GetType());
 //            print(length_current_curve);
@@ -1539,72 +1500,76 @@ void OCC_FrontEnd::EstimatedParameterUOnMesh()
         Handle_Geom_Curve current_curve = this->geometry_curves[id_curve];
         u_of_all_fekete_mesh_edges.block(idir,0,1,this->fekete.rows()) = ParametricFeketePoints(current_curve,u1,u2).transpose();
 //        print(u_of_all_fekete_mesh_edges);
-        // FIND THE SCALED LAST PARAMETER
-        Real scaled_endU = this->curve_to_parameter_scale_U(id_curve);
-        GeomAdaptor_Curve current_curve_adapt(current_curve);
-        Real umin = u_of_all_fekete_mesh_edges(idir,0); //abs
-        Real umax = u_of_all_fekete_mesh_edges(idir,this->fekete.rows()-1); //abs
-//        cout << umin << " " << umax << endl;
-        if (umin>umax)
+        if (current_curve->IsClosed())
         {
-            Real temp = umin;
-            umin = umax;
-            umax = temp;
-        }
-        Real current_curve_length = cnp::length(current_curve,1.);
-        umin *= current_curve_length/this->scale;
-        umax *= current_curve_length/this->scale;
-        Real length_right = GCPnts_AbscissaPoint::Length(current_curve_adapt,current_curve->FirstParameter(),umin);
-        Real length_left = GCPnts_AbscissaPoint::Length(current_curve_adapt,umax,current_curve->LastParameter());
-        Real edge_length = GCPnts_AbscissaPoint::Length(current_curve_adapt,umin,umax);
-//        cout << current_curve_length << endl;
-//        cout << length_right << " "<< length_left << "  "<< edge_length << endl;
-//        cout << umin << " " << umax << endl;
-//        cout << current_curve->FirstParameter() << " " << current_curve->LastParameter() << " "  << umin << " " << umax << " " << id_curve << endl;
-//        cout << umin << " "<< umax << " "<< current_curve->LastParameter() << endl;
-//        print (length_left+length_right , edge_length);
-        if (length_left+length_right < edge_length)
-        {
-//            assert ( (length_left+length_right) - edge_length > 1e-4 && "TOO_COARSE_MESH");
-            // MESH BOUNDARY (EDGE/FACE) PASSES THROUGH THE ORIGIN
-            umin = umin/current_curve_length*this->scale;
-            umax = umax/current_curve_length*this->scale;
-            Real trespassed_length = abs(this->scale*current_curve->FirstParameter()/current_curve_length-umin) + \
-                    abs(scaled_endU-umax);
 
-            u1 = umin;
-            u2 = this->scale*current_curve->FirstParameter()/current_curve_length;
-            Eigen::MatrixR right_one = (u1 - (trespassed_length)/2.0*((this->fekete).array()+1.)).matrix();
-
-            u1 = umax;
-            u2 = this->scale*current_curve->LastParameter()/current_curve_length;
-            Eigen::MatrixR left_one = (u1 + (trespassed_length)/2.0*((this->fekete).array()+1.)).matrix();
-//            cout << trespassed_length << endl;
-//            cout << right_one.transpose() << " " << left_one.transpose() << endl;
-            std::vector<Real> dum_1; dum_1.clear();
-            for (Integer i=0; i<right_one.rows();++i)
+            // FIND THE SCALED LAST PARAMETER
+            Real scaled_endU = this->curve_to_parameter_scale_U(id_curve);
+            GeomAdaptor_Curve current_curve_adapt(current_curve);
+            Real umin = u_of_all_fekete_mesh_edges(idir,0); //abs
+            Real umax = u_of_all_fekete_mesh_edges(idir,this->fekete.rows()-1); //abs
+    //        cout << umin << " " << umax << endl;
+            if (umin>umax)
             {
-                if (right_one(i) >= this->scale*current_curve->FirstParameter()/current_curve_length)
-                {
-                    dum_1.push_back(right_one(i));
-                }
+                Real temp = umin;
+                umin = umax;
+                umax = temp;
             }
-
-            for (Integer i=left_one.rows()-1; i>=0;--i)
+            Real current_curve_length = cnp::length(current_curve,1.);
+            umin *= current_curve_length/this->scale;
+            umax *= current_curve_length/this->scale;
+            Real length_right = GCPnts_AbscissaPoint::Length(current_curve_adapt,current_curve->FirstParameter(),umin);
+            Real length_left = GCPnts_AbscissaPoint::Length(current_curve_adapt,umax,current_curve->LastParameter());
+            Real edge_length = GCPnts_AbscissaPoint::Length(current_curve_adapt,umin,umax);
+    //        cout << current_curve_length << endl;
+//            cout << length_right << " "<< length_left << "  "<< edge_length << endl;
+    //        cout << umin << " " << umax << endl;
+    //        cout << current_curve->FirstParameter() << " " << current_curve->LastParameter() << " "  << umin << " " << umax << " " << id_curve << endl;
+    //        cout << umin << " "<< umax << " "<< current_curve->LastParameter() << endl;
+    //        print (length_left+length_right , edge_length);
+            if (length_left+length_right < edge_length)
             {
-                if (left_one(i) < this->scale*current_curve->LastParameter()/current_curve_length)
+    //            assert ( (length_left+length_right) - edge_length > 1e-4 && "TOO_COARSE_MESH");
+                // MESH BOUNDARY (EDGE/FACE) PASSES THROUGH THE ORIGIN
+                umin = umin/current_curve_length*this->scale;
+                umax = umax/current_curve_length*this->scale;
+                Real trespassed_length = abs(this->scale*current_curve->FirstParameter()/current_curve_length-umin) + \
+                        abs(scaled_endU-umax);
+
+                u1 = umin;
+                u2 = this->scale*current_curve->FirstParameter()/current_curve_length;
+                Eigen::MatrixR right_one = (u1 - (trespassed_length)/2.0*((this->fekete).array()+1.)).matrix();
+
+                u1 = umax;
+                u2 = this->scale*current_curve->LastParameter()/current_curve_length;
+                Eigen::MatrixR left_one = (u1 + (trespassed_length)/2.0*((this->fekete).array()+1.)).matrix();
+    //            cout << trespassed_length << endl;
+    //            cout << right_one.transpose() << " " << left_one.transpose() << endl;
+                std::vector<Real> dum_1; dum_1.clear();
+                for (Integer i=0; i<right_one.rows();++i)
                 {
-                    dum_1.push_back(left_one(i));
+                    if (right_one(i) >= this->scale*current_curve->FirstParameter()/current_curve_length)
+                    {
+                        dum_1.push_back(right_one(i));
+                    }
                 }
 
+                for (Integer i=left_one.rows()-1; i>=0;--i)
+                {
+                    if (left_one(i) < this->scale*current_curve->LastParameter()/current_curve_length)
+                    {
+                        dum_1.push_back(left_one(i));
+                    }
+
+                }
+                Eigen::MatrixR dum_1_eigen = Eigen::Map<Eigen::MatrixR>(dum_1.data(),dum_1.size(),1);
+                if (u_of_all_fekete_mesh_edges(idir,0) > u_of_all_fekete_mesh_edges(idir,1))
+                {
+                    dum_1_eigen = dum_1_eigen.reverse().eval();
+                }
+    //            print (dum_1_eigen);
+                this->u_of_all_fekete_mesh_edges.block(idir,0,1,this->fekete.rows()) = dum_1_eigen.transpose();
             }
-            Eigen::MatrixR dum_1_eigen = Eigen::Map<Eigen::MatrixR>(dum_1.data(),dum_1.size(),1);
-            if (u_of_all_fekete_mesh_edges(idir,0) > u_of_all_fekete_mesh_edges(idir,1))
-            {
-                dum_1_eigen = dum_1_eigen.reverse().eval();
-            }
-//            print (dum_1_eigen);
-            this->u_of_all_fekete_mesh_edges.block(idir,0,1,this->fekete.rows()) = dum_1_eigen.transpose();
         }
     }
 //    print (boundary_edges_order);

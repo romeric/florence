@@ -54,7 +54,7 @@ to_python_structs PyCppInterface(const char* iges_filename, Real scale, Real *po
     occ_interface.ReadIGES(iges_filename);
 
     // EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
-    occ_interface.GetGeomVertices();
+    //occ_interface.GetGeomVertices();
     occ_interface.GetGeomEdges();
     occ_interface.GetGeomFaces();
 
@@ -81,7 +81,7 @@ to_python_structs PyCppInterface(const char* iges_filename, Real scale, Real *po
     c_array_displacement = occ_interface.displacements_BC.data();
     struct_to_python.displacement_BC_stl.assign(c_array_displacement,c_array_displacement+occ_interface.ndim*struct_to_python.nodes_dir_size);
 
-
+//    cout << occ_interface.displacements_BC << endl;
     return struct_to_python;
 
 }

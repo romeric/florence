@@ -8,7 +8,7 @@ SOURCES += main.cpp \
     occ_frontend.cpp \
     py_to_occ_frontend.cpp
 
-QMAKE_CXXFLAGS += -Wno-unused -std=c++11 #-O2 -msse -msse2 -fomit-frame-pointer -fno-strict-aliasing
+QMAKE_CXXFLAGS += -Wno-unused -std=c++11 # -O2 #-fopenmp -msse -msse2 -fomit-frame-pointer -fno-strict-aliasing
 
 INCLUDEPATH +=/home/roman/Dropbox/eigen-devel
 #INCLUDEPATH +=/home/roman/Dropbox/eigen

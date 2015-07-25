@@ -45,6 +45,7 @@ def ApplyDirichletBoundaryConditions(stiffness,F,nmesh,MainData):
 			OCC_Interface.SetBoundaryFeketePoints(boundary_fekete)
 			OCC_Interface.SetProjectionMethod("Bisection")
 			nodesDBC, Dirichlet = OCC_Interface.ComputeDirichletBoundaryConditions()
+			# print Dirichlet
 			# import sys; sys.exit(0)
 			# from Core.Supplementary.cpp_src.occ_backend.PyInterface_OCC_FrontEnd import __ComputeDirichletBoundaryConditions__
 			# nodesDBC, Dirichlet = __ComputeDirichletBoundaryConditions__(MainData.BoundaryData.IGES_File, scale,
@@ -55,6 +56,8 @@ def ApplyDirichletBoundaryConditions(stiffness,F,nmesh,MainData):
 			# print nodesDBC
 			# print nodesDBC.flags
 			# print nodesDBC[0]
+			# print Dirichlet
+			# print nmesh.points
 			# import sys; sys.exit(0)
 		print 'Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds'
 

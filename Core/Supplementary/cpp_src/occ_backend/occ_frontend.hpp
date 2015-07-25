@@ -38,8 +38,8 @@ public:
     std::vector<gp_Pnt> geometry_points;
     std::vector<Handle_Geom_Curve> geometry_curves;
     std::vector<Handle_Geom_Surface> geometry_surfaces;
-    Eigen::MatrixR geometry_points_on_curves;
-    Eigen::MatrixR geometry_points_on_surfaces;
+    std::vector<Eigen::MatrixR> geometry_points_on_curves;
+    std::vector<Eigen::MatrixR> geometry_points_on_surfaces;
     std::vector<Integer> geometry_curves_types;
     std::vector<Integer> geometry_surfaces_types;
     std::vector<Handle_Geom_BSplineCurve> geometry_curves_bspline;

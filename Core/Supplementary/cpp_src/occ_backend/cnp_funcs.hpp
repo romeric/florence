@@ -122,7 +122,7 @@ inline void sort_rows(Eigen::MatrixR & arr)
     }
 }
 
-template<typename T> inline void sort_rows(Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> & arr,Eigen::MatrixI &indices)
+template<typename T> inline void sort_rows(Eigen::Matrix<T,-1,-1,1> & arr,Eigen::MatrixI &indices)
 {
     /* Sorts a 2D array row by row*/
 
@@ -141,8 +141,7 @@ template<typename T> inline void sort_rows(Eigen::Matrix<T,Eigen::Dynamic,Eigen:
 }
 
 template<typename T>
-inline void sort_back_rows(Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> &arr,
-                                                                                     Eigen::MatrixI &idx)
+inline void sort_back_rows(Eigen::Matrix<T,-1,-1,1>&arr,Eigen::MatrixI &idx)
 {
     /* Sorts back the array row-wise to its original shape given the sort indices idx. No copy involved */
     assert (idx.rows()==arr.rows() && idx.cols()==arr.cols());

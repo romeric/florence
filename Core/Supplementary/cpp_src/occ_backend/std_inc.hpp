@@ -15,9 +15,12 @@
 #include <typeinfo>
 #include <chrono>
 
+#include <omp.h>
+
 typedef int64_t Integer;
 typedef uint64_t UInteger;
 typedef double Real;
+typedef bool Boolean;
 
 #endif // STD_INC_HPP
 

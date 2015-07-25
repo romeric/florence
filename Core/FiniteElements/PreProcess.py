@@ -54,8 +54,8 @@ def PreProcess(MainData,Pr,pwd):
 	# 	print u'\u2717'.encode('utf8')+' : ','Imported mesh has',mesh_node_order,'node ordering'
 	
 
-	# mesh.points *=1000.
-	mesh.PlotMeshNumberingTri()
+	mesh.points *=1000.
+	# mesh.PlotMeshNumberingTri()
 	# print np.linalg.norm(mesh.points,axis=1)
 	# GENERATE pMESHES FOR HIGH C
 	############################################################################
