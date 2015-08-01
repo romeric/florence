@@ -19,7 +19,7 @@ def FindDuplicatesXYZ(i,Xs,sorted_repoints,Decimals):#
 	dups = None
 	duplicates_list = None 
 
-	# IF THE MULITPLICITY OF A GIVEN X-VALUE IS 1 THEN INGONRE
+	# IF THE MULITPLICITY OF A GIVEN X-VALUE IS 1 THEN IGNORE
 	if Xs[i,1]!=1:
 		# IF THE MULTIPLICITY IS MORE THAN 1, THEN FIND WHERE ALL IN THE SORTED ARRAY THIS X-VALUE OCCURS
 		dups = np.arange(np.sum(np.int64(Xs[:i,1])),np.sum(np.int64(Xs[:i+1,1])))
