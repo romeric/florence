@@ -20,7 +20,7 @@ from NodeLoopTriNPSP_Cython import NodeLoopTriNPSP_Cython
 # NEW METHOD - BASED ON (SCIPY/NUMPY) ITEMFREQ, UNIQUE & ARGSORT --> UNSTABLE METHOD DUE TO ROUND-OFF
 
 def NodeLoopTriNPSP_PARMAP_1(i,sorted_repoints,Xs,invX,tol):
-	# IF THE MULITPLICITY OF A GIVEN X-VALUE IS 1 THEN INGONRE
+	# IF THE MULITPLICITY OF A GIVEN X-VALUE IS 1 THEN IGNORE
 	dups= None; Ys = None
 	flags = None
 	if Xs[i,1]!=1:

@@ -13,6 +13,16 @@ to_python_structs PyCppInterface(const char* iges_filename, Real scale, Real *po
     //Eigen::MatrixR points_eigen_matrix(rows,cols); memcpy(eigen_matrix.data(), points_array, sizeof(double)*rows*cols);
     Eigen::MatrixI elements_eigen_matrix = Eigen::Map<Eigen::MatrixI>(elements_array,element_rows,element_cols);
 
+//    Eigen::Map<Eigen::MatrixR> points_eigen_matrix(points_array,points_rows,points_cols);
+//    Eigen::Map<Eigen::MatrixI> elements_eigen_matrix(elements_array,element_rows,element_cols);
+
+//    Eigen::MatrixR points_eigen_matrix;
+//    Eigen::MatrixI elements_eigen_matrix;
+//    new (&points_eigen_matrix) Eigen::Map<Eigen::MatrixR> (points_array,points_rows,points_cols);
+//    new (&elements_eigen_matrix) Eigen::Map<Eigen::MatrixI> (elements_array,element_rows,element_cols);
+//    print(points_array,points_eigen_matrix.data());
+
+
     Integer ndim;
     std::string element_type;
     if (points_eigen_matrix.cols()==2)
@@ -66,22 +76,35 @@ to_python_structs PyCppInterface(const char* iges_filename, Real scale, Real *po
     occ_interface.ProjectMeshOnCurve(projection_method);
     // FIX IMAGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
     occ_interface.RepairDualProjectedParameters();
-//    //PERFORM POINT INVERTION FOR THE INTERIOR POINTS
+    //PERFORM POINT INVERTION FOR THE INTERIOR POINTS
     occ_interface.MeshPointInversionCurve();
 
 
+//    to_python_structs struct_to_python;
+//    struct_to_python.nodes_dir_size = occ_interface.nodes_dir.rows();
+//    // COPYLESS CONVERSION FROM EIGEN TO C ARRAY
+//    Integer *c_array_nodes_dir;
+//    c_array_nodes_dir = occ_interface.nodes_dir.data();
+//    // COPYLESS CONVERSION FROM C ARRAY TO STL VECTOR
+//    struct_to_python.nodes_dir_out_stl.assign(c_array_nodes_dir,c_array_nodes_dir+struct_to_python.nodes_dir_size);
+//    Real *c_array_displacement;
+//    c_array_displacement = occ_interface.displacements_BC.data();
+//    struct_to_python.displacement_BC_stl.assign(c_array_displacement,c_array_displacement+occ_interface.ndim*struct_to_python.nodes_dir_size);
+
     to_python_structs struct_to_python;
     struct_to_python.nodes_dir_size = occ_interface.nodes_dir.rows();
-    // COPYLESS CONVERSION FROM EIGEN TO C ARRAY
-    Integer *c_array_nodes_dir;
-    c_array_nodes_dir = occ_interface.nodes_dir.data();
-    // COPYLESS CONVERSION FROM C ARRAY TO STL VECTOR
-    struct_to_python.nodes_dir_out_stl.assign(c_array_nodes_dir,c_array_nodes_dir+struct_to_python.nodes_dir_size);
-    Real *c_array_displacement;
-    c_array_displacement = occ_interface.displacements_BC.data();
-    struct_to_python.displacement_BC_stl.assign(c_array_displacement,c_array_displacement+occ_interface.ndim*struct_to_python.nodes_dir_size);
+    // COPYLESS CONVERSION FROM EIGEN TO STL VECTOR
+    struct_to_python.nodes_dir_out_stl.assign(occ_interface.nodes_dir.data(),occ_interface.nodes_dir.data()+struct_to_python.nodes_dir_size);
+    struct_to_python.displacement_BC_stl.assign(occ_interface.displacements_BC.data(),occ_interface.displacements_BC.data()+ \
+                                                occ_interface.ndim*struct_to_python.nodes_dir_size);
 
-//    cout << occ_interface.displacements_BC << endl;
+//    std::free(points_eigen_matrix.data());
+//    std::free(elements_eigen_matrix.data());
+//    delete [] points_eigen_matrix.data();
+//    delete [] elements_eigen_matrix.data();
+//    points_eigen_matrix.resize(0,0);
+//    elements_eigen_matrix.resize(0,0);
+
     return struct_to_python;
 
 }

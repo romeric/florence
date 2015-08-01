@@ -51,8 +51,8 @@ template<typename Derived> void print(std::vector<Derived> arr)
 
 template<typename Derived> void print(Derived arr)
 {
-//    std::cout << std::endl <<  arr << std::endl << std::endl;
-    std::cout <<  arr << std::endl;
+    std::cout << std::endl <<  arr << std::endl << std::endl;
+//    std::cout <<  arr << std::endl;
 }
 
 template<typename S, typename T> void print(S a, T b)
@@ -85,6 +85,22 @@ template<typename S, typename T, typename U> void println(S a, T b, U c)
 {
     std::cout << a << "  " << b << "  " << c << std::endl;
 }
+
+template<typename S, typename T, typename U, typename V> void println(S a, T b, U c, V d)
+{
+    std::cout << a << "  " << b << "  " << c << "  " << d << std::endl;
+}
+
+template<typename S, typename T, typename U, typename V , typename W> void println(S a, T b, U c, V d, W e)
+{
+    std::cout << a << "  " << b << "  " << c << "  " << d << "  " << e << std::endl;
+}
+
+template<typename S, typename T, typename U, typename V , typename W, typename X> void println(S a, T b, U c, V d, W e, X f)
+{
+    std::cout << a << "  " << b << "  " << c << "  " << d << "  " << e << " " << f << std::endl;
+}
+
 
 //template<typename Derived> void print(Eigen::MatrixBase<Derived> arr)
 //{

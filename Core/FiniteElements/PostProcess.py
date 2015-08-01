@@ -495,7 +495,7 @@ class PostProcess(object):
 		# plt.savefig('/home/roman/Desktop/DumpReport/scaled_jacobian_312_'+MainData.AnalysisType+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)
 
 	@staticmethod	
-	def HighOrderPatch(MainData,mesh,TotalDisp):
+	def HighOrderPatchPlot(MainData,mesh,TotalDisp):
 
 		import matplotlib.pyplot as plt
 		
@@ -531,4 +531,80 @@ class PostProcess(object):
 
 
 		# plt.savefig('/home/roman/Desktop/DumpReport/mesh_312_'+MainData.AnalysisType+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)
+
+	@staticmethod	
+	def HighOrderInterpolatedPatchPlot(MainData,mesh,TotalDisp):
+
+		import matplotlib.pyplot as plt
+		from scipy.interpolate import BarycentricInterpolator, piecewise_polynomial_interpolate, interp1d, splrep, splev
+		
+		plt.figure()
+		# print TotalDisp[:,0,-1]
+		vpoints = np.copy(mesh.points)
+		vpoints[:,0] += TotalDisp[:,0,-1]
+		vpoints[:,1] += TotalDisp[:,1,-1]
+		# plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#ffffee') 
+		# plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#F88379') #
+
+		dum1=[]; dum2=[]; dum3 = []; ddum=np.array([0,1,2,0])
+		for i in range(0,MainData.C):
+			dum1=np.append(dum1,i+3)
+			dum2 = np.append(dum2, 2*MainData.C+3 +i*MainData.C -i*(i-1)/2 )
+			dum3 = np.append(dum3,MainData.C+3 +i*(MainData.C+1) -i*(i-1)/2 )
+
+
+		if MainData.C>0:
+			ddum = (np.append(np.append(np.append(np.append(np.append(np.append(0,dum1),1),dum2),2),np.fliplr(dum3.reshape(1,dum3.shape[0]))),0) ).astype(np.int32)
+
+		# print ddum
+		p = MainData.C+1
+		ndim = MainData.ndim
+		n_interp = 10
+
+		# for elem in [59]:
+		# aa = np.arange(68)
+		# aa=np.append(aa,np.array([69,70,71,72,73,74]))
+		# for elem in aa:
+		for elem in range(mesh.nelem):
+			dum = vpoints[mesh.elements[elem,:],:]
+			x_coordinates = dum[ddum,0]
+			y_coordinates = dum[ddum,1]
+
+			x_new,y_new=[],[]
+			for iedge in range(ndim+1):
+				x_edge = x_coordinates[p*iedge:p*(iedge+1)+1]
+				y_edge = y_coordinates[p*iedge:p*(iedge+1)+1]
+
+				# print x_coordinates
+				# print x_edge
+				# print elem, iedge
+
+				x_edge = x_edge.copy(order='c')
+				unq_x_edge, idx, invx = np.unique(x_edge,return_inverse=True,return_index=True)
+				unq_y_edge = y_edge[idx]
+				# print x
+
+				interp_func = splrep(unq_x_edge,unq_y_edge,k=unq_x_edge.shape[0]-1)
+
+				x_edge_new = []
+				for j in range(unq_x_edge.shape[0]-1):
+					x_edge_new = np.append(x_edge_new[:-1],np.linspace(unq_x_edge[j],unq_x_edge[j+1],n_interp))
+
+				if idx[0]==idx.shape[0]-1:
+					x_edge_new = x_edge_new[::-1] 
+
+				y_edge_new = splev(x_edge_new,interp_func)
+		
+				x_new = np.append(x_new,x_edge_new)
+				y_new = np.append(y_new,y_edge_new)
+
+			plt.fill(x_new,y_new,'#ffddbb',alpha=1)
+
+
+		plt.axis('equal')
+		# plt.axis('off')	
+		# plt.show()
+
+		# print mesh.points[[20,21,39],:]
+		# import sys; sys.exit(0)
 

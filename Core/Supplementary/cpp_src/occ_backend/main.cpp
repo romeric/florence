@@ -56,11 +56,11 @@ int main()
 //    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/RAE2822/points_i2rae2822_p2.dat";
 //    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/RAE2822/edges_i2rae2822_p2.dat";
 
-    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/elements_mech2d_seg0_p2.dat";
-    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/points_mech2d_seg0_p2.dat";
-    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/edges_mech2d_seg0_p2.dat";
+//    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/elements_mech2d_seg0_p2.dat";
+//    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/points_mech2d_seg0_p2.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/edges_mech2d_seg0_p2.dat";
 
-//    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/elements_mech2d_seg2_p2.dat"; #
+//    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/elements_mech2d_seg2_p2.dat"; //#
 //    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/points_mech2d_seg2_p2.dat";
 //    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/edges_mech2d_seg2_p2.dat";
 
@@ -68,10 +68,20 @@ int main()
 //    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/MechanicalComponent2D/points_mech2dn_p2.dat";
 //    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/MechanicalComponent2D/edges_mech2dn_p2.dat";
 
+//    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/elements_leftpartwithcircle_p2.dat";
+//    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/points_leftpartwithcircle_p2.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/edges_leftpartwithcircle_p2.dat";
+
+    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/elements_leftcircle_p2.dat";
+    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/points_leftcircle_p2.dat";
+    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/edges_leftcircle_p2.dat";
+
 
 //    const char* iges_filename = "/home/roman/Dropbox/Python/Problems/FiniteElements/RAE2822/rae2822.igs";
 //    const char* iges_filename = "/home/roman/Dropbox/2015_HighOrderMeshing/examples/mechanical2d.igs";
-    const char* iges_filename = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/Mech2D_Seg0.igs";
+//    const char* iges_filename = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/Mech2D_Seg0.igs";
+//    const char* iges_filename = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/LeftPartWithCircle.igs";
+    const char* iges_filename = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/LeftCircle.iges";
 //    const char* iges_filename = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/Mech2D_Seg2.igs";
 //    const char* iges_filename = "/home/roman/Dropbox/OCC_Geometry_Checks/Line.igs";
 //    const char* iges_filename = "/home/roman/Dropbox/OCC_Geometry_Checks/Sphere.igs";

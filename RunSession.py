@@ -4,7 +4,7 @@
 
 
 import imp, os, sys, time
-import cProfile	
+import cProfile, pdb
 # from pympler import tracker, asizeof, summary, muppy
 # from memory_profiler import profile
 from datetime import datetime
@@ -14,7 +14,7 @@ import multiprocessing as MP
 # from mpi4py import MPI
 # from numba.decorators import jit
 # import cython
-import pdb
+
 
 # AVOID WRITING .pyc OR .pyo FILES
 sys.dont_write_bytecode
@@ -23,42 +23,47 @@ sys.dont_write_bytecode
 # START THE ANALYSIS
 print "Initiating the routines... Current time is", datetime.now().time()
 
-# ALLOCATE/BUILD THE GENERAL DATA FOR THE ANALYSIS
+# MUPY'S BASE CLASS 
 class MainData(object):
- 	"""General data such as directories, files, analysis session, etc that needs to be loaded a priori"""
+ 	"""Mupy's main class. General data such as directories, files, analysis session, etc 
+        that needs to be loaded a priori are stored
+        
+        pwd:                            Mupy's top level directory
+        session:                        {'FEM','BEM','Coupled'} Session to be run
+        __NO_DEBUG__:                   Enter debug mode of the package (if false). Activates all numerical checks                 
+        __VECTORISATION__:              Activate numpy's SIMD instructions e.g. for einsum for computing elemental matrices with no loops
+        __PARALLEL__:                   Activate multiprocessing for either or both shared and distributed memory
+        numCPU:                         Number of concurrent cores/hyperthreads for parallelisation
+        __PARALLEL_MEMORY__:            {'SHARED','DISTRIBUTED','AUTO','BOTH'} Option for shared or distributed memory parallelisation
+        
+        C:                              [int] order of basis functins. Note that C=P-1 where P is polynomial degree
+        norder:                         [int] number of quadrature points 
+        plot:                           [tuple of ints] plot flag for BEM
+        nrplot:                         [tuple] plot flag for Newton-Raphson convergence
+        write:                          [boolean] flag for writting simulation results in .vtu/.mat/.eps/.dat formats
+        
+        """
+
  	pwd = os.path.dirname(os.path.realpath('__file__'))
  	session = 'FEM'
  	# session = 'BEM'
  	# session = 'Coupled'
 
 
- 	__NO_DEBUG__ = True						# ENTER DEBUG MODE OF THE PACKAGE (IF FALSE). ACTIVATES ALL NUMERICAL CHECKS
- 	__VECTORISATION__ = True				# ACTIVATE NUMPY'S SIMD INSTRUCTIONS E.G. EINSTEIN SUMMATION (EINSUM) FOR COMPUTING ELEMENTAL MATRICES WITH NO LOOPS.
- 	__PARALLEL__ = True 					# ACTIVATE MULTI-PROCESSING 
- 	nCPU = MP.cpu_count()					# CPU COUNT FOR MULTI-PROCESSING
+ 	__NO_DEBUG__ = True						 
+ 	__VECTORISATION__ = True				 
+ 	__PARALLEL__ = True 					
+ 	numCPU = MP.cpu_count()				
  	# __PARALLEL__ = False
  	# nCPU = 8
- 	__MEMORY__ = 'SHARED'					# SHARED OR DISTRIBUTED MEMORY FOR PARALLELISATION (FOR DISTRIBUTED MEMORY THE INTERPRETER NEEDS TO BE INVOKED WITH MPI) 
+ 	__MEMORY__ = 'SHARED'			
  	# __MEMORY__ = 'DISTRIBUTED'					
 
- 	C = 3									# ORDER OF BASIS FUNCTIONS (NOTE THAT C=P-1, WHERE P IS THE POLYNOMIAL DEGREE)
- 	norder = 2  							# ORDER/NO OF QUADRATURE POINTS
- 	plot = (0,3)							# PLOT FLAG FOR BEM 
- 	nrplot = (0,'last')						# PLOT FLAG FOR NEWTON-RAPHSON CONVERGENCE
- 	write = 0								# FLAG FOR WRITING THE RESULTS IN VTK/MAT/EPS/DAT ETC
-
-
-
-# import profile_imports
-# profile_imports.install()
-# import cython
-# sys.exit(0)
-
-# import profile_imports_manual
-# profile_imports_manual.install()
-# from Core.QuadratureRules import GaussQuadrature, QuadraturePointsWeightsTet, QuadraturePointsWeightsTri
-# profile_imports_manual.log_stack_info(sys.stderr)
-# sys.exit(0)
+ 	C = 1										
+ 	norder = 2  							
+ 	plot = (0,3)						
+ 	nrplot = (0,'last')				
+ 	write = 0	
 
 
 # RUN THE APPROPRIATE SESSION

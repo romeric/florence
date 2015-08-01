@@ -549,27 +549,30 @@ def migakit():
 
 # print xx['nurbs']['U']
 
-
+# PYOCC IMPORT
+#----------------------------------------------------------------------------------------#
 import sys
-from OCC.gp import gp_Pnt, gp_XOY
-from OCC.GeomAPI import GeomAPI_ProjectPointOnCurve
-from OCC.Geom import Geom_Circle, Geom_Curve, Geom_BSplineCurve
-from OCC.IGESControl import IGESControl_Reader
-from OCC.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
-from OCC.TopoDS import TopoDS_Shape, TopoDS_Edge, TopoDS_Builder
-from OCC.BRep import BRep_Builder, BRep_Tool
-from OCC.BRepBuilderAPI import BRepBuilderAPI_NurbsConvert
-from OCC.BRepAdaptor import BRepAdaptor_Curve
-# import OCC.TopoDS as TopoDS
-from OCC.TopoDS import *
-from OCC.TopExp import TopExp_Explorer
-from OCC.TopAbs import TopAbs_VERTEX, TopAbs_FACE, TopAbs_WIRE, TopAbs_EDGE
-from Core import Mesh
+# from OCC.gp import gp_Pnt, gp_XOY
+# from OCC.GeomAPI import GeomAPI_ProjectPointOnCurve
+# from OCC.Geom import Geom_Circle, Geom_Curve, Geom_BSplineCurve
+# from OCC.IGESControl import IGESControl_Reader
+# from OCC.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
+# from OCC.TopoDS import TopoDS_Shape, TopoDS_Edge, TopoDS_Builder
+# from OCC.BRep import BRep_Builder, BRep_Tool
+# from OCC.BRepBuilderAPI import BRepBuilderAPI_NurbsConvert
+# from OCC.BRepAdaptor import BRepAdaptor_Curve
+# # import OCC.TopoDS as TopoDS
+# from OCC.TopoDS import *
+# from OCC.TopExp import TopExp_Explorer
+# from OCC.TopAbs import TopAbs_VERTEX, TopAbs_FACE, TopAbs_WIRE, TopAbs_EDGE
+# from Core import Mesh
 
-from OCC.TColStd import TColStd_HSequenceOfTransient,  TColStd_Array1OfReal, TColStd_Array1OfInteger
-from OCC.gp import gp_Vec, gp_Pnt2d, gp_Pln, gp_Dir
-from OCC.TColgp import TColgp_Array1OfPnt2d, TColgp_Array1OfPnt
+# from OCC.TColStd import TColStd_HSequenceOfTransient,  TColStd_Array1OfReal, TColStd_Array1OfInteger
+# from OCC.gp import gp_Vec, gp_Pnt2d, gp_Pln, gp_Dir
+# from OCC.TColgp import TColgp_Array1OfPnt2d, TColgp_Array1OfPnt
 from Core.Supplementary.Tensors import itemfreq_py
+#----------------------------------------------------------------------------------------#
+
 def pythoncc_test():
 
 
@@ -843,9 +846,110 @@ def pythoncc_test():
 
 
 
+
+
+
+
+from scipy.interpolate import BarycentricInterpolator, piecewise_polynomial_interpolate, interp1d, splrep, splev
+def interpolate_test():
+
+	x = np.array([ 0.76149742,  0.64771203,  0.40450851,  0.5,  0.40450851,
+        0.58458055,  0.76149742])
+	y = np.array([ -3.35757775e-01,  -8.55569287e-03,   2.93892608e-01,
+         0.0,  -2.93892608e-01,  -3.16788382e-01,     -3.35757775e-01])
+
+	# x = np.array([ 0.40450851,  0.26487088,  0.06581149, -0.04860713, -0.15450849,
+ #        0.15450851,  0.40450851])
+	# y = np.array([ 0.29389261,  0.62518198,  0.87824772,  0.68495864,  0.47552826,
+ #        0.47552825,  0.29389261])
+
+	# x = np.array([ 0.40450851,  0.344445  ,  0.1714928 ,  0.07195434,  0.00467003,
+ #       -0.10229457, -0.15450849,  0.01658031,  0.28031727,  0.40450851])
+	# y = np.array([ 0.29389261,  0.49406988,  0.73971425,  0.88070082,  0.77997623,
+ #        0.60309184,  0.47552826,  0.49972502,  0.41403168,  0.29389261])
+	
+
+	C=1
+	p = C+1
+
+	x_new = []
+	y_new = []
+	for iedge in range(3):
+	# for iedge in [1]:	
+		# print p*iedge,  p*(iedge+1)+1
+		x_edge = x[p*iedge:p*(iedge+1)+1] 
+		y_edge = y[p*iedge:p*(iedge+1)+1]
+
+		x_edge = x_edge.copy(order='c')
+
+		ux,idx,invx = np.unique(x_edge,return_inverse=True,return_index=True)
+		# print x_edge
+		# print ux
+		# print idx
+		# print invx
+
+		if ux.shape[0] < x_edge.shape[0]:
+			# for i in range(invx.shape[0]):
+			# 	x_edge[invx[i]] +=1e-1/(i+1)
+			# ux,idx,invx = np.unique(x_edge,return_inverse=True,return_index=True)
+			# x_edge[1]=0.5
+			# x_edge[2] += 1e-2
+			# temp = x_edge 
+			# x_edge = y_edge
+			# y_edge = temp 
+			# ux,idx,invx = np.unique(x_edge,return_inverse=True,return_index=True)
+			# print ux
+			# print x_edge
+			pass
+#                        pass 
+
+		uy = y_edge[idx]
+		# print y_edge
+		# print uy
+		func = splrep(ux,uy,k=ux.shape[0]-1)
+		x_edge_new = []
+		for j in range(ux.shape[0]-1):
+			x_edge_new = np.append(x_edge_new[:-1],np.linspace(ux[j],ux[j+1],40))
+
+		if idx[0]==idx.shape[0]-1:
+			x_edge_new = x_edge_new[::-1] 
+
+		# print x_new
+		y_edge_new = splev(x_edge_new,func)
+		# print x_edge_new
+		x_new = np.append(x_new,x_edge_new)
+		y_new = np.append(y_new,y_edge_new)
+
+		# print x_new
+		# print y_new
+		# plt.plot(x_edge,y_edge)
+		# plt.plot(x_edge_new,y_edge_new)
+	# print x_new #, y_new
+	plt.fill(x_new,y_new,'#ffddbb',alpha=1)
+	# plt.fill(x_new,y_new,'#4169E1',alpha=0.2)
+	plt.show()
+
+	# x = np.arange(0, 2*np.pi+np.pi/4, 2*np.pi/8)
+	# y = np.sin(x)
+	# tck = splrep(x, y, s=0)
+	# xnew = np.arange(0,2*np.pi,np.pi/50)
+	# ynew = splev(xnew, tck, der=0)
+	# plt.figure()
+	# plt.plot(x, y, 'x', xnew, ynew, xnew, np.sin(xnew), x, y, 'b')
+	# plt.legend(['Linear', 'Cubic Spline', 'True'])
+	# plt.axis([-0.05, 6.33, -1.05, 1.05])
+	# plt.title('Cubic-spline interpolation')
+	# plt.show()
+	
+
+
+
 if __name__ == '__main__':
 
-	pythoncc_test()
+	interpolate_test()
+
+
+	# pythoncc_test()
 
 
 	# migakit()

@@ -26,7 +26,7 @@ def PreProcess(MainData,Pr,pwd):
 	except NameError:
 		# IF NOT THEN ASSUME SINGLE PROCESS
 		MainData.Parallel = False
-		MainData.nCPU = 1
+		MainData.numCPU = 1
 
 	#############################################################################
 
@@ -61,7 +61,7 @@ def PreProcess(MainData,Pr,pwd):
 	############################################################################
 	# t_mesh = time()
 	if MainData.C>0:
-		mesh.GetHighOrderMesh(MainData.C,Parallel=MainData.Parallel,nCPU=MainData.nCPU)
+		mesh.GetHighOrderMesh(MainData.C,Parallel=MainData.Parallel,nCPU=MainData.numCPU)
 
 	############################################################################
 	# t1=time()
@@ -71,14 +71,6 @@ def PreProcess(MainData,Pr,pwd):
 	# index_sort_x = np.argsort(nmesh.points[:,0])
 	# sorted_repoints = nmesh.points[index_sort_x,:]
 
-	# np.savetxt('/home/roman/Dropbox/time.dat',np.array([time()-t_mesh, nmesh.points.shape[0]]))
-	
-	
-	# mesh.Readgmsh(filename='/home/roman/Dropbox/MeshingElasticity/mechanical2D.msh')
-	# mesh.Readgmsh(filename='/home/roman/Dropbox/Python/Core/MeshGeneration/PythonMeshScripts/circflow.msh') # FIX THIS
-	# print np.max(mesh.points), np.min(mesh.points)
-
-	# print np.unique(mesh.edges)
 	# ##############################################################################
 	# np.savetxt('/home/roman/Dropbox/time_3.dat',np.array([time()-t_mesh, mesh.points.shape[0]]))
 	# sys.exit("STOPPED")
@@ -88,7 +80,7 @@ def PreProcess(MainData,Pr,pwd):
 	# STORE PATHS FOR MAIN, CORE & PROBLEM DIRECTORIES
 	############################################################################
 	class Path(object):
-		"""docstring for Path"""
+		"""Getting directory paths"""
 		def __init__(self, arg):
 			super(Path, self).__init__()
 			self.arg = arg
@@ -173,7 +165,7 @@ def PreProcess(MainData,Pr,pwd):
 		z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
 
 	class Quadrature(object):
-		"""docstring for Quadrature"""
+		"""Quadrature rules"""
 		points = z
 		weights = w
 		Opt = QuadratureOpt
@@ -186,7 +178,7 @@ def PreProcess(MainData,Pr,pwd):
 	elif MainData.ndim == 2: 
 		# Get basis at all integration points (surface)
 		Domain = GetBases(MainData.C,Quadrature,MainData.MeshInfo.MeshType)
-		# GET BOUNDARY BASES AT ALL INTEGRATION POINTS (lINE)
+		# GET BOUNDARY BASES AT ALL INTEGRATION POINTS (LINE)
 		# Boundary = GetBasesBoundary(MainData.C,z,MainData.ndim)
 	Boundary = []
 
@@ -275,7 +267,7 @@ def PreProcess(MainData,Pr,pwd):
 		elif MainData.Fields == 'ElectroMechanics':
 			Hsize = 9 if MainData.ndim == 3 else 5
 		else:
-			raise NotImplementedError('H_Voigt size not giveN')
+			raise NotImplementedError('Hessian size (H_Voigt) size not given')
 
 		MainData.MaterialArgs.H_Voigt = np.zeros((Hsize,Hsize,mesh.nelem,Quadrature.weights.shape[0]),dtype=np.float64)
 		MainData.MaterialArgs.Sigma = np.zeros((MainData.ndim,MainData.ndim,mesh.nelem,Quadrature.weights.shape[0]),dtype=np.float64)
@@ -286,8 +278,8 @@ def PreProcess(MainData,Pr,pwd):
 	#############################################################################
 	if MainData.MaterialArgs.Type == 'LinearModel':
 		if MainData.ndim == 2:
-			MainData.MaterialArgs.H_Voigt = MainData.MaterialArgs.lamb*np.array([[1.,1,0],[1,1.,0],[0,0,0.]]) +\
-			 MainData.MaterialArgs.mu*np.array([[2.,0,0],[0,2.,0],[0,0,1.]])
+			MainData.MaterialArgs.H_Voigt = MainData.MaterialArgs.lamb*np.array([[1.,1.,0.],[1.,1.,0],[0.,0.,0.]]) +\
+			 MainData.MaterialArgs.mu*np.array([[2.,0.,0.],[0.,2.,0],[0.,0.,1.]])
 		else:
 			block_1 = np.zeros((6,6),dtype=np.float64); block_1[:2,:2] = np.ones((3,3))
 			block_2 = np.eye(6,6); block_2[0,0],block_2[1,1],block_2[2,2]=2.,2.,2.

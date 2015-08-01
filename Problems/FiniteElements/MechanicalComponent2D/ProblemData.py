@@ -76,10 +76,10 @@ def ProblemData(MainData):
 		Reader = 'Read'
 
 		# FileName = ProblemPath + '/MechanicalComponent2D_664.dat'
-		# FileName = ProblemPath + '/MechanicalComponent2D_192.dat'
+		FileName = ProblemPath + '/MechanicalComponent2D_192.dat'
 		# FileName = ProblemPath + '/MechanicalComponent2D_NonSmooth_2672.dat'
 		# FileName = ProblemPath + '/MechanicalComponent2D_NonSmooth_321.dat'
-		FileName = ProblemPath + '/MechanicalComponent2D_NonSmooth_236.dat'
+		# FileName = ProblemPath + '/MechanicalComponent2D_NonSmooth_236.dat'
 		
 
 

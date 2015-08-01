@@ -36,6 +36,8 @@
 #include <ShapeAnalysis_Curve.hxx>
 #include <ShapeAnalysis_Surface.hxx>
 #include <GCPnts_AbscissaPoint.hxx>
+#include <GeomConvert_CompCurveToBSplineCurve.hxx>
+//#include <Hermit.hxx>
 
 
 //! Identifies the type of a curve.

@@ -89,7 +89,17 @@ def main(MainData):
 	# np.savetxt('/home/roman/Desktop/points_mech2dn_p'+str(MainData.C+1)+'.dat', 1000*mesh.points,fmt='%6.4f',delimiter=',')
 	# np.savetxt('/home/roman/Desktop/edges_mech2dn_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
 
+	# np.savetxt('/home/roman/Desktop/elements_leftpartwithcircle_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
+	# np.savetxt('/home/roman/Desktop/points_leftpartwithcircle_p'+str(MainData.C+1)+'.dat', 1000*mesh.points,fmt='%6.4f',delimiter=',')
+	# np.savetxt('/home/roman/Desktop/edges_leftpartwithcircle_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
+
+	# np.savetxt('/home/roman/Desktop/elements_leftcircle_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
+	# np.savetxt('/home/roman/Desktop/points_leftcircle_p'+str(MainData.C+1)+'.dat', 1000*mesh.points,fmt='%6.4f',delimiter=',')
+	# np.savetxt('/home/roman/Desktop/edges_leftcircle_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
+
 	# np.savetxt('/home/roman/Desktop/unique_edges_rae2822_p'+str(MainData.C+1)+'.dat', np.unique(mesh.edges),fmt='%d',delimiter=',')
+
+
 
 	print 'Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*MainData.nvar
 	print 'Number of mesh edge nodes', np.unique(mesh.edges).shape[0]
@@ -125,6 +135,9 @@ def main(MainData):
 	# print mesh.edges
 	# print mesh.edges.shape
 	# print mesh.points[2,:]*1000
+	# print mesh.points[2,:]
+	# print mesh.points[mesh.edges[:,:2],:]
+	# print mesh.points[:8,:]
 
 	# sys.exit("STOPPED")
 	# CALL THE MAIN ROUTINE
@@ -132,17 +145,27 @@ def main(MainData):
 	# np.savetxt('/home/roman/Desktop/displacements.txt', TotalDisp[:,:,-1])
 	# print 'Total number of DoFs for the system is', sol.shape[0]
 
+	# print mesh.points
+	# print TotalDisp[:,:,0].shape
+	# print TotalDisp[1,:,0]
+	# sys.exit("STOPPED")
 	# print 'Post-Processing the information...'
 	# POST-PROCESS
 	# PostProcess().StressRecovery(MainData,mesh,TotalDisp) 	
 	PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp)
-	PostProcess.HighOrderPatch(MainData,mesh,TotalDisp)
+	PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
+	# PostProcess.HighOrderInterpolatedPatchPlot(MainData,mesh,TotalDisp)
 	import matplotlib.pyplot as plt
 	plt.show()
 	# # plt.savefig('/home/roman/Desktop/DumpReport/uniform_aniso_mesh_'+MainData.MaterialArgs.Type+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)
 
 	# from Core.Supplementary.SuppPlots.MeshNumbering import PlotMeshNumbering
 
+	# vpoints = np.copy(mesh.points)
+	# vpoints[:,0] += TotalDisp[:,0,-1]
+	# vpoints[:,1] += TotalDisp[:,1,-1]
+	# np.savetxt('/home/roman/Desktop/elements.dat', mesh.elements,fmt='%d',delimiter=',')
+	# np.savetxt('/home/roman/Desktop/points.dat', vpoints,fmt='%6.4f',delimiter=',')
 
 	# Compute Error Norms
 	# L2Norm=0; EnergyNorm=0

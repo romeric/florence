@@ -55,7 +55,8 @@ public:
     Eigen::MatrixI boundary_edges_order;
     Integer degree;
     Eigen::MatrixR curve_to_parameter_scale_U;
-
+    Eigen::MatrixR curves_parameters;
+    Eigen::MatrixR curves_lengths;
 
     // methods of occ_backend
     void Init(std::string &element_type,Integer &ndim);
@@ -86,11 +87,16 @@ public:
     void GetGeomVertices();
     void GetGeomEdges();
     void GetGeomFaces();
+    void GetCurvesParameters();
+    void GetCurvesLengths();
+    void FindCurvesSequentiallity();
+    void ConcatenateSequentialCurves();
     void GetGeomPointsOnCorrespondingEdges();
     void GetInternalCurveScale();
     void GetInternalSurfaceScales();
     void IdentifyCurvesContainingEdges();
     void ProjectMeshOnCurve(const char *projection_method);
+    void ProjectMeshOnCurve_Unstable(const char *projection_method);
     void ProjectMeshOnCurve_Old(const char *projection_method);
     void ProjectMeshOnSurface();
     void RepairDualProjectedParameters();
