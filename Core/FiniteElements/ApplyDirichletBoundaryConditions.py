@@ -35,9 +35,18 @@ def ApplyDirichletBoundaryConditions(stiffness,F,nmesh,MainData):
 				from Core.QuadratureRules.FeketePointsTri import FeketePointsTri
 				boundary_fekete = FeketePointsTri(MainData.C)
 
-			from Core.Supplementary.cpp_src.occ_backend.PyInterface_OCC_FrontEnd import PyInterface_OCC_FrontEnd as OCC_FrontEnd
+			import Core.Supplementary.cpp_src.occ_backend.OCCPluginPy as dd 
+			# print dir(dd)
+			from Core.Supplementary.cpp_src.occ_backend.OCCPluginPy import OCCPluginPy2 as OCCPlugin2
+			OCC_Interface2 = OCCPlugin2(dimension=MainData.ndim)
 			# print dir(OCC_Interface)
-			OCC_Interface = OCC_FrontEnd(dimension=MainData.ndim)
+			OCC_Interface2.setarray(nmesh.elements)
+
+			# import sys; sys.exit(0)
+
+			from Core.Supplementary.cpp_src.occ_backend.OCCPluginPy import OCCPluginPy as OCCPlugin
+			# print dir(OCC_Interface)
+			OCC_Interface = OCCPlugin(dimension=MainData.ndim)
 			OCC_Interface.SetMesh(nmesh.points,nmesh.elements,nmesh.edges,np.zeros((1,4),dtype=np.int64))
 			OCC_Interface.SetCADGeometry(MainData.BoundaryData.IGES_File)
 			OCC_Interface.SetScale(MainData.BoundaryData.scale)
@@ -47,7 +56,7 @@ def ApplyDirichletBoundaryConditions(stiffness,F,nmesh,MainData):
 			nodesDBC, Dirichlet = OCC_Interface.ComputeDirichletBoundaryConditions()
 			# print Dirichlet
 			# import sys; sys.exit(0)
-			# from Core.Supplementary.cpp_src.occ_backend.PyInterface_OCC_FrontEnd import __ComputeDirichletBoundaryConditions__
+			# from Core.Supplementary.cpp_src.occ_backend.OCCPluginPy import __ComputeDirichletBoundaryConditions__
 			# nodesDBC, Dirichlet = __ComputeDirichletBoundaryConditions__(MainData.BoundaryData.IGES_File, scale,
 				# nmesh.points,nmesh.elements,nmesh.edges,np.zeros((1,4),dtype=np.int64),condition,boundary_fekete)
 			posUnique = np.unique(nodesDBC,return_index=True)[1]

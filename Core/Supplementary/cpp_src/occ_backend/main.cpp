@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include <py_to_occ_frontend.hpp>
+#include <OCCPluginInterface.hpp>
 
 using namespace std;
 // A syntactic sugar equivalent to "import to numpy as np"
@@ -93,10 +93,10 @@ int main()
 
 
 
-    // CALL PY_OCC_FRONTEND
-    Eigen::MatrixI elements = OCC_FrontEnd::ReadI(elem_file,',');
-    Eigen::MatrixR points = OCC_FrontEnd::ReadR(point_file,',');
-    Eigen::MatrixI edges = OCC_FrontEnd::ReadI(edge_file,',');
+    // CALL PY_OCCPlugin
+    Eigen::MatrixI elements = OCCPlugin::ReadI(elem_file,',');
+    Eigen::MatrixR points = OCCPlugin::ReadR(point_file,',');
+    Eigen::MatrixI edges = OCCPlugin::ReadI(edge_file,',');
     Eigen::MatrixI faces = Eigen::MatrixI::Zero(1,4);
 //    Eigen::MatrixI unique_edges = Read(unique_edge_file);
 //    Real scale = 1000.;

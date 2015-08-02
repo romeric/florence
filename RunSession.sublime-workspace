@@ -523,7 +523,7 @@
 			"file": "RunSession.py",
 			"settings":
 			{
-				"buffer_size": 8020,
+				"buffer_size": 8090,
 				"line_ending": "Unix"
 			}
 		},
@@ -1140,15 +1140,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 8020,
+						"buffer_size": 8090,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2467,
-								2467
+								4023,
+								4023
 							]
 						],
 						"settings":
@@ -1157,7 +1157,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 918.0,
+						"translation.y": 1566.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,

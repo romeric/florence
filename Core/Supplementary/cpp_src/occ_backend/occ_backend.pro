@@ -5,8 +5,8 @@ CONFIG -= qt
 CONFIG += c++11
 
 SOURCES += main.cpp \
-    occ_frontend.cpp \
-    py_to_occ_frontend.cpp
+    OCCPlugin.cpp \
+    OCCPluginInterface.cpp
 
 QMAKE_CXXFLAGS += -Wno-unused -std=c++11 # -O2 #-fopenmp -msse -msse2 -fomit-frame-pointer -fno-strict-aliasing
 
@@ -44,12 +44,11 @@ include(deployment.pri)
 qtcAddDeployment()
 
 HEADERS += \
-    cnp_funcs.hpp \
-    occ_inc.hpp \
-    cnp_funcs.hpp \
-    aux_funcs.hpp \
-    eigen_inc.hpp \
-    occ_frontend.hpp \
-    std_inc.hpp \
-    py_to_occ_frontend.hpp
+    EIGEN_INC.hpp \
+    OCCPlugin.hpp \
+    AuxFuncs.hpp \
+    CNPFuncs.hpp \
+    OCC_INC.hpp \
+    STL_INC.hpp \
+    OCCPluginInterface.hpp
 
