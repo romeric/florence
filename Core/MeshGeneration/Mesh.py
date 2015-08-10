@@ -78,20 +78,22 @@ class Mesh(object):
 			x = whereEQ(self.elements,self.elements[i,0])[0]
 			y = whereEQ(self.elements,self.elements[i,1])[0]
 			z = whereEQ(self.elements,self.elements[i,2])[0]
+			# print x,y,z, self.elements[i,:]
 
 			# A BOUNDARY EDGE IS ONE WHICH IS NOT SHARED WITH ANY OTHER ELEMENT
 			edge0 =  np.intersect1d(x,y)
 			edge1 =  np.intersect1d(y,z)
 			edge2 =  np.intersect1d(z,x)
+			# if i==0:
+			# 	print x,y,z, edge0, edge1, edge2
 
 
 			if edge0.shape[0]==1:
 				boundaryEdges = np.concatenate((boundaryEdges,np.array([[self.elements[i,0], self.elements[i,1]]])),axis=0)
-			elif edge1.shape[0]==1:
+			if edge1.shape[0]==1:
 				boundaryEdges = np.concatenate((boundaryEdges,np.array([[self.elements[i,1], self.elements[i,2]]])),axis=0)
-			elif edge2.shape[0]==1:
+			if edge2.shape[0]==1:
 				boundaryEdges = np.concatenate((boundaryEdges,np.array([[self.elements[i,2], self.elements[i,0]]])),axis=0)
-
 
 		self.edges = boundaryEdges[1:,:]
 		return edges
@@ -139,11 +141,11 @@ class Mesh(object):
 
 			if edge0.shape[0]==1:
 				boundaryEdges = np.concatenate((boundaryEdges,np.array([[self.elements[i,0], self.elements[i,1], self.elements[i,2]]])),axis=0)
-			elif edge1.shape[0]==1:
+			if edge1.shape[0]==1:
 				boundaryEdges = np.concatenate((boundaryEdges,np.array([[self.elements[i,0], self.elements[i,1], self.elements[i,3]]])),axis=0)
-			elif edge2.shape[0]==1:
+			if edge2.shape[0]==1:
 				boundaryEdges = np.concatenate((boundaryEdges,np.array([[self.elements[i,0], self.elements[i,2], self.elements[i,3]]])),axis=0)
-			elif edge3.shape[0]==1:
+			if edge3.shape[0]==1:
 				boundaryEdges = np.concatenate((boundaryEdges,np.array([[self.elements[i,1], self.elements[i,2], self.elements[i,3]]])),axis=0)
 
 
@@ -198,7 +200,7 @@ class Mesh(object):
 	    # ALLOCATE
 	    mesh_boundary_edges = np.zeros((1,2),dtype=int)
 	    # LOOP OVER GEOMETRY EDGES
-	    for i in range(0,geo_edges.shape[0]):
+	    for i in range(geo_edges.shape[0]):
 	    	# GET COORDINATES OF BOTH NODES AT THE EDGE
 	    	geo_edge_coord = geo_points[geo_edges[i]]
 	    	geo_x1 = geo_edge_coord[0,0];		geo_y1 = geo_edge_coord[0,1]
@@ -256,9 +258,10 @@ class Mesh(object):
 			nmesh = HighOrderMeshQuad(C,self,**kwargs)
 
 		self.points = nmesh.points
-		self.elements = nmesh.elements
-		self.edges = nmesh.edges
-		self.faces = nmesh.faces
+		self.elements = nmesh.elements.astype(np.uint64)
+		self.edges = nmesh.edges.astype(np.uint64)
+		if isinstance(self.faces,np.ndarray):
+			self.faces = nmesh.faces.astype(np.uint64)
 		self.nelem = nmesh.nelem
 		self.element_type = nmesh.info 
 		
@@ -274,9 +277,10 @@ class Mesh(object):
 
 		mesh = ReadMesh(*args,**kwargs)
 		self.points = mesh.points
-		self.elements = mesh.elements
-		self.edges = mesh.edges
-		self.faces = mesh.faces
+		self.elements = mesh.elements.astype(np.uint64)
+		self.edges = mesh.edges.astype(np.uint64)
+		if isinstance(self.faces,np.ndarray):
+			self.faces = mesh.faces.astype(np.uint64)
 		self.nelem = mesh.nelem
 		self.element_type = mesh.info 
 
@@ -291,8 +295,10 @@ class Mesh(object):
 			self.GetBoundaryEdgesTet()
 
 
-	def ReadSeparate(self,connectivity_file,coordinates_file,mesh_type,delimiter_connectivity=' ',delimiter_coordinates=' ',
-		ignore_cols_connectivity=None,ignore_cols_coordinates=None,index_style='c'):
+	def ReadSeparate(self,connectivity_file,coordinates_file,mesh_type, edges_file = None, faces_file = None,
+		delimiter_connectivity=' ',delimiter_coordinates=' ', delimiter_edges=' ', delimiter_faces=' ',
+		ignore_cols_connectivity=None,ignore_cols_coordinates=None,ignore_cols_edges=None,
+		ignore_cols_faces=None,index_style='c'):
 		"""Read meshes when the element connectivity and nodal coordinates are written in separate files
 
 		input:
@@ -300,10 +306,16 @@ class Mesh(object):
 			connectivity_file:				[str] filename containing element connectivity
 			coordinates_file:				[str] filename containing nodal coordinates
 			mesh_type:						[str] type of mesh tri/tet/quad/hex 
+			edges_file:						[str] filename containing edges of the mesh (if not given gets computed)
+			faces_file:						[str] filename containing faces of the mesh (if not given gets computed)
 			delimiter_connectivity:			[str] delimiter for connectivity_file - default is white space/tab
 			delimiter_coordinates:			[str] delimiter for coordinates_file - default is white space/tab
+			delimiter_edges:				[str] delimiter for edges_file - default is white space/tab
+			delimiter_faces:				[str] delimiter for faces_file - default is white space/tab
 			ignore_cols_connectivity:		[int] no of columns to be ignored (from the start) in the connectivity_file 
 			ignore_cols_coordinates:		[int] no of columns to be ignored (from the start) in the coordinates_file
+			ignore_cols_edges: 				[int] no of columns to be ignored (from the start) in the connectivity_file 
+			ignore_cols_faces:				[int] no of columns to be ignored (from the start) in the coordinates_file
 			index_style:					[str] either 'c' C-based (zero based) indexing or 'f' fortran-based
 											  	  (one based) indexing for elements connectivity - default is 'c'
 
@@ -313,8 +325,11 @@ class Mesh(object):
 		if index_style == 'c':
 			index = 1
 
+		from time import time; t1=time()	
 		self.elements = np.loadtxt(connectivity_file,dtype=np.int64,delimiter=delimiter_connectivity) - index 
+		# self.elements = np.fromfile(connectivity_file,dtype=np.int64,count=-1) - index
 		self.points = np.loadtxt(coordinates_file,dtype=np.float64,delimiter=delimiter_coordinates)
+
 
 		if ignore_cols_connectivity != None:
 			self.elements = self.elements[ignore_cols_connectivity:,:]
@@ -324,11 +339,26 @@ class Mesh(object):
 		if (mesh_type == 'tri' or mesh_type == 'quad') and self.points.shape[1]>2:
 			self.points = self.points[:,:2]
 
-
 		self.element_type = mesh_type
 		self.nelem = self.elements.shape[0]
-		self.edges = None 
-		self.GetBoundaryEdgesTri()
+		# self.edges = None 
+		if edges_file is None:
+			if mesh_type == "tri":
+				self.GetBoundaryEdgesTri()
+			elif mesh_type == "tet":
+				self.GetBoundaryEdgesTet()
+		else:
+			self.edges = np.loadtxt(edges_file,dtype=np.int64,delimiter=delimiter_edges) - index
+			if ignore_cols_edges !=None:
+				self.edges = self.edges[ignore_cols_edges:,:] 
+
+		if faces_file is None:
+			if mesh_type == "tet":
+				self.GetBoundaryFacesTet()
+		else:
+			self.faces = np.loadtxt(faces_file,dtype=np.int64,delimiter=delimiter_edges) - index
+			if ignore_cols_faces !=None:
+				self.faces = self.faces[ignore_cols_faces:,:]
 
 
 
@@ -429,6 +459,21 @@ class Mesh(object):
 					break
 
 		return edge_elements
+
+
+
+	def SimplePlot(self):
+		"""Simple mesh plot. Just a wire plot"""
+
+		import matplotlib.pyplot as plt 
+		fig = plt.figure()
+		if self.element_type == "tri":
+			plt.triplot(self.points[:,0],self.points[:,1], self.elements[:,:3])
+		else:
+			raise NotImplementedError("SimplePlot for "+self.element_type+" not implemented yet")
+
+		plt.axis("equal")
+		plt.show()
 
 
 
@@ -592,3 +637,75 @@ class Mesh(object):
 		self.element_type = element_type
 		self.nelem = self.elements.shape[0]
 		self.nnode = self.points.shape[0]
+
+
+
+	def RemoveElements(self,(x_min,y_min,x_max,y_max),element_removal_criterion="all",keep_boundary_only=False,
+			compute_edges=True,compute_faces=True,plot_new_mesh=True):
+		"""Removes elements with some specified criteria
+
+		input:				
+			(x_min,y_min,x_max,y_max)		[tuple of doubles] box selection. Deletes all the elements apart 
+											from the one within this box 
+			element_removal_criterion 		[str]{"all","any"} the criterion for element removal with box selection. 
+											How many nodes of the element should be within the box in order 
+											not to be removed. Default is "all". "any" implies at least one node 
+			keep_boundary_only				[bool] delete all elements apart from the boundary ones 
+			compute_edges					[bool] if True also compute new edges
+			compute_faces					[bool] if True also compute new faces (only 3D)
+			plot_new_mesh					[bool] if True also plot the new mesh
+
+		1. Note that this method computes a new mesh without maintaining a copy of the original 
+		2. Different criteria can be mixed for instance removing all elements in the mesh apart from the ones
+		in the boundary which are within a box
+		"""
+
+		assert self.elements != None
+		assert self.points != None
+		assert self.edges != None
+
+		new_elements = np.zeros((1,3),dtype=np.int64)
+
+		edge_elements = np.arange(self.nelem)
+		if keep_boundary_only == True:
+			if self.element_type == "tri":
+				edge_elements = self.GetElementsWithBoundaryEdgesTri()
+
+		for elem in edge_elements:
+			xe = self.points[self.elements[elem,:],0]
+			ye = self.points[self.elements[elem,:],1]
+
+			if element_removal_criterion == "all":
+				if ( (xe > x_min).all() and (ye > y_min).all() and (xe < x_max).all() and (ye < y_max).all() ):
+					new_elements = np.vstack((new_elements,self.elements[elem,:]))
+
+			elif element_removal_criterion == "any":
+				if ( (xe > x_min).any() and (ye > y_min).any() and (xe < x_max).any() and (ye < y_max).any() ):
+					new_elements = np.vstack((new_elements,self.elements[elem,:]))
+
+		self.elements = new_elements[1:,:]
+		self.nelem = self.elements.shape[0]
+		unique_elements, inv_elements =  np.unique(self.elements,return_inverse=True)
+		self.points = self.points[unique_elements,:]
+		# RE-ORDER ELEMENT CONNECTIVITY
+		remap_elements =  np.arange(self.points.shape[0])
+		self.elements = remap_elements[inv_elements].reshape(self.nelem,self.elements.shape[1])
+
+		# RECOMPUTE EDGES 
+		if compute_edges == True:
+			if self.element_type == "tri":
+				self.GetBoundaryEdgesTri()
+
+		# RECOMPUTE FACES 
+		if compute_faces == True:
+			if self.element_type == "tet":
+				# FACES WILL BE COMPUTED AUTOMATICALLY
+				self.GetBoundaryEdgesTet()
+
+		# PLOT THE NEW MESH
+		if plot_new_mesh == True:
+			import matplotlib.pyplot as plt
+			fig = plt.figure()
+			plt.triplot(self.points[:,0],self.points[:,1],self.elements[:,:3])
+			plt.axis('equal')
+			plt.show()

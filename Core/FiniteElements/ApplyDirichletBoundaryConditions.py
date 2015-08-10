@@ -16,6 +16,10 @@ def ApplyDirichletBoundaryConditions(stiffness,F,nmesh,MainData):
 	if MainData.BoundaryData.Type == 'nurbs':
 		from_cad = True 
 		# from_cad = False
+
+		# MainData.BoundaryData().ProjectionCriteria(nmesh)
+		# import sys; sys.exit(0)
+
 		tCAD = time()
 		if from_cad == False:
 			from Core.Supplementary.nurbs.nurbs import Nurbs
@@ -35,19 +39,44 @@ def ApplyDirichletBoundaryConditions(stiffness,F,nmesh,MainData):
 				from Core.QuadratureRules.FeketePointsTri import FeketePointsTri
 				boundary_fekete = FeketePointsTri(MainData.C)
 
-			import Core.Supplementary.cpp_src.occ_backend.OCCPluginPy as dd 
+			# import Core.Supplementary.cpp_src.occ_backend.OCCPluginPy as dd 
 			# print dir(dd)
 			from Core.Supplementary.cpp_src.occ_backend.OCCPluginPy import OCCPluginPy2 as OCCPlugin2
-			OCC_Interface2 = OCCPlugin2(dimension=MainData.ndim)
 			# print dir(OCC_Interface)
-			OCC_Interface2.setarray(nmesh.elements)
+			occ_interface = OCCPlugin2(nmesh.element_type,dimension=MainData.ndim)
+			occ_interface.SetMeshElements(nmesh.elements)
+			occ_interface.SetMeshPoints(nmesh.points)
+			occ_interface.SetMeshEdges(nmesh.edges)
+			occ_interface.SetMeshFaces(np.zeros((1,4),dtype=np.uint64))
+			occ_interface.SetScale(MainData.BoundaryData.scale)
+			occ_interface.SetCondition(MainData.BoundaryData.condition)
+			occ_interface.ScaleMesh()
+			# occ_interface.InferInterpolationPolynomialDegree();
+			occ_interface.SetFeketePoints(boundary_fekete)
+			occ_interface.GetBoundaryPointsOrder()
+			# READ THE GEOMETRY FROM THE IGES FILE
+			occ_interface.ReadIGES(MainData.BoundaryData.IGES_File)
+			# EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
+			occ_interface.GetGeomVertices()
+			occ_interface.GetGeomEdges()
+			occ_interface.GetGeomFaces()
+			occ_interface.GetGeomPointsOnCorrespondingEdges()
+			# FIRST IDENTIFY WHICH CURVES CONTAIN WHICH EDGES
+			occ_interface.IdentifyCurvesContainingEdges()
+			# PROJECT ALL BOUNDARY POINTS FROM THE MESH TO THE CURVE
+			occ_interface.ProjectMeshOnCurve("Bisection")
+			# FIX IMAGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
+			occ_interface.RepairDualProjectedParameters()
+			# PERFORM POINT INVERTION FOR THE INTERIOR POINTS
+			occ_interface.MeshPointInversionCurve()
 
 			# import sys; sys.exit(0)
+
 
 			from Core.Supplementary.cpp_src.occ_backend.OCCPluginPy import OCCPluginPy as OCCPlugin
 			# print dir(OCC_Interface)
 			OCC_Interface = OCCPlugin(dimension=MainData.ndim)
-			OCC_Interface.SetMesh(nmesh.points,nmesh.elements,nmesh.edges,np.zeros((1,4),dtype=np.int64))
+			OCC_Interface.SetMesh(nmesh.points,nmesh.elements,nmesh.edges,np.zeros((1,4),dtype=np.uint64))
 			OCC_Interface.SetCADGeometry(MainData.BoundaryData.IGES_File)
 			OCC_Interface.SetScale(MainData.BoundaryData.scale)
 			OCC_Interface.SetCondition(MainData.BoundaryData.condition)
