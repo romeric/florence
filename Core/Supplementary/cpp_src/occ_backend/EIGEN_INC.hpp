@@ -18,6 +18,7 @@ namespace Eigen {
 /* RowMajor matrix */
 typedef Eigen::Matrix<Real,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> MatrixR;
 typedef Eigen::Matrix<Integer,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> MatrixI;
+typedef Eigen::Matrix<UInteger,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> MatrixUI;
 }
 
 

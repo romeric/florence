@@ -15,7 +15,7 @@ extensions = [
         ":libTKXMesh.so.9", ":libTKGeomAlgo.so.9", ":libTKShHealing.so.9", ":libTKFeat.so.9", ":libTKFillet.so.9",
         ":libTKBO.so.9", ":libTKPrim.so.9"], 
         library_dirs = ["/home/roman/Dropbox/Python/Core/Supplementary/cpp_src/occ_backend/","/usr/local/lib/"],
-        extra_compile_args = ['-std=c++11']
+        extra_compile_args = ["-std=c++11","-msse","-msse2","-msse4","-mavx"]
         ),
 ]
 

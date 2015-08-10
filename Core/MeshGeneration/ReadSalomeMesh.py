@@ -70,7 +70,7 @@ def ReadMesh_NPFROMFILE(filename,MeshType,C=0):
 	# READ THE WHOLE FILE
 	FileContent = np.fromfile(filename,dtype=np.float64, sep=" ") 
 	# GET NO OF NODES AND NELSE (NELES=NO OF FREE EDGES + NO OF FREE FACES + NO OF ELEMENTS)
-	mesh.nnode = np.int64(FileContent[0]); nelse = np.int64(FileContent[1])
+	mesh.nnode = np.uint64(FileContent[0]); nelse = np.uint64(FileContent[1])
 	# DETERMINE MULTIPLICITY OF EACH TYPE (i.e. EDGES, FACES, ELEMENTS)
 
 
@@ -411,6 +411,12 @@ def ReadMesh(filename,MeshType,C=0):
 
 	# USE THE NPFROMFILE+CYTHON MESH READER
 	mesh = ReadMesh_NPFROMFILE(filename,MeshType,C=0)
+
+	# Unsigned 
+	# mesh.elements = mesh.elements.astype(np.uint64)
+	# mesh.edges = mesh.edges.astype(np.uint64)
+	# if MeshType == "tet" or MeshType == "hex":
+	# 	mesh.faces = mesh.faces.astype(np.uint64)
 
 
 	return mesh 

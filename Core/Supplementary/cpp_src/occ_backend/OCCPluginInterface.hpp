@@ -3,18 +3,11 @@
 
 #include <OCCPlugin.hpp>
 
-struct to_python_structs
-{
-    std::vector<Real> displacement_BC_stl;
-    std::vector<Integer> nodes_dir_out_stl;
-    Integer nodes_dir_size;
-};
-
-to_python_structs PyCppInterface(const char *iges_filename, Real scale, Real* points_array, Integer points_rows, Integer points_cols,
-                                   Integer *elements_array, Integer element_rows, Integer element_cols,
-                                   Integer *edges_array, Integer edges_rows, Integer edges_cols,
-                                   Integer *faces_array, Integer faces_rows, Integer faces_cols, Real condition,
-                                 Real *boundary_fekete, Integer fekete_rows, Integer fekete_cols, const char *projection_method);
+PassToPython PyCppInterface(const char *iges_filename, Real scale, Real* points_array, const Integer points_rows, const Integer points_cols,
+                                   UInteger *elements_array, const Integer element_rows, const Integer element_cols,
+                                   UInteger *edges_array, const Integer &edges_rows, const Integer &edges_cols,
+                                   UInteger *faces_array, const Integer &faces_rows, const Integer &faces_cols, Real condition,
+                                 Real *boundary_fekete, const Integer fekete_rows, const Integer fekete_cols, const char *projection_method);
 
 
 #endif // PY_TO_OCC_BACKEND_HPP

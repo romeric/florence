@@ -11,54 +11,171 @@ import numpy as np
 cimport numpy as np
 
 ctypedef np.int64_t Integer
+ctypedef np.uint64_t UInteger
 ctypedef np.float64_t Real 
 
+
 cdef extern from "OCCPluginInterface.hpp": 
-	struct to_python_structs:
+	struct PassToPython:
 		vector[Real] displacement_BC_stl
 		vector[Integer] nodes_dir_out_stl
 		Integer nodes_dir_size
 
-	to_python_structs PyCppInterface (const char* iges_filename, Real scale, Real* points_array, Integer points_rows, Integer points_cols, 
-		Integer* elements_array, Integer element_rows, Integer element_cols, Integer* edges, Integer edges_rows, Integer edges_cols,
-		Integer* faces, Integer faces_rows, Integer faces_cols, Real condition, Real* boundary_fekete, Integer fekete_rows, Integer fekete_cols,
-		const char* projection_method)
+	PassToPython PyCppInterface (const char* iges_filename, Real scale, Real* points_array, Integer points_rows, Integer points_cols, 
+		UInteger* elements_array, const Integer element_rows, const Integer element_cols, 
+		UInteger* edges, const Integer edges_rows, const Integer edges_cols,
+		UInteger* faces, const Integer faces_rows, const Integer faces_cols, Real condition, 
+		Real* boundary_fekete, const Integer fekete_rows, const Integer fekete_cols, const char* projection_method)
 
 cdef extern from "OCCPlugin.hpp":
 	cdef cppclass OCCPlugin:
-		OCCPlugin()
-		OCCPlugin(string &element_type, Integer &dim)
-		void setarray(Integer *arr, Integer &rows, Integer &cols)
+		OCCPlugin() except +
+		OCCPlugin(string &element_type, const UInteger &dim) except +
+		UInteger ndim
+		void Init(string &element_type, const UInteger &dim)
+		void SetScale(Real &scale)
+		void SetCondition(Real &condition)
+		void SetDimension(const UInteger &dim)
+		void SetMeshElementType(string &type)
+		void SetMeshElements(UInteger *arr, const Integer &rows, const Integer &cols)
+		void SetMeshPoints(Real *arr, Integer &rows, Integer &cols)
+		void SetMeshEdges(UInteger *arr, const Integer &rows, const Integer &cols)
+		void SetMeshFaces(UInteger *arr, const Integer &rows, const Integer &cols)
+		void ScaleMesh()
+		string GetMeshElementType()
+		void SetFeketePoints(Real *arr, const Integer &rows, const Integer &cols)
+		void ReadIGES(const char* filename)
+		void GetGeomVertices()
+		void GetGeomEdges()
+		void GetGeomFaces()
+		void GetCurvesParameters()
+		void GetCurvesLengths()
+		void GetGeomPointsOnCorrespondingEdges()
+		void IdentifyCurvesContainingEdges()
+		void ProjectMeshOnCurve(const char *projection_method)
+		void ProjectMeshOnSurface()
+		void RepairDualProjectedParameters()
+		void MeshPointInversionCurve()
+		void MeshPointInversionSurface()
+		void GetBoundaryPointsOrder()
+		PassToPython GetDirichletData()
+
+
 
 cdef class OCCPluginPy2:
 
-	cdef bytes iges_filename
-	cdef Integer ndim 
-	cdef Real scale 
-	cdef Real condition 
+	cdef UInteger ndim 
 	# USE CYTHONS TYPED MEMORY VIEWS AS NUMPY
 	# ARRAYS CANNOT BE DECLARED AT MODULE LEVEL
-	cdef Real[:,:] points 
-	cdef Integer[:,:] elements
-	cdef Integer[:,:] edges 
-	cdef Integer[:,:] faces 
 	cdef Real[:,:] boundary_fekete 
-	cdef bytes projection_method
 
 	cdef OCCPlugin *thisptr
 
-	def __cinit__(self,dimension=2):
-		self.ndim = dimension
-		self.thisptr = new OCCPlugin()
+	def __cinit__(self, bytes py_element_type, UInteger dimension=2):
+		# Convert to cpp string explicitly
+		cdef string cpp_element_type = py_element_type
+		# self.thisptr = new OCCPlugin()
+		self.thisptr = new OCCPlugin(cpp_element_type,dimension)
+
+	def Init(self, bytes py_element_type, UInteger dimension):
+		cdef string cpp_element_type = py_element_type
+		self.thisptr.Init(cpp_element_type,dimension)
+
+	def SetScale(self,Real scale):
+		self.thisptr.SetScale(scale)
+
+	def SetCondition(self,Real condition):
+		self.thisptr.SetCondition(condition)
+
+	def SetDimension(self,Integer dimension):
+		self.thisptr.SetDimension(dimension)
+
+	def SetMeshElementType(self,bytes py_element_type):
+		cdef string cpp_element_type = py_element_type
+		self.thisptr.SetMeshElementType(cpp_element_type) 
+
+	def SetMeshElements(self,UInteger[:,::1] elements):
+		self.thisptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])
+	
+	def SetMeshPoints(self,Real[:,::1] points):
+		self.thisptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])
+	
+	def SetMeshEdges(self,UInteger[:,::1] edges):
+		self.thisptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
+
+	def SetMeshFaces(self,UInteger[:,::1] faces):
+		self.thisptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
+
+	def ScaleMesh(self):
+		self.thisptr.ScaleMesh()
+
+	def GetMeshElementType(self):
+		cdef string cpp_element_type = self.thisptr.GetMeshElementType()
+		cdef bytes py_element_type = cpp_element_type
+		return py_element_type
+
+	def SetFeketePoints(self, Real[:,::1] fekete):
+		self.thisptr.SetFeketePoints(&fekete[0,0],fekete.shape[0],fekete.shape[1])
+
+	def ReadIGES(self, bytes filename):
+		self.thisptr.ReadIGES(<const char*>filename)
+
+	def GetGeomVertices(self):
+		self.thisptr.GetGeomVertices()
+
+	def GetGeomEdges(self):
+		self.thisptr.GetGeomEdges()
+
+	def GetGeomFaces(self):
+		self.thisptr.GetGeomFaces()
+
+	def GetCurvesParameters(self):
+		self.thisptr.GetCurvesParameters()
+
+	def GetCurvesLengths(self):
+		self.thisptr.GetCurvesLengths()
+
+	def GetGeomPointsOnCorrespondingEdges(self):
+		self.thisptr.GetGeomPointsOnCorrespondingEdges()
+
+	def IdentifyCurvesContainingEdges(self):
+		self.thisptr.IdentifyCurvesContainingEdges()
+
+	def ProjectMeshOnCurve(self, bytes projection_method):
+		self.thisptr.ProjectMeshOnCurve(<const char *> projection_method)
+	
+	def ProjectMeshOnSurface(self):
+		self.thisptr.ProjectMeshOnSurface()
+
+	def RepairDualProjectedParameters(self):
+		self.thisptr.RepairDualProjectedParameters()
+
+	def MeshPointInversionCurve(self):
+		self.thisptr.MeshPointInversionCurve()
+
+	def MeshPointInversionSurface(self):
+		self.thisptr.MeshPointInversionSurface()
+
+	def GetBoundaryPointsOrder(self):
+		self.thisptr.GetBoundaryPointsOrder()
+
+	def GetDirichletData(self):
+		cdef PassToPython struct_to_python = self.thisptr.GetDirichletData()
+		cdef np.ndarray nodes_dir = np.zeros((struct_to_python.nodes_dir_size,1),dtype=np.int64)
+		cdef Integer i 
+		for i in range(struct_to_python.nodes_dir_size):
+			nodes_dir[i] = struct_to_python.nodes_dir_out_stl[i]
+		cdef np.ndarray displacements_BC = np.zeros((self.thisptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64) 
+		for i in range(self.thisptr.ndim*struct_to_python.nodes_dir_size):
+			displacements_BC[i] = struct_to_python.displacement_BC_stl[i]
+
+		return nodes_dir, displacements_BC.reshape(struct_to_python.nodes_dir_size,self.thisptr.ndim) 
+
 
 	def __dealloc__(self):
 		del self.thisptr
 
-	def setarray(self,Integer[:,::1] elements):
-		pass
-		# print self.thisptr
-		# cdef OCCPlugin interf = OCCPlugin()
-		self.thisptr.setarray(&elements[0,0],elements.shape[0],elements.shape[1])
+
 
 
 cdef class OCCPluginPy:
@@ -67,23 +184,23 @@ cdef class OCCPluginPy:
 	"""
 
 	cdef bytes iges_filename
-	cdef Integer ndim 
+	cdef UInteger ndim 
 	cdef Real scale 
 	cdef Real condition 
 	# USE CYTHONS TYPED MEMORY VIEWS AS NUMPY
 	# ARRAYS CANNOT BE DECLARED AT MODULE LEVEL
 	cdef Real[:,:] points 
-	cdef Integer[:,:] elements
-	cdef Integer[:,:] edges 
-	cdef Integer[:,:] faces 
+	cdef UInteger[:,:] elements
+	cdef UInteger[:,:] edges 
+	cdef UInteger[:,:] faces 
 	cdef Real[:,:] boundary_fekete 
 	cdef bytes projection_method
 
 	def __init__(self,dimension=2):
 		self.ndim = dimension
 
-	def SetMesh(self,np.ndarray[Real, ndim=2, mode="c"] points, np.ndarray[Integer, ndim=2, mode="c"] elements,
-		np.ndarray[Integer, ndim=2, mode="c"] edges, np.ndarray[Integer, ndim=2, mode="c"] faces=None):
+	def SetMesh(self,np.ndarray[Real, ndim=2, mode="c"] points, np.ndarray[UInteger, ndim=2, mode="c"] elements,
+		np.ndarray[UInteger, ndim=2, mode="c"] edges, np.ndarray[UInteger, ndim=2, mode="c"] faces=None):
 
 		self.elements = elements 
 		self.points = points
@@ -95,7 +212,7 @@ cdef class OCCPluginPy:
 	def SetCADGeometry(self,bytes iges_filename):
 		self.iges_filename = iges_filename
 
-	def SetDimension(self,Integer dim):
+	def SetDimension(self,UInteger dim):
 		self.ndim = dim 
 
 	def SetScale(self,Real scale):
@@ -124,8 +241,8 @@ cdef class OCCPluginPy:
 @cython.profile(False)
 @cython.wraparound(False)
 def __ComputeDirichletBoundaryConditions__(bytes iges_filename not None, Real scale, np.ndarray[Real, ndim=2, mode="c"] points not None, 
-	np.ndarray[Integer, ndim=2, mode="c"] elements not None, np.ndarray[Integer, ndim=2, mode="c"] edges not None, 
-	np.ndarray[Integer, ndim=2, mode="c"] faces not None, Real condition, np.ndarray[Real, ndim=2, mode="c"] boundary_fekete not None,
+	np.ndarray[UInteger, ndim=2, mode="c"] elements not None, np.ndarray[UInteger, ndim=2, mode="c"] edges not None, 
+	np.ndarray[UInteger, ndim=2, mode="c"] faces not None, Real condition, np.ndarray[Real, ndim=2, mode="c"] boundary_fekete not None,
 	bytes projection_method not None):
 	"""
 	Actual wrapper for occ_frontend, kept as a 'static' function for debugging purposes 
@@ -146,7 +263,7 @@ def __ComputeDirichletBoundaryConditions__(bytes iges_filename not None, Real sc
 	# INITIALISED AND ALLOCATED IN PYTHON (CYTHON) THEN PASSED TO CPP. HOWEVER THIS IS ONLY POSSIBLE FOR FIXED
 	# ARRAY SIZES. LOOK AT THE END OF THE FILE FOR THESE ALTERNATIVE APPROACHES
 
-	cdef to_python_structs struct_to_python
+	cdef PassToPython struct_to_python
 	# CALL CPP ROUTINE
 	struct_to_python = PyCppInterface (<const char*>iges_filename, scale, &points[0,0], points_rows, points_cols, &elements[0,0], 
 		elements_rows, elements_cols,&edges[0,0], edges_rows, edges_cols, &faces[0,0], faces_rows, faces_cols, 

@@ -74,13 +74,14 @@ def ProblemData(MainData):
 	class MeshInfo(object):
 		MeshType = 'tri'
 		Nature = 'straight'
-		# Reader = 'ReadSeparate'
-		Reader = 'Read'
+		Reader = 'ReadSeparate'
+		# Reader = 'Read'
 
 		ConnectivityFile = ProblemPath + '/elements_rae.dat'
 		CoordinatesFile = ProblemPath +'/points_rae.dat'
+		EdgesFile = ProblemPath + '/edges_rae.dat'
 		# FileName = ProblemPath +'/RAE2822_Isotropic_90.dat'
-		FileName = ProblemPath +'/RAE2822_Isotropic_414.dat'
+		# FileName = ProblemPath +'/RAE2822_Isotropic_414.dat'
 		
 
 
@@ -91,11 +92,13 @@ def ProblemData(MainData):
 		# Type = 'mixed'
 		IGES_File = ProblemPath + '/rae2822.igs'
 
-		# condition = 2.
-		# scale = 1000.
-
-		condition = 0.6
+		# aniso
+		condition = 5.
 		scale = 1.
+
+		# iso
+		# condition = 0.6
+		# scale = 1.
 
 
 		class DirichArgs(object):
@@ -193,6 +196,27 @@ def ProblemData(MainData):
 
 		def NURBSCondition(self,x):
 			return np.sqrt(x[:,0]**2 + x[:,1]**2) < 2
+
+		def ProjectionCriteria(self,mesh):
+			projection_edges = np.zeros(mesh.edges.shape[0],dtype=np.uint64)
+			num = mesh.edges.shape[1]
+			condition = 5
+			print np.max(mesh.points)
+			print np.min(mesh.points)
+			for iedge in range(mesh.edges.shape[0]):
+				x = np.sum(mesh.points[mesh.edges[iedge,:],0])/num
+				y = np.sum(mesh.points[mesh.edges[iedge,:],1])/num
+				if np.sqrt(x*x+y*y)< condition:
+					projection_edges[iedge]=1
+				# print x,y
+			print projection_edges
+			# print mesh.elements.shape
+			# print mesh.edges.shape
+
+			# import matplotlib.pyplot as plt
+			# plt.plot(mesh.points[np.unique(mesh.edges),0],mesh.points[np.unique(mesh.edges),1])
+			# plt.show()
+
 
 
 		

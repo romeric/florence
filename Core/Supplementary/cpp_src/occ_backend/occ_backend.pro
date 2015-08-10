@@ -8,7 +8,7 @@ SOURCES += main.cpp \
     OCCPlugin.cpp \
     OCCPluginInterface.cpp
 
-QMAKE_CXXFLAGS += -Wno-unused -std=c++11 # -O2 #-fopenmp -msse -msse2 -fomit-frame-pointer -fno-strict-aliasing
+QMAKE_CXXFLAGS += -std=c++11 -Wall #-Wno-unused # -O2 #-fopenmp -msse -msse2 -fomit-frame-pointer -fno-strict-aliasing
 
 INCLUDEPATH +=/home/roman/Dropbox/eigen-devel
 #INCLUDEPATH +=/home/roman/Dropbox/eigen

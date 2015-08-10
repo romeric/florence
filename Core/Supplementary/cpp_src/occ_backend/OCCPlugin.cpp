@@ -7,7 +7,7 @@ using namespace std;
 
 
 // OCCPlugin class definitions
-void OCCPlugin::Init(std::string &element_type, Integer &ndim)
+void OCCPlugin::Init(std::string &element_type, const UInteger &ndim)
 {
     this->mesh_element_type = element_type;
     this->ndim = ndim;
@@ -23,7 +23,7 @@ void OCCPlugin::SetCondition(Real &condition)
     this->condition = condition;
 }
 
-void OCCPlugin::SetDimension(Integer &dim)
+void OCCPlugin::SetDimension(const UInteger &dim)
 {
     this->ndim=dim;
 }
@@ -31,6 +31,28 @@ void OCCPlugin::SetDimension(Integer &dim)
 void OCCPlugin::SetMeshElementType(std::string &type)
 {
     this->mesh_element_type = type;
+}
+
+void OCCPlugin::SetMeshElements(UInteger *arr, const Integer &rows, const Integer &cols)
+{
+    this->mesh_elements = Eigen::Map<Eigen::MatrixUI>(arr,rows,cols);
+}
+
+void OCCPlugin::SetMeshPoints(Real *arr, const Integer &rows, const Integer &cols)
+{
+    this->mesh_points = Eigen::Map<Eigen::MatrixR>(arr,rows,cols);
+//    new (&this->mesh_points) Eigen::Map<Eigen::MatrixR> (arr,rows,cols);
+//    print (this->mesh_points.rows(),this->mesh_points.cols());
+}
+
+void OCCPlugin::SetMeshEdges(UInteger *arr, const Integer &rows, const Integer &cols)
+{
+    this->mesh_edges = Eigen::Map<Eigen::MatrixUI>(arr,rows,cols);
+}
+
+void OCCPlugin::SetMeshFaces(UInteger *arr, const Integer &rows, const Integer &cols)
+{
+    this->mesh_faces = Eigen::Map<Eigen::MatrixUI>(arr,rows,cols);
 }
 
 void OCCPlugin::ScaleMesh()
@@ -275,7 +297,7 @@ Eigen::MatrixI OCCPlugin::Read(std::string &filename)
     return out_arr;
 }
 
-Eigen::MatrixI OCCPlugin::ReadI(std::string &filename, char delim)
+Eigen::MatrixUI OCCPlugin::ReadI(std::string &filename, char delim)
 {
     /*Reading 2D integer row major arrays */
     std::vector<std::string> arr;
@@ -303,7 +325,7 @@ Eigen::MatrixI OCCPlugin::ReadI(std::string &filename, char delim)
     const int cols = (split(arr[0], delim)).size();
 
 
-    Eigen::MatrixI out_arr = Eigen::MatrixI::Zero(rows,cols);
+    Eigen::MatrixUI out_arr = Eigen::MatrixUI::Zero(rows,cols);
 
     for(int i=0 ; i<rows;i++)
     {
@@ -488,6 +510,11 @@ void OCCPlugin::CheckMesh()
 
 }
 
+void OCCPlugin::SetFeketePoints(Real *arr, const Integer &rows, const Integer &cols)
+{
+    this->fekete = Eigen::Map<Eigen::MatrixR>(arr,rows,cols);
+}
+
 void OCCPlugin::ReadIGES(const char* filename)
 {
     /* IGES FILE READER BASED ON OCC BACKEND
@@ -618,9 +645,9 @@ void OCCPlugin::GetCurvesLengths()
 
 void OCCPlugin::FindCurvesSequentiallity()
 {
-    //! Checks if the parametric representation of curves are sequential, i.e.
-    //! if the LastParameter of one curve is equal to the FirstParameter of the second curve.
-    //! Generally true for bspline curves
+    //! CHECKS IF THE PARAMETRIC REPRESENTATION OF CURVES ARE SEQUENTIAL, I.E.
+    //! IF THE LastParameter OF ONE CURVE IS EQUAL TO THE FirstParameter OF THE SECOND CURVE.
+    //! GENERALLY TRUE FOR BSPLINE CURVES
     Real Standard_Tolerance = 1.0e-14;
     std::vector<Integer> consecutive_curves; consecutive_curves.clear();
     Eigen::MatrixI curves_sequentiallity = -Eigen::MatrixI::Ones(this->geometry_curves.size(),3);
@@ -749,7 +776,7 @@ void OCCPlugin::IdentifyCurvesContainingEdges()
 //            print (sqrt(x_avg*x_avg+y_avg*y_avg),this->condition);
 //            println(x_avg,y_avg);
             this->listedges.push_back(iedge);
-            for (Integer iter=0;iter<ndim;++iter){
+            for (UInteger iter=0;iter<ndim;++iter){
                dirichlet_edges(index_edge,iter) = this->mesh_edges(iedge,iter);
                 }
 
@@ -827,7 +854,7 @@ void OCCPlugin::IdentifyCurvesContainingEdges()
 
 void OCCPlugin::ProjectMeshOnCurve(const char *projection_method)
 {
-    Real precision_tolerance = 1.0e-4;
+    Real precision_tolerance = 1.0e-7;
     this->projection_method = projection_method;
 //    this->InferInterpolationPolynomialDegree();
 
@@ -838,7 +865,7 @@ void OCCPlugin::ProjectMeshOnCurve(const char *projection_method)
     for (Integer iedge=0; iedge<this->dirichlet_edges.rows(); ++iedge)
     {
         // LOOP OVER THE TWO END NODES OF THIS EDGE (VERTICES OF THE EDGE)
-        for (Integer inode=0; inode<this->ndim; ++inode)
+        for (UInteger inode=0; inode<this->ndim; ++inode)
         {
             // PROJECTION PARAMETER
             Real parameterU;
@@ -877,6 +904,7 @@ void OCCPlugin::ProjectMeshOnCurve(const char *projection_method)
             catch (StdFail_NotDone)
             {
                 std::cerr << "The edge node was not projected to the right curve. Curve number: " << " " << icurve << std::endl;
+                print(x,y,iedge);
             }
 
             // GET CURVE LENGTH
@@ -951,7 +979,10 @@ void OCCPlugin::ProjectMeshOnCurve(const char *projection_method)
 //    println()
 //    Hermit::Solution()
 
-//    exit(EXIT_FAILURE);
+//    for (int i; i<(int)geometry_points.size(); ++i)
+//        print(geometry_points[i].X(),geometry_points[i].Y(),geometry_points[i].Z());
+
+    exit(EXIT_FAILURE);
 }
 
 void OCCPlugin::ProjectMeshOnSurface()
@@ -964,9 +995,9 @@ void OCCPlugin::ProjectMeshOnSurface()
     this->listfaces.clear();
     int index_face = 0;
 
-    for (int iface=0; iface<this->mesh_edges.rows(); ++iface)
+    for (Integer iface=0; iface<this->mesh_edges.rows(); ++iface)
     {
-        for (int jface=0; jface<this->ndim; ++jface) // linear
+        for (UInteger jface=0; jface<this->ndim; ++jface) // linear
         {
             Standard_Real x = this->mesh_points(this->mesh_edges(iface,jface),0);
             Standard_Real y = this->mesh_points(this->mesh_edges(iface,jface),1);
@@ -976,7 +1007,7 @@ void OCCPlugin::ProjectMeshOnSurface()
                 if (jface==0)
                 {
                     this->listfaces.push_back(iface);
-                    for (int iter=0;iter<ndim;++iter)
+                    for (UInteger iter=0;iter<ndim;++iter)
                         dirichlet_faces(index_face,iter) = this->mesh_edges(iface,iter);
                     index_face +=1;
                 }
@@ -1140,26 +1171,37 @@ void OCCPlugin::MeshPointInversionCurve()
         for (Integer j=0; j<no_edge_nodes;++j)
         {
             Real tol =1e-10;
-
-//            GCPnts_AbscissaPoint inv = GCPnts_AbscissaPoint(tol,current_curve_adapt,
-//                                                            internal_scale*this->u_of_all_fekete_mesh_edges(idir,
-//                                                            this->boundary_edges_order(this->listedges[idir],j))*this->scale,0.);
-//            Real U0 = current_curve_adapt.FirstParameter();
-//            if (this->geometry_curves_types[id_curve]==0)
-//                U0 = 0.;
             Real U0 = this->geometry_curves_types[id_curve]==0 ? 0. : current_curve_adapt.FirstParameter();
-//            GCPnts_AbscissaPoint inv = GCPnts_AbscissaPoint(tol,current_curve_adapt,
-//                                                            internal_scale*this->u_of_all_fekete_mesh_edges(idir,
-//                                                            this->boundary_edges_order(this->listedges[idir],j))*this->scale,U0);
-            GCPnts_AbscissaPoint inv = GCPnts_AbscissaPoint(tol,current_curve_adapt,
-                                                            internal_scale*curves_lengths(id_curve)*this->u_of_all_fekete_mesh_edges(idir,
-                                                            this->boundary_edges_order(this->listedges[idir],j))*this->scale,U0);
-
-
-            Real uEq = inv.Parameter();
+            GCPnts_AbscissaPoint inv;
+            Real uEq;
             gp_Pnt xEq;
+
+//            inv = GCPnts_AbscissaPoint(tol,current_curve_adapt,
+//                                       internal_scale*this->u_of_all_fekete_mesh_edges(idir,
+//                                       this->boundary_edges_order(this->listedges[idir],j))*this->scale,0.);
+
+            if ( (this->scale-1.)<1e-14)
+            {
+                inv = GCPnts_AbscissaPoint(tol,current_curve_adapt,
+                                           internal_scale*curves_lengths(id_curve)*this->u_of_all_fekete_mesh_edges(idir,
+                                           this->boundary_edges_order(this->listedges[idir],j))*this->scale,U0);
+
+                uEq = inv.Parameter();
+                current_curve_adapt.D0(uEq,xEq);
+            }
+            else
+            {
+                inv = GCPnts_AbscissaPoint(tol,current_curve_adapt,
+                                           internal_scale*this->u_of_all_fekete_mesh_edges(idir,
+                                           this->boundary_edges_order(this->listedges[idir],j))*this->scale,U0);
+
+                uEq = inv.Parameter();
+                current_curve_adapt.D0(uEq*length_current_curve,xEq);
+            }
+
+
 //            current_curve_adapt.D0(uEq*length_current_curve,xEq);
-            current_curve_adapt.D0(uEq,xEq);
+//            current_curve_adapt.D0(uEq,xEq);
 //            current_curve_adapt.D0(uEq*length_current_curve+U0,xEq);
 //            println(uEq,uEq*length_current_curve,U0);
 //            println(length_current_curve);
@@ -1172,8 +1214,8 @@ void OCCPlugin::MeshPointInversionCurve()
 
 //            println( internal_scale*this->u_of_all_fekete_mesh_edges(idir, this->boundary_edges_order(this->listedges[idir],j))*this->scale );
 //            println(internal_scale*curves_lengths(id_curve)*this->u_of_all_fekete_mesh_edges(idir,this->boundary_edges_order(this->listedges[idir],j))*this->scale);
-            println( internal_scale*this->u_of_all_fekete_mesh_edges(idir, this->boundary_edges_order(this->listedges[idir],j))*this->scale,
-                     internal_scale*curves_lengths(id_curve)*this->u_of_all_fekete_mesh_edges(idir,this->boundary_edges_order(this->listedges[idir],j))*this->scale);
+//            println( internal_scale*this->u_of_all_fekete_mesh_edges(idir, this->boundary_edges_order(this->listedges[idir],j))*this->scale,
+//                     internal_scale*curves_lengths(id_curve)*this->u_of_all_fekete_mesh_edges(idir,this->boundary_edges_order(this->listedges[idir],j))*this->scale);
 //            println(curves_lengths.rows(),curves_lengths.cols());
 //            println(this->u_of_all_fekete_mesh_edges(idir, this->boundary_edges_order(this->listedges[idir],j))*scale );
 //            println( this->boundary_edges_order(this->listedges[idir],j) );
@@ -1200,11 +1242,14 @@ void OCCPlugin::MeshPointInversionCurve()
 //            gp_Pnt x1 = current_curve->Value(current_curve->FirstParameter());
 //            println(x1.X(),x1.Y(),x2.X(),x2.Y(),current_curve->FirstParameter(),id_curve);
 
+
+
         }
         this->index_nodes = ((this->index_nodes).array()+no_edge_nodes).eval().matrix();
-        cout << " " << endl;
+//        cout << " " << endl;
     }
 //    cout << displacements_BC << endl;
+//    print (this->ndim);
 
 }
 
@@ -1213,15 +1258,9 @@ void OCCPlugin::MeshPointInversionSurface()
 
 }
 
-Eigen::MatrixR OCCPlugin::ParametricFeketePoints(Handle_Geom_Curve &curve,Standard_Real &u1,Standard_Real &u2)
+Eigen::MatrixR OCCPlugin::ParametricFeketePoints(Standard_Real &u1,Standard_Real &u2)
 {
     Eigen::MatrixR fekete_on_curve;
-//        std::string type_d = "normalised";
-//        if (std::strcmp(type_p,type_d)==0 )
-//        {
-//            fekete_1d_curve = (((u2-u1)/2.)*this->fekete_1d).eval();
-//        }
-//        fekete_1d_curve = ((1.0/2.0)*((this->fekete_1d).array()+1.).matrix()).eval();
     fekete_on_curve = (u1 + (u2-u1)/2.0*((this->fekete).array()+1.)).matrix();
     return fekete_on_curve;
 }
@@ -1346,7 +1385,7 @@ void OCCPlugin::EstimatedParameterUOnMesh()
         Real u1 = this->projection_U(idir,0);
         Real u2 = this->projection_U(idir,1);
         Handle_Geom_Curve current_curve = this->geometry_curves[id_curve];
-        u_of_all_fekete_mesh_edges.block(idir,0,1,this->fekete.rows()) = ParametricFeketePoints(current_curve,u1,u2).transpose();
+        u_of_all_fekete_mesh_edges.block(idir,0,1,this->fekete.rows()) = ParametricFeketePoints(u1,u2).transpose();
 //        print(u_of_all_fekete_mesh_edges);
         if (current_curve->IsClosed())
         {
@@ -1423,4 +1462,16 @@ void OCCPlugin::EstimatedParameterUOnMesh()
 //    print (boundary_edges_order);
 //    cout << this->u_of_all_fekete_mesh_edges << endl;
 //    exit (EXIT_FAILURE);
+}
+
+PassToPython OCCPlugin::GetDirichletData()
+{
+    PassToPython struct_to_python;
+    struct_to_python.nodes_dir_size = this->nodes_dir.rows();
+    // CONVERT FROM EIGEN TO STL VECTOR
+    struct_to_python.nodes_dir_out_stl.assign(this->nodes_dir.data(),this->nodes_dir.data()+struct_to_python.nodes_dir_size);
+    struct_to_python.displacement_BC_stl.assign(this->displacements_BC.data(),this->displacements_BC.data()+ \
+                                                this->ndim*struct_to_python.nodes_dir_size);
+
+    return struct_to_python;
 }

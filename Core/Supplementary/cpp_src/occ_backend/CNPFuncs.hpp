@@ -180,7 +180,7 @@ template<typename T> inline Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic,Eigen:
 }
 
 template<typename Derived>
-inline std::tuple<Eigen::MatrixI,Eigen::MatrixI > where_eq(Eigen::Matrix<Derived,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> &arr,
+inline std::tuple<Eigen::MatrixUI,Eigen::MatrixUI > where_eq(Eigen::Matrix<Derived,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> &arr,
                                                                                       Derived num, Real tolerance=1e-14)
 
 //template<typename Derived>
@@ -188,8 +188,8 @@ inline std::tuple<Eigen::MatrixI,Eigen::MatrixI > where_eq(Eigen::Matrix<Derived
 {
 //    Eigen::MatrixBase<Derived> idx_rows;
 //    Eigen::MatrixBase<Derived> idx_cols;
-    std::vector<Integer> idx_rows;
-    std::vector<Integer> idx_cols;
+    std::vector<UInteger> idx_rows;
+    std::vector<UInteger> idx_cols;
     idx_rows.clear(); idx_cols.clear();
     for (Integer i=0; i<arr.rows();++i)
     {
@@ -203,8 +203,8 @@ inline std::tuple<Eigen::MatrixI,Eigen::MatrixI > where_eq(Eigen::Matrix<Derived
         }
     }
 
-    return std::make_tuple( Eigen::Map<Eigen::MatrixI>(idx_rows.data(),idx_rows.size(),1),
-                            Eigen::Map<Eigen::MatrixI>(idx_cols.data(),idx_cols.size(),1));
+    return std::make_tuple( Eigen::Map<Eigen::MatrixUI>(idx_rows.data(),idx_rows.size(),1),
+                            Eigen::Map<Eigen::MatrixUI>(idx_cols.data(),idx_cols.size(),1));
 }
 
 

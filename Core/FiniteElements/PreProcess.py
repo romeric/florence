@@ -40,8 +40,10 @@ def PreProcess(MainData,Pr,pwd):
 			MeshReader(MainData.MeshInfo.FileName,MainData.MeshInfo.MeshType,MainData.C)
 		elif MainData.MeshInfo.Reader is 'ReadSeparate':
 			# READ MESH FROM SEPARATE FILES FOR CONNECTIVITY AND COORDINATES
+			# mesh.ReadSeparate(MainData.MeshInfo.ConnectivityFile,MainData.MeshInfo.CoordinatesFile,MainData.MeshInfo.MeshType,
+			# 	delimiter_connectivity=',',delimiter_coordinates=',')
 			mesh.ReadSeparate(MainData.MeshInfo.ConnectivityFile,MainData.MeshInfo.CoordinatesFile,MainData.MeshInfo.MeshType,
-				delimiter_connectivity=',',delimiter_coordinates=',')
+				edges_file=MainData.MeshInfo.EdgesFile,delimiter_connectivity=',',delimiter_coordinates=',')
 		elif MainData.MeshInfo.Reader is 'UniformHollowCircle':
 			# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=4,ncirc=12)
 			# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=7,ncirc=7) # isotropic
@@ -53,13 +55,21 @@ def PreProcess(MainData,Pr,pwd):
 	# else:
 	# 	print u'\u2717'.encode('utf8')+' : ','Imported mesh has',mesh_node_order,'node ordering'
 	
-
-	mesh.points *=1000.
+	# mesh.points[:,0] -= 0.5
+	# mesh.points *=1000. 
+	# mesh.SimplePlot()
+	# print mesh.GetElementsWithBoundaryEdgesTri()
+	# mesh.RetainElementsWithin((-0.52,-0.08,0.72,0.08))
+	# mesh.RetainElementsWithin((-0.502,-0.06,0.505,0.06283))
+	# mesh.RemoveElements((-0.9,-0.1,1.9,0.1),keep_boundary_only=True)
+	# mesh.RemoveElements((-0.9,-0.1,1.9,0.1),keep_boundary_only=True,plot_new_mesh=False) #
 	# mesh.PlotMeshNumberingTri()
+	# sys.exit(0)
 	# print np.linalg.norm(mesh.points,axis=1)
 	# GENERATE pMESHES FOR HIGH C
 	############################################################################
 	# t_mesh = time()
+
 	if MainData.C>0:
 		mesh.GetHighOrderMesh(MainData.C,Parallel=MainData.Parallel,nCPU=MainData.numCPU)
 
