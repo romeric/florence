@@ -15,7 +15,7 @@ from Core.FiniteElements.PostProcess import *
 from Core.FiniteElements.Solvers.Solver import *
 # print 'TIME',time()-t_import
 # sys.exit(0)
-#######################################################################################################################################################
+############################################################################################################################################
 # PROBLEM FILE DIRECTORIES
 # Pr = imp.load_source('Square_Piezo',pwd+'/Problems/FiniteElements/MultiPhysics_3D_Cube/ProblemData.py')
 # Pr = imp.load_source('Nonlinear_3D_Cube',pwd+'/Problems/FiniteElements/Nonlinear_3D_Cube/ProblemData.py')
@@ -34,7 +34,7 @@ Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle/
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/RAE2822/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Misc/ProblemData.py')
 
-########################################################################################################################################################
+#############################################################################################################################################
 # from line_profiler import profile
 # @profile
 def main(MainData):
@@ -160,7 +160,6 @@ def main(MainData):
 	# PostProcess.HighOrderInterpolatedPatchPlot(MainData,mesh,TotalDisp)
 	import matplotlib.pyplot as plt
 	plt.show()
-	# # plt.savefig('/home/roman/Desktop/DumpReport/uniform_aniso_mesh_'+MainData.MaterialArgs.Type+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)
 
 	# from Core.Supplementary.SuppPlots.MeshNumbering import PlotMeshNumbering
 

@@ -201,6 +201,17 @@ def ProblemData(MainData):
 			# return np.sqrt(x[:,0]**2 + x[:,1]**2) < 2000
 
 
+		def ProjectionCriteria(self,mesh):
+			projection_edges = np.zeros(mesh.edges.shape[0],dtype=np.uint64)
+			num = mesh.edges.shape[1]
+			for iedge in range(mesh.edges.shape[0]):
+				x = np.sum(mesh.points[mesh.edges[iedge,:],0])/num
+				y = np.sum(mesh.points[mesh.edges[iedge,:],1])/num
+				if np.sqrt(x*x+y*y)< self.condition:
+					projection_edges[iedge]=1
+			print projection_edges
+
+
 		
 		def NeumannCriterion(self,NeuArgs,Analysis=0,Step=0):
 			# USING THIS APPROACH YOU EITHER NEED TO APPLY FORCE (N) OR YOU SHOULD KNOW THE VALUE OF AREA (M^2)

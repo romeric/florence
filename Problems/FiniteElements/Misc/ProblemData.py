@@ -196,10 +196,15 @@ def ProblemData(MainData):
 		
 			return b
 
-		# def bcs(self,x):
-			# return np.sqrt(x[:,0]**2 + x[:,1]**2) < 2
-			# MainData.BoundaryData.DirichArgs.bcs = 'np.sqrt(x[:,0]**2 + x[:,1]**2) < 2'
-			# MainData.BoundaryData.DirichArgs.bcs = bcs
+		def ProjectionCriteria(self,mesh):
+			projection_edges = np.zeros(mesh.edges.shape[0],dtype=np.uint64)
+			num = mesh.edges.shape[1]
+			for iedge in range(mesh.edges.shape[0]):
+				x = np.sum(mesh.points[mesh.edges[iedge,:],0])/num
+				y = np.sum(mesh.points[mesh.edges[iedge,:],1])/num
+				if np.sqrt(x*x+y*y)< self.condition:
+					projection_edges[iedge]=1
+			print projection_edges
 
 
 		

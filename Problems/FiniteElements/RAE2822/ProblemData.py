@@ -201,12 +201,12 @@ def ProblemData(MainData):
 			projection_edges = np.zeros(mesh.edges.shape[0],dtype=np.uint64)
 			num = mesh.edges.shape[1]
 			condition = 5
-			print np.max(mesh.points)
-			print np.min(mesh.points)
+			# print np.max(mesh.points)
+			# print np.min(mesh.points)
 			for iedge in range(mesh.edges.shape[0]):
 				x = np.sum(mesh.points[mesh.edges[iedge,:],0])/num
 				y = np.sum(mesh.points[mesh.edges[iedge,:],1])/num
-				if np.sqrt(x*x+y*y)< condition:
+				if np.sqrt(x*x+y*y)< self.condition:
 					projection_edges[iedge]=1
 				# print x,y
 			print projection_edges

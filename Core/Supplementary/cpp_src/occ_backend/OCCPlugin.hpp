@@ -92,6 +92,7 @@ public:
     static Eigen::MatrixR ReadR(std::string &filename, char delim);
     void CheckMesh();
     void SetFeketePoints(Real *arr, const Integer &rows, const Integer &cols);
+    void ComputeProjectionCriteria();
     void ReadIGES(const char *filename);
     void GetGeomVertices();
     void GetGeomEdges();

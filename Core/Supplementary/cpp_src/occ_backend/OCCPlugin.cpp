@@ -520,6 +520,32 @@ void OCCPlugin::SetFeketePoints(Real *arr, const Integer &rows, const Integer &c
     this->fekete = Eigen::Map<Eigen::MatrixR>(arr,rows,cols);
 }
 
+void OCCPlugin::ComputeProjectionCriteria()
+{
+    // IF NOT ALLOCATED THEN COMPUTE
+    if (this->projection_criteria.rows()==0)
+    {
+        this->projection_criteria.setZero(mesh_edges.rows(),mesh_edges.cols());
+        for (auto iedge=0; iedge<mesh_edges.rows(); iedge++)
+        {
+            // GET THE COORDINATES OF THE TWO END NODES
+            Real x1 = this->mesh_points(this->mesh_edges(iedge,0),0);
+            Real y1 = this->mesh_points(this->mesh_edges(iedge,0),1);
+            Real x2 = this->mesh_points(this->mesh_edges(iedge,1),0);
+            Real y2 = this->mesh_points(this->mesh_edges(iedge,1),1);
+
+            // GET THE MIDDLE POINT OF THE EDGE
+            Real x_avg = ( x1 + x2 )/2.;
+            Real y_avg = ( y1 + y2 )/2.;
+            if (sqrt(x_avg*x_avg+y_avg*y_avg)<this->condition)
+            {
+                projection_criteria(iedge)=1;
+            }
+        }
+        //this->projection_criteria.setOnes(mesh_edges.rows(),mesh_edges.cols());
+    }
+}
+
 void OCCPlugin::ReadIGES(const char* filename)
 {
     /* IGES FILE READER BASED ON OCC BACKEND
