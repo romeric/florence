@@ -23,15 +23,15 @@ sys.dont_write_bytecode
 # START THE ANALYSIS
 print "Initiating the routines... Current time is", datetime.now().time()
 
-# MUPY'S BASE CLASS 
+# FLORENCE BASE CLASS 
 class MainData(object):
- 	"""Mupy's main class. General data such as directories, files, analysis session, etc 
+ 	"""FLorence base class. General data such as directories, files, analysis session, etc 
         that needs to be loaded a priori are stored
         
-        pwd:                            Mupy's top level directory
+        pwd:                            Florence's top level directory
         session:                        {'FEM','BEM','Coupled'} Session to be run
         __NO_DEBUG__:                   Enter debug mode of the package (if false). Activates all numerical checks                 
-        __VECTORISATION__:              Activate numpy's SIMD instructions e.g. for einsum for computing elemental matrices with no loops
+        __VECTORISATION__:              Activate numpy's SIMD instructions e.g. (einsum) for computing elemental matrices with no loops
         __PARALLEL__:                   Activate multiprocessing for either or both shared and distributed memory
         numCPU:                         Number of concurrent cores/hyperthreads for parallelisation
         __PARALLEL_MEMORY__:            {'SHARED','DISTRIBUTED','AUTO','BOTH'} Option for shared or distributed memory parallelisation

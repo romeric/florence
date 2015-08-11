@@ -207,9 +207,12 @@ def ProblemData(MainData):
 			for iedge in range(mesh.edges.shape[0]):
 				x = np.sum(mesh.points[mesh.edges[iedge,:],0])/num
 				y = np.sum(mesh.points[mesh.edges[iedge,:],1])/num
+				x *= self.scale
+				y *= self.scale
 				if np.sqrt(x*x+y*y)< self.condition:
 					projection_edges[iedge]=1
-			print projection_edges
+			
+			return projection_edges
 
 
 		

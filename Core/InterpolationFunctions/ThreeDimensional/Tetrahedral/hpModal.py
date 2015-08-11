@@ -1,7 +1,6 @@
 import imp, os
 import numpy as np 
-# import scipy as sp 
-from Core.JacobiPolynomials.JacobiPolynomials import *
+from Core.InterpolationFunctions.JacobiPolynomials.JacobiPolynomials import *
 
 
 def hpBases(C,r0,s,t):

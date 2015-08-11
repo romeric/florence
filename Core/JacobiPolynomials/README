@@ -1,3 +1,0 @@
-JacobiPolynomials.so is about 1-2 orders of magnitude faster than the CPython code.
-
-Build with Cython using: python setup.py build_ext --inplace

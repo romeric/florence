@@ -25,7 +25,8 @@ cdef extern from "OCCPluginInterface.hpp":
 		UInteger* elements_array, const Integer element_rows, const Integer element_cols, 
 		UInteger* edges, const Integer edges_rows, const Integer edges_cols,
 		UInteger* faces, const Integer faces_rows, const Integer faces_cols, Real condition, 
-		Real* boundary_fekete, const Integer fekete_rows, const Integer fekete_cols, const char* projection_method)
+		Real* boundary_fekete, const Integer fekete_rows, const Integer fekete_cols,
+		UInteger* criteria, const Integer criteria_rows, const Integer criteria_cols, const char* projection_method)
 
 cdef extern from "OCCPlugin.hpp":
 	cdef cppclass OCCPlugin:
@@ -35,6 +36,7 @@ cdef extern from "OCCPlugin.hpp":
 		void Init(string &element_type, const UInteger &dim)
 		void SetScale(Real &scale)
 		void SetCondition(Real &condition)
+		void SetProjectionCriteria(UInteger *criteria, Integer &rows, Integer &cols)
 		void SetDimension(const UInteger &dim)
 		void SetMeshElementType(string &type)
 		void SetMeshElements(UInteger *arr, const Integer &rows, const Integer &cols)
@@ -86,6 +88,9 @@ cdef class OCCPluginPy2:
 
 	def SetCondition(self,Real condition):
 		self.thisptr.SetCondition(condition)
+
+	def SetProjectionCriteria(self, UInteger[:,::1] criteria):
+		self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])
 
 	def SetDimension(self,Integer dimension):
 		self.thisptr.SetDimension(dimension)
@@ -190,9 +195,10 @@ cdef class OCCPluginPy:
 	# USE CYTHONS TYPED MEMORY VIEWS AS NUMPY
 	# ARRAYS CANNOT BE DECLARED AT MODULE LEVEL
 	cdef Real[:,:] points 
-	cdef UInteger[:,:] elements
-	cdef UInteger[:,:] edges 
-	cdef UInteger[:,:] faces 
+	cdef UInteger[:,::1] elements
+	cdef UInteger[:,::1] edges 
+	cdef UInteger[:,::1] faces 
+	cdef UInteger[:,:] projection_criteria
 	cdef Real[:,:] boundary_fekete 
 	cdef bytes projection_method
 
@@ -227,12 +233,16 @@ cdef class OCCPluginPy:
 	def SetProjectionMethod(self, bytes projection_method):
 		self.projection_method = projection_method
 
+	def SetProjectionCriteria(self, np.ndarray[UInteger, ndim=2, mode="c"] criteria):
+		self.projection_criteria = criteria
+
 	def ComputeDirichletBoundaryConditions(self):
 		# CALLS STATIC FUNCTION __ComputeDirichletBoundaryConditions__
 		# NOTE THAT np.asarray IS USED TO CONVERT CYTHON'S MEMORY VIEW TO ndarray. 
 		# ALTHOUGH THIS INVOLVES OVERHEAD THIS FUNCTION IS CALLED ONLY ONCE.
 		return __ComputeDirichletBoundaryConditions__(self.iges_filename, self.scale, np.asarray(self.points), np.asarray(self.elements), 
-			np.asarray(self.edges), np.asarray(self.faces), self.condition, np.asarray(self.boundary_fekete), self.projection_method)
+			np.asarray(self.edges), np.asarray(self.faces), self.condition, np.asarray(self.boundary_fekete), 
+			np.asarray(self.projection_criteria), self.projection_method)
 
 
 
@@ -243,21 +253,23 @@ cdef class OCCPluginPy:
 def __ComputeDirichletBoundaryConditions__(bytes iges_filename not None, Real scale, np.ndarray[Real, ndim=2, mode="c"] points not None, 
 	np.ndarray[UInteger, ndim=2, mode="c"] elements not None, np.ndarray[UInteger, ndim=2, mode="c"] edges not None, 
 	np.ndarray[UInteger, ndim=2, mode="c"] faces not None, Real condition, np.ndarray[Real, ndim=2, mode="c"] boundary_fekete not None,
-	bytes projection_method not None):
+	np.ndarray[UInteger, ndim=2, mode="c"] criteria not None, bytes projection_method not None):
 	"""
-	Actual wrapper for occ_frontend, kept as a 'static' function for debugging purposes 
+	One function wrapper for OCCPlugin, kept as a 'static' function for debugging purposes 
 	"""
 
-	cdef Integer element_rows, points_rows, element_cols, points_cols, edges_rows, edges_cols, faces_rows, faces_cols
+	cdef Integer element_rows, points_rows, \
+	element_cols, points_cols, edges_rows, edges_cols, \
+	faces_rows, faces_cols, criteria_rows, criteria_cols, \
+	fekete_rows, fekete_cols
+	cdef Integer i 
 
 	elements_rows, elements_cols = elements.shape[0], elements.shape[1]
 	points_rows, points_cols = points.shape[0], points.shape[1]
 	edges_rows, edges_cols = edges.shape[0], edges.shape[1]
 	faces_rows, faces_cols = faces.shape[0], faces.shape[1]
-
-	cdef Integer fekete_rows, fekete_cols
 	fekete_rows, fekete_cols = boundary_fekete.shape[0], boundary_fekete.shape[1]
-
+	criteria_rows, criteria_cols = criteria.shape[0], criteria.shape[1]
 
 	# AT THE MOMENT THE ARRAYS ARE DEEPLY COPIED FROM CPP TO PYTHON. TO AVOID THIS THE OBJECTS HAVE TO BE 
 	# INITIALISED AND ALLOCATED IN PYTHON (CYTHON) THEN PASSED TO CPP. HOWEVER THIS IS ONLY POSSIBLE FOR FIXED
@@ -265,13 +277,14 @@ def __ComputeDirichletBoundaryConditions__(bytes iges_filename not None, Real sc
 
 	cdef PassToPython struct_to_python
 	# CALL CPP ROUTINE
-	struct_to_python = PyCppInterface (<const char*>iges_filename, scale, &points[0,0], points_rows, points_cols, &elements[0,0], 
-		elements_rows, elements_cols,&edges[0,0], edges_rows, edges_cols, &faces[0,0], faces_rows, faces_cols, 
-		condition, &boundary_fekete[0,0], fekete_rows, fekete_cols,<const char*>projection_method)
+	struct_to_python = PyCppInterface (<const char*>iges_filename, scale, &points[0,0], points_rows, points_cols,
+	 	&elements[0,0], elements_rows, elements_cols,&edges[0,0], edges_rows, edges_cols, 
+	 	&faces[0,0], faces_rows, faces_cols, condition, &boundary_fekete[0,0], fekete_rows, fekete_cols,
+	 	&criteria[0,0], criteria_rows, criteria_cols, <const char*>projection_method)
 
 
 	cdef np.ndarray nodes_dir = np.zeros((struct_to_python.nodes_dir_size,1),dtype=np.int64)
-	cdef Integer i 
+	
 	for i in range(struct_to_python.nodes_dir_size):
 		nodes_dir[i] = struct_to_python.nodes_dir_out_stl[i]
 	cdef np.ndarray displacements_BC = np.zeros((points_cols*struct_to_python.nodes_dir_size,1),dtype=np.float64) 

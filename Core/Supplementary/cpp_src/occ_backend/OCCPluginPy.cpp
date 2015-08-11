@@ -6,8 +6,6 @@
         "language": "c++", 
         "libraries": [
             "stdc++", 
-            ":OCCPluginInterface.so", 
-            ":OCCPlugin.so", 
             ":libTKIGES.so.9", 
             ":libTKXSBase.so.9", 
             ":libTKBRep.so.9", 
@@ -31,8 +29,8 @@
             ":libTKPrim.so.9"
         ], 
         "depends": [
-            "/home/roman/Dropbox/Python/Core/Supplementary/cpp_src/occ_backend/OCCPlugin.hpp", 
-            "/home/roman/Dropbox/Python/Core/Supplementary/cpp_src/occ_backend/OCCPluginInterface.hpp"
+            "/home/roman/Dropbox/Python/Core/Supplementary/cpp_src/occ_backend/include/OCCPluginInterface.hpp", 
+            "/home/roman/Dropbox/Python/Core/Supplementary/cpp_src/occ_backend/include/OCCPlugin.hpp"
         ], 
         "extra_compile_args": [
             "-std=c++11", 
@@ -42,11 +40,11 @@
             "-mavx"
         ], 
         "library_dirs": [
-            "/home/roman/Dropbox/Python/Core/Supplementary/cpp_src/occ_backend/", 
+            "/home/roman/Dropbox/Python/Core/Supplementary/cpp_src/occ_backend/include", 
             "/usr/local/lib/"
         ], 
         "include_dirs": [
-            "/home/roman/Dropbox/Python/Core/Supplementary/cpp_src/occ_backend/", 
+            "/home/roman/Dropbox/Python/Core/Supplementary/cpp_src/occ_backend/include/", 
             "/home/roman/Dropbox/eigen-devel/", 
             "/usr/local/include/oce/"
         ]
@@ -893,7 +891,7 @@ typedef npy_clongdouble __pyx_t_5numpy_clongdouble_t;
  */
 typedef npy_cdouble __pyx_t_5numpy_complex_t;
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":65
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":67
  * 
  * 
  * cdef class OCCPluginPy2:             # <<<<<<<<<<<<<<
@@ -908,7 +906,7 @@ struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCP
 };
 
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":181
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":186
  * 
  * 
  * cdef class OCCPluginPy:             # <<<<<<<<<<<<<<
@@ -925,6 +923,7 @@ struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCP
   __Pyx_memviewslice elements;
   __Pyx_memviewslice edges;
   __Pyx_memviewslice faces;
+  __Pyx_memviewslice projection_criteria;
   __Pyx_memviewslice boundary_fekete;
   PyObject *projection_method;
 };
@@ -1388,8 +1387,6 @@ static PyObject *__Pyx_Import(PyObject *name, PyObject *from_list, int level);
 
 static CYTHON_INLINE npy_uint64 __Pyx_PyInt_As_npy_uint64(PyObject *);
 
-static CYTHON_INLINE npy_int64 __Pyx_PyInt_As_npy_int64(PyObject *);
-
 static int __pyx_typeinfo_cmp(__Pyx_TypeInfo *a, __Pyx_TypeInfo *b);
 
 static int __Pyx_ValidateAndInit_memviewslice(
@@ -1403,6 +1400,8 @@ static int __Pyx_ValidateAndInit_memviewslice(
                 PyObject *original_obj);
 
 static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger(PyObject *);
+
+static CYTHON_INLINE npy_int64 __Pyx_PyInt_As_npy_int64(PyObject *);
 
 static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real(PyObject *);
 
@@ -1578,9 +1577,9 @@ static CYTHON_INLINE char __Pyx_PyInt_As_char(PyObject *);
 
 static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *);
 
-static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dsds_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger(PyObject *);
-
 static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dsds_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real(PyObject *);
+
+static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dsds_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger(PyObject *);
 
 static int __Pyx_check_binary_version(void);
 
@@ -1712,31 +1711,32 @@ static int __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_1
 static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_2Init(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, PyObject *__pyx_v_py_element_type, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger __pyx_v_dimension); /* proto */
 static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_4SetScale(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real __pyx_v_scale); /* proto */
 static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_6SetCondition(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real __pyx_v_condition); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_8SetDimension(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer __pyx_v_dimension); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_10SetMeshElementType(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, PyObject *__pyx_v_py_element_type); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_12SetMeshElements(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __Pyx_memviewslice __pyx_v_elements); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_14SetMeshPoints(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __Pyx_memviewslice __pyx_v_points); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_16SetMeshEdges(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __Pyx_memviewslice __pyx_v_edges); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_18SetMeshFaces(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __Pyx_memviewslice __pyx_v_faces); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_20ScaleMesh(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_22GetMeshElementType(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_24SetFeketePoints(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __Pyx_memviewslice __pyx_v_fekete); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_26ReadIGES(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, PyObject *__pyx_v_filename); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_28GetGeomVertices(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_30GetGeomEdges(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_32GetGeomFaces(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_34GetCurvesParameters(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_36GetCurvesLengths(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_38GetGeomPointsOnCorrespondingEdges(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_40IdentifyCurvesContainingEdges(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_42ProjectMeshOnCurve(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, PyObject *__pyx_v_projection_method); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_44ProjectMeshOnSurface(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_46RepairDualProjectedParameters(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_48MeshPointInversionCurve(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_50MeshPointInversionSurface(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_52GetBoundaryPointsOrder(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_54GetDirichletData(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
-static void __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_56__dealloc__(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_8SetProjectionCriteria(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __Pyx_memviewslice __pyx_v_criteria); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_10SetDimension(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer __pyx_v_dimension); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_12SetMeshElementType(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, PyObject *__pyx_v_py_element_type); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_14SetMeshElements(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __Pyx_memviewslice __pyx_v_elements); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_16SetMeshPoints(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __Pyx_memviewslice __pyx_v_points); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_18SetMeshEdges(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __Pyx_memviewslice __pyx_v_edges); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_20SetMeshFaces(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __Pyx_memviewslice __pyx_v_faces); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_22ScaleMesh(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_24GetMeshElementType(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_26SetFeketePoints(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __Pyx_memviewslice __pyx_v_fekete); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_28ReadIGES(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, PyObject *__pyx_v_filename); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_30GetGeomVertices(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_32GetGeomEdges(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_34GetGeomFaces(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_36GetCurvesParameters(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_38GetCurvesLengths(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_40GetGeomPointsOnCorrespondingEdges(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_42IdentifyCurvesContainingEdges(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_44ProjectMeshOnCurve(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, PyObject *__pyx_v_projection_method); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_46ProjectMeshOnSurface(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_48RepairDualProjectedParameters(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_50MeshPointInversionCurve(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_52MeshPointInversionSurface(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_54GetBoundaryPointsOrder(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_56GetDirichletData(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
+static void __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_58__dealloc__(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self); /* proto */
 static int __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy___init__(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy *__pyx_v_self, PyObject *__pyx_v_dimension); /* proto */
 static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_2SetMesh(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy *__pyx_v_self, PyArrayObject *__pyx_v_points, PyArrayObject *__pyx_v_elements, PyArrayObject *__pyx_v_edges, PyArrayObject *__pyx_v_faces); /* proto */
 static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_4SetCADGeometry(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy *__pyx_v_self, PyObject *__pyx_v_iges_filename); /* proto */
@@ -1745,8 +1745,9 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
 static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_10SetCondition(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy *__pyx_v_self, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real __pyx_v_condition); /* proto */
 static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_12SetBoundaryFeketePoints(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy *__pyx_v_self, PyArrayObject *__pyx_v_boundary_fekete); /* proto */
 static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_14SetProjectionMethod(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy *__pyx_v_self, PyObject *__pyx_v_projection_method); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_16ComputeDirichletBoundaryConditions(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy___ComputeDirichletBoundaryConditions__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_iges_filename, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real __pyx_v_scale, PyArrayObject *__pyx_v_points, PyArrayObject *__pyx_v_elements, PyArrayObject *__pyx_v_edges, PyArrayObject *__pyx_v_faces, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real __pyx_v_condition, PyArrayObject *__pyx_v_boundary_fekete, PyObject *__pyx_v_projection_method); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_16SetProjectionCriteria(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy *__pyx_v_self, PyArrayObject *__pyx_v_criteria); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_18ComputeDirichletBoundaryConditions(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy___ComputeDirichletBoundaryConditions__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_iges_filename, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real __pyx_v_scale, PyArrayObject *__pyx_v_points, PyArrayObject *__pyx_v_elements, PyArrayObject *__pyx_v_edges, PyArrayObject *__pyx_v_faces, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real __pyx_v_condition, PyArrayObject *__pyx_v_boundary_fekete, PyArrayObject *__pyx_v_criteria, PyObject *__pyx_v_projection_method); /* proto */
 static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
@@ -1844,6 +1845,7 @@ static char __pyx_k_fortran[] = "fortran";
 static char __pyx_k_memview[] = "memview";
 static char __pyx_k_reshape[] = "reshape";
 static char __pyx_k_Ellipsis[] = "Ellipsis";
+static char __pyx_k_criteria[] = "criteria";
 static char __pyx_k_elements[] = "elements";
 static char __pyx_k_itemsize[] = "itemsize";
 static char __pyx_k_TypeError[] = "TypeError";
@@ -1866,6 +1868,8 @@ static char __pyx_k_points_rows[] = "points_rows";
 static char __pyx_k_RuntimeError[] = "RuntimeError";
 static char __pyx_k_element_cols[] = "element_cols";
 static char __pyx_k_element_rows[] = "element_rows";
+static char __pyx_k_criteria_cols[] = "criteria_cols";
+static char __pyx_k_criteria_rows[] = "criteria_rows";
 static char __pyx_k_elements_cols[] = "elements_cols";
 static char __pyx_k_elements_rows[] = "elements_rows";
 static char __pyx_k_iges_filename[] = "iges_filename";
@@ -1946,6 +1950,9 @@ static PyObject *__pyx_n_s_class;
 static PyObject *__pyx_n_s_condition;
 static PyObject *__pyx_kp_s_contiguous_and_direct;
 static PyObject *__pyx_kp_s_contiguous_and_indirect;
+static PyObject *__pyx_n_s_criteria;
+static PyObject *__pyx_n_s_criteria_cols;
+static PyObject *__pyx_n_s_criteria_rows;
 static PyObject *__pyx_n_s_ctypes;
 static PyObject *__pyx_n_s_dimension;
 static PyObject *__pyx_n_s_displacements_BC;
@@ -2049,7 +2056,7 @@ static PyObject *__pyx_tuple__24;
 static PyObject *__pyx_tuple__25;
 static PyObject *__pyx_codeobj__20;
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":74
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":76
  * 	cdef OCCPlugin *thisptr
  * 
  * 	def __cinit__(self, bytes py_element_type, UInteger dimension=2):             # <<<<<<<<<<<<<<
@@ -2092,7 +2099,7 @@ static int __pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_1
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__cinit__") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__cinit__") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 76; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -2104,20 +2111,20 @@ static int __pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_1
     }
     __pyx_v_py_element_type = ((PyObject*)values[0]);
     if (values[1]) {
-      __pyx_v_dimension = __Pyx_PyInt_As_npy_uint64(values[1]); if (unlikely((__pyx_v_dimension == (npy_uint64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_v_dimension = __Pyx_PyInt_As_npy_uint64(values[1]); if (unlikely((__pyx_v_dimension == (npy_uint64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 76; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     } else {
       __pyx_v_dimension = ((__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger)2);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__cinit__", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("__cinit__", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 76; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Core.Supplementary.cpp_src.occ_backend.OCCPluginPy.OCCPluginPy2.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return -1;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_py_element_type), (&PyBytes_Type), 1, "py_element_type", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_py_element_type), (&PyBytes_Type), 1, "py_element_type", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 76; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2___cinit__(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self), __pyx_v_py_element_type, __pyx_v_dimension);
 
   /* function exit code */
@@ -2140,17 +2147,17 @@ static int __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_1
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":76
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":78
  * 	def __cinit__(self, bytes py_element_type, UInteger dimension=2):
  * 		# Convert to cpp string explicitly
  * 		cdef string cpp_element_type = py_element_type             # <<<<<<<<<<<<<<
  * 		# self.thisptr = new OCCPlugin()
  * 		self.thisptr = new OCCPlugin(cpp_element_type,dimension)
  */
-  __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_v_py_element_type); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 76; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_v_py_element_type); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_cpp_element_type = __pyx_t_1;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":78
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":80
  * 		cdef string cpp_element_type = py_element_type
  * 		# self.thisptr = new OCCPlugin()
  * 		self.thisptr = new OCCPlugin(cpp_element_type,dimension)             # <<<<<<<<<<<<<<
@@ -2161,11 +2168,11 @@ static int __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_1
     __pyx_t_2 = new OCCPlugin(__pyx_v_cpp_element_type, __pyx_v_dimension);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 80; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_v_self->thisptr = __pyx_t_2;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":74
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":76
  * 	cdef OCCPlugin *thisptr
  * 
  * 	def __cinit__(self, bytes py_element_type, UInteger dimension=2):             # <<<<<<<<<<<<<<
@@ -2184,7 +2191,7 @@ static int __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_1
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":80
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":82
  * 		self.thisptr = new OCCPlugin(cpp_element_type,dimension)
  * 
  * 	def Init(self, bytes py_element_type, UInteger dimension):             # <<<<<<<<<<<<<<
@@ -2223,11 +2230,11 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dimension)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("Init", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 80; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("Init", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 82; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "Init") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 80; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "Init") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 82; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -2236,17 +2243,17 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
     __pyx_v_py_element_type = ((PyObject*)values[0]);
-    __pyx_v_dimension = __Pyx_PyInt_As_npy_uint64(values[1]); if (unlikely((__pyx_v_dimension == (npy_uint64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 80; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_dimension = __Pyx_PyInt_As_npy_uint64(values[1]); if (unlikely((__pyx_v_dimension == (npy_uint64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 82; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("Init", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 80; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("Init", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 82; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Core.Supplementary.cpp_src.occ_backend.OCCPluginPy.OCCPluginPy2.Init", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_py_element_type), (&PyBytes_Type), 1, "py_element_type", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 80; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_py_element_type), (&PyBytes_Type), 1, "py_element_type", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 82; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_2Init(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self), __pyx_v_py_element_type, __pyx_v_dimension);
 
   /* function exit code */
@@ -2268,17 +2275,17 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("Init", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":81
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":83
  * 
  * 	def Init(self, bytes py_element_type, UInteger dimension):
  * 		cdef string cpp_element_type = py_element_type             # <<<<<<<<<<<<<<
  * 		self.thisptr.Init(cpp_element_type,dimension)
  * 
  */
-  __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_v_py_element_type); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 81; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_v_py_element_type); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 83; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_cpp_element_type = __pyx_t_1;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":82
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":84
  * 	def Init(self, bytes py_element_type, UInteger dimension):
  * 		cdef string cpp_element_type = py_element_type
  * 		self.thisptr.Init(cpp_element_type,dimension)             # <<<<<<<<<<<<<<
@@ -2287,7 +2294,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
   __pyx_v_self->thisptr->Init(__pyx_v_cpp_element_type, __pyx_v_dimension);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":80
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":82
  * 		self.thisptr = new OCCPlugin(cpp_element_type,dimension)
  * 
  * 	def Init(self, bytes py_element_type, UInteger dimension):             # <<<<<<<<<<<<<<
@@ -2307,7 +2314,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":84
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":86
  * 		self.thisptr.Init(cpp_element_type,dimension)
  * 
  * 	def SetScale(self,Real scale):             # <<<<<<<<<<<<<<
@@ -2326,7 +2333,7 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetScale (wrapper)", 0);
   assert(__pyx_arg_scale); {
-    __pyx_v_scale = __pyx_PyFloat_AsDouble(__pyx_arg_scale); if (unlikely((__pyx_v_scale == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_scale = __pyx_PyFloat_AsDouble(__pyx_arg_scale); if (unlikely((__pyx_v_scale == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 86; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -2346,7 +2353,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetScale", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":85
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":87
  * 
  * 	def SetScale(self,Real scale):
  * 		self.thisptr.SetScale(scale)             # <<<<<<<<<<<<<<
@@ -2355,7 +2362,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
   __pyx_v_self->thisptr->SetScale(__pyx_v_scale);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":84
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":86
  * 		self.thisptr.Init(cpp_element_type,dimension)
  * 
  * 	def SetScale(self,Real scale):             # <<<<<<<<<<<<<<
@@ -2370,7 +2377,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":87
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":89
  * 		self.thisptr.SetScale(scale)
  * 
  * 	def SetCondition(self,Real condition):             # <<<<<<<<<<<<<<
@@ -2389,7 +2396,7 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetCondition (wrapper)", 0);
   assert(__pyx_arg_condition); {
-    __pyx_v_condition = __pyx_PyFloat_AsDouble(__pyx_arg_condition); if (unlikely((__pyx_v_condition == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 87; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_condition = __pyx_PyFloat_AsDouble(__pyx_arg_condition); if (unlikely((__pyx_v_condition == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 89; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -2409,16 +2416,16 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetCondition", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":88
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":90
  * 
  * 	def SetCondition(self,Real condition):
  * 		self.thisptr.SetCondition(condition)             # <<<<<<<<<<<<<<
  * 
- * 	def SetDimension(self,Integer dimension):
+ * 	def SetProjectionCriteria(self, UInteger[:,::1] criteria):
  */
   __pyx_v_self->thisptr->SetCondition(__pyx_v_condition);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":87
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":89
  * 		self.thisptr.SetScale(scale)
  * 
  * 	def SetCondition(self,Real condition):             # <<<<<<<<<<<<<<
@@ -2433,8 +2440,98 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":90
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":92
  * 		self.thisptr.SetCondition(condition)
+ * 
+ * 	def SetProjectionCriteria(self, UInteger[:,::1] criteria):             # <<<<<<<<<<<<<<
+ * 		self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])
+ * 
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_9SetProjectionCriteria(PyObject *__pyx_v_self, PyObject *__pyx_arg_criteria); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_9SetProjectionCriteria(PyObject *__pyx_v_self, PyObject *__pyx_arg_criteria) {
+  __Pyx_memviewslice __pyx_v_criteria = { 0, 0, { 0 }, { 0 }, { 0 } };
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("SetProjectionCriteria (wrapper)", 0);
+  assert(__pyx_arg_criteria); {
+    __pyx_v_criteria = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger(__pyx_arg_criteria); if (unlikely(!__pyx_v_criteria.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 92; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("Core.Supplementary.cpp_src.occ_backend.OCCPluginPy.OCCPluginPy2.SetProjectionCriteria", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_8SetProjectionCriteria(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self), __pyx_v_criteria);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_8SetProjectionCriteria(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __Pyx_memviewslice __pyx_v_criteria) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  Py_ssize_t __pyx_t_1;
+  Py_ssize_t __pyx_t_2;
+  int __pyx_t_3;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("SetProjectionCriteria", 0);
+
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":93
+ * 
+ * 	def SetProjectionCriteria(self, UInteger[:,::1] criteria):
+ * 		self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])             # <<<<<<<<<<<<<<
+ * 
+ * 	def SetDimension(self,Integer dimension):
+ */
+  __pyx_t_1 = 0;
+  __pyx_t_2 = 0;
+  __pyx_t_3 = -1;
+  if (__pyx_t_1 < 0) {
+    __pyx_t_1 += __pyx_v_criteria.shape[0];
+    if (unlikely(__pyx_t_1 < 0)) __pyx_t_3 = 0;
+  } else if (unlikely(__pyx_t_1 >= __pyx_v_criteria.shape[0])) __pyx_t_3 = 0;
+  if (__pyx_t_2 < 0) {
+    __pyx_t_2 += __pyx_v_criteria.shape[1];
+    if (unlikely(__pyx_t_2 < 0)) __pyx_t_3 = 1;
+  } else if (unlikely(__pyx_t_2 >= __pyx_v_criteria.shape[1])) __pyx_t_3 = 1;
+  if (unlikely(__pyx_t_3 != -1)) {
+    __Pyx_RaiseBufferIndexError(__pyx_t_3);
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
+  __pyx_v_self->thisptr->SetProjectionCriteria((&(*((__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger *) ( /* dim=0 */ (__pyx_v_criteria.data + __pyx_t_1 * __pyx_v_criteria.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_criteria.shape[0]), (__pyx_v_criteria.shape[1]));
+
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":92
+ * 		self.thisptr.SetCondition(condition)
+ * 
+ * 	def SetProjectionCriteria(self, UInteger[:,::1] criteria):             # <<<<<<<<<<<<<<
+ * 		self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])
+ * 
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("Core.Supplementary.cpp_src.occ_backend.OCCPluginPy.OCCPluginPy2.SetProjectionCriteria", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __PYX_XDEC_MEMVIEW(&__pyx_v_criteria, 1);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":95
+ * 		self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])
  * 
  * 	def SetDimension(self,Integer dimension):             # <<<<<<<<<<<<<<
  * 		self.thisptr.SetDimension(dimension)
@@ -2442,8 +2539,8 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_9SetDimension(PyObject *__pyx_v_self, PyObject *__pyx_arg_dimension); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_9SetDimension(PyObject *__pyx_v_self, PyObject *__pyx_arg_dimension) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_11SetDimension(PyObject *__pyx_v_self, PyObject *__pyx_arg_dimension); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_11SetDimension(PyObject *__pyx_v_self, PyObject *__pyx_arg_dimension) {
   __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer __pyx_v_dimension;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
@@ -2452,7 +2549,7 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetDimension (wrapper)", 0);
   assert(__pyx_arg_dimension); {
-    __pyx_v_dimension = __Pyx_PyInt_As_npy_int64(__pyx_arg_dimension); if (unlikely((__pyx_v_dimension == (npy_int64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 90; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_dimension = __Pyx_PyInt_As_npy_int64(__pyx_arg_dimension); if (unlikely((__pyx_v_dimension == (npy_int64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -2460,19 +2557,19 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_8SetDimension(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self), ((__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer)__pyx_v_dimension));
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_10SetDimension(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self), ((__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer)__pyx_v_dimension));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_8SetDimension(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer __pyx_v_dimension) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_10SetDimension(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer __pyx_v_dimension) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetDimension", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":91
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":96
  * 
  * 	def SetDimension(self,Integer dimension):
  * 		self.thisptr.SetDimension(dimension)             # <<<<<<<<<<<<<<
@@ -2481,8 +2578,8 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
   __pyx_v_self->thisptr->SetDimension(__pyx_v_dimension);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":90
- * 		self.thisptr.SetCondition(condition)
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":95
+ * 		self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])
  * 
  * 	def SetDimension(self,Integer dimension):             # <<<<<<<<<<<<<<
  * 		self.thisptr.SetDimension(dimension)
@@ -2496,7 +2593,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":93
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":98
  * 		self.thisptr.SetDimension(dimension)
  * 
  * 	def SetMeshElementType(self,bytes py_element_type):             # <<<<<<<<<<<<<<
@@ -2505,16 +2602,16 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_11SetMeshElementType(PyObject *__pyx_v_self, PyObject *__pyx_v_py_element_type); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_11SetMeshElementType(PyObject *__pyx_v_self, PyObject *__pyx_v_py_element_type) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_13SetMeshElementType(PyObject *__pyx_v_self, PyObject *__pyx_v_py_element_type); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_13SetMeshElementType(PyObject *__pyx_v_self, PyObject *__pyx_v_py_element_type) {
   CYTHON_UNUSED int __pyx_lineno = 0;
   CYTHON_UNUSED const char *__pyx_filename = NULL;
   CYTHON_UNUSED int __pyx_clineno = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetMeshElementType (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_py_element_type), (&PyBytes_Type), 1, "py_element_type", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_10SetMeshElementType(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self), ((PyObject*)__pyx_v_py_element_type));
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_py_element_type), (&PyBytes_Type), 1, "py_element_type", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 98; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_12SetMeshElementType(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self), ((PyObject*)__pyx_v_py_element_type));
 
   /* function exit code */
   goto __pyx_L0;
@@ -2525,7 +2622,7 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_10SetMeshElementType(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, PyObject *__pyx_v_py_element_type) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_12SetMeshElementType(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, PyObject *__pyx_v_py_element_type) {
   std::string __pyx_v_cpp_element_type;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -2535,17 +2632,17 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("SetMeshElementType", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":94
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":99
  * 
  * 	def SetMeshElementType(self,bytes py_element_type):
  * 		cdef string cpp_element_type = py_element_type             # <<<<<<<<<<<<<<
  * 		self.thisptr.SetMeshElementType(cpp_element_type)
  * 
  */
-  __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_v_py_element_type); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_v_py_element_type); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 99; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_cpp_element_type = __pyx_t_1;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":95
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":100
  * 	def SetMeshElementType(self,bytes py_element_type):
  * 		cdef string cpp_element_type = py_element_type
  * 		self.thisptr.SetMeshElementType(cpp_element_type)             # <<<<<<<<<<<<<<
@@ -2554,7 +2651,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
   __pyx_v_self->thisptr->SetMeshElementType(__pyx_v_cpp_element_type);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":93
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":98
  * 		self.thisptr.SetDimension(dimension)
  * 
  * 	def SetMeshElementType(self,bytes py_element_type):             # <<<<<<<<<<<<<<
@@ -2574,7 +2671,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":97
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":102
  * 		self.thisptr.SetMeshElementType(cpp_element_type)
  * 
  * 	def SetMeshElements(self,UInteger[:,::1] elements):             # <<<<<<<<<<<<<<
@@ -2583,8 +2680,8 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_13SetMeshElements(PyObject *__pyx_v_self, PyObject *__pyx_arg_elements); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_13SetMeshElements(PyObject *__pyx_v_self, PyObject *__pyx_arg_elements) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_15SetMeshElements(PyObject *__pyx_v_self, PyObject *__pyx_arg_elements); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_15SetMeshElements(PyObject *__pyx_v_self, PyObject *__pyx_arg_elements) {
   __Pyx_memviewslice __pyx_v_elements = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
@@ -2593,7 +2690,7 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetMeshElements (wrapper)", 0);
   assert(__pyx_arg_elements); {
-    __pyx_v_elements = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger(__pyx_arg_elements); if (unlikely(!__pyx_v_elements.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 97; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_elements = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger(__pyx_arg_elements); if (unlikely(!__pyx_v_elements.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 102; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -2601,14 +2698,14 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_12SetMeshElements(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self), __pyx_v_elements);
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_14SetMeshElements(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self), __pyx_v_elements);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_12SetMeshElements(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __Pyx_memviewslice __pyx_v_elements) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_14SetMeshElements(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __Pyx_memviewslice __pyx_v_elements) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   Py_ssize_t __pyx_t_1;
@@ -2619,7 +2716,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("SetMeshElements", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":98
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":103
  * 
  * 	def SetMeshElements(self,UInteger[:,::1] elements):
  * 		self.thisptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])             # <<<<<<<<<<<<<<
@@ -2639,11 +2736,11 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   } else if (unlikely(__pyx_t_2 >= __pyx_v_elements.shape[1])) __pyx_t_3 = 1;
   if (unlikely(__pyx_t_3 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_3);
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 98; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 103; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_v_self->thisptr->SetMeshElements((&(*((__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger *) ( /* dim=0 */ (__pyx_v_elements.data + __pyx_t_1 * __pyx_v_elements.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_elements.shape[0]), (__pyx_v_elements.shape[1]));
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":97
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":102
  * 		self.thisptr.SetMeshElementType(cpp_element_type)
  * 
  * 	def SetMeshElements(self,UInteger[:,::1] elements):             # <<<<<<<<<<<<<<
@@ -2664,7 +2761,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":100
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":105
  * 		self.thisptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])
  * 
  * 	def SetMeshPoints(self,Real[:,::1] points):             # <<<<<<<<<<<<<<
@@ -2673,8 +2770,8 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_15SetMeshPoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_points); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_15SetMeshPoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_points) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_17SetMeshPoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_points); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_17SetMeshPoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_points) {
   __Pyx_memviewslice __pyx_v_points = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
@@ -2683,7 +2780,7 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetMeshPoints (wrapper)", 0);
   assert(__pyx_arg_points); {
-    __pyx_v_points = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real(__pyx_arg_points); if (unlikely(!__pyx_v_points.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 100; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_points = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real(__pyx_arg_points); if (unlikely(!__pyx_v_points.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 105; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -2691,14 +2788,14 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_14SetMeshPoints(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self), __pyx_v_points);
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_16SetMeshPoints(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self), __pyx_v_points);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_14SetMeshPoints(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __Pyx_memviewslice __pyx_v_points) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_16SetMeshPoints(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __Pyx_memviewslice __pyx_v_points) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   Py_ssize_t __pyx_t_1;
@@ -2709,7 +2806,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("SetMeshPoints", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":101
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":106
  * 
  * 	def SetMeshPoints(self,Real[:,::1] points):
  * 		self.thisptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])             # <<<<<<<<<<<<<<
@@ -2729,11 +2826,11 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   } else if (unlikely(__pyx_t_2 >= __pyx_v_points.shape[1])) __pyx_t_3 = 1;
   if (unlikely(__pyx_t_3 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_3);
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 101; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 106; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_v_self->thisptr->SetMeshPoints((&(*((__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real *) ( /* dim=1 */ ((char *) (((__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real *) ( /* dim=0 */ (__pyx_v_points.data + __pyx_t_1 * __pyx_v_points.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_points.shape[0]), (__pyx_v_points.shape[1]));
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":100
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":105
  * 		self.thisptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])
  * 
  * 	def SetMeshPoints(self,Real[:,::1] points):             # <<<<<<<<<<<<<<
@@ -2754,7 +2851,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":103
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":108
  * 		self.thisptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])
  * 
  * 	def SetMeshEdges(self,UInteger[:,::1] edges):             # <<<<<<<<<<<<<<
@@ -2763,8 +2860,8 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_17SetMeshEdges(PyObject *__pyx_v_self, PyObject *__pyx_arg_edges); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_17SetMeshEdges(PyObject *__pyx_v_self, PyObject *__pyx_arg_edges) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_19SetMeshEdges(PyObject *__pyx_v_self, PyObject *__pyx_arg_edges); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_19SetMeshEdges(PyObject *__pyx_v_self, PyObject *__pyx_arg_edges) {
   __Pyx_memviewslice __pyx_v_edges = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
@@ -2773,7 +2870,7 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetMeshEdges (wrapper)", 0);
   assert(__pyx_arg_edges); {
-    __pyx_v_edges = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger(__pyx_arg_edges); if (unlikely(!__pyx_v_edges.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 103; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_edges = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger(__pyx_arg_edges); if (unlikely(!__pyx_v_edges.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 108; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -2781,14 +2878,14 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_16SetMeshEdges(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self), __pyx_v_edges);
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_18SetMeshEdges(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self), __pyx_v_edges);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_16SetMeshEdges(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __Pyx_memviewslice __pyx_v_edges) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_18SetMeshEdges(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __Pyx_memviewslice __pyx_v_edges) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   Py_ssize_t __pyx_t_1;
@@ -2799,7 +2896,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("SetMeshEdges", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":104
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":109
  * 
  * 	def SetMeshEdges(self,UInteger[:,::1] edges):
  * 		self.thisptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])             # <<<<<<<<<<<<<<
@@ -2819,11 +2916,11 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   } else if (unlikely(__pyx_t_2 >= __pyx_v_edges.shape[1])) __pyx_t_3 = 1;
   if (unlikely(__pyx_t_3 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_3);
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 104; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 109; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_v_self->thisptr->SetMeshEdges((&(*((__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger *) ( /* dim=0 */ (__pyx_v_edges.data + __pyx_t_1 * __pyx_v_edges.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_edges.shape[0]), (__pyx_v_edges.shape[1]));
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":103
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":108
  * 		self.thisptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])
  * 
  * 	def SetMeshEdges(self,UInteger[:,::1] edges):             # <<<<<<<<<<<<<<
@@ -2844,7 +2941,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":106
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":111
  * 		self.thisptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
  * 
  * 	def SetMeshFaces(self,UInteger[:,::1] faces):             # <<<<<<<<<<<<<<
@@ -2853,8 +2950,8 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_19SetMeshFaces(PyObject *__pyx_v_self, PyObject *__pyx_arg_faces); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_19SetMeshFaces(PyObject *__pyx_v_self, PyObject *__pyx_arg_faces) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_21SetMeshFaces(PyObject *__pyx_v_self, PyObject *__pyx_arg_faces); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_21SetMeshFaces(PyObject *__pyx_v_self, PyObject *__pyx_arg_faces) {
   __Pyx_memviewslice __pyx_v_faces = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
@@ -2863,7 +2960,7 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetMeshFaces (wrapper)", 0);
   assert(__pyx_arg_faces); {
-    __pyx_v_faces = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger(__pyx_arg_faces); if (unlikely(!__pyx_v_faces.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 106; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_faces = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger(__pyx_arg_faces); if (unlikely(!__pyx_v_faces.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 111; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -2871,14 +2968,14 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_18SetMeshFaces(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self), __pyx_v_faces);
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_20SetMeshFaces(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self), __pyx_v_faces);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_18SetMeshFaces(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __Pyx_memviewslice __pyx_v_faces) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_20SetMeshFaces(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __Pyx_memviewslice __pyx_v_faces) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   Py_ssize_t __pyx_t_1;
@@ -2889,7 +2986,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("SetMeshFaces", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":107
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":112
  * 
  * 	def SetMeshFaces(self,UInteger[:,::1] faces):
  * 		self.thisptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])             # <<<<<<<<<<<<<<
@@ -2909,11 +3006,11 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   } else if (unlikely(__pyx_t_2 >= __pyx_v_faces.shape[1])) __pyx_t_3 = 1;
   if (unlikely(__pyx_t_3 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_3);
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 107; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 112; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_v_self->thisptr->SetMeshFaces((&(*((__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger *) ( /* dim=0 */ (__pyx_v_faces.data + __pyx_t_1 * __pyx_v_faces.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_faces.shape[0]), (__pyx_v_faces.shape[1]));
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":106
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":111
  * 		self.thisptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
  * 
  * 	def SetMeshFaces(self,UInteger[:,::1] faces):             # <<<<<<<<<<<<<<
@@ -2934,7 +3031,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":109
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":114
  * 		self.thisptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
  * 
  * 	def ScaleMesh(self):             # <<<<<<<<<<<<<<
@@ -2943,24 +3040,24 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_21ScaleMesh(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_21ScaleMesh(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_23ScaleMesh(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_23ScaleMesh(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("ScaleMesh (wrapper)", 0);
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_20ScaleMesh(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_22ScaleMesh(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_20ScaleMesh(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_22ScaleMesh(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("ScaleMesh", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":110
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":115
  * 
  * 	def ScaleMesh(self):
  * 		self.thisptr.ScaleMesh()             # <<<<<<<<<<<<<<
@@ -2969,7 +3066,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
   __pyx_v_self->thisptr->ScaleMesh();
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":109
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":114
  * 		self.thisptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
  * 
  * 	def ScaleMesh(self):             # <<<<<<<<<<<<<<
@@ -2984,7 +3081,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":112
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":117
  * 		self.thisptr.ScaleMesh()
  * 
  * 	def GetMeshElementType(self):             # <<<<<<<<<<<<<<
@@ -2993,19 +3090,19 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_23GetMeshElementType(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_23GetMeshElementType(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_25GetMeshElementType(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_25GetMeshElementType(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetMeshElementType (wrapper)", 0);
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_22GetMeshElementType(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_24GetMeshElementType(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_22GetMeshElementType(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_24GetMeshElementType(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
   std::string __pyx_v_cpp_element_type;
   PyObject *__pyx_v_py_element_type = 0;
   PyObject *__pyx_r = NULL;
@@ -3016,7 +3113,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("GetMeshElementType", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":113
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":118
  * 
  * 	def GetMeshElementType(self):
  * 		cdef string cpp_element_type = self.thisptr.GetMeshElementType()             # <<<<<<<<<<<<<<
@@ -3025,19 +3122,19 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
   __pyx_v_cpp_element_type = __pyx_v_self->thisptr->GetMeshElementType();
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":114
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":119
  * 	def GetMeshElementType(self):
  * 		cdef string cpp_element_type = self.thisptr.GetMeshElementType()
  * 		cdef bytes py_element_type = cpp_element_type             # <<<<<<<<<<<<<<
  * 		return py_element_type
  * 
  */
-  __pyx_t_1 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_cpp_element_type); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 114; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_cpp_element_type); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 119; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_py_element_type = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":115
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":120
  * 		cdef string cpp_element_type = self.thisptr.GetMeshElementType()
  * 		cdef bytes py_element_type = cpp_element_type
  * 		return py_element_type             # <<<<<<<<<<<<<<
@@ -3049,7 +3146,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __pyx_r = __pyx_v_py_element_type;
   goto __pyx_L0;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":112
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":117
  * 		self.thisptr.ScaleMesh()
  * 
  * 	def GetMeshElementType(self):             # <<<<<<<<<<<<<<
@@ -3069,7 +3166,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":117
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":122
  * 		return py_element_type
  * 
  * 	def SetFeketePoints(self, Real[:,::1] fekete):             # <<<<<<<<<<<<<<
@@ -3078,8 +3175,8 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_25SetFeketePoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_fekete); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_25SetFeketePoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_fekete) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_27SetFeketePoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_fekete); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_27SetFeketePoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_fekete) {
   __Pyx_memviewslice __pyx_v_fekete = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
@@ -3088,7 +3185,7 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetFeketePoints (wrapper)", 0);
   assert(__pyx_arg_fekete); {
-    __pyx_v_fekete = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real(__pyx_arg_fekete); if (unlikely(!__pyx_v_fekete.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 117; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_fekete = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real(__pyx_arg_fekete); if (unlikely(!__pyx_v_fekete.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 122; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -3096,14 +3193,14 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_24SetFeketePoints(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self), __pyx_v_fekete);
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_26SetFeketePoints(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self), __pyx_v_fekete);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_24SetFeketePoints(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __Pyx_memviewslice __pyx_v_fekete) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_26SetFeketePoints(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, __Pyx_memviewslice __pyx_v_fekete) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   Py_ssize_t __pyx_t_1;
@@ -3114,7 +3211,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("SetFeketePoints", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":118
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":123
  * 
  * 	def SetFeketePoints(self, Real[:,::1] fekete):
  * 		self.thisptr.SetFeketePoints(&fekete[0,0],fekete.shape[0],fekete.shape[1])             # <<<<<<<<<<<<<<
@@ -3134,11 +3231,11 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   } else if (unlikely(__pyx_t_2 >= __pyx_v_fekete.shape[1])) __pyx_t_3 = 1;
   if (unlikely(__pyx_t_3 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_3);
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 118; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 123; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_v_self->thisptr->SetFeketePoints((&(*((__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real *) ( /* dim=1 */ ((char *) (((__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real *) ( /* dim=0 */ (__pyx_v_fekete.data + __pyx_t_1 * __pyx_v_fekete.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_fekete.shape[0]), (__pyx_v_fekete.shape[1]));
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":117
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":122
  * 		return py_element_type
  * 
  * 	def SetFeketePoints(self, Real[:,::1] fekete):             # <<<<<<<<<<<<<<
@@ -3159,7 +3256,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":120
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":125
  * 		self.thisptr.SetFeketePoints(&fekete[0,0],fekete.shape[0],fekete.shape[1])
  * 
  * 	def ReadIGES(self, bytes filename):             # <<<<<<<<<<<<<<
@@ -3168,16 +3265,16 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_27ReadIGES(PyObject *__pyx_v_self, PyObject *__pyx_v_filename); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_27ReadIGES(PyObject *__pyx_v_self, PyObject *__pyx_v_filename) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_29ReadIGES(PyObject *__pyx_v_self, PyObject *__pyx_v_filename); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_29ReadIGES(PyObject *__pyx_v_self, PyObject *__pyx_v_filename) {
   CYTHON_UNUSED int __pyx_lineno = 0;
   CYTHON_UNUSED const char *__pyx_filename = NULL;
   CYTHON_UNUSED int __pyx_clineno = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("ReadIGES (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_filename), (&PyBytes_Type), 1, "filename", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 120; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_26ReadIGES(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self), ((PyObject*)__pyx_v_filename));
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_filename), (&PyBytes_Type), 1, "filename", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 125; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_28ReadIGES(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self), ((PyObject*)__pyx_v_filename));
 
   /* function exit code */
   goto __pyx_L0;
@@ -3188,7 +3285,7 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_26ReadIGES(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, PyObject *__pyx_v_filename) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_28ReadIGES(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, PyObject *__pyx_v_filename) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   char const *__pyx_t_1;
@@ -3197,17 +3294,17 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("ReadIGES", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":121
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":126
  * 
  * 	def ReadIGES(self, bytes filename):
  * 		self.thisptr.ReadIGES(<const char*>filename)             # <<<<<<<<<<<<<<
  * 
  * 	def GetGeomVertices(self):
  */
-  __pyx_t_1 = __Pyx_PyObject_AsString(__pyx_v_filename); if (unlikely((!__pyx_t_1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 121; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_AsString(__pyx_v_filename); if (unlikely((!__pyx_t_1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 126; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_self->thisptr->ReadIGES(((char const *)__pyx_t_1));
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":120
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":125
  * 		self.thisptr.SetFeketePoints(&fekete[0,0],fekete.shape[0],fekete.shape[1])
  * 
  * 	def ReadIGES(self, bytes filename):             # <<<<<<<<<<<<<<
@@ -3227,7 +3324,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":123
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":128
  * 		self.thisptr.ReadIGES(<const char*>filename)
  * 
  * 	def GetGeomVertices(self):             # <<<<<<<<<<<<<<
@@ -3236,24 +3333,24 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_29GetGeomVertices(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_29GetGeomVertices(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_31GetGeomVertices(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_31GetGeomVertices(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetGeomVertices (wrapper)", 0);
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_28GetGeomVertices(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_30GetGeomVertices(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_28GetGeomVertices(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_30GetGeomVertices(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetGeomVertices", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":124
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":129
  * 
  * 	def GetGeomVertices(self):
  * 		self.thisptr.GetGeomVertices()             # <<<<<<<<<<<<<<
@@ -3262,7 +3359,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
   __pyx_v_self->thisptr->GetGeomVertices();
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":123
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":128
  * 		self.thisptr.ReadIGES(<const char*>filename)
  * 
  * 	def GetGeomVertices(self):             # <<<<<<<<<<<<<<
@@ -3277,7 +3374,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":126
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":131
  * 		self.thisptr.GetGeomVertices()
  * 
  * 	def GetGeomEdges(self):             # <<<<<<<<<<<<<<
@@ -3286,24 +3383,24 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_31GetGeomEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_31GetGeomEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_33GetGeomEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_33GetGeomEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetGeomEdges (wrapper)", 0);
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_30GetGeomEdges(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_32GetGeomEdges(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_30GetGeomEdges(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_32GetGeomEdges(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetGeomEdges", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":127
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":132
  * 
  * 	def GetGeomEdges(self):
  * 		self.thisptr.GetGeomEdges()             # <<<<<<<<<<<<<<
@@ -3312,7 +3409,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
   __pyx_v_self->thisptr->GetGeomEdges();
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":126
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":131
  * 		self.thisptr.GetGeomVertices()
  * 
  * 	def GetGeomEdges(self):             # <<<<<<<<<<<<<<
@@ -3327,7 +3424,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":129
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":134
  * 		self.thisptr.GetGeomEdges()
  * 
  * 	def GetGeomFaces(self):             # <<<<<<<<<<<<<<
@@ -3336,24 +3433,24 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_33GetGeomFaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_33GetGeomFaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_35GetGeomFaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_35GetGeomFaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetGeomFaces (wrapper)", 0);
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_32GetGeomFaces(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_34GetGeomFaces(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_32GetGeomFaces(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_34GetGeomFaces(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetGeomFaces", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":130
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":135
  * 
  * 	def GetGeomFaces(self):
  * 		self.thisptr.GetGeomFaces()             # <<<<<<<<<<<<<<
@@ -3362,7 +3459,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
   __pyx_v_self->thisptr->GetGeomFaces();
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":129
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":134
  * 		self.thisptr.GetGeomEdges()
  * 
  * 	def GetGeomFaces(self):             # <<<<<<<<<<<<<<
@@ -3377,7 +3474,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":132
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":137
  * 		self.thisptr.GetGeomFaces()
  * 
  * 	def GetCurvesParameters(self):             # <<<<<<<<<<<<<<
@@ -3386,24 +3483,24 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_35GetCurvesParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_35GetCurvesParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_37GetCurvesParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_37GetCurvesParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetCurvesParameters (wrapper)", 0);
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_34GetCurvesParameters(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_36GetCurvesParameters(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_34GetCurvesParameters(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_36GetCurvesParameters(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetCurvesParameters", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":133
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":138
  * 
  * 	def GetCurvesParameters(self):
  * 		self.thisptr.GetCurvesParameters()             # <<<<<<<<<<<<<<
@@ -3412,7 +3509,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
   __pyx_v_self->thisptr->GetCurvesParameters();
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":132
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":137
  * 		self.thisptr.GetGeomFaces()
  * 
  * 	def GetCurvesParameters(self):             # <<<<<<<<<<<<<<
@@ -3427,7 +3524,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":135
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":140
  * 		self.thisptr.GetCurvesParameters()
  * 
  * 	def GetCurvesLengths(self):             # <<<<<<<<<<<<<<
@@ -3436,24 +3533,24 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_37GetCurvesLengths(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_37GetCurvesLengths(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_39GetCurvesLengths(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_39GetCurvesLengths(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetCurvesLengths (wrapper)", 0);
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_36GetCurvesLengths(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_38GetCurvesLengths(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_36GetCurvesLengths(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_38GetCurvesLengths(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetCurvesLengths", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":136
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":141
  * 
  * 	def GetCurvesLengths(self):
  * 		self.thisptr.GetCurvesLengths()             # <<<<<<<<<<<<<<
@@ -3462,7 +3559,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
   __pyx_v_self->thisptr->GetCurvesLengths();
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":135
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":140
  * 		self.thisptr.GetCurvesParameters()
  * 
  * 	def GetCurvesLengths(self):             # <<<<<<<<<<<<<<
@@ -3477,7 +3574,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":138
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":143
  * 		self.thisptr.GetCurvesLengths()
  * 
  * 	def GetGeomPointsOnCorrespondingEdges(self):             # <<<<<<<<<<<<<<
@@ -3486,24 +3583,24 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_39GetGeomPointsOnCorrespondingEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_39GetGeomPointsOnCorrespondingEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_41GetGeomPointsOnCorrespondingEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_41GetGeomPointsOnCorrespondingEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetGeomPointsOnCorrespondingEdges (wrapper)", 0);
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_38GetGeomPointsOnCorrespondingEdges(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_40GetGeomPointsOnCorrespondingEdges(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_38GetGeomPointsOnCorrespondingEdges(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_40GetGeomPointsOnCorrespondingEdges(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetGeomPointsOnCorrespondingEdges", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":139
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":144
  * 
  * 	def GetGeomPointsOnCorrespondingEdges(self):
  * 		self.thisptr.GetGeomPointsOnCorrespondingEdges()             # <<<<<<<<<<<<<<
@@ -3512,7 +3609,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
   __pyx_v_self->thisptr->GetGeomPointsOnCorrespondingEdges();
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":138
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":143
  * 		self.thisptr.GetCurvesLengths()
  * 
  * 	def GetGeomPointsOnCorrespondingEdges(self):             # <<<<<<<<<<<<<<
@@ -3527,7 +3624,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":141
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":146
  * 		self.thisptr.GetGeomPointsOnCorrespondingEdges()
  * 
  * 	def IdentifyCurvesContainingEdges(self):             # <<<<<<<<<<<<<<
@@ -3536,24 +3633,24 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_41IdentifyCurvesContainingEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_41IdentifyCurvesContainingEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_43IdentifyCurvesContainingEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_43IdentifyCurvesContainingEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("IdentifyCurvesContainingEdges (wrapper)", 0);
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_40IdentifyCurvesContainingEdges(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_42IdentifyCurvesContainingEdges(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_40IdentifyCurvesContainingEdges(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_42IdentifyCurvesContainingEdges(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("IdentifyCurvesContainingEdges", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":142
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":147
  * 
  * 	def IdentifyCurvesContainingEdges(self):
  * 		self.thisptr.IdentifyCurvesContainingEdges()             # <<<<<<<<<<<<<<
@@ -3562,7 +3659,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
   __pyx_v_self->thisptr->IdentifyCurvesContainingEdges();
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":141
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":146
  * 		self.thisptr.GetGeomPointsOnCorrespondingEdges()
  * 
  * 	def IdentifyCurvesContainingEdges(self):             # <<<<<<<<<<<<<<
@@ -3577,7 +3674,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":144
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":149
  * 		self.thisptr.IdentifyCurvesContainingEdges()
  * 
  * 	def ProjectMeshOnCurve(self, bytes projection_method):             # <<<<<<<<<<<<<<
@@ -3586,16 +3683,16 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_43ProjectMeshOnCurve(PyObject *__pyx_v_self, PyObject *__pyx_v_projection_method); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_43ProjectMeshOnCurve(PyObject *__pyx_v_self, PyObject *__pyx_v_projection_method) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_45ProjectMeshOnCurve(PyObject *__pyx_v_self, PyObject *__pyx_v_projection_method); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_45ProjectMeshOnCurve(PyObject *__pyx_v_self, PyObject *__pyx_v_projection_method) {
   CYTHON_UNUSED int __pyx_lineno = 0;
   CYTHON_UNUSED const char *__pyx_filename = NULL;
   CYTHON_UNUSED int __pyx_clineno = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("ProjectMeshOnCurve (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_projection_method), (&PyBytes_Type), 1, "projection_method", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_42ProjectMeshOnCurve(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self), ((PyObject*)__pyx_v_projection_method));
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_projection_method), (&PyBytes_Type), 1, "projection_method", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 149; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_44ProjectMeshOnCurve(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self), ((PyObject*)__pyx_v_projection_method));
 
   /* function exit code */
   goto __pyx_L0;
@@ -3606,7 +3703,7 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_42ProjectMeshOnCurve(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, PyObject *__pyx_v_projection_method) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_44ProjectMeshOnCurve(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self, PyObject *__pyx_v_projection_method) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   char const *__pyx_t_1;
@@ -3615,17 +3712,17 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("ProjectMeshOnCurve", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":145
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":150
  * 
  * 	def ProjectMeshOnCurve(self, bytes projection_method):
  * 		self.thisptr.ProjectMeshOnCurve(<const char *> projection_method)             # <<<<<<<<<<<<<<
  * 
  * 	def ProjectMeshOnSurface(self):
  */
-  __pyx_t_1 = __Pyx_PyObject_AsString(__pyx_v_projection_method); if (unlikely((!__pyx_t_1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 145; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_AsString(__pyx_v_projection_method); if (unlikely((!__pyx_t_1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_self->thisptr->ProjectMeshOnCurve(((char const *)__pyx_t_1));
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":144
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":149
  * 		self.thisptr.IdentifyCurvesContainingEdges()
  * 
  * 	def ProjectMeshOnCurve(self, bytes projection_method):             # <<<<<<<<<<<<<<
@@ -3645,7 +3742,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":147
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":152
  * 		self.thisptr.ProjectMeshOnCurve(<const char *> projection_method)
  * 
  * 	def ProjectMeshOnSurface(self):             # <<<<<<<<<<<<<<
@@ -3654,24 +3751,24 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_45ProjectMeshOnSurface(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_45ProjectMeshOnSurface(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_47ProjectMeshOnSurface(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_47ProjectMeshOnSurface(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("ProjectMeshOnSurface (wrapper)", 0);
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_44ProjectMeshOnSurface(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_46ProjectMeshOnSurface(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_44ProjectMeshOnSurface(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_46ProjectMeshOnSurface(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("ProjectMeshOnSurface", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":148
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":153
  * 
  * 	def ProjectMeshOnSurface(self):
  * 		self.thisptr.ProjectMeshOnSurface()             # <<<<<<<<<<<<<<
@@ -3680,7 +3777,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
   __pyx_v_self->thisptr->ProjectMeshOnSurface();
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":147
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":152
  * 		self.thisptr.ProjectMeshOnCurve(<const char *> projection_method)
  * 
  * 	def ProjectMeshOnSurface(self):             # <<<<<<<<<<<<<<
@@ -3695,7 +3792,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":150
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":155
  * 		self.thisptr.ProjectMeshOnSurface()
  * 
  * 	def RepairDualProjectedParameters(self):             # <<<<<<<<<<<<<<
@@ -3704,24 +3801,24 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_47RepairDualProjectedParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_47RepairDualProjectedParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_49RepairDualProjectedParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_49RepairDualProjectedParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("RepairDualProjectedParameters (wrapper)", 0);
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_46RepairDualProjectedParameters(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_48RepairDualProjectedParameters(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_46RepairDualProjectedParameters(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_48RepairDualProjectedParameters(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("RepairDualProjectedParameters", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":151
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":156
  * 
  * 	def RepairDualProjectedParameters(self):
  * 		self.thisptr.RepairDualProjectedParameters()             # <<<<<<<<<<<<<<
@@ -3730,7 +3827,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
   __pyx_v_self->thisptr->RepairDualProjectedParameters();
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":150
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":155
  * 		self.thisptr.ProjectMeshOnSurface()
  * 
  * 	def RepairDualProjectedParameters(self):             # <<<<<<<<<<<<<<
@@ -3745,7 +3842,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":153
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":158
  * 		self.thisptr.RepairDualProjectedParameters()
  * 
  * 	def MeshPointInversionCurve(self):             # <<<<<<<<<<<<<<
@@ -3754,24 +3851,24 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_49MeshPointInversionCurve(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_49MeshPointInversionCurve(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_51MeshPointInversionCurve(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_51MeshPointInversionCurve(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("MeshPointInversionCurve (wrapper)", 0);
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_48MeshPointInversionCurve(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_50MeshPointInversionCurve(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_48MeshPointInversionCurve(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_50MeshPointInversionCurve(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("MeshPointInversionCurve", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":154
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":159
  * 
  * 	def MeshPointInversionCurve(self):
  * 		self.thisptr.MeshPointInversionCurve()             # <<<<<<<<<<<<<<
@@ -3780,7 +3877,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
   __pyx_v_self->thisptr->MeshPointInversionCurve();
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":153
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":158
  * 		self.thisptr.RepairDualProjectedParameters()
  * 
  * 	def MeshPointInversionCurve(self):             # <<<<<<<<<<<<<<
@@ -3795,7 +3892,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":156
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":161
  * 		self.thisptr.MeshPointInversionCurve()
  * 
  * 	def MeshPointInversionSurface(self):             # <<<<<<<<<<<<<<
@@ -3804,24 +3901,24 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_51MeshPointInversionSurface(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_51MeshPointInversionSurface(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_53MeshPointInversionSurface(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_53MeshPointInversionSurface(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("MeshPointInversionSurface (wrapper)", 0);
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_50MeshPointInversionSurface(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_52MeshPointInversionSurface(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_50MeshPointInversionSurface(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_52MeshPointInversionSurface(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("MeshPointInversionSurface", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":157
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":162
  * 
  * 	def MeshPointInversionSurface(self):
  * 		self.thisptr.MeshPointInversionSurface()             # <<<<<<<<<<<<<<
@@ -3830,7 +3927,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
   __pyx_v_self->thisptr->MeshPointInversionSurface();
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":156
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":161
  * 		self.thisptr.MeshPointInversionCurve()
  * 
  * 	def MeshPointInversionSurface(self):             # <<<<<<<<<<<<<<
@@ -3845,7 +3942,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":159
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":164
  * 		self.thisptr.MeshPointInversionSurface()
  * 
  * 	def GetBoundaryPointsOrder(self):             # <<<<<<<<<<<<<<
@@ -3854,24 +3951,24 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_53GetBoundaryPointsOrder(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_53GetBoundaryPointsOrder(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_55GetBoundaryPointsOrder(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_55GetBoundaryPointsOrder(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetBoundaryPointsOrder (wrapper)", 0);
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_52GetBoundaryPointsOrder(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_54GetBoundaryPointsOrder(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_52GetBoundaryPointsOrder(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_54GetBoundaryPointsOrder(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetBoundaryPointsOrder", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":160
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":165
  * 
  * 	def GetBoundaryPointsOrder(self):
  * 		self.thisptr.GetBoundaryPointsOrder()             # <<<<<<<<<<<<<<
@@ -3880,7 +3977,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
   __pyx_v_self->thisptr->GetBoundaryPointsOrder();
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":159
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":164
  * 		self.thisptr.MeshPointInversionSurface()
  * 
  * 	def GetBoundaryPointsOrder(self):             # <<<<<<<<<<<<<<
@@ -3895,7 +3992,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":162
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":167
  * 		self.thisptr.GetBoundaryPointsOrder()
  * 
  * 	def GetDirichletData(self):             # <<<<<<<<<<<<<<
@@ -3904,19 +4001,19 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_55GetDirichletData(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_55GetDirichletData(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_57GetDirichletData(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_57GetDirichletData(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetDirichletData (wrapper)", 0);
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_54GetDirichletData(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_56GetDirichletData(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_54GetDirichletData(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_56GetDirichletData(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
   struct PassToPython __pyx_v_struct_to_python;
   PyArrayObject *__pyx_v_nodes_dir = 0;
   __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer __pyx_v_i;
@@ -3938,7 +4035,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("GetDirichletData", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":163
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":168
  * 
  * 	def GetDirichletData(self):
  * 		cdef PassToPython struct_to_python = self.thisptr.GetDirichletData()             # <<<<<<<<<<<<<<
@@ -3947,21 +4044,21 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
   __pyx_v_struct_to_python = __pyx_v_self->thisptr->GetDirichletData();
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":164
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":169
  * 	def GetDirichletData(self):
  * 		cdef PassToPython struct_to_python = self.thisptr.GetDirichletData()
  * 		cdef np.ndarray nodes_dir = np.zeros((struct_to_python.nodes_dir_size,1),dtype=np.int64)             # <<<<<<<<<<<<<<
  * 		cdef Integer i
  * 		for i in range(struct_to_python.nodes_dir_size):
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 169; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 169; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_From_npy_int64(__pyx_v_struct_to_python.nodes_dir_size); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyInt_From_npy_int64(__pyx_v_struct_to_python.nodes_dir_size); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 169; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 169; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_1);
@@ -3969,30 +4066,30 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_int_1);
   __Pyx_GIVEREF(__pyx_int_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 169; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_3);
   __pyx_t_3 = 0;
-  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 169; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 169; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_int64); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_int64); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 169; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 169; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 169; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 169; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_nodes_dir = ((PyArrayObject *)__pyx_t_5);
   __pyx_t_5 = 0;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":166
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":171
  * 		cdef np.ndarray nodes_dir = np.zeros((struct_to_python.nodes_dir_size,1),dtype=np.int64)
  * 		cdef Integer i
  * 		for i in range(struct_to_python.nodes_dir_size):             # <<<<<<<<<<<<<<
@@ -4003,34 +4100,34 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   for (__pyx_t_7 = 0; __pyx_t_7 < __pyx_t_6; __pyx_t_7+=1) {
     __pyx_v_i = __pyx_t_7;
 
-    /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":167
+    /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":172
  * 		cdef Integer i
  * 		for i in range(struct_to_python.nodes_dir_size):
  * 			nodes_dir[i] = struct_to_python.nodes_dir_out_stl[i]             # <<<<<<<<<<<<<<
  * 		cdef np.ndarray displacements_BC = np.zeros((self.thisptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64)
  * 		for i in range(self.thisptr.ndim*struct_to_python.nodes_dir_size):
  */
-    __pyx_t_5 = __Pyx_PyInt_From_npy_int64((__pyx_v_struct_to_python.nodes_dir_out_stl[__pyx_v_i])); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 167; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_5 = __Pyx_PyInt_From_npy_int64((__pyx_v_struct_to_python.nodes_dir_out_stl[__pyx_v_i])); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 172; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_5);
-    if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_nodes_dir), __pyx_v_i, __pyx_t_5, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer, 1, __Pyx_PyInt_From_npy_int64, 0, 1, 1) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 167; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_nodes_dir), __pyx_v_i, __pyx_t_5, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer, 1, __Pyx_PyInt_From_npy_int64, 0, 1, 1) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 172; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   }
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":168
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":173
  * 		for i in range(struct_to_python.nodes_dir_size):
  * 			nodes_dir[i] = struct_to_python.nodes_dir_out_stl[i]
  * 		cdef np.ndarray displacements_BC = np.zeros((self.thisptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64)             # <<<<<<<<<<<<<<
  * 		for i in range(self.thisptr.ndim*struct_to_python.nodes_dir_size):
  * 			displacements_BC[i] = struct_to_python.displacement_BC_stl[i]
  */
-  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 168; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 168; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyInt_From_npy_uint64((__pyx_v_self->thisptr->ndim * __pyx_v_struct_to_python.nodes_dir_size)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 168; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyInt_From_npy_uint64((__pyx_v_self->thisptr->ndim * __pyx_v_struct_to_python.nodes_dir_size)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 168; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_5);
@@ -4038,30 +4135,30 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_int_1);
   __Pyx_GIVEREF(__pyx_int_1);
   __pyx_t_5 = 0;
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 168; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 168; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 168; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_float64); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 168; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_float64); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 168; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 168; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 168; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_displacements_BC = ((PyArrayObject *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":169
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":174
  * 			nodes_dir[i] = struct_to_python.nodes_dir_out_stl[i]
  * 		cdef np.ndarray displacements_BC = np.zeros((self.thisptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64)
  * 		for i in range(self.thisptr.ndim*struct_to_python.nodes_dir_size):             # <<<<<<<<<<<<<<
@@ -4072,20 +4169,20 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_8; __pyx_t_6+=1) {
     __pyx_v_i = __pyx_t_6;
 
-    /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":170
+    /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":175
  * 		cdef np.ndarray displacements_BC = np.zeros((self.thisptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64)
  * 		for i in range(self.thisptr.ndim*struct_to_python.nodes_dir_size):
  * 			displacements_BC[i] = struct_to_python.displacement_BC_stl[i]             # <<<<<<<<<<<<<<
  * 
  * 		return nodes_dir, displacements_BC.reshape(struct_to_python.nodes_dir_size,self.thisptr.ndim)
  */
-    __pyx_t_4 = PyFloat_FromDouble((__pyx_v_struct_to_python.displacement_BC_stl[__pyx_v_i])); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = PyFloat_FromDouble((__pyx_v_struct_to_python.displacement_BC_stl[__pyx_v_i])); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 175; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
-    if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_displacements_BC), __pyx_v_i, __pyx_t_4, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer, 1, __Pyx_PyInt_From_npy_int64, 0, 1, 1) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_displacements_BC), __pyx_v_i, __pyx_t_4, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer, 1, __Pyx_PyInt_From_npy_int64, 0, 1, 1) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 175; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":172
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":177
  * 			displacements_BC[i] = struct_to_python.displacement_BC_stl[i]
  * 
  * 		return nodes_dir, displacements_BC.reshape(struct_to_python.nodes_dir_size,self.thisptr.ndim)             # <<<<<<<<<<<<<<
@@ -4093,11 +4190,11 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_displacements_BC), __pyx_n_s_reshape); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 172; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_displacements_BC), __pyx_n_s_reshape); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_5 = __Pyx_PyInt_From_npy_int64(__pyx_v_struct_to_python.nodes_dir_size); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 172; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyInt_From_npy_int64(__pyx_v_struct_to_python.nodes_dir_size); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_3 = __Pyx_PyInt_From_npy_uint64(__pyx_v_self->thisptr->ndim); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 172; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyInt_From_npy_uint64(__pyx_v_self->thisptr->ndim); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_2 = NULL;
   __pyx_t_9 = 0;
@@ -4111,7 +4208,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
       __pyx_t_9 = 1;
     }
   }
-  __pyx_t_10 = PyTuple_New(2+__pyx_t_9); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 172; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_10 = PyTuple_New(2+__pyx_t_9); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_10);
   if (__pyx_t_2) {
     PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_2); __Pyx_GIVEREF(__pyx_t_2); __pyx_t_2 = NULL;
@@ -4122,11 +4219,11 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_GIVEREF(__pyx_t_3);
   __pyx_t_5 = 0;
   __pyx_t_3 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_10, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 172; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_10, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 172; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(((PyObject *)__pyx_v_nodes_dir));
   PyTuple_SET_ITEM(__pyx_t_1, 0, ((PyObject *)__pyx_v_nodes_dir));
@@ -4138,7 +4235,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":162
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":167
  * 		self.thisptr.GetBoundaryPointsOrder()
  * 
  * 	def GetDirichletData(self):             # <<<<<<<<<<<<<<
@@ -4164,7 +4261,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":175
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":180
  * 
  * 
  * 	def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -4173,21 +4270,21 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static void __pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_57__dealloc__(PyObject *__pyx_v_self); /*proto*/
-static void __pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_57__dealloc__(PyObject *__pyx_v_self) {
+static void __pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_59__dealloc__(PyObject *__pyx_v_self); /*proto*/
+static void __pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_59__dealloc__(PyObject *__pyx_v_self) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__dealloc__ (wrapper)", 0);
-  __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_56__dealloc__(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
+  __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_58__dealloc__(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
 }
 
-static void __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_56__dealloc__(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
+static void __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_58__dealloc__(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 *__pyx_v_self) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":176
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":181
  * 
  * 	def __dealloc__(self):
  * 		del self.thisptr             # <<<<<<<<<<<<<<
@@ -4196,7 +4293,7 @@ static void __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_
  */
   delete __pyx_v_self->thisptr;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":175
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":180
  * 
  * 
  * 	def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -4208,7 +4305,7 @@ static void __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_
   __Pyx_RefNannyFinishContext();
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":199
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":205
  * 	cdef bytes projection_method
  * 
  * 	def __init__(self,dimension=2):             # <<<<<<<<<<<<<<
@@ -4247,7 +4344,7 @@ static int __pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_1
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 199; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -4260,7 +4357,7 @@ static int __pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_1
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 199; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("__init__", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Core.Supplementary.cpp_src.occ_backend.OCCPluginPy.OCCPluginPy.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -4282,17 +4379,17 @@ static int __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_1
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":200
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":206
  * 
  * 	def __init__(self,dimension=2):
  * 		self.ndim = dimension             # <<<<<<<<<<<<<<
  * 
  * 	def SetMesh(self,np.ndarray[Real, ndim=2, mode="c"] points, np.ndarray[UInteger, ndim=2, mode="c"] elements,
  */
-  __pyx_t_1 = __Pyx_PyInt_As_npy_uint64(__pyx_v_dimension); if (unlikely((__pyx_t_1 == (npy_uint64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 200; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyInt_As_npy_uint64(__pyx_v_dimension); if (unlikely((__pyx_t_1 == (npy_uint64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 206; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_self->ndim = __pyx_t_1;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":199
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":205
  * 	cdef bytes projection_method
  * 
  * 	def __init__(self,dimension=2):             # <<<<<<<<<<<<<<
@@ -4311,7 +4408,7 @@ static int __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_1
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":202
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":208
  * 		self.ndim = dimension
  * 
  * 	def SetMesh(self,np.ndarray[Real, ndim=2, mode="c"] points, np.ndarray[UInteger, ndim=2, mode="c"] elements,             # <<<<<<<<<<<<<<
@@ -4336,7 +4433,7 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
     static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_points,&__pyx_n_s_elements,&__pyx_n_s_edges,&__pyx_n_s_faces,0};
     PyObject* values[4] = {0,0,0,0};
 
-    /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":203
+    /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":209
  * 
  * 	def SetMesh(self,np.ndarray[Real, ndim=2, mode="c"] points, np.ndarray[UInteger, ndim=2, mode="c"] elements,
  * 		np.ndarray[UInteger, ndim=2, mode="c"] edges, np.ndarray[UInteger, ndim=2, mode="c"] faces=None):             # <<<<<<<<<<<<<<
@@ -4363,12 +4460,12 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_elements)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("SetMesh", 0, 3, 4, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("SetMesh", 0, 3, 4, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_edges)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("SetMesh", 0, 3, 4, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("SetMesh", 0, 3, 4, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  3:
         if (kw_args > 0) {
@@ -4377,7 +4474,7 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "SetMesh") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "SetMesh") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -4396,19 +4493,19 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("SetMesh", 0, 3, 4, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("SetMesh", 0, 3, 4, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Core.Supplementary.cpp_src.occ_backend.OCCPluginPy.OCCPluginPy.SetMesh", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_points), __pyx_ptype_5numpy_ndarray, 1, "points", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_elements), __pyx_ptype_5numpy_ndarray, 1, "elements", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_edges), __pyx_ptype_5numpy_ndarray, 1, "edges", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 203; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_faces), __pyx_ptype_5numpy_ndarray, 1, "faces", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 203; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_points), __pyx_ptype_5numpy_ndarray, 1, "points", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_elements), __pyx_ptype_5numpy_ndarray, 1, "elements", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_edges), __pyx_ptype_5numpy_ndarray, 1, "edges", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 209; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_faces), __pyx_ptype_5numpy_ndarray, 1, "faces", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 209; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_2SetMesh(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy *)__pyx_v_self), __pyx_v_points, __pyx_v_elements, __pyx_v_edges, __pyx_v_faces);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":202
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":208
  * 		self.ndim = dimension
  * 
  * 	def SetMesh(self,np.ndarray[Real, ndim=2, mode="c"] points, np.ndarray[UInteger, ndim=2, mode="c"] elements,             # <<<<<<<<<<<<<<
@@ -4460,40 +4557,40 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __pyx_pybuffernd_faces.rcbuffer = &__pyx_pybuffer_faces;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_points.rcbuffer->pybuffer, (PyObject*)__pyx_v_points, &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_points.rcbuffer->pybuffer, (PyObject*)__pyx_v_points, &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_pybuffernd_points.diminfo[0].strides = __pyx_pybuffernd_points.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_points.diminfo[0].shape = __pyx_pybuffernd_points.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_points.diminfo[1].strides = __pyx_pybuffernd_points.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_points.diminfo[1].shape = __pyx_pybuffernd_points.rcbuffer->pybuffer.shape[1];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_elements.rcbuffer->pybuffer, (PyObject*)__pyx_v_elements, &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_elements.rcbuffer->pybuffer, (PyObject*)__pyx_v_elements, &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_pybuffernd_elements.diminfo[0].strides = __pyx_pybuffernd_elements.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_elements.diminfo[0].shape = __pyx_pybuffernd_elements.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_elements.diminfo[1].strides = __pyx_pybuffernd_elements.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_elements.diminfo[1].shape = __pyx_pybuffernd_elements.rcbuffer->pybuffer.shape[1];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_edges.rcbuffer->pybuffer, (PyObject*)__pyx_v_edges, &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_edges.rcbuffer->pybuffer, (PyObject*)__pyx_v_edges, &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_pybuffernd_edges.diminfo[0].strides = __pyx_pybuffernd_edges.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_edges.diminfo[0].shape = __pyx_pybuffernd_edges.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_edges.diminfo[1].strides = __pyx_pybuffernd_edges.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_edges.diminfo[1].shape = __pyx_pybuffernd_edges.rcbuffer->pybuffer.shape[1];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_faces.rcbuffer->pybuffer, (PyObject*)__pyx_v_faces, &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_faces.rcbuffer->pybuffer, (PyObject*)__pyx_v_faces, &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_pybuffernd_faces.diminfo[0].strides = __pyx_pybuffernd_faces.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_faces.diminfo[0].shape = __pyx_pybuffernd_faces.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_faces.diminfo[1].strides = __pyx_pybuffernd_faces.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_faces.diminfo[1].shape = __pyx_pybuffernd_faces.rcbuffer->pybuffer.shape[1];
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":205
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":211
  * 		np.ndarray[UInteger, ndim=2, mode="c"] edges, np.ndarray[UInteger, ndim=2, mode="c"] faces=None):
  * 
  * 		self.elements = elements             # <<<<<<<<<<<<<<
  * 		self.points = points
  * 		self.edges = edges
  */
-  __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_dsds_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger(((PyObject *)__pyx_v_elements));
-  if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger(((PyObject *)__pyx_v_elements));
+  if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 211; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __PYX_XDEC_MEMVIEW(&__pyx_v_self->elements, 0);
   __pyx_v_self->elements = __pyx_t_1;
   __pyx_t_1.memview = NULL;
   __pyx_t_1.data = NULL;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":206
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":212
  * 
  * 		self.elements = elements
  * 		self.points = points             # <<<<<<<<<<<<<<
@@ -4501,41 +4598,41 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  * 		self.faces = faces
  */
   __pyx_t_2 = __Pyx_PyObject_to_MemoryviewSlice_dsds_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real(((PyObject *)__pyx_v_points));
-  if (unlikely(!__pyx_t_2.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 206; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_2.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 212; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __PYX_XDEC_MEMVIEW(&__pyx_v_self->points, 0);
   __pyx_v_self->points = __pyx_t_2;
   __pyx_t_2.memview = NULL;
   __pyx_t_2.data = NULL;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":207
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":213
  * 		self.elements = elements
  * 		self.points = points
  * 		self.edges = edges             # <<<<<<<<<<<<<<
  * 		self.faces = faces
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_dsds_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger(((PyObject *)__pyx_v_edges));
-  if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger(((PyObject *)__pyx_v_edges));
+  if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 213; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __PYX_XDEC_MEMVIEW(&__pyx_v_self->edges, 0);
   __pyx_v_self->edges = __pyx_t_1;
   __pyx_t_1.memview = NULL;
   __pyx_t_1.data = NULL;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":208
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":214
  * 		self.points = points
  * 		self.edges = edges
  * 		self.faces = faces             # <<<<<<<<<<<<<<
  * 
  * 		return self
  */
-  __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_dsds_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger(((PyObject *)__pyx_v_faces));
-  if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger(((PyObject *)__pyx_v_faces));
+  if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 214; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __PYX_XDEC_MEMVIEW(&__pyx_v_self->faces, 0);
   __pyx_v_self->faces = __pyx_t_1;
   __pyx_t_1.memview = NULL;
   __pyx_t_1.data = NULL;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":210
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":216
  * 		self.faces = faces
  * 
  * 		return self             # <<<<<<<<<<<<<<
@@ -4547,7 +4644,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __pyx_r = ((PyObject *)__pyx_v_self);
   goto __pyx_L0;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":202
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":208
  * 		self.ndim = dimension
  * 
  * 	def SetMesh(self,np.ndarray[Real, ndim=2, mode="c"] points, np.ndarray[UInteger, ndim=2, mode="c"] elements,             # <<<<<<<<<<<<<<
@@ -4580,7 +4677,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":212
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":218
  * 		return self
  * 
  * 	def SetCADGeometry(self,bytes iges_filename):             # <<<<<<<<<<<<<<
@@ -4597,7 +4694,7 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetCADGeometry (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_iges_filename), (&PyBytes_Type), 1, "iges_filename", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 212; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_iges_filename), (&PyBytes_Type), 1, "iges_filename", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_4SetCADGeometry(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy *)__pyx_v_self), ((PyObject*)__pyx_v_iges_filename));
 
   /* function exit code */
@@ -4614,7 +4711,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetCADGeometry", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":213
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":219
  * 
  * 	def SetCADGeometry(self,bytes iges_filename):
  * 		self.iges_filename = iges_filename             # <<<<<<<<<<<<<<
@@ -4627,7 +4724,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_DECREF(__pyx_v_self->iges_filename);
   __pyx_v_self->iges_filename = __pyx_v_iges_filename;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":212
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":218
  * 		return self
  * 
  * 	def SetCADGeometry(self,bytes iges_filename):             # <<<<<<<<<<<<<<
@@ -4642,7 +4739,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":215
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":221
  * 		self.iges_filename = iges_filename
  * 
  * 	def SetDimension(self,UInteger dim):             # <<<<<<<<<<<<<<
@@ -4661,7 +4758,7 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetDimension (wrapper)", 0);
   assert(__pyx_arg_dim); {
-    __pyx_v_dim = __Pyx_PyInt_As_npy_uint64(__pyx_arg_dim); if (unlikely((__pyx_v_dim == (npy_uint64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 215; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_dim = __Pyx_PyInt_As_npy_uint64(__pyx_arg_dim); if (unlikely((__pyx_v_dim == (npy_uint64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4681,7 +4778,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetDimension", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":216
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":222
  * 
  * 	def SetDimension(self,UInteger dim):
  * 		self.ndim = dim             # <<<<<<<<<<<<<<
@@ -4690,7 +4787,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
   __pyx_v_self->ndim = __pyx_v_dim;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":215
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":221
  * 		self.iges_filename = iges_filename
  * 
  * 	def SetDimension(self,UInteger dim):             # <<<<<<<<<<<<<<
@@ -4705,7 +4802,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":218
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":224
  * 		self.ndim = dim
  * 
  * 	def SetScale(self,Real scale):             # <<<<<<<<<<<<<<
@@ -4724,7 +4821,7 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetScale (wrapper)", 0);
   assert(__pyx_arg_scale); {
-    __pyx_v_scale = __pyx_PyFloat_AsDouble(__pyx_arg_scale); if (unlikely((__pyx_v_scale == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_scale = __pyx_PyFloat_AsDouble(__pyx_arg_scale); if (unlikely((__pyx_v_scale == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 224; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4744,7 +4841,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetScale", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":219
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":225
  * 
  * 	def SetScale(self,Real scale):
  * 		self.scale = scale             # <<<<<<<<<<<<<<
@@ -4753,7 +4850,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
   __pyx_v_self->scale = __pyx_v_scale;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":218
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":224
  * 		self.ndim = dim
  * 
  * 	def SetScale(self,Real scale):             # <<<<<<<<<<<<<<
@@ -4768,7 +4865,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":221
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":227
  * 		self.scale = scale
  * 
  * 	def SetCondition(self,Real condition):             # <<<<<<<<<<<<<<
@@ -4787,7 +4884,7 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetCondition (wrapper)", 0);
   assert(__pyx_arg_condition); {
-    __pyx_v_condition = __pyx_PyFloat_AsDouble(__pyx_arg_condition); if (unlikely((__pyx_v_condition == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_condition = __pyx_PyFloat_AsDouble(__pyx_arg_condition); if (unlikely((__pyx_v_condition == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 227; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4807,7 +4904,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetCondition", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":222
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":228
  * 
  * 	def SetCondition(self,Real condition):
  * 		self.condition = condition             # <<<<<<<<<<<<<<
@@ -4816,7 +4913,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
   __pyx_v_self->condition = __pyx_v_condition;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":221
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":227
  * 		self.scale = scale
  * 
  * 	def SetCondition(self,Real condition):             # <<<<<<<<<<<<<<
@@ -4831,7 +4928,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":224
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":230
  * 		self.condition = condition
  * 
  * 	def SetBoundaryFeketePoints(self,np.ndarray[Real, ndim=2, mode="c"] boundary_fekete):             # <<<<<<<<<<<<<<
@@ -4848,7 +4945,7 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetBoundaryFeketePoints (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_boundary_fekete), __pyx_ptype_5numpy_ndarray, 1, "boundary_fekete", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 224; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_boundary_fekete), __pyx_ptype_5numpy_ndarray, 1, "boundary_fekete", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_12SetBoundaryFeketePoints(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy *)__pyx_v_self), ((PyArrayObject *)__pyx_v_boundary_fekete));
 
   /* function exit code */
@@ -4876,11 +4973,11 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __pyx_pybuffernd_boundary_fekete.rcbuffer = &__pyx_pybuffer_boundary_fekete;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_boundary_fekete.rcbuffer->pybuffer, (PyObject*)__pyx_v_boundary_fekete, &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 224; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_boundary_fekete.rcbuffer->pybuffer, (PyObject*)__pyx_v_boundary_fekete, &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_pybuffernd_boundary_fekete.diminfo[0].strides = __pyx_pybuffernd_boundary_fekete.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_boundary_fekete.diminfo[0].shape = __pyx_pybuffernd_boundary_fekete.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_boundary_fekete.diminfo[1].strides = __pyx_pybuffernd_boundary_fekete.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_boundary_fekete.diminfo[1].shape = __pyx_pybuffernd_boundary_fekete.rcbuffer->pybuffer.shape[1];
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":225
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":231
  * 
  * 	def SetBoundaryFeketePoints(self,np.ndarray[Real, ndim=2, mode="c"] boundary_fekete):
  * 		self.boundary_fekete = boundary_fekete             # <<<<<<<<<<<<<<
@@ -4888,13 +4985,13 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  * 	def SetProjectionMethod(self, bytes projection_method):
  */
   __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_dsds_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real(((PyObject *)__pyx_v_boundary_fekete));
-  if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 225; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __PYX_XDEC_MEMVIEW(&__pyx_v_self->boundary_fekete, 0);
   __pyx_v_self->boundary_fekete = __pyx_t_1;
   __pyx_t_1.memview = NULL;
   __pyx_t_1.data = NULL;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":224
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":230
  * 		self.condition = condition
  * 
  * 	def SetBoundaryFeketePoints(self,np.ndarray[Real, ndim=2, mode="c"] boundary_fekete):             # <<<<<<<<<<<<<<
@@ -4922,7 +5019,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":227
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":233
  * 		self.boundary_fekete = boundary_fekete
  * 
  * 	def SetProjectionMethod(self, bytes projection_method):             # <<<<<<<<<<<<<<
@@ -4939,7 +5036,7 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetProjectionMethod (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_projection_method), (&PyBytes_Type), 1, "projection_method", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 227; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_projection_method), (&PyBytes_Type), 1, "projection_method", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_14SetProjectionMethod(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy *)__pyx_v_self), ((PyObject*)__pyx_v_projection_method));
 
   /* function exit code */
@@ -4956,12 +5053,12 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetProjectionMethod", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":228
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":234
  * 
  * 	def SetProjectionMethod(self, bytes projection_method):
  * 		self.projection_method = projection_method             # <<<<<<<<<<<<<<
  * 
- * 	def ComputeDirichletBoundaryConditions(self):
+ * 	def SetProjectionCriteria(self, np.ndarray[UInteger, ndim=2, mode="c"] criteria):
  */
   __Pyx_INCREF(__pyx_v_projection_method);
   __Pyx_GIVEREF(__pyx_v_projection_method);
@@ -4969,7 +5066,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_DECREF(__pyx_v_self->projection_method);
   __pyx_v_self->projection_method = __pyx_v_projection_method;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":227
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":233
  * 		self.boundary_fekete = boundary_fekete
  * 
  * 	def SetProjectionMethod(self, bytes projection_method):             # <<<<<<<<<<<<<<
@@ -4984,8 +5081,99 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":230
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":236
  * 		self.projection_method = projection_method
+ * 
+ * 	def SetProjectionCriteria(self, np.ndarray[UInteger, ndim=2, mode="c"] criteria):             # <<<<<<<<<<<<<<
+ * 		self.projection_criteria = criteria
+ * 
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_17SetProjectionCriteria(PyObject *__pyx_v_self, PyObject *__pyx_v_criteria); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_17SetProjectionCriteria(PyObject *__pyx_v_self, PyObject *__pyx_v_criteria) {
+  CYTHON_UNUSED int __pyx_lineno = 0;
+  CYTHON_UNUSED const char *__pyx_filename = NULL;
+  CYTHON_UNUSED int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("SetProjectionCriteria (wrapper)", 0);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_criteria), __pyx_ptype_5numpy_ndarray, 1, "criteria", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 236; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_16SetProjectionCriteria(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy *)__pyx_v_self), ((PyArrayObject *)__pyx_v_criteria));
+
+  /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_16SetProjectionCriteria(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy *__pyx_v_self, PyArrayObject *__pyx_v_criteria) {
+  __Pyx_LocalBuf_ND __pyx_pybuffernd_criteria;
+  __Pyx_Buffer __pyx_pybuffer_criteria;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("SetProjectionCriteria", 0);
+  __pyx_pybuffer_criteria.pybuffer.buf = NULL;
+  __pyx_pybuffer_criteria.refcount = 0;
+  __pyx_pybuffernd_criteria.data = NULL;
+  __pyx_pybuffernd_criteria.rcbuffer = &__pyx_pybuffer_criteria;
+  {
+    __Pyx_BufFmt_StackElem __pyx_stack[1];
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_criteria.rcbuffer->pybuffer, (PyObject*)__pyx_v_criteria, &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 236; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
+  __pyx_pybuffernd_criteria.diminfo[0].strides = __pyx_pybuffernd_criteria.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_criteria.diminfo[0].shape = __pyx_pybuffernd_criteria.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_criteria.diminfo[1].strides = __pyx_pybuffernd_criteria.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_criteria.diminfo[1].shape = __pyx_pybuffernd_criteria.rcbuffer->pybuffer.shape[1];
+
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":237
+ * 
+ * 	def SetProjectionCriteria(self, np.ndarray[UInteger, ndim=2, mode="c"] criteria):
+ * 		self.projection_criteria = criteria             # <<<<<<<<<<<<<<
+ * 
+ * 	def ComputeDirichletBoundaryConditions(self):
+ */
+  __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_dsds_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger(((PyObject *)__pyx_v_criteria));
+  if (unlikely(!__pyx_t_1.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 237; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __PYX_XDEC_MEMVIEW(&__pyx_v_self->projection_criteria, 0);
+  __pyx_v_self->projection_criteria = __pyx_t_1;
+  __pyx_t_1.memview = NULL;
+  __pyx_t_1.data = NULL;
+
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":236
+ * 		self.projection_method = projection_method
+ * 
+ * 	def SetProjectionCriteria(self, np.ndarray[UInteger, ndim=2, mode="c"] criteria):             # <<<<<<<<<<<<<<
+ * 		self.projection_criteria = criteria
+ * 
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
+  { PyObject *__pyx_type, *__pyx_value, *__pyx_tb;
+    __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
+    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_criteria.rcbuffer->pybuffer);
+  __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
+  __Pyx_AddTraceback("Core.Supplementary.cpp_src.occ_backend.OCCPluginPy.OCCPluginPy.SetProjectionCriteria", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  goto __pyx_L2;
+  __pyx_L0:;
+  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_criteria.rcbuffer->pybuffer);
+  __pyx_L2:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":239
+ * 		self.projection_criteria = criteria
  * 
  * 	def ComputeDirichletBoundaryConditions(self):             # <<<<<<<<<<<<<<
  * 		# CALLS STATIC FUNCTION __ComputeDirichletBoundaryConditions__
@@ -4993,19 +5181,19 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_17ComputeDirichletBoundaryConditions(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_17ComputeDirichletBoundaryConditions(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_19ComputeDirichletBoundaryConditions(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_19ComputeDirichletBoundaryConditions(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("ComputeDirichletBoundaryConditions (wrapper)", 0);
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_16ComputeDirichletBoundaryConditions(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_18ComputeDirichletBoundaryConditions(((struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_16ComputeDirichletBoundaryConditions(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy *__pyx_v_self) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_18ComputeDirichletBoundaryConditions(struct __pyx_obj_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -5021,31 +5209,32 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   PyObject *__pyx_t_11 = NULL;
   PyObject *__pyx_t_12 = NULL;
   PyObject *__pyx_t_13 = NULL;
-  Py_ssize_t __pyx_t_14;
+  PyObject *__pyx_t_14 = NULL;
+  Py_ssize_t __pyx_t_15;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("ComputeDirichletBoundaryConditions", 0);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":234
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":243
  * 		# NOTE THAT np.asarray IS USED TO CONVERT CYTHON'S MEMORY VIEW TO ndarray.
  * 		# ALTHOUGH THIS INVOLVES OVERHEAD THIS FUNCTION IS CALLED ONLY ONCE.
  * 		return __ComputeDirichletBoundaryConditions__(self.iges_filename, self.scale, np.asarray(self.points), np.asarray(self.elements),             # <<<<<<<<<<<<<<
- * 			np.asarray(self.edges), np.asarray(self.faces), self.condition, np.asarray(self.boundary_fekete), self.projection_method)
- * 
+ * 			np.asarray(self.edges), np.asarray(self.faces), self.condition, np.asarray(self.boundary_fekete),
+ * 			np.asarray(self.projection_criteria), self.projection_method)
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_ComputeDirichletBoundaryCondit); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_ComputeDirichletBoundaryCondit); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_self->scale); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_self->scale); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_asarray); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_asarray); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (unlikely(!__pyx_v_self->points.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");{__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}}
-  __pyx_t_5 = __pyx_memoryview_fromslice(__pyx_v_self->points, 2, (PyObject *(*)(char *)) __pyx_memview_get_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real, (int (*)(char *, PyObject *)) __pyx_memview_set_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real, 0);; if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_v_self->points.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");{__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}}
+  __pyx_t_5 = __pyx_memoryview_fromslice(__pyx_v_self->points, 2, (PyObject *(*)(char *)) __pyx_memview_get_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real, (int (*)(char *, PyObject *)) __pyx_memview_set_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real, 0);; if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_t_7 = NULL;
   if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_6))) {
@@ -5058,28 +5247,28 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
     }
   }
   if (!__pyx_t_7) {
-    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_5); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_5); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_GOTREF(__pyx_t_4);
   } else {
-    __pyx_t_8 = PyTuple_New(1+1); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = PyTuple_New(1+1); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
     PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_7); __Pyx_GIVEREF(__pyx_t_7); __pyx_t_7 = NULL;
     PyTuple_SET_ITEM(__pyx_t_8, 0+1, __pyx_t_5);
     __Pyx_GIVEREF(__pyx_t_5);
     __pyx_t_5 = 0;
-    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_8, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_8, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   }
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_asarray); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_asarray); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-  if (unlikely(!__pyx_v_self->elements.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");{__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}}
-  __pyx_t_8 = __pyx_memoryview_fromslice(__pyx_v_self->elements, 2, (PyObject *(*)(char *)) __pyx_memview_get_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, (int (*)(char *, PyObject *)) __pyx_memview_set_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, 0);; if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_v_self->elements.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");{__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}}
+  __pyx_t_8 = __pyx_memoryview_fromslice(__pyx_v_self->elements, 2, (PyObject *(*)(char *)) __pyx_memview_get_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, (int (*)(char *, PyObject *)) __pyx_memview_set_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, 0);; if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_8);
   __pyx_t_7 = NULL;
   if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_5))) {
@@ -5092,36 +5281,36 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
     }
   }
   if (!__pyx_t_7) {
-    __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     __Pyx_GOTREF(__pyx_t_6);
   } else {
-    __pyx_t_9 = PyTuple_New(1+1); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_9 = PyTuple_New(1+1); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_9);
     PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_7); __Pyx_GIVEREF(__pyx_t_7); __pyx_t_7 = NULL;
     PyTuple_SET_ITEM(__pyx_t_9, 0+1, __pyx_t_8);
     __Pyx_GIVEREF(__pyx_t_8);
     __pyx_t_8 = 0;
-    __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_9, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_9, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   }
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":235
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":244
  * 		# ALTHOUGH THIS INVOLVES OVERHEAD THIS FUNCTION IS CALLED ONLY ONCE.
  * 		return __ComputeDirichletBoundaryConditions__(self.iges_filename, self.scale, np.asarray(self.points), np.asarray(self.elements),
- * 			np.asarray(self.edges), np.asarray(self.faces), self.condition, np.asarray(self.boundary_fekete), self.projection_method)             # <<<<<<<<<<<<<<
- * 
+ * 			np.asarray(self.edges), np.asarray(self.faces), self.condition, np.asarray(self.boundary_fekete),             # <<<<<<<<<<<<<<
+ * 			np.asarray(self.projection_criteria), self.projection_method)
  * 
  */
-  __pyx_t_9 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_9 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_9, __pyx_n_s_asarray); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_9, __pyx_n_s_asarray); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_8);
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  if (unlikely(!__pyx_v_self->edges.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");{__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L1_error;}}
-  __pyx_t_9 = __pyx_memoryview_fromslice(__pyx_v_self->edges, 2, (PyObject *(*)(char *)) __pyx_memview_get_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, (int (*)(char *, PyObject *)) __pyx_memview_set_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, 0);; if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_v_self->edges.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");{__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}}
+  __pyx_t_9 = __pyx_memoryview_fromslice(__pyx_v_self->edges, 2, (PyObject *(*)(char *)) __pyx_memview_get_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, (int (*)(char *, PyObject *)) __pyx_memview_set_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, 0);; if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_9);
   __pyx_t_7 = NULL;
   if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_8))) {
@@ -5134,28 +5323,28 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
     }
   }
   if (!__pyx_t_7) {
-    __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_9); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_9); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
     __Pyx_GOTREF(__pyx_t_5);
   } else {
-    __pyx_t_10 = PyTuple_New(1+1); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_10 = PyTuple_New(1+1); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_10);
     PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_7); __Pyx_GIVEREF(__pyx_t_7); __pyx_t_7 = NULL;
     PyTuple_SET_ITEM(__pyx_t_10, 0+1, __pyx_t_9);
     __Pyx_GIVEREF(__pyx_t_9);
     __pyx_t_9 = 0;
-    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_10, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_10, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
   }
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-  __pyx_t_10 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_10 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_10);
-  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_10, __pyx_n_s_asarray); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_10, __pyx_n_s_asarray); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-  if (unlikely(!__pyx_v_self->faces.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");{__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L1_error;}}
-  __pyx_t_10 = __pyx_memoryview_fromslice(__pyx_v_self->faces, 2, (PyObject *(*)(char *)) __pyx_memview_get_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, (int (*)(char *, PyObject *)) __pyx_memview_set_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, 0);; if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_v_self->faces.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");{__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}}
+  __pyx_t_10 = __pyx_memoryview_fromslice(__pyx_v_self->faces, 2, (PyObject *(*)(char *)) __pyx_memview_get_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, (int (*)(char *, PyObject *)) __pyx_memview_set_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, 0);; if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_10);
   __pyx_t_7 = NULL;
   if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_9))) {
@@ -5168,30 +5357,30 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
     }
   }
   if (!__pyx_t_7) {
-    __pyx_t_8 = __Pyx_PyObject_CallOneArg(__pyx_t_9, __pyx_t_10); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_PyObject_CallOneArg(__pyx_t_9, __pyx_t_10); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
     __Pyx_GOTREF(__pyx_t_8);
   } else {
-    __pyx_t_11 = PyTuple_New(1+1); if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_11 = PyTuple_New(1+1); if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_11);
     PyTuple_SET_ITEM(__pyx_t_11, 0, __pyx_t_7); __Pyx_GIVEREF(__pyx_t_7); __pyx_t_7 = NULL;
     PyTuple_SET_ITEM(__pyx_t_11, 0+1, __pyx_t_10);
     __Pyx_GIVEREF(__pyx_t_10);
     __pyx_t_10 = 0;
-    __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_11, NULL); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_11, NULL); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
   }
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  __pyx_t_9 = PyFloat_FromDouble(__pyx_v_self->condition); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_9 = PyFloat_FromDouble(__pyx_v_self->condition); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_10 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_10 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_10);
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_10, __pyx_n_s_asarray); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_10, __pyx_n_s_asarray); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-  if (unlikely(!__pyx_v_self->boundary_fekete.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");{__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L1_error;}}
-  __pyx_t_10 = __pyx_memoryview_fromslice(__pyx_v_self->boundary_fekete, 2, (PyObject *(*)(char *)) __pyx_memview_get_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real, (int (*)(char *, PyObject *)) __pyx_memview_set_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real, 0);; if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_v_self->boundary_fekete.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");{__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}}
+  __pyx_t_10 = __pyx_memoryview_fromslice(__pyx_v_self->boundary_fekete, 2, (PyObject *(*)(char *)) __pyx_memview_get_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real, (int (*)(char *, PyObject *)) __pyx_memview_set_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real, 0);; if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_10);
   __pyx_t_12 = NULL;
   if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_7))) {
@@ -5204,57 +5393,101 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
     }
   }
   if (!__pyx_t_12) {
-    __pyx_t_11 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_10); if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_11 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_10); if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
     __Pyx_GOTREF(__pyx_t_11);
   } else {
-    __pyx_t_13 = PyTuple_New(1+1); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_13 = PyTuple_New(1+1); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_13);
     PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
     PyTuple_SET_ITEM(__pyx_t_13, 0+1, __pyx_t_10);
     __Pyx_GIVEREF(__pyx_t_10);
     __pyx_t_10 = 0;
-    __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_13, NULL); if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_13, NULL); if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_11);
     __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
   }
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = NULL;
-  __pyx_t_14 = 0;
-  if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_2))) {
-    __pyx_t_7 = PyMethod_GET_SELF(__pyx_t_2);
-    if (likely(__pyx_t_7)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
-      __Pyx_INCREF(__pyx_t_7);
+
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":245
+ * 		return __ComputeDirichletBoundaryConditions__(self.iges_filename, self.scale, np.asarray(self.points), np.asarray(self.elements),
+ * 			np.asarray(self.edges), np.asarray(self.faces), self.condition, np.asarray(self.boundary_fekete),
+ * 			np.asarray(self.projection_criteria), self.projection_method)             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __pyx_t_13 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_13);
+  __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_13, __pyx_n_s_asarray); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_10);
+  __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
+  if (unlikely(!__pyx_v_self->projection_criteria.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");{__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}}
+  __pyx_t_13 = __pyx_memoryview_fromslice(__pyx_v_self->projection_criteria, 2, (PyObject *(*)(char *)) __pyx_memview_get_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, (int (*)(char *, PyObject *)) __pyx_memview_set_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, 0);; if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_13);
+  __pyx_t_12 = NULL;
+  if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_10))) {
+    __pyx_t_12 = PyMethod_GET_SELF(__pyx_t_10);
+    if (likely(__pyx_t_12)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_10);
+      __Pyx_INCREF(__pyx_t_12);
       __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_2, function);
-      __pyx_t_14 = 1;
+      __Pyx_DECREF_SET(__pyx_t_10, function);
     }
   }
-  __pyx_t_13 = PyTuple_New(9+__pyx_t_14); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_13);
-  if (__pyx_t_7) {
-    PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_t_7); __Pyx_GIVEREF(__pyx_t_7); __pyx_t_7 = NULL;
+  if (!__pyx_t_12) {
+    __pyx_t_7 = __Pyx_PyObject_CallOneArg(__pyx_t_10, __pyx_t_13); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
+    __Pyx_GOTREF(__pyx_t_7);
+  } else {
+    __pyx_t_14 = PyTuple_New(1+1); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_14);
+    PyTuple_SET_ITEM(__pyx_t_14, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
+    PyTuple_SET_ITEM(__pyx_t_14, 0+1, __pyx_t_13);
+    __Pyx_GIVEREF(__pyx_t_13);
+    __pyx_t_13 = 0;
+    __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_10, __pyx_t_14, NULL); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_7);
+    __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
+  }
+  __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+  __pyx_t_10 = NULL;
+  __pyx_t_15 = 0;
+  if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_2))) {
+    __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_2);
+    if (likely(__pyx_t_10)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
+      __Pyx_INCREF(__pyx_t_10);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_2, function);
+      __pyx_t_15 = 1;
+    }
+  }
+  __pyx_t_14 = PyTuple_New(10+__pyx_t_15); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_14);
+  if (__pyx_t_10) {
+    PyTuple_SET_ITEM(__pyx_t_14, 0, __pyx_t_10); __Pyx_GIVEREF(__pyx_t_10); __pyx_t_10 = NULL;
   }
   __Pyx_INCREF(__pyx_v_self->iges_filename);
-  PyTuple_SET_ITEM(__pyx_t_13, 0+__pyx_t_14, __pyx_v_self->iges_filename);
+  PyTuple_SET_ITEM(__pyx_t_14, 0+__pyx_t_15, __pyx_v_self->iges_filename);
   __Pyx_GIVEREF(__pyx_v_self->iges_filename);
-  PyTuple_SET_ITEM(__pyx_t_13, 1+__pyx_t_14, __pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_14, 1+__pyx_t_15, __pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_13, 2+__pyx_t_14, __pyx_t_4);
+  PyTuple_SET_ITEM(__pyx_t_14, 2+__pyx_t_15, __pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_4);
-  PyTuple_SET_ITEM(__pyx_t_13, 3+__pyx_t_14, __pyx_t_6);
+  PyTuple_SET_ITEM(__pyx_t_14, 3+__pyx_t_15, __pyx_t_6);
   __Pyx_GIVEREF(__pyx_t_6);
-  PyTuple_SET_ITEM(__pyx_t_13, 4+__pyx_t_14, __pyx_t_5);
+  PyTuple_SET_ITEM(__pyx_t_14, 4+__pyx_t_15, __pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_5);
-  PyTuple_SET_ITEM(__pyx_t_13, 5+__pyx_t_14, __pyx_t_8);
+  PyTuple_SET_ITEM(__pyx_t_14, 5+__pyx_t_15, __pyx_t_8);
   __Pyx_GIVEREF(__pyx_t_8);
-  PyTuple_SET_ITEM(__pyx_t_13, 6+__pyx_t_14, __pyx_t_9);
+  PyTuple_SET_ITEM(__pyx_t_14, 6+__pyx_t_15, __pyx_t_9);
   __Pyx_GIVEREF(__pyx_t_9);
-  PyTuple_SET_ITEM(__pyx_t_13, 7+__pyx_t_14, __pyx_t_11);
+  PyTuple_SET_ITEM(__pyx_t_14, 7+__pyx_t_15, __pyx_t_11);
   __Pyx_GIVEREF(__pyx_t_11);
+  PyTuple_SET_ITEM(__pyx_t_14, 8+__pyx_t_15, __pyx_t_7);
+  __Pyx_GIVEREF(__pyx_t_7);
   __Pyx_INCREF(__pyx_v_self->projection_method);
-  PyTuple_SET_ITEM(__pyx_t_13, 8+__pyx_t_14, __pyx_v_self->projection_method);
+  PyTuple_SET_ITEM(__pyx_t_14, 9+__pyx_t_15, __pyx_v_self->projection_method);
   __Pyx_GIVEREF(__pyx_v_self->projection_method);
   __pyx_t_3 = 0;
   __pyx_t_4 = 0;
@@ -5263,16 +5496,17 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __pyx_t_8 = 0;
   __pyx_t_9 = 0;
   __pyx_t_11 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_13, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_7 = 0;
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_14, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
+  __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":230
- * 		self.projection_method = projection_method
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":239
+ * 		self.projection_criteria = criteria
  * 
  * 	def ComputeDirichletBoundaryConditions(self):             # <<<<<<<<<<<<<<
  * 		# CALLS STATIC FUNCTION __ComputeDirichletBoundaryConditions__
@@ -5294,6 +5528,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_XDECREF(__pyx_t_11);
   __Pyx_XDECREF(__pyx_t_12);
   __Pyx_XDECREF(__pyx_t_13);
+  __Pyx_XDECREF(__pyx_t_14);
   __Pyx_AddTraceback("Core.Supplementary.cpp_src.occ_backend.OCCPluginPy.OCCPluginPy.ComputeDirichletBoundaryConditions", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -5302,7 +5537,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":243
+/* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":253
  * @cython.profile(False)
  * @cython.wraparound(False)
  * def __ComputeDirichletBoundaryConditions__(bytes iges_filename not None, Real scale, np.ndarray[Real, ndim=2, mode="c"] points not None,             # <<<<<<<<<<<<<<
@@ -5312,7 +5547,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
 
 /* Python wrapper */
 static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_1__ComputeDirichletBoundaryConditions__(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy___ComputeDirichletBoundaryConditions__[] = "\n\tActual wrapper for occ_frontend, kept as a 'static' function for debugging purposes \n\t";
+static char __pyx_doc_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy___ComputeDirichletBoundaryConditions__[] = "\n\tOne function wrapper for OCCPlugin, kept as a 'static' function for debugging purposes \n\t";
 static PyMethodDef __pyx_mdef_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_1__ComputeDirichletBoundaryConditions__ = {"__ComputeDirichletBoundaryConditions__", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_1__ComputeDirichletBoundaryConditions__, METH_VARARGS|METH_KEYWORDS, __pyx_doc_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy___ComputeDirichletBoundaryConditions__};
 static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_1__ComputeDirichletBoundaryConditions__(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_iges_filename = 0;
@@ -5323,6 +5558,7 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   PyArrayObject *__pyx_v_faces = 0;
   __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real __pyx_v_condition;
   PyArrayObject *__pyx_v_boundary_fekete = 0;
+  PyArrayObject *__pyx_v_criteria = 0;
   PyObject *__pyx_v_projection_method = 0;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
@@ -5331,12 +5567,13 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__ComputeDirichletBoundaryConditions__ (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_iges_filename,&__pyx_n_s_scale,&__pyx_n_s_points,&__pyx_n_s_elements,&__pyx_n_s_edges,&__pyx_n_s_faces,&__pyx_n_s_condition,&__pyx_n_s_boundary_fekete,&__pyx_n_s_projection_method,0};
-    PyObject* values[9] = {0,0,0,0,0,0,0,0,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_iges_filename,&__pyx_n_s_scale,&__pyx_n_s_points,&__pyx_n_s_elements,&__pyx_n_s_edges,&__pyx_n_s_faces,&__pyx_n_s_condition,&__pyx_n_s_boundary_fekete,&__pyx_n_s_criteria,&__pyx_n_s_projection_method,0};
+    PyObject* values[10] = {0,0,0,0,0,0,0,0,0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
+        case 10: values[9] = PyTuple_GET_ITEM(__pyx_args, 9);
         case  9: values[8] = PyTuple_GET_ITEM(__pyx_args, 8);
         case  8: values[7] = PyTuple_GET_ITEM(__pyx_args, 7);
         case  7: values[6] = PyTuple_GET_ITEM(__pyx_args, 6);
@@ -5357,48 +5594,53 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_scale)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__ComputeDirichletBoundaryConditions__", 1, 9, 9, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("__ComputeDirichletBoundaryConditions__", 1, 10, 10, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_points)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__ComputeDirichletBoundaryConditions__", 1, 9, 9, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("__ComputeDirichletBoundaryConditions__", 1, 10, 10, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_elements)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__ComputeDirichletBoundaryConditions__", 1, 9, 9, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("__ComputeDirichletBoundaryConditions__", 1, 10, 10, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  4:
         if (likely((values[4] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_edges)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__ComputeDirichletBoundaryConditions__", 1, 9, 9, 4); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("__ComputeDirichletBoundaryConditions__", 1, 10, 10, 4); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  5:
         if (likely((values[5] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_faces)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__ComputeDirichletBoundaryConditions__", 1, 9, 9, 5); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("__ComputeDirichletBoundaryConditions__", 1, 10, 10, 5); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  6:
         if (likely((values[6] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_condition)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__ComputeDirichletBoundaryConditions__", 1, 9, 9, 6); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("__ComputeDirichletBoundaryConditions__", 1, 10, 10, 6); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  7:
         if (likely((values[7] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_boundary_fekete)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__ComputeDirichletBoundaryConditions__", 1, 9, 9, 7); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("__ComputeDirichletBoundaryConditions__", 1, 10, 10, 7); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  8:
-        if (likely((values[8] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_projection_method)) != 0)) kw_args--;
+        if (likely((values[8] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_criteria)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__ComputeDirichletBoundaryConditions__", 1, 9, 9, 8); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("__ComputeDirichletBoundaryConditions__", 1, 10, 10, 8); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        }
+        case  9:
+        if (likely((values[9] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_projection_method)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("__ComputeDirichletBoundaryConditions__", 1, 10, 10, 9); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__ComputeDirichletBoundaryConditions__") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__ComputeDirichletBoundaryConditions__") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
-    } else if (PyTuple_GET_SIZE(__pyx_args) != 9) {
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 10) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
@@ -5410,33 +5652,36 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
       values[6] = PyTuple_GET_ITEM(__pyx_args, 6);
       values[7] = PyTuple_GET_ITEM(__pyx_args, 7);
       values[8] = PyTuple_GET_ITEM(__pyx_args, 8);
+      values[9] = PyTuple_GET_ITEM(__pyx_args, 9);
     }
     __pyx_v_iges_filename = ((PyObject*)values[0]);
-    __pyx_v_scale = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_scale == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_scale = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_scale == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     __pyx_v_points = ((PyArrayObject *)values[2]);
     __pyx_v_elements = ((PyArrayObject *)values[3]);
     __pyx_v_edges = ((PyArrayObject *)values[4]);
     __pyx_v_faces = ((PyArrayObject *)values[5]);
-    __pyx_v_condition = __pyx_PyFloat_AsDouble(values[6]); if (unlikely((__pyx_v_condition == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_condition = __pyx_PyFloat_AsDouble(values[6]); if (unlikely((__pyx_v_condition == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 255; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     __pyx_v_boundary_fekete = ((PyArrayObject *)values[7]);
-    __pyx_v_projection_method = ((PyObject*)values[8]);
+    __pyx_v_criteria = ((PyArrayObject *)values[8]);
+    __pyx_v_projection_method = ((PyObject*)values[9]);
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__ComputeDirichletBoundaryConditions__", 1, 9, 9, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("__ComputeDirichletBoundaryConditions__", 1, 10, 10, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Core.Supplementary.cpp_src.occ_backend.OCCPluginPy.__ComputeDirichletBoundaryConditions__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_iges_filename), (&PyBytes_Type), 0, "iges_filename", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_points), __pyx_ptype_5numpy_ndarray, 0, "points", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_elements), __pyx_ptype_5numpy_ndarray, 0, "elements", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_edges), __pyx_ptype_5numpy_ndarray, 0, "edges", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_faces), __pyx_ptype_5numpy_ndarray, 0, "faces", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_boundary_fekete), __pyx_ptype_5numpy_ndarray, 0, "boundary_fekete", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_projection_method), (&PyBytes_Type), 0, "projection_method", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 246; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy___ComputeDirichletBoundaryConditions__(__pyx_self, __pyx_v_iges_filename, __pyx_v_scale, __pyx_v_points, __pyx_v_elements, __pyx_v_edges, __pyx_v_faces, __pyx_v_condition, __pyx_v_boundary_fekete, __pyx_v_projection_method);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_iges_filename), (&PyBytes_Type), 0, "iges_filename", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_points), __pyx_ptype_5numpy_ndarray, 0, "points", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_elements), __pyx_ptype_5numpy_ndarray, 0, "elements", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 254; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_edges), __pyx_ptype_5numpy_ndarray, 0, "edges", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 254; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_faces), __pyx_ptype_5numpy_ndarray, 0, "faces", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 255; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_boundary_fekete), __pyx_ptype_5numpy_ndarray, 0, "boundary_fekete", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 255; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_criteria), __pyx_ptype_5numpy_ndarray, 0, "criteria", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 256; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_projection_method), (&PyBytes_Type), 0, "projection_method", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 256; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy___ComputeDirichletBoundaryConditions__(__pyx_self, __pyx_v_iges_filename, __pyx_v_scale, __pyx_v_points, __pyx_v_elements, __pyx_v_edges, __pyx_v_faces, __pyx_v_condition, __pyx_v_boundary_fekete, __pyx_v_criteria, __pyx_v_projection_method);
 
   /* function exit code */
   goto __pyx_L0;
@@ -5447,23 +5692,27 @@ static PyObject *__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy___ComputeDirichletBoundaryConditions__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_iges_filename, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real __pyx_v_scale, PyArrayObject *__pyx_v_points, PyArrayObject *__pyx_v_elements, PyArrayObject *__pyx_v_edges, PyArrayObject *__pyx_v_faces, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real __pyx_v_condition, PyArrayObject *__pyx_v_boundary_fekete, PyObject *__pyx_v_projection_method) {
+static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy___ComputeDirichletBoundaryConditions__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_iges_filename, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real __pyx_v_scale, PyArrayObject *__pyx_v_points, PyArrayObject *__pyx_v_elements, PyArrayObject *__pyx_v_edges, PyArrayObject *__pyx_v_faces, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real __pyx_v_condition, PyArrayObject *__pyx_v_boundary_fekete, PyArrayObject *__pyx_v_criteria, PyObject *__pyx_v_projection_method) {
   __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer __pyx_v_points_rows;
   __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer __pyx_v_points_cols;
   __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer __pyx_v_edges_rows;
   __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer __pyx_v_edges_cols;
   __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer __pyx_v_faces_rows;
   __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer __pyx_v_faces_cols;
-  npy_intp __pyx_v_elements_rows;
-  npy_intp __pyx_v_elements_cols;
+  __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer __pyx_v_criteria_rows;
+  __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer __pyx_v_criteria_cols;
   __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer __pyx_v_fekete_rows;
   __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer __pyx_v_fekete_cols;
+  __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer __pyx_v_i;
+  npy_intp __pyx_v_elements_rows;
+  npy_intp __pyx_v_elements_cols;
   struct PassToPython __pyx_v_struct_to_python;
   PyArrayObject *__pyx_v_nodes_dir = 0;
-  __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer __pyx_v_i;
   PyArrayObject *__pyx_v_displacements_BC = 0;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_boundary_fekete;
   __Pyx_Buffer __pyx_pybuffer_boundary_fekete;
+  __Pyx_LocalBuf_ND __pyx_pybuffernd_criteria;
+  __Pyx_Buffer __pyx_pybuffer_criteria;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_edges;
   __Pyx_Buffer __pyx_pybuffer_edges;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_elements;
@@ -5487,16 +5736,18 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   long __pyx_t_11;
   long __pyx_t_12;
   long __pyx_t_13;
-  char const *__pyx_t_14;
-  PyObject *__pyx_t_15 = NULL;
-  PyObject *__pyx_t_16 = NULL;
+  long __pyx_t_14;
+  long __pyx_t_15;
+  char const *__pyx_t_16;
   PyObject *__pyx_t_17 = NULL;
   PyObject *__pyx_t_18 = NULL;
   PyObject *__pyx_t_19 = NULL;
-  __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer __pyx_t_20;
-  __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer __pyx_t_21;
-  Py_ssize_t __pyx_t_22;
-  PyObject *__pyx_t_23 = NULL;
+  PyObject *__pyx_t_20 = NULL;
+  PyObject *__pyx_t_21 = NULL;
+  __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer __pyx_t_22;
+  __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer __pyx_t_23;
+  Py_ssize_t __pyx_t_24;
+  PyObject *__pyx_t_25 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -5521,34 +5772,43 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __pyx_pybuffer_boundary_fekete.refcount = 0;
   __pyx_pybuffernd_boundary_fekete.data = NULL;
   __pyx_pybuffernd_boundary_fekete.rcbuffer = &__pyx_pybuffer_boundary_fekete;
+  __pyx_pybuffer_criteria.pybuffer.buf = NULL;
+  __pyx_pybuffer_criteria.refcount = 0;
+  __pyx_pybuffernd_criteria.data = NULL;
+  __pyx_pybuffernd_criteria.rcbuffer = &__pyx_pybuffer_criteria;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_points.rcbuffer->pybuffer, (PyObject*)__pyx_v_points, &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_points.rcbuffer->pybuffer, (PyObject*)__pyx_v_points, &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_pybuffernd_points.diminfo[0].strides = __pyx_pybuffernd_points.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_points.diminfo[0].shape = __pyx_pybuffernd_points.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_points.diminfo[1].strides = __pyx_pybuffernd_points.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_points.diminfo[1].shape = __pyx_pybuffernd_points.rcbuffer->pybuffer.shape[1];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_elements.rcbuffer->pybuffer, (PyObject*)__pyx_v_elements, &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_elements.rcbuffer->pybuffer, (PyObject*)__pyx_v_elements, &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_pybuffernd_elements.diminfo[0].strides = __pyx_pybuffernd_elements.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_elements.diminfo[0].shape = __pyx_pybuffernd_elements.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_elements.diminfo[1].strides = __pyx_pybuffernd_elements.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_elements.diminfo[1].shape = __pyx_pybuffernd_elements.rcbuffer->pybuffer.shape[1];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_edges.rcbuffer->pybuffer, (PyObject*)__pyx_v_edges, &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_edges.rcbuffer->pybuffer, (PyObject*)__pyx_v_edges, &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_pybuffernd_edges.diminfo[0].strides = __pyx_pybuffernd_edges.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_edges.diminfo[0].shape = __pyx_pybuffernd_edges.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_edges.diminfo[1].strides = __pyx_pybuffernd_edges.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_edges.diminfo[1].shape = __pyx_pybuffernd_edges.rcbuffer->pybuffer.shape[1];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_faces.rcbuffer->pybuffer, (PyObject*)__pyx_v_faces, &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_faces.rcbuffer->pybuffer, (PyObject*)__pyx_v_faces, &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_pybuffernd_faces.diminfo[0].strides = __pyx_pybuffernd_faces.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_faces.diminfo[0].shape = __pyx_pybuffernd_faces.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_faces.diminfo[1].strides = __pyx_pybuffernd_faces.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_faces.diminfo[1].shape = __pyx_pybuffernd_faces.rcbuffer->pybuffer.shape[1];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_boundary_fekete.rcbuffer->pybuffer, (PyObject*)__pyx_v_boundary_fekete, &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_boundary_fekete.rcbuffer->pybuffer, (PyObject*)__pyx_v_boundary_fekete, &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_pybuffernd_boundary_fekete.diminfo[0].strides = __pyx_pybuffernd_boundary_fekete.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_boundary_fekete.diminfo[0].shape = __pyx_pybuffernd_boundary_fekete.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_boundary_fekete.diminfo[1].strides = __pyx_pybuffernd_boundary_fekete.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_boundary_fekete.diminfo[1].shape = __pyx_pybuffernd_boundary_fekete.rcbuffer->pybuffer.shape[1];
+  {
+    __Pyx_BufFmt_StackElem __pyx_stack[1];
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_criteria.rcbuffer->pybuffer, (PyObject*)__pyx_v_criteria, &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
+  __pyx_pybuffernd_criteria.diminfo[0].strides = __pyx_pybuffernd_criteria.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_criteria.diminfo[0].shape = __pyx_pybuffernd_criteria.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_criteria.diminfo[1].strides = __pyx_pybuffernd_criteria.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_criteria.diminfo[1].shape = __pyx_pybuffernd_criteria.rcbuffer->pybuffer.shape[1];
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":253
- * 	cdef Integer element_rows, points_rows, element_cols, points_cols, edges_rows, edges_cols, faces_rows, faces_cols
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":267
+ * 	cdef Integer i
  * 
  * 	elements_rows, elements_cols = elements.shape[0], elements.shape[1]             # <<<<<<<<<<<<<<
  * 	points_rows, points_cols = points.shape[0], points.shape[1]
@@ -5559,7 +5819,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __pyx_v_elements_rows = __pyx_t_1;
   __pyx_v_elements_cols = __pyx_t_2;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":254
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":268
  * 
  * 	elements_rows, elements_cols = elements.shape[0], elements.shape[1]
  * 	points_rows, points_cols = points.shape[0], points.shape[1]             # <<<<<<<<<<<<<<
@@ -5571,35 +5831,35 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __pyx_v_points_rows = __pyx_t_2;
   __pyx_v_points_cols = __pyx_t_1;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":255
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":269
  * 	elements_rows, elements_cols = elements.shape[0], elements.shape[1]
  * 	points_rows, points_cols = points.shape[0], points.shape[1]
  * 	edges_rows, edges_cols = edges.shape[0], edges.shape[1]             # <<<<<<<<<<<<<<
  * 	faces_rows, faces_cols = faces.shape[0], faces.shape[1]
- * 
+ * 	fekete_rows, fekete_cols = boundary_fekete.shape[0], boundary_fekete.shape[1]
  */
   __pyx_t_1 = (__pyx_v_edges->dimensions[0]);
   __pyx_t_2 = (__pyx_v_edges->dimensions[1]);
   __pyx_v_edges_rows = __pyx_t_1;
   __pyx_v_edges_cols = __pyx_t_2;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":256
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":270
  * 	points_rows, points_cols = points.shape[0], points.shape[1]
  * 	edges_rows, edges_cols = edges.shape[0], edges.shape[1]
  * 	faces_rows, faces_cols = faces.shape[0], faces.shape[1]             # <<<<<<<<<<<<<<
- * 
- * 	cdef Integer fekete_rows, fekete_cols
+ * 	fekete_rows, fekete_cols = boundary_fekete.shape[0], boundary_fekete.shape[1]
+ * 	criteria_rows, criteria_cols = criteria.shape[0], criteria.shape[1]
  */
   __pyx_t_2 = (__pyx_v_faces->dimensions[0]);
   __pyx_t_1 = (__pyx_v_faces->dimensions[1]);
   __pyx_v_faces_rows = __pyx_t_2;
   __pyx_v_faces_cols = __pyx_t_1;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":259
- * 
- * 	cdef Integer fekete_rows, fekete_cols
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":271
+ * 	edges_rows, edges_cols = edges.shape[0], edges.shape[1]
+ * 	faces_rows, faces_cols = faces.shape[0], faces.shape[1]
  * 	fekete_rows, fekete_cols = boundary_fekete.shape[0], boundary_fekete.shape[1]             # <<<<<<<<<<<<<<
- * 
+ * 	criteria_rows, criteria_cols = criteria.shape[0], criteria.shape[1]
  * 
  */
   __pyx_t_1 = (__pyx_v_boundary_fekete->dimensions[0]);
@@ -5607,190 +5867,212 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   __pyx_v_fekete_rows = __pyx_t_1;
   __pyx_v_fekete_cols = __pyx_t_2;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":268
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":272
+ * 	faces_rows, faces_cols = faces.shape[0], faces.shape[1]
+ * 	fekete_rows, fekete_cols = boundary_fekete.shape[0], boundary_fekete.shape[1]
+ * 	criteria_rows, criteria_cols = criteria.shape[0], criteria.shape[1]             # <<<<<<<<<<<<<<
+ * 
+ * 	# AT THE MOMENT THE ARRAYS ARE DEEPLY COPIED FROM CPP TO PYTHON. TO AVOID THIS THE OBJECTS HAVE TO BE
+ */
+  __pyx_t_2 = (__pyx_v_criteria->dimensions[0]);
+  __pyx_t_1 = (__pyx_v_criteria->dimensions[1]);
+  __pyx_v_criteria_rows = __pyx_t_2;
+  __pyx_v_criteria_cols = __pyx_t_1;
+
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":280
  * 	cdef PassToPython struct_to_python
  * 	# CALL CPP ROUTINE
- * 	struct_to_python = PyCppInterface (<const char*>iges_filename, scale, &points[0,0], points_rows, points_cols, &elements[0,0],             # <<<<<<<<<<<<<<
- * 		elements_rows, elements_cols,&edges[0,0], edges_rows, edges_cols, &faces[0,0], faces_rows, faces_cols,
- * 		condition, &boundary_fekete[0,0], fekete_rows, fekete_cols,<const char*>projection_method)
+ * 	struct_to_python = PyCppInterface (<const char*>iges_filename, scale, &points[0,0], points_rows, points_cols,             # <<<<<<<<<<<<<<
+ * 	 	&elements[0,0], elements_rows, elements_cols,&edges[0,0], edges_rows, edges_cols,
+ * 	 	&faces[0,0], faces_rows, faces_cols, condition, &boundary_fekete[0,0], fekete_rows, fekete_cols,
  */
-  __pyx_t_3 = __Pyx_PyObject_AsString(__pyx_v_iges_filename); if (unlikely((!__pyx_t_3) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 268; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_AsString(__pyx_v_iges_filename); if (unlikely((!__pyx_t_3) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 280; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_4 = 0;
   __pyx_t_5 = 0;
+
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":281
+ * 	# CALL CPP ROUTINE
+ * 	struct_to_python = PyCppInterface (<const char*>iges_filename, scale, &points[0,0], points_rows, points_cols,
+ * 	 	&elements[0,0], elements_rows, elements_cols,&edges[0,0], edges_rows, edges_cols,             # <<<<<<<<<<<<<<
+ * 	 	&faces[0,0], faces_rows, faces_cols, condition, &boundary_fekete[0,0], fekete_rows, fekete_cols,
+ * 	 	&criteria[0,0], criteria_rows, criteria_cols, <const char*>projection_method)
+ */
   __pyx_t_6 = 0;
   __pyx_t_7 = 0;
-
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":269
- * 	# CALL CPP ROUTINE
- * 	struct_to_python = PyCppInterface (<const char*>iges_filename, scale, &points[0,0], points_rows, points_cols, &elements[0,0],
- * 		elements_rows, elements_cols,&edges[0,0], edges_rows, edges_cols, &faces[0,0], faces_rows, faces_cols,             # <<<<<<<<<<<<<<
- * 		condition, &boundary_fekete[0,0], fekete_rows, fekete_cols,<const char*>projection_method)
- * 
- */
   __pyx_t_8 = 0;
   __pyx_t_9 = 0;
+
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":282
+ * 	struct_to_python = PyCppInterface (<const char*>iges_filename, scale, &points[0,0], points_rows, points_cols,
+ * 	 	&elements[0,0], elements_rows, elements_cols,&edges[0,0], edges_rows, edges_cols,
+ * 	 	&faces[0,0], faces_rows, faces_cols, condition, &boundary_fekete[0,0], fekete_rows, fekete_cols,             # <<<<<<<<<<<<<<
+ * 	 	&criteria[0,0], criteria_rows, criteria_cols, <const char*>projection_method)
+ * 
+ */
   __pyx_t_10 = 0;
   __pyx_t_11 = 0;
-
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":270
- * 	struct_to_python = PyCppInterface (<const char*>iges_filename, scale, &points[0,0], points_rows, points_cols, &elements[0,0],
- * 		elements_rows, elements_cols,&edges[0,0], edges_rows, edges_cols, &faces[0,0], faces_rows, faces_cols,
- * 		condition, &boundary_fekete[0,0], fekete_rows, fekete_cols,<const char*>projection_method)             # <<<<<<<<<<<<<<
- * 
- * 
- */
   __pyx_t_12 = 0;
   __pyx_t_13 = 0;
-  __pyx_t_14 = __Pyx_PyObject_AsString(__pyx_v_projection_method); if (unlikely((!__pyx_t_14) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 270; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":268
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":283
+ * 	 	&elements[0,0], elements_rows, elements_cols,&edges[0,0], edges_rows, edges_cols,
+ * 	 	&faces[0,0], faces_rows, faces_cols, condition, &boundary_fekete[0,0], fekete_rows, fekete_cols,
+ * 	 	&criteria[0,0], criteria_rows, criteria_cols, <const char*>projection_method)             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __pyx_t_14 = 0;
+  __pyx_t_15 = 0;
+  __pyx_t_16 = __Pyx_PyObject_AsString(__pyx_v_projection_method); if (unlikely((!__pyx_t_16) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":280
  * 	cdef PassToPython struct_to_python
  * 	# CALL CPP ROUTINE
- * 	struct_to_python = PyCppInterface (<const char*>iges_filename, scale, &points[0,0], points_rows, points_cols, &elements[0,0],             # <<<<<<<<<<<<<<
- * 		elements_rows, elements_cols,&edges[0,0], edges_rows, edges_cols, &faces[0,0], faces_rows, faces_cols,
- * 		condition, &boundary_fekete[0,0], fekete_rows, fekete_cols,<const char*>projection_method)
+ * 	struct_to_python = PyCppInterface (<const char*>iges_filename, scale, &points[0,0], points_rows, points_cols,             # <<<<<<<<<<<<<<
+ * 	 	&elements[0,0], elements_rows, elements_cols,&edges[0,0], edges_rows, edges_cols,
+ * 	 	&faces[0,0], faces_rows, faces_cols, condition, &boundary_fekete[0,0], fekete_rows, fekete_cols,
  */
-  __pyx_v_struct_to_python = PyCppInterface(((char const *)__pyx_t_3), __pyx_v_scale, (&(*__Pyx_BufPtrCContig2d(__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real *, __pyx_pybuffernd_points.rcbuffer->pybuffer.buf, __pyx_t_4, __pyx_pybuffernd_points.diminfo[0].strides, __pyx_t_5, __pyx_pybuffernd_points.diminfo[1].strides))), __pyx_v_points_rows, __pyx_v_points_cols, (&(*__Pyx_BufPtrCContig2d(__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger *, __pyx_pybuffernd_elements.rcbuffer->pybuffer.buf, __pyx_t_6, __pyx_pybuffernd_elements.diminfo[0].strides, __pyx_t_7, __pyx_pybuffernd_elements.diminfo[1].strides))), __pyx_v_elements_rows, __pyx_v_elements_cols, (&(*__Pyx_BufPtrCContig2d(__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger *, __pyx_pybuffernd_edges.rcbuffer->pybuffer.buf, __pyx_t_8, __pyx_pybuffernd_edges.diminfo[0].strides, __pyx_t_9, __pyx_pybuffernd_edges.diminfo[1].strides))), __pyx_v_edges_rows, __pyx_v_edges_cols, (&(*__Pyx_BufPtrCContig2d(__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger *, __pyx_pybuffernd_faces.rcbuffer->pybuffer.buf, __pyx_t_10, __pyx_pybuffernd_faces.diminfo[0].strides, __pyx_t_11, __pyx_pybuffernd_faces.diminfo[1].strides))), __pyx_v_faces_rows, __pyx_v_faces_cols, __pyx_v_condition, (&(*__Pyx_BufPtrCContig2d(__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real *, __pyx_pybuffernd_boundary_fekete.rcbuffer->pybuffer.buf, __pyx_t_12, __pyx_pybuffernd_boundary_fekete.diminfo[0].strides, __pyx_t_13, __pyx_pybuffernd_boundary_fekete.diminfo[1].strides))), __pyx_v_fekete_rows, __pyx_v_fekete_cols, ((char const *)__pyx_t_14));
+  __pyx_v_struct_to_python = PyCppInterface(((char const *)__pyx_t_3), __pyx_v_scale, (&(*__Pyx_BufPtrCContig2d(__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real *, __pyx_pybuffernd_points.rcbuffer->pybuffer.buf, __pyx_t_4, __pyx_pybuffernd_points.diminfo[0].strides, __pyx_t_5, __pyx_pybuffernd_points.diminfo[1].strides))), __pyx_v_points_rows, __pyx_v_points_cols, (&(*__Pyx_BufPtrCContig2d(__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger *, __pyx_pybuffernd_elements.rcbuffer->pybuffer.buf, __pyx_t_6, __pyx_pybuffernd_elements.diminfo[0].strides, __pyx_t_7, __pyx_pybuffernd_elements.diminfo[1].strides))), __pyx_v_elements_rows, __pyx_v_elements_cols, (&(*__Pyx_BufPtrCContig2d(__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger *, __pyx_pybuffernd_edges.rcbuffer->pybuffer.buf, __pyx_t_8, __pyx_pybuffernd_edges.diminfo[0].strides, __pyx_t_9, __pyx_pybuffernd_edges.diminfo[1].strides))), __pyx_v_edges_rows, __pyx_v_edges_cols, (&(*__Pyx_BufPtrCContig2d(__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger *, __pyx_pybuffernd_faces.rcbuffer->pybuffer.buf, __pyx_t_10, __pyx_pybuffernd_faces.diminfo[0].strides, __pyx_t_11, __pyx_pybuffernd_faces.diminfo[1].strides))), __pyx_v_faces_rows, __pyx_v_faces_cols, __pyx_v_condition, (&(*__Pyx_BufPtrCContig2d(__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real *, __pyx_pybuffernd_boundary_fekete.rcbuffer->pybuffer.buf, __pyx_t_12, __pyx_pybuffernd_boundary_fekete.diminfo[0].strides, __pyx_t_13, __pyx_pybuffernd_boundary_fekete.diminfo[1].strides))), __pyx_v_fekete_rows, __pyx_v_fekete_cols, (&(*__Pyx_BufPtrCContig2d(__pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger *, __pyx_pybuffernd_criteria.rcbuffer->pybuffer.buf, __pyx_t_14, __pyx_pybuffernd_criteria.diminfo[0].strides, __pyx_t_15, __pyx_pybuffernd_criteria.diminfo[1].strides))), __pyx_v_criteria_rows, __pyx_v_criteria_cols, ((char const *)__pyx_t_16));
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":273
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":286
  * 
  * 
  * 	cdef np.ndarray nodes_dir = np.zeros((struct_to_python.nodes_dir_size,1),dtype=np.int64)             # <<<<<<<<<<<<<<
- * 	cdef Integer i
+ * 
  * 	for i in range(struct_to_python.nodes_dir_size):
  */
-  __pyx_t_15 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 273; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_15);
-  __pyx_t_16 = __Pyx_PyObject_GetAttrStr(__pyx_t_15, __pyx_n_s_zeros); if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 273; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_16);
-  __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-  __pyx_t_15 = __Pyx_PyInt_From_npy_int64(__pyx_v_struct_to_python.nodes_dir_size); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 273; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_15);
-  __pyx_t_17 = PyTuple_New(2); if (unlikely(!__pyx_t_17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 273; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_17 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 286; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_17);
-  PyTuple_SET_ITEM(__pyx_t_17, 0, __pyx_t_15);
-  __Pyx_GIVEREF(__pyx_t_15);
-  __Pyx_INCREF(__pyx_int_1);
-  PyTuple_SET_ITEM(__pyx_t_17, 1, __pyx_int_1);
-  __Pyx_GIVEREF(__pyx_int_1);
-  __pyx_t_15 = 0;
-  __pyx_t_15 = PyTuple_New(1); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 273; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_15);
-  PyTuple_SET_ITEM(__pyx_t_15, 0, __pyx_t_17);
-  __Pyx_GIVEREF(__pyx_t_17);
-  __pyx_t_17 = 0;
-  __pyx_t_17 = PyDict_New(); if (unlikely(!__pyx_t_17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 273; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_17);
-  __pyx_t_18 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_18)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 273; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_18 = __Pyx_PyObject_GetAttrStr(__pyx_t_17, __pyx_n_s_zeros); if (unlikely(!__pyx_t_18)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 286; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_18);
-  __pyx_t_19 = __Pyx_PyObject_GetAttrStr(__pyx_t_18, __pyx_n_s_int64); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 273; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_19);
-  __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
-  if (PyDict_SetItem(__pyx_t_17, __pyx_n_s_dtype, __pyx_t_19) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 273; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
-  __pyx_t_19 = __Pyx_PyObject_Call(__pyx_t_16, __pyx_t_15, __pyx_t_17); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 273; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_19);
-  __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-  __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
   __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
-  if (!(likely(((__pyx_t_19) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_19, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 273; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_v_nodes_dir = ((PyArrayObject *)__pyx_t_19);
+  __pyx_t_17 = __Pyx_PyInt_From_npy_int64(__pyx_v_struct_to_python.nodes_dir_size); if (unlikely(!__pyx_t_17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 286; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_17);
+  __pyx_t_19 = PyTuple_New(2); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 286; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_19);
+  PyTuple_SET_ITEM(__pyx_t_19, 0, __pyx_t_17);
+  __Pyx_GIVEREF(__pyx_t_17);
+  __Pyx_INCREF(__pyx_int_1);
+  PyTuple_SET_ITEM(__pyx_t_19, 1, __pyx_int_1);
+  __Pyx_GIVEREF(__pyx_int_1);
+  __pyx_t_17 = 0;
+  __pyx_t_17 = PyTuple_New(1); if (unlikely(!__pyx_t_17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 286; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_17);
+  PyTuple_SET_ITEM(__pyx_t_17, 0, __pyx_t_19);
+  __Pyx_GIVEREF(__pyx_t_19);
   __pyx_t_19 = 0;
+  __pyx_t_19 = PyDict_New(); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 286; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_19);
+  __pyx_t_20 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_20)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 286; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_20);
+  __pyx_t_21 = __Pyx_PyObject_GetAttrStr(__pyx_t_20, __pyx_n_s_int64); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 286; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_21);
+  __Pyx_DECREF(__pyx_t_20); __pyx_t_20 = 0;
+  if (PyDict_SetItem(__pyx_t_19, __pyx_n_s_dtype, __pyx_t_21) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 286; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
+  __pyx_t_21 = __Pyx_PyObject_Call(__pyx_t_18, __pyx_t_17, __pyx_t_19); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 286; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_21);
+  __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
+  __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
+  __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
+  if (!(likely(((__pyx_t_21) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_21, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 286; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_v_nodes_dir = ((PyArrayObject *)__pyx_t_21);
+  __pyx_t_21 = 0;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":275
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":288
  * 	cdef np.ndarray nodes_dir = np.zeros((struct_to_python.nodes_dir_size,1),dtype=np.int64)
- * 	cdef Integer i
+ * 
  * 	for i in range(struct_to_python.nodes_dir_size):             # <<<<<<<<<<<<<<
  * 		nodes_dir[i] = struct_to_python.nodes_dir_out_stl[i]
  * 	cdef np.ndarray displacements_BC = np.zeros((points_cols*struct_to_python.nodes_dir_size,1),dtype=np.float64)
  */
-  __pyx_t_20 = __pyx_v_struct_to_python.nodes_dir_size;
-  for (__pyx_t_21 = 0; __pyx_t_21 < __pyx_t_20; __pyx_t_21+=1) {
-    __pyx_v_i = __pyx_t_21;
+  __pyx_t_22 = __pyx_v_struct_to_python.nodes_dir_size;
+  for (__pyx_t_23 = 0; __pyx_t_23 < __pyx_t_22; __pyx_t_23+=1) {
+    __pyx_v_i = __pyx_t_23;
 
-    /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":276
- * 	cdef Integer i
+    /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":289
+ * 
  * 	for i in range(struct_to_python.nodes_dir_size):
  * 		nodes_dir[i] = struct_to_python.nodes_dir_out_stl[i]             # <<<<<<<<<<<<<<
  * 	cdef np.ndarray displacements_BC = np.zeros((points_cols*struct_to_python.nodes_dir_size,1),dtype=np.float64)
  * 	for i in range(points_cols*struct_to_python.nodes_dir_size):
  */
-    __pyx_t_19 = __Pyx_PyInt_From_npy_int64((__pyx_v_struct_to_python.nodes_dir_out_stl[__pyx_v_i])); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 276; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GOTREF(__pyx_t_19);
-    if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_nodes_dir), __pyx_v_i, __pyx_t_19, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer, 1, __Pyx_PyInt_From_npy_int64, 0, 0, 0) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 276; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
+    __pyx_t_21 = __Pyx_PyInt_From_npy_int64((__pyx_v_struct_to_python.nodes_dir_out_stl[__pyx_v_i])); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 289; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_21);
+    if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_nodes_dir), __pyx_v_i, __pyx_t_21, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer, 1, __Pyx_PyInt_From_npy_int64, 0, 0, 0) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 289; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
   }
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":277
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":290
  * 	for i in range(struct_to_python.nodes_dir_size):
  * 		nodes_dir[i] = struct_to_python.nodes_dir_out_stl[i]
  * 	cdef np.ndarray displacements_BC = np.zeros((points_cols*struct_to_python.nodes_dir_size,1),dtype=np.float64)             # <<<<<<<<<<<<<<
  * 	for i in range(points_cols*struct_to_python.nodes_dir_size):
  * 		displacements_BC[i] = struct_to_python.displacement_BC_stl[i]
  */
-  __pyx_t_19 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_21 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 290; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_21);
+  __pyx_t_19 = __Pyx_PyObject_GetAttrStr(__pyx_t_21, __pyx_n_s_zeros); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 290; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_19);
-  __pyx_t_17 = __Pyx_PyObject_GetAttrStr(__pyx_t_19, __pyx_n_s_zeros); if (unlikely(!__pyx_t_17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
+  __pyx_t_21 = __Pyx_PyInt_From_npy_int64((__pyx_v_points_cols * __pyx_v_struct_to_python.nodes_dir_size)); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 290; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_21);
+  __pyx_t_17 = PyTuple_New(2); if (unlikely(!__pyx_t_17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 290; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_17);
-  __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
-  __pyx_t_19 = __Pyx_PyInt_From_npy_int64((__pyx_v_points_cols * __pyx_v_struct_to_python.nodes_dir_size)); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_19);
-  __pyx_t_15 = PyTuple_New(2); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_15);
-  PyTuple_SET_ITEM(__pyx_t_15, 0, __pyx_t_19);
-  __Pyx_GIVEREF(__pyx_t_19);
+  PyTuple_SET_ITEM(__pyx_t_17, 0, __pyx_t_21);
+  __Pyx_GIVEREF(__pyx_t_21);
   __Pyx_INCREF(__pyx_int_1);
-  PyTuple_SET_ITEM(__pyx_t_15, 1, __pyx_int_1);
+  PyTuple_SET_ITEM(__pyx_t_17, 1, __pyx_int_1);
   __Pyx_GIVEREF(__pyx_int_1);
-  __pyx_t_19 = 0;
-  __pyx_t_19 = PyTuple_New(1); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_19);
-  PyTuple_SET_ITEM(__pyx_t_19, 0, __pyx_t_15);
-  __Pyx_GIVEREF(__pyx_t_15);
-  __pyx_t_15 = 0;
-  __pyx_t_15 = PyDict_New(); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_15);
-  __pyx_t_16 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_16);
-  __pyx_t_18 = __Pyx_PyObject_GetAttrStr(__pyx_t_16, __pyx_n_s_float64); if (unlikely(!__pyx_t_18)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_21 = 0;
+  __pyx_t_21 = PyTuple_New(1); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 290; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_21);
+  PyTuple_SET_ITEM(__pyx_t_21, 0, __pyx_t_17);
+  __Pyx_GIVEREF(__pyx_t_17);
+  __pyx_t_17 = 0;
+  __pyx_t_17 = PyDict_New(); if (unlikely(!__pyx_t_17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 290; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_17);
+  __pyx_t_18 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_18)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 290; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_18);
-  __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-  if (PyDict_SetItem(__pyx_t_15, __pyx_n_s_dtype, __pyx_t_18) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_20 = __Pyx_PyObject_GetAttrStr(__pyx_t_18, __pyx_n_s_float64); if (unlikely(!__pyx_t_20)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 290; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_20);
   __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
-  __pyx_t_18 = __Pyx_PyObject_Call(__pyx_t_17, __pyx_t_19, __pyx_t_15); if (unlikely(!__pyx_t_18)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_18);
-  __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
+  if (PyDict_SetItem(__pyx_t_17, __pyx_n_s_dtype, __pyx_t_20) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 290; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_20); __pyx_t_20 = 0;
+  __pyx_t_20 = __Pyx_PyObject_Call(__pyx_t_19, __pyx_t_21, __pyx_t_17); if (unlikely(!__pyx_t_20)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 290; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_20);
   __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
-  __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-  if (!(likely(((__pyx_t_18) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_18, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_v_displacements_BC = ((PyArrayObject *)__pyx_t_18);
-  __pyx_t_18 = 0;
+  __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
+  __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
+  if (!(likely(((__pyx_t_20) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_20, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 290; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_v_displacements_BC = ((PyArrayObject *)__pyx_t_20);
+  __pyx_t_20 = 0;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":278
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":291
  * 		nodes_dir[i] = struct_to_python.nodes_dir_out_stl[i]
  * 	cdef np.ndarray displacements_BC = np.zeros((points_cols*struct_to_python.nodes_dir_size,1),dtype=np.float64)
  * 	for i in range(points_cols*struct_to_python.nodes_dir_size):             # <<<<<<<<<<<<<<
  * 		displacements_BC[i] = struct_to_python.displacement_BC_stl[i]
  * 
  */
-  __pyx_t_20 = (__pyx_v_points_cols * __pyx_v_struct_to_python.nodes_dir_size);
-  for (__pyx_t_21 = 0; __pyx_t_21 < __pyx_t_20; __pyx_t_21+=1) {
-    __pyx_v_i = __pyx_t_21;
+  __pyx_t_22 = (__pyx_v_points_cols * __pyx_v_struct_to_python.nodes_dir_size);
+  for (__pyx_t_23 = 0; __pyx_t_23 < __pyx_t_22; __pyx_t_23+=1) {
+    __pyx_v_i = __pyx_t_23;
 
-    /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":279
+    /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":292
  * 	cdef np.ndarray displacements_BC = np.zeros((points_cols*struct_to_python.nodes_dir_size,1),dtype=np.float64)
  * 	for i in range(points_cols*struct_to_python.nodes_dir_size):
  * 		displacements_BC[i] = struct_to_python.displacement_BC_stl[i]             # <<<<<<<<<<<<<<
  * 
  * 
  */
-    __pyx_t_18 = PyFloat_FromDouble((__pyx_v_struct_to_python.displacement_BC_stl[__pyx_v_i])); if (unlikely(!__pyx_t_18)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GOTREF(__pyx_t_18);
-    if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_displacements_BC), __pyx_v_i, __pyx_t_18, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer, 1, __Pyx_PyInt_From_npy_int64, 0, 0, 0) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
+    __pyx_t_20 = PyFloat_FromDouble((__pyx_v_struct_to_python.displacement_BC_stl[__pyx_v_i])); if (unlikely(!__pyx_t_20)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 292; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_20);
+    if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_displacements_BC), __pyx_v_i, __pyx_t_20, __pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Integer, 1, __Pyx_PyInt_From_npy_int64, 0, 0, 0) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 292; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_20); __pyx_t_20 = 0;
   }
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":282
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":295
  * 
  * 
  * 	return nodes_dir, displacements_BC.reshape(struct_to_python.nodes_dir_size,points_cols)             # <<<<<<<<<<<<<<
@@ -5798,52 +6080,52 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_15 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_displacements_BC), __pyx_n_s_reshape); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 282; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_15);
-  __pyx_t_19 = __Pyx_PyInt_From_npy_int64(__pyx_v_struct_to_python.nodes_dir_size); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 282; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_19);
-  __pyx_t_17 = __Pyx_PyInt_From_npy_int64(__pyx_v_points_cols); if (unlikely(!__pyx_t_17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 282; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_17 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_displacements_BC), __pyx_n_s_reshape); if (unlikely(!__pyx_t_17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 295; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_17);
-  __pyx_t_16 = NULL;
-  __pyx_t_22 = 0;
-  if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_15))) {
-    __pyx_t_16 = PyMethod_GET_SELF(__pyx_t_15);
-    if (likely(__pyx_t_16)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_15);
-      __Pyx_INCREF(__pyx_t_16);
+  __pyx_t_21 = __Pyx_PyInt_From_npy_int64(__pyx_v_struct_to_python.nodes_dir_size); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 295; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_21);
+  __pyx_t_19 = __Pyx_PyInt_From_npy_int64(__pyx_v_points_cols); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 295; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_19);
+  __pyx_t_18 = NULL;
+  __pyx_t_24 = 0;
+  if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_17))) {
+    __pyx_t_18 = PyMethod_GET_SELF(__pyx_t_17);
+    if (likely(__pyx_t_18)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_17);
+      __Pyx_INCREF(__pyx_t_18);
       __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_15, function);
-      __pyx_t_22 = 1;
+      __Pyx_DECREF_SET(__pyx_t_17, function);
+      __pyx_t_24 = 1;
     }
   }
-  __pyx_t_23 = PyTuple_New(2+__pyx_t_22); if (unlikely(!__pyx_t_23)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 282; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_23);
-  if (__pyx_t_16) {
-    PyTuple_SET_ITEM(__pyx_t_23, 0, __pyx_t_16); __Pyx_GIVEREF(__pyx_t_16); __pyx_t_16 = NULL;
+  __pyx_t_25 = PyTuple_New(2+__pyx_t_24); if (unlikely(!__pyx_t_25)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 295; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_25);
+  if (__pyx_t_18) {
+    PyTuple_SET_ITEM(__pyx_t_25, 0, __pyx_t_18); __Pyx_GIVEREF(__pyx_t_18); __pyx_t_18 = NULL;
   }
-  PyTuple_SET_ITEM(__pyx_t_23, 0+__pyx_t_22, __pyx_t_19);
+  PyTuple_SET_ITEM(__pyx_t_25, 0+__pyx_t_24, __pyx_t_21);
+  __Pyx_GIVEREF(__pyx_t_21);
+  PyTuple_SET_ITEM(__pyx_t_25, 1+__pyx_t_24, __pyx_t_19);
   __Pyx_GIVEREF(__pyx_t_19);
-  PyTuple_SET_ITEM(__pyx_t_23, 1+__pyx_t_22, __pyx_t_17);
-  __Pyx_GIVEREF(__pyx_t_17);
+  __pyx_t_21 = 0;
   __pyx_t_19 = 0;
-  __pyx_t_17 = 0;
-  __pyx_t_18 = __Pyx_PyObject_Call(__pyx_t_15, __pyx_t_23, NULL); if (unlikely(!__pyx_t_18)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 282; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_18);
-  __Pyx_DECREF(__pyx_t_23); __pyx_t_23 = 0;
-  __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-  __pyx_t_15 = PyTuple_New(2); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 282; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_15);
+  __pyx_t_20 = __Pyx_PyObject_Call(__pyx_t_17, __pyx_t_25, NULL); if (unlikely(!__pyx_t_20)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 295; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_20);
+  __Pyx_DECREF(__pyx_t_25); __pyx_t_25 = 0;
+  __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
+  __pyx_t_17 = PyTuple_New(2); if (unlikely(!__pyx_t_17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 295; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_17);
   __Pyx_INCREF(((PyObject *)__pyx_v_nodes_dir));
-  PyTuple_SET_ITEM(__pyx_t_15, 0, ((PyObject *)__pyx_v_nodes_dir));
+  PyTuple_SET_ITEM(__pyx_t_17, 0, ((PyObject *)__pyx_v_nodes_dir));
   __Pyx_GIVEREF(((PyObject *)__pyx_v_nodes_dir));
-  PyTuple_SET_ITEM(__pyx_t_15, 1, __pyx_t_18);
-  __Pyx_GIVEREF(__pyx_t_18);
-  __pyx_t_18 = 0;
-  __pyx_r = __pyx_t_15;
-  __pyx_t_15 = 0;
+  PyTuple_SET_ITEM(__pyx_t_17, 1, __pyx_t_20);
+  __Pyx_GIVEREF(__pyx_t_20);
+  __pyx_t_20 = 0;
+  __pyx_r = __pyx_t_17;
+  __pyx_t_17 = 0;
   goto __pyx_L0;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":243
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":253
  * @cython.profile(False)
  * @cython.wraparound(False)
  * def __ComputeDirichletBoundaryConditions__(bytes iges_filename not None, Real scale, np.ndarray[Real, ndim=2, mode="c"] points not None,             # <<<<<<<<<<<<<<
@@ -5853,15 +6135,16 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
 
   /* function exit code */
   __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_15);
-  __Pyx_XDECREF(__pyx_t_16);
   __Pyx_XDECREF(__pyx_t_17);
   __Pyx_XDECREF(__pyx_t_18);
   __Pyx_XDECREF(__pyx_t_19);
-  __Pyx_XDECREF(__pyx_t_23);
+  __Pyx_XDECREF(__pyx_t_20);
+  __Pyx_XDECREF(__pyx_t_21);
+  __Pyx_XDECREF(__pyx_t_25);
   { PyObject *__pyx_type, *__pyx_value, *__pyx_tb;
     __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_boundary_fekete.rcbuffer->pybuffer);
+    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_criteria.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_edges.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_elements.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_faces.rcbuffer->pybuffer);
@@ -5872,6 +6155,7 @@ static PyObject *__pyx_pf_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPlug
   goto __pyx_L2;
   __pyx_L0:;
   __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_boundary_fekete.rcbuffer->pybuffer);
+  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_criteria.rcbuffer->pybuffer);
   __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_edges.rcbuffer->pybuffer);
   __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_elements.rcbuffer->pybuffer);
   __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_faces.rcbuffer->pybuffer);
@@ -18850,7 +19134,7 @@ static void __pyx_tp_dealloc_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCP
     PyObject *etype, *eval, *etb;
     PyErr_Fetch(&etype, &eval, &etb);
     ++Py_REFCNT(o);
-    __pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_57__dealloc__(o);
+    __pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_59__dealloc__(o);
     --Py_REFCNT(o);
     PyErr_Restore(etype, eval, etb);
   }
@@ -18862,30 +19146,31 @@ static PyMethodDef __pyx_methods_4Core_13Supplementary_7cpp_src_11occ_backend_11
   {"Init", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_3Init, METH_VARARGS|METH_KEYWORDS, 0},
   {"SetScale", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_5SetScale, METH_O, 0},
   {"SetCondition", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_7SetCondition, METH_O, 0},
-  {"SetDimension", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_9SetDimension, METH_O, 0},
-  {"SetMeshElementType", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_11SetMeshElementType, METH_O, 0},
-  {"SetMeshElements", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_13SetMeshElements, METH_O, 0},
-  {"SetMeshPoints", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_15SetMeshPoints, METH_O, 0},
-  {"SetMeshEdges", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_17SetMeshEdges, METH_O, 0},
-  {"SetMeshFaces", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_19SetMeshFaces, METH_O, 0},
-  {"ScaleMesh", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_21ScaleMesh, METH_NOARGS, 0},
-  {"GetMeshElementType", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_23GetMeshElementType, METH_NOARGS, 0},
-  {"SetFeketePoints", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_25SetFeketePoints, METH_O, 0},
-  {"ReadIGES", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_27ReadIGES, METH_O, 0},
-  {"GetGeomVertices", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_29GetGeomVertices, METH_NOARGS, 0},
-  {"GetGeomEdges", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_31GetGeomEdges, METH_NOARGS, 0},
-  {"GetGeomFaces", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_33GetGeomFaces, METH_NOARGS, 0},
-  {"GetCurvesParameters", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_35GetCurvesParameters, METH_NOARGS, 0},
-  {"GetCurvesLengths", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_37GetCurvesLengths, METH_NOARGS, 0},
-  {"GetGeomPointsOnCorrespondingEdges", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_39GetGeomPointsOnCorrespondingEdges, METH_NOARGS, 0},
-  {"IdentifyCurvesContainingEdges", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_41IdentifyCurvesContainingEdges, METH_NOARGS, 0},
-  {"ProjectMeshOnCurve", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_43ProjectMeshOnCurve, METH_O, 0},
-  {"ProjectMeshOnSurface", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_45ProjectMeshOnSurface, METH_NOARGS, 0},
-  {"RepairDualProjectedParameters", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_47RepairDualProjectedParameters, METH_NOARGS, 0},
-  {"MeshPointInversionCurve", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_49MeshPointInversionCurve, METH_NOARGS, 0},
-  {"MeshPointInversionSurface", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_51MeshPointInversionSurface, METH_NOARGS, 0},
-  {"GetBoundaryPointsOrder", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_53GetBoundaryPointsOrder, METH_NOARGS, 0},
-  {"GetDirichletData", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_55GetDirichletData, METH_NOARGS, 0},
+  {"SetProjectionCriteria", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_9SetProjectionCriteria, METH_O, 0},
+  {"SetDimension", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_11SetDimension, METH_O, 0},
+  {"SetMeshElementType", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_13SetMeshElementType, METH_O, 0},
+  {"SetMeshElements", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_15SetMeshElements, METH_O, 0},
+  {"SetMeshPoints", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_17SetMeshPoints, METH_O, 0},
+  {"SetMeshEdges", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_19SetMeshEdges, METH_O, 0},
+  {"SetMeshFaces", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_21SetMeshFaces, METH_O, 0},
+  {"ScaleMesh", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_23ScaleMesh, METH_NOARGS, 0},
+  {"GetMeshElementType", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_25GetMeshElementType, METH_NOARGS, 0},
+  {"SetFeketePoints", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_27SetFeketePoints, METH_O, 0},
+  {"ReadIGES", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_29ReadIGES, METH_O, 0},
+  {"GetGeomVertices", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_31GetGeomVertices, METH_NOARGS, 0},
+  {"GetGeomEdges", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_33GetGeomEdges, METH_NOARGS, 0},
+  {"GetGeomFaces", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_35GetGeomFaces, METH_NOARGS, 0},
+  {"GetCurvesParameters", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_37GetCurvesParameters, METH_NOARGS, 0},
+  {"GetCurvesLengths", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_39GetCurvesLengths, METH_NOARGS, 0},
+  {"GetGeomPointsOnCorrespondingEdges", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_41GetGeomPointsOnCorrespondingEdges, METH_NOARGS, 0},
+  {"IdentifyCurvesContainingEdges", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_43IdentifyCurvesContainingEdges, METH_NOARGS, 0},
+  {"ProjectMeshOnCurve", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_45ProjectMeshOnCurve, METH_O, 0},
+  {"ProjectMeshOnSurface", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_47ProjectMeshOnSurface, METH_NOARGS, 0},
+  {"RepairDualProjectedParameters", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_49RepairDualProjectedParameters, METH_NOARGS, 0},
+  {"MeshPointInversionCurve", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_51MeshPointInversionCurve, METH_NOARGS, 0},
+  {"MeshPointInversionSurface", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_53MeshPointInversionSurface, METH_NOARGS, 0},
+  {"GetBoundaryPointsOrder", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_55GetBoundaryPointsOrder, METH_NOARGS, 0},
+  {"GetDirichletData", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_12OCCPluginPy2_57GetDirichletData, METH_NOARGS, 0},
   {0, 0, 0, 0}
 };
 
@@ -18966,6 +19251,8 @@ static PyObject *__pyx_tp_new_4Core_13Supplementary_7cpp_src_11occ_backend_11OCC
   p->edges.memview = NULL;
   p->faces.data = NULL;
   p->faces.memview = NULL;
+  p->projection_criteria.data = NULL;
+  p->projection_criteria.memview = NULL;
   p->boundary_fekete.data = NULL;
   p->boundary_fekete.memview = NULL;
   return o;
@@ -18984,6 +19271,7 @@ static void __pyx_tp_dealloc_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCP
   __PYX_XDEC_MEMVIEW(&p->elements, 1);
   __PYX_XDEC_MEMVIEW(&p->edges, 1);
   __PYX_XDEC_MEMVIEW(&p->faces, 1);
+  __PYX_XDEC_MEMVIEW(&p->projection_criteria, 1);
   __PYX_XDEC_MEMVIEW(&p->boundary_fekete, 1);
   (*Py_TYPE(o)->tp_free)(o);
 }
@@ -18996,7 +19284,8 @@ static PyMethodDef __pyx_methods_4Core_13Supplementary_7cpp_src_11occ_backend_11
   {"SetCondition", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_11SetCondition, METH_O, 0},
   {"SetBoundaryFeketePoints", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_13SetBoundaryFeketePoints, METH_O, 0},
   {"SetProjectionMethod", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_15SetProjectionMethod, METH_O, 0},
-  {"ComputeDirichletBoundaryConditions", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_17ComputeDirichletBoundaryConditions, METH_NOARGS, 0},
+  {"SetProjectionCriteria", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_17SetProjectionCriteria, METH_O, 0},
+  {"ComputeDirichletBoundaryConditions", (PyCFunction)__pyx_pw_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_11OCCPluginPy_19ComputeDirichletBoundaryConditions, METH_NOARGS, 0},
   {0, 0, 0, 0}
 };
 
@@ -19768,6 +20057,9 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_condition, __pyx_k_condition, sizeof(__pyx_k_condition), 0, 0, 1, 1},
   {&__pyx_kp_s_contiguous_and_direct, __pyx_k_contiguous_and_direct, sizeof(__pyx_k_contiguous_and_direct), 0, 0, 1, 0},
   {&__pyx_kp_s_contiguous_and_indirect, __pyx_k_contiguous_and_indirect, sizeof(__pyx_k_contiguous_and_indirect), 0, 0, 1, 0},
+  {&__pyx_n_s_criteria, __pyx_k_criteria, sizeof(__pyx_k_criteria), 0, 0, 1, 1},
+  {&__pyx_n_s_criteria_cols, __pyx_k_criteria_cols, sizeof(__pyx_k_criteria_cols), 0, 0, 1, 1},
+  {&__pyx_n_s_criteria_rows, __pyx_k_criteria_rows, sizeof(__pyx_k_criteria_rows), 0, 0, 1, 1},
   {&__pyx_n_s_ctypes, __pyx_k_ctypes, sizeof(__pyx_k_ctypes), 0, 0, 1, 1},
   {&__pyx_n_s_dimension, __pyx_k_dimension, sizeof(__pyx_k_dimension), 0, 0, 1, 1},
   {&__pyx_n_s_displacements_BC, __pyx_k_displacements_BC, sizeof(__pyx_k_displacements_BC), 0, 0, 1, 1},
@@ -19844,7 +20136,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 166; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 171; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_RuntimeError = __Pyx_GetBuiltinName(__pyx_n_s_RuntimeError); if (!__pyx_builtin_RuntimeError) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 802; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 142; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -20063,17 +20355,17 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__18);
   __Pyx_GIVEREF(__pyx_tuple__18);
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":243
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":253
  * @cython.profile(False)
  * @cython.wraparound(False)
  * def __ComputeDirichletBoundaryConditions__(bytes iges_filename not None, Real scale, np.ndarray[Real, ndim=2, mode="c"] points not None,             # <<<<<<<<<<<<<<
  * 	np.ndarray[UInteger, ndim=2, mode="c"] elements not None, np.ndarray[UInteger, ndim=2, mode="c"] edges not None,
  * 	np.ndarray[UInteger, ndim=2, mode="c"] faces not None, Real condition, np.ndarray[Real, ndim=2, mode="c"] boundary_fekete not None,
  */
-  __pyx_tuple__19 = PyTuple_Pack(25, __pyx_n_s_iges_filename, __pyx_n_s_scale, __pyx_n_s_points, __pyx_n_s_elements, __pyx_n_s_edges, __pyx_n_s_faces, __pyx_n_s_condition, __pyx_n_s_boundary_fekete, __pyx_n_s_projection_method, __pyx_n_s_element_rows, __pyx_n_s_points_rows, __pyx_n_s_element_cols, __pyx_n_s_points_cols, __pyx_n_s_edges_rows, __pyx_n_s_edges_cols, __pyx_n_s_faces_rows, __pyx_n_s_faces_cols, __pyx_n_s_elements_rows, __pyx_n_s_elements_cols, __pyx_n_s_fekete_rows, __pyx_n_s_fekete_cols, __pyx_n_s_struct_to_python, __pyx_n_s_nodes_dir, __pyx_n_s_i, __pyx_n_s_displacements_BC); if (unlikely(!__pyx_tuple__19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__19 = PyTuple_Pack(28, __pyx_n_s_iges_filename, __pyx_n_s_scale, __pyx_n_s_points, __pyx_n_s_elements, __pyx_n_s_edges, __pyx_n_s_faces, __pyx_n_s_condition, __pyx_n_s_boundary_fekete, __pyx_n_s_criteria, __pyx_n_s_projection_method, __pyx_n_s_element_rows, __pyx_n_s_points_rows, __pyx_n_s_element_cols, __pyx_n_s_points_cols, __pyx_n_s_edges_rows, __pyx_n_s_edges_cols, __pyx_n_s_faces_rows, __pyx_n_s_faces_cols, __pyx_n_s_criteria_rows, __pyx_n_s_criteria_cols, __pyx_n_s_fekete_rows, __pyx_n_s_fekete_cols, __pyx_n_s_i, __pyx_n_s_elements_rows, __pyx_n_s_elements_cols, __pyx_n_s_struct_to_python, __pyx_n_s_nodes_dir, __pyx_n_s_displacements_BC); if (unlikely(!__pyx_tuple__19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__19);
   __Pyx_GIVEREF(__pyx_tuple__19);
-  __pyx_codeobj__20 = (PyObject*)__Pyx_PyCode_New(9, 0, 25, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__19, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_roman_Dropbox_Python_Core, __pyx_n_s_ComputeDirichletBoundaryCondit, 243, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__20)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__20 = (PyObject*)__Pyx_PyCode_New(10, 0, 28, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__19, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_roman_Dropbox_Python_Core, __pyx_n_s_ComputeDirichletBoundaryCondit, 253, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__20)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
   /* "View.MemoryView":276
  *         return self.name
@@ -20232,13 +20524,13 @@ PyMODINIT_FUNC PyInit_OCCPluginPy(void)
   /*--- Variable export code ---*/
   /*--- Function export code ---*/
   /*--- Type init code ---*/
-  if (PyType_Ready(&__pyx_type_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyType_Ready(&__pyx_type_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 67; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_type_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2.tp_print = 0;
-  if (PyObject_SetAttrString(__pyx_m, "OCCPluginPy2", (PyObject *)&__pyx_type_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyObject_SetAttrString(__pyx_m, "OCCPluginPy2", (PyObject *)&__pyx_type_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 67; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_ptype_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2 = &__pyx_type_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy2;
-  if (PyType_Ready(&__pyx_type_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 181; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyType_Ready(&__pyx_type_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_type_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy.tp_print = 0;
-  if (PyObject_SetAttrString(__pyx_m, "OCCPluginPy", (PyObject *)&__pyx_type_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 181; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyObject_SetAttrString(__pyx_m, "OCCPluginPy", (PyObject *)&__pyx_type_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_ptype_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy = &__pyx_type_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_OCCPluginPy;
   if (PyType_Ready(&__pyx_type___pyx_array) < 0) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 99; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_type___pyx_array.tp_print = 0;
@@ -20308,16 +20600,16 @@ PyMODINIT_FUNC PyInit_OCCPluginPy(void)
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 10; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":243
+  /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":253
  * @cython.profile(False)
  * @cython.wraparound(False)
  * def __ComputeDirichletBoundaryConditions__(bytes iges_filename not None, Real scale, np.ndarray[Real, ndim=2, mode="c"] points not None,             # <<<<<<<<<<<<<<
  * 	np.ndarray[UInteger, ndim=2, mode="c"] elements not None, np.ndarray[UInteger, ndim=2, mode="c"] edges not None,
  * 	np.ndarray[UInteger, ndim=2, mode="c"] faces not None, Real condition, np.ndarray[Real, ndim=2, mode="c"] boundary_fekete not None,
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_1__ComputeDirichletBoundaryConditions__, NULL, __pyx_n_s_Core_Supplementary_cpp_src_occ_b); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_1__ComputeDirichletBoundaryConditions__, NULL, __pyx_n_s_Core_Supplementary_cpp_src_occ_b); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_ComputeDirichletBoundaryCondit, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_ComputeDirichletBoundaryCondit, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "Core/Supplementary/cpp_src/occ_backend/OCCPluginPy.pyx":1
@@ -22477,101 +22769,6 @@ raise_neg_overflow:
     return (npy_uint64) -1;
 }
 
-static CYTHON_INLINE npy_int64 __Pyx_PyInt_As_npy_int64(PyObject *x) {
-    const npy_int64 neg_one = (npy_int64) -1, const_zero = 0;
-    const int is_unsigned = neg_one > const_zero;
-#if PY_MAJOR_VERSION < 3
-    if (likely(PyInt_Check(x))) {
-        if (sizeof(npy_int64) < sizeof(long)) {
-            __PYX_VERIFY_RETURN_INT(npy_int64, long, PyInt_AS_LONG(x))
-        } else {
-            long val = PyInt_AS_LONG(x);
-            if (is_unsigned && unlikely(val < 0)) {
-                goto raise_neg_overflow;
-            }
-            return (npy_int64) val;
-        }
-    } else
-#endif
-    if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
-#if CYTHON_COMPILING_IN_CPYTHON && PY_MAJOR_VERSION >= 3
- #if CYTHON_USE_PYLONG_INTERNALS
-            switch (Py_SIZE(x)) {
-                case  0: return 0;
-                case  1: __PYX_VERIFY_RETURN_INT(npy_int64, digit, ((PyLongObject*)x)->ob_digit[0]);
-            }
- #endif
-#endif
-            if (unlikely(Py_SIZE(x) < 0)) {
-                goto raise_neg_overflow;
-            }
-            if (sizeof(npy_int64) <= sizeof(unsigned long)) {
-                __PYX_VERIFY_RETURN_INT(npy_int64, unsigned long, PyLong_AsUnsignedLong(x))
-            } else if (sizeof(npy_int64) <= sizeof(unsigned long long)) {
-                __PYX_VERIFY_RETURN_INT(npy_int64, unsigned long long, PyLong_AsUnsignedLongLong(x))
-            }
-        } else {
-#if CYTHON_COMPILING_IN_CPYTHON && PY_MAJOR_VERSION >= 3
- #if CYTHON_USE_PYLONG_INTERNALS
-            switch (Py_SIZE(x)) {
-                case  0: return 0;
-                case  1: __PYX_VERIFY_RETURN_INT(npy_int64,  digit, +(((PyLongObject*)x)->ob_digit[0]));
-                case -1: __PYX_VERIFY_RETURN_INT(npy_int64, sdigit, -(sdigit) ((PyLongObject*)x)->ob_digit[0]);
-            }
- #endif
-#endif
-            if (sizeof(npy_int64) <= sizeof(long)) {
-                __PYX_VERIFY_RETURN_INT(npy_int64, long, PyLong_AsLong(x))
-            } else if (sizeof(npy_int64) <= sizeof(long long)) {
-                __PYX_VERIFY_RETURN_INT(npy_int64, long long, PyLong_AsLongLong(x))
-            }
-        }
-        {
-#if CYTHON_COMPILING_IN_PYPY && !defined(_PyLong_AsByteArray)
-            PyErr_SetString(PyExc_RuntimeError,
-                            "_PyLong_AsByteArray() not available in PyPy, cannot convert large numbers");
-#else
-            npy_int64 val;
-            PyObject *v = __Pyx_PyNumber_Int(x);
- #if PY_MAJOR_VERSION < 3
-            if (likely(v) && !PyLong_Check(v)) {
-                PyObject *tmp = v;
-                v = PyNumber_Long(tmp);
-                Py_DECREF(tmp);
-            }
- #endif
-            if (likely(v)) {
-                int one = 1; int is_little = (int)*(unsigned char *)&one;
-                unsigned char *bytes = (unsigned char *)&val;
-                int ret = _PyLong_AsByteArray((PyLongObject *)v,
-                                              bytes, sizeof(val),
-                                              is_little, !is_unsigned);
-                Py_DECREF(v);
-                if (likely(!ret))
-                    return val;
-            }
-#endif
-            return (npy_int64) -1;
-        }
-    } else {
-        npy_int64 val;
-        PyObject *tmp = __Pyx_PyNumber_Int(x);
-        if (!tmp) return (npy_int64) -1;
-        val = __Pyx_PyInt_As_npy_int64(tmp);
-        Py_DECREF(tmp);
-        return val;
-    }
-raise_overflow:
-    PyErr_SetString(PyExc_OverflowError,
-        "value too large to convert to npy_int64");
-    return (npy_int64) -1;
-raise_neg_overflow:
-    PyErr_SetString(PyExc_OverflowError,
-        "can't convert negative value to npy_int64");
-    return (npy_int64) -1;
-}
-
 static int
 __pyx_typeinfo_cmp(__Pyx_TypeInfo *a, __Pyx_TypeInfo *b)
 {
@@ -22813,6 +23010,101 @@ __pyx_fail:
     result.memview = NULL;
     result.data = NULL;
     return result;
+}
+
+static CYTHON_INLINE npy_int64 __Pyx_PyInt_As_npy_int64(PyObject *x) {
+    const npy_int64 neg_one = (npy_int64) -1, const_zero = 0;
+    const int is_unsigned = neg_one > const_zero;
+#if PY_MAJOR_VERSION < 3
+    if (likely(PyInt_Check(x))) {
+        if (sizeof(npy_int64) < sizeof(long)) {
+            __PYX_VERIFY_RETURN_INT(npy_int64, long, PyInt_AS_LONG(x))
+        } else {
+            long val = PyInt_AS_LONG(x);
+            if (is_unsigned && unlikely(val < 0)) {
+                goto raise_neg_overflow;
+            }
+            return (npy_int64) val;
+        }
+    } else
+#endif
+    if (likely(PyLong_Check(x))) {
+        if (is_unsigned) {
+#if CYTHON_COMPILING_IN_CPYTHON && PY_MAJOR_VERSION >= 3
+ #if CYTHON_USE_PYLONG_INTERNALS
+            switch (Py_SIZE(x)) {
+                case  0: return 0;
+                case  1: __PYX_VERIFY_RETURN_INT(npy_int64, digit, ((PyLongObject*)x)->ob_digit[0]);
+            }
+ #endif
+#endif
+            if (unlikely(Py_SIZE(x) < 0)) {
+                goto raise_neg_overflow;
+            }
+            if (sizeof(npy_int64) <= sizeof(unsigned long)) {
+                __PYX_VERIFY_RETURN_INT(npy_int64, unsigned long, PyLong_AsUnsignedLong(x))
+            } else if (sizeof(npy_int64) <= sizeof(unsigned long long)) {
+                __PYX_VERIFY_RETURN_INT(npy_int64, unsigned long long, PyLong_AsUnsignedLongLong(x))
+            }
+        } else {
+#if CYTHON_COMPILING_IN_CPYTHON && PY_MAJOR_VERSION >= 3
+ #if CYTHON_USE_PYLONG_INTERNALS
+            switch (Py_SIZE(x)) {
+                case  0: return 0;
+                case  1: __PYX_VERIFY_RETURN_INT(npy_int64,  digit, +(((PyLongObject*)x)->ob_digit[0]));
+                case -1: __PYX_VERIFY_RETURN_INT(npy_int64, sdigit, -(sdigit) ((PyLongObject*)x)->ob_digit[0]);
+            }
+ #endif
+#endif
+            if (sizeof(npy_int64) <= sizeof(long)) {
+                __PYX_VERIFY_RETURN_INT(npy_int64, long, PyLong_AsLong(x))
+            } else if (sizeof(npy_int64) <= sizeof(long long)) {
+                __PYX_VERIFY_RETURN_INT(npy_int64, long long, PyLong_AsLongLong(x))
+            }
+        }
+        {
+#if CYTHON_COMPILING_IN_PYPY && !defined(_PyLong_AsByteArray)
+            PyErr_SetString(PyExc_RuntimeError,
+                            "_PyLong_AsByteArray() not available in PyPy, cannot convert large numbers");
+#else
+            npy_int64 val;
+            PyObject *v = __Pyx_PyNumber_Int(x);
+ #if PY_MAJOR_VERSION < 3
+            if (likely(v) && !PyLong_Check(v)) {
+                PyObject *tmp = v;
+                v = PyNumber_Long(tmp);
+                Py_DECREF(tmp);
+            }
+ #endif
+            if (likely(v)) {
+                int one = 1; int is_little = (int)*(unsigned char *)&one;
+                unsigned char *bytes = (unsigned char *)&val;
+                int ret = _PyLong_AsByteArray((PyLongObject *)v,
+                                              bytes, sizeof(val),
+                                              is_little, !is_unsigned);
+                Py_DECREF(v);
+                if (likely(!ret))
+                    return val;
+            }
+#endif
+            return (npy_int64) -1;
+        }
+    } else {
+        npy_int64 val;
+        PyObject *tmp = __Pyx_PyNumber_Int(x);
+        if (!tmp) return (npy_int64) -1;
+        val = __Pyx_PyInt_As_npy_int64(tmp);
+        Py_DECREF(tmp);
+        return val;
+    }
+raise_overflow:
+    PyErr_SetString(PyExc_OverflowError,
+        "value too large to convert to npy_int64");
+    return (npy_int64) -1;
+raise_neg_overflow:
+    PyErr_SetString(PyExc_OverflowError,
+        "can't convert negative value to npy_int64");
+    return (npy_int64) -1;
 }
 
 static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real(PyObject *obj) {
@@ -23623,28 +23915,6 @@ raise_neg_overflow:
     return (long) -1;
 }
 
-static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dsds_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger(PyObject *obj) {
-    __Pyx_memviewslice result = { 0, 0, { 0 }, { 0 }, { 0 } };
-    __Pyx_BufFmt_StackElem stack[1];
-    int axes_specs[] = { (__Pyx_MEMVIEW_DIRECT | __Pyx_MEMVIEW_STRIDED), (__Pyx_MEMVIEW_DIRECT | __Pyx_MEMVIEW_STRIDED) };
-    int retcode;
-    if (obj == Py_None) {
-        result.memview = (struct __pyx_memoryview_obj *) Py_None;
-        return result;
-    }
-    retcode = __Pyx_ValidateAndInit_memviewslice(axes_specs, 0,
-                                                 PyBUF_RECORDS, 2,
-                                                 &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, stack,
-                                                 &result, obj);
-    if (unlikely(retcode == -1))
-        goto __pyx_fail;
-    return result;
-__pyx_fail:
-    result.memview = NULL;
-    result.data = NULL;
-    return result;
-}
-
 static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dsds_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real(PyObject *obj) {
     __Pyx_memviewslice result = { 0, 0, { 0 }, { 0 }, { 0 } };
     __Pyx_BufFmt_StackElem stack[1];
@@ -23657,6 +23927,28 @@ static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dsds_n
     retcode = __Pyx_ValidateAndInit_memviewslice(axes_specs, 0,
                                                  PyBUF_RECORDS, 2,
                                                  &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_Real, stack,
+                                                 &result, obj);
+    if (unlikely(retcode == -1))
+        goto __pyx_fail;
+    return result;
+__pyx_fail:
+    result.memview = NULL;
+    result.data = NULL;
+    return result;
+}
+
+static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dsds_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger(PyObject *obj) {
+    __Pyx_memviewslice result = { 0, 0, { 0 }, { 0 }, { 0 } };
+    __Pyx_BufFmt_StackElem stack[1];
+    int axes_specs[] = { (__Pyx_MEMVIEW_DIRECT | __Pyx_MEMVIEW_STRIDED), (__Pyx_MEMVIEW_DIRECT | __Pyx_MEMVIEW_STRIDED) };
+    int retcode;
+    if (obj == Py_None) {
+        result.memview = (struct __pyx_memoryview_obj *) Py_None;
+        return result;
+    }
+    retcode = __Pyx_ValidateAndInit_memviewslice(axes_specs, 0,
+                                                 PyBUF_RECORDS, 2,
+                                                 &__Pyx_TypeInfo_nn___pyx_t_4Core_13Supplementary_7cpp_src_11occ_backend_11OCCPluginPy_UInteger, stack,
                                                  &result, obj);
     if (unlikely(retcode == -1))
         goto __pyx_fail;

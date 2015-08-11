@@ -10,6 +10,8 @@ from Core.QuadratureRules.FeketePointsTri import *
 from Core.Supplementary.Where import *
 from Core.Supplementary.Tensors import itemfreq_py
 from NodeLoopTriNPSP_Cython import NodeLoopTriNPSP_Cython 
+import imp
+# v2 = imp.load_dynamic('whereEQ','/home/roman/Dropbox/zDumps/DumpStudies/fused_where/whereEQ.so')
 
 # import pyximport; pyximport.install()
 # from Core.Supplementary.Where.whereEQ import *
@@ -40,7 +42,9 @@ def NodeLoopTriNPSP_PARMAP_1(i,sorted_repoints,Xs,invX,tol):
 
 def DuplicatesLoopTri(i,reelements,duplicates):
 	return whereEQ(reelements,duplicates[i,1])
+	# return v2.whereEQ(reelements,duplicates[i,1])
 	# return np.where(reelements==duplicates[i,1])
+	# return np.where(reelements.tolist()==duplicates[i,1])
 
 
 def NodeLoopTriNPSP_PARMAP(sorted_repoints,Xs,invX,iSortX,duplicates,Decimals,tol,nCPU):
@@ -313,7 +317,7 @@ def HighOrderMeshTri_UNSTABLE(C,mesh,Decimals=10,Parallel=False,nCPU=1):
 		info = 'tri'
 
 	# print '\npMeshing timing:\n\t\tElement loop 1:\t '+str(telements)+' seconds\n\t\tNode loop:\t\t '+str(tnodes)+\
-	#  ' seconds'+'\n\t\tElement loop 2:\t '+str(telements_2)+' seconds\n\t\tEdge loop:\t\t '+str(tedges)+' seconds\n'
+	 # ' seconds'+'\n\t\tElement loop 2:\t '+str(telements_2)+' seconds\n\t\tEdge loop:\t\t '+str(tedges)+' seconds\n'
 
 	return nmesh
 #---------------------------------------------------------------------------------------------------------------------------------------#
@@ -335,6 +339,8 @@ def NodeLoopTri(inode,reelements,repoints):
 	tol=1.0e-14
 	#--------------------------------------------------------------------------------------------------------------------------------------#
 	# difference =  np.linalg.norm( np.repeat(repoints[inode,:].reshape(1,repoints.shape[1]),inode,axis=0) - repoints[:inode,:],axis=1 )
+	# j = np.where(difference < tol)[0]
+	# difference =  np.linalg.norm( np.repeat(repoints[inode,:].reshape(1,repoints.shape[1]),inode,axis=0) - repoints[:inode,:],axis=1 ).tolist()
 	# j = np.where(difference < tol)[0]
 	#--------------------------------------------------------------------------------------------------------------------------------------#
 

@@ -4,15 +4,17 @@ CONFIG -= app_bundle
 CONFIG -= qt
 CONFIG += c++11
 
-SOURCES += main.cpp \
-    OCCPlugin.cpp \
-    OCCPluginInterface.cpp
+SOURCES += src/main.cpp \
+    src/OCCPlugin.cpp \
+    src/OCCPluginInterface.cpp
 
 QMAKE_CXXFLAGS += -std=c++11 -Wall #-Wno-unused # -O2 #-fopenmp -msse -msse2 -fomit-frame-pointer -fno-strict-aliasing
 
+INCLUDEPATH +=./include/
 INCLUDEPATH +=/home/roman/Dropbox/eigen-devel
 #INCLUDEPATH +=/home/roman/Dropbox/eigen
 INCLUDEPATH +=/usr/local/include/oce/
+
 
 LIBS += -L/usr/local/lib -l:libTKIGES.so.9 -l:libTKXSBase.so.9 -l:libTKBRep.so.9 -l:libTKernel.so.9 -l:libTKTopAlgo.so.9 \
      -l:libTKGeomBase.so.9 -l:libTKMath.so.9 -l:libTKHLR.so.9 -l:libTKG2d.so.9 -l:libTKBool.so.9 -l:libTKG3d.so.9 -l:libTKOffset.so.9 \
@@ -45,10 +47,16 @@ qtcAddDeployment()
 
 HEADERS += \
     EIGEN_INC.hpp \
-    OCCPlugin.hpp \
     AuxFuncs.hpp \
     CNPFuncs.hpp \
     OCC_INC.hpp \
     STL_INC.hpp \
-    OCCPluginInterface.hpp
+    OCCPluginInterface.hpp \
+    include/OCCPlugin.hpp \
+    include/AuxFuncs.hpp \
+    include/CNPFuncs.hpp \
+    include/EIGEN_INC.hpp \
+    include/OCC_INC.hpp \
+    include/OCCPluginInterface.hpp \
+    include/STL_INC.hpp
 

@@ -72,6 +72,8 @@ def PreProcess(MainData,Pr,pwd):
 
 	if MainData.C>0:
 		mesh.GetHighOrderMesh(MainData.C,Parallel=MainData.Parallel,nCPU=MainData.numCPU)
+	else:
+		mesh.ChangeType()
 
 	############################################################################
 	# t1=time()
@@ -80,7 +82,6 @@ def PreProcess(MainData,Pr,pwd):
 
 	# index_sort_x = np.argsort(nmesh.points[:,0])
 	# sorted_repoints = nmesh.points[index_sort_x,:]
-
 	# ##############################################################################
 	# np.savetxt('/home/roman/Dropbox/time_3.dat',np.array([time()-t_mesh, mesh.points.shape[0]]))
 	# sys.exit("STOPPED")

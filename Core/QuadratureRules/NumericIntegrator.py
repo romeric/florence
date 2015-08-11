@@ -1,6 +1,6 @@
 import numpy as np
 import warnings
-from Core.JacobiPolynomials.JacobiPolynomials import JacobiPolynomials, DiffJacobiPolynomials
+from Core.InterpolationFunctions.JacobiPolynomials.JacobiPolynomials import JacobiPolynomials, DiffJacobiPolynomials
 
 
 def GaussQuadrature(N,a=-1,b=1):

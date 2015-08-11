@@ -1,6 +1,6 @@
 import numpy as np 
 from Core.QuadratureRules.FeketePointsTet import *
-from Core.JacobiPolynomials.NormalisedJacobi import *
+from Core.InterpolationFunctions.JacobiPolynomials.NormalisedJacobi import *
 from Core.InterpolationFunctions.DegenerateMappings import MapXiEtaZeta2RST
 
 def hpBases(C,xi,eta,zeta,Transform=0,EvalOpt=0):

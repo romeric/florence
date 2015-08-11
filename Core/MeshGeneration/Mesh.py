@@ -277,10 +277,10 @@ class Mesh(object):
 
 		mesh = ReadMesh(*args,**kwargs)
 		self.points = mesh.points
-		self.elements = mesh.elements.astype(np.uint64)
-		self.edges = mesh.edges.astype(np.uint64)
+		self.elements = mesh.elements.astype(np.int64)
+		self.edges = mesh.edges.astype(np.int64)
 		if isinstance(self.faces,np.ndarray):
-			self.faces = mesh.faces.astype(np.uint64)
+			self.faces = mesh.faces.astype(np.int64)
 		self.nelem = mesh.nelem
 		self.element_type = mesh.info 
 
@@ -709,3 +709,9 @@ class Mesh(object):
 			plt.triplot(self.points[:,0],self.points[:,1],self.elements[:,:3])
 			plt.axis('equal')
 			plt.show()
+
+	def ChangeType(self):
+		self.elements = mesh.elements.astype(np.uint64)
+		self.edges = mesh.edges.astype(np.uint64)
+		if isinstance(self.faces,np.ndarray):
+			self.faces = mesh.faces.astype(np.uint64)
