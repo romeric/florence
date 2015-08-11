@@ -11,6 +11,25 @@ using namespace std;
 namespace cnp = cpp_numpy;
 
 
+Eigen::MatrixUI ComputeCriteria(Eigen::MatrixUI &edges, Eigen::MatrixR &points, Real condition)
+{
+   Eigen::MatrixUI criteria = Eigen::MatrixUI::Zero(edges.rows(),edges.cols());
+   for (auto i=0; i<edges.rows();++i)
+   {
+       Real x1 = points(edges(i,0),0);
+       Real y1 = points(edges(i,0),1);
+       Real x2 = points(edges(i,1),0);
+       Real y2 = points(edges(i,1),1);
+
+       if ((sqrt(x1*x1+y1*y1)<condition) && ( sqrt(x2*x2+y2*y2)< condition))
+       {
+           criteria(i) = 1;
+       }
+   }
+  return criteria;
+}
+
+
 
 int main()
 {
@@ -103,6 +122,7 @@ int main()
     Eigen::MatrixUI edges = OCCPlugin::ReadI(edge_file,',');
     Eigen::MatrixUI faces = Eigen::MatrixUI::Zero(1,4);
 //    Eigen::MatrixI unique_edges = Read(unique_edge_file);
+
 //    Real scale = 1000.;
 //    Real condition = 2000.;
 //    Real condition = 1000.;
@@ -138,6 +158,7 @@ int main()
 //    cout << points.block(0,0,100,2) << endl;
 //    print(points.maxCoeff());
 
+    Eigen::MatrixUI criteria = ComputeCriteria(edges,points,condition);
 
 //    const char *projection_method = "Newton";
     const char *projection_method = "Bisection";
@@ -151,6 +172,7 @@ int main()
                            edges.data(), edges.rows(), edges.cols(),
                            faces.data(),  faces.rows(),  faces.cols(),condition,
                            boundary_fekete.data(), boundary_fekete.rows(), boundary_fekete.cols(),
+                           criteria.data(), criteria.rows(), criteria.cols(),
                            projection_method);
 
 //    print(struct_to_python.displacement_BC_stl);

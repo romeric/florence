@@ -56,6 +56,7 @@ public:
     std::vector<Handle_Geom_BSplineCurve> geometry_curves_bspline;
     std::vector<Handle_Geom_BSplineSurface> geometry_surfaces_bspline;
     Real condition;
+    Eigen::MatrixUI projection_criteria;
     Real scale;
     Eigen::MatrixR displacements_BC;
     Eigen::MatrixI index_nodes;
@@ -72,6 +73,7 @@ public:
     void Init(std::string &element_type, const UInteger &ndim);
     void SetScale(Real &scale);
     void SetCondition(Real &condition);
+    void SetProjectionCriteria(UInteger *criteria, const Integer &rows, const Integer &cols);
     void SetDimension(const UInteger &dim);
     void SetMeshElementType(std::string &type);
     void SetMeshElements(UInteger *arr, const Integer &rows, const Integer &cols);

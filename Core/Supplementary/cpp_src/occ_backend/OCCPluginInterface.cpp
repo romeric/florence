@@ -7,7 +7,8 @@ PassToPython  PyCppInterface(const char* iges_filename, Real scale, Real *points
                       UInteger *elements_array, const Integer element_rows, const Integer element_cols,
                       UInteger *edges_array, const Integer &edges_rows, const Integer &edges_cols,
                       UInteger *faces_array, const Integer &faces_rows, const Integer &faces_cols, Real condition,
-                      Real *boundary_fekete, const Integer fekete_rows, const Integer fekete_cols, const char* projection_method)
+                      Real *boundary_fekete, const Integer fekete_rows, const Integer fekete_cols,
+                      UInteger *criteria, const Integer criteria_rows, const Integer criteria_cols, const char *projection_method)
 {
     //Convert to Eigen matrix
 //    Eigen::MatrixR points_eigen_matrix = Eigen::Map<Eigen::MatrixR>(points_array,points_rows,points_cols);
@@ -40,6 +41,7 @@ PassToPython  PyCppInterface(const char* iges_filename, Real scale, Real *points
     occ_interface.SetMeshFaces(faces_array,faces_rows,faces_cols);
     occ_interface.SetScale(scale);
     occ_interface.SetCondition(condition);
+    occ_interface.SetProjectionCriteria(criteria,criteria_rows,criteria_cols);
     occ_interface.ScaleMesh();
 
     occ_interface.InferInterpolationPolynomialDegree();

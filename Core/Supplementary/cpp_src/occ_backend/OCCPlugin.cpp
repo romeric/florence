@@ -23,6 +23,11 @@ void OCCPlugin::SetCondition(Real &condition)
     this->condition = condition;
 }
 
+void OCCPlugin::SetProjectionCriteria(UInteger *criteria, const Integer &rows, const Integer &cols)
+{
+    this->projection_criteria = Eigen::Map<Eigen::MatrixUI>(criteria,rows,cols);
+}
+
 void OCCPlugin::SetDimension(const UInteger &dim)
 {
     this->ndim=dim;
@@ -321,17 +326,17 @@ Eigen::MatrixUI OCCPlugin::ReadI(std::string &filename, char delim)
     datafile.close();
 
 
-    const int rows = arr.size();
-    const int cols = (split(arr[0], delim)).size();
+    const Integer rows = arr.size();
+    const Integer cols = (split(arr[0], delim)).size();
 
 
     Eigen::MatrixUI out_arr = Eigen::MatrixUI::Zero(rows,cols);
 
-    for(int i=0 ; i<rows;i++)
+    for(Integer i=0 ; i<rows;i++)
     {
         std::vector<std::string> elems;
         elems = split(arr[i], delim);
-        for(int j=0 ; j<cols;j++)
+        for(Integer j=0 ; j<cols;j++)
         {
             out_arr(i,j) = std::atof(elems[j].c_str());
         }
@@ -339,7 +344,7 @@ Eigen::MatrixUI OCCPlugin::ReadI(std::string &filename, char delim)
 
     // CHECK IF LAST LINE IS READ CORRECTLY
     bool duplicate_rows = Standard_False;
-    for (int j=0; j<cols; ++j)
+    for (Integer j=0; j<cols; ++j)
     {
         if ( out_arr(out_arr.rows()-2,j)==out_arr(out_arr.rows()-1,j) )
         {
@@ -382,13 +387,13 @@ Eigen::MatrixR OCCPlugin::ReadR(std::string &filename, char delim)
     datafile.close();
 
 
-    const int rows = arr.size();
-    const int cols = (split(arr[0], delim)).size();
+    const Integer rows = arr.size();
+    const Integer cols = (split(arr[0], delim)).size();
 
 
     Eigen::MatrixR out_arr = Eigen::MatrixR::Zero(rows,cols);
 
-    for(int i=0 ; i<rows;i++)
+    for(Integer i=0 ; i<rows;i++)
     {
         std::vector<std::string> elems;
         elems = split(arr[i], delim);
@@ -400,7 +405,7 @@ Eigen::MatrixR OCCPlugin::ReadR(std::string &filename, char delim)
 
     // CHECK IF LAST LINE IS READ CORRECTLY
     bool duplicate_rows = Standard_False;
-    for (int j=0; j<cols; ++j)
+    for (Integer j=0; j<cols; ++j)
     {
         if ( out_arr(out_arr.rows()-2,j)==out_arr(out_arr.rows()-1,j) )
         {
@@ -462,7 +467,7 @@ void OCCPlugin::CheckMesh()
 
     // edges
     int flag_ed = 0;
-    for (int i=this->mesh_edges.rows()-2; i<this->mesh_edges.rows();i++)
+    for (Integer i=this->mesh_edges.rows()-2; i<this->mesh_edges.rows();i++)
     {
         check_duplicated_rows = (this->mesh_edges.row(i) - this->mesh_edges.row(i-1)).norm();
         if (std::abs(check_duplicated_rows)  < 1.0e-14)
@@ -480,8 +485,8 @@ void OCCPlugin::CheckMesh()
     // faces for 3D
     if (this->mesh_faces.cols()!=0)
     {
-        int flag_f = 0;
-        for (int i=this->mesh_faces.rows()-2; i<this->mesh_faces.rows();i++)
+        Integer flag_f = 0;
+        for (Integer i=this->mesh_faces.rows()-2; i<this->mesh_faces.rows();i++)
         {
             check_duplicated_rows = (this->mesh_faces.row(i) - this->mesh_faces.row(i-1)).norm();
             if (std::abs(check_duplicated_rows)  < 1.0e-14)
@@ -497,8 +502,8 @@ void OCCPlugin::CheckMesh()
         }
     }
 
-    int maxelem = this->mesh_elements.maxCoeff();
-    int maxpoint = this->mesh_points.rows();
+    Integer maxelem = this->mesh_elements.maxCoeff();
+    Integer maxpoint = this->mesh_points.rows();
 
     if (maxelem+1 != maxpoint)
     {
@@ -771,7 +776,8 @@ void OCCPlugin::IdentifyCurvesContainingEdges()
 //        print(x1,y1,x2,y2);
 //        cout << x_avg << " " << y_avg << endl;
 
-        if (sqrt(x_avg*x_avg+y_avg*y_avg)<this->condition)
+//        if (sqrt(x_avg*x_avg+y_avg*y_avg)<this->condition)
+        if (this->projection_criteria(iedge)==1)
         {
 //            print (sqrt(x_avg*x_avg+y_avg*y_avg),this->condition);
 //            println(x_avg,y_avg);
