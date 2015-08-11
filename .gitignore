@@ -1,0 +1,15 @@
+# Python bytecodes
+*.pyc
+*.pyo
+
+# backup files
+*~
+
+# hidden files
+.*
+
+# results files
+*.vtu
+
+# binary files
+*.dat
