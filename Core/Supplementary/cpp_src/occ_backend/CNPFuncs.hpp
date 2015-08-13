@@ -246,5 +246,8 @@ append(Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> &arr, T nu
 }
 // end of namespace
 
+// A shorthanded version equivalent to "import numpy as np"
+namespace cnp = cpp_numpy;
+
 #endif // CNP_FUNCS_H
 

@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include <OCCPluginInterface.hpp>
+#include <PythonInterface.hpp>
 
 using namespace std;
 // A syntactic sugar equivalent to "import to numpy as np"
@@ -58,12 +58,12 @@ Eigen::MatrixUI ComputeCriteria(Eigen::MatrixUI &edges, Eigen::MatrixR &points, 
 
 
 
+
 int main()
 {
 
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
-
 
 //    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle_Nurbs/elements_circle_p2.dat";
 //    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Annular_Circle_Nurbs/points_circle_p2.dat";
@@ -143,10 +143,10 @@ int main()
 
 
 
-    // CALL PY_OCCPlugin
-    Eigen::MatrixUI elements = OCCPlugin::ReadI(elem_file,',');
-    Eigen::MatrixR points = OCCPlugin::ReadR(point_file,',');
-    Eigen::MatrixUI edges = OCCPlugin::ReadI(edge_file,',');
+    // CALL PY_PostMeshCurve
+    Eigen::MatrixUI elements = PostMeshCurve::ReadI(elem_file,',');
+    Eigen::MatrixR points = PostMeshCurve::ReadR(point_file,',');
+    Eigen::MatrixUI edges = PostMeshCurve::ReadI(edge_file,',');
     Eigen::MatrixUI faces = Eigen::MatrixUI::Zero(1,4);
 //    Eigen::MatrixI unique_edges = Read(unique_edge_file);
 

@@ -14,6 +14,7 @@
 #include <tuple>
 #include <typeinfo>
 #include <chrono>
+#include <memory>
 
 #include <omp.h>
 

@@ -5,9 +5,10 @@ CONFIG -= qt
 CONFIG += c++11
 
 SOURCES += src/main.cpp \
-    src/OCCPlugin.cpp \
-    src/OCCPluginInterface.cpp \
-    src/PostMeshBase.cpp
+    src/PostMeshBase.cpp \
+    src/PostMeshCurve.cpp \
+    src/PythonInterface.cpp \
+    src/PostMeshSurface.cpp
 
 QMAKE_CXXFLAGS += -std=c++11 -Wall #-Wno-unused # -O2 #-fopenmp -msse -msse2 -fomit-frame-pointer -fno-strict-aliasing
 
@@ -17,7 +18,7 @@ INCLUDEPATH +=/home/roman/Dropbox/eigen-devel
 INCLUDEPATH +=/usr/local/include/oce/
 
 
-LIBS += -L/usr/local/lib -l:libTKIGES.so.9 -l:libTKXSBase.so.9 -l:libTKBRep.so.9 -l:libTKernel.so.9 -l:libTKTopAlgo.so.9 \
+LIBS += -L/usr/local/lib -l:libTKIGES.so.9 -l:libTKSTEP.so.9 -l:libTKXSBase.so.9 -l:libTKBRep.so.9 -l:libTKernel.so.9 -l:libTKTopAlgo.so.9 \
      -l:libTKGeomBase.so.9 -l:libTKMath.so.9 -l:libTKHLR.so.9 -l:libTKG2d.so.9 -l:libTKBool.so.9 -l:libTKG3d.so.9 -l:libTKOffset.so.9 \
      -l:libTKG2d.so.9 -l:libTKXMesh.so.9 -l:libTKGeomAlgo.so.9 -l:libTKShHealing.so.9 -l:libTKFeat.so.9 -l:libTKFillet.so.9 \
      -l:libTKBO.so.9 -l:libTKPrim.so.9
@@ -49,9 +50,11 @@ HEADERS += \
     CNPFuncs.hpp \
     EIGEN_INC.hpp \
     OCC_INC.hpp \
-    OCCPlugin.hpp \
     PostMeshBase.hpp \
-    STL_INC.hpp
+    STL_INC.hpp \
+    PostMeshCurve.hpp \
+    PythonInterface.hpp \
+    PostMeshSurface.hpp
 #    include/OCCPlugin.hpp \
 #    include/AuxFuncs.hpp \
 #    include/CNPFuncs.hpp \
