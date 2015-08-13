@@ -68,6 +68,7 @@ PassToPython  PyCppInterface(const char* iges_filename, Real scale, Real *points
     occ_interface.MeshPointInversionCurve();
     // OBTAIN DIRICHLET DATA
     PassToPython struct_to_python = occ_interface.GetDirichletData();
+//    PassToPython struct_to_python;
 
 
     return struct_to_python;

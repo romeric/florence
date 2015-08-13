@@ -30,6 +30,33 @@ Eigen::MatrixUI ComputeCriteria(Eigen::MatrixUI &edges, Eigen::MatrixR &points, 
 }
 
 
+//class Polygon {
+//  protected:
+//    int width, height;
+//  public:
+//    Real condition;
+//    void set_values (int a, int b)
+//      { width=a; height=b;}
+// };
+
+//class Rectangle: public Polygon {
+//  public:
+//    int area ()
+//      { return width * height; }
+//    void get()
+//    {
+//        this->condition = 2.;
+//        cout << condition << "\n";
+//    }
+// };
+
+//class Triangle: public Polygon {
+//  public:
+//    int area ()
+//      { return width * height / 2; }
+//  };
+
+
 
 int main()
 {
@@ -148,8 +175,10 @@ int main()
 //    boundary_fekete << -1.,-0.447213595499957983,0.447213595499957928,1.;
 //    boundary_fekete <<-1.,-0.654653670707977198,0.,0.654653670707977198,1.;
 
+    // anistropic rae2822
     points = (points.array()/1000.).eval().matrix();
     points.col(0) = (points.col(0).array()-0.5).eval().matrix();
+
 //    points = (points.array()/100000.).eval().matrix();
 //    print(elements);
 //    print(points);
@@ -181,6 +210,9 @@ int main()
     end = std::chrono::system_clock::now();
     std::chrono::duration<Real> elapsed_secs = end-start;
     std::cout << std::endl << "Total time elapsed was " << elapsed_secs.count() << " seconds" << std::endl;
+
+//    Rectangle rect;
+//    rect.get();
 
     //exit (EXIT_FAILURE);
     return 0;

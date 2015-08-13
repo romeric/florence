@@ -198,24 +198,17 @@ def ProblemData(MainData):
 			return np.sqrt(x[:,0]**2 + x[:,1]**2) < 2
 
 		def ProjectionCriteria(self,mesh):
-			projection_edges = np.zeros(mesh.edges.shape[0],dtype=np.uint64)
+			projection_edges = np.zeros((mesh.edges.shape[0],1),dtype=np.uint64)
 			num = mesh.edges.shape[1]
-			condition = 5
-			# print np.max(mesh.points)
-			# print np.min(mesh.points)
 			for iedge in range(mesh.edges.shape[0]):
 				x = np.sum(mesh.points[mesh.edges[iedge,:],0])/num
 				y = np.sum(mesh.points[mesh.edges[iedge,:],1])/num
+				x *= self.scale
+				y *= self.scale 
 				if np.sqrt(x*x+y*y)< self.condition:
 					projection_edges[iedge]=1
-				# print x,y
-			print projection_edges
-			# print mesh.elements.shape
-			# print mesh.edges.shape
 
-			# import matplotlib.pyplot as plt
-			# plt.plot(mesh.points[np.unique(mesh.edges),0],mesh.points[np.unique(mesh.edges),1])
-			# plt.show()
+			return projection_edges
 
 
 

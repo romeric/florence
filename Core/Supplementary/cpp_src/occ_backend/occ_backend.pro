@@ -6,11 +6,12 @@ CONFIG += c++11
 
 SOURCES += src/main.cpp \
     src/OCCPlugin.cpp \
-    src/OCCPluginInterface.cpp
+    src/OCCPluginInterface.cpp \
+    src/PostMeshBase.cpp
 
 QMAKE_CXXFLAGS += -std=c++11 -Wall #-Wno-unused # -O2 #-fopenmp -msse -msse2 -fomit-frame-pointer -fno-strict-aliasing
 
-INCLUDEPATH +=./include/
+#INCLUDEPATH += include/
 INCLUDEPATH +=/home/roman/Dropbox/eigen-devel
 #INCLUDEPATH +=/home/roman/Dropbox/eigen
 INCLUDEPATH +=/usr/local/include/oce/
@@ -42,21 +43,21 @@ LIBS += -L/usr/local/lib -l:libTKIGES.so.9 -l:libTKXSBase.so.9 -l:libTKBRep.so.9
 #    -lTKGeomAlgo
 
 
-include(deployment.pri)
-qtcAddDeployment()
 
 HEADERS += \
-    EIGEN_INC.hpp \
     AuxFuncs.hpp \
     CNPFuncs.hpp \
+    EIGEN_INC.hpp \
     OCC_INC.hpp \
-    STL_INC.hpp \
-    OCCPluginInterface.hpp \
-    include/OCCPlugin.hpp \
-    include/AuxFuncs.hpp \
-    include/CNPFuncs.hpp \
-    include/EIGEN_INC.hpp \
-    include/OCC_INC.hpp \
-    include/OCCPluginInterface.hpp \
-    include/STL_INC.hpp
+    OCCPlugin.hpp \
+    PostMeshBase.hpp \
+    STL_INC.hpp
+#    include/OCCPlugin.hpp \
+#    include/AuxFuncs.hpp \
+#    include/CNPFuncs.hpp \
+#    include/EIGEN_INC.hpp \
+#    include/OCC_INC.hpp \
+#    include/OCCPluginInterface.hpp \
+#    include/STL_INC.hpp \
+#    include/PostMeshBase.hpp \
 

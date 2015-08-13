@@ -783,7 +783,7 @@ void OCCPlugin::IdentifyCurvesContainingEdges()
     //this->dirichlet_edges.block(0,0,mesh_edges.rows(),2) = this->mesh_edges.block(0,0,mesh_edges.rows(),2);
     this->listedges.clear();
 
-    this->InferInterpolationPolynomialDegree();
+//    this->InferInterpolationPolynomialDegree();
 
     Integer index_edge = 0;
 
@@ -886,7 +886,8 @@ void OCCPlugin::IdentifyCurvesContainingEdges()
 
 void OCCPlugin::ProjectMeshOnCurve(const char *projection_method)
 {
-    Real precision_tolerance = 1.0e-7;
+//    Real precision_tolerance = 1.0e-2;
+    Real precision_tolerance = 1.0e-4;
     this->projection_method = projection_method;
 //    this->InferInterpolationPolynomialDegree();
 
@@ -937,6 +938,7 @@ void OCCPlugin::ProjectMeshOnCurve(const char *projection_method)
             {
                 std::cerr << "The edge node was not projected to the right curve. Curve number: " << " " << icurve << std::endl;
 //                print(x,y,iedge);
+//                print(x,y,x2_curve,y2_curve);
             }
 
             // GET CURVE LENGTH
