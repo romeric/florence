@@ -41,9 +41,9 @@ def ApplyDirichletBoundaryConditions(stiffness,F,nmesh,MainData):
 
 			# import Core.Supplementary.cpp_src.occ_backend.OCCPluginPy as dd 
 			# print dir(dd)
-			from Core.Supplementary.cpp_src.occ_backend.OCCPluginPy import OCCPluginPy2 as OCCPlugin2
+			from Core.Supplementary.cpp_src.occ_backend.OCCPluginPy import OCCPluginPy as OCCPlugin
 			# print dir(OCC_Interface)
-			occ_interface = OCCPlugin2(nmesh.element_type,dimension=MainData.ndim)
+			occ_interface = OCCPlugin(nmesh.element_type,dimension=MainData.ndim)
 			occ_interface.SetMeshElements(nmesh.elements)
 			occ_interface.SetMeshPoints(nmesh.points)
 			occ_interface.SetMeshEdges(nmesh.edges)
@@ -77,36 +77,9 @@ def ApplyDirichletBoundaryConditions(stiffness,F,nmesh,MainData):
 			nodesDBC, Dirichlet = nodesDBC[posUnique], Dirichlet[posUnique,:]
 			# print Dirichlet
 			# print nodesDBC
-			# print 'WOW'
 			# import sys; sys.exit(0)
 
 
-			# from Core.Supplementary.cpp_src.occ_backend.OCCPluginPy import OCCPluginPy as OCCPlugin
-			# # print dir(OCC_Interface)
-			# OCC_Interface = OCCPlugin(dimension=MainData.ndim)
-			# OCC_Interface.SetMesh(nmesh.points,nmesh.elements,nmesh.edges,np.zeros((1,4),dtype=np.uint64))
-			# OCC_Interface.SetCADGeometry(MainData.BoundaryData.IGES_File)
-			# OCC_Interface.SetScale(MainData.BoundaryData.scale)
-			# OCC_Interface.SetCondition(MainData.BoundaryData.condition)
-			# OCC_Interface.SetBoundaryFeketePoints(boundary_fekete)
-			# OCC_Interface.SetProjectionCriteria(MainData.BoundaryData().ProjectionCriteria(nmesh))
-			# OCC_Interface.SetProjectionMethod("Bisection")
-			# nodesDBC, Dirichlet = OCC_Interface.ComputeDirichletBoundaryConditions()
-			# # print Dirichlet
-			# # print nodesDBC
-			# # import sys; sys.exit(0)
-			# # from Core.Supplementary.cpp_src.occ_backend.OCCPluginPy import __ComputeDirichletBoundaryConditions__
-			# # nodesDBC, Dirichlet = __ComputeDirichletBoundaryConditions__(MainData.BoundaryData.IGES_File, scale,
-			# 	# nmesh.points,nmesh.elements,nmesh.edges,np.zeros((1,4),dtype=np.int64),condition,boundary_fekete)
-			# posUnique = np.unique(nodesDBC,return_index=True)[1]
-			# nodesDBC, Dirichlet = nodesDBC[posUnique], Dirichlet[posUnique,:]
-			# # print type(nodesDBC[0])
-			# print nodesDBC
-			# # print nodesDBC.flags
-			# # print nodesDBC[0]
-			# # print Dirichlet
-			# # print nmesh.points
-			# import sys; sys.exit(0)
 		print 'Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds'
 
 		nOfDBCnodes = nodesDBC.shape[0]
