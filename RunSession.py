@@ -50,20 +50,20 @@ class MainData(object):
  	# session = 'Coupled'
 
 
- 	__NO_DEBUG__ = True						 
- 	__VECTORISATION__ = True				 
- 	__PARALLEL__ = True 					
- 	numCPU = MP.cpu_count()				
+ 	__NO_DEBUG__ = True
+ 	__VECTORISATION__ = True
+ 	__PARALLEL__ = True
+ 	numCPU = MP.cpu_count()
  	# __PARALLEL__ = False
  	# nCPU = 8
- 	__MEMORY__ = 'SHARED'			
- 	# __MEMORY__ = 'DISTRIBUTED'					
+ 	__MEMORY__ = 'SHARED'
+ 	# __MEMORY__ = 'DISTRIBUTED'
 
- 	C = 1									
- 	norder = 2  							
- 	plot = (0,3)						
- 	nrplot = (0,'last')				
- 	write = 0	
+ 	C = 1
+ 	norder = 2 
+ 	plot = (0,3)
+ 	nrplot = (0,'last')
+ 	write = 0
 
 
 # RUN THE APPROPRIATE SESSION
@@ -83,7 +83,7 @@ if MainData.session == 'FEM':
 	# sp.__config__.show()
 	# sp.test()
 	# pdb.run('main(MainData)')
-	main(MainData)	
+	main(MainData)
 	# tr.print_diff()
 	# print asizeof.asizeof(MainData)
 	print 'Time taken for the entire analysis was', time.time()-t_FEM, 'seconds \n'

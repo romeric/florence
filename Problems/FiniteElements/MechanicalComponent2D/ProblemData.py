@@ -76,9 +76,9 @@ def ProblemData(MainData):
 		Reader = 'Read'
 
 		# FileName = ProblemPath + '/MechanicalComponent2D_664.dat'
-		# FileName = ProblemPath + '/MechanicalComponent2D_192.dat'
+		FileName = ProblemPath + '/MechanicalComponent2D_192.dat'
 		# FileName = ProblemPath + '/MechanicalComponent2D_NonSmooth_2672.dat'
-		FileName = ProblemPath + '/MechanicalComponent2D_NonSmooth_321.dat'
+		# FileName = ProblemPath + '/MechanicalComponent2D_NonSmooth_321.dat'
 		# FileName = ProblemPath + '/MechanicalComponent2D_NonSmooth_236.dat'
 		
 
@@ -92,8 +92,8 @@ def ProblemData(MainData):
 		scale = 1.
 		condition = 1e10
 
-		# IGES_File = ProblemPath + '/mechanical2D.iges'
-		IGES_File = ProblemPath + '/mechanical2d.igs' # non-smooth
+		IGES_File = ProblemPath + '/mechanical2D.iges'
+		# IGES_File = ProblemPath + '/mechanical2d.igs' # non-smooth
 
 		class DirichArgs(object):
 			node = 0

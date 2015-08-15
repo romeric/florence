@@ -55,15 +55,41 @@ def PreProcess(MainData,Pr,pwd):
 	# else:
 	# 	print u'\u2717'.encode('utf8')+' : ','Imported mesh has',mesh_node_order,'node ordering'
 	
-	# mesh.points[:,0] -= 0.5
-	mesh.points *=1000. 
+	mesh.points[:,0] -= 0.5
+	# mesh.points[89,:] =[-0.5,0]
+	# mesh.points *=1000. 
 	# mesh.SimplePlot()
+	# mesh.PlotMeshNumberingTri()
 	# print mesh.GetElementsWithBoundaryEdgesTri()
 	# mesh.RetainElementsWithin((-0.52,-0.08,0.72,0.08))
 	# mesh.RetainElementsWithin((-0.502,-0.06,0.505,0.06283))
 	# mesh.RemoveElements((-0.9,-0.1,1.9,0.1),keep_boundary_only=True)
 	# mesh.RemoveElements((-0.9,-0.1,1.9,0.1),keep_boundary_only=True,plot_new_mesh=False) #
+	# print mesh.points[89,:] 
+	# print mesh.points[279,:] 
+
+	# for i in range(mesh.nelem):
+	# 	x = np.max(mesh.elements[i,:])
+	# 	if mesh.points[x,0] > 0.:
+	# 		mesh.points[x,0] +=0.2
+	# 	else:
+	# 		mesh.points[x,0] +=-0.2
+
+	# print mesh.elements[88,:]
+	# print mesh.points[[89,90,279],:]
+	# mesh.elements =np.array([[0,1,2]]) 
+	# mesh.points =  mesh.points[[89,90,279],:]
+	# mesh.edges = np.array([[0,1]])
+	# print mesh.elements
+	# print mesh.points
+	# print mesh.edges
+	# mesh.SimplePlot()
 	# mesh.PlotMeshNumberingTri()
+	# print mesh.points[89,:]
+	# import matplotlib.pyplot as plt
+	# plt.plot(x[0],x[1])
+	# print np.where(mesh.points==-0.49982644) 
+	
 	# sys.exit(0)
 	# print np.linalg.norm(mesh.points,axis=1)
 	# GENERATE pMESHES FOR HIGH C
@@ -86,6 +112,9 @@ def PreProcess(MainData,Pr,pwd):
 	# np.savetxt('/home/roman/Dropbox/time_3.dat',np.array([time()-t_mesh, mesh.points.shape[0]]))
 	# sys.exit("STOPPED")
 
+	# np.savetxt('/home/roman/Desktop/elements_check_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
+	# np.savetxt('/home/roman/Desktop/points_check_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%6.4f',delimiter=',')
+	# np.savetxt('/home/roman/Desktop/edges_check_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
 
 
 	# STORE PATHS FOR MAIN, CORE & PROBLEM DIRECTORIES
@@ -156,7 +185,6 @@ def PreProcess(MainData,Pr,pwd):
 			else:
 				os.mkdir(MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel)
 	############################################################################
-
 
 
 	# COMPUTING BASES FUNCTIONS AT ALL INTEGRATION POINTS

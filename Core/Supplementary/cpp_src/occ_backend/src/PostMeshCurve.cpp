@@ -6,74 +6,36 @@ using namespace std;
 
 
 // PostMeshCurve class definitions
+PostMeshCurve::PostMeshCurve()
+{
+    this->ndim = 2;
+    this->mesh_element_type = "tri";
+    this->scale = 1.0;
+    this->condition = 1.0e10;
+    this->projection_precision = 1.0e-4;
+}
+
 void PostMeshCurve::Init()
 {
     this->mesh_element_type = "tri";
     this->ndim = 2;
     this->scale = 1.0;
     this->condition = 1.0e10;
+    this->projection_precision = 1.0e-4;
 }
 
 void PostMeshCurve::InferInterpolationPolynomialDegree()
 {
-    /* This is restricted to tris and tets*/
-    if (this->ndim==2)
+    //! WORKS ONLY FOR TRIS
+    for (auto i=0; i<50;++i)
     {
-        for (auto i=0; i<50;++i)
+        if ( (i+1)*(i+2)/2 == this->mesh_elements.cols())
         {
-            if ( (i+1)*(i+2)/2 == this->mesh_elements.cols())
-            {
-                this->degree = i;
-                break;
-            }
-        }
-    }
-    else if (this->ndim==3)
-    {
-        for (auto i=0; i<50;++i)
-        {
-            if ( (i+1)*(i+2)*(i+3)/6 == this->mesh_elements.cols())
-            {
-                this->degree = i;
-                break;
-            }
+            this->degree = i;
+            break;
         }
     }
 }
-
-
-
-void PostMeshCurve::SetFeketePoints(Real *arr, const Integer &rows, const Integer &cols)
-{
-    this->fekete = Eigen::Map<Eigen::MatrixR>(arr,rows,cols);
-}
-
-void PostMeshCurve::ComputeProjectionCriteria()
-{
-    // IF NOT ALLOCATED THEN COMPUTE
-    if (this->projection_criteria.rows()==0)
-    {
-        this->projection_criteria.setZero(mesh_edges.rows(),mesh_edges.cols());
-        for (auto iedge=0; iedge<mesh_edges.rows(); iedge++)
-        {
-            // GET THE COORDINATES OF THE TWO END NODES
-            Real x1 = this->mesh_points(this->mesh_edges(iedge,0),0);
-            Real y1 = this->mesh_points(this->mesh_edges(iedge,0),1);
-            Real x2 = this->mesh_points(this->mesh_edges(iedge,1),0);
-            Real y2 = this->mesh_points(this->mesh_edges(iedge,1),1);
-
-            // GET THE MIDDLE POINT OF THE EDGE
-            Real x_avg = ( x1 + x2 )/2.;
-            Real y_avg = ( y1 + y2 )/2.;
-            if (sqrt(x_avg*x_avg+y_avg*y_avg)<this->condition)
-            {
-                projection_criteria(iedge)=1;
-            }
-        }
-        //this->projection_criteria.setOnes(mesh_edges.rows(),mesh_edges.cols());
-    }
-}
-
 
 void PostMeshCurve::GetCurvesParameters()
 {
@@ -196,11 +158,6 @@ void PostMeshCurve::GetInternalCurveScale()
     }
 }
 
-void PostMeshCurve::GetInternalSurfaceScales()
-{
-
-}
-
 void PostMeshCurve::IdentifyCurvesContainingEdges()
 {
     this->dirichlet_edges = Eigen::MatrixI::Zero(this->mesh_edges.rows(),this->ndim+1);
@@ -310,12 +267,13 @@ void PostMeshCurve::IdentifyCurvesContainingEdges()
 
 void PostMeshCurve::ProjectMeshOnCurve(const char *projection_method)
 {
-//    Real precision_tolerance = 1.0e-2;
-    Real precision_tolerance = 1.0e-4;
     this->projection_method = projection_method;
-//    this->InferInterpolationPolynomialDegree();
+    this->InferInterpolationPolynomialDegree();
 
-    this->projection_ID = Eigen::MatrixI::Zero(this->dirichlet_edges.rows(),this->ndim);
+//    print(mesh_points);
+//    println(this->geometry_points[0].X(),this->geometry_points[0].Y(),this->geometry_points[1].X(),this->geometry_points[1].Y());
+
+//    this->projection_ID = Eigen::MatrixI::Zero(this->dirichlet_edges.rows(),this->ndim);
     this->projection_U = Eigen::MatrixR::Zero(this->dirichlet_edges.rows(),this->ndim);
 
     // LOOP OVER EDGES
@@ -337,13 +295,13 @@ void PostMeshCurve::ProjectMeshOnCurve(const char *projection_method)
             Real x2_curve = this->geometry_points_on_curves[icurve](1,0);
             Real y2_curve = this->geometry_points_on_curves[icurve](1,1);
             // CHECK IF WE ARE ON THE CURVE INTERSECTION
-            if (abs(x1_curve-x) < precision_tolerance && abs(y1_curve-y) < precision_tolerance && this->geometry_curves_types[icurve]!=0)
+            if (abs(x1_curve-x) < projection_precision && abs(y1_curve-y) < projection_precision && this->geometry_curves_types[icurve]!=0)
             {
                 // PROJECT THE CURVE VERTEX INSTEAD OF THE EDGE NODE (THIS IS NECESSARY TO ENSURE SUCCESSFUL PROJECTION)
                 x = x1_curve;
                 y = y1_curve;
             }
-            else if (abs(x2_curve-x) < precision_tolerance && abs(y2_curve-y) < precision_tolerance && this->geometry_curves_types[icurve]!=0)
+            else if (abs(x2_curve-x) < projection_precision && abs(y2_curve-y) < projection_precision && this->geometry_curves_types[icurve]!=0)
             {
                 x = x2_curve;
                 y = y2_curve;
@@ -362,6 +320,7 @@ void PostMeshCurve::ProjectMeshOnCurve(const char *projection_method)
             {
                 std::cerr << "The edge node was not projected to the right curve. Curve number: " << " " << icurve << std::endl;
 //                print(x,y,iedge);
+//                print(dirichlet_edges(iedge,inode));
 //                print(x,y,x2_curve,y2_curve);
             }
 
@@ -374,8 +333,6 @@ void PostMeshCurve::ProjectMeshOnCurve(const char *projection_method)
 //            print(this->geometry_points_on_curves[icurve]);
 
 //            println(x,y,x_curve,y_curve,icurve);
-            // STORE ID OF NURBS
-            this->projection_ID(iedge,inode) = icurve;
             // STORE PROJECTION POINT PARAMETER ON THE CURVE (NORMALISED)
             //this->projection_U(iedge,inode) = this->scale*parameterU/curve_length; //# THIS
             Real U0 = this->geometry_curves_types[icurve]==0 ? 0. : this->geometry_curves[icurve]->FirstParameter();
@@ -441,55 +398,6 @@ void PostMeshCurve::ProjectMeshOnCurve(const char *projection_method)
 //        print(geometry_points[i].X(),geometry_points[i].Y(),geometry_points[i].Z());
 
 //    exit(EXIT_FAILURE);
-}
-
-void PostMeshCurve::ProjectMeshOnSurface()
-{
-    /* Projects all the points on the mesh to the boundary of Geom_Curve */
-    this->projection_ID = Eigen::MatrixI::Zero(this->mesh_edges.rows(),this->ndim);
-    this->projection_U = Eigen::MatrixR::Zero(this->mesh_edges.rows(),this->ndim);
-    this->projection_V = Eigen::MatrixR::Zero(this->mesh_edges.rows(),this->ndim);
-    this->dirichlet_faces = Eigen::MatrixI::Zero(this->mesh_edges.rows(),this->ndim+1);
-    this->listfaces.clear();
-    int index_face = 0;
-
-    for (Integer iface=0; iface<this->mesh_edges.rows(); ++iface)
-    {
-        for (UInteger jface=0; jface<this->ndim; ++jface) // linear
-        {
-            Standard_Real x = this->mesh_points(this->mesh_edges(iface,jface),0);
-            Standard_Real y = this->mesh_points(this->mesh_edges(iface,jface),1);
-            Standard_Real z = this->mesh_points(this->mesh_edges(iface,jface),2);
-            if (sqrt(x*x+y*y+z*z)<this->condition)
-            {
-                if (jface==0)
-                {
-                    this->listfaces.push_back(iface);
-                    for (UInteger iter=0;iter<ndim;++iter)
-                        dirichlet_faces(index_face,iter) = this->mesh_edges(iface,iter);
-                    index_face +=1;
-                }
-
-                Standard_Real min_distance = 1.0e10;
-                Standard_Real distance = 0.;
-                gp_Pnt project_this_point = gp_Pnt(x,y,0.0);
-                for (unsigned int kface=0; kface<this->geometry_surfaces.size(); ++kface)
-                {
-                    GeomAPI_ProjectPointOnSurf proj;
-                    proj.Init(project_this_point,this->geometry_surfaces[kface]);
-                    distance = proj.LowerDistance();
-
-                    if (distance < min_distance)
-                    {
-                        // STORE ID OF NURBS
-                        this->projection_ID(iface,jface) = kface;
-                        proj.LowerDistanceParameters(this->projection_U(iface,jface),this->projection_V(iface,jface)); //DIVIDE BY DIRECTIONAL LENGTH (AREA)?
-                        min_distance = distance;
-                    }
-                }
-            }
-        }
-    }
 }
 
 void PostMeshCurve::RepairDualProjectedParameters()
@@ -576,17 +484,6 @@ void PostMeshCurve::CurvesToBsplineCurves()
     for (unsigned int icurve=0; icurve < this->geometry_curves.size(); ++icurve)
     {
         this->geometry_curves_bspline.push_back( GeomConvert::CurveToBSplineCurve(this->geometry_curves[icurve]) );
-    }
-}
-
-void PostMeshCurve::SurfacesToBsplineSurfaces()
-{
-    /* Converts all the imported surfaces to bspline surfaces : http://dev.opencascade.org/doc/refman/html/class_geom_convert.html
-     */
-    this->geometry_surfaces_bspline.clear();
-    for (unsigned int isurf=0; isurf < this->geometry_surfaces.size(); ++isurf)
-    {
-        this->geometry_surfaces_bspline.push_back( GeomConvert::SurfaceToBSplineSurface(this->geometry_surfaces[isurf]) );
     }
 }
 
@@ -708,11 +605,6 @@ void PostMeshCurve::MeshPointInversionCurve()
     }
 //    cout << displacements_BC << endl;
 //    print (this->ndim);
-
-}
-
-void PostMeshCurve::MeshPointInversionSurface()
-{
 
 }
 

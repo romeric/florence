@@ -6,6 +6,7 @@ PostMeshBase::PostMeshBase()
 {
     this->scale = 1.0;
     this->condition = 1.0e10;
+    this->projection_precision = 1.0e-04;
 }
 
 PostMeshBase::~PostMeshBase()
@@ -18,16 +19,25 @@ void PostMeshBase::Init(std::string &etype, const UInteger &dim)
     this->ndim = dim;
     this->scale = 1.0;
     this->condition = 1.0e10;
+    this->projection_precision = 1.0e-04;
 }
 
-void PostMeshBase::SetScale(Real &scale)
+void PostMeshBase::SetScale(const Real &scale)
 {
     this->scale = scale;
 }
 
-void PostMeshBase::SetCondition(Real &condition)
+void PostMeshBase::SetCondition(const Real &condition)
 {
     this->condition = condition;
+}
+
+void PostMeshBase::SetProjectionPrecision(const Real &precision)
+{
+    if (precision < 1e-01)
+        this->projection_precision = precision;
+    else
+        std::cerr << "Prescribed precision " << precision << " too high. Decrease it." << std::endl;
 }
 
 void PostMeshBase::SetProjectionCriteria(UInteger *criteria, const Integer &rows, const Integer &cols)
@@ -75,6 +85,11 @@ void PostMeshBase::ScaleMesh()
 std::string PostMeshBase::GetMeshElementType()
 {
     return this->mesh_element_type;
+}
+
+void PostMeshBase::SetFeketePoints(Real *arr, const Integer &rows, const Integer &cols)
+{
+    this->fekete = Eigen::Map<Eigen::MatrixR>(arr,rows,cols);
 }
 
 void PostMeshBase::ReadIGES(const char* filename)
@@ -464,5 +479,31 @@ void PostMeshBase::GetGeomFaces()
         // STORE TYPE OF SURFACE (SURFACE TYPES ARE DEFINED IN occ_inc.hpp)
         this->geometry_surfaces_types.push_back(adapt_surface.GetType());
 
+    }
+}
+
+void PostMeshBase::ComputeProjectionCriteria()
+{
+    // IF NOT ALLOCATED THEN COMPUTE
+    if (this->projection_criteria.rows()==0)
+    {
+        this->projection_criteria.setZero(mesh_edges.rows(),mesh_edges.cols());
+        for (auto iedge=0; iedge<mesh_edges.rows(); iedge++)
+        {
+            // GET THE COORDINATES OF THE TWO END NODES
+            Real x1 = this->mesh_points(this->mesh_edges(iedge,0),0);
+            Real y1 = this->mesh_points(this->mesh_edges(iedge,0),1);
+            Real x2 = this->mesh_points(this->mesh_edges(iedge,1),0);
+            Real y2 = this->mesh_points(this->mesh_edges(iedge,1),1);
+
+            // GET THE MIDDLE POINT OF THE EDGE
+            Real x_avg = ( x1 + x2 )/2.;
+            Real y_avg = ( y1 + y2 )/2.;
+            if (sqrt(x_avg*x_avg+y_avg*y_avg)<this->condition)
+            {
+                projection_criteria(iedge)=1;
+            }
+        }
+        //this->projection_criteria.setOnes(mesh_edges.rows(),mesh_edges.cols());
     }
 }

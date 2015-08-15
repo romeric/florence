@@ -7,10 +7,10 @@ CONFIG += c++11
 SOURCES += src/main.cpp \
     src/PostMeshBase.cpp \
     src/PostMeshCurve.cpp \
-    src/PythonInterface.cpp \
-    src/PostMeshSurface.cpp
+    src/PostMeshSurface.cpp \
+    src/PyInterfaceEmulator.cpp
 
-QMAKE_CXXFLAGS += -std=c++11 -Wall #-Wno-unused # -O2 #-fopenmp -msse -msse2 -fomit-frame-pointer -fno-strict-aliasing
+QMAKE_CXXFLAGS += -std=c++11 -Wall -Wdelete-non-virtual-dtor #-Wno-unused # -O2 #-fopenmp -msse -msse2 -fomit-frame-pointer -fno-strict-aliasing
 
 #INCLUDEPATH += include/
 INCLUDEPATH +=/home/roman/Dropbox/eigen-devel
@@ -53,8 +53,9 @@ HEADERS += \
     PostMeshBase.hpp \
     STL_INC.hpp \
     PostMeshCurve.hpp \
-    PythonInterface.hpp \
-    PostMeshSurface.hpp
+    PostMeshSurface.hpp \
+    PyInterfaceEmulator.hpp \
+    PyInterface.hpp
 #    include/OCCPlugin.hpp \
 #    include/AuxFuncs.hpp \
 #    include/CNPFuncs.hpp \

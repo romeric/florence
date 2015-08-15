@@ -402,97 +402,73 @@ class PostProcess(object):
 
 
 
-	def MeshQualityMeasures(self,MainData,nmesh,TotalDisp):
+	def MeshQualityMeasures(self,MainData,mesh,TotalDisp,show_plot=True):
 
-		import matplotlib.pyplot as plt
 
 		Domain = MainData.Domain
-		points = nmesh.points
-		vpoints = np.copy(nmesh.points)
+		points = mesh.points
+		vpoints = np.copy(mesh.points)
 		# vpoints	+= TotalDisp[:,:,-1]
 		vpoints	= vpoints+ TotalDisp[:,:,-1]
 
-		elements = nmesh.elements
+		elements = mesh.elements
 
 		MainData.ScaledJacobian = np.zeros(elements.shape[0])
 		# MainData.ScaledJacobian = []
 		# MainData.ScaledJacobianElem = []
 
+
 		JMax =[]; JMin=[]
-		for elem in range(0,elements.shape[0]):
+		for elem in range(mesh.nelem):
 			LagrangeElemCoords = points[elements[elem,:],:]
 			EulerElemCoords = vpoints[elements[elem,:],:]
-			for counter in range(0,Domain.AllGauss.shape[0]):
-				# GRADIENT TENSOR IN PARENT ELEMENT [\nabla_\varepsilon (N)]
-				Jm = Domain.Jm[:,:,counter]
-				# MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-				ParentGradientX=np.dot(Jm,LagrangeElemCoords) #
-				# MAPPING TENSOR [\partial\vec{x}/ \partial\vec{\varepsilon} (ndim x ndim)]
-				ParentGradientx=np.dot(Jm,EulerElemCoords) #
 
-				# MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
-				MaterialGradient = np.dot(la.inv(ParentGradientX),Jm)
-				# DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
-				F = np.dot(EulerElemCoords.T,MaterialGradient.T)
+			# COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
+			# MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+			ParentGradientX = np.einsum('ijk,jl->kil',MainData.Domain.Jm,LagrangeElemCoords)
+			# MAPPING TENSOR [\partial\vec{x}/ \partial\vec{\varepsilon} (ndim x ndim)]
+			ParentGradientx = np.einsum('ijk,jl->kil',MainData.Domain.Jm,EulerElemCoords)
+			# MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
+			MaterialGradient = np.einsum('ijk,kli->ijl',la.inv(ParentGradientX),MainData.Domain.Jm)
+			# DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
+			F = np.einsum('ij,kli->kjl',EulerElemCoords,MaterialGradient)
+			# JACOBIAN OF DEFORMATION GRADIENT TENSOR
+			detF = np.abs(np.linalg.det(F))
+			# COFACTOR OF DEFORMATION GRADIENT TENSOR
+			H = np.einsum('ijk,k->ijk',np.linalg.inv(F).T,detF)
 
-				detF = np.abs(np.linalg.det(F))
-				H = detF*np.linalg.inv(F).T
+			# FIND JACOBIAN OF SPATIAL GRADIENT
+			Jacobian = np.abs(np.linalg.det(ParentGradientx))
+			# FIND MIN AND MAX VALUES
+			JMin = np.min(Jacobian); JMax = np.max(Jacobian)
 
-				# Jacobian = np.sqrt(np.einsum('ij,ij',H,H))
-				# Jacobian = np.einsum('ij,ij',H,H)
-				# Jacobian = np.einsum('ij,ij',F,F)
-				# Jacobian = np.sqrt(np.einsum('ij,ij',F,F))
-				
-				# Jacobian = np.sqrt(np.sqrt(np.sqrt(np.einsum('ij,ij',F,F))))
-
-				# from scipy.special import cbrt
-				# Jacobian = cbrt(np.einsum('ij,ij',F,F))
-
-				Jacobian = np.abs(np.linalg.det(ParentGradientx))
-				# Jacobian = np.abs(np.linalg.det(F))
-				# if elem==71:
-					# print np.abs(np.linalg.det(ParentGradientx)), np.abs(np.linalg.det(ParentGradientX))
-				
-				if counter==0:
-					JMin=Jacobian; JMax = Jacobian
-
-				if Jacobian > JMax:
-					JMax = Jacobian
-				if Jacobian < JMin:
-					JMin = Jacobian
-				# print Jacobian
-				# pass
-			if np.allclose(1.0,1.0*JMin/JMax,rtol=1e-3):
-				pass
-			else:
-				pass
-				# print 1.0*JMin/JMax
 				# MainData.ScaledJacobian[elem] = 1.0*JMin/JMax
 				# MainData.ScaledJacobian = np.append(MainData.ScaledJacobian,1.0*JMin/JMax)
 				# MainData.ScaledJacobianElem = np.append(MainData.ScaledJacobianElem,elem)	
 
 			MainData.ScaledJacobian[elem] = 1.0*JMin/JMax
-			# print JMin, JMax
-		# print MainData.ScaledJacobian.shape, np.unique(elements).shape
+
+		print 'Minimum ScaledJacobian value is:', np.min(MainData.ScaledJacobian)
 
 
-		fig = plt.figure()
-		# # plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),MainData.ScaledJacobian,width=1.,color='#FE6F5E',alpha=0.8)
+		if show_plot == True:
 
-		plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),MainData.ScaledJacobian,width=1.,alpha=0.4)
-		plt.xlabel(r'$Elements$',fontsize=18)
-		plt.ylabel(r'$Scaled\, Jacobian$',fontsize=18)
+			import matplotlib.pyplot as plt
+				
+			fig = plt.figure()
+			# # plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),MainData.ScaledJacobian,width=1.,color='#FE6F5E',alpha=0.8)
 
+			plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),MainData.ScaledJacobian,width=1.,alpha=0.4)
+			plt.xlabel(r'$Elements$',fontsize=18)
+			plt.ylabel(r'$Scaled\, Jacobian$',fontsize=18)
 
-
-		# plt.bar(np.linspace(0,MainData.ScaledJacobianElem.shape[0]-1,MainData.ScaledJacobianElem.shape[0]),MainData.ScaledJacobian,width=1.,alpha=0.4)
-		# plt.xlabel(r'$Elements$',fontsize=18)
-		# plt.ylabel(r'$Scaled\, Jacobian$',fontsize=18)
-
-
-
+			# plt.bar(np.linspace(0,MainData.ScaledJacobianElem.shape[0]-1,MainData.ScaledJacobianElem.shape[0]),MainData.ScaledJacobian,width=1.,alpha=0.4)
+			# plt.xlabel(r'$Elements$',fontsize=18)
+			# plt.ylabel(r'$Scaled\, Jacobian$',fontsize=18)
 
 		# plt.savefig('/home/roman/Desktop/DumpReport/scaled_jacobian_312_'+MainData.AnalysisType+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)
+
+
 
 	@staticmethod	
 	def HighOrderPatchPlot(MainData,mesh,TotalDisp):

@@ -472,6 +472,7 @@ class Mesh(object):
 		else:
 			raise NotImplementedError("SimplePlot for "+self.element_type+" not implemented yet")
 
+		# plt.plot(self.points[89,0],self.points[89,1],'ro')
 		plt.axis("equal")
 		plt.show()
 

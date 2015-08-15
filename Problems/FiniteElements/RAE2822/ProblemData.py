@@ -94,6 +94,7 @@ def ProblemData(MainData):
 
 		# aniso
 		condition = 5.
+		condition = 0.2
 		scale = 1.
 
 		# iso

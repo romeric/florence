@@ -1,6 +1,7 @@
 #!/bin/sh
 
 clear
-rm OCCPluginPy.cpp OCCPluginPy.so
+rm PostMeshPy.cpp PostMeshPy.so
 python setup.py build_ext -if
 rm -rf build 
+# clear

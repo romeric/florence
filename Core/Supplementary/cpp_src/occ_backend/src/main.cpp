@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include <PythonInterface.hpp>
+#include <PyInterfaceEmulator.hpp>
 
 using namespace std;
 // A syntactic sugar equivalent to "import to numpy as np"
@@ -30,33 +30,33 @@ Eigen::MatrixUI ComputeCriteria(Eigen::MatrixUI &edges, Eigen::MatrixR &points, 
 }
 
 
-//class Polygon {
-//  protected:
-//    int width, height;
-//  public:
-//    Real condition;
-//    void set_values (int a, int b)
-//      { width=a; height=b;}
-// };
+class Node
+{
+private:
+    int data;
+    int key;
 
-//class Rectangle: public Polygon {
-//  public:
-//    int area ()
-//      { return width * height; }
-//    void get()
-//    {
-//        this->condition = 2.;
-//        cout << condition << "\n";
-//    }
-// };
-
-//class Triangle: public Polygon {
-//  public:
-//    int area ()
-//      { return width * height / 2; }
-//  };
-
-
+    friend class BinaryTree; // class BinaryTree can now access data directly
+};
+class BinaryTree
+{
+public:
+    Node *root;
+    int find(int key);
+};
+int BinaryTree::find(int key)
+{
+    root = new Node;
+    // check root for NULL...
+    if(root->key == key)
+    {
+        // no need to go through an accessor function
+        return root->data;
+    }
+    root->key = 5;
+    // perform rest of find
+    return root->key;
+}
 
 
 int main()
@@ -94,9 +94,13 @@ int main()
 //    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/points_twoarcs_p2.dat";
 //    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/Misc/edges_twoarcs_p2.dat";
 
-    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/RAE2822/elements_rae2822_p2.dat";
-    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/RAE2822/points_rae2822_p2.dat";
-    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/RAE2822/edges_rae2822_p2.dat";
+//    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/RAE2822/elements_rae2822_p2.dat";
+//    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/RAE2822/points_rae2822_p2.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/RAE2822/edges_rae2822_p2.dat";
+
+    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/RAE2822/elements_check_p2.dat";
+    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/RAE2822/points_check_p2.dat";
+    std::string edge_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/RAE2822/edges_check_p2.dat";
 
 //    std::string elem_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/RAE2822/elements_irae2822_p2.dat";
 //    std::string point_file = "/home/roman/Dropbox/Python/Problems/FiniteElements/RAE2822/points_irae2822_p2.dat";
@@ -176,8 +180,9 @@ int main()
 //    boundary_fekete <<-1.,-0.654653670707977198,0.,0.654653670707977198,1.;
 
     // anistropic rae2822
-    points = (points.array()/1000.).eval().matrix();
-    points.col(0) = (points.col(0).array()-0.5).eval().matrix();
+//    points = (points.array()/1000.).eval().matrix();
+//    points.col(0) = (points.col(0).array()-0.5).eval().matrix();
+//    print (points(89,0),points(89,1));
 
 //    points = (points.array()/100000.).eval().matrix();
 //    print(elements);
@@ -185,24 +190,25 @@ int main()
 //    print(edges);
 //    print (edges.rows(),elements.rows(),elements.cols());
 //    cout << points.block(0,0,100,2) << endl;
-//    print(points.maxCoeff());
+//    println(points.minCoeff(),points.maxCoeff());
 
     Eigen::MatrixUI criteria = ComputeCriteria(edges,points,condition);
 
 //    const char *projection_method = "Newton";
     const char *projection_method = "Bisection";
+    Real precision = 1.0e-02;
 
 
 
 //    exit (EXIT_FAILURE);
     PassToPython struct_to_python;
-    struct_to_python = PyCppInterface(iges_filename,scale,points.data(),points.rows(), points.cols(),
+    struct_to_python = ComputeDirichleteData(iges_filename,scale,points.data(),points.rows(), points.cols(),
                            elements.data(), elements.rows(), elements.cols(),
                            edges.data(), edges.rows(), edges.cols(),
                            faces.data(),  faces.rows(),  faces.cols(),condition,
                            boundary_fekete.data(), boundary_fekete.rows(), boundary_fekete.cols(),
                            criteria.data(), criteria.rows(), criteria.cols(),
-                           projection_method);
+                           projection_method, precision);
 
 //    print(struct_to_python.displacement_BC_stl);
 
@@ -211,8 +217,10 @@ int main()
     std::chrono::duration<Real> elapsed_secs = end-start;
     std::cout << std::endl << "Total time elapsed was " << elapsed_secs.count() << " seconds" << std::endl;
 
-//    Rectangle rect;
-//    rect.get();
+//    BinaryTree xx;
+////    xx.root = new Node;
+//    int x = xx.find(2);
+//    println(x);
 
     //exit (EXIT_FAILURE);
     return 0;
