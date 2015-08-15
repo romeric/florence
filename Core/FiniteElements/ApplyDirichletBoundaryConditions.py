@@ -40,10 +40,9 @@ def ApplyDirichletBoundaryConditions(stiffness,F,mesh,MainData):
 				from Core.QuadratureRules.FeketePointsTri import FeketePointsTri
 				boundary_fekete = FeketePointsTri(MainData.C)
 
-			# import Core.Supplementary.cpp_src.occ_backend.OCCPluginPy as dd 
-			# print dir(dd)
-			from Core.Supplementary.cpp_src.occ_backend.PostMeshPy import PostMeshPy as PostMesh
-			# print dir(OCC_Interface)
+			from Core import PostMeshPy as PostMesh 
+			# print dir(PostMeshPy) 
+			# import sys; sys.exit(0)
 			curvilinear_mesh = PostMesh(mesh.element_type,dimension=MainData.ndim)
 			curvilinear_mesh.SetMeshElements(mesh.elements)
 			curvilinear_mesh.SetMeshPoints(mesh.points)

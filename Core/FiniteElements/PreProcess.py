@@ -55,9 +55,9 @@ def PreProcess(MainData,Pr,pwd):
 	# else:
 	# 	print u'\u2717'.encode('utf8')+' : ','Imported mesh has',mesh_node_order,'node ordering'
 	
-	mesh.points[:,0] -= 0.5
+	# mesh.points[:,0] -= 0.5
+	mesh.points *=1000. 
 	# mesh.points[89,:] =[-0.5,0]
-	# mesh.points *=1000. 
 	# mesh.SimplePlot()
 	# mesh.PlotMeshNumberingTri()
 	# print mesh.GetElementsWithBoundaryEdgesTri()

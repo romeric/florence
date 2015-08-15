@@ -107,6 +107,9 @@ elif MainData.session == 'BEM3D':
 # arc length
 # https://sites.google.com/site/joebartok/circleradiusarc
 
+# delete all .pyc files 
+# find . -name '*.pyc' -delete 
+
 # import inspect; print(inspect.getsource(numpy.linspace)) # numpy/scipy documenation in a shell
 # import inspect; print(inspect.getsource(np.unique)) # numpy/scipy documenation in a shellnp un
 # print u'\u2713'.encode('utf8')
