@@ -2,7 +2,7 @@ import numpy as np
 from time import time
 
 # ROUTINE FOR APPLYING DIRICHLET BOUNDARY CONDITIONS
-def ApplyDirichletBoundaryConditions(stiffness,F,nmesh,MainData):
+def ApplyDirichletBoundaryConditions(stiffness,F,mesh,MainData):
 
 	#######################################################
 	nvar = MainData.nvar
@@ -17,8 +17,9 @@ def ApplyDirichletBoundaryConditions(stiffness,F,nmesh,MainData):
 		from_cad = True 
 		# from_cad = False
 
-		# print MainData.BoundaryData().ProjectionCriteria(nmesh)
-		# import sys; sys.exit(0)
+		## x= MainData.BoundaryData().ProjectionCriteria(mesh)
+		## print x.reshape(x.shape[0])
+		## import sys; sys.exit(0)
 
 		tCAD = time()
 		if from_cad == False:
@@ -26,7 +27,7 @@ def ApplyDirichletBoundaryConditions(stiffness,F,nmesh,MainData):
 			# GET THE NURBS CURVE FROM PROBLEMDATA
 			nurbs = MainData.BoundaryData().NURBSParameterisation()
 			# IDENTIFIY DIRICHLET BOUNDARY CONDITIONS BASED ON THE EXACT GEOMETRY
-			nodesDBC, Dirichlet = Nurbs(nmesh,nurbs,MainData.BoundaryData,MainData.C)
+			nodesDBC, Dirichlet = Nurbs(mesh,nurbs,MainData.BoundaryData,MainData.C)
 		else:
 			# GET BOUNDARY FEKETE POINTS
 			if MainData.ndim == 2:
@@ -41,37 +42,38 @@ def ApplyDirichletBoundaryConditions(stiffness,F,nmesh,MainData):
 
 			# import Core.Supplementary.cpp_src.occ_backend.OCCPluginPy as dd 
 			# print dir(dd)
-			from Core.Supplementary.cpp_src.occ_backend.OCCPluginPy import OCCPluginPy as OCCPlugin
+			from Core.Supplementary.cpp_src.occ_backend.PostMeshPy import PostMeshPy as PostMesh
 			# print dir(OCC_Interface)
-			occ_interface = OCCPlugin(nmesh.element_type,dimension=MainData.ndim)
-			occ_interface.SetMeshElements(nmesh.elements)
-			occ_interface.SetMeshPoints(nmesh.points)
-			occ_interface.SetMeshEdges(nmesh.edges)
-			occ_interface.SetMeshFaces(np.zeros((1,4),dtype=np.uint64))
-			occ_interface.SetScale(MainData.BoundaryData.scale)
-			occ_interface.SetCondition(MainData.BoundaryData.condition)
-			occ_interface.SetProjectionCriteria(MainData.BoundaryData().ProjectionCriteria(nmesh))
-			occ_interface.ScaleMesh()
-			# occ_interface.InferInterpolationPolynomialDegree();
-			occ_interface.SetFeketePoints(boundary_fekete)
-			occ_interface.GetBoundaryPointsOrder()
+			curvilinear_mesh = PostMesh(mesh.element_type,dimension=MainData.ndim)
+			curvilinear_mesh.SetMeshElements(mesh.elements)
+			curvilinear_mesh.SetMeshPoints(mesh.points)
+			curvilinear_mesh.SetMeshEdges(mesh.edges)
+			curvilinear_mesh.SetMeshFaces(np.zeros((1,4),dtype=np.uint64))
+			curvilinear_mesh.SetScale(MainData.BoundaryData.scale)
+			curvilinear_mesh.SetCondition(MainData.BoundaryData.condition)
+			curvilinear_mesh.SetProjectionPrecision(1.0e-04)
+			curvilinear_mesh.SetProjectionCriteria(MainData.BoundaryData().ProjectionCriteria(mesh))
+			curvilinear_mesh.ScaleMesh()
+			# curvilinear_mesh.InferInterpolationPolynomialDegree();
+			curvilinear_mesh.SetFeketePoints(boundary_fekete)
+			curvilinear_mesh.GetBoundaryPointsOrder()
 			# READ THE GEOMETRY FROM THE IGES FILE
-			occ_interface.ReadIGES(MainData.BoundaryData.IGES_File)
+			curvilinear_mesh.ReadIGES(MainData.BoundaryData.IGES_File)
 			# EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
-			occ_interface.GetGeomVertices()
-			occ_interface.GetGeomEdges()
-			occ_interface.GetGeomFaces()
-			occ_interface.GetGeomPointsOnCorrespondingEdges()
+			curvilinear_mesh.GetGeomVertices()
+			curvilinear_mesh.GetGeomEdges()
+			curvilinear_mesh.GetGeomFaces()
+			curvilinear_mesh.GetGeomPointsOnCorrespondingEdges()
 			# FIRST IDENTIFY WHICH CURVES CONTAIN WHICH EDGES
-			occ_interface.IdentifyCurvesContainingEdges()
+			curvilinear_mesh.IdentifyCurvesContainingEdges()
 			# PROJECT ALL BOUNDARY POINTS FROM THE MESH TO THE CURVE
-			occ_interface.ProjectMeshOnCurve("Bisection")
+			curvilinear_mesh.ProjectMeshOnCurve("Bisection")
 			# FIX IMAGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
-			occ_interface.RepairDualProjectedParameters()
+			curvilinear_mesh.RepairDualProjectedParameters()
 			# PERFORM POINT INVERTION FOR THE INTERIOR POINTS
-			occ_interface.MeshPointInversionCurve()
+			curvilinear_mesh.MeshPointInversionCurve()
 			# GET DIRICHLET DATA
-			nodesDBC, Dirichlet = occ_interface.GetDirichletData() 
+			nodesDBC, Dirichlet = curvilinear_mesh.GetDirichletData() 
 			# FIND UNIQUE VALUES OF DIRICHLET DATA
 			posUnique = np.unique(nodesDBC,return_index=True)[1]
 			nodesDBC, Dirichlet = nodesDBC[posUnique], Dirichlet[posUnique,:]
@@ -99,17 +101,17 @@ def ApplyDirichletBoundaryConditions(stiffness,F,nmesh,MainData):
 			# GET UNIQUE NODES AT THE BOUNDARY
 			unique_edge_nodes = []
 			if ndim==2:
-				unique_edge_nodes = np.unique(nmesh.edges)
+				unique_edge_nodes = np.unique(mesh.edges)
 			elif ndim==3:
-				unique_edge_nodes = np.unique(nmesh.faces)
+				unique_edge_nodes = np.unique(mesh.faces)
 			# ACTIVATE THIS FOR DEBUGGING ELECTROMECHANICAL PROBLEMS
-			# unique_edge_nodes = np.unique(nmesh.elements) 
+			# unique_edge_nodes = np.unique(mesh.elements) 
 
 
-			MainData.BoundaryData().DirichArgs.points = nmesh.points
-			MainData.BoundaryData().DirichArgs.edges = nmesh.edges
+			MainData.BoundaryData().DirichArgs.points = mesh.points
+			MainData.BoundaryData().DirichArgs.edges = mesh.edges
 			for inode in range(0,unique_edge_nodes.shape[0]):
-				coord_node = nmesh.points[unique_edge_nodes[inode]]
+				coord_node = mesh.points[unique_edge_nodes[inode]]
 				MainData.BoundaryData().DirichArgs.node = coord_node
 				MainData.BoundaryData().DirichArgs.inode = unique_edge_nodes[inode]
 
@@ -132,7 +134,7 @@ def ApplyDirichletBoundaryConditions(stiffness,F,nmesh,MainData):
 
 	# GENERAL PROCEDURE - GET REDUCED MATRICES FOR FINAL SOLUTION
 	columns_out = columns_out.astype(np.int64)
-	columns_in = np.delete(np.arange(0,nvar*nmesh.points.shape[0]),columns_out)
+	columns_in = np.delete(np.arange(0,nvar*mesh.points.shape[0]),columns_out)
 	# print columns_in.shape
 	# print AppliedDirichlet#,'\n',columns_out
 	# print AppliedDirichlet.shape
@@ -149,7 +151,7 @@ def ApplyDirichletBoundaryConditions(stiffness,F,nmesh,MainData):
 
 
 
-def ApplyIncrementalDirichletBoundaryConditions(stiffness,F,columns_in,columns_out,AppliedDirichlet,Iter,Minimal,nmesh,mass=0,Analysis=0):
+def ApplyIncrementalDirichletBoundaryConditions(stiffness,F,columns_in,columns_out,AppliedDirichlet,Iter,Minimal,mesh,mass=0,Analysis=0):
 
 	# for i in range(0,columns_out.shape[0]):
 	# 	if AppliedDirichlet[i]!=0.0:
