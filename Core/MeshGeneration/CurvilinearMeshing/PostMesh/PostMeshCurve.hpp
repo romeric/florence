@@ -14,12 +14,28 @@ class PostMeshCurve: public PostMeshBase
 
 public:
 
-    PostMeshCurve();
-    PostMeshCurve(std::string &element_type, const UInteger &dim) : PostMeshBase(element_type,dim){}
-    ~PostMeshCurve(){}
+    inline PostMeshCurve()
+    {
+        this->ndim = 2;
+        this->mesh_element_type = "tri";
+        this->scale = 1.0;
+        this->condition = 1.0e10;
+        this->projection_precision = 1.0e-4;
+    }
 
-    // Public member functions
-    void Init();
+    inline PostMeshCurve(std::string &element_type, const UInteger &dim) : PostMeshBase(element_type,dim){}
+
+    inline ~PostMeshCurve(){}
+
+    inline void Init()
+    {
+        this->mesh_element_type = "tri";
+        this->ndim = 2;
+        this->scale = 1.0;
+        this->condition = 1.0e10;
+        this->projection_precision = 1.0e-4;
+    }
+
     void InferInterpolationPolynomialDegree();
     void CurvesToBsplineCurves();
     void GetCurvesParameters();

@@ -1,14 +1,5 @@
+
 #include "PostMeshSurface.hpp"
-
-PostMeshSurface::PostMeshSurface()
-{
-    this->ndim = 3;
-    this->mesh_element_type = "tet";
-    this->scale = 1.0;
-    this->condition = 1.0e10;
-
-    this_curve = std::make_shared<PostMeshCurve>(PostMeshCurve());
-}
 
 void PostMeshSurface::Init()
 {

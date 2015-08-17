@@ -25,25 +25,94 @@
 class PostMeshBase
 {
 public:
-    PostMeshBase();
-    PostMeshBase(std::string &element_type, const UInteger &dim) : mesh_element_type(element_type), ndim(dim) {
+    //! PUBLIC MEMBER FUNCTIONS OF POSTMESH BASE CLASS. SHORTER FUNCTIONS ARE
+    //! DECLARED AND DEFINED IN THE HEADER TO PROVIDE THEM WITH THE POSSIBILITY
+    //! OF BEING INLINED BY THE COMPILER. ALTHOUGH THIS WOULD NOT AFFECT THE
+    //! PERFORMANCE MUCH AS THESE FUNCTIONS ARE MAINLY CALLED ONCE.
+
+    inline PostMeshBase()
+    {
+        this->scale = 1.0;
+        this->condition = 1.0e10;
+        this->projection_precision = 1.0e-04;
+    }
+
+    inline PostMeshBase(std::string &element_type, const UInteger &dim) : mesh_element_type(element_type), ndim(dim) {
         this->condition = 1.0e10;
         this->scale = 1.;
     }
-    virtual ~PostMeshBase();
 
-    virtual void Init(std::string &etype, const UInteger &dim);
-    void SetScale(const Real &scale);
-    void SetCondition(const Real &condition);
-    void SetProjectionPrecision(const Real &precision);
-    void SetProjectionCriteria(UInteger *criteria, const Integer &rows, const Integer &cols);
-    void SetMeshElements(UInteger *arr, const Integer &rows, const Integer &cols);
-    void SetMeshPoints(Real *arr, const Integer &rows, const Integer &cols);
-    void SetMeshEdges(UInteger *arr, const Integer &rows, const Integer &cols);
-    void SetMeshFaces(UInteger *arr, const Integer &rows, const Integer &cols);
-    void ScaleMesh();
-    std::string GetMeshElementType();
-    void SetFeketePoints(Real *arr, const Integer &rows, const Integer &cols);
+    virtual inline ~PostMeshBase(){}
+
+    virtual inline void Init(std::string &etype, const UInteger &dim)
+    {
+        this->mesh_element_type = etype;
+        this->ndim = dim;
+        this->scale = 1.0;
+        this->condition = 1.0e10;
+        this->projection_precision = 1.0e-04;
+    }
+
+    inline void SetScale(const Real &scale)
+    {
+        this->scale = scale;
+    }
+
+    inline void SetCondition(const Real &condition)
+    {
+        this->condition = condition;
+    }
+
+    inline void SetProjectionPrecision(const Real &precision)
+    {
+        if (precision < 1e-01)
+            this->projection_precision = precision;
+        else
+            std::cerr << "Prescribed precision " << precision << " too high. Decrease it." << std::endl;
+    }
+
+    inline void SetProjectionCriteria(UInteger *criteria, const Integer &rows, const Integer &cols)
+    {
+        this->projection_criteria = Eigen::Map<Eigen::MatrixUI>(criteria,rows,cols);
+    }
+
+    inline void SetMeshElements(UInteger *arr, const Integer &rows, const Integer &cols)
+    {
+        this->mesh_elements = Eigen::Map<Eigen::MatrixUI>(arr,rows,cols);
+    }
+
+    inline void SetMeshPoints(Real *arr, const Integer &rows, const Integer &cols)
+    {
+        this->mesh_points = Eigen::Map<Eigen::MatrixR>(arr,rows,cols);
+    //    new (&this->mesh_points) Eigen::Map<Eigen::MatrixR> (arr,rows,cols);
+    //    print (this->mesh_points.rows(),this->mesh_points.cols());
+    }
+
+    inline void SetMeshEdges(UInteger *arr, const Integer &rows, const Integer &cols)
+    {
+        this->mesh_edges = Eigen::Map<Eigen::MatrixUI>(arr,rows,cols);
+    }
+
+    inline void SetMeshFaces(UInteger *arr, const Integer &rows, const Integer &cols)
+    {
+        this->mesh_faces = Eigen::Map<Eigen::MatrixUI>(arr,rows,cols);
+    }
+
+    inline void ScaleMesh()
+    {
+        this->mesh_points *=this->scale;
+    }
+
+    inline std::string GetMeshElementType()
+    {
+        return this->mesh_element_type;
+    }
+
+    inline void SetFeketePoints(Real *arr, const Integer &rows, const Integer &cols)
+    {
+        this->fekete = Eigen::Map<Eigen::MatrixR>(arr,rows,cols);
+    }
+
     void ReadIGES(const char *filename);
     void ReadSTEP(const char *filename);
     static Eigen::MatrixI Read(std::string &filename);
@@ -87,8 +156,15 @@ protected:
     void ComputeProjectionCriteria();
 
 private:
-    void SetDimension(const UInteger &dim);
-    void SetMeshElementType(std::string &type);
+    void SetDimension(const UInteger &dim)
+    {
+        this->ndim=dim;
+    }
+
+    void SetMeshElementType(std::string &type)
+    {
+        this->mesh_element_type = type;
+    }
 };
 
 #endif // POSTMESHBASE

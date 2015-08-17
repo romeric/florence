@@ -9,7 +9,15 @@ class PostMeshSurface: public PostMeshBase
 
 
 public:
-    PostMeshSurface();
+    PostMeshSurface()
+    {
+        this->ndim = 3;
+        this->mesh_element_type = "tet";
+        this->scale = 1.0;
+        this->condition = 1.0e10;
+
+        this_curve = std::make_shared<PostMeshCurve>(PostMeshCurve());
+    }
     PostMeshSurface(std::string &element_type, const UInteger &dim) : PostMeshBase(element_type,dim){}
     ~PostMeshSurface(){}
 

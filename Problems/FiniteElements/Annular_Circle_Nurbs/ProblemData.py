@@ -78,6 +78,8 @@ def ProblemData(MainData):
 
 		ConnectivityFile = ProblemPath + '/elements_circle.dat'
 		CoordinatesFile = ProblemPath +'/points_circle.dat'
+		EdgesFile = None
+		FacesFile = None
 
 
 
@@ -202,7 +204,7 @@ def ProblemData(MainData):
 
 
 		def ProjectionCriteria(self,mesh):
-			projection_edges = np.zeros(mesh.edges.shape[0],dtype=np.uint64)
+			projection_edges = np.zeros((mesh.edges.shape[0],1),dtype=np.uint64)
 			num = mesh.edges.shape[1]
 			for iedge in range(mesh.edges.shape[0]):
 				x = np.sum(mesh.points[mesh.edges[iedge,:],0])/num

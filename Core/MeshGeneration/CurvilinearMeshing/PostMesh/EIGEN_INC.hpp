@@ -7,19 +7,28 @@
 #include <STL_INC.hpp>
 #endif
 
+#define EIGEN_VECTORIZE
+#define EIGEN_DEFAULT_TO_ROW_MAJOR
+
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include<Eigen/StdVector>
 
-#ifdef EIGEN_VECTORIZE
-    #define EIGEN_VECTORIZE
-#endif
+// DEFINE STORAGE ORDERS
+#define C_Contiguous Eigen::RowMajor
+#define F_Contiguous Eigen::ColMajor
+// GENERIC ALIGNED
+#define POSTMESH_ALIGNED C_Contiguous
+
+
+// DYNAMIC MATRICES
+#define DYNAMIC Eigen::Dynamic
 
 namespace Eigen {
-/* RowMajor matrix */
-typedef Eigen::Matrix<Real,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> MatrixR;
-typedef Eigen::Matrix<Integer,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> MatrixI;
-typedef Eigen::Matrix<UInteger,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> MatrixUI;
+// DEFINE Real, Integer AND UInteger BASED MATRICES
+typedef Eigen::Matrix<Real,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> MatrixR;
+typedef Eigen::Matrix<Integer,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> MatrixI;
+typedef Eigen::Matrix<UInteger,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> MatrixUI;
 }
 
 

@@ -15,6 +15,7 @@
 #include <typeinfo>
 #include <chrono>
 #include <memory>
+#include <algorithm>
 
 #include <omp.h>
 

@@ -6,23 +6,6 @@ using namespace std;
 
 
 // PostMeshCurve class definitions
-PostMeshCurve::PostMeshCurve()
-{
-    this->ndim = 2;
-    this->mesh_element_type = "tri";
-    this->scale = 1.0;
-    this->condition = 1.0e10;
-    this->projection_precision = 1.0e-4;
-}
-
-void PostMeshCurve::Init()
-{
-    this->mesh_element_type = "tri";
-    this->ndim = 2;
-    this->scale = 1.0;
-    this->condition = 1.0e10;
-    this->projection_precision = 1.0e-4;
-}
 
 void PostMeshCurve::InferInterpolationPolynomialDegree()
 {
@@ -69,7 +52,7 @@ void PostMeshCurve::FindCurvesSequentiallity()
     std::vector<Integer> consecutive_curves; consecutive_curves.clear();
     Eigen::MatrixI curves_sequentiallity = -Eigen::MatrixI::Ones(this->geometry_curves.size(),3);
     this->GetCurvesParameters();
-    println(this->curves_parameters);
+
     for (UInteger icurve=0; icurve<this->geometry_curves.size(); ++icurve)
     {
         curves_sequentiallity(icurve,0)=icurve;
@@ -101,7 +84,7 @@ void PostMeshCurve::FindCurvesSequentiallity()
         }
     }
 //    print(consecutive_curves);
-    println(curves_sequentiallity);
+//    print(curves_sequentiallity);
 }
 
 void PostMeshCurve::ConcatenateSequentialCurves()
@@ -318,7 +301,7 @@ void PostMeshCurve::ProjectMeshOnCurve(const char *projection_method)
             }
             catch (StdFail_NotDone)
             {
-                std::cerr << "The edge node was not projected to the right curve. Curve number: " << " " << icurve << std::endl;
+                warn("The edge node was not projected to the right curve. Curve number: ",icurve);
 //                print(x,y,iedge);
 //                print(dirichlet_edges(iedge,inode));
 //                print(x,y,x2_curve,y2_curve);
