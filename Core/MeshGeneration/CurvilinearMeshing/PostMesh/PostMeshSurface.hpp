@@ -9,19 +9,64 @@ class PostMeshSurface: public PostMeshBase
 
 
 public:
-    PostMeshSurface()
+    PostMeshSurface() : PostMeshBase()
+    {
+        this->ndim = 3;
+        this->mesh_element_type = "tet";
+
+        this_curve = std::make_shared<PostMeshCurve>(PostMeshCurve());
+    }
+    PostMeshSurface(std::string &element_type, const UInteger &dim) : PostMeshBase(element_type,dim){}
+
+    inline PostMeshSurface(const PostMeshSurface& other) : PostMeshBase(other)
+    {
+        // Copy constructor
+        this->ndim = other.ndim;
+        this->mesh_element_type = other.mesh_element_type;
+    }
+
+    inline PostMeshSurface& operator=(const PostMeshSurface& other)
+    {
+        // Copy assignment operator
+        this->ndim = other.ndim;
+        this->mesh_element_type = other.mesh_element_type;
+
+        cout << "copy is called in derived" << endl;
+
+        return *this;
+    }
+
+    inline PostMeshSurface(PostMeshSurface&& other) : PostMeshBase(std::move(other))
+    {
+        // Move constructor
+        this->ndim = other.ndim;
+        this->mesh_element_type = other.mesh_element_type;
+    }
+
+    inline PostMeshSurface& operator=(PostMeshSurface&& other)
+    {
+        // Move assignment operator
+        this->ndim = other.ndim;
+        this->mesh_element_type = other.mesh_element_type;
+
+        cout << "move is called in derived" << endl;
+
+        return *this;
+    }
+
+    ~PostMeshSurface(){}
+
+    inline void Init()
     {
         this->ndim = 3;
         this->mesh_element_type = "tet";
         this->scale = 1.0;
         this->condition = 1.0e10;
 
+        //this->this_curve = new PostMeshCurve();
         this_curve = std::make_shared<PostMeshCurve>(PostMeshCurve());
     }
-    PostMeshSurface(std::string &element_type, const UInteger &dim) : PostMeshBase(element_type,dim){}
-    ~PostMeshSurface(){}
 
-    inline void Init();
     void ProjectMeshOnSurface();
     void InferInterpolationPolynomialDegree();
     void SurfacesToBsplineSurfaces();

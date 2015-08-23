@@ -14,16 +14,49 @@ class PostMeshCurve: public PostMeshBase
 
 public:
 
-    inline PostMeshCurve()
+    inline PostMeshCurve() : PostMeshBase()
     {
         this->ndim = 2;
         this->mesh_element_type = "tri";
-        this->scale = 1.0;
-        this->condition = 1.0e10;
-        this->projection_precision = 1.0e-4;
     }
 
     inline PostMeshCurve(std::string &element_type, const UInteger &dim) : PostMeshBase(element_type,dim){}
+
+    inline PostMeshCurve(const PostMeshCurve& other) : PostMeshBase(std::move(other))
+    {
+        // Copy constructor
+        this->ndim = other.ndim;
+        this->mesh_element_type = other.mesh_element_type;
+    }
+
+    inline PostMeshCurve& operator=(const PostMeshCurve& other)
+    {
+        // Copy assignment operator
+        this->ndim = other.ndim;
+        this->mesh_element_type = other.mesh_element_type;
+
+        cout << "copy is called in derived" << endl;
+
+        return *this;
+    }
+
+    inline PostMeshCurve(PostMeshCurve&& other) : PostMeshBase(other)
+    {
+        // Move constructor
+        this->ndim = other.ndim;
+        this->mesh_element_type = other.mesh_element_type;
+    }
+
+    inline PostMeshCurve& operator=(PostMeshCurve&& other)
+    {
+        // Move assignment operator
+        this->ndim = other.ndim;
+        this->mesh_element_type = other.mesh_element_type;
+
+        cout << "move is called in derived" << endl;
+
+        return *this;
+    }
 
     inline ~PostMeshCurve(){}
 

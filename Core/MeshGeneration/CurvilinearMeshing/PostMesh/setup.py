@@ -21,8 +21,8 @@ if os.name is "posix":
                 compiler_args.append("-msse")
             if 'sse2' in item and '-msse2' not in compiler_args:
                 compiler_args.append("-msse2")
-            if 'sse3' in item and '-msse3' not in compiler_args:
-                compiler_args.append("-msse3")
+            if 'ssse3' in item and '-mssse3' not in compiler_args:
+                compiler_args.append("-mssse3")
             if 'sse4' in item and '-msse4' not in compiler_args:
                 compiler_args.append("-msse4")
             if 'avx' in item and '-mavx' not in compiler_args:
@@ -56,7 +56,7 @@ extensions = [
         "/usr/local/include/oce/"],
         libraries= ["stdc++"] + occ_libs, 
         library_dirs = [_pwd_,_pwd_+"/include","/usr/local/lib/"],
-        extra_compile_args = compiler_args
+        extra_compile_args = compiler_args + ["-O3"]
         ),
 ]
 

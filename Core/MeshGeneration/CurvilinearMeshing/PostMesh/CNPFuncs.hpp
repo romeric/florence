@@ -151,25 +151,12 @@ inline void sort_back_rows(Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED>&arr
     }
 }
 
-
-template<typename T> inline Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> ravel(Eigen::Matrix<T,
-                                                                                                 DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> &arr)
+template<typename T>
+inline Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> ravel(Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> &arr)
 {
-    //! IRRESPECTIVE OF THE ARRAY CONTIGUOUSNESS (C/FORTRAN), RAVELS THE ARRAY ROW BY ROW. NOTE THAT THIS INVOLVES A COPY
-    assert (arr.cols()!=0);
-
-    Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> ravel_arr(arr.rows()*arr.cols(),1);
-    Integer counter =0;
-    for (auto i=0; i<arr.rows(); ++i)
-    {
-        for (auto j=0; j<arr.cols(); ++j)
-        {
-            ravel_arr(counter) = arr(i,j);
-            counter += 1;
-        }
-    }
-
-    return ravel_arr;
+    //! RAVEL/FLATTEN THE ARRAY RESPECTING DATA CONTIGUOUSNESS.
+    //! NOTE: MAKES A COPY
+    return Eigen::Map<Eigen::Matrix<T,DYNAMIC,DYNAMIC> > (arr.data(),arr.rows()*arr.cols(),1);
 }
 
 template<typename T>

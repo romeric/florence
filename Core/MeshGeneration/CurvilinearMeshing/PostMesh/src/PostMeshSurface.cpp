@@ -1,17 +1,6 @@
 
 #include "PostMeshSurface.hpp"
 
-void PostMeshSurface::Init()
-{
-    this->ndim = 3;
-    this->mesh_element_type = "tet";
-    this->scale = 1.0;
-    this->condition = 1.0e10;
-
-//    this->this_curve = new PostMeshCurve();
-    this_curve = std::make_shared<PostMeshCurve>(PostMeshCurve());
-}
-
 void PostMeshSurface::InferInterpolationPolynomialDegree()
 {
     //! WORKS ONLY FOR TETS

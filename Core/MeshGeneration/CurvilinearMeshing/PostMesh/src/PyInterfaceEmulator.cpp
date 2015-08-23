@@ -2,6 +2,8 @@
 #include <PyInterfaceEmulator.hpp>
 #include <PostMeshCurve.hpp>
 
+#include <PostMeshSurface.hpp>
+
 
 PassToPython  ComputeDirichleteData(const char* iges_filename, Real scale, Real *points_array, const Integer points_rows, const Integer points_cols,
                       UInteger *elements_array, const Integer element_rows, const Integer element_cols,
@@ -54,6 +56,14 @@ PassToPython  ComputeDirichleteData(const char* iges_filename, Real scale, Real 
     // OBTAIN DIRICHLET DATA
     PassToPython struct_to_python = curvilinear_mesh->GetDirichletData();
 //    PassToPython struct_to_python;
+
+//    PostMeshCurve dd;
+//    PostMeshCurve mm(dd);
+//    PostMeshCurve d2;
+//    d2 = mm;
+//    d2 = std::move(mm);
+
+//    PostMeshSurface ff;
 
 
 //    PostMeshCurve occ_interface = PostMeshCurve();

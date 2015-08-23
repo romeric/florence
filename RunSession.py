@@ -108,7 +108,9 @@ elif MainData.session == 'BEM3D':
 # https://sites.google.com/site/joebartok/circleradiusarc
 
 # delete all .pyc files 
-# find . -name '*.pyc' -delete 
+# find . -name '*.pyc' -delete
+
+# g++ asm_check.cpp -O2 -mavx -ftree-vectorize -fopt-info-vec-missed-optimized -march=native -mtune=native -o asm_check 
 
 # import inspect; print(inspect.getsource(numpy.linspace)) # numpy/scipy documenation in a shell
 # import inspect; print(inspect.getsource(np.unique)) # numpy/scipy documenation in a shellnp un

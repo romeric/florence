@@ -40,6 +40,42 @@ public:
     inline PostMeshBase(std::string &element_type, const UInteger &dim) : mesh_element_type(element_type), ndim(dim) {
         this->condition = 1.0e10;
         this->scale = 1.;
+        this->projection_precision = 1.0e-04;
+    }
+
+    inline PostMeshBase(const PostMeshBase& other) : \
+        scale(other.scale), condition(other.condition), projection_precision(other.projection_precision)
+    {
+        // Copy constructor
+        cout << "copy is called" << endl;
+    }
+
+    inline PostMeshBase& operator=(const PostMeshBase& other)
+    {
+        // Copy assignment operator
+        this->scale = other.scale;
+        this->condition = other.condition;
+        this->projection_precision = other.projection_precision;
+
+        cout << "copy is called in base" << endl;
+
+        return *this;
+    }
+
+    inline PostMeshBase(PostMeshBase&& other) : \
+        scale(other.scale), condition(other.condition), projection_precision(other.projection_precision)
+    {
+        // Move constructor
+    }
+
+    inline PostMeshBase& operator=(PostMeshBase&& other)
+    {
+        // Move assignment operator
+        this->scale = other.scale;
+        this->condition = other.condition;
+        this->projection_precision = other.projection_precision;
+
+        return *this;
     }
 
     virtual inline ~PostMeshBase(){}
@@ -127,8 +163,8 @@ public:
 
     std::string mesh_element_type;
     UInteger ndim;
-    Real condition;
     Real scale;
+    Real condition;
     Real projection_precision;
     Eigen::MatrixUI mesh_elements;
     Eigen::MatrixR mesh_points;
