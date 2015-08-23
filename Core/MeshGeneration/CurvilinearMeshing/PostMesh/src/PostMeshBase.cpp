@@ -25,8 +25,6 @@ PostMeshBase::PostMeshBase(const PostMeshBase& other) : \
     this->index_nodes = other.index_nodes;
     this->nodes_dir = other.nodes_dir;
     this->fekete = other.fekete;
-
-    cout << "copy base" << endl;
 }
 
 PostMeshBase& PostMeshBase::operator=(const PostMeshBase& other)
@@ -57,8 +55,6 @@ PostMeshBase& PostMeshBase::operator=(const PostMeshBase& other)
     this->nodes_dir = other.nodes_dir;
     this->fekete = other.fekete;
 
-    cout << "copy assignment base" << endl;
-
     return *this;
 }
 
@@ -87,7 +83,6 @@ PostMeshBase::PostMeshBase(PostMeshBase&& other) : \
     this->nodes_dir = std::move(other.nodes_dir);
     this->fekete = std::move(other.fekete);
 
-    cout << "move base \n";
     //! NB: Check that the version of Eigen you are using supports rvalue references
     //! (EIGEN_HAVE_RVALUE_REFERENCES). In PostMesh this is activated by default.
     //! Activating/deactiviting should not break the code in any way, as copy constructor
@@ -121,8 +116,6 @@ PostMeshBase& PostMeshBase::operator=(PostMeshBase&& other)
     this->index_nodes = std::move(other.index_nodes);
     this->nodes_dir = std::move(other.nodes_dir);
     this->fekete = std::move(other.fekete);
-
-    cout << "copy assignment base" << endl;
 
     //! NB: Check that the version of Eigen you are using supports rvalue references
     //! (EIGEN_HAVE_RVALUE_REFERENCES). In PostMesh this is activated by default.

@@ -17,20 +17,11 @@ PostMeshCurve::PostMeshCurve(const PostMeshCurve& other) : PostMeshBase(other)
         this->curve_to_parameter_scale_U = other.curve_to_parameter_scale_U;
         this->curves_parameters = other.curves_parameters;
         this->curves_lengths = other.curves_lengths;
-        cout << "copy" << endl;
     }
 
 PostMeshCurve& PostMeshCurve::operator=(const PostMeshCurve& other)
     {
         // Copy assignment operator
-        this->geometry_points_on_curves = other.geometry_points_on_curves;
-        this->geometry_curves_bspline = other.geometry_curves_bspline;
-        this->boundary_points_order = other.boundary_points_order;
-        this->boundary_edges_order = other.boundary_edges_order;
-        this->curve_to_parameter_scale_U = other.curve_to_parameter_scale_U;
-        this->curves_parameters = other.curves_parameters;
-        this->curves_lengths = other.curves_lengths;
-
         this->mesh_elements = other.mesh_elements;
         this->mesh_points = other.mesh_points;
         this->mesh_edges = other.mesh_edges;
@@ -49,7 +40,16 @@ PostMeshCurve& PostMeshCurve::operator=(const PostMeshCurve& other)
         this->index_nodes = other.index_nodes;
         this->nodes_dir = other.nodes_dir;
         this->fekete = other.fekete;
-        cout << "copy assignment" << endl;
+
+        this->ndim = other.ndim;
+        this->mesh_element_type = other.mesh_element_type;
+        this->geometry_points_on_curves = other.geometry_points_on_curves;
+        this->geometry_curves_bspline = other.geometry_curves_bspline;
+        this->boundary_points_order = other.boundary_points_order;
+        this->boundary_edges_order = other.boundary_edges_order;
+        this->curve_to_parameter_scale_U = other.curve_to_parameter_scale_U;
+        this->curves_parameters = other.curves_parameters;
+        this->curves_lengths = other.curves_lengths;
 
         return *this;
     }
@@ -66,7 +66,6 @@ PostMeshCurve::PostMeshCurve(PostMeshCurve&& other) : PostMeshBase(std::move(oth
         this->curve_to_parameter_scale_U = std::move(other.curve_to_parameter_scale_U);
         this->curves_parameters = std::move(other.curves_parameters);
         this->curves_lengths = std::move(other.curves_lengths);
-        cout << "move" << endl;
     }
 
 PostMeshCurve& PostMeshCurve::operator=(PostMeshCurve&& other)
@@ -100,7 +99,6 @@ PostMeshCurve& PostMeshCurve::operator=(PostMeshCurve&& other)
         this->curve_to_parameter_scale_U = std::move(other.curve_to_parameter_scale_U);
         this->curves_parameters = std::move(other.curves_parameters);
         this->curves_lengths = std::move(other.curves_lengths);
-        cout << "move assignemnt" << endl;
 
         return *this;
     }
@@ -108,7 +106,7 @@ PostMeshCurve& PostMeshCurve::operator=(PostMeshCurve&& other)
 void PostMeshCurve::InferInterpolationPolynomialDegree()
 {
     //! WORKS ONLY FOR TRIS
-    for (auto i=0; i<50;++i)
+    for (auto i=1; i<50;++i)
     {
         if ( (i+1)*(i+2)/2 == this->mesh_elements.cols())
         {

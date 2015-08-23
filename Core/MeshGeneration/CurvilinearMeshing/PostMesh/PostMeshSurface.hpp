@@ -13,7 +13,6 @@ public:
     {
         this->ndim = 3;
         this->mesh_element_type = "tet";
-        cout << "default surface" << endl;
 
         this_curve = std::make_shared<PostMeshCurve>(PostMeshCurve());
     }

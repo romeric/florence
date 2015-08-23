@@ -39,7 +39,9 @@
             "-std=c++11", 
             "-msse", 
             "-msse2", 
-            "-mavx"
+            "-mssse3", 
+            "-mavx", 
+            "-O3"
         ], 
         "library_dirs": [
             "/home/roman/Dropbox/Florence/Core/MeshGeneration/CurvilinearMeshing/PostMesh", 

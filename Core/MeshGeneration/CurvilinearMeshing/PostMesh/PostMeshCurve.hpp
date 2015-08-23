@@ -15,7 +15,6 @@ public:
     {
         this->ndim = 2;
         this->mesh_element_type = "tri";
-        cout << "default curve\n";
     }
 
     inline PostMeshCurve(std::string &element_type, const UInteger &dim) : PostMeshBase(element_type,dim){}

@@ -10,19 +10,35 @@ PostMeshSurface::PostMeshSurface(const PostMeshSurface& other) : PostMeshBase(ot
     this->geometry_points_on_surfaces = other.geometry_points_on_surfaces;
     this->geometry_surfaces_bspline = other.geometry_surfaces_bspline;
     this->boundary_faces_order = other.boundary_faces_order;
-    cout << "copy" << endl;
 }
 
 PostMeshSurface& PostMeshSurface::operator=(const PostMeshSurface& other)
 {
     // Copy assignment operator
+    this->mesh_elements = other.mesh_elements;
+    this->mesh_points = other.mesh_points;
+    this->mesh_edges = other.mesh_edges;
+    this->mesh_faces = other.mesh_faces;
+    this->projection_criteria = other.projection_criteria;
+    this->degree = degree;
+    this->imported_shape = other.imported_shape;
+    this->no_of_shapes = other.no_of_shapes;
+    this->geometry_points = other.geometry_points;
+    this->geometry_curves = other.geometry_curves;
+    this->geometry_surfaces = other.geometry_surfaces;
+    this->geometry_curves_types = other.geometry_curves_types;
+    this->geometry_surfaces_types = other.geometry_surfaces_types;
+    this->projection_method = other.projection_method;
+    this->displacements_BC = other.displacements_BC;
+    this->index_nodes = other.index_nodes;
+    this->nodes_dir = other.nodes_dir;
+    this->fekete = other.fekete;
+
     this->ndim = other.ndim;
     this->mesh_element_type = other.mesh_element_type;
-
     this->geometry_points_on_surfaces = other.geometry_points_on_surfaces;
     this->geometry_surfaces_bspline = other.geometry_surfaces_bspline;
     this->boundary_faces_order = other.boundary_faces_order;
-    cout << "copy assignment" << endl;
 
     return *this;
 }
@@ -32,33 +48,47 @@ PostMeshSurface::PostMeshSurface(PostMeshSurface&& other) : PostMeshBase(std::mo
     // Move constructor
     this->ndim = other.ndim;
     this->mesh_element_type = other.mesh_element_type;
-
     this->geometry_points_on_surfaces = std::move(other.geometry_points_on_surfaces);
     this->geometry_surfaces_bspline = std::move(other.geometry_surfaces_bspline);
     this->boundary_faces_order = std::move(other.boundary_faces_order);
-    cout << "move" << endl;
 }
 
 PostMeshSurface& PostMeshSurface::operator=(PostMeshSurface&& other)
 {
     // Move assignment operator
+    this->mesh_elements = std::move(other.mesh_elements);
+    this->mesh_points = std::move(other.mesh_points);
+    this->mesh_edges = std::move(other.mesh_edges);
+    this->mesh_faces = std::move(other.mesh_faces);
+    this->projection_criteria = std::move(other.projection_criteria);
+    this->degree = degree;
+    this->imported_shape = std::move(other.imported_shape);
+    this->no_of_shapes = other.no_of_shapes;
+    this->geometry_points = std::move(other.geometry_points);
+    this->geometry_curves = std::move(other.geometry_curves);
+    this->geometry_surfaces = std::move(other.geometry_surfaces);
+    this->geometry_curves_types = std::move(other.geometry_curves_types);
+    this->geometry_surfaces_types = std::move(other.geometry_surfaces_types);
+    this->projection_method = std::move(other.projection_method);
+    this->displacements_BC = std::move(other.displacements_BC);
+    this->index_nodes = std::move(other.index_nodes);
+    this->nodes_dir = std::move(other.nodes_dir);
+    this->fekete = std::move(other.fekete);
+
     this->ndim = other.ndim;
     this->mesh_element_type = other.mesh_element_type;
-
     this->geometry_points_on_surfaces = std::move(other.geometry_points_on_surfaces);
     this->geometry_surfaces_bspline = std::move(other.geometry_surfaces_bspline);
     this->boundary_faces_order = std::move(other.boundary_faces_order);
-    cout << "move assignment" << endl;
 
     return *this;
 }
 
 
-
 void PostMeshSurface::InferInterpolationPolynomialDegree()
 {
     //! WORKS ONLY FOR TETS
-    for (auto i=0; i<50;++i)
+    for (auto i=1; i<50;++i)
     {
         if ( (i+1)*(i+2)*(i+3)/6 == this->mesh_elements.cols())
         {
