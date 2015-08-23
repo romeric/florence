@@ -31,8 +31,6 @@ public:
         this->ndim = other.ndim;
         this->mesh_element_type = other.mesh_element_type;
 
-        cout << "copy is called in derived" << endl;
-
         return *this;
     }
 
@@ -48,8 +46,6 @@ public:
         // Move assignment operator
         this->ndim = other.ndim;
         this->mesh_element_type = other.mesh_element_type;
-
-        cout << "move is called in derived" << endl;
 
         return *this;
     }

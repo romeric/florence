@@ -19,6 +19,7 @@ PassToPython  ComputeDirichleteData(const char* iges_filename, Real scale, Real 
 
 //    PostMeshCurve occ_interface = PostMeshCurve(element_type,dimension);
 //    PostMeshCurve *curvilinear_mesh = new PostMeshCurve();
+//    PostMeshCurve check;
     std::shared_ptr<PostMeshCurve> curvilinear_mesh = std::make_shared<PostMeshCurve>(PostMeshCurve());
     curvilinear_mesh->SetMeshElements(elements_array,element_rows,element_cols);
     curvilinear_mesh->SetMeshElements(elements_array,element_rows,element_cols);
@@ -56,51 +57,6 @@ PassToPython  ComputeDirichleteData(const char* iges_filename, Real scale, Real 
     // OBTAIN DIRICHLET DATA
     PassToPython struct_to_python = curvilinear_mesh->GetDirichletData();
 //    PassToPython struct_to_python;
-
-//    PostMeshCurve dd;
-//    PostMeshCurve mm(dd);
-//    PostMeshCurve d2;
-//    d2 = mm;
-//    d2 = std::move(mm);
-
-//    PostMeshSurface ff;
-
-
-//    PostMeshCurve occ_interface = PostMeshCurve();
-//    occ_interface.SetMeshElements(elements_array,element_rows,element_cols);
-//    occ_interface.SetMeshPoints(points_array,points_rows,points_cols);
-//    occ_interface.SetMeshEdges(edges_array,edges_rows,edges_cols);
-//    occ_interface.SetMeshFaces(faces_array,faces_rows,faces_cols);
-//    occ_interface.SetScale(scale);
-//    occ_interface.SetCondition(condition);
-//    occ_interface.SetProjectionCriteria(criteria,criteria_rows,criteria_cols);
-//    occ_interface.ScaleMesh();
-
-//    occ_interface.InferInterpolationPolynomialDegree();
-//    occ_interface.SetFeketePoints(boundary_fekete,fekete_rows,fekete_cols);
-//    occ_interface.GetBoundaryPointsOrder();
-
-//    // READ THE GEOMETRY FROM THE IGES FILE
-//    occ_interface.ReadIGES(iges_filename);
-
-//    // EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
-//    occ_interface.GetGeomVertices();
-//    occ_interface.GetGeomEdges();
-//    occ_interface.GetGeomFaces();
-
-//    occ_interface.GetGeomPointsOnCorrespondingEdges();
-
-//    // FIRST IDENTIFY WHICH CURVES CONTAIN WHICH EDGES
-//    occ_interface.IdentifyCurvesContainingEdges();
-//    // PROJECT ALL BOUNDARY POINTS FROM THE MESH TO THE CURVE
-//    occ_interface.ProjectMeshOnCurve(projection_method);
-//    // FIX IMAGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
-//    occ_interface.RepairDualProjectedParameters();
-//    //PERFORM POINT INVERTION FOR THE INTERIOR POINTS
-//    occ_interface.MeshPointInversionCurve();
-//    // OBTAIN DIRICHLET DATA
-//    PassToPython struct_to_python = occ_interface.GetDirichletData();
-////    PassToPython struct_to_python;
 
 
     return struct_to_python;

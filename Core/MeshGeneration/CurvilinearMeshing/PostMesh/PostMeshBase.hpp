@@ -27,8 +27,9 @@ class PostMeshBase
 public:
     //! PUBLIC MEMBER FUNCTIONS OF POSTMESH BASE CLASS. SHORTER FUNCTIONS ARE
     //! DECLARED AND DEFINED IN THE HEADER TO PROVIDE THEM WITH THE POSSIBILITY
-    //! OF BEING INLINED BY THE COMPILER. ALTHOUGH THIS WOULD NOT AFFECT THE
-    //! PERFORMANCE MUCH AS THESE FUNCTIONS ARE MAINLY CALLED ONCE.
+    //! OF BEING INLINED BY THE COMPILER. ALTHOUGH DEEMED UN-NECESSARY, USER-
+    //! DEFINED COPY/MOVE CONSTRUCTORS AND OPERATORS ARE IMPLEMENTED TO RESTRICT
+    //! COPY OF DATA MEMBERS TO A SPECIFIC SET.
 
     inline PostMeshBase()
     {
@@ -47,7 +48,26 @@ public:
         scale(other.scale), condition(other.condition), projection_precision(other.projection_precision)
     {
         // Copy constructor
-        cout << "copy is called" << endl;
+        this->mesh_element_type = other.mesh_element_type;
+        this->ndim = other.ndim;
+        this->mesh_elements = other.mesh_elements;
+        this->mesh_points = other.mesh_points;
+        this->mesh_edges = other.mesh_edges;
+        this->mesh_faces = other.mesh_faces;
+        this->projection_criteria = other.projection_criteria;
+        this->degree = degree;
+        this->imported_shape = other.imported_shape;
+        this->no_of_shapes = other.no_of_shapes;
+        this->geometry_points = other.geometry_points;
+        this->geometry_curves = other.geometry_curves;
+        this->geometry_surfaces = other.geometry_surfaces;
+        this->geometry_curves_types = other.geometry_curves_types;
+        this->geometry_surfaces_types = other.geometry_surfaces_types;
+        this->projection_method = other.projection_method;
+        this->displacements_BC = other.displacements_BC;
+        this->index_nodes = other.index_nodes;
+        this->nodes_dir = other.nodes_dir;
+        this->fekete = other.fekete;
     }
 
     inline PostMeshBase& operator=(const PostMeshBase& other)
@@ -57,7 +77,26 @@ public:
         this->condition = other.condition;
         this->projection_precision = other.projection_precision;
 
-        cout << "copy is called in base" << endl;
+        this->mesh_element_type = other.mesh_element_type;
+        this->ndim = other.ndim;
+        this->mesh_elements = other.mesh_elements;
+        this->mesh_points = other.mesh_points;
+        this->mesh_edges = other.mesh_edges;
+        this->mesh_faces = other.mesh_faces;
+        this->projection_criteria = other.projection_criteria;
+        this->degree = degree;
+        this->imported_shape = other.imported_shape;
+        this->no_of_shapes = other.no_of_shapes;
+        this->geometry_points = other.geometry_points;
+        this->geometry_curves = other.geometry_curves;
+        this->geometry_surfaces = other.geometry_surfaces;
+        this->geometry_curves_types = other.geometry_curves_types;
+        this->geometry_surfaces_types = other.geometry_surfaces_types;
+        this->projection_method = other.projection_method;
+        this->displacements_BC = other.displacements_BC;
+        this->index_nodes = other.index_nodes;
+        this->nodes_dir = other.nodes_dir;
+        this->fekete = other.fekete;
 
         return *this;
     }
@@ -65,7 +104,31 @@ public:
     inline PostMeshBase(PostMeshBase&& other) : \
         scale(other.scale), condition(other.condition), projection_precision(other.projection_precision)
     {
-        // Move constructor
+        //! Move constructor for PostMeshBase class
+        this->mesh_element_type = other.mesh_element_type;
+        this->ndim = other.ndim;
+        this->mesh_elements = std::move(other.mesh_elements);
+        this->mesh_points = std::move(other.mesh_points);
+        this->mesh_edges = std::move(other.mesh_edges);
+        this->mesh_faces = std::move(other.mesh_faces);
+        this->projection_criteria = std::move(other.projection_criteria);
+        this->degree = degree;
+        this->imported_shape = std::move(other.imported_shape);
+        this->no_of_shapes = other.no_of_shapes;
+        this->geometry_points = std::move(other.geometry_points);
+        this->geometry_curves = std::move(other.geometry_curves);
+        this->geometry_surfaces = std::move(other.geometry_surfaces);
+        this->geometry_curves_types = std::move(other.geometry_curves_types);
+        this->geometry_surfaces_types = std::move(other.geometry_surfaces_types);
+        this->projection_method = std::move(other.projection_method);
+        this->displacements_BC = std::move(other.displacements_BC);
+        this->index_nodes = std::move(other.index_nodes);
+        this->nodes_dir = std::move(other.nodes_dir);
+        this->fekete = std::move(other.fekete);
+
+        //! NB: While STL containers implement move semantics, Eigen does not. So a proper
+        //! "move" happens when std::vector is used while a moved Eigen::Matrix<T,Options> will
+        //! still be in scope
     }
 
     inline PostMeshBase& operator=(PostMeshBase&& other)
@@ -74,6 +137,31 @@ public:
         this->scale = other.scale;
         this->condition = other.condition;
         this->projection_precision = other.projection_precision;
+
+        this->mesh_element_type = other.mesh_element_type;
+        this->ndim = other.ndim;
+        this->mesh_elements = std::move(other.mesh_elements);
+        this->mesh_points = std::move(other.mesh_points);
+        this->mesh_edges = std::move(other.mesh_edges);
+        this->mesh_faces = std::move(other.mesh_faces);
+        this->projection_criteria = std::move(other.projection_criteria);
+        this->degree = degree;
+        this->imported_shape = std::move(other.imported_shape);
+        this->no_of_shapes = other.no_of_shapes;
+        this->geometry_points = std::move(other.geometry_points);
+        this->geometry_curves = std::move(other.geometry_curves);
+        this->geometry_surfaces = std::move(other.geometry_surfaces);
+        this->geometry_curves_types = std::move(other.geometry_curves_types);
+        this->geometry_surfaces_types = std::move(other.geometry_surfaces_types);
+        this->projection_method = std::move(other.projection_method);
+        this->displacements_BC = std::move(other.displacements_BC);
+        this->index_nodes = std::move(other.index_nodes);
+        this->nodes_dir = std::move(other.nodes_dir);
+        this->fekete = std::move(other.fekete);
+
+        //! NB: While STL containers implement move semantics, Eigen does not. So a proper
+        //! "move" happens when std::vector is used while a moved Eigen::Matrix<T,Options> will
+        //! still be in scope
 
         return *this;
     }
@@ -171,8 +259,6 @@ public:
     Eigen::MatrixUI mesh_edges;
     Eigen::MatrixUI mesh_faces;
     Eigen::MatrixUI projection_criteria;
-//    Eigen::EigenBase<Real> xx;
-//    Eigen::MatrixBase<Real> xx;
 
     UInteger degree;
     TopoDS_Shape imported_shape;
