@@ -13,43 +13,17 @@ public:
     {
         this->ndim = 3;
         this->mesh_element_type = "tet";
+        cout << "default surface" << endl;
 
         this_curve = std::make_shared<PostMeshCurve>(PostMeshCurve());
     }
+
     PostMeshSurface(std::string &element_type, const UInteger &dim) : PostMeshBase(element_type,dim){}
 
-    inline PostMeshSurface(const PostMeshSurface& other) : PostMeshBase(other)
-    {
-        // Copy constructor
-        this->ndim = other.ndim;
-        this->mesh_element_type = other.mesh_element_type;
-    }
-
-    inline PostMeshSurface& operator=(const PostMeshSurface& other)
-    {
-        // Copy assignment operator
-        this->ndim = other.ndim;
-        this->mesh_element_type = other.mesh_element_type;
-
-        return *this;
-    }
-
-    inline PostMeshSurface(PostMeshSurface&& other) : PostMeshBase(std::move(other))
-    {
-        // Move constructor
-        this->ndim = other.ndim;
-        this->mesh_element_type = other.mesh_element_type;
-    }
-
-    inline PostMeshSurface& operator=(PostMeshSurface&& other)
-    {
-        // Move assignment operator
-        this->ndim = other.ndim;
-        this->mesh_element_type = other.mesh_element_type;
-
-        return *this;
-    }
-
+    PostMeshSurface(const PostMeshSurface& other);
+    PostMeshSurface& operator=(const PostMeshSurface& other);
+    PostMeshSurface(PostMeshSurface&& other);
+    PostMeshSurface& operator=(PostMeshSurface&& other);
     ~PostMeshSurface(){}
 
     inline void Init()
@@ -71,7 +45,7 @@ public:
 
     std::vector<Eigen::MatrixR> geometry_points_on_surfaces;
     std::vector<Handle_Geom_BSplineSurface> geometry_surfaces_bspline;
-    Eigen::MatrixI boundary_edges_order;
+    Eigen::MatrixI boundary_faces_order;
 
 protected:
 //    PostMeshCurve *this_curve;

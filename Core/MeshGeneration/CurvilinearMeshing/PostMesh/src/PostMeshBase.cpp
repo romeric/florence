@@ -1,6 +1,138 @@
 
 #include <PostMeshBase.hpp>
 
+PostMeshBase::PostMeshBase(const PostMeshBase& other) : \
+    scale(other.scale), condition(other.condition), projection_precision(other.projection_precision)
+{
+    // Copy constructor
+    this->mesh_element_type = other.mesh_element_type;
+    this->ndim = other.ndim;
+    this->mesh_elements = other.mesh_elements;
+    this->mesh_points = other.mesh_points;
+    this->mesh_edges = other.mesh_edges;
+    this->mesh_faces = other.mesh_faces;
+    this->projection_criteria = other.projection_criteria;
+    this->degree = degree;
+    this->imported_shape = other.imported_shape;
+    this->no_of_shapes = other.no_of_shapes;
+    this->geometry_points = other.geometry_points;
+    this->geometry_curves = other.geometry_curves;
+    this->geometry_surfaces = other.geometry_surfaces;
+    this->geometry_curves_types = other.geometry_curves_types;
+    this->geometry_surfaces_types = other.geometry_surfaces_types;
+    this->projection_method = other.projection_method;
+    this->displacements_BC = other.displacements_BC;
+    this->index_nodes = other.index_nodes;
+    this->nodes_dir = other.nodes_dir;
+    this->fekete = other.fekete;
+
+    cout << "copy base" << endl;
+}
+
+PostMeshBase& PostMeshBase::operator=(const PostMeshBase& other)
+{
+    // Copy assignment operator
+    this->scale = other.scale;
+    this->condition = other.condition;
+    this->projection_precision = other.projection_precision;
+
+    this->mesh_element_type = other.mesh_element_type;
+    this->ndim = other.ndim;
+    this->mesh_elements = other.mesh_elements;
+    this->mesh_points = other.mesh_points;
+    this->mesh_edges = other.mesh_edges;
+    this->mesh_faces = other.mesh_faces;
+    this->projection_criteria = other.projection_criteria;
+    this->degree = degree;
+    this->imported_shape = other.imported_shape;
+    this->no_of_shapes = other.no_of_shapes;
+    this->geometry_points = other.geometry_points;
+    this->geometry_curves = other.geometry_curves;
+    this->geometry_surfaces = other.geometry_surfaces;
+    this->geometry_curves_types = other.geometry_curves_types;
+    this->geometry_surfaces_types = other.geometry_surfaces_types;
+    this->projection_method = other.projection_method;
+    this->displacements_BC = other.displacements_BC;
+    this->index_nodes = other.index_nodes;
+    this->nodes_dir = other.nodes_dir;
+    this->fekete = other.fekete;
+
+    cout << "copy assignment base" << endl;
+
+    return *this;
+}
+
+PostMeshBase::PostMeshBase(PostMeshBase&& other) : \
+    scale(other.scale), condition(other.condition), projection_precision(other.projection_precision)
+{
+    //! Move constructor for PostMeshBase class
+    this->mesh_element_type = other.mesh_element_type;
+    this->ndim = other.ndim;
+    this->mesh_elements = std::move(other.mesh_elements);
+    this->mesh_points = std::move(other.mesh_points);
+    this->mesh_edges = std::move(other.mesh_edges);
+    this->mesh_faces = std::move(other.mesh_faces);
+    this->projection_criteria = std::move(other.projection_criteria);
+    this->degree = degree;
+    this->imported_shape = std::move(other.imported_shape);
+    this->no_of_shapes = other.no_of_shapes;
+    this->geometry_points = std::move(other.geometry_points);
+    this->geometry_curves = std::move(other.geometry_curves);
+    this->geometry_surfaces = std::move(other.geometry_surfaces);
+    this->geometry_curves_types = std::move(other.geometry_curves_types);
+    this->geometry_surfaces_types = std::move(other.geometry_surfaces_types);
+    this->projection_method = std::move(other.projection_method);
+    this->displacements_BC = std::move(other.displacements_BC);
+    this->index_nodes = std::move(other.index_nodes);
+    this->nodes_dir = std::move(other.nodes_dir);
+    this->fekete = std::move(other.fekete);
+
+    cout << "move base \n";
+    //! NB: Check that the version of Eigen you are using supports rvalue references
+    //! (EIGEN_HAVE_RVALUE_REFERENCES). In PostMesh this is activated by default.
+    //! Activating/deactiviting should not break the code in any way, as copy constructor
+    //! would kick in
+}
+
+PostMeshBase& PostMeshBase::operator=(PostMeshBase&& other)
+{
+    // Move assignment operator
+    this->scale = other.scale;
+    this->condition = other.condition;
+    this->projection_precision = other.projection_precision;
+
+    this->mesh_element_type = other.mesh_element_type;
+    this->ndim = other.ndim;
+    this->mesh_elements = std::move(other.mesh_elements);
+    this->mesh_points = std::move(other.mesh_points);
+    this->mesh_edges = std::move(other.mesh_edges);
+    this->mesh_faces = std::move(other.mesh_faces);
+    this->projection_criteria = std::move(other.projection_criteria);
+    this->degree = degree;
+    this->imported_shape = std::move(other.imported_shape);
+    this->no_of_shapes = other.no_of_shapes;
+    this->geometry_points = std::move(other.geometry_points);
+    this->geometry_curves = std::move(other.geometry_curves);
+    this->geometry_surfaces = std::move(other.geometry_surfaces);
+    this->geometry_curves_types = std::move(other.geometry_curves_types);
+    this->geometry_surfaces_types = std::move(other.geometry_surfaces_types);
+    this->projection_method = std::move(other.projection_method);
+    this->displacements_BC = std::move(other.displacements_BC);
+    this->index_nodes = std::move(other.index_nodes);
+    this->nodes_dir = std::move(other.nodes_dir);
+    this->fekete = std::move(other.fekete);
+
+    cout << "copy assignment base" << endl;
+
+    //! NB: Check that the version of Eigen you are using supports rvalue references
+    //! (EIGEN_HAVE_RVALUE_REFERENCES). In PostMesh this is activated by default.
+    //! Activating/deactiviting should not break the code in any way, as copy constructor
+    //! would kick in
+
+    return *this;
+}
+
+
 
 void PostMeshBase::ReadIGES(const char* filename)
 {

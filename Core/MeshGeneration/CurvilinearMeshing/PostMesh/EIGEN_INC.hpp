@@ -9,6 +9,7 @@
 
 #define EIGEN_VECTORIZE
 #define EIGEN_DEFAULT_TO_ROW_MAJOR
+#define EIGEN_HAVE_RVALUE_REFERENCES
 
 #include <Eigen/Core>
 #include <Eigen/Dense>

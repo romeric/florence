@@ -4,9 +4,6 @@
 #include <PostMeshBase.hpp>
 
 
-
-
-
 // BASE CLASS FOR OPENCASCADE FRONT-END
 class PostMeshCurve: public PostMeshBase
 {
@@ -18,42 +15,15 @@ public:
     {
         this->ndim = 2;
         this->mesh_element_type = "tri";
+        cout << "default curve\n";
     }
 
     inline PostMeshCurve(std::string &element_type, const UInteger &dim) : PostMeshBase(element_type,dim){}
 
-    inline PostMeshCurve(const PostMeshCurve& other) : PostMeshBase(std::move(other))
-    {
-        // Copy constructor
-        this->ndim = other.ndim;
-        this->mesh_element_type = other.mesh_element_type;
-    }
-
-    inline PostMeshCurve& operator=(const PostMeshCurve& other)
-    {
-        // Copy assignment operator
-        this->ndim = other.ndim;
-        this->mesh_element_type = other.mesh_element_type;
-
-        return *this;
-    }
-
-    inline PostMeshCurve(PostMeshCurve&& other) : PostMeshBase(other)
-    {
-        // Move constructor
-        this->ndim = other.ndim;
-        this->mesh_element_type = other.mesh_element_type;
-    }
-
-    inline PostMeshCurve& operator=(PostMeshCurve&& other)
-    {
-        // Move assignment operator
-        this->ndim = other.ndim;
-        this->mesh_element_type = other.mesh_element_type;
-
-        return *this;
-    }
-
+    PostMeshCurve(const PostMeshCurve& other);
+    PostMeshCurve& operator=(const PostMeshCurve& other);
+    PostMeshCurve(PostMeshCurve&& other);
+    PostMeshCurve& operator=(PostMeshCurve&& other);
     inline ~PostMeshCurve(){}
 
     inline void Init()

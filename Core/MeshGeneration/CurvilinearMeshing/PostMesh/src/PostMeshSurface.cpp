@@ -1,5 +1,59 @@
 
-#include "PostMeshSurface.hpp"
+#include <PostMeshSurface.hpp>
+
+PostMeshSurface::PostMeshSurface(const PostMeshSurface& other) : PostMeshBase(other)
+{
+    // Copy constructor
+    this->ndim = other.ndim;
+    this->mesh_element_type = other.mesh_element_type;
+
+    this->geometry_points_on_surfaces = other.geometry_points_on_surfaces;
+    this->geometry_surfaces_bspline = other.geometry_surfaces_bspline;
+    this->boundary_faces_order = other.boundary_faces_order;
+    cout << "copy" << endl;
+}
+
+PostMeshSurface& PostMeshSurface::operator=(const PostMeshSurface& other)
+{
+    // Copy assignment operator
+    this->ndim = other.ndim;
+    this->mesh_element_type = other.mesh_element_type;
+
+    this->geometry_points_on_surfaces = other.geometry_points_on_surfaces;
+    this->geometry_surfaces_bspline = other.geometry_surfaces_bspline;
+    this->boundary_faces_order = other.boundary_faces_order;
+    cout << "copy assignment" << endl;
+
+    return *this;
+}
+
+PostMeshSurface::PostMeshSurface(PostMeshSurface&& other) : PostMeshBase(std::move(other))
+{
+    // Move constructor
+    this->ndim = other.ndim;
+    this->mesh_element_type = other.mesh_element_type;
+
+    this->geometry_points_on_surfaces = std::move(other.geometry_points_on_surfaces);
+    this->geometry_surfaces_bspline = std::move(other.geometry_surfaces_bspline);
+    this->boundary_faces_order = std::move(other.boundary_faces_order);
+    cout << "move" << endl;
+}
+
+PostMeshSurface& PostMeshSurface::operator=(PostMeshSurface&& other)
+{
+    // Move assignment operator
+    this->ndim = other.ndim;
+    this->mesh_element_type = other.mesh_element_type;
+
+    this->geometry_points_on_surfaces = std::move(other.geometry_points_on_surfaces);
+    this->geometry_surfaces_bspline = std::move(other.geometry_surfaces_bspline);
+    this->boundary_faces_order = std::move(other.boundary_faces_order);
+    cout << "move assignment" << endl;
+
+    return *this;
+}
+
+
 
 void PostMeshSurface::InferInterpolationPolynomialDegree()
 {

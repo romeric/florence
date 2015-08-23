@@ -5,7 +5,105 @@
 using namespace std;
 
 
-// PostMeshCurve class definitions
+PostMeshCurve::PostMeshCurve(const PostMeshCurve& other) : PostMeshBase(other)
+    {
+        // Copy constructor
+        this->ndim = other.ndim;
+        this->mesh_element_type = other.mesh_element_type;
+        this->geometry_points_on_curves = other.geometry_points_on_curves;
+        this->geometry_curves_bspline = other.geometry_curves_bspline;
+        this->boundary_points_order = other.boundary_points_order;
+        this->boundary_edges_order = other.boundary_edges_order;
+        this->curve_to_parameter_scale_U = other.curve_to_parameter_scale_U;
+        this->curves_parameters = other.curves_parameters;
+        this->curves_lengths = other.curves_lengths;
+        cout << "copy" << endl;
+    }
+
+PostMeshCurve& PostMeshCurve::operator=(const PostMeshCurve& other)
+    {
+        // Copy assignment operator
+        this->geometry_points_on_curves = other.geometry_points_on_curves;
+        this->geometry_curves_bspline = other.geometry_curves_bspline;
+        this->boundary_points_order = other.boundary_points_order;
+        this->boundary_edges_order = other.boundary_edges_order;
+        this->curve_to_parameter_scale_U = other.curve_to_parameter_scale_U;
+        this->curves_parameters = other.curves_parameters;
+        this->curves_lengths = other.curves_lengths;
+
+        this->mesh_elements = other.mesh_elements;
+        this->mesh_points = other.mesh_points;
+        this->mesh_edges = other.mesh_edges;
+        this->mesh_faces = other.mesh_faces;
+        this->projection_criteria = other.projection_criteria;
+        this->degree = degree;
+        this->imported_shape = other.imported_shape;
+        this->no_of_shapes = other.no_of_shapes;
+        this->geometry_points = other.geometry_points;
+        this->geometry_curves = other.geometry_curves;
+        this->geometry_surfaces = other.geometry_surfaces;
+        this->geometry_curves_types = other.geometry_curves_types;
+        this->geometry_surfaces_types = other.geometry_surfaces_types;
+        this->projection_method = other.projection_method;
+        this->displacements_BC = other.displacements_BC;
+        this->index_nodes = other.index_nodes;
+        this->nodes_dir = other.nodes_dir;
+        this->fekete = other.fekete;
+        cout << "copy assignment" << endl;
+
+        return *this;
+    }
+
+PostMeshCurve::PostMeshCurve(PostMeshCurve&& other) : PostMeshBase(std::move(other))
+    {
+        // Move constructor
+        this->ndim = other.ndim;
+        this->mesh_element_type = std::move(other.mesh_element_type);
+        this->geometry_points_on_curves = std::move(other.geometry_points_on_curves);
+        this->geometry_curves_bspline = std::move(other.geometry_curves_bspline);
+        this->boundary_points_order = std::move(other.boundary_points_order);
+        this->boundary_edges_order = std::move(other.boundary_edges_order);
+        this->curve_to_parameter_scale_U = std::move(other.curve_to_parameter_scale_U);
+        this->curves_parameters = std::move(other.curves_parameters);
+        this->curves_lengths = std::move(other.curves_lengths);
+        cout << "move" << endl;
+    }
+
+PostMeshCurve& PostMeshCurve::operator=(PostMeshCurve&& other)
+    {
+        // Move assignment operator
+        this->mesh_elements = std::move(other.mesh_elements);
+        this->mesh_points = std::move(other.mesh_points);
+        this->mesh_edges = std::move(other.mesh_edges);
+        this->mesh_faces = std::move(other.mesh_faces);
+        this->projection_criteria = std::move(other.projection_criteria);
+        this->degree = degree;
+        this->imported_shape = std::move(other.imported_shape);
+        this->no_of_shapes = other.no_of_shapes;
+        this->geometry_points = std::move(other.geometry_points);
+        this->geometry_curves = std::move(other.geometry_curves);
+        this->geometry_surfaces = std::move(other.geometry_surfaces);
+        this->geometry_curves_types = std::move(other.geometry_curves_types);
+        this->geometry_surfaces_types = std::move(other.geometry_surfaces_types);
+        this->projection_method = std::move(other.projection_method);
+        this->displacements_BC = std::move(other.displacements_BC);
+        this->index_nodes = std::move(other.index_nodes);
+        this->nodes_dir = std::move(other.nodes_dir);
+        this->fekete = std::move(other.fekete);
+
+        this->ndim = other.ndim;
+        this->mesh_element_type = other.mesh_element_type;
+        this->geometry_points_on_curves = std::move(other.geometry_points_on_curves);
+        this->geometry_curves_bspline = std::move(other.geometry_curves_bspline);
+        this->boundary_points_order = std::move(other.boundary_points_order);
+        this->boundary_edges_order = std::move(other.boundary_edges_order);
+        this->curve_to_parameter_scale_U = std::move(other.curve_to_parameter_scale_U);
+        this->curves_parameters = std::move(other.curves_parameters);
+        this->curves_lengths = std::move(other.curves_lengths);
+        cout << "move assignemnt" << endl;
+
+        return *this;
+    }
 
 void PostMeshCurve::InferInterpolationPolynomialDegree()
 {
