@@ -42,6 +42,9 @@ PassToPython  ComputeDirichleteData(const char* iges_filename, Real scale, Real 
     curvilinear_mesh->GetGeomVertices();
     curvilinear_mesh->GetGeomEdges();
     curvilinear_mesh->GetGeomFaces();
+//    Handle_Geom_Surface xx = curvilinear_mesh->geometry_surfaces[0];
+//    cout << xx->IsUClosed() << endl;
+//    exit (EXIT_FAILURE);
 
     curvilinear_mesh->GetGeomPointsOnCorrespondingEdges();
 

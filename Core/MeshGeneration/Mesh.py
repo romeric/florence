@@ -43,6 +43,17 @@ class Mesh(object):
 		self.faces = None
 		self.element_type = None
 
+	def SetElements(self,arr):
+		self.elements = arr
+
+	def SetPoints(self,arr):
+		self.points = arr
+
+	def SetEdges(self,arr):
+		self.edges = arr
+
+	def SetFaces(self,arr):
+		self.faces = arr
 
 	def GetBoundaryEdgesTri(self,TotalEdges=False):
 		"""Given a linear triangular mesh, find the boundary edges (lines).
@@ -710,6 +721,7 @@ class Mesh(object):
 			plt.triplot(self.points[:,0],self.points[:,1],self.elements[:,:3])
 			plt.axis('equal')
 			plt.show()
+
 
 	def ChangeType(self):
 		self.elements = mesh.elements.astype(np.uint64)

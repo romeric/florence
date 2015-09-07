@@ -15,29 +15,45 @@ namespace cpp_numpy {
 
 inline Eigen::MatrixI arange(Integer a, Integer b)
 {
-//    return Eigen::VectorXi::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
     return Eigen::Matrix<Integer,DYNAMIC,1,POSTMESH_ALIGNED>::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
 }
+
 inline Eigen::MatrixI arange(Integer b=1)
 {
-    /* default arange starting from zero and ending at 1.
-     * b is optional and a is always zero
+    /* DEFAULT ARANGE STARTING FROM ZERO AND ENDING AT 1.
+     * b IS OPTIONAL AND A IS ALWAYS ZERO
      */
     Integer a = 0;
-//    return Eigen::VectorXi::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
     return Eigen::Matrix<Integer,DYNAMIC,1,POSTMESH_ALIGNED>::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
 }
 inline Eigen::MatrixI arange(Integer &a, Integer &b)
 {
-    //return Eigen::VectorXi::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
     return Eigen::Matrix<Integer,DYNAMIC,1,POSTMESH_ALIGNED>::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
 }
 
-template<typename T> Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> take(Eigen::Matrix<T,
-                                                                                         DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> &arr,
-                                                                                         Eigen::MatrixI &arr_row, Eigen::MatrixI &arr_col)
+//template<typename T>
+//Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> take(Eigen::Matrix<T,
+//                                                                                         DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> &arr,
+//                                                                                         Eigen::MatrixI &arr_row, Eigen::MatrixI &arr_col)
+//{
+//    Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> arr_reduced(arr_row.rows(),arr_col.rows());
+
+//    for (auto i=0; i<arr_row.rows();i++)
+//    {
+//        for (auto j=0; j<arr_col.rows();j++)
+//        {
+//            arr_reduced(i,j) = arr(arr_row(i),arr_col(j));
+//        }
+//    }
+
+//    return arr_reduced;
+//}
+
+template<typename T>
+Eigen::PlainObjectBase<T> take(Eigen::PlainObjectBase<T> &arr, Eigen::MatrixI &arr_row, Eigen::MatrixI &arr_col)
 {
-    Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> arr_reduced(arr_row.rows(),arr_col.rows());
+    Eigen::PlainObjectBase<T> arr_reduced;
+    arr_reduced.setZero(arr_row.rows(),arr_col.rows());
 
     for (auto i=0; i<arr_row.rows();i++)
     {
@@ -50,31 +66,34 @@ template<typename T> Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> take(Eige
     return arr_reduced;
 }
 
-template<typename T> Eigen::Matrix<T,DYNAMIC,DYNAMIC,F_Contiguous> take(Eigen::Matrix<T,
-                                                                                         DYNAMIC,DYNAMIC,F_Contiguous> &arr,
-                                                                                         Eigen::MatrixI &arr_row, Eigen::MatrixI &arr_col)
-{
-    Eigen::Matrix<T,DYNAMIC,DYNAMIC,F_Contiguous> arr_reduced(arr_row.rows(),arr_col.rows());
+//template<typename T> inline Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> take(Eigen::Matrix<T,
+//                                                                                                DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> &arr,
+//                                                                                                Eigen::MatrixI &arr_idx)
+//{
+//    assert (arr_idx.rows()<=arr.rows());
+//    assert (arr_idx.cols()<=arr.cols());
 
-    for (auto i=0; i<arr_row.rows();i++)
-    {
-        for (auto j=0; j<arr_col.rows();j++)
-        {
-            arr_reduced(i,j) = arr(arr_row(i),arr_col(j));
-        }
-    }
+//    Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> arr_reduced(arr_idx.rows(),arr_idx.cols());
 
-    return arr_reduced;
-}
+//    for (auto i=0; i<arr_idx.rows();i++)
+//    {
+//        for (auto j=0; j<arr_idx.cols();j++)
+//        {
+//            arr_reduced(i,j) = arr(arr_idx(i),arr_idx(j));
+//        }
+//    }
 
-template<typename T> inline Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> take(Eigen::Matrix<T,
-                                                                                                DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> &arr,
-                                                                                                Eigen::MatrixI &arr_idx)
+//    return arr_reduced;
+//}
+
+template<typename T>
+Eigen::PlainObjectBase<T> take(Eigen::PlainObjectBase<T> &arr, Eigen::MatrixI &arr_idx)
 {
     assert (arr_idx.rows()<=arr.rows());
     assert (arr_idx.cols()<=arr.cols());
 
-    Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> arr_reduced(arr_idx.rows(),arr_idx.cols());
+    Eigen::PlainObjectBase<T> arr_reduced;
+    arr_reduced.setZero(arr_idx.rows(),arr_idx.cols());
 
     for (auto i=0; i<arr_idx.rows();i++)
     {
@@ -96,7 +115,8 @@ inline Standard_Real length(Handle_Geom_Curve &curve, Standard_Real scale=0.001)
     return scale*curve_length;
 }
 
-template <typename T> std::vector<Integer> argsort(const std::vector<T> &v) {
+template <typename T>
+std::vector<Integer> argsort(const std::vector<T> &v) {
 
   // INITIALIZE ORIGINAL INDEX LOCATIONS
   std::vector<Integer> idx(v.size());

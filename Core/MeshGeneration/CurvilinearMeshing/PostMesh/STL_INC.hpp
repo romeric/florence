@@ -25,7 +25,8 @@ typedef uint64_t UInteger;
 typedef double Real;
 typedef bool Boolean;
 
-
+#define False false
+#define True  true
 
 #endif // STD_INC_HPP
 

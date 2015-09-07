@@ -73,7 +73,6 @@ protected:
     Standard_Integer no_dir_edges;
     Eigen::MatrixR u_of_all_fekete_mesh_edges;
     Eigen::MatrixI elements_with_boundary_edges;
-    Real ccc;
 };
 
 

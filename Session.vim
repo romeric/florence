@@ -2,8 +2,8 @@ let SessionLoad = 1
 if &cp | set nocp | endif
 let s:cpo_save=&cpo
 set cpo&vim
-imap <Nul> <C-Space>
 inoremap <C-Space> 
+imap <Nul> <C-Space>
 inoremap <expr> <S-Tab> pumvisible() ? "\" : "\<S-Tab>"
 inoremap <Plug>TComment_9 :call tcomment#SetOption("count", 9)
 inoremap <Plug>TComment_8 :call tcomment#SetOption("count", 8)
@@ -29,21 +29,21 @@ inoremap <silent> <Plug>snipMateTrigger =snipMate#TriggerSnippet(1)
 inoremap <silent> <Plug>snipMateNextOrTrigger =snipMate#TriggerSnippet()
 imap <Right> <Nop>
 imap <Left> <Nop>
-inoremap <expr> <Down> pumvisible() ? "\" : "\<Down>"
-inoremap <expr> <Up> pumvisible() ? "\" : "\<Up>"
+imap <Down> <Nop>
+imap <Up> <Nop>
 xmap 	 <Plug>snipMateVisual
 smap 	 <Plug>snipMateNextOrTrigger
 nmap  o
-nmap  <Plug>TComment_
-nmap 1 <Plug>TComment_1
-nmap 2 <Plug>TComment_2
-nmap 3 <Plug>TComment_3
-nmap 4 <Plug>TComment_4
-nmap 5 <Plug>TComment_5
-nmap 6 <Plug>TComment_6
-nmap 7 <Plug>TComment_7
-nmap 8 <Plug>TComment_8
 nmap 9 <Plug>TComment_9
+nmap 8 <Plug>TComment_8
+nmap 7 <Plug>TComment_7
+nmap 6 <Plug>TComment_6
+nmap 5 <Plug>TComment_5
+nmap 4 <Plug>TComment_4
+nmap 3 <Plug>TComment_3
+nmap 2 <Plug>TComment_2
+nmap 1 <Plug>TComment_1
+nmap  <Plug>TComment_
 vmap 9 <Plug>TComment_9
 omap 9 <Plug>TComment_9
 vmap 8 <Plug>TComment_8
@@ -74,30 +74,30 @@ map   <Plug>TComment_
 map p <Plug>TComment_p
 vmap  <Plug>TComment_
 omap  <Plug>TComment_
-onoremap <silent> ,cc :silents/^/=escape(b:comment_leader,'\/')/:nohlsearch
-vnoremap <silent> ,cc :silents/^/=escape(b:comment_leader,'\/')/:nohlsearch
-onoremap <silent> ,cu :silents/^\V=escape(b:comment_leader,'\/')//e:nohlsearch
-vnoremap <silent> ,cu :silents/^\V=escape(b:comment_leader,'\/')//e:nohlsearch
-nnoremap ,cc :silent s/\V\.\*/\=printf(&commentstring,getline("."))/:nohlsearch
-nnoremap ,cu :silent s/\V\^=escape(get(split(&commentstring,'%s'),0,''),'\/').'\|'.escape(get(split(&commentstring,'%s'),1,''),'\/')\$//g:nohlsearch
-map ,mm :Minimap
-map ,mu :MinimapUpdate
-map ,mc :MinimapClose
-omap ,__ <Plug>TComment_,__
-smap ,__ <Plug>TComment_,__
-nmap ,__ <Plug>TComment_,__
-xmap ,__ <Plug>TComment_,__
-map ,_p <Plug>TComment_,_p
-map ,_  <Plug>TComment_,_ 
-xmap ,_i <Plug>TComment_,_i
-map ,_r <Plug>TComment_,_r
-map ,_b <Plug>TComment_,_b
-map ,_a <Plug>TComment_,_a
-map ,_n <Plug>TComment_,_n
-map ,_s <Plug>TComment_,_s
 nnoremap ,d :YcmShowDetailedDiagnostic
+map ,_s <Plug>TComment_,_s
+map ,_n <Plug>TComment_,_n
+map ,_a <Plug>TComment_,_a
+map ,_b <Plug>TComment_,_b
+map ,_r <Plug>TComment_,_r
+xmap ,_i <Plug>TComment_,_i
+map ,_  <Plug>TComment_,_ 
+map ,_p <Plug>TComment_,_p
+xmap ,__ <Plug>TComment_,__
+nmap ,__ <Plug>TComment_,__
+smap ,__ <Plug>TComment_,__
+omap ,__ <Plug>TComment_,__
+map ,mc :MinimapClose
+map ,mu :MinimapUpdate
+map ,mm :Minimap
+nnoremap ,cu :silent s/\V\^=escape(get(split(&commentstring,'%s'),0,''),'\/').'\|'.escape(get(split(&commentstring,'%s'),1,''),'\/')\$//g:nohlsearch
+nnoremap ,cc :silent s/\V\.\*/\=printf(&commentstring,getline("."))/:nohlsearch
+vnoremap <silent> ,cu :silents/^\V=escape(b:comment_leader,'\/')//e:nohlsearch
+onoremap <silent> ,cu :silents/^\V=escape(b:comment_leader,'\/')//e:nohlsearch
+vnoremap <silent> ,cc :silents/^/=escape(b:comment_leader,'\/')/:nohlsearch
+onoremap <silent> ,cc :silents/^/=escape(b:comment_leader,'\/')/:nohlsearch
 nnoremap ,vi :w:source ~/.vimrc
-nnoremap ,sm :wa:mksession!:qa
+nnoremap ,sm :wa:mksession! ~/Dropbox/Florence/Session.vim:qa
 nnoremap ,ns :q!
 nnoremap ,sa :wqa
 nnoremap ,sf :q!
@@ -108,9 +108,9 @@ nnoremap ,tt Bhxi(A)a
 nnoremap ,rr Bhxi[A]a
 nmap - <Plug>VinegarUp
 xmap S <Plug>VSurround
-nnoremap \d :YcmShowDetailedDiagnostic
-nmap \__ <Plug>TComment_\__
 smap \__ <Plug>TComment_\__
+nmap \__ <Plug>TComment_\__
+nnoremap \d :YcmShowDetailedDiagnostic
 map \_s <Plug>TComment_\_s
 map \_n <Plug>TComment_\_n
 map \_a <Plug>TComment_\_a
@@ -165,7 +165,7 @@ nmap <silent> gc <Plug>TComment_gc
 omap ic <Plug>TComment_ic
 vmap ic <Plug>TComment_ic
 nnoremap m :wa:exec '!clear;python ~/Dropbox/Python/RunSession.py' shellescape(@%, 1)
-nnoremap mp :wa:exec '!clear;python ~/Dropbox/Python/RunSession.py' shellescape(@%, 1)
+nnoremap mp :wa:exec '!clear;python ~/Dropbox/Florence/RunSession.py' shellescape(@%, 1)
 nnoremap tc :tabclose
 nnoremap tf :tabfirst
 nnoremap tl :tablast
@@ -178,30 +178,30 @@ nmap yss <Plug>Yssurround
 nmap yS <Plug>YSurround
 nmap ys <Plug>Ysurround
 nnoremap yf :%y
-nnoremap <Plug>TComment_ :TComment
-onoremap <Plug>TComment_,__ :TComment
-snoremap <Plug>TComment_,__ :TComment
-nnoremap <Plug>TComment_,__ :TComment
-xnoremap <Plug>TComment_,__ :TCommentMaybeInline
-noremap <Plug>TComment_,_p vip:TComment
-noremap <Plug>TComment_,_  :TComment 
-xnoremap <Plug>TComment_,_i :TCommentInline
-noremap <Plug>TComment_,_r :TCommentRight
-noremap <Plug>TComment_,_b :TCommentBlock
-noremap <Plug>TComment_,_a :TCommentAs 
-noremap <Plug>TComment_,_n :TCommentAs =&ft 
-noremap <Plug>TComment_,_s :TCommentAs =&ft_
-nnoremap <Plug>TComment_1 :call tcomment#SetOption("count", 1)
-nnoremap <Plug>TComment_2 :call tcomment#SetOption("count", 2)
-nnoremap <Plug>TComment_3 :call tcomment#SetOption("count", 3)
-nnoremap <Plug>TComment_4 :call tcomment#SetOption("count", 4)
-nnoremap <Plug>TComment_5 :call tcomment#SetOption("count", 5)
-nnoremap <Plug>TComment_6 :call tcomment#SetOption("count", 6)
-nnoremap <Plug>TComment_7 :call tcomment#SetOption("count", 7)
-nnoremap <Plug>TComment_8 :call tcomment#SetOption("count", 8)
-nnoremap <Plug>TComment_9 :call tcomment#SetOption("count", 9)
-nnoremap <Plug>TComment_\__ :TComment
 snoremap <Plug>TComment_\__ :TComment
+nnoremap <Plug>TComment_\__ :TComment
+nnoremap <Plug>TComment_9 :call tcomment#SetOption("count", 9)
+nnoremap <Plug>TComment_8 :call tcomment#SetOption("count", 8)
+nnoremap <Plug>TComment_7 :call tcomment#SetOption("count", 7)
+nnoremap <Plug>TComment_6 :call tcomment#SetOption("count", 6)
+nnoremap <Plug>TComment_5 :call tcomment#SetOption("count", 5)
+nnoremap <Plug>TComment_4 :call tcomment#SetOption("count", 4)
+nnoremap <Plug>TComment_3 :call tcomment#SetOption("count", 3)
+nnoremap <Plug>TComment_2 :call tcomment#SetOption("count", 2)
+nnoremap <Plug>TComment_1 :call tcomment#SetOption("count", 1)
+noremap <Plug>TComment_,_s :TCommentAs =&ft_
+noremap <Plug>TComment_,_n :TCommentAs =&ft 
+noremap <Plug>TComment_,_a :TCommentAs 
+noremap <Plug>TComment_,_b :TCommentBlock
+noremap <Plug>TComment_,_r :TCommentRight
+xnoremap <Plug>TComment_,_i :TCommentInline
+noremap <Plug>TComment_,_  :TComment 
+noremap <Plug>TComment_,_p vip:TComment
+xnoremap <Plug>TComment_,__ :TCommentMaybeInline
+nnoremap <Plug>TComment_,__ :TComment
+snoremap <Plug>TComment_,__ :TComment
+onoremap <Plug>TComment_,__ :TComment
+nnoremap <Plug>TComment_ :TComment
 smap <S-Tab> <Plug>snipMateBack
 nnoremap <silent> <Plug>NetrwBrowseX :call netrw#NetrwBrowseX(expand("<cWORD>"),0)
 nnoremap <silent> <Plug>SurroundRepeat .
@@ -306,7 +306,6 @@ set comments=s1:/*,mb:*,ex:*/,://,b:#,:XCOMM,n:>,fb:-
 set commentstring=#%s
 set completefunc=youcompleteme#Complete
 set completeopt=preview,menuone
-set cpoptions=aAceFsB
 set fileencodings=ucs-bom,utf-8,default,latin1
 set helplang=en
 set laststatus=2
@@ -327,7 +326,7 @@ set wildignore=*.pyc
 let s:so_save = &so | let s:siso_save = &siso | set so=0 siso=0
 let v:this_session=expand("<sfile>:p")
 silent only
-cd ~/Dropbox/Python
+cd ~/Dropbox/Florence
 if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
@@ -336,12 +335,12 @@ badd +1 RunSession.py
 badd +1 Main/FiniteElements/MainFEM.py
 badd +1 Core/FiniteElements/PreProcess.py
 badd +1 Core/MeshGeneration/Me
-badd +1 Core/MeshGeneration/Mesh.py
+badd +673 Core/MeshGeneration/Mesh.py
 badd +135 ~/.vimrc
-badd +1 Problems/FiniteElements/RAE2822/ProblemData.py
-badd +1 Core/FiniteElements/ApplyDirichletBoundaryConditions.py
-badd +421 Core/FiniteElements/PostProcess.py
-badd +1 Core/FiniteElements/ElementalMatrices/ElementalStiffness.py
+badd +148 Problems/FiniteElements/RAE2822/ProblemData.py
+badd +21 Core/FiniteElements/ApplyDirichletBoundaryConditions.py
+badd +450 Core/FiniteElements/PostProcess.py
+badd +36 Core/FiniteElements/ElementalMatrices/ElementalStiffness.py
 args RunSession.py
 edit RunSession.py
 set splitbelow splitright
@@ -350,8 +349,8 @@ set nosplitright
 wincmd t
 set winheight=1 winwidth=1
 argglobal
-nnoremap <buffer> m :wa:exec '!clear;python ~/Dropbox/Python/RunSession.py' shellescape(@%, 1)
 nnoremap <buffer> mm :w:exec '!clear;python' shellescape(@%, 1)
+nnoremap <buffer> m :wa:exec '!clear;python ~/Dropbox/Python/RunSession.py' shellescape(@%, 1)
 setlocal keymap=
 setlocal noarabic
 setlocal autoindent
@@ -438,7 +437,7 @@ setlocal nospell
 setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
 setlocal spellfile=
 setlocal spelllang=en
-setlocal statusline=%!pyeval('powerline.statusline(7)')
+setlocal statusline=%!pyeval('powerline.statusline(1)')
 setlocal suffixesadd=.py
 setlocal swapfile
 setlocal synmaxcol=3000
@@ -454,7 +453,7 @@ setlocal nowinfixheight
 setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
-let s:l = 26 - ((0 * winheight(0) + 19) / 39)
+let s:l = 26 - ((0 * winheight(0) + 25) / 51)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -553,7 +552,7 @@ setlocal nospell
 setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
 setlocal spellfile=
 setlocal spelllang=en
-setlocal statusline=%!pyeval('powerline.statusline(6)')
+setlocal statusline=%!pyeval('powerline.statusline(1)')
 setlocal suffixesadd=.py
 setlocal swapfile
 setlocal synmaxcol=3000
@@ -570,7 +569,7 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 150 - ((7 * winheight(0) + 19) / 39)
+let s:l = 150 - ((9 * winheight(0) + 25) / 51)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -686,7 +685,7 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 67 - ((0 * winheight(0) + 19) / 39)
+let s:l = 67 - ((0 * winheight(0) + 25) / 51)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -802,7 +801,7 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 148 - ((0 * winheight(0) + 19) / 39)
+let s:l = 148 - ((0 * winheight(0) + 25) / 51)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -918,7 +917,7 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 21 - ((15 * winheight(0) + 19) / 39)
+let s:l = 21 - ((20 * winheight(0) + 25) / 51)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -1034,7 +1033,7 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 450 - ((20 * winheight(0) + 19) / 39)
+let s:l = 450 - ((26 * winheight(0) + 25) / 51)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -1150,7 +1149,7 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 36 - ((0 * winheight(0) + 19) / 39)
+let s:l = 36 - ((0 * winheight(0) + 25) / 51)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -1250,7 +1249,7 @@ setlocal nospell
 setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
 setlocal spellfile=
 setlocal spelllang=en
-setlocal statusline=%!pyeval('powerline.statusline(6)')
+setlocal statusline=%!pyeval('powerline.statusline(2)')
 setlocal suffixesadd=.py
 setlocal swapfile
 setlocal synmaxcol=3000
@@ -1266,13 +1265,13 @@ setlocal nowinfixheight
 setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
-let s:l = 711 - ((0 * winheight(0) + 19) / 39)
+let s:l = 673 - ((25 * winheight(0) + 25) / 51)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-711
+673
 normal! 022|
-tabnext 1
+tabnext 2
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf
 endif

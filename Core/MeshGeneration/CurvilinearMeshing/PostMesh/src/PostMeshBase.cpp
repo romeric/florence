@@ -205,7 +205,7 @@ Eigen::MatrixI PostMeshBase::Read(std::string &filename)
 
     if(!datafile)
     {
-        cout << "Unable to read file" << endl;
+        warn("Unable to read file");
     }
     while(datafile)
     {
@@ -248,7 +248,7 @@ Eigen::MatrixUI PostMeshBase::ReadI(std::string &filename, char delim)
 
     if(!datafile)
     {
-        cout << "Unable to read file" << endl;
+        warn("Unable to read file");
     }
     while(datafile)
     {
@@ -277,19 +277,19 @@ Eigen::MatrixUI PostMeshBase::ReadI(std::string &filename, char delim)
     }
 
     // CHECK IF LAST LINE IS READ CORRECTLY
-    bool duplicate_rows = Standard_False;
+    bool duplicate_rows = False;
     for (Integer j=0; j<cols; ++j)
     {
         if ( out_arr(out_arr.rows()-2,j)==out_arr(out_arr.rows()-1,j) )
         {
-            duplicate_rows = Standard_True;
+            duplicate_rows = True;
         }
         else
         {
-            duplicate_rows = Standard_False;
+            duplicate_rows = False;
         }
     }
-    if (duplicate_rows==Standard_True)
+    if (duplicate_rows == True)
     {
         out_arr = out_arr.block(0,0,out_arr.rows()-1,out_arr.cols()).eval();
     }
@@ -309,7 +309,7 @@ Eigen::MatrixR PostMeshBase::ReadR(std::string &filename, char delim)
 
     if(!datafile)
     {
-        cout << "Unable to read file" << endl;
+        warn("Unable to read file");
     }
     while(datafile)
     {
@@ -338,19 +338,19 @@ Eigen::MatrixR PostMeshBase::ReadR(std::string &filename, char delim)
     }
 
     // CHECK IF LAST LINE IS READ CORRECTLY
-    bool duplicate_rows = Standard_False;
+    bool duplicate_rows = False;
     for (Integer j=0; j<cols; ++j)
     {
         if ( out_arr(out_arr.rows()-2,j)==out_arr(out_arr.rows()-1,j) )
         {
-            duplicate_rows = Standard_True;
+            duplicate_rows = True;
         }
         else
         {
-            duplicate_rows = Standard_False;
+            duplicate_rows = False;
         }
     }
-    if (duplicate_rows==Standard_True)
+    if (duplicate_rows == True)
     {
         out_arr = out_arr.block(0,0,out_arr.rows()-1,out_arr.cols()).eval();
     }
