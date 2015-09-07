@@ -449,6 +449,7 @@ class PostProcess(object):
 			MainData.ScaledJacobian[elem] = 1.0*JMin/JMax
 
 		print 'Minimum ScaledJacobian value is:', np.min(MainData.ScaledJacobian)
+		print np.where(np.min(MainData.ScaledJacobian)==MainData.ScaledJacobian)[0]
 
 
 		if show_plot == True:
