@@ -495,6 +495,8 @@ class PostProcess(object):
 
 		for i in range(0,mesh.elements.shape[0]):
 			dum = vpoints[mesh.elements[i,:],:]
+			if i==0:
+				print dum
 			plt.plot(dum[ddum,0],dum[ddum,1],alpha=0.02)
 			# plt.fill(dum[ddum,0],dum[ddum,1],'#A4DDED')
 			plt.fill(dum[ddum,0],dum[ddum,1],color=(0.75,MainData.ScaledJacobian[i],0.35))	
@@ -508,6 +510,107 @@ class PostProcess(object):
 
 
 		# plt.savefig('/home/roman/Desktop/DumpReport/mesh_312_'+MainData.AnalysisType+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)
+
+
+	@staticmethod
+	def HighOrderPatchPlot3D(MainData,mesh,TotalDisp=0):
+		from mpl_toolkits.mplot3d import Axes3D
+		from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+		import matplotlib.pyplot as plt
+
+		C = MainData.C
+		a1,a2,a3,a4 = [],[],[],[]
+		if C==1:
+			a1 = [1, 5, 2, 9, 4, 8, 1]
+			a2 = [1, 5, 2, 7, 3, 6, 1]
+			a3 = [1, 6, 3, 10, 4, 8, 1]
+			a4 = [2, 7, 3, 10, 4, 9, 2]
+		elif C==2:
+			a1 = [1, 5, 6, 2, 9, 11, 3, 10, 7, 1]
+			a2 = [1, 5, 6, 2, 14, 19, 4, 18, 12, 1]
+			a3 = [2, 9, 11, 3, 17, 20, 4, 19, 14, 2]
+			a4 = [1, 12, 18, 4, 20, 17, 3, 10, 7, 1]
+		elif C==3:
+			a1 = [1, 5, 6, 7, 2, 20, 29, 34, 4, 33, 27, 17, 1]
+			a2 = [1, 8, 12, 15, 3, 16, 14, 11, 2, 7, 6, 5, 1]
+			a3 = [2, 11, 14, 16, 3, 26, 32, 35, 4, 34, 29, 20, 2]
+			a4 = [1, 8, 12, 15, 3, 26, 32, 35, 4, 33, 27, 17, 1]
+		elif C==4:
+			a1 = [1, 5, 6, 7, 8, 2, 27, 41, 50, 55, 4, 54, 48, 38, 23, 1]
+			a2 = [1, 9, 14, 18, 21, 3, 22, 20, 17, 13, 2, 8, 7, 6, 5, 1]
+			a3 = [2, 13, 17, 20, 22, 3, 37, 47, 53, 56, 4, 55, 50, 41, 27, 2]
+			a4 = [1, 9, 14, 18, 21, 3, 37, 47, 53, 56, 4, 54, 48, 38, 23, 1]
+
+		a1 = np.asarray(a1); a2 = np.asarray(a2); a3 = np.asarray(a3); a4 = np.asarray(a4)
+
+		a1 -= 1
+		a2 -= 1
+		a3 -= 1
+		a4 -= 1
+
+
+		fig = plt.figure()
+		ax = Axes3D(fig)
+
+		for elem in range(mesh.nelem):
+		# for elem in range(1):
+			# x = mesh.points[mesh.elements[elem,:],0]
+			# y = mesh.points[mesh.elements[elem,:],1]
+			# z = mesh.points[mesh.elements[elem,:],2]
+
+			x1 = mesh.points[mesh.elements[elem,a1],0]
+			x2 = mesh.points[mesh.elements[elem,a2],0]
+			x3 = mesh.points[mesh.elements[elem,a3],0]
+			x4 = mesh.points[mesh.elements[elem,a4],0]
+
+			y1 = mesh.points[mesh.elements[elem,a1],1]
+			y2 = mesh.points[mesh.elements[elem,a2],1]
+			y3 = mesh.points[mesh.elements[elem,a3],1]
+			y4 = mesh.points[mesh.elements[elem,a4],1]
+
+			z1 = mesh.points[mesh.elements[elem,a1],2]
+			z2 = mesh.points[mesh.elements[elem,a2],2]
+			z3 = mesh.points[mesh.elements[elem,a3],2]
+			z4 = mesh.points[mesh.elements[elem,a4],2]
+
+
+			# if elem==0:
+			# 	print mesh.elements[elem,:]
+			# 	print 
+			# 	print mesh.elements[elem,a1]
+
+			verts_1 = [zip(x1,y1,z1)]
+			verts_2 = [zip(x2,y2,z2)]
+			verts_3 = [zip(x3,y3,z3)]
+			verts_4 = [zip(x4,y4,z4)]
+			# verts = [zip(x,y,z)]
+			# ax.add_collection3d(Poly3DCollection(verts))
+			# ax.add_collection3d(Poly3DCollection(verts_1))
+			# ax.add_collection3d(Poly3DCollection(verts_2))
+			# ax.add_collection3d(Poly3DCollection(verts_3))
+			# ax.add_collection3d(Poly3DCollection(verts_4))
+
+			poly_object = Poly3DCollection(verts_1)
+			poly_object.set_linewidth(1)
+			poly_object.set_linestyle('solid')
+			# poly_object.set_facecolor('r') 
+			poly_object.set_facecolor((0.75,1,0.35)) 
+			ax.add_collection3d(poly_object)
+			# print xx.get_edgecolor()
+
+
+		
+		# ax.autoscale(enable=True, axis=u'both', tight=None)
+
+
+		ax.plot(mesh.points[:,0],mesh.points[:,1],mesh.points[:,2],'o',color='#F88379')
+
+		plt.axis('off')
+		plt.show()
+
+
+
+
 
 	@staticmethod	
 	def HighOrderInterpolatedPatchPlot(MainData,mesh,TotalDisp):

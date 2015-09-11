@@ -56,7 +56,7 @@ def PreProcess(MainData,Pr,pwd):
 	# 	print u'\u2717'.encode('utf8')+' : ','Imported mesh has',mesh_node_order,'node ordering'
 	
 	# mesh.points[:,0] -= 0.5
-	mesh.points *=1000. 
+	# mesh.points *=1000. 
 	# mesh.points[89,:] =[-0.5,0]
 	# mesh.SimplePlot()
 	# mesh.PlotMeshNumberingTri()
@@ -83,6 +83,7 @@ def PreProcess(MainData,Pr,pwd):
 	# print mesh.elements
 	# print mesh.points
 	# print mesh.edges
+	# print mesh.faces
 	# mesh.SimplePlot()
 	# mesh.PlotMeshNumberingTri()
 	# print mesh.points[89,:]
@@ -92,6 +93,10 @@ def PreProcess(MainData,Pr,pwd):
 	
 	# sys.exit(0)
 	# print np.linalg.norm(mesh.points,axis=1)
+
+	mesh.Sphere()
+
+
 	# GENERATE pMESHES FOR HIGH C
 	############################################################################
 	# t_mesh = time()
@@ -110,6 +115,11 @@ def PreProcess(MainData,Pr,pwd):
 	# sorted_repoints = nmesh.points[index_sort_x,:]
 	# ##############################################################################
 	# np.savetxt('/home/roman/Dropbox/time_3.dat',np.array([time()-t_mesh, mesh.points.shape[0]]))
+
+	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/elements_cube.dat',mesh.elements)
+	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_cube.dat',mesh.points)
+	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/elements_cube5.dat',mesh.elements)
+	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_cube5.dat',mesh.points)
 	# sys.exit("STOPPED")
 
 	# np.savetxt('/home/roman/Desktop/elements_check_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
@@ -320,9 +330,9 @@ def PreProcess(MainData,Pr,pwd):
 			MainData.MaterialArgs.H_Voigt = MainData.MaterialArgs.lamb*np.array([[1.,1.,0.],[1.,1.,0],[0.,0.,0.]]) +\
 			 MainData.MaterialArgs.mu*np.array([[2.,0.,0.],[0.,2.,0],[0.,0.,1.]])
 		else:
-			block_1 = np.zeros((6,6),dtype=np.float64); block_1[:2,:2] = np.ones((3,3))
+			block_1 = np.zeros((6,6),dtype=np.float64); block_1[:3,:3] = np.ones((3,3))
 			block_2 = np.eye(6,6); block_2[0,0],block_2[1,1],block_2[2,2]=2.,2.,2.
-			MainData.MaterialArgs.H_Voigt = lamb*block_1 + mu*block_2
+			MainData.MaterialArgs.H_Voigt = MainData.MaterialArgs.lamb*block_1 + MainData.MaterialArgs.mu*block_2
 
 
 

@@ -290,7 +290,7 @@ class Mesh(object):
 		self.points = mesh.points
 		self.elements = mesh.elements.astype(np.int64)
 		self.edges = mesh.edges.astype(np.int64)
-		if isinstance(self.faces,np.ndarray):
+		if isinstance(mesh.faces,np.ndarray):
 			self.faces = mesh.faces.astype(np.int64)
 		self.nelem = mesh.nelem
 		self.element_type = mesh.info 
@@ -651,6 +651,50 @@ class Mesh(object):
 		self.nnode = self.points.shape[0]
 
 
+	def Sphere(self,radius=1,points=10):
+		"""Create a tetrahedral mesh on an sphere
+
+		input:
+
+			radius:			[double] radius of sphere
+			points:			[int] no of disrectisation"""
+
+		from math import pi, cos, sin
+		from meshpy.tet import MeshInfo, build
+		from meshpy.geometry import generate_surface_of_revolution, EXT_OPEN, GeometryBuilder
+
+		r = radius
+
+		points = 10
+		dphi = pi/points
+
+		def truncate(r):
+		    if abs(r) < 1e-10:
+		        return 0
+		    else:
+		        return r
+
+		rz = [(truncate(r*sin(i*dphi)), r*cos(i*dphi)) for i in range(points+1)]
+
+		geob = GeometryBuilder()
+		geob.add_geometry(*generate_surface_of_revolution(rz,
+		        closure=EXT_OPEN, radial_subdiv=10))
+
+		mesh_info = MeshInfo()
+		geob.set(mesh_info)
+
+		mesh = build(mesh_info)
+
+		self.points = np.asarray(mesh.points)
+		self.elements = np.asarray(mesh.elements)
+		self.nelem = self.elements.shape[0]
+		self.element_type = "tet"
+
+		# GET EDGES & FACES
+		self.GetBoundaryFacesTet()
+		self.GetBoundaryEdgesTet()
+
+
 
 	def RemoveElements(self,(x_min,y_min,x_max,y_max),element_removal_criterion="all",keep_boundary_only=False,
 			compute_edges=True,compute_faces=True,plot_new_mesh=True):
@@ -724,6 +768,7 @@ class Mesh(object):
 
 
 	def ChangeType(self):
+		""" Change mesh data type from signed to unsigned"""
 		self.elements = mesh.elements.astype(np.uint64)
 		self.edges = mesh.edges.astype(np.uint64)
 		if isinstance(self.faces,np.ndarray):

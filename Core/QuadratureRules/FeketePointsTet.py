@@ -229,6 +229,6 @@ def FeketePointsTet(C):
             [-1.000000000000000e+000,   -8.302238962785671e-001,    8.302238962785671e-001]
             ])
 	else:
-		raise ValueError("FeketePointsTet beyond C=5 has not been implemented!")
+		raise NotImplementedError("Tetrahedral Fekete points beyond C=5 not available")
 
 	return feketeNodes 

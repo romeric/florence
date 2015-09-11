@@ -36,21 +36,27 @@ public:
         this_curve = std::make_shared<PostMeshCurve>(PostMeshCurve());
     }
 
-    void ProjectMeshOnSurface();
     void InferInterpolationPolynomialDegree();
     void SurfacesToBsplineSurfaces();
+    void GetSurfacesParameters();
+    void GetGeomPointsOnCorrespondingFaces();
+    void IdentifySurfacesContainingFaces();
+    void ProjectMeshOnSurface(const char *projection_method);
     void MeshPointInversionSurface();
 
 
     std::vector<Eigen::MatrixR> geometry_points_on_surfaces;
     std::vector<Handle_Geom_BSplineSurface> geometry_surfaces_bspline;
     Eigen::MatrixI boundary_faces_order;
+    Eigen::MatrixR surfaces_Uparameters;
+    Eigen::MatrixR surfaces_Vparameters;
 
 protected:
 //    PostMeshCurve *this_curve;
     std::shared_ptr<PostMeshCurve> this_curve;
 
     Eigen::MatrixI projection_ID;
+    Eigen::MatrixR projection_U;
     Eigen::MatrixR projection_V;
     Eigen::MatrixI sorted_projected_indices;
     Eigen::MatrixI dirichlet_faces;
