@@ -137,7 +137,7 @@ class Mesh(object):
 		# interiorEdges = np.zeros((1,3),dtype=np.int64)
 
 		# LOOP OVER ALL ELEMENTS
-		for i in range(self.elements.shape[0]):
+		for i in range(self.nelem):
 			# FIND HOW MANY ELEMENTS SHARE A SPECIFIC NODE
 			x = whereEQ(self.elements,self.elements[i,0])[0]
 			y = whereEQ(self.elements,self.elements[i,1])[0]
@@ -441,7 +441,7 @@ class Mesh(object):
 
 	def GetElementsWithBoundaryEdgesTri(self):
 		""" Computes elements which have edges on the boundary. Mesh can be linear or higher order.
-			For triangles each element has only one edge on the boundary.
+			Note that this assumes that a triangular element can only have one edge on the boundary.
 
 		output: 
 
@@ -470,6 +470,78 @@ class Mesh(object):
 					break
 
 		return edge_elements
+
+
+	def GetElementsWithBoundaryFacesTet(self):
+		""" Computes elements which have faces on the boundary. Mesh can be linear or higher order.
+			At most a tetrahedral can have all its four faces at boundary. It is assumed that a tetrahedral
+			can only have one face at the boundary 
+
+		output: 
+
+			face_elements:				[1D array] array containing elements which have face
+										on the boundary"""
+
+		assert self.faces is not None or self.elements is not None
+
+		face_elements = np.zeros(self.faces.shape[0],dtype=np.int64)
+		for i in range(self.faces.shape[0]):
+			x = []
+			for j in range(self.faces.shape[1]):
+				x = np.append(x,np.where(self.elements==self.faces[i,j])[0])
+			# x = x.astype(np.int64)
+			for k in range(len(x)):
+				y = np.where(x==x[k])[0]
+				if y.shape[0]==self.faces.shape[1]:
+					face_elements[i] = np.int64(x[k])
+					break
+
+		return face_elements
+
+
+	def ArrangeFacesTet(self):
+		""" Computes elements which have faces on the boundary. Mesh can be linear or higher order.
+			At most a tetrahedral can have all its four faces at boundary. It is assumed that a tetrahedral
+			can only have one face at the boundary 
+
+		output: 
+
+			face_elements:				[1D array] array containing elements which have face
+										on the boundary"""
+
+		assert self.faces is not None or self.elements is not None
+
+		# GET THE DEGREE
+		p = 0
+		
+		for p in range(1,100):
+			if (p+1)*(p+2)*(p+3)/6 == self.elements.shape[1]:
+				break 
+		fsize = int((p+1)*(p+2)/2) 
+
+		from Core.Supplementary.Tensors import itemfreq_py
+		# face_elements = -1*np.ones((self.faces.shape[0],4),dtype=np.int64)
+		face_elements = []
+		for i in range(self.faces.shape[0]):
+			x,y = [],[]
+			for j in range(self.faces.shape[1]):
+				x = np.append(x,np.where(self.elements==self.faces[i,j])[0])
+				y = np.append(y,np.where(self.elements==self.faces[i,j])[1])
+				# print np.where(self.faces==self.elements[elem,j])
+			if x.shape[0] > 0:
+				freqs = itemfreq_py(x).astype(np.int64)
+				# print freqs
+				for k in range(freqs.shape[0]):
+					if freqs[k,1] >= fsize:
+						# print freqs[k,0]
+						face_elements = np.append(face_elements,freqs[k,0])
+						# print face_elements
+						pass
+			# print y
+
+		print face_elements
+
+
 
 
 

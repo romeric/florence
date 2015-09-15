@@ -508,7 +508,6 @@ class PostProcess(object):
 		plt.axis('equal')
 		# plt.axis('off')	
 
-
 		# plt.savefig('/home/roman/Desktop/DumpReport/mesh_312_'+MainData.AnalysisType+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)
 
 
@@ -542,71 +541,52 @@ class PostProcess(object):
 			a4 = [1, 9, 14, 18, 21, 3, 37, 47, 53, 56, 4, 54, 48, 38, 23, 1]
 
 		a1 = np.asarray(a1); a2 = np.asarray(a2); a3 = np.asarray(a3); a4 = np.asarray(a4)
-
-		a1 -= 1
-		a2 -= 1
-		a3 -= 1
-		a4 -= 1
-
+		a1 -= 1;	a2 -= 1;	a3 -= 1;	a4 -= 1
+		a_list = [a1,a2,a3,a4]
 
 		fig = plt.figure()
 		ax = Axes3D(fig)
 
+		# face_elements = mesh.GetElementsWithBoundaryFacesTet()
+		# elements = mesh.elements[face_elements,:]
+		# print mesh.faces 
+		mesh.ArrangeFacesTet()
+
+		# for elem in range(elements.shape[0]):
 		for elem in range(mesh.nelem):
 		# for elem in range(1):
-			# x = mesh.points[mesh.elements[elem,:],0]
-			# y = mesh.points[mesh.elements[elem,:],1]
-			# z = mesh.points[mesh.elements[elem,:],2]
 
-			x1 = mesh.points[mesh.elements[elem,a1],0]
-			x2 = mesh.points[mesh.elements[elem,a2],0]
-			x3 = mesh.points[mesh.elements[elem,a3],0]
-			x4 = mesh.points[mesh.elements[elem,a4],0]
+			# LOOP OVER TET FACES
+			num_faces = 4
+			for iface in range(num_faces):
+				a = a_list[iface]
 
-			y1 = mesh.points[mesh.elements[elem,a1],1]
-			y2 = mesh.points[mesh.elements[elem,a2],1]
-			y3 = mesh.points[mesh.elements[elem,a3],1]
-			y4 = mesh.points[mesh.elements[elem,a4],1]
+				x = mesh.points[mesh.elements[elem,a],0]
+				y = mesh.points[mesh.elements[elem,a],1]
+				z = mesh.points[mesh.elements[elem,a],2]
 
-			z1 = mesh.points[mesh.elements[elem,a1],2]
-			z2 = mesh.points[mesh.elements[elem,a2],2]
-			z3 = mesh.points[mesh.elements[elem,a3],2]
-			z4 = mesh.points[mesh.elements[elem,a4],2]
+				# x = mesh.points[elements[elem,a],0]
+				# y = mesh.points[elements[elem,a],1]
+				# z = mesh.points[elements[elem,a],2]
 
+				vertices = [zip(x,y,z)]
+				poly_object = Poly3DCollection(vertices)
+				poly_object.set_linewidth(1)
+				poly_object.set_linestyle('solid')
+				poly_object.set_facecolor((0.75,1,0.35)) 
+				ax.add_collection3d(poly_object)
 
-			# if elem==0:
-			# 	print mesh.elements[elem,:]
-			# 	print 
-			# 	print mesh.elements[elem,a1]
+				# if elem==0 and iface==0:
+				# 	# print mesh.elements[elem,a]
+				# 	print x
 
-			verts_1 = [zip(x1,y1,z1)]
-			verts_2 = [zip(x2,y2,z2)]
-			verts_3 = [zip(x3,y3,z3)]
-			verts_4 = [zip(x4,y4,z4)]
-			# verts = [zip(x,y,z)]
-			# ax.add_collection3d(Poly3DCollection(verts))
-			# ax.add_collection3d(Poly3DCollection(verts_1))
-			# ax.add_collection3d(Poly3DCollection(verts_2))
-			# ax.add_collection3d(Poly3DCollection(verts_3))
-			# ax.add_collection3d(Poly3DCollection(verts_4))
-
-			poly_object = Poly3DCollection(verts_1)
-			poly_object.set_linewidth(1)
-			poly_object.set_linestyle('solid')
-			# poly_object.set_facecolor('r') 
-			poly_object.set_facecolor((0.75,1,0.35)) 
-			ax.add_collection3d(poly_object)
-			# print xx.get_edgecolor()
-
-
-		
 		# ax.autoscale(enable=True, axis=u'both', tight=None)
+		# ax.plot(mesh.points[:,0],mesh.points[:,1],mesh.points[:,2],'o',color='#F88379')
 
-
-		ax.plot(mesh.points[:,0],mesh.points[:,1],mesh.points[:,2],'o',color='#F88379')
-
+		plt.axis('equal')
 		plt.axis('off')
-		plt.show()
+		# plt.savefig('/home/roman/Desktop/destination_path.eps', format='eps', dpi=1000)
+		# plt.show()
 
 
 
