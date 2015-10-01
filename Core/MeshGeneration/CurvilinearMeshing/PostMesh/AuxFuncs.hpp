@@ -227,7 +227,7 @@ inline double timeit(T (*func)(Args...), Args...args)
             mean_time /= counter;
             if (mean_time >= 1.0e-3 && mean_time < 1.)
             {
-                std::cout << static_cast<long int>(counter)<< "runs, average elapsed time is "<< mean_time/1.0e-03 << " ms" << std::endl;
+                std::cout << static_cast<long int>(counter)<< " runs, average elapsed time is "<< mean_time/1.0e-03 << " ms" << std::endl;
             }
             else if (mean_time >= 1.0e-6 && mean_time < 1.0e-3)
             {

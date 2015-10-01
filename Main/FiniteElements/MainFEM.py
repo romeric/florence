@@ -28,12 +28,12 @@ from Core.FiniteElements.Solvers.Solver import *
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Electromechanics/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Nurbs/ProblemData.py')
-# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/MechanicalComponent2D/ProblemData.py')
+Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/MechanicalComponent2D/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Sphere/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Naca_Isotropic/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/RAE2822/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Misc/ProblemData.py')
-Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Tests/ProblemData.py')
+# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Tests/ProblemData.py')
 
 #############################################################################################################################################
 # from line_profiler import profile
@@ -150,9 +150,9 @@ def main(MainData):
 	# print mesh.points[mesh.edges[:,:2],:]
 	# print mesh.points[:8,:]
 
-	PostProcess.HighOrderPatchPlot3D(MainData,mesh)
+	# PostProcess.HighOrderPatchPlot3D(MainData,mesh)
 
-	sys.exit("STOPPED")
+	# sys.exit("STOPPED")
 	# CALL THE MAIN ROUTINE
 	TotalDisp = MainSolver(MainData,mesh)
 	# np.savetxt('/home/roman/Desktop/displacements.txt', TotalDisp[:,:,-1])

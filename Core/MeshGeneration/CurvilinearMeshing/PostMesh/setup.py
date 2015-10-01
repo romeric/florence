@@ -13,6 +13,7 @@ compiler_args = ["-std=c++11"]
 
 # Determine OS 
 if os.name is "posix":
+    compiler_args.append("-march=native")
     # Determine intrinsics
     for line in open("/proc/cpuinfo"):    
         item  = line.rsplit()
@@ -33,7 +34,7 @@ if os.name is "posix":
                 compiler_args.append("-mfma")
 
 elif os.name is "windows":
-    pass
+    compiler_args.append("-march=native")
 
 # Source files
 sourcefiles = ["PostMeshPy.pyx",_pwd_+"/src/PyInterfaceEmulator.cpp",
