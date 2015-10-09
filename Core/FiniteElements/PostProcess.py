@@ -513,6 +513,9 @@ class PostProcess(object):
 
 	@staticmethod
 	def HighOrderPatchPlot3D(MainData,mesh,TotalDisp=0):
+		""" This 3D patch plot works but the elements at background are
+		also shown
+		"""
 		from mpl_toolkits.mplot3d import Axes3D
 		from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 		import matplotlib.pyplot as plt
@@ -550,7 +553,7 @@ class PostProcess(object):
 		# face_elements = mesh.GetElementsWithBoundaryFacesTet()
 		# elements = mesh.elements[face_elements,:]
 		# print mesh.faces 
-		mesh.ArrangeFacesTet()
+		# mesh.ArrangeFacesTet() 
 
 		# for elem in range(elements.shape[0]):
 		for elem in range(mesh.nelem):
@@ -576,17 +579,14 @@ class PostProcess(object):
 				poly_object.set_facecolor((0.75,1,0.35)) 
 				ax.add_collection3d(poly_object)
 
-				# if elem==0 and iface==0:
-				# 	# print mesh.elements[elem,a]
-				# 	print x
 
 		# ax.autoscale(enable=True, axis=u'both', tight=None)
-		# ax.plot(mesh.points[:,0],mesh.points[:,1],mesh.points[:,2],'o',color='#F88379')
+		ax.plot(mesh.points[:,0],mesh.points[:,1],mesh.points[:,2],'o',color='#F88379')
 
 		plt.axis('equal')
 		plt.axis('off')
 		# plt.savefig('/home/roman/Desktop/destination_path.eps', format='eps', dpi=1000)
-		# plt.show()
+		plt.show()
 
 
 
