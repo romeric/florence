@@ -103,10 +103,15 @@ int main()
 //    std::string edge_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Misc/edges_leftcircle_p2.dat";
 
     // 3D
-    std::string elem_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/elements_sphere_p2.dat";
-    std::string point_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/points_sphere_p2.dat";
-    std::string edge_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/edges_sphere_p2.dat";
-    std::string face_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/faces_sphere_p2.dat";
+//    std::string elem_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/elements_sphere_p2.dat";
+//    std::string point_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/points_sphere_p2.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/edges_sphere_p2.dat";
+//    std::string face_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/faces_sphere_p2.dat";
+
+    std::string elem_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/elements_sphere2_p2.dat";
+    std::string point_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/points_sphere2_p2.dat";
+    std::string edge_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/edges_sphere2_p2.dat";
+    std::string face_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/faces_sphere2_p2.dat";
 
 
 

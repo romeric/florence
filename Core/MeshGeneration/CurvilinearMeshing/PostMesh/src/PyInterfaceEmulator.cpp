@@ -112,7 +112,7 @@ PassToPython ComputeDirichleteData3D(const char* iges_filename, Real scale, Real
 //    // FIX IMAGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
 //    curvilinear_mesh->RepairDualProjectedParameters();
 //    //PERFORM POINT INVERTION FOR THE INTERIOR POINTS
-//    curvilinear_mesh->MeshPointInversionCurve();
+    curvilinear_mesh->MeshPointInversionSurface();
 //    // OBTAIN DIRICHLET DATA
 //    PassToPython struct_to_python = curvilinear_mesh->GetDirichletData();
     PassToPython struct_to_python;

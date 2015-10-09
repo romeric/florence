@@ -106,11 +106,11 @@ Eigen::PlainObjectBase<T> take(Eigen::PlainObjectBase<T> &arr, Eigen::MatrixI &a
     return arr_reduced;
 }
 
-inline Standard_Real length(Handle_Geom_Curve &curve, Standard_Real scale=0.001)
+inline Real length(Handle_Geom_Curve &curve, Standard_Real scale=0.001)
 {
     // GET LENGTH OF THE CURVE
     GeomAdaptor_Curve current_curve(curve);
-    Standard_Real curve_length = GCPnts_AbscissaPoint::Length(current_curve);
+    Real curve_length = GCPnts_AbscissaPoint::Length(current_curve);
     // CHANGE THE SCALE TO 1. IF NEEDED
     return scale*curve_length;
 }

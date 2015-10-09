@@ -54,11 +54,11 @@ def PreProcess(MainData,Pr,pwd):
 	# 	print u'\u2713'.encode('utf8')+' : ','Imported mesh has',mesh_node_order,'node ordering'
 	# else:
 	# 	print u'\u2717'.encode('utf8')+' : ','Imported mesh has',mesh_node_order,'node ordering'
-	
+
 	# mesh.points[:,0] -= 0.5
-	mesh.points *=1000. 
+	# mesh.points *=1000. 
 	# mesh.points[89,:] =[-0.5,0]
-	mesh.SimplePlot()
+	# mesh.SimplePlot()
 	# mesh.PlotMeshNumberingTri()
 	# print mesh.GetElementsWithBoundaryEdgesTri()
 	# mesh.RetainElementsWithin((-0.52,-0.08,0.72,0.08))
@@ -95,6 +95,11 @@ def PreProcess(MainData,Pr,pwd):
 	# print np.linalg.norm(mesh.points,axis=1)
 
 	# mesh.Sphere()
+	mesh.Sphere(points=2)
+	# mesh.SimplePlot()
+	# sys.exit(0)
+	# print mesh.elements
+	# mesh.WriteVTK('/home/roman/Desktop/sphere2.vtu')
 
 
 	# GENERATE pMESHES FOR HIGH C

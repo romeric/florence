@@ -1,7 +1,8 @@
 
 #include <PostMeshSurface.hpp>
 
-PostMeshSurface::PostMeshSurface(const PostMeshSurface& other) : PostMeshBase(other)
+PostMeshSurface::PostMeshSurface(const PostMeshSurface& other)
+noexcept(std::is_copy_assignable<PostMeshSurface>::value) : PostMeshBase(other)
 {
     // Copy constructor
     this->ndim = other.ndim;
@@ -13,6 +14,7 @@ PostMeshSurface::PostMeshSurface(const PostMeshSurface& other) : PostMeshBase(ot
 }
 
 PostMeshSurface& PostMeshSurface::operator=(const PostMeshSurface& other)
+noexcept(std::is_copy_assignable<PostMeshSurface>::value)
 {
     // Copy assignment operator
     this->mesh_elements = other.mesh_elements;
@@ -124,7 +126,7 @@ void PostMeshSurface::GetSurfacesParameters()
 
         surfaces_Vparameters(isurface,0) = v1;
         surfaces_Vparameters(isurface,1) = v2;
-        print(u1,v1,u2,v2);
+//        print(u1,v1,u2,v2);
     }
 }
 
@@ -151,16 +153,16 @@ void PostMeshSurface::GetGeomPointsOnCorrespondingFaces()
 
             counter++;
         }
-
-        Eigen::MatrixR current_face_X_ = Eigen::Map<Eigen::MatrixR>(current_face_X.data(),current_face_X.size(),1);
-        Eigen::MatrixR current_face_Y_ = Eigen::Map<Eigen::MatrixR>(current_face_Y.data(),current_face_Y.size(),1);
-        Eigen::MatrixR current_face_Z_ = Eigen::Map<Eigen::MatrixR>(current_face_Z.data(),current_face_Z.size(),1);
+        const auto &current_face_X_ = static_cast<Eigen::MatrixR>
+                (Eigen::Map<Eigen::MatrixR>(current_face_X.data(),current_face_X.size(),1));
+        const auto &current_face_Y_ = static_cast<Eigen::MatrixR>
+                (Eigen::Map<Eigen::MatrixR>(current_face_Y.data(),current_face_Y.size(),1));
+        const auto &current_face_Z_ = static_cast<Eigen::MatrixR>
+                (Eigen::Map<Eigen::MatrixR>(current_face_Z.data(),current_face_Z.size(),1));
 
         Eigen::MatrixR current_face_coords(current_face_X_.rows(),3*current_face_X_.cols());
         current_face_coords << current_face_X_, current_face_Y_, current_face_Z_;
-//        print(current_face_coords);
         this->geometry_points_on_surfaces.push_back(current_face_coords);
-//        print(this->geometry_points_on_surfaces[0]);
     }
 //    exit(EXIT_FAILURE);
 }
@@ -253,6 +255,7 @@ void PostMeshSurface::IdentifySurfacesContainingFaces()
     Eigen::MatrixI arr_cols = cnp::arange(ndim+1);
     this->dirichlet_faces = cnp::take(this->dirichlet_faces,arr_rows,arr_cols);
 //    print(dirichlet_faces);
+//    print(dirichlet_faces.rows());
 //    exit(EXIT_FAILURE);
 }
 
@@ -274,13 +277,13 @@ void PostMeshSurface::ProjectMeshOnSurface(const char *projection_method)
         // LOOP OVER THE THREE VERTICES OF THE FACE
         for (UInteger inode=0; inode<this->ndim; ++inode)
         {
-            // PROJECTION PARAMETER
+            // PROJECTION PARAMETERS
             Real parameterU, parameterV;
             // GET THE COORDINATES OF THE NODE
             Real x = this->mesh_points(this->dirichlet_faces(iface,inode),0);
             Real y = this->mesh_points(this->dirichlet_faces(iface,inode),1);
             Real z = this->mesh_points(this->dirichlet_faces(iface,inode),2);
-            // GET THE CURVE THAT THIS EDGE HAS TO BE PROJECTED TO
+            // GET THE SURFACE THAT THIS FACE HAS TO BE PROJECTED TO
             UInteger isurface = this->dirichlet_faces(iface,3);
             // GET THE COORDINATES OF SURFACE'S THREE VERTICES
             Real x_surface, y_surface, z_surface;
@@ -310,7 +313,7 @@ void PostMeshSurface::ProjectMeshOnSurface(const char *projection_method)
             }
             catch (StdFail_NotDone)
             {
-                warn("The face node was not projected to the right surface. Surface number: ",isurface);
+                warn("The face node was not projected on to the right surface. Surface number: ",isurface);
             }
 
             // STORE PROJECTION POINT PARAMETER ON THE SURFACE (NORMALISED)
@@ -322,18 +325,150 @@ void PostMeshSurface::ProjectMeshOnSurface(const char *projection_method)
     // SORT PROJECTED PARAMETERS OF EACH EDGE - MUST INITIALISE SORT INDICES
     this->sorted_projected_indices = Eigen::MatrixI::Zero(this->projection_U.rows(),this->projection_U.cols());
 
-    print(this->projection_U);
+//    print(this->dirichlet_faces);
+//    for (size_t i=0; i<340; i++)
+//    {
+//        if (projection_U(i,1)<1e-14)
+//            print(dirichlet_faces(i,1));
+//    }
+//    print(this->projection_U);
 //    print(this->projection_V);
     cnp::sort_rows(this->projection_U,this->sorted_projected_indices);
     cnp::sort_rows(this->projection_V,this->sorted_projected_indices);
-    print(this->projection_U);
+//    print(this->projection_U);
+//    print(this->projection_U.rows(),this->projection_U.cols());
+//    print(this->projection_V.rows(),this->projection_V.cols());
 //    print(sorted_projected_indices);
 //    print(this->dirichlet_edges);
 //    print(this->geometry_curves_types);
+
+//    Handle_Geom_Surface dd =  this->geometry_surfaces[0];
+//    Real u1,u2,u3,u4;
+//    dd->Bounds(u1,u2,u3,u4);
+//    print(u1,u2,u3,u4);
+
+    // Project common points of the sphere
+//    auto ee = 10;
+//    Real x = mesh_points(ee,0);
+//    Real y = mesh_points(ee,1);
+//    Real z = mesh_points(ee,2);
+//    Real pu,pv;
+////    gp_Pnt node_to_be_projected = gp_Pnt(0,-1,0);
+//    gp_Pnt node_to_be_projected = gp_Pnt(x,y,z);
+//    // PROJECT THE NODES ON THE CURVE AND GET THE PARAMETER U
+//    GeomAPI_ProjectPointOnSurf proj;
+//    proj.Init(node_to_be_projected,this->geometry_surfaces[0]);
+//    proj.LowerDistanceParameters(pu,pv);
+////    print(proj.NbPoints());
+////    auto xx = proj.Point(1);
+////    print(xx.X(),xx.Y(),xx.Z());
+////    print("");
+////    Handle_Geom_Surface yy =  this->geometry_surfaces[0];
+////    yy->D0(pu,pv,xx);
+////    print(xx.X(),xx.Y(),xx.Z());
+
+////    auto xx = proj.NearestPoint();
+////    print(xx.X(),)
+//    print(x,y,z);
+//    print(pu,pv);
+//    print("");
+
 }
 
 void PostMeshSurface::MeshPointInversionSurface()
 {
+    this->no_dir_faces = this->dirichlet_faces.rows();
+    Integer no_face_nodes = this->mesh_faces.cols();
+    Eigen::MatrixI arr_row = Eigen::Map<Eigen::Matrix<Integer,Eigen::Dynamic,1> >
+            (this->listfaces.data(),this->listfaces.size());
+//    Eigen::MatrixI arr_row = cnp::arange(this->dirichlet_edges.rows());
+    Eigen::MatrixI arr_col = cnp::arange(0,no_face_nodes);
+    this->nodes_dir = cnp::take(this->mesh_faces,arr_row,arr_col);
+    this->nodes_dir = cnp::ravel(this->nodes_dir);
+    this->index_nodes = cnp::arange(no_face_nodes);
+    this->displacements_BC = Eigen::MatrixR::Zero(this->no_dir_faces*no_face_nodes,this->ndim);
+
+    // FIND CURVE LENGTH AND LAST PARAMETER SCALE
+//    this->GetInternalSurfaceScale();
+//    this->EstimatedParameterUOnMesh();
+
+//    print(this->u_of_all_fekete_mesh_edges);
+//    print(boundary_edges_order);
+//    this->GetSurfaceLengths();
+    this->GetSurfacesParameters();
+//    print(this->index_nodes);
+//    println(this->curves_parameters);
+
+//    print(no_dir_faces);
+//    print(no_face_nodes);
+    for (Integer idir=0; idir< this->no_dir_faces; ++idir)
+    {
+        auto id_curve = static_cast<Integer>(this->dirichlet_faces(idir,3));
+        Handle_Geom_Surface current_surface = this->geometry_surfaces[id_curve];
+//        Real length_current_surface = cnp::length(current_curve,1/this->scale);
+//        Real internal_scale = 1; //./this->curve_to_parameter_scale_U(id_curve);
+
+
+//        GeomAdaptor_Surface current_surface_adapt(current_surface);
+
+        for (Integer j=3; j<no_face_nodes;++j)
+        {
+//            auto tol =1.0e-4;
+            auto x = this->mesh_points(this->mesh_faces(this->listfaces[idir],j),0);
+            auto y = this->mesh_points(this->mesh_faces(this->listfaces[idir],j),1);
+            auto z = this->mesh_points(this->mesh_faces(this->listfaces[idir],j),2);
+
+
+//            for (std::vector<gp_Pnt>::iterator k =geometry_points.begin(); k!=geometry_points.end(); ++k)
+//                print(k->X());
+//            for (UInteger k=0; k<geometry_points.size(); k++)
+//            {
+//            }
+//            print(this->projection_precision);
+            // LOOP OVER ALL GEOMETRY POINTS AND IF POSSIBLE PICK THOSE INSTEAD
+            for (auto &k : geometry_points)
+            {
+                if ( (abs(k.X() - x ) < this->projection_precision) && \
+                     (abs(k.Y() - y ) < this->projection_precision) && \
+                     (abs(k.Z() - z ) < this->projection_precision) )
+                {
+//                    print(k.X(),k.Y(),k.Z());
+                    x = k.X(); y = k.Y(); z = k.Z();
+                    break;
+                }
+
+            }
+
+//            print(x,y,z);
+//            print(geometry_surfaces.size());
+//            auto xx = geometry_points[0];
+//            print(xx.X(),xx.Y(),xx.Z());
+
+            Real uEq,vEq;
+            auto point_to_be_projected = gp_Pnt(x,y,z);
+            GeomAPI_ProjectPointOnSurf proj;
+//            proj.Init(point_to_be_projected,this->geometry_surfaces[static_cast<UInteger>(dirichlet_faces(idir,3))]);
+            proj.Init(point_to_be_projected,current_surface);
+            proj.LowerDistanceParameters(uEq,vEq);
+//            print(uEq,vEq);
+
+            auto xEq = gp_Pnt(0.,0.,0.);
+            current_surface->D0(uEq,vEq,xEq);
+
+
+            Eigen::MatrixR gp_pnt_old = (this->mesh_points.row(this->nodes_dir(this->index_nodes( j ))).array()/this->scale);
+
+            this->displacements_BC(this->index_nodes(j),0) = (xEq.X()/this->scale - gp_pnt_old(0));
+            this->displacements_BC(this->index_nodes(j),1) = (xEq.Y()/this->scale - gp_pnt_old(1));
+            this->displacements_BC(this->index_nodes(j),2) = (xEq.Z()/this->scale - gp_pnt_old(2));
+
+//            print(gp_pnt_old(0),gp_pnt_old(1),gp_pnt_old(2)," ",xEq.X()/this->scale,xEq.Y()/this->scale,xEq.Z()/this->scale);
+
+        }
+        this->index_nodes = ((this->index_nodes).array()+no_face_nodes).eval().matrix();
+    }
+    cout << displacements_BC << endl;
+//    print (this->ndim);
 
 }
 

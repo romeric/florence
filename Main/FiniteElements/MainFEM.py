@@ -28,12 +28,12 @@ from Core.FiniteElements.Solvers.Solver import *
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Electromechanics/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Nurbs/ProblemData.py')
-Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/MechanicalComponent2D/ProblemData.py')
+# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/MechanicalComponent2D/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Sphere/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Naca_Isotropic/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/RAE2822/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Misc/ProblemData.py')
-# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Tests/ProblemData.py')
+Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Tests/ProblemData.py')
 
 #############################################################################################################################################
 # from line_profiler import profile
@@ -109,11 +109,18 @@ def main(MainData):
 	# np.savetxt(MainData.Path.Problem+'/points_sphere_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%10.9f',delimiter=',')
 	# np.savetxt(MainData.Path.Problem+'/edges_sphere_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
 	# np.savetxt(MainData.Path.Problem+'/faces_sphere_p'+str(MainData.C+1)+'.dat', mesh.faces,fmt='%d',delimiter=',')
+	# np.savetxt('/home/roman/Desktop/faces_cube_p'+str(MainData.C+1)+'.dat', mesh.faces,fmt='%d',delimiter=',')
+
+	# np.savetxt(MainData.Path.Problem+'/elements_sphere2_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
+	# np.savetxt(MainData.Path.Problem+'/points_sphere2_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%10.9f',delimiter=',')
+	# np.savetxt(MainData.Path.Problem+'/edges_sphere2_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
+	# np.savetxt(MainData.Path.Problem+'/faces_sphere2_p'+str(MainData.C+1)+'.dat', mesh.faces,fmt='%d',delimiter=',')
+
+	
 
 
 	print 'Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*MainData.nvar
 	print 'Number of mesh edge nodes', np.unique(mesh.edges).shape[0]
-
 
 
 	# x = mesh.points[mesh.elements[0,:],:]
@@ -136,6 +143,7 @@ def main(MainData):
 	# import matplotlib.pyplot as plt
 	# plt.plot(mesh.points[:,0],mesh.points[:,1],'o')
 	# plt.show()
+	# mesh.SimplePlot()
 
 	# print mesh.points[mesh.edges[20:24,:],:]
 	# print mesh.points[mesh.edges[42:46,:],:]
@@ -152,7 +160,7 @@ def main(MainData):
 
 	# PostProcess.HighOrderPatchPlot3D(MainData,mesh)
 
-	# sys.exit("STOPPED")
+	sys.exit("STOPPED")
 	# CALL THE MAIN ROUTINE
 	TotalDisp = MainSolver(MainData,mesh)
 	# np.savetxt('/home/roman/Desktop/displacements.txt', TotalDisp[:,:,-1])

@@ -19,10 +19,10 @@ public:
 
     inline PostMeshCurve(std::string &element_type, const UInteger &dim) : PostMeshBase(element_type,dim){}
 
-    PostMeshCurve(const PostMeshCurve& other);
-    PostMeshCurve& operator=(const PostMeshCurve& other);
-    PostMeshCurve(PostMeshCurve&& other);
-    PostMeshCurve& operator=(PostMeshCurve&& other);
+    PostMeshCurve(const PostMeshCurve& other) noexcept(std::is_copy_constructible<PostMeshCurve>::value);
+    PostMeshCurve& operator=(const PostMeshCurve& other) noexcept(std::is_copy_assignable<PostMeshCurve>::value);
+    PostMeshCurve(PostMeshCurve&& other) noexcept;
+    PostMeshCurve& operator=(PostMeshCurve&& other) noexcept;
     inline ~PostMeshCurve(){}
 
     inline void Init()

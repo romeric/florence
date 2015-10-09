@@ -539,9 +539,8 @@ class Mesh(object):
 						pass
 			# print y
 
-		print face_elements
-
-
+		# print face_elements
+		return face_elements
 
 
 
@@ -552,10 +551,35 @@ class Mesh(object):
 		fig = plt.figure()
 		if self.element_type == "tri":
 			plt.triplot(self.points[:,0],self.points[:,1], self.elements[:,:3])
+
+		elif self.element_type == "tet":
+			# assert self.elements.shape[1] == 4
+			if self.faces is None:
+				raise ValueError('Mesh faces not available. Compute it first')
+			from mpl_toolkits.mplot3d import Axes3D
+
+			# FOR PLOTTING ELEMENTS
+			# for elem in range(self.elements.shape[0]):
+			# 	coords = self.points[self.elements[elem,:],:]
+			# 	plt.gca(projection='3d')
+			# 	plt.plot(coords[:,0],coords[:,1],coords[:,2],'-bo')
+
+			# FOR PLOTTING ONLY BOUNDARY FACES
+			if self.faces.shape[1] == 3:
+				for face in range(self.faces.shape[0]):
+					coords = self.points[self.faces[face,:3],:]
+					plt.gca(projection='3d')
+					plt.plot(coords[:,0],coords[:,1],coords[:,2],'-bo')
+			else:
+				for face in range(self.faces.shape[0]):
+					coords = self.points[self.faces[face,:3],:]
+					coords_all = self.points[self.faces[face,:],:]
+					plt.gca(projection='3d')
+					plt.plot(coords[:,0],coords[:,1],coords[:,2],'-b')
+					plt.plot(coords_all[:,0],coords_all[:,1],coords_all[:,2],'bo')
 		else:
 			raise NotImplementedError("SimplePlot for "+self.element_type+" not implemented yet")
 
-		# plt.plot(self.points[89,0],self.points[89,1],'ro')
 		plt.axis("equal")
 		plt.show()
 
@@ -585,7 +609,7 @@ class Mesh(object):
 
 
 
-	def WriteVTK(self,**kwargs):
+	def WriteVTK(self,*args,**kwargs):
 		"""Write mesh/results to vtu"""
 
 		cellflag = None
@@ -603,6 +627,11 @@ class Mesh(object):
 		for i in kwargs.items():
 			if 'fname' in i:
 				FNAME = True
+				fname = i
+		for i in range(len(args)):
+			if isinstance(args[i],str):
+				FNAME = True 
+				fname = args[i]
 		if not FNAME:
 			# IF NOT WRITE TO THE TOP LEVEL DIRECTORY
 			pathvtu = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
@@ -610,7 +639,7 @@ class Mesh(object):
 			fname = pathvtu+str('/output.vtu')
 			write_vtu(Verts=self.points, Cells={cellflag:self.elements},fname=fname,**kwargs)
 		else:
-			write_vtu(Verts=self.points, Cells={cellflag:self.elements},**kwargs)
+			write_vtu(Verts=self.points, Cells={cellflag:self.elements},fname=fname,**kwargs)
 
 
 
@@ -737,7 +766,6 @@ class Mesh(object):
 
 		r = radius
 
-		points = 10
 		dphi = pi/points
 
 		def truncate(r):

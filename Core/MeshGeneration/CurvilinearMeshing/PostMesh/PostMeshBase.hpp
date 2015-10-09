@@ -49,9 +49,9 @@ public:
     PostMeshBase(PostMeshBase&& other);
     PostMeshBase& operator=(PostMeshBase&& other);
 
-    virtual inline ~PostMeshBase(){}
+    inline ~PostMeshBase(){}
 
-    virtual inline void Init(std::string &etype, const UInteger &dim)
+    inline void Init(std::string &etype, const UInteger &dim)
     {
         this->mesh_element_type = etype;
         this->ndim = dim;

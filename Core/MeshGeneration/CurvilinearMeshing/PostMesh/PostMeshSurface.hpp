@@ -19,8 +19,8 @@ public:
 
     PostMeshSurface(std::string &element_type, const UInteger &dim) : PostMeshBase(element_type,dim){}
 
-    PostMeshSurface(const PostMeshSurface& other);
-    PostMeshSurface& operator=(const PostMeshSurface& other);
+    PostMeshSurface(const PostMeshSurface& other) noexcept(std::is_copy_constructible<PostMeshSurface>::value);
+    PostMeshSurface& operator=(const PostMeshSurface& other) noexcept(std::is_copy_assignable<PostMeshSurface>::value);
     PostMeshSurface(PostMeshSurface&& other);
     PostMeshSurface& operator=(PostMeshSurface&& other);
     ~PostMeshSurface(){}

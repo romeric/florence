@@ -54,7 +54,7 @@ PostMeshCurve& PostMeshCurve::operator=(const PostMeshCurve& other)
         return *this;
     }
 
-PostMeshCurve::PostMeshCurve(PostMeshCurve&& other) : PostMeshBase(std::move(other))
+PostMeshCurve::PostMeshCurve(PostMeshCurve&& other) noexcept : PostMeshBase(std::move(other))
     {
         // Move constructor
         this->ndim = other.ndim;
@@ -68,7 +68,7 @@ PostMeshCurve::PostMeshCurve(PostMeshCurve&& other) : PostMeshBase(std::move(oth
         this->curves_lengths = std::move(other.curves_lengths);
     }
 
-PostMeshCurve& PostMeshCurve::operator=(PostMeshCurve&& other)
+PostMeshCurve& PostMeshCurve::operator=(PostMeshCurve&& other) noexcept
     {
         // Move assignment operator
         this->mesh_elements = std::move(other.mesh_elements);
