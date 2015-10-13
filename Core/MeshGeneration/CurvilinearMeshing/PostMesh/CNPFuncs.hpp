@@ -13,44 +13,31 @@ template<typename T> struct unique_container
 // A LIST OF NUMPY-LIKE FUNCTIONS
 namespace cpp_numpy {
 
-inline Eigen::MatrixI arange(Integer a, Integer b)
+ALWAYS_INLINE Eigen::MatrixI arange(Integer a, Integer b)
 {
-    return Eigen::Matrix<Integer,DYNAMIC,1,POSTMESH_ALIGNED>::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
+    return Eigen::Matrix<Integer,DYNAMIC,1,
+            POSTMESH_ALIGNED>::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
 }
 
-inline Eigen::MatrixI arange(Integer b=1)
+ALWAYS_INLINE Eigen::MatrixI arange(Integer b=1)
 {
     /* DEFAULT ARANGE STARTING FROM ZERO AND ENDING AT 1.
      * b IS OPTIONAL AND A IS ALWAYS ZERO
      */
     Integer a = 0;
-    return Eigen::Matrix<Integer,DYNAMIC,1,POSTMESH_ALIGNED>::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
+    return Eigen::Matrix<Integer,DYNAMIC,1,
+            POSTMESH_ALIGNED>::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
 }
-inline Eigen::MatrixI arange(Integer &a, Integer &b)
+
+ALWAYS_INLINE Eigen::MatrixI arange(Integer &a, Integer &b)
 {
-    return Eigen::Matrix<Integer,DYNAMIC,1,POSTMESH_ALIGNED>::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
+    return Eigen::Matrix<Integer,DYNAMIC,1,
+            POSTMESH_ALIGNED>::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
 }
-
-//template<typename T>
-//Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> take(Eigen::Matrix<T,
-//                                                                                         DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> &arr,
-//                                                                                         Eigen::MatrixI &arr_row, Eigen::MatrixI &arr_col)
-//{
-//    Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> arr_reduced(arr_row.rows(),arr_col.rows());
-
-//    for (auto i=0; i<arr_row.rows();i++)
-//    {
-//        for (auto j=0; j<arr_col.rows();j++)
-//        {
-//            arr_reduced(i,j) = arr(arr_row(i),arr_col(j));
-//        }
-//    }
-
-//    return arr_reduced;
-//}
 
 template<typename T>
-Eigen::PlainObjectBase<T> take(Eigen::PlainObjectBase<T> &arr, Eigen::MatrixI &arr_row, Eigen::MatrixI &arr_col)
+Eigen::PlainObjectBase<T>
+take(Eigen::PlainObjectBase<T> &arr, Eigen::MatrixI &arr_row, Eigen::MatrixI &arr_col)
 {
     Eigen::PlainObjectBase<T> arr_reduced;
     arr_reduced.setZero(arr_row.rows(),arr_col.rows());
@@ -66,28 +53,9 @@ Eigen::PlainObjectBase<T> take(Eigen::PlainObjectBase<T> &arr, Eigen::MatrixI &a
     return arr_reduced;
 }
 
-//template<typename T> inline Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> take(Eigen::Matrix<T,
-//                                                                                                DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> &arr,
-//                                                                                                Eigen::MatrixI &arr_idx)
-//{
-//    assert (arr_idx.rows()<=arr.rows());
-//    assert (arr_idx.cols()<=arr.cols());
-
-//    Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> arr_reduced(arr_idx.rows(),arr_idx.cols());
-
-//    for (auto i=0; i<arr_idx.rows();i++)
-//    {
-//        for (auto j=0; j<arr_idx.cols();j++)
-//        {
-//            arr_reduced(i,j) = arr(arr_idx(i),arr_idx(j));
-//        }
-//    }
-
-//    return arr_reduced;
-//}
-
 template<typename T>
-Eigen::PlainObjectBase<T> take(Eigen::PlainObjectBase<T> &arr, Eigen::MatrixI &arr_idx)
+Eigen::PlainObjectBase<T>
+take(Eigen::PlainObjectBase<T> &arr, Eigen::MatrixI &arr_idx)
 {
     assert (arr_idx.rows()<=arr.rows());
     assert (arr_idx.cols()<=arr.cols());
@@ -106,7 +74,7 @@ Eigen::PlainObjectBase<T> take(Eigen::PlainObjectBase<T> &arr, Eigen::MatrixI &a
     return arr_reduced;
 }
 
-inline Real length(Handle_Geom_Curve &curve, Standard_Real scale=0.001)
+ALWAYS_INLINE Real length(Handle_Geom_Curve &curve, Standard_Real scale=0.001)
 {
     // GET LENGTH OF THE CURVE
     GeomAdaptor_Curve current_curve(curve);
@@ -128,7 +96,7 @@ std::vector<Integer> argsort(const std::vector<T> &v) {
 }
 
 template<typename T>
-inline void sort_rows(Eigen::MatrixBase<T> &arr)
+ALWAYS_INLINE void sort_rows(Eigen::MatrixBase<T> &arr)
 {
     //! SORTS A 2D ARRAY ROW BY ROW
     for (auto i=0; i<arr.rows(); ++i)
@@ -138,31 +106,33 @@ inline void sort_rows(Eigen::MatrixBase<T> &arr)
 }
 
 template<typename T>
-inline void sort_rows(Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> & arr,Eigen::MatrixI &indices)
+void sort_rows(Eigen::PlainObjectBase<T> & arr,Eigen::MatrixI &indices)
 {
-    // SORTS A 2D ARRAY ROW BY ROW
+    //! SORTS A 2D ARRAY ROW BY ROW
     for (auto i=0; i<arr.rows(); ++i)
     {
         std::vector<Integer> row_indices;
-        std::vector<T> row_arr;
+        std::vector<typename Eigen::PlainObjectBase<T>::Scalar> row_arr;
         row_arr.assign(arr.row(i).data(),arr.row(i).data()+arr.row(i).size());
         row_indices = argsort(row_arr);
-        indices.block(i,0,1,indices.cols()) = Eigen::Map<Eigen::MatrixI>(row_indices.data(),1,row_indices.size());
+        indices.block(i,0,1,indices.cols()) = \
+                Eigen::Map<Eigen::MatrixI>(row_indices.data(),1,row_indices.size());
         // SORT THE ACTUAL ARRAY NOW
         std::sort(arr.row(i).data(),arr.row(i).data()+arr.row(i).size());
     }
 }
 
 template<typename T>
-inline void sort_back_rows(Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED>&arr,Eigen::MatrixI &idx)
+void sort_back_rows(Eigen::PlainObjectBase<T>&arr,Eigen::MatrixI &idx)
 {
-    //! SORTS BACK THE ARRAY ROW-WISE TO ITS ORIGINAL SHAPE GIVEN THE SORT INDICES IDX. nO COPY INVOLVED
+    //! SORTS BACK THE ARRAY ROW-WISE TO ITS ORIGINAL SHAPE GIVEN THE SORT INDICES IDX.
+    //! NO COPY INVOLVED
     assert (idx.rows()==arr.rows() && idx.cols()==arr.cols());
 
     for (auto i=0; i<arr.rows(); ++i)
     {
-        Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> \
-                current_row = Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED>::Zero(1,arr.cols());
+        Eigen::PlainObjectBase<T> current_row;
+        current_row.setZero(1,arr.cols());
         for (auto j=0; j<arr.cols(); ++j)
         {
             current_row(j) = arr(i,idx(i,j));
@@ -172,17 +142,20 @@ inline void sort_back_rows(Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED>&arr
 }
 
 template<typename T>
-inline Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> ravel(Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> &arr)
+ALWAYS_INLINE Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED>
+ravel(Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> &arr)
 {
-    //! RAVEL/FLATTEN THE ARRAY RESPECTING DATA CONTIGUOUSNESS.
-    //! NOTE: MAKES A COPY
-    return Eigen::Map<Eigen::Matrix<T,DYNAMIC,DYNAMIC> > (arr.data(),arr.rows()*arr.cols(),1);
+    //! RAVEL/FLATTEN THE ARRAY RESPECTING DATA CONTIGUOUSNESS. MAKES A COPY
+    return Eigen::Map<Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> >
+            (arr.data(),arr.rows()*arr.cols(),1);
 }
 
-template<typename T>
-inline std::tuple<Eigen::MatrixUI,Eigen::MatrixUI > where_eq(Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> &arr,
-                                                                                      T num, Real tolerance=1e-14)
+template<typename T, typename U = T>
+std::tuple<Eigen::MatrixUI,Eigen::MatrixUI >
+where_eq(Eigen::PlainObjectBase<T> &arr,
+         U num, Real tolerance=1e-14)
 {
+    //! FIND THE OCCURENCES OF VALUE IN A MATRIX
     std::vector<UInteger> idx_rows;
     std::vector<UInteger> idx_cols;
     idx_rows.clear(); idx_cols.clear();
@@ -190,7 +163,7 @@ inline std::tuple<Eigen::MatrixUI,Eigen::MatrixUI > where_eq(Eigen::Matrix<T,DYN
     {
         for (Integer j=0; j<arr.cols();++j)
         {
-            if (abs(arr(i,j)-num)<tolerance)
+            if (static_cast<Real>(abs(arr(i,j)-num))<tolerance)
             {
                 idx_rows.push_back(i);
                 idx_cols.push_back(j);
@@ -198,20 +171,27 @@ inline std::tuple<Eigen::MatrixUI,Eigen::MatrixUI > where_eq(Eigen::Matrix<T,DYN
         }
     }
 
-    return std::make_tuple( Eigen::Map<Eigen::MatrixUI>(idx_rows.data(),idx_rows.size(),1),
-                            Eigen::Map<Eigen::MatrixUI>(idx_cols.data(),idx_cols.size(),1));
+    return std::make_tuple(
+                Eigen::Map<Eigen::MatrixUI>
+                (idx_rows.data(),idx_rows.size(),1),
+                Eigen::Map<Eigen::MatrixUI>
+                (idx_cols.data(),idx_cols.size(),1));
 }
 
-
-template<typename T>
-inline Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> \
-append(Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> &arr, T num)
+template<typename T, typename U = T>
+ALWAYS_INLINE Eigen::PlainObjectBase<T>
+append(Eigen::PlainObjectBase<T> &arr, U num)
 {
-    Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> arr_pushed(arr.rows()+1,1);
-    arr_pushed.block(0,0,arr.rows(),1) = arr;
-    arr_pushed(arr.rows()) = num;
+    //! APPEND TO AN EIGEN VECTOR, SIMILAR TO PUSH_BACK. MAKES A COPY
+    assert(arr.cols()==1 && "YOU CANNOT APPEND TO MULTI-DIMENSIONAL MATRICES. "
+                            "APPEND IS STRICTLY FOR MATRICES WITH COLS()==1");
 
-    return arr_pushed;
+    Eigen::PlainObjectBase<T> new_arr;
+    new_arr.setZero(arr.rows()+1,1);
+    new_arr.block(0,0,arr.rows(),1) = arr;
+    new_arr(arr.rows()) = static_cast<typename Eigen::PlainObjectBase<T>::Scalar>(num);
+
+    return new_arr;
 }
 
 

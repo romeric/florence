@@ -28,5 +28,15 @@ typedef bool Boolean;
 #define False false
 #define True  true
 
+
+// Control function inlining more aggressively
+#if defined(__GNUC__) || defined(__GNUG__)
+    #define ALWAYS_INLINE inline __attribute__((always_inline))
+    #define NEVER_INLINE __attribute__((noinline))
+#elif defined(_MSC_VER)
+    #define ALWAYS_INLINE __forceinline
+    #define NEVER_INLINE __declspec(noinline)
+#endif
+
 #endif // STD_INC_HPP
 

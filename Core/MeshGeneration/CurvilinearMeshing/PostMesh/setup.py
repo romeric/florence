@@ -9,7 +9,7 @@ import sys
 _pwd_ = os.path.dirname(os.path.realpath('__file__'))
 
 # Compiler arguments
-compiler_args = ["-std=c++11"]
+compiler_args = ["-std=c++11","-march=native"]
 
 # Determine OS 
 if os.name is "posix":

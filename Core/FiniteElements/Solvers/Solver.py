@@ -14,35 +14,35 @@ from Core.FiniteElements.Solvers.StaticSolver import *
 
 
 
-def MainSolver(MainData,nmesh):
+def MainSolver(MainData,mesh):
 
 	# INITIATE DATA FOR NON-LINEAR ANALYSIS
-	NodalForces, Residual = InitiateNonlinearAnalysisData(MainData,nmesh)
+	NodalForces, Residual = InitiateNonlinearAnalysisData(MainData,mesh)
 	# SET NON-LINEAR PARAMETERS
 	Tolerance = MainData.AssemblyParameters.NRTolerance
 	LoadIncrement = MainData.AssemblyParameters.LoadIncrements
 	ResidualNorm = { 'Increment_'+str(Increment) : [] for Increment in range(0,LoadIncrement) }
 	
 	# ALLOCATE FOR GEOMETRY AND SOLUTION FIELDS
-	Eulerx = np.copy(nmesh.points)
-	TotalDisp = np.zeros((nmesh.points.shape[0],MainData.nvar,LoadIncrement),dtype=np.float64)
+	Eulerx = np.copy(mesh.points)
+	TotalDisp = np.zeros((mesh.points.shape[0],MainData.nvar,LoadIncrement),dtype=np.float64)
 
 	# PRE-ASSEMBLY
 	print 'Assembling the system and acquiring neccessary information for the analysis...'
 	tAssembly=time()
 	# RHS
-	# F = AssemblyForces(MainData,nmesh,MainData.Quadrature,Domain,MainData.MaterialArgs,BoundaryData,Boundary)
-	# F = AssemblyForces_Cheap(MainData,nmesh,Quadrature,Domain,MainData.MaterialArgs,BoundaryData,Boundary)
-	F = np.zeros((nmesh.points.shape[0]*MainData.nvar,1),dtype=np.float64)
+	# F = AssemblyForces(MainData,mesh,MainData.Quadrature,Domain,MainData.MaterialArgs,BoundaryData,Boundary)
+	# F = AssemblyForces_Cheap(MainData,mesh,Quadrature,Domain,MainData.MaterialArgs,BoundaryData,Boundary)
+	F = np.zeros((mesh.points.shape[0]*MainData.nvar,1),dtype=np.float64)
 	# LHS
 	M = []
 	if MainData.Analysis == 'Static':
-		K,TractionForces,_,_ = Assembly(MainData,nmesh,Eulerx,np.zeros((nmesh.points.shape[0],1),dtype=np.float64))
+		K,TractionForces,_,_ = Assembly(MainData,mesh,Eulerx,np.zeros((mesh.points.shape[0],1),dtype=np.float64))
 	else:
-		K,_,_,M = Assembly(MainData,nmesh,Eulerx,np.zeros((nmesh.points.shape[0],1),dtype=np.float64))
+		K,_,_,M = Assembly(MainData,mesh,Eulerx,np.zeros((mesh.points.shape[0],1),dtype=np.float64))
 
 	# APPLY DIRICHLET BOUNDARY CONDITIONS TO GET: columns_in, columns_out, AppliedDirichlet
-	_, _, F, columns_in, columns_out, AppliedDirichlet = ApplyDirichletBoundaryConditions(K,F,nmesh,MainData)
+	_, _, F, columns_in, columns_out, AppliedDirichlet = ApplyDirichletBoundaryConditions(K,F,mesh,MainData)
 
 	if MainData.AnalysisType=='Nonlinear':
 		print 'Finished all pre-processing stage. Time elapsed was', time()-tAssembly, 'sec'
@@ -50,10 +50,10 @@ def MainSolver(MainData,nmesh):
 		print 'Finished the assembly stage. Time elapsed was', time()-tAssembly, 'sec'
 
 	if MainData.Analysis != 'Static':
-		TotalDisp = DynamicSolver(LoadIncrement,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nmesh,TotalDisp,
+		TotalDisp = DynamicSolver(LoadIncrement,MainData,K,F,M,NodalForces,Residual,ResidualNorm,mesh,TotalDisp,
 			Eulerx,columns_in,columns_out,AppliedDirichlet,Domain,Boundary,MainData.MaterialArgs)
 	else:
-		TotalDisp = StaticSolver(LoadIncrement,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nmesh,TotalDisp,
+		TotalDisp = StaticSolver(LoadIncrement,MainData,K,F,M,NodalForces,Residual,ResidualNorm,mesh,TotalDisp,
 			Eulerx,columns_in,columns_out,AppliedDirichlet)
 
 	MainData.NRConvergence = ResidualNorm

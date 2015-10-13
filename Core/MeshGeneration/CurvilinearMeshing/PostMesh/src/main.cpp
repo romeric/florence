@@ -195,7 +195,6 @@ int main()
     Real precision = 1.0e-04;
 
 
-
 //    exit (EXIT_FAILURE);
     PassToPython struct_to_python;
 //    struct_to_python = ComputeDirichleteData(iges_filename,scale,points.data(),points.rows(), points.cols(),
@@ -215,16 +214,11 @@ int main()
                            projection_method, precision);
 
 //    print(struct_to_python.displacement_BC_stl);
-
+//    print(elements);
 
     end = std::chrono::system_clock::now();
     std::chrono::duration<Real> elapsed_secs = end-start;
     std::cout << std::endl << "Total time elapsed was " << elapsed_secs.count() << " seconds" << std::endl;
-
-//    BinaryTree xx;
-////    xx.root = new Node;
-//    int x = xx.find(2);
-//    println(x);
 
     //exit (EXIT_FAILURE);
     return 0;

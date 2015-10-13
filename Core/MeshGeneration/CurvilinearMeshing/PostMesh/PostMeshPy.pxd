@@ -21,7 +21,7 @@ cdef extern from "PostMeshCurve.hpp":
 		PostMeshCurve() except +
 		PostMeshCurve(string &element_type, const UInteger &dim) except +
 		UInteger ndim
-		void Init()
+		void Init() except +
 		void SetScale(const Real &scale)
 		void SetCondition(const Real &condition)
 		void SetProjectionPrecision(const Real &precision)
@@ -54,7 +54,7 @@ cdef extern from "PostMeshSurface.hpp":
 		PostMeshSurface() except +
 		PostMeshSurface(string &element_type, const UInteger &dim) except +
 		UInteger ndim
-		void Init()
+		void Init() except +
 		void SetScale(Real &scale)
 		void SetCondition(Real &condition)
 		void SetProjectionCriteria(UInteger *criteria, Integer &rows, Integer &cols)
@@ -85,6 +85,15 @@ cdef extern from "PostMeshSurface.hpp":
 cdef extern from "PyInterfaceEmulator.hpp": 
 	
 	PassToPython ComputeDirichleteData (const char* iges_filename, Real scale, 
+		Real* points_array, Integer points_rows, Integer points_cols, 
+		UInteger* elements_array, const Integer element_rows, const Integer element_cols, 
+		UInteger* edges, const Integer edges_rows, const Integer edges_cols,
+		UInteger* faces, const Integer faces_rows, const Integer faces_cols, Real condition, 
+		Real* boundary_fekete, const Integer fekete_rows, const Integer fekete_cols,
+		UInteger* criteria, const Integer criteria_rows, const Integer criteria_cols, 
+		const char* projection_method, const Real precision)
+
+	PassToPython ComputeDirichleteData3D (const char* iges_filename, Real scale, 
 		Real* points_array, Integer points_rows, Integer points_cols, 
 		UInteger* elements_array, const Integer element_rows, const Integer element_cols, 
 		UInteger* edges, const Integer edges_rows, const Integer edges_cols,

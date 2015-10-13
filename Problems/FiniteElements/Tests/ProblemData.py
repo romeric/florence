@@ -91,7 +91,7 @@ def ProblemData(MainData):
 		Type = 'nurbs'
 		# Type = 'straight'
 		# Type = 'mixed'
-		IGES_File = ProblemPath + '/Circle.igs'
+		IGES_File = ProblemPath + '/Sphere.igs'
 
 		condition = 1000.
 		scale = 1000.

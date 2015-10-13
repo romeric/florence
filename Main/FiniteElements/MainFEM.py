@@ -116,7 +116,7 @@ def main(MainData):
 	# np.savetxt(MainData.Path.Problem+'/edges_sphere2_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
 	# np.savetxt(MainData.Path.Problem+'/faces_sphere2_p'+str(MainData.C+1)+'.dat', mesh.faces,fmt='%d',delimiter=',')
 
-	
+
 
 
 	print 'Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*MainData.nvar
@@ -171,7 +171,8 @@ def main(MainData):
 	# sys.exit("STOPPED")
 	# print 'Post-Processing the information...'
 	# POST-PROCESS
-	# PostProcess().StressRecovery(MainData,mesh,TotalDisp) 	
+	# PostProcess().StressRecovery(MainData,mesh,TotalDisp) 
+	# print mesh.elements	
 	PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp,show_plot=False)
 	PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
 	# PostProcess.HighOrderInterpolatedPatchPlot(MainData,mesh,TotalDisp)

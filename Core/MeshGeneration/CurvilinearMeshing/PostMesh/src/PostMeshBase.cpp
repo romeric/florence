@@ -1,8 +1,10 @@
 
 #include <PostMeshBase.hpp>
 
-PostMeshBase::PostMeshBase(const PostMeshBase& other) : \
-    scale(other.scale), condition(other.condition), projection_precision(other.projection_precision)
+PostMeshBase::PostMeshBase(const PostMeshBase& other) \
+    noexcept(std::is_copy_constructible<PostMeshBase>::value): \
+    scale(other.scale), condition(other.condition), \
+    projection_precision(other.projection_precision)
 {
     // Copy constructor
     this->mesh_element_type = other.mesh_element_type;
@@ -27,7 +29,8 @@ PostMeshBase::PostMeshBase(const PostMeshBase& other) : \
     this->fekete = other.fekete;
 }
 
-PostMeshBase& PostMeshBase::operator=(const PostMeshBase& other)
+PostMeshBase& PostMeshBase::operator=(const PostMeshBase& other) \
+noexcept(std::is_copy_assignable<PostMeshBase>::value)
 {
     // Copy assignment operator
     this->scale = other.scale;

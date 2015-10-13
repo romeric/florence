@@ -74,7 +74,7 @@ inline void warn(const U first, const T... rest)
 
 
 template<typename T, typename ... Args>
-inline std::chrono::duration<double> timer(T (*func)(Args...), Args...args)
+std::chrono::duration<double> timer(T (*func)(Args...), Args&&...args)
 {
     //! Generic timer function for measuring elapsed time on a given
     //! function. For simple functions with no overload, pass the
@@ -117,13 +117,33 @@ inline std::chrono::duration<double> timer(T (*func)(Args...), Args...args)
     //! then
     //!
     //!     timer(simple_mul_ptr,a,b);
+    //!
+    //! If you pass mutating functions that take pointers as input
+    //! arguments you need to cast them separately, for instance
+    //!
+    //!     void mutating_func(double *arr,double num)
+    //!         arr[6] = num;
+    //!
+    //! pass it as
+    //!
+    //!     timeit(static_cast<void (*)(double*,double)>(&mutating_func),
+    //!         static_cast<double*>,double)
+    //!
+    //! The need to cast double* as double* is because of reference collapsing
+    //! and special argument deduction rule that happens at timeit function
+    //!     timeit(T (*func)(Args...), Args&&...args)
+    //! here double* is deduced as double*& for the second pack of arguments i.e.
+    //! (Args&&...args) [which is due to special argument deduction rule]
+    //! and double* is deduced as double* for first pack of arguments i.e.
+    //! (*func)(Args...) and hence the compiler will not be able to resolve
+    //! the signature of timeit function properly
 
 
 
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
 
-    func(args...);
+    func(std::forward<Args>(args)...);
 
     end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end-start;
@@ -158,15 +178,21 @@ inline std::chrono::duration<double> timer(T (*func)(Args...), Args...args)
 
 
 template<typename T, typename ... Args>
-inline double timeit(T (*func)(Args...), Args...args)
+double timeit(T (*func)(Args...), Args&&...args)
 {
-    //! IMPORTANT: Do not pass function to timeit which modify their input
-    //! arguments (unless you are completely sure, it does not affect the timing),
+    //! IMPORTANT: Do not pass functions to timeit which mutate/modify their input
+    //! arguments (unless you are completely certain it does not affect the timing),
     //! since the same function with modified arguments will have a different run-time.
     //!
     //! Generic timer function for accurately measuring elapsed time on a
-    //! given function. timeit runs a function many times and gives the mean of all
-    //! run time. For simple functions with no overload, pass the
+    //! given function. timeit runs a function many times and gives the average of all
+    //! run-time. When invoked on a function, it uses perfect forwarding to pass
+    //! arguments to the callee function with zero-overhead.
+    //!
+    //! Additionally, for hot micro-benchmarking, timeit skips the first
+    //! few runs to avoid cold runs.
+    //!
+    //! For simple functions with no other overloads, pass the
     //! function to timer function directly, followed by arguments
     //!
     //! for example: Given a function
@@ -206,41 +232,77 @@ inline double timeit(T (*func)(Args...), Args...args)
     //! then
     //!
     //!     timeit(simple_mul_ptr,a,b);
+    //!
+    //! If at all you pass mutating functions that take pointers as input
+    //! arguments you need to cast them separately, for instance
+    //!
+    //!     void mutating_func(double *arr,double num)
+    //!         arr[6] = num;
+    //!
+    //! pass it as
+    //!
+    //!     timeit(static_cast<void (*)(double*,double)>(&mutating_func),
+    //!         static_cast<double*>,double)
+    //!
+    //! The need to cast double* as double* is because of reference collapsing
+    //! and special argument deduction rule that happens at timeit function
+    //!     timeit(T (*func)(Args...), Args&&...args)
+    //! here double* is deduced as double*& for the second pack of arguments i.e.
+    //! (Args&&...args) [which is due to special argument deduction rule]
+    //! and double* is deduced as double* for first pack of arguments i.e.
+    //! (*func)(Args...) and hence the compiler will not be able to resolve
+    //! the signature of timeit function properly
 
-    double counter = 1.0f;
-    double mean_time = 0.0f;
+    auto counter = 1.0;
+    auto mean_time = 0.0;
+    auto mean_time_hot = 0.0;
+    auto no_skipped_first_few_iteration = 10;
+
     for (auto iter=0; iter<1e09; ++iter)
     {
         std::chrono::time_point<std::chrono::system_clock> start, end;
         start = std::chrono::system_clock::now();
 
-        func(args...);
+        func(std::forward<Args>(args)...);
 
         end = std::chrono::system_clock::now();
         std::chrono::duration<double> elapsed_seconds = end-start;
 
+        // Timing from a cold start
         mean_time += elapsed_seconds.count();
+
+        // Start benchmarking hot
+        if (counter>no_skipped_first_few_iteration)
+            mean_time_hot +=elapsed_seconds.count();
+
         counter++;
 
-        if (mean_time > 0.1)
+        if (mean_time > 0.5)
         {
-            mean_time /= counter;
+            if ( (counter > no_skipped_first_few_iteration) && \
+                 (counter > 2*no_skipped_first_few_iteration) ) {
+                mean_time_hot /= (counter - no_skipped_first_few_iteration);
+                mean_time = mean_time_hot;
+            }
+            else {
+                mean_time /= counter;
+            }
+
             if (mean_time >= 1.0e-3 && mean_time < 1.)
-            {
-                std::cout << static_cast<long int>(counter)<< " runs, average elapsed time is "<< mean_time/1.0e-03 << " ms" << std::endl;
-            }
+                std::cout << static_cast<long int>(counter)
+                          << " runs, average elapsed time is "
+                          << mean_time/1.0e-03 << " ms" << std::endl;
             else if (mean_time >= 1.0e-6 && mean_time < 1.0e-3)
-            {
-                std::cout << static_cast<long int>(counter)<< " runs, average elapsed time is "<< mean_time/1.0e-06 << " \xC2\xB5s" << std::endl;
-            }
+                std::cout << static_cast<long int>(counter)<< " runs, average elapsed time is "
+                          << mean_time/1.0e-06 << " \xC2\xB5s" << std::endl;
             else if (mean_time < 1.0e-6)
-            {
-                std::cout << static_cast<long int>(counter)<< " runs, average elapsed time is "<< mean_time/1.0e-09 << " ns" << std::endl;
-            }
+                std::cout << static_cast<long int>(counter)
+                          << " runs, average elapsed time is "
+                          << mean_time/1.0e-09 << " ns" << std::endl;
             else
-            {
-                std::cout << static_cast<long int>(counter)<< " runs, average elapsed time is "<< mean_time << " s" << std::endl;
-            }
+                std::cout << static_cast<long int>(counter)
+                          << " runs, average elapsed time is "
+                          << mean_time << " s" << std::endl;
 
             break;
         }

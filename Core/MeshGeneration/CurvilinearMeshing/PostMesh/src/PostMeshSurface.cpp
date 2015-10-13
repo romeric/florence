@@ -45,7 +45,8 @@ noexcept(std::is_copy_assignable<PostMeshSurface>::value)
     return *this;
 }
 
-PostMeshSurface::PostMeshSurface(PostMeshSurface&& other) : PostMeshBase(std::move(other))
+PostMeshSurface::PostMeshSurface(PostMeshSurface&& other) noexcept \
+    : PostMeshBase(std::move(other))
 {
     // Move constructor
     this->ndim = other.ndim;
@@ -55,7 +56,7 @@ PostMeshSurface::PostMeshSurface(PostMeshSurface&& other) : PostMeshBase(std::mo
     this->boundary_faces_order = std::move(other.boundary_faces_order);
 }
 
-PostMeshSurface& PostMeshSurface::operator=(PostMeshSurface&& other)
+PostMeshSurface& PostMeshSurface::operator=(PostMeshSurface&& other) noexcept
 {
     // Move assignment operator
     this->mesh_elements = std::move(other.mesh_elements);
@@ -467,7 +468,7 @@ void PostMeshSurface::MeshPointInversionSurface()
         }
         this->index_nodes = ((this->index_nodes).array()+no_face_nodes).eval().matrix();
     }
-    cout << displacements_BC << endl;
+//    cout << displacements_BC << endl;
 //    print (this->ndim);
 
 }

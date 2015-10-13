@@ -11,21 +11,24 @@ class PostMeshCurve: public PostMeshBase
 
 public:
 
-    inline PostMeshCurve() : PostMeshBase()
+    ALWAYS_INLINE PostMeshCurve() : PostMeshBase()
     {
         this->ndim = 2;
         this->mesh_element_type = "tri";
     }
 
-    inline PostMeshCurve(std::string &element_type, const UInteger &dim) : PostMeshBase(element_type,dim){}
+    ALWAYS_INLINE PostMeshCurve(std::string &element_type, const UInteger &dim) \
+        : PostMeshBase(element_type,dim){}
 
-    PostMeshCurve(const PostMeshCurve& other) noexcept(std::is_copy_constructible<PostMeshCurve>::value);
-    PostMeshCurve& operator=(const PostMeshCurve& other) noexcept(std::is_copy_assignable<PostMeshCurve>::value);
+    PostMeshCurve(const PostMeshCurve& other) \
+    noexcept(std::is_copy_constructible<PostMeshCurve>::value);
+    PostMeshCurve& operator=(const PostMeshCurve& other) \
+    noexcept(std::is_copy_assignable<PostMeshCurve>::value);
     PostMeshCurve(PostMeshCurve&& other) noexcept;
     PostMeshCurve& operator=(PostMeshCurve&& other) noexcept;
-    inline ~PostMeshCurve(){}
+    ALWAYS_INLINE ~PostMeshCurve(){}
 
-    inline void Init()
+    ALWAYS_INLINE void Init()
     {
         this->mesh_element_type = "tri";
         this->ndim = 2;

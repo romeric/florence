@@ -207,3 +207,19 @@ elif MainData.session == 'BEM3D':
 # -lTKGeomAlgo\
 # -std=c++11 -Wno-unused \
 # main.cpp occ_frontend.cpp py_to_occ_frontend.cpp -o main
+
+# `/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
+# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
+# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
+# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
+# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
+# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
+# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
+# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
+# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
+# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
+# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
+# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
+# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
+# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
+# /usr/local/openmpi/lib:/usr/local/openmpi/lib:'

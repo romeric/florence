@@ -41,7 +41,7 @@ def ApplyDirichletBoundaryConditions(stiffness,F,mesh,MainData):
 				boundary_fekete = FeketePointsTri(MainData.C)
 
 			from Core import PostMeshPy as PostMesh 
-			# print dir(PostMeshPy) 
+			# print dir(PostMesh) 
 			# import sys; sys.exit(0)
 			curvilinear_mesh = PostMesh(mesh.element_type,dimension=MainData.ndim)
 			curvilinear_mesh.SetMeshElements(mesh.elements)

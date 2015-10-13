@@ -5,7 +5,9 @@
 using namespace std;
 
 
-PostMeshCurve::PostMeshCurve(const PostMeshCurve& other) : PostMeshBase(other)
+PostMeshCurve::PostMeshCurve(const PostMeshCurve& other) \
+noexcept(std::is_copy_constructible<PostMeshCurve>::value)
+    : PostMeshBase(other)
     {
         // Copy constructor
         this->ndim = other.ndim;
@@ -19,7 +21,8 @@ PostMeshCurve::PostMeshCurve(const PostMeshCurve& other) : PostMeshBase(other)
         this->curves_lengths = other.curves_lengths;
     }
 
-PostMeshCurve& PostMeshCurve::operator=(const PostMeshCurve& other)
+PostMeshCurve& PostMeshCurve::operator=(const PostMeshCurve& other) \
+noexcept(std::is_copy_assignable<PostMeshCurve>::value)
     {
         // Copy assignment operator
         this->mesh_elements = other.mesh_elements;
@@ -54,7 +57,8 @@ PostMeshCurve& PostMeshCurve::operator=(const PostMeshCurve& other)
         return *this;
     }
 
-PostMeshCurve::PostMeshCurve(PostMeshCurve&& other) noexcept : PostMeshBase(std::move(other))
+PostMeshCurve::PostMeshCurve(PostMeshCurve&& other) noexcept :
+    PostMeshBase(std::move(other))
     {
         // Move constructor
         this->ndim = other.ndim;

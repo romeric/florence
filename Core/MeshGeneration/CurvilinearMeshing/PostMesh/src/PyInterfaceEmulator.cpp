@@ -77,7 +77,7 @@ PassToPython ComputeDirichleteData3D(const char* iges_filename, Real scale, Real
 
 //    PostMeshCurve occ_interface = PostMeshCurve(element_type,dimension);
 //    PostMeshCurve *curvilinear_mesh = new PostMeshCurve();
-//    PostMeshCurve check;
+
     std::shared_ptr<PostMeshSurface> curvilinear_mesh = std::make_shared<PostMeshSurface>(PostMeshSurface());
     curvilinear_mesh->SetMeshElements(elements_array,element_rows,element_cols);
     curvilinear_mesh->SetMeshPoints(points_array,points_rows,points_cols);
@@ -116,6 +116,8 @@ PassToPython ComputeDirichleteData3D(const char* iges_filename, Real scale, Real
 //    // OBTAIN DIRICHLET DATA
 //    PassToPython struct_to_python = curvilinear_mesh->GetDirichletData();
     PassToPython struct_to_python;
+//    print(curvilinear_mesh->mesh_elements);
+
 
 
     return struct_to_python;

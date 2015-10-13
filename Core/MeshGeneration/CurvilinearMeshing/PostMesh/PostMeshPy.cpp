@@ -37,6 +37,8 @@
         ], 
         "extra_compile_args": [
             "-std=c++11", 
+            "-march=native", 
+            "-march=native", 
             "-msse", 
             "-msse2", 
             "-mssse3", 
@@ -2093,6 +2095,9 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
 static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_10PostMeshPy_2Init(struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshPy *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("Init", 0);
 
   /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":30
@@ -2102,7 +2107,12 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  * 
  * 	def SetScale(self,Real scale):
  */
-  __pyx_v_self->thisptr->Init();
+  try {
+    __pyx_v_self->thisptr->Init();
+  } catch(...) {
+    __Pyx_CppExn2PyErr();
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
 
   /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":29
  * 		self.thisptr = new PostMeshCurve(cpp_element_type,dimension)
@@ -2114,6 +2124,11 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
 
   /* function exit code */
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("Core.MeshGeneration.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshPy.Init", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
@@ -3787,6 +3802,7 @@ static void __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10Pos
  * 	def __dealloc__(self):
  * 		if self.thisptr != NULL:             # <<<<<<<<<<<<<<
  * 			del self.thisptr
+ * 
  */
   __pyx_t_1 = ((__pyx_v_self->thisptr != NULL) != 0);
   if (__pyx_t_1) {
@@ -3795,6 +3811,8 @@ static void __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10Pos
  * 	def __dealloc__(self):
  * 		if self.thisptr != NULL:
  * 			del self.thisptr             # <<<<<<<<<<<<<<
+ * 
+ * 
  */
     delete __pyx_v_self->thisptr;
     goto __pyx_L3;
