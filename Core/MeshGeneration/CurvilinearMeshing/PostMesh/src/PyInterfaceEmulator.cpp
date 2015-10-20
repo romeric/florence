@@ -114,8 +114,8 @@ PassToPython ComputeDirichleteData3D(const char* iges_filename, Real scale, Real
 //    //PERFORM POINT INVERTION FOR THE INTERIOR POINTS
     curvilinear_mesh->MeshPointInversionSurface();
 //    // OBTAIN DIRICHLET DATA
-//    PassToPython struct_to_python = curvilinear_mesh->GetDirichletData();
-    PassToPython struct_to_python;
+    PassToPython struct_to_python = curvilinear_mesh->GetDirichletData();
+//    PassToPython struct_to_python;
 //    print(curvilinear_mesh->mesh_elements);
 
 

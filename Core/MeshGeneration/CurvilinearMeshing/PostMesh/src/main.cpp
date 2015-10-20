@@ -21,7 +21,7 @@ Eigen::MatrixUI ComputeCriteria(Eigen::MatrixUI &edges, Eigen::MatrixR &points, 
        Real x2 = points(edges(i,1),0);
        Real y2 = points(edges(i,1),1);
 
-       if ((sqrt(x1*x1+y1*y1)<condition) && ( sqrt(x2*x2+y2*y2)< condition))
+       if ((std::sqrt(x1*x1+y1*y1)<condition) && ( std::sqrt(x2*x2+y2*y2)< condition))
        {
            criteria(i) = 1;
        }
@@ -103,15 +103,15 @@ int main()
 //    std::string edge_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Misc/edges_leftcircle_p2.dat";
 
     // 3D
-//    std::string elem_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/elements_sphere_p2.dat";
-//    std::string point_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/points_sphere_p2.dat";
-//    std::string edge_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/edges_sphere_p2.dat";
-//    std::string face_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/faces_sphere_p2.dat";
+    std::string elem_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/elements_sphere_p2.dat";
+    std::string point_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/points_sphere_p2.dat";
+    std::string edge_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/edges_sphere_p2.dat";
+    std::string face_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/faces_sphere_p2.dat";
 
-    std::string elem_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/elements_sphere2_p2.dat";
-    std::string point_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/points_sphere2_p2.dat";
-    std::string edge_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/edges_sphere2_p2.dat";
-    std::string face_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/faces_sphere2_p2.dat";
+//    std::string elem_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/elements_sphere2_p2.dat";
+//    std::string point_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/points_sphere2_p2.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/edges_sphere2_p2.dat";
+//    std::string face_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/faces_sphere2_p2.dat";
 
 
 
@@ -181,6 +181,8 @@ int main()
 //    print(points);
 //    print(edges);
 //    print(faces);
+//    print(faces.rows(),faces.cols());
+//    print(points.row(92));
 //    print (edges.rows(),elements.rows(),elements.cols());
 //    cout << points.block(0,0,100,2) << endl;
 //    println(points.minCoeff(),points.maxCoeff());

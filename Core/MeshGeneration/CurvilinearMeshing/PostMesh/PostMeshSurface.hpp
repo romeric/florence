@@ -28,7 +28,7 @@ public:
     PostMeshSurface& operator=(PostMeshSurface&& other) noexcept;
     ~PostMeshSurface(){}
 
-    inline void Init()
+    ALWAYS_INLINE void Init()
     {
         this->ndim = 3;
         this->mesh_element_type = "tet";
@@ -46,6 +46,7 @@ public:
     void IdentifySurfacesContainingFaces();
     void ProjectMeshOnSurface(const char *projection_method);
     void MeshPointInversionSurface();
+    PassToPython GetDirichletData();
 
 
     std::vector<Eigen::MatrixR> geometry_points_on_surfaces;
@@ -64,7 +65,7 @@ protected:
     Eigen::MatrixI sorted_projected_indices;
     Eigen::MatrixI dirichlet_faces;
     std::vector<Integer> listfaces;
-    Standard_Integer no_dir_faces;
+    Integer no_dir_faces;
     Eigen::MatrixR v_of_all_fekete_mesh_edges;
     Eigen::MatrixR u_of_all_fekete_mesh_faces;
     Eigen::MatrixR v_of_all_fekete_mesh_faces;

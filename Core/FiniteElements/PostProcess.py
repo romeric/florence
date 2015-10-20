@@ -481,8 +481,38 @@ class PostProcess(object):
 		vpoints = np.copy(mesh.points)
 		vpoints[:,0] += TotalDisp[:,0,-1]
 		vpoints[:,1] += TotalDisp[:,1,-1]
+		if MainData.ndim == 3:
+			vpoints[:,2] += TotalDisp[:,2,-1]
+		# print 
+		# print vpoints
+		# print 
+		mm = 21
+		# print mesh.points[mm,:]
+		# print TotalDisp[mm,:,-1]
+		# print vpoints[mm,:]
+		# print np.linalg.norm(vpoints[mm,:])
+		# a = np.linalg.norm(vpoints,axis=1)
+		uniq_faces = np.unique(mesh.faces)
+		xx = np.linalg.norm(vpoints[uniq_faces,:],axis=1)
+		# print np.where(abs(xx-1)<1e-14)
+		print vpoints[92,:]
+		# for i in range(xx.shape[0]):
+			# if abs(xx[i]-1) > 1e-06:
+				# pass
+				# print uniq_faces[i], i
+		# print np.where(abs(a-1) < 1e-14)[0]
+		# print a[:,None][12]
+		# print mesh.points[12,:]
+		# print a.shape, mesh.points.shape
+		# print abs(a-1) > 1e-8
+		# print mesh.points.shape, vpoints.shape
+		# print np.linalg.norm(vpoints,axis=1)
+		import sys; sys.exit(0)
+		# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/vpoints_sphere2_p3.dat', vpoints,fmt='%10.9f',delimiter=',')
 		# plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#ffffee') 
-		plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#F88379') 
+		# plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#F88379') ##
+		# plt.plot(vpoints[:,0],vpoints[:,1],vpoints[:,2],'o',color='#F88379') 
+		# plt.gca(projection='3d')
 
 		dum1=[]; dum2=[]; dum3 = []; ddum=np.array([0,1,2,0])
 		for i in range(0,MainData.C):
@@ -495,8 +525,7 @@ class PostProcess(object):
 
 		for i in range(0,mesh.elements.shape[0]):
 			dum = vpoints[mesh.elements[i,:],:]
-			if i==0:
-				print dum
+
 			plt.plot(dum[ddum,0],dum[ddum,1],alpha=0.02)
 			# plt.fill(dum[ddum,0],dum[ddum,1],'#A4DDED')
 			plt.fill(dum[ddum,0],dum[ddum,1],color=(0.75,MainData.ScaledJacobian[i],0.35))	
@@ -505,8 +534,10 @@ class PostProcess(object):
 
 			plt.plot(dum[ddum,0],dum[ddum,1],'#000000')
 
+		plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#F88379') 
+
 		plt.axis('equal')
-		# plt.axis('off')	
+		plt.axis('off')	
 
 		# plt.savefig('/home/roman/Desktop/DumpReport/mesh_312_'+MainData.AnalysisType+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)
 

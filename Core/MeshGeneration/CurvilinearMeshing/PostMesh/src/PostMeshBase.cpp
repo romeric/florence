@@ -61,8 +61,9 @@ noexcept(std::is_copy_assignable<PostMeshBase>::value)
     return *this;
 }
 
-PostMeshBase::PostMeshBase(PostMeshBase&& other) : \
-    scale(other.scale), condition(other.condition), projection_precision(other.projection_precision)
+PostMeshBase::PostMeshBase(PostMeshBase&& other) noexcept :  \
+    scale(other.scale), condition(other.condition), \
+    projection_precision(other.projection_precision)
 {
     //! Move constructor for PostMeshBase class
     this->mesh_element_type = other.mesh_element_type;
@@ -92,7 +93,7 @@ PostMeshBase::PostMeshBase(PostMeshBase&& other) : \
     //! would kick in
 }
 
-PostMeshBase& PostMeshBase::operator=(PostMeshBase&& other)
+PostMeshBase& PostMeshBase::operator=(PostMeshBase&& other) noexcept
 {
     // Move assignment operator
     this->scale = other.scale;
@@ -158,9 +159,6 @@ void PostMeshBase::ReadIGES(const char* filename)
 
     this->imported_shape  = reader.OneShape();
     this->no_of_shapes = reader.NbShapes();
-
-//        Handle_TColStd_HSequenceOfTransient edges = reader.GiveList("iges-faces");
-
 }
 
 void PostMeshBase::ReadSTEP(const char* filename)

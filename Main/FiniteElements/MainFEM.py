@@ -116,6 +116,10 @@ def main(MainData):
 	# np.savetxt(MainData.Path.Problem+'/edges_sphere2_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
 	# np.savetxt(MainData.Path.Problem+'/faces_sphere2_p'+str(MainData.C+1)+'.dat', mesh.faces,fmt='%d',delimiter=',')
 
+	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/elements_sphere2_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
+	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_sphere2_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%10.9f',delimiter=',')
+	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/faces_sphere2_p'+str(MainData.C+1)+'.dat', mesh.faces,fmt='%d',delimiter=',')
+
 
 
 
@@ -152,31 +156,54 @@ def main(MainData):
 	# print mesh.edges
 	# print mesh.faces
 	# print mesh.edges.shape
+	# print mesh.faces.shape
+	# print mesh.points.shape
 	# print mesh.elements.shape
 	# print mesh.points[2,:]*1000
 	# print mesh.points[2,:]
 	# print mesh.points[mesh.edges[:,:2],:]
 	# print mesh.points[:8,:]
+	print mesh.points[92,:]
 
 	# PostProcess.HighOrderPatchPlot3D(MainData,mesh)
 
-	sys.exit("STOPPED")
+	# sys.exit("STOPPED")
 	# CALL THE MAIN ROUTINE
 	TotalDisp = MainSolver(MainData,mesh)
 	# np.savetxt('/home/roman/Desktop/displacements.txt', TotalDisp[:,:,-1])
 	# print 'Total number of DoFs for the system is', sol.shape[0]
 
+	# print TotalDisp.shape
 	# print TotalDisp[:,:,0].shape
 	# print TotalDisp[1,:,0]
+	# from Core.Supplementary.Tensors import makezero
+	# print makezero(TotalDisp[:,:,0])
+	# print 
+	# print np.hstack((makezero(mesh.points),makezero(TotalDisp[:,:,0])))
+	# print MainData.xx 
+	# print mesh.elements[83,:]
+	# print 
+	# print mesh.points[mesh.elements[83,:],:]
+	# print TotalDisp[2*107,:,:]
+	# print TotalDisp[824,:,:]
+	# print np.linalg.norm(TotalDisp[824,:,:],axis=0)
+	# print np.linalg.norm(TotalDisp[:,:,0],axis=0)
+	# print np.linalg.norm(TotalDisp[:,:,:],axis=1)
+	# print np.linalg.norm(TotalDisp[2*107,:,:],axis=0)
+
+
 	# sys.exit("STOPPED")
+
 	# print 'Post-Processing the information...'
 	# POST-PROCESS
 	# PostProcess().StressRecovery(MainData,mesh,TotalDisp) 
 	# print mesh.elements	
 	PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp,show_plot=False)
 	PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
+	# PostProcess.HighOrderPatchPlot3D(MainData,mesh,TotalDisp)
 	# PostProcess.HighOrderInterpolatedPatchPlot(MainData,mesh,TotalDisp)
 	import matplotlib.pyplot as plt
+	# plt.savefig('/home/roman/Dropbox/zdump/DumpReport/mech2d/postmesh_'+MainData.AnalysisType+'_p'+str(MainData.C+1)+'.eps', format='eps', dpi=1000)
 	plt.show()
 
 	# from Core.Supplementary.SuppPlots.MeshNumbering import PlotMeshNumbering

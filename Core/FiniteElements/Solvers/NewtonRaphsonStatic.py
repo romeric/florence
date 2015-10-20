@@ -9,7 +9,8 @@ from Core.FiniteElements.PostProcess import *
 from Core.FiniteElements.Assembly import *
 
 
-def NewtonRaphson(Increment,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nmesh,TotalDisp,Eulerx,columns_in,columns_out,AppliedDirichletInc):
+def NewtonRaphson(Increment,MainData,K,F,M,NodalForces,Residual,
+	ResidualNorm,nmesh,TotalDisp,Eulerx,columns_in,columns_out,AppliedDirichletInc):
 
 	Tolerance = MainData.AssemblyParameters.NRTolerance
 	LoadIncrement = MainData.AssemblyParameters.LoadIncrements
@@ -21,7 +22,8 @@ def NewtonRaphson(Increment,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nme
 
 	while np.abs(la.norm(Residual[columns_in])/NormForces) > Tolerance:
 		# APPLY INCREMENTAL DIRICHLET BOUNDARY CONDITIONS
-		K_b, F_b= ApplyIncrementalDirichletBoundaryConditions(K,Residual,columns_in,columns_out,AppliedDirichletInc,Iter,MainData.Minimal,nmesh,M,MainData.Analysis)[:2]
+		K_b, F_b= ApplyIncrementalDirichletBoundaryConditions(K,Residual,
+			columns_in,columns_out,AppliedDirichletInc,Iter,MainData.Minimal,nmesh,M,MainData.Analysis)[:2]
 
 		# SOLVE THE SYSTEM
 		if MainData.solve.type == 'direct':
@@ -41,15 +43,27 @@ def NewtonRaphson(Increment,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nme
 		# UPDATE & SAVE ITERATION NUMBER
 		MainData.AssemblyParameters.IterationNumber +=1
 		# RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES (BE CAREFUL ABOUT THE -1 INDEX IN HERE)
-		K, TractionForces = Assembly(MainData,nmesh,Eulerx,TotalDisp[:,MainData.nvar-1,Increment].reshape(TotalDisp.shape[0],1))[:2]
+		# K, TractionForces = Assembly(MainData,nmesh,Eulerx,TotalDisp[:,MainData.nvar-1,Increment].reshape(TotalDisp.shape[0],1))[:2]
+		K, TractionForces = Assembly(MainData,nmesh,Eulerx,TotalDisp[:,MainData.nvar-1,Increment,None])[:2]
 		# print np.concatenate((Residual[columns_in],NodalForces[columns_in]),axis=1)
 		# FIND THE RESIDUAL
 		Residual[columns_in] = TractionForces[columns_in] - NodalForces[columns_in]
+		# print nmesh.elements[83,:]
+		# print 
+		# print nmesh.points[nmesh.elements[83,:],:]
+		# import matplotlib.pyplot as plt 
+		# plt.plot(nmesh.points[nmesh.elements[83,:],0],nmesh.points[nmesh.elements[83,:],1],'o')
+		# MainData.xx[Increment] = np.linalg.norm(TractionForces) ##
+		# plt.show()
+		# import sys; sys.exit(0)
+		
 		# SAVE THE NORM 
 		NormForces = la.norm(NodalForces[columns_in])
-		ResidualNorm['Increment_'+str(Increment)] = np.append(ResidualNorm['Increment_'+str(Increment)],np.abs(la.norm(Residual[columns_in])/NormForces))
+		ResidualNorm['Increment_'+str(Increment)] = np.append(ResidualNorm['Increment_'+str(Increment)],\
+			np.abs(la.norm(Residual[columns_in])/NormForces))
 		
-		print 'Iteration number', Iter, 'for load increment', Increment, 'with a residual of \t\t', np.abs(la.norm(Residual[columns_in])/NormForces)
+		print 'Iteration number', Iter, 'for load increment', Increment, 'with a residual of \t\t', \
+			np.abs(la.norm(Residual[columns_in])/NormForces)
 		# sys.exit("STOPPED")
 		# UPDATE ITERATION NUMBER
 		Iter +=1 
@@ -65,7 +79,8 @@ def NewtonRaphson(Increment,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nme
 
 
 
-def NewtonRaphsonWithArcLength(Increment,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nmesh,TotalDisp,Eulerx,columns_in,columns_out,AppliedDirichletInc):
+def NewtonRaphsonWithArcLength(Increment,MainData,K,F,M,NodalForces,Residual,
+	ResidualNorm,nmesh,TotalDisp,Eulerx,columns_in,columns_out,AppliedDirichletInc):
 
 	Tolerance = MainData.AssemblyParameters.NRTolerance
 	LoadIncrement = MainData.AssemblyParameters.LoadIncrements
@@ -77,7 +92,8 @@ def NewtonRaphsonWithArcLength(Increment,MainData,K,F,M,NodalForces,Residual,Res
 
 	while np.abs(la.norm(Residual[columns_in])/NormForces) > Tolerance:
 		# APPLY INCREMENTAL DIRICHLET BOUNDARY CONDITIONS
-		K_b, F_b= ApplyIncrementalDirichletBoundaryConditions(K,Residual,columns_in,columns_out,AppliedDirichletInc,Iter,MainData.Minimal,nmesh,M,MainData.Analysis)[:2]
+		K_b, F_b= ApplyIncrementalDirichletBoundaryConditions(K,Residual,
+			columns_in,columns_out,AppliedDirichletInc,Iter,MainData.Minimal,nmesh,M,MainData.Analysis)[:2]
 
 		# SOLVE THE SYSTEM
 		if MainData.solve.type == 'direct':
@@ -103,18 +119,16 @@ def NewtonRaphsonWithArcLength(Increment,MainData,K,F,M,NodalForces,Residual,Res
 		Residual[columns_in] = TractionForces[columns_in] - NodalForces[columns_in]
 		# SAVE THE NORM 
 		NormForces = la.norm(NodalForces[columns_in])
-		ResidualNorm['Increment_'+str(Increment)] = np.append(ResidualNorm['Increment_'+str(Increment)],np.abs(la.norm(Residual[columns_in])/NormForces))
+		ResidualNorm['Increment_'+str(Increment)] = np.append(ResidualNorm['Increment_'+str(Increment)],
+			np.abs(la.norm(Residual[columns_in])/NormForces))
 		
-		print 'Iteration number', Iter, 'for load increment', Increment, 'with a residual of \t\t', np.abs(la.norm(Residual[columns_in])/NormForces)
+		print 'Iteration number', Iter, 'for load increment', Increment, 'with a residual of \t\t', \
+			np.abs(la.norm(Residual[columns_in])/NormForces)
 		# sys.exit("STOPPED")
 		# UPDATE ITERATION NUMBER
 		Iter +=1 
 
 		if Iter==MainData.AssemblyParameters.MaxIter:
 			raise StopIteration("\n\nNewton Raphson did not converge! Maximum number of iterations reached.")
-
-		# if Iter==1:
-			# sys.exit("STOPPED")
-
 
 	return TotalDisp

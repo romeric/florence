@@ -13,13 +13,13 @@ template<typename T> struct unique_container
 // A LIST OF NUMPY-LIKE FUNCTIONS
 namespace cpp_numpy {
 
-ALWAYS_INLINE Eigen::MatrixI arange(Integer a, Integer b)
+STATIC ALWAYS_INLINE Eigen::MatrixI arange(Integer a, Integer b)
 {
     return Eigen::Matrix<Integer,DYNAMIC,1,
             POSTMESH_ALIGNED>::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
 }
 
-ALWAYS_INLINE Eigen::MatrixI arange(Integer b=1)
+STATIC ALWAYS_INLINE Eigen::MatrixI arange(Integer b=1)
 {
     /* DEFAULT ARANGE STARTING FROM ZERO AND ENDING AT 1.
      * b IS OPTIONAL AND A IS ALWAYS ZERO
@@ -29,7 +29,7 @@ ALWAYS_INLINE Eigen::MatrixI arange(Integer b=1)
             POSTMESH_ALIGNED>::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
 }
 
-ALWAYS_INLINE Eigen::MatrixI arange(Integer &a, Integer &b)
+STATIC ALWAYS_INLINE Eigen::MatrixI arange(Integer &a, Integer &b)
 {
     return Eigen::Matrix<Integer,DYNAMIC,1,
             POSTMESH_ALIGNED>::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
@@ -37,7 +37,7 @@ ALWAYS_INLINE Eigen::MatrixI arange(Integer &a, Integer &b)
 
 template<typename T>
 Eigen::PlainObjectBase<T>
-take(Eigen::PlainObjectBase<T> &arr, Eigen::MatrixI &arr_row, Eigen::MatrixI &arr_col)
+STATIC take(Eigen::PlainObjectBase<T> &arr, Eigen::MatrixI &arr_row, Eigen::MatrixI &arr_col)
 {
     Eigen::PlainObjectBase<T> arr_reduced;
     arr_reduced.setZero(arr_row.rows(),arr_col.rows());
@@ -55,7 +55,7 @@ take(Eigen::PlainObjectBase<T> &arr, Eigen::MatrixI &arr_row, Eigen::MatrixI &ar
 
 template<typename T>
 Eigen::PlainObjectBase<T>
-take(Eigen::PlainObjectBase<T> &arr, Eigen::MatrixI &arr_idx)
+STATIC take(Eigen::PlainObjectBase<T> &arr, Eigen::MatrixI &arr_idx)
 {
     assert (arr_idx.rows()<=arr.rows());
     assert (arr_idx.cols()<=arr.cols());
@@ -74,7 +74,7 @@ take(Eigen::PlainObjectBase<T> &arr, Eigen::MatrixI &arr_idx)
     return arr_reduced;
 }
 
-ALWAYS_INLINE Real length(Handle_Geom_Curve &curve, Standard_Real scale=0.001)
+STATIC ALWAYS_INLINE Real length(Handle_Geom_Curve &curve, Standard_Real scale=0.001)
 {
     // GET LENGTH OF THE CURVE
     GeomAdaptor_Curve current_curve(curve);
@@ -84,7 +84,7 @@ ALWAYS_INLINE Real length(Handle_Geom_Curve &curve, Standard_Real scale=0.001)
 }
 
 template <typename T>
-std::vector<Integer> argsort(const std::vector<T> &v) {
+STATIC std::vector<Integer> argsort(const std::vector<T> &v) {
 
   // INITIALIZE ORIGINAL INDEX LOCATIONS
   std::vector<Integer> idx(v.size());
@@ -96,7 +96,7 @@ std::vector<Integer> argsort(const std::vector<T> &v) {
 }
 
 template<typename T>
-ALWAYS_INLINE void sort_rows(Eigen::MatrixBase<T> &arr)
+STATIC ALWAYS_INLINE void sort_rows(Eigen::MatrixBase<T> &arr)
 {
     //! SORTS A 2D ARRAY ROW BY ROW
     for (auto i=0; i<arr.rows(); ++i)
@@ -106,7 +106,7 @@ ALWAYS_INLINE void sort_rows(Eigen::MatrixBase<T> &arr)
 }
 
 template<typename T>
-void sort_rows(Eigen::PlainObjectBase<T> & arr,Eigen::MatrixI &indices)
+STATIC void sort_rows(Eigen::PlainObjectBase<T> & arr,Eigen::MatrixI &indices)
 {
     //! SORTS A 2D ARRAY ROW BY ROW
     for (auto i=0; i<arr.rows(); ++i)
@@ -123,7 +123,7 @@ void sort_rows(Eigen::PlainObjectBase<T> & arr,Eigen::MatrixI &indices)
 }
 
 template<typename T>
-void sort_back_rows(Eigen::PlainObjectBase<T>&arr,Eigen::MatrixI &idx)
+STATIC void sort_back_rows(Eigen::PlainObjectBase<T>&arr,Eigen::MatrixI &idx)
 {
     //! SORTS BACK THE ARRAY ROW-WISE TO ITS ORIGINAL SHAPE GIVEN THE SORT INDICES IDX.
     //! NO COPY INVOLVED
@@ -142,7 +142,7 @@ void sort_back_rows(Eigen::PlainObjectBase<T>&arr,Eigen::MatrixI &idx)
 }
 
 template<typename T>
-ALWAYS_INLINE Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED>
+STATIC ALWAYS_INLINE Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED>
 ravel(Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> &arr)
 {
     //! RAVEL/FLATTEN THE ARRAY RESPECTING DATA CONTIGUOUSNESS. MAKES A COPY
@@ -152,7 +152,7 @@ ravel(Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> &arr)
 
 template<typename T, typename U = T>
 std::tuple<Eigen::MatrixUI,Eigen::MatrixUI >
-where_eq(Eigen::PlainObjectBase<T> &arr,
+STATIC where_eq(Eigen::PlainObjectBase<T> &arr,
          U num, Real tolerance=1e-14)
 {
     //! FIND THE OCCURENCES OF VALUE IN A MATRIX
@@ -179,7 +179,7 @@ where_eq(Eigen::PlainObjectBase<T> &arr,
 }
 
 template<typename T, typename U = T>
-ALWAYS_INLINE Eigen::PlainObjectBase<T>
+STATIC ALWAYS_INLINE Eigen::PlainObjectBase<T>
 append(Eigen::PlainObjectBase<T> &arr, U num)
 {
     //! APPEND TO AN EIGEN VECTOR, SIMILAR TO PUSH_BACK. MAKES A COPY

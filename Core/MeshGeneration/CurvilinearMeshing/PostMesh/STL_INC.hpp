@@ -11,6 +11,7 @@
 #include <cmath>
 #include <ctime>
 #include <stdint.h>
+#include <stddef.h>
 #include <tuple>
 #include <typeinfo>
 #include <chrono>
@@ -37,6 +38,8 @@ typedef bool Boolean;
     #define ALWAYS_INLINE __forceinline
     #define NEVER_INLINE __declspec(noinline)
 #endif
+
+#define STATIC static
 
 #endif // STD_INC_HPP
 

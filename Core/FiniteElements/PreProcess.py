@@ -77,7 +77,7 @@ def PreProcess(MainData,Pr,pwd):
 
 	# print mesh.elements[88,:]
 	# print mesh.points[[89,90,279],:]
-	# mesh.elements =np.array([[0,1,2]]) 
+	# mesh.elements = np.array([[0,1,2]]) 
 	# mesh.points =  mesh.points[[89,90,279],:]
 	# mesh.edges = np.array([[0,1]])
 	# print mesh.elements
@@ -94,12 +94,15 @@ def PreProcess(MainData,Pr,pwd):
 	# sys.exit(0)
 	# print np.linalg.norm(mesh.points,axis=1)
 
-	# mesh.Sphere()
-	mesh.Sphere(points=2)
+	mesh.Sphere()
+	# mesh.Sphere(points=2)
 	# mesh.SimplePlot()
-	# sys.exit(0)
 	# print mesh.elements
+	# print mesh.points.shape
+	# print mesh.points[12,:]
+	# print mesh.elements.shape
 	# mesh.WriteVTK('/home/roman/Desktop/sphere2.vtu')
+	# sys.exit(0)
 
 
 	# GENERATE pMESHES FOR HIGH C

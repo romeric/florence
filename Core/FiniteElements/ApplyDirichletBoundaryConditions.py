@@ -36,56 +36,97 @@ def ApplyDirichletBoundaryConditions(stiffness,F,mesh,MainData):
 				# IT IS IMPORTANT TO ENSURE THAT THE DATA IS C-CONITGUOUS
 				boundary_fekete = boundary_fekete.copy(order="c")
 
+				from Core import PostMeshCurvePy as PostMeshCurve 
+				# print dir(PostMesh) 
+				# import sys; sys.exit(0)
+				curvilinear_mesh = PostMeshCurve(mesh.element_type,dimension=MainData.ndim)
+				curvilinear_mesh.SetMeshElements(mesh.elements)
+				curvilinear_mesh.SetMeshPoints(mesh.points)
+				curvilinear_mesh.SetMeshEdges(mesh.edges)
+				curvilinear_mesh.SetMeshFaces(np.zeros((1,4),dtype=np.uint64))
+				curvilinear_mesh.SetScale(MainData.BoundaryData.scale)
+				curvilinear_mesh.SetCondition(MainData.BoundaryData.condition)
+				curvilinear_mesh.SetProjectionPrecision(1.0e-04)
+				curvilinear_mesh.SetProjectionCriteria(MainData.BoundaryData().ProjectionCriteria(mesh))
+				curvilinear_mesh.ScaleMesh()
+				# curvilinear_mesh.InferInterpolationPolynomialDegree();
+				curvilinear_mesh.SetFeketePoints(boundary_fekete)
+				curvilinear_mesh.GetBoundaryPointsOrder()
+				# READ THE GEOMETRY FROM THE IGES FILE
+				curvilinear_mesh.ReadIGES(MainData.BoundaryData.IGES_File)
+				# EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
+				curvilinear_mesh.GetGeomVertices()
+				curvilinear_mesh.GetGeomEdges()
+				curvilinear_mesh.GetGeomFaces()
+				curvilinear_mesh.GetGeomPointsOnCorrespondingEdges()
+				# FIRST IDENTIFY WHICH CURVES CONTAIN WHICH EDGES
+				curvilinear_mesh.IdentifyCurvesContainingEdges()
+				# PROJECT ALL BOUNDARY POINTS FROM THE MESH TO THE CURVE
+				curvilinear_mesh.ProjectMeshOnCurve("Bisection")
+				# FIX IMAGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
+				curvilinear_mesh.RepairDualProjectedParameters()
+				# PERFORM POINT INVERTION FOR THE INTERIOR POINTS
+				curvilinear_mesh.MeshPointInversionCurve()
+				# GET DIRICHLET DATA
+				nodesDBC, Dirichlet = curvilinear_mesh.GetDirichletData() 
+				# FIND UNIQUE VALUES OF DIRICHLET DATA
+				posUnique = np.unique(nodesDBC,return_index=True)[1]
+				nodesDBC, Dirichlet = nodesDBC[posUnique], Dirichlet[posUnique,:]
+				# print Dirichlet
+				# print nodesDBC
+				# import sys; sys.exit(0)
+
 			elif MainData.ndim == 3:
 				from Core.QuadratureRules.FeketePointsTri import FeketePointsTri
 				boundary_fekete = FeketePointsTri(MainData.C)
 
-			from Core import PostMeshPy as PostMesh 
-			# print dir(PostMesh) 
-			# import sys; sys.exit(0)
-			curvilinear_mesh = PostMesh(mesh.element_type,dimension=MainData.ndim)
-			curvilinear_mesh.SetMeshElements(mesh.elements)
-			curvilinear_mesh.SetMeshPoints(mesh.points)
-			curvilinear_mesh.SetMeshEdges(mesh.edges)
-			curvilinear_mesh.SetMeshFaces(np.zeros((1,4),dtype=np.uint64))
-			curvilinear_mesh.SetScale(MainData.BoundaryData.scale)
-			curvilinear_mesh.SetCondition(MainData.BoundaryData.condition)
-			curvilinear_mesh.SetProjectionPrecision(1.0e-04)
-			curvilinear_mesh.SetProjectionCriteria(MainData.BoundaryData().ProjectionCriteria(mesh))
-			curvilinear_mesh.ScaleMesh()
-			# curvilinear_mesh.InferInterpolationPolynomialDegree();
-			curvilinear_mesh.SetFeketePoints(boundary_fekete)
-			curvilinear_mesh.GetBoundaryPointsOrder()
-			# READ THE GEOMETRY FROM THE IGES FILE
-			curvilinear_mesh.ReadIGES(MainData.BoundaryData.IGES_File)
-			# EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
-			curvilinear_mesh.GetGeomVertices()
-			curvilinear_mesh.GetGeomEdges()
-			curvilinear_mesh.GetGeomFaces()
-			curvilinear_mesh.GetGeomPointsOnCorrespondingEdges()
-			# FIRST IDENTIFY WHICH CURVES CONTAIN WHICH EDGES
-			curvilinear_mesh.IdentifyCurvesContainingEdges()
-			# PROJECT ALL BOUNDARY POINTS FROM THE MESH TO THE CURVE
-			curvilinear_mesh.ProjectMeshOnCurve("Bisection")
-			# FIX IMAGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
-			curvilinear_mesh.RepairDualProjectedParameters()
-			# PERFORM POINT INVERTION FOR THE INTERIOR POINTS
-			curvilinear_mesh.MeshPointInversionCurve()
-			# GET DIRICHLET DATA
-			nodesDBC, Dirichlet = curvilinear_mesh.GetDirichletData() 
-			# FIND UNIQUE VALUES OF DIRICHLET DATA
-			posUnique = np.unique(nodesDBC,return_index=True)[1]
-			nodesDBC, Dirichlet = nodesDBC[posUnique], Dirichlet[posUnique,:]
-			# print Dirichlet
-			# print nodesDBC
-			# import sys; sys.exit(0)
+				from Core import PostMeshSurfacePy as PostMeshSurface 
+				# print dir(PostMesh) 
+				# import sys; sys.exit(0)
+				curvilinear_mesh = PostMeshSurface(mesh.element_type,dimension=MainData.ndim)
+				curvilinear_mesh.SetMeshElements(mesh.elements)
+				curvilinear_mesh.SetMeshPoints(mesh.points)
+				curvilinear_mesh.SetMeshEdges(mesh.edges)
+				curvilinear_mesh.SetMeshFaces(mesh.faces)
+				curvilinear_mesh.SetScale(MainData.BoundaryData.scale)
+				curvilinear_mesh.SetCondition(MainData.BoundaryData.condition)
+				curvilinear_mesh.SetProjectionPrecision(1.0e-04)
+				curvilinear_mesh.SetProjectionCriteria(MainData.BoundaryData().ProjectionCriteria(mesh))
+				curvilinear_mesh.ScaleMesh()
+				curvilinear_mesh.SetFeketePoints(boundary_fekete)
+				# curvilinear_mesh.GetBoundaryPointsOrder()
+				# READ THE GEOMETRY FROM THE IGES FILE
+				curvilinear_mesh.ReadIGES(MainData.BoundaryData.IGES_File)
+				# EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
+				curvilinear_mesh.GetGeomVertices()
+				# curvilinear_mesh.GetGeomEdges()
+				curvilinear_mesh.GetGeomFaces()
+				curvilinear_mesh.GetGeomPointsOnCorrespondingFaces()
+				# FIRST IDENTIFY WHICH CURVES CONTAIN WHICH EDGES
+				curvilinear_mesh.IdentifySurfacesContainingFaces()
+				# PROJECT ALL BOUNDARY POINTS FROM THE MESH TO THE CURVE
+				curvilinear_mesh.ProjectMeshOnSurface("Bisection")
+				# FIX IMAGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
+				# curvilinear_mesh.RepairDualProjectedParameters()
+				# PERFORM POINT INVERTION FOR THE INTERIOR POINTS
+				curvilinear_mesh.MeshPointInversionSurface()
+				# GET DIRICHLET DATA
+				nodesDBC, Dirichlet = curvilinear_mesh.GetDirichletData() 
+				# FIND UNIQUE VALUES OF DIRICHLET DATA
+				posUnique = np.unique(nodesDBC,return_index=True)[1]
+				nodesDBC, Dirichlet = nodesDBC[posUnique], Dirichlet[posUnique,:]
+
+				from Core.Supplementary.Tensors import makezero
+				# print makezero(Dirichlet)
+				# print nodesDBC
+				# import sys; sys.exit(0)
 
 
 		print 'Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds'
 
 		nOfDBCnodes = nodesDBC.shape[0]
-		for inode in xrange(nOfDBCnodes):
-			for i in xrange(nvar):
+		for inode in range(nOfDBCnodes):
+			for i in range(nvar):
 				columns_out = np.append(columns_out,nvar*nodesDBC[inode]+i)
 				AppliedDirichlet = np.append(AppliedDirichlet,Dirichlet[inode,i])
 
@@ -134,9 +175,10 @@ def ApplyDirichletBoundaryConditions(stiffness,F,mesh,MainData):
 	# GENERAL PROCEDURE - GET REDUCED MATRICES FOR FINAL SOLUTION
 	columns_out = columns_out.astype(np.int64)
 	columns_in = np.delete(np.arange(0,nvar*mesh.points.shape[0]),columns_out)
-	# print columns_in.shape
+	# print columns_in.shape, columns_out.shape
 	# print AppliedDirichlet#,'\n',columns_out
 	# print AppliedDirichlet.shape
+	# import sys; sys.exit(0)
 
 	for i in range(0,columns_out.shape[0]):
 		# F = F - AppliedDirichlet[i]*(stiffness[:,columns_out[i]])

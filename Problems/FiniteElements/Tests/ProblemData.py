@@ -80,6 +80,7 @@ def ProblemData(MainData):
 		MeshType = 'tet'
 		# FileName = ProblemPath + '/Mesh_Cube_Tet_181.dat'
 		FileName = ProblemPath + '/Sphere_1483.dat'
+		# FileName = ProblemPath + '/Torus_612.dat'
 		# MeshType = 'quad'
 		# FileName = ProblemPath + '/Mesh_Square_Quad_64.dat'
 		# MeshType = 'hex'
@@ -92,6 +93,7 @@ def ProblemData(MainData):
 		# Type = 'straight'
 		# Type = 'mixed'
 		IGES_File = ProblemPath + '/Sphere.igs'
+		# IGES_File = ProblemPath + '/Torus.igs'
 
 		condition = 1000.
 		scale = 1000.

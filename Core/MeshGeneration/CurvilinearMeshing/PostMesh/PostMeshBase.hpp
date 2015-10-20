@@ -49,10 +49,10 @@ public:
     noexcept(std::is_copy_constructible<PostMeshBase>::value);
     PostMeshBase& operator=(const PostMeshBase& other) \
     noexcept(std::is_copy_assignable<PostMeshBase>::value);
-    PostMeshBase(PostMeshBase&& other);
-    PostMeshBase& operator=(PostMeshBase&& other);
+    PostMeshBase(PostMeshBase&& other) noexcept;
+    PostMeshBase& operator=(PostMeshBase&& other) noexcept;
 
-    ALWAYS_INLINE ~PostMeshBase(){}
+    ALWAYS_INLINE ~PostMeshBase() = default;
 
     ALWAYS_INLINE void Init(std::string &etype, const UInteger &dim)
     {
