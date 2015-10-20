@@ -353,9 +353,9 @@ def HighOrderMeshTet_UNSTABLE(C,mesh,Decimals=10,Zerofy=0,Parallel=False,nCPU=1)
 			j = np.asarray(whereLT1d(np.abs( Area - (Area1+Area2+Area3) ),tol)) 
 			# j = np.asarray(whereLT(np.abs( Area - (Area1+Area2+Area3) ).reshape(Area.shape[0],1),tol)[0]) 
 		if j.shape[0]!=0:
-			# print mesh.points[mesh.faces[iface,:],:]
-			# print repoints[j,:]
-
+			if j.shape[0]!=3:
+				FloatingPointError('More nodes within the tetrahedral face than necessary. \
+					This could be due to high/low tolerance')
 			refaces[iface,3:] = j+mesh.points.shape[0]
 			
 	refaces = refaces.astype(int)

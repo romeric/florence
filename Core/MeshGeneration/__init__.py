@@ -1,2 +1,2 @@
 from Mesh import Mesh
-from CurvilinearMeshing import PostMeshPy
+from CurvilinearMeshing import PostMeshCurvePy, PostMeshSurfacePy

@@ -10,8 +10,13 @@ def StaticSolver(LoadIncrement,MainData,K,F,M,NodalForces,Residual,ResidualNorm,
 
 	LoadFactor = 1./LoadIncrement
 	AppliedDirichletInc = np.zeros(AppliedDirichlet.shape[0])
-
+	
+	# MainData.xx = np.zeros(10)
 	for Increment in range(0,LoadIncrement):
+
+		# print Increment
+		if Increment==5:
+			break 
 
 		DeltaF = LoadFactor*F
 		NodalForces += DeltaF
@@ -30,12 +35,18 @@ def StaticSolver(LoadIncrement,MainData,K,F,M,NodalForces,Residual,ResidualNorm,
 
 			print '\nFinished Load increment', Increment, 'in', time()-t_increment, 'sec'
 			print 'Norm of Residual is', np.abs(la.norm(Residual[columns_in])/NormForces), '\n'
+			# MainData.xx = np.append(MainData.xx,np.sum(MainData.xx)+Residual[2*107][0])
+			# MainData.xx = np.append(MainData.xx,np.sum(MainData.xx)+NodalForces[2*107,:][0])
+			# MainData.xx = np.append(MainData.xx,np.sum(MainData.xx)+NodalForces[824,:][0])
+
 
 		elif MainData.AnalysisType == 'Linear':
 			TotalDisp = LinearSolver(Increment,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nmesh,TotalDisp,Eulerx,
 				columns_in,columns_out,AppliedDirichletInc)
 
 	# print np.concatenate((TotalDisp[:,:,0],TotalDisp[:,:,1]),axis=1)
+	# print Residual[2*107][0], np.sum(MainData.xx,axis=0)
+	
 
 		
 		# sys.exit("STOPPED")
