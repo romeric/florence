@@ -84,19 +84,16 @@ class Mesh(object):
 		# interiorEdges = np.zeros((1,2),dtype=np.int64)
 
 		# LOOP OVER ALL ELEMENTS
-		for i in range(self.elements.shape[0]):
+		for i in range(self.nelem):
 			# FIND HOW MANY ELEMENTS SHARE A SPECIFIC NODE
 			x = whereEQ(self.elements,self.elements[i,0])[0]
 			y = whereEQ(self.elements,self.elements[i,1])[0]
 			z = whereEQ(self.elements,self.elements[i,2])[0]
-			# print x,y,z, self.elements[i,:]
 
 			# A BOUNDARY EDGE IS ONE WHICH IS NOT SHARED WITH ANY OTHER ELEMENT
 			edge0 =  np.intersect1d(x,y)
 			edge1 =  np.intersect1d(y,z)
 			edge2 =  np.intersect1d(z,x)
-			# if i==0:
-			# 	print x,y,z, edge0, edge1, edge2
 
 
 			if edge0.shape[0]==1:
@@ -124,7 +121,7 @@ class Mesh(object):
 		# CHECK IF IT IS LINEAR MESH
 		assert self.elements.shape[1]==4
 
-		edges = []
+		edges = [] # This is faces indeed
 		if TotalFaces is True:
 			# GET ALL EDGES FROM THE ELEMENT CONNECTIVITY
 			edges = np.zeros((4*self.elements.shape[0],3),dtype=np.int64)
@@ -787,12 +784,20 @@ class Mesh(object):
 
 		self.points = np.asarray(mesh.points)
 		self.elements = np.asarray(mesh.elements)
+		# self.faces = np.asarray(mesh.faces)
+		# self.edges = np.asarray(self.edges)
 		self.nelem = self.elements.shape[0]
 		self.element_type = "tet"
 
+
 		# GET EDGES & FACES
 		self.GetBoundaryFacesTet()
-		self.GetBoundaryEdgesTet()
+		# self.GetBoundaryEdgesTet()
+		# self.SimplePlot()
+
+		# print np.linalg.norm(self.points[np.unique(self.faces),:],axis=1)
+		# print self.elements.shape, self.points.shape
+		# import sys; sys.exit()
 
 
 

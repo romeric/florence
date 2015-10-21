@@ -507,8 +507,11 @@ class PostProcess(object):
 		# print abs(a-1) > 1e-8
 		# print mesh.points.shape, vpoints.shape
 		# print np.linalg.norm(vpoints,axis=1)
-		import sys; sys.exit(0)
+		
 		# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/vpoints_sphere2_p3.dat', vpoints,fmt='%10.9f',delimiter=',')
+		np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/vpoints_nsphere_p'+str(MainData.C+1)+'.dat', vpoints,fmt='%10.9f',delimiter=',')
+		np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/sjacobian_nsphere_p'+str(MainData.C+1)+'.dat', MainData.ScaledJacobian,fmt='%10.9f',delimiter=',')
+		import sys; sys.exit(0)
 		# plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#ffffee') 
 		# plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#F88379') ##
 		# plt.plot(vpoints[:,0],vpoints[:,1],vpoints[:,2],'o',color='#F88379') 
