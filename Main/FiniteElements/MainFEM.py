@@ -120,7 +120,9 @@ def main(MainData):
 	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_sphere2_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%10.9f',delimiter=',')
 	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/faces_sphere2_p'+str(MainData.C+1)+'.dat', mesh.faces,fmt='%d',delimiter=',')
 
-
+	np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/elements_nsphere_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
+	np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_nsphere_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%10.9f',delimiter=',')
+	np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/faces_nsphere_p'+str(MainData.C+1)+'.dat', mesh.faces,fmt='%d',delimiter=',')
 
 
 	print 'Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*MainData.nvar
@@ -163,7 +165,8 @@ def main(MainData):
 	# print mesh.points[2,:]
 	# print mesh.points[mesh.edges[:,:2],:]
 	# print mesh.points[:8,:]
-	print mesh.points[92,:]
+	# print mesh.points[92,:]
+	
 
 	# PostProcess.HighOrderPatchPlot3D(MainData,mesh)
 

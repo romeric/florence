@@ -94,12 +94,25 @@ def PreProcess(MainData,Pr,pwd):
 	# sys.exit(0)
 	# print np.linalg.norm(mesh.points,axis=1)
 
-	mesh.Sphere()
+	# mesh.Sphere()
 	# mesh.Sphere(points=2)
 	# mesh.SimplePlot()
 	# print mesh.elements
 	# print mesh.points.shape
 	# print mesh.points[12,:]
+	# print mesh.points[92,:]
+
+	# uniq_faces = np.unique(mesh.faces)
+	# from Core.Supplementary.Tensors import makezero
+	# mesh.points = makezero(mesh.points)
+	# un_points = mesh.points[uniq_faces,:]
+	# print un_points[92,:]
+	# print mesh.points.shape, un_points.shape
+	# print mesh.elements.shape, mesh.faces.shape
+	# # print np.linalg.norm(un_points,axis=1)
+	# import sys; sys.exit()
+
+
 	# print mesh.elements.shape
 	# mesh.WriteVTK('/home/roman/Desktop/sphere2.vtu')
 	# sys.exit(0)
@@ -128,7 +141,7 @@ def PreProcess(MainData,Pr,pwd):
 	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_cube.dat',mesh.points)
 	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/elements_cube5.dat',mesh.elements)
 	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_cube5.dat',mesh.points)
-	# sys.exit("STOPPED")
+	sys.exit("STOPPED")
 
 	# np.savetxt('/home/roman/Desktop/elements_check_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
 	# np.savetxt('/home/roman/Desktop/points_check_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%6.4f',delimiter=',')

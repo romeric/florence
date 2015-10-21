@@ -187,14 +187,14 @@ int main()
 //    cout << points.block(0,0,100,2) << endl;
 //    println(points.minCoeff(),points.maxCoeff());
 
-    Eigen::MatrixUI criteria = ComputeCriteria(edges,points,condition);
+    auto criteria = ComputeCriteria(edges,points,condition);
 
 //    const char *projection_method = "Newton";
     const char *projection_method = "Bisection";
 //    Real precision = 1.0e-02;
 
     // 3D
-    Real precision = 1.0e-04;
+    auto precision = 1.0e-04;
 
 
 //    exit (EXIT_FAILURE);
