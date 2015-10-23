@@ -448,8 +448,8 @@ class PostProcess(object):
 
 			MainData.ScaledJacobian[elem] = 1.0*JMin/JMax
 
-		print 'Minimum ScaledJacobian value is:', np.min(MainData.ScaledJacobian)
-		print np.where(np.min(MainData.ScaledJacobian)==MainData.ScaledJacobian)[0]
+		print 'Minimum ScaledJacobian value is', np.min(MainData.ScaledJacobian), \
+		'corresponding to element', np.where(np.min(MainData.ScaledJacobian)==MainData.ScaledJacobian)[0][0]
 
 
 		if show_plot == True:
@@ -495,7 +495,7 @@ class PostProcess(object):
 		uniq_faces = np.unique(mesh.faces)
 		xx = np.linalg.norm(vpoints[uniq_faces,:],axis=1)
 		# print np.where(abs(xx-1)<1e-14)
-		print vpoints[92,:]
+		# print vpoints[92,:]
 		# for i in range(xx.shape[0]):
 			# if abs(xx[i]-1) > 1e-06:
 				# pass

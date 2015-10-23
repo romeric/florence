@@ -94,13 +94,16 @@ def PreProcess(MainData,Pr,pwd):
 	# sys.exit(0)
 	# print np.linalg.norm(mesh.points,axis=1)
 
-	# mesh.Sphere()
+	mesh.Sphere()
 	# mesh.Sphere(points=2)
 	# mesh.SimplePlot()
 	# print mesh.elements
+	# print mesh.points
+	# print mesh.faces.shape
 	# print mesh.points.shape
 	# print mesh.points[12,:]
 	# print mesh.points[92,:]
+	# sys.exit(0)
 
 	# uniq_faces = np.unique(mesh.faces)
 	# from Core.Supplementary.Tensors import makezero
@@ -141,6 +144,9 @@ def PreProcess(MainData,Pr,pwd):
 	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_cube.dat',mesh.points)
 	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/elements_cube5.dat',mesh.elements)
 	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_cube5.dat',mesh.points)
+	# print mesh.faces
+	# sys.exit(0)
+	mesh.GetBoundaryFacesHigherTet()
 	sys.exit("STOPPED")
 
 	# np.savetxt('/home/roman/Desktop/elements_check_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')

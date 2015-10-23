@@ -81,7 +81,7 @@ def ProblemData(MainData):
 		# FileName = ProblemPath + '/Mesh_Cube_Tet_181.dat'
 		FileName = ProblemPath + '/Sphere_1483.dat'
 		# FileName = ProblemPath + '/Torus_612.dat'
-		FileName = ProblemPath + '/Torus_check.dat'
+		# FileName = ProblemPath + '/Torus_check.dat'
 		# MeshType = 'quad'
 		# FileName = ProblemPath + '/Mesh_Square_Quad_64.dat'
 		# MeshType = 'hex'

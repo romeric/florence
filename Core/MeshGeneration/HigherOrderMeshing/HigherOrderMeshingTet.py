@@ -274,7 +274,13 @@ def HighOrderMeshTet_UNSTABLE(C,mesh,Decimals=10,Zerofy=0,Parallel=False,nCPU=1)
 	#------------------------------------------------------------------------------------------
 
 
+	# USE ALTERNATIVE APPROACH TO GET MESHES
+	# reedges = np.zeros((mesh.edges.shape[0],C+2))
+	# fsize = int((C+2.)*(C+3.)/2.)
+	# refaces = np.zeros((mesh.faces.shape[0],fsize))
 
+	# ComputeAll = False
+	# if ComputeAll == True:
 
 	#------------------------------------------------------------------------------------------
 	# BUILD EDGES NOW
@@ -374,9 +380,9 @@ def HighOrderMeshTet_UNSTABLE(C,mesh,Decimals=10,Zerofy=0,Parallel=False,nCPU=1)
 		info = 'tet'
 
 
-	# print '\npMeshing timing:\n\t\tElement loop 1:\t '+str(telements)+' seconds\n\t\tNode loop:\t\t '+str(tnodes)+\
-	#  ' seconds'+'\n\t\tElement loop 2:\t '+str(telements_2)+' seconds\n\t\tEdge loop:\t\t '+str(tedges)+' seconds'+\
-	#  '\n\t\tFace loop:\t\t '+str(tfaces)+' seconds\n'
+		# print '\npMeshing timing:\n\t\tElement loop 1:\t '+str(telements)+' seconds\n\t\tNode loop:\t\t '+str(tnodes)+\
+		#  ' seconds'+'\n\t\tElement loop 2:\t '+str(telements_2)+' seconds\n\t\tEdge loop:\t\t '+str(tedges)+' seconds'+\
+		#  '\n\t\tFace loop:\t\t '+str(tfaces)+' seconds\n'
 
 	return nmesh
 
