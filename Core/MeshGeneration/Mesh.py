@@ -160,6 +160,7 @@ class Mesh(object):
 		self.faces = boundaryEdges[1:,:]
 		return edges
 
+
 	def GetBoundaryEdgesTet(self):
 	# def GetBoundaryEdgesTet(self,elements,TotalEdges=False):
 		"""Given a linear tetrahedral mesh, find the boundary edges (lines).
@@ -184,6 +185,240 @@ class Mesh(object):
 
 		self.elements = elements
 		self.edges = TotalEdgesDuplicated[remaining,:]
+
+
+	def GetBoundaryFacesHigherTet(self):
+
+		assert self.elements is not None
+		assert self.points is not None
+		assert self.nelem is not None
+
+		newMesh = Mesh()
+		newMesh.nelem = self.elements.shape[0]
+		newMesh.elements = self.elements[:,:4]
+		newMesh.elements = newMesh.elements.astype(np.int64)
+		newMesh_nnode = np.max(newMesh.elements)+1 # no monkey patching
+		newMesh.points = self.points[:newMesh_nnode]
+		newMesh.GetBoundaryFacesTet()
+		# newMesh.GetBoundaryEdgesTet()
+		# print newMesh.faces.shape
+		# print newMesh.points
+		# print newMesh.elements
+		from Core.Supplementary.Tensors import itemfreq_py
+		from Core.Supplementary.Where import whereEQ
+
+		linear_faces = np.zeros_like(newMesh.faces)
+		counter = 0
+		elem_containing_faces = []
+		for elem in range(self.nelem):
+			nodes_faces = []
+			for j in range(newMesh.elements.shape[1]):
+				# row, col = np.where(newMesh.faces==newMesh.elements[elem,j])
+				row, col = whereEQ(newMesh.faces,newMesh.elements[elem,j])
+				nodes_faces = np.append(nodes_faces,row).astype(np.int64)
+			freq_nodes_faces = itemfreq_py(nodes_faces)
+			face_nodes = whereEQ(freq_nodes_faces[:,1,None],3)[0]
+			if np.asarray(face_nodes).shape[0]!=0:
+				elem_faces = nodes_faces[np.asarray(face_nodes)]
+				# linear_faces[0,:] = newMesh.faces[elem_faces,:][0] # assuming that an element has only one boundary face
+				linear_faces[(counter-1)+elem_faces.shape[0],:] = newMesh.faces[elem_faces,:][0] # not assuming above, but check
+				elem_containing_faces = np.append(elem_containing_faces,elem)
+				counter += elem_faces.shape[0]
+		elem_containing_faces = elem_containing_faces.astype(np.int64)
+		# print elem_containing_faces
+		# print self.elements.shape
+
+		from Core.QuadratureRules.NodeArrangement import NodeArrangement
+
+
+		face_nodes = []
+		for i in range(self.faces.shape[0]):
+			face_nodes = []
+			face_cols = []
+			for j in range(3):
+				row, col = np.where(self.elements==self.faces[i,j])
+				face_nodes = np.append(face_nodes,row)
+				face_cols = np.append(face_cols,row)
+			face_nodes = face_nodes.astype(np.int64)
+			face_cols = face_cols.astype(np.int64)
+			counts = itemfreq_py(face_nodes)
+			aa,bb = np.unique(face_nodes,return_inverse=True)
+			# print aa
+			# print bb
+			# print counts
+			# print face_nodes
+			# print counts.shape
+			# print face_cols.astype(np.int64).shape, face_nodes.shape
+			cc = np.where(counts[:,1]==3)[0]
+			# print counts[aa,0]
+			for j in range(counts.shape[0]):
+				if counts[j,1]==3:
+					pass
+			# for j in range(face_nodes.shape[0]):
+				# print face_nodes[j],
+			# print 
+
+			face_number = elem_containing_faces[i]
+
+		#---------------------------------------------------------------------
+		# print self.faces
+
+		# linear_faces = np.zeros((self.faces.shape[0],3))
+		# for i in range(self.faces.shape[0]):
+		# 	face_nodes = []
+		# 	for j in range(3):
+		# 		# Find if the linear face is in the element
+		# 		rows, cols = np.where(self.elements==self.faces[i,j])
+		# 		if rows.shape[0]!=0 and rows.shape[0] <=2:
+		# 			print rows.shape
+
+		# ffaces = []
+		# for i in range(self.elements.shape[0]):
+		# 	face_nodes = []
+		# 	face_cols = []
+		# 	for j in range(4):
+		# 		# Find if the linear face is in the element
+		# 		rows, cols = np.where(self.faces[:,:3]==self.elements[i,j])
+		# 		face_nodes = np.append(face_nodes,rows)
+		# 		face_cols = np.append(face_cols,cols)
+		# 	face_nodes = face_nodes.astype(np.int64)
+		# 	occurence_within_a_face = itemfreq_py(face_nodes)
+		# 	counts = np.where(occurence_within_a_face[:,1]==3)[0]
+		# 	# aa, bb = np.unique(occurence_within_a_face[:,0],return_inverse=True)
+		# 	aa, bb = np.unique(face_nodes,return_inverse=True)
+		# 	# print occurence_within_a_face
+		# 	print face_nodes
+		# 	# print counts 
+		# 	# print aa
+		# 	print bb
+		# 	cc = np.where(bb==counts)[0]
+		# 	# print cc
+		# 	print face_cols[cc]
+		# 	# print aa[bb]
+		# 	if counts.shape[0]!=0:
+		# 		ffaces = np.append(ffaces,i)
+				# print face_cols.astype(np.int64)
+
+
+
+		# print ffaces.astype(np.int64) - elem_containing_faces
+		# print self.elements.shape
+
+
+		#---------------------------------------------------------------------
+
+		C = self.InferPolynomialDegree()-1
+		fsize = int((C+2.)*(C+3.)/2.)
+		node_arrangment = NodeArrangement(C)[0]
+
+                higher_order_faces = np.zeros((self.faces.shape[0],fsize),dtype = np.uint64)
+		elements_containing_faces = []
+                counter = 0
+		for i in range(self.faces.shape[0]):
+			face_nodes = []
+			face_cols = []
+			for j in range(3):
+				# FIND IF THE LINEAR FACE IS IN THE ELEMENT
+				rows, cols = np.where(self.elements[:,:4]==self.faces[i,j])
+				face_nodes = np.append(face_nodes,rows)
+				face_cols = np.append(face_cols,cols)
+			face_nodes = face_nodes.astype(np.int64)
+			face_cols = face_cols.astype(np.int64)
+			occurence_within_an_element = itemfreq_py(face_nodes)
+			counts = np.where(occurence_within_an_element[:,1]==3)[0]
+			if counts.shape[0] != 0:
+				elements_containing_faces = np.append(elements_containing_faces, occurence_within_an_element[counts,0])
+                        # print elements_containing_faces
+                        # print occurence_within_an_element[counts,0]
+			# ffaces = np.append(ffaces,face_nodes)
+			# occurence_within_a_face = itemfreq_py(face_nodes)
+                        # print counts
+                        inv_uniques = np.unique(face_nodes,return_inverse=True)[1]
+                        which_connectivity_cols_idx = np.where(inv_uniques==counts)[0]
+                        # print which_connectivity_cols_idx
+                        which_connectivity_cols =  face_cols[which_connectivity_cols_idx]
+                        # print which_connectivity_cols
+                        if which_connectivity_cols[0]==0 and which_connectivity_cols[1]==1 and which_connectivity_cols[2]==2:
+                            higher_order_faces[counter,:] = self.elements[occurence_within_an_element[counts,0],node_arrangment[0,:]]
+                            counter += 1
+                        elif which_connectivity_cols[0]==0 and which_connectivity_cols[1]==1 and which_connectivity_cols[2]==3:
+                            higher_order_faces[counter,:] = self.elements[occurence_within_an_element[counts,0],node_arrangment[1,:]]
+                            counter += 1
+                        elif which_connectivity_cols[0]==0 and which_connectivity_cols[1]==2 and which_connectivity_cols[2]==3:
+                            higher_order_faces[counter,:] = self.elements[occurence_within_an_element[counts,0],node_arrangment[2,:]]
+                            counter += 1
+                        elif which_connectivity_cols[0]==1 and which_connectivity_cols[1]==2 and which_connectivity_cols[2]==3:
+                            higher_order_faces[counter,:] = self.elements[occurence_within_an_element[counts,0],node_arrangment[3,:]]
+                            counter += 1
+                # print higher_order_faces
+                # print 
+                # print self.faces
+                # print np.sort(higher_order_faces,axis=1)
+                # print 
+                # print np.sort(self.faces,axis=1)
+
+                # print np.linalg.norm(np.sort(higher_order_faces,axis=1) - np.sort(self.faces,axis=1))
+                
+
+		#---------------------------------------------------------------------
+
+		# for i in range(newMesh.faces.shape[0]):
+		# 	for j in range(newMesh.faces.shape[1]):
+		# 	# face_number = elem_containing_faces[i]
+		# 		np.where(newMesh.faces[i,j])
+			# for j in range(newMesh.faces.shape[1]):
+			# np.where()
+			# print self.elements[face_number,:]
+			# print self.elements[]
+
+
+		# # faces = np.array([],dtype=np.int64)
+		# p = self.InferPolynomialDegree()
+		# fsize = int((p+1.)*(p+2.)/2.)
+		# # print fsize
+		# faces = np.zeros((linear_faces.shape[0],fsize),dtype=np.int64)
+		# faces[:,:3] = linear_faces
+		
+		# # print faces.shape
+		# self.elements = self.elements.astype(np.int64)
+		# counter = 0
+		# for elem in range(self.elements.shape[0]):
+		# # for elem in range(self.nelem):
+		# 	faces_elem = np.array([])
+		# 	for j in range(3,self.elements.shape[1]):
+		# 		# row = np.where(self.elements==self.elements[elem,j])[0]
+		# 		row = np.asarray(whereEQ(self.elements,self.elements[elem,j])[0])
+		# 		# print row
+		# 		if row.shape[0]!=0 and row.shape[0] <= 2:
+		# 		# if row.shape[0] <= 2:
+		# 			# print row.shape[0]
+		# 			# print self.elements[elem,j]
+		# 			# faces.append(row)
+		# 			faces_elem = np.append(faces_elem,self.elements[elem,j])
+		# 			# print counter
+		# 			# counter +=1
+		# 	# print 
+		# 	# print faces_elem.astype(np.int64)
+		# 	# faces.append(faces_elem)
+		# 	# print faces_elem.shape
+		# 	if faces_elem.shape[0] == 3:
+		# 		# print faces_elem.shape[0]
+		# 		# faces = np.append(faces,faces_elem)
+		# 		faces[counter,3:] = faces_elem.astype(np.int64) 
+		# 		counter +=1
+		# 		pass
+		# 		# print counter
+
+
+		# print self.element_type
+		# print faces
+		# print self.elements.shape
+
+		# self.ChangeType()
+		import sys; sys.exit(0)
+
+
+
 
 
 	def BoundaryEdgesfromPhysicalParametrisation(self,points,facets,mesh_points,mesh_edges):
@@ -878,3 +1113,29 @@ class Mesh(object):
 		self.edges = mesh.edges.astype(np.uint64)
 		if isinstance(self.faces,np.ndarray):
 			self.faces = mesh.faces.astype(np.uint64)
+
+
+	def InferPolynomialDegree(self):
+		""" Infer the degree of interpolation (p) based on the shape of 
+			self.elements
+
+			returns:		[int] polynomial degree
+			"""
+
+		assert self.element_type is not None
+		assert self.elements is not None
+
+		p = 0
+		if self.element_type == "tet":
+			for i in range(100):
+				if (i+1)*(i+2)*(i+3)/6==self.elements.shape[1]:
+					p = i
+					break
+
+		if self.element_type == "tri":
+			for i in range(100):
+				if (i+1)*(i+2)/2==self.elements.shape[1]:
+					p = i
+					break 
+
+		return p 
