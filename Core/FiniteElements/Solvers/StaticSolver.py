@@ -15,8 +15,9 @@ def StaticSolver(LoadIncrement,MainData,K,F,M,NodalForces,Residual,ResidualNorm,
 	for Increment in range(0,LoadIncrement):
 
 		# print Increment
-		if Increment==5:
-			break 
+		# if Increment==12:
+		# 	np.savetxt('/home/roman/Desktop/step11.dat', 
+		# 		TotalDisp[:,:,Increment-1],fmt='%10.9f',delimiter=',')
 
 		DeltaF = LoadFactor*F
 		NodalForces += DeltaF

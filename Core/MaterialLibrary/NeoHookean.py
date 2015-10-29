@@ -19,7 +19,7 @@ class NeoHookean(object):
 		self.modelname = 'NeoHookean'
 		return self.nvar, self.modelname
 
-	def Hessian(self,MaterialArgs,ndim,StrainTensors):
+	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
 		detF = StrainTensors.J

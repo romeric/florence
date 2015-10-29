@@ -13,7 +13,7 @@ ThreeD = imp.load_source('HexLagrangeGaussLobatto',pwd+'/Core/InterpolationFunct
 Tri = imp.load_source('hpNodalTri',pwd+'/Core/InterpolationFunctions/TwoDimensional/Tri/hpNodal.py')
 Tet = imp.load_source('hpNodalTet',pwd+'/Core/InterpolationFunctions/ThreeDimensional/Tetrahedral/hpNodal.py')
 
-def GetBases(C,Quadrature,info):
+def GetBases(C,Quadrature,info, useLagrange = False):
 
 	w = Quadrature.weights
 	z = Quadrature.points

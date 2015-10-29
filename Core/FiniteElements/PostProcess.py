@@ -477,41 +477,24 @@ class PostProcess(object):
 		import matplotlib.pyplot as plt
 		
 		plt.figure()
+
+		# TotalDisp = np.loadtxt('/home/roman/Desktop/step11.dat',delimiter=',')
+		# TotalDisp = TotalDisp[:,:,None]
+		# import sys; sys.exit(0)
+
 		# print TotalDisp[:,0,-1]
+		# MainData.ScaledJacobian = np.zeros_like(MainData.ScaledJacobian)+1
 		vpoints = np.copy(mesh.points)
 		vpoints[:,0] += TotalDisp[:,0,-1]
 		vpoints[:,1] += TotalDisp[:,1,-1]
 		if MainData.ndim == 3:
 			vpoints[:,2] += TotalDisp[:,2,-1]
-		# print 
-		# print vpoints
-		# print 
-		mm = 21
-		# print mesh.points[mm,:]
-		# print TotalDisp[mm,:,-1]
-		# print vpoints[mm,:]
-		# print np.linalg.norm(vpoints[mm,:])
-		# a = np.linalg.norm(vpoints,axis=1)
-		uniq_faces = np.unique(mesh.faces)
-		xx = np.linalg.norm(vpoints[uniq_faces,:],axis=1)
-		# print np.where(abs(xx-1)<1e-14)
-		# print vpoints[92,:]
-		# for i in range(xx.shape[0]):
-			# if abs(xx[i]-1) > 1e-06:
-				# pass
-				# print uniq_faces[i], i
-		# print np.where(abs(a-1) < 1e-14)[0]
-		# print a[:,None][12]
-		# print mesh.points[12,:]
-		# print a.shape, mesh.points.shape
-		# print abs(a-1) > 1e-8
-		# print mesh.points.shape, vpoints.shape
-		# print np.linalg.norm(vpoints,axis=1)
+
 		
 		# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/vpoints_sphere2_p3.dat', vpoints,fmt='%10.9f',delimiter=',')
-		np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/vpoints_nsphere_p'+str(MainData.C+1)+'.dat', vpoints,fmt='%10.9f',delimiter=',')
-		np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/sjacobian_nsphere_p'+str(MainData.C+1)+'.dat', MainData.ScaledJacobian,fmt='%10.9f',delimiter=',')
-		import sys; sys.exit(0)
+		# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/vpoints_nsphere_p'+str(MainData.C+1)+'.dat', vpoints,fmt='%10.9f',delimiter=',')
+		# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/sjacobian_nsphere_p'+str(MainData.C+1)+'.dat', MainData.ScaledJacobian,fmt='%10.9f',delimiter=',')
+		# import sys; sys.exit(0)
 		# plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#ffffee') 
 		# plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#F88379') ##
 		# plt.plot(vpoints[:,0],vpoints[:,1],vpoints[:,2],'o',color='#F88379') 
@@ -540,8 +523,11 @@ class PostProcess(object):
 		plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#F88379') 
 
 		plt.axis('equal')
+		# plt.xlim([-40,-15])
+		# plt.ylim([-14,14])
 		plt.axis('off')	
-
+		# plt.savefig('/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/initial_plots/mech2d_curvedmesh_Linear_p2_full.eps')
+		# plt.savefig('/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/initial_plots/mech2d_curvedmesh_Incrementally_Linearised_NeoHookean_p2_full.eps')
 		# plt.savefig('/home/roman/Desktop/DumpReport/mesh_312_'+MainData.AnalysisType+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)
 
 

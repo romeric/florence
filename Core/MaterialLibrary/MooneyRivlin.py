@@ -1,11 +1,6 @@
 import numpy as np
-# from Core.Supplementary.Tensors.Tensors import *
 from Core.Supplementary.Tensors import *
-# from Core.Supplementary.Tensors.Tensors_Sym import *
 
-# nvar is the sum of dimensions of vectorial field(s) we are solving for.
-# for instance in continuum 2d problems nvar is 2 since we solve for ux and uy
-# for 3d beam problems nvar is 6 since solve for ux, uy, uz, tx, ty and tz
 
 #####################################################################################################
 								# Isotropic MooneyRivlin Model
@@ -14,11 +9,16 @@ from Core.Supplementary.Tensors import *
 
 class MooneyRivlin(object):
 	"""	Polyconvex compressible MooneyRivlin material model based on the energy:
-		W = alpha*C:I+beta*G:I+lambda/2*(J-1)**2-4*beta*J-2*lnJ - (3*alpha-beta)
-		where at the origin (alpha + beta) = mu/2"""
+
+			W = alpha*C:I+beta*G:I+lambda/2*(J-1)**2-4*beta*J-2*alpha*lnJ - (3*alpha-beta)
+
+		where at the origin (alpha + beta) = mu/2
+		"""
+
 	def __init__(self, ndim):
 		super(MooneyRivlin, self).__init__()
 		self.ndim = ndim
+
 	def Get(self):
 		self.nvar = self.ndim
 		self.modelname = 'MooneyRivlin'

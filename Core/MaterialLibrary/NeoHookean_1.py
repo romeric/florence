@@ -1,4 +1,5 @@
 import numpy as np
+from Core.Supplementary.Tensors.Tensors import *
 
 # nvar is the sum of dimensions of vectorial field(s) we are solving for.
 # for instance in continuum 2d problems nvar is 2 since we solve for ux and uy
@@ -19,41 +20,51 @@ class NeoHookean_1(object):
 		self.modelname = 'NeoHookean_1'
 		return self.nvar, self.modelname
 
-	def Hessian(self,MaterialArgs,ndim,StrainTensors):
+	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
-		detF = StrainTensors.J
+		# detF = StrainTensors.J
+		# I = StrainTensors['I']
+		detF = StrainTensors['J'][gcounter]
+		# b = StrainTensors['b'][gcounter]
 
 		mu2 = mu - lamb*(detF-1.0)
 		lamb2 = lamb*(2*detF-1.0) - mu
 
-		delta = np.eye(ndim,ndim)
+		# delta = np.eye(ndim,ndim)
+		I = np.eye(ndim,ndim)
 		# Hessian is the fourth order elasticity tensor in this case
-		C = np.zeros((ndim,ndim,ndim,ndim))
-		for i in range(0,ndim):
-			for j in range(0,ndim):
-				for k in range(0,ndim):
-					for l in range(0,ndim):
-						C[i,j,k,l] += lamb2*delta[i,j]*delta[k,l]+mu2*(delta[i,k]*delta[j,l] + delta[i,l]*delta[j,k])
+		# C = np.zeros((ndim,ndim,ndim,ndim))
+		# for i in range(0,ndim):
+		# 	for j in range(0,ndim):
+		# 		for k in range(0,ndim):
+		# 			for l in range(0,ndim):
+		# 				C[i,j,k,l] += lamb2*delta[i,j]*delta[k,l]+mu2*(delta[i,k]*delta[j,l] + delta[i,l]*delta[j,k])
+		d = np.einsum
+		C = lamb2*d('ij,kl',I,I)+mu2*(d('ik,jl',I,I) + d('il,jk',I,I))
 
 
 		# Voigt Notation
-		C_Voigt = 0.5*np.array([
-			[2*C[0,0,0,0],2*C[0,0,1,1],2*C[0,0,2,2],C[0,0,0,1]+C[0,0,1,0],C[0,0,0,2]+C[0,0,2,0],C[0,0,1,2]+C[0,0,2,1]],
-			[0			 ,2*C[1,1,1,1],2*C[1,1,2,2],C[1,1,0,1]+C[1,1,1,0],C[1,1,0,2]+C[1,1,2,0],C[1,1,1,2]+C[1,1,2,1]],
-			[0			 ,0			  ,2*C[2,2,2,2],C[2,2,0,1]+C[2,2,1,0],C[2,2,0,2]+C[2,2,2,0],C[2,2,1,2]+C[2,2,2,1]],
-			[0			 ,0			  ,0		   ,C[0,1,0,1]+C[0,1,1,0],C[0,1,0,2]+C[0,1,2,0],C[0,1,1,2]+C[0,1,2,1]],
-			[0			 ,0			  ,0		   ,0					 ,C[0,2,0,2]+C[0,2,2,0],C[0,2,1,2]+C[0,2,2,1]],
-			[0			 ,0			  ,0		   ,0					 ,0					   ,C[1,2,1,2]+C[1,2,2,1]]
-			])
-		C_Voigt = C_Voigt+C_Voigt.T 
-		for i in range(0,C_Voigt.shape[0]):
-			C_Voigt[i,i] = C_Voigt[i,i]/2.0
+		# C_Voigt = 0.5*np.array([
+		# 	[2*C[0,0,0,0],2*C[0,0,1,1],2*C[0,0,2,2],C[0,0,0,1]+C[0,0,1,0],C[0,0,0,2]+C[0,0,2,0],C[0,0,1,2]+C[0,0,2,1]],
+		# 	[0			 ,2*C[1,1,1,1],2*C[1,1,2,2],C[1,1,0,1]+C[1,1,1,0],C[1,1,0,2]+C[1,1,2,0],C[1,1,1,2]+C[1,1,2,1]],
+		# 	[0			 ,0			  ,2*C[2,2,2,2],C[2,2,0,1]+C[2,2,1,0],C[2,2,0,2]+C[2,2,2,0],C[2,2,1,2]+C[2,2,2,1]],
+		# 	[0			 ,0			  ,0		   ,C[0,1,0,1]+C[0,1,1,0],C[0,1,0,2]+C[0,1,2,0],C[0,1,1,2]+C[0,1,2,1]],
+		# 	[0			 ,0			  ,0		   ,0					 ,C[0,2,0,2]+C[0,2,2,0],C[0,2,1,2]+C[0,2,2,1]],
+		# 	[0			 ,0			  ,0		   ,0					 ,0					   ,C[1,2,1,2]+C[1,2,2,1]]
+		# 	])
+		# C_Voigt = C_Voigt+C_Voigt.T 
+		# for i in range(0,C_Voigt.shape[0]):
+		# 	C_Voigt[i,i] = C_Voigt[i,i]/2.0
+
+		C_Voigt = Voigt( C ,1)
 
 
 		MaterialArgs.H_VoigtSize = C_Voigt.shape[0]
 		
-		return C, C_Voigt
+		# return C, C_Voigt
+		# print C.shape, C_Voigt.shape
+		return C_Voigt
 
 
 
@@ -153,15 +164,15 @@ class NeoHookean_1(object):
 				
 		return BDB
 
-	def CauchyStress(self,MaterialArgs,StrainTensors):
+	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 
-		b = StrainTensors.b 
-		J = StrainTensors.J
-		I = StrainTensors.I
+		I = StrainTensors['I']
+		J = StrainTensors['J'][gcounter]
+		b = StrainTensors['b'][gcounter]
 
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
 
-		return 1.0*mu/J*b+(lamb*(J-1.0)-mu)*I
+		return (lamb*(J-1.0)-mu)*I+1.0*mu/J*b
 
 

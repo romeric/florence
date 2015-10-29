@@ -23,7 +23,6 @@ def LinearSolver(Increment,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nmes
 	if MainData.solve.type == 'direct':
 		# CHECK FOR THE CONDITION NUMBER OF THE SYSTEM
 		# MainData.solve.condA = np.linalg.cond(K_b.todense()) # REMOVE THIS
-		# from scikits.umfpack import spsolve as solvess
 		# sol = spsolve(K_b,-F_b)
 		sol = spsolve(K_b,-F_b,permc_spec='MMD_AT_PLUS_A',use_umfpack=True)
 		# sol = spsolve(K_b,-F_b,use_umfpack=True)

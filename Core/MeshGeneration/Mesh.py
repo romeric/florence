@@ -1,11 +1,3 @@
-"""
-Mesh class providing most of the pre-processing functionalities of the Core module
-
-Roman Poya - 13/06/2015
-"""
-
-
-
 from __future__ import division
 import os, warnings
 from time import time
@@ -15,11 +7,19 @@ from Core.Supplementary.Tensors import duplicate
 from vtk_writer import write_vtu
 from NormalDistance import NormalDistance
 try:
-    import meshpy.triangle as triangle
+	import meshpy.triangle as triangle
 except ImportError:
-    meshpy = None
-from ReadSalomeMesh import ReadMesh
+	meshpy = None
+from SalomeMeshReader import ReadMesh
 from HigherOrderMeshing import *
+from warnings import warn
+
+
+"""
+Mesh class providing most of the pre-processing functionalities of the Core module
+
+Roman Poya - 13/06/2015
+"""
 
 
 
@@ -106,6 +106,20 @@ class Mesh(object):
 		self.edges = boundaryEdges[1:,:]
 		return edges
 
+
+	def GetInteriorEdgesTri(self):
+		newMesh = Mesh()
+		newMesh.element_type = "tri"
+		newMesh.nelem = self.elements.shape[0]
+		newMesh.elements = self.elements[:,:3].astype(np.int64)
+		newMesh_nnode = np.max(newMesh.elements)+1 # NO MONKEY PATCHING
+		newMesh.points = self.points[:newMesh_nnode,:] 
+		all_edges = newMesh.GetBoundaryEdgesTri(TotalEdges=True)
+		print all_edges.shape
+		print self.edges.shape
+		print newMesh.edges.shape
+
+
 	def GetBoundaryFacesTet(self,TotalFaces=False):
 		"""Given a linear tetrahedral mesh, find the boundary faces (surfaces).
 		
@@ -148,13 +162,17 @@ class Mesh(object):
 			edge3 =  np.intersect1d(np.intersect1d(y,z),w)
 
 			if edge0.shape[0]==1:
-				boundaryEdges = np.concatenate((boundaryEdges,np.array([[self.elements[i,0], self.elements[i,1], self.elements[i,2]]])),axis=0)
+				boundaryEdges = np.concatenate((boundaryEdges,np.array([[self.elements[i,0], 
+					self.elements[i,1], self.elements[i,2]]])),axis=0)
 			if edge1.shape[0]==1:
-				boundaryEdges = np.concatenate((boundaryEdges,np.array([[self.elements[i,0], self.elements[i,1], self.elements[i,3]]])),axis=0)
+				boundaryEdges = np.concatenate((boundaryEdges,np.array([[self.elements[i,0], 
+					self.elements[i,1], self.elements[i,3]]])),axis=0)
 			if edge2.shape[0]==1:
-				boundaryEdges = np.concatenate((boundaryEdges,np.array([[self.elements[i,0], self.elements[i,2], self.elements[i,3]]])),axis=0)
+				boundaryEdges = np.concatenate((boundaryEdges,np.array([[self.elements[i,0], 
+					self.elements[i,2], self.elements[i,3]]])),axis=0)
 			if edge3.shape[0]==1:
-				boundaryEdges = np.concatenate((boundaryEdges,np.array([[self.elements[i,1], self.elements[i,2], self.elements[i,3]]])),axis=0)
+				boundaryEdges = np.concatenate((boundaryEdges,np.array([[self.elements[i,1], 
+					self.elements[i,2], self.elements[i,3]]])),axis=0)
 
 
 		self.faces = boundaryEdges[1:,:]
@@ -188,292 +206,164 @@ class Mesh(object):
 
 
 	def GetBoundaryFacesHigherTet(self):
+		""" Get high order planar tetrahedral faces given high order element connectivity
+			and nodal coordinates
+
+			NOT TESTED
+
+			"""
 
 		assert self.elements is not None
 		assert self.points is not None
 		assert self.nelem is not None
 
-		newMesh = Mesh()
-		newMesh.nelem = self.elements.shape[0]
-		newMesh.elements = self.elements[:,:4]
-		newMesh.elements = newMesh.elements.astype(np.int64)
-		newMesh_nnode = np.max(newMesh.elements)+1 # no monkey patching
-		newMesh.points = self.points[:newMesh_nnode]
-		newMesh.GetBoundaryFacesTet()
-		# newMesh.GetBoundaryEdgesTet()
-		# print newMesh.faces.shape
-		# print newMesh.points
-		# print newMesh.elements
 		from Core.Supplementary.Tensors import itemfreq_py
 		from Core.Supplementary.Where import whereEQ
-
-		linear_faces = np.zeros_like(newMesh.faces)
-		counter = 0
-		elem_containing_faces = []
-		for elem in range(self.nelem):
-			nodes_faces = []
-			for j in range(newMesh.elements.shape[1]):
-				# row, col = np.where(newMesh.faces==newMesh.elements[elem,j])
-				row, col = whereEQ(newMesh.faces,newMesh.elements[elem,j])
-				nodes_faces = np.append(nodes_faces,row).astype(np.int64)
-			freq_nodes_faces = itemfreq_py(nodes_faces)
-			face_nodes = whereEQ(freq_nodes_faces[:,1,None],3)[0]
-			if np.asarray(face_nodes).shape[0]!=0:
-				elem_faces = nodes_faces[np.asarray(face_nodes)]
-				# linear_faces[0,:] = newMesh.faces[elem_faces,:][0] # assuming that an element has only one boundary face
-				linear_faces[(counter-1)+elem_faces.shape[0],:] = newMesh.faces[elem_faces,:][0] # not assuming above, but check
-				elem_containing_faces = np.append(elem_containing_faces,elem)
-				counter += elem_faces.shape[0]
-		elem_containing_faces = elem_containing_faces.astype(np.int64)
-		# print elem_containing_faces
-		# print self.elements.shape
-
 		from Core.QuadratureRules.NodeArrangement import NodeArrangement
 
 
-		face_nodes = []
-		for i in range(self.faces.shape[0]):
-			face_nodes = []
-			face_cols = []
-			for j in range(3):
-				row, col = np.where(self.elements==self.faces[i,j])
-				face_nodes = np.append(face_nodes,row)
-				face_cols = np.append(face_cols,row)
-			face_nodes = face_nodes.astype(np.int64)
-			face_cols = face_cols.astype(np.int64)
-			counts = itemfreq_py(face_nodes)
-			aa,bb = np.unique(face_nodes,return_inverse=True)
-			# print aa
-			# print bb
-			# print counts
-			# print face_nodes
-			# print counts.shape
-			# print face_cols.astype(np.int64).shape, face_nodes.shape
-			cc = np.where(counts[:,1]==3)[0]
-			# print counts[aa,0]
-			for j in range(counts.shape[0]):
-				if counts[j,1]==3:
-					pass
-			# for j in range(face_nodes.shape[0]):
-				# print face_nodes[j],
-			# print 
+		# CHANGE TYPE 
+		if isinstance(self.elements[0,0],np.uint64):
+			self.elements = self.elements.astype(np.int64)
+			self.faces = self.faces.astype(np.int64)
 
-			face_number = elem_containing_faces[i]
+		# print self.faces.shape[1]
+		if self.faces.shape[1] == 0:
+			newMesh = Mesh()
+			newMesh.nelem = self.elements.shape[0]
+			newMesh.elements = self.elements[:,:4]
+			newMesh_nnode = np.max(newMesh.elements)+1 # NO MONKEY PATCHING
+			newMesh.points = self.points[:newMesh_nnode]
+			newMesh.GetBoundaryFacesTet()
+			self.faces = newMesh.faces
 
-		#---------------------------------------------------------------------
-		# print self.faces
-
-		# linear_faces = np.zeros((self.faces.shape[0],3))
-		# for i in range(self.faces.shape[0]):
-		# 	face_nodes = []
-		# 	for j in range(3):
-		# 		# Find if the linear face is in the element
-		# 		rows, cols = np.where(self.elements==self.faces[i,j])
-		# 		if rows.shape[0]!=0 and rows.shape[0] <=2:
-		# 			print rows.shape
-
-		# ffaces = []
-		# for i in range(self.elements.shape[0]):
-		# 	face_nodes = []
-		# 	face_cols = []
-		# 	for j in range(4):
-		# 		# Find if the linear face is in the element
-		# 		rows, cols = np.where(self.faces[:,:3]==self.elements[i,j])
-		# 		face_nodes = np.append(face_nodes,rows)
-		# 		face_cols = np.append(face_cols,cols)
-		# 	face_nodes = face_nodes.astype(np.int64)
-		# 	occurence_within_a_face = itemfreq_py(face_nodes)
-		# 	counts = np.where(occurence_within_a_face[:,1]==3)[0]
-		# 	# aa, bb = np.unique(occurence_within_a_face[:,0],return_inverse=True)
-		# 	aa, bb = np.unique(face_nodes,return_inverse=True)
-		# 	# print occurence_within_a_face
-		# 	print face_nodes
-		# 	# print counts 
-		# 	# print aa
-		# 	print bb
-		# 	cc = np.where(bb==counts)[0]
-		# 	# print cc
-		# 	print face_cols[cc]
-		# 	# print aa[bb]
-		# 	if counts.shape[0]!=0:
-		# 		ffaces = np.append(ffaces,i)
-				# print face_cols.astype(np.int64)
+		if self.faces.shape[1] > 3:
+			raise UserWarning("High order tetrahedral faces seem to be already computed. Do you want me to recompute them?")
+			pass
 
 
-
-		# print ffaces.astype(np.int64) - elem_containing_faces
-		# print self.elements.shape
-
-
-		#---------------------------------------------------------------------
-
+		# INFER POLYNOMIAL DEGREE AND ORDER OF CONTINUITY
 		C = self.InferPolynomialDegree()-1
+		# GET NUMBER OF COLUMNS FOR HIGHER ORDER FACES
 		fsize = int((C+2.)*(C+3.)/2.)
-		node_arrangment = NodeArrangement(C)[0]
+		# GET THE NODE ARRANGEMENT FOR FACES
+		face_node_arrangment = NodeArrangement(C)[0]
 
-                higher_order_faces = np.zeros((self.faces.shape[0],fsize),dtype = np.uint64)
+		higher_order_faces = np.zeros((self.faces.shape[0],fsize),dtype = np.int64)
 		elements_containing_faces = []
-                counter = 0
+		counter = 0
+		# FIND IF THE 3 NODES OF THE LINEAR FACE IS IN THE ELEMENT
 		for i in range(self.faces.shape[0]):
-			face_nodes = []
-			face_cols = []
+			face_nodes = [];  face_cols = []
 			for j in range(3):
-				# FIND IF THE LINEAR FACE IS IN THE ELEMENT
-				rows, cols = np.where(self.elements[:,:4]==self.faces[i,j])
+				# rows, cols = np.where(self.elements[:,:4]==self.faces[i,j])
+				rows, cols = whereEQ(self.elements[:,:4],self.faces[i,j])
+				# STORE ALL THE OCCURENCES OF CURRENT NODAL FACE IN THE ELEMENT CONNECTIVITY
 				face_nodes = np.append(face_nodes,rows)
 				face_cols = np.append(face_cols,cols)
+			# CHANGE TYPE
 			face_nodes = face_nodes.astype(np.int64)
 			face_cols = face_cols.astype(np.int64)
+			# COUNT THE NUMBER OF OCCURENCES
 			occurence_within_an_element = itemfreq_py(face_nodes)
+			# SEE WHICH ELEMENT CONTAINS ALL THE THREE NODES OF THE FACE
 			counts = np.where(occurence_within_an_element[:,1]==3)[0]
 			if counts.shape[0] != 0:
-				elements_containing_faces = np.append(elements_containing_faces, occurence_within_an_element[counts,0])
-                        # print elements_containing_faces
-                        # print occurence_within_an_element[counts,0]
-			# ffaces = np.append(ffaces,face_nodes)
-			# occurence_within_a_face = itemfreq_py(face_nodes)
-                        # print counts
-                        inv_uniques = np.unique(face_nodes,return_inverse=True)[1]
-                        which_connectivity_cols_idx = np.where(inv_uniques==counts)[0]
-                        # print which_connectivity_cols_idx
-                        which_connectivity_cols =  face_cols[which_connectivity_cols_idx]
-                        # print which_connectivity_cols
-                        if which_connectivity_cols[0]==0 and which_connectivity_cols[1]==1 and which_connectivity_cols[2]==2:
-                            higher_order_faces[counter,:] = self.elements[occurence_within_an_element[counts,0],node_arrangment[0,:]]
-                            counter += 1
-                        elif which_connectivity_cols[0]==0 and which_connectivity_cols[1]==1 and which_connectivity_cols[2]==3:
-                            higher_order_faces[counter,:] = self.elements[occurence_within_an_element[counts,0],node_arrangment[1,:]]
-                            counter += 1
-                        elif which_connectivity_cols[0]==0 and which_connectivity_cols[1]==2 and which_connectivity_cols[2]==3:
-                            higher_order_faces[counter,:] = self.elements[occurence_within_an_element[counts,0],node_arrangment[2,:]]
-                            counter += 1
-                        elif which_connectivity_cols[0]==1 and which_connectivity_cols[1]==2 and which_connectivity_cols[2]==3:
-                            higher_order_faces[counter,:] = self.elements[occurence_within_an_element[counts,0],node_arrangment[3,:]]
-                            counter += 1
-                # print higher_order_faces
-                # print 
-                # print self.faces
-                # print np.sort(higher_order_faces,axis=1)
-                # print 
-                # print np.sort(self.faces,axis=1)
+				# COMPUTE ONLY IF NEEDED LATER ON
+				# elements_containing_faces = np.append(elements_containing_faces, 
+				# 	occurence_within_an_element[counts,0])
 
-                # print np.linalg.norm(np.sort(higher_order_faces,axis=1) - np.sort(self.faces,axis=1))
-                
+				# GET THE POSITIONS FROM CONCATENATION
+				inv_uniques = np.unique(face_nodes,return_inverse=True)[1]
+				which_connectivity_cols_idx = np.where(inv_uniques==counts)[0]
+				# FROM THE POSITIONS GET THE COLUMNS AT WHICH THESE NODES OCCUR IN THE CONNECTIVITY
+				which_connectivity_cols =  face_cols[which_connectivity_cols_idx]
+				if which_connectivity_cols_idx.shape[0] != 0:
+					# BASED ON THE OCCURENCE, DECIDE WHICH FACE OF THAT ELEMENT WE ARE ON
+					if which_connectivity_cols[0]==0 and which_connectivity_cols[1]==1 \
+						and which_connectivity_cols[2]==2:
+						higher_order_faces[counter,:] = self.elements[
+						occurence_within_an_element[counts,0],face_node_arrangment[0,:]]
+						counter += 1
+					elif which_connectivity_cols[0]==0 and which_connectivity_cols[1]==1 \
+						and which_connectivity_cols[2]==3:
+						higher_order_faces[counter,:] = self.elements[
+						occurence_within_an_element[counts,0],face_node_arrangment[1,:]]
+						counter += 1
+					elif which_connectivity_cols[0]==0 and which_connectivity_cols[1]==2 \
+						and which_connectivity_cols[2]==3:
+						higher_order_faces[counter,:] = self.elements[
+						occurence_within_an_element[counts,0],face_node_arrangment[2,:]]
+						counter += 1
+					elif which_connectivity_cols[0]==1 and which_connectivity_cols[1]==2 \
+						and which_connectivity_cols[2]==3:
+						higher_order_faces[counter,:] = self.elements[
+						occurence_within_an_element[counts,0],face_node_arrangment[3,:]]
+						counter += 1
 
-		#---------------------------------------------------------------------
-
-		# for i in range(newMesh.faces.shape[0]):
-		# 	for j in range(newMesh.faces.shape[1]):
-		# 	# face_number = elem_containing_faces[i]
-		# 		np.where(newMesh.faces[i,j])
-			# for j in range(newMesh.faces.shape[1]):
-			# np.where()
-			# print self.elements[face_number,:]
-			# print self.elements[]
-
-
-		# # faces = np.array([],dtype=np.int64)
-		# p = self.InferPolynomialDegree()
-		# fsize = int((p+1.)*(p+2.)/2.)
-		# # print fsize
-		# faces = np.zeros((linear_faces.shape[0],fsize),dtype=np.int64)
-		# faces[:,:3] = linear_faces
-		
-		# # print faces.shape
-		# self.elements = self.elements.astype(np.int64)
-		# counter = 0
-		# for elem in range(self.elements.shape[0]):
-		# # for elem in range(self.nelem):
-		# 	faces_elem = np.array([])
-		# 	for j in range(3,self.elements.shape[1]):
-		# 		# row = np.where(self.elements==self.elements[elem,j])[0]
-		# 		row = np.asarray(whereEQ(self.elements,self.elements[elem,j])[0])
-		# 		# print row
-		# 		if row.shape[0]!=0 and row.shape[0] <= 2:
-		# 		# if row.shape[0] <= 2:
-		# 			# print row.shape[0]
-		# 			# print self.elements[elem,j]
-		# 			# faces.append(row)
-		# 			faces_elem = np.append(faces_elem,self.elements[elem,j])
-		# 			# print counter
-		# 			# counter +=1
-		# 	# print 
-		# 	# print faces_elem.astype(np.int64)
-		# 	# faces.append(faces_elem)
-		# 	# print faces_elem.shape
-		# 	if faces_elem.shape[0] == 3:
-		# 		# print faces_elem.shape[0]
-		# 		# faces = np.append(faces,faces_elem)
-		# 		faces[counter,3:] = faces_elem.astype(np.int64) 
-		# 		counter +=1
-		# 		pass
-		# 		# print counter
-
-
-		# print self.element_type
-		# print faces
-		# print self.elements.shape
-
-		# self.ChangeType()
-		import sys; sys.exit(0)
+		# CHECK WITH AN ALREADY EXISTING MESH GENERATOR
+		# print np.linalg.norm(np.sort(higher_order_faces,axis=1) - np.sort(self.faces,axis=1))
+				
+		self.faces = higher_order_faces
+		self.ChangeType()
 
 
 
 
 
 	def BoundaryEdgesfromPhysicalParametrisation(self,points,facets,mesh_points,mesh_edges):
-	    """Given a 2D planar mesh (mesh_points,mesh_edges) and the parametrisation of the physical geometry (points and facets)
-	    	finds boundary edges
+		"""Given a 2D planar mesh (mesh_points,mesh_edges) and the parametrisation of the physical geometry (points and facets)
+			finds boundary edges
 
-	    input:
+		input:
 
-	    	points:			nx2 numpy array of points given to meshpy/distmesh/etc API for the actual geometry
-	    	facets:			mx2 numpy array connectivity of points given to meshpy/distmesh/etc API for the actual geometry
-	    	mesh_points:	px2 numpy array of points taken from the mesh generator
-	    	mesh_edges:		qx2 numpy array of edges taken from the mesh generator
+			points:			nx2 numpy array of points given to meshpy/distmesh/etc API for the actual geometry
+			facets:			mx2 numpy array connectivity of points given to meshpy/distmesh/etc API for the actual geometry
+			mesh_points:	px2 numpy array of points taken from the mesh generator
+			mesh_edges:		qx2 numpy array of edges taken from the mesh generator
 
-	    returns:
+		returns:
 
-	    	arr_1:			nx2 numpy array of boundary edges
+			arr_1:			nx2 numpy array of boundary edges
 
-	    Note that this method could be useful for finding arbitrary edges not necessarily lying on the boundary"""
+		Note that this method could be useful for finding arbitrary edges not necessarily lying on the boundary"""
 
-	    # COMPUTE SLOPE OF THE GEOMETRY EDGE
-	    geo_edges = np.array(facets); geo_points = np.array(points)
-	    # ALLOCATE
-	    mesh_boundary_edges = np.zeros((1,2),dtype=int)
-	    # LOOP OVER GEOMETRY EDGES
-	    for i in range(geo_edges.shape[0]):
-	    	# GET COORDINATES OF BOTH NODES AT THE EDGE
-	    	geo_edge_coord = geo_points[geo_edges[i]]
-	    	geo_x1 = geo_edge_coord[0,0];		geo_y1 = geo_edge_coord[0,1]
-	    	geo_x2 = geo_edge_coord[1,0];		geo_y2 = geo_edge_coord[1,1]
+		# COMPUTE SLOPE OF THE GEOMETRY EDGE
+		geo_edges = np.array(facets); geo_points = np.array(points)
+		# ALLOCATE
+		mesh_boundary_edges = np.zeros((1,2),dtype=int)
+		# LOOP OVER GEOMETRY EDGES
+		for i in range(geo_edges.shape[0]):
+			# GET COORDINATES OF BOTH NODES AT THE EDGE
+			geo_edge_coord = geo_points[geo_edges[i]]
+			geo_x1 = geo_edge_coord[0,0];		geo_y1 = geo_edge_coord[0,1]
+			geo_x2 = geo_edge_coord[1,0];		geo_y2 = geo_edge_coord[1,1]
 
-	    	# COMPUTE SLOPE OF THIS LINE
-	    	geo_angle = np.arctan((geo_y2-geo_y1)/(geo_x2-geo_x1)) #*180/np.pi
+			# COMPUTE SLOPE OF THIS LINE
+			geo_angle = np.arctan((geo_y2-geo_y1)/(geo_x2-geo_x1)) #*180/np.pi
 
-	    	# NOW FOR EACH OF THESE GEOMETRY LINES LOOP OVER ALL MESH EDGES
-	    	for j in range(0,mesh_edges.shape[0]):
-	    		mesh_edge_coord = mesh_points[mesh_edges[j]]
-	    		mesh_x1 = mesh_edge_coord[0,0];			mesh_y1 = mesh_edge_coord[0,1]
-	    		mesh_x2 = mesh_edge_coord[1,0];			mesh_y2 = mesh_edge_coord[1,1]
+			# NOW FOR EACH OF THESE GEOMETRY LINES LOOP OVER ALL MESH EDGES
+			for j in range(0,mesh_edges.shape[0]):
+				mesh_edge_coord = mesh_points[mesh_edges[j]]
+				mesh_x1 = mesh_edge_coord[0,0];			mesh_y1 = mesh_edge_coord[0,1]
+				mesh_x2 = mesh_edge_coord[1,0];			mesh_y2 = mesh_edge_coord[1,1]
 
-	    		# FIND SLOPE OF THIS LINE 
-	    		mesh_angle = np.arctan((mesh_y2-mesh_y1)/(mesh_x2-mesh_x1))
+				# FIND SLOPE OF THIS LINE 
+				mesh_angle = np.arctan((mesh_y2-mesh_y1)/(mesh_x2-mesh_x1))
 
-	    		# CHECK IF GEOMETRY AND MESH EDGES ARE PARALLEL
-	    		if np.allclose(geo_angle,mesh_angle,atol=1e-12):
-	    			# IF SO THEN FIND THE NORMAL DISTANCE BETWEEN THEM
-	    			P1 = np.array([geo_x1,geo_y1,0]);				P2 = np.array([geo_x2,geo_y2,0])		# 1st line's coordinates
-	    			P3 = np.array([mesh_x1,mesh_y1,0]);				P4 = np.array([mesh_x2,mesh_y2,0])		# 2nd line's coordinates
+				# CHECK IF GEOMETRY AND MESH EDGES ARE PARALLEL
+				if np.allclose(geo_angle,mesh_angle,atol=1e-12):
+					# IF SO THEN FIND THE NORMAL DISTANCE BETWEEN THEM
+					P1 = np.array([geo_x1,geo_y1,0]);				P2 = np.array([geo_x2,geo_y2,0])		# 1st line's coordinates
+					P3 = np.array([mesh_x1,mesh_y1,0]);				P4 = np.array([mesh_x2,mesh_y2,0])		# 2nd line's coordinates
 
-	    			dist = NormalDistance(P1,P2,P3,P4)
-	    			# IF NORMAL DISTANCE IS ZEROS THEN MESH EDGE IS ON THE BOUNDARY
-	    			if np.allclose(dist,0,atol=1e-14):
-	    				mesh_boundary_edges = np.append(mesh_boundary_edges,mesh_edges[j].reshape(1,2),axis=0)
+					dist = NormalDistance(P1,P2,P3,P4)
+					# IF NORMAL DISTANCE IS ZEROS THEN MESH EDGE IS ON THE BOUNDARY
+					if np.allclose(dist,0,atol=1e-14):
+						mesh_boundary_edges = np.append(mesh_boundary_edges,mesh_edges[j].reshape(1,2),axis=0)
 
-	    # return np.delete(mesh_boundary_edges,0,0)
-	    return mesh_boundary_edges[1:,:]
+		# return np.delete(mesh_boundary_edges,0,0)
+		return mesh_boundary_edges[1:,:]
 
 
  
@@ -518,10 +408,13 @@ class Mesh(object):
 		"""Default mesh reader for binary and text files used for reading Salome meshes mainly.
 		The method checks if edges/faces are provided by the mesh generator and if not computes them"""
 
+
 		mesh = ReadMesh(*args,**kwargs)
+
 		self.points = mesh.points
 		self.elements = mesh.elements.astype(np.int64)
-		self.edges = mesh.edges.astype(np.int64)
+		if isinstance(mesh.edges,np.ndarray):
+			self.edges = mesh.edges.astype(np.int64)
 		if isinstance(mesh.faces,np.ndarray):
 			self.faces = mesh.faces.astype(np.int64)
 		self.nelem = mesh.nelem
@@ -560,7 +453,7 @@ class Mesh(object):
 			ignore_cols_edges: 				[int] no of columns to be ignored (from the start) in the connectivity_file 
 			ignore_cols_faces:				[int] no of columns to be ignored (from the start) in the coordinates_file
 			index_style:					[str] either 'c' C-based (zero based) indexing or 'f' fortran-based
-											  	  (one based) indexing for elements connectivity - default is 'c'
+												  (one based) indexing for elements connectivity - default is 'c'
 
 			"""
 
@@ -602,6 +495,32 @@ class Mesh(object):
 			self.faces = np.loadtxt(faces_file,dtype=np.int64,delimiter=delimiter_edges) - index
 			if ignore_cols_faces !=None:
 				self.faces = self.faces[ignore_cols_faces:,:]
+
+
+
+	def ReadGIDMesh(self,filename,mesh_type,polynomial_order = 0):
+		"""Read GID meshes"""
+
+		self.element_type = mesh_type
+		ndim, self.nelem, nnode, nboundary = np.fromfile(filename,dtype=np.int64,count=4,sep=' ')
+	
+		if ndim==2 and mesh_type=="tri":
+			content = np.fromfile(filename,dtype=np.float64,count=4+3*nnode+4*self.nelem,sep=' ')
+			self.points = content[4:4+3*nnode].reshape(nnode,3)[:,1:]
+			self.elements = content[4+3*nnode:4+3*nnode+4*self.nelem].reshape(self.nelem,4)[:,1:].astype(np.int64)
+			self.elements -= 1 
+
+			self.GetBoundaryEdgesTri()
+
+		if ndim==3 and mesh_type=="tet":
+			content = np.fromfile(filename,dtype=np.float64,count=4+4*nnode+5*self.nelem,sep=' ')
+			self.points = content[4:4+4*nnode].reshape(nnode,4)[:,1:]
+			self.elements = content[4+4*nnode:4+4*nnode+5*self.nelem].reshape(self.nelem,5)[:,1:].astype(np.int64)
+			self.elements -= 1
+
+			self.GetBoundaryFacesTet()
+			self.GetBoundaryEdgesTet()
+
 
 
 
@@ -667,6 +586,12 @@ class Mesh(object):
 				self.elements[area>0,:] = np.fliplr(self.elements[area>0,:])
 			elif change_order_to == 'anti-clockwise':
 				self.elements[area<0,:] = np.fliplr(self.elements[area<0,:])
+
+
+		if original_order == 'anti-clockwise':
+			print u'\u2713'.encode('utf8')+' : ','Imported mesh has',original_order,'node ordering'
+		else:
+			print u'\u2717'.encode('utf8')+' : ','Imported mesh has',original_order,'node ordering'
 
 		return original_order
 
@@ -813,6 +738,8 @@ class Mesh(object):
 			raise NotImplementedError("SimplePlot for "+self.element_type+" not implemented yet")
 
 		plt.axis("equal")
+		# plt.axis("off")
+		# plt.savefig('/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/initial_plots/mech2d_original_mesh.eps',format='eps', dpi=1000)
 		plt.show()
 
 
@@ -1001,16 +928,16 @@ class Mesh(object):
 		dphi = pi/points
 
 		def truncate(r):
-		    if abs(r) < 1e-10:
-		        return 0
-		    else:
-		        return r
+			if abs(r) < 1e-10:
+				return 0
+			else:
+				return r
 
 		rz = [(truncate(r*sin(i*dphi)), r*cos(i*dphi)) for i in range(points+1)]
 
 		geob = GeometryBuilder()
 		geob.add_geometry(*generate_surface_of_revolution(rz,
-		        closure=EXT_OPEN, radial_subdiv=10))
+				closure=EXT_OPEN, radial_subdiv=10))
 
 		mesh_info = MeshInfo()
 		geob.set(mesh_info)
@@ -1109,10 +1036,11 @@ class Mesh(object):
 
 	def ChangeType(self):
 		""" Change mesh data type from signed to unsigned"""
-		self.elements = mesh.elements.astype(np.uint64)
-		self.edges = mesh.edges.astype(np.uint64)
+		self.elements = self.elements.astype(np.uint64)
+		if isinstance(self.edges,np.ndarray):
+			self.edges = self.edges.astype(np.uint64)
 		if isinstance(self.faces,np.ndarray):
-			self.faces = mesh.faces.astype(np.uint64)
+			self.faces = self.faces.astype(np.uint64)
 
 
 	def InferPolynomialDegree(self):

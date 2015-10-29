@@ -143,7 +143,7 @@ def NodeLoopTriNPSP(sorted_repoints,Xs,invX,iSortX,duplicates,Decimals,tol):
 	return duplicates
 
 
-def HighOrderMeshTri_UNSTABLE(C,mesh,Decimals=10,Parallel=False,nCPU=1):
+def HighOrderMeshTri_UNSTABLE(C,mesh,Decimals=10,Parallel=False,nCPU=1,ComputeAll=False):
 
 
 	# SWITCH OFF MULTI-PROCESSING FOR SMALLER PROBLEMS WITHOUT GIVING A MESSAGE
