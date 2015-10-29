@@ -43,23 +43,11 @@ def ProblemData(MainData):
 		# GET LAME CONSTANTS
 		lamb = E*nu/(1.+nu)/(1.-2.0*nu)
 		mu = E/2./(1+nu)
-		# mu=0
-		# lamb=0
 
-		# mu = 1.
-		# lamb  = 2.
-		# mu    = 0.3571
-		# lamb  = 1.4286
 		# lamb = lamb - mu
 		# mu = 2*mu
 		# lamb = lamb + mu
 
-		# mu    = 0.090571
-		# lamb  = 1.4286
-		# mu    = 0.5
-		# lamb  = 0.6
-		# mu    = 0.5
-		# lamb  = 0.5
 		rho   = 7.5*10e-6
 		eps_1 = 1.0
 		c1    = 0.
@@ -78,12 +66,12 @@ def ProblemData(MainData):
 		MeshType = 'tri'
 		Nature = 'straight'
 		Reader = 'Read'
+		Format = 'GID'
 
-		# FileName = ProblemPath + '/MechanicalComponent2D_664.dat'
-		FileName = ProblemPath + '/MechanicalComponent2D_192.dat'
-		# FileName = ProblemPath + '/MechanicalComponent2D_NonSmooth_2672.dat'
-		# FileName = ProblemPath + '/MechanicalComponent2D_NonSmooth_321.dat'
-		# FileName = ProblemPath + '/MechanicalComponent2D_NonSmooth_236.dat'
+		FileName = ProblemPath + '/sd7003_Stretch25.dat'
+		# FileName = ProblemPath + '/sd7003_Stretch50.dat'
+		# FileName = ProblemPath + '/sd7003_Stretch100.dat'
+		# FileName = ProblemPath + '/sd7003_Stretch200.dat'
 		
 
 
@@ -94,10 +82,9 @@ def ProblemData(MainData):
 		# scale = 1000.
 		# condition = 1.0e10
 		scale = 1.
-		condition = 1e10
+		condition = 0.5
 
-		IGES_File = ProblemPath + '/mechanical2D.iges'
-		# IGES_File = ProblemPath + '/mechanical2d.igs' # non-smooth
+		IGES_File = ProblemPath + '/sd7003.igs'
 
 		class DirichArgs(object):
 			node = 0

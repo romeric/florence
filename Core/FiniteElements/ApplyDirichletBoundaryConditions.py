@@ -86,7 +86,10 @@ def ApplyDirichletBoundaryConditions(stiffness,F,mesh,MainData):
 				curvilinear_mesh = PostMeshSurface(mesh.element_type,dimension=MainData.ndim)
 				curvilinear_mesh.SetMeshElements(mesh.elements)
 				curvilinear_mesh.SetMeshPoints(mesh.points)
-				curvilinear_mesh.SetMeshEdges(mesh.edges)
+				if mesh.edges.ndim == 2 and mesh.edges.shape[1]==0:
+					mesh.edges = np.zeros((1,4),dtype=np.uint64)
+				else:
+					curvilinear_mesh.SetMeshEdges(mesh.edges)
 				curvilinear_mesh.SetMeshFaces(mesh.faces)
 				curvilinear_mesh.SetScale(MainData.BoundaryData.scale)
 				curvilinear_mesh.SetCondition(MainData.BoundaryData.condition)
@@ -116,7 +119,7 @@ def ApplyDirichletBoundaryConditions(stiffness,F,mesh,MainData):
 				posUnique = np.unique(nodesDBC,return_index=True)[1]
 				nodesDBC, Dirichlet = nodesDBC[posUnique], Dirichlet[posUnique,:]
 
-				from Core.Supplementary.Tensors import makezero
+				# from Core.Supplementary.Tensors import makezero
 				# print makezero(Dirichlet)
 				# print nodesDBC
 				# import sys; sys.exit(0)

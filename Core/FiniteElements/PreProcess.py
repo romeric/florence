@@ -5,7 +5,7 @@ import numpy as np
 # from Core.MeshGeneration.HigherOrderMeshing import *
 import Core.MaterialLibrary as MatLib 
 from Core.FiniteElements.ElementalMatrices.KinematicMeasures import *
-from Core.MeshGeneration.ReadSalomeMesh import ReadMesh
+from Core.MeshGeneration.SalomeMeshReader import ReadMesh
 from Core.QuadratureRules import GaussQuadrature, QuadraturePointsWeightsTet, QuadraturePointsWeightsTri
 from Core.FiniteElements.GetBases import *
 import Core.Formulations.DisplacementElectricPotentialApproach as DEPB
@@ -37,23 +37,26 @@ def PreProcess(MainData,Pr,pwd):
 	MeshReader = getattr(mesh,MainData.MeshInfo.Reader,None)
 	if MeshReader is not None:
 		if MainData.MeshInfo.Reader is 'Read':
-			MeshReader(MainData.MeshInfo.FileName,MainData.MeshInfo.MeshType,MainData.C)
+			if getattr(MainData.MeshInfo,'Format',None) is 'GID':
+				mesh.ReadGIDMesh(MainData.MeshInfo.FileName,MainData.MeshInfo.MeshType,MainData.C)
+			else:	
+				MeshReader(MainData.MeshInfo.FileName,MainData.MeshInfo.MeshType,MainData.C)
 		elif MainData.MeshInfo.Reader is 'ReadSeparate':
 			# READ MESH FROM SEPARATE FILES FOR CONNECTIVITY AND COORDINATES
-			# mesh.ReadSeparate(MainData.MeshInfo.ConnectivityFile,MainData.MeshInfo.CoordinatesFile,MainData.MeshInfo.MeshType,
-			# 	delimiter_connectivity=',',delimiter_coordinates=',')
 			mesh.ReadSeparate(MainData.MeshInfo.ConnectivityFile,MainData.MeshInfo.CoordinatesFile,MainData.MeshInfo.MeshType,
-				edges_file=MainData.MeshInfo.EdgesFile,delimiter_connectivity=',',delimiter_coordinates=',')
+				delimiter_connectivity=',',delimiter_coordinates=',')
+			# mesh.ReadSeparate(MainData.MeshInfo.ConnectivityFile,MainData.MeshInfo.CoordinatesFile,MainData.MeshInfo.MeshType,
+			# 	edges_file=MainData.MeshInfo.EdgesFile,delimiter_connectivity=',',delimiter_coordinates=',')
 		elif MainData.MeshInfo.Reader is 'UniformHollowCircle':
 			# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=4,ncirc=12)
 			# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=7,ncirc=7) # isotropic
 			mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=False,nrad=7,ncirc=7)
 
 	# mesh_node_order = mesh.CheckNodeNumberingTri()
-	# if mesh_node_order == 'anti-clockwise':
-	# 	print u'\u2713'.encode('utf8')+' : ','Imported mesh has',mesh_node_order,'node ordering'
-	# else:
-	# 	print u'\u2717'.encode('utf8')+' : ','Imported mesh has',mesh_node_order,'node ordering'
+	# sys.exit()
+	# print np.sum(np.unique(mesh.elements)), (1140+1)*(1140)/2
+	# print mesh.points.shape
+	# print mesh.elements.shape
 
 	# mesh.points[:,0] -= 0.5
 	# mesh.points *=1000. 
@@ -65,21 +68,9 @@ def PreProcess(MainData,Pr,pwd):
 	# mesh.RetainElementsWithin((-0.502,-0.06,0.505,0.06283))
 	# mesh.RemoveElements((-0.9,-0.1,1.9,0.1),keep_boundary_only=True)
 	# mesh.RemoveElements((-0.9,-0.1,1.9,0.1),keep_boundary_only=True,plot_new_mesh=False) #
-	# print mesh.points[89,:] 
-	# print mesh.points[279,:] 
 
-	# for i in range(mesh.nelem):
-	# 	x = np.max(mesh.elements[i,:])
-	# 	if mesh.points[x,0] > 0.:
-	# 		mesh.points[x,0] +=0.2
-	# 	else:
-	# 		mesh.points[x,0] +=-0.2
+	# mesh.RemoveElements((-0.6,-0.1,1.9,0.6),keep_boundary_only=True,plot_new_mesh=False)
 
-	# print mesh.elements[88,:]
-	# print mesh.points[[89,90,279],:]
-	# mesh.elements = np.array([[0,1,2]]) 
-	# mesh.points =  mesh.points[[89,90,279],:]
-	# mesh.edges = np.array([[0,1]])
 	# print mesh.elements
 	# print mesh.points
 	# print mesh.edges
@@ -94,26 +85,10 @@ def PreProcess(MainData,Pr,pwd):
 	# sys.exit(0)
 	# print np.linalg.norm(mesh.points,axis=1)
 
-	mesh.Sphere()
+	# mesh.Sphere()
 	# mesh.Sphere(points=2)
-	# mesh.SimplePlot()
-	# print mesh.elements
-	# print mesh.points
-	# print mesh.faces.shape
-	# print mesh.points.shape
-	# print mesh.points[12,:]
-	# print mesh.points[92,:]
+	# mesh.SimplePlot()	
 	# sys.exit(0)
-
-	# uniq_faces = np.unique(mesh.faces)
-	# from Core.Supplementary.Tensors import makezero
-	# mesh.points = makezero(mesh.points)
-	# un_points = mesh.points[uniq_faces,:]
-	# print un_points[92,:]
-	# print mesh.points.shape, un_points.shape
-	# print mesh.elements.shape, mesh.faces.shape
-	# # print np.linalg.norm(un_points,axis=1)
-	# import sys; sys.exit()
 
 
 	# print mesh.elements.shape
@@ -123,10 +98,10 @@ def PreProcess(MainData,Pr,pwd):
 
 	# GENERATE pMESHES FOR HIGH C
 	############################################################################
-	# t_mesh = time()
 
 	if MainData.C>0:
-		mesh.GetHighOrderMesh(MainData.C,Parallel=MainData.Parallel,nCPU=MainData.numCPU)
+		mesh.GetHighOrderMesh(MainData.C,Parallel=MainData.Parallel,
+			nCPU=MainData.numCPU,ComputeAll=True)
 	else:
 		mesh.ChangeType()
 
@@ -146,8 +121,14 @@ def PreProcess(MainData,Pr,pwd):
 	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_cube5.dat',mesh.points)
 	# print mesh.faces
 	# sys.exit(0)
-	mesh.GetBoundaryFacesHigherTet()
-	sys.exit("STOPPED")
+	# print mesh.faces
+	# mesh.GetBoundaryFacesHigherTet()
+	# print mesh.elements
+	# print mesh.points
+	# print mesh.faces
+	# print mesh.edges
+
+	# sys.exit("STOPPED")
 
 	# np.savetxt('/home/roman/Desktop/elements_check_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
 	# np.savetxt('/home/roman/Desktop/points_check_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%6.4f',delimiter=',')
@@ -193,33 +174,25 @@ def PreProcess(MainData,Pr,pwd):
 			MainData.Path.Analysis = 'LinearStatic/'		# ONE STEP/INCREMENT
 		# MainData.Path.LinearDynamic = 'LinearDynamic'
 		elif MainData.AnalysisType == 'Nonlinear':
-			MainData.Path.Analysis = 'NonlinearStatic/' 		# MANY INCREMENTS
+			MainData.Path.Analysis = 'NonlinearStatic/' 	# MANY INCREMENTS
 		# Subdirectories
 		if os.path.isdir(MainData.Path.ProblemResults+MainData.Path.Analysis):
-			if os.path.isdir(MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel):
-				pass
-			else:
+			if not os.path.isdir(MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel):
 				os.mkdir(MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel)
 		else:
 			os.mkdir(MainData.Path.ProblemResults+MainData.Path.Analysis)
-			if os.path.isdir(MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel):
-				pass
-			else:
+			if not os.path.isdir(MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel):
 				os.mkdir(MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel)
 
 	elif MainData.Analysis == 'Dynamic':
 		MainData.Path.Analysis = 'NonlinearDynamic/'
 		# SUBDIRECTORIES
 		if os.path.isdir(MainData.Path.ProblemResults+MainData.Path.Analysis):
-			if os.path.isdir(MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel):
-				pass
-			else:
+			if not os.path.isdir(MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel):
 				os.mkdir(MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel)
 		else:
 			os.mkdir(MainData.Path.ProblemResults+MainData.Path.Analysis)
-			if os.path.isdir(MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel):
-				pass
-			else:
+			if not os.path.isdir(MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel):
 				os.mkdir(MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel)
 	############################################################################
 
@@ -395,7 +368,7 @@ def PreProcess(MainData,Pr,pwd):
 
 		elif MainData.MaterialArgs.Type == 'LinearModel' or MainData.MaterialArgs.Type == 'AnisotropicMooneyRivlin_1' or \
 		MainData.MaterialArgs.Type == 'Incrementally_Linearised_NeoHookean' or MainData.MaterialArgs.Type == 'NearlyIncompressibleNeoHookean' or \
-		MainData.MaterialArgs.Type == 'MooneyRivlin':
+		MainData.MaterialArgs.Type == 'MooneyRivlin' or MainData.MaterialArgs.Type == 'NeoHookean_1':
 			MainData.ConstitutiveStiffnessIntegrand = DB.ConstitutiveStiffnessIntegrand
 			MainData.GeometricStiffnessIntegrand = DB.GeometricStiffnessIntegrand
 			MainData.MassIntegrand =  DB.MassIntegrand

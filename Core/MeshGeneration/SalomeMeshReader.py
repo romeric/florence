@@ -63,7 +63,7 @@ def ReadMesh_NPFROMFILE(filename,MeshType,C=0):
 	# GENERIC SALOME MESH READER
 	# FILENAME SHOULD BE A STRING
 	class mesh(object):
-		"""docstring for mesh"""
+		"""build a mesh class"""
 		info = MeshType
 			
 

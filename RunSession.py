@@ -110,13 +110,11 @@ elif MainData.session == 'BEM3D':
 # delete all .pyc files 
 # find . -name '*.pyc' -delete
 
-# g++ asm_check.cpp -O2 -mavx -ftree-vectorize -fopt-info-vec-missed-optimized -march=native -mtune=native -o asm_check 
 
 # import inspect; print(inspect.getsource(numpy.linspace)) # numpy/scipy documenation in a shell
 # import inspect; print(inspect.getsource(np.unique)) # numpy/scipy documenation in a shellnp un
 # print u'\u2713'.encode('utf8')
 
-# print np.version.version
 # print np.__version__
 # import numpy.distutils.system_info as sysinfo
 # sysinfo.get_info('atlas')
@@ -128,24 +126,6 @@ elif MainData.session == 'BEM3D':
 
 # sudo update-alternatives --config libblas.so.3
 # ldd /usr/lib/python2.7/dist-packages/numpy/core/_dotblas.so
-
-
-# .gala-notification {
-#     border: none;
-#     border-radius: 4px;
-#     background-color: transparent;
-#     background-image: linear-gradient(to bottom,
-#                                   alpha (@bg_color, 0.98),
-#                                   alpha (@bg_color, 0.98) 80%,
-#                                   alpha (shade(@bg_color, 0.94), 0.98)
-#                                   );
-#     box-shadow: inset 0 0 0 1px alpha (#fff, 0.10),
-#                 inset 0 1px 0 0 alpha (#fff, 0.90),
-#                 inset 0 -1px 0 0 alpha (#fff, 0.30),
-#                 0 0 0 1px alpha (#000, 0.20),
-#                 0 3px 6px alpha (#000, 0.16),
-#                 0 3px 6px alpha (#000, 0.23);
-
 
 
 # http://stackoverflow.com/questions/23872946/force-numpy-ndarray-to-take-ownership-of-its-memory-in-cython/
@@ -172,54 +152,3 @@ elif MainData.session == 'BEM3D':
 # t = timeit.Timer("numpy.dot(x, x.T)", setup=setup)
 # print("\ndot: %f sec" % (t.timeit(count) / count))
 #------------------------------------------------------------#
-
-# g++ -I/home/roman/Dropbox/eigen-devel/ -I/usr/local/include/oce/ -I. -L/usr/local/lib -l:libTKIGES.so.9 -l:libTKXSBase.so.9 -l:libTKBRep.so.9 \
-# -l:libTKernel.so.9 -l:libTKTopAlgo.so.9 -l:libTKGeomBase.so.9 -l:libTKMath.so.9 -l:libTKHLR.so.9 -l:libTKG2d.so.9 -l:libTKBool.so.9 -l:libTKG3d.so.9 \
-# -l:libTKOffset.so.9 -l:libTKG2d.so.9 -l:libTKXMesh.so.9 -l:libTKGeomAlgo.so.9 -l:libTKShHealing.so.9 -l:libTKFeat.so.9 -l:libTKFillet.so.9 -l:libTKBO.so.9 \
-# -l:libTKPrim.so.9 -std=c++11 -Wno-unused main.cpp occ_frontend.cpp py_to_occ_frontend.cpp -o main
-
-# g++ -I/home/roman/Dropbox/eigen-devel/ -I/usr/local/include/oce/ -I. -L/usr/local/lib /usr/local/lib/libTKIGES.so.9 /usr/local/lib/libTKXSBase.so.9 \
-# /usr/local/lib/libTKBRep.so.9 /usr/local/lib/libTKernel.so.9 /usr/local/lib/libTKTopAlgo.so.9 /usr/local/lib/libTKGeomBase.so.9 /usr/local/lib/libTKMath.so.9 \
-# /usr/local/lib/libTKHLR.so.9 /usr/local/lib/libTKG2d.so.9 /usr/local/lib/libTKBool.so.9 /usr/local/lib/libTKG3d.so.9 /usr/local/lib/libTKOffset.so.9 \
-# /usr/local/lib/libTKG2d.so.9 /usr/local/lib/libTKXMesh.so.9 /usr/local/lib/libTKGeomAlgo.so.9 /usr/local/lib/libTKShHealing.so.9 /usr/local/lib/libTKFeat.so.9 \
-# /usr/local/lib/libTKFillet.so.9 /usr/local/lib/libTKBO.so.9 /usr/local/lib/libTKPrim.so.9 -std=c++11 -Wno-unused \
-# main.cpp occ_frontend.cpp py_to_occ_frontend.cpp -o main
-
-# g++ -I/home/roman/Dropbox/eigen-devel/ -I/usr/local/include/oce/ -I. -L/usr/local/lib -lTKIGES -lTKXSBase \
-# -lTKBRep -lTKernel -lTKTopAlgo -lTKGeomBase -lTKMath -lTKHLR -lTKG2d -lTKBool \
-# -lTKXMesh\
-# -lTKFillet\
-# -lTKGeomBase\
-# -lTKPrim\
-# -lTKOffset\
-# -lTKHLR\
-# -lTKMath\
-# -lTKBO\
-# -lTKG2d\
-# -lTKG3d\
-# -lTKShHealing\
-# -lTKBRep\
-# -lTKBool\
-# -lTKBRep\
-# -lTKTopAlgo\
-# -lTKMesh\
-# -lTKFeat\
-# -lTKGeomAlgo\
-# -std=c++11 -Wno-unused \
-# main.cpp occ_frontend.cpp py_to_occ_frontend.cpp -o main
-
-# `/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
-# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
-# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
-# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
-# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
-# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
-# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
-# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
-# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
-# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
-# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
-# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
-# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
-# /usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:/usr/local/openmpi/lib:
-# /usr/local/openmpi/lib:/usr/local/openmpi/lib:'

@@ -29,16 +29,40 @@ from Core.FiniteElements.Solvers.Solver import *
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Nurbs/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/MechanicalComponent2D/ProblemData.py')
+Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Wing2D/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Sphere/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Naca_Isotropic/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/RAE2822/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Misc/ProblemData.py')
-Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Tests/ProblemData.py')
+# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Tests/ProblemData.py')
 
 #############################################################################################################################################
 # from line_profiler import profile
 # @profile
 def main(MainData):
+
+	from Core.InterpolationFunctions.TwoDimensional.Tri.hpNodalLagrange import hpBasesLagrange
+	from Core.InterpolationFunctions.TwoDimensional.Tri.hpNodal import hpBases
+	from Core.Supplementary.Tensors import makezero
+	from Core.InterpolationFunctions.DegenerateMappings import MapXiEta2RS
+
+	# xi = -0.3333
+	# eta = -0.00333
+
+	# x = xi 
+	# y = eta 
+	# r, s = MapXiEta2RS(xi,eta)
+	# print r , s 
+	# print x , y 
+	# print hpBasesLagrange(2,xi,eta)[0]
+	# print hpBasesLagrange(2,xi,eta)[1]
+	# print makezero(hpBases(1,xi,eta)[0][:,None])[:,0]
+	# print makezero(hpBases(2,r,s)[0][:,None])[:,0]
+	# print makezero(hpBases(2,r,s)[1])
+
+	# print makezero(hpBasesLagrange(2,xi,eta)[1] - makezero(hpBases(2,r,s)[1]))
+	# print hpBasesLagrange(2,-1,1)[:2]
+	# sys.exit(0)
 
 	# READ PROBLEM DATA FILE
 	Pr.ProblemData(MainData)
@@ -120,9 +144,9 @@ def main(MainData):
 	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_sphere2_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%10.9f',delimiter=',')
 	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/faces_sphere2_p'+str(MainData.C+1)+'.dat', mesh.faces,fmt='%d',delimiter=',')
 
-	np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/elements_nsphere_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
-	np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_nsphere_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%10.9f',delimiter=',')
-	np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/faces_nsphere_p'+str(MainData.C+1)+'.dat', mesh.faces,fmt='%d',delimiter=',')
+	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/elements_nsphere_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
+	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_nsphere_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%10.9f',delimiter=',')
+	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/faces_nsphere_p'+str(MainData.C+1)+'.dat', mesh.faces,fmt='%d',delimiter=',')
 
 
 	print 'Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*MainData.nvar
@@ -207,7 +231,34 @@ def main(MainData):
 	# PostProcess.HighOrderInterpolatedPatchPlot(MainData,mesh,TotalDisp)
 	import matplotlib.pyplot as plt
 	# plt.savefig('/home/roman/Dropbox/zdump/DumpReport/mech2d/postmesh_'+MainData.AnalysisType+'_p'+str(MainData.C+1)+'.eps', format='eps', dpi=1000)
+	# plt.savefig('/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/initial_plots/mech2d_planarmesh_'+MainData.MaterialArgs.Type+'_p'+str(MainData.C+1)+'.eps',format='eps', dpi=1000)
+	# plt.savefig('/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/initial_plots/mech2d_curvedmesh_'+MainData.MaterialArgs.Type+'_p'+str(MainData.C+1)+'.eps',format='eps', dpi=1000)
+
 	plt.show()
+
+	#-------------------------------------------------------------------------------------------------------------
+	# vpoints = np.copy(mesh.points)
+	# vpoints[:,0] += TotalDisp[:,0,-1]
+	# vpoints[:,1] += TotalDisp[:,1,-1]
+	# if MainData.ndim==3:
+	# 	vpoints[:,2] += TotalDisp[:,2,-1]
+
+	# print TotalDisp[:,:,-1]
+	# mesh.GetInteriorEdgesTri()
+
+	# np.savetxt('/home/roman/Desktop/MeshingElasticity2/'+MainData.AnalysisType+'_p'+str(MainData.C+1)+'_elements.dat',
+	# 	mesh.elements,fmt='%d',delimiter=',')	
+	# np.savetxt('/home/roman/Desktop/MeshingElasticity2/'+MainData.AnalysisType+'_p'+str(MainData.C+1)+'_planar_points.dat',
+	# 	mesh.points,fmt='%10.9f',delimiter=',')	
+	# np.savetxt('/home/roman/Desktop/MeshingElasticity2/'+MainData.AnalysisType+'_p'+str(MainData.C+1)+'_displacement.dat',
+	# 	TotalDisp[:,:,-1],fmt='%10.9f',delimiter=',')
+
+	# savetxt('/home/roman/Desktop/MeshingElasticity2/'+MainData.AnalysisType+'_p'+str(MainData.C+1)+'Xf.dat')
+	# savetxt('/home/roman/Desktop/MeshingElasticity2/'+MainData.AnalysisType+'_p'+str(MainData.C+1)+'Xf.dat')
+
+
+
+	#-------------------------------------------------------------------------------------------------------------
 
 	# from Core.Supplementary.SuppPlots.MeshNumbering import PlotMeshNumbering
 

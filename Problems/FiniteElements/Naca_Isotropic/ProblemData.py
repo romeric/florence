@@ -85,7 +85,13 @@ def ProblemData(MainData):
 		# NURBS/NON-NURBS TYPE BOUNDARY CONDITION
 		Type = 'nurbs'
 		# Type = 'straight'
-		# Type = 'mixed'
+
+		IGES_File = ''
+		scale = 1.0
+		condition = 2
+
+
+
 		class DirichArgs(object):
 			node = 0
 			Applied_at = 'node' 
@@ -181,6 +187,20 @@ def ProblemData(MainData):
 
 		def NURBSCondition(self,x):
 			return np.sqrt(x[:,0]**2 + x[:,1]**2) < 2
+
+
+		def ProjectionCriteria(self,mesh):
+			projection_edges = np.zeros((mesh.edges.shape[0],1),dtype=np.uint64)
+			num = mesh.edges.shape[1]
+			for iedge in range(mesh.edges.shape[0]):
+				x = np.sum(mesh.points[mesh.edges[iedge,:],0])/num
+				y = np.sum(mesh.points[mesh.edges[iedge,:],1])/num
+				x *= self.scale
+				y *= self.scale 
+				if np.sqrt(x*x+y*y)< self.condition:
+					projection_edges[iedge]=1
+
+			return projection_edges
 
 
 		

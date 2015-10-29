@@ -24,7 +24,7 @@ def hpBases(C,xi,eta,Transform=0,EvalOpt=0):
 
 	# GradNormalisedJacobiTri IS ALWAYS CALLED WITH (QUAD) R,S COORDINATE
 	if Transform:
-		# IF A TRANSFORMATION TO QUAD COORDINATE IS NEEDED
+		# IF TRANSFORMATION TO QUAD COORDINATE IS NEEDED
 		r, s = MapXiEta2RS(xi,eta)
 		p,dp_dxi,dp_deta = GradNormalisedJacobiTri(C,np.array([r,s]),EvalOpt)
 	else:

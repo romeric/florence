@@ -244,7 +244,7 @@ def GradNormalisedJacobiTet(C,x,EvalOpt=0):
     #     ds_dzeta = 2.*(1.+eta)/(1.-zeta)**2
     #--------------------------------------------------------
 
-    # Ordering: 1st incresing the degree and 2nd lexicogafic order
+    # Ordering: 1st increasing the degree and 2nd lexicogafic order
     ncount = 0
     # Loop on degree
     for nDeg in range(0,C+2):

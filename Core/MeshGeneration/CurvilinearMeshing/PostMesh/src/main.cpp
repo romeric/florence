@@ -127,9 +127,10 @@ int main()
 //    const char* iges_filename = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Annular_Circle/Circle.igs";
 //    const char* iges_filename = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Misc/Half_Circle.igs";
 //    const char* iges_filename = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Misc/Two_Arcs.iges";
+    const char* iges_filename = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Wing2D/sd7003.igs";
 
 //    const char* iges_filename = "/home/roman/Dropbox/zdump/OCC_Geometry_Checks/Cylinder.igs";
-    const char* iges_filename = "/home/roman/Dropbox/zdump/OCC_Geometry_Checks/Sphere.igs";
+//    const char* iges_filename = "/home/roman/Dropbox/zdump/OCC_Geometry_Checks/Sphere.igs";
 
 
 

@@ -48,7 +48,7 @@ def ConstitutiveStiffnessIntegrand(self,B,nvar,ndim,AnalysisType,Prestress,Spati
 
 			TotalTraction = CauchyStressTensor_Voigt
 
-
+	# print H_Voigt.shape#, B.shape
 	BDB = np.dot(np.dot(B,H_Voigt),B.T)
 	# BDB = np.dot(np.dot(B,H_Voigt),B.T.copy())
 	t=[]

@@ -57,7 +57,7 @@ def LoopArangeDuplicates(i,duplicates,Ds):
 
 
 
-def HighOrderMeshTet_UNSTABLE(C,mesh,Decimals=10,Zerofy=0,Parallel=False,nCPU=1):
+def HighOrderMeshTet_UNSTABLE(C,mesh,Decimals=10,Zerofy=0,Parallel=False,nCPU=1,ComputeAll=False):
 
 	# SWITCH OFF MULTI-PROCESSING FOR SMALLER PROBLEMS WITHOUT GIVING A MESSAGE
 	if (mesh.elements.shape[0] < 500) and (C < 6):
@@ -275,109 +275,112 @@ def HighOrderMeshTet_UNSTABLE(C,mesh,Decimals=10,Zerofy=0,Parallel=False,nCPU=1)
 
 
 	# USE ALTERNATIVE APPROACH TO GET MESHES
-	# reedges = np.zeros((mesh.edges.shape[0],C+2))
-	# fsize = int((C+2.)*(C+3.)/2.)
-	# refaces = np.zeros((mesh.faces.shape[0],fsize))
-
-	# ComputeAll = False
-	# if ComputeAll == True:
-
-	#------------------------------------------------------------------------------------------
-	# BUILD EDGES NOW
-	tedges = time()
-
 	reedges = np.zeros((mesh.edges.shape[0],C+2))
-	reedges[:,:2]=mesh.edges
-	for iedge in range(0,mesh.edges.shape[0]):
-		# TWO NODES OF THE LINEAR MESH REPLICATED REPOINTS.SHAPE[0] NUMBER OF TIMES 
-		node1 = np.repeat(mesh.points[mesh.edges[iedge,0],:].reshape(1,repoints.shape[1]),repoints.shape[0]-mesh.points.shape[0],axis=0)
-		node2 = np.repeat(mesh.points[mesh.edges[iedge,1],:].reshape(1,repoints.shape[1]),repoints.shape[0]-mesh.points.shape[0],axis=0)
-
-		# FIND WHICH NODES LIE ON THIS EDGE BY COMPUTING THE LENGTHS  -   A-----C------B  /IF C LIES ON AB THAN AC+CB=AB 
-		L1 = np.linalg.norm(node1-repoints[mesh.points.shape[0]:,:],axis=1)
-		L2 = np.linalg.norm(node2-repoints[mesh.points.shape[0]:,:],axis=1)
-		L = np.linalg.norm(node1-node2,axis=1)
-
-		# j = np.where(np.abs((L1+L2)-L) < tol)[0]
-		j = np.asarray( whereLT1d(np.abs((L1+L2)-L), tol) )
-		if j.shape[0]!=0:
-			reedges[iedge,2:] = j+mesh.points.shape[0]
-	reedges = reedges.astype(int)
-
-	tedges = time()-tedges
-	#------------------------------------------------------------------------------------------
-
-
-	#------------------------------------------------------------------------------------------
-	# BUILD FACES NOW 
-	# A SIMILAR ANALOGY TO FACES IS FOLLOWED
-
-	# C
-	# #
-	#   # 	 	if |area(ABD)+area(ADC)+area(BCD) = area(ABC)| then D lies inside the triangular face
-	#     #
-	#   D   #
-	# A       #
-	# # # # # # # B    
-
-	# ALSO CHECK COPLANARITIES OF 4 POINTS: 	http://mathworld.wolfram.com/Coplanar.html
-	# IF A POINT LIES INSIDE A TRIANGLE IN 2D:  http://mathworld.wolfram.com/TriangleInterior.html
-	tfaces = time()
-
 	fsize = int((C+2.)*(C+3.)/2.)
 	refaces = np.zeros((mesh.faces.shape[0],fsize))
-	refaces[:,:3] = mesh.faces
-	# FIND THE UNIT NORMAL VECTOR TO THE FACE
-	ParallelTuple6 = []
-	if Parallel:
-		ParallelTuple6 = parmap.map(LoopFaceTet,np.arange(0,mesh.faces.shape[0]),mesh.points,repoints,mesh.faces,tol,pool=MP.Pool(processes=nCPU))
-	for iface in range(0,mesh.faces.shape[0]):
+
+	# ComputeAll = False
+	if ComputeAll == True:
+
+		#------------------------------------------------------------------------------------------
+		# BUILD EDGES NOW
+		tedges = time()
+
+		reedges = np.zeros((mesh.edges.shape[0],C+2))
+		reedges[:,:2]=mesh.edges
+		for iedge in range(0,mesh.edges.shape[0]):
+			# TWO NODES OF THE LINEAR MESH REPLICATED REPOINTS.SHAPE[0] NUMBER OF TIMES 
+			node1 = np.repeat(mesh.points[mesh.edges[iedge,0],:].reshape(1,repoints.shape[1]),repoints.shape[0]-mesh.points.shape[0],axis=0)
+			node2 = np.repeat(mesh.points[mesh.edges[iedge,1],:].reshape(1,repoints.shape[1]),repoints.shape[0]-mesh.points.shape[0],axis=0)
+
+			# FIND WHICH NODES LIE ON THIS EDGE BY COMPUTING THE LENGTHS  -   A-----C------B  /IF C LIES ON AB THAN AC+CB=AB 
+			L1 = np.linalg.norm(node1-repoints[mesh.points.shape[0]:,:],axis=1)
+			L2 = np.linalg.norm(node2-repoints[mesh.points.shape[0]:,:],axis=1)
+			L = np.linalg.norm(node1-node2,axis=1)
+
+			# j = np.where(np.abs((L1+L2)-L) < tol)[0]
+			j = np.asarray( whereLT1d(np.abs((L1+L2)-L), tol) )
+			if j.shape[0]!=0:
+				reedges[iedge,2:] = j+mesh.points.shape[0]
+		reedges = reedges.astype(int)
+
+		tedges = time()-tedges
+		#------------------------------------------------------------------------------------------
+
+
+		#------------------------------------------------------------------------------------------
+		# BUILD FACES NOW 
+		# A SIMILAR ANALOGY TO FACES IS FOLLOWED
+
+		# C
+		# #
+		#   # 	 	if |area(ABD)+area(ADC)+area(BCD) = area(ABC)| then D lies inside the triangular face
+		#     #
+		#   D   #
+		# A       #
+		# # # # # # # B    
+
+		# ALSO CHECK COPLANARITIES OF 4 POINTS: 	http://mathworld.wolfram.com/Coplanar.html
+		# IF A POINT LIES INSIDE A TRIANGLE IN 2D:  http://mathworld.wolfram.com/TriangleInterior.html
+		tfaces = time()
+
+		fsize = int((C+2.)*(C+3.)/2.)
+		refaces = np.zeros((mesh.faces.shape[0],fsize))
+		refaces[:,:3] = mesh.faces
+		# FIND THE UNIT NORMAL VECTOR TO THE FACE
+		ParallelTuple6 = []
 		if Parallel:
-			j = ParallelTuple6[iface]
-		else:
-			# FIND THE POSITION VECTOR OF VERTICES 
-			A = mesh.points[mesh.faces[iface,0],:]
-			B = mesh.points[mesh.faces[iface,1],:]
-			C = mesh.points[mesh.faces[iface,2],:]
-			# FIND THE VECTORS OF ALL EDGES
-			BA = B - A 		# VECTOR OF EDGE 1
-			CA = C - A 		# VECTOR OF EDGE 2
-			CB = C - B  	# VECTOR OF EDGE 3
+			ParallelTuple6 = parmap.map(LoopFaceTet,np.arange(0,mesh.faces.shape[0]),mesh.points,repoints,mesh.faces,tol,pool=MP.Pool(processes=nCPU))
+		for iface in range(0,mesh.faces.shape[0]):
+			if Parallel:
+				j = ParallelTuple6[iface]
+			else:
+				# FIND THE POSITION VECTOR OF VERTICES 
+				A = mesh.points[mesh.faces[iface,0],:]
+				B = mesh.points[mesh.faces[iface,1],:]
+				C = mesh.points[mesh.faces[iface,2],:]
+				# FIND THE VECTORS OF ALL EDGES
+				BA = B - A 		# VECTOR OF EDGE 1
+				CA = C - A 		# VECTOR OF EDGE 2
+				CB = C - B  	# VECTOR OF EDGE 3
 
-			DA = repoints[mesh.points.shape[0]:,:] - np.repeat(A.reshape(1,3),repoints.shape[0] - mesh.points.shape[0],axis=0 )
-			DB = repoints[mesh.points.shape[0]:,:] - np.repeat(B.reshape(1,3),repoints.shape[0] - mesh.points.shape[0],axis=0 )
+				DA = repoints[mesh.points.shape[0]:,:] - np.repeat(A.reshape(1,3),repoints.shape[0] - mesh.points.shape[0],axis=0 )
+				DB = repoints[mesh.points.shape[0]:,:] - np.repeat(B.reshape(1,3),repoints.shape[0] - mesh.points.shape[0],axis=0 )
 
-			# COMPUTE AREAS 
-			Area = 0.5*np.linalg.norm(np.cross(BA,CA)); Area = Area*np.ones(DA.shape[0])
-			# Area1 = 0.5*np.linalg.norm(np.cross(DA,BA),axis=1); #Area1 = Area1*np.ones(DA.shape[0])
-			Area1 = 0.5*np.linalg.norm(np.cross(DA, np.repeat(BA.reshape(1,3),DA.shape[0],axis=0)),axis=1 )
-			Area2 = 0.5*np.linalg.norm(np.cross(DA, np.repeat(CA.reshape(1,3),DA.shape[0],axis=0)),axis=1 )
-			Area3 = 0.5*np.linalg.norm(np.cross(DB, np.repeat(CB.reshape(1,3),DB.shape[0],axis=0)),axis=1 )
-			# t1 +=( time()-tt)
-			# CHECK THE CONDITION
-			# j = np.where(np.abs( Area - (Area1+Area2+Area3) )  < tol)[0]
-			j = np.asarray(whereLT1d(np.abs( Area - (Area1+Area2+Area3) ),tol)) 
-			# j = np.asarray(whereLT(np.abs( Area - (Area1+Area2+Area3) ).reshape(Area.shape[0],1),tol)[0]) 
-		if j.shape[0]!=0:
-			if j.shape[0]!=3:
-				FloatingPointError('More nodes within the tetrahedral face than necessary. \
-					This could be due to high/low tolerance')
-			refaces[iface,3:] = j+mesh.points.shape[0]
-			
-	refaces = refaces.astype(int)
+				# COMPUTE AREAS 
+				Area = 0.5*np.linalg.norm(np.cross(BA,CA)); Area = Area*np.ones(DA.shape[0])
+				# Area1 = 0.5*np.linalg.norm(np.cross(DA,BA),axis=1); #Area1 = Area1*np.ones(DA.shape[0])
+				Area1 = 0.5*np.linalg.norm(np.cross(DA, np.repeat(BA.reshape(1,3),DA.shape[0],axis=0)),axis=1 )
+				Area2 = 0.5*np.linalg.norm(np.cross(DA, np.repeat(CA.reshape(1,3),DA.shape[0],axis=0)),axis=1 )
+				Area3 = 0.5*np.linalg.norm(np.cross(DB, np.repeat(CB.reshape(1,3),DB.shape[0],axis=0)),axis=1 )
+				# t1 +=( time()-tt)
+				# CHECK THE CONDITION
+				# j = np.where(np.abs( Area - (Area1+Area2+Area3) )  < tol)[0]
+				j = np.asarray(whereLT1d(np.abs( Area - (Area1+Area2+Area3) ),tol)) 
+				# j = np.asarray(whereLT(np.abs( Area - (Area1+Area2+Area3) ).reshape(Area.shape[0],1),tol)[0]) 
+			if j.shape[0]!=0:
+				if j.shape[0]!=3:
+					FloatingPointError('More nodes within the tetrahedral face than necessary. \
+						This could be due to high/low tolerance')
+				refaces[iface,3:] = j+mesh.points.shape[0]
+				
+		refaces = refaces.astype(int)
 
-	tfaces = time()- tfaces
+		tfaces = time()- tfaces
 
 
 	class nmesh(object):
 		# """Construct pMesh"""
 		points = repoints
 		elements = reelements
-		edges = reedges
-		faces = refaces
+		edges = np.array([[],[]])
+		faces = np.array([[],[]])
 		nnode = repoints.shape[0]
 		nelem = reelements.shape[0]
 		info = 'tet'
+	if ComputeAll is True:
+		nmesh.edges = reedges
+		nmesh.faces = refaces
 
 
 		# print '\npMeshing timing:\n\t\tElement loop 1:\t '+str(telements)+' seconds\n\t\tNode loop:\t\t '+str(tnodes)+\

@@ -16,18 +16,18 @@ def ProblemData(MainData):
 	MainData.Formulation = 1 	# Displacement-Potential based formulation
 	MainData.Analysis = 'Static'
 	# MainData.Analysis = 'Dynamic'
-	MainData.AnalysisType = 'Linear'
-	# MainData.AnalysisType = 'Nonlinear'
+	# MainData.AnalysisType = 'Linear'
+	MainData.AnalysisType = 'Nonlinear'
 
 	class MaterialArgs(object):
 		"""docstring for MaterialArgs"""
 		# Type = 'Steinmann'
 		# Type = 'LinearisedElectromechanics'
-		Type = 'LinearModel'
+		# Type = 'LinearModel'
 		# Type = 'Incrementally_Linearised_NeoHookean'
 		# Type = 'AnisotropicMooneyRivlin_1'
 		# Type = 'NearlyIncompressibleNeoHookean'
-		# Type = 'MooneyRivlin'
+		Type = 'MooneyRivlin'
 		
 		
 
@@ -81,7 +81,7 @@ def ProblemData(MainData):
 		# FileName = ProblemPath + '/Mesh_Cube_Tet_181.dat'
 		FileName = ProblemPath + '/Sphere_1483.dat'
 		# FileName = ProblemPath + '/Torus_612.dat'
-		# FileName = ProblemPath + '/Torus_check.dat'
+		FileName = ProblemPath + '/Torus_check.dat'
 		# MeshType = 'quad'
 		# FileName = ProblemPath + '/Mesh_Square_Quad_64.dat'
 		# MeshType = 'hex'
@@ -96,8 +96,13 @@ def ProblemData(MainData):
 		IGES_File = ProblemPath + '/Sphere.igs'
 		# IGES_File = ProblemPath + '/Torus.igs'
 
+		# sphere
 		condition = 1000.
 		scale = 1000.
+
+		# torus
+		# condition = 1.
+		# scale = 1.
 
 		class DirichArgs(object):
 			node = 0
