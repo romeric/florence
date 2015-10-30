@@ -28,7 +28,7 @@ def NewtonRaphson(Increment,MainData,K,F,M,NodalForces,Residual,
 		# SOLVE THE SYSTEM
 		if MainData.solve.type == 'direct':
 			# CHECK FOR THE CONDITION NUMBER OF THE SYSTEM
-			# MainData.solve.condA = np.linalg.cond(K_b.todense()) # REMOVE THIS
+			MainData.solve.condA = np.linalg.cond(K_b.todense()) # REMOVE THIS
 			sol = spsolve(K_b,-F_b)
 		else:
 			sol = bicgstab(K_b,-F_b,tol=MainData.solve.tol)[0]

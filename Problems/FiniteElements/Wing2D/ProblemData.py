@@ -68,9 +68,9 @@ def ProblemData(MainData):
 		Reader = 'Read'
 		Format = 'GID'
 
-		FileName = ProblemPath + '/sd7003_Stretch25.dat'
+		# FileName = ProblemPath + '/sd7003_Stretch25.dat'
 		# FileName = ProblemPath + '/sd7003_Stretch50.dat'
-		# FileName = ProblemPath + '/sd7003_Stretch100.dat'
+		FileName = ProblemPath + '/sd7003_Stretch100.dat'
 		# FileName = ProblemPath + '/sd7003_Stretch200.dat'
 		
 
@@ -79,10 +79,8 @@ def ProblemData(MainData):
 		# NURBS/NON-NURBS TYPE BOUNDARY CONDITION
 		Type = 'nurbs'
 
-		# scale = 1000.
-		# condition = 1.0e10
-		scale = 1.
-		condition = 0.5
+		scale = 1000.
+		condition = 1 # this condition is not used
 
 		IGES_File = ProblemPath + '/sd7003.igs'
 
@@ -181,19 +179,15 @@ def ProblemData(MainData):
 			nurbs['start'] = dummy_nurbs['nurbs']['iniParam'][0]
 			nurbs['end'] = dummy_nurbs['nurbs']['endParam'][0]
 
-			# print len(nurbs['Pw'])
-			# print nurbs['Pw'].size
+	
 			fnurbs=[]
 			from Core.Supplementary.Tensors import itemfreq_py
 			for i in range(0,nurbs['Pw'].shape[0]):
 				degree = np.int64(itemfreq_py(nurbs['U'][i])[-1,-1] - 1)
 				# print degree
-				fnurbs.append(({'U':nurbs['U'][i],'Pw':nurbs['Pw'][i],'start':nurbs['start'][i][0][0],'end':nurbs['end'][i][0][0],'degree':degree}))
+				fnurbs.append(({'U':nurbs['U'][i],'Pw':nurbs['Pw'][i],
+					'start':nurbs['start'][i][0][0],'end':nurbs['end'][i][0][0],'degree':degree}))
 
-			# print len(fnurbs) 
-			# print fnurbs[0]['start']
-			# print dummy_nurbs['nurbs']['iniParam'][0][1][0][0]
-			# import sys;sys.exit(0)
 			return fnurbs 
 
 		def NURBSCondition(self,x):
@@ -208,7 +202,7 @@ def ProblemData(MainData):
 				y = np.sum(mesh.points[mesh.edges[iedge,:],1])/num
 				x *= self.scale
 				y *= self.scale 
-				if np.sqrt(x*x+y*y)< self.condition:
+				if x > -510 and x < 510 and y > -10 and y < 10:
 					projection_edges[iedge]=1
 			
 			return projection_edges

@@ -36,8 +36,8 @@ def ProblemData(MainData):
 		# nu = 0.4
 		nu=0.35
 
-		# E = MainData.E 
-		# nu = MainData.nu 
+		E = MainData.E 
+		nu = MainData.nu 
 
 
 		# GET LAME CONSTANTS

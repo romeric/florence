@@ -58,9 +58,7 @@ def PreProcess(MainData,Pr,pwd):
 	# print mesh.points.shape
 	# print mesh.elements.shape
 
-	# mesh.points[:,0] -= 0.5
-	# mesh.points *=1000. 
-	# mesh.points[89,:] =[-0.5,0]
+	mesh.points *=1000. 
 	# mesh.SimplePlot()
 	# mesh.PlotMeshNumberingTri()
 	# print mesh.GetElementsWithBoundaryEdgesTri()

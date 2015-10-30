@@ -28,8 +28,8 @@ from Core.FiniteElements.Solvers.Solver import *
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Electromechanics/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Nurbs/ProblemData.py')
-# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/MechanicalComponent2D/ProblemData.py')
-Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Wing2D/ProblemData.py')
+Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/MechanicalComponent2D/ProblemData.py')
+# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Wing2D/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Sphere/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Naca_Isotropic/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/RAE2822/ProblemData.py')
@@ -39,7 +39,7 @@ Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Wing2D/ProblemD
 #############################################################################################################################################
 # from line_profiler import profile
 # @profile
-def main(MainData):
+def main(MainData, DictOutput=None):
 
 	from Core.InterpolationFunctions.TwoDimensional.Tri.hpNodalLagrange import hpBasesLagrange
 	from Core.InterpolationFunctions.TwoDimensional.Tri.hpNodal import hpBases
@@ -148,6 +148,14 @@ def main(MainData):
 	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_nsphere_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%10.9f',delimiter=',')
 	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/faces_nsphere_p'+str(MainData.C+1)+'.dat', mesh.faces,fmt='%d',delimiter=',')
 
+	# np.savetxt('/home/roman/Dropbox/Florence/Problems/FiniteElements/Wing2D/elements_wing2d_p'+str(MainData.C+1)+'.dat', 
+	# 	mesh.elements,fmt='%d',delimiter=',')
+	# np.savetxt('/home/roman/Dropbox/Florence/Problems/FiniteElements/Wing2D/points_wing2d_p'+str(MainData.C+1)+'.dat', 
+	# 	mesh.points,fmt='%10.9f',delimiter=',')
+	# np.savetxt('/home/roman/Dropbox/Florence/Problems/FiniteElements/Wing2D/edges_wing2d_p'+str(MainData.C+1)+'.dat', 
+	# 	mesh.edges,fmt='%d',delimiter=',')
+
+
 
 	print 'Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*MainData.nvar
 	print 'Number of mesh edge nodes', np.unique(mesh.edges).shape[0]
@@ -195,6 +203,7 @@ def main(MainData):
 	# PostProcess.HighOrderPatchPlot3D(MainData,mesh)
 
 	# sys.exit("STOPPED")
+	# sys.exit(0)
 	# CALL THE MAIN ROUTINE
 	TotalDisp = MainSolver(MainData,mesh)
 	# np.savetxt('/home/roman/Desktop/displacements.txt', TotalDisp[:,:,-1])
@@ -226,15 +235,29 @@ def main(MainData):
 	# PostProcess().StressRecovery(MainData,mesh,TotalDisp) 
 	# print mesh.elements	
 	PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp,show_plot=False)
-	PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
+	# PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
 	# PostProcess.HighOrderPatchPlot3D(MainData,mesh,TotalDisp)
 	# PostProcess.HighOrderInterpolatedPatchPlot(MainData,mesh,TotalDisp)
-	import matplotlib.pyplot as plt
-	# plt.savefig('/home/roman/Dropbox/zdump/DumpReport/mech2d/postmesh_'+MainData.AnalysisType+'_p'+str(MainData.C+1)+'.eps', format='eps', dpi=1000)
-	# plt.savefig('/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/initial_plots/mech2d_planarmesh_'+MainData.MaterialArgs.Type+'_p'+str(MainData.C+1)+'.eps',format='eps', dpi=1000)
-	# plt.savefig('/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/initial_plots/mech2d_curvedmesh_'+MainData.MaterialArgs.Type+'_p'+str(MainData.C+1)+'.eps',format='eps', dpi=1000)
+	# import matplotlib.pyplot as plt
+	# plt.savefig('/home/roman/Dropbox/zdump/DumpReport/mech2d/postmesh_'+MainData.AnalysisType+'_p'+str(MainData.C+1)+'.eps', 
+		# format='eps', dpi=1000)
+	# plt.savefig('/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/initial_plots/mech2d_planarmesh_'+\
+		# MainData.MaterialArgs.Type+'_p'+str(MainData.C+1)+'.eps',format='eps', dpi=1000)
+	# plt.savefig('/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/initial_plots/mech2d_curvedmesh_'+\
+		# MainData.MaterialArgs.Type+'_p'+str(MainData.C+1)+'.eps',	format='eps', dpi=1000)
 
-	plt.show()
+	# plt.show()
+
+	# Results = {'MeshPoints':mesh.points,'MeshElements':mesh.elements,
+	# 'MeshEdges':mesh.edges, 'MeshFaces':mesh.faces,'TotalDisplacement':TotalDisp}
+	DictOutput['MeshPoints_P'+str(MainData.C+1)] = mesh.points
+	DictOutput['MeshElements_P'+str(MainData.C+1)] = mesh.elements+1
+	DictOutput['MeshEdges_P'+str(MainData.C+1)] = mesh.edges+1
+	if MainData.ndim==3:
+		DictOutput['MeshFaces_P'+str(MainData.C+1)] = mesh.faces+1
+	DictOutput['TotalDisplacement_P'+str(MainData.C+1)] = TotalDisp
+	DictOutput['nSteps'] = MainData.AssemblyParameters.LoadIncrements
+
 
 	#-------------------------------------------------------------------------------------------------------------
 	# vpoints = np.copy(mesh.points)

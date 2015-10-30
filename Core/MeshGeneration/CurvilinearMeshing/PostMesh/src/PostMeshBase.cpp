@@ -190,7 +190,7 @@ void PostMeshBase::ReadSTEP(const char* filename)
     this->imported_shape  = reader.OneShape();
     this->no_of_shapes = reader.NbShapes();
 
-//        Handle_TColStd_HSequenceOfTransient edges = reader.GiveList("iges-faces");
+    //auto edges = reader.GiveList("iges-faces");
 
 }
 
@@ -221,7 +221,6 @@ Eigen::MatrixI PostMeshBase::Read(std::string &filename)
     const int cols = 1;
 
     Eigen::MatrixI out_arr = Eigen::MatrixI::Zero(rows,cols);
-    //Eigen::MatrixBase<Derived> out_arr = Eigen::MatrixBase<Derived>::Zero(rows,cols);
 
     for(int i=0 ; i<rows;i++)
     {
@@ -361,9 +360,9 @@ Eigen::MatrixR PostMeshBase::ReadR(std::string &filename, char delim)
 
 void PostMeshBase::CheckMesh()
 {
-    /* Checks if the correct mesh data are imported */
+    /* CHECKS IF MESH IS IMPORTED CORRECTLY */
 
-    // check for multiple line copies of elements, points, edges and faces
+    // CHECK FOR DUPLICATED LINE COPIES IN ELEMENTS, POINTS, EDGES AND FACES
     double check_duplicated_rows;
     int flag_p = 0;
     for (int i=this->mesh_points.rows()-2; i<this->mesh_points.rows();i++)
@@ -376,14 +375,12 @@ void PostMeshBase::CheckMesh()
     }
     if (flag_p == 1)
     {
-//            int d1=0; int d2 =  this->mesh_points.rows()-1;
         Eigen::MatrixI a_rows = cnp::arange(0,this->mesh_points.rows()-1);
-//            Eigen::MatrixI a_rows = cnp::arange(d1,d2);
         Eigen::MatrixI a_cols = cnp::arange(0,this->mesh_points.cols());
         this->mesh_points = cnp::take(this->mesh_points,a_rows,a_cols);
     }
 
-    // elements
+    // ELEMENTS
     int flag_e = 0;
     for (int i=this->mesh_elements.rows()-2; i<this->mesh_elements.rows();i++)
     {
@@ -400,7 +397,7 @@ void PostMeshBase::CheckMesh()
         this->mesh_elements = cnp::take(this->mesh_elements,a_rows,a_cols);
     }
 
-    // edges
+    // EDGES
     int flag_ed = 0;
     for (Integer i=this->mesh_edges.rows()-2; i<this->mesh_edges.rows();i++)
     {
@@ -417,7 +414,7 @@ void PostMeshBase::CheckMesh()
         this->mesh_edges = cnp::take(this->mesh_edges,a_rows,a_cols);
     }
 
-    // faces for 3D
+    // FACES FOR 3D
     if (this->mesh_faces.cols()!=0)
     {
         Integer flag_f = 0;

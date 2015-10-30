@@ -345,6 +345,10 @@ void PostMeshCurve::IdentifyCurvesContainingEdges()
 //    this->GetCurvesParameters();
 //    this->GetCurvesLengths();
 //    this->FindCurvesSequentiallity();
+
+//    for (auto & k : this->geometry_points)
+//        print(k.X(),k.Y());
+
 //    exit(EXIT_FAILURE);
 }
 

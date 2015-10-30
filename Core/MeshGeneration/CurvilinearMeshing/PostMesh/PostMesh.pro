@@ -10,7 +10,7 @@ SOURCES += src/main.cpp \
     src/PostMeshSurface.cpp \
     src/PyInterfaceEmulator.cpp
 
-QMAKE_CXXFLAGS += -std=c++11 -Wall -Wextra -pipe # -Wdelete-non-virtual-dtor -Wno-unused # -O2 #-fopenmp -msse -msse2 -fomit-frame-pointer -fno-strict-aliasing
+QMAKE_CXXFLAGS += -std=c++11 -Wall -Wextra -pipe# -Wdelete-non-virtual-dtor -Wno-unused # -O2 #-fopenmp -msse -msse2 -fomit-frame-pointer -fno-strict-aliasing
 
 #INCLUDEPATH += include/
 INCLUDEPATH +=/home/roman/Dropbox/eigen-devel

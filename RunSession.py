@@ -29,14 +29,14 @@ class MainData(object):
         that needs to be loaded a priori are stored
         
         pwd:                            Florence's top level directory
-        session:                        {'FEM','BEM','Coupled'} Session to be run
+        session:                        {'FEM','BEM','Coupled'} Session to run
         __NO_DEBUG__:                   Enter debug mode of the package (if false). Activates all numerical checks                 
         __VECTORISATION__:              Activate numpy's SIMD instructions e.g. (einsum) for computing elemental matrices with no loops
-        __PARALLEL__:                   Activate multiprocessing for either or both shared and distributed memory
+        __PARALLEL__:                   Activate multiprocessing for either shared or distributed memory or both
         numCPU:                         Number of concurrent cores/hyperthreads for parallelisation
-        __PARALLEL_MEMORY__:            {'SHARED','DISTRIBUTED','AUTO','BOTH'} Option for shared or distributed memory parallelisation
+        __MEMORY__:			            {'SHARED','DISTRIBUTED','AUTO','HYBRID'} Option for shared/distributed memory parallelisation
         
-        C:                              [int] order of basis functins. Note that C=P-1 where P is polynomial degree
+        C:                              [int] order of basis functions. Note that C=P-1 where P is polynomial degree
         norder:                         [int] number of quadrature points 
         plot:                           [tuple of ints] plot flag for BEM
         nrplot:                         [tuple] plot flag for Newton-Raphson convergence
@@ -75,16 +75,12 @@ from Main.FiniteElements.MainFEM import main
 # FEM SESSION
 if MainData.session == 'FEM':
 	t_FEM = time.time()
-	# tr = tracker.SummaryTracker()
 	# cProfile.run('main(MainData)')
 	# comm = MPI.COMM_WORLD
 	# if comm.rank==0:
 		# main(MainData)	
-	# sp.__config__.show()
-	# sp.test()
 	# pdb.run('main(MainData)')
 	main(MainData)
-	# tr.print_diff()
 	# print asizeof.asizeof(MainData)
 	print 'Time taken for the entire analysis was', time.time()-t_FEM, 'seconds \n'
 	# MEMORY USAGE INFORMATION
@@ -104,20 +100,15 @@ elif MainData.session == 'BEM3D':
 #----------------------------------------------------------------------------------------------------------------------
 
 
-# arc length
-# https://sites.google.com/site/joebartok/circleradiusarc
-
 # delete all .pyc files 
 # find . -name '*.pyc' -delete
 
 
 # import inspect; print(inspect.getsource(numpy.linspace)) # numpy/scipy documenation in a shell
 # import inspect; print(inspect.getsource(np.unique)) # numpy/scipy documenation in a shellnp un
-# print u'\u2713'.encode('utf8')
 
 # print np.__version__
 # import numpy.distutils.system_info as sysinfo
-# sysinfo.get_info('atlas')
 # sysinfo.get_info('umfpack')
 # sysinfo.get_info('openblas')
 # sp.__config__.show()
@@ -133,10 +124,8 @@ elif MainData.session == 'BEM3D':
 # http://danielnouri.org/notes/2012/12/19/libblas-and-liblapack-issues-and-speed,-with-scipy-and-ubuntu/
 
 #------ useful script for testing numpy's blas linkage--------#
-# import numpy
+# import numpy, timeit, sys
 # from numpy.distutils.system_info import get_info
-# import sys
-# import timeit
  
 # print("version: %s" % numpy.__version__)
 # print("maxint:  %i\n" % sys.maxint)
