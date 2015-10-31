@@ -23,8 +23,8 @@ def ProblemData(MainData):
 		"""docstring for MaterialArgs"""
 		# Type = 'Steinmann'
 		# Type = 'LinearisedElectromechanics'
-		Type = 'LinearModel'
-		# Type = 'Incrementally_Linearised_NeoHookean'
+		# Type = 'LinearModel'
+		Type = 'Incrementally_Linearised_NeoHookean'
 		# Type = 'AnisotropicMooneyRivlin_1'
 		# Type = 'NearlyIncompressibleNeoHookean'
 		# Type = 'NeoHookean_1'

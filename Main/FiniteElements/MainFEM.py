@@ -250,13 +250,16 @@ def main(MainData, DictOutput=None):
 
 	# Results = {'MeshPoints':mesh.points,'MeshElements':mesh.elements,
 	# 'MeshEdges':mesh.edges, 'MeshFaces':mesh.faces,'TotalDisplacement':TotalDisp}
-	DictOutput['MeshPoints_P'+str(MainData.C+1)] = mesh.points
-	DictOutput['MeshElements_P'+str(MainData.C+1)] = mesh.elements+1
-	DictOutput['MeshEdges_P'+str(MainData.C+1)] = mesh.edges+1
-	if MainData.ndim==3:
-		DictOutput['MeshFaces_P'+str(MainData.C+1)] = mesh.faces+1
-	DictOutput['TotalDisplacement_P'+str(MainData.C+1)] = TotalDisp
-	DictOutput['nSteps'] = MainData.AssemblyParameters.LoadIncrements
+
+	if DictOutput is not None:
+		DictOutput['MeshPoints_P'+str(MainData.C+1)] = mesh.points
+		DictOutput['MeshElements_P'+str(MainData.C+1)] = mesh.elements+1
+		DictOutput['MeshEdges_P'+str(MainData.C+1)] = mesh.edges+1
+		if MainData.ndim==3:
+			DictOutput['MeshFaces_P'+str(MainData.C+1)] = mesh.faces+1
+		DictOutput['TotalDisplacement_P'+str(MainData.C+1)] = TotalDisp
+		DictOutput['nSteps'] = MainData.AssemblyParameters.LoadIncrements
+		# print MainData.MaterialArgs.Type
 
 
 	#-------------------------------------------------------------------------------------------------------------
