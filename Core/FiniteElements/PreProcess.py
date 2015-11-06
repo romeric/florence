@@ -320,6 +320,21 @@ def PreProcess(MainData,Pr,pwd):
 
 		MainData.MaterialArgs.H_Voigt = np.zeros((Hsize,Hsize,mesh.nelem,Quadrature.weights.shape[0]),dtype=np.float64)
 		MainData.MaterialArgs.Sigma = np.zeros((MainData.ndim,MainData.ndim,mesh.nelem,Quadrature.weights.shape[0]),dtype=np.float64)
+		MainData.MaterialArgs.J = np.ones((mesh.nelem,Quadrature.weights.shape[0]),dtype=np.float64)
+
+		if MainData.ndim == 2:
+			H_Voigt = MainData.MaterialArgs.lamb*np.array([[1.,1.,0.],[1.,1.,0],[0.,0.,0.]]) +\
+			 			MainData.MaterialArgs.mu*np.array([[2.,0.,0.],[0.,2.,0],[0.,0.,1.]])
+
+			MainData.MaterialArgs.H_Voigt = np.tile(np.tile(H_Voigt[:,:,None],
+				mesh.nelem)[:,:,:,None],Quadrature.weights.shape[0])
+		else:
+			block_1 = np.zeros((6,6),dtype=np.float64); block_1[:3,:3] = np.ones((3,3))
+			block_2 = np.eye(6,6); block_2[0,0],block_2[1,1],block_2[2,2]=2.,2.,2.
+			H_Voigt = MainData.MaterialArgs.lamb*block_1 + MainData.MaterialArgs.mu*block_2
+			
+			MainData.MaterialArgs.H_Voigt = np.tile(np.tile(H_Voigt[:,:,None],
+				mesh.nelem)[:,:,:,None],Quadrature.weights.shape[0])
 
 
 	

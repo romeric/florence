@@ -22,7 +22,7 @@ def ProblemData(MainData):
 	class MaterialArgs(object):
 		# Type = 'Steinmann'
 		# Type = 'LinearisedElectromechanics'
-		# Type = 'LinearModel'
+		Type = 'LinearModel'
 		Type = 'IncrementallyLinearisedNeoHookean'
 		# Type = 'AnisotropicMooneyRivlin_1'
 		# Type = 'NearlyIncompressibleNeoHookean'
@@ -32,7 +32,7 @@ def ProblemData(MainData):
 		# Type = 'NearlyIncompressibleMooneyRivlin'
 
 		E = 1.0e1
-		nu=0.45
+		nu=0.35
 
 		# E = MainData.E 
 		# nu = MainData.nu 

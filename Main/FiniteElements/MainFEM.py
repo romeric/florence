@@ -183,9 +183,9 @@ def main(MainData, DictOutput=None):
 
 	if MainData.AssemblyParameters.FailedToConverge==False:
 		PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp,show_plot=False)
-		# PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
-		# import matplotlib.pyplot as plt
-		# plt.show()
+		PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
+		import matplotlib.pyplot as plt
+		plt.show()
 	else:
 		MainData.ScaledJacobian = np.NAN
 
