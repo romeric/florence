@@ -44,7 +44,7 @@ public:
     void GetSurfacesParameters();
     void GetGeomPointsOnCorrespondingFaces();
     void IdentifySurfacesContainingFaces();
-    void ProjectMeshOnSurface(const char *projection_method);
+    void ProjectMeshOnSurface();
     void MeshPointInversionSurface();
     PassToPython GetDirichletData();
 

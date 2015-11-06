@@ -182,7 +182,6 @@ public:
     std::vector<Handle_Geom_Surface> geometry_surfaces;
     std::vector<UInteger> geometry_curves_types;
     std::vector<UInteger> geometry_surfaces_types;
-    const char *projection_method;
     Eigen::MatrixR displacements_BC;
     Eigen::MatrixI index_nodes;
     Eigen::MatrixI nodes_dir;

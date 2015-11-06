@@ -43,7 +43,7 @@ public:
     void GetCurvesLengths();
     void GetGeomPointsOnCorrespondingEdges();
     void IdentifyCurvesContainingEdges();
-    void ProjectMeshOnCurve(const char *projection_method);
+    void ProjectMeshOnCurve();
     void RepairDualProjectedParameters();
     void MeshPointInversionCurve();    
     void GetBoundaryPointsOrder();

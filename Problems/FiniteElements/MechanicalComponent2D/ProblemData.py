@@ -20,24 +20,22 @@ def ProblemData(MainData):
 	# MainData.AnalysisType = 'Nonlinear'
 
 	class MaterialArgs(object):
-		"""docstring for MaterialArgs"""
 		# Type = 'Steinmann'
 		# Type = 'LinearisedElectromechanics'
 		# Type = 'LinearModel'
-		Type = 'Incrementally_Linearised_NeoHookean'
+		Type = 'IncrementallyLinearisedNeoHookean'
 		# Type = 'AnisotropicMooneyRivlin_1'
 		# Type = 'NearlyIncompressibleNeoHookean'
 		# Type = 'NeoHookean_1'
-		
-		
-		
+		# Type = 'NeoHookean_2'
+		# Type = 'MooneyRivlin'
+		# Type = 'NearlyIncompressibleMooneyRivlin'
 
 		E = 1.0e1
-		# nu = 0.4
-		nu=0.35
+		nu=0.45
 
-		E = MainData.E 
-		nu = MainData.nu 
+		# E = MainData.E 
+		# nu = MainData.nu 
 
 
 		# GET LAME CONSTANTS
@@ -46,30 +44,15 @@ def ProblemData(MainData):
 		# mu=0
 		# lamb=0
 
-		# mu = 1.
-		# lamb  = 2.
-		# mu    = 0.3571
-		# lamb  = 1.4286
 		# lamb = lamb - mu
 		# mu = 2*mu
 		# lamb = lamb + mu
 
-		# mu    = 0.090571
-		# lamb  = 1.4286
-		# mu    = 0.5
-		# lamb  = 0.6
-		# mu    = 0.5
-		# lamb  = 0.5
 		rho   = 7.5*10e-6
 		eps_1 = 1.0
 		c1    = 0.
 		c2    = 0.
 
-	# print (MaterialArgs.lamb)/2./(MaterialArgs.lamb+MaterialArgs.mu)
-
-		# mu = 23.3*1000   # N/mm^2
-		# lamb = 79.4*1000 # N/mm^2
-		# eps_1 = 1.5*10e-11  # C/mm^2
 
 	MainData.MaterialArgs = MaterialArgs
 
@@ -91,8 +74,6 @@ def ProblemData(MainData):
 		# NURBS/NON-NURBS TYPE BOUNDARY CONDITION
 		Type = 'nurbs'
 
-		# scale = 1000.
-		# condition = 1.0e10
 		scale = 1.
 		condition = 1e10
 
@@ -109,16 +90,17 @@ def ProblemData(MainData):
 			node = 0
 			# Applied_at = 'face'
 			Applied_at = 'node'
-			#--------------------------------------------------------------------------------------------------------------------------#
+			#--------------------------------------------------------------------#
 			# The condition upon which Neumann is applied 
-			# - tuple (first is the coordinate direction x=0,y=1,z=2 and second is value of coordinate in that direction e.g. x, y or z) 
+			# - tuple (first is the coordinate direction x=0,y=1,z=2 and 
+			#	second is value of coordinate in that direction e.g. x, y or z) 
 			cond = np.array([[1,2.]])
 			Loads = np.array([
 				[0.2,0.,0.],
 				])
 			# Number of nodes is necessary
 			no_nodes = 0.
-			#--------------------------------------------------------------------------------------------------------------------------#
+			#--------------------------------------------------------------------#
 
 
 		# Dynamic Data

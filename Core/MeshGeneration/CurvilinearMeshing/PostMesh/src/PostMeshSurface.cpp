@@ -4,13 +4,13 @@
 PostMeshSurface::PostMeshSurface(const PostMeshSurface& other)
 noexcept(std::is_copy_assignable<PostMeshSurface>::value) : PostMeshBase(other)
 {
-    // Copy constructor
+    // COPY CONSTRUCTOR
     this->ndim = other.ndim;
     this->mesh_element_type = other.mesh_element_type;
-
     this->geometry_points_on_surfaces = other.geometry_points_on_surfaces;
     this->geometry_surfaces_bspline = other.geometry_surfaces_bspline;
     this->boundary_faces_order = other.boundary_faces_order;
+    // REMAINING MEMBERS ARE COPY CONSTRUCTED BY BASE
 }
 
 PostMeshSurface& PostMeshSurface::operator=(const PostMeshSurface& other)
@@ -30,7 +30,6 @@ noexcept(std::is_copy_assignable<PostMeshSurface>::value)
     this->geometry_surfaces = other.geometry_surfaces;
     this->geometry_curves_types = other.geometry_curves_types;
     this->geometry_surfaces_types = other.geometry_surfaces_types;
-    this->projection_method = other.projection_method;
     this->displacements_BC = other.displacements_BC;
     this->index_nodes = other.index_nodes;
     this->nodes_dir = other.nodes_dir;
@@ -48,17 +47,17 @@ noexcept(std::is_copy_assignable<PostMeshSurface>::value)
 PostMeshSurface::PostMeshSurface(PostMeshSurface&& other) noexcept \
     : PostMeshBase(std::move(other))
 {
-    // Move constructor
+    // MOVE CONSTRUCTOR
     this->ndim = other.ndim;
-    this->mesh_element_type = other.mesh_element_type;
     this->geometry_points_on_surfaces = std::move(other.geometry_points_on_surfaces);
     this->geometry_surfaces_bspline = std::move(other.geometry_surfaces_bspline);
     this->boundary_faces_order = std::move(other.boundary_faces_order);
+    // REMAINING MEMBERS ARE MOVE CONSTRUCTED BY BASE
 }
 
 PostMeshSurface& PostMeshSurface::operator=(PostMeshSurface&& other) noexcept
 {
-    // Move assignment operator
+    // MOVE ASSIGNMENT OPERATOR
     this->mesh_elements = std::move(other.mesh_elements);
     this->mesh_points = std::move(other.mesh_points);
     this->mesh_edges = std::move(other.mesh_edges);
@@ -72,7 +71,6 @@ PostMeshSurface& PostMeshSurface::operator=(PostMeshSurface&& other) noexcept
     this->geometry_surfaces = std::move(other.geometry_surfaces);
     this->geometry_curves_types = std::move(other.geometry_curves_types);
     this->geometry_surfaces_types = std::move(other.geometry_surfaces_types);
-    this->projection_method = std::move(other.projection_method);
     this->displacements_BC = std::move(other.displacements_BC);
     this->index_nodes = std::move(other.index_nodes);
     this->nodes_dir = std::move(other.nodes_dir);
@@ -127,7 +125,6 @@ void PostMeshSurface::GetSurfacesParameters()
 
         surfaces_Vparameters(isurface,0) = v1;
         surfaces_Vparameters(isurface,1) = v2;
-//        print(u1,v1,u2,v2);
     }
 }
 
@@ -173,7 +170,6 @@ void PostMeshSurface::IdentifySurfacesContainingFaces()
     //! IDENTIFY GEOMETRICAL SURFACES CONTAINING MESH FACES
     this->dirichlet_faces = Eigen::MatrixI::Zero(this->mesh_faces.rows(),this->ndim+1);
     this->listfaces.clear();
-
 //    this->InferInterpolationPolynomialDegree();
 
     auto index_face = 0;
@@ -203,11 +199,10 @@ void PostMeshSurface::IdentifySurfacesContainingFaces()
         if (std::sqrt(x_avg*x_avg+y_avg*y_avg+z_avg*z_avg)< this->condition)
         {
             this->listfaces.push_back(iface);
-            for (UInteger iter=0;iter<ndim;++iter){
+            for (UInteger iter=0;iter<ndim;++iter)
+            {
                dirichlet_faces(index_face,iter) = this->mesh_faces(iface,iter);
-                }
-
-
+            }
 
             // PROJECT IT OVER ALL CURVES
             auto min_mid_distance = 1.0e20;
@@ -228,16 +223,13 @@ void PostMeshSurface::IdentifySurfacesContainingFaces()
                 {
                     // StdFail_NotDone ISSUE - DO NOTHING
                 }
-//                print(mid_distance,min_mid_distance, icurve);
                 if (mid_distance < min_mid_distance)
                 {
-//                    print(mid_distance,min_mid_distance,icurve);
                     // STORE ID OF CURVES
-//                    this->dirichlet_edges(iedge,2) = icurve;
                     this->dirichlet_faces(index_face,2) = isurface; // <--THIS
                     // RE-ASSIGN
                     min_mid_distance = mid_distance;
-                } //print(this->geometry_curves[icurve]->FirstParameter(),this->geometry_curves[icurve]->LastParameter());
+                }
             }
             index_face +=1;
         }
@@ -251,15 +243,9 @@ void PostMeshSurface::IdentifySurfacesContainingFaces()
 //    exit(EXIT_FAILURE);
 }
 
-void PostMeshSurface::ProjectMeshOnSurface(const char *projection_method)
+void PostMeshSurface::ProjectMeshOnSurface()
 {
-    this->projection_method = projection_method;
     this->InferInterpolationPolynomialDegree();
-
-//    print(mesh_points);
-//    println(this->geometry_points[0].X(),this->geometry_points[0].Y(),this->geometry_points[1].X(),this->geometry_points[1].Y());
-
-//    this->projection_ID = Eigen::MatrixI::Zero(this->dirichlet_edges.rows(),this->ndim);
     this->projection_U = Eigen::MatrixR::Zero(this->dirichlet_faces.rows(),this->ndim);
     this->projection_V = Eigen::MatrixR::Zero(this->dirichlet_faces.rows(),this->ndim);
 
@@ -300,25 +286,15 @@ void PostMeshSurface::ProjectMeshOnSurface(const char *projection_method)
             {
                 // GET THE NODE THAT HAS TO BE PROJECTED TO THE CURVE
                 auto node_to_be_projected = gp_Pnt(x,y,z);
-//                print(mesh_points.row(92));
-//                print(x,y,z);
                 // PROJECT THE NODES ON THE CURVE AND GET THE PARAMETER U
                 GeomAPI_ProjectPointOnSurf proj;
                 proj.Init(node_to_be_projected,this->geometry_surfaces[isurface]);
                 proj.LowerDistanceParameters(parameterU,parameterV);
-//                if (abs(x - 0.36276413*1000) < 1e-04){
-//                    if (abs(y - 0.26356357*1000) < 1e-04){
-//                       print (x,y,z,parameterU,parameterV);
-//                    }}
             }
             catch (StdFail_NotDone)
             {
                 warn("The face node was not projected on to the right surface. Surface number: ",isurface);
             }
-
-//            print(x,y,z);
-//            if ( std::abs(x-0.36276413*1000.)<1.0e-06 ){
-//                print(x,y,z);  }
 
             // STORE PROJECTION POINT PARAMETER ON THE SURFACE (NORMALISED)
             this->projection_U(iface,inode) = parameterU;
@@ -334,42 +310,8 @@ void PostMeshSurface::ProjectMeshOnSurface(const char *projection_method)
     cnp::sort_rows(this->projection_U,this->sorted_projected_indices);
     cnp::sort_rows(this->projection_V,this->sorted_projected_indices);
 //    print(this->projection_U);
-//    print(this->projection_U.rows(),this->projection_U.cols());
-//    print(this->projection_V.rows(),this->projection_V.cols());
 //    print(sorted_projected_indices);
 //    print(this->dirichlet_edges);
-//    print(this->geometry_curves_types);
-
-
-
-//    print(dirichlet_faces.rows(),mesh_points.rows());
-
-//   Project common points of the sphere
-//    auto ee = 92;
-//    auto x = mesh_points(ee,0);
-//    auto y = mesh_points(ee,1);
-//    auto z = mesh_points(ee,2);
-//    Real pu,pv;
-//    print(x,y,z);
-//////    gp_Pnt node_to_be_projected = gp_Pnt(0,-1,0);
-//    gp_Pnt node_to_be_projected = gp_Pnt(x,y,z);
-//    GeomAPI_ProjectPointOnSurf proj;
-//    proj.Init(node_to_be_projected,this->geometry_surfaces[0]);
-//    proj.LowerDistanceParameters(pu,pv);
-//////    print(proj.NbPoints());
-//    auto xx = proj.Point(1);
-//    print(xx.X(),xx.Y(),xx.Z());
-//    print (sqrt(xx.X()*xx.X()+xx.Y()*xx.Y()+xx.Z()*xx.Z()));
-////    print("");
-////    Handle_Geom_Surface yy =  this->geometry_surfaces[0];
-////    yy->D0(pu,pv,xx);
-////    print(xx.X(),xx.Y(),xx.Z());
-
-////    auto xx = proj.NearestPoint();
-////    print(xx.X(),)
-//    print(x,y,z);
-//    print(pu,pv);
-//    print("");
 
 
 //    for (auto ee=0; ee<mesh_points.rows();ee++) {
@@ -396,21 +338,15 @@ void PostMeshSurface::MeshPointInversionSurface()
     auto no_face_nodes = this->mesh_faces.cols();
     Eigen::MatrixI arr_row = Eigen::Map<Eigen::Matrix<Integer,Eigen::Dynamic,1> >
             (this->listfaces.data(),this->listfaces.size());
-//    Eigen::MatrixI arr_row = cnp::arange(this->dirichlet_edges.rows());
     auto arr_col = cnp::arange(0,no_face_nodes);
     this->nodes_dir = cnp::take(this->mesh_faces,arr_row,arr_col);
     this->nodes_dir = cnp::ravel(this->nodes_dir);
     this->index_nodes = cnp::arange(no_face_nodes);
     this->displacements_BC = Eigen::MatrixR::Zero(this->no_dir_faces*no_face_nodes,this->ndim);
 
-//    print(this->u_of_all_fekete_mesh_edges);
-//    print(boundary_edges_order);
-//    this->GetSurfaceLengths();
-    this->GetSurfacesParameters();
-//    print(this->index_nodes);
 
-//    print(no_dir_faces);
-//    print(no_face_nodes);
+    this->GetSurfacesParameters();
+
     for (auto idir=0; idir< this->no_dir_faces; ++idir)
     {
         auto id_curve = static_cast<Integer>(this->dirichlet_faces(idir,3));
@@ -418,13 +354,10 @@ void PostMeshSurface::MeshPointInversionSurface()
 
         for (auto j=3; j<no_face_nodes;++j)
         {
-//            auto tol =1.0e-4;
             auto x = this->mesh_points(this->mesh_faces(this->listfaces[idir],j),0);
             auto y = this->mesh_points(this->mesh_faces(this->listfaces[idir],j),1);
             auto z = this->mesh_points(this->mesh_faces(this->listfaces[idir],j),2);
 
-//            print (std::abs(x-0.36276413*1000.),typeid(decltype(x)).name());
-//            print(x,y,z);
 
             // LOOP OVER ALL GEOMETRY POINTS AND IF POSSIBLE PICK THOSE INSTEAD
             for (auto &k : geometry_points)
@@ -436,21 +369,13 @@ void PostMeshSurface::MeshPointInversionSurface()
                     x = k.X(); y = k.Y(); z = k.Z();
                     break;
                 }
-
             }
-
-//            print(x,y,z);
-//            print(geometry_surfaces.size());
-//            auto xx = geometry_points[0];
-//            print(xx.X(),xx.Y(),xx.Z());
 
             Real uEq,vEq;
             auto point_to_be_projected = gp_Pnt(x,y,z);
             GeomAPI_ProjectPointOnSurf proj;
-//            proj.Init(point_to_be_projected,this->geometry_surfaces[static_cast<UInteger>(dirichlet_faces(idir,3))]);
             proj.Init(point_to_be_projected,current_surface);
             proj.LowerDistanceParameters(uEq,vEq);
-//            print(uEq,vEq);
 
             auto xEq = gp_Pnt(0.,0.,0.);
             current_surface->D0(uEq,vEq,xEq);
@@ -461,22 +386,12 @@ void PostMeshSurface::MeshPointInversionSurface()
             this->displacements_BC(this->index_nodes(j),1) = (xEq.Y()/this->scale - gp_pnt_old(1));
             this->displacements_BC(this->index_nodes(j),2) = (xEq.Z()/this->scale - gp_pnt_old(2));
 
-
 //            print(gp_pnt_old(0),gp_pnt_old(1),gp_pnt_old(2)," ",xEq.X()/this->scale,xEq.Y()/this->scale,xEq.Z()/this->scale);
 
         }
         this->index_nodes = ((this->index_nodes).array()+no_face_nodes).eval().matrix();
     }
 //    cout << displacements_BC << endl;
-//    print (this->ndim);
-//    print(mesh_points);
-
-//    for (auto i=0; i<mesh_points.rows(); i++)
-//        if (abs(mesh_points(i,0)-0.36276413*1000.) < 1.0e-06)
-//            print(mesh_points.row(i));
-
-//    print(mesh_points.row(92));
-
 }
 
 void PostMeshSurface::GetInternalSurfaceScales()

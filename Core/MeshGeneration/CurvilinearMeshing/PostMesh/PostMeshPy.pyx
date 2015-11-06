@@ -88,8 +88,8 @@ cdef class PostMeshCurvePy:
 	def IdentifyCurvesContainingEdges(self):
 		self.thisptr.IdentifyCurvesContainingEdges()
 
-	def ProjectMeshOnCurve(self, bytes projection_method):
-		self.thisptr.ProjectMeshOnCurve(<const char *> projection_method)
+	def ProjectMeshOnCurve(self):
+		self.thisptr.ProjectMeshOnCurve()
 	
 	# def ProjectMeshOnSurface(self):
 		# self.thisptr.ProjectMeshOnSurface()
@@ -100,9 +100,6 @@ cdef class PostMeshCurvePy:
 	def MeshPointInversionCurve(self):
 		self.thisptr.MeshPointInversionCurve()
 
-	# def MeshPointInversionSurface(self):
-		# self.thisptr.MeshPointInversionSurface()
-
 	def GetBoundaryPointsOrder(self):
 		self.thisptr.GetBoundaryPointsOrder()
 
@@ -110,14 +107,15 @@ cdef class PostMeshCurvePy:
 	def GetDirichletData(self):
 		cdef: 
 			PassToPython struct_to_python = self.thisptr.GetDirichletData()
-			np.ndarray nodes_dir = np.zeros((struct_to_python.nodes_dir_size,1),dtype=np.int64)
+			np.ndarray[np.int64_t, ndim=2, mode='c'] nodes_dir = np.zeros((struct_to_python.nodes_dir_size,1),dtype=np.int64)
 			Integer i
 			UInteger j 
 
 		for i in range(struct_to_python.nodes_dir_size):
 			nodes_dir[i] = struct_to_python.nodes_dir_out_stl[i]
 			
-		cdef np.ndarray displacements_BC = np.zeros((self.thisptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64) 
+		cdef np.ndarray[np.float64_t, ndim=2, mode='c'] displacements_BC = \
+			np.zeros((self.thisptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64) 
 		for j in range(self.thisptr.ndim*struct_to_python.nodes_dir_size):
 			displacements_BC[j] = struct_to_python.displacement_BC_stl[j]
 
@@ -207,8 +205,8 @@ cdef class PostMeshSurfacePy:
 	def IdentifySurfacesContainingFaces(self):
 		self.thisptr.IdentifySurfacesContainingFaces()
 
-	def ProjectMeshOnSurface(self, bytes projection_method):
-		self.thisptr.ProjectMeshOnSurface(<const char *> projection_method)
+	def ProjectMeshOnSurface(self):
+		self.thisptr.ProjectMeshOnSurface()
 
 	# def RepairDualProjectedParameters(self):
 	# 	self.thisptr.RepairDualProjectedParameters()
@@ -226,14 +224,15 @@ cdef class PostMeshSurfacePy:
 	def GetDirichletData(self):
 		cdef: 
 			PassToPython struct_to_python = self.thisptr.GetDirichletData()
-			np.ndarray nodes_dir = np.zeros((struct_to_python.nodes_dir_size,1),dtype=np.int64)
+			np.ndarray[np.int64_t, ndim=2, mode='c'] nodes_dir = np.zeros((struct_to_python.nodes_dir_size,1),dtype=np.int64)
 			Integer i
 			UInteger j 
 
 		for i in range(struct_to_python.nodes_dir_size):
 			nodes_dir[i] = struct_to_python.nodes_dir_out_stl[i]
 			
-		cdef np.ndarray displacements_BC = np.zeros((self.thisptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64) 
+		cdef np.ndarray[np.float64_t, ndim=2, mode='c'] displacements_BC = \
+				np.zeros((self.thisptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64) 
 		for j in range(self.thisptr.ndim*struct_to_python.nodes_dir_size):
 			displacements_BC[j] = struct_to_python.displacement_BC_stl[j]
 

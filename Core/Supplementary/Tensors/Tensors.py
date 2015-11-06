@@ -201,6 +201,10 @@ def IncrementallyLinearisedStress(Stress_k,H_Voigt_k,I,strain,Gradu):
 	# print np.dot(H_Voigt_k,V_strain.reshape(Voigt(strain).shape[0],1))
 	# print np.dot(H_Voigt_k,V_strain.reshape(Voigt(strain).shape[0],1)).shape
 
+	# print np.dot(Stress_k,(I+strain)).shape
+	print H_Voigt_k.shape
+	print V_strain.shape
+
 					# STRESS 											HESSSIAN 'I_W:GRADU'
 	return np.dot(Stress_k,(I+strain)) + UnVoigt( np.dot(H_Voigt_k,V_strain.reshape(Voigt(strain).shape[0],1)) )
 	

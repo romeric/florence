@@ -54,10 +54,16 @@ def PreProcess(MainData,Pr,pwd):
 
 	# mesh_node_order = mesh.CheckNodeNumberingTri()
 	# sys.exit()
-	# print np.sum(np.unique(mesh.elements)), (1140+1)*(1140)/2
-	# print mesh.points.shape
-	# print mesh.elements.shape
 
+	# mesh.ReadGIDMesh("/home/roman/Dropbox/2015_HighOrderMeshing/geometriesAndMeshes/falcon/falcon_iso.dat","tet",0)
+	# mesh.ReadGIDMesh("/home/roman/Dropbox/2015_HighOrderMeshing/geometriesAndMeshes/almond/almond_H1.dat","tet",0)
+
+	# np.savetxt('/home/roman/Desktop/elements_falcon.dat', mesh.elements,fmt='%d',delimiter=',')
+	# np.savetxt('/home/roman/Desktop/points_falcon.dat', mesh.points,fmt='%10.9f',delimiter=',')
+
+	# np.savetxt('/home/roman/Desktop/elements_almond.dat', mesh.elements,fmt='%d',delimiter=',')
+	# np.savetxt('/home/roman/Desktop/points_almond.dat', mesh.points,fmt='%10.9f',delimiter=',')
+	
 	mesh.points *=1000. 
 	# mesh.SimplePlot()
 	# mesh.PlotMeshNumberingTri()
@@ -75,10 +81,6 @@ def PreProcess(MainData,Pr,pwd):
 	# print mesh.faces
 	# mesh.SimplePlot()
 	# mesh.PlotMeshNumberingTri()
-	# print mesh.points[89,:]
-	# import matplotlib.pyplot as plt
-	# plt.plot(x[0],x[1])
-	# print np.where(mesh.points==-0.49982644) 
 	
 	# sys.exit(0)
 	# print np.linalg.norm(mesh.points,axis=1)
@@ -306,7 +308,7 @@ def PreProcess(MainData,Pr,pwd):
 	# STRESS COMPUTATION FLAGS FOR LINEARISED ELASTICITY
 	###########################################################################
 	MainData.Prestress = 0
-	if MainData.MaterialArgs.Type == 'Incrementally_Linearised_NeoHookean':
+	if MainData.MaterialArgs.Type == 'IncrementallyLinearisedNeoHookean':
 		# RUN THE SIMULATION WITHIN A NONLINEAR ROUTINE WITHOUT UPDATING THE GEOMETRY BUT WITH GEOMETRIC TERM
 		MainData.Prestress = 1
 		if MainData.Fields == 'Mechanics':
@@ -314,14 +316,14 @@ def PreProcess(MainData,Pr,pwd):
 		elif MainData.Fields == 'ElectroMechanics':
 			Hsize = 9 if MainData.ndim == 3 else 5
 		else:
-			raise NotImplementedError('Hessian size (H_Voigt) size not given')
+			raise KeyError('Hessian size (H_Voigt) size not knownjul')
 
 		MainData.MaterialArgs.H_Voigt = np.zeros((Hsize,Hsize,mesh.nelem,Quadrature.weights.shape[0]),dtype=np.float64)
 		MainData.MaterialArgs.Sigma = np.zeros((MainData.ndim,MainData.ndim,mesh.nelem,Quadrature.weights.shape[0]),dtype=np.float64)
 
 
 	
-	# UNDER THE HOOD OPTIMISATIONS
+	# COMPUTE 4TH ORDER IDENTITY TENSORS/HESSIANS BEFORE-HAND 
 	#############################################################################
 	if MainData.MaterialArgs.Type == 'LinearModel':
 		if MainData.ndim == 2:
@@ -331,6 +333,15 @@ def PreProcess(MainData,Pr,pwd):
 			block_1 = np.zeros((6,6),dtype=np.float64); block_1[:3,:3] = np.ones((3,3))
 			block_2 = np.eye(6,6); block_2[0,0],block_2[1,1],block_2[2,2]=2.,2.,2.
 			MainData.MaterialArgs.H_Voigt = MainData.MaterialArgs.lamb*block_1 + MainData.MaterialArgs.mu*block_2
+	else:
+		if MainData.ndim == 2:
+			MainData.MaterialArgs.IijIkl = np.array([[1.,1.,0.],[1.,1.,0],[0.,0.,0.]])
+			MainData.MaterialArgs.IikIjl = np.array([[2.,0.,0.],[0.,2.,0],[0.,0.,1.]])
+		else:
+			block_1 = np.zeros((6,6),dtype=np.float64); block_1[:3,:3] = np.ones((3,3))
+			block_2 = np.eye(6,6); block_2[0,0],block_2[1,1],block_2[2,2]=2.,2.,2.
+			MainData.MaterialArgs.IijIkl = block_1
+			MainData.MaterialArgs.IikIjl = block_2		
 
 
 
@@ -358,15 +369,18 @@ def PreProcess(MainData,Pr,pwd):
 	#############################################################################
 	if MainData.Formulation == 1:
 		if MainData.MaterialArgs.Type == 'IsotropicElectroMechanics_1' or MainData.MaterialArgs.Type == 'Steinmann' or \
-		MainData.MaterialArgs.Type == 'AnisotropicMooneyRivlin_1_Electromechanics' or MainData.MaterialArgs.Type == 'LinearisedElectromechanics' or \
+		MainData.MaterialArgs.Type == 'AnisotropicMooneyRivlin_1_Electromechanics' or \
+		MainData.MaterialArgs.Type == 'LinearisedElectromechanics' or \
 		MainData.MaterialArgs.Type == 'LinearModelElectromechanics':
 			MainData.ConstitutiveStiffnessIntegrand = DEPB.ConstitutiveStiffnessIntegrand
 			MainData.GeometricStiffnessIntegrand = DEPB.GeometricStiffnessIntegrand
 			MainData.MassIntegrand =  DEPB.MassIntegrand
 
 		elif MainData.MaterialArgs.Type == 'LinearModel' or MainData.MaterialArgs.Type == 'AnisotropicMooneyRivlin_1' or \
-		MainData.MaterialArgs.Type == 'Incrementally_Linearised_NeoHookean' or MainData.MaterialArgs.Type == 'NearlyIncompressibleNeoHookean' or \
-		MainData.MaterialArgs.Type == 'MooneyRivlin' or MainData.MaterialArgs.Type == 'NeoHookean_1':
+		MainData.MaterialArgs.Type == 'IncrementallyLinearisedNeoHookean' or \
+		MainData.MaterialArgs.Type == 'NearlyIncompressibleNeoHookean' or \
+		MainData.MaterialArgs.Type == 'MooneyRivlin' or MainData.MaterialArgs.Type == 'NeoHookean_1' or \
+		MainData.MaterialArgs.Type == 'NeoHookean_2' or MainData.MaterialArgs.Type =='NearlyIncompressibleMooneyRivlin':
 			MainData.ConstitutiveStiffnessIntegrand = DB.ConstitutiveStiffnessIntegrand
 			MainData.GeometricStiffnessIntegrand = DB.GeometricStiffnessIntegrand
 			MainData.MassIntegrand =  DB.MassIntegrand
@@ -377,7 +391,7 @@ def PreProcess(MainData,Pr,pwd):
 	# GEOMETRY UPDATE FLAGS
 	###########################################################################
 	if MainData.MaterialArgs.Type == 'LinearisedElectromechanics' or MainData.MaterialArgs.Type == 'LinearModel' or \
-	MainData.MaterialArgs.Type == 'LinearModelElectromechanics' or MainData.MaterialArgs.Type == 'Incrementally_Linearised_NeoHookean':
+	MainData.MaterialArgs.Type == 'LinearModelElectromechanics' or MainData.MaterialArgs.Type == 'IncrementallyLinearisedNeoHookean':
 		# RUN THE SIMULATION WITHIN A NONLINEAR ROUTINE WITHOUT UPDATING THE GEOMETRY
 		MainData.GeometryUpdate = 0
 	else:
@@ -389,11 +403,9 @@ def PreProcess(MainData,Pr,pwd):
 
 
 
-
 	# CHOOSING THE SOLVER
 	#############################################################################
 	class solve(object):
-		"""docstring for solve"""
 		tol = 1e-07
 
 	if mesh.points.shape[0]*MainData.nvar > 200000:

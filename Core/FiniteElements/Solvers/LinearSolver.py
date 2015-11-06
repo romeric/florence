@@ -3,6 +3,8 @@ import numpy as np
 import numpy.linalg as la
 # from scipy.sparse.linalg import spsolve, cg, cgs, bicg, bicgstab, gmres, lgmres, minres
 from scipy.sparse.linalg import spsolve, bicgstab 
+from scipy.sparse.linalg import svds, eigsh, eigs, inv as spinv, onenormest
+from scipy.io import savemat 
 
 from Core.FiniteElements.Assembly import *
 from Core.FiniteElements.PostProcess import * 
@@ -22,7 +24,12 @@ def LinearSolver(Increment,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nmes
 	t_solver=time()
 	if MainData.solve.type == 'direct':
 		# CHECK FOR THE CONDITION NUMBER OF THE SYSTEM
-		MainData.solve.condA = np.linalg.cond(K_b.todense()) # REMOVE THIS
+		if Increment==MainData.AssemblyParameters.LoadIncrements-1:
+			# MainData.solve.condA = np.linalg.cond(K_b.todense()) # REMOVE THIS
+			# MainData.solve.condA = np.linalg.cond(K_b.toarray()) # REMOVE THIS
+			# savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/xx.mat',{'Stiffness':K_b})
+			# print onenormest(K_b)
+			MainData.solve.condA = onenormest(K_b) # REMOVE THIS
 		# sol = spsolve(K_b,-F_b)
 		sol = spsolve(K_b,-F_b,permc_spec='MMD_AT_PLUS_A',use_umfpack=True)
 		# sol = spsolve(K_b,-F_b,use_umfpack=True)

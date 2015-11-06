@@ -2,7 +2,7 @@ from time import time
 import numpy as np
 import numpy.linalg as la 
 # from scipy.sparse.linalg import spsolve, cg, cgs, bicg, bicgstab, gmres, lgmres, minres
-from scipy.sparse.linalg import spsolve, bicgstab 
+from scipy.sparse.linalg import spsolve, bicgstab, onenormest 
 from Core.FiniteElements.ApplyDirichletBoundaryConditions import *
 from Core.FiniteElements.StaticCondensationGlobal import *
 from Core.FiniteElements.PostProcess import *
@@ -28,7 +28,9 @@ def NewtonRaphson(Increment,MainData,K,F,M,NodalForces,Residual,
 		# SOLVE THE SYSTEM
 		if MainData.solve.type == 'direct':
 			# CHECK FOR THE CONDITION NUMBER OF THE SYSTEM
-			MainData.solve.condA = np.linalg.cond(K_b.todense()) # REMOVE THIS
+			if Increment==MainData.AssemblyParameters.LoadIncrements-1 and Iter>1:
+				# MainData.solve.condA = np.linalg.cond(K_b.todense()) # REMOVE THIS
+				MainData.solve.condA = onenormest(K_b) # REMOVE THIS
 			sol = spsolve(K_b,-F_b)
 		else:
 			sol = bicgstab(K_b,-F_b,tol=MainData.solve.tol)[0]
@@ -48,14 +50,6 @@ def NewtonRaphson(Increment,MainData,K,F,M,NodalForces,Residual,
 		# print np.concatenate((Residual[columns_in],NodalForces[columns_in]),axis=1)
 		# FIND THE RESIDUAL
 		Residual[columns_in] = TractionForces[columns_in] - NodalForces[columns_in]
-		# print nmesh.elements[83,:]
-		# print 
-		# print nmesh.points[nmesh.elements[83,:],:]
-		# import matplotlib.pyplot as plt 
-		# plt.plot(nmesh.points[nmesh.elements[83,:],0],nmesh.points[nmesh.elements[83,:],1],'o')
-		# MainData.xx[Increment] = np.linalg.norm(TractionForces) ##
-		# plt.show()
-		# import sys; sys.exit(0)
 		
 		# SAVE THE NORM 
 		NormForces = la.norm(NodalForces[columns_in])
@@ -68,8 +62,12 @@ def NewtonRaphson(Increment,MainData,K,F,M,NodalForces,Residual,
 		# UPDATE ITERATION NUMBER
 		Iter +=1 
 
-		if Iter==MainData.AssemblyParameters.MaxIter:
-			raise StopIteration("\n\nNewton Raphson did not converge! Maximum number of iterations reached.")
+		# if Iter==MainData.AssemblyParameters.MaxIter:
+			# raise StopIteration("\n\nNewton Raphson did not converge! Maximum number of iterations reached.")
+
+		if Iter==MainData.AssemblyParameters.MaxIter or ResidualNorm['Increment_'+str(Increment)][-1] > 1000:
+			MainData.AssemblyParameters.FailedToConverge = True
+			break
 
 		# if Iter==1:
 			# sys.exit("STOPPED")

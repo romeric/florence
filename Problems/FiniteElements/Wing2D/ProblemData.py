@@ -24,7 +24,7 @@ def ProblemData(MainData):
 		# Type = 'Steinmann'
 		# Type = 'LinearisedElectromechanics'
 		Type = 'LinearModel'
-		# Type = 'Incrementally_Linearised_NeoHookean'
+		# Type = 'IncrementallyLinearisedNeoHookean'
 		# Type = 'AnisotropicMooneyRivlin_1'
 		# Type = 'NearlyIncompressibleNeoHookean'
 		# Type = 'NeoHookean_1'
@@ -34,7 +34,7 @@ def ProblemData(MainData):
 
 		E = 1.0e1
 		# nu = 0.4
-		nu=0.35
+		nu=0.05
 
 		# E = MainData.E 
 		# nu = MainData.nu 
@@ -64,14 +64,16 @@ def ProblemData(MainData):
 	ProblemPath = os.path.dirname(os.path.realpath(__file__))
 	class MeshInfo(object):
 		MeshType = 'tri'
-		Nature = 'straight'
 		Reader = 'Read'
 		Format = 'GID'
 
-		# FileName = ProblemPath + '/sd7003_Stretch25.dat'
+		FileName = ProblemPath + '/sd7003_Stretch25.dat'
 		# FileName = ProblemPath + '/sd7003_Stretch50.dat'
-		FileName = ProblemPath + '/sd7003_Stretch100.dat'
+		# FileName = ProblemPath + '/sd7003_Stretch100.dat'
 		# FileName = ProblemPath + '/sd7003_Stretch200.dat'
+		# FileName = ProblemPath + '/sd7003_Stretch400.dat'
+		# FileName = ProblemPath + '/sd7003_Stretch800.dat'
+		# FileName = ProblemPath + '/sd7003_Stretch1600.dat'
 		
 
 

@@ -41,7 +41,7 @@ cdef extern from "PostMeshCurve.hpp":
 		void GetCurvesLengths()
 		void GetGeomPointsOnCorrespondingEdges()
 		void IdentifyCurvesContainingEdges()
-		void ProjectMeshOnCurve(const char *projection_method)
+		void ProjectMeshOnCurve()
 		void RepairDualProjectedParameters()
 		void MeshPointInversionCurve()
 		void GetBoundaryPointsOrder()
@@ -74,8 +74,8 @@ cdef extern from "PostMeshSurface.hpp":
 		# void GetCurvesLengths()
 		void GetGeomPointsOnCorrespondingFaces()
 		void IdentifySurfacesContainingFaces()
-		# void ProjectMeshOnCurve(const char *projection_method)
-		void ProjectMeshOnSurface(const char *projection_method)
+		# void ProjectMeshOnCurve()
+		void ProjectMeshOnSurface()
 		# void RepairDualProjectedParameters()
 		# void MeshPointInversionCurve()
 		void MeshPointInversionSurface()
@@ -92,7 +92,7 @@ cdef extern from "PyInterfaceEmulator.hpp":
 		UInteger* faces, const Integer faces_rows, const Integer faces_cols, Real condition, 
 		Real* boundary_fekete, const Integer fekete_rows, const Integer fekete_cols,
 		UInteger* criteria, const Integer criteria_rows, const Integer criteria_cols, 
-		const char* projection_method, const Real precision)
+		const Real precision)
 
 	PassToPython ComputeDirichleteData3D (const char* iges_filename, Real scale, 
 		Real* points_array, Integer points_rows, Integer points_cols, 
@@ -101,4 +101,4 @@ cdef extern from "PyInterfaceEmulator.hpp":
 		UInteger* faces, const Integer faces_rows, const Integer faces_cols, Real condition, 
 		Real* boundary_fekete, const Integer fekete_rows, const Integer fekete_cols,
 		UInteger* criteria, const Integer criteria_rows, const Integer criteria_cols, 
-		const char* projection_method, const Real precision)
+		const Real precision)

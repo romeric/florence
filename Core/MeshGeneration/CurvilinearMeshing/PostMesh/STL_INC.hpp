@@ -10,8 +10,8 @@
 #include <cstdarg>
 #include <cmath>
 #include <ctime>
-#include <stdint.h>
-#include <stddef.h>
+//#include <stdint.h>
+//#include <stddef.h>
 #include <tuple>
 #include <typeinfo>
 #include <chrono>
@@ -19,7 +19,6 @@
 #include <algorithm>
 #include <utility>
 
-#include <omp.h>
 
 typedef int64_t Integer;
 typedef uint64_t UInteger;

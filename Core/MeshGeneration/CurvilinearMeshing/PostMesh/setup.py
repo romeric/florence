@@ -9,32 +9,8 @@ import sys
 _pwd_ = os.path.dirname(os.path.realpath('__file__'))
 
 # Compiler arguments
-compiler_args = ["-std=c++11","-march=native"]
-
-# Determine OS 
-if os.name is "posix":
-    compiler_args.append("-march=native")
-    # Determine intrinsics
-    for line in open("/proc/cpuinfo"):    
-        item  = line.rsplit()
-        if isinstance(item,list) and len(item)>0 and item[0]=='flags':
-            if 'sse' in item and '-msse' not in compiler_args:
-                compiler_args.append("-msse")
-            if 'sse2' in item and '-msse2' not in compiler_args:
-                compiler_args.append("-msse2")
-            if 'ssse3' in item and '-mssse3' not in compiler_args:
-                compiler_args.append("-mssse3")
-            if 'sse4' in item and '-msse4' not in compiler_args:
-                compiler_args.append("-msse4")
-            if 'avx' in item and '-mavx' not in compiler_args:
-                compiler_args.append("-mavx")
-            if 'avx2' in item and '-mavx2' not in compiler_args:
-                compiler_args.append("-mavx2")
-            if 'fma' in item and '-mfma' not in compiler_args:
-                compiler_args.append("-mfma")
-
-elif os.name is "windows":
-    compiler_args.append("-march=native")
+compiler_args = ["-std=c++11","-march=native","-mtune=native",
+            "-mfpmath=sse","-ffast-math","-ftree-vectorize"]
 
 # Source files
 sourcefiles = ["PostMeshPy.pyx",_pwd_+"/src/PyInterfaceEmulator.cpp",
@@ -57,7 +33,7 @@ extensions = [
         "/usr/local/include/oce/"],
         libraries= ["stdc++"] + occ_libs, 
         library_dirs = [_pwd_,_pwd_+"/include","/usr/local/lib/"],
-        extra_compile_args = compiler_args + ["-O3"]
+        extra_compile_args = compiler_args
         ),
 ]
 

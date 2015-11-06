@@ -13,9 +13,6 @@ class MainData(object):
  	"""General data such as directories, files, analysis session, etc that needs to be loaded a priori"""
  	pwd = os.path.dirname(os.path.realpath('__file__'))
  	session = 'FEM'
- 	# session = 'BEM'
- 	# session = 'BEM3D'
- 	# session = 'Coupled'
 
  	C = 1									# ORDER OF BASIS FUNCTIONS (NOTE THAT C=P-1, WHERE P IS THE POLYNOMIAL DEGREE)
  	norder = 2  							# ORDER/NO OF QUADRATURE POINTS
@@ -45,14 +42,15 @@ rc('font',**{'family':'sans-serif','sans-serif':['Computer Modern Roman']})
 rc('font',**{'family':'serif','serif':['Palatino'],'size':18})
 rc('text', usetex=True)
 
-if 0:
+Run = 1
+if Run:
 	t_FEM = time.time()
 	# nu = np.linspace(0.001,0.495,20)
-	nu = np.linspace(0.001,0.495,100)
-	# nu = np.linspace(0.01,0.471,50)
+	# nu = np.linspace(0.001,0.495,100)
+	nu = np.linspace(0.01,0.495,2)
 	E = np.array([10])
-	p = [2,3,4,5,6]
-	# p = [2,3]
+	# p = [2,3,4,5,6]
+	p = [2,6]
 	 
 
 	Results = {'PolynomialDegrees':p,'PoissonsRatios':nu,'Youngs_Modulus':E}
@@ -75,21 +73,22 @@ if 0:
 	Results['MaterialModel'] = MainData.MaterialArgs.Type
 	# print Results['MaterialModel']
 
-	savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu'+MainData.MaterialArgs.Type+'.mat',Results)
+	savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'.mat',Results)
 	t_FEM = time.time()-t_FEM
-	np.savetxt('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/DONE2', [t_FEM])
+	print 'Time taken for the entire analysis was ', t_FEM, 'seconds'
+	np.savetxt('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/DONE', [t_FEM])
 
-if 1:
+if not Run:
 	# import h5py as hpy 
-	DictOutput = {}
-	# DictOutput = loadmat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_NuLinearModel.mat',DictOutput)
-	DictOutput =  loadmat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_NuLinearModel.mat')
+	# DictOutput = {}
+	# DictOutput =  loadmat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_NuLinearModel.mat')
+	# DictOutput =  loadmat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_Incrementally_Linearised_NeoHookean.mat')
+	DictOutput =  loadmat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_NeoHookean_1.mat')	
 	scaledA = DictOutput['ScaledJacobian']
 	condA = DictOutput['ConditionNumber']
-	nu = DictOutput['PoissonsRatios'][0]
+	# nu = DictOutput['PoissonsRatios'][0]
 	nu = np.linspace(0.001,0.5,100)*10
 	p = DictOutput['PolynomialDegrees'][0]
-	# print nu
 
 
 
@@ -99,45 +98,20 @@ if 1:
 	ymax = nu[-1]
 
 	# print xmin, xmax, ymin, ymax
-	# print nu
-	# print scaledA[4,:]
-	# plt.plot(scaledA.T)
-	# print scaledA.shape
 	scaledA = scaledA[::-1,:]
+	condA = condA[::-1,:]
 
-	# scaledA = np.array([ [ 0.71740108,  0.54950547,  0.46659289,  0.45130078,  0.40435613],
-	# 					 [ 0.72034474,  0.55847273,  0.48098432,  0.46758115,  0.41693345],
-	# 					 [ 0.72383733,  0.56930343,  0.4983352 ,  0.48726023,  0.43181139],
-	# 					 [ 0.71948871,  0.58265657,  0.51966925,  0.51154286,  0.44967149],
-	# 					 [ 0.71411154,  0.5995507 ,  0.54654843,  0.54229378,  0.47141262],
-	# 					 [ 0.70788926,  0.62165491,  0.58148482,  0.58257963,  0.49751104],
-	# 					 [ 0.70057028,  0.64610798,  0.62880681,  0.62543501,  0.53082617],
-	# 					 [ 0.69169948,  0.66548884,  0.68645197, 0.64263533 ,  0.57468561],
-	# 					 [ 0.67997664,  0.70926285,  0.70469248,  0.66298808,  0.62766284],
-	# 					 [ 0.63774012,  0.8030901 ,  0.67324841,  0.61970387,  0.59386199]
-	#  ])
+	X,Y=np.meshgrid(p,nu)
+	# print X
 
-	# plt.imshow(scaledA, extent=(xmin, xmax, ymax, ymin),
-	           # interpolation='nearest', cmap=cm.YlOrRd)
-	# plt.imshow(scaledA, extent=(xmin, xmax, ymin, ymax),
-	#            interpolation='nearest', cmap=cm.YlOrRd)
-	# plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),
-	           # interpolation='nearest', cmap=cm.Oranges) 
 
-	plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),
-	           interpolation='bicubic', cmap=cm.viridis)
-	# plt.pcolor(vmin=0)
 
-	# plt.colorbar()
+	plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bicubic', cmap=cm.viridis)
+	# # plt.colorbar()
 
-	# plt.imshow(scaledA, extent=(xmin, xmax, ymin, ymax),
-	#            interpolation='bilinear', cmap=cm.viridis)
-	# plt.imshow(scaledA, extent=(xmin, xmax, ymin, ymax))
-	# plt.colorbar()
-
-	# plt.axis('equal')
-	# plt.axis('off')
-	# tick_locs = [0, 1, 2, 3, 4]
+	# # plt.axis('equal')
+	# # plt.axis('off')
+	# # tick_locs = [0, 1, 2, 3, 4]
 	tick_locs = [2, 3, 4, 5, 6]
 	tick_lbls = [2, 3, 4, 5, 6]
 	plt.yticks(tick_locs, tick_lbls)
@@ -152,6 +126,14 @@ if 1:
 	cbar = mpl.colorbar.ColorbarBase(ax, cmap=cm.viridis,
                        norm=mpl.colors.Normalize(vmin=-0, vmax=1))
 	cbar.set_clim(0, 1)
+
+	# plt.xlim([0,5])
+	# plt.ylim([2,6])
+	ResultsPath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D'
+	# plt.savefig(ResultsPath+'/Mech2D_P_vs_NuLinearModel.eps',format='eps',dpi=1000)
+	# plt.savefig(ResultsPath+'/Mech2D_P_vs_Nu_Incrementally_Linearised_NeoHookean.eps',format='eps',dpi=1000)
+	# plt.savefig(ResultsPath+'/Mech2D_P_vs_Nu_NeoHookean_1.eps',format='eps',dpi=1000)
+
 	plt.show()
 
 

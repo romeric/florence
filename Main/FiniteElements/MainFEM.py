@@ -4,17 +4,18 @@
 import os, sys, imp
 # GET THE CURRENT DIRECTORY PARTH
 pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
-# from mpi4py import MPI
 
 # CORE IMPORTS
 # from Core.FiniteElements.ComputeErrorNorms import ComputeErrorNorms
-# from time import time
-# t_import=time()
 from Core.FiniteElements.PreProcess import PreProcess
 from Core.FiniteElements.PostProcess import *
 from Core.FiniteElements.Solvers.Solver import *
-# print 'TIME',time()-t_import
-# sys.exit(0)
+
+# from Core.InterpolationFunctions.TwoDimensional.Tri.hpNodalLagrange import hpBasesLagrange
+# from Core.InterpolationFunctions.TwoDimensional.Tri.hpNodal import hpBases
+# from Core.Supplementary.Tensors import makezero
+# from Core.InterpolationFunctions.DegenerateMappings import MapXiEta2RS
+
 ############################################################################################################################################
 # PROBLEM FILE DIRECTORIES
 # Pr = imp.load_source('Square_Piezo',pwd+'/Problems/FiniteElements/MultiPhysics_3D_Cube/ProblemData.py')
@@ -37,32 +38,8 @@ Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/MechanicalCompo
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Tests/ProblemData.py')
 
 #############################################################################################################################################
-# from line_profiler import profile
-# @profile
 def main(MainData, DictOutput=None):
 
-	from Core.InterpolationFunctions.TwoDimensional.Tri.hpNodalLagrange import hpBasesLagrange
-	from Core.InterpolationFunctions.TwoDimensional.Tri.hpNodal import hpBases
-	from Core.Supplementary.Tensors import makezero
-	from Core.InterpolationFunctions.DegenerateMappings import MapXiEta2RS
-
-	# xi = -0.3333
-	# eta = -0.00333
-
-	# x = xi 
-	# y = eta 
-	# r, s = MapXiEta2RS(xi,eta)
-	# print r , s 
-	# print x , y 
-	# print hpBasesLagrange(2,xi,eta)[0]
-	# print hpBasesLagrange(2,xi,eta)[1]
-	# print makezero(hpBases(1,xi,eta)[0][:,None])[:,0]
-	# print makezero(hpBases(2,r,s)[0][:,None])[:,0]
-	# print makezero(hpBases(2,r,s)[1])
-
-	# print makezero(hpBasesLagrange(2,xi,eta)[1] - makezero(hpBases(2,r,s)[1]))
-	# print hpBasesLagrange(2,-1,1)[:2]
-	# sys.exit(0)
 
 	# READ PROBLEM DATA FILE
 	Pr.ProblemData(MainData)
@@ -71,12 +48,6 @@ def main(MainData, DictOutput=None):
 	print 'Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation bases etc...'
 	mesh = PreProcess(MainData,Pr,pwd)
 
-	# print mesh.points
-	# print mesh.elements
-	# print mesh.edges 
-	# print mesh.points.shape
-	# print mesh.edges.shape
-	# print np.where(mesh.elements==19)
 
 	# np.savetxt('/home/roman/Desktop/elements.txt', mesh.elements)
 	# np.savetxt('/home/roman/Desktop/points.txt', mesh.points)
@@ -161,28 +132,6 @@ def main(MainData, DictOutput=None):
 	print 'Number of mesh edge nodes', np.unique(mesh.edges).shape[0]
 
 
-	# x = mesh.points[mesh.elements[0,:],:]
-	# y = x[[0,3,4,1,7,9,2,8,5,0],:2]
-	# import matplotlib.pyplot as plt
-	# plt.plot(x[:,0],x[:,1],'-ro')
-	# plt.plot(y[:,0],y[:,1],'-')
-	# plt.show()
-
-	# print mesh.edges
-	# x = mesh.points[mesh.edges[19,:],:]
-	# print x
-	# plt.plot(x[:,0],x[:,1],'-ro')
-	# plt.show()
-	# print mesh.elements.flags
-	# print mesh.points[mesh.edges[22,:],:]
-	# print mesh.edges[18:23,]
-	# print mesh.points[5,:]
-
-	# import matplotlib.pyplot as plt
-	# plt.plot(mesh.points[:,0],mesh.points[:,1],'o')
-	# plt.show()
-	# mesh.SimplePlot()
-
 	# print mesh.points[mesh.edges[20:24,:],:]
 	# print mesh.points[mesh.edges[42:46,:],:]
 	# print mesh.elements
@@ -193,17 +142,8 @@ def main(MainData, DictOutput=None):
 	# print mesh.faces.shape
 	# print mesh.points.shape
 	# print mesh.elements.shape
-	# print mesh.points[2,:]*1000
-	# print mesh.points[2,:]
-	# print mesh.points[mesh.edges[:,:2],:]
-	# print mesh.points[:8,:]
-	# print mesh.points[92,:]
-	
-
-	# PostProcess.HighOrderPatchPlot3D(MainData,mesh)
 
 	# sys.exit("STOPPED")
-	# sys.exit(0)
 	# CALL THE MAIN ROUTINE
 	TotalDisp = MainSolver(MainData,mesh)
 	# np.savetxt('/home/roman/Desktop/displacements.txt', TotalDisp[:,:,-1])
@@ -211,17 +151,9 @@ def main(MainData, DictOutput=None):
 
 	# print TotalDisp.shape
 	# print TotalDisp[:,:,0].shape
-	# print TotalDisp[1,:,0]
 	# from Core.Supplementary.Tensors import makezero
 	# print makezero(TotalDisp[:,:,0])
-	# print 
-	# print np.hstack((makezero(mesh.points),makezero(TotalDisp[:,:,0])))
-	# print MainData.xx 
-	# print mesh.elements[83,:]
-	# print 
-	# print mesh.points[mesh.elements[83,:],:]
-	# print TotalDisp[2*107,:,:]
-	# print TotalDisp[824,:,:]
+
 	# print np.linalg.norm(TotalDisp[824,:,:],axis=0)
 	# print np.linalg.norm(TotalDisp[:,:,0],axis=0)
 	# print np.linalg.norm(TotalDisp[:,:,:],axis=1)
@@ -233,8 +165,7 @@ def main(MainData, DictOutput=None):
 	# print 'Post-Processing the information...'
 	# POST-PROCESS
 	# PostProcess().StressRecovery(MainData,mesh,TotalDisp) 
-	# print mesh.elements	
-	PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp,show_plot=False)
+	# PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp,show_plot=False)
 	# PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
 	# PostProcess.HighOrderPatchPlot3D(MainData,mesh,TotalDisp)
 	# PostProcess.HighOrderInterpolatedPatchPlot(MainData,mesh,TotalDisp)
@@ -248,8 +179,15 @@ def main(MainData, DictOutput=None):
 
 	# plt.show()
 
-	# Results = {'MeshPoints':mesh.points,'MeshElements':mesh.elements,
-	# 'MeshEdges':mesh.edges, 'MeshFaces':mesh.faces,'TotalDisplacement':TotalDisp}
+	#------------------------------------------------------------------------
+
+	if MainData.AssemblyParameters.FailedToConverge==False:
+		PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp,show_plot=False)
+		# PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
+		# import matplotlib.pyplot as plt
+		# plt.show()
+	else:
+		MainData.ScaledJacobian = np.NAN
 
 	if DictOutput is not None:
 		DictOutput['MeshPoints_P'+str(MainData.C+1)] = mesh.points
@@ -286,26 +224,15 @@ def main(MainData, DictOutput=None):
 
 	#-------------------------------------------------------------------------------------------------------------
 
-	# from Core.Supplementary.SuppPlots.MeshNumbering import PlotMeshNumbering
-
-	# vpoints = np.copy(mesh.points)
-	# vpoints[:,0] += TotalDisp[:,0,-1]
-	# vpoints[:,1] += TotalDisp[:,1,-1]
-	# np.savetxt('/home/roman/Desktop/elements.dat', mesh.elements,fmt='%d',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/points.dat', vpoints,fmt='%6.4f',delimiter=',')
-
 	# Compute Error Norms
 	# L2Norm=0; EnergyNorm=0
 	# L2Norm, EnergyNorm = ComputeErrorNorms(MainData,mesh)
 
+	# DEGUGGING 
 	if MainData.__NO_DEBUG__ is False:
 		# NOTE THAT PYTHON'S BUILT-IN DEBUGGER IS ALWAYS TRUE __debug__ WITHOUT -0 FLAG
 		_DEBUG(MainData,mesh,TotalDisp)
 		mesh_node_order = mesh.CheckNodeNumberingTri()
-		if mesh_node_order == 'anti-clockwise':
-			print u'\u2713'.encode('utf8')+' : ','Imported mesh has',mesh_node_order,'node ordering'
-		else:
-			print u'\u2717'.encode('utf8')+' : ','Imported mesh has',mesh_node_order,'node ordering'
 
 		# CHECK GAUSS POINTS
 		# print np.sum(Domain.Bases,axis=0)

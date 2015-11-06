@@ -12,14 +12,15 @@ def InitiateNonlinearAnalysisData(MainData,nmesh):
 	# LoadFactor = 1./LoadIncrement
 	
 	class AssemblyParameters(object):
-		"""docstring for AssemblyParameters"""#
+		"""docstring for AssemblyParameters"""
 		ExternalLoadNature = 'Linear'
 		LoadIncrements = LoadIncrement
 		LoadIncrementNumber = 0
 		IterationNumber = 0
 		NRTolerance = Tolerance
 		GeometryUpdate = 0
-		MaxIter = 50
+		MaxIter = 15
+		FailedToConverge = False
 
 	MainData.AssemblyParameters = AssemblyParameters
 	###########################################################################

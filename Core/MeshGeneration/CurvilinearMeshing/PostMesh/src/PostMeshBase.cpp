@@ -6,7 +6,7 @@ PostMeshBase::PostMeshBase(const PostMeshBase& other) \
     scale(other.scale), condition(other.condition), \
     projection_precision(other.projection_precision)
 {
-    // Copy constructor
+    // COPY CONSTRUCTOR
     this->mesh_element_type = other.mesh_element_type;
     this->ndim = other.ndim;
     this->mesh_elements = other.mesh_elements;
@@ -22,7 +22,6 @@ PostMeshBase::PostMeshBase(const PostMeshBase& other) \
     this->geometry_surfaces = other.geometry_surfaces;
     this->geometry_curves_types = other.geometry_curves_types;
     this->geometry_surfaces_types = other.geometry_surfaces_types;
-    this->projection_method = other.projection_method;
     this->displacements_BC = other.displacements_BC;
     this->index_nodes = other.index_nodes;
     this->nodes_dir = other.nodes_dir;
@@ -32,7 +31,7 @@ PostMeshBase::PostMeshBase(const PostMeshBase& other) \
 PostMeshBase& PostMeshBase::operator=(const PostMeshBase& other) \
 noexcept(std::is_copy_assignable<PostMeshBase>::value)
 {
-    // Copy assignment operator
+    // COPY ASSIGNMENT OPERATOR
     this->scale = other.scale;
     this->condition = other.condition;
     this->projection_precision = other.projection_precision;
@@ -52,7 +51,6 @@ noexcept(std::is_copy_assignable<PostMeshBase>::value)
     this->geometry_surfaces = other.geometry_surfaces;
     this->geometry_curves_types = other.geometry_curves_types;
     this->geometry_surfaces_types = other.geometry_surfaces_types;
-    this->projection_method = other.projection_method;
     this->displacements_BC = other.displacements_BC;
     this->index_nodes = other.index_nodes;
     this->nodes_dir = other.nodes_dir;
@@ -65,7 +63,7 @@ PostMeshBase::PostMeshBase(PostMeshBase&& other) noexcept :  \
     scale(other.scale), condition(other.condition), \
     projection_precision(other.projection_precision)
 {
-    //! Move constructor for PostMeshBase class
+    // MOVE CONSTRUCTOR
     this->mesh_element_type = other.mesh_element_type;
     this->ndim = other.ndim;
     this->mesh_elements = std::move(other.mesh_elements);
@@ -81,7 +79,6 @@ PostMeshBase::PostMeshBase(PostMeshBase&& other) noexcept :  \
     this->geometry_surfaces = std::move(other.geometry_surfaces);
     this->geometry_curves_types = std::move(other.geometry_curves_types);
     this->geometry_surfaces_types = std::move(other.geometry_surfaces_types);
-    this->projection_method = std::move(other.projection_method);
     this->displacements_BC = std::move(other.displacements_BC);
     this->index_nodes = std::move(other.index_nodes);
     this->nodes_dir = std::move(other.nodes_dir);
@@ -95,7 +92,7 @@ PostMeshBase::PostMeshBase(PostMeshBase&& other) noexcept :  \
 
 PostMeshBase& PostMeshBase::operator=(PostMeshBase&& other) noexcept
 {
-    // Move assignment operator
+    // MOVE ASSIGNMENT OPERATOR
     this->scale = other.scale;
     this->condition = other.condition;
     this->projection_precision = other.projection_precision;
@@ -115,7 +112,6 @@ PostMeshBase& PostMeshBase::operator=(PostMeshBase&& other) noexcept
     this->geometry_surfaces = std::move(other.geometry_surfaces);
     this->geometry_curves_types = std::move(other.geometry_curves_types);
     this->geometry_surfaces_types = std::move(other.geometry_surfaces_types);
-    this->projection_method = std::move(other.projection_method);
     this->displacements_BC = std::move(other.displacements_BC);
     this->index_nodes = std::move(other.index_nodes);
     this->nodes_dir = std::move(other.nodes_dir);
@@ -196,7 +192,7 @@ void PostMeshBase::ReadSTEP(const char* filename)
 
 Eigen::MatrixI PostMeshBase::Read(std::string &filename)
 {
-    /*Reading 1D integer arrays */
+    //! Reading 1D integer arrays
     std::vector<std::string> arr;
     arr.clear();
     std::string temp;
@@ -217,12 +213,12 @@ Eigen::MatrixI PostMeshBase::Read(std::string &filename)
 
     datafile.close();
 
-    const int rows = arr.size();
-    const int cols = 1;
+    const Integer rows = arr.size();
+    const Integer cols = 1;
 
     Eigen::MatrixI out_arr = Eigen::MatrixI::Zero(rows,cols);
 
-    for(int i=0 ; i<rows;i++)
+    for(Integer i=0 ; i<rows;i++)
     {
         out_arr(i) = std::atof(arr[i].c_str());
     }
@@ -331,7 +327,7 @@ Eigen::MatrixR PostMeshBase::ReadR(std::string &filename, char delim)
     {
         std::vector<std::string> elems;
         elems = split(arr[i], delim);
-        for(int j=0 ; j<cols;j++)
+        for(Integer j=0 ; j<cols;j++)
         {
             out_arr(i,j) = std::atof(elems[j].c_str());
         }
@@ -521,22 +517,21 @@ void PostMeshBase::ComputeProjectionCriteria()
     if (this->projection_criteria.rows()==0)
     {
         this->projection_criteria.setZero(mesh_edges.rows(),mesh_edges.cols());
-        for (auto iedge=0; iedge<mesh_edges.rows(); iedge++)
+        for (Integer iedge=0; iedge<mesh_edges.rows(); iedge++)
         {
             // GET THE COORDINATES OF THE TWO END NODES
-            Real x1 = this->mesh_points(this->mesh_edges(iedge,0),0);
-            Real y1 = this->mesh_points(this->mesh_edges(iedge,0),1);
-            Real x2 = this->mesh_points(this->mesh_edges(iedge,1),0);
-            Real y2 = this->mesh_points(this->mesh_edges(iedge,1),1);
+            auto x1 = this->mesh_points(this->mesh_edges(iedge,0),0);
+            auto y1 = this->mesh_points(this->mesh_edges(iedge,0),1);
+            auto x2 = this->mesh_points(this->mesh_edges(iedge,1),0);
+            auto y2 = this->mesh_points(this->mesh_edges(iedge,1),1);
 
             // GET THE MIDDLE POINT OF THE EDGE
-            Real x_avg = ( x1 + x2 )/2.;
-            Real y_avg = ( y1 + y2 )/2.;
-            if (sqrt(x_avg*x_avg+y_avg*y_avg)<this->condition)
+            auto x_avg = ( x1 + x2 )/2.;
+            auto y_avg = ( y1 + y2 )/2.;
+            if (std::sqrt(x_avg*x_avg+y_avg*y_avg)<this->condition)
             {
                 projection_criteria(iedge)=1;
             }
         }
-        //this->projection_criteria.setOnes(mesh_edges.rows(),mesh_edges.cols());
     }
 }

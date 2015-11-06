@@ -10,8 +10,7 @@ PassToPython ComputeDirichleteData(const char* iges_filename, Real scale, Real *
                       UInteger *edges_array, const Integer &edges_rows, const Integer &edges_cols,
                       UInteger *faces_array, const Integer &faces_rows, const Integer &faces_cols, Real condition,
                       Real *boundary_fekete, const Integer fekete_rows, const Integer fekete_cols,
-                      UInteger *criteria, const Integer criteria_rows, const Integer criteria_cols,
-                      const char *projection_method, const Real &precision)
+                      UInteger *criteria, const Integer criteria_rows, const Integer criteria_cols, const Real &precision)
 {
 
 //    UInteger dimension = points_cols;
@@ -48,7 +47,7 @@ PassToPython ComputeDirichleteData(const char* iges_filename, Real scale, Real *
     // FIRST IDENTIFY WHICH CURVES CONTAIN WHICH EDGES
     curvilinear_mesh->IdentifyCurvesContainingEdges();
     // PROJECT ALL BOUNDARY POINTS FROM THE MESH TO THE CURVE
-    curvilinear_mesh->ProjectMeshOnCurve(projection_method);
+    curvilinear_mesh->ProjectMeshOnCurve();
     // FIX IMAGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
     curvilinear_mesh->RepairDualProjectedParameters();
     //PERFORM POINT INVERTION FOR THE INTERIOR POINTS
@@ -68,8 +67,7 @@ PassToPython ComputeDirichleteData3D(const char* iges_filename, Real scale, Real
                       UInteger *edges_array, const Integer &edges_rows, const Integer &edges_cols,
                       UInteger *faces_array, const Integer &faces_rows, const Integer &faces_cols, Real condition,
                       Real *boundary_fekete, const Integer fekete_rows, const Integer fekete_cols,
-                      UInteger *criteria, const Integer criteria_rows, const Integer criteria_cols,
-                      const char *projection_method, const Real &precision)
+                      UInteger *criteria, const Integer criteria_rows, const Integer criteria_cols, const Real &precision)
 {
 
 //    UInteger dimension = points_cols;
@@ -88,7 +86,6 @@ PassToPython ComputeDirichleteData3D(const char* iges_filename, Real scale, Real
     curvilinear_mesh->SetProjectionPrecision(precision);
     curvilinear_mesh->SetProjectionCriteria(criteria,criteria_rows,criteria_cols);
     curvilinear_mesh->ScaleMesh();
-//    print(curvilinear_mesh->mesh_points);
 
     curvilinear_mesh->InferInterpolationPolynomialDegree();
     curvilinear_mesh->SetFeketePoints(boundary_fekete,fekete_rows,fekete_cols);
@@ -108,7 +105,7 @@ PassToPython ComputeDirichleteData3D(const char* iges_filename, Real scale, Real
     // FIRST IDENTIFY WHICH CURVES CONTAIN WHICH EDGES
     curvilinear_mesh->IdentifySurfacesContainingFaces();
     // PROJECT ALL BOUNDARY POINTS FROM THE MESH TO THE SURFACE
-    curvilinear_mesh->ProjectMeshOnSurface(projection_method);
+    curvilinear_mesh->ProjectMeshOnSurface();
 //    // FIX IMAGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
 //    curvilinear_mesh->RepairDualProjectedParameters();
 //    //PERFORM POINT INVERTION FOR THE INTERIOR POINTS

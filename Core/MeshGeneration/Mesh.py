@@ -519,7 +519,7 @@ class Mesh(object):
 			self.elements -= 1
 
 			self.GetBoundaryFacesTet()
-			self.GetBoundaryEdgesTet()
+			# self.GetBoundaryEdgesTet()
 
 
 
