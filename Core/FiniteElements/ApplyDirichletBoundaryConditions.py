@@ -62,7 +62,7 @@ def ApplyDirichletBoundaryConditions(stiffness,F,mesh,MainData):
 				# FIRST IDENTIFY WHICH CURVES CONTAIN WHICH EDGES
 				curvilinear_mesh.IdentifyCurvesContainingEdges()
 				# PROJECT ALL BOUNDARY POINTS FROM THE MESH TO THE CURVE
-				curvilinear_mesh.ProjectMeshOnCurve("Bisection")
+				curvilinear_mesh.ProjectMeshOnCurve()
 				# FIX IMAGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
 				curvilinear_mesh.RepairDualProjectedParameters()
 				# PERFORM POINT INVERTION FOR THE INTERIOR POINTS
@@ -108,7 +108,7 @@ def ApplyDirichletBoundaryConditions(stiffness,F,mesh,MainData):
 				# FIRST IDENTIFY WHICH CURVES CONTAIN WHICH EDGES
 				curvilinear_mesh.IdentifySurfacesContainingFaces()
 				# PROJECT ALL BOUNDARY POINTS FROM THE MESH TO THE CURVE
-				curvilinear_mesh.ProjectMeshOnSurface("Bisection")
+				curvilinear_mesh.ProjectMeshOnSurface()
 				# FIX IMAGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
 				# curvilinear_mesh.RepairDualProjectedParameters()
 				# PERFORM POINT INVERTION FOR THE INTERIOR POINTS

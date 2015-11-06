@@ -36,10 +36,11 @@ def StaticSolver(LoadIncrement,MainData,K,F,M,NodalForces,Residual,ResidualNorm,
 
 			print '\nFinished Load increment', Increment, 'in', time()-t_increment, 'sec'
 			print 'Norm of Residual is', np.abs(la.norm(Residual[columns_in])/NormForces), '\n'
-			# MainData.xx = np.append(MainData.xx,np.sum(MainData.xx)+Residual[2*107][0])
-			# MainData.xx = np.append(MainData.xx,np.sum(MainData.xx)+NodalForces[2*107,:][0])
-			# MainData.xx = np.append(MainData.xx,np.sum(MainData.xx)+NodalForces[824,:][0])
 
+			if MainData.AssemblyParameters.FailedToConverge == True:
+				MainData.solve.condA = np.NAN
+				MainData.solve.scaledA = np.NAN
+				break
 
 		elif MainData.AnalysisType == 'Linear':
 			TotalDisp = LinearSolver(Increment,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nmesh,TotalDisp,Eulerx,

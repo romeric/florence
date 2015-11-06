@@ -14,8 +14,6 @@ from SparseAssemblySmall import SparseAssemblySmall
 # from multiprocessing import Pool
 import multiprocessing as MP
 import Core.ParallelProcessing.parmap as parmap
-# from pathos.multiprocessing import ProcessingPool as Pool
-# from pathos.multiprocessing import ProcessingPool
 
 
 #-------------- MAIN ASSEMBLY ROUTINE --------------------#
