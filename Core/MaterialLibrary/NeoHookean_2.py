@@ -7,7 +7,11 @@ from Core.Supplementary.Tensors.Tensors import *
 
 
 class NeoHookean_2(object):
-	"""docstring for NeoHookean"""
+	"""Material model for neo-Hookean with the following internal energy:
+
+		W(C) = lambda*(C:I)-mu*lnJ+lamba/2*(J-1)**2
+
+		"""
 	def __init__(self, ndim):
 		super(NeoHookean_2, self).__init__()
 		self.ndim = ndim

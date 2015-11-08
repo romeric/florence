@@ -20,9 +20,6 @@ def ProblemData(MainData):
 	# MainData.AnalysisType = 'Nonlinear'
 
 	class MaterialArgs(object):
-		"""docstring for MaterialArgs"""
-		# Type = 'Steinmann'
-		# Type = 'LinearisedElectromechanics'
 		Type = 'LinearModel'
 		# Type = 'IncrementallyLinearisedNeoHookean'
 		# Type = 'AnisotropicMooneyRivlin_1'
@@ -34,7 +31,7 @@ def ProblemData(MainData):
 
 		E = 1.0e1
 		# nu = 0.4
-		nu=0.05
+		nu=0.35
 
 		# E = MainData.E 
 		# nu = MainData.nu 

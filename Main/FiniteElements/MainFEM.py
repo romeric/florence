@@ -29,8 +29,8 @@ from Core.FiniteElements.Solvers.Solver import *
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Electromechanics/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Nurbs/ProblemData.py')
-Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/MechanicalComponent2D/ProblemData.py')
-# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Wing2D/ProblemData.py')
+# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/MechanicalComponent2D/ProblemData.py')
+Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Wing2D/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Sphere/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Naca_Isotropic/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/RAE2822/ProblemData.py')
@@ -52,46 +52,6 @@ def main(MainData, DictOutput=None):
 	# np.savetxt('/home/roman/Desktop/elements.txt', mesh.elements)
 	# np.savetxt('/home/roman/Desktop/points.txt', mesh.points)
 	# np.savetxt('/home/roman/Desktop/edges_circle.dat', mesh.edges[:,:2],fmt='%d',delimiter=',')
-
-	# np.savetxt('/home/roman/Desktop/elements_rae2822_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/points_rae2822_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%6.4f',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/edges_rae2822_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
-	
-	# np.savetxt('/home/roman/Desktop/elements_circle_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/points_circle_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%6.4f',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/edges_circle_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
-
-	# np.savetxt('/home/roman/Desktop/elements_half_circle_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/points_half_circle_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%6.4f',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/edges_half_circle_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
-
-	# np.savetxt('/home/roman/Desktop/elements_twoarcs_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/points_twoarcs_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%6.4f',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/edges_twoarcs_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
-
-	# np.savetxt('/home/roman/Desktop/elements_i2rae2822_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/points_i2rae2822_p'+str(MainData.C+1)+'.dat', 1000*mesh.points,fmt='%6.4f',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/edges_i2rae2822_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
-
-	# np.savetxt('/home/roman/Desktop/elements_mech2d_seg0_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/points_mech2d_seg0_p'+str(MainData.C+1)+'.dat', 1000*mesh.points,fmt='%6.4f',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/edges_mech2d_seg0_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
-
-	# np.savetxt('/home/roman/Desktop/elements_mech2d_seg2_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/points_mech2d_seg2_p'+str(MainData.C+1)+'.dat', 1000*mesh.points,fmt='%6.4f',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/edges_mech2d_seg2_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
-
-	# np.savetxt('/home/roman/Desktop/elements_mech2dn_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/points_mech2dn_p'+str(MainData.C+1)+'.dat', 1000*mesh.points,fmt='%6.4f',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/edges_mech2dn_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
-
-	# np.savetxt('/home/roman/Desktop/elements_leftpartwithcircle_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/points_leftpartwithcircle_p'+str(MainData.C+1)+'.dat', 1000*mesh.points,fmt='%6.4f',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/edges_leftpartwithcircle_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
-
-	# np.savetxt('/home/roman/Desktop/elements_leftcircle_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/points_leftcircle_p'+str(MainData.C+1)+'.dat', 1000*mesh.points,fmt='%6.4f',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/edges_leftcircle_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
 
 	# np.savetxt('/home/roman/Desktop/elements_rae2822_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
 	# np.savetxt('/home/roman/Desktop/points_rae2822_p'+str(MainData.C+1)+'.dat', 1000*mesh.points,fmt='%6.4f',delimiter=',')
@@ -170,22 +130,17 @@ def main(MainData, DictOutput=None):
 	# PostProcess.HighOrderPatchPlot3D(MainData,mesh,TotalDisp)
 	# PostProcess.HighOrderInterpolatedPatchPlot(MainData,mesh,TotalDisp)
 	# import matplotlib.pyplot as plt
-	# plt.savefig('/home/roman/Dropbox/zdump/DumpReport/mech2d/postmesh_'+MainData.AnalysisType+'_p'+str(MainData.C+1)+'.eps', 
-		# format='eps', dpi=1000)
-	# plt.savefig('/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/initial_plots/mech2d_planarmesh_'+\
-		# MainData.MaterialArgs.Type+'_p'+str(MainData.C+1)+'.eps',format='eps', dpi=1000)
-	# plt.savefig('/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/initial_plots/mech2d_curvedmesh_'+\
-		# MainData.MaterialArgs.Type+'_p'+str(MainData.C+1)+'.eps',	format='eps', dpi=1000)
-
 	# plt.show()
+	vpoints = mesh.points + TotalDisp[:,:MainData.ndim,-1]
+	print vpoints[mesh.elements[1570,:],:]
 
 	#------------------------------------------------------------------------
 
 	if MainData.AssemblyParameters.FailedToConverge==False:
 		PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp,show_plot=False)
-		PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
-		import matplotlib.pyplot as plt
-		plt.show()
+		# PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
+		# import matplotlib.pyplot as plt
+		# plt.show()
 	else:
 		MainData.ScaledJacobian = np.NAN
 

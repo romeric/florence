@@ -42,15 +42,15 @@ rc('font',**{'family':'sans-serif','sans-serif':['Computer Modern Roman']})
 rc('font',**{'family':'serif','serif':['Palatino'],'size':18})
 rc('text', usetex=True)
 
-Run = 1
+Run = 0
 if Run:
 	t_FEM = time.time()
 	# nu = np.linspace(0.001,0.495,20)
-	# nu = np.linspace(0.001,0.495,100)
-	nu = np.linspace(0.01,0.495,2)
+	nu = np.linspace(0.001,0.495,100)
+	# nu = np.linspace(0.01,0.495,2)
 	E = np.array([10])
-	# p = [2,3,4,5,6]
-	p = [2,6]
+	p = [2,3,4,5,6]
+	# p = [2,6]
 	 
 
 	Results = {'PolynomialDegrees':p,'PoissonsRatios':nu,'Youngs_Modulus':E}
@@ -65,8 +65,16 @@ if Run:
 			MainData.nu = nu[j]
 			MainData.E = E
 			main(MainData,Results)	
-			scaledA[i,j] = np.min(MainData.ScaledJacobian)
-			condA[i,j] = MainData.solve.condA
+			CondExists = getattr(MainData.solve,'condA',None)
+			ScaledExists = getattr(MainData.solve,'scaledA',None)
+			if ScaledExists is not None:
+				scaledA[i,j] = np.min(MainData.ScaledJacobian)
+			else:
+				scaledA[i,j] = np.NAN
+			if CondExists is not None:
+				condA[i,j] = MainData.solve.condA
+			else:
+				condA[i,j] = np.NAN
 
 	Results['ScaledJacobian'] = scaledA # one given row contains all values of nu for a fixed p
 	Results['ConditionNumber'] = condA # one given row contains all values of nu for a fixed p
@@ -81,9 +89,9 @@ if Run:
 if not Run:
 	# import h5py as hpy 
 	# DictOutput = {}
-	# DictOutput =  loadmat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_NuLinearModel.mat')
-	# DictOutput =  loadmat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_Incrementally_Linearised_NeoHookean.mat')
-	DictOutput =  loadmat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_NeoHookean_1.mat')	
+	# DictOutput =  loadmat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_LinearModel.mat')
+	# DictOutput =  loadmat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean.mat')
+	DictOutput =  loadmat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_NeoHookean_2.mat')	
 	scaledA = DictOutput['ScaledJacobian']
 	condA = DictOutput['ConditionNumber']
 	# nu = DictOutput['PoissonsRatios'][0]
@@ -130,9 +138,9 @@ if not Run:
 	# plt.xlim([0,5])
 	# plt.ylim([2,6])
 	ResultsPath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D'
-	# plt.savefig(ResultsPath+'/Mech2D_P_vs_NuLinearModel.eps',format='eps',dpi=1000)
-	# plt.savefig(ResultsPath+'/Mech2D_P_vs_Nu_Incrementally_Linearised_NeoHookean.eps',format='eps',dpi=1000)
-	# plt.savefig(ResultsPath+'/Mech2D_P_vs_Nu_NeoHookean_1.eps',format='eps',dpi=1000)
+	# plt.savefig(ResultsPath+'/Mech2D_P_vs_Nu_LinearModel.eps',format='eps',dpi=1000)
+	# plt.savefig(ResultsPath+'/Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean.eps',format='eps',dpi=1000)
+	# plt.savefig(ResultsPath+'/Mech2D_P_vs_Nu_NeoHookean_2.eps',format='eps',dpi=1000)
 
 	plt.show()
 

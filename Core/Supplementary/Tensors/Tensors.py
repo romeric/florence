@@ -196,9 +196,8 @@ def UnVoigt(v):
 def IncrementallyLinearisedStress(Stress_k,H_Voigt_k,I,strain,Gradu):
 	# IN PRINCIPLE WE NEED GRADU AND NOT STRAIN FOR V_strain
 	V_strain =  Voigt(strain)[:,None]
-					# STRESS 											HESSSIAN 'I_W:GRADU'
+					# STRESS 						HESSSIAN 'I_W:GRADU'
 	return np.dot(Stress_k,(I+strain)) + UnVoigt( np.dot(H_Voigt_k,V_strain) )
-	# return np.dot(Stress_k,(I+strain)) + UnVoigt( np.dot(H_Voigt_k,V_strain.reshape(Voigt(strain).shape[0],1)) )
 	
 
 

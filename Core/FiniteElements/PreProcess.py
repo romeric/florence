@@ -64,7 +64,10 @@ def PreProcess(MainData,Pr,pwd):
 	# np.savetxt('/home/roman/Desktop/elements_almond.dat', mesh.elements,fmt='%d',delimiter=',')
 	# np.savetxt('/home/roman/Desktop/points_almond.dat', mesh.points,fmt='%10.9f',delimiter=',')
 	
-	mesh.points *=1000. 
+	if Pr.__file__.split('/')[-2] == 'MechanicalComponent2D':
+		mesh.points *=1000.
+
+	# mesh.points *=1000. 
 	# mesh.SimplePlot()
 	# mesh.PlotMeshNumberingTri()
 	# print mesh.GetElementsWithBoundaryEdgesTri()
@@ -411,6 +414,13 @@ def PreProcess(MainData,Pr,pwd):
 		MainData.GeometryUpdate = 0
 	else:
 		MainData.GeometryUpdate = 1
+
+	# LINEAR ELASTICITY WITH STEPS
+	#############################################################################
+	if MainData.MaterialArgs.Type == 'LinearModel':
+		MainData.LinearWithStep = 1
+	else:
+		MainData.LinearWithStep = 0
 
 
 

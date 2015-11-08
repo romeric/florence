@@ -45,7 +45,7 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 
 	# LOOP OVER GAUSS POINTS
 	# for counter in range(0,MainData.Domain.AllGauss.shape[0]):
-	for counter in xrange(MainData.Domain.AllGauss.shape[0]): 
+	for counter in range(MainData.Domain.AllGauss.shape[0]): 
 
 		if MainData.Fields == 'ElectroMechanics':
 			# MATERIAL ELECTRIC FIELD  
@@ -67,7 +67,8 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 		# COMPUTE THE HESSIAN AT THIS GAUSS POINT
 		H_Voigt = MainData.Hessian(MainData.MaterialArgs,ndim,StrainTensors,ElectricFieldx,elem,counter)
 		# COMPUTE THE TANGENT STIFFNESS MATRIX
-		BDB_1, t = MainData().ConstitutiveStiffnessIntegrand(B,nvar,ndim,MainData.AnalysisType,MainData.Prestress,SpatialGradient[counter,:,:],CauchyStressTensor,ElectricDisplacementx,H_Voigt)
+		BDB_1, t = MainData().ConstitutiveStiffnessIntegrand(B,nvar,ndim,MainData.AnalysisType,
+			MainData.Prestress,SpatialGradient[counter,:,:],CauchyStressTensor,ElectricDisplacementx,H_Voigt)
 
 
 		if MainData.GeometryUpdate:
@@ -96,7 +97,6 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 		# 		if ~np.allclose(stiffness[i,j],stiffness[j,i]):
 		# 			print i,j
 	# 	print 'Elemental stiffness matrix is not symmetric'
-
 
 	return stiffness, tractionforce 
 #-------------------------------------------------------------------------------------------------------------------#
@@ -169,7 +169,8 @@ def Stiffness_NonVectorised(MainData,LagrangeElemCoords,EulerELemCoords,Electric
 		# COMPUTE THE HESSIAN AT THIS GAUSS POINT
 		H_Voigt = MainData.Hessian(MainData.MaterialArgs,ndim,StrainTensors,ElectricFieldx,elem,counter)
 		# COMPUTE THE TANGENT STIFFNESS MATRIX
-		BDB_1, t = MainData().ConstitutiveStiffnessIntegrand(B,nvar,ndim,MainData.AnalysisType,MainData.Prestress,SpatialGradient,CauchyStressTensor,ElectricDisplacementx,H_Voigt)
+		BDB_1, t = MainData().ConstitutiveStiffnessIntegrand(B,nvar,ndim,MainData.AnalysisType,MainData.Prestress,
+					SpatialGradient,CauchyStressTensor,ElectricDisplacementx,H_Voigt)
 
 
 		if MainData.GeometryUpdate:
@@ -205,7 +206,6 @@ def Stiffness_NonVectorised(MainData,LagrangeElemCoords,EulerELemCoords,Electric
 	# 	for j in range(0,stiffness.shape[0]):
 	# 		if ~np.allclose(stiffness[i,j],stiffness[j,i]):
 	# 			print i,j
-
 
 	return stiffness, tractionforce 
 
@@ -283,7 +283,8 @@ def Stiffness_NonVectorised(MainData,LagrangeElemCoords,EulerELemCoords,Electric
 	# 	# COMPUTE THE HESSIAN AT THIS GAUSS POINT
 	# 	H_Voigt = MainData.Hessian(MainData.MaterialArgs,ndim,StrainTensors,ElectricFieldx,elem,counter)
 	# 	# COMPUTE THE TANGENT STIFFNESS MATRIX
-	# 	BDB_1, t = MainData().ConstitutiveStiffnessIntegrand(B,nvar,ndim,MainData.AnalysisType,MainData.Prestress,SpatialGradient,CauchyStressTensor,ElectricDisplacementx,H_Voigt)
+	# 	BDB_1, t = MainData().ConstitutiveStiffnessIntegrand(B,nvar,ndim,MainData.AnalysisType,MainData.Prestress,
+							# SpatialGradient,CauchyStressTensor,ElectricDisplacementx,H_Voigt)
 
 
 	# 	if MainData.GeometryUpdate:

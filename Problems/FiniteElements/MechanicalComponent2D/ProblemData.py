@@ -22,7 +22,7 @@ def ProblemData(MainData):
 	class MaterialArgs(object):
 		# Type = 'Steinmann'
 		# Type = 'LinearisedElectromechanics'
-		Type = 'LinearModel'
+		# Type = 'LinearModel'
 		Type = 'IncrementallyLinearisedNeoHookean'
 		# Type = 'AnisotropicMooneyRivlin_1'
 		# Type = 'NearlyIncompressibleNeoHookean'
@@ -32,7 +32,7 @@ def ProblemData(MainData):
 		# Type = 'NearlyIncompressibleMooneyRivlin'
 
 		E = 1.0e1
-		nu=0.35
+		nu=0.45
 
 		# E = MainData.E 
 		# nu = MainData.nu 
@@ -41,11 +41,7 @@ def ProblemData(MainData):
 		# GET LAME CONSTANTS
 		lamb = E*nu/(1.+nu)/(1.-2.0*nu)
 		mu = E/2./(1+nu)
-		# mu=0
-		# lamb=0
 
-		# lamb = lamb - mu
-		# mu = 2*mu
 		# lamb = lamb + mu
 
 		rho   = 7.5*10e-6

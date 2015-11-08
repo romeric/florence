@@ -43,6 +43,7 @@ class NearlyIncompressibleNeoHookean(object):
 		# Update Lame constants
 		kappa = lamb+2.0*mu/3.0
 
+
 		H_Voigt = Voigt( kappa*(2.0*J-1)*d('ij,kl',I,I)-kappa*(J-1)*(d('ik,jl',I,I)+d('il,jk',I,I)) ,1)
 		
 		MaterialArgs.H_VoigtSize = H_Voigt.shape[0]
