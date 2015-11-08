@@ -70,7 +70,7 @@ def AssemblyLarge(MainData,nmesh,Eulerx,TotalPot):
 		ParallelTuple = parmap.map(GetElementalMatrices,np.arange(0,nelem),MainData,nmesh.elements,nmesh.points,nodeperelem,
 			Eulerx,TotalPot,I_stiff_elem,J_stiff_elem,I_mass_elem,J_mass_elem,pool=MP.Pool(processes=MainData.nCPU))
 
-	for elem in xrange(nelem):
+	for elem in range(nelem):
 
 		if MainData.Parallel:
 			# UNPACK PARALLEL TUPLE VALUES

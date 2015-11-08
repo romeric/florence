@@ -43,62 +43,16 @@ class NearlyIncompressibleMooneyRivlin(object):
 		# b=np.dot(F,F.T)
 		H = J*np.linalg.inv(F).T
 		g = np.dot(H,H.T)
-		# H_ = StrainTensors.H
-		# G = np.dot(H_.T,H_)
-		# g = np.dot(H_,H_.T)
-		# if StrainTensors['F'].shape[1] != 2:
-			# print 'wow'
-		# print StrainTensors['F'][0].shape
 
 		# Update Lame constants
-		kappa = lamb+2.0*mu/3.0
-		alpha = mu
-		beta = mu
+		gamma=1
+		alpha = gamma*mu/2.
+		beta = (mu - 2.*alpha)/3./sqrt(3.)
+		# kappa = lamb+2.0*mu/3.0 
+		kappa = lamb+4.0/3.0*alpha+2.0*sqrt(3.0)*beta # or
 
-		bcross = trace(b)*b-np.dot(b,b)
-		gcross = trace(g)*I-g
-		# print sqrt(5)
-
-		# H_Voigt =  -4/3.*alpha*J**(-5/3.)*( einsum('ij,kl',b,I) + einsum('ij,kl',I,b) ) + \
-		# 			4.*alpha/9.*J**(-5/3.)*trace(b)*einsum('ij,kl',I,I) + \
-		# 			2/3.*alpha*J**(-5/3.)*trace(b)*( einsum('il,jk',I,I) + einsum('ik,jl',I,I) )
-
-		# H_Voigt =  -4/3.*alpha*J**(-5/3.)*( einsum('ij,kl',b,I) + einsum('ij,kl',I,b) ) + \
-		# 	4.*alpha/9.*J**(-5/3.)*trace(b)*einsum('ij,kl',I,I) + \
-		# 	2/3.*alpha*J**(-5/3.)*trace(b)*( einsum('il,jk',I,I) + einsum('ik,jl',I,I) ) - \
-		# 	6.*beta*J**(-3)*sqrt(trace(g))*einsum('ij,kl',bcross,I) + \
-		# 	3.*beta*J**(-3)*(trace(g))**(-0.5)*einsum('ij,kl',bcross,gcross) + \
-		# 	6*beta*J**(-3)*sqrt(trace(g))*einsum('ij,kl',b,b) - \
-		# 	3*beta*J**(-3)*sqrt(trace(g))*( einsum('ik,jl',b,b) + einsum('il,jk',b,b) ) + \
-		# 	4*beta*J**(-3)*(trace(g))**(1.5)*einsum('ij,kl',I,I) - \
-		# 	6*beta*J**(-3)*sqrt(trace(g))*einsum('ij,kl',I,gcross) + \
-		# 	2*beta*J**(-3)*(trace(g))**(1.5) *( einsum('ik,jl',I,I) + einsum('il,jk',I,I) )  
-
-		# H_Voigt =  -6.*beta*J**(-3.)*sqrt(trace(g))*einsum('ij,kl',bcross,I) + \
-		# 	3.*beta*J**(-3.)*(trace(g))**(-0.5)*einsum('ij,kl',bcross,gcross) + \
-		# 	6*beta*J**(-3.)*sqrt(trace(g))*einsum('ij,kl',b,b) - \
-		# 	3.*beta*J**(-3.)*sqrt(trace(g))*( einsum('ik,jl',b,b) + einsum('il,jk',b,b) ) + \
-		# 	4.*beta*J**(-3.)*(trace(g))**(1.5)*einsum('ij,kl',I,I) - \
-		# 	6.*beta*J**(-3.)*sqrt(trace(g))*einsum('ij,kl',I,gcross) + \
-		# 	2.*beta*J**(-3.)*(trace(g))**(1.5) *( einsum('ik,jl',I,I) + einsum('il,jk',I,I) )  	
-
-		# H_Voigt =  3.*beta*J**(-3.)*(trace(g))**(-0.5)*einsum('ij,kl',bcross,gcross) + \
-		# 	6.*beta*J**(-3.)*sqrt(trace(g))*einsum('ij,kl',b,b) - \
-		# 	3.*beta*J**(-1.)*sqrt(trace(g))*( einsum('ik,jl',b,b) + einsum('il,jk',b,b) )
-
-		# print trace(g), g[0,0]+g[1,1] 
-
-
-		# H_Voigt =  beta*J**(-3)*trace(g)**(3./2.)* ( einsum('ij,kl',I,I) - einsum('ik,jl',I,I) - einsum('il,jk',I,I) ) - \
-		# 	3.*beta*J**(-3)*trace(g)**(1./2.)*( einsum('ij,kl',I,g) + einsum('ij,kl',g,I) ) + \
-		# 	3.*beta*J**(-3)*trace(g)**(1./2.)*( einsum('ik,jl',I,g) + einsum('il,jk',g,I) ) + \
-		# 	3.*beta*J**(-3)*trace(g)**(1./2.)*( einsum('ik,jl',g,I) + einsum('il,jk',I,g) ) + \
-		# 	3.*beta*J**(-3)*trace(g)**(-1./2.)*( einsum('ij,kl',g,g) ) 	
-
-		# H_Voigt =  beta*J**(-3)*trace(g)**(3./2.)* ( einsum('ij,kl',I,I) - einsum('ik,jl',I,I) - einsum('il,jk',I,I) ) - \
-		# 	3.*beta*J**(-3)*trace(g)**(1./2.)*( einsum('ij,kl',I,g) + einsum('ij,kl',g,I) ) + \
-		# 	6.*beta*J**(-3)*trace(g)**(1./2.)*( einsum('ik,jl',I,g) + einsum('il,jk',g,I) ) + \
-		# 	3.*beta*J**(-3)*trace(g)**(-1./2.)*( einsum('ij,kl',g,g) ) 				# #
+		# bcross = trace(b)*b-np.dot(b,b)
+		# gcross = trace(g)*I-g
 
 		H_Voigt = -4/3.*alpha*J**(-5/3.)*( einsum('ij,kl',b,I) + einsum('ij,kl',I,b) ) + \
 					4.*alpha/9.*J**(-5/3.)*trace(b)*einsum('ij,kl',I,I) + \
@@ -108,6 +62,17 @@ class NearlyIncompressibleMooneyRivlin(object):
 			6.*beta*J**(-3)*trace(g)**(1./2.)*( einsum('ik,jl',I,g) + einsum('il,jk',g,I) ) + \
 			3.*beta*J**(-3)*trace(g)**(-1./2.)*( einsum('ij,kl',g,g) ) 	+ \
 			kappa*(2.0*J-1)*einsum('ij,kl',I,I) - kappa*(J-1)*(einsum('ik,jl',I,I)+einsum('il,jk',I,I))			# #
+
+		# H_Voigt = -4/3.*alpha*J**(-5/3.)*( einsum('ij,kl',b,I) + einsum('ij,kl',I,b) ) + \
+		# 			4.*alpha/9.*J**(-5/3.)*trace(b)*einsum('ij,kl',I,I) + \
+		# 			2/3.*alpha*J**(-5/3.)*trace(b)*( einsum('il,jk',I,I) + einsum('ik,jl',I,I) ) + \
+		# 	beta*J**(-3)*trace(g)**(3./2.)* ( einsum('ij,kl',I,I) - einsum('ik,jl',I,I) - einsum('il,jk',I,I) ) - \
+		# 	3.*beta*J**(-3)*trace(g)**(1./2.)*( einsum('ij,kl',I,g) + einsum('ij,kl',g,I) ) + \
+		# 	3.*beta*J**(-3)*trace(g)**(1./2.)*( einsum('ik,jl',I,g) + einsum('il,jk',g,I) ) + \
+		# 	3.*beta*J**(-3)*trace(g)**(1./2.)*( einsum('ik,jl',g,I) + einsum('il,jk',I,g) ) + \
+		# 	3.*beta*J**(-3)*trace(g)**(-1./2.)*( einsum('ij,kl',g,g) ) 	+ \
+		# 	kappa*(2.0*J-1)*einsum('ij,kl',I,I) - kappa*(J-1)*(einsum('ik,jl',I,I)+einsum('il,jk',I,I))			# #
+
 
 		H_Voigt = Voigt( H_Voigt ,1)
 		
@@ -132,21 +97,12 @@ class NearlyIncompressibleMooneyRivlin(object):
 
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
-		kappa = lamb+2.0*mu/3.0
-		alpha = mu
-		beta = mu
-
-		# return 2.*alpha*J**(-5/3.)*b - 2./3.*alpha*J**(-5/3.)*trace(b)*I
-
-		# return 2.*alpha*J**(-5/3.)*b - 2./3.*alpha*J**(-5/3.)*trace(b)*I + \
-		# 	   3*beta*J**(-3)*sqrt(trace(g))*bcross-2*beta*J**(-3)*(trace(g))**(1.5)*I
-
-		# return 3.*beta*J**(-3.)*sqrt(trace(g))*bcross-2*beta*J**(-3.)*(trace(g))**(1.5)*I
-
-		# return -6.*sqrt(3.)*I+3.*beta*sqrt(trace(g))*bcross	
+		# kappa = lamb+2.0*mu/3.0
+		alpha = mu/2.
+		beta = (mu - 2.*alpha)/3./sqrt(3.)
+		kappa = lamb+4.0/3.0*alpha+2.0*sqrt(3.0)*beta
 
 
-		# return beta*J**(-3)*trace(g)**(3./2.)*I - 3*beta*J**(-3)*trace(g)**(1./2.)*g	
 		return 2.*alpha*J**(-5/3.)*b - 2./3.*alpha*J**(-5/3.)*trace(b)*I + \
 				beta*J**(-3)*trace(g)**(3./2.)*I - 3*beta*J**(-3)*trace(g)**(1./2.)*g + \
 				+(kappa*(J-1.0))*I 	
