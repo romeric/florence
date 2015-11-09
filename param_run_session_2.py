@@ -45,12 +45,11 @@ rc('text', usetex=True)
 Run = 0
 if Run:
 	t_FEM = time.time()
-	# nu = np.linspace(0.001,0.495,20)
 	nu = np.linspace(0.001,0.495,100)
 	# nu = np.linspace(0.01,0.495,2)
 	E = np.array([10])
 	p = [2,3,4,5,6]
-	# p = [2,6]
+	# p = [2]
 	 
 
 	Results = {'PolynomialDegrees':p,'PoissonsRatios':nu,'Youngs_Modulus':E}
@@ -66,11 +65,8 @@ if Run:
 			MainData.E = E
 			main(MainData,Results)	
 			CondExists = getattr(MainData.solve,'condA',None)
-			ScaledExists = getattr(MainData.solve,'scaledA',None)
-			if ScaledExists is not None:
-				scaledA[i,j] = np.min(MainData.ScaledJacobian)
-			else:
-				scaledA[i,j] = np.NAN
+			# ScaledExists = getattr(MainData.solve,'scaledA',None)
+			scaledA[i,j] = np.min(MainData.ScaledJacobian)
 			if CondExists is not None:
 				condA[i,j] = MainData.solve.condA
 			else:
@@ -79,9 +75,10 @@ if Run:
 	Results['ScaledJacobian'] = scaledA # one given row contains all values of nu for a fixed p
 	Results['ConditionNumber'] = condA # one given row contains all values of nu for a fixed p
 	Results['MaterialModel'] = MainData.MaterialArgs.Type
-	# print Results['MaterialModel']
+	# print Results['ScaledJacobian']
 
-	savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'.mat',Results)
+	# savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'.mat',Results)
+	savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'2.mat',Results)
 	t_FEM = time.time()-t_FEM
 	print 'Time taken for the entire analysis was ', t_FEM, 'seconds'
 	np.savetxt('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/DONE', [t_FEM])
@@ -91,7 +88,8 @@ if not Run:
 	# DictOutput = {}
 	# DictOutput =  loadmat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_LinearModel.mat')
 	# DictOutput =  loadmat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean.mat')
-	DictOutput =  loadmat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_NeoHookean_2.mat')	
+	# DictOutput =  loadmat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_NeoHookean_2.mat')	
+	DictOutput =  loadmat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_LinearModel2.mat')	
 	scaledA = DictOutput['ScaledJacobian']
 	condA = DictOutput['ConditionNumber']
 	# nu = DictOutput['PoissonsRatios'][0]
@@ -111,6 +109,7 @@ if not Run:
 
 	X,Y=np.meshgrid(p,nu)
 	# print X
+	print scaledA
 
 
 

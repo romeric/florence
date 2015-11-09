@@ -20,20 +20,18 @@ def ProblemData(MainData):
 	# MainData.AnalysisType = 'Nonlinear'
 
 	class MaterialArgs(object):
-		"""docstring for MaterialArgs"""
-		# Type = 'Steinmann'
-		# Type = 'LinearisedElectromechanics'
-		Type = 'LinearModel'
-		# Type = 'Incrementally_Linearised_NeoHookean'
+		# Type = 'LinearModel'
+		Type = 'IncrementallyLinearisedNeoHookean'
 		# Type = 'AnisotropicMooneyRivlin_1'
 		# Type = 'NearlyIncompressibleNeoHookean'
 		# Type = 'MooneyRivlin'
+		# Type = 'NeoHookean_2'
 		
 		
 
-		E = 1.0e1
+		E = 1.0e5
 		# nu = 0.4
-		nu=0.35
+		nu=0.4
 
 		# E = MainData.E 
 		# nu = MainData.nu 
@@ -97,8 +95,8 @@ def ProblemData(MainData):
 
 	class BoundaryData(object):
 		Type = 'nurbs'
-		# Type = 'straight'
-		# Type = 'mixed'
+		RequiresCAD = True
+		
 		IGES_File = ProblemPath + '/Circle.igs'
 
 		condition = 1000.

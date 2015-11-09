@@ -31,7 +31,7 @@ def ProblemData(MainData):
 		
 		
 
-		E = 1.0e1
+		E = 1.0e5
 		# nu = 0.4
 		nu=0.4
 
@@ -84,6 +84,7 @@ def ProblemData(MainData):
 	class BoundaryData(object):
 		# NURBS/NON-NURBS TYPE BOUNDARY CONDITION
 		Type = 'nurbs'
+		RequiresCAD = False
 		# Type = 'straight'
 
 		IGES_File = ''

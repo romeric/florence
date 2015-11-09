@@ -27,10 +27,10 @@ from Core.FiniteElements.Solvers.Solver import *
 # 2D
 # Pr = imp.load_source('Nonlinear_2D',pwd+'/Problems/FiniteElements/Hollow_Arc_Tri/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Electromechanics/ProblemData.py')
-# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle/ProblemData.py')
+Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Nurbs/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/MechanicalComponent2D/ProblemData.py')
-Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Wing2D/ProblemData.py')
+# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Wing2D/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Sphere/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Naca_Isotropic/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/RAE2822/ProblemData.py')
@@ -38,7 +38,7 @@ Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Wing2D/ProblemD
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Tests/ProblemData.py')
 
 #############################################################################################################################################
-def main(MainData, DictOutput=None):
+def main(MainData, DictOutput=None, nStep=0):
 
 
 	# READ PROBLEM DATA FILE
@@ -48,16 +48,17 @@ def main(MainData, DictOutput=None):
 	print 'Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation bases etc...'
 	mesh = PreProcess(MainData,Pr,pwd)
 
-
-	# np.savetxt('/home/roman/Desktop/elements.txt', mesh.elements)
-	# np.savetxt('/home/roman/Desktop/points.txt', mesh.points)
-	# np.savetxt('/home/roman/Desktop/edges_circle.dat', mesh.edges[:,:2],fmt='%d',delimiter=',')
+	# from copy import deepcopy
+	# if nStep == 0:
+	# 	MainData.mesh = deepcopy(mesh)
+	# 	MainData.vmesh = deepcopy(mesh)
+	# else:
+	# 	del mesh
+	# 	mesh = deepcopy(MainData.mesh)
 
 	# np.savetxt('/home/roman/Desktop/elements_rae2822_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
 	# np.savetxt('/home/roman/Desktop/points_rae2822_p'+str(MainData.C+1)+'.dat', 1000*mesh.points,fmt='%6.4f',delimiter=',')
 	# np.savetxt('/home/roman/Desktop/edges_rae2822_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
-
-	# np.savetxt('/home/roman/Desktop/unique_edges_rae2822_p'+str(MainData.C+1)+'.dat', np.unique(mesh.edges),fmt='%d',delimiter=',')
 
 	# 3D
 	# np.savetxt(MainData.Path.Problem+'/elements_sphere_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
@@ -66,18 +67,10 @@ def main(MainData, DictOutput=None):
 	# np.savetxt(MainData.Path.Problem+'/faces_sphere_p'+str(MainData.C+1)+'.dat', mesh.faces,fmt='%d',delimiter=',')
 	# np.savetxt('/home/roman/Desktop/faces_cube_p'+str(MainData.C+1)+'.dat', mesh.faces,fmt='%d',delimiter=',')
 
-	# np.savetxt(MainData.Path.Problem+'/elements_sphere2_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
-	# np.savetxt(MainData.Path.Problem+'/points_sphere2_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%10.9f',delimiter=',')
-	# np.savetxt(MainData.Path.Problem+'/edges_sphere2_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
-	# np.savetxt(MainData.Path.Problem+'/faces_sphere2_p'+str(MainData.C+1)+'.dat', mesh.faces,fmt='%d',delimiter=',')
-
 	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/elements_sphere2_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
 	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_sphere2_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%10.9f',delimiter=',')
 	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/faces_sphere2_p'+str(MainData.C+1)+'.dat', mesh.faces,fmt='%d',delimiter=',')
 
-	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/elements_nsphere_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
-	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_nsphere_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%10.9f',delimiter=',')
-	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/faces_nsphere_p'+str(MainData.C+1)+'.dat', mesh.faces,fmt='%d',delimiter=',')
 
 	# np.savetxt('/home/roman/Dropbox/Florence/Problems/FiniteElements/Wing2D/elements_wing2d_p'+str(MainData.C+1)+'.dat', 
 	# 	mesh.elements,fmt='%d',delimiter=',')
@@ -92,8 +85,6 @@ def main(MainData, DictOutput=None):
 	print 'Number of mesh edge nodes', np.unique(mesh.edges).shape[0]
 
 
-	# print mesh.points[mesh.edges[20:24,:],:]
-	# print mesh.points[mesh.edges[42:46,:],:]
 	# print mesh.elements
 	# print mesh.points
 	# print mesh.edges
@@ -109,17 +100,6 @@ def main(MainData, DictOutput=None):
 	# np.savetxt('/home/roman/Desktop/displacements.txt', TotalDisp[:,:,-1])
 	# print 'Total number of DoFs for the system is', sol.shape[0]
 
-	# print TotalDisp.shape
-	# print TotalDisp[:,:,0].shape
-	# from Core.Supplementary.Tensors import makezero
-	# print makezero(TotalDisp[:,:,0])
-
-	# print np.linalg.norm(TotalDisp[824,:,:],axis=0)
-	# print np.linalg.norm(TotalDisp[:,:,0],axis=0)
-	# print np.linalg.norm(TotalDisp[:,:,:],axis=1)
-	# print np.linalg.norm(TotalDisp[2*107,:,:],axis=0)
-
-
 	# sys.exit("STOPPED")
 
 	# print 'Post-Processing the information...'
@@ -131,9 +111,18 @@ def main(MainData, DictOutput=None):
 	# PostProcess.HighOrderInterpolatedPatchPlot(MainData,mesh,TotalDisp)
 	# import matplotlib.pyplot as plt
 	# plt.show()
-	vpoints = mesh.points + TotalDisp[:,:MainData.ndim,-1]
-	print vpoints[mesh.elements[1570,:],:]
 
+	# vpoints = mesh.points + TotalDisp[:,:MainData.ndim,-1]
+	# MainData.mesh.points = mesh.points + TotalDisp[:,:MainData.ndim,-1]
+
+	# print np.linalg.norm(mesh.points[mesh.elements[68,:],:],axis=1)
+	# print np.linalg.norm(vpoints[mesh.elements[68,:],:],axis=1)
+
+	# print vpoints[mesh.elements[1570,:],:]
+	if nStep ==1:
+		MainData.mesh = mesh
+		MainData.mesh.points = mesh.points + TotalDisp[:,:MainData.ndim,-1]
+	
 	#------------------------------------------------------------------------
 
 	if MainData.AssemblyParameters.FailedToConverge==False:
@@ -156,28 +145,6 @@ def main(MainData, DictOutput=None):
 
 
 	#-------------------------------------------------------------------------------------------------------------
-	# vpoints = np.copy(mesh.points)
-	# vpoints[:,0] += TotalDisp[:,0,-1]
-	# vpoints[:,1] += TotalDisp[:,1,-1]
-	# if MainData.ndim==3:
-	# 	vpoints[:,2] += TotalDisp[:,2,-1]
-
-	# print TotalDisp[:,:,-1]
-	# mesh.GetInteriorEdgesTri()
-
-	# np.savetxt('/home/roman/Desktop/MeshingElasticity2/'+MainData.AnalysisType+'_p'+str(MainData.C+1)+'_elements.dat',
-	# 	mesh.elements,fmt='%d',delimiter=',')	
-	# np.savetxt('/home/roman/Desktop/MeshingElasticity2/'+MainData.AnalysisType+'_p'+str(MainData.C+1)+'_planar_points.dat',
-	# 	mesh.points,fmt='%10.9f',delimiter=',')	
-	# np.savetxt('/home/roman/Desktop/MeshingElasticity2/'+MainData.AnalysisType+'_p'+str(MainData.C+1)+'_displacement.dat',
-	# 	TotalDisp[:,:,-1],fmt='%10.9f',delimiter=',')
-
-	# savetxt('/home/roman/Desktop/MeshingElasticity2/'+MainData.AnalysisType+'_p'+str(MainData.C+1)+'Xf.dat')
-	# savetxt('/home/roman/Desktop/MeshingElasticity2/'+MainData.AnalysisType+'_p'+str(MainData.C+1)+'Xf.dat')
-
-
-
-	#-------------------------------------------------------------------------------------------------------------
 
 	# Compute Error Norms
 	# L2Norm=0; EnergyNorm=0
@@ -196,5 +163,4 @@ def main(MainData, DictOutput=None):
 		# print np.sum(Quadrature.weights)
 
 	# sys.exit("STOPPED")
-
 

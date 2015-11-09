@@ -22,8 +22,8 @@ def ProblemData(MainData):
 	class MaterialArgs(object):
 		# Type = 'Steinmann'
 		# Type = 'LinearisedElectromechanics'
-		# Type = 'LinearModel'
-		Type = 'IncrementallyLinearisedNeoHookean'
+		Type = 'LinearModel'
+		# Type = 'IncrementallyLinearisedNeoHookean'
 		# Type = 'AnisotropicMooneyRivlin_1'
 		# Type = 'NearlyIncompressibleNeoHookean'
 		# Type = 'NeoHookean_1'
@@ -69,6 +69,7 @@ def ProblemData(MainData):
 	class BoundaryData(object):
 		# NURBS/NON-NURBS TYPE BOUNDARY CONDITION
 		Type = 'nurbs'
+		RequiresCAD = True
 
 		scale = 1.
 		condition = 1e10

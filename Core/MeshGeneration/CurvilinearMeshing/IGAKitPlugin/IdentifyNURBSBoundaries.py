@@ -9,7 +9,7 @@ from time import time
 import itertools
 import multiprocessing as mp 
 
-def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
+def GetDirichletData(mesh,nurbs,BoundaryData,BasesOrder):
 
 	# nOfBCstrings = len(bcs)
 	nOfBCstrings = 1
@@ -43,17 +43,6 @@ def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
 				dirichletFaces[indexFace,2] = ProjID[kFace,1]
 
 	dirichletFaces = dirichletFaces[:indexFace,:]
-	# print dirichletFaces.shape
-	# print dirichletFaces
-	# print mesh.edges[listFaces,:]
-	# print np.linalg.norm(mesh.points[np.unique(mesh.edges[listFaces,:]),:],axis=1)
-	# print ProjID
-	# ProjU[2,1] =0.
-	# ProjU = np.sort(ProjU,axis=1)
-	# print ProjU
-	# print listFaces
-
-	
 
 	# FIX PERIODIC NURBS 2D
 	nOfNurbs = len(nurbs)
@@ -119,8 +108,6 @@ def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
 				ProjU[kFace,0] = nurbs[idNurbs]['U'][0][0]
 			elif u1<u2 and np.abs(u2 - uMax[idNurbs]) < 1e-10:
 				ProjU[kFace,1] = nurbs[idNurbs]['U'][0][-1]
-	# print 
-	# print ProjU
 
 
 	# IDENTIFY HIGHER ORDRE DIRICHLET NODES
@@ -133,7 +120,6 @@ def Nurbs(mesh,nurbs,BoundaryData,BasesOrder):
 	indexNode = np.arange(nOfFaceNodes)
 
 
-	
 
 	for iDirichletFace in range(nOfDirichletFaces):
 
@@ -337,8 +323,6 @@ def nurbsCurvePointProjection(nurbs,p):
 		tol2 = 1e-10
 		n = 1000
 
-		# if p.shape[0] == 2:
-			# p[3]=0
 
 		pIni = CurvePoint(nurbs,nurbs['start'])[0]
 		pEnd = CurvePoint(nurbs,nurbs['end'])[0]
@@ -402,7 +386,8 @@ def nurbsCurvePointProjection(nurbs,p):
 		if niter == nMaxIter-1:
 			raise StopIteration('Convergence not achieved for point projection')
 
-		U = np.unique(nurbs['U'][0])  # tip: Completely avoid this, it is okay to loop over all knots than finding unique and calling CurvePoint on a loop
+		# tip: Completely avoid this, it is okay to loop over all knots than finding unique and calling CurvePoint on a loop	
+		U = np.unique(nurbs['U'][0])  
 		# U = nurbs['U'][0] # use something like this instead 
 		# print U, dMin
 		# CHECK IF A KNOT IS CLOSER AND WE HAVE NOT CONVERED TO IT (END POINTS OR TOLERANCE)

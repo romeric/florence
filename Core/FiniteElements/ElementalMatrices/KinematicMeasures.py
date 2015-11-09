@@ -37,7 +37,7 @@ def KinematicMeasures(F,AnalysisType):
 		StrainTensors['Gradu'] = F - StrainTensors['I']
 		# SMALL STRAIN TENSOR IS THE LINEARISED VERSION OF GREEN-LAGRANGE STRAIN TENSOR
 		StrainTensors['strain'] = 0.5*(StrainTensors['Gradu'] + np.einsum('ikj',StrainTensors['Gradu']))
-
+		
 	return StrainTensors
 
 

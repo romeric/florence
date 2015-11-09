@@ -91,6 +91,8 @@ def ProblemData(MainData):
 
 	class BoundaryData(object):
 		Type = 'nurbs'
+		RequiresCAD = True
+		
 		# Type = 'straight'
 		# Type = 'mixed'
 		# IGES_File = ProblemPath + '/Two_Arcs.iges'

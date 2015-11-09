@@ -77,6 +77,7 @@ def ProblemData(MainData):
 	class BoundaryData(object):
 		# NURBS/NON-NURBS TYPE BOUNDARY CONDITION
 		Type = 'nurbs'
+		RequiresCAD = True
 
 		scale = 1000.
 		condition = 1 # this condition is not used
