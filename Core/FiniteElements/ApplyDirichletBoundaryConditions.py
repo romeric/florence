@@ -22,7 +22,6 @@ def ApplyDirichletBoundaryConditions(stiffness,F,mesh,MainData):
 		if MainData.BoundaryData.RequiresCAD:
 			# CALL POSTMESH WRAPPER
 			nodesDBC, Dirichlet = PostMeshWrapper(MainData,mesh)
-			print Dirichlet
 		else:
 			# CALL IGAKIT WRAPPER
 			nodesDBC, Dirichlet = IGAKitWrapper(MainData,mesh)
@@ -35,8 +34,8 @@ def ApplyDirichletBoundaryConditions(stiffness,F,mesh,MainData):
 			for i in range(nvar):
 				columns_out = np.append(columns_out,nvar*nodesDBC[inode]+i)
 				AppliedDirichlet = np.append(AppliedDirichlet,Dirichlet[inode,i])
-		# print nodesDBC
-		# print columns_out
+
+		MainData.nodesDBC = nodesDBC # REMOVE THIS
 
 	#----------------------------------------------------------------------------------------------------#
 	#------------------------------------- NON-NURBS BASED SOLUTION -------------------------------------#

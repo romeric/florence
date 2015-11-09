@@ -438,7 +438,18 @@ class PostProcess(object):
 			H = np.einsum('ijk,k->ijk',np.linalg.inv(F).T,detF)
 
 			# FIND JACOBIAN OF SPATIAL GRADIENT
-			Jacobian = np.abs(np.linalg.det(ParentGradientx))
+			# USING ISOPARAMETRIC
+			# Jacobian = np.abs(np.linalg.det(ParentGradientx))
+			# USING DETEERMINANT OF DEFORMATION GRADIENT TENSOR
+			Jacobian = detF
+			# USING INVARIANT F:F
+			# xx = np.einsum('kij,lij->kl',F,F)
+			# Jacobian = np.sqrt(np.einsum('kij,lij->k',F,F))
+			# USING INVARIANT H:H
+			# Jacobian = np.sqrt(np.einsum('kij,lij->k',H,H))
+			# print xx
+			# print Jacobian.shape
+
 			# FIND MIN AND MAX VALUES
 			JMin = np.min(Jacobian); JMax = np.max(Jacobian)
 
@@ -485,10 +496,7 @@ class PostProcess(object):
 		# print TotalDisp[:,0,-1]
 		# MainData.ScaledJacobian = np.zeros_like(MainData.ScaledJacobian)+1
 		vpoints = np.copy(mesh.points)
-		vpoints[:,0] += TotalDisp[:,0,-1]
-		vpoints[:,1] += TotalDisp[:,1,-1]
-		if MainData.ndim == 3:
-			vpoints[:,2] += TotalDisp[:,2,-1]
+		vpoints += mesh.points + TotalDisp[:,:MainData.ndim,-1]
 
 		
 		# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/vpoints_sphere2_p3.dat', vpoints,fmt='%10.9f',delimiter=',')
