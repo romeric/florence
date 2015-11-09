@@ -10,9 +10,11 @@ from Core.Supplementary.Tensors import *
 
 class LinearModel(object):
 	"""docstring for LinearModel"""
+
 	def __init__(self, ndim):
 		super(LinearModel, self).__init__()
 		self.ndim = ndim
+		
 	def Get(self):
 		# self.nvar = self.ndim+1
 		self.nvar = self.ndim
@@ -35,14 +37,6 @@ class LinearModel(object):
 
 		# return H_Voigt
 		#---------------------------------------------------------------------------------------------------------#
-
-		# WHEN AN IDENTITY TENSOR IS USED TO DESCRIBE THE HESSIAN OF A MATERIAL MODEL, WE DON'T TO CALL EINSUM
-		# 2D
-		# H_Voigt = lamb*np.array([[1.,1,0],[1,1.,0],[0,0,0.]]) + mu*np.array([[2.,0,0],[0,2.,0],[0,0,1.]]) 
-		# 3D
-		# block_1 = np.zeros((6,6),dtype=np.float64); block_1[:2,:2] = np.ones((3,3))
-		# block_2 = np.eye(6,6); block_2[0,0],block_2[1,1],block_2[2,2]=2.,2.,2.
-		# H_Voigt = lamb*block_1 + mu*block_2
 		
 		MaterialArgs.H_VoigtSize = MaterialArgs.H_Voigt.shape[0]
 		return MaterialArgs.H_Voigt
