@@ -2,22 +2,24 @@ import numpy as np
 
 from Core.QuadratureRules import GaussLobattoQuadrature
 from Core.QuadratureRules.FeketePointsTri import FeketePointsTri
+
 from Core.MeshGeneration.CurvilinearMeshing.IGAKitPlugin.IdentifyNURBSBoundaries import GetDirichletData
 from Core import PostMeshCurvePy as PostMeshCurve 
 from Core import PostMeshSurfacePy as PostMeshSurface 
 
-def IGAKitWrapper(MainData):
+def IGAKitWrapper(MainData,mesh):
 	"""Calls IGAKit wrapper to get exact Dirichlet boundary conditions"""
-		# GET THE NURBS CURVE FROM PROBLEMDATA
-		nurbs = MainData.BoundaryData().NURBSParameterisation()
-		# IDENTIFIY DIRICHLET BOUNDARY CONDITIONS BASED ON THE EXACT GEOMETRY
-		nodesDBC, Dirichlet = GetDirichletData(mesh,nurbs,MainData.BoundaryData,MainData.C) 
+	
+	# GET THE NURBS CURVE FROM PROBLEMDATA
+	nurbs = MainData.BoundaryData().NURBSParameterisation()
+	# IDENTIFIY DIRICHLET BOUNDARY CONDITIONS BASED ON THE EXACT GEOMETRY
+	nodesDBC, Dirichlet = GetDirichletData(mesh,nurbs,MainData.BoundaryData,MainData.C) 
 
-		return nodesDBC, Dirichlet
+	return nodesDBC, Dirichlet
 
 
 
-def PostMeshWrapper(MainData):
+def PostMeshWrapper(MainData,mesh):
 	"""Calls PostMesh wrapper to get exact Dirichlet boundary conditions"""
 
 	# GET BOUNDARY FEKETE POINTS

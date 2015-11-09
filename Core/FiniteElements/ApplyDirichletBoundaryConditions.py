@@ -1,6 +1,6 @@
 import numpy as np 
+from DirichletBoundaryDataFromCAD import IGAKitWrapper, PostMeshWrapper
 from time import time
-from Core.MeshGeneration.CurvilinearMeshing.IGAKitPlugin.IdentifyNURBSBoundaries import GetDirichletData
 
 # ROUTINE FOR APPLYING DIRICHLET BOUNDARY CONDITIONS
 def ApplyDirichletBoundaryConditions(stiffness,F,mesh,MainData):
@@ -17,102 +17,15 @@ def ApplyDirichletBoundaryConditions(stiffness,F,mesh,MainData):
 	if MainData.BoundaryData.Type == 'nurbs':
 
 		tCAD = time()
-		if not MainData.BoundaryData.RequiresCAD:
-			# GET THE NURBS CURVE FROM PROBLEMDATA
-			nurbs = MainData.BoundaryData().NURBSParameterisation()
-			# IDENTIFIY DIRICHLET BOUNDARY CONDITIONS BASED ON THE EXACT GEOMETRY
-			nodesDBC, Dirichlet = GetDirichletData(mesh,nurbs,MainData.BoundaryData,MainData.C)
+
+		# GET DIRICHLET BOUNDARY CONDITIONS BASED ON THE EXACT GEOMETRY FROM CAD
+		if MainData.BoundaryData.RequiresCAD:
+			# CALL POSTMESH WRAPPER
+			nodesDBC, Dirichlet = PostMeshWrapper(MainData,mesh)
+			print Dirichlet
 		else:
-			# GET BOUNDARY FEKETE POINTS
-			if MainData.ndim == 2:
-				from Core.QuadratureRules import GaussLobattoQuadrature
-				boundary_fekete = GaussLobattoQuadrature(MainData.C+2)[0]
-				# IT IS IMPORTANT TO ENSURE THAT THE DATA IS C-CONITGUOUS
-				boundary_fekete = boundary_fekete.copy(order="c")
-
-				from Core import PostMeshCurvePy as PostMeshCurve 
-				# print dir(PostMesh) 
-				# import sys; sys.exit(0)
-				curvilinear_mesh = PostMeshCurve(mesh.element_type,dimension=MainData.ndim)
-				curvilinear_mesh.SetMeshElements(mesh.elements)
-				curvilinear_mesh.SetMeshPoints(mesh.points)
-				curvilinear_mesh.SetMeshEdges(mesh.edges)
-				curvilinear_mesh.SetMeshFaces(np.zeros((1,4),dtype=np.uint64))
-				curvilinear_mesh.SetScale(MainData.BoundaryData.scale)
-				curvilinear_mesh.SetCondition(MainData.BoundaryData.condition)
-				curvilinear_mesh.SetProjectionPrecision(1.0e-04)
-				curvilinear_mesh.SetProjectionCriteria(MainData.BoundaryData().ProjectionCriteria(mesh))
-				curvilinear_mesh.ScaleMesh()
-				# curvilinear_mesh.InferInterpolationPolynomialDegree();
-				curvilinear_mesh.SetFeketePoints(boundary_fekete)
-				curvilinear_mesh.GetBoundaryPointsOrder()
-				# READ THE GEOMETRY FROM THE IGES FILE
-				curvilinear_mesh.ReadIGES(MainData.BoundaryData.IGES_File)
-				# EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
-				curvilinear_mesh.GetGeomVertices()
-				curvilinear_mesh.GetGeomEdges()
-				curvilinear_mesh.GetGeomFaces()
-				curvilinear_mesh.GetGeomPointsOnCorrespondingEdges()
-				# FIRST IDENTIFY WHICH CURVES CONTAIN WHICH EDGES
-				curvilinear_mesh.IdentifyCurvesContainingEdges()
-				# PROJECT ALL BOUNDARY POINTS FROM THE MESH TO THE CURVE
-				curvilinear_mesh.ProjectMeshOnCurve()
-				# FIX IMAGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
-				curvilinear_mesh.RepairDualProjectedParameters()
-				# PERFORM POINT INVERTION FOR THE INTERIOR POINTS
-				curvilinear_mesh.MeshPointInversionCurve()
-				# GET DIRICHLET DATA
-				nodesDBC, Dirichlet = curvilinear_mesh.GetDirichletData() 
-				# FIND UNIQUE VALUES OF DIRICHLET DATA
-				posUnique = np.unique(nodesDBC,return_index=True)[1]
-				nodesDBC, Dirichlet = nodesDBC[posUnique], Dirichlet[posUnique,:]
-				# print Dirichlet
-				# print nodesDBC
-				# import sys; sys.exit(0)
-
-			elif MainData.ndim == 3:
-				from Core.QuadratureRules.FeketePointsTri import FeketePointsTri
-				boundary_fekete = FeketePointsTri(MainData.C)
-
-				from Core import PostMeshSurfacePy as PostMeshSurface 
-				# print dir(PostMesh) 
-				# import sys; sys.exit(0)
-				curvilinear_mesh = PostMeshSurface(mesh.element_type,dimension=MainData.ndim)
-				curvilinear_mesh.SetMeshElements(mesh.elements)
-				curvilinear_mesh.SetMeshPoints(mesh.points)
-				if mesh.edges.ndim == 2 and mesh.edges.shape[1]==0:
-					mesh.edges = np.zeros((1,4),dtype=np.uint64)
-				else:
-					curvilinear_mesh.SetMeshEdges(mesh.edges)
-				curvilinear_mesh.SetMeshFaces(mesh.faces)
-				curvilinear_mesh.SetScale(MainData.BoundaryData.scale)
-				curvilinear_mesh.SetCondition(MainData.BoundaryData.condition)
-				curvilinear_mesh.SetProjectionPrecision(1.0e-04)
-				curvilinear_mesh.SetProjectionCriteria(MainData.BoundaryData().ProjectionCriteria(mesh))
-				curvilinear_mesh.ScaleMesh()
-				curvilinear_mesh.SetFeketePoints(boundary_fekete)
-				# curvilinear_mesh.GetBoundaryPointsOrder()
-				# READ THE GEOMETRY FROM THE IGES FILE
-				curvilinear_mesh.ReadIGES(MainData.BoundaryData.IGES_File)
-				# EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
-				curvilinear_mesh.GetGeomVertices()
-				# curvilinear_mesh.GetGeomEdges()
-				curvilinear_mesh.GetGeomFaces()
-				curvilinear_mesh.GetGeomPointsOnCorrespondingFaces()
-				# FIRST IDENTIFY WHICH CURVES CONTAIN WHICH EDGES
-				curvilinear_mesh.IdentifySurfacesContainingFaces()
-				# PROJECT ALL BOUNDARY POINTS FROM THE MESH TO THE CURVE
-				curvilinear_mesh.ProjectMeshOnSurface()
-				# FIX IMAGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
-				# curvilinear_mesh.RepairDualProjectedParameters()
-				# PERFORM POINT INVERTION FOR THE INTERIOR POINTS
-				curvilinear_mesh.MeshPointInversionSurface()
-				# GET DIRICHLET DATA
-				nodesDBC, Dirichlet = curvilinear_mesh.GetDirichletData() 
-				# FIND UNIQUE VALUES OF DIRICHLET DATA
-				posUnique = np.unique(nodesDBC,return_index=True)[1]
-				nodesDBC, Dirichlet = nodesDBC[posUnique], Dirichlet[posUnique,:]
-
+			# CALL IGAKIT WRAPPER
+			nodesDBC, Dirichlet = IGAKitWrapper(MainData,mesh)
 
 		print 'Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds'
 
