@@ -9,13 +9,13 @@ from Core import PostMeshSurfacePy as PostMeshSurface
 
 def IGAKitWrapper(MainData,mesh):
 	"""Calls IGAKit wrapper to get exact Dirichlet boundary conditions"""
-	
+
 	# GET THE NURBS CURVE FROM PROBLEMDATA
 	nurbs = MainData.BoundaryData().NURBSParameterisation()
 	# IDENTIFIY DIRICHLET BOUNDARY CONDITIONS BASED ON THE EXACT GEOMETRY
 	nodesDBC, Dirichlet = GetDirichletData(mesh,nurbs,MainData.BoundaryData,MainData.C) 
 
-	return nodesDBC, Dirichlet
+	return nodesDBC[:,None], Dirichlet
 
 
 

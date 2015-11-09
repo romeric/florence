@@ -78,21 +78,10 @@ def MainSolver(MainData,mesh):
 		# print np.linalg.norm(vmesh.points)
 		Eulerx = np.copy(vmesh.points) 
 		K = Assembly(MainData_,vmesh,Eulerx,np.zeros((mesh.points.shape[0],1),dtype=np.float64))[0]
-		F = np.zeros((mesh.points.shape[0]*MainData_.nvar,1),dtype=np.float64)
+		# F = np.zeros((mesh.points.shape[0]*MainData_.nvar,1),dtype=np.float64)
 		# _, _, F, _, _, AppliedDirichlet = ApplyDirichletBoundaryConditions(K,F,vmesh,MainData_)
 		# print AppliedDirichlet - AppliedDirichletInc
 		# AppliedDirichlet -= AppliedDirichletInc 
-		# print mesh.points.shape[0]*MainData.nvar, columns_in.shape, columns_out.shape, AppliedDirichlet.shape
-		# print columns_out
-		# xpoints = np.concatenate((mesh.points[:,0],mesh.points[:,1]
-		# xpoints = mesh.points.flatten(order='F')
-		# print dU[0,:], dU.flatten(order='C')[:2]
-		# xpoints = np.zeros(mesh.points.shape[0]*2)
-		# xpoints[::2] = mesh.points[:,0]
-		# xpoints[1::2] = mesh.points[:,1]
-		# xpoints = np.zeros(vmesh.points.shape[0]*2)
-		# xpoints[::2] = vmesh.points[:,0]
-		# xpoints[1::2] = vmesh.points[:,1]
 
 		# xpoints = np.zeros(vmesh.points.shape[0]*2)
 		# xpoints[::2] = TotalDisp[:,0,Increment]
@@ -103,16 +92,42 @@ def MainSolver(MainData,mesh):
 		# 	F = F - AppliedDirichlet[i]*K.getcol(columns_out[i])
 		# print AppliedDirichlet
 
-		AppliedDirichlet = ApplyDirichletBoundaryConditions(K,F,vmesh,MainData_)[-1]
+		# AppliedDirichlet = ApplyDirichletBoundaryConditions(K,F,vmesh,MainData_)[-1]
 		# K2 = copy.deepcopy(K)
 		# K2[:,:] = 0
 		# F2 = np.zeros_like(F)
 		# print F2
 		# AppliedDirichlet = ApplyDirichletBoundaryConditions(K2,F2,vmesh,MainData_)[-1]
-		# AppliedDirichlet
-		# print AppliedDirichlet
-		# print AppliedDirichlet - xpoints[columns_out]
-		# print xpoints[columns_out] - ypoints[columns_out]
+
+		# from Core.FiniteElements.DirichletBoundaryDataFromCAD import IGAKitWrapper, PostMeshWrapper
+		# # GET DIRICHLET BOUNDARY CONDITIONS BASED ON THE EXACT GEOMETRY FROM CAD
+		# if MainData.BoundaryData.RequiresCAD:
+		# 	# CALL POSTMESH WRAPPER
+		# 	nodesDBC, Dirichlet = PostMeshWrapper(MainData,mesh)
+		# else:
+		# 	# CALL IGAKIT WRAPPER
+		# 	nodesDBC, Dirichlet = IGAKitWrapper(MainData,mesh)
+		# if Increment==0:
+		# 	# nodesDBC, Dirichlet = PostMeshWrapper(MainData,vmesh)
+		# 	MainData.Dirichlet = np.copy(Dirichlet)
+		# # else:
+		# 	# Dirichlet = MainData.Dirichlet - vmesh.points[nodesDBC[:,0],:]
+
+		# AppliedDirichlet = []
+		# nOfDBCnodes = nodesDBC.shape[0]
+		# for inode in range(nOfDBCnodes):
+		# 	for i in range(MainData.nvar):
+		# 		# pass
+		# 		AppliedDirichlet = np.append(AppliedDirichlet,Dirichlet[inode,i])
+
+		# print Dirichlet
+		# print AppliedDirichlet - ypoints[columns_out]
+		# AppliedDirichlet + ypoints[columns_out]
+		# print Dirichlet 
+		# print np.linalg.norm(vmesh.points[MainData.nodesDBC[:,0],:],axis=1)
+		# print np.linalg.norm(vmesh.points[413,:])
+		# print vmesh.points[23,:]
+
 
 
 

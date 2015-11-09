@@ -27,8 +27,8 @@ from Core.FiniteElements.Solvers.Solver import *
 # 2D
 # Pr = imp.load_source('Nonlinear_2D',pwd+'/Problems/FiniteElements/Hollow_Arc_Tri/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Electromechanics/ProblemData.py')
-Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle/ProblemData.py')
-# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Nurbs/ProblemData.py')
+# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle/ProblemData.py')
+Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Nurbs/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/MechanicalComponent2D/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Wing2D/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Sphere/ProblemData.py')
@@ -112,7 +112,8 @@ def main(MainData, DictOutput=None, nStep=0):
 	# import matplotlib.pyplot as plt
 	# plt.show()
 
-	# vpoints = mesh.points + TotalDisp[:,:MainData.ndim,-1]
+	vpoints = mesh.points + TotalDisp[:,:MainData.ndim,-1]
+	print np.linalg.norm(vpoints[MainData.nodesDBC[:,0],:],axis=1)
 	# MainData.mesh.points = mesh.points + TotalDisp[:,:MainData.ndim,-1]
 
 	# print np.linalg.norm(mesh.points[mesh.elements[68,:],:],axis=1)
@@ -153,14 +154,6 @@ def main(MainData, DictOutput=None, nStep=0):
 	# DEGUGGING 
 	if MainData.__NO_DEBUG__ is False:
 		# NOTE THAT PYTHON'S BUILT-IN DEBUGGER IS ALWAYS TRUE __debug__ WITHOUT -0 FLAG
-		_DEBUG(MainData,mesh,TotalDisp)
-		mesh_node_order = mesh.CheckNodeNumberingTri()
-
-		# CHECK GAUSS POINTS
-		# print np.sum(Domain.Bases,axis=0)
-		# print np.sum(Domain.gBasesx,axis=0)
-		# print np.sum(Domain.gBasesy,axis=0)
-		# print np.sum(Quadrature.weights)
-
-	# sys.exit("STOPPED")
+		from Core import debug 
+		debug(MainData,mesh,TotalDisp)
 

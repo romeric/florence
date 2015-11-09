@@ -91,12 +91,17 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 
 
 	# CHECK FOR SYMMETRY OF STIFFNESS MATRIX
-	# if MainData.__NO_DEBUG__ is False:	
-		# for i in range(0,stiffness.shape[0]):
-		# 	for j in range(0,stiffness.shape[0]):
-		# 		if ~np.allclose(stiffness[i,j],stiffness[j,i]):
-		# 			print i,j
-	# 	print 'Elemental stiffness matrix is not symmetric'
+	if MainData.__NO_DEBUG__ is False:
+		issym = True 	
+		for i in range(0,stiffness.shape[0]):
+			for j in range(0,stiffness.shape[0]):
+				if ~np.allclose(stiffness[i,j],stiffness[j,i]):
+					issym = False
+					print u'\u2717'.encode('utf8')+' : ', 'Elemental stiffness matrix is not symmetric.',
+					print ' First non-symmetric element indices are', i,j, 'Is this meant to be?'
+					break
+		# if issym:
+			# print u'\u2713'.encode('utf8')+' : ', 'Elemental stiffness matrix is symmetric'
 
 	return stiffness, tractionforce 
 #-------------------------------------------------------------------------------------------------------------------#

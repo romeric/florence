@@ -88,6 +88,8 @@ def ProblemData(MainData):
 		Type = 'nurbs'
 		# Type = 'straight'
 		# Type = 'mixed'
+		RequiresCAD = True
+
 		IGES_File = ProblemPath + '/Circle.igs'
 		condition = 2000.
 		scale = 1000.

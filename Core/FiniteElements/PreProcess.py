@@ -52,7 +52,8 @@ def PreProcess(MainData,Pr,pwd):
 			# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=7,ncirc=7) # isotropic
 			mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=False,nrad=7,ncirc=7)
 
-	# mesh_node_order = mesh.CheckNodeNumberingTri()
+	if MainData.__NO_DEBUG__ is False:
+		mesh.CheckNodeNumberingTri()
 	# sys.exit()
 
 	# mesh.ReadGIDMesh("/home/roman/Dropbox/2015_HighOrderMeshing/geometriesAndMeshes/falcon/falcon_iso.dat","tet",0)
@@ -130,6 +131,7 @@ def PreProcess(MainData,Pr,pwd):
 	# print mesh.points
 	# print mesh.faces
 	# print mesh.edges
+	# mesh.PlotMeshNumberingTri()
 
 	# sys.exit("STOPPED")
 

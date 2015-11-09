@@ -51,6 +51,7 @@ class MainData(object):
 
 
  	__NO_DEBUG__ = True
+ 	# __NO_DEBUG__ = False
  	__VECTORISATION__ = True
  	__PARALLEL__ = True
  	numCPU = MP.cpu_count()
@@ -59,7 +60,7 @@ class MainData(object):
  	__MEMORY__ = 'SHARED'
  	# __MEMORY__ = 'DISTRIBUTED'
 
- 	C = 1
+ 	C = 2
  	norder = 2 
  	plot = (0,3)
  	nrplot = (0,'last')
