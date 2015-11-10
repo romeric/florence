@@ -55,7 +55,7 @@ class MainData(object):
  	__VECTORISATION__ = True
  	__PARALLEL__ = True
  	numCPU = MP.cpu_count()
- 	# __PARALLEL__ = False
+ 	__PARALLEL__ = False
  	# nCPU = 8
  	__MEMORY__ = 'SHARED'
  	# __MEMORY__ = 'DISTRIBUTED'

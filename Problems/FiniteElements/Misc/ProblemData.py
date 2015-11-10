@@ -16,24 +16,24 @@ def ProblemData(MainData):
 	MainData.Formulation = 1 	# Displacement-Potential based formulation
 	MainData.Analysis = 'Static'
 	# MainData.Analysis = 'Dynamic'
-	MainData.AnalysisType = 'Linear'
-	# MainData.AnalysisType = 'Nonlinear'
+	# MainData.AnalysisType = 'Linear'
+	MainData.AnalysisType = 'Nonlinear'
 
 	class MaterialArgs(object):
-		"""docstring for MaterialArgs"""
 		# Type = 'Steinmann'
 		# Type = 'LinearisedElectromechanics'
-		Type = 'LinearModel'
+		# Type = 'LinearModel'
 		# Type = 'Incrementally_Linearised_NeoHookean'
 		# Type = 'AnisotropicMooneyRivlin_1'
 		# Type = 'NearlyIncompressibleNeoHookean'
 		# Type = 'MooneyRivlin'
+		Type = 'NeoHookean_2'
 		
 		
 
 		E = 1.0e1
 		# nu = 0.4
-		nu=0.35
+		nu=0.30
 
 		# E = MainData.E 
 		# nu = MainData.nu 
@@ -81,9 +81,9 @@ def ProblemData(MainData):
 		# FileName = ProblemPath + '/Half_Circle_23.dat'
 		# FileName = ProblemPath + '/Half_Circle_348.dat'
 
-		FileName = ProblemPath + '/Mech2D_Seg0_350.dat'
+		# FileName = ProblemPath + '/Mech2D_Seg0_350.dat'
 		# FileName = ProblemPath + '/Mech2D_Seg0_70.dat'
-		# FileName = ProblemPath + '/Mech2D_Seg2_6.dat'
+		FileName = ProblemPath + '/Mech2D_Seg2_6.dat'
 		# FileName = ProblemPath + '/Mesh_LeftPartWithCircle_56.dat'
 		# FileName = ProblemPath + '/LeftCircle_12.dat'
 		
@@ -97,10 +97,10 @@ def ProblemData(MainData):
 		# Type = 'mixed'
 		# IGES_File = ProblemPath + '/Two_Arcs.iges'
 		# IGES_File = ProblemPath + '/Half_Circle.igs'
-		IGES_File = ProblemPath + '/Mech2D_Seg0.igs'
+		# IGES_File = ProblemPath + '/Mech2D_Seg0.igs'
 		# IGES_File = ProblemPath + '/LeftPartWithCircle.igs'
 		# IGES_File = ProblemPath + '/LeftCircle.iges'
-		# IGES_File = ProblemPath + '/Mech2D_Seg2.igs'
+		IGES_File = ProblemPath + '/Mech2D_Seg2.igs'
 
 		# two arcs and half circle
 		scale = 1000.

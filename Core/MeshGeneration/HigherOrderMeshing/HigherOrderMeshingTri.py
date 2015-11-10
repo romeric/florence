@@ -245,11 +245,11 @@ def HighOrderMeshTri_UNSTABLE(C,mesh,Decimals=10,Parallel=False,nCPU=1,ComputeAl
 
 	for i in range(0,duplicates.shape[0]):
 		if Parallel:
-			x = ParallelTuple5[i][0]; y = ParallelTuple5[i][1];
+			x = ParallelTuple5[i][0]; y = ParallelTuple5[i][1]
 			reelements[x,y] = duplicates[i,0] 
 		else:
 			# reelements[whereEQ(reelements,duplicates[i,1])] = duplicates[i,0] 
-			reelements[reelements==duplicates[i,1]] = duplicates[i,0] 
+			reelements[reelements==duplicates[i,1]] = duplicates[i,0]
 
 	tnodes = time()-tnodes
 

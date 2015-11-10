@@ -59,9 +59,9 @@ int main()
 //    std::string edge_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Annular_Circle_Nurbs/edges_circle_p2.dat";
 //    std::string unique_edge_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Annular_Circle_Nurbs/unique_edges_circle_p2.dat";
 
-//    std::string elem_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Annular_Circle_Nurbs/elements_circle_p3.dat";
-//    std::string point_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Annular_Circle_Nurbs/points_circle_p3.dat";
-//    std::string edge_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Annular_Circle_Nurbs/edges_circle_p3.dat";
+    std::string elem_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Annular_Circle_Nurbs/elements_circle_p3.dat";
+    std::string point_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Annular_Circle_Nurbs/points_circle_p3.dat";
+    std::string edge_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Annular_Circle_Nurbs/edges_circle_p3.dat";
 
 //    std::string elem_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Annular_Circle/elements_circle_p2.dat";
 //    std::string point_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Annular_Circle/points_circle_p2.dat";
@@ -129,10 +129,10 @@ int main()
 //    std::string edge_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/edges_sphere_p2.dat";
 //    std::string face_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/faces_sphere_p2.dat";
 
-    std::string elem_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/elements_sphere2_p2.dat";
-    std::string point_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/points_sphere2_p2.dat";
-    std::string edge_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/edges_sphere2_p2.dat";
-    std::string face_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/faces_sphere2_p2.dat";
+//    std::string elem_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/elements_sphere2_p2.dat";
+//    std::string point_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/points_sphere2_p2.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/edges_sphere2_p2.dat";
+//    std::string face_file = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Tests/faces_sphere2_p2.dat";
 
 
 
@@ -144,14 +144,14 @@ int main()
 //    const char* iges_filename = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Misc/Mech2D_Seg2.igs";
 //    const char* iges_filename = "/home/roman/Dropbox/OCC_Geometry_Checks/Line.igs";
 //    const char* iges_filename = "/home/roman/Dropbox/OCC_Geometry_Checks/Sphere.igs";
-//    const char* iges_filename = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Annular_Circle_Nurbs/Circle.igs";
+    const char* iges_filename = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Annular_Circle_Nurbs/Circle.igs";
 //    const char* iges_filename = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Annular_Circle/Circle.igs";
 //    const char* iges_filename = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Misc/Half_Circle.igs";
 //    const char* iges_filename = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Misc/Two_Arcs.iges";
 //    const char* iges_filename = "/home/roman/Dropbox/Florence/Problems/FiniteElements/Wing2D/sd7003.igs";
 
 //    const char* iges_filename = "/home/roman/Dropbox/zdump/OCC_Geometry_Checks/Cylinder.igs";
-    const char* iges_filename = "/home/roman/Dropbox/zdump/OCC_Geometry_Checks/Sphere.igs";
+//    const char* iges_filename = "/home/roman/Dropbox/zdump/OCC_Geometry_Checks/Sphere.igs";
 
 
 
@@ -164,8 +164,8 @@ int main()
 //    Eigen::MatrixUI faces = PostMeshCurve::ReadI(face_file,','); // 3D
 //    Eigen::MatrixI unique_edges = Read(unique_edge_file);
 
-//    Real scale = 1000.;
-//    Real condition = 2000.;
+    Real scale = 1000.;  // for annular circle nurbs
+    Real condition = 2000.; // for annular circle nurbs
 //    Real condition = 1000.;
 //    Real condition = 2.0e20;
 
@@ -179,18 +179,18 @@ int main()
 //    Real condition = 1.0e10;
 
     // anisotropic rae2822
-    Real scale = 1.;
-    Real condition = 5;
+//    Real scale = 1.;
+//    Real condition = 5;
 
     //3D sphere
 //    Real scale = 1000.;
 //    Real condition = 1.0e20;
 
-    Eigen::Matrix<Real,3,1> boundary_fekete;
-//    Eigen::Matrix<Real,4,1> boundary_fekete;
+//    Eigen::Matrix<Real,3,1> boundary_fekete;
+    Eigen::Matrix<Real,4,1> boundary_fekete;
 //    Eigen::Matrix<Real,5,1> boundary_fekete;
-    boundary_fekete << -1., 0., 1.;
-//    boundary_fekete << -1.,-0.447213595499957983,0.447213595499957928,1.;
+//    boundary_fekete << -1., 0., 1.;
+    boundary_fekete << -1.,-0.447213595499957983,0.447213595499957928,1.;
 //    boundary_fekete <<-1.,-0.654653670707977198,0.,0.654653670707977198,1.;
 
     // anistropic rae2822
@@ -218,19 +218,19 @@ int main()
 
 //    exit (EXIT_FAILURE);
     PassToPython struct_to_python;
-//    struct_to_python = ComputeDirichleteData(iges_filename,scale,points.data(),points.rows(), points.cols(),
-//                           elements.data(), elements.rows(), elements.cols(),
-//                           edges.data(), edges.rows(), edges.cols(),
-//                           faces.data(),  faces.rows(),  faces.cols(),condition,
-//                           boundary_fekete.data(), boundary_fekete.rows(), boundary_fekete.cols(),
-//                           criteria.data(), criteria.rows(), criteria.cols(), precision);
-
-    struct_to_python = ComputeDirichleteData3D(iges_filename,scale,points.data(),points.rows(), points.cols(),
+    struct_to_python = ComputeDirichleteData(iges_filename,scale,points.data(),points.rows(), points.cols(),
                            elements.data(), elements.rows(), elements.cols(),
                            edges.data(), edges.rows(), edges.cols(),
                            faces.data(),  faces.rows(),  faces.cols(),condition,
                            boundary_fekete.data(), boundary_fekete.rows(), boundary_fekete.cols(),
                            criteria.data(), criteria.rows(), criteria.cols(), precision);
+
+//    struct_to_python = ComputeDirichleteData3D(iges_filename,scale,points.data(),points.rows(), points.cols(),
+//                           elements.data(), elements.rows(), elements.cols(),
+//                           edges.data(), edges.rows(), edges.cols(),
+//                           faces.data(),  faces.rows(),  faces.cols(),condition,
+//                           boundary_fekete.data(), boundary_fekete.rows(), boundary_fekete.cols(),
+//                           criteria.data(), criteria.rows(), criteria.cols(), precision);
 
 //    print(struct_to_python.displacement_BC_stl);
 //    print(elements);

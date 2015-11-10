@@ -20,18 +20,16 @@ def ProblemData(MainData):
 	# MainData.AnalysisType = 'Nonlinear'
 
 	class MaterialArgs(object):
-		"""docstring for MaterialArgs"""
-		# Type = 'Steinmann'
-		# Type = 'LinearisedElectromechanics'
-		Type = 'LinearModel'
-		# Type = 'Incrementally_Linearised_NeoHookean'
+		# Type = 'LinearModel'
+		Type = 'IncrementallyLinearisedNeoHookean'
 		# Type = 'AnisotropicMooneyRivlin_1'
 		# Type = 'NearlyIncompressibleNeoHookean'
 		# Type = 'MooneyRivlin'
+		# Type = 'NeoHookean_2'
 		
 		
 
-		E = 1.0e1
+		E = 1.0e0
 		# nu = 0.4
 		nu=0.4
 
@@ -78,6 +76,7 @@ def ProblemData(MainData):
 
 		ConnectivityFile = ProblemPath + '/elements_circle.dat'
 		CoordinatesFile = ProblemPath +'/points_circle.dat'
+		MatFile = ProblemPath + '/circleTest.mat'
 		EdgesFile = None
 		FacesFile = None
 

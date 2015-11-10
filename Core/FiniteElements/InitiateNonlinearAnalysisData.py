@@ -1,18 +1,18 @@
 import numpy as np
 
-def InitiateNonlinearAnalysisData(MainData,nmesh):
+def InitiateNonlinearAnalysisData(MainData,mesh):
 	
 	# INFORMATION REQUIRED FOR NONLINEAR ANALYSIS
 	################################################################################
 	Tolerance = 1.0e-05
 	if MainData.Analysis == 'Static':
-		LoadIncrement = 2
+		LoadIncrement = 1
 	else:
 		LoadIncrement = MainData.BoundaryData.nstep
 	# LoadFactor = 1./LoadIncrement
 	
 	class AssemblyParameters(object):
-		"""docstring for AssemblyParameters"""
+		"""Information about load increments, iterations and such"""
 		ExternalLoadNature = 'Linear'
 		LoadIncrements = LoadIncrement
 		LoadIncrementNumber = 0
@@ -25,4 +25,4 @@ def InitiateNonlinearAnalysisData(MainData,nmesh):
 	MainData.AssemblyParameters = AssemblyParameters
 	###########################################################################
 
-	return np.zeros((nmesh.points.shape[0]*MainData.nvar,1)), np.zeros((nmesh.points.shape[0]*MainData.nvar,1))
+	return np.zeros((mesh.points.shape[0]*MainData.nvar,1)), np.zeros((mesh.points.shape[0]*MainData.nvar,1))

@@ -70,6 +70,11 @@ def PreProcess(MainData,Pr,pwd):
 
 	# mesh.points *=1000. 
 	# mesh.SimplePlot()
+	# print mesh.points
+	# Dict = {'points':mesh.points,'element':mesh.elements}
+	# from scipy.io import savemat
+	# savemat('/home/roman/Desktop/fillet_p1',Dict)
+
 	# mesh.PlotMeshNumberingTri()
 	# print mesh.GetElementsWithBoundaryEdgesTri()
 	# mesh.RetainElementsWithin((-0.52,-0.08,0.72,0.08))
@@ -99,6 +104,12 @@ def PreProcess(MainData,Pr,pwd):
 	# mesh.WriteVTK('/home/roman/Desktop/sphere2.vtu')
 	# sys.exit(0)
 
+	from scipy.io import loadmat
+	loadedmat = loadmat(MainData.MeshInfo.MatFile)
+	mesh.points = np.ascontiguousarray(loadedmat['X'])
+	mesh.elements = np.ascontiguousarray(loadedmat['T'])-1
+
+
 
 	# GENERATE pMESHES FOR HIGH C
 	############################################################################
@@ -113,6 +124,9 @@ def PreProcess(MainData,Pr,pwd):
 	# t1=time()
 	# mesh.GetElementsWithBoundaryEdgesTri()
 	# print time()-t1
+
+
+
 
 	# index_sort_x = np.argsort(nmesh.points[:,0])
 	# sorted_repoints = nmesh.points[index_sort_x,:]
@@ -132,6 +146,7 @@ def PreProcess(MainData,Pr,pwd):
 	# print mesh.faces
 	# print mesh.edges
 	# mesh.PlotMeshNumberingTri()
+	# print mesh.points[159,:]
 
 	# sys.exit("STOPPED")
 
@@ -206,7 +221,7 @@ def PreProcess(MainData,Pr,pwd):
 	############################################################################
 	# GET QUADRATURE POINTS AND WEIGHTS
 	z=[]; w=[]; 
-	QuadratureOpt=1 	# OPTION FOR QUADRATURE TECHNIQUE FOR TRIS AND TETS
+	QuadratureOpt=0 	# OPTION FOR QUADRATURE TECHNIQUE FOR TRIS AND TETS
 
 
 	if MainData.MeshInfo.MeshType == 'quad' or MainData.MeshInfo.MeshType == 'hex':
@@ -215,7 +230,8 @@ def PreProcess(MainData,Pr,pwd):
 		zw = QuadraturePointsWeightsTet.QuadraturePointsWeightsTet(MainData.C+1,QuadratureOpt)
 		z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]; #w = np.repeat(w,MainData.ndim) 
 	elif MainData.MeshInfo.MeshType == 'tri':
-		zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(MainData.C+3,QuadratureOpt) # PUT C+4 OR HIGHER
+		# zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(MainData.C+3,QuadratureOpt) # PUT C+4 OR HIGHER
+		zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(MainData.C+1,QuadratureOpt) # PUT C+4 OR HIGHER
 		z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
 
 	class Quadrature(object):

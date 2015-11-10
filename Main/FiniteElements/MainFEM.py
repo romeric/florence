@@ -48,6 +48,13 @@ def main(MainData, DictOutput=None, nStep=0):
 	print 'Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation bases etc...'
 	mesh = PreProcess(MainData,Pr,pwd)
 
+	# print MainData.Domain.Bases
+	# print MainData.Quadrature.weights
+	# print MainData.Domain.gBasesy
+	# np.savetxt('/home/roman/Desktop/MeshingElasticity2/gBasesx.dat',MainData.Domain.gBasesx)
+	# np.savetxt('/home/roman/Desktop/MeshingElasticity2/gBasesy.dat',MainData.Domain.gBasesy)
+	# sys.exit(0)
+
 	# from copy import deepcopy
 	# if nStep == 0:
 	# 	MainData.mesh = deepcopy(mesh)
@@ -113,8 +120,13 @@ def main(MainData, DictOutput=None, nStep=0):
 	# plt.show()
 
 	vpoints = mesh.points + TotalDisp[:,:MainData.ndim,-1]
-	print np.linalg.norm(vpoints[MainData.nodesDBC[:,0],:],axis=1)
+	print 'All boundary node norms: ', np.linalg.norm(vpoints[MainData.nodesDBC[:,0],:],axis=1)
 	# MainData.mesh.points = mesh.points + TotalDisp[:,:MainData.ndim,-1]
+	# print vpoints[159,:]
+	# print np.linalg.norm(vpoints[159,:])
+	# print mesh.elements
+	# print mesh.points
+	# print mesh.edges
 
 	# print np.linalg.norm(mesh.points[mesh.elements[68,:],:],axis=1)
 	# print np.linalg.norm(vpoints[mesh.elements[68,:],:],axis=1)

@@ -36,6 +36,27 @@ def ApplyDirichletBoundaryConditions(stiffness,F,mesh,MainData):
 				AppliedDirichlet = np.append(AppliedDirichlet,Dirichlet[inode,i])
 
 		MainData.nodesDBC = nodesDBC # REMOVE THIS
+		# print Dirichlet
+		# print nodesDBC
+		# print AppliedDirichlet
+		# print nodesDBC[8]
+		# print Dirichlet.shape
+		# print Dirichlet[8,:]
+		# print AppliedDirichlet.shape
+		# import sys; sys.exit() 
+
+
+		############################
+		# To Rogelio
+		# print mesh.points
+		# Dict = {'points':mesh.points,'element':mesh.elements,'displacements':AppliedDirichlet,'displacement_dof':columns_out}
+		# from scipy.io import savemat
+		# savemat('/home/roman/Desktop/fillet_p4',Dict)
+
+
+		# import sys; sys.exit(0)
+
+		############################
 
 	#----------------------------------------------------------------------------------------------------#
 	#------------------------------------- NON-NURBS BASED SOLUTION -------------------------------------#

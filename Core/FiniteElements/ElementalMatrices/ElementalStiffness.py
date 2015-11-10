@@ -28,8 +28,10 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 	# COMPUTE REMAINING KINEMATIC MEASURES
 	StrainTensors = KinematicMeasures(F,MainData.AnalysisType)
 
+
 	# UPDATE/NO-UPDATE GEOMETRY
-	if MainData.GeometryUpdate:
+	if MainData.GeometryUpdate or MainData.Prestress:
+		# print 'WOW'
 		# MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
 		ParentGradientx = np.einsum('ijk,jl->kil',MainData.Domain.Jm,EulerELemCoords)
 		# SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
@@ -42,6 +44,13 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 		# COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
 		detJ = np.einsum('i,i->i',MainData.Domain.AllGauss[:,0],np.abs(la.det(ParentGradientX)))
 
+	# if elem==0:
+		# np.set_printoptions(precision=14)
+		# print EulerELemCoords
+		# print 
+		# print LagrangeElemCoords
+		# print StrainTensors['J']
+		# print ParentGradientx[0,:,:]
 
 	# LOOP OVER GAUSS POINTS
 	# for counter in range(0,MainData.Domain.AllGauss.shape[0]):

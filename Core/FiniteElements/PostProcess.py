@@ -450,6 +450,10 @@ class PostProcess(object):
 			# print xx
 			# print Jacobian.shape
 
+			# if elem==0:
+				# print ParentGradientx[0,:,:]
+				# print ParentGradientx.shape
+
 			# FIND MIN AND MAX VALUES
 			JMin = np.min(Jacobian); JMax = np.max(Jacobian)
 
@@ -496,7 +500,7 @@ class PostProcess(object):
 		# print TotalDisp[:,0,-1]
 		# MainData.ScaledJacobian = np.zeros_like(MainData.ScaledJacobian)+1
 		vpoints = np.copy(mesh.points)
-		vpoints += mesh.points + TotalDisp[:,:MainData.ndim,-1]
+		vpoints += TotalDisp[:,:MainData.ndim,-1]
 
 		
 		# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/vpoints_sphere2_p3.dat', vpoints,fmt='%10.9f',delimiter=',')
