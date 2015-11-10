@@ -45,7 +45,8 @@ public:
     void IdentifyCurvesContainingEdges();
     void ProjectMeshOnCurve();
     void RepairDualProjectedParameters();
-    void MeshPointInversionCurve();    
+    void MeshPointInversionCurveArcLength();
+    void MeshPointInversionCurve();
     void GetBoundaryPointsOrder();
     PassToPython GetDirichletData();
 

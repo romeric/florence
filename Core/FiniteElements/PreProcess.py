@@ -100,14 +100,15 @@ def PreProcess(MainData,Pr,pwd):
 	# sys.exit(0)
 
 
+
 	# print mesh.elements.shape
 	# mesh.WriteVTK('/home/roman/Desktop/sphere2.vtu')
 	# sys.exit(0)
 
-	from scipy.io import loadmat
-	loadedmat = loadmat(MainData.MeshInfo.MatFile)
-	mesh.points = np.ascontiguousarray(loadedmat['X'])
-	mesh.elements = np.ascontiguousarray(loadedmat['T'])-1
+	# from scipy.io import loadmat
+	# loadedmat = loadmat(MainData.MeshInfo.MatFile)
+	# mesh.points = np.ascontiguousarray(loadedmat['X'])
+	# mesh.elements = np.ascontiguousarray(loadedmat['T'])-1
 
 
 
@@ -147,6 +148,8 @@ def PreProcess(MainData,Pr,pwd):
 	# print mesh.edges
 	# mesh.PlotMeshNumberingTri()
 	# print mesh.points[159,:]
+	# print mesh.points[924,:]
+
 
 	# sys.exit("STOPPED")
 
@@ -253,7 +256,13 @@ def PreProcess(MainData,Pr,pwd):
 	Boundary = []
 
 	############################################################################
-
+	# from scipy.io import savemat
+	# print z 
+	# print w
+	# print Domain.Bases
+	# Dict = {'GaussPoints':z,'GaussWeights':w,'Bases':Domain.Bases,'gBasesx':Domain.gBasesx, 'gBasesy':Domain.gBasesy}
+	# savemat('/home/roman/Desktop/Info_P'+str(MainData.C+1),Dict)
+	# sys.exit(0)
 
 
 	# COMPUTING GRADIENTS AND JACOBIAN A PRIORI FOR ALL INTEGRATION POINTS

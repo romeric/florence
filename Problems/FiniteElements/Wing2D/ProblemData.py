@@ -64,12 +64,12 @@ def ProblemData(MainData):
 		Reader = 'Read'
 		Format = 'GID'
 
-		# FileName = ProblemPath + '/sd7003_Stretch25.dat'
+		FileName = ProblemPath + '/sd7003_Stretch25.dat'
 		# FileName = ProblemPath + '/sd7003_Stretch50.dat'
 		# FileName = ProblemPath + '/sd7003_Stretch100.dat'
 		# FileName = ProblemPath + '/sd7003_Stretch200.dat'
 		# FileName = ProblemPath + '/sd7003_Stretch400.dat'
-		FileName = ProblemPath + '/sd7003_Stretch800.dat'
+		# FileName = ProblemPath + '/sd7003_Stretch800.dat'
 		# FileName = ProblemPath + '/sd7003_Stretch1600.dat'
 		
 

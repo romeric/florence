@@ -29,6 +29,15 @@ def ApplyDirichletBoundaryConditions(stiffness,F,mesh,MainData):
 		print 'Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds'
 
 
+		# from Core.Supplementary.Tensors import makezero
+		# Dirichlet = makezero(Dirichlet)
+		# for i in range(Dirichlet.shape[0]):
+		# 	for j in range(Dirichlet.shape[1]):
+		# 		if abs(Dirichlet[i,j])<1e-02:
+		# 			Dirichlet[i,j]= 0
+
+		
+
 		nOfDBCnodes = nodesDBC.shape[0]
 		for inode in range(nOfDBCnodes):
 			for i in range(nvar):
@@ -37,12 +46,28 @@ def ApplyDirichletBoundaryConditions(stiffness,F,mesh,MainData):
 
 		MainData.nodesDBC = nodesDBC # REMOVE THIS
 		# print Dirichlet
-		# print nodesDBC
+		# print nodesDBC.shape
 		# print AppliedDirichlet
 		# print nodesDBC[8]
 		# print Dirichlet.shape
 		# print Dirichlet[8,:]
 		# print AppliedDirichlet.shape
+		# from scipy.io import savemat
+		# print nodesDBC.shape, mesh.points.shape
+
+		# print nodesDBC.shape, Dirichlet.shape
+		# for i in range(nodesDBC.shape[0]):
+		# 	x,y = np.where(mesh.edges==nodesDBC[i])
+		# 	# print x
+		# 	if x.shape[0]!=0:
+		# 		# print x,y
+		# 		Dirichlet[mesh.edges[x,y],:]=0
+		# 		# print Dirichlet[x,y]
+		# 	# pass
+
+
+
+
 		# import sys; sys.exit() 
 
 

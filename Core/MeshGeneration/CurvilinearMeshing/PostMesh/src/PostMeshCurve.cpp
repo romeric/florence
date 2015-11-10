@@ -468,6 +468,60 @@ void PostMeshCurve::MeshPointInversionCurve()
     this->displacements_BC = Eigen::MatrixR::Zero(this->no_dir_edges*no_edge_nodes,this->ndim);
 
     // FIND CURVE LENGTH AND LAST PARAMETER SCALE
+//    this->GetInternalCurveScale();
+//    this->EstimatedParameterUOnMesh();
+
+//    print(this->u_of_all_fekete_mesh_edges);
+//    print(boundary_edges_order);
+//    this->GetCurvesLengths();
+//    this->GetCurvesParameters();
+//    println(this->curves_parameters);
+//    print(dirichlet_edges);
+//    print(listedges);
+
+    for (auto idir=0; idir< this->no_dir_edges; ++idir)
+    {
+        auto id_curve = this->dirichlet_edges(idir,2);
+        Handle_Geom_Curve current_curve = this->geometry_curves[id_curve];
+//        auto length_current_curve = cnp::length(current_curve,1/this->scale);
+//        auto internal_scale = 1./this->curve_to_parameter_scale_U(id_curve);
+//        GeomAdaptor_Curve current_curve_adapt(current_curve);
+
+        for (auto j=0; j<no_edge_nodes;++j)
+        {
+            GeomAPI_ProjectPointOnCurve proj;
+            auto x = this->mesh_points(this->mesh_edges(this->listedges[idir],j),0);
+            auto y = this->mesh_points(this->mesh_edges(this->listedges[idir],j),1);
+            auto xEq = gp_Pnt(x,y,0.0);
+
+            proj.Init(xEq,current_curve);
+            auto uEq = proj.LowerDistanceParameter();
+            current_curve->D0(uEq,xEq);
+
+            Eigen::MatrixR gp_pnt_old = (this->mesh_points.row(this->nodes_dir(this->index_nodes( j ))).array()/this->scale);
+
+            this->displacements_BC(this->index_nodes(j),0) = (xEq.X()/this->scale - gp_pnt_old(0));
+            this->displacements_BC(this->index_nodes(j),1) = (xEq.Y()/this->scale - gp_pnt_old(1));
+
+        }
+        this->index_nodes = ((this->index_nodes).array()+no_edge_nodes).eval().matrix();
+//        cout << " " << endl;
+    }
+//    cout << displacements_BC << endl;
+}
+
+void PostMeshCurve::MeshPointInversionCurveArcLength()
+{
+    this->no_dir_edges = this->dirichlet_edges.rows();
+    Integer no_edge_nodes = this->mesh_edges.cols();
+    Eigen::MatrixI arr_row = Eigen::Map<Eigen::Matrix<Integer,Eigen::Dynamic,1> >(this->listedges.data(),this->listedges.size());
+    auto arr_col = cnp::arange(0,no_edge_nodes);
+    this->nodes_dir = cnp::take(this->mesh_edges,arr_row,arr_col);
+    this->nodes_dir = cnp::ravel(this->nodes_dir);
+    this->index_nodes = cnp::arange(no_edge_nodes);
+    this->displacements_BC = Eigen::MatrixR::Zero(this->no_dir_edges*no_edge_nodes,this->ndim);
+
+    // FIND CURVE LENGTH AND LAST PARAMETER SCALE
     this->GetInternalCurveScale();
     this->EstimatedParameterUOnMesh();
 
@@ -475,8 +529,6 @@ void PostMeshCurve::MeshPointInversionCurve()
 //    print(boundary_edges_order);
     this->GetCurvesLengths();
     this->GetCurvesParameters();
-//    println(this->curves_parameters);
-
 
     for (auto idir=0; idir< this->no_dir_edges; ++idir)
     {
@@ -488,7 +540,7 @@ void PostMeshCurve::MeshPointInversionCurve()
 
         for (auto j=0; j<no_edge_nodes;++j)
         {
-            auto tol =1e-10;
+            auto tol =1.0e-10;
             auto U0 = this->geometry_curves_types[id_curve]==0 ? 0. : current_curve_adapt.FirstParameter();
             GCPnts_AbscissaPoint inv;
             Real uEq;
@@ -515,6 +567,7 @@ void PostMeshCurve::MeshPointInversionCurve()
 
                 uEq = inv.Parameter();
                 current_curve_adapt.D0(uEq*length_current_curve,xEq);
+
             }
 
             Eigen::MatrixR gp_pnt_old = (this->mesh_points.row(this->nodes_dir(this->index_nodes( j ))).array()/this->scale);
@@ -650,7 +703,7 @@ void PostMeshCurve::EstimatedParameterUOnMesh()
 
             if (length_left+length_right < edge_length)
             {
-                assert ( (length_left+length_right) - edge_length > 1e-4 && "MESH_TOO_COARSE");
+//                assert ( (length_left+length_right) - edge_length > 1e-4 && "MESH_TOO_COARSE");
                 // MESH BOUNDARY (EDGE/FACE) PASSES THROUGH THE ORIGIN
                 umin = umin/current_curve_length*this->scale;
                 umax = umax/current_curve_length*this->scale;

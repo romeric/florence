@@ -28,9 +28,9 @@ from Core.FiniteElements.Solvers.Solver import *
 # Pr = imp.load_source('Nonlinear_2D',pwd+'/Problems/FiniteElements/Hollow_Arc_Tri/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Electromechanics/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle/ProblemData.py')
-Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Nurbs/ProblemData.py')
+# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Nurbs/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/MechanicalComponent2D/ProblemData.py')
-# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Wing2D/ProblemData.py')
+Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Wing2D/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Sphere/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Naca_Isotropic/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/RAE2822/ProblemData.py')
@@ -120,18 +120,27 @@ def main(MainData, DictOutput=None, nStep=0):
 	# plt.show()
 
 	vpoints = mesh.points + TotalDisp[:,:MainData.ndim,-1]
-	print 'All boundary node norms: ', np.linalg.norm(vpoints[MainData.nodesDBC[:,0],:],axis=1)
+	# print 'All boundary node norms: ', np.linalg.norm(vpoints[MainData.nodesDBC[:,0],:],axis=1)
 	# MainData.mesh.points = mesh.points + TotalDisp[:,:MainData.ndim,-1]
 	# print vpoints[159,:]
 	# print np.linalg.norm(vpoints[159,:])
 	# print mesh.elements
 	# print mesh.points
 	# print mesh.edges
+	print mesh.points[924,:]
+	print vpoints[924,:]
+	print TotalDisp[924,:,-1]
+	# print mesh.points
 
 	# print np.linalg.norm(mesh.points[mesh.elements[68,:],:],axis=1)
 	# print np.linalg.norm(vpoints[mesh.elements[68,:],:],axis=1)
 
-	# print vpoints[mesh.elements[1570,:],:]
+	# from scipy.io import loadmat
+	# dd = loadmat('/home/roman/Desktop/pp3.mat')
+	# TotalDisp[:,:,-1] = dd['x'].T - mesh.points
+	# TotalDisp = np.zeros_like(TotalDisp)
+
+
 	if nStep ==1:
 		MainData.mesh = mesh
 		MainData.mesh.points = mesh.points + TotalDisp[:,:MainData.ndim,-1]
@@ -140,9 +149,9 @@ def main(MainData, DictOutput=None, nStep=0):
 
 	if MainData.AssemblyParameters.FailedToConverge==False:
 		PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp,show_plot=False)
-		# PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
-		# import matplotlib.pyplot as plt
-		# plt.show()
+		PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
+		import matplotlib.pyplot as plt
+		plt.show()
 	else:
 		MainData.ScaledJacobian = np.NAN
 
