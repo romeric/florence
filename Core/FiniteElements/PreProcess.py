@@ -63,7 +63,7 @@ def PreProcess(MainData,Pr,pwd):
 	if Pr.__file__.split('/')[-2] == 'MechanicalComponent2D':
 		mesh.points *=1000.
 
-	# mesh.points *=1000. 
+	mesh.points *=1000. 
 	# mesh.SimplePlot()
 	# print mesh.points
 	# Dict = {'points':mesh.points,'element':mesh.elements}
@@ -266,10 +266,12 @@ def PreProcess(MainData,Pr,pwd):
 	# from scipy.io import savemat
 	# print z 
 	# print w
+	# np.set_printoptions(precision=7)
 	# print Domain.Bases
+	# print Domain.gBasesx
 	# Dict = {'GaussPoints':z,'GaussWeights':w,'Bases':Domain.Bases,'gBasesx':Domain.gBasesx, 'gBasesy':Domain.gBasesy}
 	# savemat('/home/roman/Desktop/Info_P'+str(MainData.C+1),Dict)
-	# sys.exit(0)
+	# exit(0)
 
 
 	# COMPUTING GRADIENTS AND JACOBIAN A PRIORI FOR ALL INTEGRATION POINTS
@@ -331,7 +333,11 @@ def PreProcess(MainData,Pr,pwd):
 	MainData.Boundary = Boundary
 	############################################################################
 
-
+	# from Core.Supplementary.Tensors import makezero
+	# print makezero(Domain.Jm)
+	# print Domain.Jm[0,0,2]
+	# print mesh.points
+	# exit(0)
 
 
 

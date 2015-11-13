@@ -439,9 +439,10 @@ class PostProcess(object):
 
 			# FIND JACOBIAN OF SPATIAL GRADIENT
 			# USING ISOPARAMETRIC
-			# Jacobian = np.abs(np.linalg.det(ParentGradientx))
+			Jacobian = np.abs(np.linalg.det(ParentGradientx))
 			# USING DETEERMINANT OF DEFORMATION GRADIENT TENSOR
-			Jacobian = detF
+			# Jacobian = detF
+			# print Jacobian
 			# USING INVARIANT F:F
 			# xx = np.einsum('kij,lij->kl',F,F)
 			# Jacobian = np.sqrt(np.einsum('kij,lij->k',F,F))
@@ -451,11 +452,12 @@ class PostProcess(object):
 			# print Jacobian.shape
 
 			# from Core.Supplementary.Tensors import makezero
-			# if elem==0:
+			# if elem==mesh.nelem-1:
 				# print ParentGradientx[0,:,:]
 				# print makezero(LagrangeElemCoords)
 				# print makezero(EulerElemCoords)
 				# print ParentGradientx.shape
+				# print F[:,:,:]
 
 			# FIND MIN AND MAX VALUES
 			JMin = np.min(Jacobian); JMax = np.max(Jacobian)

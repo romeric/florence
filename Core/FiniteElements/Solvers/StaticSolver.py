@@ -11,6 +11,8 @@ def StaticSolver(LoadIncrement,MainData,K,F,M,NodalForces,Residual,ResidualNorm,
 	LoadFactor = 1./LoadIncrement
 	AppliedDirichletInc = np.zeros(AppliedDirichlet.shape[0])
 	
+	# TractionForces = F
+	# F = np.zeros_like(F)
 	for Increment in range(0,LoadIncrement):
 
 		DeltaF = LoadFactor*F
@@ -39,6 +41,10 @@ def StaticSolver(LoadIncrement,MainData,K,F,M,NodalForces,Residual,ResidualNorm,
 		elif MainData.AnalysisType == 'Linear':
 			TotalDisp, K = LinearSolver(Increment,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nmesh,TotalDisp,Eulerx,
 				columns_in,columns_out,AppliedDirichletInc)
+
+		# print nmesh.points[6,:]+TotalDisp[6,:,Increment]
+		# print K
+		print np.linalg.norm(F[columns_in])
 
 
 	return TotalDisp

@@ -22,7 +22,7 @@ def NewtonRaphson(Increment,MainData,K,F,M,NodalForces,Residual,
 
 	while np.abs(la.norm(Residual[columns_in])/NormForces) > Tolerance:
 		# APPLY INCREMENTAL DIRICHLET BOUNDARY CONDITIONS
-		K_b, F_b= ApplyIncrementalDirichletBoundaryConditions(K,Residual,
+		K_b, F_b = ApplyIncrementalDirichletBoundaryConditions(K,Residual,
 			columns_in,columns_out,AppliedDirichletInc,Iter,MainData.Minimal,nmesh,M,MainData.Analysis)[:2]
 
 		# SOLVE THE SYSTEM
@@ -45,6 +45,7 @@ def NewtonRaphson(Increment,MainData,K,F,M,NodalForces,Residual,
 		# UPDATE & SAVE ITERATION NUMBER
 		MainData.AssemblyParameters.IterationNumber +=1
 		# RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES (BE CAREFUL ABOUT THE -1 INDEX IN HERE)
+		# print Residual
 		# K, TractionForces = Assembly(MainData,nmesh,Eulerx,TotalDisp[:,MainData.nvar-1,Increment].reshape(TotalDisp.shape[0],1))[:2]
 		K, TractionForces = Assembly(MainData,nmesh,Eulerx,TotalDisp[:,MainData.nvar-1,Increment,None])[:2]
 		# print np.concatenate((Residual[columns_in],NodalForces[columns_in]),axis=1)
@@ -71,6 +72,9 @@ def NewtonRaphson(Increment,MainData,K,F,M,NodalForces,Residual,
 
 		# if Iter==1:
 			# sys.exit("STOPPED")
+		# if Iter==2:
+			# print (nmesh.points + TotalDisp[:,:,Increment])[6,:]
+			# print K
 
 
 	return TotalDisp
