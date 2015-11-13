@@ -151,6 +151,14 @@ public:
     #endif
     }
 
+    ALWAYS_INLINE void ReturnModifiedMeshPoints(Real *points)
+    {
+        // RETURN MODIFIED MESH POINTS - INVOLVES DEEP COPY
+        Eigen::Map<decltype(this->mesh_points)>(points,
+                                                this->mesh_points.rows(),
+                                                this->mesh_points.cols()) = this->mesh_points/this->scale;
+    }
+
     void ReadIGES(const char *filename);
     void ReadSTEP(const char *filename);
     static Eigen::MatrixI Read(std::string &filename);

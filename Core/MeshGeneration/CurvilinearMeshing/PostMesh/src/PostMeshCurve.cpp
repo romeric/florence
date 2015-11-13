@@ -2,9 +2,6 @@
 #include <PostMeshCurve.hpp>
 
 
-using namespace std;
-
-
 PostMeshCurve::PostMeshCurve(const PostMeshCurve& other) \
 noexcept(std::is_copy_constructible<PostMeshCurve>::value)
     : PostMeshBase(other)
@@ -163,18 +160,18 @@ void PostMeshCurve::FindCurvesSequentiallity()
                gp_Pnt pnt_1, pnt_2, pnt_3, pnt_4;
                this->geometry_curves[icurve]->D0(current_first_parameter,pnt_1);
                this->geometry_curves[jcurve]->D0(this->curves_parameters(jcurve,1),pnt_2);
-               if ( abs(pnt_1.X()-pnt_2.X())< Standard_Tolerance && \
-                    abs(pnt_1.Y()-pnt_2.Y())<Standard_Tolerance && \
-                    abs(pnt_1.Z()-pnt_2.Z())<Standard_Tolerance )
+               if ( std::abs(pnt_1.X()-pnt_2.X())< Standard_Tolerance && \
+                    std::abs(pnt_1.Y()-pnt_2.Y())<Standard_Tolerance && \
+                    std::abs(pnt_1.Z()-pnt_2.Z())<Standard_Tolerance )
                {
                    consecutive_curves.push_back(jcurve);
                }
 
                this->geometry_curves[icurve]->D0(current_last_parameter,pnt_3);
                this->geometry_curves[jcurve]->D0(this->curves_parameters(jcurve,0),pnt_4);
-               if ( abs(pnt_3.X()-pnt_4.X())< Standard_Tolerance && \
-                    abs(pnt_3.Y()-pnt_4.Y())<Standard_Tolerance && \
-                    abs(pnt_3.Z()-pnt_4.Z())<Standard_Tolerance )
+               if ( std::abs(pnt_3.X()-pnt_4.X())< Standard_Tolerance && \
+                    std::abs(pnt_3.Y()-pnt_4.Y())<Standard_Tolerance && \
+                    std::abs(pnt_3.Z()-pnt_4.Z())<Standard_Tolerance )
                {
                    consecutive_curves.push_back(jcurve);
                }
@@ -197,7 +194,7 @@ void PostMeshCurve::GetGeomPointsOnCorrespondingEdges()
         TopoDS_Edge current_edge = TopoDS::Edge(explorer_edge.Current());
 
         Eigen::MatrixR current_edge_coords(2,3);
-        Integer counter=0;
+        Integer counter=0l;
         for (TopExp_Explorer explorer_point(current_edge,TopAbs_VERTEX); explorer_point.More(); explorer_point.Next())
         {
             TopoDS_Vertex current_vertex = TopoDS::Vertex(explorer_point.Current());
@@ -216,19 +213,20 @@ void PostMeshCurve::GetGeomPointsOnCorrespondingEdges()
 void PostMeshCurve::GetInternalCurveScale()
 {
     this->curve_to_parameter_scale_U = Eigen::MatrixR::Zero(this->geometry_curves.size(),1);
-    for (unsigned int icurve=0; icurve<this->geometry_curves.size(); ++icurve)
+    for (UInteger icurve=0; icurve<this->geometry_curves.size(); ++icurve)
     {
         Handle_Geom_Curve current_curve = this->geometry_curves[icurve];
         if (this->geometry_curves_types[icurve]!=0)
         {
-            //this->curve_to_parameter_scale_U(icurve) = current_curve->LastParameter()/cnp::length(current_curve,1/this->scale);
-            this->curve_to_parameter_scale_U(icurve) = std::abs(current_curve->LastParameter() - \
-                                                        current_curve->FirstParameter())/cnp::length(current_curve,1/this->scale);
+            this->curve_to_parameter_scale_U(icurve) = \
+                    std::abs(current_curve->LastParameter() - \
+                    current_curve->FirstParameter())/cnp::length(current_curve,1/this->scale);
         }
         else
         {
             // IF GEOMETRY TYPE IS A LINE
-            this->curve_to_parameter_scale_U(icurve) = 2*current_curve->LastParameter()/cnp::length(current_curve,1/this->scale);
+            this->curve_to_parameter_scale_U(icurve) = 2.0*\
+                    current_curve->LastParameter()/cnp::length(current_curve,1/this->scale);
         }
     }
 }
@@ -320,7 +318,7 @@ void PostMeshCurve::ProjectMeshOnCurve()
         for (UInteger inode=0; inode<this->ndim; ++inode)
         {
             // PROJECTION PARAMETER
-            Real parameterU;
+            auto parameterU = INF;
             // GET THE COORDINATES OF THE NODE
             auto x = this->mesh_points(this->dirichlet_edges(iedge,inode),0);
             auto y = this->mesh_points(this->dirichlet_edges(iedge,inode),1);
@@ -339,6 +337,9 @@ void PostMeshCurve::ProjectMeshOnCurve()
                 // PROJECT THE CURVE VERTEX INSTEAD OF THE EDGE NODE (THIS IS NECESSARY TO ENSURE SUCCESSFUL PROJECTION)
                 x = x1_curve;
                 y = y1_curve;
+
+                this->mesh_points(this->dirichlet_edges(iedge,inode),0) = x;
+                this->mesh_points(this->dirichlet_edges(iedge,inode),1) = y;
             }
             else if (std::abs(x2_curve-x) < projection_precision && \
                      std::abs(y2_curve-y) < projection_precision && \
@@ -346,6 +347,9 @@ void PostMeshCurve::ProjectMeshOnCurve()
             {
                 x = x2_curve;
                 y = y2_curve;
+
+                this->mesh_points(this->dirichlet_edges(iedge,inode),0) = x;
+                this->mesh_points(this->dirichlet_edges(iedge,inode),1) = y;
             }
 
             try
@@ -418,7 +422,7 @@ void PostMeshCurve::RepairDualProjectedParameters()
                      this->projection_U(iedge,0) = u2;
                  }
             }
-            else if ( abs(current_edge_U(1) - u2) < lengthTol )
+            else if ( std::abs(current_edge_U(1) - u2) < lengthTol )
             {
                  // WE ARE AT THE END PARAMETER - GET THE LENGTH TO uc
                  auto uc = current_edge_U(0);
@@ -467,25 +471,11 @@ void PostMeshCurve::MeshPointInversionCurve()
     this->index_nodes = cnp::arange(no_edge_nodes);
     this->displacements_BC = Eigen::MatrixR::Zero(this->no_dir_edges*no_edge_nodes,this->ndim);
 
-    // FIND CURVE LENGTH AND LAST PARAMETER SCALE
-//    this->GetInternalCurveScale();
-//    this->EstimatedParameterUOnMesh();
-
-//    print(this->u_of_all_fekete_mesh_edges);
-//    print(boundary_edges_order);
-//    this->GetCurvesLengths();
-//    this->GetCurvesParameters();
-//    println(this->curves_parameters);
-//    print(dirichlet_edges);
-//    print(listedges);
 
     for (auto idir=0; idir< this->no_dir_edges; ++idir)
     {
         auto id_curve = this->dirichlet_edges(idir,2);
         Handle_Geom_Curve current_curve = this->geometry_curves[id_curve];
-//        auto length_current_curve = cnp::length(current_curve,1/this->scale);
-//        auto internal_scale = 1./this->curve_to_parameter_scale_U(id_curve);
-//        GeomAdaptor_Curve current_curve_adapt(current_curve);
 
         for (auto j=0; j<no_edge_nodes;++j)
         {
@@ -493,16 +483,49 @@ void PostMeshCurve::MeshPointInversionCurve()
             auto x = this->mesh_points(this->mesh_edges(this->listedges[idir],j),0);
             auto y = this->mesh_points(this->mesh_edges(this->listedges[idir],j),1);
             auto xEq = gp_Pnt(x,y,0.0);
+            auto uEq = 0.0;
 
-            proj.Init(xEq,current_curve);
-            auto uEq = proj.LowerDistanceParameter();
-            current_curve->D0(uEq,xEq);
+            auto xEq1 = gp_Pnt(x,y,0.0);
+
+            try
+            {
+                proj.Init(xEq,current_curve);
+                uEq = proj.LowerDistanceParameter();
+                current_curve->D0(uEq,xEq);
+            }
+            catch (StdFail_NotDone)
+            {
+                try
+                {
+                    // TRY NEWTON-RAPSHON PROJECTION METHOD WITH LOWER PRECISION
+                    ShapeAnalysis_Curve proj_Newton;
+                    auto Newton_precision = projection_precision < 1.0e-05 ? 1.0e-5: projection_precision;
+                    proj_Newton.Project(current_curve,xEq1,Newton_precision,xEq,uEq,True);
+                }
+                catch (StdFail_NotDone)
+                {
+                    warn("Could not project node on to the curve. Candidate curve number is:",
+                        id_curve,"Candidate node is:",this->mesh_edges(this->listedges[idir],j));
+                }
+            }
 
             Eigen::MatrixR gp_pnt_old = (this->mesh_points.row(this->nodes_dir(this->index_nodes( j ))).array()/this->scale);
 
-            this->displacements_BC(this->index_nodes(j),0) = (xEq.X()/this->scale - gp_pnt_old(0));
-            this->displacements_BC(this->index_nodes(j),1) = (xEq.Y()/this->scale - gp_pnt_old(1));
-
+            if (j>static_cast<decltype(j)>(this->ndim)-1)
+            {
+                // FOR NON-VERTEX NODES GET THE REQUIRED DISPLACEMENT
+                this->displacements_BC(this->index_nodes(j),0) = (xEq.X()/this->scale - gp_pnt_old(0));
+                this->displacements_BC(this->index_nodes(j),1) = (xEq.Y()/this->scale - gp_pnt_old(1));
+            }
+            else
+            {
+                // FOR VERTEX NODES KEEP THE DISPLACEMENT ZERO
+                this->displacements_BC(this->index_nodes(j),0) = 0;
+                this->displacements_BC(this->index_nodes(j),1) = 0;
+                // BUT UPDATE THE MESH POINTS
+                this->mesh_points(this->mesh_edges(this->listedges[idir],j),0) = xEq.X();
+                this->mesh_points(this->mesh_edges(this->listedges[idir],j),1) = xEq.Y();
+            }
         }
         this->index_nodes = ((this->index_nodes).array()+no_edge_nodes).eval().matrix();
 //        cout << " " << endl;
@@ -572,23 +595,27 @@ void PostMeshCurve::MeshPointInversionCurveArcLength()
 
             Eigen::MatrixR gp_pnt_old = (this->mesh_points.row(this->nodes_dir(this->index_nodes( j ))).array()/this->scale);
 
-            this->displacements_BC(this->index_nodes(j),0) = (xEq.X()/this->scale - gp_pnt_old(0));
-            this->displacements_BC(this->index_nodes(j),1) = (xEq.Y()/this->scale - gp_pnt_old(1));
+//            this->displacements_BC(this->index_nodes(j),0) = (xEq.X()/this->scale - gp_pnt_old(0));
+//            this->displacements_BC(this->index_nodes(j),1) = (xEq.Y()/this->scale - gp_pnt_old(1));
             //this->displacements_BC(this->index_nodes(j),2) = (xEq.Z()/this->scale - gp_pnt_old(2)); // USEFULL FOR 3D CURVES
 
-//            println(internal_scale*this->u_of_all_fekete_mesh_edges(idir, this->boundary_edges_order(this->listedges[idir],j))*this->scale );
-//            println(internal_scale*curves_lengths(id_curve)*this->u_of_all_fekete_mesh_edges(idir,this->boundary_edges_order(this->listedges[idir],j))*this->scale);
-//            println(curves_lengths.rows(),curves_lengths.cols());
-//            println(this->u_of_all_fekete_mesh_edges(idir, this->boundary_edges_order(this->listedges[idir],j))*scale );
-//            println( this->boundary_edges_order(this->listedges[idir],j) );
-//            print(this->u_of_all_fekete_mesh_edges(idir,this->boundary_edges_order(this->listedges[idir],j))*this->scale);
-//            println( internal_scale*this->u_of_all_fekete_mesh_edges(idir, this->boundary_edges_order(this->listedges[idir],j))*this->scale,uEq,id_curve);
-//            cout << gp_pnt_old(0) << " " << gp_pnt_old(1) << "] [" << xEq.X()/this->scale << " " << xEq.Y()/this->scale << endl;
-
-
+            if (j>static_cast<decltype(j)>(this->ndim)-1)
+            {
+                // FOR NON-VERTEX NODES GET THE REQUIRED DISPLACEMENT
+                this->displacements_BC(this->index_nodes(j),0) = (xEq.X()/this->scale - gp_pnt_old(0));
+                this->displacements_BC(this->index_nodes(j),1) = (xEq.Y()/this->scale - gp_pnt_old(1));
+            }
+            else
+            {
+                // FOR VERTEX NODES KEEP THE DISPLACEMENT ZERO
+                this->displacements_BC(this->index_nodes(j),0) = 0;
+                this->displacements_BC(this->index_nodes(j),1) = 0;
+                // BUT UPDATE THE MESH POINTS
+                this->mesh_points(this->mesh_edges(this->listedges[idir],j),0) = xEq.X();
+                this->mesh_points(this->mesh_edges(this->listedges[idir],j),1) = xEq.Y();
+            }
         }
         this->index_nodes = ((this->index_nodes).array()+no_edge_nodes).eval().matrix();
-//        cout << " " << endl;
     }
 //    cout << displacements_BC << endl;
 }
@@ -703,12 +730,13 @@ void PostMeshCurve::EstimatedParameterUOnMesh()
 
             if (length_left+length_right < edge_length)
             {
-//                assert ( (length_left+length_right) - edge_length > 1e-4 && "MESH_TOO_COARSE");
+                assert ( (length_left+length_right) - edge_length > 1e-4 && "MESH_TOO_COARSE");
                 // MESH BOUNDARY (EDGE/FACE) PASSES THROUGH THE ORIGIN
                 umin = umin/current_curve_length*this->scale;
                 umax = umax/current_curve_length*this->scale;
-                Real trespassed_length = abs(this->scale*current_curve->FirstParameter()/current_curve_length-umin) + \
-                        abs(scaled_endU-umax);
+                Real trespassed_length = std::abs(this->scale*\
+                        current_curve->FirstParameter()/current_curve_length-umin) + \
+                        std::abs(scaled_endU-umax);
 
                 u1 = umin;
                 u2 = this->scale*current_curve->FirstParameter()/current_curve_length;

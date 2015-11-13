@@ -450,8 +450,11 @@ class PostProcess(object):
 			# print xx
 			# print Jacobian.shape
 
+			# from Core.Supplementary.Tensors import makezero
 			# if elem==0:
 				# print ParentGradientx[0,:,:]
+				# print makezero(LagrangeElemCoords)
+				# print makezero(EulerElemCoords)
 				# print ParentGradientx.shape
 
 			# FIND MIN AND MAX VALUES

@@ -13,7 +13,7 @@ def ProblemData(MainData):
 	MainData.Fields = 'Mechanics'
 	# MainData.Fields = 'ElectroMechanics'
 	
-	MainData.Formulation = 1 	# Displacement-Potential based formulation
+	MainData.Formulation = 'DisplacementApproach'
 	MainData.Analysis = 'Static'
 	# MainData.Analysis = 'Dynamic'
 	MainData.AnalysisType = 'Linear'
@@ -85,7 +85,7 @@ def ProblemData(MainData):
 		# NURBS/NON-NURBS TYPE BOUNDARY CONDITION
 		Type = 'nurbs'
 		RequiresCAD = False
-		# Type = 'straight'
+		# CurvilinearMeshNodalSpacing = 'fekete'
 
 		IGES_File = ''
 		scale = 1.0

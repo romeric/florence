@@ -13,29 +13,32 @@ def ProblemData(MainData):
 	MainData.Fields = 'Mechanics'
 	# MainData.Fields = 'ElectroMechanics'
 	
-	MainData.Formulation = 1 	# Displacement-Potential based formulation
+	MainData.Formulation = 'DisplacementApproach'
+	# MainData.Formulation = 'DisplacementElectricPotentialApproach'
+
 	MainData.Analysis = 'Static'
 	# MainData.Analysis = 'Dynamic'
 	MainData.AnalysisType = 'Linear'
 	# MainData.AnalysisType = 'Nonlinear'
 
 	class MaterialArgs(object):
-		# Type = 'Steinmann'
-		# Type = 'LinearisedElectromechanics'
-		Type = 'LinearModel'
-		# Type = 'IncrementallyLinearisedNeoHookean'
+		# Type = 'LinearModel'
+		# Type = 'IncrementalLinearElastic'
+		Type = 'IncrementallyLinearisedNeoHookean'
 		# Type = 'AnisotropicMooneyRivlin_1'
 		# Type = 'NearlyIncompressibleNeoHookean'
 		# Type = 'NeoHookean_1'
 		# Type = 'NeoHookean_2'
 		# Type = 'MooneyRivlin'
 		# Type = 'NearlyIncompressibleMooneyRivlin'
+		# Type = 'AnisotropicMooneyRivlin' 
 
-		E = 1.0e1
-		nu=0.45
+		E = 1.0e5
+		nu=0.35
 
 		# E = MainData.E 
 		# nu = MainData.nu 
+		# print 'Poisson ratio is:', nu
 
 
 		# GET LAME CONSTANTS
@@ -70,6 +73,8 @@ def ProblemData(MainData):
 		# NURBS/NON-NURBS TYPE BOUNDARY CONDITION
 		Type = 'nurbs'
 		RequiresCAD = True
+		CurvilinearMeshNodalSpacing = 'fekete'
+		# CurvilinearMeshNodalSpacing = 'equal'
 
 		scale = 1.
 		condition = 1e10

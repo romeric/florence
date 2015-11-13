@@ -57,7 +57,6 @@ class IncrementallyLinearisedNeoHookean(object):
 
 		# THE HESSIAN IN THE CURRENT STEP IS THE HESSIAN FROM THE PREVIOUS STEP
 		return H_Voigt_k
-		# return lamb*MaterialArgs.IijIkl+mu*MaterialArgs.IikIjl
 
 
 
@@ -82,8 +81,6 @@ class IncrementallyLinearisedNeoHookean(object):
 
 		# COMPUTE INCREMENTALLY LINEARISED STRESS BASED ON STRESS_K AND RETURN 
 		return IncrementallyLinearisedStress(Sigma_k,H_Voigt_k,I,strain,StrainTensors['Gradu'][gcounter]), Sigma_k
-		# return np.zeros((2,2)),np.zeros((2,2))
-
 		
 
 

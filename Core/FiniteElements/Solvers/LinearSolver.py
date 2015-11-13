@@ -57,7 +57,7 @@ def LinearSolver(Increment,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nmes
 		# K, TractionForces = Assembly(MainData,nmesh,Eulerx,TotalDisp[:,MainData.nvar-1,Increment].reshape(TotalDisp.shape[0],1))[:2]
 		# # FIND THE RESIDUAL
 		# Residual[columns_in] = TractionForces[columns_in] - NodalForces[columns_in]
-
+		# np.savetxt('/home/roman/Dropbox/MeshingElasticity2/K_n.dat',K.todense())
 		if Increment <MainData.AssemblyParameters.LoadIncrements-1:
 			# UPDATE THE GEOMETRY
 			Eulerx = nmesh.points + TotalDisp[:,:MainData.ndim,Increment]			
@@ -65,7 +65,7 @@ def LinearSolver(Increment,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nmes
 			K, TractionForces = Assembly(MainData,nmesh,Eulerx,TotalDisp[:,MainData.nvar-1,Increment].reshape(TotalDisp.shape[0],1))[:2]
 			# FIND THE RESIDUAL
 			Residual[columns_in] = TractionForces[columns_in] - NodalForces[columns_in]
-			print Increment
+			# print Increment
 
 	print 'Load increment', Increment, 'for incrementally linearised elastic problem'
 

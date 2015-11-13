@@ -151,6 +151,18 @@ def PreProcess(MainData,Pr,pwd):
 	# print mesh.points[924,:]
 
 
+	# from scipy.io import loadmat
+	# xx = loadmat('/home/roman/Dropbox/Florence/Problems/FiniteElements/Annular_Circle_Nurbs/rr.mat')
+	# mesh.points = xx['X'] 
+	# mesh.elements = (xx['T']-1).astype(np.int64)
+	# mesh.nelem = mesh.elements.shape[0]
+	# mesh.edges = xx['edges']-1
+	# print mesh.points.shape
+	# print np.min(mesh.elements)
+	# sys.exit(0)
+	# mesh.GetBoundaryEdgesTri()
+
+
 	# sys.exit("STOPPED")
 
 	# np.savetxt('/home/roman/Desktop/elements_check_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
@@ -338,8 +350,9 @@ def PreProcess(MainData,Pr,pwd):
 	# STRESS COMPUTATION FLAGS FOR LINEARISED ELASTICITY
 	###########################################################################
 	MainData.Prestress = 0
-	if MainData.MaterialArgs.Type == 'IncrementallyLinearisedNeoHookean':
-		# RUN THE SIMULATION WITHIN A NONLINEAR ROUTINE WITHOUT UPDATING THE GEOMETRY BUT WITH GEOMETRIC TERM
+	if MainData.MaterialArgs.Type == 'IncrementallyLinearisedNeoHookean' or \
+		MainData.MaterialArgs.Type == 'IncrementallyLinearisedMooneyRivlin':
+		# RUN THE SIMULATION WITHIN A NONLINEAR ROUTINE
 		MainData.Prestress = 1
 		if MainData.Fields == 'Mechanics':
 			Hsize = 6 if MainData.ndim == 3 else 3
@@ -366,11 +379,14 @@ def PreProcess(MainData,Pr,pwd):
 			MainData.MaterialArgs.H_Voigt = np.tile(np.tile(H_Voigt[:,:,None],
 				mesh.nelem)[:,:,:,None],Quadrature.weights.shape[0])
 
+	if MainData.MaterialArgs.Type == 'IncrementalLinearElastic':
+		MainData.Prestress = 1
+
 
 	
 	# COMPUTE 4TH ORDER IDENTITY TENSORS/HESSIANS BEFORE-HAND 
 	#############################################################################
-	if MainData.MaterialArgs.Type == 'LinearModel':
+	if MainData.MaterialArgs.Type == 'LinearModel' or MainData.MaterialArgs.Type == 'IncrementalLinearElastic':
 		if MainData.ndim == 2:
 			MainData.MaterialArgs.H_Voigt = MainData.MaterialArgs.lamb*np.array([[1.,1.,0.],[1.,1.,0],[0.,0.,0.]]) +\
 			 MainData.MaterialArgs.mu*np.array([[2.,0.,0.],[0.,2.,0],[0.,0.,1.]])
@@ -401,7 +417,6 @@ def PreProcess(MainData,Pr,pwd):
 	MainData.CauchyStress = MaterialFuncName(MainData.ndim).CauchyStress
 
 	# INITIALISE
-	# StrainTensors = KinematicMeasures(np.diag(np.ones(MainData.ndim))).Compute(MainData.AnalysisType)
 	StrainTensors = KinematicMeasures(np.asarray([np.eye(MainData.ndim,MainData.ndim)]*MainData.Domain.AllGauss.shape[0]),MainData.AnalysisType)
 	MaterialFuncName(MainData.ndim).Hessian(MainData.MaterialArgs,MainData.ndim,StrainTensors,elem=0,gcounter=0)
 
@@ -411,44 +426,30 @@ def PreProcess(MainData,Pr,pwd):
 
 
 	# FORMULATION TYPE FLAGS
-	#############################################################################
-	if MainData.Formulation == 1:
-		if MainData.MaterialArgs.Type == 'IsotropicElectroMechanics_1' or MainData.MaterialArgs.Type == 'Steinmann' or \
-		MainData.MaterialArgs.Type == 'AnisotropicMooneyRivlin_1_Electromechanics' or \
-		MainData.MaterialArgs.Type == 'LinearisedElectromechanics' or \
-		MainData.MaterialArgs.Type == 'LinearModelElectromechanics':
-			MainData.ConstitutiveStiffnessIntegrand = DEPB.ConstitutiveStiffnessIntegrand
-			MainData.GeometricStiffnessIntegrand = DEPB.GeometricStiffnessIntegrand
-			MainData.MassIntegrand =  DEPB.MassIntegrand
-
-		elif MainData.MaterialArgs.Type == 'LinearModel' or MainData.MaterialArgs.Type == 'AnisotropicMooneyRivlin_1' or \
-		MainData.MaterialArgs.Type == 'IncrementallyLinearisedNeoHookean' or \
-		MainData.MaterialArgs.Type == 'NearlyIncompressibleNeoHookean' or \
-		MainData.MaterialArgs.Type == 'MooneyRivlin' or MainData.MaterialArgs.Type == 'NeoHookean_1' or \
-		MainData.MaterialArgs.Type == 'NeoHookean_2' or MainData.MaterialArgs.Type =='NearlyIncompressibleMooneyRivlin':
-			MainData.ConstitutiveStiffnessIntegrand = DB.ConstitutiveStiffnessIntegrand
-			MainData.GeometricStiffnessIntegrand = DB.GeometricStiffnessIntegrand
-			MainData.MassIntegrand =  DB.MassIntegrand
+	#############################################################################	
+	if MainData.Formulation == 'DisplacementApproach':
+		MainData.ConstitutiveStiffnessIntegrand = DB.ConstitutiveStiffnessIntegrand
+		MainData.GeometricStiffnessIntegrand = DB.GeometricStiffnessIntegrand
+		MainData.MassIntegrand =  DB.MassIntegrand
+	
+	elif MainData.Formulation == 'DisplacementElectricPotentialApproach':
+		MainData.ConstitutiveStiffnessIntegrand = DEPB.ConstitutiveStiffnessIntegrand
+		MainData.GeometricStiffnessIntegrand = DEPB.GeometricStiffnessIntegrand
+		MainData.MassIntegrand =  DEPB.MassIntegrand
 
 
 
 
 	# GEOMETRY UPDATE FLAGS
 	###########################################################################
-	if MainData.MaterialArgs.Type == 'LinearisedElectromechanics' or MainData.MaterialArgs.Type == 'LinearModel' or \
-	MainData.MaterialArgs.Type == 'LinearModelElectromechanics' or MainData.MaterialArgs.Type == 'IncrementallyLinearisedNeoHookean':
+	# DO NOT UPDATE THE GEOMETRY IF THE MATERIAL MODEL NAME CONTAINS LINEAR OR
+	# INCREMENTS (CASE INSENSITIVE). GEOMETRY CAN STILL BE UPDATED USING THE 
+	# PRESTRESS FLAG FOR MODELS THAT ARE LINEAR BUT NEED GEOMETRY UPDATE
+	if 'Increment'.lower() or 'Linear'.lower() in MainData.MaterialArgs.Type.lower():
 		# RUN THE SIMULATION WITHIN A NONLINEAR ROUTINE WITHOUT UPDATING THE GEOMETRY
 		MainData.GeometryUpdate = 0
 	else:
 		MainData.GeometryUpdate = 1
-
-	# LINEAR ELASTICITY WITH STEPS
-	#############################################################################
-	if MainData.MaterialArgs.Type == 'LinearModel':
-		MainData.LinearWithStep = 1
-	else:
-		MainData.LinearWithStep = 0
-
 
 
 

@@ -60,7 +60,7 @@ class MainData(object):
  	__MEMORY__ = 'SHARED'
  	# __MEMORY__ = 'DISTRIBUTED'
 
- 	C = 3
+ 	C = 1
  	norder = 2 
  	plot = (0,3)
  	nrplot = (0,'last')

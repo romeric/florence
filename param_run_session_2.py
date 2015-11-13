@@ -47,7 +47,7 @@ if Run:
 	t_FEM = time.time()
 	nu = np.linspace(0.001,0.495,100)
 	# nu = np.linspace(0.01,0.495,2)
-	E = np.array([10])
+	E = np.array([1e05])
 	p = [2,3,4,5,6]
 	# p = [2]
 	 
@@ -77,19 +77,33 @@ if Run:
 	Results['MaterialModel'] = MainData.MaterialArgs.Type
 	# print Results['ScaledJacobian']
 
+	savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'_FeketeSpacing.mat',Results)
+	# savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'_Orthogonal.mat',Results)
+	# savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'_EqualSpacing.mat',Results)
 	# savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'.mat',Results)
-	savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'2.mat',Results)
+	# savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'2.mat',Results)
 	t_FEM = time.time()-t_FEM
 	print 'Time taken for the entire analysis was ', t_FEM, 'seconds'
 	np.savetxt('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/DONE', [t_FEM])
 
 if not Run:
 	# import h5py as hpy 
-	# DictOutput = {}
-	# DictOutput =  loadmat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_LinearModel.mat')
-	# DictOutput =  loadmat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean.mat')
-	# DictOutput =  loadmat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_NeoHookean_2.mat')	
-	DictOutput =  loadmat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_LinearModel2.mat')	
+	ResultsPath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/'
+
+	# ResultsFile = 'Mech2D_P_vs_Nu_IncrementalLinearElastic_EqualSpacing'
+	# ResultsFile = 'Mech2D_P_vs_Nu_IncrementalLinearElastic_FeketeSpacing'
+	# ResultsFile = 'Mech2D_P_vs_Nu_IncrementalLinearElastic_Orthogonal'
+
+	# ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_EqualSpacing'
+	# ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_FeketeSpacing'
+	# ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_Orthogonal'
+
+	ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_EqualSpacing'
+	# ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_FeketeSpacing'
+	# ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_Orthogonal'
+
+	DictOutput =  loadmat(ResultsPath+ResultsFile+'.mat')	
+	
 	scaledA = DictOutput['ScaledJacobian']
 	condA = DictOutput['ConditionNumber']
 	# nu = DictOutput['PoissonsRatios'][0]
@@ -109,11 +123,12 @@ if not Run:
 
 	X,Y=np.meshgrid(p,nu)
 	# print X
-	print scaledA
+	# print scaledA
 
 
 
 	plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bicubic', cmap=cm.viridis)
+	# plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='nearest', cmap=cm.viridis)
 	# # plt.colorbar()
 
 	# # plt.axis('equal')
@@ -136,10 +151,8 @@ if not Run:
 
 	# plt.xlim([0,5])
 	# plt.ylim([2,6])
-	ResultsPath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D'
-	# plt.savefig(ResultsPath+'/Mech2D_P_vs_Nu_LinearModel.eps',format='eps',dpi=1000)
-	# plt.savefig(ResultsPath+'/Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean.eps',format='eps',dpi=1000)
-	# plt.savefig(ResultsPath+'/Mech2D_P_vs_Nu_NeoHookean_2.eps',format='eps',dpi=1000)
+	ResultsPath+ResultsFile+'.mat'
+	# plt.savefig(ResultsPath+'Mech2D/'+ResultsFile+'.eps',format='eps',dpi=1000)
 
 	plt.show()
 

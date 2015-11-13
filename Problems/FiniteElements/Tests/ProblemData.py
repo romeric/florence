@@ -91,8 +91,8 @@ def ProblemData(MainData):
 
 	class BoundaryData(object):
 		Type = 'nurbs'
-		# Type = 'straight'
-		# Type = 'mixed'
+		CurvilinearMeshNodalSpacing = 'equal'
+		
 		IGES_File = ProblemPath + '/Sphere.igs'
 		# IGES_File = ProblemPath + '/Torus.igs'
 

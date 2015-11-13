@@ -13,7 +13,7 @@ def ProblemData(MainData):
 	MainData.Fields = 'Mechanics'
 	# MainData.Fields = 'ElectroMechanics'
 	
-	MainData.Formulation = 1 	# Displacement-Potential based formulation
+	MainData.Formulation = 'DisplacementApproach'
 	MainData.Analysis = 'Static'
 	# MainData.Analysis = 'Dynamic'
 	MainData.AnalysisType = 'Linear'
@@ -92,6 +92,7 @@ def ProblemData(MainData):
 	class BoundaryData(object):
 		Type = 'nurbs'
 		RequiresCAD = True
+		CurvilinearMeshNodalSpacing = 'fekete'
 		
 		# Type = 'straight'
 		# Type = 'mixed'

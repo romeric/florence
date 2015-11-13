@@ -1,4 +1,5 @@
 import numpy as np
+from numpy import einsum
 from Core.Supplementary.Tensors import *
 
 
@@ -26,9 +27,7 @@ class MooneyRivlin(object):
 
 	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 
-		# USING EINSUM
-		d = np.einsum
-		
+
 		# GET MATERIAL CONSTANTS 
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
@@ -40,10 +39,18 @@ class MooneyRivlin(object):
 		J = StrainTensors['J'][gcounter]
 		b = StrainTensors['b'][gcounter]
 
-		H_Voigt = Voigt( 4.0*beta/J*d('ij,kl',b,b) - 2.0*beta/J*( d('ik,jl',b,b) + d('il,jk',b,b) ) +\
-			(lamb+4.0*beta+4.0*alpha/J)*d('ij,kl',I,I) + 2.0*(lamb*(J-1.0) -4.0*beta -2.0*alpha/J)*d('ij,kl',I,I) -\
-			1.0*(lamb*(J-1.0) -4.0*beta -2.0*alpha/J)*(d('ik,jl',I,I)+d('il,jk',I,I)) ,1) 
-		
+		# Actual version
+		# d = np.einsum
+		# H_Voigt = Voigt( 4.0*beta/J*d('ij,kl',b,b) - 2.0*beta/J*( d('ik,jl',b,b) + d('il,jk',b,b) ) +\
+		# 	(lamb+4.0*beta+4.0*alpha/J)*d('ij,kl',I,I) + 2.0*(lamb*(J-1.0) -4.0*beta -2.0*alpha/J)*d('ij,kl',I,I) -\
+		# 	1.0*(lamb*(J-1.0) -4.0*beta -2.0*alpha/J)*(d('ik,jl',I,I)+d('il,jk',I,I)) ,1) 
+
+		# Simplified version
+		H_Voigt = 2.0*beta/J*( 2.0*einsum('ij,kl',b,b) - einsum('ik,jl',b,b) - einsum('il,jk',b,b) ) + \
+			(lamb*(2.0*J-1.0) -4.0*beta)*einsum('ij,kl',I,I) - \
+			(lamb*(J-1.0) -4.0*beta -2.0*alpha/J)*( einsum('ik,jl',I,I) + einsum('il,jk',I,I) )
+		H_Voigt = Voigt(H_Voigt,1) 
+
 		MaterialArgs.H_VoigtSize = H_Voigt.shape[0]
 
 		return H_Voigt

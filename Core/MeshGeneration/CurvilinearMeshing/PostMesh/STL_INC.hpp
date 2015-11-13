@@ -10,14 +10,13 @@
 #include <cstdarg>
 #include <cmath>
 #include <ctime>
-//#include <stdint.h>
-//#include <stddef.h>
 #include <tuple>
 #include <typeinfo>
 #include <chrono>
 #include <memory>
 #include <algorithm>
 #include <utility>
+#include <limits>
 
 
 typedef int64_t Integer;
@@ -39,6 +38,8 @@ typedef bool Boolean;
 #endif
 
 #define STATIC static
+
+#define INF std::numeric_limits<double>::infinity()
 
 #endif // STD_INC_HPP
 

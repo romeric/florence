@@ -13,18 +13,19 @@ def ProblemData(MainData):
 	MainData.Fields = 'Mechanics'
 	# MainData.Fields = 'ElectroMechanics'
 	
-	MainData.Formulation = 1 	# Displacement-Potential based formulation
+	MainData.Formulation = 'DisplacementApproach'
 	MainData.Analysis = 'Static'
 	# MainData.Analysis = 'Dynamic'
 	MainData.AnalysisType = 'Linear'
 	# MainData.AnalysisType = 'Nonlinear'
 
 	class MaterialArgs(object):
-		Type = 'LinearModel'
-		# Type = 'IncrementallyLinearisedNeoHookean'
+		# Type = 'LinearModel'
+		Type = 'IncrementallyLinearisedNeoHookean'
 		# Type = 'AnisotropicMooneyRivlin_1'
 		# Type = 'NearlyIncompressibleNeoHookean'
 		# Type = 'NeoHookean_1'
+		# Type = 'MooneyRivlin'
 		
 		
 		
@@ -78,6 +79,7 @@ def ProblemData(MainData):
 		# NURBS/NON-NURBS TYPE BOUNDARY CONDITION
 		Type = 'nurbs'
 		RequiresCAD = True
+		# CurvilinearMeshNodalSpacing = 'fekete'
 
 		scale = 1000.
 		condition = 1 # this condition is not used

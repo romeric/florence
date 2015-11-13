@@ -44,7 +44,9 @@ cdef extern from "PostMeshCurve.hpp":
 		void ProjectMeshOnCurve()
 		void RepairDualProjectedParameters()
 		void MeshPointInversionCurve()
+		void MeshPointInversionCurveArcLength()
 		void GetBoundaryPointsOrder()
+		void ReturnModifiedMeshPoints(Real *points)
 		PassToPython GetDirichletData()
 
 

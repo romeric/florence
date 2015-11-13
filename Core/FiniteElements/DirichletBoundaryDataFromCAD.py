@@ -1,7 +1,8 @@
-import numpy as np
+import numpy as np, sys
 
 from Core.QuadratureRules import GaussLobattoQuadrature
 from Core.QuadratureRules.FeketePointsTri import FeketePointsTri
+from Core.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints
 
 from Core.MeshGeneration.CurvilinearMeshing.IGAKitPlugin.IdentifyNURBSBoundaries import GetDirichletData
 from Core import PostMeshCurvePy as PostMeshCurve 
@@ -25,10 +26,15 @@ def PostMeshWrapper(MainData,mesh):
 	# GET BOUNDARY FEKETE POINTS
 	if MainData.ndim == 2:
 		
-		boundary_fekete = GaussLobattoQuadrature(MainData.C+2)[0]
+		# CHOOSE TYPE OF BOUNDARY SPACING 
+		boundary_fekete = np.array([[]])
+		spacing_type = getattr(MainData.BoundaryData,'CurvilinearMeshNodalSpacing',None)
+		if spacing_type == 'fekete':
+			boundary_fekete = GaussLobattoQuadrature(MainData.C+2)[0]
+		else:
+			boundary_fekete = EquallySpacedPoints(MainData.ndim,MainData.C)
 		# IT IS IMPORTANT TO ENSURE THAT THE DATA IS C-CONITGUOUS
 		boundary_fekete = boundary_fekete.copy(order="c")
-
 
 		curvilinear_mesh = PostMeshCurve(mesh.element_type,dimension=MainData.ndim)
 		curvilinear_mesh.SetMeshElements(mesh.elements)
@@ -40,8 +46,10 @@ def PostMeshWrapper(MainData,mesh):
 		curvilinear_mesh.SetProjectionPrecision(1.0e-04)
 		curvilinear_mesh.SetProjectionCriteria(MainData.BoundaryData().ProjectionCriteria(mesh))
 		curvilinear_mesh.ScaleMesh()
-		# curvilinear_mesh.InferInterpolationPolynomialDegree();
+		# curvilinear_mesh.InferInterpolationPolynomialDegree() 
 		curvilinear_mesh.SetFeketePoints(boundary_fekete)
+		# print boundary_fekete
+		# sys.exit(0)
 		curvilinear_mesh.GetBoundaryPointsOrder()
 		# READ THE GEOMETRY FROM THE IGES FILE
 		curvilinear_mesh.ReadIGES(MainData.BoundaryData.IGES_File)
@@ -57,12 +65,16 @@ def PostMeshWrapper(MainData,mesh):
 		# FIX IMAGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
 		curvilinear_mesh.RepairDualProjectedParameters()
 		# PERFORM POINT INVERTION FOR THE INTERIOR POINTS
-		curvilinear_mesh.MeshPointInversionCurve()
+		# curvilinear_mesh.MeshPointInversionCurve()
+		curvilinear_mesh.MeshPointInversionCurveArcLength()
+		# OBTAIN MODIFIED MESH POINTS - THIS IS NECESSARY TO ENSURE LINEAR MESH IS ALSO CORRECT
+		curvilinear_mesh.ReturnModifiedMeshPoints(mesh.points)
 		# GET DIRICHLET DATA
 		nodesDBC, Dirichlet = curvilinear_mesh.GetDirichletData() 
 		# FIND UNIQUE VALUES OF DIRICHLET DATA
 		posUnique = np.unique(nodesDBC,return_index=True)[1]
 		nodesDBC, Dirichlet = nodesDBC[posUnique], Dirichlet[posUnique,:]
+
 
 	elif MainData.ndim == 3:
 

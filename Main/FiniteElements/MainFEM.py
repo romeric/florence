@@ -29,8 +29,8 @@ from Core.FiniteElements.Solvers.Solver import *
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Electromechanics/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Nurbs/ProblemData.py')
-# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/MechanicalComponent2D/ProblemData.py')
-Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Wing2D/ProblemData.py')
+Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/MechanicalComponent2D/ProblemData.py')
+# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Wing2D/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Sphere/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Naca_Isotropic/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/RAE2822/ProblemData.py')
@@ -122,15 +122,22 @@ def main(MainData, DictOutput=None, nStep=0):
 	vpoints = mesh.points + TotalDisp[:,:MainData.ndim,-1]
 	# print 'All boundary node norms: ', np.linalg.norm(vpoints[MainData.nodesDBC[:,0],:],axis=1)
 	# MainData.mesh.points = mesh.points + TotalDisp[:,:MainData.ndim,-1]
+	# print mesh.points[159,:]
 	# print vpoints[159,:]
+	# from Core.Supplementary.Tensors import makezero
+	# print makezero(mesh.points[[9,159,160,1],:])
+	# print makezero(vpoints[[9,159,160,1],:])
+	# print np.linalg.norm(vpoints[[9,159,160,1],:],axis=1)
 	# print np.linalg.norm(vpoints[159,:])
+	# np.set_printoptions(precision=14)
+	# print vpoints[mesh.elements[0,:],:]
 	# print mesh.elements
 	# print mesh.points
 	# print mesh.edges
-	print mesh.points[924,:]
-	print vpoints[924,:]
-	print TotalDisp[924,:,-1]
-	# print mesh.points
+
+	# print mesh.points[924,:]
+	# print vpoints[924,:]
+	# print TotalDisp[924,:,-1]
 
 	# print np.linalg.norm(mesh.points[mesh.elements[68,:],:],axis=1)
 	# print np.linalg.norm(vpoints[mesh.elements[68,:],:],axis=1)
@@ -149,9 +156,9 @@ def main(MainData, DictOutput=None, nStep=0):
 
 	if MainData.AssemblyParameters.FailedToConverge==False:
 		PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp,show_plot=False)
-		PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
-		import matplotlib.pyplot as plt
-		plt.show()
+		# PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
+		# import matplotlib.pyplot as plt
+		# plt.show()
 	else:
 		MainData.ScaledJacobian = np.NAN
 

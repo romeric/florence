@@ -10,7 +10,7 @@ cimport numpy as np
 
 cdef class PostMeshCurvePy:
 	"""
-	Python wrapper for C++ PostMesh 
+	Python wrapper for C++ PostMeshCurve 
 	"""
 
 	cdef UInteger ndim 
@@ -100,8 +100,14 @@ cdef class PostMeshCurvePy:
 	def MeshPointInversionCurve(self):
 		self.thisptr.MeshPointInversionCurve()
 
+	def MeshPointInversionCurveArcLength(self):
+		self.thisptr.MeshPointInversionCurveArcLength()
+
 	def GetBoundaryPointsOrder(self):
 		self.thisptr.GetBoundaryPointsOrder()
+
+	def ReturnModifiedMeshPoints(self,Real[:,::1] points):
+		self.thisptr.ReturnModifiedMeshPoints(&points[0,0])
 
 	@boundscheck(False)
 	def GetDirichletData(self):
@@ -131,7 +137,7 @@ cdef class PostMeshCurvePy:
 
 cdef class PostMeshSurfacePy:
 	"""
-	Python wrapper for C++ PostMesh 
+	Python wrapper for C++ PostMeshSurface 
 	"""
 
 	cdef UInteger ndim 

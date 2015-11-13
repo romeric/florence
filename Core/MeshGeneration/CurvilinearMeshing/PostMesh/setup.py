@@ -1,6 +1,7 @@
 from distutils.core import setup
 from distutils.command.clean import clean
 from distutils.extension import Extension
+from distutils.sysconfig import get_config_vars 
 from Cython.Build import cythonize
 import os, platform
 import sys
@@ -8,9 +9,20 @@ import sys
 # Get the current directory
 _pwd_ = os.path.dirname(os.path.realpath('__file__'))
 
+# Remove the "-Wstrict-prototypes" compiler option, which isn't valid for C++.
+cfg_vars = get_config_vars()
+for key, value in cfg_vars.items():
+    if isinstance(value,str):
+        cfg_vars[key] = value.replace("-Wstrict-prototypes", "")
+
+# Suppress numpy deprecation warnings
+no_deprecated = ("NPY_NO_DEPRECATED_API",None)
+
 # Compiler arguments
 compiler_args = ["-std=c++11","-march=native","-mtune=native",
-            "-mfpmath=sse","-ffast-math","-ftree-vectorize"]
+            "-mfpmath=sse","-ffast-math","-ftree-vectorize",
+            "-funroll-loops","-Wno-unused-function","-flto",
+            "-DNPY_NO_DEPRECATED_API","-Wno-cpp"]
 
 # Source files
 sourcefiles = ["PostMeshPy.pyx",_pwd_+"/src/PyInterfaceEmulator.cpp",
@@ -33,12 +45,18 @@ extensions = [
         "/usr/local/include/oce/"],
         libraries= ["stdc++"] + occ_libs, 
         library_dirs = [_pwd_,_pwd_+"/include","/usr/local/lib/"],
-        extra_compile_args = compiler_args
+        extra_compile_args = compiler_args,
+        define_macros=[no_deprecated],
         ),
 ]
 
 setup(
-    ext_modules = cythonize(extensions)
+    ext_modules = cythonize(extensions),
+    description = "A Python wrapper for PostMesh - a high curvilinear mesh generator based on OpenCascade",
+    author="Roman Poya",
+    author_email = "r.poya@swansea.ac.uk",
+    url = "https://github.com/romeric/PostMesh",
+    version = "0.1",
 )
-
+ 
 # extra_compile_args = compiler_args + ["-O3", "-fopenmp"]

@@ -13,7 +13,7 @@ def ProblemData(MainData):
 	MainData.Fields = 'Mechanics'
 	# MainData.Fields = 'ElectroMechanics'
 	
-	MainData.Formulation = 1 	# Displacement-Potential based formulation
+	MainData.Formulation = 'DisplacementApproach'
 	MainData.Analysis = 'Static'
 	# MainData.Analysis = 'Dynamic'
 	MainData.AnalysisType = 'Linear'
@@ -85,9 +85,8 @@ def ProblemData(MainData):
 	class BoundaryData(object):
 		# NURBS/NON-NURBS TYPE BOUNDARY CONDITION
 		Type = 'nurbs'
-		# Type = 'straight'
-		# Type = 'mixed'
 		RequiresCAD = True
+		# CurvilinearMeshNodalSpacing = 'fekete'
 
 		IGES_File = ProblemPath + '/Circle.igs'
 		condition = 2000.
