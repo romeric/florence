@@ -50,6 +50,11 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 		# print LagrangeElemCoords
 		# print StrainTensors['J']
 		# print ParentGradientx[0,:,:]
+		# print ParentGradientX[0,0,:]
+		# print LagrangeElemCoords
+		# print MainData.Domain.Jm.shape
+		# print ParentGradientX.shape
+		# print MaterialGradient[0,:2,0]
 
 	# LOOP OVER GAUSS POINTS
 	for counter in range(MainData.Domain.AllGauss.shape[0]): 
@@ -97,6 +102,7 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 				tractionforce += t*detJ[counter]
 
 
+
 	# CHECK FOR SYMMETRY OF STIFFNESS MATRIX
 	if MainData.__NO_DEBUG__ is False:
 		issym = True 	
@@ -109,6 +115,9 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 					break
 		# if issym:
 			# print u'\u2713'.encode('utf8')+' : ', 'Elemental stiffness matrix is symmetric'
+
+	# if elem==1:
+		# print tractionforce
 
 	return stiffness, tractionforce 
 #-------------------------------------------------------------------------------------------------------------------#

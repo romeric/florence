@@ -9,12 +9,13 @@ from Core.Supplementary.Tensors.Tensors import *
 class NeoHookean_2(object):
 	"""Material model for neo-Hookean with the following internal energy:
 
-		W(C) = lambda*(C:I)-mu*lnJ+lamba/2*(J-1)**2
+		W(C) = mu/2*(C:I)-mu*lnJ+lamba/2*(J-1)**2
 
 		"""
 	def __init__(self, ndim):
 		super(NeoHookean_2, self).__init__()
 		self.ndim = ndim
+
 	def Get(self):
 		self.nvar = self.ndim
 		self.modelname = 'NeoHookean_2'
@@ -28,7 +29,6 @@ class NeoHookean_2(object):
 
 		mu2 = mu/detF- lamb*(detF-1.0)
 		lamb2 = lamb*(2*detF-1.0) 
-
 
 		# d = np.einsum
 		# C = lamb2*d('ij,kl',I,I)+mu2*(d('ik,jl',I,I) + d('il,jk',I,I))
@@ -48,6 +48,10 @@ class NeoHookean_2(object):
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
 
+
+		# if elem==0 and gcounter==0:
+			# print 1.0*mu/J*b + (lamb*(J-1.0)-mu/J)*I
+			
 		return 1.0*mu/J*b + (lamb*(J-1.0)-mu/J)*I
 
 

@@ -192,6 +192,7 @@ def AssemblySmall(MainData,mesh,Eulerx,TotalPot):
 	MainData.spmat = stiffness.data.nbytes/1024./1024.
 	MainData.ijv = (I_stiffness.nbytes + J_stiffness.nbytes + V_stiffness.nbytes)/1024./1024.
 
+	# print T
 	return stiffness, T, F, mass
 
 
