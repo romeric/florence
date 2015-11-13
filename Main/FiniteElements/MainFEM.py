@@ -1,6 +1,3 @@
-# from time import time
-# import numpy as np
-# import numpy.linalg as la
 import os, sys, imp
 # GET THE CURRENT DIRECTORY PARTH
 pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))

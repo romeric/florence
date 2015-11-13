@@ -1,8 +1,3 @@
-import os, imp, sys
-from time import time
-import numpy as np
-
-# from Core.MeshGeneration.HigherOrderMeshing import *
 import Core.MaterialLibrary as MatLib 
 from Core.FiniteElements.ElementalMatrices.KinematicMeasures import *
 from Core.MeshGeneration.SalomeMeshReader import ReadMesh
@@ -445,15 +440,19 @@ def PreProcess(MainData,Pr,pwd):
 	# DO NOT UPDATE THE GEOMETRY IF THE MATERIAL MODEL NAME CONTAINS LINEAR OR
 	# INCREMENTS (CASE INSENSITIVE). GEOMETRY CAN STILL BE UPDATED USING THE 
 	# PRESTRESS FLAG FOR MODELS THAT ARE LINEAR BUT NEED GEOMETRY UPDATE
-	if 'Increment'.lower() or 'Linear'.lower() in MainData.MaterialArgs.Type.lower():
+
+	# COMPARE STRINGS WHICH MIGHT CONTAIN UNICODES
+	if getattr(str,'casefold',None) is not None:
+		insensitive = lambda str_name: str_name.casefold()
+	else:
+		insensitive = lambda str_name: str_name.upper().lower()  
+
+	if insensitive('Increment') in insensitive(MainData.MaterialArgs.Type) or \
+		insensitive('Linear') in insensitive(MainData.MaterialArgs.Type):
 		# RUN THE SIMULATION WITHIN A NONLINEAR ROUTINE WITHOUT UPDATING THE GEOMETRY
 		MainData.GeometryUpdate = 0
 	else:
 		MainData.GeometryUpdate = 1
-
-
-
-
 
 
 	# CHOOSING THE SOLVER

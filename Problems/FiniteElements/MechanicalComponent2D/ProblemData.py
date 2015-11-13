@@ -18,17 +18,17 @@ def ProblemData(MainData):
 
 	MainData.Analysis = 'Static'
 	# MainData.Analysis = 'Dynamic'
-	MainData.AnalysisType = 'Linear'
-	# MainData.AnalysisType = 'Nonlinear'
+	# MainData.AnalysisType = 'Linear'
+	MainData.AnalysisType = 'Nonlinear'
 
 	class MaterialArgs(object):
 		# Type = 'LinearModel'
 		# Type = 'IncrementalLinearElastic'
-		Type = 'IncrementallyLinearisedNeoHookean'
+		# Type = 'IncrementallyLinearisedNeoHookean'
 		# Type = 'AnisotropicMooneyRivlin_1'
 		# Type = 'NearlyIncompressibleNeoHookean'
 		# Type = 'NeoHookean_1'
-		# Type = 'NeoHookean_2'
+		Type = 'NeoHookean_2'
 		# Type = 'MooneyRivlin'
 		# Type = 'NearlyIncompressibleMooneyRivlin'
 		# Type = 'AnisotropicMooneyRivlin' 

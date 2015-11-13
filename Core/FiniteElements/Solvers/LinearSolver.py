@@ -40,24 +40,9 @@ def LinearSolver(Increment,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nmes
 	# UPDATE THE FIELDS
 	TotalDisp[:,:,Increment] += dU
 
-	# # LINEAR ELASTICITY IN STEPS
-	# if MainData.LinearWithStep:
-	# 	# UPDATE THE GEOMETRY
-	# 	vmesh = copy.deepcopy(nmesh)
-	# 	vmesh.points = nmesh.points + TotalDisp[:,:MainData.ndim,Increment]
-	# 	Eulerx = np.copy(vmesh.points) 
-	# 	K = Assembly(MainData,vmesh,Eulerx,np.zeros((nmesh.points.shape[0],1),dtype=np.float64))[0]
-
 	# LINEARISED ELASTICITY WITH STRESS AND HESSIAN UPDATE
 	if MainData.Prestress:
-		
-		# # UPDATE THE GEOMETRY
-		# Eulerx = nmesh.points + TotalDisp[:,:MainData.ndim,Increment]			
-		# # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES (BE CAREFUL ABOUT THE -1 INDEX IN HERE)
-		# K, TractionForces = Assembly(MainData,nmesh,Eulerx,TotalDisp[:,MainData.nvar-1,Increment].reshape(TotalDisp.shape[0],1))[:2]
-		# # FIND THE RESIDUAL
-		# Residual[columns_in] = TractionForces[columns_in] - NodalForces[columns_in]
-		# np.savetxt('/home/roman/Dropbox/MeshingElasticity2/K_n.dat',K.todense())
+		# THE IF CONDITION IS TO AVOID ASSEMBLING FOR THE INCREMENT WHICH WE DON'T SOLVE FOR
 		if Increment <MainData.AssemblyParameters.LoadIncrements-1:
 			# UPDATE THE GEOMETRY
 			Eulerx = nmesh.points + TotalDisp[:,:MainData.ndim,Increment]			
@@ -65,7 +50,6 @@ def LinearSolver(Increment,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nmes
 			K, TractionForces = Assembly(MainData,nmesh,Eulerx,TotalDisp[:,MainData.nvar-1,Increment].reshape(TotalDisp.shape[0],1))[:2]
 			# FIND THE RESIDUAL
 			Residual[columns_in] = TractionForces[columns_in] - NodalForces[columns_in]
-			# print Increment
 
 	print 'Load increment', Increment, 'for incrementally linearised elastic problem'
 
