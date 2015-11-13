@@ -31,7 +31,6 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 
 	# UPDATE/NO-UPDATE GEOMETRY
 	if MainData.GeometryUpdate or MainData.Prestress:
-		# print 'WOW'
 		# MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
 		ParentGradientx = np.einsum('ijk,jl->kil',MainData.Domain.Jm,EulerELemCoords)
 		# SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
@@ -53,7 +52,6 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 		# print ParentGradientx[0,:,:]
 
 	# LOOP OVER GAUSS POINTS
-	# for counter in range(0,MainData.Domain.AllGauss.shape[0]):
 	for counter in range(MainData.Domain.AllGauss.shape[0]): 
 
 		if MainData.Fields == 'ElectroMechanics':
