@@ -10,18 +10,18 @@ def ConstitutiveStiffnessIntegrand(self,B,nvar,ndim,AnalysisType,Prestress,Spati
 	# THREE DIMENSIONS
 	if SpatialGradient.shape[0]==3:
 
-		B[0:B.shape[0]:nvar,0] = SpatialGradient[0,:]
-		B[1:B.shape[0]:nvar,1] = SpatialGradient[1,:]
-		B[2:B.shape[0]:nvar,2] = SpatialGradient[2,:]
+		B[0::nvar,0] = SpatialGradient[0,:]
+		B[1::nvar,1] = SpatialGradient[1,:]
+		B[2::nvar,2] = SpatialGradient[2,:]
 		# Mechanical - Shear Terms
-		B[1:B.shape[0]:nvar,5] = SpatialGradient[2,:]
-		B[2:B.shape[0]:nvar,5] = SpatialGradient[1,:]
+		B[1::nvar,5] = SpatialGradient[2,:]
+		B[2::nvar,5] = SpatialGradient[1,:]
 
-		B[0:B.shape[0]:nvar,4] = SpatialGradient[2,:]
-		B[2:B.shape[0]:nvar,4] = SpatialGradient[0,:]
+		B[0::nvar,4] = SpatialGradient[2,:]
+		B[2::nvar,4] = SpatialGradient[0,:]
 
-		B[0:B.shape[0]:nvar,3] = SpatialGradient[1,:]
-		B[1:B.shape[0]:nvar,3] = SpatialGradient[0,:]
+		B[0::nvar,3] = SpatialGradient[1,:]
+		B[1::nvar,3] = SpatialGradient[0,:]
 
 
 		if AnalysisType == 'Nonlinear' or Prestress:
@@ -34,11 +34,11 @@ def ConstitutiveStiffnessIntegrand(self,B,nvar,ndim,AnalysisType,Prestress,Spati
 
 	elif SpatialGradient.shape[0]==2:
 
-		B[0:B.shape[0]:nvar,0] = SpatialGradient[0,:]
-		B[1:B.shape[0]:nvar,1] = SpatialGradient[1,:]
+		B[0::nvar,0] = SpatialGradient[0,:]
+		B[1::nvar,1] = SpatialGradient[1,:]
 		# Mechanical - Shear Terms
-		B[0:B.shape[0]:nvar,2] = SpatialGradient[1,:]
-		B[1:B.shape[0]:nvar,2] = SpatialGradient[0,:]
+		B[0::nvar,2] = SpatialGradient[1,:]
+		B[1::nvar,2] = SpatialGradient[0,:]
 
 
 		if AnalysisType == 'Nonlinear' or Prestress:
@@ -48,7 +48,6 @@ def ConstitutiveStiffnessIntegrand(self,B,nvar,ndim,AnalysisType,Prestress,Spati
 
 			TotalTraction = CauchyStressTensor_Voigt
 
-	# print H_Voigt.shape#, B.shape
 	BDB = np.dot(np.dot(B,H_Voigt),B.T)
 	# BDB = np.dot(np.dot(B,H_Voigt),B.T.copy())
 	t=[]
@@ -69,17 +68,17 @@ def GeometricStiffnessIntegrand(self,SpatialGradient,CauchyStressTensor,nvar,ndi
 	S = 0
 	if SpatialGradient.shape[0]==3:
 
-		B[0:B.shape[0]:nvar,0] = SpatialGradient[0,:]
-		B[0:B.shape[0]:nvar,1] = SpatialGradient[1,:]
-		B[0:B.shape[0]:nvar,2] = SpatialGradient[2,:]
+		B[0::nvar,0] = SpatialGradient[0,:]
+		B[0::nvar,1] = SpatialGradient[1,:]
+		B[0::nvar,2] = SpatialGradient[2,:]
 
-		B[1:B.shape[0]:nvar,3] = SpatialGradient[0,:]
-		B[1:B.shape[0]:nvar,4] = SpatialGradient[1,:]
-		B[1:B.shape[0]:nvar,5] = SpatialGradient[2,:]
+		B[1::nvar,3] = SpatialGradient[0,:]
+		B[1::nvar,4] = SpatialGradient[1,:]
+		B[1::nvar,5] = SpatialGradient[2,:]
 
-		B[2:B.shape[0]:nvar,6] = SpatialGradient[0,:]
-		B[2:B.shape[0]:nvar,7] = SpatialGradient[1,:]
-		B[2:B.shape[0]:nvar,8] = SpatialGradient[2,:]
+		B[2::nvar,6] = SpatialGradient[0,:]
+		B[2::nvar,7] = SpatialGradient[1,:]
+		B[2::nvar,8] = SpatialGradient[2,:]
 
 		S = np.zeros((3*ndim,3*ndim))
 		S[0:ndim,0:ndim] = CauchyStressTensor
@@ -88,17 +87,15 @@ def GeometricStiffnessIntegrand(self,SpatialGradient,CauchyStressTensor,nvar,ndi
 
 	elif SpatialGradient.shape[0]==2:
 
-		B[0:B.shape[0]:nvar,0] = SpatialGradient[0,:]
-		B[0:B.shape[0]:nvar,1] = SpatialGradient[1,:]
+		B[0::nvar,0] = SpatialGradient[0,:]
+		B[0::nvar,1] = SpatialGradient[1,:]
 
-		B[1:B.shape[0]:nvar,2] = SpatialGradient[0,:]
-		B[1:B.shape[0]:nvar,3] = SpatialGradient[1,:]
+		B[1::nvar,2] = SpatialGradient[0,:]
+		B[1::nvar,3] = SpatialGradient[1,:]
 
-		# S = np.zeros((3*ndim,3*ndim))
 		S = np.zeros((ndim*ndim,ndim*ndim))
 		S[0:ndim,0:ndim] = CauchyStressTensor
 		S[ndim:2*ndim,ndim:2*ndim] = CauchyStressTensor
-		# S[2*ndim:,2*ndim:] = CauchyStressTensor
 
 
 	BDB = np.dot(np.dot(B,S),B.T)
@@ -120,7 +117,7 @@ def MassIntegrand(self,Bases,N,Minimal,MaterialArgs):
 	# Three Dimensions
 	if ndim==3:
 		for ivar in range(0,ndim):
-			N[ivar:N.shape[0]:nvar,ivar] = Bases
+			N[ivar::nvar,ivar] = Bases
 
 	
 	rhoNN = rho*np.dot(N,N.T)

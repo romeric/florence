@@ -31,7 +31,7 @@ def GetElementalMatricesSmall(elem,MainData,elements,points,Eulerx,TotalPot):
 		stiffnessel, t = Stiffness_NonVectorised(MainData,LagrangeElemCoords,EulerElemCoords,ElectricPotentialElem,elem)
 	# if elem==0:
 		# print stiffnessel
-		# np.savetxt('/home/roman/Desktop/MeshingElasticity2/K_1.dat',stiffnessel)
+		# np.savetxt('/home/roman/Dropbox/MeshingElasticity2/K_1.dat',stiffnessel)
 
 	I_mass_elem = []; J_mass_elem = []; V_mass_elem = []
 	if MainData.Analysis != 'Static':
