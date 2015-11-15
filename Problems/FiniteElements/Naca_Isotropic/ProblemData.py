@@ -31,8 +31,7 @@ def ProblemData(MainData):
 		
 		
 
-		E = 1.0e5
-		# nu = 0.4
+		E = 1.0e0
 		nu=0.4
 
 		# E = MainData.E 

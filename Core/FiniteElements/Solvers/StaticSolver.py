@@ -5,46 +5,52 @@ from Core.FiniteElements.Solvers.LinearSolver import *
 from Core.FiniteElements.ApplyDirichletBoundaryConditions import *
 
 
-def StaticSolver(LoadIncrement,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nmesh,TotalDisp,
+def StaticSolver(LoadIncrement,MainData,K,F,NeumannForces,M,NodalForces,Residual,ResidualNorm,nmesh,TotalDisp,
 	Eulerx,columns_in,columns_out,AppliedDirichlet):
 
 	LoadFactor = 1./LoadIncrement
 	AppliedDirichletInc = np.zeros(AppliedDirichlet.shape[0])
 	
-	# TractionForces = F
-	# F = np.zeros_like(F)
+
 	for Increment in range(0,LoadIncrement):
 
-		DeltaF = LoadFactor*F
+		DeltaF = LoadFactor*NeumannForces
 		NodalForces += DeltaF
-		Residual -= DeltaF
+		# RESIDUAL FORCES CONTAIN CONTRIBUTION FROM BOTH NEUMANN AND DIRICHLET
+		# print np.linalg.norm(DeltaF)
+		Residual -= (DeltaF + LoadFactor*F)
 		AppliedDirichletInc += LoadFactor*AppliedDirichlet
+
+		
 
 		# CALL THE LINEAR/NONLINEAR SOLVER
 		if MainData.AnalysisType == 'Nonlinear':
 			t_increment = time()
-			TotalDisp = NewtonRaphson(Increment,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nmesh,TotalDisp,Eulerx,
+
+			# LET NORM OF RESIDUAL BE THE NORM WITH RESPECT TO WHICH WE HAVE TO 
+			# CHECK THE CONVERGENCE OF NEWTON RAPHSON. TYPICALLY THIS IS NORM OF
+			# OF NODAL FORCES
+			if Increment==0:
+				MainData.NormForces = np.linalg.norm(Residual[columns_out])
+
+			TotalDisp = NewtonRaphson(Increment,MainData,K,M,NodalForces,Residual,ResidualNorm,nmesh,TotalDisp,Eulerx,
 				columns_in,columns_out,AppliedDirichletInc)
 
-			NormForces = la.norm(NodalForces[columns_in])
-			if la.norm(NodalForces[columns_in]) < 1e-14:
-				NormForces = 1e-14
-
 			print '\nFinished Load increment', Increment, 'in', time()-t_increment, 'sec'
-			print 'Norm of Residual is', np.abs(la.norm(Residual[columns_in])/NormForces), '\n'
+			print 'Norm of Residual is', np.abs(la.norm(Residual[columns_in])/MainData.NormForces), '\n'
 
+			# STORE THE INFORMATION IF NEWTON-RAPHSON FAILS
 			if MainData.AssemblyParameters.FailedToConverge == True:
 				MainData.solve.condA = np.NAN
 				MainData.solve.scaledA = np.NAN
 				break
 
 		elif MainData.AnalysisType == 'Linear':
-			TotalDisp, K = LinearSolver(Increment,MainData,K,F,M,NodalForces,Residual,ResidualNorm,nmesh,TotalDisp,Eulerx,
+			TotalDisp, K, F, AppliedDirichletInc, Residual, NodalForces = LinearSolver(Increment,MainData,K,F,NeumannForces,M,NodalForces,
+				Residual,ResidualNorm,nmesh,TotalDisp,Eulerx,
 				columns_in,columns_out,AppliedDirichletInc)
 
 		# print nmesh.points[6,:]+TotalDisp[6,:,Increment]
-		# print K
-		print np.linalg.norm(F[columns_in])
 
 
 	return TotalDisp

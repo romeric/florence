@@ -60,16 +60,13 @@ def PreProcess(MainData,Pr,pwd):
 	# np.savetxt('/home/roman/Desktop/elements_almond.dat', mesh.elements,fmt='%d',delimiter=',')
 	# np.savetxt('/home/roman/Desktop/points_almond.dat', mesh.points,fmt='%10.9f',delimiter=',')
 	
-	if Pr.__file__.split('/')[-2] == 'MechanicalComponent2D':
+	if 'MechanicalComponent2D' in Pr.__file__.split('/') or \
+		'Misc' in Pr.__file__.split('/'):
 		mesh.points *=1000.
 
-	mesh.points *=1000. 
-	# mesh.SimplePlot()
-	# print mesh.points
-	# Dict = {'points':mesh.points,'element':mesh.elements}
-	# from scipy.io import savemat
-	# savemat('/home/roman/Desktop/fillet_p1',Dict)
 
+	# mesh.points *=1000. 
+	# mesh.SimplePlot()
 	# mesh.PlotMeshNumberingTri()
 	# print mesh.GetElementsWithBoundaryEdgesTri()
 	# mesh.RetainElementsWithin((-0.52,-0.08,0.72,0.08))
@@ -91,8 +88,11 @@ def PreProcess(MainData,Pr,pwd):
 
 	# mesh.Sphere()
 	# mesh.Sphere(points=2)
+	# mesh.RemoveElements((-0.55,-0.1,-0.4,0.1),plot_new_mesh=False) 
 	# mesh.SimplePlot()	
 	# sys.exit(0)
+
+	# print mesh.points.shape
 
 
 
@@ -129,35 +129,11 @@ def PreProcess(MainData,Pr,pwd):
 	# ##############################################################################
 	# np.savetxt('/home/roman/Dropbox/time_3.dat',np.array([time()-t_mesh, mesh.points.shape[0]]))
 
-	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/elements_cube.dat',mesh.elements)
-	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_cube.dat',mesh.points)
-	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/elements_cube5.dat',mesh.elements)
-	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_cube5.dat',mesh.points)
-	# print mesh.faces
-	# sys.exit(0)
-	# print mesh.faces
-	# mesh.GetBoundaryFacesHigherTet()
 	# print mesh.elements
 	# print mesh.points
 	# print mesh.faces
 	# print mesh.edges
 	# mesh.PlotMeshNumberingTri()
-	# print mesh.points[159,:]
-	# print mesh.points[924,:]
-
-
-	# from scipy.io import loadmat
-	# xx = loadmat('/home/roman/Dropbox/Florence/Problems/FiniteElements/Annular_Circle_Nurbs/rr.mat')
-	# mesh.points = xx['X'] 
-	# mesh.elements = (xx['T']-1).astype(np.int64)
-	# mesh.nelem = mesh.elements.shape[0]
-	# mesh.edges = xx['edges']-1
-	# print mesh.points.shape
-	# print np.min(mesh.elements)
-	# sys.exit(0)
-	# mesh.GetBoundaryEdgesTri()
-
-
 	# sys.exit("STOPPED")
 
 	# np.savetxt('/home/roman/Desktop/elements_check_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
@@ -240,7 +216,7 @@ def PreProcess(MainData,Pr,pwd):
 		zw = QuadraturePointsWeightsTet.QuadraturePointsWeightsTet(MainData.C+1,QuadratureOpt)
 		z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]; #w = np.repeat(w,MainData.ndim) 
 	elif MainData.MeshInfo.MeshType == 'tri':
-		# zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(MainData.C+3,QuadratureOpt) # PUT C+4 OR HIGHER
+		# zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(MainData.C+1,QuadratureOpt) # PUT C+4 OR HIGHER
 		zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(MainData.C+1,QuadratureOpt) # PUT C+4 OR HIGHER
 		z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
 
@@ -264,11 +240,6 @@ def PreProcess(MainData,Pr,pwd):
 
 	############################################################################
 	# from scipy.io import savemat
-	# print z 
-	# print w
-	# np.set_printoptions(precision=7)
-	# print Domain.Bases
-	# print Domain.gBasesx
 	# Dict = {'GaussPoints':z,'GaussWeights':w,'Bases':Domain.Bases,'gBasesx':Domain.gBasesx, 'gBasesy':Domain.gBasesy}
 	# savemat('/home/roman/Desktop/Info_P'+str(MainData.C+1),Dict)
 	# exit(0)
@@ -333,11 +304,6 @@ def PreProcess(MainData,Pr,pwd):
 	MainData.Boundary = Boundary
 	############################################################################
 
-	# from Core.Supplementary.Tensors import makezero
-	# print makezero(Domain.Jm)
-	# print Domain.Jm[0,0,2]
-	# print mesh.points
-	# exit(0)
 
 
 
@@ -461,7 +427,7 @@ def PreProcess(MainData,Pr,pwd):
 		MainData.GeometryUpdate = 1
 
 
-	# CHOOSING THE SOLVER
+	# CHOOSING THE SOLVER/ASSEMBLY ROUTINES BASED ON PROBLEM SIZE
 	#############################################################################
 	class solve(object):
 		tol = 1e-07
@@ -481,6 +447,12 @@ def PreProcess(MainData,Pr,pwd):
 	else:
 		MainData.AssemblyRoutine = 'Small'
 		# print 'Small number of elements. Sticking to small assembly routine'
+
+	# FORCE QUIT PARALLELISATION  
+	if mesh.elements.shape[0] < 100:
+		MainData.__PARALLEL__ = False
+		MainData.Parallel = False
+		MainData.numCPU = 1
 
 
 	#############################################################################

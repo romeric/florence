@@ -44,7 +44,7 @@ def ApplyDirichletBoundaryConditions(stiffness,F,mesh,MainData):
 				columns_out = np.append(columns_out,nvar*nodesDBC[inode]+i)
 				AppliedDirichlet = np.append(AppliedDirichlet,Dirichlet[inode,i])
 
-		MainData.nodesDBC = nodesDBC # REMOVE THIS
+		# MainData.nodesDBC = nodesDBC # REMOVE THIS
 		# print Dirichlet
 		# print nodesDBC.shape
 		# print AppliedDirichlet
@@ -74,11 +74,12 @@ def ApplyDirichletBoundaryConditions(stiffness,F,mesh,MainData):
 		############################
 		# To Rogelio
 		# print mesh.points
+		# print AppliedDirichlet.shape, mesh.points.shape
 		# Dict = {'points':mesh.points,'element':mesh.elements,'displacements':AppliedDirichlet,'displacement_dof':columns_out}
 		# from scipy.io import savemat
-		# savemat('/home/roman/Desktop/fillet_p4',Dict)
+		# savemat('/home/roman/Desktop/wing_p2',Dict)
 
-
+		# print mesh.edges.shape, AppliedDirichlet.shape, Dirichlet.shape
 		# import sys; sys.exit(0)
 
 		############################
@@ -147,60 +148,12 @@ def ApplyDirichletBoundaryConditions(stiffness,F,mesh,MainData):
 
 
 
+def GetReducedMatrices(stiffness,F,columns_in,mass=0,Analysis=0):
 
-def ApplyIncrementalDirichletBoundaryConditions(stiffness,F,columns_in,columns_out,AppliedDirichlet,Iter,Minimal,mesh,mass=0,Analysis=0):
-
-	# for i in range(0,columns_out.shape[0]):
-	# 	if AppliedDirichlet[i]!=0.0:
-	# 		F = F - AppliedDirichlet[i]*(stiffness[:,columns_out[i]])
-	# if Iter == 0:
-	# 	for i in range(0,columns_out.shape[0]):
-	# 		if AppliedDirichlet[i]!=0.0:
-	# 			F = F - AppliedDirichlet[i]*(stiffness[:,columns_out[i]])
-
-
-	# F_b = np.delete(F,columns_out[:])
 	F_b = F[columns_in,0]
-
-	# Check F_b's size
-	if F_b.shape[0]==1:
-		F_b = F_b.reshape(F_b.shape[1],1)
-
-	F_b1 = np.zeros(F_b.shape[0])
-	for i in range(0,F_b1.shape[0]):
-		F_b1[i]=F_b[i]
-
 	stiffness_b = stiffness[columns_in,:][:,columns_in]
 
 	if Analysis != 'Static':
 		mass = mass[columns_in,:][:,columns_in]
-
-
-
-	return stiffness_b, F_b1, F, mass
-
-
-
-def ApplyLinearDirichletBoundaryConditions(stiffness,F,columns_in,Analysis,mass):
-
-	F_b = F[columns_in,0]
-
-	# # Check F_b's size
-	# if F_b.shape[0]==1:
-	# 	F_b = F_b.reshape(F_b.shape[1],1)
-
-	# F_b1 = np.zeros(F_b.shape[0])
-	# for i in range(0,F_b1.shape[0]):
-	# 	F_b1[i]=F_b[i]
-	# if F_b1.shape[0]==1:
-	# 	F_b1 = F_b 
-
-
-	stiffness_b = stiffness[columns_in,:][:,columns_in]
-
-	if Analysis != 'Static':
-		mass = mass[columns_in,:][:,columns_in]
-
 
 	return stiffness_b, F_b, F, mass
-	# return stiffness_b, F_b1, F, mass

@@ -8,27 +8,27 @@ from sys import exit
 from datetime import datetime
 import cProfile, pdb 
 import numpy as np
+import scipy as sp
 import numpy.linalg as la
 from numpy.linalg import norm
-import scipy as sp
-# from pympler import tracker, asizeof, summary, muppy
-# from memory_profiler import profile
 from datetime import datetime
-import numpy as np
-import scipy as sp 
 import multiprocessing as MP
 # from mpi4py import MPI
 # from numba.decorators import jit
 # import cython
+# from pympler import tracker, asizeof, summary, muppy
+# from memory_profiler import profile
 
-
-from Base import Base as MainData
 # AVOID WRITING .pyc OR .pyo FILES
 sys.dont_write_bytecode
 
+# IMPORT NECESSARY CLASSES FROM BASE
+from Base import Base as MainData
+
+
+
 
 if __name__ == "__main__":
-
 
 	# START THE ANALYSIS
 	print "Initiating the routines... Current time is", datetime.now().time()
@@ -37,7 +37,7 @@ if __name__ == "__main__":
  	MainData.__VECTORISATION__ = True
  	MainData.__PARALLEL__ = True
  	MainData.numCPU = MP.cpu_count()
- 	# MainData.__PARALLEL__ = False
+ 	MainData.__PARALLEL__ = False
  	# nCPU = 8
  	__MEMORY__ = 'SHARED'
  	# __MEMORY__ = 'DISTRIBUTED'

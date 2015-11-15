@@ -33,7 +33,6 @@ class Base(object):
  	__NO_DEBUG__ = False
  	__VECTORISATION__ = True
  	__PARALLEL__ = False
- 	__PARALLEL__ = False
  	nCPU = 1
  	__MEMORY__ = 'SHARED'
 

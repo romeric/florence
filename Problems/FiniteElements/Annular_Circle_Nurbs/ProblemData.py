@@ -21,7 +21,8 @@ def ProblemData(MainData):
 
 	class MaterialArgs(object):
 		# Type = 'LinearModel'
-		Type = 'IncrementallyLinearisedNeoHookean'
+		Type = 'IncrementalLinearElastic'
+		# Type = 'IncrementallyLinearisedNeoHookean'
 		# Type = 'AnisotropicMooneyRivlin_1'
 		# Type = 'NearlyIncompressibleNeoHookean'
 		# Type = 'MooneyRivlin'
@@ -30,7 +31,6 @@ def ProblemData(MainData):
 		
 
 		E = 1.0e0
-		# nu = 0.4
 		nu=0.4
 
 		# E = MainData.E 
@@ -41,30 +41,12 @@ def ProblemData(MainData):
 		lamb = E*nu/(1.+nu)/(1.-2.0*nu)
 		mu = E/2./(1+nu)
 
-		# mu = 1.
-		# lamb  = 2.
-		# mu    = 0.3571
-		# lamb  = 1.4286
-		# lamb = lamb - mu
-		# mu = 2*mu
-		# lamb = lamb + mu
 
-		# mu    = 0.090571
-		# lamb  = 1.4286
-		# mu    = 0.5
-		# lamb  = 0.6
-		# mu    = 0.5
-		# lamb  = 0.5
 		rho   = 7.5*10e-6
 		eps_1 = 1.0
 		c1    = 0.
 		c2    = 0.
 
-	# print (MaterialArgs.lamb)/2./(MaterialArgs.lamb+MaterialArgs.mu)
-
-		# mu = 23.3*1000   # N/mm^2
-		# lamb = 79.4*1000 # N/mm^2
-		# eps_1 = 1.5*10e-11  # C/mm^2
 
 	MainData.MaterialArgs = MaterialArgs
 

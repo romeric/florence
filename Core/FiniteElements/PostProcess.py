@@ -19,17 +19,18 @@ from Core.MeshGeneration import vtk_writer
 class PostProcess(object):
 	"""docstring for PostProcess"""
 
-
 	def TotalComponentSol(self,MainData,sol,columns_in,columns_out,AppliedDirichletInc,Iter,fsize):
 
 		nvar = MainData.nvar
 		ndim = MainData.ndim
 		Analysis = MainData.Analysis
 
+		TotalSol = np.zeros((fsize,1))
+
 		if MainData.AnalysisType == 'Nonlinear':
 			if Analysis =='Static':
 				# Get Total solution
-				TotalSol = np.zeros((fsize,1))
+				# TotalSol = np.zeros((fsize,1))
 				for i in range(0,columns_in.shape[0]):
 					TotalSol[columns_in[i]] = sol[i]
 				if Iter==0:
@@ -41,17 +42,26 @@ class PostProcess(object):
 					TotalSol[columns_out[i]] = AppliedDirichletInc[i]
 		elif MainData.AnalysisType == 'Linear':
 				# Get Total solution
-				TotalSol = np.zeros((fsize,1))
-				for i in range(0,columns_in.shape[0]):
-					TotalSol[columns_in[i]] = sol[i]
-				for i in range(0,columns_out.shape[0]):
-					TotalSol[columns_out[i]] = AppliedDirichletInc[i]
+				# TotalSol = np.zeros((fsize,1))
+				# for i in range(0,columns_in.shape[0]):
+				# 	TotalSol[columns_in[i]] = sol[i]
+				# for i in range(0,columns_out.shape[0]):
+				# 	TotalSol[columns_out[i]] = AppliedDirichletInc[i]
+
+				# print TotalSol[columns_in].shape, sol.shape
+				TotalSol[columns_in,0] = sol
+				TotalSol[columns_out,0] = AppliedDirichletInc
 				
 
 		# RE-ORDER SOLUTION COMPONENTS
-		dU = np.zeros((TotalSol.shape[0]/nvar,nvar),dtype=np.float64)
-		for invar in range(0,nvar):
-			dU[:,invar] = TotalSol[invar:TotalSol.shape[0]:nvar,0]
+		# dU = np.zeros((TotalSol.shape[0]/nvar,nvar),dtype=np.float64)
+		# for invar in range(0,nvar):
+		# 	# dU[:,invar] = TotalSol[invar:TotalSol.shape[0]:nvar,0]
+		# 	dU[:,invar] = TotalSol[invar::nvar,0]
+
+		dU = TotalSol.reshape(TotalSol.shape[0]/nvar,nvar)
+		# print np.linalg.norm(dU - dU2)
+
 
 		return dU
 
@@ -440,6 +450,7 @@ class PostProcess(object):
 			# FIND JACOBIAN OF SPATIAL GRADIENT
 			# USING ISOPARAMETRIC
 			Jacobian = np.abs(np.linalg.det(ParentGradientx))
+			# Jacobian = np.abs(np.linalg.det(ParentGradientX))
 			# USING DETEERMINANT OF DEFORMATION GRADIENT TENSOR
 			# Jacobian = detF
 			# print Jacobian

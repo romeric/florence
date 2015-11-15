@@ -21,18 +21,17 @@ def ProblemData(MainData):
 
 	class MaterialArgs(object):
 		# Type = 'LinearModel'
+		# Type = 'IncrementalLinearElastic'
 		Type = 'IncrementallyLinearisedNeoHookean'
 		# Type = 'AnisotropicMooneyRivlin_1'
 		# Type = 'NearlyIncompressibleNeoHookean'
 		# Type = 'NeoHookean_1'
 		# Type = 'MooneyRivlin'
 		
-		
-		
 
 		E = 1.0e1
 		# nu = 0.4
-		nu=0.35
+		nu=0.30
 
 		# E = MainData.E 
 		# nu = MainData.nu 
@@ -42,20 +41,6 @@ def ProblemData(MainData):
 		lamb = E*nu/(1.+nu)/(1.-2.0*nu)
 		mu = E/2./(1+nu)
 
-		# lamb = lamb - mu
-		# mu = 2*mu
-		# lamb = lamb + mu
-
-		rho   = 7.5*10e-6
-		eps_1 = 1.0
-		c1    = 0.
-		c2    = 0.
-
-	# print (MaterialArgs.lamb)/2./(MaterialArgs.lamb+MaterialArgs.mu)
-
-		# mu = 23.3*1000   # N/mm^2
-		# lamb = 79.4*1000 # N/mm^2
-		# eps_1 = 1.5*10e-11  # C/mm^2
 
 	MainData.MaterialArgs = MaterialArgs
 
@@ -79,7 +64,7 @@ def ProblemData(MainData):
 		# NURBS/NON-NURBS TYPE BOUNDARY CONDITION
 		Type = 'nurbs'
 		RequiresCAD = True
-		# CurvilinearMeshNodalSpacing = 'fekete'
+		CurvilinearMeshNodalSpacing = 'fekete'
 
 		scale = 1000.
 		condition = 1 # this condition is not used
@@ -205,6 +190,7 @@ def ProblemData(MainData):
 				x *= self.scale
 				y *= self.scale 
 				if x > -510 and x < 510 and y > -10 and y < 10:
+				# if x > -630 and x < 830 and y > -100 and y < 300:	
 					projection_edges[iedge]=1
 			
 			return projection_edges

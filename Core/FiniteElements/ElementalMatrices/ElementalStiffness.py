@@ -50,7 +50,7 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 		# print LagrangeElemCoords
 		# print StrainTensors['J']
 		# print ParentGradientx[0,:,:]
-		# print ParentGradientX[0,0,:]
+		# print ParentGradientX[0,:,:]
 		# print LagrangeElemCoords
 		# print MainData.Domain.Jm.shape
 		# print ParentGradientX.shape
@@ -106,8 +106,8 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 	# CHECK FOR SYMMETRY OF STIFFNESS MATRIX
 	if MainData.__NO_DEBUG__ is False:
 		issym = True 	
-		for i in range(0,stiffness.shape[0]):
-			for j in range(0,stiffness.shape[0]):
+		for i in range(stiffness.shape[0]):
+			for j in range(stiffness.shape[1]):
 				if ~np.allclose(stiffness[i,j],stiffness[j,i]):
 					issym = False
 					print u'\u2717'.encode('utf8')+' : ', 'Elemental stiffness matrix is not symmetric.',
@@ -116,8 +116,8 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 		# if issym:
 			# print u'\u2713'.encode('utf8')+' : ', 'Elemental stiffness matrix is symmetric'
 
-	# if elem==1:
-		# print tractionforce
+	# if elem==0:
+		# print stiffness[1:8:2,1:8:2]
 
 	return stiffness, tractionforce 
 #-------------------------------------------------------------------------------------------------------------------#

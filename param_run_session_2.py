@@ -96,9 +96,9 @@ if not Run:
 
 	# ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_EqualSpacing'
 	# ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_FeketeSpacing'
-	# ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_Orthogonal'
+	ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_Orthogonal'
 
-	ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_EqualSpacing'
+	# ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_EqualSpacing'
 	# ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_FeketeSpacing'
 	# ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_Orthogonal'
 
@@ -134,7 +134,9 @@ if not Run:
 	# # plt.axis('equal')
 	# # plt.axis('off')
 	# # tick_locs = [0, 1, 2, 3, 4]
-	tick_locs = [2, 3, 4, 5, 6]
+	# tick_locs = [2, 3, 4, 5, 6]
+	# tick_locs = np.linspace(2.5,6,6).tolist()
+	tick_locs = [2.45,3.25,4.,4.82,5.55]
 	tick_lbls = [2, 3, 4, 5, 6]
 	plt.yticks(tick_locs, tick_lbls)
 	tick_locs = [0,1,2,3,4,5]

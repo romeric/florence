@@ -20,8 +20,6 @@ def ProblemData(MainData):
 	MainData.AnalysisType = 'Nonlinear'
 
 	class MaterialArgs(object):
-		# Type = 'Steinmann'
-		# Type = 'LinearisedElectromechanics'
 		# Type = 'LinearModel'
 		# Type = 'IncrementallyLinearisedNeoHookean'
 		# Type = 'AnisotropicMooneyRivlin_1'
@@ -43,20 +41,7 @@ def ProblemData(MainData):
 		lamb = E*nu/(1.+nu)/(1.-2.0*nu)
 		mu = E/2./(1+nu)
 
-		# mu = 1.
-		# lamb  = 2.
-		# mu    = 0.3571
-		# lamb  = 1.4286
-		# lamb = lamb - mu
-		# mu = 2*mu
-		# lamb = lamb + mu
 
-		# mu    = 0.090571
-		# lamb  = 1.4286
-		# mu    = 0.5
-		# lamb  = 0.6
-		# mu    = 0.5
-		# lamb  = 0.5
 		rho   = 7.5*10e-6
 		eps_1 = 1.0
 		c1    = 0.

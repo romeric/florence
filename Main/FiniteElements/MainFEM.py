@@ -116,7 +116,7 @@ def main(MainData, DictOutput=None, nStep=0):
 	# import matplotlib.pyplot as plt
 	# plt.show()
 
-	vpoints = mesh.points + TotalDisp[:,:MainData.ndim,-1]
+	# vpoints = mesh.points + TotalDisp[:,:MainData.ndim,-1]
 	# print 'All boundary node norms: ', np.linalg.norm(vpoints[MainData.nodesDBC[:,0],:],axis=1)
 	# MainData.mesh.points = mesh.points + TotalDisp[:,:MainData.ndim,-1]
 	# print mesh.points[159,:]
@@ -153,9 +153,9 @@ def main(MainData, DictOutput=None, nStep=0):
 
 	if MainData.AssemblyParameters.FailedToConverge==False:
 		PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp,show_plot=False)
-		# PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
-		# import matplotlib.pyplot as plt
-		# plt.show()
+		PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
+		import matplotlib.pyplot as plt
+		plt.show()
 	else:
 		MainData.ScaledJacobian = np.NAN
 
