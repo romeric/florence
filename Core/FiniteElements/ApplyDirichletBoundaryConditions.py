@@ -3,13 +3,13 @@ from DirichletBoundaryDataFromCAD import IGAKitWrapper, PostMeshWrapper
 from time import time
 
 # ROUTINE FOR APPLYING DIRICHLET BOUNDARY CONDITIONS
-def ApplyDirichletBoundaryConditions(stiffness,F,mesh,MainData):
+def GetDirichletBoundaryConditions(mesh,MainData):
 
 	#######################################################
 	nvar = MainData.nvar
 	ndim = MainData.ndim
 
-	columns_out = []; AppliedDirichlet = []
+	ColumnsOut = []; AppliedDirichlet = []
 
 	#----------------------------------------------------------------------------------------------------#
 	#-------------------------------------- NURBS BASED SOLUTION ----------------------------------------#
@@ -27,46 +27,13 @@ def ApplyDirichletBoundaryConditions(stiffness,F,mesh,MainData):
 			nodesDBC, Dirichlet = IGAKitWrapper(MainData,mesh)
 
 		print 'Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds'
-
-
-		# from Core.Supplementary.Tensors import makezero
-		# Dirichlet = makezero(Dirichlet)
-		# for i in range(Dirichlet.shape[0]):
-		# 	for j in range(Dirichlet.shape[1]):
-		# 		if abs(Dirichlet[i,j])<1e-02:
-		# 			Dirichlet[i,j]= 0
-
-		
+	
 
 		nOfDBCnodes = nodesDBC.shape[0]
 		for inode in range(nOfDBCnodes):
 			for i in range(nvar):
-				columns_out = np.append(columns_out,nvar*nodesDBC[inode]+i)
+				ColumnsOut = np.append(ColumnsOut,nvar*nodesDBC[inode]+i)
 				AppliedDirichlet = np.append(AppliedDirichlet,Dirichlet[inode,i])
-
-		# MainData.nodesDBC = nodesDBC # REMOVE THIS
-		# print Dirichlet
-		# print nodesDBC.shape
-		# print AppliedDirichlet
-		# print nodesDBC[8]
-		# print Dirichlet.shape
-		# print Dirichlet[8,:]
-		# print AppliedDirichlet.shape
-		# from scipy.io import savemat
-		# print nodesDBC.shape, mesh.points.shape
-
-		# print nodesDBC.shape, Dirichlet.shape
-		# for i in range(nodesDBC.shape[0]):
-		# 	x,y = np.where(mesh.edges==nodesDBC[i])
-		# 	# print x
-		# 	if x.shape[0]!=0:
-		# 		# print x,y
-		# 		Dirichlet[mesh.edges[x,y],:]=0
-		# 		# print Dirichlet[x,y]
-		# 	# pass
-
-
-
 
 		# import sys; sys.exit() 
 
@@ -75,7 +42,7 @@ def ApplyDirichletBoundaryConditions(stiffness,F,mesh,MainData):
 		# To Rogelio
 		# print mesh.points
 		# print AppliedDirichlet.shape, mesh.points.shape
-		# Dict = {'points':mesh.points,'element':mesh.elements,'displacements':AppliedDirichlet,'displacement_dof':columns_out}
+		# Dict = {'points':mesh.points,'element':mesh.elements,'displacements':AppliedDirichlet,'displacement_dof':ColumnsOut}
 		# from scipy.io import savemat
 		# savemat('/home/roman/Desktop/wing_p2',Dict)
 
@@ -119,41 +86,62 @@ def ApplyDirichletBoundaryConditions(stiffness,F,mesh,MainData):
 				# 		if Dirichlet[i] is None:
 				# 			pass
 				# 		else:
-				# 			# columns_out = np.append(columns_out,nvar*inode+i) # THIS IS INVALID
+				# 			# ColumnsOut = np.append(ColumnsOut,nvar*inode+i) # THIS IS INVALID
 				# 			# ACTIVATE THIS FOR DEBUGGING ELECTROMECHANICAL PROBLEMS
-				# 			columns_out = np.append(columns_out,nvar*unique_edge_nodes[inode]+i)
+				# 			ColumnsOut = np.append(ColumnsOut,nvar*unique_edge_nodes[inode]+i)
 				# 			AppliedDirichlet = np.append(AppliedDirichlet,Dirichlet[i])
 
 				if type(Dirichlet) is not None:
 					for i in range(nvar):
 						if Dirichlet[i] is not None:
-							# columns_out = np.append(columns_out,nvar*inode+i) # THIS IS INVALID
+							# ColumnsOut = np.append(ColumnsOut,nvar*inode+i) # THIS IS INVALID
 							# ACTIVATE THIS FOR DEBUGGING ELECTROMECHANICAL PROBLEMS
-							columns_out = np.append(columns_out,nvar*unique_edge_nodes[inode]+i)
+							ColumnsOut = np.append(ColumnsOut,nvar*unique_edge_nodes[inode]+i)
 							AppliedDirichlet = np.append(AppliedDirichlet,Dirichlet[i])
 
 
 	# GENERAL PROCEDURE - GET REDUCED MATRICES FOR FINAL SOLUTION
-	columns_out = columns_out.astype(np.int64)
-	columns_in = np.delete(np.arange(0,nvar*mesh.points.shape[0]),columns_out)
-
-	for i in range(0,columns_out.shape[0]):
-		# F = F - AppliedDirichlet[i]*(stiffness[:,columns_out[i]])
-		F = F - AppliedDirichlet[i]*stiffness.getcol(columns_out[i])
+	ColumnsOut = ColumnsOut.astype(np.int64)
+	ColumnsIn = np.delete(np.arange(0,nvar*mesh.points.shape[0]),ColumnsOut)
 	
-	stiffness_b = []; F_b1 = [] 
-	return stiffness_b, F_b1, F, columns_in, columns_out, AppliedDirichlet
+	return ColumnsIn, ColumnsOut, AppliedDirichlet
 
 
 
 
 
-def GetReducedMatrices(stiffness,F,columns_in,mass=0,Analysis=0):
+def GetReducedMatrices(stiffness,F,ColumnsIn,Analysis=None,mass=None):
 
-	F_b = F[columns_in,0]
-	stiffness_b = stiffness[columns_in,:][:,columns_in]
+	# GET REDUCED FORCE VECTOR
+	F_b = F[ColumnsIn,0]
 
+	# GET REDUCED STIFFNESS MATRIX
+	stiffness_b = stiffness[ColumnsIn,:][:,ColumnsIn]
+
+	# GET REDUCED MASS MATRIX
+	mass_b = np.array([])
 	if Analysis != 'Static':
-		mass = mass[columns_in,:][:,columns_in]
+		mass_b = mass[ColumnsIn,:][:,ColumnsIn]
 
-	return stiffness_b, F_b, F, mass
+	return stiffness_b, F_b, mass_b
+
+
+
+def ApplyDirichletGetReducedMatrices(stiffness,F,ColumnsIn,ColumnsOut,AppliedDirichlet,Analysis=None,mass=None):
+
+	# APPLY DIRICHLET BOUNDARY CONDITIONS
+	for i in range(0,ColumnsOut.shape[0]):
+		F = F - AppliedDirichlet[i]*stiffness.getcol(ColumnsOut[i])
+
+	# GET REDUCED FORCE VECTOR
+	F_b = F[ColumnsIn,0]
+
+	# GET REDUCED STIFFNESS
+	stiffness_b = stiffness[ColumnsIn,:][:,ColumnsIn]
+
+	# GET REDUCED MASS MATRIX
+	mass_b = np.array([])
+	if Analysis != 'Static':
+		mass = mass[ColumnsIn,:][:,ColumnsIn]
+
+	return stiffness_b, F_b, F, mass_b
