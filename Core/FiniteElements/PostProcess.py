@@ -17,58 +17,45 @@ from ElementalMatrices.KinematicMeasures import *
 from Core.MeshGeneration import vtk_writer
 
 class PostProcess(object):
-	"""docstring for PostProcess"""
+	"""PostProcess"""
 
-	def TotalComponentSol(self,MainData,sol,columns_in,columns_out,AppliedDirichletInc,Iter,fsize):
+	def __init__(self):
+		self.is_scaledjacobian_computed = False
+
+
+	@staticmethod
+	def TotalComponentSol(MainData,sol,ColumnsIn,ColumnsOut,AppliedDirichletInc,Iter,fsize):
 
 		nvar = MainData.nvar
 		ndim = MainData.ndim
 		Analysis = MainData.Analysis
-
 		TotalSol = np.zeros((fsize,1))
 
+		# GET TOTAL SOLUTION
 		if MainData.AnalysisType == 'Nonlinear':
 			if Analysis =='Static':
-				# Get Total solution
-				# TotalSol = np.zeros((fsize,1))
-				for i in range(0,columns_in.shape[0]):
-					TotalSol[columns_in[i]] = sol[i]
+				TotalSol[ColumnsIn,0] = sol
 				if Iter==0:
-					for i in range(0,columns_out.shape[0]):
-						TotalSol[columns_out[i]] = AppliedDirichletInc[i]
+					TotalSol[ColumnsOut,0] = AppliedDirichletInc
 			if Analysis !='Static':
 				TotalSol = np.copy(sol)
-				for i in range(0,columns_out.shape[0]):
-					TotalSol[columns_out[i]] = AppliedDirichletInc[i]
-		elif MainData.AnalysisType == 'Linear':
-				# Get Total solution
-				# TotalSol = np.zeros((fsize,1))
-				# for i in range(0,columns_in.shape[0]):
-				# 	TotalSol[columns_in[i]] = sol[i]
-				# for i in range(0,columns_out.shape[0]):
-				# 	TotalSol[columns_out[i]] = AppliedDirichletInc[i]
+				TotalSol[ColumnsOut,0] = AppliedDirichletInc
 
-				# print TotalSol[columns_in].shape, sol.shape
-				TotalSol[columns_in,0] = sol
-				TotalSol[columns_out,0] = AppliedDirichletInc
+		elif MainData.AnalysisType == 'Linear':
+				TotalSol[ColumnsIn,0] = sol
+				TotalSol[ColumnsOut,0] = AppliedDirichletInc
 				
 
 		# RE-ORDER SOLUTION COMPONENTS
-		# dU = np.zeros((TotalSol.shape[0]/nvar,nvar),dtype=np.float64)
-		# for invar in range(0,nvar):
-		# 	# dU[:,invar] = TotalSol[invar:TotalSol.shape[0]:nvar,0]
-		# 	dU[:,invar] = TotalSol[invar::nvar,0]
-
 		dU = TotalSol.reshape(TotalSol.shape[0]/nvar,nvar)
-		# print np.linalg.norm(dU - dU2)
 
 
 		return dU
 
 
 
-
-	def StressRecovery(self,MainData,mesh,TotalDisp):
+	@staticmethod
+	def StressRecovery(MainData,mesh,TotalDisp):
 
 		# KEEP THE IMPORTS LOCAL AS MATPLOTLIB IMPORT IS SLOW
 		import matplotlib.pyplot as plt
@@ -411,9 +398,12 @@ class PostProcess(object):
 				#---------------------------------------------------------------------------------------------------------------------------------------#
 
 
-
 	def MeshQualityMeasures(self,MainData,mesh,TotalDisp,show_plot=True):
 
+		if self.is_scaledjacobian_computed is True:
+			raise AssertionError('Scaled Jacobian seems to be already computed. Re-Computing it may return incorrect results')
+		if MainData.isScaledJacobianComputed is True:
+			raise AssertionError('Scaled Jacobian seems to be already computed. Re-Computing it may return incorrect results')
 
 		Domain = MainData.Domain
 		points = mesh.points
@@ -518,11 +508,6 @@ class PostProcess(object):
 		vpoints = np.copy(mesh.points)
 		vpoints += TotalDisp[:,:MainData.ndim,-1]
 
-		
-		# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/vpoints_sphere2_p3.dat', vpoints,fmt='%10.9f',delimiter=',')
-		# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/vpoints_nsphere_p'+str(MainData.C+1)+'.dat', vpoints,fmt='%10.9f',delimiter=',')
-		# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/sjacobian_nsphere_p'+str(MainData.C+1)+'.dat', MainData.ScaledJacobian,fmt='%10.9f',delimiter=',')
-		# import sys; sys.exit(0)
 		# plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#ffffee') 
 		# plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#F88379') ##
 		# plt.plot(vpoints[:,0],vpoints[:,1],vpoints[:,2],'o',color='#F88379') 
@@ -535,7 +520,8 @@ class PostProcess(object):
 			dum3 = np.append(dum3,MainData.C+3 +i*(MainData.C+1) -i*(i-1)/2 )
 
 		if MainData.C>0:
-			ddum = (np.append(np.append(np.append(np.append(np.append(np.append(0,dum1),1),dum2),2),np.fliplr(dum3.reshape(1,dum3.shape[0]))),0) ).astype(np.int32)
+			ddum = (np.append(np.append(np.append(np.append(np.append(np.append(0,dum1),1),dum2),2),
+				np.fliplr(dum3.reshape(1,dum3.shape[0]))),0) ).astype(np.int32)
 
 		for i in range(0,mesh.elements.shape[0]):
 			dum = vpoints[mesh.elements[i,:],:]

@@ -40,25 +40,10 @@ def main(MainData, DictOutput=None, nStep=0):
 
 	# READ PROBLEM DATA FILE
 	Pr.ProblemData(MainData)
-	# print 'The Problem is',MainData.ndim,'Dimensional'
 	# PRE-PROCESS
 	print 'Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation bases etc...'
 	mesh = PreProcess(MainData,Pr,pwd)
 
-	# print MainData.Domain.Bases
-	# print MainData.Quadrature.weights
-	# print MainData.Domain.gBasesy
-	# np.savetxt('/home/roman/Desktop/MeshingElasticity2/gBasesx.dat',MainData.Domain.gBasesx)
-	# np.savetxt('/home/roman/Desktop/MeshingElasticity2/gBasesy.dat',MainData.Domain.gBasesy)
-	# sys.exit(0)
-
-	# from copy import deepcopy
-	# if nStep == 0:
-	# 	MainData.mesh = deepcopy(mesh)
-	# 	MainData.vmesh = deepcopy(mesh)
-	# else:
-	# 	del mesh
-	# 	mesh = deepcopy(MainData.mesh)
 
 	# np.savetxt('/home/roman/Desktop/elements_rae2822_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
 	# np.savetxt('/home/roman/Desktop/points_rae2822_p'+str(MainData.C+1)+'.dat', 1000*mesh.points,fmt='%6.4f',delimiter=',')
@@ -74,15 +59,6 @@ def main(MainData, DictOutput=None, nStep=0):
 	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/elements_sphere2_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
 	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_sphere2_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%10.9f',delimiter=',')
 	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/faces_sphere2_p'+str(MainData.C+1)+'.dat', mesh.faces,fmt='%d',delimiter=',')
-
-
-	# np.savetxt('/home/roman/Dropbox/Florence/Problems/FiniteElements/Wing2D/elements_wing2d_p'+str(MainData.C+1)+'.dat', 
-	# 	mesh.elements,fmt='%d',delimiter=',')
-	# np.savetxt('/home/roman/Dropbox/Florence/Problems/FiniteElements/Wing2D/points_wing2d_p'+str(MainData.C+1)+'.dat', 
-	# 	mesh.points,fmt='%10.9f',delimiter=',')
-	# np.savetxt('/home/roman/Dropbox/Florence/Problems/FiniteElements/Wing2D/edges_wing2d_p'+str(MainData.C+1)+'.dat', 
-	# 	mesh.edges,fmt='%d',delimiter=',')
-
 
 
 	print 'Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*MainData.nvar
@@ -101,11 +77,9 @@ def main(MainData, DictOutput=None, nStep=0):
 	# sys.exit("STOPPED")
 	# CALL THE MAIN ROUTINE
 	TotalDisp = MainSolver(MainData,mesh)
-	# np.savetxt('/home/roman/Desktop/displacements.txt', TotalDisp[:,:,-1])
 	# print 'Total number of DoFs for the system is', sol.shape[0]
 
 	# sys.exit("STOPPED")
-
 	# print 'Post-Processing the information...'
 	# POST-PROCESS
 	# PostProcess().StressRecovery(MainData,mesh,TotalDisp) 
@@ -116,34 +90,6 @@ def main(MainData, DictOutput=None, nStep=0):
 	# import matplotlib.pyplot as plt
 	# plt.show()
 
-	# vpoints = mesh.points + TotalDisp[:,:MainData.ndim,-1]
-	# print 'All boundary node norms: ', np.linalg.norm(vpoints[MainData.nodesDBC[:,0],:],axis=1)
-	# MainData.mesh.points = mesh.points + TotalDisp[:,:MainData.ndim,-1]
-	# print mesh.points[159,:]
-	# print vpoints[159,:]
-	# from Core.Supplementary.Tensors import makezero
-	# print makezero(mesh.points[[9,159,160,1],:])
-	# print makezero(vpoints[[9,159,160,1],:])
-	# print np.linalg.norm(vpoints[[9,159,160,1],:],axis=1)
-	# print np.linalg.norm(vpoints[159,:])
-	# np.set_printoptions(precision=14)
-	# print vpoints[mesh.elements[0,:],:]
-	# print mesh.elements
-	# print mesh.points
-	# print mesh.edges
-
-	# print mesh.points[924,:]
-	# print vpoints[924,:]
-	# print TotalDisp[924,:,-1]
-
-	# print np.linalg.norm(mesh.points[mesh.elements[68,:],:],axis=1)
-	# print np.linalg.norm(vpoints[mesh.elements[68,:],:],axis=1)
-
-	# from scipy.io import loadmat
-	# dd = loadmat('/home/roman/Desktop/pp3.mat')
-	# TotalDisp[:,:,-1] = dd['x'].T - mesh.points
-	# TotalDisp = np.zeros_like(TotalDisp)
-
 
 	if nStep ==1:
 		MainData.mesh = mesh
@@ -152,10 +98,11 @@ def main(MainData, DictOutput=None, nStep=0):
 	#------------------------------------------------------------------------
 
 	if MainData.AssemblyParameters.FailedToConverge==False:
-		PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp,show_plot=False)
-		PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
-		import matplotlib.pyplot as plt
-		plt.show()
+		if MainData.MaterialArgs.Type != 'IncrementalLinearElastic':
+			PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp,show_plot=False)
+		# PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
+		# import matplotlib.pyplot as plt
+		# plt.show()
 	else:
 		MainData.ScaledJacobian = np.NAN
 

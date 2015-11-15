@@ -89,4 +89,8 @@ class Base(object):
 			 """
 			self.ProblemPath = os.path.dirname(os.path.realpath(__file__))
 
+
+	# ScaledJacobian
+	isScaledJacobianComputed = False
+
  			

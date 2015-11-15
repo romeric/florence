@@ -5,39 +5,38 @@ from Core.FiniteElements.Solvers.LinearSolver import *
 from Core.FiniteElements.ApplyDirichletBoundaryConditions import *
 
 
-def StaticSolver(LoadIncrement,MainData,K,F,NeumannForces,M,NodalForces,Residual,ResidualNorm,nmesh,TotalDisp,
-	Eulerx,columns_in,columns_out,AppliedDirichlet):
+def StaticSolver(MainData,LoadIncrement,K,DirichletForces,NeumannForces,
+	NodalForces,Residual,ResidualNorm,mesh,TotalDisp,
+	Eulerx,ColumnsIn,ColumnsOut,AppliedDirichlet):
 
 	LoadFactor = 1./LoadIncrement
 	AppliedDirichletInc = np.zeros(AppliedDirichlet.shape[0])
 	
 
-	for Increment in range(0,LoadIncrement):
+	for Increment in range(LoadIncrement):
 
 		DeltaF = LoadFactor*NeumannForces
 		NodalForces += DeltaF
 		# RESIDUAL FORCES CONTAIN CONTRIBUTION FROM BOTH NEUMANN AND DIRICHLET
-		# print np.linalg.norm(DeltaF)
-		Residual -= (DeltaF + LoadFactor*F)
+		Residual -= (DeltaF + LoadFactor*DirichletForces)
 		AppliedDirichletInc += LoadFactor*AppliedDirichlet
 
-		
 
 		# CALL THE LINEAR/NONLINEAR SOLVER
 		if MainData.AnalysisType == 'Nonlinear':
 			t_increment = time()
 
-			# LET NORM OF RESIDUAL BE THE NORM WITH RESPECT TO WHICH WE HAVE TO 
-			# CHECK THE CONVERGENCE OF NEWTON RAPHSON. TYPICALLY THIS IS NORM OF
-			# OF NODAL FORCES
+			# LET NORM OF THE FIRST RESIDUAL BE THE NORM WITH RESPECT TO WHICH WE
+			# HAVE TO CHECK THE CONVERGENCE OF NEWTON RAPHSON. TYPICALLY THIS IS 
+			# NORM OF NODAL FORCES
 			if Increment==0:
-				MainData.NormForces = np.linalg.norm(Residual[columns_out])
+				MainData.NormForces = np.linalg.norm(Residual[ColumnsOut])
 
-			TotalDisp = NewtonRaphson(Increment,MainData,K,M,NodalForces,Residual,ResidualNorm,nmesh,TotalDisp,Eulerx,
-				columns_in,columns_out,AppliedDirichletInc)
+			TotalDisp = NewtonRaphson(MainData,Increment,K,NodalForces,Residual,ResidualNorm,mesh,TotalDisp,Eulerx,
+				ColumnsIn,ColumnsOut,AppliedDirichletInc)
 
 			print '\nFinished Load increment', Increment, 'in', time()-t_increment, 'sec'
-			print 'Norm of Residual is', np.abs(la.norm(Residual[columns_in])/MainData.NormForces), '\n'
+			print 'Norm of Residual is', np.abs(la.norm(Residual[ColumnsIn])/MainData.NormForces), '\n'
 
 			# STORE THE INFORMATION IF NEWTON-RAPHSON FAILS
 			if MainData.AssemblyParameters.FailedToConverge == True:
@@ -46,11 +45,11 @@ def StaticSolver(LoadIncrement,MainData,K,F,NeumannForces,M,NodalForces,Residual
 				break
 
 		elif MainData.AnalysisType == 'Linear':
-			TotalDisp, K, F, AppliedDirichletInc, Residual, NodalForces = LinearSolver(Increment,MainData,K,F,NeumannForces,M,NodalForces,
-				Residual,ResidualNorm,nmesh,TotalDisp,Eulerx,
-				columns_in,columns_out,AppliedDirichletInc)
+			TotalDisp, DirichletForces, AppliedDirichletInc, Residual, NodalForces = LinearSolver(MainData,Increment,
+				DirichletForces,NeumannForces,NodalForces,Residual,mesh,TotalDisp,Eulerx,
+				ColumnsIn,ColumnsOut,AppliedDirichlet,AppliedDirichletInc)
 
-		# print nmesh.points[6,:]+TotalDisp[6,:,Increment]
+		# print mesh.points[6,:]+TotalDisp[6,:,Increment]
 
 
 	return TotalDisp

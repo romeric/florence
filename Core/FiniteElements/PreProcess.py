@@ -92,13 +92,7 @@ def PreProcess(MainData,Pr,pwd):
 	# mesh.SimplePlot()	
 	# sys.exit(0)
 
-	# print mesh.points.shape
 
-
-
-	# print mesh.elements.shape
-	# mesh.WriteVTK('/home/roman/Desktop/sphere2.vtu')
-	# sys.exit(0)
 
 	# from scipy.io import loadmat
 	# loadedmat = loadmat(MainData.MeshInfo.MatFile)
@@ -345,9 +339,6 @@ def PreProcess(MainData,Pr,pwd):
 			
 			MainData.MaterialArgs.H_Voigt = np.tile(np.tile(H_Voigt[:,:,None],
 				mesh.nelem)[:,:,:,None],Quadrature.weights.shape[0])
-
-	if MainData.MaterialArgs.Type == 'IncrementalLinearElastic':
-		MainData.Prestress = 1
 
 
 	
