@@ -6,10 +6,9 @@ def InitiateNonlinearAnalysisData(MainData,mesh):
 	################################################################################
 	Tolerance = 1.0e-05
 	if MainData.Analysis == 'Static':
-		LoadIncrement = 2
+		LoadIncrement = 5
 	else:
 		LoadIncrement = MainData.BoundaryData.nstep
-	# LoadFactor = 1./LoadIncrement
 	
 	class AssemblyParameters(object):
 		"""Information about load increments, iterations and such"""
@@ -21,6 +20,7 @@ def InitiateNonlinearAnalysisData(MainData,mesh):
 		GeometryUpdate = 0
 		MaxIter = 100
 		FailedToConverge = False
+
 
 	MainData.AssemblyParameters = AssemblyParameters
 	###########################################################################

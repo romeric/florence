@@ -21,8 +21,7 @@ def MainSolver(MainData,mesh):
 	LoadIncrement = MainData.AssemblyParameters.LoadIncrements
 	ResidualNorm = { 'Increment_'+str(Increment) : [] for Increment in range(0,LoadIncrement) }
 	
-	# ALLOCATE FOR GEOMETRY AND SOLUTION FIELDS
-	Eulerx = np.copy(mesh.points)
+	# ALLOCATE FOR SOLUTION FIELDS
 	TotalDisp = np.zeros((mesh.points.shape[0],MainData.nvar,LoadIncrement),dtype=np.float64)
 
 	# PRE-ASSEMBLY
@@ -35,6 +34,9 @@ def MainSolver(MainData,mesh):
 	NeumannForces = np.zeros((mesh.points.shape[0]*MainData.nvar,1),dtype=np.float64)
 	# APPLY DIRICHELT BOUNDARY CONDITIONS AND GET DIRICHLET RELATED FORCES
 	ColumnsIn, ColumnsOut, AppliedDirichlet = GetDirichletBoundaryConditions(mesh,MainData)
+	# ALLOCATE FOR GEOMETRY - GetDirichletBoundaryConditions CHANGES THE MESH 
+	# SO EULERX SHOULD BE ALLOCATED AFTERWARDS 
+	Eulerx = np.copy(mesh.points)
 	# FORCES RESULTING FROM DIRICHLET BOUNDARY CONDITIONS
 	DirichletForces = np.zeros((mesh.points.shape[0]*MainData.nvar,1),dtype=np.float64)
 
@@ -48,6 +50,7 @@ def MainSolver(MainData,mesh):
 
 	# ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES
 	K,TractionForces = Assembly(MainData,mesh,Eulerx,np.zeros((mesh.points.shape[0],1),dtype=np.float64))[:2]
+	
 	# GET DIRICHLET FORCES
 	DirichletForces = ApplyDirichletGetReducedMatrices(K,DirichletForces,ColumnsIn,ColumnsOut,
 		AppliedDirichlet,MainData.Analysis,[])[2]
@@ -65,6 +68,7 @@ def MainSolver(MainData,mesh):
 	else:
 		TotalDisp = StaticSolver(MainData,LoadIncrement,K,DirichletForces,NeumannForces,NodalForces,Residual,
 			ResidualNorm,mesh,TotalDisp,Eulerx,ColumnsIn,ColumnsOut,AppliedDirichlet)
+
 
 	# UPDATE THE FIELDS
 	# TotalDisp[:,:,Increment] += dU

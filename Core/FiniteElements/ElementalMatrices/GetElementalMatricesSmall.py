@@ -24,6 +24,10 @@ def GetElementalMatricesSmall(elem,MainData,elements,points,Eulerx,TotalPot):
 	else:
 		ElectricPotentialElem = []
 
+	# if elem==0:
+		# np.set_printoptions(precision=14)
+		# print EulerElemCoords - LagrangeElemCoords
+
 	# COMPUTE THE STIFFNESS MATRIX
 	if MainData.__VECTORISATION__ is True:
 		stiffnessel, t = Stiffness(MainData,LagrangeElemCoords,EulerElemCoords,ElectricPotentialElem,elem)

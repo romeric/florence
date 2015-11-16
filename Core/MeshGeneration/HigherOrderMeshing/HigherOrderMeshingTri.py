@@ -216,18 +216,10 @@ def HighOrderMeshTri_UNSTABLE(C,mesh,Decimals=10,Parallel=False,nCPU=1,ComputeAl
 	sorted_repoints = repoints[iSortX,:]
 	# NOW LETS FIND THE UNIQUE VALUES OF THIS SORTED FLOATING POINTS ARRAY
 	# NOTE THAT FROM THE INVERSE INDICES OF A UNIQUE ARRAY WE CAN CONSTRUCT THE ACTUAL ARRAY 
-	# invX =np.unique(np.round(sorted_repoints[:,0],decimals=Decimals),return_inverse=True)[1]
-	unique_repoints,invX =np.unique(np.round(sorted_repoints[:,0],decimals=Decimals),return_inverse=True)
+	unique_repoints,invX = np.unique(np.round(sorted_repoints[:,0],decimals=Decimals),return_inverse=True)
 	
 	# NOW FIND THE MULTIPLICITY OF EACH UNIQUE X-VALUES 
-	# t2=time()
-	# Xs =  itemfreq(np.round(sorted_repoints[:,0],decimals=Decimals)) # BIG PERFORMANCE BOTTLENECK
-	
-	# Xs = np.zeros((unique_repoints.shape[0],2),dtype=np.float64)
-	# Xs[:,0] = unique_repoints; Xs[:,1]=np.bincount(invX)
 	Xs = itemfreq_py(un_arr=unique_repoints,inv_arr=invX)
-	# print np.linalg.norm(Xss -Xs)
-	# print time()-t2
 	
 
 	tol = 1.0e-14
