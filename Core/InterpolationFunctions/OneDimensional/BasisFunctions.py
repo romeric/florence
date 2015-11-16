@@ -1,6 +1,4 @@
 import numpy as np
-# import scipy as sp
-# import scipy.linalg as la
 from Core.QuadratureRules import GaussLobattoQuadrature
 
 
@@ -50,11 +48,11 @@ def Legendre(C,xi):
 
 	# For Higher Order 
 	elif C>0:
-		# The First Two Legendre Polynomials 
+		# The first two Legendre polynomials 
 		p0 = 1.0; p1 = xi
 		# Derivatives of The First Two Legendre Polynomials 
 		dp0 = 0.0; dp1 = 1.0
-		# Allocate Size and Dimensions
+		# Allocate size and dimensions
 		ndim = C+2
 		P = np.zeros((ndim+1,1)); dP = np.zeros((ndim+1,1))
 		N = np.zeros((ndim+1,1)); dN = np.zeros((ndim+1,1))
@@ -117,16 +115,3 @@ def LagrangeGaussLobatto(C,xi):
 
 
 	return (N,dN,eps) 
-
-
-
-# import matplotlib.pyplot as plt
-# C=5 
-# n = np.linspace(-1,1,100)
-# N = np.zeros((n.shape[0],C+2))
-# for m in range(C+2):
-# 	for i in range(0,n.shape[0]):
-# 		N[i,:] = BasisFunctions().LagrangeGaussLobattoShapeFunctions(C,n[i])[0]
-# 		# N[i,:] = BasisFunctions().LagrangeShapeFunctions(C,n[i])[0]
-# 	plt.plot(n,N[:,m])
-# plt.show()

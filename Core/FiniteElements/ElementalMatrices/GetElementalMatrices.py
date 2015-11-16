@@ -47,7 +47,7 @@ def GetElementalMatrices(elem,MainData,elements,points,nodeperelem,Eulerx,TotalP
 	if MainData.AssemblyParameters.ExternalLoadNature == 'Nonlinear':
 		# COMPUTE FORCE VECTOR
 		f = ApplyNeumannBoundaryConditions3D(MainData, nmesh, elem, LagrangeElemCoords)
-
+	
 	# STATIC CONDENSATION
 		# if C>0:
 			# stiffnessel,f = St.StaticCondensation(stiffnessel,f,C,nvar)

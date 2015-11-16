@@ -44,12 +44,16 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 		detJ = np.einsum('i,i->i',MainData.Domain.AllGauss[:,0],np.abs(la.det(ParentGradientX)))
 
 	# if elem==0:
+		# print np.einsum('ijk,jl->kil',MainData.Domain.Jm,EulerELemCoords)
+		# print np.einsum('ijk,jl->kil',MainData.Domain.Jm,LagrangeElemCoords)
 		# np.set_printoptions(precision=14)
 		# print EulerELemCoords
 		# print 
 		# print LagrangeElemCoords
 		# print StrainTensors['J']
 		# print ParentGradientx[0,:,:]
+		# print SpatialGradient[0,:,:]
+		# print detJ
 		# print ParentGradientX[0,:,:]
 		# print LagrangeElemCoords
 		# print MainData.Domain.Jm.shape
@@ -117,6 +121,7 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 			# print u'\u2713'.encode('utf8')+' : ', 'Elemental stiffness matrix is symmetric'
 
 	# if elem==0:
+		# print stiffness[:4,:4]
 		# print stiffness[1:8:2,1:8:2]
 
 	return stiffness, tractionforce 

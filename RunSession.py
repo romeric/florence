@@ -27,7 +27,6 @@ from Base import Base as MainData
 
 
 
-
 if __name__ == "__main__":
 
 	# START THE ANALYSIS
@@ -47,10 +46,6 @@ if __name__ == "__main__":
  	MainData.plot = (0,3)
  	nrplot = (0,'last')
  	MainData.write = 0
-
- 	# print MainData.MaterialArgs
- 	# exit(0)
-
 
 
 

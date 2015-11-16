@@ -4,45 +4,37 @@ import os, imp
 
 def ProblemData(MainData):
 
-	# ndim - Dimension of the problem - 1D, 2D, 3D
-	MainData.ndim = 2
-	# Type of formulation - Displacement-based/ mixed etc
-		# 1 - Displacement approach (for electromechanics, it is displacement-electric potential approach)
-		# 2 - x, J approach
-	
+	MainData.ndim = 2	
 	MainData.Fields = 'Mechanics'
 	# MainData.Fields = 'ElectroMechanics'
-	
 	MainData.Formulation = 'DisplacementApproach'
 	MainData.Analysis = 'Static'
 	# MainData.Analysis = 'Dynamic'
 	MainData.AnalysisType = 'Linear'
 	# MainData.AnalysisType = 'Nonlinear'
 
-	class MaterialArgs(object):
-		# Type = 'LinearModel'
-		# Type = 'IncrementalLinearElastic'
-		Type = 'IncrementallyLinearisedNeoHookean'
-		# Type = 'AnisotropicMooneyRivlin_1'
-		# Type = 'NearlyIncompressibleNeoHookean'
-		# Type = 'NeoHookean_1'
-		# Type = 'MooneyRivlin'
-		
+	# MATERIAL INPUT DATA 
+	# MainData.MaterialArgs.Type = 'LinearModel'
+	# MainData.MaterialArgs.Type = 'IncrementalLinearElastic'
+	# MainData.MaterialArgs.Type = 'IncrementallyLinearisedNeoHookean'
+	# MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin_1'
+	# MainData.MaterialArgs.Type = 'NearlyIncompressibleNeoHookean'
+	# MainData.MaterialArgs.Type = 'NeoHookean_1'
+	MainData.MaterialArgs.Type = 'NeoHookean_2'
+	# MainData.MaterialArgs.Type = 'MooneyRivlin'
+	# MainData.MaterialArgs.Type = 'NearlyIncompressibleMooneyRivlin'
+	# MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin' 
 
-		E = 1.0e1
-		# nu = 0.4
-		nu=0.30
+	# E = MainData.E 
+	# nu = MainData.nu 
 
-		# E = MainData.E 
-		# nu = MainData.nu 
-
-
-		# GET LAME CONSTANTS
-		lamb = E*nu/(1.+nu)/(1.-2.0*nu)
-		mu = E/2./(1+nu)
+	E = MainData.MaterialArgs.E
+	nu = MainData.MaterialArgs.nu
+	# GET LAME CONSTANTS
+	MainData.MaterialArgs.lamb = E*nu/(1.+nu)/(1.-2.0*nu)
+	MainData.MaterialArgs.mu = E/2./(1+nu)
 
 
-	MainData.MaterialArgs = MaterialArgs
 
 	ProblemPath = os.path.dirname(os.path.realpath(__file__))
 	class MeshInfo(object):

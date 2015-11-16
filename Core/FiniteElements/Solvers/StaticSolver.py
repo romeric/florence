@@ -8,11 +8,11 @@ from Core.FiniteElements.ApplyDirichletBoundaryConditions import *
 def StaticSolver(MainData,LoadIncrement,K,DirichletForces,NeumannForces,
 	NodalForces,Residual,ResidualNorm,mesh,TotalDisp,
 	Eulerx,ColumnsIn,ColumnsOut,AppliedDirichlet):
-
+	
 	LoadFactor = 1./LoadIncrement
 	AppliedDirichletInc = np.zeros(AppliedDirichlet.shape[0])
 	
-
+	
 	for Increment in range(LoadIncrement):
 
 		DeltaF = LoadFactor*NeumannForces
@@ -45,11 +45,10 @@ def StaticSolver(MainData,LoadIncrement,K,DirichletForces,NeumannForces,
 				break
 
 		elif MainData.AnalysisType == 'Linear':
-			TotalDisp, DirichletForces, AppliedDirichletInc, Residual, NodalForces = LinearSolver(MainData,Increment,
+			TotalDisp = LinearSolver(MainData,Increment,K,
 				DirichletForces,NeumannForces,NodalForces,Residual,mesh,TotalDisp,Eulerx,
 				ColumnsIn,ColumnsOut,AppliedDirichlet,AppliedDirichletInc)
 
-		# print mesh.points[6,:]+TotalDisp[6,:,Increment]
 
 
 	return TotalDisp

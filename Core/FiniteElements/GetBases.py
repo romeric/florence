@@ -1,17 +1,14 @@
 import numpy as np 
-import imp, os
+import os, sys, imp
 
-pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
-TwoD = imp.load_source('QuadLagrangeGaussLobatto',pwd+'/Core/InterpolationFunctions/TwoDimensional/Quad/QuadLagrangeGaussLobatto.py')
-ThreeD = imp.load_source('HexLagrangeGaussLobatto',pwd+'/Core/InterpolationFunctions/ThreeDimensional/Hexahedral/HexLagrangeGaussLobatto.py')
-# OneD = imp.load_source('OneDimensional',pwd+'/Core/InterpolationFunctions/OneDimensional/BasisFunctions.py')
-# from Core.InterpolationFunctions.TwoDimensional.Tri.hpModal import hpBases, GradhpBases
+import Core.InterpolationFunctions.TwoDimensional.Quad.QuadLagrangeGaussLobatto as TwoD
+import Core.InterpolationFunctions.ThreeDimensional.Hexahedral.HexLagrangeGaussLobatto as ThreeD
 # Modal Bases
-# Tri = imp.load_source('hpModalTri',pwd+'/Core/InterpolationFunctions/TwoDimensional/Tri/hpModal.py')
-# Tet = imp.load_source('hpModalTet',pwd+'/Core/InterpolationFunctions/ThreeDimensional/Tetrahedral/hpModal.py')
+# import Core.InterpolationFunctions.TwoDimensional.Tri.hpModal as Tri 
+# import Core.InterpolationFunctions.ThreeDimensional.Tetrahedral.hpModal as Tet 
 # Nodal Bases
-Tri = imp.load_source('hpNodalTri',pwd+'/Core/InterpolationFunctions/TwoDimensional/Tri/hpNodal.py')
-Tet = imp.load_source('hpNodalTet',pwd+'/Core/InterpolationFunctions/ThreeDimensional/Tetrahedral/hpNodal.py')
+import Core.InterpolationFunctions.TwoDimensional.Tri.hpNodal as Tri 
+import Core.InterpolationFunctions.ThreeDimensional.Tetrahedral.hpNodal as Tet 
 
 def GetBases(C,Quadrature,info, useLagrange = False):
 
@@ -52,7 +49,6 @@ def GetBases(C,Quadrature,info, useLagrange = False):
 
 
 	class Domain(object):
-		"""docstring for Domain"""
 		Bases = Basis
 		gBasesx = gBasisx
 		gBasesy = gBasisy
@@ -65,7 +61,6 @@ def GetBases(C,Quadrature,info, useLagrange = False):
 
 def GetBases3D(C,Quadrature,info):
 
-	# ndim = general_data.ndim
 	ndim = 3
 
 	w = Quadrature.weights

@@ -33,7 +33,7 @@ from Core.FiniteElements.Solvers.Solver import *
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/RAE2822/ProblemData.py')
 Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Misc/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Tests/ProblemData.py')
-
+# import Problems
 #############################################################################################################################################
 def main(MainData, DictOutput=None, nStep=0):
 
@@ -63,16 +63,6 @@ def main(MainData, DictOutput=None, nStep=0):
 
 	print 'Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*MainData.nvar
 	print 'Number of mesh edge nodes', np.unique(mesh.edges).shape[0]
-
-
-	# print mesh.elements
-	# print mesh.points
-	# print mesh.edges
-	# print mesh.faces
-	# print mesh.edges.shape
-	# print mesh.faces.shape
-	# print mesh.points.shape
-	# print mesh.elements.shape
 
 	# sys.exit("STOPPED")
 	# CALL THE MAIN ROUTINE
