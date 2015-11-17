@@ -1,17 +1,16 @@
-# import numpy as np 
-import imp, os
+import numpy as np 
 import numpy.linalg as la
 
+from Base import JacobianError, IllConditionedError
 
-pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
-TwoD = imp.load_source('QuadLagrangeGaussLobatto',pwd+'/Core/InterpolationFunctions/TwoDimensional/Quad/QuadLagrangeGaussLobatto.py')
-ThreeD = imp.load_source('HexLagrangeGaussLobatto',pwd+'/Core/InterpolationFunctions/ThreeDimensional/Hexahedral/HexLagrangeGaussLobatto.py')
-# Modal
-# Tet = imp.load_source('hpModalTet',pwd+'/Core/InterpolationFunctions/ThreeDimensional/Tetrahedral/hpModal.py')
-# Nodal
-Tri = imp.load_source('hpNodalTri',pwd+'/Core/InterpolationFunctions/TwoDimensional/Tri/hpNodal.py')
-Tet = imp.load_source('hpNodalTet',pwd+'/Core/InterpolationFunctions/ThreeDimensional/Tetrahedral/hpNodal.py')
-
+import Core.InterpolationFunctions.TwoDimensional.Quad.QuadLagrangeGaussLobatto as TwoD
+import Core.InterpolationFunctions.ThreeDimensional.Hexahedral.HexLagrangeGaussLobatto as ThreeD
+# Modal Bases
+# import Core.InterpolationFunctions.TwoDimensional.Tri.hpModal as Tri 
+# import Core.InterpolationFunctions.ThreeDimensional.Tetrahedral.hpModal as Tet 
+# Nodal Bases
+import Core.InterpolationFunctions.TwoDimensional.Tri.hpNodal as Tri 
+import Core.InterpolationFunctions.ThreeDimensional.Tetrahedral.hpNodal as Tet 
 
 from ElementalMatrices.KinematicMeasures import *
 from Core.MeshGeneration import vtk_writer
@@ -210,19 +209,23 @@ class PostProcess(object):
 						# SPATIAL ELECTRIC FIELD
 						ElectricFieldx[:,:,g,elem] = - np.dot(SpatialGradient.T,ElectricPotentialElem)
 						# COMPUTE SPATIAL ELECTRIC DISPLACEMENT
-						ElectricDisplacementx[:,:,g,elem] = MainData.ElectricDisplacementx(MaterialArgs,StrainTensors,ElectricFieldx[:,:,g,elem])
+						ElectricDisplacementx[:,:,g,elem] = MainData.ElectricDisplacementx(MaterialArgs,
+							StrainTensors,ElectricFieldx[:,:,g,elem])
 
 					# Compute remaining kinematic/deformation measures
 					# StrainTensors = KinematicMeasures(F[:,:,g,elem])
-					StrainTensors = KinematicMeasures_NonVectorised(F[:,:,g,elem],MainData.AnalysisType,MainData.Domain.AllGauss.shape[0])
+					StrainTensors = KinematicMeasures_NonVectorised(F[:,:,g,elem],MainData.AnalysisType,
+						MainData.Domain.AllGauss.shape[0])
 					if MainData.GeometryUpdate is False:
 						strain[:,:,g,elem] = StrainTensors['strain'][g]
 
 					# COMPUTE CAUCHY STRESS TENSOR
 					if MainData.Prestress:
-						CauchyStressTensor[:,:,g,elem]= MainData.CauchyStress(MainData.MaterialArgs,StrainTensors,ElectricFieldx[:,:,g,elem])[0] 
+						CauchyStressTensor[:,:,g,elem]= MainData.CauchyStress(MainData.MaterialArgs,
+							StrainTensors,ElectricFieldx[:,:,g,elem])[0] 
 					else:
-						CauchyStressTensor[:,:,g,elem] = MainData.CauchyStress(MainData.MaterialArgs,StrainTensors,ElectricFieldx[:,:,g,elem])
+						CauchyStressTensor[:,:,g,elem] = MainData.CauchyStress(MainData.MaterialArgs,
+							StrainTensors,ElectricFieldx[:,:,g,elem])
 					
 
 
@@ -236,19 +239,29 @@ class PostProcess(object):
 					myrange = np.linspace(0,elements.shape[1]-1,elements.shape[1])
 
 				for j in myrange:
-					MainData.MainDict['DeformationGradient'][:,:,inode,Increment] += F[:,:,position[inode,j],shared_elements[inode,j]]
-					MainData.MainDict['CauchyStress'][:,:,inode,Increment] += CauchyStressTensor[:,:,position[inode,j],shared_elements[inode,j]]
-					MainData.MainDict['ElectricField'][:,:,inode,Increment] += ElectricFieldx[:,:,position[inode,j],shared_elements[inode,j]]
-					MainData.MainDict['ElectricDisplacement'][:,:,inode,Increment] += ElectricDisplacementx[:,:,position[inode,j],shared_elements[inode,j]]
+					MainData.MainDict['DeformationGradient'][:,:,inode,Increment] += \
+						F[:,:,position[inode,j],shared_elements[inode,j]]
+					MainData.MainDict['CauchyStress'][:,:,inode,Increment] += \
+						CauchyStressTensor[:,:,position[inode,j],shared_elements[inode,j]]
+					MainData.MainDict['ElectricField'][:,:,inode,Increment] += \
+						ElectricFieldx[:,:,position[inode,j],shared_elements[inode,j]]
+					MainData.MainDict['ElectricDisplacement'][:,:,inode,Increment] += \
+						ElectricDisplacementx[:,:,position[inode,j],shared_elements[inode,j]]
 					if ~MainData.GeometryUpdate:
-						MainData.MainDict['SmallStrain'][:,:,inode,Increment] += strain[:,:,position[inode,j],shared_elements[inode,j]] 
+						MainData.MainDict['SmallStrain'][:,:,inode,Increment] += \
+							strain[:,:,position[inode,j],shared_elements[inode,j]] 
 
-				MainData.MainDict['DeformationGradient'][:,:,inode,Increment] = MainData.MainDict['DeformationGradient'][:,:,inode,Increment]/(1.0*len(myrange))
-				MainData.MainDict['CauchyStress'][:,:,inode,Increment] = MainData.MainDict['CauchyStress'][:,:,inode,Increment]/(1.0*len(myrange))
-				MainData.MainDict['ElectricField'][:,:,inode,Increment] = MainData.MainDict['ElectricField'][:,:,inode,Increment]/(1.0*len(myrange))
-				MainData.MainDict['ElectricDisplacement'][:,:,inode,Increment] = MainData.MainDict['ElectricDisplacement'][:,:,inode,Increment]/(1.0*len(myrange))
+				MainData.MainDict['DeformationGradient'][:,:,inode,Increment] = \
+					MainData.MainDict['DeformationGradient'][:,:,inode,Increment]/(1.0*len(myrange))
+				MainData.MainDict['CauchyStress'][:,:,inode,Increment] = \
+					MainData.MainDict['CauchyStress'][:,:,inode,Increment]/(1.0*len(myrange))
+				MainData.MainDict['ElectricField'][:,:,inode,Increment] = \
+				MainData.MainDict['ElectricField'][:,:,inode,Increment]/(1.0*len(myrange))
+				MainData.MainDict['ElectricDisplacement'][:,:,inode,Increment] = \
+				MainData.MainDict['ElectricDisplacement'][:,:,inode,Increment]/(1.0*len(myrange))
 				if ~MainData.GeometryUpdate:
-						MainData.MainDict['SmallStrain'][:,:,inode,Increment] = MainData.MainDict['SmallStrain'][:,:,inode,Increment]/(1.0*len(myrange))
+						MainData.MainDict['SmallStrain'][:,:,inode,Increment] = \
+							MainData.MainDict['SmallStrain'][:,:,inode,Increment]/(1.0*len(myrange))
 
 
 		# FOR PLOTTING PURPOSES ONLY COMPUTE THE EXTERIOR SOLUTION
@@ -266,38 +279,35 @@ class PostProcess(object):
 		# NEWTON-RAPHSON CONVERGENCE PLOT
 		if MainData.nrplot[0]:
 			if MainData.nrplot[1] == 'first':
-				plt.semilogy(MainData.NRConvergence['Increment_0'],'-ko')		# First increment convergence
+				# First increment convergence
+				plt.semilogy(MainData.NRConvergence['Increment_0'],'-ko')		
 			elif MainData.nrplot[1] == 'last':
-				plt.plot(np.log10(MainData.NRConvergence['Increment_'+str(len(MainData.NRConvergence)-1)]),'-ko') 	# Last increment convergence
+				# Last increment convergence
+				plt.plot(np.log10(MainData.NRConvergence['Increment_'+str(len(MainData.NRConvergence)-1)]),'-ko') 	
 			else:
-				plt.plot(np.log10(MainData.NRConvergence['Increment_'+str(MainData.nrplot[1])]),'-ko') 	# Arbitrary increment convergence
+				# Arbitrary increment convergence
+				plt.plot(np.log10(MainData.NRConvergence['Increment_'+str(MainData.nrplot[1])]),'-ko') 	
 
 			axis_font = {'size':'18'}
 			plt.xlabel(r'$No\, of\, Iteration$', **axis_font)
 			plt.ylabel(r'$log_{10}|Residual|$', **axis_font)
 			# Save plot
-			# plt.savefig(MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+'/NR_convergence_'+MaterialArgs.Type+'.eps',
-				# format='eps', dpi=1000)
+			# plt.savefig(MainData.Path.ProblemResults+MainData.Path.Analysis+\
+			# 	MainData.Path.MaterialModel+'/NR_convergence_'+MaterialArgs.Type+'.eps',
+			# 	format='eps', dpi=1000)
 			# Display plot
 			plt.show()
 
 
-		#------------------------------------------------------------------------------------------------------------------------------------------#
-		#------------------------------------------------------------------------------------------------------------------------------------------#
-		#------------------------------------------------------------------------------------------------------------------------------------------#
+		#-----------------------------------------------------------------------------------------------------------#
+		#-----------------------------------------------------------------------------------------------------------#
 		# Save the dictionary in .mat file
 		# MainData.MainDict['Solution'] = MainData.TotalDisp
 		# Write to Matlab .mat dictionary
 		# io.savemat(MainData.Path.ProblemResults+MainData.Path.ProblemResultsFileNameMATLAB,MainData.MainDict)
-		#------------------------------------------------------------------------------------------------------------------------------------------#
-		#------------------------------------------------------------------------------------------------------------------------------------------#
+		#-----------------------------------------------------------------------------------------------------------#
+		#-----------------------------------------------------------------------------------------------------------#
 
-
-		#------------------------------------------------------------------------------------------------------------------------------------------#
-		#------------------------------------------------------------------------------------------------------------------------------------------#
-		#------------------------------------------------------------------------------------------------------------------------------------------#
-		#------------------------------------------------------------------------------------------------------------------------------------------#
-		#------------------------------------------------------------------------------------------------------------------------------------------#
 
 		# WRITE IN VTK FILE 
 		if MainData.write:
@@ -347,7 +357,7 @@ class PostProcess(object):
 				points[:,:nvar] += TotalDisp[:,:nvar,incr]
 				npoint = points.shape[0]
 
-				#---------------------------------------------------------------------------------------------------------------------------------------#
+				#----------------------------------------------------------------------------------------------------#
 				# CAUCHY STRESS
 				vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
 					pdata=MainData.MainDict['CauchyStress'][:,0,:,incr].reshape(npoint,ndim),
@@ -364,27 +374,26 @@ class PostProcess(object):
 						pdata=MainData.MainDict['CauchyStress'][:,2,:,incr].reshape(npoint,ndim),
 						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
 						MainData.Path.ProblemResultsFileNameVTK+'_S_i2_'+str(incr)+'.vtu')
-				#---------------------------------------------------------------------------------------------------------------------------------------#
+				#-------------------------------------------------------------------------------------------------------#
 
 
-				#---------------------------------------------------------------------------------------------------------------------------------------#
+				#-------------------------------------------------------------------------------------------------------#
 				if MainData.Fields == 'ElectroMechanics':
 					# ELECTRIC FIELD
 					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
 						pdata=MainData.MainDict['ElectricField'][:,0,:,incr].reshape(npoint,ndim),
 						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
 						MainData.Path.ProblemResultsFileNameVTK+'_E_'+str(incr)+'.vtu')
-					#---------------------------------------------------------------------------------------------------------------------------------------#
-					#---------------------------------------------------------------------------------------------------------------------------------------#
+						#-----------------------------------------------------------------------------------------------------------#
+						#-----------------------------------------------------------------------------------------------------------#
 					# ELECTRIC DISPLACEMENT
 					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
 						pdata=MainData.MainDict['ElectricDisplacement'][:,0,:,incr].reshape(npoint,ndim),
 						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
 						MainData.Path.ProblemResultsFileNameVTK+'_D_'+str(incr)+'.vtu')
-				#---------------------------------------------------------------------------------------------------------------------------------------#
+				#-----------------------------------------------------------------------------------------------------------#
 
-
-				#---------------------------------------------------------------------------------------------------------------------------------------#
+				#-----------------------------------------------------------------------------------------------------------#
 				# STRAIN/KINEMATICS
 				if ~MainData.GeometryUpdate:
 					# SMALL STRAINS
@@ -420,7 +429,7 @@ class PostProcess(object):
 							pdata=MainData.MainDict['DeformationGradient'][:,2,:,incr].reshape(npoint,ndim),
 							fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
 							MainData.Path.ProblemResultsFileNameVTK+'_F_i2_'+str(incr)+'.vtu')
-				#---------------------------------------------------------------------------------------------------------------------------------------#
+				#-------------------------------------------------------------------------------------------------------#
 
 
 
@@ -437,7 +446,7 @@ class PostProcess(object):
 		points = mesh.points
 		vpoints = np.copy(mesh.points)
 		# vpoints	+= TotalDisp[:,:,-1]
-		vpoints	= vpoints+ TotalDisp[:,:,-1]
+		vpoints	= vpoints + TotalDisp[:,:,-1]
 
 		elements = mesh.elements
 
@@ -469,7 +478,7 @@ class PostProcess(object):
 			# USING ISOPARAMETRIC
 			Jacobian = np.abs(np.linalg.det(ParentGradientx))
 			# Jacobian = np.abs(np.linalg.det(ParentGradientX))
-			# USING DETEERMINANT OF DEFORMATION GRADIENT TENSOR
+			# USING DETERMINANT OF DEFORMATION GRADIENT TENSOR
 			# Jacobian = detF
 			# print Jacobian
 			# USING INVARIANT F:F
@@ -497,6 +506,10 @@ class PostProcess(object):
 
 			MainData.ScaledJacobian[elem] = 1.0*JMin/JMax
 
+		if np.isnan(MainData.ScaledJacobian).any():
+			raise JacobianError()		
+		
+
 		print 'Minimum ScaledJacobian value is', np.min(MainData.ScaledJacobian), \
 		'corresponding to element', np.where(np.min(MainData.ScaledJacobian)==MainData.ScaledJacobian)[0][0]
 
@@ -506,20 +519,17 @@ class PostProcess(object):
 			import matplotlib.pyplot as plt
 				
 			fig = plt.figure()
-			# # plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),MainData.ScaledJacobian,width=1.,color='#FE6F5E',alpha=0.8)
+			# plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),
+			# 	MainData.ScaledJacobian,width=1.,color='#FE6F5E',alpha=0.8)
 
 			plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),MainData.ScaledJacobian,width=1.,alpha=0.4)
 			plt.xlabel(r'$Elements$',fontsize=18)
 			plt.ylabel(r'$Scaled\, Jacobian$',fontsize=18)
 
-			# plt.bar(np.linspace(0,MainData.ScaledJacobianElem.shape[0]-1,MainData.ScaledJacobianElem.shape[0]),MainData.ScaledJacobian,width=1.,alpha=0.4)
+			# plt.bar(np.linspace(0,MainData.ScaledJacobianElem.shape[0]-1,
+			# 	MainData.ScaledJacobianElem.shape[0]),MainData.ScaledJacobian,width=1.,alpha=0.4)
 			# plt.xlabel(r'$Elements$',fontsize=18)
 			# plt.ylabel(r'$Scaled\, Jacobian$',fontsize=18)
-
-		# plt.savefig('/home/roman/Desktop/DumpReport/scaled_jacobian_312_'+MainData.AnalysisType+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)
-
-
-
 
 
 	@staticmethod	
@@ -570,9 +580,6 @@ class PostProcess(object):
 		# plt.xlim([-40,-15])
 		# plt.ylim([-14,14])
 		plt.axis('off')	
-		# plt.savefig('/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/initial_plots/mech2d_curvedmesh_Linear_p2_full.eps')
-		# plt.savefig('/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/initial_plots/mech2d_curvedmesh_Incrementally_Linearised_NeoHookean_p2_full.eps')
-		# plt.savefig('/home/roman/Desktop/DumpReport/mesh_312_'+MainData.AnalysisType+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)
 
 
 	@staticmethod
@@ -658,6 +665,7 @@ class PostProcess(object):
 
 	@staticmethod	
 	def HighOrderInterpolatedPatchPlot(MainData,mesh,TotalDisp):
+		"""Not tested properly"""
 
 		import matplotlib.pyplot as plt
 		from scipy.interpolate import BarycentricInterpolator, piecewise_polynomial_interpolate, interp1d, splrep, splev
@@ -678,17 +686,14 @@ class PostProcess(object):
 
 
 		if MainData.C>0:
-			ddum = (np.append(np.append(np.append(np.append(np.append(np.append(0,dum1),1),dum2),2),np.fliplr(dum3.reshape(1,dum3.shape[0]))),0) ).astype(np.int32)
+			ddum = (np.append(np.append(np.append(np.append(np.append(np.append(0,dum1),1),
+				dum2),2),np.fliplr(dum3.reshape(1,dum3.shape[0]))),0) ).astype(np.int32)
 
-		# print ddum
 		p = MainData.C+1
 		ndim = MainData.ndim
 		n_interp = 10
 
-		# for elem in [59]:
-		# aa = np.arange(68)
-		# aa=np.append(aa,np.array([69,70,71,72,73,74]))
-		# for elem in aa:
+
 		for elem in range(mesh.nelem):
 			dum = vpoints[mesh.elements[elem,:],:]
 			x_coordinates = dum[ddum,0]
@@ -728,101 +733,3 @@ class PostProcess(object):
 		plt.axis('equal')
 		# plt.axis('off')	
 		# plt.show()
-
-		# print mesh.points[[20,21,39],:]
-		# import sys; sys.exit(0)
-
-
-
-#########################
-	# def MeshQualityMeasures(self,MainData,mesh,TotalDisp,show_plot=True):
-
-		# if self.is_scaledjacobian_computed is True:
-		# 	raise AssertionError('Scaled Jacobian seems to be already computed. Re-Computing it may return incorrect results')
-		# if MainData.isScaledJacobianComputed is True:
-		# 	raise AssertionError('Scaled Jacobian seems to be already computed. Re-Computing it may return incorrect results')
-
-		# Domain = MainData.Domain
-		# points = mesh.points
-		# vpoints = np.copy(mesh.points)
-		# # vpoints	+= TotalDisp[:,:,-1]
-		# vpoints	= vpoints+ TotalDisp[:,:,-1]
-
-		# elements = mesh.elements
-
-		# MainData.ScaledJacobian = np.zeros(elements.shape[0])
-		# # MainData.ScaledJacobian = []
-		# # MainData.ScaledJacobianElem = []
-
-
-		# JMax =[]; JMin=[]
-		# for elem in range(mesh.nelem):
-		# 	LagrangeElemCoords = points[elements[elem,:],:]
-		# 	EulerElemCoords = vpoints[elements[elem,:],:]
-
-		# 	# COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
-		# 	# MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-		# 	ParentGradientX = np.einsum('ijk,jl->kil',MainData.Domain.Jm,LagrangeElemCoords)
-		# 	# MAPPING TENSOR [\partial\vec{x}/ \partial\vec{\varepsilon} (ndim x ndim)]
-		# 	ParentGradientx = np.einsum('ijk,jl->kil',MainData.Domain.Jm,EulerElemCoords)
-		# 	# MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
-		# 	MaterialGradient = np.einsum('ijk,kli->ijl',la.inv(ParentGradientX),MainData.Domain.Jm)
-		# 	# DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
-		# 	F = np.einsum('ij,kli->kjl',EulerElemCoords,MaterialGradient)
-		# 	# JACOBIAN OF DEFORMATION GRADIENT TENSOR
-		# 	detF = np.abs(np.linalg.det(F))
-		# 	# COFACTOR OF DEFORMATION GRADIENT TENSOR
-		# 	H = np.einsum('ijk,k->ijk',np.linalg.inv(F).T,detF)
-
-		# 	# FIND JACOBIAN OF SPATIAL GRADIENT
-		# 	# USING ISOPARAMETRIC
-		# 	Jacobian = np.abs(np.linalg.det(ParentGradientx))
-		# 	# Jacobian = np.abs(np.linalg.det(ParentGradientX))
-		# 	# USING DETEERMINANT OF DEFORMATION GRADIENT TENSOR
-		# 	# Jacobian = detF
-		# 	# print Jacobian
-		# 	# USING INVARIANT F:F
-		# 	# xx = np.einsum('kij,lij->kl',F,F)
-		# 	# Jacobian = np.sqrt(np.einsum('kij,lij->k',F,F))
-		# 	# USING INVARIANT H:H
-		# 	# Jacobian = np.sqrt(np.einsum('kij,lij->k',H,H))
-		# 	# print xx
-		# 	# print Jacobian.shape
-
-		# 	# from Core.Supplementary.Tensors import makezero
-		# 	# if elem==mesh.nelem-1:
-		# 		# print ParentGradientx[0,:,:]
-		# 		# print makezero(LagrangeElemCoords)
-		# 		# print makezero(EulerElemCoords)
-		# 		# print ParentGradientx.shape
-		# 		# print F[:,:,:]
-
-		# 	# FIND MIN AND MAX VALUES
-		# 	JMin = np.min(Jacobian); JMax = np.max(Jacobian)
-
-		# 		# MainData.ScaledJacobian[elem] = 1.0*JMin/JMax
-		# 		# MainData.ScaledJacobian = np.append(MainData.ScaledJacobian,1.0*JMin/JMax)
-		# 		# MainData.ScaledJacobianElem = np.append(MainData.ScaledJacobianElem,elem)	
-
-		# 	MainData.ScaledJacobian[elem] = 1.0*JMin/JMax
-
-		# print 'Minimum ScaledJacobian value is', np.min(MainData.ScaledJacobian), \
-		# 'corresponding to element', np.where(np.min(MainData.ScaledJacobian)==MainData.ScaledJacobian)[0][0]
-
-
-		# if show_plot == True:
-
-		# 	import matplotlib.pyplot as plt
-				
-		# 	fig = plt.figure()
-		# 	# # plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),MainData.ScaledJacobian,width=1.,color='#FE6F5E',alpha=0.8)
-
-		# 	plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),MainData.ScaledJacobian,width=1.,alpha=0.4)
-		# 	plt.xlabel(r'$Elements$',fontsize=18)
-		# 	plt.ylabel(r'$Scaled\, Jacobian$',fontsize=18)
-
-		# 	# plt.bar(np.linspace(0,MainData.ScaledJacobianElem.shape[0]-1,MainData.ScaledJacobianElem.shape[0]),MainData.ScaledJacobian,width=1.,alpha=0.4)
-		# 	# plt.xlabel(r'$Elements$',fontsize=18)
-		# 	# plt.ylabel(r'$Scaled\, Jacobian$',fontsize=18)
-
-		# # plt.savefig('/home/roman/Desktop/DumpReport/scaled_jacobian_312_'+MainData.AnalysisType+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)

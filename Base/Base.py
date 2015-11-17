@@ -93,4 +93,9 @@ class Base(object):
 	# ScaledJacobian
 	isScaledJacobianComputed = False
 
+
+
+
+
+
  			

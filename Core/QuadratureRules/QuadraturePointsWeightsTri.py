@@ -56,6 +56,18 @@ def QuadraturePointsWeightsTri(C,Opt=1):
 				if 'd'+str(d) in i:
 					zw = np.loadtxt(path+i)
 
+	elif Opt==2:
+		path = os.path.dirname(os.path.realpath(__file__))
+		path += '/Tables/tri/'
+		d = C+2
+
+		for i in os.listdir(path):
+			if 'witherden-vincent-n' in i:
+				if 'd'+str(d) in i:
+					zw = np.loadtxt(path+i)
+
+
+
 
 	elif Opt==3:
 		# AVOID INACCURATE QUADRATURE POINTS 
