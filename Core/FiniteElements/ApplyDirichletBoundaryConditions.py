@@ -1,4 +1,5 @@
 import numpy as np 
+import scipy as sp
 from DirichletBoundaryDataFromCAD import IGAKitWrapper, PostMeshWrapper
 from time import time
 
@@ -42,9 +43,10 @@ def GetDirichletBoundaryConditions(mesh,MainData):
 		# To Rogelio
 		# print mesh.points
 		# print AppliedDirichlet.shape, mesh.points.shape
+
 		# Dict = {'points':mesh.points,'element':mesh.elements,'displacements':AppliedDirichlet,'displacement_dof':ColumnsOut}
 		# from scipy.io import savemat
-		# savemat('/home/roman/Desktop/wing_p2',Dict)
+		# savemat('/home/roman/Desktop/circle_stretch_p4',Dict)
 
 		# print mesh.edges.shape, AppliedDirichlet.shape, Dirichlet.shape
 		# import sys; sys.exit(0)
@@ -135,6 +137,15 @@ def ApplyDirichletGetReducedMatrices(stiffness,F,ColumnsIn,ColumnsOut,AppliedDir
 
 	# GET REDUCED FORCE VECTOR
 	F_b = F[ColumnsIn,0]
+
+	# print int(sp.__version__.split('.')[1] )
+	# FOR UMFPACK SOLVER TAKE SPECIAL CARE
+	if int(sp.__version__.split('.')[1]) < 15:
+		F_b_umf = np.zeros(F_b.shape[0])
+		# F_b_umf[:] = F_b[:,0] # DOESN'T WORK
+		for i in range(F_b_umf.shape[0]):
+			F_b_umf[i] = F_b[i,0]
+		F_b = np.copy(F_b_umf)
 
 	# GET REDUCED STIFFNESS
 	stiffness_b = stiffness[ColumnsIn,:][:,ColumnsIn]

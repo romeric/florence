@@ -27,6 +27,13 @@ def QuadraturePointsWeightsTri(C,Opt=1):
 				counter +=1
 
 	elif Opt==1:
+		# AVOID INACCURATE QUADRATURE POINTS 
+		# if C==4:
+		# 	C = 6
+		# if C==5:
+		# 	C = 7 # careful
+		# if C==6:
+		# 	C = 11
 
 		if C==0:
 			zw = np.array([
