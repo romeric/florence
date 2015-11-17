@@ -201,7 +201,7 @@ def PreProcess(MainData,Pr,pwd):
 	############################################################################
 	# GET QUADRATURE POINTS AND WEIGHTS
 	z=[]; w=[]; 
-	QuadratureOpt=0 	# OPTION FOR QUADRATURE TECHNIQUE FOR TRIS AND TETS
+	QuadratureOpt=1 	# OPTION FOR QUADRATURE TECHNIQUE FOR TRIS AND TETS
 
 
 	if MainData.MeshInfo.MeshType == 'quad' or MainData.MeshInfo.MeshType == 'hex':
@@ -210,8 +210,8 @@ def PreProcess(MainData,Pr,pwd):
 		zw = QuadraturePointsWeightsTet.QuadraturePointsWeightsTet(MainData.C+1,QuadratureOpt)
 		z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]; #w = np.repeat(w,MainData.ndim) 
 	elif MainData.MeshInfo.MeshType == 'tri':
+		zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(MainData.C+1,QuadratureOpt) # PUT C+1 OR HIGHER
 		# zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(MainData.C+1,QuadratureOpt) # PUT C+4 OR HIGHER
-		zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(MainData.C+1,QuadratureOpt) # PUT C+4 OR HIGHER
 		z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
 
 	class Quadrature(object):

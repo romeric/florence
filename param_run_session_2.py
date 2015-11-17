@@ -35,7 +35,7 @@ if __name__ == '__main__':
  	MainData.__VECTORISATION__ = True
  	MainData.__PARALLEL__ = True
  	MainData.numCPU = MP.cpu_count()
- 	MainData.__PARALLEL__ = False
+ 	# MainData.__PARALLEL__ = False
  	# nCPU = 8
  	__MEMORY__ = 'SHARED'
  	# __MEMORY__ = 'DISTRIBUTED'
@@ -55,11 +55,11 @@ if __name__ == '__main__':
 	Run = 1
 	if Run:
 		t_FEM = time.time()
-		# nu = np.linspace(0.001,0.495,100)
-		nu = np.linspace(0.01,0.495,2)
+		nu = np.linspace(0.001,0.495,100)
+		# nu = np.linspace(0.01,0.495,2)
 		E = np.array([1e05])
 		p = [2,3,4,5,6]
-		p = [2]
+		# p = [2]
 		 
 
 		Results = {'PolynomialDegrees':p,'PoissonsRatios':nu,'Youngs_Modulus':E}
@@ -73,6 +73,7 @@ if __name__ == '__main__':
 			for j in range(nu.shape[0]):
 				MainData.nu = nu[j]
 				MainData.E = E
+				MainData.isScaledJacobianComputed = False
 				main(MainData,Results)	
 				CondExists = getattr(MainData.solve,'condA',None)
 				# ScaledExists = getattr(MainData.solve,'scaledA',None)
@@ -88,7 +89,7 @@ if __name__ == '__main__':
 		# print Results['ScaledJacobian']
 
 		# savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'_FeketeSpacing.mat',Results)
-		# savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'_Orthogonal.mat',Results)
+		savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'_Orthogonal.mat',Results)
 		# savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'_EqualSpacing.mat',Results)
 		# savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'.mat',Results)
 		# savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'2.mat',Results)
@@ -106,10 +107,10 @@ if __name__ == '__main__':
 
 		# ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_EqualSpacing'
 		# ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_FeketeSpacing'
-		ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_Orthogonal'
+		# ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_Orthogonal'
 
 		# ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_EqualSpacing'
-		# ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_FeketeSpacing'
+		ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_FeketeSpacing'
 		# ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_Orthogonal'
 
 		DictOutput =  loadmat(ResultsPath+ResultsFile+'.mat')	

@@ -894,6 +894,7 @@ class Mesh(object):
 
 			self.elements = connec_tri
 			# OBTAIN MESH EDGES
+			self.nelem = self.elements.shape[0]
 			self.GetBoundaryEdgesTri()
 		elif element_type == 'quad':
 			self.elements = connec
@@ -907,7 +908,6 @@ class Mesh(object):
 		self.points[:,1] += center[1]
 		# ASSIGN PROPERTIES
 		self.element_type = element_type
-		self.nelem = self.elements.shape[0]
 		self.nnode = self.points.shape[0]
 
 

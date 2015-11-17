@@ -4,11 +4,7 @@ import os, imp
 
 def ProblemData(MainData):
 
-	# ndim - Dimension of the problem - 1D, 2D, 3D
 	MainData.ndim = 2
-	# Type of formulation - Displacement-based/ mixed etc
-		# 1 - Displacement approach (for electromechanics, it is displacement-electric potential approach)
-		# 2 - x, J approach
 	
 	MainData.Fields = 'Mechanics'
 	# MainData.Fields = 'ElectroMechanics'
@@ -41,24 +37,6 @@ def ProblemData(MainData):
 		lamb = E*nu/(1.+nu)/(1.-2.0*nu)
 		mu = E/2./(1+nu)
 
-		# mu = 1.
-		# lamb  = 2.
-		# mu    = 0.3571
-		# lamb  = 1.4286
-		# lamb = lamb - mu
-		# mu = 2*mu
-		# lamb = lamb + mu
-
-		# mu    = 0.090571
-		# lamb  = 1.4286
-		# mu    = 0.5
-		# lamb  = 0.6
-		# mu    = 0.5
-		# lamb  = 0.5
-		rho   = 7.5*10e-6
-		eps_1 = 1.0
-		c1    = 0.
-		c2    = 0.
 
 	# print (MaterialArgs.lamb)/2./(MaterialArgs.lamb+MaterialArgs.mu)
 
@@ -73,7 +51,7 @@ def ProblemData(MainData):
 		MeshType = 'tri'
 		Nature = 'straight'
 		Reader = 'Read'
-		# Reader = 'UniformHollowCircle'
+		Reader = 'UniformHollowCircle'
 
 		# FileName = ProblemPath + '/Mesh_Annular_Circle_6135253.dat'
 		# FileName = ProblemPath + '/Mesh_Annular_Circle_382526.dat'

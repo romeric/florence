@@ -15,7 +15,6 @@ def ProblemData(MainData):
 	# MainData.MaterialArgs.Type = 'LinearModel'
 	# MainData.MaterialArgs.Type = 'IncrementalLinearElastic'
 	# MainData.MaterialArgs.Type = 'IncrementallyLinearisedNeoHookean'
-	# MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin_1'
 	# MainData.MaterialArgs.Type = 'NearlyIncompressibleNeoHookean'
 	# MainData.MaterialArgs.Type = 'NeoHookean_1'
 	MainData.MaterialArgs.Type = 'NeoHookean_2'
@@ -26,9 +25,9 @@ def ProblemData(MainData):
 	MainData.MaterialArgs.E  = 1.0e5
 	MainData.MaterialArgs.nu = 0.35
 
-	# E = MainData.E 
-	# nu = MainData.nu 
-	# print 'Poisson ratio is:', nu
+	# MainData.MaterialArgs.E = MainData.E 
+	# MainData.MaterialArgs.nu = MainData.nu
+	# print 'Poisson ratio is:', MainData.MaterialArgs.nu
 
 
 	E = MainData.MaterialArgs.E
@@ -54,6 +53,8 @@ def ProblemData(MainData):
 		# NURBS/NON-NURBS TYPE BOUNDARY CONDITION
 		Type = 'nurbs'
 		RequiresCAD = True
+		# ProjectionType = 'orthogonal'
+		ProjectionType = 'arc_length'
 		CurvilinearMeshNodalSpacing = 'fekete'
 		# CurvilinearMeshNodalSpacing = 'equal'
 

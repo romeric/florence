@@ -26,12 +26,12 @@ from Core.FiniteElements.Solvers.Solver import *
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Electromechanics/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Annular_Circle_Nurbs/ProblemData.py')
-# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/MechanicalComponent2D/ProblemData.py')
+Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/MechanicalComponent2D/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Wing2D/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Sphere/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Naca_Isotropic/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/RAE2822/ProblemData.py')
-Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Misc/ProblemData.py')
+# Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Misc/ProblemData.py')
 # Pr = imp.load_source('ProblemData',pwd+'/Problems/FiniteElements/Tests/ProblemData.py')
 # import Problems
 #############################################################################################################################################
@@ -62,7 +62,8 @@ def main(MainData, DictOutput=None, nStep=0):
 
 
 	print 'Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*MainData.nvar
-	print 'Number of mesh edge nodes', np.unique(mesh.edges).shape[0]
+	print 'Number of elements is', mesh.elements.shape[0], \
+			 'and number of mesh edge nodes is', np.unique(mesh.edges).shape[0]
 
 	# sys.exit("STOPPED")
 	# CALL THE MAIN ROUTINE
@@ -80,6 +81,10 @@ def main(MainData, DictOutput=None, nStep=0):
 	# import matplotlib.pyplot as plt
 	# plt.show()
 
+	# from scipy.io import loadmat
+	# pp = loadmat('/home/roman/Desktop/ToFromRogelio/Load_increment_20corr.mat')
+	# TotalDisp[:,:,-1] = pp['p'] - mesh.points
+
 
 	if nStep ==1:
 		MainData.mesh = mesh
@@ -90,9 +95,9 @@ def main(MainData, DictOutput=None, nStep=0):
 	if MainData.AssemblyParameters.FailedToConverge==False:
 		if MainData.MaterialArgs.Type != 'IncrementalLinearElastic':
 			PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp,show_plot=False)
-		# PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
-		# import matplotlib.pyplot as plt
-		# plt.show()
+		PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
+		import matplotlib.pyplot as plt
+		plt.show()
 	else:
 		MainData.ScaledJacobian = np.NAN
 

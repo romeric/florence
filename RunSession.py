@@ -24,7 +24,8 @@ sys.dont_write_bytecode
 
 # IMPORT NECESSARY CLASSES FROM BASE
 from Base import Base as MainData
-
+# RETAIN CORE AFFINITY
+# os.system("taskset -p 0xff %d" % os.getpid())
 
 
 if __name__ == "__main__":

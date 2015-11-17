@@ -52,7 +52,8 @@ def IncrementalLinearElasticitySolver(MainData,mesh,TotalDisp,Eulerx,LoadIncreme
 		Eulerx = np.copy(mesh.points)
 
 		# COMPUTE SCALED JACBIAN FOR THE MESH
-		jacobian_postprocess.MeshQualityMeasures(MainData,mesh,np.zeros_like(TotalDisp[:,:,:Increment+1]),show_plot=False)
+		if Increment == LoadIncrement - 1:
+			jacobian_postprocess.MeshQualityMeasures(MainData,mesh,np.zeros_like(TotalDisp[:,:,:Increment+1]),show_plot=False)
 
 	jacobian_postprocess.is_scaledjacobian_computed
 	MainData.isScaledJacobianComputed = True

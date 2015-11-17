@@ -65,8 +65,14 @@ def PostMeshWrapper(MainData,mesh):
 		# FIX IMAGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
 		curvilinear_mesh.RepairDualProjectedParameters()
 		# PERFORM POINT INVERTION FOR THE INTERIOR POINTS
-		# curvilinear_mesh.MeshPointInversionCurve()
-		curvilinear_mesh.MeshPointInversionCurveArcLength()
+		projection_type = getattr(MainData.BoundaryData,'ProjectionType',None)
+		if projection_type == 'orthogonal':
+			curvilinear_mesh.MeshPointInversionCurve()
+		elif projection_type == 'arc_length':
+			curvilinear_mesh.MeshPointInversionCurveArcLength()
+		else:
+			print("projection type not understood. Arc length based projection is going to be used")
+			curvilinear_mesh.MeshPointInversionCurveArcLength()
 		# OBTAIN MODIFIED MESH POINTS - THIS IS NECESSARY TO ENSURE LINEAR MESH IS ALSO CORRECT
 		curvilinear_mesh.ReturnModifiedMeshPoints(mesh.points)
 		# GET DIRICHLET DATA
