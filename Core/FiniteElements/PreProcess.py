@@ -114,9 +114,6 @@ def PreProcess(MainData,Pr,pwd):
 	# mesh.GetElementsWithBoundaryEdgesTri()
 	# print time()-t1
 
-
-
-
 	# index_sort_x = np.argsort(nmesh.points[:,0])
 	# sorted_repoints = nmesh.points[index_sort_x,:]
 	# ##############################################################################
@@ -128,10 +125,6 @@ def PreProcess(MainData,Pr,pwd):
 	# print mesh.edges
 	# mesh.PlotMeshNumberingTri()
 	# sys.exit("STOPPED")
-
-	# np.savetxt('/home/roman/Desktop/elements_check_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/points_check_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%6.4f',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/edges_check_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
 
 
 	# STORE PATHS FOR MAIN, CORE & PROBLEM DIRECTORIES
@@ -207,14 +200,7 @@ def PreProcess(MainData,Pr,pwd):
 	MainData.PostDomain, MainData.PostBoundary, MainData.PostQuadrature = GetBasesAtInegrationPoints(MainData.C,
 		2*(MainData.C),QuadratureOpt,MainData.MeshInfo.MeshType)
 
-	# QuadratureOpt = 3 	# OPTION FOR QUADRATURE TECHNIQUE FOR TRIS AND TETS
-	# MainData.Domain, MainData.Boundary, MainData.Quadrature = GetBasesAtInegrationPoints(MainData.C,
-	# 	(MainData.C+1),QuadratureOpt,MainData.MeshInfo.MeshType)
-	# MainData.PostDomain, MainData.PostBoundary, MainData.PostQuadrature = GetBasesAtInegrationPoints(MainData.C,
-	# 	2*(MainData.C),QuadratureOpt,MainData.MeshInfo.MeshType)
 
-	# MainData.Domain = Domain
-	# MainData.Boundary = Boundary
 	############################################################################
 
 
@@ -242,7 +228,8 @@ def PreProcess(MainData,Pr,pwd):
 			raise KeyError('Hessian size (H_Voigt) size not knownjul')
 
 		MainData.MaterialArgs.H_Voigt = np.zeros((Hsize,Hsize,mesh.nelem,MainData.Quadrature.weights.shape[0]),dtype=np.float64)
-		MainData.MaterialArgs.Sigma = np.zeros((MainData.ndim,MainData.ndim,mesh.nelem,MainData.Quadrature.weights.shape[0]),dtype=np.float64)
+		MainData.MaterialArgs.Sigma = np.zeros((MainData.ndim,MainData.ndim,mesh.nelem,
+			MainData.Quadrature.weights.shape[0]),dtype=np.float64)
 		MainData.MaterialArgs.J = np.ones((mesh.nelem,MainData.Quadrature.weights.shape[0]),dtype=np.float64)
 
 		if MainData.ndim == 2:
@@ -294,7 +281,8 @@ def PreProcess(MainData,Pr,pwd):
 	MainData.CauchyStress = MaterialFuncName(MainData.ndim).CauchyStress
 
 	# INITIALISE
-	StrainTensors = KinematicMeasures(np.asarray([np.eye(MainData.ndim,MainData.ndim)]*MainData.Domain.AllGauss.shape[0]),MainData.AnalysisType)
+	StrainTensors = KinematicMeasures(np.asarray([np.eye(MainData.ndim,MainData.ndim)]*\
+		MainData.Domain.AllGauss.shape[0]),MainData.AnalysisType)
 	MaterialFuncName(MainData.ndim).Hessian(MainData.MaterialArgs,MainData.ndim,StrainTensors,elem=0,gcounter=0)
 
 	##############################################################################
