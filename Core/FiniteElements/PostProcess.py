@@ -324,16 +324,19 @@ class PostProcess(object):
 
 				# WRITE DISPLACEMENTS
 				vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=TotalDisp[:,:,incr],
-				fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_U_'+str(incr)+'.vtu')
+				fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
+				MainData.Path.ProblemResultsFileNameVTK+'_U_'+str(incr)+'.vtu')
 				
 				
 				if MainData.Fields == 'ElectroMechanics':
 					# WRITE ELECTRIC POTENTIAL
 					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.TotalPot[:,:,incr],
-					fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_Phi_'+str(incr)+'.vtu')
+					fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
+					MainData.Path.ProblemResultsFileNameVTK+'_Phi_'+str(incr)+'.vtu')
 
 			# FOR LINEAR STATIC ANALYSIS
-			# vtk_writer.write_vtu(Verts=vmesh.points, Cells={12:vmesh.elements}, pdata=MainData.TotalDisp[:,:,incr], fname=MainData.Path.ProblemResults+'/Results.vtu')
+			# vtk_writer.write_vtu(Verts=vmesh.points, Cells={12:vmesh.elements}, 
+			# 	pdata=MainData.TotalDisp[:,:,incr], fname=MainData.Path.ProblemResults+'/Results.vtu')
 
 
 			for incr in range(0,MainData.AssemblyParameters.LoadIncrements):
@@ -346,28 +349,38 @@ class PostProcess(object):
 
 				#---------------------------------------------------------------------------------------------------------------------------------------#
 				# CAUCHY STRESS
-				vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.MainDict['CauchyStress'][:,0,:,incr].reshape(npoint,ndim),
-					fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_S_i0_'+str(incr)+'.vtu')
+				vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
+					pdata=MainData.MainDict['CauchyStress'][:,0,:,incr].reshape(npoint,ndim),
+					fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
+					MainData.Path.ProblemResultsFileNameVTK+'_S_i0_'+str(incr)+'.vtu')
 
-				vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.MainDict['CauchyStress'][:,1,:,incr].reshape(npoint,ndim),
-					fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_S_i1_'+str(incr)+'.vtu')
+				vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
+					pdata=MainData.MainDict['CauchyStress'][:,1,:,incr].reshape(npoint,ndim),
+					fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
+					MainData.Path.ProblemResultsFileNameVTK+'_S_i1_'+str(incr)+'.vtu')
 
 				if ndim==3:
-					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.MainDict['CauchyStress'][:,2,:,incr].reshape(npoint,ndim),
-						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_S_i2_'+str(incr)+'.vtu')
+					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
+						pdata=MainData.MainDict['CauchyStress'][:,2,:,incr].reshape(npoint,ndim),
+						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
+						MainData.Path.ProblemResultsFileNameVTK+'_S_i2_'+str(incr)+'.vtu')
 				#---------------------------------------------------------------------------------------------------------------------------------------#
 
 
 				#---------------------------------------------------------------------------------------------------------------------------------------#
 				if MainData.Fields == 'ElectroMechanics':
 					# ELECTRIC FIELD
-					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.MainDict['ElectricField'][:,0,:,incr].reshape(npoint,ndim),
-						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_E_'+str(incr)+'.vtu')
+					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
+						pdata=MainData.MainDict['ElectricField'][:,0,:,incr].reshape(npoint,ndim),
+						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
+						MainData.Path.ProblemResultsFileNameVTK+'_E_'+str(incr)+'.vtu')
 					#---------------------------------------------------------------------------------------------------------------------------------------#
 					#---------------------------------------------------------------------------------------------------------------------------------------#
 					# ELECTRIC DISPLACEMENT
-					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.MainDict['ElectricDisplacement'][:,0,:,incr].reshape(npoint,ndim),
-						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_D_'+str(incr)+'.vtu')
+					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
+						pdata=MainData.MainDict['ElectricDisplacement'][:,0,:,incr].reshape(npoint,ndim),
+						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
+						MainData.Path.ProblemResultsFileNameVTK+'_D_'+str(incr)+'.vtu')
 				#---------------------------------------------------------------------------------------------------------------------------------------#
 
 
@@ -375,29 +388,44 @@ class PostProcess(object):
 				# STRAIN/KINEMATICS
 				if ~MainData.GeometryUpdate:
 					# SMALL STRAINS
-					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.MainDict['SmallStrain'][:,0,:,incr].reshape(npoint,ndim),
-						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_Strain_i0_'+str(incr)+'.vtu')
+					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
+						pdata=MainData.MainDict['SmallStrain'][:,0,:,incr].reshape(npoint,ndim),
+						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
+						MainData.Path.ProblemResultsFileNameVTK+'_Strain_i0_'+str(incr)+'.vtu')
 
-					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.MainDict['SmallStrain'][:,1,:,incr].reshape(npoint,ndim),
-						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_Strain_i1_'+str(incr)+'.vtu')
+					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
+						pdata=MainData.MainDict['SmallStrain'][:,1,:,incr].reshape(npoint,ndim),
+						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
+						MainData.Path.ProblemResultsFileNameVTK+'_Strain_i1_'+str(incr)+'.vtu')
 
 					if ndim==3:
-						vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.MainDict['SmallStrain'][:,2,:,incr].reshape(npoint,ndim),
-							fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_Strain_i2_'+str(incr)+'.vtu')
+						vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
+							pdata=MainData.MainDict['SmallStrain'][:,2,:,incr].reshape(npoint,ndim),
+							fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
+							MainData.Path.ProblemResultsFileNameVTK+'_Strain_i2_'+str(incr)+'.vtu')
 				else:
 					# DEFORMATION GRADIENT
-					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.MainDict['DeformationGradient'][:,0,:,incr].reshape(npoint,ndim),
-						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_F_i0_'+str(incr)+'.vtu')
+					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
+						pdata=MainData.MainDict['DeformationGradient'][:,0,:,incr].reshape(npoint,ndim),
+						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
+						MainData.Path.ProblemResultsFileNameVTK+'_F_i0_'+str(incr)+'.vtu')
 
-					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.MainDict['DeformationGradient'][:,1,:,incr].reshape(npoint,ndim),
-						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_F_i1_'+str(incr)+'.vtu')
+					vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
+						pdata=MainData.MainDict['DeformationGradient'][:,1,:,incr].reshape(npoint,ndim),
+						fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
+						MainData.Path.ProblemResultsFileNameVTK+'_F_i1_'+str(incr)+'.vtu')
 
 					if ndim==3:
-						vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.MainDict['DeformationGradient'][:,2,:,incr].reshape(npoint,ndim),
-							fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+MainData.Path.ProblemResultsFileNameVTK+'_F_i2_'+str(incr)+'.vtu')
+						vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
+							pdata=MainData.MainDict['DeformationGradient'][:,2,:,incr].reshape(npoint,ndim),
+							fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
+							MainData.Path.ProblemResultsFileNameVTK+'_F_i2_'+str(incr)+'.vtu')
 				#---------------------------------------------------------------------------------------------------------------------------------------#
 
 
+
+
+	
 	def MeshQualityMeasures(self,MainData,mesh,TotalDisp,show_plot=True):
 
 		if self.is_scaledjacobian_computed is True:
@@ -405,7 +433,7 @@ class PostProcess(object):
 		if MainData.isScaledJacobianComputed is True:
 			raise AssertionError('Scaled Jacobian seems to be already computed. Re-Computing it may return incorrect results')
 
-		Domain = MainData.Domain
+		PostDomain = MainData.PostDomain
 		points = mesh.points
 		vpoints = np.copy(mesh.points)
 		# vpoints	+= TotalDisp[:,:,-1]
@@ -425,11 +453,11 @@ class PostProcess(object):
 
 			# COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
 			# MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-			ParentGradientX = np.einsum('ijk,jl->kil',MainData.Domain.Jm,LagrangeElemCoords)
+			ParentGradientX = np.einsum('ijk,jl->kil',MainData.PostDomain.Jm,LagrangeElemCoords)
 			# MAPPING TENSOR [\partial\vec{x}/ \partial\vec{\varepsilon} (ndim x ndim)]
-			ParentGradientx = np.einsum('ijk,jl->kil',MainData.Domain.Jm,EulerElemCoords)
+			ParentGradientx = np.einsum('ijk,jl->kil',MainData.PostDomain.Jm,EulerElemCoords)
 			# MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
-			MaterialGradient = np.einsum('ijk,kli->ijl',la.inv(ParentGradientX),MainData.Domain.Jm)
+			MaterialGradient = np.einsum('ijk,kli->ijl',la.inv(ParentGradientX),MainData.PostDomain.Jm)
 			# DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
 			F = np.einsum('ij,kli->kjl',EulerElemCoords,MaterialGradient)
 			# JACOBIAN OF DEFORMATION GRADIENT TENSOR
@@ -489,6 +517,8 @@ class PostProcess(object):
 			# plt.ylabel(r'$Scaled\, Jacobian$',fontsize=18)
 
 		# plt.savefig('/home/roman/Desktop/DumpReport/scaled_jacobian_312_'+MainData.AnalysisType+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)
+
+
 
 
 
@@ -702,3 +732,97 @@ class PostProcess(object):
 		# print mesh.points[[20,21,39],:]
 		# import sys; sys.exit(0)
 
+
+
+#########################
+	# def MeshQualityMeasures(self,MainData,mesh,TotalDisp,show_plot=True):
+
+		# if self.is_scaledjacobian_computed is True:
+		# 	raise AssertionError('Scaled Jacobian seems to be already computed. Re-Computing it may return incorrect results')
+		# if MainData.isScaledJacobianComputed is True:
+		# 	raise AssertionError('Scaled Jacobian seems to be already computed. Re-Computing it may return incorrect results')
+
+		# Domain = MainData.Domain
+		# points = mesh.points
+		# vpoints = np.copy(mesh.points)
+		# # vpoints	+= TotalDisp[:,:,-1]
+		# vpoints	= vpoints+ TotalDisp[:,:,-1]
+
+		# elements = mesh.elements
+
+		# MainData.ScaledJacobian = np.zeros(elements.shape[0])
+		# # MainData.ScaledJacobian = []
+		# # MainData.ScaledJacobianElem = []
+
+
+		# JMax =[]; JMin=[]
+		# for elem in range(mesh.nelem):
+		# 	LagrangeElemCoords = points[elements[elem,:],:]
+		# 	EulerElemCoords = vpoints[elements[elem,:],:]
+
+		# 	# COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
+		# 	# MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+		# 	ParentGradientX = np.einsum('ijk,jl->kil',MainData.Domain.Jm,LagrangeElemCoords)
+		# 	# MAPPING TENSOR [\partial\vec{x}/ \partial\vec{\varepsilon} (ndim x ndim)]
+		# 	ParentGradientx = np.einsum('ijk,jl->kil',MainData.Domain.Jm,EulerElemCoords)
+		# 	# MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
+		# 	MaterialGradient = np.einsum('ijk,kli->ijl',la.inv(ParentGradientX),MainData.Domain.Jm)
+		# 	# DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
+		# 	F = np.einsum('ij,kli->kjl',EulerElemCoords,MaterialGradient)
+		# 	# JACOBIAN OF DEFORMATION GRADIENT TENSOR
+		# 	detF = np.abs(np.linalg.det(F))
+		# 	# COFACTOR OF DEFORMATION GRADIENT TENSOR
+		# 	H = np.einsum('ijk,k->ijk',np.linalg.inv(F).T,detF)
+
+		# 	# FIND JACOBIAN OF SPATIAL GRADIENT
+		# 	# USING ISOPARAMETRIC
+		# 	Jacobian = np.abs(np.linalg.det(ParentGradientx))
+		# 	# Jacobian = np.abs(np.linalg.det(ParentGradientX))
+		# 	# USING DETEERMINANT OF DEFORMATION GRADIENT TENSOR
+		# 	# Jacobian = detF
+		# 	# print Jacobian
+		# 	# USING INVARIANT F:F
+		# 	# xx = np.einsum('kij,lij->kl',F,F)
+		# 	# Jacobian = np.sqrt(np.einsum('kij,lij->k',F,F))
+		# 	# USING INVARIANT H:H
+		# 	# Jacobian = np.sqrt(np.einsum('kij,lij->k',H,H))
+		# 	# print xx
+		# 	# print Jacobian.shape
+
+		# 	# from Core.Supplementary.Tensors import makezero
+		# 	# if elem==mesh.nelem-1:
+		# 		# print ParentGradientx[0,:,:]
+		# 		# print makezero(LagrangeElemCoords)
+		# 		# print makezero(EulerElemCoords)
+		# 		# print ParentGradientx.shape
+		# 		# print F[:,:,:]
+
+		# 	# FIND MIN AND MAX VALUES
+		# 	JMin = np.min(Jacobian); JMax = np.max(Jacobian)
+
+		# 		# MainData.ScaledJacobian[elem] = 1.0*JMin/JMax
+		# 		# MainData.ScaledJacobian = np.append(MainData.ScaledJacobian,1.0*JMin/JMax)
+		# 		# MainData.ScaledJacobianElem = np.append(MainData.ScaledJacobianElem,elem)	
+
+		# 	MainData.ScaledJacobian[elem] = 1.0*JMin/JMax
+
+		# print 'Minimum ScaledJacobian value is', np.min(MainData.ScaledJacobian), \
+		# 'corresponding to element', np.where(np.min(MainData.ScaledJacobian)==MainData.ScaledJacobian)[0][0]
+
+
+		# if show_plot == True:
+
+		# 	import matplotlib.pyplot as plt
+				
+		# 	fig = plt.figure()
+		# 	# # plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),MainData.ScaledJacobian,width=1.,color='#FE6F5E',alpha=0.8)
+
+		# 	plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),MainData.ScaledJacobian,width=1.,alpha=0.4)
+		# 	plt.xlabel(r'$Elements$',fontsize=18)
+		# 	plt.ylabel(r'$Scaled\, Jacobian$',fontsize=18)
+
+		# 	# plt.bar(np.linspace(0,MainData.ScaledJacobianElem.shape[0]-1,MainData.ScaledJacobianElem.shape[0]),MainData.ScaledJacobian,width=1.,alpha=0.4)
+		# 	# plt.xlabel(r'$Elements$',fontsize=18)
+		# 	# plt.ylabel(r'$Scaled\, Jacobian$',fontsize=18)
+
+		# # plt.savefig('/home/roman/Desktop/DumpReport/scaled_jacobian_312_'+MainData.AnalysisType+'_p'+str(MainData.C)+'.eps', format='eps', dpi=1000)
