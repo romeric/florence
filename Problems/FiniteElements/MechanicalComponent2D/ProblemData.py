@@ -8,26 +8,26 @@ def ProblemData(MainData):
 	MainData.Fields = 'Mechanics'	
 	MainData.Formulation = 'DisplacementApproach'
 	MainData.Analysis = 'Static'
-	# MainData.AnalysisType = 'Linear'
-	MainData.AnalysisType = 'Nonlinear'
+	MainData.AnalysisType = 'Linear'
+	# MainData.AnalysisType = 'Nonlinear'
 
 	# MATERIAL INPUT DATA 
 	# MainData.MaterialArgs.Type = 'LinearModel'
 	# MainData.MaterialArgs.Type = 'IncrementalLinearElastic'
-	# MainData.MaterialArgs.Type = 'IncrementallyLinearisedNeoHookean'
+	MainData.MaterialArgs.Type = 'IncrementallyLinearisedNeoHookean'
 	# MainData.MaterialArgs.Type = 'NearlyIncompressibleNeoHookean'
 	# MainData.MaterialArgs.Type = 'NeoHookean_1'
-	MainData.MaterialArgs.Type = 'NeoHookean_2'
+	# MainData.MaterialArgs.Type = 'NeoHookean_2'
 	# MainData.MaterialArgs.Type = 'MooneyRivlin'
 	# MainData.MaterialArgs.Type = 'NearlyIncompressibleMooneyRivlin'
 	# MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin' 
 
-	MainData.MaterialArgs.E  = 1.0e5
-	MainData.MaterialArgs.nu = 0.35
+	# MainData.MaterialArgs.E  = 1.0e5
+	# MainData.MaterialArgs.nu = 0.35
 
-	# MainData.MaterialArgs.E = MainData.E 
-	# MainData.MaterialArgs.nu = MainData.nu
-	# print 'Poisson ratio is:', MainData.MaterialArgs.nu
+	MainData.MaterialArgs.E = MainData.E 
+	MainData.MaterialArgs.nu = MainData.nu
+	print 'Poisson ratio is:', MainData.MaterialArgs.nu
 
 
 	E = MainData.MaterialArgs.E

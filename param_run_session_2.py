@@ -59,7 +59,7 @@ if __name__ == '__main__':
 		# nu = np.linspace(0.01,0.495,2)
 		E = np.array([1e05])
 		p = [2,3,4,5,6]
-		# p = [2]
+		# p = [6]
 		 
 
 		Results = {'PolynomialDegrees':p,'PoissonsRatios':nu,'Youngs_Modulus':E}
@@ -88,8 +88,8 @@ if __name__ == '__main__':
 		Results['MaterialModel'] = MainData.MaterialArgs.Type
 		# print Results['ScaledJacobian']
 
-		# savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'_FeketeSpacing.mat',Results)
-		savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'_Orthogonal.mat',Results)
+		savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'_FeketeSpacing.mat',Results)
+		# savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'_Orthogonal.mat',Results)
 		# savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'_EqualSpacing.mat',Results)
 		# savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'.mat',Results)
 		# savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'2.mat',Results)

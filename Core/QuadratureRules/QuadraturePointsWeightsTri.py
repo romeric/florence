@@ -1,11 +1,14 @@
 import numpy as np
 from NumericIntegrator import GaussQuadrature
+import os
 
 def QuadraturePointsWeightsTri(C,Opt=1):
 
 	# Opt IS FOR TYPE OF QUADTRATURE
-	# Opt=1 IS FOR OPTIMUM QUADRATURE TECHNIQUE (DEFAULT)
 	# Opt=0 IS FOR GAUSSIAN QUADRATURE TECHNIQUE
+	# Opt=1 IS FOR OPTIMUM QUADRATURE (WILLIAM-SHUNNS) TECHNIQUE (DEFAULT)
+	# Opt=2 IS FOR SYMMETRIC OPTIMUM QUADRATURE (WITHERDEN-VINCENT) TECHNIQUE 
+	# Opt=3 IS FOR OPTIMUM QUADRATURE (WILLIAM-SHUNNS) TECHNIQUE (ERRORNEOUS) 
 
 	zw = []
 
@@ -27,13 +30,41 @@ def QuadraturePointsWeightsTri(C,Opt=1):
 				counter +=1
 
 	elif Opt==1:
+		path = os.path.dirname(os.path.realpath(__file__))
+		path += '/Tables/tri/'
+		p = C+1
+
+		d = 0
+		if p==2:
+			d = 4
+		elif p==3:
+			d = 7
+		elif p==4: 
+			d = 8
+		elif p==5:
+			d = 10
+		elif p==6:
+			d = 12
+		elif p==7:
+			d = 14
+
+		if d==0:
+			raise ValueError('Quadrature rule does not exist. Try QuadratureOpt = 3 for more points')
+		
+		for i in os.listdir(path):
+			if 'williams-shunn-n' in i:
+				if 'd'+str(d) in i:
+					zw = np.loadtxt(path+i)
+
+
+	elif Opt==3:
 		# AVOID INACCURATE QUADRATURE POINTS 
-		# if C==4:
-		# 	C = 6
-		# if C==5:
-		# 	C = 7 # careful
-		# if C==6:
-		# 	C = 11
+		if C==4:
+			C = 6
+		if C==5:
+			C = 7 # careful
+		if C==6:
+			C = 11
 
 		if C==0:
 			zw = np.array([
@@ -52,7 +83,6 @@ def QuadraturePointsWeightsTri(C,Opt=1):
 				[-0.600000000000000,  0.200000000000000 , 1.041666666666667],
 				[0.200000000000000 , -0.600000000000000 , 1.041666666666667]
 				])
-				# 1.125000000000000 appears as -1.125000000000000 in the book
 		elif C==3:
 			zw = np.array([
 				[-0.108103018168070,  -0.108103018168070,  0.446763179356022],
@@ -726,6 +756,6 @@ def QuadraturePointsWeightsTri(C,Opt=1):
 				])
 
 	else:
-		raise ValueError('Unknown option for quadrature rule. Opt must be either 0 or 1')
+		raise ValueError('Unknown option for quadrature rule. Opt must be either 0, 1, 2 or 3')
 
 	return zw

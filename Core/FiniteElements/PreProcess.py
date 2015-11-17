@@ -1,8 +1,7 @@
 import Core.MaterialLibrary as MatLib 
 from Core.FiniteElements.ElementalMatrices.KinematicMeasures import *
 from Core.MeshGeneration.SalomeMeshReader import ReadMesh
-from Core.QuadratureRules import GaussQuadrature, QuadraturePointsWeightsTet, QuadraturePointsWeightsTri
-from Core.FiniteElements.GetBases import *
+from Core.FiniteElements.GetBasesAtInegrationPoints import *
 import Core.Formulations.DisplacementElectricPotentialApproach as DEPB
 import Core.Formulations.DisplacementApproach as DB
 from Core import Mesh
@@ -197,105 +196,25 @@ def PreProcess(MainData,Pr,pwd):
 	############################################################################
 
 
-	# COMPUTING BASES FUNCTIONS AT ALL INTEGRATION POINTS
-	############################################################################
-	# GET QUADRATURE POINTS AND WEIGHTS
-	z=[]; w=[]; 
-	QuadratureOpt=1 	# OPTION FOR QUADRATURE TECHNIQUE FOR TRIS AND TETS
+	# COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR ALL ELEMENTAL INTEGRATON
+	QuadratureOpt = 3 	# OPTION FOR QUADRATURE TECHNIQUE FOR TRIS AND TETS
+	MainData.Domain, MainData.Boundary, MainData.Quadrature = GetBasesAtInegrationPoints(MainData.C,
+		(MainData.C+1),QuadratureOpt,MainData.MeshInfo.MeshType)
+	# SEPARATELY COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR POST-PROCESSING
+	# E.G. FOR COMPUTATION OF SCALED JACOBIAN NOTE THAT THIS SHOULD ONLY BE USED FOR POST PROCESSING
+	# FOR ELEMENTAL INTEGRATION ALWAYS USE DOMIAN, BOUNDARY AND QUADRATURE AND NOT POSTDOMAIN, 
+	# POSTBOUNDARY ETC
+	MainData.PostDomain, MainData.PostBoundary, MainData.PostQuadrature = GetBasesAtInegrationPoints(MainData.C,
+		2*(MainData.C),QuadratureOpt,MainData.MeshInfo.MeshType)
 
+	# QuadratureOpt = 3 	# OPTION FOR QUADRATURE TECHNIQUE FOR TRIS AND TETS
+	# MainData.Domain, MainData.Boundary, MainData.Quadrature = GetBasesAtInegrationPoints(MainData.C,
+	# 	(MainData.C+1),QuadratureOpt,MainData.MeshInfo.MeshType)
+	# MainData.PostDomain, MainData.PostBoundary, MainData.PostQuadrature = GetBasesAtInegrationPoints(MainData.C,
+	# 	2*(MainData.C),QuadratureOpt,MainData.MeshInfo.MeshType)
 
-	if MainData.MeshInfo.MeshType == 'quad' or MainData.MeshInfo.MeshType == 'hex':
-		z, w = GaussQuadrature(MainData.C+MainData.norder,-1.,1.)
-	elif MainData.MeshInfo.MeshType == 'tet':
-		zw = QuadraturePointsWeightsTet.QuadraturePointsWeightsTet(MainData.C+1,QuadratureOpt)
-		z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]; #w = np.repeat(w,MainData.ndim) 
-	elif MainData.MeshInfo.MeshType == 'tri':
-		zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(MainData.C+1,QuadratureOpt) # PUT C+1 OR HIGHER
-		# zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(MainData.C+1,QuadratureOpt) # PUT C+4 OR HIGHER
-		z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
-
-	class Quadrature(object):
-		"""Quadrature rules"""
-		points = z
-		weights = w
-		Opt = QuadratureOpt
-
-	if MainData.ndim == 3:
-		# GET BASES AT ALL INTEGRATION POINTS (VOLUME)
-		Domain = GetBases3D(MainData.C,Quadrature,MainData.MeshInfo.MeshType)
-		# GET BOUNDARY BASES AT ALL INTEGRATION POINTS (SURFACE)
-		# Boundary = GetBasesBoundary(MainData.C,z,MainData.ndim)
-	elif MainData.ndim == 2: 
-		# Get basis at all integration points (surface)
-		Domain = GetBases(MainData.C,Quadrature,MainData.MeshInfo.MeshType)
-		# GET BOUNDARY BASES AT ALL INTEGRATION POINTS (LINE)
-		# Boundary = GetBasesBoundary(MainData.C,z,MainData.ndim)
-	Boundary = []
-
-	############################################################################
-	# from scipy.io import savemat
-	# Dict = {'GaussPoints':z,'GaussWeights':w,'Bases':Domain.Bases,'gBasesx':Domain.gBasesx, 'gBasesy':Domain.gBasesy}
-	# savemat('/home/roman/Desktop/Info_P'+str(MainData.C+1),Dict)
-	# exit(0)
-
-
-	# COMPUTING GRADIENTS AND JACOBIAN A PRIORI FOR ALL INTEGRATION POINTS
-	############################################################################
-	Domain.Jm = []; Domain.AllGauss=[]
-	if MainData.MeshInfo.MeshType == 'hex':
-		Domain.Jm = np.zeros((MainData.ndim,Domain.Bases.shape[0],w.shape[0]**MainData.ndim))	
-		Domain.AllGauss = np.zeros((w.shape[0]**MainData.ndim,1))	
-		counter = 0
-		for g1 in range(0,w.shape[0]):
-			for g2 in range(0,w.shape[0]): 
-				for g3 in range(0,w.shape[0]):
-					# Gradient Tensor in Parent Element [\nabla_\varepsilon (N)]
-					Domain.Jm[0,:,counter] = Domain.gBasesx[:,counter]
-					Domain.Jm[1,:,counter] = Domain.gBasesy[:,counter]
-					Domain.Jm[2,:,counter] = Domain.gBasesz[:,counter]
-
-					Domain.AllGauss[counter,0] = w[g1]*w[g2]*w[g3]
-
-					counter +=1
-
-	elif MainData.MeshInfo.MeshType == 'quad':
-		Domain.Jm = np.zeros((MainData.ndim,Domain.Bases.shape[0],w.shape[0]**MainData.ndim))	
-		Domain.AllGauss = np.zeros((w.shape[0]**MainData.ndim,1))	
-		counter = 0
-		for g1 in range(0,w.shape[0]):
-			for g2 in range(0,w.shape[0]): 
-				# Gradient Tensor in Parent Element [\nabla_\varepsilon (N)]
-				Domain.Jm[0,:,counter] = Domain.gBasesx[:,counter]
-				Domain.Jm[1,:,counter] = Domain.gBasesy[:,counter]
-
-				Domain.AllGauss[counter,0] = w[g1]*w[g2]
-				counter +=1
-
-	elif MainData.MeshInfo.MeshType == 'tet':
-		Domain.Jm = np.zeros((MainData.ndim,Domain.Bases.shape[0],w.shape[0]))	
-		Domain.AllGauss = np.zeros((w.shape[0],1))	
-		for counter in range(0,w.shape[0]):
-			# Gradient Tensor in Parent Element [\nabla_\varepsilon (N)]
-			Domain.Jm[0,:,counter] = Domain.gBasesx[:,counter]
-			Domain.Jm[1,:,counter] = Domain.gBasesy[:,counter]
-			Domain.Jm[2,:,counter] = Domain.gBasesz[:,counter]
-
-			Domain.AllGauss[counter,0] = w[counter]
-
-	elif MainData.MeshInfo.MeshType == 'tri':
-		Domain.Jm = [];  Domain.AllGauss = []
-
-		Domain.Jm = np.zeros((MainData.ndim,Domain.Bases.shape[0],w.shape[0]))	
-		Domain.AllGauss = np.zeros((w.shape[0],1))	
-		for counter in range(0,w.shape[0]):
-			# Gradient Tensor in Parent Element [\nabla_\varepsilon (N)]
-			Domain.Jm[0,:,counter] = Domain.gBasesx[:,counter]
-			Domain.Jm[1,:,counter] = Domain.gBasesy[:,counter]
-
-			Domain.AllGauss[counter,0] = w[counter]
-
-	MainData.Domain = Domain
-	MainData.Boundary = Boundary
+	# MainData.Domain = Domain
+	# MainData.Boundary = Boundary
 	############################################################################
 
 
@@ -322,23 +241,23 @@ def PreProcess(MainData,Pr,pwd):
 		else:
 			raise KeyError('Hessian size (H_Voigt) size not knownjul')
 
-		MainData.MaterialArgs.H_Voigt = np.zeros((Hsize,Hsize,mesh.nelem,Quadrature.weights.shape[0]),dtype=np.float64)
-		MainData.MaterialArgs.Sigma = np.zeros((MainData.ndim,MainData.ndim,mesh.nelem,Quadrature.weights.shape[0]),dtype=np.float64)
-		MainData.MaterialArgs.J = np.ones((mesh.nelem,Quadrature.weights.shape[0]),dtype=np.float64)
+		MainData.MaterialArgs.H_Voigt = np.zeros((Hsize,Hsize,mesh.nelem,MainData.Quadrature.weights.shape[0]),dtype=np.float64)
+		MainData.MaterialArgs.Sigma = np.zeros((MainData.ndim,MainData.ndim,mesh.nelem,MainData.Quadrature.weights.shape[0]),dtype=np.float64)
+		MainData.MaterialArgs.J = np.ones((mesh.nelem,MainData.Quadrature.weights.shape[0]),dtype=np.float64)
 
 		if MainData.ndim == 2:
 			H_Voigt = MainData.MaterialArgs.lamb*np.array([[1.,1.,0.],[1.,1.,0],[0.,0.,0.]]) +\
 			 			MainData.MaterialArgs.mu*np.array([[2.,0.,0.],[0.,2.,0],[0.,0.,1.]])
 
 			MainData.MaterialArgs.H_Voigt = np.tile(np.tile(H_Voigt[:,:,None],
-				mesh.nelem)[:,:,:,None],Quadrature.weights.shape[0])
+				mesh.nelem)[:,:,:,None],MainData.Quadrature.weights.shape[0])
 		else:
 			block_1 = np.zeros((6,6),dtype=np.float64); block_1[:3,:3] = np.ones((3,3))
 			block_2 = np.eye(6,6); block_2[0,0],block_2[1,1],block_2[2,2]=2.,2.,2.
 			H_Voigt = MainData.MaterialArgs.lamb*block_1 + MainData.MaterialArgs.mu*block_2
 			
 			MainData.MaterialArgs.H_Voigt = np.tile(np.tile(H_Voigt[:,:,None],
-				mesh.nelem)[:,:,:,None],Quadrature.weights.shape[0])
+				mesh.nelem)[:,:,:,None],MainData.Quadrature.weights.shape[0])
 
 
 	
@@ -452,16 +371,16 @@ def PreProcess(MainData,Pr,pwd):
 
 	# MINIMAL MAINDATA VARIABLES
 	############################################################################
-	class Minimal(object):
-		"""docstring for Minimal"""
-		def __init__(self, arg):
-			super(Minimal, self).__init__()
-			self.arg = arg
-		C = MainData.C
-		nvar = MainData.nvar
-		ndim = MainData.ndim
+	# class Minimal(object):
+	# 	"""docstring for Minimal"""
+	# 	def __init__(self, arg):
+	# 		super(Minimal, self).__init__()
+	# 		self.arg = arg
+	# 	C = MainData.C
+	# 	nvar = MainData.nvar
+	# 	ndim = MainData.ndim
 
-	MainData.Minimal = Minimal
+	# MainData.Minimal = Minimal
 	#############################################################################
 
 
@@ -479,7 +398,7 @@ def PreProcess(MainData,Pr,pwd):
 			
 			
 	# PLACE IN MAINDATA
-	MainData.Quadrature = Quadrature
+	# MainData.Quadrature = Quadrature
 
 	return mesh
 
