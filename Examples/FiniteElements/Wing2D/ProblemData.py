@@ -40,18 +40,17 @@ def ProblemData(MainData):
 
 
 	ProblemPath = os.path.dirname(os.path.realpath(__file__))
-	class MeshInfo(object):
-		MeshType = 'tri'
-		Reader = 'Read'
-		Format = 'GID'
-
-		FileName = ProblemPath + '/sd7003_Stretch25.dat'
-		# FileName = ProblemPath + '/sd7003_Stretch50.dat'
-		# FileName = ProblemPath + '/sd7003_Stretch100.dat'
-		# FileName = ProblemPath + '/sd7003_Stretch200.dat'
-		# FileName = ProblemPath + '/sd7003_Stretch400.dat'
-		# FileName = ProblemPath + '/sd7003_Stretch800.dat'
-		# FileName = ProblemPath + '/sd7003_Stretch1600.dat'
+	MainData.MeshInfo.MeshType = "tri"
+	MainData.MeshInfo.Reader = "Read"
+	MainData.MeshInfo.Format = "GID"
+	
+	MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch25.dat'
+	# MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch50.dat'
+	# MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch100.dat'
+	# MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch200.dat'
+	# MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch400.dat'
+	# MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch800.dat'
+	# MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch1600.dat'
 		
 
 

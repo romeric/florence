@@ -43,9 +43,6 @@ def ProblemData(MainData):
 
 
 		rho   = 7.5*10e-6
-		eps_1 = 1.0
-		c1    = 0.
-		c2    = 0.
 
 
 	MainData.MaterialArgs = MaterialArgs

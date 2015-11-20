@@ -48,7 +48,6 @@ def PreProcess(MainData,Pr,pwd):
 
 	if MainData.__NO_DEBUG__ is False:
 		mesh.CheckNodeNumberingTri()
-	# sys.exit()
 
 	# mesh.ReadGIDMesh("/home/roman/Dropbox/2015_HighOrderMeshing/geometriesAndMeshes/falcon/falcon_iso.dat","tet",0)
 	# mesh.ReadGIDMesh("/home/roman/Dropbox/2015_HighOrderMeshing/geometriesAndMeshes/almond/almond_H1.dat","tet",0)
@@ -56,8 +55,6 @@ def PreProcess(MainData,Pr,pwd):
 	# np.savetxt('/home/roman/Desktop/elements_falcon.dat', mesh.elements,fmt='%d',delimiter=',')
 	# np.savetxt('/home/roman/Desktop/points_falcon.dat', mesh.points,fmt='%10.9f',delimiter=',')
 
-	# np.savetxt('/home/roman/Desktop/elements_almond.dat', mesh.elements,fmt='%d',delimiter=',')
-	# np.savetxt('/home/roman/Desktop/points_almond.dat', mesh.points,fmt='%10.9f',delimiter=',')
 	
 	if 'MechanicalComponent2D' in Pr.__file__.split('/') or \
 		'Misc' in Pr.__file__.split('/'):
@@ -98,7 +95,8 @@ def PreProcess(MainData,Pr,pwd):
 	# mesh.points = np.ascontiguousarray(loadedmat['X'])
 	# mesh.elements = np.ascontiguousarray(loadedmat['T'])-1
 
-
+	# MainData.MaterialArgs().AnisotropicFibreOrientation(mesh)
+	# sys.exit(0)
 
 	# GENERATE pMESHES FOR HIGH C
 	############################################################################
@@ -131,9 +129,6 @@ def PreProcess(MainData,Pr,pwd):
 	############################################################################
 	class Path(object):
 		"""Getting directory paths"""
-		def __init__(self, arg):
-			super(Path, self).__init__()
-			self.arg = arg
 
 		TopLevel = pwd
 		Main = pwd+'/Main/FiniteElements'
@@ -200,6 +195,9 @@ def PreProcess(MainData,Pr,pwd):
 	MainData.PostDomain, MainData.PostBoundary, MainData.PostQuadrature = GetBasesAtInegrationPoints(MainData.C,
 		2*(MainData.C),QuadratureOpt,MainData.MeshInfo.MeshType)
 
+	# MainData.PostDomain, MainData.PostBoundary, MainData.PostQuadrature = GetBasesAtInegrationPoints(MainData.C,
+	# 	9,QuadratureOpt,MainData.MeshInfo.MeshType)
+	# sys.exit(0)
 
 	############################################################################
 
@@ -227,10 +225,12 @@ def PreProcess(MainData,Pr,pwd):
 		else:
 			raise KeyError('Hessian size (H_Voigt) size not knownjul')
 
-		MainData.MaterialArgs.H_Voigt = np.zeros((Hsize,Hsize,mesh.nelem,MainData.Quadrature.weights.shape[0]),dtype=np.float64)
+		MainData.MaterialArgs.H_Voigt = np.zeros((Hsize,Hsize,mesh.nelem,
+			MainData.Quadrature.weights.shape[0]),dtype=np.float64)
 		MainData.MaterialArgs.Sigma = np.zeros((MainData.ndim,MainData.ndim,mesh.nelem,
 			MainData.Quadrature.weights.shape[0]),dtype=np.float64)
-		MainData.MaterialArgs.J = np.ones((mesh.nelem,MainData.Quadrature.weights.shape[0]),dtype=np.float64)
+		MainData.MaterialArgs.J = np.ones((mesh.nelem,
+			MainData.Quadrature.weights.shape[0]),dtype=np.float64)
 
 		if MainData.ndim == 2:
 			H_Voigt = MainData.MaterialArgs.lamb*np.array([[1.,1.,0.],[1.,1.,0],[0.,0.,0.]]) +\
@@ -274,16 +274,20 @@ def PreProcess(MainData,Pr,pwd):
 	##############################################################################
 
 	# GET THE MEHTOD NAME FOR THE RIGHT MATERIAL MODEL
-	MaterialFuncName = getattr(MatLib,MainData.MaterialArgs.Type)
-	# INITIATE THE FUNCTIONS FROM THIS MEHTOD
-	MainData.nvar, MainData.MaterialModelName = MaterialFuncName(MainData.ndim).Get()
-	MainData.Hessian = MaterialFuncName(MainData.ndim).Hessian
-	MainData.CauchyStress = MaterialFuncName(MainData.ndim).CauchyStress
+	MaterialFuncName = getattr(MatLib,MainData.MaterialArgs.Type,None)
+	if MaterialFuncName is not None:
+		# INITIATE THE FUNCTIONS FROM THIS MEHTOD
+		MainData.nvar, MainData.MaterialModelName = MaterialFuncName(MainData.ndim).Get()
+		MainData.Hessian = MaterialFuncName(MainData.ndim).Hessian
+		MainData.CauchyStress = MaterialFuncName(MainData.ndim).CauchyStress
 
-	# INITIALISE
-	StrainTensors = KinematicMeasures(np.asarray([np.eye(MainData.ndim,MainData.ndim)]*\
-		MainData.Domain.AllGauss.shape[0]),MainData.AnalysisType)
-	MaterialFuncName(MainData.ndim).Hessian(MainData.MaterialArgs,MainData.ndim,StrainTensors,elem=0,gcounter=0)
+		# INITIALISE
+		StrainTensors = KinematicMeasures(np.asarray([np.eye(MainData.ndim,MainData.ndim)]*\
+			MainData.Domain.AllGauss.shape[0]),MainData.AnalysisType)
+		MaterialFuncName(MainData.ndim).Hessian(MainData.MaterialArgs,
+			MainData.ndim,StrainTensors,elem=0,gcounter=0)
+	else:
+		raise AttributeError('Material model with name '+MainData.MaterialArgs.Type + ' not found')
 
 	##############################################################################
 
@@ -357,21 +361,6 @@ def PreProcess(MainData,Pr,pwd):
 
 
 
-	# MINIMAL MAINDATA VARIABLES
-	############################################################################
-	# class Minimal(object):
-	# 	"""docstring for Minimal"""
-	# 	def __init__(self, arg):
-	# 		super(Minimal, self).__init__()
-	# 		self.arg = arg
-	# 	C = MainData.C
-	# 	nvar = MainData.nvar
-	# 	ndim = MainData.ndim
-
-	# MainData.Minimal = Minimal
-	#############################################################################
-
-
 
 	# DICTIONARY OF SAVED VARIABLES
 	#############################################################################
@@ -383,10 +372,7 @@ def PreProcess(MainData,Pr,pwd):
 
 	#############################################################################
 
-			
-			
-	# PLACE IN MAINDATA
-	# MainData.Quadrature = Quadrature
+
 
 	return mesh
 

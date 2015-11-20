@@ -50,7 +50,7 @@ def GetBasesAtInegrationPoints(C,norder,QuadratureOpt,MeshType):
 	############################################################################
 	# from scipy.io import savemat
 	# Dict = {'GaussPoints':z,'GaussWeights':w,'Bases':Domain.Bases,'gBasesx':Domain.gBasesx, 'gBasesy':Domain.gBasesy}
-	# savemat('/home/roman/Desktop/Info_P'+str(MainData.C+1),Dict)
+	# savemat('/home/roman/Desktop/Info_P'+str(C+1)+'_10',Dict)
 	# exit(0)
 
 
