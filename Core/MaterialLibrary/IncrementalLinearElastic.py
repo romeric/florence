@@ -14,14 +14,9 @@ class IncrementalLinearElastic(object):
 	def __init__(self, ndim):
 		super(IncrementalLinearElastic, self).__init__()
 		self.ndim = ndim
-
-	def Get(self):
-		# self.nvar = self.ndim+1
 		self.nvar = self.ndim
-		self.modelname = 'IncrementalLinearElastic'
-		return self.nvar, self.modelname
 
-	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
+	def Hessian(self,MaterialArgs,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 		# GET MATERIAL CONSTANTS
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb		

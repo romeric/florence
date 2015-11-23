@@ -7,16 +7,18 @@ from Core.Supplementary.Tensors.Tensors import *
 
 
 class NeoHookean_1(object):
-	"""docstring for NeoHookean"""
+	"""NeoHookean model with the following energy
+
+		W(C) = u/2*C:I -u*J + lambda *(J-1)**2
+
+		"""
 	def __init__(self, ndim):
 		super(NeoHookean_1, self).__init__()
 		self.ndim = ndim
-	def Get(self):
 		self.nvar = self.ndim
-		self.modelname = 'NeoHookean_1'
-		return self.nvar, self.modelname
 
-	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
+
+	def Hessian(self,MaterialArgs,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
 		I = StrainTensors['I']
@@ -26,9 +28,6 @@ class NeoHookean_1(object):
 		lamb2 = lamb*(2*detF-1.0) - mu
 
 
-		# d = np.einsum
-		# C = lamb2*d('ij,kl',I,I)+mu2*(d('ik,jl',I,I) + d('il,jk',I,I))
-		# C_Voigt = Voigt( C ,1)
 		C_Voigt = lamb2*MaterialArgs.IijIkl+mu2*MaterialArgs.IikIjl
 
 		MaterialArgs.H_VoigtSize = C_Voigt.shape[0]

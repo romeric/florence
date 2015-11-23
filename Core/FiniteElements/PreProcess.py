@@ -277,7 +277,12 @@ def PreProcess(MainData,Pr,pwd):
 	MaterialFuncName = getattr(MatLib,MainData.MaterialArgs.Type,None)
 	if MaterialFuncName is not None:
 		# INITIATE THE FUNCTIONS FROM THIS MEHTOD
-		MainData.nvar, MainData.MaterialModelName = MaterialFuncName(MainData.ndim).Get()
+
+		# MainData.nvar, MainData.MaterialModelName = MaterialFuncName(MainData.ndim).Get()
+
+		MaterialInstance = MaterialFuncName(MainData.ndim)
+		MainData.nvar, MainData.MaterialModelName = MaterialInstance.nvar, \
+													type(MaterialInstance).__name__
 		MainData.Hessian = MaterialFuncName(MainData.ndim).Hessian
 		MainData.CauchyStress = MaterialFuncName(MainData.ndim).CauchyStress
 
@@ -285,10 +290,12 @@ def PreProcess(MainData,Pr,pwd):
 		StrainTensors = KinematicMeasures(np.asarray([np.eye(MainData.ndim,MainData.ndim)]*\
 			MainData.Domain.AllGauss.shape[0]),MainData.AnalysisType)
 		MaterialFuncName(MainData.ndim).Hessian(MainData.MaterialArgs,
-			MainData.ndim,StrainTensors,elem=0,gcounter=0)
+			StrainTensors,elem=0,gcounter=0)
 	else:
 		raise AttributeError('Material model with name '+MainData.MaterialArgs.Type + ' not found')
 
+	# print type(MainData.nvar )
+	# exit(0)
 	##############################################################################
 
 

@@ -14,16 +14,21 @@ def ProblemData(MainData):
 	# MATERIAL INPUT DATA 
 	# MainData.MaterialArgs.Type = 'LinearModel'
 	# MainData.MaterialArgs.Type = 'IncrementalLinearElastic'
+	# MainData.MaterialArgs.Type = 'TranservselyIsotropicLinearElastic'
 	# MainData.MaterialArgs.Type = 'IncrementallyLinearisedNeoHookean'
 	# MainData.MaterialArgs.Type = 'NearlyIncompressibleNeoHookean'
 	# MainData.MaterialArgs.Type = 'NeoHookean_1'
 	# MainData.MaterialArgs.Type = 'NeoHookean_2'
 	# MainData.MaterialArgs.Type = 'MooneyRivlin'
 	# MainData.MaterialArgs.Type = 'NearlyIncompressibleMooneyRivlin'
-	MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin' 
+	# MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin' 
+	MainData.MaterialArgs.Type = 'TranservselyIsotropicHyperelastic'
 
 	MainData.MaterialArgs.E  = 1.0e5
 	MainData.MaterialArgs.nu = 0.35
+
+	MainData.MaterialArgs.E_A = 2.5*MainData.MaterialArgs.E
+
 
 	# MainData.MaterialArgs.E = MainData.E 
 	# MainData.MaterialArgs.nu = MainData.nu
@@ -32,6 +37,9 @@ def ProblemData(MainData):
 
 	E = MainData.MaterialArgs.E
 	nu = MainData.MaterialArgs.nu
+	E_A = MainData.MaterialArgs.E_A
+
+	MainData.MaterialArgs.G_A = (E*(E_A*nu - E_A + E_A*nu**2 + E*nu**2))/(2*(nu + 1)*(2*E*nu**2 + E_A*nu - E_A))
 	# GET LAME CONSTANTS
 	MainData.MaterialArgs.lamb = E*nu/(1.+nu)/(1.-2.0*nu)
 	MainData.MaterialArgs.mu = E/2./(1+nu)

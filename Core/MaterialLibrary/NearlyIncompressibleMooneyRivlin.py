@@ -21,18 +21,13 @@ class NearlyIncompressibleMooneyRivlin(object):
 	def __init__(self, ndim):
 		super(NearlyIncompressibleMooneyRivlin, self).__init__()
 		self.ndim = ndim
-
-	def Get(self):
 		self.nvar = self.ndim
-		self.modelname = 'NearlyIncompressibleMooneyRivlin'
-		return self.nvar, self.modelname
 
-	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
+	def Hessian(self,MaterialArgs,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 
 		einsum = np.einsum
 		sqrt = np.sqrt
 
-		# Get material constants (5 in this case)
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
 
@@ -73,10 +68,10 @@ class NearlyIncompressibleMooneyRivlin(object):
 		# 	3.*beta*J**(-3)*trace(g)**(-1./2.)*( einsum('ij,kl',g,g) ) 	+ \
 		# 	kappa*(2.0*J-1)*einsum('ij,kl',I,I) - kappa*(J-1)*(einsum('ik,jl',I,I)+einsum('il,jk',I,I))			# #
 
-		if I.shape[0]==2:
+		if self.ndim == 2:
 			trb = trace(b)+1
 			trg = trace(g)+J**2
-		elif I.shape[0]==3:
+		elif self.ndim == 3:
 			trb = trace(b)
 			trg = trace(g)
 
@@ -123,10 +118,10 @@ class NearlyIncompressibleMooneyRivlin(object):
 		# 		beta*J**(-3)*trace(g)**(3./2.)*I - 3*beta*J**(-3)*trace(g)**(1./2.)*g + \
 		# 		+(kappa*(J-1.0))*I #####
 
-		if I.shape[0]==2:
+		if self.ndim == 2:
 			trb = trace(b)+1
 			trg = trace(g)+J**2
-		elif I.shape[0]==3:
+		elif self.ndim == 3:
 			trb = trace(b)
 			trg = trace(g)
 

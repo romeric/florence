@@ -43,22 +43,6 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 		# COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
 		detJ = np.einsum('i,i->i',MainData.Domain.AllGauss[:,0],np.abs(la.det(ParentGradientX)))
 
-	# if elem==0:
-		# print np.einsum('ijk,jl->kil',MainData.Domain.Jm,EulerELemCoords)
-		# print np.einsum('ijk,jl->kil',MainData.Domain.Jm,LagrangeElemCoords)
-		# np.set_printoptions(precision=14)
-		# print EulerELemCoords
-		# print 
-		# print LagrangeElemCoords
-		# print StrainTensors['J']
-		# print ParentGradientx[0,:,:]
-		# print SpatialGradient[0,:,:]
-		# print detJ
-		# print ParentGradientX[0,:,:]
-		# print LagrangeElemCoords
-		# print MainData.Domain.Jm.shape
-		# print ParentGradientX.shape
-		# print MaterialGradient[0,:2,0]
 
 	# LOOP OVER GAUSS POINTS
 	for counter in range(MainData.Domain.AllGauss.shape[0]): 
@@ -81,7 +65,7 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 			CauchyStressTensor, LastCauchyStressTensor = MainData.CauchyStress(MainData.MaterialArgs,StrainTensors,ElectricFieldx,elem,counter)
 
 		# COMPUTE THE HESSIAN AT THIS GAUSS POINT
-		H_Voigt = MainData.Hessian(MainData.MaterialArgs,ndim,StrainTensors,ElectricFieldx,elem,counter)
+		H_Voigt = MainData.Hessian(MainData.MaterialArgs,StrainTensors,ElectricFieldx,elem,counter)
 		# COMPUTE THE TANGENT STIFFNESS MATRIX
 		BDB_1, t = MainData().ConstitutiveStiffnessIntegrand(B,nvar,ndim,MainData.AnalysisType,
 			MainData.Prestress,SpatialGradient[counter,:,:],CauchyStressTensor,ElectricDisplacementx,H_Voigt)
@@ -152,7 +136,7 @@ def Stiffness_NonVectorised(MainData,LagrangeElemCoords,EulerELemCoords,Electric
 
 	# LOOP OVER GAUSS POINTS
 	# for counter in range(0,MainData.Domain.AllGauss.shape[0]):
-	for counter in xrange(MainData.Domain.AllGauss.shape[0]): 
+	for counter in range(MainData.Domain.AllGauss.shape[0]): 
 		# GRADIENT TENSOR IN PARENT ELEMENT [\nabla_\varepsilon (N)]
 		Jm = MainData.Domain.Jm[:,:,counter]
 		# MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
@@ -223,7 +207,6 @@ def Stiffness_NonVectorised(MainData,LagrangeElemCoords,EulerELemCoords,Electric
 			if MainData.AnalysisType == 'Nonlinear' or MainData.Prestress:
 				# INTEGRATE TRACTION FORCE
 				tractionforce += t*detJ
-
 
 
 

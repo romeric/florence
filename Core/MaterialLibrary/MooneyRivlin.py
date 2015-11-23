@@ -19,13 +19,9 @@ class MooneyRivlin(object):
 	def __init__(self, ndim):
 		super(MooneyRivlin, self).__init__()
 		self.ndim = ndim
-
-	def Get(self):
 		self.nvar = self.ndim
-		self.modelname = 'MooneyRivlin'
-		return self.nvar, self.modelname
 
-	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
+	def Hessian(self,MaterialArgs,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 
 
 		# GET MATERIAL CONSTANTS 
@@ -49,7 +45,7 @@ class MooneyRivlin(object):
 		H_Voigt = 2.0*beta/J*( 2.0*einsum('ij,kl',b,b) - einsum('ik,jl',b,b) - einsum('il,jk',b,b) ) + \
 			(lamb*(2.0*J-1.0) -4.0*beta)*einsum('ij,kl',I,I) - \
 			(lamb*(J-1.0) -4.0*beta -2.0*alpha/J)*( einsum('ik,jl',I,I) + einsum('il,jk',I,I) )
-			
+
 		H_Voigt = Voigt(H_Voigt,1) 
 
 		MaterialArgs.H_VoigtSize = H_Voigt.shape[0]
@@ -70,9 +66,9 @@ class MooneyRivlin(object):
 		alpha = mu/4.0
 		beta = mu/4.0
 
-		if I.shape[0]==3:
+		if self.ndim == 3:
 			trb = trace(b)
-		elif I.shape[0]==2:
+		elif self.ndim == 2:
 			trb = trace(b) + 1
 
 		# stress = 2.0*alpha/J*b+2.0*beta/J*(trace(b)*b - np.dot(b,b)) + (lamb*(J-1.0)-4.0*beta-2.0*alpha/J)*I 
