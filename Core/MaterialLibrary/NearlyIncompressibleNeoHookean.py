@@ -14,17 +14,21 @@ from Core.Supplementary.Tensors.Tensors import *
 
 class NearlyIncompressibleNeoHookean(object):
 	"""	A nearly incompressible neo-Hookean material model whose energy functional is given by:
-		W = mu/2*C:I + k/2*(J-1)**2
+
+				W = mu/2*C:I + k/2*(J-1)**2
+
+			This is an incorrect internal energy for incompressibility as C:I is not pure 
+			deviatoric. It is missing a factor J^{-2/3}
+
+
 		"""
+
 	def __init__(self, ndim):
 		super(NearlyIncompressibleNeoHookean, self).__init__()
 		self.ndim = ndim
-	def Get(self):
 		self.nvar = self.ndim
-		self.modelname = 'NearlyIncompressibleNeoHookean'
-		return self.nvar, self.modelname
 
-	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
+	def Hessian(self,MaterialArgs,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 
 		# Using Einstein summation (using numpy einsum call)
 		d = np.einsum

@@ -14,16 +14,12 @@ class LinearModel(object):
 	def __init__(self, ndim):
 		super(LinearModel, self).__init__()
 		self.ndim = ndim
-		
-	def Get(self):
-		# self.nvar = self.ndim+1
 		self.nvar = self.ndim
-		self.modelname = 'LinearModel'
-		return self.nvar, self.modelname
+		
 
-	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
+	def Hessian(self,MaterialArgs,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 
-		#---------------------------------------------------------------------------------------------------------#
+		#------------------------------------------------------------------------------------#
 		# GET MATERIAL CONSTANTS
 		# mu = MaterialArgs.mu
 		# lamb = MaterialArgs.lamb
@@ -36,7 +32,7 @@ class LinearModel(object):
 		# MaterialArgs.H_VoigtSize = H_Voigt.shape[0]
 
 		# return H_Voigt
-		#---------------------------------------------------------------------------------------------------------#
+		#------------------------------------------------------------------------------------#
 		
 		MaterialArgs.H_VoigtSize = MaterialArgs.H_Voigt.shape[0]
 		return MaterialArgs.H_Voigt
@@ -51,6 +47,12 @@ class LinearModel(object):
 
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
+
+		# CHECK IF THIS IS NECESSARY
+		if self.ndim == 3:
+			tre = trace(strain)
+		elif self.ndim == 2:
+			tre = trace(strain) + 1
 
 		# return 2*mu*strain + lamb*np.trace(strain)*I 
 		# USE FASTER TRACE FUNCTION

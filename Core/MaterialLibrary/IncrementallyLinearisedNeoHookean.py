@@ -24,14 +24,9 @@ class IncrementallyLinearisedNeoHookean(object):
 	def __init__(self, ndim):
 		super(IncrementallyLinearisedNeoHookean, self).__init__()
 		self.ndim = ndim
-
-	def Get(self):
-		# self.nvar = self.ndim+1
 		self.nvar = self.ndim
-		self.modelname = 'IncrementallyLinearisedNeoHookean'
-		return self.nvar, self.modelname
 
-	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
+	def Hessian(self,MaterialArgs,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 
 		# GET THE JACOBIAN AND HESSIAN FROM THE PREVIOUS STEP - NOTE THAT A COPY HAS TO BE MADE
 		# H_Voigt_k = MaterialArgs.H_Voigt[:,:,elem,gcounter]
@@ -79,7 +74,7 @@ class IncrementallyLinearisedNeoHookean(object):
 		# COMPUTE THE STRESS AT THE CURRENT STEP AND STORE
 		MaterialArgs.Sigma[:,:,elem,gcounter]  = 1.0*mu/J_k*b+(lamb*(J_k-1.0)-mu/J_k)*I
 
-		# COMPUTE INCREMENTALLY LINEARISED STRESS BASED ON STRESS_K AND RETURN 
+		# COMPUTE INCREMENTALLY LINEARISED STRESS BASED ON STRESS_K AND RETURN
 		return IncrementallyLinearisedStress(Sigma_k,H_Voigt_k,I,strain,StrainTensors['Gradu'][gcounter]), Sigma_k
 		
 
