@@ -60,6 +60,9 @@ class Base(object):
 	# AnalysisType = 'Nonlinear'
 
 
+	Timer = 0
+
+
 
 
 

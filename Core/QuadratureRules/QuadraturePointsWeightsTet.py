@@ -10,8 +10,8 @@ def QuadraturePointsWeightsTet(C,Opt=1):
 
 	if Opt==0 or C>16:
 
-		# IN CASE OPT WAS CHOSEN TO BE 1
-		if Opt==1:
+		# IN CASE OPT WAS CHOSEN TO BE 3
+		if Opt==3:
 			print 'Optimal quadrature for C>16 is not available. Falling back to Gaussian quadrature'
 		
 		z1D, w1D = GaussQuadrature(C+2,-1.,1.)
@@ -27,7 +27,7 @@ def QuadraturePointsWeightsTet(C,Opt=1):
 
 					counter +=1
 
-	elif Opt==1:
+	elif Opt==3:
 		if C==0:
 			zw = np.array([
 			[ -0.500000000000000, -0.500000000000000, -0.500000000000000, 1.333333333333333 ]

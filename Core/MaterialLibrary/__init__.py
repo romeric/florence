@@ -10,7 +10,8 @@ from NearlyIncompressibleNeoHookean import *
 from MooneyRivlin import *
 from NearlyIncompressibleMooneyRivlin import *
 from AnisotropicMooneyRivlin import *
-from TranservselyIsotropicHyperelastic import *
+from TranservselyIsotropicHyperElastic import *
+from JavierTranservselyIsotropicHyperElastic import *
 # INCREMENTALLY LINEARISED MATERIAL MODELS
 from IncrementallyLinearisedNeoHookean import *
 from IncrementallyLinearisedMooneyRivlin import *

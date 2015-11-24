@@ -41,10 +41,15 @@ class MooneyRivlin(object):
 		# 	(lamb+4.0*beta+4.0*alpha/J)*d('ij,kl',I,I) + 2.0*(lamb*(J-1.0) -4.0*beta -2.0*alpha/J)*d('ij,kl',I,I) -\
 		# 	1.0*(lamb*(J-1.0) -4.0*beta -2.0*alpha/J)*(d('ik,jl',I,I)+d('il,jk',I,I)) ,1) 
 
-		# Simplified version
+		# # Simplified version
+		# H_Voigt = 2.0*beta/J*( 2.0*einsum('ij,kl',b,b) - einsum('ik,jl',b,b) - einsum('il,jk',b,b) ) + \
+		# 	(lamb*(2.0*J-1.0) -4.0*beta)*einsum('ij,kl',I,I) - \
+		# 	(lamb*(J-1.0) -4.0*beta -2.0*alpha/J)*( einsum('ik,jl',I,I) + einsum('il,jk',I,I) )
+
+		# Further simplified version
 		H_Voigt = 2.0*beta/J*( 2.0*einsum('ij,kl',b,b) - einsum('ik,jl',b,b) - einsum('il,jk',b,b) ) + \
-			(lamb*(2.0*J-1.0) -4.0*beta)*einsum('ij,kl',I,I) - \
-			(lamb*(J-1.0) -4.0*beta -2.0*alpha/J)*( einsum('ik,jl',I,I) + einsum('il,jk',I,I) )
+			(lamb*(2.0*J-1.0) -4.0*beta)*MaterialArgs.Iijkl - \
+			(lamb*(J-1.0) -4.0*beta -2.0*alpha/J)*MaterialArgs.Iikjl
 
 		H_Voigt = Voigt(H_Voigt,1) 
 

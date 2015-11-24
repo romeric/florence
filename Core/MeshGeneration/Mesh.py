@@ -738,8 +738,6 @@ class Mesh(object):
 			raise NotImplementedError("SimplePlot for "+self.element_type+" not implemented yet")
 
 		plt.axis("equal")
-		# plt.axis("off")
-		# plt.savefig('/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/initial_plots/mech2d_original_mesh.eps',format='eps', dpi=1000)
 		plt.show()
 
 

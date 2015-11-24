@@ -44,7 +44,7 @@ class IncrementallyLinearisedNeoHookean(object):
 		
 
 		# 4TH ORDER ELASTICITY TENSOR
-		MaterialArgs.H_Voigt[:,:,elem,gcounter] = lamb2*MaterialArgs.IijIkl+mu2*MaterialArgs.IikIjl
+		MaterialArgs.H_Voigt[:,:,elem,gcounter] = lamb2*MaterialArgs.vIijIkl+mu2*MaterialArgs.vIikIjl
 		# STORE THE JACOBIAN FOR THE CURRENT STEP
 		MaterialArgs.J[elem,gcounter] = StrainTensors['J'][gcounter]
 		# STORE SIZE OF HESSIAN - NEEDED ONLY ONCE

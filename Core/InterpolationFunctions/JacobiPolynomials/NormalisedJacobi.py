@@ -84,7 +84,7 @@ def GradNormalisedJacobiTri(C,x,EvalOpt=0):
     # THIS MAY RUIN THE CONVERGENCE, BUT FOR POST PROCESSING ITS FINE
     if EvalOpt==1:
         if s==1:
-            s=0.999999
+            s=0.99999999999999
 
     xi = (1.+r)*(1.-s)/2.-1
     eta = s
@@ -208,14 +208,19 @@ def GradNormalisedJacobiTet(C,x,EvalOpt=0):
 
     # THIS MAY RUIN THE CONVERGENCE, BUT FOR POST PROCESSING ITS FINE
     if EvalOpt==1:
-        if t==1:
-            t=0.9999999
-        if s==1:
-            s=0.9999999
+        if t==1.:
+            t=0.99999999999999
+        if s==1.:
+            s=0.99999999999999
 
     eta = (1./2.)*(s-s*t-1.-t)
     xi = -(1./2.)*(r+1)*(eta+t)-1.
     zeta = 1.0*t
+    
+    # THIS MAY RUIN THE CONVERGENCE, BUT FOR POST PROCESSING ITS FINE
+    if eta == 0. and zeta == 0.:
+        eta = 1.0e-14
+        zeta = 1e-14
 
     dr_dxi   = -2./(eta+zeta)
     dr_deta  = 2.*(1.+xi)/(eta+zeta)**2
@@ -254,7 +259,7 @@ def GradNormalisedJacobiTet(C,x,EvalOpt=0):
                 p_i = 1.;  q_i = 1.;  dp_i = 0.; dq_i = 0.
             else:
                 p_i = JacobiPolynomials(i,r,0.,0.)[-1]; dp_i = JacobiPolynomials(i-1,r,1.,1.)[-1]*(i+1.)/2.    
-                q_i = q_i*(1.-s)/2.; dq_i = q_i*(-i)/(1-s);
+                q_i = q_i*(1.-s)/2.; dq_i = q_i*(-i)/(1-s)
             # Loop increasing j
             for j in range(0,nDeg-i+1):
                 if j==0:

@@ -69,7 +69,7 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 		# COMPUTE THE TANGENT STIFFNESS MATRIX
 		BDB_1, t = MainData().ConstitutiveStiffnessIntegrand(B,nvar,ndim,MainData.AnalysisType,
 			MainData.Prestress,SpatialGradient[counter,:,:],CauchyStressTensor,ElectricDisplacementx,H_Voigt)
-
+		
 
 		if MainData.GeometryUpdate:
 			# COMPUTE GEOMETRIC STIFFNESS MATRIX
