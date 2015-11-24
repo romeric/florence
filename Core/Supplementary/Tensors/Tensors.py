@@ -1,5 +1,5 @@
 import numpy as np 
-
+from Core.Supplementary.CythonBuilds.voigt_sym.voigt_sym import voigt_sym
 
 
 
@@ -36,7 +36,6 @@ def SecondTensor2Vector(A):
 		vecA = np.array([
 			A[0,0],A[1,1],A[2,2],A[0,1],A[0,2],A[1,2]
 			])
-		# print np.allclose(A.T,A,rtol=1e-10,atol=1e-15)
 		# Check for symmetry
 		if ~np.allclose(A.T, A, rtol=1e-12,atol=1e-15):
 			# Matrix is non-symmetric
@@ -55,7 +54,6 @@ def SecondTensor2Vector(A):
 				A[0,0],A[1,1],A[0,1],A[1,0]
 				])
 
-
 	return vecA
 
 
@@ -67,9 +65,54 @@ def Voigt(A,sym=0):
 	# sym returns the symmetrised tensor (only for 3rd and 4th order). Switched off by default.
 
 	# GET THE DIMESNIONS
-	if len(A.shape)==2:
-		VoigtA = SecondTensor2Vector(A)
-	if len(A.shape)==3:
+	if len(A.shape)==4:
+		# GIVEN TENSOR IS FOURTH ORDER
+		# C=A
+		if sym:
+			VoigtA = voigt_sym(A)
+
+		# 	if C.shape[0]==3:
+		# 		VoigtA = 0.5*np.array([
+		# 			[2*C[0,0,0,0],2*C[0,0,1,1],2*C[0,0,2,2],C[0,0,0,1]+C[0,0,1,0],C[0,0,0,2]+C[0,0,2,0],C[0,0,1,2]+C[0,0,2,1]],
+		# 			[0			 ,2*C[1,1,1,1],2*C[1,1,2,2],C[1,1,0,1]+C[1,1,1,0],C[1,1,0,2]+C[1,1,2,0],C[1,1,1,2]+C[1,1,2,1]],
+		# 			[0			 ,0			  ,2*C[2,2,2,2],C[2,2,0,1]+C[2,2,1,0],C[2,2,0,2]+C[2,2,2,0],C[2,2,1,2]+C[2,2,2,1]],
+		# 			[0			 ,0			  ,0		   ,C[0,1,0,1]+C[0,1,1,0],C[0,1,0,2]+C[0,1,2,0],C[0,1,1,2]+C[0,1,2,1]],
+		# 			[0			 ,0			  ,0		   ,0					 ,C[0,2,0,2]+C[0,2,2,0],C[0,2,1,2]+C[0,2,2,1]],
+		# 			[0			 ,0			  ,0		   ,0					 ,0					   ,C[1,2,1,2]+C[1,2,2,1]]
+		# 			])
+
+		# 	else:
+		# 		VoigtA = 0.5*np.array([
+		# 			[2*C[0,0,0,0],2*C[0,0,1,1],C[0,0,0,1]+C[0,0,1,0]],
+		# 			[0			 ,2*C[1,1,1,1],C[1,1,0,1]+C[1,1,1,0]],
+		# 			[0			 ,0			  ,C[0,1,0,1]+C[0,1,1,0]]
+		# 			])
+
+		# 	VoigtA = VoigtA+VoigtA.T 
+		# 	for i in range(0,VoigtA.shape[0]):
+		# 		VoigtA[i,i] = VoigtA[i,i]/2.0
+
+			
+
+		else:
+			C=A
+			if C.shape[0]==3:
+				VoigtA = np.array([
+					[C[0,0,0,0],C[0,0,1,1],C[0,0,2,2],C[0,0,0,1],C[0,0,0,2],C[0,0,1,2]],
+					[C[1,1,0,0],C[1,1,1,1],C[1,1,2,2],C[1,1,0,1],C[1,1,0,2],C[1,1,1,2]],
+					[C[2,2,0,0],C[2,2,1,1],C[2,2,2,2],C[2,2,0,1],C[2,2,0,2],C[2,2,1,2]],
+					[C[0,1,0,0],C[0,1,1,1],C[0,1,2,2],C[0,1,0,1],C[0,1,0,2],C[0,1,1,2]],
+					[C[0,2,0,0],C[0,2,1,1],C[0,2,2,2],C[0,2,0,1],C[0,2,0,2],C[0,2,1,2]],
+					[C[1,2,0,0],C[1,2,1,1],C[1,2,2,2],C[1,2,0,1],C[1,2,0,2],C[1,2,1,2]]
+					])
+			elif C.shape[0]==2:
+				VoigtA = np.array([
+					[C[0,0,0,0],C[0,0,1,1],C[0,0,0,1]],
+					[C[1,1,0,0],C[1,1,1,1],C[1,1,0,1]],
+					[C[0,1,0,0],C[0,1,1,1],C[0,1,0,1]]
+					])
+
+	elif len(A.shape)==3:
 		e=A
 		if e.shape[0]==3:
 			if ~sym:
@@ -104,52 +147,15 @@ def Voigt(A,sym=0):
 					[e[0,0,1],e[1,0,1]]
 					])
 
-	if len(A.shape)==4:
-		# GIVEN TENSOR IS FOURTH ORDER
-		C=A
-		if C.shape[0]==3:	
-			if sym:
-				VoigtA = 0.5*np.array([
-					[2*C[0,0,0,0],2*C[0,0,1,1],2*C[0,0,2,2],C[0,0,0,1]+C[0,0,1,0],C[0,0,0,2]+C[0,0,2,0],C[0,0,1,2]+C[0,0,2,1]],
-					[0			 ,2*C[1,1,1,1],2*C[1,1,2,2],C[1,1,0,1]+C[1,1,1,0],C[1,1,0,2]+C[1,1,2,0],C[1,1,1,2]+C[1,1,2,1]],
-					[0			 ,0			  ,2*C[2,2,2,2],C[2,2,0,1]+C[2,2,1,0],C[2,2,0,2]+C[2,2,2,0],C[2,2,1,2]+C[2,2,2,1]],
-					[0			 ,0			  ,0		   ,C[0,1,0,1]+C[0,1,1,0],C[0,1,0,2]+C[0,1,2,0],C[0,1,1,2]+C[0,1,2,1]],
-					[0			 ,0			  ,0		   ,0					 ,C[0,2,0,2]+C[0,2,2,0],C[0,2,1,2]+C[0,2,2,1]],
-					[0			 ,0			  ,0		   ,0					 ,0					   ,C[1,2,1,2]+C[1,2,2,1]]
-					])
+	elif len(A.shape)==2:
+		VoigtA = SecondTensor2Vector(A)
 
-				VoigtA = VoigtA+VoigtA.T 
-				for i in range(0,VoigtA.shape[0]):
-					VoigtA[i,i] = VoigtA[i,i]/2.0
-			else:
-				VoigtA = np.array([
-					[C[0,0,0,0],C[0,0,1,1],C[0,0,2,2],C[0,0,0,1],C[0,0,0,2],C[0,0,1,2]],
-					[C[1,1,0,0],C[1,1,1,1],C[1,1,2,2],C[1,1,0,1],C[1,1,0,2],C[1,1,1,2]],
-					[C[2,2,0,0],C[2,2,1,1],C[2,2,2,2],C[2,2,0,1],C[2,2,0,2],C[2,2,1,2]],
-					[C[0,1,0,0],C[0,1,1,1],C[0,1,2,2],C[0,1,0,1],C[0,1,0,2],C[0,1,1,2]],
-					[C[0,2,0,0],C[0,2,1,1],C[0,2,2,2],C[0,2,0,1],C[0,2,0,2],C[0,2,1,2]],
-					[C[1,2,0,0],C[1,2,1,1],C[1,2,2,2],C[1,2,0,1],C[1,2,0,2],C[1,2,1,2]]
-					])
-		elif C.shape[0]==2:
-			if sym:
-				VoigtA = 0.5*np.array([
-					[2*C[0,0,0,0],2*C[0,0,1,1],C[0,0,0,1]+C[0,0,1,0]],
-					[0			 ,2*C[1,1,1,1],C[1,1,0,1]+C[1,1,1,0]],
-					[0			 ,0			  ,C[0,1,0,1]+C[0,1,1,0]]
-					])
-
-				VoigtA = VoigtA+VoigtA.T 
-				for i in range(0,VoigtA.shape[0]):
-					VoigtA[i,i] = VoigtA[i,i]/2.0
-			else:
-				VoigtA = np.array([
-					[C[0,0,0,0],C[0,0,1,1],C[0,0,0,1]],
-					[C[1,1,0,0],C[1,1,1,1],C[1,1,0,1]],
-					[C[0,1,0,0],C[0,1,1,1],C[0,1,0,1]]
-					])
-
+	else:
+		VoigtA = np.array([])
 
 	return VoigtA
+
+
 
 
 def UnVoigt(v):

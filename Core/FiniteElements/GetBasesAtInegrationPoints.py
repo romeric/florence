@@ -12,14 +12,14 @@ def GetBasesAtInegrationPoints(C,norder,QuadratureOpt,MeshType):
 
 	z=[]; w=[]; 
 
-	if MeshType == 'quad' or MeshType == 'hex':
+	if MeshType == "quad" or MeshType == "hex":
 		z, w = GaussQuadrature(norder,-1.,1.)
 		# z, w = GaussQuadrature(MainData.C+MainData.norder,-1.,1.)
-	elif MeshType == 'tet':
-		zw = QuadraturePointsWeightsTet.QuadraturePointsWeightsTet(norder,QuadratureOpt)
-		# zw = QuadraturePointsWeightsTet.QuadraturePointsWeightsTet(MainData.C+1,QuadratureOpt)
-		z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]; #w = np.repeat(w,MainData.ndim) 
-	elif MeshType == 'tri':
+	elif MeshType == "tet":
+		# zw = QuadraturePointsWeightsTet.QuadraturePointsWeightsTet(norder,QuadratureOpt)
+		zw = QuadraturePointsWeightsTet.QuadraturePointsWeightsTet(C+1,QuadratureOpt)
+		z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
+	elif MeshType == "tri":
 		zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(norder,QuadratureOpt) # PUT C+1 OR HIGHER
 		# zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(MainData.C+1,QuadratureOpt) # PUT C+1 OR HIGHER
 		# zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(MainData.C+1,QuadratureOpt) # PUT C+4 OR HIGHER
@@ -50,7 +50,7 @@ def GetBasesAtInegrationPoints(C,norder,QuadratureOpt,MeshType):
 	############################################################################
 	# from scipy.io import savemat
 	# Dict = {'GaussPoints':z,'GaussWeights':w,'Bases':Domain.Bases,'gBasesx':Domain.gBasesx, 'gBasesy':Domain.gBasesy}
-	# savemat('/home/roman/Desktop/Info_P'+str(C+1)+'_10',Dict)
+	# savemat('/home/roman/Desktop/Bases_P'+str(C+1)+'_Quad_P'+str(norder),Dict)
 	# exit(0)
 
 

@@ -4,71 +4,42 @@ import os, imp
 
 def ProblemData(MainData):
 
-	# ndim - Dimension of the problem - 1D, 2D, 3D
 	MainData.ndim = 3
-	# Type of formulation - Displacement-based/ mixed etc
-		# 1 - Displacement approach (for electromechanics, it is displacement-electric potential approach)
-		# 2 - x, J approach
-	
-	MainData.Fields = 'Mechanics'
-	# MainData.Fields = 'ElectroMechanics'
-	
-	MainData.Formulation = 1 	# Displacement-Potential based formulation
+	MainData.Fields = 'Mechanics'	
+	MainData.Formulation = 'DisplacementApproach'
 	MainData.Analysis = 'Static'
-	# MainData.Analysis = 'Dynamic'
-	# MainData.AnalysisType = 'Linear'
-	MainData.AnalysisType = 'Nonlinear'
+	MainData.AnalysisType = 'Linear'
+	# MainData.AnalysisType = 'Nonlinear'
 
-	class MaterialArgs(object):
-		"""docstring for MaterialArgs"""
-		# Type = 'Steinmann'
-		# Type = 'LinearisedElectromechanics'
-		# Type = 'LinearModel'
-		# Type = 'Incrementally_Linearised_NeoHookean'
-		# Type = 'AnisotropicMooneyRivlin_1'
-		# Type = 'NearlyIncompressibleNeoHookean'
-		Type = 'MooneyRivlin'
-		
-		
+	# MATERIAL INPUT DATA 
+	MainData.MaterialArgs.Type = 'LinearModel'
+	# MainData.MaterialArgs.Type = 'IncrementalLinearElastic'
+	# MainData.MaterialArgs.Type = 'IncrementallyLinearisedNeoHookean'
+	# MainData.MaterialArgs.Type = 'IncrementallyLinearisedMooneyRivlin'
+	# MainData.MaterialArgs.Type = 'NearlyIncompressibleNeoHookean'
+	# MainData.MaterialArgs.Type = 'NeoHookean_1'
+	# MainData.MaterialArgs.Type = 'NeoHookean_2'
+	# MainData.MaterialArgs.Type = 'MooneyRivlin'
+	# MainData.MaterialArgs.Type = 'NearlyIncompressibleMooneyRivlin'
+	# MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin' 
+	# MainData.MaterialArgs.Type = 'TranservselyIsotropicLinearElastic'
+	# MainData.MaterialArgs.Type = 'TranservselyIsotropicHyperElastic'
+	# MainData.MaterialArgs.Type = 'JavierTranservselyIsotropicHyperElastic'
 
-		E = 1.0e1
-		# nu = 0.4
-		nu=0.35
+	MainData.MaterialArgs.E  = 1.0e1
+	MainData.MaterialArgs.nu = 0.35
 
-		# E = MainData.E 
-		# nu = MainData.nu 
+	# MainData.MaterialArgs.E = MainData.E 
+	# MainData.MaterialArgs.nu = MainData.nu
+	# print 'Poisson ratio is:', MainData.MaterialArgs.nu
 
 
-		# GET LAME CONSTANTS
-		lamb = E*nu/(1.+nu)/(1.-2.0*nu)
-		mu = E/2./(1+nu)
+	E = MainData.MaterialArgs.E
+	nu = MainData.MaterialArgs.nu
 
-		# mu = 1.
-		# lamb  = 2.
-		# mu    = 0.3571
-		# lamb  = 1.4286
-		# lamb = lamb - mu
-		# mu = 2*mu
-		# lamb = lamb + mu
-
-		# mu    = 0.090571
-		# lamb  = 1.4286
-		# mu    = 0.5
-		# lamb  = 0.6
-		# mu    = 0.5
-		# lamb  = 0.5
-		rho   = 7.5*10e-6
-		eps_1 = 1.0
-		c1    = 0.
-		c2    = 0.
-
-	# print (MaterialArgs.lamb)/2./(MaterialArgs.lamb+MaterialArgs.mu)
-
-		# mu = 23.3*1000   # N/mm^2
-		# lamb = 79.4*1000 # N/mm^2
-		# eps_1 = 1.5*10e-11  # C/mm^2
-
-	MainData.MaterialArgs = MaterialArgs
+	# GET LAME CONSTANTS
+	MainData.MaterialArgs.lamb = E*nu/(1.+nu)/(1.-2.0*nu)
+	MainData.MaterialArgs.mu = E/2./(1+nu)
 
 	ProblemPath = os.path.dirname(os.path.realpath(__file__))
 	class MeshInfo(object):
@@ -91,6 +62,7 @@ def ProblemData(MainData):
 
 	class BoundaryData(object):
 		Type = 'nurbs'
+		RequiresCAD = True
 		CurvilinearMeshNodalSpacing = 'equal'
 		
 		IGES_File = ProblemPath + '/Sphere.igs'

@@ -83,10 +83,17 @@ def PreProcess(MainData,Pr,pwd):
 	# print np.linalg.norm(mesh.points,axis=1)
 
 	# mesh.Sphere()
-	# mesh.Sphere(points=2)
+	# mesh.Sphere(points=14)
+	# mesh.Sphere(points=3)
 	# mesh.RemoveElements((-0.55,-0.1,-0.4,0.1),plot_new_mesh=False) 
 	# mesh.SimplePlot()	
 	# sys.exit(0)
+	# mesh.PlotMeshNumberingTri()
+
+	# un_faces = np.unique(mesh.faces)
+	# vpoints = mesh.points[un_faces,:]
+	# print np.linalg.norm(vpoints,axis=1)
+	# exit(0)
 
 
 
@@ -96,7 +103,7 @@ def PreProcess(MainData,Pr,pwd):
 	# mesh.elements = np.ascontiguousarray(loadedmat['T'])-1
 
 	# MainData.MaterialArgs().AnisotropicFibreOrientation(mesh)
-	# sys.exit(0)
+	# exit(0)
 
 	# GENERATE pMESHES FOR HIGH C
 	############################################################################
@@ -185,18 +192,26 @@ def PreProcess(MainData,Pr,pwd):
 
 
 	# COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR ALL ELEMENTAL INTEGRATON
+	# FOR DISPLACEMENT-BASED FORMULATIONS (GRADIENT-GRADIENT) WE NEED (P-1)+(P-1) TO EXACTLY
+	# INTEGRATE THE INTEGRANDS
 	QuadratureOpt = 3 	# OPTION FOR QUADRATURE TECHNIQUE FOR TRIS AND TETS
+	norder = MainData.C+MainData.C
+	if norder == 0:
+		# TAKE CARE OF C=0 CASE
+		norder = 1
 	MainData.Domain, MainData.Boundary, MainData.Quadrature = GetBasesAtInegrationPoints(MainData.C,
-		(MainData.C+1),QuadratureOpt,MainData.MeshInfo.MeshType)
+		norder,QuadratureOpt,MainData.MeshInfo.MeshType)
 	# SEPARATELY COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR POST-PROCESSING
-	# E.G. FOR COMPUTATION OF SCALED JACOBIAN NOTE THAT THIS SHOULD ONLY BE USED FOR POST PROCESSING
+	# E.G. FOR COMPUTATION OF SCALED JACOBIAN. NOTE THAT THIS SHOULD ONLY BE USED FOR POST PROCESSING
 	# FOR ELEMENTAL INTEGRATION ALWAYS USE DOMIAN, BOUNDARY AND QUADRATURE AND NOT POSTDOMAIN, 
 	# POSTBOUNDARY ETC
+	# FOR SCALED JACOBIAN WE NEED QUADRATURE FOR P*P 
+	norder_post = (MainData.C+1)+(MainData.C+1)
 	MainData.PostDomain, MainData.PostBoundary, MainData.PostQuadrature = GetBasesAtInegrationPoints(MainData.C,
-		2*(MainData.C),QuadratureOpt,MainData.MeshInfo.MeshType)
+		norder_post,QuadratureOpt,MainData.MeshInfo.MeshType)
 
 	# MainData.PostDomain, MainData.PostBoundary, MainData.PostQuadrature = GetBasesAtInegrationPoints(MainData.C,
-	# 	9,QuadratureOpt,MainData.MeshInfo.MeshType)
+	# 	8,QuadratureOpt,MainData.MeshInfo.MeshType)
 	# sys.exit(0)
 
 	############################################################################
@@ -260,14 +275,17 @@ def PreProcess(MainData,Pr,pwd):
 			MainData.MaterialArgs.H_Voigt = MainData.MaterialArgs.lamb*block_1 + MainData.MaterialArgs.mu*block_2
 	else:
 		if MainData.ndim == 2:
-			MainData.MaterialArgs.IijIkl = np.array([[1.,1.,0.],[1.,1.,0],[0.,0.,0.]])
-			MainData.MaterialArgs.IikIjl = np.array([[2.,0.,0.],[0.,2.,0],[0.,0.,1.]])
+			MainData.MaterialArgs.vIijIkl = np.array([[1.,1.,0.],[1.,1.,0],[0.,0.,0.]])
+			MainData.MaterialArgs.vIikIjl = np.array([[2.,0.,0.],[0.,2.,0],[0.,0.,1.]])
 		else:
 			block_1 = np.zeros((6,6),dtype=np.float64); block_1[:3,:3] = np.ones((3,3))
 			block_2 = np.eye(6,6); block_2[0,0],block_2[1,1],block_2[2,2]=2.,2.,2.
-			MainData.MaterialArgs.IijIkl = block_1
-			MainData.MaterialArgs.IikIjl = block_2		
+			MainData.MaterialArgs.vIijIkl = block_1
+			MainData.MaterialArgs.vIikIjl = block_2	
 
+		I = np.eye(MainData.ndim,MainData.ndim)
+		MainData.MaterialArgs.Iijkl = np.einsum('ij,kl',I,I)	
+		MainData.MaterialArgs.Iikjl = np.einsum('ik,jl',I,I) + np.einsum('il,jk',I,I) 
 
 
 	# CHOOSE AND INITIALISE THE RIGHT MATERIAL MODEL 
@@ -294,8 +312,6 @@ def PreProcess(MainData,Pr,pwd):
 	else:
 		raise AttributeError('Material model with name '+MainData.MaterialArgs.Type + ' not found')
 
-	# print type(MainData.nvar )
-	# exit(0)
 	##############################################################################
 
 

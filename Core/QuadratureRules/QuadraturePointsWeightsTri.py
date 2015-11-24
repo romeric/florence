@@ -14,8 +14,8 @@ def QuadraturePointsWeightsTri(C,Opt=1):
 
 	if Opt==0 or C>19:
 
-		# IN CASE OPT WAS CHOSEN TO BE 1
-		if Opt==1:
+		# IN CASE OPT WAS CHOSEN TO BE 3
+		if Opt==3:
 			print 'Optimal quadrature for C>19 is not available. Falling back to Gaussian quadrature'
 
 		z1D, w1D = GaussQuadrature(C+1,-1.,1.)
@@ -70,13 +70,13 @@ def QuadraturePointsWeightsTri(C,Opt=1):
 
 
 	elif Opt==3:
-		# AVOID INACCURATE QUADRATURE POINTS 
-		if C==4:
-			C = 6
-		if C==5:
-			C = 7 # careful
-		if C==6:
-			C = 11
+		# # AVOID INACCURATE QUADRATURE POINTS 
+		# if C==4:
+		# 	C = 6
+		# if C==5:
+		# 	C = 7 # careful
+		# if C==6:
+		# 	C = 11
 
 		if C==0:
 			zw = np.array([

@@ -28,7 +28,7 @@ class NeoHookean_1(object):
 		lamb2 = lamb*(2*detF-1.0) - mu
 
 
-		C_Voigt = lamb2*MaterialArgs.IijIkl+mu2*MaterialArgs.IikIjl
+		C_Voigt = lamb2*MaterialArgs.vIijIkl+mu2*MaterialArgs.vIikIjl
 
 		MaterialArgs.H_VoigtSize = C_Voigt.shape[0]
 

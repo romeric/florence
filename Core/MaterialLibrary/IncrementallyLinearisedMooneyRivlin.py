@@ -1,4 +1,5 @@
 import numpy as np
+from numpy import einsum
 from Core.Supplementary.Tensors import *
 
 #####################################################################################################
@@ -24,14 +25,10 @@ class IncrementallyLinearisedMooneyRivlin(object):
 	def __init__(self, ndim):
 		super(IncrementallyLinearisedMooneyRivlin, self).__init__()
 		self.ndim = ndim
-
-	def Get(self):
-		# self.nvar = self.ndim+1
 		self.nvar = self.ndim
-		self.modelname = 'IncrementallyLinearisedMooneyRivlin'
-		return self.nvar, self.modelname
 
-	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
+
+	def Hessian(self,MaterialArgs,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 
 		# GET THE JACOBIAN AND HESSIAN FROM THE PREVIOUS STEP - NOTE THAT A COPY HAS TO BE MADE
 		H_Voigt_k = np.copy(MaterialArgs.H_Voigt[:,:,elem,gcounter])
@@ -42,7 +39,7 @@ class IncrementallyLinearisedMooneyRivlin(object):
 		lamb = MaterialArgs.lamb
 
 		I = StrainTensors['I']
-		b = StrainTensors['b']
+		b = StrainTensors['b'][gcounter]
 
 		alpha = mu/4.0
 		beta = mu/4.0
@@ -69,7 +66,7 @@ class IncrementallyLinearisedMooneyRivlin(object):
 		# GET STRESSES, HESSIANS AND JACOBIANS FROM THE PREVIOUS STEP - NOTE THAT A COPY HAS TO BE MADE
 		Sigma_k = np.copy(MaterialArgs.Sigma[:,:,elem,gcounter])
 		H_Voigt_k = np.copy(MaterialArgs.H_Voigt[:,:,elem,gcounter])
-		J_k = np.copy(MaterialArgs.J[elem,gcounter])		
+		J = np.copy(MaterialArgs.J[elem,gcounter])		
 
 		strain = StrainTensors['strain'][gcounter]
 		I = StrainTensors['I']

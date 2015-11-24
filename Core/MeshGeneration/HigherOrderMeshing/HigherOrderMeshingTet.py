@@ -69,7 +69,7 @@ def HighOrderMeshTet_UNSTABLE(C,mesh,Decimals=10,Zerofy=0,Parallel=False,nCPU=1,
 	# COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
 	Neval = np.zeros((4,eps.shape[0]),dtype=np.float64)
 	for i in range(4,eps.shape[0]):
-		Neval[:,i] = Tet.hpBases(0,eps[i,0],eps[i,1],eps[i,2],Transform=1)[0]
+		Neval[:,i] = Tet.hpBases(0,eps[i,0],eps[i,1],eps[i,2],Transform=1,EvalOpt=1)[0]
 
 	nodeperelem = mesh.elements.shape[1]
 	renodeperelem = int((C+2.)*(C+3.)*(C+4.)/6.)

@@ -20,10 +20,11 @@ def ProblemData(MainData):
 	# MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin_1'
 	# MainData.MaterialArgs.Type = 'NearlyIncompressibleNeoHookean'
 	# MainData.MaterialArgs.Type = 'NeoHookean_1'
-	MainData.MaterialArgs.Type = 'NeoHookean_2'
-	# MainData.MaterialArgs.Type = 'MooneyRivlin'
+	# MainData.MaterialArgs.Type = 'NeoHookean_2'
+	MainData.MaterialArgs.Type = 'MooneyRivlin'
 	# MainData.MaterialArgs.Type = 'NearlyIncompressibleMooneyRivlin'
 	# MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin' 
+	# MainData.MaterialArgs.Type = 'TranservselyIsotropicHyperelastic'
 
 	# E = MainData.E 
 	# nu = MainData.nu 
@@ -36,6 +37,13 @@ def ProblemData(MainData):
 	# GET LAME CONSTANTS
 	MainData.MaterialArgs.lamb = E*nu/(1.+nu)/(1.-2.0*nu)
 	MainData.MaterialArgs.mu = E/2./(1+nu)
+
+	MainData.MaterialArgs.E_A = 2.5*MainData.MaterialArgs.E
+	E = MainData.MaterialArgs.E
+	nu = MainData.MaterialArgs.nu
+	E_A = MainData.MaterialArgs.E_A
+	MainData.MaterialArgs.G_A = (E*(E_A*nu - E_A + E_A*nu**2 + E*nu**2))/(2*(nu + 1)*(2*E*nu**2 + E_A*nu - E_A))
+
 
 
 
@@ -216,17 +224,6 @@ def ProblemData(MainData):
 			return t
 
 
-		# class DynamicData(object):
-			# nstep = 100
-			# dt = 1./nstep
-			# drange = np.linspace(0.,60.,nstep)
-			# Amp = 100.0
-			# DynLoad = Amp*np.sin(drange)
-
-
-
-
-
 	class AnalyticalSolution(object):
 		class Args(object):
 			node = 0
@@ -262,6 +259,3 @@ def ProblemData(MainData):
 	# PLACE THEM ALL INSIDE THE MAIN CLASS
 	MainData.BoundaryData = BoundaryData
 	MainData.AnalyticalSolution = AnalyticalSolution
-	MainData.MeshInfo = MeshInfo
-
-	# return MainData, MeshInfo, AnalyticalSolution 

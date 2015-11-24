@@ -1,6 +1,6 @@
 import numpy as np
 import numpy.linalg as la
-import matplotlib.pyplot as plt
+
 
 
 #############################################################################################
@@ -265,6 +265,8 @@ def ComputeErrorNorms(global_coord,total_sol,opt=0,internal_points=0,POT=0):
 
 
 def PlotFunc(mesh,POT,Flux1,Flux2,opt=0):
+
+	import matplotlib.pyplot as plt
 
 	mesh_points = np.array(mesh.points)
 	mesh_tris = np.array(mesh.elements)

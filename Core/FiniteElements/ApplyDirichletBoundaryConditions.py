@@ -36,17 +36,14 @@ def GetDirichletBoundaryConditions(mesh,MainData):
 				ColumnsOut = np.append(ColumnsOut,nvar*nodesDBC[inode]+i)
 				AppliedDirichlet = np.append(AppliedDirichlet,Dirichlet[inode,i])
 
+		MainData.nodesDBC = nodesDBC
 		# import sys; sys.exit() 
 
 
 		############################
-		# To Rogelio
-		# print mesh.points
-		# print AppliedDirichlet.shape, mesh.points.shape
-
 		# Dict = {'points':mesh.points,'element':mesh.elements,'displacements':AppliedDirichlet,'displacement_dof':ColumnsOut}
 		# from scipy.io import savemat
-		# savemat('/home/roman/Desktop/circle_stretch_p4',Dict)
+		# savemat('/home/roman/Desktop/wing_p3',Dict)
 
 		# print mesh.edges.shape, AppliedDirichlet.shape, Dirichlet.shape
 		# import sys; sys.exit(0)

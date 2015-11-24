@@ -14,15 +14,17 @@ def ProblemData(MainData):
 	# MATERIAL INPUT DATA 
 	# MainData.MaterialArgs.Type = 'LinearModel'
 	# MainData.MaterialArgs.Type = 'IncrementalLinearElastic'
-	# MainData.MaterialArgs.Type = 'TranservselyIsotropicLinearElastic'
 	# MainData.MaterialArgs.Type = 'IncrementallyLinearisedNeoHookean'
+	# MainData.MaterialArgs.Type = 'IncrementallyLinearisedMooneyRivlin'
 	# MainData.MaterialArgs.Type = 'NearlyIncompressibleNeoHookean'
 	# MainData.MaterialArgs.Type = 'NeoHookean_1'
 	# MainData.MaterialArgs.Type = 'NeoHookean_2'
-	# MainData.MaterialArgs.Type = 'MooneyRivlin'
+	MainData.MaterialArgs.Type = 'MooneyRivlin'
 	# MainData.MaterialArgs.Type = 'NearlyIncompressibleMooneyRivlin'
 	# MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin' 
-	MainData.MaterialArgs.Type = 'TranservselyIsotropicHyperelastic'
+	# MainData.MaterialArgs.Type = 'TranservselyIsotropicLinearElastic'
+	# MainData.MaterialArgs.Type = 'TranservselyIsotropicHyperElastic'
+	# MainData.MaterialArgs.Type = 'JavierTranservselyIsotropicHyperElastic'
 
 	MainData.MaterialArgs.E  = 1.0e5
 	MainData.MaterialArgs.nu = 0.35
@@ -39,11 +41,11 @@ def ProblemData(MainData):
 	nu = MainData.MaterialArgs.nu
 	E_A = MainData.MaterialArgs.E_A
 
-	MainData.MaterialArgs.G_A = (E*(E_A*nu - E_A + E_A*nu**2 + E*nu**2))/(2*(nu + 1)*(2*E*nu**2 + E_A*nu - E_A))
+	# MainData.MaterialArgs.G_A = (E*(E_A*nu - E_A + E_A*nu**2 + E*nu**2))/(2*(nu + 1)*(2*E*nu**2 + E_A*nu - E_A))
+	MainData.MaterialArgs.G_A = E/2.
 	# GET LAME CONSTANTS
 	MainData.MaterialArgs.lamb = E*nu/(1.+nu)/(1.-2.0*nu)
 	MainData.MaterialArgs.mu = E/2./(1+nu)
-	# lamb = lamb + mu
 
 	
 	ProblemPath = os.path.dirname(os.path.realpath(__file__))
@@ -73,8 +75,7 @@ def ProblemData(MainData):
 				coords = mesh.points[mesh.edges[iedge,:],:]
 				min_x = min(coords[0,0],coords[1,0])
 				dist = (coords[0,0:]-coords[1,:])/np.linalg.norm(coords[0,0:]-coords[1,:])
-				# dist = (coords[0,0:]-coords[1,:])
-				# print np.linalg.norm(dist)
+
 				if min_x != coords[0,0]:
 					dist *= -1 
 
@@ -84,32 +85,26 @@ def ProblemData(MainData):
 				if directions[i,0]==0. and directions[i,1]==0:
 					directions[i,0] = -1. 
 
-					
-			print directions
-				# plt.quiver(dist,dist)
-			# X,Y = np.meshgrid(directions[:,0],directions[:,1])
-			# Q = plt.quiver(X,Y)
-			Q = plt.quiver(directions[:,0],directions[:,1])
-			plt.quiverkey(Q, 0.9, 1.05, 1, r'$1 \frac{m}{s}$',
-				labelpos='E',fontproperties={'weight': 'bold'})
+
+			Xs,Ys = [],[]
+			for i in range(mesh.nelem):
+				x_avg = np.sum(mesh.points[mesh.elements[i,:],0])/mesh.points[mesh.elements[i,:],0].shape[0]
+				y_avg = np.sum(mesh.points[mesh.elements[i,:],1])/mesh.points[mesh.elements[i,:],1].shape[0]
+
+				Xs=np.append(Xs,x_avg)
+				Ys=np.append(Ys,y_avg)
+
+
+
+			q = plt.quiver(Xs, Ys, directions[:,0], directions[:,1], 
+			           color='Teal', 
+			           headlength=5,width=0.004)
+			# p = plt.quiverkey(q,1,16.5,50,"50 m/s",coordinates='data',color='r')
+
 			plt.triplot(mesh.points[:,0],mesh.points[:,1], mesh.elements[:,:3])
+			plt.axis('equal')
 			plt.show()
 
-			# X, Y = np.meshgrid(np.arange(0, 2 * np.pi, .2), np.arange(0, 2 * np.pi, .2))
-			# U = np.cos(X)
-			# V = np.sin(Y)
-
-			# # 1
-			# plt.figure()
-			# Q = plt.quiver(U, V)
-			# qk = plt.quiverkey(Q, 0.5, 0.92, 2, r'$2 \frac{m}{s}$', labelpos='W',
-			#                    fontproperties={'weight': 'bold'})
-			# l, r, b, t = plt.axis()
-			# dx, dy = r - l, t - b
-			# plt.axis([l - 0.05*dx, r + 0.05*dx, b - 0.05*dy, t + 0.05*dy])
-
-			# plt.title('Minimal arguments, no kwargs')
-			# plt.show()
 
 
 	MainData.MaterialArgs.AnisotropicFibreOrientation = AnisotropicFibreOrientation

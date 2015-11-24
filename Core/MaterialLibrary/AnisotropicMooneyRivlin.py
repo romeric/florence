@@ -28,12 +28,6 @@ class AnisotropicMooneyRivlin(object):
 		self.nvar = self.ndim
 
 
-
-	# def Get(self):
-	# 	self.nvar = self.ndim
-	# 	self.modelname = 'AnisotropicMooneyRivlin'
-	# 	return self.nvar, self.modelname
-
 	def Hessian(self,MaterialArgs,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 
 		# Get material constants (5 in this case)

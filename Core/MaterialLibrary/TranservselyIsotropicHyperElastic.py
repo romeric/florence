@@ -7,7 +7,7 @@ from numpy import einsum
 #####################################################################################################
 
 
-class TranservselyIsotropicHyperelastic(object):
+class TranservselyIsotropicHyperElastic(object):
 	"""A compressible transervely isotropic model with the isotropic part being Mooney-Rivlin
 		The energy is given by:
 
@@ -23,7 +23,7 @@ class TranservselyIsotropicHyperelastic(object):
 	"""
 
 	def __init__(self, ndim, gamma=0.5):
-		super(TranservselyIsotropicHyperelastic, self).__init__()
+		super(TranservselyIsotropicHyperElastic, self).__init__()
 		self.ndim = ndim
 		self.nvar = self.ndim
 		self.gamma = gamma
@@ -32,8 +32,9 @@ class TranservselyIsotropicHyperelastic(object):
 	def Hessian(self,MaterialArgs,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 
 		# Get material constants (5 in this case)
-		mu = MaterialArgs.mu
-		lamb = MaterialArgs.lamb
+		E = MaterialArgs.E
+		E_A = MaterialArgs.E_A
+		v = MaterialArgs.nu
 
 		I = StrainTensors['I']
 		J = StrainTensors['J'][gcounter]
@@ -48,31 +49,28 @@ class TranservselyIsotropicHyperelastic(object):
 		outerHN = einsum('i,j',HN,HN)
 
 		gamma = self.gamma
-		alpha = mu/4./gamma 
-		beta  = mu/4./gamma
-		eta   = mu/3.
-		ut    = 2.*gamma*(alpha+2.0*beta) + 2.*(1. - gamma)*eta
-		lamb  = lamb + 2.*gamma*alpha - 2*(1.- gamma)*eta
+
+		lamb = -(E_A*E*v)/(2.*E*v**2 + E_A*v - E_A)
+		ut = (E**2*v**2 + E_A*E*v**2 + E_A*E*v - E_A*E)/(2*(v + 1)*(2*E*v**2 + E_A*v - E_A))
+		beta = 0.
+		eta_1 = (E_A**2*v**2 - E_A**2 - 2*E_A*E*v**2 + E_A*E + E**2*v**2)/(4*(gamma - 1)*(v + 1)*(2*E*v**2 + E_A*v - E_A))
+		eta_2 = -(E_A**2*v - E_A**2 + E_A*E - E_A*E*v)/(4*(gamma - 1)*(2*E*v**2 + E_A*v - E_A))
+		alpha = ut - 4*gamma*beta - 2*(1-gamma)*eta_1 - 2*(1-gamma)*eta_2
+		alpha = alpha/2./gamma
+		eta = [eta_1,eta_2]
+
 
 		H_Voigt = 2.*gamma*beta/J* ( 2.0*einsum('ij,kl',b,b) - einsum('ik,jl',b,b) - einsum('il,jk',b,b) ) - \
-				(ut - lamb*(2.*J-1.) ) *einsum('ij,kl',I,I) + \
+				(- lamb*(2.*J-1.) ) *einsum('ij,kl',I,I) + \
 				(ut - lamb*(J-1.) ) * ( einsum('ik,jl',I,I) + einsum('il,jk',I,I) ) 
 
-		# n_1 = 1 
-		# n_2 = 2
-		# m_1 = 2
-		# m_2 = 2
-		# H_VoigtNCN_1 = self.TransverseHessianNCN(StrainTensors,m,eta,gamma,FN,innerFN,elem,gcounter)
-		# H_VoigtNGN_1 = self.TransverseHessianNGN(StrainTensors,n,eta,gamma,HN,innerHN,elem,gcounter)
-		# H_VoigtNCN_1 = self.TransverseHessianNCN(StrainTensors,m,eta,gamma,FN,innerFN,elem,gcounter)
-		# H_VoigtNGN_1 = self.TransverseHessianNGN(StrainTensors,n,eta,gamma,HN,innerHN,elem,gcounter)
-		# H_Voigt += H_VoigtNCN_1
-		# H_Voigt += H_VoigtNGN_1
+		
 
 		for m in range(2,4):
-			H_Voigt += self.TransverseHessianNCN(StrainTensors,m,eta,gamma,FN,innerFN,elem,gcounter)
-		for n in range(1,3):
-			H_Voigt += self.TransverseHessianNGN(StrainTensors,n,eta,gamma,HN,innerHN,elem,gcounter)	
+			H_Voigt += self.TransverseHessianNCN(StrainTensors,m,eta[m-2],gamma,FN,innerFN,elem,gcounter)
+		
+		H_Voigt += self.TransverseHessianNGN(StrainTensors,1.,eta_1,gamma,HN,innerHN,elem,gcounter)
+		H_Voigt += self.TransverseHessianNGN(StrainTensors,1.,eta_2,gamma,HN,innerHN,elem,gcounter)	
 
 		H_Voigt = Voigt(H_Voigt ,1)
 		
@@ -124,15 +122,20 @@ class TranservselyIsotropicHyperelastic(object):
 		innerHN = einsum('i,i',HN,HN)
 		outerHN = einsum('i,j',HN,HN)
 
-		mu = MaterialArgs.mu
-		lamb = MaterialArgs.lamb
+		E = MaterialArgs.E
+		E_A = MaterialArgs.E_A
+		v = MaterialArgs.nu
 
 		gamma = self.gamma
-		alpha = mu/4./gamma 
-		beta  = mu/4./gamma
-		eta   = mu/3.
-		ut    = 2.*gamma*(alpha+2.0*beta) + 2.*(1. - gamma)*eta
-		lamb  = lamb + 2.*gamma*alpha - 2*(1.- gamma)*eta
+
+		lamb = -(E_A*E*v)/(2.*E*v**2 + E_A*v - E_A)
+		ut = (E**2*v**2 + E_A*E*v**2 + E_A*E*v - E_A*E)/(2*(v + 1)*(2*E*v**2 + E_A*v - E_A))
+		beta = 0.
+		eta_1 = (E_A**2*v**2 - E_A**2 - 2*E_A*E*v**2 + E_A*E + E**2*v**2)/(4*(gamma - 1)*(v + 1)*(2*E*v**2 + E_A*v - E_A))
+		eta_2 = -(E_A**2*v - E_A**2 + E_A*E - E_A*E*v)/(4*(gamma - 1)*(2*E*v**2 + E_A*v - E_A))
+		alpha = ut - 4*gamma*beta - 2*(1-gamma)*eta_1 - 2*(1-gamma)*eta_2
+		alpha = alpha/2./gamma
+		eta = [eta_1,eta_2]
 
 
 		if self.ndim == 3:
@@ -141,7 +144,7 @@ class TranservselyIsotropicHyperelastic(object):
 			trb = trace(b) + 1
 
 
-		stress = 2.*gamma*alpha/J*b + 2.*gamma*beta/J*(trb*b - np.dot(b,b)) - ut*I + lamb*(J-1.)*I
+		stress = 2.*gamma*alpha/J*b + 2.*gamma*beta/J*(trb*b - np.dot(b,b)) - ut/J*I + lamb*(J-1.)*I
 
 		# n=1
 		# m=2
@@ -151,9 +154,10 @@ class TranservselyIsotropicHyperelastic(object):
 		# stress += stressNGN_1
 
 		for m in range(2,4):
-			stress += self.CauchyStressNCN(StrainTensors,m,eta,gamma,FN,innerFN,elem,gcounter)
-		for n in range(1,3):
-			stress += self.CauchyStressNGN(StrainTensors,n,eta,gamma,innerHN,outerHN,elem,gcounter)
+			stress += self.CauchyStressNCN(StrainTensors,m,eta[m-2],gamma,FN,innerFN,elem,gcounter)
+		
+		stress += self.CauchyStressNGN(StrainTensors,1.,eta_1,gamma,innerHN,outerHN,elem,gcounter)
+		stress += self.CauchyStressNGN(StrainTensors,1.,eta_2,gamma,innerHN,outerHN,elem,gcounter)
 
 		# print stress
 		return stress
