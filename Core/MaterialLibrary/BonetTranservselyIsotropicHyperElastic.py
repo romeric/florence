@@ -7,23 +7,13 @@ from numpy import einsum
 #####################################################################################################
 
 
-class JavierTranservselyIsotropicHyperElastic(object):
-	"""A compressible transervely isotropic model with the isotropic part being Mooney-Rivlin
-		The energy is given by:
-
-			W(C) =  gamma * ( alpha*(C:I) + beta*(G:I) ) + 
-					eta*(1-alpha)*( (N C N)**2 + N G N) - ut*J + lambda/2*(J-1)**2
-
-			ut = 2.*gamma*(alpha+2.0*beta) + 2.*(1. - gamma)*eta  # for the stress to be 
-				zero at the origin
-
-		the parameter "gamma" controls the amount of anisotropy and the vector N(ndim,1) is 
-		the direction of anisotropy
-
+class BonetTranservselyIsotropicHyperElastic(object):
+	"""A compressible transervely isotropic model based on Bonet 1998.
+		Material model is not polyconvex
 	"""
 
 	def __init__(self, ndim, gamma=0.5):
-		super(JavierTranservselyIsotropicHyperElastic, self).__init__()
+		super(BonetTranservselyIsotropicHyperElastic, self).__init__()
 		self.ndim = ndim
 		self.nvar = self.ndim
 

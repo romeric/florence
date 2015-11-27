@@ -89,6 +89,7 @@ class NearlyIncompressibleMooneyRivlin(object):
 		
 		MaterialArgs.H_VoigtSize = H_Voigt.shape[0]
 
+
 		return H_Voigt
 
 

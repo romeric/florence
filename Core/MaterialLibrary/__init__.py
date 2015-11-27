@@ -11,10 +11,11 @@ from MooneyRivlin import *
 from NearlyIncompressibleMooneyRivlin import *
 from AnisotropicMooneyRivlin import *
 from TranservselyIsotropicHyperElastic import *
-from JavierTranservselyIsotropicHyperElastic import *
+from BonetTranservselyIsotropicHyperElastic import *
 # INCREMENTALLY LINEARISED MATERIAL MODELS
 from IncrementallyLinearisedNeoHookean import *
 from IncrementallyLinearisedMooneyRivlin import *
+from IncrementallyLinearisedBonetTranservselyIsotropicHyperElastic import *
 
 # ELECTROMECHANICAL MATERIAL MODELS
 from LinearModelElectromechanics import *

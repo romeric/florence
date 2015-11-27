@@ -27,9 +27,7 @@ class TranservselyIsotropicLinearElastic(object):
 		G_A = MaterialArgs.G_A
 		v = MaterialArgs.nu
 
-		if self.ndim == 3:
-
-			H_Voigt = np.array([
+		H_Voigt = np.array([
 				[ -(E*(- E*v**2 + E_A))/((v + 1)*(2*E*v**2 + E_A*v - E_A)),   -(E*v*(E_A + E*v))/((v + 1)*(2*E*v**2 + E_A*v - E_A)),      -(E_A*E*v)/(2*E*v**2 + E_A*v - E_A),              0,   			0,   0],
 				[   -(E*v*(E_A + E*v))/((v + 1)*(2*E*v**2 + E_A*v - E_A)), -(E*(- E*v**2 + E_A))/((v + 1)*(2*E*v**2 + E_A*v - E_A)),      -(E_A*E*v)/(2*E*v**2 + E_A*v - E_A),              0,   			0,   0],
 				[                     -(E_A*E*v)/(2*E*v**2 + E_A*v - E_A),                     -(E_A*E*v)/(2*E*v**2 + E_A*v - E_A), (E_A**2*(v - 1))/(2*E*v**2 + E_A*v - E_A),              0,   			0,   0],
@@ -38,16 +36,13 @@ class TranservselyIsotropicLinearElastic(object):
 				[                                                      0,                                                      0,                                       0,             		0,   			0, G_A]
 			])
 
-		elif self.ndim == 2:
+		if self.ndim == 2:
+			# CAREFUL WITH THIS SLICING AS SOME MATERIAL CONSTANTS WOULD BE REMOVED.
+			# ESSENTIALLY IN PLANE STRAIN ANISOTROPY THE BEHAVIOUR OF MATERIAL 
+			# PERPENDICULAR TO THE PLANE IS LOST  
 
-			# G_A NOT NEEDED FOR PLAIN STRAIN. ESSENTIALLY IN PLANE STRAIN ANISOTROPY 
-			# THE BEHAVIOUR OF MATERIAL PERPENDICULAR TO THE PLANE IS LOST  
+			H_Voigt = H_Voigt[np.array([2,1,-1])[:,None],[2,1,-1]]
 
-			H_Voigt = np.array([
-				[ -(E*(- E*v**2 + E_A))/((v + 1)*(2*E*v**2 + E_A*v - E_A)),   -(E*v*(E_A + E*v))/((v + 1)*(2*E*v**2 + E_A*v - E_A)),             0],
-				[   -(E*v*(E_A + E*v))/((v + 1)*(2*E*v**2 + E_A*v - E_A)), -(E*(- E*v**2 + E_A))/((v + 1)*(2*E*v**2 + E_A*v - E_A)),             0],
-				[                                                      0,                                                      0, 	 E/(2*(v + 1))] 
-				])
 		
 		MaterialArgs.H_VoigtSize = H_Voigt.shape[0]
 
@@ -66,32 +61,21 @@ class TranservselyIsotropicLinearElastic(object):
 		G_A = MaterialArgs.G_A
 		v = MaterialArgs.nu
 
-		if self.ndim == 3:
-
-			H_Voigt = np.array([
+		H_Voigt = np.array([
 				[ -(E*(- E*v**2 + E_A))/((v + 1)*(2*E*v**2 + E_A*v - E_A)),   -(E*v*(E_A + E*v))/((v + 1)*(2*E*v**2 + E_A*v - E_A)),      -(E_A*E*v)/(2*E*v**2 + E_A*v - E_A),              0,   			0,   0],
 				[   -(E*v*(E_A + E*v))/((v + 1)*(2*E*v**2 + E_A*v - E_A)), -(E*(- E*v**2 + E_A))/((v + 1)*(2*E*v**2 + E_A*v - E_A)),      -(E_A*E*v)/(2*E*v**2 + E_A*v - E_A),              0,   			0,   0],
 				[                     -(E_A*E*v)/(2*E*v**2 + E_A*v - E_A),                     -(E_A*E*v)/(2*E*v**2 + E_A*v - E_A), (E_A**2*(v - 1))/(2*E*v**2 + E_A*v - E_A),              0,   			0,   0],
 				[                                                      0,                                                      0,                                       0, 					E/(2*(v + 1)),  0,   0],
 				[                                                      0,                                                      0,                                       0,             		0, 				G_A, 0],
 				[                                                      0,                                                      0,                                       0,             		0,   			0, G_A]
- 
 			])
 
-			
+		if self.ndim == 2:
+			# CAREFUL WITH THIS SLICING AS SOME MATERIAL CONSTANTS WOULD BE REMOVED.
+			# ESSENTIALLY IN PLANE STRAIN ANISOTROPY THE BEHAVIOUR OF MATERIAL 
+			# PERPENDICULAR TO THE PLANE IS LOST  
 
-
-		elif self.ndim == 2:
-
-			# G_A NOT NEEDED FOR PLAIN STRAIN. ESSENTIALLY IN PLANE STRAIN ANISOTROPY 
-			# THE BEHAVIOUR OF MATERIAL PERPENDICULAR TO THE PLANE IS LOST 
-
-			H_Voigt = np.array([
-				[ -(E*(- E*v**2 + E_A))/((v + 1)*(2*E*v**2 + E_A*v - E_A)),   -(E*v*(E_A + E*v))/((v + 1)*(2*E*v**2 + E_A*v - E_A)),             0],
-				[   -(E*v*(E_A + E*v))/((v + 1)*(2*E*v**2 + E_A*v - E_A)), -(E*(- E*v**2 + E_A))/((v + 1)*(2*E*v**2 + E_A*v - E_A)),             0],
-				[                                                      0,                                                      0, E/(2*(v + 1))]
- 
-				])
+			H_Voigt = H_Voigt[np.array([2,1,-1])[:,None],[2,1,-1]]
 
 		stress = UnVoigt(np.dot(H_Voigt,strain_Voigt))
 
