@@ -150,6 +150,7 @@ def AssemblySmall(MainData,mesh,Eulerx,TotalPot):
 	F = np.zeros((mesh.points.shape[0]*nvar,1)); T =  np.zeros((mesh.points.shape[0]*nvar,1))  
 	mass = []
 
+
 	if MainData.Parallel:
 		# COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
 		ParallelTuple = parmap.map(GetElementalMatricesSmall,np.arange(0,nelem),MainData,mesh.elements,mesh.points,Eulerx,TotalPot,
@@ -169,16 +170,13 @@ def AssemblySmall(MainData,mesh,Eulerx,TotalPot):
 				mesh.elements,mesh.points,Eulerx,TotalPot)
 
 		# SPARSE ASSEMBLY - STIFFNESS MATRIX
-		# I_stiffness, J_stiffness, V_stiffness = SparseAssemblySmall(I_stiff_elem,J_stiff_elem,
-		# 	V_stiff_elem,I_stiffness,J_stiffness,V_stiffness,
-		# 	elem,nvar,nodeperelem,mesh.elements)
+		SparseAssemblyNative(I_stiff_elem,J_stiff_elem,V_stiff_elem,I_stiffness,J_stiffness,V_stiffness,
+			elem,nvar,nodeperelem,mesh.elements)
 
 		# SparseAssemblySmall(I_stiff_elem,J_stiff_elem,V_stiff_elem,
 		# 	I_stiffness,J_stiffness,V_stiffness,elem,nvar,nodeperelem,mesh.elements)
 
-		SparseAssemblyNative(I_stiff_elem,J_stiff_elem,V_stiff_elem,I_stiffness,J_stiffness,V_stiffness,
-			elem,nvar,nodeperelem,mesh.elements)
-
+		
 		if MainData.Analysis != 'Static':
 			# SPARSE ASSEMBLY - MASS MATRIX
 			I_mass, J_mass, V_mass = SparseAssemblySmall(I_mass_elem,J_mass_elem,V_mass_elem,

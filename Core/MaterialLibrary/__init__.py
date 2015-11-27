@@ -15,6 +15,7 @@ from BonetTranservselyIsotropicHyperElastic import *
 # INCREMENTALLY LINEARISED MATERIAL MODELS
 from IncrementallyLinearisedNeoHookean import *
 from IncrementallyLinearisedMooneyRivlin import *
+from IncrementallyLinearisedNearlyIncompressibleMooneyRivlin import *
 from IncrementallyLinearisedBonetTranservselyIsotropicHyperElastic import *
 
 # ELECTROMECHANICAL MATERIAL MODELS

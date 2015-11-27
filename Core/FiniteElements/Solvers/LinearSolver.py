@@ -1,10 +1,14 @@
 from time import time
+from copy import deepcopy
 import numpy as np
 import numpy.linalg as la
 # from scipy.sparse.linalg import spsolve, cg, cgs, bicg, bicgstab, gmres, lgmres, minres
-from scipy.sparse.linalg import spsolve, bicgstab, onenormest 
+from scipy.sparse.linalg import spsolve, bicgstab, onenormest, cg, spilu 
 # from scipy.sparse.linalg import svds, eigsh, eigs, inv as spinv, onenormest
-from copy import deepcopy
+from pyamg import *
+from pyamg.gallery import *
+
+
 
 from Core.FiniteElements.Assembly import *
 from Core.FiniteElements.PostProcess import * 
@@ -26,7 +30,20 @@ def LinearSolver(MainData,Increment,K,DirichletForces,NeumannForces,
 			# MainData.solve.condA = np.linalg.cond(K_b.todense()) # REMOVE THIS
 			MainData.solve.condA = onenormest(K_b) # REMOVE THIS
 		# CALL DIRECT SOLVER
-		sol = spsolve(K_b,-F_b,permc_spec='MMD_AT_PLUS_A',use_umfpack=True)
+		# sol = spsolve(K_b,-F_b,permc_spec='MMD_AT_PLUS_A',use_umfpack=True)
+
+		# invest_K = spilu(K_b)
+		# print dir(invest_K)
+		# sol = invest_K.solve(-F_b)
+		# exit(0)
+		# X0 = np.dot(invest_K)
+		# sol = cg(K_b,-F_b,tol=MainData.solve.tol,M=invest_K)[0]
+		# ml = ruge_stuben_solver(K_b)
+		# sol = ml.solve(-F_b, tol=1e-6)
+
+		sol = spsolve(K_b,-F_b,permc_spec='MMD_AT_PLUS_A',use_umfpack=True) 
+		# print sol 
+		# exit(0)
 	else:
 		# CALL ITERATIVE SOLVER
 		sol = bicgstab(K_b,-F_b,tol=MainData.solve.tol)[0]
@@ -50,7 +67,7 @@ def LinearSolver(MainData,Increment,K,DirichletForces,NeumannForces,
 			Residual[ColumnsIn] = TractionForces[ColumnsIn] - NodalForces[ColumnsIn]
 
 			# COMPUTE SCALED JACOBIAN
-			# PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp[:,:,:Increment+1],show_plot=False)
+			PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp[:,:,:Increment+1],show_plot=False)
 
 	print 'Load increment', Increment, 'for incrementally linearised elastic problem'
 
