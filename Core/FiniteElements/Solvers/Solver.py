@@ -48,6 +48,14 @@ def MainSolver(MainData,mesh):
 
 		return TotalDisp
 
+	elif MainData.MaterialArgs.Type == 'IncrementallyLinearisedNeoHookean':
+		vmesh = deepcopy(mesh)
+		TotalDisp = LinearSolver(MainData,vmesh,TotalDisp,
+			Eulerx,LoadIncrement,NeumannForces,ColumnsIn,ColumnsOut,AppliedDirichlet)
+
+		return TotalDisp
+
+
 	# ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES
 	K,TractionForces = Assembly(MainData,mesh,Eulerx,np.zeros((mesh.points.shape[0],1),dtype=np.float64))[:2]
 	

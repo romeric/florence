@@ -57,15 +57,18 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 		else:
 			ElectricFieldx, ElectricDisplacementx = [],[]
 
+
+		# COMPUTE THE HESSIAN AT THIS GAUSS POINT
+		H_Voigt = MainData.Hessian(MainData.MaterialArgs,StrainTensors,ElectricFieldx,elem,counter)
+		
 		# COMPUTE CAUCHY STRESS TENSOR
 		CauchyStressTensor = []
 		if MainData.AnalysisType == 'Nonlinear':
 			CauchyStressTensor = MainData.CauchyStress(MainData.MaterialArgs,StrainTensors,ElectricFieldx,elem,counter)
 		elif MainData.Prestress:
 			CauchyStressTensor, LastCauchyStressTensor = MainData.CauchyStress(MainData.MaterialArgs,StrainTensors,ElectricFieldx,elem,counter)
+			# print CauchyStressTensor-LastCauchyStressTensor
 
-		# COMPUTE THE HESSIAN AT THIS GAUSS POINT
-		H_Voigt = MainData.Hessian(MainData.MaterialArgs,StrainTensors,ElectricFieldx,elem,counter)
 		# COMPUTE THE TANGENT STIFFNESS MATRIX
 		BDB_1, t = MainData().ConstitutiveStiffnessIntegrand(B,nvar,ndim,MainData.AnalysisType,
 			MainData.Prestress,SpatialGradient[counter,:,:],CauchyStressTensor,ElectricDisplacementx,H_Voigt)

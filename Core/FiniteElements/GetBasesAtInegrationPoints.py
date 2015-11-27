@@ -20,8 +20,8 @@ def GetBasesAtInegrationPoints(C,norder,QuadratureOpt,MeshType):
 		zw = QuadraturePointsWeightsTet.QuadraturePointsWeightsTet(C+1,QuadratureOpt)
 		z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
 	elif MeshType == "tri":
-		# zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(norder,QuadratureOpt) # PUT C+1 OR HIGHER
-		zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(C+2,QuadratureOpt) # PUT C+4 OR HIGHER
+		zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(norder,QuadratureOpt) # PUT C+1 OR HIGHER
+		# zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(C+1,QuadratureOpt) # PUT C+4 OR HIGHER
 		z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
 
 
