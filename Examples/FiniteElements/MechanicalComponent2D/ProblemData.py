@@ -8,23 +8,24 @@ def ProblemData(MainData):
 	MainData.Fields = 'Mechanics'	
 	MainData.Formulation = 'DisplacementApproach'
 	MainData.Analysis = 'Static'
-	# MainData.AnalysisType = 'Linear'
-	MainData.AnalysisType = 'Nonlinear'
+	MainData.AnalysisType = 'Linear'
+	# MainData.AnalysisType = 'Nonlinear'
 
 	# MATERIAL INPUT DATA 
 	# MainData.MaterialArgs.Type = 'LinearModel'
 	# MainData.MaterialArgs.Type = 'IncrementalLinearElastic'
 	# MainData.MaterialArgs.Type = 'IncrementallyLinearisedNeoHookean'
 	# MainData.MaterialArgs.Type = 'IncrementallyLinearisedMooneyRivlin'
+	# MainData.MaterialArgs.Type = 'IncrementallyLinearisedBonetTranservselyIsotropicHyperElastic'
 	# MainData.MaterialArgs.Type = 'NearlyIncompressibleNeoHookean'
 	# MainData.MaterialArgs.Type = 'NeoHookean_1'
 	# MainData.MaterialArgs.Type = 'NeoHookean_2'
-	MainData.MaterialArgs.Type = 'MooneyRivlin'
+	# MainData.MaterialArgs.Type = 'MooneyRivlin'
 	# MainData.MaterialArgs.Type = 'NearlyIncompressibleMooneyRivlin'
 	# MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin' 
-	# MainData.MaterialArgs.Type = 'TranservselyIsotropicLinearElastic'
+	MainData.MaterialArgs.Type = 'TranservselyIsotropicLinearElastic'
 	# MainData.MaterialArgs.Type = 'TranservselyIsotropicHyperElastic'
-	# MainData.MaterialArgs.Type = 'JavierTranservselyIsotropicHyperElastic'
+	# MainData.MaterialArgs.Type = 'BonetTranservselyIsotropicHyperElastic'
 
 	MainData.MaterialArgs.E  = 1.0e5
 	MainData.MaterialArgs.nu = 0.35
@@ -59,18 +60,15 @@ def ProblemData(MainData):
 
 
 	class AnisotropicFibreOrientation(object):
-
-		def __init__(self,mesh):
+		# ndim = 2
+		def __init__(self,mesh,plot=True):
 			
-			assert mesh.elements.shape[1]==3
-
-			import matplotlib.pyplot as plt
-
-			ndim=2
+			# ndim = self.ndim
+			ndim = 2
 
 			edge_elements = mesh.GetElementsWithBoundaryEdgesTri()
 
-			directions = np.zeros((mesh.nelem,ndim),dtype=np.float64)
+			self.directions = np.zeros((mesh.nelem,ndim),dtype=np.float64)
 			for iedge in range(edge_elements.shape[0]):
 				coords = mesh.points[mesh.edges[iedge,:],:]
 				min_x = min(coords[0,0],coords[1,0])
@@ -79,11 +77,11 @@ def ProblemData(MainData):
 				if min_x != coords[0,0]:
 					dist *= -1 
 
-				directions[edge_elements[iedge],:] = dist
+				self.directions[edge_elements[iedge],:] = dist
 
 			for i in range(mesh.nelem):
-				if directions[i,0]==0. and directions[i,1]==0:
-					directions[i,0] = -1. 
+				if self.directions[i,0]==0. and self.directions[i,1]==0:
+					self.directions[i,0] = -1. 
 
 
 			Xs,Ys = [],[]
@@ -95,18 +93,22 @@ def ProblemData(MainData):
 				Ys=np.append(Ys,y_avg)
 
 
-
-			q = plt.quiver(Xs, Ys, directions[:,0], directions[:,1], 
-			           color='Teal', 
-			           headlength=5,width=0.004)
-			# p = plt.quiverkey(q,1,16.5,50,"50 m/s",coordinates='data',color='r')
-
-			plt.triplot(mesh.points[:,0],mesh.points[:,1], mesh.elements[:,:3])
-			plt.axis('equal')
-			plt.show()
+			print self.directions
 
 
+			if plot:
+				import matplotlib.pyplot as plt
+				q = plt.quiver(Xs, Ys, self.directions[:,0], self.directions[:,1], 
+				           color='Teal', 
+				           headlength=5,width=0.004)
+				# p = plt.quiverkey(q,1,16.5,50,"50 m/s",coordinates='data',color='r')
 
+				plt.triplot(mesh.points[:,0],mesh.points[:,1], mesh.elements[:,:3])
+				plt.axis('equal')
+				plt.show()
+
+
+	# PATCH FIBRE ORIENTATION FUNCTION TO MAINDATA
 	MainData.MaterialArgs.AnisotropicFibreOrientation = AnisotropicFibreOrientation
 		
 

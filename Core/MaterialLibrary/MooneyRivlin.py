@@ -53,6 +53,7 @@ class MooneyRivlin(object):
 
 		H_Voigt = Voigt(H_Voigt,1) 
 
+
 		MaterialArgs.H_VoigtSize = H_Voigt.shape[0]
 
 		return H_Voigt

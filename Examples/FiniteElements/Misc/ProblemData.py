@@ -13,17 +13,17 @@ def ProblemData(MainData):
 	MainData.Formulation = 'DisplacementApproach'
 	MainData.Analysis = 'Static'
 	# MainData.Analysis = 'Dynamic'
-	# MainData.AnalysisType = 'Linear'
-	MainData.AnalysisType = 'Nonlinear'
+	MainData.AnalysisType = 'Linear'
+	# MainData.AnalysisType = 'Nonlinear'
 
 
 	# MainData.MaterialArgs.Type = 'LinearModel'
 	# MainData.MaterialArgs.Type = 'IncrementalLinearElastic'
-	# MainData.MaterialArgs.Type = 'IncrementallyLinearisedNeoHookean'
+	MainData.MaterialArgs.Type = 'IncrementallyLinearisedNeoHookean'
 	# MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin_1'
 	# MainData.MaterialArgs.Type = 'NearlyIncompressibleNeoHookean'
 	# MainData.MaterialArgs.Type = 'MooneyRivlin'
-	MainData.MaterialArgs.Type = 'NeoHookean_2'
+	# MainData.MaterialArgs.Type = 'NeoHookean_2'
 
 
 	MainData.MaterialArgs.E  = 1.0e1

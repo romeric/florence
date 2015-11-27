@@ -1,3 +1,5 @@
+# THIS FILE IS PART OF FLORENCE
+from Base import SetPath
 import Core.MaterialLibrary as MatLib 
 from Core.FiniteElements.ElementalMatrices.KinematicMeasures import *
 from Core.MeshGeneration.SalomeMeshReader import ReadMesh
@@ -72,22 +74,16 @@ def PreProcess(MainData,Pr,pwd):
 
 	# mesh.RemoveElements((-0.6,-0.1,1.9,0.6),keep_boundary_only=True,plot_new_mesh=False)
 
-	# print mesh.elements
-	# print mesh.points
-	# print mesh.edges
-	# print mesh.faces
+
 	# mesh.SimplePlot()
 	# mesh.PlotMeshNumberingTri()
 	
-	# sys.exit(0)
-	# print np.linalg.norm(mesh.points,axis=1)
 
 	# mesh.Sphere()
 	# mesh.Sphere(points=14)
 	# mesh.Sphere(points=3)
 	# mesh.RemoveElements((-0.55,-0.1,-0.4,0.1),plot_new_mesh=False) 
 	# mesh.SimplePlot()	
-	# sys.exit(0)
 	# mesh.PlotMeshNumberingTri()
 
 	# un_faces = np.unique(mesh.faces)
@@ -102,7 +98,7 @@ def PreProcess(MainData,Pr,pwd):
 	# mesh.points = np.ascontiguousarray(loadedmat['X'])
 	# mesh.elements = np.ascontiguousarray(loadedmat['T'])-1
 
-	# MainData.MaterialArgs().AnisotropicFibreOrientation(mesh)
+	# mm = MainData.MaterialArgs().AnisotropicFibreOrientation(mesh,plot=False)
 	# exit(0)
 
 	# GENERATE pMESHES FOR HIGH C
@@ -124,74 +120,27 @@ def PreProcess(MainData,Pr,pwd):
 	# ##############################################################################
 	# np.savetxt('/home/roman/Dropbox/time_3.dat',np.array([time()-t_mesh, mesh.points.shape[0]]))
 
-	# print mesh.elements
-	# print mesh.points
-	# print mesh.faces
-	# print mesh.edges
 	# mesh.PlotMeshNumberingTri()
 	# sys.exit("STOPPED")
 
 
+
+	# COMPARE STRINGS WHICH MIGHT CONTAIN UNICODES
+	############################################################################
+	if getattr(str,'casefold',None) is not None:
+		insensitive = lambda str_name: str_name.casefold()
+	else:
+		insensitive = lambda str_name: str_name.upper().lower()  
+
 	# STORE PATHS FOR MAIN, CORE & PROBLEM DIRECTORIES
 	############################################################################
-	class Path(object):
-		"""Getting directory paths"""
+	MainData.Path = SetPath(Pr,pwd,MainData.C,mesh,
+		MainData.Analysis,MainData.AnalysisType,MainData.MaterialArgs.Type)
 
-		TopLevel = pwd
-		Main = pwd+'/Main/FiniteElements'
-		Problem = os.path.dirname(Pr.__file__)
-		Core = pwd+'/Core/FiniteElements'
-
-	MainData.Path = Path
-
-
-	if os.path.isdir(MainData.Path.Problem+'/Results'):
-		print 'Writing results in the problem directory:', MainData.Path.Problem
-	else:
-		print 'Writing the results in problem directory:', MainData.Path.Problem
-		os.mkdir(MainData.Path.Problem+'/Results')
-
-
-	MainData.Path.ProblemResults = MainData.Path.Problem+'/Results/'
-	MainData.Path.ProblemResultsFileNameMATLAB = 'Results_h'+str(mesh.elements.shape[0])+'_C'+str(MainData.C)+'.mat'
-	# FOR NON-LINEAR ANALYSIS - DO NOT ADD THE EXTENSION
-	MainData.Path.ProblemResultsFileNameVTK = 'Results_h'+str(mesh.elements.shape[0])+'_C'+str(MainData.C)
-	# FOR LINEAR ANALYSIS
-	# MainData.Path.ProblemResultsFileNameVTK = 'Results_h'+str(mesh.elements.shape[0])+'_C'+str(MainData.C)+'.vtu'
-
-	# CONSIDERATION OF MATERAIL MODEL
-	MainData.Path.MaterialModel = MainData.MaterialArgs.Type + '_Model/'
-
-	# ANALYSIS SPECIFIC DIRECTORIES
-	if MainData.Analysis == 'Static':
-		if MainData.AnalysisType == 'Linear':
-			MainData.Path.Analysis = 'LinearStatic/'		# ONE STEP/INCREMENT
-		# MainData.Path.LinearDynamic = 'LinearDynamic'
-		elif MainData.AnalysisType == 'Nonlinear':
-			MainData.Path.Analysis = 'NonlinearStatic/' 	# MANY INCREMENTS
-		# Subdirectories
-		if os.path.isdir(MainData.Path.ProblemResults+MainData.Path.Analysis):
-			if not os.path.isdir(MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel):
-				os.mkdir(MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel)
-		else:
-			os.mkdir(MainData.Path.ProblemResults+MainData.Path.Analysis)
-			if not os.path.isdir(MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel):
-				os.mkdir(MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel)
-
-	elif MainData.Analysis == 'Dynamic':
-		MainData.Path.Analysis = 'NonlinearDynamic/'
-		# SUBDIRECTORIES
-		if os.path.isdir(MainData.Path.ProblemResults+MainData.Path.Analysis):
-			if not os.path.isdir(MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel):
-				os.mkdir(MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel)
-		else:
-			os.mkdir(MainData.Path.ProblemResults+MainData.Path.Analysis)
-			if not os.path.isdir(MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel):
-				os.mkdir(MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel)
-	############################################################################
 
 
 	# COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR ALL ELEMENTAL INTEGRATON
+	############################################################################
 	# FOR DISPLACEMENT-BASED FORMULATIONS (GRADIENT-GRADIENT) WE NEED (P-1)+(P-1) TO EXACTLY
 	# INTEGRATE THE INTEGRANDS
 	QuadratureOpt = 3 	# OPTION FOR QUADRATURE TECHNIQUE FOR TRIS AND TETS
@@ -230,7 +179,8 @@ def PreProcess(MainData,Pr,pwd):
 	###########################################################################
 	MainData.Prestress = 0
 	if MainData.MaterialArgs.Type == 'IncrementallyLinearisedNeoHookean' or \
-		MainData.MaterialArgs.Type == 'IncrementallyLinearisedMooneyRivlin':
+		MainData.MaterialArgs.Type == 'IncrementallyLinearisedMooneyRivlin' or \
+		MainData.MaterialArgs.Type == 'IncrementallyLinearisedBonetTranservselyIsotropicHyperElastic':
 		# RUN THE SIMULATION WITHIN A NONLINEAR ROUTINE
 		MainData.Prestress = 1
 		if MainData.Fields == 'Mechanics':
@@ -238,28 +188,14 @@ def PreProcess(MainData,Pr,pwd):
 		elif MainData.Fields == 'ElectroMechanics':
 			Hsize = 9 if MainData.ndim == 3 else 5
 		else:
-			raise KeyError('Hessian size (H_Voigt) size not knownjul')
+			raise KeyError('Hessian size (H_Voigt) size not known')
 
 		MainData.MaterialArgs.H_Voigt = np.zeros((Hsize,Hsize,mesh.nelem,
 			MainData.Quadrature.weights.shape[0]),dtype=np.float64)
 		MainData.MaterialArgs.Sigma = np.zeros((MainData.ndim,MainData.ndim,mesh.nelem,
 			MainData.Quadrature.weights.shape[0]),dtype=np.float64)
-		MainData.MaterialArgs.J = np.ones((mesh.nelem,
-			MainData.Quadrature.weights.shape[0]),dtype=np.float64)
-
-		if MainData.ndim == 2:
-			H_Voigt = MainData.MaterialArgs.lamb*np.array([[1.,1.,0.],[1.,1.,0],[0.,0.,0.]]) +\
-			 			MainData.MaterialArgs.mu*np.array([[2.,0.,0.],[0.,2.,0],[0.,0.,1.]])
-
-			MainData.MaterialArgs.H_Voigt = np.tile(np.tile(H_Voigt[:,:,None],
-				mesh.nelem)[:,:,:,None],MainData.Quadrature.weights.shape[0])
-		else:
-			block_1 = np.zeros((6,6),dtype=np.float64); block_1[:3,:3] = np.ones((3,3))
-			block_2 = np.eye(6,6); block_2[0,0],block_2[1,1],block_2[2,2]=2.,2.,2.
-			H_Voigt = MainData.MaterialArgs.lamb*block_1 + MainData.MaterialArgs.mu*block_2
-			
-			MainData.MaterialArgs.H_Voigt = np.tile(np.tile(H_Voigt[:,:,None],
-				mesh.nelem)[:,:,:,None],MainData.Quadrature.weights.shape[0])
+		# MainData.MaterialArgs.J = np.ones((mesh.nelem,
+			# MainData.Quadrature.weights.shape[0]),dtype=np.float64)
 
 
 	
@@ -295,9 +231,6 @@ def PreProcess(MainData,Pr,pwd):
 	MaterialFuncName = getattr(MatLib,MainData.MaterialArgs.Type,None)
 	if MaterialFuncName is not None:
 		# INITIATE THE FUNCTIONS FROM THIS MEHTOD
-
-		# MainData.nvar, MainData.MaterialModelName = MaterialFuncName(MainData.ndim).Get()
-
 		MaterialInstance = MaterialFuncName(MainData.ndim)
 		MainData.nvar, MainData.MaterialModelName = MaterialInstance.nvar, \
 													type(MaterialInstance).__name__
@@ -307,13 +240,29 @@ def PreProcess(MainData,Pr,pwd):
 		# INITIALISE
 		StrainTensors = KinematicMeasures(np.asarray([np.eye(MainData.ndim,MainData.ndim)]*\
 			MainData.Domain.AllGauss.shape[0]),MainData.AnalysisType)
+
 		MaterialFuncName(MainData.ndim).Hessian(MainData.MaterialArgs,
 			StrainTensors,elem=0,gcounter=0)
+
 	else:
 		raise AttributeError('Material model with name '+MainData.MaterialArgs.Type + ' not found')
 
 	##############################################################################
 
+	# COMPUTE ANISOTROPY DIRECTIONS/STRUCTURAL TENSORS FOR ANISOTROPIC MATERIAL
+	##############################################################################
+	# THIS HAS TO BE CALLED BEFORE CALLING THE ANY HESSIAN METHODS AS 
+	# aniso_obj = MainData.MaterialArgs.AnisotropicFibreOrientation(mesh,plot=False)
+	# MainData.MaterialArgs.AnisotropicOrientations = aniso_obj.directions
+	# exit(0)
+
+	# FOR INCREMENTALLY LINEARISED MODELS COMPUTE HESSIAN FOR THE FIRST INCREMENT
+	##############################################################################
+	if "incrementally" in insensitive(MainData.MaterialArgs.Type):
+		H_Voigt_0 = MainData.MaterialArgs.H_Voigt[:,:,0,0]
+		MainData.MaterialArgs.H_Voigt = np.tile(np.tile(H_Voigt_0[:,:,None],
+			mesh.nelem)[:,:,:,None],MainData.Quadrature.weights.shape[0])
+	##############################################################################
 
 
 
@@ -338,18 +287,21 @@ def PreProcess(MainData,Pr,pwd):
 	# INCREMENTS (CASE INSENSITIVE). GEOMETRY CAN STILL BE UPDATED USING THE 
 	# PRESTRESS FLAG FOR MODELS THAT ARE LINEAR BUT NEED GEOMETRY UPDATE
 
-	# COMPARE STRINGS WHICH MIGHT CONTAIN UNICODES
-	if getattr(str,'casefold',None) is not None:
-		insensitive = lambda str_name: str_name.casefold()
-	else:
-		insensitive = lambda str_name: str_name.upper().lower()  
-
 	if insensitive('Increment') in insensitive(MainData.MaterialArgs.Type) or \
 		insensitive('Linear') in insensitive(MainData.MaterialArgs.Type):
 		# RUN THE SIMULATION WITHIN A NONLINEAR ROUTINE WITHOUT UPDATING THE GEOMETRY
 		MainData.GeometryUpdate = 0
 	else:
 		MainData.GeometryUpdate = 1
+
+
+	# CHECK IF MATERIAL MODEL AND ANALYSIS TYPE ARE COMPATIBLE
+	#############################################################################
+	if "nonlinear" in insensitive(MainData.AnalysisType):
+		if "linear" in  insensitive(MainData.MaterialArgs.Type) or \
+			"increment" in insensitive(MainData.MaterialArgs.Type):
+			raise TypeError("Incompatible material model and analysis type",
+					MainData.MaterialArgs.Type,MainData.AnalysisType)
 
 
 	# CHOOSING THE SOLVER/ASSEMBLY ROUTINES BASED ON PROBLEM SIZE

@@ -35,6 +35,8 @@ class LinearModel(object):
 		#------------------------------------------------------------------------------------#
 		
 		MaterialArgs.H_VoigtSize = MaterialArgs.H_Voigt.shape[0]
+
+
 		return MaterialArgs.H_Voigt
 
 

@@ -32,7 +32,7 @@ class IncrementallyLinearisedMooneyRivlin(object):
 
 		# GET THE JACOBIAN AND HESSIAN FROM THE PREVIOUS STEP - NOTE THAT A COPY HAS TO BE MADE
 		H_Voigt_k = np.copy(MaterialArgs.H_Voigt[:,:,elem,gcounter])
-		J = np.copy(MaterialArgs.J[elem,gcounter]) # OLD J (i.e J_K) IS CALLED J 
+		
 
 		# GET MATERIAL CONSTANTS
 		mu = MaterialArgs.mu
@@ -40,21 +40,22 @@ class IncrementallyLinearisedMooneyRivlin(object):
 
 		I = StrainTensors['I']
 		b = StrainTensors['b'][gcounter]
+		J = StrainTensors['J'][gcounter]
 
 		alpha = mu/4.0
 		beta = mu/4.0
 
-		# Simplified version
+		# HESSIAN AT THE CURRENT STEP - ALL WITH NEWLY EVALUTED KINEMATIC MEASURES
 		H_Voigt = 2.0*beta/J*( 2.0*einsum('ij,kl',b,b) - einsum('ik,jl',b,b) - einsum('il,jk',b,b) ) + \
 			(lamb*(2.0*J-1.0) -4.0*beta)*einsum('ij,kl',I,I) - \
 			(lamb*(J-1.0) -4.0*beta -2.0*alpha/J)*( einsum('ik,jl',I,I) + einsum('il,jk',I,I) )
 
 		# 4TH ORDER ELASTICITY TENSOR
 		MaterialArgs.H_Voigt[:,:,elem,gcounter] = Voigt(H_Voigt,1) 
-		# STORE THE JACOBIAN FOR THE CURRENT STEP
-		MaterialArgs.J[elem,gcounter] = StrainTensors['J'][gcounter]
+
 		# STORE SIZE OF HESSIAN - NEEDED ONLY ONCE
 		MaterialArgs.H_VoigtSize = H_Voigt_k.shape[0] 
+
 
 		# THE HESSIAN IN THE CURRENT STEP IS THE HESSIAN FROM THE PREVIOUS STEP
 		return H_Voigt_k
@@ -66,11 +67,11 @@ class IncrementallyLinearisedMooneyRivlin(object):
 		# GET STRESSES, HESSIANS AND JACOBIANS FROM THE PREVIOUS STEP - NOTE THAT A COPY HAS TO BE MADE
 		Sigma_k = np.copy(MaterialArgs.Sigma[:,:,elem,gcounter])
 		H_Voigt_k = np.copy(MaterialArgs.H_Voigt[:,:,elem,gcounter])
-		J = np.copy(MaterialArgs.J[elem,gcounter])		
 
 		strain = StrainTensors['strain'][gcounter]
 		I = StrainTensors['I']
 		b = StrainTensors['b'][gcounter]
+		J = StrainTensors['J'][gcounter]
 
 		# GET MATERIAL CONSTANTS
 		mu = MaterialArgs.mu

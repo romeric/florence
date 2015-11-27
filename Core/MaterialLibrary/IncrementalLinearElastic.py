@@ -22,8 +22,8 @@ class IncrementalLinearElastic(object):
 		lamb = MaterialArgs.lamb		
 
 		MaterialArgs.H_VoigtSize = MaterialArgs.H_Voigt.shape[0]
+
 		# RETURN THE 4TH ORDER ELASTICITY TENSOR (VOIGT FORM)
-		# return lamb*MaterialArgs.IijIkl+mu*MaterialArgs.IikIjl
 		return MaterialArgs.H_Voigt
 
 

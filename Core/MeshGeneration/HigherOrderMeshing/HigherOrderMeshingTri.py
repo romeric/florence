@@ -39,13 +39,11 @@ def NodeLoopTriNPSP_PARMAP_1(i,sorted_repoints,Xs,invX,tol):
 
 	return dups, Ys, flags
 
-
 def DuplicatesLoopTri(i,reelements,duplicates):
+	# return whereEQ1HitCount(reelements,duplicates[i,1])
 	return whereEQ(reelements,duplicates[i,1])
-	# return v2.whereEQ(reelements,duplicates[i,1])
+	# return whereEQ(reelements[:,3:],duplicates[i,1])
 	# return np.where(reelements==duplicates[i,1])
-	# return np.where(reelements.tolist()==duplicates[i,1])
-
 
 def NodeLoopTriNPSP_PARMAP(sorted_repoints,Xs,invX,iSortX,duplicates,Decimals,tol,nCPU):
 
@@ -184,8 +182,6 @@ def HighOrderMeshTri_UNSTABLE(C,mesh,Decimals=10,Parallel=False,nCPU=1,ComputeAl
 	# LOOP OVER ELEMENTS
 	maxNode = np.max(reelements)
 	for elem in range(0,mesh.elements.shape[0]):
-		# maxNode = np.max(np.unique(reelements)) # BIGGEST BOTTLENECK
-		# maxNode = np.max(reelements)
 
 		# GET HIGHER ORDER COORDINATES
 		if Parallel:
@@ -229,7 +225,6 @@ def HighOrderMeshTri_UNSTABLE(C,mesh,Decimals=10,Parallel=False,nCPU=1,ComputeAl
 	else:
 		duplicates = NodeLoopTriNPSP(sorted_repoints,Xs,invX,iSortX,duplicates,Decimals,tol)
 		# duplicates = NodeLoopTriNPSP_Cython(sorted_repoints,Xs,invX,iSortX,duplicates,Decimals,tol) # CYTHON VERSION
-	# print duplicates
 
 	ParallelTuple5 = []
 	if Parallel:
@@ -309,7 +304,8 @@ def HighOrderMeshTri_UNSTABLE(C,mesh,Decimals=10,Parallel=False,nCPU=1,ComputeAl
 		info = 'tri'
 
 	# print '\npMeshing timing:\n\t\tElement loop 1:\t '+str(telements)+' seconds\n\t\tNode loop:\t\t '+str(tnodes)+\
-	 # ' seconds'+'\n\t\tElement loop 2:\t '+str(telements_2)+' seconds\n\t\tEdge loop:\t\t '+str(tedges)+' seconds\n'
+	#  ' seconds'+'\n\t\tElement loop 2:\t '+str(telements_2)+' seconds\n\t\tEdge loop:\t\t '+str(tedges)+' seconds\n'
+
 
 	return nmesh
 #---------------------------------------------------------------------------------------------------------------------------------------#
@@ -336,7 +332,8 @@ def NodeLoopTri(inode,reelements,repoints):
 	# j = np.where(difference < tol)[0]
 	#--------------------------------------------------------------------------------------------------------------------------------------#
 
-	# difference =  np.linalg.norm( np.repeat(repoints[inode,:].reshape(1,repoints.shape[1]),inode,axis=0) - repoints[:inode,:],axis=1 ).reshape(repoints[:inode,:].shape[0],1)
+	# difference =  np.linalg.norm( np.repeat(repoints[inode,:].reshape(1,
+		# repoints.shape[1]),inode,axis=0) - repoints[:inode,:],axis=1 ).reshape(repoints[:inode,:].shape[0],1)
 	# j = np.asarray(whereLT(difference.reshape(difference.shape[0],1), tol)[0])
 	# j = np.asarray(whereLT(difference, tol)[0])
 

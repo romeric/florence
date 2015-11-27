@@ -70,9 +70,8 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 		BDB_1, t = MainData().ConstitutiveStiffnessIntegrand(B,nvar,ndim,MainData.AnalysisType,
 			MainData.Prestress,SpatialGradient[counter,:,:],CauchyStressTensor,ElectricDisplacementx,H_Voigt)
 		
-
+		# COMPUTE GEOMETRIC STIFFNESS MATRIX
 		if MainData.GeometryUpdate:
-			# COMPUTE GEOMETRIC STIFFNESS MATRIX
 			BDB_2 = MainData().GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],CauchyStressTensor,nvar,ndim)
 			# INTEGRATE STIFFNESS
 			stiffness += (BDB_1+BDB_2)*detJ[counter]
@@ -81,7 +80,7 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 			tractionforce += t*detJ[counter]
 		else:
 			if MainData.Prestress:
-				# COMPUTE GEOMETRIC STIFFNESS MATRIX - RHS IS BDB_2
+				# RHS IS BDB_2 - GEOMETRIC STIFFNESS INTEGRAND
 				BDB_1 += MainData().GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],LastCauchyStressTensor,nvar,ndim)
 			# INTEGRATE STIFFNESS
 			stiffness += (BDB_1)*detJ[counter]

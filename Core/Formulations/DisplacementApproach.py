@@ -59,6 +59,14 @@ def MassIntegrand(self,Bases,N,Minimal,MaterialArgs):
 
 
 
+
+
+
+
+
+
+
+
 # PURE PYTHON INDEXING FOR DISPLACEMENT APPROACH
 #----------------------------------------------------------------------------
 

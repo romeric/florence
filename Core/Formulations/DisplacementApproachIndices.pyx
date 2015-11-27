@@ -17,7 +17,6 @@ cdef inline void FillConstitutiveB_(double *B,double* SpatialGradient,
 
 	elif ndim == 3:
 
-		# print cols, rows
 		for i in range(rows):
 			B[i*cols*nvar] = SpatialGradient[i]
 			B[i*cols*nvar+cols+1] = SpatialGradient[i+rows]

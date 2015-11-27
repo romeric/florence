@@ -28,11 +28,12 @@ class NeoHookean_2(object):
 		mu2 = mu/detF- lamb*(detF-1.0)
 		lamb2 = lamb*(2*detF-1.0) 
 
-		C_Voigt = lamb2*MaterialArgs.vIijIkl+mu2*MaterialArgs.vIikIjl
+		H_Voigt = lamb2*MaterialArgs.vIijIkl+mu2*MaterialArgs.vIikIjl
 
-		MaterialArgs.H_VoigtSize = C_Voigt.shape[0]
 
-		return C_Voigt
+		MaterialArgs.H_VoigtSize = H_Voigt.shape[0]
+
+		return H_Voigt
 
 	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 

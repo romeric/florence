@@ -20,8 +20,8 @@ def ProblemData(MainData):
 	# MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin_1'
 	# MainData.MaterialArgs.Type = 'NearlyIncompressibleNeoHookean'
 	# MainData.MaterialArgs.Type = 'NeoHookean_1'
-	# MainData.MaterialArgs.Type = 'NeoHookean_2'
-	MainData.MaterialArgs.Type = 'MooneyRivlin'
+	MainData.MaterialArgs.Type = 'NeoHookean_2'
+	# MainData.MaterialArgs.Type = 'MooneyRivlin'
 	# MainData.MaterialArgs.Type = 'NearlyIncompressibleMooneyRivlin'
 	# MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin' 
 	# MainData.MaterialArgs.Type = 'TranservselyIsotropicHyperelastic'
@@ -52,13 +52,13 @@ def ProblemData(MainData):
 	MainData.MeshInfo.Reader = "Read"
 	MainData.MeshInfo.Format = "GID"
 	
-	MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch25.dat'
+	# MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch25.dat'
 	# MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch50.dat'
 	# MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch100.dat'
 	# MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch200.dat'
 	# MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch400.dat'
 	# MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch800.dat'
-	# MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch1600.dat'
+	MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch1600.dat'
 		
 
 
