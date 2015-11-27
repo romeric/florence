@@ -447,6 +447,7 @@ class PostProcess(object):
 		vpoints = np.copy(mesh.points)
 		# vpoints	+= TotalDisp[:,:,-1]
 		vpoints	= vpoints + TotalDisp[:,:,-1]
+		# vpoints = mesh.points + np.sum(TotalDisp,axis=2)
 
 		elements = mesh.elements
 
@@ -546,6 +547,7 @@ class PostProcess(object):
 		# print TotalDisp[:,0,-1]
 		# MainData.ScaledJacobian = np.zeros_like(MainData.ScaledJacobian)+1
 		vpoints = np.copy(mesh.points)
+		# print TotalDisp[:,:MainData.ndim,-1]
 		vpoints += TotalDisp[:,:MainData.ndim,-1]
 
 		# plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#ffffee') 

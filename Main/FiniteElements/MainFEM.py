@@ -20,12 +20,12 @@ from Core.FiniteElements.Solvers.Solver import *
 # import Examples.FiniteElements.Annular_Circle_Electromechanics.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle_Nurbs.ProblemData as Pr
-import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
+# import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
 # import Examples.FiniteElements.Wing2D.ProblemData as Pr
 # import Examples.FiniteElements.Sphere.ProblemData as Pr
 # import Examples.FiniteElements.Naca_Isotropic.ProblemData as Pr
 # import Examples.FiniteElements.RAE2822.ProblemData as Pr
-# import Examples.FiniteElements.Misc.ProblemData as Pr
+import Examples.FiniteElements.Misc.ProblemData as Pr
 # import Examples.FiniteElements.Tests.ProblemData as Pr
 
 ###########################################################################################################
@@ -73,6 +73,18 @@ def main(MainData, DictOutput=None, nStep=0):
 	# un_faces = np.unique(mesh.faces)
 	# print np.linalg.norm(vpoints[un_faces,:],axis=1)
 
+	# vpoints = mesh.points + TotalDisp[:,:,-1]
+	# # vpoints = mesh.points
+	# un_faces = np.unique(mesh.edges)
+	# print np.linalg.norm(vpoints[un_faces,:],axis=1)
+
+	# print TotalDisp[:,:,-1]
+	# vpoints = mesh.points + np.sum(TotalDisp,axis=2)
+	# import matplotlib.pyplot as plt
+	# plt.plot(mesh.points[:,0],mesh.points[:,1],'ro')
+	# plt.plot(vpoints[:,0],vpoints[:,1],'bs')
+	# plt.axis('equal')
+	# plt.show()
 
 	if nStep ==1:
 		MainData.mesh = mesh
@@ -80,14 +92,15 @@ def main(MainData, DictOutput=None, nStep=0):
 	
 	#------------------------------------------------------------------------
 
-	if MainData.AssemblyParameters.FailedToConverge==False:
-		if MainData.MaterialArgs.Type != 'IncrementalLinearElastic':
-			PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp,show_plot=False)
-		# PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
-		# import matplotlib.pyplot as plt
-		# plt.show()
-	else:
-		MainData.ScaledJacobian = np.NAN
+	# if MainData.AssemblyParameters.FailedToConverge==False:
+	# 	if MainData.MaterialArgs.Type != 'IncrementalLinearElastic':
+	# 		PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp,show_plot=False)
+	# 		pass
+	# 	# PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
+	# 	# import matplotlib.pyplot as plt
+	# 	# plt.show()
+	# else:
+	# 	MainData.ScaledJacobian = np.NAN
 
 	if DictOutput is not None:
 		DictOutput['MeshPoints_P'+str(MainData.C+1)] = mesh.points

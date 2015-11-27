@@ -47,13 +47,18 @@ def IncrementalLinearElasticitySolver(MainData,mesh,TotalDisp,Eulerx,LoadIncreme
 		dU = PostProcess().TotalComponentSol(MainData,sol,ColumnsIn,ColumnsOut,AppliedDirichletInc,0,K.shape[0]) 
 		# STORE TOTAL SOLUTION DATA
 		TotalDisp[:,:,Increment] += dU
+
 		# UPDATE MESH GEOMETRY
 		mesh.points += TotalDisp[:,:MainData.ndim,Increment]	
 		Eulerx = np.copy(mesh.points)
 
 		# COMPUTE SCALED JACBIAN FOR THE MESH
-		if Increment == LoadIncrement - 1:
-			jacobian_postprocess.MeshQualityMeasures(MainData,mesh,np.zeros_like(TotalDisp[:,:,:Increment+1]),show_plot=False)
+		# if Increment == LoadIncrement - 1:
+		jacobian_postprocess.MeshQualityMeasures(MainData,mesh,np.zeros_like(TotalDisp[:,:,:Increment+1]),show_plot=False)
+
+			# PostProcess.HighOrderPatchPlot(MainData,mesh,np.zeros_like(TotalDisp))
+			# import matplotlib.pyplot as plt
+			# plt.show()
 
 	jacobian_postprocess.is_scaledjacobian_computed
 	MainData.isScaledJacobianComputed = True

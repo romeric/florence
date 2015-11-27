@@ -15,8 +15,8 @@ def ProblemData(MainData):
 
 	# MATERIAL INPUT DATA 
 	# MainData.MaterialArgs.Type = 'LinearModel'
-	# MainData.MaterialArgs.Type = 'IncrementalLinearElastic'
-	MainData.MaterialArgs.Type = 'IncrementallyLinearisedNeoHookean'
+	MainData.MaterialArgs.Type = 'IncrementalLinearElastic'
+	# MainData.MaterialArgs.Type = 'IncrementallyLinearisedNeoHookean'
 	# MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin_1'
 	# MainData.MaterialArgs.Type = 'NearlyIncompressibleNeoHookean'
 	# MainData.MaterialArgs.Type = 'NeoHookean_1'
