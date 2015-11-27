@@ -1,8 +1,14 @@
 from time import time
 import numpy as np
 import numpy.linalg as la 
-# from scipy.sparse.linalg import spsolve, cg, cgs, bicg, bicgstab, gmres, lgmres, minres
-from scipy.sparse.linalg import spsolve, bicgstab, onenormest 
+# from scipy.sparse.linalg import spsolve, cg, cgs, bicg, bicgstab, gmres, lgmres, minres, lobpcg
+from scipy.sparse.linalg import spsolve, bicgstab, gmres, onenormest 
+try:
+	from scikits.umfpack import spsolve as umfpack_spsolve
+	umfpack_solver = True
+except ImportError:
+	umfpack_solver = False
+
 from Core.FiniteElements.ApplyDirichletBoundaryConditions import *
 from Core.FiniteElements.StaticCondensationGlobal import *
 from Core.FiniteElements.PostProcess import *
@@ -35,6 +41,7 @@ def NewtonRaphson(MainData,Increment,K,NodalForces,Residual,
 				# MainData.solve.condA = np.linalg.cond(K_b.todense()) # REMOVE THIS
 				MainData.solve.condA = onenormest(K_b) # REMOVE THIS
 			sol = spsolve(K_b,-F_b)
+			# sol = umfpack_spsolve(K_b,-F_b)
 		else:
 			sol = bicgstab(K_b,-F_b,tol=MainData.solve.tol)[0]
 

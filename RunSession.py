@@ -47,7 +47,7 @@ if __name__ == "__main__":
 	__MEMORY__ = 'SHARED'
 	# __MEMORY__ = 'DISTRIBUTED'
 	
-	MainData.C = 5
+	MainData.C = 1
 	MainData.norder = 2
 	MainData.plot = (0, 3)
 	nrplot = (0, 'last')

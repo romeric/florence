@@ -1,4 +1,5 @@
 # THIS FILE IS PART OF FLORENCE
+from warnings import warn
 from Base import SetPath
 import Core.MaterialLibrary as MatLib 
 from Core.FiniteElements.ElementalMatrices.KinematicMeasures import *
@@ -175,12 +176,18 @@ def PreProcess(MainData,Pr,pwd):
 	#############################################################################
 	#############################################################################
 
+	# CHECK IF MATERIAL MODEL AND ANALYSIS TYPE ARE COMPATIBLE
+	#############################################################################
+	if "nonlinear" in insensitive(MainData.AnalysisType):
+		if "linear" in  insensitive(MainData.MaterialArgs.Type) or \
+			"increment" in insensitive(MainData.MaterialArgs.Type):
+			warn("Incompatible material model and analysis type. I'm going to change analysis type")
+			MainData.AnalysisType = "Linear"
+
 	# STRESS COMPUTATION FLAGS FOR LINEARISED ELASTICITY
 	###########################################################################
 	MainData.Prestress = 0
-	if MainData.MaterialArgs.Type == 'IncrementallyLinearisedNeoHookean' or \
-		MainData.MaterialArgs.Type == 'IncrementallyLinearisedMooneyRivlin' or \
-		MainData.MaterialArgs.Type == 'IncrementallyLinearisedBonetTranservselyIsotropicHyperElastic':
+	if "incrementally" in insensitive(MainData.MaterialArgs.Type):
 		# RUN THE SIMULATION WITHIN A NONLINEAR ROUTINE
 		MainData.Prestress = 1
 		if MainData.Fields == 'Mechanics':
@@ -293,15 +300,6 @@ def PreProcess(MainData,Pr,pwd):
 		MainData.GeometryUpdate = 0
 	else:
 		MainData.GeometryUpdate = 1
-
-
-	# CHECK IF MATERIAL MODEL AND ANALYSIS TYPE ARE COMPATIBLE
-	#############################################################################
-	if "nonlinear" in insensitive(MainData.AnalysisType):
-		if "linear" in  insensitive(MainData.MaterialArgs.Type) or \
-			"increment" in insensitive(MainData.MaterialArgs.Type):
-			raise TypeError("Incompatible material model and analysis type",
-					MainData.MaterialArgs.Type,MainData.AnalysisType)
 
 
 	# CHOOSING THE SOLVER/ASSEMBLY ROUTINES BASED ON PROBLEM SIZE

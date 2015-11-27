@@ -67,8 +67,8 @@ class IncrementallyLinearisedMooneyRivlin(object):
 		# GET STRESSES, HESSIANS AND JACOBIANS FROM THE PREVIOUS STEP - NOTE THAT A COPY HAS TO BE MADE
 		Sigma_k = np.copy(MaterialArgs.Sigma[:,:,elem,gcounter])
 		H_Voigt_k = np.copy(MaterialArgs.H_Voigt[:,:,elem,gcounter])
-
 		strain = StrainTensors['strain'][gcounter]
+
 		I = StrainTensors['I']
 		b = StrainTensors['b'][gcounter]
 		J = StrainTensors['J'][gcounter]

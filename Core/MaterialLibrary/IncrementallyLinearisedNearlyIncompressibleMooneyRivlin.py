@@ -7,8 +7,9 @@ from Core.Supplementary.Tensors import *
 #####################################################################################################
 
 
-class NearlyIncompressibleMooneyRivlin(object):
-	"""	A nearly incompressible Mooney-Rivlin material model whose energy functional is given by:
+class IncrementallyLinearisedNearlyIncompressibleMooneyRivlin(object):
+	"""	An incrementally linearised version of nearly incompressible Mooney-Rivlin material model 
+		whose energy functional is given by:
 		
 			W(C,G,J**2) = alpha*J**(-2/3)*(C:I) + beta*J**(-2)*(G:I)**(3/2) + kappa/2*(J-1)**2
 
@@ -19,11 +20,14 @@ class NearlyIncompressibleMooneyRivlin(object):
 		"""
 
 	def __init__(self, ndim):
-		super(NearlyIncompressibleMooneyRivlin, self).__init__()
+		super(IncrementallyLinearisedNearlyIncompressibleMooneyRivlin, self).__init__()
 		self.ndim = ndim
 		self.nvar = self.ndim
 
 	def Hessian(self,MaterialArgs,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
+
+		# GET THE JACOBIAN AND HESSIAN FROM THE PREVIOUS STEP - NOTE THAT A COPY HAS TO BE MADE
+		H_Voigt_k = np.copy(MaterialArgs.H_Voigt[:,:,elem,gcounter])
 
 		einsum = np.einsum
 		sqrt = np.sqrt
@@ -76,16 +80,21 @@ class NearlyIncompressibleMooneyRivlin(object):
 			kappa*(2.0*J-1)*MaterialArgs.Iijkl - kappa*(J-1)*MaterialArgs.Iikjl	
 
 
-		H_Voigt = Voigt( H_Voigt ,1)
+		MaterialArgs.H_Voigt[:,:,elem,gcounter] = Voigt( H_Voigt ,1)
 		
-		MaterialArgs.H_VoigtSize = H_Voigt.shape[0]
+		MaterialArgs.H_VoigtSize = H_Voigt_k.shape[0]
 
 
-		return H_Voigt
+		return H_Voigt_k
 
 
 
 	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
+
+		# GET STRESSES, HESSIANS AND JACOBIANS FROM THE PREVIOUS STEP - NOTE THAT A COPY HAS TO BE MADE
+		Sigma_k = np.copy(MaterialArgs.Sigma[:,:,elem,gcounter])
+		H_Voigt_k = np.copy(MaterialArgs.H_Voigt[:,:,elem,gcounter])
+		strain = StrainTensors['strain'][gcounter]
 
 		sqrt = np.sqrt
 
@@ -117,11 +126,12 @@ class NearlyIncompressibleMooneyRivlin(object):
 			trb = trace(b)
 			trg = trace(g)
 
-		stress = 2.*alpha*J**(-5/3.)*b - 2./3.*alpha*J**(-5/3.)*(trb)*I + \
+		MaterialArgs.Sigma[:,:,elem,gcounter] = 2.*alpha*J**(-5/3.)*b - 2./3.*alpha*J**(-5/3.)*(trb)*I + \
 				beta*J**(-3)*(trg)**(3./2.)*I - 3*beta*J**(-3)*(trg)**(1./2.)*g + \
 				+(kappa*(J-1.0))*I 
 
-		return stress
+		# COMPUTE INCREMENTALLY LINEARISED STRESS BASED ON STRESS_K AND RETURN 
+		return IncrementallyLinearisedStress(Sigma_k,H_Voigt_k,I,strain,StrainTensors['Gradu'][gcounter]), Sigma_k
 
 	def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 		ndim = StrainTensors['I'].shape[0]

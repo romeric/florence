@@ -7,7 +7,6 @@ pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
 St = imp.load_source('FiniteElements',pwd+'/FiniteElements/StaticCondensation.py')
 
 def FindIndices(A):
-	# NEW FASTER APPROACH - NO TEMPORARY
 	return np.repeat(np.arange(0,A.shape[0]),A.shape[0],axis=0), np.tile(np.arange(0,A.shape[0]),A.shape[0]), A.ravel()
 
 

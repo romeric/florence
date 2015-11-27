@@ -10,27 +10,27 @@ def ProblemData(MainData):
 	MainData.Formulation = 'DisplacementApproach'
 	MainData.Analysis = 'Static'
 	# MainData.Analysis = 'Dynamic'
-	# MainData.AnalysisType = 'Linear'
-	MainData.AnalysisType = 'Nonlinear'
+	MainData.AnalysisType = 'Linear'
+	# MainData.AnalysisType = 'Nonlinear'
 
 	# MATERIAL INPUT DATA 
 	# MainData.MaterialArgs.Type = 'LinearModel'
 	# MainData.MaterialArgs.Type = 'IncrementalLinearElastic'
-	# MainData.MaterialArgs.Type = 'IncrementallyLinearisedNeoHookean'
+	MainData.MaterialArgs.Type = 'IncrementallyLinearisedNeoHookean'
 	# MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin_1'
 	# MainData.MaterialArgs.Type = 'NearlyIncompressibleNeoHookean'
 	# MainData.MaterialArgs.Type = 'NeoHookean_1'
-	MainData.MaterialArgs.Type = 'NeoHookean_2'
+	# MainData.MaterialArgs.Type = 'NeoHookean_2'
 	# MainData.MaterialArgs.Type = 'MooneyRivlin'
 	# MainData.MaterialArgs.Type = 'NearlyIncompressibleMooneyRivlin'
 	# MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin' 
-	# MainData.MaterialArgs.Type = 'TranservselyIsotropicHyperelastic'
+	# MainData.MaterialArgs.Type = 'TranservselyIsotropicHyperElastic'
 
 	# E = MainData.E 
 	# nu = MainData.nu 
 
 	MainData.MaterialArgs.E  = 1.0e5
-	MainData.MaterialArgs.nu = 0.35
+	MainData.MaterialArgs.nu = 0.495
 
 	E = MainData.MaterialArgs.E
 	nu = MainData.MaterialArgs.nu
@@ -52,13 +52,13 @@ def ProblemData(MainData):
 	MainData.MeshInfo.Reader = "Read"
 	MainData.MeshInfo.Format = "GID"
 	
-	# MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch25.dat'
+	MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch25.dat'
 	# MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch50.dat'
 	# MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch100.dat'
 	# MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch200.dat'
 	# MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch400.dat'
 	# MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch800.dat'
-	MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch1600.dat'
+	# MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch1600.dat'
 		
 
 
