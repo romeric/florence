@@ -1,7 +1,6 @@
 from time import time
 import numpy as np
 from Core.FiniteElements.Solvers.NewtonRaphsonStatic import *
-from Core.FiniteElements.Solvers.LinearSolver import *
 from Core.FiniteElements.ApplyDirichletBoundaryConditions import *
 
 
@@ -12,7 +11,6 @@ def StaticSolver(MainData,LoadIncrement,K,DirichletForces,NeumannForces,
 	LoadFactor = 1./LoadIncrement
 	AppliedDirichletInc = np.zeros(AppliedDirichlet.shape[0])
 	
-	
 	for Increment in range(LoadIncrement):
 
 		DeltaF = LoadFactor*NeumannForces
@@ -20,7 +18,6 @@ def StaticSolver(MainData,LoadIncrement,K,DirichletForces,NeumannForces,
 		# RESIDUAL FORCES CONTAIN CONTRIBUTION FROM BOTH NEUMANN AND DIRICHLET
 		Residual -= (DeltaF + LoadFactor*DirichletForces)
 		AppliedDirichletInc += LoadFactor*AppliedDirichlet
-
 
 		# CALL THE LINEAR/NONLINEAR SOLVER
 		if MainData.AnalysisType == 'Nonlinear':
@@ -43,12 +40,5 @@ def StaticSolver(MainData,LoadIncrement,K,DirichletForces,NeumannForces,
 				MainData.solve.condA = np.NAN
 				MainData.solve.scaledA = np.NAN
 				break
-
-		elif MainData.AnalysisType == 'Linear':
-			TotalDisp = LinearSolver(MainData,Increment,K,
-				DirichletForces,NeumannForces,NodalForces,Residual,mesh,TotalDisp,Eulerx,
-				ColumnsIn,ColumnsOut,AppliedDirichlet,AppliedDirichletInc)
-
-
 
 	return TotalDisp

@@ -41,20 +41,13 @@ def MainSolver(MainData,mesh):
 	DirichletForces = np.zeros((mesh.points.shape[0]*MainData.nvar,1),dtype=np.float64)
 
 	# ADOPT A DIFFERENT PATH FOR INCREMENTAL LINEAR ELASTICITY
-	if MainData.MaterialArgs.Type == 'IncrementalLinearElastic':
+	if MainData.Fields == "Mechanics" and MainData.AnalysisType != "Nonlinear":		
+		# MAKE A COPY OF MESH, AS MESH POINTS WILL BE OVERWRITTEN
 		vmesh = deepcopy(mesh)
 		TotalDisp = IncrementalLinearElasticitySolver(MainData,vmesh,TotalDisp,
 			Eulerx,LoadIncrement,NeumannForces,ColumnsIn,ColumnsOut,AppliedDirichlet)
 
 		return TotalDisp
-
-	elif MainData.MaterialArgs.Type == 'IncrementallyLinearisedNeoHookean':
-		vmesh = deepcopy(mesh)
-		TotalDisp = LinearSolver(MainData,vmesh,TotalDisp,
-			Eulerx,LoadIncrement,NeumannForces,ColumnsIn,ColumnsOut,AppliedDirichlet)
-
-		return TotalDisp
-
 
 	# ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES
 	K,TractionForces = Assembly(MainData,mesh,Eulerx,np.zeros((mesh.points.shape[0],1),dtype=np.float64))[:2]

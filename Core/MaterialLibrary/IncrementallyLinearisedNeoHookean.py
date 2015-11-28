@@ -28,10 +28,6 @@ class IncrementallyLinearisedNeoHookean(object):
 
 	def Hessian(self,MaterialArgs,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 
-		# GET THE JACOBIAN AND HESSIAN FROM THE PREVIOUS STEP - NOTE THAT A COPY HAS TO BE MADE
-		# H_Voigt_k = np.copy(MaterialArgs.H_Voigt[:,:,elem,gcounter])
-		# J = np.copy(MaterialArgs.J[elem,gcounter])
-
 		# GET MATERIAL CONSTANTS
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
@@ -42,28 +38,18 @@ class IncrementallyLinearisedNeoHookean(object):
 		mu2 = mu/J - lamb*(J-1.0)
 		lamb2 = lamb*(2.0*J-1.0) 
 		
-
 		# 4TH ORDER ELASTICITY TENSOR - ALL EVALUTED WITH NEWLY EVALUATED KINEMATIC MEASURES
 		# MaterialArgs.H_Voigt[:,:,elem,gcounter] = lamb2*MaterialArgs.vIijIkl+mu2*MaterialArgs.vIikIjl
 		H_Voigt = lamb2*MaterialArgs.vIijIkl+mu2*MaterialArgs.vIikIjl
-		# STORE THE JACOBIAN FOR THE CURRENT STEP
-		# MaterialArgs.J[elem,gcounter] = StrainTensors['J'][gcounter]
 		# STORE SIZE OF HESSIAN - NEEDED ONLY ONCE
 		MaterialArgs.H_VoigtSize = H_Voigt.shape[0] 
 
-
-		# THE HESSIAN IN THE CURRENT STEP IS THE HESSIAN FROM THE PREVIOUS STEP
-		# return H_Voigt_k
-		# return MaterialArgs.H_Voigt[:,:,elem,gcounter]
 		return H_Voigt
 
 
 
 	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 
-
-		# H_Voigt_k = MaterialArgs.H_Voigt[:,:,elem,gcounter]
-		# strain = StrainTensors['strain'][gcounter]
 		I = StrainTensors['I']
 		J = StrainTensors['J'][gcounter]
 		b = StrainTensors['b'][gcounter]
@@ -75,12 +61,7 @@ class IncrementallyLinearisedNeoHookean(object):
 		# COMPUTE THE STRESS AT THE CURRENT STEP AND STORE
 		stress = 1.0*mu/J*b+(lamb*(J-1.0)-mu/J)*I
 
-		# print stress
-
-		# COMPUTE INCREMENTALLY LINEARISED STRESS BASED ON STRESS_K AND RETURN
-		# return IncrementallyLinearisedStress(stress,H_Voigt_k,I,strain,StrainTensors['Gradu'][gcounter]), stress
-		return stress, stress
-		# return IncrementallyLinearisedStress(Sigma_k,H_Voigt_k,I,strain,StrainTensors['Gradu'][gcounter]), Sigma_k
+		return stress
 		
 
 

@@ -30,7 +30,7 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 
 
 	# UPDATE/NO-UPDATE GEOMETRY
-	if MainData.GeometryUpdate or MainData.Prestress:
+	if MainData.GeometryUpdate:
 		# MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
 		ParentGradientx = np.einsum('ijk,jl->kil',MainData.Domain.Jm,EulerELemCoords)
 		# SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
@@ -63,11 +63,8 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 		
 		# COMPUTE CAUCHY STRESS TENSOR
 		CauchyStressTensor = []
-		if MainData.AnalysisType == 'Nonlinear':
+		if MainData.GeometryUpdate:
 			CauchyStressTensor = MainData.CauchyStress(MainData.MaterialArgs,StrainTensors,ElectricFieldx,elem,counter)
-		elif MainData.Prestress:
-			CauchyStressTensor, LastCauchyStressTensor = MainData.CauchyStress(MainData.MaterialArgs,StrainTensors,ElectricFieldx,elem,counter)
-			# print CauchyStressTensor-LastCauchyStressTensor
 
 		# COMPUTE THE TANGENT STIFFNESS MATRIX
 		BDB_1, t = MainData().ConstitutiveStiffnessIntegrand(B,nvar,ndim,MainData.AnalysisType,
@@ -75,21 +72,13 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 		
 		# COMPUTE GEOMETRIC STIFFNESS MATRIX
 		if MainData.GeometryUpdate:
-			BDB_2 = MainData().GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],CauchyStressTensor,nvar,ndim)
-			# INTEGRATE STIFFNESS
-			stiffness += (BDB_1+BDB_2)*detJ[counter]
+			BDB_1 += MainData().GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],CauchyStressTensor,nvar,ndim)
 			# stiffness += (BDB_1)*detJ[counter]
 			# INTEGRATE TRACTION FORCE
 			tractionforce += t*detJ[counter]
-		else:
-			if MainData.Prestress:
-				# RHS IS BDB_2 - GEOMETRIC STIFFNESS INTEGRAND
-				BDB_1 += MainData().GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],LastCauchyStressTensor,nvar,ndim)
-			# INTEGRATE STIFFNESS
-			stiffness += (BDB_1)*detJ[counter]
-			if MainData.AnalysisType == 'Nonlinear' or MainData.Prestress:
-				# INTEGRATE TRACTION FORCE
-				tractionforce += t*detJ[counter]
+
+		# INTEGRATE STIFFNESS
+		stiffness += BDB_1*detJ[counter]
 
 
 
@@ -106,9 +95,6 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 		# if issym:
 			# print u'\u2713'.encode('utf8')+' : ', 'Elemental stiffness matrix is symmetric'
 
-	# if elem==0:
-		# print stiffness[:4,:4]
-		# print stiffness[1:8:2,1:8:2]
 
 	return stiffness, tractionforce 
 #-------------------------------------------------------------------------------------------------------------------#
