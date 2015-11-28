@@ -184,31 +184,13 @@ def PreProcess(MainData,Pr,pwd):
 			warn("Incompatible material model and analysis type. I'm going to change analysis type")
 			MainData.AnalysisType = "Linear"
 
-	# STRESS COMPUTATION FLAGS FOR LINEARISED ELASTICITY
-	###########################################################################
-	MainData.Prestress = 0
-	if "incrementally" in insensitive(MainData.MaterialArgs.Type):
-		# RUN THE SIMULATION WITHIN A NONLINEAR ROUTINE
-		MainData.Prestress = 1
-		if MainData.Fields == 'Mechanics':
-			Hsize = 6 if MainData.ndim == 3 else 3
-		elif MainData.Fields == 'ElectroMechanics':
-			Hsize = 9 if MainData.ndim == 3 else 5
-		else:
-			raise KeyError('Hessian size (H_Voigt) size not known')
-
-		MainData.MaterialArgs.H_Voigt = np.zeros((Hsize,Hsize,mesh.nelem,
-			MainData.Quadrature.weights.shape[0]),dtype=np.float64)
-		MainData.MaterialArgs.Sigma = np.zeros((MainData.ndim,MainData.ndim,mesh.nelem,
-			MainData.Quadrature.weights.shape[0]),dtype=np.float64)
-		# MainData.MaterialArgs.J = np.ones((mesh.nelem,
-			# MainData.Quadrature.weights.shape[0]),dtype=np.float64)
 
 
-	
 	# COMPUTE 4TH ORDER IDENTITY TENSORS/HESSIANS BEFORE-HAND 
 	#############################################################################
-	if MainData.MaterialArgs.Type == 'LinearModel' or MainData.MaterialArgs.Type == 'IncrementalLinearElastic':
+	if MainData.MaterialArgs.Type == 'LinearModel' or \
+		MainData.MaterialArgs.Type == 'IncrementalLinearElastic':
+
 		if MainData.ndim == 2:
 			MainData.MaterialArgs.H_Voigt = MainData.MaterialArgs.lamb*np.array([[1.,1.,0.],[1.,1.,0],[0.,0.,0.]]) +\
 			 MainData.MaterialArgs.mu*np.array([[2.,0.,0.],[0.,2.,0],[0.,0.,1.]])
@@ -263,14 +245,6 @@ def PreProcess(MainData,Pr,pwd):
 	# MainData.MaterialArgs.AnisotropicOrientations = aniso_obj.directions
 	# exit(0)
 
-	# FOR INCREMENTALLY LINEARISED MODELS COMPUTE HESSIAN FOR THE FIRST INCREMENT
-	##############################################################################
-	if "incrementally" in insensitive(MainData.MaterialArgs.Type):
-		H_Voigt_0 = MainData.MaterialArgs.H_Voigt[:,:,0,0]
-		MainData.MaterialArgs.H_Voigt = np.tile(np.tile(H_Voigt_0[:,:,None],
-			mesh.nelem)[:,:,:,None],MainData.Quadrature.weights.shape[0])
-	##############################################################################
-
 
 
 	# FORMULATION TYPE FLAGS
@@ -288,18 +262,39 @@ def PreProcess(MainData,Pr,pwd):
 
 
 
+
+
+	# STRESS COMPUTATION FLAGS FOR LINEARISED ELASTICITY
+	###########################################################################
+	MainData.Prestress = 0
+	if "nonlinear" not in insensitive(MainData.AnalysisType) and MainData.Fields == "Mechanics":
+		# RUN THE SIMULATION WITHIN A NONLINEAR ROUTINE
+		if MainData.MaterialArgs.Type != "IncrementalLinearElastic" and \
+			MainData.MaterialArgs.Type != "LinearModel":
+			MainData.Prestress = 1
+		else:
+			MainData.Prestress = 0
+
 	# GEOMETRY UPDATE FLAGS
 	###########################################################################
-	# DO NOT UPDATE THE GEOMETRY IF THE MATERIAL MODEL NAME CONTAINS LINEAR OR
-	# INCREMENTS (CASE INSENSITIVE). GEOMETRY CAN STILL BE UPDATED USING THE 
-	# PRESTRESS FLAG FOR MODELS THAT ARE LINEAR BUT NEED GEOMETRY UPDATE
+	# DO NOT UPDATE THE GEOMETRY IF THE MATERIAL MODEL NAME CONTAINS 
+	# INCREMENT (CASE INSENSITIVE). VALID FOR ELECTROMECHANICS FORMULATION. 
+	MainData.GeometryUpdate = 0
+	if MainData.Fields == "ElectroMechanics":
+		if "Increment" in insensitive(MainData.MaterialArgs.Type):
+			# RUN THE SIMULATION WITHIN A NONLINEAR ROUTINE WITHOUT UPDATING THE GEOMETRY
+			MainData.GeometryUpdate = 0
+		else:
+			MainData.GeometryUpdate = 1
+	elif MainData.Fields == "Mechanics":
+		if MainData.AnalysisType == "Nonlinear" or MainData.Prestress:
+			MainData.GeometryUpdate = 1
 
-	if insensitive('Increment') in insensitive(MainData.MaterialArgs.Type) or \
-		insensitive('Linear') in insensitive(MainData.MaterialArgs.Type):
-		# RUN THE SIMULATION WITHIN A NONLINEAR ROUTINE WITHOUT UPDATING THE GEOMETRY
-		MainData.GeometryUpdate = 0
-	else:
-		MainData.GeometryUpdate = 1
+
+
+
+
+
 
 
 	# CHOOSING THE SOLVER/ASSEMBLY ROUTINES BASED ON PROBLEM SIZE

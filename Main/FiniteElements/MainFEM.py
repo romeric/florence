@@ -20,12 +20,12 @@ from Core.FiniteElements.Solvers.Solver import *
 # import Examples.FiniteElements.Annular_Circle_Electromechanics.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle_Nurbs.ProblemData as Pr
-# import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
+import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
 # import Examples.FiniteElements.Wing2D.ProblemData as Pr
 # import Examples.FiniteElements.Sphere.ProblemData as Pr
 # import Examples.FiniteElements.Naca_Isotropic.ProblemData as Pr
 # import Examples.FiniteElements.RAE2822.ProblemData as Pr
-import Examples.FiniteElements.Misc.ProblemData as Pr
+# import Examples.FiniteElements.Misc.ProblemData as Pr
 # import Examples.FiniteElements.Tests.ProblemData as Pr
 
 ###########################################################################################################
@@ -92,15 +92,15 @@ def main(MainData, DictOutput=None, nStep=0):
 	
 	#------------------------------------------------------------------------
 
-	# if MainData.AssemblyParameters.FailedToConverge==False:
-	# 	if MainData.MaterialArgs.Type != 'IncrementalLinearElastic':
-	# 		PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp,show_plot=False)
-	# 		pass
-	# 	# PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
-	# 	# import matplotlib.pyplot as plt
-	# 	# plt.show()
-	# else:
-	# 	MainData.ScaledJacobian = np.NAN
+	if MainData.AssemblyParameters.FailedToConverge==False:
+		if MainData.AnalysisType == 'Nonlinear':
+			PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp,show_plot=False)
+			pass
+		# PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
+		# import matplotlib.pyplot as plt
+		# plt.show()
+	else:
+		MainData.ScaledJacobian = np.NAN
 
 	if DictOutput is not None:
 		DictOutput['MeshPoints_P'+str(MainData.C+1)] = mesh.points
@@ -116,7 +116,8 @@ def main(MainData, DictOutput=None, nStep=0):
 	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_nnsphere2_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%10.9f',delimiter=',')
 	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/vpoints_nnsphere2_p'+str(MainData.C+1)+'.dat', vpoints,fmt='%10.9f',delimiter=',')
 	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/faces_nnsphere2_p'+str(MainData.C+1)+'.dat', mesh.faces,fmt='%d',delimiter=',')
-	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/sjacobian_nnsphere2_p'+str(MainData.C+1)+'.dat', MainData.ScaledJacobian,fmt='%8.9f',delimiter=',')
+	# np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/sjacobian_nnsphere2_p'+str(MainData.C+1)+'.dat', 
+		# MainData.ScaledJacobian,fmt='%8.9f',delimiter=',')
 
 
 	#---------------------------------------------------------------------------------

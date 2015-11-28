@@ -1,4 +1,5 @@
 import numpy as np
+from warnings import warn
 
 def InitiateNonlinearAnalysisData(MainData,mesh):
 	
@@ -9,6 +10,11 @@ def InitiateNonlinearAnalysisData(MainData,mesh):
 		LoadIncrement = 7
 	else:
 		LoadIncrement = MainData.BoundaryData.nstep
+
+
+	if MainData.MaterialArgs.Type == "LinearModel" and LoadIncrement > 1:
+		warn("LinearModel cannot be solved in multiple increments. I am changing LoadIncrement to 1")
+		LoadIncrement = 1
 	
 	class AssemblyParameters(object):
 		"""Information about load increments, iterations and such"""
@@ -20,6 +26,7 @@ def InitiateNonlinearAnalysisData(MainData,mesh):
 		GeometryUpdate = 0
 		MaxIter = 50
 		FailedToConverge = False
+
 
 
 	MainData.AssemblyParameters = AssemblyParameters
