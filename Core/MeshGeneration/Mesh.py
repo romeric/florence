@@ -498,6 +498,27 @@ class Mesh(object):
 
 
 
+
+	def ReadHighOrderMesh(self,filename,C,element_type="tri"):
+		"""Convenience function for reading high order mesh"""
+
+		if element_type=="tri":
+
+			self.elements = np.loadtxt(filename+"_elements_P"+str(C+1)+".dat")
+			self.edges = np.loadtxt(filename+"_edges_P"+str(C+1)+".dat")
+			self.points = np.loadtxt(filename+"_points_P"+str(C+1)+".dat")
+			self.nelem = self.elements.shape[0]
+			self.element_type = element_type
+
+			self.elements = self.elements.astype(np.uint64)
+			self.edges = self.edges.astype(np.uint64)
+
+		elif element_type=="tet":
+			pass
+
+
+
+
 	def ReadGIDMesh(self,filename,mesh_type,polynomial_order = 0):
 		"""Read GID meshes"""
 
@@ -616,8 +637,8 @@ class Mesh(object):
 		for i in range(self.edges.shape[0]):
 			x = []
 			for j in range(self.edges.shape[1]):
-				# x = np.append(x,np.where(self.elements==self.edges[i,j])[0])
-				x = np.append(x,whereEQ(self.elements,self.edges[i,j])[0])
+				x = np.append(x,np.where(self.elements==self.edges[i,j])[0])
+				# x = np.append(x,whereEQ(self.elements,self.edges[i,j])[0])
 			# x = x.astype(np.int64)
 			for k in range(len(x)):
 				y = np.where(x==x[k])[0]

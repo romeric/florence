@@ -27,8 +27,7 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 
 	# COMPUTE REMAINING KINEMATIC MEASURES
 	StrainTensors = KinematicMeasures(F,MainData.AnalysisType)
-
-
+	
 	# UPDATE/NO-UPDATE GEOMETRY
 	if MainData.GeometryUpdate:
 		# MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
@@ -43,6 +42,7 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 		# COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
 		detJ = np.einsum('i,i->i',MainData.Domain.AllGauss[:,0],np.abs(la.det(ParentGradientX)))
 
+	
 
 	# LOOP OVER GAUSS POINTS
 	for counter in range(MainData.Domain.AllGauss.shape[0]): 
@@ -79,7 +79,6 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 
 		# INTEGRATE STIFFNESS
 		stiffness += BDB_1*detJ[counter]
-
 
 
 	# CHECK FOR SYMMETRY OF STIFFNESS MATRIX

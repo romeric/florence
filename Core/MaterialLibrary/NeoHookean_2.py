@@ -13,13 +13,14 @@ class NeoHookean_2(object):
 
 		"""
 
-	def __init__(self, ndim):
+	def __init__(self, ndim, MaterialArgs=None):
 		super(NeoHookean_2, self).__init__()
 		self.ndim = ndim
 		self.nvar = self.ndim
 
 
 	def Hessian(self,MaterialArgs,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
+		
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
 		I = StrainTensors['I']

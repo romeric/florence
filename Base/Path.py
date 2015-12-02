@@ -1,6 +1,6 @@
 import os, sys
 
-def SetPath(Pr,pwd,C,mesh,Analysis,AnalysisType, MaterialArgsType):
+def SetPath(Pr,pwd,C,nelem,Analysis,AnalysisType, MaterialArgsType):
 	
 	# STORE PATHS FOR MAIN, CORE & PROBLEM DIRECTORIES
 	############################################################################
@@ -23,11 +23,11 @@ def SetPath(Pr,pwd,C,mesh,Analysis,AnalysisType, MaterialArgsType):
 
 
 	Path.ProblemResults = Path.Problem+'/Results/'
-	Path.ProblemResultsFileNameMATLAB = 'Results_h'+str(mesh.elements.shape[0])+'_C'+str(C)+'.mat'
+	Path.ProblemResultsFileNameMATLAB = 'Results_h'+str(nelem)+'_C'+str(C)+'.mat'
 	# FOR NON-LINEAR ANALYSIS - DO NOT ADD THE EXTENSION
-	Path.ProblemResultsFileNameVTK = 'Results_h'+str(mesh.elements.shape[0])+'_C'+str(C)
+	Path.ProblemResultsFileNameVTK = 'Results_h'+str(nelem)+'_C'+str(C)
 	# FOR LINEAR ANALYSIS
-	# MainData.Path.ProblemResultsFileNameVTK = 'Results_h'+str(mesh.elements.shape[0])+'_C'+str(C)+'.vtu'
+	# MainData.Path.ProblemResultsFileNameVTK = 'Results_h'+str(nelem)+'_C'+str(C)+'.vtu'
 
 	# CONSIDERATION OF MATERAIL MODEL
 	Path.MaterialModel = MaterialArgsType + '_Model/'

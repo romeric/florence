@@ -1,5 +1,7 @@
 import numpy as np
+from numpy import einsum
 from Core.Supplementary.Tensors import *
+from math import sqrt
 
 
 #####################################################################################################
@@ -18,18 +20,27 @@ class NearlyIncompressibleMooneyRivlin(object):
 
 		"""
 
-	def __init__(self, ndim):
+	def __init__(self, ndim, MaterialArgs=None):
 		super(NearlyIncompressibleMooneyRivlin, self).__init__()
+		
 		self.ndim = ndim
 		self.nvar = self.ndim
 
-	def Hessian(self,MaterialArgs,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
-
-		einsum = np.einsum
-		sqrt = np.sqrt
-
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
+
+		self.gamma=1
+		self.alpha = self.gamma*mu/2.
+		self.beta = (mu - 2.*self.alpha)/3./sqrt(3.)
+		# kappa = lamb+2.0*mu/3.0 
+		self.kappa = lamb+4.0/3.0*self.alpha+2.0*sqrt(3.0)*self.beta # or
+
+	def Hessian(self,MaterialArgs,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
+
+		alpha = self.alpha
+		beta = self.beta
+		kappa = self.kappa
+		
 
 		I = StrainTensors['I']
 		J = StrainTensors['J'][gcounter]
@@ -39,12 +50,7 @@ class NearlyIncompressibleMooneyRivlin(object):
 		H = J*np.linalg.inv(F).T
 		g = np.dot(H,H.T)
 
-		# Update Lame constants
-		gamma=1
-		alpha = gamma*mu/2.
-		beta = (mu - 2.*alpha)/3./sqrt(3.)
-		# kappa = lamb+2.0*mu/3.0 
-		kappa = lamb+4.0/3.0*alpha+2.0*sqrt(3.0)*beta # or
+		
 
 
 		if self.ndim == 2:
@@ -87,7 +93,9 @@ class NearlyIncompressibleMooneyRivlin(object):
 
 	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 
-		sqrt = np.sqrt
+		alpha = self.alpha
+		beta = self.beta
+		kappa = self.kappa
 
 		I = StrainTensors['I']
 		J = StrainTensors['J'][gcounter]
@@ -98,12 +106,6 @@ class NearlyIncompressibleMooneyRivlin(object):
 		bcross = trace(b)*b-np.dot(b,b)
 		# b=np.dot(F,F.T)
 
-		mu = MaterialArgs.mu
-		lamb = MaterialArgs.lamb
-		# kappa = lamb+2.0*mu/3.0
-		alpha = mu/2.
-		beta = (mu - 2.*alpha)/3./sqrt(3.)
-		kappa = lamb+4.0/3.0*alpha+2.0*sqrt(3.0)*beta
 
 
 		# stress = 2.*alpha*J**(-5/3.)*b - 2./3.*alpha*J**(-5/3.)*trace(b)*I + \

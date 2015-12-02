@@ -22,7 +22,7 @@ class AnisotropicMooneyRivlin(object):
 
 	"""
 
-	def __init__(self, ndim):
+	def __init__(self, ndim, MaterialArgs=None):
 		super(AnisotropicMooneyRivlin, self).__init__()
 		self.ndim = ndim
 		self.nvar = self.ndim

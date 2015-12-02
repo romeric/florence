@@ -9,7 +9,7 @@ from Core.Supplementary.Tensors import *
 class NeoHookean(object):
 	"""docstring for NeoHookean"""
 
-	def __init__(self, ndim):
+	def __init__(self, ndim, MaterialArgs=None):
 		super(NeoHookean, self).__init__()
 		self.ndim = ndim
 		self.nvar = self.ndim

@@ -3,7 +3,7 @@ cimport numpy as np
 from cython cimport boundscheck, wraparound
 
 cdef inline void FillConstitutiveB_(double *B,double* SpatialGradient,
-					 int ndim, int nvar, int rows, int cols):
+					 int ndim, int nvar, int rows, int cols) nogil:
 	cdef int i
 
 	if ndim == 2:
@@ -60,7 +60,8 @@ def FillConstitutiveB(np.ndarray[double,ndim=2,mode='c'] B,
 
 
 cdef inline void FillGeometricB_(double *B,double *SpatialGradient, 
-						double *S, double *CauchyStressTensor,int ndim, int nvar, int rows, int cols):
+						double *S, double *CauchyStressTensor,
+						int ndim, int nvar, int rows, int cols) nogil:
 	cdef int i
 
 	if ndim == 2:

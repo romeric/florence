@@ -21,17 +21,17 @@ def KinematicMeasures(F,AnalysisType):
 	'I':np.eye(F.shape[1],F.shape[1],dtype=np.float64)}
 
 
-	if AnalysisType == 'Nonlinear':
-		# ADDITIONAL POLYCONVEX MEASURES - ACTIVATE IF NECESSARY
-		# StrainTensors['H'] = np.einsum('i,ijk->ijk',StrainTensors['J'],np.einsum('ikj',np.linalg.inv(StrainTensors['F'])))
-		# StrainTensors['g'] = np.einsum('ijk,ilk->ijl',StrainTensors['H'],StrainTensors['H'])
-		# StrainTensors['C'] = np.einsum('ikj,ikl->ijl',StrainTensors['F'],StrainTensors['F']) 
-		# StrainTensors['G'] = np.einsum('ikj,ikl->ijl',StrainTensors['H'],StrainTensors['H'])
-		# StrainTensors['detC'] = np.einsum('i,i->i',StrainTensors['J'],StrainTensors['J'])
-		pass
+	# if AnalysisType == 'Nonlinear':
+	# 	# ADDITIONAL POLYCONVEX MEASURES - ACTIVATE IF NECESSARY
+	# 	# StrainTensors['H'] = np.einsum('i,ijk->ijk',StrainTensors['J'],np.einsum('ikj',np.linalg.inv(StrainTensors['F'])))
+	# 	# StrainTensors['g'] = np.einsum('ijk,ilk->ijl',StrainTensors['H'],StrainTensors['H'])
+	# 	# StrainTensors['C'] = np.einsum('ikj,ikl->ijl',StrainTensors['F'],StrainTensors['F']) 
+	# 	# StrainTensors['G'] = np.einsum('ikj,ikl->ijl',StrainTensors['H'],StrainTensors['H'])
+	# 	# StrainTensors['detC'] = np.einsum('i,i->i',StrainTensors['J'],StrainTensors['J'])
+	# 	pass
 
 
-	elif AnalysisType=='Linear':
+	if AnalysisType=='Linear':
 		# LINEARISED KINEMATICS
 		# MATERIAL GRADIENT OF DISPLACEMENT
 		StrainTensors['Gradu'] = F - StrainTensors['I']
@@ -39,6 +39,12 @@ def KinematicMeasures(F,AnalysisType):
 		StrainTensors['strain'] = 0.5*(StrainTensors['Gradu'] + np.einsum('ikj',StrainTensors['Gradu']))
 		
 	return StrainTensors
+
+
+
+
+
+
 
 
 
