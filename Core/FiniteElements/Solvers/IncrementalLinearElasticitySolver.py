@@ -1,5 +1,6 @@
 import numpy as np
-from scipy.sparse.linalg import spsolve, bicgstab, onenormest 
+from scipy.sparse.linalg import onenormest 
+from SparseSolver import SparseSolver
 
 from Core.FiniteElements.Assembly import *
 from Core.FiniteElements.ApplyDirichletBoundaryConditions import *
@@ -44,16 +45,13 @@ def IncrementalLinearElasticitySolver(MainData,mesh,TotalDisp,Eulerx,LoadIncreme
 
 		# SOLVE THE SYSTEM
 		t_solver=time()
-		if MainData.solve.type == 'direct':
-			# CHECK FOR THE CONDITION NUMBER OF THE SYSTEM
-			if Increment==MainData.AssemblyParameters.LoadIncrements-1:
-				# MainData.solve.condA = np.linalg.cond(K_b.todense()) # REMOVE THIS
-				MainData.solve.condA = onenormest(K_b) # REMOVE THIS
-			# CALL DIRECT SOLVER
-			sol = spsolve(K_b,F_b,permc_spec='MMD_AT_PLUS_A',use_umfpack=True)
-		else:
-			# CALL ITERATIVE SOLVER
-			sol = bicgstab(K_b,F_b,tol=MainData.solve.tol)[0]
+
+		# sol = SparseSolver(K_b,F_b,MainData.solve.type,sub_type='MUMPS')
+		sol = SparseSolver(K_b,F_b,MainData.solve.type,sub_type='UMFPACK')
+
+		if Increment==MainData.AssemblyParameters.LoadIncrements-1:
+			# MainData.solve.condA = np.linalg.cond(K_b.todense()) # REMOVE THIS
+			MainData.solve.condA = onenormest(K_b) # REMOVE THIS
 		t_solver = time()-t_solver
 
 		dU = PostProcess().TotalComponentSol(MainData,sol,ColumnsIn,ColumnsOut,AppliedDirichletInc,0,K.shape[0]) 
@@ -70,12 +68,20 @@ def IncrementalLinearElasticitySolver(MainData,mesh,TotalDisp,Eulerx,LoadIncreme
 			print "Finished load increment "+str(Increment)+" for linear problem. Solver time is", t_solver
 
 		# COMPUTE SCALED JACBIAN FOR THE MESH
-		# if Increment == LoadIncrement - 1:
-		jacobian_postprocess.MeshQualityMeasures(MainData,mesh,np.zeros_like(TotalDisp[:,:,:Increment+1]),show_plot=False)
+		if Increment == LoadIncrement - 1:
+			smesh = deepcopy(mesh)
+			smesh.points -= TotalDisp[:,:,-1] 
+			# jacobian_postprocess.MeshQualityMeasures(MainData,mesh,np.zeros_like(TotalDisp[:,:,:Increment+1]),show_plot=False)
+			jacobian_postprocess.MeshQualityMeasures(MainData,smesh,TotalDisp,show_plot=False)
 
-		# PostProcess.HighOrderPatchPlot(MainData,mesh,np.zeros_like(TotalDisp))
-		# import matplotlib.pyplot as plt
-		# plt.show()
+			# CHECK IF THE WING2D MESH P2 IS DISPLACED CORRECTLY
+			# print mesh.points[906,:], TotalDisp[906,:,-1]
+			# print mesh.points[887,:], TotalDisp[887,:,-1]
+			# print mesh.points[3715,:], TotalDisp[3715,:,-1]
+
+			# PostProcess.HighOrderPatchPlot(MainData,mesh,np.zeros_like(TotalDisp))
+			# import matplotlib.pyplot as plt
+			# plt.show()
 
 	jacobian_postprocess.is_scaledjacobian_computed
 	MainData.isScaledJacobianComputed = True

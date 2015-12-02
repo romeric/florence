@@ -14,7 +14,7 @@ class TranservselyIsotropicLinearElastic(object):
 		Note that this assumes N = [0,0,1] as the direction of anisotropy
 	"""
 
-	def __init__(self, ndim, gamma=0.5):
+	def __init__(self, ndim, MaterialArgs=None):
 		super(TranservselyIsotropicLinearElastic, self).__init__()
 		self.ndim = ndim
 		self.nvar = self.ndim

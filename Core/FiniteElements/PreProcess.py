@@ -14,6 +14,7 @@ from Core.Supplementary.Timing.Timing import timing
 @timing
 def PreProcess(MainData,Pr,pwd):
 
+
 	# PARALLEL PROCESSING
 	############################################################################
 	try:
@@ -48,6 +49,8 @@ def PreProcess(MainData,Pr,pwd):
 			# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=4,ncirc=12)
 			# mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=7,ncirc=7) # isotropic
 			mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=False,nrad=7,ncirc=7)
+		elif MainData.MeshInfo.Reader is 'ReadHighOrderMesh':
+			mesh.ReadHighOrderMesh(MainData.MeshInfo.FileName.split(".")[0],MainData.C,MainData.MeshInfo.MeshType)
 
 	if MainData.__NO_DEBUG__ is False:
 		mesh.CheckNodeNumberingTri()
@@ -102,12 +105,25 @@ def PreProcess(MainData,Pr,pwd):
 	# mm = MainData.MaterialArgs().AnisotropicFibreOrientation(mesh,plot=False)
 	# exit(0)
 
+
+	# STORE PATHS FOR MAIN, CORE & PROBLEM DIRECTORIES
+	############################################################################
+	MainData.Path = SetPath(Pr,pwd,MainData.C,mesh.nelem,
+		MainData.Analysis,MainData.AnalysisType,MainData.MaterialArgs.Type)
+
 	# GENERATE pMESHES FOR HIGH C
 	############################################################################
 
+	IsHighOrder = getattr(MainData.MeshInfo,"IsHighOrder",None)
+	if IsHighOrder is None:
+		IsHighOrder = False
+	# print IsHighOrder
+	# exit(0)
+
 	if MainData.C>0:
-		mesh.GetHighOrderMesh(MainData.C,Parallel=MainData.Parallel,
-			nCPU=MainData.numCPU,ComputeAll=True)
+		if IsHighOrder is False:
+			mesh.GetHighOrderMesh(MainData.C,Parallel=MainData.Parallel,
+				nCPU=MainData.numCPU,ComputeAll=True)
 	else:
 		mesh.ChangeType()
 
@@ -122,7 +138,13 @@ def PreProcess(MainData,Pr,pwd):
 	# np.savetxt('/home/roman/Dropbox/time_3.dat',np.array([time()-t_mesh, mesh.points.shape[0]]))
 
 	# mesh.PlotMeshNumberingTri()
-	# sys.exit("STOPPED")
+
+	# np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_elements_"+"P"+str(MainData.C+1)+".dat",mesh.elements)
+	# np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_points_"+"P"+str(MainData.C+1)+".dat",mesh.points,fmt="%9.16f")
+	# np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_edges_"+"P"+str(MainData.C+1)+".dat",mesh.edges)
+
+
+
 
 
 
@@ -132,11 +154,6 @@ def PreProcess(MainData,Pr,pwd):
 		insensitive = lambda str_name: str_name.casefold()
 	else:
 		insensitive = lambda str_name: str_name.upper().lower()  
-
-	# STORE PATHS FOR MAIN, CORE & PROBLEM DIRECTORIES
-	############################################################################
-	MainData.Path = SetPath(Pr,pwd,MainData.C,mesh,
-		MainData.Analysis,MainData.AnalysisType,MainData.MaterialArgs.Type)
 
 
 
@@ -185,7 +202,6 @@ def PreProcess(MainData,Pr,pwd):
 			MainData.AnalysisType = "Linear"
 
 
-
 	# COMPUTE 4TH ORDER IDENTITY TENSORS/HESSIANS BEFORE-HAND 
 	#############################################################################
 	if MainData.MaterialArgs.Type == 'LinearModel' or \
@@ -213,6 +229,16 @@ def PreProcess(MainData,Pr,pwd):
 		MainData.MaterialArgs.Iikjl = np.einsum('ik,jl',I,I) + np.einsum('il,jk',I,I) 
 
 
+	# COMPUTE ANISOTROPY DIRECTIONS/STRUCTURAL TENSORS FOR ANISOTROPIC MATERIAL
+	##############################################################################
+	# THIS HAS TO BE CALLED BEFORE CALLING THE ANY HESSIAN METHODS AS HESSIAN OF 
+	# ANISOTROPIC MODELS REQUIRE FIBRE ORIENTATION
+	AnisoFuncName = getattr(MainData.MaterialArgs,"AnisotropicFibreOrientation",None)
+	if AnisoFuncName is not None:
+		aniso_obj = AnisoFuncName(mesh,plot=False)
+		MainData.MaterialArgs.AnisotropicOrientations = aniso_obj.directions
+
+
 	# CHOOSE AND INITIALISE THE RIGHT MATERIAL MODEL 
 	##############################################################################
 
@@ -220,30 +246,24 @@ def PreProcess(MainData,Pr,pwd):
 	MaterialFuncName = getattr(MatLib,MainData.MaterialArgs.Type,None)
 	if MaterialFuncName is not None:
 		# INITIATE THE FUNCTIONS FROM THIS MEHTOD
-		MaterialInstance = MaterialFuncName(MainData.ndim)
+		MaterialInstance = MaterialFuncName(MainData.ndim,MainData.MaterialArgs)
 		MainData.nvar, MainData.MaterialModelName = MaterialInstance.nvar, \
 													type(MaterialInstance).__name__
-		MainData.Hessian = MaterialFuncName(MainData.ndim).Hessian
-		MainData.CauchyStress = MaterialFuncName(MainData.ndim).CauchyStress
+
+		MainData.Hessian = MaterialInstance.Hessian		
+		MainData.CauchyStress = MaterialInstance.CauchyStress
 
 		# INITIALISE
 		StrainTensors = KinematicMeasures(np.asarray([np.eye(MainData.ndim,MainData.ndim)]*\
 			MainData.Domain.AllGauss.shape[0]),MainData.AnalysisType)
 
-		MaterialFuncName(MainData.ndim).Hessian(MainData.MaterialArgs,
+		MaterialInstance.Hessian(MainData.MaterialArgs,
 			StrainTensors,elem=0,gcounter=0)
 
 	else:
 		raise AttributeError('Material model with name '+MainData.MaterialArgs.Type + ' not found')
 
 	##############################################################################
-
-	# COMPUTE ANISOTROPY DIRECTIONS/STRUCTURAL TENSORS FOR ANISOTROPIC MATERIAL
-	##############################################################################
-	# THIS HAS TO BE CALLED BEFORE CALLING THE ANY HESSIAN METHODS AS 
-	# aniso_obj = MainData.MaterialArgs.AnisotropicFibreOrientation(mesh,plot=False)
-	# MainData.MaterialArgs.AnisotropicOrientations = aniso_obj.directions
-	# exit(0)
 
 
 

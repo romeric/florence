@@ -2,12 +2,14 @@ from time import time
 import numpy as np
 import numpy.linalg as la 
 # from scipy.sparse.linalg import spsolve, cg, cgs, bicg, bicgstab, gmres, lgmres, minres, lobpcg
-from scipy.sparse.linalg import spsolve, bicgstab, gmres, onenormest 
+from scipy.sparse.linalg import onenormest 
 try:
 	from scikits.umfpack import spsolve as umfpack_spsolve
 	umfpack_solver = True
 except ImportError:
 	umfpack_solver = False
+
+from SparseSolver import SparseSolver
 
 from Core.FiniteElements.ApplyDirichletBoundaryConditions import *
 from Core.FiniteElements.StaticCondensationGlobal import *
@@ -35,15 +37,14 @@ def NewtonRaphson(MainData,Increment,K,NodalForces,Residual,
 		K_b, F_b = GetReducedMatrices(K,Residual,ColumnsIn,MainData.Analysis,[])[:2]
 
 		# SOLVE THE SYSTEM
-		if MainData.solve.type == 'direct':
-			# CHECK FOR THE CONDITION NUMBER OF THE SYSTEM
-			if Increment==MainData.AssemblyParameters.LoadIncrements-1 and Iter>1:
-				# MainData.solve.condA = np.linalg.cond(K_b.todense()) # REMOVE THIS
-				MainData.solve.condA = onenormest(K_b) # REMOVE THIS
-			sol = spsolve(K_b,-F_b)
-			# sol = umfpack_spsolve(K_b,-F_b)
-		else:
-			sol = bicgstab(K_b,-F_b,tol=MainData.solve.tol)[0]
+
+		# CHECK FOR THE CONDITION NUMBER OF THE SYSTEM
+		if Increment==MainData.AssemblyParameters.LoadIncrements-1 and Iter>1:
+			# MainData.solve.condA = np.linalg.cond(K_b.todense()) # REMOVE THIS
+			MainData.solve.condA = onenormest(K_b) # REMOVE THIS
+
+		# sol = SparseSolver(K_b,F_b,MainData.solve.type,sub_type='MUMPS')
+		sol = SparseSolver(K_b,-F_b,MainData.solve.type,sub_type='UMFPACK')
 
 		# GET THE TOTAL SOLUTION AND ITS COMPONENTS SUCH AS UX, UY, UZ, PHI ETC
 		dU = PostProcess().TotalComponentSol(MainData,sol,ColumnsIn,ColumnsOut,AppliedDirichletInc,Iter,K.shape[0]) 
@@ -64,7 +65,7 @@ def NewtonRaphson(MainData,Increment,K,NodalForces,Residual,
 			np.abs(la.norm(Residual[ColumnsIn])/NormForces))
 		
 		print 'Iteration number', Iter, 'for load increment', Increment, 'with a residual of \t\t', \
-			np.abs(la.norm(Residual[ColumnsIn])/NormForces)
+			np.abs(la.norm(Residual[ColumnsIn])/NormForces)			 
 
 		# UPDATE ITERATION NUMBER
 		Iter +=1 
@@ -73,6 +74,9 @@ def NewtonRaphson(MainData,Increment,K,NodalForces,Residual,
 			# raise StopIteration("\n\nNewton Raphson did not converge! Maximum number of iterations reached.")
 
 		if Iter==MainData.AssemblyParameters.MaxIter or ResidualNorm['Increment_'+str(Increment)][-1] > 1000:
+			MainData.AssemblyParameters.FailedToConverge = True
+			break
+		if np.isnan(np.abs(la.norm(Residual[ColumnsIn])/NormForces)):
 			MainData.AssemblyParameters.FailedToConverge = True
 			break
 

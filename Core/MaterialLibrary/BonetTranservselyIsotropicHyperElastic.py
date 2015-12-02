@@ -12,7 +12,7 @@ class BonetTranservselyIsotropicHyperElastic(object):
 		Material model is not polyconvex
 	"""
 
-	def __init__(self, ndim, gamma=0.5):
+	def __init__(self, ndim, MaterialArgs=None):
 		super(BonetTranservselyIsotropicHyperElastic, self).__init__()
 		self.ndim = ndim
 		self.nvar = self.ndim
@@ -32,7 +32,8 @@ class BonetTranservselyIsotropicHyperElastic(object):
 		b = StrainTensors['b'][gcounter]
 		F = StrainTensors['F'][gcounter]
 		H = J*np.linalg.inv(F).T
-		N = np.array([-1.,0.]).reshape(2,1)
+		# N = np.array([-1.,0.]).reshape(2,1)
+		N = MaterialArgs.AnisotropicOrientations[elem,:,None]
 		FN = np.dot(F,N)[:,0]
 
 		E = MaterialArgs.E
@@ -78,8 +79,8 @@ class BonetTranservselyIsotropicHyperElastic(object):
 		b = StrainTensors['b'][gcounter]
 		F = StrainTensors['F'][gcounter]
 		H = J*np.linalg.inv(F).T
-		N = np.array([-1.,0.]).reshape(2,1)
-		# N = np.array([0.,0.]).reshape(2,1)
+		# N = np.array([-1.,0.]).reshape(2,1)
+		N = MaterialArgs.AnisotropicOrientations[elem,:,None]
 		FN = np.dot(F,N)
 		# HN = np.dot(H,N)[:,0]
 		innerFN = np.dot(FN.T,FN)[0][0]

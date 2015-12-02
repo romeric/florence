@@ -11,7 +11,7 @@ class IncrementalLinearElastic(object):
 		but the geometry is updated incrementally i.e. at every x=x_k
 		"""
 
-	def __init__(self, ndim):
+	def __init__(self, ndim, MaterialArgs=None):
 		super(IncrementalLinearElastic, self).__init__()
 		self.ndim = ndim
 		self.nvar = self.ndim

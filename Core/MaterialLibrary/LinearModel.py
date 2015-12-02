@@ -11,7 +11,7 @@ from Core.Supplementary.Tensors import *
 class LinearModel(object):
 	"""docstring for LinearModel"""
 
-	def __init__(self, ndim):
+	def __init__(self, ndim, MaterialArgs=None):
 		super(LinearModel, self).__init__()
 		self.ndim = ndim
 		self.nvar = self.ndim

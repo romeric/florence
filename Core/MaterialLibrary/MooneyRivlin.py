@@ -16,20 +16,22 @@ class MooneyRivlin(object):
 		where at the origin (alpha + beta) = mu/2
 		"""
 
-	def __init__(self, ndim):
+	def __init__(self, ndim, MaterialArgs=None):
 		super(MooneyRivlin, self).__init__()
 		self.ndim = ndim
 		self.nvar = self.ndim
-
-	def Hessian(self,MaterialArgs,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
-
 
 		# GET MATERIAL CONSTANTS 
 		mu = MaterialArgs.mu
 		lamb = MaterialArgs.lamb
 
-		alpha = mu/4.0
-		beta = mu/4.0
+		self.alpha = mu/4.0
+		self.beta = mu/4.0
+
+	def Hessian(self,MaterialArgs,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
+
+		lamb = MaterialArgs.lamb
+
 
 		I = StrainTensors['I']
 		J = StrainTensors['J'][gcounter]
@@ -47,9 +49,9 @@ class MooneyRivlin(object):
 		# 	(lamb*(J-1.0) -4.0*beta -2.0*alpha/J)*( einsum('ik,jl',I,I) + einsum('il,jk',I,I) )
 
 		# Further simplified version
-		H_Voigt = 2.0*beta/J*( 2.0*einsum('ij,kl',b,b) - einsum('ik,jl',b,b) - einsum('il,jk',b,b) ) + \
-			(lamb*(2.0*J-1.0) -4.0*beta)*MaterialArgs.Iijkl - \
-			(lamb*(J-1.0) -4.0*beta -2.0*alpha/J)*MaterialArgs.Iikjl
+		H_Voigt = 2.0*self.beta/J*( 2.0*einsum('ij,kl',b,b) - einsum('ik,jl',b,b) - einsum('il,jk',b,b) ) + \
+			(lamb*(2.0*J-1.0) -4.0*self.beta)*MaterialArgs.Iijkl - \
+			(lamb*(J-1.0) -4.0*self.beta -2.0*self.alpha/J)*MaterialArgs.Iikjl
 
 		H_Voigt = Voigt(H_Voigt,1) 
 
@@ -62,15 +64,12 @@ class MooneyRivlin(object):
 
 	def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 
+		lamb = MaterialArgs.lamb
+
 		I = StrainTensors['I']
 		J = StrainTensors['J'][gcounter]
 		b = StrainTensors['b'][gcounter]
 
-		mu = MaterialArgs.mu
-		lamb = MaterialArgs.lamb
-		
-		alpha = mu/4.0
-		beta = mu/4.0
 
 		if self.ndim == 3:
 			trb = trace(b)
@@ -78,7 +77,7 @@ class MooneyRivlin(object):
 			trb = trace(b) + 1
 
 		# stress = 2.0*alpha/J*b+2.0*beta/J*(trace(b)*b - np.dot(b,b)) + (lamb*(J-1.0)-4.0*beta-2.0*alpha/J)*I 
-		stress = 2.0*alpha/J*b+2.0*beta/J*(trb*b - np.dot(b,b)) + (lamb*(J-1.0)-4.0*beta-2.0*alpha/J)*I 
+		stress = 2.0*self.alpha/J*b+2.0*self.beta/J*(trb*b - np.dot(b,b)) + (lamb*(J-1.0)-4.0*self.beta-2.0*self.alpha/J)*I 
 		# print stress
 		return stress
 

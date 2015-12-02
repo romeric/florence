@@ -8,8 +8,8 @@ def ProblemData(MainData):
 	MainData.Fields = 'Mechanics'	
 	MainData.Formulation = 'DisplacementApproach'
 	MainData.Analysis = 'Static'
-	# MainData.AnalysisType = 'Linear'
-	MainData.AnalysisType = 'Nonlinear'
+	MainData.AnalysisType = 'Linear'
+	# MainData.AnalysisType = 'Nonlinear'
 
 	# MATERIAL INPUT DATA 
 	# MainData.MaterialArgs.Type = 'LinearModel'
@@ -20,25 +20,25 @@ def ProblemData(MainData):
 	# MainData.MaterialArgs.Type = 'IncrementallyLinearisedBonetTranservselyIsotropicHyperElastic'
 	# MainData.MaterialArgs.Type = 'NearlyIncompressibleNeoHookean'
 	# MainData.MaterialArgs.Type = 'NeoHookean_1'
-	MainData.MaterialArgs.Type = 'NeoHookean_2'
+	# MainData.MaterialArgs.Type = 'NeoHookean_2'
 	# MainData.MaterialArgs.Type = 'MooneyRivlin'
 	# MainData.MaterialArgs.Type = 'NearlyIncompressibleMooneyRivlin'
 	# MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin' 
 	# MainData.MaterialArgs.Type = 'TranservselyIsotropicLinearElastic'
 	# MainData.MaterialArgs.Type = 'TranservselyIsotropicHyperElastic'
-	# MainData.MaterialArgs.Type = 'BonetTranservselyIsotropicHyperElastic'
+	MainData.MaterialArgs.Type = 'BonetTranservselyIsotropicHyperElastic'
 
 	MainData.MaterialArgs.E  = 1.0e5
-	MainData.MaterialArgs.nu = 0.35
+	MainData.MaterialArgs.nu = 0.25
 
-	# MainData.MaterialArgs.E_A = 2.5*MainData.MaterialArgs.E
-	# # MainData.MaterialArgs.G_A = (E*(E_A*nu - E_A + E_A*nu**2 + E*nu**2))/(2*(nu + 1)*(2*E*nu**2 + E_A*nu - E_A))
-	# MainData.MaterialArgs.G_A = E/2.
+	MainData.MaterialArgs.E_A = 2.5*MainData.MaterialArgs.E
+	# # # MainData.MaterialArgs.G_A = (E*(E_A*nu - E_A + E_A*nu**2 + E*nu**2))/(2*(nu + 1)*(2*E*nu**2 + E_A*nu - E_A))
+	MainData.MaterialArgs.G_A = MainData.MaterialArgs.E/2.
 
 
 	# MainData.MaterialArgs.E = MainData.E 
 	# MainData.MaterialArgs.nu = MainData.nu
-	# print 'Poisson ratio is:', MainData.MaterialArgs.nu
+	print 'Poisson ratio is:', MainData.MaterialArgs.nu
 
 
 	E = MainData.MaterialArgs.E
@@ -62,10 +62,9 @@ def ProblemData(MainData):
 
 
 	class AnisotropicFibreOrientation(object):
-		# ndim = 2
+
 		def __init__(self,mesh,plot=True):
 			
-			# ndim = self.ndim
 			ndim = 2
 
 			edge_elements = mesh.GetElementsWithBoundaryEdgesTri()
@@ -93,9 +92,6 @@ def ProblemData(MainData):
 
 				Xs=np.append(Xs,x_avg)
 				Ys=np.append(Ys,y_avg)
-
-
-			print self.directions
 
 
 			if plot:

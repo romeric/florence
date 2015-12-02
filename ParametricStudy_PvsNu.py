@@ -52,14 +52,14 @@ if __name__ == '__main__':
 	rc('font',**{'family':'serif','serif':['Palatino'],'size':18})
 	rc('text', usetex=True)
 
-	Run = 1
+	Run = 0
 	if Run:
 		t_FEM = time.time()
 		nu = np.linspace(0.001,0.495,100)
 		# nu = np.linspace(0.01,0.495,2)
 		E = np.array([1e05])
 		p = [2,3,4,5,6]
-		# p = [6]
+		# p = [2]
 		 
 
 		Results = {'PolynomialDegrees':p,'PoissonsRatios':nu,'Youngs_Modulus':E}
@@ -71,8 +71,8 @@ if __name__ == '__main__':
 		for i in range(len(p)):
 			MainData.C = p[i]-1
 			for j in range(nu.shape[0]):
-				MainData.nu = nu[j]
-				MainData.E = E
+				MainData.MaterialArgs.nu = nu[j]
+				MainData.MaterialArgs.E = E[0]
 				MainData.isScaledJacobianComputed = False
 				main(MainData,Results)	
 				CondExists = getattr(MainData.solve,'condA',None)
@@ -88,11 +88,19 @@ if __name__ == '__main__':
 		Results['MaterialModel'] = MainData.MaterialArgs.Type
 		# print Results['ScaledJacobian']
 
-		savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'_FeketeSpacing.mat',Results)
-		# savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'_Orthogonal.mat',Results)
-		# savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'_EqualSpacing.mat',Results)
-		# savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'.mat',Results)
-		# savemat('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'+MainData.MaterialArgs.Type+'2.mat',Results)
+		fname = MainData.MaterialArgs.Type
+		if MainData.MaterialArgs.Type != "IncrementalLinearElastic" and MainData.MaterialArgs.Type != "LinearModel":
+			if MainData.AnalysisType == "Linear":
+				fname = "IncrementallyLinearised"+MainData.MaterialArgs.Type
+		
+		fname = fname + "_" + MainData.BoundaryData.ProjectionType+".mat"
+		fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'
+
+		# print fname
+		# exit(0)
+		savemat(fpath+fname,Results)
+
+
 		t_FEM = time.time()-t_FEM
 		print 'Time taken for the entire analysis was ', t_FEM, 'seconds'
 		np.savetxt('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/DONE', [t_FEM])
@@ -100,18 +108,19 @@ if __name__ == '__main__':
 	if not Run:
 		# import h5py as hpy 
 		ResultsPath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/'
+		SavePath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Mech2D/"
 
 		# ResultsFile = 'Mech2D_P_vs_Nu_IncrementalLinearElastic_EqualSpacing'
 		# ResultsFile = 'Mech2D_P_vs_Nu_IncrementalLinearElastic_FeketeSpacing'
-		# ResultsFile = 'Mech2D_P_vs_Nu_IncrementalLinearElastic_Orthogonal'
+		# ResultsFile = 'Mech2D_P_vs_Nu_IncrementalLinearElastic_orthogonal'
 
 		# ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_EqualSpacing'
-		# ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_FeketeSpacing'
-		# ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_Orthogonal'
+		# ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_2_arc_length'
+		ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_2_orthogonal'
 
 		# ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_EqualSpacing'
-		ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_FeketeSpacing'
-		# ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_Orthogonal'
+		# ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_FeketeSpacing'
+		# ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_orthogonal'
 
 		DictOutput =  loadmat(ResultsPath+ResultsFile+'.mat')	
 		
@@ -147,7 +156,8 @@ if __name__ == '__main__':
 		# # tick_locs = [0, 1, 2, 3, 4]
 		# tick_locs = [2, 3, 4, 5, 6]
 		# tick_locs = np.linspace(2.5,6,6).tolist()
-		tick_locs = [2.45,3.25,4.,4.82,5.55]
+		# tick_locs = [2.45,3.25,4.,4.82,5.55]
+		tick_locs = [2,2.8,3.6,4.4,5.2]
 		tick_lbls = [2, 3, 4, 5, 6]
 		plt.yticks(tick_locs, tick_lbls)
 		tick_locs = [0,1,2,3,4,5]
@@ -164,8 +174,8 @@ if __name__ == '__main__':
 
 		# plt.xlim([0,5])
 		# plt.ylim([2,6])
-		ResultsPath+ResultsFile+'.mat'
-		# plt.savefig(ResultsPath+'Mech2D/'+ResultsFile+'.eps',format='eps',dpi=1000)
+		# ResultsPath+ResultsFile+'.mat'
+		plt.savefig(SavePath+ResultsFile+'.eps',format='eps',dpi=1000)
 
 		plt.show()
 
