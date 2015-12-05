@@ -115,117 +115,167 @@ if __name__ == '__main__':
 
     if not Run:
 
-        # MaterialModels = ["Isotropic Linear Elastic","Anisotropic Linear Elastic","Linearised NeoHookean",
-            # "Linearised Mooney-Rivlin","Linearised Nearly Incompressible Material","Linearised Anisotropic Hyperelastic"]
-        pp = 0
-        mm = 5
-        if mm==3:
-            MaterialModels = [r"$Isotropic\; Linear\; Elastic$",r"$Linearised\; Mooney-Rivlin$",r"$Mooney-Rivlin$"]
-        elif mm==2:
-            MaterialModels = [r"$Isotropic\; Linear\; Elastic$",r"$Linearised\; NeoHookean$",r"$NeoHookean$"]
-        elif mm==4:
-            MaterialModels = [r"$Isotropic\; Linear\; Elastic$",r"$Linearised\;Nearly\;Incompressible Material$",r"$Nearly\;Incompressible Material$"]
-        elif mm==5:
-            MaterialModels = [r"$Transervsely\;Isotropic\; Linear\; Elastic$",r"$Linearised\; Transervsely\;Isotropic\;Hyperelastic$",
-            r"$Transervsely\;Isotropic\;Hyperelastic$"]
-            pp = 1
-
         import matplotlib as mpl
         import matplotlib.pyplot as plt
         import matplotlib.cm as cm
         from matplotlib import rc
-
-        # rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-        rc('font',**{'family':'sans-serif','sans-serif':['Computer Modern Roman']})
-        ## for Palatino and other serif fonts use:
-        rc('font',**{'family':'serif','serif':['Palatino'],'size':18})
-        rc('text', usetex=True)
-
-        # rc('axes',color_cycle=['#D1655B','#44AA66','#FACD85','#70B9B0','#72B0D7','#E79C5D','#4D5C75','#E79C5D'])
-        rc('axes',color_cycle=['#D1655B','#FACD85','#72B0D7','#E79C5D','#4D5C75','#E79C5D'])
-        # rc('axes',**{'prop_cycle':['#D1655B','#FACD85','#70B9B0','#72B0D7','#E79C5D']})
-
-        # mpl.rcParams['axis.color_cycle'] = ['#D1655B','g','b']
+        import itertools
 
 
-        # import h5py as hpy 
-        ResultsPath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/MaterialFormulation_vs_Nu/'
-        # ResultsFile = "Mech2D_MaterialFormulation_vs_Nu_P2_orthogonal"
-        ResultsFile = "Mech2D_MaterialFormulation_vs_Nu_P4"
+        def plotter(degree = 2, which_func=0, save = False):
+            """
+                degree          2,3 or 4 every degree is a mat file for p
 
-        SavePath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Mech2D/"
+                which_func = 0 for scaledA
+                which_func = 1 for condA
 
-        DictOutput =  loadmat(ResultsPath+ResultsFile+'.mat')   
-        
-        scaledA = DictOutput['ScaledJacobian']
-        condA = DictOutput['ConditionNumber']
-        # nu = DictOutput['PoissonsRatios'][0]
-        nu = np.linspace(0.001,0.5,100)*1
-        p = DictOutput['PolynomialDegrees'][0]
+                save            to save or not
 
-        # plt.plot(nu,scaledA[0,:,:].T,'-o')
-        # plt.plot(condA[0,:,:-5].T,'-o')
-
-        nn = -5
-        # nn = -1
-        # func = scaledA
-        func = condA
-
-        font_size = 18
-        plt.plot(nu[:nn],func[0,pp,:nn],linewidth=2)
-        plt.plot(nu[:nn],func[0,mm,:nn],linewidth=2)
-        plt.plot(nu[:nn],func[1,mm,:nn],linewidth=2)
-        plt.xlabel(r"$Poisson's\, Ratio\,\, (\nu)$",fontsize=font_size)
-        # plt.ylabel(r"$Mesh\, Quality\,\, (Q_1)$",fontsize=font_size)
-        plt.ylabel(r"$\kappa(A)$",fontsize=font_size)
-
-        plt.legend(MaterialModels,loc='upper left',fontsize=font_size-2)
-        # plt.legend(MaterialModels,loc='lower left',fontsize=font_size-2)
-        # print np.mean(scaledA[0,5,:nn])
-        # print np.std(scaledA[0,5,:nn],dtype=np.float64)
-        # print np.min(scaledA[0,3,:nn]), np.max(scaledA[0,3,:nn])
-        # print scaledA[0,3,:]
-        # plt.show()
-
-        # import itertools
-        # marker = itertools.cycle(('o', 's', '+', '.', 'o', '*','x')) 
-
-        # nn=10
-        # for mm in range(6):
-        #     zdata = np.polyfit(nu[:-nn],condA[0,mm,:-nn],5)
-        #     poly = np.poly1d(zdata)
-        #     xx=[]
-        #     for i in nu[:-nn]:
-        #         xx.append(poly(i))
-        #     # print condA[0,0,:]
-        #     # print xx
-
-        #     plt.plot(nu[:-nn],xx,marker.next(),linestyle='-',linewidth=2)
-        #     plt.legend(MaterialModels,loc='upper left')
-
-        # # plt.plot(nu[:-nn],condA[0,mm,:-nn],'-ro')
-        # plt.xlabel(r"$Poisson's\, Ratio\,\, (\nu)$",fontsize=18)
-
-        # if mm==3:
-        #     plt.savefig(SavePath+ResultsFile+"_MooneyRivlin.eps",format='eps',dpi=1000)
-        # elif mm==2:
-        #     plt.savefig(SavePath+ResultsFile+"_Neo-Hookean.eps",format='eps',dpi=1000)
-        # elif mm==4:
-        #     plt.savefig(SavePath+ResultsFile+"_NearlyIncompressibleMaterial.eps",format='eps',dpi=1000)
-        # elif mm==5:
-        #     plt.savefig(SavePath+ResultsFile+"_TransverselyIsotropicMaterial.eps",format='eps',dpi=1000)
+            """
 
 
-        # if mm==3:
-        #     plt.savefig(SavePath+ResultsFile+"_MooneyRivlin_CondA.eps",format='eps',dpi=1000)
-        # elif mm==2:
-        #     plt.savefig(SavePath+ResultsFile+"_Neo-Hookean_CondA.eps",format='eps',dpi=1000)
-        # elif mm==4:
-        #     plt.savefig(SavePath+ResultsFile+"_NearlyIncompressibleMaterial_CondA.eps",format='eps',dpi=1000)
-        # elif mm==5:
-        #     plt.savefig(SavePath+ResultsFile+"_TransverselyIsotropicMaterial_CondA.eps",format='eps',dpi=1000)
-        # print SavePath+ResultsFile+".mat"
-        plt.show()
+            # marker = itertools.cycle(('o', 's', 'x', '+', '*','.'))
+            marker = itertools.cycle(('o', 's', 'x'))
+
+            # rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+            rc('font',**{'family':'sans-serif','sans-serif':['Computer Modern Roman']})
+            ## for Palatino and other serif fonts use:
+            rc('font',**{'family':'serif','serif':['Palatino'],'size':18})
+            rc('text', usetex=True)
+
+            # rc('axes',color_cycle=['#D1655B','#44AA66','#FACD85','#70B9B0','#72B0D7','#E79C5D','#4D5C75','#E79C5D'])
+            rc('axes',color_cycle=['#D1655B','#FACD85','#72B0D7','#E79C5D','#4D5C75','#E79C5D'])
+            # rc('axes',**{'prop_cycle':['#D1655B','#FACD85','#70B9B0','#72B0D7','#E79C5D']})
+
+
+            pp = 0
+            for mm in range(2,6):
+                if mm==3:
+                    MaterialModels = [r"$Isotropic\;Linear\;Elastic$",r"$Linearised\; Mooney-Rivlin$",r"$Mooney-Rivlin$"]
+                elif mm==2:
+                    MaterialModels = [r"$Isotropic\;Linear\;Elastic$",r"$Linearised\; neo-Hookean$",r"$neo-Hookean$"]
+                elif mm==4:
+                    MaterialModels = [r"$Isotropic\;Linear\;Elastic$",r"$Linearised\;Nearly\;Incompressible\;Material$",r"$Nearly\;Incompressible\;Material$"]
+                elif mm==5:
+                    MaterialModels = [r"$Transervsely\;Isotropic\; Linear\; Elastic$",r"$Linearised\; Transervsely\;Isotropic\;Hyperelastic$",
+                    r"$Transervsely\;Isotropic\;Hyperelastic$"]
+                    pp = 1
+
+            
+
+                ResultsPath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/MaterialFormulation_vs_Nu/'
+                # ResultsFile = "Mech2D_MaterialFormulation_vs_Nu_P2_orthogonal"
+                ResultsFile = "Mech2D_MaterialFormulation_vs_Nu_P"+str(degree)
+                SavePath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Mech2D/"
+
+                DictOutput =  loadmat(ResultsPath+ResultsFile+'.mat')   
+                
+                scaledA = DictOutput['ScaledJacobian']
+                condA = DictOutput['ConditionNumber']
+                # nu = DictOutput['PoissonsRatios'][0]
+                nu = np.linspace(0.001,0.5,100)*1
+                p = DictOutput['PolynomialDegrees'][0]
+
+                font_size = 18
+
+                plt.xlabel(r"$Poisson's\, Ratio\,\, (\nu)$",fontsize=font_size)
+                
+
+                # print np.mean(scaledA[0,5,:nn])
+                # print np.std(scaledA[0,5,:nn],dtype=np.float64)
+                # print np.min(scaledA[0,3,:nn]), np.max(scaledA[0,3,:nn])
+                # print scaledA[0,3,:]
+
+                if which_func == 1:
+                    func = scaledA
+                    nn=-1
+                    plt.plot(nu[:nn],func[0,pp,:nn],marker.next(),linestyle='-',linewidth=2)
+                    plt.plot(nu[:nn],func[0,mm,:nn],marker.next(),linestyle='-',linewidth=2)
+                    plt.plot(nu[:nn],func[1,mm,:nn],marker.next(),linestyle='-',linewidth=2)
+
+
+                    plt.ylabel(r"$Mesh\, Quality\,\, (Q_3)$",fontsize=font_size)
+
+
+                    plt.legend(MaterialModels,loc='lower left',fontsize=font_size-2)
+                    if degree == 2 and mm == 5:
+                        plt.legend(MaterialModels,loc='upper left',fontsize=font_size-2)
+                    if degree > 2:
+                        plt.legend(MaterialModels,loc='upper left',fontsize=font_size-2)
+                        if degree == 4 and mm==5:
+                            plt.legend(MaterialModels,loc='lower left',fontsize=font_size-2)
+
+
+
+                    if save:
+                        if mm==3:
+                            plt.savefig(SavePath+ResultsFile+"_MooneyRivlin.eps",format='eps',dpi=1000)
+                        elif mm==2:
+                            plt.savefig(SavePath+ResultsFile+"_Neo-Hookean.eps",format='eps',dpi=1000)
+                        elif mm==4:
+                            plt.savefig(SavePath+ResultsFile+"_NearlyIncompressibleMaterial.eps",format='eps',dpi=1000)
+                        elif mm==5:
+                            plt.savefig(SavePath+ResultsFile+"_TransverselyIsotropicMaterial.eps",format='eps',dpi=1000)
+
+
+                
+                
+
+
+                if which_func == 0:
+
+                    func = condA
+
+                    nn=1
+                    pdegree = 8
+                    # for mm in range(6):
+                    zdata = np.polyfit(nu[:-nn],condA[0,pp,:-nn],pdegree)
+                    poly = np.poly1d(zdata)
+                    x1=[]
+                    for i in nu[:-nn]:
+                        x1.append(poly(i))
+
+                    zdata = np.polyfit(nu[:-nn],condA[0,mm,:-nn],pdegree)
+                    poly = np.poly1d(zdata)
+                    x2=[]
+                    for i in nu[:-nn]:
+                        x2.append(poly(i))
+
+                    zdata = np.polyfit(nu[:-nn],condA[1,mm,:-nn],pdegree)
+                    poly = np.poly1d(zdata)
+                    x3=[]
+                    for i in nu[:-nn]:
+                        x3.append(poly(i))
+
+                    plt.plot(nu[:-nn],x1,marker.next(),linestyle='-',linewidth=2)
+                    plt.plot(nu[:-nn],x2,marker.next(),linestyle='-',linewidth=2)
+                    plt.plot(nu[:-nn],x3,marker.next(),linestyle='-',linewidth=2)
+
+                    plt.legend(MaterialModels,loc='upper left',fontsize=font_size-2)
+                    plt.ylabel(r"$\kappa(A)$",fontsize=font_size)
+
+                    y_formatter = mpl.ticker.ScalarFormatter(useOffset=True)
+                    y_formatter.set_powerlimits((-4,4))
+                    ax = plt.gca()
+                    ax.yaxis.set_major_formatter(y_formatter)
+
+                    if save:
+                        if mm==3:
+                            plt.savefig(SavePath+ResultsFile+"_MooneyRivlin_CondA.eps",format='eps',dpi=1000)
+                        elif mm==2:
+                            plt.savefig(SavePath+ResultsFile+"_Neo-Hookean_CondA.eps",format='eps',dpi=1000)
+                        elif mm==4:
+                            plt.savefig(SavePath+ResultsFile+"_NearlyIncompressibleMaterial_CondA.eps",format='eps',dpi=1000)
+                        elif mm==5:
+                            plt.savefig(SavePath+ResultsFile+"_TransverselyIsotropicMaterial_CondA.eps",format='eps',dpi=1000)
+
+
+
+                plt.show()
+
+
+        plotter(degree=4,which_func=1,save=True)
+        # plotter(which_func=1)
 
 
 

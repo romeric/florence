@@ -73,7 +73,7 @@ def NewtonRaphson(MainData,Increment,K,NodalForces,Residual,
 		# if Iter==MainData.AssemblyParameters.MaxIter:
 			# raise StopIteration("\n\nNewton Raphson did not converge! Maximum number of iterations reached.")
 
-		if Iter==MainData.AssemblyParameters.MaxIter or ResidualNorm['Increment_'+str(Increment)][-1] > 1000:
+		if Iter==MainData.AssemblyParameters.MaxIter or ResidualNorm['Increment_'+str(Increment)][-1] > 500:
 			MainData.AssemblyParameters.FailedToConverge = True
 			break
 		if np.isnan(np.abs(la.norm(Residual[ColumnsIn])/NormForces)):
@@ -82,6 +82,8 @@ def NewtonRaphson(MainData,Increment,K,NodalForces,Residual,
 
 
 	return TotalDisp
+
+
 
 
 

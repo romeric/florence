@@ -19,25 +19,33 @@ def GetDirichletBoundaryConditions(mesh,MainData):
 
 		tCAD = time()
 
-		# GET DIRICHLET BOUNDARY CONDITIONS BASED ON THE EXACT GEOMETRY FROM CAD
-		if MainData.BoundaryData.RequiresCAD:
-			# CALL POSTMESH WRAPPER
-			nodesDBC, Dirichlet = PostMeshWrapper(MainData,mesh)
-		else:
-			# CALL IGAKIT WRAPPER
-			nodesDBC, Dirichlet = IGAKitWrapper(MainData,mesh)
+		# # GET DIRICHLET BOUNDARY CONDITIONS BASED ON THE EXACT GEOMETRY FROM CAD
+		# if MainData.BoundaryData.RequiresCAD:
+		# 	# CALL POSTMESH WRAPPER
+		# 	nodesDBC, Dirichlet = PostMeshWrapper(MainData,mesh)
+		# else:
+		# 	# CALL IGAKIT WRAPPER
+		# 	nodesDBC, Dirichlet = IGAKitWrapper(MainData,mesh)
 
-		print 'Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds'
+		# print 'Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds'
 	
 
-		nOfDBCnodes = nodesDBC.shape[0]
-		for inode in range(nOfDBCnodes):
-			for i in range(nvar):
-				ColumnsOut = np.append(ColumnsOut,nvar*nodesDBC[inode]+i)
-				AppliedDirichlet = np.append(AppliedDirichlet,Dirichlet[inode,i])
+		# nOfDBCnodes = nodesDBC.shape[0]
+		# for inode in range(nOfDBCnodes):
+		# 	for i in range(nvar):
+		# 		ColumnsOut = np.append(ColumnsOut,nvar*nodesDBC[inode]+i)
+		# 		AppliedDirichlet = np.append(AppliedDirichlet,Dirichlet[inode,i])
 
-		MainData.nodesDBC = nodesDBC
-		# import sys; sys.exit() 
+		# MainData.nodesDBC = nodesDBC
+
+		# np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_Dirichlet_"+"P"+str(MainData.C+1)+".dat",AppliedDirichlet,fmt="%9.16f")
+		# np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_ColumnsOut_"+"P"+str(MainData.C+1)+".dat",ColumnsOut)
+
+		AppliedDirichlet = np.loadtxt(MainData.MeshInfo.FileName.split(".")[0]+"_Dirichlet_"+"P"+str(MainData.C+1)+".dat",dtype=np.float64)
+		ColumnsOut = np.loadtxt(MainData.MeshInfo.FileName.split(".")[0]+"_ColumnsOut_"+"P"+str(MainData.C+1)+".dat")
+
+		print 'Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds'
+		# exit() 
 
 
 		############################
