@@ -71,10 +71,6 @@ def MainSolver(MainData,mesh):
 			ResidualNorm,mesh,TotalDisp,Eulerx,ColumnsIn,ColumnsOut,AppliedDirichlet)
 
 
-	# UPDATE THE FIELDS
-	# TotalDisp[:,:,Increment] += dU
-
-
 	MainData.NRConvergence = ResidualNorm
 
 

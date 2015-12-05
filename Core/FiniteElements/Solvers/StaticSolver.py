@@ -33,12 +33,17 @@ def StaticSolver(MainData,LoadIncrement,K,DirichletForces,NeumannForces,
 				ColumnsIn,ColumnsOut,AppliedDirichletInc)
 
 			print '\nFinished Load increment', Increment, 'in', time()-t_increment, 'sec'
-			print 'Norm of Residual is', np.abs(la.norm(Residual[ColumnsIn])/MainData.NormForces), '\n'
+			try:
+				print 'Norm of Residual is', np.abs(la.norm(Residual[ColumnsIn])/MainData.NormForces), '\n'
+			except RuntimeWarning:
+				print what
 
 			# STORE THE INFORMATION IF NEWTON-RAPHSON FAILS
 			if MainData.AssemblyParameters.FailedToConverge == True:
 				MainData.solve.condA = np.NAN
 				MainData.solve.scaledA = np.NAN
+				MainData.solve.scaledAFF = np.NAN
+				MainData.solve.scaledAHH = np.NAN
 				break
 
 	return TotalDisp
