@@ -454,6 +454,9 @@ class PostProcess(object):
         MainData.ScaledJacobian = np.zeros(elements.shape[0])
         MainData.ScaledFF = np.zeros(elements.shape[0])
         MainData.ScaledHH = np.zeros(elements.shape[0])
+
+        MainData.ScaledFNFN = np.zeros(elements.shape[0])
+        MainData.ScaledCNCN = np.zeros(elements.shape[0])
         # MainData.Jacobian = np.zeros(elements.shape[0])
         # MainData.ScaledJacobian = []
         # MainData.ScaledJacobianElem = []
@@ -484,10 +487,22 @@ class PostProcess(object):
             # USING DETERMINANT OF DEFORMATION GRADIENT TENSOR
             # Jacobian = detF
             # USING INVARIANT F:F
-            Q2 = np.sqrt(np.einsum('kij,lij->kl',F,F)).diagonal()
+            Q1 = np.sqrt(np.einsum('kij,lij->kl',F,F)).diagonal()
             # USING INVARIANT H:H
-            Q3 = np.sqrt(np.einsum('ijk,ijl->kl',H,H)).diagonal()
+            Q2 = np.sqrt(np.einsum('ijk,ijl->kl',H,H)).diagonal()
             # print np.isnan(Q3).any()
+            Directions = getattr(MainData.MaterialArgs,"AnisotropicOrientations",None)
+            if Directions != None and MainData.MaterialArgs.Type == "BonetTranservselyIsotropicHyperElastic":
+                Q4 = np.einsum('ijk,k',F,Directions[elem,:])
+                Q4 = np.sqrt(np.dot(Q4,Q4.T)).diagonal()
+
+                C = np.einsum('ikj,ikl->ijl',F,F)
+                Q5 = np.einsum('ijk,k',C,Directions[elem,:]) 
+                Q5 = np.sqrt(np.dot(Q5,Q5.T)).diagonal()
+                # print Q4
+                # print F.shape
+                # Q4 = np.sqrt()
+                # print Q4
 
             # FIND MIN AND MAX VALUES
             JMin = np.min(Jacobian); JMax = np.max(Jacobian)
@@ -498,9 +513,13 @@ class PostProcess(object):
 
             MainData.ScaledJacobian[elem] = 1.0*JMin/JMax
             # MainData.Jacobian[elem] = np.min(Jacobian)
-            MainData.ScaledFF[elem] = 1.0*np.min(Q2)/np.max(Q2)
-            MainData.ScaledHH[elem] = 1.0*np.min(Q3)/np.max(Q3)
+            MainData.ScaledFF[elem] = 1.0*np.min(Q1)/np.max(Q1)
+            MainData.ScaledHH[elem] = 1.0*np.min(Q2)/np.max(Q2)
             # MainData.Jacobian[elem] = np.min(detF)
+
+            if Directions != None and MainData.MaterialArgs.Type == "BonetTranservselyIsotropicHyperElastic":
+                MainData.ScaledFNFN[elem] = 1.0*np.min(Q4)/np.max(Q4)
+                MainData.ScaledCNCN[elem] = 1.0*np.min(Q5)/np.max(Q5)
 
         if np.isnan(MainData.ScaledJacobian).any():
             raise JacobianError()
@@ -516,6 +535,13 @@ class PostProcess(object):
 
         print 'Minimum ScaledHH value is', np.min(MainData.ScaledHH), \
         'corresponding to element', np.where(np.min(MainData.ScaledHH)==MainData.ScaledHH)[0][0]
+
+        if Directions != None and MainData.MaterialArgs.Type == "BonetTranservselyIsotropicHyperElastic":
+            print 'Minimum ScaledFNFN value is', np.min(MainData.ScaledFNFN), \
+            'corresponding to element', np.where(np.min(MainData.ScaledFNFN)==MainData.ScaledFNFN)[0][0]
+
+            print 'Minimum ScaledCNCN value is', np.min(MainData.ScaledCNCN), \
+            'corresponding to element', np.where(np.min(MainData.ScaledCNCN)==MainData.ScaledCNCN)[0][0]
 
 
         if show_plot == True:
