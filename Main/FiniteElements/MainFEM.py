@@ -21,8 +21,8 @@ from Core.FiniteElements.Solvers.Solver import *
 # import Examples.FiniteElements.Annular_Circle_Electromechanics.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle_Nurbs.ProblemData as Pr
-# import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
-import Examples.FiniteElements.Wing2D.ProblemData as Pr
+import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
+# import Examples.FiniteElements.Wing2D.ProblemData as Pr
 # import Examples.FiniteElements.Sphere.ProblemData as Pr
 # import Examples.FiniteElements.Naca_Isotropic.ProblemData as Pr
 # import Examples.FiniteElements.RAE2822.ProblemData as Pr
@@ -54,7 +54,7 @@ def main(MainData, DictOutput=None, nStep=0):
     print 'Number of elements is', mesh.elements.shape[0], \
              'and number of mesh edge nodes is', np.unique(mesh.edges).shape[0]
 
-
+    # exit()
     # CALL THE MAIN ROUTINE
     MainData.Timer = time()
     TotalDisp = MainSolver(MainData,mesh)
@@ -105,6 +105,8 @@ def main(MainData, DictOutput=None, nStep=0):
         MainData.ScaledJacobian = np.zeros(mesh.nelem)+np.NAN
         MainData.ScaledFF = np.zeros(mesh.nelem)+np.NAN
         MainData.ScaledHH = np.zeros(mesh.nelem)+np.NAN
+        MainData.ScaledFNFN = np.zeros(mesh.nelem)+np.NAN
+        MainData.ScaledCNCN = np.zeros(mesh.nelem)+np.NAN
 
     # if DictOutput is not None:
         # DictOutput['MeshPoints_P'+str(MainData.C+1)] = mesh.points

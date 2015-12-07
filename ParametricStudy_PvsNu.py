@@ -14,170 +14,200 @@ from datetime import datetime
 import multiprocessing as MP
 # AVOID WRITING .pyc OR .pyo FILES
 sys.dont_write_bytecode
+np.set_printoptions(linewidth=400)
 
 # IMPORT NECESSARY CLASSES FROM BASE
 from Base import Base as MainData
 
 from Main.FiniteElements.MainFEM import main
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 from scipy.io import savemat, loadmat
-from matplotlib import rc
+
 
 
 if __name__ == '__main__':
 
-	# START THE ANALYSIS
-	print "Initiating the routines... Current time is", datetime.now().time()
+    # START THE ANALYSIS
+    print "Initiating the routines... Current time is", datetime.now().time()
 
-	MainData.__NO_DEBUG__ = True
- 	MainData.__VECTORISATION__ = True
- 	MainData.__PARALLEL__ = True
- 	MainData.numCPU = MP.cpu_count()
- 	# MainData.__PARALLEL__ = False
- 	# nCPU = 8
- 	__MEMORY__ = 'SHARED'
- 	# __MEMORY__ = 'DISTRIBUTED'
+    MainData.__NO_DEBUG__ = True
+    MainData.__VECTORISATION__ = True
+    MainData.__PARALLEL__ = True
+    MainData.numCPU = MP.cpu_count()
+    # MainData.__PARALLEL__ = False
+    # nCPU = 8
+    __MEMORY__ = 'SHARED'
+    # __MEMORY__ = 'DISTRIBUTED'
 
- 	MainData.C = 1
- 	MainData.norder = 2 
- 	MainData.plot = (0,3)
- 	nrplot = (0,'last')
- 	MainData.write = 0
+    MainData.C = 1
+    MainData.norder = 2 
+    MainData.plot = (0,3)
+    nrplot = (0,'last')
+    MainData.write = 0
 
-	# rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-	rc('font',**{'family':'sans-serif','sans-serif':['Computer Modern Roman']})
-	## for Palatino and other serif fonts use:
-	rc('font',**{'family':'serif','serif':['Palatino'],'size':18})
-	rc('text', usetex=True)
+    
 
-	Run = 0
-	if Run:
-		t_FEM = time.time()
-		nu = np.linspace(0.001,0.495,100)
-		# nu = np.linspace(0.01,0.495,2)
-		E = np.array([1e05])
-		p = [2,3,4,5,6]
-		# p = [2]
-		 
+    Run = 0
+    if Run:
+        t_FEM = time.time()
+        nu = np.linspace(0.001,0.495,10)
+        # nu = np.linspace(0.01,0.495,2)
+        E = np.array([1e05])
+        p = [2,3,4,5,6]
+        # p = [2]
+         
 
-		Results = {'PolynomialDegrees':p,'PoissonsRatios':nu,'Youngs_Modulus':E}
-			# 'MeshPoints':None,'MeshElements':None,
-			# 'MeshEdges':None, 'MeshFaces':None,'TotalDisplacement':None}
+        Results = {'PolynomialDegrees':p,'PoissonsRatios':nu,'Youngs_Modulus':E}
+            # 'MeshPoints':None,'MeshElements':None,
+            # 'MeshEdges':None, 'MeshFaces':None,'TotalDisplacement':None}
 
-		condA=np.zeros((len(p),nu.shape[0]))
-		scaledA = np.copy(condA)
-		for i in range(len(p)):
-			MainData.C = p[i]-1
-			for j in range(nu.shape[0]):
-				MainData.MaterialArgs.nu = nu[j]
-				MainData.MaterialArgs.E = E[0]
-				MainData.isScaledJacobianComputed = False
-				main(MainData,Results)	
-				CondExists = getattr(MainData.solve,'condA',None)
-				# ScaledExists = getattr(MainData.solve,'scaledA',None)
-				scaledA[i,j] = np.min(MainData.ScaledJacobian)
-				if CondExists is not None:
-					condA[i,j] = MainData.solve.condA
-				else:
-					condA[i,j] = np.NAN
+        condA=np.zeros((len(p),nu.shape[0]))
+        scaledA = np.copy(condA)
+        scaledAFF = np.copy(condA)
+        scaledAHH = np.copy(condA)
+        scaledAFNFN = np.copy(condA)
+        scaledACNCN = np.copy(condA)
+        for i in range(len(p)):
+            MainData.C = p[i]-1
+            for j in range(nu.shape[0]):
+                MainData.MaterialArgs.nu = nu[j]
+                MainData.MaterialArgs.E = E[0]
+                MainData.isScaledJacobianComputed = False
+                main(MainData,Results)  
+                CondExists = getattr(MainData.solve,'condA',None)
+                # ScaledExists = getattr(MainData.solve,'scaledA',None)
+                scaledA[i,j] = np.min(MainData.ScaledJacobian)
+                scaledAFF[i,j] = np.min(MainData.ScaledFF)
+                scaledAHH[i,j] = np.min(MainData.ScaledHH)
+                # scaledAFNFN[i,j] = np.min(MainData.ScaledFNFN)
+                # scaledACNCN[i,j] = np.min(MainData.ScaledCNCN)
+                if CondExists is not None:
+                    condA[i,j] = MainData.solve.condA
+                else:
+                    condA[i,j] = np.NAN
 
-		Results['ScaledJacobian'] = scaledA # one given row contains all values of nu for a fixed p
-		Results['ConditionNumber'] = condA # one given row contains all values of nu for a fixed p
-		Results['MaterialModel'] = MainData.MaterialArgs.Type
-		# print Results['ScaledJacobian']
+        Results['ScaledJacobian'] = scaledA # one given row contains all values of nu for a fixed p
+        Results['ScaledFF'] = scaledAFF # one given row contains all values of nu for a fixed p
+        Results['ScaledHH'] = scaledAHH # one given row contains all values of nu for a fixed p
+        # Results['ScaledFNFN'] = scaledAFNFN # one given row contains all values of nu for a fixed p
+        # Results['ScaledCNCN'] = scaledACNCN # one given row contains all values of nu for a fixed p
+        Results['ConditionNumber'] = condA # one given row contains all values of nu for a fixed p
+        Results['MaterialModel'] = MainData.MaterialArgs.Type
+        # print Results['ScaledJacobian']
 
-		fname = MainData.MaterialArgs.Type
-		if MainData.MaterialArgs.Type != "IncrementalLinearElastic" and MainData.MaterialArgs.Type != "LinearModel":
-			if MainData.AnalysisType == "Linear":
-				fname = "IncrementallyLinearised"+MainData.MaterialArgs.Type
-		
-		fname = fname + "_" + MainData.BoundaryData.ProjectionType+".mat"
-		fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'
+        fname = MainData.MaterialArgs.Type
+        if MainData.MaterialArgs.Type != "IncrementalLinearElastic" and MainData.MaterialArgs.Type != "LinearModel":
+            if MainData.AnalysisType == "Linear":
+                fname = "IncrementallyLinearised"+MainData.MaterialArgs.Type
+        
+        fname = fname + "_" + MainData.BoundaryData.ProjectionType+".mat"
+        fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'
 
-		# print fname
-		# exit(0)
-		savemat(fpath+fname,Results)
-
-
-		t_FEM = time.time()-t_FEM
-		print 'Time taken for the entire analysis was ', t_FEM, 'seconds'
-		np.savetxt('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/DONE', [t_FEM])
-
-	if not Run:
-		# import h5py as hpy 
-		ResultsPath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/'
-		SavePath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Mech2D/"
-
-		# ResultsFile = 'Mech2D_P_vs_Nu_IncrementalLinearElastic_EqualSpacing'
-		# ResultsFile = 'Mech2D_P_vs_Nu_IncrementalLinearElastic_FeketeSpacing'
-		# ResultsFile = 'Mech2D_P_vs_Nu_IncrementalLinearElastic_orthogonal'
-
-		# ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_EqualSpacing'
-		# ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_2_arc_length'
-		ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_2_orthogonal'
-
-		# ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_EqualSpacing'
-		# ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_FeketeSpacing'
-		# ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_orthogonal'
-
-		DictOutput =  loadmat(ResultsPath+ResultsFile+'.mat')	
-		
-		scaledA = DictOutput['ScaledJacobian']
-		condA = DictOutput['ConditionNumber']
-		# nu = DictOutput['PoissonsRatios'][0]
-		nu = np.linspace(0.001,0.5,100)*10
-		p = DictOutput['PolynomialDegrees'][0]
+        # print fname
+        # exit(0)
+        savemat(fpath+fname,Results)
 
 
+        t_FEM = time.time()-t_FEM
+        print 'Time taken for the entire analysis was ', t_FEM, 'seconds'
+        # np.savetxt('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/DONE', [t_FEM])
 
-		xmin = p[0]
-		xmax = p[-1]
-		ymin = nu[0]
-		ymax = nu[-1]
+    if not Run:
 
-		# print xmin, xmax, ymin, ymax
-		scaledA = scaledA[::-1,:]
-		condA = condA[::-1,:]
+        import matplotlib as mpl
+        import matplotlib.pyplot as plt
+        import matplotlib.cm as cm
+        from matplotlib import rc
 
-		X,Y=np.meshgrid(p,nu)
-		# print X
-		# print scaledA
+        # rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+        # rc('font',**{'family':'sans-serif','sans-serif':['Computer Modern Roman']})
+        ## for Palatino and other serif fonts use:
+        rc('font',**{'family':'serif','serif':['Palatino'],'size':18})
+        rc('text', usetex=True)
+        params = {'text.latex.preamble' : [r'\usepackage{amssymb}',r'\usepackage{mathtools}']}
+
+
+        # import h5py as hpy 
+        # ResultsPath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/'
+        ResultsPath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D/'
+        SavePath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Mech2D/"
+
+        ResultsFile = 'Mech2D_P_vs_Nu_IncrementalLinearElastic_arc_length'
+        # ResultsFile = 'Mech2D_P_vs_Nu_IncrementalLinearElastic_orthogonal'
+
+        # ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_2_arc_length'
+        # ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_2_orthogonal'
+
+        # ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_arc_length'
+        # ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_orthogonal'
+
+        DictOutput =  loadmat(ResultsPath+ResultsFile+'.mat')   
+        
+        scaledA = DictOutput['ScaledJacobian']
+        condA = DictOutput['ConditionNumber']
+        # nu = DictOutput['PoissonsRatios'][0]
+        nu = np.linspace(0.001,0.5,100)*10
+        p = DictOutput['PolynomialDegrees'][0]
 
 
 
-		plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bicubic', cmap=cm.viridis)
-		# plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='nearest', cmap=cm.viridis)
-		# # plt.colorbar()
+        xmin = p[0]
+        xmax = p[-1]
+        ymin = nu[0]
+        ymax = nu[-1]
 
-		# # plt.axis('equal')
-		# # plt.axis('off')
-		# # tick_locs = [0, 1, 2, 3, 4]
-		# tick_locs = [2, 3, 4, 5, 6]
-		# tick_locs = np.linspace(2.5,6,6).tolist()
-		# tick_locs = [2.45,3.25,4.,4.82,5.55]
-		tick_locs = [2,2.8,3.6,4.4,5.2]
-		tick_lbls = [2, 3, 4, 5, 6]
-		plt.yticks(tick_locs, tick_lbls)
-		tick_locs = [0,1,2,3,4,5]
-		tick_lbls = [0,0.1,0.2,0.3,0.4,0.5]
-		plt.xticks(tick_locs, tick_lbls)
-		plt.ylabel(r'$Polynomial\, Degree\,\, (p)$',fontsize=18)
-		plt.xlabel(r"$Poisson's\, Ratio\,\, (\nu)$",fontsize=18)
-		plt.title(r"$Mesh\, Quality\,\, (Q_1)$",fontsize=18)
+        # print np.mean(scaledA[2,:]), np.std(scaledA[2,:])
 
-		ax, _ = mpl.colorbar.make_axes(plt.gca(), shrink=0.8)
-		cbar = mpl.colorbar.ColorbarBase(ax, cmap=cm.viridis,
-	                       norm=mpl.colors.Normalize(vmin=-0, vmax=1))
-		cbar.set_clim(0, 1)
+        # print xmin, xmax, ymin, ymax
+        # print scaledA, "\n"
 
-		# plt.xlim([0,5])
-		# plt.ylim([2,6])
-		# ResultsPath+ResultsFile+'.mat'
-		plt.savefig(SavePath+ResultsFile+'.eps',format='eps',dpi=1000)
+        # imshow is a direct matrix-to-pixel transformation
+        # so flip the matrix upside down
+        scaledA = scaledA[::-1,:]
+        # print scaledA
+        # exit()
+        condA = condA[::-1,:]
 
-		plt.show()
+        X,Y = np.meshgrid(p,nu)
+        # print X
+        # print scaledA
+        # print scaledA[0,:]
+
+        # print scaledA.shape
+        # print np.mean(scaledA,axis=1)
+        # exit()
+
+
+
+        plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bicubic', cmap=cm.viridis)
+        # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='nearest', cmap=cm.viridis)
+
+        # # plt.axis('equal')
+        # # plt.axis('off')
+        # # tick_locs = [0, 1, 2, 3, 4]
+        # tick_locs = [2, 3, 4, 5, 6]
+        # tick_locs = np.linspace(2.5,6,6).tolist()
+        # tick_locs = [2.45,3.25,4.,4.82,5.55]
+        tick_locs = [2,2.8,3.6,4.4,5.2]
+        tick_lbls = [2, 3, 4, 5, 6]
+        plt.yticks(tick_locs, tick_lbls)
+        tick_locs = [0,1,2,3,4,5]
+        tick_lbls = [0,0.1,0.2,0.3,0.4,0.5]
+        plt.xticks(tick_locs, tick_lbls)
+        plt.ylabel(r'$Polynomial\, Degree\,\, (p)$',fontsize=18)
+        plt.xlabel(r"$Poisson's\, Ratio\,\, (\nu)$",fontsize=18)
+        plt.title(r"$Mesh\, Quality\,-\, min(Q_3)$",fontsize=18)
+
+        ax, _ = mpl.colorbar.make_axes(plt.gca(), shrink=0.8)
+        cbar = mpl.colorbar.ColorbarBase(ax, cmap=cm.viridis,
+                           norm=mpl.colors.Normalize(vmin=-0, vmax=1))
+        cbar.set_clim(0, 1)
+        plt.clim(0,1)
+
+        # ResultsPath+ResultsFile+'.mat'
+        # plt.savefig(SavePath+ResultsFile+'.eps',format='eps',dpi=1000)
+        # plt.savefig(SavePath+ResultsFile+'.eps',format='eps',dpi=300)
+
+        plt.show()
 
 
 

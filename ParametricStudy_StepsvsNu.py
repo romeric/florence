@@ -14,6 +14,8 @@ from datetime import datetime
 import multiprocessing as MP
 # AVOID WRITING .pyc OR .pyo FILES
 sys.dont_write_bytecode
+np.set_printoptions(linewidth=400)
+
 
 # IMPORT NECESSARY CLASSES FROM BASE
 from Base import Base as MainData
@@ -37,16 +39,16 @@ def runMain():
     __MEMORY__ = 'SHARED'
     # __MEMORY__ = 'DISTRIBUTED'
 
-    MainData.C = 1
+    MainData.C = 3
     MainData.norder = 2 
     MainData.plot = (0,3)
     nrplot = (0,'last')
     MainData.write = 0
 
     t_FEM = time.time()
-    # nu = np.linspace(0.001,0.495,10)
+    nu = np.linspace(0.001,0.495,10)
     # nu = np.linspace(0.001,0.495,1)
-    nu = np.linspace(0.35,0.495,1)
+    # nu = np.linspace(0.35,0.495,1)
     E = 1e05
     E_A = 2.5*E
     G_A = E/2.
@@ -56,10 +58,12 @@ def runMain():
     ProblemDataFile = ["sd7003_Stretch25","sd7003_Stretch50",
         "sd7003_Stretch100","sd7003_Stretch200","sd7003_Stretch400",
         "sd7003_Stretch800","sd7003_Stretch1600"]
-    nStep= [1,2,5,10,25,50]
+    nStep = [1,2,5,10,25,50]
+    # nStep = [1,2,5,10,25]
+    # nStep = [1,2,5]
 
-    ProblemDataFile = ["sd7003_Stretch25"]
-    nStep=[1]
+    # ProblemDataFile = ["sd7003_Stretch25"]
+    # nStep=[10]
 
     
 
@@ -71,7 +75,7 @@ def runMain():
     scaledAHH = np.copy(condA)
     whole_scaledA = np.zeros((3,len(nStep),len(ProblemDataFile),nu.shape[0],4000))
     # LOOP OVER FORMULATIONS
-    for m in range(2,3):
+    for m in range(0,3):
 
         if m==0:
             MainData.AnalysisType = "Linear"
@@ -90,9 +94,14 @@ def runMain():
             for i in range(len(ProblemDataFile)):
                 MainData.MeshInfo.FileName = ProblemPath+ProblemDataFile[i]
 
-                if MainData.C==5 and MainData.AnalysisType == "Nonlinear" \
-                    and nStep[k]>6:
-                    continue
+                # if MainData.C==5 and MainData.AnalysisType == "Nonlinear" \
+                #     and nStep[k]>6:
+                #     continue
+                # print int(MainData.MeshInfo.FileName.split("h")[-1])
+                # if MainData.C==3 and MainData.AnalysisType == "Nonlinear" \
+                #     and int(MainData.MeshInfo.FileName.split("h")[-1]) > 25 \
+                #     and MainData.LoadIncrement > 6:
+                    # continue
 
                 # LOOP OVER POISSON'S RATIOS
                 for j in range(nu.shape[0]):
@@ -101,24 +110,48 @@ def runMain():
                     MainData.MaterialArgs.E_A = E_A
                     MainData.MaterialArgs.G_A = G_A
 
-                    print 'Poisson ratio is:', MainData.MaterialArgs.nu
+                    print 'Poisson ratio is:', MainData.MaterialArgs.nu, "Degree is:", MainData.C+1
                     print MainData.AnalysisType, MainData.MaterialArgs.Type, "LoadIncrements", MainData.LoadIncrement, 
                     print "FileName", MainData.MeshInfo.FileName.split("/")[-1]
 
-                    
-                    MainData.isScaledJacobianComputed = False
-                    main(MainData,Results)  
-                    print 
-                    CondExists = getattr(MainData.solve,'condA',None)
-                    # ScaledExists = getattr(MainData.solve,'scaledA',None)
-                    scaledA[m,k,i,j] = np.min(MainData.ScaledJacobian)
-                    scaledAFF[m,k,i,j] = np.min(MainData.ScaledFF)
-                    scaledAHH[m,k,i,j] = np.min(MainData.ScaledHH)
-                    whole_scaledA[m,k,i,j,:MainData.ScaledJacobian.shape[0]] = MainData.ScaledJacobian
-                    if CondExists is not None:
-                        condA[m,k,i,j] = MainData.solve.condA
-                    else:
+                    if MainData.C==3 and MainData.AnalysisType == "Nonlinear" \
+                        and int(MainData.MeshInfo.FileName.split("h")[-1]) > 25 \
+                        and MainData.LoadIncrement > 11:
+
+                        MainData.isScaledJacobianComputed = False
+                        print 
+ 
+                        scaledA[m,k,i,j] = np.NAN
+                        scaledAFF[m,k,i,j] = np.NAN
+                        scaledAHH[m,k,i,j] = np.NAN
+                        whole_scaledA[m,k,i,j,:] = np.NAN
                         condA[m,k,i,j] = np.NAN
+
+                    # elif MainData.C==5 and MainData.AnalysisType == "Nonlinear" \
+                    #     and MainData.LoadIncrement > 6:
+
+                    #     MainData.isScaledJacobianComputed = False
+                    #     print 
+                    #     scaledA[m,k,i,j] = np.NAN
+                    #     scaledAFF[m,k,i,j] = np.NAN
+                    #     scaledAHH[m,k,i,j] = np.NAN
+                    #     whole_scaledA[m,k,i,j,:] = np.NAN
+                    #     condA[m,k,i,j] = np.NAN
+
+                    else:
+                        MainData.isScaledJacobianComputed = False
+                        main(MainData,Results)  
+                        print 
+                        CondExists = getattr(MainData.solve,'condA',None)
+                        # ScaledExists = getattr(MainData.solve,'scaledA',None)
+                        scaledA[m,k,i,j] = np.min(MainData.ScaledJacobian)
+                        scaledAFF[m,k,i,j] = np.min(MainData.ScaledFF)
+                        scaledAHH[m,k,i,j] = np.min(MainData.ScaledHH)
+                        whole_scaledA[m,k,i,j,:MainData.ScaledJacobian.shape[0]] = MainData.ScaledJacobian
+                        if CondExists is not None:
+                            condA[m,k,i,j] = MainData.solve.condA
+                        else:
+                            condA[m,k,i,j] = np.NAN
 
     Results['ScaledJacobian'] = scaledA # one given row contains all values of nu for a fixed p
     Results['ConditionNumber'] = condA # one given row contains all values of nu for a fixed p
@@ -131,15 +164,202 @@ def runMain():
     fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Steps_vs_Nu/Wing2D_Steps_vs_Nu_'
 
     # print fpath+fname
-    # savemat(fpath+fname,Results)
+    savemat(fpath+fname,Results)
 
     t_FEM = time.time()-t_FEM
     print 'Time taken for the entire analysis was ', t_FEM, 'seconds'
-    # np.savetxt('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Steps_vs_Nu/DONE_P'+str(MainData.C+1), [t_FEM])
+    np.savetxt('/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Steps_vs_Nu/DONE_P'+str(MainData.C+1), [t_FEM])
+
+
+def plotter_surface():
+
+    # fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Steps_vs_Nu/Wing2D_Steps_vs_Nu_'
+    fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Steps_vs_Nu_Old/Wing2D_Steps_vs_Nu_'
+    fname = "P"+str(p)+".mat"
+    
+
+    DictOutput =  loadmat(fpath+fname)   
+
+    scaledA = DictOutput['ScaledJacobian']
+    condA = DictOutput['ConditionNumber']
+    # nu = DictOutput['PoissonsRatios'][0]
+    nu = np.linspace(0.001,0.5,10)*100
+    p = DictOutput['PolynomialDegrees'][0]
+
+
+    xmin = 0
+    xmax = 50
+    ymin = nu[0]
+    ymax = nu[-1]
+
+    # print np.min(DictOutput['WholeScaledJacobian'][0,1,0,0][:2171])
+    nStep= [1,2,5,10,25,50]
+
+    # scaledA  = np.zeros((6,10))
+    # for i in range(len(nStep)):
+    #     for j in range(10):
+    #         scaledA[i,j] = np.min(DictOutput['WholeScaledJacobian'][0,i,0,j][:2171])
+    
+
+
+    scaledA = DictOutput['ScaledJacobian'][0,:,0,:]
+    # scaledA = np.fliplr(scaledA)
+
+    # imshow is a direct matrix-to-pixel visualtion so flip the 
+    # matrix upside down
+    scaledA = np.flipud(scaledA)
+
+    # print scaledA
+    # exit()
+    # print scaledA.shape
+    # scaledA = scaledA[2,:,0,:]
+    # exit()
+    # x = np.linspace(0.0,0.5,10)
+    # y = np.array([1,2,5,10,25,50])
+    # y = np.array([1,2,5])
+    # Z = scaledA[0,:,0,:]
+    # Z1 = scaledA[0,:,6,:]
+    # print x.shape, y.shape, z.shape
+    # exit()
+
+    # X,Y,Z = np.meshgrid(x,y,z)
+
+    # X,Y = np.meshgrid(x,y)
+
+    # print X.shape, Y.shape, Z.shape
+    # exit()
+    # 
+    # fig = plt.figure()
+    # ax = fig.gca(projection='3d')
+    # surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.viridis, linewidth=0, antialiased=False, shade=False)
+    # surf = ax.plot_surface(X, Y, Z1, rstride=1, cstride=1, cmap=cm.viridis, linewidth=0, antialiased=False, shade=True)
+    # surf = ax.plot_surface(X, Y, Z, cmap=cm.viridis, linewidth=0, antialiased=False)
+
+    # ax.view_init(90,0)
+    # plt.axis('off')
+
+
+    # ax.set_ylabel(r'$Increments$',fontsize=18)
+    # ax.set_xlabel(r"$Poisson's\, Ratio\,\, (\nu)$",fontsize=18)
+    # ax.set_zlabel(r"$Mesh\, Quality\,\, (Q_3)$",fontsize=18)
+
+
+
+def plotter_individual_imshow(p=2):
+
+    stretch = [25, 50, 100, 200, 400, 800, 1600]
+    formulations = ["Linear","Linearised","Nonlinear"]
+
+    # fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Steps_vs_Nu/Wing2D_Steps_vs_Nu_'
+    fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Steps_vs_Nu_Old/Wing2D_Steps_vs_Nu_'
+    fname = "P"+str(p)+".mat"
+    spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_Steps_vs_Nu_"
+    
+
+    DictOutput =  loadmat(fpath+fname)   
+
+    scaledA = DictOutput['ScaledJacobian']
+    condA = DictOutput['ConditionNumber']
+    # nu = DictOutput['PoissonsRatios'][0]
+    nu = np.linspace(0.001,0.5,10)*100
+    p = DictOutput['PolynomialDegrees'][0]
+
+
+    xmin = 0
+    xmax = 50
+    ymin = nu[0]
+    ymax = nu[-1]
+
+    nStep= [1,2,5,10,25,50]
+
+
+    # print DictOutput['ScaledJacobian'][0,:,0,:]
+    # print
+    # print DictOutput['ScaledJacobian'][0,:,1,:]
+
+    print DictOutput['ScaledJacobian'][0,2,0,:]
+    print
+    print DictOutput['ScaledJacobian'][0,2,1,:]
+    exit()
+    # which stretching 
+    for lstr in range(0,7):
+        # which formulation
+        for m in range(0,3):
+            # scaledA = DictOutput['ScaledJacobian'][m,:,lstr,:]
+            scaledA =  np.zeros((6,10))
+
+
+            for i in range(6):
+                for j in range(10):
+                    # print np.min(DictOutput['WholeScaledJacobian'][m,i,lstr,j][:2171])
+                    scaledA[i,j] = np.min(DictOutput['WholeScaledJacobian'][m,i,lstr,j][:2171])
+
+            if p==6 and m==2:
+                scaledA[3:,:] = np.NAN
+
+            # imshow is a direct matrix-to-pixel visualtion so flip the 
+            # matrix upside down
+            scaledA = np.flipud(scaledA)
+            # scaledA = scaledA[::-1,:] # or
+
+            # print scaledA
+            print lstr, m
+            # print DictOutput['ScaledJacobian'][0,:,lstr,1]
+            # print DictOutput['ScaledJacobian'][1,:,lstr,1]
+            # print DictOutput['ScaledJacobian'][2,:,lstr,1]
+            # exit()
+            
+
+
+            # tick_locs = [1.0,2.0,5.0,10.0,24.0,49.0]
+            # tick_lbls = [1, 2, 5, 10, 25, 50]
+            tick_locs = [0,10,20,30,40,50]
+            tick_lbls = [1,10,20,30,40,50]
+            plt.yticks(tick_locs, tick_lbls)
+            tick_locs = np.array([0,1,2,3,4,5])*10
+            tick_lbls = [0,0.1,0.2,0.3,0.4,0.5]
+            plt.xticks(tick_locs, tick_lbls)
+
+            plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bicubic', cmap=cm.viridis)
+            # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bilinear', cmap=cm.viridis)
+            # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='nearest', cmap=cm.viridis)
+            # plt.imshow(scaledA)
+
+            plt.ylabel(r'$Number\;of\;Increments$',fontsize=18)
+            plt.xlabel(r"$Poisson's\, Ratio\,\, (\nu)$",fontsize=18)
+            # plt.zlabel(r"$Mesh\, Quality\,\, (Q_3)$",fontsize=18)
+            plt.title(r"$Mesh\, Quality\,\, (Q_3)$",fontsize=18)
+
+            ax, _ = mpl.colorbar.make_axes(plt.gca(), shrink=0.8)
+            # cbar = mpl.colorbar.ColorbarBase(ax, cmap=cm.viridis,
+                               # norm=mpl.colors.Normalize(vmin=-0, vmax=1))
+            cbar = mpl.colorbar.ColorbarBase(ax, cmap=cm.viridis)
+            cbar.set_clim(0, 1)
+            cbar.set_ticks([0,0.1,0.2,0.3,0.4,0.5,.6,0.7,0.8,0.9,1])
+            plt.clim(0,1)
+
+            # sname = spath+fname.split(".")[0]+"_"+str(formulations[m])+"_Stretch"+str(stretch[0])+'.eps'
+            sname = spath+fname.split(".")[0]+"_"+str(formulations[m])+"_Stretch"+str(stretch[lstr])+'.eps'
+
+            # exit()
+            # plt.savefig(sname,format='eps',dpi=300)
+
+            # plt.show()
+
+            # print np.min(scaledA), np.max(scaledA)
+            # if lstr==0 and m==1:
+            #     return
+            # if m==0:
+                # print scaledA
+
+
+
+
+
 
 if __name__ == '__main__':
 
-    Run = 0
+    Run = 1
     if Run:
         runMain()
 
@@ -168,132 +388,6 @@ if __name__ == '__main__':
         # rc('axes',**{'prop_cycle':['#D1655B','#FACD85','#70B9B0','#72B0D7','#E79C5D']})
 
 
-        p=2
-        fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Steps_vs_Nu/Wing2D_Steps_vs_Nu_'
-        fname = "P"+str(p)+".mat"
-        
 
-        DictOutput =  loadmat(fpath+fname)   
-        # print DictOutput
-        # exit(0)
-        scaledA = DictOutput['ScaledJacobian']
-        condA = DictOutput['ConditionNumber']
-        # nu = DictOutput['PoissonsRatios'][0]
-        nu = np.linspace(0.001,0.5,10)*100
-        p = DictOutput['PolynomialDegrees'][0]
-
-
-        xmin = 0
-        xmax = 50
-        ymin = nu[0]
-        ymax = nu[-1]
-
-        # print DictOutput
-        # for key, value in DictOutput.iteritems():
-            # print key
-
-        print np.min(DictOutput['WholeScaledJacobian'][0,1,0,0][:2171])
-        # print scaledA.shape
-        nStep= [1,2,5,10,25,50]
-
-        scaledA  = np.zeros((6,10))
-        for i in range(len(nStep)):
-            for j in range(10):
-                scaledA[i,j] = np.min(DictOutput['WholeScaledJacobian'][0,i,0,j][:2171])
-        # print scaledA[:,0]
-        # scaledA = scaledA.T
-        # Z = scaledA
-        # print scaledA
-        # surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.viridis, linewidth=0, antialiased=False, shade=False)
-
-        # scaledA = np.min(scaledA,axis=)
-        # plt.plot(DictOutput['WholeScaledJacobian'][2,0,0,0])
-        # plt.show()
-        # exit()
-        
-
-
-        # scaledA = DictOutput['ScaledJacobian'][2,:,0,:]
-        # scaledA = np.fliplr(scaledA)
-
-        # print scaledA
-        scaledA = np.flipud(scaledA)
-
-        print scaledA
-        # exit()
-        # print scaledA.shape
-        # scaledA = scaledA[2,:,0,:]
-        # exit()
-        # x = np.linspace(0.0,0.5,10)
-        # y = np.array([1,2,5,10,25,50])
-        # y = np.array([1,2,5])
-        # Z = scaledA[0,:,0,:]
-        # Z1 = scaledA[0,:,6,:]
-        # print x.shape, y.shape, z.shape
-        # exit()
-
-        # X,Y,Z = np.meshgrid(x,y,z)
-
-        # X,Y = np.meshgrid(x,y)
-
-        # print X.shape, Z.shape, Y.shape
-        # print Z.shape
-        # exit()
-        # 
-        # fig = plt.figure()
-        # ax = fig.gca(projection='3d')
-        # surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.viridis, linewidth=0, antialiased=False, shade=False)
-        # surf = ax.plot_surface(X, Y, Z1, rstride=1, cstride=1, cmap=cm.viridis, linewidth=0, antialiased=False, shade=True)
-        # surf = ax.plot_surface(X, Y, Z, cmap=cm.viridis, linewidth=0, antialiased=False)
-
-        # ax.view_init(90,0)
-        # plt.axis('off')
-
-
-        # ax.set_ylabel(r'$Increments$',fontsize=18)
-        # ax.set_xlabel(r"$Poisson's\, Ratio\,\, (\nu)$",fontsize=18)
-        # ax.set_zlabel(r"$Mesh\, Quality\,\, (Q_3)$",fontsize=18)
-
-        # 
-
-        # tick_locs = [1.0,2.0,5.0,10.0,24.0,49.0]
-        # tick_lbls = [1, 2, 5, 10, 25, 50]
-        tick_locs = [0,10,20,30,40,50]
-        tick_lbls = [1,10,20,30,40,50]
-        plt.yticks(tick_locs, tick_lbls)
-        tick_locs = np.array([0,1,2,3,4,5])*10
-        tick_lbls = [0,0.1,0.2,0.3,0.4,0.5]
-        plt.xticks(tick_locs, tick_lbls)
-
-        plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bicubic', cmap=cm.viridis)
-        # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bilinear', cmap=cm.viridis)
-        # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='nearest', cmap=cm.viridis)
-        # plt.imshow(scaledA)
-
-        # tick_locs = [2,2.8,3.6,4.4,5.2]
-        # tick_lbls = [2, 3, 4, 5, 6]
-        # plt.yticks(tick_locs, tick_lbls)
-        # tick_locs = [0,1,2,3,4,5]
-        # tick_lbls = [0,0.1,0.2,0.3,0.4,0.5]
-        # plt.xticks(tick_locs, tick_lbls)
-        plt.ylabel(r'$Number\;of\;Increments$',fontsize=18)
-        plt.xlabel(r"$Poisson's\, Ratio\,\, (\nu)$",fontsize=18)
-        # plt.zlabel(r"$Mesh\, Quality\,\, (Q_3)$",fontsize=18)
-        plt.title(r"$Mesh\, Quality\,\, (Q_3)$",fontsize=18)
-
-        ax, _ = mpl.colorbar.make_axes(plt.gca(), shrink=0.8)
-        cbar = mpl.colorbar.ColorbarBase(ax, cmap=cm.viridis,
-                           norm=mpl.colors.Normalize(vmin=-0, vmax=1))
-        # cbar = mpl.colorbar.ColorbarBase(ax, cmap=cm.viridis)
-        cbar.set_clim(0, 1)
-        plt.clim(0,1)
-
-        plt.show()
-
-
-
-
-
-
-
-
+        p=4
+        plotter_individual_imshow(p)

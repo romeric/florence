@@ -8,11 +8,11 @@ def ProblemData(MainData):
 	MainData.Fields = 'Mechanics'	
 	MainData.Formulation = 'DisplacementApproach'
 	MainData.Analysis = 'Static'
-	# MainData.AnalysisType = 'Linear'
+	MainData.AnalysisType = 'Linear'
 	# MainData.AnalysisType = 'Nonlinear'
 
 	# MATERIAL INPUT DATA 
-	# MainData.MaterialArgs.Type = 'LinearModel'
+	MainData.MaterialArgs.Type = 'LinearModel'
 	# MainData.MaterialArgs.Type = 'IncrementalLinearElastic'
 	# MainData.MaterialArgs.Type = 'IncrementallyLinearisedNeoHookean'
 	# MainData.MaterialArgs.Type = 'IncrementallyLinearisedMooneyRivlin'
@@ -29,11 +29,11 @@ def ProblemData(MainData):
 	# MainData.MaterialArgs.Type = 'BonetTranservselyIsotropicHyperElastic'
 
 	MainData.MaterialArgs.E  = 1.0e5
-	MainData.MaterialArgs.nu = 0.35
+	MainData.MaterialArgs.nu = 0.40
 
-	MainData.MaterialArgs.E_A = 2.5*MainData.MaterialArgs.E
+	# MainData.MaterialArgs.E_A = 2.5*MainData.MaterialArgs.E
 	# # # MainData.MaterialArgs.G_A = (E*(E_A*nu - E_A + E_A*nu**2 + E*nu**2))/(2*(nu + 1)*(2*E*nu**2 + E_A*nu - E_A))
-	MainData.MaterialArgs.G_A = MainData.MaterialArgs.E/2.
+	# MainData.MaterialArgs.G_A = MainData.MaterialArgs.E/2.
 
 
 	# MainData.MaterialArgs.E = MainData.E 
