@@ -609,13 +609,12 @@ class PostProcess(object):
             # plt.fill(dum[ddum,0],dum[ddum,1],color=(MainData.ScaledJacobian[i],0,1-MainData.ScaledJacobian[i]))   
 
             plt.plot(dum[ddum,0],dum[ddum,1],'#000000')
-
-            coord = mesh.points[mesh.elements[i,:],:]
-            x_avg.append(np.sum(coord[:,0])/mesh.elements.shape[1])
-            y_avg.append(np.sum(coord[:,1])/mesh.elements.shape[1])
-            # plt.text(x_avg[i],y_avg[i],np.around(MainData.Jacobian[i],decimals=3))
-            plt.text(x_avg[i],y_avg[i],np.around(MainData.ScaledJacobian[i],decimals=3))
-            # plt.text(x_avg[i],y_avg[i],MainData.Jacobian)
+            
+            # WRITE JACOBIAN VALUES ON ELEMENTS
+            # coord = mesh.points[mesh.elements[i,:],:]
+            # x_avg.append(np.sum(coord[:,0])/mesh.elements.shape[1])
+            # y_avg.append(np.sum(coord[:,1])/mesh.elements.shape[1])
+            # plt.text(x_avg[i],y_avg[i],np.around(MainData.ScaledJacobian[i],decimals=3))
 
 
         plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#F88379') 

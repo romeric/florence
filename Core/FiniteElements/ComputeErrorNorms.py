@@ -103,7 +103,8 @@ def ComputeErrorNorms(MainData,mesh,nmesh,AnalyticalSolution,Domain,Quadrature,M
 			# COMPUTE THE HESSIAN AT THIS GAUSS POINT
 			H_Voigt = MainData.Hessian(MaterialArgs,ndim,StrainTensors,ElectricFieldx)
 			# COMPUTE THE TANGENT STIFFNESS MATRIX
-			BDB_1, t = MainData().ConstitutiveStiffnessIntegrand(Domain,B,MaterialGradient,nvar,SpatialGradient,ndim,CauchyStressTensor,ElectricDisplacementx,MaterialArgs,H_Voigt)
+			BDB_1, t = MainData().ConstitutiveStiffnessIntegrand(Domain,B,MaterialGradient,nvar,SpatialGradient,
+				ndim,CauchyStressTensor,ElectricDisplacementx,MaterialArgs,H_Voigt)
 
 			# L2 NORM
 			L2_nom   += np.linalg.norm((AnalyticalSolGauss - ElementalSolGauss)**2)*Domain.AllGauss[counter,0]
@@ -118,3 +119,138 @@ def ComputeErrorNorms(MainData,mesh,nmesh,AnalyticalSolution,Domain,Quadrature,M
 	EnergyNorm = np.sqrt(E_nom)/np.sqrt(E_denom)
 	print L2Norm, EnergyNorm
 	return L2Norm, EnergyNorm
+
+
+
+
+def CheapNorm(MainData,mesh,TotalDisp):
+
+	# mesh.points = np.array([
+	# 	[2.,2.],
+	# 	[5.,2.],
+	# 	[5.,4.],
+	# 	[2.,4.]
+	# 	])
+	# mesh.elements = np.array([
+	# 	[0,1,3],
+	# 	[1,2,3]
+	# 	])
+	# mesh.edges = np.array([
+	# 	[0,1],
+	# 	[1,3],
+	# 	[3,0],
+	# 	[1,2],
+	# 	[2,3]
+	# 	])
+
+	# mesh.GetHighOrderMesh(MainData.C)
+
+	# print mesh.points
+	# print mesh.elements
+	# mesh.SimplePlot()
+	# mesh.PlotMeshNumberingTri()
+	# return
+
+	# func = lambda x,y : np.sin(x)*np.cos(y)
+	func = lambda x,y : x*np.sin(y)+y*np.cos(x)
+	# func = lambda x,y : x**3*(y+1)**3
+
+	nodeperelem = mesh.elements.shape[1]
+	# print MainData.Domain.Bases[:,0].shape
+	# print nodeperelem
+	# print MainData.Domain.Bases[:,0].reshape(1,nodeperelem)
+	# print MainData.Domain.Bases.shape
+	# print MainData.Domain.Jm.shape
+
+	# print MainData.Quadrature.points, "\n"
+	
+
+	# 
+
+	L2_normX = 0; L2_denormX = 0
+	L2_normx = 0; L2_denormx = 0
+	for elem in range(mesh.nelem):
+		LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
+		vpoints = mesh.points+TotalDisp[:,:,-1]
+		EulerElemCoords = vpoints[mesh.elements[elem,:],:]
+		# print LagrangeElemCoords.shape
+
+
+		ParentGradientX = np.einsum('ijk,jl->kil',MainData.Domain.Jm,LagrangeElemCoords)
+		ElementalSolGaussX = np.einsum('ij,ik',MainData.Domain.Bases,LagrangeElemCoords)
+
+		AnalyticalSolNodesX = func(LagrangeElemCoords[:,0],LagrangeElemCoords[:,1])
+		AnalyticalSolGaussX = func(ElementalSolGaussX[:,0],ElementalSolGaussX[:,1])
+		NumericalSolGaussX = np.einsum('i,ij',AnalyticalSolNodesX,MainData.Domain.Bases)
+
+		# Deformed
+		ParentGradientx = np.einsum('ijk,jl->kil',MainData.Domain.Jm,EulerElemCoords)
+		ElementalSolGaussx = np.einsum('ij,ik',MainData.Domain.Bases,EulerElemCoords)
+
+		AnalyticalSolNodesx = func(EulerElemCoords[:,0],EulerElemCoords[:,1])
+		AnalyticalSolGaussx = func(ElementalSolGaussx[:,0],ElementalSolGaussx[:,1])
+		NumericalSolGaussx = np.einsum('i,ij',AnalyticalSolNodesx,MainData.Domain.Bases)
+
+		# L2_norm = (AnalyticalSolGauss - NumericalSolGauss)
+
+
+		# L2_norm += np.linalg.norm((AnalyticalSolGauss - NumericalSolGauss)**2)
+		# L2_denorm += np.linalg.norm((AnalyticalSolGauss)**2)
+		# print L2_norm, L2_denorm
+		# print AnalyticalSolGauss -  NumericalSolGauss
+
+		for counter in range(0,MainData.Domain.AllGauss.shape[0]):
+			# L2_normX += np.linalg.norm((AnalyticalSolGaussX - NumericalSolGaussX)**2)*MainData.Domain.AllGauss[counter,0]
+			# L2_denormX += np.linalg.norm((AnalyticalSolGaussX)**2)*MainData.Domain.AllGauss[counter,0]
+
+			L2_normX += (AnalyticalSolGaussX - NumericalSolGaussX)**2*MainData.Domain.AllGauss[counter,0]
+			L2_denormX += (AnalyticalSolGaussX)**2*MainData.Domain.AllGauss[counter,0]
+
+			# L2_normx += np.linalg.norm((AnalyticalSolGaussx - NumericalSolGaussx)**2)*MainData.Domain.AllGauss[counter,0]
+			# L2_denormx += np.linalg.norm((AnalyticalSolGaussx)**2)*MainData.Domain.AllGauss[counter,0]
+
+			L2_normx += (AnalyticalSolGaussx - NumericalSolGaussx)**2*MainData.Domain.AllGauss[counter,0]
+			L2_denormx += (AnalyticalSolGaussx)**2*MainData.Domain.AllGauss[counter,0]
+
+
+		# print MainData.Domain.AllGauss.shape
+		# return
+		# if elem==1:
+			# print LagrangeElemCoords
+			# print ElementalSolGauss
+			# print AnalyticalSolGauss
+			# print xx
+			# print NumericalSolGauss
+
+			# print AnalyticalSolGauss -  NumericalSolGauss
+			# print np.linalg.norm((AnalyticalSolGauss - NumericalSolGauss)**2)
+
+			# print
+			# print np.einsum('i,ij',xx,MainData.Domain.Bases)
+			# pass
+			# print MainData.Domain.Jm.shape, LagrangeElemCoords.shape
+			# print np.einsum('ijk,ji',MainData.Domain.Jm,LagrangeElemCoords)
+
+		# ElementalSolGauss = np.zeros((MainData.Domain.AllGauss.shape[0],MainData.nvar))
+		# for counter in range(0,MainData.Domain.AllGauss.shape[0]):
+		# 	# GET THE NUMERICAL SOLUTION WITHIN THE ELEMENT (AT QUADRATURE POINTS)
+		# 	ElementalSolGauss[counter,:] = np.dot(MainData.Domain.Bases[:,counter].reshape(1,nodeperelem),LagrangeElemCoords)
+		# 	if elem==0 and counter==3:
+		# 		print ElementalSolGauss
+
+	L2NormX = np.sqrt(L2_normX)/np.sqrt(L2_denormX)
+	L2NormX = np.linalg.norm(L2NormX)
+
+	L2Normx = np.sqrt(L2_normx)/np.sqrt(L2_denormx)
+	L2Normx = np.linalg.norm(L2Normx)
+
+
+	# L2NormX = L2_normX/L2_denormX
+	# L2Normx = L2_normx/L2_denormx
+	print L2NormX, L2Normx
+	# print np.linalg.norm(L2NormX)
+
+	MainData.L2NormX = L2NormX
+	MainData.L2Normx = L2Normx
+	MainData.DoF = mesh.points.shape[0]*MainData.nvar
+	MainData.NELEM = mesh.elements.shape[0]

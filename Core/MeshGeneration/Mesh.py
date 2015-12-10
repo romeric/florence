@@ -722,13 +722,13 @@ class Mesh(object):
 
 
 
-	def SimplePlot(self):
+	def SimplePlot(self,save=False,filename=None):
 		"""Simple mesh plot. Just a wire plot"""
 
 		import matplotlib.pyplot as plt 
 		fig = plt.figure()
 		if self.element_type == "tri":
-			plt.triplot(self.points[:,0],self.points[:,1], self.elements[:,:3])
+			plt.triplot(self.points[:,0],self.points[:,1], self.elements[:,:3],color='k')
 
 		elif self.element_type == "tet":
 			# assert self.elements.shape[1] == 4
@@ -747,18 +747,30 @@ class Mesh(object):
 				for face in range(self.faces.shape[0]):
 					coords = self.points[self.faces[face,:3],:]
 					plt.gca(projection='3d')
-					plt.plot(coords[:,0],coords[:,1],coords[:,2],'-bo')
+					plt.plot(coords[:,0],coords[:,1],coords[:,2],'-ko')
 			else:
 				for face in range(self.faces.shape[0]):
 					coords = self.points[self.faces[face,:3],:]
 					coords_all = self.points[self.faces[face,:],:]
 					plt.gca(projection='3d')
-					plt.plot(coords[:,0],coords[:,1],coords[:,2],'-b')
-					plt.plot(coords_all[:,0],coords_all[:,1],coords_all[:,2],'bo')
+					plt.plot(coords[:,0],coords[:,1],coords[:,2],'-k')
+					plt.plot(coords_all[:,0],coords_all[:,1],coords_all[:,2],'ko')
 		else:
 			raise NotImplementedError("SimplePlot for "+self.element_type+" not implemented yet")
 
 		plt.axis("equal")
+
+		# plt.xlim([-0.5,-0.42])
+		# plt.ylim([-0.05,0.07])
+		# plt.axis('off')
+		if save:
+			if filename is None:
+				raise KeyError('File name not given. Supply one')
+			else:
+				if filename.split(".")[-1] == filename:
+					filename += ".eps"
+				plt.savefig(filename,format="eps",dpi=300)
+
 		plt.show()
 
 

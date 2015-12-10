@@ -94,7 +94,6 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 		# if issym:
 			# print u'\u2713'.encode('utf8')+' : ', 'Elemental stiffness matrix is symmetric'
 
-
 	return stiffness, tractionforce 
 #-------------------------------------------------------------------------------------------------------------------#
 

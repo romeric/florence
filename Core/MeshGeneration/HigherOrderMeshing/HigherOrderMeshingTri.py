@@ -351,7 +351,7 @@ def NodeLoopTri(inode,reelements,repoints):
 	return j
 
 
-def HighOrderMeshTri(C,mesh,info=0,Parallel=False,nCPU=1):
+def HighOrderMeshTri(C,mesh,info=0,Parallel=False,nCPU=1,ComputeAll=True):
 
 	if mesh.points.shape[1]!=2:
 		raise ValueError('Incompatible mesh coordinates size. mesh.point.shape[1] must be 2')
