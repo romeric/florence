@@ -1,11 +1,13 @@
 import os
 from time import time
+from copy import deepcopy
 
 # CORE IMPORTS
 # from Core.FiniteElements.ComputeErrorNorms import ComputeErrorNorms
 from Core.FiniteElements.PreProcess import PreProcess
 from Core.FiniteElements.PostProcess import *
 from Core.FiniteElements.Solvers.Solver import *
+from Core.FiniteElements.ComputeErrorNorms import *
 
 
 ###########################################################################################################
@@ -21,8 +23,8 @@ from Core.FiniteElements.Solvers.Solver import *
 # import Examples.FiniteElements.Annular_Circle_Electromechanics.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle_Nurbs.ProblemData as Pr
-import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
-# import Examples.FiniteElements.Wing2D.ProblemData as Pr
+# import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
+import Examples.FiniteElements.Wing2D.ProblemData as Pr
 # import Examples.FiniteElements.Sphere.ProblemData as Pr
 # import Examples.FiniteElements.Naca_Isotropic.ProblemData as Pr
 # import Examples.FiniteElements.RAE2822.ProblemData as Pr
@@ -88,6 +90,16 @@ def main(MainData, DictOutput=None, nStep=0):
     # plt.axis('equal')
     # plt.show()
 
+    #####################
+    # from scipy.io import savemat
+    # Dict = {'InitialX':mesh.points, 'T':mesh.elements, 
+    #     'TotalDisplacement':TotalDisp[:,:,MainData.AssemblyParameters.LoadIncrements-1],
+    #     'FinalX':mesh.points+TotalDisp[:,:,MainData.AssemblyParameters.LoadIncrements-1],
+    #     'ScaledJacobian':MainData.ScaledJacobian,
+    #     'nIncrements':MainData.AssemblyParameters.LoadIncrements}
+    # savemat('/home/roman/Dropbox/Wing2D_Results_P'+str(MainData.C+1)+'.mat',Dict)
+    #####################
+
     if nStep ==1:
         MainData.mesh = mesh
         MainData.mesh.points = mesh.points + TotalDisp[:,:MainData.ndim,-1]
@@ -98,9 +110,14 @@ def main(MainData, DictOutput=None, nStep=0):
         if MainData.AnalysisType == 'Nonlinear':
             PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp,show_plot=False)
             pass
-        # PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
-        # import matplotlib.pyplot as plt
-        # plt.show()
+        if MainData.AnalysisType == "Linear":
+            vmesh = deepcopy(mesh)
+            vmesh.points = vmesh.points + TotalDisp[:,:,MainData.AssemblyParameters.LoadIncrements-1]
+        else:
+            vmesh = mesh    
+        PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
+        import matplotlib.pyplot as plt
+        plt.show()
     else:
         MainData.ScaledJacobian = np.zeros(mesh.nelem)+np.NAN
         MainData.ScaledFF = np.zeros(mesh.nelem)+np.NAN
@@ -108,14 +125,14 @@ def main(MainData, DictOutput=None, nStep=0):
         MainData.ScaledFNFN = np.zeros(mesh.nelem)+np.NAN
         MainData.ScaledCNCN = np.zeros(mesh.nelem)+np.NAN
 
-    # if DictOutput is not None:
-        # DictOutput['MeshPoints_P'+str(MainData.C+1)] = mesh.points
-        # DictOutput['MeshElements_P'+str(MainData.C+1)] = mesh.elements+1
-        # DictOutput['MeshEdges_P'+str(MainData.C+1)] = mesh.edges+1
-        # if MainData.ndim==3:
-        #     DictOutput['MeshFaces_P'+str(MainData.C+1)] = mesh.faces+1
-        # DictOutput['TotalDisplacement_P'+str(MainData.C+1)] = TotalDisp
-        # DictOutput['nSteps'] = MainData.AssemblyParameters.LoadIncrements
+    if DictOutput is not None:
+        DictOutput['MeshPoints_P'+str(MainData.C+1)] = mesh.points
+        DictOutput['MeshElements_P'+str(MainData.C+1)] = mesh.elements+1
+        DictOutput['MeshEdges_P'+str(MainData.C+1)] = mesh.edges+1
+        if MainData.ndim==3:
+            DictOutput['MeshFaces_P'+str(MainData.C+1)] = mesh.faces+1
+        DictOutput['TotalDisplacement_P'+str(MainData.C+1)] = TotalDisp
+        DictOutput['nSteps'] = MainData.AssemblyParameters.LoadIncrements
 
     # vpoints = mesh.points + TotalDisp[:,:,-1]
     # np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/elements_nnsphere2_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
@@ -131,6 +148,12 @@ def main(MainData, DictOutput=None, nStep=0):
     # Compute Error Norms
     # L2Norm=0; EnergyNorm=0
     # L2Norm, EnergyNorm = ComputeErrorNorms(MainData,mesh)
+    # CheapNorm(MainData,mesh,TotalDisp)
+
+    # for C in range(8):
+        # MainData.C = C
+        # CheapNorm(MainData,mesh,TotalDisp)
+
 
     #----------------------------------------------------------------------------------
 

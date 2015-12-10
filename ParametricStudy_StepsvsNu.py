@@ -39,7 +39,7 @@ def runMain():
     __MEMORY__ = 'SHARED'
     # __MEMORY__ = 'DISTRIBUTED'
 
-    MainData.C = 3
+    MainData.C = 1
     MainData.norder = 2 
     MainData.plot = (0,3)
     nrplot = (0,'last')
@@ -114,18 +114,18 @@ def runMain():
                     print MainData.AnalysisType, MainData.MaterialArgs.Type, "LoadIncrements", MainData.LoadIncrement, 
                     print "FileName", MainData.MeshInfo.FileName.split("/")[-1]
 
-                    if MainData.C==3 and MainData.AnalysisType == "Nonlinear" \
-                        and int(MainData.MeshInfo.FileName.split("h")[-1]) > 25 \
-                        and MainData.LoadIncrement > 11:
+                    # if MainData.C==3 and MainData.AnalysisType == "Nonlinear" \
+                    #     and int(MainData.MeshInfo.FileName.split("h")[-1]) > 25 \
+                    #     and MainData.LoadIncrement > 11:
 
-                        MainData.isScaledJacobianComputed = False
-                        print 
+                    #     MainData.isScaledJacobianComputed = False
+                    #     print 
  
-                        scaledA[m,k,i,j] = np.NAN
-                        scaledAFF[m,k,i,j] = np.NAN
-                        scaledAHH[m,k,i,j] = np.NAN
-                        whole_scaledA[m,k,i,j,:] = np.NAN
-                        condA[m,k,i,j] = np.NAN
+                    #     scaledA[m,k,i,j] = np.NAN
+                    #     scaledAFF[m,k,i,j] = np.NAN
+                    #     scaledAHH[m,k,i,j] = np.NAN
+                    #     whole_scaledA[m,k,i,j,:] = np.NAN
+                    #     condA[m,k,i,j] = np.NAN
 
                     # elif MainData.C==5 and MainData.AnalysisType == "Nonlinear" \
                     #     and MainData.LoadIncrement > 6:
@@ -138,20 +138,36 @@ def runMain():
                     #     whole_scaledA[m,k,i,j,:] = np.NAN
                     #     condA[m,k,i,j] = np.NAN
 
+                    # else:
+                    #     MainData.isScaledJacobianComputed = False
+                    #     main(MainData,Results)  
+                    #     print 
+                    #     CondExists = getattr(MainData.solve,'condA',None)
+                    #     # ScaledExists = getattr(MainData.solve,'scaledA',None)
+                    #     scaledA[m,k,i,j] = np.min(MainData.ScaledJacobian)
+                    #     scaledAFF[m,k,i,j] = np.min(MainData.ScaledFF)
+                    #     scaledAHH[m,k,i,j] = np.min(MainData.ScaledHH)
+                    #     whole_scaledA[m,k,i,j,:MainData.ScaledJacobian.shape[0]] = MainData.ScaledJacobian
+                    #     if CondExists is not None:
+                    #         condA[m,k,i,j] = MainData.solve.condA
+                    #     else:
+                    #         condA[m,k,i,j] = np.NAN
+
+
+                    # Direct for p==2
+                    MainData.isScaledJacobianComputed = False
+                    main(MainData,Results)  
+                    print 
+                    CondExists = getattr(MainData.solve,'condA',None)
+                    # ScaledExists = getattr(MainData.solve,'scaledA',None)
+                    scaledA[m,k,i,j] = np.min(MainData.ScaledJacobian)
+                    scaledAFF[m,k,i,j] = np.min(MainData.ScaledFF)
+                    scaledAHH[m,k,i,j] = np.min(MainData.ScaledHH)
+                    whole_scaledA[m,k,i,j,:MainData.ScaledJacobian.shape[0]] = MainData.ScaledJacobian
+                    if CondExists is not None:
+                        condA[m,k,i,j] = MainData.solve.condA
                     else:
-                        MainData.isScaledJacobianComputed = False
-                        main(MainData,Results)  
-                        print 
-                        CondExists = getattr(MainData.solve,'condA',None)
-                        # ScaledExists = getattr(MainData.solve,'scaledA',None)
-                        scaledA[m,k,i,j] = np.min(MainData.ScaledJacobian)
-                        scaledAFF[m,k,i,j] = np.min(MainData.ScaledFF)
-                        scaledAHH[m,k,i,j] = np.min(MainData.ScaledHH)
-                        whole_scaledA[m,k,i,j,:MainData.ScaledJacobian.shape[0]] = MainData.ScaledJacobian
-                        if CondExists is not None:
-                            condA[m,k,i,j] = MainData.solve.condA
-                        else:
-                            condA[m,k,i,j] = np.NAN
+                        condA[m,k,i,j] = np.NAN
 
     Results['ScaledJacobian'] = scaledA # one given row contains all values of nu for a fixed p
     Results['ConditionNumber'] = condA # one given row contains all values of nu for a fixed p
@@ -250,12 +266,12 @@ def plotter_individual_imshow(p=2):
     stretch = [25, 50, 100, 200, 400, 800, 1600]
     formulations = ["Linear","Linearised","Nonlinear"]
 
-    # fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Steps_vs_Nu/Wing2D_Steps_vs_Nu_'
-    fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Steps_vs_Nu_Old/Wing2D_Steps_vs_Nu_'
+    fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Steps_vs_Nu/Wing2D_Steps_vs_Nu_'
+    # fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Steps_vs_Nu_Old/Wing2D_Steps_vs_Nu_'
     fname = "P"+str(p)+".mat"
     spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_Steps_vs_Nu_"
     
-
+    # print fpath+fname
     DictOutput =  loadmat(fpath+fname)   
 
     scaledA = DictOutput['ScaledJacobian']
@@ -277,10 +293,10 @@ def plotter_individual_imshow(p=2):
     # print
     # print DictOutput['ScaledJacobian'][0,:,1,:]
 
-    print DictOutput['ScaledJacobian'][0,2,0,:]
-    print
-    print DictOutput['ScaledJacobian'][0,2,1,:]
-    exit()
+    # print DictOutput['ScaledJacobian'][0,2,0,:]
+    # print
+    # print DictOutput['ScaledJacobian'][0,2,1,:]
+    # exit()
     # which stretching 
     for lstr in range(0,7):
         # which formulation
@@ -303,7 +319,7 @@ def plotter_individual_imshow(p=2):
             # scaledA = scaledA[::-1,:] # or
 
             # print scaledA
-            print lstr, m
+            # print lstr, m
             # print DictOutput['ScaledJacobian'][0,:,lstr,1]
             # print DictOutput['ScaledJacobian'][1,:,lstr,1]
             # print DictOutput['ScaledJacobian'][2,:,lstr,1]
@@ -317,7 +333,7 @@ def plotter_individual_imshow(p=2):
             tick_lbls = [1,10,20,30,40,50]
             plt.yticks(tick_locs, tick_lbls)
             tick_locs = np.array([0,1,2,3,4,5])*10
-            tick_lbls = [0,0.1,0.2,0.3,0.4,0.5]
+            tick_lbls = [0.0,0.1,0.2,0.3,0.4,0.5]
             plt.xticks(tick_locs, tick_lbls)
 
             plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bicubic', cmap=cm.viridis)
@@ -325,10 +341,11 @@ def plotter_individual_imshow(p=2):
             # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='nearest', cmap=cm.viridis)
             # plt.imshow(scaledA)
 
-            plt.ylabel(r'$Number\;of\;Increments$',fontsize=18)
-            plt.xlabel(r"$Poisson's\, Ratio\,\, (\nu)$",fontsize=18)
+            font_size = 20
+            plt.ylabel(r'$Number\;of\;Increments$',fontsize=font_size)
+            plt.xlabel(r"$Poisson's\, Ratio\,\, (\nu)$",fontsize=font_size)
             # plt.zlabel(r"$Mesh\, Quality\,\, (Q_3)$",fontsize=18)
-            plt.title(r"$Mesh\, Quality\,\, (Q_3)$",fontsize=18)
+            # plt.title(r"$Mesh\, Quality\,\, (Q_3)$",fontsize=18)
 
             ax, _ = mpl.colorbar.make_axes(plt.gca(), shrink=0.8)
             # cbar = mpl.colorbar.ColorbarBase(ax, cmap=cm.viridis,
@@ -338,13 +355,18 @@ def plotter_individual_imshow(p=2):
             cbar.set_ticks([0,0.1,0.2,0.3,0.4,0.5,.6,0.7,0.8,0.9,1])
             plt.clim(0,1)
 
+            # fig = plt.gcf()
+            # fig.set_size_inches(8,8)
+
             # sname = spath+fname.split(".")[0]+"_"+str(formulations[m])+"_Stretch"+str(stretch[0])+'.eps'
-            sname = spath+fname.split(".")[0]+"_"+str(formulations[m])+"_Stretch"+str(stretch[lstr])+'.eps'
+            # sname = spath+fname.split(".")[0]+"_"+str(formulations[m])+"_Stretch"+str(stretch[lstr])+'.eps'
+            sname = spath+fname.split(".")[0]+"_"+str(formulations[m])+"_Stretch"+str(stretch[lstr])+'.png'
 
             # exit()
             # plt.savefig(sname,format='eps',dpi=300)
+            plt.savefig(sname,format='png',dpi=100)
 
-            # plt.show()
+            plt.show()
 
             # print np.min(scaledA), np.max(scaledA)
             # if lstr==0 and m==1:
@@ -353,13 +375,120 @@ def plotter_individual_imshow(p=2):
                 # print scaledA
 
 
+def plotter_quality_evolution(p):
+
+    stretch = [25, 50, 100, 200, 400, 800, 1600]
+    formulations = ["Linear","Linearised","Nonlinear"]
+
+    fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Steps_vs_Nu/Wing2D_Steps_vs_Nu_'
+    fname = "P"+str(p)+".mat"
+    spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_Quality_Improvement_"
+    sname = "P"+str(p)
+    
+    DictOutput =  loadmat(fpath+fname)   
+
+    scaledA = DictOutput['ScaledJacobian']
+    # scaledA = DictOutput['ScaledFF']
+    condA = DictOutput['ConditionNumber']
+    nu = np.linspace(0.0,0.5,10)*100
+    p = DictOutput['PolynomialDegrees'][0]
+
+    colors = ['#D1655B','#44AA66','#72B0D7','#FACD85',
+                    '#558C89','#4D5C75','#F5CCBA']
+
+
+    fig, ax = plt.subplots()
+    font_size = 20
+    legend_font_size = 20
+    rc('font',**{'family':'serif','serif':['Palatino'],'size':font_size})
+
+    mm=-1
+    print nu[mm]/100.
+    # if p==6:
+        # mm=-2
+    # print scaledA[0,-1,2,mm], scaledA[0,0,2,mm]
+    # print scaledA[1,-1,2,mm], scaledA[1,0,2,mm]
+    percentage_improvement = np.zeros((7,3))
+    for i in range(7):
+        for j in range(3):
+            percentage_improvement[i,j] =  (scaledA[j,-1,i,mm] - scaledA[j,0,i,mm])/scaledA[j,0,i,mm]*100
+            # if i==2 and j==1:
+                # print percentage_improvement[i,j]
+
+    percentage_improvement[:,2] = 0
+    # percentage_improvement = np.abs(percentage_improvement)
+    # print percentage_improvement
+    # percentage_improvement[:,:2] = np.log(percentage_improvement[:,:2])
+    # percentage_improvement[:,2] = 0
+    print percentage_improvement
+    print scaledA[0,-1,6,mm], scaledA[0,0,6,mm]
+    return
+
+    
+
+    nmax = np.max(percentage_improvement)
+    print np.exp(nmax)
+    for i in range(7):
+        if p!=4:
+            plt.plot([i+1.1,i+1.1],[percentage_improvement[i,0],nmax*1.4],'-k')
+            tt1 = plt.text(i+1,nmax*1.9,np.around(scaledA[0,-1,i,mm],3),rotation=90,fontsize=font_size-2)
+
+            # mmax = max(percentage_improvement[i,1],percentage_improvement[i,0])
+            plt.plot([i+1.3,i+1.3],[percentage_improvement[i,1],nmax*2.2],'-k')
+            tt2 = plt.text(i+1.2,nmax*2.7,np.around(scaledA[1,-1,i,mm],3),rotation=90,fontsize=font_size-2)
+
+        elif p==4:
+            plt.plot([i+1.1,i+1.1],[percentage_improvement[i,0],nmax*1.2],'-k')
+            tt1 = plt.text(i+1,nmax*2.4,np.around(scaledA[0,-1,i,mm],3),rotation=90,fontsize=font_size-2)
+
+            plt.plot([i+1.3,i+1.3],[percentage_improvement[i,1],nmax*2.2],'-k')
+            tt2 = plt.text(i+1.2,nmax*3.8,np.around(scaledA[1,-1,i,mm],3),rotation=90,fontsize=font_size-2)
+    
+    # percentage_improvement = np.log(percentage_improvement)
+    nmin = np.min(percentage_improvement)
+    plt.ylim([2*nmin,5*nmax])
+
+    width = 0.2
+    rects = [None]*21
+    ind = 1
+    counter = 0
+    for i in range(7):
+        for j in range(3):
+            rects[counter] = ax.bar(ind+i+j*width, percentage_improvement[i,j], width, color=colors[j])
+            counter +=1
+
+    ax.legend((rects[0][0], rects[1][0], rects[2][0]), 
+                            (r"$II\;Linear\;Elastic$",r"$IL\; neo-Hookean$",
+                                r"$neo-Hookean$"),
+                            loc='upper left',fontsize=legend_font_size)
+
+    ax.set_xticklabels((r'$25$',r'$50$',r'$100$',r'$200$',r'$400$',r'$800$',r'$1600$'),fontsize=font_size)
+    plt.xticks([1.2, 2.2, 3.2, 4.2, 5.2, 6.2, 7.2],rotation=45)
+    if p==4:
+        plt.yticks([-5, 0, 10, 20])
+    elif p==6:
+        plt.yticks([0, 50, 100])
+    else:
+        plt.yticks([0, 10, 20])
+    # plt.ylabel(r'log($(Q_{3_{50}} - Q_{3_{1}})/Q_{3_{1}} \times 100)$',fontsize=font_size)
+    plt.ylabel(r'$(Q_{3_{50}} - Q_{3_{1}})/Q_{3_{1}} \times 100$',fontsize=font_size)
+
+
+    # print percentage_improvement
+    plt.xlim([-0.01,8.3])
+    # print spath+sname+"_"+str(np.around(nu[mm]/100.,3))
+    plt.savefig(spath+sname+".eps", format="eps", dpi=300)
+    
+    plt.show()
+
+
 
 
 
 
 if __name__ == '__main__':
 
-    Run = 1
+    Run = 0
     if Run:
         runMain()
 
@@ -377,9 +506,6 @@ if __name__ == '__main__':
         # marker = itertools.cycle(('o', 's', 'x', '+', '*','.'))
         marker = itertools.cycle(('o', 's', 'x'))
 
-        # rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-        rc('font',**{'family':'sans-serif','sans-serif':['Computer Modern Roman']})
-        ## for Palatino and other serif fonts use:
         rc('font',**{'family':'serif','serif':['Palatino'],'size':18})
         rc('text', usetex=True)
 
@@ -389,5 +515,6 @@ if __name__ == '__main__':
 
 
 
-        p=4
-        plotter_individual_imshow(p)
+        p=6
+        # plotter_individual_imshow(p)
+        plotter_quality_evolution(p)

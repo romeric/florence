@@ -78,8 +78,10 @@ def PreProcess(MainData,Pr,pwd):
 
     # mesh.RemoveElements((-0.6,-0.1,1.9,0.6),keep_boundary_only=True,plot_new_mesh=False)
 
-
     # mesh.SimplePlot()
+    # mesh.SimplePlot(save=True,filename="/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_Mesh_Stretch_25")
+    # mesh.SimplePlot(save=True,filename="/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_Mesh_Stretch_200")
+    # mesh.SimplePlot(save=True,filename="/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_Mesh_Stretch_1600")
     # mesh.PlotMeshNumberingTri()
     
 
@@ -144,9 +146,9 @@ def PreProcess(MainData,Pr,pwd):
     # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_points_"+"P"+str(MainData.C+1)+".dat",mesh.points,fmt="%9.16f")
     # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_edges_"+"P"+str(MainData.C+1)+".dat",mesh.edges)
 
-
-    # print mesh.points.shape
+    # print mesh.elements.shape, mesh.points.shape, mesh.edges.shape
     # exit(0)
+
 
 
     # COMPARE STRINGS WHICH MIGHT CONTAIN UNICODES

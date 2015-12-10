@@ -113,101 +113,124 @@ if __name__ == '__main__':
 
     if not Run:
 
-        import matplotlib as mpl
-        import matplotlib.pyplot as plt
-        import matplotlib.cm as cm
-        from matplotlib import rc
 
-        # rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-        # rc('font',**{'family':'sans-serif','sans-serif':['Computer Modern Roman']})
-        ## for Palatino and other serif fonts use:
-        rc('font',**{'family':'serif','serif':['Palatino'],'size':18})
-        rc('text', usetex=True)
-        params = {'text.latex.preamble' : [r'\usepackage{amssymb}',r'\usepackage{mathtools}']}
+        def plotter(which_formulation=0,projection_type=0, save=False):
+            """ 
+                which_formulation           0 for linear
+                                            1 for linearised
+                                            2 for nonlinear
 
+                projection_type             0 for arc length
+                                            1 for orthogonal
+            """
 
-        # import h5py as hpy 
-        # ResultsPath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/'
-        ResultsPath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D/'
-        SavePath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Mech2D/"
+            import matplotlib as mpl
+            import matplotlib.pyplot as plt
+            import matplotlib.cm as cm
+            from matplotlib import rc
 
-        ResultsFile = 'Mech2D_P_vs_Nu_IncrementalLinearElastic_arc_length'
-        # ResultsFile = 'Mech2D_P_vs_Nu_IncrementalLinearElastic_orthogonal'
-
-        # ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_2_arc_length'
-        # ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_2_orthogonal'
-
-        # ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_arc_length'
-        # ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_orthogonal'
-
-        DictOutput =  loadmat(ResultsPath+ResultsFile+'.mat')   
-        
-        scaledA = DictOutput['ScaledJacobian']
-        condA = DictOutput['ConditionNumber']
-        # nu = DictOutput['PoissonsRatios'][0]
-        nu = np.linspace(0.001,0.5,100)*10
-        p = DictOutput['PolynomialDegrees'][0]
+            ## for Palatino and other serif fonts use:
+            rc('font',**{'family':'serif','serif':['Palatino'],'size':18})
+            rc('text', usetex=True)
+            params = {'text.latex.preamble' : [r'\usepackage{amssymb}',r'\usepackage{mathtools}']}
 
 
+            # ResultsPath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/'
+            ResultsPath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D/'
+            SavePath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Mech2D/"
 
-        xmin = p[0]
-        xmax = p[-1]
-        ymin = nu[0]
-        ymax = nu[-1]
+            if which_formulation == 0:
+                if projection_type == 0:
+                    ResultsFile = 'Mech2D_P_vs_Nu_IncrementalLinearElastic_arc_length'
+                elif projection_type == 1:
+                    ResultsFile = 'Mech2D_P_vs_Nu_IncrementalLinearElastic_orthogonal'
+                else:
+                    raise ValueError('ProjectionType not understood')
 
-        # print np.mean(scaledA[2,:]), np.std(scaledA[2,:])
+            elif which_formulation == 1:
+                if projection_type == 0:
+                    ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_2_arc_length'
+                elif projection_type == 1:
+                    ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_2_orthogonal'
+                else:
+                    raise ValueError('ProjectionType not understood')
 
-        # print xmin, xmax, ymin, ymax
-        # print scaledA, "\n"
+            elif which_formulation == 2:
+                if projection_type == 0:
+                    ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_arc_length'
+                elif projection_type == 1:
+                    ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_orthogonal'
+                else:
+                    raise ValueError('ProjectionType not understood')
 
-        # imshow is a direct matrix-to-pixel transformation
-        # so flip the matrix upside down
-        scaledA = scaledA[::-1,:]
-        # print scaledA
-        # exit()
-        condA = condA[::-1,:]
 
-        X,Y = np.meshgrid(p,nu)
-        # print X
-        # print scaledA
-        # print scaledA[0,:]
-
-        # print scaledA.shape
-        # print np.mean(scaledA,axis=1)
-        # exit()
+            DictOutput =  loadmat(ResultsPath+ResultsFile+'.mat')   
+            
+            scaledA = DictOutput['ScaledJacobian']
+            condA = DictOutput['ConditionNumber']
+            # nu = DictOutput['PoissonsRatios'][0]
+            nu = np.linspace(0.001,0.5,100)*10
+            p = DictOutput['PolynomialDegrees'][0]
 
 
 
-        plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bicubic', cmap=cm.viridis)
-        # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='nearest', cmap=cm.viridis)
+            xmin = p[0]
+            xmax = p[-1]
+            ymin = nu[0]
+            ymax = nu[-1]
 
-        # # plt.axis('equal')
-        # # plt.axis('off')
-        # # tick_locs = [0, 1, 2, 3, 4]
-        # tick_locs = [2, 3, 4, 5, 6]
-        # tick_locs = np.linspace(2.5,6,6).tolist()
-        # tick_locs = [2.45,3.25,4.,4.82,5.55]
-        tick_locs = [2,2.8,3.6,4.4,5.2]
-        tick_lbls = [2, 3, 4, 5, 6]
-        plt.yticks(tick_locs, tick_lbls)
-        tick_locs = [0,1,2,3,4,5]
-        tick_lbls = [0,0.1,0.2,0.3,0.4,0.5]
-        plt.xticks(tick_locs, tick_lbls)
-        plt.ylabel(r'$Polynomial\, Degree\,\, (p)$',fontsize=18)
-        plt.xlabel(r"$Poisson's\, Ratio\,\, (\nu)$",fontsize=18)
-        plt.title(r"$Mesh\, Quality\,-\, min(Q_3)$",fontsize=18)
 
-        ax, _ = mpl.colorbar.make_axes(plt.gca(), shrink=0.8)
-        cbar = mpl.colorbar.ColorbarBase(ax, cmap=cm.viridis,
+
+            # imshow is a direct matrix-to-pixel transformation
+            # so flip the matrix upside down
+            print scaledA[0,0]
+            return 
+            scaledA = scaledA[::-1,:]
+            # print scaledA
+            # exit()
+            condA = condA[::-1,:]
+
+            X,Y = np.meshgrid(p,nu)
+
+
+            font_size = 22
+            plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bicubic', cmap=cm.viridis)
+
+            tick_locs = [2,2.8,3.6,4.4,5.2]
+            tick_lbls = [2, 3, 4, 5, 6]
+            plt.yticks(tick_locs, tick_lbls)
+            tick_locs = [0,1,2,3,4,5]
+            tick_lbls = [0,0.1,0.2,0.3,0.4,0.5]
+            plt.xticks(tick_locs, tick_lbls)
+            plt.ylabel(r'$Polynomial\, Degree\,\, (p)$',fontsize=font_size)
+            plt.xlabel(r"$Poisson's\, Ratio\,\, (\nu)$",fontsize=font_size)
+            # plt.title(r"$Mesh\, Quality\,-\, min(Q_3)$",fontsize=18) # DONT PUT TITLE
+
+            # USE COLORBAR ONLY FOR THE NONLINEAR - LAST COLUMN IN THE PAPER
+            # if which_formulation == 2:
+            ax, _ = mpl.colorbar.make_axes(plt.gca(), shrink=0.8)
+            cbar = mpl.colorbar.ColorbarBase(ax, cmap=cm.viridis,
                            norm=mpl.colors.Normalize(vmin=-0, vmax=1))
-        cbar.set_clim(0, 1)
-        plt.clim(0,1)
+            cbar.set_clim(0, 1)
+            # Scale the image
+            plt.clim(0,1)
 
-        # ResultsPath+ResultsFile+'.mat'
-        # plt.savefig(SavePath+ResultsFile+'.eps',format='eps',dpi=1000)
-        # plt.savefig(SavePath+ResultsFile+'.eps',format='eps',dpi=300)
+            # fig = plt.gcf()
+            # fig.set_size_inches(8, 7, forward=True)
 
-        plt.show()
+            if save:
+                # plt.savefig(SavePath+ResultsFile+'.eps',format='eps',dpi=1000) # high resolution
+                # plt.savefig(SavePath+ResultsFile+'.eps',format='eps',dpi=300)
+                # plt.savefig('/home/roman/Dropbox/dddd.svg', format='svg',dpi=1200)
+                plt.savefig(SavePath+ResultsFile+'.png',bbox='tight',format='png',dpi=100)
+
+                # plt.savefig('/home/roman/Dropbox/dddd.eps', format='eps',dpi=100)
+
+            plt.show()
+
+
+        # plotter(2,1,True)
+        plotter(which_formulation=0,projection_type=0, save=False) 
 
 
 

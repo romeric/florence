@@ -193,7 +193,7 @@ if __name__ == '__main__':
                 elif mm==5:
                     MaterialModels = [r"$ITI\; Linear\; Elastic$",
                         r"$ILTI\;Hyperelastic$",
-                        r"$Transervsely\;Isotropic\;Hyperelastic$"]
+                        r"$TI\;Hyperelastic$"]
                     pp = 1
 
             
@@ -211,8 +211,11 @@ if __name__ == '__main__':
                 nu = np.linspace(0.001,0.5,100)*1
                 p = DictOutput['PolynomialDegrees'][0]
 
-                font_size = 18
-                legend_font_size = 18
+                font_size = 22
+                legend_font_size = 22
+
+                # fig = plt.gcf()
+                # fig.set_size_inches(8,9)
 
                 plt.xlabel(r"$Poisson's\, Ratio\,\, (\nu)$",fontsize=font_size)
                 
@@ -375,11 +378,11 @@ if __name__ == '__main__':
             if linear:
                 plt.legend([r"$II\;Linear\;Elastic$",r"$ITI\;Linear\;Elastic$",r"$IL\;neo-Hookean$",
                     r"$IL\;Mooney-Rivlin$",r"$IL\;Nearly\;Incompressible$",
-                    r"$IL\;Transervsely\;Isotropic\;Hyperelastic$"],loc="upper left",fontsize=legend_font_size)
+                    r"$ILTI\;Hyperelastic$"],loc="upper left",fontsize=legend_font_size)
             else:
                 plt.legend([r"$II\;Linear\;Elastic$",r"$ITI\;Linear\;Elastic$",r"$neo-Hookean$",
                     r"$Mooney-Rivlin$",r"$Nearly\;Incompressible$",
-                    r"$Transervsely\;Isotropic\;Hyperelastic$"],loc="upper left",fontsize=legend_font_size)
+                    r"$TI\;Hyperelastic$"],loc="upper left",fontsize=legend_font_size)
 
 
             if which_func == 1:
@@ -428,8 +431,8 @@ if __name__ == '__main__':
                 condA = DictOutput['ConditionNumber']
                 nu = np.linspace(0.001,0.5,100)*1
 
-                font_size = 18
-                legend_font_size = 16
+                font_size = 22
+                legend_font_size = 20
 
 
                 if linear:
@@ -443,7 +446,6 @@ if __name__ == '__main__':
                 width=0.15
                 ind = 1
 
-                legend_font_size = 10
 
                 func = scaledA
                 if which_func==0:
@@ -497,8 +499,10 @@ if __name__ == '__main__':
                         counter+=1
 
                 if which_func==1:
-                    plt.ylim([0,1]) 
-                    plt.ylabel(r"$mean(min(Q_3))$")
+                    plt.ylim([0,1.8])
+                    ax.set_yticklabels([0, 0.2, 0.4, 0.8, 1],fontsize=font_size)
+                    ax.set_yticks([0.0,0.2,0.4,0.6,0.8,1.0]) 
+                    plt.ylabel(r"$mean(min(Q_3))$",fontsize=font_size)
 
                 if linear:
                     ax.legend((rects[0][0], rects[1][0], rects[2][0], rects[3][0], rects[4][0], rects[5][0]), 
@@ -508,11 +512,11 @@ if __name__ == '__main__':
                 else:
                     ax.legend((rects[0][0], rects[1][0], rects[2][0], rects[3][0], rects[4][0], rects[5][0]), 
                         (r"$II\;Linear\;Elastic$",r"$ITI\;Linear\;Elastic$",r"$neo-Hookean$",
-                            r"$Mooney-Rivlin$",r"$Nearly\;Incompressible$",r"$Transervsely\;Isotropic\;Hyperelastic$"),
+                            r"$Mooney-Rivlin$",r"$Nearly\;Incompressible$",r"$TI\;Hyperelastic$"),
                         loc='upper right',fontsize=legend_font_size)
  
 
-                ax.set_xticklabels((r'$p=2$', r'$p=3$', r'$p=4$'))
+                ax.set_xticklabels((r'$p=2$', r'$p=3$', r'$p=4$'),fontsize=font_size)
                 ax.set_xlim([2,4.9])
                 ax.set_xticks([2.45,3.5,4.4])
 
@@ -536,14 +540,14 @@ if __name__ == '__main__':
 
 
 
-        # plotter(degree=4,which_func=1,save=True)
+        # plotter(degree=2,which_func=0,save=True)
         # plotter(which_func=1)
 
         # plotter_all_materials(degree=3,which_func=1,linear=False,save=True)
         # plotter_all_materials(degree=3,linear=False)
 
-        plotter_bar(which_func=1,linear=True,save=True)
-        # plotter_bar()
+        # plotter_bar(which_func=1,linear=False,save=True)
+        plotter_bar()
 
 
 
