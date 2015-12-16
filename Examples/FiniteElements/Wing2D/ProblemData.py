@@ -10,7 +10,7 @@ def ProblemData(MainData):
     MainData.Formulation = 'DisplacementApproach'
     MainData.Analysis = 'Static'
     # MainData.Analysis = 'Dynamic'
-    MainData.AnalysisType = 'Linear'
+    # MainData.AnalysisType = 'Linear'
     # MainData.AnalysisType = 'Nonlinear'
 
     # MATERIAL INPUT DATA 
@@ -20,7 +20,7 @@ def ProblemData(MainData):
     # MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin_1'
     # MainData.MaterialArgs.Type = 'NearlyIncompressibleNeoHookean'
     # MainData.MaterialArgs.Type = 'NeoHookean_1'
-    MainData.MaterialArgs.Type = 'NeoHookean_2'
+    # MainData.MaterialArgs.Type = 'NeoHookean_2'
     # MainData.MaterialArgs.Type = 'MooneyRivlin'
     # MainData.MaterialArgs.Type = 'NearlyIncompressibleMooneyRivlin'
     # MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin' 
@@ -29,8 +29,8 @@ def ProblemData(MainData):
     # E = MainData.E 
     # nu = MainData.nu 
 
-    MainData.MaterialArgs.E  = 1.0e5
-    MainData.MaterialArgs.nu = 0.4
+    # MainData.MaterialArgs.E  = 1.0e5
+    # MainData.MaterialArgs.nu = 0.4
 
     E = MainData.MaterialArgs.E
     nu = MainData.MaterialArgs.nu
@@ -49,8 +49,8 @@ def ProblemData(MainData):
 
     ProblemPath = os.path.dirname(os.path.realpath(__file__))
     MainData.MeshInfo.MeshType = "tri"
-    # MainData.MeshInfo.Reader = "Read"
-    MainData.MeshInfo.Reader = "ReadHighOrderMesh"
+    MainData.MeshInfo.Reader = "Read"
+    # MainData.MeshInfo.Reader = "ReadHighOrderMesh"
     MainData.MeshInfo.Format = "GID"
     
     MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch25.dat'
@@ -61,7 +61,7 @@ def ProblemData(MainData):
     # MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch800.dat'
     # MainData.MeshInfo.FileName = ProblemPath + '/sd7003_Stretch1600.dat'
 
-    MainData.MeshInfo.IsHighOrder = True
+    # MainData.MeshInfo.IsHighOrder = True
         
 
     class AnisotropicFibreOrientation(object):

@@ -65,6 +65,7 @@ def PreProcess(MainData,Pr,pwd):
     if 'MechanicalComponent2D' in Pr.__file__.split('/') or \
         'Misc' in Pr.__file__.split('/'):
         mesh.points *=1000.
+        # mesh.points /=1000.
 
 
     # mesh.points *=1000. 
@@ -121,7 +122,6 @@ def PreProcess(MainData,Pr,pwd):
     IsHighOrder = getattr(MainData.MeshInfo,"IsHighOrder",None)
     if IsHighOrder is None:
         IsHighOrder = False
-
 
     if MainData.C>0:
         if IsHighOrder is False:

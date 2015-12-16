@@ -110,14 +110,14 @@ def main(MainData, DictOutput=None, nStep=0):
         if MainData.AnalysisType == 'Nonlinear':
             PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp,show_plot=False)
             pass
-        if MainData.AnalysisType == "Linear":
-            vmesh = deepcopy(mesh)
-            vmesh.points = vmesh.points + TotalDisp[:,:,MainData.AssemblyParameters.LoadIncrements-1]
-        else:
-            vmesh = mesh    
-        PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
-        import matplotlib.pyplot as plt
-        plt.show()
+        # if MainData.AnalysisType == "Linear":
+        #     vmesh = deepcopy(mesh)
+        #     vmesh.points = vmesh.points + TotalDisp[:,:,MainData.AssemblyParameters.LoadIncrements-1]
+        # else:
+        #     vmesh = mesh    
+        # PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
+        # import matplotlib.pyplot as plt
+        # plt.show()
     else:
         MainData.ScaledJacobian = np.zeros(mesh.nelem)+np.NAN
         MainData.ScaledFF = np.zeros(mesh.nelem)+np.NAN
@@ -148,7 +148,18 @@ def main(MainData, DictOutput=None, nStep=0):
     # Compute Error Norms
     # L2Norm=0; EnergyNorm=0
     # L2Norm, EnergyNorm = ComputeErrorNorms(MainData,mesh)
-    # CheapNorm(MainData,mesh,TotalDisp)
+
+
+
+    # lmesh = deepcopy(mesh)
+    # lmesh.elements = mesh.elements[:,:MainData.ndim+1]
+    # lmesh.edges = mesh.edges[:,:MainData.ndim]
+    # nnode = np.max(mesh.elements)+1
+    # lmesh.points = mesh.points[:nnode,:]
+
+    # CheapNorm(MainData,lmesh,TotalDisp[:nnode,:])
+    CheapNorm(MainData,mesh,TotalDisp)
+    # exit()
 
     # for C in range(8):
         # MainData.C = C

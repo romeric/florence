@@ -29,7 +29,7 @@ def ProblemData(MainData):
     # MainData.MaterialArgs.Type = 'BonetTranservselyIsotropicHyperElastic'
 
     MainData.MaterialArgs.E  = 1.0e5
-    MainData.MaterialArgs.nu = 0.001
+    MainData.MaterialArgs.nu = 0.4
 
     # MainData.MaterialArgs.E_A = 2.5*MainData.MaterialArgs.E
     # # # MainData.MaterialArgs.G_A = (E*(E_A*nu - E_A + E_A*nu**2 + E*nu**2))/(2*(nu + 1)*(2*E*nu**2 + E_A*nu - E_A))

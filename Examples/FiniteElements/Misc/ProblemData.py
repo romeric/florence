@@ -47,13 +47,13 @@ def ProblemData(MainData):
         Reader = 'Read'
         # Reader = 'UniformHollowCircle'
 
-        # FileName = ProblemPath + '/TwoArcs_18.dat'
+        FileName = ProblemPath + '/TwoArcs_18.dat'
         # FileName = ProblemPath + '/Half_Circle_23.dat'
         # FileName = ProblemPath + '/Half_Circle_348.dat'
 
         # FileName = ProblemPath + '/Mech2D_Seg0_350.dat'
         # FileName = ProblemPath + '/Mech2D_Seg0_70.dat'
-        FileName = ProblemPath + '/Mech2D_Seg2_6.dat'
+        # FileName = ProblemPath + '/Mech2D_Seg2_6.dat'
         # FileName = ProblemPath + '/Mesh_LeftPartWithCircle_56.dat'
         # FileName = ProblemPath + '/LeftCircle_12.dat'
         
@@ -66,12 +66,12 @@ def ProblemData(MainData):
         
         # Type = 'straight'
         # Type = 'mixed'
-        # IGES_File = ProblemPath + '/Two_Arcs.iges'
+        IGES_File = ProblemPath + '/Two_Arcs.iges'
         # IGES_File = ProblemPath + '/Half_Circle.igs'
         # IGES_File = ProblemPath + '/Mech2D_Seg0.igs'
         # IGES_File = ProblemPath + '/LeftPartWithCircle.igs'
         # IGES_File = ProblemPath + '/LeftCircle.iges'
-        IGES_File = ProblemPath + '/Mech2D_Seg2.igs'
+        # IGES_File = ProblemPath + '/Mech2D_Seg2.igs'
 
         # two arcs and half circle
         scale = 1000.
@@ -79,8 +79,8 @@ def ProblemData(MainData):
         # condition = 300000.
 
         # mech2d_seg0 also activate multiply by 1000 in pre-process
-        scale = 1.
-        condition = 1e10 
+        # scale = 1.
+        # condition = 1e10 
 
         class DirichArgs(object):
             node = 0

@@ -2,6 +2,7 @@
 import os, sys, imp, time
 # from time import time
 import multiprocessing as MP
+import numpy as np
 
 # FLORENCE BASE CLASS 
 class Base(object):
@@ -70,11 +71,11 @@ class Base(object):
 	class MaterialArgs(object):
 		"""Container for all material models"""
 
-		E = 0.
-		nu = 0.
-		lamb = 0.
-		mu = 0.
-		rho = 0.
+		E = np.NAN
+		nu = np.NAN
+		lamb = np.NAN
+		mu = np.NAN
+		rho = np.NAN
 
 		def __init__(self):
 			pass
