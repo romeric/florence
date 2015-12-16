@@ -67,22 +67,22 @@ def IncrementalLinearElasticitySolver(MainData,mesh,TotalDisp,Eulerx,LoadIncreme
 		else:
 			print "Finished load increment "+str(Increment)+" for linear problem. Solver time is", t_solver
 
-		# COMPUTE SCALED JACBIAN FOR THE MESH
-		if Increment == LoadIncrement - 1:
-			smesh = deepcopy(mesh)
-			smesh.points -= TotalDisp[:,:,-1] 
-			# jacobian_postprocess.MeshQualityMeasures(MainData,mesh,np.zeros_like(TotalDisp[:,:,:Increment+1]),show_plot=False)
-			jacobian_postprocess.MeshQualityMeasures(MainData,smesh,TotalDisp,show_plot=False)
-			# jacobian_postprocess.MeshQualityMeasures(MainData,smesh,TotalDisp[:,:,:-1],show_plot=False)
+		# # COMPUTE SCALED JACBIAN FOR THE MESH
+		# if Increment == LoadIncrement - 1:
+		# 	smesh = deepcopy(mesh)
+		# 	smesh.points -= TotalDisp[:,:,-1] 
+		# 	# jacobian_postprocess.MeshQualityMeasures(MainData,mesh,np.zeros_like(TotalDisp[:,:,:Increment+1]),show_plot=False)
+		# 	jacobian_postprocess.MeshQualityMeasures(MainData,smesh,TotalDisp,show_plot=False)
+		# 	# jacobian_postprocess.MeshQualityMeasures(MainData,smesh,TotalDisp[:,:,:-1],show_plot=False)
 
-			# CHECK IF THE WING2D MESH P2 IS DISPLACED CORRECTLY
-			# print mesh.points[906,:], TotalDisp[906,:,-1]
-			# print mesh.points[887,:], TotalDisp[887,:,-1]
-			# print mesh.points[3715,:], TotalDisp[3715,:,-1]
+		# 	# CHECK IF THE WING2D MESH P2 IS DISPLACED CORRECTLY
+		# 	# print mesh.points[906,:], TotalDisp[906,:,-1]
+		# 	# print mesh.points[887,:], TotalDisp[887,:,-1]
+		# 	# print mesh.points[3715,:], TotalDisp[3715,:,-1]
 
-			# PostProcess.HighOrderPatchPlot(MainData,mesh,np.zeros_like(TotalDisp))
-			# import matplotlib.pyplot as plt
-			# plt.show()
+		# 	# PostProcess.HighOrderPatchPlot(MainData,mesh,np.zeros_like(TotalDisp))
+		# 	# import matplotlib.pyplot as plt
+		# 	# plt.show()
 
 	jacobian_postprocess.is_scaledjacobian_computed
 	MainData.isScaledJacobianComputed = True
