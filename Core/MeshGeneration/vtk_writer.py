@@ -51,24 +51,25 @@ def write_vtu(Verts, Cells, pdata=None, pvdata=None, cdata=None, cvdata=None, fn
     - cdata,cvdata = list of dictionaries in the form of Cells
 
 
-    =====  =================== ============= ===
-    keys   type                n points      dim
-    =====  =================== ============= ===
-       1   VTK_VERTEX:         1 point        2d
-       2   VTK_POLY_VERTEX:    n points       2d
-       3   VTK_LINE:           2 points       2d
-       4   VTK_POLY_LINE:      n+1 points     2d
-       5   VTK_TRIANGLE:       3 points       2d
-       6   VTK_TRIANGLE_STRIP: n+2 points     2d
-       7   VTK_POLYGON:        n points       2d
-       8   VTK_PIXEL:          4 points       2d
-       9   VTK_QUAD:           4 points       2d
-       10  VTK_TETRA:          4 points       3d
-       11  VTK_VOXEL:          8 points       3d
-       12  VTK_HEXAHEDRON:     8 points       3d
-       13  VTK_WEDGE:          6 points       3d
-       14  VTK_PYRAMID:        5 points       3d
-    =====  =================== ============= ===
+    =====  ========================= ============= ===
+    keys   type                      n points      dim
+    =====  ========================= ============= ===
+       1   VTK_VERTEX:               1 point        2d
+       2   VTK_POLY_VERTEX:          n points       2d
+       3   VTK_LINE:                 2 points       2d
+       4   VTK_POLY_LINE:            n+1 points     2d
+       5   VTK_TRIANGLE:             3 points       2d
+       6   VTK_TRIANGLE_STRIP:       n+2 points     2d
+       7   VTK_POLYGON:              n points       2d
+       8   VTK_PIXEL:                4 points       2d
+       9   VTK_QUAD:                 4 points       2d
+       10  VTK_TETRA:                4 points       3d
+       11  VTK_VOXEL:                8 points       3d
+       12  VTK_HEXAHEDRON:           8 points       3d
+       13  VTK_WEDGE:                6 points       3d
+       14  VTK_PYRAMID:              5 points       3d
+       24  VTK_QUADRATIC_TETRA       10 points      3d
+    =====  ========================= ============= ===
 
     Examples
     --------
@@ -112,7 +113,9 @@ def write_vtu(Verts, Cells, pdata=None, pvdata=None, cdata=None, cvdata=None, fn
        
     """
     # number of indices per cell for each cell type
-    vtk_cell_info = [-1, 1, None, 2, None, 3, None, None, 4, 4, 4, 8, 8, 6, 5]
+    # vtk_cell_info = [-1, 1, None, 2, None, 3, None, None, 4, 4, 4, 8, 8, 6, 5]
+    vtk_cell_info = [-1, 1, None, 2, None, 3, None, None, 4, 4, 4, 8, 8, 6, 5,
+                        None, None, None, None, None, None, 3, 6, 8, 10, 20]
 
     # check fname
     if type(fname) is str:
@@ -134,8 +137,8 @@ def write_vtu(Verts, Cells, pdata=None, pvdata=None, cdata=None, cvdata=None, fn
     # keys must ve valid (integer and not "None" in vtk_cell_info)
     # Cell data can't be empty for a non empty key
     for key in Cells:
-        if ((type(key) != int) or (key not in range(1,15))):
-            raise ValueError('cell array must have positive integer keys in [1,14]')
+        if ((type(key) != int) or (key not in range(1,26))):
+            raise ValueError('cell array must have positive integer keys in [1,25]')
         if (vtk_cell_info[key] == None) and (Cells[key] != None):
             # Poly data
             raise NotImplementedError('Poly Data not implemented yet')

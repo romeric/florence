@@ -51,6 +51,8 @@ def PreProcess(MainData,Pr,pwd):
             mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=False,nrad=7,ncirc=7)
         elif MainData.MeshInfo.Reader is 'ReadHighOrderMesh':
             mesh.ReadHighOrderMesh(MainData.MeshInfo.FileName.split(".")[0],MainData.C,MainData.MeshInfo.MeshType)
+        elif MainData.MeshInfo.Reader is 'Sphere':
+            mesh.Sphere()
 
     if MainData.__NO_DEBUG__ is False:
         mesh.CheckNodeNumberingTri()
@@ -108,7 +110,12 @@ def PreProcess(MainData,Pr,pwd):
     # mm = MainData.MaterialArgs().AnisotropicFibreOrientation(mesh,plot=False)
 
     # print mesh.nelem, mesh.points.shape[0], mesh.edges.shape[0]
-    # exit(0)
+    # mesh.WriteVTK(fname="/home/roman/Dropbox/dd2.vtu")
+    # print mesh.faces
+    # print np.where(mesh.elements==130)[0]
+    # print np.where(mesh.elements==140)[0]
+    # print np.where(mesh.elements==127)[0]
+    # exit()
 
 
     # STORE PATHS FOR MAIN, CORE & PROBLEM DIRECTORIES
@@ -142,12 +149,28 @@ def PreProcess(MainData,Pr,pwd):
 
     # mesh.PlotMeshNumberingTri()
 
-    # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_elements_"+"P"+str(MainData.C+1)+".dat",mesh.elements)
-    # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_points_"+"P"+str(MainData.C+1)+".dat",mesh.points,fmt="%9.16f")
-    # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_edges_"+"P"+str(MainData.C+1)+".dat",mesh.edges)
+    # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_elements_"+"P"+str(MainData.C+1)+".dat",mesh.elements,delimiter=',')
+    # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_points_"+"P"+str(MainData.C+1)+".dat",mesh.points,fmt="%9.16f",delimiter=',')
+    # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_edges_"+"P"+str(MainData.C+1)+".dat",mesh.edges,delimiter=',')
+    # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_faces_"+"P"+str(MainData.C+1)+".dat",mesh.faces,delimiter=',')
+
 
     # print mesh.elements.shape, mesh.points.shape, mesh.edges.shape
-    # exit(0)
+    # print np.min(mesh.points[:,0]), np.min(mesh.points[:,1]), np.min(mesh.points[:,2]) 
+    # print np.max(mesh.points[:,0]), np.max(mesh.points[:,1]), np.max(mesh.points[:,2]) 
+    # print mesh.elements
+    # print mesh.faces
+
+    # xx = mesh.points[np.unique(mesh.faces),:]
+    # from Core.Supplementary.Tensors import makezero
+    # xx = makezero(xx)
+    # # print xx
+    # for i in range(xx.shape[0]):
+    #     if xx[i,0] > -2.5 and xx[i,0] < 2.5 and xx[i,1] < 2. and xx[i,1] > -2. and xx[i,2] < 2. and xx[i,2] > -2.:
+    #         print xx[i,:]*10.*2.54
+
+
+    # exit()
 
 
 

@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <utility>
 #include <limits>
+#include <omp.h>
 
 
 typedef int64_t Integer;

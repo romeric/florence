@@ -24,12 +24,13 @@ from Core.FiniteElements.ComputeErrorNorms import *
 # import Examples.FiniteElements.Annular_Circle.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle_Nurbs.ProblemData as Pr
 # import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
-import Examples.FiniteElements.Wing2D.ProblemData as Pr
-# import Examples.FiniteElements.Sphere.ProblemData as Pr
+# import Examples.FiniteElements.Wing2D.ProblemData as Pr
 # import Examples.FiniteElements.Naca_Isotropic.ProblemData as Pr
 # import Examples.FiniteElements.RAE2822.ProblemData as Pr
 # import Examples.FiniteElements.Misc.ProblemData as Pr
 # import Examples.FiniteElements.Tests.ProblemData as Pr
+# import Examples.FiniteElements.Sphere.ProblemData as Pr
+import Examples.FiniteElements.Almond3D.ProblemData as Pr
 
 ###########################################################################################################
 
@@ -135,12 +136,15 @@ def main(MainData, DictOutput=None, nStep=0):
         DictOutput['nSteps'] = MainData.AssemblyParameters.LoadIncrements
 
     # vpoints = mesh.points + TotalDisp[:,:,-1]
-    # np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/elements_nnsphere2_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
-    # np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_nnsphere2_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%10.9f',delimiter=',')
-    # np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/vpoints_nnsphere2_p'+str(MainData.C+1)+'.dat', vpoints,fmt='%10.9f',delimiter=',')
-    # np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/faces_nnsphere2_p'+str(MainData.C+1)+'.dat', mesh.faces,fmt='%d',delimiter=',')
-    # np.savetxt('/home/roman/Dropbox/Matlpab_Files/tetplots/sjacobian_nnsphere2_p'+str(MainData.C+1)+'.dat', 
-        # MainData.ScaledJacobian,fmt='%8.9f',delimiter=',')
+    # np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/elements_almond_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
+    # np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_almond_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%10.9f',delimiter=',')
+    # np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/vpoints_almond_p'+str(MainData.C+1)+'.dat', vpoints,fmt='%10.9f',delimiter=',')
+    # # np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/faces_nnsphere2_p'+str(MainData.C+1)+'.dat', mesh.faces,fmt='%d',delimiter=',')
+    # np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/sjacobian_almond_p'+str(MainData.C+1)+'.dat', 
+    #     MainData.ScaledJacobian,fmt='%8.9f',delimiter=',')
+
+    mesh.WriteVTK(fname="/home/roman/Dropbox/dd.vtu",pdata=TotalDisp[:,:,-1])
+    # mesh.WriteVTK(pdata=TotalDisp[:,:,-1])
 
 
     #---------------------------------------------------------------------------------

@@ -182,18 +182,20 @@ if __name__ == '__main__':
         # plt.plot(np.sqrt(DoF[0,:]),np.log10(L2NormX[0,:]),'-bs')
         # plt.plot(np.sqrt(DoF[0,:]),np.log10(L2Normx[0,:]),'-.ro')
 
-        for i in range(10):
-            plt.plot(np.sqrt(DoF[0,:]),np.log10(L2Normx[i,:]),marker.next(),linestyle=linestyle.next(),linewidth=2)
-        # plt.plot(np.log10(np.sqrt(DoF[0,:])),np.log10(L2Normx[0,:]),'-ro')
+        
+        plt.plot(np.sqrt(DoF[0,:]),np.log10(L2NormX[0,:]),'-ro')
         # plt.loglog(DoF[0,:],L2Normx[0,:],'-ro')
         # plt.legend([r'$Undeformed\; mesh$',r'$Deformed\; mesh\;using\;Linear\; Elasticity$'],loc='best',fontsize=16)
-        plt.legend([r"$II\;Linear\;Elastic$",r"$ITI\;Linear\;Elastic$",r"$IL\; neo-Hookean$",
-                                r"$IL\;Mooney-Rivlin$",r"$IL\;Nearly\;Incompressible$",r"$ILTI\;Hyperelastic$",
-                                r"$neo-Hookean$",r"$Mooney-Rivlin$",r"$Nearly\;Incompressible$",
-                                r"$TI\;Hyperelastic$"],loc='best',fontsize=16)
-        plt.ylabel(r'log$_{10}(L^2\;error)$')
-        plt.xlabel(r'$\sqrt{ndof}$')
-        plt.grid('on')
+
+        # for i in range(10):
+            # plt.plot(np.sqrt(DoF[0,:]),np.log10(L2Normx[i,:]),marker.next(),linestyle=linestyle.next(),linewidth=2)
+        # plt.legend([r"$II\;Linear\;Elastic$",r"$ITI\;Linear\;Elastic$",r"$IL\; neo-Hookean$",
+        #                         r"$IL\;Mooney-Rivlin$",r"$IL\;Nearly\;Incompressible$",r"$ILTI\;Hyperelastic$",
+        #                         r"$neo-Hookean$",r"$Mooney-Rivlin$",r"$Nearly\;Incompressible$",
+        #                         r"$TI\;Hyperelastic$"],loc='best',fontsize=14)
+        # plt.ylabel(r'log$_{10}(L^2\;error)$')
+        # plt.xlabel(r'$\sqrt{ndof}$')
+        # plt.grid('on')
 
 
         sname = fpath+fname
@@ -201,5 +203,6 @@ if __name__ == '__main__':
         print sname
         # plt.savefig(fpath+fname,format='png',dpi=100)
         # plt.savefig("/home/roman/Dropbox/Wing2D_Errors_Stretch25.eps",format='eps',dpi=100)
+        # plt.savefig("/home/roman/Dropbox/Wing2D_Errors_Stretch25.png",format='png',dpi=100)
 
         plt.show()

@@ -470,15 +470,22 @@ void PostMeshBase::GetGeomEdges()
         // GET THE EDGES
         TopoDS_Edge current_edge = TopoDS::Edge(explorer.Current());
         // CONVERT THEM TO GEOM_CURVE
-        Standard_Real first, last;
+        Real first, last;
         Handle_Geom_Curve curve = BRep_Tool::Curve(current_edge,first,last);
         // STORE HANDLE IN THE CONTAINER
         this->geometry_curves.push_back(curve);
 
         // TO GET TYPE OF THE CURVE, CONVERT THE CURVE TO ADAPTIVE CURVE
-        GeomAdaptor_Curve adapt_curve = GeomAdaptor_Curve(curve);
-        // STORE TYPE OF CURVE (CURVE TYPES ARE DEFINED IN occ_inc.hpp)
-        this->geometry_curves_types.push_back(adapt_curve.GetType());
+        try
+        {
+            GeomAdaptor_Curve adapt_curve = GeomAdaptor_Curve(curve);
+            // STORE TYPE OF CURVE (CURVE TYPES ARE DEFINED IN occ_inc.hpp)
+            this->geometry_curves_types.push_back(adapt_curve.GetType());
+        }
+        catch (Standard_NullObject)
+        {
+            warn("Warning: Types of 3D curves could not be determined");
+        }
     }
 //    print(this->geometry_curves.size());
 //    exit(EXIT_FAILURE);
@@ -496,9 +503,9 @@ void PostMeshBase::GetGeomFaces()
     for (TopExp_Explorer explorer(this->imported_shape,TopAbs_FACE); explorer.More(); explorer.Next())
     {
 
-        // GET THE EDGES
+        // GET THE FACES
         TopoDS_Face current_face = TopoDS::Face(explorer.Current());
-        // CONVERT THEM TO GEOM_CURVE
+        // CONVERT THEM TO GEOM_SURFACE
         Handle_Geom_Surface surface = BRep_Tool::Surface(current_face);
         // STORE HANDLE IN THE CONTAINER
         this->geometry_surfaces.push_back(surface);

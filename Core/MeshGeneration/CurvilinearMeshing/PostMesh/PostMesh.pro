@@ -10,7 +10,9 @@ SOURCES += src/main.cpp \
     src/PostMeshSurface.cpp \
     src/PyInterfaceEmulator.cpp
 
-QMAKE_CXXFLAGS += -std=c++11 -Wall -Wextra -pipe# -Wdelete-non-virtual-dtor -Wno-unused # -O2 #-fopenmp -msse -msse2 -fomit-frame-pointer -fno-strict-aliasing
+#QMAKE_CXXFLAGS += -std=c++11 -Wall -Wextra -pipe# -Wdelete-non-virtual-dtor -Wno-unused # -O2 #-fopenmp -msse -msse2 -fomit-frame-pointer -fno-strict-aliasing
+QMAKE_CXXFLAGS += -std=c++11 -Wall -Wextra -Wno-unused #-O3 -fopenmp
+
 
 #INCLUDEPATH += include/
 INCLUDEPATH +=/home/roman/Dropbox/eigen-devel
@@ -22,6 +24,8 @@ LIBS += -L/usr/local/lib -l:libTKIGES.so.9 -l:libTKSTEP.so.9 -l:libTKXSBase.so.9
      -l:libTKGeomBase.so.9 -l:libTKMath.so.9 -l:libTKHLR.so.9 -l:libTKG2d.so.9 -l:libTKBool.so.9 -l:libTKG3d.so.9 -l:libTKOffset.so.9 \
      -l:libTKG2d.so.9 -l:libTKXMesh.so.9 -l:libTKGeomAlgo.so.9 -l:libTKShHealing.so.9 -l:libTKFeat.so.9 -l:libTKFillet.so.9 \
      -l:libTKBO.so.9 -l:libTKPrim.so.9
+
+#LIBS += -L/usr/lib/gcc/x86_64-linux-gnu/4.8.4 -lgomp
 
 #LIBS += -L/usr/local/lib -lTKIGES -lTKXSBase -lTKBRep -lTKernel -lTKTopAlgo -lTKGeomBase -lTKMath -lTKHLR -lTKG2d -lTKBool \
 #    -lTKXMesh\

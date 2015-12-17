@@ -40,14 +40,15 @@ def ProblemData(MainData):
 
     ProblemPath = os.path.dirname(os.path.realpath(__file__))
     MainData.MeshInfo.MeshType = "tet"
-    MainData.MeshInfo.Reader = "Read"
+    # MainData.MeshInfo.Reader = "Read"
+    MainData.MeshInfo.Reader = "Sphere"
 
     # MainData.MeshInfo.FileName = ProblemPath + '/Mesh_Cube_Tet_393401.dat'
     # MainData.MeshInfo.FileName = ProblemPath + '/Mesh_Cube_Tet_123962.dat'
     # MainData.MeshInfo.FileName = ProblemPath + '/Mesh_Cube_Tet_56407.dat'
     # MainData.MeshInfo.FileName = ProblemPath + '/Mesh_Cube_Tet_1473.dat'
     # MainData.MeshInfo.FileName = ProblemPath + '/Mesh_Cube_Tet_181.dat'
-    MainData.MeshInfo.FileName = ProblemPath + '/Mesh_Cube_Tet_12.dat'
+    # MainData.MeshInfo.FileName = ProblemPath + '/Mesh_Cube_Tet_12.dat'
     # MainData.MeshInfo.FileName = ProblemPath + '/Mesh_Sphere_8219.dat'
     # MainData.MeshInfo.FileName = ProblemPath + '/Mesh_Sphere_1483.dat'
     # MainData.MeshInfo.FileName = ProblemPath + '/Mesh_Sphere_880.dat'
@@ -55,6 +56,7 @@ def ProblemData(MainData):
     # MainData.MeshInfo.FileName = ProblemPath + '/Mesh_Sphere_16.dat'
     # MainData.MeshInfo.FileName = ProblemPath + '/Circular_Holes.dat'
     # MainData.MeshInfo.FileName = ProblemPath + '/Mesh_Cyl_Hole_1528.dat'
+    # MainData.MeshInfo.FileName = ProblemPath + '/Sphere.dat'
         
         
 

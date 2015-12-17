@@ -19,7 +19,7 @@ def SetPath(Pr,pwd,C,nelem,Analysis,AnalysisType, MaterialArgsType):
 		print 'Writing results in the problem directory:', Path.Problem
 	else:
 		print 'Writing the results in problem directory:', Path.Problem
-		os.mkdir(MainData.Path.Problem+'/Results')
+		os.mkdir(Path.Problem+'/Results')
 
 
 	Path.ProblemResults = Path.Problem+'/Results/'

@@ -21,6 +21,7 @@
 #include <GeomConvert.hxx>
 #include <BRepAdaptor_Curve.hxx>
 #include <BRep_Tool.hxx>
+#include <BRepTools.hxx>
 #include <BRepBuilderAPI_NurbsConvert.hxx>
 //#include <TColgp_Array1OfPnt.hxx>
 //#include <TColStd_Array1OfReal.hxx>
@@ -48,6 +49,9 @@
 //    GeomAbs_OtherCurve
 //};
 
+//! Identifies the type of a curve.
+//! Not necessary to redefine as they are defined in OCC
+//!
 //enum GeomAbs_SurfaceType {
 //    GeomAbs_Plane,
 //    GeomAbs_Cylinder,
