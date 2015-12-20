@@ -162,7 +162,6 @@ void PostMeshSurface::GetGeomPointsOnCorrespondingFaces()
         current_face_coords << current_face_X_, current_face_Y_, current_face_Z_;
         this->geometry_points_on_surfaces.push_back(current_face_coords);
     }
-//    exit(EXIT_FAILURE);
 }
 
 void PostMeshSurface::IdentifySurfacesContainingFaces()
@@ -171,35 +170,6 @@ void PostMeshSurface::IdentifySurfacesContainingFaces()
     this->dirichlet_faces = Eigen::MatrixI::Zero(this->mesh_faces.rows(),this->ndim+1);
     this->listfaces.clear();
 //    this->InferInterpolationPolynomialDegree();
-
-
-//    std::vector<Handle_Geom_Curve> xx;
-//    for (TopExp_Explorer explorer(this->imported_shape,TopAbs_EDGE); explorer.More(); explorer.Next())
-//    {
-
-//        // GET THE EDGES
-//        TopoDS_Edge current_edge = TopoDS::Edge(explorer.Current());
-//        // CONVERT THEM TO GEOM_CURVE
-//        Real first, last;
-//        Handle_Geom_Curve curve = BRep_Tool::Curve(current_edge,first,last);
-//        // STORE HANDLE IN THE CONTAINER
-//        xx.push_back(curve);
-//    }
-//    print(xx.size());
-//    Handle_Geom_Curve yy = xx[0];
-//    print(yy->FirstParameter(),yy->LastParameter());
-
-//    for (auto &i : this->geometry_curves)
-//    {
-//        print(i->FirstParameter(),i->LastParameter());
-//    }
-
-//    GeomAPI_ProjectPointOnCurve jj;
-//    jj.
-
-//    print(this->geometry_points[0])
-//    exit(EXIT_FAILURE);
-
 
     auto index_face = 0;
 
@@ -225,9 +195,6 @@ void PostMeshSurface::IdentifySurfacesContainingFaces()
         auto y_avg = ( y1 + y2 + y3 )/3.;
         auto z_avg = ( z1 + z2 + z3 )/3.;
 
-
-
-
 //        if (std::sqrt(x_avg*x_avg+y_avg*y_avg+z_avg*z_avg)< this->condition)
         if (this->projection_criteria(iface)==1)
         {
@@ -236,7 +203,6 @@ void PostMeshSurface::IdentifySurfacesContainingFaces()
             {
                dirichlet_faces(index_face,iter) = this->mesh_faces(iface,iter);
             }
-//            print(x_avg,y_avg,z_avg);
 
             // PROJECT IT OVER ALL CURVES
             auto min_mid_distance = 1.0e20;
@@ -247,28 +213,12 @@ void PostMeshSurface::IdentifySurfacesContainingFaces()
 //#pragma omp critical
             for (UInteger isurface=0; isurface<this->geometry_surfaces.size(); ++isurface)
             {
-//                Handle_Geom_Surface xx = this->geometry_surfaces[isurface];
-                Real u1,u2,v1,v2;
-                this->geometry_surfaces[isurface]->Bounds(u1,u2,v1,v2);
-//                print(u1,u2,v1,v2,isurface,this->geometry_surfaces_types[isurface]);
-//                exit(EXIT_FAILURE);
                 // PROJECT THE NODES ON THE CURVE AND GET THE PARAMETER U
                 try
                 {
                     GeomAPI_ProjectPointOnSurf proj;
                     proj.Init(middle_point,this->geometry_surfaces[isurface]);
-//                    proj.Init(middle_point,this->geometry_surfaces[isurface],u1,u2,v1,v2,1e-06);
-//                    proj.Init(middle_point,this->geometry_surfaces[isurface],u1,u2/1.2,v1,v2/1.2,1e-06);
                     mid_distance = proj.LowerDistance();
-//                    print(mid_distance);
-//                    print(proj.NearestPoint().X());
-
-//                    ShapeAnalysis_Surface projj(this->geometry_surfaces[isurface]);
-//                    print(projj.HasSingularities(1e-06));
-//                    projj.Bounds(u1,u2,v1,v2);
-//                    print(u1,u2,v1,v2);
-//                    auto xx = projj.Value(u1,u2);
-//                    print(xx.X(),xx.Y());
                 }
                 catch (StdFail_NotDone)
                 {
@@ -362,28 +312,6 @@ void PostMeshSurface::ProjectMeshOnSurface()
 //    print(this->projection_V);
     cnp::sort_rows(this->projection_U,this->sorted_projected_indices);
     cnp::sort_rows(this->projection_V,this->sorted_projected_indices);
-//    print(this->projection_U);
-//    print(sorted_projected_indices);
-//    print(this->dirichlet_edges);
-
-
-//    for (auto ee=0; ee<mesh_points.rows();ee++) {
-//        auto x = mesh_points(ee,0);
-//        auto y = mesh_points(ee,1);
-//        auto z = mesh_points(ee,2);
-//        Real pu,pv;
-//        gp_Pnt node_to_be_projected = gp_Pnt(x,y,z);
-//        GeomAPI_ProjectPointOnSurf proj;
-//        proj.Init(node_to_be_projected,this->geometry_surfaces[0]);
-//        proj.LowerDistanceParameters(pu,pv);
-
-//        auto xx = proj.Point(1);
-//        auto norm_xx = sqrt(xx.X()*xx.X()+xx.Y()*xx.Y()+xx.Z()*xx.Z());
-//        print(xx.X(),xx.Y(),xx.Z(),"----",norm_xx);
-//    }
-
-
-
 
 //    for (auto &k: this->geometry_points){
 //        print("[",k.X(),",",k.Y(),",",k.Z(),"],");
@@ -411,8 +339,6 @@ void PostMeshSurface::MeshPointInversionSurface()
     {
         auto id_surface = static_cast<Integer>(this->dirichlet_faces(idir,3));
         Handle_Geom_Surface current_surface = this->geometry_surfaces[id_surface];
-//        print(geometry_surfaces_types[id_surface]);
-//        print (current_surface->IsUClosed(),current_surface->IsVClosed());
 
         for (auto j=3; j<no_face_nodes;++j)
         {
@@ -424,7 +350,6 @@ void PostMeshSurface::MeshPointInversionSurface()
             // LOOP OVER ALL GEOMETRY POINTS AND IF POSSIBLE PICK THOSE INSTEAD
             for (auto &k : geometry_points)
             {
-//                print (k.X(),x);
                 if ( (std::abs(k.X() - x ) < this->projection_precision) && \
                      (std::abs(k.Y() - y ) < this->projection_precision) && \
                      (std::abs(k.Z() - z ) < this->projection_precision) )
@@ -433,18 +358,12 @@ void PostMeshSurface::MeshPointInversionSurface()
                     break;
                 }
             }
-//            print(x);
 
             Real uEq,vEq;
             auto point_to_be_projected = gp_Pnt(x,y,z);
-//            auto point_to_be_projected = gp_Pnt(0,0,0);
-//            auto point_to_be_projected = gp_Pnt(x/1000.,y/1000.,z/1000.);
-//            auto point_to_be_projected = gp_Pnt(x*1000.,y*1000.,z*1000.);
             GeomAPI_ProjectPointOnSurf proj;
             proj.Init(point_to_be_projected,current_surface,1e-06);
             proj.LowerDistanceParameters(uEq,vEq);
-//            print(proj.NbPoints());
-
 
             auto xEq = gp_Pnt(0.,0.,0.);
             current_surface->D0(uEq,vEq,xEq);

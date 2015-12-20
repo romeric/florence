@@ -12,8 +12,8 @@ def ProblemData(MainData):
     # MainData.AnalysisType = 'Nonlinear'
 
     # MATERIAL INPUT DATA 
-    MainData.MaterialArgs.Type = 'LinearModel'
-    # MainData.MaterialArgs.Type = 'IncrementalLinearElastic'
+    # MainData.MaterialArgs.Type = 'LinearModel'
+    MainData.MaterialArgs.Type = 'IncrementalLinearElastic'
     # MainData.MaterialArgs.Type = 'IncrementallyLinearisedNeoHookean'
     # MainData.MaterialArgs.Type = 'IncrementallyLinearisedMooneyRivlin'
     # MainData.MaterialArgs.Type = 'NearlyIncompressibleNeoHookean'
@@ -50,9 +50,9 @@ def ProblemData(MainData):
 
         MeshType = 'tet'
         # FileName = ProblemPath + '/Mesh_Cube_Tet_181.dat'
-        FileName = ProblemPath + '/Sphere_1483.dat'
-        # FileName = ProblemPath + '/Torus_612.dat'
-        FileName = ProblemPath + '/Torus_check.dat'
+        # FileName = ProblemPath + '/Sphere_1483.dat'
+        FileName = ProblemPath + '/Torus_612.dat'
+        # FileName = ProblemPath + '/Torus_check.dat'
         # MeshType = 'quad'
         # FileName = ProblemPath + '/Mesh_Square_Quad_64.dat'
         # MeshType = 'hex'
@@ -65,16 +65,16 @@ def ProblemData(MainData):
         RequiresCAD = True
         CurvilinearMeshNodalSpacing = 'equal'
         
-        IGES_File = ProblemPath + '/Sphere.igs'
-        # IGES_File = ProblemPath + '/Torus.igs'
+        # IGES_File = ProblemPath + '/Sphere.igs'
+        IGES_File = ProblemPath + '/Torus.igs'
 
         # sphere
-        condition = 1000.
-        scale = 1000.
+        # condition = 1000.
+        # scale = 1000.
 
         # torus
-        # condition = 1.
-        # scale = 1.
+        condition = 1.0e20
+        scale = 1000.
 
         class DirichArgs(object):
             node = 0
@@ -163,18 +163,33 @@ def ProblemData(MainData):
         
             return b
 
+        # def ProjectionCriteria(self,mesh):
+        #     projection_edges = np.zeros((mesh.edges.shape[0],1),dtype=np.uint64)
+        #     num = mesh.edges.shape[1]
+        #     for iedge in range(mesh.edges.shape[0]):
+        #         x = np.sum(mesh.points[mesh.edges[iedge,:],0])/num
+        #         y = np.sum(mesh.points[mesh.edges[iedge,:],1])/num
+        #         x *= self.scale
+        #         y *= self.scale
+        #         if np.sqrt(x*x+y*y)< self.condition:
+        #             projection_edges[iedge,0]=1
+            
+        #     return projection_edges
+
         def ProjectionCriteria(self,mesh):
-            projection_edges = np.zeros((mesh.edges.shape[0],1),dtype=np.uint64)
-            num = mesh.edges.shape[1]
-            for iedge in range(mesh.edges.shape[0]):
-                x = np.sum(mesh.points[mesh.edges[iedge,:],0])/num
-                y = np.sum(mesh.points[mesh.edges[iedge,:],1])/num
+            projection_faces = np.zeros((mesh.faces.shape[0],1),dtype=np.uint64)
+            num = mesh.faces.shape[1]
+            for iface in range(mesh.faces.shape[0]):
+                x = np.sum(mesh.points[mesh.faces[iface,:],0])/num
+                y = np.sum(mesh.points[mesh.faces[iface,:],1])/num
+                z = np.sum(mesh.points[mesh.faces[iface,:],2])/num
                 x *= self.scale
                 y *= self.scale
-                if np.sqrt(x*x+y*y)< self.condition:
-                    projection_edges[iedge,0]=1
+                z *= self.scale 
+                if np.sqrt(x*x+y*y+z*z)< self.condition:
+                    projection_faces[iface]=1
             
-            return projection_edges
+            return projection_faces
 
 
         

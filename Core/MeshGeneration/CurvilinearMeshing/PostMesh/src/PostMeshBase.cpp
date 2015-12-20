@@ -458,9 +458,8 @@ void PostMeshBase::GetGeomVertices()
 
 void PostMeshBase::GetGeomEdges()
 {
-    /*  Iterate over TopoDS_Shape and extract all the edges, convert the edges into Geom_Curve and
-        get their handles
-    */
+    //!  ITERATE OVER TopoDS_Shape AND EXTRACT ALL THE EDGES. CONVERT THE EDGES TO Geom_Curve AND
+    //! GET THEIR HANDLES
 
     this->geometry_curves.clear();
     this->geometry_curves_types.clear();
@@ -475,7 +474,7 @@ void PostMeshBase::GetGeomEdges()
         // STORE HANDLE IN THE CONTAINER
         this->geometry_curves.push_back(curve);
 
-        // TO GET TYPE OF THE CURVE, CONVERT THE CURVE TO ADAPTIVE CURVE
+        // TO GET TYPE OF THE CURVE, CONVERT THE CURVE TO ADAPTIVE CURVE (THE TRY-CATCH IS FOR 3D)
         try
         {
             GeomAdaptor_Curve adapt_curve = GeomAdaptor_Curve(curve);
@@ -487,15 +486,12 @@ void PostMeshBase::GetGeomEdges()
             warn("Warning: Types of 3D curves could not be determined");
         }
     }
-//    print(this->geometry_curves.size());
-//    exit(EXIT_FAILURE);
 }
 
 void PostMeshBase::GetGeomFaces()
 {
-    /*  Iterate over TopoDS_Shape and extract all the faces, convert the faces into Geom_Surface and
-        get their handles
-    */
+    //!  ITERATE OVER TopoDS_Shape AND EXTRACT ALL THE EDGES. CONVERT THE EDGES TO Geom_Surface AND
+    //! GET THEIR HANDLES
 
     this->geometry_surfaces.clear();
     this->geometry_surfaces_types.clear();
@@ -518,9 +514,26 @@ void PostMeshBase::GetGeomFaces()
     }
 }
 
+std::vector<Real> PostMeshBase::ObtainGeomVertices()
+{
+    std::vector<Real> geom_points;
+    geom_points.clear();
+    // PASS TO CYTHON
+    for (UInteger i=0; i<this->geometry_points.size(); ++i)
+    {
+        geom_points.push_back(this->geometry_points[i].X());
+        geom_points.push_back(this->geometry_points[i].Y());
+        geom_points.push_back(this->geometry_points[i].Z());
+    }
+
+    return geom_points;
+}
+
 void PostMeshBase::ComputeProjectionCriteria()
 {
-    // IF NOT ALLOCATED THEN COMPUTE
+    // IF NOT INITIALISED THEN COMPUTE
+    assert((this->ndim==2 || this->ndim==3) && "Unknown number of dimensions");
+
     if (this->projection_criteria.rows()==0)
     {
         this->projection_criteria.setZero(mesh_edges.rows(),mesh_edges.cols());
@@ -535,7 +548,26 @@ void PostMeshBase::ComputeProjectionCriteria()
             // GET THE MIDDLE POINT OF THE EDGE
             auto x_avg = ( x1 + x2 )/2.;
             auto y_avg = ( y1 + y2 )/2.;
-            if (std::sqrt(x_avg*x_avg+y_avg*y_avg)<this->condition)
+
+            auto cond = std::sqrt(x_avg*x_avg+y_avg*y_avg);
+
+            Real z1,z2,z3,x3,y3,z_avg;
+            if (this->ndim==3) {
+                z1 = this->mesh_points(this->mesh_edges(iedge,0),2);
+                z2 = this->mesh_points(this->mesh_edges(iedge,1),2);
+
+                x3 = this->mesh_points(this->mesh_edges(iedge,2),0);
+                y3 = this->mesh_points(this->mesh_edges(iedge,2),1);
+                z3 = this->mesh_points(this->mesh_edges(iedge,2),2);
+
+                x_avg = (x1 + x2 + x3 )/3.;
+                y_avg = (y1 + y2 + y3 )/3.;
+                z_avg = (z1 + z2 + z3 )/3.;
+
+                cond = std::sqrt(x_avg*x_avg+y_avg*y_avg+z_avg*z_avg);
+            }
+
+            if (cond<this->condition)
             {
                 projection_criteria(iedge)=1;
             }

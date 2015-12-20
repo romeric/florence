@@ -869,7 +869,7 @@ class Mesh(object):
             fname = pathvtu+str('/output.vtu')
             write_vtu(Verts=self.points, Cells={cellflag:self.elements},fname=fname,**kwargs)
         else:
-            write_vtu(Verts=self.points, Cells={cellflag:self.elements},**kwargs)
+                write_vtu(Verts=self.points, Cells={cellflag:self.elements},**kwargs)
 
 
 

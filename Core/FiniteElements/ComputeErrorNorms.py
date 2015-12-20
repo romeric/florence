@@ -161,8 +161,10 @@ def CheapNorm(MainData,mesh,TotalDisp):
     # return
 
     # func = lambda x,y : np.sin(x)*np.cos(y)
-    func = lambda x,y : x*np.sin(y)+y*np.cos(x)
-    # func = lambda x,y : x**3*(y+1)**3
+    # func = lambda x,y : x*np.sin(y)+y*np.cos(x)
+    # func = lambda x,y : x**3+(y+1)**3
+    func = lambda x,y : (x+y)**11
+    # func = lambda x,y : x**3*(y+1)**5
 
     nodeperelem = mesh.elements.shape[1]
     # print MainData.Domain.Bases[:,0].shape
@@ -232,37 +234,6 @@ def CheapNorm(MainData,mesh,TotalDisp):
             # L2_denormx += (AnalyticalSolGaussx)*MainData.Domain.AllGauss[counter,0]
 
 
-        # print MainData.Domain.AllGauss.shape
-        # return
-        # if elem==1:
-        #   # print LagrangeElemCoords
-        #   # print ElementalSolGauss
-        #   # print AnalyticalSolGauss
-        #   # print xx
-        #   # print NumericalSolGauss
-        #   print ParentGradientX.shape
-        #   xx = np.linalg.inv(ParentGradientX)[0,:,:]
-        #   print np.dot(xx,LagrangeElemCoords.T)
-        #   print 
-        #   print LagrangeElemCoords.T
-        #   print MaterialGradient[0,:,:]
-
-            # print AnalyticalSolGauss -  NumericalSolGauss
-            # print np.linalg.norm((AnalyticalSolGauss - NumericalSolGauss)**2)
-
-            # print
-            # print np.einsum('i,ij',xx,MainData.Domain.Bases)
-            # pass
-            # print MainData.Domain.Jm.shape, LagrangeElemCoords.shape
-            # print np.einsum('ijk,ji',MainData.Domain.Jm,LagrangeElemCoords)
-
-        # ElementalSolGauss = np.zeros((MainData.Domain.AllGauss.shape[0],MainData.nvar))
-        # for counter in range(0,MainData.Domain.AllGauss.shape[0]):
-        #   # GET THE NUMERICAL SOLUTION WITHIN THE ELEMENT (AT QUADRATURE POINTS)
-        #   ElementalSolGauss[counter,:] = np.dot(MainData.Domain.Bases[:,counter].reshape(1,nodeperelem),LagrangeElemCoords)
-        #   if elem==0 and counter==3:
-        #       print ElementalSolGauss
-
     # L2NormX = np.sqrt(L2_normX)/np.sqrt(L2_denormX)
     # L2NormX = np.linalg.norm(L2NormX)
 
@@ -282,6 +253,3 @@ def CheapNorm(MainData,mesh,TotalDisp):
     MainData.L2Normx = L2Normx
     MainData.DoF = mesh.points.shape[0]*MainData.nvar
     MainData.NELEM = mesh.elements.shape[0]
-
-
-    # exit()

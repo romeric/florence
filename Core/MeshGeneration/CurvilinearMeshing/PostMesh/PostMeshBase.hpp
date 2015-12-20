@@ -169,6 +169,7 @@ public:
     void GetGeomVertices();
     void GetGeomEdges();
     void GetGeomFaces();
+    std::vector<Real> ObtainGeomVertices();
 
 
     std::string mesh_element_type;

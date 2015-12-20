@@ -29,8 +29,9 @@ from Core.FiniteElements.ComputeErrorNorms import *
 # import Examples.FiniteElements.RAE2822.ProblemData as Pr
 # import Examples.FiniteElements.Misc.ProblemData as Pr
 # import Examples.FiniteElements.Tests.ProblemData as Pr
-# import Examples.FiniteElements.Sphere.ProblemData as Pr
-import Examples.FiniteElements.Almond3D.ProblemData as Pr
+import Examples.FiniteElements.Sphere.ProblemData as Pr
+# import Examples.FiniteElements.Almond3D.ProblemData as Pr
+# import Examples.FiniteElements.Falcon3D.ProblemData as Pr
 
 ###########################################################################################################
 
@@ -111,14 +112,14 @@ def main(MainData, DictOutput=None, nStep=0):
         if MainData.AnalysisType == 'Nonlinear':
             PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp,show_plot=False)
             pass
-        # if MainData.AnalysisType == "Linear":
-        #     vmesh = deepcopy(mesh)
-        #     vmesh.points = vmesh.points + TotalDisp[:,:,MainData.AssemblyParameters.LoadIncrements-1]
-        # else:
-        #     vmesh = mesh    
-        # PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
-        # import matplotlib.pyplot as plt
-        # plt.show()
+        if MainData.AnalysisType == "Linear":
+            vmesh = deepcopy(mesh)
+            vmesh.points = vmesh.points + TotalDisp[:,:,MainData.AssemblyParameters.LoadIncrements-1]
+        else:
+            vmesh = mesh    
+        PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
+        import matplotlib.pyplot as plt
+        plt.show()
     else:
         MainData.ScaledJacobian = np.zeros(mesh.nelem)+np.NAN
         MainData.ScaledFF = np.zeros(mesh.nelem)+np.NAN
@@ -126,25 +127,51 @@ def main(MainData, DictOutput=None, nStep=0):
         MainData.ScaledFNFN = np.zeros(mesh.nelem)+np.NAN
         MainData.ScaledCNCN = np.zeros(mesh.nelem)+np.NAN
 
-    if DictOutput is not None:
-        DictOutput['MeshPoints_P'+str(MainData.C+1)] = mesh.points
-        DictOutput['MeshElements_P'+str(MainData.C+1)] = mesh.elements+1
-        DictOutput['MeshEdges_P'+str(MainData.C+1)] = mesh.edges+1
-        if MainData.ndim==3:
-            DictOutput['MeshFaces_P'+str(MainData.C+1)] = mesh.faces+1
-        DictOutput['TotalDisplacement_P'+str(MainData.C+1)] = TotalDisp
-        DictOutput['nSteps'] = MainData.AssemblyParameters.LoadIncrements
+    # if DictOutput is not None:
+    #     DictOutput['MeshPoints_P'+str(MainData.C+1)] = mesh.points
+    #     DictOutput['MeshElements_P'+str(MainData.C+1)] = mesh.elements+1
+    #     DictOutput['MeshEdges_P'+str(MainData.C+1)] = mesh.edges+1
+    #     if MainData.ndim==3:
+    #         DictOutput['MeshFaces_P'+str(MainData.C+1)] = mesh.faces+1
+    #     DictOutput['TotalDisplacement_P'+str(MainData.C+1)] = TotalDisp
+    #     DictOutput['nSteps'] = MainData.AssemblyParameters.LoadIncrements
+
+    # # For WriteCurvedMeshFiles
+    # if DictOutput is not None:
+    #     DictOutput['MeshPoints_P'+str(MainData.C+1)] = mesh.points
+    #     DictOutput['MeshElements_P'+str(MainData.C+1)] = mesh.elements+1
+    #     # DictOutput['MeshEdges_P'+str(MainData.C+1)] = mesh.edges+1
+    #     if MainData.ndim==3:
+    #         DictOutput['MeshFaces_P'+str(MainData.C+1)] = mesh.faces+1
+    #     DictOutput['TotalDisplacement_P'+str(MainData.C+1)+"_"+MainData.AnalysisType+"_"+MainData.MaterialArgs.Type] = TotalDisp
+    #     DictOutput['ScaledJacobian_P'+str(MainData.C+1)+"_"+MainData.AnalysisType+"_"+MainData.MaterialArgs.Type] = MainData.ScaledJacobian
+    #     DictOutput['nSteps'] = MainData.AssemblyParameters.LoadIncrements
+
+    # For WriteCurvedMeshFiles for the case where nonlinear struggles for Wing2D
+    # Results = {'PolynomialDegree':MainData.C+1,
+    #     'PoissonsRatio':MainData.MaterialArgs.nu,'Youngs_Modulus':MainData.MaterialArgs.E,
+    #     'MeshPoints':mesh.points,'MeshElements':mesh.elements+1,'TotalDisplacement':TotalDisp,
+    #     'ScaledJacobian':MainData.ScaledJacobian}
+    # spath = "/home/roman/Dropbox/2015_HighOrderMeshing/Paper_CompMech2015_CurvedMeshFiles/Wing2D_Nonlinear.mat"
+    # from scipy.io import savemat
+    # savemat(spath,Results)
 
     # vpoints = mesh.points + TotalDisp[:,:,-1]
     # np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/elements_almond_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
     # np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_almond_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%10.9f',delimiter=',')
     # np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/vpoints_almond_p'+str(MainData.C+1)+'.dat', vpoints,fmt='%10.9f',delimiter=',')
-    # # np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/faces_nnsphere2_p'+str(MainData.C+1)+'.dat', mesh.faces,fmt='%d',delimiter=',')
     # np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/sjacobian_almond_p'+str(MainData.C+1)+'.dat', 
     #     MainData.ScaledJacobian,fmt='%8.9f',delimiter=',')
 
-    mesh.WriteVTK(fname="/home/roman/Dropbox/dd.vtu",pdata=TotalDisp[:,:,-1])
+    # np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/elements_torus_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
+    # np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/points_torus_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%10.9f',delimiter=',')
+    # np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/vpoints_torus_p'+str(MainData.C+1)+'.dat', vpoints,fmt='%10.9f',delimiter=',')
+    # np.savetxt('/home/roman/Dropbox/Matlab_Files/tetplots/sjacobian_torus_p'+str(MainData.C+1)+'.dat', 
+    #     MainData.ScaledJacobian,fmt='%8.9f',delimiter=',')
+
+    # mesh.WriteVTK(fname="/home/roman/Dropbox/dd.vtu",pdata=TotalDisp[:,:,-1])
     # mesh.WriteVTK(pdata=TotalDisp[:,:,-1])
+
 
 
     #---------------------------------------------------------------------------------
@@ -162,7 +189,7 @@ def main(MainData, DictOutput=None, nStep=0):
     # lmesh.points = mesh.points[:nnode,:]
 
     # CheapNorm(MainData,lmesh,TotalDisp[:nnode,:])
-    CheapNorm(MainData,mesh,TotalDisp)
+    # CheapNorm(MainData,mesh,TotalDisp)
     # exit()
 
     # for C in range(8):

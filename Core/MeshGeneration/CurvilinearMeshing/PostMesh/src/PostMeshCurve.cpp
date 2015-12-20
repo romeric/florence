@@ -129,7 +129,7 @@ void PostMeshCurve::GetCurvesParameters()
 
 void PostMeshCurve::GetCurvesLengths()
 {
-    //! Computes length of all curves
+    //! COMPUTES LENGTH OF CURVES
     this->curves_lengths = Eigen::MatrixR::Zero(this->geometry_curves.size(),1);
     for (UInteger icurve=0; icurve<this->geometry_curves.size(); ++icurve)
     {

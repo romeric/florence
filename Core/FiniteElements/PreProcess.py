@@ -112,6 +112,8 @@ def PreProcess(MainData,Pr,pwd):
     # print mesh.nelem, mesh.points.shape[0], mesh.edges.shape[0]
     # mesh.WriteVTK(fname="/home/roman/Dropbox/dd2.vtu")
     # print mesh.faces
+    # mesh.points[mesh.points <= 0.000001] = 1e10
+    # print np.min(mesh.points)
     # print np.where(mesh.elements==130)[0]
     # print np.where(mesh.elements==140)[0]
     # print np.where(mesh.elements==127)[0]
@@ -160,16 +162,8 @@ def PreProcess(MainData,Pr,pwd):
     # print np.max(mesh.points[:,0]), np.max(mesh.points[:,1]), np.max(mesh.points[:,2]) 
     # print mesh.elements
     # print mesh.faces
-
-    # xx = mesh.points[np.unique(mesh.faces),:]
-    # from Core.Supplementary.Tensors import makezero
-    # xx = makezero(xx)
-    # # print xx
-    # for i in range(xx.shape[0]):
-    #     if xx[i,0] > -2.5 and xx[i,0] < 2.5 and xx[i,1] < 2. and xx[i,1] > -2. and xx[i,2] < 2. and xx[i,2] > -2.:
-    #         print xx[i,:]*10.*2.54
-
-
+    # print mesh.edges.shape
+    # print mesh.points
     # exit()
 
 
@@ -349,15 +343,19 @@ def PreProcess(MainData,Pr,pwd):
         tol = 1e-07
 
     if mesh.points.shape[0]*MainData.nvar > 200000:
-        solve.type = 'iterative'
-        print 'Large system of equations. Switching to iterative solver'
+        # solve.type = 'iterative'
+        solve.type = "direct"
+        solve.sub_type = "MUMPS"
+        # print 'Large system of equations. Switching to iterative solver'
+        print 'Large system of equations. Switching to MUMPS solver'
     else:
-        solve.type = 'direct'
+        solve.type = "direct"
+        solve.sub_type = "UMFPACK"
 
     MainData.solve = solve 
             
 
-    if mesh.nelem > 100000:
+    if mesh.nelem > 1e07:
         MainData.AssemblyRoutine = 'Large'
         print 'Large number of elements. Switching to faster assembly routine'
     else:
@@ -373,6 +371,14 @@ def PreProcess(MainData,Pr,pwd):
 
     #############################################################################
 
+
+
+
+    #############################################################################
+    MainData.IsSymmetricityComputed = False
+
+
+    #############################################################################
 
 
 

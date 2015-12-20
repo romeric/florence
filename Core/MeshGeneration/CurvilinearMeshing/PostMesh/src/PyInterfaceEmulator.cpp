@@ -96,7 +96,7 @@ PassToPython ComputeDirichleteData3D(const char* iges_filename, Real scale, Real
 
     // EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
     curvilinear_mesh->GetGeomVertices();
-    curvilinear_mesh->GetGeomEdges();
+//    curvilinear_mesh->GetGeomEdges();
     curvilinear_mesh->GetGeomFaces();
 
 //    curvilinear_mesh->GetSurfacesParameters();

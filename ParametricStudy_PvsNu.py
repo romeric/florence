@@ -183,15 +183,10 @@ if __name__ == '__main__':
 
             # imshow is a direct matrix-to-pixel transformation
             # so flip the matrix upside down
-            print scaledA[0,0]
-            return 
             scaledA = scaledA[::-1,:]
             # print scaledA
             # exit()
             condA = condA[::-1,:]
-
-            X,Y = np.meshgrid(p,nu)
-
 
             font_size = 22
             plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bicubic', cmap=cm.viridis)

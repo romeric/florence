@@ -62,6 +62,7 @@ def ProblemData(MainData):
     class BoundaryData(object):
         Type = 'nurbs'
         RequiresCAD = True
+        ProjectionType = 'arc_length'
         CurvilinearMeshNodalSpacing = 'fekete'
         
         # Type = 'straight'

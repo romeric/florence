@@ -261,13 +261,18 @@ def plotter_surface():
 
 
 
-def plotter_individual_imshow(p=2,save=False):
+def plotter_individual_imshow(p=2,which_q=3,save=False):
+
+    """ which_q:            3 for scaled Jacobian Q_3
+                            1 for F:F Q_1
+                            2 for H:H Q_2 
+
+    """
 
     stretch = [25, 50, 100, 200, 400, 800, 1600]
     formulations = ["Linear","Linearised","Nonlinear"]
 
     fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Steps_vs_Nu/Wing2D_Steps_vs_Nu_'
-    # fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Steps_vs_Nu_Old/Wing2D_Steps_vs_Nu_'
     fname = "P"+str(p)+".mat"
     spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_Steps_vs_Nu_"
     
@@ -276,7 +281,6 @@ def plotter_individual_imshow(p=2,save=False):
 
     scaledA = DictOutput['ScaledJacobian']
     condA = DictOutput['ConditionNumber']
-    # nu = DictOutput['PoissonsRatios'][0]
     nu = np.linspace(0.001,0.5,10)*100
     p = DictOutput['PolynomialDegrees'][0]
 
@@ -298,19 +302,24 @@ def plotter_individual_imshow(p=2,save=False):
     # print DictOutput['ScaledJacobian'][0,2,1,:]
 
     # print DictOutput['ScaledJacobian'][0,0,1,-4], DictOutput['ScaledJacobian'][0,-1,1,-4]
-    # exit()
+    print DictOutput['ScaledJacobian'][2,2,0,:]
+    print DictOutput['PoissonsRatios']
+    exit()
     # which stretching 
     for lstr in range(0,7):
         # which formulation
         for m in range(0,3):
-            # scaledA = DictOutput['ScaledJacobian'][m,:,lstr,:]
-            scaledA =  np.zeros((6,10))
-
-
-            for i in range(6):
-                for j in range(10):
-                    # print np.min(DictOutput['WholeScaledJacobian'][m,i,lstr,j][:2171])
-                    scaledA[i,j] = np.min(DictOutput['WholeScaledJacobian'][m,i,lstr,j][:2171])
+            if which_q == 3:
+                scaledA = DictOutput['ScaledJacobian'][m,:,lstr,:]
+                # scaledA =  np.zeros((6,10))
+                # for i in range(6):
+                #     for j in range(10):
+                #         # print np.min(DictOutput['WholeScaledJacobian'][m,i,lstr,j][:2171])
+                #         scaledA[i,j] = np.min(DictOutput['WholeScaledJacobian'][m,i,lstr,j][:2171])
+            elif which_q == 1:
+                scaledA = DictOutput['ScaledFF'][m,:,lstr,:]
+            elif which_q == 2:
+                scaledA = DictOutput['ScaledHH'][m,:,lstr,:]
 
             if p==6 and m==2:
                 scaledA[3:,:] = np.NAN
@@ -319,15 +328,6 @@ def plotter_individual_imshow(p=2,save=False):
             # matrix upside down
             scaledA = np.flipud(scaledA)
             # scaledA = scaledA[::-1,:] # or
-
-            # print scaledA
-            # print lstr, m
-            # print DictOutput['ScaledJacobian'][0,:,lstr,1]
-            # print DictOutput['ScaledJacobian'][1,:,lstr,1]
-            # print DictOutput['ScaledJacobian'][2,:,lstr,1]
-            # exit()
-            
-
 
             plt.figure()
             # tick_locs = [1.0,2.0,5.0,10.0,24.0,49.0]
@@ -339,9 +339,9 @@ def plotter_individual_imshow(p=2,save=False):
             tick_lbls = [0.0,0.1,0.2,0.3,0.4,0.5]
             plt.xticks(tick_locs, tick_lbls)
 
-            # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bicubic', cmap=cm.viridis)
+            plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bicubic', cmap=cm.viridis)
             # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bilinear', cmap=cm.viridis)
-            plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='nearest', cmap=cm.viridis)
+            # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='nearest', cmap=cm.viridis)
             # plt.imshow(scaledA)
 
             font_size = 20
@@ -357,18 +357,26 @@ def plotter_individual_imshow(p=2,save=False):
             cbar.set_ticks([0,0.1,0.2,0.3,0.4,0.5,.6,0.7,0.8,0.9,1])
             plt.clim(0,1)
 
+
             # fig = plt.gcf()
             # fig.set_size_inches(8,8)
 
-            # sname = spath+fname.split(".")[0]+"_"+str(formulations[m])+"_Stretch"+str(stretch[0])+'.eps'
-            # sname = spath+fname.split(".")[0]+"_"+str(formulations[m])+"_Stretch"+str(stretch[lstr])+'.eps'
-            sname = spath+fname.split(".")[0]+"_"+str(formulations[m])+"_Stretch"+str(stretch[lstr])+'.png'
+            if which_q==3:
+                # sname = spath+fname.split(".")[0]+"_"+str(formulations[m])+"_Stretch"+str(stretch[lstr])+'.eps'
+                sname = spath+fname.split(".")[0]+"_"+str(formulations[m])+"_Stretch"+str(stretch[lstr])+'.png'
+            elif which_q==1:
+                # for scaledFF
+                sname = spath+fname.split(".")[0]+"_"+str(formulations[m])+"_Stretch"+str(stretch[lstr])+'_Q1.png'
+            elif which_q==2:
+                sname = spath+fname.split(".")[0]+"_"+str(formulations[m])+"_Stretch"+str(stretch[lstr])+'_Q2.png'
+            # print sname
 
             if save:
-                # plt.savefig(sname,format='eps',dpi=300)
+            #     # plt.savefig(sname,format='eps',dpi=300)
                 plt.savefig(sname,format='png',dpi=100)
 
             plt.show()
+            plt.close()
 
 
 
@@ -485,12 +493,13 @@ def plotter_distribution_q3(p=2,save=False):
     from scipy.stats import norm
 
     stretch = [25, 50, 100, 200, 400, 800, 1600]
+    nStep = [1,2,5,10,25,50]
     formulations = ["Linear","Linearised","Nonlinear"]
 
     fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Steps_vs_Nu/Wing2D_Steps_vs_Nu_'
     # fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Steps_vs_Nu_Old/Wing2D_Steps_vs_Nu_'
     fname = "P"+str(p)+".mat"
-    spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_Steps_vs_Nu_"
+    spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_Quality_Distribution_"
     
     # print fpath+fname
     DictOutput =  loadmat(fpath+fname)   
@@ -499,58 +508,141 @@ def plotter_distribution_q3(p=2,save=False):
     condA = DictOutput['ConditionNumber']
     # nu = DictOutput['PoissonsRatios'][0]
     nu = np.linspace(0.001,0.5,10)*100
-    p = DictOutput['PolynomialDegrees'][0]
+
+    colors = ['#D1655B','#FACD85','#72B0D7','#E79C5D','#4D5C75','#E79C5D']
+
+    nelems = [2171,2339,2511,2683,2855,3027,3199]
+    lstr=4 # for fix level of stretching 
+    incr = 0
+    nus = [-8,-4,-2]
 
 
-    xmin = 0
-    xmax = 50
-    ymin = nu[0]
-    ymax = nu[-1]
+    for mm in nus:
+        # print nu[mm]/100.
+        for incr in [0,3,5]:
+            bar_1 = DictOutput['WholeScaledJacobian'][0,incr,lstr,mm][:nelems[lstr]]
+            bar_2 = DictOutput['WholeScaledJacobian'][1,incr,lstr,mm][:nelems[lstr]]
+            bar_3 = DictOutput['WholeScaledJacobian'][2,incr,lstr,mm][:nelems[lstr]]
 
-    nStep= [1,2,5,10,25,50]
+            all_nan = False
+            if np.isnan(bar_3).all():
+                all_nan = True
+            bar_3 = np.nan_to_num(bar_3)
+
+            hist_1 =  plt.hist(bar_1,range=(0.,1.),log=True)[0]
+            hist_2 =  plt.hist(bar_2,range=(0.,1.),log=True)[0]
+            hist_3 =  plt.hist(bar_3,range=(0.,1.),log=True)[0]
+            if all_nan is True:
+                hist_3 = np.zeros_like(hist_3)+1
+
+            plt.close()
+            fig = plt.figure()
+            ax = fig.gca()
+            width_1=0.09
+            width_2=0.07
+            width_3=0.05
+
+            rects = [None]*3
+            rects[0] = plt.bar(np.linspace(0,1,10)-width_1,hist_1,width=width_1,log=True,color=colors[0])
+            rects[1] = plt.bar(np.linspace(0,1,10)-width_2*1.15,hist_2,width=width_2,log=True,color=colors[1])
+            rects[2] = plt.bar(np.linspace(0,1,10)-width_3*1.4,hist_3,width=width_3,log=True,color=colors[2])
+
+            plt.grid('on')
+            plt.xlim([0,1])
+            plt.ylim([0,10000])
+
+            legend_font_size = 20
+            font_size = 22
+            plt.xlabel(r"$Scaled\;Jacobian\;(Q_3)$",fontsize=font_size)
+            plt.ylabel(r"$Number\;of\;Elements$",fontsize=font_size)
+            ax.legend((rects[0][0], rects[1][0], rects[2][0]), 
+                                    (r"$II\;Linear\;Elastic$",r"$IL\; neo-Hookean$",
+                                        r"$neo-Hookean$"),
+                                    loc='upper left',fontsize=legend_font_size)
+
+            # plt.hist(DictOutput['WholeScaledJacobian'][0,0,0,-4][:2171],log=True)
+            spath = (spath+"Nu"+str(np.around(nu[mm]/100.,3))).split(".")
+            spath = spath[0]+spath[1]+"_Inc"+str(nStep[incr])+"_P"+str(p)+".eps"
+            print spath
+
+            if save:
+                plt.savefig(spath,format="eps",dpi=300)
+
+            spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_Quality_Distribution_"
+            plt.show()
 
 
-    # for i in range(6):
-        # for j in range(10):
-            # print np.min(DictOutput['WholeScaledJacobian'][m,i,lstr,j][:2171])
-            # scaledA[i,j] = np.min(DictOutput['WholeScaledJacobian'][0,i,0,j][:2171])
 
-    # scaledA_dist = DictOutput['WholeScaledJacobian'][0,0,0,0][:2171]
+def plotter_quality_measures(p=2,save=False):
 
+    stretch = [25, 50, 100, 200, 400, 800, 1600]
+    nStep = [1,2,5,10,25,50]
+    formulations = ["Linear","Linearised","Nonlinear"]
 
-    # if p==6 and m==2:
-        # scaledA[3:,:] = np.NAN
+    fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Steps_vs_Nu/Wing2D_Steps_vs_Nu_'
+    # fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Steps_vs_Nu_Old/Wing2D_Steps_vs_Nu_'
+    fname = "P"+str(p)+".mat"
+    spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_Quality_Measures_"
+    
+    # print fpath+fname
+    DictOutput =  loadmat(fpath+fname)   
 
-    # imshow is a direct matrix-to-pixel visualtion so flip the 
-    # matrix upside down
-    # scaledA = np.flipud(scaledA)
+    scaledA = DictOutput['ScaledJacobian']
+    scaledAFF = DictOutput['ScaledFF']
+    scaledAHH = DictOutput['ScaledHH']
+    # condA = DictOutput['ConditionNumber']
+    # nu = DictOutput['PoissonsRatios'][0]
+    nu = np.linspace(0.001,0.5,10)*100
 
-    # plt.scatter(np.arange(2171),DictOutput['WholeScaledJacobian'][0,0,0,0][:2171], c=DictOutput['WholeScaledJacobian'][0,0,0,0][:2171], cmap=cm.viridis)
-    # plt.scatter(np.arange(2171),DictOutput['WholeScaledJacobian'][1,0,0,0][:2171], c=DictOutput['WholeScaledJacobian'][1,0,0,0][:2171], cmap=cm.viridis)
-    # plt.scatter(np.arange(2171),DictOutput['WholeScaledJacobian'][2,0,0,0][:2171], c=DictOutput['WholeScaledJacobian'][2,0,0,0][:2171], cmap=cm.viridis)
-
-    colors = ['r','g','b']
-
-    hist, bin_edges = np.histogram(DictOutput['WholeScaledJacobian'][0,0,0,-1][:2171], density=True)
-    print hist
-    print bin_edges
-    plt.hist(DictOutput['WholeScaledJacobian'][0,0,0,-4][:2171],log=True)
-    plt.show()
-    return 
-
-    for m in range(3):
-        y = DictOutput['WholeScaledJacobian'][m,0,0,0][1550:1950]
-        x = np.arange(y.shape[0])
-        plt.scatter(x,y,s=100.*y,c=colors[m])
-    # plt.scatter(np.arange(2171),DictOutput['WholeScaledJacobian'][1,0,0,0][:2171], c='g')
-    # plt.scatter(np.arange(2171),DictOutput['WholeScaledJacobian'][2,0,0,0][:2171], c='b')
+    colors = ['#D1655B','#FACD85','#72B0D7','#E79C5D','#4D5C75','#E79C5D']
 
 
-    if save:
-        # plt.savefig(sname,format='eps',dpi=300)
-        plt.savefig(sname,format='png',dpi=100)
+    marker = itertools.cycle(('o', 's', 'x'))
+    linestyle = itertools.cycle(('-', '--', '-.'))
 
-    plt.show()
+    font_size = 24
+    legend_font_size = 22
+
+
+    mm=0
+    incr = 2
+    for lstr in [0,3,6]:
+        for mm in range(3):
+            plt.plot(nu/100.,scaledAFF[mm,incr,lstr,:],marker.next(),linestyle=linestyle.next(),color=colors[0],linewidth=3)
+            plt.plot(nu/100.,scaledAHH[mm,incr,lstr,:],marker.next(),linestyle=linestyle.next(),color=colors[1],linewidth=3)
+            plt.plot(nu/100.,scaledA[mm,incr,lstr,:],marker.next(),linestyle=linestyle.next(),color=colors[2],linewidth=3)
+
+            # scaledAFF[mm,0,0,:]/3./scaledA[mm,0,0,:]
+            # print scaledAFF[mm,0,0,:]**2/3./2**(3./2)
+
+            plt.legend([r"$Q_1$",r"$Q_2$",r"$Q_3$"],loc="best",fontsize=legend_font_size)
+            plt.xlabel(r"$Poisson's\;Ratio\;(\nu)$",fontsize=font_size)
+            plt.ylabel(r"$Quality\;Measures$",fontsize=font_size)
+            plt.grid('on')
+            plt.xlim([0,0.5])
+            plt.ylim([0.,1.0])
+
+            if mm==0:
+                appender = "IILinearElastic"
+            elif mm==1:
+                appender = "ILneoHookean"
+            elif mm==2:
+                appender = "neoHookean"
+
+            spath = spath+appender+"_Stretch"+str(stretch[lstr])+"_P"+str(p)+".eps"
+            print spath
+
+            fig = plt.gcf()
+            fig.set_size_inches(7,7)
+            # plt.axis('equal')
+
+            if save:
+                plt.savefig(spath,format="eps",dpi=300)
+
+            spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_Quality_Measures_"
+            # plt.show()
+            plt.close()
+
 
 
 
@@ -584,6 +676,14 @@ if __name__ == '__main__':
 
 
         p=4
-        # plotter_individual_imshow(p)
+        plotter_individual_imshow(p)
+        # plotter_individual_imshow(p,which_q=1,save=True)
+
+
         # plotter_quality_evolution(p)
-        plotter_distribution_q3(p)
+        
+        # plotter_distribution_q3(p)
+        # plotter_distribution_q3(p,save=True)
+
+        # plotter_quality_measures(p)
+        # plotter_quality_measures(p,save=True)

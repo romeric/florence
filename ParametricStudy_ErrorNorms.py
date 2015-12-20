@@ -14,6 +14,7 @@ from datetime import datetime
 import multiprocessing as MP
 # AVOID WRITING .pyc OR .pyo FILES
 sys.dont_write_bytecode
+np.set_printoptions(linewidth=300)
 
 # IMPORT NECESSARY CLASSES FROM BASE
 from Base import Base as MainData
@@ -52,9 +53,10 @@ if __name__ == '__main__':
         G_A = E/2.
         nu = 0.4
 
-        # p = [2,3,4,5,6,7,8,9]
-        p = [2,3,4,5,6,7]
+        p = [2,3,4,5,6,7,8,9]
+        # p = [2,3,4,5,6,7]
         # p = [2,3]
+        # p=[9]
 
         Results = {'PolynomialDegrees':MainData.C+1,'PoissonsRatios':nu,'Youngs_Modulus':E,"E_A":E_A,"G_A":G_A}
 
@@ -131,7 +133,7 @@ if __name__ == '__main__':
         fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/ErrorNorms/Wing2D_Errors_'
         print fpath+fname
 
-        savemat(fpath+fname,Results)
+        # savemat(fpath+fname,Results)
 
         t_FEM = time.time()-t_FEM
         print 'Time taken for the entire analysis was ', t_FEM, 'seconds'
@@ -151,58 +153,77 @@ if __name__ == '__main__':
         marker = itertools.cycle(('o', 's', 'x', '+', '*','.'))
         linestyle = itertools.cycle(('-','-.','--',':'))
 
-        rc('font',**{'family':'serif','serif':['Palatino'],'size':18})
+        rc('font',**{'family':'serif','serif':['Palatino'],'size':26})
         rc('text', usetex=True)
 
         # rc('axes',color_cycle=['#D1655B','#44AA66','#FACD85','#70B9B0','#72B0D7','#E79C5D','#4D5C75','#E79C5D'])
         rc('axes',color_cycle=['#D1655B','#FACD85','#72B0D7','#E79C5D','#4D5C75','#E79C5D'])
         # rc('axes',**{'prop_cycle':['#D1655B','#FACD85','#70B9B0','#72B0D7','#E79C5D']})
 
-        
+        def plotter(save=False):
 
-        # fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/ComputationalTime/Mech2D_Time_'
-        fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/ErrorNorms/Wing2D_Errors_'
-        fname = "Stretch25.mat"
-        # fname = "Stretch1600.mat"
+            # fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/ComputationalTime/Mech2D_Errors_'
+            fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/ErrorNorms/Wing2D_Errors_'
 
-        print fpath+fname
+            # spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Mech2D_L2Error_"
+            spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_L2Error_"
 
-        Results = loadmat(fpath+fname)
-
-        DoF = Results['DoF']
-        L2Normx = Results['L2Normx']
-        L2NormX = Results['L2NormX']
-
-        print DoF.shape, L2Normx.shape
-        # plt.loglog(DoF[0,:],L2NormX[0,:],'-bs')
-        # plt.loglog(DoF[0,:],L2Normx[0,:],'-ro')
-        # L2NormX = np.concatenate((np.zeros((1,2)),L2NormX),axis=1)
-        # print L2NormX
-
-        # plt.plot(np.sqrt(DoF[0,:]),np.log10(L2NormX[0,:]),'-bs')
-        # plt.plot(np.sqrt(DoF[0,:]),np.log10(L2Normx[0,:]),'-.ro')
-
-        
-        plt.plot(np.sqrt(DoF[0,:]),np.log10(L2NormX[0,:]),'-ro')
-        # plt.loglog(DoF[0,:],L2Normx[0,:],'-ro')
-        # plt.legend([r'$Undeformed\; mesh$',r'$Deformed\; mesh\;using\;Linear\; Elasticity$'],loc='best',fontsize=16)
-
-        # for i in range(10):
-            # plt.plot(np.sqrt(DoF[0,:]),np.log10(L2Normx[i,:]),marker.next(),linestyle=linestyle.next(),linewidth=2)
-        # plt.legend([r"$II\;Linear\;Elastic$",r"$ITI\;Linear\;Elastic$",r"$IL\; neo-Hookean$",
-        #                         r"$IL\;Mooney-Rivlin$",r"$IL\;Nearly\;Incompressible$",r"$ILTI\;Hyperelastic$",
-        #                         r"$neo-Hookean$",r"$Mooney-Rivlin$",r"$Nearly\;Incompressible$",
-        #                         r"$TI\;Hyperelastic$"],loc='best',fontsize=14)
-        # plt.ylabel(r'log$_{10}(L^2\;error)$')
-        # plt.xlabel(r'$\sqrt{ndof}$')
-        # plt.grid('on')
+            fname = "Stretch25.mat"
+            # fname = "Stretch200.mat"
+            # fname = "Stretch1600.mat"
 
 
-        sname = fpath+fname
-        sname = sname.split(".")[0]+".eps"
-        print sname
-        # plt.savefig(fpath+fname,format='png',dpi=100)
-        # plt.savefig("/home/roman/Dropbox/Wing2D_Errors_Stretch25.eps",format='eps',dpi=100)
-        # plt.savefig("/home/roman/Dropbox/Wing2D_Errors_Stretch25.png",format='png',dpi=100)
+            Results = loadmat(fpath+fname)
 
-        plt.show()
+            DoF = Results['DoF']
+            L2Normx = Results['L2Normx']
+            L2NormX = Results['L2NormX']
+
+            font_size = 28
+            legend_font_size = 22
+
+            colors = ['#D1655B','#44AA66','#FACD85','#70B9B0','#72B0D7','#E79C5D',
+                '#4D5C75','#FFF056','#558C89','#F5CCBA','#A2AB58','#7E8F7C','#005A31']
+
+
+            for i in range(10):
+                plt.plot(np.sqrt(DoF[0,:]),np.log10(L2Normx[i,:]),
+                    marker.next(),linestyle=linestyle.next(),linewidth=5,color=colors[i])
+            legend_handle = plt.legend([r"$II\;Linear\;Elastic$",r"$ITI\;Linear\;Elastic$",r"$IL\; neo-Hookean$",
+                                    r"$IL\;Mooney-Rivlin$",r"$IL\;Nearly\;Incompressible$",r"$ILTI\;Hyperelastic$",
+                                    r"$neo-Hookean$",r"$Mooney-Rivlin$",r"$Nearly\;Incompressible$",
+                                    r"$TI\;Hyperelastic$"],loc='best',fontsize=legend_font_size,ncol=1)
+
+            plt.ylabel(r'log$_{10}(L^2\;error)$',fontsize=font_size)
+            plt.xlabel(r'$\sqrt{ndof}$',fontsize=font_size)
+            plt.grid('on')
+            plt.ylim([-16,0])
+            # plt.gca(fontsize=font_size)
+
+            if int(fname.split(".")[0][7:]) == 25:
+                plt.xlim([0,500])
+            elif int(fname.split(".")[0][7:]) == 200:
+                plt.xlim([0,500])
+            elif int(fname.split(".")[0][7:]) == 1600:
+                plt.xlim([0,600])
+
+
+            sname = spath+fname
+            sname = sname.split(".")[0]+".eps"
+            # print sname
+
+            fig = plt.gcf()
+            fig.set_size_inches(11,9.4)
+            # ax = fig.gca()
+            # print xx
+            # xx.figure.savefig("/home/roman/dd.eps",format="eps",dpi=300)
+
+            if save:
+                plt.savefig(sname,format='eps',dpi=300)
+                # plt.savefig("/home/roman/Dropbox/Wing2D_Errors_Stretch25.eps",format='eps',dpi=100)
+
+            # plt.show()
+
+
+        # plotter()
+        plotter(save=True)

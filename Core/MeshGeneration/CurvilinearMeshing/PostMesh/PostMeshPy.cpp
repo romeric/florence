@@ -953,7 +953,7 @@ struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMes
 };
 
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":138
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":142
  * 
  * 
  * cdef class PostMeshSurfacePy:             # <<<<<<<<<<<<<<
@@ -1486,11 +1486,11 @@ static void __Pyx_CppExn2PyErr() {
 }
 #endif
 
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_unsigned_long(unsigned long value);
+
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value);
 
 static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *);
-
-static CYTHON_INLINE PyObject* __Pyx_PyInt_From_unsigned_long(unsigned long value);
 
 #if CYTHON_CCOMPLEX
   #ifdef __cplusplus
@@ -1613,6 +1613,8 @@ static CYTHON_INLINE PyObject *__pyx_capsule_create(void *p, const char *sig);
 
 static CYTHON_INLINE char __Pyx_PyInt_As_char(PyObject *);
 
+static CYTHON_INLINE size_t __Pyx_PyInt_As_size_t(PyObject *);
+
 static int __Pyx_check_binary_version(void);
 
 #if !defined(__Pyx_PyIdentifier_FromString)
@@ -1722,6 +1724,7 @@ static CYTHON_INLINE PyObject *__pyx_convert_PyUnicode_string_to_py_std__in_stri
 static CYTHON_INLINE PyObject *__pyx_convert_PyStr_string_to_py_std__in_string(std::string const &); /*proto*/
 static CYTHON_INLINE PyObject *__pyx_convert_PyBytes_string_to_py_std__in_string(std::string const &); /*proto*/
 static CYTHON_INLINE PyObject *__pyx_convert_PyByteArray_string_to_py_std__in_string(std::string const &); /*proto*/
+static PyObject *__pyx_convert_vector_to_py___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(const std::vector<__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real>  &); /*proto*/
 static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_5numpy_int64_t = { "int64_t", NULL, sizeof(__pyx_t_5numpy_int64_t), { 0 }, 0, IS_UNSIGNED(__pyx_t_5numpy_int64_t) ? 'U' : 'I', IS_UNSIGNED(__pyx_t_5numpy_int64_t), 0 };
 static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t = { "float64_t", NULL, sizeof(__pyx_t_5numpy_float64_t), { 0 }, 0, 'R', 0, 0 };
 static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger = { "UInteger", NULL, sizeof(__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger), { 0 }, 0, IS_UNSIGNED(__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger) ? 'U' : 'I', IS_UNSIGNED(__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger), 0 };
@@ -1761,6 +1764,7 @@ static char __pyx_k_id[] = "id";
 static char __pyx_k_np[] = "np";
 static char __pyx_k_obj[] = "obj";
 static char __pyx_k_base[] = "base";
+static char __pyx_k_copy[] = "copy";
 static char __pyx_k_main[] = "__main__";
 static char __pyx_k_mode[] = "mode";
 static char __pyx_k_name[] = "name";
@@ -1771,6 +1775,7 @@ static char __pyx_k_step[] = "step";
 static char __pyx_k_stop[] = "stop";
 static char __pyx_k_test[] = "__test__";
 static char __pyx_k_ASCII[] = "ASCII";
+static char __pyx_k_array[] = "array";
 static char __pyx_k_class[] = "__class__";
 static char __pyx_k_dtype[] = "dtype";
 static char __pyx_k_error[] = "error";
@@ -1860,12 +1865,14 @@ static PyObject *__pyx_n_s_TypeError;
 static PyObject *__pyx_kp_s_Unable_to_convert_item_to_object;
 static PyObject *__pyx_n_s_ValueError;
 static PyObject *__pyx_n_s_allocate_buffer;
+static PyObject *__pyx_n_s_array;
 static PyObject *__pyx_n_s_base;
 static PyObject *__pyx_n_s_c;
 static PyObject *__pyx_n_u_c;
 static PyObject *__pyx_n_s_class;
 static PyObject *__pyx_kp_s_contiguous_and_direct;
 static PyObject *__pyx_kp_s_contiguous_and_indirect;
+static PyObject *__pyx_n_s_copy;
 static PyObject *__pyx_n_s_dimension;
 static PyObject *__pyx_n_s_dtype;
 static PyObject *__pyx_n_s_dtype_is_object;
@@ -1966,8 +1973,9 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
 static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_38IdentifySurfacesContainingFaces(struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_40ProjectMeshOnSurface(struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_42MeshPointInversionSurface(struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_44GetDirichletData(struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
-static void __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_46__dealloc__(struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_44ReturnModifiedMeshPoints(struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_points); /* proto */
+static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_46GetDirichletData(struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
+static void __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_48__dealloc__(struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
 static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
@@ -2141,8 +2149,8 @@ static int __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10Post
  * 		cdef string cpp_element_type = py_element_type
  * 		# self.thisptr = new OCCPlugin()
  * 		self.thisptr = new PostMeshCurve(cpp_element_type,dimension)             # <<<<<<<<<<<<<<
+ * 		self.ndim = 2
  * 
- * 	def Init(self):
  */
   try {
     __pyx_t_2 = new PostMeshCurve(__pyx_v_cpp_element_type, __pyx_v_dimension);
@@ -2151,6 +2159,15 @@ static int __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10Post
     {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_v_self->thisptr = __pyx_t_2;
+
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":28
+ * 		# self.thisptr = new OCCPlugin()
+ * 		self.thisptr = new PostMeshCurve(cpp_element_type,dimension)
+ * 		self.ndim = 2             # <<<<<<<<<<<<<<
+ * 
+ * 	def Init(self):
+ */
+  __pyx_v_self->ndim = 2;
 
   /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":23
  * 	cdef PostMeshCurve *thisptr
@@ -2171,8 +2188,8 @@ static int __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10Post
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":29
- * 		self.thisptr = new PostMeshCurve(cpp_element_type,dimension)
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":30
+ * 		self.ndim = 2
  * 
  * 	def Init(self):             # <<<<<<<<<<<<<<
  * 		self.thisptr.Init()
@@ -2200,7 +2217,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("Init", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":30
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":31
  * 
  * 	def Init(self):
  * 		self.thisptr.Init()             # <<<<<<<<<<<<<<
@@ -2211,11 +2228,11 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
     __pyx_v_self->thisptr->Init();
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":29
- * 		self.thisptr = new PostMeshCurve(cpp_element_type,dimension)
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":30
+ * 		self.ndim = 2
  * 
  * 	def Init(self):             # <<<<<<<<<<<<<<
  * 		self.thisptr.Init()
@@ -2234,7 +2251,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":32
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":33
  * 		self.thisptr.Init()
  * 
  * 	def SetScale(self,Real scale):             # <<<<<<<<<<<<<<
@@ -2253,7 +2270,7 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetScale (wrapper)", 0);
   assert(__pyx_arg_scale); {
-    __pyx_v_scale = __pyx_PyFloat_AsDouble(__pyx_arg_scale); if (unlikely((__pyx_v_scale == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 32; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_scale = __pyx_PyFloat_AsDouble(__pyx_arg_scale); if (unlikely((__pyx_v_scale == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 33; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -2273,7 +2290,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetScale", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":33
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":34
  * 
  * 	def SetScale(self,Real scale):
  * 		self.thisptr.SetScale(scale)             # <<<<<<<<<<<<<<
@@ -2282,7 +2299,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->SetScale(__pyx_v_scale);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":32
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":33
  * 		self.thisptr.Init()
  * 
  * 	def SetScale(self,Real scale):             # <<<<<<<<<<<<<<
@@ -2297,7 +2314,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":35
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":36
  * 		self.thisptr.SetScale(scale)
  * 
  * 	def SetCondition(self,Real condition):             # <<<<<<<<<<<<<<
@@ -2316,7 +2333,7 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetCondition (wrapper)", 0);
   assert(__pyx_arg_condition); {
-    __pyx_v_condition = __pyx_PyFloat_AsDouble(__pyx_arg_condition); if (unlikely((__pyx_v_condition == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 35; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_condition = __pyx_PyFloat_AsDouble(__pyx_arg_condition); if (unlikely((__pyx_v_condition == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 36; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -2336,7 +2353,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetCondition", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":36
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":37
  * 
  * 	def SetCondition(self,Real condition):
  * 		self.thisptr.SetCondition(condition)             # <<<<<<<<<<<<<<
@@ -2345,7 +2362,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->SetCondition(__pyx_v_condition);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":35
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":36
  * 		self.thisptr.SetScale(scale)
  * 
  * 	def SetCondition(self,Real condition):             # <<<<<<<<<<<<<<
@@ -2360,7 +2377,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":38
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":39
  * 		self.thisptr.SetCondition(condition)
  * 
  * 	def SetProjectionPrecision(self, Real precision):             # <<<<<<<<<<<<<<
@@ -2379,7 +2396,7 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetProjectionPrecision (wrapper)", 0);
   assert(__pyx_arg_precision); {
-    __pyx_v_precision = __pyx_PyFloat_AsDouble(__pyx_arg_precision); if (unlikely((__pyx_v_precision == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_precision = __pyx_PyFloat_AsDouble(__pyx_arg_precision); if (unlikely((__pyx_v_precision == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 39; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -2399,7 +2416,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetProjectionPrecision", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":39
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":40
  * 
  * 	def SetProjectionPrecision(self, Real precision):
  * 		self.thisptr.SetProjectionPrecision(precision)             # <<<<<<<<<<<<<<
@@ -2408,7 +2425,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->SetProjectionPrecision(__pyx_v_precision);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":38
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":39
  * 		self.thisptr.SetCondition(condition)
  * 
  * 	def SetProjectionPrecision(self, Real precision):             # <<<<<<<<<<<<<<
@@ -2423,7 +2440,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":41
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":42
  * 		self.thisptr.SetProjectionPrecision(precision)
  * 
  * 	def SetProjectionCriteria(self, UInteger[:,::1] criteria):             # <<<<<<<<<<<<<<
@@ -2442,7 +2459,7 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetProjectionCriteria (wrapper)", 0);
   assert(__pyx_arg_criteria); {
-    __pyx_v_criteria = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_criteria); if (unlikely(!__pyx_v_criteria.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_criteria = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_criteria); if (unlikely(!__pyx_v_criteria.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 42; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -2464,7 +2481,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   Py_ssize_t __pyx_t_2;
   __Pyx_RefNannySetupContext("SetProjectionCriteria", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":42
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":43
  * 
  * 	def SetProjectionCriteria(self, UInteger[:,::1] criteria):
  * 		self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])             # <<<<<<<<<<<<<<
@@ -2475,7 +2492,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __pyx_t_2 = 0;
   __pyx_v_self->thisptr->SetProjectionCriteria((&(*((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=0 */ (__pyx_v_criteria.data + __pyx_t_1 * __pyx_v_criteria.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_criteria.shape[0]), (__pyx_v_criteria.shape[1]));
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":41
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":42
  * 		self.thisptr.SetProjectionPrecision(precision)
  * 
  * 	def SetProjectionCriteria(self, UInteger[:,::1] criteria):             # <<<<<<<<<<<<<<
@@ -2491,7 +2508,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":44
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":45
  * 		self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])
  * 
  * 	def SetMeshElements(self,UInteger[:,::1] elements):             # <<<<<<<<<<<<<<
@@ -2510,7 +2527,7 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetMeshElements (wrapper)", 0);
   assert(__pyx_arg_elements); {
-    __pyx_v_elements = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_elements); if (unlikely(!__pyx_v_elements.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 44; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_elements = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_elements); if (unlikely(!__pyx_v_elements.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 45; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -2532,7 +2549,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   Py_ssize_t __pyx_t_2;
   __Pyx_RefNannySetupContext("SetMeshElements", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":45
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":46
  * 
  * 	def SetMeshElements(self,UInteger[:,::1] elements):
  * 		self.thisptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])             # <<<<<<<<<<<<<<
@@ -2543,7 +2560,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __pyx_t_2 = 0;
   __pyx_v_self->thisptr->SetMeshElements((&(*((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=0 */ (__pyx_v_elements.data + __pyx_t_1 * __pyx_v_elements.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_elements.shape[0]), (__pyx_v_elements.shape[1]));
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":44
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":45
  * 		self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])
  * 
  * 	def SetMeshElements(self,UInteger[:,::1] elements):             # <<<<<<<<<<<<<<
@@ -2559,7 +2576,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":47
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":48
  * 		self.thisptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])
  * 
  * 	def SetMeshPoints(self,Real[:,::1] points):             # <<<<<<<<<<<<<<
@@ -2578,7 +2595,7 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetMeshPoints (wrapper)", 0);
   assert(__pyx_arg_points); {
-    __pyx_v_points = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_arg_points); if (unlikely(!__pyx_v_points.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_points = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_arg_points); if (unlikely(!__pyx_v_points.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -2600,7 +2617,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   Py_ssize_t __pyx_t_2;
   __Pyx_RefNannySetupContext("SetMeshPoints", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":48
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":49
  * 
  * 	def SetMeshPoints(self,Real[:,::1] points):
  * 		self.thisptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])             # <<<<<<<<<<<<<<
@@ -2611,7 +2628,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __pyx_t_2 = 0;
   __pyx_v_self->thisptr->SetMeshPoints((&(*((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=1 */ ((char *) (((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=0 */ (__pyx_v_points.data + __pyx_t_1 * __pyx_v_points.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_points.shape[0]), (__pyx_v_points.shape[1]));
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":47
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":48
  * 		self.thisptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])
  * 
  * 	def SetMeshPoints(self,Real[:,::1] points):             # <<<<<<<<<<<<<<
@@ -2627,7 +2644,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":50
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":51
  * 		self.thisptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])
  * 
  * 	def SetMeshEdges(self,UInteger[:,::1] edges):             # <<<<<<<<<<<<<<
@@ -2646,7 +2663,7 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetMeshEdges (wrapper)", 0);
   assert(__pyx_arg_edges); {
-    __pyx_v_edges = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_edges); if (unlikely(!__pyx_v_edges.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 50; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_edges = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_edges); if (unlikely(!__pyx_v_edges.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 51; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -2668,7 +2685,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   Py_ssize_t __pyx_t_2;
   __Pyx_RefNannySetupContext("SetMeshEdges", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":51
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":52
  * 
  * 	def SetMeshEdges(self,UInteger[:,::1] edges):
  * 		self.thisptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])             # <<<<<<<<<<<<<<
@@ -2679,7 +2696,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __pyx_t_2 = 0;
   __pyx_v_self->thisptr->SetMeshEdges((&(*((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=0 */ (__pyx_v_edges.data + __pyx_t_1 * __pyx_v_edges.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_edges.shape[0]), (__pyx_v_edges.shape[1]));
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":50
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":51
  * 		self.thisptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])
  * 
  * 	def SetMeshEdges(self,UInteger[:,::1] edges):             # <<<<<<<<<<<<<<
@@ -2695,7 +2712,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":53
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":54
  * 		self.thisptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
  * 
  * 	def SetMeshFaces(self,UInteger[:,::1] faces):             # <<<<<<<<<<<<<<
@@ -2714,7 +2731,7 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetMeshFaces (wrapper)", 0);
   assert(__pyx_arg_faces); {
-    __pyx_v_faces = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_faces); if (unlikely(!__pyx_v_faces.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 53; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_faces = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_faces); if (unlikely(!__pyx_v_faces.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 54; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -2736,7 +2753,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   Py_ssize_t __pyx_t_2;
   __Pyx_RefNannySetupContext("SetMeshFaces", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":54
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":55
  * 
  * 	def SetMeshFaces(self,UInteger[:,::1] faces):
  * 		self.thisptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])             # <<<<<<<<<<<<<<
@@ -2747,7 +2764,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __pyx_t_2 = 0;
   __pyx_v_self->thisptr->SetMeshFaces((&(*((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=0 */ (__pyx_v_faces.data + __pyx_t_1 * __pyx_v_faces.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_faces.shape[0]), (__pyx_v_faces.shape[1]));
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":53
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":54
  * 		self.thisptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
  * 
  * 	def SetMeshFaces(self,UInteger[:,::1] faces):             # <<<<<<<<<<<<<<
@@ -2763,7 +2780,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":56
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":57
  * 		self.thisptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
  * 
  * 	def ScaleMesh(self):             # <<<<<<<<<<<<<<
@@ -2789,7 +2806,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("ScaleMesh", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":57
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":58
  * 
  * 	def ScaleMesh(self):
  * 		self.thisptr.ScaleMesh()             # <<<<<<<<<<<<<<
@@ -2798,7 +2815,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->ScaleMesh();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":56
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":57
  * 		self.thisptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
  * 
  * 	def ScaleMesh(self):             # <<<<<<<<<<<<<<
@@ -2813,7 +2830,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":59
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":60
  * 		self.thisptr.ScaleMesh()
  * 
  * 	def GetMeshElementType(self):             # <<<<<<<<<<<<<<
@@ -2845,7 +2862,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("GetMeshElementType", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":60
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":61
  * 
  * 	def GetMeshElementType(self):
  * 		cdef string cpp_element_type = self.thisptr.GetMeshElementType()             # <<<<<<<<<<<<<<
@@ -2854,19 +2871,19 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_cpp_element_type = __pyx_v_self->thisptr->GetMeshElementType();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":61
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":62
  * 	def GetMeshElementType(self):
  * 		cdef string cpp_element_type = self.thisptr.GetMeshElementType()
  * 		cdef bytes py_element_type = cpp_element_type             # <<<<<<<<<<<<<<
  * 		return py_element_type
  * 
  */
-  __pyx_t_1 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_cpp_element_type); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 61; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_cpp_element_type); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 62; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_py_element_type = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":62
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":63
  * 		cdef string cpp_element_type = self.thisptr.GetMeshElementType()
  * 		cdef bytes py_element_type = cpp_element_type
  * 		return py_element_type             # <<<<<<<<<<<<<<
@@ -2878,7 +2895,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __pyx_r = __pyx_v_py_element_type;
   goto __pyx_L0;
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":59
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":60
  * 		self.thisptr.ScaleMesh()
  * 
  * 	def GetMeshElementType(self):             # <<<<<<<<<<<<<<
@@ -2898,7 +2915,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":64
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":65
  * 		return py_element_type
  * 
  * 	def SetFeketePoints(self, Real[:,::1] fekete):             # <<<<<<<<<<<<<<
@@ -2917,7 +2934,7 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetFeketePoints (wrapper)", 0);
   assert(__pyx_arg_fekete); {
-    __pyx_v_fekete = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_arg_fekete); if (unlikely(!__pyx_v_fekete.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 64; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_fekete = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_arg_fekete); if (unlikely(!__pyx_v_fekete.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -2939,7 +2956,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   Py_ssize_t __pyx_t_2;
   __Pyx_RefNannySetupContext("SetFeketePoints", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":65
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":66
  * 
  * 	def SetFeketePoints(self, Real[:,::1] fekete):
  * 		self.thisptr.SetFeketePoints(&fekete[0,0],fekete.shape[0],fekete.shape[1])             # <<<<<<<<<<<<<<
@@ -2950,7 +2967,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __pyx_t_2 = 0;
   __pyx_v_self->thisptr->SetFeketePoints((&(*((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=1 */ ((char *) (((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=0 */ (__pyx_v_fekete.data + __pyx_t_1 * __pyx_v_fekete.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_fekete.shape[0]), (__pyx_v_fekete.shape[1]));
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":64
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":65
  * 		return py_element_type
  * 
  * 	def SetFeketePoints(self, Real[:,::1] fekete):             # <<<<<<<<<<<<<<
@@ -2966,7 +2983,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":67
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":68
  * 		self.thisptr.SetFeketePoints(&fekete[0,0],fekete.shape[0],fekete.shape[1])
  * 
  * 	def ReadIGES(self, bytes filename):             # <<<<<<<<<<<<<<
@@ -2983,7 +3000,7 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("ReadIGES (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_filename), (&PyBytes_Type), 1, "filename", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 67; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_filename), (&PyBytes_Type), 1, "filename", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 68; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_r = __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_26ReadIGES(((struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self), ((PyObject*)__pyx_v_filename));
 
   /* function exit code */
@@ -3004,17 +3021,17 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("ReadIGES", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":68
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":69
  * 
  * 	def ReadIGES(self, bytes filename):
  * 		self.thisptr.ReadIGES(<const char*>filename)             # <<<<<<<<<<<<<<
  * 
  * 	def GetGeomVertices(self):
  */
-  __pyx_t_1 = __Pyx_PyObject_AsString(__pyx_v_filename); if (unlikely((!__pyx_t_1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 68; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_AsString(__pyx_v_filename); if (unlikely((!__pyx_t_1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 69; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_self->thisptr->ReadIGES(((char const *)__pyx_t_1));
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":67
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":68
  * 		self.thisptr.SetFeketePoints(&fekete[0,0],fekete.shape[0],fekete.shape[1])
  * 
  * 	def ReadIGES(self, bytes filename):             # <<<<<<<<<<<<<<
@@ -3034,12 +3051,12 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":70
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":71
  * 		self.thisptr.ReadIGES(<const char*>filename)
  * 
  * 	def GetGeomVertices(self):             # <<<<<<<<<<<<<<
  * 		self.thisptr.GetGeomVertices()
- * 
+ * 		cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()
  */
 
 /* Python wrapper */
@@ -3056,36 +3073,155 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
 }
 
 static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_28GetGeomVertices(struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
+  std::vector<__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real>  __pyx_v_geom_points;
+  PyArrayObject *__pyx_v_geometry_points = 0;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  PyObject *__pyx_t_5 = NULL;
+  Py_ssize_t __pyx_t_6;
+  PyObject *__pyx_t_7 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("GetGeomVertices", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":71
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":72
  * 
  * 	def GetGeomVertices(self):
  * 		self.thisptr.GetGeomVertices()             # <<<<<<<<<<<<<<
- * 
- * 	def GetGeomEdges(self):
+ * 		cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()
+ * 		cdef np.ndarray geometry_points = np.array(geom_points,copy=False)
  */
   __pyx_v_self->thisptr->GetGeomVertices();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":70
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":73
+ * 	def GetGeomVertices(self):
+ * 		self.thisptr.GetGeomVertices()
+ * 		cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()             # <<<<<<<<<<<<<<
+ * 		cdef np.ndarray geometry_points = np.array(geom_points,copy=False)
+ * 		return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
+ */
+  __pyx_v_geom_points = __pyx_v_self->thisptr->ObtainGeomVertices();
+
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":74
+ * 		self.thisptr.GetGeomVertices()
+ * 		cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()
+ * 		cdef np.ndarray geometry_points = np.array(geom_points,copy=False)             # <<<<<<<<<<<<<<
+ * 		return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
+ * 
+ */
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = __pyx_convert_vector_to_py___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_v_geom_points); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_GIVEREF(__pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
+  __pyx_t_1 = 0;
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_v_geometry_points = ((PyArrayObject *)__pyx_t_4);
+  __pyx_t_4 = 0;
+
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":75
+ * 		cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()
+ * 		cdef np.ndarray geometry_points = np.array(geom_points,copy=False)
+ * 		return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)             # <<<<<<<<<<<<<<
+ * 
+ * 	def GetGeomEdges(self):
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_geometry_points), __pyx_n_s_reshape); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  if (unlikely(__pyx_v_self->ndim == 0)) {
+    PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
+  __pyx_t_3 = __Pyx_PyInt_From_unsigned_long(((__pyx_v_geometry_points->dimensions[0]) / __pyx_v_self->ndim)); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_3);
+  __pyx_t_3 = 0;
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)(&PyInt_Type)), __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_PyInt_From_unsigned_long(__pyx_v_self->ndim); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_5 = NULL;
+  __pyx_t_6 = 0;
+  if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_1))) {
+    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_1);
+    if (likely(__pyx_t_5)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
+      __Pyx_INCREF(__pyx_t_5);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_1, function);
+      __pyx_t_6 = 1;
+    }
+  }
+  __pyx_t_7 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_7);
+  if (__pyx_t_5) {
+    __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_5); __pyx_t_5 = NULL;
+  }
+  __Pyx_GIVEREF(__pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_7, 0+__pyx_t_6, __pyx_t_3);
+  __Pyx_GIVEREF(__pyx_t_2);
+  PyTuple_SET_ITEM(__pyx_t_7, 1+__pyx_t_6, __pyx_t_2);
+  __pyx_t_3 = 0;
+  __pyx_t_2 = 0;
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_7, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_r = __pyx_t_4;
+  __pyx_t_4 = 0;
+  goto __pyx_L0;
+
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":71
  * 		self.thisptr.ReadIGES(<const char*>filename)
  * 
  * 	def GetGeomVertices(self):             # <<<<<<<<<<<<<<
  * 		self.thisptr.GetGeomVertices()
- * 
+ * 		cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()
  */
 
   /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_AddTraceback("Core.MeshGeneration.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshCurvePy.GetGeomVertices", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XDECREF((PyObject *)__pyx_v_geometry_points);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":73
- * 		self.thisptr.GetGeomVertices()
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":77
+ * 		return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
  * 
  * 	def GetGeomEdges(self):             # <<<<<<<<<<<<<<
  * 		self.thisptr.GetGeomEdges()
@@ -3110,7 +3246,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetGeomEdges", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":74
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":78
  * 
  * 	def GetGeomEdges(self):
  * 		self.thisptr.GetGeomEdges()             # <<<<<<<<<<<<<<
@@ -3119,8 +3255,8 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->GetGeomEdges();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":73
- * 		self.thisptr.GetGeomVertices()
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":77
+ * 		return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
  * 
  * 	def GetGeomEdges(self):             # <<<<<<<<<<<<<<
  * 		self.thisptr.GetGeomEdges()
@@ -3134,7 +3270,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":76
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":80
  * 		self.thisptr.GetGeomEdges()
  * 
  * 	def GetGeomFaces(self):             # <<<<<<<<<<<<<<
@@ -3160,7 +3296,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetGeomFaces", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":77
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":81
  * 
  * 	def GetGeomFaces(self):
  * 		self.thisptr.GetGeomFaces()             # <<<<<<<<<<<<<<
@@ -3169,7 +3305,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->GetGeomFaces();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":76
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":80
  * 		self.thisptr.GetGeomEdges()
  * 
  * 	def GetGeomFaces(self):             # <<<<<<<<<<<<<<
@@ -3184,7 +3320,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":79
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":83
  * 		self.thisptr.GetGeomFaces()
  * 
  * 	def GetCurvesParameters(self):             # <<<<<<<<<<<<<<
@@ -3210,7 +3346,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetCurvesParameters", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":80
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":84
  * 
  * 	def GetCurvesParameters(self):
  * 		self.thisptr.GetCurvesParameters()             # <<<<<<<<<<<<<<
@@ -3219,7 +3355,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->GetCurvesParameters();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":79
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":83
  * 		self.thisptr.GetGeomFaces()
  * 
  * 	def GetCurvesParameters(self):             # <<<<<<<<<<<<<<
@@ -3234,7 +3370,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":82
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":86
  * 		self.thisptr.GetCurvesParameters()
  * 
  * 	def GetCurvesLengths(self):             # <<<<<<<<<<<<<<
@@ -3260,7 +3396,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetCurvesLengths", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":83
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":87
  * 
  * 	def GetCurvesLengths(self):
  * 		self.thisptr.GetCurvesLengths()             # <<<<<<<<<<<<<<
@@ -3269,7 +3405,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->GetCurvesLengths();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":82
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":86
  * 		self.thisptr.GetCurvesParameters()
  * 
  * 	def GetCurvesLengths(self):             # <<<<<<<<<<<<<<
@@ -3284,7 +3420,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":85
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":89
  * 		self.thisptr.GetCurvesLengths()
  * 
  * 	def GetGeomPointsOnCorrespondingEdges(self):             # <<<<<<<<<<<<<<
@@ -3310,7 +3446,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetGeomPointsOnCorrespondingEdges", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":86
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":90
  * 
  * 	def GetGeomPointsOnCorrespondingEdges(self):
  * 		self.thisptr.GetGeomPointsOnCorrespondingEdges()             # <<<<<<<<<<<<<<
@@ -3319,7 +3455,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->GetGeomPointsOnCorrespondingEdges();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":85
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":89
  * 		self.thisptr.GetCurvesLengths()
  * 
  * 	def GetGeomPointsOnCorrespondingEdges(self):             # <<<<<<<<<<<<<<
@@ -3334,7 +3470,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":88
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":92
  * 		self.thisptr.GetGeomPointsOnCorrespondingEdges()
  * 
  * 	def IdentifyCurvesContainingEdges(self):             # <<<<<<<<<<<<<<
@@ -3360,7 +3496,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("IdentifyCurvesContainingEdges", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":89
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":93
  * 
  * 	def IdentifyCurvesContainingEdges(self):
  * 		self.thisptr.IdentifyCurvesContainingEdges()             # <<<<<<<<<<<<<<
@@ -3369,7 +3505,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->IdentifyCurvesContainingEdges();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":88
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":92
  * 		self.thisptr.GetGeomPointsOnCorrespondingEdges()
  * 
  * 	def IdentifyCurvesContainingEdges(self):             # <<<<<<<<<<<<<<
@@ -3384,7 +3520,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":91
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":95
  * 		self.thisptr.IdentifyCurvesContainingEdges()
  * 
  * 	def ProjectMeshOnCurve(self):             # <<<<<<<<<<<<<<
@@ -3410,7 +3546,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("ProjectMeshOnCurve", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":92
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":96
  * 
  * 	def ProjectMeshOnCurve(self):
  * 		self.thisptr.ProjectMeshOnCurve()             # <<<<<<<<<<<<<<
@@ -3419,7 +3555,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->ProjectMeshOnCurve();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":91
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":95
  * 		self.thisptr.IdentifyCurvesContainingEdges()
  * 
  * 	def ProjectMeshOnCurve(self):             # <<<<<<<<<<<<<<
@@ -3434,7 +3570,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":97
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":101
  * 		# self.thisptr.ProjectMeshOnSurface()
  * 
  * 	def RepairDualProjectedParameters(self):             # <<<<<<<<<<<<<<
@@ -3460,7 +3596,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("RepairDualProjectedParameters", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":98
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":102
  * 
  * 	def RepairDualProjectedParameters(self):
  * 		self.thisptr.RepairDualProjectedParameters()             # <<<<<<<<<<<<<<
@@ -3469,7 +3605,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->RepairDualProjectedParameters();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":97
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":101
  * 		# self.thisptr.ProjectMeshOnSurface()
  * 
  * 	def RepairDualProjectedParameters(self):             # <<<<<<<<<<<<<<
@@ -3484,7 +3620,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":100
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":104
  * 		self.thisptr.RepairDualProjectedParameters()
  * 
  * 	def MeshPointInversionCurve(self):             # <<<<<<<<<<<<<<
@@ -3510,7 +3646,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("MeshPointInversionCurve", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":101
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":105
  * 
  * 	def MeshPointInversionCurve(self):
  * 		self.thisptr.MeshPointInversionCurve()             # <<<<<<<<<<<<<<
@@ -3519,7 +3655,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->MeshPointInversionCurve();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":100
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":104
  * 		self.thisptr.RepairDualProjectedParameters()
  * 
  * 	def MeshPointInversionCurve(self):             # <<<<<<<<<<<<<<
@@ -3534,7 +3670,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":103
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":107
  * 		self.thisptr.MeshPointInversionCurve()
  * 
  * 	def MeshPointInversionCurveArcLength(self):             # <<<<<<<<<<<<<<
@@ -3560,7 +3696,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("MeshPointInversionCurveArcLength", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":104
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":108
  * 
  * 	def MeshPointInversionCurveArcLength(self):
  * 		self.thisptr.MeshPointInversionCurveArcLength()             # <<<<<<<<<<<<<<
@@ -3569,7 +3705,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->MeshPointInversionCurveArcLength();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":103
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":107
  * 		self.thisptr.MeshPointInversionCurve()
  * 
  * 	def MeshPointInversionCurveArcLength(self):             # <<<<<<<<<<<<<<
@@ -3584,7 +3720,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":106
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":110
  * 		self.thisptr.MeshPointInversionCurveArcLength()
  * 
  * 	def GetBoundaryPointsOrder(self):             # <<<<<<<<<<<<<<
@@ -3610,7 +3746,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetBoundaryPointsOrder", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":107
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":111
  * 
  * 	def GetBoundaryPointsOrder(self):
  * 		self.thisptr.GetBoundaryPointsOrder()             # <<<<<<<<<<<<<<
@@ -3619,7 +3755,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->GetBoundaryPointsOrder();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":106
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":110
  * 		self.thisptr.MeshPointInversionCurveArcLength()
  * 
  * 	def GetBoundaryPointsOrder(self):             # <<<<<<<<<<<<<<
@@ -3634,7 +3770,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":109
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":113
  * 		self.thisptr.GetBoundaryPointsOrder()
  * 
  * 	def ReturnModifiedMeshPoints(self,Real[:,::1] points):             # <<<<<<<<<<<<<<
@@ -3653,7 +3789,7 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("ReturnModifiedMeshPoints (wrapper)", 0);
   assert(__pyx_arg_points); {
-    __pyx_v_points = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_arg_points); if (unlikely(!__pyx_v_points.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 109; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_points = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_arg_points); if (unlikely(!__pyx_v_points.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 113; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -3675,7 +3811,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   Py_ssize_t __pyx_t_2;
   __Pyx_RefNannySetupContext("ReturnModifiedMeshPoints", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":110
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":114
  * 
  * 	def ReturnModifiedMeshPoints(self,Real[:,::1] points):
  * 		self.thisptr.ReturnModifiedMeshPoints(&points[0,0])             # <<<<<<<<<<<<<<
@@ -3686,7 +3822,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __pyx_t_2 = 0;
   __pyx_v_self->thisptr->ReturnModifiedMeshPoints((&(*((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=1 */ ((char *) (((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=0 */ (__pyx_v_points.data + __pyx_t_1 * __pyx_v_points.strides[0]) )) + __pyx_t_2)) )))));
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":109
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":113
  * 		self.thisptr.GetBoundaryPointsOrder()
  * 
  * 	def ReturnModifiedMeshPoints(self,Real[:,::1] points):             # <<<<<<<<<<<<<<
@@ -3702,7 +3838,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":113
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":117
  * 
  * 	@boundscheck(False)
  * 	def GetDirichletData(self):             # <<<<<<<<<<<<<<
@@ -3761,7 +3897,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __pyx_pybuffernd_displacements_BC.data = NULL;
   __pyx_pybuffernd_displacements_BC.rcbuffer = &__pyx_pybuffer_displacements_BC;
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":115
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":119
  * 	def GetDirichletData(self):
  * 		cdef:
  * 			PassToPython struct_to_python = self.thisptr.GetDirichletData()             # <<<<<<<<<<<<<<
@@ -3770,21 +3906,21 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_struct_to_python = __pyx_v_self->thisptr->GetDirichletData();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":116
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":120
  * 		cdef:
  * 			PassToPython struct_to_python = self.thisptr.GetDirichletData()
  * 			np.ndarray[np.int64_t, ndim=2, mode='c'] nodes_dir = np.zeros((struct_to_python.nodes_dir_size,1),dtype=np.int64)             # <<<<<<<<<<<<<<
  * 			Integer i
  * 			UInteger j
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 120; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 120; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_From_long(__pyx_v_struct_to_python.nodes_dir_size); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyInt_From_long(__pyx_v_struct_to_python.nodes_dir_size); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 120; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 120; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
@@ -3792,32 +3928,32 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_GIVEREF(__pyx_int_1);
   PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_int_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 120; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_3);
   __pyx_t_3 = 0;
-  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 120; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 120; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_int64); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_int64); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 120; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 120; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 120; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 120; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_6 = ((PyArrayObject *)__pyx_t_5);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer, (PyObject*)__pyx_t_6, &__Pyx_TypeInfo_nn___pyx_t_5numpy_int64_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {
       __pyx_v_nodes_dir = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.buf = NULL;
-      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 120; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     } else {__pyx_pybuffernd_nodes_dir.diminfo[0].strides = __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_nodes_dir.diminfo[0].shape = __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_nodes_dir.diminfo[1].strides = __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_nodes_dir.diminfo[1].shape = __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.shape[1];
     }
   }
@@ -3825,7 +3961,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __pyx_v_nodes_dir = ((PyArrayObject *)__pyx_t_5);
   __pyx_t_5 = 0;
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":120
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":124
  * 			UInteger j
  * 
  * 		for i in range(struct_to_python.nodes_dir_size):             # <<<<<<<<<<<<<<
@@ -3836,34 +3972,34 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
     __pyx_v_i = __pyx_t_8;
 
-    /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":121
+    /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":125
  * 
  * 		for i in range(struct_to_python.nodes_dir_size):
  * 			nodes_dir[i] = struct_to_python.nodes_dir_out_stl[i]             # <<<<<<<<<<<<<<
  * 
  * 		cdef np.ndarray[np.float64_t, ndim=2, mode='c'] displacements_BC = \
  */
-    __pyx_t_5 = __Pyx_PyInt_From_long((__pyx_v_struct_to_python.nodes_dir_out_stl[__pyx_v_i])); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 121; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_5 = __Pyx_PyInt_From_long((__pyx_v_struct_to_python.nodes_dir_out_stl[__pyx_v_i])); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 125; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_5);
-    if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_nodes_dir), __pyx_v_i, __pyx_t_5, __pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer, 1, __Pyx_PyInt_From_long, 0, 0, 0) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 121; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_nodes_dir), __pyx_v_i, __pyx_t_5, __pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer, 1, __Pyx_PyInt_From_long, 0, 0, 0) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 125; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   }
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":124
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":128
  * 
  * 		cdef np.ndarray[np.float64_t, ndim=2, mode='c'] displacements_BC = \
  * 			np.zeros((self.thisptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64)             # <<<<<<<<<<<<<<
  * 		for j in range(self.thisptr.ndim*struct_to_python.nodes_dir_size):
  * 			displacements_BC[j] = struct_to_python.displacement_BC_stl[j]
  */
-  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 124; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 124; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyInt_From_unsigned_long((__pyx_v_self->thisptr->ndim * __pyx_v_struct_to_python.nodes_dir_size)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 124; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyInt_From_unsigned_long((__pyx_v_self->thisptr->ndim * __pyx_v_struct_to_python.nodes_dir_size)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 124; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_5);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_5);
@@ -3871,32 +4007,32 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_GIVEREF(__pyx_int_1);
   PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_int_1);
   __pyx_t_5 = 0;
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 124; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 124; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 124; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_float64); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 124; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_float64); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 124; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 124; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 124; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_9 = ((PyArrayObject *)__pyx_t_4);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer, (PyObject*)__pyx_t_9, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {
       __pyx_v_displacements_BC = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.buf = NULL;
-      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 123; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 127; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     } else {__pyx_pybuffernd_displacements_BC.diminfo[0].strides = __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_displacements_BC.diminfo[0].shape = __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_displacements_BC.diminfo[1].strides = __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_displacements_BC.diminfo[1].shape = __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.shape[1];
     }
   }
@@ -3904,7 +4040,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __pyx_v_displacements_BC = ((PyArrayObject *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":125
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":129
  * 		cdef np.ndarray[np.float64_t, ndim=2, mode='c'] displacements_BC = \
  * 			np.zeros((self.thisptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64)
  * 		for j in range(self.thisptr.ndim*struct_to_python.nodes_dir_size):             # <<<<<<<<<<<<<<
@@ -3915,20 +4051,20 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   for (__pyx_t_11 = 0; __pyx_t_11 < __pyx_t_10; __pyx_t_11+=1) {
     __pyx_v_j = __pyx_t_11;
 
-    /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":126
+    /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":130
  * 			np.zeros((self.thisptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64)
  * 		for j in range(self.thisptr.ndim*struct_to_python.nodes_dir_size):
  * 			displacements_BC[j] = struct_to_python.displacement_BC_stl[j]             # <<<<<<<<<<<<<<
  * 
  * 		return nodes_dir, displacements_BC.reshape(struct_to_python.nodes_dir_size,self.thisptr.ndim)
  */
-    __pyx_t_4 = PyFloat_FromDouble((__pyx_v_struct_to_python.displacement_BC_stl[__pyx_v_j])); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 126; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = PyFloat_FromDouble((__pyx_v_struct_to_python.displacement_BC_stl[__pyx_v_j])); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 130; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
-    if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_displacements_BC), __pyx_v_j, __pyx_t_4, __pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger, 0, __Pyx_PyInt_From_unsigned_long, 0, 0, 0) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 126; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_displacements_BC), __pyx_v_j, __pyx_t_4, __pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger, 0, __Pyx_PyInt_From_unsigned_long, 0, 0, 0) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 130; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":128
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":132
  * 			displacements_BC[j] = struct_to_python.displacement_BC_stl[j]
  * 
  * 		return nodes_dir, displacements_BC.reshape(struct_to_python.nodes_dir_size,self.thisptr.ndim)             # <<<<<<<<<<<<<<
@@ -3936,11 +4072,11 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_displacements_BC), __pyx_n_s_reshape); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_displacements_BC), __pyx_n_s_reshape); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 132; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_5 = __Pyx_PyInt_From_long(__pyx_v_struct_to_python.nodes_dir_size); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyInt_From_long(__pyx_v_struct_to_python.nodes_dir_size); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 132; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_3 = __Pyx_PyInt_From_unsigned_long(__pyx_v_self->thisptr->ndim); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyInt_From_unsigned_long(__pyx_v_self->thisptr->ndim); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 132; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_2 = NULL;
   __pyx_t_12 = 0;
@@ -3954,7 +4090,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
       __pyx_t_12 = 1;
     }
   }
-  __pyx_t_13 = PyTuple_New(2+__pyx_t_12); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_13 = PyTuple_New(2+__pyx_t_12); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 132; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_13);
   if (__pyx_t_2) {
     __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_t_2); __pyx_t_2 = NULL;
@@ -3965,11 +4101,11 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   PyTuple_SET_ITEM(__pyx_t_13, 1+__pyx_t_12, __pyx_t_3);
   __pyx_t_5 = 0;
   __pyx_t_3 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_13, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_13, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 132; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 132; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(((PyObject *)__pyx_v_nodes_dir));
   __Pyx_GIVEREF(((PyObject *)__pyx_v_nodes_dir));
@@ -3981,7 +4117,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":113
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":117
  * 
  * 	@boundscheck(False)
  * 	def GetDirichletData(self):             # <<<<<<<<<<<<<<
@@ -4016,7 +4152,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":131
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":135
  * 
  * 
  * 	def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -4040,7 +4176,7 @@ static void __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10Pos
   int __pyx_t_1;
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":132
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":136
  * 
  * 	def __dealloc__(self):
  * 		if self.thisptr != NULL:             # <<<<<<<<<<<<<<
@@ -4050,7 +4186,7 @@ static void __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10Pos
   __pyx_t_1 = ((__pyx_v_self->thisptr != NULL) != 0);
   if (__pyx_t_1) {
 
-    /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":133
+    /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":137
  * 	def __dealloc__(self):
  * 		if self.thisptr != NULL:
  * 			del self.thisptr             # <<<<<<<<<<<<<<
@@ -4059,7 +4195,7 @@ static void __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10Pos
  */
     delete __pyx_v_self->thisptr;
 
-    /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":132
+    /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":136
  * 
  * 	def __dealloc__(self):
  * 		if self.thisptr != NULL:             # <<<<<<<<<<<<<<
@@ -4068,7 +4204,7 @@ static void __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10Pos
  */
   }
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":131
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":135
  * 
  * 
  * 	def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -4080,10 +4216,10 @@ static void __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10Pos
   __Pyx_RefNannyFinishContext();
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":150
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":154
  * 	cdef PostMeshSurface *thisptr
  * 
- * 	def __cinit__(self, bytes py_element_type, UInteger dimension=2):             # <<<<<<<<<<<<<<
+ * 	def __cinit__(self, bytes py_element_type, UInteger dimension=3):             # <<<<<<<<<<<<<<
  * 		# Convert to cpp string explicitly
  * 		cdef string cpp_element_type = py_element_type
  */
@@ -4123,7 +4259,7 @@ static int __pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10Post
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__cinit__") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__cinit__") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 154; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -4135,20 +4271,20 @@ static int __pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10Post
     }
     __pyx_v_py_element_type = ((PyObject*)values[0]);
     if (values[1]) {
-      __pyx_v_dimension = __Pyx_PyInt_As_unsigned_long(values[1]); if (unlikely((__pyx_v_dimension == (unsigned long)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_v_dimension = __Pyx_PyInt_As_unsigned_long(values[1]); if (unlikely((__pyx_v_dimension == (unsigned long)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 154; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     } else {
-      __pyx_v_dimension = ((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger)2);
+      __pyx_v_dimension = ((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger)3);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__cinit__", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("__cinit__", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 154; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Core.MeshGeneration.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return -1;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_py_element_type), (&PyBytes_Type), 1, "py_element_type", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_py_element_type), (&PyBytes_Type), 1, "py_element_type", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 154; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_r = __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy___cinit__(((struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self), __pyx_v_py_element_type, __pyx_v_dimension);
 
   /* function exit code */
@@ -4171,35 +4307,44 @@ static int __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10Post
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":152
- * 	def __cinit__(self, bytes py_element_type, UInteger dimension=2):
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":156
+ * 	def __cinit__(self, bytes py_element_type, UInteger dimension=3):
  * 		# Convert to cpp string explicitly
  * 		cdef string cpp_element_type = py_element_type             # <<<<<<<<<<<<<<
  * 		self.thisptr = new PostMeshSurface(cpp_element_type,dimension)
- * 
+ * 		self.ndim = 3
  */
-  __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_v_py_element_type); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 152; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_v_py_element_type); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_cpp_element_type = __pyx_t_1;
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":153
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":157
  * 		# Convert to cpp string explicitly
  * 		cdef string cpp_element_type = py_element_type
  * 		self.thisptr = new PostMeshSurface(cpp_element_type,dimension)             # <<<<<<<<<<<<<<
+ * 		self.ndim = 3
  * 
- * 	def Init(self):
  */
   try {
     __pyx_t_2 = new PostMeshSurface(__pyx_v_cpp_element_type, __pyx_v_dimension);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 153; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 157; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_v_self->thisptr = __pyx_t_2;
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":150
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":158
+ * 		cdef string cpp_element_type = py_element_type
+ * 		self.thisptr = new PostMeshSurface(cpp_element_type,dimension)
+ * 		self.ndim = 3             # <<<<<<<<<<<<<<
+ * 
+ * 	def Init(self):
+ */
+  __pyx_v_self->ndim = 3;
+
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":154
  * 	cdef PostMeshSurface *thisptr
  * 
- * 	def __cinit__(self, bytes py_element_type, UInteger dimension=2):             # <<<<<<<<<<<<<<
+ * 	def __cinit__(self, bytes py_element_type, UInteger dimension=3):             # <<<<<<<<<<<<<<
  * 		# Convert to cpp string explicitly
  * 		cdef string cpp_element_type = py_element_type
  */
@@ -4215,8 +4360,8 @@ static int __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10Post
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":155
- * 		self.thisptr = new PostMeshSurface(cpp_element_type,dimension)
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":160
+ * 		self.ndim = 3
  * 
  * 	def Init(self):             # <<<<<<<<<<<<<<
  * 		self.thisptr.Init()
@@ -4244,7 +4389,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("Init", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":156
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":161
  * 
  * 	def Init(self):
  * 		self.thisptr.Init()             # <<<<<<<<<<<<<<
@@ -4255,11 +4400,11 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
     __pyx_v_self->thisptr->Init();
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 161; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":155
- * 		self.thisptr = new PostMeshSurface(cpp_element_type,dimension)
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":160
+ * 		self.ndim = 3
  * 
  * 	def Init(self):             # <<<<<<<<<<<<<<
  * 		self.thisptr.Init()
@@ -4278,7 +4423,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":158
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":163
  * 		self.thisptr.Init()
  * 
  * 	def SetScale(self,Real scale):             # <<<<<<<<<<<<<<
@@ -4297,7 +4442,7 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetScale (wrapper)", 0);
   assert(__pyx_arg_scale); {
-    __pyx_v_scale = __pyx_PyFloat_AsDouble(__pyx_arg_scale); if (unlikely((__pyx_v_scale == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 158; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_scale = __pyx_PyFloat_AsDouble(__pyx_arg_scale); if (unlikely((__pyx_v_scale == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 163; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4317,7 +4462,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetScale", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":159
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":164
  * 
  * 	def SetScale(self,Real scale):
  * 		self.thisptr.SetScale(scale)             # <<<<<<<<<<<<<<
@@ -4326,7 +4471,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->SetScale(__pyx_v_scale);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":158
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":163
  * 		self.thisptr.Init()
  * 
  * 	def SetScale(self,Real scale):             # <<<<<<<<<<<<<<
@@ -4341,7 +4486,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":161
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":166
  * 		self.thisptr.SetScale(scale)
  * 
  * 	def SetCondition(self,Real condition):             # <<<<<<<<<<<<<<
@@ -4360,7 +4505,7 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetCondition (wrapper)", 0);
   assert(__pyx_arg_condition); {
-    __pyx_v_condition = __pyx_PyFloat_AsDouble(__pyx_arg_condition); if (unlikely((__pyx_v_condition == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 161; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_condition = __pyx_PyFloat_AsDouble(__pyx_arg_condition); if (unlikely((__pyx_v_condition == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 166; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4380,7 +4525,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetCondition", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":162
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":167
  * 
  * 	def SetCondition(self,Real condition):
  * 		self.thisptr.SetCondition(condition)             # <<<<<<<<<<<<<<
@@ -4389,7 +4534,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->SetCondition(__pyx_v_condition);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":161
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":166
  * 		self.thisptr.SetScale(scale)
  * 
  * 	def SetCondition(self,Real condition):             # <<<<<<<<<<<<<<
@@ -4404,7 +4549,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":164
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":169
  * 		self.thisptr.SetCondition(condition)
  * 
  * 	def SetProjectionPrecision(self, Real precision):             # <<<<<<<<<<<<<<
@@ -4423,7 +4568,7 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetProjectionPrecision (wrapper)", 0);
   assert(__pyx_arg_precision); {
-    __pyx_v_precision = __pyx_PyFloat_AsDouble(__pyx_arg_precision); if (unlikely((__pyx_v_precision == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_precision = __pyx_PyFloat_AsDouble(__pyx_arg_precision); if (unlikely((__pyx_v_precision == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 169; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4443,7 +4588,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetProjectionPrecision", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":165
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":170
  * 
  * 	def SetProjectionPrecision(self, Real precision):
  * 		self.thisptr.SetProjectionPrecision(precision)             # <<<<<<<<<<<<<<
@@ -4452,7 +4597,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->SetProjectionPrecision(__pyx_v_precision);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":164
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":169
  * 		self.thisptr.SetCondition(condition)
  * 
  * 	def SetProjectionPrecision(self, Real precision):             # <<<<<<<<<<<<<<
@@ -4467,7 +4612,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":167
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":172
  * 		self.thisptr.SetProjectionPrecision(precision)
  * 
  * 	def SetProjectionCriteria(self, UInteger[:,::1] criteria):             # <<<<<<<<<<<<<<
@@ -4486,7 +4631,7 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetProjectionCriteria (wrapper)", 0);
   assert(__pyx_arg_criteria); {
-    __pyx_v_criteria = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_criteria); if (unlikely(!__pyx_v_criteria.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 167; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_criteria = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_criteria); if (unlikely(!__pyx_v_criteria.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 172; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4508,7 +4653,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   Py_ssize_t __pyx_t_2;
   __Pyx_RefNannySetupContext("SetProjectionCriteria", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":168
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":173
  * 
  * 	def SetProjectionCriteria(self, UInteger[:,::1] criteria):
  * 		self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])             # <<<<<<<<<<<<<<
@@ -4519,7 +4664,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __pyx_t_2 = 0;
   __pyx_v_self->thisptr->SetProjectionCriteria((&(*((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=0 */ (__pyx_v_criteria.data + __pyx_t_1 * __pyx_v_criteria.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_criteria.shape[0]), (__pyx_v_criteria.shape[1]));
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":167
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":172
  * 		self.thisptr.SetProjectionPrecision(precision)
  * 
  * 	def SetProjectionCriteria(self, UInteger[:,::1] criteria):             # <<<<<<<<<<<<<<
@@ -4535,7 +4680,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":170
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":175
  * 		self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])
  * 
  * 	def SetMeshElements(self,UInteger[:,::1] elements):             # <<<<<<<<<<<<<<
@@ -4554,7 +4699,7 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetMeshElements (wrapper)", 0);
   assert(__pyx_arg_elements); {
-    __pyx_v_elements = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_elements); if (unlikely(!__pyx_v_elements.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_elements = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_elements); if (unlikely(!__pyx_v_elements.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 175; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4576,7 +4721,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   Py_ssize_t __pyx_t_2;
   __Pyx_RefNannySetupContext("SetMeshElements", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":171
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":176
  * 
  * 	def SetMeshElements(self,UInteger[:,::1] elements):
  * 		self.thisptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])             # <<<<<<<<<<<<<<
@@ -4587,7 +4732,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __pyx_t_2 = 0;
   __pyx_v_self->thisptr->SetMeshElements((&(*((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=0 */ (__pyx_v_elements.data + __pyx_t_1 * __pyx_v_elements.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_elements.shape[0]), (__pyx_v_elements.shape[1]));
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":170
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":175
  * 		self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])
  * 
  * 	def SetMeshElements(self,UInteger[:,::1] elements):             # <<<<<<<<<<<<<<
@@ -4603,7 +4748,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":173
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":178
  * 		self.thisptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])
  * 
  * 	def SetMeshPoints(self,Real[:,::1] points):             # <<<<<<<<<<<<<<
@@ -4622,7 +4767,7 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetMeshPoints (wrapper)", 0);
   assert(__pyx_arg_points); {
-    __pyx_v_points = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_arg_points); if (unlikely(!__pyx_v_points.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_points = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_arg_points); if (unlikely(!__pyx_v_points.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 178; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4644,7 +4789,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   Py_ssize_t __pyx_t_2;
   __Pyx_RefNannySetupContext("SetMeshPoints", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":174
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":179
  * 
  * 	def SetMeshPoints(self,Real[:,::1] points):
  * 		self.thisptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])             # <<<<<<<<<<<<<<
@@ -4655,7 +4800,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __pyx_t_2 = 0;
   __pyx_v_self->thisptr->SetMeshPoints((&(*((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=1 */ ((char *) (((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=0 */ (__pyx_v_points.data + __pyx_t_1 * __pyx_v_points.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_points.shape[0]), (__pyx_v_points.shape[1]));
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":173
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":178
  * 		self.thisptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])
  * 
  * 	def SetMeshPoints(self,Real[:,::1] points):             # <<<<<<<<<<<<<<
@@ -4671,7 +4816,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":176
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":181
  * 		self.thisptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])
  * 
  * 	def SetMeshEdges(self,UInteger[:,::1] edges):             # <<<<<<<<<<<<<<
@@ -4690,7 +4835,7 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetMeshEdges (wrapper)", 0);
   assert(__pyx_arg_edges); {
-    __pyx_v_edges = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_edges); if (unlikely(!__pyx_v_edges.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_edges = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_edges); if (unlikely(!__pyx_v_edges.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 181; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4712,7 +4857,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   Py_ssize_t __pyx_t_2;
   __Pyx_RefNannySetupContext("SetMeshEdges", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":177
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":182
  * 
  * 	def SetMeshEdges(self,UInteger[:,::1] edges):
  * 		self.thisptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])             # <<<<<<<<<<<<<<
@@ -4723,7 +4868,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __pyx_t_2 = 0;
   __pyx_v_self->thisptr->SetMeshEdges((&(*((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=0 */ (__pyx_v_edges.data + __pyx_t_1 * __pyx_v_edges.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_edges.shape[0]), (__pyx_v_edges.shape[1]));
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":176
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":181
  * 		self.thisptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])
  * 
  * 	def SetMeshEdges(self,UInteger[:,::1] edges):             # <<<<<<<<<<<<<<
@@ -4739,7 +4884,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":179
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":184
  * 		self.thisptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
  * 
  * 	def SetMeshFaces(self,UInteger[:,::1] faces):             # <<<<<<<<<<<<<<
@@ -4758,7 +4903,7 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetMeshFaces (wrapper)", 0);
   assert(__pyx_arg_faces); {
-    __pyx_v_faces = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_faces); if (unlikely(!__pyx_v_faces.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 179; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_faces = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_faces); if (unlikely(!__pyx_v_faces.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 184; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4780,7 +4925,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   Py_ssize_t __pyx_t_2;
   __Pyx_RefNannySetupContext("SetMeshFaces", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":180
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":185
  * 
  * 	def SetMeshFaces(self,UInteger[:,::1] faces):
  * 		self.thisptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])             # <<<<<<<<<<<<<<
@@ -4791,7 +4936,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __pyx_t_2 = 0;
   __pyx_v_self->thisptr->SetMeshFaces((&(*((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=0 */ (__pyx_v_faces.data + __pyx_t_1 * __pyx_v_faces.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_faces.shape[0]), (__pyx_v_faces.shape[1]));
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":179
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":184
  * 		self.thisptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
  * 
  * 	def SetMeshFaces(self,UInteger[:,::1] faces):             # <<<<<<<<<<<<<<
@@ -4807,7 +4952,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":182
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":187
  * 		self.thisptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
  * 
  * 	def ScaleMesh(self):             # <<<<<<<<<<<<<<
@@ -4833,7 +4978,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("ScaleMesh", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":183
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":188
  * 
  * 	def ScaleMesh(self):
  * 		self.thisptr.ScaleMesh()             # <<<<<<<<<<<<<<
@@ -4842,7 +4987,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->ScaleMesh();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":182
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":187
  * 		self.thisptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
  * 
  * 	def ScaleMesh(self):             # <<<<<<<<<<<<<<
@@ -4857,7 +5002,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":185
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":190
  * 		self.thisptr.ScaleMesh()
  * 
  * 	def GetMeshElementType(self):             # <<<<<<<<<<<<<<
@@ -4889,7 +5034,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("GetMeshElementType", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":186
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":191
  * 
  * 	def GetMeshElementType(self):
  * 		cdef string cpp_element_type = self.thisptr.GetMeshElementType()             # <<<<<<<<<<<<<<
@@ -4898,19 +5043,19 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_cpp_element_type = __pyx_v_self->thisptr->GetMeshElementType();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":187
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":192
  * 	def GetMeshElementType(self):
  * 		cdef string cpp_element_type = self.thisptr.GetMeshElementType()
  * 		cdef bytes py_element_type = cpp_element_type             # <<<<<<<<<<<<<<
  * 		return py_element_type
  * 
  */
-  __pyx_t_1 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_cpp_element_type); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 187; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_cpp_element_type); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 192; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_py_element_type = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":188
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":193
  * 		cdef string cpp_element_type = self.thisptr.GetMeshElementType()
  * 		cdef bytes py_element_type = cpp_element_type
  * 		return py_element_type             # <<<<<<<<<<<<<<
@@ -4922,7 +5067,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __pyx_r = __pyx_v_py_element_type;
   goto __pyx_L0;
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":185
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":190
  * 		self.thisptr.ScaleMesh()
  * 
  * 	def GetMeshElementType(self):             # <<<<<<<<<<<<<<
@@ -4942,7 +5087,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":190
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":195
  * 		return py_element_type
  * 
  * 	def SetFeketePoints(self, Real[:,::1] fekete):             # <<<<<<<<<<<<<<
@@ -4961,7 +5106,7 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SetFeketePoints (wrapper)", 0);
   assert(__pyx_arg_fekete); {
-    __pyx_v_fekete = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_arg_fekete); if (unlikely(!__pyx_v_fekete.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 190; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_fekete = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_arg_fekete); if (unlikely(!__pyx_v_fekete.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 195; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4983,7 +5128,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   Py_ssize_t __pyx_t_2;
   __Pyx_RefNannySetupContext("SetFeketePoints", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":191
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":196
  * 
  * 	def SetFeketePoints(self, Real[:,::1] fekete):
  * 		self.thisptr.SetFeketePoints(&fekete[0,0],fekete.shape[0],fekete.shape[1])             # <<<<<<<<<<<<<<
@@ -4994,7 +5139,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __pyx_t_2 = 0;
   __pyx_v_self->thisptr->SetFeketePoints((&(*((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=1 */ ((char *) (((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=0 */ (__pyx_v_fekete.data + __pyx_t_1 * __pyx_v_fekete.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_fekete.shape[0]), (__pyx_v_fekete.shape[1]));
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":190
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":195
  * 		return py_element_type
  * 
  * 	def SetFeketePoints(self, Real[:,::1] fekete):             # <<<<<<<<<<<<<<
@@ -5010,7 +5155,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":193
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":198
  * 		self.thisptr.SetFeketePoints(&fekete[0,0],fekete.shape[0],fekete.shape[1])
  * 
  * 	def ReadIGES(self, bytes filename):             # <<<<<<<<<<<<<<
@@ -5027,7 +5172,7 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("ReadIGES (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_filename), (&PyBytes_Type), 1, "filename", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 193; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_filename), (&PyBytes_Type), 1, "filename", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 198; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_r = __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_26ReadIGES(((struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self), ((PyObject*)__pyx_v_filename));
 
   /* function exit code */
@@ -5048,17 +5193,17 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("ReadIGES", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":194
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":199
  * 
  * 	def ReadIGES(self, bytes filename):
  * 		self.thisptr.ReadIGES(<const char*>filename)             # <<<<<<<<<<<<<<
  * 
  * 	def GetGeomVertices(self):
  */
-  __pyx_t_1 = __Pyx_PyObject_AsString(__pyx_v_filename); if (unlikely((!__pyx_t_1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 194; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_AsString(__pyx_v_filename); if (unlikely((!__pyx_t_1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 199; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_self->thisptr->ReadIGES(((char const *)__pyx_t_1));
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":193
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":198
  * 		self.thisptr.SetFeketePoints(&fekete[0,0],fekete.shape[0],fekete.shape[1])
  * 
  * 	def ReadIGES(self, bytes filename):             # <<<<<<<<<<<<<<
@@ -5078,12 +5223,12 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":196
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":201
  * 		self.thisptr.ReadIGES(<const char*>filename)
  * 
  * 	def GetGeomVertices(self):             # <<<<<<<<<<<<<<
  * 		self.thisptr.GetGeomVertices()
- * 
+ * 		cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()
  */
 
 /* Python wrapper */
@@ -5100,36 +5245,155 @@ static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
 }
 
 static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_28GetGeomVertices(struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
+  std::vector<__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real>  __pyx_v_geom_points;
+  PyArrayObject *__pyx_v_geometry_points = 0;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  PyObject *__pyx_t_5 = NULL;
+  Py_ssize_t __pyx_t_6;
+  PyObject *__pyx_t_7 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("GetGeomVertices", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":197
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":202
  * 
  * 	def GetGeomVertices(self):
  * 		self.thisptr.GetGeomVertices()             # <<<<<<<<<<<<<<
- * 
- * 	def GetGeomEdges(self):
+ * 		cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()
+ * 		cdef np.ndarray geometry_points = np.array(geom_points,copy=False)
  */
   __pyx_v_self->thisptr->GetGeomVertices();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":196
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":203
+ * 	def GetGeomVertices(self):
+ * 		self.thisptr.GetGeomVertices()
+ * 		cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()             # <<<<<<<<<<<<<<
+ * 		cdef np.ndarray geometry_points = np.array(geom_points,copy=False)
+ * 		return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
+ */
+  __pyx_v_geom_points = __pyx_v_self->thisptr->ObtainGeomVertices();
+
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":204
+ * 		self.thisptr.GetGeomVertices()
+ * 		cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()
+ * 		cdef np.ndarray geometry_points = np.array(geom_points,copy=False)             # <<<<<<<<<<<<<<
+ * 		return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
+ * 
+ */
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 204; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 204; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = __pyx_convert_vector_to_py___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_v_geom_points); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 204; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 204; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_GIVEREF(__pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
+  __pyx_t_1 = 0;
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 204; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 204; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 204; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 204; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_v_geometry_points = ((PyArrayObject *)__pyx_t_4);
+  __pyx_t_4 = 0;
+
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":205
+ * 		cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()
+ * 		cdef np.ndarray geometry_points = np.array(geom_points,copy=False)
+ * 		return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)             # <<<<<<<<<<<<<<
+ * 
+ * 	def GetGeomEdges(self):
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_geometry_points), __pyx_n_s_reshape); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  if (unlikely(__pyx_v_self->ndim == 0)) {
+    PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
+  __pyx_t_3 = __Pyx_PyInt_From_unsigned_long(((__pyx_v_geometry_points->dimensions[0]) / __pyx_v_self->ndim)); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_3);
+  __pyx_t_3 = 0;
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)(&PyInt_Type)), __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_PyInt_From_unsigned_long(__pyx_v_self->ndim); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_5 = NULL;
+  __pyx_t_6 = 0;
+  if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_1))) {
+    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_1);
+    if (likely(__pyx_t_5)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
+      __Pyx_INCREF(__pyx_t_5);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_1, function);
+      __pyx_t_6 = 1;
+    }
+  }
+  __pyx_t_7 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_7);
+  if (__pyx_t_5) {
+    __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_5); __pyx_t_5 = NULL;
+  }
+  __Pyx_GIVEREF(__pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_7, 0+__pyx_t_6, __pyx_t_3);
+  __Pyx_GIVEREF(__pyx_t_2);
+  PyTuple_SET_ITEM(__pyx_t_7, 1+__pyx_t_6, __pyx_t_2);
+  __pyx_t_3 = 0;
+  __pyx_t_2 = 0;
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_7, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_r = __pyx_t_4;
+  __pyx_t_4 = 0;
+  goto __pyx_L0;
+
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":201
  * 		self.thisptr.ReadIGES(<const char*>filename)
  * 
  * 	def GetGeomVertices(self):             # <<<<<<<<<<<<<<
  * 		self.thisptr.GetGeomVertices()
- * 
+ * 		cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()
  */
 
   /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_AddTraceback("Core.MeshGeneration.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.GetGeomVertices", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XDECREF((PyObject *)__pyx_v_geometry_points);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":199
- * 		self.thisptr.GetGeomVertices()
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":207
+ * 		return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
  * 
  * 	def GetGeomEdges(self):             # <<<<<<<<<<<<<<
  * 		self.thisptr.GetGeomEdges()
@@ -5154,7 +5418,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetGeomEdges", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":200
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":208
  * 
  * 	def GetGeomEdges(self):
  * 		self.thisptr.GetGeomEdges()             # <<<<<<<<<<<<<<
@@ -5163,8 +5427,8 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->GetGeomEdges();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":199
- * 		self.thisptr.GetGeomVertices()
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":207
+ * 		return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
  * 
  * 	def GetGeomEdges(self):             # <<<<<<<<<<<<<<
  * 		self.thisptr.GetGeomEdges()
@@ -5178,7 +5442,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":202
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":210
  * 		self.thisptr.GetGeomEdges()
  * 
  * 	def GetGeomFaces(self):             # <<<<<<<<<<<<<<
@@ -5204,7 +5468,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetGeomFaces", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":203
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":211
  * 
  * 	def GetGeomFaces(self):
  * 		self.thisptr.GetGeomFaces()             # <<<<<<<<<<<<<<
@@ -5213,7 +5477,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->GetGeomFaces();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":202
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":210
  * 		self.thisptr.GetGeomEdges()
  * 
  * 	def GetGeomFaces(self):             # <<<<<<<<<<<<<<
@@ -5228,7 +5492,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":205
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":213
  * 		self.thisptr.GetGeomFaces()
  * 
  * 	def GetSurfacesParameters(self):             # <<<<<<<<<<<<<<
@@ -5254,7 +5518,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetSurfacesParameters", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":206
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":214
  * 
  * 	def GetSurfacesParameters(self):
  * 		self.thisptr.GetSurfacesParameters()             # <<<<<<<<<<<<<<
@@ -5263,7 +5527,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->GetSurfacesParameters();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":205
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":213
  * 		self.thisptr.GetGeomFaces()
  * 
  * 	def GetSurfacesParameters(self):             # <<<<<<<<<<<<<<
@@ -5278,7 +5542,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":208
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":216
  * 		self.thisptr.GetSurfacesParameters()
  * 
  * 	def GetGeomPointsOnCorrespondingFaces(self):             # <<<<<<<<<<<<<<
@@ -5304,7 +5568,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetGeomPointsOnCorrespondingFaces", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":209
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":217
  * 
  * 	def GetGeomPointsOnCorrespondingFaces(self):
  * 		self.thisptr.GetGeomPointsOnCorrespondingFaces()             # <<<<<<<<<<<<<<
@@ -5313,7 +5577,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->GetGeomPointsOnCorrespondingFaces();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":208
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":216
  * 		self.thisptr.GetSurfacesParameters()
  * 
  * 	def GetGeomPointsOnCorrespondingFaces(self):             # <<<<<<<<<<<<<<
@@ -5328,7 +5592,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":211
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":219
  * 		self.thisptr.GetGeomPointsOnCorrespondingFaces()
  * 
  * 	def IdentifySurfacesContainingFaces(self):             # <<<<<<<<<<<<<<
@@ -5354,7 +5618,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("IdentifySurfacesContainingFaces", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":212
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":220
  * 
  * 	def IdentifySurfacesContainingFaces(self):
  * 		self.thisptr.IdentifySurfacesContainingFaces()             # <<<<<<<<<<<<<<
@@ -5363,7 +5627,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->IdentifySurfacesContainingFaces();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":211
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":219
  * 		self.thisptr.GetGeomPointsOnCorrespondingFaces()
  * 
  * 	def IdentifySurfacesContainingFaces(self):             # <<<<<<<<<<<<<<
@@ -5378,7 +5642,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":214
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":222
  * 		self.thisptr.IdentifySurfacesContainingFaces()
  * 
  * 	def ProjectMeshOnSurface(self):             # <<<<<<<<<<<<<<
@@ -5404,7 +5668,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("ProjectMeshOnSurface", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":215
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":223
  * 
  * 	def ProjectMeshOnSurface(self):
  * 		self.thisptr.ProjectMeshOnSurface()             # <<<<<<<<<<<<<<
@@ -5413,7 +5677,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_self->thisptr->ProjectMeshOnSurface();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":214
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":222
  * 		self.thisptr.IdentifySurfacesContainingFaces()
  * 
  * 	def ProjectMeshOnSurface(self):             # <<<<<<<<<<<<<<
@@ -5428,7 +5692,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":220
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":228
  * 	# 	self.thisptr.RepairDualProjectedParameters()
  * 
  * 	def MeshPointInversionSurface(self):             # <<<<<<<<<<<<<<
@@ -5454,16 +5718,16 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("MeshPointInversionSurface", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":221
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":229
  * 
  * 	def MeshPointInversionSurface(self):
  * 		self.thisptr.MeshPointInversionSurface()             # <<<<<<<<<<<<<<
  * 
- * 	# def MeshPointInversionSurface(self):
+ * 	# def GetBoundaryPointsOrder(self):
  */
   __pyx_v_self->thisptr->MeshPointInversionSurface();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":220
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":228
  * 	# 	self.thisptr.RepairDualProjectedParameters()
  * 
  * 	def MeshPointInversionSurface(self):             # <<<<<<<<<<<<<<
@@ -5478,7 +5742,75 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":230
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":234
+ * 	# 	self.thisptr.GetBoundaryPointsOrder()
+ * 
+ * 	def ReturnModifiedMeshPoints(self,Real[:,::1] points):             # <<<<<<<<<<<<<<
+ * 		self.thisptr.ReturnModifiedMeshPoints(&points[0,0])
+ * 
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_45ReturnModifiedMeshPoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_points); /*proto*/
+static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_45ReturnModifiedMeshPoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_points) {
+  __Pyx_memviewslice __pyx_v_points = { 0, 0, { 0 }, { 0 }, { 0 } };
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("ReturnModifiedMeshPoints (wrapper)", 0);
+  assert(__pyx_arg_points); {
+    __pyx_v_points = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_arg_points); if (unlikely(!__pyx_v_points.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("Core.MeshGeneration.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.ReturnModifiedMeshPoints", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_44ReturnModifiedMeshPoints(((struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self), __pyx_v_points);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_44ReturnModifiedMeshPoints(struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_points) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  Py_ssize_t __pyx_t_1;
+  Py_ssize_t __pyx_t_2;
+  __Pyx_RefNannySetupContext("ReturnModifiedMeshPoints", 0);
+
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":235
+ * 
+ * 	def ReturnModifiedMeshPoints(self,Real[:,::1] points):
+ * 		self.thisptr.ReturnModifiedMeshPoints(&points[0,0])             # <<<<<<<<<<<<<<
+ * 
+ * 	@boundscheck(False)
+ */
+  __pyx_t_1 = 0;
+  __pyx_t_2 = 0;
+  __pyx_v_self->thisptr->ReturnModifiedMeshPoints((&(*((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=1 */ ((char *) (((__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=0 */ (__pyx_v_points.data + __pyx_t_1 * __pyx_v_points.strides[0]) )) + __pyx_t_2)) )))));
+
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":234
+ * 	# 	self.thisptr.GetBoundaryPointsOrder()
+ * 
+ * 	def ReturnModifiedMeshPoints(self,Real[:,::1] points):             # <<<<<<<<<<<<<<
+ * 		self.thisptr.ReturnModifiedMeshPoints(&points[0,0])
+ * 
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_points, 1);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":238
  * 
  * 	@boundscheck(False)
  * 	def GetDirichletData(self):             # <<<<<<<<<<<<<<
@@ -5487,19 +5819,19 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_45GetDirichletData(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_45GetDirichletData(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_47GetDirichletData(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_47GetDirichletData(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetDirichletData (wrapper)", 0);
-  __pyx_r = __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_44GetDirichletData(((struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_46GetDirichletData(((struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_44GetDirichletData(struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
+static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_46GetDirichletData(struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
   struct PassToPython __pyx_v_struct_to_python;
   PyArrayObject *__pyx_v_nodes_dir = 0;
   __pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_i;
@@ -5537,7 +5869,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __pyx_pybuffernd_displacements_BC.data = NULL;
   __pyx_pybuffernd_displacements_BC.rcbuffer = &__pyx_pybuffer_displacements_BC;
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":232
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":240
  * 	def GetDirichletData(self):
  * 		cdef:
  * 			PassToPython struct_to_python = self.thisptr.GetDirichletData()             # <<<<<<<<<<<<<<
@@ -5546,21 +5878,21 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
   __pyx_v_struct_to_python = __pyx_v_self->thisptr->GetDirichletData();
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":233
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":241
  * 		cdef:
  * 			PassToPython struct_to_python = self.thisptr.GetDirichletData()
  * 			np.ndarray[np.int64_t, ndim=2, mode='c'] nodes_dir = np.zeros((struct_to_python.nodes_dir_size,1),dtype=np.int64)             # <<<<<<<<<<<<<<
  * 			Integer i
  * 			UInteger j
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_From_long(__pyx_v_struct_to_python.nodes_dir_size); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyInt_From_long(__pyx_v_struct_to_python.nodes_dir_size); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
@@ -5568,32 +5900,32 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_GIVEREF(__pyx_int_1);
   PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_int_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_3);
   __pyx_t_3 = 0;
-  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_int64); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_int64); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_6 = ((PyArrayObject *)__pyx_t_5);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer, (PyObject*)__pyx_t_6, &__Pyx_TypeInfo_nn___pyx_t_5numpy_int64_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {
       __pyx_v_nodes_dir = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.buf = NULL;
-      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     } else {__pyx_pybuffernd_nodes_dir.diminfo[0].strides = __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_nodes_dir.diminfo[0].shape = __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_nodes_dir.diminfo[1].strides = __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_nodes_dir.diminfo[1].shape = __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.shape[1];
     }
   }
@@ -5601,7 +5933,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __pyx_v_nodes_dir = ((PyArrayObject *)__pyx_t_5);
   __pyx_t_5 = 0;
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":237
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":245
  * 			UInteger j
  * 
  * 		for i in range(struct_to_python.nodes_dir_size):             # <<<<<<<<<<<<<<
@@ -5612,34 +5944,34 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
     __pyx_v_i = __pyx_t_8;
 
-    /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":238
+    /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":246
  * 
  * 		for i in range(struct_to_python.nodes_dir_size):
  * 			nodes_dir[i] = struct_to_python.nodes_dir_out_stl[i]             # <<<<<<<<<<<<<<
  * 
  * 		cdef np.ndarray[np.float64_t, ndim=2, mode='c'] displacements_BC = \
  */
-    __pyx_t_5 = __Pyx_PyInt_From_long((__pyx_v_struct_to_python.nodes_dir_out_stl[__pyx_v_i])); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 238; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_5 = __Pyx_PyInt_From_long((__pyx_v_struct_to_python.nodes_dir_out_stl[__pyx_v_i])); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 246; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_5);
-    if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_nodes_dir), __pyx_v_i, __pyx_t_5, __pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer, 1, __Pyx_PyInt_From_long, 0, 0, 0) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 238; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_nodes_dir), __pyx_v_i, __pyx_t_5, __pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer, 1, __Pyx_PyInt_From_long, 0, 0, 0) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 246; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   }
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":241
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":249
  * 
  * 		cdef np.ndarray[np.float64_t, ndim=2, mode='c'] displacements_BC = \
  * 				np.zeros((self.thisptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64)             # <<<<<<<<<<<<<<
  * 		for j in range(self.thisptr.ndim*struct_to_python.nodes_dir_size):
  * 			displacements_BC[j] = struct_to_python.displacement_BC_stl[j]
  */
-  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 249; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 249; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyInt_From_unsigned_long((__pyx_v_self->thisptr->ndim * __pyx_v_struct_to_python.nodes_dir_size)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyInt_From_unsigned_long((__pyx_v_self->thisptr->ndim * __pyx_v_struct_to_python.nodes_dir_size)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 249; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 249; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_5);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_5);
@@ -5647,32 +5979,32 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __Pyx_GIVEREF(__pyx_int_1);
   PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_int_1);
   __pyx_t_5 = 0;
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 249; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 249; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 249; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_float64); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_float64); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 249; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 249; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 249; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 249; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_9 = ((PyArrayObject *)__pyx_t_4);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer, (PyObject*)__pyx_t_9, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {
       __pyx_v_displacements_BC = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.buf = NULL;
-      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 240; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 248; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     } else {__pyx_pybuffernd_displacements_BC.diminfo[0].strides = __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_displacements_BC.diminfo[0].shape = __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_displacements_BC.diminfo[1].strides = __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_displacements_BC.diminfo[1].shape = __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.shape[1];
     }
   }
@@ -5680,7 +6012,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __pyx_v_displacements_BC = ((PyArrayObject *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":242
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":250
  * 		cdef np.ndarray[np.float64_t, ndim=2, mode='c'] displacements_BC = \
  * 				np.zeros((self.thisptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64)
  * 		for j in range(self.thisptr.ndim*struct_to_python.nodes_dir_size):             # <<<<<<<<<<<<<<
@@ -5691,20 +6023,20 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   for (__pyx_t_11 = 0; __pyx_t_11 < __pyx_t_10; __pyx_t_11+=1) {
     __pyx_v_j = __pyx_t_11;
 
-    /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":243
+    /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":251
  * 				np.zeros((self.thisptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64)
  * 		for j in range(self.thisptr.ndim*struct_to_python.nodes_dir_size):
  * 			displacements_BC[j] = struct_to_python.displacement_BC_stl[j]             # <<<<<<<<<<<<<<
  * 
  * 		return nodes_dir, displacements_BC.reshape(struct_to_python.nodes_dir_size,self.thisptr.ndim)
  */
-    __pyx_t_4 = PyFloat_FromDouble((__pyx_v_struct_to_python.displacement_BC_stl[__pyx_v_j])); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = PyFloat_FromDouble((__pyx_v_struct_to_python.displacement_BC_stl[__pyx_v_j])); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 251; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
-    if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_displacements_BC), __pyx_v_j, __pyx_t_4, __pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger, 0, __Pyx_PyInt_From_unsigned_long, 0, 0, 0) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_displacements_BC), __pyx_v_j, __pyx_t_4, __pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger, 0, __Pyx_PyInt_From_unsigned_long, 0, 0, 0) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 251; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":245
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":253
  * 			displacements_BC[j] = struct_to_python.displacement_BC_stl[j]
  * 
  * 		return nodes_dir, displacements_BC.reshape(struct_to_python.nodes_dir_size,self.thisptr.ndim)             # <<<<<<<<<<<<<<
@@ -5712,11 +6044,11 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_displacements_BC), __pyx_n_s_reshape); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_displacements_BC), __pyx_n_s_reshape); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_5 = __Pyx_PyInt_From_long(__pyx_v_struct_to_python.nodes_dir_size); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyInt_From_long(__pyx_v_struct_to_python.nodes_dir_size); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_3 = __Pyx_PyInt_From_unsigned_long(__pyx_v_self->thisptr->ndim); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyInt_From_unsigned_long(__pyx_v_self->thisptr->ndim); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_2 = NULL;
   __pyx_t_12 = 0;
@@ -5730,7 +6062,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
       __pyx_t_12 = 1;
     }
   }
-  __pyx_t_13 = PyTuple_New(2+__pyx_t_12); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_13 = PyTuple_New(2+__pyx_t_12); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_13);
   if (__pyx_t_2) {
     __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_t_2); __pyx_t_2 = NULL;
@@ -5741,11 +6073,11 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   PyTuple_SET_ITEM(__pyx_t_13, 1+__pyx_t_12, __pyx_t_3);
   __pyx_t_5 = 0;
   __pyx_t_3 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_13, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_13, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(((PyObject *)__pyx_v_nodes_dir));
   __Pyx_GIVEREF(((PyObject *)__pyx_v_nodes_dir));
@@ -5757,7 +6089,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":230
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":238
  * 
  * 	@boundscheck(False)
  * 	def GetDirichletData(self):             # <<<<<<<<<<<<<<
@@ -5792,7 +6124,7 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
   return __pyx_r;
 }
 
-/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":248
+/* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":256
  * 
  * 
  * 	def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -5801,22 +6133,22 @@ static PyObject *__pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_
  */
 
 /* Python wrapper */
-static void __pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_47__dealloc__(PyObject *__pyx_v_self); /*proto*/
-static void __pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_47__dealloc__(PyObject *__pyx_v_self) {
+static void __pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_49__dealloc__(PyObject *__pyx_v_self); /*proto*/
+static void __pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_49__dealloc__(PyObject *__pyx_v_self) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__dealloc__ (wrapper)", 0);
-  __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_46__dealloc__(((struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
+  __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_48__dealloc__(((struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
 }
 
-static void __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_46__dealloc__(struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
+static void __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_48__dealloc__(struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":249
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":257
  * 
  * 	def __dealloc__(self):
  * 		if self.thisptr != NULL:             # <<<<<<<<<<<<<<
@@ -5825,14 +6157,14 @@ static void __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10Pos
   __pyx_t_1 = ((__pyx_v_self->thisptr != NULL) != 0);
   if (__pyx_t_1) {
 
-    /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":250
+    /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":258
  * 	def __dealloc__(self):
  * 		if self.thisptr != NULL:
  * 			del self.thisptr             # <<<<<<<<<<<<<<
  */
     delete __pyx_v_self->thisptr;
 
-    /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":249
+    /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":257
  * 
  * 	def __dealloc__(self):
  * 		if self.thisptr != NULL:             # <<<<<<<<<<<<<<
@@ -5840,7 +6172,7 @@ static void __pyx_pf_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10Pos
  */
   }
 
-  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":248
+  /* "Core/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":256
  * 
  * 
  * 	def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -19820,6 +20152,69 @@ static CYTHON_INLINE PyObject *__pyx_convert_PyByteArray_string_to_py_std__in_st
   return __pyx_r;
 }
 
+/* "vector.to_py":67
+ * 
+ * @cname("__pyx_convert_vector_to_py___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real")
+ * cdef object __pyx_convert_vector_to_py___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(vector[X]& v):             # <<<<<<<<<<<<<<
+ *     return [X_to_py(v[i]) for i in range(v.size())]
+ * 
+ */
+
+static PyObject *__pyx_convert_vector_to_py___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(const std::vector<__pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real>  &__pyx_v_v) {
+  size_t __pyx_v_i;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  size_t __pyx_t_2;
+  size_t __pyx_t_3;
+  PyObject *__pyx_t_4 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__pyx_convert_vector_to_py___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real", 0);
+
+  /* "vector.to_py":68
+ * @cname("__pyx_convert_vector_to_py___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real")
+ * cdef object __pyx_convert_vector_to_py___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(vector[X]& v):
+ *     return [X_to_py(v[i]) for i in range(v.size())]             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 68; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __pyx_v_v.size();
+  for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
+    __pyx_v_i = __pyx_t_3;
+    __pyx_t_4 = PyFloat_FromDouble((__pyx_v_v[__pyx_v_i])); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 68; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_4);
+    if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_4))) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 68; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  }
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "vector.to_py":67
+ * 
+ * @cname("__pyx_convert_vector_to_py___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real")
+ * cdef object __pyx_convert_vector_to_py___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(vector[X]& v):             # <<<<<<<<<<<<<<
+ *     return [X_to_py(v[i]) for i in range(v.size())]
+ * 
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_AddTraceback("vector.to_py.__pyx_convert_vector_to_py___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = 0;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
 static PyObject *__pyx_tp_new_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy(PyTypeObject *t, PyObject *a, PyObject *k) {
   struct __pyx_obj_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *p;
   PyObject *o;
@@ -19975,7 +20370,7 @@ static void __pyx_tp_dealloc_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMe
     PyObject *etype, *eval, *etb;
     PyErr_Fetch(&etype, &eval, &etb);
     ++Py_REFCNT(o);
-    __pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_47__dealloc__(o);
+    __pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_49__dealloc__(o);
     --Py_REFCNT(o);
     PyErr_Restore(etype, eval, etb);
   }
@@ -20005,7 +20400,8 @@ static PyMethodDef __pyx_methods_4Core_14MeshGeneration_18CurvilinearMeshing_8Po
   {"IdentifySurfacesContainingFaces", (PyCFunction)__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_39IdentifySurfacesContainingFaces, METH_NOARGS, 0},
   {"ProjectMeshOnSurface", (PyCFunction)__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_41ProjectMeshOnSurface, METH_NOARGS, 0},
   {"MeshPointInversionSurface", (PyCFunction)__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_43MeshPointInversionSurface, METH_NOARGS, 0},
-  {"GetDirichletData", (PyCFunction)__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_45GetDirichletData, METH_NOARGS, 0},
+  {"ReturnModifiedMeshPoints", (PyCFunction)__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_45ReturnModifiedMeshPoints, METH_O, 0},
+  {"GetDirichletData", (PyCFunction)__pyx_pw_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_47GetDirichletData, METH_NOARGS, 0},
   {0, 0, 0, 0}
 };
 
@@ -20772,12 +21168,14 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_Unable_to_convert_item_to_object, __pyx_k_Unable_to_convert_item_to_object, sizeof(__pyx_k_Unable_to_convert_item_to_object), 0, 0, 1, 0},
   {&__pyx_n_s_ValueError, __pyx_k_ValueError, sizeof(__pyx_k_ValueError), 0, 0, 1, 1},
   {&__pyx_n_s_allocate_buffer, __pyx_k_allocate_buffer, sizeof(__pyx_k_allocate_buffer), 0, 0, 1, 1},
+  {&__pyx_n_s_array, __pyx_k_array, sizeof(__pyx_k_array), 0, 0, 1, 1},
   {&__pyx_n_s_base, __pyx_k_base, sizeof(__pyx_k_base), 0, 0, 1, 1},
   {&__pyx_n_s_c, __pyx_k_c, sizeof(__pyx_k_c), 0, 0, 1, 1},
   {&__pyx_n_u_c, __pyx_k_c, sizeof(__pyx_k_c), 0, 1, 0, 1},
   {&__pyx_n_s_class, __pyx_k_class, sizeof(__pyx_k_class), 0, 0, 1, 1},
   {&__pyx_kp_s_contiguous_and_direct, __pyx_k_contiguous_and_direct, sizeof(__pyx_k_contiguous_and_direct), 0, 0, 1, 0},
   {&__pyx_kp_s_contiguous_and_indirect, __pyx_k_contiguous_and_indirect, sizeof(__pyx_k_contiguous_and_indirect), 0, 0, 1, 0},
+  {&__pyx_n_s_copy, __pyx_k_copy, sizeof(__pyx_k_copy), 0, 0, 1, 1},
   {&__pyx_n_s_dimension, __pyx_k_dimension, sizeof(__pyx_k_dimension), 0, 0, 1, 1},
   {&__pyx_n_s_dtype, __pyx_k_dtype, sizeof(__pyx_k_dtype), 0, 0, 1, 1},
   {&__pyx_n_s_dtype_is_object, __pyx_k_dtype_is_object, sizeof(__pyx_k_dtype_is_object), 0, 0, 1, 1},
@@ -20830,7 +21228,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 120; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 124; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_RuntimeError = __Pyx_GetBuiltinName(__pyx_n_s_RuntimeError); if (!__pyx_builtin_RuntimeError) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 799; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -21226,9 +21624,9 @@ PyMODINIT_FUNC PyInit_PostMeshPy(void)
   __pyx_type_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy.tp_print = 0;
   if (PyObject_SetAttrString(__pyx_m, "PostMeshCurvePy", (PyObject *)&__pyx_type_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 11; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_ptype_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy = &__pyx_type_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy;
-  if (PyType_Ready(&__pyx_type_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyType_Ready(&__pyx_type_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 142; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_type_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy.tp_print = 0;
-  if (PyObject_SetAttrString(__pyx_m, "PostMeshSurfacePy", (PyObject *)&__pyx_type_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyObject_SetAttrString(__pyx_m, "PostMeshSurfacePy", (PyObject *)&__pyx_type_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 142; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_ptype_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy = &__pyx_type_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy;
   if (PyType_Ready(&__pyx_type___pyx_array) < 0) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 101; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_type___pyx_array.tp_print = 0;
@@ -21408,11 +21806,11 @@ PyMODINIT_FUNC PyInit_PostMeshPy(void)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   PyType_Modified(__pyx_memoryviewslice_type);
 
-  /* "string.to_py":55
+  /* "vector.to_py":67
  * 
- * @cname("__pyx_convert_PyByteArray_string_to_py_std__in_string")
- * cdef inline object __pyx_convert_PyByteArray_string_to_py_std__in_string(const string& s):             # <<<<<<<<<<<<<<
- *     return __Pyx_PyByteArray_FromStringAndSize(s.data(), s.size())
+ * @cname("__pyx_convert_vector_to_py___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real")
+ * cdef object __pyx_convert_vector_to_py___pyx_t_4Core_14MeshGeneration_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(vector[X]& v):             # <<<<<<<<<<<<<<
+ *     return [X_to_py(v[i]) for i in range(v.size())]
  * 
  */
 
@@ -23920,6 +24318,32 @@ __pyx_fail:
     return result;
 }
 
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_unsigned_long(unsigned long value) {
+    const unsigned long neg_one = (unsigned long) -1, const_zero = (unsigned long) 0;
+    const int is_unsigned = neg_one > const_zero;
+    if (is_unsigned) {
+        if (sizeof(unsigned long) < sizeof(long)) {
+            return PyInt_FromLong((long) value);
+        } else if (sizeof(unsigned long) <= sizeof(unsigned long)) {
+            return PyLong_FromUnsignedLong((unsigned long) value);
+        } else if (sizeof(unsigned long) <= sizeof(unsigned PY_LONG_LONG)) {
+            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
+        }
+    } else {
+        if (sizeof(unsigned long) <= sizeof(long)) {
+            return PyInt_FromLong((long) value);
+        } else if (sizeof(unsigned long) <= sizeof(PY_LONG_LONG)) {
+            return PyLong_FromLongLong((PY_LONG_LONG) value);
+        }
+    }
+    {
+        int one = 1; int little = (int)*(unsigned char *)&one;
+        unsigned char *bytes = (unsigned char *)&value;
+        return _PyLong_FromByteArray(bytes, sizeof(unsigned long),
+                                     little, !is_unsigned);
+    }
+}
+
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
     const long neg_one = (long) -1, const_zero = (long) 0;
     const int is_unsigned = neg_one > const_zero;
@@ -24128,32 +24552,6 @@ raise_neg_overflow:
     PyErr_SetString(PyExc_OverflowError,
         "can't convert negative value to long");
     return (long) -1;
-}
-
-static CYTHON_INLINE PyObject* __Pyx_PyInt_From_unsigned_long(unsigned long value) {
-    const unsigned long neg_one = (unsigned long) -1, const_zero = (unsigned long) 0;
-    const int is_unsigned = neg_one > const_zero;
-    if (is_unsigned) {
-        if (sizeof(unsigned long) < sizeof(long)) {
-            return PyInt_FromLong((long) value);
-        } else if (sizeof(unsigned long) <= sizeof(unsigned long)) {
-            return PyLong_FromUnsignedLong((unsigned long) value);
-        } else if (sizeof(unsigned long) <= sizeof(unsigned PY_LONG_LONG)) {
-            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
-        }
-    } else {
-        if (sizeof(unsigned long) <= sizeof(long)) {
-            return PyInt_FromLong((long) value);
-        } else if (sizeof(unsigned long) <= sizeof(PY_LONG_LONG)) {
-            return PyLong_FromLongLong((PY_LONG_LONG) value);
-        }
-    }
-    {
-        int one = 1; int little = (int)*(unsigned char *)&one;
-        unsigned char *bytes = (unsigned char *)&value;
-        return _PyLong_FromByteArray(bytes, sizeof(unsigned long),
-                                     little, !is_unsigned);
-    }
 }
 
 #if CYTHON_CCOMPLEX
@@ -24949,6 +25347,190 @@ raise_neg_overflow:
     PyErr_SetString(PyExc_OverflowError,
         "can't convert negative value to char");
     return (char) -1;
+}
+
+static CYTHON_INLINE size_t __Pyx_PyInt_As_size_t(PyObject *x) {
+    const size_t neg_one = (size_t) -1, const_zero = (size_t) 0;
+    const int is_unsigned = neg_one > const_zero;
+#if PY_MAJOR_VERSION < 3
+    if (likely(PyInt_Check(x))) {
+        if (sizeof(size_t) < sizeof(long)) {
+            __PYX_VERIFY_RETURN_INT(size_t, long, PyInt_AS_LONG(x))
+        } else {
+            long val = PyInt_AS_LONG(x);
+            if (is_unsigned && unlikely(val < 0)) {
+                goto raise_neg_overflow;
+            }
+            return (size_t) val;
+        }
+    } else
+#endif
+    if (likely(PyLong_Check(x))) {
+        if (is_unsigned) {
+#if CYTHON_USE_PYLONG_INTERNALS
+            const digit* digits = ((PyLongObject*)x)->ob_digit;
+            switch (Py_SIZE(x)) {
+                case  0: return (size_t) 0;
+                case  1: __PYX_VERIFY_RETURN_INT(size_t, digit, digits[0])
+                case 2:
+                    if (8 * sizeof(size_t) > 1 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(size_t, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(size_t) >= 2 * PyLong_SHIFT) {
+                            return (size_t) (((((size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0]));
+                        }
+                    }
+                    break;
+                case 3:
+                    if (8 * sizeof(size_t) > 2 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(size_t, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(size_t) >= 3 * PyLong_SHIFT) {
+                            return (size_t) (((((((size_t)digits[2]) << PyLong_SHIFT) | (size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0]));
+                        }
+                    }
+                    break;
+                case 4:
+                    if (8 * sizeof(size_t) > 3 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(size_t, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(size_t) >= 4 * PyLong_SHIFT) {
+                            return (size_t) (((((((((size_t)digits[3]) << PyLong_SHIFT) | (size_t)digits[2]) << PyLong_SHIFT) | (size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0]));
+                        }
+                    }
+                    break;
+            }
+#endif
+#if CYTHON_COMPILING_IN_CPYTHON
+            if (unlikely(Py_SIZE(x) < 0)) {
+                goto raise_neg_overflow;
+            }
+#else
+            {
+                int result = PyObject_RichCompareBool(x, Py_False, Py_LT);
+                if (unlikely(result < 0))
+                    return (size_t) -1;
+                if (unlikely(result == 1))
+                    goto raise_neg_overflow;
+            }
+#endif
+            if (sizeof(size_t) <= sizeof(unsigned long)) {
+                __PYX_VERIFY_RETURN_INT_EXC(size_t, unsigned long, PyLong_AsUnsignedLong(x))
+            } else if (sizeof(size_t) <= sizeof(unsigned PY_LONG_LONG)) {
+                __PYX_VERIFY_RETURN_INT_EXC(size_t, unsigned PY_LONG_LONG, PyLong_AsUnsignedLongLong(x))
+            }
+        } else {
+#if CYTHON_USE_PYLONG_INTERNALS
+            const digit* digits = ((PyLongObject*)x)->ob_digit;
+            switch (Py_SIZE(x)) {
+                case  0: return (size_t) 0;
+                case -1: __PYX_VERIFY_RETURN_INT(size_t, sdigit, -(sdigit) digits[0])
+                case  1: __PYX_VERIFY_RETURN_INT(size_t,  digit, +digits[0])
+                case -2:
+                    if (8 * sizeof(size_t) - 1 > 1 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(size_t, long, -(long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(size_t) - 1 > 2 * PyLong_SHIFT) {
+                            return (size_t) (((size_t)-1)*(((((size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0])));
+                        }
+                    }
+                    break;
+                case 2:
+                    if (8 * sizeof(size_t) > 1 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(size_t, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(size_t) - 1 > 2 * PyLong_SHIFT) {
+                            return (size_t) ((((((size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0])));
+                        }
+                    }
+                    break;
+                case -3:
+                    if (8 * sizeof(size_t) - 1 > 2 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(size_t, long, -(long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(size_t) - 1 > 3 * PyLong_SHIFT) {
+                            return (size_t) (((size_t)-1)*(((((((size_t)digits[2]) << PyLong_SHIFT) | (size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0])));
+                        }
+                    }
+                    break;
+                case 3:
+                    if (8 * sizeof(size_t) > 2 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(size_t, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(size_t) - 1 > 3 * PyLong_SHIFT) {
+                            return (size_t) ((((((((size_t)digits[2]) << PyLong_SHIFT) | (size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0])));
+                        }
+                    }
+                    break;
+                case -4:
+                    if (8 * sizeof(size_t) - 1 > 3 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(size_t, long, -(long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(size_t) - 1 > 4 * PyLong_SHIFT) {
+                            return (size_t) (((size_t)-1)*(((((((((size_t)digits[3]) << PyLong_SHIFT) | (size_t)digits[2]) << PyLong_SHIFT) | (size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0])));
+                        }
+                    }
+                    break;
+                case 4:
+                    if (8 * sizeof(size_t) > 3 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(size_t, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(size_t) - 1 > 4 * PyLong_SHIFT) {
+                            return (size_t) ((((((((((size_t)digits[3]) << PyLong_SHIFT) | (size_t)digits[2]) << PyLong_SHIFT) | (size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0])));
+                        }
+                    }
+                    break;
+            }
+#endif
+            if (sizeof(size_t) <= sizeof(long)) {
+                __PYX_VERIFY_RETURN_INT_EXC(size_t, long, PyLong_AsLong(x))
+            } else if (sizeof(size_t) <= sizeof(PY_LONG_LONG)) {
+                __PYX_VERIFY_RETURN_INT_EXC(size_t, PY_LONG_LONG, PyLong_AsLongLong(x))
+            }
+        }
+        {
+#if CYTHON_COMPILING_IN_PYPY && !defined(_PyLong_AsByteArray)
+            PyErr_SetString(PyExc_RuntimeError,
+                            "_PyLong_AsByteArray() not available in PyPy, cannot convert large numbers");
+#else
+            size_t val;
+            PyObject *v = __Pyx_PyNumber_Int(x);
+ #if PY_MAJOR_VERSION < 3
+            if (likely(v) && !PyLong_Check(v)) {
+                PyObject *tmp = v;
+                v = PyNumber_Long(tmp);
+                Py_DECREF(tmp);
+            }
+ #endif
+            if (likely(v)) {
+                int one = 1; int is_little = (int)*(unsigned char *)&one;
+                unsigned char *bytes = (unsigned char *)&val;
+                int ret = _PyLong_AsByteArray((PyLongObject *)v,
+                                              bytes, sizeof(val),
+                                              is_little, !is_unsigned);
+                Py_DECREF(v);
+                if (likely(!ret))
+                    return val;
+            }
+#endif
+            return (size_t) -1;
+        }
+    } else {
+        size_t val;
+        PyObject *tmp = __Pyx_PyNumber_Int(x);
+        if (!tmp) return (size_t) -1;
+        val = __Pyx_PyInt_As_size_t(tmp);
+        Py_DECREF(tmp);
+        return val;
+    }
+raise_overflow:
+    PyErr_SetString(PyExc_OverflowError,
+        "value too large to convert to size_t");
+    return (size_t) -1;
+raise_neg_overflow:
+    PyErr_SetString(PyExc_OverflowError,
+        "can't convert negative value to size_t");
+    return (size_t) -1;
 }
 
 static int __Pyx_check_binary_version(void) {

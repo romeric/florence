@@ -25,6 +25,7 @@ cdef class PostMeshCurvePy:
 		cdef string cpp_element_type = py_element_type
 		# self.thisptr = new OCCPlugin()
 		self.thisptr = new PostMeshCurve(cpp_element_type,dimension)
+		self.ndim = 2
 
 	def Init(self):
 		self.thisptr.Init()
@@ -69,6 +70,9 @@ cdef class PostMeshCurvePy:
 
 	def GetGeomVertices(self):
 		self.thisptr.GetGeomVertices()
+		cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()
+		cdef np.ndarray geometry_points = np.array(geom_points,copy=False)
+		return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
 
 	def GetGeomEdges(self):
 		self.thisptr.GetGeomEdges()
@@ -147,10 +151,11 @@ cdef class PostMeshSurfacePy:
 
 	cdef PostMeshSurface *thisptr
 
-	def __cinit__(self, bytes py_element_type, UInteger dimension=2):
+	def __cinit__(self, bytes py_element_type, UInteger dimension=3):
 		# Convert to cpp string explicitly
 		cdef string cpp_element_type = py_element_type
 		self.thisptr = new PostMeshSurface(cpp_element_type,dimension)
+		self.ndim = 3
 
 	def Init(self):
 		self.thisptr.Init()
@@ -195,6 +200,9 @@ cdef class PostMeshSurfacePy:
 
 	def GetGeomVertices(self):
 		self.thisptr.GetGeomVertices()
+		cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()
+		cdef np.ndarray geometry_points = np.array(geom_points,copy=False)
+		return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
 
 	def GetGeomEdges(self):
 		self.thisptr.GetGeomEdges()
@@ -220,11 +228,11 @@ cdef class PostMeshSurfacePy:
 	def MeshPointInversionSurface(self):
 		self.thisptr.MeshPointInversionSurface()
 
-	# def MeshPointInversionSurface(self):
-		# self.thisptr.MeshPointInversionSurface()
-
 	# def GetBoundaryPointsOrder(self):
 	# 	self.thisptr.GetBoundaryPointsOrder()
+
+	def ReturnModifiedMeshPoints(self,Real[:,::1] points):
+		self.thisptr.ReturnModifiedMeshPoints(&points[0,0])
 
 	@boundscheck(False)
 	def GetDirichletData(self):
