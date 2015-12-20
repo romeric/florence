@@ -21,7 +21,7 @@ class IncrementallyLinearisedNeoHookean(object):
 
 		"""
 
-	def __init__(self, ndim):
+	def __init__(self, ndim, MaterialArgs=None):
 		super(IncrementallyLinearisedNeoHookean, self).__init__()
 		self.ndim = ndim
 		self.nvar = self.ndim

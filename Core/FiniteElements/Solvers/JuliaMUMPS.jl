@@ -1,5 +1,12 @@
 
-include("/home/roman/Julia/MUMPS.jl/src/MUMPS.jl")
+if CPU_CORES == 16
+	prepender = "/home/roman"
+elseif CPU_CORES == 4
+	prepender = "/media/MATLAB"
+end
+
+include(prepender*"/Julia/MUMPS.jl/src/MUMPS.jl")
+
 using MUMPS
 using MAT
 
