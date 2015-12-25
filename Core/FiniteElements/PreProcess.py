@@ -52,7 +52,9 @@ def PreProcess(MainData,Pr,pwd):
         elif MainData.MeshInfo.Reader is 'ReadHighOrderMesh':
             mesh.ReadHighOrderMesh(MainData.MeshInfo.FileName.split(".")[0],MainData.C,MainData.MeshInfo.MeshType)
         elif MainData.MeshInfo.Reader is 'Sphere':
-            mesh.Sphere()
+            # mesh.Sphere()
+            # mesh.Sphere(points=10)
+            mesh.Sphere(points=2)
 
     if MainData.__NO_DEBUG__ is False:
         mesh.CheckNodeNumberingTri()
@@ -88,9 +90,6 @@ def PreProcess(MainData,Pr,pwd):
     # mesh.PlotMeshNumberingTri()
     
 
-    # mesh.Sphere()
-    # mesh.Sphere(points=14)
-    # mesh.Sphere(points=3)
     # mesh.RemoveElements((-0.55,-0.1,-0.4,0.1),plot_new_mesh=False) 
     # mesh.SimplePlot() 
     # mesh.PlotMeshNumberingTri()
@@ -98,7 +97,7 @@ def PreProcess(MainData,Pr,pwd):
     # un_faces = np.unique(mesh.faces)
     # vpoints = mesh.points[un_faces,:]
     # print np.linalg.norm(vpoints,axis=1)
-    # exit(0)
+    # exit()
 
 
 
@@ -117,7 +116,13 @@ def PreProcess(MainData,Pr,pwd):
     # print np.where(mesh.elements==130)[0]
     # print np.where(mesh.elements==140)[0]
     # print np.where(mesh.elements==127)[0]
-    # exit()
+
+    # print mesh.GetElementsWithBoundaryFacesTet() - mesh.ArrangeFacesTet()
+    # print 
+    # mesh.ArrangeFacesTet()
+
+    mesh.GetFacesTet()
+    exit()
 
 
     # STORE PATHS FOR MAIN, CORE & PROBLEM DIRECTORIES
@@ -164,6 +169,12 @@ def PreProcess(MainData,Pr,pwd):
     # print mesh.faces
     # print mesh.edges.shape
     # print mesh.points
+
+    # un_faces = np.unique(mesh.faces)
+    # vpoints = mesh.points[un_faces,:]
+    # print np.linalg.norm(vpoints,axis=1)
+
+    # mesh.GetFaceFlagsTets()
     # exit()
 
 
@@ -199,7 +210,9 @@ def PreProcess(MainData,Pr,pwd):
 
     # MainData.PostDomain, MainData.PostBoundary, MainData.PostQuadrature = GetBasesAtInegrationPoints(MainData.C,
     #   8,QuadratureOpt,MainData.MeshInfo.MeshType)
-    # sys.exit(0)
+
+    # print MainData.PostDomain.Jm
+    # exit()
 
     ############################################################################
 
@@ -342,7 +355,8 @@ def PreProcess(MainData,Pr,pwd):
     class solve(object):
         tol = 1e-07
 
-    if mesh.points.shape[0]*MainData.nvar > 200000:
+    # if mesh.points.shape[0]*MainData.nvar > 200000:
+    if mesh.points.shape[0]*MainData.nvar > 50000:
         # solve.type = 'iterative'
         solve.type = "direct"
         solve.sub_type = "MUMPS"

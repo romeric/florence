@@ -46,14 +46,14 @@ if __name__ == '__main__':
 
     
 
-    Run = 0
+    Run = 1
     if Run:
         t_FEM = time.time()
         nu = np.linspace(0.001,0.495,10)
         # nu = np.linspace(0.01,0.495,2)
         E = np.array([1e05])
         p = [2,3,4,5,6]
-        # p = [2]
+        p = [2]
          
 
         Results = {'PolynomialDegrees':p,'PoissonsRatios':nu,'Youngs_Modulus':E}
@@ -103,8 +103,11 @@ if __name__ == '__main__':
         fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'
 
         # print fname
+        print repr(scaledA)
+        print repr(condA)
+        exit()
         # exit(0)
-        savemat(fpath+fname,Results)
+        # savemat(fpath+fname,Results)
 
 
         t_FEM = time.time()-t_FEM

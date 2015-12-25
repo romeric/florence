@@ -9,7 +9,7 @@ def ProblemData(MainData):
     MainData.Formulation = 'DisplacementApproach'
     MainData.Analysis = 'Static'
     # MainData.AnalysisType = 'Linear'
-    # MainData.AnalysisType = 'Nonlinear'
+    MainData.AnalysisType = 'Nonlinear'
 
     # MATERIAL INPUT DATA 
     # MainData.MaterialArgs.Type = 'LinearModel'
@@ -20,7 +20,8 @@ def ProblemData(MainData):
     # MainData.MaterialArgs.Type = 'IncrementallyLinearisedBonetTranservselyIsotropicHyperElastic'
     # MainData.MaterialArgs.Type = 'NearlyIncompressibleNeoHookean'
     # MainData.MaterialArgs.Type = 'NeoHookean_1'
-    # MainData.MaterialArgs.Type = 'NeoHookean_2'
+    MainData.MaterialArgs.Type = 'NeoHookean_2'
+    # MainData.MaterialArgs.Type = 'NeoHookeanCoercive'
     # MainData.MaterialArgs.Type = 'MooneyRivlin'
     # MainData.MaterialArgs.Type = 'NearlyIncompressibleMooneyRivlin'
     # MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin' 
@@ -28,8 +29,8 @@ def ProblemData(MainData):
     # MainData.MaterialArgs.Type = 'TranservselyIsotropicHyperElastic'
     # MainData.MaterialArgs.Type = 'BonetTranservselyIsotropicHyperElastic'
 
-    # MainData.MaterialArgs.E  = 1.0e5
-    # MainData.MaterialArgs.nu = 0.4
+    MainData.MaterialArgs.E  = 1.0e5
+    MainData.MaterialArgs.nu = 0.4
 
     # MainData.MaterialArgs.E_A = 2.5*MainData.MaterialArgs.E
     # # # MainData.MaterialArgs.G_A = (E*(E_A*nu - E_A + E_A*nu**2 + E*nu**2))/(2*(nu + 1)*(2*E*nu**2 + E_A*nu - E_A))

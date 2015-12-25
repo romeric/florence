@@ -302,9 +302,9 @@ def plotter_individual_imshow(p=2,which_q=3,save=False):
     # print DictOutput['ScaledJacobian'][0,2,1,:]
 
     # print DictOutput['ScaledJacobian'][0,0,1,-4], DictOutput['ScaledJacobian'][0,-1,1,-4]
-    print DictOutput['ScaledJacobian'][2,2,0,:]
-    print DictOutput['PoissonsRatios']
-    exit()
+    # print DictOutput['ScaledJacobian'][2,2,0,:]
+    # print DictOutput['PoissonsRatios']
+    # exit()
     # which stretching 
     for lstr in range(0,7):
         # which formulation

@@ -8,8 +8,8 @@ def ProblemData(MainData):
     MainData.Fields = 'Mechanics'   
     MainData.Formulation = 'DisplacementApproach'
     MainData.Analysis = 'Static'
-    # MainData.AnalysisType = 'Linear'
-    MainData.AnalysisType = 'Nonlinear'
+    MainData.AnalysisType = 'Linear'
+    # MainData.AnalysisType = 'Nonlinear'
 
     # MATERIAL INPUT DATA 
     # MainData.MaterialArgs.Type = 'LinearModel'

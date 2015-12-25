@@ -29,8 +29,8 @@ inoremap <silent> <Plug>snipMateTrigger =snipMate#TriggerSnippet(1)
 inoremap <silent> <Plug>snipMateNextOrTrigger =snipMate#TriggerSnippet()
 imap <Right> <Nop>
 imap <Left> <Nop>
-imap <Down> <Nop>
-imap <Up> <Nop>
+inoremap <expr> <Down> pumvisible() ? "\" : "\<Down>"
+inoremap <expr> <Up> pumvisible() ? "\" : "\<Up>"
 xmap 	 <Plug>snipMateVisual
 smap 	 <Plug>snipMateNextOrTrigger
 nmap  o
@@ -165,6 +165,7 @@ nmap <silent> gc <Plug>TComment_gc
 omap ic <Plug>TComment_ic
 vmap ic <Plug>TComment_ic
 nnoremap m :wa:exec '!clear;python ~/Dropbox/Python/RunSession.py' shellescape(@%, 1)
+nnoremap ml :wa:exec '!clear; pdflatex -synctex=1 -interaction=nonstopmode CompMech_2015.tex'
 nnoremap mp :wa:exec '!clear;python ~/Dropbox/Florence/RunSession.py' shellescape(@%, 1)
 nnoremap tc :tabclose
 nnoremap tf :tabfirst
@@ -306,6 +307,7 @@ set comments=s1:/*,mb:*,ex:*/,://,b:#,:XCOMM,n:>,fb:-
 set commentstring=#%s
 set completefunc=youcompleteme#Complete
 set completeopt=preview,menuone
+set cpoptions=aAceFsB
 set fileencodings=ucs-bom,utf-8,default,latin1
 set helplang=en
 set laststatus=2
@@ -323,6 +325,7 @@ set tabstop=4
 set ttimeoutlen=0
 set updatetime=2000
 set wildignore=*.pyc
+set window=54
 let s:so_save = &so | let s:siso_save = &siso | set so=0 siso=0
 let v:this_session=expand("<sfile>:p")
 silent only
@@ -336,8 +339,8 @@ badd +1 Main/FiniteElements/MainFEM.py
 badd +1 Core/FiniteElements/PreProcess.py
 badd +1 Core/MeshGeneration/Me
 badd +673 Core/MeshGeneration/Mesh.py
-badd +135 ~/.vimrc
-badd +148 Problems/FiniteElements/RAE2822/ProblemData.py
+badd +137 ~/.vimrc
+badd +1 Problems/FiniteElements/RAE2822/ProblemData.py
 badd +21 Core/FiniteElements/ApplyDirichletBoundaryConditions.py
 badd +450 Core/FiniteElements/PostProcess.py
 badd +36 Core/FiniteElements/ElementalMatrices/ElementalStiffness.py
@@ -437,7 +440,7 @@ setlocal nospell
 setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
 setlocal spellfile=
 setlocal spelllang=en
-setlocal statusline=%!pyeval('powerline.statusline(1)')
+setlocal statusline=%!pyeval('powerline.statusline(6)')
 setlocal suffixesadd=.py
 setlocal swapfile
 setlocal synmaxcol=3000
@@ -453,12 +456,12 @@ setlocal nowinfixheight
 setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
-let s:l = 26 - ((0 * winheight(0) + 25) / 51)
+let s:l = 81 - ((30 * winheight(0) + 27) / 54)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-26
-normal! 022|
+81
+normal! 0
 tabedit Main/FiniteElements/MainFEM.py
 set splitbelow splitright
 set nosplitbelow
@@ -569,11 +572,11 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 150 - ((9 * winheight(0) + 25) / 51)
+let s:l = 156 - ((38 * winheight(0) + 26) / 53)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-150
+156
 normal! 0
 tabedit Core/FiniteElements/PreProcess.py
 set splitbelow splitright
@@ -668,7 +671,7 @@ setlocal nospell
 setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
 setlocal spellfile=
 setlocal spelllang=en
-setlocal statusline=%!pyeval('powerline.statusline(5)')
+setlocal statusline=%!pyeval('powerline.statusline(2)')
 setlocal suffixesadd=.py
 setlocal swapfile
 setlocal synmaxcol=3000
@@ -685,128 +688,12 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 67 - ((0 * winheight(0) + 25) / 51)
+let s:l = 67 - ((0 * winheight(0) + 26) / 53)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 67
-normal! 06|
-tabedit Problems/FiniteElements/RAE2822/ProblemData.py
-set splitbelow splitright
-set nosplitbelow
-set nosplitright
-wincmd t
-set winheight=1 winwidth=1
-argglobal
-setlocal keymap=
-setlocal noarabic
-setlocal autoindent
-setlocal nobinary
-setlocal bufhidden=
-setlocal buflisted
-setlocal buftype=
-setlocal cindent
-setlocal cinkeys=0{,0},0),:,!^F,o,O,e
-setlocal cinoptions=
-setlocal cinwords=if,else,while,do,for,switch
-setlocal colorcolumn=
-setlocal comments=sO:\"\ -,mO:\"\ \ ,eO:\"\",:\"
-setlocal commentstring=#%s
-setlocal complete=.,w,b,u,t,i
-setlocal concealcursor=
-setlocal conceallevel=0
-setlocal completefunc=youcompleteme#Complete
-setlocal nocopyindent
-setlocal cryptmethod=
-setlocal nocursorbind
-setlocal nocursorcolumn
-setlocal nocursorline
-setlocal define=
-setlocal dictionary=
-setlocal nodiff
-setlocal equalprg=
-setlocal errorformat=
-setlocal noexpandtab
-if &filetype != 'python'
-setlocal filetype=python
-endif
-setlocal foldcolumn=0
-setlocal foldenable
-setlocal foldexpr=0
-setlocal foldignore=#
-setlocal foldlevel=0
-setlocal foldmarker={{{,}}}
-setlocal foldmethod=manual
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldtext=foldtext()
-setlocal formatexpr=
-setlocal formatoptions=tcq
-setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
-setlocal grepprg=
-setlocal iminsert=0
-setlocal imsearch=0
-setlocal include=^\\s*\\(from\\|import\\)
-setlocal includeexpr=substitute(v:fname,'\\.','/','g')
-setlocal indentexpr=GetPythonIndent(v:lnum)
-setlocal indentkeys=0{,0},:,!^F,o,O,e,<:>,=elif,=except
-setlocal noinfercase
-setlocal iskeyword=@,48-57,_,192-255
-setlocal keywordprg=
-setlocal nolinebreak
-setlocal nolisp
-setlocal nolist
-setlocal makeprg=
-setlocal matchpairs=(:),{:},[:]
-setlocal modeline
-setlocal modifiable
-setlocal nrformats=octal,hex
-set number
-setlocal number
-set numberwidth=5
-setlocal numberwidth=5
-setlocal omnifunc=youcompleteme#OmniComplete
-setlocal path=
-setlocal nopreserveindent
-setlocal nopreviewwindow
-setlocal quoteescape=\\
-setlocal noreadonly
-set relativenumber
-setlocal relativenumber
-setlocal norightleft
-setlocal rightleftcmd=search
-setlocal noscrollbind
-setlocal shiftwidth=4
-setlocal noshortname
-setlocal nosmartindent
-setlocal softtabstop=0
-setlocal nospell
-setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
-setlocal spellfile=
-setlocal spelllang=en
-setlocal statusline=%!pyeval('powerline.statusline(4)')
-setlocal suffixesadd=.py
-setlocal swapfile
-setlocal synmaxcol=3000
-if &syntax != 'python'
-setlocal syntax=python
-endif
-setlocal tabstop=4
-setlocal tags=
-setlocal textwidth=0
-setlocal thesaurus=
-setlocal noundofile
-setlocal nowinfixheight
-setlocal nowinfixwidth
-setlocal wrap
-setlocal wrapmargin=0
-silent! normal! zE
-let s:l = 148 - ((0 * winheight(0) + 25) / 51)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-148
-normal! 024|
+normal! 0
 tabedit Core/FiniteElements/ApplyDirichletBoundaryConditions.py
 set splitbelow splitright
 set nosplitbelow
@@ -900,7 +787,7 @@ setlocal nospell
 setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
 setlocal spellfile=
 setlocal spelllang=en
-setlocal statusline=%!pyeval('powerline.statusline(3)')
+setlocal statusline=%!pyeval('powerline.statusline(5)')
 setlocal suffixesadd=.py
 setlocal swapfile
 setlocal synmaxcol=3000
@@ -917,12 +804,12 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 21 - ((20 * winheight(0) + 25) / 51)
+let s:l = 1 - ((0 * winheight(0) + 26) / 53)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-21
-normal! 09|
+1
+normal! 0
 tabedit Core/FiniteElements/PostProcess.py
 set splitbelow splitright
 set nosplitbelow
@@ -1033,7 +920,7 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 450 - ((26 * winheight(0) + 25) / 51)
+let s:l = 450 - ((27 * winheight(0) + 26) / 53)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -1149,7 +1036,7 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 36 - ((0 * winheight(0) + 25) / 51)
+let s:l = 36 - ((0 * winheight(0) + 26) / 53)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -1249,7 +1136,7 @@ setlocal nospell
 setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
 setlocal spellfile=
 setlocal spelllang=en
-setlocal statusline=%!pyeval('powerline.statusline(2)')
+setlocal statusline=%!pyeval('powerline.statusline(1)')
 setlocal suffixesadd=.py
 setlocal swapfile
 setlocal synmaxcol=3000
@@ -1265,13 +1152,13 @@ setlocal nowinfixheight
 setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
-let s:l = 673 - ((25 * winheight(0) + 25) / 51)
+let s:l = 673 - ((0 * winheight(0) + 26) / 52)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 673
 normal! 022|
-tabnext 2
+tabnext 7
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf
 endif

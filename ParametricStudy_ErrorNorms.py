@@ -45,7 +45,7 @@ if __name__ == '__main__':
     MainData.write = 0
 
 
-    Run = 0
+    Run = 1
     if Run:
         t_FEM = time.time()
         E = 1e05
@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
         Results = {'PolynomialDegrees':MainData.C+1,'PoissonsRatios':nu,'Youngs_Modulus':E,"E_A":E_A,"G_A":G_A}
 
-        mm = 10
+        mm = 1
         L2NormX = np.zeros((mm,len(p)),dtype=np.float64)
         L2Normx = np.zeros((mm,len(p)),dtype=np.float64)
         DoF = np.zeros((mm,len(p)),dtype=np.int64)

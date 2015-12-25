@@ -21,6 +21,7 @@ def ProblemData(MainData):
     # MainData.MaterialArgs.Type = 'NearlyIncompressibleNeoHookean'
     # MainData.MaterialArgs.Type = 'NeoHookean_1'
     MainData.MaterialArgs.Type = 'NeoHookean_2'
+    # MainData.MaterialArgs.Type = 'NeoHookeanCoercive'
     # MainData.MaterialArgs.Type = 'MooneyRivlin'
     # MainData.MaterialArgs.Type = 'NearlyIncompressibleMooneyRivlin'
     # MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin' 

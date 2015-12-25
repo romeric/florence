@@ -122,6 +122,46 @@ class Mesh(object):
         print newMesh.edges.shape
 
 
+    def GetFacesTet(self):
+        """ Given a linear tetrahedral mesh, find the all faces (surfaces).
+            The method does not add/patch faces as a data member to the class, but
+            rather returns it 
+
+        returns:            
+
+            arr:            numpy ndarray of all faces"""
+
+        # CHECK IF IT IS LINEAR MESH
+        assert self.elements.shape[1]==4
+        # if isinstance(self.faces,np.ndarray):
+            # raise UserWarning("Faces/Boundary faces already computed. Do you want me to rewrite them?")
+
+        # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY
+        faces = np.zeros((4*self.elements.shape[0],3),dtype=np.int64)
+        faces[:self.elements.shape[0],:] = self.elements[:,[0,1,2]]
+        faces[self.elements.shape[0]:2*self.elements.shape[0],:] = self.elements[:,[0,1,3]]
+        faces[2*self.elements.shape[0]:3*self.elements.shape[0],:] = self.elements[:,[0,2,3]]
+        faces[3*self.elements.shape[0]:,:] = self.elements[:,[1,2,3]]
+
+        sorted_faces =  np.sort(faces,axis=1)
+
+        x=[]
+        for i in range(faces.shape[0]):
+            current_sorted_face = np.tile(sorted_faces[i,:],sorted_faces.shape[0]).reshape(sorted_faces.shape[0],sorted_faces.shape[1])
+            duplicated_faces = np.linalg.norm(sorted_faces - current_sorted_face,axis=1)
+            pos_of_duplicated_faces = np.where(duplicated_faces==0)[0]
+            if pos_of_duplicated_faces.shape[0]>1:
+                x.append(pos_of_duplicated_faces[1:])
+
+        all_faces_arranger = np.arange(sorted_faces.shape[0])
+        all_faces_arranger = np.setdiff1d(all_faces_arranger,np.array(x)[:,0])
+        faces = faces[all_faces_arranger,:]
+        # print  sorted_faces[all_faces_arranger,:]
+
+
+        return faces
+
+
     def GetBoundaryFacesTet(self,TotalFaces=False):
         """Given a linear tetrahedral mesh, find the boundary faces (surfaces).
         
@@ -144,7 +184,8 @@ class Mesh(object):
             edges[:self.elements.shape[0],:] = self.elements[:,[0,1,2]]
             edges[self.elements.shape[0]:2*self.elements.shape[0],:] = self.elements[:,[0,1,3]]
             edges[2*self.elements.shape[0]:3*self.elements.shape[0],:] = self.elements[:,[0,2,3]]
-            edges[2*self.elements.shape[0]:3*self.elements.shape[0],:] = self.elements[:,[1,2,3]]
+            # edges[2*self.elements.shape[0]:3*self.elements.shape[0],:] = self.elements[:,[1,2,3]] # BUG
+            edges[2*self.elements.shape[0]::,:] = self.elements[:,[1,2,3]] 
 
         boundaryEdges = np.zeros((1,3),dtype=np.int64)
         # interiorEdges = np.zeros((1,3),dtype=np.int64)
@@ -683,8 +724,7 @@ class Mesh(object):
 
     def GetElementsWithBoundaryFacesTet(self):
         """ Computes elements which have faces on the boundary. Mesh can be linear or higher order.
-            At most a tetrahedral can have all its four faces at boundary. It is assumed that a tetrahedral
-            can only have one face at the boundary 
+            At most a tetrahedral can have all its four faces at boundary.
 
         output: 
 
@@ -693,62 +733,84 @@ class Mesh(object):
 
         assert self.faces is not None or self.elements is not None
 
-        face_elements = np.zeros(self.faces.shape[0],dtype=np.int64)
+        from Core.Supplementary.Tensors import itemfreq_py
+        
+        face_elements = []
         for i in range(self.faces.shape[0]):
             x = []
             for j in range(self.faces.shape[1]):
-                x = np.append(x,np.where(self.elements==self.faces[i,j])[0])
-            # x = x.astype(np.int64)
-            for k in range(len(x)):
-                y = np.where(x==x[k])[0]
-                if y.shape[0]==self.faces.shape[1]:
-                    face_elements[i] = np.int64(x[k])
-                    break
+                x.append(np.where(self.elements==self.faces[i,j])[0])
 
-        return face_elements
+            z = x[0]
+            for k in range(1,len(x)):
+                z = np.intersect1d(x[k],z)
+            try:
+                face_elements.append(z[0])
+            except:
+                face_elements.append(z)
+                print z, self.faces[i,:]
+
+        return np.array(face_elements)
 
 
-    def ArrangeFacesTet(self):
-        """ Computes elements which have faces on the boundary. Mesh can be linear or higher order.
-            At most a tetrahedral can have all its four faces at boundary. It is assumed that a tetrahedral
-            can only have one face at the boundary 
+    def GetFaceFlagsTets(self):
+        """ Computes elements which have faces on the boundary with a flag containing 
+            which faces of the elements are on the boundary [0,1,2,3] as well as aranges the faces. 
+            Mesh can be linear or higher order.
+            At most a tetrahedral can have all its four faces at boundary. 
 
         output: 
 
-            face_elements:              [1D array] array containing elements which have face
-                                        on the boundary"""
+            face_elements:              [2D array] nfaces x 2 array containing elements which have face
+                                        on the boundary with their flags"""
 
-        assert self.faces is not None or self.elements is not None
+        # DETERMINE DEGREE
+        p = 1
+        for k in range(1,100):
+            if int((k+1)*(k+2)*(k+3)/6) == self.elements.shape[1]:
+                p = k
+                break
 
-        # GET THE DEGREE
-        p = 0
-        
-        for p in range(1,100):
-            if (p+1)*(p+2)*(p+3)/6 == self.elements.shape[1]:
-                break 
-        fsize = int((p+1)*(p+2)/2) 
+        if p==2:
+            face_0 = [0,1,2,4,5,6]
+            face_1 = [0,1,3,4,7,8]
+            face_2 = [0,2,3,5,7,9]
+            face_3 = [1,2,3,6,8,9]
+        elif p==3:
+            face_0 = [0,1,2,4,5,6,7,8,9,10]
+            face_1 = [0,1,3,4,5,11,12,13,17,18]
+            face_2 = [0,2,3,6,9,11,14,16,17,19]
+            face_3 = [1,2,3,8,10,13,15,16,18,19]
+        elif p==4:
+            face_0 = [0,1,2,4,5,6,7,8,9,10,11,12,13,14,15]
+            face_1 = [0,1,3,4,5,6,16,17,18,19,26,27,28,32,33]
+            face_2 = [0,2,3,7,11,14,16,20,23,25,26,29,31,32,34]
+            face_3 = [1,2,3,10,13,15,19,22,24,25,28,30,31,33,34]
 
-        from Core.Supplementary.Tensors import itemfreq_py
-        # face_elements = -1*np.ones((self.faces.shape[0],4),dtype=np.int64)
-        face_elements = []
+        face_elements = self.GetElementsWithBoundaryFacesTet()
+        face_elements = np.concatenate((face_elements[:,None],np.zeros_like(face_elements)[:,None]),axis=1)
+
+        assert face_elements.shape[0]==self.faces.shape[0]
+
         for i in range(self.faces.shape[0]):
-            x,y = [],[]
+            pos = []
             for j in range(self.faces.shape[1]):
-                x = np.append(x,np.where(self.elements==self.faces[i,j])[0])
-                y = np.append(y,np.where(self.elements==self.faces[i,j])[1])
-                # print np.where(self.faces==self.elements[elem,j])
-            if x.shape[0] > 0:
-                freqs = itemfreq_py(x).astype(np.int64)
-                # print freqs
-                for k in range(freqs.shape[0]):
-                    if freqs[k,1] >= fsize:
-                        # print freqs[k,0]
-                        face_elements = np.append(face_elements,freqs[k,0])
-                        # print face_elements
-                        pass
-            # print y
+                pos.append(np.where(self.elements[face_elements[i,0],:]==self.faces[i,j])[0][0])
+            pos.sort()
+            
+            if np.array_equal(pos,face_0):
+                face_elements[i,1] = 0
+                self.faces[i,:] = self.elements[face_elements[i,0],face_0]
+            elif np.array_equal(pos,face_1):
+                face_elements[i,1] = 1
+                self.faces[i,:] = self.elements[face_elements[i,0],face_1]
+            elif np.array_equal(pos,face_2):
+                face_elements[i,1] = 2
+                self.faces[i,:] = self.elements[face_elements[i,0],face_2]
+            elif np.array_equal(pos,face_3):
+                face_elements[i,1] = 3
+                self.faces[i,:] = self.elements[face_elements[i,0],face_3]
 
-        # print face_elements
         return face_elements
 
 
@@ -845,6 +907,9 @@ class Mesh(object):
         if self.element_type =='tet':
             cellflag = 10
             if self.elements.shape[1]==10:
+                # CHANGE NUMBERING ORDER FOR PARAVIEW
+                # para_arange = [0,4,1,6,2,5,7,8,9,3]
+                # self.elements = self.elements[:,para_arange]    # NOTE: CHANGES MESH ELEMENT ORDERING
                 cellflag = 24
         elif self.element_type == 'hex':
             cellflag = 12

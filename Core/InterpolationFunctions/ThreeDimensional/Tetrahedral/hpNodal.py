@@ -28,8 +28,9 @@ def hpBases(C,xi,eta,zeta,Transform=0,EvalOpt=0):
 		r, s, t = MapXiEtaZeta2RST(xi,eta,zeta)
 		p, dp_dxi, dp_deta, dp_dzeta = GradNormalisedJacobiTet(C,np.array([r,s,t]),EvalOpt)
 	else:
-		# IF XI,ETA,ZETA ARE DIRECTLY GIVEN IN HEX FORMAT - FOR GAUSSIAN QUADRATURE THIS IS THE CASE
+		# IF XI,ETA,ZETA ARE DIRECTLY GIVEN IN HEX FORMAT
 		p, dp_dxi, dp_deta, dp_dzeta = GradNormalisedJacobiTet(C,np.array([xi,eta,zeta]),EvalOpt)
+
 
 	Bases = np.linalg.solve(V.T,p)
 	gBases[:,0] = np.linalg.solve(V.T,dp_dxi)
