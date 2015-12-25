@@ -28,7 +28,7 @@ def hpBases(C,xi,eta,Transform=0,EvalOpt=0):
 		r, s = MapXiEta2RS(xi,eta)
 		p,dp_dxi,dp_deta = GradNormalisedJacobiTri(C,np.array([r,s]),EvalOpt)
 	else:
-		# IF XI,ETA ARE DIRECTLY GIVEN IN QUAD FORMAT - FOR GAUSSIAN QUADRATURE THIS IS THE CASE
+		# IF XI,ETA ARE DIRECTLY GIVEN IN QUAD FORMAT
 		p,dp_dxi,dp_deta = GradNormalisedJacobiTri(C,np.array([xi,eta]),EvalOpt)
 
 	

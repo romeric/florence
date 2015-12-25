@@ -50,7 +50,7 @@ def GetBasesAtInegrationPoints(C,norder,QuadratureOpt,MeshType):
     # from scipy.io import savemat
     # Dict = {'GaussPoints':z,'GaussWeights':w,'Bases':Domain.Bases,'gBasesx':Domain.gBasesx, 'gBasesy':Domain.gBasesy}
     # savemat('/home/roman/Desktop/Bases_P'+str(C+1)+'_Quad_P'+str(norder),Dict)
-    # exit(0)
+    # exit()
 
 
     # COMPUTING GRADIENTS AND JACOBIAN A PRIORI FOR ALL INTEGRATION POINTS

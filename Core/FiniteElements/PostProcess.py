@@ -573,6 +573,8 @@ class PostProcess(object):
         # TotalDisp = np.loadtxt('/home/roman/Desktop/step11.dat',delimiter=',')
         # TotalDisp = TotalDisp[:,:,None]
         # import sys; sys.exit(0)
+        # TotalDisp = np.zeros_like(TotalDisp)
+        # MainData.ScaledJacobian = np.ones_like(MainData.ScaledJacobian)
 
         # print TotalDisp[:,0,-1]
         # MainData.ScaledJacobian = np.zeros_like(MainData.ScaledJacobian)+1
@@ -620,8 +622,9 @@ class PostProcess(object):
         plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#F88379') 
 
         plt.axis('equal')
-        # plt.xlim([-40,-15])
-        # plt.ylim([-14,14])
+        # plt.xlim([-0.52,-0.43])
+        # plt.ylim([-0.03,0.045])
+        # plt.axis('off')
 
         # ax = plt.gca()
         # PCM=ax.get_children()[2]

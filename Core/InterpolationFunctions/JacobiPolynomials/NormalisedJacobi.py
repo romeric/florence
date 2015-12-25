@@ -209,8 +209,11 @@ def GradNormalisedJacobiTet(C,x,EvalOpt=0):
     # THIS MAY RUIN THE CONVERGENCE, BUT FOR POST PROCESSING ITS FINE
     if EvalOpt==1:
         if t==1.:
-            t=0.99999999999999
-        if s==1.:
+            t=0.999999999999
+        if np.isclose(s,1.):
+            s=0.999999999999
+
+    if np.isclose(s,1.):
             s=0.99999999999999
 
     eta = (1./2.)*(s-s*t-1.-t)
@@ -259,7 +262,9 @@ def GradNormalisedJacobiTet(C,x,EvalOpt=0):
                 p_i = 1.;  q_i = 1.;  dp_i = 0.; dq_i = 0.
             else:
                 p_i = JacobiPolynomials(i,r,0.,0.)[-1]; dp_i = JacobiPolynomials(i-1,r,1.,1.)[-1]*(i+1.)/2.    
-                q_i = q_i*(1.-s)/2.; dq_i = q_i*(-i)/(1-s)
+                q_i = q_i*(1.-s)/2.; dq_i = q_i*(-i)/(1.-s)
+                if np.isnan(dq_i):
+                    print s
             # Loop increasing j
             for j in range(0,nDeg-i+1):
                 if j==0:
@@ -282,6 +287,8 @@ def GradNormalisedJacobiTet(C,x,EvalOpt=0):
                 dp_dr = ( (dp_i)*q_i*p_j*q_j*p_k )*factor 
                 dp_ds = ( p_i*(dq_i*p_j+q_i*dp_j)*q_j*p_k )*factor
                 dp_dt = ( p_i*q_i*p_j*(dq_j*p_k+q_j*dp_k) )*factor
+                # if np.isnan(dp_ds):
+                    # print p_i, dq_i, p_j, q_i, dp_j, q_j, p_k, factor
                 # Derivatives with respect to (xi,eta,zeta)
                 dp_dxi[ncount]   = dp_dr*dr_dxi
                 dp_deta[ncount]  = dp_dr*dr_deta + dp_ds*ds_deta
