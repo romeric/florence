@@ -1,11 +1,15 @@
 import numpy as np 
 from Core.QuadratureRules.FeketePointsTri import *
+from Core.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
 from Core.InterpolationFunctions.JacobiPolynomials.NormalisedJacobi import *
 from Core.InterpolationFunctions.DegenerateMappings import MapXiEta2RS
 
-def hpBases(C,xi,eta,Transform=0,EvalOpt=0):
+def hpBases(C,xi,eta,Transform=0,EvalOpt=0,EquallySpacedPoints=0):
 
 	eps = FeketePointsTri(C)
+	if EquallySpacedPoints == 1:
+		eps = EquallySpacedPointsTri(C)
+		
 	N = eps.shape[0]
 	# Make the Vandermonde matrix
 	V = np.zeros((N,N),dtype=np.float64)

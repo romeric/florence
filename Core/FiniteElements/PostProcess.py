@@ -819,93 +819,168 @@ class PostProcess(object):
 
 
     @staticmethod
-    def HighOrderCurvedPatchPlot(MainData,mesh,TotalDisp):
+    def HighOrderCurvedPatchPlot(MainData,mesh,TotalDisp,
+        InterpolationDegree=40,EquallySpacedPoints=False,TriSurf=False,colorbar=False):
 
-        from Core.QuadratureRules.FeketePointsTri import *
-        from scipy.spatial import Delaunay
-        import matplotlib.pyplot as plt
-        from Core.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
-        from Core.InterpolationFunctions.JacobiPolynomials.NormalisedJacobi import *
+        """High order curved triangular mesh plots, based on high order nodal FEM.
+            The equally spaced FEM points do not work as good as the Fekete points 
+        """
+
+        from Core.QuadratureRules.FeketePointsTri import FeketePointsTri
+        from Core.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
+        from Core.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature, GaussQuadrature
         import Core.InterpolationFunctions.TwoDimensional.Tri.hpNodal as Tri 
-        from Core.InterpolationFunctions.OneDimensional.BasisFunctions import LagrangeGaussLobatto
+        from Core.InterpolationFunctions.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
         from Core.FiniteElements.GetBases import GetBases
+
         from copy import deepcopy
+        from scipy.spatial import Delaunay
+        from mpl_toolkits.mplot3d import Axes3D
+        from matplotlib.colors import LightSource
+        import matplotlib as mpl
+        import matplotlib.pyplot as plt
+        import matplotlib.tri as mtri
+        import matplotlib.cm as cm
+        from mpl_toolkits.axes_grid1 import make_axes_locatable
+        
 
-
-        # C = MainData.C
-        C = 7
-        p=C+1
+        C = InterpolationDegree
+        p = C+1
         nsize = int((p+1)*(p+2)/2.)
+        nsize_2 = int((MainData.C+2)*(MainData.C+3)/2.)
 
         FeketePointsTri = FeketePointsTri(C)
-        Triangles = Delaunay(FeketePointsTri)
-        # print Triangles.simplices
-        # plt.triplot(FeketePointsTri[:,0], FeketePointsTri[:,1], Triangles.simplices.copy())
+        if EquallySpacedPoints is True:
+            FeketePointsTri = EquallySpacedPointsTri(C)
 
-        GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0]
+        # BUILD DELAUNAY TRIANGULATION OF REFERENCE ELEMENTS
+        TrianglesFunc = Delaunay(FeketePointsTri)
+        Triangles = TrianglesFunc.simplices.copy()
+        # plt.triplot(FeketePointsTri[:,0], FeketePointsTri[:,1], Triangles); plt.axis('off')
 
-        # Quadrature = deepcopy(MainData.Quadrature)
-        # Quadrature.points = FeketePointsTri
-        # Quadrature.weights = np.zeros_like(Quadrature.points)
-        # print Quadrature.points
-        # print Quadrature.weights
 
-        # GetBases(C,Quadrature,"tri",Transform=0)
+        # GET EQUALLY-SPACED/GAUSS-LOBATTO POINTS FOR THE EDGES
+        if EquallySpacedPoints is False:
+            GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0]
+        else:
+            GaussLobattoPointsOneD = Lagrange(C,0)[-1]
 
-        BasesTri = np.zeros((nsize,FeketePointsTri.shape[0]),dtype=np.float64)
+        BasesTri = np.zeros((nsize_2,FeketePointsTri.shape[0]),dtype=np.float64)
         for i in range(FeketePointsTri.shape[0]):
-            BasesTri[:,i] = Tri.hpBases(C,FeketePointsTri[i,0],FeketePointsTri[i,1],EvalOpt=1)[0]
-            # gBasisx[:,i] = dummy[:,0]
-            # gBasisy[:,i] = dummy[:,1]
+            BasesTri[:,i] = Tri.hpBases(MainData.C,FeketePointsTri[i,0],FeketePointsTri[i,1],
+                EvalOpt=1,EquallySpacedPoints=EquallySpacedPoints,Transform=1)[0]
 
-        # N = FeketePointsTri.shape[0]
-        # # Make the Vandermonde matrix
-        # V = np.zeros((N,N),dtype=np.float64)
-
-        # for i in range(0,N):
-        #     x = FeketePointsTri[i,:]
-        #     p1 = NormalisedJacobiTri(C,x)
-        #     V[i,:] = p1
-
-        BasesOneD = np.zeros((C+2,GaussLobattoPointsOneD.shape[0]),dtype=np.float64)
+        BasesOneD = np.zeros((MainData.C+2,GaussLobattoPointsOneD.shape[0]),dtype=np.float64)
         for i in range(GaussLobattoPointsOneD.shape[0]):
-            BasesOneD[i,:] = LagrangeGaussLobatto(C,GaussLobattoPointsOneD[i])[0]
-        # print BasesOneD
+            BasesOneD[:,i] = LagrangeGaussLobatto(MainData.C,GaussLobattoPointsOneD[i])[0]
 
         smesh = deepcopy(mesh)
         smesh.elements = mesh.elements[:,:MainData.ndim+1]
         smesh.edges = mesh.edges[:,:MainData.ndim]
         nmax = np.max(smesh.elements)+1
         smesh.points = mesh.points[:nmax,:]
-        # print smesh.points
         all_edges = smesh.GetEdgesTri()
-        # edge_elements = smesh.GetElementsWithBoundaryEdgesTri()
         edge_elements = smesh.GetElementsEdgeNumbering()
-        print edge_elements
 
 
-        edge0 = []; edge1 = []; edge2 = []; travesed_edges = np.array([0,1,2,0])
+        edge0 = []; edge1 = []; edge2 = []
         for i in range(0,MainData.C):
             edge0 = np.append(edge0,i+3)
             edge1 = np.append(edge1, 2*MainData.C+3 +i*MainData.C -i*(i-1)/2 )
             edge2 = np.append(edge2,MainData.C+3 +i*(MainData.C+1) -i*(i-1)/2 )
 
-        if MainData.C>0:
-            travesed_edges = (np.append(np.append(np.append(np.append(np.append(np.append(0,edge0),1),edge1),2),
-                np.fliplr(edge2.reshape(1,edge2.shape[0]))),0) ).astype(np.int64)
-
         edge0 = np.append(np.append(0,edge0),1)
         edge1 = np.append(np.append(1,edge1),2)
-        edge2 = np.append(np.append(2,edge2),0)
+        edge2 = np.append(np.append(2,edge2[::-1]),0)
 
         ref_edges = np.concatenate((edge0[None,:],edge1[None,:],edge2[None,:]),axis=0).astype(np.int64)
-        # print ref_edges
+
+        vpoints = np.copy(mesh.points)
+        vpoints = mesh.points + TotalDisp[:,:,-1]
+
+        x_edges = np.zeros((C+2,all_edges.shape[0]))
+        y_edges = np.zeros((C+2,all_edges.shape[0]))
+
+        for iedge in range(all_edges.shape[0]):
+
+            ielem = edge_elements[iedge,0]
+            edge = mesh.elements[ielem,ref_edges[edge_elements[iedge,1],:]]
+            coord_edge = vpoints[edge,:]
+            x_edges[:,iedge], y_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
 
 
-        for iedge in range(smesh.edges.shape[0]):
-            ielem = edge_elements[iedge]
-            elem = mesh.elements[ielem,:]
-            # edge = mesh.
+        # MAKE FIGURE
+        fig = plt.figure()
+        ls = LightSource(azdeg=315, altdeg=45)
+        if TriSurf is True:
+            ax = fig.add_subplot(111, projection='3d')
+        else:
+            ax = fig.add_subplot(111)
+
+        # PLOT CURVED EDGES
+        ax.plot(x_edges,y_edges,'k')
+        
+
+        nnode = nsize*mesh.nelem
+        nelem = Triangles.shape[0]*mesh.nelem
+
+        Xplot = np.zeros((nnode,2),dtype=np.float64)
+        Tplot = np.zeros((nelem,3),dtype=np.int64)
+        Uplot = np.zeros(nnode,dtype=np.float64)
+
+
+        # iNodeIni = 0
+        # iElemIni = 0
+        # for ielem in range(mesh.nelem):
+        # # for ielem in range(1):
+        #     iNodeEnd = iNodeIni + nsize
+        #     iElemEnd = iElemIni + TrianglesFunc.nsimplex
+        #     Xplot[iNodeIni:iNodeEnd,:] = np.dot(BasesTri.T, vpoints[mesh.elements[ielem,:],:])
+        #     # Xplot[iNodeIni:iNodeEnd,:] = np.dot(BasesTri.T, mesh.points[mesh.elements[ielem],:])
+        #     Tplot[iElemIni:iElemEnd,:] = Triangles + iNodeIni
+
+        #     iNodeIni += nsize
+        #     iElemIni += TrianglesFunc.nsimplex
+
+
+        for ielem in range(mesh.nelem):
+            Xplot[ielem*nsize:(ielem+1)*nsize,:] = np.dot(BasesTri.T, vpoints[mesh.elements[ielem,:],:])
+            Tplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex,:] = Triangles + ielem*nsize
+            Uplot[ielem*nsize:(ielem+1)*nsize] = MainData.ScaledJacobian[ielem]
+
+        # PLOT CURVED ELEMENTS
+        if TriSurf is True:
+            # ax.plot_trisurf(Tplot,Xplot[:,0], Xplot[:,1], Xplot[:,1]*0)
+            triang = mtri.Triangulation(Xplot[:,0], Xplot[:,1],Tplot)
+            ax.plot_trisurf(triang,Xplot[:,0]*0, edgecolor="none",facecolor="#ffddbb")
+            ax.view_init(90,-90)
+            ax.dist = 7
+        else:
+            # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, np.ones(Xplot.shape[0]), 100,alpha=0.8)
+            plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, 100,alpha=0.8)
+            # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot[:4,:], np.ones(Xplot.shape[0]),alpha=0.8,origin='lower')
+            pass
+
+        # PLOT CURVED POINTS
+        # plt.plot(vpoints[:,0],vpoints[:,1],'o',markersize=3,color='#F88379')
+        plt.plot(vpoints[:,0],vpoints[:,1],'o',markersize=3,color='k')
+
+
+        plt.set_cmap('viridis')
+        plt.clim(0,1)
+        
+
+        if colorbar is True:
+            ax_cbar = mpl.colorbar.make_axes(plt.gca(), shrink=1.0)[0]
+            cbar = mpl.colorbar.ColorbarBase(ax_cbar, cmap=cm.viridis,
+                               norm=mpl.colors.Normalize(vmin=-0, vmax=1))
+            cbar.set_clim(0, 1)
+            divider = make_axes_locatable(ax_cbar)
+            cax = divider.append_axes("right", size="1%", pad=0.005)
+        
+
+        plt.axis('equal')
+        plt.axis('off')
 
 
 
