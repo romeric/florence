@@ -56,3 +56,12 @@ def NodeArrangement(C):
 
 
 	return face_numbering, traversed_edge_numbering
+
+
+
+def NodalArrangementTri(C):
+
+	# TRIANGULAR EDGE ORDERING
+	edge_order = [[0,1],[1,2],[2,0]]
+	if C==1:
+		pass

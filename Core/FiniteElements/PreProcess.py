@@ -53,8 +53,8 @@ def PreProcess(MainData,Pr,pwd):
             mesh.ReadHighOrderMesh(MainData.MeshInfo.FileName.split(".")[0],MainData.C,MainData.MeshInfo.MeshType)
         elif MainData.MeshInfo.Reader is 'Sphere':
             # mesh.Sphere()
-            # mesh.Sphere(points=10)
-            mesh.Sphere(points=2)
+            mesh.Sphere(points=10)
+            # mesh.Sphere(points=2)
 
     if MainData.__NO_DEBUG__ is False:
         mesh.CheckNodeNumberingTri()
@@ -111,6 +111,7 @@ def PreProcess(MainData,Pr,pwd):
     # print mesh.nelem, mesh.points.shape[0], mesh.edges.shape[0]
     # mesh.WriteVTK(fname="/home/roman/Dropbox/dd2.vtu")
     # print mesh.faces
+    # print mesh.points
     # mesh.points[mesh.points <= 0.000001] = 1e10
     # print np.min(mesh.points)
     # print np.where(mesh.elements==130)[0]
@@ -121,8 +122,11 @@ def PreProcess(MainData,Pr,pwd):
     # print 
     # mesh.ArrangeFacesTet()
 
-    mesh.GetFacesTet()
-    exit()
+    # mesh.GetFacesTet()
+    # mesh.GetEdgesTri()
+    # mesh.GetInteriorEdgesTri()
+    # mesh.GetInteriorFacesTet()
+    # exit()
 
 
     # STORE PATHS FOR MAIN, CORE & PROBLEM DIRECTORIES

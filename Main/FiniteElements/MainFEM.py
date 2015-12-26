@@ -27,9 +27,9 @@ from Core.FiniteElements.ComputeErrorNorms import *
 # import Examples.FiniteElements.Wing2D.ProblemData as Pr
 # import Examples.FiniteElements.Naca_Isotropic.ProblemData as Pr
 # import Examples.FiniteElements.RAE2822.ProblemData as Pr
-# import Examples.FiniteElements.Misc.ProblemData as Pr
+import Examples.FiniteElements.Misc.ProblemData as Pr
 # import Examples.FiniteElements.Tests.ProblemData as Pr
-import Examples.FiniteElements.Sphere.ProblemData as Pr
+# import Examples.FiniteElements.Sphere.ProblemData as Pr
 # import Examples.FiniteElements.Almond3D.ProblemData as Pr
 # import Examples.FiniteElements.Falcon3D.ProblemData as Pr
 
@@ -117,19 +117,16 @@ def main(MainData, DictOutput=None, nStep=0):
         if MainData.AnalysisType == 'Nonlinear':
             PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp,show_plot=False)
             pass
-        # if MainData.AnalysisType == "Linear":
-        #     vmesh = deepcopy(mesh)
-        #     vmesh.points = vmesh.points + TotalDisp[:,:,MainData.AssemblyParameters.LoadIncrements-1]
-        # else:
-        #     vmesh = mesh    
+        if MainData.AnalysisType == "Linear":
+            vmesh = deepcopy(mesh)
+            vmesh.points = vmesh.points + TotalDisp[:,:,MainData.AssemblyParameters.LoadIncrements-1]
+        else:
+            vmesh = mesh    
         # PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
-        # import matplotlib.pyplot as plt
-        # plt.savefig("/media/MATLAB/Presentation_LNMMunich_Roman/pictures/curved_meshes/curved_wing2d_25.eps",format='eps',dpi=300)
-        # plt.savefig("/media/MATLAB/Presentation_LNMMunich_Roman/pictures/curved_meshes/uncurved_twoarcs.eps",format='eps',dpi=300)
-        # plt.savefig("/media/MATLAB/Presentation_LNMMunich_Roman/pictures/curved_meshes/curved_twoarcs.eps",format='eps',dpi=300)
-        # plt.savefig("/media/MATLAB/Presentation_LNMMunich_Roman/pictures/curved_meshes/uncurved_circle.eps",format='eps',dpi=300)
-        # plt.savefig("/media/MATLAB/Presentation_LNMMunich_Roman/pictures/curved_meshes/curved_circle.eps",format='eps',dpi=300)
-        # plt.show()
+        # PostProcess.HighOrderInterpolatedPatchPlot(MainData,mesh,TotalDisp)
+        PostProcess.HighOrderCurvedPatchPlot(MainData,mesh,TotalDisp)
+        import matplotlib.pyplot as plt
+        plt.show()
     else:
         MainData.ScaledJacobian = np.zeros(mesh.nelem)+np.NAN
         MainData.ScaledFF = np.zeros(mesh.nelem)+np.NAN
