@@ -752,7 +752,7 @@ class PostProcess(object):
 
         p = MainData.C+1
         ndim = MainData.ndim
-        n_interp = 10
+        n_interp = 20
 
 
         for elem in range(mesh.nelem):
@@ -774,7 +774,10 @@ class PostProcess(object):
                 unq_y_edge = y_edge[idx]
                 # print x
 
-                interp_func = splrep(unq_x_edge,unq_y_edge,k=unq_x_edge.shape[0]-1)
+                # interp_func = splrep(unq_x_edge,unq_y_edge,k=unq_x_edge.shape[0]-1)
+                interp_ = np.polyfit(unq_x_edge,unq_y_edge,p)
+                interp_func2 = np.poly1d(interp_)
+
 
                 x_edge_new = []
                 for j in range(unq_x_edge.shape[0]-1):
@@ -783,7 +786,26 @@ class PostProcess(object):
                 if idx[0]==idx.shape[0]-1:
                     x_edge_new = x_edge_new[::-1] 
 
-                y_edge_new = splev(x_edge_new,interp_func)
+                # y_edge_new = splev(x_edge_new,interp_func)
+                y_edge_new = interp_func2(x_edge_new)
+                # print np.min(y_edge_new)
+                # print x_edge_new
+                if elem==1:
+                    print x_edge
+                    # print
+                    print repr(x_edge_new)
+                    # print
+                    print y_edge
+                    print 
+                    # exit()
+                    # plt.plot()
+                # exit()
+
+                
+
+
+
+
         
                 x_new = np.append(x_new,x_edge_new)
                 y_new = np.append(y_new,y_edge_new)
@@ -794,3 +816,100 @@ class PostProcess(object):
         plt.axis('equal')
         # plt.axis('off')   
         # plt.show()
+
+
+    @staticmethod
+    def HighOrderCurvedPatchPlot(MainData,mesh,TotalDisp):
+
+        from Core.QuadratureRules.FeketePointsTri import *
+        from scipy.spatial import Delaunay
+        import matplotlib.pyplot as plt
+        from Core.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
+        from Core.InterpolationFunctions.JacobiPolynomials.NormalisedJacobi import *
+        import Core.InterpolationFunctions.TwoDimensional.Tri.hpNodal as Tri 
+        from Core.InterpolationFunctions.OneDimensional.BasisFunctions import LagrangeGaussLobatto
+        from Core.FiniteElements.GetBases import GetBases
+        from copy import deepcopy
+
+
+        # C = MainData.C
+        C = 7
+        p=C+1
+        nsize = int((p+1)*(p+2)/2.)
+
+        FeketePointsTri = FeketePointsTri(C)
+        Triangles = Delaunay(FeketePointsTri)
+        # print Triangles.simplices
+        # plt.triplot(FeketePointsTri[:,0], FeketePointsTri[:,1], Triangles.simplices.copy())
+
+        GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0]
+
+        # Quadrature = deepcopy(MainData.Quadrature)
+        # Quadrature.points = FeketePointsTri
+        # Quadrature.weights = np.zeros_like(Quadrature.points)
+        # print Quadrature.points
+        # print Quadrature.weights
+
+        # GetBases(C,Quadrature,"tri",Transform=0)
+
+        BasesTri = np.zeros((nsize,FeketePointsTri.shape[0]),dtype=np.float64)
+        for i in range(FeketePointsTri.shape[0]):
+            BasesTri[:,i] = Tri.hpBases(C,FeketePointsTri[i,0],FeketePointsTri[i,1],EvalOpt=1)[0]
+            # gBasisx[:,i] = dummy[:,0]
+            # gBasisy[:,i] = dummy[:,1]
+
+        # N = FeketePointsTri.shape[0]
+        # # Make the Vandermonde matrix
+        # V = np.zeros((N,N),dtype=np.float64)
+
+        # for i in range(0,N):
+        #     x = FeketePointsTri[i,:]
+        #     p1 = NormalisedJacobiTri(C,x)
+        #     V[i,:] = p1
+
+        BasesOneD = np.zeros((C+2,GaussLobattoPointsOneD.shape[0]),dtype=np.float64)
+        for i in range(GaussLobattoPointsOneD.shape[0]):
+            BasesOneD[i,:] = LagrangeGaussLobatto(C,GaussLobattoPointsOneD[i])[0]
+        # print BasesOneD
+
+        smesh = deepcopy(mesh)
+        smesh.elements = mesh.elements[:,:MainData.ndim+1]
+        smesh.edges = mesh.edges[:,:MainData.ndim]
+        nmax = np.max(smesh.elements)+1
+        smesh.points = mesh.points[:nmax,:]
+        # print smesh.points
+        all_edges = smesh.GetEdgesTri()
+        # edge_elements = smesh.GetElementsWithBoundaryEdgesTri()
+        edge_elements = smesh.GetElementsEdgeNumbering()
+        print edge_elements
+
+
+        edge0 = []; edge1 = []; edge2 = []; travesed_edges = np.array([0,1,2,0])
+        for i in range(0,MainData.C):
+            edge0 = np.append(edge0,i+3)
+            edge1 = np.append(edge1, 2*MainData.C+3 +i*MainData.C -i*(i-1)/2 )
+            edge2 = np.append(edge2,MainData.C+3 +i*(MainData.C+1) -i*(i-1)/2 )
+
+        if MainData.C>0:
+            travesed_edges = (np.append(np.append(np.append(np.append(np.append(np.append(0,edge0),1),edge1),2),
+                np.fliplr(edge2.reshape(1,edge2.shape[0]))),0) ).astype(np.int64)
+
+        edge0 = np.append(np.append(0,edge0),1)
+        edge1 = np.append(np.append(1,edge1),2)
+        edge2 = np.append(np.append(2,edge2),0)
+
+        ref_edges = np.concatenate((edge0[None,:],edge1[None,:],edge2[None,:]),axis=0).astype(np.int64)
+        # print ref_edges
+
+
+        for iedge in range(smesh.edges.shape[0]):
+            ielem = edge_elements[iedge]
+            elem = mesh.elements[ielem,:]
+            # edge = mesh.
+
+
+
+
+
+
+
