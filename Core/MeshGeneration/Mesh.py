@@ -771,74 +771,52 @@ class Mesh(object):
         # CHECK IF IT IS LINEAR MESH
         assert self.elements.shape[1]==3
 
-        # # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY 
-        # # THE LAST COLUMN IS THE EDGE NUMBER ON THE ELEMENT
-        # edges = np.zeros((3*self.elements.shape[0],3),dtype=np.int64)
-        
-        # edges[:self.elements.shape[0],:2] = self.elements[:,[0,1]]
-        # edges[:self.elements.shape[0],2] = 0
-
-        # edges[self.elements.shape[0]:2*self.elements.shape[0],:2] = self.elements[:,[1,2]]
-        # edges[self.elements.shape[0]:2*self.elements.shape[0],2] = 1
-
-        # edges[2*self.elements.shape[0]:3*self.elements.shape[0],:2] = self.elements[:,[2,0]]
-        # edges[2*self.elements.shape[0]::,2] = 2
-
-        # sorted_edges =  np.sort(edges[:,:2],axis=1)
-
-        # x=[]
-        # for i in range(edges.shape[0]):
-        #     current_sorted_edge = np.tile(sorted_edges[i,:],sorted_edges.shape[0]).reshape(sorted_edges.shape[0],sorted_edges.shape[1])
-        #     duplicated_edges = np.linalg.norm(sorted_edges - current_sorted_edge,axis=1)
-        #     pos_of_duplicated_faces = np.where(duplicated_edges==0)[0]
-        #     if pos_of_duplicated_faces.shape[0]>1:
-        #         x.append(pos_of_duplicated_faces[1:])
-
-        # all_faces_arranger = np.arange(sorted_edges.shape[0])
-        # all_faces_arranger = np.setdiff1d(all_faces_arranger,np.array(x)[:,0])
-        # edges = edges[all_faces_arranger,:]
-        # # print sorted_edges[all_faces_arranger,:]
-
+        # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY 
         edges = self.GetBoundaryEdgesTri(TotalEdges=True)
 
 
         from Core.Supplementary.Where import whereEQ
         from Core.Supplementary.Tensors import itemfreq_py
         
-        edge_elements = np.zeros((edges.shape[0],2),dtype=np.int64)
+        edge_elements = np.zeros((edges.shape[0],3),dtype=np.int64)
         for i in range(edges.shape[0]):
-            x,y = [],[]
+            x = []
             for j in range(2):
                 x.append(np.where(self.elements==edges[i,j])[0])
-                # y.append(np.where(self.elements==edges[i,j])[1])
 
             z = x[0]
-            # w = y[0]
             for k in range(1,len(x)):
                 z = np.intersect1d(x[k],z)
-                # w = np.intersect1d(y[k],w)
-            # print z, x, y
 
+            # TAKE ONLY ONE EDGE
             edge_elements[i,0] = z[0]
             cols = np.array([np.where(self.elements[z[0],:]==edges[i,0])[0], np.where(self.elements[z[0],:]==edges[i,1])[0]])
-            cols = np.sort(cols.flatten())
-            # print cols
+
+            # cols = np.sort(cols.flatten()) # CAREFUL
+            cols = cols.flatten() # CAREFUL
             if cols[0]==0 and cols[1]==1:
                 edge_number = 0
+                swap = 0
             elif cols[0]==1 and cols[1]==2:
                 edge_number = 1
+                swap = 0
+            elif cols[0]==2 and cols[1]==0:
+                edge_number = 2
+                swap = 0
+
+            elif cols[0]==1 and cols[1]==0:
+                edge_number = 0
+                swap = 1
+            elif cols[0]==2 and cols[1]==1:
+                edge_number = 1
+                swap = 1
             elif cols[0]==0 and cols[1]==2:
                 edge_number = 2
+                swap = 1
+
             edge_elements[i,1] = edge_number
-            # print self.elements[z[0],:]
-            # print cols, edge_number
-
-
-        # print edges
-        # print edge_elements
-        # self.PlotMeshNumberingTri()
-        # print self.elements
-        # exit()
+            edge_elements[i,2] = swap
+ 
         return edge_elements
 
 

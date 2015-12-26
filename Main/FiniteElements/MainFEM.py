@@ -25,9 +25,9 @@ from Core.FiniteElements.ComputeErrorNorms import *
 # import Examples.FiniteElements.Annular_Circle_Nurbs.ProblemData as Pr
 # import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
 # import Examples.FiniteElements.Wing2D.ProblemData as Pr
-# import Examples.FiniteElements.Naca_Isotropic.ProblemData as Pr
+import Examples.FiniteElements.Naca_Isotropic.ProblemData as Pr
 # import Examples.FiniteElements.RAE2822.ProblemData as Pr
-import Examples.FiniteElements.Misc.ProblemData as Pr
+# import Examples.FiniteElements.Misc.ProblemData as Pr
 # import Examples.FiniteElements.Tests.ProblemData as Pr
 # import Examples.FiniteElements.Sphere.ProblemData as Pr
 # import Examples.FiniteElements.Almond3D.ProblemData as Pr
@@ -125,6 +125,8 @@ def main(MainData, DictOutput=None, nStep=0):
         # PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
         # PostProcess.HighOrderInterpolatedPatchPlot(MainData,mesh,TotalDisp)
         PostProcess.HighOrderCurvedPatchPlot(MainData,mesh,TotalDisp)
+        # PostProcess.HighOrderCurvedPatchPlot(MainData,mesh,TotalDisp,TriSurf=True,EquallySpacedPoints=True)
+        # PostProcess.HighOrderCurvedPatchPlot(MainData,mesh,TotalDisp,EquallySpacedPoints=True)
         import matplotlib.pyplot as plt
         plt.show()
     else:
