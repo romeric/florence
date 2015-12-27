@@ -39,11 +39,22 @@ class Mesh(object):
 
     def __init__(self):
         super(Mesh, self).__init__()
+        # self.faces and self.edges ARE BOUNDARY FACES 
+        # AND EDGES, RESPECTIVELY
+
         self.elements = None
         self.points = None
         self.edges = None
         self.faces = None
         self.element_type = None
+
+        self.face_to_element = None
+        self.edge_to_element = None
+        self.all_faces = None
+        self.all_edges = None
+        self.interior_faces = None
+        self.interior_edges = None
+
 
     def SetElements(self,arr):
         self.elements = arr
@@ -190,15 +201,25 @@ class Mesh(object):
 
     def GetFacesTet(self):
         """ Given a linear tetrahedral mesh, find all faces (surfaces) in the mesh (boundary & interior).
-            The method does not add/patch faces as a data member to the class, but
-            rather returns it 
+            Sets all_faces property and returns it
 
         returns:            
 
             arr:            numpy ndarray of all faces"""
 
-        # CHECK IF IT IS LINEAR MESH
-        assert self.elements.shape[1]==4
+        # DETERMINE DEGREE
+        p = 1
+        for k in range(1,100):
+            if int((k+1)*(k+2)*(k+3)/6) == self.elements.shape[1]:
+                p = k
+                break
+
+        from Core.QuadratureRules.NodeArrangement import NodeArrangement
+
+        # node_arranger = NodeArrangement(p-1)[0]
+        # print node_arranger
+        # exit()
+
         # CHECK IF FACES ARE ALREADY AVAILABLE
         # if isinstance(self.faces,np.ndarray):
         #     if self.faces.shape[0] > 1:
@@ -211,6 +232,7 @@ class Mesh(object):
         faces[2*self.elements.shape[0]:3*self.elements.shape[0],:] = self.elements[:,[0,2,3]]
         faces[3*self.elements.shape[0]:,:] = self.elements[:,[1,2,3]]
 
+        # REMOVE DUPLICATES
         sorted_faces =  np.sort(faces,axis=1)
 
         x=[]
@@ -347,169 +369,6 @@ class Mesh(object):
 
 
 
-    def GetBoundaryFacesHigherTet(self):
-        """Get high order planar tetrahedral faces given high order element connectivity
-            and nodal coordinates
-
-            NOT TESTED
-
-            """
-
-        assert self.elements is not None
-        assert self.points is not None
-        assert self.nelem is not None
-
-        from Core.Supplementary.Tensors import itemfreq_py
-        from Core.Supplementary.Where import whereEQ
-        from Core.QuadratureRules.NodeArrangement import NodeArrangement
-
-
-        # CHANGE TYPE 
-        if isinstance(self.elements[0,0],np.uint64):
-            self.elements = self.elements.astype(np.int64)
-            self.faces = self.faces.astype(np.int64)
-
-        # print self.faces.shape[1]
-        if self.faces.shape[1] == 0:
-            newMesh = Mesh()
-            newMesh.nelem = self.elements.shape[0]
-            newMesh.elements = self.elements[:,:4]
-            newMesh_nnode = np.max(newMesh.elements)+1 # NO MONKEY PATCHING
-            newMesh.points = self.points[:newMesh_nnode]
-            newMesh.GetBoundaryFacesTet()
-            self.faces = newMesh.faces
-
-        if self.faces.shape[1] > 3:
-            raise UserWarning("High order tetrahedral faces seem to be already computed. Do you want me to recompute them?")
-            pass
-
-
-        # INFER POLYNOMIAL DEGREE AND ORDER OF CONTINUITY
-        C = self.InferPolynomialDegree()-1
-        # GET NUMBER OF COLUMNS FOR HIGHER ORDER FACES
-        fsize = int((C+2.)*(C+3.)/2.)
-        # GET THE NODE ARRANGEMENT FOR FACES
-        face_node_arrangment = NodeArrangement(C)[0]
-
-        higher_order_faces = np.zeros((self.faces.shape[0],fsize),dtype = np.int64)
-        elements_containing_faces = []
-        counter = 0
-        # FIND IF THE 3 NODES OF THE LINEAR FACE IS IN THE ELEMENT
-        for i in range(self.faces.shape[0]):
-            face_nodes = [];  face_cols = []
-            for j in range(3):
-                # rows, cols = np.where(self.elements[:,:4]==self.faces[i,j])
-                rows, cols = whereEQ(self.elements[:,:4],self.faces[i,j])
-                # STORE ALL THE OCCURENCES OF CURRENT NODAL FACE IN THE ELEMENT CONNECTIVITY
-                face_nodes = np.append(face_nodes,rows)
-                face_cols = np.append(face_cols,cols)
-            # CHANGE TYPE
-            face_nodes = face_nodes.astype(np.int64)
-            face_cols = face_cols.astype(np.int64)
-            # COUNT THE NUMBER OF OCCURENCES
-            occurence_within_an_element = itemfreq_py(face_nodes)
-            # SEE WHICH ELEMENT CONTAINS ALL THE THREE NODES OF THE FACE
-            counts = np.where(occurence_within_an_element[:,1]==3)[0]
-            if counts.shape[0] != 0:
-                # COMPUTE ONLY IF NEEDED LATER ON
-                # elements_containing_faces = np.append(elements_containing_faces, 
-                #   occurence_within_an_element[counts,0])
-
-                # GET THE POSITIONS FROM CONCATENATION
-                inv_uniques = np.unique(face_nodes,return_inverse=True)[1]
-                which_connectivity_cols_idx = np.where(inv_uniques==counts)[0]
-                # FROM THE POSITIONS GET THE COLUMNS AT WHICH THESE NODES OCCUR IN THE CONNECTIVITY
-                which_connectivity_cols =  face_cols[which_connectivity_cols_idx]
-                if which_connectivity_cols_idx.shape[0] != 0:
-                    # BASED ON THE OCCURENCE, DECIDE WHICH FACE OF THAT ELEMENT WE ARE ON
-                    if which_connectivity_cols[0]==0 and which_connectivity_cols[1]==1 \
-                        and which_connectivity_cols[2]==2:
-                        higher_order_faces[counter,:] = self.elements[
-                        occurence_within_an_element[counts,0],face_node_arrangment[0,:]]
-                        counter += 1
-                    elif which_connectivity_cols[0]==0 and which_connectivity_cols[1]==1 \
-                        and which_connectivity_cols[2]==3:
-                        higher_order_faces[counter,:] = self.elements[
-                        occurence_within_an_element[counts,0],face_node_arrangment[1,:]]
-                        counter += 1
-                    elif which_connectivity_cols[0]==0 and which_connectivity_cols[1]==2 \
-                        and which_connectivity_cols[2]==3:
-                        higher_order_faces[counter,:] = self.elements[
-                        occurence_within_an_element[counts,0],face_node_arrangment[2,:]]
-                        counter += 1
-                    elif which_connectivity_cols[0]==1 and which_connectivity_cols[1]==2 \
-                        and which_connectivity_cols[2]==3:
-                        higher_order_faces[counter,:] = self.elements[
-                        occurence_within_an_element[counts,0],face_node_arrangment[3,:]]
-                        counter += 1
-
-        # CHECK WITH AN ALREADY EXISTING MESH GENERATOR
-        # print np.linalg.norm(np.sort(higher_order_faces,axis=1) - np.sort(self.faces,axis=1))
-                
-        self.faces = higher_order_faces
-        self.ChangeType()
-
-
-
-
-
-    def BoundaryEdgesfromPhysicalParametrisation(self,points,facets,mesh_points,mesh_edges):
-        """Given a 2D planar mesh (mesh_points,mesh_edges) and the parametrisation of the physical geometry (points and facets)
-            finds boundary edges
-
-        input:
-
-            points:         nx2 numpy array of points given to meshpy/distmesh/etc API for the actual geometry
-            facets:         mx2 numpy array connectivity of points given to meshpy/distmesh/etc API for the actual geometry
-            mesh_points:    px2 numpy array of points taken from the mesh generator
-            mesh_edges:     qx2 numpy array of edges taken from the mesh generator
-
-        returns:
-
-            arr_1:          nx2 numpy array of boundary edges
-
-        Note that this method could be useful for finding arbitrary edges not necessarily lying on the boundary"""
-
-        # COMPUTE SLOPE OF THE GEOMETRY EDGE
-        geo_edges = np.array(facets); geo_points = np.array(points)
-        # ALLOCATE
-        mesh_boundary_edges = np.zeros((1,2),dtype=int)
-        # LOOP OVER GEOMETRY EDGES
-        for i in range(geo_edges.shape[0]):
-            # GET COORDINATES OF BOTH NODES AT THE EDGE
-            geo_edge_coord = geo_points[geo_edges[i]]
-            geo_x1 = geo_edge_coord[0,0];       geo_y1 = geo_edge_coord[0,1]
-            geo_x2 = geo_edge_coord[1,0];       geo_y2 = geo_edge_coord[1,1]
-
-            # COMPUTE SLOPE OF THIS LINE
-            geo_angle = np.arctan((geo_y2-geo_y1)/(geo_x2-geo_x1)) #*180/np.pi
-
-            # NOW FOR EACH OF THESE GEOMETRY LINES LOOP OVER ALL MESH EDGES
-            for j in range(0,mesh_edges.shape[0]):
-                mesh_edge_coord = mesh_points[mesh_edges[j]]
-                mesh_x1 = mesh_edge_coord[0,0];         mesh_y1 = mesh_edge_coord[0,1]
-                mesh_x2 = mesh_edge_coord[1,0];         mesh_y2 = mesh_edge_coord[1,1]
-
-                # FIND SLOPE OF THIS LINE 
-                mesh_angle = np.arctan((mesh_y2-mesh_y1)/(mesh_x2-mesh_x1))
-
-                # CHECK IF GEOMETRY AND MESH EDGES ARE PARALLEL
-                if np.allclose(geo_angle,mesh_angle,atol=1e-12):
-                    # IF SO THEN FIND THE NORMAL DISTANCE BETWEEN THEM
-                    P1 = np.array([geo_x1,geo_y1,0]);               P2 = np.array([geo_x2,geo_y2,0])        # 1st line's coordinates
-                    P3 = np.array([mesh_x1,mesh_y1,0]);             P4 = np.array([mesh_x2,mesh_y2,0])      # 2nd line's coordinates
-
-                    dist = NormalDistance(P1,P2,P3,P4)
-                    # IF NORMAL DISTANCE IS ZEROS THEN MESH EDGE IS ON THE BOUNDARY
-                    if np.allclose(dist,0,atol=1e-14):
-                        mesh_boundary_edges = np.append(mesh_boundary_edges,mesh_edges[j].reshape(1,2),axis=0)
-
-        # return np.delete(mesh_boundary_edges,0,0)
-        return mesh_boundary_edges[1:,:]
-
-
- 
-
 
     def GetHighOrderMesh(self,C,**kwargs):
         """Given a linear tri, tet, quad or hex mesh compute high order mesh based on it.
@@ -526,7 +385,8 @@ class Mesh(object):
         elif self.element_type == 'tet':
             # BUILD A NEW MESH USING THE FEKETE NODAL POINTS FOR TETRAHEDRALS
             # nmesh = HighOrderMeshTet(C,self,**kwargs)
-            nmesh = HighOrderMeshTet_UNSTABLE(C,self,**kwargs)
+            # nmesh = HighOrderMeshTet_UNSTABLE(C,self,**kwargs)
+            nmesh = HighOrderMeshTet_SEMISTABLE(C,self,**kwargs)
 
         elif self.element_type == 'quad':
             # BUILD A NEW MESH USING THE GAUSS-LOBATTO NODAL POINTS FOR QUADS
@@ -542,6 +402,369 @@ class Mesh(object):
         
         print 'Finished generating the high order mesh. Time taken', time()-t_mesh,'sec'
 
+
+
+    def Areas(self,with_sign=False):
+        """Find areas of all 2D elements [tris, quads]. 
+            For 3D elements returns surface areas of faces 
+
+            returns:                    1D array of nelem x 1 containing areas
+
+        """
+
+        assert self.elements is not None
+        assert self.points is not None
+        assert self.element_type is not None
+
+        if self.element_type == "tri":
+            points = np.ones((self.points.shape[0],3),dtype=np.float64)
+            points[:,:2]=self.points
+            # FIND AREAS OF ALL THE ELEMENTS
+            area = 0.5*np.linalg.det(points[self.elements,:])
+        elif self.element_type == "tet":
+            # GET ALL THE FACES
+            faces = self.GetFacesTet()
+
+            points = np.ones((self.points.shape[0],3),dtype=np.float64)
+            points[:,:2]=self.points[:,:2]
+            area0 = np.linalg.det(points[faces,:])
+
+            points[:,:2]=self.points[:,[2,0]]
+            area1 = np.linalg.det(points[faces,:])
+
+            points[:,:2]=self.points[:,[1,2]]
+            area2 = np.linalg.det(points[faces,:])
+
+            area = 0.5*np.linalg.norm(area0+area1+area2)
+
+        if with_sign is False:
+            if self.element_type == "tri":
+                area = np.abs(area)
+            elif self.element_type == "tet":
+                raise NotImplementedError('Numbering order of tetrahedral faces could be determined')
+
+
+        return area
+
+    def Volumes(self,with_sign=False):
+        """Find Volumes of all 3D elements [tets, hexes]. 
+
+            returns:                    1D array of nelem x 1 containing volumes
+
+        """
+
+        assert self.elements is not None
+        assert self.points is not None
+        assert self.element_type is not None
+
+        if self.element_type == "tet":
+
+            a = self.points[self.elements[:,0],:]
+            b = self.points[self.elements[:,1],:]
+            c = self.points[self.elements[:,2],:]
+            d = self.points[self.elements[:,3],:]
+
+            det_array = np.dstack((a-d,b-d,c-d))
+            # FIND VOLUME OF ALL THE ELEMENTS
+            volume = 1./6.*np.linalg.det(det_array)
+
+        if with_sign is False:
+            volume = np.abs(volume)
+
+        return volume
+
+
+
+
+    def CheckNodeNumbering(self,change_order_to='retain'):
+        """Checks for node numbering order of the imported mesh. Mesh can be tri or tet
+
+        input:
+
+            change_order_to:            [str] {'clockwise','anti-clockwise','retain'} changes the order to clockwise, 
+                                        anti-clockwise or retains the numbering order - default is 'retain' 
+
+        output: 
+
+            original_order:             [str] {'clockwise','anti-clockwise','retain'} returns the original numbering order"""
+
+
+        assert self.elements is not None
+        assert self.points is not None
+
+        # CHECK IF IT IS LINEAR MESH
+        quantity = np.array([])
+        if self.element_type == "tri":
+            assert self.elements.shape[1]==3
+            quantity = self.Areas(with_sign=True)
+        elif self.element_type == "tet":
+            assert self.elements.shape[1]==4
+            quantity = self.Volumes(with_sign=True)
+
+        original_order = ''
+
+        # CHECK NUMBERING
+        if (quantity > 0).all():
+            original_order = 'anti-clockwise'
+            if change_order_to == 'clockwise':
+                self.elements = np.fliplr(self.elements)
+        elif (quantity < 0).all():
+            original_order = 'clockwise'
+            if change_order_to == 'anti-clockwise':
+                self.elements = np.fliplr(self.elements)
+        else:
+            original_order = 'mixed'
+            if change_order_to == 'clockwise':
+                self.elements[quantity>0,:] = np.fliplr(self.elements[quantity>0,:])
+            elif change_order_to == 'anti-clockwise':
+                self.elements[quantity<0,:] = np.fliplr(self.elements[quantity<0,:])
+
+
+        if original_order == 'anti-clockwise':
+            print u'\u2713'.encode('utf8')+' : ','Imported mesh has',original_order,'node ordering'
+        else:
+            print u'\u2717'.encode('utf8')+' : ','Imported mesh has',original_order,'node ordering'
+
+        return original_order
+
+
+
+
+    def GetElementsEdgeNumberingTri(self):
+        """Finds edges of elements and their flags saying which edge they are [0,1,2]. Mesh must be linear.
+            At most a tetrahedral can have all its four faces at boundary.
+
+        output: 
+
+            edge_elements:              [1D array] array containing elements which have face
+                                        on the boundary
+
+                                        Note that this method sets the self.edge_to_element to edge_elements,
+                                        so the return value is not strictly necessary
+        """
+
+        # CHECK IF IT IS LINEAR MESH
+        assert self.elements.shape[1]==3
+
+        # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY 
+        edges = self.GetBoundaryEdgesTri(TotalEdges=True)
+
+
+        from Core.Supplementary.Where import whereEQ
+        from Core.Supplementary.Tensors import itemfreq_py
+        
+        edge_elements = np.zeros((edges.shape[0],3),dtype=np.int64)
+        for i in range(edges.shape[0]):
+            x = []
+            for j in range(2):
+                x.append(np.where(self.elements==edges[i,j])[0])
+
+            z = x[0]
+            for k in range(1,len(x)):
+                z = np.intersect1d(x[k],z)
+
+            # TAKE ONLY ONE EDGE
+            edge_elements[i,0] = z[0]
+            cols = np.array([np.where(self.elements[z[0],:]==edges[i,0])[0], np.where(self.elements[z[0],:]==edges[i,1])[0]])
+
+            # cols = np.sort(cols.flatten()) # CAREFUL
+            cols = cols.flatten() # CAREFUL
+            if cols[0]==0 and cols[1]==1:
+                edge_number = 0
+                swap = 0
+            elif cols[0]==1 and cols[1]==2:
+                edge_number = 1
+                swap = 0
+            elif cols[0]==2 and cols[1]==0:
+                edge_number = 2
+                swap = 0
+
+            elif cols[0]==1 and cols[1]==0:
+                edge_number = 0
+                swap = 1
+            elif cols[0]==2 and cols[1]==1:
+                edge_number = 1
+                swap = 1
+            elif cols[0]==0 and cols[1]==2:
+                edge_number = 2
+                swap = 1
+
+            edge_elements[i,1] = edge_number
+            edge_elements[i,2] = swap
+
+
+        self.edge_to_element = edge_elements
+        return edge_elements
+
+
+    def GetElementsWithBoundaryEdgesTri(self):
+        """ Computes elements which have edges on the boundary. Mesh can be linear or higher order.
+            Note that this assumes that a triangular element can only have one edge on the boundary.
+
+        output: 
+
+            edge_elements:              [1D array] array containing elements which have edge
+                                        on the boundary. Row number is edge number"""
+
+
+        assert self.edges is not None or self.elements is not None
+        # CYTHON SOLUTION
+        # from GetElementsWithBoundaryEdgesTri_Cython import GetElementsWithBoundaryEdgesTri_Cython
+        # return GetElementsWithBoundaryEdgesTri_Cython(self.elements,self.edges)
+        
+        from Core.Supplementary.Where import whereEQ
+        edge_elements = np.zeros(self.edges.shape[0],dtype=np.int64)
+        for i in range(self.edges.shape[0]):
+            x = []
+            for j in range(self.edges.shape[1]):
+                x = np.append(x,np.where(self.elements==self.edges[i,j])[0])
+                # x = np.append(x,whereEQ(self.elements,self.edges[i,j])[0])
+            # x = x.astype(np.int64)
+            for k in range(len(x)):
+                y = np.where(x==x[k])[0]
+                # y = np.asarray(whereEQ(np.array([x]),np.int64(x[k]))[0])
+                if y.shape[0]==self.edges.shape[1]:
+                    edge_elements[i] = np.int64(x[k])
+                    break
+
+        return edge_elements
+
+
+    def GetElementsWithBoundaryFacesTet(self):
+        """ Computes elements which have faces on the boundary.
+            At most a tetrahedral can have all its four faces at boundary.
+
+        output: 
+
+            face_elements:              [2D array] array containing elements which have face
+                                        on the boundary [cloumn 0] and a flag stating which faces they are [column 1]
+
+        """
+
+        assert self.faces is not None or self.elements is not None
+        assert self.elements.shape[1] == 4
+
+        # GET ALL FACES FROM ELEMENT CONNECTIVITY
+        if self.faces is None:
+            self.GetBoundaryFacesTet()
+
+        face_elements = np.zeros((self.faces.shape[0],2),dtype=np.int64)
+        # FIND WHICH FACE NODES ARE IN WHICH ELEMENT
+        for i in range(self.faces.shape[0]):
+            x = []
+            for j in range(3):
+                x.append(np.where(self.elements==self.faces[i,j])[0])
+
+            # FIND WHICH ELEMENTS CONTAIN ALL FACE NODES - FOR INTERIOR ELEMENTS
+            # THEIR CAN BE MORE THAN ONE ELEMENT CONTAINING ALL FACE NODES
+            z = x[0]
+            for k in range(1,len(x)):
+                z = np.intersect1d(x[k],z)
+
+            # CHOOSE ONLY ONE OF THESE ELEMENTS
+            face_elements[i,0] = z[0]
+            # WHICH COLUMNS IN THAT ELEMENT ARE THE FACE NODES LOCATED 
+            cols = np.array([np.where(self.elements[z[0],:]==self.faces[i,0])[0], 
+                            np.where(self.elements[z[0],:]==self.faces[i,1])[0],
+                            np.where(self.elements[z[0],:]==self.faces[i,2])[0]
+                            ])
+
+            cols = np.sort(cols.flatten())
+
+            if cols[0] == 0 and cols[1] == 1 and cols[2] == 2:
+                face_elements[i,1] = 0
+            elif cols[0] == 0 and cols[1] == 1 and cols[2] == 3:
+                face_elements[i,1] = 1
+            elif cols[0] == 0 and cols[1] == 2 and cols[2] == 3:
+                face_elements[i,1] = 2
+            elif cols[0] == 1 and cols[1] == 2 and cols[2] == 3:
+                face_elements[i,1] = 3
+
+        return face_elements
+
+
+    def GetElementsFaceNumberingTet(self):
+        """Finds which faces belong to which element and which face of the element 
+            they are e.g. 0,1,2 or 3.  
+
+            output: 
+
+                face_elements:              [2D array] nfaces x 2 array containing elements which have face
+                                            on the boundary with their flags
+
+                                            Note that this method also sets the self.face_to_element to face_elements,
+                                            so the return value is not strictly necessary   
+        """
+
+
+        assert self.elements is not None
+        assert self.elements.shape[1] == 4 
+
+        # GET ALL FACES FROM ELEMENT CONNECTIVITY
+        if self.all_faces is None:
+            faces = self.GetFacesTet()
+        else:
+            faces = all_faces
+
+        face_elements = np.zeros((faces.shape[0],2),dtype=np.int64)
+        # FIND WHICH FACE NODES ARE IN WHICH ELEMENT
+        for i in range(faces.shape[0]):
+            x = []
+            for j in range(3):
+                x.append(np.where(self.elements==faces[i,j])[0])
+
+            # FIND WHICH ELEMENTS CONTAIN ALL FACE NODES - FOR INTERIOR ELEMENTS
+            # THEIR CAN BE MORE THAN ONE ELEMENT CONTAINING ALL FACE NODES
+            z = x[0]
+            for k in range(1,len(x)):
+                z = np.intersect1d(x[k],z)
+
+            # CHOOSE ONLY ONE OF THESE ELEMENTS
+            face_elements[i,0] = z[0]
+            # WHICH COLUMNS IN THAT ELEMENT ARE THE FACE NODES LOCATED 
+            cols = np.array([np.where(self.elements[z[0],:]==faces[i,0])[0], 
+                            np.where(self.elements[z[0],:]==faces[i,1])[0],
+                            np.where(self.elements[z[0],:]==faces[i,2])[0]
+                            ])
+
+            cols = np.sort(cols.flatten())
+            # print cols
+
+            if cols[0] == 0 and cols[1] == 1 and cols[2] == 2:
+                face_elements[i,1] = 0
+            elif cols[0] == 0 and cols[1] == 1 and cols[2] == 3:
+                face_elements[i,1] = 1
+            elif cols[0] == 0 and cols[1] == 2 and cols[2] == 3:
+                face_elements[i,1] = 2
+            elif cols[0] == 1 and cols[1] == 2 and cols[2] == 3:
+                face_elements[i,1] = 3
+
+
+        self.face_to_element = face_elements
+        return face_elements
+
+
+    def ArrangeFacesTet(self):
+        """Arranges all the faces of tetrahedral elements 
+            with triangular type node ordering """
+
+        from Core.QuadratureRules.NodeArrangement import NodeArrangement
+
+        if self.all_faces is None:
+            self.all_faces = self.GetFacesTet()
+        if self.face_to_element is None:
+            self.GetElementsFaceNumberingTet()
+
+        # DETERMINE DEGREE
+        p = 1
+        for k in range(1,100):
+            if int((k+1)*(k+2)*(k+3)/6) == self.elements.shape[1]:
+                p = k
+                break
+
+        node_arranger = NodeArrangement(p-1)[0]
+        for i in range(self.face_to_element.shape[0]):
+            self.all_faces = self.elements[self.face_to_element[i,0],node_arranger[self.face_to_element[i,1],:]]
 
 
 
@@ -687,7 +910,7 @@ class Mesh(object):
 
 
 
-    def Readgmsh(self,filename):
+    def ReadGmsh(self,filename):
         """Read gmsh (.msh) file. TO DO"""
         from gmsh import Mesh as msh
         mesh = msh()
@@ -697,252 +920,6 @@ class Mesh(object):
         self.elements = mesh.Elmts 
         print self.elements
         # print mesh.Phys
-
-
-
-    def CheckNodeNumberingTri(self,change_order_to='retain'):
-        """Checks for node numbering order of the imported triangular mesh
-
-        input:
-
-            change_order_to:            [str] {'clockwise','anti-clockwise','retain'} changes the order to clockwise, 
-                                        anti-clockwise or retains the numbering order - default is 'retain' 
-
-        output: 
-
-            original_order:             [str] {'clockwise','anti-clockwise','retain'} returns the original numbering order"""
-
-
-        assert self.elements is not None
-        assert self.points is not None
-
-        # CHECK IF IT IS LINEAR MESH
-        assert self.elements.shape[1]==3
-
-        # C ##
-            # #
-            #  #
-            #   #
-            #    #
-            #     #
-        # A ######## B
-
-        original_order = ''
-
-        points = np.ones((self.points.shape[0],3),dtype=np.float64)
-        points[:,:2]=self.points
-
-        # FIND AREAS OF ALL THE ELEMENTS
-        area = 0.5*np.linalg.det(points[self.elements,:])
-        # CHECK NUMBERING
-        if (area > 0).all():
-            original_order = 'anti-clockwise'
-            if change_order_to == 'clockwise':
-                self.elements = np.fliplr(self.elements)
-        elif (area < 0).all():
-            original_order = 'clockwise'
-            if change_order_to == 'anti-clockwise':
-                self.elements = np.fliplr(self.elements)
-        else:
-            original_order = 'mixed'
-            if change_order_to == 'clockwise':
-                self.elements[area>0,:] = np.fliplr(self.elements[area>0,:])
-            elif change_order_to == 'anti-clockwise':
-                self.elements[area<0,:] = np.fliplr(self.elements[area<0,:])
-
-
-        if original_order == 'anti-clockwise':
-            print u'\u2713'.encode('utf8')+' : ','Imported mesh has',original_order,'node ordering'
-        else:
-            print u'\u2717'.encode('utf8')+' : ','Imported mesh has',original_order,'node ordering'
-
-        return original_order
-
-
-    def GetElementsEdgeNumbering(self):
-        """Finds edges of elements and their flags saying which edge they are [0,1,2]. Mesh must be linear.
-            At most a tetrahedral can have all its four faces at boundary.
-
-        output: 
-
-            edge_elements:              [1D array] array containing elements which have face
-                                        on the boundary"""
-
-        # CHECK IF IT IS LINEAR MESH
-        assert self.elements.shape[1]==3
-
-        # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY 
-        edges = self.GetBoundaryEdgesTri(TotalEdges=True)
-
-
-        from Core.Supplementary.Where import whereEQ
-        from Core.Supplementary.Tensors import itemfreq_py
-        
-        edge_elements = np.zeros((edges.shape[0],3),dtype=np.int64)
-        for i in range(edges.shape[0]):
-            x = []
-            for j in range(2):
-                x.append(np.where(self.elements==edges[i,j])[0])
-
-            z = x[0]
-            for k in range(1,len(x)):
-                z = np.intersect1d(x[k],z)
-
-            # TAKE ONLY ONE EDGE
-            edge_elements[i,0] = z[0]
-            cols = np.array([np.where(self.elements[z[0],:]==edges[i,0])[0], np.where(self.elements[z[0],:]==edges[i,1])[0]])
-
-            # cols = np.sort(cols.flatten()) # CAREFUL
-            cols = cols.flatten() # CAREFUL
-            if cols[0]==0 and cols[1]==1:
-                edge_number = 0
-                swap = 0
-            elif cols[0]==1 and cols[1]==2:
-                edge_number = 1
-                swap = 0
-            elif cols[0]==2 and cols[1]==0:
-                edge_number = 2
-                swap = 0
-
-            elif cols[0]==1 and cols[1]==0:
-                edge_number = 0
-                swap = 1
-            elif cols[0]==2 and cols[1]==1:
-                edge_number = 1
-                swap = 1
-            elif cols[0]==0 and cols[1]==2:
-                edge_number = 2
-                swap = 1
-
-            edge_elements[i,1] = edge_number
-            edge_elements[i,2] = swap
- 
-        return edge_elements
-
-
-    def GetElementsWithBoundaryEdgesTri(self):
-        """ Computes elements which have edges on the boundary. Mesh can be linear or higher order.
-            Note that this assumes that a triangular element can only have one edge on the boundary.
-
-        output: 
-
-            edge_elements:              [1D array] array containing elements which have edge
-                                        on the boundary. Row number is edge number"""
-
-
-        assert self.edges is not None or self.elements is not None
-        # CYTHON SOLUTION
-        # from GetElementsWithBoundaryEdgesTri_Cython import GetElementsWithBoundaryEdgesTri_Cython
-        # return GetElementsWithBoundaryEdgesTri_Cython(self.elements,self.edges)
-        
-        from Core.Supplementary.Where import whereEQ
-        edge_elements = np.zeros(self.edges.shape[0],dtype=np.int64)
-        for i in range(self.edges.shape[0]):
-            x = []
-            for j in range(self.edges.shape[1]):
-                x = np.append(x,np.where(self.elements==self.edges[i,j])[0])
-                # x = np.append(x,whereEQ(self.elements,self.edges[i,j])[0])
-            # x = x.astype(np.int64)
-            for k in range(len(x)):
-                y = np.where(x==x[k])[0]
-                # y = np.asarray(whereEQ(np.array([x]),np.int64(x[k]))[0])
-                if y.shape[0]==self.edges.shape[1]:
-                    edge_elements[i] = np.int64(x[k])
-                    break
-
-        return edge_elements
-
-
-    def GetElementsWithBoundaryFacesTet(self):
-        """ Computes elements which have faces on the boundary. Mesh can be linear or higher order.
-            At most a tetrahedral can have all its four faces at boundary.
-
-        output: 
-
-            face_elements:              [1D array] array containing elements which have face
-                                        on the boundary"""
-
-        assert self.faces is not None or self.elements is not None
-
-        from Core.Supplementary.Tensors import itemfreq_py
-        
-        face_elements = []
-        for i in range(self.faces.shape[0]):
-            x = []
-            for j in range(self.faces.shape[1]):
-                x.append(np.where(self.elements==self.faces[i,j])[0])
-
-            z = x[0]
-            for k in range(1,len(x)):
-                z = np.intersect1d(x[k],z)
-            try:
-                face_elements.append(z[0])
-            except:
-                face_elements.append(z)
-                print z, self.faces[i,:]
-
-        return np.array(face_elements)
-
-
-    def GetFaceFlagsTets(self):
-        """ Computes elements which have faces on the boundary with a flag containing 
-            which faces of the elements are on the boundary [0,1,2,3] as well as aranges the faces. 
-            Mesh can be linear or higher order.
-            At most a tetrahedral can have all its four faces at boundary. 
-
-        output: 
-
-            face_elements:              [2D array] nfaces x 2 array containing elements which have face
-                                        on the boundary with their flags"""
-
-        # DETERMINE DEGREE
-        p = 1
-        for k in range(1,100):
-            if int((k+1)*(k+2)*(k+3)/6) == self.elements.shape[1]:
-                p = k
-                break
-
-        if p==2:
-            face_0 = [0,1,2,4,5,6]
-            face_1 = [0,1,3,4,7,8]
-            face_2 = [0,2,3,5,7,9]
-            face_3 = [1,2,3,6,8,9]
-        elif p==3:
-            face_0 = [0,1,2,4,5,6,7,8,9,10]
-            face_1 = [0,1,3,4,5,11,12,13,17,18]
-            face_2 = [0,2,3,6,9,11,14,16,17,19]
-            face_3 = [1,2,3,8,10,13,15,16,18,19]
-        elif p==4:
-            face_0 = [0,1,2,4,5,6,7,8,9,10,11,12,13,14,15]
-            face_1 = [0,1,3,4,5,6,16,17,18,19,26,27,28,32,33]
-            face_2 = [0,2,3,7,11,14,16,20,23,25,26,29,31,32,34]
-            face_3 = [1,2,3,10,13,15,19,22,24,25,28,30,31,33,34]
-
-        face_elements = self.GetElementsWithBoundaryFacesTet()
-        face_elements = np.concatenate((face_elements[:,None],np.zeros_like(face_elements)[:,None]),axis=1)
-
-        assert face_elements.shape[0]==self.faces.shape[0]
-
-        for i in range(self.faces.shape[0]):
-            pos = []
-            for j in range(self.faces.shape[1]):
-                pos.append(np.where(self.elements[face_elements[i,0],:]==self.faces[i,j])[0][0])
-            pos.sort()
-            
-            if np.array_equal(pos,face_0):
-                face_elements[i,1] = 0
-                self.faces[i,:] = self.elements[face_elements[i,0],face_0]
-            elif np.array_equal(pos,face_1):
-                face_elements[i,1] = 1
-                self.faces[i,:] = self.elements[face_elements[i,0],face_1]
-            elif np.array_equal(pos,face_2):
-                face_elements[i,1] = 2
-                self.faces[i,:] = self.elements[face_elements[i,0],face_2]
-            elif np.array_equal(pos,face_3):
-                face_elements[i,1] = 3
-                self.faces[i,:] = self.elements[face_elements[i,0],face_3]
-
-        return face_elements
 
 
 
@@ -1079,6 +1056,7 @@ class Mesh(object):
         return triangle.build(info,*args,**kwargs)
 
 
+
     def UniformHollowCircle(self,center=(0,0),inner_radius=1.0,outer_radius=2.,element_type='tri',isotropic=True,nrad=5,ncirc=10):
         """Generates isotropic and anisotropic tri and quad meshes on a hollow circle.
 
@@ -1176,6 +1154,7 @@ class Mesh(object):
         # ASSIGN PROPERTIES
         self.element_type = element_type
         self.nnode = self.points.shape[0]
+
 
 
     def Sphere(self,radius=1,points=10):
@@ -1335,3 +1314,165 @@ class Mesh(object):
                     break 
 
         return p 
+
+
+
+    def BoundaryEdgesfromPhysicalParametrisation(self,points,facets,mesh_points,mesh_edges):
+        """Given a 2D planar mesh (mesh_points,mesh_edges) and the parametrisation of the physical geometry (points and facets)
+            finds boundary edges
+
+        input:
+
+            points:         nx2 numpy array of points given to meshpy/distmesh/etc API for the actual geometry
+            facets:         mx2 numpy array connectivity of points given to meshpy/distmesh/etc API for the actual geometry
+            mesh_points:    px2 numpy array of points taken from the mesh generator
+            mesh_edges:     qx2 numpy array of edges taken from the mesh generator
+
+        returns:
+
+            arr_1:          nx2 numpy array of boundary edges
+
+        Note that this method could be useful for finding arbitrary edges not necessarily lying on the boundary"""
+
+        # COMPUTE SLOPE OF THE GEOMETRY EDGE
+        geo_edges = np.array(facets); geo_points = np.array(points)
+        # ALLOCATE
+        mesh_boundary_edges = np.zeros((1,2),dtype=int)
+        # LOOP OVER GEOMETRY EDGES
+        for i in range(geo_edges.shape[0]):
+            # GET COORDINATES OF BOTH NODES AT THE EDGE
+            geo_edge_coord = geo_points[geo_edges[i]]
+            geo_x1 = geo_edge_coord[0,0];       geo_y1 = geo_edge_coord[0,1]
+            geo_x2 = geo_edge_coord[1,0];       geo_y2 = geo_edge_coord[1,1]
+
+            # COMPUTE SLOPE OF THIS LINE
+            geo_angle = np.arctan((geo_y2-geo_y1)/(geo_x2-geo_x1)) #*180/np.pi
+
+            # NOW FOR EACH OF THESE GEOMETRY LINES LOOP OVER ALL MESH EDGES
+            for j in range(0,mesh_edges.shape[0]):
+                mesh_edge_coord = mesh_points[mesh_edges[j]]
+                mesh_x1 = mesh_edge_coord[0,0];         mesh_y1 = mesh_edge_coord[0,1]
+                mesh_x2 = mesh_edge_coord[1,0];         mesh_y2 = mesh_edge_coord[1,1]
+
+                # FIND SLOPE OF THIS LINE 
+                mesh_angle = np.arctan((mesh_y2-mesh_y1)/(mesh_x2-mesh_x1))
+
+                # CHECK IF GEOMETRY AND MESH EDGES ARE PARALLEL
+                if np.allclose(geo_angle,mesh_angle,atol=1e-12):
+                    # IF SO THEN FIND THE NORMAL DISTANCE BETWEEN THEM
+                    P1 = np.array([geo_x1,geo_y1,0]);               P2 = np.array([geo_x2,geo_y2,0])        # 1st line's coordinates
+                    P3 = np.array([mesh_x1,mesh_y1,0]);             P4 = np.array([mesh_x2,mesh_y2,0])      # 2nd line's coordinates
+
+                    dist = NormalDistance(P1,P2,P3,P4)
+                    # IF NORMAL DISTANCE IS ZEROS THEN MESH EDGE IS ON THE BOUNDARY
+                    if np.allclose(dist,0,atol=1e-14):
+                        mesh_boundary_edges = np.append(mesh_boundary_edges,mesh_edges[j].reshape(1,2),axis=0)
+
+        # return np.delete(mesh_boundary_edges,0,0)
+        return mesh_boundary_edges[1:,:]
+
+
+
+
+##############===============================
+    def GetBoundaryFacesHigherTet(self):
+        """Get high order planar tetrahedral faces given high order element connectivity
+            and nodal coordinates
+
+            NOT TESTED
+
+            """
+
+        assert self.elements is not None
+        assert self.points is not None
+        assert self.nelem is not None
+
+        from Core.Supplementary.Tensors import itemfreq_py
+        from Core.Supplementary.Where import whereEQ
+        from Core.QuadratureRules.NodeArrangement import NodeArrangement
+
+
+        # CHANGE TYPE 
+        if isinstance(self.elements[0,0],np.uint64):
+            self.elements = self.elements.astype(np.int64)
+            self.faces = self.faces.astype(np.int64)
+
+        # print self.faces.shape[1]
+        if self.faces.shape[1] == 0:
+            newMesh = Mesh()
+            newMesh.nelem = self.elements.shape[0]
+            newMesh.elements = self.elements[:,:4]
+            newMesh_nnode = np.max(newMesh.elements)+1 # NO MONKEY PATCHING
+            newMesh.points = self.points[:newMesh_nnode]
+            newMesh.GetBoundaryFacesTet()
+            self.faces = newMesh.faces
+
+        if self.faces.shape[1] > 3:
+            raise UserWarning("High order tetrahedral faces seem to be already computed. Do you want me to recompute them?")
+            pass
+
+
+        # INFER POLYNOMIAL DEGREE AND ORDER OF CONTINUITY
+        C = self.InferPolynomialDegree()-1
+        # GET NUMBER OF COLUMNS FOR HIGHER ORDER FACES
+        fsize = int((C+2.)*(C+3.)/2.)
+        # GET THE NODE ARRANGEMENT FOR FACES
+        face_node_arrangment = NodeArrangement(C)[0]
+
+        higher_order_faces = np.zeros((self.faces.shape[0],fsize),dtype = np.int64)
+        elements_containing_faces = []
+        counter = 0
+        # FIND IF THE 3 NODES OF THE LINEAR FACE IS IN THE ELEMENT
+        for i in range(self.faces.shape[0]):
+            face_nodes = [];  face_cols = []
+            for j in range(3):
+                # rows, cols = np.where(self.elements[:,:4]==self.faces[i,j])
+                rows, cols = whereEQ(self.elements[:,:4],self.faces[i,j])
+                # STORE ALL THE OCCURENCES OF CURRENT NODAL FACE IN THE ELEMENT CONNECTIVITY
+                face_nodes = np.append(face_nodes,rows)
+                face_cols = np.append(face_cols,cols)
+            # CHANGE TYPE
+            face_nodes = face_nodes.astype(np.int64)
+            face_cols = face_cols.astype(np.int64)
+            # COUNT THE NUMBER OF OCCURENCES
+            occurence_within_an_element = itemfreq_py(face_nodes)
+            # SEE WHICH ELEMENT CONTAINS ALL THE THREE NODES OF THE FACE
+            counts = np.where(occurence_within_an_element[:,1]==3)[0]
+            if counts.shape[0] != 0:
+                # COMPUTE ONLY IF NEEDED LATER ON
+                # elements_containing_faces = np.append(elements_containing_faces, 
+                #   occurence_within_an_element[counts,0])
+
+                # GET THE POSITIONS FROM CONCATENATION
+                inv_uniques = np.unique(face_nodes,return_inverse=True)[1]
+                which_connectivity_cols_idx = np.where(inv_uniques==counts)[0]
+                # FROM THE POSITIONS GET THE COLUMNS AT WHICH THESE NODES OCCUR IN THE CONNECTIVITY
+                which_connectivity_cols =  face_cols[which_connectivity_cols_idx]
+                if which_connectivity_cols_idx.shape[0] != 0:
+                    # BASED ON THE OCCURENCE, DECIDE WHICH FACE OF THAT ELEMENT WE ARE ON
+                    if which_connectivity_cols[0]==0 and which_connectivity_cols[1]==1 \
+                        and which_connectivity_cols[2]==2:
+                        higher_order_faces[counter,:] = self.elements[
+                        occurence_within_an_element[counts,0],face_node_arrangment[0,:]]
+                        counter += 1
+                    elif which_connectivity_cols[0]==0 and which_connectivity_cols[1]==1 \
+                        and which_connectivity_cols[2]==3:
+                        higher_order_faces[counter,:] = self.elements[
+                        occurence_within_an_element[counts,0],face_node_arrangment[1,:]]
+                        counter += 1
+                    elif which_connectivity_cols[0]==0 and which_connectivity_cols[1]==2 \
+                        and which_connectivity_cols[2]==3:
+                        higher_order_faces[counter,:] = self.elements[
+                        occurence_within_an_element[counts,0],face_node_arrangment[2,:]]
+                        counter += 1
+                    elif which_connectivity_cols[0]==1 and which_connectivity_cols[1]==2 \
+                        and which_connectivity_cols[2]==3:
+                        higher_order_faces[counter,:] = self.elements[
+                        occurence_within_an_element[counts,0],face_node_arrangment[3,:]]
+                        counter += 1
+
+        # CHECK WITH AN ALREADY EXISTING MESH GENERATOR
+        # print np.linalg.norm(np.sort(higher_order_faces,axis=1) - np.sort(self.faces,axis=1))
+                
+        self.faces = higher_order_faces
+        self.ChangeType()

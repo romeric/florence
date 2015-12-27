@@ -5,20 +5,14 @@
 #include <EIGEN_INC.hpp>
 #endif
 
-#ifdef OCC_INC_HPP
 #include <OCC_INC.hpp>
-#endif
 
 #ifndef CNP_FUNCS_HPP
 #define CNP_FUNC_HPP
 #include <CNPFuncs.hpp>
 #endif
 
-//#ifndef AUX_FUNCS_HPP
-//#define AUX_FUNCS_HPP
 #include <AuxFuncs.hpp>
-//#endif
-
 #include <PyInterface.hpp>
 
 
@@ -170,6 +164,21 @@ public:
     void GetGeomEdges();
     void GetGeomFaces();
     std::vector<Real> ObtainGeomVertices();
+
+    ALWAYS_INLINE Integer NbPoints()
+    {
+        return this->geometry_points.size();
+    }
+
+    ALWAYS_INLINE Integer NbCurves()
+    {
+        return this->geometry_curves.size();
+    }
+
+    ALWAYS_INLINE Integer NbSurfaces()
+    {
+        return this->geometry_surfaces.size();
+    }
 
 
     std::string mesh_element_type;

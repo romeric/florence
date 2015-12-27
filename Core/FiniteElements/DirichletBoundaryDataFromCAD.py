@@ -48,8 +48,6 @@ def PostMeshWrapper(MainData,mesh):
         curvilinear_mesh.ScaleMesh()
         # curvilinear_mesh.InferInterpolationPolynomialDegree() 
         curvilinear_mesh.SetFeketePoints(boundary_fekete)
-        # print boundary_fekete
-        # sys.exit(0)
         curvilinear_mesh.GetBoundaryPointsOrder()
         # READ THE GEOMETRY FROM THE IGES FILE
         curvilinear_mesh.ReadIGES(MainData.BoundaryData.IGES_File)
@@ -57,6 +55,7 @@ def PostMeshWrapper(MainData,mesh):
         geometry_points = curvilinear_mesh.GetGeomVertices()
         curvilinear_mesh.GetGeomEdges()
         curvilinear_mesh.GetGeomFaces()
+
         curvilinear_mesh.GetGeomPointsOnCorrespondingEdges()
         # FIRST IDENTIFY WHICH CURVES CONTAIN WHICH EDGES
         curvilinear_mesh.IdentifyCurvesContainingEdges()
@@ -81,6 +80,8 @@ def PostMeshWrapper(MainData,mesh):
         posUnique = np.unique(nodesDBC,return_index=True)[1]
         nodesDBC, Dirichlet = nodesDBC[posUnique], Dirichlet[posUnique,:]
 
+        # GET ACTUAL CURVE POINTS - THIS FUNCTION IS EXPENSIVE
+        # MainData.ActualCurve = curvilinear_mesh.DiscretiseCurves(100)
 
     elif MainData.ndim == 3:
 

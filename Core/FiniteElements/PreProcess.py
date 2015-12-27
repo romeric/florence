@@ -57,7 +57,7 @@ def PreProcess(MainData,Pr,pwd):
             # mesh.Sphere(points=2)
 
     if MainData.__NO_DEBUG__ is False:
-        mesh.CheckNodeNumberingTri()
+        mesh.CheckNodeNumbering()
 
     # mesh.ReadGIDMesh("/home/roman/Dropbox/2015_HighOrderMeshing/geometriesAndMeshes/falcon/falcon_iso.dat","tet",0)
     # mesh.ReadGIDMesh("/home/roman/Dropbox/2015_HighOrderMeshing/geometriesAndMeshes/almond/almond_H1.dat","tet",0)
@@ -106,26 +106,26 @@ def PreProcess(MainData,Pr,pwd):
     # mesh.points = np.ascontiguousarray(loadedmat['X'])
     # mesh.elements = np.ascontiguousarray(loadedmat['T'])-1
 
-    # mm = MainData.MaterialArgs().AnisotropicFibreOrientation(mesh,plot=False)
 
     # print mesh.nelem, mesh.points.shape[0], mesh.edges.shape[0]
     # mesh.WriteVTK(fname="/home/roman/Dropbox/dd2.vtu")
     # print mesh.faces
     # print mesh.points
-    # mesh.points[mesh.points <= 0.000001] = 1e10
-    # print np.min(mesh.points)
-    # print np.where(mesh.elements==130)[0]
-    # print np.where(mesh.elements==140)[0]
-    # print np.where(mesh.elements==127)[0]
 
     # print mesh.GetElementsWithBoundaryFacesTet() - mesh.ArrangeFacesTet()
     # print 
     # mesh.ArrangeFacesTet()
 
-    # mesh.GetFacesTet()
+    # print mesh.GetFacesTet()
+    # mesh.GetElementsFaceNumberingTet()
+    # mesh.ArrangeFacesTet()
     # mesh.GetEdgesTri()
     # mesh.GetInteriorEdgesTri()
     # mesh.GetInteriorFacesTet()
+    # mesh.CheckNodeNumbering()
+
+    # print 
+    # mesh.GetElementsWithBoundaryFacesTet()
     # exit()
 
 
@@ -179,6 +179,7 @@ def PreProcess(MainData,Pr,pwd):
     # print np.linalg.norm(vpoints,axis=1)
 
     # mesh.GetFaceFlagsTets()
+    mesh.GetFacesTet()
     # exit()
 
 
@@ -211,12 +212,6 @@ def PreProcess(MainData,Pr,pwd):
     norder_post = (MainData.C+1)+(MainData.C+1)
     MainData.PostDomain, MainData.PostBoundary, MainData.PostQuadrature = GetBasesAtInegrationPoints(MainData.C,
         norder_post,QuadratureOpt,MainData.MeshInfo.MeshType)
-
-    # MainData.PostDomain, MainData.PostBoundary, MainData.PostQuadrature = GetBasesAtInegrationPoints(MainData.C,
-    #   8,QuadratureOpt,MainData.MeshInfo.MeshType)
-
-    # print MainData.PostDomain.Jm
-    # exit()
 
     ############################################################################
 
@@ -360,7 +355,7 @@ def PreProcess(MainData,Pr,pwd):
         tol = 1e-07
 
     # if mesh.points.shape[0]*MainData.nvar > 200000:
-    if mesh.points.shape[0]*MainData.nvar > 50000:
+    if mesh.points.shape[0]*MainData.nvar > 100000:
         # solve.type = 'iterative'
         solve.type = "direct"
         solve.sub_type = "MUMPS"

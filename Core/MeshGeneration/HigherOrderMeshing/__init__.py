@@ -1,3 +1,3 @@
 from HigherOrderMeshingTri import HighOrderMeshTri, HighOrderMeshTri_UNSTABLE
-from HigherOrderMeshingTet import HighOrderMeshTet, HighOrderMeshTet_UNSTABLE
+from HigherOrderMeshingTet import HighOrderMeshTet, HighOrderMeshTet_UNSTABLE, HighOrderMeshTet_SEMISTABLE
 from HigherOrderMeshingQuad import HighOrderMeshQuad

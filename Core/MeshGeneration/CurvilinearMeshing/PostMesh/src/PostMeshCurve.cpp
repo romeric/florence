@@ -138,6 +138,52 @@ void PostMeshCurve::GetCurvesLengths()
     }
 }
 
+std::vector<std::vector<Real> > PostMeshCurve::DiscretiseCurves(Integer npoints)
+{
+    if (this->geometry_curves.empty())
+    {
+        warn("Geometry curves are not computed. Compute them first");
+    }
+
+    if (this->dirichlet_edges.isZero(0.))
+    {
+        warn("Curve discretisation can only be performed after it has been identified. Call 'IdentifyCurvesContainingEdges' first");
+    }
+
+
+    std::vector<std::vector<Real> > discritised_points;
+
+    for (auto idir=0; idir< this->no_dir_edges; ++idir)
+    {
+        auto id_curve = this->dirichlet_edges(idir,2);
+        Handle_Geom_Curve current_curve = this->geometry_curves[id_curve];
+        GeomAdaptor_Curve current_curve_adapt(current_curve);
+
+        auto U0 = current_curve->FirstParameter();
+//        auto curve_length = GCPnts_AbscissaPoint::Length(current_curve_adapt,U0,U1);
+        auto curve_length = this->curves_lengths(id_curve);
+
+        auto h = 1.0*curve_length/npoints;
+        std::vector<Real> curve_points;
+
+        for (auto i=0; i<=npoints; ++i)
+        {
+            auto pnt = GCPnts_AbscissaPoint(1e-05,current_curve_adapt,U0+i*h,U0);
+            auto upnt = pnt.Parameter();
+            gp_Pnt coord_pnt;
+            current_curve_adapt.D0(upnt,coord_pnt);
+
+            curve_points.push_back(coord_pnt.X());
+            curve_points.push_back(coord_pnt.Y());
+            curve_points.push_back(coord_pnt.Z());
+
+        }
+        discritised_points.push_back(curve_points);
+    }
+
+    return discritised_points;
+}
+
 void PostMeshCurve::FindCurvesSequentiallity()
 {
     //! CHECKS IF THE PARAMETRIC REPRESENTATION OF CURVES ARE SEQUENTIAL, I.E.

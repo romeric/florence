@@ -23,6 +23,8 @@
 #include <BRep_Tool.hxx>
 #include <BRepTools.hxx>
 #include <BRepBuilderAPI_NurbsConvert.hxx>
+#include <BRepMesh.hxx>
+#include <BRepMesh_GeomTool.hxx>
 //#include <TColgp_Array1OfPnt.hxx>
 //#include <TColStd_Array1OfReal.hxx>
 //#include <TColStd_Array1OfInteger.hxx>
@@ -31,6 +33,8 @@
 #include <ShapeAnalysis_Curve.hxx>
 #include <ShapeAnalysis_Surface.hxx>
 #include <GCPnts_AbscissaPoint.hxx>
+#include <GCPnts_UniformDeflection.hxx>
+#include <GCPnts_QuasiUniformDeflection.hxx>
 #include <GeomConvert_CompCurveToBSplineCurve.hxx>
 //#include <Hermit.hxx>
 

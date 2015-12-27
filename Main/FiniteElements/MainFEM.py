@@ -25,11 +25,11 @@ from Core.FiniteElements.ComputeErrorNorms import *
 # import Examples.FiniteElements.Annular_Circle_Nurbs.ProblemData as Pr
 # import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
 # import Examples.FiniteElements.Wing2D.ProblemData as Pr
-import Examples.FiniteElements.Naca_Isotropic.ProblemData as Pr
+# import Examples.FiniteElements.Naca_Isotropic.ProblemData as Pr
 # import Examples.FiniteElements.RAE2822.ProblemData as Pr
 # import Examples.FiniteElements.Misc.ProblemData as Pr
 # import Examples.FiniteElements.Tests.ProblemData as Pr
-# import Examples.FiniteElements.Sphere.ProblemData as Pr
+import Examples.FiniteElements.Sphere.ProblemData as Pr
 # import Examples.FiniteElements.Almond3D.ProblemData as Pr
 # import Examples.FiniteElements.Falcon3D.ProblemData as Pr
 
@@ -62,20 +62,15 @@ def main(MainData, DictOutput=None, nStep=0):
         print 'Number of elements is', mesh.elements.shape[0], \
              'and number of boundary nodes is', np.unique(mesh.faces).shape[0]
 
-    # exit()
     # CALL THE MAIN ROUTINE
     MainData.Timer = time()
     TotalDisp = MainSolver(MainData,mesh)
     MainData.Timer = time() - MainData.Timer
 
-    # exit(0)
-    # print 'Post-Processing the information...'
     # POST-PROCESS
+    # print ('Post-Processing the information...')
     # PostProcess().StressRecovery(MainData,mesh,TotalDisp) 
 
-    # from scipy.io import loadmat
-    # pp = loadmat('/home/roman/Desktop/ToFromRogelio/Load_increment_20corr.mat')
-    # TotalDisp[:,:,-1] = pp['p'] - mesh.points
 
     # CHECK IF ALL THE FACE POINTS COORDINATES ARE ON THE SPHERE
     # vpoints = mesh.points + TotalDisp[:,:,-1]
@@ -89,13 +84,6 @@ def main(MainData, DictOutput=None, nStep=0):
     # un_faces = np.unique(mesh.edges)
     # print np.linalg.norm(vpoints[un_faces,:],axis=1)
 
-    # print TotalDisp[:,:,-1]
-    # vpoints = mesh.points + np.sum(TotalDisp,axis=2)
-    # import matplotlib.pyplot as plt
-    # plt.plot(mesh.points[:,0],mesh.points[:,1],'ro')
-    # plt.plot(vpoints[:,0],vpoints[:,1],'bs')
-    # plt.axis('equal')
-    # plt.show()
 
     #####################
     # from scipy.io import savemat
@@ -123,12 +111,10 @@ def main(MainData, DictOutput=None, nStep=0):
         else:
             vmesh = mesh    
         # PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
-        # PostProcess.HighOrderInterpolatedPatchPlot(MainData,mesh,TotalDisp)
-        PostProcess.HighOrderCurvedPatchPlot(MainData,mesh,TotalDisp)
-        # PostProcess.HighOrderCurvedPatchPlot(MainData,mesh,TotalDisp,TriSurf=True,EquallySpacedPoints=True)
-        # PostProcess.HighOrderCurvedPatchPlot(MainData,mesh,TotalDisp,EquallySpacedPoints=True)
-        import matplotlib.pyplot as plt
-        plt.show()
+        # # PostProcess.HighOrderCurvedPatchPlot(MainData,mesh,TotalDisp,InterpolationDegree=40)
+        # # PostProcess.HighOrderCurvedPatchPlot(MainData,mesh,TotalDisp,PlotActualCurve=True)
+        # import matplotlib.pyplot as plt
+        # plt.show()
     else:
         MainData.ScaledJacobian = np.zeros(mesh.nelem)+np.NAN
         MainData.ScaledFF = np.zeros(mesh.nelem)+np.NAN
@@ -192,7 +178,6 @@ def main(MainData, DictOutput=None, nStep=0):
     # Compute Error Norms
     # L2Norm=0; EnergyNorm=0
     # L2Norm, EnergyNorm = ComputeErrorNorms(MainData,mesh)
-
 
     # CheapNorm(MainData,mesh,TotalDisp)
 

@@ -7,6 +7,7 @@
 #include <string>
 #include <sstream>
 #include <stdexcept>
+#include <exception>
 #include <cstdarg>
 #include <cmath>
 #include <ctime>
@@ -18,6 +19,7 @@
 #include <utility>
 #include <limits>
 #include <omp.h>
+
 
 
 typedef int64_t Integer;

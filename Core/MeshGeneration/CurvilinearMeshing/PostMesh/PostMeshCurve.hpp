@@ -41,6 +41,7 @@ public:
     void CurvesToBsplineCurves();
     void GetCurvesParameters();
     void GetCurvesLengths();
+    std::vector<std::vector<Real> > DiscretiseCurves(Integer npoints);
     void GetGeomPointsOnCorrespondingEdges();
     void IdentifyCurvesContainingEdges();
     void ProjectMeshOnCurve();
