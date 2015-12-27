@@ -1,7 +1,6 @@
 import numpy as np
 from Core.QuadratureRules import GaussLobattoQuadrature
 
-
 def Lagrange(C,xi):
 	n = C+2
 	nsize = n-1

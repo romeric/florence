@@ -582,11 +582,6 @@ class PostProcess(object):
         # print TotalDisp[:,:MainData.ndim,-1]
         vpoints += TotalDisp[:,:MainData.ndim,-1]
 
-        # plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#ffffee') 
-        # plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#F88379') ##
-        # plt.plot(vpoints[:,0],vpoints[:,1],vpoints[:,2],'o',color='#F88379') 
-        # plt.gca(projection='3d')
-
         dum1=[]; dum2=[]; dum3 = []; ddum=np.array([0,1,2,0])
         for i in range(0,MainData.C):
             dum1=np.append(dum1,i+3)
@@ -619,27 +614,16 @@ class PostProcess(object):
             # plt.text(x_avg[i],y_avg[i],np.around(MainData.ScaledJacobian[i],decimals=3))
 
 
-        plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#F88379') 
+        plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#F88379',markersize=5) 
 
         plt.axis('equal')
         # plt.xlim([-0.52,-0.43])
         # plt.ylim([-0.03,0.045])
-        # plt.axis('off')
+        plt.axis('off')
 
         # ax = plt.gca()
         # PCM=ax.get_children()[2]
         # plt.colorbar(afig)
-
-
-        # print afig
-        # xs, ys = np.meshgrid(np.array(x_avg),np.array(y_avg))
-        # JJ = np.dot(MainData.Jacobian[:,None],MainData.Jacobian[:,None].T)
-        # print JJ.shape
-        # plt.pcolormesh(np.array(x_avg),np.array(y_avg),MainData.Jacobian, antialiased=True)
-        # plt.pcolormesh(xs,ys,JJ, antialiased=True)
-        # plt.axis('off')   
-        # print MainData.ScaledJacobian
-        # exit(0)
 
 
 
@@ -820,7 +804,8 @@ class PostProcess(object):
 
     @staticmethod
     def HighOrderCurvedPatchPlot(MainData,mesh,TotalDisp,
-        InterpolationDegree=40,EquallySpacedPoints=False,TriSurf=False,colorbar=False):
+        InterpolationDegree=40,EquallySpacedPoints=False,TriSurf=False,colorbar=False,
+        PlotActualCurve=False):
 
         """High order curved triangular mesh plots, based on high order nodal FEM.
             The equally spaced FEM points do not work as good as the Fekete points 
@@ -880,7 +865,7 @@ class PostProcess(object):
         nmax = np.max(smesh.elements)+1
         smesh.points = mesh.points[:nmax,:]
         all_edges = smesh.GetEdgesTri()
-        edge_elements = smesh.GetElementsEdgeNumbering()
+        edge_elements = smesh.GetElementsEdgeNumberingTri()
 
 
         edge0 = []; edge1 = []; edge2 = []
@@ -928,21 +913,7 @@ class PostProcess(object):
         Tplot = np.zeros((nelem,3),dtype=np.int64)
         Uplot = np.zeros(nnode,dtype=np.float64)
 
-
-        # iNodeIni = 0
-        # iElemIni = 0
-        # for ielem in range(mesh.nelem):
-        # # for ielem in range(1):
-        #     iNodeEnd = iNodeIni + nsize
-        #     iElemEnd = iElemIni + TrianglesFunc.nsimplex
-        #     Xplot[iNodeIni:iNodeEnd,:] = np.dot(BasesTri.T, vpoints[mesh.elements[ielem,:],:])
-        #     # Xplot[iNodeIni:iNodeEnd,:] = np.dot(BasesTri.T, mesh.points[mesh.elements[ielem],:])
-        #     Tplot[iElemIni:iElemEnd,:] = Triangles + iNodeIni
-
-        #     iNodeIni += nsize
-        #     iElemIni += TrianglesFunc.nsimplex
-
-
+        # FOR CURVED ELEMENTS
         for ielem in range(mesh.nelem):
             Xplot[ielem*nsize:(ielem+1)*nsize,:] = np.dot(BasesTri.T, vpoints[mesh.elements[ielem,:],:])
             Tplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex,:] = Triangles + ielem*nsize
@@ -978,6 +949,14 @@ class PostProcess(object):
             divider = make_axes_locatable(ax_cbar)
             cax = divider.append_axes("right", size="1%", pad=0.005)
         
+        if PlotActualCurve is True:
+            ActualCurve = getattr(MainData,'ActualCurve',None)
+            if ActualCurve is not None:
+                for i in range(len(MainData.ActualCurve)):
+                    actual_curve_points = MainData.ActualCurve[i]
+                    plt.plot(actual_curve_points[:,0],actual_curve_points[:,1],'-r',linewidth=3)
+            else:
+                raise KeyError("You have not computed the CAD curve points")
 
         plt.axis('equal')
         plt.axis('off')

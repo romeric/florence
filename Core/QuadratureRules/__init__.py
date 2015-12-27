@@ -1,2 +1,1 @@
-
 from NumericIntegrator import GaussQuadrature, GaussQuadratureLogarithmic, GaussLobattoQuadrature
