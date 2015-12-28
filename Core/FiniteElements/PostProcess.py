@@ -706,102 +706,6 @@ class PostProcess(object):
 
 
 
-
-
-    @staticmethod   
-    def HighOrderInterpolatedPatchPlot(MainData,mesh,TotalDisp):
-        """Not tested properly"""
-
-        import matplotlib.pyplot as plt
-        from scipy.interpolate import BarycentricInterpolator, piecewise_polynomial_interpolate, interp1d, splrep, splev
-        
-        plt.figure()
-        # print TotalDisp[:,0,-1]
-        vpoints = np.copy(mesh.points)
-        vpoints[:,0] += TotalDisp[:,0,-1]
-        vpoints[:,1] += TotalDisp[:,1,-1]
-        # plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#ffffee') 
-        # plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#F88379') #
-
-        dum1=[]; dum2=[]; dum3 = []; ddum=np.array([0,1,2,0])
-        for i in range(0,MainData.C):
-            dum1=np.append(dum1,i+3)
-            dum2 = np.append(dum2, 2*MainData.C+3 +i*MainData.C -i*(i-1)/2 )
-            dum3 = np.append(dum3,MainData.C+3 +i*(MainData.C+1) -i*(i-1)/2 )
-
-
-        if MainData.C>0:
-            ddum = (np.append(np.append(np.append(np.append(np.append(np.append(0,dum1),1),
-                dum2),2),np.fliplr(dum3.reshape(1,dum3.shape[0]))),0) ).astype(np.int32)
-
-        p = MainData.C+1
-        ndim = MainData.ndim
-        n_interp = 20
-
-
-        for elem in range(mesh.nelem):
-            dum = vpoints[mesh.elements[elem,:],:]
-            x_coordinates = dum[ddum,0]
-            y_coordinates = dum[ddum,1]
-
-            x_new,y_new=[],[]
-            for iedge in range(ndim+1):
-                x_edge = x_coordinates[p*iedge:p*(iedge+1)+1]
-                y_edge = y_coordinates[p*iedge:p*(iedge+1)+1]
-
-                # print x_coordinates
-                # print x_edge
-                # print elem, iedge
-
-                x_edge = x_edge.copy(order='c')
-                unq_x_edge, idx, invx = np.unique(x_edge,return_inverse=True,return_index=True)
-                unq_y_edge = y_edge[idx]
-                # print x
-
-                # interp_func = splrep(unq_x_edge,unq_y_edge,k=unq_x_edge.shape[0]-1)
-                interp_ = np.polyfit(unq_x_edge,unq_y_edge,p)
-                interp_func2 = np.poly1d(interp_)
-
-
-                x_edge_new = []
-                for j in range(unq_x_edge.shape[0]-1):
-                    x_edge_new = np.append(x_edge_new[:-1],np.linspace(unq_x_edge[j],unq_x_edge[j+1],n_interp))
-
-                if idx[0]==idx.shape[0]-1:
-                    x_edge_new = x_edge_new[::-1] 
-
-                # y_edge_new = splev(x_edge_new,interp_func)
-                y_edge_new = interp_func2(x_edge_new)
-                # print np.min(y_edge_new)
-                # print x_edge_new
-                if elem==1:
-                    print x_edge
-                    # print
-                    print repr(x_edge_new)
-                    # print
-                    print y_edge
-                    print 
-                    # exit()
-                    # plt.plot()
-                # exit()
-
-                
-
-
-
-
-        
-                x_new = np.append(x_new,x_edge_new)
-                y_new = np.append(y_new,y_edge_new)
-
-            plt.fill(x_new,y_new,'#ffddbb',alpha=1)
-
-
-        plt.axis('equal')
-        # plt.axis('off')   
-        # plt.show()
-
-
     @staticmethod
     def HighOrderCurvedPatchPlot(MainData,mesh,TotalDisp,
         InterpolationDegree=40,EquallySpacedPoints=False,TriSurf=False,colorbar=False,
@@ -960,6 +864,174 @@ class PostProcess(object):
 
         plt.axis('equal')
         plt.axis('off')
+
+
+
+
+
+
+
+    @staticmethod
+    def HighOrderCurvedPatchPlotTet(MainData,mesh,TotalDisp,
+        InterpolationDegree=10,EquallySpacedPoints=False,TriSurf=False,colorbar=False,
+        PlotActualCurve=False):
+
+        """High order curved triangular mesh plots, based on high order nodal FEM.
+            The equally spaced FEM points do not work as good as the Fekete points 
+        """
+
+        from Core.QuadratureRules.FeketePointsTri import FeketePointsTri
+        from Core.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
+        from Core.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature, GaussQuadrature
+        import Core.InterpolationFunctions.TwoDimensional.Tri.hpNodal as Tri 
+        from Core.InterpolationFunctions.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
+        from Core.FiniteElements.GetBases import GetBases
+
+        from copy import deepcopy
+        from scipy.spatial import Delaunay
+        from mpl_toolkits.mplot3d import Axes3D
+        from matplotlib.colors import LightSource
+        import matplotlib as mpl
+        import matplotlib.pyplot as plt
+        import matplotlib.tri as mtri
+        import matplotlib.cm as cm
+        from mpl_toolkits.axes_grid1 import make_axes_locatable
+        
+
+        C = InterpolationDegree
+        p = C+1
+        nsize = int((p+1)*(p+2)/2.)
+        nsize_2 = int((MainData.C+2)*(MainData.C+3)/2.)
+
+        FeketePointsTri = FeketePointsTri(C)
+        if EquallySpacedPoints is True:
+            FeketePointsTri = EquallySpacedPointsTri(C)
+
+        # BUILD DELAUNAY TRIANGULATION OF REFERENCE ELEMENTS
+        TrianglesFunc = Delaunay(FeketePointsTri)
+        Triangles = TrianglesFunc.simplices.copy()
+        # plt.triplot(FeketePointsTri[:,0], FeketePointsTri[:,1], Triangles); plt.axis('off')
+
+
+        # GET EQUALLY-SPACED/GAUSS-LOBATTO POINTS FOR THE EDGES
+        if EquallySpacedPoints is False:
+            GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0]
+        else:
+            GaussLobattoPointsOneD = Lagrange(C,0)[-1]
+
+        BasesTri = np.zeros((nsize_2,FeketePointsTri.shape[0]),dtype=np.float64)
+        for i in range(FeketePointsTri.shape[0]):
+            BasesTri[:,i] = Tri.hpBases(MainData.C,FeketePointsTri[i,0],FeketePointsTri[i,1],
+                EvalOpt=1,EquallySpacedPoints=EquallySpacedPoints,Transform=1)[0]
+
+        BasesOneD = np.zeros((MainData.C+2,GaussLobattoPointsOneD.shape[0]),dtype=np.float64)
+        for i in range(GaussLobattoPointsOneD.shape[0]):
+            BasesOneD[:,i] = LagrangeGaussLobatto(MainData.C,GaussLobattoPointsOneD[i])[0]
+
+        smesh = deepcopy(mesh)
+        smesh.elements = mesh.elements[:,:MainData.ndim+1]
+        smesh.edges = mesh.edges[:,:MainData.ndim]
+        nmax = np.max(smesh.elements)+1
+        smesh.points = mesh.points[:nmax,:]
+        all_edges = smesh.GetEdgesTri()
+        edge_elements = smesh.GetElementsEdgeNumberingTri()
+
+
+        edge0 = []; edge1 = []; edge2 = []
+        for i in range(0,MainData.C):
+            edge0 = np.append(edge0,i+3)
+            edge1 = np.append(edge1, 2*MainData.C+3 +i*MainData.C -i*(i-1)/2 )
+            edge2 = np.append(edge2,MainData.C+3 +i*(MainData.C+1) -i*(i-1)/2 )
+
+        edge0 = np.append(np.append(0,edge0),1)
+        edge1 = np.append(np.append(1,edge1),2)
+        edge2 = np.append(np.append(2,edge2[::-1]),0)
+
+        ref_edges = np.concatenate((edge0[None,:],edge1[None,:],edge2[None,:]),axis=0).astype(np.int64)
+
+        vpoints = np.copy(mesh.points)
+        vpoints = mesh.points + TotalDisp[:,:,-1]
+
+        x_edges = np.zeros((C+2,all_edges.shape[0]))
+        y_edges = np.zeros((C+2,all_edges.shape[0]))
+        z_edges = np.zeros((C+2,all_edges.shape[0]))
+
+        for iedge in range(all_edges.shape[0]):
+
+            ielem = edge_elements[iedge,0]
+            edge = mesh.elements[ielem,ref_edges[edge_elements[iedge,1],:]]
+            coord_edge = vpoints[edge,:]
+            # x_edges[:,iedge], y_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
+            x_edges[:,iedge], y_edges[:,iedge], z_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
+
+
+        # MAKE FIGURE
+        fig = plt.figure()
+        ls = LightSource(azdeg=315, altdeg=45)
+        if TriSurf is True:
+            ax = fig.add_subplot(111, projection='3d')
+        else:
+            ax = fig.add_subplot(111)
+
+        # PLOT CURVED EDGES
+        ax.plot(x_edges,y_edges,'k')
+        
+        nface = mesh.faces.shape[0]
+
+        nnode = nsize*nface
+        nelem = Triangles.shape[0]*nface
+
+        Xplot = np.zeros((nnode,3),dtype=np.float64)
+        Tplot = np.zeros((nelem,3),dtype=np.int64)
+        Uplot = np.zeros(nnode,dtype=np.float64)
+
+        # FOR CURVED ELEMENTS
+        for ielem in range(nface):
+            Xplot[ielem*nsize:(ielem+1)*nsize,:] = np.dot(BasesTri.T, vpoints[mesh.faces[ielem,:],:])
+            Tplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex,:] = Triangles + ielem*nsize
+            Uplot[ielem*nsize:(ielem+1)*nsize] = MainData.ScaledJacobian[ielem]
+
+        # PLOT CURVED ELEMENTS
+        if TriSurf is True:
+            # ax.plot_trisurf(Tplot,Xplot[:,0], Xplot[:,1], Xplot[:,1]*0)
+            triang = mtri.Triangulation(Xplot[:,0], Xplot[:,1],Tplot)            
+            ax.plot_trisurf(triang,Xplot[:,0]*0, edgecolor="none",facecolor="#ffddbb")
+            # ax.view_init(90,-90)
+            # ax.dist = 7
+        else:
+            # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, np.ones(Xplot.shape[0]), 100,alpha=0.8)
+            plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, 100,alpha=0.8)
+            # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot[:4,:], np.ones(Xplot.shape[0]),alpha=0.8,origin='lower')
+            pass
+
+        # PLOT CURVED POINTS
+        # plt.plot(vpoints[:,0],vpoints[:,1],'o',markersize=3,color='#F88379')
+        plt.plot(vpoints[:,0],vpoints[:,1],vpoints[:,0],'o',markersize=3,color='k')
+
+
+        if TriSurf is False:        
+            plt.set_cmap('viridis')
+            plt.clim(0,1)        
+
+        if colorbar is True:
+            ax_cbar = mpl.colorbar.make_axes(plt.gca(), shrink=1.0)[0]
+            cbar = mpl.colorbar.ColorbarBase(ax_cbar, cmap=cm.viridis,
+                               norm=mpl.colors.Normalize(vmin=-0, vmax=1))
+            cbar.set_clim(0, 1)
+            divider = make_axes_locatable(ax_cbar)
+            cax = divider.append_axes("right", size="1%", pad=0.005)
+        
+        if PlotActualCurve is True:
+            ActualCurve = getattr(MainData,'ActualCurve',None)
+            if ActualCurve is not None:
+                for i in range(len(MainData.ActualCurve)):
+                    actual_curve_points = MainData.ActualCurve[i]
+                    plt.plot(actual_curve_points[:,0],actual_curve_points[:,1],'-r',linewidth=3)
+            else:
+                raise KeyError("You have not computed the CAD curve points")
+
+        plt.axis('equal')
+        plt.axis('off')        
 
 
 
