@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.sparse.linalg import spsolve, bicgstab
+from scipy.sparse.linalg import spsolve, bicgstab, gmres, cg
 from scipy.io import savemat, loadmat
 from subprocess import call
 import os
@@ -40,7 +40,9 @@ def SparseSolver(A,b,solver='direct',sub_type='UMFPACK',tol=1e-05):
             sol = spsolve(A,b,permc_spec='MMD_AT_PLUS_A',use_umfpack=True)
     else:
         # CALL ITERATIVE SOLVER
-        sol = bicgstab(A,b,tol=tol)[0]
+        # sol = bicgstab(A,b,tol=tol)[0]
+        # sol = gmres(A,b,tol=tol)[0]
+        sol = cg(A,b,tol=tol)[0]
 
     return sol
 

@@ -1,6 +1,6 @@
 import numpy as np
 
-def NodeArrangement(C):
+def NodeArrangementTet(C):
 
     # Traversing the tetrahedral only via edges - used for plotting
     a1,a2,a3,a4 = [],[],[],[]
@@ -44,7 +44,7 @@ def NodeArrangement(C):
     traversed_edge_numbering_tet = np.array([a2,a1,a3,a4])
 
 
-    # Get face numbering order from a tetrahedral element
+    # GET FACE NUMBERING ORDER FROM TETRAHEDRAL ELEMENT
     face_0,face_1,face_2,face_3 = [],[],[],[]
     if C==0:
         face_0 = [0,1,2]
@@ -85,9 +85,28 @@ def NodeArrangement(C):
 
 
 
-def NodalArrangementTri(C):
+def NodeArrangementTri(C):
 
-    # TRIANGULAR EDGE ORDERING
-    edge_order = [[0,1],[1,2],[2,0]]
-    if C==1:
-        pass
+    # GET FACE NUMBERING ORDER FROM TETRAHEDRAL ELEMENT
+    edge0 = []; edge1 = []; edge2 = []
+    for i in range(0,C):
+        edge0 = np.append(edge0,i+3)
+        edge1 = np.append(edge1, 2*C+3 +i*C -i*(i-1)/2 )
+        edge2 = np.append(edge2,C+3 +i*(C+1) -i*(i-1)/2 )
+
+
+    # TRAVERSING TRIANGULAR ELEMENT VIA EDGES
+    traversed_edge_numbering_tri = np.concatenate(([0],edge0,[1],edge1,[2],edge2,[0])).astype(np.int64)
+
+    # edge0 = np.append(np.append(0,edge0),1)
+    # edge1 = np.append(np.append(1,edge1),2)
+    # edge2 = np.append(np.append(2,edge2[::-1]),0)
+
+    edge0 = np.append(np.append(0,1),edge0)
+    edge1 = np.append(np.append(1,2),edge1)
+    edge2 = np.append(np.append(2,0),edge2[::-1])
+    edge_numbering = np.concatenate((edge0[None,:],edge1[None,:],edge2[None,:]),axis=0).astype(np.int64)
+  
+
+    return edge_numbering, traversed_edge_numbering_tri
+

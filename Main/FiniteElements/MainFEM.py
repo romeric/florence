@@ -111,8 +111,9 @@ def main(MainData, DictOutput=None, nStep=0):
         else:
             vmesh = mesh    
         # PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
-        # # PostProcess.HighOrderCurvedPatchPlot(MainData,mesh,TotalDisp,InterpolationDegree=40)
+        # PostProcess.HighOrderCurvedPatchPlot(MainData,mesh,TotalDisp,InterpolationDegree=40)
         # # PostProcess.HighOrderCurvedPatchPlot(MainData,mesh,TotalDisp,PlotActualCurve=True)
+        # PostProcess.HighOrderCurvedPatchPlotTet(MainData,mesh,TotalDisp,TriSurf=True)
         # import matplotlib.pyplot as plt
         # plt.show()
     else:

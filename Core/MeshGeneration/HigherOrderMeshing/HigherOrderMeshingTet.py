@@ -1,4 +1,5 @@
 import numpy as np 
+from copy import deepcopy
 # from scipy.stats import itemfreq
 from time import time
 import multiprocessing as MP
@@ -11,7 +12,7 @@ from Core.QuadratureRules.FeketePointsTet import *
 from Core.Supplementary.Where import *
 from Core.Supplementary.Tensors import itemfreq_py, makezero, duplicate
 from TwoLoopNode_Cython import TwoLoopNode_Cython
-from Core.QuadratureRules.NodeArrangement import NodeArrangement
+from Core.QuadratureRules.NodeArrangement import NodeArrangementTet
 
 
 #--------------------------------------------------------------------------------------------------------------------------#
@@ -287,49 +288,36 @@ def HighOrderMeshTet_SEMISTABLE(C,mesh,Decimals=10,Zerofy=0,Parallel=False,nCPU=
     if ComputeAll == True:
 
         #------------------------------------------------------------------------------------------
-        # BUILD EDGES NOW
-        tedges = time()
-
-        etol = 1e-12
-
-        reedges = np.zeros((mesh.edges.shape[0],C+2))
-        reedges[:,:2]=mesh.edges
-        for iedge in range(0,mesh.edges.shape[0]):
-            # TWO NODES OF THE LINEAR MESH REPLICATED REPOINTS.SHAPE[0] NUMBER OF TIMES 
-            node1 = np.repeat(mesh.points[mesh.edges[iedge,0],:].reshape(1,repoints.shape[1]),repoints.shape[0]-mesh.points.shape[0],axis=0)
-            node2 = np.repeat(mesh.points[mesh.edges[iedge,1],:].reshape(1,repoints.shape[1]),repoints.shape[0]-mesh.points.shape[0],axis=0)
-
-            # FIND WHICH NODES LIE ON THIS EDGE BY COMPUTING THE LENGTHS  -   A-----C------B  /IF C LIES ON AB THAN AC+CB=AB 
-            L1 = np.linalg.norm(node1-repoints[mesh.points.shape[0]:,:],axis=1)
-            L2 = np.linalg.norm(node2-repoints[mesh.points.shape[0]:,:],axis=1)
-            L = np.linalg.norm(node1-node2,axis=1)
-
-            # j = np.where(np.abs((L1+L2)-L) < etol)[0]
-            j = np.asarray( whereLT1d(np.abs((L1+L2)-L), etol) )
-            if j.shape[0]==reedges.shape[1]-2:
-                reedges[iedge,2:] = j+mesh.points.shape[0]
-        reedges = reedges.astype(int)
-
-        tedges = time()-tedges
-        #------------------------------------------------------------------------------------------
-
-
-        #------------------------------------------------------------------------------------------
-        # BUILD FACES NOW 
+        # BUILD FACES NOW
         tfaces = time()
-
-        ftol = 1e-12
-        fsize = int((C+2.)*(C+3.)/2.)
 
         refaces = np.zeros((mesh.faces.shape[0],fsize))
         face_to_elements = mesh.GetElementsWithBoundaryFacesTet()
-        node_arranger = NodeArrangement(C)[0]
+        node_arranger = NodeArrangementTet(C)[0]
         for i in range(mesh.faces.shape[0]):
             refaces[i,:] = reelements[face_to_elements[i,0],node_arranger[face_to_elements[i,1],:]]
 
         tfaces = time()-tfaces
+        #------------------------------------------------------------------------------------------
 
 
+        #------------------------------------------------------------------------------------------
+        # BUILD EDGES NOW
+        tedges = time()
+
+        tt = time()
+         # BUILD A 2D MESH
+        tmesh = deepcopy(mesh) 
+        tmesh.element_type = "tri"
+        tmesh.faces = refaces
+        tmesh.nelem = tmesh.elements.shape[0]
+        # GET BOUNDARY EDGES        
+        tmesh.GetBoundaryEdgesTet()
+        redges = tmesh.edges
+        del tmesh
+
+        tedges = time()-tedges
+        #------------------------------------------------------------------------------------------
 
     class nmesh(object):
         # """Construct pMesh"""

@@ -53,8 +53,9 @@ def PreProcess(MainData,Pr,pwd):
             mesh.ReadHighOrderMesh(MainData.MeshInfo.FileName.split(".")[0],MainData.C,MainData.MeshInfo.MeshType)
         elif MainData.MeshInfo.Reader is 'Sphere':
             # mesh.Sphere()
-            mesh.Sphere(points=10)
-            # mesh.Sphere(points=2)
+            # mesh.Sphere(points=10)
+            mesh.Sphere(points=4)
+            # mesh.SimplePlot()
 
     if MainData.__NO_DEBUG__ is False:
         mesh.CheckNodeNumbering()
@@ -128,7 +129,6 @@ def PreProcess(MainData,Pr,pwd):
     # mesh.GetElementsWithBoundaryFacesTet()
     # exit()
 
-
     # STORE PATHS FOR MAIN, CORE & PROBLEM DIRECTORIES
     ############################################################################
     MainData.Path = SetPath(Pr,pwd,MainData.C,mesh.nelem,
@@ -179,7 +179,18 @@ def PreProcess(MainData,Pr,pwd):
     # print np.linalg.norm(vpoints,axis=1)
 
     # mesh.GetFaceFlagsTets()
-    mesh.GetFacesTet()
+    # mesh.GetFacesTet()
+    # mesh.GetBoundaryFacesTet()
+    # mesh.GetBoundaryEdgesTet()
+    # mesh.GetInteriorFacesTet()
+    # mesh.GetEdgesTet()
+    # print mesh.all_edges
+    # print mesh.all_faces.shape
+    
+    # mesh.GetEdgesTri()
+    # mesh.GetBoundaryEdgesTri()
+    # mesh.GetInteriorEdgesTri()
+
     # exit()
 
 
@@ -352,14 +363,16 @@ def PreProcess(MainData,Pr,pwd):
     # CHOOSING THE SOLVER/ASSEMBLY ROUTINES BASED ON PROBLEM SIZE
     #############################################################################
     class solve(object):
-        tol = 1e-07
+        tol = 1e-06
 
-    # if mesh.points.shape[0]*MainData.nvar > 200000:
+    # if mesh.points.shape[0]*MainData.nvar > 100000:
+    #     solve.type = "iterative"
+    #     solve.sub_type = ""
+    #     print 'Large system of equations. Switching to iterative solver'
+
     if mesh.points.shape[0]*MainData.nvar > 100000:
-        # solve.type = 'iterative'
         solve.type = "direct"
         solve.sub_type = "MUMPS"
-        # print 'Large system of equations. Switching to iterative solver'
         print 'Large system of equations. Switching to MUMPS solver'
     else:
         solve.type = "direct"
