@@ -345,7 +345,7 @@ def GaussLobattoQuadrature(C):
         a=1;    b=a;
         # Redefine C: at least there are two Gauss-Lobatto points always
         if C<=1:
-            warnings.warn("There should be at least two Gauss-Lobatto points")
+            raise ValueError("There should be at least two Gauss-Lobatto points")
         if C>=1:
             C=C-2
         # Initial Guess - Chebyshev-Gauss-Lobatto points

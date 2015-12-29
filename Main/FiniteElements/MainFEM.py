@@ -23,13 +23,13 @@ from Core.FiniteElements.ComputeErrorNorms import *
 # import Examples.FiniteElements.Annular_Circle_Electromechanics.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle_Nurbs.ProblemData as Pr
-# import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
+import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
 # import Examples.FiniteElements.Wing2D.ProblemData as Pr
 # import Examples.FiniteElements.Naca_Isotropic.ProblemData as Pr
 # import Examples.FiniteElements.RAE2822.ProblemData as Pr
 # import Examples.FiniteElements.Misc.ProblemData as Pr
 # import Examples.FiniteElements.Tests.ProblemData as Pr
-import Examples.FiniteElements.Sphere.ProblemData as Pr
+# import Examples.FiniteElements.Sphere.ProblemData as Pr
 # import Examples.FiniteElements.Almond3D.ProblemData as Pr
 # import Examples.FiniteElements.Falcon3D.ProblemData as Pr
 
@@ -80,8 +80,7 @@ def main(MainData, DictOutput=None, nStep=0):
     # print np.allclose(np.linalg.norm(vpoints[un_faces,:],axis=1),1)
 
     # vpoints = mesh.points + TotalDisp[:,:,-1]
-    # # vpoints = mesh.points
-    # un_faces = np.unique(mesh.edges)
+    # un_faces = np.unique(mesh.faces)
     # print np.linalg.norm(vpoints[un_faces,:],axis=1)
 
 
@@ -111,11 +110,10 @@ def main(MainData, DictOutput=None, nStep=0):
         else:
             vmesh = mesh    
         # PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
-        # PostProcess.HighOrderCurvedPatchPlot(MainData,mesh,TotalDisp,InterpolationDegree=40)
+        PostProcess.HighOrderCurvedPatchPlot(MainData,mesh,TotalDisp,InterpolationDegree=40)
         # # PostProcess.HighOrderCurvedPatchPlot(MainData,mesh,TotalDisp,PlotActualCurve=True)
-        # PostProcess.HighOrderCurvedPatchPlotTet(MainData,mesh,TotalDisp,TriSurf=True)
-        # import matplotlib.pyplot as plt
-        # plt.show()
+        import matplotlib.pyplot as plt
+        plt.show()
     else:
         MainData.ScaledJacobian = np.zeros(mesh.nelem)+np.NAN
         MainData.ScaledFF = np.zeros(mesh.nelem)+np.NAN

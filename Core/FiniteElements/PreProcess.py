@@ -365,15 +365,15 @@ def PreProcess(MainData,Pr,pwd):
     class solve(object):
         tol = 1e-06
 
-    # if mesh.points.shape[0]*MainData.nvar > 100000:
-    #     solve.type = "iterative"
-    #     solve.sub_type = ""
-    #     print 'Large system of equations. Switching to iterative solver'
-
     if mesh.points.shape[0]*MainData.nvar > 100000:
-        solve.type = "direct"
-        solve.sub_type = "MUMPS"
-        print 'Large system of equations. Switching to MUMPS solver'
+        solve.type = "iterative"
+        solve.sub_type = ""
+        print 'Large system of equations. Switching to iterative solver'
+
+    # if mesh.points.shape[0]*MainData.nvar > 100000:
+    #     solve.type = "direct"
+    #     solve.sub_type = "MUMPS"
+    #     print 'Large system of equations. Switching to MUMPS solver'
     else:
         solve.type = "direct"
         solve.sub_type = "UMFPACK"
