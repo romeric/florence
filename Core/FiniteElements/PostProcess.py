@@ -707,17 +707,17 @@ class PostProcess(object):
 
     @staticmethod
     def HighOrderCurvedPatchPlot(*args,**kwargs):
-        MainData = args[0]
-        if MainData.ndim == 2:
+        mesh = args[0]
+        if mesh.element_type == "tri":
             PostProcess().HighOrderCurvedPatchPlotTri(*args,**kwargs)
-        elif MainData.ndim == 3:
+        elif mesh.element_type == "tet":
             PostProcess().HighOrderCurvedPatchPlotTet(*args,**kwargs)
 
 
     @staticmethod
-    def HighOrderCurvedPatchPlotTri(MainData,mesh,TotalDisp,
-        InterpolationDegree=40,EquallySpacedPoints=False,TriSurf=False,colorbar=False,
-        PlotActualCurve=False):
+    def HighOrderCurvedPatchPlotTri(mesh,TotalDisp,QuantityToPlot=None,
+        ProjectionFlags=None,InterpolationDegree=40,EquallySpacedPoints=False,
+        TriSurf=False,colorbar=False,PlotActualCurve=False):
 
         """High order curved triangular mesh plots, based on high order nodal FEM.
             The equally spaced FEM points do not work as good as the Fekete points 
@@ -725,7 +725,8 @@ class PostProcess(object):
 
         from Core.QuadratureRules.FeketePointsTri import FeketePointsTri
         from Core.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
-        from Core.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature, GaussQuadrature
+        from Core.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
+        from Core.QuadratureRules.NodeArrangement import NodeArrangementTri
         import Core.InterpolationFunctions.TwoDimensional.Tri.hpNodal as Tri 
         from Core.InterpolationFunctions.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
         from Core.FiniteElements.GetBases import GetBases
@@ -740,11 +741,14 @@ class PostProcess(object):
         import matplotlib.cm as cm
         from mpl_toolkits.axes_grid1 import make_axes_locatable
         
+        # SINCE THIS IS A 2D PLOT
+        ndim = 2
 
         C = InterpolationDegree
         p = C+1
         nsize = int((p+1)*(p+2)/2.)
-        nsize_2 = int((MainData.C+2)*(MainData.C+3)/2.)
+        CActual = mesh.InferPolynomialDegree() - 1 
+        nsize_2 = int((CActual+2)*(CActual+3)/2.)
 
         FeketePointsTri = FeketePointsTri(C)
         if EquallySpacedPoints is True:
@@ -764,45 +768,37 @@ class PostProcess(object):
 
         BasesTri = np.zeros((nsize_2,FeketePointsTri.shape[0]),dtype=np.float64)
         for i in range(FeketePointsTri.shape[0]):
-            BasesTri[:,i] = Tri.hpBases(MainData.C,FeketePointsTri[i,0],FeketePointsTri[i,1],
+            BasesTri[:,i] = Tri.hpBases(CActual,FeketePointsTri[i,0],FeketePointsTri[i,1],
                 EvalOpt=1,EquallySpacedPoints=EquallySpacedPoints,Transform=1)[0]
 
-        BasesOneD = np.zeros((MainData.C+2,GaussLobattoPointsOneD.shape[0]),dtype=np.float64)
+        BasesOneD = np.zeros((CActual+2,GaussLobattoPointsOneD.shape[0]),dtype=np.float64)
         for i in range(GaussLobattoPointsOneD.shape[0]):
-            BasesOneD[:,i] = LagrangeGaussLobatto(MainData.C,GaussLobattoPointsOneD[i])[0]
+            BasesOneD[:,i] = LagrangeGaussLobatto(CActual,GaussLobattoPointsOneD[i])[0]
 
         smesh = deepcopy(mesh)
-        smesh.elements = mesh.elements[:,:MainData.ndim+1]
-        smesh.edges = mesh.edges[:,:MainData.ndim]
+        smesh.elements = mesh.elements[:,:ndim+1]
+        smesh.edges = mesh.edges[:,:ndim]
         nmax = np.max(smesh.elements)+1
         smesh.points = mesh.points[:nmax,:]
-        all_edges = smesh.GetEdgesTri()
+        smesh.GetEdgesTri()
         edge_elements = smesh.GetElementsEdgeNumberingTri()
 
 
+        # GET EDGE ORDERING IN THE REFERENCE ELEMENT
+        reference_edges = NodeArrangementTri(CActual)[0]
+        reference_edges = np.concatenate((reference_edges,reference_edges[:,1,None]),axis=1)
+        reference_edges = np.delete(reference_edges,1,1)
 
-        edge0 = []; edge1 = []; edge2 = []
-        for i in range(0,MainData.C):
-            edge0 = np.append(edge0,i+3)
-            edge1 = np.append(edge1, 2*MainData.C+3 +i*MainData.C -i*(i-1)/2 )
-            edge2 = np.append(edge2,MainData.C+3 +i*(MainData.C+1) -i*(i-1)/2 )
-
-        edge0 = np.append(np.append(0,edge0),1)
-        edge1 = np.append(np.append(1,edge1),2)
-        edge2 = np.append(np.append(2,edge2[::-1]),0)
-
-        ref_edges = np.concatenate((edge0[None,:],edge1[None,:],edge2[None,:]),axis=0).astype(np.int64)
-
-        vpoints = np.copy(mesh.points)
+        # GET EULERIAN GEOMETRY
         vpoints = mesh.points + TotalDisp[:,:,-1]
 
-        x_edges = np.zeros((C+2,all_edges.shape[0]))
-        y_edges = np.zeros((C+2,all_edges.shape[0]))
+        # GET X & Y OF CURVED EDGES
+        x_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
+        y_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
 
-        for iedge in range(all_edges.shape[0]):
-
+        for iedge in range(smesh.all_edges.shape[0]):
             ielem = edge_elements[iedge,0]
-            edge = mesh.elements[ielem,ref_edges[edge_elements[iedge,1],:]]
+            edge = mesh.elements[ielem,reference_edges[edge_elements[iedge,1],:]]
             coord_edge = vpoints[edge,:]
             x_edges[:,iedge], y_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
 
@@ -830,7 +826,7 @@ class PostProcess(object):
         for ielem in range(mesh.nelem):
             Xplot[ielem*nsize:(ielem+1)*nsize,:] = np.dot(BasesTri.T, vpoints[mesh.elements[ielem,:],:])
             Tplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex,:] = Triangles + ielem*nsize
-            Uplot[ielem*nsize:(ielem+1)*nsize] = MainData.ScaledJacobian[ielem]
+            Uplot[ielem*nsize:(ielem+1)*nsize] = QuantityToPlot[ielem]
 
         # PLOT CURVED ELEMENTS
         if TriSurf is True:
@@ -881,9 +877,9 @@ class PostProcess(object):
 
 
     @staticmethod
-    def HighOrderCurvedPatchPlotTet(MainData,mesh,TotalDisp,
-        InterpolationDegree=20,EquallySpacedPoints=False,colorbar=False,
-        PlotActualCurve=False):
+    def HighOrderCurvedPatchPlotTet(mesh,TotalDisp,QuantityToPlot=None,
+        ProjectionFlags=None,InterpolationDegree=20,EquallySpacedPoints=False,
+        colorbar=False,PlotActualCurve=False):
 
         """High order curved tetrahedral surfaces mesh plots, based on high order nodal FEM.
             The equally spaced FEM points do not work as good as the Fekete points 
@@ -906,18 +902,21 @@ class PostProcess(object):
         import matplotlib.pyplot as plt
         import matplotlib.tri as mtri
         import matplotlib.cm as cm
+        from matplotlib.colors import ColorConverter
         from mpl_toolkits.axes_grid1 import make_axes_locatable
 
         import os
         os.environ['ETS_TOOLKIT'] = 'qt4'
         from mayavi import mlab
 
-        
+        # SINCE THIS IS A 3D PLOT
+        ndim=3
 
         C = InterpolationDegree
         p = C+1
         nsize = int((p+1)*(p+2)/2.)
-        nsize_2 = int((MainData.C+2)*(MainData.C+3)/2.)
+        CActual = mesh.InferPolynomialDegree() - 1
+        nsize_2 = int((CActual+2)*(CActual+3)/2.)
 
         FeketePointsTri = FeketePointsTri(C)
         if EquallySpacedPoints is True:
@@ -937,17 +936,44 @@ class PostProcess(object):
 
         BasesTri = np.zeros((nsize_2,FeketePointsTri.shape[0]),dtype=np.float64)
         for i in range(FeketePointsTri.shape[0]):
-            BasesTri[:,i] = Tri.hpBases(MainData.C,FeketePointsTri[i,0],FeketePointsTri[i,1],
+            BasesTri[:,i] = Tri.hpBases(CActual,FeketePointsTri[i,0],FeketePointsTri[i,1],
                 EvalOpt=1,EquallySpacedPoints=EquallySpacedPoints,Transform=1)[0]
 
-        BasesOneD = np.zeros((MainData.C+2,GaussLobattoPointsOneD.shape[0]),dtype=np.float64)
+        BasesOneD = np.zeros((CActual+2,GaussLobattoPointsOneD.shape[0]),dtype=np.float64)
         for i in range(GaussLobattoPointsOneD.shape[0]):
-            BasesOneD[:,i] = LagrangeGaussLobatto(MainData.C,GaussLobattoPointsOneD[i])[0]
+            BasesOneD[:,i] = LagrangeGaussLobatto(CActual,GaussLobattoPointsOneD[i])[0]
 
 
+        # FOR MAPPING DATA E.G. SCALED JACOBIAN FROM ELEMENTS TO FACES
+        face_elements = mesh.GetElementsWithBoundaryFacesTet()
+
+
+        # GET ONLY THE FACES WHICH NEED TO BE PLOTTED 
+        # faces_to_plot_flag = np.ones(mesh.faces.shape[0],dtype=np.int64)
+        # proj_func = getattr(MainData.BoundaryData,'ProjectionCriteria',None)
+        # if proj_func is not None:
+            # faces_to_plot_flag = MainData.BoundaryData().ProjectionCriteria(mesh)
+        faces_to_plot_flag = ProjectionFlags
+        if len(faces_to_plot_flag.shape) == 2:
+            faces_to_plot_flag = faces_to_plot_flag.flatten()
+
+        faces_to_plot = np.zeros_like(mesh.faces)
+        quantity_to_plot = np.zeros(mesh.faces.shape[0])
+        counter = 0
+        for i in range(mesh.faces.shape[0]):
+            if faces_to_plot_flag[i]==1:
+                faces_to_plot[i,:] = mesh.faces[i,:]
+                quantity_to_plot[i] = QuantityToPlot[face_elements[i,0]]
+                counter +=1
+        faces_to_plot = faces_to_plot[:counter,:]
+        quantity_to_plot = quantity_to_plot[:counter]
+
+
+        # BUILD MESH OF SURFACE
         smesh = Mesh()
         smesh.element_type = "tri"
-        smesh.elements = np.copy(mesh.faces)
+        # smesh.elements = np.copy(mesh.faces)
+        smesh.elements = np.copy(faces_to_plot)
         smesh.nelem = smesh.elements.shape[0]
         smesh.points = mesh.points[np.unique(smesh.elements),:]
 
@@ -956,7 +982,8 @@ class PostProcess(object):
 
         counter = 0
         for i in nrange:
-            rows,cols = np.where(smesh.elements==nrange[i])
+            # rows, cols = np.where(smesh.elements==nrange[i])
+            rows, cols = np.where(smesh.elements==i)
             if rows.shape[0]!=0:
                 smesh.elements[rows,cols]=counter
                 counter +=1
@@ -965,50 +992,34 @@ class PostProcess(object):
         smesh.GetEdgesTri()
         edge_elements = smesh.GetElementsEdgeNumberingTri()
         
+        # GET EDGE ORDERING IN THE REFERENCE ELEMENT
+        reference_edges = NodeArrangementTri(CActual)[0]
+        reference_edges = np.concatenate((reference_edges,reference_edges[:,1,None]),axis=1)
+        reference_edges = np.delete(reference_edges,1,1)
 
-        edge0 = []; edge1 = []; edge2 = []
-        for i in range(0,MainData.C):
-            edge0 = np.append(edge0,i+3)
-            edge1 = np.append(edge1, 2*MainData.C+3 +i*MainData.C -i*(i-1)/2 )
-            edge2 = np.append(edge2,MainData.C+3 +i*(MainData.C+1) -i*(i-1)/2 )
-
-        edge0 = np.append(np.append(0,edge0),1)
-        edge1 = np.append(np.append(1,edge1),2)
-        edge2 = np.append(np.append(2,edge2[::-1]),0)
-
-        ref_edges = np.concatenate((edge0[None,:],edge1[None,:],edge2[None,:]),axis=0).astype(np.int64)
-        node_arranger = NodeArrangementTri(MainData.C)[0]
-
-        temp = np.copy(node_arranger[:,1])
-        node_arranger[:,1] = node_arranger[:,-1]
-        node_arranger[:,-1] = temp
-
-        print ref_edges
-        print        
-        print node_arranger
-        exit()
-
-        vpoints = np.copy(mesh.points)
+        # GET EULERIAN GEOMETRY
         vpoints = mesh.points + TotalDisp[:,:,-1]
-        # svpoints = vpoints[np.unique(smesh.elements),:]
-        svpoints = vpoints[np.unique(mesh.faces),:]
+        # svpoints = vpoints[np.unique(mesh.faces),:]
+        svpoints = vpoints[np.unique(faces_to_plot),:]
 
+        # GET X, Y & Z OF CURVED EDGES  
         x_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
         y_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
         z_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
 
         for iedge in range(smesh.all_edges.shape[0]):
-
             ielem = edge_elements[iedge,0]
-            edge = smesh.elements[ielem,ref_edges[edge_elements[iedge,1],:]]
+            edge = smesh.elements[ielem,reference_edges[edge_elements[iedge,1],:]]
             coord_edge = svpoints[edge,:]
             x_edges[:,iedge], y_edges[:,iedge], z_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
 
 
+        # PLOT CURVED EDGES
         for i in range(x_edges.shape[1]):
             mlab.plot3d(x_edges[:,i],y_edges[:,i],z_edges[:,i],color=(0,0,0),tube_radius=0.0025)
 
-
+        # mlab.show()
+        # exit()
         nface = smesh.elements.shape[0]
         nnode = nsize*nface
         nelem = Triangles.shape[0]*nface
@@ -1022,12 +1033,21 @@ class PostProcess(object):
         for ielem in range(nface):
             Xplot[ielem*nsize:(ielem+1)*nsize,:] = np.dot(BasesTri.T, svpoints[smesh.elements[ielem,:],:])
             Tplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex,:] = Triangles + ielem*nsize
-            # Uplot[ielem*nsize:(ielem+1)*nsize] = MainData.ScaledJacobian[ielem]
-            Uplot[ielem*nsize:(ielem+1)*nsize] = 1.0
+            Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
 
-        mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars=Uplot,color=(0,1,0),line_width=1)
-        mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=.025)
+        # mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars=Uplot,color=(0,1,0),line_width=1,colormap='cool')
+        trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars=Uplot,line_width=1)
+        mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=.0125)
 
-        mlab.show()
-        # plt.axis('equal')
-        # plt.axis('off')        
+        
+        # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO 
+        # GET VIRIDIS COLORMAP FROM MATPLOTLIB
+        color_func = ColorConverter()
+        rgba_lower = color_func.to_rgba_array(cm.viridis.colors)
+        RGBA_higher = np.round(rgba_lower*255).astype(np.int64)
+        # UPDATE LUT OF THE COLORMAP
+        trimesh_h.module_manager.scalar_lut_manager.lut.table = RGBA_higher 
+        # FORCE UPDATE MLAB TO UPDATE COLORMAP
+        mlab.draw()
+
+        mlab.show()     

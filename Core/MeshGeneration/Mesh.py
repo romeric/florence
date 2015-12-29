@@ -84,8 +84,8 @@ class Mesh(object):
         node_arranger = NodeArrangementTri(p-1)[0]
 
         # CHECK IF FACES ARE ALREADY AVAILABLE
-        if isinstance(self.edges,np.ndarray):
-            if self.edges.shape[0] > 1 and self.edges.shape[1] == p+1:
+        if isinstance(self.all_edges,np.ndarray):
+            if self.all_edges.shape[0] > 1 and self.all_edges.shape[1] == p+1:
                 warn("Mesh edges seem to be already computed. I am going to recompute them")
 
 
@@ -712,8 +712,8 @@ class Mesh(object):
 
 
     def GetElementsWithBoundaryFacesTet(self):
-        """ Computes elements which have faces on the boundary.
-            At most a tetrahedral can have all its four faces at boundary.
+        """Finds elements which have faces on the boundary.
+            At most a tetrahedral can have all its four faces on the boundary.
 
         output: 
 
@@ -723,7 +723,6 @@ class Mesh(object):
         """
 
         assert self.faces is not None or self.elements is not None
-        assert self.elements.shape[1] == 4
 
         # GET ALL FACES FROM ELEMENT CONNECTIVITY
         if self.faces is None:
@@ -734,7 +733,7 @@ class Mesh(object):
         for i in range(self.faces.shape[0]):
             x = []
             for j in range(3):
-                x.append(np.where(self.elements==self.faces[i,j])[0])
+                x.append(np.where(self.elements[:,:4]==self.faces[i,j])[0])
 
             # FIND WHICH ELEMENTS CONTAIN ALL FACE NODES - FOR INTERIOR ELEMENTS
             # THEIR CAN BE MORE THAN ONE ELEMENT CONTAINING ALL FACE NODES
@@ -765,8 +764,8 @@ class Mesh(object):
 
 
     def GetElementsFaceNumberingTet(self):
-        """Finds which faces belong to which element and which face of the element 
-            they are e.g. 0,1,2 or 3.  
+        """Finds which faces belong to which elements and which faces of the elements 
+            they are e.g. 0, 1, 2 or 3.  
 
             output: 
 
