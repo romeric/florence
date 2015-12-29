@@ -23,13 +23,13 @@ from Core.FiniteElements.ComputeErrorNorms import *
 # import Examples.FiniteElements.Annular_Circle_Electromechanics.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle_Nurbs.ProblemData as Pr
-import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
+# import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
 # import Examples.FiniteElements.Wing2D.ProblemData as Pr
 # import Examples.FiniteElements.Naca_Isotropic.ProblemData as Pr
 # import Examples.FiniteElements.RAE2822.ProblemData as Pr
 # import Examples.FiniteElements.Misc.ProblemData as Pr
 # import Examples.FiniteElements.Tests.ProblemData as Pr
-# import Examples.FiniteElements.Sphere.ProblemData as Pr
+import Examples.FiniteElements.Sphere.ProblemData as Pr
 # import Examples.FiniteElements.Almond3D.ProblemData as Pr
 # import Examples.FiniteElements.Falcon3D.ProblemData as Pr
 
@@ -94,6 +94,19 @@ def main(MainData, DictOutput=None, nStep=0):
     # savemat('/home/roman/Dropbox/Wing2D_Results_P'+str(MainData.C+1)+'.mat',Dict)
     #####################
 
+
+    #####################
+    # from scipy.io import savemat
+    # Dict = {'points':mesh.points, 'elements':mesh.elements, 
+    #     'element_type':mesh.element_type, 'faces':mesh.faces,
+    #     'TotalDisp':TotalDisp,
+    #     'ScaledJacobian':MainData.ScaledJacobian, 
+    #     'C':MainData.C, 'ProjFlags':MainData.BoundaryData().ProjectionCriteria(mesh)}
+    # savemat('/home/roman/Almond3D_P'+str(MainData.C+1)+'.mat',Dict)
+    # # savemat('/home/roman/Sphere_P'+str(MainData.C+1)+'.mat',Dict)
+    # exit()
+    #####################
+
     if nStep ==1:
         MainData.mesh = mesh
         MainData.mesh.points = mesh.points + TotalDisp[:,:MainData.ndim,-1]
@@ -108,10 +121,17 @@ def main(MainData, DictOutput=None, nStep=0):
             vmesh = deepcopy(mesh)
             vmesh.points = vmesh.points + TotalDisp[:,:,MainData.AssemblyParameters.LoadIncrements-1]
         else:
-            vmesh = mesh    
+            vmesh = mesh
+
+        ProjFunc = getattr(MainData.BoundaryData,'ProjectionCriteria',None)
+        if ProjFunc is None:
+            ProjFlags = np.ones(mesh.faces.shape[0],dtype=np.int64)
+        else:
+            ProjFlags = MainData.BoundaryData().ProjectionCriteria(mesh)
+
         # PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
-        PostProcess.HighOrderCurvedPatchPlot(MainData,mesh,TotalDisp,InterpolationDegree=40)
-        # # PostProcess.HighOrderCurvedPatchPlot(MainData,mesh,TotalDisp,PlotActualCurve=True)
+        PostProcess.HighOrderCurvedPatchPlot(mesh,TotalDisp,QuantityToPlot=MainData.ScaledJacobian,
+            ProjectionFlags=ProjFlags,InterpolationDegree=40)
         import matplotlib.pyplot as plt
         plt.show()
     else:

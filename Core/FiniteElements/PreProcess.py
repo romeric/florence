@@ -54,7 +54,7 @@ def PreProcess(MainData,Pr,pwd):
         elif MainData.MeshInfo.Reader is 'Sphere':
             # mesh.Sphere()
             # mesh.Sphere(points=10)
-            mesh.Sphere(points=4)
+            mesh.Sphere(points=2)
             # mesh.SimplePlot()
 
     if MainData.__NO_DEBUG__ is False:
@@ -112,21 +112,6 @@ def PreProcess(MainData,Pr,pwd):
     # mesh.WriteVTK(fname="/home/roman/Dropbox/dd2.vtu")
     # print mesh.faces
     # print mesh.points
-
-    # print mesh.GetElementsWithBoundaryFacesTet() - mesh.ArrangeFacesTet()
-    # print 
-    # mesh.ArrangeFacesTet()
-
-    # print mesh.GetFacesTet()
-    # mesh.GetElementsFaceNumberingTet()
-    # mesh.ArrangeFacesTet()
-    # mesh.GetEdgesTri()
-    # mesh.GetInteriorEdgesTri()
-    # mesh.GetInteriorFacesTet()
-    # mesh.CheckNodeNumbering()
-
-    # print 
-    # mesh.GetElementsWithBoundaryFacesTet()
     # exit()
 
     # STORE PATHS FOR MAIN, CORE & PROBLEM DIRECTORIES
@@ -365,15 +350,14 @@ def PreProcess(MainData,Pr,pwd):
     class solve(object):
         tol = 1e-06
 
-    if mesh.points.shape[0]*MainData.nvar > 100000:
+    if mesh.points.shape[0]*MainData.nvar > 100000 and MainData.C > 4:
         solve.type = "iterative"
         solve.sub_type = ""
         print 'Large system of equations. Switching to iterative solver'
-
-    # if mesh.points.shape[0]*MainData.nvar > 100000:
-    #     solve.type = "direct"
-    #     solve.sub_type = "MUMPS"
-    #     print 'Large system of equations. Switching to MUMPS solver'
+    elif mesh.points.shape[0]*MainData.nvar > 50000 and MainData.C < 5:
+        solve.type = "direct"
+        solve.sub_type = "MUMPS"
+        print 'Large system of equations. Switching to MUMPS solver'
     else:
         solve.type = "direct"
         solve.sub_type = "UMFPACK"

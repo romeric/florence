@@ -68,7 +68,7 @@ def ProblemData(MainData):
         ProjectionType = 'orthogonal'
 
         scale = 1000.
-        condition = 1000.
+        condition = 1e10
 
         IGES_File = ProblemPath + '/Sphere.igs'
 
