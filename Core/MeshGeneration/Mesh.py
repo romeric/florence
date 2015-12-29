@@ -625,7 +625,10 @@ class Mesh(object):
         # assert self.elements.shape[1]==3
 
         # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY 
-        edges = self.GetBoundaryEdgesTri(TotalEdges=True)
+        if self.all_edges is None:
+            edges = self.GetEdgesTri()
+        else:
+            edges = self.all_edges 
 
 
         from Core.Supplementary.Where import whereEQ
