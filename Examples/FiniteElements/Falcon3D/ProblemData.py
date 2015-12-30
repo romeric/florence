@@ -38,10 +38,12 @@ def ProblemData(MainData):
 
     ProblemPath = os.path.dirname(os.path.realpath(__file__))
     MainData.MeshInfo.MeshType = "tet"
-    MainData.MeshInfo.Reader = "Read"
-    MainData.MeshInfo.Format = "GID"
+    # MainData.MeshInfo.Reader = "Read"
+    # MainData.MeshInfo.Format = "GID"
+    MainData.MeshInfo.Reader = "ReadHDF5"
 
-    MainData.MeshInfo.FileName = ProblemPath + '/falcon_iso.dat'
+    # MainData.MeshInfo.FileName = ProblemPath + '/falcon_iso.dat'
+    MainData.MeshInfo.FileName = ProblemPath + '/Falcon3DIso.mat'
         
 
 

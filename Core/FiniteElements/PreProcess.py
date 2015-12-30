@@ -45,16 +45,18 @@ def PreProcess(MainData,Pr,pwd):
                 delimiter_connectivity=',',delimiter_coordinates=',')
             # mesh.ReadSeparate(MainData.MeshInfo.ConnectivityFile,MainData.MeshInfo.CoordinatesFile,MainData.MeshInfo.MeshType,
             #   edges_file=MainData.MeshInfo.EdgesFile,delimiter_connectivity=',',delimiter_coordinates=',')
+        elif MainData.MeshInfo.Reader is 'ReadHighOrderMesh':
+            mesh.ReadHighOrderMesh(MainData.MeshInfo.FileName.split(".")[0],MainData.C,MainData.MeshInfo.MeshType)
+        elif MainData.MeshInfo.Reader is 'ReadHDF5':
+            mesh.ReadHDF5(MainData.MeshInfo.FileName)
         elif MainData.MeshInfo.Reader is 'UniformHollowCircle':
             # mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=4,ncirc=12)
             # mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=7,ncirc=7) # isotropic
             mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=False,nrad=7,ncirc=7)
-        elif MainData.MeshInfo.Reader is 'ReadHighOrderMesh':
-            mesh.ReadHighOrderMesh(MainData.MeshInfo.FileName.split(".")[0],MainData.C,MainData.MeshInfo.MeshType)
         elif MainData.MeshInfo.Reader is 'Sphere':
             # mesh.Sphere()
             # mesh.Sphere(points=10)
-            mesh.Sphere(points=2)
+            mesh.Sphere(points=4)
             # mesh.SimplePlot()
 
     if MainData.__NO_DEBUG__ is False:

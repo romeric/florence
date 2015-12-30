@@ -2,6 +2,7 @@ from __future__ import division
 import os, warnings
 from time import time
 import numpy as np 
+from scipy.io import loadmat
 from Core.Supplementary.Where import *
 from Core.Supplementary.Tensors import duplicate
 from vtk_writer import write_vtu
@@ -50,6 +51,8 @@ class Mesh(object):
 
         self.face_to_element = None
         self.edge_to_element = None
+        self.boundary_face_to_element = None
+        self.boundary_edge_to_element = None
         self.all_faces = None
         self.all_edges = None
         self.interior_faces = None
@@ -76,11 +79,19 @@ class Mesh(object):
 
             arr:            numpy ndarray of all edges"""
 
+        p = self.InferPolynomialDegree()
 
+        # DO NOT COMPUTE IF ALREADY COMPUTED
+        if isinstance(self.all_edges,np.ndarray):
+            if self.all_edges.shape[0] > 1:
+                # IF LINEAR VERSION IS COMPUTED, DO COMPUTE HIGHER VERSION
+                if self.all_edges.shape[1]==2 and p > 1:
+                    pass
+                else:
+                    return self.all_edges 
 
         from Core.QuadratureRules.NodeArrangement import NodeArrangementTri
         
-        p = self.InferPolynomialDegree()
         node_arranger = NodeArrangementTri(p-1)[0]
 
         # CHECK IF FACES ARE ALREADY AVAILABLE
@@ -94,11 +105,6 @@ class Mesh(object):
         edges[:self.elements.shape[0],:] = self.elements[:,node_arranger[0,:]]
         edges[self.elements.shape[0]:2*self.elements.shape[0],:] = self.elements[:,node_arranger[1,:]]
         edges[2*self.elements.shape[0]:,:] = self.elements[:,node_arranger[2,:]]
-
-        # edges = np.zeros((3*self.elements.shape[0],2),dtype=np.int64)
-        # edges[:self.elements.shape[0],:] = self.elements[:,[0,1]]
-        # edges[self.elements.shape[0]:2*self.elements.shape[0],:] = self.elements[:,[1,2]]
-        # edges[2*self.elements.shape[0]:3*self.elements.shape[0],:] = self.elements[:,[2,0]]
 
         # FIND AND REMOVE DUPLICATES
         sorted_edges =  np.sort(edges,axis=1)
@@ -140,28 +146,24 @@ class Mesh(object):
         return edges
 
 
-    def GetBoundaryEdgesTri(self,TotalEdges=False):
-        """Find boundary edges (lines) of triangular mesh.
-        
-        input:
-            
-            TotalEdges:     if True returns all the edges in the triangular mesh
-                            otherwise returns an empty list (default False)
+    def GetBoundaryEdgesTri(self):
+        """Find boundary edges (lines) of triangular mesh"""
 
-        returns:            
-            
-            arr:            numpy ndarray of all edges provided TotalEdges is True"""
+        p = self.InferPolynomialDegree()
+
+        # DO NOT COMPUTE IF ALREADY COMPUTED
+        if isinstance(self.edges,np.ndarray):
+            if self.edges.shape[0] > 1:
+                # IF LINEAR VERSION IS COMPUTED, DO COMPUTE HIGHER VERSION
+                if self.edges.shape[1] == 2 and p > 1:
+                    pass
+                else:
+                    return
 
 
         from Core.QuadratureRules.NodeArrangement import NodeArrangementTri
 
-        p = self.InferPolynomialDegree()
         node_arranger = NodeArrangementTri(p-1)[0]
-
-        edges = []
-        if TotalEdges is True:
-            # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY
-            edges = self.GetEdgesTri()
 
         boundary_edges = np.zeros((1,p+1),dtype=np.uint64)
 
@@ -185,15 +187,7 @@ class Mesh(object):
             if edge_2.shape[0]==1:
                 boundary_edges = np.concatenate((boundary_edges,np.array([self.elements[i,node_arranger[2,:]]])),axis=0)
 
-            # if edge_0.shape[0]==1:
-            #     boundary_edges = np.concatenate((boundary_edges,np.array([[self.elements[i,0], self.elements[i,1]]])),axis=0)
-            # if edge_1.shape[0]==1:
-            #     boundary_edges = np.concatenate((boundary_edges,np.array([[self.elements[i,1], self.elements[i,2]]])),axis=0)
-            # if edge_2.shape[0]==1:
-            #     boundary_edges = np.concatenate((boundary_edges,np.array([[self.elements[i,2], self.elements[i,0]]])),axis=0)
-
         self.edges = boundary_edges[1:,:].astype(np.uint64)
-        return edges
 
 
     def GetInteriorEdgesTri(self):
@@ -205,9 +199,6 @@ class Mesh(object):
                 edge_flags              ndarray of edge flags: 0 for interior and 1 for boundary
 
         """
-
-        # # GET ALL EDGES AND BOUNDARY EDGES        
-        # all_edges = self.GetBoundaryEdgesTri(TotalEdges=True)
 
         if not isinstance(self.all_edges,np.ndarray):
             self.GetEdgesTri()
@@ -248,10 +239,20 @@ class Mesh(object):
 
         """
 
-        from Core.QuadratureRules.NodeArrangement import NodeArrangementTet
-
         # DETERMINE DEGREE
         p = self.InferPolynomialDegree()
+
+        # DO NOT COMPUTE IF ALREADY COMPUTED
+        if isinstance(self.all_faces,np.ndarray):
+            if self.all_faces.shape[0] > 1:
+                # IF LINEAR VERSION IS COMPUTED, DO COMPUTE HIGHER VERSION
+                if self.all_faces.shape[1] == 3 and p > 1:
+                    pass
+                else:
+                    return self.all_faces 
+
+        from Core.QuadratureRules.NodeArrangement import NodeArrangementTet
+
 
         node_arranger = NodeArrangementTet(p-1)[0]
         fsize = int((p+1.)*(p+2.)/2.)
@@ -287,8 +288,21 @@ class Mesh(object):
         self.all_faces = faces
         return faces
 
+
     def GetEdgesTet(self):
         """Find all edges (lines) of tetrahedral mesh (boundary & interior)"""
+
+        p = self.InferPolynomialDegree()
+
+        # DO NOT COMPUTE IF ALREADY COMPUTED
+        if isinstance(self.all_edges,np.ndarray):
+            if self.all_edges.shape[0] > 1:
+                # IF LINEAR VERSION IS COMPUTED, DO COMPUTE HIGHER VERSION
+                if self.all_edges.shape[1] == 2 and p > 1:
+                    pass
+                else:
+                    return self.all_edges 
+
 
         # FIRST GET BOUNDARY FACES
         if not isinstance(self.all_faces,np.ndarray):
@@ -309,32 +323,27 @@ class Mesh(object):
 
 
 
-    def GetBoundaryFacesTet(self,TotalFaces=False):
-        """Find boundary faces (surfaces) of a tetrahedral mesh.
-        
-        input:
-            
-            TotalFaces:     if True returns all the faces in the tetrahedral mesh
-                            otherwise returns an empty list (default False)
+    def GetBoundaryFacesTet(self):
+        """Find boundary faces (surfaces) of a tetrahedral mesh"""
 
-        returns:            
 
-            arr:            numpy ndarray of all faces provided TotalFaces is True"""
+        p = self.InferPolynomialDegree()
+
+        # DO NOT COMPUTE IF ALREADY COMPUTED
+        if isinstance(self.faces,np.ndarray):
+            if self.faces.shape[0] > 1:
+                # IF LINEAR VERSION IS COMPUTED, DO COMPUTE HIGHER VERSION
+                if self.faces.shape[1] == 3 and p > 1:
+                    pass
+                else:
+                    return
+
 
         from Core.QuadratureRules.NodeArrangement import NodeArrangementTet
-        
-        # DETERMINE DEGREE
-        p = self.InferPolynomialDegree()
-        # print p, self.elements.shape
-        # exit()
 
         node_arranger = NodeArrangementTet(p-1)[0]
         fsize = int((p+1.)*(p+2.)/2.)
 
-        all_faces = []
-        if TotalFaces is True:
-            # GET ALL FACES FROM THE ELEMENT CONNECTIVITY
-            all_faces = self.GetFacesTet()
 
         boundary_faces = np.zeros((1,fsize),dtype=np.int64)
         # LOOP OVER ALL ELEMENTS
@@ -362,29 +371,24 @@ class Mesh(object):
             if face_3.shape[0]==1:
                 boundary_faces = np.concatenate((boundary_faces,np.array([self.elements[i,node_arranger[3,:]]])),axis=0)
 
-
-            # if face_0.shape[0]==1:
-            #     boundaryEdges = np.concatenate((boundaryEdges,np.array([[self.elements[i,0], 
-            #         self.elements[i,1], self.elements[i,2]]])),axis=0)
-            # if face_1.shape[0]==1:
-            #     boundaryEdges = np.concatenate((boundaryEdges,np.array([[self.elements[i,0], 
-            #         self.elements[i,1], self.elements[i,3]]])),axis=0)
-            # if face_2.shape[0]==1:
-            #     boundaryEdges = np.concatenate((boundaryEdges,np.array([[self.elements[i,0], 
-            #         self.elements[i,2], self.elements[i,3]]])),axis=0)
-            # if face_3.shape[0]==1:
-            #     boundaryEdges = np.concatenate((boundaryEdges,np.array([[self.elements[i,1], 
-            #         self.elements[i,2], self.elements[i,3]]])),axis=0)
-
-
         self.faces = boundary_faces[1:,:].astype(np.uint64)
-        return all_faces
+
 
 
     def GetBoundaryEdgesTet(self):
         """Find boundary edges (lines) of tetrahedral mesh.
             Note that for tetrahedrals this function is more robust than Salome's default edge generator
         """
+
+        p = self.InferPolynomialDegree()
+        # DO NOT COMPUTE IF ALREADY COMPUTED
+        if isinstance(self.edges,np.ndarray):
+            if self.edges.shape[0] > 1:
+                # IF LINEAR VERSION IS COMPUTED, DO COMPUTE HIGHER VERSION
+                if self.edges.shape[1] == 2 and p > 1:
+                    pass
+                else:
+                    return
 
         if self.faces is None or self.faces is list:
             raise AttributeError('Tetrahedral edges cannot be computed independent of tetrahedral faces. Compute faces first')
@@ -784,7 +788,7 @@ class Mesh(object):
         if self.all_faces is None:
             faces = self.GetFacesTet()
         else:
-            faces = all_faces
+            faces = self.all_faces
 
         face_elements = np.zeros((faces.shape[0],2),dtype=np.int64)
         # FIND WHICH FACE NODES ARE IN WHICH ELEMENT
@@ -1000,6 +1004,21 @@ class Mesh(object):
         self.elements = mesh.Elmts 
         print self.elements
         # print mesh.Phys
+
+
+    def ReadHDF5(self,filename):
+
+        DictOutput = loadmat(filename)
+
+        self.elements = DictOutput['elements']
+        self.points = DictOutput['points']
+        self.nelem = self.elements.shape[0]
+        self.element_type = DictOutput['element_type'][0]
+        self.edges = DictOutput['edges']
+        self.faces = DictOutput['faces']
+
+        self.all_faces = DictOutput['all_faces']
+        self.all_edges = DictOutput['all_edges']
 
 
 
