@@ -1,5 +1,6 @@
 import numpy as np 
 from Core.InterpolationFunctions.JacobiPolynomials.JacobiPolynomials import *
+import math
 
 # 1D - LINE
 #------------------------------------------------------------------------------------------------------------------#
@@ -47,7 +48,8 @@ def NormalisedJacobi2D(C,x):
             else:
                p_j = JacobiPolynomials(j,s,2.*i+1.,0.)[-1]
             
-            factor = np.sqrt( (2.*i+1.)*(i+j+1.)/2. )
+            # factor = np.sqrt( (2.*i+1.)*(i+j+1.)/2. )
+            factor = math.sqrt( (2.*i+1.)*(i+j+1.)/2. )
             p[ncount] = ( p_i*q_i*p_j )*factor
 
             ncount += 1
@@ -112,7 +114,8 @@ def GradNormalisedJacobiTri(C,x,EvalOpt=0):
             else:
                 p_j = JacobiPolynomials(j,s,2.*i+1.,0.)[-1]; dp_j = JacobiPolynomials(j-1,s,2.*i+2.,1.)[-1]*(j+2.*i+2.)/2.  
             
-            factor = np.sqrt( (2.*i+1.)*(i+j+1.)/2. )
+            # factor = np.sqrt( (2.*i+1.)*(i+j+1.)/2. )
+            factor = math.sqrt( (2.*i+1.)*(i+j+1.)/2. )
             # Normalized polynomial
             p[ncount] = ( p_i*q_i*p_j )*factor
             # Derivatives with respect to (r,s)
@@ -165,7 +168,8 @@ def NormalisedJacobi3D(C,x):
                    p_k = 1.
                 else:
                     p_k = JacobiPolynomials(k,t,2.*(i+j)+2.,0.)[-1]
-                factor = np.sqrt( (2.*i+1.)*(i+j+1.)*(2.*(i+j+k)+3.)/4. )
+                # factor = np.sqrt( (2.*i+1.)*(i+j+1.)*(2.*(i+j+k)+3.)/4. )
+                factor = math.sqrt( (2.*i+1.)*(i+j+1.)*(2.*(i+j+k)+3.)/4. )
                 p[ncount] = ( p_i*q_i*p_j*q_j*p_k )*factor
                 ncount += 1
 
@@ -190,6 +194,7 @@ def NormalisedJacobiTet(C,x):
     t = zeta
 
     return NormalisedJacobi3D(C,[r,s,t])
+    # return NormalisedJacobi3D_Native(C,[r,s,t])
 
 
 def GradNormalisedJacobiTet(C,x,EvalOpt=0):
@@ -263,8 +268,6 @@ def GradNormalisedJacobiTet(C,x,EvalOpt=0):
             else:
                 p_i = JacobiPolynomials(i,r,0.,0.)[-1]; dp_i = JacobiPolynomials(i-1,r,1.,1.)[-1]*(i+1.)/2.    
                 q_i = q_i*(1.-s)/2.; dq_i = q_i*(-i)/(1.-s)
-                if np.isnan(dq_i):
-                    print s
             # Loop increasing j
             for j in range(0,nDeg-i+1):
                 if j==0:
@@ -280,7 +283,8 @@ def GradNormalisedJacobiTet(C,x,EvalOpt=0):
                 else:
                     p_k = JacobiPolynomials(k,t,2.*(i+j)+2.,0.)[-1];  dp_k = JacobiPolynomials(k-1,t,2.*(i+j)+3.,1.)[-1]*(k+2.*i+2.*j+3.)/2.
         
-                factor = np.sqrt( (2.*i+1.)*(i+j+1.)*(2.*(i+j+k)+3.)/4. )
+                # factor = np.sqrt( (2.*i+1.)*(i+j+1.)*(2.*(i+j+k)+3.)/4. )
+                factor = math.sqrt( (2.*i+1.)*(i+j+1.)*(2.*(i+j+k)+3.)/4. )
                 # Normalized polynomial
                 p[ncount] = ( p_i*q_i*p_j*q_j*p_k )*factor
                 # Derivatives with respect to (r,s,t)

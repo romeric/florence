@@ -949,10 +949,6 @@ class PostProcess(object):
 
 
         # GET ONLY THE FACES WHICH NEED TO BE PLOTTED 
-        # faces_to_plot_flag = np.ones(mesh.faces.shape[0],dtype=np.int64)
-        # proj_func = getattr(MainData.BoundaryData,'ProjectionCriteria',None)
-        # if proj_func is not None:
-            # faces_to_plot_flag = MainData.BoundaryData().ProjectionCriteria(mesh)
         faces_to_plot_flag = ProjectionFlags
         if len(faces_to_plot_flag.shape) == 2:
             faces_to_plot_flag = faces_to_plot_flag.flatten()
@@ -1014,6 +1010,8 @@ class PostProcess(object):
             x_edges[:,iedge], y_edges[:,iedge], z_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
 
 
+        # MAKE A FIGURE
+        mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(800,600))
         # PLOT CURVED EDGES
         for i in range(x_edges.shape[1]):
             mlab.plot3d(x_edges[:,i],y_edges[:,i],z_edges[:,i],color=(0,0,0),tube_radius=0.0025)
@@ -1035,11 +1033,16 @@ class PostProcess(object):
             Tplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex,:] = Triangles + ielem*nsize
             Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
 
-        # mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars=Uplot,color=(0,1,0),line_width=1,colormap='cool')
-        trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars=Uplot,line_width=1)
-        mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=.0125)
 
-        
+        point_line_width = .005
+        trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars=Uplot,line_width=point_line_width)
+        mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=point_line_width)
+
+        # CHANGE LIGHTING OPTION
+        trimesh_h.actor.property.interpolation = 'phong'
+        trimesh_h.actor.property.specular = 0.1
+        trimesh_h.actor.property.specular_power = 5
+
         # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO 
         # GET VIRIDIS COLORMAP FROM MATPLOTLIB
         color_func = ColorConverter()
@@ -1047,6 +1050,10 @@ class PostProcess(object):
         RGBA_higher = np.round(rgba_lower*255).astype(np.int64)
         # UPDATE LUT OF THE COLORMAP
         trimesh_h.module_manager.scalar_lut_manager.lut.table = RGBA_higher 
+
+        # SAVEFIG
+        # mlab.savefig("/home/roman/Dropbox/filename.eps",magnification="auto")
+
         # FORCE UPDATE MLAB TO UPDATE COLORMAP
         mlab.draw()
 
