@@ -134,7 +134,7 @@ public:
         return this->mesh_element_type;
     }
 
-    ALWAYS_INLINE void SetFeketePoints(Real *arr, const Integer &rows, const Integer &cols)
+    ALWAYS_INLINE void SetNodalSpacing(Real *arr, const Integer &rows, const Integer &cols)
     {
     #if !defined(WRAP_DATA)
         this->fekete = Eigen::Map<Eigen::MatrixR>(arr,rows,cols);
@@ -180,6 +180,8 @@ public:
         return this->geometry_surfaces.size();
     }
 
+    void ComputeProjectionCriteria();
+
 
     std::string mesh_element_type;
     UInteger ndim;
@@ -205,8 +207,6 @@ public:
     Eigen::MatrixI nodes_dir;
     Eigen::MatrixR fekete;
 
-protected:
-    void ComputeProjectionCriteria();
 
 private:
     void SetDimension(const UInteger &dim)

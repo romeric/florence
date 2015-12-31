@@ -46,7 +46,7 @@ public:
     void IdentifySurfacesContainingFaces();
     void ProjectMeshOnSurface();
     void MeshPointInversionSurface();
-    PassToPython GetDirichletData();
+    DirichletData GetDirichletData();
 
 
     std::vector<Eigen::MatrixR> geometry_points_on_surfaces;

@@ -49,7 +49,7 @@ public:
     void MeshPointInversionCurveArcLength();
     void MeshPointInversionCurve();
     void GetBoundaryPointsOrder();
-    PassToPython GetDirichletData();
+    DirichletData GetDirichletData();
 
 
     // Public data members of PostMeshCurve

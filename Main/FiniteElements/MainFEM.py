@@ -23,12 +23,12 @@ from Core.FiniteElements.ComputeErrorNorms import *
 # import Examples.FiniteElements.Annular_Circle_Electromechanics.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle_Nurbs.ProblemData as Pr
-import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
+# import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
 # import Examples.FiniteElements.Wing2D.ProblemData as Pr
 # import Examples.FiniteElements.Naca_Isotropic.ProblemData as Pr
 # import Examples.FiniteElements.RAE2822.ProblemData as Pr
 # import Examples.FiniteElements.Misc.ProblemData as Pr
-# import Examples.FiniteElements.Tests.ProblemData as Pr
+import Examples.FiniteElements.Tests.ProblemData as Pr
 # import Examples.FiniteElements.Sphere.ProblemData as Pr
 # import Examples.FiniteElements.Almond3D.ProblemData as Pr
 # import Examples.FiniteElements.Falcon3D.ProblemData as Pr
@@ -107,6 +107,26 @@ def main(MainData, DictOutput=None, nStep=0):
     # # savemat('/home/roman/Sphere_P'+str(MainData.C+1)+'.mat',Dict)
     # exit()
     #####################
+
+
+    # np.savetxt("/home/roman/Dropbox/PostMesh/post_mesh/examples/sphere/sphere_points.dat",mesh.points,fmt="%10.9f",delimiter=',')
+    # np.savetxt("/home/roman/Dropbox/PostMesh/post_mesh/examples/sphere/sphere_elements.dat",mesh.elements,delimiter=',')
+    # np.savetxt("/home/roman/Dropbox/PostMesh/post_mesh/examples/sphere/sphere_faces.dat",mesh.faces,delimiter=',')
+    # np.savetxt("/home/roman/Dropbox/PostMesh/post_mesh/examples/sphere/sphere_edges.dat",mesh.edges,delimiter=',')
+    # from Core.QuadratureRules.FeketePointsTri import FeketePointsTri
+    # fekete = FeketePointsTri(MainData.C)
+    # np.savetxt("/home/roman/Dropbox/PostMesh/post_mesh/examples/sphere/nodal_spacing_p4.dat",fekete,fmt="%10.9f",delimiter=',')
+    # exit()
+
+    # np.savetxt("/home/roman/Dropbox/PostMesh/examples/leaf/leaf_points.dat",mesh.points,fmt="%10.9f",delimiter=',')
+    # np.savetxt("/home/roman/Dropbox/PostMesh/examples/leaf/leaf_elements.dat",mesh.elements,delimiter=',')
+    # # np.savetxt("/home/roman/Dropbox/PostMesh/examples/leaf/leaf_faces.dat",mesh.faces,delimiter=',')
+    # np.savetxt("/home/roman/Dropbox/PostMesh/examples/leaf/leaf_edges.dat",mesh.edges,delimiter=',')
+    # from Core.QuadratureRules import GaussLobattoQuadrature
+    # fekete = GaussLobattoQuadrature(MainData.C)
+    # np.savetxt("/home/roman/Dropbox/PostMesh/examples/leaf/nodal_spacing_p8.dat",fekete,fmt="%10.9f",delimiter=',')
+    # exit()
+    
 
     if nStep ==1:
         MainData.mesh = mesh

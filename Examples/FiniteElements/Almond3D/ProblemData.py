@@ -38,11 +38,15 @@ def ProblemData(MainData):
 
     ProblemPath = os.path.dirname(os.path.realpath(__file__))
     MainData.MeshInfo.MeshType = "tet"
-    MainData.MeshInfo.Reader = "Read"
-    MainData.MeshInfo.Format = "GID"
+    # MainData.MeshInfo.Reader = "Read"
+    # MainData.MeshInfo.Format = "GID"
+    MainData.MeshInfo.Reader = "ReadHDF5"
 
-    MainData.MeshInfo.FileName = ProblemPath + '/almond_H1.dat'
-    # MainData.MeshInfo.FileName = ProblemPath + '/almond_H2.dat'       
+    # MainData.MeshInfo.FileName = ProblemPath + '/almond_H1.dat'
+    # MainData.MeshInfo.FileName = ProblemPath + '/almond_H2.dat'
+
+    MainData.MeshInfo.FileName = ProblemPath + '/Almond3D_H1.mat'
+    # MainData.MeshInfo.FileName = ProblemPath + '/Almond3D_H2.mat'       
         
 
 

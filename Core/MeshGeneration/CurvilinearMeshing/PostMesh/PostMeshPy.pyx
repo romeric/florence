@@ -39,6 +39,9 @@ cdef class PostMeshCurvePy:
     def SetProjectionPrecision(self, Real precision):
         self.thisptr.SetProjectionPrecision(precision)
 
+    def ComputeProjectionCriteria(self):
+        self.thisptr.ComputeProjectionCriteria()
+
     def SetProjectionCriteria(self, UInteger[:,::1] criteria):
         self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])
 
@@ -62,8 +65,8 @@ cdef class PostMeshCurvePy:
         cdef bytes py_element_type = cpp_element_type
         return py_element_type
 
-    def SetFeketePoints(self, Real[:,::1] fekete):
-        self.thisptr.SetFeketePoints(&fekete[0,0],fekete.shape[0],fekete.shape[1])
+    def SetNodalSpacing(self, Real[:,::1] fekete):
+        self.thisptr.SetNodalSpacing(&fekete[0,0],fekete.shape[0],fekete.shape[1])
 
     def ReadIGES(self, bytes filename):
         self.thisptr.ReadIGES(<const char*>filename)
@@ -130,7 +133,7 @@ cdef class PostMeshCurvePy:
     @boundscheck(False)
     def GetDirichletData(self):
         cdef: 
-            PassToPython struct_to_python = self.thisptr.GetDirichletData()
+            DirichletData struct_to_python = self.thisptr.GetDirichletData()
             np.ndarray[np.int64_t, ndim=2, mode='c'] nodes_dir = np.zeros((struct_to_python.nodes_dir_size,1),dtype=np.int64)
             Integer i
             UInteger j 
@@ -183,6 +186,9 @@ cdef class PostMeshSurfacePy:
     def SetProjectionPrecision(self, Real precision):
         self.thisptr.SetProjectionPrecision(precision)
 
+    def ComputeProjectionCriteria(self):
+        self.thisptr.ComputeProjectionCriteria()
+
     def SetProjectionCriteria(self, UInteger[:,::1] criteria):
         self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])
 
@@ -206,8 +212,8 @@ cdef class PostMeshSurfacePy:
         cdef bytes py_element_type = cpp_element_type
         return py_element_type
 
-    def SetFeketePoints(self, Real[:,::1] fekete):
-        self.thisptr.SetFeketePoints(&fekete[0,0],fekete.shape[0],fekete.shape[1])
+    def SetNodalSpacing(self, Real[:,::1] fekete):
+        self.thisptr.SetNodalSpacing(&fekete[0,0],fekete.shape[0],fekete.shape[1])
 
     def ReadIGES(self, bytes filename):
         self.thisptr.ReadIGES(<const char*>filename)
@@ -260,7 +266,7 @@ cdef class PostMeshSurfacePy:
     @boundscheck(False)
     def GetDirichletData(self):
         cdef: 
-            PassToPython struct_to_python = self.thisptr.GetDirichletData()
+            DirichletData struct_to_python = self.thisptr.GetDirichletData()
             np.ndarray[np.int64_t, ndim=2, mode='c'] nodes_dir = np.zeros((struct_to_python.nodes_dir_size,1),dtype=np.int64)
             Integer i
             UInteger j 

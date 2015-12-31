@@ -20,13 +20,18 @@ no_deprecated = ("NPY_NO_DEPRECATED_API",None)
 
 # Compiler arguments
 compiler_args = ["-std=c++11","-march=native","-mtune=native",
-            "-mfpmath=sse","-ffast-math","-ftree-vectorize",
-            "-funroll-loops","-Wno-unused-function","-flto",
-            "-DNPY_NO_DEPRECATED_API","-Wno-cpp"]
+                "-mfpmath=sse","-ffast-math","-ftree-vectorize",
+                "-funroll-loops","-finline-functions","-Wno-unused-function",
+                "-flto","-DNPY_NO_DEPRECATED_API","-Wno-cpp"]
 
 # Source files
-sourcefiles = ["PostMeshPy.pyx",_pwd_+"/src/PyInterfaceEmulator.cpp",
-        _pwd_+"/src/PostMeshBase.cpp",_pwd_+"/src/PostMeshCurve.cpp",_pwd_+"/src/PostMeshSurface.cpp"]
+# sourcefiles = ["PostMeshPy.pyx",_pwd_+"/src/PyInterfaceEmulator.cpp",
+        # _pwd_+"/src/PostMeshBase.cpp",_pwd_+"/src/PostMeshCurve.cpp",_pwd_+"/src/PostMeshSurface.cpp"]
+
+sourcefiles = ["PostMeshPy.pyx",
+                _pwd_+"/src/PostMeshBase.cpp",
+                _pwd_+"/src/PostMeshCurve.cpp",
+                _pwd_+"/src/PostMeshSurface.cpp"]
 
 # OpenCascade runtime libraries
 occ_libs = [":libTKIGES.so.9",":libTKSTEP.so.9",":libTKXSBase.so.9",":libTKBRep.so.9",
@@ -41,8 +46,9 @@ extensions = [
         name = "PostMeshPy",  
         sources = sourcefiles,
     	language="c++",
-        include_dirs = [_pwd_,_pwd_+"/include/","/home/roman/Dropbox/eigen-devel/",
-        "/usr/local/include/oce/"],
+        include_dirs = [_pwd_,_pwd_+"/include/",
+                        "/home/roman/Dropbox/eigen-devel/",
+                        "/usr/local/include/oce/"],
         libraries= ["stdc++"] + occ_libs, 
         library_dirs = [_pwd_,_pwd_+"/include","/usr/local/lib/"],
         extra_compile_args = compiler_args,
@@ -52,11 +58,9 @@ extensions = [
 
 setup(
     ext_modules = cythonize(extensions),
-    description = "A Python wrapper for PostMesh - a high curvilinear mesh generator based on OpenCascade",
+    description = "A Python wrapper for PostMesh - a high order curvilinear mesh generator based on OpenCascade",
     author="Roman Poya",
     author_email = "r.poya@swansea.ac.uk",
     url = "https://github.com/romeric/PostMesh",
     version = "0.1",
 )
- 
-# extra_compile_args = compiler_args + ["-O3", "-fopenmp"]

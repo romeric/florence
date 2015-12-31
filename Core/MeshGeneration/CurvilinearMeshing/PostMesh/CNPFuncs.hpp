@@ -194,6 +194,41 @@ append(Eigen::PlainObjectBase<T> &arr, U num)
     return new_arr;
 }
 
+template<typename T = Integer>
+std::tuple<std::vector<T>,std::vector<size_t> > unique(std::vector<T> &arr) {
+
+    std::vector<T> uniques;
+    std::vector<UInteger> idx;
+
+    for (auto i=0; i<arr.size(); ++i) {
+        bool isunique = true;
+        for (auto j=0; j<=i; ++j) {
+            if (arr[i]==arr[j] && i!=j) {
+                isunique = false;
+                break;
+            }
+        }
+
+        if (isunique==true) {
+            uniques.push_back(arr[i]);
+            idx.push_back(i);
+        }
+    }
+
+    // SORT UNIQUE VALUES
+    auto sorter = argsort(uniques);
+    std::sort(uniques.begin(),uniques.end());
+    std::vector<UInteger> idx_sorted(idx.size());
+    for (auto i=0; i<uniques.size();++i) {
+        idx_sorted[i] = idx[sorter[i]];
+    }
+
+    std::tuple<std::vector<T>,std::vector<size_t> >
+            uniques_idx = std::make_tuple(uniques,idx_sorted);
+
+    return uniques_idx;
+}
+
 
 }
 // end of namespace

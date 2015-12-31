@@ -214,7 +214,8 @@ int main()
 //    const char* iges_filename = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Wing2D/sd7003.igs";
 
 //    const char* iges_filename = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Sphere/Sphere.igs";
-    const char* iges_filename = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Almond3D/almond.igs";
+//    const char* iges_filename = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Almond3D/almond.igs";
+    std::string iges_filename = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Almond3D/almond.igs";
 
 //    const char* iges_filename = "/home/roman/Dropbox/zdump/OCC_Geometry_Checks/Cylinder.igs";
 //    const char* iges_filename = "/home/roman/Dropbox/zdump/OCC_Geometry_Checks/Sphere.igs";
@@ -223,14 +224,14 @@ int main()
 
 
     // CALL PY_PostMeshCurve
-    Eigen::MatrixUI elements = PostMeshCurve::ReadI(elem_file,',');
-    Eigen::MatrixR points = PostMeshCurve::ReadR(point_file,',');
+    Eigen::MatrixUI elements = PostMeshBase::ReadI(elem_file,',');
+    Eigen::MatrixR points = PostMeshBase::ReadR(point_file,',');
 
 //    Eigen::MatrixUI edges = PostMeshCurve::ReadI(edge_file,','); // 2D
 //    Eigen::MatrixUI faces = Eigen::MatrixUI::Zero(1,4); // 2D
 
-    Eigen::MatrixUI edges = PostMeshCurve::ReadI(edge_file,','); // 3D
-    Eigen::MatrixUI faces = PostMeshCurve::ReadI(face_file,','); // 3D
+    Eigen::MatrixUI edges = PostMeshBase::ReadI(edge_file,','); // 3D
+    Eigen::MatrixUI faces = PostMeshBase::ReadI(face_file,','); // 3D
 
 
 //    Real scale = 1000.;  // for annular circle nurbs
@@ -298,22 +299,22 @@ int main()
 
 
 //    exit (EXIT_FAILURE);
-    PassToPython struct_to_python;
-//    struct_to_python = ComputeDirichleteData(iges_filename,scale,points.data(),points.rows(), points.cols(),
+    DirichletData Dirichlet_data;
+//    Dirichlet_data = ComputeDirichleteData(iges_filename.c_str(),scale,points.data(),points.rows(), points.cols(),
 //                           elements.data(), elements.rows(), elements.cols(),
 //                           edges.data(), edges.rows(), edges.cols(),
 //                           faces.data(),  faces.rows(),  faces.cols(),condition,
 //                           boundary_fekete.data(), boundary_fekete.rows(), boundary_fekete.cols(),
 //                           criteria.data(), criteria.rows(), criteria.cols(), precision);
 
-    struct_to_python = ComputeDirichleteData3D(iges_filename,scale,points.data(),points.rows(), points.cols(),
+    Dirichlet_data = ComputeDirichleteData3D(iges_filename.c_str(),scale,points.data(),points.rows(), points.cols(),
                            elements.data(), elements.rows(), elements.cols(),
                            edges.data(), edges.rows(), edges.cols(),
                            faces.data(),  faces.rows(),  faces.cols(),condition,
                            boundary_fekete.data(), boundary_fekete.rows(), boundary_fekete.cols(),
                            criteria.data(), criteria.rows(), criteria.cols(), precision);
 
-//    print(struct_to_python.displacement_BC_stl);
+//    print(Dirichlet_data.displacement_BC_stl);
 //    print(elements);
 
     end = std::chrono::system_clock::now();

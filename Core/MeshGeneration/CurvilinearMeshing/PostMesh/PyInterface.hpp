@@ -3,8 +3,8 @@
 
 #include <STL_INC.hpp>
 
-// struct to pass to Python
-struct PassToPython
+// DirichletData STRUCTURE - FOR THE PURPOSE OF PASSING TO PYTHON
+struct DirichletData
 {
     std::vector<Real> displacement_BC_stl;
     std::vector<Integer> nodes_dir_out_stl;

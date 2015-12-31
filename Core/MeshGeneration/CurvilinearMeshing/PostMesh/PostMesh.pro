@@ -8,7 +8,7 @@ SOURCES += src/main.cpp \
     src/PostMeshBase.cpp \
     src/PostMeshCurve.cpp \
     src/PostMeshSurface.cpp \
-    src/PyInterfaceEmulator.cpp
+    src/Examples.cpp
 
 #QMAKE_CXXFLAGS += -std=c++11 -Wall -Wextra -pipe# -Wdelete-non-virtual-dtor -Wno-unused # -O2 #-fopenmp -msse -msse2 -fomit-frame-pointer -fno-strict-aliasing
 QMAKE_CXXFLAGS += -std=c++11 -Wall -Wextra -Wno-unused -D_OCC64#-O3 -fopenmp

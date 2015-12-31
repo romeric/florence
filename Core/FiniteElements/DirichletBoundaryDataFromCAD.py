@@ -47,7 +47,7 @@ def PostMeshWrapper(MainData,mesh):
         curvilinear_mesh.SetProjectionCriteria(MainData.BoundaryData().ProjectionCriteria(mesh))
         curvilinear_mesh.ScaleMesh()
         # curvilinear_mesh.InferInterpolationPolynomialDegree() 
-        curvilinear_mesh.SetFeketePoints(boundary_fekete)
+        curvilinear_mesh.SetNodalSpacing(boundary_fekete)
         curvilinear_mesh.GetBoundaryPointsOrder()
         # READ THE GEOMETRY FROM THE IGES FILE
         curvilinear_mesh.ReadIGES(MainData.BoundaryData.IGES_File)
@@ -63,7 +63,7 @@ def PostMeshWrapper(MainData,mesh):
         curvilinear_mesh.ProjectMeshOnCurve()
         # FIX IMAGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
         curvilinear_mesh.RepairDualProjectedParameters()
-        # PERFORM POINT INVERTION FOR THE INTERIOR POINTS
+        # PERFORM POINT INVERSION FOR THE INTERIOR POINTS
         projection_type = getattr(MainData.BoundaryData,'ProjectionType',None)
         if projection_type == 'orthogonal':
             curvilinear_mesh.MeshPointInversionCurve()
@@ -74,11 +74,12 @@ def PostMeshWrapper(MainData,mesh):
             curvilinear_mesh.MeshPointInversionCurveArcLength()
         # OBTAIN MODIFIED MESH POINTS - THIS IS NECESSARY TO ENSURE LINEAR MESH IS ALSO CORRECT
         curvilinear_mesh.ReturnModifiedMeshPoints(mesh.points)
-        # GET DIRICHLET DATA
+        # GET DIRICHLET MainData
         nodesDBC, Dirichlet = curvilinear_mesh.GetDirichletData() 
         # FIND UNIQUE VALUES OF DIRICHLET DATA
-        posUnique = np.unique(nodesDBC,return_index=True)[1]
-        nodesDBC, Dirichlet = nodesDBC[posUnique], Dirichlet[posUnique,:]
+        # posUnique = np.unique(nodesDBC,return_index=True)[1]
+        # nodesDBC, Dirichlet = nodesDBC[posUnique], Dirichlet[posUnique,:]
+
 
         # GET ACTUAL CURVE POINTS - THIS FUNCTION IS EXPENSIVE
         # MainData.ActualCurve = curvilinear_mesh.DiscretiseCurves(100)
@@ -100,7 +101,7 @@ def PostMeshWrapper(MainData,mesh):
         curvilinear_mesh.SetProjectionPrecision(1.0e-04)
         curvilinear_mesh.SetProjectionCriteria(MainData.BoundaryData().ProjectionCriteria(mesh))
         curvilinear_mesh.ScaleMesh()
-        curvilinear_mesh.SetFeketePoints(boundary_fekete)
+        curvilinear_mesh.SetNodalSpacing(boundary_fekete)
         # curvilinear_mesh.GetBoundaryPointsOrder()
         # READ THE GEOMETRY FROM THE IGES FILE
         curvilinear_mesh.ReadIGES(MainData.BoundaryData.IGES_File)
@@ -121,9 +122,10 @@ def PostMeshWrapper(MainData,mesh):
         curvilinear_mesh.ReturnModifiedMeshPoints(mesh.points)
         # GET DIRICHLET DATA
         nodesDBC, Dirichlet = curvilinear_mesh.GetDirichletData() 
-        # FIND UNIQUE VALUES OF DIRICHLET DATA
-        posUnique = np.unique(nodesDBC,return_index=True)[1]
-        nodesDBC, Dirichlet = nodesDBC[posUnique], Dirichlet[posUnique,:]
+
+        # # FIND UNIQUE VALUES OF DIRICHLET DATA
+        # posUnique = np.unique(nodesDBC,return_index=True)[1]
+        # nodesDBC, Dirichlet = nodesDBC[posUnique], Dirichlet[posUnique,:]
 
 
     return nodesDBC, Dirichlet

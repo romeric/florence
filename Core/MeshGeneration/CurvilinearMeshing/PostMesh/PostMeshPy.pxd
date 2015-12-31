@@ -9,7 +9,7 @@ ctypedef double Real
 
 cdef extern from "PyInterface.hpp":
 
-    struct PassToPython:
+    struct DirichletData:
         vector[Real] displacement_BC_stl
         vector[Integer] nodes_dir_out_stl
         Integer nodes_dir_size
@@ -26,13 +26,14 @@ cdef extern from "PostMeshCurve.hpp":
         void SetCondition(const Real &condition)
         void SetProjectionPrecision(const Real &precision)
         void SetProjectionCriteria(UInteger *criteria, Integer &rows, Integer &cols)
+        void ComputeProjectionCriteria()
         void SetMeshElements(UInteger *arr, const Integer &rows, const Integer &cols)
         void SetMeshPoints(Real *arr, Integer &rows, Integer &cols)
         void SetMeshEdges(UInteger *arr, const Integer &rows, const Integer &cols)
         void SetMeshFaces(UInteger *arr, const Integer &rows, const Integer &cols)
         void ScaleMesh()
         string GetMeshElementType()
-        void SetFeketePoints(Real *arr, const Integer &rows, const Integer &cols)
+        void SetNodalSpacing(Real *arr, const Integer &rows, const Integer &cols)
         void ReadIGES(const char* filename)
         void GetGeomVertices()
         void GetGeomEdges()
@@ -51,7 +52,7 @@ cdef extern from "PostMeshCurve.hpp":
         void MeshPointInversionCurveArcLength()
         void GetBoundaryPointsOrder()
         void ReturnModifiedMeshPoints(Real *points)
-        PassToPython GetDirichletData()
+        DirichletData GetDirichletData()
 
 
 cdef extern from "PostMeshSurface.hpp":
@@ -66,12 +67,13 @@ cdef extern from "PostMeshSurface.hpp":
         void SetProjectionPrecision(const Real &precision)
         void SetProjectionCriteria(UInteger *criteria, Integer &rows, Integer &cols)
         void SetMeshElements(UInteger *arr, const Integer &rows, const Integer &cols)
+        void ComputeProjectionCriteria()
         void SetMeshPoints(Real *arr, Integer &rows, Integer &cols)
         void SetMeshEdges(UInteger *arr, const Integer &rows, const Integer &cols)
         void SetMeshFaces(UInteger *arr, const Integer &rows, const Integer &cols)
         void ScaleMesh()
         string GetMeshElementType()
-        void SetFeketePoints(Real *arr, const Integer &rows, const Integer &cols)
+        void SetNodalSpacing(Real *arr, const Integer &rows, const Integer &cols)
         void ReadIGES(const char* filename)
         void GetGeomVertices()
         void GetGeomEdges()
@@ -91,12 +93,12 @@ cdef extern from "PostMeshSurface.hpp":
         void MeshPointInversionSurface()
         # void GetBoundaryPointsOrder()
         void ReturnModifiedMeshPoints(Real *points)
-        PassToPython GetDirichletData()
+        DirichletData GetDirichletData()
         
 
 cdef extern from "PyInterfaceEmulator.hpp": 
     
-    PassToPython ComputeDirichleteData (const char* iges_filename, Real scale, 
+    DirichletData ComputeDirichleteData (const char* iges_filename, Real scale, 
         Real* points_array, Integer points_rows, Integer points_cols, 
         UInteger* elements_array, const Integer element_rows, const Integer element_cols, 
         UInteger* edges, const Integer edges_rows, const Integer edges_cols,
@@ -105,7 +107,7 @@ cdef extern from "PyInterfaceEmulator.hpp":
         UInteger* criteria, const Integer criteria_rows, const Integer criteria_cols, 
         const Real precision)
 
-    PassToPython ComputeDirichleteData3D (const char* iges_filename, Real scale, 
+    DirichletData ComputeDirichleteData3D (const char* iges_filename, Real scale, 
         Real* points_array, Integer points_rows, Integer points_cols, 
         UInteger* elements_array, const Integer element_rows, const Integer element_cols, 
         UInteger* edges, const Integer edges_rows, const Integer edges_cols,

@@ -370,9 +370,28 @@ void PostMeshSurface::MeshPointInversionSurface()
 
             auto gp_pnt_old = (this->mesh_points.row(this->nodes_dir(this->index_nodes( j ))).array()/this->scale);
 
-            this->displacements_BC(this->index_nodes(j),0) = (xEq.X()/this->scale - gp_pnt_old(0));
-            this->displacements_BC(this->index_nodes(j),1) = (xEq.Y()/this->scale - gp_pnt_old(1));
-            this->displacements_BC(this->index_nodes(j),2) = (xEq.Z()/this->scale - gp_pnt_old(2));
+//            this->displacements_BC(this->index_nodes(j),0) = (xEq.X()/this->scale - gp_pnt_old(0));
+//            this->displacements_BC(this->index_nodes(j),1) = (xEq.Y()/this->scale - gp_pnt_old(1));
+//            this->displacements_BC(this->index_nodes(j),2) = (xEq.Z()/this->scale - gp_pnt_old(2));
+
+            if (j>static_cast<decltype(j)>(this->ndim)-1)
+            {
+                // FOR NON-VERTEX NODES GET THE REQUIRED DISPLACEMENT
+                this->displacements_BC(this->index_nodes(j),0) = (xEq.X()/this->scale - gp_pnt_old(0));
+                this->displacements_BC(this->index_nodes(j),1) = (xEq.Y()/this->scale - gp_pnt_old(1));
+                this->displacements_BC(this->index_nodes(j),2) = (xEq.Z()/this->scale - gp_pnt_old(2));
+            }
+            else
+            {
+                // FOR VERTEX NODES KEEP THE DISPLACEMENT ZERO
+                this->displacements_BC(this->index_nodes(j),0) = 0.;
+                this->displacements_BC(this->index_nodes(j),1) = 0.;
+                this->displacements_BC(this->index_nodes(j),2) = 0.;
+                // BUT UPDATE THE MESH POINTS TO CONFORM TO CAD GEOMETRY
+                this->mesh_points(this->mesh_faces(this->listfaces[idir],j),0) = xEq.X();
+                this->mesh_points(this->mesh_faces(this->listfaces[idir],j),1) = xEq.Y();
+                this->mesh_points(this->mesh_faces(this->listfaces[idir],j),2) = xEq.Z();
+            }
 
 //            print(proj.NearestPoint().X()/this->scale, xEq.X()/this->scale,proj.Point(proj.NbPoints()).X()/this->scale);
 //            print(proj.NearestPoint().X()/this->scale ,proj.Point(proj.NbPoints()).X()/this->scale);
@@ -392,16 +411,36 @@ void PostMeshSurface::GetInternalSurfaceScales()
 }
 
 
-PassToPython PostMeshSurface::GetDirichletData()
+DirichletData PostMeshSurface::GetDirichletData()
 {
-    PassToPython struct_to_python;
-    struct_to_python.nodes_dir_size = this->nodes_dir.rows();
+//    DirichletData Dirichlet_data;
+//    Dirichlet_data.nodes_dir_size = this->nodes_dir.rows();
+//    // CONVERT FROM EIGEN TO STL VECTOR
+//    Dirichlet_data.nodes_dir_out_stl.assign(this->nodes_dir.data(),this->nodes_dir.data()+Dirichlet_data.nodes_dir_size);
+//    Dirichlet_data.displacement_BC_stl.assign(this->displacements_BC.data(),this->displacements_BC.data()+this->ndim*Dirichlet_data.nodes_dir_size);
+
+    // OBTAIN DIRICHLET DATA
+    DirichletData Dirichlet_data;
     // CONVERT FROM EIGEN TO STL VECTOR
-    struct_to_python.nodes_dir_out_stl.assign(this->nodes_dir.data(),this->nodes_dir.data()+struct_to_python.nodes_dir_size);
-    struct_to_python.displacement_BC_stl.assign(this->displacements_BC.data(),this->displacements_BC.data()+ \
-                                                this->ndim*struct_to_python.nodes_dir_size);
+    std::vector<Integer> nodes_Dirichlet_data_stl;
+    nodes_Dirichlet_data_stl.assign(this->nodes_dir.data(),this->nodes_dir.data()+this->nodes_dir.rows());
+    // FIND UNIQUE VALUES OF DIRICHLET DATA
+    std::vector<Integer> uniques;
+    std::vector<UInteger> idx;
+    std::tie(uniques,idx) = cnp::unique(nodes_Dirichlet_data_stl);
 
-//    cout << this->displacements_BC << endl;
+    Dirichlet_data.nodes_dir_out_stl.resize(idx.size());
+    Dirichlet_data.displacement_BC_stl.resize(this->ndim*idx.size());
+    Dirichlet_data.nodes_dir_size = idx.size();
 
-    return struct_to_python;
+    for (UInteger i=0; i<idx.size(); ++i)
+    {
+        Dirichlet_data.nodes_dir_out_stl[i] = nodes_Dirichlet_data_stl[idx[i]];
+        for (UInteger j=0; j<this->ndim; ++j)
+        {
+            Dirichlet_data.displacement_BC_stl[this->ndim*i+j] = this->displacements_BC(idx[i],j);
+        }
+    }
+
+    return Dirichlet_data;
 }

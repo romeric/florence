@@ -73,7 +73,7 @@ ALWAYS_INLINE void warn(U&& first, T&&... rest)
 
 
 
-template<typename T, typename Params, typename ... Args>
+template<typename T, typename ... Params, typename ... Args>
 std::chrono::duration<double> timer(T (*func)(Params...), Args&&...args)
 {
     //! Generic timer function for measuring elapsed time on a given
@@ -177,7 +177,7 @@ std::chrono::duration<double> timer(T (*func)(Params...), Args&&...args)
 }
 
 
-template<typename T, typename Params, typename ... Args>
+template<typename T, typename ... Params, typename ... Args>
 double timeit(T (*func)(Params...), Args&&...args)
 {
     //! IMPORTANT: Do not pass functions to timeit which mutate/modify their input
@@ -289,6 +289,25 @@ double timeit(T (*func)(Params...), Args&&...args)
         }
     }
     return mean_time;
+}
+
+
+ALWAYS_INLINE std::string getcwdpath(void)
+{
+  char cpath[FILENAME_MAX];
+  if (!getcwd(cpath, sizeof(cpath))) {
+      throw std::invalid_argument("File name exceeds 255 character");
+  }
+  cpath[sizeof(cpath) - 1] = '\0';
+  std::string path = std::string(cpath);
+  return path;
+}
+
+ALWAYS_INLINE std::string getexepath()
+{
+  char result[ PATH_MAX ];
+  ssize_t count = readlink( "/proc/self/exe", result, PATH_MAX );
+  return std::string( result, (count > 0) ? count : 0 );
 }
 
 

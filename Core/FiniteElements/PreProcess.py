@@ -56,7 +56,7 @@ def PreProcess(MainData,Pr,pwd):
         elif MainData.MeshInfo.Reader is 'Sphere':
             # mesh.Sphere()
             # mesh.Sphere(points=10)
-            mesh.Sphere(points=4)
+            mesh.Sphere(points=5)
             # mesh.SimplePlot()
 
     if MainData.__NO_DEBUG__ is False:
@@ -353,16 +353,21 @@ def PreProcess(MainData,Pr,pwd):
         tol = 1e-06
 
     if mesh.points.shape[0]*MainData.nvar > 100000 and MainData.C > 4:
-        solve.type = "iterative"
-        solve.sub_type = ""
-        print 'Large system of equations. Switching to iterative solver'
+        solve.type = "multigrid"
+        solve.sub_type = "amg"
+        print 'Large system of equations. Switching to algebraic multigrid solver'
     elif mesh.points.shape[0]*MainData.nvar > 50000 and MainData.C < 5:
         solve.type = "direct"
         solve.sub_type = "MUMPS"
         print 'Large system of equations. Switching to MUMPS solver'
+    elif mesh.points.shape[0]*MainData.nvar > 1e09 and MainData.C > 4:
+        solve.type = "iterative"
+        solve.sub_type = "cg"
+        print 'Large system of equations. Switching to iterative solver'
     else:
         solve.type = "direct"
         solve.sub_type = "UMFPACK"
+
 
     MainData.solve = solve 
             

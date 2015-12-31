@@ -819,14 +819,37 @@ void PostMeshCurve::EstimatedParameterUOnMesh()
     }
 }
 
-PassToPython PostMeshCurve::GetDirichletData()
+DirichletData PostMeshCurve::GetDirichletData()
 {
-    PassToPython struct_to_python;
-    struct_to_python.nodes_dir_size = this->nodes_dir.rows();
-    // CONVERT FROM EIGEN TO STL VECTOR
-    struct_to_python.nodes_dir_out_stl.assign(this->nodes_dir.data(),this->nodes_dir.data()+struct_to_python.nodes_dir_size);
-    struct_to_python.displacement_BC_stl.assign(this->displacements_BC.data(),this->displacements_BC.data()+ \
-                                                this->ndim*struct_to_python.nodes_dir_size);
+//    DirichletData Dirichlet_data;
+//    Dirichlet_data.nodes_dir_size = this->nodes_dir.rows();
+//    // CONVERT FROM EIGEN TO STL VECTOR
+//    Dirichlet_data.nodes_dir_out_stl.assign(this->nodes_dir.data(),this->nodes_dir.data()+Dirichlet_data.nodes_dir_size);
+//    Dirichlet_data.displacement_BC_stl.assign(this->displacements_BC.data(),this->displacements_BC.data()+this->ndim*Dirichlet_data.nodes_dir_size);
 
-    return struct_to_python;
+    // OBTAIN DIRICHLET DATA
+    DirichletData Dirichlet_data;
+    // CONVERT FROM EIGEN TO STL VECTOR
+    std::vector<Integer> nodes_Dirichlet_data_stl;
+    nodes_Dirichlet_data_stl.assign(this->nodes_dir.data(),this->nodes_dir.data()+this->nodes_dir.rows());
+    // FIND UNIQUE VALUES OF DIRICHLET DATA
+    std::vector<Integer> uniques;
+    std::vector<UInteger> idx;
+    std::tie(uniques,idx) = cnp::unique(nodes_Dirichlet_data_stl);
+
+    Dirichlet_data.nodes_dir_out_stl.resize(idx.size());
+    Dirichlet_data.displacement_BC_stl.resize(this->ndim*idx.size());
+    Dirichlet_data.nodes_dir_size = idx.size();
+
+    for (UInteger i=0; i<idx.size(); ++i)
+    {
+        Dirichlet_data.nodes_dir_out_stl[i] = nodes_Dirichlet_data_stl[idx[i]];
+        for (UInteger j=0; j<this->ndim; ++j)
+        {
+            Dirichlet_data.displacement_BC_stl[this->ndim*i+j] = this->displacements_BC(idx[i],j);
+        }
+    }
+
+
+    return Dirichlet_data;
 }

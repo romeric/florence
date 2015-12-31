@@ -3,6 +3,12 @@ from scipy.sparse.linalg import spsolve, bicgstab, gmres, cg
 from scipy.io import savemat, loadmat
 from subprocess import call
 import os
+try:
+    from pyamg import *
+    from pyamg.gallery import *
+    pyamg_imp = True
+except ImportError:
+    pyamg_imp = False
 
 def SparseSolver(A,b,solver='direct',sub_type='UMFPACK',tol=1e-05):
 
@@ -38,10 +44,17 @@ def SparseSolver(A,b,solver='direct',sub_type='UMFPACK',tol=1e-05):
 
         elif sub_type=='super_lu':
             sol = spsolve(A,b,permc_spec='MMD_AT_PLUS_A',use_umfpack=True)
-    else:
+    elif solver == "iterative":
         # CALL ITERATIVE SOLVER
         # sol = bicgstab(A,b,tol=tol)[0]
         # sol = gmres(A,b,tol=tol)[0]
         sol = cg(A,b,tol=1e-04)[0]
+
+    elif solver == "multigrid":
+        if pyamg_imp is False:
+            raise ImportError('A multigrid solver was not found')
+
+        ml = ruge_stuben_solver(A.tocsr())
+        sol = ml.solve(b,tol=tol)
 
     return sol
