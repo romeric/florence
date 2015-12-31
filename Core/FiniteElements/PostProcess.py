@@ -492,7 +492,7 @@ class PostProcess(object):
             Q2 = np.sqrt(np.einsum('ijk,ijl->kl',H,H)).diagonal()
             # print np.isnan(Q3).any()
             Directions = getattr(MainData.MaterialArgs,"AnisotropicOrientations",None)
-            if Directions != None and MainData.MaterialArgs.Type == "BonetTranservselyIsotropicHyperElastic":
+            if isinstance(Directions,np.ndarray) and MainData.MaterialArgs.Type == "BonetTranservselyIsotropicHyperElastic":
                 Q4 = np.einsum('ijk,k',F,Directions[elem,:])
                 Q4 = np.sqrt(np.dot(Q4,Q4.T)).diagonal()
 
@@ -717,11 +717,13 @@ class PostProcess(object):
     @staticmethod
     def HighOrderCurvedPatchPlotTri(mesh,TotalDisp,QuantityToPlot=None,
         ProjectionFlags=None,InterpolationDegree=40,EquallySpacedPoints=False,
-        TriSurf=False,colorbar=False,PlotActualCurve=False):
+        TriSurf=False,colorbar=False,PlotActualCurve=False,save=False,filename=None):
 
         """High order curved triangular mesh plots, based on high order nodal FEM.
             The equally spaced FEM points do not work as good as the Fekete points 
         """
+
+        # QuantityToPlot = np.ones_like(QuantityToPlot)
 
         from Core.QuadratureRules.FeketePointsTri import FeketePointsTri
         from Core.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
@@ -839,7 +841,6 @@ class PostProcess(object):
             # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, np.ones(Xplot.shape[0]), 100,alpha=0.8)
             plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, 100,alpha=0.8)
             # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot[:4,:], np.ones(Xplot.shape[0]),alpha=0.8,origin='lower')
-            pass
 
         # PLOT CURVED POINTS
         # plt.plot(vpoints[:,0],vpoints[:,1],'o',markersize=3,color='#F88379')
@@ -867,6 +868,12 @@ class PostProcess(object):
             else:
                 raise KeyError("You have not computed the CAD curve points")
 
+        if save:
+            if filename is None:
+                raise ValueError("No filename given. Supply one with extension")
+            else:
+                plt.savefig("filename",format="eps",dpi=300)
+
         plt.axis('equal')
         plt.axis('off')
 
@@ -879,7 +886,7 @@ class PostProcess(object):
     @staticmethod
     def HighOrderCurvedPatchPlotTet(mesh,TotalDisp,QuantityToPlot=None,
         ProjectionFlags=None,InterpolationDegree=20,EquallySpacedPoints=False,
-        colorbar=False,PlotActualCurve=False):
+        colorbar=False,PlotActualCurve=False,save=False,filename=None):
 
         """High order curved tetrahedral surfaces mesh plots, based on high order nodal FEM.
             The equally spaced FEM points do not work as good as the Fekete points 
@@ -1013,8 +1020,10 @@ class PostProcess(object):
         # MAKE A FIGURE
         mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(800,600))
         # PLOT CURVED EDGES
+        # edge_width = 0.0025
+        edge_width = 0.75
         for i in range(x_edges.shape[1]):
-            mlab.plot3d(x_edges[:,i],y_edges[:,i],z_edges[:,i],color=(0,0,0),tube_radius=0.0025)
+            mlab.plot3d(x_edges[:,i],y_edges[:,i],z_edges[:,i],color=(0,0,0),tube_radius=edge_width)
 
         # mlab.show()
         # exit()
@@ -1034,9 +1043,10 @@ class PostProcess(object):
             Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
 
 
-        point_line_width = .005
+        # point_line_width = .005
+        point_line_width = 2.
         trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars=Uplot,line_width=point_line_width)
-        mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=point_line_width)
+        mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=2.5*point_line_width)
 
         # CHANGE LIGHTING OPTION
         trimesh_h.actor.property.interpolation = 'phong'
@@ -1046,13 +1056,18 @@ class PostProcess(object):
         # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO 
         # GET VIRIDIS COLORMAP FROM MATPLOTLIB
         color_func = ColorConverter()
-        rgba_lower = color_func.to_rgba_array(cm.viridis.colors)
+        # rgba_lower = color_func.to_rgba_array(cm.viridis.colors)
+        rgba_lower = color_func.to_rgba_array(cm.viridis_r.colors)
         RGBA_higher = np.round(rgba_lower*255).astype(np.int64)
         # UPDATE LUT OF THE COLORMAP
         trimesh_h.module_manager.scalar_lut_manager.lut.table = RGBA_higher 
 
         # SAVEFIG
-        # mlab.savefig("/home/roman/Dropbox/filename.eps",magnification="auto")
+        if save:
+            if filename is None:
+                raise ValueError("No filename given. Supply one with extension")
+            else:
+                mlab.savefig(filename,magnification="auto")
 
         # FORCE UPDATE MLAB TO UPDATE COLORMAP
         mlab.draw()
