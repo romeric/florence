@@ -56,7 +56,7 @@ def ProblemData(MainData):
     # MainData.MeshInfo.FileName = ProblemPath + '/Mesh_Sphere_16.dat'
     # MainData.MeshInfo.FileName = ProblemPath + '/Circular_Holes.dat'
     # MainData.MeshInfo.FileName = ProblemPath + '/Mesh_Cyl_Hole_1528.dat'
-    # MainData.MeshInfo.FileName = ProblemPath + '/Sphere.dat'
+    MainData.MeshInfo.FileName = ProblemPath + '/Sphere.dat'
         
         
 

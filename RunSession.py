@@ -18,7 +18,12 @@ import numpy.linalg as la
 from numpy.linalg import norm
 from datetime import datetime
 import multiprocessing as MP
-# from mpi4py import MPI
+try:
+    from mpi4py import MPI
+    comm = MPI.COMM_WORLD
+except ImportError:
+    hasMPI = False
+
 # from numba.decorators import jit
 # import cython
 # from pympler import tracker, asizeof, summary, muppy
@@ -45,7 +50,7 @@ if __name__ == "__main__":
     MainData.__PARALLEL__ = True
     MainData.numCPU = MP.cpu_count()
     # MainData.__PARALLEL__ = False
-    # nCPU = 8
+    nCPU = 2
     __MEMORY__ = 'SHARED'
     # __MEMORY__ = 'DISTRIBUTED'
     

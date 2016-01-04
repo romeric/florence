@@ -23,12 +23,12 @@ from Core.FiniteElements.ComputeErrorNorms import *
 # import Examples.FiniteElements.Annular_Circle_Electromechanics.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle_Nurbs.ProblemData as Pr
-# import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
+import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
 # import Examples.FiniteElements.Wing2D.ProblemData as Pr
 # import Examples.FiniteElements.Naca_Isotropic.ProblemData as Pr
 # import Examples.FiniteElements.RAE2822.ProblemData as Pr
 # import Examples.FiniteElements.Misc.ProblemData as Pr
-import Examples.FiniteElements.Tests.ProblemData as Pr
+# import Examples.FiniteElements.Tests.ProblemData as Pr
 # import Examples.FiniteElements.Sphere.ProblemData as Pr
 # import Examples.FiniteElements.Almond3D.ProblemData as Pr
 # import Examples.FiniteElements.Falcon3D.ProblemData as Pr
@@ -144,17 +144,17 @@ def main(MainData, DictOutput=None, nStep=0):
         else:
             vmesh = mesh
 
-        ProjFunc = getattr(MainData.BoundaryData,'ProjectionCriteria',None)
-        if ProjFunc is None:
-            ProjFlags = np.ones(mesh.faces.shape[0],dtype=np.int64)
-        else:
-            ProjFlags = MainData.BoundaryData().ProjectionCriteria(mesh)
+        # ProjFunc = getattr(MainData.BoundaryData,'ProjectionCriteria',None)
+        # if ProjFunc is None:
+        #     ProjFlags = np.ones(mesh.faces.shape[0],dtype=np.int64)
+        # else:
+        #     ProjFlags = MainData.BoundaryData().ProjectionCriteria(mesh)
 
-        # PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
-        PostProcess.HighOrderCurvedPatchPlot(mesh,TotalDisp,QuantityToPlot=MainData.ScaledJacobian,
-            ProjectionFlags=ProjFlags,InterpolationDegree=40)
-        import matplotlib.pyplot as plt
-        plt.show()
+        # # PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
+        # PostProcess.HighOrderCurvedPatchPlot(mesh,TotalDisp,QuantityToPlot=MainData.ScaledJacobian,
+        #     ProjectionFlags=ProjFlags,InterpolationDegree=40)
+        # import matplotlib.pyplot as plt
+        # plt.show()
     else:
         MainData.ScaledJacobian = np.zeros(mesh.nelem)+np.NAN
         MainData.ScaledFF = np.zeros(mesh.nelem)+np.NAN

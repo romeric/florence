@@ -12,11 +12,11 @@ def ProblemData(MainData):
     # MainData.AnalysisType = 'Nonlinear'
 
     # MATERIAL INPUT DATA 
-    MainData.MaterialArgs.Type = 'LinearModel'
+    # MainData.MaterialArgs.Type = 'LinearModel'
     # MainData.MaterialArgs.Type = 'IncrementalLinearElastic'
     # MainData.MaterialArgs.Type = 'NearlyIncompressibleNeoHookean'
     # MainData.MaterialArgs.Type = 'NeoHookean_1'
-    # MainData.MaterialArgs.Type = 'NeoHookean_2'
+    MainData.MaterialArgs.Type = 'NeoHookean_2'
     # MainData.MaterialArgs.Type = 'MooneyRivlin'
     # MainData.MaterialArgs.Type = 'NearlyIncompressibleMooneyRivlin'
     # MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin' 
@@ -25,12 +25,13 @@ def ProblemData(MainData):
     # MainData.MaterialArgs.Type = 'JavierTranservselyIsotropicHyperElastic'
 
     MainData.MaterialArgs.E  = 1.0e5
-    MainData.MaterialArgs.nu = 0.35
+    MainData.MaterialArgs.nu = 0.485
 
-    MainData.MaterialArgs.E_A = 2.5*MainData.MaterialArgs.E
+    # MainData.MaterialArgs.E_A = 2.5*MainData.MaterialArgs.E
 
     E = MainData.MaterialArgs.E
     nu = MainData.MaterialArgs.nu
+    print 'Poisson ratio is:', MainData.MaterialArgs.nu
 
     # GET LAME CONSTANTS
     MainData.MaterialArgs.lamb = E*nu/(1.+nu)/(1.-2.0*nu)
@@ -45,8 +46,13 @@ def ProblemData(MainData):
     # MainData.MeshInfo.FileName = ProblemPath + '/almond_H1.dat'
     # MainData.MeshInfo.FileName = ProblemPath + '/almond_H2.dat'
 
-    MainData.MeshInfo.FileName = ProblemPath + '/Almond3D_H1.mat'
-    # MainData.MeshInfo.FileName = ProblemPath + '/Almond3D_H2.mat'       
+    # MainData.MeshInfo.FileName = ProblemPath + '/Almond3D_H1.mat'
+    # MainData.MeshInfo.FileName = ProblemPath + '/Almond3D_H2.mat' 
+
+    MainData.MeshInfo.FileName = ProblemPath + '/Almond3D_H1_P'+str(MainData.C+1)+'.mat'
+    # MainData.MeshInfo.FileName = ProblemPath + '/Almond3D_H2_P'+str(MainData.C+1)+'.mat'
+
+    MainData.MeshInfo.IsHighOrder = True   
         
 
 
@@ -74,7 +80,7 @@ def ProblemData(MainData):
                 z *= self.scale 
                 # if np.sqrt(x*x+y*y+z*z)< self.condition:
                 if x > -2.5*self.scale and x < 2.5*self.scale and y > -2.*self.scale \
-                    and y < 2.*self.scale and z > -2.*self.scale and z < 2.*self.scale:   
+                    and y < 2.*self.scale and z > -2.*self.scale and z < 2.*self.scale:    
                     projection_faces[iface]=1
             
             return projection_faces

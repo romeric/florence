@@ -53,7 +53,7 @@ if __name__ == '__main__':
         # nu = np.linspace(0.01,0.495,2)
         E = np.array([1e05])
         p = [2,3,4,5,6]
-        p = [2]
+        # p = [2]
          
 
         Results = {'PolynomialDegrees':p,'PoissonsRatios':nu,'Youngs_Modulus':E}
@@ -84,6 +84,7 @@ if __name__ == '__main__':
                     condA[i,j] = MainData.solve.condA
                 else:
                     condA[i,j] = np.NAN
+                print 
 
         Results['ScaledJacobian'] = scaledA # one given row contains all values of nu for a fixed p
         Results['ScaledFF'] = scaledAFF # one given row contains all values of nu for a fixed p
@@ -100,14 +101,14 @@ if __name__ == '__main__':
                 fname = "IncrementallyLinearised"+MainData.MaterialArgs.Type
         
         fname = fname + "_" + MainData.BoundaryData.ProjectionType+".mat"
-        fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'
+        # fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D_P_vs_Nu_'
+        fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Almond3D_P_vs_Nu_'
 
         # print fname
         print repr(scaledA)
         print repr(condA)
-        exit()
-        # exit(0)
-        # savemat(fpath+fname,Results)
+
+        savemat(fpath+fname,Results)
 
 
         t_FEM = time.time()-t_FEM

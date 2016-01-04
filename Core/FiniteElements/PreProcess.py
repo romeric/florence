@@ -11,6 +11,7 @@ from Core import Mesh
 
 from Core.Supplementary.Timing.Timing import timing
 
+# @profile
 @timing
 def PreProcess(MainData,Pr,pwd):
 
@@ -152,6 +153,22 @@ def PreProcess(MainData,Pr,pwd):
     # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_edges_"+"P"+str(MainData.C+1)+".dat",mesh.edges,delimiter=',')
     # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_faces_"+"P"+str(MainData.C+1)+".dat",mesh.faces,delimiter=',')
 
+    # For saving 3D problems
+    # from scipy.io import savemat
+    # mesh.GetFacesTet()
+    # mesh.GetEdgesTet()
+    # face_flags = mesh.GetInteriorFacesTet()
+    # mesh.GetElementsFaceNumberingTet()
+    # boundary_face_to_element = mesh.GetElementsWithBoundaryFacesTet()
+
+    # Dict = {'points':mesh.points, 'elements':mesh.elements, 
+    #     'element_type':mesh.element_type, 'faces':mesh.faces,
+    #     'edges':mesh.edges, 'all_faces':mesh.all_faces, 'all_edges':mesh.all_edges,
+    #     'face_flags':face_flags,'face_to_element':mesh.face_to_element,
+    #     'boundary_face_to_element':boundary_face_to_element}
+    # savemat(MainData.MeshInfo.FileName.split(".")[0]+"_P"+str(MainData.C+1)+".mat",Dict)
+    # exit()
+
 
     # print mesh.elements.shape, mesh.points.shape, mesh.edges.shape
     # print np.min(mesh.points[:,0]), np.min(mesh.points[:,1]), np.min(mesh.points[:,2]) 
@@ -178,6 +195,12 @@ def PreProcess(MainData,Pr,pwd):
     # mesh.GetBoundaryEdgesTri()
     # mesh.GetInteriorEdgesTri()
 
+    # print np.max(mesh.points[:,0]), np.max(mesh.points[:,1]), np.max(mesh.points[:,2])
+    # print np.min(mesh.points[:,0]), np.min(mesh.points[:,1]), np.min(mesh.points[:,2])
+    # from Core.Supplementary.Tensors import itemfreq_py
+    # print itemfreq_py(MainData.BoundaryData().ProjectionCriteria(mesh))
+    # print type(mesh.element_type)
+    # print mesh.elements.flags
     # exit()
 
 
@@ -350,13 +373,13 @@ def PreProcess(MainData,Pr,pwd):
     # CHOOSING THE SOLVER/ASSEMBLY ROUTINES BASED ON PROBLEM SIZE
     #############################################################################
     class solve(object):
-        tol = 1e-06
+        tol = 5.0e-07
 
-    if mesh.points.shape[0]*MainData.nvar > 100000 and MainData.C > 4:
+    if mesh.points.shape[0]*MainData.nvar > 100000 and MainData.C > 3:
         solve.type = "multigrid"
         solve.sub_type = "amg"
         print 'Large system of equations. Switching to algebraic multigrid solver'
-    elif mesh.points.shape[0]*MainData.nvar > 50000 and MainData.C < 5:
+    elif mesh.points.shape[0]*MainData.nvar > 50000 and MainData.C < 4:
         solve.type = "direct"
         solve.sub_type = "MUMPS"
         print 'Large system of equations. Switching to MUMPS solver'
@@ -368,6 +391,8 @@ def PreProcess(MainData,Pr,pwd):
         solve.type = "direct"
         solve.sub_type = "UMFPACK"
 
+    # solve.type = "multigrid"
+    # solve.sub_type = "amg"
 
     MainData.solve = solve 
             

@@ -5,9 +5,9 @@ def InitiateNonlinearAnalysisData(MainData,mesh):
     
     # INFORMATION REQUIRED FOR NONLINEAR ANALYSIS
     ################################################################################
-    Tolerance = 1.0e-05
+    Tolerance = 2.0e-04
     if MainData.Analysis == 'Static':
-        LoadIncrement = 1
+        LoadIncrement = 2
         pass
     else:
         LoadIncrement = MainData.BoundaryData.nstep

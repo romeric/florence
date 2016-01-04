@@ -43,9 +43,7 @@ def NewtonRaphson(MainData,Increment,K,NodalForces,Residual,
             # MainData.solve.condA = np.linalg.cond(K_b.todense()) # REMOVE THIS
             MainData.solve.condA = onenormest(K_b) # REMOVE THIS
 
-        # sol = SparseSolver(K_b,-F_b,MainData.solve.type,sub_type='MUMPS')
-        # sol = SparseSolver(K_b,-F_b,MainData.solve.type,sub_type='UMFPACK')
-        sol = SparseSolver(K_b,-F_b,MainData.solve.type,sub_type=MainData.solve.sub_type)
+        sol = SparseSolver(K_b,-F_b,MainData.solve.type,sub_type=MainData.solve.sub_type,tol=MainData.solve.tol)
 
         # GET THE TOTAL SOLUTION AND ITS COMPONENTS SUCH AS UX, UY, UZ, PHI ETC
         dU = PostProcess().TotalComponentSol(MainData,sol,ColumnsIn,ColumnsOut,AppliedDirichletInc,Iter,K.shape[0]) 
