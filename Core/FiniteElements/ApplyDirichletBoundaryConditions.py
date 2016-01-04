@@ -37,21 +37,24 @@ def GetDirichletBoundaryConditions(mesh,MainData):
                 AppliedDirichlet = np.append(AppliedDirichlet,Dirichlet[inode,i])
 
         # FIX THE DOF IN THE REST OF THE BOUNDARY - INCORRECT/ FIX IT
-        # Rest_DOFs = np.intersect1d(np.unique(mesh.edges),nodesDBC)
-        # for inode in range(Rest_DOFs.shape[0]):
-        #   for i in range(nvar):
-        #       ColumnsOut = np.append(ColumnsOut,nvar*Rest_DOFs[inode]+i)
-        #       AppliedDirichlet = np.append(AppliedDirichlet,0.0)
+        if ndim==2:
+            Rest_DOFs = np.setdiff1d(np.unique(mesh.edges),nodesDBC)
+        elif ndim==3:
+            Rest_DOFs = np.setdiff1d(np.unique(mesh.faces),nodesDBC)
+        for inode in range(Rest_DOFs.shape[0]):
+          for i in range(nvar):
+              ColumnsOut = np.append(ColumnsOut,nvar*Rest_DOFs[inode]+i)
+              AppliedDirichlet = np.append(AppliedDirichlet,0.0)
 
-        # MainData.nodesDBC = nodesDBC
+        # # end = -3
+        # # np.savetxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_Dirichlet_"+"P"+str(MainData.C+1)+".dat",AppliedDirichlet,fmt="%9.16f")
+        # # np.savetxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_ColumnsOut_"+"P"+str(MainData.C+1)+".dat",ColumnsOut)
 
-        # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_Dirichlet_"+"P"+str(MainData.C+1)+".dat",AppliedDirichlet,fmt="%9.16f")
-        # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_ColumnsOut_"+"P"+str(MainData.C+1)+".dat",ColumnsOut)
+        # end = -3
+        # AppliedDirichlet = np.loadtxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_Dirichlet_"+"P"+str(MainData.C+1)+".dat",dtype=np.float64)
+        # ColumnsOut = np.loadtxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_ColumnsOut_"+"P"+str(MainData.C+1)+".dat")
 
-        # AppliedDirichlet = np.loadtxt(MainData.MeshInfo.FileName.split(".")[0]+"_Dirichlet_"+"P"+str(MainData.C+1)+".dat",dtype=np.float64)
-        # ColumnsOut = np.loadtxt(MainData.MeshInfo.FileName.split(".")[0]+"_ColumnsOut_"+"P"+str(MainData.C+1)+".dat")
-
-        # print 'Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds'
+        print 'Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds'
 
 
 

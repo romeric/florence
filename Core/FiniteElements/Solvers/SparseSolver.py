@@ -10,7 +10,7 @@ try:
 except ImportError:
     pyamg_imp = False
 
-def SparseSolver(A,b,solver='direct',sub_type='UMFPACK',tol=1e-05):
+def SparseSolver(A,b,solver='direct',sub_type='UMFPACK',tol=1e-06):
 
 
     # sol = np.array([])

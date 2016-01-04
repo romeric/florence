@@ -257,11 +257,6 @@ class Mesh(object):
         node_arranger = NodeArrangementTet(p-1)[0]
         fsize = int((p+1.)*(p+2.)/2.)
 
-        # CHECK IF FACES ARE ALREADY AVAILABLE
-        if isinstance(self.all_faces,np.ndarray):
-            if self.all_faces.shape[0] > 1:
-                warn("Mesh faces seem to be already computed. I am going to recompute them")
-
         # GET ALL FACES FROM THE ELEMENT CONNECTIVITY
         faces = np.zeros((4*self.elements.shape[0],fsize),dtype=np.uint64)
         faces[:self.elements.shape[0],:] = self.elements[:,node_arranger[0,:]]
@@ -309,16 +304,17 @@ class Mesh(object):
             self.GetFacesTet()
 
         # BUILD A 2D MESH
-        tmesh = deepcopy(self) 
+        tmesh = Mesh()
+        # tmesh = deepcopy(self) 
         tmesh.element_type = "tri"
-        tmesh.elements = tmesh.all_faces
+        tmesh.elements = self.all_faces
         tmesh.nelem = tmesh.elements.shape[0]
         del tmesh.faces
         del tmesh.points
-        del tmesh.all_faces
-        
+       
         # COMPUTE ALL EDGES
         self.all_edges = tmesh.GetEdgesTri()
+
 
 
 
@@ -398,9 +394,9 @@ class Mesh(object):
             self.GetBoundaryFacesTet()
 
         # BUILD A 2D MESH
-        tmesh = deepcopy(self) 
+        tmesh = Mesh()
         tmesh.element_type = "tri"
-        tmesh.elements = tmesh.faces
+        tmesh.elements = self.faces
         tmesh.nelem = tmesh.elements.shape[0]
         del tmesh.faces
         del tmesh.points
@@ -726,9 +722,13 @@ class Mesh(object):
 
         """
 
+        if isinstance(self.boundary_face_to_element,np.ndarray):
+            return self.boundary_face_to_element
+
+
         assert self.faces is not None or self.elements is not None
 
-        # GET ALL FACES FROM ELEMENT CONNECTIVITY
+        # GET BONDARY FACES FROM ELEMENT CONNECTIVITY
         if self.faces is None:
             self.GetBoundaryFacesTet()
 
@@ -780,6 +780,8 @@ class Mesh(object):
                                             so the return value is not strictly necessary   
         """
 
+        if isinstance(self.face_to_element,np.ndarray):
+            return self.face_to_element
 
         assert self.elements is not None
         # assert self.elements.shape[1] == 4 
@@ -1010,16 +1012,21 @@ class Mesh(object):
 
         DictOutput = loadmat(filename)
 
-        self.elements = DictOutput['elements']
-        self.points = DictOutput['points']
+        self.elements = np.ascontiguousarray(DictOutput['elements'])
+        self.points = np.ascontiguousarray(DictOutput['points'])
         self.nelem = self.elements.shape[0]
-        self.element_type = DictOutput['element_type'][0]
-        self.edges = DictOutput['edges']
-        self.faces = DictOutput['faces']
+        self.element_type = str(DictOutput['element_type'][0])
+        self.edges = np.ascontiguousarray(DictOutput['edges'])
+        self.faces = np.ascontiguousarray(DictOutput['faces'])
 
-        self.all_faces = DictOutput['all_faces']
-        self.all_edges = DictOutput['all_edges']
+        self.all_faces = np.ascontiguousarray(DictOutput['all_faces'])
+        self.all_edges = np.ascontiguousarray(DictOutput['all_edges'])
 
+        self.boundary_face_to_element = np.ascontiguousarray(DictOutput['boundary_face_to_element'])
+        # self.boundary_edge_to_element = np.ascontiguousarray(DictOutput['boundary_edge_to_element'])
+
+        # print (self.all_faces.nbytes+self.all_edges.nbytes)/1024./1024.
+        # exit()
 
 
     def SimplePlot(self,save=False,filename=None):

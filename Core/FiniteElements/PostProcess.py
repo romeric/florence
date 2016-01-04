@@ -1020,13 +1020,11 @@ class PostProcess(object):
         # MAKE A FIGURE
         mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(800,600))
         # PLOT CURVED EDGES
-        # edge_width = 0.0025
-        edge_width = 0.75
+        edge_width = 0.0025
+        # edge_width = 0.75
         for i in range(x_edges.shape[1]):
             mlab.plot3d(x_edges[:,i],y_edges[:,i],z_edges[:,i],color=(0,0,0),tube_radius=edge_width)
 
-        # mlab.show()
-        # exit()
         nface = smesh.elements.shape[0]
         nnode = nsize*nface
         nelem = Triangles.shape[0]*nface
@@ -1043,8 +1041,8 @@ class PostProcess(object):
             Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
 
 
-        # point_line_width = .005
-        point_line_width = 2.
+        point_line_width = .005
+        # point_line_width = 2.
         trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars=Uplot,line_width=point_line_width)
         mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=2.5*point_line_width)
 
@@ -1056,8 +1054,8 @@ class PostProcess(object):
         # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO 
         # GET VIRIDIS COLORMAP FROM MATPLOTLIB
         color_func = ColorConverter()
-        # rgba_lower = color_func.to_rgba_array(cm.viridis.colors)
-        rgba_lower = color_func.to_rgba_array(cm.viridis_r.colors)
+        rgba_lower = color_func.to_rgba_array(cm.viridis.colors)
+        # rgba_lower = color_func.to_rgba_array(cm.viridis_r.colors)
         RGBA_higher = np.round(rgba_lower*255).astype(np.int64)
         # UPDATE LUT OF THE COLORMAP
         trimesh_h.module_manager.scalar_lut_manager.lut.table = RGBA_higher 

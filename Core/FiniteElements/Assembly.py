@@ -22,7 +22,7 @@ import Core.ParallelProcessing.parmap as parmap
 #---------------------------------------------------------#
 
 def Assembly(MainData,mesh,Eulerx,TotalPot):
-	return AssemblyLarge(MainData,mesh,Eulerx,TotalPot) if mesh.nelem > 100000 else AssemblySmall(MainData,mesh,Eulerx,TotalPot)
+	return AssemblyLarge(MainData,mesh,Eulerx,TotalPot) if mesh.nelem > 1e09 else AssemblySmall(MainData,mesh,Eulerx,TotalPot)
 
 
 #-------------- ASSEMBLY ROUTINE FOR RELATIVELY LARGER MATRICES (NELEM > 100000)------------------------#

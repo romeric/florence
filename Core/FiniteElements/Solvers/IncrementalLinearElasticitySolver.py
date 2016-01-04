@@ -27,6 +27,7 @@ def IncrementalLinearElasticitySolver(MainData,mesh,TotalDisp,Eulerx,LoadIncreme
         DirichletForces = np.zeros((mesh.points.shape[0]*MainData.nvar,1),dtype=np.float64)
         Residual = DirichletForces + NodalForces
 
+        t_assembly = time()
         # IF STRESSES ARE TO BE CALCULATED 
         if MainData.Prestress:
             # GET THE MESH COORDINATES FOR LAST INCREMENT 
@@ -40,15 +41,14 @@ def IncrementalLinearElasticitySolver(MainData,mesh,TotalDisp,Eulerx,LoadIncreme
         else:
             # ASSEMBLE
             K = Assembly(MainData,mesh,Eulerx,np.zeros_like(mesh.points))[0]
+        print 'Finished assembling the system of equations. Time elapsed is', time() - t_assembly, 'seconds'
         # APPLY DIRICHLET BOUNDARY CONDITIONS & GET REDUCED MATRICES 
         K_b, F_b = ApplyDirichletGetReducedMatrices(K,Residual,ColumnsIn,ColumnsOut,AppliedDirichletInc,MainData.Analysis,[])[:2]
 
         # SOLVE THE SYSTEM
         t_solver=time()
 
-        # sol = SparseSolver(K_b,F_b,MainData.solve.type,sub_type='MUMPS')
-        # sol = SparseSolver(K_b,F_b,MainData.solve.type,sub_type='UMFPACK')
-        sol = SparseSolver(K_b,F_b,MainData.solve.type,sub_type=MainData.solve.sub_type)
+        sol = SparseSolver(K_b,F_b,MainData.solve.type,sub_type=MainData.solve.sub_type,tol=MainData.solve.tol)
 
         if Increment==MainData.AssemblyParameters.LoadIncrements-1:
             # MainData.solve.condA = np.linalg.cond(K_b.todense()) # REMOVE THIS
