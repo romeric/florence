@@ -24,21 +24,19 @@ compiler_args = ["-std=c++11","-march=native","-mtune=native",
                 "-funroll-loops","-finline-functions","-Wno-unused-function",
                 "-flto","-DNPY_NO_DEPRECATED_API","-Wno-cpp"]
 
-# Source files
-# sourcefiles = ["PostMeshPy.pyx",_pwd_+"/src/PyInterfaceEmulator.cpp",
-        # _pwd_+"/src/PostMeshBase.cpp",_pwd_+"/src/PostMeshCurve.cpp",_pwd_+"/src/PostMeshSurface.cpp"]
 
 sourcefiles = ["PostMeshPy.pyx",
                 _pwd_+"/src/PostMeshBase.cpp",
                 _pwd_+"/src/PostMeshCurve.cpp",
                 _pwd_+"/src/PostMeshSurface.cpp"]
 
-# OpenCascade runtime libraries
-occ_libs = [":libTKIGES.so.9",":libTKSTEP.so.9",":libTKXSBase.so.9",":libTKBRep.so.9",
-        ":libTKernel.so.9",":libTKTopAlgo.so.9",":libTKGeomBase.so.9",":libTKMath.so.9",":libTKHLR.so.9",
-        ":libTKHLR.so.9", ":libTKG3d.so.9", ":libTKBool.so.9", ":libTKG3d.so.9", ":libTKOffset.so.9", ":libTKG2d.so.9",
-        ":libTKXMesh.so.9", ":libTKMesh.so.9", ":libTKMeshVS.so.9",":libTKGeomAlgo.so.9", ":libTKShHealing.so.9", ":libTKFeat.so.9", 
-        ":libTKFillet.so.9", ":libTKBO.so.9", ":libTKPrim.so.9"]
+# Link to OpenCascade runtime libraries
+occ_dir = "/usr/local/lib"
+all_dir_libs = os.listdir(occ_dir)
+occ_libs = []
+for i in all_dir_libs:
+    if i[:4]=="libT" and i.split(".")[-1] != "a" and i.split(".")[-1] != "0":
+        occ_libs.append(":"+i)
 
 # Create extension module
 extensions = [
@@ -64,6 +62,3 @@ setup(
     url = "https://github.com/romeric/PostMesh",
     version = "0.1",
 )
-
-
-# "/home/roman/Dropbox/eigen-devel/"
