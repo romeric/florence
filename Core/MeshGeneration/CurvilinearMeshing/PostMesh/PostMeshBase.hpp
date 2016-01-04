@@ -204,7 +204,7 @@ public:
     std::vector<UInteger> geometry_surfaces_types;
     Eigen::MatrixR displacements_BC;
     Eigen::MatrixI index_nodes;
-    Eigen::MatrixI nodes_dir;
+    Eigen::MatrixUI nodes_dir;
     Eigen::MatrixR fekete;
 
 

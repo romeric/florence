@@ -35,25 +35,8 @@ STATIC ALWAYS_INLINE Eigen::MatrixI arange(Integer &a, Integer &b)
             POSTMESH_ALIGNED>::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
 }
 
-//template<typename T>
-//Eigen::PlainObjectBase<T>
-//STATIC take(Eigen::PlainObjectBase<T> &arr, Eigen::MatrixI &arr_row, Eigen::MatrixI &arr_col)
-//{
-//    Eigen::PlainObjectBase<T> arr_reduced;
-//    arr_reduced.setZero(arr_row.rows(),arr_col.rows());
 
-//    for (auto i=0; i<arr_row.rows();i++)
-//    {
-//        for (auto j=0; j<arr_col.rows();j++)
-//        {
-//            arr_reduced(i,j) = arr(arr_row(i),arr_col(j));
-//        }
-//    }
-
-//    return arr_reduced;
-//}
-
-template<typename T, typename U=UInteger>
+template<typename T, typename U>
 Eigen::PlainObjectBase<T>
 STATIC take(Eigen::PlainObjectBase<T> &arr, Eigen::PlainObjectBase<U> &arr_row, Eigen::MatrixI &arr_col)
 {
@@ -213,7 +196,7 @@ append(Eigen::PlainObjectBase<T> &arr, U num)
 }
 
 template<typename T = Integer>
-std::tuple<std::vector<T>,std::vector<size_t> > unique(std::vector<T> &arr) {
+STATIC std::tuple<std::vector<T>,std::vector<size_t> > unique(std::vector<T> &arr) {
 
     std::vector<T> uniques;
     std::vector<UInteger> idx;

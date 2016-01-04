@@ -510,8 +510,7 @@ void PostMeshCurve::MeshPointInversionCurve()
 {
     this->no_dir_edges = this->dirichlet_edges.rows();
     Integer no_edge_nodes = this->mesh_edges.cols();
-    Eigen::MatrixUI arr_row = Eigen::Map<Eigen::Matrix<
-            Integer,Eigen::Dynamic,1> >(this->listedges.data(),this->listedges.size()).cast<UInteger>();
+    Eigen::MatrixI arr_row = Eigen::Map<Eigen::Matrix<Integer,Eigen::Dynamic,1> >(this->listedges.data(),this->listedges.size());
     auto arr_col = cnp::arange(0,no_edge_nodes);
     this->nodes_dir = cnp::take(this->mesh_edges,arr_row,arr_col);
     this->nodes_dir = cnp::ravel(this->nodes_dir);
@@ -685,7 +684,7 @@ void PostMeshCurve::GetElementsWithBoundaryEdgesTri()
         std::vector<Integer> all_rows; all_rows.clear();
         for (auto jedge=0; jedge<this->mesh_edges.cols();++jedge)
         {
-            Eigen::MatrixI rows; //Eigen::MatrixI cols; not needed
+            Eigen::MatrixUI rows; //Eigen::MatrixI cols; not needed
             auto indices = cnp::where_eq(this->mesh_elements,this->mesh_edges(iedge,jedge));
             std::tie(rows,std::ignore) = indices;
 
@@ -698,7 +697,7 @@ void PostMeshCurve::GetElementsWithBoundaryEdgesTri()
         Eigen::MatrixI all_rows_eigen = Eigen::Map<Eigen::MatrixI>(all_rows.data(),all_rows.size(),1);
         for (auto i=0; i<all_rows_eigen.rows(); ++i)
         {
-            Eigen::MatrixI rows_2;
+            Eigen::MatrixUI rows_2;
             auto indices = cnp::where_eq(all_rows_eigen,all_rows_eigen(i));
             std::tie(rows_2,std::ignore) = indices;
             if (rows_2.rows()==this->mesh_edges.cols())

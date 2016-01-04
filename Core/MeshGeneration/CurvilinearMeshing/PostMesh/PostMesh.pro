@@ -15,8 +15,8 @@ QMAKE_CXXFLAGS += -std=c++11 -Wall -Wextra -Wno-unused -D_OCC64#-O3 -fopenmp
 
 
 #INCLUDEPATH += include/
-INCLUDEPATH +=/home/roman/Dropbox/eigen-devel
-#INCLUDEPATH +=/home/roman/Dropbox/eigen
+#INCLUDEPATH +=/home/roman/Dropbox/eigen-devel
+INCLUDEPATH +=/usr/local/include/eigen/
 INCLUDEPATH +=/usr/local/include/oce/
 
 

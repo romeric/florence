@@ -32,7 +32,7 @@
         "include_dirs": [
             "/home/roman/Dropbox/Florence/Core/MeshGeneration/CurvilinearMeshing/PostMesh", 
             "/home/roman/Dropbox/Florence/Core/MeshGeneration/CurvilinearMeshing/PostMesh/include/", 
-            "/home/roman/Dropbox/eigen-devel/", 
+            "/usr/local/include/eigen/", 
             "/usr/local/include/oce/"
         ], 
         "language": "c++", 

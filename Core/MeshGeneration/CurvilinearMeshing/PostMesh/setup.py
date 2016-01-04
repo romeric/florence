@@ -47,7 +47,7 @@ extensions = [
         sources = sourcefiles,
     	language="c++",
         include_dirs = [_pwd_,_pwd_+"/include/",
-                        "/home/roman/Dropbox/eigen-devel/",
+                        "/usr/local/include/eigen/",
                         "/usr/local/include/oce/"],
         libraries= ["stdc++"] + occ_libs, 
         library_dirs = [_pwd_,_pwd_+"/include","/usr/local/lib/"],
@@ -64,3 +64,6 @@ setup(
     url = "https://github.com/romeric/PostMesh",
     version = "0.1",
 )
+
+
+# "/home/roman/Dropbox/eigen-devel/"
