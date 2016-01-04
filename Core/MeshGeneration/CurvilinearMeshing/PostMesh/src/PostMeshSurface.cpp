@@ -308,8 +308,6 @@ void PostMeshSurface::ProjectMeshOnSurface()
     // SORT PROJECTED PARAMETERS OF EACH EDGE - MUST INITIALISE SORT INDICES
     this->sorted_projected_indices.setZero(this->projection_U.rows(),this->projection_U.cols());
 
-//    print(this->projection_U);
-//    print(this->projection_V);
     cnp::sort_rows(this->projection_U,this->sorted_projected_indices);
     cnp::sort_rows(this->projection_V,this->sorted_projected_indices);
 
@@ -370,10 +368,6 @@ void PostMeshSurface::MeshPointInversionSurface()
 
             auto gp_pnt_old = (this->mesh_points.row(this->nodes_dir(this->index_nodes( j ))).array()/this->scale);
 
-//            this->displacements_BC(this->index_nodes(j),0) = (xEq.X()/this->scale - gp_pnt_old(0));
-//            this->displacements_BC(this->index_nodes(j),1) = (xEq.Y()/this->scale - gp_pnt_old(1));
-//            this->displacements_BC(this->index_nodes(j),2) = (xEq.Z()/this->scale - gp_pnt_old(2));
-
             if (j>static_cast<decltype(j)>(this->ndim)-1)
             {
                 // FOR NON-VERTEX NODES GET THE REQUIRED DISPLACEMENT
@@ -413,21 +407,14 @@ void PostMeshSurface::GetInternalSurfaceScales()
 
 DirichletData PostMeshSurface::GetDirichletData()
 {
-//    DirichletData Dirichlet_data;
-//    Dirichlet_data.nodes_dir_size = this->nodes_dir.rows();
-//    // CONVERT FROM EIGEN TO STL VECTOR
-//    Dirichlet_data.nodes_dir_out_stl.assign(this->nodes_dir.data(),this->nodes_dir.data()+Dirichlet_data.nodes_dir_size);
-//    Dirichlet_data.displacement_BC_stl.assign(this->displacements_BC.data(),this->displacements_BC.data()+this->ndim*Dirichlet_data.nodes_dir_size);
-
     // OBTAIN DIRICHLET DATA
     DirichletData Dirichlet_data;
     // CONVERT FROM EIGEN TO STL VECTOR
     std::vector<Integer> nodes_Dirichlet_data_stl;
     nodes_Dirichlet_data_stl.assign(this->nodes_dir.data(),this->nodes_dir.data()+this->nodes_dir.rows());
     // FIND UNIQUE VALUES OF DIRICHLET DATA
-    std::vector<Integer> uniques;
     std::vector<UInteger> idx;
-    std::tie(uniques,idx) = cnp::unique(nodes_Dirichlet_data_stl);
+    std::tie(std::ignore,idx) = cnp::unique(nodes_Dirichlet_data_stl);
 
     Dirichlet_data.nodes_dir_out_stl.resize(idx.size());
     Dirichlet_data.displacement_BC_stl.resize(this->ndim*idx.size());

@@ -486,19 +486,13 @@ void PostMeshCurve::RepairDualProjectedParameters()
     }
 
     // SORT projection_U AGAIN
-//    print(this->projection_U);
     cnp::sort_back_rows(this->projection_U,this->sorted_projected_indices);
-//    print(sorted_projected_indices);
-//    print(this->projection_U);
-//    exit(EXIT_FAILURE);
-
 }
 
 void PostMeshCurve::CurvesToBsplineCurves()
 {
-    /* Converts all the imported curves to bspline curves. Apart from circle all the remaining converted
-     * curves will be non-periodic: http://dev.opencascade.org/doc/refman/html/class_geom_convert.html
-     */
+    //! CONVERTS ALL IMPORTED CURVES TO BSPLINE CURVES. APART FROM CIRCLE ALL THE REMAINING
+    //! CONVERTED CURVES WILL BE NON-PERIODIC http://dev.opencascade.org/doc/refman/html/class_geom_convert.html
     this->geometry_curves_bspline.clear();
     for (unsigned int icurve=0; icurve < this->geometry_curves.size(); ++icurve)
     {
@@ -593,9 +587,6 @@ void PostMeshCurve::MeshPointInversionCurveArcLength()
     // FIND CURVE LENGTH AND LAST PARAMETER SCALE
     this->GetInternalCurveScale();
     this->EstimatedParameterUOnMesh();
-
-//    print(this->u_of_all_fekete_mesh_edges);
-//    print(boundary_edges_order);
     this->GetCurvesLengths();
     this->GetCurvesParameters();
 
@@ -640,10 +631,6 @@ void PostMeshCurve::MeshPointInversionCurveArcLength()
             }
 
             Eigen::MatrixR gp_pnt_old = (this->mesh_points.row(this->nodes_dir(this->index_nodes( j ))).array()/this->scale);
-
-//            this->displacements_BC(this->index_nodes(j),0) = (xEq.X()/this->scale - gp_pnt_old(0));
-//            this->displacements_BC(this->index_nodes(j),1) = (xEq.Y()/this->scale - gp_pnt_old(1));
-            //this->displacements_BC(this->index_nodes(j),2) = (xEq.Z()/this->scale - gp_pnt_old(2)); // USEFULL FOR 3D CURVES
 
             if (j>static_cast<decltype(j)>(this->ndim)-1)
             {
@@ -821,21 +808,14 @@ void PostMeshCurve::EstimatedParameterUOnMesh()
 
 DirichletData PostMeshCurve::GetDirichletData()
 {
-//    DirichletData Dirichlet_data;
-//    Dirichlet_data.nodes_dir_size = this->nodes_dir.rows();
-//    // CONVERT FROM EIGEN TO STL VECTOR
-//    Dirichlet_data.nodes_dir_out_stl.assign(this->nodes_dir.data(),this->nodes_dir.data()+Dirichlet_data.nodes_dir_size);
-//    Dirichlet_data.displacement_BC_stl.assign(this->displacements_BC.data(),this->displacements_BC.data()+this->ndim*Dirichlet_data.nodes_dir_size);
-
     // OBTAIN DIRICHLET DATA
     DirichletData Dirichlet_data;
     // CONVERT FROM EIGEN TO STL VECTOR
     std::vector<Integer> nodes_Dirichlet_data_stl;
     nodes_Dirichlet_data_stl.assign(this->nodes_dir.data(),this->nodes_dir.data()+this->nodes_dir.rows());
     // FIND UNIQUE VALUES OF DIRICHLET DATA
-    std::vector<Integer> uniques;
     std::vector<UInteger> idx;
-    std::tie(uniques,idx) = cnp::unique(nodes_Dirichlet_data_stl);
+    std::tie(std::ignore,idx) = cnp::unique(nodes_Dirichlet_data_stl);
 
     Dirichlet_data.nodes_dir_out_stl.resize(idx.size());
     Dirichlet_data.displacement_BC_stl.resize(this->ndim*idx.size());
@@ -849,7 +829,6 @@ DirichletData PostMeshCurve::GetDirichletData()
             Dirichlet_data.displacement_BC_stl[this->ndim*i+j] = this->displacements_BC(idx[i],j);
         }
     }
-
 
     return Dirichlet_data;
 }

@@ -35,7 +35,6 @@ STATIC ALWAYS_INLINE Eigen::MatrixI arange(Integer &a, Integer &b)
             POSTMESH_ALIGNED>::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
 }
 
-
 template<typename T, typename U>
 Eigen::PlainObjectBase<T>
 STATIC take(Eigen::PlainObjectBase<T> &arr, Eigen::PlainObjectBase<U> &arr_row, Eigen::MatrixI &arr_col)
