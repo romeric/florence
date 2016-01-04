@@ -510,7 +510,8 @@ void PostMeshCurve::MeshPointInversionCurve()
 {
     this->no_dir_edges = this->dirichlet_edges.rows();
     Integer no_edge_nodes = this->mesh_edges.cols();
-    Eigen::MatrixI arr_row = Eigen::Map<Eigen::Matrix<Integer,Eigen::Dynamic,1> >(this->listedges.data(),this->listedges.size());
+    Eigen::MatrixUI arr_row = Eigen::Map<Eigen::Matrix<
+            Integer,Eigen::Dynamic,1> >(this->listedges.data(),this->listedges.size()).cast<UInteger>();
     auto arr_col = cnp::arange(0,no_edge_nodes);
     this->nodes_dir = cnp::take(this->mesh_edges,arr_row,arr_col);
     this->nodes_dir = cnp::ravel(this->nodes_dir);
