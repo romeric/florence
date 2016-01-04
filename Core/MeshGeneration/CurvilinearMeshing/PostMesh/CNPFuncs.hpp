@@ -35,9 +35,27 @@ STATIC ALWAYS_INLINE Eigen::MatrixI arange(Integer &a, Integer &b)
             POSTMESH_ALIGNED>::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
 }
 
-template<typename T>
+//template<typename T>
+//Eigen::PlainObjectBase<T>
+//STATIC take(Eigen::PlainObjectBase<T> &arr, Eigen::MatrixI &arr_row, Eigen::MatrixI &arr_col)
+//{
+//    Eigen::PlainObjectBase<T> arr_reduced;
+//    arr_reduced.setZero(arr_row.rows(),arr_col.rows());
+
+//    for (auto i=0; i<arr_row.rows();i++)
+//    {
+//        for (auto j=0; j<arr_col.rows();j++)
+//        {
+//            arr_reduced(i,j) = arr(arr_row(i),arr_col(j));
+//        }
+//    }
+
+//    return arr_reduced;
+//}
+
+template<typename T, typename U=UInteger>
 Eigen::PlainObjectBase<T>
-STATIC take(Eigen::PlainObjectBase<T> &arr, Eigen::MatrixI &arr_row, Eigen::MatrixI &arr_col)
+STATIC take(Eigen::PlainObjectBase<T> &arr, Eigen::PlainObjectBase<U> &arr_row, Eigen::MatrixI &arr_col)
 {
     Eigen::PlainObjectBase<T> arr_reduced;
     arr_reduced.setZero(arr_row.rows(),arr_col.rows());

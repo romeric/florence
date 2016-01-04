@@ -724,7 +724,7 @@ void PostMeshCurve::GetBoundaryPointsOrder()
 
     for (auto iedge=0;iedge<this->mesh_edges.rows();++iedge)
     {
-        Eigen::MatrixI current_edge = this->mesh_edges.row(iedge).transpose();
+        Eigen::MatrixUI current_edge = this->mesh_edges.row(iedge).transpose();
         Eigen::MatrixI all_points_cols = cnp::arange(this->mesh_points.cols());
         Eigen::MatrixR current_edge_coordinates = cnp::take(this->mesh_points,current_edge,all_points_cols);
         current_edge_coordinates = (current_edge_coordinates.array()/1000.).matrix().eval();
