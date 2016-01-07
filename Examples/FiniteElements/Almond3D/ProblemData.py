@@ -13,10 +13,10 @@ def ProblemData(MainData):
 
     # MATERIAL INPUT DATA 
     # MainData.MaterialArgs.Type = 'LinearModel'
-    # MainData.MaterialArgs.Type = 'IncrementalLinearElastic'
+    MainData.MaterialArgs.Type = 'IncrementalLinearElastic'
     # MainData.MaterialArgs.Type = 'NearlyIncompressibleNeoHookean'
     # MainData.MaterialArgs.Type = 'NeoHookean_1'
-    MainData.MaterialArgs.Type = 'NeoHookean_2'
+    # MainData.MaterialArgs.Type = 'NeoHookean_2'
     # MainData.MaterialArgs.Type = 'MooneyRivlin'
     # MainData.MaterialArgs.Type = 'NearlyIncompressibleMooneyRivlin'
     # MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin' 
@@ -84,6 +84,26 @@ def ProblemData(MainData):
                     projection_faces[iface]=1
             
             return projection_faces
+
+
+        def PlottingCriteria(self,mesh):
+            """Which faces need plotting"""
+
+            plotting_faces = np.zeros((mesh.all_faces.shape[0],1),dtype=np.uint64)
+            num = mesh.all_faces.shape[1]
+            for iface in range(mesh.all_faces.shape[0]):
+                x = np.sum(mesh.points[mesh.all_faces[iface,:],0])/num
+                y = np.sum(mesh.points[mesh.all_faces[iface,:],1])/num
+                z = np.sum(mesh.points[mesh.all_faces[iface,:],2])/num
+
+                # x = np.min(mesh.points[mesh.faces[iface,:],0])
+                x *= self.scale
+                y *= self.scale
+                z *= self.scale 
+                if z < -1.0:
+                    plotting_faces[iface]=1
+
+            return plotting_faces
 
 
 

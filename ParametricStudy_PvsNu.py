@@ -46,13 +46,15 @@ if __name__ == '__main__':
 
     
 
-    Run = 1
+    Run = 0
     if Run:
         t_FEM = time.time()
-        nu = np.linspace(0.001,0.495,10)
+        # nu = np.linspace(0.001,0.495,10)
+        nu = np.linspace(0.001,0.495,6)
         # nu = np.linspace(0.01,0.495,2)
         E = np.array([1e05])
         p = [2,3,4,5,6]
+        # p = [5,6]
         # p = [2]
          
 
@@ -118,7 +120,7 @@ if __name__ == '__main__':
     if not Run:
 
 
-        def plotter(which_formulation=0,projection_type=0, save=False):
+        def plotter(which_formulation=0,projection_type=0, which_quality = 3, save=False):
             """ 
                 which_formulation           0 for linear
                                             1 for linearised
@@ -126,7 +128,15 @@ if __name__ == '__main__':
 
                 projection_type             0 for arc length
                                             1 for orthogonal
+
+
+                which_quality               1 F:F
+                                            2 H:H
+                                            3 J**2
             """
+
+            if which_quality < 1:
+                raise ValueError("which_quality can only be 1, 2 or 3")
 
             import matplotlib as mpl
             import matplotlib.pyplot as plt
@@ -140,41 +150,52 @@ if __name__ == '__main__':
 
 
             # ResultsPath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/'
-            ResultsPath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Mech2D/'
-            SavePath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Mech2D/"
+
+            ProblemName = "Mech2D"
+            # ProblemName = "Almond3D"
+            ResultsPath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/'+ProblemName+"/"
+            SavePath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/"+ProblemName+"/"
 
             if which_formulation == 0:
                 if projection_type == 0:
-                    ResultsFile = 'Mech2D_P_vs_Nu_IncrementalLinearElastic_arc_length'
+                    ResultsFile = ProblemName+'_P_vs_Nu_IncrementalLinearElastic_arc_length'
                 elif projection_type == 1:
-                    ResultsFile = 'Mech2D_P_vs_Nu_IncrementalLinearElastic_orthogonal'
+                    ResultsFile = ProblemName+'_P_vs_Nu_IncrementalLinearElastic_orthogonal'
                 else:
                     raise ValueError('ProjectionType not understood')
 
             elif which_formulation == 1:
                 if projection_type == 0:
-                    ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_2_arc_length'
+                    ResultsFile = ProblemName+'_P_vs_Nu_IncrementallyLinearisedNeoHookean_2_arc_length'
                 elif projection_type == 1:
-                    ResultsFile = 'Mech2D_P_vs_Nu_IncrementallyLinearisedNeoHookean_2_orthogonal'
+                    ResultsFile = ProblemName+'_P_vs_Nu_IncrementallyLinearisedNeoHookean_2_orthogonal'
                 else:
                     raise ValueError('ProjectionType not understood')
 
             elif which_formulation == 2:
                 if projection_type == 0:
-                    ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_arc_length'
+                    ResultsFile = ProblemName+'_P_vs_Nu_NeoHookean_2_arc_length'
                 elif projection_type == 1:
-                    ResultsFile = 'Mech2D_P_vs_Nu_NeoHookean_2_orthogonal'
+                    ResultsFile = ProblemName+'_P_vs_Nu_NeoHookean_2_orthogonal'
                 else:
                     raise ValueError('ProjectionType not understood')
 
 
             DictOutput =  loadmat(ResultsPath+ResultsFile+'.mat')   
             
-            scaledA = DictOutput['ScaledJacobian']
-            condA = DictOutput['ConditionNumber']
+            if which_quality == 3:
+                scaledA = DictOutput['ScaledJacobian']
+            elif which_quality == 1:
+                scaledA = DictOutput['ScaledFF']
+                ResultsFile += "_Q1"
+            elif which_quality == 2:
+                scaledA = DictOutput['ScaledHH']
+                ResultsFile += "_Q2"
+
+            # condA = DictOutput['ConditionNumber']
             # nu = DictOutput['PoissonsRatios'][0]
             nu = np.linspace(0.001,0.5,100)*10
-            p = DictOutput['PolynomialDegrees'][0]
+            p = np.array(DictOutput['PolynomialDegrees'][0])
 
 
 
@@ -183,17 +204,44 @@ if __name__ == '__main__':
             ymin = nu[0]
             ymax = nu[-1]
 
+            if scaledA.shape == (3,6):
+                scaledA = np.concatenate((scaledA,np.zeros((2,6))+np.NAN),axis=0)
+                xmax = 6
 
+            # print scaledA  
+            # print scaledA.shape
 
             # imshow is a direct matrix-to-pixel transformation
             # so flip the matrix upside down
             scaledA = scaledA[::-1,:]
-            # print scaledA
-            # exit()
-            condA = condA[::-1,:]
+            # condA = condA[::-1,:]
+
+            #-----------------------------------
+            # Manual interpolation
+            from scipy.interpolate import interp1d
+            cols = 20
+            new_scaledA = np.zeros((p.shape[0]*cols,scaledA.shape[1]))+np.NAN
+            for i in range(scaledA.shape[1]):
+                if which_formulation==2:
+                    upto = np.min(np.where(np.isnan(np.sort(scaledA[:,i])))[0])
+                else:
+                    upto = 6
+                if upto==0:
+                    upto = 5
+                to_interpolate_y = scaledA[:,i][-upto:]
+                to_interpolate_x = p[:upto]
+                if to_interpolate_y.shape[0] > 1:
+                    func = interp1d(to_interpolate_x,to_interpolate_y,kind='linear')
+                    x_interp_data = np.linspace(2,to_interpolate_x[-1],cols*(to_interpolate_x.shape[0]))
+                    y_interp_data = func(x_interp_data)
+                    new_scaledA[cols*(to_interpolate_x[0]-2):cols*(to_interpolate_x[-1]-1),i] = y_interp_data[::-1]
+            scaledA = new_scaledA[::-1,:]
+            #-----------------------------------
 
             font_size = 22
-            plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bicubic', cmap=cm.viridis)
+            # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bicubic', cmap=cm.viridis)
+            # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bilinear', cmap=cm.viridis)
+            plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='nearest', cmap=cm.viridis)
 
             tick_locs = [2,2.8,3.6,4.4,5.2]
             tick_lbls = [2, 3, 4, 5, 6]
@@ -217,6 +265,7 @@ if __name__ == '__main__':
             # fig = plt.gcf()
             # fig.set_size_inches(8, 7, forward=True)
 
+
             if save:
                 # plt.savefig(SavePath+ResultsFile+'.eps',format='eps',dpi=1000) # high resolution
                 # plt.savefig(SavePath+ResultsFile+'.eps',format='eps',dpi=300)
@@ -227,9 +276,12 @@ if __name__ == '__main__':
 
             plt.show()
 
+            print SavePath+ResultsFile+'.png'
 
-        # plotter(2,1,True)
+        # plotter(2,1)
         plotter(which_formulation=0,projection_type=0, save=False) 
+        # Alomnd3D
+        # plotter(which_formulation=2,projection_type=1, which_quality=1, save=True) 
 
 
 

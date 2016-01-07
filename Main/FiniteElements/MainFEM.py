@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 from time import time
 from copy import deepcopy
@@ -45,22 +46,17 @@ def main(MainData, DictOutput=None, nStep=0):
     Pr.ProblemData(MainData)
     
     # PRE-PROCESS
-    print 'Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation bases etc...'
+    print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation bases etc...')
+
     mesh = PreProcess(MainData,Pr,pwd)
 
-
-    # np.savetxt('/home/roman/Desktop/elements_rae2822_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
-    # np.savetxt('/home/roman/Desktop/points_rae2822_p'+str(MainData.C+1)+'.dat', 1000*mesh.points,fmt='%6.4f',delimiter=',')
-    # np.savetxt('/home/roman/Desktop/edges_rae2822_p'+str(MainData.C+1)+'.dat', mesh.edges,fmt='%d',delimiter=',')
-
-    
-    print 'Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*MainData.nvar
+    print('Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*MainData.nvar)
     if MainData.ndim==2:
-        print 'Number of elements is', mesh.elements.shape[0], \
-             'and number of boundary nodes is', np.unique(mesh.edges).shape[0]
+        print('Number of elements is', mesh.elements.shape[0], \
+             'and number of boundary nodes is', np.unique(mesh.edges).shape[0])
     elif MainData.ndim==3:
-        print 'Number of elements is', mesh.elements.shape[0], \
-             'and number of boundary nodes is', np.unique(mesh.faces).shape[0]
+        print('Number of elements is', mesh.elements.shape[0], \
+             'and number of boundary nodes is', np.unique(mesh.faces).shape[0])
 
     # CALL THE MAIN ROUTINE
     MainData.Timer = time()
@@ -72,12 +68,12 @@ def main(MainData, DictOutput=None, nStep=0):
     # PostProcess().StressRecovery(MainData,mesh,TotalDisp) 
 
 
-    # CHECK IF ALL THE FACE POINTS COORDINATES ARE ON THE SPHERE
+    # # CHECK IF ALL THE FACE POINTS COORDINATES ARE ON THE SPHERE
     # vpoints = mesh.points + TotalDisp[:,:,-1]
-    # # vpoints = mesh.points
+    # # print(vpoints[mesh.elements[1502,:],:])
     # un_faces = np.unique(mesh.faces)
-    # print np.linalg.norm(vpoints[un_faces,:],axis=1)
-    # print np.allclose(np.linalg.norm(vpoints[un_faces,:],axis=1),1)
+    # print(np.linalg.norm(vpoints[un_faces,:],axis=1))
+    # print(np.allclose(np.linalg.norm(vpoints[un_faces,:],axis=1),1))
 
     # vpoints = mesh.points + TotalDisp[:,:,-1]
     # un_faces = np.unique(mesh.faces)
@@ -128,7 +124,8 @@ def main(MainData, DictOutput=None, nStep=0):
     # exit()
     
 
-    if nStep ==1:
+
+    if nStep == 1:
         MainData.mesh = mesh
         MainData.mesh.points = mesh.points + TotalDisp[:,:MainData.ndim,-1]
     
@@ -144,13 +141,19 @@ def main(MainData, DictOutput=None, nStep=0):
         else:
             vmesh = mesh
 
-        # ProjFunc = getattr(MainData.BoundaryData,'ProjectionCriteria',None)
-        # if ProjFunc is None:
-        #     ProjFlags = np.ones(mesh.faces.shape[0],dtype=np.int64)
-        # else:
-        #     ProjFlags = MainData.BoundaryData().ProjectionCriteria(mesh)
+        ProjFunc = getattr(MainData.BoundaryData,'ProjectionCriteria',None)
+        if ProjFunc is None:
+            ProjFlags = np.ones(mesh.faces.shape[0],dtype=np.int64)
+        else:
+            ProjFlags = MainData.BoundaryData().ProjectionCriteria(mesh)
 
-        # # PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
+        # print(np.max(mesh.points[:,0]), np.min(mesh.points[:,0]))
+        # ProjFlags = MainData.BoundaryData().PlottingCriteria(mesh)
+        # # exit()
+
+        # TotalDisp = np.zeros_like(TotalDisp)
+        # MainData.ScaledJacobian = np.zeros_like(MainData.ScaledJacobian)
+        # PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
         # PostProcess.HighOrderCurvedPatchPlot(mesh,TotalDisp,QuantityToPlot=MainData.ScaledJacobian,
         #     ProjectionFlags=ProjFlags,InterpolationDegree=40)
         # import matplotlib.pyplot as plt

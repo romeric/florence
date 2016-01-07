@@ -10,6 +10,7 @@ import sys
 import time
 from sys import exit
 from datetime import datetime
+from warnings import warn
 import cProfile
 import pdb
 import numpy as np
@@ -18,14 +19,14 @@ import numpy.linalg as la
 from numpy.linalg import norm
 from datetime import datetime
 import multiprocessing as MP
-try:
-    from mpi4py import MPI
-    comm = MPI.COMM_WORLD
-except ImportError:
-    hasMPI = False
+# try:
+#     from mpi4py import MPI
+#     hasMPI = True
+#     comm = MPI.COMM_WORLD
+# except ImportError:
+#     hasMPI = False
 
 # from numba.decorators import jit
-# import cython
 # from pympler import tracker, asizeof, summary, muppy
 # from memory_profiler import profile
 
@@ -36,6 +37,10 @@ np.set_printoptions(linewidth=300)
 
 # IMPORT NECESSARY CLASSES FROM BASE
 from Base import Base as MainData
+# RUN THE APPROPRIATE SESSION
+from Main.FiniteElements.MainFEM import main
+# import Main.BoundaryElements.Main_BEM3D as BEM3D
+
 # RETAIN CORE AFFINITY
 # os.system("taskset -p 0xff %d" % os.getpid())
 
@@ -49,22 +54,32 @@ if __name__ == "__main__":
     MainData.__VECTORISATION__ = True
     MainData.__PARALLEL__ = True
     MainData.numCPU = MP.cpu_count()
-    # MainData.__PARALLEL__ = False
-    nCPU = 2
-    __MEMORY__ = 'SHARED'
-    # __MEMORY__ = 'DISTRIBUTED'
+    MainData.__PARALLEL__ = False
+    MainData.__MEMORY__ = 'SHARED'
+    # MainData.__MEMORY__ = 'DISTRIBUTED'
     
-    MainData.C = 1
+    MainData.C = 3
     MainData.norder = 2
     MainData.plot = (0, 3)
     nrplot = (0, 'last')
     MainData.write = 0
 
-    # RUN THE APPROPRIATE SESSION
-    from Main.FiniteElements.MainFEM import main
-    # import Main.BoundaryElements.Main_BEM3D as BEM3D
+    # #-------------------------------------------------------------------------
+    # if comm.rank == 0:
+    #     if MainData.__MEMORY__ == "SHARED":
+    #         pass
+    #     elif MainData.__MEMORY__ == "DISTRIBUTED":
+    #         if hasMPI is False:
+    #             raise ImportError("MPI4Py module which is required for distributed parallelisation, was not found")
+    #         if comm.size == 1:
+    #             warn("Are you sure you want invoke MPI on a single Core? This is going to be slower than a typical serial run")
+                
+    #         MainData.numCPU = comm.size
+
+    # #-------------------------------------------------------------------------
+
+        
     #-------------------------------------------------------------------------
-    # exit(0)
     # FEM SESSION
     if MainData.session == 'FEM':
         t_FEM = time.time()

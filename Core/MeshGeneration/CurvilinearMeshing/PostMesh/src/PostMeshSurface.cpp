@@ -174,7 +174,6 @@ void PostMeshSurface::IdentifySurfacesContainingFaces()
     auto index_face = 0;
 
     // LOOP OVER FACES
-//#pragma omp parallel for
     for (auto iface=0; iface<this->mesh_faces.rows(); ++iface)
     {
         // GET THE COORDINATES OF THE FACE VERTICES (VERTICES OF TRIANGLE)
@@ -210,7 +209,6 @@ void PostMeshSurface::IdentifySurfacesContainingFaces()
             gp_Pnt middle_point(x_avg,y_avg,z_avg);
 
             // LOOP OVER CURVES
-//#pragma omp critical
             for (UInteger isurface=0; isurface<this->geometry_surfaces.size(); ++isurface)
             {
                 // PROJECT THE NODES ON THE CURVE AND GET THE PARAMETER U
@@ -338,7 +336,7 @@ void PostMeshSurface::MeshPointInversionSurface()
         auto id_surface = static_cast<Integer>(this->dirichlet_faces(idir,3));
         Handle_Geom_Surface current_surface = this->geometry_surfaces[id_surface];
 
-        for (auto j=3; j<no_face_nodes;++j)
+        for (auto j=0; j<no_face_nodes;++j)
         {
             auto x = this->mesh_points(this->mesh_faces(this->listfaces[idir],j),0);
             auto y = this->mesh_points(this->mesh_faces(this->listfaces[idir],j),1);
@@ -381,10 +379,11 @@ void PostMeshSurface::MeshPointInversionSurface()
                 this->displacements_BC(this->index_nodes(j),0) = 0.;
                 this->displacements_BC(this->index_nodes(j),1) = 0.;
                 this->displacements_BC(this->index_nodes(j),2) = 0.;
-                // BUT UPDATE THE MESH POINTS TO CONFORM TO CAD GEOMETRY
+                // BUT UPDATE THE MESH POINTS TO CONFORM TO CAD GEOMETRY - NOT TO SCALE
                 this->mesh_points(this->mesh_faces(this->listfaces[idir],j),0) = xEq.X();
                 this->mesh_points(this->mesh_faces(this->listfaces[idir],j),1) = xEq.Y();
                 this->mesh_points(this->mesh_faces(this->listfaces[idir],j),2) = xEq.Z();
+
             }
 
 //            print(proj.NearestPoint().X()/this->scale, xEq.X()/this->scale,proj.Point(proj.NbPoints()).X()/this->scale);

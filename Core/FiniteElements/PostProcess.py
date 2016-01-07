@@ -499,10 +499,6 @@ class PostProcess(object):
                 C = np.einsum('ikj,ikl->ijl',F,F)
                 Q5 = np.einsum('ijk,k',C,Directions[elem,:]) 
                 Q5 = np.sqrt(np.dot(Q5,Q5.T)).diagonal()
-                # print Q4
-                # print F.shape
-                # Q4 = np.sqrt()
-                # print Q4
 
             # FIND MIN AND MAX VALUES
             JMin = np.min(Jacobian); JMax = np.max(Jacobian)
@@ -522,9 +518,9 @@ class PostProcess(object):
                 MainData.ScaledCNCN[elem] = 1.0*np.min(Q5)/np.max(Q5)
 
         if np.isnan(MainData.ScaledJacobian).any():
-            raise JacobianError()
+            # raise JacobianError()
+            warn("Jacobian of mapping is close to zero")
 
-        # exit(0)
         
 
         print 'Minimum ScaledJacobian value is', np.min(MainData.ScaledJacobian), \
@@ -951,21 +947,29 @@ class PostProcess(object):
             BasesOneD[:,i] = LagrangeGaussLobatto(CActual,GaussLobattoPointsOneD[i])[0]
 
 
-        # FOR MAPPING DATA E.G. SCALED JACOBIAN FROM ELEMENTS TO FACES
-        face_elements = mesh.GetElementsWithBoundaryFacesTet()
-
-
         # GET ONLY THE FACES WHICH NEED TO BE PLOTTED 
-        faces_to_plot_flag = ProjectionFlags
-        if len(faces_to_plot_flag.shape) == 2:
-            faces_to_plot_flag = faces_to_plot_flag.flatten()
+        faces_to_plot_flag = ProjectionFlags.flatten()
+        # CHECK IF ALL FACES NEED TO BE PLOTTED OR ONLY BOUNDARY FACES
+        if faces_to_plot_flag.shape[0] > mesh.faces.shape[0]:
+            # ALL FACES
+            corr_faces = mesh.all_faces
+            # FOR MAPPING DATA E.G. SCALED JACOBIAN FROM ELEMENTS TO FACES
+            face_elements = mesh.GetElementsFaceNumberingTet()
 
-        faces_to_plot = np.zeros_like(mesh.faces)
-        quantity_to_plot = np.zeros(mesh.faces.shape[0])
+        elif faces_to_plot_flag.shape[0] == mesh.faces.shape[0]:
+            # ONLY BOUNDARY FACES
+            corr_faces = mesh.faces
+            # FOR MAPPING DATA E.G. SCALED JACOBIAN FROM ELEMENTS TO FACES
+            face_elements = mesh.GetElementsWithBoundaryFacesTet()
+        else:
+            raise ValueError("I do not understand what you want to plot")
+
+        faces_to_plot = np.zeros_like(corr_faces)
+        quantity_to_plot = np.zeros(corr_faces.shape[0])
         counter = 0
-        for i in range(mesh.faces.shape[0]):
+        for i in range(corr_faces.shape[0]):
             if faces_to_plot_flag[i]==1:
-                faces_to_plot[i,:] = mesh.faces[i,:]
+                faces_to_plot[i,:] = corr_faces[i,:]
                 quantity_to_plot[i] = QuantityToPlot[face_elements[i,0]]
                 counter +=1
         faces_to_plot = faces_to_plot[:counter,:]
@@ -975,14 +979,13 @@ class PostProcess(object):
         # BUILD MESH OF SURFACE
         smesh = Mesh()
         smesh.element_type = "tri"
-        # smesh.elements = np.copy(mesh.faces)
+        # smesh.elements = np.copy(corr_faces)
         smesh.elements = np.copy(faces_to_plot)
         smesh.nelem = smesh.elements.shape[0]
         smesh.points = mesh.points[np.unique(smesh.elements),:]
 
         nmin, nmax = np.min(smesh.elements), np.max(smesh.elements)
         nrange = np.arange(nmin,nmax+1,dtype=np.int64)
-
         counter = 0
         for i in nrange:
             # rows, cols = np.where(smesh.elements==nrange[i])
@@ -1018,12 +1021,16 @@ class PostProcess(object):
 
 
         # MAKE A FIGURE
-        mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(800,600))
+        figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(800,600))
         # PLOT CURVED EDGES
-        edge_width = 0.0025
+        edge_width = .001
+        # edge_width = 0.0003
         # edge_width = 0.75
+
+        figure.scene.disable_render = True
         for i in range(x_edges.shape[1]):
             mlab.plot3d(x_edges[:,i],y_edges[:,i],z_edges[:,i],color=(0,0,0),tube_radius=edge_width)
+        
 
         nface = smesh.elements.shape[0]
         nnode = nsize*nface
@@ -1038,13 +1045,33 @@ class PostProcess(object):
         for ielem in range(nface):
             Xplot[ielem*nsize:(ielem+1)*nsize,:] = np.dot(BasesTri.T, svpoints[smesh.elements[ielem,:],:])
             Tplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex,:] = Triangles + ielem*nsize
-            Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
+            # Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
+
+            if face_elements[ielem,0] == 1502:
+                Uplot[ielem*nsize:(ielem+1)*nsize] = 0
+            else:
+                Uplot[ielem*nsize:(ielem+1)*nsize] = 0.5
 
 
-        point_line_width = .005
+        point_line_width = .0015
+        # point_line_width = .0008
         # point_line_width = 2.
         trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars=Uplot,line_width=point_line_width)
+        # PLOT POINTS ON CURVED MESH
         mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=2.5*point_line_width)
+
+
+        # for i in range(smesh.nelem):
+        #     x_avg = np.sum(svpoints[smesh.elements[i,:],0])/smesh.elements.shape[1]
+        #     y_avg = np.sum(svpoints[smesh.elements[i,:],1])/smesh.elements.shape[1]
+        #     z_avg = np.sum(svpoints[smesh.elements[i,:],2])/smesh.elements.shape[1]
+        #     if face_elements[i,0] == 1502:
+        #         mlab.text3d(x_avg,y_avg,z_avg,str(face_elements[i,0]),scale=0.008,orient_to_camera=True,color=(0,0,0))
+
+        # for i in range(svpoints.shape[0]):
+            # mlab.text3d(svpoints[i,0],svpoints[i,1],svpoints[i,2],str(i),scale=0.02,orient_to_camera=True,color=(0,0,0))
+
+        figure.scene.disable_render = False
 
         # CHANGE LIGHTING OPTION
         trimesh_h.actor.property.interpolation = 'phong'
@@ -1054,8 +1081,8 @@ class PostProcess(object):
         # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO 
         # GET VIRIDIS COLORMAP FROM MATPLOTLIB
         color_func = ColorConverter()
-        rgba_lower = color_func.to_rgba_array(cm.viridis.colors)
-        # rgba_lower = color_func.to_rgba_array(cm.viridis_r.colors)
+        # rgba_lower = color_func.to_rgba_array(cm.viridis.colors)
+        rgba_lower = color_func.to_rgba_array(cm.viridis_r.colors)
         RGBA_higher = np.round(rgba_lower*255).astype(np.int64)
         # UPDATE LUT OF THE COLORMAP
         trimesh_h.module_manager.scalar_lut_manager.lut.table = RGBA_higher 

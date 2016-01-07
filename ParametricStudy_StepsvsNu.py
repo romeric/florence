@@ -339,9 +339,44 @@ def plotter_individual_imshow(p=2,which_q=3,save=False):
             tick_lbls = [0.0,0.1,0.2,0.3,0.4,0.5]
             plt.xticks(tick_locs, tick_lbls)
 
-            plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bicubic', cmap=cm.viridis)
+            # Manual bilinear interpolation
+            ninterp = 50
+            xp = nu/100.
+            cols = scaledA.shape[1]*ninterp
+            new_scaledA = np.zeros((scaledA.shape[0],cols))
+            for i in range(scaledA.shape[0]):
+                yp = scaledA[i,:]
+                new_scaledA[i,:] = np.interp(np.linspace(0.001,0.5,cols),xp,yp)
+            scaledA = new_scaledA
+
+            xp = np.array([1,2,5,10,25,50])
+            # interpolated_xs = np.array([1,2,5,10,15,20,25,30,35,40,45,50])
+            interpolated_xs = np.linspace(1,25,100)
+            interpolated_xs = np.concatenate((interpolated_xs,[50]))
+            # interpolated_xs = np.array([1,2,3,4,5,6,7,8,9,10,11,12,15,20,25,50])
+            # interpolated_xs = xp
+            rows = scaledA.shape[0]*15
+            # rows = interpolated_xs.shape[0]
+            new_scaledA = np.zeros((rows,scaledA.shape[1]))
+            for i in range(scaledA.shape[1]):
+                yp = scaledA[:,i]
+                new_scaledA[:,i] = np.interp(np.linspace(1,50,rows),xp,yp)
+                # new_scaledA[:,i] = np.interp(interpolated_xs,xp,yp)
+            scaledA = new_scaledA
+
+            # print scaledA[0,:]
+            # print
+            for i in range(1,3):
+                # scaledA[:,i] = scaledA[:,0]
+                scaledA[-i,:] = scaledA[-1,:] 
+            # print scaledA[:3,:]
+            # exit()
+
+            # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bicubic', cmap=cm.viridis)
             # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bilinear', cmap=cm.viridis)
-            # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='nearest', cmap=cm.viridis)
+            plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='nearest', cmap=cm.viridis)
+            # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='nearest', cmap=cm.jet)
+            # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bspline', cmap=cm.viridis)
             # plt.imshow(scaledA)
 
             font_size = 20
@@ -353,6 +388,7 @@ def plotter_individual_imshow(p=2,which_q=3,save=False):
             # cbar = mpl.colorbar.ColorbarBase(ax, cmap=cm.viridis,
                                # norm=mpl.colors.Normalize(vmin=-0, vmax=1))
             cbar = mpl.colorbar.ColorbarBase(ax, cmap=cm.viridis)
+            # cbar = mpl.colorbar.ColorbarBase(ax, cmap=cm.jet)
             cbar.set_clim(0, 1)
             cbar.set_ticks([0,0.1,0.2,0.3,0.4,0.5,.6,0.7,0.8,0.9,1])
             plt.clim(0,1)

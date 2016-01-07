@@ -38,7 +38,7 @@ if __name__ == '__main__':
     __MEMORY__ = 'SHARED'
     # __MEMORY__ = 'DISTRIBUTED'
 
-    MainData.C = 2
+    MainData.C = 5
     MainData.norder = 2 
     MainData.plot = (0,3)
     nrplot = (0,'last')
@@ -47,11 +47,12 @@ if __name__ == '__main__':
 
 
 
-    Run = 0
+    Run = 1
     if Run:
         t_FEM = time.time()
         # nu = np.linspace(0.001,0.495,100)
         nu = np.linspace(0.001,0.495,20)
+        # nu = np.linspace(0.001,0.495,10)
         # nu = np.linspace(0.01,0.495,2)
         E = 1e05
         E_A = 2.5*E
@@ -541,13 +542,13 @@ if __name__ == '__main__':
 
 
         # plotter(degree=2,which_func=0,save=True)
-        # plotter(which_func=1)
+        plotter(which_func=1)
 
         # plotter_all_materials(degree=3,which_func=1,linear=False,save=True)
         # plotter_all_materials(degree=3,linear=False)
 
         # plotter_bar(which_func=1,linear=False,save=True)
-        plotter_bar()
+        # plotter_bar()
 
 
 

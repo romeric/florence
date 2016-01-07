@@ -89,6 +89,29 @@ def ProblemData(MainData):
             return projection_faces
 
 
+        def PlottingCriteria(self,mesh):
+            """Which faces need plotting"""
+
+            mesh.GetFacesTet()
+            corr_faces = mesh.faces
+            # corr_faces = mesh.all_faces
+            plotting_faces = np.zeros((corr_faces.shape[0],1),dtype=np.uint64)
+            num = corr_faces.shape[1]
+            for iface in range(corr_faces.shape[0]):
+                x = np.sum(mesh.points[corr_faces[iface,:],0])/num
+                y = np.sum(mesh.points[corr_faces[iface,:],1])/num
+                z = np.sum(mesh.points[corr_faces[iface,:],2])/num
+
+                # x = np.min(mesh.points[mesh.faces[iface,:],0])
+                x *= self.scale
+                y *= self.scale
+                z *= self.scale 
+                if x < 0.:
+                    plotting_faces[iface]=1
+
+            return plotting_faces
+
+
 
         class DirichArgs(object):
             pass

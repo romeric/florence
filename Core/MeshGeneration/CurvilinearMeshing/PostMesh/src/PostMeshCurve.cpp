@@ -641,8 +641,8 @@ void PostMeshCurve::MeshPointInversionCurveArcLength()
             else
             {
                 // FOR VERTEX NODES KEEP THE DISPLACEMENT ZERO
-                this->displacements_BC(this->index_nodes(j),0) = 0;
-                this->displacements_BC(this->index_nodes(j),1) = 0;
+                this->displacements_BC(this->index_nodes(j),0) = 0.;
+                this->displacements_BC(this->index_nodes(j),1) = 0.;
                 // BUT UPDATE THE MESH POINTS
                 this->mesh_points(this->mesh_edges(this->listedges[idir],j),0) = xEq.X();
                 this->mesh_points(this->mesh_edges(this->listedges[idir],j),1) = xEq.Y();

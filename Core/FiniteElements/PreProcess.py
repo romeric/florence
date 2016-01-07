@@ -57,17 +57,11 @@ def PreProcess(MainData,Pr,pwd):
         elif MainData.MeshInfo.Reader is 'Sphere':
             # mesh.Sphere()
             # mesh.Sphere(points=10)
-            mesh.Sphere(points=5)
+            mesh.Sphere(points=2)
             # mesh.SimplePlot()
 
     if MainData.__NO_DEBUG__ is False:
         mesh.CheckNodeNumbering()
-
-    # mesh.ReadGIDMesh("/home/roman/Dropbox/2015_HighOrderMeshing/geometriesAndMeshes/falcon/falcon_iso.dat","tet",0)
-    # mesh.ReadGIDMesh("/home/roman/Dropbox/2015_HighOrderMeshing/geometriesAndMeshes/almond/almond_H1.dat","tet",0)
-
-    # np.savetxt('/home/roman/Desktop/elements_falcon.dat', mesh.elements,fmt='%d',delimiter=',')
-    # np.savetxt('/home/roman/Desktop/points_falcon.dat', mesh.points,fmt='%10.9f',delimiter=',')
 
     
     if 'MechanicalComponent2D' in Pr.__file__.split('/') or \
@@ -78,7 +72,7 @@ def PreProcess(MainData,Pr,pwd):
 
     # mesh.points *=1000. 
     # mesh.SimplePlot()
-    # mesh.PlotMeshNumberingTri()
+    # mesh.PlotMeshNumbering()
     # print mesh.GetElementsWithBoundaryEdgesTri()
     # mesh.RetainElementsWithin((-0.52,-0.08,0.72,0.08))
     # mesh.RetainElementsWithin((-0.502,-0.06,0.505,0.06283))
@@ -91,12 +85,12 @@ def PreProcess(MainData,Pr,pwd):
     # mesh.SimplePlot(save=True,filename="/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_Mesh_Stretch_25")
     # mesh.SimplePlot(save=True,filename="/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_Mesh_Stretch_200")
     # mesh.SimplePlot(save=True,filename="/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_Mesh_Stretch_1600")
-    # mesh.PlotMeshNumberingTri()
+    # mesh.PlotMeshNumbering()
     
 
     # mesh.RemoveElements((-0.55,-0.1,-0.4,0.1),plot_new_mesh=False) 
     # mesh.SimplePlot() 
-    # mesh.PlotMeshNumberingTri()
+    # mesh.PlotMeshNumbering()
 
     # un_faces = np.unique(mesh.faces)
     # vpoints = mesh.points[un_faces,:]
@@ -115,6 +109,17 @@ def PreProcess(MainData,Pr,pwd):
     # mesh.WriteVTK(fname="/home/roman/Dropbox/dd2.vtu")
     # print mesh.faces
     # print mesh.points
+    # exit()
+
+    # print mesh.points.shape[0], mesh.elements.shape[0]
+    # from time import time
+    # tt = time()
+    # # mesh.GetEdgesTri()
+    # mesh.GetFacesTet()
+    # print time() - tt
+    # # print mesh.all_edges
+    # # print mesh.all_edges.shape
+    # print mesh.all_faces.shape
     # exit()
 
     # STORE PATHS FOR MAIN, CORE & PROBLEM DIRECTORIES
@@ -201,7 +206,7 @@ def PreProcess(MainData,Pr,pwd):
     # print itemfreq_py(MainData.BoundaryData().ProjectionCriteria(mesh))
     # print type(mesh.element_type)
     # print mesh.elements.flags
-    # exit()
+
 
 
 
@@ -393,6 +398,9 @@ def PreProcess(MainData,Pr,pwd):
 
     # solve.type = "multigrid"
     # solve.sub_type = "amg"
+    
+    # solve.type = "direct"
+    # solve.sub_type = "MUMPS"
 
     MainData.solve = solve 
             
