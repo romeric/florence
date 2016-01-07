@@ -16,6 +16,8 @@ from HigherOrderMeshing import *
 from warnings import warn
 from copy import deepcopy
 
+# from Core.Supplementary.Tensors.remove_duplicates import remove_duplicates
+from Core.Supplementary.CythonBuilds.remove_duplicates.remove_duplicates import remove_duplicates
 
 """
 Mesh class providing most of the pre-processing functionalities of the Core module
@@ -106,33 +108,38 @@ class Mesh(object):
         edges[self.elements.shape[0]:2*self.elements.shape[0],:] = self.elements[:,node_arranger[1,:]]
         edges[2*self.elements.shape[0]:,:] = self.elements[:,node_arranger[2,:]]
 
-        # FIND AND REMOVE DUPLICATES
-        sorted_edges =  np.sort(edges,axis=1)
-        x=[]
-        for i in range(edges.shape[0]):
-            current_sorted_face = np.tile(sorted_edges[i,:],sorted_edges.shape[0]).reshape(sorted_edges.shape[0],sorted_edges.shape[1])
-            duplicated_faces = np.linalg.norm(sorted_edges - current_sorted_face,axis=1)
-            pos_of_duplicated_faces = np.where(duplicated_faces==0)[0]
-            if pos_of_duplicated_faces.shape[0]>1:
-                x.append(pos_of_duplicated_faces[1:])
+        # REMOVE DUPLICATES
+        edges = remove_duplicates(edges)
 
-        all_faces_arranger = np.arange(sorted_edges.shape[0])
+        #============================================
+        # FIND AND REMOVE DUPLICATES
+        # sorted_edges =  np.sort(edges,axis=1)
+        # x=[]
+        # for i in range(edges.shape[0]):
+        #     current_sorted_face = np.tile(sorted_edges[i,:],sorted_edges.shape[0]).reshape(sorted_edges.shape[0],sorted_edges.shape[1])
+        #     duplicated_faces = np.linalg.norm(sorted_edges - current_sorted_face,axis=1)
+        #     pos_of_duplicated_faces = np.where(duplicated_faces==0)[0]
+        #     if pos_of_duplicated_faces.shape[0]>1:
+        #         x.append(pos_of_duplicated_faces[1:])
+
+        # all_faces_arranger = np.arange(sorted_edges.shape[0])
         
 
-        # THIS IS FOR FINDING TETRAHEDRAL EDGES - SINCE GetEdgesTet CALLS GetEdgesTri AND IN
-        # A TETRAHEDRAL MESH THERE CAN BE INFINITE ELEMENTS SHARING AN EDGE
-        if np.array(x).dtype == 'object':
-            y = np.array([])
-            for i in range(np.array(x).shape[0]):
-                y = np.append(y,np.array(x)[i])
-            y = y.astype(np.int64)
-        else:
-            y = np.array(x)[:,0]
+        # # THIS IS FOR FINDING TETRAHEDRAL EDGES - SINCE GetEdgesTet CALLS GetEdgesTri AND IN
+        # # A TETRAHEDRAL MESH THERE CAN BE INFINITE ELEMENTS SHARING AN EDGE
+        # if np.array(x).dtype == 'object':
+        #     y = np.array([])
+        #     for i in range(np.array(x).shape[0]):
+        #         y = np.append(y,np.array(x)[i])
+        #     y = y.astype(np.int64)
+        # else:
+        #     y = np.array(x)[:,0]
 
 
-        all_faces_arranger = np.setdiff1d(all_faces_arranger,y)
-        edges = edges[all_faces_arranger,:]
-        # print sorted_edges[all_faces_arranger,:]
+        # all_faces_arranger = np.setdiff1d(all_faces_arranger,y)
+        # edges = edges[all_faces_arranger,:]
+        # # print sorted_edges[all_faces_arranger,:]
+        #============================================
 
 
         # DO NOT SET all_edges IF THE CALLER FUNCTION IS GetBoundaryEdgesTet
@@ -264,21 +271,25 @@ class Mesh(object):
         faces[2*self.elements.shape[0]:3*self.elements.shape[0],:] = self.elements[:,node_arranger[2,:]]
         faces[3*self.elements.shape[0]:,:] = self.elements[:,node_arranger[3,:]]
 
-        # REMOVE DUPLICATES
-        sorted_faces =  np.sort(faces,axis=1)
+        faces = remove_duplicates(faces)
+        
+        #==================================
+        # # REMOVE DUPLICATES
+        # sorted_faces =  np.sort(faces,axis=1)
 
-        x=[]
-        for i in range(faces.shape[0]):
-            current_sorted_face = np.tile(sorted_faces[i,:],sorted_faces.shape[0]).reshape(sorted_faces.shape[0],sorted_faces.shape[1])
-            duplicated_faces = np.linalg.norm(sorted_faces - current_sorted_face,axis=1)
-            pos_of_duplicated_faces = np.where(duplicated_faces==0)[0]
-            if pos_of_duplicated_faces.shape[0]>1:
-                x.append(pos_of_duplicated_faces[1:])
+        # x=[]
+        # for i in range(faces.shape[0]):
+        #     current_sorted_face = np.tile(sorted_faces[i,:],sorted_faces.shape[0]).reshape(sorted_faces.shape[0],sorted_faces.shape[1])
+        #     duplicated_faces = np.linalg.norm(sorted_faces - current_sorted_face,axis=1)
+        #     pos_of_duplicated_faces = np.where(duplicated_faces==0)[0]
+        #     if pos_of_duplicated_faces.shape[0]>1:
+        #         x.append(pos_of_duplicated_faces[1:])
 
-        all_faces_arranger = np.arange(sorted_faces.shape[0])
-        all_faces_arranger = np.setdiff1d(all_faces_arranger,np.array(x)[:,0])
-        faces = faces[all_faces_arranger,:]
-        # print  sorted_faces[all_faces_arranger,:]
+        # all_faces_arranger = np.arange(sorted_faces.shape[0])
+        # all_faces_arranger = np.setdiff1d(all_faces_arranger,np.array(x)[:,0])
+        # faces = faces[all_faces_arranger,:]
+        # # # print  sorted_faces[all_faces_arranger,:]
+        #==================================
 
         self.all_faces = faces
         return faces
@@ -781,7 +792,8 @@ class Mesh(object):
         """
 
         if isinstance(self.face_to_element,np.ndarray):
-            return self.face_to_element
+            if self.face_to_element.shape[0] > 1:
+                return self.face_to_element
 
         assert self.elements is not None
         # assert self.elements.shape[1] == 4 
@@ -1022,6 +1034,9 @@ class Mesh(object):
         self.all_faces = np.ascontiguousarray(DictOutput['all_faces'])
         self.all_edges = np.ascontiguousarray(DictOutput['all_edges'])
 
+        self.face_to_element = np.ascontiguousarray(DictOutput['face_to_element'])
+        # self.edge_to_element = np.ascontiguousarray(DictOutput['edge_to_element'])
+
         self.boundary_face_to_element = np.ascontiguousarray(DictOutput['boundary_face_to_element'])
         # self.boundary_edge_to_element = np.ascontiguousarray(DictOutput['boundary_edge_to_element'])
 
@@ -1082,27 +1097,54 @@ class Mesh(object):
 
 
 
-    def PlotMeshNumberingTri(self):
+    def PlotMeshNumbering(self):
         """Plots element and node numbers on top of the triangular mesh"""
 
         import matplotlib.pyplot as plt
 
-        fig = plt.figure()
-        plt.triplot(self.points[:,0],self.points[:,1], self.elements[:,:3])
-        plt.tricontourf(self.points[:,0], self.points[:,1], self.elements[:,:3], np.ones(self.points.shape[0]), 100,alpha=0.3)
+        if self.element_type == "tri":
 
-        for i in range(0,self.elements.shape[0]):
-            coord = self.points[self.elements[i,:],:]
-            x_avg = np.sum(coord[:,0])/self.elements.shape[1]
-            y_avg = np.sum(coord[:,1])/self.elements.shape[1]
-            plt.text(x_avg,y_avg,str(i),backgroundcolor='#F88379',ha='center')
+            fig = plt.figure()
+            plt.triplot(self.points[:,0],self.points[:,1], self.elements[:,:3])
+            plt.tricontourf(self.points[:,0], self.points[:,1], self.elements[:,:3], np.ones(self.points.shape[0]), 100,alpha=0.3)
 
-        for i in range(0,self.points.shape[0]):
-            plt.text(self.points[i,0],self.points[i,1],str(i),backgroundcolor='#0087BD',ha='center')
+            for i in range(0,self.elements.shape[0]):
+                coord = self.points[self.elements[i,:],:]
+                x_avg = np.sum(coord[:,0])/self.elements.shape[1]
+                y_avg = np.sum(coord[:,1])/self.elements.shape[1]
+                plt.text(x_avg,y_avg,str(i),backgroundcolor='#F88379',ha='center')
 
-        plt.axis('equal')
-        # plt.show(block=False)
-        plt.show()
+            for i in range(0,self.points.shape[0]):
+                plt.text(self.points[i,0],self.points[i,1],str(i),backgroundcolor='#0087BD',ha='center')
+
+            plt.axis('equal')
+            # plt.show(block=False)
+            plt.show()
+
+        elif self.element_type == "tet":
+
+            assert self.faces.shape[1] == 3
+
+            import matplotlib as mpl
+            import os
+            os.environ['ETS_TOOLKIT'] = 'qt4'
+            from mayavi import mlab
+
+            mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(800,600))
+
+            color = mpl.colors.hex2color('#F88379')
+            linewidth = 100.2
+            trimesh_h = mlab.triangular_mesh(self.points[:,0], 
+                self.points[:,1], self.points[:,2], self.faces,
+                line_width=linewidth,tube_radius=linewidth,color=(0,0.6,0.4),
+                representation='surface')
+
+            # CHANGE LIGHTING OPTION
+            trimesh_h.actor.property.interpolation = 'phong'
+            trimesh_h.actor.property.specular = 0.1
+            trimesh_h.actor.property.specular_power = 5
+
+            mlab.show()
 
 
 

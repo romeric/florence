@@ -19,42 +19,52 @@ def GetDirichletBoundaryConditions(mesh,MainData):
 
         tCAD = time()
 
-        # GET DIRICHLET BOUNDARY CONDITIONS BASED ON THE EXACT GEOMETRY FROM CAD
-        if MainData.BoundaryData.RequiresCAD:
-            # CALL POSTMESH WRAPPER
-            nodesDBC, Dirichlet = PostMeshWrapper(MainData,mesh)
+        IsHighOrder = getattr(MainData.MeshInfo,"IsHighOrder",None)
+        if IsHighOrder is None:
+            IsHighOrder = False
+            
+        # IsHighOrder = False
+
+        if IsHighOrder is False:
+
+            # GET DIRICHLET BOUNDARY CONDITIONS BASED ON THE EXACT GEOMETRY FROM CAD
+            if MainData.BoundaryData.RequiresCAD:
+                # CALL POSTMESH WRAPPER
+                nodesDBC, Dirichlet = PostMeshWrapper(MainData,mesh)
+            else:
+                # CALL IGAKIT WRAPPER
+                nodesDBC, Dirichlet = IGAKitWrapper(MainData,mesh)
+        
+
+            nOfDBCnodes = nodesDBC.shape[0]
+            for inode in range(nOfDBCnodes):
+                for i in range(nvar):
+                    ColumnsOut = np.append(ColumnsOut,nvar*nodesDBC[inode]+i)
+                    AppliedDirichlet = np.append(AppliedDirichlet,Dirichlet[inode,i])
+
+            # FIX THE DOF IN THE REST OF THE BOUNDARY - INCORRECT/ FIX IT
+            if ndim==2:
+                Rest_DOFs = np.setdiff1d(np.unique(mesh.edges),nodesDBC)
+            elif ndim==3:
+                Rest_DOFs = np.setdiff1d(np.unique(mesh.faces),nodesDBC)
+            for inode in range(Rest_DOFs.shape[0]):
+              for i in range(nvar):
+                  ColumnsOut = np.append(ColumnsOut,nvar*Rest_DOFs[inode]+i)
+                  AppliedDirichlet = np.append(AppliedDirichlet,0.0)
+
+            print 'Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds'
+
+            # # end = -3
+            # # np.savetxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_Dirichlet_"+"P"+str(MainData.C+1)+".dat",AppliedDirichlet,fmt="%9.16f")
+            # # np.savetxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_ColumnsOut_"+"P"+str(MainData.C+1)+".dat",ColumnsOut)
+
         else:
-            # CALL IGAKIT WRAPPER
-            nodesDBC, Dirichlet = IGAKitWrapper(MainData,mesh)
+            
+            end = -3
+            AppliedDirichlet = np.loadtxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_Dirichlet_"+"P"+str(MainData.C+1)+".dat",dtype=np.float64)
+            ColumnsOut = np.loadtxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_ColumnsOut_"+"P"+str(MainData.C+1)+".dat")
 
-        print 'Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds'
-    
-
-        nOfDBCnodes = nodesDBC.shape[0]
-        for inode in range(nOfDBCnodes):
-            for i in range(nvar):
-                ColumnsOut = np.append(ColumnsOut,nvar*nodesDBC[inode]+i)
-                AppliedDirichlet = np.append(AppliedDirichlet,Dirichlet[inode,i])
-
-        # FIX THE DOF IN THE REST OF THE BOUNDARY - INCORRECT/ FIX IT
-        if ndim==2:
-            Rest_DOFs = np.setdiff1d(np.unique(mesh.edges),nodesDBC)
-        elif ndim==3:
-            Rest_DOFs = np.setdiff1d(np.unique(mesh.faces),nodesDBC)
-        for inode in range(Rest_DOFs.shape[0]):
-          for i in range(nvar):
-              ColumnsOut = np.append(ColumnsOut,nvar*Rest_DOFs[inode]+i)
-              AppliedDirichlet = np.append(AppliedDirichlet,0.0)
-
-        # # end = -3
-        # # np.savetxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_Dirichlet_"+"P"+str(MainData.C+1)+".dat",AppliedDirichlet,fmt="%9.16f")
-        # # np.savetxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_ColumnsOut_"+"P"+str(MainData.C+1)+".dat",ColumnsOut)
-
-        # end = -3
-        # AppliedDirichlet = np.loadtxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_Dirichlet_"+"P"+str(MainData.C+1)+".dat",dtype=np.float64)
-        # ColumnsOut = np.loadtxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_ColumnsOut_"+"P"+str(MainData.C+1)+".dat")
-
-        # print 'Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds'
+            print 'Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds'
 
 
 
