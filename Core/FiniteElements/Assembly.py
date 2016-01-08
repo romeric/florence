@@ -154,7 +154,7 @@ def AssemblySmall(MainData,mesh,Eulerx,TotalPot):
 	if MainData.Parallel:
 		# COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
 		ParallelTuple = parmap.map(GetElementalMatricesSmall,np.arange(0,nelem),MainData,mesh.elements,mesh.points,Eulerx,TotalPot,
-			pool=MP.Pool(processes=MainData.numCPU))
+			pool=MP.Pool(processes=MainData.numCPU,maxtasksperchild=500)) # maxtasksperchild=300),chunksize=100
 
 	for elem in range(nelem):
 

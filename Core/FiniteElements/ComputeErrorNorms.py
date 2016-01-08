@@ -163,7 +163,8 @@ def CheapNorm(MainData,mesh,TotalDisp):
     # func = lambda x,y : np.sin(x)*np.cos(y)
     # func = lambda x,y : x*np.sin(y)+y*np.cos(x)
     # func = lambda x,y : x**3+(y+1)**3
-    func = lambda x,y : (x+y)**11
+    # func = lambda x,y : (x+y)**11 ##
+    func = lambda x,y : (x+y)**7 ##
     # func = lambda x,y : x**3*(y+1)**5
 
     nodeperelem = mesh.elements.shape[1]

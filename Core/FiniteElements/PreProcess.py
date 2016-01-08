@@ -56,8 +56,8 @@ def PreProcess(MainData,Pr,pwd):
             mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=False,nrad=7,ncirc=7)
         elif MainData.MeshInfo.Reader is 'Sphere':
             # mesh.Sphere()
-            # mesh.Sphere(points=10)
-            mesh.Sphere(points=2)
+            mesh.Sphere(points=20)
+            # mesh.Sphere(points=2)
             # mesh.SimplePlot()
 
     if MainData.__NO_DEBUG__ is False:
@@ -120,6 +120,10 @@ def PreProcess(MainData,Pr,pwd):
     # # print mesh.all_edges
     # # print mesh.all_edges.shape
     # print mesh.all_faces.shape
+    # print mesh.nelem
+    # print np.max(mesh.points[:,0]), np.max(mesh.points[:,1]), np.max(mesh.points[:,2])
+    # print np.min(mesh.points[:,0]), np.min(mesh.points[:,1]), np.min(mesh.points[:,2])
+    # print MainData.MeshInfo.FileName.split(".")[0]+"_P"+str(MainData.C+1)+".mat"
     # exit()
 
     # STORE PATHS FOR MAIN, CORE & PROBLEM DIRECTORIES
@@ -151,7 +155,7 @@ def PreProcess(MainData,Pr,pwd):
     # ##############################################################################
     # np.savetxt('/home/roman/Dropbox/time_3.dat',np.array([time()-t_mesh, mesh.points.shape[0]]))
 
-    # mesh.PlotMeshNumberingTri()
+    # mesh.PlotMeshNumbering()
 
     # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_elements_"+"P"+str(MainData.C+1)+".dat",mesh.elements,delimiter=',')
     # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_points_"+"P"+str(MainData.C+1)+".dat",mesh.points,fmt="%9.16f",delimiter=',')
@@ -172,6 +176,7 @@ def PreProcess(MainData,Pr,pwd):
     #     'face_flags':face_flags,'face_to_element':mesh.face_to_element,
     #     'boundary_face_to_element':boundary_face_to_element}
     # savemat(MainData.MeshInfo.FileName.split(".")[0]+"_P"+str(MainData.C+1)+".mat",Dict)
+    # print MainData.MeshInfo.FileName.split(".")[0]+"_P"+str(MainData.C+1)+".mat"
     # exit()
 
 
@@ -396,8 +401,8 @@ def PreProcess(MainData,Pr,pwd):
         solve.type = "direct"
         solve.sub_type = "UMFPACK"
 
-    # solve.type = "multigrid"
-    # solve.sub_type = "amg"
+    solve.type = "multigrid"
+    solve.sub_type = "amg"
     
     # solve.type = "direct"
     # solve.sub_type = "MUMPS"

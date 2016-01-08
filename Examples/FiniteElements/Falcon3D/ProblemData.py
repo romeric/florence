@@ -43,7 +43,11 @@ def ProblemData(MainData):
     MainData.MeshInfo.Reader = "ReadHDF5"
 
     # MainData.MeshInfo.FileName = ProblemPath + '/falcon_iso.dat'
-    MainData.MeshInfo.FileName = ProblemPath + '/Falcon3DIso.mat'
+    # MainData.MeshInfo.FileName = ProblemPath + '/Falcon3DIso.mat'
+
+    MainData.MeshInfo.FileName = ProblemPath + '/Falcon3DIso_P'+str(MainData.C+1)+'.mat'
+
+    MainData.MeshInfo.IsHighOrder = True
         
 
 
@@ -53,7 +57,7 @@ def ProblemData(MainData):
         RequiresCAD = True
         ProjectionType = 'orthogonal'
 
-        scale = 1000.
+        scale = 25.4
         condition = 2000. # this condition it not used
 
         IGES_File = ProblemPath + '/falcon.igs'
@@ -70,8 +74,8 @@ def ProblemData(MainData):
                 y *= self.scale
                 z *= self.scale 
                 # if np.sqrt(x*x+y*y+z*z)< self.condition:
-                if x > -2.5*self.scale and x < 2.5*self.scale and y > -2.*self.scale \
-                    and y < 2.*self.scale and z > -2.*self.scale and z < 2.*self.scale:   
+                if x > -20*self.scale and x < 40*self.scale and y > -30.*self.scale \
+                    and y < 30.*self.scale and z > -20.*self.scale and z < 20.*self.scale:   
                     projection_faces[iface]=1
             
             return projection_faces

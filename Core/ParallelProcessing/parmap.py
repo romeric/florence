@@ -121,7 +121,8 @@ def map(function, iterable, *args, **kwargs):
         except AssertionError:  # Disable parallel on error:
             print("W: Could not create multiprocessing.Pool.",
                   "Parallel disabled")
-            parallel = False
+            parallel = False   
+
     # Map:
     if parallel:
         output = pool.map(_func_star_single,

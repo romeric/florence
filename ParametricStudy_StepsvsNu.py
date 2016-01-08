@@ -680,6 +680,118 @@ def plotter_quality_measures(p=2,save=False):
             plt.close()
 
 
+def plotter_quality_measures_3D(p=2,save=False):
+
+    formulations = ["Linear","Linearised","Nonlinear"]
+    fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Almond3D/'
+    # fname = "Almond3D_P_vs_Nu_IncrementalLinearElastic_orthogonal.mat"
+    spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Almond3D/Almond3D_Quality_Measures_"
+    
+    # print fpath+fname
+    DictOutput =  loadmat(fpath+"Almond3D_P_vs_Nu_IncrementalLinearElastic_orthogonal.mat")   
+    scaledA_0 = DictOutput['ScaledJacobian']
+    scaledAFF_0 = DictOutput['ScaledFF']
+    scaledAHH_0 = DictOutput['ScaledHH']
+
+    DictOutput =  loadmat(fpath+"Almond3D_P_vs_Nu_IncrementallyLinearisedNeoHookean_2_orthogonal.mat")
+    scaledA_1 = DictOutput['ScaledJacobian']
+    scaledAFF_1 = DictOutput['ScaledFF']
+    scaledAHH_1 = DictOutput['ScaledHH']
+
+    scaledA_1[3,8] = 0.5*(scaledA_1[3,7]+scaledA_1[3,9])
+    scaledAFF_1[3,8] = 0.5*(scaledAFF_1[3,7]+scaledAFF_1[3,9])
+    scaledAHH_1[3,8] = 0.5*(scaledAHH_1[3,7]+scaledAHH_1[3,9]) 
+
+    DictOutput =  loadmat(fpath+"Almond3D_P_vs_Nu_NeoHookean_2_orthogonal.mat")
+    scaledA_2 = DictOutput['ScaledJacobian']
+    scaledAFF_2 = DictOutput['ScaledFF']
+    scaledAHH_2 = DictOutput['ScaledHH']
+    scaledA_2 = np.concatenate((scaledA_2,np.zeros((2,6))+np.NAN),axis=0)
+    scaledAFF_2 = np.concatenate((scaledAFF_2,np.zeros((2,6))+np.NAN),axis=0)
+    scaledAHH_2 = np.concatenate((scaledAHH_2,np.zeros((2,6))+np.NAN),axis=0)
+
+
+    def interp(scaledA,xp,ninterp):
+        cols = scaledA.shape[1]*ninterp
+        new_scaledA = np.zeros((scaledA.shape[0],cols))
+        for i in range(scaledA.shape[0]):
+            yp = scaledA[i,:]
+            new_scaledA[i,:] = np.interp(np.linspace(0.001,0.5,cols),xp,yp)
+        
+        return new_scaledA
+
+    ninterp_x = 2
+    scaledA_0 = interp(scaledA_0,np.linspace(0.001,0.5,6),10/6.*ninterp_x)
+    scaledA_1 = interp(scaledA_1,np.linspace(0.001,0.5,10),1*ninterp_x)
+    scaledA_2 = interp(scaledA_2,np.linspace(0.001,0.5,6),10/6.*ninterp_x)
+
+    scaledAFF_0 = interp(scaledAFF_0,np.linspace(0.001,0.5,6),10/6.*ninterp_x)
+    scaledAFF_1 = interp(scaledAFF_1,np.linspace(0.001,0.5,10),1*ninterp_x)
+    scaledAFF_2 = interp(scaledAFF_2,np.linspace(0.001,0.5,6),10/6.*ninterp_x)
+
+    scaledAHH_0 = interp(scaledAHH_0,np.linspace(0.001,0.5,6),10/6.*ninterp_x)
+    scaledAHH_1 = interp(scaledAHH_1,np.linspace(0.001,0.5,10),1*ninterp_x)
+    scaledAHH_2 = interp(scaledAHH_2,np.linspace(0.001,0.5,6),10/6.*ninterp_x)
+    # exit()
+
+    def get_scaled(*args):
+        scaledA = np.zeros((3,args[0].shape[0],args[0].shape[1]))
+        for i in range(3):
+            # print args[i]
+            scaledA[i,:,:] = args[i]
+        return scaledA
+
+    scaledA = get_scaled(scaledA_0,scaledA_1,scaledA_2)
+    scaledAFF = get_scaled(scaledAFF_0,scaledAFF_1,scaledAFF_2)
+    scaledAHH = get_scaled(scaledAHH_0,scaledAHH_1,scaledAHH_2)
+
+    nu = np.linspace(0.001,0.5,scaledA.shape[-1])*100
+
+
+    colors = ['#D1655B','#FACD85','#72B0D7','#E79C5D','#4D5C75','#E79C5D']
+
+
+    marker = itertools.cycle(('o', 's', 'x'))
+    linestyle = itertools.cycle(('-', '--', '-.'))
+
+    font_size = 24
+    legend_font_size = 22
+
+    for mm in range(3):
+        plt.plot(nu/100.,scaledAFF[mm,p-2,:],marker.next(),linestyle=linestyle.next(),color=colors[0],linewidth=3)
+        plt.plot(nu/100.,scaledAHH[mm,p-2,:],marker.next(),linestyle=linestyle.next(),color=colors[1],linewidth=3)
+        plt.plot(nu/100.,scaledA[mm,p-2,:],marker.next(),linestyle=linestyle.next(),color=colors[2],linewidth=3)
+
+        # scaledAFF[mm,0,0,:]/3./scaledA[mm,0,0,:]
+        # print scaledAFF[mm,0,0,:]**2/3./2**(3./2)
+
+        plt.legend([r"$Q_1$",r"$Q_2$",r"$Q_3$"],loc="best",fontsize=legend_font_size)
+        plt.xlabel(r"$Poisson's\;Ratio\;(\nu)$",fontsize=font_size)
+        plt.ylabel(r"$Quality\;Measures$",fontsize=font_size)
+        plt.grid('on')
+        plt.xlim([0,0.5])
+        plt.ylim([0.,1.0])
+
+        if mm==0:
+            appender = "IILinearElastic"
+        elif mm==1:
+            appender = "ILneoHookean"
+        elif mm==2:
+            appender = "neoHookean"
+
+        spath = spath+appender+"_P"+str(p)+".eps"
+        print spath
+
+        fig = plt.gcf()
+        fig.set_size_inches(7,7)
+        # plt.axis('equal')
+
+        if save:
+            plt.savefig(spath,format="eps",dpi=300)
+
+        spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Almond3D/Almond3D_Quality_Measures_"
+        plt.show()
+        plt.close()
 
 
 if __name__ == '__main__':
@@ -711,8 +823,8 @@ if __name__ == '__main__':
 
 
 
-        p=4
-        plotter_individual_imshow(p)
+        p=5
+        # plotter_individual_imshow(p)
         # plotter_individual_imshow(p,which_q=1,save=True)
 
 
@@ -723,3 +835,6 @@ if __name__ == '__main__':
 
         # plotter_quality_measures(p)
         # plotter_quality_measures(p,save=True)
+
+        # plotter_quality_measures_3D(p)
+        plotter_quality_measures_3D(p,save=True)

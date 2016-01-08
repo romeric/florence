@@ -107,6 +107,7 @@ def PostMeshWrapper(MainData,mesh):
         curvilinear_mesh.ReadIGES(MainData.BoundaryData.IGES_File)
         # EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
         geometry_points = curvilinear_mesh.GetGeomVertices()
+        # print np.max(geometry_points[:,0]), np.max(mesh.points[:,0])
         # curvilinear_mesh.GetGeomEdges()
         curvilinear_mesh.GetGeomFaces()
         curvilinear_mesh.GetGeomPointsOnCorrespondingFaces()

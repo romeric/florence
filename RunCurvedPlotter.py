@@ -5,22 +5,44 @@ from scipy.io import savemat, loadmat
 from Core import Mesh
 from Core.FiniteElements.PostProcess import *
 
+#  
+def ProjectionCriteria(mesh):
+    scale = 1.
+    projection_faces = np.zeros((mesh.faces.shape[0],1),dtype=np.uint64)
+    num = mesh.faces.shape[1]
+    for iface in range(mesh.faces.shape[0]):
+        x = np.sum(mesh.points[mesh.faces[iface,:],0])/num
+        y = np.sum(mesh.points[mesh.faces[iface,:],1])/num
+        z = np.sum(mesh.points[mesh.faces[iface,:],2])/num
+        x *= scale
+        y *= scale
+        z *= scale 
+        if x > -20*scale and x < 40*scale and y > -30.*scale \
+            and y < 30.*scale and z > -20.*scale and z < 20.*scale:   
+            projection_faces[iface]=1
+    
+    return projection_faces
+
 def RunCurvedPlotter(filename):
     DictOutput = loadmat(filename)
 
     mesh = Mesh()
     mesh.elements = DictOutput['elements']
+    mesh.nelem = mesh.elements.shape[0]
     mesh.element_type = DictOutput['element_type']
     mesh.points = DictOutput['points']
     mesh.faces = DictOutput['faces']
     TotalDisp = DictOutput['TotalDisp']
+    # TotalDisp = np.zeros_like(mesh.points)[:,:,None]
     C = DictOutput['C']
-    ScaledJacobian = DictOutput['ScaledJacobian']
+    # C=1
+    # ScaledJacobian = DictOutput['ScaledJacobian']
+    ScaledJacobian = np.ones(mesh.nelem)
     ProjFlags = DictOutput['ProjFlags']
-    mesh.nelem = mesh.elements.shape[0]
+    # ProjFlags = ProjectionCriteria(mesh)
 
     PostProcess.HighOrderCurvedPatchPlot(mesh,TotalDisp,QuantityToPlot=ScaledJacobian.flatten(),
-            ProjectionFlags=ProjFlags,InterpolationDegree=40)
+            ProjectionFlags=ProjFlags,InterpolationDegree=1)
 
 
 if __name__ == '__main__':
@@ -28,10 +50,13 @@ if __name__ == '__main__':
     directory = "/home/roman/Dropbox/"
     # filename = directory+"Almond3D_P2.mat"
     # filename = directory+"Almond3D_P3.mat"
-    filename = directory+"Almond3D_P4.mat"
+    # filename = directory+"Almond3D_P4.mat"
     # filename = directory+"Almond3D_H2_P4.mat"
     # filename = directory+"Sphere.mat"
+    filename = directory+"Falcon3DIso_P2.mat"
 
+    # filename = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Falcon3D/Falcon3DIso_P2.mat"
+    # filename = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Falcon3D/Falcon3DIso.mat"
     RunCurvedPlotter(filename)
 
     exit()
@@ -93,7 +118,7 @@ if __name__ == '__main__':
 
     # mesh.PlotMeshNumbering()
     PostProcess.HighOrderCurvedPatchPlot(mesh,TotalDisp[:,:,None],QuantityToPlot=ScaledJacobian.flatten(),
-            ProjectionFlags=ProjFlags,InterpolationDegree=100)
+            ProjectionFlags=ProjFlags,InterpolationDegree=50)
 
 
 

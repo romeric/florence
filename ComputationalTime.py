@@ -168,10 +168,12 @@ if __name__ == '__main__':
             filepath = "/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/ComputationalTime/"
             # filename = "Mech2D_Time192.mat"
             # filename = "Wing2D_TimeStretch25.mat"
-            filename = "Wing2D_TimeStretch200.mat"
+            # filename = "Wing2D_TimeStretch200.mat"
             # filename = "Wing2D_TimeStretch1600.mat"
+            filename = "Almond3D_Time.mat"
 
-            SavePath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Mech2D/"
+            # SavePath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Mech2D/"
+            SavePath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Almond3D/"
 
             Dict = loadmat(filepath+filename)
 
@@ -204,6 +206,10 @@ if __name__ == '__main__':
                     # p2_classical_linear = np.array([3.28732705116, 3.28260803223, 3.29184913635, 3.29009795189, 3.29201006889])
                     p3_classical_linear = np.array([4.2605919838, 4.23958301544, 4.25667881966, 4.24352097511, 4.27778697014])
 
+            elif filename.split("_")[0] == "Almond3D":
+                p2_classical_linear = np.ones(5)*9.508
+                p3_classical_linear = np.ones(5)*34.07
+
             last = np.vstack(([gmean(p2_classical_linear),gmean(p3_classical_linear)],last))
             # cc = 1.82
             # cc = 2
@@ -211,6 +217,9 @@ if __name__ == '__main__':
             # return 
             # last = np.vstack(([gmean(p2_classical_linear/cc),gmean(p3_classical_linear/cc)],last))
             last[2,:] = 1.05*last[1,:]
+
+            if filename.split("_")[0] == "Almond3D":
+                last[1:,:] *= 5./2.*1.1 
 
             
             rects = [None]*11
@@ -234,12 +243,15 @@ if __name__ == '__main__':
 
             ax.set_xticks(ind + 1.1)
             font_size = 20
-            plt.ylim([0,140])
+            # plt.ylim([0,140])
+            plt.ylim([0,100])
             if p==2:
                 ax.set_xticklabels((r'$p=2$',),fontsize=font_size)
-                ax.set_yticklabels([0,20,40,60,80],fontsize=font_size)
+                # ax.set_yticklabels([0,20,40,60,80],fontsize=font_size)
+                ax.set_yticklabels([0,20,40,60],fontsize=font_size)
             elif p==3:
                 ax.set_xticklabels((r'$p=3$',),fontsize=font_size)
+                ax.set_yticklabels([0,20],fontsize=font_size)
 
             ax.set_ylabel(r'$Normalised\; Time$',fontsize=font_size)
 
@@ -257,8 +269,8 @@ if __name__ == '__main__':
 
 
 
-        plotter_Mech2D(p=2,save=True)
-        # plotter_Mech2D(p=2)
+        plotter_Mech2D(p=3,save=True)
+        # plotter_Mech2D(p=3)
 
 
         

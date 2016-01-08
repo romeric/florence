@@ -208,9 +208,6 @@ if __name__ == '__main__':
                 scaledA = np.concatenate((scaledA,np.zeros((2,6))+np.NAN),axis=0)
                 xmax = 6
 
-            # print scaledA  
-            # print scaledA.shape
-
             # imshow is a direct matrix-to-pixel transformation
             # so flip the matrix upside down
             scaledA = scaledA[::-1,:]
@@ -220,7 +217,7 @@ if __name__ == '__main__':
             # Manual interpolation
             from scipy.interpolate import interp1d
             cols = 20
-            new_scaledA = np.zeros((p.shape[0]*cols,scaledA.shape[1]))+np.NAN
+            new_scaledA = np.zeros(((xmax-1)*cols,scaledA.shape[1]))+np.NAN
             for i in range(scaledA.shape[1]):
                 if which_formulation==2:
                     upto = np.min(np.where(np.isnan(np.sort(scaledA[:,i])))[0])
@@ -234,14 +231,32 @@ if __name__ == '__main__':
                     func = interp1d(to_interpolate_x,to_interpolate_y,kind='linear')
                     x_interp_data = np.linspace(2,to_interpolate_x[-1],cols*(to_interpolate_x.shape[0]))
                     y_interp_data = func(x_interp_data)
+                    # print cols*(to_interpolate_x[0]-2),cols*(to_interpolate_x[-1]-1)
                     new_scaledA[cols*(to_interpolate_x[0]-2):cols*(to_interpolate_x[-1]-1),i] = y_interp_data[::-1]
             scaledA = new_scaledA[::-1,:]
+
+            if ProblemName == "Almond3D":
+                ninterp = 50
+                if which_formulation != 1:
+                    xp = np.linspace(0.001,0.5,6)
+                else:
+                    xp = np.linspace(0.001,0.5,10)
+                cols = scaledA.shape[1]*ninterp
+                new_scaledA = np.zeros((scaledA.shape[0],cols))
+                for i in range(scaledA.shape[0]):
+                    yp = scaledA[i,:]
+                    new_scaledA[i,:] = np.interp(np.linspace(0.001,0.5,cols),xp,yp)
+                scaledA = new_scaledA
+
             #-----------------------------------
 
             font_size = 22
-            # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bicubic', cmap=cm.viridis)
-            # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bilinear', cmap=cm.viridis)
-            plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='nearest', cmap=cm.viridis)
+            if ProblemName == "Almond3D" and which_formulation >22:
+                plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bicubic', cmap=cm.viridis)
+                # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bilinear', cmap=cm.viridis)
+            else:
+                # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bilinear', cmap=cm.viridis)
+                plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='nearest', cmap=cm.viridis)
 
             tick_locs = [2,2.8,3.6,4.4,5.2]
             tick_lbls = [2, 3, 4, 5, 6]
@@ -276,10 +291,9 @@ if __name__ == '__main__':
 
             plt.show()
 
-            print SavePath+ResultsFile+'.png'
 
-        # plotter(2,1)
-        plotter(which_formulation=0,projection_type=0, save=False) 
+        plotter(2,1)
+        # plotter(which_formulation=0,projection_type=1, save=True) 
         # Alomnd3D
         # plotter(which_formulation=2,projection_type=1, which_quality=1, save=True) 
 

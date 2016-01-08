@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
 
 
-    Run = 1
+    Run = 0
     if Run:
         t_FEM = time.time()
         # nu = np.linspace(0.001,0.495,100)
@@ -225,6 +225,17 @@ if __name__ == '__main__':
                 # print np.std(scaledA[0,5,:nn],dtype=np.float64)
                 # print np.min(scaledA[0,3,:nn]), np.max(scaledA[0,3,:nn])
                 # print scaledA[0,3,:]
+
+                if degree > 4:
+                    new_scaledA = np.zeros((scaledA.shape[0],scaledA.shape[1],nu.shape[0]))
+                    new_condA = np.zeros((scaledA.shape[0],scaledA.shape[1],nu.shape[0]))
+                    for i in range(2):
+                        for j in range(6):
+                            new_scaledA[i,j,:] = np.interp(nu,np.linspace(0.001,0.5,scaledA[i,j,:].shape[0]), scaledA[i,j,:])
+                            new_condA[i,j,:] = np.interp(nu,np.linspace(0.001,0.5,scaledA[i,j,:].shape[0]), condA[i,j,:])
+                    scaledA = new_scaledA
+                    condA = new_condA
+
 
                 if which_func == 1:
                     func = scaledA
@@ -406,9 +417,10 @@ if __name__ == '__main__':
 
             fig, ax = plt.subplots()
 
-            rects = [None]*(3*6)
+            # rects = [None]*(3*6)
+            rects = [None]*(5*6)
             counter = 0
-            for degree in range(2,5):
+            for degree in range(2,7):
 
                 ResultsPath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/MaterialFormulation_vs_Nu/'
                 # ResultsFile = "Mech2D_MaterialFormulation_vs_Nu_P2_orthogonal"
@@ -427,6 +439,7 @@ if __name__ == '__main__':
                 colors_err[3] = colors[2]
                 colors_err[4] = colors[5]
                 colors_err[5] = 'y'
+
                 
                 scaledA = DictOutput['ScaledJacobian']
                 condA = DictOutput['ConditionNumber']
@@ -490,10 +503,10 @@ if __name__ == '__main__':
                         if linear is False:
                             mean = np.mean(func[indd,i,intersects])
                             std = np.std(func[indd,i,intersects])
-                            # HACK
-                            if degree==4:
-                                mean = np.NAN
-                                std = np.NAN
+                            # # HACK
+                            # if degree>=4:
+                            #     mean = np.NAN
+                            #     std = np.NAN
 
                         rects[counter] = ax.bar((degree-1)+ind+i*width, mean, width, color=colors[i],
                             yerr=std,capstyle='butt',capsize=2,ecolor=colors_err[i])
@@ -517,9 +530,13 @@ if __name__ == '__main__':
                         loc='upper right',fontsize=legend_font_size)
  
 
-                ax.set_xticklabels((r'$p=2$', r'$p=3$', r'$p=4$'),fontsize=font_size)
-                ax.set_xlim([2,4.9])
-                ax.set_xticks([2.45,3.5,4.4])
+                # ax.set_xticklabels((r'$p=2$', r'$p=3$', r'$p=4$'),fontsize=font_size)
+                # ax.set_xlim([2,4.9])
+                # ax.set_xticks([2.45,3.5,4.4])
+
+                ax.set_xticklabels((r'$p=2$', r'$p=3$', r'$p=4$', r'$p=5$', r'$p=6$'),fontsize=font_size)
+                ax.set_xlim([2,6.9])
+                ax.set_xticks([2.45,3.5,4.4,5.4,6.4])
 
                 
 
@@ -541,13 +558,13 @@ if __name__ == '__main__':
 
 
 
-        # plotter(degree=2,which_func=0,save=True)
-        plotter(which_func=1)
+        # plotter(degree=5,which_func=1,save=True)
+        # plotter(degree=6,which_func=1)
 
         # plotter_all_materials(degree=3,which_func=1,linear=False,save=True)
         # plotter_all_materials(degree=3,linear=False)
 
-        # plotter_bar(which_func=1,linear=False,save=True)
+        plotter_bar(which_func=1,linear=False,save=True)
         # plotter_bar()
 
 
