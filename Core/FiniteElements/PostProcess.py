@@ -997,6 +997,18 @@ class PostProcess(object):
         smesh.GetBoundaryEdgesTri()
         smesh.GetEdgesTri()
         edge_elements = smesh.GetElementsEdgeNumberingTri()
+
+
+        # color = mpl.colors.hex2color('#F88379')
+        # linewidth = 100.2
+        # nmax = np.max(smesh.elements[:,:3])+1
+        # print np.max(smesh.elements[:,:3]), np.min(smesh.elements[:,:3])
+        # trimesh_h = mlab.triangular_mesh(smesh.points[:nmax,0], 
+        #         smesh.points[:nmax,1], smesh.points[:nmax,2], smesh.elements[:,:3],
+        #         line_width=linewidth,tube_radius=linewidth,color=(0,0.6,0.4),
+        #         representation='surface')
+        # mlab.show()
+        # return
         
         # GET EDGE ORDERING IN THE REFERENCE ELEMENT
         reference_edges = NodeArrangementTri(CActual)[0]
@@ -1047,18 +1059,19 @@ class PostProcess(object):
             Tplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex,:] = Triangles + ielem*nsize
             # Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
 
-            if face_elements[ielem,0] == 1502:
-                Uplot[ielem*nsize:(ielem+1)*nsize] = 0
-            else:
-                Uplot[ielem*nsize:(ielem+1)*nsize] = 0.5
+            # if face_elements[ielem,0] == 1502:
+            #     Uplot[ielem*nsize:(ielem+1)*nsize] = 0
+            # else:
+            #     Uplot[ielem*nsize:(ielem+1)*nsize] = 0.5
 
 
         point_line_width = .0015
         # point_line_width = .0008
         # point_line_width = 2.
         trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars=Uplot,line_width=point_line_width)
+        # trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars=Uplot,line_width=point_line_width,colormap='summer')
         # PLOT POINTS ON CURVED MESH
-        mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=2.5*point_line_width)
+        # mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=2.5*point_line_width)
 
 
         # for i in range(smesh.nelem):
@@ -1094,6 +1107,10 @@ class PostProcess(object):
             else:
                 mlab.savefig(filename,magnification="auto")
 
+
+        # CONTROL CAMERA VIEW
+        mlab.view(azimuth=-135, elevation=65, distance=1, focalpoint=None,
+                roll=None, reset_roll=True, figure=None)
         # FORCE UPDATE MLAB TO UPDATE COLORMAP
         mlab.draw()
 

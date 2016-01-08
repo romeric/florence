@@ -54,9 +54,9 @@ def GetDirichletBoundaryConditions(mesh,MainData):
 
             print 'Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds'
 
-            # # end = -3
-            # # np.savetxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_Dirichlet_"+"P"+str(MainData.C+1)+".dat",AppliedDirichlet,fmt="%9.16f")
-            # # np.savetxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_ColumnsOut_"+"P"+str(MainData.C+1)+".dat",ColumnsOut)
+            # end = -3
+            # np.savetxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_Dirichlet_"+"P"+str(MainData.C+1)+".dat",AppliedDirichlet,fmt="%9.16f")
+            # np.savetxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_ColumnsOut_"+"P"+str(MainData.C+1)+".dat",ColumnsOut)
 
         else:
             

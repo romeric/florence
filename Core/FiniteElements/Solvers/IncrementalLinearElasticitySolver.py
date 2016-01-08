@@ -42,6 +42,7 @@ def IncrementalLinearElasticitySolver(MainData,mesh,TotalDisp,Eulerx,LoadIncreme
             # ASSEMBLE
             K = Assembly(MainData,mesh,Eulerx,np.zeros_like(mesh.points))[0]
         print 'Finished assembling the system of equations. Time elapsed is', time() - t_assembly, 'seconds'
+
         # APPLY DIRICHLET BOUNDARY CONDITIONS & GET REDUCED MATRICES 
         K_b, F_b = ApplyDirichletGetReducedMatrices(K,Residual,ColumnsIn,ColumnsOut,AppliedDirichletInc,MainData.Analysis,[])[:2]
 
