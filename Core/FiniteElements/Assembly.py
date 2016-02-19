@@ -34,13 +34,6 @@ def Assembly(MainData,mesh,Eulerx,TotalPot):
     #     print("Large system. Numpy memmap assembly is turned on")
     #     return AssemblyLarge(MainData,mesh,Eulerx,TotalPot)
 
-    # filename = "/media/MATLAB/IJV_triplets_F6_P3.hdf5"
-    # filename = "/home/roman/IJV_triplets_F6_P3.hdf5"
-
-    filename = "/home/roman/LayerSolution/Layer_1/IJV_triplets_f6BL_Layer_1_P3.hdf5"
-    # filename = "/home/roman/LayerSolution/Layer_2/IJV_triplets_f6BL_Layer_2_P3.hdf5"
-    # return OutofCoreAssembly(MainData,mesh,Eulerx,TotalPot,filename=filename)
-
 
 #-------------- ASSEMBLY ROUTINE FOR RELATIVELY SMALL SIZE MATRICES (NELEM < 1e6 3D)--------------------#
 #-------------------------------------------------------------------------------------------------------#
@@ -340,45 +333,38 @@ def OutofCoreAssembly(MainData, mesh, Eulerx, TotalPot, calculate_rhs=True, file
 
     gc.collect()
 
-    # print 'Writing the triplets to disk'
-    # t_hdf5 = time()
-    # for elem in range(nelem):
+    print 'Writing the triplets to disk'
+    t_hdf5 = time()
+    for elem in range(nelem):
 
-    #     full_current_row_stiff, full_current_column_stiff, coeff_stiff, t, f, \
-    #         full_current_row_mass, full_current_column_mass, coeff_mass = GetElementalMatrices(elem,
-    #             MainData,mesh.elements,mesh.points,nodeperelem,Eulerx,TotalPot,I_stiff_elem,J_stiff_elem,I_mass_elem,J_mass_elem)
+        full_current_row_stiff, full_current_column_stiff, coeff_stiff, t, f, \
+            full_current_row_mass, full_current_column_mass, coeff_mass = GetElementalMatrices(elem,
+                MainData,mesh.elements,mesh.points,nodeperelem,Eulerx,TotalPot,I_stiff_elem,J_stiff_elem,I_mass_elem,J_mass_elem)
 
-    #     # from scipy.io import savemat
-    #     # Dict = {'full_current_row_stiff':full_current_row_stiff,
-    #     #     'full_current_column_stiff':full_current_column_stiff,
-    #     #     'coeff_stiff':coeff_stiff}
+        IJV_triplets[(nvar*nodeperelem)**2*elem:(nvar*nodeperelem)**2*(elem+1),0] = full_current_row_stiff.flatten()
+        IJV_triplets[(nvar*nodeperelem)**2*elem:(nvar*nodeperelem)**2*(elem+1),1] = full_current_column_stiff.flatten()
+        IJV_triplets[(nvar*nodeperelem)**2*elem:(nvar*nodeperelem)**2*(elem+1),2] = coeff_stiff.flatten()
 
-    #     # savemat("/home/roman/f6BL_DIR/Step_1/stiffness_elem_"+str(elem),Dict)
+        if calculate_rhs is True:
 
-    #     IJV_triplets[(nvar*nodeperelem)**2*elem:(nvar*nodeperelem)**2*(elem+1),0] = full_current_row_stiff.flatten()
-    #     IJV_triplets[(nvar*nodeperelem)**2*elem:(nvar*nodeperelem)**2*(elem+1),1] = full_current_column_stiff.flatten()
-    #     IJV_triplets[(nvar*nodeperelem)**2*elem:(nvar*nodeperelem)**2*(elem+1),2] = coeff_stiff.flatten()
+            if MainData.Analysis != 'Static':
+                # SPARSE ASSEMBLY - MASS MATRIX
+                I_mass, J_mass, V_mass = SparseAssembly_Step_2(I_mass,J_mass,V_mass,full_current_row_mass,full_current_column_mass,coeff_mass,
+                    nvar,nodeperelem,elem)
 
-    #     if calculate_rhs is True:
+            if MainData.AssemblyParameters.ExternalLoadNature == 'Nonlinear':
+                # RHS ASSEMBLY
+                for iterator in range(0,nvar):
+                    F[mesh.elements[elem,:]*nvar+iterator,0]+=f[iterator::nvar]
+            # INTERNAL TRACTION FORCE ASSEMBLY
+            for iterator in range(0,nvar):
+                    T[mesh.elements[elem,:]*nvar+iterator,0]+=t[iterator::nvar,0]
 
-    #         if MainData.Analysis != 'Static':
-    #             # SPARSE ASSEMBLY - MASS MATRIX
-    #             I_mass, J_mass, V_mass = SparseAssembly_Step_2(I_mass,J_mass,V_mass,full_current_row_mass,full_current_column_mass,coeff_mass,
-    #                 nvar,nodeperelem,elem)
+        if elem % 10000 == 0:
+            print elem
 
-    #         if MainData.AssemblyParameters.ExternalLoadNature == 'Nonlinear':
-    #             # RHS ASSEMBLY
-    #             for iterator in range(0,nvar):
-    #                 F[mesh.elements[elem,:]*nvar+iterator,0]+=f[iterator::nvar]
-    #         # INTERNAL TRACTION FORCE ASSEMBLY
-    #         for iterator in range(0,nvar):
-    #                 T[mesh.elements[elem,:]*nvar+iterator,0]+=t[iterator::nvar,0]
-
-    #     if elem % 10000 == 0:
-    #         print elem
-
-    # hdf_file.close()
-    # print 'Finished writing the triplets to disk. Time taken', time() - t_hdf5, 'seconds'
+    hdf_file.close()
+    print 'Finished writing the triplets to disk. Time taken', time() - t_hdf5, 'seconds'
 
 
     print 'Reading the triplets back from disk'
@@ -396,19 +382,6 @@ def OutofCoreAssembly(MainData, mesh, Eulerx, TotalPot, calculate_rhs=True, file
     stiffness = csr_matrix((IJV_triplets[:,2].astype(np.float32),
         (IJV_triplets[:,0].astype(np.int32),IJV_triplets[:,1].astype(np.int32))),
         shape=((mesh.points.shape[0]*nvar,mesh.points.shape[0]*nvar)),dtype=np.float32)
-    
-    # print 'Writing stiffness matrix to disk'
-    # hdf_file = h5py.File("home/roman/LayerSolution/Layer_1/Layer_1_P3_Stiffness.mat",'w')
-    # IJV_triplets = hdf_file.create_dataset("IJV_triplets",((nvar*nodeperelem)**2*nelem,3),dtype=np.float32)
-    # Dict = {'stiffness':stiffness}
-    
-    # del Dict
-    # gc.collect()
-    # print 'Reading back the stiffness matrix from disk'
-    # Dict = loadmat("/home/roman/LayerSolution/Layer_1/Layer_1_P3_Stiffness.mat")
-    # stiffness = Dict['stiffness']
-    # del Dict
-    # gc.collect()
 
     print 'Done creating the sparse matrix, time taken', time() - t_sparse
     
