@@ -33,6 +33,15 @@ class Base(object):
         
         """
 
+    FloatType=np.float32
+    IntType=np.int32
+
+    if sys.version_info.major == 2:
+        Range = xrange
+    else:
+        Range = range 
+
+
     pwd = os.path.dirname(os.path.realpath('__file__'))
     session = 'FEM'
     # session = 'BEM'

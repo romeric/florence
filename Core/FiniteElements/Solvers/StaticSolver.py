@@ -32,6 +32,7 @@ def StaticSolver(MainData,LoadIncrement,K,DirichletForces,NeumannForces,
             TotalDisp = NewtonRaphson(MainData,Increment,K,NodalForces,Residual,ResidualNorm,mesh,TotalDisp,Eulerx,
                 ColumnsIn,ColumnsOut,AppliedDirichletInc)
 
+
             print '\nFinished Load increment', Increment, 'in', time()-t_increment, 'sec'
             try:
                 print 'Norm of Residual is', np.abs(la.norm(Residual[ColumnsIn])/MainData.NormForces), '\n'

@@ -2,9 +2,9 @@ from __future__ import division
 import os, warnings
 from time import time
 import numpy as np 
-from scipy.io import loadmat
-from Core.Supplementary.Where import *
-from Core.Supplementary.Tensors import duplicate
+from scipy.io import loadmat, savemat
+# from Core.Supplementary.Where import *
+from Core.Supplementary.Tensors import makezero, itemfreq_py, remove_duplicates, unique2d, in2d
 from vtk_writer import write_vtu
 from NormalDistance import NormalDistance
 try:
@@ -16,8 +16,7 @@ from HigherOrderMeshing import *
 from warnings import warn
 from copy import deepcopy
 
-# from Core.Supplementary.Tensors.remove_duplicates import remove_duplicates
-from Core.Supplementary.CythonBuilds.remove_duplicates.remove_duplicates import remove_duplicates
+
 
 """
 Mesh class providing most of the pre-processing functionalities of the Core module
@@ -33,17 +32,22 @@ class Mesh(object):
     1. Generating higher order meshes based on a linear mesh, for tris, tets, quads and hexes
     2. Generating linear tri and tet meshes based on meshpy back-end
     3. Generating linear tri meshes based on distmesh back-end
-    4. Finding bounary edges and faces for tris and tets, in case it is not provided by the mesh generator
-    5. Reading Salome meshes in data (.dat/.txt/etc) format
+    4. Finding bounary edges and faces for tris and tets, in case they are not provided by the mesh generator
+    5. Reading Salome meshes in binary (.dat/.txt/etc) format
     6. Reading gmsh files .msh 
     7. Checking for node numbering order of elements and fixing it if desired
     8. Writing meshes to unstructured vtk file format (.vtu) based on the original script by Luke Olson 
-       (extended here to high order elements) """
+       (extended here to high order elements) 
+    """
 
     def __init__(self):
         super(Mesh, self).__init__()
         # self.faces and self.edges ARE BOUNDARY FACES 
         # AND BOUNDARY EDGES, RESPECTIVELY
+        
+        self.degree = None
+        self.nelem = None
+        self.nnode = None
 
         self.elements = None
         self.points = None
@@ -53,12 +57,17 @@ class Mesh(object):
 
         self.face_to_element = None
         self.edge_to_element = None
-        self.boundary_face_to_element = None
         self.boundary_edge_to_element = None
+        self.boundary_face_to_element = None
         self.all_faces = None
         self.all_edges = None
         self.interior_faces = None
         self.interior_edges = None
+
+        # FOR GEOMETRICAL CURVES/SURFACES
+        self.edge_to_curve = None
+        self.face_to_surface = None
+
 
 
     def SetElements(self,arr):
@@ -72,6 +81,27 @@ class Mesh(object):
 
     def SetFaces(self,arr):
         self.faces = arr
+
+    @property
+    def Bounds(self):
+        """Returns bounds of a mesh i.e. the minimum and maximum coordinate values
+            in every direction
+        """
+        assert self.points is not None
+
+        if self.points.shape[1] == 3:
+            return makezero(np.array([[np.min(self.points[:,0]),
+                        np.min(self.points[:,1]),
+                        np.min(self.points[:,2])],
+                        [np.max(self.points[:,0]),
+                        np.max(self.points[:,1]),
+                        np.max(self.points[:,2])]]))
+        else:
+            return makezero(np.array([[np.min(self.points[:,0]),
+                        np.min(self.points[:,1])],
+                        [np.max(self.points[:,0]),
+                        np.max(self.points[:,1])]]))
+
 
     def GetEdgesTri(self):
         """Find the all edges of a triangular mesh.
@@ -109,7 +139,16 @@ class Mesh(object):
         edges[2*self.elements.shape[0]:,:] = self.elements[:,node_arranger[2,:]]
 
         # REMOVE DUPLICATES
-        edges = remove_duplicates(edges)
+        # CYTHON SOLUTION
+        # edges = remove_duplicates(edges)
+        # Much faster than the cython's solution
+        edges, idx = unique2d(edges,consider_sort=True,order=False,return_index=True)
+
+        edge_to_element = np.zeros((edges.shape[0],2),np.int64)
+        edge_to_element[:,0] =  idx % self.elements.shape[0]
+        edge_to_element[:,1] =  idx // self.elements.shape[0]
+
+        self.edge_to_element = edge_to_element
 
         #============================================
         # FIND AND REMOVE DUPLICATES
@@ -172,29 +211,64 @@ class Mesh(object):
 
         node_arranger = NodeArrangementTri(p-1)[0]
 
-        boundary_edges = np.zeros((1,p+1),dtype=np.uint64)
+        # CONCATENATE ALL THE EDGES MADE FROM ELEMENTS
+        all_edges = np.concatenate((self.elements[:,:2],self.elements[:,[1,2]],
+                             self.elements[:,[2,0]]),axis=0)
+        # GET UNIQUE ROWS 
+        uniques, idx, inv = unique2d(all_edges,consider_sort=True,order=False,return_index=True,return_inverse=True)
 
-        # LOOP OVER ALL ELEMENTS
-        for i in range(self.nelem):
-            # FIND HOW MANY ELEMENTS SHARE A SPECIFIC NODE
-            x = np.where(self.elements==self.elements[i,0])[0]
-            y = np.where(self.elements==self.elements[i,1])[0]
-            z = np.where(self.elements==self.elements[i,2])[0]
+        # ROWS THAT APPEAR ONLY ONCE CORRESPOND TO BOUNDARY EDGES
+        freqs_inv = itemfreq_py(inv)
+        edges_ext_flags = freqs_inv[freqs_inv[:,1]==1,0]
+        # NOT ARRANGED
+        self.edges = uniques[edges_ext_flags,:] 
 
-            # A BOUNDARY EDGE IS ONE WHICH IS NOT SHARED WITH ANY OTHER ELEMENT
-            edge_0 =  np.intersect1d(x,y)
-            edge_1 =  np.intersect1d(y,z)
-            edge_2 =  np.intersect1d(z,x)
+        # DETERMINE WHICH FACE OF THE ELEMENT THEY ARE
+        boundary_edge_to_element = np.zeros((edges_ext_flags.shape[0],2),dtype=np.int64)
+
+        # FURTHER RE-ARRANGEMENT / ARANGE THE NODES BASED ON THE ORDER THEY APPEAR
+        # IN ELEMENT CONNECTIVITY
+        # THIS STEP IS NOT NECESSARY INDEED - ITS JUST FOR RE-ARANGMENT OF EDGES
+        all_edges_in_edges = in2d(all_edges,self.edges,consider_sort=True)
+        all_edges_in_edges = np.where(all_edges_in_edges==True)[0]
+
+        boundary_edge_to_element[:,0] = all_edges_in_edges % self.elements.shape[0]
+        boundary_edge_to_element[:,1] = all_edges_in_edges // self.elements.shape[0]
+
+        # ARRANGE FOR ANY ORDER OF BASES/ELEMENTS AND ASSIGN DATA MEMBERS
+        self.edges = self.elements[boundary_edge_to_element[:,0][:,None],node_arranger[boundary_edge_to_element[:,1],:]]
+        self.edges = self.edges.astype(np.uint64)
+        self.boundary_edge_to_element = boundary_edge_to_element
+
+        return self.edges
 
 
-            if edge_0.shape[0]==1:
-                boundary_edges = np.concatenate((boundary_edges,np.array([self.elements[i,node_arranger[0,:]]])),axis=0)
-            if edge_1.shape[0]==1:
-                boundary_edges = np.concatenate((boundary_edges,np.array([self.elements[i,node_arranger[1,:]]])),axis=0)
-            if edge_2.shape[0]==1:
-                boundary_edges = np.concatenate((boundary_edges,np.array([self.elements[i,node_arranger[2,:]]])),axis=0)
 
-        self.edges = boundary_edges[1:,:].astype(np.uint64)
+        # ---------------------------------------------------------------------------
+        # boundary_edges = np.zeros((1,p+1),dtype=np.uint64)
+        # # LOOP OVER ALL ELEMENTS
+        # for i in range(self.nelem):
+        #     # FIND HOW MANY ELEMENTS SHARE A SPECIFIC NODE
+        #     x = np.where(self.elements==self.elements[i,0])[0]
+        #     y = np.where(self.elements==self.elements[i,1])[0]
+        #     z = np.where(self.elements==self.elements[i,2])[0]
+
+        #     # A BOUNDARY EDGE IS ONE WHICH IS NOT SHARED WITH ANY OTHER ELEMENT
+        #     edge_0 =  np.intersect1d(x,y)
+        #     edge_1 =  np.intersect1d(y,z)
+        #     edge_2 =  np.intersect1d(z,x)
+
+
+        #     if edge_0.shape[0]==1:
+        #         boundary_edges = np.concatenate((boundary_edges,np.array([self.elements[i,node_arranger[0,:]]])),axis=0)
+        #     if edge_1.shape[0]==1:
+        #         boundary_edges = np.concatenate((boundary_edges,np.array([self.elements[i,node_arranger[1,:]]])),axis=0)
+        #     if edge_2.shape[0]==1:
+        #         boundary_edges = np.concatenate((boundary_edges,np.array([self.elements[i,node_arranger[2,:]]])),axis=0)
+
+        # self.edges = boundary_edges[1:,:].astype(np.uint64)
+        # ---------------------------------------------------------------------------
+
 
 
     def GetInteriorEdgesTri(self):
@@ -260,7 +334,6 @@ class Mesh(object):
 
         from Core.QuadratureRules.NodeArrangement import NodeArrangementTet
 
-
         node_arranger = NodeArrangementTet(p-1)[0]
         fsize = int((p+1.)*(p+2.)/2.)
 
@@ -271,8 +344,20 @@ class Mesh(object):
         faces[2*self.elements.shape[0]:3*self.elements.shape[0],:] = self.elements[:,node_arranger[2,:]]
         faces[3*self.elements.shape[0]:,:] = self.elements[:,node_arranger[3,:]]
 
-        faces = remove_duplicates(faces)
+        # Cython solution
+        # faces = remove_duplicates(faces)
+        # Much faster than the cython solution
+        self.all_faces, idx = unique2d(faces,consider_sort=True,order=False,return_index=True) 
+
+        face_to_element = np.zeros((self.all_faces.shape[0],2),np.int64)
+        face_to_element[:,0] =  idx % self.elements.shape[0]
+        face_to_element[:,1] =  idx // self.elements.shape[0]
+
+        self.face_to_element = face_to_element
+
+        return self.all_faces 
         
+
         #==================================
         # # REMOVE DUPLICATES
         # sorted_faces =  np.sort(faces,axis=1)
@@ -289,10 +374,12 @@ class Mesh(object):
         # all_faces_arranger = np.setdiff1d(all_faces_arranger,np.array(x)[:,0])
         # faces = faces[all_faces_arranger,:]
         # # # print  sorted_faces[all_faces_arranger,:]
+
+        # self.all_faces = faces
+        # return faces
         #==================================
 
-        self.all_faces = faces
-        return faces
+        
 
 
     def GetEdgesTet(self):
@@ -325,6 +412,7 @@ class Mesh(object):
        
         # COMPUTE ALL EDGES
         self.all_edges = tmesh.GetEdgesTri()
+        return self.all_edges
 
 
 
@@ -332,7 +420,6 @@ class Mesh(object):
 
     def GetBoundaryFacesTet(self):
         """Find boundary faces (surfaces) of a tetrahedral mesh"""
-
 
         p = self.InferPolynomialDegree()
 
@@ -349,36 +436,78 @@ class Mesh(object):
         from Core.QuadratureRules.NodeArrangement import NodeArrangementTet
 
         node_arranger = NodeArrangementTet(p-1)[0]
-        fsize = int((p+1.)*(p+2.)/2.)
+
+        # CONCATENATE ALL THE FACES MADE FROM ELEMENTS
+        all_faces = np.concatenate((self.elements[:,:3],self.elements[:,[0,1,3]],
+                             self.elements[:,[0,2,3]],self.elements[:,[1,2,3]]),axis=0)
+        # GET UNIQUE ROWS 
+        uniques, idx, inv = unique2d(all_faces,consider_sort=True,order=False,return_index=True,return_inverse=True)
+
+        # ROWS THAT APPEAR ONLY ONCE CORRESPOND TO BOUNDARY FACES
+        freqs_inv = itemfreq_py(inv)
+        faces_ext_flags = freqs_inv[freqs_inv[:,1]==1,0]
+        # NOT ARRANGED
+        self.faces = uniques[faces_ext_flags,:] 
+
+        # DETERMINE WHICH FACE OF THE ELEMENT THEY ARE
+        boundary_face_to_element = np.zeros((faces_ext_flags.shape[0],2),dtype=np.int64)
+        # THE FOLLOWING WILL COMPUTE FACES BASED ON SORTING AND NOT TAKING INTO ACCOUNT 
+        # THE ELEMENT CONNECTIVITY
+        # boundary_face_to_element[:,0] = np.remainder(idx[faces_ext_flags],self.elements.shape[0])
+        # boundary_face_to_element[:,1] = np.floor_divide(idx[faces_ext_flags],self.elements.shape[0])
+        # OR EQUIVALENTLY
+        # boundary_face_to_element[:,0] = idx[faces_ext_flags] % self.elements.shape[0]
+        # boundary_face_to_element[:,1] = idx[faces_ext_flags] // self.elements.shape[0]
+
+        # FURTHER RE-ARRANGEMENT / ARANGE THE NODES BASED ON THE ORDER THEY APPEAR
+        # IN ELEMENT CONNECTIVITY
+        # THIS STEP IS NOT NECESSARY INDEED - ITS JUST FOR RE-ARANGMENT OF FACES
+        all_faces_in_faces = in2d(all_faces,self.faces,consider_sort=True)
+        all_faces_in_faces = np.where(all_faces_in_faces==True)[0]
+
+        # boundary_face_to_element = np.zeros((all_faces_in_faces.shape[0],2),dtype=np.int64)
+        boundary_face_to_element[:,0] = all_faces_in_faces % self.elements.shape[0]
+        boundary_face_to_element[:,1] = all_faces_in_faces // self.elements.shape[0]
+
+        # ARRANGE FOR ANY ORDER OF BASES/ELEMENTS AND ASSIGN DATA MEMBERS
+        self.faces = self.elements[boundary_face_to_element[:,0][:,None],node_arranger[boundary_face_to_element[:,1],:]]
+        self.faces = self.faces.astype(np.uint64)
+        self.boundary_face_to_element = boundary_face_to_element
 
 
-        boundary_faces = np.zeros((1,fsize),dtype=np.int64)
-        # LOOP OVER ALL ELEMENTS
-        for i in range(self.nelem):
-            # FIND WHICH ELEMENTS HAVE 3 OF THE 4 NODES             
-            x = np.where(self.elements==self.elements[i,0])[0]
-            y = np.where(self.elements==self.elements[i,1])[0]
-            z = np.where(self.elements==self.elements[i,2])[0]
-            w = np.where(self.elements==self.elements[i,3])[0]
 
-            # A BOUNDARY EDGE IS ONE WHICH IS NOT SHARED WITH ANY OTHER ELEMENT
-            face_0 =  np.intersect1d(np.intersect1d(x,y),z)
-            face_1 =  np.intersect1d(np.intersect1d(x,y),w)
-            face_2 =  np.intersect1d(np.intersect1d(x,z),w)
-            face_3 =  np.intersect1d(np.intersect1d(y,z),w)
+        # OLDER VERSION MAINTAINED FOR DEBUGGING
+        #------------------------------------------------------------------------------------------#
+        # fsize = int((p+1.)*(p+2.)/2.)
+        # boundary_faces = np.zeros((1,fsize),dtype=np.int64)
+        # # LOOP OVER ALL ELEMENTS
+        # for i in range(self.nelem):
+        #     # FIND WHICH ELEMENTS HAVE 3 OF THE 4 NODES             
+        #     x = np.where(self.elements==self.elements[i,0])[0]
+        #     y = np.where(self.elements==self.elements[i,1])[0]
+        #     z = np.where(self.elements==self.elements[i,2])[0]
+        #     w = np.where(self.elements==self.elements[i,3])[0]
 
-            # IF THERE IS ONLY ONE ELEMENT CONTAINING 3 OF THE 4 NODES, THEN THESE 3 NODES
-            # MAKE A FACE WHICH IS ON THE BOUNDARY
-            if face_0.shape[0]==1:
-                boundary_faces = np.concatenate((boundary_faces,np.array([self.elements[i,node_arranger[0,:]]])),axis=0)
-            if face_1.shape[0]==1:
-                boundary_faces = np.concatenate((boundary_faces,np.array([self.elements[i,node_arranger[1,:]]])),axis=0)
-            if face_2.shape[0]==1:
-                boundary_faces = np.concatenate((boundary_faces,np.array([self.elements[i,node_arranger[2,:]]])),axis=0)
-            if face_3.shape[0]==1:
-                boundary_faces = np.concatenate((boundary_faces,np.array([self.elements[i,node_arranger[3,:]]])),axis=0)
+        #     # A BOUNDARY EDGE IS ONE WHICH IS NOT SHARED WITH ANY OTHER ELEMENT
+        #     face_0 =  np.intersect1d(np.intersect1d(x,y),z)
+        #     face_1 =  np.intersect1d(np.intersect1d(x,y),w)
+        #     face_2 =  np.intersect1d(np.intersect1d(x,z),w)
+        #     face_3 =  np.intersect1d(np.intersect1d(y,z),w)
 
-        self.faces = boundary_faces[1:,:].astype(np.uint64)
+        #     # IF THERE IS ONLY ONE ELEMENT CONTAINING 3 OF THE 4 NODES, THEN THESE 3 NODES
+        #     # MAKE A FACE WHICH IS ON THE BOUNDARY
+        #     if face_0.shape[0]==1:
+        #         boundary_faces = np.concatenate((boundary_faces,np.array([self.elements[i,node_arranger[0,:]]])),axis=0)
+        #     if face_1.shape[0]==1:
+        #         boundary_faces = np.concatenate((boundary_faces,np.array([self.elements[i,node_arranger[1,:]]])),axis=0)
+        #     if face_2.shape[0]==1:
+        #         boundary_faces = np.concatenate((boundary_faces,np.array([self.elements[i,node_arranger[2,:]]])),axis=0)
+        #     if face_3.shape[0]==1:
+        #         boundary_faces = np.concatenate((boundary_faces,np.array([self.elements[i,node_arranger[3,:]]])),axis=0)
+
+        # self.faces = boundary_faces[1:,:].astype(np.uint64)
+        #------------------------------------------------------------------------------------------#
+
 
 
 
@@ -413,7 +542,7 @@ class Mesh(object):
         del tmesh.points
         
         # ALL THE EDGES CORRESPONDING TO THESE BOUNDARY FACES ARE BOUNDARY EDGES
-        self.edges = tmesh.GetEdgesTri()
+        self.edges =  tmesh.GetEdgesTri()
 
 
 
@@ -423,7 +552,7 @@ class Mesh(object):
             returns:        
 
                 interior_faces          ndarray of interior faces
-                face_flags              ndarray of face flags: 0 for interior and 1 for boundary
+                face_flags              1D array of face flags: 0 for interior and 1 for boundary
 
         """
 
@@ -432,29 +561,37 @@ class Mesh(object):
         if not isinstance(self.faces,np.ndarray):
             self.GetBoundaryFacesTet()
 
+        face_flags = in2d(self.all_faces.astype(self.faces.dtype),self.faces,consider_sort=True)
+        face_flags[face_flags==True] = 1
+        face_flags[face_flags==False] = 0
+        interior_faces = self.all_faces[face_flags==False,:]
 
-        sorted_all_faces = np.sort(self.all_faces,axis=1)
-        sorted_boundary_faces = np.sort(self.faces,axis=1)
-
-        x = []
-        for i in range(self.faces.shape[0]):
-            current_sorted_boundary_face = np.tile(sorted_boundary_faces[i,:],
-                self.all_faces.shape[0]).reshape(self.all_faces.shape[0],self.all_faces.shape[1])
-            interior_faces = np.linalg.norm(current_sorted_boundary_face - sorted_all_faces,axis=1)
-            pos_interior_faces = np.where(interior_faces==0)[0]
-            if pos_interior_faces.shape[0] != 0:
-                x.append(pos_interior_faces)
-
-        face_aranger = np.arange(self.all_faces.shape[0])
-        face_aranger = np.setdiff1d(face_aranger,np.array(x)[:,0])
-        interior_faces = self.all_faces[face_aranger,:]
-
-        # GET FLAGS FOR BOUNDRAY AND INTERIOR
-        face_flags = np.ones(self.all_faces.shape[0],dtype=np.int64)
-        face_flags[face_aranger] = 0
-
-        self.interior_faces = interior_faces
         return interior_faces, face_flags
+
+        #-------------------------------------------------------------------------
+        # sorted_all_faces = np.sort(self.all_faces,axis=1)
+        # sorted_boundary_faces = np.sort(self.faces,axis=1)
+
+        # x = []
+        # for i in range(self.faces.shape[0]):
+        #     current_sorted_boundary_face = np.tile(sorted_boundary_faces[i,:],
+        #         self.all_faces.shape[0]).reshape(self.all_faces.shape[0],self.all_faces.shape[1])
+        #     interior_faces = np.linalg.norm(current_sorted_boundary_face - sorted_all_faces,axis=1)
+        #     pos_interior_faces = np.where(interior_faces==0)[0]
+        #     if pos_interior_faces.shape[0] != 0:
+        #         x.append(pos_interior_faces)
+
+        # face_aranger = np.arange(self.all_faces.shape[0])
+        # face_aranger = np.setdiff1d(face_aranger,np.array(x)[:,0])
+        # interior_faces = self.all_faces[face_aranger,:]
+
+        # # GET FLAGS FOR BOUNDRAY AND INTERIOR
+        # face_flags = np.ones(self.all_faces.shape[0],dtype=np.int64)
+        # face_flags[face_aranger] = 0
+
+        # self.interior_faces = interior_faces
+        # return interior_faces, face_flags
+        #-------------------------------------------------------------------------
 
 
 
@@ -463,13 +600,49 @@ class Mesh(object):
         """Given a linear tri, tet, quad or hex mesh compute high order mesh based on it.
         This is a static method linked to the HigherOrderMeshing module"""
 
+        if self.degree is None:
+            self.InferPolynomialDegree()
+        if self.degree - 1 == C:
+            # DO NOT COMPUTE IF ALREADY COMPUTED FOR THE SAME ORDER
+            return
+
+        # SITUATIONS WHEN ANOTHER HIGH ORDER MESH IS REQUIRED, WITH ONE HIGH
+        # ORDER MESH ALREADY AVAILABLE
+        if self.degree != 1 and self.degree - 1 != C:
+            if self.element_type == "tri":
+                self.elements = self.elements[:,:3]
+                nmax = self.elements.max() + 1
+                self.points = self.points[:nmax,:]
+                if self.edges is not None:
+                    self.edges = self.edges[:,:2]
+                if self.all_edges is not None:
+                    self.all_edges = self.all_edges[:,:2]
+            elif self.element_type == "tet":
+                self.elements = self.elements[:,:4]
+                nmax = self.elements.max() + 1
+                self.points = self.points[:nmax,:]
+                if self.edges is not None:
+                    self.edges = self.edges[:,:2]
+                if self.faces is not None:
+                    self.faces = self.faces[:,:3]
+                if self.all_edges is not None:
+                    self.all_edges = self.all_edges[:,:2]
+                if self.all_faces is not None:
+                    self.all_faces = self.all_faces[:,:3]
+            else:
+                raise NotImplementedError("Creating high order mesh based on another high order mesh for",
+                    self.element_type, "elements is not implemented yet")
+
+
+
         print 'Generating p = '+str(C+1)+' mesh based on the linear mesh...'
         t_mesh = time()
         # BUILD A NEW MESH BASED ON THE LINEAR MESH
         if self.element_type == 'tri':
             # BUILD A NEW MESH USING THE FEKETE NODAL POINTS FOR TRIANGLES  
             # nmesh = HighOrderMeshTri(C,self,**kwargs)
-            nmesh = HighOrderMeshTri_UNSTABLE(C,self,**kwargs)
+            # nmesh = HighOrderMeshTri_UNSTABLE(C,self,**kwargs)
+            nmesh = HighOrderMeshTri_SEMISTABLE(C,self,**kwargs)
 
         elif self.element_type == 'tet':
             # BUILD A NEW MESH USING THE FEKETE NODAL POINTS FOR TETRAHEDRALS
@@ -487,12 +660,55 @@ class Mesh(object):
         if isinstance(self.faces,np.ndarray):
             self.faces = nmesh.faces.astype(np.uint64)
         self.nelem = nmesh.nelem
-        self.element_type = nmesh.info 
+        self.element_type = nmesh.info
+        self.degree = C+1
         
         print 'Finished generating the high order mesh. Time taken', time()-t_mesh,'sec'
 
 
+    @property
+    def EdgeLengths(self,which_edges='boundary'):
+        """Computes length of edges, for 2D and 3D meshes
 
+        which_edges:            [str] 'boundary' for boundary edges only 
+                                and 'all' for all edges
+        """
+
+        assert self.points is not None
+        assert self.element_type is not None
+
+        if self.element_type != "tet" and self.element_type != "tri":
+            raise NotImplementedError("Computing edge lengths for", self.element_type, "is not implemented yet")
+
+        lengths = None
+        if which_edges == 'boundary':
+            if self.faces is None:
+                if self.element_type == "tri":
+                    self.GetBoundaryEdgesTri()
+                elif self.element_type == "tet":
+                    self.GetBoundaryEdgesTet()
+
+            if self.element_type == "tri" or self.element_type == "tet":
+                # THE ORDERING OF NODES FOR EDGES IS FOR TRIS AND TETS ONLY
+                edge_coords = self.points[self.edges[:,:2],:]
+                lengths = np.linalg.norm(edge_coords[:,1,:] - edge_coords[:,0,:],axis=1)
+
+        elif which_edges == 'all':
+            if self.all_faces is None:
+                if self.element_type == "tri":
+                    self.GetEdgesTri()
+                elif self.element_type == "tet":
+                    self.GetEdgesTet()
+
+            if self.element_type == "tri" or self.element_type == "tet":
+                # THE ORDERING OF NODES FOR EDGES IS FOR TRIS AND TETS ONLY
+                edge_coords = self.points[self.all_edges[:,:2],:]
+                lengths = np.linalg.norm(edge_coords[:,1,:] - edge_coords[:,0,:],axis=1)
+
+        return lengths  
+
+
+    @property
     def Areas(self,with_sign=False):
         """Find areas of all 2D elements [tris, quads]. 
             For 3D elements returns surface areas of faces 
@@ -530,11 +746,12 @@ class Mesh(object):
             if self.element_type == "tri":
                 area = np.abs(area)
             elif self.element_type == "tet":
-                raise NotImplementedError('Numbering order of tetrahedral faces could be determined')
-
+                raise NotImplementedError('Numbering order of tetrahedral faces could not be determined')
 
         return area
 
+
+    @property
     def Volumes(self,with_sign=False):
         """Find Volumes of all 3D elements [tets, hexes]. 
 
@@ -562,7 +779,104 @@ class Mesh(object):
 
         return volume
 
+    @property
+    def AspectRatios(self,algorithm='edge_based'):
+        """Compute aspect ratio of the mesh element-by-element.
+            For 2D meshes aspect ratio is aspect ratio is defined as 
+            the ratio of maximum edge length to minimum edge length.
+            For 3D meshes aspect ratio can be either length or area based. 
 
+            input:
+                algorithm:                  [str] 'edge_based' or 'face_based'
+            returns:
+                aspect_ratio:               [1D array] of size (self.nelem) containing aspect ratio of elements
+        """ 
+
+        assert self.points is not None
+        assert self.element_type is not None
+
+        if self.element_type != "tet" and self.element_type != "tri":
+            raise NotImplementedError("Computing aspect ratio of ", self.element_type, "is not implemented yet")
+
+        aspect_ratio = None
+        if algorithm == 'edge_based':
+            if self.element_type == "tri":
+                edge_coords = self.points[self.elements[:,:3],:]
+                AB = np.linalg.norm(edge_coords[:,1,:] - edge_coords[:,0,:],axis=1)
+                AC = np.linalg.norm(edge_coords[:,2,:] - edge_coords[:,0,:],axis=1)
+                BC = np.linalg.norm(edge_coords[:,2,:] - edge_coords[:,1,:],axis=1)
+
+                minimum = np.minimum(np.minimum(AB,AC),BC)
+                maximum = np.maximum(np.maximum(AB,AC),BC)
+
+                aspect_ratio = 1.0*maximum/minimum
+
+            elif self.element_type == "tet":
+                edge_coords = self.points[self.elements[:,:4],:]
+                AB = np.linalg.norm(edge_coords[:,1,:] - edge_coords[:,0,:],axis=1)
+                AC = np.linalg.norm(edge_coords[:,2,:] - edge_coords[:,0,:],axis=1)
+                AD = np.linalg.norm(edge_coords[:,3,:] - edge_coords[:,0,:],axis=1)
+                BC = np.linalg.norm(edge_coords[:,2,:] - edge_coords[:,1,:],axis=1)
+                BD = np.linalg.norm(edge_coords[:,3,:] - edge_coords[:,1,:],axis=1)
+                CD = np.linalg.norm(edge_coords[:,3,:] - edge_coords[:,2,:],axis=1)
+
+                minimum = np.minimum(np.minimum(np.minimum(np.minimum(np.minimum(AB,AC),AD),BC),BD),CD)
+                maximum = np.maximum(np.maximum(np.maximum(np.maximum(np.maximum(AB,AC),AD),BC),BD),CD)
+
+                aspect_ratio = 1.0*maximum/minimum
+
+        elif algorithm == 'face_based':
+            raise NotImplementedError("Face/area based aspect ratio is not implemented yet")
+
+        return aspect_ratio
+
+    @property
+    def Median(self):
+        """Computes median of the elements tri, tet, quad, hex based on the interpolation function
+
+            retruns:
+                median:             [ndarray] of median of elements
+                bases_at_median:    [1D array] of bases at median            
+        """
+
+        assert self.element_type is not None
+        assert self.elements is not None
+        assert self.points is not None
+
+        median = None
+
+        if self.element_type == "tri":
+            import Core.InterpolationFunctions.TwoDimensional.Tri.hpNodal as Tri
+            from Core.QuadratureRules.FeketePointsTri import FeketePointsTri
+
+            middle_point_isoparametric = FeketePointsTri(2)[6] # check
+            if not np.isclose(sum(middle_point_isoparametric),-1.5):
+                raise ValueError("Median of triangle does not match [-0.5,-0.5]. "
+                    "Did you change your nodal spacing or interpolation functions?")
+
+            # C = self.InferPolynomialDegree() - 1
+            bases_for_middle_point = Tri.hpBases(0,middle_point_isoparametric[0],
+                middle_point_isoparametric[1])[0]
+
+            median = np.einsum('ijk,j',self.points[self.elements[:,:3],:],bases_for_middle_point) 
+
+        elif self.element_type == "tet":
+            import Core.InterpolationFunctions.ThreeDimensional.Tetrahedral.hpNodal as Tet
+            from Core.QuadratureRules.FeketePointsTet import FeketePointsTet
+
+            middle_point_isoparametric = FeketePointsTet(3)[21]
+            if not np.isclose(sum(middle_point_isoparametric),-1.5):
+                raise ValueError("Median of tetrahedral does not match [-0.5,-0.5,-0.5]. "
+                    "Did you change your nodal spacing or interpolation functions?")
+
+            # C = self.InferPolynomialDegree() - 1
+            bases_for_middle_point = Tet.hpBases(0,middle_point_isoparametric[0],
+                middle_point_isoparametric[1],middle_point_isoparametric[2])[0]
+
+            median = np.einsum('ijk,j',self.points[self.elements[:,:4],:],bases_for_middle_point) 
+
+        return median, bases_for_middle_point
+  
 
 
     def CheckNodeNumbering(self,change_order_to='retain'):
@@ -620,8 +934,8 @@ class Mesh(object):
 
 
     def GetElementsEdgeNumberingTri(self):
-        """Finds edges of elements and their flags saying which edge they are [0,1,2]. Mesh must be linear.
-            At most a tetrahedral can have all its four faces at boundary.
+        """Finds edges of elements and their flags saying which edge they are [0,1,2].
+            At most a triangle can have all its four edges on the boundary.
 
         output: 
 
@@ -632,93 +946,135 @@ class Mesh(object):
                                         so the return value is not strictly necessary
         """
 
-        # CHECK IF IT IS LINEAR MESH
-        # assert self.elements.shape[1]==3
+        if isinstance(self.edge_to_element,np.ndarray):
+            if self.edge_to_element.shape[0] > 1:
+                return self.edge_to_element
 
         # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY 
         if self.all_edges is None:
-            edges = self.GetEdgesTri()
-        else:
-            edges = self.all_edges 
+            self.GetEdgesTri()
 
 
-        from Core.Supplementary.Where import whereEQ
-        from Core.Supplementary.Tensors import itemfreq_py
+        all_edges = np.concatenate((self.elements[:,:2],self.elements[:,[1,2]],
+            self.elements[:,[2,0]]),axis=0).astype(np.int64)
+
+        _,idx = unique2d(all_edges,consider_sort=True,order=False, return_index=True)
+        edge_elements = np.zeros((self.all_faces.shape[0],2),dtype=np.int64)
+
+        edge_elements[:,0] = idx % self.elements.shape[0]
+        edge_elements[:,1] = idx // self.elements.shape[0]
+
+        self.edge_to_element = edge_elements
+        return self.edge_to_element
+
+
+
+        #--------------------------------------------------------------------
+        # from Core.Supplementary.Where import whereEQ
+        # from Core.Supplementary.Tensors import itemfreq_py
         
-        edge_elements = np.zeros((edges.shape[0],3),dtype=np.int64)
-        for i in range(edges.shape[0]):
+        # edge_elements = np.zeros((edges.shape[0],3),dtype=np.int64)
+        # for i in range(edges.shape[0]):
+        #     x = []
+        #     for j in range(2):
+        #         x.append(np.where(self.elements==edges[i,j])[0])
+
+        #     z = x[0]
+        #     for k in range(1,len(x)):
+        #         z = np.intersect1d(x[k],z)
+
+        #     # TAKE ONLY ONE EDGE
+        #     edge_elements[i,0] = z[0]
+        #     cols = np.array([np.where(self.elements[z[0],:]==edges[i,0])[0], np.where(self.elements[z[0],:]==edges[i,1])[0]])
+
+        #     # cols = np.sort(cols.flatten()) # CAREFUL
+        #     cols = cols.flatten() # CAREFUL
+        #     if cols[0]==0 and cols[1]==1:
+        #         edge_number = 0
+        #         swap = 0
+        #     elif cols[0]==1 and cols[1]==2:
+        #         edge_number = 1
+        #         swap = 0
+        #     elif cols[0]==2 and cols[1]==0:
+        #         edge_number = 2
+        #         swap = 0
+
+        #     elif cols[0]==1 and cols[1]==0:
+        #         edge_number = 0
+        #         swap = 1
+        #     elif cols[0]==2 and cols[1]==1:
+        #         edge_number = 1
+        #         swap = 1
+        #     elif cols[0]==0 and cols[1]==2:
+        #         edge_number = 2
+        #         swap = 1
+
+        #     edge_elements[i,1] = edge_number
+        #     edge_elements[i,2] = swap
+
+
+        # self.edge_to_element = edge_elements
+        # return edge_elements
+        #--------------------------------------------------------------------
+
+
+    def GetElementsWithBoundaryEdgesTri(self):
+        """Finds elements which have edges on the boundary.
+            At most a triangle can have all its four edges on the boundary.
+
+        output: 
+
+            edge_elements:              [2D array] array containing elements which have face
+                                        on the boundary [cloumn 0] and a flag stating which edges they are [column 1]
+
+        """
+
+        if isinstance(self.boundary_edge_to_element,np.ndarray):
+            if self.boundary_edge_to_element.shape[1] > 1 and self.boundary_edge_to_element.shape[0] > 1:
+                return self.boundary_edge_to_element
+
+        assert self.edges is not None or self.elements is not None
+
+        edge_elements = np.zeros((self.edges.shape[0],2),dtype=np.int64)
+        # for i in range(self.edges.shape[0]):
+        #     x = []
+        #     for j in range(self.edges.shape[1]):
+        #         x = np.append(x,np.where(self.elements[:,:3]==self.edges[i,j])[0])
+        #     for k in range(len(x)):
+        #         y = np.where(x==x[k])[0]
+        #         if y.shape[0]==self.edges.shape[1]:
+        #             edge_elements[i,0] = np.int64(x[k])
+        #             break
+
+        # FIND WHICH FACE NODES ARE IN WHICH ELEMENT
+        for i in range(self.edges.shape[0]):
             x = []
             for j in range(2):
-                x.append(np.where(self.elements==edges[i,j])[0])
+                x.append(np.where(self.elements[:,:3]==self.edges[i,j])[0])
 
+            # FIND WHICH ELEMENTS CONTAIN ALL FACE NODES - FOR INTERIOR ELEMENTS
+            # THEIR CAN BE MORE THAN ONE ELEMENT CONTAINING ALL FACE NODES
             z = x[0]
             for k in range(1,len(x)):
                 z = np.intersect1d(x[k],z)
 
-            # TAKE ONLY ONE EDGE
+            # CHOOSE ONLY ONE OF THESE ELEMENTS
             edge_elements[i,0] = z[0]
-            cols = np.array([np.where(self.elements[z[0],:]==edges[i,0])[0], np.where(self.elements[z[0],:]==edges[i,1])[0]])
+            # WHICH COLUMNS IN THAT ELEMENT ARE THE FACE NODES LOCATED 
+            cols = np.array([np.where(self.elements[z[0],:]==self.edges[i,0])[0], 
+                            np.where(self.elements[z[0],:]==self.edges[i,1])[0]
+                            ])
 
-            # cols = np.sort(cols.flatten()) # CAREFUL
-            cols = cols.flatten() # CAREFUL
-            if cols[0]==0 and cols[1]==1:
-                edge_number = 0
-                swap = 0
-            elif cols[0]==1 and cols[1]==2:
-                edge_number = 1
-                swap = 0
-            elif cols[0]==2 and cols[1]==0:
-                edge_number = 2
-                swap = 0
+            cols = np.sort(cols.flatten())
 
-            elif cols[0]==1 and cols[1]==0:
-                edge_number = 0
-                swap = 1
-            elif cols[0]==2 and cols[1]==1:
-                edge_number = 1
-                swap = 1
-            elif cols[0]==0 and cols[1]==2:
-                edge_number = 2
-                swap = 1
+            if cols[0] == 0 and cols[1] == 1:
+                edge_elements[i,1] = 0
+            elif cols[0] == 1 and cols[1] == 2:
+                edge_elements[i,1] = 1
+            elif cols[0] == 0 and cols[1] == 2:
+                edge_elements[i,1] = 2
 
-            edge_elements[i,1] = edge_number
-            edge_elements[i,2] = swap
-
-
-        self.edge_to_element = edge_elements
-        return edge_elements
-
-
-    def GetElementsWithBoundaryEdgesTri(self):
-        """ Computes elements which have edges on the boundary. Mesh can be linear or higher order.
-            Note that this assumes that a triangular element can only have one edge on the boundary.
-
-        output: 
-
-            edge_elements:              [1D array] array containing elements which have edge
-                                        on the boundary. Row number is edge number"""
-
-
-        assert self.edges is not None or self.elements is not None
-        # CYTHON SOLUTION
-        # from GetElementsWithBoundaryEdgesTri_Cython import GetElementsWithBoundaryEdgesTri_Cython
-        # return GetElementsWithBoundaryEdgesTri_Cython(self.elements,self.edges)
-        
-        from Core.Supplementary.Where import whereEQ
-        edge_elements = np.zeros(self.edges.shape[0],dtype=np.int64)
-        for i in range(self.edges.shape[0]):
-            x = []
-            for j in range(self.edges.shape[1]):
-                x = np.append(x,np.where(self.elements==self.edges[i,j])[0])
-                # x = np.append(x,whereEQ(self.elements,self.edges[i,j])[0])
-            # x = x.astype(np.int64)
-            for k in range(len(x)):
-                y = np.where(x==x[k])[0]
-                # y = np.asarray(whereEQ(np.array([x]),np.int64(x[k]))[0])
-                if y.shape[0]==self.edges.shape[1]:
-                    edge_elements[i] = np.int64(x[k])
-                    break
-
+        self.boundary_edge_to_element = edge_elements
         return edge_elements
 
 
@@ -728,54 +1084,105 @@ class Mesh(object):
 
         output: 
 
-            face_elements:              [2D array] array containing elements which have face
+            boundary_face_to_element:   [2D array] array containing elements which have face
                                         on the boundary [cloumn 0] and a flag stating which faces they are [column 1]
 
         """
 
-        if isinstance(self.boundary_face_to_element,np.ndarray):
-            return self.boundary_face_to_element
-
-
         assert self.faces is not None or self.elements is not None
 
-        # GET BONDARY FACES FROM ELEMENT CONNECTIVITY
-        if self.faces is None:
-            self.GetBoundaryFacesTet()
+        # THIS METHOD ALWAYS RETURNS THE FACE TO ELEMENT ARRAY, AND DOES NOT CHECK
+        # IF THIS HAS BEEN COMPUTED BEFORE, THE REASON BEING THAT THE FACES CAN COME 
+        # EXTERNALLY WHOSE ARRANGEMENT WOULD NOT CORRESPOND TO THE ONE USED INTERNALLY
+        # HENCE THIS MAPPING BECOMES NECESSARY
+        
+        all_faces = np.concatenate((self.elements[:,:3],self.elements[:,[0,1,3]],
+            self.elements[:,[0,2,3]],self.elements[:,[1,2,3]]),axis=0).astype(self.faces.dtype)
 
-        face_elements = np.zeros((self.faces.shape[0],2),dtype=np.int64)
-        # FIND WHICH FACE NODES ARE IN WHICH ELEMENT
-        for i in range(self.faces.shape[0]):
-            x = []
-            for j in range(3):
-                x.append(np.where(self.elements[:,:4]==self.faces[i,j])[0])
+        all_faces_in_faces = in2d(all_faces,self.faces[:,:3],consider_sort=True)
+        all_faces_in_faces = np.where(all_faces_in_faces==True)[0]
 
-            # FIND WHICH ELEMENTS CONTAIN ALL FACE NODES - FOR INTERIOR ELEMENTS
-            # THEIR CAN BE MORE THAN ONE ELEMENT CONTAINING ALL FACE NODES
-            z = x[0]
-            for k in range(1,len(x)):
-                z = np.intersect1d(x[k],z)
+        boundary_face_to_element = np.zeros((all_faces_in_faces.shape[0],2),dtype=np.int64)
+        boundary_face_to_element[:,0] = all_faces_in_faces % self.elements.shape[0]
+        boundary_face_to_element[:,1] = all_faces_in_faces // self.elements.shape[0]
 
-            # CHOOSE ONLY ONE OF THESE ELEMENTS
-            face_elements[i,0] = z[0]
-            # WHICH COLUMNS IN THAT ELEMENT ARE THE FACE NODES LOCATED 
-            cols = np.array([np.where(self.elements[z[0],:]==self.faces[i,0])[0], 
-                            np.where(self.elements[z[0],:]==self.faces[i,1])[0],
-                            np.where(self.elements[z[0],:]==self.faces[i,2])[0]
-                            ])
 
-            cols = np.sort(cols.flatten())
+        # SO FAR WE HAVE COMPUTED THE ELEMENTS THAT CONTAIN FACES, HOWEVER 
+        # NOTE THAT WE STILL HAVE NOT COMPUTED A MAPPING BETWEEN ELEMENTS AND 
+        # FACES. WE ONLY KNOW WHICH ELEMENTS CONTAIN FACES FROM in2d.
+        # WE NEED TO FIND THIS MAPPING NOW
 
-            if cols[0] == 0 and cols[1] == 1 and cols[2] == 2:
-                face_elements[i,1] = 0
-            elif cols[0] == 0 and cols[1] == 1 and cols[2] == 3:
-                face_elements[i,1] = 1
-            elif cols[0] == 0 and cols[1] == 2 and cols[2] == 3:
-                face_elements[i,1] = 2
-            elif cols[0] == 1 and cols[1] == 2 and cols[2] == 3:
-                face_elements[i,1] = 3
+        from Core.QuadratureRules.NodeArrangement import NodeArrangementTet
 
-        return face_elements
+        C = self.InferPolynomialDegree() - 1
+        node_arranger = NodeArrangementTet(C)[0]
+
+        # WE NEED TO DO THIS DUMMY RECONSTRUCTION OF FACES BASED ON ELEMENTS
+        faces = self.elements[boundary_face_to_element[:,0][:,None],
+            node_arranger[boundary_face_to_element[:,1],:]].astype(self.faces.dtype)
+
+        # CHECK FOR THIS CONDITION AS ARRANGEMENT IS NO LONGER MAINTAINED
+        assert np.sum(faces[:,:3].astype(np.int64) - self.faces[:,:3].astype(np.int64)) == 0
+
+        # NOW GET THE ROW MAPPING BETWEEN OLD FACES AND NEW FACES 
+        from Core.Supplementary.Tensors import shuffle_along_axis
+        row_mapper = shuffle_along_axis(faces[:,:3],self.faces[:,:3],consider_sort=True)
+
+        # UPDATE THE MAP
+        boundary_face_to_element[:,:] = boundary_face_to_element[row_mapper,:]
+        self.boundary_face_to_element = boundary_face_to_element
+        
+        return self.boundary_face_to_element
+
+
+
+        # --------------------------------------------------------------------------
+        # if isinstance(self.boundary_face_to_element,np.ndarray):
+        #     if self.boundary_face_to_element.shape[1] > 1 and self.boundary_face_to_element.shape[0] > 1:
+        #         return self.boundary_face_to_element
+
+
+        # # GET BONDARY FACES FROM ELEMENT CONNECTIVITY
+        # if self.faces.shape[0]> 1 and self.faces.shape[1]==3:
+        #     self.GetBoundaryFacesTet()
+
+        # face_elements = np.zeros((self.faces.shape[0],2),dtype=np.int64)
+
+        # # FIND WHICH FACE NODES ARE IN WHICH ELEMENT
+        # for i in range(self.faces.shape[0]):
+        #     x = []
+        #     for j in range(3):
+        #         x.append(np.where(self.elements[:,:4]==self.faces[i,j])[0])
+
+        #     # FIND WHICH ELEMENTS CONTAIN ALL FACE NODES - FOR INTERIOR ELEMENTS
+        #     # THEIR CAN BE MORE THAN ONE ELEMENT CONTAINING ALL FACE NODES
+        #     z = x[0]
+        #     for k in range(1,len(x)):
+        #         z = np.intersect1d(x[k],z)
+
+        #     # CHOOSE ONLY ONE OF THESE ELEMENTS
+        #     face_elements[i,0] = z[0]
+        #     # WHICH COLUMNS IN THAT ELEMENT ARE THE FACE NODES LOCATED 
+        #     cols = np.array([np.where(self.elements[z[0],:]==self.faces[i,0])[0], 
+        #                     np.where(self.elements[z[0],:]==self.faces[i,1])[0],
+        #                     np.where(self.elements[z[0],:]==self.faces[i,2])[0]
+        #                     ])
+
+        #     cols = np.sort(cols.flatten())
+
+        #     if cols[0] == 0 and cols[1] == 1 and cols[2] == 2:
+        #         face_elements[i,1] = 0
+        #     elif cols[0] == 0 and cols[1] == 1 and cols[2] == 3:
+        #         face_elements[i,1] = 1
+        #     elif cols[0] == 0 and cols[1] == 2 and cols[2] == 3:
+        #         face_elements[i,1] = 2
+        #     elif cols[0] == 1 and cols[1] == 2 and cols[2] == 3:
+        #         face_elements[i,1] = 3
+
+
+        # self.boundary_face_to_element = face_elements
+        # return face_elements
+        # --------------------------------------------------------------------------
 
 
     def GetElementsFaceNumberingTet(self):
@@ -796,50 +1203,63 @@ class Mesh(object):
                 return self.face_to_element
 
         assert self.elements is not None
-        # assert self.elements.shape[1] == 4 
 
         # GET ALL FACES FROM ELEMENT CONNECTIVITY
         if self.all_faces is None:
-            faces = self.GetFacesTet()
-        else:
-            faces = self.all_faces
+            self.GetFacesTet()
 
-        face_elements = np.zeros((faces.shape[0],2),dtype=np.int64)
-        # FIND WHICH FACE NODES ARE IN WHICH ELEMENT
-        for i in range(faces.shape[0]):
-            x = []
-            for j in range(3):
-                x.append(np.where(self.elements==faces[i,j])[0])
 
-            # FIND WHICH ELEMENTS CONTAIN ALL FACE NODES - FOR INTERIOR ELEMENTS
-            # THEIR CAN BE MORE THAN ONE ELEMENT CONTAINING ALL FACE NODES
-            z = x[0]
-            for k in range(1,len(x)):
-                z = np.intersect1d(x[k],z)
+        all_faces = np.concatenate((self.elements[:,:3],self.elements[:,[0,1,3]],
+            self.elements[:,[0,2,3]],self.elements[:,[1,2,3]]),axis=0).astype(np.int64)
 
-            # CHOOSE ONLY ONE OF THESE ELEMENTS
-            face_elements[i,0] = z[0]
-            # WHICH COLUMNS IN THAT ELEMENT ARE THE FACE NODES LOCATED 
-            cols = np.array([np.where(self.elements[z[0],:]==faces[i,0])[0], 
-                            np.where(self.elements[z[0],:]==faces[i,1])[0],
-                            np.where(self.elements[z[0],:]==faces[i,2])[0]
-                            ])
+        _,idx = unique2d(all_faces,consider_sort=True,order=False, return_index=True)
+        face_elements = np.zeros((self.all_faces.shape[0],2),dtype=np.int64)
 
-            cols = np.sort(cols.flatten())
-            # print cols
-
-            if cols[0] == 0 and cols[1] == 1 and cols[2] == 2:
-                face_elements[i,1] = 0
-            elif cols[0] == 0 and cols[1] == 1 and cols[2] == 3:
-                face_elements[i,1] = 1
-            elif cols[0] == 0 and cols[1] == 2 and cols[2] == 3:
-                face_elements[i,1] = 2
-            elif cols[0] == 1 and cols[1] == 2 and cols[2] == 3:
-                face_elements[i,1] = 3
-
+        face_elements[:,0] = idx % self.elements.shape[0]
+        face_elements[:,1] = idx // self.elements.shape[0]
 
         self.face_to_element = face_elements
-        return face_elements
+        return self.face_to_element
+
+
+        #--------------------------------------------------------------
+        # faces = self.all_faces
+        # face_elements = np.zeros((faces.shape[0],2),dtype=np.int64)
+        # # FIND WHICH FACE NODES ARE IN WHICH ELEMENT
+        # for i in range(faces.shape[0]):
+        #     x = []
+        #     for j in range(3):
+        #         x.append(np.where(self.elements==faces[i,j])[0])
+
+        #     # FIND WHICH ELEMENTS CONTAIN ALL FACE NODES - FOR INTERIOR ELEMENTS
+        #     # THEIR CAN BE MORE THAN ONE ELEMENT CONTAINING ALL FACE NODES
+        #     z = x[0]
+        #     for k in range(1,len(x)):
+        #         z = np.intersect1d(x[k],z)
+
+        #     # CHOOSE ONLY ONE OF THESE ELEMENTS
+        #     face_elements[i,0] = z[0]
+        #     # WHICH COLUMNS IN THAT ELEMENT ARE THE FACE NODES LOCATED 
+        #     cols = np.array([np.where(self.elements[z[0],:]==faces[i,0])[0], 
+        #                     np.where(self.elements[z[0],:]==faces[i,1])[0],
+        #                     np.where(self.elements[z[0],:]==faces[i,2])[0]
+        #                     ])
+
+        #     cols = np.sort(cols.flatten())
+        #     # print cols
+
+        #     if cols[0] == 0 and cols[1] == 1 and cols[2] == 2:
+        #         face_elements[i,1] = 0
+        #     elif cols[0] == 0 and cols[1] == 1 and cols[2] == 3:
+        #         face_elements[i,1] = 1
+        #     elif cols[0] == 0 and cols[1] == 2 and cols[2] == 3:
+        #         face_elements[i,1] = 2
+        #     elif cols[0] == 1 and cols[1] == 2 and cols[2] == 3:
+        #         face_elements[i,1] = 3
+
+
+        # self.face_to_element = face_elements
+        # return face_elements
 
 
     def ArrangeFacesTet(self):
@@ -854,15 +1274,13 @@ class Mesh(object):
             self.GetElementsFaceNumberingTet()
 
         # DETERMINE DEGREE
-        p = 1
-        for k in range(1,100):
-            if int((k+1)*(k+2)*(k+3)/6) == self.elements.shape[1]:
-                p = k
-                break
+        p = self.InferPolynomialDegree()
 
         node_arranger = NodeArrangementTet(p-1)[0]
-        for i in range(self.face_to_element.shape[0]):
-            self.all_faces = self.elements[self.face_to_element[i,0],node_arranger[self.face_to_element[i,1],:]]
+        # for i in range(self.face_to_element.shape[0]):
+            # self.all_faces = self.elements[self.face_to_element[i,0],node_arranger[self.face_to_element[i,1],:]]
+
+        self.all_faces = self.elements[self.face_to_element[:,0][:,None],node_arranger[self.face_to_element[:,1],:]]
 
 
 
@@ -880,15 +1298,18 @@ class Mesh(object):
             self.edges = mesh.edges.astype(np.int64)
         if isinstance(mesh.faces,np.ndarray):
             self.faces = mesh.faces.astype(np.int64)
-        self.nelem = mesh.nelem
+        self.nelem = np.int64(mesh.nelem)
         self.element_type = mesh.info 
 
         # RETRIEVE FACE/EDGE ATTRIBUTE
-        if self.element_type == 'tri' and (type(getattr(self,'edges')) is None or type(getattr(self,'edges')) is list):
+        if self.element_type == 'tri' and self.edges is None:
             # COMPUTE EDGES
             self.GetBoundaryEdgesTri()
-        if self.element_type == 'tet' and (type(getattr(self,'faces')) is None or type(getattr(self,'faces')) is list or\
-        type(getattr(self,'edges')) is None or type(getattr(self,'edges')) is list):
+
+        # DO NOT RELY ON SALOME FACE GENERATER
+        if self.element_type == 'tet':
+            self.edges = None
+            self.faces = None
             # COMPUTE FACES & EDGES
             self.GetBoundaryFacesTet()
             self.GetBoundaryEdgesTet()
@@ -985,6 +1406,8 @@ class Mesh(object):
     def ReadGIDMesh(self,filename,mesh_type,polynomial_order = 0):
         """Read GID meshes"""
 
+        self.__reset__()
+
         self.element_type = mesh_type
         ndim, self.nelem, nnode, nboundary = np.fromfile(filename,dtype=np.int64,count=4,sep=' ')
     
@@ -997,12 +1420,17 @@ class Mesh(object):
             self.GetBoundaryEdgesTri()
 
         if ndim==3 and mesh_type=="tet":
-            content = np.fromfile(filename,dtype=np.float64,count=4+4*nnode+5*self.nelem,sep=' ')
+            content = np.fromfile(filename,dtype=np.float64,count=4+4*nnode+5*self.nelem+9*nboundary,sep=' ')
             self.points = content[4:4+4*nnode].reshape(nnode,4)[:,1:]
             self.elements = content[4+4*nnode:4+4*nnode+5*self.nelem].reshape(self.nelem,5)[:,1:].astype(np.int64)
             self.elements -= 1
 
-            self.GetBoundaryFacesTet()
+            face_flags = content[4*nnode+5*self.nelem+4:].reshape(nboundary,9)[:,1:].astype(np.int64)
+            self.faces = np.ascontiguousarray(face_flags[:,1:4] - 1)
+            self.face_to_surface = np.ascontiguousarray(face_flags[:,7] - 1)
+            # self.boundary_face_to_element = np.ascontiguousarray(face_flags[:,0])
+
+            # self.GetBoundaryFacesTet()
             self.GetBoundaryEdgesTet()
 
 
@@ -1010,53 +1438,73 @@ class Mesh(object):
 
     def ReadGmsh(self,filename):
         """Read gmsh (.msh) file. TO DO"""
+
         from gmsh import Mesh as msh
+
+        self.__reset__()
+
         mesh = msh()
         mesh.read_msh(filename)
         self.points = mesh.Verts
         print dir(mesh)
         self.elements = mesh.Elmts 
         print self.elements
-        # print mesh.Phys
 
 
     def ReadHDF5(self,filename):
+        """Read mesh from MATLAB HDF5 file format"""
+
+        self.__reset__()
 
         DictOutput = loadmat(filename)
 
-        self.elements = np.ascontiguousarray(DictOutput['elements'])
+        self.elements = np.ascontiguousarray(DictOutput['elements']).astype(np.uint64)
         self.points = np.ascontiguousarray(DictOutput['points'])
         self.nelem = self.elements.shape[0]
-        self.element_type = str(DictOutput['element_type'][0])
-        self.edges = np.ascontiguousarray(DictOutput['edges'])
-        self.faces = np.ascontiguousarray(DictOutput['faces'])
-
-        self.all_faces = np.ascontiguousarray(DictOutput['all_faces'])
-        self.all_edges = np.ascontiguousarray(DictOutput['all_edges'])
-
-        self.face_to_element = np.ascontiguousarray(DictOutput['face_to_element'])
-        # self.edge_to_element = np.ascontiguousarray(DictOutput['edge_to_element'])
-
-        self.boundary_face_to_element = np.ascontiguousarray(DictOutput['boundary_face_to_element'])
+        # self.element_type = str(DictOutput['element_type'][0])
+        self.element_type = "tet"
+        self.edges = np.ascontiguousarray(DictOutput['edges']).astype(np.uint64)
+        self.faces = np.ascontiguousarray(DictOutput['faces']).astype(np.uint64)
+        # self.all_faces = np.ascontiguousarray(DictOutput['all_faces'])
+        # self.all_edges = np.ascontiguousarray(DictOutput['all_edges'])
+        # self.face_to_element = np.ascontiguousarray(DictOutput['face_to_element'])
+        # # self.edge_to_element = np.ascontiguousarray(DictOutput['edge_to_element'])
+        # self.boundary_face_to_element = np.ascontiguousarray(DictOutput['boundary_face_to_element'])
         # self.boundary_edge_to_element = np.ascontiguousarray(DictOutput['boundary_edge_to_element'])
 
-        # print (self.all_faces.nbytes+self.all_edges.nbytes)/1024./1024.
-        # exit()
+        # Tri
+        # self.elements = np.ascontiguousarray(DictOutput['elements'])
+        # self.points = np.ascontiguousarray(DictOutput['points'])
+        # self.nelem = self.elements.shape[0]
+        # self.element_type = str(DictOutput['element_type'][0])
+        # self.edges = np.ascontiguousarray(DictOutput['edges'])
+        # self.all_edges = np.ascontiguousarray(DictOutput['all_edges'])
+
+        # # self.edge_to_element = np.ascontiguousarray(DictOutput['edge_to_element'])
+        # # self.boundary_edge_to_element = np.ascontiguousarray(DictOutput['boundary_edge_to_element'])
 
 
-    def SimplePlot(self,save=False,filename=None):
-        """Simple mesh plot. Just a wire plot"""
+
+    def SimplePlot(self,to_plot='faces',color=None,save=False,filename=None,figure=None,show_plot=True):
+        """Simple mesh plot
+
+            to_plot:        [str] only for 3D. 'faces' to plot only boundary faces
+                            or 'all_faces' to plot all faces
+            """
+
+        assert self.element_type is not None
 
         import matplotlib.pyplot as plt 
-        fig = plt.figure()
         if self.element_type == "tri":
+            fig = plt.figure()
             plt.triplot(self.points[:,0],self.points[:,1], self.elements[:,:3],color='k')
+            plt.axis("equal")
 
         elif self.element_type == "tet":
-            # assert self.elements.shape[1] == 4
-            if self.faces is None:
-                raise ValueError('Mesh faces not available. Compute it first')
-            from mpl_toolkits.mplot3d import Axes3D
+            if self.faces is None and self.all_faces is None:
+                raise ValueError('Mesh faces not available. Compute them first')
+            # from mpl_toolkits.mplot3d import Axes3D
+            # fig = plt.figure()
 
             # FOR PLOTTING ELEMENTS
             # for elem in range(self.elements.shape[0]):
@@ -1064,27 +1512,59 @@ class Mesh(object):
             #   plt.gca(projection='3d')
             #   plt.plot(coords[:,0],coords[:,1],coords[:,2],'-bo')
 
-            # FOR PLOTTING ONLY BOUNDARY FACES
-            if self.faces.shape[1] == 3:
-                for face in range(self.faces.shape[0]):
-                    coords = self.points[self.faces[face,:3],:]
-                    plt.gca(projection='3d')
-                    plt.plot(coords[:,0],coords[:,1],coords[:,2],'-ko')
+            # FOR PLOTTING ONLY BOUNDARY FACES - MATPLOTLIB SOLUTION
+            # if self.faces.shape[1] == 3:
+            #     for face in range(self.faces.shape[0]):
+            #         coords = self.points[self.faces[face,:3],:]
+            #         plt.gca(projection='3d')
+            #         plt.plot(coords[:,0],coords[:,1],coords[:,2],'-ko')
+            # else:
+            #     for face in range(self.faces.shape[0]):
+            #         coords = self.points[self.faces[face,:3],:]
+            #         coords_all = self.points[self.faces[face,:],:]
+            #         plt.gca(projection='3d')
+            #         plt.plot(coords[:,0],coords[:,1],coords[:,2],'-k')
+            #         plt.plot(coords_all[:,0],coords_all[:,1],coords_all[:,2],'ko')
+
+            # plt.axis("equal")
+
+            # FOR PLOTTING ONLY BOUNDARY FACES - MAYAVI.MLAB SOLUTION
+            import os
+            os.environ['ETS_TOOLKIT'] = 'qt4'
+            from mayavi import mlab
+
+            if to_plot == 'all_faces':
+                faces = self.all_faces
+                if self.all_faces is None:
+                    raise ValueError("Boundary faces not available")
             else:
-                for face in range(self.faces.shape[0]):
-                    coords = self.points[self.faces[face,:3],:]
-                    coords_all = self.points[self.faces[face,:],:]
-                    plt.gca(projection='3d')
-                    plt.plot(coords[:,0],coords[:,1],coords[:,2],'-k')
-                    plt.plot(coords_all[:,0],coords_all[:,1],coords_all[:,2],'ko')
+                faces = self.faces
+                if self.faces is None:
+                    raise ValueError("Faces not available")
+
+
+            if figure is None:
+                figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(1000,800))
+
+            if color is None:
+                color=(197/255.,241/255.,197/255.)
+
+            mlab.triangular_mesh(self.points[:,0],self.points[:,1],
+                self.points[:,2],self.faces[:,:3],color=color)
+            radius = 1e-00
+            mlab.triangular_mesh(self.points[:,0],self.points[:,1],self.points[:,2], faces[:,:3],
+                line_width=radius,tube_radius=radius,color=(0,0,0),
+                representation='wireframe')
+
+            # svpoints = self.points[np.unique(self.faces),:]
+            # mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=0.005)
+
+            if show_plot:
+                mlab.show()
+
         else:
             raise NotImplementedError("SimplePlot for "+self.element_type+" not implemented yet")
 
-        plt.axis("equal")
-
-        # plt.xlim([-0.5,-0.42])
-        # plt.ylim([-0.05,0.07])
-        # plt.axis('off')
         if save:
             if filename is None:
                 raise KeyError('File name not given. Supply one')
@@ -1123,27 +1603,64 @@ class Mesh(object):
 
         elif self.element_type == "tet":
 
-            assert self.faces.shape[1] == 3
-
             import matplotlib as mpl
             import os
             os.environ['ETS_TOOLKIT'] = 'qt4'
             from mayavi import mlab
 
-            mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(800,600))
+            figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(800,600))
+            view = mlab.view()
+            figure.scene.disable_render = True
 
             color = mpl.colors.hex2color('#F88379')
-            linewidth = 100.2
+
+            linewidth = 10.
+            # trimesh_h = mlab.triangular_mesh(self.points[:,0], 
+                # self.points[:,1], self.points[:,2], self.faces[:,:3],
+                # line_width=linewidth,tube_radius=linewidth,color=(0,0.6,0.4),
+                # representation='surface') # representation='surface'
             trimesh_h = mlab.triangular_mesh(self.points[:,0], 
-                self.points[:,1], self.points[:,2], self.faces,
+                self.points[:,1], self.points[:,2], self.faces[:,:3],
                 line_width=linewidth,tube_radius=linewidth,color=(0,0.6,0.4),
-                representation='surface')
+                representation='wireframe') # representation='surface'
 
             # CHANGE LIGHTING OPTION
             trimesh_h.actor.property.interpolation = 'phong'
             trimesh_h.actor.property.specular = 0.1
             trimesh_h.actor.property.specular_power = 5
 
+            # ELEMENT NUMBERING
+            # for i in range(0,self.elements.shape[0]):
+            #     coord = self.points[self.elements[i,:],:]
+            #     x_avg = np.sum(coord[:,0])/self.elements.shape[1]
+            #     y_avg = np.sum(coord[:,1])/self.elements.shape[1]
+            #     z_avg = np.sum(coord[:,2])/self.elements.shape[1]
+                
+            #     # mlab.text3d(x_avg,y_avg,z_avg,str(i),color=color)
+            #     mlab.text3d(x_avg,y_avg,z_avg,str(i),color=(0,0,0.),scale=2)
+
+            # POINT NUMBERING
+            # for i in range(self.points.shape[0]):
+            #     # text_obj = mlab.text3d(self.points[i,0],self.points[i,1],self.points[i,2],str(i),color=(0,0,0.),scale=2)
+            #     # if i==0:
+            #     #     text_obj = mlab.text3d(self.points[i,0],self.points[i,1],self.points[i,2],str(i),color=(0,0,0.),scale=500)
+            #     # else:
+            #     #     text_obj.position = self.points[i,:]
+            #     #     text_obj.text = str(i)
+            #     #     text_obj.scale = [2,2,2]
+
+            #     if self.points[i,2] == 0:
+            #         text_obj = mlab.text3d(self.points[i,0],self.points[i,1],self.points[i,2],str(i),color=(0,0,0.),scale=0.5)
+
+            for i in range(self.faces.shape[0]):
+                if i==3:# or i==441:
+                    for j in self.faces[i,:]:
+                        text_obj = mlab.text3d(self.points[j,0],self.points[j,1],self.points[j,2],str(j),color=(0,0,0.),scale=10.5)
+
+
+            figure.scene.disable_render = False
+
+            # mlab.view(*view)
             mlab.show()
 
 
@@ -1193,6 +1710,34 @@ class Mesh(object):
                 write_vtu(Verts=self.points, Cells={cellflag:self.elements},**kwargs)
 
 
+    def WriteHDF5(self, filename=None, external_fields=None):
+        """Write to MATLAB's HDF5 format
+
+            external_fields:        [dict or tuple] of fields to save together with the mesh
+                                    for instance desired results. If a tuple is given keys in
+                                    dictionary will be named results_0, results_1 and so on"""
+
+        Dict = self.__dict__
+
+        if isinstance(external_fields,dict):
+            Dict.update(external_fields)
+        elif isinstance(external_fields,tuple):            
+            for counter, fields in enumerate(external_fields):
+                Dict['results_'+str(counter)] = fields
+        else:
+            raise AssertionError("Fields should be eirther tuple or a dict")
+
+        for key in Dict.keys():
+            if Dict[str(key)] is None:
+                del Dict[str(key)]
+
+        if filename is None:
+            pwd = os.path.dirname(os.path.realpath(__file__))
+            filename = pwd+'/output.mat'
+
+        savemat(filename, Dict, do_compression=True)
+
+
 
     @staticmethod
     def MeshPyTri(points,facets,*args,**kwargs):
@@ -1220,6 +1765,9 @@ class Mesh(object):
 
         output:                 [Mesh] an instance of the Mesh class  
         """
+
+        # FOR SAFETY, RESET THE CLASS
+        self.__reset__()
 
         if np.allclose(inner_radius,0):
             raise ValueError('inner_radius cannot be zero')
@@ -1286,12 +1834,16 @@ class Mesh(object):
                 connec_tri[2*i+1,:] = np.array([connec[i,2],connec[i,3],connec[i,1]])
 
             self.elements = connec_tri
-            # OBTAIN MESH EDGES
             self.nelem = self.elements.shape[0]
+            self.element_type = element_type
+            # OBTAIN MESH EDGES
             self.GetBoundaryEdgesTri()
+
         elif element_type == 'quad':
             self.elements = connec
-            raise NotImplementedError('GetBoundaryEdgesQuad is not yet implemented')
+            self.nelem = self.elements.shape[0]
+            self.element_type = element_type
+            warn('Edges are not computed as GetBoundaryEdgesQuad is not yet implemented')
 
 
         # ASSIGN NODAL COORDINATES
@@ -1300,7 +1852,6 @@ class Mesh(object):
         self.points[:,0] += center[0]
         self.points[:,1] += center[1]
         # ASSIGN PROPERTIES
-        self.element_type = element_type
         self.nnode = self.points.shape[0]
 
 
@@ -1311,7 +1862,11 @@ class Mesh(object):
         input:
 
             radius:         [double] radius of sphere
-            points:         [int] no of disrectisation"""
+            points:         [int] no of disrectisation
+        """
+
+        # RESET MESH
+        self.__reset__()
 
         from math import pi, cos, sin
         from meshpy.tet import MeshInfo, build
@@ -1346,7 +1901,10 @@ class Mesh(object):
         self.element_type = "tet"
 
 
-        # GET EDGES & FACES
+        # GET EDGES & FACES - NONE ASSIGNMENT IS NECESSARY OTHERWISE IF FACES/EDGES ALREADY EXIST 
+        # THEY WON'T GET UPDATED
+        self.faces = None
+        self.edges = None
         self.GetBoundaryFacesTet()
         self.GetBoundaryEdgesTet()
 
@@ -1430,7 +1988,7 @@ class Mesh(object):
 
 
     def ChangeType(self):
-        """ Change mesh data type from signed to unsigned"""
+        """Change mesh data type from signed to unsigned"""
         self.elements = self.elements.astype(np.uint64)
         if isinstance(self.edges,np.ndarray):
             self.edges = self.edges.astype(np.uint64)
@@ -1439,7 +1997,7 @@ class Mesh(object):
 
 
     def InferPolynomialDegree(self):
-        """ Infer the degree of interpolation (p) based on the shape of 
+        """Infer the degree of interpolation (p) based on the shape of 
             self.elements
 
             returns:        [int] polynomial degree
@@ -1447,6 +2005,14 @@ class Mesh(object):
 
         assert self.element_type is not None
         assert self.elements is not None
+
+        if self.degree is not None:
+            i = self.degree
+            if self.element_type == "tet" and (i+1)*(i+2)*(i+3)/6==self.elements.shape[1]:
+                return self.degree
+            if self.element_type == "tri" and (i+1)*(i+2)/2==self.elements.shape[1]:
+                return self.degree
+        
 
         p = 0
         if self.element_type == "tet":
@@ -1461,8 +2027,8 @@ class Mesh(object):
                     p = i
                     break 
 
+        self.degree = p
         return p 
-
 
 
     def BoundaryEdgesfromPhysicalParametrisation(self,points,facets,mesh_points,mesh_edges):
@@ -1518,6 +2084,14 @@ class Mesh(object):
 
         # return np.delete(mesh_boundary_edges,0,0)
         return mesh_boundary_edges[1:,:]
+
+
+    def __reset__(self):
+        """Class resetter. Resets all elements of the class
+        """
+
+        for i in self.__dict__.keys():
+            self.__dict__[i] = None
 
 
 

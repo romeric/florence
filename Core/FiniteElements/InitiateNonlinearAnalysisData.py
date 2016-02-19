@@ -34,4 +34,5 @@ def InitiateNonlinearAnalysisData(MainData,mesh):
     MainData.AssemblyParameters = AssemblyParameters
     ###########################################################################
 
-    return np.zeros((mesh.points.shape[0]*MainData.nvar,1)), np.zeros((mesh.points.shape[0]*MainData.nvar,1))
+    return np.zeros((mesh.points.shape[0]*MainData.nvar,1),dtype=np.float32), \
+    	np.zeros((mesh.points.shape[0]*MainData.nvar,1),dtype=np.float32)

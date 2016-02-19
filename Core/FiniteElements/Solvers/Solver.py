@@ -22,7 +22,8 @@ def MainSolver(MainData,mesh):
     ResidualNorm = { 'Increment_'+str(Increment) : [] for Increment in range(0,LoadIncrement) }
     
     # ALLOCATE FOR SOLUTION FIELDS
-    TotalDisp = np.zeros((mesh.points.shape[0],MainData.nvar,LoadIncrement),dtype=np.float64)
+    # TotalDisp = np.zeros((mesh.points.shape[0],MainData.nvar,LoadIncrement),dtype=np.float64)
+    TotalDisp = np.zeros((mesh.points.shape[0],MainData.nvar,LoadIncrement),dtype=np.float32)
 
     # PRE-ASSEMBLY
     print 'Assembling the system and acquiring neccessary information for the analysis...'
@@ -31,14 +32,16 @@ def MainSolver(MainData,mesh):
     # FIND PURE NEUMANN (EXTERNAL) NODAL FORCE VECTOR
     # NeumannForces = AssemblyForces(MainData,mesh)
     # NeumannForces = AssemblyForces_Cheap(MainData,mesh)
-    NeumannForces = np.zeros((mesh.points.shape[0]*MainData.nvar,1),dtype=np.float64)
+    # NeumannForces = np.zeros((mesh.points.shape[0]*MainData.nvar,1),dtype=np.float64)
+    NeumannForces = np.zeros((mesh.points.shape[0]*MainData.nvar,1),dtype=np.float32)
     # APPLY DIRICHELT BOUNDARY CONDITIONS AND GET DIRICHLET RELATED FORCES
     ColumnsIn, ColumnsOut, AppliedDirichlet = GetDirichletBoundaryConditions(mesh,MainData)
     # ALLOCATE FOR GEOMETRY - GetDirichletBoundaryConditions CHANGES THE MESH 
     # SO EULERX SHOULD BE ALLOCATED AFTERWARDS 
     Eulerx = np.copy(mesh.points)
     # FORCES RESULTING FROM DIRICHLET BOUNDARY CONDITIONS
-    DirichletForces = np.zeros((mesh.points.shape[0]*MainData.nvar,1),dtype=np.float64)
+    # DirichletForces = np.zeros((mesh.points.shape[0]*MainData.nvar,1),dtype=np.float64)
+    DirichletForces = np.zeros((mesh.points.shape[0]*MainData.nvar,1),dtype=np.float32)
 
     # ADOPT A DIFFERENT PATH FOR INCREMENTAL LINEAR ELASTICITY
     if MainData.Fields == "Mechanics" and MainData.AnalysisType != "Nonlinear":     
@@ -46,6 +49,11 @@ def MainSolver(MainData,mesh):
         vmesh = deepcopy(mesh)
         TotalDisp = IncrementalLinearElasticitySolver(MainData,vmesh,TotalDisp,
             Eulerx,LoadIncrement,NeumannForces,ColumnsIn,ColumnsOut,AppliedDirichlet)
+        del vmesh
+
+        # ADD EACH INCREMENTAL CONTRIBUTION TO MAKE IT CONSISTENT WITH THE NONLINEAR ANALYSYS
+        for i in range(TotalDisp.shape[2]-1,0,-1):
+            TotalDisp[:,:,i] = np.sum(TotalDisp[:,:,:i+1],axis=2)
 
         return TotalDisp
 
@@ -72,7 +80,6 @@ def MainSolver(MainData,mesh):
 
 
     MainData.NRConvergence = ResidualNorm
-
 
     return TotalDisp
 
