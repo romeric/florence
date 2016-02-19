@@ -9,5 +9,6 @@ This release brings outstanding changes to florence.
 - Extremely fast 3D curvilinear visualisation method under PostProcess. Millions of data points can be plotted in a few seconds. The data points now go through a VTK filter, so now no warnings are generated regarding normals.
 - 2D solutions for curvilinear mesh generator for planar faces.
 - Arc length based projection in 3D is now implemented and is working, although in the event of unsuccessful projection it falls back to orthogonal projection.
+- And above all the tests pass i.e. linear/non-linear analyses, 2D/3D curvilinear meshings, solvers, examples etc.
 
-Note that finally this also maintenance release as the code requires significant clean-up and many deprecated features would be removed right in the next few commits.    
+Note that finally this is also maintenance release as the code requires significant clean-up and many deprecated features would be removed right in the next few commits.    

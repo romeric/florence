@@ -1007,18 +1007,6 @@ class PostProcess(object):
         if QuantityToPlot is not None:
             quantity_to_plot = QuantityToPlot[face_elements[faces_to_plot_flag.flatten()==1,0]]
 
-        # faces_to_plot = np.zeros_like(corr_faces)
-        # quantity_to_plot = np.zeros(corr_faces.shape[0])
-        # counter = 0
-        # for i in range(corr_faces.shape[0]):
-        #     if faces_to_plot_flag[i]==1:
-        #         faces_to_plot[counter,:] = corr_faces[i,:]
-        #         quantity_to_plot[counter] = QuantityToPlot[face_elements[i,0]]
-        #         counter +=1
-        # faces_to_plot = faces_to_plot[:counter,:]
-        # quantity_to_plot = quantity_to_plot[:counter]
-
-
         # BUILD MESH OF SURFACE
         smesh = Mesh()
         smesh.element_type = "tri"
@@ -1033,31 +1021,11 @@ class PostProcess(object):
         mapper = np.arange(unique_elements.shape[0])
         smesh.elements = mapper[inv].reshape(smesh.elements.shape)
 
-        # nmin, nmax = np.min(smesh.elements), np.max(smesh.elements)
-        # nrange = np.arange(nmin,nmax+1,dtype=np.int64)
-        # counter = 0
-        # for i in nrange:
-        #     # rows, cols = np.where(smesh.elements==nrange[i])
-        #     rows, cols = np.where(smesh.elements==i)
-        #     if rows.shape[0]!=0:
-        #         smesh.elements[rows,cols]=counter
-        #         counter +=1
-
-
+ 
         smesh.GetBoundaryEdgesTri()
         smesh.GetEdgesTri()
         edge_elements = smesh.GetElementsEdgeNumberingTri()
 
-        # color = mpl.colors.hex2color('#F88379')
-        # linewidth = 100.2
-        # nmax = np.max(smesh.elements[:,:3])+1
-        # print np.max(smesh.elements[:,:3]), np.min(smesh.elements[:,:3])
-        # trimesh_h = mlab.triangular_mesh(smesh.points[:nmax,0], 
-        #         smesh.points[:nmax,1], smesh.points[:nmax,2], smesh.elements[:,:3],
-        #         line_width=linewidth,tube_radius=linewidth,color=(0,0.6,0.4),
-        #         representation='surface')
-        # mlab.show()
-        # return
         
         # GET EDGE ORDERING IN THE REFERENCE ELEMENT
         reference_edges = NodeArrangementTri(CActual)[0]
@@ -1106,7 +1074,6 @@ class PostProcess(object):
             connections[i*(x_edges.shape[0]-1):(i+1)*(x_edges.shape[0]-1),0] = connections_elements[i,:-1]
             connections[i*(x_edges.shape[0]-1):(i+1)*(x_edges.shape[0]-1),1] = connections_elements[i,1:]
         connections = connections[:(i+1)*(x_edges.shape[0]-1),:]
-        # print connenctions
         # point_cloulds = np.concatenate((x_edges.flatten()[:,None],y_edges.flatten()[:,None],z_edges.flatten()[:,None]),axis=1)
         
         figure.scene.disable_render = True
@@ -1137,16 +1104,6 @@ class PostProcess(object):
             for ielem in range(nface):
                 Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
 
-            # if face_elements[ielem,0] == 70:
-            #     print ielem*TrianglesFunc.nsimplex,(ielem+1)*TrianglesFunc.nsimplex
-            #     Uplot[ielem*nsize:(ielem+1)*nsize] = 0
-            # else:
-            #     Uplot[ielem*nsize:(ielem+1)*nsize] = 0.5
-
-        # Tplot2 = Tplot[68921:70602,:]
-        # Tplot3 = Tplot[21853:23534,:]
-        # Tplot4 = Tplot[65559:67240,:]
-
         point_line_width = .002
         # point_line_width = 0.5
         # point_line_width = .0008
@@ -1164,24 +1121,6 @@ class PostProcess(object):
         else:
             trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars = Uplot,
                 line_width=point_line_width,colormap='summer')
-
-
-        # if mesh.dd == 1:
-        #     trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars=Uplot,
-        #         line_width=point_line_width,color=(197/255.,241/255.,197/255.))
-        # else:
-        #     trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars=Uplot,
-        #     line_width=point_line_width,color=(254/255., 111/255., 94/255.))
-
-        # trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars=Uplot,
-        #     line_width=point_line_width,color=(197/255.,241/255.,197/255.))
-
-        # trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot2, scalars=Uplot,
-        #     line_width=point_line_width,color=(73/255.,89/255.,133/255.))
-        # trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot3, scalars=Uplot,
-        #     line_width=point_line_width,color=(254/255., 111/255., 94/255.))
-        # trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot4, scalars=Uplot,
-        #     line_width=point_line_width,color=(254/255., 111/255., 94/255.))
 
         # trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars=Uplot,line_width=point_line_width,colormap='summer')
 
@@ -1218,15 +1157,6 @@ class PostProcess(object):
         # CONTROL CAMERA VIEW
         # mlab.view(azimuth=45, elevation=50, distance=80, focalpoint=None,
         #         roll=0, reset_roll=True, figure=None)
-
-        # Falcon3D
-        # mlab.view(azimuth=-140, elevation=50, distance=22, focalpoint=None,
-        #         roll=60, reset_roll=True, figure=None)
-
-        # F6
-        # mlab.view(azimuth=-120, elevation=60, distance=52, focalpoint=None,
-        #         roll=60, reset_roll=True, figure=None)
-
     
         if show_plot is True:
             # FORCE UPDATE MLAB TO UPDATE COLORMAP
