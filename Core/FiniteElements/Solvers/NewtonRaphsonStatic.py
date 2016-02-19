@@ -31,6 +31,10 @@ def NewtonRaphson(MainData,Increment,K,NodalForces,Residual,
     if la.norm(Residual[ColumnsIn]) < 1e-14:
         NormForces = 1e-14
 
+    # CREATE POST-PROCESS OBJECT ONCE
+    post_process = PostProcess(MainData.ndim,MainData.nvar)
+    post_process.SetAnalysis(MainData.AnalysisType,MainData.Analysis)
+
 
     while np.abs(la.norm(Residual[ColumnsIn])/NormForces) > Tolerance:
         # APPLY INCREMENTAL DIRICHLET BOUNDARY CONDITIONS
@@ -46,7 +50,7 @@ def NewtonRaphson(MainData,Increment,K,NodalForces,Residual,
         sol = SparseSolver(K_b,-F_b,MainData.solve.type,sub_type=MainData.solve.sub_type,tol=MainData.solve.tol)
 
         # GET THE TOTAL SOLUTION AND ITS COMPONENTS SUCH AS UX, UY, UZ, PHI ETC
-        dU = PostProcess().TotalComponentSol(MainData,sol,ColumnsIn,ColumnsOut,AppliedDirichletInc,Iter,K.shape[0]) 
+        dU = post_process.TotalComponentSol(sol,ColumnsIn,ColumnsOut,AppliedDirichletInc,Iter,K.shape[0]) 
 
         # UPDATE THE FIELDS
         TotalDisp[:,:,Increment] += dU
@@ -67,7 +71,7 @@ def NewtonRaphson(MainData,Increment,K,NodalForces,Residual,
             np.abs(la.norm(Residual[ColumnsIn])/NormForces)          
 
         # UPDATE ITERATION NUMBER
-        Iter +=1 
+        Iter +=1
 
         # if Iter==MainData.AssemblyParameters.MaxIter:
             # raise StopIteration("\n\nNewton Raphson did not converge! Maximum number of iterations reached.")

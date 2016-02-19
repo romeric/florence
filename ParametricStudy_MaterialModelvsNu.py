@@ -167,36 +167,35 @@ if __name__ == '__main__':
             pp = 0
             for mm in range(2,6):
                 # if mm==3:
-                #     MaterialModels = [r"$Incremental\; Isotropic\;Linear\;Elastic$",
-                #         r"$Incrementally\;Linearised\; Mooney-Rivlin$",r"$Mooney-Rivlin$"]
+                #     MaterialModels = [r"$II\;Linear\;Elastic$",
+                #         r"$IL\; Mooney-Rivlin$",r"$Mooney-Rivlin$"]
                 # elif mm==2:
-                #     MaterialModels = [r"$Incremental\; Isotropic\;Linear\;Elastic$",
-                #         r"$Incrementally\;Linearised\; neo-Hookean$",r"$neo-Hookean$"]
+                #     MaterialModels = [r"$II\;Linear\;Elastic$",
+                #         r"$IL\; neo-Hookean$",r"$neo-Hookean$"]
                 # elif mm==4:
-                #     MaterialModels = [r"$Incremental\;Isotropic\;Linear\;Elastic$",
-                #         r"$Incrementally\;Linearised\;Nearly\;Incompressible\;Material$",
-                #         r"$Nearly\;Incompressible\;Material$"]
+                #     MaterialModels = [r"$II\;Linear\;Elastic$",
+                #         r"$IL\;Nearly\;Incompressible$",
+                #         r"$Nearly\;Incompressible$"]
                 # elif mm==5:
-                #     MaterialModels = [r"$Incremental\;Transervsely\;Isotropic\; Linear\; Elastic$",
-                #         r"$Incrementally\;Linearised\; Transervsely\;Isotropic\;Hyperelastic$",
-                #         r"$Transervsely\;Isotropic\;Hyperelastic$"]
+                #     MaterialModels = [r"$ITI\; Linear\; Elastic$",
+                #         r"$ILTI\;Hyperelastic$",
+                #         r"$TI\;Hyperelastic$"]
                 #     pp = 1
                 if mm==3:
-                    MaterialModels = [r"$II\;Linear\;Elastic$",
-                        r"$IL\; Mooney-Rivlin$",r"$Mooney-Rivlin$"]
+                    MaterialModels = [r"$ILE\;Isotropic$",
+                        r"$CIL\; Mooney-Rivlin$",r"$Mooney-Rivlin$"]
                 elif mm==2:
-                    MaterialModels = [r"$II\;Linear\;Elastic$",
-                        r"$IL\; neo-Hookean$",r"$neo-Hookean$"]
+                    MaterialModels = [r"$ILE\;Isotropic$",
+                        r"$CIL\; neo-Hookean$",r"$neo-Hookean$"]
                 elif mm==4:
-                    MaterialModels = [r"$II\;Linear\;Elastic$",
-                        r"$IL\;Nearly\;Incompressible$",
-                        r"$Nearly\;Incompressible$"]
+                    MaterialModels = [r"$ILE\;Isotropic$",
+                        r"$CIL\;NI-MR$",
+                        r"$NI-MR$"]
                 elif mm==5:
-                    MaterialModels = [r"$ITI\; Linear\; Elastic$",
-                        r"$ILTI\;Hyperelastic$",
-                        r"$TI\;Hyperelastic$"]
+                    MaterialModels = [r"$ILE\;TI$",
+                        r"$CIL\;TI$",
+                        r"$TI$"]
                     pp = 1
-
             
 
                 ResultsPath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/MaterialFormulation_vs_Nu/'
@@ -246,6 +245,18 @@ if __name__ == '__main__':
 
 
                     plt.ylabel(r"$Mesh\, Quality\,-\, min(Q_3)$",fontsize=font_size)
+                    plt.grid('on')
+
+                    if degree == 6:
+                        plt.ylim([0.3,0.8])
+                    elif degree == 5:
+                        plt.ylim([0.2,0.8])
+                    elif degree == 4:
+                        plt.ylim([0.0,0.9])
+                    elif degree == 3:
+                        plt.ylim([0.45,0.9])
+                    elif degree == 2:
+                        plt.ylim([0.66,0.78])
 
 
                     plt.legend(MaterialModels,loc='lower left',fontsize=legend_font_size)
@@ -260,13 +271,17 @@ if __name__ == '__main__':
 
                     if save:
                         if mm==3:
-                            plt.savefig(SavePath+ResultsFile+"_MooneyRivlin.eps",format='eps',dpi=500)
+                            plt.savefig(SavePath+ResultsFile+"_MooneyRivlin.eps",
+                                bbox_inches='tight',pad_inches=0.08,format='eps',dpi=300)
                         elif mm==2:
-                            plt.savefig(SavePath+ResultsFile+"_Neo-Hookean.eps",format='eps',dpi=500)
+                            plt.savefig(SavePath+ResultsFile+"_Neo-Hookean.eps",
+                                bbox_inches='tight',pad_inches=0.08,format='eps',dpi=300)
                         elif mm==4:
-                            plt.savefig(SavePath+ResultsFile+"_NearlyIncompressibleMaterial.eps",format='eps',dpi=500)
+                            plt.savefig(SavePath+ResultsFile+"_NearlyIncompressibleMaterial.eps",
+                                bbox_inches='tight',pad_inches=0.08,format='eps',dpi=300)
                         elif mm==5:
-                            plt.savefig(SavePath+ResultsFile+"_TransverselyIsotropicMaterial.eps",format='eps',dpi=500)
+                            plt.savefig(SavePath+ResultsFile+"_TransverselyIsotropicMaterial.eps",
+                                bbox_inches='tight',pad_inches=0.08,format='eps',dpi=300)
 
 
                 
@@ -298,27 +313,48 @@ if __name__ == '__main__':
                     for i in nu[:-nn]:
                         x3.append(poly(i))
 
-                    plt.plot(nu[:-nn],x1,marker.next(),linestyle='-',linewidth=2)
-                    plt.plot(nu[:-nn],x2,marker.next(),linestyle='-',linewidth=2)
-                    plt.plot(nu[:-nn],x3,marker.next(),linestyle='-',linewidth=2)
+                    # plt.plot(nu[:-nn],x1,marker.next(),linestyle='-',linewidth=2)
+                    # plt.plot(nu[:-nn],x2,marker.next(),linestyle='-',linewidth=2)
+                    # plt.plot(nu[:-nn],x3,marker.next(),linestyle='-',linewidth=2)
+
+                    plt.plot(nu[:-nn],np.log10(x1),marker.next(),linestyle='-',linewidth=2)
+                    plt.plot(nu[:-nn],np.log10(x2),marker.next(),linestyle='-',linewidth=2)
+                    plt.plot(nu[:-nn],np.log10(x3),marker.next(),linestyle='-',linewidth=2)
 
                     plt.legend(MaterialModels,loc='upper left',fontsize=legend_font_size)
-                    plt.ylabel(r"$\kappa(A)$",fontsize=font_size)
+                    plt.ylabel(r"log$_{10}\bigg(\kappa(A)\bigg)$",fontsize=font_size)
 
-                    y_formatter = mpl.ticker.ScalarFormatter(useOffset=True)
-                    y_formatter.set_powerlimits((-4,4))
-                    ax = plt.gca()
-                    ax.yaxis.set_major_formatter(y_formatter)
+                    # y_formatter = mpl.ticker.ScalarFormatter(useOffset=True)
+                    # y_formatter.set_powerlimits((-4,4))
+                    # ax = plt.gca()
+                    # ax.yaxis.set_major_formatter(y_formatter)
+
+                    plt.grid('on')
+                    if degree == 2:
+                        plt.ylim([6.0,7.6])
+                    elif degree == 3:
+                        plt.ylim([6.2,7.8])
+                    elif degree == 4:
+                        plt.ylim([6.4,7.8])
+                    elif degree == 5:
+                        plt.ylim([6.5,8.5])
+                    elif degree == 6:
+                        plt.ylim([6.5,8.5])
 
                     if save:
+                        # save_tuple = (bbox_inches='tight',pad_inches=0.01,format='eps',dpi=300)
                         if mm==3:
-                            plt.savefig(SavePath+ResultsFile+"_MooneyRivlin_CondA.eps",format='eps',dpi=500)
+                            plt.savefig(SavePath+ResultsFile+"_MooneyRivlin_CondA.eps",
+                                bbox_inches='tight',pad_inches=0.08,format='eps',dpi=300)
                         elif mm==2:
-                            plt.savefig(SavePath+ResultsFile+"_Neo-Hookean_CondA.eps",format='eps',dpi=500)
+                            plt.savefig(SavePath+ResultsFile+"_Neo-Hookean_CondA.eps",
+                                bbox_inches='tight',pad_inches=0.08,format='eps',dpi=300)
                         elif mm==4:
-                            plt.savefig(SavePath+ResultsFile+"_NearlyIncompressibleMaterial_CondA.eps",format='eps',dpi=500)
+                            plt.savefig(SavePath+ResultsFile+"_NearlyIncompressibleMaterial_CondA.eps",
+                                bbox_inches='tight',pad_inches=0.08,format='eps',dpi=300)
                         elif mm==5:
-                            plt.savefig(SavePath+ResultsFile+"_TransverselyIsotropicMaterial_CondA.eps",format='eps',dpi=500)
+                            plt.savefig(SavePath+ResultsFile+"_TransverselyIsotropicMaterial_CondA.eps",
+                                bbox_inches='tight',pad_inches=0.08,format='eps',dpi=300)
 
 
 
@@ -388,13 +424,21 @@ if __name__ == '__main__':
 
 
             if linear:
-                plt.legend([r"$II\;Linear\;Elastic$",r"$ITI\;Linear\;Elastic$",r"$IL\;neo-Hookean$",
-                    r"$IL\;Mooney-Rivlin$",r"$IL\;Nearly\;Incompressible$",
-                    r"$ILTI\;Hyperelastic$"],loc="upper left",fontsize=legend_font_size)
+                # plt.legend([r"$II\;Linear\;Elastic$",r"$ITI\;Linear\;Elastic$",r"$IL\;neo-Hookean$",
+                    # r"$IL\;Mooney-Rivlin$",r"$IL\;Nearly\;Incompressible$",
+                    # r"$ILTI\;Hyperelastic$"],loc="upper left",fontsize=legend_font_size)
+
+                plt.legend([r"$ILE\;Isotropic$",r"$ILE\;TI$",r"$CIL\;neo-Hookean$",
+                    r"$CIL\;Mooney-Rivlin$",r"$CIL\;NI-MR$",
+                    r"$CIL\;TI$"],loc="upper left",fontsize=legend_font_size)
             else:
-                plt.legend([r"$II\;Linear\;Elastic$",r"$ITI\;Linear\;Elastic$",r"$neo-Hookean$",
-                    r"$Mooney-Rivlin$",r"$Nearly\;Incompressible$",
-                    r"$TI\;Hyperelastic$"],loc="upper left",fontsize=legend_font_size)
+                # plt.legend([r"$II\;Linear\;Elastic$",r"$ITI\;Linear\;Elastic$",r"$neo-Hookean$",
+                    # r"$Mooney-Rivlin$",r"$Nearly\;Incompressible$",
+                    # r"$TI\;Hyperelastic$"],loc="upper left",fontsize=legend_font_size)
+
+                plt.legend([r"$ILE\;Isotropic$",r"$ILE\;TI$",r"$neo-Hookean$",
+                    r"$Mooney-Rivlin$",r"$NI-MR$",
+                    r"$TI$"],loc="upper left",fontsize=legend_font_size)
 
 
             if which_func == 1:
@@ -465,6 +509,8 @@ if __name__ == '__main__':
                 if which_func==0:
                     func = condA
 
+                plt.grid('on')
+
 
                 if which_func == 1:
 
@@ -513,21 +559,32 @@ if __name__ == '__main__':
                         counter+=1
 
                 if which_func==1:
-                    plt.ylim([0,1.8])
-                    ax.set_yticklabels([0, 0.2, 0.4, 0.8, 1],fontsize=font_size)
-                    ax.set_yticks([0.0,0.2,0.4,0.6,0.8,1.0]) 
+                    plt.ylim([0,0.8])
+                    # plt.ylim([0,1.8])
+                    # ax.set_yticklabels([0, 0.2, 0.4, 0.8, 1],fontsize=font_size)
+                    # ax.set_yticks([0.0,0.2,0.4,0.6,0.8,1.0]) 
                     plt.ylabel(r"$mean(min(Q_3))$",fontsize=font_size)
 
-                if linear:
-                    ax.legend((rects[0][0], rects[1][0], rects[2][0], rects[3][0], rects[4][0], rects[5][0]), 
-                        (r"$II\;Linear\;Elastic$",r"$ITI\;Linear\;Elastic$",r"$IL\; neo-Hookean$",
-                            r"$IL\;Mooney-Rivlin$",r"$IL\;Nearly\;Incompressible$",r"$ILTI\;Hyperelastic$"),
-                        loc='upper right',fontsize=legend_font_size)
-                else:
-                    ax.legend((rects[0][0], rects[1][0], rects[2][0], rects[3][0], rects[4][0], rects[5][0]), 
-                        (r"$II\;Linear\;Elastic$",r"$ITI\;Linear\;Elastic$",r"$neo-Hookean$",
-                            r"$Mooney-Rivlin$",r"$Nearly\;Incompressible$",r"$TI\;Hyperelastic$"),
-                        loc='upper right',fontsize=legend_font_size)
+                # if linear:
+                #     # ax.legend((rects[0][0], rects[1][0], rects[2][0], rects[3][0], rects[4][0], rects[5][0]), 
+                #         # (r"$II\;Linear\;Elastic$",r"$ITI\;Linear\;Elastic$",r"$IL\; neo-Hookean$",
+                #             # r"$IL\;Mooney-Rivlin$",r"$IL\;Nearly\;Incompressible$",r"$ILTI\;Hyperelastic$"),
+                #         # loc='upper right',fontsize=legend_font_size)
+
+                #     ax.legend((rects[0][0], rects[1][0], rects[2][0], rects[3][0], rects[4][0], rects[5][0]), 
+                #         (r"$ILE\;Isotropic$",r"$ILE\;TI$",r"$CIL\; neo-Hookean$",
+                #             r"$CIL\;Mooney-Rivlin$",r"$CIL\;NI-MR$",r"$CIL\;TI$"),
+                #         loc='upper right',fontsize=legend_font_size)
+                # else:
+                #     # ax.legend((rects[0][0], rects[1][0], rects[2][0], rects[3][0], rects[4][0], rects[5][0]), 
+                #         # (r"$II\;Linear\;Elastic$",r"$ITI\;Linear\;Elastic$",r"$neo-Hookean$",
+                #             # r"$Mooney-Rivlin$",r"$Nearly\;Incompressible$",r"$TI\;Hyperelastic$"),
+                #         # loc='upper right',fontsize=legend_font_size)
+
+                #     ax.legend((rects[0][0], rects[1][0], rects[2][0], rects[3][0], rects[4][0], rects[5][0]), 
+                #         (r"$ILE\;Isotropic$",r"$ILE\;TI$",r"$neo-Hookean$",
+                #             r"$Mooney-Rivlin$",r"$NI-MR$",r"$TI$"),
+                #         loc='upper right',fontsize=legend_font_size)
  
 
                 # ax.set_xticklabels((r'$p=2$', r'$p=3$', r'$p=4$'),fontsize=font_size)
@@ -538,39 +595,36 @@ if __name__ == '__main__':
                 ax.set_xlim([2,6.9])
                 ax.set_xticks([2.45,3.5,4.4,5.4,6.4])
 
+
                 
 
             
             if save:
                 if which_func == 1:
-                    plt.savefig(SavePath+ResultsFile.split("P")[0]+append+"AllMaterials_scaledA.eps",format='eps',dpi=500)
-                    # print SavePath+ResultsFile.split("P")[0]+append+"AllMaterials_scaledA.eps"
+                    plt.savefig(SavePath+ResultsFile.split("P")[0]+append+"AllMaterials_scaledA.eps",
+                        format='eps',dpi=300,bbox_inches='tight',pad_inches=0.08)
+                    print SavePath+ResultsFile.split("P")[0]+append+"AllMaterials_scaledA.eps"
                 else:
-                    plt.savefig(SavePath+ResultsFile+"_"+append+"AllMaterials_condA.eps",format='eps',dpi=500)
+                    plt.savefig(SavePath+ResultsFile+"_"+append+"AllMaterials_condA.eps",
+                        format='eps',dpi=300,bbox_inches='tight',pad_inches=0.08)
+                    print SavePath+ResultsFile+"_"+append+"AllMaterials_condA.eps"
 
 
 
 
             plt.show()
+            plt.close()
             # print rects
 
 
 
 
 
-        # plotter(degree=5,which_func=1,save=True)
+        # plotter(degree=6,which_func=1,save=True)
         # plotter(degree=6,which_func=1)
 
         # plotter_all_materials(degree=3,which_func=1,linear=False,save=True)
         # plotter_all_materials(degree=3,linear=False)
 
-        plotter_bar(which_func=1,linear=False,save=True)
-        # plotter_bar()
-
-
-
-
-
-
-
-
+        # plotter_bar(which_func=1,linear=False,save=True)
+        plotter_bar()

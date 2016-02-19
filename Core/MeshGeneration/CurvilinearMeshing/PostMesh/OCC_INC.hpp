@@ -13,18 +13,31 @@
 #include <TopoDS_Face.hxx>
 #include <TopExp_Explorer.hxx>
 #include <gp.hxx>
-#include <Geom_Line.hxx>
 #include <gp_Circ.hxx>
+#include <Geom_Line.hxx>
 #include <Geom_Circle.hxx>
 #include <Geom_BSplineCurve.hxx>
 #include <Geom_BSplineSurface.hxx>
+#include <GeomAdaptor_HSurface.hxx>
 #include <GeomConvert.hxx>
+#include <GeomProjLib.hxx>
+#include <GeomLib_Tool.hxx>
+#include <GeomLib_IsPlanarSurface.hxx>
+#include <ProjLib_CompProjectedCurve.hxx>
+#include <ProjLib_ProjectOnSurface.hxx>
 #include <BRepAdaptor_Curve.hxx>
 #include <BRep_Tool.hxx>
 #include <BRepTools.hxx>
+#include <BRepAdaptor_Curve.hxx>
+#include <BRepAdaptor_Surface.hxx>
+#include <BRepAdaptor_HSurface.hxx>
 #include <BRepBuilderAPI_NurbsConvert.hxx>
+#include <BRepBuilderAPI_MakeVertex.hxx>
+#include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepMesh.hxx>
 #include <BRepMesh_GeomTool.hxx>
+#include <BRepMesh_IncrementalMesh.hxx>
+#include <BRepClass_FaceClassifier.hxx>
 //#include <TColgp_Array1OfPnt.hxx>
 //#include <TColStd_Array1OfReal.hxx>
 //#include <TColStd_Array1OfInteger.hxx>
@@ -37,6 +50,11 @@
 #include <GCPnts_QuasiUniformDeflection.hxx>
 #include <GeomConvert_CompCurveToBSplineCurve.hxx>
 //#include <Hermit.hxx>
+#include <IntCurvesFace_Intersector.hxx>
+#include <IntCurveSurface_Intersection.hxx>
+#include <GeomAPI_IntCS.hxx>
+#include <Extrema_ExtPC.hxx>
+#include <Extrema_ExtPS.hxx>
 
 
 //! Identifies the type of a curve.

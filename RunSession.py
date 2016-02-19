@@ -89,8 +89,8 @@ if __name__ == "__main__":
         print("Time taken for the entire analysis was",
               time.time() - t_FEM, "seconds \n")
         # MEMORY USAGE INFORMATION
-        # print 'Global sparse matrix needed', MainData.spmat, \
-        #   'MB of memory with IJV indices requiring', MainData.ijv, 'MB'
+        print('Global sparse matrix needed', MainData.spmat, \
+          'MB of memory with IJV indices requiring', MainData.ijv, 'MB')
         # print sys.getsizeof(MainData)
 
     # BEM SESSION
@@ -98,7 +98,7 @@ if __name__ == "__main__":
         for MainData.C in range(0, 1):
             t_BEM = time.time()
             rel_error = Main.BoundaryElements.main(MainData,
-                                                   MainData.C, 5, 5, MainData.norder, 0, 0, 1)[0]
+                MainData.C, 5, 5, MainData.norder, 0, 0, 1)[0]
             print("Time taken for the entire analysis was",
                   time.time() - t_BEM, "seconds \n")
             # print (rel_error, MainData.C)

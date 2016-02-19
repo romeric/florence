@@ -21,9 +21,8 @@ cdef class PostMeshCurvePy:
     cdef PostMeshCurve *thisptr
 
     def __cinit__(self, bytes py_element_type, UInteger dimension=2):
-        # Convert to cpp string explicitly
+        # CONVERT TO CPP STRING EXPLICITLY
         cdef string cpp_element_type = py_element_type
-        # self.thisptr = new OCCPlugin()
         self.thisptr = new PostMeshCurve(cpp_element_type,dimension)
         self.ndim = 2
 
@@ -111,9 +110,6 @@ cdef class PostMeshCurvePy:
 
     def ProjectMeshOnCurve(self):
         self.thisptr.ProjectMeshOnCurve()
-    
-    # def ProjectMeshOnSurface(self):
-        # self.thisptr.ProjectMeshOnSurface()
 
     def RepairDualProjectedParameters(self):
         self.thisptr.RepairDualProjectedParameters()
@@ -169,7 +165,7 @@ cdef class PostMeshSurfacePy:
     cdef PostMeshSurface *thisptr
 
     def __cinit__(self, bytes py_element_type, UInteger dimension=3):
-        # Convert to cpp string explicitly
+        # CONVERT TO CPP STRING EXPLICITLY
         cdef string cpp_element_type = py_element_type
         self.thisptr = new PostMeshSurface(cpp_element_type,dimension)
         self.ndim = 3
@@ -245,23 +241,44 @@ cdef class PostMeshSurfacePy:
     def GetGeomPointsOnCorrespondingFaces(self):
         self.thisptr.GetGeomPointsOnCorrespondingFaces()
 
+    def IdentifySurfacesContainingFacesByPureProjection(self):
+        self.thisptr.IdentifySurfacesContainingFacesByPureProjection()
+
     def IdentifySurfacesContainingFaces(self):
         self.thisptr.IdentifySurfacesContainingFaces()
+
+    def IdentifyRemainingSurfacesByProjection(self):
+        self.thisptr.IdentifyRemainingSurfacesByProjection()
+
+    def IdentifySurfacesIntersections(self):
+        self.thisptr.IdentifySurfacesIntersections()
+
+    def SupplySurfacesContainingFaces(self,Integer[::1] arr, Integer already_mapped = 0, Integer caller = 0):
+        self.thisptr.SupplySurfacesContainingFaces(&arr[0], arr.shape[0], already_mapped, caller)
 
     def ProjectMeshOnSurface(self):
         self.thisptr.ProjectMeshOnSurface()
 
-    # def RepairDualProjectedParameters(self):
-    #   self.thisptr.RepairDualProjectedParameters()
+    def RepairDualProjectedParameters(self):
+        self.thisptr.RepairDualProjectedParameters()
 
-    def MeshPointInversionSurface(self):
-        self.thisptr.MeshPointInversionSurface()
+    def MeshPointInversionSurface(self,Integer project_on_curves, Integer modify_linear_mesh = 0):
+        self.thisptr.MeshPointInversionSurface(project_on_curves, modify_linear_mesh)
 
-    # def GetBoundaryPointsOrder(self):
-    #   self.thisptr.GetBoundaryPointsOrder()
+    def MeshPointInversionSurfaceArcLength(self,Integer project_on_curves, Real OrthTol, Real[:,::1] FEbases):
+        self.thisptr.MeshPointInversionSurfaceArcLength(project_on_curves,OrthTol,&FEbases[0,0],FEbases.shape[0],FEbases.shape[1])
 
     def ReturnModifiedMeshPoints(self,Real[:,::1] points):
         self.thisptr.ReturnModifiedMeshPoints(&points[0,0])
+
+    @boundscheck(False)
+    def GetMeshFacesOnPlanarSurfaces(self):
+        return np.array(self.thisptr.GetMeshFacesOnPlanarSurfaces(),copy=False).T.copy(order='C')
+
+    @boundscheck(False)
+    def GetDirichletFaces(self):
+        cdef vector[Integer] dirichlet_faces = self.thisptr.GetDirichletFaces()
+        return np.array(dirichlet_faces,copy=False).reshape(dirichlet_faces.size()/(self.ndim+1),self.ndim+1)
 
     @boundscheck(False)
     def GetDirichletData(self):

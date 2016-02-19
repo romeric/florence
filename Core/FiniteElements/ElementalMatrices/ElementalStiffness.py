@@ -4,7 +4,7 @@ from KinematicMeasures import *
 
 
 #-------------------------------------------------------------------------------------------------------------------#
-#                   VECTORISED ELEMENTAL MATRIX COMPUTATION USING EINSUM AND AVOIDING FOR LOOP
+#                   VECTORISED ELEMENTAL MATRIX COMPUTATION USING EINSUM
 #-------------------------------------------------------------------------------------------------------------------#
 def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,elem):
 
@@ -45,7 +45,7 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
     
 
     # LOOP OVER GAUSS POINTS
-    for counter in range(MainData.Domain.AllGauss.shape[0]): 
+    for counter in MainData.Range(MainData.Domain.AllGauss.shape[0]): 
 
         if MainData.Fields == 'ElectroMechanics':
             # MATERIAL ELECTRIC FIELD  
@@ -105,10 +105,10 @@ def Stiffness(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,
 
 
 #-------------------------------------------------------------------------------------------------------------------#
-# THIS METHOD IS KEPT FOR DEBUG PURPOSES AS IT RETAINS MUCH OF THE ORIGINAL ALGORITHM, HOWEVER IT IS COSTLIER AS IT 
-# MAKES DUPICATE COPIES OF KINEMATIC MEASURES. THERE ARE ONLY TWO LINES WHICH HAVE CHANGED FROM THE ORIGINAL VERSION 
-# ONE IS THE LINE WHERE KinematicMeasures_NonVectorised IS CALLED AND THE OTHER ONE IS COMPUTING detJ FOR NONLINEAR 
-# PROBLEMS AS detJ IS NOW A VECTOR NOT A SCALAR 
+# THIS METHOD IS KEPT FOR DEBUGGING PURPOSES AS IT RETAINS MUCH OF THE ORIGINAL NON-VECTORISED ALGORITHM, HOWEVER IT 
+# IS COSTLIER THAN THE ORIGINAL AS IT MAKES DUPICATE COPIES OF KINEMATIC MEASURES. THERE ARE ONLY TWO LINES WHICH HAVE 
+# CHANGED FROM THE ORIGINAL VERSION ONE IS THE LINE WHERE KinematicMeasures_NonVectorised IS CALLED AND THE OTHER ONE 
+# IS COMPUTING detJ FOR NONLINEAR PROBLEMS AS detJ IS NOW A VECTOR NOT A SCALAR 
 #-------------------------------------------------------------------------------------------------------------------#
 def Stiffness_NonVectorised(MainData,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,elem):
 

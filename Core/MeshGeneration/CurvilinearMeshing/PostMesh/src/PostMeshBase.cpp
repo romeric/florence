@@ -371,8 +371,8 @@ void PostMeshBase::CheckMesh()
     }
     if (flag_p == 1)
     {
-        Eigen::MatrixI a_rows = cnp::arange(0,this->mesh_points.rows()-1);
-        Eigen::MatrixI a_cols = cnp::arange(0,this->mesh_points.cols());
+        Eigen::MatrixI a_rows = cnp::arange(this->mesh_points.rows()-1);
+        Eigen::MatrixI a_cols = cnp::arange(this->mesh_points.cols());
         this->mesh_points = cnp::take(this->mesh_points,a_rows,a_cols);
     }
 
@@ -388,8 +388,8 @@ void PostMeshBase::CheckMesh()
     }
     if (flag_e == 1)
     {
-        Eigen::MatrixI a_rows = cnp::arange(0,this->mesh_elements.rows()-1);
-        Eigen::MatrixI a_cols = cnp::arange(0,this->mesh_elements.cols());
+        Eigen::MatrixI a_rows = cnp::arange(this->mesh_elements.rows()-1);
+        Eigen::MatrixI a_cols = cnp::arange(this->mesh_elements.cols());
         this->mesh_elements = cnp::take(this->mesh_elements,a_rows,a_cols);
     }
 
@@ -405,8 +405,8 @@ void PostMeshBase::CheckMesh()
     }
     if (flag_ed == 1)
     {
-        Eigen::MatrixI a_rows = cnp::arange(0,this->mesh_edges.rows()-1);
-        Eigen::MatrixI a_cols = cnp::arange(0,this->mesh_edges.cols());
+        Eigen::MatrixI a_rows = cnp::arange(this->mesh_edges.rows()-1);
+        Eigen::MatrixI a_cols = cnp::arange(this->mesh_edges.cols());
         this->mesh_edges = cnp::take(this->mesh_edges,a_rows,a_cols);
     }
 
@@ -424,8 +424,8 @@ void PostMeshBase::CheckMesh()
         }
         if (flag_f == 1)
         {
-            Eigen::MatrixI a_rows = cnp::arange(0,this->mesh_faces.rows()-1);
-            Eigen::MatrixI a_cols = cnp::arange(0,this->mesh_faces.cols());
+            Eigen::MatrixI a_rows = cnp::arange(this->mesh_faces.rows()-1);
+            Eigen::MatrixI a_cols = cnp::arange(this->mesh_faces.cols());
             this->mesh_faces = cnp::take(this->mesh_faces,a_rows,a_cols);
         }
     }
@@ -445,7 +445,9 @@ void PostMeshBase::CheckMesh()
 
 void PostMeshBase::GetGeomVertices()
 {
-    this->geometry_points.clear();
+    if (!this->geometry_points.empty())
+        return;
+
     for (TopExp_Explorer explorer(this->imported_shape,TopAbs_VERTEX); explorer.More(); explorer.Next())
     {
         // GET THE VERTICES LYING ON THE IMPORTED TOPOLOGICAL SHAPE
@@ -461,9 +463,9 @@ void PostMeshBase::GetGeomEdges()
     //!  ITERATE OVER TopoDS_Shape AND EXTRACT ALL THE EDGES. CONVERT THE EDGES TO Geom_Curve AND
     //! GET THEIR HANDLES
 
-    this->geometry_curves.clear();
-    this->geometry_curves_types.clear();
-//    for (TopExp_Explorer explorer(this->imported_shape,TopAbs_WIRE); explorer.More(); explorer.Next())
+    if (!this->geometry_curves.empty())
+        return;
+
     for (TopExp_Explorer explorer(this->imported_shape,TopAbs_EDGE); explorer.More(); explorer.Next())
     {
         // GET THE EDGES
@@ -474,17 +476,11 @@ void PostMeshBase::GetGeomEdges()
         // STORE HANDLE IN THE CONTAINER
         this->geometry_curves.push_back(curve);
 
-        // TO GET TYPE OF THE CURVE, CONVERT THE CURVE TO ADAPTIVE CURVE (THE TRY-CATCH IS FOR 3D)
-        try
-        {
-            GeomAdaptor_Curve adapt_curve = GeomAdaptor_Curve(curve);
-            // STORE TYPE OF CURVE (CURVE TYPES ARE DEFINED IN occ_inc.hpp)
-            this->geometry_curves_types.push_back(adapt_curve.GetType());
-        }
-        catch (Standard_NullObject)
-        {
-            warn("Warning: Types of 3D curves could not be determined");
-        }
+        // TO GET TYPE OF THE CURVE - UNLIKE GeomAdaptor_Curve, BRepAdaptor_Curve
+        // DOES NOT THROW BUT RETURNS GeomAbs_OtherCurve FOR UNKNOWN TYPE OF CURVES
+        BRepAdaptor_Curve adapt_curve(current_edge);
+        // STORE TYPE OF CURVE (CURVE TYPES ARE DEFINED IN OCC_INC.hpp)
+        this->geometry_curves_types.push_back(adapt_curve.GetType());
     }
 }
 
@@ -493,22 +489,25 @@ void PostMeshBase::GetGeomFaces()
     //!  ITERATE OVER TopoDS_Shape AND EXTRACT ALL THE EDGES. CONVERT THE EDGES TO Geom_Surface AND
     //! GET THEIR HANDLES
 
-    this->geometry_surfaces.clear();
-    this->geometry_surfaces_types.clear();
+    if (!this->geometry_surfaces.empty() && !this->topo_faces.empty())
+        return;
 
     for (TopExp_Explorer explorer(this->imported_shape,TopAbs_FACE); explorer.More(); explorer.Next())
     {
 
         // GET THE FACES
         TopoDS_Face current_face = TopoDS::Face(explorer.Current());
+        // STORE
+        this->topo_faces.push_back(current_face);
         // CONVERT THEM TO GEOM_SURFACE
         Handle_Geom_Surface surface = BRep_Tool::Surface(current_face);
         // STORE HANDLE IN THE CONTAINER
         this->geometry_surfaces.push_back(surface);
 
-        // TO GET TYPE OF THE SURFACE, CONVERT THE SURFACE TO ADAPTIVE SURFACE
-        GeomAdaptor_Surface adapt_surface = GeomAdaptor_Surface(surface);
-        // STORE TYPE OF SURFACE (SURFACE TYPES ARE DEFINED IN occ_inc.hpp)
+        // TO GET TYPE OF THE SURFACE. UNLIKE GeomAdaptor_Surface, BRepAdaptor_Surface
+        // DOES NOT THROW BUT RETURNS GeomAbs_OtherSurface FOR UNKNOWN TYPE OF SURFACES
+        BRepAdaptor_Surface adapt_surface(current_face);
+        // STORE TYPE OF SURFACE (SURFACE TYPES ARE DEFINED IN OCC_INC.hpp)
         this->geometry_surfaces_types.push_back(adapt_surface.GetType());
 
     }

@@ -1,6 +1,7 @@
 import numpy as np 
 import numpy.linalg as la
-
+import gc
+from warnings import warn
 from Base import JacobianError, IllConditionedError
 
 import Core.InterpolationFunctions.TwoDimensional.Quad.QuadLagrangeGaussLobatto as TwoD
@@ -16,38 +17,65 @@ from ElementalMatrices.KinematicMeasures import *
 from Core.MeshGeneration import vtk_writer
 
 class PostProcess(object):
-    """PostProcess"""
+    """Post-process class for finite element solvers"""
 
-    def __init__(self):
+    def __init__(self,ndim,nvar):
+
+        self.domain_bases = None
+        self.postdomain_bases = None
+        self.boundary_bases = None
+        self.ndim = ndim
+        self.nvar = nvar
+        self.analysis_type = None
+        self.analysis_nature = None
+        self.material_type = None
+
         self.is_scaledjacobian_computed = False
+        self.is_material_anisotropic = False
 
 
-    @staticmethod
-    def TotalComponentSol(MainData,sol,ColumnsIn,ColumnsOut,AppliedDirichletInc,Iter,fsize):
+    def SetBases(self,domain=None,postdomain=None,boundary=None):
+        """Sets bases for all integration points for 'domain', 'postdomain' or 'boundary'
+        """
 
-        nvar = MainData.nvar
-        ndim = MainData.ndim
-        Analysis = MainData.Analysis
+        if domain is None and postdomain is None and boundary is None:
+            warn("Nothing to be set") 
+
+        self.domain_bases = domain
+        self.postdomain_bases = postdomain
+        self.boundary_bases = boundary
+
+    def SetSolution(self,sol):
+        self.sol = sol
+
+    def SetAnalysis(self,AnalysisType,AnalysisNature):
+        self.analysis_type = AnalysisType
+        self.analysis_nature = AnalysisNature
+
+
+    def TotalComponentSol(self,sol,ColumnsIn,ColumnsOut,AppliedDirichletInc,Iter,fsize):
+
+        nvar = self.nvar
+        ndim = self.ndim
         TotalSol = np.zeros((fsize,1))
 
         # GET TOTAL SOLUTION
-        if MainData.AnalysisType == 'Nonlinear':
-            if Analysis =='Static':
+        if self.analysis_type == 'Nonlinear':
+            if self.analysis_nature =='Static':
                 TotalSol[ColumnsIn,0] = sol
                 if Iter==0:
                     TotalSol[ColumnsOut,0] = AppliedDirichletInc
-            if Analysis !='Static':
+            if self.analysis_nature !='Static':
                 TotalSol = np.copy(sol)
                 TotalSol[ColumnsOut,0] = AppliedDirichletInc
 
-        elif MainData.AnalysisType == 'Linear':
+        elif self.analysis_type == 'Linear':
                 TotalSol[ColumnsIn,0] = sol
                 TotalSol[ColumnsOut,0] = AppliedDirichletInc
                 
 
         # RE-ORDER SOLUTION COMPONENTS
         dU = TotalSol.reshape(TotalSol.shape[0]/nvar,nvar)
-
 
         return dU
 
@@ -435,45 +463,54 @@ class PostProcess(object):
 
 
     
-    def MeshQualityMeasures(self,MainData,mesh,TotalDisp,show_plot=True):
+    def MeshQualityMeasures(self, mesh, TotalDisp, plot=True, show_plot=True):
+        """Computes mesh quality measures, Q_1, Q_2, Q_3
+
+            input:
+                mesh:                   [Mesh] an instance of class mesh can be any mesh type
+
+        """
+
+        if self.is_scaledjacobian_computed is None:
+            self.is_scaledjacobian_computed = False
+        if self.is_material_anisotropic is None:
+            self.is_material_anisotropic = False
 
         if self.is_scaledjacobian_computed is True:
             raise AssertionError('Scaled Jacobian seems to be already computed. Re-Computing it may return incorrect results')
-        if MainData.isScaledJacobianComputed is True:
-            raise AssertionError('Scaled Jacobian seems to be already computed. Re-Computing it may return incorrect results')
 
-        PostDomain = MainData.PostDomain
-        points = mesh.points
-        vpoints = np.copy(mesh.points)
-        # vpoints   += TotalDisp[:,:,-1]
-        vpoints = vpoints + TotalDisp[:,:,-1]
-        # vpoints = mesh.points + np.sum(TotalDisp,axis=2)
+        PostDomain = self.postdomain_bases
+
+        vpoints = mesh.points
+        if TotalDisp.ndim == 3:
+            vpoints = vpoints + TotalDisp[:,:,-1]
+        elif TotalDisp.ndim == 2:
+            vpoints = vpoints + TotalDisp
+        else:
+            raise AssertionError("mesh points and displacment arrays are incompatible")
 
         elements = mesh.elements
 
-        MainData.ScaledJacobian = np.zeros(elements.shape[0])
-        MainData.ScaledFF = np.zeros(elements.shape[0])
-        MainData.ScaledHH = np.zeros(elements.shape[0])
+        ScaledJacobian = np.zeros(elements.shape[0])
+        ScaledFF = np.zeros(elements.shape[0])
+        ScaledHH = np.zeros(elements.shape[0])
 
-        MainData.ScaledFNFN = np.zeros(elements.shape[0])
-        MainData.ScaledCNCN = np.zeros(elements.shape[0])
-        # MainData.Jacobian = np.zeros(elements.shape[0])
-        # MainData.ScaledJacobian = []
-        # MainData.ScaledJacobianElem = []
-
+        if self.is_material_anisotropic:
+            ScaledFNFN = np.zeros(elements.shape[0])
+            ScaledCNCN = np.zeros(elements.shape[0])
 
         JMax =[]; JMin=[]
         for elem in range(mesh.nelem):
-            LagrangeElemCoords = points[elements[elem,:],:]
+            LagrangeElemCoords = mesh.points[elements[elem,:],:]
             EulerElemCoords = vpoints[elements[elem,:],:]
 
             # COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
             # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-            ParentGradientX = np.einsum('ijk,jl->kil',MainData.PostDomain.Jm,LagrangeElemCoords)
+            ParentGradientX = np.einsum('ijk,jl->kil',PostDomain.Jm,LagrangeElemCoords)
             # MAPPING TENSOR [\partial\vec{x}/ \partial\vec{\varepsilon} (ndim x ndim)]
-            ParentGradientx = np.einsum('ijk,jl->kil',MainData.PostDomain.Jm,EulerElemCoords)
+            ParentGradientx = np.einsum('ijk,jl->kil',PostDomain.Jm,EulerElemCoords)
             # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
-            MaterialGradient = np.einsum('ijk,kli->ijl',la.inv(ParentGradientX),MainData.PostDomain.Jm)
+            MaterialGradient = np.einsum('ijk,kli->ijl',la.inv(ParentGradientX),PostDomain.Jm)
             # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
             F = np.einsum('ij,kli->kjl',EulerElemCoords,MaterialGradient)
             # JACOBIAN OF DEFORMATION GRADIENT TENSOR
@@ -485,14 +522,13 @@ class PostProcess(object):
             # USING ISOPARAMETRIC
             Jacobian = np.abs(np.linalg.det(ParentGradientx))
             # USING DETERMINANT OF DEFORMATION GRADIENT TENSOR
-            # Jacobian = detF
+            Jacobian = detF
             # USING INVARIANT F:F
             Q1 = np.sqrt(np.einsum('kij,lij->kl',F,F)).diagonal()
             # USING INVARIANT H:H
             Q2 = np.sqrt(np.einsum('ijk,ijl->kl',H,H)).diagonal()
-            # print np.isnan(Q3).any()
-            Directions = getattr(MainData.MaterialArgs,"AnisotropicOrientations",None)
-            if isinstance(Directions,np.ndarray) and MainData.MaterialArgs.Type == "BonetTranservselyIsotropicHyperElastic":
+
+            if self.is_material_anisotropic:
                 Q4 = np.einsum('ijk,k',F,Directions[elem,:])
                 Q4 = np.sqrt(np.dot(Q4,Q4.T)).diagonal()
 
@@ -502,60 +538,53 @@ class PostProcess(object):
 
             # FIND MIN AND MAX VALUES
             JMin = np.min(Jacobian); JMax = np.max(Jacobian)
+            ScaledJacobian[elem] = 1.0*JMin/JMax
+            ScaledFF[elem] = 1.0*np.min(Q1)/np.max(Q1)
+            ScaledHH[elem] = 1.0*np.min(Q2)/np.max(Q2)
+            # Jacobian[elem] = np.min(detF)
 
-            # MainData.ScaledJacobian[elem] = 1.0*JMin/JMax
-            # MainData.ScaledJacobian = np.append(MainData.ScaledJacobian,1.0*JMin/JMax)
-            # MainData.ScaledJacobianElem = np.append(MainData.ScaledJacobianElem,elem) 
+            if self.is_material_anisotropic:
+                ScaledFNFN[elem] = 1.0*np.min(Q4)/np.max(Q4)
+                ScaledCNCN[elem] = 1.0*np.min(Q5)/np.max(Q5)
 
-            MainData.ScaledJacobian[elem] = 1.0*JMin/JMax
-            # MainData.Jacobian[elem] = np.min(Jacobian)
-            MainData.ScaledFF[elem] = 1.0*np.min(Q1)/np.max(Q1)
-            MainData.ScaledHH[elem] = 1.0*np.min(Q2)/np.max(Q2)
-            # MainData.Jacobian[elem] = np.min(detF)
-
-            if Directions != None and MainData.MaterialArgs.Type == "BonetTranservselyIsotropicHyperElastic":
-                MainData.ScaledFNFN[elem] = 1.0*np.min(Q4)/np.max(Q4)
-                MainData.ScaledCNCN[elem] = 1.0*np.min(Q5)/np.max(Q5)
-
-        if np.isnan(MainData.ScaledJacobian).any():
-            # raise JacobianError()
+        if np.isnan(ScaledJacobian).any():
             warn("Jacobian of mapping is close to zero")
 
-        
+        print 'Minimum ScaledJacobian value is', ScaledJacobian.min(), \
+        'corresponding to element', ScaledJacobian.argmin()
 
-        print 'Minimum ScaledJacobian value is', np.min(MainData.ScaledJacobian), \
-        'corresponding to element', np.where(np.min(MainData.ScaledJacobian)==MainData.ScaledJacobian)[0][0]
+        print 'Minimum ScaledFF value is', ScaledFF.min(), \
+        'corresponding to element', ScaledFF.argmin()
 
-        print 'Minimum ScaledFF value is', np.min(MainData.ScaledFF), \
-        'corresponding to element', np.where(np.min(MainData.ScaledFF)==MainData.ScaledFF)[0][0]
+        print 'Minimum ScaledHH value is', ScaledHH.min(), \
+        'corresponding to element', ScaledHH.argmin()
 
-        print 'Minimum ScaledHH value is', np.min(MainData.ScaledHH), \
-        'corresponding to element', np.where(np.min(MainData.ScaledHH)==MainData.ScaledHH)[0][0]
+        if self.is_material_anisotropic:
+            print 'Minimum ScaledFNFN value is', ScaledFNFN.min(), \
+            'corresponding to element', ScaledFNFN.argmin()
 
-        if Directions != None and MainData.MaterialArgs.Type == "BonetTranservselyIsotropicHyperElastic":
-            print 'Minimum ScaledFNFN value is', np.min(MainData.ScaledFNFN), \
-            'corresponding to element', np.where(np.min(MainData.ScaledFNFN)==MainData.ScaledFNFN)[0][0]
-
-            print 'Minimum ScaledCNCN value is', np.min(MainData.ScaledCNCN), \
-            'corresponding to element', np.where(np.min(MainData.ScaledCNCN)==MainData.ScaledCNCN)[0][0]
+            print 'Minimum ScaledCNCN value is', ScaledCNCN.min(), \
+            'corresponding to element', ScaledCNCN.argmin()
 
 
-        if show_plot == True:
-
+        if plot:
             import matplotlib.pyplot as plt
-                
             fig = plt.figure()
-            # plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),
-            #   MainData.ScaledJacobian,width=1.,color='#FE6F5E',alpha=0.8)
-
-            plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),MainData.ScaledJacobian,width=1.,alpha=0.4)
+            plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),ScaledJacobian,width=1.,alpha=0.4)
             plt.xlabel(r'$Elements$',fontsize=18)
             plt.ylabel(r'$Scaled\, Jacobian$',fontsize=18)
+            if show_plot:
+                plt.show()
 
-            # plt.bar(np.linspace(0,MainData.ScaledJacobianElem.shape[0]-1,
-            #   MainData.ScaledJacobianElem.shape[0]),MainData.ScaledJacobian,width=1.,alpha=0.4)
-            # plt.xlabel(r'$Elements$',fontsize=18)
-            # plt.ylabel(r'$Scaled\, Jacobian$',fontsize=18)
+        # SET COMPUTED TO TRUE
+        self.is_scaledjacobian_computed = True
+
+        if not self.is_material_anisotropic:
+            return self.is_scaledjacobian_computed, ScaledFF, ScaledHH, ScaledJacobian
+        else:
+            return self.is_scaledjacobian_computed, ScaledFF, ScaledHH, ScaledJacobian, ScaledFNFN, ScaledCNCN
+
+
 
 
     @staticmethod   
@@ -566,9 +595,6 @@ class PostProcess(object):
         fig = plt.figure()
         ax = fig.axes
 
-        # TotalDisp = np.loadtxt('/home/roman/Desktop/step11.dat',delimiter=',')
-        # TotalDisp = TotalDisp[:,:,None]
-        # import sys; sys.exit(0)
         # TotalDisp = np.zeros_like(TotalDisp)
         # MainData.ScaledJacobian = np.ones_like(MainData.ScaledJacobian)
 
@@ -701,25 +727,25 @@ class PostProcess(object):
         plt.show()
 
 
-    @staticmethod
-    def HighOrderCurvedPatchPlot(*args,**kwargs):
+    def HighOrderCurvedPatchPlot(self,*args,**kwargs):
         mesh = args[0]
         if mesh.element_type == "tri":
-            PostProcess().HighOrderCurvedPatchPlotTri(*args,**kwargs)
+            self.HighOrderCurvedPatchPlotTri(*args,**kwargs)
         elif mesh.element_type == "tet":
-            PostProcess().HighOrderCurvedPatchPlotTet(*args,**kwargs)
+            self.HighOrderCurvedPatchPlotTet(*args,**kwargs)
+        else:
+            raise ValueError("Unknown mesh type")
 
 
     @staticmethod
     def HighOrderCurvedPatchPlotTri(mesh,TotalDisp,QuantityToPlot=None,
         ProjectionFlags=None,InterpolationDegree=40,EquallySpacedPoints=False,
-        TriSurf=False,colorbar=False,PlotActualCurve=False,save=False,filename=None):
+        TriSurf=False,colorbar=False,PlotActualCurve=False,plot_points=False,save=False,filename=None):
 
         """High order curved triangular mesh plots, based on high order nodal FEM.
             The equally spaced FEM points do not work as good as the Fekete points 
         """
 
-        # QuantityToPlot = np.ones_like(QuantityToPlot)
 
         from Core.QuadratureRules.FeketePointsTri import FeketePointsTri
         from Core.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
@@ -775,7 +801,6 @@ class PostProcess(object):
 
         smesh = deepcopy(mesh)
         smesh.elements = mesh.elements[:,:ndim+1]
-        smesh.edges = mesh.edges[:,:ndim]
         nmax = np.max(smesh.elements)+1
         smesh.points = mesh.points[:nmax,:]
         smesh.GetEdgesTri()
@@ -788,7 +813,10 @@ class PostProcess(object):
         reference_edges = np.delete(reference_edges,1,1)
 
         # GET EULERIAN GEOMETRY
-        vpoints = mesh.points + TotalDisp[:,:,-1]
+        if TotalDisp.ndim==3:
+            vpoints = mesh.points + TotalDisp[:,:,-1]
+        else:
+            vpoints = mesh.points + TotalDisp
 
         # GET X & Y OF CURVED EDGES
         x_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
@@ -839,8 +867,9 @@ class PostProcess(object):
             # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot[:4,:], np.ones(Xplot.shape[0]),alpha=0.8,origin='lower')
 
         # PLOT CURVED POINTS
-        # plt.plot(vpoints[:,0],vpoints[:,1],'o',markersize=3,color='#F88379')
-        plt.plot(vpoints[:,0],vpoints[:,1],'o',markersize=3,color='k')
+        if plot_points:
+            # plt.plot(vpoints[:,0],vpoints[:,1],'o',markersize=3,color='#F88379')
+            plt.plot(vpoints[:,0],vpoints[:,1],'o',markersize=3,color='k')
 
 
         plt.set_cmap('viridis')
@@ -881,12 +910,15 @@ class PostProcess(object):
 
     @staticmethod
     def HighOrderCurvedPatchPlotTet(mesh,TotalDisp,QuantityToPlot=None,
-        ProjectionFlags=None,InterpolationDegree=20,EquallySpacedPoints=False,
-        colorbar=False,PlotActualCurve=False,save=False,filename=None):
+        ProjectionFlags=None,InterpolationDegree=20,EquallySpacedPoints=False,PlotActualCurve=False,
+        plot_points=False,point_radius=0.1,colorbar=False,color=None,figure=None,
+        show_plot=True,save=False,filename=None):
 
         """High order curved tetrahedral surfaces mesh plots, based on high order nodal FEM.
             The equally spaced FEM points do not work as good as the Fekete points 
         """
+
+
 
         from Core.QuadratureRules.FeketePointsTri import FeketePointsTri
         from Core.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
@@ -948,7 +980,11 @@ class PostProcess(object):
 
 
         # GET ONLY THE FACES WHICH NEED TO BE PLOTTED 
-        faces_to_plot_flag = ProjectionFlags.flatten()
+        if ProjectionFlags is None:
+            faces_to_plot_flag = np.ones(mesh.faces.shape[0])
+        else:
+            faces_to_plot_flag = ProjectionFlags.flatten()
+
         # CHECK IF ALL FACES NEED TO BE PLOTTED OR ONLY BOUNDARY FACES
         if faces_to_plot_flag.shape[0] > mesh.faces.shape[0]:
             # ALL FACES
@@ -962,18 +998,25 @@ class PostProcess(object):
             # FOR MAPPING DATA E.G. SCALED JACOBIAN FROM ELEMENTS TO FACES
             face_elements = mesh.GetElementsWithBoundaryFacesTet()
         else:
-            raise ValueError("I do not understand what you want to plot")
+            # raise ValueError("I do not understand what you want to plot")
+            corr_faces = mesh.all_faces
+            face_elements = mesh.GetElementsFaceNumberingTet()
 
-        faces_to_plot = np.zeros_like(corr_faces)
-        quantity_to_plot = np.zeros(corr_faces.shape[0])
-        counter = 0
-        for i in range(corr_faces.shape[0]):
-            if faces_to_plot_flag[i]==1:
-                faces_to_plot[i,:] = corr_faces[i,:]
-                quantity_to_plot[i] = QuantityToPlot[face_elements[i,0]]
-                counter +=1
-        faces_to_plot = faces_to_plot[:counter,:]
-        quantity_to_plot = quantity_to_plot[:counter]
+        faces_to_plot = corr_faces[faces_to_plot_flag.flatten()==1,:]
+
+        if QuantityToPlot is not None:
+            quantity_to_plot = QuantityToPlot[face_elements[faces_to_plot_flag.flatten()==1,0]]
+
+        # faces_to_plot = np.zeros_like(corr_faces)
+        # quantity_to_plot = np.zeros(corr_faces.shape[0])
+        # counter = 0
+        # for i in range(corr_faces.shape[0]):
+        #     if faces_to_plot_flag[i]==1:
+        #         faces_to_plot[counter,:] = corr_faces[i,:]
+        #         quantity_to_plot[counter] = QuantityToPlot[face_elements[i,0]]
+        #         counter +=1
+        # faces_to_plot = faces_to_plot[:counter,:]
+        # quantity_to_plot = quantity_to_plot[:counter]
 
 
         # BUILD MESH OF SURFACE
@@ -984,20 +1027,26 @@ class PostProcess(object):
         smesh.nelem = smesh.elements.shape[0]
         smesh.points = mesh.points[np.unique(smesh.elements),:]
 
-        nmin, nmax = np.min(smesh.elements), np.max(smesh.elements)
-        nrange = np.arange(nmin,nmax+1,dtype=np.int64)
-        counter = 0
-        for i in nrange:
-            # rows, cols = np.where(smesh.elements==nrange[i])
-            rows, cols = np.where(smesh.elements==i)
-            if rows.shape[0]!=0:
-                smesh.elements[rows,cols]=counter
-                counter +=1
+
+        # MAP         
+        unique_elements, inv = np.unique(smesh.elements,return_inverse=True)
+        mapper = np.arange(unique_elements.shape[0])
+        smesh.elements = mapper[inv].reshape(smesh.elements.shape)
+
+        # nmin, nmax = np.min(smesh.elements), np.max(smesh.elements)
+        # nrange = np.arange(nmin,nmax+1,dtype=np.int64)
+        # counter = 0
+        # for i in nrange:
+        #     # rows, cols = np.where(smesh.elements==nrange[i])
+        #     rows, cols = np.where(smesh.elements==i)
+        #     if rows.shape[0]!=0:
+        #         smesh.elements[rows,cols]=counter
+        #         counter +=1
+
 
         smesh.GetBoundaryEdgesTri()
         smesh.GetEdgesTri()
         edge_elements = smesh.GetElementsEdgeNumberingTri()
-
 
         # color = mpl.colors.hex2color('#F88379')
         # linewidth = 100.2
@@ -1016,9 +1065,17 @@ class PostProcess(object):
         reference_edges = np.delete(reference_edges,1,1)
 
         # GET EULERIAN GEOMETRY
-        vpoints = mesh.points + TotalDisp[:,:,-1]
+        if TotalDisp.ndim == 3:
+            vpoints = mesh.points + TotalDisp[:,:,-1]
+        elif TotalDisp.ndim == 2:
+            vpoints = mesh.points + TotalDisp
+        else:
+            raise AssertionError("mesh points and displacment arrays are incompatible")
+
         # svpoints = vpoints[np.unique(mesh.faces),:]
         svpoints = vpoints[np.unique(faces_to_plot),:]
+        del vpoints
+        gc.collect()
 
         # GET X, Y & Z OF CURVED EDGES  
         x_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
@@ -1033,15 +1090,34 @@ class PostProcess(object):
 
 
         # MAKE A FIGURE
-        figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(800,600))
+        if figure is None:
+            figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(800,600))
         # PLOT CURVED EDGES
-        edge_width = .001
+        # edge_width = .0016
+        # edge_width = .08
         # edge_width = 0.0003
         # edge_width = 0.75
+        edge_width = .03
 
+        
+        connections_elements = np.arange(x_edges.size).reshape(x_edges.shape[1],x_edges.shape[0])
+        connections = np.zeros((x_edges.size,2),dtype=np.int64)
+        for i in range(connections_elements.shape[0]):
+            connections[i*(x_edges.shape[0]-1):(i+1)*(x_edges.shape[0]-1),0] = connections_elements[i,:-1]
+            connections[i*(x_edges.shape[0]-1):(i+1)*(x_edges.shape[0]-1),1] = connections_elements[i,1:]
+        connections = connections[:(i+1)*(x_edges.shape[0]-1),:]
+        # print connenctions
+        # point_cloulds = np.concatenate((x_edges.flatten()[:,None],y_edges.flatten()[:,None],z_edges.flatten()[:,None]),axis=1)
+        
         figure.scene.disable_render = True
-        for i in range(x_edges.shape[1]):
-            mlab.plot3d(x_edges[:,i],y_edges[:,i],z_edges[:,i],color=(0,0,0),tube_radius=edge_width)
+        # src = mlab.pipeline.scalar_scatter(x_edges.flatten(), y_edges.flatten(), z_edges.flatten())
+        src = mlab.pipeline.scalar_scatter(x_edges.T.copy().flatten(), y_edges.T.copy().flatten(), z_edges.T.copy().flatten())
+        src.mlab_source.dataset.lines = connections
+        lines = mlab.pipeline.stripper(src)
+        mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
+
+        # for i in range(x_edges.shape[1]):
+        #     mlab.plot3d(x_edges[:,i],y_edges[:,i],z_edges[:,i],color=(0,0,0),tube_radius=edge_width)
         
 
         nface = smesh.elements.shape[0]
@@ -1050,55 +1126,86 @@ class PostProcess(object):
 
         Xplot = np.zeros((nnode,3),dtype=np.float64)
         Tplot = np.zeros((nelem,3),dtype=np.int64)
-        Uplot = np.zeros(nnode,dtype=np.float64)
-
 
         # FOR CURVED ELEMENTS
         for ielem in range(nface):
             Xplot[ielem*nsize:(ielem+1)*nsize,:] = np.dot(BasesTri.T, svpoints[smesh.elements[ielem,:],:])
             Tplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex,:] = Triangles + ielem*nsize
-            # Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
 
-            # if face_elements[ielem,0] == 1502:
+        if QuantityToPlot is not None:
+            Uplot = np.zeros(nnode,dtype=np.float64)
+            for ielem in range(nface):
+                Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
+
+            # if face_elements[ielem,0] == 70:
+            #     print ielem*TrianglesFunc.nsimplex,(ielem+1)*TrianglesFunc.nsimplex
             #     Uplot[ielem*nsize:(ielem+1)*nsize] = 0
             # else:
             #     Uplot[ielem*nsize:(ielem+1)*nsize] = 0.5
 
+        # Tplot2 = Tplot[68921:70602,:]
+        # Tplot3 = Tplot[21853:23534,:]
+        # Tplot4 = Tplot[65559:67240,:]
 
-        point_line_width = .0015
+        point_line_width = .002
+        # point_line_width = 0.5
         # point_line_width = .0008
         # point_line_width = 2.
-        trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars=Uplot,line_width=point_line_width)
+        # point_line_width = .045
+        # point_line_width = .015 # F6
+
+
+        if color is None:
+            color=(197/255.,241/255.,197/255.)
+
+        if QuantityToPlot is None:
+            trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot,
+                line_width=point_line_width,color=color)
+        else:
+            trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars = Uplot,
+                line_width=point_line_width,colormap='summer')
+
+
+        # if mesh.dd == 1:
+        #     trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars=Uplot,
+        #         line_width=point_line_width,color=(197/255.,241/255.,197/255.))
+        # else:
+        #     trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars=Uplot,
+        #     line_width=point_line_width,color=(254/255., 111/255., 94/255.))
+
+        # trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars=Uplot,
+        #     line_width=point_line_width,color=(197/255.,241/255.,197/255.))
+
+        # trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot2, scalars=Uplot,
+        #     line_width=point_line_width,color=(73/255.,89/255.,133/255.))
+        # trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot3, scalars=Uplot,
+        #     line_width=point_line_width,color=(254/255., 111/255., 94/255.))
+        # trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot4, scalars=Uplot,
+        #     line_width=point_line_width,color=(254/255., 111/255., 94/255.))
+
         # trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars=Uplot,line_width=point_line_width,colormap='summer')
+
         # PLOT POINTS ON CURVED MESH
-        # mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=2.5*point_line_width)
-
-
-        # for i in range(smesh.nelem):
-        #     x_avg = np.sum(svpoints[smesh.elements[i,:],0])/smesh.elements.shape[1]
-        #     y_avg = np.sum(svpoints[smesh.elements[i,:],1])/smesh.elements.shape[1]
-        #     z_avg = np.sum(svpoints[smesh.elements[i,:],2])/smesh.elements.shape[1]
-        #     if face_elements[i,0] == 1502:
-        #         mlab.text3d(x_avg,y_avg,z_avg,str(face_elements[i,0]),scale=0.008,orient_to_camera=True,color=(0,0,0))
-
-        # for i in range(svpoints.shape[0]):
-            # mlab.text3d(svpoints[i,0],svpoints[i,1],svpoints[i,2],str(i),scale=0.02,orient_to_camera=True,color=(0,0,0))
+        if plot_points:
+            # mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=2.5*point_line_width)
+            mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=point_radius)
 
         figure.scene.disable_render = False
 
-        # CHANGE LIGHTING OPTION
-        trimesh_h.actor.property.interpolation = 'phong'
-        trimesh_h.actor.property.specular = 0.1
-        trimesh_h.actor.property.specular_power = 5
+        if QuantityToPlot is not None:
+            # CHANGE LIGHTING OPTION
+            trimesh_h.actor.property.interpolation = 'phong'
+            trimesh_h.actor.property.specular = 0.1
+            trimesh_h.actor.property.specular_power = 5
 
-        # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO 
-        # GET VIRIDIS COLORMAP FROM MATPLOTLIB
-        color_func = ColorConverter()
-        # rgba_lower = color_func.to_rgba_array(cm.viridis.colors)
-        rgba_lower = color_func.to_rgba_array(cm.viridis_r.colors)
-        RGBA_higher = np.round(rgba_lower*255).astype(np.int64)
-        # UPDATE LUT OF THE COLORMAP
-        trimesh_h.module_manager.scalar_lut_manager.lut.table = RGBA_higher 
+            # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO 
+            # GET VIRIDIS COLORMAP FROM MATPLOTLIB
+            color_func = ColorConverter()
+            rgba_lower = color_func.to_rgba_array(cm.viridis.colors)
+            # rgba_lower = color_func.to_rgba_array(cm.viridis_r.colors)
+            RGBA_higher = np.round(rgba_lower*255).astype(np.int64)
+            # UPDATE LUT OF THE COLORMAP
+            trimesh_h.module_manager.scalar_lut_manager.lut.table = RGBA_higher 
 
         # SAVEFIG
         if save:
@@ -1109,9 +1216,19 @@ class PostProcess(object):
 
 
         # CONTROL CAMERA VIEW
-        mlab.view(azimuth=-135, elevation=65, distance=1, focalpoint=None,
-                roll=None, reset_roll=True, figure=None)
-        # FORCE UPDATE MLAB TO UPDATE COLORMAP
-        mlab.draw()
+        # mlab.view(azimuth=45, elevation=50, distance=80, focalpoint=None,
+        #         roll=0, reset_roll=True, figure=None)
 
-        mlab.show()     
+        # Falcon3D
+        # mlab.view(azimuth=-140, elevation=50, distance=22, focalpoint=None,
+        #         roll=60, reset_roll=True, figure=None)
+
+        # F6
+        # mlab.view(azimuth=-120, elevation=60, distance=52, focalpoint=None,
+        #         roll=60, reset_roll=True, figure=None)
+
+    
+        if show_plot is True:
+            # FORCE UPDATE MLAB TO UPDATE COLORMAP
+            mlab.draw()
+            mlab.show()     

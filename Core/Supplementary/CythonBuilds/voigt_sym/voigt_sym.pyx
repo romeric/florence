@@ -3,7 +3,7 @@ import numpy as np
 cimport numpy as np
 from cython cimport boundscheck, wraparound
 
-cdef Voigtc_3(double *C, double *VoigtA):
+cdef Voigtc_3(const double *C, double *VoigtA):
     VoigtA[0] = C[0]
     VoigtA[1] = C[4]
     VoigtA[2] = C[8]
@@ -42,7 +42,7 @@ cdef Voigtc_3(double *C, double *VoigtA):
     VoigtA[35] = 0.5*(C[50]+C[52])
     
     
-cdef Voigtc_2(double *C, double *VoigtA):
+cdef Voigtc_2(const double *C, double *VoigtA):
     VoigtA[0] = C[0]
     VoigtA[1] = C[3]
     VoigtA[2] = 0.5*(C[1]+C[2])

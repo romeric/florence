@@ -52,7 +52,7 @@ public:
     DirichletData GetDirichletData();
 
 
-    // Public data members of PostMeshCurve
+    // PUBLIC DATA MEMBERS OF PostMeshCurve
     std::vector<Eigen::MatrixR> geometry_points_on_curves;
     std::vector<Handle_Geom_BSplineCurve> geometry_curves_bspline;
     Eigen::MatrixI boundary_points_order;

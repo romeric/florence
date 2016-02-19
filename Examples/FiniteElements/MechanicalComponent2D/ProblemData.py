@@ -13,14 +13,14 @@ def ProblemData(MainData):
 
     # MATERIAL INPUT DATA 
     # MainData.MaterialArgs.Type = 'LinearModel'
-    # MainData.MaterialArgs.Type = 'IncrementalLinearElastic'
+    MainData.MaterialArgs.Type = 'IncrementalLinearElastic'
     # MainData.MaterialArgs.Type = 'IncrementallyLinearisedNeoHookean'
     # MainData.MaterialArgs.Type = 'IncrementallyLinearisedMooneyRivlin'
     # MainData.MaterialArgs.Type = 'IncrementallyLinearisedNearlyIncompressibleMooneyRivlin'
     # MainData.MaterialArgs.Type = 'IncrementallyLinearisedBonetTranservselyIsotropicHyperElastic'
     # MainData.MaterialArgs.Type = 'NearlyIncompressibleNeoHookean'
     # MainData.MaterialArgs.Type = 'NeoHookean_1'
-    MainData.MaterialArgs.Type = 'NeoHookean_2'
+    # MainData.MaterialArgs.Type = 'NeoHookean_2'
     # MainData.MaterialArgs.Type = 'NeoHookeanCoercive'
     # MainData.MaterialArgs.Type = 'MooneyRivlin'
     # MainData.MaterialArgs.Type = 'NearlyIncompressibleMooneyRivlin'

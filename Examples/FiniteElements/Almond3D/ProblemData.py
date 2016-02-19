@@ -8,8 +8,8 @@ def ProblemData(MainData):
     MainData.Fields = 'Mechanics'   
     MainData.Formulation = 'DisplacementApproach'
     MainData.Analysis = 'Static'
-    MainData.AnalysisType = 'Linear'
-    # MainData.AnalysisType = 'Nonlinear'
+    # MainData.AnalysisType = 'Linear'
+    MainData.AnalysisType = 'Nonlinear'
 
     # MATERIAL INPUT DATA 
     # MainData.MaterialArgs.Type = 'LinearModel'
@@ -39,20 +39,20 @@ def ProblemData(MainData):
 
     ProblemPath = os.path.dirname(os.path.realpath(__file__))
     MainData.MeshInfo.MeshType = "tet"
-    # MainData.MeshInfo.Reader = "Read"
-    # MainData.MeshInfo.Format = "GID"
-    MainData.MeshInfo.Reader = "ReadHDF5"
+    MainData.MeshInfo.Reader = "Read"
+    MainData.MeshInfo.Format = "GID"
+    # MainData.MeshInfo.Reader = "ReadHDF5"
 
-    # MainData.MeshInfo.FileName = ProblemPath + '/almond_H1.dat'
+    MainData.MeshInfo.FileName = ProblemPath + '/almond_H1.dat'
     # MainData.MeshInfo.FileName = ProblemPath + '/almond_H2.dat'
 
     # MainData.MeshInfo.FileName = ProblemPath + '/Almond3D_H1.mat'
     # MainData.MeshInfo.FileName = ProblemPath + '/Almond3D_H2.mat' 
 
-    MainData.MeshInfo.FileName = ProblemPath + '/Almond3D_H1_P'+str(MainData.C+1)+'.mat'
+    # MainData.MeshInfo.FileName = ProblemPath + '/Almond3D_H1_P'+str(MainData.C+1)+'.mat'
     # MainData.MeshInfo.FileName = ProblemPath + '/Almond3D_H2_P'+str(MainData.C+1)+'.mat'
 
-    MainData.MeshInfo.IsHighOrder = True   
+    # MainData.MeshInfo.IsHighOrder = True   
         
 
 
@@ -86,7 +86,7 @@ def ProblemData(MainData):
             return projection_faces
 
 
-        def PlottingCriteria(self,mesh):
+        def PlottingCriteriaPlotting(self,mesh):
             """Which faces need plotting"""
 
             plotting_faces = np.zeros((mesh.all_faces.shape[0],1),dtype=np.uint64)

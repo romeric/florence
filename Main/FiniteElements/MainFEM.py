@@ -28,11 +28,16 @@ from Core.FiniteElements.ComputeErrorNorms import *
 # import Examples.FiniteElements.Wing2D.ProblemData as Pr
 # import Examples.FiniteElements.Naca_Isotropic.ProblemData as Pr
 # import Examples.FiniteElements.RAE2822.ProblemData as Pr
-# import Examples.FiniteElements.Misc.ProblemData as Pr
+import Examples.FiniteElements.Misc.ProblemData as Pr
+# import Examples.FiniteElements.Leaf.ProblemData as Pr
 # import Examples.FiniteElements.Tests.ProblemData as Pr
 # import Examples.FiniteElements.Sphere.ProblemData as Pr
 # import Examples.FiniteElements.Almond3D.ProblemData as Pr
-import Examples.FiniteElements.Falcon3D.ProblemData as Pr
+# import Examples.FiniteElements.Falcon3D.ProblemData as Pr
+# import Examples.FiniteElements.F6.ProblemData as Pr
+# import Examples.FiniteElements.Drill.ProblemData as Pr
+# import Examples.FiniteElements.Valve.ProblemData as Pr
+# import Examples.FiniteElements.MechanicalComponent3D.ProblemData as Pr
 
 ###########################################################################################################
 
@@ -70,74 +75,79 @@ def main(MainData, DictOutput=None, nStep=0):
 
     # # CHECK IF ALL THE FACE POINTS COORDINATES ARE ON THE SPHERE
     # vpoints = mesh.points + TotalDisp[:,:,-1]
-    # # print(vpoints[mesh.elements[1502,:],:])
     # un_faces = np.unique(mesh.faces)
     # print(np.linalg.norm(vpoints[un_faces,:],axis=1))
     # print(np.allclose(np.linalg.norm(vpoints[un_faces,:],axis=1),1))
 
     # vpoints = mesh.points + TotalDisp[:,:,-1]
     # un_faces = np.unique(mesh.faces)
-    # print np.linalg.norm(vpoints[un_faces,:],axis=1)
+    # print(np.linalg.norm(vpoints[un_faces,:],axis=1))
 
 
-    #####################
+    # ####################
     # from scipy.io import savemat
-    # Dict = {'InitialX':mesh.points, 'T':mesh.elements, 
-    #     'TotalDisplacement':TotalDisp[:,:,MainData.AssemblyParameters.LoadIncrements-1],
-    #     'FinalX':mesh.points+TotalDisp[:,:,MainData.AssemblyParameters.LoadIncrements-1],
-    #     'ScaledJacobian':MainData.ScaledJacobian,
-    #     'nIncrements':MainData.AssemblyParameters.LoadIncrements}
-    # savemat('/home/roman/Dropbox/Wing2D_Results_P'+str(MainData.C+1)+'.mat',Dict)
+    # if TotalDisp.ndim == 3:
+    #     mesh.points = mesh.points + TotalDisp[:,:,-1]
+    # else:
+    #     mesh.points = mesh.points + TotalDisp
+
+    # Dict = {'points':mesh.points, 'elements':mesh.elements, 
+    #     'element_type':mesh.element_type, 'faces':mesh.faces, 'edges':mesh.edges}
+    # savemat('/home/roman/Dropbox/Falcon3DBig_P'+str(MainData.C+1)+'.mat',Dict,do_compression=True)
+    # # savemat('/home/roman/Dropbox/MechanicalComponent3D_P'+str(MainData.C+1)+'.mat',Dict,do_compression=True)
+    # # savemat('/home/roman/Dropbox/F6ISO_P'+str(MainData.C+1)+'.mat',Dict,do_compression=True)
+    # return
     #####################
 
 
-    #####################
-    from scipy.io import savemat
-    Dict = {'points':mesh.points, 'elements':mesh.elements, 
-        'element_type':mesh.element_type, 'faces':mesh.faces,
-        'TotalDisp':TotalDisp,
-        'ScaledJacobian':MainData.ScaledJacobian, 
-        'C':MainData.C, 'ProjFlags':MainData.BoundaryData().ProjectionCriteria(mesh)}
-    # savemat('/home/roman/Dropbox/Almond3D_P'+str(MainData.C+1)+'.mat',Dict)
-    savemat('/home/roman/Dropbox/Falcon3DIso_P'+str(MainData.C+1)+'.mat',Dict)
-    # savemat('/home/roman/Sphere_P'+str(MainData.C+1)+'.mat',Dict)
-    exit()
-    #####################
 
-
-    # np.savetxt("/home/roman/Dropbox/PostMesh/post_mesh/examples/sphere/sphere_points.dat",mesh.points,fmt="%10.9f",delimiter=',')
-    # np.savetxt("/home/roman/Dropbox/PostMesh/post_mesh/examples/sphere/sphere_elements.dat",mesh.elements,delimiter=',')
-    # np.savetxt("/home/roman/Dropbox/PostMesh/post_mesh/examples/sphere/sphere_faces.dat",mesh.faces,delimiter=',')
-    # np.savetxt("/home/roman/Dropbox/PostMesh/post_mesh/examples/sphere/sphere_edges.dat",mesh.edges,delimiter=',')
-    # from Core.QuadratureRules.FeketePointsTri import FeketePointsTri
-    # fekete = FeketePointsTri(MainData.C)
-    # np.savetxt("/home/roman/Dropbox/PostMesh/post_mesh/examples/sphere/nodal_spacing_p4.dat",fekete,fmt="%10.9f",delimiter=',')
+    # ####################
+    # from scipy.io import savemat
+    # Dict = {'points':mesh.points, 'elements':mesh.elements, 
+    #     'element_type':mesh.element_type, 'faces':mesh.faces,
+    #     'TotalDisp':TotalDisp,
+    #     'ScaledJacobian':MainData.ScaledJacobian, 
+    #     'C':MainData.C, 'ProjFlags':MainData.BoundaryData().ProjectionCriteria(mesh)}
+    # # savemat('/home/roman/Sphere_P'+str(MainData.C+1)+'.mat',Dict)
+    # savemat('/home/roman/Dropbox/Almond3D_P'+str(MainData.C+1)+'.mat',Dict,do_compression=True)
+    # # savemat('/home/roman/Dropbox/Falcon3DIso_P'+str(MainData.C+1)+'.mat',Dict,do_compression=True)
+    # # savemat('/home/roman/Dropbox/Falcon3DBig_P'+str(MainData.C+1)+'.mat',Dict,do_compression=True)
+    # # savemat('/home/roman/Dropbox/Drill_P'+str(MainData.C+1)+'.mat',Dict,do_compression=True)
+    # # savemat('/home/roman/Dropbox/Valve_P'+str(MainData.C+1)+'.mat',Dict,do_compression=True)
+    # # savemat('/home/roman/Dropbox/MechanicalComponent3D_P'+str(MainData.C+1)+'.mat',Dict,do_compression=True)
+    # # savemat('/home/roman/Dropbox/MechanicalComponent3D_P'+str(MainData.C+1)+'_New_200.mat',Dict,do_compression=True)
+    # # savemat('/home/roman/Dropbox/F6_P'+str(MainData.C+1)+'.mat',Dict)
+    # # savemat('/home/roman/Dropbox/F6Iso_P'+str(MainData.C+1)+'.mat',Dict)
+    # # savemat('/home/roman/LayerSolution/Layer_dd/f6BL_Layer_dd_Sol_P'+str(MainData.C+1)+'.mat',Dict)
+    # # savemat(MainData.SolName,Dict,do_compression=True)
     # exit()
-
-    # np.savetxt("/home/roman/Dropbox/PostMesh/examples/leaf/leaf_points.dat",mesh.points,fmt="%10.9f",delimiter=',')
-    # np.savetxt("/home/roman/Dropbox/PostMesh/examples/leaf/leaf_elements.dat",mesh.elements,delimiter=',')
-    # # np.savetxt("/home/roman/Dropbox/PostMesh/examples/leaf/leaf_faces.dat",mesh.faces,delimiter=',')
-    # np.savetxt("/home/roman/Dropbox/PostMesh/examples/leaf/leaf_edges.dat",mesh.edges,delimiter=',')
-    # from Core.QuadratureRules import GaussLobattoQuadrature
-    # fekete = GaussLobattoQuadrature(MainData.C)
-    # np.savetxt("/home/roman/Dropbox/PostMesh/examples/leaf/nodal_spacing_p8.dat",fekete,fmt="%10.9f",delimiter=',')
-    # exit()
-    
+    # # # return
+    #####################
 
 
-    if nStep == 1:
-        MainData.mesh = mesh
-        MainData.mesh.points = mesh.points + TotalDisp[:,:MainData.ndim,-1]
+    # if nStep == 1:
+    #     MainData.mesh = mesh
+    #     MainData.mesh.points = mesh.points + TotalDisp[:,:MainData.ndim,-1]
     
     #------------------------------------------------------------------------
 
     if MainData.AssemblyParameters.FailedToConverge==False:
+
+        post_process = PostProcess(MainData.ndim,MainData.nvar)
+        Directions = getattr(MainData.MaterialArgs,"AnisotropicOrientations",None)
+        if Directions != None and MainData.MaterialArgs.Type == "BonetTranservselyIsotropicHyperElastic":
+            post_process.is_material_anisotropic = True
+
         if MainData.AnalysisType == 'Nonlinear':
-            PostProcess().MeshQualityMeasures(MainData,mesh,TotalDisp,show_plot=False)
-            pass
+            post_process.SetBases(postdomain=MainData.PostDomain)
+            qualities = post_process.MeshQualityMeasures(mesh,TotalDisp,plot=False,show_plot=False)
+            MainData.isScaledJacobianComputed = qualities[0]
+            MainData.ScaledJacobian = qualities[3]
+
         if MainData.AnalysisType == "Linear":
             vmesh = deepcopy(mesh)
             vmesh.points = vmesh.points + TotalDisp[:,:,MainData.AssemblyParameters.LoadIncrements-1]
+            # TotalDisp = np.sum(TotalDisp,axis=2)[:,:,None]
         else:
             vmesh = mesh
 
@@ -147,17 +157,15 @@ def main(MainData, DictOutput=None, nStep=0):
         else:
             ProjFlags = MainData.BoundaryData().ProjectionCriteria(mesh)
 
-        # print(np.max(mesh.points[:,0]), np.min(mesh.points[:,0]))
-        # ProjFlags = MainData.BoundaryData().PlottingCriteria(mesh)
-        # # exit()
-
         # TotalDisp = np.zeros_like(TotalDisp)
+        # TotalDisp = TotalDisp/3.
         # MainData.ScaledJacobian = np.zeros_like(MainData.ScaledJacobian)
         # PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
-        # PostProcess.HighOrderCurvedPatchPlot(mesh,TotalDisp,QuantityToPlot=MainData.ScaledJacobian,
-        #     ProjectionFlags=ProjFlags,InterpolationDegree=40)
-        # import matplotlib.pyplot as plt
-        # plt.show()
+
+        post_process.HighOrderCurvedPatchPlot(mesh,TotalDisp,QuantityToPlot=MainData.ScaledJacobian,
+            ProjectionFlags=ProjFlags,InterpolationDegree=40)
+        import matplotlib.pyplot as plt
+        plt.show()
     else:
         MainData.ScaledJacobian = np.zeros(mesh.nelem)+np.NAN
         MainData.ScaledFF = np.zeros(mesh.nelem)+np.NAN
@@ -219,7 +227,7 @@ def main(MainData, DictOutput=None, nStep=0):
     # Results = {'WholeScaledJacobian':MainData.ScaledJacobian}
     # savemat("/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Almond3D/II_P"+str(MainData.C+1)+"_Whole_ScaledJacobian.mat",Results)
     # savemat("/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Almond3D/IL_P"+str(MainData.C+1)+"_Whole_ScaledJacobian.mat",Results)
-    # savemat("/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Almond3D/NL_P2_Whole_ScaledJacobian.mat",Results)
+    # savemat("/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Almond3D/NL_P"+str(MainData.C+1)+"_Whole_ScaledJacobian.mat",Results)
 
     #---------------------------------------------------------------------------------
 

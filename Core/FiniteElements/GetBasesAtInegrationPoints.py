@@ -38,12 +38,23 @@ def GetBasesAtInegrationPoints(C,norder,QuadratureOpt,MeshType):
         # GET BASES AT ALL INTEGRATION POINTS (VOLUME)
         Domain = GetBases3D(C,Quadrature,MeshType)
         # GET BOUNDARY BASES AT ALL INTEGRATION POINTS (SURFACE)
-        # Boundary = GetBasesBoundary(MainData.C,z,MainData.ndim)
+        # Boundary = GetBasesBoundary(C,z,ndim)
+        # MeshTypeBoundary = 'tri'
+        # if MeshType == 'hex':
+        #     MeshTypeBoundary = 'quad'
+        # if MeshTypeBoundary == 'tri':
+        #     zw_b = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(norder,QuadratureOpt)
+        #     z_b = zw_b[:,:-1]; z_b=z_b.reshape(z_b.shape[0],z_b.shape[1]); w_b=zw_b[:,-1]
+        #     class BoundaryQuadrature(Quadrature):
+        #         points = w_b
+        #         weights = z_b
+        # Boundary = GetBases(C,BoundaryQuadrature,MeshTypeBoundary)
+
     elif MeshType == 'tri' or MeshType == 'quad':
         # Get basis at all integration points (surface)
         Domain = GetBases(C,Quadrature,MeshType)
         # GET BOUNDARY BASES AT ALL INTEGRATION POINTS (LINE)
-        # Boundary = GetBasesBoundary(MainData.C,z,MainData.ndim)
+        # Boundary = GetBasesBoundary(C,z,ndim)
     Boundary = []
 
     ############################################################################

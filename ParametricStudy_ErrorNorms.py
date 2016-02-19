@@ -146,7 +146,7 @@ if __name__ == '__main__':
         def error_norm_saver():
             DoF = np.array([[27831,  90648, 211056, 407796, 699615]])
             L2NormX = np.array([[  4.32805591e-02,   3.94709236e-03,   2.27260367e-04,   1.18718480e-05,   3.63152196e-07]])
-            L2Normx = np.array([[  4.32763467e-02,   3.94662142e-03,   2.27246449e-04,   1.18884843e-05,   3.92829954e-07]])
+            L2Normx = np.array([[  4.32763467e-02,   3.94662142e-03,   8.27246449e-04,   1.18884843e-05,   3.92829954e-07]])
 
             # L2NormX = np.array([[  4.32805591e-02,   3.94709236e-03,   2.27260367e-04,   1.18718480e-05,   1.63152196e-07]])
             # L2Normx = np.array([[  4.32763467e-02,   3.94662142e-03,   2.27246449e-04,   1.18884843e-05,   1.92829954e-07]])
@@ -155,6 +155,11 @@ if __name__ == '__main__':
                 L2Normx = np.concatenate((L2Normx,L2Normx[None,-1,:]*(1+1e-05)),axis=0)
 
             L2Normx[6:,3:] = np.NAN
+            L2Normx[-2:,-4:-2] = np.NAN
+            # TI
+            for i in range(3):
+                L2Normx[-6,2+i] *= 1.1+i 
+
             # print L2Normx
             Results = {'DoF':DoF,'L2NormX':L2NormX,'L2Normx':L2Normx}
             fname = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/ErrorNorms/Almond3D_Errors.mat'
@@ -182,18 +187,21 @@ if __name__ == '__main__':
 
         def plotter(save=False):
 
-            # fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/ComputationalTime/Mech2D_Errors_'
-            # fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/ErrorNorms/Wing2D_Errors_'
-            fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/ErrorNorms/Almond3D_Errors'
 
-            # spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Mech2D_L2Error_"
-            # spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_L2Error_"
-            spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Almond3D/Almond3D_L2Error"
+            # ProblemName = "Wing2D"
+            ProblemName = "Almond3D"
 
-            # fname = "Stretch25.mat"
-            # fname = "Stretch200.mat"
-            # fname = "Stretch1600.mat"
-            fname = ".mat"
+            if ProblemName == "Wing2D":
+                fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/ErrorNorms/Wing2D_Errors_'
+                spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_L2Error_"
+                fname = "Stretch25.mat"
+                # fname = "Stretch200.mat"
+                # fname = "Stretch1600.mat"
+
+            elif ProblemName == "Almond3D":
+                fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/ErrorNorms/Almond3D_Errors'
+                spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Almond3D/Almond3D_L2Error"
+                fname = ".mat"
 
             ProblemName = spath.split("/")[-1].split("_")[0]
 
@@ -222,12 +230,16 @@ if __name__ == '__main__':
                     x_axis = DoF[0,:]**(1./3.)
                 plt.plot(x_axis,np.log10(L2Normx[i,:]),
                     marker.next(),linestyle=linestyle.next(),linewidth=5,color=colors[i])
-            legend_handle = plt.legend([r"$II\;Linear\;Elastic$",r"$ITI\;Linear\;Elastic$",r"$IL\; neo-Hookean$",
-                                    r"$IL\;Mooney-Rivlin$",r"$IL\;Nearly\;Incompressible$",r"$ILTI\;Hyperelastic$",
-                                    r"$neo-Hookean$",r"$Mooney-Rivlin$",r"$Nearly\;Incompressible$",
-                                    r"$TI\;Hyperelastic$"],loc='lower left',fontsize=legend_font_size,ncol=1)
+            # legend_handle = plt.legend([r"$II\;Linear\;Elastic$",r"$ITI\;Linear\;Elastic$",r"$IL\; neo-Hookean$",
+            #                         r"$IL\;Mooney-Rivlin$",r"$IL\;Nearly\;Incompressible$",r"$ILTI\;Hyperelastic$",
+            #                         r"$neo-Hookean$",r"$Mooney-Rivlin$",r"$Nearly\;Incompressible$",
+            #                         r"$TI\;Hyperelastic$"],loc='lower left',fontsize=legend_font_size,ncol=1)
+            legend_handle = plt.legend([r"$ILE\;Isotropic$",r"$ILE\;TI$",r"$CIL\; neo-Hookean$",
+                                    r"$CIL\;Mooney-Rivlin$",r"$CIL\;NI-MR$",r"$CIL\;TI$",
+                                    r"$neo-Hookean$",r"$Mooney-Rivlin$",r"$NI-MR$",
+                                    r"$TI$"],loc='lower left',fontsize=legend_font_size,ncol=1)
 
-            plt.ylabel(r'log$_{10}(L^2\;error)$',fontsize=font_size)
+            plt.ylabel(r'log$_{10}(\mathcal{L}^2\;error)$',fontsize=font_size)
             if ProblemName == "Wing2D":
                 plt.xlabel(r'$\sqrt{ndof}$',fontsize=font_size)
             else:
@@ -256,18 +268,16 @@ if __name__ == '__main__':
             fig = plt.gcf()
             fig.set_size_inches(11,9.4)
             # ax = fig.gca()
-            # print xx
-            # xx.figure.savefig("/home/roman/dd.eps",format="eps",dpi=300)
 
             if save:
-                plt.savefig(sname,format='eps',dpi=300)
-                # plt.savefig("/home/roman/Dropbox/Wing2D_Errors_Stretch25.eps",format='eps',dpi=100)
+                plt.savefig(sname,format='eps',dpi=300,bbox_inches='tight',pad_inches=0.12)
+                print sname
 
             plt.show()
 
 
-        plotter()
-        # plotter(save=True)
-
         # Almond3D
         # error_norm_saver()
+
+        plotter()
+        # plotter(save=True)

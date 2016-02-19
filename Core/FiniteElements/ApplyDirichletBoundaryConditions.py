@@ -12,6 +12,7 @@ def GetDirichletBoundaryConditions(mesh,MainData):
 
     ColumnsOut = []; AppliedDirichlet = []
 
+
     #----------------------------------------------------------------------------------------------------#
     #-------------------------------------- NURBS BASED SOLUTION ----------------------------------------#
     #----------------------------------------------------------------------------------------------------#
@@ -19,22 +20,26 @@ def GetDirichletBoundaryConditions(mesh,MainData):
 
         tCAD = time()
 
-        IsHighOrder = getattr(MainData.MeshInfo,"IsHighOrder",None)
-        if IsHighOrder is None:
-            IsHighOrder = False
+        IsHighOrder = getattr(MainData.MeshInfo,"IsHighOrder",False)
+        IsDirichletComputed = getattr(MainData.BoundaryData,"IsDirichletComputed",None)
             
-        # IsHighOrder = False
+        IsHighOrder = False
 
         if IsHighOrder is False:
 
-            # GET DIRICHLET BOUNDARY CONDITIONS BASED ON THE EXACT GEOMETRY FROM CAD
-            if MainData.BoundaryData.RequiresCAD:
-                # CALL POSTMESH WRAPPER
-                nodesDBC, Dirichlet = PostMeshWrapper(MainData,mesh)
+            if IsDirichletComputed is None:
+
+                # GET DIRICHLET BOUNDARY CONDITIONS BASED ON THE EXACT GEOMETRY FROM CAD
+                if MainData.BoundaryData.RequiresCAD:
+                    # CALL POSTMESH WRAPPER
+                    nodesDBC, Dirichlet = PostMeshWrapper(MainData,mesh)
+                else:
+                    # CALL IGAKIT WRAPPER
+                    nodesDBC, Dirichlet = IGAKitWrapper(MainData,mesh)
+
             else:
-                # CALL IGAKIT WRAPPER
-                nodesDBC, Dirichlet = IGAKitWrapper(MainData,mesh)
-        
+                nodesDBC, Dirichlet = MainData.BoundaryData.nodesDBC, MainData.BoundaryData.Dirichlet                
+
 
             nOfDBCnodes = nodesDBC.shape[0]
             for inode in range(nOfDBCnodes):
@@ -42,7 +47,7 @@ def GetDirichletBoundaryConditions(mesh,MainData):
                     ColumnsOut = np.append(ColumnsOut,nvar*nodesDBC[inode]+i)
                     AppliedDirichlet = np.append(AppliedDirichlet,Dirichlet[inode,i])
 
-            # FIX THE DOF IN THE REST OF THE BOUNDARY - INCORRECT/ FIX IT
+            # FIX THE DOF IN THE REST OF THE BOUNDARY 
             if ndim==2:
                 Rest_DOFs = np.setdiff1d(np.unique(mesh.edges),nodesDBC)
             elif ndim==3:
@@ -57,6 +62,7 @@ def GetDirichletBoundaryConditions(mesh,MainData):
             # end = -3
             # np.savetxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_Dirichlet_"+"P"+str(MainData.C+1)+".dat",AppliedDirichlet,fmt="%9.16f")
             # np.savetxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_ColumnsOut_"+"P"+str(MainData.C+1)+".dat",ColumnsOut)
+            # # np.savetxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_PlanarMeshFaces_"+"P"+str(MainData.C+1)+".dat",MainData.planar_mesh_faces)
 
         else:
             
@@ -64,19 +70,28 @@ def GetDirichletBoundaryConditions(mesh,MainData):
             AppliedDirichlet = np.loadtxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_Dirichlet_"+"P"+str(MainData.C+1)+".dat",dtype=np.float64)
             ColumnsOut = np.loadtxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_ColumnsOut_"+"P"+str(MainData.C+1)+".dat")
 
+            # AppliedDirichlet = np.loadtxt("/home/roman/Dropbox/Florence/Examples/FiniteElements/Falcon3D/falcon_big_Dirichlet_P3.dat")
+            # ColumnsOut = np.loadtxt("/home/roman/Dropbox/Florence/Examples/FiniteElements/Falcon3D/falcon_big_ColumnsOut_P3.dat")
+
+            # AppliedDirichlet = np.loadtxt("/home/roman/Dropbox/Florence/Examples/FiniteElements/MechanicalComponent3D/mechanicalComplex_Dirichlet_P4.dat")
+            # ColumnsOut = np.loadtxt("/home/roman/Dropbox/Florence/Examples/FiniteElements/MechanicalComponent3D/mechanicalComplex_ColumnsOut_P4.dat")
+
+            # AppliedDirichlet = np.loadtxt("/home/roman/LayerSolution/Layer_dd/Layer_dd_AppliedDirichlet.dat",dtype=np.float64)
+            # ColumnsOut = np.loadtxt("/home/roman/LayerSolution/Layer_dd/Layer_dd_ColumnsOut.dat")
+
+            # AppliedDirichlet = np.loadtxt(MainData.DirichletName,dtype=np.float64)
+            # ColumnsOut = np.loadtxt(MainData.ColumnsOutName)
+
+            # AppliedDirichlet = AppliedDirichlet*MainData.CurrentIncr/MainData.nStep
+            # AppliedDirichlet = AppliedDirichlet*1.0/MainData.nStep
+
             print 'Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds'
 
 
 
         ############################
-        # Dict = {'points':mesh.points,'element':mesh.elements,'displacements':AppliedDirichlet,'displacement_dof':ColumnsOut}
-        # from scipy.io import savemat
-        # savemat('/home/roman/Desktop/wing_p3',Dict)
-
-        # print mesh.edges.shape, AppliedDirichlet.shape, Dirichlet.shape
-        # print np.max(AppliedDirichlet), [np.min(mesh.points),np.max(mesh.points)]
+        # print np.max(AppliedDirichlet), mesh.Bounds
         # exit()
-
         ############################
 
     #----------------------------------------------------------------------------------------------------#
@@ -131,7 +146,8 @@ def GetDirichletBoundaryConditions(mesh,MainData):
     # GENERAL PROCEDURE - GET REDUCED MATRICES FOR FINAL SOLUTION
     ColumnsOut = ColumnsOut.astype(np.int64)
     ColumnsIn = np.delete(np.arange(0,nvar*mesh.points.shape[0]),ColumnsOut)
-    
+
+
     return ColumnsIn, ColumnsOut, AppliedDirichlet
 
 

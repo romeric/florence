@@ -75,8 +75,8 @@ Eigen::MatrixUI ComputeCriteria(Eigen::MatrixUI &faces, Eigen::MatrixR &points, 
 
 Eigen::MatrixUI ComputeCriteria(Eigen::MatrixUI &faces, Eigen::MatrixR &points)
 {
-   Eigen::MatrixUI criteria = Eigen::MatrixUI::Zero(faces.rows(),faces.cols());
-   auto num = static_cast<double>(faces.cols());
+   Eigen::MatrixUI criteria = Eigen::MatrixUI::Zero(faces.rows(),1);
+   auto num = static_cast<Real>(faces.cols());
    for (auto i=0; i<faces.rows();++i)
    {
        auto current_row = faces.row(i);
@@ -93,7 +93,10 @@ Eigen::MatrixUI ComputeCriteria(Eigen::MatrixUI &faces, Eigen::MatrixR &points)
        y /= num;
        z /= num;
 
-       if ( (x > -2.5) && (x < 2.5) && (y > -2.) && (y < 2.0) && (z > -2.) && (z < 2.) ) {
+//       if ( (x > -2.5) && (x < 2.5) && (y > -2.) && (y < 2.0) && (z > -2.) && (z < 2.) ) {
+//           criteria(i) = 1;
+//       }
+       if ( x > -10. && x < 30. && y > -20. && y < 20. && z > -15. && z < 15.) {
            criteria(i) = 1;
        }
    }
@@ -188,16 +191,45 @@ int main()
 //    std::string edge_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/edges_sphere2_p2.dat";
 //    std::string face_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/faces_sphere2_p2.dat";
 
-//    std::string elem_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Sphere/Sphere_elements_P2.dat";
-//    std::string point_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Sphere/Sphere_points_P2.dat";
-//    std::string edge_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Sphere/Sphere_edges_P2.dat";
-//    std::string face_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Sphere/Sphere_faces_P2.dat";
+    std::string elem_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Sphere/Sphere_elements_P2.dat";
+    std::string point_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Sphere/Sphere_points_P2.dat";
+    std::string edge_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Sphere/Sphere_edges_P2.dat";
+    std::string face_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Sphere/Sphere_faces_P2.dat";
 
-    std::string elem_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Almond3D/almond_H1_elements_P2.dat";
-    std::string point_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Almond3D/almond_H1_points_P2.dat";
-    std::string edge_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Almond3D/almond_H1_edges_P2.dat";
-    std::string face_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Almond3D/almond_H1_faces_P2.dat";
+//    std::string elem_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Almond3D/almond_H1_elements_P2.dat";
+//    std::string point_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Almond3D/almond_H1_points_P2.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Almond3D/almond_H1_edges_P2.dat";
+//    std::string face_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Almond3D/almond_H1_faces_P2.dat";
 
+//    std::string elem_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/TPipe_2262_elements_P2.dat";
+//    std::string point_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/TPipe_2262_points_P2.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/TPipe_2262_edges_P2.dat";
+//    std::string face_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/TPipe_2262_faces_P2.dat";
+
+//    std::string elem_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/TPipe_2_1247_elements_P2.dat";
+//    std::string point_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/TPipe_2_1247_points_P2.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/TPipe_2_1247_edges_P2.dat";
+//    std::string face_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/TPipe_2_1247_faces_P2.dat";
+
+//    std::string elem_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/FullTPipe_elements_P2.dat";
+//    std::string point_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/FullTPipe_points_P2.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/FullTPipe_edges_P2.dat";
+//    std::string face_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/FullTPipe_faces_P2.dat";
+
+//    std::string elem_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/Hollow_Cylinder_elements_P2.dat";
+//    std::string point_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/Hollow_Cylinder_points_P2.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/Hollow_Cylinder_edges_P2.dat";
+//    std::string face_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/Hollow_Cylinder_faces_P2.dat";
+
+//    std::string elem_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/form1_elements_P2.dat";
+//    std::string point_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/form1_points_P2.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/form1_edges_P2.dat";
+//    std::string face_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/form1_faces_P2.dat";
+
+//    std::string elem_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Falcon3D/falcon_iso_P2_elements_P2.dat";
+//    std::string point_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Falcon3D/falcon_iso_P2_points_P2.dat";
+//    std::string edge_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Falcon3D/falcon_iso_P2_edges_P2.dat";
+//    std::string face_file = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Falcon3D/falcon_iso_P2_faces_P2.dat";
 
 
 //    const char* iges_filename = "/home/roman/Dropbox/Florence/Problems/FiniteElements/RAE2822/rae2822.igs"; //
@@ -213,14 +245,15 @@ int main()
 //    const char* iges_filename = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Misc/Two_Arcs.iges";
 //    const char* iges_filename = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Wing2D/sd7003.igs";
 
-//    const char* iges_filename = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Sphere/Sphere.igs";
-//    const char* iges_filename = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Almond3D/almond.igs";
-    std::string iges_filename = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Almond3D/almond.igs";
-
-//    const char* iges_filename = "/home/roman/Dropbox/zdump/OCC_Geometry_Checks/Cylinder.igs";
-//    const char* iges_filename = "/home/roman/Dropbox/zdump/OCC_Geometry_Checks/Sphere.igs";
-
-
+    std::string iges_filename = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Sphere/Sphere.igs";
+//    std::string iges_filename = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Almond3D/almond.igs";
+//    std::string iges_filename = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Almond3D/almond.igs";
+//    std::string iges_filename = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/PipeTShape.igs";
+//    std::string iges_filename = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/TPipe_2.igs";
+//    std::string iges_filename = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/FullTPipe.igs";
+//    std::string iges_filename = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/Hollow_Cylinder.igs";
+//    std::string iges_filename = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/form1.igs";
+//    std::string iges_filename = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Falcon3D/falcon.igs";
 
 
     // CALL PY_PostMeshCurve
@@ -253,9 +286,19 @@ int main()
 //    Real condition = 5;
 
     //3D sphere
+    Real scale = 1000.;
+    Real condition = 1.0e10;
+
+    // almond and falcon
+//    Real scale = 25.4;
+//    Real condition = 1.0e20;
+
+    // TPipe
 //    Real scale = 1000.;
-    Real scale = 25.4;
-    Real condition = 1.0e20;
+//    Real condition = 1.0e20;
+
+//    Real scale = 25.4;
+//    Real condition = 1.0e20;
 
 //    Eigen::Matrix<Real,3,1> boundary_fekete;
 //    Eigen::Matrix<Real,4,1> boundary_fekete;
@@ -288,10 +331,12 @@ int main()
 //    print (edges.rows(),elements.rows(),elements.cols());
 //    cout << points.block(0,0,100,2) << endl;
 //    println(points.minCoeff(),points.maxCoeff());
+//    print(boundary_fekete);
 
 //    auto criteria = ComputeCriteria(edges,points,condition);
-    auto criteria = ComputeCriteria(faces,points); // 3D
-//    auto criteria = ComputeCriteria(faces,points,condition); // 3D
+//    auto criteria = ComputeCriteria(faces,points); // 3D
+    auto criteria = ComputeCriteria(faces,points,condition); // 3D
+//    print(criteria);
 
 //    Real precision = 1.0e-02;
     // 3D
@@ -324,3 +369,32 @@ int main()
     //exit (EXIT_FAILURE);
     return 0;
 }
+
+
+//-------------------------------------------------------------
+////    print(unique_surface_flags_ext);
+//    Eigen::MatrixI map_int_ext = Eigen::MatrixI::Zero(unique_surface_flags_ext.size(),2);
+//    for (UInteger i=0; i<this->geometry_points_on_surfaces.size(); ++i)
+//    {
+//        for (UInteger j=0; j<unique_surface_flags_ext.size(); ++j)
+//        {
+//            if (this->geometry_points_on_surfaces[i].rows()!=this->geometry_points_on_surfaces[j].rows())
+//            {
+//                continue;
+//            }
+//            else
+//            {
+//                if ((this->geometry_points_on_surfaces[i] - this->geometry_points_on_surfaces[j]).isMuchSmallerThan(1e-05))
+//                {
+//                    map_int_ext(i,0) = i;
+//                    map_int_ext(i,1) = j;
+//                }
+////                print(this->geometry_points_on_surfaces[i] - points);
+//            }
+////            print(points);
+//        }
+//    }
+//    print(map_int_ext);
+////    print(counter);
+//    exit(0);
+//-------------------------------------------------------------

@@ -12,12 +12,12 @@ def ProblemData(MainData):
     # MainData.AnalysisType = 'Nonlinear'
 
     # MATERIAL INPUT DATA 
-    MainData.MaterialArgs.Type = 'LinearModel'
+    # MainData.MaterialArgs.Type = 'LinearModel'
     # MainData.MaterialArgs.Type = 'IncrementalLinearElastic'
     # MainData.MaterialArgs.Type = 'NearlyIncompressibleNeoHookean'
     # MainData.MaterialArgs.Type = 'NeoHookean_1'
     # MainData.MaterialArgs.Type = 'NeoHookean_2'
-    # MainData.MaterialArgs.Type = 'MooneyRivlin'
+    MainData.MaterialArgs.Type = 'MooneyRivlin'
     # MainData.MaterialArgs.Type = 'NearlyIncompressibleMooneyRivlin'
     # MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin' 
     # MainData.MaterialArgs.Type = 'TranservselyIsotropicLinearElastic'
@@ -25,7 +25,7 @@ def ProblemData(MainData):
     # MainData.MaterialArgs.Type = 'JavierTranservselyIsotropicHyperElastic'
 
     MainData.MaterialArgs.E  = 1.0e5
-    MainData.MaterialArgs.nu = 0.35
+    MainData.MaterialArgs.nu = 0.4
 
     MainData.MaterialArgs.E_A = 2.5*MainData.MaterialArgs.E
 
@@ -44,8 +44,17 @@ def ProblemData(MainData):
 
     # MainData.MeshInfo.FileName = ProblemPath + '/falcon_iso.dat'
     # MainData.MeshInfo.FileName = ProblemPath + '/Falcon3DIso.mat'
+    # MainData.MeshInfo.FileName = '/home/roman/Dropbox/2015_HighOrderMeshing/geometriesAndMeshes/falcon/falcon_big.dat'
 
-    MainData.MeshInfo.FileName = ProblemPath + '/Falcon3DIso_P'+str(MainData.C+1)+'.mat'
+    # MainData.MeshInfo.FileName = ProblemPath + '/falcon_iso_P'+str(MainData.C+1)+'.mat'
+    # MainData.MeshInfo.FileName = ProblemPath + '/Falcon3DIso_P'+str(MainData.C+1)+'.mat'
+    # MainData.MeshInfo.FileName = ProblemPath + '/Falcon3DIso_P'+str(MainData.C+1)+'_New.mat'
+    # MainData.MeshInfo.FileName = ProblemPath + '/falcon_big_P'+str(MainData.C+1)+'.mat'
+
+    if MainData.CurrentIncr == 1:
+        MainData.MeshInfo.FileName = ProblemPath + '/falcon_big_P'+str(MainData.C+1)+'.mat'
+    else:
+        MainData.MeshInfo.FileName = '/home/roman/Dropbox/Falcon3DBig_P'+str(MainData.C+1)+'.mat'
 
     MainData.MeshInfo.IsHighOrder = True
         
@@ -58,7 +67,7 @@ def ProblemData(MainData):
         ProjectionType = 'orthogonal'
 
         scale = 25.4
-        condition = 2000. # this condition it not used
+        condition = 1.0e20 # this condition it not used
 
         IGES_File = ProblemPath + '/falcon.igs'
 
@@ -72,10 +81,11 @@ def ProblemData(MainData):
                 z = np.sum(mesh.points[mesh.faces[iface,:],2])/num
                 x *= self.scale
                 y *= self.scale
-                z *= self.scale 
-                # if np.sqrt(x*x+y*y+z*z)< self.condition:
-                if x > -20*self.scale and x < 40*self.scale and y > -30.*self.scale \
-                    and y < 30.*self.scale and z > -20.*self.scale and z < 20.*self.scale:   
+                z *= self.scale
+                # if x > -20*self.scale and x < 40*self.scale and y > -30.*self.scale \
+                    # and y < 30.*self.scale and z > -20.*self.scale and z < 20.*self.scale:  
+                if x > -10*self.scale and x < 30*self.scale and y > -20.*self.scale \
+                    and y < 20.*self.scale and z > -15.*self.scale and z < 15.*self.scale:   
                     projection_faces[iface]=1
             
             return projection_faces

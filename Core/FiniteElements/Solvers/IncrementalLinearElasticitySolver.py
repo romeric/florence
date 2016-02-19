@@ -6,7 +6,9 @@ from Core.FiniteElements.Assembly import *
 from Core.FiniteElements.ApplyDirichletBoundaryConditions import *
 from Core.FiniteElements.PostProcess import *
 from copy import deepcopy
+import gc
 
+# @profile
 def IncrementalLinearElasticitySolver(MainData,mesh,TotalDisp,Eulerx,LoadIncrement,NeumannForces,
         ColumnsIn,ColumnsOut,AppliedDirichlet):
     """An icremental linear elasticity solver, in which the geometry is updated 
@@ -16,7 +18,9 @@ def IncrementalLinearElasticitySolver(MainData,mesh,TotalDisp,Eulerx,LoadIncreme
         of equations needed for non-linear analysis
     """
 
-    jacobian_postprocess = PostProcess()
+    # CREATE POST-PROCESS OBJECT ONCE
+    post_process = PostProcess(MainData.ndim,MainData.nvar)
+    post_process.SetAnalysis(MainData.AnalysisType,MainData.Analysis)
 
     LoadFactor = 1./LoadIncrement
     for Increment in range(LoadIncrement):
@@ -24,7 +28,8 @@ def IncrementalLinearElasticitySolver(MainData,mesh,TotalDisp,Eulerx,LoadIncreme
         NodalForces = LoadFactor*NeumannForces
         AppliedDirichletInc = LoadFactor*AppliedDirichlet
         # DIRICHLET FORCES IS SET TO ZERO EVERY TIME
-        DirichletForces = np.zeros((mesh.points.shape[0]*MainData.nvar,1),dtype=np.float64)
+        # DirichletForces = np.zeros((mesh.points.shape[0]*MainData.nvar,1),dtype=np.float64)
+        DirichletForces = np.zeros((mesh.points.shape[0]*MainData.nvar,1),dtype=np.float32)
         Residual = DirichletForces + NodalForces
 
         t_assembly = time()
@@ -42,21 +47,21 @@ def IncrementalLinearElasticitySolver(MainData,mesh,TotalDisp,Eulerx,LoadIncreme
             # ASSEMBLE
             K = Assembly(MainData,mesh,Eulerx,np.zeros_like(mesh.points))[0]
         print 'Finished assembling the system of equations. Time elapsed is', time() - t_assembly, 'seconds'
-
         # APPLY DIRICHLET BOUNDARY CONDITIONS & GET REDUCED MATRICES 
         K_b, F_b = ApplyDirichletGetReducedMatrices(K,Residual,ColumnsIn,ColumnsOut,AppliedDirichletInc,MainData.Analysis,[])[:2]
-
+        
         # SOLVE THE SYSTEM
         t_solver=time()
-
         sol = SparseSolver(K_b,F_b,MainData.solve.type,sub_type=MainData.solve.sub_type,tol=MainData.solve.tol)
 
-        if Increment==MainData.AssemblyParameters.LoadIncrements-1:
+        # if Increment==MainData.AssemblyParameters.LoadIncrements-1:
             # MainData.solve.condA = np.linalg.cond(K_b.todense()) # REMOVE THIS
-            MainData.solve.condA = onenormest(K_b) # REMOVE THIS
+            # MainData.solve.condA = onenormest(K_b) # REMOVE THIS
         t_solver = time()-t_solver
 
-        dU = PostProcess().TotalComponentSol(MainData,sol,ColumnsIn,ColumnsOut,AppliedDirichletInc,0,K.shape[0]) 
+        dU = post_process.TotalComponentSol(sol,ColumnsIn,ColumnsOut,AppliedDirichletInc,0,K.shape[0]) 
+
+        # dU = PostProcess().TotalComponentSol(MainData,sol,ColumnsIn,ColumnsOut,AppliedDirichletInc,0,K.shape[0]) 
         # STORE TOTAL SOLUTION DATA
         TotalDisp[:,:,Increment] += dU
 
@@ -68,26 +73,32 @@ def IncrementalLinearElasticitySolver(MainData,mesh,TotalDisp,Eulerx,LoadIncreme
             print "Finished load increment "+str(Increment)+" for incrementally linearised problem. Solver time is", t_solver
         else:
             print "Finished load increment "+str(Increment)+" for linear problem. Solver time is", t_solver
+        gc.collect()
 
         # COMPUTE SCALED JACBIAN FOR THE MESH
         if Increment == LoadIncrement - 1:
             smesh = deepcopy(mesh)
             smesh.points -= TotalDisp[:,:,-1] 
-            # jacobian_postprocess.MeshQualityMeasures(MainData,mesh,np.zeros_like(TotalDisp[:,:,:Increment+1]),show_plot=False)
-            jacobian_postprocess.MeshQualityMeasures(MainData,smesh,TotalDisp,show_plot=False)
+
+            Directions = getattr(MainData.MaterialArgs,"AnisotropicOrientations",None)
+            if Directions != None and MainData.MaterialArgs.Type == "BonetTranservselyIsotropicHyperElastic":
+                post_process.is_material_anisotropic = True
+
+            post_process.SetBases(postdomain=MainData.PostDomain)    
+            qualities = post_process.MeshQualityMeasures(smesh,TotalDisp,plot=False,show_plot=False)
+            MainData.isScaledJacobianComputed = qualities[0]
+            MainData.ScaledJacobian = qualities[3]
+
+            del smesh, post_process
+            gc.collect()
             # jacobian_postprocess.MeshQualityMeasures(MainData,smesh,TotalDisp[:,:,:-1],show_plot=False)
-
-            # CHECK IF THE WING2D MESH P2 IS DISPLACED CORRECTLY
-            # print mesh.points[906,:], TotalDisp[906,:,-1]
-            # print mesh.points[887,:], TotalDisp[887,:,-1]
-            # print mesh.points[3715,:], TotalDisp[3715,:,-1]
-
+            
             # PostProcess.HighOrderPatchPlot(MainData,mesh,np.zeros_like(TotalDisp))
             # import matplotlib.pyplot as plt
             # plt.show()
 
-    jacobian_postprocess.is_scaledjacobian_computed
-    MainData.isScaledJacobianComputed = True
+    # post_process.is_scaledjacobian_computed
+    # MainData.isScaledJacobianComputed = True
 
 
     return TotalDisp

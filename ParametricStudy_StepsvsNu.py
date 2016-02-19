@@ -355,7 +355,7 @@ def plotter_individual_imshow(p=2,which_q=3,save=False):
             interpolated_xs = np.concatenate((interpolated_xs,[50]))
             # interpolated_xs = np.array([1,2,3,4,5,6,7,8,9,10,11,12,15,20,25,50])
             # interpolated_xs = xp
-            rows = scaledA.shape[0]*15
+            rows = scaledA.shape[0]*5
             # rows = interpolated_xs.shape[0]
             new_scaledA = np.zeros((rows,scaledA.shape[1]))
             for i in range(scaledA.shape[1]):
@@ -409,14 +409,14 @@ def plotter_individual_imshow(p=2,which_q=3,save=False):
 
             if save:
             #     # plt.savefig(sname,format='eps',dpi=300)
-                plt.savefig(sname,format='png',dpi=100)
+                plt.savefig(sname,format='png',dpi=100,bbox_inches='tight',pad_inches=0.01)
 
             plt.show()
             plt.close()
 
 
 
-def plotter_quality_evolution(p):
+def plotter_quality_evolution(p=2,save=False):
 
     stretch = [25, 50, 100, 200, 400, 800, 1600]
     formulations = ["Linear","Linearised","Nonlinear"]
@@ -443,32 +443,16 @@ def plotter_quality_evolution(p):
     legend_font_size = 20
     rc('font',**{'family':'serif','serif':['Palatino'],'size':font_size})
 
-    mm=-1
-    print nu[mm]/100.
-    # if p==6:
-        # mm=-2
-    # print scaledA[0,-1,2,mm], scaledA[0,0,2,mm]
-    # print scaledA[1,-1,2,mm], scaledA[1,0,2,mm]
+    mm=-4
+    # print nu[mm]/100.
     percentage_improvement = np.zeros((7,3))
     for i in range(7):
         for j in range(3):
             percentage_improvement[i,j] =  (scaledA[j,-1,i,mm] - scaledA[j,0,i,mm])/scaledA[j,0,i,mm]*100
-            # if i==2 and j==1:
-                # print percentage_improvement[i,j]
 
-    percentage_improvement[:,2] = 0
-    # percentage_improvement = np.abs(percentage_improvement)
-    # print percentage_improvement
-    # percentage_improvement[:,:2] = np.log(percentage_improvement[:,:2])
-    # percentage_improvement[:,2] = 0
-    print percentage_improvement
-    print scaledA[0,-1,6,mm], scaledA[0,0,6,mm]
-    return
-
-    
+    percentage_improvement[:,2] = 0    
 
     nmax = np.max(percentage_improvement)
-    print np.exp(nmax)
     for i in range(7):
         if p!=4:
             plt.plot([i+1.1,i+1.1],[percentage_improvement[i,0],nmax*1.4],'-k')
@@ -506,7 +490,8 @@ def plotter_quality_evolution(p):
     ax.set_xticklabels((r'$25$',r'$50$',r'$100$',r'$200$',r'$400$',r'$800$',r'$1600$'),fontsize=font_size)
     plt.xticks([1.2, 2.2, 3.2, 4.2, 5.2, 6.2, 7.2],rotation=45)
     if p==4:
-        plt.yticks([-5, 0, 10, 20])
+        plt.yticks([-3, 0, 3])
+        plt.ylim([-5,20])
     elif p==6:
         plt.yticks([0, 50, 100])
     else:
@@ -517,16 +502,97 @@ def plotter_quality_evolution(p):
 
     # print percentage_improvement
     plt.xlim([-0.01,8.3])
-    # print spath+sname+"_"+str(np.around(nu[mm]/100.,3))
-    plt.savefig(spath+sname+".eps", format="eps", dpi=300)
+    if save:
+        print spath+sname+".eps"
+        plt.savefig(spath+sname+".eps", format="eps", dpi=300,bbox_inches='tight',pad_inches=0.06)
+    
+    plt.show()
+
+
+def plotter_quality_evolution_factor(p=2,save=False):
+
+    stretch = [25, 50, 100, 200, 400, 800, 1600]
+    formulations = ["Linear","Linearised","Nonlinear"]
+
+    fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Steps_vs_Nu/Wing2D_Steps_vs_Nu_'
+    fname = "P"+str(p)+".mat"
+    spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_Quality_Improvement_Factor_"
+    sname = "P"+str(p)
+    
+    DictOutput =  loadmat(fpath+fname)   
+
+    scaledA = DictOutput['ScaledJacobian']
+    nu = np.linspace(0.0,0.5,10)*100
+
+    colors = ['#D1655B','#44AA66','#72B0D7','#FACD85',
+                    '#558C89','#4D5C75','#F5CCBA']
+
+
+    fig, ax = plt.subplots()
+    font_size = 20
+    legend_font_size = 20
+    rc('font',**{'family':'serif','serif':['Palatino'],'size':font_size})
+
+    mm=-1
+    print nu[mm]/100.
+    percentage_improvement = np.zeros((7,3))
+    for i in range(7):
+        for j in range(3):
+            # percentage_improvement[i,j] =  (scaledA[j,-1,i,mm] - scaledA[j,0,i,mm])/scaledA[j,0,i,mm]*100
+            # percentage_improvement[i,j] =  scaledA[j,-1,i,mm]/scaledA[j,0,i,mm]
+            # percentage_improvement[i,j] =  np.log10(scaledA[j,-1,i,mm]/scaledA[j,0,i,mm])
+            percentage_improvement[i,j] =  np.abs(np.log10(scaledA[j,-1,i,mm]/scaledA[j,0,i,mm]))
+
+    percentage_improvement[:,2] = 0
+    # print percentage_improvement   
+    # exit() 
+
+    width = 0.35
+    rects = [None]*21
+    counter = 0
+    for i in range(7):
+        for j in range(3):
+            rects[counter] = ax.bar(i*1.2+j*width, percentage_improvement[i,j], width, color=colors[j])
+            counter +=1
+
+    # ax.legend((rects[0][0], rects[1][0], rects[2][0]), 
+    #                         (r"$II\;Linear\;Elastic$",r"$IL\; neo-Hookean$",
+    #                             r"$neo-Hookean$"),
+    #                         loc='upper left',fontsize=legend_font_size)
+
+    if p==6:
+        ax.legend((rects[0][0], rects[1][0], rects[2][0]), 
+                            (r"$ILE\;Isotropic$",r"$CIL\; neo-Hookean$",
+                                r"$neo-Hookean$"),
+                            loc='upper left',fontsize=legend_font_size)
+
+    ax.set_xticklabels((r'$25$',r'$50$',r'$100$',r'$200$',r'$400$',r'$800$',r'$1600$'),fontsize=font_size)
+    xticks = np.array([1.2, 2.4, 3.6, 4.8, 6., 7.2, 8.4]) - 0.84
+    plt.xticks(xticks.tolist(),rotation=45)
+
+    plt.ylabel(r'log$_{10}(Q_{3}^{50}/Q_{3}^{1})$',fontsize=font_size)
+
+    # plt.plot([0.0,10.0],[1,1],'k--')
+
+    nmax = percentage_improvement.max() + percentage_improvement.max()/100.
+    plt.xlim([0.,7.9])
+    plt.ylim([0.,nmax])
+    plt.grid('on')
+
+    if save:
+        print spath+sname+".eps"
+        plt.savefig(spath+sname+".eps", format="eps", dpi=300,bbox_inches='tight',pad_inches=0.09)
     
     plt.show()
 
 
 
-def plotter_distribution_q3(p=2,save=False):
+def plotter_distribution_q3(p=4,save=False):
 
     from scipy.stats import norm
+
+    if p != 4:
+        raise ValueError('p is supposed to be only 4 for this plotter function')    
 
     stretch = [25, 50, 100, 200, 400, 800, 1600]
     nStep = [1,2,5,10,25,50]
@@ -592,7 +658,7 @@ def plotter_distribution_q3(p=2,save=False):
             plt.xlabel(r"$Scaled\;Jacobian\;(Q_3)$",fontsize=font_size)
             plt.ylabel(r"$Number\;of\;Elements$",fontsize=font_size)
             ax.legend((rects[0][0], rects[1][0], rects[2][0]), 
-                                    (r"$II\;Linear\;Elastic$",r"$IL\; neo-Hookean$",
+                                    (r"$ILE\;Isotropic$",r"$CIL\; neo-Hookean$",
                                         r"$neo-Hookean$"),
                                     loc='upper left',fontsize=legend_font_size)
 
@@ -602,14 +668,17 @@ def plotter_distribution_q3(p=2,save=False):
             print spath
 
             if save:
-                plt.savefig(spath,format="eps",dpi=300)
+                plt.savefig(spath,format="eps",dpi=300,bbox_inches='tight',pad_inches=0.08)
 
             spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_Quality_Distribution_"
-            plt.show()
+            # plt.show()
+            plt.close()
 
 
 
 def plotter_quality_measures(p=2,save=False):
+
+    assert p==2 or p==4 or p==6
 
     stretch = [25, 50, 100, 200, 400, 800, 1600]
     nStep = [1,2,5,10,25,50]
@@ -653,7 +722,8 @@ def plotter_quality_measures(p=2,save=False):
 
             plt.legend([r"$Q_1$",r"$Q_2$",r"$Q_3$"],loc="best",fontsize=legend_font_size)
             plt.xlabel(r"$Poisson's\;Ratio\;(\nu)$",fontsize=font_size)
-            plt.ylabel(r"$Quality\;Measures$",fontsize=font_size)
+            # plt.ylabel(r"$Quality\;Measures$",fontsize=font_size)
+            plt.ylabel(r"$Quality$",fontsize=font_size)
             plt.grid('on')
             plt.xlim([0,0.5])
             plt.ylim([0.,1.0])
@@ -673,7 +743,7 @@ def plotter_quality_measures(p=2,save=False):
             # plt.axis('equal')
 
             if save:
-                plt.savefig(spath,format="eps",dpi=300)
+                plt.savefig(spath,format="eps",dpi=300,bbox_inches='tight',pad_inches=0.08)
 
             spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_Quality_Measures_"
             # plt.show()
@@ -767,7 +837,8 @@ def plotter_quality_measures_3D(p=2,save=False):
 
         plt.legend([r"$Q_1$",r"$Q_2$",r"$Q_3$"],loc="best",fontsize=legend_font_size)
         plt.xlabel(r"$Poisson's\;Ratio\;(\nu)$",fontsize=font_size)
-        plt.ylabel(r"$Quality\;Measures$",fontsize=font_size)
+        # plt.ylabel(r"$Quality\;Measures$",fontsize=font_size)
+        plt.ylabel(r"$Quality$",fontsize=font_size)
         plt.grid('on')
         plt.xlim([0,0.5])
         plt.ylim([0.,1.0])
@@ -787,11 +858,81 @@ def plotter_quality_measures_3D(p=2,save=False):
         # plt.axis('equal')
 
         if save:
-            plt.savefig(spath,format="eps",dpi=300)
+            plt.savefig(spath,format="eps",dpi=300,bbox_inches='tight',pad_inches=0.08)
 
         spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Almond3D/Almond3D_Quality_Measures_"
         plt.show()
         plt.close()
+
+
+def plotter_distribution_q3_3D(p=2,save=False):
+
+    from scipy.stats import norm
+
+    stretch = [25, 50, 100, 200, 400, 800, 1600]
+    nStep = [1,2,5,10,25,50]
+    formulations = ["Linear","Linearised","Nonlinear"]
+
+    fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Almond3D/'
+    fname = "P"+str(p)+".mat"
+    spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Almond3D/Almond3D_Quality_Distribution_"
+    
+    # print fpath+fname
+    DictOutput_0 =  loadmat(fpath+"II_P"+str(p)+"_Whole_ScaledJacobian.mat")
+    DictOutput_1 =  loadmat(fpath+"IL_P"+str(p)+"_Whole_ScaledJacobian.mat")
+    DictOutput_2 =  loadmat(fpath+"NL_P"+str(p)+"_Whole_ScaledJacobian.mat")   
+ 
+    nu = np.linspace(0.001,0.5,10)*100
+
+    colors = ['#D1655B','#FACD85','#72B0D7','#E79C5D','#4D5C75','#E79C5D']
+
+
+    bar_1 = DictOutput_0['WholeScaledJacobian'].flatten()
+    bar_2 = DictOutput_1['WholeScaledJacobian'].flatten()
+    bar_3 = DictOutput_2['WholeScaledJacobian'].flatten()
+
+
+    all_nan = False
+    if np.isnan(bar_3).all():
+        all_nan = True
+    bar_3 = np.nan_to_num(bar_3)
+
+    hist_1 =  plt.hist(bar_1,range=(0.,1.),log=True)[0]
+    hist_2 =  plt.hist(bar_2,range=(0.,1.),log=True)[0]
+    hist_3 =  plt.hist(bar_3,range=(0.,1.),log=True)[0]
+    if all_nan is True:
+        hist_3 = np.zeros_like(hist_3)+1
+
+    plt.close()
+    fig = plt.figure()
+    ax = fig.gca()
+    width_1=0.09
+    width_2=0.07
+    width_3=0.05
+
+    rects = [None]*3
+    rects[0] = plt.bar(np.linspace(0,1,10)-width_1,hist_1,width=width_1,log=True,color=colors[0])
+    rects[1] = plt.bar(np.linspace(0,1,10)-width_2*1.15,hist_2,width=width_2,log=True,color=colors[1])
+    rects[2] = plt.bar(np.linspace(0,1,10)-width_3*1.4,hist_3,width=width_3,log=True,color=colors[2])
+
+    plt.grid('on')
+    plt.xlim([0,1])
+    plt.ylim([0,10000])
+
+    legend_font_size = 20
+    font_size = 22
+    plt.xlabel(r"$Scaled\;Jacobian\;(Q_3)$",fontsize=font_size)
+    plt.ylabel(r"$Number\;of\;Elements$",fontsize=font_size)
+    ax.legend((rects[0][0], rects[1][0], rects[2][0]), 
+                            (r"$ILE\;Isotropic$",r"$CIL\; neo-Hookean$",
+                                r"$neo-Hookean$"),
+                            loc='upper left',fontsize=legend_font_size)
+
+    print spath+"P"+str(p)+".eps"
+    if save:
+        plt.savefig(spath+"P"+str(p)+".eps",format="eps",dpi=300,bbox_inches='tight',pad_inches=0.06)
+
+    plt.show()
 
 
 if __name__ == '__main__':
@@ -829,6 +970,10 @@ if __name__ == '__main__':
 
 
         # plotter_quality_evolution(p)
+        # plotter_quality_evolution(p,save=True)
+
+        # plotter_quality_evolution_factor(p)
+        # plotter_quality_evolution_factor(p,save=True)
         
         # plotter_distribution_q3(p)
         # plotter_distribution_q3(p,save=True)
@@ -836,5 +981,8 @@ if __name__ == '__main__':
         # plotter_quality_measures(p)
         # plotter_quality_measures(p,save=True)
 
-        # plotter_quality_measures_3D(p)
-        plotter_quality_measures_3D(p,save=True)
+        plotter_quality_measures_3D(p)
+        # plotter_quality_measures_3D(p,save=True)
+
+        # plotter_distribution_q3_3D(p)
+        # plotter_distribution_q3_3D(p,save=True)

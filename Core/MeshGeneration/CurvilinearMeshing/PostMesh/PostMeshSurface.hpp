@@ -14,7 +14,7 @@ public:
         this->ndim = 3;
         this->mesh_element_type = "tet";
 
-        this_curve = std::make_shared<PostMeshCurve>(PostMeshCurve());
+        //this_curve = std::make_shared<PostMeshCurve>(PostMeshCurve());
     }
 
     PostMeshSurface(std::string &element_type, const UInteger &dim) : \
@@ -35,18 +35,27 @@ public:
         this->scale = 1.0;
         this->condition = 1.0e10;
 
-        //this->this_curve = new PostMeshCurve();
-        this_curve = std::make_shared<PostMeshCurve>(PostMeshCurve());
+        //this_curve = std::make_shared<PostMeshCurve>(PostMeshCurve());
     }
 
     void InferInterpolationPolynomialDegree();
     void SurfacesToBsplineSurfaces();
     void GetSurfacesParameters();
     void GetGeomPointsOnCorrespondingFaces();
+    void IdentifySurfacesContainingFacesByPureProjection();
+    void IdentifyRemainingSurfacesByProjection();
     void IdentifySurfacesContainingFaces();
+    void SupplySurfacesContainingFaces(const Integer *arr, Integer rows, Integer already_mapped = 0, Integer caller = 0);
+    void IdentifySurfacesIntersections();
     void ProjectMeshOnSurface();
-    void MeshPointInversionSurface();
+    void RepairDualProjectedParameters();
+    void MeshPointInversionCurve(const gp_Pnt &point_in, gp_Pnt &point_out);
+    void MeshPointInversionSurface(Integer project_on_curves, Integer modify_linear_mesh = 0);
+    void MeshPointInversionSurfaceArcLength(Integer project_on_curves, Real OrthTol, Real *FEbases, Integer rows, Integer cols);
+    void GetBoundaryPointsOrder();
+    std::vector<std::vector<Integer> > GetMeshFacesOnPlanarSurfaces();
     DirichletData GetDirichletData();
+    std::vector<Integer> GetDirichletFaces();
 
 
     std::vector<Eigen::MatrixR> geometry_points_on_surfaces;
@@ -56,22 +65,20 @@ public:
     Eigen::MatrixR surfaces_Vparameters;
 
 protected:
-//    PostMeshCurve *this_curve;
-    std::shared_ptr<PostMeshCurve> this_curve;
+    //std::shared_ptr<PostMeshCurve> this_curve;
 
     Eigen::MatrixI projection_ID;
     Eigen::MatrixR projection_U;
     Eigen::MatrixR projection_V;
-    Eigen::MatrixI sorted_projected_indices;
+    Eigen::MatrixI sorted_projected_indicesU;
+    Eigen::MatrixI sorted_projected_indicesV;
     Eigen::MatrixI dirichlet_faces;
     std::vector<Integer> listfaces;
     Integer no_dir_faces;
-    Eigen::MatrixR v_of_all_fekete_mesh_edges;
-    Eigen::MatrixR u_of_all_fekete_mesh_faces;
-    Eigen::MatrixR v_of_all_fekete_mesh_faces;
     Eigen::MatrixI elements_with_boundary_faces;
+    Eigen::MatrixI curve_surface_projection_flags;
 
-    void GetInternalSurfaceScales();
+    std::vector<Boolean> FindPlanarSurfaces();
 };
 
 #endif // POSTMESHSURFACE_H

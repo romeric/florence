@@ -120,7 +120,7 @@ if __name__ == '__main__':
     if not Run:
 
 
-        def plotter(which_formulation=0,projection_type=0, which_quality = 3, save=False):
+        def plotter(which_formulation=0,projection_type=0, which_quality = 3, interpolate=False, save=False):
             """ 
                 which_formulation           0 for linear
                                             1 for linearised
@@ -151,8 +151,8 @@ if __name__ == '__main__':
 
             # ResultsPath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/'
 
-            ProblemName = "Mech2D"
-            # ProblemName = "Almond3D"
+            # ProblemName = "Mech2D"
+            ProblemName = "Almond3D"
             ResultsPath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/'+ProblemName+"/"
             SavePath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/"+ProblemName+"/"
 
@@ -215,25 +215,27 @@ if __name__ == '__main__':
 
             #-----------------------------------
             # Manual interpolation
-            from scipy.interpolate import interp1d
-            cols = 20
-            new_scaledA = np.zeros(((xmax-1)*cols,scaledA.shape[1]))+np.NAN
-            for i in range(scaledA.shape[1]):
-                if which_formulation==2:
-                    upto = np.min(np.where(np.isnan(np.sort(scaledA[:,i])))[0])
-                else:
-                    upto = 6
-                if upto==0:
-                    upto = 5
-                to_interpolate_y = scaledA[:,i][-upto:]
-                to_interpolate_x = p[:upto]
-                if to_interpolate_y.shape[0] > 1:
-                    func = interp1d(to_interpolate_x,to_interpolate_y,kind='linear')
-                    x_interp_data = np.linspace(2,to_interpolate_x[-1],cols*(to_interpolate_x.shape[0]))
-                    y_interp_data = func(x_interp_data)
-                    # print cols*(to_interpolate_x[0]-2),cols*(to_interpolate_x[-1]-1)
-                    new_scaledA[cols*(to_interpolate_x[0]-2):cols*(to_interpolate_x[-1]-1),i] = y_interp_data[::-1]
-            scaledA = new_scaledA[::-1,:]
+            if interpolate is True:
+                from scipy.interpolate import interp1d
+                cols = 20
+                new_scaledA = np.zeros(((xmax-1)*cols,scaledA.shape[1]))+np.NAN
+                for i in range(scaledA.shape[1]):
+                    if which_formulation==2:
+                        upto = np.min(np.where(np.isnan(np.sort(scaledA[:,i])))[0])
+                    else:
+                        upto = 6
+                    if upto==0:
+                        upto = 5
+                    to_interpolate_y = scaledA[:,i][-upto:]
+                    to_interpolate_x = p[:upto]
+                    if to_interpolate_y.shape[0] > 1:
+                        func = interp1d(to_interpolate_x,to_interpolate_y,kind='linear')
+                        x_interp_data = np.linspace(2,to_interpolate_x[-1],cols*(to_interpolate_x.shape[0]))
+                        y_interp_data = func(x_interp_data)
+                        # print cols*(to_interpolate_x[0]-2),cols*(to_interpolate_x[-1]-1)
+                        new_scaledA[cols*(to_interpolate_x[0]-2):cols*(to_interpolate_x[-1]-1),i] = y_interp_data[::-1]
+                scaledA = new_scaledA[::-1,:]
+            #-----------------------------------
 
             if ProblemName == "Almond3D":
                 ninterp = 50
@@ -247,7 +249,6 @@ if __name__ == '__main__':
                     yp = scaledA[i,:]
                     new_scaledA[i,:] = np.interp(np.linspace(0.001,0.5,cols),xp,yp)
                 scaledA = new_scaledA
-
             #-----------------------------------
 
             font_size = 22
@@ -258,9 +259,15 @@ if __name__ == '__main__':
                 # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bilinear', cmap=cm.viridis)
                 plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='nearest', cmap=cm.viridis)
 
-            tick_locs = [2,2.8,3.6,4.4,5.2]
-            tick_lbls = [2, 3, 4, 5, 6]
-            plt.yticks(tick_locs, tick_lbls)
+            if interpolate is True:
+                tick_locs = [2,2.8,3.6,4.4,5.2]
+                tick_lbls = [2, 3, 4, 5, 6]
+                plt.yticks(tick_locs, tick_lbls)
+            else:
+                tick_locs = [2.4,3.2,4.0,4.8,5.6]
+                tick_lbls = [2, 3, 4, 5, 6]
+                plt.yticks(tick_locs, tick_lbls)
+
             tick_locs = [0,1,2,3,4,5]
             tick_lbls = [0,0.1,0.2,0.3,0.4,0.5]
             plt.xticks(tick_locs, tick_lbls)
@@ -284,18 +291,20 @@ if __name__ == '__main__':
             if save:
                 # plt.savefig(SavePath+ResultsFile+'.eps',format='eps',dpi=1000) # high resolution
                 # plt.savefig(SavePath+ResultsFile+'.eps',format='eps',dpi=300)
-                # plt.savefig('/home/roman/Dropbox/dddd.svg', format='svg',dpi=1200)
-                plt.savefig(SavePath+ResultsFile+'.png',bbox='tight',format='png',dpi=100)
+                plt.savefig(SavePath+ResultsFile+'.png',bbox_inches='tight',format='png',dpi=100,pad_inches=0.01)
+                print SavePath+ResultsFile+'.png'
 
-                # plt.savefig('/home/roman/Dropbox/dddd.eps', format='eps',dpi=100)
+            # plt.show()
+            plt.close()
 
-            plt.show()
 
-
-        plotter(2,1)
-        # plotter(which_formulation=0,projection_type=1, save=True) 
+        # plotter(2,0)
+        # plotter(which_formulation=2,projection_type=1, save=True) 
         # Alomnd3D
-        # plotter(which_formulation=2,projection_type=1, which_quality=1, save=True) 
+        # plotter(which_formulation=0,projection_type=1, which_quality=3, save=False)
+        for i in range(3):
+            for j in range(1,4):
+                plotter(which_formulation=i,projection_type=1, which_quality=j, save=False) 
 
 
 

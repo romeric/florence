@@ -6,6 +6,8 @@
 #include <EIGEN_INC.hpp>
 #endif
 
+#include <OCC_INC.hpp>
+
 //! AUXILARY FUNCTIONS FOR POSTMESH
 ALWAYS_INLINE std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
     //! SPLIT STRINGS
@@ -26,17 +28,31 @@ ALWAYS_INLINE std::vector<std::string> split(const std::string &s, char delim) {
 
 
 template<typename T>
-ALWAYS_INLINE void print(std::vector<T> arr)
+ALWAYS_INLINE void print(std::vector<T>& arr)
 {
     //! PRINT FUNCTION OVERLOADED FOR STL VECTORS
-    //! EASIER TO BIND EVERYTHING WITH PRINT FUNCTION
-    //! RATHER THAN BINDING WITH OPERATOR <<
 
-    //typeid(arr[0]).name();
-    std::cout << std::endl;
+    std::cout << "\n";
     for (typename std::vector<T>::const_iterator i=arr.begin(); i<arr.end();++i)
     {
-        std::cout <<  *i << std::endl;
+        std::cout <<  *i << "\n";
+    }
+    std::cout << std::endl;
+}
+
+template<typename T>
+ALWAYS_INLINE void print(std::vector<std::vector<T> >& arr)
+{
+    //! PRINT FUNCTION OVERLOADED FOR STL VECTORS OF VECTORS
+
+    std::cout << "\n";
+    for (auto &i: arr)
+    {
+        for (auto &j: i)
+        {
+            std::cout << j << " ";
+        }
+        std::cout << "\n";
     }
     std::cout << std::endl;
 }
@@ -45,7 +61,7 @@ template <typename T>
 ALWAYS_INLINE void print(T&& last)
 {
     //! PRINT FUNCTION OVERLOADED FOR GENERIC TYPE T
-    std::cout << last << std::endl;
+    std::cout << last << "\n";
 }
 
 template <typename U, typename... T>
@@ -54,6 +70,12 @@ ALWAYS_INLINE void print(U&& first, T&&... rest)
     //! PRINT FUNCTION OVERLOADED USING VARIADIC TEMPLATE ARGUMENTS
     std::cout << first << " ";
     print(std::forward<T>(rest)...);
+}
+
+ALWAYS_INLINE void print(gp_Pnt pnt, Real scale = 1.)
+{
+    //! PRINT FUNCTION OVERLOADED USING gp_Pnt
+    std::cout << pnt.X()/scale << "  " << pnt.Y()/scale << "  " << pnt.Z()/scale << "\n";
 }
 
 template <typename T>

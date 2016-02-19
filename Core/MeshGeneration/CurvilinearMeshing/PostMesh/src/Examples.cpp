@@ -50,7 +50,7 @@ DirichletData ComputeDirichleteData(const char* iges_filename, Real scale, Real 
     curvilinear_mesh->ProjectMeshOnCurve();
     // FIX IMAGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
     curvilinear_mesh->RepairDualProjectedParameters();
-    //PERFORM POINT INVERTION FOR THE INTERIOR POINTS
+    //PERFORM POINT INVERSION FOR THE INTERIOR POINTS
     curvilinear_mesh->MeshPointInversionCurveArcLength();
     // OBTAIN DIRICHLET DATA
     DirichletData Dirichlet_data = curvilinear_mesh->GetDirichletData();
@@ -96,20 +96,37 @@ DirichletData ComputeDirichleteData3D(const char* iges_filename, Real scale, Rea
 
     // EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
     curvilinear_mesh->GetGeomVertices();
-//    curvilinear_mesh->GetGeomEdges();
+    curvilinear_mesh->GetGeomEdges();
     curvilinear_mesh->GetGeomFaces();
 
 //    curvilinear_mesh->GetSurfacesParameters();
     curvilinear_mesh->GetGeomPointsOnCorrespondingFaces();
 
-    // FIRST IDENTIFY WHICH CURVES CONTAIN WHICH EDGES
-    curvilinear_mesh->IdentifySurfacesContainingFaces();
+    // FIRST IDENTIFY WHICH SURFACES CONTAIN WHICH FACES
+//    curvilinear_mesh->IdentifySurfacesContainingFaces();
+//    curvilinear_mesh->IdentifySurfacesContainingFacesByProjection();
+    curvilinear_mesh->IdentifySurfacesContainingFacesByPureProjection();
+
+//    std::string filename = "/home/roman/Dropbox/Florence/Examples/FiniteElements/Tests/form1_face_to_surface_P2.dat";
+//    auto face_to_surface = PostMeshSurface::Read(filename);
+//    print(face_to_surface);
+//    curvilinear_mesh->SupplySurfacesContainingFaces(face_to_surface.data(),face_to_surface.rows());
+//    print(curvilinear_mesh->)
+    // IDENTIFY WHICH EDGES ARE SHARED BETWEEN SURFACES
+    curvilinear_mesh->IdentifySurfacesIntersections();
     // PROJECT ALL BOUNDARY POINTS FROM THE MESH TO THE SURFACE
     curvilinear_mesh->ProjectMeshOnSurface();
-//    // FIX IMAGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
 //    curvilinear_mesh->RepairDualProjectedParameters();
-//    //PERFORM POINT INVERTION FOR THE INTERIOR POINTS
-    curvilinear_mesh->MeshPointInversionSurface();
+    // FIX ACTUAL MESH
+    curvilinear_mesh->ReturnModifiedMeshPoints(points_array);
+//    //PERFORM POINT INVERSION FOR THE INTERIOR POINTS
+//    curvilinear_mesh->MeshPointInversionSurface(0);
+
+    // Read FE bases
+    std::string bases_file = "/home/roman/Dropbox/neval.dat";
+    Eigen::MatrixR FEbases = PostMeshBase::ReadR(bases_file,','); // 3D
+    auto OrthTol=0.5;
+    curvilinear_mesh->MeshPointInversionSurfaceArcLength(0,OrthTol,FEbases.data(),FEbases.rows(),FEbases.cols());
 //    // OBTAIN DIRICHLET DATA
     DirichletData Dirichlet_data = curvilinear_mesh->GetDirichletData();
 //    DirichletData Dirichlet_data;

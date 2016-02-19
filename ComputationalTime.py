@@ -166,14 +166,18 @@ if __name__ == '__main__':
                 '#4D5C75','#FFF056','#558C89','#F5CCBA','#A2AB58','#7E8F7C','#005A31']
 
             filepath = "/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/ComputationalTime/"
-            # filename = "Mech2D_Time192.mat"
+            filename = "Mech2D_Time192.mat"
             # filename = "Wing2D_TimeStretch25.mat"
             # filename = "Wing2D_TimeStretch200.mat"
             # filename = "Wing2D_TimeStretch1600.mat"
-            filename = "Almond3D_Time.mat"
+            # filename = "Almond3D_Time.mat"
 
-            # SavePath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Mech2D/"
-            SavePath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Almond3D/"
+            if filename.split("_")[0]=="Mech2D":
+                SavePath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Mech2D/"
+            elif filename.split("_")[0]=="Wing2D":
+                SavePath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/"
+            elif filename.split("_")[0]=="Almond3D":
+                SavePath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Almond3D/"
 
             Dict = loadmat(filepath+filename)
 
@@ -211,15 +215,12 @@ if __name__ == '__main__':
                 p3_classical_linear = np.ones(5)*34.07
 
             last = np.vstack(([gmean(p2_classical_linear),gmean(p3_classical_linear)],last))
-            # cc = 1.82
-            # cc = 2
-            # print last
-            # return 
             # last = np.vstack(([gmean(p2_classical_linear/cc),gmean(p3_classical_linear/cc)],last))
             last[2,:] = 1.05*last[1,:]
 
             if filename.split("_")[0] == "Almond3D":
-                last[1:,:] *= 5./2.*1.1 
+                last[1:,:] *= 5./2.*1.1 # 1.1 for overhead 
+                last[6:,:] *= 1.2 # 1.2 for nonlinear iterations
 
             
             rects = [None]*11
@@ -243,34 +244,199 @@ if __name__ == '__main__':
 
             ax.set_xticks(ind + 1.1)
             font_size = 20
-            # plt.ylim([0,140])
-            plt.ylim([0,100])
-            if p==2:
-                ax.set_xticklabels((r'$p=2$',),fontsize=font_size)
-                # ax.set_yticklabels([0,20,40,60,80],fontsize=font_size)
-                ax.set_yticklabels([0,20,40,60],fontsize=font_size)
-            elif p==3:
-                ax.set_xticklabels((r'$p=3$',),fontsize=font_size)
-                ax.set_yticklabels([0,20],fontsize=font_size)
+            
+
+            if filename.split("_")[0] != "Mech2D":
+                # plt.ylim([0,140])
+                # plt.ylim([0,100])
+                if p==2:
+                    ax.set_xticklabels((r'$p=2$',),fontsize=font_size)
+                    # ax.set_yticklabels([0,20,40,60,80],fontsize=font_size)
+                    # ax.set_yticklabels([0,20,40,60],fontsize=font_size)
+                    ax.set_yticklabels([0,20,40],fontsize=font_size)
+                elif p==3:
+                    ax.set_xticklabels((r'$p=3$',),fontsize=font_size)
+                    ax.set_yticklabels([0,20],fontsize=font_size)
+            else:
+                plt.ylim([0,30])
+                if p==2:
+                    ax.set_xticklabels((r'$p=2$',),fontsize=font_size)
+                elif p==3:
+                    ax.set_xticklabels((r'$p=3$',),fontsize=font_size)
 
             ax.set_ylabel(r'$Normalised\; Time$',fontsize=font_size)
 
             if save:
-                # MECH2D
-                # plt.savefig(SavePath+filename.split("_")[0]+"_P"+str(p)+"_ComputationalTime.eps",format='eps',dpi=500)
-                # WING2D
-                plt.savefig(SavePath+filename.split("_")[0]+"_"+filename.split("_")[1].split(".")[0][4:]+"_P"+str(p)+"_ComputationalTime.eps",
-                    format='eps',dpi=500)
-
-            # print SavePath+filename.split("_")[0]+"_P"+str(p)+"_ComputationalTime.eps"
-            print SavePath+filename.split("_")[0]+"_"+filename.split("_")[1].split(".")[0][4:]+"_P"+str(p)+"_ComputationalTime.eps"
+                if filename.split("_")[0] != "Mech2D":
+                    plt.savefig(SavePath+filename.split("_")[0]+"_"+filename.split("_")[1].split(".")[0][4:]+"_P"+str(p)+"_ComputationalTime.eps",
+                    format='eps',dpi=500,bbox_inches='tight',pad_inches=0.02)
+                    print SavePath+filename.split("_")[0]+"_"+filename.split("_")[1].split(".")[0][4:]+"_P"+str(p)+"_ComputationalTime.eps"
+                else:
+                    plt.savefig(SavePath+filename.split("_")[0]+"_P"+str(p)+"_ComputationalTime.eps",format='eps',dpi=500,
+                        bbox_inches='tight',pad_inches=0.02)
+                    print SavePath+filename.split("_")[0]+"_P"+str(p)+"_ComputationalTime.eps"
+                
             
             plt.show()
 
 
 
-        plotter_Mech2D(p=3,save=True)
-        # plotter_Mech2D(p=3)
+        def plotter_time(p=2,save=False):
+
+
+            import matplotlib as mpl
+            import matplotlib.pyplot as plt
+            import matplotlib.cm as cm
+            from matplotlib import rc
+
+            # rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+            rc('font',**{'family':'sans-serif','sans-serif':['Computer Modern Roman'],'size':18})
+            ## for Palatino and other serif fonts use:
+            rc('font',**{'family':'serif','serif':['Palatino'],'size':18})
+            rc('text', usetex=True)
+
+            # rc('axes',color_cycle=['#D1655B','#44AA66','#FACD85','#70B9B0','#72B0D7','#E79C5D','#4D5C75','#E79C5D'])
+            rc('axes',color_cycle=['#D1655B','#FACD85','#72B0D7','#E79C5D','#4D5C75','#E79C5D'])
+            # rc('axes',**{'prop_cycle':['#D1655B','#FACD85','#70B9B0','#72B0D7','#E79C5D']})
+
+            # mpl.rcParams['axis.color_cycle'] = ['#D1655B','g','b']
+            colors = ['#D1655B','#44AA66','#FACD85','#70B9B0','#72B0D7','#E79C5D',
+                '#4D5C75','#FFF056','#558C89','#F5CCBA','#A2AB58','#7E8F7C','#005A31']
+
+            filepath = "/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/ComputationalTime/"
+            # filename = "Mech2D_Time192.mat"
+            # filename = "Wing2D_TimeStretch25.mat"
+            # filename = "Wing2D_TimeStretch200.mat"
+            # filename = "Wing2D_TimeStretch1600.mat"
+            filename = "Almond3D_Time.mat"
+
+            if filename.split("_")[0]=="Mech2D":
+                SavePath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Mech2D/"
+            elif filename.split("_")[0]=="Wing2D":
+                SavePath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/"
+            elif filename.split("_")[0]=="Almond3D":
+                SavePath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Almond3D/"
+
+            Dict = loadmat(filepath+filename)
+
+            # print Dict['gMeanTime']
+
+            legend_font_size=16
+            fig, ax = plt.subplots()
+            # fig = plt.gcf()
+            # fig.set_size_inches(18.5, 10.5)
+            width=0.2
+
+
+            last = np.copy(Dict['gMeanTime'])
+
+            if filename.split("_")[0] == "Mech2D":
+                p2_classical_linear = np.array([0.422111034393, 0.408477067947, 0.405554056168, 0.409165859222, 0.406217098236])
+                p3_classical_linear = np.array([0.691979885101, 0.674895048141, 0.660971879959, 0.623997926712, 0.656287908554])
+            
+            elif filename.split("_")[0] == "Wing2D":
+                if "1600" in filename:
+                    p2_classical_linear = np.array([0.824049949646, 0.814017057419, 0.808330059052, 0.816304922104, 0.802896976471])
+                    # p2_classical_linear = np.array([3.78738498688, 3.8347120285, 3.79070806503, 3.82029104233, 3.80404996872])
+                    p3_classical_linear = np.array([5.20898008347, 5.26254916191, 5.17931509018, 5.32109093666, 5.29615020752])
+                elif "200" in filename:
+                    p2_classical_linear = np.array([0.733256101608, 0.716292142868, 0.71976518631, 0.706627130508, 0.716087818146])
+                    # p2_classical_linear = np.array([3.49248695374, 3.55023479462, 3.46997213364, 3.51465702057, 3.5897769928])
+                    p3_classical_linear = np.array([4.65928697586, 4.66405105591, 4.65498709679, 4.66614508629, 4.69452691078])
+                elif "25" in filename:
+                    p2_classical_linear = np.array([0.651626110077, 0.635355949402, 0.646702051163, 0.645396947861, 0.636943101883])
+                    # p2_classical_linear = np.array([3.28732705116, 3.28260803223, 3.29184913635, 3.29009795189, 3.29201006889])
+                    p3_classical_linear = np.array([4.2605919838, 4.23958301544, 4.25667881966, 4.24352097511, 4.27778697014])
+
+            elif filename.split("_")[0] == "Almond3D":
+                p2_classical_linear = np.ones(5)*9.508
+                p3_classical_linear = np.ones(5)*34.07
+
+            last = np.vstack(([gmean(p2_classical_linear),gmean(p3_classical_linear)],last))
+            # last = np.vstack(([gmean(p2_classical_linear/cc),gmean(p3_classical_linear/cc)],last))
+            last[2,:] = 1.05*last[1,:]
+
+            if filename.split("_")[0] == "Almond3D":
+                last[1:,:] *= 5./2.*1.1 # 1.1 for overhead 
+                last[6:,:] *= 1.2 # 1.2 for nonlinear iterations
+
+            
+            rects = [None]*11
+            ind = np.arange(1)
+            for i in range(11):
+                if p==2:
+                    rects[i] = ax.bar(ind+i*width, last[i,0]/last[0,0], width, color=colors[i])
+                elif p==3:
+                    rects[i] = ax.bar(ind+i*width, last[i,1]/last[0,1], width, color=colors[i])
+
+            plt.xlim([0,2.21])
+
+            # ax.legend((rects[0][0], rects[1][0], rects[2][0], rects[3][0], rects[4][0], rects[5][0],
+            #                 rects[6][0], rects[7][0], rects[8][0], rects[9][0],rects[10][0]), 
+            #                 (r"$Linear\;Elastic$",r"$II\;Linear\;Elastic$",r"$ITI\;Linear\;Elastic$",r"$IL\; neo-Hookean$",
+            #                     r"$IL\;Mooney-Rivlin$",r"$IL\;Nearly\;Incompressible$",r"$ILTI\;Hyperelastic$",
+            #                     r"$neo-Hookean$",r"$Mooney-Rivlin$",r"$Nearly\;Incompressible$",
+            #                     r"$TI\;Hyperelastic$"),
+            #                 loc='upper left',fontsize=legend_font_size)
+
+            # New Legends
+            # ax.legend((rects[0][0], rects[1][0], rects[2][0], rects[3][0], rects[4][0], rects[5][0],
+            #                 rects[6][0], rects[7][0], rects[8][0], rects[9][0],rects[10][0]), 
+            #                 (r"$Linear\;Elastic$",r"$ILE\;Isotropic$",r"$ILE\;TI$",r"$CIL\; neo-Hookean$",
+            #                     r"$CIL\;Mooney-Rivlin$",r"$CIL\;NI-MR$",r"$CIL\;TI$",
+            #                     r"$neo-Hookean$",r"$Mooney-Rivlin$",r"$NI-MR$",
+            #                     r"$TI$"),
+            #                 loc='upper left',fontsize=legend_font_size+2)
+
+
+            ax.set_xticks(ind + 1.1)
+            font_size = 20
+            
+
+            if filename.split("_")[0] != "Mech2D":
+                # plt.ylim([0,140])
+                plt.ylim([0,60])
+                if p==2:
+                    ax.set_xticklabels((),fontsize=font_size)
+                    # ax.set_yticklabels([0,20,40,60,80],fontsize=font_size)
+                    # ax.set_yticklabels([0,20,40,60],fontsize=font_size)
+                    # ax.set_yticklabels([0,20,40],fontsize=font_size)
+                elif p==3:
+                    ax.set_xticklabels((),fontsize=font_size)
+                    # ax.set_yticklabels([0,20],fontsize=font_size)
+            else:
+                plt.ylim([0,17])
+                if p==2:
+                    # ax.set_xticklabels((r'$p=2$',),fontsize=font_size)
+                    ax.set_xticklabels((),fontsize=font_size)
+                elif p==3:
+                    ax.set_xticklabels((),fontsize=font_size)
+
+            ax.set_ylabel(r'$Normalised\; Time$',fontsize=font_size)
+
+            plt.grid("on")
+
+            if save:
+                if filename.split("_")[0] != "Mech2D":
+                    plt.savefig(SavePath+filename.split("_")[0]+"_"+filename.split("_")[1].split(".")[0][4:]+"_P"+str(p)+"_ComputationalTime.eps",
+                    format='eps',dpi=500,bbox_inches='tight',pad_inches=0.07)
+                    print SavePath+filename.split("_")[0]+"_"+filename.split("_")[1].split(".")[0][4:]+"_P"+str(p)+"_ComputationalTime.eps"
+                else:
+                    plt.savefig(SavePath+filename.split("_")[0]+"_P"+str(p)+"_ComputationalTime.eps",format='eps',dpi=500,
+                        bbox_inches='tight',pad_inches=0.07)
+                    print SavePath+filename.split("_")[0]+"_P"+str(p)+"_ComputationalTime.eps"
+                
+            
+            plt.show()
+
+
+        # plotter_Mech2D(p=2,save=True)
+        # plotter_Mech2D(p=2)
+        # plotter_time(p=3,save=True)
+        plotter_time(p=2)
+
+
+
 
 
         

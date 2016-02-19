@@ -15,7 +15,6 @@ from Core.Supplementary.Timing.Timing import timing
 @timing
 def PreProcess(MainData,Pr,pwd):
 
-
     # PARALLEL PROCESSING
     ############################################################################
     try:
@@ -35,7 +34,7 @@ def PreProcess(MainData,Pr,pwd):
 
     MeshReader = getattr(mesh,MainData.MeshInfo.Reader,None)
     if MeshReader is not None:
-        if MainData.MeshInfo.Reader is 'Read':
+        if MainData.MeshInfo.Reader is 'Read': 
             if getattr(MainData.MeshInfo,'Format',None) is 'GID':
                 mesh.ReadGIDMesh(MainData.MeshInfo.FileName,MainData.MeshInfo.MeshType,MainData.C)
             else:   
@@ -56,8 +55,8 @@ def PreProcess(MainData,Pr,pwd):
             mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=False,nrad=7,ncirc=7)
         elif MainData.MeshInfo.Reader is 'Sphere':
             # mesh.Sphere()
-            mesh.Sphere(points=20)
-            # mesh.Sphere(points=2)
+            # mesh.Sphere(points=200)
+            mesh.Sphere(points=2)
             # mesh.SimplePlot()
 
     if MainData.__NO_DEBUG__ is False:
@@ -71,30 +70,46 @@ def PreProcess(MainData,Pr,pwd):
 
 
     # mesh.points *=1000. 
+
     # mesh.SimplePlot()
     # mesh.PlotMeshNumbering()
+
     # print mesh.GetElementsWithBoundaryEdgesTri()
     # mesh.RetainElementsWithin((-0.52,-0.08,0.72,0.08))
     # mesh.RetainElementsWithin((-0.502,-0.06,0.505,0.06283))
     # mesh.RemoveElements((-0.9,-0.1,1.9,0.1),keep_boundary_only=True)
     # mesh.RemoveElements((-0.9,-0.1,1.9,0.1),keep_boundary_only=True,plot_new_mesh=False) #
-
     # mesh.RemoveElements((-0.6,-0.1,1.9,0.6),keep_boundary_only=True,plot_new_mesh=False)
-
-    # mesh.SimplePlot()
-    # mesh.SimplePlot(save=True,filename="/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_Mesh_Stretch_25")
-    # mesh.SimplePlot(save=True,filename="/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_Mesh_Stretch_200")
-    # mesh.SimplePlot(save=True,filename="/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_Mesh_Stretch_1600")
-    # mesh.PlotMeshNumbering()
-    
-
     # mesh.RemoveElements((-0.55,-0.1,-0.4,0.1),plot_new_mesh=False) 
-    # mesh.SimplePlot() 
-    # mesh.PlotMeshNumbering()
+
 
     # un_faces = np.unique(mesh.faces)
     # vpoints = mesh.points[un_faces,:]
     # print np.linalg.norm(vpoints,axis=1)
+    # exit()
+
+    # print mesh.points.shape
+    # from Core.Supplementary.Tensors import remove_duplicate_rows
+    # mesh.points = remove_duplicate_rows(mesh.points,consider_sort=False)
+    # print mesh.points.shape
+    # print mesh.elements.shape, mesh.edges.shape
+    # mesh.faces = mesh.faces[MainData.BoundaryData().ProjectionCriteria(mesh).flatten()==1,:]
+    # mesh.SimplePlot()
+    # exit()
+
+    # print mesh.points.dtype, mesh.elements.dtype, mesh.faces.dtype, mesh.edges.dtype
+    # exit()
+
+    # from tensor import unique2d
+    # from Core import tensor
+
+    # mesh.Median
+    # from Core.MixedFormulations.MixedFormulations import NearlyIncompressibleHuWashizu
+    # xx = NearlyIncompressibleHuWashizu(mesh)
+    # exit()
+
+
+    # print Float
     # exit()
 
 
@@ -105,27 +120,6 @@ def PreProcess(MainData,Pr,pwd):
     # mesh.elements = np.ascontiguousarray(loadedmat['T'])-1
 
 
-    # print mesh.nelem, mesh.points.shape[0], mesh.edges.shape[0]
-    # mesh.WriteVTK(fname="/home/roman/Dropbox/dd2.vtu")
-    # print mesh.faces
-    # print mesh.points
-    # exit()
-
-    # print mesh.points.shape[0], mesh.elements.shape[0]
-    # from time import time
-    # tt = time()
-    # # mesh.GetEdgesTri()
-    # mesh.GetFacesTet()
-    # print time() - tt
-    # # print mesh.all_edges
-    # # print mesh.all_edges.shape
-    # print mesh.all_faces.shape
-    # print mesh.nelem
-    # print np.max(mesh.points[:,0]), np.max(mesh.points[:,1]), np.max(mesh.points[:,2])
-    # print np.min(mesh.points[:,0]), np.min(mesh.points[:,1]), np.min(mesh.points[:,2])
-    # print MainData.MeshInfo.FileName.split(".")[0]+"_P"+str(MainData.C+1)+".mat"
-    # exit()
-
     # STORE PATHS FOR MAIN, CORE & PROBLEM DIRECTORIES
     ############################################################################
     MainData.Path = SetPath(Pr,pwd,MainData.C,mesh.nelem,
@@ -134,10 +128,8 @@ def PreProcess(MainData,Pr,pwd):
     # GENERATE pMESHES FOR HIGH C
     ############################################################################
 
-    IsHighOrder = getattr(MainData.MeshInfo,"IsHighOrder",None)
-    if IsHighOrder is None:
-        IsHighOrder = False
-
+    IsHighOrder = getattr(MainData.MeshInfo,"IsHighOrder",False)
+    
     if MainData.C>0:
         if IsHighOrder is False:
             mesh.GetHighOrderMesh(MainData.C,Parallel=MainData.Parallel,
@@ -146,23 +138,27 @@ def PreProcess(MainData,Pr,pwd):
         mesh.ChangeType()
 
     ############################################################################
-    # t1=time()
-    # mesh.GetElementsWithBoundaryEdgesTri()
-    # print time()-t1
-
-    # index_sort_x = np.argsort(nmesh.points[:,0])
-    # sorted_repoints = nmesh.points[index_sort_x,:]
-    # ##############################################################################
-    # np.savetxt('/home/roman/Dropbox/time_3.dat',np.array([time()-t_mesh, mesh.points.shape[0]]))
+    # from Core.Supplementary.Tensors import makezero, unique2d
+    # un_faces =  unique2d(mesh.faces,consider_sort=False)
+    # print un_faces.shape, mesh.faces.shape
+    # ##########################################################################
 
     # mesh.PlotMeshNumbering()
+    # mesh.SimplePlot()
+    # exit()
 
+    # print MainData.MeshInfo.FileName.split(".")[0]+"_elements_"+"P"+str(MainData.C+1)+".dat"
     # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_elements_"+"P"+str(MainData.C+1)+".dat",mesh.elements,delimiter=',')
     # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_points_"+"P"+str(MainData.C+1)+".dat",mesh.points,fmt="%9.16f",delimiter=',')
     # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_edges_"+"P"+str(MainData.C+1)+".dat",mesh.edges,delimiter=',')
     # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_faces_"+"P"+str(MainData.C+1)+".dat",mesh.faces,delimiter=',')
+    # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_face_to_surface_"+"P"+str(MainData.C+1)+".dat",mesh.face_to_surface,delimiter=',')
+    # exit()
+
 
     # For saving 3D problems
+    # from time import time
+    # tt = time()
     # from scipy.io import savemat
     # mesh.GetFacesTet()
     # mesh.GetEdgesTet()
@@ -175,43 +171,98 @@ def PreProcess(MainData,Pr,pwd):
     #     'edges':mesh.edges, 'all_faces':mesh.all_faces, 'all_edges':mesh.all_edges,
     #     'face_flags':face_flags,'face_to_element':mesh.face_to_element,
     #     'boundary_face_to_element':boundary_face_to_element}
-    # savemat(MainData.MeshInfo.FileName.split(".")[0]+"_P"+str(MainData.C+1)+".mat",Dict)
+    # # Dict['face_to_surface'] = mesh.face_to_surface
+    # savemat(MainData.MeshInfo.FileName.split(".")[0]+"_P"+str(MainData.C+1)+".mat",Dict,do_compression=True)
+    # # savemat(MainData.MeshInfo.FileName.split(".")[0]+"_P"+str(MainData.C+1)+"_New.mat",Dict,do_compression=True)
     # print MainData.MeshInfo.FileName.split(".")[0]+"_P"+str(MainData.C+1)+".mat"
+    # print 'rest of the time', time() - tt
     # exit()
 
 
-    # print mesh.elements.shape, mesh.points.shape, mesh.edges.shape
-    # print np.min(mesh.points[:,0]), np.min(mesh.points[:,1]), np.min(mesh.points[:,2]) 
-    # print np.max(mesh.points[:,0]), np.max(mesh.points[:,1]), np.max(mesh.points[:,2]) 
-    # print mesh.elements
-    # print mesh.faces
-    # print mesh.edges.shape
-    # print mesh.points
 
-    # un_faces = np.unique(mesh.faces)
-    # vpoints = mesh.points[un_faces,:]
-    # print np.linalg.norm(vpoints,axis=1)
+    # For saving 3D problems
+    # from scipy.io import savemat
 
-    # mesh.GetFaceFlagsTets()
-    # mesh.GetFacesTet()
-    # mesh.GetBoundaryFacesTet()
-    # mesh.GetBoundaryEdgesTet()
-    # mesh.GetInteriorFacesTet()
-    # mesh.GetEdgesTet()
-    # print mesh.all_edges
-    # print mesh.all_faces.shape
-    
+    # Dict = {'points':mesh.points, 'elements':mesh.elements, 
+    #     'element_type':mesh.element_type, 'faces':mesh.faces,
+    #     'edges':mesh.edges}
+    # # Dict['face_to_surface'] = mesh.face_to_surface
+    # savemat(MainData.MeshInfo.FileName.split(".")[0]+"_P"+str(MainData.C+1)+".mat",Dict,do_compression=True)
+    # print MainData.MeshInfo.FileName.split(".")[0]+"_P"+str(MainData.C+1)+".mat"
+    # exit()
+
+    # Save 2D
+    # from time import time
+    # tt = time()
+    # from scipy.io import savemat
     # mesh.GetEdgesTri()
-    # mesh.GetBoundaryEdgesTri()
-    # mesh.GetInteriorEdgesTri()
+    # edge_flags = mesh.GetInteriorEdgesTri()
+    # boundary_edge_to_element = mesh.GetElementsWithBoundaryEdgesTri()
 
-    # print np.max(mesh.points[:,0]), np.max(mesh.points[:,1]), np.max(mesh.points[:,2])
-    # print np.min(mesh.points[:,0]), np.min(mesh.points[:,1]), np.min(mesh.points[:,2])
-    # from Core.Supplementary.Tensors import itemfreq_py
-    # print itemfreq_py(MainData.BoundaryData().ProjectionCriteria(mesh))
-    # print type(mesh.element_type)
-    # print mesh.elements.flags
+    # Dict = {'points':mesh.points, 'elements':mesh.elements, 
+    #     'element_type':mesh.element_type,
+    #     'edges':mesh.edges, 'all_edges':mesh.all_edges,
+    #     'face_flags':edge_flags,'boundary_face_to_element':boundary_edge_to_element}
+    # savemat(MainData.MeshInfo.FileName.split(".")[0]+"_P"+str(MainData.C+1)+".mat",Dict)
+    # # savemat(MainData.MeshInfo.FileName.split(".")[0]+"_P"+str(MainData.C+1)+"_New.mat",Dict)
+    # print MainData.MeshInfo.FileName.split(".")[0]+"_P"+str(MainData.C+1)+".mat"
+    # print 'rest of the time', time() - tt
+    # exit()
 
+
+
+    # For F6
+    # face_to_surface = np.loadtxt("/home/roman/Dropbox/Florence/Examples/FiniteElements/F6/face_to_surface_mapped.dat").astype(np.int64)
+    # face_to_surface = np.loadtxt("/home/roman/Dropbox/Florence/Examples/FiniteElements/F6/f6_iso_face_to_surface_mapped.dat").astype(np.int64)
+    # face_to_surface = np.loadtxt("/home/roman/Dropbox/Florence/Examples/FiniteElements/F6/f6BL_face_to_surface_mapped.dat").astype(np.int64)
+    # face_to_surface = np.loadtxt("/home/roman/Dropbox/Florence/Examples/FiniteElements/Drill/face_to_surface_mapped.dat").astype(np.int64)
+    # face_to_surface = np.loadtxt("/home/roman/Dropbox/Florence/Examples/FiniteElements/Valve/face_to_surface_mapped.dat").astype(np.int64)
+    # face_to_surface = np.loadtxt("/home/roman/Dropbox/Florence/Examples/FiniteElements/MechanicalComponent3D/face_to_surface_mapped.dat").astype(np.int64)
+    # face_to_surface = np.loadtxt("/home/roman/Dropbox/Florence/Examples/FiniteElements/Almond3D/face_to_surface_mapped.dat").astype(np.int64)
+    # mesh.face_to_surface = face_to_surface
+
+
+    # Falcon
+    # lmesh = Mesh()
+    # lmesh.ReadGIDMesh("/home/roman/Dropbox/Florence/Examples/FiniteElements/Falcon3D/falcon_iso.dat","tet")
+    # lmesh.ReadGIDMesh("/home/roman/Dropbox/2015_HighOrderMeshing/geometriesAndMeshes/falcon/falcon_big.dat","tet")
+    # mesh.face_to_surface = lmesh.face_to_surface
+    # print mesh.face_to_surface
+    # exit()
+
+
+    # nnode_linear = mesh.elements[:,:4].max()+1
+    # yy = np.where(np.abs(mesh.points[:,1]) < 1e-10)[0].shape[0] # F6
+    # xx = np.where(np.abs(mesh.points[:nnode_linear,1]) < 1e-10)[0].shape[0] # F6
+
+    # print "The linear mesh has", 2*mesh.elements.shape[0], "elements", 2*np.unique(mesh.elements[:,:4]).shape[0], \
+    # "vertices and", 2*mesh.faces[MainData.BoundaryData().ProjectionCriteria(mesh).flatten()==1,:].shape[0], "triangular faces."
+    # print "The resulting high order mesh with p=", (MainData.C+1), "has", 2*mesh.points.shape[0]-yy, "nodes and",  \
+    # 2*np.unique(mesh.faces[MainData.BoundaryData().ProjectionCriteria(mesh).flatten()==1,:]).shape[0], "nodes on the"
+
+    # aspect = mesh.AspectRatios
+    # print aspect.min(), aspect.max()
+    # exit()
+
+
+
+    # print mesh.nelem, mesh.faces.shape, mesh.points.shape
+    # omesh = Mesh()
+    # omesh.ReadHDF5(MainData.Path.Problem+'/Almond3D_H1_P'+str(MainData.C+1)+'.mat') 
+    # # print omesh.nelem, omesh.faces.shape, omesh.points.shape
+    # m=100
+    # print mesh.faces[m,:]
+    # print 
+    # print omesh.faces[m,:]
+
+    # print mesh.points[mesh.faces[m,:]] - omesh.points[omesh.faces[m,:]]
+
+    # print np.sum(mesh.points - omesh.points)
+    # print mesh.points[22,:]
+    # print omesh.points[22,:]
+    # print np.where(MainData.BoundaryData().ProjectionCriteria(mesh).flatten()==1)[0].shape
+    # print np.where(MainData.BoundaryData().ProjectionCriteria(omesh).flatten()==1)[0].shape
+    # exit()
 
 
 
@@ -385,7 +436,7 @@ def PreProcess(MainData,Pr,pwd):
     class solve(object):
         tol = 5.0e-07
 
-    if mesh.points.shape[0]*MainData.nvar > 100000 and MainData.C > 3:
+    if mesh.points.shape[0]*MainData.nvar > 100000 and MainData.C >= 2:
         solve.type = "multigrid"
         solve.sub_type = "amg"
         print 'Large system of equations. Switching to algebraic multigrid solver'
@@ -393,16 +444,15 @@ def PreProcess(MainData,Pr,pwd):
         solve.type = "direct"
         solve.sub_type = "MUMPS"
         print 'Large system of equations. Switching to MUMPS solver'
-    elif mesh.points.shape[0]*MainData.nvar > 1e09 and MainData.C > 4:
-        solve.type = "iterative"
-        solve.sub_type = "cg"
-        print 'Large system of equations. Switching to iterative solver'
     else:
         solve.type = "direct"
         solve.sub_type = "UMFPACK"
 
-    solve.type = "multigrid"
-    solve.sub_type = "amg"
+    # solve.type = "direct"
+    # solve.sub_type = "UMFPACK"
+
+    # solve.type = "multigrid"
+    # solve.sub_type = "amg"
     
     # solve.type = "direct"
     # solve.sub_type = "MUMPS"
@@ -412,7 +462,7 @@ def PreProcess(MainData,Pr,pwd):
 
     if mesh.nelem > 1e07:
         MainData.AssemblyRoutine = 'Large'
-        print 'Large number of elements. Switching to faster assembly routine'
+        print 'Large number of elements. Switching to out of core assembly routine'
     else:
         MainData.AssemblyRoutine = 'Small'
         # print 'Small number of elements. Sticking to small assembly routine'
