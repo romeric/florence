@@ -68,7 +68,6 @@ def PreProcess(MainData,Pr,pwd):
         mesh.points *=1000.
         # mesh.points /=1000.
 
-
     # mesh.points *=1000. 
 
     # mesh.SimplePlot()
@@ -88,30 +87,10 @@ def PreProcess(MainData,Pr,pwd):
     # print np.linalg.norm(vpoints,axis=1)
     # exit()
 
-    # print mesh.points.shape
-    # from Core.Supplementary.Tensors import remove_duplicate_rows
-    # mesh.points = remove_duplicate_rows(mesh.points,consider_sort=False)
-    # print mesh.points.shape
-    # print mesh.elements.shape, mesh.edges.shape
-    # mesh.faces = mesh.faces[MainData.BoundaryData().ProjectionCriteria(mesh).flatten()==1,:]
-    # mesh.SimplePlot()
-    # exit()
-
-    # print mesh.points.dtype, mesh.elements.dtype, mesh.faces.dtype, mesh.edges.dtype
-    # exit()
-
-    # from tensor import unique2d
-    # from Core import tensor
-
     # mesh.Median
     # from Core.MixedFormulations.MixedFormulations import NearlyIncompressibleHuWashizu
     # xx = NearlyIncompressibleHuWashizu(mesh)
     # exit()
-
-
-    # print Float
-    # exit()
-
 
 
     # from scipy.io import loadmat
@@ -179,38 +158,6 @@ def PreProcess(MainData,Pr,pwd):
     # exit()
 
 
-
-    # For saving 3D problems
-    # from scipy.io import savemat
-
-    # Dict = {'points':mesh.points, 'elements':mesh.elements, 
-    #     'element_type':mesh.element_type, 'faces':mesh.faces,
-    #     'edges':mesh.edges}
-    # # Dict['face_to_surface'] = mesh.face_to_surface
-    # savemat(MainData.MeshInfo.FileName.split(".")[0]+"_P"+str(MainData.C+1)+".mat",Dict,do_compression=True)
-    # print MainData.MeshInfo.FileName.split(".")[0]+"_P"+str(MainData.C+1)+".mat"
-    # exit()
-
-    # Save 2D
-    # from time import time
-    # tt = time()
-    # from scipy.io import savemat
-    # mesh.GetEdgesTri()
-    # edge_flags = mesh.GetInteriorEdgesTri()
-    # boundary_edge_to_element = mesh.GetElementsWithBoundaryEdgesTri()
-
-    # Dict = {'points':mesh.points, 'elements':mesh.elements, 
-    #     'element_type':mesh.element_type,
-    #     'edges':mesh.edges, 'all_edges':mesh.all_edges,
-    #     'face_flags':edge_flags,'boundary_face_to_element':boundary_edge_to_element}
-    # savemat(MainData.MeshInfo.FileName.split(".")[0]+"_P"+str(MainData.C+1)+".mat",Dict)
-    # # savemat(MainData.MeshInfo.FileName.split(".")[0]+"_P"+str(MainData.C+1)+"_New.mat",Dict)
-    # print MainData.MeshInfo.FileName.split(".")[0]+"_P"+str(MainData.C+1)+".mat"
-    # print 'rest of the time', time() - tt
-    # exit()
-
-
-
     # For F6
     # face_to_surface = np.loadtxt("/home/roman/Dropbox/Florence/Examples/FiniteElements/F6/face_to_surface_mapped.dat").astype(np.int64)
     # face_to_surface = np.loadtxt("/home/roman/Dropbox/Florence/Examples/FiniteElements/F6/f6_iso_face_to_surface_mapped.dat").astype(np.int64)
@@ -230,11 +177,6 @@ def PreProcess(MainData,Pr,pwd):
     # print mesh.face_to_surface
     # exit()
 
-
-    # nnode_linear = mesh.elements[:,:4].max()+1
-    # yy = np.where(np.abs(mesh.points[:,1]) < 1e-10)[0].shape[0] # F6
-    # xx = np.where(np.abs(mesh.points[:nnode_linear,1]) < 1e-10)[0].shape[0] # F6
-
     # print "The linear mesh has", 2*mesh.elements.shape[0], "elements", 2*np.unique(mesh.elements[:,:4]).shape[0], \
     # "vertices and", 2*mesh.faces[MainData.BoundaryData().ProjectionCriteria(mesh).flatten()==1,:].shape[0], "triangular faces."
     # print "The resulting high order mesh with p=", (MainData.C+1), "has", 2*mesh.points.shape[0]-yy, "nodes and",  \
@@ -244,25 +186,6 @@ def PreProcess(MainData,Pr,pwd):
     # print aspect.min(), aspect.max()
     # exit()
 
-
-
-    # print mesh.nelem, mesh.faces.shape, mesh.points.shape
-    # omesh = Mesh()
-    # omesh.ReadHDF5(MainData.Path.Problem+'/Almond3D_H1_P'+str(MainData.C+1)+'.mat') 
-    # # print omesh.nelem, omesh.faces.shape, omesh.points.shape
-    # m=100
-    # print mesh.faces[m,:]
-    # print 
-    # print omesh.faces[m,:]
-
-    # print mesh.points[mesh.faces[m,:]] - omesh.points[omesh.faces[m,:]]
-
-    # print np.sum(mesh.points - omesh.points)
-    # print mesh.points[22,:]
-    # print omesh.points[22,:]
-    # print np.where(MainData.BoundaryData().ProjectionCriteria(mesh).flatten()==1)[0].shape
-    # print np.where(MainData.BoundaryData().ProjectionCriteria(omesh).flatten()==1)[0].shape
-    # exit()
 
 
 

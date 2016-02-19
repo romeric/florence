@@ -182,53 +182,6 @@ def main(MainData, DictOutput=None, nStep=0):
     #     DictOutput['TotalDisplacement_P'+str(MainData.C+1)] = TotalDisp
     #     DictOutput['nSteps'] = MainData.AssemblyParameters.LoadIncrements
 
-    #########################################################
-    # # For WriteCurvedMeshFiles
-    # if DictOutput is not None:
-    #     DictOutput['MeshPoints_P'+str(MainData.C+1)] = mesh.points
-    #     DictOutput['MeshElements_P'+str(MainData.C+1)] = mesh.elements+1
-    #     # DictOutput['MeshEdges_P'+str(MainData.C+1)] = mesh.edges+1
-    #     if MainData.ndim==3:
-    #         DictOutput['MeshFaces_P'+str(MainData.C+1)] = mesh.faces+1
-    #     DictOutput['TotalDisplacement_P'+str(MainData.C+1)+"_"+MainData.AnalysisType+"_"+MainData.MaterialArgs.Type] = TotalDisp
-    #     DictOutput['ScaledJacobian_P'+str(MainData.C+1)+"_"+MainData.AnalysisType+"_"+MainData.MaterialArgs.Type] = MainData.ScaledJacobian
-    #     DictOutput['nSteps'] = MainData.AssemblyParameters.LoadIncrements
-
-    # For WriteCurvedMeshFiles for the case where nonlinear struggles for Wing2D
-    # Results = {'PolynomialDegree':MainData.C+1,
-    #     'PoissonsRatio':MainData.MaterialArgs.nu,'Youngs_Modulus':MainData.MaterialArgs.E,
-    #     'MeshPoints':mesh.points,'MeshElements':mesh.elements+1,'TotalDisplacement':TotalDisp,
-    #     'ScaledJacobian':MainData.ScaledJacobian}
-    # spath = "/home/roman/Dropbox/2015_HighOrderMeshing/Paper_CompMech2015_CurvedMeshFiles/Wing2D_Nonlinear.mat"
-    # from scipy.io import savemat
-    # savemat(spath,Results)
-    #########################################################
-
-    # vpoints = mesh.points + TotalDisp[:,:,-1]
-    # mpath = "/home/roman/Dropbox/Matlab_Files/tetplots/"
-    # # mname = "sphere"
-    # # mname = "torus"
-    # mname = "almond"
-
-    # np.savetxt(mpath+'elements_'+mname+'_p'+str(MainData.C+1)+'.dat', mesh.elements,fmt='%d',delimiter=',')
-    # np.savetxt(mpath+'points_'+mname+'_p'+str(MainData.C+1)+'.dat', mesh.points,fmt='%10.9f',delimiter=',')
-    # np.savetxt(mpath+'vpoints_'+mname+'_p'+str(MainData.C+1)+'.dat', vpoints,fmt='%10.9f',delimiter=',')
-    # np.savetxt(mpath+'faces_'+mname+'_p'+str(MainData.C+1)+'.dat', mesh.faces,fmt='%d',delimiter=',')
-    # np.savetxt(mpath+'sjacobian_'+mname+'_p'+str(MainData.C+1)+'.dat',MainData.ScaledJacobian,fmt='%8.9f',delimiter=',')
-
-    # np.savetxt(mpath+'pfaces_'+mname+'_p'+str(MainData.C+1)+'.dat',MainData.BoundaryData().ProjectionCriteria(mesh))
-
-
-    # mesh.WriteVTK(fname="/home/roman/Dropbox/dd.vtu",pdata=TotalDisp[:,:,-1])
-    # mesh.WriteVTK(pdata=TotalDisp[:,:,-1])
-
-
-    # from scipy.io import savemat
-    # Results = {'WholeScaledJacobian':MainData.ScaledJacobian}
-    # savemat("/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Almond3D/II_P"+str(MainData.C+1)+"_Whole_ScaledJacobian.mat",Results)
-    # savemat("/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Almond3D/IL_P"+str(MainData.C+1)+"_Whole_ScaledJacobian.mat",Results)
-    # savemat("/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Almond3D/NL_P"+str(MainData.C+1)+"_Whole_ScaledJacobian.mat",Results)
-
     #---------------------------------------------------------------------------------
 
     # Compute Error Norms
