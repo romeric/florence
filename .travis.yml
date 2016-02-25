@@ -15,10 +15,13 @@ branches:
 
 # Install dependencies
 install:
+  - FLORENCEPATH=$(pwd)
+  - echo $FLORENCEPATH
+  # Install OpenCascade
   - cd ~
   - OCETAG="OCE-0.15" 
   - OCEMAKEPATH="oce/build"
-  # Attempt to install all the pre-requisites
+  # Install all OCC dependencies
   - sudo apt-get install -fy cmake libx11-dev mesa-common-dev freeglut3-dev libfreetype6-dev libc6-dev libstdc++6 
   - sudo apt-get install libstdc++-4.8-dev -fy build-essential gcc g++ libftgl-dev xorg-dev tcl-dev tk-dev
   - git clone --branch $OCETAG https://github.com/tpaviot/oce.git
@@ -26,12 +29,19 @@ install:
   - cmake ..
   - make '-j'$(nproc)
   - sudo make install/strip
+  # Eigen install
+  - cd ~
+  - wget http://bitbucket.org/eigen/eigen/get/3.2.7.tar.bz2
+  - tar -xvf eigen-eigen-b30b87236a1b.tar.bz2
+  - sudo mv eigen-eigen-b30b87236a1b /usr/local/include/eigen/ 
   # pypi
-  - sudo pip install -r "requirements.txt"
+  - cd $FLORENCEPATH; sudo pip install -r "requirements.txt"
+  # Setup florence - build interfaces
+  - python setup.py
 
 script:
   # Run florence test suite
-  cd ~; nose2
+  cd $FLORENCEPATH; nose2
 
 notification:
   email: false

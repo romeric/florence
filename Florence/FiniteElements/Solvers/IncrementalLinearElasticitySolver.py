@@ -4,7 +4,6 @@ from scipy.sparse.linalg import onenormest
 # from SparseSolver import SparseSolver
 
 from Florence.FiniteElements.Assembly import *
-from Florence.FiniteElements.ApplyDirichletBoundaryConditions import *
 from Florence.FiniteElements.PostProcess import *
 from copy import deepcopy
 import gc

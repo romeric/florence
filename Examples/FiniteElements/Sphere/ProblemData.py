@@ -32,6 +32,8 @@ def ProblemData(MainData):
     boundary_condition.SetCADProjectionParameters(cad_file,projection_type='orthogonal',
         scale=1000.0,condition=1e10,project_on_curves=False,solve_for_planar_faces=False)
     boundary_condition.GetProjectionCriteria(mesh)
- 
+
+    solver = LinearSolver(linear_solver="direct", linear_solver_type="umfpack")
+    MainData.solver = solver 
 
     return mesh, material, boundary_condition

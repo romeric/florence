@@ -3,7 +3,6 @@ import numpy as np
 import numpy.linalg as la 
 # from SparseSolver import SparseSolver
 
-from Florence.FiniteElements.ApplyDirichletBoundaryConditions import *
 from Florence.FiniteElements.StaticCondensationGlobal import *
 from Florence.FiniteElements.PostProcess import *
 from Florence.FiniteElements.Assembly import *

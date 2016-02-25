@@ -42,6 +42,10 @@
 # object files
 .o
 
+# qt creator project files
+*.pro
+*.user
+
 # top level project files
 Session.vim
 RunSession.sublime-project
@@ -59,4 +63,5 @@ ParametricStudy_StepsvsNu.py
 WriteCurvedMeshFiles.py
 
 # testfiles not to ignore
-!Tests/*
+!Tests/Almond3D/
+!Tests/Almond3D/*

@@ -1241,7 +1241,7 @@ static char __pyx_k_RuntimeError[] = "RuntimeError";
 static char __pyx_k_Florence_Tensor_LinAlg[] = "Florence.Tensor.LinAlg";
 static char __pyx_k_matrices_are_not_aligned[] = "matrices are not aligned";
 static char __pyx_k_ndarray_is_not_C_contiguous[] = "ndarray is not C contiguous";
-static char __pyx_k_home_roman_Dropbox_Florence_Flo[] = "/home/roman/Dropbox/Florence/Florence/Tensor/LinAlg.pyx";
+static char __pyx_k_home_roman_Dropbox_florence_Flo[] = "/home/roman/Dropbox/florence/Florence/Tensor/LinAlg.pyx";
 static char __pyx_k_unknown_dtype_code_in_numpy_pxd[] = "unknown dtype code in numpy.pxd (%d)";
 static char __pyx_k_Format_string_allocated_too_shor[] = "Format string allocated too short, see comment in numpy.pxd";
 static char __pyx_k_Non_native_byte_order_not_suppor[] = "Non-native byte order not supported";
@@ -1269,7 +1269,7 @@ static PyObject *__pyx_kp_s_determinant_of_matrices_3x3_fall;
 static PyObject *__pyx_kp_s_dgemm_of_matrices_3x3_falls_back;
 static PyObject *__pyx_n_s_dot;
 static PyObject *__pyx_n_s_dtype;
-static PyObject *__pyx_kp_s_home_roman_Dropbox_Florence_Flo;
+static PyObject *__pyx_kp_s_home_roman_Dropbox_florence_Flo;
 static PyObject *__pyx_n_s_import;
 static PyObject *__pyx_n_s_ind;
 static PyObject *__pyx_n_s_indices;
@@ -7901,7 +7901,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_dgemm_of_matrices_3x3_falls_back, __pyx_k_dgemm_of_matrices_3x3_falls_back, sizeof(__pyx_k_dgemm_of_matrices_3x3_falls_back), 0, 0, 1, 0},
   {&__pyx_n_s_dot, __pyx_k_dot, sizeof(__pyx_k_dot), 0, 0, 1, 1},
   {&__pyx_n_s_dtype, __pyx_k_dtype, sizeof(__pyx_k_dtype), 0, 0, 1, 1},
-  {&__pyx_kp_s_home_roman_Dropbox_Florence_Flo, __pyx_k_home_roman_Dropbox_Florence_Flo, sizeof(__pyx_k_home_roman_Dropbox_Florence_Flo), 0, 0, 1, 0},
+  {&__pyx_kp_s_home_roman_Dropbox_florence_Flo, __pyx_k_home_roman_Dropbox_florence_Flo, sizeof(__pyx_k_home_roman_Dropbox_florence_Flo), 0, 0, 1, 0},
   {&__pyx_n_s_import, __pyx_k_import, sizeof(__pyx_k_import), 0, 0, 1, 1},
   {&__pyx_n_s_ind, __pyx_k_ind, sizeof(__pyx_k_ind), 0, 0, 1, 1},
   {&__pyx_n_s_indices, __pyx_k_indices, sizeof(__pyx_k_indices), 0, 0, 1, 1},
@@ -8096,7 +8096,7 @@ static int __Pyx_InitCachedConstants(void) {
   __pyx_tuple__14 = PyTuple_Pack(5, __pyx_n_s_A, __pyx_n_s_ind, __pyx_n_s_ptr, __pyx_n_s_num_rows, __pyx_n_s_order); if (unlikely(!__pyx_tuple__14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 29; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__14);
   __Pyx_GIVEREF(__pyx_tuple__14);
-  __pyx_codeobj__15 = (PyObject*)__Pyx_PyCode_New(1, 0, 5, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__14, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_roman_Dropbox_Florence_Flo, __pyx_n_s_symrcm, 29, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 29; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__15 = (PyObject*)__Pyx_PyCode_New(1, 0, 5, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__14, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_roman_Dropbox_florence_Flo, __pyx_n_s_symrcm, 29, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 29; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;

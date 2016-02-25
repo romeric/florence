@@ -31,8 +31,8 @@ from Florence.FiniteElements.ComputeErrorNorms import *
 # import Examples.FiniteElements.Misc.ProblemData as Pr
 # import Examples.FiniteElements.Leaf.ProblemData as Pr
 # import Examples.FiniteElements.Misc3D.ProblemData as Pr
-# import Examples.FiniteElements.Sphere.ProblemData as Pr
-import Examples.FiniteElements.Almond3D.ProblemData as Pr
+import Examples.FiniteElements.Sphere.ProblemData as Pr
+# import Examples.FiniteElements.Almond3D.ProblemData as Pr
 # import Examples.FiniteElements.Falcon3D.ProblemData as Pr
 # import Examples.FiniteElements.F6.ProblemData as Pr
 # import Examples.FiniteElements.Drill.ProblemData as Pr
