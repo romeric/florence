@@ -17,7 +17,6 @@ import numpy as np
 import scipy as sp
 import numpy.linalg as la
 from numpy.linalg import norm
-from datetime import datetime
 import multiprocessing as MP
 # try:
 #     from mpi4py import MPI
@@ -36,9 +35,9 @@ sys.dont_write_bytecode
 np.set_printoptions(linewidth=300)
 
 # IMPORT NECESSARY CLASSES FROM BASE
-from Base import Base as MainData
+from Florence.Base import Base as MainData
 # RUN THE APPROPRIATE SESSION
-from Main.FiniteElements.MainFEM import main
+from Florence.Main.FiniteElements.MainFEM import main
 # import Main.BoundaryElements.Main_BEM3D as BEM3D
 
 # RETAIN CORE AFFINITY

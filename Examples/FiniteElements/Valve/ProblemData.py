@@ -1,6 +1,7 @@
 import numpy as np 
 import os, imp
-
+from Florence import Mesh, BoundaryCondition, LinearSolver, FEMSolver
+from Florence.MaterialLibrary import *
 
 def ProblemData(MainData):
 
@@ -11,96 +12,38 @@ def ProblemData(MainData):
     MainData.AnalysisType = 'Linear'
     # MainData.AnalysisType = 'Nonlinear'
 
-    # MATERIAL INPUT DATA 
-    # MainData.MaterialArgs.Type = 'LinearModel'
-    MainData.MaterialArgs.Type = 'IncrementalLinearElastic'
-    # MainData.MaterialArgs.Type = 'NearlyIncompressibleNeoHookean'
-    # MainData.MaterialArgs.Type = 'NeoHookean_1'
-    # MainData.MaterialArgs.Type = 'NeoHookean_2'
-    # MainData.MaterialArgs.Type = 'MooneyRivlin'
-    # MainData.MaterialArgs.Type = 'NearlyIncompressibleMooneyRivlin'
-    # MainData.MaterialArgs.Type = 'AnisotropicMooneyRivlin' 
-    # MainData.MaterialArgs.Type = 'TranservselyIsotropicLinearElastic'
-    # MainData.MaterialArgs.Type = 'TranservselyIsotropicHyperElastic'
-    # MainData.MaterialArgs.Type = 'JavierTranservselyIsotropicHyperElastic'
-
-    MainData.MaterialArgs.E  = 1.0e5
-    MainData.MaterialArgs.nu = 0.45
-
-    MainData.MaterialArgs.E_A = 2.5*MainData.MaterialArgs.E
-
-    E = MainData.MaterialArgs.E
-    nu = MainData.MaterialArgs.nu
-
-    # GET LAME CONSTANTS
-    MainData.MaterialArgs.lamb = E*nu/(1.+nu)/(1.-2.0*nu)
-    MainData.MaterialArgs.mu = E/2./(1+nu)
+    # material = LinearModel(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.45)
+    material = IncrementalLinearElastic(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.45)
+    # material = NeoHookean_2(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.45)
+    # material = MooneyRivlin(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.45)
+    # material = NearlyIncompressibleMooneyRivlin(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.45)
+    # material = BonetTranservselyIsotropicHyperElastic(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.45,
+        # E_A=2.5e05,G_A=5.0e04)
+    # material = TranservselyIsotropicLinearElastic(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.45,
+        # E_A=2.5e05,G_A=5.0e04)
 
     ProblemPath = os.path.dirname(os.path.realpath(__file__))
-    MainData.MeshInfo.MeshType = "tet"
     # MainData.MeshInfo.Reader = "Read"
     # MainData.MeshInfo.Format = "GID"
-    MainData.MeshInfo.Reader = "ReadHDF5"
+    # MainData.MeshInfo.Reader = "ReadHDF5"
 
-    # MainData.MeshInfo.FileName = ProblemPath + '/valve.dat'
+    # filename = ProblemPath + '/valve.dat'
+    filename = ProblemPath + '/valve_P'+str(MainData.C+1)+'.mat'
+    # MainData.MeshInfo.IsHighOrder = True
 
-    MainData.MeshInfo.FileName = ProblemPath + '/valve_P'+str(MainData.C+1)+'.mat'
+    mesh = Mesh()
+    mesh.Reader(filename=filename,element_type="tet",reader_type="ReadHDF5")
+    face_to_surface = np.loadtxt(ProblemPath+"/face_to_surface_mapped.dat").astype(np.int64)
 
-    MainData.MeshInfo.IsHighOrder = True
-        
+ 
+    cad_file = ProblemPath + '/valve.igs'
+    boundary_condition = BoundaryCondition()
+    boundary_condition.SetCADProjectionParameters(cad_file,projection_type='orthogonal',
+        scale=1000.0,project_on_curves=True,solve_for_planar_faces=True, modify_linear_mesh_on_projection=False)
+    boundary_condition.GetProjectionCriteria(mesh)
 
+    solver = LinearSolver(linear_solver="multigrid", linear_solver_type="amg",iterative_solver_tolerance=5.0e-07)
+    MainData.solver = solver
+       
 
-    class BoundaryData(object):
-        # NURBS/NON-NURBS TYPE BOUNDARY CONDITION
-        Type = 'nurbs'
-        RequiresCAD = True
-        ProjectionType = 'orthogonal'
-
-        scale = 1000.0
-        condition = 1.0e10 # this condition it not used
-
-        IGES_File = ProblemPath + '/valve.igs'
-
-
-        def ProjectionCriteria(self,mesh):
-            projection_faces = np.zeros((mesh.faces.shape[0],1),dtype=np.uint64)
-            num = mesh.faces.shape[1]
-            for iface in range(mesh.faces.shape[0]):
-                x = np.sum(mesh.points[mesh.faces[iface,:],0])/num
-                y = np.sum(mesh.points[mesh.faces[iface,:],1])/num
-                z = np.sum(mesh.points[mesh.faces[iface,:],2])/num
-                x *= self.scale
-                y *= self.scale
-                z *= self.scale 
-                if np.sqrt(x*x+y*y+z*z)< self.condition:
-                    projection_faces[iface]=1
-            
-            return projection_faces
-
-
-
-        class DirichArgs(object):
-            pass
-                                    
-        class NeuArgs(object):
-            pass
-
-        def DirichletCriterion(self,DirichArgs):
-            pass
-
-        def NeumannCriterion(self,NeuArgs,Analysis=0,Step=0):
-            pass
-
-
-    class AnalyticalSolution(object):
-        class Args(object):
-            node = 0
-            points = 0
-
-        def Get(self,Args):
-            pass
-
-            
-    # PLACE THEM ALL INSIDE THE MAIN CLASS
-    MainData.BoundaryData = BoundaryData
-    MainData.AnalyticalSolution = AnalyticalSolution
+    return mesh, material, boundary_condition
