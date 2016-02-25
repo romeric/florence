@@ -1,0 +1,62 @@
+# Python bytecodes
+*.pyc
+*.pyo
+
+# backup files
+*~
+
+# hidden files
+.*
+!.gitignore
+!.travis.yml
+
+# results files
+*.vtu
+*.vtk
+
+# binary files
+*.dat
+*.txt
+!requirement.txt
+
+# ipython notebooks
+*.ipynb
+
+# gmsh files 
+*.msh 
+*.geo
+
+# hdf5 files 
+*.mat
+*.hdf
+*.hdf5
+
+# cad files 
+*.igs
+*.iges
+*.IGES
+*.STEP
+*.stp
+*.step
+
+# object files
+.o
+
+# top level project files
+Session.vim
+RunSession.sublime-project
+RunSession.sublime-workspace
+param_run_session.py
+profile_imports_manual.py
+nr.py
+
+# scripts parametric studies
+ComputationalTime.py
+ParametricStudy_ErrorNorms.py
+ParametricStudy_MaterialModelvsNu.py
+ParametricStudy_PvsNu.py
+ParametricStudy_StepsvsNu.py
+WriteCurvedMeshFiles.py
+
+# testfiles not to ignore
+!Tests/*

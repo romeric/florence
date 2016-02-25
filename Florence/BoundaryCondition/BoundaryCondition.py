@@ -486,6 +486,7 @@ class BoundaryCondition(object):
             
             # IDENTIFY WHICH EDGES ARE SHARED BETWEEN SURFACES
             curvilinear_mesh.IdentifySurfacesIntersections()
+            
 
             # PERFORM POINT INVERSION FOR THE INTERIOR POINTS
             Neval = np.zeros((3,boundary_fekete.shape[0]),dtype=np.float64)

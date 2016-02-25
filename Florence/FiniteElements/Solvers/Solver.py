@@ -66,7 +66,7 @@ def MainSolver(MainData, mesh, material, boundary_condition):
         return TotalDisp
 
     # ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES
-    K,TractionForces = Assembly(MainData,mesh,material,Eulerx,np.zeros((mesh.points.shape[0],1),dtype=np.float32))[:2]
+    K,TractionForces = Assembly(MainData,mesh,material,Eulerx,np.zeros((mesh.points.shape[0],1),dtype=np.float64))[:2]
     
     # GET DIRICHLET FORCES
     DirichletForces = boundary_condition.ApplyDirichletGetReducedMatrices(K,DirichletForces,
