@@ -17,7 +17,7 @@
 # binary files
 *.dat
 *.txt
-!requirement.txt
+!requirements.txt
 
 # ipython notebooks
 *.ipynb

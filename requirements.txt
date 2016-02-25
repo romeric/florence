@@ -1,0 +1,6 @@
+nose2
+cython
+numpy>=1.8
+scipy
+meshpy
+matplotlib
