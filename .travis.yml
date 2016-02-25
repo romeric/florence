@@ -32,7 +32,7 @@ install:
   # Eigen install
   - cd ~
   - wget http://bitbucket.org/eigen/eigen/get/3.2.7.tar.bz2
-  - tar -xvf eigen-eigen-b30b87236a1b.tar.bz2
+  - tar -xvf 3.2.7.tar.bz2
   - sudo mv eigen-eigen-b30b87236a1b /usr/local/include/eigen/ 
   # pypi
   - cd $FLORENCEPATH; sudo pip install -r "requirements.txt"
