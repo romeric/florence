@@ -1,0 +1,37 @@
+
+dist: trusty
+
+sudo: required
+
+language: python
+
+python:
+  - "2.7"
+
+branches:
+  only:
+    master
+
+
+# Install dependencies
+install:
+  - cd ~
+  - OCETAG="OCE-0.15" 
+  - OCEMAKEPATH="oce/build"
+  # Attempt to install all the pre-requisites
+  - sudo apt-get install -fy cmake libx11-dev mesa-common-dev freeglut3-dev libfreetype6-dev libc6-dev libstdc++6 
+  - sudo apt-get libstdc++-4.8-dev install -fy build-essential gcc g++ libftgl-dev xorg-dev tcl-dev tk-dev
+  - git clone --branch $OCETAG https://github.com/tpaviot/oce.git
+  - mkdir $OCEMAKEPATH && cd $OCEMAKEPATH
+  - cmake ..
+  - make '-j'$(nproc)
+  - sudo make install/strip
+  # pypi
+  - sudo pip install -r "requirements.txt"
+
+script:
+  # Run florence test suite
+  cd ~; nose2
+
+notification:
+  email: true

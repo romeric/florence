@@ -53,7 +53,7 @@ if __name__ == "__main__":
     MainData.__VECTORISATION__ = True
     MainData.__PARALLEL__ = True
     MainData.numCPU = MP.cpu_count()
-    # MainData.__PARALLEL__ = False
+    MainData.__PARALLEL__ = False
     MainData.__MEMORY__ = 'SHARED'
     # MainData.__MEMORY__ = 'DISTRIBUTED'
     

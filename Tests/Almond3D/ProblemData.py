@@ -54,7 +54,7 @@ def ProblemData(MainData):
     cad_file = ProblemPath + '/almond.igs'
     boundary_condition = BoundaryCondition()
     boundary_condition.SetCADProjectionParameters(cad_file,projection_type='orthogonal',
-        scale=25.4,project_on_curves=False,solve_for_planar_faces=False)
+        scale=25.4,project_on_curves=False,solve_for_planar_faces=False,modify_linear_mesh_on_projection=False)
     boundary_condition.SetProjectionCriteria(ProjectionCriteria,mesh,takes_self=True)
 
     solver = LinearSolver(iterative_solver_tolerance=5.0e-07)

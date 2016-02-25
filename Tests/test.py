@@ -107,14 +107,14 @@ def dirichlet_checker(ColumnsOut,AppliedDirichlet,Dict):
 def final_solution_checker(MainData,material,TotalDisp,Dict):
 
     print("Checking for final solution")
-    if material.nu != Dict['PoissonRatio']:
+    if not np.isclose(material.nu, float(Dict['PoissonRatio'])):
         raise ValueError("Analysis with different material parameters are being compared")
-    if material.E != Dict['YoungsModulus']:
+    if not np.isclose(material.E,float(Dict['YoungsModulus'])):
         raise ValueError("Analysis with different material parameters are being compared")
     if material.is_transversely_isotropic:
-        if material.E_A != Dict['E_A']:
+        if not np.isclose(material.E_A,float(Dict['E_A'])):
             raise ValueError("Analysis with different material parameters are being compared")
-        if material.G_A != Dict['G_A']:
+        if not np.isclose(material.G_A,float(Dict['G_A'])):
             raise ValueError("Analysis with different material parameters are being compared")
 
     if MainData.solver.solver_type != Dict['SolverType']:
@@ -123,17 +123,17 @@ def final_solution_checker(MainData,material,TotalDisp,Dict):
         raise ValueError("Solver results with different tolerances are being compared")
 
 
-    tol = 1e-9
-    print(np.linalg.norm(TotalDisp - Dict['TotalDisp']))
+    tol = 1e-7
     if entity_checker(TotalDisp,Dict['TotalDisp'],tol):
         print(tick, "Final solution is correct")
     else:
+        print(np.linalg.norm(TotalDisp - Dict['TotalDisp']))
         print(cross, "Final solution does not match with pre-computed solution")
         exit()
 
     Dict['ScaledJacobian'] = Dict['ScaledJacobian'].flatten()
     MainData.ScaledJacobian = MainData.ScaledJacobian.flatten()
-    if entity_checker(MainData.ScaledJacobian,Dict['ScaledJacobian'],1e-8):
+    if entity_checker(MainData.ScaledJacobian,Dict['ScaledJacobian'],tol):
         print(tick,"Final mesh quality is correct")
     else:
         print(cross,"Final mesh quality does not match")
@@ -168,13 +168,14 @@ def AlmondTestCases():
 
     # GET THE CURRENT DIRECTORY PARTH
     pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
-    # material_models = ["IncrementalLinearElastic","TranservselyIsotropicLinearElastic",
-                        # "NeoHookean_2","MooneyRivlin","NearlyIncompressibleMooneyRivlin",
-                        # "BonetTranservselyIsotropicHyperElastic"]
+    material_models = ["IncrementalLinearElastic","TranservselyIsotropicLinearElastic",
+                        "NeoHookean_2","MooneyRivlin","NearlyIncompressibleMooneyRivlin",
+                        "BonetTranservselyIsotropicHyperElastic"]
 
-    material_models = ["IncrementalLinearElastic"]
+    # material_models = ["IncrementalLinearElastic"]
 
-    for p in [2,3,4,5,6]:
+    # for p in [2,3,4,5,6]:
+    for p in [2,3,4]:
         MainData.C = p - 1
 
         # MainData.MaterialArgs.Type = "IncrementalLinearElastic"
@@ -185,7 +186,8 @@ def AlmondTestCases():
         # MainData.MaterialArgs.Type = 'BonetTranservselyIsotropicHyperElastic'
 
         # for Increment in [1,10]:
-        for Increment in [1]:    
+        # for Increment in [1]:
+        for Increment in [10]:    
             MainData.LoadIncrement = Increment
 
             # if p > 3 and Increment == 10:
@@ -193,15 +195,24 @@ def AlmondTestCases():
 
             for material_model in material_models:
 
-                MainData.MaterialArgs.Type = material_model
+                # MainData.MaterialArgs.Type = material_model
+                material_func = getattr(Florence.MaterialLibrary,material_model,None)
+
+                material = material_func(3,youngs_modulus=1.0e05,poissons_ratio=0.485,
+                    E_A=2.5e05,G_A=19129.858032006006)
 
                 # READ PROBLEM DATA FILE
-                Pr.ProblemData(MainData)
+                mesh, boundary_condition = Pr.ProblemData(MainData)
                 
                 # PRE-PROCESS
                 print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation bases etc...')
 
-                mesh = PreProcess(MainData,Pr,pwd)
+                PreProcess(MainData,mesh,material,Pr,pwd)
+                MainData.nvar = material.nvar
+                MainData.ndim = material.ndim
+
+                if material.is_transversely_isotropic:
+                    material.GetFibresOrientation(mesh)
                 
                 cdir = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..'))
                 cfile = os.path.join(cdir,"Tests/Almond3D/almond_H1_P"+str(MainData.C+1)+".mat")
@@ -213,10 +224,10 @@ def AlmondTestCases():
                 gc.collect()
 
                 # Checking Dirichlet data from CAD
-                ColumnsIn, ColumnsOut, AppliedDirichlet = GetDirichletBoundaryConditions(mesh,MainData)
+                boundary_condition.GetDirichletBoundaryConditions(MainData,mesh,material)
                 cfile = os.path.join(cdir,"Tests/Almond3D/almond_H1_DirichletData_P"+str(MainData.C+1)+".mat")
                 Dict = loadmat(cfile)
-                dirichlet_checker(ColumnsOut,AppliedDirichlet,Dict)
+                dirichlet_checker(boundary_condition.columns_out,boundary_condition.applied_dirichlet,Dict)
                 del Dict
                 gc.collect()
 
@@ -229,30 +240,30 @@ def AlmondTestCases():
                          'and number of boundary nodes is', np.unique(mesh.faces).shape[0])
 
                 # CALL THE MAIN ROUTINE
-                TotalDisp = MainSolver(MainData,mesh)
+                TotalDisp = MainSolver(MainData,mesh,material,boundary_condition)
 
-                # if MainData.AssemblyParameters.LoadIncrements != 10:
-                    # raise ValueError("Results with different load increments are being compared")
+                if MainData.AssemblyParameters.LoadIncrements != 10:
+                    raise ValueError("Results with different load increments are being compared")
 
-                # cfile = MainData.MeshInfo.FileName.split(".")[0]+"_Solution_"+\
-                #     MainData.MaterialArgs.Type+"_Increments_"+\
-                #     str(MainData.AssemblyParameters.LoadIncrements)+"_P"+str(MainData.C+1)+".mat"
+                cfile = mesh.filename.split(".")[0]+"_Solution_"+\
+                    material.mtype+"_Increments_"+\
+                    str(MainData.AssemblyParameters.LoadIncrements)+"_P"+str(MainData.C+1)+".mat"
 
-                # Dict = loadmat(cfile)
-                # # Checking the final solution 
-                # final_solution_checker(MainData,TotalDisp,Dict)
-                # del Dict
-                # gc.collect()
+                Dict = loadmat(cfile)
+                # Checking the final solution 
+                final_solution_checker(MainData,material,TotalDisp,Dict)
+                del Dict
+                gc.collect()
 
-                Dict = {'TotalDisp':TotalDisp, 'ScaledJacobian':MainData.ScaledJacobian,'LoadIncrements':MainData.AssemblyParameters.LoadIncrements,
-                    'YoungsModulus': MainData.MaterialArgs.E, 'PoissonRatio':MainData.MaterialArgs.nu,'AnalysisType':MainData.AnalysisType,
-                    'MaterialArgsType':MainData.MaterialArgs.Type,'SolverType':MainData.solve.type,'SolverSubType':MainData.solve.sub_type,
-                    'SolverTol':MainData.solve.tol,'E_A':MainData.MaterialArgs.E_A,'G_A':MainData.MaterialArgs.G_A,
-                    'AnisotropicOrientations':MainData.MaterialArgs.AnisotropicOrientations}
+                DDict = {'TotalDisp':TotalDisp, 'ScaledJacobian':MainData.ScaledJacobian,'LoadIncrements':MainData.AssemblyParameters.LoadIncrements,
+                    'YoungsModulus': material.E, 'PoissonRatio':material.nu,'AnalysisType':MainData.AnalysisType,
+                    'MaterialArgsType':material.mtype,'SolverType':MainData.solver.solver_type,'SolverSubType':MainData.solver.solver_subtype,
+                    'SolverTol':MainData.solver.iterative_solver_tolerance,'E_A':material.E_A,'G_A':material.G_A,
+                    'AnisotropicOrientations':material.anisotropic_orientations}
 
-                spath = MainData.MeshInfo.FileName.split(".")[0]+"_Solution_"+\
-                    MainData.MaterialArgs.Type+"_Increments_"+str(MainData.AssemblyParameters.LoadIncrements)+"_P"+str(MainData.C+1)+".mat"
-                savemat(spath,Dict)
+                spath = mesh.filename.split(".")[0]+"_Solution_"+\
+                    material.mtype+"_Increments_"+str(MainData.AssemblyParameters.LoadIncrements)+"_P"+str(MainData.C+1)+".mat"
+                # savemat(spath,Dict)
 
 
 def RunTestCases():
@@ -422,4 +433,5 @@ def RunTestCases():
 
 # RUN TEST-CASES
 # if __name__ == "__main__":
-RunTestCases()
+AlmondTestCases()
+# RunTestCases()

@@ -1,6 +1,7 @@
 import numpy as np 
 import numpy.linalg as la
 from KinematicMeasures import *
+from Florence.Tensor import issymetric
 
 
 #-------------------------------------------------------------------------------------------------------------------#
@@ -86,15 +87,11 @@ def Stiffness(MainData,material,LagrangeElemCoords,EulerELemCoords,ElectricPoten
 
     # CHECK FOR SYMMETRY OF STIFFNESS MATRIX
     if MainData.__NO_DEBUG__ is False:
-        issym = True
-        for i in range(stiffness.shape[0]):
-            for j in range(stiffness.shape[1]):
-                if ~np.allclose(stiffness[i,j],stiffness[j,i]):
-                    issym = False
-                    print u'\u2717'.encode('utf8')+' : ', 'Elemental stiffness matrix is not symmetric.',
-                    print ' First non-symmetric element indices are', i,j, 'Is this meant to be?'
-                    break
-        if issym and MainData.IsSymmetricityComputed is False:
+        symmetric = issymetric(stiffness)
+        if not symmetric:
+            print u'\u2717'.encode('utf8')+' : ', 'Elemental stiffness matrix is not symmetric.',
+            print ' Is this meant to be?'
+        if issym and (MainData.IsSymmetricityComputed is False):
             print u'\u2713'.encode('utf8')+' : ', 'Elemental stiffness matrix is symmetric'
             MainData.IsSymmetricityComputed = True
 

@@ -13,8 +13,8 @@ def ProblemData(MainData):
     # MainData.AnalysisType = 'Nonlinear'
 
     # material = LinearModel(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.485)
-    # material = IncrementalLinearElastic(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.485)
-    material = NeoHookean_2(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.485)
+    material = IncrementalLinearElastic(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.485)
+    # material = NeoHookean_2(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.485)
     # material = MooneyRivlin(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.485)
     # material = NearlyIncompressibleMooneyRivlin(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.485)
     # material = BonetTranservselyIsotropicHyperElastic(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.485,
@@ -41,6 +41,7 @@ def ProblemData(MainData):
 
     mesh = Mesh()
     mesh.Reader(filename=filename,element_type="tet",reader_type_format="GID")
+    mesh.face_to_surface = np.loadtxt(ProblemPath+"/face_to_surface_mapped.dat").astype(np.int64)
 
     def ProjectionCriteria(mesh,boundary_condition):
         projection_faces = np.zeros((mesh.faces.shape[0],1),dtype=np.uint64)
@@ -62,7 +63,7 @@ def ProblemData(MainData):
     cad_file = ProblemPath + '/almond.igs'
     boundary_condition = BoundaryCondition()
     boundary_condition.SetCADProjectionParameters(cad_file,projection_type='orthogonal',
-        scale=25.4,project_on_curves=False,solve_for_planar_faces=False)
+        scale=25.4,project_on_curves=False,solve_for_planar_faces=False,modify_linear_mesh_on_projection=False)
     boundary_condition.SetProjectionCriteria(ProjectionCriteria,mesh,takes_self=True)
         
 
