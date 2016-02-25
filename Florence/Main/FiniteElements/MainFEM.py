@@ -26,12 +26,12 @@ from Florence.FiniteElements.ComputeErrorNorms import *
 # import Examples.FiniteElements.Annular_Circle_Nurbs.ProblemData as Pr
 # import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
 # import Examples.FiniteElements.Wing2D.ProblemData as Pr
-# import Examples.FiniteElements.Naca_Isotropic.ProblemData as Pr
+import Examples.FiniteElements.Naca_Isotropic.ProblemData as Pr
 # import Examples.FiniteElements.RAE2822.ProblemData as Pr
 # import Examples.FiniteElements.Misc.ProblemData as Pr
 # import Examples.FiniteElements.Leaf.ProblemData as Pr
 # import Examples.FiniteElements.Misc3D.ProblemData as Pr
-import Examples.FiniteElements.Sphere.ProblemData as Pr
+# import Examples.FiniteElements.Sphere.ProblemData as Pr
 # import Examples.FiniteElements.Almond3D.ProblemData as Pr
 # import Examples.FiniteElements.Falcon3D.ProblemData as Pr
 # import Examples.FiniteElements.F6.ProblemData as Pr
