@@ -1,7 +1,6 @@
 from time import time
 import numpy as np
 from Florence.FiniteElements.Solvers.NewtonRaphsonStatic import *
-from Florence.FiniteElements.ApplyDirichletBoundaryConditions import *
 
 
 def StaticSolver(MainData,LoadIncrement,K,DirichletForces,NeumannForces,

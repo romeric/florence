@@ -10,7 +10,7 @@ from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
 from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints
 import Florence.InterpolationFunctions.TwoDimensional.Tri.hpNodal as Tri
 
-from Florence.MeshGeneration.CurvilinearMeshing.IGAKitPlugin.IdentifyNURBSBoundaries import GetDirichletData
+from CurvilinearMeshing.IGAKitPlugin.IdentifyNURBSBoundaries import GetDirichletData
 # from Florence import PostMeshCurvePy as PostMeshCurve 
 # from Florence import PostMeshSurfacePy as PostMeshSurface 
 
@@ -374,8 +374,8 @@ class BoundaryCondition(object):
     def PostMeshWrapper(self,MainData,mesh,material):
         """Calls PostMesh wrapper to get exact Dirichlet boundary conditions"""
 
-        from Florence import PostMeshCurvePy as PostMeshCurve 
-        from Florence import PostMeshSurfacePy as PostMeshSurface 
+        from CurvilinearMeshing import (PostMeshCurvePy as PostMeshCurve,
+            PostMeshSurfacePy as PostMeshSurface)
 
         # GET BOUNDARY FEKETE POINTS
         if MainData.ndim == 2:
