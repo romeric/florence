@@ -12,6 +12,9 @@ branches:
   only:
     master
 
+virtualenv:
+  system_site_packages: true
+
 
 # Install dependencies
 install:
@@ -19,7 +22,8 @@ install:
   - echo $FLORENCEPATH
   - cd ~
   # Install BLAS libraries
-  - sudo apt-get install gfortran libblas-dev liblapack-dev libatlas-base-dev
+  # - sudo apt-get install gfortran libblas-dev liblapack-dev libatlas-base-dev
+  - sudo apt-get install python-numpy python-scipy
   # Install OpenCascade
   - OCETAG="OCE-0.15" 
   - OCEMAKEPATH="oce/build"
@@ -38,7 +42,10 @@ install:
   - sudo mv eigen-eigen-b30b87236a1b /usr/local/include/eigen/ 
   # pypi
   - cd $FLORENCEPATH
-  - sudo pip install -r "requirements.txt"
+  - pip install cython
+  - pip install meshpy
+  - pip install pyamg
+  # - sudo pip install -r "requirements.txt"
   # Setup florence - build interfaces
   - python setup.py
 
