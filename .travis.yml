@@ -22,8 +22,9 @@ install:
   - echo $FLORENCEPATH
   - cd ~
   # Install BLAS libraries
-  # - echo -ne '\n' | sudo apt-get install gfortran libblas-dev liblapack-dev libatlas-base-dev
-  - echo -ne '\n' | sudo apt-get install python-numpy python-scipy
+  - echo -ne '\n' | sudo apt-get install gfortran libblas-dev liblapack-dev libatlas-base-dev
+  - travis_wait 30 pip install -r "requirements.txt"
+  # - echo -ne '\n' | sudo apt-get install python-numpy python-scipy
   # Install OpenCascade
   - OCETAG="OCE-0.15" 
   - OCEMAKEPATH="oce/build"
