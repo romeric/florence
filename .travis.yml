@@ -12,8 +12,8 @@ branches:
   only:
     master
 
-virtualenv:
-  system_site_packages: true
+# virtualenv:
+  # system_site_packages: true
 
 
 # Install dependencies
