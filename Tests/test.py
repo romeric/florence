@@ -123,7 +123,7 @@ def final_solution_checker(MainData,material,TotalDisp,Dict):
         raise ValueError("Solver results with different tolerances are being compared")
 
 
-    tol = 1e-6
+    tol = 1e-04
     if entity_checker(TotalDisp,Dict['TotalDisp'],tol):
         print(tick, "Final solution is correct")
     else:
