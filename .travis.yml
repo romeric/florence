@@ -17,8 +17,10 @@ branches:
 install:
   - FLORENCEPATH=$(pwd)
   - echo $FLORENCEPATH
-  # Install OpenCascade
   - cd ~
+  # Install BLAS libraries
+  - sudo apt-get install gfortran libblas-dev liblapack-dev libatlas-base-dev
+  # Install OpenCascade
   - OCETAG="OCE-0.15" 
   - OCEMAKEPATH="oce/build"
   # Install all OCC dependencies
@@ -35,8 +37,6 @@ install:
   - tar -xvf 3.2.7.tar.bz2
   - sudo mv eigen-eigen-b30b87236a1b /usr/local/include/eigen/ 
   # pypi
-  # Install BLAS libraries
-  - sudo apt-get install gfortran libblas-dev liblapack-dev libatlas-base-dev
   - cd $FLORENCEPATH; sudo pip install -r "requirements.txt"
   # Setup florence - build interfaces
   - python setup.py
