@@ -42,6 +42,7 @@ install:
   - sudo mv eigen-eigen-b30b87236a1b /usr/local/include/eigen/ 
   # pypi
   - cd $FLORENCEPATH
+  - pip install nose2
   - pip install cython
   - pip install meshpy
   - pip install pyamg
