@@ -5,6 +5,7 @@ from distutils.sysconfig import get_config_vars
 from Cython.Build import cythonize
 import os, platform
 import sys
+import numpy
 
 # Get the current directory
 _pwd_ = os.path.dirname(os.path.realpath('__file__'))
@@ -46,7 +47,8 @@ extensions = [
     	language="c++",
         include_dirs = [_pwd_,_pwd_+"/include/",
                         "/usr/local/include/eigen/",
-                        "/usr/local/include/oce/"],
+                        "/usr/local/include/oce/",
+                        numpy.get_include()],
         libraries= ["stdc++"] + occ_libs, 
         library_dirs = [_pwd_,_pwd_+"/include","/usr/local/lib/"],
         extra_compile_args = compiler_args,

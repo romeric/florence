@@ -13,7 +13,9 @@
             "/home/roman/Dropbox/florence/Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshCurve.hpp", 
             "/home/roman/Dropbox/florence/Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshSurface.hpp", 
             "/home/roman/Dropbox/florence/Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PyInterface.hpp", 
-            "/home/roman/Dropbox/florence/Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PyInterfaceEmulator.hpp"
+            "/home/roman/Dropbox/florence/Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PyInterfaceEmulator.hpp", 
+            "/usr/lib/python2.7/dist-packages/numpy/core/include/numpy/arrayobject.h", 
+            "/usr/lib/python2.7/dist-packages/numpy/core/include/numpy/ufuncobject.h"
         ], 
         "extra_compile_args": [
             "-std=c++11", 
@@ -33,7 +35,8 @@
             "/home/roman/Dropbox/florence/Florence/BoundaryCondition/CurvilinearMeshing/PostMesh", 
             "/home/roman/Dropbox/florence/Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/include/", 
             "/usr/local/include/eigen/", 
-            "/usr/local/include/oce/"
+            "/usr/local/include/oce/", 
+            "/usr/lib/python2.7/dist-packages/numpy/core/include"
         ], 
         "language": "c++", 
         "libraries": [
