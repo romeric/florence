@@ -2,8 +2,7 @@ from __future__ import with_statement
 import imp
 import numpy as np 
 
-from NPFROMFILE_Loop_Cython import NPFROMFILE_LOOP_Cython
-# from Core.Supplementary.Tensors import makezero
+from _fromfile_reader import NPFROMFILE_LOOP_Cython
 
 
 #--------------------------------------------------------------------------------------------------#

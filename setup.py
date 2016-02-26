@@ -12,7 +12,13 @@ tensor_path = os.path.join(_pwd_,"Florence/Tensor/")
 print("Building Tensor module")
 p = subprocess.Popen('cd '+tensor_path+' && ./Makefile.sh', shell=True)
 p.wait()
+# BUILD OPENCASCADE FRONT-END
 print("Building OpenCascade front-end")
 occ_path = os.path.join(_pwd_,"Florence/BoundaryCondition/CurvilinearMeshing/PostMesh")
 p = subprocess.Popen('cd '+occ_path+' && ./Makefile.sh', shell=True)
+p.wait()
+# BUILD SALOME MESH READER
+print("Building mesh reader for salome")
+mesh_path = os.path.join(_pwd_,"Florence/MeshGeneration/")
+p = subprocess.Popen('cd '+mesh_path+' && ./Makefile.sh', shell=True)
 p.wait()
