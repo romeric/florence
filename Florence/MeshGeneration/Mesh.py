@@ -45,6 +45,7 @@ class Mesh(object):
         # AND BOUNDARY EDGES, RESPECTIVELY
         
         self.degree = None
+        self.ndim = None
         self.nelem = None
         self.nnode = None
 
@@ -1204,16 +1205,75 @@ class Mesh(object):
 
 
     def ReadGmsh(self,filename):
-        """Read gmsh (.msh) file. TO DO"""
+        """Read gmsh (.msh) file"""
 
+        if self.elements is not None and self.points is not None:
+            self.__reset__()
+        # else:
+            # print("Did not read anything")
+            # return
+
+        try:
+            fid = open(filename, "r")
+        except IOError:
+            print "File '%s' not found." % (filename)
+            sys.exit()
+
+        self.filename = filename
+
+        rem_nnode, rem_nelem, rem_faces = long(1e09), long(1e09), long(1e09)
+        face_counter = 0
+        for line_counter, line in enumerate(open(filename)):
+            item = line.rstrip()
+            plist = item.split()
+            if plist[0] == "Dimension":
+                self.ndim = plist[1]
+            elif plist[0] == "Vertices":
+                rem_nnode = line_counter+1
+                continue
+            elif plist[0] == "Triangles":
+                rem_faces = line_counter+1
+                continue
+            elif plist[0] == "Tetrahedra":
+                rem_nelem = line_counter+1
+                continue
+            if rem_nnode == line_counter:
+                self.nnode = int(plist[0])
+            if rem_faces == line_counter:
+                face_counter = int(plist[0])
+            if rem_nelem == line_counter:
+                self.nelem = int(plist[0])
+                break
+
+        # Re-read
+        points, elements = [],[]
+        for line_counter, line in enumerate(open(filename)):
+            item = line.rstrip()
+            plist = item.split()
+            if line_counter > rem_nnode and line_counter < self.nnode+rem_nnode+1:
+                points.append([float(i) for i in plist[:3]])
+            if line_counter > rem_nelem and line_counter < self.nelem+rem_nelem+1:
+                elements.append([long(i) for i in plist[:4]])
+
+        self.points = np.array(points,copy=True)
+        self.elements = np.array(elements,copy=True)
+
+        # print self.ndim, self.nnode, self.nelem, rem_nnode, rem_nelem, rem_faces
+        self.element_type = "tet"
+        self.GetBoundaryFacesTet()
+        self.GetBoundaryEdgesTet()
+
+        self.SimplePlot()
+
+        return 
+
+        # OTHER VARIANTS OF GMSH
         from gmsh import Mesh as msh
-
-        self.__reset__()
-
+        self.meshname = mshfile
         mesh = msh()
         mesh.read_msh(filename)
         self.points = mesh.Verts
-        print dir(mesh)
+        # print dir(mesh)
         self.elements = mesh.Elmts 
         print self.elements
 
