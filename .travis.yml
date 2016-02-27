@@ -32,7 +32,7 @@ before_install:
   - OCEMAKEPATH="oce/build"
   # Install all OCC dependencies
   - sudo apt-get install -fy cmake libx11-dev mesa-common-dev freeglut3-dev libfreetype6-dev libc6-dev libstdc++6 
-  - sudo apt-get install libstdc++-4.8-dev -fy build-essential gcc g++ libftgl-dev xorg-dev tcl-dev tk-dev
+  - sudo apt-get install libstdc++-4.8-dev -fy build-essential gcc g++ libftgl-dev xorg-dev tcl-dev tk-dev swig
   - git clone --branch $OCETAG https://github.com/tpaviot/oce.git
   - mkdir $OCEMAKEPATH && cd $OCEMAKEPATH
   - cmake ..
