@@ -24,7 +24,7 @@ def LagrangeGaussLobatto(C,zeta,eta,arrange=1):
 	if arrange==0:
 		Bases[:,0] = np.dot(Nzeta,Neta.T).reshape((C+2)**2)
 	elif arrange==1:
-		# Arrange in counterclockwise
+		# Arrange in counterclockwise - THIS FUNCTION NEEDS TO BE OPTIMISED
 		zeta_index, eta_index = GetCounterClockwiseIndices(C)
 		TBases = np.dot(Nzeta,Neta.T)
 		for i in range(0,(C+2)**2):

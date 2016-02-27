@@ -47,33 +47,3 @@ void diffjacobi(const unsigned short n, const double xi, const double a, const d
 
 	free(P);
 }
-
-/* int main() */
-/* { */
-/* 	unsigned short n = 10; */
-/* 	double xi = 0.5; */
-/* 	double a=0.0; */
-/* 	double b=0.0; */
-/* 	unsigned short opt = 0; */
-/* 	double *P = malloc( (n+1)*sizeof(double)); */
-/* 	double *dP = malloc( (n+1)*sizeof(double)); */
-/*  */
-/* 	clock_t begin, end; */
-/* 	double time_spent; */
-/*  */
-/* 	#<{(| jacobi(n,xi,a,b,P); |)}># */
-/* 	diffjacobi(n,xi,a,b,opt,dP); */
-/* 	int i= n+1; */
-/* 	for (i=0;i<n+1; i++) */
-/* 		printf("%6.6f ",dP[i]); */
-/* 	printf("\n"); */
-/*  */
-/* 	begin = clock(); */
-/* 	end = clock(); */
-/* 	time_spent = (double)(end - begin) / CLOCKS_PER_SEC; */
-/* 	#<{(| printf("time elapsed was: %6.6f\n", time_spent); |)}># */
-/*  */
-/* 	free(P); */
-/* 	free(dP); */
-/* 	return 0; */
-/* } */

@@ -152,6 +152,8 @@ class LinearSolver(object):
 
 
     def Solve(self,A,b):
+        """Solves the linear system of equations"""
+
 
         # DECIDE IF THE SOLVER TYPE IS APPROPRIATE FOR THE PROBLEM
         if self.switcher_message is False:
@@ -173,9 +175,9 @@ class LinearSolver(object):
             if self.solver_subtype=='umfpack' and self.has_umfpack:
                 if A.dtype != np.float64:
                     A = A.astype(np.float64)
-                    # savemat("/home/roman/Dropbox/knew.mat",{'A':A,'b':b})
-                    # print 22
+
                 sol = spsolve(A,b,permc_spec='MMD_AT_PLUS_A',use_umfpack=True)
+
             elif sub_type=='mumps' and self.has_mumps:
                 # CALL JULIA'S MUMPS WRAPPER
                 pwd = os.path.dirname(os.path.realpath(__file__))

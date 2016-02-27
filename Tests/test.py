@@ -255,14 +255,14 @@ def AlmondTestCases():
                 del Dict
                 gc.collect()
 
-                DDict = {'TotalDisp':TotalDisp, 'ScaledJacobian':MainData.ScaledJacobian,'LoadIncrements':MainData.AssemblyParameters.LoadIncrements,
-                    'YoungsModulus': material.E, 'PoissonRatio':material.nu,'AnalysisType':MainData.AnalysisType,
-                    'MaterialArgsType':material.mtype,'SolverType':MainData.solver.solver_type,'SolverSubType':MainData.solver.solver_subtype,
-                    'SolverTol':MainData.solver.iterative_solver_tolerance,'E_A':material.E_A,'G_A':material.G_A,
-                    'AnisotropicOrientations':material.anisotropic_orientations}
+                # DDict = {'TotalDisp':TotalDisp, 'ScaledJacobian':MainData.ScaledJacobian,'LoadIncrements':MainData.AssemblyParameters.LoadIncrements,
+                #     'YoungsModulus': material.E, 'PoissonRatio':material.nu,'AnalysisType':MainData.AnalysisType,
+                #     'MaterialArgsType':material.mtype,'SolverType':MainData.solver.solver_type,'SolverSubType':MainData.solver.solver_subtype,
+                #     'SolverTol':MainData.solver.iterative_solver_tolerance,'E_A':material.E_A,'G_A':material.G_A,
+                #     'AnisotropicOrientations':material.anisotropic_orientations}
 
-                spath = mesh.filename.split(".")[0]+"_Solution_"+\
-                    material.mtype+"_Increments_"+str(MainData.AssemblyParameters.LoadIncrements)+"_P"+str(MainData.C+1)+".mat"
+                # spath = mesh.filename.split(".")[0]+"_Solution_"+\
+                #     material.mtype+"_Increments_"+str(MainData.AssemblyParameters.LoadIncrements)+"_P"+str(MainData.C+1)+".mat"
                 # savemat(spath,Dict)
 
 
