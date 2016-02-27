@@ -21,7 +21,7 @@ before_install:
   - FLORENCEPATH=$(pwd)
   - echo $FLORENCEPATH
   # Install BLAS libraries
-  - echo -ne '\n' | sudo apt-get install gfortran libblas-dev liblapack-dev libatlas-base-dev
+  - echo -ne '\n' | sudo apt-get install gfortran libblas-dev liblapack-dev libatlas-base-dev libsuitesparse-dev libsuitesparse-metis-dev
   # - travis_wait 30 pip install -r "requirements.txt"
   # - travis_wait 30 pip install numpy
   # - travis_wait 40 pip install scipy
@@ -59,7 +59,7 @@ install:
 
 script:
   # Run florence test suite
-  - cd $FLORENCEPATH; nose2
+  - cd $FLORENCEPATH; nosetests -x --with-coverage Tests/test.py
 
-notification:
+notifications:
   email: false

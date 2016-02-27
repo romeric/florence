@@ -63,22 +63,26 @@ def mesh_checker(mesh,Dict):
         print(tick, "mesh elements match")
     else:
         print(cross, "mesh elements do not match")
+        exit()
 
     if entity_checker(mesh.points,Dict['points']):
         print(tick, "mesh points match")
     else:
         print(cross, "mesh points do not match")
+        exit()
 
     if entity_checker(mesh.edges,Dict['edges']):
         print(tick, "mesh edges match")
     else:
         print(cross, "mesh edges do not match")
+        exit()
 
     if mesh.element_type == "tet" or mesh.element_type == "hex":
         if entity_checker(mesh.faces,Dict['faces']):
             print(tick, "mesh faces match")
         else:
             print(cross, "mesh faces do not match")
+            exit()
 
 
 def dirichlet_checker(ColumnsOut,AppliedDirichlet,Dict):
@@ -98,11 +102,13 @@ def dirichlet_checker(ColumnsOut,AppliedDirichlet,Dict):
         print(tick, "Dirichlet degrees of freedom match")
     else:
         print(cross, "Dirichlet degrees of freedom do not match")
+        exit()
 
     if entity_checker(AppliedDirichlet,Dict['AppliedDirichlet']):
         print(tick, "Dirichlet data for degrees of freedom match")
     else:
         print(cross, "Dirichlet data for degrees of freedom do not match")
+        exit()
 
 def final_solution_checker(MainData,material,TotalDisp,Dict):
 

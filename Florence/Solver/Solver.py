@@ -56,6 +56,8 @@ class LinearSolver(object):
         except ImportError:
             self.has_umfpack = False
 
+        self.has_mumps = False
+
         self.switcher_message = False
 
         # self.analysis_type = "static"
@@ -178,7 +180,7 @@ class LinearSolver(object):
 
                 sol = spsolve(A,b,permc_spec='MMD_AT_PLUS_A',use_umfpack=True)
 
-            elif sub_type=='mumps' and self.has_mumps:
+            elif self.solver_subtype=='mumps' and self.has_mumps:
                 # CALL JULIA'S MUMPS WRAPPER
                 pwd = os.path.dirname(os.path.realpath(__file__))
 
