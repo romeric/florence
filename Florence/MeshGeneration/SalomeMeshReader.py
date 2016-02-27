@@ -172,7 +172,7 @@ def ReadMesh_PANDAS(filename,MeshType,C=0):
         mesh.points = pd.read_csv(filename,dtype=np.float64,sep=' ',skiprows=nodeRows,error_bad_lines=False,header=None,usecols=(1,2)).as_matrix()
         # READ EDGES
         edge_cols = np.arange(2,int(nelse_type[0,0]-100)+2).tolist()
-        mesh.edges = pd.read_csv(filename,dtype=np.int64,sep=' ',skiprows=1+mesh.nnode,skipfooter=nelse_type[1,1],usecols=edge_cols,
+        mesh.edges = pd.read_csv(filename,dtype=np.float64,sep=' ',skiprows=1+mesh.nnode,skipfooter=nelse_type[1,1],usecols=edge_cols,
             header=None, error_bad_lines=False).as_matrix() -1
         # READ ELEMENTS
         elem_cols = np.arange(2,int(nelse_type[1,0]-200)+2)

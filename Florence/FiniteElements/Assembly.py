@@ -8,7 +8,8 @@ from SparseAssembly import SparseAssembly_Step_2
 
 from ElementalMatrices.GetElementalMatricesSmall import *
 from SparseAssemblySmall import SparseAssemblySmall
-import pyximport; pyximport.install()
+import pyximport
+pyximport.install(setup_args={'include_dirs': np.get_include()})
 from SparseAssemblyNative import SparseAssemblyNative
 import gc, os
 

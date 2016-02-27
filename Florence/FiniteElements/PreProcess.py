@@ -80,12 +80,6 @@ def PreProcess(MainData,mesh,material,Pr,pwd):
     # mesh.RemoveElements((-0.6,-0.1,1.9,0.6),keep_boundary_only=True,plot_new_mesh=False)
     # mesh.RemoveElements((-0.55,-0.1,-0.4,0.1),plot_new_mesh=False) 
 
-
-    # un_faces = np.unique(mesh.faces)
-    # vpoints = mesh.points[un_faces,:]
-    # print np.linalg.norm(vpoints,axis=1)
-    # exit()
-
     # mesh.Median
     # from Core.MixedFormulations.MixedFormulations import NearlyIncompressibleHuWashizu
     # xx = NearlyIncompressibleHuWashizu(mesh)
@@ -96,6 +90,17 @@ def PreProcess(MainData,mesh,material,Pr,pwd):
     # loadedmat = loadmat(MainData.MeshInfo.MatFile)
     # mesh.points = np.ascontiguousarray(loadedmat['X'])
     # mesh.elements = np.ascontiguousarray(loadedmat['T'])-1
+
+    # del mesh
+    # mesh = Mesh()
+    # # mesh.ReadGmsh("/home/roman/Dropbox/florence/Examples/FiniteElements/Misc3D/hand.mesh")
+    # mesh.element_type = "tet"
+    # mesh.points = np.loadtxt("/home/roman/Dropbox/florence/Examples/FiniteElements/Misc3D/hand_mesh_points.dat")[:,:3]
+    # mesh.elements = np.loadtxt("/home/roman/Dropbox/florence/Examples/FiniteElements/Misc3D/hand_mesh_elements.dat")[:,:4].astype(np.int64) - 1
+    # # mesh.faces = np.loadtxt("/home/roman/Dropbox/florence/Examples/FiniteElements/Misc3D/hand_mesh_elements.dat")[:,:3].astype(np.int64) - 1
+    # mesh.GetBoundaryFacesTet()
+    # mesh.SimplePlot()
+    # exit()
 
 
     # STORE PATHS FOR MAIN, CORE & PROBLEM DIRECTORIES
