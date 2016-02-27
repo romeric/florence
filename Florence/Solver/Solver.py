@@ -228,7 +228,7 @@ class LinearSolver(object):
             # sol = lgmres(A, b, tol=1e-4, M=M)[0]
 
         elif self.solver_type == "multigrid":
-            if pyamg_imp is False:
+            if self.has_amg_solver is False:
                 raise ImportError('A multigrid solver was not found')
 
             if A.dtype != b.dtype:

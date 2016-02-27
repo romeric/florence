@@ -282,7 +282,7 @@ class Mesh(object):
                 else:
                     return self.all_faces 
 
-        from Core.QuadratureRules.NodeArrangement import NodeArrangementTet
+        from Florence.QuadratureRules.NodeArrangement import NodeArrangementTet
 
         node_arranger = NodeArrangementTet(p-1)[0]
         fsize = int((p+1.)*(p+2.)/2.)
@@ -710,8 +710,8 @@ class Mesh(object):
         median = None
 
         if self.element_type == "tri":
-            import Core.InterpolationFunctions.TwoDimensional.Tri.hpNodal as Tri
-            from Core.QuadratureRules.FeketePointsTri import FeketePointsTri
+            import Florence.InterpolationFunctions.TwoDimensional.Tri.hpNodal as Tri
+            from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
 
             middle_point_isoparametric = FeketePointsTri(2)[6] # check
             if not np.isclose(sum(middle_point_isoparametric),-1.5):
@@ -725,8 +725,8 @@ class Mesh(object):
             median = np.einsum('ijk,j',self.points[self.elements[:,:3],:],bases_for_middle_point) 
 
         elif self.element_type == "tet":
-            import Core.InterpolationFunctions.ThreeDimensional.Tetrahedral.hpNodal as Tet
-            from Core.QuadratureRules.FeketePointsTet import FeketePointsTet
+            import Florence.InterpolationFunctions.ThreeDimensional.Tetrahedral.hpNodal as Tet
+            from Florence.QuadratureRules.FeketePointsTet import FeketePointsTet
 
             middle_point_isoparametric = FeketePointsTet(3)[21]
             if not np.isclose(sum(middle_point_isoparametric),-1.5):
@@ -990,7 +990,7 @@ class Mesh(object):
         """Arranges all the faces of tetrahedral elements 
             with triangular type node ordering """
 
-        from Core.QuadratureRules.NodeArrangement import NodeArrangementTet
+        from Florence.QuadratureRules.NodeArrangement import NodeArrangementTet
 
         if self.all_faces is None:
             self.all_faces = self.GetFacesTet()
@@ -1894,9 +1894,8 @@ class Mesh(object):
         assert self.points is not None
         assert self.nelem is not None
 
-        from Core.Supplementary.Tensors import itemfreq
-        from Core.Supplementary.Where import whereEQ
-        from Core.QuadratureRules.NodeArrangement import NodeArrangementTet
+        from Florence.Tensor import itemfreq
+        from Florence.QuadratureRules.NodeArrangement import NodeArrangementTet
 
 
         # CHANGE TYPE 

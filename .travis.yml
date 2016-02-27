@@ -17,14 +17,14 @@ branches:
 
 
 # Install dependencies
-install:
+before_install:
   - FLORENCEPATH=$(pwd)
   - echo $FLORENCEPATH
   # Install BLAS libraries
   - echo -ne '\n' | sudo apt-get install gfortran libblas-dev liblapack-dev libatlas-base-dev
   # - travis_wait 30 pip install -r "requirements.txt"
-  - travis_wait 30 pip install numpy
-  - travis_wait 40 pip install scipy
+  # - travis_wait 30 pip install numpy
+  # - travis_wait 40 pip install scipy
   - cd ~
   # - echo -ne '\n' | sudo apt-get install python-numpy python-scipy
   # Install OpenCascade
@@ -43,15 +43,19 @@ install:
   - wget http://bitbucket.org/eigen/eigen/get/3.2.7.tar.bz2
   - tar -xvf 3.2.7.tar.bz2
   - sudo mv eigen-eigen-b30b87236a1b /usr/local/include/eigen/ 
-  # pypi
+  # pypi packages
   - cd $FLORENCEPATH
-  - pip install nose2
-  - pip install cython
-  - pip install meshpy
-  - pip install pyamg
-  # - travis_wait 30 pip install -r "requirements.txt"
+  # - pip install nose2
+  # - pip install cython
+  # - pip install meshpy
+  # - pip install pyamg
+  - travis_wait 50 pip install -r "requirements.txt"
+  # update the cache
+  - sudo ldconfig
+
+install:
   # Setup florence - build interfaces
-  - python setup.py
+  - cd $FLORENCEPATH; python setup.py
 
 script:
   # Run florence test suite
