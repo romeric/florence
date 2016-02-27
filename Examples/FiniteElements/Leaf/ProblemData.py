@@ -10,13 +10,14 @@ def ProblemData(MainData):
     MainData.Fields = 'Mechanics'    
     MainData.Formulation = 'DisplacementApproach'
     MainData.Analysis = 'Static'
-    MainData.AnalysisType = 'Linear'
-    # MainData.AnalysisType = 'Nonlinear'
+    # MainData.AnalysisType = 'Linear'
+    MainData.AnalysisType = 'Nonlinear'
 
 
     # material = LinearModel(MainData.ndim,youngs_modulus=1.0e01,poissons_ratio=0.3)
-    material = IncrementalLinearElastic(MainData.ndim,youngs_modulus=1.,poissons_ratio=0.3)
+    # material = IncrementalLinearElastic(MainData.ndim,youngs_modulus=1.,poissons_ratio=0.3)
     # material = NeoHookean_2(MainData.ndim,youngs_modulus=1.,poissons_ratio=0.3)
+    material = NeoHookean_2(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
     # material = MooneyRivlin(MainData.ndim,youngs_modulus=1.,poissons_ratio=0.3)
     # material = NearlyIncompressibleMooneyRivlin(MainData.ndim,youngs_modulus=1.,poissons_ratio=0.3)
     # material = BonetTranservselyIsotropicHyperElastic(MainData.ndim,youngs_modulus=1.,poissons_ratio=0.3,
@@ -49,7 +50,7 @@ def ProblemData(MainData):
     cad_file = ProblemPath + '/Two_Arcs.iges'
     boundary_condition = BoundaryCondition()
     boundary_condition.SetCADProjectionParameters(cad_file,projection_type='arc_length',
-        nodal_spacing='equal',scale=1000.0,condition=3000.0)
+        nodal_spacing='fekete',scale=1000.0,condition=3000.0)
     boundary_condition.SetProjectionCriteria(ProjectionCriteria,mesh,takes_self=True)
 
     solver = LinearSolver(linear_solver="direct", linear_solver_type="umfpack")

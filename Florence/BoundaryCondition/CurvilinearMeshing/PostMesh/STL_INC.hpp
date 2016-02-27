@@ -37,7 +37,7 @@ typedef bool Boolean;
 #define True  true
 
 
-// Control function inlining more aggressively
+// CONTROL FUNCTION INLINING
 #if defined(__GNUC__) || defined(__GNUG__)
     #define ALWAYS_INLINE inline __attribute__((always_inline))
     #define NEVER_INLINE __attribute__((noinline))

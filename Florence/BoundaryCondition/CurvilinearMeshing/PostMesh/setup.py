@@ -36,7 +36,9 @@ occ_dir = "/usr/local/lib"
 all_dir_libs = os.listdir(occ_dir)
 occ_libs = []
 for i in all_dir_libs:
-    if i[:4]=="libT" and i.split(".")[-1] != "a" and i.split(".")[-1] != "0":
+    lib_suffix = i.split(".")[-1]
+    if i[:4]=="libT" and (lib_suffix != "a" and lib_suffix != "la" \
+    and lib_suffix != "0"):
         occ_libs.append(":"+i)
 
 # Create extension module
@@ -44,7 +46,7 @@ extensions = [
     Extension(
         name = "PostMeshPy",  
         sources = sourcefiles,
-    	language="c++",
+        language="c++",
         include_dirs = [_pwd_,_pwd_+"/include/",
                         "/usr/local/include/eigen/",
                         "/usr/local/include/oce/",
@@ -62,5 +64,5 @@ setup(
     author="Roman Poya",
     author_email = "r.poya@swansea.ac.uk",
     url = "https://github.com/romeric/PostMesh",
-    version = "0.1",
+    version = "0.2",
 )

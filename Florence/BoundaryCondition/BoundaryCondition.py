@@ -105,6 +105,7 @@ class BoundaryCondition(object):
         self.orthogonal_fallback_tolerance = orthogonal_fallback_tolerance
         self.surface_identification_algorithm = surface_identification_algorithm
         self.modify_linear_mesh_on_projection = modify_linear_mesh_on_projection
+        self.nodal_spacing_for_cad = nodal_spacing
 
         self.project_on_curves = int(self.project_on_curves)
         self.modify_linear_mesh_on_projection = int(self.modify_linear_mesh_on_projection)
@@ -267,11 +268,16 @@ class BoundaryCondition(object):
                 # np.savetxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_ColumnsOut_"+"P"+str(MainData.C+1)+".dat",ColumnsOut)
                 # # np.savetxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_PlanarMeshFaces_"+"P"+str(MainData.C+1)+".dat",MainData.planar_mesh_faces)
 
-                # from scipy.io import savemat
-                # print(MainData.MeshInfo.FileName.split(".")[0]+"_DirichletData_P"+str(MainData.C+1)+".mat")
-                # Dict = {'AppliedDirichlet':AppliedDirichlet,'ColumnsOut':ColumnsOut.astype(np.int64)}
-                # savemat(MainData.MeshInfo.FileName.split(".")[0]+"_DirichletData_P"+str(MainData.C+1)+".mat",Dict,do_compression=True)
-                # # exit()
+                # if MainData.ndim==3:
+                #     from scipy.io import savemat
+                #     print(mesh.filename.split(".")[0]+"_DirichletData_P"+str(MainData.C+1)+".mat")
+                #     Dict = {'AppliedDirichlet':self.applied_dirichlet,'ColumnsOut':self.columns_out.astype(np.int64)}
+                #     savemat(mesh.filename.split(".")[0]+"_DirichletData_P"+str(MainData.C+1)+".mat",Dict,do_compression=True)
+                #     # exit()
+
+                # print repr(self.applied_dirichlet.reshape(-1,1))
+                # print repr(mesh.points)
+                # exit()
 
             else:
                 
@@ -383,7 +389,6 @@ class BoundaryCondition(object):
             # CHOOSE TYPE OF BOUNDARY SPACING 
             boundary_fekete = np.array([[]])
             # spacing_type = getattr(MainData.BoundaryData,'CurvilinearMeshNodalSpacing',None)
-            # self.nodal_spacing
             if self.nodal_spacing_for_cad == 'fekete':
                 boundary_fekete = GaussLobattoQuadrature(MainData.C+2)[0]
             else:
@@ -437,6 +442,7 @@ class BoundaryCondition(object):
             # FIND UNIQUE VALUES OF DIRICHLET DATA
             # posUnique = np.unique(nodesDBC,return_index=True)[1]
             # nodesDBC, Dirichlet = nodesDBC[posUnique], Dirichlet[posUnique,:]
+
 
             # GET ACTUAL CURVE POINTS - THIS FUNCTION IS EXPENSIVE
             # MainData.ActualCurve = curvilinear_mesh.DiscretiseCurves(100)

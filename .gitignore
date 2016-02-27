@@ -65,3 +65,5 @@ WriteCurvedMeshFiles.py
 # testfiles not to ignore
 !Tests/Almond3D/
 !Tests/Almond3D/*
+!Tests/Cylinder/
+!Tests/Cylinder/*

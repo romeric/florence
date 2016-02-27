@@ -119,11 +119,13 @@ def final_solution_checker(MainData,material,TotalDisp,Dict):
 
     if MainData.solver.solver_type != Dict['SolverType']:
         raise ValueError("Results from different solvers are being compared")
-    if MainData.solver.iterative_solver_tolerance != Dict['SolverTol']:
-        raise ValueError("Solver results with different tolerances are being compared")
+    elif MainData.solver.solver_type == "multigrid" or MainData.solver.solver_type == "amg":
+        if MainData.solver.solver_subtype == "multigrid" or MainData.solver.solver_subtype == "amg":
+            if MainData.solver.iterative_solver_tolerance != Dict['SolverTol']:
+                raise ValueError("Solver results with different tolerances are being compared")
 
 
-    tol = 1e-04
+    tol = 1e-05
     if entity_checker(TotalDisp,Dict['TotalDisp'],tol):
         print(tick, "Final solution is correct")
     else:
@@ -133,9 +135,11 @@ def final_solution_checker(MainData,material,TotalDisp,Dict):
 
     Dict['ScaledJacobian'] = Dict['ScaledJacobian'].flatten()
     MainData.ScaledJacobian = MainData.ScaledJacobian.flatten()
-    if entity_checker(MainData.ScaledJacobian,Dict['ScaledJacobian'],tol):
+    # if entity_checker(MainData.ScaledJacobian,Dict['ScaledJacobian'],tol):
+    if np.abs((MainData.ScaledJacobian.min() - Dict['ScaledJacobian'].min())<tol):
         print(tick,"Final mesh quality is correct")
     else:
+        # print(np.linalg.norm(MainData.ScaledJacobian - Dict['ScaledJacobian']))
         print(cross,"Final mesh quality does not match")
         exit()
 
@@ -177,13 +181,6 @@ def AlmondTestCases():
     # for p in [2,3,4,5,6]:
     for p in [2,3,4]:
         MainData.C = p - 1
-
-        # MainData.MaterialArgs.Type = "IncrementalLinearElastic"
-        # MainData.MaterialArgs.Type = 'TranservselyIsotropicLinearElastic'
-        # MainData.MaterialArgs.Type = "NeoHookean_2"
-        # MainData.MaterialArgs.Type = 'MooneyRivlin'
-        # MainData.MaterialArgs.Type = 'NearlyIncompressibleMooneyRivlin'
-        # MainData.MaterialArgs.Type = 'BonetTranservselyIsotropicHyperElastic'
 
         # for Increment in [1,10]:
         # for Increment in [1]:
@@ -266,7 +263,7 @@ def AlmondTestCases():
                 # savemat(spath,Dict)
 
 
-def RunTestCases():
+def LeafTestCases():
 
     print("\n=========================================================================")
     print("                       RUNNING FLORENCE TEST-SUITE                         ")
@@ -286,10 +283,10 @@ def RunTestCases():
     nrplot = (0, 'last')
     MainData.write = 0
 
-    import Tests.Almond3D.ProblemData as Pr
+    # import Tests.Almond3D.ProblemData as Pr
     # import Tests.MechanicalComponent2D.ProblemData as Pr
     # import Tests.Annular_Circle.ProblemData as Pr
-    # import Tests.Leaf.ProblemData as Pr
+    import Tests.Leaf.ProblemData as Pr
     # import Tests.Sphere.ProblemData as Pr # MeshPy with 10 points
     # import Tests.MechanicalComponent3D.ProblemData as Pr
     # import Tests.F6.ProblemData as Pr
@@ -311,13 +308,6 @@ def RunTestCases():
     for p in [2,3,4,5]:    
         MainData.C = p - 1
 
-        # MainData.MaterialArgs.Type = "IncrementalLinearElastic"
-        # MainData.MaterialArgs.Type = 'TranservselyIsotropicLinearElastic'
-        # MainData.MaterialArgs.Type = "NeoHookean_2"
-        # MainData.MaterialArgs.Type = 'MooneyRivlin'
-        # MainData.MaterialArgs.Type = 'NearlyIncompressibleMooneyRivlin'
-        # MainData.MaterialArgs.Type = 'BonetTranservselyIsotropicHyperElastic'
-
         # for Increment in [1,10]:
         # for Increment in [5]:
         for Increment in [10]:    
@@ -330,7 +320,7 @@ def RunTestCases():
 
                 material_func = getattr(Florence.MaterialLibrary,material_model,None)
 
-                material = material_func(3,youngs_modulus=1.0e05,poissons_ratio=0.485,
+                material = material_func(2,youngs_modulus=1.0e05,poissons_ratio=0.4,
                     E_A=2.5e05,G_A=5.0e04)
                 # material = material_func(2,youngs_modulus=1.0e05,poissons_ratio=0.4,
                     # E_A=2.5e05,G_A=5.0e04)
@@ -358,19 +348,18 @@ def RunTestCases():
                 if material.is_transversely_isotropic:
                     material.GetFibresOrientation(mesh)
                 
+                # Checking higher order mesh generators results
                 cdir = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..'))
-                cfile = os.path.join(cdir,"Tests/Almond3D/almond_H1_P"+str(MainData.C+1)+".mat")
+                cfile = os.path.join(cdir,"Tests/Leaf/TwoArcs_18_P"+str(MainData.C+1)+".mat")
                 Dict = loadmat(cfile)
 
-                # Checking higher order mesh generators results
                 mesh_checker(mesh,Dict)
                 del Dict
                 gc.collect()
 
                 # Checking Dirichlet data from CAD
-                # ColumnsIn, ColumnsOut, AppliedDirichlet = GetDirichletBoundaryConditions(mesh,MainData)
                 boundary_condition.GetDirichletBoundaryConditions(MainData,mesh,material)
-                cfile = os.path.join(cdir,"Tests/Almond3D/almond_H1_DirichletData_P"+str(MainData.C+1)+".mat")
+                cfile = os.path.join(cdir,"Tests/Leaf/TwoArcs_18_DirichletData_P"+str(MainData.C+1)+".mat")
                 Dict = loadmat(cfile)
                 dirichlet_checker(boundary_condition.columns_out,boundary_condition.applied_dirichlet,Dict)
                 del Dict
@@ -390,16 +379,6 @@ def RunTestCases():
                 if MainData.AssemblyParameters.LoadIncrements != 10:
                     raise ValueError("Results with different load increments are being compared")
 
-                cfile = mesh.filename.split(".")[0]+"_Solution_"+\
-                    material.mtype+"_Increments_"+\
-                    str(MainData.AssemblyParameters.LoadIncrements)+"_P"+str(MainData.C+1)+".mat"
-
-                Dict = loadmat(cfile)
-                # Checking the final solution 
-                final_solution_checker(MainData,material,TotalDisp,Dict)
-                del Dict
-                gc.collect()
-
                 if material.anisotropic_orientations is None:
                     material.anisotropic_orientations = np.array([np.NAN])
 
@@ -413,6 +392,16 @@ def RunTestCases():
                     qualities = post_process.MeshQualityMeasures(mesh,TotalDisp,plot=False,show_plot=False)
                     MainData.isScaledJacobianComputed = qualities[0]
                     MainData.ScaledJacobian = qualities[3]
+
+                cfile = mesh.filename.split(".")[0]+"_Solution_"+\
+                material.mtype+"_Nonlinear_"+\
+                "P"+str(MainData.C+1)+".mat"
+
+                Dict = loadmat(cfile)
+                # Checking the final solution 
+                final_solution_checker(MainData,material,TotalDisp,Dict)
+                del Dict
+                gc.collect()
 
                 Dict = {'TotalDisp':TotalDisp, 'ScaledJacobian':MainData.ScaledJacobian,'LoadIncrements':MainData.AssemblyParameters.LoadIncrements,
                     'YoungsModulus': material.E, 'PoissonRatio':material.nu,'AnalysisType':MainData.AnalysisType,
@@ -428,10 +417,117 @@ def RunTestCases():
                 # savemat(spath,Dict)
 
 
+def CylinderTestCases():
+
+    print("\n=========================================================================")
+    print("                       RUNNING FLORENCE TEST-SUITE                         ")
+    print("=========================================================================\n")
+    print("                       RUNNING Cylinder TEST CASES                         ")
+
+    MainData.__NO_DEBUG__ = True
+    MainData.__VECTORISATION__ = True
+    MainData.__PARALLEL__ = True
+    MainData.numCPU = MP.cpu_count()
+    MainData.__PARALLEL__ = False
+    MainData.__MEMORY__ = 'SHARED'
+    # MainData.__MEMORY__ = 'DISTRIBUTED'
+    
+    MainData.norder = 2
+    MainData.plot = (0, 3)
+    nrplot = (0, 'last')
+    MainData.write = 0
+
+    import Tests.Cylinder.ProblemData as Pr
+
+    # GET THE CURRENT DIRECTORY PATH
+    pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
+
+    for p in [2,3,4,5]:    
+        MainData.C = p - 1
+
+        for Increment in [5]:
+            MainData.LoadIncrement = Increment
+
+            # READ PROBLEM DATA FILE
+            mesh, material, boundary_condition = Pr.ProblemData(MainData)
+            MainData.nvar = material.nvar
+            MainData.ndim = material.ndim
+
+
+            
+            # PRE-PROCESS
+            print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation bases etc...')
+
+            # mesh = PreProcess(MainData,material,Pr,pwd)
+            PreProcess(MainData,mesh,material,Pr,pwd)
+
+
+            if material.is_transversely_isotropic:
+                material.GetFibresOrientation(mesh)
+            
+            # Checking higher order mesh generators results
+            cfile = os.path.join(mesh.filename.split(".")[0]+"_P"+str(MainData.C+1)+".mat")
+            Dict = loadmat(cfile)
+
+            mesh_checker(mesh,Dict)
+            del Dict
+            gc.collect()
+
+
+            # Checking Dirichlet data from CAD
+            boundary_condition.GetDirichletBoundaryConditions(MainData,mesh,material)
+            cfile = os.path.join(mesh.filename.split(".")[0]+"_DirichletData_P"+str(MainData.C+1)+".mat")
+            Dict = loadmat(cfile)
+            dirichlet_checker(boundary_condition.columns_out,boundary_condition.applied_dirichlet,Dict)
+            del Dict
+            gc.collect()
+
+            print('Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*MainData.nvar)
+            print('Number of elements is', mesh.elements.shape[0], \
+                     'and number of boundary nodes is', np.unique(mesh.faces).shape[0])
+
+            # CALL THE MAIN ROUTINE
+            TotalDisp = MainSolver(MainData,mesh,material,boundary_condition)
+
+            if MainData.AssemblyParameters.LoadIncrements != 5:
+                raise ValueError("Results with different load increments are being compared")
+
+            if material.anisotropic_orientations is None:
+                material.anisotropic_orientations = np.array([np.NAN])
+
+            post_process = PostProcess(MainData.ndim,MainData.nvar)
+            if material.is_transversely_isotropic:
+                post_process.is_material_anisotropic = True
+                post_process.SetAnisotropicOrientations(material.anisotropic_orientations)
+
+            cfile = mesh.filename.split(".")[0]+"_Solution_"+\
+            material.mtype+"_"+\
+            "P"+str(MainData.C+1)+".mat"
+
+            Dict = loadmat(cfile)
+            # Checking the final solution 
+            final_solution_checker(MainData,material,TotalDisp,Dict)
+            del Dict
+            gc.collect()
+
+            # Dict = {'TotalDisp':TotalDisp, 'ScaledJacobian':MainData.ScaledJacobian,'LoadIncrements':MainData.AssemblyParameters.LoadIncrements,
+            #     'YoungsModulus': material.E, 'PoissonRatio':material.nu,'AnalysisType':MainData.AnalysisType,
+            #     'MaterialArgsType':material.mtype,'SolverType':MainData.solver.solver_type,'SolverSubType':MainData.solver.solver_subtype,
+            #     'SolverTol':MainData.solver.iterative_solver_tolerance}
+
+            # spath = mesh.filename.split(".")[0]+"_Solution_"+\
+            #     material.mtype+"_Increments_"+str(MainData.AssemblyParameters.LoadIncrements)+"_P"+str(MainData.C+1)+".mat"
+            # spath = mesh.filename.split(".")[0]+"_Solution_"+\
+            #     material.mtype+"_Nonlinear_P"+str(MainData.C+1)+".mat"
+
+            # savemat(spath,Dict)
+
+
 
 
 
 # RUN TEST-CASES
 # if __name__ == "__main__":
-AlmondTestCases()
-# RunTestCases()
+# LeafTestCases()
+CylinderTestCases()
+# AlmondTestCases()

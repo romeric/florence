@@ -153,9 +153,10 @@ def PreProcess(MainData,mesh,material,Pr,pwd):
     #     'face_flags':face_flags,'face_to_element':mesh.face_to_element,
     #     'boundary_face_to_element':boundary_face_to_element}
     # # Dict['face_to_surface'] = mesh.face_to_surface
-    # savemat(MainData.MeshInfo.FileName.split(".")[0]+"_P"+str(MainData.C+1)+".mat",Dict,do_compression=True)
+    # # savemat(MainData.MeshInfo.FileName.split(".")[0]+"_P"+str(MainData.C+1)+".mat",Dict,do_compression=True)
+    # savemat(mesh.filename.split(".")[0]+"_P"+str(MainData.C+1)+".mat",Dict,do_compression=True)
     # # savemat(MainData.MeshInfo.FileName.split(".")[0]+"_P"+str(MainData.C+1)+"_New.mat",Dict,do_compression=True)
-    # print MainData.MeshInfo.FileName.split(".")[0]+"_P"+str(MainData.C+1)+".mat"
+    # print mesh.filename.split(".")[0]+"_P"+str(MainData.C+1)+".mat"
     # print 'rest of the time', time() - tt
     # # exit()
 

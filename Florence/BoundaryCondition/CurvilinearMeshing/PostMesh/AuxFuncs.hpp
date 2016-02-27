@@ -139,26 +139,6 @@ std::chrono::duration<double> timer(T (*func)(Params...), Args&&...args)
     //! then
     //!
     //!     timer(simple_mul_ptr,a,b);
-    //!
-    //! If you pass mutating functions that take pointers as input
-    //! arguments you need to cast them separately, for instance
-    //!
-    //!     void mutating_func(double *arr,double num)
-    //!         arr[6] = num;
-    //!
-    //! pass it as
-    //!
-    //!     timeit(static_cast<void (*)(double*,double)>(&mutating_func),
-    //!         static_cast<double*>,double)
-    //!
-    //! The need to cast double* as double* is because of reference collapsing
-    //! and special argument deduction rule that happens at timeit function
-    //!     timeit(T (*func)(Args...), Args&&...args)
-    //! here double* is deduced as double*& for the second pack of arguments i.e.
-    //! (Args&&...args) [which is due to special argument deduction rule]
-    //! and double* is deduced as double* for first pack of arguments i.e.
-    //! (*func)(Args...) and hence the compiler will not be able to resolve
-    //! the signature of timeit function properly
 
 
 

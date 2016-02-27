@@ -326,7 +326,6 @@ void PostMeshCurve::IdentifyCurvesContainingEdges()
                 if (mid_distance < min_mid_distance)
                 {
                     // STORE ID OF CURVES
-//                    this->dirichlet_edges(iedge,2) = icurve;
                     this->dirichlet_edges(index_edge,2) = icurve; // <--THIS
 //                    this->dirichlet_edges(index_edge,2) = this->geometry_curves_types[icurve]; // CHECK THIS
                     // RE-ASSIGN
@@ -340,8 +339,6 @@ void PostMeshCurve::IdentifyCurvesContainingEdges()
     auto arr_rows = cnp::arange(static_cast<Integer>(index_edge));
     auto arr_cols = cnp::arange(static_cast<Integer>(ndim)+1);
     this->dirichlet_edges = cnp::take(this->dirichlet_edges,arr_rows,arr_cols);
-//    print(this->dirichlet_edges);
-//    exit(EXIT_FAILURE);
 }
 
 void PostMeshCurve::ProjectMeshOnCurve()
@@ -418,13 +415,7 @@ void PostMeshCurve::ProjectMeshOnCurve()
     // SORT PROJECTED PARAMETERS OF EACH EDGE - MUST INITIALISE SORT INDICES
     this->sorted_projected_indices = Eigen::MatrixI::Zero(this->projection_U.rows(),this->projection_U.cols());
 
-//    println(this->projection_U);
     cnp::sort_rows(this->projection_U,this->sorted_projected_indices);
-//    print(this->projection_U);
-//    print(sorted_projected_indices);
-//    print(this->dirichlet_edges);
-
-//    exit(EXIT_FAILURE);
 }
 
 void PostMeshCurve::RepairDualProjectedParameters()
@@ -562,7 +553,6 @@ void PostMeshCurve::MeshPointInversionCurve()
         }
         this->index_nodes = ((this->index_nodes).array()+no_edge_nodes).eval().matrix();
     }
-//    cout << displacements_BC << endl;
 }
 
 void PostMeshCurve::MeshPointInversionCurveArcLength()
@@ -642,7 +632,6 @@ void PostMeshCurve::MeshPointInversionCurveArcLength()
         }
         this->index_nodes = ((this->index_nodes).array()+no_edge_nodes).eval().matrix();
     }
-//    cout << displacements_BC << endl;
 }
 
 Eigen::MatrixR PostMeshCurve::ParametricFeketePoints(Standard_Real &u1,Standard_Real &u2)

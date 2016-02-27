@@ -16,7 +16,7 @@ noexcept(std::is_copy_assignable<PostMeshSurface>::value) : PostMeshBase(other)
 PostMeshSurface& PostMeshSurface::operator=(const PostMeshSurface& other)
 noexcept(std::is_copy_assignable<PostMeshSurface>::value)
 {
-    // Copy assignment operator
+    // COPY ASSIGNMENT OPERATOR
     this->mesh_elements = other.mesh_elements;
     this->mesh_points = other.mesh_points;
     this->mesh_edges = other.mesh_edges;
@@ -101,11 +101,14 @@ void PostMeshSurface::InferInterpolationPolynomialDegree()
 
 void PostMeshSurface::SurfacesToBsplineSurfaces()
 {
-    //! CONVERST ALL SURFACES TO BSPLINE SURFACES: http://dev.opencascade.org/doc/refman/html/class_geom_convert.html
+    //! CONVERST ALL SURFACES TO BSPLINE SURFACES:
+    //! http://dev.opencascade.org/doc/refman/html/class_geom_convert.html
+
     this->geometry_surfaces_bspline.clear();
     for (unsigned int isurf=0; isurf < this->geometry_surfaces.size(); ++isurf)
     {
-        this->geometry_surfaces_bspline.push_back( GeomConvert::SurfaceToBSplineSurface(this->geometry_surfaces[isurf]) );
+        this->geometry_surfaces_bspline.push_back(
+                    GeomConvert::SurfaceToBSplineSurface(this->geometry_surfaces[isurf]) );
     }
 }
 
@@ -130,6 +133,7 @@ void PostMeshSurface::GetSurfacesParameters()
 
 void PostMeshSurface::GetGeomPointsOnCorrespondingFaces()
 {
+    //! COMPUTE WHICH GEOMETRICAL POINTS LIE ON WHICH GEMOETRICAL SURFACE
     this->geometry_points_on_surfaces.clear();
     for (TopExp_Explorer explorer_face(this->imported_shape,TopAbs_FACE); explorer_face.More(); explorer_face.Next())
     {
@@ -256,9 +260,12 @@ void PostMeshSurface::IdentifySurfacesContainingFaces()
 
                 try
                 {
-                    Extrema_ExtPS extrema_1(vertex_1,adapt_surface,this->projection_precision,this->projection_precision,Extrema_ExtFlag_MIN);
-                    Extrema_ExtPS extrema_2(vertex_2,adapt_surface,this->projection_precision,this->projection_precision,Extrema_ExtFlag_MIN);
-                    Extrema_ExtPS extrema_3(vertex_3,adapt_surface,this->projection_precision,this->projection_precision,Extrema_ExtFlag_MIN);
+                    Extrema_ExtPS extrema_1(vertex_1,adapt_surface,this->projection_precision,
+                                            this->projection_precision,Extrema_ExtFlag_MIN);
+                    Extrema_ExtPS extrema_2(vertex_2,adapt_surface,this->projection_precision,
+                                            this->projection_precision,Extrema_ExtFlag_MIN);
+                    Extrema_ExtPS extrema_3(vertex_3,adapt_surface,this->projection_precision,
+                                            this->projection_precision,Extrema_ExtFlag_MIN);
 
                     for (auto extrema_iter=1; extrema_iter<=extrema_1.NbExt(); ++extrema_iter)
                     {
@@ -313,10 +320,8 @@ void PostMeshSurface::IdentifySurfacesContainingFaces()
     auto arr_rows = cnp::arange(static_cast<Integer>(index_face));
     auto arr_cols = cnp::arange(static_cast<Integer>(ndim)+1);
     this->dirichlet_faces = cnp::take(this->dirichlet_faces,arr_rows,arr_cols);
-//    print(dirichlet_faces);
+
     this->IdentifyRemainingSurfacesByProjection();
-//    print(this->dirichlet_faces);
-//    exit(EXIT_FAILURE);
 }
 
 void PostMeshSurface::IdentifyRemainingSurfacesByProjection()
@@ -575,7 +580,6 @@ void PostMeshSurface::IdentifyRemainingSurfacesByProjection()
 
 //    print(dirichlet_faces);
 //    print(this->projection_ID);
-//    print(dirichlet_faces.rows(),this->mesh_faces.rows());
 //    exit(EXIT_FAILURE);
 }
 
@@ -747,7 +751,6 @@ void PostMeshSurface::IdentifySurfacesContainingFacesByPureProjection()
 
 //    print(dirichlet_faces);
 //    print(this->projection_ID);
-//    print(dirichlet_faces.rows(),this->mesh_faces.rows());
 //    exit(EXIT_FAILURE);
 }
 
@@ -1205,7 +1208,6 @@ void PostMeshSurface::MeshPointInversionSurface(Integer project_on_curves, Integ
 //    print(this->dirichlet_faces);
 //    print(this->displacements_BC);
 //    print(displacements_BC.maxCoeff());
-//    print(displacements_BC.rows(),displacements_BC.cols());
 //    exit (EXIT_FAILURE);
 }
 
@@ -1262,7 +1264,6 @@ void PostMeshSurface::MeshPointInversionSurfaceArcLength(Integer project_on_curv
                 current_surface->D0(parametric_surface(j,0),parametric_surface(j,1),xEq);
 
                 // TRY PROJECTION AS WELL TO RESOLVE FOR INCORRECT NODES
-//                auto xEq_Orthogonal = gp_Pnt(gp_pnt_old(0),gp_pnt_old(1),gp_pnt_old(2));
                 auto xEq_Orthogonal = gp_Pnt(gp_pnt_old(0)*this->scale,gp_pnt_old(1)*this->scale,gp_pnt_old(2)*this->scale);
                 // IN CASE BOUNDS OF MESH FACE IN THE ISOPARAMETRIC DOMAIN NEEDS TO BE PASSED
 //                // TO THE PROJECTOR
@@ -1321,7 +1322,6 @@ void PostMeshSurface::MeshPointInversionSurfaceArcLength(Integer project_on_curv
 //                this->displacements_BC(this->index_nodes(j),2) = Zdisp_orth;
 
 //                print(gp_pnt_old(0),gp_pnt_old(1),gp_pnt_old(2));
-//                print(gp_pnt_old(0),gp_pnt_old(1),gp_pnt_old(2),"   ",xEq_Orthogonal.X()/this->scale,xEq_Orthogonal.Y()/this->scale,xEq_Orthogonal.Z()/this->scale);
             }
         }
         this->index_nodes = ((this->index_nodes).array()+no_face_nodes).eval().matrix();

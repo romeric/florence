@@ -34,7 +34,10 @@ def ProblemData(MainData):
     cad_file = ProblemPath + '/Two_Arcs.iges'
     boundary_condition = BoundaryCondition()
     boundary_condition.SetCADProjectionParameters(cad_file,projection_type='arc_length',
-        nodal_spacing='equal',scale=1000.0,condition=3000.0)
+        nodal_spacing='fekete',scale=1000.0,condition=3000.0)
     boundary_condition.SetProjectionCriteria(ProjectionCriteria,mesh,takes_self=True)
+
+    solver = LinearSolver(linear_solver="direct", linear_solver_type="umfpack")
+    MainData.solver = solver
 
     return mesh, boundary_condition

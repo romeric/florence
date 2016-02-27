@@ -84,10 +84,10 @@ PostMeshBase::PostMeshBase(PostMeshBase&& other) noexcept :  \
     this->nodes_dir = std::move(other.nodes_dir);
     this->fekete = std::move(other.fekete);
 
-    //! NB: Check that the version of Eigen you are using supports rvalue references
+    //! NB: CHECK THAT YOUR VERSION OF EIGEN SUPPORTS RVALUE REFERENCES
     //! (EIGEN_HAVE_RVALUE_REFERENCES). In PostMesh this is activated by default.
-    //! Activating/deactiviting should not break the code in any way, as copy constructor
-    //! would kick in
+    //! ACTIVATING/DEACTIVATING DOES NOT AFFECT THE CODE IN ANY WAY COMPATIBILITY-WISE
+    //! AS THEN THE COPY CONSTRUCTOR WOULD KICK IN INSTEAD OF MOVE CONSTRUCTOR
 }
 
 PostMeshBase& PostMeshBase::operator=(PostMeshBase&& other) noexcept
@@ -117,10 +117,10 @@ PostMeshBase& PostMeshBase::operator=(PostMeshBase&& other) noexcept
     this->nodes_dir = std::move(other.nodes_dir);
     this->fekete = std::move(other.fekete);
 
-    //! NB: Check that the version of Eigen you are using supports rvalue references
+    //! NB: CHECK THAT YOUR VERSION OF EIGEN SUPPORTS RVALUE REFERENCES
     //! (EIGEN_HAVE_RVALUE_REFERENCES). In PostMesh this is activated by default.
-    //! Activating/deactiviting should not break the code in any way, as copy constructor
-    //! would kick in
+    //! ACTIVATING/DEACTIVATING DOES NOT AFFECT THE CODE IN ANY WAY COMPATIBILITY-WISE
+    //! AS THEN THE COPY CONSTRUCTOR WOULD KICK IN INSTEAD OF MOVE CONSTRUCTOR
 
     return *this;
 }

@@ -17,6 +17,7 @@ template<typename T>
 STATIC ALWAYS_INLINE
 Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> arange(T a, T b)
 {
+    //! EQUIVALENT TO NUMPY UNIQUE. GET A LINEARLY SPACED VECTOR
     return Eigen::Matrix<T,DYNAMIC,1,
             POSTMESH_ALIGNED>::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
 }
@@ -26,6 +27,7 @@ STATIC ALWAYS_INLINE
 Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED>
 arange(T b=1)
 {
+    //! EQUIVALENT TO NUMPY UNIQUE. GET A LINEARLY SPACED VECTOR
     //! DEFAULT ARANGE STARTING FROM ZERO AND ENDING AT 1.
     //! b IS OPTIONAL AND A IS ALWAYS ZERO
 
@@ -34,19 +36,11 @@ arange(T b=1)
             POSTMESH_ALIGNED>::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
 }
 
-//template<typename T>
-//STATIC ALWAYS_INLINE
-//Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED>
-//arange(T &a, T &b)
-//{
-//    return Eigen::Matrix<T,DYNAMIC,1,
-//            POSTMESH_ALIGNED>::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
-//}
-
 template<typename T, typename U>
 Eigen::PlainObjectBase<T>
 STATIC take(const Eigen::PlainObjectBase<T> &arr, const Eigen::PlainObjectBase<U> &arr_row, const Eigen::PlainObjectBase<U> &arr_col)
 {
+    //! TAKE OUT PART OF A 2D ARRAY. MAKES A COPY
     Eigen::PlainObjectBase<T> arr_reduced;
     arr_reduced.setZero(arr_row.rows(),arr_col.rows());
 
@@ -65,6 +59,7 @@ template<typename T>
 Eigen::PlainObjectBase<T>
 STATIC take(const Eigen::PlainObjectBase<T> &arr, const Eigen::MatrixI &arr_idx)
 {
+    //! TAKE OUT PART OF A 2D ARRAY. MAKES A COPY
     assert (arr_idx.rows()<=arr.rows());
     assert (arr_idx.cols()<=arr.cols());
 
@@ -86,6 +81,7 @@ template<typename T, typename U>
 void STATIC put(Eigen::PlainObjectBase<T> &arr_to_put, const Eigen::PlainObjectBase<T> &arr_to_take,
                 const Eigen::PlainObjectBase<U> &arr_row, const Eigen::PlainObjectBase<U> &arr_col)
 {
+    //! PUT A SUBARRAY INTO AN ARRAY. THIS IS IN-PLACE OPERATION
     assert(arr_to_put.rows()==arr_to_take.rows()
            && arr_to_put.cols()==arr_to_take.cols()
            && "ARRAY_TO_PUT_AND_ARRAY_TO_TAKE_VALUES_FROM_SHOULD_HAVE_THE_SAME_VALUES");
@@ -103,6 +99,7 @@ template<typename T, typename U>
 void STATIC put(Eigen::PlainObjectBase<T> &arr_to_put, typename Eigen::PlainObjectBase<T>::Scalar value,
                 const Eigen::PlainObjectBase<U> &arr_row, const Eigen::PlainObjectBase<U> &arr_col)
 {
+    //! PUT A VALUE INTO PART OF AN ARRAY. THIS IS IN-PLACE OPERATION
     for (auto i=0; i<arr_row.rows();i++)
     {
         for (auto j=0; j<arr_col.rows();j++)
@@ -114,7 +111,7 @@ void STATIC put(Eigen::PlainObjectBase<T> &arr_to_put, typename Eigen::PlainObje
 
 STATIC ALWAYS_INLINE Real length(const Handle_Geom_Curve &curve, Standard_Real scale=0.001)
 {
-    // GET LENGTH OF THE CURVE
+    //! GET LENGTH OF A GEOMETRICAL CURVE
     GeomAdaptor_Curve current_curve(curve);
     Real curve_length = GCPnts_AbscissaPoint::Length(current_curve);
     // CHANGE THE SCALE TO 1. IF NEEDED
@@ -122,15 +119,16 @@ STATIC ALWAYS_INLINE Real length(const Handle_Geom_Curve &curve, Standard_Real s
 }
 
 template <typename T>
-STATIC std::vector<Integer> argsort(const std::vector<T> &v) {
+STATIC std::vector<Integer> argsort(const std::vector<T> &v)
+{
+    //! GET INDICES OF A SORTED VECTOR
+    // INITIALIZE ORIGINAL INDEX LOCATIONS
+    std::vector<Integer> idx(v.size());
+    std::iota(idx.begin(),idx.end(),0);
+    // SORT INDICES BY COMPARING VALUES IN V USING LAMBDA FUNCTION
+    std::sort(idx.begin(), idx.end(),[&v](Integer i1, Integer i2) {return v[i1] < v[i2];});
 
-  // INITIALIZE ORIGINAL INDEX LOCATIONS
-  std::vector<Integer> idx(v.size());
-  std::iota(idx.begin(),idx.end(),0);
-  // SORT INDICES BY COMPARING VALUES IN V USING LAMBDA FUNCTION
-  std::sort(idx.begin(), idx.end(),[&v](Integer i1, Integer i2) {return v[i1] < v[i2];});
-
-  return idx;
+    return idx;
 }
 
 template<typename T>
@@ -299,8 +297,9 @@ STATIC std::vector<T> intersect(const std::vector<T>& vec1, const std::vector<T>
 
 template<typename T>
 STATIC std::tuple<std::vector<typename Eigen::PlainObjectBase<T>::Scalar>,std::vector<UInteger> >
-unique(const Eigen::PlainObjectBase<T> &arr) {
-
+unique(const Eigen::PlainObjectBase<T> &arr)
+{
+    //! RETURNS UNIQUE VALUES AND UNIQUE INDICES OF AN EIGEN MATRIX
     assert(arr.cols()==1 && "UNIQUE_METHOD_IS_ONLY_AVAILABLE_FOR_1D_ARRAYS/MATRICES");
     std::vector<typename Eigen::PlainObjectBase<T>::Scalar> uniques;
     std::vector<UInteger> idx;
@@ -335,8 +334,9 @@ unique(const Eigen::PlainObjectBase<T> &arr) {
 }
 
 template<typename T = Integer>
-STATIC std::tuple<std::vector<T>,std::vector<UInteger> > unique(const std::vector<T> &arr) {
-
+STATIC std::tuple<std::vector<T>,std::vector<UInteger> > unique(const std::vector<T> &arr)
+{
+    //! RETURNS UNIQUE VALUES AND UNIQUE INDICES OF A STD::VECTOR
     std::vector<T> uniques;
     std::vector<UInteger> idx;
 
@@ -372,6 +372,7 @@ STATIC std::tuple<std::vector<T>,std::vector<UInteger> > unique(const std::vecto
 template<typename T>
 Eigen::PlainObjectBase<T> itemfreq(const Eigen::PlainObjectBase<T> &arr)
 {
+    //! FINDS THE NUMBER OF OCCURENCE OF EACH VALUE IN AN EIGEN MATRIX
     std::vector<typename Eigen::PlainObjectBase<T>::Scalar> uniques;
     std::tie(uniques,std::ignore) = unique(arr);
     Eigen::PlainObjectBase<T> freqs;
@@ -392,6 +393,7 @@ Eigen::PlainObjectBase<T> itemfreq(const Eigen::PlainObjectBase<T> &arr)
 template<typename T>
 Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> itemfreq(const std::vector<T> &arr)
 {
+    //! FINDS THE NUMBER OF OCCURENCE OF EACH VALUE IN A VECTOR
     std::vector<T> uniques;
     std::tie(uniques,std::ignore) = unique(arr);
     Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> freqs(uniques.size(),2);
