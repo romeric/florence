@@ -9,7 +9,7 @@ def InitiateNonlinearAnalysisData(MainData,mesh,material):
     if MainData.Analysis == 'Static':
     	Increments = getattr(MainData,"LoadIncrement",None)
     	if Increments is None:
-    		LoadIncrement = 10
+    		LoadIncrement = 1
     	else:
     		LoadIncrement = Increments
     else:
