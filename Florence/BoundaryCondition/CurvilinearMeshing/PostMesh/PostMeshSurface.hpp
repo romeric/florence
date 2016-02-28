@@ -7,14 +7,11 @@
 class PostMeshSurface: public PostMeshBase
 {
 
-
 public:
     PostMeshSurface() : PostMeshBase()
     {
         this->ndim = 3;
         this->mesh_element_type = "tet";
-
-        //this_curve = std::make_shared<PostMeshCurve>(PostMeshCurve());
     }
 
     PostMeshSurface(std::string &element_type, const UInteger &dim) : \
@@ -34,8 +31,6 @@ public:
         this->mesh_element_type = "tet";
         this->scale = 1.0;
         this->condition = 1.0e10;
-
-        //this_curve = std::make_shared<PostMeshCurve>(PostMeshCurve());
     }
 
     void InferInterpolationPolynomialDegree();
@@ -54,7 +49,6 @@ public:
     void MeshPointInversionSurfaceArcLength(Integer project_on_curves, Real OrthTol, Real *FEbases, Integer rows, Integer cols);
     void GetBoundaryPointsOrder();
     std::vector<std::vector<Integer> > GetMeshFacesOnPlanarSurfaces();
-    DirichletData GetDirichletData();
     std::vector<Integer> GetDirichletFaces();
 
 
@@ -65,7 +59,6 @@ public:
     Eigen::MatrixR surfaces_Vparameters;
 
 protected:
-    //std::shared_ptr<PostMeshCurve> this_curve;
 
     Eigen::MatrixI projection_ID;
     Eigen::MatrixR projection_U;

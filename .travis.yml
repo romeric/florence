@@ -12,9 +12,6 @@ branches:
   only:
     master
 
-# virtualenv:
-  # system_site_packages: true
-
 
 # Install dependencies
 before_install:
@@ -22,11 +19,7 @@ before_install:
   - echo $FLORENCEPATH
   # Install BLAS libraries
   - echo -ne '\n' | sudo apt-get install gfortran libblas-dev liblapack-dev libatlas-base-dev libsuitesparse-dev
-  # - travis_wait 30 pip install -r "requirements.txt"
-  # - travis_wait 30 pip install numpy
-  # - travis_wait 40 pip install scipy
   - cd ~
-  # - echo -ne '\n' | sudo apt-get install python-numpy python-scipy
   # Install OpenCascade
   - OCETAG="OCE-0.15" 
   - OCEMAKEPATH="oce/build"
@@ -45,10 +38,7 @@ before_install:
   - sudo mv eigen-eigen-b30b87236a1b /usr/local/include/eigen/ 
   # pypi packages
   - cd $FLORENCEPATH
-  # - pip install nose2
-  # - pip install cython
-  # - pip install meshpy
-  # - pip install pyamg
+  # - echo -ne '\n' | sudo apt-get install python-numpy python-scipy
   - travis_wait 50 pip install -r "requirements.txt"
   # update the cache
   - sudo ldconfig

@@ -232,7 +232,7 @@ class BoundaryCondition(object):
                 # print time() - tt
                 # tt = time()
                 # print np.repeat(nodesDBC[:,None],nvar,axis=1)
-                # print nodesDBC
+
                 self.columns_out = (np.repeat(nodesDBC,nvar,axis=1)*nvar +\
                  np.tile(np.arange(nvar)[None,:],nodesDBC.shape[0]).reshape(nodesDBC.shape[0],MainData.ndim)).ravel()
                 self.applied_dirichlet = Dirichlet.ravel()
@@ -299,8 +299,9 @@ class BoundaryCondition(object):
 
 
             ############################
-            # print np.max(AppliedDirichlet), mesh.Bounds
-            # exit()
+            # if MainData.ndim==3:
+                # print np.max(self.applied_dirichlet), mesh.Bounds 
+                # exit()
             ############################
 
         #----------------------------------------------------------------------------------------------------#
@@ -353,13 +354,9 @@ class BoundaryCondition(object):
 
 
         # GENERAL PROCEDURE - GET REDUCED MATRICES FOR FINAL SOLUTION
-        # ColumnsOut = ColumnsOut.astype(np.int64)
-        # ColumnsIn = np.delete(np.arange(0,nvar*mesh.points.shape[0]),ColumnsOut)
         self.columns_out = self.columns_out.astype(np.int64)
         self.columns_in = np.delete(np.arange(0,nvar*mesh.points.shape[0]),self.columns_out)
 
-
-        # return ColumnsIn, ColumnsOut, AppliedDirichlet
 
 
 
@@ -369,7 +366,6 @@ class BoundaryCondition(object):
         # GET THE NURBS CURVE FROM PROBLEMDATA
         # nurbs = self.NURBSParameterisation()
         # IDENTIFIY DIRICHLET BOUNDARY CONDITIONS BASED ON THE EXACT GEOMETRY
-        # nodesDBC, Dirichlet = GetDirichletData(mesh,nurbs,MainData.BoundaryData,MainData.C)
         C = mesh.InferPolynomialDegree() - 1
         nodesDBC, Dirichlet = GetDirichletData(mesh,self.nurbs_info,self,C) 
 
@@ -410,6 +406,7 @@ class BoundaryCondition(object):
             # curvilinear_mesh.InferInterpolationPolynomialDegree() 
             curvilinear_mesh.SetNodalSpacing(boundary_fekete)
             curvilinear_mesh.GetBoundaryPointsOrder()
+            # exit()
             # READ THE GEOMETRY FROM THE IGES FILE
             curvilinear_mesh.ReadIGES(self.cad_file)
             # EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
@@ -418,7 +415,6 @@ class BoundaryCondition(object):
             # exit()
             curvilinear_mesh.GetGeomEdges()
             curvilinear_mesh.GetGeomFaces()
-
             curvilinear_mesh.GetGeomPointsOnCorrespondingEdges()
             # FIRST IDENTIFY WHICH CURVES CONTAIN WHICH EDGES
             curvilinear_mesh.IdentifyCurvesContainingEdges()
@@ -474,8 +470,8 @@ class BoundaryCondition(object):
             # exit()
             curvilinear_mesh.GetGeomEdges()
             curvilinear_mesh.GetGeomFaces()
-            print "CAD geometry has", curvilinear_mesh.NbPoints(), "points,", \
-            curvilinear_mesh.NbCurves(), "curves and", curvilinear_mesh.NbSurfaces(), \
+            print "CAD geometry has", curvilinear_mesh.NbPoints, "points,", \
+            curvilinear_mesh.NbCurves, "curves and", curvilinear_mesh.NbSurfaces, \
             "surfaces"
             curvilinear_mesh.GetGeomPointsOnCorrespondingFaces()
 
@@ -483,7 +479,9 @@ class BoundaryCondition(object):
             # mesh.face_to_surface = None
             if getattr(mesh,"face_to_surface",None) is not None:
                 if mesh.faces.shape[0] == mesh.face_to_surface.shape[0]:
+                    # print mesh.faces.shape, mesh.face_to_surface.shape
                     curvilinear_mesh.SupplySurfacesContainingFaces(mesh.face_to_surface,already_mapped=1)
+                    # exit()
                 else:
                     raise AssertionError("face-to-surface mapping does not seem correct. Point projection is going to stop")
             else:
@@ -701,7 +699,8 @@ class BoundaryCondition(object):
             Dirichlet[temp_dict,:] = np.dot(Disp,Q)
 
             if plot:
-                PostProcess.HighOrderCurvedPatchPlot(pmesh,TotalDisp,QuantityToPlot=MainData2D.ScaledJacobian,InterpolationDegree=40)
+                post_process = PostProcess(2,2)
+                post_process.HighOrderCurvedPatchPlot(pmesh,TotalDisp,QuantityToPlot=MainData2D.ScaledJacobian,InterpolationDegree=40)
                 import matplotlib.pyplot as plt
                 plt.show()
 

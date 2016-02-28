@@ -181,6 +181,7 @@ public:
     }
 
     void ComputeProjectionCriteria();
+    DirichletData GetDirichletData();
 
 
     std::string mesh_element_type;

@@ -762,7 +762,7 @@ void PostMeshSurface::SupplySurfacesContainingFaces(const Integer *arr, Integer 
     //! NOTE THAT THIS FUNCTION ASSUMES THAT THE EXTERNAL FACE-T0-SURFACE CORRESPONDENCE
     //! SUPPLIED, IS MORE ACCURATE THAN THE INTERNAL (OPENCASADE ONE). HOWEVER, IT IS
     //! POSSIBLE THAT THE SURFACE NUMBERING OF EXTERNALLY PROVIDED SOFTWARE AND OPENCASCADE
-    //! ARE DIFFERENT IN WHICH CASE. FOR SUCH CASES SUPPLY ALREADY_MAPPED FLAG AS ZERO
+    //! ARE DIFFERENT. FOR SUCH CASES SUPPLY ALREADY_MAPPED FLAG AS ZERO
 
     Eigen::MatrixI dirichlet_faces_ext = Eigen::MatrixI::Ones(rows,this->ndim+1)*(-1);
     this->listfaces.clear();
@@ -1265,16 +1265,6 @@ void PostMeshSurface::MeshPointInversionSurfaceArcLength(Integer project_on_curv
 
                 // TRY PROJECTION AS WELL TO RESOLVE FOR INCORRECT NODES
                 auto xEq_Orthogonal = gp_Pnt(gp_pnt_old(0)*this->scale,gp_pnt_old(1)*this->scale,gp_pnt_old(2)*this->scale);
-                // IN CASE BOUNDS OF MESH FACE IN THE ISOPARAMETRIC DOMAIN NEEDS TO BE PASSED
-//                // TO THE PROJECTOR
-//                auto minu = std::min(u1,u2);
-//                minu = std::min(minu,u3);
-//                auto maxu = std::max(u1,u2);
-//                maxu = std::max(maxu,u3);
-//                auto minv = std::min(v1,v2);
-//                minv = std::min(minv,v3);
-//                auto maxv = std::max(v1,v2);
-//                maxv = std::max(maxv,v3);
 
                 try
                 {
@@ -1388,31 +1378,4 @@ std::vector<Integer> PostMeshSurface::GetDirichletFaces()
     dirichlet_faces_stl.assign(this->dirichlet_faces.data(),
                                this->dirichlet_faces.data()+this->dirichlet_faces.rows()*this->dirichlet_faces.cols());
     return dirichlet_faces_stl;
-}
-
-DirichletData PostMeshSurface::GetDirichletData()
-{
-    // OBTAIN DIRICHLET DATA
-    DirichletData Dirichlet_data;
-    // CONVERT FROM EIGEN TO STL VECTOR
-    std::vector<Integer> nodes_Dirichlet_data_stl;
-    nodes_Dirichlet_data_stl.assign(this->nodes_dir.data(),this->nodes_dir.data()+this->nodes_dir.rows());
-    // FIND UNIQUE VALUES OF DIRICHLET DATA
-    std::vector<UInteger> idx;
-    std::tie(std::ignore,idx) = cnp::unique(nodes_Dirichlet_data_stl);
-
-    Dirichlet_data.nodes_dir_out_stl.resize(idx.size());
-    Dirichlet_data.displacement_BC_stl.resize(this->ndim*idx.size());
-    Dirichlet_data.nodes_dir_size = idx.size();
-
-    for (UInteger i=0; i<idx.size(); ++i)
-    {
-        Dirichlet_data.nodes_dir_out_stl[i] = nodes_Dirichlet_data_stl[idx[i]];
-        for (UInteger j=0; j<this->ndim; ++j)
-        {
-            Dirichlet_data.displacement_BC_stl[this->ndim*i+j] = this->displacements_BC(idx[i],j);
-        }
-    }
-
-    return Dirichlet_data;
 }

@@ -99,17 +99,21 @@ class Mesh(object):
         assert self.points is not None
 
         if self.points.shape[1] == 3:
-            return makezero(np.array([[np.min(self.points[:,0]),
+            bounds = np.array([[np.min(self.points[:,0]),
                         np.min(self.points[:,1]),
                         np.min(self.points[:,2])],
                         [np.max(self.points[:,0]),
                         np.max(self.points[:,1]),
-                        np.max(self.points[:,2])]]))
+                        np.max(self.points[:,2])]])
+            makezero(bounds)
+            return bounds
         else:
-            return makezero(np.array([[np.min(self.points[:,0]),
+            bounds = np.array([[np.min(self.points[:,0]),
                         np.min(self.points[:,1])],
                         [np.max(self.points[:,0]),
-                        np.max(self.points[:,1])]]))
+                        np.max(self.points[:,1])]])
+            makezero(bounds)
+            return bounds
 
 
     def GetEdgesTri(self):

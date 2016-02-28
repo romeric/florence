@@ -7,7 +7,6 @@
 // BASE CLASS FOR OPENCASCADE FRONT-END
 class PostMeshCurve: public PostMeshBase
 {
-    friend class PostMeshSurface;
 
 public:
 
@@ -49,7 +48,6 @@ public:
     void MeshPointInversionCurveArcLength();
     void MeshPointInversionCurve();
     void GetBoundaryPointsOrder();
-    DirichletData GetDirichletData();
 
 
     // PUBLIC DATA MEMBERS OF PostMeshCurve

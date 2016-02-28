@@ -60,9 +60,10 @@ extensions = [
 
 setup(
     ext_modules = cythonize(extensions),
+    name = "PostMeshPy",
+    version = "1.2",
     description = "A Python wrapper for PostMesh - a high order curvilinear mesh generator based on OpenCascade",
     author="Roman Poya",
     author_email = "r.poya@swansea.ac.uk",
     url = "https://github.com/romeric/PostMesh",
-    version = "0.2",
 )

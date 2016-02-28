@@ -10,6 +10,7 @@
             ]
         ], 
         "depends": [
+            "/home/roman/Dropbox/florence/Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshBase.hpp", 
             "/home/roman/Dropbox/florence/Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshCurve.hpp", 
             "/home/roman/Dropbox/florence/Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshSurface.hpp", 
             "/home/roman/Dropbox/florence/Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PyInterface.hpp", 
@@ -396,6 +397,7 @@ static CYTHON_INLINE float __PYX_NAN() {
 #include "string.h"
 #include <string>
 #include "PyInterface.hpp"
+#include "PostMeshBase.hpp"
 #include "PostMeshCurve.hpp"
 #include "PostMeshSurface.hpp"
 #include "PyInterfaceEmulator.hpp"
@@ -969,6 +971,7 @@ typedef double __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostM
 
 
 /*--- Type declarations ---*/
+struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy;
 struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy;
 struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy;
 struct __pyx_array_obj;
@@ -1012,33 +1015,42 @@ typedef npy_clongdouble __pyx_t_5numpy_clongdouble_t;
  */
 typedef npy_cdouble __pyx_t_5numpy_complex_t;
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":11
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":15
  * 
  * 
- * cdef class PostMeshCurvePy:             # <<<<<<<<<<<<<<
+ * cdef class PostMeshBasePy:             # <<<<<<<<<<<<<<
  *     """
- *     Python wrapper for C++ PostMeshCurve
+ *     PostMesh base class. Provides most of the common functionality for
  */
-struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy {
+struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy {
   PyObject_HEAD
   __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger ndim;
   __Pyx_memviewslice boundary_fekete;
-  PostMeshCurve *thisptr;
+  PostMeshBase *baseptr;
 };
 
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":155
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":219
  * 
  * 
- * cdef class PostMeshSurfacePy:             # <<<<<<<<<<<<<<
+ * cdef class PostMeshCurvePy(PostMeshBasePy):             # <<<<<<<<<<<<<<
  *     """
- *     Python wrapper for C++ PostMeshSurface
+ *     Point projection and inversion onto curves, for 2D finite elements
+ */
+struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy {
+  struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy __pyx_base;
+};
+
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":343
+ * 
+ * 
+ * cdef class PostMeshSurfacePy(PostMeshBasePy):             # <<<<<<<<<<<<<<
+ *     """
+ *     Point projection and inversion onto surfaces and curves
  */
 struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy {
-  PyObject_HEAD
-  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger ndim;
-  __Pyx_memviewslice boundary_fekete;
-  PostMeshSurface *thisptr;
+  struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy __pyx_base;
 };
 
 
@@ -1244,6 +1256,17 @@ static void __Pyx_RaiseArgtupleInvalid(const char* func_name, int exact,
 static CYTHON_INLINE int __Pyx_ArgTypeTest(PyObject *obj, PyTypeObject *type, int none_allowed,
     const char *name, int exact);
 
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw);
+#else
+#define __Pyx_PyObject_Call(func, arg, kw) PyObject_Call(func, arg, kw)
+#endif
+
+static CYTHON_INLINE void __Pyx_ErrRestore(PyObject *type, PyObject *value, PyObject *tb);
+static CYTHON_INLINE void __Pyx_ErrFetch(PyObject **type, PyObject **value, PyObject **tb);
+
+static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause);
+
 static CYTHON_INLINE int  __Pyx_GetBufferAndValidate(Py_buffer* buf, PyObject* obj,
     __Pyx_TypeInfo* dtype, int flags, int nd, int cast, __Pyx_BufFmt_StackElem* stack);
 static CYTHON_INLINE void __Pyx_SafeReleaseBuffer(Py_buffer* info);
@@ -1273,15 +1296,63 @@ static CYTHON_INLINE int __pyx_sub_acquisition_count_locked(
 static CYTHON_INLINE void __Pyx_INC_MEMVIEW(__Pyx_memviewslice *, int, int);
 static CYTHON_INLINE void __Pyx_XDEC_MEMVIEW(__Pyx_memviewslice *, int, int);
 
-static CYTHON_INLINE PyObject *__Pyx_GetModuleGlobalName(PyObject *name);
+#define __Pyx_GetItemInt(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
+    (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
+    __Pyx_GetItemInt_Fast(o, (Py_ssize_t)i, is_list, wraparound, boundscheck) :\
+    (is_list ? (PyErr_SetString(PyExc_IndexError, "list index out of range"), (PyObject*)NULL) :\
+               __Pyx_GetItemInt_Generic(o, to_py_func(i))))
+#define __Pyx_GetItemInt_List(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
+    (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
+    __Pyx_GetItemInt_List_Fast(o, (Py_ssize_t)i, wraparound, boundscheck) :\
+    (PyErr_SetString(PyExc_IndexError, "list index out of range"), (PyObject*)NULL))
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_List_Fast(PyObject *o, Py_ssize_t i,
+                                                              int wraparound, int boundscheck);
+#define __Pyx_GetItemInt_Tuple(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
+    (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
+    __Pyx_GetItemInt_Tuple_Fast(o, (Py_ssize_t)i, wraparound, boundscheck) :\
+    (PyErr_SetString(PyExc_IndexError, "tuple index out of range"), (PyObject*)NULL))
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Tuple_Fast(PyObject *o, Py_ssize_t i,
+                                                              int wraparound, int boundscheck);
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j);
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i,
+                                                     int is_list, int wraparound, int boundscheck);
 
 #if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw);
-#else
-#define __Pyx_PyObject_Call(func, arg, kw) PyObject_Call(func, arg, kw)
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg);
 #endif
 
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg);
+
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func);
+#else
+#define __Pyx_PyObject_CallNoArg(func) __Pyx_PyObject_Call(func, __pyx_empty_tuple, NULL)
+#endif
+
+#include <string.h>
+
+static CYTHON_INLINE int __Pyx_PyBytes_Equals(PyObject* s1, PyObject* s2, int equals);
+
+static CYTHON_INLINE int __Pyx_PyUnicode_Equals(PyObject* s1, PyObject* s2, int equals);
+
+#if PY_MAJOR_VERSION >= 3
+#define __Pyx_PyString_Equals __Pyx_PyUnicode_Equals
+#else
+#define __Pyx_PyString_Equals __Pyx_PyBytes_Equals
+#endif
+
+static CYTHON_INLINE PyObject *__Pyx_GetModuleGlobalName(PyObject *name);
+
 static CYTHON_INLINE int __Pyx_TypeTest(PyObject *obj, PyTypeObject *type);
+
+#define __Pyx_SetItemInt(o, i, v, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
+    (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
+    __Pyx_SetItemInt_Fast(o, (Py_ssize_t)i, v, is_list, wraparound, boundscheck) :\
+    (is_list ? (PyErr_SetString(PyExc_IndexError, "list assignment index out of range"), -1) :\
+               __Pyx_SetItemInt_Generic(o, to_py_func(i), v)))
+static CYTHON_INLINE int __Pyx_SetItemInt_Generic(PyObject *o, PyObject *j, PyObject *v);
+static CYTHON_INLINE int __Pyx_SetItemInt_Fast(PyObject *o, Py_ssize_t i, PyObject *v,
+                                               int is_list, int wraparound, int boundscheck);
 
 #if CYTHON_COMPILING_IN_CPYTHON
 static CYTHON_INLINE int __Pyx_PyList_Append(PyObject* list, PyObject* x) {
@@ -1299,27 +1370,7 @@ static CYTHON_INLINE int __Pyx_PyList_Append(PyObject* list, PyObject* x) {
 #define __Pyx_PyList_Append(L,x) PyList_Append(L,x)
 #endif
 
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg);
-#endif
-
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg);
-
 static CYTHON_INLINE Py_ssize_t __Pyx_div_Py_ssize_t(Py_ssize_t, Py_ssize_t);
-
-#define __Pyx_SetItemInt(o, i, v, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
-    (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
-    __Pyx_SetItemInt_Fast(o, (Py_ssize_t)i, v, is_list, wraparound, boundscheck) :\
-    (is_list ? (PyErr_SetString(PyExc_IndexError, "list assignment index out of range"), -1) :\
-               __Pyx_SetItemInt_Generic(o, to_py_func(i), v)))
-static CYTHON_INLINE int __Pyx_SetItemInt_Generic(PyObject *o, PyObject *j, PyObject *v);
-static CYTHON_INLINE int __Pyx_SetItemInt_Fast(PyObject *o, Py_ssize_t i, PyObject *v,
-                                               int is_list, int wraparound, int boundscheck);
-
-static CYTHON_INLINE void __Pyx_ErrRestore(PyObject *type, PyObject *value, PyObject *tb);
-static CYTHON_INLINE void __Pyx_ErrFetch(PyObject **type, PyObject **value, PyObject **tb);
-
-static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause);
 
 #if PY_MAJOR_VERSION >= 3 && !CYTHON_COMPILING_IN_PYPY
 static PyObject *__Pyx_PyDict_GetItem(PyObject *d, PyObject* key) {
@@ -1347,18 +1398,6 @@ static CYTHON_INLINE void __Pyx_RaiseNeedMoreValuesError(Py_ssize_t index);
 
 static CYTHON_INLINE void __Pyx_RaiseNoneNotIterableError(void);
 
-#include <string.h>
-
-static CYTHON_INLINE int __Pyx_PyBytes_Equals(PyObject* s1, PyObject* s2, int equals);
-
-static CYTHON_INLINE int __Pyx_PyUnicode_Equals(PyObject* s1, PyObject* s2, int equals);
-
-#if PY_MAJOR_VERSION >= 3
-#define __Pyx_PyString_Equals __Pyx_PyUnicode_Equals
-#else
-#define __Pyx_PyString_Equals __Pyx_PyBytes_Equals
-#endif
-
 #define UNARY_NEG_WOULD_OVERFLOW(x)\
         (((x) < 0) & ((unsigned long)(x) == 0-(unsigned long)(x)))
 
@@ -1379,27 +1418,6 @@ static int __Pyx_GetException(PyObject **type, PyObject **value, PyObject **tb);
 static CYTHON_INLINE void __Pyx_ExceptionSwap(PyObject **type, PyObject **value, PyObject **tb);
 
 static PyObject *__Pyx_Import(PyObject *name, PyObject *from_list, int level);
-
-#define __Pyx_GetItemInt(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
-    (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
-    __Pyx_GetItemInt_Fast(o, (Py_ssize_t)i, is_list, wraparound, boundscheck) :\
-    (is_list ? (PyErr_SetString(PyExc_IndexError, "list index out of range"), (PyObject*)NULL) :\
-               __Pyx_GetItemInt_Generic(o, to_py_func(i))))
-#define __Pyx_GetItemInt_List(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
-    (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
-    __Pyx_GetItemInt_List_Fast(o, (Py_ssize_t)i, wraparound, boundscheck) :\
-    (PyErr_SetString(PyExc_IndexError, "list index out of range"), (PyObject*)NULL))
-static CYTHON_INLINE PyObject *__Pyx_GetItemInt_List_Fast(PyObject *o, Py_ssize_t i,
-                                                              int wraparound, int boundscheck);
-#define __Pyx_GetItemInt_Tuple(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
-    (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
-    __Pyx_GetItemInt_Tuple_Fast(o, (Py_ssize_t)i, wraparound, boundscheck) :\
-    (PyErr_SetString(PyExc_IndexError, "tuple index out of range"), (PyObject*)NULL))
-static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Tuple_Fast(PyObject *o, Py_ssize_t i,
-                                                              int wraparound, int boundscheck);
-static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j);
-static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i,
-                                                     int is_list, int wraparound, int boundscheck);
 
 static CYTHON_UNUSED int __pyx_memoryview_getbuffer(PyObject *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /*proto*/
 static PyObject *__pyx_memoryview_transpose(PyObject *__pyx_v_self); /*proto*/
@@ -1460,6 +1478,10 @@ static void __Pyx_WriteUnraisable(const char *name, int clineno,
                                   int full_traceback, int nogil);
 
 static int __Pyx_SetVtable(PyObject *dict, void *vtable);
+
+static PyObject* __Pyx_ImportFrom(PyObject* module, PyObject* name);
+
+static PyObject *__Pyx_GetNameInClass(PyObject *nmspace, PyObject *name);
 
 typedef struct {
     int code_line;
@@ -1564,9 +1586,9 @@ static void __Pyx_CppExn2PyErr() {
 }
 #endif
 
-static CYTHON_INLINE PyObject* __Pyx_PyInt_From_unsigned_long(unsigned long value);
-
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value);
+
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_unsigned_long(unsigned long value);
 
 #if CYTHON_CCOMPLEX
   #ifdef __cplusplus
@@ -1751,6 +1773,7 @@ static PyTypeObject *__pyx_ptype_5numpy_ufunc = 0;
 static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *, char *, char *, int *); /*proto*/
 
 /* Module declarations from 'Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy' */
+static PyTypeObject *__pyx_ptype_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy = 0;
 static PyTypeObject *__pyx_ptype_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy = 0;
 static PyTypeObject *__pyx_ptype_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy = 0;
 static PyTypeObject *__pyx_array_type = 0;
@@ -1813,17 +1836,17 @@ static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_8Florence_17BoundaryCondition_18
 int __pyx_module_is_main_Florence__BoundaryCondition__CurvilinearMeshing__PostMesh__PostMeshPy = 0;
 
 /* Implementation of 'Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy' */
+static PyObject *__pyx_builtin_property;
+static PyObject *__pyx_builtin_MemoryError;
 static PyObject *__pyx_builtin_range;
 static PyObject *__pyx_builtin_ValueError;
 static PyObject *__pyx_builtin_RuntimeError;
-static PyObject *__pyx_builtin_MemoryError;
 static PyObject *__pyx_builtin_enumerate;
 static PyObject *__pyx_builtin_Ellipsis;
 static PyObject *__pyx_builtin_TypeError;
 static PyObject *__pyx_builtin_id;
 static PyObject *__pyx_builtin_IndexError;
 static char __pyx_k_B[] = "B";
-static char __pyx_k_C[] = "C";
 static char __pyx_k_H[] = "H";
 static char __pyx_k_I[] = "I";
 static char __pyx_k_L[] = "L";
@@ -1842,12 +1865,15 @@ static char __pyx_k_q[] = "q";
 static char __pyx_k_Zd[] = "Zd";
 static char __pyx_k_Zf[] = "Zf";
 static char __pyx_k_Zg[] = "Zg";
+static char __pyx_k__2[] = ".";
 static char __pyx_k_id[] = "id";
 static char __pyx_k_np[] = "np";
-static char __pyx_k_arr[] = "arr";
+static char __pyx_k_igs[] = "igs";
 static char __pyx_k_obj[] = "obj";
+static char __pyx_k_stp[] = "stp";
 static char __pyx_k_base[] = "base";
 static char __pyx_k_copy[] = "copy";
+static char __pyx_k_iges[] = "iges";
 static char __pyx_k_main[] = "__main__";
 static char __pyx_k_mode[] = "mode";
 static char __pyx_k_name[] = "name";
@@ -1857,53 +1883,77 @@ static char __pyx_k_size[] = "size";
 static char __pyx_k_step[] = "step";
 static char __pyx_k_stop[] = "stop";
 static char __pyx_k_test[] = "__test__";
+static char __pyx_k_warn[] = "warn";
 static char __pyx_k_ASCII[] = "ASCII";
 static char __pyx_k_array[] = "array";
 static char __pyx_k_class[] = "__class__";
 static char __pyx_k_dtype[] = "dtype";
+static char __pyx_k_edges[] = "edges";
 static char __pyx_k_error[] = "error";
+static char __pyx_k_faces[] = "faces";
 static char __pyx_k_flags[] = "flags";
 static char __pyx_k_int64[] = "int64";
+static char __pyx_k_lower[] = "lower";
 static char __pyx_k_numpy[] = "numpy";
 static char __pyx_k_order[] = "order";
 static char __pyx_k_range[] = "range";
 static char __pyx_k_shape[] = "shape";
+static char __pyx_k_split[] = "split";
 static char __pyx_k_start[] = "start";
+static char __pyx_k_upper[] = "upper";
 static char __pyx_k_zeros[] = "zeros";
-static char __pyx_k_caller[] = "caller";
 static char __pyx_k_encode[] = "encode";
 static char __pyx_k_format[] = "format";
 static char __pyx_k_import[] = "__import__";
 static char __pyx_k_name_2[] = "__name__";
+static char __pyx_k_points[] = "points";
+static char __pyx_k_radius[] = "radius";
 static char __pyx_k_struct[] = "struct";
 static char __pyx_k_unpack[] = "unpack";
 static char __pyx_k_FEbases[] = "FEbases";
-static char __pyx_k_OrthTol[] = "OrthTol";
 static char __pyx_k_float64[] = "float64";
 static char __pyx_k_fortran[] = "fortran";
 static char __pyx_k_memview[] = "memview";
 static char __pyx_k_reshape[] = "reshape";
+static char __pyx_k_spacing[] = "spacing";
 static char __pyx_k_Ellipsis[] = "Ellipsis";
+static char __pyx_k_NbCurves[] = "NbCurves";
+static char __pyx_k_NbPoints[] = "NbPoints";
+static char __pyx_k_elements[] = "elements";
 static char __pyx_k_itemsize[] = "itemsize";
+static char __pyx_k_orth_tol[] = "orth_tol";
+static char __pyx_k_property[] = "property";
+static char __pyx_k_supplied[] = "supplied";
+static char __pyx_k_warnings[] = "warnings";
 static char __pyx_k_TypeError[] = "TypeError";
 static char __pyx_k_dimension[] = "dimension";
 static char __pyx_k_enumerate[] = "enumerate";
 static char __pyx_k_IndexError[] = "IndexError";
+static char __pyx_k_NbSurfaces[] = "NbSurfaces";
 static char __pyx_k_ValueError[] = "ValueError";
+static char __pyx_k_arc_length[] = "arc_length";
+static char __pyx_k_orthogonal[] = "orthogonal";
+static char __pyx_k_projection[] = "projection";
 static char __pyx_k_pyx_vtable[] = "__pyx_vtable__";
+static char __pyx_k_scale_mesh[] = "scale_mesh";
 static char __pyx_k_MemoryError[] = "MemoryError";
+static char __pyx_k_ReadGeometry[] = "ReadGeometry";
 static char __pyx_k_RuntimeError[] = "RuntimeError";
+static char __pyx_k_minimisation[] = "minimisation";
 static char __pyx_k_pyx_getbuffer[] = "__pyx_getbuffer";
 static char __pyx_k_already_mapped[] = "already_mapped";
 static char __pyx_k_allocate_buffer[] = "allocate_buffer";
 static char __pyx_k_dtype_is_object[] = "dtype_is_object";
+static char __pyx_k_projection_type[] = "projection_type";
 static char __pyx_k_py_element_type[] = "py_element_type";
 static char __pyx_k_project_on_curves[] = "project_on_curves";
 static char __pyx_k_modify_linear_mesh[] = "modify_linear_mesh";
 static char __pyx_k_strided_and_direct[] = "<strided and direct>";
+static char __pyx_k_face_to_surface_map[] = "face_to_surface_map";
 static char __pyx_k_strided_and_indirect[] = "<strided and indirect>";
 static char __pyx_k_contiguous_and_direct[] = "<contiguous and direct>";
 static char __pyx_k_MemoryView_of_r_object[] = "<MemoryView of %r object>";
+static char __pyx_k_repair_dual_projection[] = "repair_dual_projection";
 static char __pyx_k_MemoryView_of_r_at_0x_x[] = "<MemoryView of %r at 0x%x>";
 static char __pyx_k_contiguous_and_indirect[] = "<contiguous and indirect>";
 static char __pyx_k_Cannot_index_with_type_s[] = "Cannot index with type '%s'";
@@ -1915,31 +1965,40 @@ static char __pyx_k_Step_may_not_be_zero_axis_d[] = "Step may not be zero (axis 
 static char __pyx_k_itemsize_0_for_cython_array[] = "itemsize <= 0 for cython.array";
 static char __pyx_k_ndarray_is_not_C_contiguous[] = "ndarray is not C contiguous";
 static char __pyx_k_unable_to_allocate_array_data[] = "unable to allocate array data.";
+static char __pyx_k_curve_identification_algorithm[] = "curve_identification_algorithm";
 static char __pyx_k_strided_and_direct_or_indirect[] = "<strided and direct or indirect>";
+static char __pyx_k_Could_not_create_an_instance_of[] = "Could not create an instance of PostMesh";
+static char __pyx_k_internal_surface_identification[] = "internal_surface_identification_algorithm";
 static char __pyx_k_unknown_dtype_code_in_numpy_pxd[] = "unknown dtype code in numpy.pxd (%d)";
+static char __pyx_k_A_mapping_between_mesh_faces_and[] = "A mapping between mesh faces and geometrical surfaces was not supplied";
 static char __pyx_k_All_dimensions_preceding_dimensi[] = "All dimensions preceding dimension %d must be indexed and not sliced";
 static char __pyx_k_Buffer_view_does_not_expose_stri[] = "Buffer view does not expose strides";
 static char __pyx_k_Can_only_create_a_buffer_that_is[] = "Can only create a buffer that is contiguous in memory.";
 static char __pyx_k_Cannot_transpose_memoryview_with[] = "Cannot transpose memoryview with indirect dimensions";
 static char __pyx_k_Empty_shape_tuple_for_cython_arr[] = "Empty shape tuple for cython.array";
+static char __pyx_k_Finite_element_bases_functions_w[] = "Finite element bases functions were not supplied for arc length based projection";
 static char __pyx_k_Format_string_allocated_too_shor[] = "Format string allocated too short, see comment in numpy.pxd";
 static char __pyx_k_Indirect_dimensions_not_supporte[] = "Indirect dimensions not supported";
 static char __pyx_k_Invalid_mode_expected_c_or_fortr[] = "Invalid mode, expected 'c' or 'fortran', got %s";
 static char __pyx_k_Non_native_byte_order_not_suppor[] = "Non-native byte order not supported";
+static char __pyx_k_Only_projection_algorithm_is_ava[] = "Only projection algorithm is available for curve identification";
 static char __pyx_k_Out_of_bounds_on_buffer_access_a[] = "Out of bounds on buffer access (axis %d)";
 static char __pyx_k_Unable_to_convert_item_to_object[] = "Unable to convert item to object";
 static char __pyx_k_got_differing_extents_in_dimensi[] = "got differing extents in dimension %d (got %d and %d)";
 static char __pyx_k_ndarray_is_not_Fortran_contiguou[] = "ndarray is not Fortran contiguous";
+static char __pyx_k_surface_identification_algorithm[] = "surface_identification_algorithm";
 static char __pyx_k_unable_to_allocate_shape_and_str[] = "unable to allocate shape and strides.";
 static char __pyx_k_Format_string_allocated_too_shor_2[] = "Format string allocated too short.";
 static PyObject *__pyx_n_s_ASCII;
+static PyObject *__pyx_kp_s_A_mapping_between_mesh_faces_and;
 static PyObject *__pyx_kp_s_Buffer_view_does_not_expose_stri;
-static PyObject *__pyx_n_s_C;
 static PyObject *__pyx_kp_s_Can_only_create_a_buffer_that_is;
 static PyObject *__pyx_kp_s_Cannot_index_with_type_s;
+static PyObject *__pyx_kp_s_Could_not_create_an_instance_of;
 static PyObject *__pyx_n_s_Ellipsis;
 static PyObject *__pyx_kp_s_Empty_shape_tuple_for_cython_arr;
 static PyObject *__pyx_n_s_FEbases;
+static PyObject *__pyx_kp_s_Finite_element_bases_functions_w;
 static PyObject *__pyx_kp_u_Format_string_allocated_too_shor;
 static PyObject *__pyx_kp_u_Format_string_allocated_too_shor_2;
 static PyObject *__pyx_n_s_IndexError;
@@ -1949,33 +2008,42 @@ static PyObject *__pyx_kp_s_Invalid_shape_in_axis_d_d;
 static PyObject *__pyx_n_s_MemoryError;
 static PyObject *__pyx_kp_s_MemoryView_of_r_at_0x_x;
 static PyObject *__pyx_kp_s_MemoryView_of_r_object;
+static PyObject *__pyx_n_s_NbCurves;
+static PyObject *__pyx_n_s_NbPoints;
+static PyObject *__pyx_n_s_NbSurfaces;
 static PyObject *__pyx_kp_u_Non_native_byte_order_not_suppor;
 static PyObject *__pyx_n_b_O;
-static PyObject *__pyx_n_s_OrthTol;
+static PyObject *__pyx_kp_s_Only_projection_algorithm_is_ava;
 static PyObject *__pyx_kp_s_Out_of_bounds_on_buffer_access_a;
+static PyObject *__pyx_n_s_ReadGeometry;
 static PyObject *__pyx_n_s_RuntimeError;
 static PyObject *__pyx_n_s_T;
 static PyObject *__pyx_n_s_TypeError;
 static PyObject *__pyx_kp_s_Unable_to_convert_item_to_object;
 static PyObject *__pyx_n_s_ValueError;
+static PyObject *__pyx_kp_s__2;
 static PyObject *__pyx_n_s_allocate_buffer;
 static PyObject *__pyx_n_s_already_mapped;
-static PyObject *__pyx_n_s_arr;
+static PyObject *__pyx_n_s_arc_length;
 static PyObject *__pyx_n_s_array;
 static PyObject *__pyx_n_s_base;
 static PyObject *__pyx_n_s_c;
 static PyObject *__pyx_n_u_c;
-static PyObject *__pyx_n_s_caller;
 static PyObject *__pyx_n_s_class;
 static PyObject *__pyx_kp_s_contiguous_and_direct;
 static PyObject *__pyx_kp_s_contiguous_and_indirect;
 static PyObject *__pyx_n_s_copy;
+static PyObject *__pyx_n_s_curve_identification_algorithm;
 static PyObject *__pyx_n_s_dimension;
 static PyObject *__pyx_n_s_dtype;
 static PyObject *__pyx_n_s_dtype_is_object;
+static PyObject *__pyx_n_s_edges;
+static PyObject *__pyx_n_s_elements;
 static PyObject *__pyx_n_s_encode;
 static PyObject *__pyx_n_s_enumerate;
 static PyObject *__pyx_n_s_error;
+static PyObject *__pyx_n_s_face_to_surface_map;
+static PyObject *__pyx_n_s_faces;
 static PyObject *__pyx_n_s_flags;
 static PyObject *__pyx_n_s_float64;
 static PyObject *__pyx_n_s_format;
@@ -1983,12 +2051,17 @@ static PyObject *__pyx_n_s_fortran;
 static PyObject *__pyx_n_u_fortran;
 static PyObject *__pyx_kp_s_got_differing_extents_in_dimensi;
 static PyObject *__pyx_n_s_id;
+static PyObject *__pyx_n_s_iges;
+static PyObject *__pyx_n_s_igs;
 static PyObject *__pyx_n_s_import;
 static PyObject *__pyx_n_s_int64;
+static PyObject *__pyx_n_s_internal_surface_identification;
 static PyObject *__pyx_n_s_itemsize;
 static PyObject *__pyx_kp_s_itemsize_0_for_cython_array;
+static PyObject *__pyx_n_s_lower;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_memview;
+static PyObject *__pyx_n_s_minimisation;
 static PyObject *__pyx_n_s_mode;
 static PyObject *__pyx_n_s_modify_linear_mesh;
 static PyObject *__pyx_n_s_name;
@@ -2000,98 +2073,103 @@ static PyObject *__pyx_n_s_np;
 static PyObject *__pyx_n_s_numpy;
 static PyObject *__pyx_n_s_obj;
 static PyObject *__pyx_n_s_order;
+static PyObject *__pyx_n_s_orth_tol;
+static PyObject *__pyx_n_s_orthogonal;
 static PyObject *__pyx_n_s_pack;
+static PyObject *__pyx_n_s_points;
 static PyObject *__pyx_n_s_project_on_curves;
+static PyObject *__pyx_n_s_projection;
+static PyObject *__pyx_n_s_projection_type;
+static PyObject *__pyx_n_s_property;
 static PyObject *__pyx_n_s_py_element_type;
 static PyObject *__pyx_n_s_pyx_getbuffer;
 static PyObject *__pyx_n_s_pyx_vtable;
+static PyObject *__pyx_n_s_radius;
 static PyObject *__pyx_n_s_range;
+static PyObject *__pyx_n_s_repair_dual_projection;
 static PyObject *__pyx_n_s_reshape;
+static PyObject *__pyx_n_s_scale_mesh;
 static PyObject *__pyx_n_s_shape;
 static PyObject *__pyx_n_s_size;
+static PyObject *__pyx_n_s_spacing;
+static PyObject *__pyx_n_s_split;
 static PyObject *__pyx_n_s_start;
 static PyObject *__pyx_n_s_step;
 static PyObject *__pyx_n_s_stop;
+static PyObject *__pyx_n_s_stp;
 static PyObject *__pyx_kp_s_strided_and_direct;
 static PyObject *__pyx_kp_s_strided_and_direct_or_indirect;
 static PyObject *__pyx_kp_s_strided_and_indirect;
 static PyObject *__pyx_n_s_struct;
+static PyObject *__pyx_n_s_supplied;
+static PyObject *__pyx_n_s_surface_identification_algorithm;
 static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_kp_s_unable_to_allocate_array_data;
 static PyObject *__pyx_kp_s_unable_to_allocate_shape_and_str;
 static PyObject *__pyx_kp_u_unknown_dtype_code_in_numpy_pxd;
 static PyObject *__pyx_n_s_unpack;
+static PyObject *__pyx_n_s_upper;
+static PyObject *__pyx_n_s_warn;
+static PyObject *__pyx_n_s_warnings;
 static PyObject *__pyx_n_s_zeros;
+static int __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy___cinit__(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, PyObject *__pyx_v_py_element_type, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger __pyx_v_dimension); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_2Init(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, PyObject *__pyx_v_py_element_type, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger __pyx_v_dimension); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_4SetScale(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_scale); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_6SetCondition(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_radius); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_8SetProjectionPrecision(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_precision); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_10SetProjectionCriteria(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_criteria); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_12ComputeProjectionCriteria(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_14SetMeshElements(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_elements); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_16SetMeshPoints(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_points); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_18SetMeshEdges(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_edges); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_20SetMeshFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_faces); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_22ScaleMesh(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_24GetMeshElementType(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_26SetNodalSpacing(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_spacing); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_28SetMesh(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_elements, __Pyx_memviewslice __pyx_v_points, __Pyx_memviewslice __pyx_v_edges, __Pyx_memviewslice __pyx_v_faces, __Pyx_memviewslice __pyx_v_spacing, PyObject *__pyx_v_scale_mesh); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_30ReadIGES(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, PyObject *__pyx_v_filename); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_32ReadSTEP(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, PyObject *__pyx_v_filename); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_34ReadGeometry(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, PyObject *__pyx_v_filename); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_36GetGeomVertices(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_38GetGeomEdges(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_40GetGeomFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_42NbPoints(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_44NbCurves(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_46NbSurfaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_48SetGeometry(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, PyObject *__pyx_v_filename); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_50GetDirichletData(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self); /* proto */
+static void __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_52__dealloc__(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self); /* proto */
 static int __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy___cinit__(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, PyObject *__pyx_v_py_element_type, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger __pyx_v_dimension); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_2Init(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_4SetScale(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_scale); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_6SetCondition(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_condition); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_8SetProjectionPrecision(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_precision); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_10ComputeProjectionCriteria(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_12SetProjectionCriteria(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_criteria); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_14SetMeshElements(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_elements); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_16SetMeshPoints(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_points); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_18SetMeshEdges(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_edges); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_20SetMeshFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_faces); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_22ScaleMesh(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_24GetMeshElementType(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_26SetNodalSpacing(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_fekete); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_28ReadIGES(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, PyObject *__pyx_v_filename); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_30GetGeomVertices(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_32GetGeomEdges(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_34GetGeomFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_36NbPoints(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_38NbCurves(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_40DiscretiseCurves(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_npoints); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_42GetCurvesParameters(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_44GetCurvesLengths(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_46GetGeomPointsOnCorrespondingEdges(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_48IdentifyCurvesContainingEdges(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_50ProjectMeshOnCurve(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_52RepairDualProjectedParameters(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_54MeshPointInversionCurve(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_56MeshPointInversionCurveArcLength(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_58GetBoundaryPointsOrder(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_60ReturnModifiedMeshPoints(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_points); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_62GetDirichletData(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
-static void __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_64__dealloc__(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_2DiscretiseCurves(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_npoints); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_4GetCurvesParameters(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_6GetCurvesLengths(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_8GetBoundaryPointsOrder(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_10GetGeomPointsOnCorrespondingEdges(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_12IdentifyCurvesContainingEdges(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_14ProjectMeshOnCurve(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_16RepairDualProjectedParameters(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_18MeshPointInversionCurve(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_20MeshPointInversionCurveArcLength(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_22PerformPointProjectionInversionCurve(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, PyObject *__pyx_v_curve_identification_algorithm, PyObject *__pyx_v_projection_type); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_24ReturnModifiedMeshPoints(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_points); /* proto */
+static void __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_26__dealloc__(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self); /* proto */
 static int __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy___cinit__(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, PyObject *__pyx_v_py_element_type, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger __pyx_v_dimension); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_2Init(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_4SetScale(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_scale); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_6SetCondition(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_condition); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_8SetProjectionPrecision(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_precision); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_10ComputeProjectionCriteria(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_12SetProjectionCriteria(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_criteria); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_14SetMeshElements(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_elements); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_16SetMeshPoints(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_points); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_18SetMeshEdges(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_edges); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_20SetMeshFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_faces); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_22ScaleMesh(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_24GetMeshElementType(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_26SetNodalSpacing(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_fekete); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_28ReadIGES(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, PyObject *__pyx_v_filename); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_30GetGeomVertices(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_32GetGeomEdges(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_34GetGeomFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_36NbPoints(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_38NbCurves(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_40NbSurfaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_42GetSurfacesParameters(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_44GetGeomPointsOnCorrespondingFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_46IdentifySurfacesContainingFacesByPureProjection(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_48IdentifySurfacesContainingFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_50IdentifyRemainingSurfacesByProjection(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_52IdentifySurfacesIntersections(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_54SupplySurfacesContainingFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_arr, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_already_mapped, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_caller); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_56ProjectMeshOnSurface(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_58RepairDualProjectedParameters(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_60MeshPointInversionSurface(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_project_on_curves, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_modify_linear_mesh); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_62MeshPointInversionSurfaceArcLength(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_project_on_curves, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_OrthTol, __Pyx_memviewslice __pyx_v_FEbases); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_64ReturnModifiedMeshPoints(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_points); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_66GetMeshFacesOnPlanarSurfaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_68GetDirichletFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_70GetDirichletData(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
-static void __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_72__dealloc__(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_2GetSurfacesParameters(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_4GetGeomPointsOnCorrespondingFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_6IdentifySurfacesContainingFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_8IdentifyRemainingSurfacesByProjection(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_10IdentifySurfacesContainingFacesByPureProjection(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_12IdentifySurfacesIntersections(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_14SupplySurfacesContainingFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_face_to_surface_map, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_already_mapped, PyObject *__pyx_v_internal_surface_identification_algorithm); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_16ProjectMeshOnSurface(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_18RepairDualProjectedParameters(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_20MeshPointInversionSurface(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_project_on_curves, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_modify_linear_mesh); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_22MeshPointInversionSurfaceArcLength(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_project_on_curves, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_orth_tol, __Pyx_memviewslice __pyx_v_FEbases); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_24PerformPointProjectionInversionSurface(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, PyObject *__pyx_v_surface_identification_algorithm, PyObject *__pyx_v_projection_type, __Pyx_memviewslice __pyx_v_face_to_surface_map, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_already_mapped, PyObject *__pyx_v_internal_surface_identification_algorithm, PyObject *__pyx_v_repair_dual_projection, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_project_on_curves, CYTHON_UNUSED __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_modify_linear_mesh, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_orth_tol, __Pyx_memviewslice __pyx_v_FEbases); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_26ReturnModifiedMeshPoints(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_points); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_28GetMeshFacesOnPlanarSurfaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_30GetDirichletFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
+static void __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_32__dealloc__(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self); /* proto */
 static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
@@ -2126,6 +2204,7 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_20
 static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_22copy_fortran(struct __pyx_memoryview_obj *__pyx_v_self); /* proto */
 static void __pyx_memoryviewslice___pyx_pf_15View_dot_MemoryView_16_memoryviewslice___dealloc__(struct __pyx_memoryviewslice_obj *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_15View_dot_MemoryView_16_memoryviewslice_4base___get__(struct __pyx_memoryviewslice_obj *__pyx_v_self); /* proto */
+static PyObject *__pyx_tp_new_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_array(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
@@ -2136,37 +2215,2854 @@ static PyObject *__pyx_int_0;
 static PyObject *__pyx_int_1;
 static PyObject *__pyx_int_3;
 static PyObject *__pyx_int_neg_1;
+static __Pyx_memviewslice __pyx_k__5;
+static __Pyx_memviewslice __pyx_k__6;
 static PyObject *__pyx_tuple_;
-static PyObject *__pyx_tuple__2;
 static PyObject *__pyx_tuple__3;
 static PyObject *__pyx_tuple__4;
-static PyObject *__pyx_tuple__5;
-static PyObject *__pyx_tuple__6;
 static PyObject *__pyx_tuple__7;
 static PyObject *__pyx_tuple__8;
 static PyObject *__pyx_tuple__9;
-static PyObject *__pyx_slice__16;
-static PyObject *__pyx_slice__17;
-static PyObject *__pyx_slice__18;
+static PyObject *__pyx_slice__24;
+static PyObject *__pyx_slice__25;
+static PyObject *__pyx_slice__26;
 static PyObject *__pyx_tuple__10;
 static PyObject *__pyx_tuple__11;
 static PyObject *__pyx_tuple__12;
 static PyObject *__pyx_tuple__13;
 static PyObject *__pyx_tuple__14;
 static PyObject *__pyx_tuple__15;
+static PyObject *__pyx_tuple__16;
+static PyObject *__pyx_tuple__17;
+static PyObject *__pyx_tuple__18;
 static PyObject *__pyx_tuple__19;
 static PyObject *__pyx_tuple__20;
 static PyObject *__pyx_tuple__21;
 static PyObject *__pyx_tuple__22;
 static PyObject *__pyx_tuple__23;
-static PyObject *__pyx_tuple__24;
+static PyObject *__pyx_tuple__27;
+static PyObject *__pyx_tuple__28;
+static PyObject *__pyx_tuple__29;
+static PyObject *__pyx_tuple__30;
+static PyObject *__pyx_tuple__31;
+static PyObject *__pyx_tuple__32;
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":23
- *     cdef PostMeshCurve *thisptr
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":30
+ *     cdef PostMeshBase *baseptr
  * 
  *     def __cinit__(self, bytes py_element_type, UInteger dimension=2):             # <<<<<<<<<<<<<<
+ * 
+ *         self.ndim = dimension
+ */
+
+/* Python wrapper */
+static int __pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static int __pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  PyObject *__pyx_v_py_element_type = 0;
+  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger __pyx_v_dimension;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__cinit__ (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_py_element_type,&__pyx_n_s_dimension,0};
+    PyObject* values[2] = {0,0};
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_py_element_type)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+        case  1:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dimension);
+          if (value) { values[1] = value; kw_args--; }
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__cinit__") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      }
+    } else {
+      switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+    }
+    __pyx_v_py_element_type = ((PyObject*)values[0]);
+    if (values[1]) {
+      __pyx_v_dimension = __Pyx_PyInt_As_unsigned_long(values[1]); if (unlikely((__pyx_v_dimension == (unsigned long)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    } else {
+      __pyx_v_dimension = ((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger)2);
+    }
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("__cinit__", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return -1;
+  __pyx_L4_argument_unpacking_done:;
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_py_element_type), (&PyBytes_Type), 1, "py_element_type", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy___cinit__(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self), __pyx_v_py_element_type, __pyx_v_dimension);
+
+  /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __pyx_r = -1;
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static int __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy___cinit__(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, PyObject *__pyx_v_py_element_type, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger __pyx_v_dimension) {
+  std::string __pyx_v_cpp_element_type;
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  std::string __pyx_t_1;
+  PostMeshBase *__pyx_t_2;
+  int __pyx_t_3;
+  PyObject *__pyx_t_4 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__cinit__", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":32
+ *     def __cinit__(self, bytes py_element_type, UInteger dimension=2):
+ * 
+ *         self.ndim = dimension             # <<<<<<<<<<<<<<
  *         # CONVERT TO CPP STRING EXPLICITLY
  *         cdef string cpp_element_type = py_element_type
+ */
+  __pyx_v_self->ndim = __pyx_v_dimension;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":34
+ *         self.ndim = dimension
+ *         # CONVERT TO CPP STRING EXPLICITLY
+ *         cdef string cpp_element_type = py_element_type             # <<<<<<<<<<<<<<
+ *         # CREATE A NEW CPP OBJECT BY CALLING ITS CONSTRUCTOR
+ *         self.baseptr = new PostMeshBase(cpp_element_type,dimension)
+ */
+  __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_v_py_element_type); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 34; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_v_cpp_element_type = __pyx_t_1;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":36
+ *         cdef string cpp_element_type = py_element_type
+ *         # CREATE A NEW CPP OBJECT BY CALLING ITS CONSTRUCTOR
+ *         self.baseptr = new PostMeshBase(cpp_element_type,dimension)             # <<<<<<<<<<<<<<
+ *         # CHECK IF THE OBJECT WAS CREATED
+ *         if self.baseptr is NULL:
+ */
+  try {
+    __pyx_t_2 = new PostMeshBase(__pyx_v_cpp_element_type, __pyx_v_dimension);
+  } catch(...) {
+    __Pyx_CppExn2PyErr();
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 36; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
+  __pyx_v_self->baseptr = __pyx_t_2;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":38
+ *         self.baseptr = new PostMeshBase(cpp_element_type,dimension)
+ *         # CHECK IF THE OBJECT WAS CREATED
+ *         if self.baseptr is NULL:             # <<<<<<<<<<<<<<
+ *             raise MemoryError("Could not create an instance of PostMesh")
+ * 
+ */
+  __pyx_t_3 = ((__pyx_v_self->baseptr == NULL) != 0);
+  if (__pyx_t_3) {
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":39
+ *         # CHECK IF THE OBJECT WAS CREATED
+ *         if self.baseptr is NULL:
+ *             raise MemoryError("Could not create an instance of PostMesh")             # <<<<<<<<<<<<<<
+ * 
+ *     def Init(self, bytes py_element_type, UInteger dimension=2):
+ */
+    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_MemoryError, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 39; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_4);
+    __Pyx_Raise(__pyx_t_4, 0, 0, 0);
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 39; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":38
+ *         self.baseptr = new PostMeshBase(cpp_element_type,dimension)
+ *         # CHECK IF THE OBJECT WAS CREATED
+ *         if self.baseptr is NULL:             # <<<<<<<<<<<<<<
+ *             raise MemoryError("Could not create an instance of PostMesh")
+ * 
+ */
+  }
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":30
+ *     cdef PostMeshBase *baseptr
+ * 
+ *     def __cinit__(self, bytes py_element_type, UInteger dimension=2):             # <<<<<<<<<<<<<<
+ * 
+ *         self.ndim = dimension
+ */
+
+  /* function exit code */
+  __pyx_r = 0;
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = -1;
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":41
+ *             raise MemoryError("Could not create an instance of PostMesh")
+ * 
+ *     def Init(self, bytes py_element_type, UInteger dimension=2):             # <<<<<<<<<<<<<<
+ *         # CONVERT TO CPP STRING EXPLICITLY
+ *         cdef string cpp_element_type = py_element_type
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_3Init(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_3Init(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  PyObject *__pyx_v_py_element_type = 0;
+  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger __pyx_v_dimension;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("Init (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_py_element_type,&__pyx_n_s_dimension,0};
+    PyObject* values[2] = {0,0};
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_py_element_type)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+        case  1:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dimension);
+          if (value) { values[1] = value; kw_args--; }
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "Init") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      }
+    } else {
+      switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+    }
+    __pyx_v_py_element_type = ((PyObject*)values[0]);
+    if (values[1]) {
+      __pyx_v_dimension = __Pyx_PyInt_As_unsigned_long(values[1]); if (unlikely((__pyx_v_dimension == (unsigned long)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    } else {
+      __pyx_v_dimension = ((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger)2);
+    }
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("Init", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.Init", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_py_element_type), (&PyBytes_Type), 1, "py_element_type", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_2Init(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self), __pyx_v_py_element_type, __pyx_v_dimension);
+
+  /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_2Init(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, PyObject *__pyx_v_py_element_type, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger __pyx_v_dimension) {
+  std::string __pyx_v_cpp_element_type;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  std::string __pyx_t_1;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("Init", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":43
+ *     def Init(self, bytes py_element_type, UInteger dimension=2):
+ *         # CONVERT TO CPP STRING EXPLICITLY
+ *         cdef string cpp_element_type = py_element_type             # <<<<<<<<<<<<<<
+ *         self.baseptr.Init(cpp_element_type, dimension)
+ * 
+ */
+  __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_v_py_element_type); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 43; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_v_cpp_element_type = __pyx_t_1;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":44
+ *         # CONVERT TO CPP STRING EXPLICITLY
+ *         cdef string cpp_element_type = py_element_type
+ *         self.baseptr.Init(cpp_element_type, dimension)             # <<<<<<<<<<<<<<
+ * 
+ *     def SetScale(self,Real scale):
+ */
+  try {
+    __pyx_v_self->baseptr->Init(__pyx_v_cpp_element_type, __pyx_v_dimension);
+  } catch(...) {
+    __Pyx_CppExn2PyErr();
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 44; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":41
+ *             raise MemoryError("Could not create an instance of PostMesh")
+ * 
+ *     def Init(self, bytes py_element_type, UInteger dimension=2):             # <<<<<<<<<<<<<<
+ *         # CONVERT TO CPP STRING EXPLICITLY
+ *         cdef string cpp_element_type = py_element_type
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.Init", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":46
+ *         self.baseptr.Init(cpp_element_type, dimension)
+ * 
+ *     def SetScale(self,Real scale):             # <<<<<<<<<<<<<<
+ *         """Scales the mesh to match the scaling of CAD"""
+ *         self.baseptr.SetScale(scale)
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_5SetScale(PyObject *__pyx_v_self, PyObject *__pyx_arg_scale); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_4SetScale[] = "Scales the mesh to match the scaling of CAD";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_5SetScale(PyObject *__pyx_v_self, PyObject *__pyx_arg_scale) {
+  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_scale;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("SetScale (wrapper)", 0);
+  assert(__pyx_arg_scale); {
+    __pyx_v_scale = __pyx_PyFloat_AsDouble(__pyx_arg_scale); if (unlikely((__pyx_v_scale == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.SetScale", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_4SetScale(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self), ((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real)__pyx_v_scale));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_4SetScale(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_scale) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("SetScale", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":48
+ *     def SetScale(self,Real scale):
+ *         """Scales the mesh to match the scaling of CAD"""
+ *         self.baseptr.SetScale(scale)             # <<<<<<<<<<<<<<
+ * 
+ *     def SetCondition(self,Real radius=1.0e20):
+ */
+  __pyx_v_self->baseptr->SetScale(__pyx_v_scale);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":46
+ *         self.baseptr.Init(cpp_element_type, dimension)
+ * 
+ *     def SetScale(self,Real scale):             # <<<<<<<<<<<<<<
+ *         """Scales the mesh to match the scaling of CAD"""
+ *         self.baseptr.SetScale(scale)
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":50
+ *         self.baseptr.SetScale(scale)
+ * 
+ *     def SetCondition(self,Real radius=1.0e20):             # <<<<<<<<<<<<<<
+ *         """Set the condition for projection. This is useful in situations
+ *         when the far-field does not need projection. Everything in the mesh
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_7SetCondition(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_6SetCondition[] = "Set the condition for projection. This is useful in situations\n        when the far-field does not need projection. Everything in the mesh \n        within the 'radius' gets projected\n        ";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_7SetCondition(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_radius;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("SetCondition (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_radius,0};
+    PyObject* values[1] = {0};
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_radius);
+          if (value) { values[0] = value; kw_args--; }
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "SetCondition") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 50; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      }
+    } else {
+      switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+    }
+    if (values[0]) {
+      __pyx_v_radius = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_radius == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 50; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    } else {
+      __pyx_v_radius = ((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real)1.0e20);
+    }
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("SetCondition", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 50; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.SetCondition", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_6SetCondition(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self), __pyx_v_radius);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_6SetCondition(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_radius) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("SetCondition", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":55
+ *         within the 'radius' gets projected
+ *         """
+ *         self.baseptr.SetCondition(radius)             # <<<<<<<<<<<<<<
+ * 
+ *     def SetProjectionPrecision(self, Real precision):
+ */
+  __pyx_v_self->baseptr->SetCondition(__pyx_v_radius);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":50
+ *         self.baseptr.SetScale(scale)
+ * 
+ *     def SetCondition(self,Real radius=1.0e20):             # <<<<<<<<<<<<<<
+ *         """Set the condition for projection. This is useful in situations
+ *         when the far-field does not need projection. Everything in the mesh
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":57
+ *         self.baseptr.SetCondition(radius)
+ * 
+ *     def SetProjectionPrecision(self, Real precision):             # <<<<<<<<<<<<<<
+ *         """Set projection precision. A linear mesh can be inaccurate compared
+ *         to the actual CAD geometry. If the geometrical point and the mesh point
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_9SetProjectionPrecision(PyObject *__pyx_v_self, PyObject *__pyx_arg_precision); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_8SetProjectionPrecision[] = "Set projection precision. A linear mesh can be inaccurate compared\n        to the actual CAD geometry. If the geometrical point and the mesh point\n        are within the 'precision' they are treated to be the same point\n        ";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_9SetProjectionPrecision(PyObject *__pyx_v_self, PyObject *__pyx_arg_precision) {
+  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_precision;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("SetProjectionPrecision (wrapper)", 0);
+  assert(__pyx_arg_precision); {
+    __pyx_v_precision = __pyx_PyFloat_AsDouble(__pyx_arg_precision); if (unlikely((__pyx_v_precision == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.SetProjectionPrecision", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_8SetProjectionPrecision(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self), ((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real)__pyx_v_precision));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_8SetProjectionPrecision(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_precision) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("SetProjectionPrecision", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":62
+ *         are within the 'precision' they are treated to be the same point
+ *         """
+ *         self.baseptr.SetProjectionPrecision(precision)             # <<<<<<<<<<<<<<
+ * 
+ *     def SetProjectionCriteria(self, UInteger[:,::1] criteria):
+ */
+  __pyx_v_self->baseptr->SetProjectionPrecision(__pyx_v_precision);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":57
+ *         self.baseptr.SetCondition(radius)
+ * 
+ *     def SetProjectionPrecision(self, Real precision):             # <<<<<<<<<<<<<<
+ *         """Set projection precision. A linear mesh can be inaccurate compared
+ *         to the actual CAD geometry. If the geometrical point and the mesh point
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":64
+ *         self.baseptr.SetProjectionPrecision(precision)
+ * 
+ *     def SetProjectionCriteria(self, UInteger[:,::1] criteria):             # <<<<<<<<<<<<<<
+ *         """Set projection criteria for complex situations when specifying a radius
+ *         is not enough. 'criteria' is an array containing either 0s or 1s with a
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_11SetProjectionCriteria(PyObject *__pyx_v_self, PyObject *__pyx_arg_criteria); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_10SetProjectionCriteria[] = "Set projection criteria for complex situations when specifying a radius \n        is not enough. 'criteria' is an array containing either 0s or 1s with a \n        dimension of (nfaces/nedges x 1) where nfaces/nedges is number of boundary\n        edges/faces\n        ";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_11SetProjectionCriteria(PyObject *__pyx_v_self, PyObject *__pyx_arg_criteria) {
+  __Pyx_memviewslice __pyx_v_criteria = { 0, 0, { 0 }, { 0 }, { 0 } };
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("SetProjectionCriteria (wrapper)", 0);
+  assert(__pyx_arg_criteria); {
+    __pyx_v_criteria = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_criteria); if (unlikely(!__pyx_v_criteria.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 64; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.SetProjectionCriteria", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_10SetProjectionCriteria(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self), __pyx_v_criteria);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_10SetProjectionCriteria(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_criteria) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  Py_ssize_t __pyx_t_1;
+  Py_ssize_t __pyx_t_2;
+  __Pyx_RefNannySetupContext("SetProjectionCriteria", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":70
+ *         edges/faces
+ *         """
+ *         self.baseptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])             # <<<<<<<<<<<<<<
+ * 
+ *     def ComputeProjectionCriteria(self):
+ */
+  __pyx_t_1 = 0;
+  __pyx_t_2 = 0;
+  __pyx_v_self->baseptr->SetProjectionCriteria((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=0 */ (__pyx_v_criteria.data + __pyx_t_1 * __pyx_v_criteria.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_criteria.shape[0]), (__pyx_v_criteria.shape[1]));
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":64
+ *         self.baseptr.SetProjectionPrecision(precision)
+ * 
+ *     def SetProjectionCriteria(self, UInteger[:,::1] criteria):             # <<<<<<<<<<<<<<
+ *         """Set projection criteria for complex situations when specifying a radius
+ *         is not enough. 'criteria' is an array containing either 0s or 1s with a
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_criteria, 1);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":72
+ *         self.baseptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])
+ * 
+ *     def ComputeProjectionCriteria(self):             # <<<<<<<<<<<<<<
+ *         """Convenience function for computing projection criteria based on
+ *         radius specifed through SetCondition"""
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_13ComputeProjectionCriteria(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_12ComputeProjectionCriteria[] = "Convenience function for computing projection criteria based on\n        radius specifed through SetCondition";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_13ComputeProjectionCriteria(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("ComputeProjectionCriteria (wrapper)", 0);
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_12ComputeProjectionCriteria(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_12ComputeProjectionCriteria(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("ComputeProjectionCriteria", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":75
+ *         """Convenience function for computing projection criteria based on
+ *         radius specifed through SetCondition"""
+ *         self.baseptr.ComputeProjectionCriteria()             # <<<<<<<<<<<<<<
+ * 
+ *     def SetMeshElements(self,UInteger[:,::1] elements):
+ */
+  __pyx_v_self->baseptr->ComputeProjectionCriteria();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":72
+ *         self.baseptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])
+ * 
+ *     def ComputeProjectionCriteria(self):             # <<<<<<<<<<<<<<
+ *         """Convenience function for computing projection criteria based on
+ *         radius specifed through SetCondition"""
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":77
+ *         self.baseptr.ComputeProjectionCriteria()
+ * 
+ *     def SetMeshElements(self,UInteger[:,::1] elements):             # <<<<<<<<<<<<<<
+ *         """Set up elements of the linear mesh"""
+ *         self.baseptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_15SetMeshElements(PyObject *__pyx_v_self, PyObject *__pyx_arg_elements); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_14SetMeshElements[] = "Set up elements of the linear mesh";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_15SetMeshElements(PyObject *__pyx_v_self, PyObject *__pyx_arg_elements) {
+  __Pyx_memviewslice __pyx_v_elements = { 0, 0, { 0 }, { 0 }, { 0 } };
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("SetMeshElements (wrapper)", 0);
+  assert(__pyx_arg_elements); {
+    __pyx_v_elements = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_elements); if (unlikely(!__pyx_v_elements.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.SetMeshElements", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_14SetMeshElements(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self), __pyx_v_elements);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_14SetMeshElements(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_elements) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  Py_ssize_t __pyx_t_1;
+  Py_ssize_t __pyx_t_2;
+  __Pyx_RefNannySetupContext("SetMeshElements", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":79
+ *     def SetMeshElements(self,UInteger[:,::1] elements):
+ *         """Set up elements of the linear mesh"""
+ *         self.baseptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])             # <<<<<<<<<<<<<<
+ * 
+ *     def SetMeshPoints(self,Real[:,::1] points):
+ */
+  __pyx_t_1 = 0;
+  __pyx_t_2 = 0;
+  __pyx_v_self->baseptr->SetMeshElements((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=0 */ (__pyx_v_elements.data + __pyx_t_1 * __pyx_v_elements.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_elements.shape[0]), (__pyx_v_elements.shape[1]));
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":77
+ *         self.baseptr.ComputeProjectionCriteria()
+ * 
+ *     def SetMeshElements(self,UInteger[:,::1] elements):             # <<<<<<<<<<<<<<
+ *         """Set up elements of the linear mesh"""
+ *         self.baseptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_elements, 1);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":81
+ *         self.baseptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])
+ * 
+ *     def SetMeshPoints(self,Real[:,::1] points):             # <<<<<<<<<<<<<<
+ *         """Set up nodal coordinates of the linear mesh"""
+ *         self.baseptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_17SetMeshPoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_points); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_16SetMeshPoints[] = "Set up nodal coordinates of the linear mesh";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_17SetMeshPoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_points) {
+  __Pyx_memviewslice __pyx_v_points = { 0, 0, { 0 }, { 0 }, { 0 } };
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("SetMeshPoints (wrapper)", 0);
+  assert(__pyx_arg_points); {
+    __pyx_v_points = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_arg_points); if (unlikely(!__pyx_v_points.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 81; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.SetMeshPoints", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_16SetMeshPoints(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self), __pyx_v_points);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_16SetMeshPoints(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_points) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  Py_ssize_t __pyx_t_1;
+  Py_ssize_t __pyx_t_2;
+  __Pyx_RefNannySetupContext("SetMeshPoints", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":83
+ *     def SetMeshPoints(self,Real[:,::1] points):
+ *         """Set up nodal coordinates of the linear mesh"""
+ *         self.baseptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])             # <<<<<<<<<<<<<<
+ * 
+ *     def SetMeshEdges(self,UInteger[:,::1] edges):
+ */
+  __pyx_t_1 = 0;
+  __pyx_t_2 = 0;
+  __pyx_v_self->baseptr->SetMeshPoints((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=0 */ (__pyx_v_points.data + __pyx_t_1 * __pyx_v_points.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_points.shape[0]), (__pyx_v_points.shape[1]));
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":81
+ *         self.baseptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])
+ * 
+ *     def SetMeshPoints(self,Real[:,::1] points):             # <<<<<<<<<<<<<<
+ *         """Set up nodal coordinates of the linear mesh"""
+ *         self.baseptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_points, 1);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":85
+ *         self.baseptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])
+ * 
+ *     def SetMeshEdges(self,UInteger[:,::1] edges):             # <<<<<<<<<<<<<<
+ *         """Set up boundary edges of the linear mesh"""
+ *         self.baseptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_19SetMeshEdges(PyObject *__pyx_v_self, PyObject *__pyx_arg_edges); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_18SetMeshEdges[] = "Set up boundary edges of the linear mesh";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_19SetMeshEdges(PyObject *__pyx_v_self, PyObject *__pyx_arg_edges) {
+  __Pyx_memviewslice __pyx_v_edges = { 0, 0, { 0 }, { 0 }, { 0 } };
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("SetMeshEdges (wrapper)", 0);
+  assert(__pyx_arg_edges); {
+    __pyx_v_edges = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_edges); if (unlikely(!__pyx_v_edges.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 85; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.SetMeshEdges", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_18SetMeshEdges(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self), __pyx_v_edges);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_18SetMeshEdges(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_edges) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  Py_ssize_t __pyx_t_1;
+  Py_ssize_t __pyx_t_2;
+  __Pyx_RefNannySetupContext("SetMeshEdges", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":87
+ *     def SetMeshEdges(self,UInteger[:,::1] edges):
+ *         """Set up boundary edges of the linear mesh"""
+ *         self.baseptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])             # <<<<<<<<<<<<<<
+ * 
+ *     def SetMeshFaces(self,UInteger[:,::1] faces):
+ */
+  __pyx_t_1 = 0;
+  __pyx_t_2 = 0;
+  __pyx_v_self->baseptr->SetMeshEdges((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=0 */ (__pyx_v_edges.data + __pyx_t_1 * __pyx_v_edges.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_edges.shape[0]), (__pyx_v_edges.shape[1]));
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":85
+ *         self.baseptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])
+ * 
+ *     def SetMeshEdges(self,UInteger[:,::1] edges):             # <<<<<<<<<<<<<<
+ *         """Set up boundary edges of the linear mesh"""
+ *         self.baseptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_edges, 1);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":89
+ *         self.baseptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
+ * 
+ *     def SetMeshFaces(self,UInteger[:,::1] faces):             # <<<<<<<<<<<<<<
+ *         """Set up boundary faces of the linear mesh"""
+ *         self.baseptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_21SetMeshFaces(PyObject *__pyx_v_self, PyObject *__pyx_arg_faces); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_20SetMeshFaces[] = "Set up boundary faces of the linear mesh";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_21SetMeshFaces(PyObject *__pyx_v_self, PyObject *__pyx_arg_faces) {
+  __Pyx_memviewslice __pyx_v_faces = { 0, 0, { 0 }, { 0 }, { 0 } };
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("SetMeshFaces (wrapper)", 0);
+  assert(__pyx_arg_faces); {
+    __pyx_v_faces = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_faces); if (unlikely(!__pyx_v_faces.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 89; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.SetMeshFaces", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_20SetMeshFaces(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self), __pyx_v_faces);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_20SetMeshFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_faces) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  Py_ssize_t __pyx_t_1;
+  Py_ssize_t __pyx_t_2;
+  __Pyx_RefNannySetupContext("SetMeshFaces", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":91
+ *     def SetMeshFaces(self,UInteger[:,::1] faces):
+ *         """Set up boundary faces of the linear mesh"""
+ *         self.baseptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])             # <<<<<<<<<<<<<<
+ * 
+ *     def ScaleMesh(self):
+ */
+  __pyx_t_1 = 0;
+  __pyx_t_2 = 0;
+  __pyx_v_self->baseptr->SetMeshFaces((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=0 */ (__pyx_v_faces.data + __pyx_t_1 * __pyx_v_faces.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_faces.shape[0]), (__pyx_v_faces.shape[1]));
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":89
+ *         self.baseptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
+ * 
+ *     def SetMeshFaces(self,UInteger[:,::1] faces):             # <<<<<<<<<<<<<<
+ *         """Set up boundary faces of the linear mesh"""
+ *         self.baseptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_faces, 1);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":93
+ *         self.baseptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
+ * 
+ *     def ScaleMesh(self):             # <<<<<<<<<<<<<<
+ *         """Scale mesh to match the CAD geometry"""
+ *         self.baseptr.ScaleMesh()
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_23ScaleMesh(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_22ScaleMesh[] = "Scale mesh to match the CAD geometry";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_23ScaleMesh(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("ScaleMesh (wrapper)", 0);
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_22ScaleMesh(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_22ScaleMesh(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("ScaleMesh", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":95
+ *     def ScaleMesh(self):
+ *         """Scale mesh to match the CAD geometry"""
+ *         self.baseptr.ScaleMesh()             # <<<<<<<<<<<<<<
+ * 
+ *     def GetMeshElementType(self):
+ */
+  __pyx_v_self->baseptr->ScaleMesh();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":93
+ *         self.baseptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
+ * 
+ *     def ScaleMesh(self):             # <<<<<<<<<<<<<<
+ *         """Scale mesh to match the CAD geometry"""
+ *         self.baseptr.ScaleMesh()
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":97
+ *         self.baseptr.ScaleMesh()
+ * 
+ *     def GetMeshElementType(self):             # <<<<<<<<<<<<<<
+ *         cdef string cpp_element_type = self.baseptr.GetMeshElementType()
+ *         cdef bytes py_element_type = cpp_element_type
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_25GetMeshElementType(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_25GetMeshElementType(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("GetMeshElementType (wrapper)", 0);
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_24GetMeshElementType(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_24GetMeshElementType(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self) {
+  std::string __pyx_v_cpp_element_type;
+  PyObject *__pyx_v_py_element_type = 0;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("GetMeshElementType", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":98
+ * 
+ *     def GetMeshElementType(self):
+ *         cdef string cpp_element_type = self.baseptr.GetMeshElementType()             # <<<<<<<<<<<<<<
+ *         cdef bytes py_element_type = cpp_element_type
+ *         return py_element_type
+ */
+  __pyx_v_cpp_element_type = __pyx_v_self->baseptr->GetMeshElementType();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":99
+ *     def GetMeshElementType(self):
+ *         cdef string cpp_element_type = self.baseptr.GetMeshElementType()
+ *         cdef bytes py_element_type = cpp_element_type             # <<<<<<<<<<<<<<
+ *         return py_element_type
+ * 
+ */
+  __pyx_t_1 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_cpp_element_type); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 99; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_v_py_element_type = ((PyObject*)__pyx_t_1);
+  __pyx_t_1 = 0;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":100
+ *         cdef string cpp_element_type = self.baseptr.GetMeshElementType()
+ *         cdef bytes py_element_type = cpp_element_type
+ *         return py_element_type             # <<<<<<<<<<<<<<
+ * 
+ *     def SetNodalSpacing(self, Real[:,::1] spacing):
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __Pyx_INCREF(__pyx_v_py_element_type);
+  __pyx_r = __pyx_v_py_element_type;
+  goto __pyx_L0;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":97
+ *         self.baseptr.ScaleMesh()
+ * 
+ *     def GetMeshElementType(self):             # <<<<<<<<<<<<<<
+ *         cdef string cpp_element_type = self.baseptr.GetMeshElementType()
+ *         cdef bytes py_element_type = cpp_element_type
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.GetMeshElementType", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XDECREF(__pyx_v_py_element_type);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":102
+ *         return py_element_type
+ * 
+ *     def SetNodalSpacing(self, Real[:,::1] spacing):             # <<<<<<<<<<<<<<
+ *         """Set nodal spacing of high order points in the mesh.
+ *         spacing has to be given in the isoparametric domain of finite element,
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_27SetNodalSpacing(PyObject *__pyx_v_self, PyObject *__pyx_arg_spacing); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_26SetNodalSpacing[] = "Set nodal spacing of high order points in the mesh.\n        spacing has to be given in the isoparametric domain of finite element, \n        for instance equally-spaced, Gauss-Lobatto or Fekete point spacing\n        ";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_27SetNodalSpacing(PyObject *__pyx_v_self, PyObject *__pyx_arg_spacing) {
+  __Pyx_memviewslice __pyx_v_spacing = { 0, 0, { 0 }, { 0 }, { 0 } };
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("SetNodalSpacing (wrapper)", 0);
+  assert(__pyx_arg_spacing); {
+    __pyx_v_spacing = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_arg_spacing); if (unlikely(!__pyx_v_spacing.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 102; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.SetNodalSpacing", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_26SetNodalSpacing(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self), __pyx_v_spacing);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_26SetNodalSpacing(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_spacing) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  Py_ssize_t __pyx_t_1;
+  Py_ssize_t __pyx_t_2;
+  __Pyx_RefNannySetupContext("SetNodalSpacing", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":107
+ *         for instance equally-spaced, Gauss-Lobatto or Fekete point spacing
+ *         """
+ *         self.baseptr.SetNodalSpacing(&spacing[0,0],spacing.shape[0],spacing.shape[1])             # <<<<<<<<<<<<<<
+ * 
+ *     def SetMesh(self,UInteger[:,::1] elements, Real[:,::1] points,
+ */
+  __pyx_t_1 = 0;
+  __pyx_t_2 = 0;
+  __pyx_v_self->baseptr->SetNodalSpacing((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=0 */ (__pyx_v_spacing.data + __pyx_t_1 * __pyx_v_spacing.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_spacing.shape[0]), (__pyx_v_spacing.shape[1]));
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":102
+ *         return py_element_type
+ * 
+ *     def SetNodalSpacing(self, Real[:,::1] spacing):             # <<<<<<<<<<<<<<
+ *         """Set nodal spacing of high order points in the mesh.
+ *         spacing has to be given in the isoparametric domain of finite element,
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_spacing, 1);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":109
+ *         self.baseptr.SetNodalSpacing(&spacing[0,0],spacing.shape[0],spacing.shape[1])
+ * 
+ *     def SetMesh(self,UInteger[:,::1] elements, Real[:,::1] points,             # <<<<<<<<<<<<<<
+ *         UInteger[:,::1] edges, UInteger[:,::1] faces, Real[:,::1] spacing, scale_mesh=True):
+ *         """Convenience method for Python interface for setting up the linear mesh
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_29SetMesh(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_28SetMesh[] = "Convenience method for Python interface for setting up the linear mesh\n\n            input:\n                elements:               [ndarray] element connectivity of the linear mesh\n                points:                 [ndarray] nodal coordinates of the linear mesh\n                edges:                  [ndarray] boundary edges of the linear mesh\n                faces:                  [ndarray] boundary faces of the linear mesh\n                spacing:                [ndarray] nodal spacing of high order points \n                                        in the mesh. spacing has to be given in the \n                                        isoparametric domain of finite element, for \n                                        instance equally-spaced, Gauss-Lobatto or Fekete \n                                        point spacing\n                scale_mesh:             [bool] True/False, to scale or not to scale the\n                                        mesh based on CAD geometry\n                ";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_29SetMesh(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  __Pyx_memviewslice __pyx_v_elements = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_memviewslice __pyx_v_points = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_memviewslice __pyx_v_edges = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_memviewslice __pyx_v_faces = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_memviewslice __pyx_v_spacing = { 0, 0, { 0 }, { 0 }, { 0 } };
+  PyObject *__pyx_v_scale_mesh = 0;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("SetMesh (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_elements,&__pyx_n_s_points,&__pyx_n_s_edges,&__pyx_n_s_faces,&__pyx_n_s_spacing,&__pyx_n_s_scale_mesh,0};
+    PyObject* values[6] = {0,0,0,0,0,0};
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":110
+ * 
+ *     def SetMesh(self,UInteger[:,::1] elements, Real[:,::1] points,
+ *         UInteger[:,::1] edges, UInteger[:,::1] faces, Real[:,::1] spacing, scale_mesh=True):             # <<<<<<<<<<<<<<
+ *         """Convenience method for Python interface for setting up the linear mesh
+ * 
+ */
+    values[5] = ((PyObject *)Py_True);
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  6: values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
+        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+        case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+        case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_elements)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+        case  1:
+        if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_points)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("SetMesh", 0, 5, 6, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 109; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        }
+        case  2:
+        if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_edges)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("SetMesh", 0, 5, 6, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 109; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        }
+        case  3:
+        if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_faces)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("SetMesh", 0, 5, 6, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 109; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        }
+        case  4:
+        if (likely((values[4] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_spacing)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("SetMesh", 0, 5, 6, 4); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 109; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        }
+        case  5:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_scale_mesh);
+          if (value) { values[5] = value; kw_args--; }
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "SetMesh") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 109; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      }
+    } else {
+      switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case  6: values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
+        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+        values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+        values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+        values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+    }
+    __pyx_v_elements = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(values[0]); if (unlikely(!__pyx_v_elements.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 109; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_points = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(values[1]); if (unlikely(!__pyx_v_points.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 109; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_edges = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(values[2]); if (unlikely(!__pyx_v_edges.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 110; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_faces = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(values[3]); if (unlikely(!__pyx_v_faces.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 110; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_spacing = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(values[4]); if (unlikely(!__pyx_v_spacing.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 110; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_scale_mesh = values[5];
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("SetMesh", 0, 5, 6, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 109; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.SetMesh", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_28SetMesh(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self), __pyx_v_elements, __pyx_v_points, __pyx_v_edges, __pyx_v_faces, __pyx_v_spacing, __pyx_v_scale_mesh);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":109
+ *         self.baseptr.SetNodalSpacing(&spacing[0,0],spacing.shape[0],spacing.shape[1])
+ * 
+ *     def SetMesh(self,UInteger[:,::1] elements, Real[:,::1] points,             # <<<<<<<<<<<<<<
+ *         UInteger[:,::1] edges, UInteger[:,::1] faces, Real[:,::1] spacing, scale_mesh=True):
+ *         """Convenience method for Python interface for setting up the linear mesh
+ */
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_28SetMesh(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_elements, __Pyx_memviewslice __pyx_v_points, __Pyx_memviewslice __pyx_v_edges, __Pyx_memviewslice __pyx_v_faces, __Pyx_memviewslice __pyx_v_spacing, PyObject *__pyx_v_scale_mesh) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  Py_ssize_t __pyx_t_1;
+  Py_ssize_t __pyx_t_2;
+  Py_ssize_t __pyx_t_3;
+  Py_ssize_t __pyx_t_4;
+  Py_ssize_t __pyx_t_5;
+  Py_ssize_t __pyx_t_6;
+  Py_ssize_t __pyx_t_7;
+  Py_ssize_t __pyx_t_8;
+  int __pyx_t_9;
+  Py_ssize_t __pyx_t_10;
+  Py_ssize_t __pyx_t_11;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("SetMesh", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":127
+ *                 """
+ * 
+ *         self.baseptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])             # <<<<<<<<<<<<<<
+ *         self.baseptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])
+ *         self.baseptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
+ */
+  __pyx_t_1 = 0;
+  __pyx_t_2 = 0;
+  __pyx_v_self->baseptr->SetMeshElements((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=0 */ (__pyx_v_elements.data + __pyx_t_1 * __pyx_v_elements.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_elements.shape[0]), (__pyx_v_elements.shape[1]));
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":128
+ * 
+ *         self.baseptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])
+ *         self.baseptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])             # <<<<<<<<<<<<<<
+ *         self.baseptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
+ *         self.baseptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
+ */
+  __pyx_t_3 = 0;
+  __pyx_t_4 = 0;
+  __pyx_v_self->baseptr->SetMeshPoints((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=0 */ (__pyx_v_points.data + __pyx_t_3 * __pyx_v_points.strides[0]) )) + __pyx_t_4)) )))), (__pyx_v_points.shape[0]), (__pyx_v_points.shape[1]));
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":129
+ *         self.baseptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])
+ *         self.baseptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])
+ *         self.baseptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])             # <<<<<<<<<<<<<<
+ *         self.baseptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
+ *         if scale_mesh:
+ */
+  __pyx_t_5 = 0;
+  __pyx_t_6 = 0;
+  __pyx_v_self->baseptr->SetMeshEdges((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=0 */ (__pyx_v_edges.data + __pyx_t_5 * __pyx_v_edges.strides[0]) )) + __pyx_t_6)) )))), (__pyx_v_edges.shape[0]), (__pyx_v_edges.shape[1]));
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":130
+ *         self.baseptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])
+ *         self.baseptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
+ *         self.baseptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])             # <<<<<<<<<<<<<<
+ *         if scale_mesh:
+ *             self.baseptr.ScaleMesh()
+ */
+  __pyx_t_7 = 0;
+  __pyx_t_8 = 0;
+  __pyx_v_self->baseptr->SetMeshFaces((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=0 */ (__pyx_v_faces.data + __pyx_t_7 * __pyx_v_faces.strides[0]) )) + __pyx_t_8)) )))), (__pyx_v_faces.shape[0]), (__pyx_v_faces.shape[1]));
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":131
+ *         self.baseptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
+ *         self.baseptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
+ *         if scale_mesh:             # <<<<<<<<<<<<<<
+ *             self.baseptr.ScaleMesh()
+ *         self.baseptr.SetNodalSpacing(&spacing[0,0],spacing.shape[0],spacing.shape[1])
+ */
+  __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_v_scale_mesh); if (unlikely(__pyx_t_9 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 131; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (__pyx_t_9) {
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":132
+ *         self.baseptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
+ *         if scale_mesh:
+ *             self.baseptr.ScaleMesh()             # <<<<<<<<<<<<<<
+ *         self.baseptr.SetNodalSpacing(&spacing[0,0],spacing.shape[0],spacing.shape[1])
+ * 
+ */
+    __pyx_v_self->baseptr->ScaleMesh();
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":131
+ *         self.baseptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
+ *         self.baseptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
+ *         if scale_mesh:             # <<<<<<<<<<<<<<
+ *             self.baseptr.ScaleMesh()
+ *         self.baseptr.SetNodalSpacing(&spacing[0,0],spacing.shape[0],spacing.shape[1])
+ */
+  }
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":133
+ *         if scale_mesh:
+ *             self.baseptr.ScaleMesh()
+ *         self.baseptr.SetNodalSpacing(&spacing[0,0],spacing.shape[0],spacing.shape[1])             # <<<<<<<<<<<<<<
+ * 
+ *     def ReadIGES(self, bytes filename):
+ */
+  __pyx_t_10 = 0;
+  __pyx_t_11 = 0;
+  __pyx_v_self->baseptr->SetNodalSpacing((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=0 */ (__pyx_v_spacing.data + __pyx_t_10 * __pyx_v_spacing.strides[0]) )) + __pyx_t_11)) )))), (__pyx_v_spacing.shape[0]), (__pyx_v_spacing.shape[1]));
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":109
+ *         self.baseptr.SetNodalSpacing(&spacing[0,0],spacing.shape[0],spacing.shape[1])
+ * 
+ *     def SetMesh(self,UInteger[:,::1] elements, Real[:,::1] points,             # <<<<<<<<<<<<<<
+ *         UInteger[:,::1] edges, UInteger[:,::1] faces, Real[:,::1] spacing, scale_mesh=True):
+ *         """Convenience method for Python interface for setting up the linear mesh
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.SetMesh", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __PYX_XDEC_MEMVIEW(&__pyx_v_elements, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_points, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_edges, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_faces, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_spacing, 1);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":135
+ *         self.baseptr.SetNodalSpacing(&spacing[0,0],spacing.shape[0],spacing.shape[1])
+ * 
+ *     def ReadIGES(self, bytes filename):             # <<<<<<<<<<<<<<
+ *         """Read IGES files"""
+ *         self.baseptr.ReadIGES(<const char*>filename)
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_31ReadIGES(PyObject *__pyx_v_self, PyObject *__pyx_v_filename); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_30ReadIGES[] = "Read IGES files";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_31ReadIGES(PyObject *__pyx_v_self, PyObject *__pyx_v_filename) {
+  CYTHON_UNUSED int __pyx_lineno = 0;
+  CYTHON_UNUSED const char *__pyx_filename = NULL;
+  CYTHON_UNUSED int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("ReadIGES (wrapper)", 0);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_filename), (&PyBytes_Type), 1, "filename", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 135; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_30ReadIGES(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self), ((PyObject*)__pyx_v_filename));
+
+  /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_30ReadIGES(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, PyObject *__pyx_v_filename) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  char const *__pyx_t_1;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("ReadIGES", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":137
+ *     def ReadIGES(self, bytes filename):
+ *         """Read IGES files"""
+ *         self.baseptr.ReadIGES(<const char*>filename)             # <<<<<<<<<<<<<<
+ * 
+ *     def ReadSTEP(self, bytes filename):
+ */
+  __pyx_t_1 = __Pyx_PyObject_AsString(__pyx_v_filename); if (unlikely((!__pyx_t_1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 137; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_v_self->baseptr->ReadIGES(((char const *)__pyx_t_1));
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":135
+ *         self.baseptr.SetNodalSpacing(&spacing[0,0],spacing.shape[0],spacing.shape[1])
+ * 
+ *     def ReadIGES(self, bytes filename):             # <<<<<<<<<<<<<<
+ *         """Read IGES files"""
+ *         self.baseptr.ReadIGES(<const char*>filename)
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.ReadIGES", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":139
+ *         self.baseptr.ReadIGES(<const char*>filename)
+ * 
+ *     def ReadSTEP(self, bytes filename):             # <<<<<<<<<<<<<<
+ *         """Read STEP files"""
+ *         self.baseptr.ReadSTEP(<const char*>filename)
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_33ReadSTEP(PyObject *__pyx_v_self, PyObject *__pyx_v_filename); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_32ReadSTEP[] = "Read STEP files";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_33ReadSTEP(PyObject *__pyx_v_self, PyObject *__pyx_v_filename) {
+  CYTHON_UNUSED int __pyx_lineno = 0;
+  CYTHON_UNUSED const char *__pyx_filename = NULL;
+  CYTHON_UNUSED int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("ReadSTEP (wrapper)", 0);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_filename), (&PyBytes_Type), 1, "filename", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_32ReadSTEP(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self), ((PyObject*)__pyx_v_filename));
+
+  /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_32ReadSTEP(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, PyObject *__pyx_v_filename) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  char const *__pyx_t_1;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("ReadSTEP", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":141
+ *     def ReadSTEP(self, bytes filename):
+ *         """Read STEP files"""
+ *         self.baseptr.ReadSTEP(<const char*>filename)             # <<<<<<<<<<<<<<
+ * 
+ *     @wraparound(True)
+ */
+  __pyx_t_1 = __Pyx_PyObject_AsString(__pyx_v_filename); if (unlikely((!__pyx_t_1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_v_self->baseptr->ReadSTEP(((char const *)__pyx_t_1));
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":139
+ *         self.baseptr.ReadIGES(<const char*>filename)
+ * 
+ *     def ReadSTEP(self, bytes filename):             # <<<<<<<<<<<<<<
+ *         """Read STEP files"""
+ *         self.baseptr.ReadSTEP(<const char*>filename)
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.ReadSTEP", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":144
+ * 
+ *     @wraparound(True)
+ *     def ReadGeometry(self, bytes filename):             # <<<<<<<<<<<<<<
+ *         """Read geometry from IGES or STEP files"""
+ *         suffix = filename.split(".")[-1].upper().lower()
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_35ReadGeometry(PyObject *__pyx_v_self, PyObject *__pyx_v_filename); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_34ReadGeometry[] = "Read geometry from IGES or STEP files";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_35ReadGeometry(PyObject *__pyx_v_self, PyObject *__pyx_v_filename) {
+  CYTHON_UNUSED int __pyx_lineno = 0;
+  CYTHON_UNUSED const char *__pyx_filename = NULL;
+  CYTHON_UNUSED int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("ReadGeometry (wrapper)", 0);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_filename), (&PyBytes_Type), 1, "filename", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_34ReadGeometry(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self), ((PyObject*)__pyx_v_filename));
+
+  /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_34ReadGeometry(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, PyObject *__pyx_v_filename) {
+  PyObject *__pyx_v_suffix = NULL;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  int __pyx_t_5;
+  int __pyx_t_6;
+  char const *__pyx_t_7;
+  char const *__pyx_t_8;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("ReadGeometry", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":146
+ *     def ReadGeometry(self, bytes filename):
+ *         """Read geometry from IGES or STEP files"""
+ *         suffix = filename.split(".")[-1].upper().lower()             # <<<<<<<<<<<<<<
+ *         if suffix == "iges" or suffix == "igs":
+ *             self.baseptr.ReadIGES(<const char*>filename)
+ */
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_filename, __pyx_n_s_split); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_3 = __Pyx_GetItemInt(__pyx_t_4, -1L, long, 1, __Pyx_PyInt_From_long, 0, 1, 0); if (unlikely(__pyx_t_3 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_upper); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_3 = NULL;
+  if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_4))) {
+    __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_4);
+    if (likely(__pyx_t_3)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
+      __Pyx_INCREF(__pyx_t_3);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_4, function);
+    }
+  }
+  if (__pyx_t_3) {
+    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_3); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  } else {
+    __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_4); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_lower); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = NULL;
+  if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_4))) {
+    __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_4);
+    if (likely(__pyx_t_2)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
+      __Pyx_INCREF(__pyx_t_2);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_4, function);
+    }
+  }
+  if (__pyx_t_2) {
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  } else {
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_4); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_v_suffix = __pyx_t_1;
+  __pyx_t_1 = 0;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":147
+ *         """Read geometry from IGES or STEP files"""
+ *         suffix = filename.split(".")[-1].upper().lower()
+ *         if suffix == "iges" or suffix == "igs":             # <<<<<<<<<<<<<<
+ *             self.baseptr.ReadIGES(<const char*>filename)
+ *         if suffix == "step" or suffix == "stp":
+ */
+  __pyx_t_6 = (__Pyx_PyString_Equals(__pyx_v_suffix, __pyx_n_s_iges, Py_EQ)); if (unlikely(__pyx_t_6 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 147; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!__pyx_t_6) {
+  } else {
+    __pyx_t_5 = __pyx_t_6;
+    goto __pyx_L4_bool_binop_done;
+  }
+  __pyx_t_6 = (__Pyx_PyString_Equals(__pyx_v_suffix, __pyx_n_s_igs, Py_EQ)); if (unlikely(__pyx_t_6 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 147; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __pyx_t_6;
+  __pyx_L4_bool_binop_done:;
+  if (__pyx_t_5) {
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":148
+ *         suffix = filename.split(".")[-1].upper().lower()
+ *         if suffix == "iges" or suffix == "igs":
+ *             self.baseptr.ReadIGES(<const char*>filename)             # <<<<<<<<<<<<<<
+ *         if suffix == "step" or suffix == "stp":
+ *             self.baseptr.ReadSTEP(<const char*>filename)
+ */
+    __pyx_t_7 = __Pyx_PyObject_AsString(__pyx_v_filename); if (unlikely((!__pyx_t_7) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 148; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_v_self->baseptr->ReadIGES(((char const *)__pyx_t_7));
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":147
+ *         """Read geometry from IGES or STEP files"""
+ *         suffix = filename.split(".")[-1].upper().lower()
+ *         if suffix == "iges" or suffix == "igs":             # <<<<<<<<<<<<<<
+ *             self.baseptr.ReadIGES(<const char*>filename)
+ *         if suffix == "step" or suffix == "stp":
+ */
+  }
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":149
+ *         if suffix == "iges" or suffix == "igs":
+ *             self.baseptr.ReadIGES(<const char*>filename)
+ *         if suffix == "step" or suffix == "stp":             # <<<<<<<<<<<<<<
+ *             self.baseptr.ReadSTEP(<const char*>filename)
+ * 
+ */
+  __pyx_t_6 = (__Pyx_PyString_Equals(__pyx_v_suffix, __pyx_n_s_step, Py_EQ)); if (unlikely(__pyx_t_6 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 149; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!__pyx_t_6) {
+  } else {
+    __pyx_t_5 = __pyx_t_6;
+    goto __pyx_L7_bool_binop_done;
+  }
+  __pyx_t_6 = (__Pyx_PyString_Equals(__pyx_v_suffix, __pyx_n_s_stp, Py_EQ)); if (unlikely(__pyx_t_6 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 149; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __pyx_t_6;
+  __pyx_L7_bool_binop_done:;
+  if (__pyx_t_5) {
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":150
+ *             self.baseptr.ReadIGES(<const char*>filename)
+ *         if suffix == "step" or suffix == "stp":
+ *             self.baseptr.ReadSTEP(<const char*>filename)             # <<<<<<<<<<<<<<
+ * 
+ *     def GetGeomVertices(self):
+ */
+    __pyx_t_8 = __Pyx_PyObject_AsString(__pyx_v_filename); if (unlikely((!__pyx_t_8) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_v_self->baseptr->ReadSTEP(((char const *)__pyx_t_8));
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":149
+ *         if suffix == "iges" or suffix == "igs":
+ *             self.baseptr.ReadIGES(<const char*>filename)
+ *         if suffix == "step" or suffix == "stp":             # <<<<<<<<<<<<<<
+ *             self.baseptr.ReadSTEP(<const char*>filename)
+ * 
+ */
+  }
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":144
+ * 
+ *     @wraparound(True)
+ *     def ReadGeometry(self, bytes filename):             # <<<<<<<<<<<<<<
+ *         """Read geometry from IGES or STEP files"""
+ *         suffix = filename.split(".")[-1].upper().lower()
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.ReadGeometry", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XDECREF(__pyx_v_suffix);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":152
+ *             self.baseptr.ReadSTEP(<const char*>filename)
+ * 
+ *     def GetGeomVertices(self):             # <<<<<<<<<<<<<<
+ *         self.baseptr.GetGeomVertices()
+ *         cdef vector[Real] geom_points = self.baseptr.ObtainGeomVertices()
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_37GetGeomVertices(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_37GetGeomVertices(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("GetGeomVertices (wrapper)", 0);
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_36GetGeomVertices(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_36GetGeomVertices(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self) {
+  std::vector<__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real>  __pyx_v_geom_points;
+  PyArrayObject *__pyx_v_geometry_points = 0;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  PyObject *__pyx_t_5 = NULL;
+  Py_ssize_t __pyx_t_6;
+  PyObject *__pyx_t_7 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("GetGeomVertices", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":153
+ * 
+ *     def GetGeomVertices(self):
+ *         self.baseptr.GetGeomVertices()             # <<<<<<<<<<<<<<
+ *         cdef vector[Real] geom_points = self.baseptr.ObtainGeomVertices()
+ *         cdef np.ndarray geometry_points = np.array(geom_points,copy=False)
+ */
+  __pyx_v_self->baseptr->GetGeomVertices();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":154
+ *     def GetGeomVertices(self):
+ *         self.baseptr.GetGeomVertices()
+ *         cdef vector[Real] geom_points = self.baseptr.ObtainGeomVertices()             # <<<<<<<<<<<<<<
+ *         cdef np.ndarray geometry_points = np.array(geom_points,copy=False)
+ *         return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
+ */
+  __pyx_v_geom_points = __pyx_v_self->baseptr->ObtainGeomVertices();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":155
+ *         self.baseptr.GetGeomVertices()
+ *         cdef vector[Real] geom_points = self.baseptr.ObtainGeomVertices()
+ *         cdef np.ndarray geometry_points = np.array(geom_points,copy=False)             # <<<<<<<<<<<<<<
+ *         return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
+ * 
+ */
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 155; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 155; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = __pyx_convert_vector_to_py___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_v_geom_points); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 155; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 155; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_GIVEREF(__pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
+  __pyx_t_1 = 0;
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 155; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 155; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 155; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 155; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_v_geometry_points = ((PyArrayObject *)__pyx_t_4);
+  __pyx_t_4 = 0;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":156
+ *         cdef vector[Real] geom_points = self.baseptr.ObtainGeomVertices()
+ *         cdef np.ndarray geometry_points = np.array(geom_points,copy=False)
+ *         return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)             # <<<<<<<<<<<<<<
+ * 
+ *     def GetGeomEdges(self):
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_geometry_points), __pyx_n_s_reshape); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  if (unlikely(__pyx_v_self->ndim == 0)) {
+    PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
+  __pyx_t_3 = __Pyx_PyInt_From_unsigned_long(((__pyx_v_geometry_points->dimensions[0]) / __pyx_v_self->ndim)); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_3);
+  __pyx_t_3 = 0;
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)(&PyInt_Type)), __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_PyInt_From_unsigned_long(__pyx_v_self->ndim); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_5 = NULL;
+  __pyx_t_6 = 0;
+  if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_1))) {
+    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_1);
+    if (likely(__pyx_t_5)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
+      __Pyx_INCREF(__pyx_t_5);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_1, function);
+      __pyx_t_6 = 1;
+    }
+  }
+  __pyx_t_7 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_7);
+  if (__pyx_t_5) {
+    __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_5); __pyx_t_5 = NULL;
+  }
+  __Pyx_GIVEREF(__pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_7, 0+__pyx_t_6, __pyx_t_3);
+  __Pyx_GIVEREF(__pyx_t_2);
+  PyTuple_SET_ITEM(__pyx_t_7, 1+__pyx_t_6, __pyx_t_2);
+  __pyx_t_3 = 0;
+  __pyx_t_2 = 0;
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_7, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_r = __pyx_t_4;
+  __pyx_t_4 = 0;
+  goto __pyx_L0;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":152
+ *             self.baseptr.ReadSTEP(<const char*>filename)
+ * 
+ *     def GetGeomVertices(self):             # <<<<<<<<<<<<<<
+ *         self.baseptr.GetGeomVertices()
+ *         cdef vector[Real] geom_points = self.baseptr.ObtainGeomVertices()
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.GetGeomVertices", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XDECREF((PyObject *)__pyx_v_geometry_points);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":158
+ *         return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
+ * 
+ *     def GetGeomEdges(self):             # <<<<<<<<<<<<<<
+ *         """Obtain geometrical curves and topological edges from the imported CAD model"""
+ *         self.baseptr.GetGeomEdges()
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_39GetGeomEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_38GetGeomEdges[] = "Obtain geometrical curves and topological edges from the imported CAD model";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_39GetGeomEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("GetGeomEdges (wrapper)", 0);
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_38GetGeomEdges(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_38GetGeomEdges(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("GetGeomEdges", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":160
+ *     def GetGeomEdges(self):
+ *         """Obtain geometrical curves and topological edges from the imported CAD model"""
+ *         self.baseptr.GetGeomEdges()             # <<<<<<<<<<<<<<
+ * 
+ *     def GetGeomFaces(self):
+ */
+  __pyx_v_self->baseptr->GetGeomEdges();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":158
+ *         return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
+ * 
+ *     def GetGeomEdges(self):             # <<<<<<<<<<<<<<
+ *         """Obtain geometrical curves and topological edges from the imported CAD model"""
+ *         self.baseptr.GetGeomEdges()
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":162
+ *         self.baseptr.GetGeomEdges()
+ * 
+ *     def GetGeomFaces(self):             # <<<<<<<<<<<<<<
+ *         """Obtain geometrical surfaces and topological faces from the imported CAD model"""
+ *         self.baseptr.GetGeomFaces()
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_41GetGeomFaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_40GetGeomFaces[] = "Obtain geometrical surfaces and topological faces from the imported CAD model";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_41GetGeomFaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("GetGeomFaces (wrapper)", 0);
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_40GetGeomFaces(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_40GetGeomFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("GetGeomFaces", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":164
+ *     def GetGeomFaces(self):
+ *         """Obtain geometrical surfaces and topological faces from the imported CAD model"""
+ *         self.baseptr.GetGeomFaces()             # <<<<<<<<<<<<<<
+ * 
+ *     @property
+ */
+  __pyx_v_self->baseptr->GetGeomFaces();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":162
+ *         self.baseptr.GetGeomEdges()
+ * 
+ *     def GetGeomFaces(self):             # <<<<<<<<<<<<<<
+ *         """Obtain geometrical surfaces and topological faces from the imported CAD model"""
+ *         self.baseptr.GetGeomFaces()
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":167
+ * 
+ *     @property
+ *     def NbPoints(self):             # <<<<<<<<<<<<<<
+ *         """Retruns number of geometrical points"""
+ *         return self.baseptr.NbPoints()
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_43NbPoints(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_42NbPoints[] = "Retruns number of geometrical points";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_43NbPoints(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("NbPoints (wrapper)", 0);
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_42NbPoints(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_42NbPoints(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("NbPoints", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":169
+ *     def NbPoints(self):
+ *         """Retruns number of geometrical points"""
+ *         return self.baseptr.NbPoints()             # <<<<<<<<<<<<<<
+ * 
+ *     @property
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __Pyx_PyInt_From_long(__pyx_v_self->baseptr->NbPoints()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 169; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":167
+ * 
+ *     @property
+ *     def NbPoints(self):             # <<<<<<<<<<<<<<
+ *         """Retruns number of geometrical points"""
+ *         return self.baseptr.NbPoints()
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.NbPoints", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":172
+ * 
+ *     @property
+ *     def NbCurves(self):             # <<<<<<<<<<<<<<
+ *         """Retruns number of geometrical curves"""
+ *         return self.baseptr.NbCurves()
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_45NbCurves(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_44NbCurves[] = "Retruns number of geometrical curves";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_45NbCurves(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("NbCurves (wrapper)", 0);
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_44NbCurves(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_44NbCurves(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("NbCurves", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":174
+ *     def NbCurves(self):
+ *         """Retruns number of geometrical curves"""
+ *         return self.baseptr.NbCurves()             # <<<<<<<<<<<<<<
+ * 
+ *     @property
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __Pyx_PyInt_From_long(__pyx_v_self->baseptr->NbCurves()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 174; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":172
+ * 
+ *     @property
+ *     def NbCurves(self):             # <<<<<<<<<<<<<<
+ *         """Retruns number of geometrical curves"""
+ *         return self.baseptr.NbCurves()
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.NbCurves", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":177
+ * 
+ *     @property
+ *     def NbSurfaces(self):             # <<<<<<<<<<<<<<
+ *         """Retruns number of geometrical surfaces"""
+ *         return self.baseptr.NbSurfaces()
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_47NbSurfaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_46NbSurfaces[] = "Retruns number of geometrical surfaces";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_47NbSurfaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("NbSurfaces (wrapper)", 0);
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_46NbSurfaces(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_46NbSurfaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("NbSurfaces", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":179
+ *     def NbSurfaces(self):
+ *         """Retruns number of geometrical surfaces"""
+ *         return self.baseptr.NbSurfaces()             # <<<<<<<<<<<<<<
+ * 
+ *     def SetGeometry(self, bytes filename):
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __Pyx_PyInt_From_long(__pyx_v_self->baseptr->NbSurfaces()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 179; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":177
+ * 
+ *     @property
+ *     def NbSurfaces(self):             # <<<<<<<<<<<<<<
+ *         """Retruns number of geometrical surfaces"""
+ *         return self.baseptr.NbSurfaces()
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.NbSurfaces", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":181
+ *         return self.baseptr.NbSurfaces()
+ * 
+ *     def SetGeometry(self, bytes filename):             # <<<<<<<<<<<<<<
+ *         """Convenience method for Python API for setting up the CAD geometry"""
+ *         self.ReadGeometry(filename)
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_49SetGeometry(PyObject *__pyx_v_self, PyObject *__pyx_v_filename); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_48SetGeometry[] = "Convenience method for Python API for setting up the CAD geometry";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_49SetGeometry(PyObject *__pyx_v_self, PyObject *__pyx_v_filename) {
+  CYTHON_UNUSED int __pyx_lineno = 0;
+  CYTHON_UNUSED const char *__pyx_filename = NULL;
+  CYTHON_UNUSED int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("SetGeometry (wrapper)", 0);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_filename), (&PyBytes_Type), 1, "filename", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 181; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_48SetGeometry(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self), ((PyObject*)__pyx_v_filename));
+
+  /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_48SetGeometry(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self, PyObject *__pyx_v_filename) {
+  std::vector<__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real>  __pyx_v_geom_points;
+  PyArrayObject *__pyx_v_geometry_points = 0;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  PyObject *__pyx_t_5 = NULL;
+  Py_ssize_t __pyx_t_6;
+  PyObject *__pyx_t_7 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("SetGeometry", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":183
+ *     def SetGeometry(self, bytes filename):
+ *         """Convenience method for Python API for setting up the CAD geometry"""
+ *         self.ReadGeometry(filename)             # <<<<<<<<<<<<<<
+ *         self.baseptr.GetGeomVertices()
+ *         cdef vector[Real] geom_points = self.baseptr.ObtainGeomVertices()
+ */
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_ReadGeometry); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 183; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = NULL;
+  if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_2))) {
+    __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_2);
+    if (likely(__pyx_t_3)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
+      __Pyx_INCREF(__pyx_t_3);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_2, function);
+    }
+  }
+  if (!__pyx_t_3) {
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_v_filename); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 183; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_1);
+  } else {
+    __pyx_t_4 = PyTuple_New(1+1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 183; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_4);
+    __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_3); __pyx_t_3 = NULL;
+    __Pyx_INCREF(__pyx_v_filename);
+    __Pyx_GIVEREF(__pyx_v_filename);
+    PyTuple_SET_ITEM(__pyx_t_4, 0+1, __pyx_v_filename);
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_4, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 183; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  }
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":184
+ *         """Convenience method for Python API for setting up the CAD geometry"""
+ *         self.ReadGeometry(filename)
+ *         self.baseptr.GetGeomVertices()             # <<<<<<<<<<<<<<
+ *         cdef vector[Real] geom_points = self.baseptr.ObtainGeomVertices()
+ *         cdef np.ndarray geometry_points = np.array(geom_points,copy=False)
+ */
+  __pyx_v_self->baseptr->GetGeomVertices();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":185
+ *         self.ReadGeometry(filename)
+ *         self.baseptr.GetGeomVertices()
+ *         cdef vector[Real] geom_points = self.baseptr.ObtainGeomVertices()             # <<<<<<<<<<<<<<
+ *         cdef np.ndarray geometry_points = np.array(geom_points,copy=False)
+ * 
+ */
+  __pyx_v_geom_points = __pyx_v_self->baseptr->ObtainGeomVertices();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":186
+ *         self.baseptr.GetGeomVertices()
+ *         cdef vector[Real] geom_points = self.baseptr.ObtainGeomVertices()
+ *         cdef np.ndarray geometry_points = np.array(geom_points,copy=False)             # <<<<<<<<<<<<<<
+ * 
+ *         self.baseptr.GetGeomEdges()
+ */
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = __pyx_convert_vector_to_py___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_v_geom_points); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_GIVEREF(__pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
+  __pyx_t_1 = 0;
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  if (!(likely(((__pyx_t_3) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_3, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_v_geometry_points = ((PyArrayObject *)__pyx_t_3);
+  __pyx_t_3 = 0;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":188
+ *         cdef np.ndarray geometry_points = np.array(geom_points,copy=False)
+ * 
+ *         self.baseptr.GetGeomEdges()             # <<<<<<<<<<<<<<
+ *         self.baseptr.GetGeomFaces()
+ *         return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
+ */
+  __pyx_v_self->baseptr->GetGeomEdges();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":189
+ * 
+ *         self.baseptr.GetGeomEdges()
+ *         self.baseptr.GetGeomFaces()             # <<<<<<<<<<<<<<
+ *         return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
+ * 
+ */
+  __pyx_v_self->baseptr->GetGeomFaces();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":190
+ *         self.baseptr.GetGeomEdges()
+ *         self.baseptr.GetGeomFaces()
+ *         return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)             # <<<<<<<<<<<<<<
+ * 
+ *     @boundscheck(False)
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_geometry_points), __pyx_n_s_reshape); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 190; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  if (unlikely(__pyx_v_self->ndim == 0)) {
+    PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 190; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
+  __pyx_t_4 = __Pyx_PyInt_From_unsigned_long(((__pyx_v_geometry_points->dimensions[0]) / __pyx_v_self->ndim)); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 190; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 190; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_4);
+  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_4);
+  __pyx_t_4 = 0;
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)(&PyInt_Type)), __pyx_t_2, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 190; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_PyInt_From_unsigned_long(__pyx_v_self->ndim); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 190; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_5 = NULL;
+  __pyx_t_6 = 0;
+  if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_1))) {
+    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_1);
+    if (likely(__pyx_t_5)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
+      __Pyx_INCREF(__pyx_t_5);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_1, function);
+      __pyx_t_6 = 1;
+    }
+  }
+  __pyx_t_7 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 190; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_7);
+  if (__pyx_t_5) {
+    __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_5); __pyx_t_5 = NULL;
+  }
+  __Pyx_GIVEREF(__pyx_t_4);
+  PyTuple_SET_ITEM(__pyx_t_7, 0+__pyx_t_6, __pyx_t_4);
+  __Pyx_GIVEREF(__pyx_t_2);
+  PyTuple_SET_ITEM(__pyx_t_7, 1+__pyx_t_6, __pyx_t_2);
+  __pyx_t_4 = 0;
+  __pyx_t_2 = 0;
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_7, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 190; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_r = __pyx_t_3;
+  __pyx_t_3 = 0;
+  goto __pyx_L0;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":181
+ *         return self.baseptr.NbSurfaces()
+ * 
+ *     def SetGeometry(self, bytes filename):             # <<<<<<<<<<<<<<
+ *         """Convenience method for Python API for setting up the CAD geometry"""
+ *         self.ReadGeometry(filename)
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.SetGeometry", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XDECREF((PyObject *)__pyx_v_geometry_points);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":193
+ * 
+ *     @boundscheck(False)
+ *     def GetDirichletData(self):             # <<<<<<<<<<<<<<
+ *         """Obtain Dirichlet boundary condition for higher order nodes of the mesh"""
+ *         cdef:
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_51GetDirichletData(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_50GetDirichletData[] = "Obtain Dirichlet boundary condition for higher order nodes of the mesh";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_51GetDirichletData(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("GetDirichletData (wrapper)", 0);
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_50GetDirichletData(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_50GetDirichletData(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self) {
+  struct DirichletData __pyx_v_struct_to_python;
+  PyArrayObject *__pyx_v_nodes_dir = 0;
+  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_i;
+  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger __pyx_v_j;
+  PyArrayObject *__pyx_v_displacements_BC = 0;
+  __Pyx_LocalBuf_ND __pyx_pybuffernd_displacements_BC;
+  __Pyx_Buffer __pyx_pybuffer_displacements_BC;
+  __Pyx_LocalBuf_ND __pyx_pybuffernd_nodes_dir;
+  __Pyx_Buffer __pyx_pybuffer_nodes_dir;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  PyObject *__pyx_t_5 = NULL;
+  PyArrayObject *__pyx_t_6 = NULL;
+  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_t_7;
+  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_t_8;
+  PyArrayObject *__pyx_t_9 = NULL;
+  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger __pyx_t_10;
+  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger __pyx_t_11;
+  Py_ssize_t __pyx_t_12;
+  PyObject *__pyx_t_13 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("GetDirichletData", 0);
+  __pyx_pybuffer_nodes_dir.pybuffer.buf = NULL;
+  __pyx_pybuffer_nodes_dir.refcount = 0;
+  __pyx_pybuffernd_nodes_dir.data = NULL;
+  __pyx_pybuffernd_nodes_dir.rcbuffer = &__pyx_pybuffer_nodes_dir;
+  __pyx_pybuffer_displacements_BC.pybuffer.buf = NULL;
+  __pyx_pybuffer_displacements_BC.refcount = 0;
+  __pyx_pybuffernd_displacements_BC.data = NULL;
+  __pyx_pybuffernd_displacements_BC.rcbuffer = &__pyx_pybuffer_displacements_BC;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":196
+ *         """Obtain Dirichlet boundary condition for higher order nodes of the mesh"""
+ *         cdef:
+ *             DirichletData struct_to_python = self.baseptr.GetDirichletData()             # <<<<<<<<<<<<<<
+ *             np.ndarray[np.int64_t, ndim=2, mode='c'] nodes_dir = np.zeros((struct_to_python.nodes_dir_size,1),dtype=np.int64)
+ *             Integer i
+ */
+  __pyx_v_struct_to_python = __pyx_v_self->baseptr->GetDirichletData();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":197
+ *         cdef:
+ *             DirichletData struct_to_python = self.baseptr.GetDirichletData()
+ *             np.ndarray[np.int64_t, ndim=2, mode='c'] nodes_dir = np.zeros((struct_to_python.nodes_dir_size,1),dtype=np.int64)             # <<<<<<<<<<<<<<
+ *             Integer i
+ *             UInteger j
+ */
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 197; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 197; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = __Pyx_PyInt_From_long(__pyx_v_struct_to_python.nodes_dir_size); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 197; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 197; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_GIVEREF(__pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
+  __Pyx_INCREF(__pyx_int_1);
+  __Pyx_GIVEREF(__pyx_int_1);
+  PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_int_1);
+  __pyx_t_1 = 0;
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 197; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_GIVEREF(__pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_3);
+  __pyx_t_3 = 0;
+  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 197; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 197; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_int64); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 197; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_5);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 197; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 197; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_5);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 197; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_6 = ((PyArrayObject *)__pyx_t_5);
+  {
+    __Pyx_BufFmt_StackElem __pyx_stack[1];
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer, (PyObject*)__pyx_t_6, &__Pyx_TypeInfo_nn___pyx_t_5numpy_int64_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {
+      __pyx_v_nodes_dir = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.buf = NULL;
+      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 197; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    } else {__pyx_pybuffernd_nodes_dir.diminfo[0].strides = __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_nodes_dir.diminfo[0].shape = __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_nodes_dir.diminfo[1].strides = __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_nodes_dir.diminfo[1].shape = __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.shape[1];
+    }
+  }
+  __pyx_t_6 = 0;
+  __pyx_v_nodes_dir = ((PyArrayObject *)__pyx_t_5);
+  __pyx_t_5 = 0;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":201
+ *             UInteger j
+ * 
+ *         for i in range(struct_to_python.nodes_dir_size):             # <<<<<<<<<<<<<<
+ *             nodes_dir[i] = struct_to_python.nodes_dir_out_stl[i]
+ * 
+ */
+  __pyx_t_7 = __pyx_v_struct_to_python.nodes_dir_size;
+  for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
+    __pyx_v_i = __pyx_t_8;
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":202
+ * 
+ *         for i in range(struct_to_python.nodes_dir_size):
+ *             nodes_dir[i] = struct_to_python.nodes_dir_out_stl[i]             # <<<<<<<<<<<<<<
+ * 
+ *         cdef np.ndarray[np.float64_t, ndim=2, mode='c'] displacements_BC = \
+ */
+    __pyx_t_5 = __Pyx_PyInt_From_long((__pyx_v_struct_to_python.nodes_dir_out_stl[__pyx_v_i])); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_5);
+    if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_nodes_dir), __pyx_v_i, __pyx_t_5, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer, 1, __Pyx_PyInt_From_long, 0, 0, 0) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  }
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":205
+ * 
+ *         cdef np.ndarray[np.float64_t, ndim=2, mode='c'] displacements_BC = \
+ *             np.zeros((self.baseptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64)             # <<<<<<<<<<<<<<
+ *         for j in range(self.baseptr.ndim*struct_to_python.nodes_dir_size):
+ *             displacements_BC[j] = struct_to_python.displacement_BC_stl[j]
+ */
+  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_5);
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  __pyx_t_5 = __Pyx_PyInt_From_unsigned_long((__pyx_v_self->baseptr->ndim * __pyx_v_struct_to_python.nodes_dir_size)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_5);
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_GIVEREF(__pyx_t_5);
+  PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_5);
+  __Pyx_INCREF(__pyx_int_1);
+  __Pyx_GIVEREF(__pyx_int_1);
+  PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_int_1);
+  __pyx_t_5 = 0;
+  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_5);
+  __Pyx_GIVEREF(__pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_1);
+  __pyx_t_1 = 0;
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_float64); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_9 = ((PyArrayObject *)__pyx_t_4);
+  {
+    __Pyx_BufFmt_StackElem __pyx_stack[1];
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer, (PyObject*)__pyx_t_9, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {
+      __pyx_v_displacements_BC = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.buf = NULL;
+      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 204; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    } else {__pyx_pybuffernd_displacements_BC.diminfo[0].strides = __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_displacements_BC.diminfo[0].shape = __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_displacements_BC.diminfo[1].strides = __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_displacements_BC.diminfo[1].shape = __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.shape[1];
+    }
+  }
+  __pyx_t_9 = 0;
+  __pyx_v_displacements_BC = ((PyArrayObject *)__pyx_t_4);
+  __pyx_t_4 = 0;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":206
+ *         cdef np.ndarray[np.float64_t, ndim=2, mode='c'] displacements_BC = \
+ *             np.zeros((self.baseptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64)
+ *         for j in range(self.baseptr.ndim*struct_to_python.nodes_dir_size):             # <<<<<<<<<<<<<<
+ *             displacements_BC[j] = struct_to_python.displacement_BC_stl[j]
+ * 
+ */
+  __pyx_t_10 = (__pyx_v_self->baseptr->ndim * __pyx_v_struct_to_python.nodes_dir_size);
+  for (__pyx_t_11 = 0; __pyx_t_11 < __pyx_t_10; __pyx_t_11+=1) {
+    __pyx_v_j = __pyx_t_11;
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":207
+ *             np.zeros((self.baseptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64)
+ *         for j in range(self.baseptr.ndim*struct_to_python.nodes_dir_size):
+ *             displacements_BC[j] = struct_to_python.displacement_BC_stl[j]             # <<<<<<<<<<<<<<
+ * 
+ *         return nodes_dir, displacements_BC.reshape(struct_to_python.nodes_dir_size,self.baseptr.ndim)
+ */
+    __pyx_t_4 = PyFloat_FromDouble((__pyx_v_struct_to_python.displacement_BC_stl[__pyx_v_j])); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_4);
+    if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_displacements_BC), __pyx_v_j, __pyx_t_4, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger, 0, __Pyx_PyInt_From_unsigned_long, 0, 0, 0) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  }
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":209
+ *             displacements_BC[j] = struct_to_python.displacement_BC_stl[j]
+ * 
+ *         return nodes_dir, displacements_BC.reshape(struct_to_python.nodes_dir_size,self.baseptr.ndim)             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_displacements_BC), __pyx_n_s_reshape); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 209; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_5 = __Pyx_PyInt_From_long(__pyx_v_struct_to_python.nodes_dir_size); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 209; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_5);
+  __pyx_t_3 = __Pyx_PyInt_From_unsigned_long(__pyx_v_self->baseptr->ndim); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 209; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = NULL;
+  __pyx_t_12 = 0;
+  if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_1))) {
+    __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_1);
+    if (likely(__pyx_t_2)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
+      __Pyx_INCREF(__pyx_t_2);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_1, function);
+      __pyx_t_12 = 1;
+    }
+  }
+  __pyx_t_13 = PyTuple_New(2+__pyx_t_12); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 209; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_13);
+  if (__pyx_t_2) {
+    __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_t_2); __pyx_t_2 = NULL;
+  }
+  __Pyx_GIVEREF(__pyx_t_5);
+  PyTuple_SET_ITEM(__pyx_t_13, 0+__pyx_t_12, __pyx_t_5);
+  __Pyx_GIVEREF(__pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_13, 1+__pyx_t_12, __pyx_t_3);
+  __pyx_t_5 = 0;
+  __pyx_t_3 = 0;
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_13, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 209; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 209; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_INCREF(((PyObject *)__pyx_v_nodes_dir));
+  __Pyx_GIVEREF(((PyObject *)__pyx_v_nodes_dir));
+  PyTuple_SET_ITEM(__pyx_t_1, 0, ((PyObject *)__pyx_v_nodes_dir));
+  __Pyx_GIVEREF(__pyx_t_4);
+  PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_4);
+  __pyx_t_4 = 0;
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":193
+ * 
+ *     @boundscheck(False)
+ *     def GetDirichletData(self):             # <<<<<<<<<<<<<<
+ *         """Obtain Dirichlet boundary condition for higher order nodes of the mesh"""
+ *         cdef:
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_XDECREF(__pyx_t_13);
+  { PyObject *__pyx_type, *__pyx_value, *__pyx_tb;
+    __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
+    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer);
+    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer);
+  __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy.GetDirichletData", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  goto __pyx_L2;
+  __pyx_L0:;
+  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer);
+  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer);
+  __pyx_L2:;
+  __Pyx_XDECREF((PyObject *)__pyx_v_nodes_dir);
+  __Pyx_XDECREF((PyObject *)__pyx_v_displacements_BC);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":212
+ * 
+ * 
+ *     def __dealloc__(self):             # <<<<<<<<<<<<<<
+ *         if self.baseptr != NULL:
+ *             del self.baseptr
+ */
+
+/* Python wrapper */
+static void __pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_53__dealloc__(PyObject *__pyx_v_self); /*proto*/
+static void __pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_53__dealloc__(PyObject *__pyx_v_self) {
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__dealloc__ (wrapper)", 0);
+  __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_52__dealloc__(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+}
+
+static void __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_52__dealloc__(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *__pyx_v_self) {
+  __Pyx_RefNannyDeclarations
+  int __pyx_t_1;
+  __Pyx_RefNannySetupContext("__dealloc__", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":213
+ * 
+ *     def __dealloc__(self):
+ *         if self.baseptr != NULL:             # <<<<<<<<<<<<<<
+ *             del self.baseptr
+ * 
+ */
+  __pyx_t_1 = ((__pyx_v_self->baseptr != NULL) != 0);
+  if (__pyx_t_1) {
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":214
+ *     def __dealloc__(self):
+ *         if self.baseptr != NULL:
+ *             del self.baseptr             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+    delete __pyx_v_self->baseptr;
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":213
+ * 
+ *     def __dealloc__(self):
+ *         if self.baseptr != NULL:             # <<<<<<<<<<<<<<
+ *             del self.baseptr
+ * 
+ */
+  }
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":212
+ * 
+ * 
+ *     def __dealloc__(self):             # <<<<<<<<<<<<<<
+ *         if self.baseptr != NULL:
+ *             del self.baseptr
+ */
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":225
+ *     """
+ * 
+ *     def __cinit__(self, bytes py_element_type, UInteger dimension=2):             # <<<<<<<<<<<<<<
+ * 
+ *         self.ndim = 2
  */
 
 /* Python wrapper */
@@ -2204,7 +5100,7 @@ static int __pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__cinit__") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 23; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__cinit__") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 225; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -2216,20 +5112,20 @@ static int __pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh
     }
     __pyx_v_py_element_type = ((PyObject*)values[0]);
     if (values[1]) {
-      __pyx_v_dimension = __Pyx_PyInt_As_unsigned_long(values[1]); if (unlikely((__pyx_v_dimension == (unsigned long)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 23; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_v_dimension = __Pyx_PyInt_As_unsigned_long(values[1]); if (unlikely((__pyx_v_dimension == (unsigned long)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 225; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     } else {
       __pyx_v_dimension = ((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger)2);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__cinit__", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 23; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("__cinit__", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 225; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshCurvePy.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return -1;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_py_element_type), (&PyBytes_Type), 1, "py_element_type", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 23; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_py_element_type), (&PyBytes_Type), 1, "py_element_type", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 225; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy___cinit__(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self), __pyx_v_py_element_type, __pyx_v_dimension);
 
   /* function exit code */
@@ -2252,46 +5148,46 @@ static int __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":25
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":227
  *     def __cinit__(self, bytes py_element_type, UInteger dimension=2):
- *         # CONVERT TO CPP STRING EXPLICITLY
- *         cdef string cpp_element_type = py_element_type             # <<<<<<<<<<<<<<
- *         self.thisptr = new PostMeshCurve(cpp_element_type,dimension)
- *         self.ndim = 2
- */
-  __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_v_py_element_type); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 25; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_v_cpp_element_type = __pyx_t_1;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":26
+ * 
+ *         self.ndim = 2             # <<<<<<<<<<<<<<
  *         # CONVERT TO CPP STRING EXPLICITLY
  *         cdef string cpp_element_type = py_element_type
- *         self.thisptr = new PostMeshCurve(cpp_element_type,dimension)             # <<<<<<<<<<<<<<
+ */
+  __pyx_v_self->__pyx_base.ndim = 2;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":229
  *         self.ndim = 2
+ *         # CONVERT TO CPP STRING EXPLICITLY
+ *         cdef string cpp_element_type = py_element_type             # <<<<<<<<<<<<<<
+ *         # CREATE A CPP PostMeshCurve OBJECT AND CAST IT TO CPP PostMeshBase
+ *         self.baseptr = <PostMeshBase*> new PostMeshCurve(cpp_element_type,dimension)
+ */
+  __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_v_py_element_type); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 229; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_v_cpp_element_type = __pyx_t_1;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":231
+ *         cdef string cpp_element_type = py_element_type
+ *         # CREATE A CPP PostMeshCurve OBJECT AND CAST IT TO CPP PostMeshBase
+ *         self.baseptr = <PostMeshBase*> new PostMeshCurve(cpp_element_type,dimension)             # <<<<<<<<<<<<<<
  * 
+ *     def DiscretiseCurves(self, Integer npoints):
  */
   try {
     __pyx_t_2 = new PostMeshCurve(__pyx_v_cpp_element_type, __pyx_v_dimension);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 26; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
-  __pyx_v_self->thisptr = __pyx_t_2;
+  __pyx_v_self->__pyx_base.baseptr = ((PostMeshBase *)__pyx_t_2);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":27
- *         cdef string cpp_element_type = py_element_type
- *         self.thisptr = new PostMeshCurve(cpp_element_type,dimension)
- *         self.ndim = 2             # <<<<<<<<<<<<<<
- * 
- *     def Init(self):
- */
-  __pyx_v_self->ndim = 2;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":23
- *     cdef PostMeshCurve *thisptr
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":225
+ *     """
  * 
  *     def __cinit__(self, bytes py_element_type, UInteger dimension=2):             # <<<<<<<<<<<<<<
- *         # CONVERT TO CPP STRING EXPLICITLY
- *         cdef string cpp_element_type = py_element_type
+ * 
+ *         self.ndim = 2
  */
 
   /* function exit code */
@@ -2305,1325 +5201,18 @@ static int __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh
   return __pyx_r;
 }
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":29
- *         self.ndim = 2
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":233
+ *         self.baseptr = <PostMeshBase*> new PostMeshCurve(cpp_element_type,dimension)
  * 
- *     def Init(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.Init()
- * 
+ *     def DiscretiseCurves(self, Integer npoints):             # <<<<<<<<<<<<<<
+ *         """Discretise geometrical curves. This is only useful for post-processing"""
+ *         cdef:
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_3Init(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_3Init(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("Init (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_2Init(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_2Init(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("Init", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":30
- * 
- *     def Init(self):
- *         self.thisptr.Init()             # <<<<<<<<<<<<<<
- * 
- *     def SetScale(self,Real scale):
- */
-  try {
-    __pyx_v_self->thisptr->Init();
-  } catch(...) {
-    __Pyx_CppExn2PyErr();
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  }
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":29
- *         self.ndim = 2
- * 
- *     def Init(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.Init()
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshCurvePy.Init", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":32
- *         self.thisptr.Init()
- * 
- *     def SetScale(self,Real scale):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetScale(scale)
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_5SetScale(PyObject *__pyx_v_self, PyObject *__pyx_arg_scale); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_5SetScale(PyObject *__pyx_v_self, PyObject *__pyx_arg_scale) {
-  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_scale;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetScale (wrapper)", 0);
-  assert(__pyx_arg_scale); {
-    __pyx_v_scale = __pyx_PyFloat_AsDouble(__pyx_arg_scale); if (unlikely((__pyx_v_scale == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 32; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshCurvePy.SetScale", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_4SetScale(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self), ((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real)__pyx_v_scale));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_4SetScale(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_scale) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetScale", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":33
- * 
- *     def SetScale(self,Real scale):
- *         self.thisptr.SetScale(scale)             # <<<<<<<<<<<<<<
- * 
- *     def SetCondition(self,Real condition):
- */
-  __pyx_v_self->thisptr->SetScale(__pyx_v_scale);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":32
- *         self.thisptr.Init()
- * 
- *     def SetScale(self,Real scale):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetScale(scale)
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":35
- *         self.thisptr.SetScale(scale)
- * 
- *     def SetCondition(self,Real condition):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetCondition(condition)
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_7SetCondition(PyObject *__pyx_v_self, PyObject *__pyx_arg_condition); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_7SetCondition(PyObject *__pyx_v_self, PyObject *__pyx_arg_condition) {
-  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_condition;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetCondition (wrapper)", 0);
-  assert(__pyx_arg_condition); {
-    __pyx_v_condition = __pyx_PyFloat_AsDouble(__pyx_arg_condition); if (unlikely((__pyx_v_condition == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 35; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshCurvePy.SetCondition", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_6SetCondition(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self), ((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real)__pyx_v_condition));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_6SetCondition(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_condition) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetCondition", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":36
- * 
- *     def SetCondition(self,Real condition):
- *         self.thisptr.SetCondition(condition)             # <<<<<<<<<<<<<<
- * 
- *     def SetProjectionPrecision(self, Real precision):
- */
-  __pyx_v_self->thisptr->SetCondition(__pyx_v_condition);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":35
- *         self.thisptr.SetScale(scale)
- * 
- *     def SetCondition(self,Real condition):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetCondition(condition)
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":38
- *         self.thisptr.SetCondition(condition)
- * 
- *     def SetProjectionPrecision(self, Real precision):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetProjectionPrecision(precision)
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_9SetProjectionPrecision(PyObject *__pyx_v_self, PyObject *__pyx_arg_precision); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_9SetProjectionPrecision(PyObject *__pyx_v_self, PyObject *__pyx_arg_precision) {
-  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_precision;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetProjectionPrecision (wrapper)", 0);
-  assert(__pyx_arg_precision); {
-    __pyx_v_precision = __pyx_PyFloat_AsDouble(__pyx_arg_precision); if (unlikely((__pyx_v_precision == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshCurvePy.SetProjectionPrecision", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_8SetProjectionPrecision(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self), ((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real)__pyx_v_precision));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_8SetProjectionPrecision(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_precision) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetProjectionPrecision", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":39
- * 
- *     def SetProjectionPrecision(self, Real precision):
- *         self.thisptr.SetProjectionPrecision(precision)             # <<<<<<<<<<<<<<
- * 
- *     def ComputeProjectionCriteria(self):
- */
-  __pyx_v_self->thisptr->SetProjectionPrecision(__pyx_v_precision);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":38
- *         self.thisptr.SetCondition(condition)
- * 
- *     def SetProjectionPrecision(self, Real precision):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetProjectionPrecision(precision)
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":41
- *         self.thisptr.SetProjectionPrecision(precision)
- * 
- *     def ComputeProjectionCriteria(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.ComputeProjectionCriteria()
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_11ComputeProjectionCriteria(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_11ComputeProjectionCriteria(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("ComputeProjectionCriteria (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_10ComputeProjectionCriteria(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_10ComputeProjectionCriteria(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("ComputeProjectionCriteria", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":42
- * 
- *     def ComputeProjectionCriteria(self):
- *         self.thisptr.ComputeProjectionCriteria()             # <<<<<<<<<<<<<<
- * 
- *     def SetProjectionCriteria(self, UInteger[:,::1] criteria):
- */
-  __pyx_v_self->thisptr->ComputeProjectionCriteria();
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":41
- *         self.thisptr.SetProjectionPrecision(precision)
- * 
- *     def ComputeProjectionCriteria(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.ComputeProjectionCriteria()
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":44
- *         self.thisptr.ComputeProjectionCriteria()
- * 
- *     def SetProjectionCriteria(self, UInteger[:,::1] criteria):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_13SetProjectionCriteria(PyObject *__pyx_v_self, PyObject *__pyx_arg_criteria); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_13SetProjectionCriteria(PyObject *__pyx_v_self, PyObject *__pyx_arg_criteria) {
-  __Pyx_memviewslice __pyx_v_criteria = { 0, 0, { 0 }, { 0 }, { 0 } };
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetProjectionCriteria (wrapper)", 0);
-  assert(__pyx_arg_criteria); {
-    __pyx_v_criteria = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_criteria); if (unlikely(!__pyx_v_criteria.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 44; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshCurvePy.SetProjectionCriteria", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_12SetProjectionCriteria(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self), __pyx_v_criteria);
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_12SetProjectionCriteria(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_criteria) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  Py_ssize_t __pyx_t_1;
-  Py_ssize_t __pyx_t_2;
-  __Pyx_RefNannySetupContext("SetProjectionCriteria", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":45
- * 
- *     def SetProjectionCriteria(self, UInteger[:,::1] criteria):
- *         self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])             # <<<<<<<<<<<<<<
- * 
- *     def SetMeshElements(self,UInteger[:,::1] elements):
- */
-  __pyx_t_1 = 0;
-  __pyx_t_2 = 0;
-  __pyx_v_self->thisptr->SetProjectionCriteria((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=0 */ (__pyx_v_criteria.data + __pyx_t_1 * __pyx_v_criteria.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_criteria.shape[0]), (__pyx_v_criteria.shape[1]));
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":44
- *         self.thisptr.ComputeProjectionCriteria()
- * 
- *     def SetProjectionCriteria(self, UInteger[:,::1] criteria):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_criteria, 1);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":47
- *         self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])
- * 
- *     def SetMeshElements(self,UInteger[:,::1] elements):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_15SetMeshElements(PyObject *__pyx_v_self, PyObject *__pyx_arg_elements); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_15SetMeshElements(PyObject *__pyx_v_self, PyObject *__pyx_arg_elements) {
-  __Pyx_memviewslice __pyx_v_elements = { 0, 0, { 0 }, { 0 }, { 0 } };
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetMeshElements (wrapper)", 0);
-  assert(__pyx_arg_elements); {
-    __pyx_v_elements = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_elements); if (unlikely(!__pyx_v_elements.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshCurvePy.SetMeshElements", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_14SetMeshElements(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self), __pyx_v_elements);
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_14SetMeshElements(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_elements) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  Py_ssize_t __pyx_t_1;
-  Py_ssize_t __pyx_t_2;
-  __Pyx_RefNannySetupContext("SetMeshElements", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":48
- * 
- *     def SetMeshElements(self,UInteger[:,::1] elements):
- *         self.thisptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])             # <<<<<<<<<<<<<<
- * 
- *     def SetMeshPoints(self,Real[:,::1] points):
- */
-  __pyx_t_1 = 0;
-  __pyx_t_2 = 0;
-  __pyx_v_self->thisptr->SetMeshElements((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=0 */ (__pyx_v_elements.data + __pyx_t_1 * __pyx_v_elements.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_elements.shape[0]), (__pyx_v_elements.shape[1]));
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":47
- *         self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])
- * 
- *     def SetMeshElements(self,UInteger[:,::1] elements):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_elements, 1);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":50
- *         self.thisptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])
- * 
- *     def SetMeshPoints(self,Real[:,::1] points):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_17SetMeshPoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_points); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_17SetMeshPoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_points) {
-  __Pyx_memviewslice __pyx_v_points = { 0, 0, { 0 }, { 0 }, { 0 } };
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetMeshPoints (wrapper)", 0);
-  assert(__pyx_arg_points); {
-    __pyx_v_points = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_arg_points); if (unlikely(!__pyx_v_points.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 50; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshCurvePy.SetMeshPoints", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_16SetMeshPoints(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self), __pyx_v_points);
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_16SetMeshPoints(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_points) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  Py_ssize_t __pyx_t_1;
-  Py_ssize_t __pyx_t_2;
-  __Pyx_RefNannySetupContext("SetMeshPoints", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":51
- * 
- *     def SetMeshPoints(self,Real[:,::1] points):
- *         self.thisptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])             # <<<<<<<<<<<<<<
- * 
- *     def SetMeshEdges(self,UInteger[:,::1] edges):
- */
-  __pyx_t_1 = 0;
-  __pyx_t_2 = 0;
-  __pyx_v_self->thisptr->SetMeshPoints((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=0 */ (__pyx_v_points.data + __pyx_t_1 * __pyx_v_points.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_points.shape[0]), (__pyx_v_points.shape[1]));
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":50
- *         self.thisptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])
- * 
- *     def SetMeshPoints(self,Real[:,::1] points):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_points, 1);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":53
- *         self.thisptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])
- * 
- *     def SetMeshEdges(self,UInteger[:,::1] edges):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_19SetMeshEdges(PyObject *__pyx_v_self, PyObject *__pyx_arg_edges); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_19SetMeshEdges(PyObject *__pyx_v_self, PyObject *__pyx_arg_edges) {
-  __Pyx_memviewslice __pyx_v_edges = { 0, 0, { 0 }, { 0 }, { 0 } };
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetMeshEdges (wrapper)", 0);
-  assert(__pyx_arg_edges); {
-    __pyx_v_edges = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_edges); if (unlikely(!__pyx_v_edges.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 53; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshCurvePy.SetMeshEdges", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_18SetMeshEdges(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self), __pyx_v_edges);
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_18SetMeshEdges(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_edges) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  Py_ssize_t __pyx_t_1;
-  Py_ssize_t __pyx_t_2;
-  __Pyx_RefNannySetupContext("SetMeshEdges", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":54
- * 
- *     def SetMeshEdges(self,UInteger[:,::1] edges):
- *         self.thisptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])             # <<<<<<<<<<<<<<
- * 
- *     def SetMeshFaces(self,UInteger[:,::1] faces):
- */
-  __pyx_t_1 = 0;
-  __pyx_t_2 = 0;
-  __pyx_v_self->thisptr->SetMeshEdges((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=0 */ (__pyx_v_edges.data + __pyx_t_1 * __pyx_v_edges.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_edges.shape[0]), (__pyx_v_edges.shape[1]));
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":53
- *         self.thisptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])
- * 
- *     def SetMeshEdges(self,UInteger[:,::1] edges):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_edges, 1);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":56
- *         self.thisptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
- * 
- *     def SetMeshFaces(self,UInteger[:,::1] faces):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_21SetMeshFaces(PyObject *__pyx_v_self, PyObject *__pyx_arg_faces); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_21SetMeshFaces(PyObject *__pyx_v_self, PyObject *__pyx_arg_faces) {
-  __Pyx_memviewslice __pyx_v_faces = { 0, 0, { 0 }, { 0 }, { 0 } };
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetMeshFaces (wrapper)", 0);
-  assert(__pyx_arg_faces); {
-    __pyx_v_faces = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_faces); if (unlikely(!__pyx_v_faces.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshCurvePy.SetMeshFaces", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_20SetMeshFaces(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self), __pyx_v_faces);
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_20SetMeshFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_faces) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  Py_ssize_t __pyx_t_1;
-  Py_ssize_t __pyx_t_2;
-  __Pyx_RefNannySetupContext("SetMeshFaces", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":57
- * 
- *     def SetMeshFaces(self,UInteger[:,::1] faces):
- *         self.thisptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])             # <<<<<<<<<<<<<<
- * 
- *     def ScaleMesh(self):
- */
-  __pyx_t_1 = 0;
-  __pyx_t_2 = 0;
-  __pyx_v_self->thisptr->SetMeshFaces((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=0 */ (__pyx_v_faces.data + __pyx_t_1 * __pyx_v_faces.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_faces.shape[0]), (__pyx_v_faces.shape[1]));
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":56
- *         self.thisptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
- * 
- *     def SetMeshFaces(self,UInteger[:,::1] faces):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_faces, 1);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":59
- *         self.thisptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
- * 
- *     def ScaleMesh(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.ScaleMesh()
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_23ScaleMesh(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_23ScaleMesh(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("ScaleMesh (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_22ScaleMesh(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_22ScaleMesh(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("ScaleMesh", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":60
- * 
- *     def ScaleMesh(self):
- *         self.thisptr.ScaleMesh()             # <<<<<<<<<<<<<<
- * 
- *     def GetMeshElementType(self):
- */
-  __pyx_v_self->thisptr->ScaleMesh();
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":59
- *         self.thisptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
- * 
- *     def ScaleMesh(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.ScaleMesh()
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":62
- *         self.thisptr.ScaleMesh()
- * 
- *     def GetMeshElementType(self):             # <<<<<<<<<<<<<<
- *         cdef string cpp_element_type = self.thisptr.GetMeshElementType()
- *         cdef bytes py_element_type = cpp_element_type
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_25GetMeshElementType(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_25GetMeshElementType(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("GetMeshElementType (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_24GetMeshElementType(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_24GetMeshElementType(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
-  std::string __pyx_v_cpp_element_type;
-  PyObject *__pyx_v_py_element_type = 0;
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("GetMeshElementType", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":63
- * 
- *     def GetMeshElementType(self):
- *         cdef string cpp_element_type = self.thisptr.GetMeshElementType()             # <<<<<<<<<<<<<<
- *         cdef bytes py_element_type = cpp_element_type
- *         return py_element_type
- */
-  __pyx_v_cpp_element_type = __pyx_v_self->thisptr->GetMeshElementType();
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":64
- *     def GetMeshElementType(self):
- *         cdef string cpp_element_type = self.thisptr.GetMeshElementType()
- *         cdef bytes py_element_type = cpp_element_type             # <<<<<<<<<<<<<<
- *         return py_element_type
- * 
- */
-  __pyx_t_1 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_cpp_element_type); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 64; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_v_py_element_type = ((PyObject*)__pyx_t_1);
-  __pyx_t_1 = 0;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":65
- *         cdef string cpp_element_type = self.thisptr.GetMeshElementType()
- *         cdef bytes py_element_type = cpp_element_type
- *         return py_element_type             # <<<<<<<<<<<<<<
- * 
- *     def SetNodalSpacing(self, Real[:,::1] fekete):
- */
-  __Pyx_XDECREF(__pyx_r);
-  __Pyx_INCREF(__pyx_v_py_element_type);
-  __pyx_r = __pyx_v_py_element_type;
-  goto __pyx_L0;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":62
- *         self.thisptr.ScaleMesh()
- * 
- *     def GetMeshElementType(self):             # <<<<<<<<<<<<<<
- *         cdef string cpp_element_type = self.thisptr.GetMeshElementType()
- *         cdef bytes py_element_type = cpp_element_type
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshCurvePy.GetMeshElementType", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XDECREF(__pyx_v_py_element_type);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":67
- *         return py_element_type
- * 
- *     def SetNodalSpacing(self, Real[:,::1] fekete):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetNodalSpacing(&fekete[0,0],fekete.shape[0],fekete.shape[1])
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_27SetNodalSpacing(PyObject *__pyx_v_self, PyObject *__pyx_arg_fekete); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_27SetNodalSpacing(PyObject *__pyx_v_self, PyObject *__pyx_arg_fekete) {
-  __Pyx_memviewslice __pyx_v_fekete = { 0, 0, { 0 }, { 0 }, { 0 } };
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetNodalSpacing (wrapper)", 0);
-  assert(__pyx_arg_fekete); {
-    __pyx_v_fekete = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_arg_fekete); if (unlikely(!__pyx_v_fekete.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 67; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshCurvePy.SetNodalSpacing", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_26SetNodalSpacing(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self), __pyx_v_fekete);
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_26SetNodalSpacing(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_fekete) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  Py_ssize_t __pyx_t_1;
-  Py_ssize_t __pyx_t_2;
-  __Pyx_RefNannySetupContext("SetNodalSpacing", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":68
- * 
- *     def SetNodalSpacing(self, Real[:,::1] fekete):
- *         self.thisptr.SetNodalSpacing(&fekete[0,0],fekete.shape[0],fekete.shape[1])             # <<<<<<<<<<<<<<
- * 
- *     def ReadIGES(self, bytes filename):
- */
-  __pyx_t_1 = 0;
-  __pyx_t_2 = 0;
-  __pyx_v_self->thisptr->SetNodalSpacing((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=0 */ (__pyx_v_fekete.data + __pyx_t_1 * __pyx_v_fekete.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_fekete.shape[0]), (__pyx_v_fekete.shape[1]));
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":67
- *         return py_element_type
- * 
- *     def SetNodalSpacing(self, Real[:,::1] fekete):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetNodalSpacing(&fekete[0,0],fekete.shape[0],fekete.shape[1])
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_fekete, 1);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":70
- *         self.thisptr.SetNodalSpacing(&fekete[0,0],fekete.shape[0],fekete.shape[1])
- * 
- *     def ReadIGES(self, bytes filename):             # <<<<<<<<<<<<<<
- *         self.thisptr.ReadIGES(<const char*>filename)
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_29ReadIGES(PyObject *__pyx_v_self, PyObject *__pyx_v_filename); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_29ReadIGES(PyObject *__pyx_v_self, PyObject *__pyx_v_filename) {
-  CYTHON_UNUSED int __pyx_lineno = 0;
-  CYTHON_UNUSED const char *__pyx_filename = NULL;
-  CYTHON_UNUSED int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("ReadIGES (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_filename), (&PyBytes_Type), 1, "filename", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 70; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_28ReadIGES(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self), ((PyObject*)__pyx_v_filename));
-
-  /* function exit code */
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_28ReadIGES(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, PyObject *__pyx_v_filename) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  char const *__pyx_t_1;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("ReadIGES", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":71
- * 
- *     def ReadIGES(self, bytes filename):
- *         self.thisptr.ReadIGES(<const char*>filename)             # <<<<<<<<<<<<<<
- * 
- *     def GetGeomVertices(self):
- */
-  __pyx_t_1 = __Pyx_PyObject_AsString(__pyx_v_filename); if (unlikely((!__pyx_t_1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_v_self->thisptr->ReadIGES(((char const *)__pyx_t_1));
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":70
- *         self.thisptr.SetNodalSpacing(&fekete[0,0],fekete.shape[0],fekete.shape[1])
- * 
- *     def ReadIGES(self, bytes filename):             # <<<<<<<<<<<<<<
- *         self.thisptr.ReadIGES(<const char*>filename)
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshCurvePy.ReadIGES", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":73
- *         self.thisptr.ReadIGES(<const char*>filename)
- * 
- *     def GetGeomVertices(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetGeomVertices()
- *         cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_31GetGeomVertices(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_31GetGeomVertices(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("GetGeomVertices (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_30GetGeomVertices(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_30GetGeomVertices(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
-  std::vector<__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real>  __pyx_v_geom_points;
-  PyArrayObject *__pyx_v_geometry_points = 0;
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
-  PyObject *__pyx_t_4 = NULL;
-  PyObject *__pyx_t_5 = NULL;
-  Py_ssize_t __pyx_t_6;
-  PyObject *__pyx_t_7 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("GetGeomVertices", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":74
- * 
- *     def GetGeomVertices(self):
- *         self.thisptr.GetGeomVertices()             # <<<<<<<<<<<<<<
- *         cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()
- *         cdef np.ndarray geometry_points = np.array(geom_points,copy=False)
- */
-  __pyx_v_self->thisptr->GetGeomVertices();
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":75
- *     def GetGeomVertices(self):
- *         self.thisptr.GetGeomVertices()
- *         cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()             # <<<<<<<<<<<<<<
- *         cdef np.ndarray geometry_points = np.array(geom_points,copy=False)
- *         return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
- */
-  __pyx_v_geom_points = __pyx_v_self->thisptr->ObtainGeomVertices();
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":76
- *         self.thisptr.GetGeomVertices()
- *         cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()
- *         cdef np.ndarray geometry_points = np.array(geom_points,copy=False)             # <<<<<<<<<<<<<<
- *         return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
- * 
- */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 76; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 76; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __pyx_convert_vector_to_py___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_v_geom_points); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 76; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 76; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
-  __pyx_t_1 = 0;
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 76; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 76; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 76; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 76; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_v_geometry_points = ((PyArrayObject *)__pyx_t_4);
-  __pyx_t_4 = 0;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":77
- *         cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()
- *         cdef np.ndarray geometry_points = np.array(geom_points,copy=False)
- *         return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)             # <<<<<<<<<<<<<<
- * 
- *     def GetGeomEdges(self):
- */
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_geometry_points), __pyx_n_s_reshape); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  if (unlikely(__pyx_v_self->ndim == 0)) {
-    PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  }
-  __pyx_t_3 = __Pyx_PyInt_From_unsigned_long(((__pyx_v_geometry_points->dimensions[0]) / __pyx_v_self->ndim)); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_GIVEREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_3);
-  __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)(&PyInt_Type)), __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyInt_From_unsigned_long(__pyx_v_self->ndim); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_5 = NULL;
-  __pyx_t_6 = 0;
-  if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_1))) {
-    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_1);
-    if (likely(__pyx_t_5)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
-      __Pyx_INCREF(__pyx_t_5);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_1, function);
-      __pyx_t_6 = 1;
-    }
-  }
-  __pyx_t_7 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_7);
-  if (__pyx_t_5) {
-    __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_5); __pyx_t_5 = NULL;
-  }
-  __Pyx_GIVEREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_7, 0+__pyx_t_6, __pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_2);
-  PyTuple_SET_ITEM(__pyx_t_7, 1+__pyx_t_6, __pyx_t_2);
-  __pyx_t_3 = 0;
-  __pyx_t_2 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_7, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_r = __pyx_t_4;
-  __pyx_t_4 = 0;
-  goto __pyx_L0;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":73
- *         self.thisptr.ReadIGES(<const char*>filename)
- * 
- *     def GetGeomVertices(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetGeomVertices()
- *         cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_5);
-  __Pyx_XDECREF(__pyx_t_7);
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshCurvePy.GetGeomVertices", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XDECREF((PyObject *)__pyx_v_geometry_points);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":79
- *         return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
- * 
- *     def GetGeomEdges(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetGeomEdges()
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_33GetGeomEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_33GetGeomEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("GetGeomEdges (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_32GetGeomEdges(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_32GetGeomEdges(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("GetGeomEdges", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":80
- * 
- *     def GetGeomEdges(self):
- *         self.thisptr.GetGeomEdges()             # <<<<<<<<<<<<<<
- * 
- *     def GetGeomFaces(self):
- */
-  __pyx_v_self->thisptr->GetGeomEdges();
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":79
- *         return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
- * 
- *     def GetGeomEdges(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetGeomEdges()
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":82
- *         self.thisptr.GetGeomEdges()
- * 
- *     def GetGeomFaces(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetGeomFaces()
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_35GetGeomFaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_35GetGeomFaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("GetGeomFaces (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_34GetGeomFaces(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_34GetGeomFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("GetGeomFaces", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":83
- * 
- *     def GetGeomFaces(self):
- *         self.thisptr.GetGeomFaces()             # <<<<<<<<<<<<<<
- * 
- *     def NbPoints(self):
- */
-  __pyx_v_self->thisptr->GetGeomFaces();
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":82
- *         self.thisptr.GetGeomEdges()
- * 
- *     def GetGeomFaces(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetGeomFaces()
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":85
- *         self.thisptr.GetGeomFaces()
- * 
- *     def NbPoints(self):             # <<<<<<<<<<<<<<
- *         return self.thisptr.NbPoints()
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_37NbPoints(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_37NbPoints(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("NbPoints (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_36NbPoints(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_36NbPoints(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("NbPoints", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":86
- * 
- *     def NbPoints(self):
- *         return self.thisptr.NbPoints()             # <<<<<<<<<<<<<<
- * 
- *     def NbCurves(self):
- */
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_long(__pyx_v_self->thisptr->NbPoints()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 86; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_r = __pyx_t_1;
-  __pyx_t_1 = 0;
-  goto __pyx_L0;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":85
- *         self.thisptr.GetGeomFaces()
- * 
- *     def NbPoints(self):             # <<<<<<<<<<<<<<
- *         return self.thisptr.NbPoints()
- * 
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshCurvePy.NbPoints", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":88
- *         return self.thisptr.NbPoints()
- * 
- *     def NbCurves(self):             # <<<<<<<<<<<<<<
- *         return self.thisptr.NbCurves()
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_39NbCurves(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_39NbCurves(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("NbCurves (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_38NbCurves(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_38NbCurves(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("NbCurves", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":89
- * 
- *     def NbCurves(self):
- *         return self.thisptr.NbCurves()             # <<<<<<<<<<<<<<
- * 
- *     def DiscretiseCurves(self,Integer npoints):
- */
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_long(__pyx_v_self->thisptr->NbCurves()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 89; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_r = __pyx_t_1;
-  __pyx_t_1 = 0;
-  goto __pyx_L0;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":88
- *         return self.thisptr.NbPoints()
- * 
- *     def NbCurves(self):             # <<<<<<<<<<<<<<
- *         return self.thisptr.NbCurves()
- * 
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshCurvePy.NbCurves", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":91
- *         return self.thisptr.NbCurves()
- * 
- *     def DiscretiseCurves(self,Integer npoints):             # <<<<<<<<<<<<<<
- *         cdef vector[vector[Real]] discretised_points
- *         discretised_points = self.thisptr.DiscretiseCurves(npoints)
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_41DiscretiseCurves(PyObject *__pyx_v_self, PyObject *__pyx_arg_npoints); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_41DiscretiseCurves(PyObject *__pyx_v_self, PyObject *__pyx_arg_npoints) {
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_3DiscretiseCurves(PyObject *__pyx_v_self, PyObject *__pyx_arg_npoints); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_2DiscretiseCurves[] = "Discretise geometrical curves. This is only useful for post-processing";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_3DiscretiseCurves(PyObject *__pyx_v_self, PyObject *__pyx_arg_npoints) {
   __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_npoints;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
@@ -3632,7 +5221,7 @@ static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("DiscretiseCurves (wrapper)", 0);
   assert(__pyx_arg_npoints); {
-    __pyx_v_npoints = __Pyx_PyInt_As_long(__pyx_arg_npoints); if (unlikely((__pyx_v_npoints == (long)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 91; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_npoints = __Pyx_PyInt_As_long(__pyx_arg_npoints); if (unlikely((__pyx_v_npoints == (long)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -3640,23 +5229,23 @@ static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_40DiscretiseCurves(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self), ((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer)__pyx_v_npoints));
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_2DiscretiseCurves(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self), ((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer)__pyx_v_npoints));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_40DiscretiseCurves(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_npoints) {
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_2DiscretiseCurves(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_npoints) {
   std::vector<std::vector<__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real> >  __pyx_v_discretised_points;
+  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_i;
   PyObject *__pyx_v_discretised_points_py = NULL;
-  Py_ssize_t __pyx_v_i;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   std::vector<std::vector<__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real> >  __pyx_t_1;
   PyObject *__pyx_t_2 = NULL;
   Py_ssize_t __pyx_t_3;
-  Py_ssize_t __pyx_t_4;
+  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_t_4;
   PyObject *__pyx_t_5 = NULL;
   PyObject *__pyx_t_6 = NULL;
   PyObject *__pyx_t_7 = NULL;
@@ -3669,60 +5258,60 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("DiscretiseCurves", 0);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":93
- *     def DiscretiseCurves(self,Integer npoints):
- *         cdef vector[vector[Real]] discretised_points
- *         discretised_points = self.thisptr.DiscretiseCurves(npoints)             # <<<<<<<<<<<<<<
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":238
+ *             vector[vector[Real]] discretised_points
+ *             Integer i
+ *         discretised_points = (<PostMeshCurve*>self.baseptr).DiscretiseCurves(npoints)             # <<<<<<<<<<<<<<
  *         discretised_points_py = []
  *         for i in range(len(discretised_points)):
  */
   try {
-    __pyx_t_1 = __pyx_v_self->thisptr->DiscretiseCurves(__pyx_v_npoints);
+    __pyx_t_1 = ((PostMeshCurve *)__pyx_v_self->__pyx_base.baseptr)->DiscretiseCurves(__pyx_v_npoints);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 238; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_v_discretised_points = __pyx_t_1;
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":94
- *         cdef vector[vector[Real]] discretised_points
- *         discretised_points = self.thisptr.DiscretiseCurves(npoints)
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":239
+ *             Integer i
+ *         discretised_points = (<PostMeshCurve*>self.baseptr).DiscretiseCurves(npoints)
  *         discretised_points_py = []             # <<<<<<<<<<<<<<
  *         for i in range(len(discretised_points)):
  *             discretised_points_py.append(np.array(discretised_points[i]).reshape(len(discretised_points[0])/3,3))
  */
-  __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 239; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_v_discretised_points_py = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":95
- *         discretised_points = self.thisptr.DiscretiseCurves(npoints)
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":240
+ *         discretised_points = (<PostMeshCurve*>self.baseptr).DiscretiseCurves(npoints)
  *         discretised_points_py = []
  *         for i in range(len(discretised_points)):             # <<<<<<<<<<<<<<
  *             discretised_points_py.append(np.array(discretised_points[i]).reshape(len(discretised_points[0])/3,3))
  *         return discretised_points_py
  */
-  __pyx_t_2 = __pyx_convert_vector_to_py_std_3a__3a_vector_3c___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real_3e___(__pyx_v_discretised_points); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __pyx_convert_vector_to_py_std_3a__3a_vector_3c___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real_3e___(__pyx_v_discretised_points); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 240; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyObject_Length(__pyx_t_2); if (unlikely(__pyx_t_3 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyObject_Length(__pyx_t_2); if (unlikely(__pyx_t_3 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 240; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_3; __pyx_t_4+=1) {
     __pyx_v_i = __pyx_t_4;
 
-    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":96
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":241
  *         discretised_points_py = []
  *         for i in range(len(discretised_points)):
  *             discretised_points_py.append(np.array(discretised_points[i]).reshape(len(discretised_points[0])/3,3))             # <<<<<<<<<<<<<<
  *         return discretised_points_py
  * 
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_array); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_array); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_6 = __pyx_convert_vector_to_py___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real((__pyx_v_discretised_points[__pyx_v_i])); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __pyx_convert_vector_to_py___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real((__pyx_v_discretised_points[__pyx_v_i])); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_t_8 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_7))) {
@@ -3735,29 +5324,29 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
       }
     }
     if (!__pyx_t_8) {
-      __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_6); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_6); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_GOTREF(__pyx_t_5);
     } else {
-      __pyx_t_9 = PyTuple_New(1+1); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_9 = PyTuple_New(1+1); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_9);
       __Pyx_GIVEREF(__pyx_t_8); PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_8); __pyx_t_8 = NULL;
       __Pyx_GIVEREF(__pyx_t_6);
       PyTuple_SET_ITEM(__pyx_t_9, 0+1, __pyx_t_6);
       __pyx_t_6 = 0;
-      __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_9, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_9, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
     }
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_reshape); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_reshape); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_5 = __pyx_convert_vector_to_py___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real((__pyx_v_discretised_points[0])); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_5 = __pyx_convert_vector_to_py___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real((__pyx_v_discretised_points[0])); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_10 = PyObject_Length(__pyx_t_5); if (unlikely(__pyx_t_10 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_10 = PyObject_Length(__pyx_t_5); if (unlikely(__pyx_t_10 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_5 = PyInt_FromSsize_t(__Pyx_div_Py_ssize_t(__pyx_t_10, 3)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_5 = PyInt_FromSsize_t(__Pyx_div_Py_ssize_t(__pyx_t_10, 3)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_t_9 = NULL;
     __pyx_t_10 = 0;
@@ -3771,7 +5360,7 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
         __pyx_t_10 = 1;
       }
     }
-    __pyx_t_6 = PyTuple_New(2+__pyx_t_10); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = PyTuple_New(2+__pyx_t_10); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
     if (__pyx_t_9) {
       __Pyx_GIVEREF(__pyx_t_9); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_9); __pyx_t_9 = NULL;
@@ -3782,15 +5371,15 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
     __Pyx_GIVEREF(__pyx_int_3);
     PyTuple_SET_ITEM(__pyx_t_6, 1+__pyx_t_10, __pyx_int_3);
     __pyx_t_5 = 0;
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_6, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_6, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_11 = __Pyx_PyList_Append(__pyx_v_discretised_points_py, __pyx_t_2); if (unlikely(__pyx_t_11 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_11 = __Pyx_PyList_Append(__pyx_v_discretised_points_py, __pyx_t_2); if (unlikely(__pyx_t_11 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":97
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":242
  *         for i in range(len(discretised_points)):
  *             discretised_points_py.append(np.array(discretised_points[i]).reshape(len(discretised_points[0])/3,3))
  *         return discretised_points_py             # <<<<<<<<<<<<<<
@@ -3802,12 +5391,12 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   __pyx_r = __pyx_v_discretised_points_py;
   goto __pyx_L0;
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":91
- *         return self.thisptr.NbCurves()
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":233
+ *         self.baseptr = <PostMeshBase*> new PostMeshCurve(cpp_element_type,dimension)
  * 
- *     def DiscretiseCurves(self,Integer npoints):             # <<<<<<<<<<<<<<
- *         cdef vector[vector[Real]] discretised_points
- *         discretised_points = self.thisptr.DiscretiseCurves(npoints)
+ *     def DiscretiseCurves(self, Integer npoints):             # <<<<<<<<<<<<<<
+ *         """Discretise geometrical curves. This is only useful for post-processing"""
+ *         cdef:
  */
 
   /* function exit code */
@@ -3827,47 +5416,48 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   return __pyx_r;
 }
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":99
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":244
  *         return discretised_points_py
  * 
  *     def GetCurvesParameters(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetCurvesParameters()
- * 
+ *         """Get curves isoparametric parameters"""
+ *         (<PostMeshCurve*>self.baseptr).GetCurvesParameters()
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_43GetCurvesParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_43GetCurvesParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_5GetCurvesParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_4GetCurvesParameters[] = "Get curves isoparametric parameters";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_5GetCurvesParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetCurvesParameters (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_42GetCurvesParameters(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_4GetCurvesParameters(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_42GetCurvesParameters(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_4GetCurvesParameters(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetCurvesParameters", 0);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":100
- * 
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":246
  *     def GetCurvesParameters(self):
- *         self.thisptr.GetCurvesParameters()             # <<<<<<<<<<<<<<
+ *         """Get curves isoparametric parameters"""
+ *         (<PostMeshCurve*>self.baseptr).GetCurvesParameters()             # <<<<<<<<<<<<<<
  * 
  *     def GetCurvesLengths(self):
  */
-  __pyx_v_self->thisptr->GetCurvesParameters();
+  ((PostMeshCurve *)__pyx_v_self->__pyx_base.baseptr)->GetCurvesParameters();
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":99
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":244
  *         return discretised_points_py
  * 
  *     def GetCurvesParameters(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetCurvesParameters()
- * 
+ *         """Get curves isoparametric parameters"""
+ *         (<PostMeshCurve*>self.baseptr).GetCurvesParameters()
  */
 
   /* function exit code */
@@ -3877,347 +5467,48 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   return __pyx_r;
 }
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":102
- *         self.thisptr.GetCurvesParameters()
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":248
+ *         (<PostMeshCurve*>self.baseptr).GetCurvesParameters()
  * 
  *     def GetCurvesLengths(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetCurvesLengths()
- * 
+ *         """Get lengths of all geometrical curves"""
+ *         (<PostMeshCurve*>self.baseptr).GetCurvesLengths()
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_45GetCurvesLengths(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_45GetCurvesLengths(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_7GetCurvesLengths(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_6GetCurvesLengths[] = "Get lengths of all geometrical curves";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_7GetCurvesLengths(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetCurvesLengths (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_44GetCurvesLengths(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_6GetCurvesLengths(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_44GetCurvesLengths(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_6GetCurvesLengths(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetCurvesLengths", 0);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":103
- * 
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":250
  *     def GetCurvesLengths(self):
- *         self.thisptr.GetCurvesLengths()             # <<<<<<<<<<<<<<
- * 
- *     def GetGeomPointsOnCorrespondingEdges(self):
- */
-  __pyx_v_self->thisptr->GetCurvesLengths();
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":102
- *         self.thisptr.GetCurvesParameters()
- * 
- *     def GetCurvesLengths(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetCurvesLengths()
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":105
- *         self.thisptr.GetCurvesLengths()
- * 
- *     def GetGeomPointsOnCorrespondingEdges(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetGeomPointsOnCorrespondingEdges()
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_47GetGeomPointsOnCorrespondingEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_47GetGeomPointsOnCorrespondingEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("GetGeomPointsOnCorrespondingEdges (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_46GetGeomPointsOnCorrespondingEdges(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_46GetGeomPointsOnCorrespondingEdges(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("GetGeomPointsOnCorrespondingEdges", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":106
- * 
- *     def GetGeomPointsOnCorrespondingEdges(self):
- *         self.thisptr.GetGeomPointsOnCorrespondingEdges()             # <<<<<<<<<<<<<<
- * 
- *     def IdentifyCurvesContainingEdges(self):
- */
-  __pyx_v_self->thisptr->GetGeomPointsOnCorrespondingEdges();
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":105
- *         self.thisptr.GetCurvesLengths()
- * 
- *     def GetGeomPointsOnCorrespondingEdges(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetGeomPointsOnCorrespondingEdges()
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":108
- *         self.thisptr.GetGeomPointsOnCorrespondingEdges()
- * 
- *     def IdentifyCurvesContainingEdges(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.IdentifyCurvesContainingEdges()
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_49IdentifyCurvesContainingEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_49IdentifyCurvesContainingEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("IdentifyCurvesContainingEdges (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_48IdentifyCurvesContainingEdges(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_48IdentifyCurvesContainingEdges(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("IdentifyCurvesContainingEdges", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":109
- * 
- *     def IdentifyCurvesContainingEdges(self):
- *         self.thisptr.IdentifyCurvesContainingEdges()             # <<<<<<<<<<<<<<
- * 
- *     def ProjectMeshOnCurve(self):
- */
-  __pyx_v_self->thisptr->IdentifyCurvesContainingEdges();
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":108
- *         self.thisptr.GetGeomPointsOnCorrespondingEdges()
- * 
- *     def IdentifyCurvesContainingEdges(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.IdentifyCurvesContainingEdges()
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":111
- *         self.thisptr.IdentifyCurvesContainingEdges()
- * 
- *     def ProjectMeshOnCurve(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.ProjectMeshOnCurve()
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_51ProjectMeshOnCurve(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_51ProjectMeshOnCurve(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("ProjectMeshOnCurve (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_50ProjectMeshOnCurve(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_50ProjectMeshOnCurve(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("ProjectMeshOnCurve", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":112
- * 
- *     def ProjectMeshOnCurve(self):
- *         self.thisptr.ProjectMeshOnCurve()             # <<<<<<<<<<<<<<
- * 
- *     def RepairDualProjectedParameters(self):
- */
-  __pyx_v_self->thisptr->ProjectMeshOnCurve();
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":111
- *         self.thisptr.IdentifyCurvesContainingEdges()
- * 
- *     def ProjectMeshOnCurve(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.ProjectMeshOnCurve()
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":114
- *         self.thisptr.ProjectMeshOnCurve()
- * 
- *     def RepairDualProjectedParameters(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.RepairDualProjectedParameters()
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_53RepairDualProjectedParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_53RepairDualProjectedParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("RepairDualProjectedParameters (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_52RepairDualProjectedParameters(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_52RepairDualProjectedParameters(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("RepairDualProjectedParameters", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":115
- * 
- *     def RepairDualProjectedParameters(self):
- *         self.thisptr.RepairDualProjectedParameters()             # <<<<<<<<<<<<<<
- * 
- *     def MeshPointInversionCurve(self):
- */
-  __pyx_v_self->thisptr->RepairDualProjectedParameters();
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":114
- *         self.thisptr.ProjectMeshOnCurve()
- * 
- *     def RepairDualProjectedParameters(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.RepairDualProjectedParameters()
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":117
- *         self.thisptr.RepairDualProjectedParameters()
- * 
- *     def MeshPointInversionCurve(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.MeshPointInversionCurve()
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_55MeshPointInversionCurve(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_55MeshPointInversionCurve(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("MeshPointInversionCurve (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_54MeshPointInversionCurve(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_54MeshPointInversionCurve(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("MeshPointInversionCurve", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":118
- * 
- *     def MeshPointInversionCurve(self):
- *         self.thisptr.MeshPointInversionCurve()             # <<<<<<<<<<<<<<
- * 
- *     def MeshPointInversionCurveArcLength(self):
- */
-  __pyx_v_self->thisptr->MeshPointInversionCurve();
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":117
- *         self.thisptr.RepairDualProjectedParameters()
- * 
- *     def MeshPointInversionCurve(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.MeshPointInversionCurve()
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":120
- *         self.thisptr.MeshPointInversionCurve()
- * 
- *     def MeshPointInversionCurveArcLength(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.MeshPointInversionCurveArcLength()
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_57MeshPointInversionCurveArcLength(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_57MeshPointInversionCurveArcLength(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("MeshPointInversionCurveArcLength (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_56MeshPointInversionCurveArcLength(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_56MeshPointInversionCurveArcLength(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("MeshPointInversionCurveArcLength", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":121
- * 
- *     def MeshPointInversionCurveArcLength(self):
- *         self.thisptr.MeshPointInversionCurveArcLength()             # <<<<<<<<<<<<<<
+ *         """Get lengths of all geometrical curves"""
+ *         (<PostMeshCurve*>self.baseptr).GetCurvesLengths()             # <<<<<<<<<<<<<<
  * 
  *     def GetBoundaryPointsOrder(self):
  */
-  __pyx_v_self->thisptr->MeshPointInversionCurveArcLength();
+  ((PostMeshCurve *)__pyx_v_self->__pyx_base.baseptr)->GetCurvesLengths();
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":120
- *         self.thisptr.MeshPointInversionCurve()
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":248
+ *         (<PostMeshCurve*>self.baseptr).GetCurvesParameters()
  * 
- *     def MeshPointInversionCurveArcLength(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.MeshPointInversionCurveArcLength()
- * 
+ *     def GetCurvesLengths(self):             # <<<<<<<<<<<<<<
+ *         """Get lengths of all geometrical curves"""
+ *         (<PostMeshCurve*>self.baseptr).GetCurvesLengths()
  */
 
   /* function exit code */
@@ -4227,47 +5518,48 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   return __pyx_r;
 }
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":123
- *         self.thisptr.MeshPointInversionCurveArcLength()
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":252
+ *         (<PostMeshCurve*>self.baseptr).GetCurvesLengths()
  * 
  *     def GetBoundaryPointsOrder(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetBoundaryPointsOrder()
- * 
+ *         """Order high order nodes in VTK style"""
+ *         (<PostMeshCurve*>self.baseptr).GetBoundaryPointsOrder()
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_59GetBoundaryPointsOrder(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_59GetBoundaryPointsOrder(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_9GetBoundaryPointsOrder(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_8GetBoundaryPointsOrder[] = "Order high order nodes in VTK style";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_9GetBoundaryPointsOrder(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetBoundaryPointsOrder (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_58GetBoundaryPointsOrder(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_8GetBoundaryPointsOrder(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_58GetBoundaryPointsOrder(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_8GetBoundaryPointsOrder(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetBoundaryPointsOrder", 0);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":124
- * 
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":254
  *     def GetBoundaryPointsOrder(self):
- *         self.thisptr.GetBoundaryPointsOrder()             # <<<<<<<<<<<<<<
+ *         """Order high order nodes in VTK style"""
+ *         (<PostMeshCurve*>self.baseptr).GetBoundaryPointsOrder()             # <<<<<<<<<<<<<<
  * 
- *     def ReturnModifiedMeshPoints(self,Real[:,::1] points):
+ *     def GetGeomPointsOnCorrespondingEdges(self):
  */
-  __pyx_v_self->thisptr->GetBoundaryPointsOrder();
+  ((PostMeshCurve *)__pyx_v_self->__pyx_base.baseptr)->GetBoundaryPointsOrder();
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":123
- *         self.thisptr.MeshPointInversionCurveArcLength()
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":252
+ *         (<PostMeshCurve*>self.baseptr).GetCurvesLengths()
  * 
  *     def GetBoundaryPointsOrder(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetBoundaryPointsOrder()
- * 
+ *         """Order high order nodes in VTK style"""
+ *         (<PostMeshCurve*>self.baseptr).GetBoundaryPointsOrder()
  */
 
   /* function exit code */
@@ -4277,17 +5569,579 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   return __pyx_r;
 }
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":126
- *         self.thisptr.GetBoundaryPointsOrder()
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":256
+ *         (<PostMeshCurve*>self.baseptr).GetBoundaryPointsOrder()
  * 
- *     def ReturnModifiedMeshPoints(self,Real[:,::1] points):             # <<<<<<<<<<<<<<
- *         self.thisptr.ReturnModifiedMeshPoints(&points[0,0])
- * 
+ *     def GetGeomPointsOnCorrespondingEdges(self):             # <<<<<<<<<<<<<<
+ *         """Find which geometrical points lie on which geometrical curves/topological edges"""
+ *         (<PostMeshCurve*>self.baseptr).GetGeomPointsOnCorrespondingEdges()
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_61ReturnModifiedMeshPoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_points); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_61ReturnModifiedMeshPoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_points) {
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_11GetGeomPointsOnCorrespondingEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_10GetGeomPointsOnCorrespondingEdges[] = "Find which geometrical points lie on which geometrical curves/topological edges";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_11GetGeomPointsOnCorrespondingEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("GetGeomPointsOnCorrespondingEdges (wrapper)", 0);
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_10GetGeomPointsOnCorrespondingEdges(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_10GetGeomPointsOnCorrespondingEdges(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("GetGeomPointsOnCorrespondingEdges", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":258
+ *     def GetGeomPointsOnCorrespondingEdges(self):
+ *         """Find which geometrical points lie on which geometrical curves/topological edges"""
+ *         (<PostMeshCurve*>self.baseptr).GetGeomPointsOnCorrespondingEdges()             # <<<<<<<<<<<<<<
+ * 
+ *     def IdentifyCurvesContainingEdges(self):
+ */
+  ((PostMeshCurve *)__pyx_v_self->__pyx_base.baseptr)->GetGeomPointsOnCorrespondingEdges();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":256
+ *         (<PostMeshCurve*>self.baseptr).GetBoundaryPointsOrder()
+ * 
+ *     def GetGeomPointsOnCorrespondingEdges(self):             # <<<<<<<<<<<<<<
+ *         """Find which geometrical points lie on which geometrical curves/topological edges"""
+ *         (<PostMeshCurve*>self.baseptr).GetGeomPointsOnCorrespondingEdges()
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":260
+ *         (<PostMeshCurve*>self.baseptr).GetGeomPointsOnCorrespondingEdges()
+ * 
+ *     def IdentifyCurvesContainingEdges(self):             # <<<<<<<<<<<<<<
+ *         """Identify which geometrical curves contain which mesh edges"""
+ *         (<PostMeshCurve*>self.baseptr).IdentifyCurvesContainingEdges()
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_13IdentifyCurvesContainingEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_12IdentifyCurvesContainingEdges[] = "Identify which geometrical curves contain which mesh edges";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_13IdentifyCurvesContainingEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("IdentifyCurvesContainingEdges (wrapper)", 0);
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_12IdentifyCurvesContainingEdges(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_12IdentifyCurvesContainingEdges(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("IdentifyCurvesContainingEdges", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":262
+ *     def IdentifyCurvesContainingEdges(self):
+ *         """Identify which geometrical curves contain which mesh edges"""
+ *         (<PostMeshCurve*>self.baseptr).IdentifyCurvesContainingEdges()             # <<<<<<<<<<<<<<
+ * 
+ *     def ProjectMeshOnCurve(self):
+ */
+  ((PostMeshCurve *)__pyx_v_self->__pyx_base.baseptr)->IdentifyCurvesContainingEdges();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":260
+ *         (<PostMeshCurve*>self.baseptr).GetGeomPointsOnCorrespondingEdges()
+ * 
+ *     def IdentifyCurvesContainingEdges(self):             # <<<<<<<<<<<<<<
+ *         """Identify which geometrical curves contain which mesh edges"""
+ *         (<PostMeshCurve*>self.baseptr).IdentifyCurvesContainingEdges()
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":264
+ *         (<PostMeshCurve*>self.baseptr).IdentifyCurvesContainingEdges()
+ * 
+ *     def ProjectMeshOnCurve(self):             # <<<<<<<<<<<<<<
+ *         """Project linear mesh nodes on to the true CAD curves"""
+ *         (<PostMeshCurve*>self.baseptr).ProjectMeshOnCurve()
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_15ProjectMeshOnCurve(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_14ProjectMeshOnCurve[] = "Project linear mesh nodes on to the true CAD curves";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_15ProjectMeshOnCurve(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("ProjectMeshOnCurve (wrapper)", 0);
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_14ProjectMeshOnCurve(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_14ProjectMeshOnCurve(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("ProjectMeshOnCurve", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":266
+ *     def ProjectMeshOnCurve(self):
+ *         """Project linear mesh nodes on to the true CAD curves"""
+ *         (<PostMeshCurve*>self.baseptr).ProjectMeshOnCurve()             # <<<<<<<<<<<<<<
+ * 
+ *     def RepairDualProjectedParameters(self):
+ */
+  ((PostMeshCurve *)__pyx_v_self->__pyx_base.baseptr)->ProjectMeshOnCurve();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":264
+ *         (<PostMeshCurve*>self.baseptr).IdentifyCurvesContainingEdges()
+ * 
+ *     def ProjectMeshOnCurve(self):             # <<<<<<<<<<<<<<
+ *         """Project linear mesh nodes on to the true CAD curves"""
+ *         (<PostMeshCurve*>self.baseptr).ProjectMeshOnCurve()
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":268
+ *         (<PostMeshCurve*>self.baseptr).ProjectMeshOnCurve()
+ * 
+ *     def RepairDualProjectedParameters(self):             # <<<<<<<<<<<<<<
+ *         """Repair/fix projected points, if projection happens to be inaccurate.
+ *         This is typically the case for closed/periodic curves
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_17RepairDualProjectedParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_16RepairDualProjectedParameters[] = "Repair/fix projected points, if projection happens to be inaccurate.\n        This is typically the case for closed/periodic curves\n        ";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_17RepairDualProjectedParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("RepairDualProjectedParameters (wrapper)", 0);
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_16RepairDualProjectedParameters(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_16RepairDualProjectedParameters(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("RepairDualProjectedParameters", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":272
+ *         This is typically the case for closed/periodic curves
+ *         """
+ *         (<PostMeshCurve*>self.baseptr).RepairDualProjectedParameters()             # <<<<<<<<<<<<<<
+ * 
+ *     def MeshPointInversionCurve(self):
+ */
+  ((PostMeshCurve *)__pyx_v_self->__pyx_base.baseptr)->RepairDualProjectedParameters();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":268
+ *         (<PostMeshCurve*>self.baseptr).ProjectMeshOnCurve()
+ * 
+ *     def RepairDualProjectedParameters(self):             # <<<<<<<<<<<<<<
+ *         """Repair/fix projected points, if projection happens to be inaccurate.
+ *         This is typically the case for closed/periodic curves
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":274
+ *         (<PostMeshCurve*>self.baseptr).RepairDualProjectedParameters()
+ * 
+ *     def MeshPointInversionCurve(self):             # <<<<<<<<<<<<<<
+ *         """Perform point inversion of high order nodes in the mesh on
+ *         to the true CAD geometry using an orthogonal projection
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_19MeshPointInversionCurve(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_18MeshPointInversionCurve[] = "Perform point inversion of high order nodes in the mesh on\n        to the true CAD geometry using an orthogonal projection\n        ";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_19MeshPointInversionCurve(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("MeshPointInversionCurve (wrapper)", 0);
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_18MeshPointInversionCurve(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_18MeshPointInversionCurve(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("MeshPointInversionCurve", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":278
+ *         to the true CAD geometry using an orthogonal projection
+ *         """
+ *         (<PostMeshCurve*>self.baseptr).MeshPointInversionCurve()             # <<<<<<<<<<<<<<
+ * 
+ *     def MeshPointInversionCurveArcLength(self):
+ */
+  ((PostMeshCurve *)__pyx_v_self->__pyx_base.baseptr)->MeshPointInversionCurve();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":274
+ *         (<PostMeshCurve*>self.baseptr).RepairDualProjectedParameters()
+ * 
+ *     def MeshPointInversionCurve(self):             # <<<<<<<<<<<<<<
+ *         """Perform point inversion of high order nodes in the mesh on
+ *         to the true CAD geometry using an orthogonal projection
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":280
+ *         (<PostMeshCurve*>self.baseptr).MeshPointInversionCurve()
+ * 
+ *     def MeshPointInversionCurveArcLength(self):             # <<<<<<<<<<<<<<
+ *         """Perform point inversion of high order nodes in the mesh on
+ *         to the true CAD geometry using an arc-length-based projection.
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_21MeshPointInversionCurveArcLength(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_20MeshPointInversionCurveArcLength[] = "Perform point inversion of high order nodes in the mesh on\n        to the true CAD geometry using an arc-length-based projection.\n        This is an isometric projection, in that the spacing of nodes\n        in the curved mesh remain the same i.e. equally-spaced, Fekete\n        etc\n        ";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_21MeshPointInversionCurveArcLength(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("MeshPointInversionCurveArcLength (wrapper)", 0);
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_20MeshPointInversionCurveArcLength(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_20MeshPointInversionCurveArcLength(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("MeshPointInversionCurveArcLength", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":287
+ *         etc
+ *         """
+ *         (<PostMeshCurve*>self.baseptr).MeshPointInversionCurveArcLength()             # <<<<<<<<<<<<<<
+ * 
+ *     def PerformPointProjectionInversionCurve(self, str curve_identification_algorithm="projection",
+ */
+  ((PostMeshCurve *)__pyx_v_self->__pyx_base.baseptr)->MeshPointInversionCurveArcLength();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":280
+ *         (<PostMeshCurve*>self.baseptr).MeshPointInversionCurve()
+ * 
+ *     def MeshPointInversionCurveArcLength(self):             # <<<<<<<<<<<<<<
+ *         """Perform point inversion of high order nodes in the mesh on
+ *         to the true CAD geometry using an arc-length-based projection.
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":289
+ *         (<PostMeshCurve*>self.baseptr).MeshPointInversionCurveArcLength()
+ * 
+ *     def PerformPointProjectionInversionCurve(self, str curve_identification_algorithm="projection",             # <<<<<<<<<<<<<<
+ *         str projection_type="arc_length"):
+ *         """Convenience function for Python API. Performs point projection and
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_23PerformPointProjectionInversionCurve(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_22PerformPointProjectionInversionCurve[] = "Convenience function for Python API. Performs point projection and\n            point inversion at one go\n\n            input:\n                curve_identification_algorithm          [str] algorithm to use for identifying\n                                                        which mesh edges lie on which geometrical \n                                                        curves, either \"projection\" or \"minimisation\".\n                                                        Note that this input argument can be ignored,\n                                                        as it is only kept for API consistency at the \n                                                        moment, as \"minimisation\" algorithm is not\n                                                        implemented for curves \n\n                projection_type:                        [str] type of prjection to use for projecting\n                                                        high order nodes to CAD geometry, should be\n                                                        either \"arc_length\" or \"orthogonal\".\n                                                        The default for 2D meshes is arc_length, as\n                                                        it results in better quality high order meshes\n        ";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_23PerformPointProjectionInversionCurve(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  PyObject *__pyx_v_curve_identification_algorithm = 0;
+  PyObject *__pyx_v_projection_type = 0;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("PerformPointProjectionInversionCurve (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_curve_identification_algorithm,&__pyx_n_s_projection_type,0};
+    PyObject* values[2] = {0,0};
+    values[0] = ((PyObject*)__pyx_n_s_projection);
+    values[1] = ((PyObject*)__pyx_n_s_arc_length);
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_curve_identification_algorithm);
+          if (value) { values[0] = value; kw_args--; }
+        }
+        case  1:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_projection_type);
+          if (value) { values[1] = value; kw_args--; }
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "PerformPointProjectionInversionCurve") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 289; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      }
+    } else {
+      switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+    }
+    __pyx_v_curve_identification_algorithm = ((PyObject*)values[0]);
+    __pyx_v_projection_type = ((PyObject*)values[1]);
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("PerformPointProjectionInversionCurve", 0, 0, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 289; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshCurvePy.PerformPointProjectionInversionCurve", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_curve_identification_algorithm), (&PyString_Type), 1, "curve_identification_algorithm", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 289; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_projection_type), (&PyString_Type), 1, "projection_type", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 290; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_22PerformPointProjectionInversionCurve(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self), __pyx_v_curve_identification_algorithm, __pyx_v_projection_type);
+
+  /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_22PerformPointProjectionInversionCurve(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, PyObject *__pyx_v_curve_identification_algorithm, PyObject *__pyx_v_projection_type) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  int __pyx_t_1;
+  int __pyx_t_2;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("PerformPointProjectionInversionCurve", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":310
+ *         """
+ * 
+ *         (<PostMeshCurve*>self.baseptr).GetCurvesParameters()             # <<<<<<<<<<<<<<
+ *         (<PostMeshCurve*>self.baseptr).GetCurvesLengths()
+ *         (<PostMeshCurve*>self.baseptr).GetBoundaryPointsOrder()
+ */
+  ((PostMeshCurve *)__pyx_v_self->__pyx_base.baseptr)->GetCurvesParameters();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":311
+ * 
+ *         (<PostMeshCurve*>self.baseptr).GetCurvesParameters()
+ *         (<PostMeshCurve*>self.baseptr).GetCurvesLengths()             # <<<<<<<<<<<<<<
+ *         (<PostMeshCurve*>self.baseptr).GetBoundaryPointsOrder()
+ *         (<PostMeshCurve*>self.baseptr).GetGeomPointsOnCorrespondingEdges()
+ */
+  ((PostMeshCurve *)__pyx_v_self->__pyx_base.baseptr)->GetCurvesLengths();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":312
+ *         (<PostMeshCurve*>self.baseptr).GetCurvesParameters()
+ *         (<PostMeshCurve*>self.baseptr).GetCurvesLengths()
+ *         (<PostMeshCurve*>self.baseptr).GetBoundaryPointsOrder()             # <<<<<<<<<<<<<<
+ *         (<PostMeshCurve*>self.baseptr).GetGeomPointsOnCorrespondingEdges()
+ *         if curve_identification_algorithm != "projection":
+ */
+  ((PostMeshCurve *)__pyx_v_self->__pyx_base.baseptr)->GetBoundaryPointsOrder();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":313
+ *         (<PostMeshCurve*>self.baseptr).GetCurvesLengths()
+ *         (<PostMeshCurve*>self.baseptr).GetBoundaryPointsOrder()
+ *         (<PostMeshCurve*>self.baseptr).GetGeomPointsOnCorrespondingEdges()             # <<<<<<<<<<<<<<
+ *         if curve_identification_algorithm != "projection":
+ *             warn("Only projection algorithm is available for curve identification")
+ */
+  ((PostMeshCurve *)__pyx_v_self->__pyx_base.baseptr)->GetGeomPointsOnCorrespondingEdges();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":314
+ *         (<PostMeshCurve*>self.baseptr).GetBoundaryPointsOrder()
+ *         (<PostMeshCurve*>self.baseptr).GetGeomPointsOnCorrespondingEdges()
+ *         if curve_identification_algorithm != "projection":             # <<<<<<<<<<<<<<
+ *             warn("Only projection algorithm is available for curve identification")
+ *         (<PostMeshCurve*>self.baseptr).IdentifyCurvesContainingEdges()
+ */
+  __pyx_t_1 = (__Pyx_PyString_Equals(__pyx_v_curve_identification_algorithm, __pyx_n_s_projection, Py_NE)); if (unlikely(__pyx_t_1 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 314; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = (__pyx_t_1 != 0);
+  if (__pyx_t_2) {
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":315
+ *         (<PostMeshCurve*>self.baseptr).GetGeomPointsOnCorrespondingEdges()
+ *         if curve_identification_algorithm != "projection":
+ *             warn("Only projection algorithm is available for curve identification")             # <<<<<<<<<<<<<<
+ *         (<PostMeshCurve*>self.baseptr).IdentifyCurvesContainingEdges()
+ *         (<PostMeshCurve*>self.baseptr).ProjectMeshOnCurve()
+ */
+    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_warn); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 315; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_3);
+    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_tuple__4, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 315; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_4);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":314
+ *         (<PostMeshCurve*>self.baseptr).GetBoundaryPointsOrder()
+ *         (<PostMeshCurve*>self.baseptr).GetGeomPointsOnCorrespondingEdges()
+ *         if curve_identification_algorithm != "projection":             # <<<<<<<<<<<<<<
+ *             warn("Only projection algorithm is available for curve identification")
+ *         (<PostMeshCurve*>self.baseptr).IdentifyCurvesContainingEdges()
+ */
+  }
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":316
+ *         if curve_identification_algorithm != "projection":
+ *             warn("Only projection algorithm is available for curve identification")
+ *         (<PostMeshCurve*>self.baseptr).IdentifyCurvesContainingEdges()             # <<<<<<<<<<<<<<
+ *         (<PostMeshCurve*>self.baseptr).ProjectMeshOnCurve()
+ *         (<PostMeshCurve*>self.baseptr).RepairDualProjectedParameters()
+ */
+  ((PostMeshCurve *)__pyx_v_self->__pyx_base.baseptr)->IdentifyCurvesContainingEdges();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":317
+ *             warn("Only projection algorithm is available for curve identification")
+ *         (<PostMeshCurve*>self.baseptr).IdentifyCurvesContainingEdges()
+ *         (<PostMeshCurve*>self.baseptr).ProjectMeshOnCurve()             # <<<<<<<<<<<<<<
+ *         (<PostMeshCurve*>self.baseptr).RepairDualProjectedParameters()
+ *         if projection_type == "orthogonal":
+ */
+  ((PostMeshCurve *)__pyx_v_self->__pyx_base.baseptr)->ProjectMeshOnCurve();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":318
+ *         (<PostMeshCurve*>self.baseptr).IdentifyCurvesContainingEdges()
+ *         (<PostMeshCurve*>self.baseptr).ProjectMeshOnCurve()
+ *         (<PostMeshCurve*>self.baseptr).RepairDualProjectedParameters()             # <<<<<<<<<<<<<<
+ *         if projection_type == "orthogonal":
+ *             (<PostMeshCurve*>self.baseptr).MeshPointInversionCurve()
+ */
+  ((PostMeshCurve *)__pyx_v_self->__pyx_base.baseptr)->RepairDualProjectedParameters();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":319
+ *         (<PostMeshCurve*>self.baseptr).ProjectMeshOnCurve()
+ *         (<PostMeshCurve*>self.baseptr).RepairDualProjectedParameters()
+ *         if projection_type == "orthogonal":             # <<<<<<<<<<<<<<
+ *             (<PostMeshCurve*>self.baseptr).MeshPointInversionCurve()
+ *         else:
+ */
+  __pyx_t_2 = (__Pyx_PyString_Equals(__pyx_v_projection_type, __pyx_n_s_orthogonal, Py_EQ)); if (unlikely(__pyx_t_2 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 319; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = (__pyx_t_2 != 0);
+  if (__pyx_t_1) {
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":320
+ *         (<PostMeshCurve*>self.baseptr).RepairDualProjectedParameters()
+ *         if projection_type == "orthogonal":
+ *             (<PostMeshCurve*>self.baseptr).MeshPointInversionCurve()             # <<<<<<<<<<<<<<
+ *         else:
+ *             (<PostMeshCurve*>self.baseptr).MeshPointInversionCurveArcLength()
+ */
+    ((PostMeshCurve *)__pyx_v_self->__pyx_base.baseptr)->MeshPointInversionCurve();
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":319
+ *         (<PostMeshCurve*>self.baseptr).ProjectMeshOnCurve()
+ *         (<PostMeshCurve*>self.baseptr).RepairDualProjectedParameters()
+ *         if projection_type == "orthogonal":             # <<<<<<<<<<<<<<
+ *             (<PostMeshCurve*>self.baseptr).MeshPointInversionCurve()
+ *         else:
+ */
+    goto __pyx_L4;
+  }
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":322
+ *             (<PostMeshCurve*>self.baseptr).MeshPointInversionCurve()
+ *         else:
+ *             (<PostMeshCurve*>self.baseptr).MeshPointInversionCurveArcLength()             # <<<<<<<<<<<<<<
+ * 
+ *     def ReturnModifiedMeshPoints(self,Real[:,::1] points):
+ */
+  /*else*/ {
+    ((PostMeshCurve *)__pyx_v_self->__pyx_base.baseptr)->MeshPointInversionCurveArcLength();
+  }
+  __pyx_L4:;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":289
+ *         (<PostMeshCurve*>self.baseptr).MeshPointInversionCurveArcLength()
+ * 
+ *     def PerformPointProjectionInversionCurve(self, str curve_identification_algorithm="projection",             # <<<<<<<<<<<<<<
+ *         str projection_type="arc_length"):
+ *         """Convenience function for Python API. Performs point projection and
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshCurvePy.PerformPointProjectionInversionCurve", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":324
+ *             (<PostMeshCurve*>self.baseptr).MeshPointInversionCurveArcLength()
+ * 
+ *     def ReturnModifiedMeshPoints(self,Real[:,::1] points):             # <<<<<<<<<<<<<<
+ *         """Return modified points in the linear mesh. Needs nodal coordinates
+ *         as input argument
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_25ReturnModifiedMeshPoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_points); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_24ReturnModifiedMeshPoints[] = "Return modified points in the linear mesh. Needs nodal coordinates\n        as input argument\n        ";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_25ReturnModifiedMeshPoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_points) {
   __Pyx_memviewslice __pyx_v_points = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
@@ -4296,7 +6150,7 @@ static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("ReturnModifiedMeshPoints (wrapper)", 0);
   assert(__pyx_arg_points); {
-    __pyx_v_points = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_arg_points); if (unlikely(!__pyx_v_points.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 126; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_points = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_arg_points); if (unlikely(!__pyx_v_points.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 324; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4304,37 +6158,37 @@ static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_60ReturnModifiedMeshPoints(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self), __pyx_v_points);
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_24ReturnModifiedMeshPoints(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self), __pyx_v_points);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_60ReturnModifiedMeshPoints(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_points) {
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_24ReturnModifiedMeshPoints(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_points) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   Py_ssize_t __pyx_t_1;
   Py_ssize_t __pyx_t_2;
   __Pyx_RefNannySetupContext("ReturnModifiedMeshPoints", 0);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":127
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":328
+ *         as input argument
+ *         """
+ *         (<PostMeshCurve*>self.baseptr).ReturnModifiedMeshPoints(&points[0,0])             # <<<<<<<<<<<<<<
  * 
- *     def ReturnModifiedMeshPoints(self,Real[:,::1] points):
- *         self.thisptr.ReturnModifiedMeshPoints(&points[0,0])             # <<<<<<<<<<<<<<
- * 
- *     @boundscheck(False)
+ *     def __dealloc__(self):
  */
   __pyx_t_1 = 0;
   __pyx_t_2 = 0;
-  __pyx_v_self->thisptr->ReturnModifiedMeshPoints((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=0 */ (__pyx_v_points.data + __pyx_t_1 * __pyx_v_points.strides[0]) )) + __pyx_t_2)) )))));
+  ((PostMeshCurve *)__pyx_v_self->__pyx_base.baseptr)->ReturnModifiedMeshPoints((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=0 */ (__pyx_v_points.data + __pyx_t_1 * __pyx_v_points.strides[0]) )) + __pyx_t_2)) )))));
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":126
- *         self.thisptr.GetBoundaryPointsOrder()
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":324
+ *             (<PostMeshCurve*>self.baseptr).MeshPointInversionCurveArcLength()
  * 
  *     def ReturnModifiedMeshPoints(self,Real[:,::1] points):             # <<<<<<<<<<<<<<
- *         self.thisptr.ReturnModifiedMeshPoints(&points[0,0])
- * 
+ *         """Return modified points in the linear mesh. Needs nodal coordinates
+ *         as input argument
  */
 
   /* function exit code */
@@ -4345,390 +6199,95 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   return __pyx_r;
 }
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":130
- * 
- *     @boundscheck(False)
- *     def GetDirichletData(self):             # <<<<<<<<<<<<<<
- *         cdef:
- *             DirichletData struct_to_python = self.thisptr.GetDirichletData()
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_63GetDirichletData(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_63GetDirichletData(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("GetDirichletData (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_62GetDirichletData(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_62GetDirichletData(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
-  struct DirichletData __pyx_v_struct_to_python;
-  PyArrayObject *__pyx_v_nodes_dir = 0;
-  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_i;
-  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger __pyx_v_j;
-  PyArrayObject *__pyx_v_displacements_BC = 0;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_displacements_BC;
-  __Pyx_Buffer __pyx_pybuffer_displacements_BC;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_nodes_dir;
-  __Pyx_Buffer __pyx_pybuffer_nodes_dir;
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
-  PyObject *__pyx_t_4 = NULL;
-  PyObject *__pyx_t_5 = NULL;
-  PyArrayObject *__pyx_t_6 = NULL;
-  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_t_7;
-  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_t_8;
-  PyArrayObject *__pyx_t_9 = NULL;
-  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger __pyx_t_10;
-  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger __pyx_t_11;
-  Py_ssize_t __pyx_t_12;
-  PyObject *__pyx_t_13 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("GetDirichletData", 0);
-  __pyx_pybuffer_nodes_dir.pybuffer.buf = NULL;
-  __pyx_pybuffer_nodes_dir.refcount = 0;
-  __pyx_pybuffernd_nodes_dir.data = NULL;
-  __pyx_pybuffernd_nodes_dir.rcbuffer = &__pyx_pybuffer_nodes_dir;
-  __pyx_pybuffer_displacements_BC.pybuffer.buf = NULL;
-  __pyx_pybuffer_displacements_BC.refcount = 0;
-  __pyx_pybuffernd_displacements_BC.data = NULL;
-  __pyx_pybuffernd_displacements_BC.rcbuffer = &__pyx_pybuffer_displacements_BC;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":132
- *     def GetDirichletData(self):
- *         cdef:
- *             DirichletData struct_to_python = self.thisptr.GetDirichletData()             # <<<<<<<<<<<<<<
- *             np.ndarray[np.int64_t, ndim=2, mode='c'] nodes_dir = np.zeros((struct_to_python.nodes_dir_size,1),dtype=np.int64)
- *             Integer i
- */
-  __pyx_v_struct_to_python = __pyx_v_self->thisptr->GetDirichletData();
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":133
- *         cdef:
- *             DirichletData struct_to_python = self.thisptr.GetDirichletData()
- *             np.ndarray[np.int64_t, ndim=2, mode='c'] nodes_dir = np.zeros((struct_to_python.nodes_dir_size,1),dtype=np.int64)             # <<<<<<<<<<<<<<
- *             Integer i
- *             UInteger j
- */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_From_long(__pyx_v_struct_to_python.nodes_dir_size); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
-  __Pyx_INCREF(__pyx_int_1);
-  __Pyx_GIVEREF(__pyx_int_1);
-  PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_int_1);
-  __pyx_t_1 = 0;
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_3);
-  __pyx_t_3 = 0;
-  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_int64); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_6 = ((PyArrayObject *)__pyx_t_5);
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer, (PyObject*)__pyx_t_6, &__Pyx_TypeInfo_nn___pyx_t_5numpy_int64_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {
-      __pyx_v_nodes_dir = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.buf = NULL;
-      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    } else {__pyx_pybuffernd_nodes_dir.diminfo[0].strides = __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_nodes_dir.diminfo[0].shape = __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_nodes_dir.diminfo[1].strides = __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_nodes_dir.diminfo[1].shape = __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.shape[1];
-    }
-  }
-  __pyx_t_6 = 0;
-  __pyx_v_nodes_dir = ((PyArrayObject *)__pyx_t_5);
-  __pyx_t_5 = 0;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":137
- *             UInteger j
- * 
- *         for i in range(struct_to_python.nodes_dir_size):             # <<<<<<<<<<<<<<
- *             nodes_dir[i] = struct_to_python.nodes_dir_out_stl[i]
- * 
- */
-  __pyx_t_7 = __pyx_v_struct_to_python.nodes_dir_size;
-  for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
-    __pyx_v_i = __pyx_t_8;
-
-    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":138
- * 
- *         for i in range(struct_to_python.nodes_dir_size):
- *             nodes_dir[i] = struct_to_python.nodes_dir_out_stl[i]             # <<<<<<<<<<<<<<
- * 
- *         cdef np.ndarray[np.float64_t, ndim=2, mode='c'] displacements_BC = \
- */
-    __pyx_t_5 = __Pyx_PyInt_From_long((__pyx_v_struct_to_python.nodes_dir_out_stl[__pyx_v_i])); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GOTREF(__pyx_t_5);
-    if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_nodes_dir), __pyx_v_i, __pyx_t_5, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer, 1, __Pyx_PyInt_From_long, 0, 0, 0) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  }
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":141
- * 
- *         cdef np.ndarray[np.float64_t, ndim=2, mode='c'] displacements_BC = \
- *             np.zeros((self.thisptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64)             # <<<<<<<<<<<<<<
- *         for j in range(self.thisptr.ndim*struct_to_python.nodes_dir_size):
- *             displacements_BC[j] = struct_to_python.displacement_BC_stl[j]
- */
-  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyInt_From_unsigned_long((__pyx_v_self->thisptr->ndim * __pyx_v_struct_to_python.nodes_dir_size)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_5);
-  PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_5);
-  __Pyx_INCREF(__pyx_int_1);
-  __Pyx_GIVEREF(__pyx_int_1);
-  PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_int_1);
-  __pyx_t_5 = 0;
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_1);
-  __pyx_t_1 = 0;
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_float64); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_9 = ((PyArrayObject *)__pyx_t_4);
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer, (PyObject*)__pyx_t_9, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {
-      __pyx_v_displacements_BC = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.buf = NULL;
-      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    } else {__pyx_pybuffernd_displacements_BC.diminfo[0].strides = __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_displacements_BC.diminfo[0].shape = __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_displacements_BC.diminfo[1].strides = __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_displacements_BC.diminfo[1].shape = __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.shape[1];
-    }
-  }
-  __pyx_t_9 = 0;
-  __pyx_v_displacements_BC = ((PyArrayObject *)__pyx_t_4);
-  __pyx_t_4 = 0;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":142
- *         cdef np.ndarray[np.float64_t, ndim=2, mode='c'] displacements_BC = \
- *             np.zeros((self.thisptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64)
- *         for j in range(self.thisptr.ndim*struct_to_python.nodes_dir_size):             # <<<<<<<<<<<<<<
- *             displacements_BC[j] = struct_to_python.displacement_BC_stl[j]
- * 
- */
-  __pyx_t_10 = (__pyx_v_self->thisptr->ndim * __pyx_v_struct_to_python.nodes_dir_size);
-  for (__pyx_t_11 = 0; __pyx_t_11 < __pyx_t_10; __pyx_t_11+=1) {
-    __pyx_v_j = __pyx_t_11;
-
-    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":143
- *             np.zeros((self.thisptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64)
- *         for j in range(self.thisptr.ndim*struct_to_python.nodes_dir_size):
- *             displacements_BC[j] = struct_to_python.displacement_BC_stl[j]             # <<<<<<<<<<<<<<
- * 
- *         return nodes_dir, displacements_BC.reshape(struct_to_python.nodes_dir_size,self.thisptr.ndim)
- */
-    __pyx_t_4 = PyFloat_FromDouble((__pyx_v_struct_to_python.displacement_BC_stl[__pyx_v_j])); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 143; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GOTREF(__pyx_t_4);
-    if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_displacements_BC), __pyx_v_j, __pyx_t_4, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger, 0, __Pyx_PyInt_From_unsigned_long, 0, 0, 0) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 143; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  }
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":145
- *             displacements_BC[j] = struct_to_python.displacement_BC_stl[j]
- * 
- *         return nodes_dir, displacements_BC.reshape(struct_to_python.nodes_dir_size,self.thisptr.ndim)             # <<<<<<<<<<<<<<
- * 
- * 
- */
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_displacements_BC), __pyx_n_s_reshape); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 145; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_5 = __Pyx_PyInt_From_long(__pyx_v_struct_to_python.nodes_dir_size); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 145; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_3 = __Pyx_PyInt_From_unsigned_long(__pyx_v_self->thisptr->ndim); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 145; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = NULL;
-  __pyx_t_12 = 0;
-  if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_1))) {
-    __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_1);
-    if (likely(__pyx_t_2)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
-      __Pyx_INCREF(__pyx_t_2);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_1, function);
-      __pyx_t_12 = 1;
-    }
-  }
-  __pyx_t_13 = PyTuple_New(2+__pyx_t_12); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 145; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_13);
-  if (__pyx_t_2) {
-    __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_t_2); __pyx_t_2 = NULL;
-  }
-  __Pyx_GIVEREF(__pyx_t_5);
-  PyTuple_SET_ITEM(__pyx_t_13, 0+__pyx_t_12, __pyx_t_5);
-  __Pyx_GIVEREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_13, 1+__pyx_t_12, __pyx_t_3);
-  __pyx_t_5 = 0;
-  __pyx_t_3 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_13, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 145; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 145; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_INCREF(((PyObject *)__pyx_v_nodes_dir));
-  __Pyx_GIVEREF(((PyObject *)__pyx_v_nodes_dir));
-  PyTuple_SET_ITEM(__pyx_t_1, 0, ((PyObject *)__pyx_v_nodes_dir));
-  __Pyx_GIVEREF(__pyx_t_4);
-  PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_4);
-  __pyx_t_4 = 0;
-  __pyx_r = __pyx_t_1;
-  __pyx_t_1 = 0;
-  goto __pyx_L0;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":130
- * 
- *     @boundscheck(False)
- *     def GetDirichletData(self):             # <<<<<<<<<<<<<<
- *         cdef:
- *             DirichletData struct_to_python = self.thisptr.GetDirichletData()
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_5);
-  __Pyx_XDECREF(__pyx_t_13);
-  { PyObject *__pyx_type, *__pyx_value, *__pyx_tb;
-    __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer);
-  __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshCurvePy.GetDirichletData", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  goto __pyx_L2;
-  __pyx_L0:;
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer);
-  __pyx_L2:;
-  __Pyx_XDECREF((PyObject *)__pyx_v_nodes_dir);
-  __Pyx_XDECREF((PyObject *)__pyx_v_displacements_BC);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":148
- * 
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":330
+ *         (<PostMeshCurve*>self.baseptr).ReturnModifiedMeshPoints(&points[0,0])
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
- *         if self.thisptr != NULL:
- *             del self.thisptr
+ *         # CREATE A TEMPORARY DERIVED CPP OBJECT
+ *         cdef PostMeshCurve *tmpptr
  */
 
 /* Python wrapper */
-static void __pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_65__dealloc__(PyObject *__pyx_v_self); /*proto*/
-static void __pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_65__dealloc__(PyObject *__pyx_v_self) {
+static void __pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_27__dealloc__(PyObject *__pyx_v_self); /*proto*/
+static void __pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_27__dealloc__(PyObject *__pyx_v_self) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__dealloc__ (wrapper)", 0);
-  __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_64__dealloc__(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
+  __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_26__dealloc__(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
 }
 
-static void __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_64__dealloc__(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
+static void __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_26__dealloc__(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *__pyx_v_self) {
+  PostMeshCurve *__pyx_v_tmpptr;
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":149
- * 
- *     def __dealloc__(self):
- *         if self.thisptr != NULL:             # <<<<<<<<<<<<<<
- *             del self.thisptr
- * 
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":333
+ *         # CREATE A TEMPORARY DERIVED CPP OBJECT
+ *         cdef PostMeshCurve *tmpptr
+ *         if self.baseptr != NULL:             # <<<<<<<<<<<<<<
+ *             # CAST IT TO BASE
+ *             tmpptr = <PostMeshCurve*>self.baseptr
  */
-  __pyx_t_1 = ((__pyx_v_self->thisptr != NULL) != 0);
+  __pyx_t_1 = ((__pyx_v_self->__pyx_base.baseptr != NULL) != 0);
   if (__pyx_t_1) {
 
-    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":150
- *     def __dealloc__(self):
- *         if self.thisptr != NULL:
- *             del self.thisptr             # <<<<<<<<<<<<<<
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":335
+ *         if self.baseptr != NULL:
+ *             # CAST IT TO BASE
+ *             tmpptr = <PostMeshCurve*>self.baseptr             # <<<<<<<<<<<<<<
+ *             # DELETE IT
+ *             del tmpptr
+ */
+    __pyx_v_tmpptr = ((PostMeshCurve *)__pyx_v_self->__pyx_base.baseptr);
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":337
+ *             tmpptr = <PostMeshCurve*>self.baseptr
+ *             # DELETE IT
+ *             del tmpptr             # <<<<<<<<<<<<<<
+ *             # SET BASE POINTER TO NULL
+ *             self.baseptr = NULL
+ */
+    delete __pyx_v_tmpptr;
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":339
+ *             del tmpptr
+ *             # SET BASE POINTER TO NULL
+ *             self.baseptr = NULL             # <<<<<<<<<<<<<<
  * 
  * 
  */
-    delete __pyx_v_self->thisptr;
+    __pyx_v_self->__pyx_base.baseptr = NULL;
 
-    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":149
- * 
- *     def __dealloc__(self):
- *         if self.thisptr != NULL:             # <<<<<<<<<<<<<<
- *             del self.thisptr
- * 
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":333
+ *         # CREATE A TEMPORARY DERIVED CPP OBJECT
+ *         cdef PostMeshCurve *tmpptr
+ *         if self.baseptr != NULL:             # <<<<<<<<<<<<<<
+ *             # CAST IT TO BASE
+ *             tmpptr = <PostMeshCurve*>self.baseptr
  */
   }
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":148
- * 
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":330
+ *         (<PostMeshCurve*>self.baseptr).ReturnModifiedMeshPoints(&points[0,0])
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
- *         if self.thisptr != NULL:
- *             del self.thisptr
+ *         # CREATE A TEMPORARY DERIVED CPP OBJECT
+ *         cdef PostMeshCurve *tmpptr
  */
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
 }
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":167
- *     cdef PostMeshSurface *thisptr
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":350
+ *     """
  * 
  *     def __cinit__(self, bytes py_element_type, UInteger dimension=3):             # <<<<<<<<<<<<<<
- *         # CONVERT TO CPP STRING EXPLICITLY
- *         cdef string cpp_element_type = py_element_type
+ * 
+ *         self.ndim = 3
  */
 
 /* Python wrapper */
@@ -4766,7 +6325,7 @@ static int __pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__cinit__") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 167; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__cinit__") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 350; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -4778,20 +6337,20 @@ static int __pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh
     }
     __pyx_v_py_element_type = ((PyObject*)values[0]);
     if (values[1]) {
-      __pyx_v_dimension = __Pyx_PyInt_As_unsigned_long(values[1]); if (unlikely((__pyx_v_dimension == (unsigned long)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 167; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_v_dimension = __Pyx_PyInt_As_unsigned_long(values[1]); if (unlikely((__pyx_v_dimension == (unsigned long)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 350; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     } else {
       __pyx_v_dimension = ((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger)3);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__cinit__", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 167; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("__cinit__", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 350; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return -1;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_py_element_type), (&PyBytes_Type), 1, "py_element_type", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 167; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_py_element_type), (&PyBytes_Type), 1, "py_element_type", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 350; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy___cinit__(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self), __pyx_v_py_element_type, __pyx_v_dimension);
 
   /* function exit code */
@@ -4814,46 +6373,46 @@ static int __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":169
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":352
  *     def __cinit__(self, bytes py_element_type, UInteger dimension=3):
- *         # CONVERT TO CPP STRING EXPLICITLY
- *         cdef string cpp_element_type = py_element_type             # <<<<<<<<<<<<<<
- *         self.thisptr = new PostMeshSurface(cpp_element_type,dimension)
- *         self.ndim = 3
- */
-  __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_v_py_element_type); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 169; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_v_cpp_element_type = __pyx_t_1;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":170
+ * 
+ *         self.ndim = 3             # <<<<<<<<<<<<<<
  *         # CONVERT TO CPP STRING EXPLICITLY
  *         cdef string cpp_element_type = py_element_type
- *         self.thisptr = new PostMeshSurface(cpp_element_type,dimension)             # <<<<<<<<<<<<<<
+ */
+  __pyx_v_self->__pyx_base.ndim = 3;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":354
  *         self.ndim = 3
+ *         # CONVERT TO CPP STRING EXPLICITLY
+ *         cdef string cpp_element_type = py_element_type             # <<<<<<<<<<<<<<
+ *         self.baseptr = <PostMeshBase*>new PostMeshSurface(cpp_element_type,dimension)
  * 
+ */
+  __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_v_py_element_type); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 354; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_v_cpp_element_type = __pyx_t_1;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":355
+ *         # CONVERT TO CPP STRING EXPLICITLY
+ *         cdef string cpp_element_type = py_element_type
+ *         self.baseptr = <PostMeshBase*>new PostMeshSurface(cpp_element_type,dimension)             # <<<<<<<<<<<<<<
+ * 
+ *     def GetSurfacesParameters(self):
  */
   try {
     __pyx_t_2 = new PostMeshSurface(__pyx_v_cpp_element_type, __pyx_v_dimension);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 355; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
-  __pyx_v_self->thisptr = __pyx_t_2;
+  __pyx_v_self->__pyx_base.baseptr = ((PostMeshBase *)__pyx_t_2);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":171
- *         cdef string cpp_element_type = py_element_type
- *         self.thisptr = new PostMeshSurface(cpp_element_type,dimension)
- *         self.ndim = 3             # <<<<<<<<<<<<<<
- * 
- *     def Init(self):
- */
-  __pyx_v_self->ndim = 3;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":167
- *     cdef PostMeshSurface *thisptr
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":350
+ *     """
  * 
  *     def __cinit__(self, bytes py_element_type, UInteger dimension=3):             # <<<<<<<<<<<<<<
- *         # CONVERT TO CPP STRING EXPLICITLY
- *         cdef string cpp_element_type = py_element_type
+ * 
+ *         self.ndim = 3
  */
 
   /* function exit code */
@@ -4867,1418 +6426,48 @@ static int __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh
   return __pyx_r;
 }
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":173
- *         self.ndim = 3
- * 
- *     def Init(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.Init()
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_3Init(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_3Init(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("Init (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_2Init(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_2Init(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("Init", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":174
- * 
- *     def Init(self):
- *         self.thisptr.Init()             # <<<<<<<<<<<<<<
- * 
- *     def SetScale(self,Real scale):
- */
-  try {
-    __pyx_v_self->thisptr->Init();
-  } catch(...) {
-    __Pyx_CppExn2PyErr();
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 174; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  }
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":173
- *         self.ndim = 3
- * 
- *     def Init(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.Init()
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.Init", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":176
- *         self.thisptr.Init()
- * 
- *     def SetScale(self,Real scale):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetScale(scale)
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_5SetScale(PyObject *__pyx_v_self, PyObject *__pyx_arg_scale); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_5SetScale(PyObject *__pyx_v_self, PyObject *__pyx_arg_scale) {
-  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_scale;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetScale (wrapper)", 0);
-  assert(__pyx_arg_scale); {
-    __pyx_v_scale = __pyx_PyFloat_AsDouble(__pyx_arg_scale); if (unlikely((__pyx_v_scale == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.SetScale", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_4SetScale(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self), ((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real)__pyx_v_scale));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_4SetScale(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_scale) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetScale", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":177
- * 
- *     def SetScale(self,Real scale):
- *         self.thisptr.SetScale(scale)             # <<<<<<<<<<<<<<
- * 
- *     def SetCondition(self,Real condition):
- */
-  __pyx_v_self->thisptr->SetScale(__pyx_v_scale);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":176
- *         self.thisptr.Init()
- * 
- *     def SetScale(self,Real scale):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetScale(scale)
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":179
- *         self.thisptr.SetScale(scale)
- * 
- *     def SetCondition(self,Real condition):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetCondition(condition)
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_7SetCondition(PyObject *__pyx_v_self, PyObject *__pyx_arg_condition); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_7SetCondition(PyObject *__pyx_v_self, PyObject *__pyx_arg_condition) {
-  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_condition;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetCondition (wrapper)", 0);
-  assert(__pyx_arg_condition); {
-    __pyx_v_condition = __pyx_PyFloat_AsDouble(__pyx_arg_condition); if (unlikely((__pyx_v_condition == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 179; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.SetCondition", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_6SetCondition(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self), ((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real)__pyx_v_condition));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_6SetCondition(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_condition) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetCondition", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":180
- * 
- *     def SetCondition(self,Real condition):
- *         self.thisptr.SetCondition(condition)             # <<<<<<<<<<<<<<
- * 
- *     def SetProjectionPrecision(self, Real precision):
- */
-  __pyx_v_self->thisptr->SetCondition(__pyx_v_condition);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":179
- *         self.thisptr.SetScale(scale)
- * 
- *     def SetCondition(self,Real condition):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetCondition(condition)
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":182
- *         self.thisptr.SetCondition(condition)
- * 
- *     def SetProjectionPrecision(self, Real precision):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetProjectionPrecision(precision)
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_9SetProjectionPrecision(PyObject *__pyx_v_self, PyObject *__pyx_arg_precision); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_9SetProjectionPrecision(PyObject *__pyx_v_self, PyObject *__pyx_arg_precision) {
-  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_precision;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetProjectionPrecision (wrapper)", 0);
-  assert(__pyx_arg_precision); {
-    __pyx_v_precision = __pyx_PyFloat_AsDouble(__pyx_arg_precision); if (unlikely((__pyx_v_precision == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 182; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.SetProjectionPrecision", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_8SetProjectionPrecision(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self), ((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real)__pyx_v_precision));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_8SetProjectionPrecision(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_precision) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetProjectionPrecision", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":183
- * 
- *     def SetProjectionPrecision(self, Real precision):
- *         self.thisptr.SetProjectionPrecision(precision)             # <<<<<<<<<<<<<<
- * 
- *     def ComputeProjectionCriteria(self):
- */
-  __pyx_v_self->thisptr->SetProjectionPrecision(__pyx_v_precision);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":182
- *         self.thisptr.SetCondition(condition)
- * 
- *     def SetProjectionPrecision(self, Real precision):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetProjectionPrecision(precision)
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":185
- *         self.thisptr.SetProjectionPrecision(precision)
- * 
- *     def ComputeProjectionCriteria(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.ComputeProjectionCriteria()
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_11ComputeProjectionCriteria(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_11ComputeProjectionCriteria(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("ComputeProjectionCriteria (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_10ComputeProjectionCriteria(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_10ComputeProjectionCriteria(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("ComputeProjectionCriteria", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":186
- * 
- *     def ComputeProjectionCriteria(self):
- *         self.thisptr.ComputeProjectionCriteria()             # <<<<<<<<<<<<<<
- * 
- *     def SetProjectionCriteria(self, UInteger[:,::1] criteria):
- */
-  __pyx_v_self->thisptr->ComputeProjectionCriteria();
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":185
- *         self.thisptr.SetProjectionPrecision(precision)
- * 
- *     def ComputeProjectionCriteria(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.ComputeProjectionCriteria()
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":188
- *         self.thisptr.ComputeProjectionCriteria()
- * 
- *     def SetProjectionCriteria(self, UInteger[:,::1] criteria):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_13SetProjectionCriteria(PyObject *__pyx_v_self, PyObject *__pyx_arg_criteria); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_13SetProjectionCriteria(PyObject *__pyx_v_self, PyObject *__pyx_arg_criteria) {
-  __Pyx_memviewslice __pyx_v_criteria = { 0, 0, { 0 }, { 0 }, { 0 } };
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetProjectionCriteria (wrapper)", 0);
-  assert(__pyx_arg_criteria); {
-    __pyx_v_criteria = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_criteria); if (unlikely(!__pyx_v_criteria.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 188; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.SetProjectionCriteria", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_12SetProjectionCriteria(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self), __pyx_v_criteria);
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_12SetProjectionCriteria(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_criteria) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  Py_ssize_t __pyx_t_1;
-  Py_ssize_t __pyx_t_2;
-  __Pyx_RefNannySetupContext("SetProjectionCriteria", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":189
- * 
- *     def SetProjectionCriteria(self, UInteger[:,::1] criteria):
- *         self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])             # <<<<<<<<<<<<<<
- * 
- *     def SetMeshElements(self,UInteger[:,::1] elements):
- */
-  __pyx_t_1 = 0;
-  __pyx_t_2 = 0;
-  __pyx_v_self->thisptr->SetProjectionCriteria((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=0 */ (__pyx_v_criteria.data + __pyx_t_1 * __pyx_v_criteria.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_criteria.shape[0]), (__pyx_v_criteria.shape[1]));
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":188
- *         self.thisptr.ComputeProjectionCriteria()
- * 
- *     def SetProjectionCriteria(self, UInteger[:,::1] criteria):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_criteria, 1);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":191
- *         self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])
- * 
- *     def SetMeshElements(self,UInteger[:,::1] elements):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_15SetMeshElements(PyObject *__pyx_v_self, PyObject *__pyx_arg_elements); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_15SetMeshElements(PyObject *__pyx_v_self, PyObject *__pyx_arg_elements) {
-  __Pyx_memviewslice __pyx_v_elements = { 0, 0, { 0 }, { 0 }, { 0 } };
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetMeshElements (wrapper)", 0);
-  assert(__pyx_arg_elements); {
-    __pyx_v_elements = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_elements); if (unlikely(!__pyx_v_elements.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 191; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.SetMeshElements", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_14SetMeshElements(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self), __pyx_v_elements);
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_14SetMeshElements(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_elements) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  Py_ssize_t __pyx_t_1;
-  Py_ssize_t __pyx_t_2;
-  __Pyx_RefNannySetupContext("SetMeshElements", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":192
- * 
- *     def SetMeshElements(self,UInteger[:,::1] elements):
- *         self.thisptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])             # <<<<<<<<<<<<<<
- * 
- *     def SetMeshPoints(self,Real[:,::1] points):
- */
-  __pyx_t_1 = 0;
-  __pyx_t_2 = 0;
-  __pyx_v_self->thisptr->SetMeshElements((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=0 */ (__pyx_v_elements.data + __pyx_t_1 * __pyx_v_elements.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_elements.shape[0]), (__pyx_v_elements.shape[1]));
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":191
- *         self.thisptr.SetProjectionCriteria(&criteria[0,0],criteria.shape[0],criteria.shape[1])
- * 
- *     def SetMeshElements(self,UInteger[:,::1] elements):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_elements, 1);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":194
- *         self.thisptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])
- * 
- *     def SetMeshPoints(self,Real[:,::1] points):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_17SetMeshPoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_points); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_17SetMeshPoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_points) {
-  __Pyx_memviewslice __pyx_v_points = { 0, 0, { 0 }, { 0 }, { 0 } };
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetMeshPoints (wrapper)", 0);
-  assert(__pyx_arg_points); {
-    __pyx_v_points = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_arg_points); if (unlikely(!__pyx_v_points.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 194; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.SetMeshPoints", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_16SetMeshPoints(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self), __pyx_v_points);
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_16SetMeshPoints(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_points) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  Py_ssize_t __pyx_t_1;
-  Py_ssize_t __pyx_t_2;
-  __Pyx_RefNannySetupContext("SetMeshPoints", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":195
- * 
- *     def SetMeshPoints(self,Real[:,::1] points):
- *         self.thisptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])             # <<<<<<<<<<<<<<
- * 
- *     def SetMeshEdges(self,UInteger[:,::1] edges):
- */
-  __pyx_t_1 = 0;
-  __pyx_t_2 = 0;
-  __pyx_v_self->thisptr->SetMeshPoints((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=0 */ (__pyx_v_points.data + __pyx_t_1 * __pyx_v_points.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_points.shape[0]), (__pyx_v_points.shape[1]));
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":194
- *         self.thisptr.SetMeshElements(&elements[0,0],elements.shape[0],elements.shape[1])
- * 
- *     def SetMeshPoints(self,Real[:,::1] points):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_points, 1);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":197
- *         self.thisptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])
- * 
- *     def SetMeshEdges(self,UInteger[:,::1] edges):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_19SetMeshEdges(PyObject *__pyx_v_self, PyObject *__pyx_arg_edges); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_19SetMeshEdges(PyObject *__pyx_v_self, PyObject *__pyx_arg_edges) {
-  __Pyx_memviewslice __pyx_v_edges = { 0, 0, { 0 }, { 0 }, { 0 } };
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetMeshEdges (wrapper)", 0);
-  assert(__pyx_arg_edges); {
-    __pyx_v_edges = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_edges); if (unlikely(!__pyx_v_edges.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 197; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.SetMeshEdges", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_18SetMeshEdges(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self), __pyx_v_edges);
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_18SetMeshEdges(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_edges) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  Py_ssize_t __pyx_t_1;
-  Py_ssize_t __pyx_t_2;
-  __Pyx_RefNannySetupContext("SetMeshEdges", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":198
- * 
- *     def SetMeshEdges(self,UInteger[:,::1] edges):
- *         self.thisptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])             # <<<<<<<<<<<<<<
- * 
- *     def SetMeshFaces(self,UInteger[:,::1] faces):
- */
-  __pyx_t_1 = 0;
-  __pyx_t_2 = 0;
-  __pyx_v_self->thisptr->SetMeshEdges((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=0 */ (__pyx_v_edges.data + __pyx_t_1 * __pyx_v_edges.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_edges.shape[0]), (__pyx_v_edges.shape[1]));
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":197
- *         self.thisptr.SetMeshPoints(&points[0,0],points.shape[0],points.shape[1])
- * 
- *     def SetMeshEdges(self,UInteger[:,::1] edges):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_edges, 1);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":200
- *         self.thisptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
- * 
- *     def SetMeshFaces(self,UInteger[:,::1] faces):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_21SetMeshFaces(PyObject *__pyx_v_self, PyObject *__pyx_arg_faces); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_21SetMeshFaces(PyObject *__pyx_v_self, PyObject *__pyx_arg_faces) {
-  __Pyx_memviewslice __pyx_v_faces = { 0, 0, { 0 }, { 0 }, { 0 } };
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetMeshFaces (wrapper)", 0);
-  assert(__pyx_arg_faces); {
-    __pyx_v_faces = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger(__pyx_arg_faces); if (unlikely(!__pyx_v_faces.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 200; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.SetMeshFaces", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_20SetMeshFaces(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self), __pyx_v_faces);
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_20SetMeshFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_faces) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  Py_ssize_t __pyx_t_1;
-  Py_ssize_t __pyx_t_2;
-  __Pyx_RefNannySetupContext("SetMeshFaces", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":201
- * 
- *     def SetMeshFaces(self,UInteger[:,::1] faces):
- *         self.thisptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])             # <<<<<<<<<<<<<<
- * 
- *     def ScaleMesh(self):
- */
-  __pyx_t_1 = 0;
-  __pyx_t_2 = 0;
-  __pyx_v_self->thisptr->SetMeshFaces((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger *) ( /* dim=0 */ (__pyx_v_faces.data + __pyx_t_1 * __pyx_v_faces.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_faces.shape[0]), (__pyx_v_faces.shape[1]));
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":200
- *         self.thisptr.SetMeshEdges(&edges[0,0],edges.shape[0],edges.shape[1])
- * 
- *     def SetMeshFaces(self,UInteger[:,::1] faces):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_faces, 1);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":203
- *         self.thisptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
- * 
- *     def ScaleMesh(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.ScaleMesh()
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_23ScaleMesh(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_23ScaleMesh(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("ScaleMesh (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_22ScaleMesh(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_22ScaleMesh(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("ScaleMesh", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":204
- * 
- *     def ScaleMesh(self):
- *         self.thisptr.ScaleMesh()             # <<<<<<<<<<<<<<
- * 
- *     def GetMeshElementType(self):
- */
-  __pyx_v_self->thisptr->ScaleMesh();
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":203
- *         self.thisptr.SetMeshFaces(&faces[0,0],faces.shape[0],faces.shape[1])
- * 
- *     def ScaleMesh(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.ScaleMesh()
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":206
- *         self.thisptr.ScaleMesh()
- * 
- *     def GetMeshElementType(self):             # <<<<<<<<<<<<<<
- *         cdef string cpp_element_type = self.thisptr.GetMeshElementType()
- *         cdef bytes py_element_type = cpp_element_type
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_25GetMeshElementType(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_25GetMeshElementType(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("GetMeshElementType (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_24GetMeshElementType(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_24GetMeshElementType(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
-  std::string __pyx_v_cpp_element_type;
-  PyObject *__pyx_v_py_element_type = 0;
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("GetMeshElementType", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":207
- * 
- *     def GetMeshElementType(self):
- *         cdef string cpp_element_type = self.thisptr.GetMeshElementType()             # <<<<<<<<<<<<<<
- *         cdef bytes py_element_type = cpp_element_type
- *         return py_element_type
- */
-  __pyx_v_cpp_element_type = __pyx_v_self->thisptr->GetMeshElementType();
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":208
- *     def GetMeshElementType(self):
- *         cdef string cpp_element_type = self.thisptr.GetMeshElementType()
- *         cdef bytes py_element_type = cpp_element_type             # <<<<<<<<<<<<<<
- *         return py_element_type
- * 
- */
-  __pyx_t_1 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_cpp_element_type); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_v_py_element_type = ((PyObject*)__pyx_t_1);
-  __pyx_t_1 = 0;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":209
- *         cdef string cpp_element_type = self.thisptr.GetMeshElementType()
- *         cdef bytes py_element_type = cpp_element_type
- *         return py_element_type             # <<<<<<<<<<<<<<
- * 
- *     def SetNodalSpacing(self, Real[:,::1] fekete):
- */
-  __Pyx_XDECREF(__pyx_r);
-  __Pyx_INCREF(__pyx_v_py_element_type);
-  __pyx_r = __pyx_v_py_element_type;
-  goto __pyx_L0;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":206
- *         self.thisptr.ScaleMesh()
- * 
- *     def GetMeshElementType(self):             # <<<<<<<<<<<<<<
- *         cdef string cpp_element_type = self.thisptr.GetMeshElementType()
- *         cdef bytes py_element_type = cpp_element_type
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.GetMeshElementType", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XDECREF(__pyx_v_py_element_type);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":211
- *         return py_element_type
- * 
- *     def SetNodalSpacing(self, Real[:,::1] fekete):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetNodalSpacing(&fekete[0,0],fekete.shape[0],fekete.shape[1])
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_27SetNodalSpacing(PyObject *__pyx_v_self, PyObject *__pyx_arg_fekete); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_27SetNodalSpacing(PyObject *__pyx_v_self, PyObject *__pyx_arg_fekete) {
-  __Pyx_memviewslice __pyx_v_fekete = { 0, 0, { 0 }, { 0 }, { 0 } };
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("SetNodalSpacing (wrapper)", 0);
-  assert(__pyx_arg_fekete); {
-    __pyx_v_fekete = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_arg_fekete); if (unlikely(!__pyx_v_fekete.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 211; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.SetNodalSpacing", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_26SetNodalSpacing(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self), __pyx_v_fekete);
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_26SetNodalSpacing(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_fekete) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  Py_ssize_t __pyx_t_1;
-  Py_ssize_t __pyx_t_2;
-  __Pyx_RefNannySetupContext("SetNodalSpacing", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":212
- * 
- *     def SetNodalSpacing(self, Real[:,::1] fekete):
- *         self.thisptr.SetNodalSpacing(&fekete[0,0],fekete.shape[0],fekete.shape[1])             # <<<<<<<<<<<<<<
- * 
- *     def ReadIGES(self, bytes filename):
- */
-  __pyx_t_1 = 0;
-  __pyx_t_2 = 0;
-  __pyx_v_self->thisptr->SetNodalSpacing((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=0 */ (__pyx_v_fekete.data + __pyx_t_1 * __pyx_v_fekete.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_fekete.shape[0]), (__pyx_v_fekete.shape[1]));
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":211
- *         return py_element_type
- * 
- *     def SetNodalSpacing(self, Real[:,::1] fekete):             # <<<<<<<<<<<<<<
- *         self.thisptr.SetNodalSpacing(&fekete[0,0],fekete.shape[0],fekete.shape[1])
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_fekete, 1);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":214
- *         self.thisptr.SetNodalSpacing(&fekete[0,0],fekete.shape[0],fekete.shape[1])
- * 
- *     def ReadIGES(self, bytes filename):             # <<<<<<<<<<<<<<
- *         self.thisptr.ReadIGES(<const char*>filename)
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_29ReadIGES(PyObject *__pyx_v_self, PyObject *__pyx_v_filename); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_29ReadIGES(PyObject *__pyx_v_self, PyObject *__pyx_v_filename) {
-  CYTHON_UNUSED int __pyx_lineno = 0;
-  CYTHON_UNUSED const char *__pyx_filename = NULL;
-  CYTHON_UNUSED int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("ReadIGES (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_filename), (&PyBytes_Type), 1, "filename", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 214; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_28ReadIGES(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self), ((PyObject*)__pyx_v_filename));
-
-  /* function exit code */
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_28ReadIGES(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, PyObject *__pyx_v_filename) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  char const *__pyx_t_1;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("ReadIGES", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":215
- * 
- *     def ReadIGES(self, bytes filename):
- *         self.thisptr.ReadIGES(<const char*>filename)             # <<<<<<<<<<<<<<
- * 
- *     def GetGeomVertices(self):
- */
-  __pyx_t_1 = __Pyx_PyObject_AsString(__pyx_v_filename); if (unlikely((!__pyx_t_1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 215; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_v_self->thisptr->ReadIGES(((char const *)__pyx_t_1));
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":214
- *         self.thisptr.SetNodalSpacing(&fekete[0,0],fekete.shape[0],fekete.shape[1])
- * 
- *     def ReadIGES(self, bytes filename):             # <<<<<<<<<<<<<<
- *         self.thisptr.ReadIGES(<const char*>filename)
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.ReadIGES", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":217
- *         self.thisptr.ReadIGES(<const char*>filename)
- * 
- *     def GetGeomVertices(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetGeomVertices()
- *         cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_31GetGeomVertices(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_31GetGeomVertices(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("GetGeomVertices (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_30GetGeomVertices(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_30GetGeomVertices(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
-  std::vector<__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real>  __pyx_v_geom_points;
-  PyArrayObject *__pyx_v_geometry_points = 0;
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
-  PyObject *__pyx_t_4 = NULL;
-  PyObject *__pyx_t_5 = NULL;
-  Py_ssize_t __pyx_t_6;
-  PyObject *__pyx_t_7 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("GetGeomVertices", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":218
- * 
- *     def GetGeomVertices(self):
- *         self.thisptr.GetGeomVertices()             # <<<<<<<<<<<<<<
- *         cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()
- *         cdef np.ndarray geometry_points = np.array(geom_points,copy=False)
- */
-  __pyx_v_self->thisptr->GetGeomVertices();
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":219
- *     def GetGeomVertices(self):
- *         self.thisptr.GetGeomVertices()
- *         cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()             # <<<<<<<<<<<<<<
- *         cdef np.ndarray geometry_points = np.array(geom_points,copy=False)
- *         return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
- */
-  __pyx_v_geom_points = __pyx_v_self->thisptr->ObtainGeomVertices();
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":220
- *         self.thisptr.GetGeomVertices()
- *         cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()
- *         cdef np.ndarray geometry_points = np.array(geom_points,copy=False)             # <<<<<<<<<<<<<<
- *         return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
- * 
- */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 220; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 220; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __pyx_convert_vector_to_py___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_v_geom_points); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 220; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 220; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
-  __pyx_t_1 = 0;
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 220; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 220; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 220; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 220; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_v_geometry_points = ((PyArrayObject *)__pyx_t_4);
-  __pyx_t_4 = 0;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":221
- *         cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()
- *         cdef np.ndarray geometry_points = np.array(geom_points,copy=False)
- *         return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)             # <<<<<<<<<<<<<<
- * 
- *     def GetGeomEdges(self):
- */
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_geometry_points), __pyx_n_s_reshape); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  if (unlikely(__pyx_v_self->ndim == 0)) {
-    PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  }
-  __pyx_t_3 = __Pyx_PyInt_From_unsigned_long(((__pyx_v_geometry_points->dimensions[0]) / __pyx_v_self->ndim)); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_GIVEREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_3);
-  __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)(&PyInt_Type)), __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyInt_From_unsigned_long(__pyx_v_self->ndim); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_5 = NULL;
-  __pyx_t_6 = 0;
-  if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_1))) {
-    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_1);
-    if (likely(__pyx_t_5)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
-      __Pyx_INCREF(__pyx_t_5);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_1, function);
-      __pyx_t_6 = 1;
-    }
-  }
-  __pyx_t_7 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_7);
-  if (__pyx_t_5) {
-    __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_5); __pyx_t_5 = NULL;
-  }
-  __Pyx_GIVEREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_7, 0+__pyx_t_6, __pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_2);
-  PyTuple_SET_ITEM(__pyx_t_7, 1+__pyx_t_6, __pyx_t_2);
-  __pyx_t_3 = 0;
-  __pyx_t_2 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_7, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_r = __pyx_t_4;
-  __pyx_t_4 = 0;
-  goto __pyx_L0;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":217
- *         self.thisptr.ReadIGES(<const char*>filename)
- * 
- *     def GetGeomVertices(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetGeomVertices()
- *         cdef vector[Real] geom_points = self.thisptr.ObtainGeomVertices()
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_5);
-  __Pyx_XDECREF(__pyx_t_7);
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.GetGeomVertices", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XDECREF((PyObject *)__pyx_v_geometry_points);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":223
- *         return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
- * 
- *     def GetGeomEdges(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetGeomEdges()
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_33GetGeomEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_33GetGeomEdges(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("GetGeomEdges (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_32GetGeomEdges(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_32GetGeomEdges(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("GetGeomEdges", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":224
- * 
- *     def GetGeomEdges(self):
- *         self.thisptr.GetGeomEdges()             # <<<<<<<<<<<<<<
- * 
- *     def GetGeomFaces(self):
- */
-  __pyx_v_self->thisptr->GetGeomEdges();
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":223
- *         return geometry_points.reshape(int(geometry_points.shape[0]/self.ndim),self.ndim)
- * 
- *     def GetGeomEdges(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetGeomEdges()
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":226
- *         self.thisptr.GetGeomEdges()
- * 
- *     def GetGeomFaces(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetGeomFaces()
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_35GetGeomFaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_35GetGeomFaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("GetGeomFaces (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_34GetGeomFaces(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_34GetGeomFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("GetGeomFaces", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":227
- * 
- *     def GetGeomFaces(self):
- *         self.thisptr.GetGeomFaces()             # <<<<<<<<<<<<<<
- * 
- *     def NbPoints(self):
- */
-  __pyx_v_self->thisptr->GetGeomFaces();
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":226
- *         self.thisptr.GetGeomEdges()
- * 
- *     def GetGeomFaces(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetGeomFaces()
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":229
- *         self.thisptr.GetGeomFaces()
- * 
- *     def NbPoints(self):             # <<<<<<<<<<<<<<
- *         return self.thisptr.NbPoints()
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_37NbPoints(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_37NbPoints(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("NbPoints (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_36NbPoints(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_36NbPoints(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("NbPoints", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":230
- * 
- *     def NbPoints(self):
- *         return self.thisptr.NbPoints()             # <<<<<<<<<<<<<<
- * 
- *     def NbCurves(self):
- */
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_long(__pyx_v_self->thisptr->NbPoints()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_r = __pyx_t_1;
-  __pyx_t_1 = 0;
-  goto __pyx_L0;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":229
- *         self.thisptr.GetGeomFaces()
- * 
- *     def NbPoints(self):             # <<<<<<<<<<<<<<
- *         return self.thisptr.NbPoints()
- * 
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.NbPoints", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":232
- *         return self.thisptr.NbPoints()
- * 
- *     def NbCurves(self):             # <<<<<<<<<<<<<<
- *         return self.thisptr.NbCurves()
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_39NbCurves(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_39NbCurves(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("NbCurves (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_38NbCurves(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_38NbCurves(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("NbCurves", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":233
- * 
- *     def NbCurves(self):
- *         return self.thisptr.NbCurves()             # <<<<<<<<<<<<<<
- * 
- *     def NbSurfaces(self):
- */
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_long(__pyx_v_self->thisptr->NbCurves()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_r = __pyx_t_1;
-  __pyx_t_1 = 0;
-  goto __pyx_L0;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":232
- *         return self.thisptr.NbPoints()
- * 
- *     def NbCurves(self):             # <<<<<<<<<<<<<<
- *         return self.thisptr.NbCurves()
- * 
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.NbCurves", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":235
- *         return self.thisptr.NbCurves()
- * 
- *     def NbSurfaces(self):             # <<<<<<<<<<<<<<
- *         return self.thisptr.NbSurfaces()
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_41NbSurfaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_41NbSurfaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("NbSurfaces (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_40NbSurfaces(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_40NbSurfaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("NbSurfaces", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":236
- * 
- *     def NbSurfaces(self):
- *         return self.thisptr.NbSurfaces()             # <<<<<<<<<<<<<<
- * 
- *     def GetSurfacesParameters(self):
- */
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_long(__pyx_v_self->thisptr->NbSurfaces()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 236; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_r = __pyx_t_1;
-  __pyx_t_1 = 0;
-  goto __pyx_L0;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":235
- *         return self.thisptr.NbCurves()
- * 
- *     def NbSurfaces(self):             # <<<<<<<<<<<<<<
- *         return self.thisptr.NbSurfaces()
- * 
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.NbSurfaces", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":238
- *         return self.thisptr.NbSurfaces()
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":357
+ *         self.baseptr = <PostMeshBase*>new PostMeshSurface(cpp_element_type,dimension)
  * 
  *     def GetSurfacesParameters(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetSurfacesParameters()
- * 
+ *         """Get surfaces isoparametric parameters"""
+ *         (<PostMeshSurface*>self.baseptr).GetSurfacesParameters()
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_43GetSurfacesParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_43GetSurfacesParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_3GetSurfacesParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_2GetSurfacesParameters[] = "Get surfaces isoparametric parameters";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_3GetSurfacesParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetSurfacesParameters (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_42GetSurfacesParameters(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_2GetSurfacesParameters(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_42GetSurfacesParameters(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_2GetSurfacesParameters(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetSurfacesParameters", 0);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":239
- * 
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":359
  *     def GetSurfacesParameters(self):
- *         self.thisptr.GetSurfacesParameters()             # <<<<<<<<<<<<<<
+ *         """Get surfaces isoparametric parameters"""
+ *         (<PostMeshSurface*>self.baseptr).GetSurfacesParameters()             # <<<<<<<<<<<<<<
  * 
  *     def GetGeomPointsOnCorrespondingFaces(self):
  */
-  __pyx_v_self->thisptr->GetSurfacesParameters();
+  ((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr)->GetSurfacesParameters();
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":238
- *         return self.thisptr.NbSurfaces()
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":357
+ *         self.baseptr = <PostMeshBase*>new PostMeshSurface(cpp_element_type,dimension)
  * 
  *     def GetSurfacesParameters(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetSurfacesParameters()
- * 
+ *         """Get surfaces isoparametric parameters"""
+ *         (<PostMeshSurface*>self.baseptr).GetSurfacesParameters()
  */
 
   /* function exit code */
@@ -6288,97 +6477,48 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   return __pyx_r;
 }
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":241
- *         self.thisptr.GetSurfacesParameters()
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":361
+ *         (<PostMeshSurface*>self.baseptr).GetSurfacesParameters()
  * 
  *     def GetGeomPointsOnCorrespondingFaces(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetGeomPointsOnCorrespondingFaces()
- * 
+ *         """Find which geometrical points lie on which geometrical surfaces/topological faces"""
+ *         (<PostMeshSurface*>self.baseptr).GetGeomPointsOnCorrespondingFaces()
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_45GetGeomPointsOnCorrespondingFaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_45GetGeomPointsOnCorrespondingFaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_5GetGeomPointsOnCorrespondingFaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_4GetGeomPointsOnCorrespondingFaces[] = "Find which geometrical points lie on which geometrical surfaces/topological faces";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_5GetGeomPointsOnCorrespondingFaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetGeomPointsOnCorrespondingFaces (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_44GetGeomPointsOnCorrespondingFaces(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_4GetGeomPointsOnCorrespondingFaces(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_44GetGeomPointsOnCorrespondingFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_4GetGeomPointsOnCorrespondingFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetGeomPointsOnCorrespondingFaces", 0);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":242
- * 
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":363
  *     def GetGeomPointsOnCorrespondingFaces(self):
- *         self.thisptr.GetGeomPointsOnCorrespondingFaces()             # <<<<<<<<<<<<<<
- * 
- *     def IdentifySurfacesContainingFacesByPureProjection(self):
- */
-  __pyx_v_self->thisptr->GetGeomPointsOnCorrespondingFaces();
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":241
- *         self.thisptr.GetSurfacesParameters()
- * 
- *     def GetGeomPointsOnCorrespondingFaces(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.GetGeomPointsOnCorrespondingFaces()
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":244
- *         self.thisptr.GetGeomPointsOnCorrespondingFaces()
- * 
- *     def IdentifySurfacesContainingFacesByPureProjection(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.IdentifySurfacesContainingFacesByPureProjection()
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_47IdentifySurfacesContainingFacesByPureProjection(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_47IdentifySurfacesContainingFacesByPureProjection(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("IdentifySurfacesContainingFacesByPureProjection (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_46IdentifySurfacesContainingFacesByPureProjection(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_46IdentifySurfacesContainingFacesByPureProjection(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("IdentifySurfacesContainingFacesByPureProjection", 0);
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":245
- * 
- *     def IdentifySurfacesContainingFacesByPureProjection(self):
- *         self.thisptr.IdentifySurfacesContainingFacesByPureProjection()             # <<<<<<<<<<<<<<
+ *         """Find which geometrical points lie on which geometrical surfaces/topological faces"""
+ *         (<PostMeshSurface*>self.baseptr).GetGeomPointsOnCorrespondingFaces()             # <<<<<<<<<<<<<<
  * 
  *     def IdentifySurfacesContainingFaces(self):
  */
-  __pyx_v_self->thisptr->IdentifySurfacesContainingFacesByPureProjection();
+  ((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr)->GetGeomPointsOnCorrespondingFaces();
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":244
- *         self.thisptr.GetGeomPointsOnCorrespondingFaces()
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":361
+ *         (<PostMeshSurface*>self.baseptr).GetSurfacesParameters()
  * 
- *     def IdentifySurfacesContainingFacesByPureProjection(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.IdentifySurfacesContainingFacesByPureProjection()
- * 
+ *     def GetGeomPointsOnCorrespondingFaces(self):             # <<<<<<<<<<<<<<
+ *         """Find which geometrical points lie on which geometrical surfaces/topological faces"""
+ *         (<PostMeshSurface*>self.baseptr).GetGeomPointsOnCorrespondingFaces()
  */
 
   /* function exit code */
@@ -6388,47 +6528,48 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   return __pyx_r;
 }
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":247
- *         self.thisptr.IdentifySurfacesContainingFacesByPureProjection()
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":365
+ *         (<PostMeshSurface*>self.baseptr).GetGeomPointsOnCorrespondingFaces()
  * 
  *     def IdentifySurfacesContainingFaces(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.IdentifySurfacesContainingFaces()
- * 
+ *         """Identify which geometrical surfaces contain which mesh faces,
+ *         by solving a minimisation problem"""
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_49IdentifySurfacesContainingFaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_49IdentifySurfacesContainingFaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_7IdentifySurfacesContainingFaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_6IdentifySurfacesContainingFaces[] = "Identify which geometrical surfaces contain which mesh faces, \n        by solving a minimisation problem";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_7IdentifySurfacesContainingFaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("IdentifySurfacesContainingFaces (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_48IdentifySurfacesContainingFaces(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_6IdentifySurfacesContainingFaces(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_48IdentifySurfacesContainingFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_6IdentifySurfacesContainingFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("IdentifySurfacesContainingFaces", 0);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":248
- * 
- *     def IdentifySurfacesContainingFaces(self):
- *         self.thisptr.IdentifySurfacesContainingFaces()             # <<<<<<<<<<<<<<
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":368
+ *         """Identify which geometrical surfaces contain which mesh faces,
+ *         by solving a minimisation problem"""
+ *         (<PostMeshSurface*>self.baseptr).IdentifySurfacesContainingFaces()             # <<<<<<<<<<<<<<
  * 
  *     def IdentifyRemainingSurfacesByProjection(self):
  */
-  __pyx_v_self->thisptr->IdentifySurfacesContainingFaces();
+  ((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr)->IdentifySurfacesContainingFaces();
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":247
- *         self.thisptr.IdentifySurfacesContainingFacesByPureProjection()
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":365
+ *         (<PostMeshSurface*>self.baseptr).GetGeomPointsOnCorrespondingFaces()
  * 
  *     def IdentifySurfacesContainingFaces(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.IdentifySurfacesContainingFaces()
- * 
+ *         """Identify which geometrical surfaces contain which mesh faces,
+ *         by solving a minimisation problem"""
  */
 
   /* function exit code */
@@ -6438,47 +6579,48 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   return __pyx_r;
 }
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":250
- *         self.thisptr.IdentifySurfacesContainingFaces()
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":370
+ *         (<PostMeshSurface*>self.baseptr).IdentifySurfacesContainingFaces()
  * 
  *     def IdentifyRemainingSurfacesByProjection(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.IdentifyRemainingSurfacesByProjection()
- * 
+ *         """If identifying which geometrical surfaces contain which mesh faces,
+ *         fails use proejction to identify the remaining surfaces"""
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_51IdentifyRemainingSurfacesByProjection(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_51IdentifyRemainingSurfacesByProjection(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_9IdentifyRemainingSurfacesByProjection(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_8IdentifyRemainingSurfacesByProjection[] = "If identifying which geometrical surfaces contain which mesh faces, \n        fails use proejction to identify the remaining surfaces";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_9IdentifyRemainingSurfacesByProjection(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("IdentifyRemainingSurfacesByProjection (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_50IdentifyRemainingSurfacesByProjection(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_8IdentifyRemainingSurfacesByProjection(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_50IdentifyRemainingSurfacesByProjection(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_8IdentifyRemainingSurfacesByProjection(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("IdentifyRemainingSurfacesByProjection", 0);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":251
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":373
+ *         """If identifying which geometrical surfaces contain which mesh faces,
+ *         fails use proejction to identify the remaining surfaces"""
+ *         (<PostMeshSurface*>self.baseptr).IdentifyRemainingSurfacesByProjection()             # <<<<<<<<<<<<<<
  * 
- *     def IdentifyRemainingSurfacesByProjection(self):
- *         self.thisptr.IdentifyRemainingSurfacesByProjection()             # <<<<<<<<<<<<<<
- * 
- *     def IdentifySurfacesIntersections(self):
+ *     def IdentifySurfacesContainingFacesByPureProjection(self):
  */
-  __pyx_v_self->thisptr->IdentifyRemainingSurfacesByProjection();
+  ((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr)->IdentifyRemainingSurfacesByProjection();
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":250
- *         self.thisptr.IdentifySurfacesContainingFaces()
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":370
+ *         (<PostMeshSurface*>self.baseptr).IdentifySurfacesContainingFaces()
  * 
  *     def IdentifyRemainingSurfacesByProjection(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.IdentifyRemainingSurfacesByProjection()
- * 
+ *         """If identifying which geometrical surfaces contain which mesh faces,
+ *         fails use proejction to identify the remaining surfaces"""
  */
 
   /* function exit code */
@@ -6488,47 +6630,99 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   return __pyx_r;
 }
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":253
- *         self.thisptr.IdentifyRemainingSurfacesByProjection()
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":375
+ *         (<PostMeshSurface*>self.baseptr).IdentifyRemainingSurfacesByProjection()
  * 
- *     def IdentifySurfacesIntersections(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.IdentifySurfacesIntersections()
- * 
+ *     def IdentifySurfacesContainingFacesByPureProjection(self):             # <<<<<<<<<<<<<<
+ *         """Identify which geometrical surfaces contain which mesh faces,
+ *         solely by relying on projection"""
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_53IdentifySurfacesIntersections(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_53IdentifySurfacesIntersections(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_11IdentifySurfacesContainingFacesByPureProjection(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_10IdentifySurfacesContainingFacesByPureProjection[] = "Identify which geometrical surfaces contain which mesh faces, \n        solely by relying on projection";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_11IdentifySurfacesContainingFacesByPureProjection(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("IdentifySurfacesIntersections (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_52IdentifySurfacesIntersections(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
+  __Pyx_RefNannySetupContext("IdentifySurfacesContainingFacesByPureProjection (wrapper)", 0);
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_10IdentifySurfacesContainingFacesByPureProjection(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_52IdentifySurfacesIntersections(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_10IdentifySurfacesContainingFacesByPureProjection(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("IdentifySurfacesContainingFacesByPureProjection", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":378
+ *         """Identify which geometrical surfaces contain which mesh faces,
+ *         solely by relying on projection"""
+ *         (<PostMeshSurface*>self.baseptr).IdentifySurfacesContainingFacesByPureProjection()             # <<<<<<<<<<<<<<
+ * 
+ *     def IdentifySurfacesIntersections(self):
+ */
+  ((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr)->IdentifySurfacesContainingFacesByPureProjection();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":375
+ *         (<PostMeshSurface*>self.baseptr).IdentifyRemainingSurfacesByProjection()
+ * 
+ *     def IdentifySurfacesContainingFacesByPureProjection(self):             # <<<<<<<<<<<<<<
+ *         """Identify which geometrical surfaces contain which mesh faces,
+ *         solely by relying on projection"""
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":380
+ *         (<PostMeshSurface*>self.baseptr).IdentifySurfacesContainingFacesByPureProjection()
+ * 
+ *     def IdentifySurfacesIntersections(self):             # <<<<<<<<<<<<<<
+ *         """Identify which geometrical surfaces contain which mesh faces"""
+ *         (<PostMeshSurface*>self.baseptr).IdentifySurfacesIntersections()
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_13IdentifySurfacesIntersections(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_12IdentifySurfacesIntersections[] = "Identify which geometrical surfaces contain which mesh faces";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_13IdentifySurfacesIntersections(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("IdentifySurfacesIntersections (wrapper)", 0);
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_12IdentifySurfacesIntersections(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_12IdentifySurfacesIntersections(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("IdentifySurfacesIntersections", 0);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":254
- * 
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":382
  *     def IdentifySurfacesIntersections(self):
- *         self.thisptr.IdentifySurfacesIntersections()             # <<<<<<<<<<<<<<
+ *         """Identify which geometrical surfaces contain which mesh faces"""
+ *         (<PostMeshSurface*>self.baseptr).IdentifySurfacesIntersections()             # <<<<<<<<<<<<<<
  * 
- *     def SupplySurfacesContainingFaces(self,Integer[::1] arr, Integer already_mapped = 0, Integer caller = 0):
+ *     def SupplySurfacesContainingFaces(self, Integer[::1] face_to_surface_map,
  */
-  __pyx_v_self->thisptr->IdentifySurfacesIntersections();
+  ((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr)->IdentifySurfacesIntersections();
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":253
- *         self.thisptr.IdentifyRemainingSurfacesByProjection()
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":380
+ *         (<PostMeshSurface*>self.baseptr).IdentifySurfacesContainingFacesByPureProjection()
  * 
  *     def IdentifySurfacesIntersections(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.IdentifySurfacesIntersections()
- * 
+ *         """Identify which geometrical surfaces contain which mesh faces"""
+ *         (<PostMeshSurface*>self.baseptr).IdentifySurfacesIntersections()
  */
 
   /* function exit code */
@@ -6538,20 +6732,21 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   return __pyx_r;
 }
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":256
- *         self.thisptr.IdentifySurfacesIntersections()
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":384
+ *         (<PostMeshSurface*>self.baseptr).IdentifySurfacesIntersections()
  * 
- *     def SupplySurfacesContainingFaces(self,Integer[::1] arr, Integer already_mapped = 0, Integer caller = 0):             # <<<<<<<<<<<<<<
- *         self.thisptr.SupplySurfacesContainingFaces(&arr[0], arr.shape[0], already_mapped, caller)
- * 
+ *     def SupplySurfacesContainingFaces(self, Integer[::1] face_to_surface_map,             # <<<<<<<<<<<<<<
+ *         Integer already_mapped=0,
+ *         str internal_surface_identification_algorithm="minimisation"):
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_55SupplySurfacesContainingFaces(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_55SupplySurfacesContainingFaces(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
-  __Pyx_memviewslice __pyx_v_arr = { 0, 0, { 0 }, { 0 }, { 0 } };
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_15SupplySurfacesContainingFaces(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_14SupplySurfacesContainingFaces[] = "Supply which mesh faces lie on which geometrical surfaces, from an external sources. \n        Typically linear mesh generators are able to provide this information. \n        This is due to the face that in some extreme cases OpenCascade might fail to identify\n        the right surface that a mesh face lies. \n\n            input:\n                face_to_surface_map:        [1D array] of the same size as number of boundary\n                                            faces, each entry corresponding to a geometrical surface\n                                            that contains the corresponding mesh boundary face\n\n                already_mapped:             [int] 0 or 1.  Due to different CAD standards \n                                            the external mapping provided for the geometry \n                                            and that geometry read internally might have \n                                            different face numbering, in which case supply\n                                            already_map as zero.\n\n                internal_surface_identification_algorithm\n                                            [str] either \"minimisation\" of \"projection\". \n                                            If the internal and externally supplied numbering of\n                                            entities do not match, surfaces will have to be\n                                            identified internally to gaurantee, the validity\n                                            of external mapping \n        ";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_15SupplySurfacesContainingFaces(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  __Pyx_memviewslice __pyx_v_face_to_surface_map = { 0, 0, { 0 }, { 0 }, { 0 } };
   __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_already_mapped;
-  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_caller;
+  PyObject *__pyx_v_internal_surface_identification_algorithm = 0;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -6559,8 +6754,9 @@ static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("SupplySurfacesContainingFaces (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_arr,&__pyx_n_s_already_mapped,&__pyx_n_s_caller,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_face_to_surface_map,&__pyx_n_s_already_mapped,&__pyx_n_s_internal_surface_identification,0};
     PyObject* values[3] = {0,0,0};
+    values[2] = ((PyObject*)__pyx_n_s_minimisation);
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
@@ -6574,7 +6770,7 @@ static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
       kw_args = PyDict_Size(__pyx_kwds);
       switch (pos_args) {
         case  0:
-        if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_arr)) != 0)) kw_args--;
+        if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_face_to_surface_map)) != 0)) kw_args--;
         else goto __pyx_L5_argtuple_error;
         case  1:
         if (kw_args > 0) {
@@ -6583,12 +6779,12 @@ static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
         }
         case  2:
         if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_caller);
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_internal_surface_identification);
           if (value) { values[2] = value; kw_args--; }
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "SupplySurfacesContainingFaces") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 256; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "SupplySurfacesContainingFaces") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 384; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -6599,106 +6795,165 @@ static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
         default: goto __pyx_L5_argtuple_error;
       }
     }
-    __pyx_v_arr = __Pyx_PyObject_to_MemoryviewSlice_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer(values[0]); if (unlikely(!__pyx_v_arr.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 256; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_face_to_surface_map = __Pyx_PyObject_to_MemoryviewSlice_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer(values[0]); if (unlikely(!__pyx_v_face_to_surface_map.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 384; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     if (values[1]) {
-      __pyx_v_already_mapped = __Pyx_PyInt_As_long(values[1]); if (unlikely((__pyx_v_already_mapped == (long)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 256; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_v_already_mapped = __Pyx_PyInt_As_long(values[1]); if (unlikely((__pyx_v_already_mapped == (long)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 385; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     } else {
       __pyx_v_already_mapped = ((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer)0);
     }
-    if (values[2]) {
-      __pyx_v_caller = __Pyx_PyInt_As_long(values[2]); if (unlikely((__pyx_v_caller == (long)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 256; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    } else {
-      __pyx_v_caller = ((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer)0);
-    }
+    __pyx_v_internal_surface_identification_algorithm = ((PyObject*)values[2]);
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("SupplySurfacesContainingFaces", 0, 1, 3, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 256; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("SupplySurfacesContainingFaces", 0, 1, 3, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 384; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.SupplySurfacesContainingFaces", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_54SupplySurfacesContainingFaces(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self), __pyx_v_arr, __pyx_v_already_mapped, __pyx_v_caller);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_internal_surface_identification_algorithm), (&PyString_Type), 1, "internal_surface_identification_algorithm", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 386; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_14SupplySurfacesContainingFaces(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self), __pyx_v_face_to_surface_map, __pyx_v_already_mapped, __pyx_v_internal_surface_identification_algorithm);
 
   /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __pyx_r = NULL;
+  __pyx_L0:;
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_54SupplySurfacesContainingFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_arr, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_already_mapped, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_caller) {
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_14SupplySurfacesContainingFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_face_to_surface_map, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_already_mapped, PyObject *__pyx_v_internal_surface_identification_algorithm) {
+  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_caller;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
-  Py_ssize_t __pyx_t_1;
+  int __pyx_t_1;
+  int __pyx_t_2;
+  Py_ssize_t __pyx_t_3;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("SupplySurfacesContainingFaces", 0);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":257
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":411
+ *         """
  * 
- *     def SupplySurfacesContainingFaces(self,Integer[::1] arr, Integer already_mapped = 0, Integer caller = 0):
- *         self.thisptr.SupplySurfacesContainingFaces(&arr[0], arr.shape[0], already_mapped, caller)             # <<<<<<<<<<<<<<
+ *         cdef Integer caller = 0             # <<<<<<<<<<<<<<
+ *         if internal_surface_identification_algorithm != "minimisation":
+ *             caller = 1
+ */
+  __pyx_v_caller = 0;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":412
+ * 
+ *         cdef Integer caller = 0
+ *         if internal_surface_identification_algorithm != "minimisation":             # <<<<<<<<<<<<<<
+ *             caller = 1
+ *         (<PostMeshSurface*>self.baseptr).SupplySurfacesContainingFaces(&face_to_surface_map[0],
+ */
+  __pyx_t_1 = (__Pyx_PyString_Equals(__pyx_v_internal_surface_identification_algorithm, __pyx_n_s_minimisation, Py_NE)); if (unlikely(__pyx_t_1 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 412; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = (__pyx_t_1 != 0);
+  if (__pyx_t_2) {
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":413
+ *         cdef Integer caller = 0
+ *         if internal_surface_identification_algorithm != "minimisation":
+ *             caller = 1             # <<<<<<<<<<<<<<
+ *         (<PostMeshSurface*>self.baseptr).SupplySurfacesContainingFaces(&face_to_surface_map[0],
+ *             face_to_surface_map.shape[0], already_mapped, caller)
+ */
+    __pyx_v_caller = 1;
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":412
+ * 
+ *         cdef Integer caller = 0
+ *         if internal_surface_identification_algorithm != "minimisation":             # <<<<<<<<<<<<<<
+ *             caller = 1
+ *         (<PostMeshSurface*>self.baseptr).SupplySurfacesContainingFaces(&face_to_surface_map[0],
+ */
+  }
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":414
+ *         if internal_surface_identification_algorithm != "minimisation":
+ *             caller = 1
+ *         (<PostMeshSurface*>self.baseptr).SupplySurfacesContainingFaces(&face_to_surface_map[0],             # <<<<<<<<<<<<<<
+ *             face_to_surface_map.shape[0], already_mapped, caller)
+ * 
+ */
+  __pyx_t_3 = 0;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":415
+ *             caller = 1
+ *         (<PostMeshSurface*>self.baseptr).SupplySurfacesContainingFaces(&face_to_surface_map[0],
+ *             face_to_surface_map.shape[0], already_mapped, caller)             # <<<<<<<<<<<<<<
  * 
  *     def ProjectMeshOnSurface(self):
  */
-  __pyx_t_1 = 0;
-  __pyx_v_self->thisptr->SupplySurfacesContainingFaces((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer *) ( /* dim=0 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer *) __pyx_v_arr.data) + __pyx_t_1)) )))), (__pyx_v_arr.shape[0]), __pyx_v_already_mapped, __pyx_v_caller);
+  ((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr)->SupplySurfacesContainingFaces((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer *) ( /* dim=0 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer *) __pyx_v_face_to_surface_map.data) + __pyx_t_3)) )))), (__pyx_v_face_to_surface_map.shape[0]), __pyx_v_already_mapped, __pyx_v_caller);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":256
- *         self.thisptr.IdentifySurfacesIntersections()
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":384
+ *         (<PostMeshSurface*>self.baseptr).IdentifySurfacesIntersections()
  * 
- *     def SupplySurfacesContainingFaces(self,Integer[::1] arr, Integer already_mapped = 0, Integer caller = 0):             # <<<<<<<<<<<<<<
- *         self.thisptr.SupplySurfacesContainingFaces(&arr[0], arr.shape[0], already_mapped, caller)
- * 
+ *     def SupplySurfacesContainingFaces(self, Integer[::1] face_to_surface_map,             # <<<<<<<<<<<<<<
+ *         Integer already_mapped=0,
+ *         str internal_surface_identification_algorithm="minimisation"):
  */
 
   /* function exit code */
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_arr, 1);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.SupplySurfacesContainingFaces", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __PYX_XDEC_MEMVIEW(&__pyx_v_face_to_surface_map, 1);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":259
- *         self.thisptr.SupplySurfacesContainingFaces(&arr[0], arr.shape[0], already_mapped, caller)
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":417
+ *             face_to_surface_map.shape[0], already_mapped, caller)
  * 
  *     def ProjectMeshOnSurface(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.ProjectMeshOnSurface()
- * 
+ *         """Project linear mesh nodes on to the true CAD curves"""
+ *         (<PostMeshSurface*>self.baseptr).ProjectMeshOnSurface()
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_57ProjectMeshOnSurface(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_57ProjectMeshOnSurface(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_17ProjectMeshOnSurface(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_16ProjectMeshOnSurface[] = "Project linear mesh nodes on to the true CAD curves";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_17ProjectMeshOnSurface(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("ProjectMeshOnSurface (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_56ProjectMeshOnSurface(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_16ProjectMeshOnSurface(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_56ProjectMeshOnSurface(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_16ProjectMeshOnSurface(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("ProjectMeshOnSurface", 0);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":260
- * 
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":419
  *     def ProjectMeshOnSurface(self):
- *         self.thisptr.ProjectMeshOnSurface()             # <<<<<<<<<<<<<<
+ *         """Project linear mesh nodes on to the true CAD curves"""
+ *         (<PostMeshSurface*>self.baseptr).ProjectMeshOnSurface()             # <<<<<<<<<<<<<<
  * 
  *     def RepairDualProjectedParameters(self):
  */
-  __pyx_v_self->thisptr->ProjectMeshOnSurface();
+  ((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr)->ProjectMeshOnSurface();
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":259
- *         self.thisptr.SupplySurfacesContainingFaces(&arr[0], arr.shape[0], already_mapped, caller)
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":417
+ *             face_to_surface_map.shape[0], already_mapped, caller)
  * 
  *     def ProjectMeshOnSurface(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.ProjectMeshOnSurface()
- * 
+ *         """Project linear mesh nodes on to the true CAD curves"""
+ *         (<PostMeshSurface*>self.baseptr).ProjectMeshOnSurface()
  */
 
   /* function exit code */
@@ -6708,47 +6963,48 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   return __pyx_r;
 }
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":262
- *         self.thisptr.ProjectMeshOnSurface()
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":421
+ *         (<PostMeshSurface*>self.baseptr).ProjectMeshOnSurface()
  * 
  *     def RepairDualProjectedParameters(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.RepairDualProjectedParameters()
- * 
+ *         """Repair/fix projected points, if projection happens to be inaccurate.
+ *         This is typically the case for closed/periodic iso-curves
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_59RepairDualProjectedParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_59RepairDualProjectedParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_19RepairDualProjectedParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_18RepairDualProjectedParameters[] = "Repair/fix projected points, if projection happens to be inaccurate.\n        This is typically the case for closed/periodic iso-curves\n        ";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_19RepairDualProjectedParameters(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("RepairDualProjectedParameters (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_58RepairDualProjectedParameters(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_18RepairDualProjectedParameters(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_58RepairDualProjectedParameters(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_18RepairDualProjectedParameters(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("RepairDualProjectedParameters", 0);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":263
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":425
+ *         This is typically the case for closed/periodic iso-curves
+ *         """
+ *         (<PostMeshSurface*>self.baseptr).RepairDualProjectedParameters()             # <<<<<<<<<<<<<<
  * 
- *     def RepairDualProjectedParameters(self):
- *         self.thisptr.RepairDualProjectedParameters()             # <<<<<<<<<<<<<<
- * 
- *     def MeshPointInversionSurface(self,Integer project_on_curves, Integer modify_linear_mesh = 0):
+ *     def MeshPointInversionSurface(self,Integer project_on_curves, Integer modify_linear_mesh=0):
  */
-  __pyx_v_self->thisptr->RepairDualProjectedParameters();
+  ((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr)->RepairDualProjectedParameters();
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":262
- *         self.thisptr.ProjectMeshOnSurface()
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":421
+ *         (<PostMeshSurface*>self.baseptr).ProjectMeshOnSurface()
  * 
  *     def RepairDualProjectedParameters(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.RepairDualProjectedParameters()
- * 
+ *         """Repair/fix projected points, if projection happens to be inaccurate.
+ *         This is typically the case for closed/periodic iso-curves
  */
 
   /* function exit code */
@@ -6758,17 +7014,18 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   return __pyx_r;
 }
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":265
- *         self.thisptr.RepairDualProjectedParameters()
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":427
+ *         (<PostMeshSurface*>self.baseptr).RepairDualProjectedParameters()
  * 
- *     def MeshPointInversionSurface(self,Integer project_on_curves, Integer modify_linear_mesh = 0):             # <<<<<<<<<<<<<<
- *         self.thisptr.MeshPointInversionSurface(project_on_curves, modify_linear_mesh)
- * 
+ *     def MeshPointInversionSurface(self,Integer project_on_curves, Integer modify_linear_mesh=0):             # <<<<<<<<<<<<<<
+ *         """Perform point inversion of high order nodes in the mesh on
+ *         to the true CAD geometry using an orthogonal projection
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_61MeshPointInversionSurface(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_61MeshPointInversionSurface(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_21MeshPointInversionSurface(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_20MeshPointInversionSurface[] = "Perform point inversion of high order nodes in the mesh on\n        to the true CAD geometry using an orthogonal projection\n\n            input:\n                project_on_curves:          [int] 0 or 1, project of surface intersections\n\n                modify_linear_mesh          [int] 0 or 1, modify linear mesh, if it has\n                                            inaccuracy in nodal coordinates\n        ";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_21MeshPointInversionSurface(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_project_on_curves;
   __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_modify_linear_mesh;
   int __pyx_lineno = 0;
@@ -6801,7 +7058,7 @@ static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "MeshPointInversionSurface") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 265; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "MeshPointInversionSurface") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 427; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -6811,48 +7068,48 @@ static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
         default: goto __pyx_L5_argtuple_error;
       }
     }
-    __pyx_v_project_on_curves = __Pyx_PyInt_As_long(values[0]); if (unlikely((__pyx_v_project_on_curves == (long)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 265; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_project_on_curves = __Pyx_PyInt_As_long(values[0]); if (unlikely((__pyx_v_project_on_curves == (long)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 427; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     if (values[1]) {
-      __pyx_v_modify_linear_mesh = __Pyx_PyInt_As_long(values[1]); if (unlikely((__pyx_v_modify_linear_mesh == (long)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 265; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_v_modify_linear_mesh = __Pyx_PyInt_As_long(values[1]); if (unlikely((__pyx_v_modify_linear_mesh == (long)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 427; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     } else {
       __pyx_v_modify_linear_mesh = ((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer)0);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("MeshPointInversionSurface", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 265; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("MeshPointInversionSurface", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 427; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.MeshPointInversionSurface", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_60MeshPointInversionSurface(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self), __pyx_v_project_on_curves, __pyx_v_modify_linear_mesh);
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_20MeshPointInversionSurface(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self), __pyx_v_project_on_curves, __pyx_v_modify_linear_mesh);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_60MeshPointInversionSurface(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_project_on_curves, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_modify_linear_mesh) {
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_20MeshPointInversionSurface(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_project_on_curves, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_modify_linear_mesh) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("MeshPointInversionSurface", 0);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":266
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":437
+ *                                             inaccuracy in nodal coordinates
+ *         """
+ *         (<PostMeshSurface*>self.baseptr).MeshPointInversionSurface(project_on_curves, modify_linear_mesh)             # <<<<<<<<<<<<<<
  * 
- *     def MeshPointInversionSurface(self,Integer project_on_curves, Integer modify_linear_mesh = 0):
- *         self.thisptr.MeshPointInversionSurface(project_on_curves, modify_linear_mesh)             # <<<<<<<<<<<<<<
- * 
- *     def MeshPointInversionSurfaceArcLength(self,Integer project_on_curves, Real OrthTol, Real[:,::1] FEbases):
+ *     def MeshPointInversionSurfaceArcLength(self, Integer project_on_curves,
  */
-  __pyx_v_self->thisptr->MeshPointInversionSurface(__pyx_v_project_on_curves, __pyx_v_modify_linear_mesh);
+  ((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr)->MeshPointInversionSurface(__pyx_v_project_on_curves, __pyx_v_modify_linear_mesh);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":265
- *         self.thisptr.RepairDualProjectedParameters()
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":427
+ *         (<PostMeshSurface*>self.baseptr).RepairDualProjectedParameters()
  * 
- *     def MeshPointInversionSurface(self,Integer project_on_curves, Integer modify_linear_mesh = 0):             # <<<<<<<<<<<<<<
- *         self.thisptr.MeshPointInversionSurface(project_on_curves, modify_linear_mesh)
- * 
+ *     def MeshPointInversionSurface(self,Integer project_on_curves, Integer modify_linear_mesh=0):             # <<<<<<<<<<<<<<
+ *         """Perform point inversion of high order nodes in the mesh on
+ *         to the true CAD geometry using an orthogonal projection
  */
 
   /* function exit code */
@@ -6862,19 +7119,20 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   return __pyx_r;
 }
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":268
- *         self.thisptr.MeshPointInversionSurface(project_on_curves, modify_linear_mesh)
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":439
+ *         (<PostMeshSurface*>self.baseptr).MeshPointInversionSurface(project_on_curves, modify_linear_mesh)
  * 
- *     def MeshPointInversionSurfaceArcLength(self,Integer project_on_curves, Real OrthTol, Real[:,::1] FEbases):             # <<<<<<<<<<<<<<
- *         self.thisptr.MeshPointInversionSurfaceArcLength(project_on_curves,OrthTol,&FEbases[0,0],FEbases.shape[0],FEbases.shape[1])
- * 
+ *     def MeshPointInversionSurfaceArcLength(self, Integer project_on_curves,             # <<<<<<<<<<<<<<
+ *         Real orth_tol, Real[:,::1] FEbases):
+ *         """Perform point inversion of high order nodes in the mesh on
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_63MeshPointInversionSurfaceArcLength(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_63MeshPointInversionSurfaceArcLength(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_23MeshPointInversionSurfaceArcLength(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_22MeshPointInversionSurfaceArcLength[] = "Perform point inversion of high order nodes in the mesh on\n        to the true CAD geometry using an arc-length-based projection.\n        This is an isometric projection, in that the spacing of nodes\n        in the curved mesh remain the same i.e. equally-spaced, Fekete\n        etc\n\n            input:\n                project_on_curves:          [int] 0 or 1, project of surface intersections\n\n                orth_tol                    [double] 0 or 1, tolerance to fall back to\n                                            orthogonal projection if arc length fails.\n                                            This is a a tolerance defined in the physical space\n                                            such that (L_arc - L_orth)/L_orth < orth_tol, where\n                                            L represents the amount of displacement that the \n                                            boundary node undergoes. Typically a value between\n                                            0 and 1 should be given\n\n                FEbases                     [2D array] of finite element shape functions \n                                            evaluated at each isoparamertric point. Arc length \n                                            projection works by placing the points of \n                                            isoparametric finite element in the \n                                            isoparametric domain of NURBS\n        ";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_23MeshPointInversionSurfaceArcLength(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_project_on_curves;
-  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_OrthTol;
+  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_orth_tol;
   __Pyx_memviewslice __pyx_v_FEbases = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
@@ -6883,7 +7141,7 @@ static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("MeshPointInversionSurfaceArcLength (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_project_on_curves,&__pyx_n_s_OrthTol,&__pyx_n_s_FEbases,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_project_on_curves,&__pyx_n_s_orth_tol,&__pyx_n_s_FEbases,0};
     PyObject* values[3] = {0,0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
@@ -6901,18 +7159,18 @@ static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
         if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_project_on_curves)) != 0)) kw_args--;
         else goto __pyx_L5_argtuple_error;
         case  1:
-        if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_OrthTol)) != 0)) kw_args--;
+        if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_orth_tol)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("MeshPointInversionSurfaceArcLength", 1, 3, 3, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 268; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("MeshPointInversionSurfaceArcLength", 1, 3, 3, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 439; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_FEbases)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("MeshPointInversionSurfaceArcLength", 1, 3, 3, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 268; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("MeshPointInversionSurfaceArcLength", 1, 3, 3, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 439; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "MeshPointInversionSurfaceArcLength") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 268; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "MeshPointInversionSurfaceArcLength") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 439; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 3) {
       goto __pyx_L5_argtuple_error;
@@ -6921,49 +7179,57 @@ static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
       values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
     }
-    __pyx_v_project_on_curves = __Pyx_PyInt_As_long(values[0]); if (unlikely((__pyx_v_project_on_curves == (long)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 268; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_OrthTol = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_OrthTol == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 268; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_FEbases = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(values[2]); if (unlikely(!__pyx_v_FEbases.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 268; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_project_on_curves = __Pyx_PyInt_As_long(values[0]); if (unlikely((__pyx_v_project_on_curves == (long)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 439; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_orth_tol = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_orth_tol == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 440; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_FEbases = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(values[2]); if (unlikely(!__pyx_v_FEbases.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 440; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("MeshPointInversionSurfaceArcLength", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 268; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("MeshPointInversionSurfaceArcLength", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 439; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.MeshPointInversionSurfaceArcLength", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_62MeshPointInversionSurfaceArcLength(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self), __pyx_v_project_on_curves, __pyx_v_OrthTol, __pyx_v_FEbases);
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_22MeshPointInversionSurfaceArcLength(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self), __pyx_v_project_on_curves, __pyx_v_orth_tol, __pyx_v_FEbases);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_62MeshPointInversionSurfaceArcLength(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_project_on_curves, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_OrthTol, __Pyx_memviewslice __pyx_v_FEbases) {
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_22MeshPointInversionSurfaceArcLength(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_project_on_curves, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_orth_tol, __Pyx_memviewslice __pyx_v_FEbases) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   Py_ssize_t __pyx_t_1;
   Py_ssize_t __pyx_t_2;
   __Pyx_RefNannySetupContext("MeshPointInversionSurfaceArcLength", 0);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":269
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":465
+ *         """
+ *         (<PostMeshSurface*>self.baseptr).MeshPointInversionSurfaceArcLength(project_on_curves,orth_tol,
+ *             &FEbases[0,0],FEbases.shape[0],FEbases.shape[1])             # <<<<<<<<<<<<<<
  * 
- *     def MeshPointInversionSurfaceArcLength(self,Integer project_on_curves, Real OrthTol, Real[:,::1] FEbases):
- *         self.thisptr.MeshPointInversionSurfaceArcLength(project_on_curves,OrthTol,&FEbases[0,0],FEbases.shape[0],FEbases.shape[1])             # <<<<<<<<<<<<<<
- * 
- *     def ReturnModifiedMeshPoints(self,Real[:,::1] points):
+ *     def PerformPointProjectionInversionSurface(self, str surface_identification_algorithm="minimisation",
  */
   __pyx_t_1 = 0;
   __pyx_t_2 = 0;
-  __pyx_v_self->thisptr->MeshPointInversionSurfaceArcLength(__pyx_v_project_on_curves, __pyx_v_OrthTol, (&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=0 */ (__pyx_v_FEbases.data + __pyx_t_1 * __pyx_v_FEbases.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_FEbases.shape[0]), (__pyx_v_FEbases.shape[1]));
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":268
- *         self.thisptr.MeshPointInversionSurface(project_on_curves, modify_linear_mesh)
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":464
+ *                                             isoparametric domain of NURBS
+ *         """
+ *         (<PostMeshSurface*>self.baseptr).MeshPointInversionSurfaceArcLength(project_on_curves,orth_tol,             # <<<<<<<<<<<<<<
+ *             &FEbases[0,0],FEbases.shape[0],FEbases.shape[1])
  * 
- *     def MeshPointInversionSurfaceArcLength(self,Integer project_on_curves, Real OrthTol, Real[:,::1] FEbases):             # <<<<<<<<<<<<<<
- *         self.thisptr.MeshPointInversionSurfaceArcLength(project_on_curves,OrthTol,&FEbases[0,0],FEbases.shape[0],FEbases.shape[1])
+ */
+  ((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr)->MeshPointInversionSurfaceArcLength(__pyx_v_project_on_curves, __pyx_v_orth_tol, (&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=0 */ (__pyx_v_FEbases.data + __pyx_t_1 * __pyx_v_FEbases.strides[0]) )) + __pyx_t_2)) )))), (__pyx_v_FEbases.shape[0]), (__pyx_v_FEbases.shape[1]));
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":439
+ *         (<PostMeshSurface*>self.baseptr).MeshPointInversionSurface(project_on_curves, modify_linear_mesh)
  * 
+ *     def MeshPointInversionSurfaceArcLength(self, Integer project_on_curves,             # <<<<<<<<<<<<<<
+ *         Real orth_tol, Real[:,::1] FEbases):
+ *         """Perform point inversion of high order nodes in the mesh on
  */
 
   /* function exit code */
@@ -6974,17 +7240,575 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   return __pyx_r;
 }
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":271
- *         self.thisptr.MeshPointInversionSurfaceArcLength(project_on_curves,OrthTol,&FEbases[0,0],FEbases.shape[0],FEbases.shape[1])
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":467
+ *             &FEbases[0,0],FEbases.shape[0],FEbases.shape[1])
+ * 
+ *     def PerformPointProjectionInversionSurface(self, str surface_identification_algorithm="minimisation",             # <<<<<<<<<<<<<<
+ *         str projection_type="orthogonal", Integer[::1] face_to_surface_map=None,
+ *         Integer already_mapped=0, str internal_surface_identification_algorithm="minimisation",
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_25PerformPointProjectionInversionSurface(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_24PerformPointProjectionInversionSurface[] = "Convenience function for Python API. Performs point projection and\n            point inversion at one go\n\n            input:\n                surface_identification_algorithm          \n                                            [str] algorithm to use for identifying\n                                            which mesh faces lie on which geometrical \n                                            surfaces, either \"projection\" or \"minimisation\"\n                                            or \"supplied\" in case it is supplied externally.\n                                            Default is minimisation in 3D, unless supplied            \n\n                projection_type:            [str] type of prjection to use for projecting\n                                            high order nodes to CAD geometry, should be\n                                            either \"arc_length\" or \"orthogonal\".\n                                            The default for 3D meshes is orhthogonal, as\n                                            it is more robust for surfaces\n\n                face_to_surface_map:        [1D array] of the same size as number of boundary\n                                            faces, each entry corresponding to a geometrical surface\n                                            that contains the corresponding mesh boundary face\n\n                already_mapped:             [int] 0 or 1.  Due to different CAD standards \n                                            the external mapping provided for the geometry \n                                            and that geometry read internally might have \n                                            different face numbering, in which case supply\n                                            already_map as zero.\n\n                internal_surface_identification_algorithm:\n                                            [str] either \"minimisation\" of \"projection\". \n                    ""                        If the internal and externally supplied numbering of\n                                            entities do not match, surfaces will have to be\n                                            identified internally to gaurantee the validity\n                                            of external mapping\n\n                repair_dual_projection:     [bool] True/False to repair/fix projected points, \n                                            if projection happens to be inaccurate.\n                                            This is typically the case for closed/periodic \n                                            iso-curves\n\n                project_on_curves:          [int] 0 or 1, project of surface intersections\n\n                modify_linear_mesh          [int] 0 or 1, modify linear mesh, if it has\n                                            inaccuracy in nodal coordinates\n\n                orth_tol                    [double] 0 or 1, tolerance to fall back to\n                                            orthogonal projection if arc length fails.\n                                            This is a a tolerance defined in the physical space\n                                            such that (L_arc - L_orth)/L_orth < orth_tol, where\n                                            L represents the amount of displacement that the \n                                            boundary node undergoes. Typically a value between\n                                            0 and 1 should be given \n\n                FEbases                     [2D array] of finite element shape functions \n                                            evaluated at each isoparamertric point. Arc length \n                                            projection works by placing the points of \n                                            isoparametric finite element in the \n                                            isoparametric domain of NURBS\n        ";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_25PerformPointProjectionInversionSurface(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  PyObject *__pyx_v_surface_identification_algorithm = 0;
+  PyObject *__pyx_v_projection_type = 0;
+  __Pyx_memviewslice __pyx_v_face_to_surface_map = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_already_mapped;
+  PyObject *__pyx_v_internal_surface_identification_algorithm = 0;
+  PyObject *__pyx_v_repair_dual_projection = 0;
+  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_project_on_curves;
+  CYTHON_UNUSED __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_modify_linear_mesh;
+  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_orth_tol;
+  __Pyx_memviewslice __pyx_v_FEbases = { 0, 0, { 0 }, { 0 }, { 0 } };
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("PerformPointProjectionInversionSurface (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_surface_identification_algorithm,&__pyx_n_s_projection_type,&__pyx_n_s_face_to_surface_map,&__pyx_n_s_already_mapped,&__pyx_n_s_internal_surface_identification,&__pyx_n_s_repair_dual_projection,&__pyx_n_s_project_on_curves,&__pyx_n_s_modify_linear_mesh,&__pyx_n_s_orth_tol,&__pyx_n_s_FEbases,0};
+    PyObject* values[10] = {0,0,0,0,0,0,0,0,0,0};
+    values[0] = ((PyObject*)__pyx_n_s_minimisation);
+    values[1] = ((PyObject*)__pyx_n_s_orthogonal);
+    values[4] = ((PyObject*)__pyx_n_s_minimisation);
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":470
+ *         str projection_type="orthogonal", Integer[::1] face_to_surface_map=None,
+ *         Integer already_mapped=0, str internal_surface_identification_algorithm="minimisation",
+ *         repair_dual_projection=False, Integer project_on_curves=1,             # <<<<<<<<<<<<<<
+ *         Integer modify_linear_mesh=0, Real orth_tol=1, Real[:,::1] FEbases=None):
+ *         """Convenience function for Python API. Performs point projection and
+ */
+    values[5] = ((PyObject *)Py_False);
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case 10: values[9] = PyTuple_GET_ITEM(__pyx_args, 9);
+        case  9: values[8] = PyTuple_GET_ITEM(__pyx_args, 8);
+        case  8: values[7] = PyTuple_GET_ITEM(__pyx_args, 7);
+        case  7: values[6] = PyTuple_GET_ITEM(__pyx_args, 6);
+        case  6: values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
+        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+        case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+        case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_surface_identification_algorithm);
+          if (value) { values[0] = value; kw_args--; }
+        }
+        case  1:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_projection_type);
+          if (value) { values[1] = value; kw_args--; }
+        }
+        case  2:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_face_to_surface_map);
+          if (value) { values[2] = value; kw_args--; }
+        }
+        case  3:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_already_mapped);
+          if (value) { values[3] = value; kw_args--; }
+        }
+        case  4:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_internal_surface_identification);
+          if (value) { values[4] = value; kw_args--; }
+        }
+        case  5:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_repair_dual_projection);
+          if (value) { values[5] = value; kw_args--; }
+        }
+        case  6:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_project_on_curves);
+          if (value) { values[6] = value; kw_args--; }
+        }
+        case  7:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_modify_linear_mesh);
+          if (value) { values[7] = value; kw_args--; }
+        }
+        case  8:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_orth_tol);
+          if (value) { values[8] = value; kw_args--; }
+        }
+        case  9:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_FEbases);
+          if (value) { values[9] = value; kw_args--; }
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "PerformPointProjectionInversionSurface") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 467; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      }
+    } else {
+      switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case 10: values[9] = PyTuple_GET_ITEM(__pyx_args, 9);
+        case  9: values[8] = PyTuple_GET_ITEM(__pyx_args, 8);
+        case  8: values[7] = PyTuple_GET_ITEM(__pyx_args, 7);
+        case  7: values[6] = PyTuple_GET_ITEM(__pyx_args, 6);
+        case  6: values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
+        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+        case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+        case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+    }
+    __pyx_v_surface_identification_algorithm = ((PyObject*)values[0]);
+    __pyx_v_projection_type = ((PyObject*)values[1]);
+    if (values[2]) {
+      __pyx_v_face_to_surface_map = __Pyx_PyObject_to_MemoryviewSlice_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer(values[2]); if (unlikely(!__pyx_v_face_to_surface_map.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    } else {
+      __pyx_v_face_to_surface_map = __pyx_k__5;
+      __PYX_INC_MEMVIEW(&__pyx_v_face_to_surface_map, 1);
+    }
+    if (values[3]) {
+      __pyx_v_already_mapped = __Pyx_PyInt_As_long(values[3]); if (unlikely((__pyx_v_already_mapped == (long)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 469; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    } else {
+      __pyx_v_already_mapped = ((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer)0);
+    }
+    __pyx_v_internal_surface_identification_algorithm = ((PyObject*)values[4]);
+    __pyx_v_repair_dual_projection = values[5];
+    if (values[6]) {
+      __pyx_v_project_on_curves = __Pyx_PyInt_As_long(values[6]); if (unlikely((__pyx_v_project_on_curves == (long)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 470; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    } else {
+      __pyx_v_project_on_curves = ((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer)1);
+    }
+    if (values[7]) {
+      __pyx_v_modify_linear_mesh = __Pyx_PyInt_As_long(values[7]); if (unlikely((__pyx_v_modify_linear_mesh == (long)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 471; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    } else {
+      __pyx_v_modify_linear_mesh = ((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer)0);
+    }
+    if (values[8]) {
+      __pyx_v_orth_tol = __pyx_PyFloat_AsDouble(values[8]); if (unlikely((__pyx_v_orth_tol == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 471; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    } else {
+      __pyx_v_orth_tol = ((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real)1.0);
+    }
+    if (values[9]) {
+      __pyx_v_FEbases = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(values[9]); if (unlikely(!__pyx_v_FEbases.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 471; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    } else {
+      __pyx_v_FEbases = __pyx_k__6;
+      __PYX_INC_MEMVIEW(&__pyx_v_FEbases, 1);
+    }
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("PerformPointProjectionInversionSurface", 0, 0, 10, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 467; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.PerformPointProjectionInversionSurface", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_surface_identification_algorithm), (&PyString_Type), 1, "surface_identification_algorithm", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 467; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_projection_type), (&PyString_Type), 1, "projection_type", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_internal_surface_identification_algorithm), (&PyString_Type), 1, "internal_surface_identification_algorithm", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 469; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_24PerformPointProjectionInversionSurface(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self), __pyx_v_surface_identification_algorithm, __pyx_v_projection_type, __pyx_v_face_to_surface_map, __pyx_v_already_mapped, __pyx_v_internal_surface_identification_algorithm, __pyx_v_repair_dual_projection, __pyx_v_project_on_curves, __pyx_v_modify_linear_mesh, __pyx_v_orth_tol, __pyx_v_FEbases);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":467
+ *             &FEbases[0,0],FEbases.shape[0],FEbases.shape[1])
+ * 
+ *     def PerformPointProjectionInversionSurface(self, str surface_identification_algorithm="minimisation",             # <<<<<<<<<<<<<<
+ *         str projection_type="orthogonal", Integer[::1] face_to_surface_map=None,
+ *         Integer already_mapped=0, str internal_surface_identification_algorithm="minimisation",
+ */
+
+  /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_24PerformPointProjectionInversionSurface(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, PyObject *__pyx_v_surface_identification_algorithm, PyObject *__pyx_v_projection_type, __Pyx_memviewslice __pyx_v_face_to_surface_map, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_already_mapped, PyObject *__pyx_v_internal_surface_identification_algorithm, PyObject *__pyx_v_repair_dual_projection, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_project_on_curves, CYTHON_UNUSED __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_modify_linear_mesh, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real __pyx_v_orth_tol, __Pyx_memviewslice __pyx_v_FEbases) {
+  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_caller;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  int __pyx_t_1;
+  int __pyx_t_2;
+  Py_ssize_t __pyx_t_3;
+  PyObject *__pyx_t_4 = NULL;
+  Py_ssize_t __pyx_t_5;
+  Py_ssize_t __pyx_t_6;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("PerformPointProjectionInversionSurface", 0);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":531
+ *         """
+ * 
+ *         cdef Integer caller = 0             # <<<<<<<<<<<<<<
+ *         if internal_surface_identification_algorithm != "minimisation":
+ *             caller = 1
+ */
+  __pyx_v_caller = 0;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":532
+ * 
+ *         cdef Integer caller = 0
+ *         if internal_surface_identification_algorithm != "minimisation":             # <<<<<<<<<<<<<<
+ *             caller = 1
+ * 
+ */
+  __pyx_t_1 = (__Pyx_PyString_Equals(__pyx_v_internal_surface_identification_algorithm, __pyx_n_s_minimisation, Py_NE)); if (unlikely(__pyx_t_1 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 532; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = (__pyx_t_1 != 0);
+  if (__pyx_t_2) {
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":533
+ *         cdef Integer caller = 0
+ *         if internal_surface_identification_algorithm != "minimisation":
+ *             caller = 1             # <<<<<<<<<<<<<<
+ * 
+ *         (<PostMeshSurface*>self.baseptr).GetSurfacesParameters()
+ */
+    __pyx_v_caller = 1;
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":532
+ * 
+ *         cdef Integer caller = 0
+ *         if internal_surface_identification_algorithm != "minimisation":             # <<<<<<<<<<<<<<
+ *             caller = 1
+ * 
+ */
+  }
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":535
+ *             caller = 1
+ * 
+ *         (<PostMeshSurface*>self.baseptr).GetSurfacesParameters()             # <<<<<<<<<<<<<<
+ *         (<PostMeshSurface*>self.baseptr).GetGeomPointsOnCorrespondingFaces()
+ *         if surface_identification_algorithm == "minimisation":
+ */
+  ((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr)->GetSurfacesParameters();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":536
+ * 
+ *         (<PostMeshSurface*>self.baseptr).GetSurfacesParameters()
+ *         (<PostMeshSurface*>self.baseptr).GetGeomPointsOnCorrespondingFaces()             # <<<<<<<<<<<<<<
+ *         if surface_identification_algorithm == "minimisation":
+ *             (<PostMeshSurface*>self.baseptr).IdentifySurfacesContainingFaces()
+ */
+  ((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr)->GetGeomPointsOnCorrespondingFaces();
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":537
+ *         (<PostMeshSurface*>self.baseptr).GetSurfacesParameters()
+ *         (<PostMeshSurface*>self.baseptr).GetGeomPointsOnCorrespondingFaces()
+ *         if surface_identification_algorithm == "minimisation":             # <<<<<<<<<<<<<<
+ *             (<PostMeshSurface*>self.baseptr).IdentifySurfacesContainingFaces()
+ *             (<PostMeshSurface*>self.baseptr).IdentifyRemainingSurfacesByProjection()
+ */
+  __pyx_t_2 = (__Pyx_PyString_Equals(__pyx_v_surface_identification_algorithm, __pyx_n_s_minimisation, Py_EQ)); if (unlikely(__pyx_t_2 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 537; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = (__pyx_t_2 != 0);
+  if (__pyx_t_1) {
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":538
+ *         (<PostMeshSurface*>self.baseptr).GetGeomPointsOnCorrespondingFaces()
+ *         if surface_identification_algorithm == "minimisation":
+ *             (<PostMeshSurface*>self.baseptr).IdentifySurfacesContainingFaces()             # <<<<<<<<<<<<<<
+ *             (<PostMeshSurface*>self.baseptr).IdentifyRemainingSurfacesByProjection()
+ *         elif surface_identification_algorithm == "projection":
+ */
+    ((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr)->IdentifySurfacesContainingFaces();
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":539
+ *         if surface_identification_algorithm == "minimisation":
+ *             (<PostMeshSurface*>self.baseptr).IdentifySurfacesContainingFaces()
+ *             (<PostMeshSurface*>self.baseptr).IdentifyRemainingSurfacesByProjection()             # <<<<<<<<<<<<<<
+ *         elif surface_identification_algorithm == "projection":
+ *             (<PostMeshSurface*>self.baseptr).IdentifySurfacesContainingFacesByPureProjection()
+ */
+    ((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr)->IdentifyRemainingSurfacesByProjection();
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":537
+ *         (<PostMeshSurface*>self.baseptr).GetSurfacesParameters()
+ *         (<PostMeshSurface*>self.baseptr).GetGeomPointsOnCorrespondingFaces()
+ *         if surface_identification_algorithm == "minimisation":             # <<<<<<<<<<<<<<
+ *             (<PostMeshSurface*>self.baseptr).IdentifySurfacesContainingFaces()
+ *             (<PostMeshSurface*>self.baseptr).IdentifyRemainingSurfacesByProjection()
+ */
+    goto __pyx_L4;
+  }
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":540
+ *             (<PostMeshSurface*>self.baseptr).IdentifySurfacesContainingFaces()
+ *             (<PostMeshSurface*>self.baseptr).IdentifyRemainingSurfacesByProjection()
+ *         elif surface_identification_algorithm == "projection":             # <<<<<<<<<<<<<<
+ *             (<PostMeshSurface*>self.baseptr).IdentifySurfacesContainingFacesByPureProjection()
+ *         elif surface_identification_algorithm == "supplied":
+ */
+  __pyx_t_1 = (__Pyx_PyString_Equals(__pyx_v_surface_identification_algorithm, __pyx_n_s_projection, Py_EQ)); if (unlikely(__pyx_t_1 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 540; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = (__pyx_t_1 != 0);
+  if (__pyx_t_2) {
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":541
+ *             (<PostMeshSurface*>self.baseptr).IdentifyRemainingSurfacesByProjection()
+ *         elif surface_identification_algorithm == "projection":
+ *             (<PostMeshSurface*>self.baseptr).IdentifySurfacesContainingFacesByPureProjection()             # <<<<<<<<<<<<<<
+ *         elif surface_identification_algorithm == "supplied":
+ *             if face_to_surface_map is not None:
+ */
+    ((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr)->IdentifySurfacesContainingFacesByPureProjection();
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":540
+ *             (<PostMeshSurface*>self.baseptr).IdentifySurfacesContainingFaces()
+ *             (<PostMeshSurface*>self.baseptr).IdentifyRemainingSurfacesByProjection()
+ *         elif surface_identification_algorithm == "projection":             # <<<<<<<<<<<<<<
+ *             (<PostMeshSurface*>self.baseptr).IdentifySurfacesContainingFacesByPureProjection()
+ *         elif surface_identification_algorithm == "supplied":
+ */
+    goto __pyx_L4;
+  }
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":542
+ *         elif surface_identification_algorithm == "projection":
+ *             (<PostMeshSurface*>self.baseptr).IdentifySurfacesContainingFacesByPureProjection()
+ *         elif surface_identification_algorithm == "supplied":             # <<<<<<<<<<<<<<
+ *             if face_to_surface_map is not None:
+ *                 (<PostMeshSurface*>self.baseptr).SupplySurfacesContainingFaces(&face_to_surface_map[0],
+ */
+  __pyx_t_2 = (__Pyx_PyString_Equals(__pyx_v_surface_identification_algorithm, __pyx_n_s_supplied, Py_EQ)); if (unlikely(__pyx_t_2 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 542; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = (__pyx_t_2 != 0);
+  if (__pyx_t_1) {
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":543
+ *             (<PostMeshSurface*>self.baseptr).IdentifySurfacesContainingFacesByPureProjection()
+ *         elif surface_identification_algorithm == "supplied":
+ *             if face_to_surface_map is not None:             # <<<<<<<<<<<<<<
+ *                 (<PostMeshSurface*>self.baseptr).SupplySurfacesContainingFaces(&face_to_surface_map[0],
+ *             face_to_surface_map.shape[0], already_mapped, caller)
+ */
+    __pyx_t_1 = ((((PyObject *) __pyx_v_face_to_surface_map.memview) != Py_None) != 0);
+    if (__pyx_t_1) {
+
+      /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":544
+ *         elif surface_identification_algorithm == "supplied":
+ *             if face_to_surface_map is not None:
+ *                 (<PostMeshSurface*>self.baseptr).SupplySurfacesContainingFaces(&face_to_surface_map[0],             # <<<<<<<<<<<<<<
+ *             face_to_surface_map.shape[0], already_mapped, caller)
+ *             else:
+ */
+      __pyx_t_3 = 0;
+
+      /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":545
+ *             if face_to_surface_map is not None:
+ *                 (<PostMeshSurface*>self.baseptr).SupplySurfacesContainingFaces(&face_to_surface_map[0],
+ *             face_to_surface_map.shape[0], already_mapped, caller)             # <<<<<<<<<<<<<<
+ *             else:
+ *                 raise ValueError("A mapping between mesh faces and geometrical surfaces was not supplied")
+ */
+      ((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr)->SupplySurfacesContainingFaces((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer *) ( /* dim=0 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer *) __pyx_v_face_to_surface_map.data) + __pyx_t_3)) )))), (__pyx_v_face_to_surface_map.shape[0]), __pyx_v_already_mapped, __pyx_v_caller);
+
+      /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":543
+ *             (<PostMeshSurface*>self.baseptr).IdentifySurfacesContainingFacesByPureProjection()
+ *         elif surface_identification_algorithm == "supplied":
+ *             if face_to_surface_map is not None:             # <<<<<<<<<<<<<<
+ *                 (<PostMeshSurface*>self.baseptr).SupplySurfacesContainingFaces(&face_to_surface_map[0],
+ *             face_to_surface_map.shape[0], already_mapped, caller)
+ */
+      goto __pyx_L5;
+    }
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":547
+ *             face_to_surface_map.shape[0], already_mapped, caller)
+ *             else:
+ *                 raise ValueError("A mapping between mesh faces and geometrical surfaces was not supplied")             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+    /*else*/ {
+      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__7, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 547; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_GOTREF(__pyx_t_4);
+      __Pyx_Raise(__pyx_t_4, 0, 0, 0);
+      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 547; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    }
+    __pyx_L5:;
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":542
+ *         elif surface_identification_algorithm == "projection":
+ *             (<PostMeshSurface*>self.baseptr).IdentifySurfacesContainingFacesByPureProjection()
+ *         elif surface_identification_algorithm == "supplied":             # <<<<<<<<<<<<<<
+ *             if face_to_surface_map is not None:
+ *                 (<PostMeshSurface*>self.baseptr).SupplySurfacesContainingFaces(&face_to_surface_map[0],
+ */
+  }
+  __pyx_L4:;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":550
+ * 
+ * 
+ *         if projection_type == "orthogonal":             # <<<<<<<<<<<<<<
+ *             (<PostMeshCurve*>self.baseptr).MeshPointInversionCurve()
+ *         else:
+ */
+  __pyx_t_1 = (__Pyx_PyString_Equals(__pyx_v_projection_type, __pyx_n_s_orthogonal, Py_EQ)); if (unlikely(__pyx_t_1 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 550; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = (__pyx_t_1 != 0);
+  if (__pyx_t_2) {
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":551
+ * 
+ *         if projection_type == "orthogonal":
+ *             (<PostMeshCurve*>self.baseptr).MeshPointInversionCurve()             # <<<<<<<<<<<<<<
+ *         else:
+ *             (<PostMeshSurface*>self.baseptr).ProjectMeshOnSurface()
+ */
+    ((PostMeshCurve *)__pyx_v_self->__pyx_base.baseptr)->MeshPointInversionCurve();
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":550
+ * 
+ * 
+ *         if projection_type == "orthogonal":             # <<<<<<<<<<<<<<
+ *             (<PostMeshCurve*>self.baseptr).MeshPointInversionCurve()
+ *         else:
+ */
+    goto __pyx_L6;
+  }
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":553
+ *             (<PostMeshCurve*>self.baseptr).MeshPointInversionCurve()
+ *         else:
+ *             (<PostMeshSurface*>self.baseptr).ProjectMeshOnSurface()             # <<<<<<<<<<<<<<
+ *             if repair_dual_projection:
+ *                 (<PostMeshSurface*>self.baseptr).RepairDualProjectedParameters()
+ */
+  /*else*/ {
+    ((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr)->ProjectMeshOnSurface();
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":554
+ *         else:
+ *             (<PostMeshSurface*>self.baseptr).ProjectMeshOnSurface()
+ *             if repair_dual_projection:             # <<<<<<<<<<<<<<
+ *                 (<PostMeshSurface*>self.baseptr).RepairDualProjectedParameters()
+ *             if FEbases is None:
+ */
+    __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_v_repair_dual_projection); if (unlikely(__pyx_t_2 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 554; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (__pyx_t_2) {
+
+      /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":555
+ *             (<PostMeshSurface*>self.baseptr).ProjectMeshOnSurface()
+ *             if repair_dual_projection:
+ *                 (<PostMeshSurface*>self.baseptr).RepairDualProjectedParameters()             # <<<<<<<<<<<<<<
+ *             if FEbases is None:
+ *                 raise ValueError("Finite element bases functions were not supplied "
+ */
+      ((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr)->RepairDualProjectedParameters();
+
+      /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":554
+ *         else:
+ *             (<PostMeshSurface*>self.baseptr).ProjectMeshOnSurface()
+ *             if repair_dual_projection:             # <<<<<<<<<<<<<<
+ *                 (<PostMeshSurface*>self.baseptr).RepairDualProjectedParameters()
+ *             if FEbases is None:
+ */
+    }
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":556
+ *             if repair_dual_projection:
+ *                 (<PostMeshSurface*>self.baseptr).RepairDualProjectedParameters()
+ *             if FEbases is None:             # <<<<<<<<<<<<<<
+ *                 raise ValueError("Finite element bases functions were not supplied "
+ *                     "for arc length based projection")
+ */
+    __pyx_t_2 = ((((PyObject *) __pyx_v_FEbases.memview) == Py_None) != 0);
+    if (__pyx_t_2) {
+
+      /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":557
+ *                 (<PostMeshSurface*>self.baseptr).RepairDualProjectedParameters()
+ *             if FEbases is None:
+ *                 raise ValueError("Finite element bases functions were not supplied "             # <<<<<<<<<<<<<<
+ *                     "for arc length based projection")
+ *             (<PostMeshSurface*>self.baseptr).MeshPointInversionSurfaceArcLength(project_on_curves,orth_tol,
+ */
+      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__8, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 557; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_GOTREF(__pyx_t_4);
+      __Pyx_Raise(__pyx_t_4, 0, 0, 0);
+      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 557; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+
+      /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":556
+ *             if repair_dual_projection:
+ *                 (<PostMeshSurface*>self.baseptr).RepairDualProjectedParameters()
+ *             if FEbases is None:             # <<<<<<<<<<<<<<
+ *                 raise ValueError("Finite element bases functions were not supplied "
+ *                     "for arc length based projection")
+ */
+    }
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":560
+ *                     "for arc length based projection")
+ *             (<PostMeshSurface*>self.baseptr).MeshPointInversionSurfaceArcLength(project_on_curves,orth_tol,
+ *             &FEbases[0,0],FEbases.shape[0],FEbases.shape[1])             # <<<<<<<<<<<<<<
+ * 
+ *     def ReturnModifiedMeshPoints(self,Real[:,::1] points):
+ */
+    __pyx_t_5 = 0;
+    __pyx_t_6 = 0;
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":559
+ *                 raise ValueError("Finite element bases functions were not supplied "
+ *                     "for arc length based projection")
+ *             (<PostMeshSurface*>self.baseptr).MeshPointInversionSurfaceArcLength(project_on_curves,orth_tol,             # <<<<<<<<<<<<<<
+ *             &FEbases[0,0],FEbases.shape[0],FEbases.shape[1])
+ * 
+ */
+    ((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr)->MeshPointInversionSurfaceArcLength(__pyx_v_project_on_curves, __pyx_v_orth_tol, (&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=0 */ (__pyx_v_FEbases.data + __pyx_t_5 * __pyx_v_FEbases.strides[0]) )) + __pyx_t_6)) )))), (__pyx_v_FEbases.shape[0]), (__pyx_v_FEbases.shape[1]));
+  }
+  __pyx_L6:;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":467
+ *             &FEbases[0,0],FEbases.shape[0],FEbases.shape[1])
+ * 
+ *     def PerformPointProjectionInversionSurface(self, str surface_identification_algorithm="minimisation",             # <<<<<<<<<<<<<<
+ *         str projection_type="orthogonal", Integer[::1] face_to_surface_map=None,
+ *         Integer already_mapped=0, str internal_surface_identification_algorithm="minimisation",
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.PerformPointProjectionInversionSurface", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __PYX_XDEC_MEMVIEW(&__pyx_v_face_to_surface_map, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_FEbases, 1);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":562
+ *             &FEbases[0,0],FEbases.shape[0],FEbases.shape[1])
  * 
  *     def ReturnModifiedMeshPoints(self,Real[:,::1] points):             # <<<<<<<<<<<<<<
- *         self.thisptr.ReturnModifiedMeshPoints(&points[0,0])
+ *         (<PostMeshSurface*>self.baseptr).ReturnModifiedMeshPoints(&points[0,0])
  * 
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_65ReturnModifiedMeshPoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_points); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_65ReturnModifiedMeshPoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_points) {
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_27ReturnModifiedMeshPoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_points); /*proto*/
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_27ReturnModifiedMeshPoints(PyObject *__pyx_v_self, PyObject *__pyx_arg_points) {
   __Pyx_memviewslice __pyx_v_points = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
@@ -6993,7 +7817,7 @@ static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("ReturnModifiedMeshPoints (wrapper)", 0);
   assert(__pyx_arg_points); {
-    __pyx_v_points = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_arg_points); if (unlikely(!__pyx_v_points.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 271; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_points = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(__pyx_arg_points); if (unlikely(!__pyx_v_points.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 562; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -7001,36 +7825,36 @@ static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_64ReturnModifiedMeshPoints(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self), __pyx_v_points);
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_26ReturnModifiedMeshPoints(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self), __pyx_v_points);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_64ReturnModifiedMeshPoints(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_points) {
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_26ReturnModifiedMeshPoints(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self, __Pyx_memviewslice __pyx_v_points) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   Py_ssize_t __pyx_t_1;
   Py_ssize_t __pyx_t_2;
   __Pyx_RefNannySetupContext("ReturnModifiedMeshPoints", 0);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":272
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":563
  * 
  *     def ReturnModifiedMeshPoints(self,Real[:,::1] points):
- *         self.thisptr.ReturnModifiedMeshPoints(&points[0,0])             # <<<<<<<<<<<<<<
+ *         (<PostMeshSurface*>self.baseptr).ReturnModifiedMeshPoints(&points[0,0])             # <<<<<<<<<<<<<<
  * 
  *     @boundscheck(False)
  */
   __pyx_t_1 = 0;
   __pyx_t_2 = 0;
-  __pyx_v_self->thisptr->ReturnModifiedMeshPoints((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=0 */ (__pyx_v_points.data + __pyx_t_1 * __pyx_v_points.strides[0]) )) + __pyx_t_2)) )))));
+  ((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr)->ReturnModifiedMeshPoints((&(*((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=1 */ ((char *) (((__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real *) ( /* dim=0 */ (__pyx_v_points.data + __pyx_t_1 * __pyx_v_points.strides[0]) )) + __pyx_t_2)) )))));
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":271
- *         self.thisptr.MeshPointInversionSurfaceArcLength(project_on_curves,OrthTol,&FEbases[0,0],FEbases.shape[0],FEbases.shape[1])
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":562
+ *             &FEbases[0,0],FEbases.shape[0],FEbases.shape[1])
  * 
  *     def ReturnModifiedMeshPoints(self,Real[:,::1] points):             # <<<<<<<<<<<<<<
- *         self.thisptr.ReturnModifiedMeshPoints(&points[0,0])
+ *         (<PostMeshSurface*>self.baseptr).ReturnModifiedMeshPoints(&points[0,0])
  * 
  */
 
@@ -7042,28 +7866,29 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   return __pyx_r;
 }
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":275
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":566
  * 
  *     @boundscheck(False)
  *     def GetMeshFacesOnPlanarSurfaces(self):             # <<<<<<<<<<<<<<
- *         return np.array(self.thisptr.GetMeshFacesOnPlanarSurfaces(),copy=False).T.copy(order='C')
- * 
+ *         """Get boundary mesh faces that lie on planar CAD surfaces.
+ *         These faces typically require in-plane translation of nodes,
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_67GetMeshFacesOnPlanarSurfaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_67GetMeshFacesOnPlanarSurfaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_29GetMeshFacesOnPlanarSurfaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_28GetMeshFacesOnPlanarSurfaces[] = "Get boundary mesh faces that lie on planar CAD surfaces. \n        These faces typically require in-plane translation of nodes, \n        that is separate 2D analyses";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_29GetMeshFacesOnPlanarSurfaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetMeshFacesOnPlanarSurfaces (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_66GetMeshFacesOnPlanarSurfaces(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_28GetMeshFacesOnPlanarSurfaces(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_66GetMeshFacesOnPlanarSurfaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_28GetMeshFacesOnPlanarSurfaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -7075,44 +7900,68 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("GetMeshFacesOnPlanarSurfaces", 0);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":276
- *     @boundscheck(False)
- *     def GetMeshFacesOnPlanarSurfaces(self):
- *         return np.array(self.thisptr.GetMeshFacesOnPlanarSurfaces(),copy=False).T.copy(order='C')             # <<<<<<<<<<<<<<
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":571
+ *         that is separate 2D analyses"""
+ *         # TRANSPOSE AND COPY
+ *         return np.array((<PostMeshSurface*>self.baseptr).GetMeshFacesOnPlanarSurfaces(),             # <<<<<<<<<<<<<<
+ *             copy=False).T.copy(order="c")
  * 
- *     @boundscheck(False)
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 276; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 571; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 276; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 571; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __pyx_convert_vector_to_py_std_3a__3a_vector_3c___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer_3e___(__pyx_v_self->thisptr->GetMeshFacesOnPlanarSurfaces()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 276; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __pyx_convert_vector_to_py_std_3a__3a_vector_3c___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer_3e___(((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr)->GetMeshFacesOnPlanarSurfaces()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 571; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 276; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 571; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 276; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":572
+ *         # TRANSPOSE AND COPY
+ *         return np.array((<PostMeshSurface*>self.baseptr).GetMeshFacesOnPlanarSurfaces(),
+ *             copy=False).T.copy(order="c")             # <<<<<<<<<<<<<<
+ * 
+ *     @boundscheck(False)
+ */
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 572; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 276; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 276; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 572; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":571
+ *         that is separate 2D analyses"""
+ *         # TRANSPOSE AND COPY
+ *         return np.array((<PostMeshSurface*>self.baseptr).GetMeshFacesOnPlanarSurfaces(),             # <<<<<<<<<<<<<<
+ *             copy=False).T.copy(order="c")
+ * 
+ */
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 571; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_T); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 276; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":572
+ *         # TRANSPOSE AND COPY
+ *         return np.array((<PostMeshSurface*>self.baseptr).GetMeshFacesOnPlanarSurfaces(),
+ *             copy=False).T.copy(order="c")             # <<<<<<<<<<<<<<
+ * 
+ *     @boundscheck(False)
+ */
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_T); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 572; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_copy); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 276; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_copy); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 572; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 276; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 572; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_order, __pyx_n_s_C) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 276; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 276; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_order, __pyx_n_s_c) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 572; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 572; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -7120,12 +7969,12 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":275
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":566
  * 
  *     @boundscheck(False)
  *     def GetMeshFacesOnPlanarSurfaces(self):             # <<<<<<<<<<<<<<
- *         return np.array(self.thisptr.GetMeshFacesOnPlanarSurfaces(),copy=False).T.copy(order='C')
- * 
+ *         """Get boundary mesh faces that lie on planar CAD surfaces.
+ *         These faces typically require in-plane translation of nodes,
  */
 
   /* function exit code */
@@ -7142,28 +7991,29 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   return __pyx_r;
 }
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":279
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":575
  * 
  *     @boundscheck(False)
  *     def GetDirichletFaces(self):             # <<<<<<<<<<<<<<
- *         cdef vector[Integer] dirichlet_faces = self.thisptr.GetDirichletFaces()
- *         return np.array(dirichlet_faces,copy=False).reshape(dirichlet_faces.size()/(self.ndim+1),self.ndim+1)
+ *         """Get boundary faces that are being projected on to the CAD surfaces"""
+ *         cdef vector[Integer] dirichlet_faces = (<PostMeshSurface*>self.baseptr).GetDirichletFaces()
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_69GetDirichletFaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_69GetDirichletFaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_31GetDirichletFaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_30GetDirichletFaces[] = "Get boundary faces that are being projected on to the CAD surfaces";
+static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_31GetDirichletFaces(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("GetDirichletFaces (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_68GetDirichletFaces(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
+  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_30GetDirichletFaces(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_68GetDirichletFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
+static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_30GetDirichletFaces(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
   std::vector<__pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer>  __pyx_v_dirichlet_faces;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -7181,55 +8031,95 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("GetDirichletFaces", 0);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":280
- *     @boundscheck(False)
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":577
  *     def GetDirichletFaces(self):
- *         cdef vector[Integer] dirichlet_faces = self.thisptr.GetDirichletFaces()             # <<<<<<<<<<<<<<
- *         return np.array(dirichlet_faces,copy=False).reshape(dirichlet_faces.size()/(self.ndim+1),self.ndim+1)
- * 
+ *         """Get boundary faces that are being projected on to the CAD surfaces"""
+ *         cdef vector[Integer] dirichlet_faces = (<PostMeshSurface*>self.baseptr).GetDirichletFaces()             # <<<<<<<<<<<<<<
+ *         return np.array(dirichlet_faces,
+ *             copy=False).reshape(dirichlet_faces.size()/(self.ndim+1),self.ndim+1)
  */
-  __pyx_v_dirichlet_faces = __pyx_v_self->thisptr->GetDirichletFaces();
+  __pyx_v_dirichlet_faces = ((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr)->GetDirichletFaces();
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":281
- *     def GetDirichletFaces(self):
- *         cdef vector[Integer] dirichlet_faces = self.thisptr.GetDirichletFaces()
- *         return np.array(dirichlet_faces,copy=False).reshape(dirichlet_faces.size()/(self.ndim+1),self.ndim+1)             # <<<<<<<<<<<<<<
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":578
+ *         """Get boundary faces that are being projected on to the CAD surfaces"""
+ *         cdef vector[Integer] dirichlet_faces = (<PostMeshSurface*>self.baseptr).GetDirichletFaces()
+ *         return np.array(dirichlet_faces,             # <<<<<<<<<<<<<<
+ *             copy=False).reshape(dirichlet_faces.size()/(self.ndim+1),self.ndim+1)
  * 
- *     @boundscheck(False)
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":579
+ *         cdef vector[Integer] dirichlet_faces = (<PostMeshSurface*>self.baseptr).GetDirichletFaces()
+ *         return np.array(dirichlet_faces,
+ *             copy=False).reshape(dirichlet_faces.size()/(self.ndim+1),self.ndim+1)             # <<<<<<<<<<<<<<
+ * 
+ *     def __dealloc__(self):
+ */
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 578; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":578
+ *         """Get boundary faces that are being projected on to the CAD surfaces"""
+ *         cdef vector[Integer] dirichlet_faces = (<PostMeshSurface*>self.baseptr).GetDirichletFaces()
+ *         return np.array(dirichlet_faces,             # <<<<<<<<<<<<<<
+ *             copy=False).reshape(dirichlet_faces.size()/(self.ndim+1),self.ndim+1)
+ * 
+ */
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 578; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __pyx_convert_vector_to_py___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer(__pyx_v_dirichlet_faces); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __pyx_convert_vector_to_py___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer(__pyx_v_dirichlet_faces); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 578; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 578; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":579
+ *         cdef vector[Integer] dirichlet_faces = (<PostMeshSurface*>self.baseptr).GetDirichletFaces()
+ *         return np.array(dirichlet_faces,
+ *             copy=False).reshape(dirichlet_faces.size()/(self.ndim+1),self.ndim+1)             # <<<<<<<<<<<<<<
+ * 
+ *     def __dealloc__(self):
+ */
+  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 579; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 579; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":578
+ *         """Get boundary faces that are being projected on to the CAD surfaces"""
+ *         cdef vector[Integer] dirichlet_faces = (<PostMeshSurface*>self.baseptr).GetDirichletFaces()
+ *         return np.array(dirichlet_faces,             # <<<<<<<<<<<<<<
+ *             copy=False).reshape(dirichlet_faces.size()/(self.ndim+1),self.ndim+1)
+ * 
+ */
+  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 578; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_reshape); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":579
+ *         cdef vector[Integer] dirichlet_faces = (<PostMeshSurface*>self.baseptr).GetDirichletFaces()
+ *         return np.array(dirichlet_faces,
+ *             copy=False).reshape(dirichlet_faces.size()/(self.ndim+1),self.ndim+1)             # <<<<<<<<<<<<<<
+ * 
+ *     def __dealloc__(self):
+ */
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_reshape); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 579; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_t_6 = __pyx_v_dirichlet_faces.size();
-  __pyx_t_7 = (__pyx_v_self->ndim + 1);
+  __pyx_t_7 = (__pyx_v_self->__pyx_base.ndim + 1);
   if (unlikely(__pyx_t_7 == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 579; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
-  __pyx_t_5 = __Pyx_PyInt_FromSize_t((__pyx_t_6 / __pyx_t_7)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyInt_FromSize_t((__pyx_t_6 / __pyx_t_7)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 579; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_4 = __Pyx_PyInt_From_unsigned_long((__pyx_v_self->ndim + 1)); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyInt_From_unsigned_long((__pyx_v_self->__pyx_base.ndim + 1)); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 579; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_3 = NULL;
   __pyx_t_8 = 0;
@@ -7243,7 +8133,7 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
       __pyx_t_8 = 1;
     }
   }
-  __pyx_t_9 = PyTuple_New(2+__pyx_t_8); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_9 = PyTuple_New(2+__pyx_t_8); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 579; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_9);
   if (__pyx_t_3) {
     __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_3); __pyx_t_3 = NULL;
@@ -7254,7 +8144,7 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   PyTuple_SET_ITEM(__pyx_t_9, 1+__pyx_t_8, __pyx_t_4);
   __pyx_t_5 = 0;
   __pyx_t_4 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_9, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_9, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 579; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -7262,12 +8152,12 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":279
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":575
  * 
  *     @boundscheck(False)
  *     def GetDirichletFaces(self):             # <<<<<<<<<<<<<<
- *         cdef vector[Integer] dirichlet_faces = self.thisptr.GetDirichletFaces()
- *         return np.array(dirichlet_faces,copy=False).reshape(dirichlet_faces.size()/(self.ndim+1),self.ndim+1)
+ *         """Get boundary faces that are being projected on to the CAD surfaces"""
+ *         cdef vector[Integer] dirichlet_faces = (<PostMeshSurface*>self.baseptr).GetDirichletFaces()
  */
 
   /* function exit code */
@@ -7286,374 +8176,81 @@ static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8Po
   return __pyx_r;
 }
 
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":284
- * 
- *     @boundscheck(False)
- *     def GetDirichletData(self):             # <<<<<<<<<<<<<<
- *         cdef:
- *             DirichletData struct_to_python = self.thisptr.GetDirichletData()
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_71GetDirichletData(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_71GetDirichletData(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("GetDirichletData (wrapper)", 0);
-  __pyx_r = __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_70GetDirichletData(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_70GetDirichletData(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
-  struct DirichletData __pyx_v_struct_to_python;
-  PyArrayObject *__pyx_v_nodes_dir = 0;
-  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_v_i;
-  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger __pyx_v_j;
-  PyArrayObject *__pyx_v_displacements_BC = 0;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_displacements_BC;
-  __Pyx_Buffer __pyx_pybuffer_displacements_BC;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_nodes_dir;
-  __Pyx_Buffer __pyx_pybuffer_nodes_dir;
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
-  PyObject *__pyx_t_4 = NULL;
-  PyObject *__pyx_t_5 = NULL;
-  PyArrayObject *__pyx_t_6 = NULL;
-  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_t_7;
-  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer __pyx_t_8;
-  PyArrayObject *__pyx_t_9 = NULL;
-  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger __pyx_t_10;
-  __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger __pyx_t_11;
-  Py_ssize_t __pyx_t_12;
-  PyObject *__pyx_t_13 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("GetDirichletData", 0);
-  __pyx_pybuffer_nodes_dir.pybuffer.buf = NULL;
-  __pyx_pybuffer_nodes_dir.refcount = 0;
-  __pyx_pybuffernd_nodes_dir.data = NULL;
-  __pyx_pybuffernd_nodes_dir.rcbuffer = &__pyx_pybuffer_nodes_dir;
-  __pyx_pybuffer_displacements_BC.pybuffer.buf = NULL;
-  __pyx_pybuffer_displacements_BC.refcount = 0;
-  __pyx_pybuffernd_displacements_BC.data = NULL;
-  __pyx_pybuffernd_displacements_BC.rcbuffer = &__pyx_pybuffer_displacements_BC;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":286
- *     def GetDirichletData(self):
- *         cdef:
- *             DirichletData struct_to_python = self.thisptr.GetDirichletData()             # <<<<<<<<<<<<<<
- *             np.ndarray[np.int64_t, ndim=2, mode='c'] nodes_dir = np.zeros((struct_to_python.nodes_dir_size,1),dtype=np.int64)
- *             Integer i
- */
-  __pyx_v_struct_to_python = __pyx_v_self->thisptr->GetDirichletData();
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":287
- *         cdef:
- *             DirichletData struct_to_python = self.thisptr.GetDirichletData()
- *             np.ndarray[np.int64_t, ndim=2, mode='c'] nodes_dir = np.zeros((struct_to_python.nodes_dir_size,1),dtype=np.int64)             # <<<<<<<<<<<<<<
- *             Integer i
- *             UInteger j
- */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 287; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 287; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_From_long(__pyx_v_struct_to_python.nodes_dir_size); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 287; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 287; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
-  __Pyx_INCREF(__pyx_int_1);
-  __Pyx_GIVEREF(__pyx_int_1);
-  PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_int_1);
-  __pyx_t_1 = 0;
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 287; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_3);
-  __pyx_t_3 = 0;
-  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 287; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 287; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_int64); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 287; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 287; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 287; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 287; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_6 = ((PyArrayObject *)__pyx_t_5);
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer, (PyObject*)__pyx_t_6, &__Pyx_TypeInfo_nn___pyx_t_5numpy_int64_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {
-      __pyx_v_nodes_dir = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.buf = NULL;
-      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 287; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    } else {__pyx_pybuffernd_nodes_dir.diminfo[0].strides = __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_nodes_dir.diminfo[0].shape = __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_nodes_dir.diminfo[1].strides = __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_nodes_dir.diminfo[1].shape = __pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer.shape[1];
-    }
-  }
-  __pyx_t_6 = 0;
-  __pyx_v_nodes_dir = ((PyArrayObject *)__pyx_t_5);
-  __pyx_t_5 = 0;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":291
- *             UInteger j
- * 
- *         for i in range(struct_to_python.nodes_dir_size):             # <<<<<<<<<<<<<<
- *             nodes_dir[i] = struct_to_python.nodes_dir_out_stl[i]
- * 
- */
-  __pyx_t_7 = __pyx_v_struct_to_python.nodes_dir_size;
-  for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
-    __pyx_v_i = __pyx_t_8;
-
-    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":292
- * 
- *         for i in range(struct_to_python.nodes_dir_size):
- *             nodes_dir[i] = struct_to_python.nodes_dir_out_stl[i]             # <<<<<<<<<<<<<<
- * 
- *         cdef np.ndarray[np.float64_t, ndim=2, mode='c'] displacements_BC = \
- */
-    __pyx_t_5 = __Pyx_PyInt_From_long((__pyx_v_struct_to_python.nodes_dir_out_stl[__pyx_v_i])); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 292; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GOTREF(__pyx_t_5);
-    if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_nodes_dir), __pyx_v_i, __pyx_t_5, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer, 1, __Pyx_PyInt_From_long, 0, 0, 0) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 292; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  }
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":295
- * 
- *         cdef np.ndarray[np.float64_t, ndim=2, mode='c'] displacements_BC = \
- *                 np.zeros((self.thisptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64)             # <<<<<<<<<<<<<<
- *         for j in range(self.thisptr.ndim*struct_to_python.nodes_dir_size):
- *             displacements_BC[j] = struct_to_python.displacement_BC_stl[j]
- */
-  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 295; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 295; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyInt_From_unsigned_long((__pyx_v_self->thisptr->ndim * __pyx_v_struct_to_python.nodes_dir_size)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 295; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 295; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_5);
-  PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_5);
-  __Pyx_INCREF(__pyx_int_1);
-  __Pyx_GIVEREF(__pyx_int_1);
-  PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_int_1);
-  __pyx_t_5 = 0;
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 295; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_1);
-  __pyx_t_1 = 0;
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 295; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 295; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_float64); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 295; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 295; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 295; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 295; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_9 = ((PyArrayObject *)__pyx_t_4);
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer, (PyObject*)__pyx_t_9, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {
-      __pyx_v_displacements_BC = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.buf = NULL;
-      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 294; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    } else {__pyx_pybuffernd_displacements_BC.diminfo[0].strides = __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_displacements_BC.diminfo[0].shape = __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_displacements_BC.diminfo[1].strides = __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_displacements_BC.diminfo[1].shape = __pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer.shape[1];
-    }
-  }
-  __pyx_t_9 = 0;
-  __pyx_v_displacements_BC = ((PyArrayObject *)__pyx_t_4);
-  __pyx_t_4 = 0;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":296
- *         cdef np.ndarray[np.float64_t, ndim=2, mode='c'] displacements_BC = \
- *                 np.zeros((self.thisptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64)
- *         for j in range(self.thisptr.ndim*struct_to_python.nodes_dir_size):             # <<<<<<<<<<<<<<
- *             displacements_BC[j] = struct_to_python.displacement_BC_stl[j]
- * 
- */
-  __pyx_t_10 = (__pyx_v_self->thisptr->ndim * __pyx_v_struct_to_python.nodes_dir_size);
-  for (__pyx_t_11 = 0; __pyx_t_11 < __pyx_t_10; __pyx_t_11+=1) {
-    __pyx_v_j = __pyx_t_11;
-
-    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":297
- *                 np.zeros((self.thisptr.ndim*struct_to_python.nodes_dir_size,1),dtype=np.float64)
- *         for j in range(self.thisptr.ndim*struct_to_python.nodes_dir_size):
- *             displacements_BC[j] = struct_to_python.displacement_BC_stl[j]             # <<<<<<<<<<<<<<
- * 
- *         return nodes_dir, displacements_BC.reshape(struct_to_python.nodes_dir_size,self.thisptr.ndim)
- */
-    __pyx_t_4 = PyFloat_FromDouble((__pyx_v_struct_to_python.displacement_BC_stl[__pyx_v_j])); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 297; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GOTREF(__pyx_t_4);
-    if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_displacements_BC), __pyx_v_j, __pyx_t_4, __pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_UInteger, 0, __Pyx_PyInt_From_unsigned_long, 0, 0, 0) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 297; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  }
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":299
- *             displacements_BC[j] = struct_to_python.displacement_BC_stl[j]
- * 
- *         return nodes_dir, displacements_BC.reshape(struct_to_python.nodes_dir_size,self.thisptr.ndim)             # <<<<<<<<<<<<<<
- * 
- * 
- */
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_displacements_BC), __pyx_n_s_reshape); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 299; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_5 = __Pyx_PyInt_From_long(__pyx_v_struct_to_python.nodes_dir_size); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 299; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_3 = __Pyx_PyInt_From_unsigned_long(__pyx_v_self->thisptr->ndim); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 299; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = NULL;
-  __pyx_t_12 = 0;
-  if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_1))) {
-    __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_1);
-    if (likely(__pyx_t_2)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
-      __Pyx_INCREF(__pyx_t_2);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_1, function);
-      __pyx_t_12 = 1;
-    }
-  }
-  __pyx_t_13 = PyTuple_New(2+__pyx_t_12); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 299; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_13);
-  if (__pyx_t_2) {
-    __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_t_2); __pyx_t_2 = NULL;
-  }
-  __Pyx_GIVEREF(__pyx_t_5);
-  PyTuple_SET_ITEM(__pyx_t_13, 0+__pyx_t_12, __pyx_t_5);
-  __Pyx_GIVEREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_13, 1+__pyx_t_12, __pyx_t_3);
-  __pyx_t_5 = 0;
-  __pyx_t_3 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_13, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 299; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 299; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_INCREF(((PyObject *)__pyx_v_nodes_dir));
-  __Pyx_GIVEREF(((PyObject *)__pyx_v_nodes_dir));
-  PyTuple_SET_ITEM(__pyx_t_1, 0, ((PyObject *)__pyx_v_nodes_dir));
-  __Pyx_GIVEREF(__pyx_t_4);
-  PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_4);
-  __pyx_t_4 = 0;
-  __pyx_r = __pyx_t_1;
-  __pyx_t_1 = 0;
-  goto __pyx_L0;
-
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":284
- * 
- *     @boundscheck(False)
- *     def GetDirichletData(self):             # <<<<<<<<<<<<<<
- *         cdef:
- *             DirichletData struct_to_python = self.thisptr.GetDirichletData()
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_5);
-  __Pyx_XDECREF(__pyx_t_13);
-  { PyObject *__pyx_type, *__pyx_value, *__pyx_tb;
-    __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer);
-  __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshSurfacePy.GetDirichletData", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  goto __pyx_L2;
-  __pyx_L0:;
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_displacements_BC.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_nodes_dir.rcbuffer->pybuffer);
-  __pyx_L2:;
-  __Pyx_XDECREF((PyObject *)__pyx_v_nodes_dir);
-  __Pyx_XDECREF((PyObject *)__pyx_v_displacements_BC);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":302
- * 
+/* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":581
+ *             copy=False).reshape(dirichlet_faces.size()/(self.ndim+1),self.ndim+1)
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
- *         if self.thisptr != NULL:
- *             del self.thisptr
+ *         # CREATE A TEMPORARY DERIVED CPP OBJECT
+ *         cdef PostMeshSurface *tmpptr
  */
 
 /* Python wrapper */
-static void __pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_73__dealloc__(PyObject *__pyx_v_self); /*proto*/
-static void __pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_73__dealloc__(PyObject *__pyx_v_self) {
+static void __pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_33__dealloc__(PyObject *__pyx_v_self); /*proto*/
+static void __pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_33__dealloc__(PyObject *__pyx_v_self) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__dealloc__ (wrapper)", 0);
-  __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_72__dealloc__(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
+  __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_32__dealloc__(((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
 }
 
-static void __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_72__dealloc__(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
+static void __pyx_pf_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_32__dealloc__(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *__pyx_v_self) {
+  PostMeshSurface *__pyx_v_tmpptr;
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":303
- * 
- *     def __dealloc__(self):
- *         if self.thisptr != NULL:             # <<<<<<<<<<<<<<
- *             del self.thisptr
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":584
+ *         # CREATE A TEMPORARY DERIVED CPP OBJECT
+ *         cdef PostMeshSurface *tmpptr
+ *         if self.baseptr != NULL:             # <<<<<<<<<<<<<<
+ *             # CAST IT TO BASE
+ *             tmpptr = <PostMeshSurface*>self.baseptr
  */
-  __pyx_t_1 = ((__pyx_v_self->thisptr != NULL) != 0);
+  __pyx_t_1 = ((__pyx_v_self->__pyx_base.baseptr != NULL) != 0);
   if (__pyx_t_1) {
 
-    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":304
- *     def __dealloc__(self):
- *         if self.thisptr != NULL:
- *             del self.thisptr             # <<<<<<<<<<<<<<
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":586
+ *         if self.baseptr != NULL:
+ *             # CAST IT TO BASE
+ *             tmpptr = <PostMeshSurface*>self.baseptr             # <<<<<<<<<<<<<<
+ *             # DELETE IT
+ *             del tmpptr
  */
-    delete __pyx_v_self->thisptr;
+    __pyx_v_tmpptr = ((PostMeshSurface *)__pyx_v_self->__pyx_base.baseptr);
 
-    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":303
- * 
- *     def __dealloc__(self):
- *         if self.thisptr != NULL:             # <<<<<<<<<<<<<<
- *             del self.thisptr
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":588
+ *             tmpptr = <PostMeshSurface*>self.baseptr
+ *             # DELETE IT
+ *             del tmpptr             # <<<<<<<<<<<<<<
+ *             # SET BASE POINTER TO NULL
+ *             self.baseptr = NULL
+ */
+    delete __pyx_v_tmpptr;
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":590
+ *             del tmpptr
+ *             # SET BASE POINTER TO NULL
+ *             self.baseptr = NULL             # <<<<<<<<<<<<<<
+ */
+    __pyx_v_self->__pyx_base.baseptr = NULL;
+
+    /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":584
+ *         # CREATE A TEMPORARY DERIVED CPP OBJECT
+ *         cdef PostMeshSurface *tmpptr
+ *         if self.baseptr != NULL:             # <<<<<<<<<<<<<<
+ *             # CAST IT TO BASE
+ *             tmpptr = <PostMeshSurface*>self.baseptr
  */
   }
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":302
- * 
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":581
+ *             copy=False).reshape(dirichlet_faces.size()/(self.ndim+1),self.ndim+1)
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
- *         if self.thisptr != NULL:
- *             del self.thisptr
+ *         # CREATE A TEMPORARY DERIVED CPP OBJECT
+ *         cdef PostMeshSurface *tmpptr
  */
 
   /* function exit code */
@@ -7832,7 +8429,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  * 
  *             if ((flags & pybuf.PyBUF_F_CONTIGUOUS == pybuf.PyBUF_F_CONTIGUOUS)
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__9, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -7888,7 +8485,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  * 
  *             info.buf = PyArray_DATA(self)
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__10, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -8197,7 +8794,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  *                 if   t == NPY_BYTE:        f = "b"
  *                 elif t == NPY_UBYTE:       f = "B"
  */
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 259; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__11, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 259; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_Raise(__pyx_t_3, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -9030,7 +9627,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
  * 
  *         if ((child.byteorder == c'>' and little_endian) or
  */
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__4, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 799; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__12, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 799; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_Raise(__pyx_t_3, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -9098,7 +9695,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
  *             # One could encode it in the format string and have Cython
  *             # complain instead, BUT: < and > in format strings also imply
  */
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__5, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 803; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__13, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 803; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_Raise(__pyx_t_3, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -9207,7 +9804,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
  * 
  *             # Until ticket #99 is fixed, use integers to avoid warnings
  */
-        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__6, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 823; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__14, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 823; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_Raise(__pyx_t_4, 0, 0, 0);
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -9994,7 +10591,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  * 
  *         if itemsize <= 0:
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__7, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 129; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__15, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 129; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -10026,7 +10623,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  * 
  *         if not isinstance(format, bytes):
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__8, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 132; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__16, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 132; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -10061,7 +10658,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  */
     __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_format, __pyx_n_s_encode); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 135; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_tuple__9, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 135; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_tuple__17, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 135; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF_SET(__pyx_v_format, __pyx_t_5);
@@ -10137,7 +10734,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  * 
  * 
  */
-    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_MemoryError, __pyx_tuple__10, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_MemoryError, __pyx_tuple__18, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_Raise(__pyx_t_5, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -10421,7 +11018,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  * 
  *             if self.dtype_is_object:
  */
-      __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_MemoryError, __pyx_tuple__11, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 172; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_MemoryError, __pyx_tuple__19, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 172; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_Raise(__pyx_t_5, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -10662,7 +11259,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(stru
  *         info.buf = self.data
  *         info.len = self.len
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__12, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 188; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__20, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 188; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -13448,7 +14045,7 @@ static PyObject *__pyx_memoryview_convert_item_to_object(struct __pyx_memoryview
  *         else:
  *             if len(self.view.format) == 1:
  */
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__13, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 447; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__21, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 447; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_Raise(__pyx_t_6, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -14278,7 +14875,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_7strides___get__(st
  * 
  *             return tuple([stride for stride in self.view.strides[:self.view.ndim]])
  */
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__14, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 523; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__22, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 523; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_Raise(__pyx_t_2, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -14395,7 +14992,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_10suboffsets___get_
     __Pyx_XDECREF(__pyx_r);
     __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_self->view.ndim); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 531; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PyNumber_Multiply(__pyx_tuple__15, __pyx_t_2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 531; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = PyNumber_Multiply(__pyx_tuple__23, __pyx_t_2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 531; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_r = __pyx_t_3;
@@ -15735,9 +16332,9 @@ static PyObject *_unellipsify(PyObject *__pyx_v_index, int __pyx_v_ndim) {
         __Pyx_GOTREF(__pyx_t_7);
         { Py_ssize_t __pyx_temp;
           for (__pyx_temp=0; __pyx_temp < ((__pyx_v_ndim - __pyx_t_8) + 1); __pyx_temp++) {
-            __Pyx_INCREF(__pyx_slice__16);
-            __Pyx_GIVEREF(__pyx_slice__16);
-            PyList_SET_ITEM(__pyx_t_7, __pyx_temp, __pyx_slice__16);
+            __Pyx_INCREF(__pyx_slice__24);
+            __Pyx_GIVEREF(__pyx_slice__24);
+            PyList_SET_ITEM(__pyx_t_7, __pyx_temp, __pyx_slice__24);
           }
         }
         __pyx_t_9 = __Pyx_PyList_Extend(__pyx_v_result, __pyx_t_7); if (unlikely(__pyx_t_9 == -1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 640; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -15770,7 +16367,7 @@ static PyObject *_unellipsify(PyObject *__pyx_v_index, int __pyx_v_ndim) {
  *         else:
  */
       /*else*/ {
-        __pyx_t_9 = __Pyx_PyList_Append(__pyx_v_result, __pyx_slice__17); if (unlikely(__pyx_t_9 == -1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 643; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_9 = __Pyx_PyList_Append(__pyx_v_result, __pyx_slice__25); if (unlikely(__pyx_t_9 == -1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 643; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       }
       __pyx_L7:;
 
@@ -15915,9 +16512,9 @@ static PyObject *_unellipsify(PyObject *__pyx_v_index, int __pyx_v_ndim) {
     __Pyx_GOTREF(__pyx_t_3);
     { Py_ssize_t __pyx_temp;
       for (__pyx_temp=0; __pyx_temp < __pyx_v_nslices; __pyx_temp++) {
-        __Pyx_INCREF(__pyx_slice__18);
-        __Pyx_GIVEREF(__pyx_slice__18);
-        PyList_SET_ITEM(__pyx_t_3, __pyx_temp, __pyx_slice__18);
+        __Pyx_INCREF(__pyx_slice__26);
+        __Pyx_GIVEREF(__pyx_slice__26);
+        PyList_SET_ITEM(__pyx_t_3, __pyx_temp, __pyx_slice__26);
       }
     }
     __pyx_t_9 = __Pyx_PyList_Extend(__pyx_v_result, __pyx_t_3); if (unlikely(__pyx_t_9 == -1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 654; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -16044,7 +16641,7 @@ static PyObject *assert_direct_dimensions(Py_ssize_t *__pyx_v_suboffsets, int __
  * 
  * 
  */
-      __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__19, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 661; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__27, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 661; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_Raise(__pyx_t_5, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -21856,8 +22453,8 @@ static PyObject *__pyx_convert_vector_to_py_std_3a__3a_vector_3c___pyx_t_8Floren
   return __pyx_r;
 }
 
-static PyObject *__pyx_tp_new_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy(PyTypeObject *t, PyObject *a, PyObject *k) {
-  struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *p;
+static PyObject *__pyx_tp_new_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy(PyTypeObject *t, PyObject *a, PyObject *k) {
+  struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *p;
   PyObject *o;
   if (likely((t->tp_flags & Py_TPFLAGS_IS_ABSTRACT) == 0)) {
     o = (*t->tp_alloc)(t, 0);
@@ -21865,17 +22462,17 @@ static PyObject *__pyx_tp_new_8Florence_17BoundaryCondition_18CurvilinearMeshing
     o = (PyObject *) PyBaseObject_Type.tp_new(t, __pyx_empty_tuple, 0);
   }
   if (unlikely(!o)) return 0;
-  p = ((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)o);
+  p = ((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)o);
   p->boundary_fekete.data = NULL;
   p->boundary_fekete.memview = NULL;
-  if (unlikely(__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_1__cinit__(o, a, k) < 0)) {
+  if (unlikely(__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_1__cinit__(o, a, k) < 0)) {
     Py_DECREF(o); o = 0;
   }
   return o;
 }
 
-static void __pyx_tp_dealloc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy(PyObject *o) {
-  struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *p = (struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy *)o;
+static void __pyx_tp_dealloc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy(PyObject *o) {
+  struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *p = (struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy *)o;
   #if PY_VERSION_HEX >= 0x030400a1
   if (unlikely(Py_TYPE(o)->tp_finalize) && (!PyType_IS_GC(Py_TYPE(o)) || !_PyGC_FINALIZED(o))) {
     if (PyObject_CallFinalizerFromDealloc(o)) return;
@@ -21885,7 +22482,7 @@ static void __pyx_tp_dealloc_8Florence_17BoundaryCondition_18CurvilinearMeshing_
     PyObject *etype, *eval, *etb;
     PyErr_Fetch(&etype, &eval, &etb);
     ++Py_REFCNT(o);
-    __pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_65__dealloc__(o);
+    __pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_53__dealloc__(o);
     --Py_REFCNT(o);
     PyErr_Restore(etype, eval, etb);
   }
@@ -21893,38 +22490,132 @@ static void __pyx_tp_dealloc_8Florence_17BoundaryCondition_18CurvilinearMeshing_
   (*Py_TYPE(o)->tp_free)(o);
 }
 
+static PyMethodDef __pyx_methods_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy[] = {
+  {"Init", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_3Init, METH_VARARGS|METH_KEYWORDS, 0},
+  {"SetScale", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_5SetScale, METH_O, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_4SetScale},
+  {"SetCondition", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_7SetCondition, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_6SetCondition},
+  {"SetProjectionPrecision", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_9SetProjectionPrecision, METH_O, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_8SetProjectionPrecision},
+  {"SetProjectionCriteria", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_11SetProjectionCriteria, METH_O, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_10SetProjectionCriteria},
+  {"ComputeProjectionCriteria", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_13ComputeProjectionCriteria, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_12ComputeProjectionCriteria},
+  {"SetMeshElements", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_15SetMeshElements, METH_O, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_14SetMeshElements},
+  {"SetMeshPoints", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_17SetMeshPoints, METH_O, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_16SetMeshPoints},
+  {"SetMeshEdges", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_19SetMeshEdges, METH_O, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_18SetMeshEdges},
+  {"SetMeshFaces", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_21SetMeshFaces, METH_O, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_20SetMeshFaces},
+  {"ScaleMesh", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_23ScaleMesh, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_22ScaleMesh},
+  {"GetMeshElementType", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_25GetMeshElementType, METH_NOARGS, 0},
+  {"SetNodalSpacing", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_27SetNodalSpacing, METH_O, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_26SetNodalSpacing},
+  {"SetMesh", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_29SetMesh, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_28SetMesh},
+  {"ReadIGES", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_31ReadIGES, METH_O, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_30ReadIGES},
+  {"ReadSTEP", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_33ReadSTEP, METH_O, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_32ReadSTEP},
+  {"ReadGeometry", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_35ReadGeometry, METH_O, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_34ReadGeometry},
+  {"GetGeomVertices", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_37GetGeomVertices, METH_NOARGS, 0},
+  {"GetGeomEdges", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_39GetGeomEdges, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_38GetGeomEdges},
+  {"GetGeomFaces", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_41GetGeomFaces, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_40GetGeomFaces},
+  {"NbPoints", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_43NbPoints, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_42NbPoints},
+  {"NbCurves", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_45NbCurves, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_44NbCurves},
+  {"NbSurfaces", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_47NbSurfaces, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_46NbSurfaces},
+  {"SetGeometry", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_49SetGeometry, METH_O, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_48SetGeometry},
+  {"GetDirichletData", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_51GetDirichletData, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_14PostMeshBasePy_50GetDirichletData},
+  {0, 0, 0, 0}
+};
+
+static PyTypeObject __pyx_type_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy = {
+  PyVarObject_HEAD_INIT(0, 0)
+  "Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy.PostMeshBasePy", /*tp_name*/
+  sizeof(struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy), /*tp_basicsize*/
+  0, /*tp_itemsize*/
+  __pyx_tp_dealloc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy, /*tp_dealloc*/
+  0, /*tp_print*/
+  0, /*tp_getattr*/
+  0, /*tp_setattr*/
+  #if PY_MAJOR_VERSION < 3
+  0, /*tp_compare*/
+  #endif
+  #if PY_MAJOR_VERSION >= 3
+  0, /*tp_as_async*/
+  #endif
+  0, /*tp_repr*/
+  0, /*tp_as_number*/
+  0, /*tp_as_sequence*/
+  0, /*tp_as_mapping*/
+  0, /*tp_hash*/
+  0, /*tp_call*/
+  0, /*tp_str*/
+  0, /*tp_getattro*/
+  0, /*tp_setattro*/
+  0, /*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE, /*tp_flags*/
+  "\n    PostMesh base class. Provides most of the common functionality for \n    point projection, point inversion and obtaining Dirichlet data.\n    This class should not be directly.\n    ", /*tp_doc*/
+  0, /*tp_traverse*/
+  0, /*tp_clear*/
+  0, /*tp_richcompare*/
+  0, /*tp_weaklistoffset*/
+  0, /*tp_iter*/
+  0, /*tp_iternext*/
+  __pyx_methods_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy, /*tp_methods*/
+  0, /*tp_members*/
+  0, /*tp_getset*/
+  0, /*tp_base*/
+  0, /*tp_dict*/
+  0, /*tp_descr_get*/
+  0, /*tp_descr_set*/
+  0, /*tp_dictoffset*/
+  0, /*tp_init*/
+  0, /*tp_alloc*/
+  __pyx_tp_new_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy, /*tp_new*/
+  0, /*tp_free*/
+  0, /*tp_is_gc*/
+  0, /*tp_bases*/
+  0, /*tp_mro*/
+  0, /*tp_cache*/
+  0, /*tp_subclasses*/
+  0, /*tp_weaklist*/
+  0, /*tp_del*/
+  0, /*tp_version_tag*/
+  #if PY_VERSION_HEX >= 0x030400a1
+  0, /*tp_finalize*/
+  #endif
+};
+
+static PyObject *__pyx_tp_new_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy(PyTypeObject *t, PyObject *a, PyObject *k) {
+  PyObject *o = __pyx_tp_new_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy(t, a, k);
+  if (unlikely(!o)) return 0;
+  if (unlikely(__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_1__cinit__(o, a, k) < 0)) {
+    Py_DECREF(o); o = 0;
+  }
+  return o;
+}
+
+static void __pyx_tp_dealloc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy(PyObject *o) {
+  #if PY_VERSION_HEX >= 0x030400a1
+  if (unlikely(Py_TYPE(o)->tp_finalize) && (!PyType_IS_GC(Py_TYPE(o)) || !_PyGC_FINALIZED(o))) {
+    if (PyObject_CallFinalizerFromDealloc(o)) return;
+  }
+  #endif
+  {
+    PyObject *etype, *eval, *etb;
+    PyErr_Fetch(&etype, &eval, &etb);
+    ++Py_REFCNT(o);
+    __pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_27__dealloc__(o);
+    --Py_REFCNT(o);
+    PyErr_Restore(etype, eval, etb);
+  }
+  __pyx_tp_dealloc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy(o);
+}
+
 static PyMethodDef __pyx_methods_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy[] = {
-  {"Init", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_3Init, METH_NOARGS, 0},
-  {"SetScale", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_5SetScale, METH_O, 0},
-  {"SetCondition", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_7SetCondition, METH_O, 0},
-  {"SetProjectionPrecision", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_9SetProjectionPrecision, METH_O, 0},
-  {"ComputeProjectionCriteria", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_11ComputeProjectionCriteria, METH_NOARGS, 0},
-  {"SetProjectionCriteria", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_13SetProjectionCriteria, METH_O, 0},
-  {"SetMeshElements", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_15SetMeshElements, METH_O, 0},
-  {"SetMeshPoints", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_17SetMeshPoints, METH_O, 0},
-  {"SetMeshEdges", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_19SetMeshEdges, METH_O, 0},
-  {"SetMeshFaces", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_21SetMeshFaces, METH_O, 0},
-  {"ScaleMesh", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_23ScaleMesh, METH_NOARGS, 0},
-  {"GetMeshElementType", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_25GetMeshElementType, METH_NOARGS, 0},
-  {"SetNodalSpacing", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_27SetNodalSpacing, METH_O, 0},
-  {"ReadIGES", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_29ReadIGES, METH_O, 0},
-  {"GetGeomVertices", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_31GetGeomVertices, METH_NOARGS, 0},
-  {"GetGeomEdges", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_33GetGeomEdges, METH_NOARGS, 0},
-  {"GetGeomFaces", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_35GetGeomFaces, METH_NOARGS, 0},
-  {"NbPoints", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_37NbPoints, METH_NOARGS, 0},
-  {"NbCurves", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_39NbCurves, METH_NOARGS, 0},
-  {"DiscretiseCurves", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_41DiscretiseCurves, METH_O, 0},
-  {"GetCurvesParameters", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_43GetCurvesParameters, METH_NOARGS, 0},
-  {"GetCurvesLengths", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_45GetCurvesLengths, METH_NOARGS, 0},
-  {"GetGeomPointsOnCorrespondingEdges", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_47GetGeomPointsOnCorrespondingEdges, METH_NOARGS, 0},
-  {"IdentifyCurvesContainingEdges", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_49IdentifyCurvesContainingEdges, METH_NOARGS, 0},
-  {"ProjectMeshOnCurve", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_51ProjectMeshOnCurve, METH_NOARGS, 0},
-  {"RepairDualProjectedParameters", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_53RepairDualProjectedParameters, METH_NOARGS, 0},
-  {"MeshPointInversionCurve", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_55MeshPointInversionCurve, METH_NOARGS, 0},
-  {"MeshPointInversionCurveArcLength", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_57MeshPointInversionCurveArcLength, METH_NOARGS, 0},
-  {"GetBoundaryPointsOrder", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_59GetBoundaryPointsOrder, METH_NOARGS, 0},
-  {"ReturnModifiedMeshPoints", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_61ReturnModifiedMeshPoints, METH_O, 0},
-  {"GetDirichletData", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_63GetDirichletData, METH_NOARGS, 0},
+  {"DiscretiseCurves", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_3DiscretiseCurves, METH_O, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_2DiscretiseCurves},
+  {"GetCurvesParameters", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_5GetCurvesParameters, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_4GetCurvesParameters},
+  {"GetCurvesLengths", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_7GetCurvesLengths, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_6GetCurvesLengths},
+  {"GetBoundaryPointsOrder", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_9GetBoundaryPointsOrder, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_8GetBoundaryPointsOrder},
+  {"GetGeomPointsOnCorrespondingEdges", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_11GetGeomPointsOnCorrespondingEdges, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_10GetGeomPointsOnCorrespondingEdges},
+  {"IdentifyCurvesContainingEdges", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_13IdentifyCurvesContainingEdges, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_12IdentifyCurvesContainingEdges},
+  {"ProjectMeshOnCurve", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_15ProjectMeshOnCurve, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_14ProjectMeshOnCurve},
+  {"RepairDualProjectedParameters", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_17RepairDualProjectedParameters, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_16RepairDualProjectedParameters},
+  {"MeshPointInversionCurve", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_19MeshPointInversionCurve, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_18MeshPointInversionCurve},
+  {"MeshPointInversionCurveArcLength", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_21MeshPointInversionCurveArcLength, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_20MeshPointInversionCurveArcLength},
+  {"PerformPointProjectionInversionCurve", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_23PerformPointProjectionInversionCurve, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_22PerformPointProjectionInversionCurve},
+  {"ReturnModifiedMeshPoints", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_25ReturnModifiedMeshPoints, METH_O, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_15PostMeshCurvePy_24ReturnModifiedMeshPoints},
   {0, 0, 0, 0}
 };
 
@@ -21954,7 +22645,7 @@ static PyTypeObject __pyx_type_8Florence_17BoundaryCondition_18CurvilinearMeshin
   0, /*tp_setattro*/
   0, /*tp_as_buffer*/
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE, /*tp_flags*/
-  "\n    Python wrapper for C++ PostMeshCurve \n    ", /*tp_doc*/
+  "\n    Point projection and inversion onto curves, for 2D finite elements\n    such as triangular and quad elements \n    ", /*tp_doc*/
   0, /*tp_traverse*/
   0, /*tp_clear*/
   0, /*tp_richcompare*/
@@ -21987,17 +22678,8 @@ static PyTypeObject __pyx_type_8Florence_17BoundaryCondition_18CurvilinearMeshin
 };
 
 static PyObject *__pyx_tp_new_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy(PyTypeObject *t, PyObject *a, PyObject *k) {
-  struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *p;
-  PyObject *o;
-  if (likely((t->tp_flags & Py_TPFLAGS_IS_ABSTRACT) == 0)) {
-    o = (*t->tp_alloc)(t, 0);
-  } else {
-    o = (PyObject *) PyBaseObject_Type.tp_new(t, __pyx_empty_tuple, 0);
-  }
+  PyObject *o = __pyx_tp_new_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy(t, a, k);
   if (unlikely(!o)) return 0;
-  p = ((struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)o);
-  p->boundary_fekete.data = NULL;
-  p->boundary_fekete.memview = NULL;
   if (unlikely(__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_1__cinit__(o, a, k) < 0)) {
     Py_DECREF(o); o = 0;
   }
@@ -22005,7 +22687,6 @@ static PyObject *__pyx_tp_new_8Florence_17BoundaryCondition_18CurvilinearMeshing
 }
 
 static void __pyx_tp_dealloc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy(PyObject *o) {
-  struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *p = (struct __pyx_obj_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy *)o;
   #if PY_VERSION_HEX >= 0x030400a1
   if (unlikely(Py_TYPE(o)->tp_finalize) && (!PyType_IS_GC(Py_TYPE(o)) || !_PyGC_FINALIZED(o))) {
     if (PyObject_CallFinalizerFromDealloc(o)) return;
@@ -22015,50 +22696,29 @@ static void __pyx_tp_dealloc_8Florence_17BoundaryCondition_18CurvilinearMeshing_
     PyObject *etype, *eval, *etb;
     PyErr_Fetch(&etype, &eval, &etb);
     ++Py_REFCNT(o);
-    __pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_73__dealloc__(o);
+    __pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_33__dealloc__(o);
     --Py_REFCNT(o);
     PyErr_Restore(etype, eval, etb);
   }
-  __PYX_XDEC_MEMVIEW(&p->boundary_fekete, 1);
-  (*Py_TYPE(o)->tp_free)(o);
+  __pyx_tp_dealloc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy(o);
 }
 
 static PyMethodDef __pyx_methods_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy[] = {
-  {"Init", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_3Init, METH_NOARGS, 0},
-  {"SetScale", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_5SetScale, METH_O, 0},
-  {"SetCondition", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_7SetCondition, METH_O, 0},
-  {"SetProjectionPrecision", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_9SetProjectionPrecision, METH_O, 0},
-  {"ComputeProjectionCriteria", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_11ComputeProjectionCriteria, METH_NOARGS, 0},
-  {"SetProjectionCriteria", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_13SetProjectionCriteria, METH_O, 0},
-  {"SetMeshElements", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_15SetMeshElements, METH_O, 0},
-  {"SetMeshPoints", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_17SetMeshPoints, METH_O, 0},
-  {"SetMeshEdges", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_19SetMeshEdges, METH_O, 0},
-  {"SetMeshFaces", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_21SetMeshFaces, METH_O, 0},
-  {"ScaleMesh", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_23ScaleMesh, METH_NOARGS, 0},
-  {"GetMeshElementType", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_25GetMeshElementType, METH_NOARGS, 0},
-  {"SetNodalSpacing", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_27SetNodalSpacing, METH_O, 0},
-  {"ReadIGES", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_29ReadIGES, METH_O, 0},
-  {"GetGeomVertices", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_31GetGeomVertices, METH_NOARGS, 0},
-  {"GetGeomEdges", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_33GetGeomEdges, METH_NOARGS, 0},
-  {"GetGeomFaces", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_35GetGeomFaces, METH_NOARGS, 0},
-  {"NbPoints", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_37NbPoints, METH_NOARGS, 0},
-  {"NbCurves", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_39NbCurves, METH_NOARGS, 0},
-  {"NbSurfaces", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_41NbSurfaces, METH_NOARGS, 0},
-  {"GetSurfacesParameters", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_43GetSurfacesParameters, METH_NOARGS, 0},
-  {"GetGeomPointsOnCorrespondingFaces", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_45GetGeomPointsOnCorrespondingFaces, METH_NOARGS, 0},
-  {"IdentifySurfacesContainingFacesByPureProjection", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_47IdentifySurfacesContainingFacesByPureProjection, METH_NOARGS, 0},
-  {"IdentifySurfacesContainingFaces", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_49IdentifySurfacesContainingFaces, METH_NOARGS, 0},
-  {"IdentifyRemainingSurfacesByProjection", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_51IdentifyRemainingSurfacesByProjection, METH_NOARGS, 0},
-  {"IdentifySurfacesIntersections", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_53IdentifySurfacesIntersections, METH_NOARGS, 0},
-  {"SupplySurfacesContainingFaces", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_55SupplySurfacesContainingFaces, METH_VARARGS|METH_KEYWORDS, 0},
-  {"ProjectMeshOnSurface", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_57ProjectMeshOnSurface, METH_NOARGS, 0},
-  {"RepairDualProjectedParameters", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_59RepairDualProjectedParameters, METH_NOARGS, 0},
-  {"MeshPointInversionSurface", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_61MeshPointInversionSurface, METH_VARARGS|METH_KEYWORDS, 0},
-  {"MeshPointInversionSurfaceArcLength", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_63MeshPointInversionSurfaceArcLength, METH_VARARGS|METH_KEYWORDS, 0},
-  {"ReturnModifiedMeshPoints", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_65ReturnModifiedMeshPoints, METH_O, 0},
-  {"GetMeshFacesOnPlanarSurfaces", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_67GetMeshFacesOnPlanarSurfaces, METH_NOARGS, 0},
-  {"GetDirichletFaces", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_69GetDirichletFaces, METH_NOARGS, 0},
-  {"GetDirichletData", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_71GetDirichletData, METH_NOARGS, 0},
+  {"GetSurfacesParameters", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_3GetSurfacesParameters, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_2GetSurfacesParameters},
+  {"GetGeomPointsOnCorrespondingFaces", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_5GetGeomPointsOnCorrespondingFaces, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_4GetGeomPointsOnCorrespondingFaces},
+  {"IdentifySurfacesContainingFaces", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_7IdentifySurfacesContainingFaces, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_6IdentifySurfacesContainingFaces},
+  {"IdentifyRemainingSurfacesByProjection", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_9IdentifyRemainingSurfacesByProjection, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_8IdentifyRemainingSurfacesByProjection},
+  {"IdentifySurfacesContainingFacesByPureProjection", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_11IdentifySurfacesContainingFacesByPureProjection, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_10IdentifySurfacesContainingFacesByPureProjection},
+  {"IdentifySurfacesIntersections", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_13IdentifySurfacesIntersections, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_12IdentifySurfacesIntersections},
+  {"SupplySurfacesContainingFaces", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_15SupplySurfacesContainingFaces, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_14SupplySurfacesContainingFaces},
+  {"ProjectMeshOnSurface", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_17ProjectMeshOnSurface, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_16ProjectMeshOnSurface},
+  {"RepairDualProjectedParameters", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_19RepairDualProjectedParameters, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_18RepairDualProjectedParameters},
+  {"MeshPointInversionSurface", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_21MeshPointInversionSurface, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_20MeshPointInversionSurface},
+  {"MeshPointInversionSurfaceArcLength", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_23MeshPointInversionSurfaceArcLength, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_22MeshPointInversionSurfaceArcLength},
+  {"PerformPointProjectionInversionSurface", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_25PerformPointProjectionInversionSurface, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_24PerformPointProjectionInversionSurface},
+  {"ReturnModifiedMeshPoints", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_27ReturnModifiedMeshPoints, METH_O, 0},
+  {"GetMeshFacesOnPlanarSurfaces", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_29GetMeshFacesOnPlanarSurfaces, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_28GetMeshFacesOnPlanarSurfaces},
+  {"GetDirichletFaces", (PyCFunction)__pyx_pw_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_31GetDirichletFaces, METH_NOARGS, __pyx_doc_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_17PostMeshSurfacePy_30GetDirichletFaces},
   {0, 0, 0, 0}
 };
 
@@ -22088,7 +22748,7 @@ static PyTypeObject __pyx_type_8Florence_17BoundaryCondition_18CurvilinearMeshin
   0, /*tp_setattro*/
   0, /*tp_as_buffer*/
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE, /*tp_flags*/
-  "\n    Python wrapper for C++ PostMeshSurface \n    ", /*tp_doc*/
+  "\n    Point projection and inversion onto surfaces and curves \n    (i.e. surface intersections), for 3D finite elements\n    such as tetrahedra and hexahedra  \n    ", /*tp_doc*/
   0, /*tp_traverse*/
   0, /*tp_clear*/
   0, /*tp_richcompare*/
@@ -22803,13 +23463,15 @@ static struct PyModuleDef __pyx_moduledef = {
 
 static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_ASCII, __pyx_k_ASCII, sizeof(__pyx_k_ASCII), 0, 0, 1, 1},
+  {&__pyx_kp_s_A_mapping_between_mesh_faces_and, __pyx_k_A_mapping_between_mesh_faces_and, sizeof(__pyx_k_A_mapping_between_mesh_faces_and), 0, 0, 1, 0},
   {&__pyx_kp_s_Buffer_view_does_not_expose_stri, __pyx_k_Buffer_view_does_not_expose_stri, sizeof(__pyx_k_Buffer_view_does_not_expose_stri), 0, 0, 1, 0},
-  {&__pyx_n_s_C, __pyx_k_C, sizeof(__pyx_k_C), 0, 0, 1, 1},
   {&__pyx_kp_s_Can_only_create_a_buffer_that_is, __pyx_k_Can_only_create_a_buffer_that_is, sizeof(__pyx_k_Can_only_create_a_buffer_that_is), 0, 0, 1, 0},
   {&__pyx_kp_s_Cannot_index_with_type_s, __pyx_k_Cannot_index_with_type_s, sizeof(__pyx_k_Cannot_index_with_type_s), 0, 0, 1, 0},
+  {&__pyx_kp_s_Could_not_create_an_instance_of, __pyx_k_Could_not_create_an_instance_of, sizeof(__pyx_k_Could_not_create_an_instance_of), 0, 0, 1, 0},
   {&__pyx_n_s_Ellipsis, __pyx_k_Ellipsis, sizeof(__pyx_k_Ellipsis), 0, 0, 1, 1},
   {&__pyx_kp_s_Empty_shape_tuple_for_cython_arr, __pyx_k_Empty_shape_tuple_for_cython_arr, sizeof(__pyx_k_Empty_shape_tuple_for_cython_arr), 0, 0, 1, 0},
   {&__pyx_n_s_FEbases, __pyx_k_FEbases, sizeof(__pyx_k_FEbases), 0, 0, 1, 1},
+  {&__pyx_kp_s_Finite_element_bases_functions_w, __pyx_k_Finite_element_bases_functions_w, sizeof(__pyx_k_Finite_element_bases_functions_w), 0, 0, 1, 0},
   {&__pyx_kp_u_Format_string_allocated_too_shor, __pyx_k_Format_string_allocated_too_shor, sizeof(__pyx_k_Format_string_allocated_too_shor), 0, 1, 0, 0},
   {&__pyx_kp_u_Format_string_allocated_too_shor_2, __pyx_k_Format_string_allocated_too_shor_2, sizeof(__pyx_k_Format_string_allocated_too_shor_2), 0, 1, 0, 0},
   {&__pyx_n_s_IndexError, __pyx_k_IndexError, sizeof(__pyx_k_IndexError), 0, 0, 1, 1},
@@ -22819,33 +23481,42 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_MemoryError, __pyx_k_MemoryError, sizeof(__pyx_k_MemoryError), 0, 0, 1, 1},
   {&__pyx_kp_s_MemoryView_of_r_at_0x_x, __pyx_k_MemoryView_of_r_at_0x_x, sizeof(__pyx_k_MemoryView_of_r_at_0x_x), 0, 0, 1, 0},
   {&__pyx_kp_s_MemoryView_of_r_object, __pyx_k_MemoryView_of_r_object, sizeof(__pyx_k_MemoryView_of_r_object), 0, 0, 1, 0},
+  {&__pyx_n_s_NbCurves, __pyx_k_NbCurves, sizeof(__pyx_k_NbCurves), 0, 0, 1, 1},
+  {&__pyx_n_s_NbPoints, __pyx_k_NbPoints, sizeof(__pyx_k_NbPoints), 0, 0, 1, 1},
+  {&__pyx_n_s_NbSurfaces, __pyx_k_NbSurfaces, sizeof(__pyx_k_NbSurfaces), 0, 0, 1, 1},
   {&__pyx_kp_u_Non_native_byte_order_not_suppor, __pyx_k_Non_native_byte_order_not_suppor, sizeof(__pyx_k_Non_native_byte_order_not_suppor), 0, 1, 0, 0},
   {&__pyx_n_b_O, __pyx_k_O, sizeof(__pyx_k_O), 0, 0, 0, 1},
-  {&__pyx_n_s_OrthTol, __pyx_k_OrthTol, sizeof(__pyx_k_OrthTol), 0, 0, 1, 1},
+  {&__pyx_kp_s_Only_projection_algorithm_is_ava, __pyx_k_Only_projection_algorithm_is_ava, sizeof(__pyx_k_Only_projection_algorithm_is_ava), 0, 0, 1, 0},
   {&__pyx_kp_s_Out_of_bounds_on_buffer_access_a, __pyx_k_Out_of_bounds_on_buffer_access_a, sizeof(__pyx_k_Out_of_bounds_on_buffer_access_a), 0, 0, 1, 0},
+  {&__pyx_n_s_ReadGeometry, __pyx_k_ReadGeometry, sizeof(__pyx_k_ReadGeometry), 0, 0, 1, 1},
   {&__pyx_n_s_RuntimeError, __pyx_k_RuntimeError, sizeof(__pyx_k_RuntimeError), 0, 0, 1, 1},
   {&__pyx_n_s_T, __pyx_k_T, sizeof(__pyx_k_T), 0, 0, 1, 1},
   {&__pyx_n_s_TypeError, __pyx_k_TypeError, sizeof(__pyx_k_TypeError), 0, 0, 1, 1},
   {&__pyx_kp_s_Unable_to_convert_item_to_object, __pyx_k_Unable_to_convert_item_to_object, sizeof(__pyx_k_Unable_to_convert_item_to_object), 0, 0, 1, 0},
   {&__pyx_n_s_ValueError, __pyx_k_ValueError, sizeof(__pyx_k_ValueError), 0, 0, 1, 1},
+  {&__pyx_kp_s__2, __pyx_k__2, sizeof(__pyx_k__2), 0, 0, 1, 0},
   {&__pyx_n_s_allocate_buffer, __pyx_k_allocate_buffer, sizeof(__pyx_k_allocate_buffer), 0, 0, 1, 1},
   {&__pyx_n_s_already_mapped, __pyx_k_already_mapped, sizeof(__pyx_k_already_mapped), 0, 0, 1, 1},
-  {&__pyx_n_s_arr, __pyx_k_arr, sizeof(__pyx_k_arr), 0, 0, 1, 1},
+  {&__pyx_n_s_arc_length, __pyx_k_arc_length, sizeof(__pyx_k_arc_length), 0, 0, 1, 1},
   {&__pyx_n_s_array, __pyx_k_array, sizeof(__pyx_k_array), 0, 0, 1, 1},
   {&__pyx_n_s_base, __pyx_k_base, sizeof(__pyx_k_base), 0, 0, 1, 1},
   {&__pyx_n_s_c, __pyx_k_c, sizeof(__pyx_k_c), 0, 0, 1, 1},
   {&__pyx_n_u_c, __pyx_k_c, sizeof(__pyx_k_c), 0, 1, 0, 1},
-  {&__pyx_n_s_caller, __pyx_k_caller, sizeof(__pyx_k_caller), 0, 0, 1, 1},
   {&__pyx_n_s_class, __pyx_k_class, sizeof(__pyx_k_class), 0, 0, 1, 1},
   {&__pyx_kp_s_contiguous_and_direct, __pyx_k_contiguous_and_direct, sizeof(__pyx_k_contiguous_and_direct), 0, 0, 1, 0},
   {&__pyx_kp_s_contiguous_and_indirect, __pyx_k_contiguous_and_indirect, sizeof(__pyx_k_contiguous_and_indirect), 0, 0, 1, 0},
   {&__pyx_n_s_copy, __pyx_k_copy, sizeof(__pyx_k_copy), 0, 0, 1, 1},
+  {&__pyx_n_s_curve_identification_algorithm, __pyx_k_curve_identification_algorithm, sizeof(__pyx_k_curve_identification_algorithm), 0, 0, 1, 1},
   {&__pyx_n_s_dimension, __pyx_k_dimension, sizeof(__pyx_k_dimension), 0, 0, 1, 1},
   {&__pyx_n_s_dtype, __pyx_k_dtype, sizeof(__pyx_k_dtype), 0, 0, 1, 1},
   {&__pyx_n_s_dtype_is_object, __pyx_k_dtype_is_object, sizeof(__pyx_k_dtype_is_object), 0, 0, 1, 1},
+  {&__pyx_n_s_edges, __pyx_k_edges, sizeof(__pyx_k_edges), 0, 0, 1, 1},
+  {&__pyx_n_s_elements, __pyx_k_elements, sizeof(__pyx_k_elements), 0, 0, 1, 1},
   {&__pyx_n_s_encode, __pyx_k_encode, sizeof(__pyx_k_encode), 0, 0, 1, 1},
   {&__pyx_n_s_enumerate, __pyx_k_enumerate, sizeof(__pyx_k_enumerate), 0, 0, 1, 1},
   {&__pyx_n_s_error, __pyx_k_error, sizeof(__pyx_k_error), 0, 0, 1, 1},
+  {&__pyx_n_s_face_to_surface_map, __pyx_k_face_to_surface_map, sizeof(__pyx_k_face_to_surface_map), 0, 0, 1, 1},
+  {&__pyx_n_s_faces, __pyx_k_faces, sizeof(__pyx_k_faces), 0, 0, 1, 1},
   {&__pyx_n_s_flags, __pyx_k_flags, sizeof(__pyx_k_flags), 0, 0, 1, 1},
   {&__pyx_n_s_float64, __pyx_k_float64, sizeof(__pyx_k_float64), 0, 0, 1, 1},
   {&__pyx_n_s_format, __pyx_k_format, sizeof(__pyx_k_format), 0, 0, 1, 1},
@@ -22853,12 +23524,17 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_u_fortran, __pyx_k_fortran, sizeof(__pyx_k_fortran), 0, 1, 0, 1},
   {&__pyx_kp_s_got_differing_extents_in_dimensi, __pyx_k_got_differing_extents_in_dimensi, sizeof(__pyx_k_got_differing_extents_in_dimensi), 0, 0, 1, 0},
   {&__pyx_n_s_id, __pyx_k_id, sizeof(__pyx_k_id), 0, 0, 1, 1},
+  {&__pyx_n_s_iges, __pyx_k_iges, sizeof(__pyx_k_iges), 0, 0, 1, 1},
+  {&__pyx_n_s_igs, __pyx_k_igs, sizeof(__pyx_k_igs), 0, 0, 1, 1},
   {&__pyx_n_s_import, __pyx_k_import, sizeof(__pyx_k_import), 0, 0, 1, 1},
   {&__pyx_n_s_int64, __pyx_k_int64, sizeof(__pyx_k_int64), 0, 0, 1, 1},
+  {&__pyx_n_s_internal_surface_identification, __pyx_k_internal_surface_identification, sizeof(__pyx_k_internal_surface_identification), 0, 0, 1, 1},
   {&__pyx_n_s_itemsize, __pyx_k_itemsize, sizeof(__pyx_k_itemsize), 0, 0, 1, 1},
   {&__pyx_kp_s_itemsize_0_for_cython_array, __pyx_k_itemsize_0_for_cython_array, sizeof(__pyx_k_itemsize_0_for_cython_array), 0, 0, 1, 0},
+  {&__pyx_n_s_lower, __pyx_k_lower, sizeof(__pyx_k_lower), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_n_s_memview, __pyx_k_memview, sizeof(__pyx_k_memview), 0, 0, 1, 1},
+  {&__pyx_n_s_minimisation, __pyx_k_minimisation, sizeof(__pyx_k_minimisation), 0, 0, 1, 1},
   {&__pyx_n_s_mode, __pyx_k_mode, sizeof(__pyx_k_mode), 0, 0, 1, 1},
   {&__pyx_n_s_modify_linear_mesh, __pyx_k_modify_linear_mesh, sizeof(__pyx_k_modify_linear_mesh), 0, 0, 1, 1},
   {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
@@ -22870,35 +23546,53 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_numpy, __pyx_k_numpy, sizeof(__pyx_k_numpy), 0, 0, 1, 1},
   {&__pyx_n_s_obj, __pyx_k_obj, sizeof(__pyx_k_obj), 0, 0, 1, 1},
   {&__pyx_n_s_order, __pyx_k_order, sizeof(__pyx_k_order), 0, 0, 1, 1},
+  {&__pyx_n_s_orth_tol, __pyx_k_orth_tol, sizeof(__pyx_k_orth_tol), 0, 0, 1, 1},
+  {&__pyx_n_s_orthogonal, __pyx_k_orthogonal, sizeof(__pyx_k_orthogonal), 0, 0, 1, 1},
   {&__pyx_n_s_pack, __pyx_k_pack, sizeof(__pyx_k_pack), 0, 0, 1, 1},
+  {&__pyx_n_s_points, __pyx_k_points, sizeof(__pyx_k_points), 0, 0, 1, 1},
   {&__pyx_n_s_project_on_curves, __pyx_k_project_on_curves, sizeof(__pyx_k_project_on_curves), 0, 0, 1, 1},
+  {&__pyx_n_s_projection, __pyx_k_projection, sizeof(__pyx_k_projection), 0, 0, 1, 1},
+  {&__pyx_n_s_projection_type, __pyx_k_projection_type, sizeof(__pyx_k_projection_type), 0, 0, 1, 1},
+  {&__pyx_n_s_property, __pyx_k_property, sizeof(__pyx_k_property), 0, 0, 1, 1},
   {&__pyx_n_s_py_element_type, __pyx_k_py_element_type, sizeof(__pyx_k_py_element_type), 0, 0, 1, 1},
   {&__pyx_n_s_pyx_getbuffer, __pyx_k_pyx_getbuffer, sizeof(__pyx_k_pyx_getbuffer), 0, 0, 1, 1},
   {&__pyx_n_s_pyx_vtable, __pyx_k_pyx_vtable, sizeof(__pyx_k_pyx_vtable), 0, 0, 1, 1},
+  {&__pyx_n_s_radius, __pyx_k_radius, sizeof(__pyx_k_radius), 0, 0, 1, 1},
   {&__pyx_n_s_range, __pyx_k_range, sizeof(__pyx_k_range), 0, 0, 1, 1},
+  {&__pyx_n_s_repair_dual_projection, __pyx_k_repair_dual_projection, sizeof(__pyx_k_repair_dual_projection), 0, 0, 1, 1},
   {&__pyx_n_s_reshape, __pyx_k_reshape, sizeof(__pyx_k_reshape), 0, 0, 1, 1},
+  {&__pyx_n_s_scale_mesh, __pyx_k_scale_mesh, sizeof(__pyx_k_scale_mesh), 0, 0, 1, 1},
   {&__pyx_n_s_shape, __pyx_k_shape, sizeof(__pyx_k_shape), 0, 0, 1, 1},
   {&__pyx_n_s_size, __pyx_k_size, sizeof(__pyx_k_size), 0, 0, 1, 1},
+  {&__pyx_n_s_spacing, __pyx_k_spacing, sizeof(__pyx_k_spacing), 0, 0, 1, 1},
+  {&__pyx_n_s_split, __pyx_k_split, sizeof(__pyx_k_split), 0, 0, 1, 1},
   {&__pyx_n_s_start, __pyx_k_start, sizeof(__pyx_k_start), 0, 0, 1, 1},
   {&__pyx_n_s_step, __pyx_k_step, sizeof(__pyx_k_step), 0, 0, 1, 1},
   {&__pyx_n_s_stop, __pyx_k_stop, sizeof(__pyx_k_stop), 0, 0, 1, 1},
+  {&__pyx_n_s_stp, __pyx_k_stp, sizeof(__pyx_k_stp), 0, 0, 1, 1},
   {&__pyx_kp_s_strided_and_direct, __pyx_k_strided_and_direct, sizeof(__pyx_k_strided_and_direct), 0, 0, 1, 0},
   {&__pyx_kp_s_strided_and_direct_or_indirect, __pyx_k_strided_and_direct_or_indirect, sizeof(__pyx_k_strided_and_direct_or_indirect), 0, 0, 1, 0},
   {&__pyx_kp_s_strided_and_indirect, __pyx_k_strided_and_indirect, sizeof(__pyx_k_strided_and_indirect), 0, 0, 1, 0},
   {&__pyx_n_s_struct, __pyx_k_struct, sizeof(__pyx_k_struct), 0, 0, 1, 1},
+  {&__pyx_n_s_supplied, __pyx_k_supplied, sizeof(__pyx_k_supplied), 0, 0, 1, 1},
+  {&__pyx_n_s_surface_identification_algorithm, __pyx_k_surface_identification_algorithm, sizeof(__pyx_k_surface_identification_algorithm), 0, 0, 1, 1},
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
   {&__pyx_kp_s_unable_to_allocate_array_data, __pyx_k_unable_to_allocate_array_data, sizeof(__pyx_k_unable_to_allocate_array_data), 0, 0, 1, 0},
   {&__pyx_kp_s_unable_to_allocate_shape_and_str, __pyx_k_unable_to_allocate_shape_and_str, sizeof(__pyx_k_unable_to_allocate_shape_and_str), 0, 0, 1, 0},
   {&__pyx_kp_u_unknown_dtype_code_in_numpy_pxd, __pyx_k_unknown_dtype_code_in_numpy_pxd, sizeof(__pyx_k_unknown_dtype_code_in_numpy_pxd), 0, 1, 0, 0},
   {&__pyx_n_s_unpack, __pyx_k_unpack, sizeof(__pyx_k_unpack), 0, 0, 1, 1},
+  {&__pyx_n_s_upper, __pyx_k_upper, sizeof(__pyx_k_upper), 0, 0, 1, 1},
+  {&__pyx_n_s_warn, __pyx_k_warn, sizeof(__pyx_k_warn), 0, 0, 1, 1},
+  {&__pyx_n_s_warnings, __pyx_k_warnings, sizeof(__pyx_k_warnings), 0, 0, 1, 1},
   {&__pyx_n_s_zeros, __pyx_k_zeros, sizeof(__pyx_k_zeros), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}
 };
 static int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_builtin_property = __Pyx_GetBuiltinName(__pyx_n_s_property); if (!__pyx_builtin_property) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 166; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 39; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 201; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 547; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_RuntimeError = __Pyx_GetBuiltinName(__pyx_n_s_RuntimeError); if (!__pyx_builtin_RuntimeError) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 799; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 147; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_Ellipsis = __Pyx_GetBuiltinName(__pyx_n_s_Ellipsis); if (!__pyx_builtin_Ellipsis) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 359; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 388; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -22913,6 +23607,61 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":39
+ *         # CHECK IF THE OBJECT WAS CREATED
+ *         if self.baseptr is NULL:
+ *             raise MemoryError("Could not create an instance of PostMesh")             # <<<<<<<<<<<<<<
+ * 
+ *     def Init(self, bytes py_element_type, UInteger dimension=2):
+ */
+  __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_s_Could_not_create_an_instance_of); if (unlikely(!__pyx_tuple_)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 39; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple_);
+  __Pyx_GIVEREF(__pyx_tuple_);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":146
+ *     def ReadGeometry(self, bytes filename):
+ *         """Read geometry from IGES or STEP files"""
+ *         suffix = filename.split(".")[-1].upper().lower()             # <<<<<<<<<<<<<<
+ *         if suffix == "iges" or suffix == "igs":
+ *             self.baseptr.ReadIGES(<const char*>filename)
+ */
+  __pyx_tuple__3 = PyTuple_Pack(1, __pyx_kp_s__2); if (unlikely(!__pyx_tuple__3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__3);
+  __Pyx_GIVEREF(__pyx_tuple__3);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":315
+ *         (<PostMeshCurve*>self.baseptr).GetGeomPointsOnCorrespondingEdges()
+ *         if curve_identification_algorithm != "projection":
+ *             warn("Only projection algorithm is available for curve identification")             # <<<<<<<<<<<<<<
+ *         (<PostMeshCurve*>self.baseptr).IdentifyCurvesContainingEdges()
+ *         (<PostMeshCurve*>self.baseptr).ProjectMeshOnCurve()
+ */
+  __pyx_tuple__4 = PyTuple_Pack(1, __pyx_kp_s_Only_projection_algorithm_is_ava); if (unlikely(!__pyx_tuple__4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 315; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__4);
+  __Pyx_GIVEREF(__pyx_tuple__4);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":547
+ *             face_to_surface_map.shape[0], already_mapped, caller)
+ *             else:
+ *                 raise ValueError("A mapping between mesh faces and geometrical surfaces was not supplied")             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_kp_s_A_mapping_between_mesh_faces_and); if (unlikely(!__pyx_tuple__7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 547; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__7);
+  __Pyx_GIVEREF(__pyx_tuple__7);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":557
+ *                 (<PostMeshSurface*>self.baseptr).RepairDualProjectedParameters()
+ *             if FEbases is None:
+ *                 raise ValueError("Finite element bases functions were not supplied "             # <<<<<<<<<<<<<<
+ *                     "for arc length based projection")
+ *             (<PostMeshSurface*>self.baseptr).MeshPointInversionSurfaceArcLength(project_on_curves,orth_tol,
+ */
+  __pyx_tuple__8 = PyTuple_Pack(1, __pyx_kp_s_Finite_element_bases_functions_w); if (unlikely(!__pyx_tuple__8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 557; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__8);
+  __Pyx_GIVEREF(__pyx_tuple__8);
+
   /* "../../../../../../../../usr/local/lib/python2.7/dist-packages/Cython/Includes/numpy/__init__.pxd":218
  *             if ((flags & pybuf.PyBUF_C_CONTIGUOUS == pybuf.PyBUF_C_CONTIGUOUS)
  *                 and not PyArray_CHKFLAGS(self, NPY_C_CONTIGUOUS)):
@@ -22920,9 +23669,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *             if ((flags & pybuf.PyBUF_F_CONTIGUOUS == pybuf.PyBUF_F_CONTIGUOUS)
  */
-  __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_u_ndarray_is_not_C_contiguous); if (unlikely(!__pyx_tuple_)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple_);
-  __Pyx_GIVEREF(__pyx_tuple_);
+  __pyx_tuple__9 = PyTuple_Pack(1, __pyx_kp_u_ndarray_is_not_C_contiguous); if (unlikely(!__pyx_tuple__9)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__9);
+  __Pyx_GIVEREF(__pyx_tuple__9);
 
   /* "../../../../../../../../usr/local/lib/python2.7/dist-packages/Cython/Includes/numpy/__init__.pxd":222
  *             if ((flags & pybuf.PyBUF_F_CONTIGUOUS == pybuf.PyBUF_F_CONTIGUOUS)
@@ -22931,9 +23680,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *             info.buf = PyArray_DATA(self)
  */
-  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_kp_u_ndarray_is_not_Fortran_contiguou); if (unlikely(!__pyx_tuple__2)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__2);
-  __Pyx_GIVEREF(__pyx_tuple__2);
+  __pyx_tuple__10 = PyTuple_Pack(1, __pyx_kp_u_ndarray_is_not_Fortran_contiguou); if (unlikely(!__pyx_tuple__10)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__10);
+  __Pyx_GIVEREF(__pyx_tuple__10);
 
   /* "../../../../../../../../usr/local/lib/python2.7/dist-packages/Cython/Includes/numpy/__init__.pxd":259
  *                 if ((descr.byteorder == c'>' and little_endian) or
@@ -22942,9 +23691,9 @@ static int __Pyx_InitCachedConstants(void) {
  *                 if   t == NPY_BYTE:        f = "b"
  *                 elif t == NPY_UBYTE:       f = "B"
  */
-  __pyx_tuple__3 = PyTuple_Pack(1, __pyx_kp_u_Non_native_byte_order_not_suppor); if (unlikely(!__pyx_tuple__3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 259; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__3);
-  __Pyx_GIVEREF(__pyx_tuple__3);
+  __pyx_tuple__11 = PyTuple_Pack(1, __pyx_kp_u_Non_native_byte_order_not_suppor); if (unlikely(!__pyx_tuple__11)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 259; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__11);
+  __Pyx_GIVEREF(__pyx_tuple__11);
 
   /* "../../../../../../../../usr/local/lib/python2.7/dist-packages/Cython/Includes/numpy/__init__.pxd":799
  * 
@@ -22953,9 +23702,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *         if ((child.byteorder == c'>' and little_endian) or
  */
-  __pyx_tuple__4 = PyTuple_Pack(1, __pyx_kp_u_Format_string_allocated_too_shor); if (unlikely(!__pyx_tuple__4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 799; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__4);
-  __Pyx_GIVEREF(__pyx_tuple__4);
+  __pyx_tuple__12 = PyTuple_Pack(1, __pyx_kp_u_Format_string_allocated_too_shor); if (unlikely(!__pyx_tuple__12)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 799; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__12);
+  __Pyx_GIVEREF(__pyx_tuple__12);
 
   /* "../../../../../../../../usr/local/lib/python2.7/dist-packages/Cython/Includes/numpy/__init__.pxd":803
  *         if ((child.byteorder == c'>' and little_endian) or
@@ -22964,9 +23713,9 @@ static int __Pyx_InitCachedConstants(void) {
  *             # One could encode it in the format string and have Cython
  *             # complain instead, BUT: < and > in format strings also imply
  */
-  __pyx_tuple__5 = PyTuple_Pack(1, __pyx_kp_u_Non_native_byte_order_not_suppor); if (unlikely(!__pyx_tuple__5)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 803; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__5);
-  __Pyx_GIVEREF(__pyx_tuple__5);
+  __pyx_tuple__13 = PyTuple_Pack(1, __pyx_kp_u_Non_native_byte_order_not_suppor); if (unlikely(!__pyx_tuple__13)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 803; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__13);
+  __Pyx_GIVEREF(__pyx_tuple__13);
 
   /* "../../../../../../../../usr/local/lib/python2.7/dist-packages/Cython/Includes/numpy/__init__.pxd":823
  *             t = child.type_num
@@ -22975,9 +23724,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *             # Until ticket #99 is fixed, use integers to avoid warnings
  */
-  __pyx_tuple__6 = PyTuple_Pack(1, __pyx_kp_u_Format_string_allocated_too_shor_2); if (unlikely(!__pyx_tuple__6)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 823; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__6);
-  __Pyx_GIVEREF(__pyx_tuple__6);
+  __pyx_tuple__14 = PyTuple_Pack(1, __pyx_kp_u_Format_string_allocated_too_shor_2); if (unlikely(!__pyx_tuple__14)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 823; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__14);
+  __Pyx_GIVEREF(__pyx_tuple__14);
 
   /* "View.MemoryView":129
  * 
@@ -22986,9 +23735,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *         if itemsize <= 0:
  */
-  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_kp_s_Empty_shape_tuple_for_cython_arr); if (unlikely(!__pyx_tuple__7)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 129; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__7);
-  __Pyx_GIVEREF(__pyx_tuple__7);
+  __pyx_tuple__15 = PyTuple_Pack(1, __pyx_kp_s_Empty_shape_tuple_for_cython_arr); if (unlikely(!__pyx_tuple__15)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 129; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__15);
+  __Pyx_GIVEREF(__pyx_tuple__15);
 
   /* "View.MemoryView":132
  * 
@@ -22997,9 +23746,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *         if not isinstance(format, bytes):
  */
-  __pyx_tuple__8 = PyTuple_Pack(1, __pyx_kp_s_itemsize_0_for_cython_array); if (unlikely(!__pyx_tuple__8)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 132; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__8);
-  __Pyx_GIVEREF(__pyx_tuple__8);
+  __pyx_tuple__16 = PyTuple_Pack(1, __pyx_kp_s_itemsize_0_for_cython_array); if (unlikely(!__pyx_tuple__16)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 132; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__16);
+  __Pyx_GIVEREF(__pyx_tuple__16);
 
   /* "View.MemoryView":135
  * 
@@ -23008,9 +23757,9 @@ static int __Pyx_InitCachedConstants(void) {
  *         self._format = format  # keep a reference to the byte string
  *         self.format = self._format
  */
-  __pyx_tuple__9 = PyTuple_Pack(1, __pyx_n_s_ASCII); if (unlikely(!__pyx_tuple__9)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 135; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__9);
-  __Pyx_GIVEREF(__pyx_tuple__9);
+  __pyx_tuple__17 = PyTuple_Pack(1, __pyx_n_s_ASCII); if (unlikely(!__pyx_tuple__17)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 135; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__17);
+  __Pyx_GIVEREF(__pyx_tuple__17);
 
   /* "View.MemoryView":144
  * 
@@ -23019,9 +23768,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__10 = PyTuple_Pack(1, __pyx_kp_s_unable_to_allocate_shape_and_str); if (unlikely(!__pyx_tuple__10)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__10);
-  __Pyx_GIVEREF(__pyx_tuple__10);
+  __pyx_tuple__18 = PyTuple_Pack(1, __pyx_kp_s_unable_to_allocate_shape_and_str); if (unlikely(!__pyx_tuple__18)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__18);
+  __Pyx_GIVEREF(__pyx_tuple__18);
 
   /* "View.MemoryView":172
  *             self.data = <char *>malloc(self.len)
@@ -23030,9 +23779,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *             if self.dtype_is_object:
  */
-  __pyx_tuple__11 = PyTuple_Pack(1, __pyx_kp_s_unable_to_allocate_array_data); if (unlikely(!__pyx_tuple__11)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 172; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__11);
-  __Pyx_GIVEREF(__pyx_tuple__11);
+  __pyx_tuple__19 = PyTuple_Pack(1, __pyx_kp_s_unable_to_allocate_array_data); if (unlikely(!__pyx_tuple__19)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 172; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__19);
+  __Pyx_GIVEREF(__pyx_tuple__19);
 
   /* "View.MemoryView":188
  *             bufmode = PyBUF_F_CONTIGUOUS | PyBUF_ANY_CONTIGUOUS
@@ -23041,9 +23790,9 @@ static int __Pyx_InitCachedConstants(void) {
  *         info.buf = self.data
  *         info.len = self.len
  */
-  __pyx_tuple__12 = PyTuple_Pack(1, __pyx_kp_s_Can_only_create_a_buffer_that_is); if (unlikely(!__pyx_tuple__12)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 188; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__12);
-  __Pyx_GIVEREF(__pyx_tuple__12);
+  __pyx_tuple__20 = PyTuple_Pack(1, __pyx_kp_s_Can_only_create_a_buffer_that_is); if (unlikely(!__pyx_tuple__20)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 188; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__20);
+  __Pyx_GIVEREF(__pyx_tuple__20);
 
   /* "View.MemoryView":447
  *             result = struct.unpack(self.view.format, bytesitem)
@@ -23052,9 +23801,9 @@ static int __Pyx_InitCachedConstants(void) {
  *         else:
  *             if len(self.view.format) == 1:
  */
-  __pyx_tuple__13 = PyTuple_Pack(1, __pyx_kp_s_Unable_to_convert_item_to_object); if (unlikely(!__pyx_tuple__13)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 447; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__13);
-  __Pyx_GIVEREF(__pyx_tuple__13);
+  __pyx_tuple__21 = PyTuple_Pack(1, __pyx_kp_s_Unable_to_convert_item_to_object); if (unlikely(!__pyx_tuple__21)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 447; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__21);
+  __Pyx_GIVEREF(__pyx_tuple__21);
 
   /* "View.MemoryView":523
  *             if self.view.strides == NULL:
@@ -23063,9 +23812,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *             return tuple([stride for stride in self.view.strides[:self.view.ndim]])
  */
-  __pyx_tuple__14 = PyTuple_Pack(1, __pyx_kp_s_Buffer_view_does_not_expose_stri); if (unlikely(!__pyx_tuple__14)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 523; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__14);
-  __Pyx_GIVEREF(__pyx_tuple__14);
+  __pyx_tuple__22 = PyTuple_Pack(1, __pyx_kp_s_Buffer_view_does_not_expose_stri); if (unlikely(!__pyx_tuple__22)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 523; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__22);
+  __Pyx_GIVEREF(__pyx_tuple__22);
 
   /* "View.MemoryView":531
  *         def __get__(self):
@@ -23074,12 +23823,12 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *             return tuple([suboffset for suboffset in self.view.suboffsets[:self.view.ndim]])
  */
-  __pyx_tuple__15 = PyTuple_New(1); if (unlikely(!__pyx_tuple__15)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 531; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__15);
+  __pyx_tuple__23 = PyTuple_New(1); if (unlikely(!__pyx_tuple__23)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 531; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__23);
   __Pyx_INCREF(__pyx_int_neg_1);
   __Pyx_GIVEREF(__pyx_int_neg_1);
-  PyTuple_SET_ITEM(__pyx_tuple__15, 0, __pyx_int_neg_1);
-  __Pyx_GIVEREF(__pyx_tuple__15);
+  PyTuple_SET_ITEM(__pyx_tuple__23, 0, __pyx_int_neg_1);
+  __Pyx_GIVEREF(__pyx_tuple__23);
 
   /* "View.MemoryView":640
  *         if item is Ellipsis:
@@ -23088,9 +23837,9 @@ static int __Pyx_InitCachedConstants(void) {
  *                 seen_ellipsis = True
  *             else:
  */
-  __pyx_slice__16 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__16)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 640; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_slice__16);
-  __Pyx_GIVEREF(__pyx_slice__16);
+  __pyx_slice__24 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__24)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 640; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_slice__24);
+  __Pyx_GIVEREF(__pyx_slice__24);
 
   /* "View.MemoryView":643
  *                 seen_ellipsis = True
@@ -23099,9 +23848,9 @@ static int __Pyx_InitCachedConstants(void) {
  *             have_slices = True
  *         else:
  */
-  __pyx_slice__17 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__17)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 643; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_slice__17);
-  __Pyx_GIVEREF(__pyx_slice__17);
+  __pyx_slice__25 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__25)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 643; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_slice__25);
+  __Pyx_GIVEREF(__pyx_slice__25);
 
   /* "View.MemoryView":654
  *     nslices = ndim - len(result)
@@ -23110,9 +23859,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *     return have_slices or nslices, tuple(result)
  */
-  __pyx_slice__18 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__18)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 654; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_slice__18);
-  __Pyx_GIVEREF(__pyx_slice__18);
+  __pyx_slice__26 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__26)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 654; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_slice__26);
+  __Pyx_GIVEREF(__pyx_slice__26);
 
   /* "View.MemoryView":661
  *     for suboffset in suboffsets[:ndim]:
@@ -23121,9 +23870,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__19 = PyTuple_Pack(1, __pyx_kp_s_Indirect_dimensions_not_supporte); if (unlikely(!__pyx_tuple__19)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 661; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__19);
-  __Pyx_GIVEREF(__pyx_tuple__19);
+  __pyx_tuple__27 = PyTuple_Pack(1, __pyx_kp_s_Indirect_dimensions_not_supporte); if (unlikely(!__pyx_tuple__27)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 661; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__27);
+  __Pyx_GIVEREF(__pyx_tuple__27);
 
   /* "View.MemoryView":278
  *         return self.name
@@ -23132,9 +23881,9 @@ static int __Pyx_InitCachedConstants(void) {
  * cdef strided = Enum("<strided and direct>") # default
  * cdef indirect = Enum("<strided and indirect>")
  */
-  __pyx_tuple__20 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct_or_indirect); if (unlikely(!__pyx_tuple__20)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 278; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__20);
-  __Pyx_GIVEREF(__pyx_tuple__20);
+  __pyx_tuple__28 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct_or_indirect); if (unlikely(!__pyx_tuple__28)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 278; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__28);
+  __Pyx_GIVEREF(__pyx_tuple__28);
 
   /* "View.MemoryView":279
  * 
@@ -23143,9 +23892,9 @@ static int __Pyx_InitCachedConstants(void) {
  * cdef indirect = Enum("<strided and indirect>")
  * 
  */
-  __pyx_tuple__21 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct); if (unlikely(!__pyx_tuple__21)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__21);
-  __Pyx_GIVEREF(__pyx_tuple__21);
+  __pyx_tuple__29 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct); if (unlikely(!__pyx_tuple__29)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__29);
+  __Pyx_GIVEREF(__pyx_tuple__29);
 
   /* "View.MemoryView":280
  * cdef generic = Enum("<strided and direct or indirect>")
@@ -23154,9 +23903,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__22 = PyTuple_Pack(1, __pyx_kp_s_strided_and_indirect); if (unlikely(!__pyx_tuple__22)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 280; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__22);
-  __Pyx_GIVEREF(__pyx_tuple__22);
+  __pyx_tuple__30 = PyTuple_Pack(1, __pyx_kp_s_strided_and_indirect); if (unlikely(!__pyx_tuple__30)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 280; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__30);
+  __Pyx_GIVEREF(__pyx_tuple__30);
 
   /* "View.MemoryView":283
  * 
@@ -23165,9 +23914,9 @@ static int __Pyx_InitCachedConstants(void) {
  * cdef indirect_contiguous = Enum("<contiguous and indirect>")
  * 
  */
-  __pyx_tuple__23 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_direct); if (unlikely(!__pyx_tuple__23)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__23);
-  __Pyx_GIVEREF(__pyx_tuple__23);
+  __pyx_tuple__31 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_direct); if (unlikely(!__pyx_tuple__31)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__31);
+  __Pyx_GIVEREF(__pyx_tuple__31);
 
   /* "View.MemoryView":284
  * 
@@ -23176,9 +23925,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__24 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_indirect); if (unlikely(!__pyx_tuple__24)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__24);
-  __Pyx_GIVEREF(__pyx_tuple__24);
+  __pyx_tuple__32 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_indirect); if (unlikely(!__pyx_tuple__32)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__32);
+  __Pyx_GIVEREF(__pyx_tuple__32);
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -23206,6 +23955,9 @@ PyMODINIT_FUNC PyInit_PostMeshPy(void)
 #endif
 {
   PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  __Pyx_memviewslice __pyx_t_3 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_memviewslice __pyx_t_4 = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -23288,13 +24040,19 @@ PyMODINIT_FUNC PyInit_PostMeshPy(void)
   /*--- Variable export code ---*/
   /*--- Function export code ---*/
   /*--- Type init code ---*/
-  if (PyType_Ready(&__pyx_type_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 11; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyType_Ready(&__pyx_type_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 15; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_type_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy.tp_print = 0;
+  if (PyObject_SetAttrString(__pyx_m, "PostMeshBasePy", (PyObject *)&__pyx_type_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 15; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_ptype_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy = &__pyx_type_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy;
+  __pyx_type_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy.tp_base = __pyx_ptype_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy;
+  if (PyType_Ready(&__pyx_type_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 219; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_type_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy.tp_print = 0;
-  if (PyObject_SetAttrString(__pyx_m, "PostMeshCurvePy", (PyObject *)&__pyx_type_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 11; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyObject_SetAttrString(__pyx_m, "PostMeshCurvePy", (PyObject *)&__pyx_type_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 219; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_ptype_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy = &__pyx_type_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshCurvePy;
-  if (PyType_Ready(&__pyx_type_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 155; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_type_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy.tp_base = __pyx_ptype_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy;
+  if (PyType_Ready(&__pyx_type_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 343; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_type_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy.tp_print = 0;
-  if (PyObject_SetAttrString(__pyx_m, "PostMeshSurfacePy", (PyObject *)&__pyx_type_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 155; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyObject_SetAttrString(__pyx_m, "PostMeshSurfacePy", (PyObject *)&__pyx_type_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 343; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_ptype_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy = &__pyx_type_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshSurfacePy;
   if (PyType_Ready(&__pyx_type___pyx_array) < 0) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 101; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_type___pyx_array.tp_print = 0;
@@ -23343,27 +24101,161 @@ PyMODINIT_FUNC PyInit_PostMeshPy(void)
   if (__Pyx_patch_abc() < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   #endif
 
-  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":7
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":8
  * 
  * from cython import boundscheck, nonecheck, wraparound, profile, double
  * import numpy as np             # <<<<<<<<<<<<<<
  * cimport numpy as np
  * 
  */
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_numpy, 0, -1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 7; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_numpy, 0, -1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 8; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 7; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 8; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":11
+ * cimport numpy as np
+ * 
+ * from warnings import warn             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 11; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_INCREF(__pyx_n_s_warn);
+  __Pyx_GIVEREF(__pyx_n_s_warn);
+  PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s_warn);
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_warnings, __pyx_t_1, -1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 11; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_warn); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 11; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_warn, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 11; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":167
+ * 
+ *     @property
+ *     def NbPoints(self):             # <<<<<<<<<<<<<<
+ *         """Retruns number of geometrical points"""
+ *         return self.baseptr.NbPoints()
+ */
+  __pyx_t_2 = __Pyx_GetNameInClass((PyObject *)__pyx_ptype_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy, __pyx_n_s_NbPoints); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 167; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":166
+ *         self.baseptr.GetGeomFaces()
+ * 
+ *     @property             # <<<<<<<<<<<<<<
+ *     def NbPoints(self):
+ *         """Retruns number of geometrical points"""
+ */
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 166; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_GIVEREF(__pyx_t_2);
+  PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_2);
+  __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_property, __pyx_t_1, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 166; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  if (PyDict_SetItem((PyObject *)__pyx_ptype_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy->tp_dict, __pyx_n_s_NbPoints, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 167; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  PyType_Modified(__pyx_ptype_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":172
+ * 
+ *     @property
+ *     def NbCurves(self):             # <<<<<<<<<<<<<<
+ *         """Retruns number of geometrical curves"""
+ *         return self.baseptr.NbCurves()
+ */
+  __pyx_t_2 = __Pyx_GetNameInClass((PyObject *)__pyx_ptype_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy, __pyx_n_s_NbCurves); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 172; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":171
+ *         return self.baseptr.NbPoints()
+ * 
+ *     @property             # <<<<<<<<<<<<<<
+ *     def NbCurves(self):
+ *         """Retruns number of geometrical curves"""
+ */
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 171; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_GIVEREF(__pyx_t_2);
+  PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_2);
+  __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_property, __pyx_t_1, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 171; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  if (PyDict_SetItem((PyObject *)__pyx_ptype_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy->tp_dict, __pyx_n_s_NbCurves, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 172; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  PyType_Modified(__pyx_ptype_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":177
+ * 
+ *     @property
+ *     def NbSurfaces(self):             # <<<<<<<<<<<<<<
+ *         """Retruns number of geometrical surfaces"""
+ *         return self.baseptr.NbSurfaces()
+ */
+  __pyx_t_2 = __Pyx_GetNameInClass((PyObject *)__pyx_ptype_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy, __pyx_n_s_NbSurfaces); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":176
+ *         return self.baseptr.NbCurves()
+ * 
+ *     @property             # <<<<<<<<<<<<<<
+ *     def NbSurfaces(self):
+ *         """Retruns number of geometrical surfaces"""
+ */
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_GIVEREF(__pyx_t_2);
+  PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_2);
+  __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_property, __pyx_t_1, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  if (PyDict_SetItem((PyObject *)__pyx_ptype_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy->tp_dict, __pyx_n_s_NbSurfaces, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  PyType_Modified(__pyx_ptype_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_PostMeshBasePy);
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":468
+ * 
+ *     def PerformPointProjectionInversionSurface(self, str surface_identification_algorithm="minimisation",
+ *         str projection_type="orthogonal", Integer[::1] face_to_surface_map=None,             # <<<<<<<<<<<<<<
+ *         Integer already_mapped=0, str internal_surface_identification_algorithm="minimisation",
+ *         repair_dual_projection=False, Integer project_on_curves=1,
+ */
+  __pyx_t_3 = __Pyx_PyObject_to_MemoryviewSlice_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Integer(Py_None);
+  if (unlikely(!__pyx_t_3.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_k__5 = __pyx_t_3;
+  __pyx_t_3.memview = NULL;
+  __pyx_t_3.data = NULL;
+
+  /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":471
+ *         Integer already_mapped=0, str internal_surface_identification_algorithm="minimisation",
+ *         repair_dual_projection=False, Integer project_on_curves=1,
+ *         Integer modify_linear_mesh=0, Real orth_tol=1, Real[:,::1] FEbases=None):             # <<<<<<<<<<<<<<
+ *         """Convenience function for Python API. Performs point projection and
+ *             point inversion at one go
+ */
+  __pyx_t_4 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn___pyx_t_8Florence_17BoundaryCondition_18CurvilinearMeshing_8PostMesh_10PostMeshPy_Real(Py_None);
+  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 471; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_k__6 = __pyx_t_4;
+  __pyx_t_4.memview = NULL;
+  __pyx_t_4.data = NULL;
 
   /* "Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx":1
  * #cython: profile=False             # <<<<<<<<<<<<<<
+ * #cython: infer_types=True
  * #cython: boundscheck=False
- * #cython: wraparound=False
  */
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "View.MemoryView":205
  *         info.obj = self
@@ -23372,10 +24264,10 @@ PyMODINIT_FUNC PyInit_PostMeshPy(void)
  * 
  *     def __dealloc__(array self):
  */
-  __pyx_t_1 = __pyx_capsule_create(((void *)(&__pyx_array_getbuffer)), __pyx_k_getbuffer_obj_view_flags); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_array_type->tp_dict, __pyx_n_s_pyx_getbuffer, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = __pyx_capsule_create(((void *)(&__pyx_array_getbuffer)), __pyx_k_getbuffer_obj_view_flags); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_array_type->tp_dict, __pyx_n_s_pyx_getbuffer, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_array_type);
 
   /* "View.MemoryView":278
@@ -23385,12 +24277,12 @@ PyMODINIT_FUNC PyInit_PostMeshPy(void)
  * cdef strided = Enum("<strided and direct>") # default
  * cdef indirect = Enum("<strided and indirect>")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__20, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 278; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__28, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 278; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_XGOTREF(generic);
-  __Pyx_DECREF_SET(generic, __pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_1);
-  __pyx_t_1 = 0;
+  __Pyx_DECREF_SET(generic, __pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_2);
+  __pyx_t_2 = 0;
 
   /* "View.MemoryView":279
  * 
@@ -23399,12 +24291,12 @@ PyMODINIT_FUNC PyInit_PostMeshPy(void)
  * cdef indirect = Enum("<strided and indirect>")
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__21, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__29, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_XGOTREF(strided);
-  __Pyx_DECREF_SET(strided, __pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_1);
-  __pyx_t_1 = 0;
+  __Pyx_DECREF_SET(strided, __pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_2);
+  __pyx_t_2 = 0;
 
   /* "View.MemoryView":280
  * cdef generic = Enum("<strided and direct or indirect>")
@@ -23413,12 +24305,12 @@ PyMODINIT_FUNC PyInit_PostMeshPy(void)
  * 
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__22, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 280; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__30, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 280; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_XGOTREF(indirect);
-  __Pyx_DECREF_SET(indirect, __pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_1);
-  __pyx_t_1 = 0;
+  __Pyx_DECREF_SET(indirect, __pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_2);
+  __pyx_t_2 = 0;
 
   /* "View.MemoryView":283
  * 
@@ -23427,12 +24319,12 @@ PyMODINIT_FUNC PyInit_PostMeshPy(void)
  * cdef indirect_contiguous = Enum("<contiguous and indirect>")
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__23, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__31, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_XGOTREF(contiguous);
-  __Pyx_DECREF_SET(contiguous, __pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_1);
-  __pyx_t_1 = 0;
+  __Pyx_DECREF_SET(contiguous, __pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_2);
+  __pyx_t_2 = 0;
 
   /* "View.MemoryView":284
  * 
@@ -23441,12 +24333,12 @@ PyMODINIT_FUNC PyInit_PostMeshPy(void)
  * 
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__24, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__32, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_XGOTREF(indirect_contiguous);
-  __Pyx_DECREF_SET(indirect_contiguous, __pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_1);
-  __pyx_t_1 = 0;
+  __Pyx_DECREF_SET(indirect_contiguous, __pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_2);
+  __pyx_t_2 = 0;
 
   /* "View.MemoryView":498
  *         info.obj = self
@@ -23455,10 +24347,10 @@ PyMODINIT_FUNC PyInit_PostMeshPy(void)
  * 
  * 
  */
-  __pyx_t_1 = __pyx_capsule_create(((void *)(&__pyx_memoryview_getbuffer)), __pyx_k_getbuffer_obj_view_flags); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 498; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_memoryview_type->tp_dict, __pyx_n_s_pyx_getbuffer, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 498; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = __pyx_capsule_create(((void *)(&__pyx_memoryview_getbuffer)), __pyx_k_getbuffer_obj_view_flags); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 498; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_memoryview_type->tp_dict, __pyx_n_s_pyx_getbuffer, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 498; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_memoryview_type);
 
   /* "View.MemoryView":954
@@ -23468,10 +24360,10 @@ PyMODINIT_FUNC PyInit_PostMeshPy(void)
  * 
  * 
  */
-  __pyx_t_1 = __pyx_capsule_create(((void *)(&__pyx_memoryview_getbuffer)), __pyx_k_getbuffer_obj_view_flags); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 954; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_memoryviewslice_type->tp_dict, __pyx_n_s_pyx_getbuffer, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 954; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = __pyx_capsule_create(((void *)(&__pyx_memoryview_getbuffer)), __pyx_k_getbuffer_obj_view_flags); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 954; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_memoryviewslice_type->tp_dict, __pyx_n_s_pyx_getbuffer, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 954; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_memoryviewslice_type);
 
   /* "vector.to_py":67
@@ -23487,6 +24379,9 @@ PyMODINIT_FUNC PyInit_PostMeshPy(void)
   goto __pyx_L0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __PYX_XDEC_MEMVIEW(&__pyx_t_3, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_t_4, 1);
   if (__pyx_m) {
     if (__pyx_d) {
       __Pyx_AddTraceback("init Florence.BoundaryCondition.CurvilinearMeshing.PostMesh.PostMeshPy", __pyx_clineno, __pyx_lineno, __pyx_filename);
@@ -23698,6 +24593,216 @@ static CYTHON_INLINE int __Pyx_ArgTypeTest(PyObject *obj, PyTypeObject *type, in
     __Pyx_RaiseArgumentTypeInvalid(name, obj, type);
     return 0;
 }
+
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw) {
+    PyObject *result;
+    ternaryfunc call = func->ob_type->tp_call;
+    if (unlikely(!call))
+        return PyObject_Call(func, arg, kw);
+    if (unlikely(Py_EnterRecursiveCall((char*)" while calling a Python object")))
+        return NULL;
+    result = (*call)(func, arg, kw);
+    Py_LeaveRecursiveCall();
+    if (unlikely(!result) && unlikely(!PyErr_Occurred())) {
+        PyErr_SetString(
+            PyExc_SystemError,
+            "NULL result without error in PyObject_Call");
+    }
+    return result;
+}
+#endif
+
+static CYTHON_INLINE void __Pyx_ErrRestore(PyObject *type, PyObject *value, PyObject *tb) {
+#if CYTHON_COMPILING_IN_CPYTHON
+    PyObject *tmp_type, *tmp_value, *tmp_tb;
+    PyThreadState *tstate = PyThreadState_GET();
+    tmp_type = tstate->curexc_type;
+    tmp_value = tstate->curexc_value;
+    tmp_tb = tstate->curexc_traceback;
+    tstate->curexc_type = type;
+    tstate->curexc_value = value;
+    tstate->curexc_traceback = tb;
+    Py_XDECREF(tmp_type);
+    Py_XDECREF(tmp_value);
+    Py_XDECREF(tmp_tb);
+#else
+    PyErr_Restore(type, value, tb);
+#endif
+}
+static CYTHON_INLINE void __Pyx_ErrFetch(PyObject **type, PyObject **value, PyObject **tb) {
+#if CYTHON_COMPILING_IN_CPYTHON
+    PyThreadState *tstate = PyThreadState_GET();
+    *type = tstate->curexc_type;
+    *value = tstate->curexc_value;
+    *tb = tstate->curexc_traceback;
+    tstate->curexc_type = 0;
+    tstate->curexc_value = 0;
+    tstate->curexc_traceback = 0;
+#else
+    PyErr_Fetch(type, value, tb);
+#endif
+}
+
+#if PY_MAJOR_VERSION < 3
+static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb,
+                        CYTHON_UNUSED PyObject *cause) {
+    Py_XINCREF(type);
+    if (!value || value == Py_None)
+        value = NULL;
+    else
+        Py_INCREF(value);
+    if (!tb || tb == Py_None)
+        tb = NULL;
+    else {
+        Py_INCREF(tb);
+        if (!PyTraceBack_Check(tb)) {
+            PyErr_SetString(PyExc_TypeError,
+                "raise: arg 3 must be a traceback or None");
+            goto raise_error;
+        }
+    }
+    if (PyType_Check(type)) {
+#if CYTHON_COMPILING_IN_PYPY
+        if (!value) {
+            Py_INCREF(Py_None);
+            value = Py_None;
+        }
+#endif
+        PyErr_NormalizeException(&type, &value, &tb);
+    } else {
+        if (value) {
+            PyErr_SetString(PyExc_TypeError,
+                "instance exception may not have a separate value");
+            goto raise_error;
+        }
+        value = type;
+        type = (PyObject*) Py_TYPE(type);
+        Py_INCREF(type);
+        if (!PyType_IsSubtype((PyTypeObject *)type, (PyTypeObject *)PyExc_BaseException)) {
+            PyErr_SetString(PyExc_TypeError,
+                "raise: exception class must be a subclass of BaseException");
+            goto raise_error;
+        }
+    }
+    __Pyx_ErrRestore(type, value, tb);
+    return;
+raise_error:
+    Py_XDECREF(value);
+    Py_XDECREF(type);
+    Py_XDECREF(tb);
+    return;
+}
+#else
+static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause) {
+    PyObject* owned_instance = NULL;
+    if (tb == Py_None) {
+        tb = 0;
+    } else if (tb && !PyTraceBack_Check(tb)) {
+        PyErr_SetString(PyExc_TypeError,
+            "raise: arg 3 must be a traceback or None");
+        goto bad;
+    }
+    if (value == Py_None)
+        value = 0;
+    if (PyExceptionInstance_Check(type)) {
+        if (value) {
+            PyErr_SetString(PyExc_TypeError,
+                "instance exception may not have a separate value");
+            goto bad;
+        }
+        value = type;
+        type = (PyObject*) Py_TYPE(value);
+    } else if (PyExceptionClass_Check(type)) {
+        PyObject *instance_class = NULL;
+        if (value && PyExceptionInstance_Check(value)) {
+            instance_class = (PyObject*) Py_TYPE(value);
+            if (instance_class != type) {
+                int is_subclass = PyObject_IsSubclass(instance_class, type);
+                if (!is_subclass) {
+                    instance_class = NULL;
+                } else if (unlikely(is_subclass == -1)) {
+                    goto bad;
+                } else {
+                    type = instance_class;
+                }
+            }
+        }
+        if (!instance_class) {
+            PyObject *args;
+            if (!value)
+                args = PyTuple_New(0);
+            else if (PyTuple_Check(value)) {
+                Py_INCREF(value);
+                args = value;
+            } else
+                args = PyTuple_Pack(1, value);
+            if (!args)
+                goto bad;
+            owned_instance = PyObject_Call(type, args, NULL);
+            Py_DECREF(args);
+            if (!owned_instance)
+                goto bad;
+            value = owned_instance;
+            if (!PyExceptionInstance_Check(value)) {
+                PyErr_Format(PyExc_TypeError,
+                             "calling %R should have returned an instance of "
+                             "BaseException, not %R",
+                             type, Py_TYPE(value));
+                goto bad;
+            }
+        }
+    } else {
+        PyErr_SetString(PyExc_TypeError,
+            "raise: exception class must be a subclass of BaseException");
+        goto bad;
+    }
+#if PY_VERSION_HEX >= 0x03030000
+    if (cause) {
+#else
+    if (cause && cause != Py_None) {
+#endif
+        PyObject *fixed_cause;
+        if (cause == Py_None) {
+            fixed_cause = NULL;
+        } else if (PyExceptionClass_Check(cause)) {
+            fixed_cause = PyObject_CallObject(cause, NULL);
+            if (fixed_cause == NULL)
+                goto bad;
+        } else if (PyExceptionInstance_Check(cause)) {
+            fixed_cause = cause;
+            Py_INCREF(fixed_cause);
+        } else {
+            PyErr_SetString(PyExc_TypeError,
+                            "exception causes must derive from "
+                            "BaseException");
+            goto bad;
+        }
+        PyException_SetCause(value, fixed_cause);
+    }
+    PyErr_SetObject(type, value);
+    if (tb) {
+#if CYTHON_COMPILING_IN_PYPY
+        PyObject *tmp_type, *tmp_value, *tmp_tb;
+        PyErr_Fetch(&tmp_type, &tmp_value, &tmp_tb);
+        Py_INCREF(tb);
+        PyErr_Restore(tmp_type, tmp_value, tb);
+        Py_XDECREF(tmp_tb);
+#else
+        PyThreadState *tstate = PyThreadState_GET();
+        PyObject* tmp_tb = tstate->curexc_traceback;
+        if (tb != tmp_tb) {
+            Py_INCREF(tb);
+            tstate->curexc_traceback = tb;
+            Py_XDECREF(tmp_tb);
+        }
+#endif
+    }
+bad:
+    Py_XDECREF(owned_instance);
+    return;
+}
+#endif
 
 static CYTHON_INLINE int __Pyx_IsLittleEndian(void) {
   unsigned int n = 1;
@@ -24382,52 +25487,85 @@ static CYTHON_INLINE void __Pyx_XDEC_MEMVIEW(__Pyx_memviewslice *memslice,
     }
 }
 
-static CYTHON_INLINE PyObject *__Pyx_GetModuleGlobalName(PyObject *name) {
-    PyObject *result;
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j) {
+    PyObject *r;
+    if (!j) return NULL;
+    r = PyObject_GetItem(o, j);
+    Py_DECREF(j);
+    return r;
+}
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_List_Fast(PyObject *o, Py_ssize_t i,
+                                                              CYTHON_NCP_UNUSED int wraparound,
+                                                              CYTHON_NCP_UNUSED int boundscheck) {
 #if CYTHON_COMPILING_IN_CPYTHON
-    result = PyDict_GetItem(__pyx_d, name);
-    if (likely(result)) {
-        Py_INCREF(result);
-    } else {
+    if (wraparound & unlikely(i < 0)) i += PyList_GET_SIZE(o);
+    if ((!boundscheck) || likely((0 <= i) & (i < PyList_GET_SIZE(o)))) {
+        PyObject *r = PyList_GET_ITEM(o, i);
+        Py_INCREF(r);
+        return r;
+    }
+    return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
 #else
-    result = PyObject_GetItem(__pyx_d, name);
-    if (!result) {
-        PyErr_Clear();
+    return PySequence_GetItem(o, i);
 #endif
-        result = __Pyx_GetBuiltinName(name);
-    }
-    return result;
 }
-
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Tuple_Fast(PyObject *o, Py_ssize_t i,
+                                                              CYTHON_NCP_UNUSED int wraparound,
+                                                              CYTHON_NCP_UNUSED int boundscheck) {
 #if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw) {
-    PyObject *result;
-    ternaryfunc call = func->ob_type->tp_call;
-    if (unlikely(!call))
-        return PyObject_Call(func, arg, kw);
-    if (unlikely(Py_EnterRecursiveCall((char*)" while calling a Python object")))
-        return NULL;
-    result = (*call)(func, arg, kw);
-    Py_LeaveRecursiveCall();
-    if (unlikely(!result) && unlikely(!PyErr_Occurred())) {
-        PyErr_SetString(
-            PyExc_SystemError,
-            "NULL result without error in PyObject_Call");
+    if (wraparound & unlikely(i < 0)) i += PyTuple_GET_SIZE(o);
+    if ((!boundscheck) || likely((0 <= i) & (i < PyTuple_GET_SIZE(o)))) {
+        PyObject *r = PyTuple_GET_ITEM(o, i);
+        Py_INCREF(r);
+        return r;
     }
-    return result;
-}
+    return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
+#else
+    return PySequence_GetItem(o, i);
 #endif
-
-static CYTHON_INLINE int __Pyx_TypeTest(PyObject *obj, PyTypeObject *type) {
-    if (unlikely(!type)) {
-        PyErr_SetString(PyExc_SystemError, "Missing type object");
-        return 0;
+}
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i, int is_list,
+                                                     CYTHON_NCP_UNUSED int wraparound,
+                                                     CYTHON_NCP_UNUSED int boundscheck) {
+#if CYTHON_COMPILING_IN_CPYTHON
+    if (is_list || PyList_CheckExact(o)) {
+        Py_ssize_t n = ((!wraparound) | likely(i >= 0)) ? i : i + PyList_GET_SIZE(o);
+        if ((!boundscheck) || (likely((n >= 0) & (n < PyList_GET_SIZE(o))))) {
+            PyObject *r = PyList_GET_ITEM(o, n);
+            Py_INCREF(r);
+            return r;
+        }
     }
-    if (likely(PyObject_TypeCheck(obj, type)))
-        return 1;
-    PyErr_Format(PyExc_TypeError, "Cannot convert %.200s to %.200s",
-                 Py_TYPE(obj)->tp_name, type->tp_name);
-    return 0;
+    else if (PyTuple_CheckExact(o)) {
+        Py_ssize_t n = ((!wraparound) | likely(i >= 0)) ? i : i + PyTuple_GET_SIZE(o);
+        if ((!boundscheck) || likely((n >= 0) & (n < PyTuple_GET_SIZE(o)))) {
+            PyObject *r = PyTuple_GET_ITEM(o, n);
+            Py_INCREF(r);
+            return r;
+        }
+    } else {
+        PySequenceMethods *m = Py_TYPE(o)->tp_as_sequence;
+        if (likely(m && m->sq_item)) {
+            if (wraparound && unlikely(i < 0) && likely(m->sq_length)) {
+                Py_ssize_t l = m->sq_length(o);
+                if (likely(l >= 0)) {
+                    i += l;
+                } else {
+                    if (PyErr_ExceptionMatches(PyExc_OverflowError))
+                        PyErr_Clear();
+                    else
+                        return NULL;
+                }
+            }
+            return m->sq_item(o, i);
+        }
+    }
+#else
+    if (is_list || PySequence_Check(o)) {
+        return PySequence_GetItem(o, i);
+    }
+#endif
+    return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
 }
 
 #if CYTHON_COMPILING_IN_CPYTHON
@@ -24483,266 +25621,20 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObjec
 }
 #endif
 
-static CYTHON_INLINE Py_ssize_t __Pyx_div_Py_ssize_t(Py_ssize_t a, Py_ssize_t b) {
-    Py_ssize_t q = a / b;
-    Py_ssize_t r = a - q*b;
-    q -= ((r != 0) & ((r ^ b) < 0));
-    return q;
-}
-
-static CYTHON_INLINE int __Pyx_SetItemInt_Generic(PyObject *o, PyObject *j, PyObject *v) {
-    int r;
-    if (!j) return -1;
-    r = PyObject_SetItem(o, j, v);
-    Py_DECREF(j);
-    return r;
-}
-static CYTHON_INLINE int __Pyx_SetItemInt_Fast(PyObject *o, Py_ssize_t i, PyObject *v, int is_list,
-                                               CYTHON_NCP_UNUSED int wraparound, CYTHON_NCP_UNUSED int boundscheck) {
 #if CYTHON_COMPILING_IN_CPYTHON
-    if (is_list || PyList_CheckExact(o)) {
-        Py_ssize_t n = (!wraparound) ? i : ((likely(i >= 0)) ? i : i + PyList_GET_SIZE(o));
-        if ((!boundscheck) || likely((n >= 0) & (n < PyList_GET_SIZE(o)))) {
-            PyObject* old = PyList_GET_ITEM(o, n);
-            Py_INCREF(v);
-            PyList_SET_ITEM(o, n, v);
-            Py_DECREF(old);
-            return 1;
-        }
-    } else {
-        PySequenceMethods *m = Py_TYPE(o)->tp_as_sequence;
-        if (likely(m && m->sq_ass_item)) {
-            if (wraparound && unlikely(i < 0) && likely(m->sq_length)) {
-                Py_ssize_t l = m->sq_length(o);
-                if (likely(l >= 0)) {
-                    i += l;
-                } else {
-                    if (PyErr_ExceptionMatches(PyExc_OverflowError))
-                        PyErr_Clear();
-                    else
-                        return -1;
-                }
-            }
-            return m->sq_ass_item(o, i, v);
-        }
-    }
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func) {
+#ifdef __Pyx_CyFunction_USED
+    if (likely(PyCFunction_Check(func) || PyObject_TypeCheck(func, __pyx_CyFunctionType))) {
 #else
-#if CYTHON_COMPILING_IN_PYPY
-    if (is_list || (PySequence_Check(o) && !PyDict_Check(o))) {
-#else
-    if (is_list || PySequence_Check(o)) {
+    if (likely(PyCFunction_Check(func))) {
 #endif
-        return PySequence_SetItem(o, i, v);
-    }
-#endif
-    return __Pyx_SetItemInt_Generic(o, PyInt_FromSsize_t(i), v);
-}
-
-static CYTHON_INLINE void __Pyx_ErrRestore(PyObject *type, PyObject *value, PyObject *tb) {
-#if CYTHON_COMPILING_IN_CPYTHON
-    PyObject *tmp_type, *tmp_value, *tmp_tb;
-    PyThreadState *tstate = PyThreadState_GET();
-    tmp_type = tstate->curexc_type;
-    tmp_value = tstate->curexc_value;
-    tmp_tb = tstate->curexc_traceback;
-    tstate->curexc_type = type;
-    tstate->curexc_value = value;
-    tstate->curexc_traceback = tb;
-    Py_XDECREF(tmp_type);
-    Py_XDECREF(tmp_value);
-    Py_XDECREF(tmp_tb);
-#else
-    PyErr_Restore(type, value, tb);
-#endif
-}
-static CYTHON_INLINE void __Pyx_ErrFetch(PyObject **type, PyObject **value, PyObject **tb) {
-#if CYTHON_COMPILING_IN_CPYTHON
-    PyThreadState *tstate = PyThreadState_GET();
-    *type = tstate->curexc_type;
-    *value = tstate->curexc_value;
-    *tb = tstate->curexc_traceback;
-    tstate->curexc_type = 0;
-    tstate->curexc_value = 0;
-    tstate->curexc_traceback = 0;
-#else
-    PyErr_Fetch(type, value, tb);
-#endif
-}
-
-#if PY_MAJOR_VERSION < 3
-static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb,
-                        CYTHON_UNUSED PyObject *cause) {
-    Py_XINCREF(type);
-    if (!value || value == Py_None)
-        value = NULL;
-    else
-        Py_INCREF(value);
-    if (!tb || tb == Py_None)
-        tb = NULL;
-    else {
-        Py_INCREF(tb);
-        if (!PyTraceBack_Check(tb)) {
-            PyErr_SetString(PyExc_TypeError,
-                "raise: arg 3 must be a traceback or None");
-            goto raise_error;
+        if (likely(PyCFunction_GET_FLAGS(func) & METH_NOARGS)) {
+            return __Pyx_PyObject_CallMethO(func, NULL);
         }
     }
-    if (PyType_Check(type)) {
-#if CYTHON_COMPILING_IN_PYPY
-        if (!value) {
-            Py_INCREF(Py_None);
-            value = Py_None;
-        }
-#endif
-        PyErr_NormalizeException(&type, &value, &tb);
-    } else {
-        if (value) {
-            PyErr_SetString(PyExc_TypeError,
-                "instance exception may not have a separate value");
-            goto raise_error;
-        }
-        value = type;
-        type = (PyObject*) Py_TYPE(type);
-        Py_INCREF(type);
-        if (!PyType_IsSubtype((PyTypeObject *)type, (PyTypeObject *)PyExc_BaseException)) {
-            PyErr_SetString(PyExc_TypeError,
-                "raise: exception class must be a subclass of BaseException");
-            goto raise_error;
-        }
-    }
-    __Pyx_ErrRestore(type, value, tb);
-    return;
-raise_error:
-    Py_XDECREF(value);
-    Py_XDECREF(type);
-    Py_XDECREF(tb);
-    return;
-}
-#else
-static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause) {
-    PyObject* owned_instance = NULL;
-    if (tb == Py_None) {
-        tb = 0;
-    } else if (tb && !PyTraceBack_Check(tb)) {
-        PyErr_SetString(PyExc_TypeError,
-            "raise: arg 3 must be a traceback or None");
-        goto bad;
-    }
-    if (value == Py_None)
-        value = 0;
-    if (PyExceptionInstance_Check(type)) {
-        if (value) {
-            PyErr_SetString(PyExc_TypeError,
-                "instance exception may not have a separate value");
-            goto bad;
-        }
-        value = type;
-        type = (PyObject*) Py_TYPE(value);
-    } else if (PyExceptionClass_Check(type)) {
-        PyObject *instance_class = NULL;
-        if (value && PyExceptionInstance_Check(value)) {
-            instance_class = (PyObject*) Py_TYPE(value);
-            if (instance_class != type) {
-                int is_subclass = PyObject_IsSubclass(instance_class, type);
-                if (!is_subclass) {
-                    instance_class = NULL;
-                } else if (unlikely(is_subclass == -1)) {
-                    goto bad;
-                } else {
-                    type = instance_class;
-                }
-            }
-        }
-        if (!instance_class) {
-            PyObject *args;
-            if (!value)
-                args = PyTuple_New(0);
-            else if (PyTuple_Check(value)) {
-                Py_INCREF(value);
-                args = value;
-            } else
-                args = PyTuple_Pack(1, value);
-            if (!args)
-                goto bad;
-            owned_instance = PyObject_Call(type, args, NULL);
-            Py_DECREF(args);
-            if (!owned_instance)
-                goto bad;
-            value = owned_instance;
-            if (!PyExceptionInstance_Check(value)) {
-                PyErr_Format(PyExc_TypeError,
-                             "calling %R should have returned an instance of "
-                             "BaseException, not %R",
-                             type, Py_TYPE(value));
-                goto bad;
-            }
-        }
-    } else {
-        PyErr_SetString(PyExc_TypeError,
-            "raise: exception class must be a subclass of BaseException");
-        goto bad;
-    }
-#if PY_VERSION_HEX >= 0x03030000
-    if (cause) {
-#else
-    if (cause && cause != Py_None) {
-#endif
-        PyObject *fixed_cause;
-        if (cause == Py_None) {
-            fixed_cause = NULL;
-        } else if (PyExceptionClass_Check(cause)) {
-            fixed_cause = PyObject_CallObject(cause, NULL);
-            if (fixed_cause == NULL)
-                goto bad;
-        } else if (PyExceptionInstance_Check(cause)) {
-            fixed_cause = cause;
-            Py_INCREF(fixed_cause);
-        } else {
-            PyErr_SetString(PyExc_TypeError,
-                            "exception causes must derive from "
-                            "BaseException");
-            goto bad;
-        }
-        PyException_SetCause(value, fixed_cause);
-    }
-    PyErr_SetObject(type, value);
-    if (tb) {
-#if CYTHON_COMPILING_IN_PYPY
-        PyObject *tmp_type, *tmp_value, *tmp_tb;
-        PyErr_Fetch(&tmp_type, &tmp_value, &tmp_tb);
-        Py_INCREF(tb);
-        PyErr_Restore(tmp_type, tmp_value, tb);
-        Py_XDECREF(tmp_tb);
-#else
-        PyThreadState *tstate = PyThreadState_GET();
-        PyObject* tmp_tb = tstate->curexc_traceback;
-        if (tb != tmp_tb) {
-            Py_INCREF(tb);
-            tstate->curexc_traceback = tb;
-            Py_XDECREF(tmp_tb);
-        }
-#endif
-    }
-bad:
-    Py_XDECREF(owned_instance);
-    return;
+    return __Pyx_PyObject_Call(func, __pyx_empty_tuple, NULL);
 }
 #endif
-
-static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected) {
-    PyErr_Format(PyExc_ValueError,
-                 "too many values to unpack (expected %" CYTHON_FORMAT_SSIZE_T "d)", expected);
-}
-
-static CYTHON_INLINE void __Pyx_RaiseNeedMoreValuesError(Py_ssize_t index) {
-    PyErr_Format(PyExc_ValueError,
-                 "need more than %" CYTHON_FORMAT_SSIZE_T "d value%.1s to unpack",
-                 index, (index == 1) ? "" : "s");
-}
-
-static CYTHON_INLINE void __Pyx_RaiseNoneNotIterableError(void) {
-    PyErr_SetString(PyExc_TypeError, "'NoneType' object is not iterable");
-}
 
 static CYTHON_INLINE int __Pyx_PyBytes_Equals(PyObject* s1, PyObject* s2, int equals) {
 #if CYTHON_COMPILING_IN_PYPY
@@ -24862,6 +25754,105 @@ return_ne:
     #endif
     return (equals == Py_NE);
 #endif
+}
+
+static CYTHON_INLINE PyObject *__Pyx_GetModuleGlobalName(PyObject *name) {
+    PyObject *result;
+#if CYTHON_COMPILING_IN_CPYTHON
+    result = PyDict_GetItem(__pyx_d, name);
+    if (likely(result)) {
+        Py_INCREF(result);
+    } else {
+#else
+    result = PyObject_GetItem(__pyx_d, name);
+    if (!result) {
+        PyErr_Clear();
+#endif
+        result = __Pyx_GetBuiltinName(name);
+    }
+    return result;
+}
+
+static CYTHON_INLINE int __Pyx_TypeTest(PyObject *obj, PyTypeObject *type) {
+    if (unlikely(!type)) {
+        PyErr_SetString(PyExc_SystemError, "Missing type object");
+        return 0;
+    }
+    if (likely(PyObject_TypeCheck(obj, type)))
+        return 1;
+    PyErr_Format(PyExc_TypeError, "Cannot convert %.200s to %.200s",
+                 Py_TYPE(obj)->tp_name, type->tp_name);
+    return 0;
+}
+
+static CYTHON_INLINE int __Pyx_SetItemInt_Generic(PyObject *o, PyObject *j, PyObject *v) {
+    int r;
+    if (!j) return -1;
+    r = PyObject_SetItem(o, j, v);
+    Py_DECREF(j);
+    return r;
+}
+static CYTHON_INLINE int __Pyx_SetItemInt_Fast(PyObject *o, Py_ssize_t i, PyObject *v, int is_list,
+                                               CYTHON_NCP_UNUSED int wraparound, CYTHON_NCP_UNUSED int boundscheck) {
+#if CYTHON_COMPILING_IN_CPYTHON
+    if (is_list || PyList_CheckExact(o)) {
+        Py_ssize_t n = (!wraparound) ? i : ((likely(i >= 0)) ? i : i + PyList_GET_SIZE(o));
+        if ((!boundscheck) || likely((n >= 0) & (n < PyList_GET_SIZE(o)))) {
+            PyObject* old = PyList_GET_ITEM(o, n);
+            Py_INCREF(v);
+            PyList_SET_ITEM(o, n, v);
+            Py_DECREF(old);
+            return 1;
+        }
+    } else {
+        PySequenceMethods *m = Py_TYPE(o)->tp_as_sequence;
+        if (likely(m && m->sq_ass_item)) {
+            if (wraparound && unlikely(i < 0) && likely(m->sq_length)) {
+                Py_ssize_t l = m->sq_length(o);
+                if (likely(l >= 0)) {
+                    i += l;
+                } else {
+                    if (PyErr_ExceptionMatches(PyExc_OverflowError))
+                        PyErr_Clear();
+                    else
+                        return -1;
+                }
+            }
+            return m->sq_ass_item(o, i, v);
+        }
+    }
+#else
+#if CYTHON_COMPILING_IN_PYPY
+    if (is_list || (PySequence_Check(o) && !PyDict_Check(o))) {
+#else
+    if (is_list || PySequence_Check(o)) {
+#endif
+        return PySequence_SetItem(o, i, v);
+    }
+#endif
+    return __Pyx_SetItemInt_Generic(o, PyInt_FromSsize_t(i), v);
+}
+
+static CYTHON_INLINE Py_ssize_t __Pyx_div_Py_ssize_t(Py_ssize_t a, Py_ssize_t b) {
+    Py_ssize_t q = a / b;
+    Py_ssize_t r = a - q*b;
+    q -= ((r != 0) & ((r ^ b) < 0));
+    return q;
+}
+
+static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected) {
+    PyErr_Format(PyExc_ValueError,
+                 "too many values to unpack (expected %" CYTHON_FORMAT_SSIZE_T "d)", expected);
+}
+
+static CYTHON_INLINE void __Pyx_RaiseNeedMoreValuesError(Py_ssize_t index) {
+    PyErr_Format(PyExc_ValueError,
+                 "need more than %" CYTHON_FORMAT_SSIZE_T "d value%.1s to unpack",
+                 index, (index == 1) ? "" : "s");
+}
+
+static CYTHON_INLINE void __Pyx_RaiseNoneNotIterableError(void) {
+    PyErr_SetString(PyExc_TypeError, "'NoneType' object is not iterable");
 }
 
 static CYTHON_INLINE PyObject *__Pyx_GetAttr(PyObject *o, PyObject *n) {
@@ -25088,87 +26079,6 @@ bad:
     return module;
 }
 
-static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j) {
-    PyObject *r;
-    if (!j) return NULL;
-    r = PyObject_GetItem(o, j);
-    Py_DECREF(j);
-    return r;
-}
-static CYTHON_INLINE PyObject *__Pyx_GetItemInt_List_Fast(PyObject *o, Py_ssize_t i,
-                                                              CYTHON_NCP_UNUSED int wraparound,
-                                                              CYTHON_NCP_UNUSED int boundscheck) {
-#if CYTHON_COMPILING_IN_CPYTHON
-    if (wraparound & unlikely(i < 0)) i += PyList_GET_SIZE(o);
-    if ((!boundscheck) || likely((0 <= i) & (i < PyList_GET_SIZE(o)))) {
-        PyObject *r = PyList_GET_ITEM(o, i);
-        Py_INCREF(r);
-        return r;
-    }
-    return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
-#else
-    return PySequence_GetItem(o, i);
-#endif
-}
-static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Tuple_Fast(PyObject *o, Py_ssize_t i,
-                                                              CYTHON_NCP_UNUSED int wraparound,
-                                                              CYTHON_NCP_UNUSED int boundscheck) {
-#if CYTHON_COMPILING_IN_CPYTHON
-    if (wraparound & unlikely(i < 0)) i += PyTuple_GET_SIZE(o);
-    if ((!boundscheck) || likely((0 <= i) & (i < PyTuple_GET_SIZE(o)))) {
-        PyObject *r = PyTuple_GET_ITEM(o, i);
-        Py_INCREF(r);
-        return r;
-    }
-    return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
-#else
-    return PySequence_GetItem(o, i);
-#endif
-}
-static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i, int is_list,
-                                                     CYTHON_NCP_UNUSED int wraparound,
-                                                     CYTHON_NCP_UNUSED int boundscheck) {
-#if CYTHON_COMPILING_IN_CPYTHON
-    if (is_list || PyList_CheckExact(o)) {
-        Py_ssize_t n = ((!wraparound) | likely(i >= 0)) ? i : i + PyList_GET_SIZE(o);
-        if ((!boundscheck) || (likely((n >= 0) & (n < PyList_GET_SIZE(o))))) {
-            PyObject *r = PyList_GET_ITEM(o, n);
-            Py_INCREF(r);
-            return r;
-        }
-    }
-    else if (PyTuple_CheckExact(o)) {
-        Py_ssize_t n = ((!wraparound) | likely(i >= 0)) ? i : i + PyTuple_GET_SIZE(o);
-        if ((!boundscheck) || likely((n >= 0) & (n < PyTuple_GET_SIZE(o)))) {
-            PyObject *r = PyTuple_GET_ITEM(o, n);
-            Py_INCREF(r);
-            return r;
-        }
-    } else {
-        PySequenceMethods *m = Py_TYPE(o)->tp_as_sequence;
-        if (likely(m && m->sq_item)) {
-            if (wraparound && unlikely(i < 0) && likely(m->sq_length)) {
-                Py_ssize_t l = m->sq_length(o);
-                if (likely(l >= 0)) {
-                    i += l;
-                } else {
-                    if (PyErr_ExceptionMatches(PyExc_OverflowError))
-                        PyErr_Clear();
-                    else
-                        return NULL;
-                }
-            }
-            return m->sq_item(o, i);
-        }
-    }
-#else
-    if (is_list || PySequence_Check(o)) {
-        return PySequence_GetItem(o, i);
-    }
-#endif
-    return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
-}
-
 #if CYTHON_USE_PYLONG_INTERNALS
   #include "longintrepr.h"
 #endif
@@ -25332,6 +26242,27 @@ static int __Pyx_SetVtable(PyObject *dict, void *vtable) {
 bad:
     Py_XDECREF(ob);
     return -1;
+}
+
+static PyObject* __Pyx_ImportFrom(PyObject* module, PyObject* name) {
+    PyObject* value = __Pyx_PyObject_GetAttrStr(module, name);
+    if (unlikely(!value) && PyErr_ExceptionMatches(PyExc_AttributeError)) {
+        PyErr_Format(PyExc_ImportError,
+        #if PY_MAJOR_VERSION < 3
+            "cannot import name %.230s", PyString_AS_STRING(name));
+        #else
+            "cannot import name %S", name);
+        #endif
+    }
+    return value;
+}
+
+static PyObject *__Pyx_GetNameInClass(PyObject *nmspace, PyObject *name) {
+    PyObject *result;
+    result = __Pyx_PyObject_GetAttrStr(nmspace, name);
+    if (!result)
+        result = __Pyx_GetModuleGlobalName(name);
+    return result;
 }
 
 static int __pyx_bisect_code_objects(__Pyx_CodeObjectCacheEntry* entries, int count, int code_line) {
@@ -25516,7 +26447,7 @@ static void __Pyx_ReleaseBuffer(Py_buffer *view) {
 #endif
 
 
-          #define __PYX_VERIFY_RETURN_INT(target_type, func_type, func_value)\
+            #define __PYX_VERIFY_RETURN_INT(target_type, func_type, func_value)\
     __PYX__VERIFY_RETURN_INT(target_type, func_type, func_value, 0)
 #define __PYX_VERIFY_RETURN_INT_EXC(target_type, func_type, func_value)\
     __PYX__VERIFY_RETURN_INT(target_type, func_type, func_value, 1)
@@ -26192,32 +27123,6 @@ __pyx_fail:
     return result;
 }
 
-static CYTHON_INLINE PyObject* __Pyx_PyInt_From_unsigned_long(unsigned long value) {
-    const unsigned long neg_one = (unsigned long) -1, const_zero = (unsigned long) 0;
-    const int is_unsigned = neg_one > const_zero;
-    if (is_unsigned) {
-        if (sizeof(unsigned long) < sizeof(long)) {
-            return PyInt_FromLong((long) value);
-        } else if (sizeof(unsigned long) <= sizeof(unsigned long)) {
-            return PyLong_FromUnsignedLong((unsigned long) value);
-        } else if (sizeof(unsigned long) <= sizeof(unsigned PY_LONG_LONG)) {
-            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
-        }
-    } else {
-        if (sizeof(unsigned long) <= sizeof(long)) {
-            return PyInt_FromLong((long) value);
-        } else if (sizeof(unsigned long) <= sizeof(PY_LONG_LONG)) {
-            return PyLong_FromLongLong((PY_LONG_LONG) value);
-        }
-    }
-    {
-        int one = 1; int little = (int)*(unsigned char *)&one;
-        unsigned char *bytes = (unsigned char *)&value;
-        return _PyLong_FromByteArray(bytes, sizeof(unsigned long),
-                                     little, !is_unsigned);
-    }
-}
-
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
     const long neg_one = (long) -1, const_zero = (long) 0;
     const int is_unsigned = neg_one > const_zero;
@@ -26240,6 +27145,32 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
         int one = 1; int little = (int)*(unsigned char *)&one;
         unsigned char *bytes = (unsigned char *)&value;
         return _PyLong_FromByteArray(bytes, sizeof(long),
+                                     little, !is_unsigned);
+    }
+}
+
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_unsigned_long(unsigned long value) {
+    const unsigned long neg_one = (unsigned long) -1, const_zero = (unsigned long) 0;
+    const int is_unsigned = neg_one > const_zero;
+    if (is_unsigned) {
+        if (sizeof(unsigned long) < sizeof(long)) {
+            return PyInt_FromLong((long) value);
+        } else if (sizeof(unsigned long) <= sizeof(unsigned long)) {
+            return PyLong_FromUnsignedLong((unsigned long) value);
+        } else if (sizeof(unsigned long) <= sizeof(unsigned PY_LONG_LONG)) {
+            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
+        }
+    } else {
+        if (sizeof(unsigned long) <= sizeof(long)) {
+            return PyInt_FromLong((long) value);
+        } else if (sizeof(unsigned long) <= sizeof(PY_LONG_LONG)) {
+            return PyLong_FromLongLong((PY_LONG_LONG) value);
+        }
+    }
+    {
+        int one = 1; int little = (int)*(unsigned char *)&one;
+        unsigned char *bytes = (unsigned char *)&value;
+        return _PyLong_FromByteArray(bytes, sizeof(unsigned long),
                                      little, !is_unsigned);
     }
 }

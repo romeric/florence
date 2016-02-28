@@ -15,13 +15,13 @@ cdef extern from "PyInterface.hpp":
         Integer nodes_dir_size
 
 
-cdef extern from "PostMeshCurve.hpp":
+cdef extern from "PostMeshBase.hpp":
 
-    cdef cppclass PostMeshCurve:
-        PostMeshCurve() except +
-        PostMeshCurve(string &element_type, const UInteger &dim) except +
+    cdef cppclass PostMeshBase:
+        PostMeshBase() except +
+        PostMeshBase(string &element_type, const UInteger &dim) except +
         UInteger ndim
-        void Init() except +
+        void Init(string &element_type, const UInteger &dim) except +
         void SetScale(const Real &scale)
         void SetCondition(const Real &condition)
         void SetProjectionPrecision(const Real &precision)
@@ -35,12 +35,23 @@ cdef extern from "PostMeshCurve.hpp":
         string GetMeshElementType()
         void SetNodalSpacing(Real *arr, const Integer &rows, const Integer &cols)
         void ReadIGES(const char* filename)
+        void ReadSTEP(const char* filename)
         void GetGeomVertices()
         void GetGeomEdges()
         void GetGeomFaces()
         vector[Real] ObtainGeomVertices()
         Integer NbPoints()
         Integer NbCurves()
+        Integer NbSurfaces()
+        DirichletData GetDirichletData()
+
+
+cdef extern from "PostMeshCurve.hpp":
+
+    cdef cppclass PostMeshCurve:
+        PostMeshCurve() except +
+        PostMeshCurve(string &element_type, const UInteger &dim) except +
+        void Init() except +
         vector[vector[Real]] DiscretiseCurves(Integer npoints) except +
         void GetCurvesParameters()
         void GetCurvesLengths()
@@ -52,7 +63,6 @@ cdef extern from "PostMeshCurve.hpp":
         void MeshPointInversionCurveArcLength()
         void GetBoundaryPointsOrder()
         void ReturnModifiedMeshPoints(Real *points)
-        DirichletData GetDirichletData()
 
 
 cdef extern from "PostMeshSurface.hpp":
@@ -60,28 +70,7 @@ cdef extern from "PostMeshSurface.hpp":
     cdef cppclass PostMeshSurface:
         PostMeshSurface() except +
         PostMeshSurface(string &element_type, const UInteger &dim) except +
-        UInteger ndim
         void Init() except +
-        void SetScale(Real &scale)
-        void SetCondition(Real &condition)
-        void SetProjectionPrecision(const Real &precision)
-        void SetProjectionCriteria(UInteger *criteria, Integer &rows, Integer &cols)
-        void SetMeshElements(UInteger *arr, const Integer &rows, const Integer &cols)
-        void ComputeProjectionCriteria()
-        void SetMeshPoints(Real *arr, Integer &rows, Integer &cols)
-        void SetMeshEdges(UInteger *arr, const Integer &rows, const Integer &cols)
-        void SetMeshFaces(UInteger *arr, const Integer &rows, const Integer &cols)
-        void ScaleMesh()
-        string GetMeshElementType()
-        void SetNodalSpacing(Real *arr, const Integer &rows, const Integer &cols)
-        void ReadIGES(const char* filename)
-        void GetGeomVertices()
-        void GetGeomEdges()
-        void GetGeomFaces()
-        vector[Real] ObtainGeomVertices()
-        Integer NbPoints()
-        Integer NbCurves()
-        Integer NbSurfaces()
         void GetSurfacesParameters()
         void GetGeomPointsOnCorrespondingFaces()
         void IdentifyRemainingSurfacesByProjection()
@@ -96,7 +85,6 @@ cdef extern from "PostMeshSurface.hpp":
         void ReturnModifiedMeshPoints(Real *points)
         vector[vector[Integer]] GetMeshFacesOnPlanarSurfaces()
         vector[Integer] GetDirichletFaces()
-        DirichletData GetDirichletData()
         
 
 cdef extern from "PyInterfaceEmulator.hpp": 
