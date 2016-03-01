@@ -1,3 +1,5 @@
+import gc, os
+from warnings import warn
 import numpy as np 
 import scipy as sp
 from scipy.io import loadmat, savemat
@@ -11,7 +13,6 @@ from SparseAssemblySmall import SparseAssemblySmall
 import pyximport
 pyximport.install(setup_args={'include_dirs': np.get_include()})
 from SparseAssemblyNative import SparseAssemblyNative
-import gc, os
 
 
 # PARALLEL PROCESSING ROUTINES
@@ -26,14 +27,50 @@ import Florence.ParallelProcessing.parmap as parmap
 def Assembly(MainData,mesh,material,Eulerx,TotalPot):
     # return AssemblyLarge(MainData,mesh,Eulerx,TotalPot) if mesh.nelem > 1e08 else AssemblySmall(MainData,mesh,Eulerx,TotalPot)
 
-    if mesh.nelem <= 500000:
-        return AssemblySmall(MainData,mesh,material,Eulerx,TotalPot)
-    elif mesh.nelem > 500000:
-        print("Larger than memory system. Dask on disk parallel assembly is turned on")
-        return OutofCoreAssembly(MainData,mesh,material,Eulerx,TotalPot)
-    # else:
-    #     print("Large system. Numpy memmap assembly is turned on")
-    #     return AssemblyLarge(MainData,mesh,Eulerx,TotalPot)
+    if MainData.__MEMORY__ == "SHARED" or MainData.__MEMORY__ is None:
+        if mesh.nelem <= 500000:
+            return AssemblySmall(MainData,mesh,material,Eulerx,TotalPot)
+        elif mesh.nelem > 500000:
+            print("Larger than memory system. Dask on disk parallel assembly is turned on")
+            return OutofCoreAssembly(MainData,mesh,material,Eulerx,TotalPot)
+        # else:
+        #     print("Large system. Numpy memmap assembly is turned on")
+        #     return AssemblyLarge(MainData,mesh,Eulerx,TotalPot)
+
+    elif MainData.__MEMORY__ == "DISTRIBUTED":
+
+        if not MainData.__PARALLEL__:
+            warn("parallelisation is going to be turned on")
+
+        import subprocess, os, shutil
+        from time import time
+        from Florence.Utils import par_unpickle
+
+        tmp_dir = par_unpickle(MainData,mesh,material,Eulerx,TotalPot)
+        pwd = os.path.dirname(os.path.realpath(__file__))
+        distributed_caller = os.path.join(pwd,"DistributedAssembly.py")
+        # mpirun -np 4 Florence/FiniteElements/DistributedAssembly.py "/home/roman/tmp/"
+        # p = subprocess.call(['mpirun', '-np', '4', distributed_caller, tmp_dir[0]])
+        # p = subprocess.call(['mpirun', '-np', '4', 'Florence/FiniteElements/DistributedAssembly.py', 
+        # tmp_dir[0]], cwd="/home/roman/Dropbox/florence/")
+        # p = subprocess.call(["./mpi_runner.sh"], cwd="/home/roman/Dropbox/florence/", shell=True) ##
+         # time mpirun -np 8 Florence/FiniteElements/DistributedAssembly.py "/home/roman/tmp/"
+        # p = subprocess.call(["time mpirun -np "+str(MP.cpu_count())+" Florence/FiniteElements/DistributedAssembly.py"+" /home/roman/tmp/"], 
+            # cwd="/home/roman/Dropbox/florence/", shell=True)
+        t_dassembly = time()
+        p = subprocess.Popen("time mpirun -np "+str(MP.cpu_count())+" Florence/FiniteElements/DistributedAssembly.py"+" /home/roman/tmp/", 
+            cwd="/home/roman/Dropbox/florence/", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        # p = subprocess.Popen("./mpi_runner.sh", cwd="/home/roman/Dropbox/florence/", shell=True)
+        p.wait()
+        print 'MPI took', time() - t_dassembly, 'seconds for distributed assembly'
+        Dict = loadmat(os.path.join(tmp_dir,"results.mat"))
+
+        try:
+            shutil.rmtree(tmp_dir)
+        except IOError:
+            raise IOError("Could not delete the directory")
+
+        return Dict['stiffness'], Dict['T'], Dict['F'], []
 
 
 #-------------- ASSEMBLY ROUTINE FOR RELATIVELY SMALL SIZE MATRICES (NELEM < 1e6 3D)--------------------#
@@ -307,8 +344,8 @@ def OutofCoreAssembly(MainData, mesh, material, Eulerx, TotalPot, calculate_rhs=
     memory = psutil.virtual_memory()
     size_of_triplets_gbytes = (mesh.points.shape[0]*nvar)**2*nelem*(4)*(3)//1024**3
     if memory.available//1024**3 > 2*size_of_triplets_gbytes:
-        warn("Out of core assembly is designed for larger than memory "
-            "system of equations. Using it on smaller matrices can be really inefficient")
+        warn("Out of core assembly is only efficient for larger than memory "
+            "system of equations. Using it on smaller matrices can be very inefficient")
 
     # hdf_file = h5py.File(filename,'w')
     # IJV_triplets = hdf_file.create_dataset("IJV_triplets",((nvar*nodeperelem)**2*nelem,3),dtype=np.float32)
