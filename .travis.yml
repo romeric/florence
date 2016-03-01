@@ -17,6 +17,7 @@ branches:
 before_install:
   - FLORENCEPATH=$(pwd)
   - echo $FLORENCEPATH
+  - sudo apt-get update --fix-missing
   # Install BLAS libraries
   - echo -ne '\n' | sudo apt-get install gfortran libblas-dev liblapack-dev libatlas-base-dev libsuitesparse-dev
   - cd ~

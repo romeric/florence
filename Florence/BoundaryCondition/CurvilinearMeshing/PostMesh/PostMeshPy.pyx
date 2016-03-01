@@ -16,7 +16,7 @@ cdef class PostMeshBasePy:
     """
     PostMesh base class. Provides most of the common functionality for 
     point projection, point inversion and obtaining Dirichlet data.
-    This class should not be directly.
+    This class should not be used directly.
     """
 
     cdef UInteger ndim 

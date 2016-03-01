@@ -8,6 +8,7 @@ from Florence.FiniteElements.GetBasesAtInegrationPoints import *
 import Florence.Formulations.DisplacementElectricPotentialApproach as DEPB
 import Florence.Formulations.DisplacementApproach as DB
 from Florence import Mesh
+from Florence.Utils import insensitive
 
 from Florence.Supplementary.Timing import timing
 
@@ -27,37 +28,6 @@ def PreProcess(MainData,mesh,material,Pr,pwd):
         MainData.numCPU = 1
 
     #############################################################################
-
-    # READ MESH-FILE
-    ############################################################################
-    # mesh = Mesh()
-
-    # MeshReader = getattr(mesh,MainData.MeshInfo.Reader,None)
-    # if MeshReader is not None:
-    #     if MainData.MeshInfo.Reader is 'Read': 
-    #         if getattr(MainData.MeshInfo,'Format',None) is 'GID':
-    #             mesh.ReadGIDMesh(MainData.MeshInfo.FileName,MainData.MeshInfo.MeshType,MainData.C)
-    #         else:   
-    #             MeshReader(MainData.MeshInfo.FileName,MainData.MeshInfo.MeshType,MainData.C)
-    #     elif MainData.MeshInfo.Reader is 'ReadSeparate':
-    #         # READ MESH FROM SEPARATE FILES FOR CONNECTIVITY AND COORDINATES
-    #         mesh.ReadSeparate(MainData.MeshInfo.ConnectivityFile,MainData.MeshInfo.CoordinatesFile,MainData.MeshInfo.MeshType,
-    #             delimiter_connectivity=',',delimiter_coordinates=',')
-    #         # mesh.ReadSeparate(MainData.MeshInfo.ConnectivityFile,MainData.MeshInfo.CoordinatesFile,MainData.MeshInfo.MeshType,
-    #         #   edges_file=MainData.MeshInfo.EdgesFile,delimiter_connectivity=',',delimiter_coordinates=',')
-    #     elif MainData.MeshInfo.Reader is 'ReadHighOrderMesh':
-    #         mesh.ReadHighOrderMesh(MainData.MeshInfo.FileName.split(".")[0],MainData.C,MainData.MeshInfo.MeshType)
-    #     elif MainData.MeshInfo.Reader is 'ReadHDF5':
-    #         mesh.ReadHDF5(MainData.MeshInfo.FileName)
-    #     elif MainData.MeshInfo.Reader is 'UniformHollowCircle':
-    #         # mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=4,ncirc=12)
-    #         # mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=7,ncirc=7) # isotropic
-    #         mesh.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=False,nrad=7,ncirc=7)
-    #     elif MainData.MeshInfo.Reader is 'Sphere':
-    #         # mesh.Sphere()
-    #         # mesh.Sphere(points=200)
-    #         mesh.Sphere(points=10)
-
     if MainData.__NO_DEBUG__ is False:
         mesh.CheckNodeNumbering()
 
@@ -83,6 +53,7 @@ def PreProcess(MainData,mesh,material,Pr,pwd):
     # mesh.Median
     # from Core.MixedFormulations.MixedFormulations import NearlyIncompressibleHuWashizu
     # xx = NearlyIncompressibleHuWashizu(mesh)
+    # print mesh.elements.shape, mesh.points.shape
     # exit()
 
 
@@ -93,7 +64,7 @@ def PreProcess(MainData,mesh,material,Pr,pwd):
 
     # del mesh
     # mesh = Mesh()
-    # # mesh.ReadGmsh("/home/roman/Dropbox/florence/Examples/FiniteElements/Misc3D/hand.mesh")
+    # mesh.ReadGmsh("/home/roman/Dropbox/florence/Examples/FiniteElements/Misc3D/hand.mesh")
     # mesh.element_type = "tet"
     # mesh.points = np.loadtxt("/home/roman/Dropbox/florence/Examples/FiniteElements/Misc3D/hand_mesh_points.dat")[:,:3]
     # mesh.elements = np.loadtxt("/home/roman/Dropbox/florence/Examples/FiniteElements/Misc3D/hand_mesh_elements.dat")[:,:4].astype(np.int64) - 1
@@ -109,7 +80,7 @@ def PreProcess(MainData,mesh,material,Pr,pwd):
         MainData.Analysis,MainData.AnalysisType,material.GetType())
 
     # GENERATE pMESHES FOR HIGH C
-    ############################################################################
+    # ############################################################################
 
     # IsHighOrder = getattr(MainData.MeshInfo,"IsHighOrder",False)
     IsHighOrder = False
@@ -122,12 +93,7 @@ def PreProcess(MainData,mesh,material,Pr,pwd):
                 nCPU=MainData.numCPU,ComputeAll=True)
     else:
         mesh.ChangeType()
-
     ############################################################################
-    # from Core.Supplementary.Tensors import makezero, unique2d
-    # un_faces =  unique2d(mesh.faces,consider_sort=False)
-    # print un_faces.shape, mesh.faces.shape
-    # ##########################################################################
 
     # mesh.PlotMeshNumbering()
     # mesh.SimplePlot()
@@ -209,22 +175,11 @@ def PreProcess(MainData,mesh,material,Pr,pwd):
 
     # aspect = mesh.AspectRatios
     # print aspect.min(), aspect.max()
+    # print mesh.elements.shape, mesh.points.shape
     # exit()
 
     # MainData.MaterialArgs.AnisotropicOrientations = np.zeros((mesh.elements.shape[0],3))
     # MainData.MaterialArgs.AnisotropicOrientations[:,0] = 1.0
-
-
-
-
-    # COMPARE STRINGS WHICH MIGHT CONTAIN UNICODES
-    ############################################################################
-    if getattr(str,'casefold',None) is not None:
-        insensitive = lambda str_name: str_name.casefold()
-    else:
-        insensitive = lambda str_name: str_name.upper().lower()
-
-
 
 
     # COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR ALL ELEMENTAL INTEGRATON
@@ -253,7 +208,6 @@ def PreProcess(MainData,mesh,material,Pr,pwd):
 
 
 
-
     #############################################################################
                             # MATERIAL MODEL PRE-PROCESS
     #############################################################################
@@ -267,90 +221,10 @@ def PreProcess(MainData,mesh,material,Pr,pwd):
             warn("Incompatible material model and analysis type. I'm going to change analysis type")
             MainData.AnalysisType = "Linear"
 
-
-    # COMPUTE 4TH ORDER IDENTITY TENSORS/HESSIANS BEFORE-HAND 
-    # #############################################################################
-    # if material.mtype == 'LinearModel' or \
-    #     material.mtype == 'IncrementalLinearElastic':
-
-    #     if MainData.ndim == 2:
-    #         MainData.MaterialArgs.H_Voigt = MainData.MaterialArgs.lamb*np.array([[1.,1.,0.],[1.,1.,0],[0.,0.,0.]]) +\
-    #          MainData.MaterialArgs.mu*np.array([[2.,0.,0.],[0.,2.,0],[0.,0.,1.]])
-    #     else:
-    #         block_1 = np.zeros((6,6),dtype=np.float64); block_1[:3,:3] = np.ones((3,3))
-    #         block_2 = np.eye(6,6); block_2[0,0],block_2[1,1],block_2[2,2]=2.,2.,2.
-    #         MainData.MaterialArgs.H_Voigt = MainData.MaterialArgs.lamb*block_1 + MainData.MaterialArgs.mu*block_2
-    # else:
-    #     if MainData.ndim == 2:
-    #         MainData.MaterialArgs.vIijIkl = np.array([[1.,1.,0.],[1.,1.,0],[0.,0.,0.]])
-    #         MainData.MaterialArgs.vIikIjl = np.array([[2.,0.,0.],[0.,2.,0],[0.,0.,1.]])
-    #     else:
-    #         block_1 = np.zeros((6,6),dtype=np.float64); block_1[:3,:3] = np.ones((3,3))
-    #         block_2 = np.eye(6,6); block_2[0,0],block_2[1,1],block_2[2,2]=2.,2.,2.
-    #         MainData.MaterialArgs.vIijIkl = block_1
-    #         MainData.MaterialArgs.vIikIjl = block_2 
-
-    #     I = np.eye(MainData.ndim,MainData.ndim)
-    #     MainData.MaterialArgs.Iijkl = np.einsum('ij,kl',I,I)    
-    #     MainData.MaterialArgs.Iikjl = np.einsum('ik,jl',I,I) + np.einsum('il,jk',I,I) 
-
-
-    # # COMPUTE ANISOTROPY DIRECTIONS/STRUCTURAL TENSORS FOR ANISOTROPIC MATERIAL
-    # ##############################################################################
-    # # THIS HAS TO BE CALLED BEFORE CALLING THE ANY HESSIAN METHODS AS HESSIAN OF 
-    # # ANISOTROPIC MODELS REQUIRE FIBRE ORIENTATION
-    # AnisoFuncName = getattr(MainData.MaterialArgs,"AnisotropicFibreOrientation",None)
-    # if AnisoFuncName is not None:
-    #     aniso_obj = AnisoFuncName(mesh,plot=False)
-    #     material.AnisotropicOrientations = aniso_obj.directions
-    # if material.mtype == "BonetTranservselyIsotropicHyperElastic"\
-    # and AnisoFuncName is None:
-    #     MainData.MaterialArgs.AnisotropicOrientations = np.zeros((mesh.nelem,MainData.ndim))
-    #     MainData.MaterialArgs.AnisotropicOrientations[:,0] = 1.0
-
     if material.is_transversely_isotropic:
         material.GetFibresOrientation(mesh)
     ##############################################################################
     MainData.nvar = material.nvar
-    # MainData.boundary_condition.SetProjectionCriteria(ProjectionCriteria,mesh)
-
-
-    # # CHOOSE AND INITIALISE THE RIGHT MATERIAL MODEL 
-    # ##############################################################################
-
-    # # GET THE MEHTOD NAME FOR THE RIGHT MATERIAL MODEL
-    # MaterialFuncName = getattr(MatLib,MainData.MaterialArgs.Type,None)
-    # if MaterialFuncName is not None:
-    #     # INITIATE THE FUNCTIONS FROM THIS MEHTOD
-    #     # MaterialInstance = MaterialFuncName(MainData.ndim,MainData.MaterialArgs)
-
-    #     kwargs = MainData.MaterialArgs.__dict__
-    #     material = MaterialFuncName(MainData.MaterialArgs.Type, MainData.ndim, **kwargs)
-    #     MainData.nvar, MainData.MaterialModelName = material.nvar, \
-    #                                                 type(material).__name__
-
-
-    #     # MainData.Hessian = material.Hessian     
-    #     # MainData.CauchyStress = material.CauchyStress
-
-    #     # INITIALISE
-    #     StrainTensors = KinematicMeasures(np.asarray([np.eye(MainData.ndim,MainData.ndim)]*\
-    #         MainData.Domain.AllGauss.shape[0]),MainData.AnalysisType)
-
-
-    #     # MaterialInstance.Hessian(MainData.MaterialArgs,
-    #     #     StrainTensors,elem=0,gcounter=0)
-    #     # MainData.MaterialArgs.H_VoigtSize = 
-    #     material.Hessian(StrainTensors,elem=0,gcounter=0)
-
-    # MainData.material = material
-
-    # else:
-    #     raise AttributeError('Material model with name '+MainData.MaterialArgs.Type + ' not found')
-
-    ##############################################################################
-
-
 
     # FORMULATION TYPE FLAGS
     #############################################################################   
@@ -363,9 +237,6 @@ def PreProcess(MainData,mesh,material,Pr,pwd):
         MainData.ConstitutiveStiffnessIntegrand = DEPB.ConstitutiveStiffnessIntegrand
         MainData.GeometricStiffnessIntegrand = DEPB.GeometricStiffnessIntegrand
         MainData.MassIntegrand =  DEPB.MassIntegrand
-
-
-
 
 
 
@@ -394,65 +265,6 @@ def PreProcess(MainData,mesh,material,Pr,pwd):
     elif MainData.Fields == "Mechanics":
         if MainData.AnalysisType == "Nonlinear" or MainData.Prestress:
             MainData.GeometryUpdate = 1
-
-
-
-
-
-
-
-
-    # CHOOSING THE SOLVER/ASSEMBLY ROUTINES BASED ON PROBLEM SIZE
-    #############################################################################
-
-    # if mesh.points.shape[0]*MainData.nvar > 100000:
-    #     MainData.solver.solver_type = "multigrid"
-    #     MainData.solver.solver_subtype = "amg"
-    #     print 'Large system of equations. Switching to algebraic multigrid solver'
-    # # elif mesh.points.shape[0]*MainData.nvar > 50000 and MainData.C < 4:
-    #     # solve.type = "direct"
-    #     # solve.sub_type = "MUMPS"
-    #     # print 'Large system of equations. Switching to MUMPS solver'
-    # else:
-    #     MainData.solver.solver_type = "direct"
-    #     MainData.solver.solver_subtype = "umfpack"
-
-    # solve.type = "direct"
-    # solve.sub_type = "UMFPACK"
-
-    # solve.type = "multigrid"
-    # solve.sub_type = "amg"
-    
-    # solve.type = "direct"
-    # solve.sub_type = "MUMPS"
-
-
-
-    # class solve(object):
-    #     tol = 5.0e-07
-
-    # if mesh.points.shape[0]*MainData.nvar > 100000:
-    #     solve.type = "multigrid"
-    #     solve.sub_type = "amg"
-    #     print 'Large system of equations. Switching to algebraic multigrid solver'
-    # # elif mesh.points.shape[0]*MainData.nvar > 50000 and MainData.C < 4:
-    #     # solve.type = "direct"
-    #     # solve.sub_type = "MUMPS"
-    #     # print 'Large system of equations. Switching to MUMPS solver'
-    # else:
-    #     solve.type = "direct"
-    #     solve.sub_type = "UMFPACK"
-
-    # # solve.type = "direct"
-    # # solve.sub_type = "UMFPACK"
-
-    # # solve.type = "multigrid"
-    # # solve.sub_type = "amg"
-    
-    # # solve.type = "direct"
-    # # solve.sub_type = "MUMPS"
-
-    # MainData.solve = solve 
             
 
     if mesh.nelem > 1e07:

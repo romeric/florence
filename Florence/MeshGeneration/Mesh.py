@@ -1260,7 +1260,7 @@ class Mesh(object):
                 elements.append([long(i) for i in plist[:4]])
 
         self.points = np.array(points,copy=True)
-        self.elements = np.array(elements,copy=True)
+        self.elements = np.array(elements,copy=True) - 1
 
         # print self.ndim, self.nnode, self.nelem, rem_nnode, rem_nelem, rem_faces
         self.element_type = "tet"

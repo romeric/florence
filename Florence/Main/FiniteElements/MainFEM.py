@@ -22,7 +22,7 @@ from Florence.FiniteElements.ComputeErrorNorms import *
 
 # import Examples.FiniteElements.Hollow_Arc_Tri.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle_Electromechanics.ProblemData as Pr
-import Examples.FiniteElements.Annular_Circle.ProblemData as Pr
+# import Examples.FiniteElements.Annular_Circle.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle_Nurbs.ProblemData as Pr
 # import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
 # import Examples.FiniteElements.Wing2D.ProblemData as Pr
@@ -32,7 +32,7 @@ import Examples.FiniteElements.Annular_Circle.ProblemData as Pr
 # import Examples.FiniteElements.Leaf.ProblemData as Pr
 # import Examples.FiniteElements.Misc3D.ProblemData as Pr
 # import Examples.FiniteElements.Sphere.ProblemData as Pr
-# import Examples.FiniteElements.Almond3D.ProblemData as Pr
+import Examples.FiniteElements.Almond3D.ProblemData as Pr
 # import Examples.FiniteElements.Falcon3D.ProblemData as Pr
 # import Examples.FiniteElements.F6.ProblemData as Pr
 # import Examples.FiniteElements.Drill.ProblemData as Pr
@@ -120,7 +120,8 @@ def main(MainData, DictOutput=None, nStep=0):
     # # savemat('/home/roman/Dropbox/F6Iso_P'+str(MainData.C+1)+'.mat',Dict)
     # # savemat('/home/roman/LayerSolution/Layer_dd/f6BL_Layer_dd_Sol_P'+str(MainData.C+1)+'.mat',Dict)
     # # savemat(MainData.SolName,Dict,do_compression=True)
-    # exit()
+
+    exit()
     # # # return
     #####################
 
