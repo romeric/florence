@@ -582,8 +582,10 @@ DirichletData PostMeshBase::GetDirichletData()
     std::vector<Integer> nodes_Dirichlet_data_stl;
     nodes_Dirichlet_data_stl.assign(this->nodes_dir.data(),this->nodes_dir.data()+this->nodes_dir.rows());
     // FIND UNIQUE VALUES OF DIRICHLET DATA
-    std::vector<UInteger> idx;
-    std::tie(std::ignore,idx) = cnp::unique(nodes_Dirichlet_data_stl);
+    // std::vector<UInteger> idx;
+    // std::tie(std::ignore,idx) = cnp::unique(nodes_Dirichlet_data_stl);
+    std::vector<Integer> idx;
+    std::tie(std::ignore,idx) = cnp::unique(nodes_Dirichlet_data_stl,true);
 
     Dirichlet_data.nodes_dir_out_stl.resize(idx.size());
     Dirichlet_data.displacement_BC_stl.resize(this->ndim*idx.size());

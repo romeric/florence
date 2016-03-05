@@ -5,11 +5,11 @@ def InitiateNonlinearAnalysisData(MainData,mesh,material):
     
     # INFORMATION REQUIRED FOR NONLINEAR ANALYSIS
     ################################################################################
-    Tolerance = 2.0e-04
+    Tolerance = 2.0e-07
     if MainData.Analysis == 'Static':
     	Increments = getattr(MainData,"LoadIncrement",None)
     	if Increments is None:
-    		LoadIncrement = 2
+    		LoadIncrement = 1
     	else:
     		LoadIncrement = Increments
     else:

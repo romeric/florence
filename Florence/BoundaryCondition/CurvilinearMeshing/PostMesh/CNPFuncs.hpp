@@ -296,13 +296,13 @@ STATIC std::vector<T> intersect(const std::vector<T>& vec1, const std::vector<T>
 }
 
 template<typename T>
-STATIC std::tuple<std::vector<typename Eigen::PlainObjectBase<T>::Scalar>,std::vector<UInteger> >
+STATIC std::tuple<std::vector<typename Eigen::PlainObjectBase<T>::Scalar>,std::vector<Integer> >
 unique(const Eigen::PlainObjectBase<T> &arr)
 {
     //! RETURNS UNIQUE VALUES AND UNIQUE INDICES OF AN EIGEN MATRIX
     assert(arr.cols()==1 && "UNIQUE_METHOD_IS_ONLY_AVAILABLE_FOR_1D_ARRAYS/MATRICES");
     std::vector<typename Eigen::PlainObjectBase<T>::Scalar> uniques;
-    std::vector<UInteger> idx;
+    std::vector<Integer> idx;
 
     for (auto i=0; i<arr.rows(); ++i) {
         bool isunique = true;
@@ -322,51 +322,42 @@ unique(const Eigen::PlainObjectBase<T> &arr)
     // SORT UNIQUE VALUES
     auto sorter = argsort(uniques);
     std::sort(uniques.begin(),uniques.end());
-    std::vector<UInteger> idx_sorted(idx.size());
+    std::vector<Integer> idx_sorted(idx.size());
     for (UInteger i=0; i<uniques.size();++i) {
         idx_sorted[i] = idx[sorter[i]];
     }
 
-    std::tuple<std::vector<typename Eigen::PlainObjectBase<T>::Scalar>,std::vector<UInteger> >
+    std::tuple<std::vector<typename Eigen::PlainObjectBase<T>::Scalar>,std::vector<Integer> >
             uniques_idx = std::make_tuple(uniques,idx_sorted);
 
     return uniques_idx;
 }
 
-template<typename T = Integer>
-STATIC std::tuple<std::vector<T>,std::vector<UInteger> > unique(const std::vector<T> &arr)
+template<typename T>
+STATIC std::tuple<std::vector<T>,std::vector<Integer> > 
+unique(const std::vector<T> &v, bool return_index=false) 
 {
     //! RETURNS UNIQUE VALUES AND UNIQUE INDICES OF A STD::VECTOR
-    std::vector<T> uniques;
-    std::vector<UInteger> idx;
+    if (return_index == false) {
+        std::vector<T> uniques(v.begin(),v.end());
+        std::sort(uniques.begin(),uniques.end());
+        uniques.erase(std::unique(uniques.begin(),uniques.end()),uniques.end());
 
-    for (UInteger i=0; i<arr.size(); ++i) {
-        bool isunique = true;
-        for (UInteger j=0; j<=i; ++j) {
-            if (arr[i]==arr[j] && i!=j) {
-                isunique = false;
-                break;
-            }
-        }
-
-        if (isunique==true) {
-            uniques.push_back(arr[i]);
-            idx.push_back(i);
-        }
+        return std::make_tuple(uniques,std::vector<Integer>(0));
     }
 
-    // SORT UNIQUE VALUES
-    auto sorter = argsort(uniques);
-    std::sort(uniques.begin(),uniques.end());
-    std::vector<UInteger> idx_sorted(idx.size());
-    for (UInteger i=0; i<uniques.size();++i) {
-        idx_sorted[i] = idx[sorter[i]];
+    auto sorter = argsort(v);
+    auto last = std::unique(sorter.begin(),sorter.end(),[&v](T a, T b){return v[a]==v[b];});
+    sorter.erase(last,sorter.end());
+
+    std::vector<T> uniques(sorter.size());
+    auto counter = 0;
+    for (auto &k: sorter) {
+        uniques[counter] = v[k];
+        counter++;
     }
 
-    std::tuple<std::vector<T>,std::vector<UInteger> >
-            uniques_idx = std::make_tuple(uniques,idx_sorted);
-
-    return uniques_idx;
+    return std::make_tuple(uniques,sorter);
 }
 
 template<typename T>
@@ -395,7 +386,7 @@ Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> itemfreq(const std::vector<T> 
 {
     //! FINDS THE NUMBER OF OCCURENCE OF EACH VALUE IN A VECTOR
     std::vector<T> uniques;
-    std::tie(uniques,std::ignore) = unique(arr);
+    std::tie(uniques,std::ignore) = unique(arr,false);
     Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> freqs(uniques.size(),2);
 
     auto counter = 0;

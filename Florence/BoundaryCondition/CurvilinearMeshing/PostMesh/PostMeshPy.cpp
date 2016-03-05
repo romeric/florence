@@ -22545,7 +22545,7 @@ static PyTypeObject __pyx_type_8Florence_17BoundaryCondition_18CurvilinearMeshin
   0, /*tp_setattro*/
   0, /*tp_as_buffer*/
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE, /*tp_flags*/
-  "\n    PostMesh base class. Provides most of the common functionality for \n    point projection, point inversion and obtaining Dirichlet data.\n    This class should not be directly.\n    ", /*tp_doc*/
+  "\n    PostMesh base class. Provides most of the common functionality for \n    point projection, point inversion and obtaining Dirichlet data.\n    This class should not be used directly.\n    ", /*tp_doc*/
   0, /*tp_traverse*/
   0, /*tp_clear*/
   0, /*tp_richcompare*/

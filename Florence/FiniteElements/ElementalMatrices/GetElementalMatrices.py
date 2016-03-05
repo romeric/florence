@@ -34,20 +34,22 @@ def DistributedMatrices(elem,MainData,mesh,material,Eulerx,I_stiff_elem,J_stiff_
     stiffnessel, t = Stiffness(MainData,material,LagrangeElemCoords,EulerElemCoords,ElectricPotentialElem,elem)
 
     # FROM THE LOCAL I & J VECTORS GET GLOBAL I & J VECTORS
-    full_current_row_stiff, full_current_column_stiff = SparseAssembly_Step_1(I_stiff_elem,J_stiff_elem,MainData.nvar,nodeperelem,elem,mesh.elements)
+    full_current_row_stiff, full_current_column_stiff = SparseAssembly_Step_1(I_stiff_elem,
+        J_stiff_elem,MainData.nvar,nodeperelem,elem,mesh.elements)
 
-    # print full_current_row_stiff
     return full_current_row_stiff, full_current_column_stiff, stiffnessel.ravel(), t, f, [],[],[]
 
 
 
 
+
 def FindIndices(A):
-    # NEW FASTER APPROACH - NO TEMPORARY
     return np.repeat(np.arange(0,A.shape[0]),A.shape[0],axis=0), np.tile(np.arange(0,A.shape[0]),A.shape[0]), A.ravel()
 
 
-def GetElementalMatrices(elem,MainData,elements,points,nodeperelem,Eulerx,TotalPot,I_stiff_elem,J_stiff_elem,I_mass_elem,J_mass_elem):
+def GetElementalMatrices(elem,MainData,elements,points,nodeperelem,Eulerx,
+    TotalPot,I_stiff_elem,J_stiff_elem,I_mass_elem,J_mass_elem):
+
     # ALLOCATE
     Domain = MainData.Domain
 
@@ -67,7 +69,8 @@ def GetElementalMatrices(elem,MainData,elements,points,nodeperelem,Eulerx,TotalP
         stiffnessel, t = Stiffness_NonVectorised(MainData,LagrangeElemCoords,EulerElemCoords,ElectricPotentialElem,elem)
 
     # FROM THE LOCAL I & J VECTORS GET GLOBAL I & J VECTORS
-    full_current_row_stiff, full_current_column_stiff = SparseAssembly_Step_1(I_stiff_elem,J_stiff_elem,MainData.nvar,nodeperelem,elem,elements)
+    full_current_row_stiff, full_current_column_stiff = SparseAssembly_Step_1(I_stiff_elem,
+        J_stiff_elem,MainData.nvar,nodeperelem,elem,elements)
 
     # FOR TIME-DEPENDENT PROBLEMS   
     full_current_row_mass=[]; full_current_column_mass =[]; V_mass_elem=[]
@@ -75,7 +78,8 @@ def GetElementalMatrices(elem,MainData,elements,points,nodeperelem,Eulerx,TotalP
         # COMPUTE THE MASS MATRIX
         massel = Mass(MainData,LagrangeElemCoords,EulerElemCoords,elem)
         # FROM THE LOCAL I & J VECTORS GET GLOBAL I & J VECTORS
-        full_current_row_mass, full_current_column_mass = SparseAssembly_Step_1(I_mass_elem,J_mass_elem,MainData.nvar,nodeperelem,elem,elements)
+        full_current_row_mass, full_current_column_mass = SparseAssembly_Step_1(I_mass_elem,
+            J_mass_elem,MainData.nvar,nodeperelem,elem,elements)
         # RAVEL MASS MATRIX
         V_mass_elem = massel.ravel()
 
@@ -90,4 +94,5 @@ def GetElementalMatrices(elem,MainData,elements,points,nodeperelem,Eulerx,TotalP
 
 
 
-    return full_current_row_stiff, full_current_column_stiff, stiffnessel.ravel(), t, f, full_current_row_mass, full_current_column_mass, V_mass_elem
+    return full_current_row_stiff, full_current_column_stiff, stiffnessel.ravel(), 
+    t, f, full_current_row_mass, full_current_column_mass, V_mass_elem

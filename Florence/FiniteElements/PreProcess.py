@@ -12,7 +12,6 @@ from Florence.Utils import insensitive
 
 from Florence.Supplementary.Timing import timing
 
-# @profile
 @timing
 def PreProcess(MainData,mesh,material,Pr,pwd):
 
@@ -99,15 +98,6 @@ def PreProcess(MainData,mesh,material,Pr,pwd):
     # mesh.SimplePlot()
     # exit()
 
-    # print MainData.MeshInfo.FileName.split(".")[0]+"_elements_"+"P"+str(MainData.C+1)+".dat"
-    # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_elements_"+"P"+str(MainData.C+1)+".dat",mesh.elements,delimiter=',')
-    # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_points_"+"P"+str(MainData.C+1)+".dat",mesh.points,fmt="%9.16f",delimiter=',')
-    # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_edges_"+"P"+str(MainData.C+1)+".dat",mesh.edges,delimiter=',')
-    # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_faces_"+"P"+str(MainData.C+1)+".dat",mesh.faces,delimiter=',')
-    # np.savetxt(MainData.MeshInfo.FileName.split(".")[0]+"_face_to_surface_"+"P"+str(MainData.C+1)+".dat",mesh.face_to_surface,delimiter=',')
-    # exit()
-
-
     # # For saving 3D problems
     # from time import time
     # tt = time()
@@ -130,7 +120,6 @@ def PreProcess(MainData,mesh,material,Pr,pwd):
     # print mesh.filename.split(".")[0]+"_P"+str(MainData.C+1)+".mat"
     # print 'rest of the time', time() - tt
     # # exit()
-
 
 
     # # For saving 2D problems
@@ -160,6 +149,7 @@ def PreProcess(MainData,mesh,material,Pr,pwd):
     # mesh.face_to_surface = face_to_surface
 
 
+
     # Falcon
     # lmesh = Mesh()
     # lmesh.ReadGIDMesh("/home/roman/Dropbox/Florence/Examples/FiniteElements/Falcon3D/falcon_iso.dat","tet")
@@ -173,13 +163,13 @@ def PreProcess(MainData,mesh,material,Pr,pwd):
     # print "The resulting high order mesh with p=", (MainData.C+1), "has", 2*mesh.points.shape[0]-yy, "nodes and",  \
     # 2*np.unique(mesh.faces[MainData.BoundaryData().ProjectionCriteria(mesh).flatten()==1,:]).shape[0], "nodes on the"
 
-    # aspect = mesh.AspectRatios
-    # print aspect.min(), aspect.max()
-    # print mesh.elements.shape, mesh.points.shape
-    # exit()
 
-    # MainData.MaterialArgs.AnisotropicOrientations = np.zeros((mesh.elements.shape[0],3))
-    # MainData.MaterialArgs.AnisotropicOrientations[:,0] = 1.0
+
+
+    # from Florence.MixedFormulations import NearlyIncompressibleHuWashizu
+    # formulation = NearlyIncompressibleHuWashizu(mesh)
+    # print dir(formulation)
+    # exit()
 
 
     # COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR ALL ELEMENTAL INTEGRATON
@@ -282,16 +272,7 @@ def PreProcess(MainData,mesh,material,Pr,pwd):
 
 
     #############################################################################
-
-
-
-
-    #############################################################################
     MainData.IsSymmetricityComputed = False
-
-
-    #############################################################################
-
 
 
     # DICTIONARY OF SAVED VARIABLES
@@ -303,11 +284,3 @@ def PreProcess(MainData,mesh,material,Pr,pwd):
          'SecondPiolaStress':[], 'ElectricField':[], 'ElectricDisplacement':[]}
 
     #############################################################################
-
-
-
-    return mesh
-
-
-
-

@@ -530,10 +530,68 @@ def CylinderTestCases():
 
 
 
+def F6TestCase():
+
+    print("\n=========================================================================")
+    print("                       RUNNING FLORENCE TEST-SUITE                         ")
+    print("=========================================================================\n")
+    print("                         RUNNING DLR-F6 TEST CASES                         ")
+
+    MainData.__NO_DEBUG__ = True
+    MainData.__VECTORISATION__ = True
+    MainData.__PARALLEL__ = True
+    MainData.numCPU = MP.cpu_count()
+    MainData.__PARALLEL__ = False
+    MainData.__MEMORY__ = 'SHARED'
+    # MainData.__MEMORY__ = 'DISTRIBUTED'
+    
+    MainData.norder = 1
+    MainData.plot = (0, 3)
+    nrplot = (0, 'last')
+    MainData.write = 0
+
+    import Tests.F6.ProblemData as Pr
+    # GET THE CURRENT DIRECTORY PATH
+    pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
+
+    for p in [2]:    
+        MainData.C = p - 1
+
+        for Increment in [1]:    
+            MainData.LoadIncrement = Increment
+
+            # READ PROBLEM DATA FILE
+            mesh, material, boundary_condition = Pr.ProblemData(MainData)
+
+            MainData.nvar = material.nvar
+            # MainData.ndim = material.ndim
+
+            # PRE-PROCESS
+            print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation bases etc...')
+
+            PreProcess(MainData,mesh,material,Pr,pwd)
+
+            # Checking higher order mesh generators results
+            cdir = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..'))
+            cfile = os.path.join(cdir,"Tests/F6/f6_iso_P"+str(MainData.C+1)+".mat")
+            Dict = loadmat(cfile)
+
+            mesh_checker(mesh,Dict)
+            del Dict
+            gc.collect()
+
+            # Checking Dirichlet data from CAD
+            boundary_condition.GetDirichletBoundaryConditions(MainData,mesh,material)
+            cfile = os.path.join(cdir,"Tests/F6/f6_iso_DirichletData_P"+str(MainData.C+1)+".mat")
+            Dict = loadmat(cfile)
+            dirichlet_checker(boundary_condition.columns_out,boundary_condition.applied_dirichlet,Dict)
+            del Dict
+            gc.collect()
 
 
 # RUN TEST-CASES
 # if __name__ == "__main__":
 # LeafTestCases()
-CylinderTestCases()
+# CylinderTestCases()
+F6TestCase()
 # AlmondTestCases()

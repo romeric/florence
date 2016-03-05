@@ -43,10 +43,10 @@ def StaticSolver(MainData,LoadIncrement,K,DirichletForces,NeumannForces,
 
             # STORE THE INFORMATION IF NEWTON-RAPHSON FAILS
             if MainData.AssemblyParameters.FailedToConverge == True:
-                MainData.solve.condA = np.NAN
-                MainData.solve.scaledA = np.NAN
-                MainData.solve.scaledAFF = np.NAN
-                MainData.solve.scaledAHH = np.NAN
+                MainData.solver.condA = np.NAN
+                MainData.solver.scaledA = np.NAN
+                MainData.solver.scaledAFF = np.NAN
+                MainData.solver.scaledAHH = np.NAN
                 break
 
     return TotalDisp

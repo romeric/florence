@@ -8,8 +8,9 @@ from vtk_writer import write_vtu
 from NormalDistance import NormalDistance
 try:
     import meshpy.triangle as triangle
+    has_meshpy = True
 except ImportError:
-    meshpy = None
+    has_meshpy = False
 from SalomeMeshReader import ReadMesh
 from HigherOrderMeshing import *
 from warnings import warn
@@ -76,6 +77,7 @@ class Mesh(object):
         self.writer_type = None
 
         self.filename = None
+        # self.has_meshpy = has_meshpy
 
 
 
@@ -152,9 +154,6 @@ class Mesh(object):
         edges[2*self.elements.shape[0]:,:] = self.elements[:,node_arranger[2,:]]
 
         # REMOVE DUPLICATES
-        # CYTHON SOLUTION
-        # edges = remove_duplicates(edges)
-        # Much faster than the cython's solution
         edges, idx = unique2d(edges,consider_sort=True,order=False,return_index=True)
 
         edge_to_element = np.zeros((edges.shape[0],2),np.int64)
@@ -719,8 +718,8 @@ class Mesh(object):
             from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
 
             middle_point_isoparametric = FeketePointsTri(2)[6] # check
-            if not np.isclose(sum(middle_point_isoparametric),-1.5):
-                raise ValueError("Median of triangle does not match [-0.5,-0.5]. "
+            if not np.isclose(sum(middle_point_isoparametric),-0.6666666):
+                raise ValueError("Median of triangle does not match [-0.3333,-0.3333]. "
                     "Did you change your nodal spacing or interpolation functions?")
 
             # C = self.InferPolynomialDegree() - 1
@@ -1285,7 +1284,8 @@ class Mesh(object):
     def ReadHDF5(self,filename):
         """Read mesh from MATLAB HDF5 file format"""
 
-        self.__reset__()
+        if self.elements is not None and self.points is not None:
+            self.__reset__()
 
         DictOutput = loadmat(filename)
 
@@ -1579,6 +1579,45 @@ class Mesh(object):
 
         return triangle.build(info,*args,**kwargs)
 
+
+    def Rectangle(self,lower_left_point=(0,0),upper_right_point=(2,1),nx=5,ny=5):
+        """Create a triangular mesh of on rectangle"""
+
+        if self.elements is not None and self.points is not None:
+            self.__reset__()
+
+        if (lower_left_point[0] > upper_right_point[0]) or \
+            (lower_left_point[1] > upper_right_point[1]):
+            raise ValueError("Incorrect coordinate for lower left and upper right vertices")
+
+
+        from scipy.spatial import Delaunay
+
+        x=np.linspace(lower_left_point[0],upper_right_point[0],nx)
+        y=np.linspace(lower_left_point[1],upper_right_point[1],ny)
+
+        X,Y = np.meshgrid(x,y)
+        coordinates = np.dstack((X.ravel(),Y.ravel()))[0,:,:]
+
+        tri_func = Delaunay(coordinates)
+        self.element_type = "tri"
+        self.elements = tri_func.simplices
+        self.points = tri_func.points
+        self.GetBoundaryEdgesTri()
+
+
+    def Square(self,lower_left_point=(0,0),side_length=1,n=5):
+        """Create a triangular mesh on a square
+
+            input:
+                lower_left_corner           [tuple] of lower left vertex of the square
+                side_length:                [int] length of side 
+                n:                          [int] number of discretisation
+            """
+
+        upper_right_point = (side_length+lower_left_point[0],side_length+lower_left_point[1])
+        self.Rectangle(lower_left_point=lower_left_point,
+            upper_right_point=upper_right_point,nx=n,ny=n)
 
 
     def UniformHollowCircle(self,center=(0,0),inner_radius=1.0,outer_radius=2.,element_type='tri',isotropic=True,nrad=5,ncirc=10):
@@ -1933,6 +1972,32 @@ class Mesh(object):
 
         # return np.delete(mesh_boundary_edges,0,0)
         return mesh_boundary_edges[1:,:]
+
+
+    def __add__(self, other):
+        """TODO: EXLUDE EXTERIOR REGIONS"""
+
+        assert self.element_type is not None
+        assert self.elements is not None
+        assert self.points is not None
+
+        assert other.element_type is not None
+        assert other.elements is not None
+        assert other.points is not None
+
+        if self.element_type != other.element_type:
+            raise NotImplementedError("Hybrid meshes are not supported")
+
+        from scipy.spatial import Delaunay
+
+        self.points = np.concatenate((self.points,other.points),axis=0)
+        self.points = unique2d(self.points,consider_sort=False,order=False)
+
+        tri_func = Delaunay(self.points)
+        self.elements = tri_func.simplices
+        self.points = tri_func.points
+
+        self.SimplePlot()
 
 
     def __reset__(self):

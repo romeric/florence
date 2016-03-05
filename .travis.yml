@@ -30,7 +30,7 @@ before_install:
   - git clone --branch $OCETAG https://github.com/tpaviot/oce.git
   - mkdir $OCEMAKEPATH && cd $OCEMAKEPATH
   - cmake ..
-  - make '-j'$(nproc)
+  - make '-j'$(nproc) -s
   - sudo make install/strip
   # Eigen install
   - cd ~

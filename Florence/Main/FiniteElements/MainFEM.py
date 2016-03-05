@@ -24,7 +24,7 @@ from Florence.FiniteElements.ComputeErrorNorms import *
 # import Examples.FiniteElements.Annular_Circle_Electromechanics.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle_Nurbs.ProblemData as Pr
-# import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
+import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
 # import Examples.FiniteElements.Wing2D.ProblemData as Pr
 # import Examples.FiniteElements.Naca_Isotropic.ProblemData as Pr
 # import Examples.FiniteElements.RAE2822.ProblemData as Pr
@@ -32,7 +32,7 @@ from Florence.FiniteElements.ComputeErrorNorms import *
 # import Examples.FiniteElements.Leaf.ProblemData as Pr
 # import Examples.FiniteElements.Misc3D.ProblemData as Pr
 # import Examples.FiniteElements.Sphere.ProblemData as Pr
-import Examples.FiniteElements.Almond3D.ProblemData as Pr
+# import Examples.FiniteElements.Almond3D.ProblemData as Pr
 # import Examples.FiniteElements.Falcon3D.ProblemData as Pr
 # import Examples.FiniteElements.F6.ProblemData as Pr
 # import Examples.FiniteElements.Drill.ProblemData as Pr
@@ -73,33 +73,6 @@ def main(MainData, DictOutput=None, nStep=0):
     # PostProcess().StressRecovery(MainData,mesh,TotalDisp) 
 
 
-    # # CHECK IF ALL THE FACE POINTS COORDINATES ARE ON THE SPHERE
-    # vpoints = mesh.points + TotalDisp[:,:,-1]
-    # un_faces = np.unique(mesh.faces)
-    # print(np.linalg.norm(vpoints[un_faces,:],axis=1))
-    # print(np.allclose(np.linalg.norm(vpoints[un_faces,:],axis=1),1))
-
-    # vpoints = mesh.points + TotalDisp[:,:,-1]
-    # un_faces = np.unique(mesh.faces)
-    # print(np.linalg.norm(vpoints[un_faces,:],axis=1))
-
-
-    # ####################
-    # from scipy.io import savemat
-    # if TotalDisp.ndim == 3:
-    #     mesh.points = mesh.points + TotalDisp[:,:,-1]
-    # else:
-    #     mesh.points = mesh.points + TotalDisp
-
-    # Dict = {'points':mesh.points, 'elements':mesh.elements, 
-    #     'element_type':mesh.element_type, 'faces':mesh.faces, 'edges':mesh.edges}
-    # savemat('/home/roman/Dropbox/Falcon3DBig_P'+str(MainData.C+1)+'.mat',Dict,do_compression=True)
-    # # savemat('/home/roman/Dropbox/MechanicalComponent3D_P'+str(MainData.C+1)+'.mat',Dict,do_compression=True)
-    # # savemat('/home/roman/Dropbox/F6ISO_P'+str(MainData.C+1)+'.mat',Dict,do_compression=True)
-    # return
-    #####################
-
-
 
     # ####################
     # from scipy.io import savemat
@@ -118,10 +91,8 @@ def main(MainData, DictOutput=None, nStep=0):
     # # savemat('/home/roman/Dropbox/MechanicalComponent3D_P'+str(MainData.C+1)+'_New_200.mat',Dict,do_compression=True)
     # # savemat('/home/roman/Dropbox/F6_P'+str(MainData.C+1)+'.mat',Dict)
     # # savemat('/home/roman/Dropbox/F6Iso_P'+str(MainData.C+1)+'.mat',Dict)
-    # # savemat('/home/roman/LayerSolution/Layer_dd/f6BL_Layer_dd_Sol_P'+str(MainData.C+1)+'.mat',Dict)
     # # savemat(MainData.SolName,Dict,do_compression=True)
-
-    exit()
+    # exit()
     # # # return
     #####################
 
@@ -168,6 +139,9 @@ def main(MainData, DictOutput=None, nStep=0):
 
         post_process.HighOrderCurvedPatchPlot(mesh,TotalDisp,QuantityToPlot=MainData.ScaledJacobian,
             ProjectionFlags=boundary_condition.projection_flags,InterpolationDegree=40)
+            
+        # post_process.HighOrderCurvedPatchPlot(mesh,TotalDisp, ProjectionFlags=boundary_condition.projection_flags,
+        #     InterpolationDegree=0,plot_points=False)
         import matplotlib.pyplot as plt
         plt.show()
     else:

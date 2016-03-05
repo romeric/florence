@@ -38,7 +38,7 @@ def Assembly(MainData,mesh,material,Eulerx,TotalPot):
         #     return AssemblyLarge(MainData,mesh,Eulerx,TotalPot)
 
     elif MainData.__MEMORY__ == "DISTRIBUTED":
-
+        # RUN THIS PROGRAM FROM SHELL WITH python RunSession.py INSTEAD
         if not MainData.__PARALLEL__:
             warn("parallelisation is going to be turned on")
 
@@ -49,10 +49,6 @@ def Assembly(MainData,mesh,material,Eulerx,TotalPot):
         tmp_dir = par_unpickle(MainData,mesh,material,Eulerx,TotalPot)
         pwd = os.path.dirname(os.path.realpath(__file__))
         distributed_caller = os.path.join(pwd,"DistributedAssembly.py")
-        # mpirun -np 4 Florence/FiniteElements/DistributedAssembly.py "/home/roman/tmp/"
-        # p = subprocess.call(['mpirun', '-np', '4', distributed_caller, tmp_dir[0]])
-        # p = subprocess.call(['mpirun', '-np', '4', 'Florence/FiniteElements/DistributedAssembly.py', 
-        # tmp_dir[0]], cwd="/home/roman/Dropbox/florence/")
         # p = subprocess.call(["./mpi_runner.sh"], cwd="/home/roman/Dropbox/florence/", shell=True) ##
          # time mpirun -np 8 Florence/FiniteElements/DistributedAssembly.py "/home/roman/tmp/"
         # p = subprocess.call(["time mpirun -np "+str(MP.cpu_count())+" Florence/FiniteElements/DistributedAssembly.py"+" /home/roman/tmp/"], 
