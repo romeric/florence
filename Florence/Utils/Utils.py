@@ -44,7 +44,7 @@ def par_unpickle(MainData,mesh,material,Eulerx,TotalPot):
     f = file(TotalPot_file, 'wb')
     pickle.dump(TotalPot,f,pickle.HIGHEST_PROTOCOL)
     
-    savemat(os.path.join(tmp_dir,'rest'),
+    savemat(os.path.join(tmp_dir,'rest.mat'),
         {'C':MainData.C,'ndim':MainData.ndim,'nvar':MainData.nvar},do_compression=True)
     del MainData, mesh, material, Eulerx, TotalPot, f
     gc.collect()

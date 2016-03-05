@@ -1,5 +1,6 @@
 import numpy as np
-from Florence.QuadratureRules import GaussQuadrature, QuadraturePointsWeightsTet, QuadraturePointsWeightsTri
+# from Florence.QuadratureRules import GaussQuadrature, QuadraturePointsWeightsTet, QuadraturePointsWeightsTri
+from Florence import QuadratureRule
 from Florence.FiniteElements.GetBases import *
 
 def GetBasesAtInegrationPoints(C,norder,QuadratureOpt,MeshType):
@@ -10,58 +11,44 @@ def GetBasesAtInegrationPoints(C,norder,QuadratureOpt,MeshType):
         ndim = 3
 
 
-    z=[]; w=[]; 
+    # z=[]; w=[]; 
 
-    if MeshType == "quad" or MeshType == "hex":
-        z, w = GaussQuadrature(norder,-1.,1.)
-        # z, w = GaussQuadrature(MainData.C+MainData.norder,-1.,1.)
-    elif MeshType == "tet":
-        zw = QuadraturePointsWeightsTet.QuadraturePointsWeightsTet(norder,QuadratureOpt)
-        # zw = QuadraturePointsWeightsTet.QuadraturePointsWeightsTet(C+1,QuadratureOpt)
-        z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
-    elif MeshType == "tri":
-        zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(norder,QuadratureOpt) # PUT C+1 OR HIGHER
-        # zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(C+5,QuadratureOpt) # PUT C+4 OR HIGHER
-        z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
-
-
-    class Quadrature(object):
-        """Quadrature rules"""
-        points = z
-        weights = w
-        Opt = QuadratureOpt
+    # if MeshType == "quad" or MeshType == "hex":
+    #     z, w = GaussQuadrature(norder,-1.,1.)
+    #     # z, w = GaussQuadrature(MainData.C+MainData.norder,-1.,1.)
+    # elif MeshType == "tet":
+    #     zw = QuadraturePointsWeightsTet.QuadraturePointsWeightsTet(norder,QuadratureOpt)
+    #     # zw = QuadraturePointsWeightsTet.QuadraturePointsWeightsTet(C+1,QuadratureOpt)
+    #     z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
+    # elif MeshType == "tri":
+    #     zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(norder,QuadratureOpt) # PUT C+1 OR HIGHER
+    #     # zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(C+5,QuadratureOpt) # PUT C+4 OR HIGHER
+    #     z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
 
 
+    # # class Quadrature(object):
+    # #     """Quadrature rules"""
+    # #     points = z
+    # #     weights = w
+    # #     Opt = QuadratureOpt
+
+    quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder, mesh_type=MeshType)
+    z = quadrature.points
+    w = quadrature.weights
 
 
     if MeshType == 'tet' or MeshType == 'hex':
         # GET BASES AT ALL INTEGRATION POINTS (VOLUME)
-        Domain = GetBases3D(C,Quadrature,MeshType)
-        # GET BOUNDARY BASES AT ALL INTEGRATION POINTS (SURFACE)
-        # Boundary = GetBasesBoundary(C,z,ndim)
-        # MeshTypeBoundary = 'tri'
-        # if MeshType == 'hex':
-        #     MeshTypeBoundary = 'quad'
-        # if MeshTypeBoundary == 'tri':
-        #     zw_b = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(norder,QuadratureOpt)
-        #     z_b = zw_b[:,:-1]; z_b=z_b.reshape(z_b.shape[0],z_b.shape[1]); w_b=zw_b[:,-1]
-        #     class BoundaryQuadrature(Quadrature):
-        #         points = w_b
-        #         weights = z_b
-        # Boundary = GetBases(C,BoundaryQuadrature,MeshTypeBoundary)
+        Domain = GetBases3D(C,quadrature,MeshType)
 
     elif MeshType == 'tri' or MeshType == 'quad':
         # Get basis at all integration points (surface)
-        Domain = GetBases(C,Quadrature,MeshType)
+        Domain = GetBases(C,quadrature,MeshType)
         # GET BOUNDARY BASES AT ALL INTEGRATION POINTS (LINE)
         # Boundary = GetBasesBoundary(C,z,ndim)
     Boundary = []
 
     ############################################################################
-    # from scipy.io import savemat
-    # Dict = {'GaussPoints':z,'GaussWeights':w,'Bases':Domain.Bases,'gBasesx':Domain.gBasesx, 'gBasesy':Domain.gBasesy}
-    # savemat('/home/roman/Desktop/Bases_P'+str(C+1)+'_Quad_P'+str(norder),Dict)
-    # exit()
 
 
     # COMPUTING GRADIENTS AND JACOBIAN A PRIORI FOR ALL INTEGRATION POINTS
@@ -119,4 +106,4 @@ def GetBasesAtInegrationPoints(C,norder,QuadratureOpt,MeshType):
 
             Domain.AllGauss[counter,0] = w[counter]
 
-    return Domain, Boundary, Quadrature
+    return Domain, Boundary, quadrature

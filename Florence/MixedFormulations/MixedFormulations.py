@@ -1,6 +1,6 @@
 import numpy as np
-from Core import Mesh
-from Core.FiniteElements.GetBasesAtInegrationPoints import GetBasesAtInegrationPoints
+from Florence import Mesh
+from Florence.FiniteElements.GetBasesAtInegrationPoints import GetBasesAtInegrationPoints
 
 class MixedFormulations():
 
@@ -52,6 +52,9 @@ class NearlyIncompressibleHuWashizu(MixedFormulations):
                 degree=1
             self.quadrature_rules[counter] = list(GetBasesAtInegrationPoints(degree-1, 2*degree,
                 QuadratureOpt,mesh.element_type))
+
+        # print self.quadrature_rules[0][0].Jm
+        print self.median
 
 
     def GetLocalResiduals(self):

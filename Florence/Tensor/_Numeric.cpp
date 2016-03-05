@@ -2,7 +2,8 @@
 #include <vector>
 
 template<typename T>
-std::vector<long int> FindEqual(const T *arr, long int size,T num) {
+std::vector<long int> 
+FindEqual(const T *arr, long int size,T num) {
     std::vector<long int> counts;
     auto p = std::find_if(arr,arr+size,[&](T j){return j==num;});
     if (p-arr==size) {
@@ -19,7 +20,8 @@ std::vector<long int> FindEqual(const T *arr, long int size,T num) {
 }
 
 template<typename T>
-std::vector<long int> FindEqualApprox(const T *arr, long int size,T num, double tolerance) {
+std::vector<long int> 
+FindEqualApprox(const T *arr, long int size,T num, double tolerance) {
     std::vector<long int> counts;
     auto p = std::find_if(arr,arr+size,[&](T j){return std::abs(j - num) < tolerance;});
     if (p-arr==size) {
@@ -36,7 +38,8 @@ std::vector<long int> FindEqualApprox(const T *arr, long int size,T num, double 
 }
 
 template<typename T>
-std::vector<long int> FindLessThan(const T *arr, long int size,T num) {
+std::vector<long int> 
+FindLessThan(const T *arr, long int size,T num) {
     std::vector<long int> counts;
     auto p = std::find_if(arr,arr+size,[&](T j){return j < num;});
     if (p-arr==size) {
@@ -54,7 +57,8 @@ std::vector<long int> FindLessThan(const T *arr, long int size,T num) {
 
 
 template<typename T>
-std::vector<long int> FindGreaterThan(const T *arr, long int size,T num) {
+std::vector<long int> 
+FindGreaterThan(const T *arr, long int size,T num) {
     std::vector<long int> counts;
     auto p = std::find_if(arr,arr+size,[&](T j){return j > num;});
     if (p-arr==size) {
@@ -72,7 +76,8 @@ std::vector<long int> FindGreaterThan(const T *arr, long int size,T num) {
 
 
 template <typename T>
-std::vector<std::size_t> argsort(const std::vector<T> &v) {
+inline std::vector<std::size_t> 
+argsort(const std::vector<T> &v) {
 
   // INITIALISE INDICES
   std::vector<std::size_t> idx(v.size());
@@ -83,4 +88,31 @@ std::vector<std::size_t> argsort(const std::vector<T> &v) {
        [&v](std::size_t i1, std::size_t i2) {return v[i1] < v[i2];});
 
   return idx;
+}
+
+
+template<typename T>
+inline std::tuple<std::vector<T>,std::vector<std::size_t> > 
+unique(const std::vector<T> &v, bool return_index=false) {
+
+    if (return_index == false) {
+        std::vector<T> uniques(v.begin(),v.end());
+        std::sort(uniques.begin(),uniques.end());
+        uniques.erase(std::unique(uniques.begin(),uniques.end()),uniques.end());
+
+        return std::make_tuple(uniques,std::vector<std::size_t>(0));
+    }
+
+    auto sorter = argsort(v);
+    auto last = std::unique(sorter.begin(),sorter.end(),[&v](T a, T b){return v[a]==v[b];});
+    sorter.erase(last,sorter.end());
+
+    std::vector<T> uniques(sorter.size());
+    auto counter = 0;
+    for (auto &k: sorter) {
+        uniques[counter] = v[k];
+        counter++;
+    }
+
+    return std::make_tuple(uniques,sorter);
 }

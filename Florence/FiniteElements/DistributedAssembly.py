@@ -19,9 +19,17 @@ def DistributedAssembly(tmp_dir):
     from Florence.Utils import par_pickle
 
     MainData, mesh, material, Eulerx, TotalPot = par_pickle(tmp_dir)
+    # if comm.rank == 0:
+    #     MainData, mesh, material, Eulerx, TotalPot = par_pickle(tmp_dir)
+    # else:
+    #     MainData, mesh, material, Eulerx, TotalPot = None, None, None, None, None
 
-    # BROADCAST FROM RANK 0 TO EVERYBODY
-    # comm.Bcast([MainData])  
+    # MainData = comm.bcast(MainData,root=0)
+    # mesh = comm.bcast(mesh,root=0)
+    # material = comm.bcast(material,root=0)
+    # Eulerx = comm.bcast(Eulerx,root=0)
+    # TotalPot = comm.bcast(TotalPot,root=0)
+  
     C = MainData.C
     nvar = MainData.nvar
     ndim = MainData.ndim
@@ -57,24 +65,16 @@ def DistributedAssembly(tmp_dir):
     MainData.Prestress = False
     MainData.__NO_DEBUG__ = True
 
-    # print parmap(lambda x, y: x**y, [1,2,3,4], 2) # square the sequence
-    ParallelTuple = parmap(DistributedMatrices,np.arange(0,nelem),MainData,mesh,material,Eulerx,I_stiff_elem,J_stiff_elem,I_mass_elem,J_mass_elem)
+    # DO NOT USE ANOTHER parmap BEFORE THIS 
+    ParallelTuple = parmap(DistributedMatrices,np.arange(0,nelem),
+        MainData,mesh,material,Eulerx,I_stiff_elem,J_stiff_elem,I_mass_elem,J_mass_elem)
     
-    # print ParallelTuple[9][0].shape
-    # print len(ParallelTuple[0])
-
-    # COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
-    # ParallelTuple = parmap(GetElementalMatrices,np.arange(0,nelem),MainData,mesh.elements,mesh.points,nodeperelem,
-        # Eulerx,TotalPot,I_stiff_elem,J_stiff_elem,I_mass_elem,J_mass_elem)
-
-    # exit()
     if comm.rank == 0:
 
-         # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF STIFFNESS MATRIX
+        # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF STIFFNESS MATRIX
         I_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.int32)
         J_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.int32)
         V_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.float32)
-
 
         # ALLOCATE RHS VECTORS
         F = np.zeros((mesh.points.shape[0]*nvar,1)) 
@@ -85,7 +85,8 @@ def DistributedAssembly(tmp_dir):
             # UNPACK PARALLEL TUPLE VALUES
             full_current_row_stiff = ParallelTuple[elem][0]; full_current_column_stiff = ParallelTuple[elem][1]
             coeff_stiff = ParallelTuple[elem][2]; t = ParallelTuple[elem][3]; f = ParallelTuple[elem][4]
-            full_current_row_mass = ParallelTuple[elem][5]; full_current_column_mass = ParallelTuple[elem][6]; coeff_mass = ParallelTuple[elem][6]
+            full_current_row_mass = ParallelTuple[elem][5]; 
+            full_current_column_mass = ParallelTuple[elem][6]; coeff_mass = ParallelTuple[elem][6]
 
             I_stiffness[(nvar*nodeperelem)**2*elem:(nvar*nodeperelem)**2*(elem+1)] = full_current_row_stiff
             J_stiffness[(nvar*nodeperelem)**2*elem:(nvar*nodeperelem)**2*(elem+1)] = full_current_column_stiff
@@ -93,7 +94,8 @@ def DistributedAssembly(tmp_dir):
 
             if MainData.Analysis != 'Static':
                 # SPARSE ASSEMBLY - MASS MATRIX
-                I_mass, J_mass, V_mass = SparseAssembly_Step_2(I_mass,J_mass,V_mass,full_current_row_mass,full_current_column_mass,coeff_mass,
+                I_mass, J_mass, V_mass = SparseAssembly_Step_2(I_mass,J_mass,
+                    V_mass,full_current_row_mass,full_current_column_mass,coeff_mass,
                     nvar,nodeperelem,elem)
 
             # INTERNAL TRACTION FORCE ASSEMBLY
@@ -115,12 +117,9 @@ def DistributedAssembly(tmp_dir):
             mass = coo_matrix((V_mass,(I_mass,J_mass)),shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0]))).tocsc()
 
 
-    # return stiffness, T, F, mass
         if not mass:
             mass = 0
 
-    # print os.path.join(tmp_dir,"results.mat")
-    # exit()
         savemat(os.path.join(tmp_dir,"results.mat"),{'stiffness':stiffness,'T':T,'F':F,'mass':mass},do_compression=True)
 
 

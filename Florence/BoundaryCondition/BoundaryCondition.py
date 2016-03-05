@@ -220,33 +220,10 @@ class BoundaryCondition(object):
                     # nodesDBC, Dirichlet = MainData.BoundaryData.nodesDBC, MainData.BoundaryData.Dirichlet
                     nodesDBC, Dirichlet = self.nodesDBC, self.Dirichlet                
 
-                # tt = time()
-
-                # ColumnsOut = []; AppliedDirichlet = []
-                # nOfDBCnodes = nodesDBC.shape[0]
-                # for inode in range(nOfDBCnodes):
-                #     for i in range(nvar):
-                #         ColumnsOut = np.append(ColumnsOut,nvar*nodesDBC[inode]+i)
-                #         AppliedDirichlet = np.append(AppliedDirichlet,Dirichlet[inode,i])
-
-                # print time() - tt
-                # tt = time()
-                # print np.repeat(nodesDBC[:,None],nvar,axis=1)
-
+                # GET DIRICHLET DoFs
                 self.columns_out = (np.repeat(nodesDBC,nvar,axis=1)*nvar +\
                  np.tile(np.arange(nvar)[None,:],nodesDBC.shape[0]).reshape(nodesDBC.shape[0],MainData.ndim)).ravel()
                 self.applied_dirichlet = Dirichlet.ravel()
-                # temp_1 = np.repeat(nodesDBC,nvar,axis=1)*nvar
-                # temp_2 = np.tile(np.arange(nvar)[None,:],nodesDBC.shape[0]).reshape(nodesDBC.shape[0],2)
-                # self.columns_out = (temp_1+temp_2).flatten()
-                # del temp_1, temp_2
-                # print time() - tt
-                # print nodesDBC.shape
-                # print self.columns_out.shape, ColumnsOut.shape
-                # assert np.isclose(ColumnsOut.astype(np.int64) - self.columns_out,0.).all() 
-                # assert np.isclose(self.applied_dirichlet - AppliedDirichlet,0.).all()
-                # print AppliedDirichlet - self.applied_dirichlet
-                # exit()
 
                 # FIX THE DOF IN THE REST OF THE BOUNDARY
                 if self.fix_dof_elsewhere:
@@ -256,8 +233,6 @@ class BoundaryCondition(object):
                         Rest_DOFs = np.setdiff1d(np.unique(mesh.faces),nodesDBC)
                     for inode in range(Rest_DOFs.shape[0]):
                         for i in range(nvar):
-                            # ColumnsOut = np.append(ColumnsOut,nvar*Rest_DOFs[inode]+i)
-                            # AppliedDirichlet = np.append(AppliedDirichlet,0.0)
                             self.columns_out = np.append(self.columns_out,nvar*Rest_DOFs[inode]+i)
                             self.applied_dirichlet = np.append(self.applied_dirichlet,0.0)
 

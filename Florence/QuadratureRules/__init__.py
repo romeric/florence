@@ -1,1 +1,2 @@
 from NumericIntegrator import GaussQuadrature, GaussQuadratureLogarithmic, GaussLobattoQuadrature
+from QuadratureRule import QuadratureRule

@@ -41,8 +41,8 @@ def GetBases(C,Quadrature,info, useLagrange = False):
                 counter+=1
     elif info == 'tri':
         for i in range(0,w.shape[0]):
-            # Better convergence for curved meshes when Quadrature.Opt!=0
-            ndummy, dummy = Tri.hpBases(C,z[i,0],z[i,1],Quadrature.Opt) 
+            # Better convergence for curved meshes when Quadrature.optimal!=0
+            ndummy, dummy = Tri.hpBases(C,z[i,0],z[i,1],Quadrature.optimal) 
             # ndummy, dummy = Tri.hpBases(C,z[i,0],z[i,1])
             Basis[:,i] = ndummy
             gBasisx[:,i] = dummy[:,0]
@@ -99,8 +99,8 @@ def GetBases3D(C,Quadrature,info):
                     counter+=1
     elif info=='tet':
         for i in range(0,w.shape[0]):
-            # Better convergence for curved meshes when Quadrature.Opt!=0
-            ndummy, dummy = Tet.hpBases(C,z[i,0],z[i,1],z[i,2],Quadrature.Opt)
+            # Better convergence for curved meshes when Quadrature.optimal!=0
+            ndummy, dummy = Tet.hpBases(C,z[i,0],z[i,1],z[i,2],Quadrature.optimal)
             # ndummy, dummy = Tet.hpBases(C,z[i,0],z[i,1],z[i,2])
             Basis[:,i] = ndummy
             gBasisx[:,i] = dummy[:,0]

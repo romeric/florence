@@ -171,7 +171,6 @@ class LinearSolver(object):
                 self.solver_type = "direct"
                 self.solver_subtype = "umfpack"
 
-
         if self.solver_type == 'direct':
             # CALL DIRECT SOLVER
             if self.solver_subtype=='umfpack' and self.has_umfpack:
