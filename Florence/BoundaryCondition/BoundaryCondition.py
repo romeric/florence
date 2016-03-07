@@ -226,15 +226,15 @@ class BoundaryCondition(object):
                 self.applied_dirichlet = Dirichlet.ravel()
 
                 # FIX THE DOF IN THE REST OF THE BOUNDARY
-                if self.fix_dof_elsewhere:
-                    if ndim==2:
-                        Rest_DOFs = np.setdiff1d(np.unique(mesh.edges),nodesDBC)
-                    elif ndim==3:
-                        Rest_DOFs = np.setdiff1d(np.unique(mesh.faces),nodesDBC)
-                    for inode in range(Rest_DOFs.shape[0]):
-                        for i in range(nvar):
-                            self.columns_out = np.append(self.columns_out,nvar*Rest_DOFs[inode]+i)
-                            self.applied_dirichlet = np.append(self.applied_dirichlet,0.0)
+                # if self.fix_dof_elsewhere:
+                #     if ndim==2:
+                #         Rest_DOFs = np.setdiff1d(np.unique(mesh.edges),nodesDBC)
+                #     elif ndim==3:
+                #         Rest_DOFs = np.setdiff1d(np.unique(mesh.faces),nodesDBC)
+                #     for inode in range(Rest_DOFs.shape[0]):
+                #         for i in range(nvar):
+                #             self.columns_out = np.append(self.columns_out,nvar*Rest_DOFs[inode]+i)
+                #             self.applied_dirichlet = np.append(self.applied_dirichlet,0.0)
 
                 print 'Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds'
 
@@ -274,6 +274,9 @@ class BoundaryCondition(object):
 
 
             ############################
+            # print np.max(self.applied_dirichlet), mesh.Bounds 
+            # print repr(self.applied_dirichlet)
+            # exit()
             # if MainData.ndim==3:
                 # print np.max(self.applied_dirichlet), mesh.Bounds 
                 # exit()
@@ -381,6 +384,7 @@ class BoundaryCondition(object):
             # curvilinear_mesh.InferInterpolationPolynomialDegree() 
             curvilinear_mesh.SetNodalSpacing(boundary_fekete)
             curvilinear_mesh.GetBoundaryPointsOrder()
+            # exit()
             # exit()
             # READ THE GEOMETRY FROM THE IGES FILE
             curvilinear_mesh.ReadIGES(self.cad_file)

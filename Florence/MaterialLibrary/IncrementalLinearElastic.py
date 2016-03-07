@@ -17,12 +17,6 @@ class IncrementalLinearElastic(Material):
         super(IncrementalLinearElastic, self).__init__(mtype,ndim,**kwargs)
 
     def Hessian(self,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
-        # # GET MATERIAL CONSTANTS
-        # mu = MaterialArgs.mu
-        # lamb = MaterialArgs.lamb        
-
-        # MaterialArgs.H_VoigtSize = MaterialArgs.H_Voigt.shape[0]
-
         # RETURN THE 4TH ORDER ELASTICITY TENSOR (VOIGT FORM)
         return self.H_Voigt
 

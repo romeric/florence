@@ -592,6 +592,6 @@ def F6TestCase():
 # RUN TEST-CASES
 # if __name__ == "__main__":
 # LeafTestCases()
-# CylinderTestCases()
-F6TestCase()
+CylinderTestCases()
+# F6TestCase()
 # AlmondTestCases()

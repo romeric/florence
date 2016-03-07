@@ -16,8 +16,8 @@ def ProblemData(MainData):
     # MainData.AnalysisType = 'Nonlinear'
 
     # material = LinearModel(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
-    # material = IncrementalLinearElastic(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
-    material = NeoHookean_2(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
+    material = IncrementalLinearElastic(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.001)
+    # material = NeoHookean_2(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.001)
     # material = MooneyRivlin(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
     # material = NearlyIncompressibleMooneyRivlin(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
     # material = BonetTranservselyIsotropicHyperElastic(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4,
@@ -29,13 +29,13 @@ def ProblemData(MainData):
 
     ProblemPath = os.path.dirname(os.path.realpath(__file__))
 
-    # filename = ProblemPath + '/sd7003_Stretch25.dat'
+    filename = ProblemPath + '/sd7003_Stretch25.dat'
     # filename = ProblemPath + '/sd7003_Stretch50.dat'
     # filename = ProblemPath + '/sd7003_Stretch100.dat'
     # filename = ProblemPath + '/sd7003_Stretch200.dat'
     # filename = ProblemPath + '/sd7003_Stretch400.dat'
     # filename = ProblemPath + '/sd7003_Stretch800.dat'
-    filename = ProblemPath + '/sd7003_Stretch1600.dat'
+    # filename = ProblemPath + '/sd7003_Stretch1600.dat'
 
     # MainData.MeshInfo.IsHighOrder = True
 

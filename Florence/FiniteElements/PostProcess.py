@@ -526,6 +526,7 @@ class PostProcess(object):
             # USING ISOPARAMETRIC
             Jacobian = np.abs(np.linalg.det(ParentGradientx))
             # USING DETERMINANT OF DEFORMATION GRADIENT TENSOR
+            # THIS GIVES A RESULT MUCH CLOSER TO ONE
             Jacobian = detF
             # USING INVARIANT F:F
             Q1 = np.sqrt(np.einsum('kij,lij->kl',F,F)).diagonal()

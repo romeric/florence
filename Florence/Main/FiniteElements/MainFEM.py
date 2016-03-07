@@ -24,8 +24,8 @@ from Florence.FiniteElements.ComputeErrorNorms import *
 # import Examples.FiniteElements.Annular_Circle_Electromechanics.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle_Nurbs.ProblemData as Pr
-import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
-# import Examples.FiniteElements.Wing2D.ProblemData as Pr
+# import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
+import Examples.FiniteElements.Wing2D.ProblemData as Pr
 # import Examples.FiniteElements.Naca_Isotropic.ProblemData as Pr
 # import Examples.FiniteElements.RAE2822.ProblemData as Pr
 # import Examples.FiniteElements.Misc.ProblemData as Pr
@@ -139,7 +139,7 @@ def main(MainData, DictOutput=None, nStep=0):
 
         post_process.HighOrderCurvedPatchPlot(mesh,TotalDisp,QuantityToPlot=MainData.ScaledJacobian,
             ProjectionFlags=boundary_condition.projection_flags,InterpolationDegree=40)
-            
+
         # post_process.HighOrderCurvedPatchPlot(mesh,TotalDisp, ProjectionFlags=boundary_condition.projection_flags,
         #     InterpolationDegree=0,plot_points=False)
         import matplotlib.pyplot as plt

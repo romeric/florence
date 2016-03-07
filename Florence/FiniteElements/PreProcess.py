@@ -166,7 +166,7 @@ def PreProcess(MainData,mesh,material,Pr,pwd):
 
 
 
-    # from Florence.MixedFormulations import NearlyIncompressibleHuWashizu
+    # from Florence.VariationalPrinciple import NearlyIncompressibleHuWashizu
     # formulation = NearlyIncompressibleHuWashizu(mesh)
     # print dir(formulation)
     # exit()
@@ -240,6 +240,7 @@ def PreProcess(MainData,mesh,material,Pr,pwd):
             MainData.Prestress = 1
         else:
             MainData.Prestress = 0
+
 
     # GEOMETRY UPDATE FLAGS
     ###########################################################################
