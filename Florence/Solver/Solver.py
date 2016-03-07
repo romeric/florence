@@ -212,6 +212,8 @@ class LinearSolver(object):
 
             else:
                 # FOR 'super_lu'
+                if A.dtype != np.float64:
+                    A = A.astype(np.float64)
                 sol = spsolve(A,b,permc_spec='MMD_AT_PLUS_A',use_umfpack=True)
 
         elif self.solver_type == "iterative":

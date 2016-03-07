@@ -854,16 +854,7 @@ class Mesh(object):
         assert self.edges is not None or self.elements is not None
 
         edge_elements = np.zeros((self.edges.shape[0],2),dtype=np.int64)
-        # for i in range(self.edges.shape[0]):
-        #     x = []
-        #     for j in range(self.edges.shape[1]):
-        #         x = np.append(x,np.where(self.elements[:,:3]==self.edges[i,j])[0])
-        #     for k in range(len(x)):
-        #         y = np.where(x==x[k])[0]
-        #         if y.shape[0]==self.edges.shape[1]:
-        #             edge_elements[i,0] = np.int64(x[k])
-        #             break
-
+        
         # FIND WHICH FACE NODES ARE IN WHICH ELEMENT
         for i in range(self.edges.shape[0]):
             x = []
