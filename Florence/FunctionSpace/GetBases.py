@@ -1,14 +1,19 @@
 import numpy as np 
 import os, sys, imp
 
-import Florence.InterpolationFunctions.TwoDimensional.Quad.QuadLagrangeGaussLobatto as TwoD
-import Florence.InterpolationFunctions.ThreeDimensional.Hexahedral.HexLagrangeGaussLobatto as ThreeD
+# import Florence.FunctionSpace.TwoDimensional.Quad.QuadLagrangeGaussLobatto as TwoD
+# import Florence.FunctionSpace.ThreeDimensional.Hexahedral.HexLagrangeGaussLobatto as ThreeD
+from Florence.FunctionSpace import QuadLagrangeGaussLobatto as TwoD
+from Florence.FunctionSpace import HexLagrangeGaussLobatto as ThreeD
 # Modal Bases
 # import Florence.InterpolationFunctions.TwoDimensional.Tri.hpModal as Tri 
 # import Florence.InterpolationFunctions.ThreeDimensional.Tetrahedral.hpModal as Tet 
 # Nodal Bases
-import Florence.InterpolationFunctions.TwoDimensional.Tri.hpNodal as Tri 
-import Florence.InterpolationFunctions.ThreeDimensional.Tetrahedral.hpNodal as Tet 
+# import Florence.FunctionSpace.TwoDimensional.Tri.hpNodal as Tri 
+# import Florence.FunctionSpace.ThreeDimensional.Tetrahedral.hpNodal as Tet 
+
+from Florence.FunctionSpace import Tri
+from Florence.FunctionSpace import Tet
 
 def GetBases(C,Quadrature,info, useLagrange = False):
 
@@ -40,9 +45,10 @@ def GetBases(C,Quadrature,info, useLagrange = False):
                 gBasisy[:,counter] = dummy[:,1]
                 counter+=1
     elif info == 'tri':
+        hpBases = Tri.hpNodal.hpBases
         for i in range(0,w.shape[0]):
             # Better convergence for curved meshes when Quadrature.optimal!=0
-            ndummy, dummy = Tri.hpBases(C,z[i,0],z[i,1],Quadrature.optimal) 
+            ndummy, dummy = hpBases(C,z[i,0],z[i,1],Quadrature.optimal) 
             # ndummy, dummy = Tri.hpBases(C,z[i,0],z[i,1])
             Basis[:,i] = ndummy
             gBasisx[:,i] = dummy[:,0]
@@ -98,9 +104,10 @@ def GetBases3D(C,Quadrature,info):
                     gBasisz[:,counter] = dummy[:,2]
                     counter+=1
     elif info=='tet':
+        hpBases = Tet.hpNodal.hpBases
         for i in range(0,w.shape[0]):
             # Better convergence for curved meshes when Quadrature.optimal!=0
-            ndummy, dummy = Tet.hpBases(C,z[i,0],z[i,1],z[i,2],Quadrature.optimal)
+            ndummy, dummy = hpBases(C,z[i,0],z[i,1],z[i,2],Quadrature.optimal)
             # ndummy, dummy = Tet.hpBases(C,z[i,0],z[i,1],z[i,2])
             Basis[:,i] = ndummy
             gBasisx[:,i] = dummy[:,0]

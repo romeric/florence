@@ -4,7 +4,12 @@ import multiprocessing as MP
 import imp
 
 import GetInteriorCoordinates as Gett
+import Florence.ParallelProcessing.parmap as parmap
 from Florence.QuadratureRules.FeketePointsTri import *
+from Florence import FunctionSpace
+# import Florence.FunctionSpace.TwoDimensional.Tri.hpNodal
+from Florence.FunctionSpace import Tri
+# import Florence.FunctionSpace.TwoDimensional.Tri.hpNodal as Tri 
 from Florence.Tensor import itemfreq, makezero, unique2d
 from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
 
@@ -16,8 +21,6 @@ def ElementLoopTri(elem,elements,points,MeshType,eps,Neval):
 
 def HighOrderMeshTri_SEMISTABLE(C,mesh,Decimals=10,Parallel=False,nCPU=1,ComputeAll=False):
 
-    import Florence.ParallelProcessing.parmap as parmap
-    import Florence.InterpolationFunctions.TwoDimensional.Tri.hpNodal as Tri 
 
     # SWITCH OFF MULTI-PROCESSING FOR SMALLER PROBLEMS WITHOUT GIVING A MESSAGE
     if (mesh.elements.shape[0] < 1000) and (C < 8):
@@ -29,9 +32,10 @@ def HighOrderMeshTri_SEMISTABLE(C,mesh,Decimals=10,Parallel=False,nCPU=1,Compute
 
     eps =  FeketePointsTri(C)
     # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
+    hpBases = Tri.hpNodal.hpBases
     Neval = np.zeros((3,eps.shape[0]),dtype=np.float64)
     for i in range(3,eps.shape[0]):
-        Neval[:,i]  = Tri.hpBases(0,eps[i,0],eps[i,1],1)[0]
+        Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],1)[0]
 
     # from Core.Supplementary.Tensors import makezero
     # np.savetxt("/home/roman/Dropbox/neval.dat",makezero(Neval),delimiter=',')

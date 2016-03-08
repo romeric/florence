@@ -8,7 +8,8 @@ from Florence.FiniteElements.SparseAssembly import SparseAssembly_Step_1
 # St = imp.load_source('FiniteElements',pwd+'/FiniteElements/StaticCondensation.py')
 
 
-from Florence.FiniteElements.GetBasesAtInegrationPoints import *
+from Florence.FunctionSpace.GetBasesAtInegrationPoints import *
+
 def DistributedMatrices(elem,MainData,mesh,material,Eulerx,I_stiff_elem,J_stiff_elem,I_mass_elem,J_mass_elem):
     massel=[]; f = []  
     # GET THE FIELDS AT THE ELEMENT LEVEL

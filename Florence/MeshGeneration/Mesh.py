@@ -714,7 +714,7 @@ class Mesh(object):
         median = None
 
         if self.element_type == "tri":
-            import Florence.InterpolationFunctions.TwoDimensional.Tri.hpNodal as Tri
+            from Florence.FunctionSpace import Tri
             from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
 
             middle_point_isoparametric = FeketePointsTri(2)[6] # check
@@ -723,13 +723,14 @@ class Mesh(object):
                     "Did you change your nodal spacing or interpolation functions?")
 
             # C = self.InferPolynomialDegree() - 1
-            bases_for_middle_point = Tri.hpBases(0,middle_point_isoparametric[0],
+            hpBases = Tri.hpNodal.hpBases
+            bases_for_middle_point = hpBases(0,middle_point_isoparametric[0],
                 middle_point_isoparametric[1])[0]
 
             median = np.einsum('ijk,j',self.points[self.elements[:,:3],:],bases_for_middle_point) 
 
         elif self.element_type == "tet":
-            import Florence.InterpolationFunctions.ThreeDimensional.Tetrahedral.hpNodal as Tet
+            from Florence.FunctionSpace import Tet
             from Florence.QuadratureRules.FeketePointsTet import FeketePointsTet
 
             middle_point_isoparametric = FeketePointsTet(3)[21]
@@ -738,7 +739,8 @@ class Mesh(object):
                     "Did you change your nodal spacing or interpolation functions?")
 
             # C = self.InferPolynomialDegree() - 1
-            bases_for_middle_point = Tet.hpBases(0,middle_point_isoparametric[0],
+            hpBases = Tet.hpNodal.hpBases
+            bases_for_middle_point = hpBases(0,middle_point_isoparametric[0],
                 middle_point_isoparametric[1],middle_point_isoparametric[2])[0]
 
             median = np.einsum('ijk,j',self.points[self.elements[:,:4],:],bases_for_middle_point) 
@@ -1018,7 +1020,7 @@ class Mesh(object):
                 self.Read(filename,element_type,order)
         elif self.reader_type is 'ReadSeparate':
             # READ MESH FROM SEPARATE FILES FOR CONNECTIVITY AND COORDINATES
-            from Florence.Base import insensitive
+            from Florence.Utils import insensitive
             # return insensitive(kwargs.keys())
             for key in kwargs.keys():
                 inkey = insensitive(key)

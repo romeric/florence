@@ -1,2 +1,2 @@
 from Hexahedral import HexLagrangeGaussLobatto
-from Tetrahedral import hpModal
+import Tetrahedral

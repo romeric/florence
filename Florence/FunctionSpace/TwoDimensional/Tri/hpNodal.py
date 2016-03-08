@@ -1,8 +1,8 @@
 import numpy as np 
 from Florence.QuadratureRules.FeketePointsTri import *
 from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
-from Florence.InterpolationFunctions.JacobiPolynomials.JacobiPolynomials import *
-from Florence.InterpolationFunctions.DegenerateMappings import MapXiEta2RS
+from Florence.FunctionSpace.JacobiPolynomials.JacobiPolynomials import *
+from Florence.FunctionSpace.DegenerateMappings import MapXiEta2RS
 
 def hpBases(C,xi,eta,Transform=0,EvalOpt=0,EquallySpacedPoints=0):
 

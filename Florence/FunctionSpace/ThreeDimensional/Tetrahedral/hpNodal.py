@@ -1,7 +1,7 @@
 import numpy as np 
 from Florence.QuadratureRules.FeketePointsTet import *
-from Florence.InterpolationFunctions.JacobiPolynomials import *
-from Florence.InterpolationFunctions.DegenerateMappings import MapXiEtaZeta2RST
+from Florence.FunctionSpace.JacobiPolynomials import *
+from Florence.FunctionSpace.DegenerateMappings import MapXiEtaZeta2RST
 
 def hpBases(C,xi,eta,zeta,Transform=0,EvalOpt=0):
 
