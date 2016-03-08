@@ -1,5 +1,6 @@
 from Base import Base
 from QuadratureRules import QuadratureRule 
+from FunctionSpace import FunctionSpace
 from MaterialLibrary import *
 from MeshGeneration.Mesh import Mesh
 from MaterialLibrary import Material

@@ -1,7 +1,7 @@
 import numpy as np
 # from Florence.QuadratureRules import GaussQuadrature, QuadraturePointsWeightsTet, QuadraturePointsWeightsTri
 from Florence import QuadratureRule
-from Florence.FiniteElements.GetBases import *
+from Florence.FunctionSpace.GetBases import *
 
 def GetBasesAtInegrationPoints(C,norder,QuadratureOpt,MeshType):
     """Compute interpolation functions at all integration points"""
@@ -9,28 +9,6 @@ def GetBasesAtInegrationPoints(C,norder,QuadratureOpt,MeshType):
     ndim = 2
     if MeshType == 'tet' or MeshType == 'hex':
         ndim = 3
-
-
-    # z=[]; w=[]; 
-
-    # if MeshType == "quad" or MeshType == "hex":
-    #     z, w = GaussQuadrature(norder,-1.,1.)
-    #     # z, w = GaussQuadrature(MainData.C+MainData.norder,-1.,1.)
-    # elif MeshType == "tet":
-    #     zw = QuadraturePointsWeightsTet.QuadraturePointsWeightsTet(norder,QuadratureOpt)
-    #     # zw = QuadraturePointsWeightsTet.QuadraturePointsWeightsTet(C+1,QuadratureOpt)
-    #     z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
-    # elif MeshType == "tri":
-    #     zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(norder,QuadratureOpt) # PUT C+1 OR HIGHER
-    #     # zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(C+5,QuadratureOpt) # PUT C+4 OR HIGHER
-    #     z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
-
-
-    # # class Quadrature(object):
-    # #     """Quadrature rules"""
-    # #     points = z
-    # #     weights = w
-    # #     Opt = QuadratureOpt
 
     quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder, mesh_type=MeshType)
     z = quadrature.points

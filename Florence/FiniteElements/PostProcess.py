@@ -4,14 +4,18 @@ import gc
 from warnings import warn
 from Florence.Base import JacobianError, IllConditionedError
 
-import Florence.InterpolationFunctions.TwoDimensional.Quad.QuadLagrangeGaussLobatto as TwoD
-import Florence.InterpolationFunctions.ThreeDimensional.Hexahedral.HexLagrangeGaussLobatto as ThreeD
+# import Florence.FunctionSpace.TwoDimensional.Quad.QuadLagrangeGaussLobatto as TwoD
+# import Florence.FunctionSpace.ThreeDimensional.Hexahedral.HexLagrangeGaussLobatto as ThreeD
+from Florence.FunctionSpace import QuadLagrangeGaussLobatto as TwoD
+from Florence.FunctionSpace import HexLagrangeGaussLobatto as ThreeD
 # Modal Bases
-# import Core.InterpolationFunctions.TwoDimensional.Tri.hpModal as Tri 
-# import Core.InterpolationFunctions.ThreeDimensional.Tetrahedral.hpModal as Tet 
+# import Core.FunctionSpace.TwoDimensional.Tri.hpModal as Tri 
+# import Core.FunctionSpace.ThreeDimensional.Tetrahedral.hpModal as Tet 
 # Nodal Bases
-import Florence.InterpolationFunctions.TwoDimensional.Tri.hpNodal as Tri 
-import Florence.InterpolationFunctions.ThreeDimensional.Tetrahedral.hpNodal as Tet 
+# import Florence.FunctionSpace.TwoDimensional.Tri.hpNodal as Tri 
+# import Florence.FunctionSpace.ThreeDimensional.Tetrahedral.hpNodal as Tet 
+from Florence.FunctionSpace import Tri
+from Florence.FunctionSpace import Tet
 
 from ElementalMatrices.KinematicMeasures import *
 # from Core.MeshGeneration import vtk_writer
@@ -756,9 +760,9 @@ class PostProcess(object):
         from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
-        import Florence.InterpolationFunctions.TwoDimensional.Tri.hpNodal as Tri 
-        from Florence.InterpolationFunctions.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
-        from Florence.FiniteElements.GetBases import GetBases
+        from Florence.FunctionSpace import Tri 
+        from Florence.FunctionSpace.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
+        from Florence.FunctionSpace.GetBases import GetBases
 
         from copy import deepcopy
         from scipy.spatial import Delaunay
@@ -786,7 +790,6 @@ class PostProcess(object):
         # BUILD DELAUNAY TRIANGULATION OF REFERENCE ELEMENTS
         TrianglesFunc = Delaunay(FeketePointsTri)
         Triangles = TrianglesFunc.simplices.copy()
-        # plt.triplot(FeketePointsTri[:,0], FeketePointsTri[:,1], Triangles); plt.axis('off')
 
 
         # GET EQUALLY-SPACED/GAUSS-LOBATTO POINTS FOR THE EDGES
@@ -796,8 +799,9 @@ class PostProcess(object):
             GaussLobattoPointsOneD = Lagrange(C,0)[-1]
 
         BasesTri = np.zeros((nsize_2,FeketePointsTri.shape[0]),dtype=np.float64)
+        hpBases = Tri.hpNodal.hpBases
         for i in range(FeketePointsTri.shape[0]):
-            BasesTri[:,i] = Tri.hpBases(CActual,FeketePointsTri[i,0],FeketePointsTri[i,1],
+            BasesTri[:,i] = hpBases(CActual,FeketePointsTri[i,0],FeketePointsTri[i,1],
                 EvalOpt=1,EquallySpacedPoints=EquallySpacedPoints,Transform=1)[0]
 
         BasesOneD = np.zeros((CActual+2,GaussLobattoPointsOneD.shape[0]),dtype=np.float64)
@@ -929,9 +933,9 @@ class PostProcess(object):
         from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
-        import Florence.InterpolationFunctions.TwoDimensional.Tri.hpNodal as Tri 
-        from Florence.InterpolationFunctions.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
-        from Florence.FiniteElements.GetBases import GetBases
+        from Florence.FunctionSpace import Tri 
+        from Florence.FunctionSpace.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
+        from Florence.FunctionSpace.GetBases import GetBases
         from Florence import Mesh
 
         from copy import deepcopy
@@ -975,8 +979,9 @@ class PostProcess(object):
             GaussLobattoPointsOneD = Lagrange(C,0)[-1]
 
         BasesTri = np.zeros((nsize_2,FeketePointsTri.shape[0]),dtype=np.float64)
+        hpBases = Tri.hpNodal.hpBases
         for i in range(FeketePointsTri.shape[0]):
-            BasesTri[:,i] = Tri.hpBases(CActual,FeketePointsTri[i,0],FeketePointsTri[i,1],
+            BasesTri[:,i] = hpBases(CActual,FeketePointsTri[i,0],FeketePointsTri[i,1],
                 EvalOpt=1,EquallySpacedPoints=EquallySpacedPoints,Transform=1)[0]
 
         BasesOneD = np.zeros((CActual+2,GaussLobattoPointsOneD.shape[0]),dtype=np.float64)
@@ -1065,14 +1070,8 @@ class PostProcess(object):
         # MAKE A FIGURE
         if figure is None:
             figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(800,600))
-        # PLOT CURVED EDGES
-        # edge_width = .0016
-        # edge_width = .08
-        # edge_width = 0.0003
-        # edge_width = 0.75
-        edge_width = .03
-
         
+        # PLOT CURVED EDGES
         connections_elements = np.arange(x_edges.size).reshape(x_edges.shape[1],x_edges.shape[0])
         connections = np.zeros((x_edges.size,2),dtype=np.int64)
         for i in range(connections_elements.shape[0]):
@@ -1088,6 +1087,7 @@ class PostProcess(object):
         lines = mlab.pipeline.stripper(src)
         mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
 
+        # OLDER VERSION
         # for i in range(x_edges.shape[1]):
         #     mlab.plot3d(x_edges[:,i],y_edges[:,i],z_edges[:,i],color=(0,0,0),tube_radius=edge_width)
         

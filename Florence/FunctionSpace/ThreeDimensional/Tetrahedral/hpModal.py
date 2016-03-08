@@ -1,6 +1,6 @@
 import imp, os
 import numpy as np 
-from Florence.InterpolationFunctions.JacobiPolynomials import *
+from Florence.FunctionSpace.JacobiPolynomials import *
 
 
 def hpBases(C,r0,s,t):

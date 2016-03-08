@@ -7,10 +7,10 @@ import multiprocessing as MP
 import GetInteriorCoordinates as Gett
 from Florence.QuadratureRules.FeketePointsTet import *
 from Florence.Tensor import itemfreq, makezero, unique2d
+# import Florence.FunctionSpace.ThreeDimensional.Tetrahedral.hpNodal as Tet 
+from Florence.FunctionSpace import Tet
 from Florence.QuadratureRules.NodeArrangement import NodeArrangementTet
 import Florence.ParallelProcessing.parmap as parmap
-import Florence.InterpolationFunctions.TwoDimensional.Quad.QuadLagrangeGaussLobatto as TwoD 
-import Florence.InterpolationFunctions.ThreeDimensional.Tetrahedral.hpNodal as Tet 
 
 #--------------------------------------------------------------------------------------------------------------------------#
 # SUPPLEMENTARY FUNCTIONS 
@@ -19,7 +19,6 @@ def ElementLoopTet(elem,elements,points,MeshType,eps,Neval):
     return xycoord_higher
 
 
-# @profile
 def HighOrderMeshTet_SEMISTABLE(C,mesh,Decimals=10,Zerofy=True,Parallel=False,nCPU=1,ComputeAll=True):
 
     
@@ -32,8 +31,9 @@ def HighOrderMeshTet_SEMISTABLE(C,mesh,Decimals=10,Zerofy=True,Parallel=False,nC
 
     # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
     Neval = np.zeros((4,eps.shape[0]),dtype=np.float64)
+    hpBases = Tet.hpNodal.hpBases
     for i in range(4,eps.shape[0]):
-        Neval[:,i] = Tet.hpBases(0,eps[i,0],eps[i,1],eps[i,2],Transform=1,EvalOpt=1)[0]
+        Neval[:,i] = hpBases(0,eps[i,0],eps[i,1],eps[i,2],Transform=1,EvalOpt=1)[0]
 
     nodeperelem = mesh.elements.shape[1]
     renodeperelem = int((C+2.)*(C+3.)*(C+4.)/6.)

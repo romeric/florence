@@ -1,20 +1,28 @@
 import numpy as np
-from Florence import Mesh
-from Florence.FiniteElements.GetBasesAtInegrationPoints import GetBasesAtInegrationPoints
+from Florence import QuadratureRule, FunctionSpace, Mesh
 
-class MixedFormulations():
+class VariationalPrinciple():
 
-    def __init__(self,mesh,variables_order=(1,0)):
+    def __init__(self, mesh, variables_order=(1,0), 
+        analysis_type='static', analysis_nature='nonlinear',
+        quadrature_rules=None, median=None, prestress_required=True,
+        requires_geometry_update=True):
+
         self.variables_order = variables_order
-        self.quadrature_rules = None
-        self.median = None
+        self.quadrature_rules = quadrature_rules
+        self.median = median
+        self.analysis_type = analysis_type
+        self.analysis_nature = analysis_nature
+        self.requires_prestress = prestress_required
+        self.requires_geometry_update = requires_geometry_update 
+
 
 
 class upFormulation():
     pass
 
 
-class FiveFieldPenalty(MixedFormulations):
+class FiveFieldPenalty(VariationalPrinciple):
 
     def __init__(self,mesh):
 

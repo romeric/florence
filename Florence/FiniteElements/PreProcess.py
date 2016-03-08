@@ -1,14 +1,14 @@
 # THIS FILE IS PART OF FLORENCE
 from warnings import warn
 from Florence.Base import SetPath
-# import Core.MaterialLibrary as MatLib 
+from Florence import QuadratureRule
+from Florence import FunctionSpace
 from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import *
 from Florence.MeshGeneration.SalomeMeshReader import ReadMesh
-from Florence.FiniteElements.GetBasesAtInegrationPoints import *
 import Florence.Formulations.DisplacementElectricPotentialApproach as DEPB
 import Florence.Formulations.DisplacementApproach as DB
-from Florence import Mesh
 from Florence.Utils import insensitive
+from Florence import Mesh
 
 from Florence.Supplementary.Timing import timing
 
@@ -172,6 +172,8 @@ def PreProcess(MainData,mesh,material,Pr,pwd):
     # exit()
 
 
+
+
     # COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR ALL ELEMENTAL INTEGRATON
     ############################################################################
     # FOR DISPLACEMENT-BASED FORMULATIONS (GRADIENT-GRADIENT) WE NEED (P-1)+(P-1) TO EXACTLY
@@ -181,16 +183,46 @@ def PreProcess(MainData,mesh,material,Pr,pwd):
     if norder == 0:
         # TAKE CARE OF C=0 CASE
         norder = 1
-    MainData.Domain, MainData.Boundary, MainData.Quadrature = GetBasesAtInegrationPoints(MainData.C,
-        norder,QuadratureOpt,mesh.element_type)
+    # GET QUADRATURE
+    quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder, mesh_type=mesh.element_type)
+    MainData.quadrature = quadrature
+
+    function_space = FunctionSpace(mesh, quadrature, p=MainData.C+1)
+    MainData.Domain, MainData.Boundary = function_space, function_space.Boundary
     # SEPARATELY COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR POST-PROCESSING
     # E.G. FOR COMPUTATION OF SCALED JACOBIAN. NOTE THAT THIS SHOULD ONLY BE USED FOR POST PROCESSING
     # FOR ELEMENTAL INTEGRATION ALWAYS USE DOMIAN, BOUNDARY AND QUADRATURE AND NOT POSTDOMAIN, 
     # POSTBOUNDARY ETC
     # FOR SCALED JACOBIAN WE NEED QUADRATURE FOR P*P 
     norder_post = (MainData.C+1)+(MainData.C+1)
-    MainData.PostDomain, MainData.PostBoundary, MainData.PostQuadrature = GetBasesAtInegrationPoints(MainData.C,
-        norder_post,QuadratureOpt,mesh.element_type)
+    post_quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder_post, mesh_type=mesh.element_type)
+
+    function_space = FunctionSpace(mesh, post_quadrature, p=MainData.C+1)
+    MainData.PostDomain, MainData.PostBoundary = function_space, function_space.Boundary
+    MainData.post_quadrature = post_quadrature
+
+    ############################################################################
+
+    # from Florence.FunctionSpace.GetBasesAtInegrationPoints import GetBasesAtInegrationPoints
+    # # COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR ALL ELEMENTAL INTEGRATON
+    # ############################################################################
+    # # FOR DISPLACEMENT-BASED FORMULATIONS (GRADIENT-GRADIENT) WE NEED (P-1)+(P-1) TO EXACTLY
+    # # INTEGRATE THE INTEGRANDS
+    # QuadratureOpt = 3   # OPTION FOR QUADRATURE TECHNIQUE FOR TRIS AND TETS
+    # norder = MainData.C+MainData.C
+    # if norder == 0:
+    #     # TAKE CARE OF C=0 CASE
+    #     norder = 1
+    # MainData.Domain, MainData.Boundary, MainData.Quadrature = GetBasesAtInegrationPoints(MainData.C,
+    #     norder,QuadratureOpt,mesh.element_type)
+    # # SEPARATELY COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR POST-PROCESSING
+    # # E.G. FOR COMPUTATION OF SCALED JACOBIAN. NOTE THAT THIS SHOULD ONLY BE USED FOR POST PROCESSING
+    # # FOR ELEMENTAL INTEGRATION ALWAYS USE DOMIAN, BOUNDARY AND QUADRATURE AND NOT POSTDOMAIN, 
+    # # POSTBOUNDARY ETC
+    # # FOR SCALED JACOBIAN WE NEED QUADRATURE FOR P*P 
+    # norder_post = (MainData.C+1)+(MainData.C+1)
+    # MainData.PostDomain, MainData.PostBoundary, MainData.PostQuadrature = GetBasesAtInegrationPoints(MainData.C,
+    #     norder_post,QuadratureOpt,mesh.element_type)
 
     ############################################################################
 
