@@ -3,15 +3,12 @@ from Florence.QuadratureRules import GaussQuadrature, QuadraturePointsWeightsTet
 
 class QuadratureRule(object):
 
-    def __init__(self, qtype="gauss", norder=None, mesh_type="tri", optimal=3):
+    def __init__(self, qtype="gauss", norder=2, mesh_type="tri", optimal=3):
 
         self.qtype = qtype
         self.norder = norder
         # OPTIMAL QUADRATURE POINTS FOR TRIS AND TETS
         self.optimal = optimal
-
-        # self.points = None
-        # self.weights = None
 
         if optimal is False or optimal is None:
             self.qtype = None

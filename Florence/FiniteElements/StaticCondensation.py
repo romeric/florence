@@ -2,8 +2,8 @@ import numpy as np
 import numpy.linalg as la
 import imp, os
 
-pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
-TwoD = imp.load_source('QuadLagrangeGaussLobatto',pwd+'/Florence/InterpolationFunctions/TwoDimensional/Quad/QuadLagrangeGaussLobatto.py')
+# pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
+# TwoD = imp.load_source('QuadLagrangeGaussLobatto',pwd+'/Florence/FunctionSpace/TwoDimensional/Quad/QuadLagrangeGaussLobatto.py')
 
 
 

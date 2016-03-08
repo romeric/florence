@@ -8,7 +8,6 @@ from time import time
 from Florence.QuadratureRules import GaussLobattoQuadrature
 from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
 from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints
-import Florence.InterpolationFunctions.TwoDimensional.Tri.hpNodal as Tri
 
 from CurvilinearMeshing.IGAKitPlugin.IdentifyNURBSBoundaries import GetDirichletData
 # from Florence import PostMeshCurvePy as PostMeshCurve 
@@ -357,6 +356,8 @@ class BoundaryCondition(object):
         from CurvilinearMeshing import (PostMeshCurvePy as PostMeshCurve,
             PostMeshSurfacePy as PostMeshSurface)
 
+        from Florence.FunctionSpace import Tri
+
         # GET BOUNDARY FEKETE POINTS
         if MainData.ndim == 2:
             
@@ -473,8 +474,9 @@ class BoundaryCondition(object):
 
             # PERFORM POINT INVERSION FOR THE INTERIOR POINTS
             Neval = np.zeros((3,boundary_fekete.shape[0]),dtype=np.float64)
+            hpBases = Tri.hpNodal.hpBases
             for i in range(3,boundary_fekete.shape[0]):
-                Neval[:,i]  = Tri.hpBases(0,boundary_fekete[i,0],boundary_fekete[i,1],1)[0]
+                Neval[:,i]  = hpBases(0,boundary_fekete[i,0],boundary_fekete[i,1],1)[0]
             # OrthTol = 0.5
             # project_on_curves = 0
 
@@ -543,7 +545,7 @@ class BoundaryCondition(object):
         from Florence.Tensor import itemfreq, makezero
         from Florence import Mesh
         from Florence.FiniteElements.Solvers.Solver import MainSolver
-        from Florence.FiniteElements.GetBasesAtInegrationPoints import GetBasesAtInegrationPoints
+        from Florence.FunctionSpace.GetBasesAtInegrationPoints import GetBasesAtInegrationPoints
         from Florence.FiniteElements.PostProcess import PostProcess
 
         surface_flags = itemfreq(planar_mesh_faces[:,1])

@@ -1,11 +1,13 @@
 import numpy as np
-from NumericIntegrator import GaussLobattoQuadrature
 
 #------------------------------------------------------------------------------------#
 # 	THIS ROUTINE IS TABULATED BUT FALLS BACK TO ALGORITHMIC PROCEDURE FOR C>14       #
 #------------------------------------------------------------------------------------#
 
 def FeketePointsTri(C):
+	
+	from NumericIntegrator import GaussLobattoQuadrature
+	
 	# FEKETE POINTS ON A TRIANGLE ARE BUILD BASED ON 1D GAUSS-LOBATTO POINTS - SEE THE ALGORITHM
 	FeketePoints = []
 	
