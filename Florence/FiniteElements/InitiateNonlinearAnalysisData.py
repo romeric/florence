@@ -7,11 +7,11 @@ def InitiateNonlinearAnalysisData(MainData,mesh,material):
     ################################################################################
     Tolerance = 2.0e-07
     if MainData.Analysis == 'Static':
-    	Increments = getattr(MainData,"LoadIncrement",None)
-    	if Increments is None:
-    		LoadIncrement = 1
-    	else:
-    		LoadIncrement = Increments
+        Increments = getattr(MainData,"LoadIncrement",None)
+        if Increments is None:
+            LoadIncrement = 1
+        else:
+            LoadIncrement = Increments
     else:
         LoadIncrement = MainData.BoundaryData.nstep
 
@@ -38,4 +38,4 @@ def InitiateNonlinearAnalysisData(MainData,mesh,material):
     ###########################################################################
 
     return np.zeros((mesh.points.shape[0]*MainData.nvar,1),dtype=np.float32), \
-    	np.zeros((mesh.points.shape[0]*MainData.nvar,1),dtype=np.float32)
+        np.zeros((mesh.points.shape[0]*MainData.nvar,1),dtype=np.float32)

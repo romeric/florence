@@ -24,15 +24,15 @@ import Florence.ParallelProcessing.parmap as parmap
 #-------------- MAIN ASSEMBLY ROUTINE --------------------#
 #---------------------------------------------------------#
 
-def Assembly(MainData,mesh,material,Eulerx,TotalPot):
+def Assembly(function_space, formulation, mesh, material, fem_solver, Eulerx, TotalPot):
     # return AssemblyLarge(MainData,mesh,Eulerx,TotalPot) if mesh.nelem > 1e08 else AssemblySmall(MainData,mesh,Eulerx,TotalPot)
 
-    if MainData.__MEMORY__ == "SHARED" or MainData.__MEMORY__ is None:
+    if fem_solver.memory_model == "shared" or fem_solver.memory_model is None:
         if mesh.nelem <= 500000:
-            return AssemblySmall(MainData,mesh,material,Eulerx,TotalPot)
+            return AssemblySmall(function_space, formulation, mesh, material, fem_solver, Eulerx, TotalPot)
         elif mesh.nelem > 500000:
             print("Larger than memory system. Dask on disk parallel assembly is turned on")
-            return OutofCoreAssembly(MainData,mesh,material,Eulerx,TotalPot)
+            return OutofCoreAssembly(function_space, formulation, mesh, material, fem_solver, Eulerx, TotalPot)
         # else:
         #     print("Large system. Numpy memmap assembly is turned on")
         #     return AssemblyLarge(MainData,mesh,Eulerx,TotalPot)
@@ -49,10 +49,7 @@ def Assembly(MainData,mesh,material,Eulerx,TotalPot):
         tmp_dir = par_unpickle(MainData,mesh,material,Eulerx,TotalPot)
         pwd = os.path.dirname(os.path.realpath(__file__))
         distributed_caller = os.path.join(pwd,"DistributedAssembly.py")
-        # p = subprocess.call(["./mpi_runner.sh"], cwd="/home/roman/Dropbox/florence/", shell=True) ##
-         # time mpirun -np 8 Florence/FiniteElements/DistributedAssembly.py "/home/roman/tmp/"
-        # p = subprocess.call(["time mpirun -np "+str(MP.cpu_count())+" Florence/FiniteElements/DistributedAssembly.py"+" /home/roman/tmp/"], 
-            # cwd="/home/roman/Dropbox/florence/", shell=True)
+
         t_dassembly = time()
         p = subprocess.Popen("time mpirun -np "+str(MP.cpu_count())+" Florence/FiniteElements/DistributedAssembly.py"+" /home/roman/tmp/", 
             cwd="/home/roman/Dropbox/florence/", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -72,24 +69,26 @@ def Assembly(MainData,mesh,material,Eulerx,TotalPot):
 #-------------- ASSEMBLY ROUTINE FOR RELATIVELY SMALL SIZE MATRICES (NELEM < 1e6 3D)--------------------#
 #-------------------------------------------------------------------------------------------------------#
 
-def AssemblySmall(MainData,mesh,material,Eulerx,TotalPot):
+def AssemblySmall(function_space, formulation, mesh, material, fem_solver, Eulerx, TotalPot):
 
     # GET MESH DETAILS
-    C = MainData.C
-    nvar = MainData.nvar
-    ndim = MainData.ndim
+    # C = MainData.C
+    # nvar = MainData.nvar
+    # ndim = MainData.ndim
+
+    C = mesh.InferPolynomialDegree() - 1
+    ndim = formulation.ndim
+    nvar = formulation.nvar
     nelem = mesh.nelem
     nodeperelem = mesh.elements.shape[1]
 
     # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF STIFFNESS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
-    pwd = os.path.dirname(os.path.realpath(__file__))
-
     I_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.int32)
     J_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.int32)
     V_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.float32)
 
     I_mass=[];J_mass=[];V_mass=[]
-    if MainData.Analysis !='Static':
+    if fem_solver.analysis_type !='static':
         # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF MASS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
         I_mass=np.zeros((nvar*nodeperelem)**2*mesh.elements.shape[0],dtype=np.int32)
         J_mass=np.zeros((nvar*nodeperelem)**2*mesh.elements.shape[0],dtype=np.int32)
@@ -100,15 +99,15 @@ def AssemblySmall(MainData,mesh,material,Eulerx,TotalPot):
     mass = []
 
 
-    if MainData.Parallel:
+    if fem_solver.parallel:
         # COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
         ParallelTuple = parmap.map(GetElementalMatricesSmall,np.arange(0,nelem,dtype=np.int32),
-            MainData,material,mesh.elements,mesh.points,Eulerx,TotalPot,
-            pool=MP.Pool(processes=MainData.numCPU,maxtasksperchild=500)) # maxtasksperchild=300),chunksize=100
+            function_space, formulation, material, mesh, fem_solver, Eulerx, TotalPot,
+            pool=MP.Pool(processes=fem_solver.no_of_cpu_cores,maxtasksperchild=500)) # maxtasksperchild=300),chunksize=100
 
-    for elem in MainData.Range(nelem):
+    for elem in range(nelem):
 
-        if MainData.Parallel:
+        if fem_solver.parallel:
             # UNPACK PARALLEL TUPLE VALUES
             I_stiff_elem = ParallelTuple[elem][0]; J_stiff_elem = ParallelTuple[elem][1]; V_stiff_elem = ParallelTuple[elem][2]
             t = ParallelTuple[elem][3]; f = ParallelTuple[elem][4]
@@ -116,8 +115,8 @@ def AssemblySmall(MainData,mesh,material,Eulerx,TotalPot):
 
         else:
             # COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
-            I_stiff_elem, J_stiff_elem, V_stiff_elem, t, f, I_mass_elem, J_mass_elem, V_mass_elem = GetElementalMatricesSmall(elem,MainData,
-                material,mesh.elements,mesh.points,Eulerx,TotalPot)
+            I_stiff_elem, J_stiff_elem, V_stiff_elem, t, f, I_mass_elem, J_mass_elem, V_mass_elem = GetElementalMatricesSmall(elem,
+                function_space, formulation, material, mesh, fem_solver, Eulerx,TotalPot)
 
         # SPARSE ASSEMBLY - STIFFNESS MATRIX
         SparseAssemblyNative(I_stiff_elem,J_stiff_elem,V_stiff_elem,I_stiffness,J_stiffness,V_stiffness,
@@ -126,12 +125,12 @@ def AssemblySmall(MainData,mesh,material,Eulerx,TotalPot):
         # SparseAssemblySmall(I_stiff_elem,J_stiff_elem,V_stiff_elem,
         #   I_stiffness,J_stiffness,V_stiffness,elem,nvar,nodeperelem,mesh.elements)
 
-        if MainData.Analysis != 'Static':
+        if fem_solver.analysis_type != 'static':
             # SPARSE ASSEMBLY - MASS MATRIX
             I_mass, J_mass, V_mass = SparseAssemblySmall(I_mass_elem,J_mass_elem,V_mass_elem,
                 I_mass,J_mass,V_mass,elem,nvar,nodeperelem,mesh.elements)
 
-        if MainData.AssemblyParameters.ExternalLoadNature == 'Nonlinear':
+        if fem_solver.has_moving_boundary:
             # RHS ASSEMBLY
             for iterator in range(0,nvar):
                 F[mesh.elements[elem,:]*nvar+iterator,0]+=f[iterator::nvar,0]
@@ -139,7 +138,7 @@ def AssemblySmall(MainData,mesh,material,Eulerx,TotalPot):
         for iterator in range(0,nvar):
             T[mesh.elements[elem,:]*nvar+iterator,0]+=t[iterator::nvar,0]
 
-    if MainData.Parallel:
+    if fem_solver.parallel:
         del ParallelTuple
     gc.collect()
 
@@ -154,13 +153,13 @@ def AssemblySmall(MainData,mesh,material,Eulerx,TotalPot):
         shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float32)
     
     # GET STORAGE/MEMORY DETAILS
-    MainData.spmat = stiffness.data.nbytes/1024./1024.
-    MainData.ijv = (I_stiffness.nbytes + J_stiffness.nbytes + V_stiffness.nbytes)/1024./1024.
+    fem_solver.spmat = stiffness.data.nbytes/1024./1024.
+    fem_solver.ijv = (I_stiffness.nbytes + J_stiffness.nbytes + V_stiffness.nbytes)/1024./1024.
 
     del I_stiffness, J_stiffness, V_stiffness
     gc.collect()
 
-    if MainData.Analysis != 'Static':
+    if fem_solver.analysis_type != 'static':
         # CALL BUILT-IN SPARSE ASSEMBLER
         mass = csc_matrix((V_mass,(I_mass,J_mass)),shape=((nvar*mesh.points.shape[0],
             nvar*mesh.points.shape[0])),dtype=np.float32)
