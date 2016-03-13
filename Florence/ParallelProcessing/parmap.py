@@ -108,16 +108,21 @@ def map(function, iterable, *args, **kwargs):
     chunksize = kwargs.get("chunksize", None)
     pool = kwargs.get("pool", None)
     processes = kwargs.get("processes", None)
+    # processes = kwargs.get("ncpus", None)
+
     # Check if parallel is inconsistent with HAVE_PARALLEL:
     if HAVE_PARALLEL == False and parallel == True:
         print("W: Parallelization is disabled because",
               "multiprocessing is missing")
         parallel = False
+    # Assign right number of processes
+    if processes is None:
+        processes = multiprocessing.cpu_count()
     # Initialize pool if parallel:
     if parallel and pool is None:
         try:
             pool = multiprocessing.Pool(processes=processes)
-            # pool = multiprocessing.Pool(nodes=processes)
+            # pool = multiprocessing.ProcessingPool(ncpus=processes)
         except AssertionError:  # Disable parallel on error:
             print("W: Could not create multiprocessing.Pool.",
                   "Parallel disabled")
@@ -126,11 +131,7 @@ def map(function, iterable, *args, **kwargs):
     # Map:
     if parallel:
         output = pool.map(_func_star_single,
-                          izip(repeat(function), iterable,
-                               repeat(list(args))),
-                          chunksize)
-        pool.close()
-        pool.join()
+                          izip(repeat(function), iterable,repeat(list(args))))
     else:
         output = [function(*([item] + list(args))) for item in iterable]
     return output

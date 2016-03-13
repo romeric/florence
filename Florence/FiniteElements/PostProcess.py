@@ -68,16 +68,16 @@ class PostProcess(object):
         TotalSol = np.zeros((fsize,1))
 
         # GET TOTAL SOLUTION
-        if self.analysis_type == 'Nonlinear':
-            if self.analysis_nature =='Static':
+        if self.analysis_nature == 'nonlinear':
+            if self.analysis_type =='static':
                 TotalSol[ColumnsIn,0] = sol
                 if Iter==0:
                     TotalSol[ColumnsOut,0] = AppliedDirichletInc
-            if self.analysis_nature !='Static':
+            if self.analysis_type !='static':
                 TotalSol = np.copy(sol)
                 TotalSol[ColumnsOut,0] = AppliedDirichletInc
 
-        elif self.analysis_type == 'Linear':
+        elif self.analysis_nature == 'linear':
                 TotalSol[ColumnsIn,0] = sol
                 TotalSol[ColumnsOut,0] = AppliedDirichletInc
                 
