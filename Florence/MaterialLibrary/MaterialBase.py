@@ -8,6 +8,7 @@ else:
 
 # BASE CLASS FOR ALL MATERIAL MODELS - SHOULD NOT BE USED DIRECTLY 
 class Material(object):
+    """Base class for all material models"""
 
     def __init__(self,mtype,ndim,
         lame_parameter_1=None, lame_parameter_2=None, poissons_ratio=None, youngs_modulus=None,
@@ -17,7 +18,7 @@ class Material(object):
 
         # SAFETY CHECKS
         if not isinstance(mtype, str):
-            raise TypeError("Type of material model should be given in string format")
+            raise TypeError("Type of material model should be given as a string")
 
         # MATERIAL CONSTANTS
         self.mu = lame_parameter_1

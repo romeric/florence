@@ -2,14 +2,15 @@ import numpy as np
 import os, imp
 from Florence import Mesh, BoundaryCondition, LinearSolver, FEMSolver
 from Florence.MaterialLibrary import *
+from Florence.VariationalPrinciple import *
 
 def ProblemData(MainData):
 
     MainData.ndim = 2   
-    MainData.Fields = 'Mechanics'   
-    MainData.Formulation = 'DisplacementApproach'
-    MainData.Analysis = 'Static'
-    MainData.AnalysisType = 'Linear'
+    # MainData.Fields = 'Mechanics'   
+    # MainData.Formulation = 'DisplacementApproach'
+    # MainData.Analysis = 'Static'
+    # MainData.AnalysisType = 'Linear'
     # MainData.AnalysisType = 'Nonlinear'
 
     # material = LinearModel(MainData.ndim,youngs_modulus=1.0e01,poissons_ratio=0.4)
@@ -141,5 +142,9 @@ def ProblemData(MainData):
     #     def Get(self,Args):
     #         pass
 
+    formulation = DisplacementFormulation(mesh)
+    fem_solver = FEMSolver(number_of_load_increments=2,analysis_type="static",
+        analysis_nature="linear",parallel=True)
 
-    return mesh, material, boundary_condition
+
+    return formulation, mesh, material, boundary_condition, solver, fem_solver

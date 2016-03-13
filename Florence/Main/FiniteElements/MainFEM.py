@@ -22,8 +22,9 @@ from Florence.FiniteElements.ComputeErrorNorms import *
 
 # import Examples.FiniteElements.Hollow_Arc_Tri.ProblemData as Pr
 # import Examples.FiniteElements.Annular_Circle_Electromechanics.ProblemData as Pr
-# import Examples.FiniteElements.Annular_Circle.ProblemData as Pr
-import Examples.FiniteElements.Annular_Circle_Nurbs.ProblemData as Pr
+import Examples.FiniteElements.Annular_Circle.ProblemData as Pr
+# import Examples.FiniteElements.Annular_Circle_Nurbs.ProblemData as Pr
+# import Examples.FiniteElements.AnnularCircle_MVP.ProblemData as Pr
 # import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
 # import Examples.FiniteElements.Wing2D.ProblemData as Pr
 # import Examples.FiniteElements.Naca_Isotropic.ProblemData as Pr
@@ -48,12 +49,12 @@ def main(MainData, DictOutput=None, nStep=0):
     pwd = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
 
     # READ PROBLEM DATA FILE
-    mesh, material, boundary_condition = Pr.ProblemData(MainData)
-    
+    formulation, mesh, material, boundary_condition, solver, fem_solver = Pr.ProblemData(MainData)
+
     # PRE-PROCESS
     print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation bases etc...')
 
-    PreProcess(MainData,mesh,material,Pr,pwd)
+    quadrature_rules, function_spaces = PreProcess(MainData, formulation, mesh, material, fem_solver, Pr, pwd)
 
     print('Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*MainData.nvar)
     if MainData.ndim==2:
@@ -64,9 +65,50 @@ def main(MainData, DictOutput=None, nStep=0):
              'and number of boundary nodes is', np.unique(mesh.faces).shape[0])
 
     # CALL THE MAIN ROUTINE
-    MainData.Timer = time()
-    TotalDisp = MainSolver(MainData,mesh,material,boundary_condition)
-    MainData.Timer = time() - MainData.Timer
+    # MainData.Timer = time()
+    # # TotalDisp = MainSolver(MainData,mesh,material,boundary_condition)
+    # TotalDisp = MainSolver(function_spaces, formulation, mesh, material, boundary_condition, solver, fem_solver)
+    # MainData.Timer = time() - MainData.Timer
+
+    # ################################################
+    from Florence.VariationalPrinciple import NearlyIncompressibleHuWashizu, DisplacementFormulation
+    from Florence import FEMSolver
+    
+    # formulation = NearlyIncompressibleHuWashizu(mesh)
+    # formulation = DisplacementFormulation(mesh,variables_order=(MainData.C+1,))
+
+    # fem_solver = FEMSolver(analysis_type="static",analysis_nature="nonlinear")
+    # fem_solver.SetFlags(material,formulation)
+
+    # import inspect 
+    # print(inspect.getargspec(formulation.ConstitutiveStiffnessIntegrand))
+    # # print type(self).__name__
+    # exit()
+    # print(formulation)
+    # exit()
+
+    TotalDisp = fem_solver.Solve(function_spaces, formulation, mesh, material, boundary_condition, solver)
+    # print(np.linalg.norm(TotalDisp))
+    # print(np.linalg.norm(mesh.points))
+    # exit()
+
+
+    
+    # formulation.GetLocalStiffness(MainData.Domain,material, 
+    #     mesh.points[mesh.elements[0,:],:],
+    #     mesh.points[mesh.elements[0,:],:], fem_solver, 0)
+
+    # I_stiff_elem, J_stiff_elem, V_stiff_elem, t, f, \
+    # I_mass_elem, J_mass_elem, V_mass_elem = formulation.GetElementalMatrices(elem, 
+    #     MainData.Domain, mesh, material, fem_solver, Eulerx, TotalPot)
+
+    # print I_stiff_elem
+    # exit()
+    # # #################################################
+
+
+
+
 
     # POST-PROCESS
     # print ('Post-Processing the information...')
@@ -103,31 +145,33 @@ def main(MainData, DictOutput=None, nStep=0):
     
     #------------------------------------------------------------------------
 
-    if MainData.AssemblyParameters.FailedToConverge==False:
+    # if MainData.AssemblyParameters.FailedToConverge==False:
+    if not fem_solver.newton_raphson_failed_to_converge:
 
-        post_process = PostProcess(MainData.ndim,MainData.nvar)
+        post_process = PostProcess(formulation.ndim,formulation.nvar)
         if material.is_transversely_isotropic:
             post_process.is_material_anisotropic = True
             post_process.SetAnisotropicOrientations(material.anisotropic_orientations)
 
-        if MainData.AnalysisType == 'Nonlinear':
-            post_process.SetBases(postdomain=MainData.PostDomain)
+        if fem_solver.analysis_nature == 'nonlinear':
+            post_process.SetBases(postdomain=function_spaces[1])
             qualities = post_process.MeshQualityMeasures(mesh,TotalDisp,plot=False,show_plot=False)
-            MainData.isScaledJacobianComputed = qualities[0]
-            MainData.ScaledJacobian = qualities[3]
+            fem_solver.isScaledJacobianComputed = qualities[0]
+            fem_solver.ScaledJacobian = qualities[3]
 
-        if MainData.AnalysisType == "Linear":
-            vmesh = deepcopy(mesh)
-            vmesh.points = vmesh.points + TotalDisp[:,:,MainData.AssemblyParameters.LoadIncrements-1]
-            # TotalDisp = np.sum(TotalDisp,axis=2)[:,:,None]
-        else:
-            vmesh = mesh
+        # if fem_solver.analysis_nature == "linear":
+        #     vmesh = deepcopy(mesh)
+        #     # vmesh.points = vmesh.points + TotalDisp[:,:,MainData.AssemblyParameters.LoadIncrements-1]
+        #     vmesh.points = vmesh.points + TotalDisp[:,:,fem_solver.number_of_load_increments-1]
+        #     # TotalDisp = np.sum(TotalDisp,axis=2)[:,:,None]
+        # else:
+        #     vmesh = mesh
 
         if boundary_condition.projection_flags is None:
             # ProjFlags = np.ones(mesh.faces.shape[0],dtype=np.int64)
-            if MainData.ndim == 1:
+            if formulation.ndim == 1:
                 boundary_condition.projection_flags = np.ones(mesh.faces.shape[0],dtype=np.int64)
-            elif MainData.ndim == 2:
+            elif formulation.ndim == 2:
                 boundary_condition.projection_flags = np.ones(mesh.edges.shape[0],dtype=np.int64)
         # else:
             # ProjFlags = MainData.BoundaryData().ProjectionCriteria(mesh)
@@ -137,7 +181,7 @@ def main(MainData, DictOutput=None, nStep=0):
         # MainData.ScaledJacobian = np.zeros_like(MainData.ScaledJacobian)
         # PostProcess.HighOrderPatchPlot(MainData,mesh,TotalDisp)
 
-        post_process.HighOrderCurvedPatchPlot(mesh,TotalDisp,QuantityToPlot=MainData.ScaledJacobian,
+        post_process.HighOrderCurvedPatchPlot(mesh,TotalDisp,QuantityToPlot=fem_solver.ScaledJacobian,
             ProjectionFlags=boundary_condition.projection_flags,InterpolationDegree=40)
 
         # post_process.HighOrderCurvedPatchPlot(mesh,TotalDisp, ProjectionFlags=boundary_condition.projection_flags,

@@ -4,58 +4,63 @@ from KinematicMeasures import *
 from Florence.Tensor import issymetric
 
 
+
 #-------------------------------------------------------------------------------------------------------------------#
 #                   VECTORISED ELEMENTAL MATRIX COMPUTATION USING EINSUM
 #-------------------------------------------------------------------------------------------------------------------#
-def Stiffness(MainData,material,LagrangeElemCoords,EulerELemCoords,ElectricPotentialElem,elem):
+def Stiffness(function_space, formulation, material, fem_solver, 
+    LagrangeElemCoords, EulerELemCoords, ElectricPotentialElem, elem):
 
-    nvar = MainData.nvar
-    ndim = MainData.ndim
+    nvar = formulation.nvar
+    ndim = formulation.ndim
+    Domain = function_space
+
+    inv = np.linalg.inv
+    det = np.linalg.det
 
     # ALLOCATE
-    stiffness = np.zeros((MainData.Domain.Bases.shape[0]*nvar,MainData.Domain.Bases.shape[0]*nvar),dtype=np.float64)
-    tractionforce = np.zeros((MainData.Domain.Bases.shape[0]*nvar,1),dtype=np.float64)
+    stiffness = np.zeros((Domain.Bases.shape[0]*nvar,Domain.Bases.shape[0]*nvar),dtype=np.float64)
+    tractionforce = np.zeros((Domain.Bases.shape[0]*nvar,1),dtype=np.float64)
     # B = np.zeros((MainData.Domain.Bases.shape[0]*nvar,MainData.MaterialArgs.H_VoigtSize),dtype=np.float64)
-    B = np.zeros((MainData.Domain.Bases.shape[0]*nvar,material.H_VoigtSize),dtype=np.float64)
+    B = np.zeros((Domain.Bases.shape[0]*nvar,material.H_VoigtSize),dtype=np.float64)
 
     
     # COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
     # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-    ParentGradientX = np.einsum('ijk,jl->kil',MainData.Domain.Jm,LagrangeElemCoords)
+    ParentGradientX = np.einsum('ijk,jl->kil',Domain.Jm,LagrangeElemCoords)
     # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
-    MaterialGradient = np.einsum('ijk,kli->ijl',la.inv(ParentGradientX),MainData.Domain.Jm)
+    MaterialGradient = np.einsum('ijk,kli->ijl',inv(ParentGradientX),Domain.Jm)
     # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
     F = np.einsum('ij,kli->kjl',EulerELemCoords,MaterialGradient)
 
     # COMPUTE REMAINING KINEMATIC MEASURES
-    StrainTensors = KinematicMeasures(F,MainData.AnalysisType)
+    StrainTensors = KinematicMeasures(F,fem_solver.analysis_nature)
     
     # UPDATE/NO-UPDATE GEOMETRY
-    if MainData.GeometryUpdate:
+    if fem_solver.requires_geometry_update:
         # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-        ParentGradientx = np.einsum('ijk,jl->kil',MainData.Domain.Jm,EulerELemCoords)
+        ParentGradientx = np.einsum('ijk,jl->kil',Domain.Jm,EulerELemCoords)
         # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
-        SpatialGradient = np.einsum('ijk,kli->ilj',la.inv(ParentGradientx),MainData.Domain.Jm)
+        SpatialGradient = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Domain.Jm)
         # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
-        detJ = np.einsum('i,i,i->i',MainData.Domain.AllGauss[:,0],np.abs(la.det(ParentGradientX)),np.abs(StrainTensors['J']))
+        detJ = np.einsum('i,i,i->i',Domain.AllGauss[:,0],np.abs(det(ParentGradientX)),np.abs(StrainTensors['J']))
     else:
         # SPATIAL GRADIENT AND MATERIAL GRADIENT TENSORS ARE EQUAL
         SpatialGradient = np.einsum('ikj',MaterialGradient)
         # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
-        detJ = np.einsum('i,i->i',MainData.Domain.AllGauss[:,0],np.abs(la.det(ParentGradientX)))
+        detJ = np.einsum('i,i->i',Domain.AllGauss[:,0],np.abs(det(ParentGradientX)))
 
-    
 
     # LOOP OVER GAUSS POINTS
-    for counter in MainData.Range(MainData.Domain.AllGauss.shape[0]): 
+    for counter in range(Domain.AllGauss.shape[0]): 
 
-        if MainData.Fields == 'ElectroMechanics':
+        if formulation.fields == 'electro_mechanics':
             # MATERIAL ELECTRIC FIELD  
             # ElectricFieldX = - np.dot(ElectricPotentialElem.T,MaterialGradient.T)
             # SPATIAL ELECTRIC FIELD
             ElectricFieldx = - np.dot(SpatialGradient[counter,:,:].T,ElectricPotentialElem)
             # COMPUTE SPATIAL ELECTRIC DISPLACEMENT
-            ElectricDisplacementx = MainData.ElectricDisplacementx(MainData.MaterialArgs,StrainTensors,ElectricFieldx)
+            ElectricDisplacementx = fem_solver.ElectricDisplacementx(material,StrainTensors,ElectricFieldx)
         else:
             ElectricFieldx, ElectricDisplacementx = [],[]
 
@@ -64,19 +69,23 @@ def Stiffness(MainData,material,LagrangeElemCoords,EulerELemCoords,ElectricPoten
         # H_Voigt = MainData.Hessian(MainData.MaterialArgs,StrainTensors,ElectricFieldx,elem,counter)
         # H_Voigt = MainData.Hessian(StrainTensors,ElectricFieldx,elem,counter)[0]
         H_Voigt = material.Hessian(StrainTensors,ElectricFieldx,elem,counter)
-        
+
         # COMPUTE CAUCHY STRESS TENSOR
         CauchyStressTensor = []
-        if MainData.GeometryUpdate:
+        if fem_solver.requires_geometry_update:
             CauchyStressTensor = material.CauchyStress(StrainTensors,ElectricFieldx,elem,counter)
 
         # COMPUTE THE TANGENT STIFFNESS MATRIX
-        BDB_1, t = MainData().ConstitutiveStiffnessIntegrand(B,nvar,ndim,MainData.AnalysisType,
-            MainData.Prestress,SpatialGradient[counter,:,:],CauchyStressTensor,ElectricDisplacementx,H_Voigt)
+        # BDB_1, t = MainData().ConstitutiveStiffnessIntegrand(B,nvar,ndim,MainData.AnalysisType,
+            # MainData.Prestress,SpatialGradient[counter,:,:],CauchyStressTensor,ElectricDisplacementx,H_Voigt)
+        BDB_1, t = formulation.ConstitutiveStiffnessIntegrand(B,nvar,ndim,fem_solver.analysis_nature,
+            fem_solver.has_prestress,SpatialGradient[counter,:,:],CauchyStressTensor,ElectricDisplacementx,H_Voigt)
+        
         
         # COMPUTE GEOMETRIC STIFFNESS MATRIX
-        if MainData.GeometryUpdate:
-            BDB_1 += MainData().GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],CauchyStressTensor,nvar,ndim)
+        if fem_solver.requires_geometry_update:
+            # BDB_1 += MainData().GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],CauchyStressTensor,nvar,ndim)
+            BDB_1 += formulation.GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],CauchyStressTensor,nvar,ndim)
             # stiffness += (BDB_1)*detJ[counter]
             # INTEGRATE TRACTION FORCE
             tractionforce += t*detJ[counter]
@@ -86,14 +95,14 @@ def Stiffness(MainData,material,LagrangeElemCoords,EulerELemCoords,ElectricPoten
 
 
     # CHECK FOR SYMMETRY OF STIFFNESS MATRIX
-    if MainData.__NO_DEBUG__ is False:
+    if fem_solver.debug:
         symmetric = issymetric(stiffness)
         if not symmetric:
             print u'\u2717'.encode('utf8')+' : ', 'Elemental stiffness matrix is not symmetric.',
             print ' Is this meant to be?'
-        if issym and (MainData.IsSymmetricityComputed is False):
+        if issym and (fem_solver.IsSymmetricityComputed is False):
             print u'\u2713'.encode('utf8')+' : ', 'Elemental stiffness matrix is symmetric'
-            MainData.IsSymmetricityComputed = True
+            fem_solver.IsSymmetricityComputed = True
 
 
     return stiffness, tractionforce 

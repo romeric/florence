@@ -2,6 +2,7 @@ import numpy as np
 import os, imp
 from Florence import Mesh, BoundaryCondition, LinearSolver, FEMSolver
 from Florence.MaterialLibrary import *
+from Florence.VariationalPrinciple import *
 
 
 def ProblemData(MainData):
@@ -214,21 +215,8 @@ def ProblemData(MainData):
     #         pass
 
     solver = LinearSolver(linear_solver="direct", linear_solver_type="umfpack")
-    MainData.solver = solver
+    formulation = DisplacementFormulation(mesh)
+    fem_solver = FEMSolver(number_of_load_increments=10)
 
-
-    class AnalyticalSolution(object):
-
-        class Args(object):
-            node = 0
-            points = 0
-
-        def Get(self,Args):
-            pass
-
-            
-    # PLACE THEM ALL INSIDE THE MAIN CLASS
-    MainData.AnalyticalSolution = AnalyticalSolution
-
-    return mesh, material, boundary_condition
+    return formulation, mesh, material, boundary_condition, solver, fem_solver
 

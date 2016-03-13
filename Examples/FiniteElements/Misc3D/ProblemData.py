@@ -2,6 +2,7 @@ import numpy as np
 import os, imp
 from Florence import Mesh, BoundaryCondition, LinearSolver, FEMSolver
 from Florence.MaterialLibrary import *
+from Florence.VariationalPrinciple import *
 
 
 def ProblemData(MainData):
@@ -88,7 +89,11 @@ def ProblemData(MainData):
     boundary_condition.GetProjectionCriteria(mesh)
 
     solver = LinearSolver(linear_solver="multigrid", linear_solver_type="amg",iterative_solver_tolerance=5.0e-07)
-    MainData.solver = solver
+    # MainData.solver = solver
 
-    return mesh, material, boundary_condition
+    formulation = DisplacementFormulation(mesh)
+    fem_solver = FEMSolver(number_of_load_increments=2,analysis_type="static",
+        analysis_nature="linear")
+
+    return formulation, mesh, material, boundary_condition, solver, fem_solver
 

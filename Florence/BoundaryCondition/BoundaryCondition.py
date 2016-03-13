@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np, scipy as sp, sys, os, gc
 from warnings import warn
 from time import time
@@ -110,7 +111,7 @@ class BoundaryCondition(object):
         self.modify_linear_mesh_on_projection = int(self.modify_linear_mesh_on_projection)
 
 
-    def SetProjectionCriteria(self, proj_func,mesh, takes_self=False, **kwargs):
+    def SetProjectionCriteria(self, proj_func, mesh, takes_self=False, **kwargs):
         """Factory function for setting projection criteria specific 
             to a problem
 
@@ -179,11 +180,11 @@ class BoundaryCondition(object):
 
 
 
-    def GetDirichletBoundaryConditions(self,MainData,mesh,material):
+    def GetDirichletBoundaryConditions(self, formulation, mesh, material, solver, fem_solver):
 
         #######################################################
-        nvar = MainData.nvar
-        ndim = MainData.ndim
+        nvar = formulation.nvar
+        ndim = formulation.ndim
 
         # ColumnsOut = []; AppliedDirichlet = []
         self.columns_in, self.applied_dirichlet = [], []
@@ -196,7 +197,6 @@ class BoundaryCondition(object):
 
             tCAD = time()
 
-            # IsHighOrder = getattr(MainData.MeshInfo,"IsHighOrder",False)
             IsHighOrder = mesh.IsHighOrder
             # IsDirichletComputed = getattr(MainData.BoundaryData,"IsDirichletComputed",None)
 
@@ -210,32 +210,31 @@ class BoundaryCondition(object):
                     # GET DIRICHLET BOUNDARY CONDITIONS BASED ON THE EXACT GEOMETRY FROM CAD
                     if self.requires_cad:
                         # CALL POSTMESH WRAPPER
-                        nodesDBC, Dirichlet = self.PostMeshWrapper(MainData,mesh,material)
+                        nodesDBC, Dirichlet = self.PostMeshWrapper(formulation, mesh, material, solver, fem_solver)
                     else:
                         # CALL IGAKIT WRAPPER
-                        nodesDBC, Dirichlet = self.IGAKitWrapper(MainData,mesh)
+                        nodesDBC, Dirichlet = self.IGAKitWrapper(mesh)
 
                 else:
-                    # nodesDBC, Dirichlet = MainData.BoundaryData.nodesDBC, MainData.BoundaryData.Dirichlet
                     nodesDBC, Dirichlet = self.nodesDBC, self.Dirichlet                
 
                 # GET DIRICHLET DoFs
                 self.columns_out = (np.repeat(nodesDBC,nvar,axis=1)*nvar +\
-                 np.tile(np.arange(nvar)[None,:],nodesDBC.shape[0]).reshape(nodesDBC.shape[0],MainData.ndim)).ravel()
+                 np.tile(np.arange(nvar)[None,:],nodesDBC.shape[0]).reshape(nodesDBC.shape[0],formulation.ndim)).ravel()
                 self.applied_dirichlet = Dirichlet.ravel()
 
                 # FIX THE DOF IN THE REST OF THE BOUNDARY
-                # if self.fix_dof_elsewhere:
-                #     if ndim==2:
-                #         Rest_DOFs = np.setdiff1d(np.unique(mesh.edges),nodesDBC)
-                #     elif ndim==3:
-                #         Rest_DOFs = np.setdiff1d(np.unique(mesh.faces),nodesDBC)
-                #     for inode in range(Rest_DOFs.shape[0]):
-                #         for i in range(nvar):
-                #             self.columns_out = np.append(self.columns_out,nvar*Rest_DOFs[inode]+i)
-                #             self.applied_dirichlet = np.append(self.applied_dirichlet,0.0)
+                if self.fix_dof_elsewhere:
+                    if ndim==2:
+                        Rest_DOFs = np.setdiff1d(np.unique(mesh.edges),nodesDBC)
+                    elif ndim==3:
+                        Rest_DOFs = np.setdiff1d(np.unique(mesh.faces),nodesDBC)
+                    for inode in range(Rest_DOFs.shape[0]):
+                        for i in range(nvar):
+                            self.columns_out = np.append(self.columns_out,nvar*Rest_DOFs[inode]+i)
+                            self.applied_dirichlet = np.append(self.applied_dirichlet,0.0)
 
-                print 'Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds'
+                print('Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds')
 
                 # end = -3
                 # np.savetxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_Dirichlet_"+"P"+str(MainData.C+1)+".dat",AppliedDirichlet,fmt="%9.16f")
@@ -268,7 +267,7 @@ class BoundaryCondition(object):
                 # AppliedDirichlet = AppliedDirichlet*MainData.CurrentIncr/MainData.nStep
                 # AppliedDirichlet = AppliedDirichlet*1.0/MainData.nStep
 
-                print 'Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds'
+                print('Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds')
 
 
 
@@ -336,8 +335,7 @@ class BoundaryCondition(object):
 
 
 
-
-    def IGAKitWrapper(self,MainData,mesh):
+    def IGAKitWrapper(self,mesh):
         """Calls IGAKit wrapper to get exact Dirichlet boundary conditions"""
 
         # GET THE NURBS CURVE FROM PROBLEMDATA
@@ -350,28 +348,30 @@ class BoundaryCondition(object):
 
 
 
-    def PostMeshWrapper(self,MainData,mesh,material):
+    def PostMeshWrapper(self, formulation, mesh, material, solver, fem_solver):
         """Calls PostMesh wrapper to get exact Dirichlet boundary conditions"""
 
         from CurvilinearMeshing import (PostMeshCurvePy as PostMeshCurve,
             PostMeshSurfacePy as PostMeshSurface)
 
+        C = mesh.InferPolynomialDegree() - 1
+
         from Florence.FunctionSpace import Tri
 
         # GET BOUNDARY FEKETE POINTS
-        if MainData.ndim == 2:
+        if formulation.ndim == 2:
             
             # CHOOSE TYPE OF BOUNDARY SPACING 
             boundary_fekete = np.array([[]])
             # spacing_type = getattr(MainData.BoundaryData,'CurvilinearMeshNodalSpacing',None)
             if self.nodal_spacing_for_cad == 'fekete':
-                boundary_fekete = GaussLobattoQuadrature(MainData.C+2)[0]
+                boundary_fekete = GaussLobattoQuadrature(C+2)[0]
             else:
-                boundary_fekete = EquallySpacedPoints(MainData.ndim,MainData.C)
+                boundary_fekete = EquallySpacedPoints(formulation.ndim,C)
             # IT IS IMPORTANT TO ENSURE THAT THE DATA IS C-CONITGUOUS
             boundary_fekete = boundary_fekete.copy(order="c")
 
-            curvilinear_mesh = PostMeshCurve(mesh.element_type,dimension=MainData.ndim)
+            curvilinear_mesh = PostMeshCurve(mesh.element_type,dimension=formulation.ndim)
             curvilinear_mesh.SetMeshElements(mesh.elements)
             curvilinear_mesh.SetMeshPoints(mesh.points)
             curvilinear_mesh.SetMeshEdges(mesh.edges)
@@ -379,7 +379,6 @@ class BoundaryCondition(object):
             curvilinear_mesh.SetScale(self.scale_value_on_projection)
             curvilinear_mesh.SetCondition(self.condition_for_projection)
             curvilinear_mesh.SetProjectionPrecision(1.0e-04)
-            # curvilinear_mesh.SetProjectionCriteria(MainData.BoundaryData().ProjectionCriteria(mesh))
             curvilinear_mesh.SetProjectionCriteria(self.projection_flags)
             curvilinear_mesh.ScaleMesh()
             # curvilinear_mesh.InferInterpolationPolynomialDegree() 
@@ -423,11 +422,11 @@ class BoundaryCondition(object):
             # GET ACTUAL CURVE POINTS - THIS FUNCTION IS EXPENSIVE
             # MainData.ActualCurve = curvilinear_mesh.DiscretiseCurves(100)
 
-        elif MainData.ndim == 3:
+        elif formulation.ndim == 3:
 
-            boundary_fekete = FeketePointsTri(MainData.C)
+            boundary_fekete = FeketePointsTri(C)
 
-            curvilinear_mesh = PostMeshSurface(mesh.element_type,dimension=MainData.ndim)
+            curvilinear_mesh = PostMeshSurface(mesh.element_type,dimension=formulation.ndim)
             curvilinear_mesh.SetMeshElements(mesh.elements)
             curvilinear_mesh.SetMeshPoints(mesh.points)
             if mesh.edges.ndim == 2 and mesh.edges.shape[1]==0:
@@ -450,9 +449,9 @@ class BoundaryCondition(object):
             # exit()
             curvilinear_mesh.GetGeomEdges()
             curvilinear_mesh.GetGeomFaces()
-            print "CAD geometry has", curvilinear_mesh.NbPoints, "points,", \
+            print("CAD geometry has", curvilinear_mesh.NbPoints, "points,", \
             curvilinear_mesh.NbCurves, "curves and", curvilinear_mesh.NbSurfaces, \
-            "surfaces"
+            "surfaces")
             curvilinear_mesh.GetGeomPointsOnCorrespondingFaces()
 
             # FIRST IDENTIFY WHICH SURFACES CONTAIN WHICH FACES
@@ -517,7 +516,7 @@ class BoundaryCondition(object):
 
             # FOR GEOMETRIES CONTAINING PLANAR SURFACES
             planar_mesh_faces = curvilinear_mesh.GetMeshFacesOnPlanarSurfaces()
-            MainData.planar_mesh_faces = planar_mesh_faces
+            # self.planar_mesh_faces = planar_mesh_faces
 
             # np.savetxt("/home/roman/Dropbox/nodesDBC_.dat",nodesDBC) 
             # np.savetxt("/home/roman/Dropbox/Dirichlet_.dat",Dirichlet)
@@ -526,30 +525,33 @@ class BoundaryCondition(object):
             if self.solve_for_planar_faces:
                 if planar_mesh_faces.shape[0] != 0:
                     # SOLVE A 2D PROBLEM FOR PLANAR SURFACES
-                    switcher = MainData.Parallel
-                    if MainData.Parallel is True or MainData.__PARALLEL__ is True:
-                        MainData.Parallel = False
-                        MainData.__PARALLEL__ = False
+                    switcher = fem_solver.parallel
+                    if fem_solver.parallel is True:
+                        fem_solver.parallel = False
 
-                    self.GetDirichletDataForPlanarFaces(MainData,material,mesh,planar_mesh_faces,nodesDBC,Dirichlet,plot=False)
-                    MainData.__PARALLEL__ == switcher
-                    MainData.Parallel = switcher
+                    self.GetDirichletDataForPlanarFaces(formulation, material,
+                        mesh, solver, fem_solver, planar_mesh_faces, nodesDBC, Dirichlet, plot=False)
+                    fem_solver.parallel == switcher
 
         return nodesDBC, Dirichlet
 
 
     @staticmethod
-    def GetDirichletDataForPlanarFaces(MainData,material,mesh,planar_mesh_faces,nodesDBC,Dirichlet,plot=False):
+    def GetDirichletDataForPlanarFaces(formulation, material, 
+        mesh, solver, fem_solver, planar_mesh_faces, nodesDBC, Dirichlet, plot=False):
         """Solve a 2D problem for planar faces. Modifies Dirichlet"""
 
+        from copy import deepcopy
         from Florence.Tensor import itemfreq, makezero
         from Florence import Mesh
         from Florence.FiniteElements.Solvers.Solver import MainSolver
-        from Florence.FunctionSpace.GetBasesAtInegrationPoints import GetBasesAtInegrationPoints
+        from Florence import FunctionSpace, QuadratureRule
         from Florence.FiniteElements.PostProcess import PostProcess
 
         surface_flags = itemfreq(planar_mesh_faces[:,1])
         number_of_planar_surfaces = surface_flags.shape[0]
+
+        C = mesh.InferPolynomialDegree() - 1
 
         E1 = [1.,0.,0.]
         E2 = [0.,1.,0.]
@@ -560,7 +562,7 @@ class BoundaryCondition(object):
         pmaterial_func = getattr(Florence.MaterialLibrary,material.mtype,None)
         pmaterial = pmaterial_func(2,E=material.E,nu=material.nu,E_A=material.E_A,G_A=material.G_A)
         
-        print "The problem requires 2D analyses. Solving", number_of_planar_surfaces, "2D problems"
+        print("The problem requires 2D analyses. Solving", number_of_planar_surfaces, "2D problems")
         for niter in range(number_of_planar_surfaces):
             
             pmesh = Mesh()
@@ -586,7 +588,6 @@ class BoundaryCondition(object):
 
             counter = 0
             for i in unique_edges:
-                # nodesDBC2D[counter] = whereEQ(nodesDBC,i)[0][0]
                 nodesDBC2D[counter] = np.where(nodesDBC==i)[0][0]
                 Dirichlet2D[counter,:] = Dirichlet[nodesDBC2D[counter],:]
                 counter += 1
@@ -631,12 +632,6 @@ class BoundaryCondition(object):
             pmesh.edges = None
             pmesh.GetBoundaryEdgesTri()
 
-            # DEEP COPY BY SUBCLASSING
-            class MainData2D(MainData):
-                ndim = pmaterial.ndim
-                nvar = pmaterial.nvar
-                __PARALLEL__ = False
-
             # FOR DYNAMICALLY PATCHED ITEMS
             pboundary_condition = BoundaryCondition()
             pboundary_condition.SetCADProjectionParameters()
@@ -648,24 +643,52 @@ class BoundaryCondition(object):
             pboundary_condition.Dirichlet = Dirichlet2D
             # MainData2D.MeshInfo.MeshType = "tri"
 
+
+            psolver = deepcopy(solver)
+            pformulation = deepcopy(formulation)
+            pformulation.ndim = 2
+            pformulation.nvar = 2
+            pfem_solver = deepcopy(fem_solver)
+
+
             # COMPUTE BASES FOR TRIANGULAR ELEMENTS
             QuadratureOpt = 3   # OPTION FOR QUADRATURE TECHNIQUE FOR TRIS AND TETS
-            norder = MainData.C+MainData.C
+            norder = 2*C
             if norder == 0:
                 # TAKE CARE OF C=0 CASE
                 norder = 1
-            MainData2D.Domain, MainData2D.Boundary, MainData2D.Quadrature = GetBasesAtInegrationPoints(MainData2D.C,
-                norder,QuadratureOpt,"tri")
-            # SEPARATELY COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR POST-PROCESSING
-            norder_post = (MainData.C+1)+(MainData.C+1)
-            MainData2D.PostDomain, MainData2D.PostBoundary, MainData2D.PostQuadrature = GetBasesAtInegrationPoints(MainData2D.C,
-                norder_post,QuadratureOpt,"tri")
+
+
+
+            print('Solvingq planar problem number', niter, 'Number of DoF is', pmesh.points.shape[0]*pformulation.nvar)
+
+            # GET QUADRATURE
+            quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder, mesh_type=pmesh.element_type)
+            pfunction_space = FunctionSpace(pmesh, quadrature, p=C+1)
+            # MainData2D.Domain, MainData2D.Boundary = pfunction_space, pfunction_space.Boundary
+
+            norder_post = (C+1)+(C+1)
+            post_quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder_post, mesh_type=pmesh.element_type)
+
+            ppost_function_space = FunctionSpace(pmesh, post_quadrature, p=C+1)
+            # MainData2D.PostDomain, MainData2D.PostBoundary = ppost_function_space, ppost_function_space.Boundary
+            pfunction_spaces = (pfunction_space,ppost_function_space)
+
+            # MainData2D.Domain, MainData2D.Boundary, MainData2D.Quadrature = GetBasesAtInegrationPoints(MainData2D.C,
+            # norder,QuadratureOpt,"tri")
+            # # SEPARATELY COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR POST-PROCESSING
+            # norder_post = (MainData.C+1)+(MainData.C+1)
+            # MainData2D.PostDomain, MainData2D.PostBoundary, MainData2D.PostQuadrature = GetBasesAtInegrationPoints(MainData2D.C,
+            #     norder_post,QuadratureOpt,"tri")
             
             
-            print 'Solvingq planar problem number', niter, 'Number of DoF is', pmesh.points.shape[0]*MainData2D.nvar
             if pmesh.points.shape[0] != Dirichlet2D.shape[0]:
                 # CALL THE MAIN SOLVER FOR SOLVING THE 2D PROBLEM
-                TotalDisp = MainSolver(MainData2D,pmesh,pmaterial,pboundary_condition)
+                # TotalDisp = MainSolver(MainData2D,pmesh,pmaterial,pboundary_condition)
+                # TotalDisp = MainSolver(pfunction_spaces, 
+                    # pformulation, pmesh, pmaterial, pboundary_condition, psolver, pfem_solver)
+                    TotalDisp = pfem_solver.Solve(pfunction_spaces, 
+                    pformulation, pmesh, pmaterial, pboundary_condition, psolver)
             else:
                 # IF THERE IS NO DEGREE OF FREEDOM TO SOLVE FOR (ONE ELEMENT CASE)
                 TotalDisp = Dirichlet2D[:,:,None]

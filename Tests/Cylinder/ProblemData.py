@@ -2,15 +2,16 @@ import numpy as np
 import os, imp
 from Florence import Mesh, BoundaryCondition, LinearSolver, FEMSolver
 from Florence.MaterialLibrary import *
+from Florence.VariationalPrinciple import *
 
 
 def ProblemData(MainData):
 
     MainData.ndim = 3
-    MainData.Fields = 'Mechanics'   
-    MainData.Formulation = 'DisplacementApproach'
-    MainData.Analysis = 'Static'
-    MainData.AnalysisType = 'Linear'
+    # MainData.Fields = 'Mechanics'   
+    # MainData.Formulation = 'DisplacementApproach'
+    # MainData.Analysis = 'Static'
+    # MainData.AnalysisType = 'Linear'
 
     material = IncrementalLinearElastic(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
 
@@ -32,7 +33,9 @@ def ProblemData(MainData):
     boundary_condition.GetProjectionCriteria(mesh)
 
     solver = LinearSolver(linear_solver="multigrid", linear_solver_type="amg",iterative_solver_tolerance=5.0e-07)
-    MainData.solver = solver
+    # formulation = DisplacementFormulation(mesh,variables_order=(2,))
+    formulation = DisplacementFormulation(mesh)
+    fem_solver = FEMSolver(number_of_load_increments=5,analysis_nature="linear")
 
-    return mesh, material, boundary_condition
+    return formulation, mesh, material, boundary_condition, solver, fem_solver
 

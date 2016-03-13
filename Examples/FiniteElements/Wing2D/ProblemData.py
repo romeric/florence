@@ -2,6 +2,7 @@ import numpy as np
 import os, imp
 from Florence import Mesh, BoundaryCondition, LinearSolver, FEMSolver
 from Florence.MaterialLibrary import *
+from Florence.VariationalPrinciple import *
 
 
 def ProblemData(MainData):
@@ -65,6 +66,9 @@ def ProblemData(MainData):
     boundary_condition.SetProjectionCriteria(ProjectionCriteria,mesh,takes_self=True)
 
     solver = LinearSolver()
-    MainData.solver = solver
+    formulation = DisplacementFormulation(mesh)
 
-    return mesh, material, boundary_condition
+    fem_solver = FEMSolver(number_of_load_increments=2,analysis_type="static",
+        analysis_nature="linear",parallel=False)
+
+    return formulation, mesh, material, boundary_condition, solver, fem_solver

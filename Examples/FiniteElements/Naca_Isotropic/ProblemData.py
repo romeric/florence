@@ -2,6 +2,7 @@ import numpy as np
 import os, imp
 from Florence import Mesh, BoundaryCondition, LinearSolver, FEMSolver
 from Florence.MaterialLibrary import *
+from Florence.VariationalPrinciple import *
 
 
 def ProblemData(MainData):
@@ -50,41 +51,9 @@ def ProblemData(MainData):
     boundary_condition.SetNURBSCondition(NURBSCondition,mesh.points[mesh.edges[:,:2],:])
         
     solver = LinearSolver(linear_solver="direct", linear_solver_type="umfpack")
-    MainData.solver = solver
+    formulation = DisplacementFormulation(mesh)
 
-    # class BoundaryData(object):
-    #     # NURBS/NON-NURBS TYPE BOUNDARY CONDITION
-    #     Type = 'nurbs'
-    #     RequiresCAD = False
-    #     # CurvilinearMeshNodalSpacing = 'fekete'
+    fem_solver = FEMSolver(number_of_load_increments=2,analysis_type="static",
+        analysis_nature="linear",parallel=True)
 
-    #     IGES_File = ''
-    #     scale = 1.0
-    #     condition = 2
-
-
-    #     def NURBSParameterisation(self):
-    #         control = np.loadtxt(ProblemPath+'/controls_naca.dat',delimiter=',')
-    #         knots = np.loadtxt(ProblemPath+'/knots_naca.dat',delimiter=',')
-    #         return [({'U':(knots,),'Pw':control,'start':0,'end':2.039675505705710,'degree':3})]
-
-    #     def NURBSCondition(self,x):
-    #         return np.sqrt(x[:,0]**2 + x[:,1]**2) < 2
-
-
-    #     def ProjectionCriteria(self,mesh):
-    #         projection_edges = np.zeros((mesh.edges.shape[0],1),dtype=np.uint64)
-    #         num = mesh.edges.shape[1]
-    #         for iedge in range(mesh.edges.shape[0]):
-    #             x = np.sum(mesh.points[mesh.edges[iedge,:],0])/num
-    #             y = np.sum(mesh.points[mesh.edges[iedge,:],1])/num
-    #             x *= self.scale
-    #             y *= self.scale 
-    #             if np.sqrt(x*x+y*y)< self.condition:
-    #                 projection_edges[iedge]=1
-
-    #         return projection_edges
-
-
-
-    return mesh, material, boundary_condition
+    return formulation, mesh, material, boundary_condition, solver, fem_solver

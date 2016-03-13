@@ -8,9 +8,9 @@ from Florence.FiniteElements.SparseAssembly import SparseAssembly_Step_1
 # St = imp.load_source('FiniteElements',pwd+'/FiniteElements/StaticCondensation.py')
 
 
-from Florence.FunctionSpace.GetBasesAtInegrationPoints import *
 
 def DistributedMatrices(elem,MainData,mesh,material,Eulerx,I_stiff_elem,J_stiff_elem,I_mass_elem,J_mass_elem):
+    
     massel=[]; f = []  
     # GET THE FIELDS AT THE ELEMENT LEVEL
     LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
@@ -21,16 +21,28 @@ def DistributedMatrices(elem,MainData,mesh,material,Eulerx,I_stiff_elem,J_stiff_
         ElectricPotentialElem = []
 
     nodeperelem = mesh.elements.shape[1]
+    
+    from Florence import FunctionSpace, QuadratureRule
 
     norder = 2*MainData.C
     if norder == 0:
         norder = 1
     QuadratureOpt=3
-    MainData.Domain, MainData.Boundary, MainData.Quadrature = GetBasesAtInegrationPoints(MainData.C,
-        norder,QuadratureOpt,mesh.element_type)
+
+    quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder, mesh_type=mesh.element_type)
+    function_space = FunctionSpace(mesh, quadrature, p=MainData.C+1)
+    MainData.Domain, MainData.Boundary = function_space, function_space.Boundary
+
     norder_post = (MainData.C+1)+(MainData.C+1)
-    MainData.PostDomain, MainData.PostBoundary, MainData.PostQuadrature = GetBasesAtInegrationPoints(MainData.C,
-        norder_post,QuadratureOpt,mesh.element_type)
+    post_quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder_post, mesh_type=mesh.element_type)
+    function_space = FunctionSpace(mesh, post_quadrature, p=MainData.C+1)
+    MainData.PostDomain, MainData.PostBoundary = function_space, function_space.Boundary
+
+    # MainData.Domain, MainData.Boundary, MainData.Quadrature = GetBasesAtInegrationPoints(MainData.C,
+    #     norder,QuadratureOpt,mesh.element_type)
+    # norder_post = (MainData.C+1)+(MainData.C+1)
+    # MainData.PostDomain, MainData.PostBoundary, MainData.PostQuadrature = GetBasesAtInegrationPoints(MainData.C,
+    #     norder_post,QuadratureOpt,mesh.element_type)
 
     stiffnessel, t = Stiffness(MainData,material,LagrangeElemCoords,EulerElemCoords,ElectricPotentialElem,elem)
 

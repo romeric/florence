@@ -2,15 +2,16 @@ import numpy as np
 import os, imp
 from Florence import Mesh, BoundaryCondition, LinearSolver, FEMSolver
 from Florence.MaterialLibrary import *
+from Florence.VariationalPrinciple import *
 
 
 def ProblemData(MainData):
 
     MainData.ndim = 2   
-    MainData.Fields = 'Mechanics'   
-    MainData.Formulation = 'DisplacementApproach'
-    MainData.Analysis = 'Static'
-    MainData.AnalysisType = 'Linear'
+    # MainData.Fields = 'Mechanics'   
+    # MainData.Formulation = 'DisplacementApproach'
+    # MainData.Analysis = 'Static'
+    # MainData.AnalysisType = 'Linear'
     # MainData.AnalysisType = 'Nonlinear'
 
     # material = Material("LinearModel",MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
@@ -90,16 +91,21 @@ def ProblemData(MainData):
     mesh = Mesh()
     mesh.Reader(filename=filename, element_type="tri", reader_type="Read")
 
+    solver = LinearSolver(linear_solver="direct", linear_solver_type="umfpack")    
+    
+    formulation = DisplacementFormulation(mesh)
+    fem_solver = FEMSolver(number_of_load_increments=2,analysis_type="static",
+        analysis_nature="linear",parallel=False)
+
 
     cad_file = ProblemPath + '/Circle.igs'
     boundary_condition = BoundaryCondition()
+    boundary_condition.SetAnalysisParameters(analysis_nature=fem_solver.analysis_nature,
+        analysis_type=fem_solver.analysis_type)
     boundary_condition.SetCADProjectionParameters(cad_file,projection_type='arc_length',
         nodal_spacing='fekete',scale=1000.0,condition=1000.0)
     boundary_condition.GetProjectionCriteria(mesh)
 
-    solver = LinearSolver(linear_solver="direct", linear_solver_type="umfpack")
-    MainData.solver = solver
-    
         
 
 
@@ -283,6 +289,14 @@ def ProblemData(MainData):
 
             
     # PLACE THEM ALL INSIDE THE MAIN CLASS
-    MainData.AnalyticalSolution = AnalyticalSolution
+    # MainData.AnalyticalSolution = AnalyticalSolution
 
-    return mesh, material, boundary_condition
+
+
+    # print fem_solver.analysis_nature, fem_solver.analysis_type
+    # print fem_solver.has_prestress
+    # exit()
+
+
+    return formulation, mesh, material, boundary_condition, solver, fem_solver
+

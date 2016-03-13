@@ -1,4 +1,5 @@
 from __future__ import print_function
+import unittest
 import sys, os, imp, time, gc
 from sys import exit
 from datetime import datetime
@@ -40,13 +41,20 @@ def entity_checker(x,y,tol=1e-10):
         raise TypeError("shape of entity does not match with pre-computed solution")
 
     # safe-guard against unsigned overflow
-    if x.dtype != y.dtype:
-        if x.dtype != float:
-            if x.dtype == np.uint64 or x.dtype == np.uint32:
-                x = x.astype(np.int64)
-        if y.dtype != float:
-            if y.dtype == np.uint64 or y.dtype == np.uint32:
-                y = y.astype(np.int64)
+    # if x.dtype != y.dtype:
+    #     if x.dtype != float:
+    #         if x.dtype == np.uint64 or x.dtype == np.uint32:
+    #             x = x.astype(np.int64)
+    #     if y.dtype != float:
+    #         if y.dtype == np.uint64 or y.dtype == np.uint32:
+    #             y = y.astype(np.int64)
+
+    if x.dtype == np.uint64 or x.dtype == np.uint32:
+        x = x.astype(np.int64)
+    if y.dtype == np.uint64 or y.dtype == np.uint32:
+        y = y.astype(np.int64)
+
+    # print(np.sum(x[:,:4]-y[:,:4]))
 
     if np.isclose(x-y,0.,atol=tol).all():
         return True
@@ -58,6 +66,8 @@ def entity_checker(x,y,tol=1e-10):
 def mesh_checker(mesh,Dict):
     """Give a mesh and a Dict loaded from HDF5 to compare"""
 
+    # print((mesh.elements - Dict['elements']).max())
+    # print(mesh.elements.dtype, Dict['elements'].dtype)
     print("Checking higher order mesh generators results")
     if entity_checker(mesh.elements,Dict['elements']):
         print(tick, "mesh elements match")
@@ -110,7 +120,7 @@ def dirichlet_checker(ColumnsOut,AppliedDirichlet,Dict):
         print(cross, "Dirichlet data for degrees of freedom do not match")
         exit()
 
-def final_solution_checker(MainData,material,TotalDisp,Dict):
+def final_solution_checker(material,solver,fem_solver,TotalDisp,Dict):
 
     print("Checking for final solution")
     if not np.isclose(material.nu, float(Dict['PoissonRatio'])):
@@ -123,11 +133,11 @@ def final_solution_checker(MainData,material,TotalDisp,Dict):
         if not np.isclose(material.G_A,float(Dict['G_A'])):
             raise ValueError("Analysis with different material parameters are being compared")
 
-    if MainData.solver.solver_type != Dict['SolverType']:
+    if solver.solver_type != Dict['SolverType']:
         raise ValueError("Results from different solvers are being compared")
-    elif MainData.solver.solver_type == "multigrid" or MainData.solver.solver_type == "amg":
-        if MainData.solver.solver_subtype == "multigrid" or MainData.solver.solver_subtype == "amg":
-            if MainData.solver.iterative_solver_tolerance != Dict['SolverTol']:
+    elif solver.solver_type == "multigrid" or solver.solver_type == "amg":
+        if solver.solver_subtype == "multigrid" or solver.solver_subtype == "amg":
+            if solver.iterative_solver_tolerance != Dict['SolverTol']:
                 raise ValueError("Solver results with different tolerances are being compared")
 
 
@@ -140,9 +150,9 @@ def final_solution_checker(MainData,material,TotalDisp,Dict):
         exit()
 
     Dict['ScaledJacobian'] = Dict['ScaledJacobian'].flatten()
-    MainData.ScaledJacobian = MainData.ScaledJacobian.flatten()
+    fem_solver.ScaledJacobian = fem_solver.ScaledJacobian.flatten()
     # if entity_checker(MainData.ScaledJacobian,Dict['ScaledJacobian'],tol):
-    if np.abs((MainData.ScaledJacobian.min() - Dict['ScaledJacobian'].min())<tol):
+    if np.abs((fem_solver.ScaledJacobian.min() - Dict['ScaledJacobian'].min())<tol):
         print(tick,"Final mesh quality is correct")
     else:
         # print(np.linalg.norm(MainData.ScaledJacobian - Dict['ScaledJacobian']))
@@ -423,7 +433,8 @@ def LeafTestCases():
                 # savemat(spath,Dict)
 
 
-def CylinderTestCases():
+# def CylinderTestCases():
+def TestCaseCylinder():    
 
     print("\n=========================================================================")
     print("                       RUNNING FLORENCE TEST-SUITE                         ")
@@ -431,17 +442,17 @@ def CylinderTestCases():
     print("                       RUNNING Cylinder TEST CASES                         ")
 
     MainData.__NO_DEBUG__ = True
-    MainData.__VECTORISATION__ = True
+    # MainData.__VECTORISATION__ = True
     MainData.__PARALLEL__ = True
     MainData.numCPU = MP.cpu_count()
-    MainData.__PARALLEL__ = False
-    MainData.__MEMORY__ = 'SHARED'
-    # MainData.__MEMORY__ = 'DISTRIBUTED'
+    # MainData.__PARALLEL__ = False
+    # MainData.__MEMORY__ = 'SHARED'
+    # # MainData.__MEMORY__ = 'DISTRIBUTED'
     
-    MainData.norder = 2
-    MainData.plot = (0, 3)
-    nrplot = (0, 'last')
-    MainData.write = 0
+    # MainData.norder = 2
+    # MainData.plot = (0, 3)
+    # nrplot = (0, 'last')
+    # MainData.write = 0
 
     import Tests.Cylinder.ProblemData as Pr
 
@@ -455,21 +466,20 @@ def CylinderTestCases():
             MainData.LoadIncrement = Increment
 
             # READ PROBLEM DATA FILE
-            mesh, material, boundary_condition = Pr.ProblemData(MainData)
-            MainData.nvar = material.nvar
-            MainData.ndim = material.ndim
-
+            formulation, mesh, material, boundary_condition, solver, fem_solver = Pr.ProblemData(MainData)
+            # MainData.nvar = material.nvar
+            # MainData.ndim = material.ndim
 
             
             # PRE-PROCESS
             print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation bases etc...')
 
             # mesh = PreProcess(MainData,material,Pr,pwd)
-            PreProcess(MainData,mesh,material,Pr,pwd)
+            # PreProcess(MainData,mesh,material,Pr,pwd)
+            quadrature_rules, function_spaces = PreProcess(MainData,formulation,mesh,material,fem_solver,Pr,pwd)
 
-
-            if material.is_transversely_isotropic:
-                material.GetFibresOrientation(mesh)
+            # if material.is_transversely_isotropic:
+                # material.GetFibresOrientation(mesh)
             
             # Checking higher order mesh generators results
             cfile = os.path.join(mesh.filename.split(".")[0]+"_P"+str(MainData.C+1)+".mat")
@@ -478,10 +488,11 @@ def CylinderTestCases():
             mesh_checker(mesh,Dict)
             del Dict
             gc.collect()
+            # exit()
 
 
             # Checking Dirichlet data from CAD
-            boundary_condition.GetDirichletBoundaryConditions(MainData,mesh,material)
+            boundary_condition.GetDirichletBoundaryConditions(formulation, mesh, material, solver, fem_solver)
             cfile = os.path.join(mesh.filename.split(".")[0]+"_DirichletData_P"+str(MainData.C+1)+".mat")
             Dict = loadmat(cfile)
             dirichlet_checker(boundary_condition.columns_out,boundary_condition.applied_dirichlet,Dict)
@@ -493,10 +504,12 @@ def CylinderTestCases():
                      'and number of boundary nodes is', np.unique(mesh.faces).shape[0])
 
             # CALL THE MAIN ROUTINE
-            TotalDisp = MainSolver(MainData,mesh,material,boundary_condition)
+            # TotalDisp = MainSolver(MainData,mesh,material,boundary_condition)
+            TotalDisp = fem_solver.Solve(function_spaces, formulation, mesh, material, boundary_condition, solver)
 
-            if MainData.AssemblyParameters.LoadIncrements != 5:
-                raise ValueError("Results with different load increments are being compared")
+            # if MainData.AssemblyParameters.LoadIncrements != 5:
+            # if fem_solver.number_of_load_increments != 5:
+                # raise ValueError("Results with different load increments are being compared")
 
             if material.anisotropic_orientations is None:
                 material.anisotropic_orientations = np.array([np.NAN])
@@ -512,7 +525,7 @@ def CylinderTestCases():
 
             Dict = loadmat(cfile)
             # Checking the final solution 
-            final_solution_checker(MainData,material,TotalDisp,Dict)
+            final_solution_checker(material,solver,fem_solver,TotalDisp,Dict)
             del Dict
             gc.collect()
 
@@ -592,6 +605,6 @@ def F6TestCase():
 # RUN TEST-CASES
 # if __name__ == "__main__":
 # LeafTestCases()
-CylinderTestCases()
+# CylinderTestCases()
 # F6TestCase()
 # AlmondTestCases()

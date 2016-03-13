@@ -53,7 +53,7 @@ if __name__ == "__main__":
     MainData.__VECTORISATION__ = True
     MainData.__PARALLEL__ = True
     MainData.numCPU = MP.cpu_count()
-    MainData.__PARALLEL__ = False
+    # MainData.__PARALLEL__ = False
     MainData.__MEMORY__ = 'SHARED'
     # MainData.__MEMORY__ = 'DISTRIBUTED'
     
@@ -88,8 +88,8 @@ if __name__ == "__main__":
         print("Time taken for the entire analysis was",
               time.time() - t_FEM, "seconds \n")
         # MEMORY USAGE INFORMATION
-        print('Global sparse matrix needed', MainData.spmat, \
-          'MB of memory with IJV indices requiring', MainData.ijv, 'MB')
+        # print('Global sparse matrix needed', MainData.spmat, \
+          # 'MB of memory with IJV indices requiring', MainData.ijv, 'MB')
         # print sys.getsizeof(MainData)
 
     # BEM SESSION

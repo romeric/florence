@@ -21,11 +21,11 @@ class NeoHookean_2(Material):
 
         # INITIALISE STRAIN TENSORS
         from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import KinematicMeasures
-        StrainTensors = KinematicMeasures(np.asarray([np.eye(self.ndim,self.ndim)]*2),"Nonlinear")
+        StrainTensors = KinematicMeasures(np.asarray([np.eye(self.ndim,self.ndim)]*2),"nonlinear")
         self.Hessian(StrainTensors)
         
 
-    def Hessian(self,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
+    def Hessian(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
         
         I = StrainTensors['I']
         detF = StrainTensors['J'][gcounter]
@@ -40,7 +40,7 @@ class NeoHookean_2(Material):
 
         return H_Voigt
 
-    def CauchyStress(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
+    def CauchyStress(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
 
         I = StrainTensors['I']
         J = StrainTensors['J'][gcounter]
