@@ -55,7 +55,7 @@ profile_imports_manual.py
 nr.py
 
 # testfiles not to ignore
-!Tests/Almond3D/
-!Tests/Almond3D/*
-!Tests/Cylinder/
-!Tests/Cylinder/*
+!tests/Almond3D/
+!tests/Almond3D/*
+!tests/Cylinder/
+!tests/Cylinder/*
