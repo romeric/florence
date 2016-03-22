@@ -1,1 +1,1 @@
-from JacobiPolynomials import *
+from .JacobiPolynomials import *

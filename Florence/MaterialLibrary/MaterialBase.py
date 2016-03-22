@@ -89,10 +89,15 @@ class Material(object):
         if self.H_Voigt is not None:
             self.H_VoigtSize = self.H_Voigt.shape[0]
 
+        self.is_compressible = True
+        self.is_incompressible = False
+        self.is_nearly_incompressible = False
+
         self.is_anisotropic = False
         self.is_transversely_isotropic = False
         self.is_nonisotropic = False
         self.anisotropic_orientations = None
+
 
 
     def SetFibresOrientation(self,anisotropic_orientations):
