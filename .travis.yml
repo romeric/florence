@@ -50,7 +50,7 @@ install:
 
 script:
   # Run florence test suite
-  - cd $FLORENCEPATH; nosetests -x --with-coverage Tests/test.py
+  - cd $FLORENCEPATH; nosetests -x --with-coverage tests/test.py
 
 notifications:
   email: false
