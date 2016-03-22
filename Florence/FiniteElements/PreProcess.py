@@ -1,12 +1,9 @@
 # THIS FILE IS PART OF FLORENCE
 from warnings import warn
-from Florence.Base import SetPath
-from Florence import QuadratureRule
-from Florence import FunctionSpace
+# from Florence.Base import SetPath
+from Florence import QuadratureRule, FunctionSpace
 from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import *
 from Florence.MeshGeneration.SalomeMeshReader import ReadMesh
-import Florence.Formulations.DisplacementElectricPotentialApproach as DEPB
-import Florence.Formulations.DisplacementApproach as DB
 from Florence.Utils import insensitive
 from Florence import Mesh
 
@@ -167,36 +164,36 @@ def PreProcess(MainData, formulation, mesh, material, fem_solver, Pr, pwd):
 
 
 
-    # COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR ALL ELEMENTAL INTEGRATON
-    ############################################################################
-    # FOR DISPLACEMENT-BASED FORMULATIONS (GRADIENT-GRADIENT) WE NEED (P-1)+(P-1) TO EXACTLY
-    # INTEGRATE THE INTEGRANDS
-    QuadratureOpt = 3   # OPTION FOR QUADRATURE TECHNIQUE FOR TRIS AND TETS
-    norder = MainData.C+MainData.C
-    if norder == 0:
-        # TAKE CARE OF C=0 CASE
-        norder = 1
-    # GET QUADRATURE
-    quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder, mesh_type=mesh.element_type)
-    # MainData.quadrature = quadrature
-    function_space = FunctionSpace(mesh, quadrature, p=MainData.C+1)
-    # MainData.Domain, MainData.Boundary = function_space, function_space.Boundary
+    # # COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR ALL ELEMENTAL INTEGRATON
+    # ############################################################################
+    # # FOR DISPLACEMENT-BASED FORMULATIONS (GRADIENT-GRADIENT) WE NEED (P-1)+(P-1) TO EXACTLY
+    # # INTEGRATE THE INTEGRANDS
+    # QuadratureOpt = 3   # OPTION FOR QUADRATURE TECHNIQUE FOR TRIS AND TETS
+    # norder = MainData.C+MainData.C
+    # if norder == 0:
+    #     # TAKE CARE OF C=0 CASE
+    #     norder = 1
+    # # GET QUADRATURE
+    # quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder, mesh_type=mesh.element_type)
+    # # MainData.quadrature = quadrature
+    # function_space = FunctionSpace(mesh, quadrature, p=MainData.C+1)
+    # # MainData.Domain, MainData.Boundary = function_space, function_space.Boundary
 
-    # COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR POST-PROCESSING
-    # E.G. FOR COMPUTATION OF SCALED JACOBIAN. NOTE THAT THIS SHOULD ONLY BE USED FOR POST PROCESSING
-    # FOR ELEMENTAL INTEGRATION ALWAYS USE DOMIAN, BOUNDARY AND QUADRATURE AND NOT POSTDOMAIN, 
-    # POSTBOUNDARY ETC
-    # FOR SCALED JACOBIAN WE NEED QUADRATURE FOR P*P 
-    norder_post = (MainData.C+1)+(MainData.C+1)
-    post_quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder_post, mesh_type=mesh.element_type)
+    # # COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR POST-PROCESSING
+    # # E.G. FOR COMPUTATION OF SCALED JACOBIAN. NOTE THAT THIS SHOULD ONLY BE USED FOR POST PROCESSING
+    # # FOR ELEMENTAL INTEGRATION ALWAYS USE DOMIAN, BOUNDARY AND QUADRATURE AND NOT POSTDOMAIN, 
+    # # POSTBOUNDARY ETC
+    # # FOR SCALED JACOBIAN WE NEED QUADRATURE FOR P*P 
+    # norder_post = (MainData.C+1)+(MainData.C+1)
+    # post_quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder_post, mesh_type=mesh.element_type)
 
-    post_function_space = FunctionSpace(mesh, post_quadrature, p=MainData.C+1)
-    # MainData.PostDomain, MainData.PostBoundary = function_space, function_space.Boundary
-    # MainData.post_quadrature = post_quadrature
+    # post_function_space = FunctionSpace(mesh, post_quadrature, p=MainData.C+1)
+    # # MainData.PostDomain, MainData.PostBoundary = function_space, function_space.Boundary
+    # # MainData.post_quadrature = post_quadrature
 
-    quadrature_rules = (quadrature,post_quadrature)
-    function_spaces = (function_space,post_function_space)
-    #############################################################################
+    # quadrature_rules = (quadrature,post_quadrature)
+    # function_spaces = (function_space,post_function_space)
+    # #############################################################################
 
 
 
@@ -205,115 +202,6 @@ def PreProcess(MainData, formulation, mesh, material, fem_solver, Pr, pwd):
                             # MATERIAL MODEL PRE-PROCESS
     #############################################################################
     #############################################################################
-
-    # CHECK IF MATERIAL MODEL AND ANALYSIS TYPE ARE COMPATIBLE
-    #############################################################################
-    if "nonlinear" in insensitive(MainData.AnalysisType):
-        if "linear" in  iqnsensitive(material.mtype) or \
-            "increment" in insensitive(material.mtype):
-            warn("Incompatible material model and analysis type. I'm going to change analysis type")
-            MainData.AnalysisType = "Linear"
-
-    if material.is_transversely_isotropic:
-        material.GetFibresOrientation(mesh)
-    ##############################################################################
-    # MainData.nvar = material.nvar
-
-    # # FORMULATION TYPE FLAGS
-    # #############################################################################   
-    # if MainData.Formulation == 'DisplacementApproach':
-    #     MainData.ConstitutiveStiffnessIntegrand = DB.ConstitutiveStiffnessIntegrand
-    #     MainData.GeometricStiffnessIntegrand = DB.GeometricStiffnessIntegrand
-    #     MainData.MassIntegrand =  DB.MassIntegrand
-    
-    # elif MainData.Formulation == 'DisplacementElectricPotentialApproach':
-    #     MainData.ConstitutiveStiffnessIntegrand = DEPB.ConstitutiveStiffnessIntegrand
-    #     MainData.GeometricStiffnessIntegrand = DEPB.GeometricStiffnessIntegrand
-    #     MainData.MassIntegrand =  DEPB.MassIntegrand
-
-
-
-    # # STRESS COMPUTATION FLAGS FOR LINEARISED ELASTICITY
-    # ###########################################################################
-    # MainData.Prestress = 0
-    # if "nonlinear" not in insensitive(MainData.AnalysisType) and MainData.Fields == "Mechanics":
-    #     # RUN THE SIMULATION WITHIN A NONLINEAR ROUTINE
-    #     if material.mtype != "IncrementalLinearElastic" and \
-    #         material.mtype != "LinearModel":
-    #         MainData.Prestress = 1
-    #     else:
-    #         MainData.Prestress = 0
-
-    # # GEOMETRY UPDATE FLAGS
-    # ###########################################################################
-    # # DO NOT UPDATE THE GEOMETRY IF THE MATERIAL MODEL NAME CONTAINS 
-    # # INCREMENT (CASE INSENSITIVE). VALID FOR ELECTROMECHANICS FORMULATION. 
-    # MainData.GeometryUpdate = 0
-    # if MainData.Fields == "ElectroMechanics":
-    #     if "Increment" in insensitive(material.mtype):
-    #         # RUN THE SIMULATION WITHIN A NONLINEAR ROUTINE WITHOUT UPDATING THE GEOMETRY
-    #         MainData.GeometryUpdate = 0
-    #     else:
-    #         MainData.GeometryUpdate = 1
-    # elif MainData.Fields == "Mechanics":
-    #     if MainData.AnalysisType == "Nonlinear" or MainData.Prestress:
-    #         MainData.GeometryUpdate = 1
-    # ###########################################################################
-
-    # # CHECK IF MATERIAL MODEL AND ANALYSIS TYPE ARE COMPATIBLE
-    # #############################################################################
-    # if "nonlinear" in insensitive(fem_solver.analysis_nature):
-    #     if "linear" in  insensitive(material.mtype) or \
-    #         "increment" in insensitive(material.mtype):
-    #         warn("Incompatible material model and analysis type. I'm going to change analysis type")
-    #         fem_solver.analysis_nature = "linear"
-
-    # if material.is_transversely_isotropic:
-    #     material.GetFibresOrientation(mesh)
-    # ##############################################################################
-    # MainData.nvar = material.nvar
-
-    # FORMULATION TYPE FLAGS
-    ############################################################################# 
-
-    # if type(formulation).__name__ == 'DisplacementFormulation':
-    #     formulation.ConstitutiveStiffnessIntegrand = DB.ConstitutiveStiffnessIntegrand
-    #     formulation.GeometricStiffnessIntegrand = DB.GeometricStiffnessIntegrand
-    #     formulation.MassIntegrand =  DB.MassIntegrand
-    
-    # elif type(formulation).__name__ == 'DisplacementPotentialFormulation':
-    #     formulation.ConstitutiveStiffnessIntegrand = DEPB.ConstitutiveStiffnessIntegrand
-    #     formulation.GeometricStiffnessIntegrand = DEPB.GeometricStiffnessIntegrand
-    #     formulation.MassIntegrand =  DEPB.MassIntegrand
-
-
-    # STRESS COMPUTATION FLAGS FOR LINEARISED ELASTICITY
-    ###########################################################################
-    fem_solver.has_prestress = False
-    if "nonlinear" not in insensitive(fem_solver.analysis_nature) and formulation.fields == "mechanics":
-        # RUN THE SIMULATION WITHIN A NONLINEAR ROUTINE
-        if material.mtype != "IncrementalLinearElastic" and \
-            material.mtype != "LinearModel":
-            fem_solver.has_prestress = True
-            
-
-    # GEOMETRY UPDATE FLAGS
-    ###########################################################################
-    # DO NOT UPDATE THE GEOMETRY IF THE MATERIAL MODEL NAME CONTAINS 
-    # INCREMENT (CASE INSENSITIVE). VALID FOR ELECTROMECHANICS FORMULATION. 
-    fem_solver.requires_geometry_update = False
-    if formulation.fields == "electro_mechanics":
-        if insensitive("increment") in insensitive(material.mtype):
-            # RUN THE SIMULATION WITHIN A NONLINEAR ROUTINE WITHOUT UPDATING THE GEOMETRY
-            fem_solver.requires_geometry_update = False
-        else:
-            fem_solver.requires_geometry_update = True
-    elif formulation.fields == "mechanics":
-        if fem_solver.analysis_nature == "nonlinear" or fem_solver.has_prestress:
-            fem_solver.requires_geometry_update = True
-    ###########################################################################
-
-
 
 
 
@@ -335,15 +223,15 @@ def PreProcess(MainData, formulation, mesh, material, fem_solver, Pr, pwd):
     MainData.IsSymmetricityComputed = False
 
 
-    # DICTIONARY OF SAVED VARIABLES
-    #############################################################################
-    if MainData.write == 1:
-        MainData.MainDict = {'ProblemPath': MainData.Path.ProblemResults, 
-         'MeshPoints':mesh.points, 'MeshElements':mesh.elements, 'MeshFaces':mesh.faces, 'MeshEdges':mesh.edges,
-         'Solution':[], 'DeformationGradient':[], 'CauchyStress':[],
-         'SecondPiolaStress':[], 'ElectricField':[], 'ElectricDisplacement':[]}
+    # # DICTIONARY OF SAVED VARIABLES
+    # #############################################################################
+    # if MainData.write == 1:
+    #     MainData.MainDict = {'ProblemPath': MainData.Path.ProblemResults, 
+    #      'MeshPoints':mesh.points, 'MeshElements':mesh.elements, 'MeshFaces':mesh.faces, 'MeshEdges':mesh.edges,
+    #      'Solution':[], 'DeformationGradient':[], 'CauchyStress':[],
+    #      'SecondPiolaStress':[], 'ElectricField':[], 'ElectricDisplacement':[]}
 
-    #############################################################################
+    # #############################################################################
 
 
     return quadrature_rules, function_spaces

@@ -464,14 +464,21 @@ class Mesh(object):
         return interior_faces, face_flags
 
 
-    def GetHighOrderMesh(self,C,**kwargs):
+    def GetHighOrderMesh(self,p=1,**kwargs):
         """Given a linear tri, tet, quad or hex mesh compute high order mesh based on it.
         This is a static method linked to the HigherOrderMeshing module"""
 
         if self.degree is None:
             self.InferPolynomialDegree()
-        if self.degree - 1 == C:
-            # DO NOT COMPUTE IF ALREADY COMPUTED FOR THE SAME ORDER
+
+        C = p-1
+        if 'C' in kwargs.keys():
+            if kwargs['C'] != p - 1:
+                raise ValueError("Did not understand the specified interpolation degree of the mesh")
+            del kwargs['C']
+
+        # DO NOT COMPUTE IF ALREADY COMPUTED FOR THE SAME ORDER
+        if self.degree == p:
             return
 
         # SITUATIONS WHEN ANOTHER HIGH ORDER MESH IS REQUIRED, WITH ONE HIGH
@@ -530,11 +537,12 @@ class Mesh(object):
         self.nelem = nmesh.nelem
         self.element_type = nmesh.info
         self.degree = C+1
+
+        self.ChangeType()
         
         print 'Finished generating the high order mesh. Time taken', time()-t_mesh,'sec'
 
 
-    @property
     def EdgeLengths(self,which_edges='boundary'):
         """Computes length of edges, for 2D and 3D meshes
 
@@ -576,39 +584,47 @@ class Mesh(object):
         return lengths  
 
 
-    @property
-    def Areas(self,with_sign=False):
+    def Areas(self, with_sign=False, gpoints=None):
         """Find areas of all 2D elements [tris, quads]. 
             For 3D elements returns surface areas of faces 
+
+            input:
+                with_sign:              [str] compute with/without sign
+                gpoints:                [ndarray] given coordinates to use instead of
+                                        self.points
 
             returns:                    1D array of nelem x 1 containing areas
 
         """
 
         assert self.elements is not None
-        assert self.points is not None
         assert self.element_type is not None
+        if gpoints is None:
+            assert self.points is not None
+            gpoints = self.points
 
         if self.element_type == "tri":
-            points = np.ones((self.points.shape[0],3),dtype=np.float64)
-            points[:,:2]=self.points
+            points = np.ones((gpoints.shape[0],3),dtype=np.float64)
+            points[:,:2] = gpoints
             # FIND AREAS OF ALL THE ELEMENTS
-            area = 0.5*np.linalg.det(points[self.elements,:])
+            area = 0.5*np.linalg.det(points[self.elements[:,:3],:])
         elif self.element_type == "tet":
             # GET ALL THE FACES
             faces = self.GetFacesTet()
 
-            points = np.ones((self.points.shape[0],3),dtype=np.float64)
-            points[:,:2]=self.points[:,:2]
-            area0 = np.linalg.det(points[faces,:])
+            points = np.ones((gpoints.shape[0],3),dtype=np.float64)
+            points[:,:2]=gpoints[:,:2]
+            area0 = np.linalg.det(points[faces[:,:3],:])
 
-            points[:,:2]=self.points[:,[2,0]]
-            area1 = np.linalg.det(points[faces,:])
+            points[:,:2]=gpoints[:,[2,0]]
+            area1 = np.linalg.det(points[faces[:,:3],:])
 
-            points[:,:2]=self.points[:,[1,2]]
-            area2 = np.linalg.det(points[faces,:])
+            points[:,:2]=gpoints[:,[1,2]]
+            area2 = np.linalg.det(points[faces[:,:3],:])
 
             area = 0.5*np.linalg.norm(area0+area1+area2)
+        else:
+            raise NotImplementedError("Computing areas for", self.element_type, "elements not implemented yet")
 
         if with_sign is False:
             if self.element_type == "tri":
@@ -619,35 +635,44 @@ class Mesh(object):
         return area
 
 
-    @property
-    def Volumes(self,with_sign=False):
-        """Find Volumes of all 3D elements [tets, hexes]. 
+    def Volumes(self, with_sign=False, gpoints=None):
+        """Find Volumes of all 3D elements [tets, hexes]
+
+            input:
+                with_sign:              [str] compute with/without sign
+                gpoints:                [ndarray] given coordinates to use instead of
+                                        self.points
 
             returns:                    1D array of nelem x 1 containing volumes
 
         """
 
         assert self.elements is not None
-        assert self.points is not None
         assert self.element_type is not None
+        if gpoints is None:
+            assert self.points is not None
+            gpoints = self.points
 
         if self.element_type == "tet":
 
-            a = self.points[self.elements[:,0],:]
-            b = self.points[self.elements[:,1],:]
-            c = self.points[self.elements[:,2],:]
-            d = self.points[self.elements[:,3],:]
+            a = gpoints[self.elements[:,0],:]
+            b = gpoints[self.elements[:,1],:]
+            c = gpoints[self.elements[:,2],:]
+            d = gpoints[self.elements[:,3],:]
 
             det_array = np.dstack((a-d,b-d,c-d))
             # FIND VOLUME OF ALL THE ELEMENTS
             volume = 1./6.*np.linalg.det(det_array)
+
+        else:
+            raise NotImplementedError("Computing volumes for", self.element_type, "elements not implemented yet")
 
         if with_sign is False:
             volume = np.abs(volume)
 
         return volume
 
-    @property
+
     def AspectRatios(self,algorithm='edge_based'):
         """Compute aspect ratio of the mesh element-by-element.
             For 2D meshes aspect ratio is aspect ratio is defined as 
@@ -698,7 +723,7 @@ class Mesh(object):
 
         return aspect_ratio
 
-    @property
+
     def Median(self):
         """Computes median of the elements tri, tet, quad, hex based on the interpolation function
 
@@ -1004,7 +1029,7 @@ class Mesh(object):
         self.all_faces = self.elements[self.face_to_element[:,0][:,None],node_arranger[self.face_to_element[:,1],:]]
 
 
-    def Reader(self, filename=None, element_type="tri", reader_type="Read", reader_type_format=None, 
+    def Reader(self, filename=None, element_type="tri", reader_type="Salome", reader_type_format=None, 
         reader_type_version=None, order=0, **kwargs):
         """Convenience mesh reader method to dispatch call to subsequent apporpriate methods"""
 
@@ -1013,11 +1038,10 @@ class Mesh(object):
         self.reader_type_format = reader_type_format
         self.reader_type_version = reader_type_version
 
-        if self.reader_type is 'Read': 
-            if reader_type_format is 'GID':
-                self.ReadGIDMesh(filename,element_type,order)
-            else:   
-                self.Read(filename,element_type,order)
+        if self.reader_type is 'Salome': 
+            self.Read(filename,element_type,order)
+        elif reader_type is 'GID':
+            self.ReadGIDMesh(filename,element_type,order)
         elif self.reader_type is 'ReadSeparate':
             # READ MESH FROM SEPARATE FILES FOR CONNECTIVITY AND COORDINATES
             from Florence.Utils import insensitive
@@ -1850,7 +1874,8 @@ class Mesh(object):
 
     def ChangeType(self):
         """Change mesh data type from signed to unsigned"""
-        self.elements = self.elements.astype(np.uint64)
+        if isinstance(self.elements,np.ndarray):
+            self.elements = self.elements.astype(np.uint64)
         if isinstance(self.edges,np.ndarray):
             self.edges = self.edges.astype(np.uint64)
         if isinstance(self.faces,np.ndarray):

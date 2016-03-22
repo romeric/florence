@@ -1,20 +1,18 @@
+import os, sys
+sys.path.insert(1,'/home/roman/Dropbox/florence')
+
 import numpy as np 
-import os, imp
-from Florence import Mesh, BoundaryCondition, LinearSolver, FEMSolver
-from Florence.MaterialLibrary import *
+from Florence import *
 from Florence.VariationalPrinciple import *
 
-def ProblemData(MainData):
+def ProblemData(*args, **kwargs):
 
-    MainData.ndim = 3   
-    MainData.Fields = 'Mechanics'   
-    MainData.Formulation = 'DisplacementApproach'
-    MainData.Analysis = 'Static'
-    # MainData.AnalysisType = 'Linear'
-    MainData.AnalysisType = 'Nonlinear'
+
+    ndim = 3
+    p = 2
 
     # material = LinearModel(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
-    material = IncrementalLinearElastic(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
+    material = IncrementalLinearElastic(ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
     # material = NeoHookean_2(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
     # material = MooneyRivlin(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
     # material = NearlyIncompressibleMooneyRivlin(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
@@ -26,7 +24,7 @@ def ProblemData(MainData):
     ProblemPath = os.path.dirname(os.path.realpath(__file__))
     mesh = Mesh()
     mesh.Reader(element_type="tet",reader_type="Sphere")
-
+    mesh.GetHighOrderMesh(p=p)
 
     cad_file = ProblemPath + '/Sphere.igs'
     boundary_condition = BoundaryCondition()
@@ -35,10 +33,15 @@ def ProblemData(MainData):
     boundary_condition.GetProjectionCriteria(mesh)
 
     solver = LinearSolver(linear_solver="direct", linear_solver_type="umfpack")
-    # MainData.solver = solver 
-
     formulation = DisplacementFormulation(mesh)
     fem_solver = FEMSolver(number_of_load_increments=2,analysis_type="static",
         analysis_nature="linear")
 
-    return formulation, mesh, material, boundary_condition, solver, fem_solver
+    solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
+            material=material, boundary_condition=boundary_condition, solver=solver)
+
+    solution.CurvilinearPlot()
+
+
+if __name__ == "__main__":
+    ProblemData()

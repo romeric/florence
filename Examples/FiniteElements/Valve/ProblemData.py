@@ -1,39 +1,38 @@
+import os, sys
+sys.path.insert(1,'/home/roman/Dropbox/florence')
+
 import numpy as np 
-import os, imp
-from Florence import Mesh, BoundaryCondition, LinearSolver, FEMSolver
-from Florence.MaterialLibrary import *
+from Florence import *
+from Florence.VariationalPrinciple import *
 
-def ProblemData(MainData):
+def ProblemData(*args, **kwargs):
 
-    MainData.ndim = 3   
-    MainData.Fields = 'Mechanics'   
-    MainData.Formulation = 'DisplacementApproach'
-    MainData.Analysis = 'Static'
-    MainData.AnalysisType = 'Linear'
-    # MainData.AnalysisType = 'Nonlinear'
+    ndim = 3
+    p = 2
 
-    # material = LinearModel(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.45)
-    material = IncrementalLinearElastic(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.45)
-    # material = NeoHookean_2(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.45)
-    # material = MooneyRivlin(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.45)
-    # material = NearlyIncompressibleMooneyRivlin(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.45)
-    # material = BonetTranservselyIsotropicHyperElastic(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.45,
+    # material = LinearModel(ndim,youngs_modulus=1.0e05,poissons_ratio=0.45)
+    material = IncrementalLinearElastic(ndim,youngs_modulus=1.0e05,poissons_ratio=0.45)
+    # material = NeoHookean_2(ndim,youngs_modulus=1.0e05,poissons_ratio=0.45)
+    # material = MooneyRivlin(ndim,youngs_modulus=1.0e05,poissons_ratio=0.45)
+    # material = NearlyIncompressibleMooneyRivlin(ndim,youngs_modulus=1.0e05,poissons_ratio=0.45)
+    # material = BonetTranservselyIsotropicHyperElastic(ndim,youngs_modulus=1.0e05,poissons_ratio=0.45,
         # E_A=2.5e05,G_A=5.0e04)
-    # material = TranservselyIsotropicLinearElastic(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.45,
+    # material = TranservselyIsotropicLinearElastic(ndim,youngs_modulus=1.0e05,poissons_ratio=0.45,
         # E_A=2.5e05,G_A=5.0e04)
 
-    ProblemPath = os.path.dirname(os.path.realpath(__file__))
+    ProblemPath = PWD(__file__)
     # MainData.MeshInfo.Reader = "Read"
     # MainData.MeshInfo.Format = "GID"
     # MainData.MeshInfo.Reader = "ReadHDF5"
 
     # filename = ProblemPath + '/valve.dat'
-    filename = ProblemPath + '/valve_P'+str(MainData.C+1)+'.mat'
+    filename = ProblemPath + '/valve_P'+str(p)+'.mat'
     # MainData.MeshInfo.IsHighOrder = True
 
     mesh = Mesh()
     mesh.Reader(filename=filename,element_type="tet",reader_type="ReadHDF5")
     face_to_surface = np.loadtxt(ProblemPath+"/face_to_surface_mapped.dat").astype(np.int64)
+    mesh.GetHighOrderMesh(p=p)
 
  
     cad_file = ProblemPath + '/valve.igs'
@@ -43,7 +42,13 @@ def ProblemData(MainData):
     boundary_condition.GetProjectionCriteria(mesh)
 
     solver = LinearSolver(linear_solver="multigrid", linear_solver_type="amg",iterative_solver_tolerance=5.0e-07)
-    MainData.solver = solver
-       
+    formulation = DisplacementFormulation(mesh)
+    fem_solver = FEMSolver(number_of_load_increments=1,analysis_type="static",
+        analysis_nature="linear",parallelise=False)
 
-    return mesh, material, boundary_condition
+    TotalDisp = fem_solver.Solve(formulation=formulation, mesh=mesh, 
+            material=material, boundary_condition=boundary_condition, solver=solver)
+
+
+if __name__ == "__main__":
+    ProblemData()

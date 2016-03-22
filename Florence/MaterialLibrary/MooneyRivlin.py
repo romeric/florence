@@ -27,13 +27,6 @@ class MooneyRivlin(Material):
         from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import KinematicMeasures
         StrainTensors = KinematicMeasures(np.asarray([np.eye(self.ndim,self.ndim)]*2),"Nonlinear")
         self.Hessian(StrainTensors)
-    # def __init__(self, ndim, MaterialArgs=None):
-    #     self.ndim = ndim
-    #     self.nvar = self.ndim
-
-    #     # GET MATERIAL CONSTANTS 
-    #     mu = MaterialArgs.mu
-    #     lamb = MaterialArgs.lamb
 
 
     def Hessian(self,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):

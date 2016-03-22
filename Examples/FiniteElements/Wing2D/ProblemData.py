@@ -1,23 +1,18 @@
+import os, sys
+sys.path.insert(1,'/home/roman/Dropbox/florence')
+
 import numpy as np 
-import os, imp
-from Florence import Mesh, BoundaryCondition, LinearSolver, FEMSolver
-from Florence.MaterialLibrary import *
+from Florence import *
 from Florence.VariationalPrinciple import *
 
 
-def ProblemData(MainData):
+def ProblemData(MainData=None):
 
-    MainData.ndim = 2   
-    MainData.Fields = 'Mechanics'
-    # MainData.Fields = 'ElectroMechanics'
-    MainData.Formulation = 'DisplacementApproach'
-    MainData.Analysis = 'Static'
-    # MainData.Analysis = 'Dynamic'
-    MainData.AnalysisType = 'Linear'
-    # MainData.AnalysisType = 'Nonlinear'
+    p = 2
+    ndim = 2
 
     # material = LinearModel(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
-    material = IncrementalLinearElastic(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.001)
+    material = IncrementalLinearElastic(ndim,youngs_modulus=1.0e05,poissons_ratio=0.001)
     # material = NeoHookean_2(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.001)
     # material = MooneyRivlin(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
     # material = NearlyIncompressibleMooneyRivlin(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
@@ -41,8 +36,8 @@ def ProblemData(MainData):
     # MainData.MeshInfo.IsHighOrder = True
 
     mesh = Mesh()
-    mesh.Reader(filename=filename, element_type="tri", reader_type="Read",
-        reader_type_format="GID")
+    mesh.Reader(filename=filename, element_type="tri", reader_type="GID")
+    mesh.GetHighOrderMesh(p=p)
 
 
     def ProjectionCriteria(mesh,boundary_condition):
@@ -65,10 +60,13 @@ def ProblemData(MainData):
         nodal_spacing='fekete',scale=1000.0)
     boundary_condition.SetProjectionCriteria(ProjectionCriteria,mesh,takes_self=True)
 
-    solver = LinearSolver()
     formulation = DisplacementFormulation(mesh)
 
-    fem_solver = FEMSolver(number_of_load_increments=2,analysis_type="static",
-        analysis_nature="linear",parallel=False)
+    fem_solver = FEMSolver(number_of_load_increments=1,analysis_type="static",
+        analysis_nature="linear",parallelise=False)
 
-    return formulation, mesh, material, boundary_condition, solver, fem_solver
+    TotalDisp = fem_solver.Solve(formulation=formulation, mesh=mesh, 
+        material=material, boundary_condition=boundary_condition)
+
+if __name__ == "__main__":
+    ProblemData()

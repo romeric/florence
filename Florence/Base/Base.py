@@ -1,4 +1,4 @@
-# IMPORT ALL REQUIRED MODULES IN BASE
+from __future__ import print_function
 import os, sys, imp
 from time import time
 import multiprocessing as MP
@@ -66,19 +66,19 @@ class Base(object):
 
 
 
-    # PROBLEM SPATIAL DIMENSION- 1D, 2D, 3D
-    ndim = 2
-    nvar = ndim
-    Fields = 'Mechanics'
-    # Fields = 'ElectroMechanics'
+    # # PROBLEM SPATIAL DIMENSION- 1D, 2D, 3D
+    # ndim = 2
+    # nvar = ndim
+    # Fields = 'Mechanics'
+    # # Fields = 'ElectroMechanics'
     
-    Formulation = 'DisplacementApproach'
-    # Formulation = 'DisplacementElectricPotentialApproach'
+    # Formulation = 'DisplacementApproach'
+    # # Formulation = 'DisplacementElectricPotentialApproach'
 
-    Analysis = 'Static'
-    # Analysis = 'Dynamic'
-    AnalysisType = 'Linear'
-    # AnalysisType = 'Nonlinear'
+    # Analysis = 'Static'
+    # # Analysis = 'Dynamic'
+    # AnalysisType = 'Linear'
+    # # AnalysisType = 'Nonlinear'
 
 
     Timer = 0
@@ -86,46 +86,9 @@ class Base(object):
 
     # DECIDE WHICH PARALLEL MODEL TO ACTIVATE
     def ParallelModel(self):
-        if self.__MEMORY__ == "SHARED":
+        if self.__MEMORY__ == "shared":
             pass
-        elif self.__MEMORY__ == "DISTRIBUTED":
-            print comm.rank
+        elif self.__MEMORY__ == "distributed":
+            print(comm.rank)
 
-
-
-
-
-    # # MaterialArgs class
-    # class MaterialArgs(object):
-    #     """Container for all material models"""
-
-    #     E = np.NAN
-    #     nu = np.NAN
-    #     lamb = np.NAN
-    #     mu = np.NAN
-    #     rho = np.NAN
-
-    #     def __init__(self):
-    #         pass
-
-    #     # def AnisotropicFibreOrientation(self,mesh):
-    #         # pass
-
-
-    # # MeshInfo class 
-    # class MeshInfo(object):
-    #     """Container for mesh information"""
-    #     MeshType = 'tri'
-    #     Reader = 'Read'
-    #     ProblemPath = ''
-
-    #     def __init__(self,path):
-    #         """Invoke it like so to get path of the current file:
-    #         >>> MainData.MeshInfo(__file__)
-
-    #          """
-    #         self.ProblemPath = os.path.dirname(os.path.realpath(__file__))
-
-
-    # ScaledJacobian
     isScaledJacobianComputed = False

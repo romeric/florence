@@ -61,3 +61,7 @@ def SetPath(Pr,pwd,C,nelem,Analysis,AnalysisType, MaterialArgsType):
 
 
 	return Path
+
+
+def PWD(filename):
+	return os.path.dirname(os.path.realpath(filename))

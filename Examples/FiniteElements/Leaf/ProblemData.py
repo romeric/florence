@@ -1,37 +1,33 @@
-import numpy as np 
-import os, imp
-from Florence import Mesh, BoundaryCondition, LinearSolver, FEMSolver
-from Florence.MaterialLibrary import *
+import os, sys
+sys.path.insert(1,'/home/roman/Dropbox/florence')
 
+from Florence import *
+from Florence.VariationalPrinciple import *
 
-def ProblemData(MainData):
+def ProblemData(*args, **kwargs):
 
-    MainData.ndim = 2    
-    MainData.Fields = 'Mechanics'    
-    MainData.Formulation = 'DisplacementApproach'
-    MainData.Analysis = 'Static'
-    # MainData.AnalysisType = 'Linear'
-    MainData.AnalysisType = 'Nonlinear'
+    ndim = 2
+    p = 2
 
-
-    # material = LinearModel(MainData.ndim,youngs_modulus=1.0e01,poissons_ratio=0.3)
-    # material = IncrementalLinearElastic(MainData.ndim,youngs_modulus=1.,poissons_ratio=0.3)
-    # material = NeoHookean_2(MainData.ndim,youngs_modulus=1.,poissons_ratio=0.3)
-    material = NeoHookean_2(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
-    # material = MooneyRivlin(MainData.ndim,youngs_modulus=1.,poissons_ratio=0.3)
-    # material = NearlyIncompressibleMooneyRivlin(MainData.ndim,youngs_modulus=1.,poissons_ratio=0.3)
-    # material = BonetTranservselyIsotropicHyperElastic(MainData.ndim,youngs_modulus=1.,poissons_ratio=0.3,
+    # material = LinearModel(ndim,youngs_modulus=1.0e01,poissons_ratio=0.3)
+    # material = IncrementalLinearElastic(ndim,youngs_modulus=1.,poissons_ratio=0.3)
+    # material = NeoHookean_2(ndim,youngs_modulus=1.,poissons_ratio=0.3)
+    material = NeoHookean_2(ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
+    # material = MooneyRivlin(ndim,youngs_modulus=1.,poissons_ratio=0.3)
+    # material = NearlyIncompressibleMooneyRivlin(ndim,youngs_modulus=1.,poissons_ratio=0.3)
+    # material = BonetTranservselyIsotropicHyperElastic(ndim,youngs_modulus=1.,poissons_ratio=0.3,
         # E_A=2.5,G_A=0.5)
-    # material = TranservselyIsotropicLinearElastic(MainData.ndim,youngs_modulus=1.,poissons_ratio=0.3,
+    # material = TranservselyIsotropicLinearElastic(ndim,youngs_modulus=1.,poissons_ratio=0.3,
         # E_A=2.5,G_A=0.5)
 
 
-    ProblemPath = os.path.dirname(os.path.realpath(__file__))
+    ProblemPath = PWD(__file__)
     filename = ProblemPath + '/TwoArcs_18.dat'
     # FileName = ProblemPath + '/Leaf_2.dat'
 
     mesh = Mesh()
-    mesh.Reader(filename=filename,element_type="tri",reader_type="Read")
+    mesh.Reader(filename=filename,element_type="tri",reader_type="Salome")
+    mesh.GetHighOrderMesh(p=p)
 
     def ProjectionCriteria(mesh,boundary_condition):
         projection_edges = np.zeros((mesh.edges.shape[0],1),dtype=np.uint64)
@@ -53,7 +49,15 @@ def ProblemData(MainData):
         nodal_spacing='fekete',scale=1000.0,condition=3000.0)
     boundary_condition.SetProjectionCriteria(ProjectionCriteria,mesh,takes_self=True)
 
-    solver = LinearSolver(linear_solver="direct", linear_solver_type="umfpack")
-    MainData.solver = solver
+    formulation = DisplacementFormulation(mesh)
+    fem_solver = FEMSolver(number_of_load_increments=10,analysis_type="static",
+        analysis_nature="nonlinear",parallelise=False)
 
-    return mesh, material, boundary_condition
+    fem_solver.Solve(material=material,formulation=formulation,
+        mesh=mesh,boundary_condition=boundary_condition)
+
+if __name__ == "__main__":
+    from time import time
+    t=time()
+    ProblemData()
+    print time() - t

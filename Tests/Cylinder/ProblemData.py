@@ -1,26 +1,21 @@
-import numpy as np 
-import os, imp
-from Florence import Mesh, BoundaryCondition, LinearSolver, FEMSolver
-from Florence.MaterialLibrary import *
+from Florence import *
 from Florence.VariationalPrinciple import *
 
 
-def ProblemData(MainData):
+def ProblemData(*args, **kwargs):
 
-    MainData.ndim = 3
-    # MainData.Fields = 'Mechanics'   
-    # MainData.Formulation = 'DisplacementApproach'
-    # MainData.Analysis = 'Static'
-    # MainData.AnalysisType = 'Linear'
+    assert len(args) == 1
+    MainData = args[0]
+    ndim = 3
 
-    material = IncrementalLinearElastic(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
+    material = IncrementalLinearElastic(ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
 
-    ProblemPath = os.path.dirname(os.path.realpath(__file__))
+    ProblemPath = PWD(__file__)
     filename = ProblemPath + '/Hollow_Cylinder.dat'
-
 
     mesh = Mesh()
     mesh.Reader(filename=filename, element_type="tet")
+    mesh.GetHighOrderMesh(p=MainData.C+1)
 
     cad_file = ProblemPath + '/Hollow_Cylinder.igs'
 
@@ -33,7 +28,6 @@ def ProblemData(MainData):
     boundary_condition.GetProjectionCriteria(mesh)
 
     solver = LinearSolver(linear_solver="multigrid", linear_solver_type="amg",iterative_solver_tolerance=5.0e-07)
-    # formulation = DisplacementFormulation(mesh,variables_order=(2,))
     formulation = DisplacementFormulation(mesh)
     fem_solver = FEMSolver(number_of_load_increments=5,analysis_nature="linear")
 

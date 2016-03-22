@@ -7,13 +7,43 @@ from Florence.Tensor import issymetric
 
 class DisplacementFormulation(VariationalPrinciple):
 
-    def __init__(self, mesh, variables_order=(1,)):
+    def __init__(self, mesh, variables_order=(1,), 
+        quadrature_rules=None, quadrature_type=None, function_spaces=None):
 
         if mesh.element_type != "tet" and mesh.element_type != "tri":
             raise NotImplementedError( type(self.__name__), "has not been implemented for", mesh.element_type, "elements")
 
+        if isinstance(variables_order,int):
+            self.variables_order = (self.variables_order,)
         self.variables_order = variables_order
-        super(DisplacementFormulation, self).__init__(mesh,variables_order=self.variables_order)
+
+        super(DisplacementFormulation, self).__init__(mesh,variables_order=self.variables_order,
+            quadrature_type=quadrature_type,quadrature_rules=quadrature_rules,function_spaces=function_spaces)
+
+
+        C = mesh.InferPolynomialDegree() - 1               
+
+        # OPTION FOR QUADRATURE TECHNIQUE FOR TRIS AND TETS
+        if mesh.element_type == "tri" or mesh.element_type == "tet":
+            optimal_quadrature = 3
+
+        norder = 2*C
+        # TAKE CARE OF C=0 CASE
+        if norder == 0:
+            norder = 1
+        # GET QUADRATURE
+        quadrature = QuadratureRule(optimal=optimal_quadrature, norder=norder, mesh_type=mesh.element_type)
+        function_space = FunctionSpace(mesh, quadrature, p=C+1)
+
+        # COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR POST-PROCESSING
+        norder_post = 2*(C+1)
+        post_quadrature = QuadratureRule(optimal=optimal_quadrature, norder=norder_post, mesh_type=mesh.element_type)
+
+        # CREATE FUNCTIONAL SPACES
+        post_function_space = FunctionSpace(mesh, post_quadrature, p=C+1)
+
+        self.quadrature_rules = (quadrature,post_quadrature)
+        self.function_spaces = (function_space,post_function_space)
 
 
     def GetElementalMatrices(self, elem, function_space, mesh, material, fem_solver, Eulerx, TotalPot):
@@ -73,7 +103,7 @@ class DisplacementFormulation(VariationalPrinciple):
 
 
         # COMPUTE REMAINING KINEMATIC MEASURES
-        StrainTensors = KinematicMeasures(F, self.analysis_nature)
+        StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
         
         # UPDATE/NO-UPDATE GEOMETRY
         if fem_solver.requires_geometry_update:
@@ -119,8 +149,42 @@ class DisplacementFormulation(VariationalPrinciple):
 
 
 
-    def GetLocalMass(self):
-        pass 
+    def GetLocalMass(self, function_space, formulation):
+
+        ndim = self.ndim
+        nvar = self.nvar
+        Domain = function_space
+
+        N = np.zeros((Domain.Bases.shape[0]*nvar,nvar))
+        mass = np.zeros((Domain.Bases.shape[0]*nvar,Domain.Bases.shape[0]*nvar))
+
+        # LOOP OVER GAUSS POINTS
+        for counter in range(0,Domain.AllGauss.shape[0]):
+            # GRADIENT TENSOR IN PARENT ELEMENT [\nabla_\varepsilon (N)]
+            Jm = Domain.Jm[:,:,counter]
+            Bases = Domain.Bases[:,counter]
+            # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+            ParentGradientX=np.dot(Jm,LagrangeElemCoords)
+
+            # UPDATE/NO-UPDATE GEOMETRY
+            if MainData.GeometryUpdate:
+                # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+                ParentGradientx = np.dot(Jm,EulerELemCoords)
+            else:
+                ParentGradientx = ParentGradientX
+
+            # COMPUTE THE MASS INTEGRAND
+            rhoNN = self.MassIntegrand(Bases,N,MainData.Minimal,MainData.MaterialArgs)
+
+            if MainData.GeometryUpdate:
+                # INTEGRATE MASS
+                mass += rhoNN*MainData.Domain.AllGauss[counter,0]*np.abs(la.det(ParentGradientX))
+                # mass += rhoNN*w[g1]*w[g2]*w[g3]*np.abs(la.det(ParentGradientX))*np.abs(StrainTensors.J)
+            else:
+                # INTEGRATE MASS
+                mass += rhoNN*MainData.Domain.AllGauss[counter,0]*np.abs(la.det(ParentGradientX))
+
+        return mass 
 
 
     def GetLocalResiduals(self):

@@ -1,21 +1,20 @@
+import os, sys
+sys.path.insert(1,'/home/roman/Dropbox/florence')
+
 import numpy as np 
-import os, imp
-from Florence import Mesh, BoundaryCondition, LinearSolver, FEMSolver
-from Florence.MaterialLibrary import *
+from Florence import *
+from Florence.VariationalPrinciple import *
 
-def ProblemData(MainData):
+def ProblemData(*args, **kwargs):
 
-    MainData.ndim = 3   
-    MainData.Fields = 'Mechanics'   
-    MainData.Formulation = 'DisplacementApproach'
-    MainData.Analysis = 'Static'
-    MainData.AnalysisType = 'Linear'
-    # MainData.AnalysisType = 'Nonlinear'
 
-    # material = LinearModel(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
-    # material = IncrementalLinearElastic(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
-    # material = NeoHookean_2(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
-    material = MooneyRivlin(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
+    ndim = 3
+    p = 2
+
+    # material = LinearModel(ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
+    # material = IncrementalLinearElastic(ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
+    # material = NeoHookean_2(ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
+    material = MooneyRivlin(ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
     # material = NearlyIncompressibleMooneyRivlin(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
     # material = BonetTranservselyIsotropicHyperElastic(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4,
         # E_A=2.5e05,G_A=5.0e04)
@@ -35,7 +34,7 @@ def ProblemData(MainData):
     # MainData.MeshInfo.FileName = ProblemPath + '/falcon_iso_P'+str(MainData.C+1)+'.mat'
     # MainData.MeshInfo.FileName = ProblemPath + '/Falcon3DIso_P'+str(MainData.C+1)+'.mat'
     # MainData.MeshInfo.FileName = ProblemPath + '/Falcon3DIso_P'+str(MainData.C+1)+'_New.mat'
-    filename = ProblemPath + '/falcon_big_P'+str(MainData.C+1)+'.mat'
+    filename = ProblemPath + '/falcon_big_P'+str(p)+'.mat'
 
     # if MainData.CurrentIncr == 1:
     #     MainData.MeshInfo.FileName = ProblemPath + '/falcon_big_P'+str(MainData.C+1)+'.mat'
@@ -46,6 +45,7 @@ def ProblemData(MainData):
 
     mesh = Mesh()
     mesh.Reader(filename=filename,element_type="tet",reader_type="ReadHDF5")
+    mesh.GetHighOrderMesh(p=p)
 
     def ProjectionCriteria(mesh,boundary_condition):
         projection_faces = np.zeros((mesh.faces.shape[0],1),dtype=np.uint64)
@@ -104,7 +104,14 @@ def ProblemData(MainData):
     #         return projection_faces
 
     solver = LinearSolver(linear_solver="multigrid", linear_solver_type="amg",iterative_solver_tolerance=5.0e-07)
-    MainData.solver = solver
+
+    formulation = DisplacementFormulation(mesh)
+    fem_solver = FEMSolver(number_of_load_increments=1,analysis_type="static",
+        analysis_nature="linear",parallelise=False)
+
+    TotalDisp = fem_solver.Solve(formulation=formulation, mesh=mesh, 
+            material=material, boundary_condition=boundary_condition, solver=solver)
 
 
-    return mesh, material, boundary_condition
+if __name__ == "__main__":
+    ProblemData()

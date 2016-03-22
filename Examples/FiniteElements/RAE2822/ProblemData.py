@@ -1,33 +1,27 @@
-import numpy as np 
-import os, imp
-from Florence import Mesh, BoundaryCondition, LinearSolver, FEMSolver
-from Florence.MaterialLibrary import *
+import os, sys
+sys.path.insert(1,'/home/roman/Dropbox/florence')
+
+from Florence import *
 from Florence.VariationalPrinciple import *
 
+def ProblemData(*args, **kwargs):
 
-def ProblemData(MainData):
+    ndim = 2
+    p = 2
 
-    MainData.ndim = 2
-    MainData.Fields = 'Mechanics'
-    MainData.Formulation = 'DisplacementApproach'
-    MainData.Analysis = 'Static'
-    MainData.AnalysisType = 'Linear'
-
-    # material = LinearModel(MainData.ndim,youngs_modulus=1.0e01,poissons_ratio=0.4)
-    material = IncrementalLinearElastic(MainData.ndim,youngs_modulus=1.,poissons_ratio=0.4)
-    # material = NeoHookean_2(MainData.ndim,youngs_modulus=1.,poissons_ratio=0.4)
-    # material = MooneyRivlin(MainData.ndim,youngs_modulus=1.,poissons_ratio=0.4)
-    # material = NearlyIncompressibleMooneyRivlin(MainData.ndim,youngs_modulus=1.,poissons_ratio=0.4)
-    # material = BonetTranservselyIsotropicHyperElastic(MainData.ndim,youngs_modulus=1.,poissons_ratio=0.4,
+    # material = LinearModel(ndim,youngs_modulus=1.0e01,poissons_ratio=0.4)
+    material = IncrementalLinearElastic(ndim,youngs_modulus=1.,poissons_ratio=0.4)
+    # material = NeoHookean_2(ndim,youngs_modulus=1.,poissons_ratio=0.4)
+    # material = MooneyRivlin(ndim,youngs_modulus=1.,poissons_ratio=0.4)
+    # material = NearlyIncompressibleMooneyRivlin(ndim,youngs_modulus=1.,poissons_ratio=0.4)
+    # material = BonetTranservselyIsotropicHyperElastic(ndim,youngs_modulus=1.,poissons_ratio=0.4,
         # E_A=2.5,G_A=0.5)
-    # material = TranservselyIsotropicLinearElastic(MainData.ndim,youngs_modulus=1.,poissons_ratio=0.4,
+    # material = TranservselyIsotropicLinearElastic(ndim,youngs_modulus=1.,poissons_ratio=0.4,
         # E_A=2.5,G_A=0.5)
 
 
-    ProblemPath = os.path.dirname(os.path.realpath(__file__))
+    ProblemPath = PWD(__file__)
 
-    # MainData.MeshInfo.MeshType = 'tri'
-    # MainData.MeshInfo.Nature = 'straight'
     # # MainData.MeshInfo.Reader = 'ReadSeparate'
     # MainData.MeshInfo.Reader = 'ReadHDF5'
 
@@ -44,6 +38,7 @@ def ProblemData(MainData):
     mesh = Mesh()
     mesh.Reader(reader_type="ReadSeparate",element_type="tri",
         connectivity_file=ConnectivityFile,coordinate_file=CoordinatesFile)
+    mesh.GetHighOrderMesh(p=p)
 
 
 
@@ -94,8 +89,10 @@ def ProblemData(MainData):
 
     formulation = DisplacementFormulation(mesh)
     fem_solver = FEMSolver(number_of_load_increments=2,analysis_type="static",
-        analysis_nature="linear",parallel=True)
+        analysis_nature="linear",parallelise=True)
 
+    fem_solver.Solve(material=material,formulation=formulation,
+        mesh=mesh,boundary_condition=boundary_condition,solver=solver)
 
-
-    return formulation, mesh, material, boundary_condition, solver, fem_solver
+if __name__ == "__main__":
+    ProblemData()

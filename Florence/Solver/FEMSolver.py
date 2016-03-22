@@ -1,3 +1,4 @@
+from __future__ import print_function
 import gc, os, sys
 from copy import deepcopy
 from warnings import warn
@@ -11,6 +12,7 @@ from Florence.Utils import insensitive
 from Florence.FiniteElements.SparseAssembly import SparseAssembly_Step_2
 from Florence.FiniteElements.SparseAssemblySmall import SparseAssemblySmall
 from Florence.FiniteElements.PostProcess import *
+from Florence.Solver import LinearSolver
 
 import pyximport
 pyximport.install(setup_args={'include_dirs': np.get_include()})
@@ -33,8 +35,9 @@ class FEMSolver(object):
         is_geometrically_linearised=False, requires_geometry_update=True,
         requires_line_search=False, requires_arc_length=False, has_moving_boundary=False,
         has_prestress=True, number_of_load_increments=1, 
-        newton_raphson_tolerance=1.0e-6, maximum_iteration_for_newton_raphson=50, 
-        parallel=False, memory_model="shared"):
+        newton_raphson_tolerance=1.0e-6, maximum_iteration_for_newton_raphson=50,
+        compute_mesh_qualities=True,  
+        parallelise=False, memory_model="shared", platform="cpu", backend="opencl"):
 
         self.analysis_type = analysis_type
         self.analysis_nature = analysis_nature
@@ -49,42 +52,50 @@ class FEMSolver(object):
         self.number_of_load_increments = number_of_load_increments
         self.newton_raphson_tolerance = newton_raphson_tolerance
         self.maximum_iteration_for_newton_raphson = maximum_iteration_for_newton_raphson
-
         self.newton_raphson_failed_to_converge = False
 
-        self.parallel = parallel
+        self.compute_mesh_qualities = compute_mesh_qualities
+
+        self.vectorise = True
+        self.parallel = parallelise
         self.no_of_cpu_cores = multiprocessing.cpu_count()
         self.memory_model = memory_model
-        self.vectorise = True
+        self.platform = platform
+        self.backend = backend
         self.debug = False
 
 
-    def CheckSate(self, material, formulation, mesh):
+    def __checkdata__(self, material, formulation, mesh):
         """Checks the state of data for FEMSolver"""
+
+        if material.mtype == "LinearModel" and self.number_of_load_increments > 1:
+            warn("Can not solve a linear elastic multiple step. "
+                "The number of load increments is going to be set to 1")
+            self.number_of_load_increments = 1
 
         self.has_prestress = False
         if "nonlinear" not in insensitive(self.analysis_nature) and formulation.fields == "mechanics":
             # RUN THE SIMULATION WITHIN A NONLINEAR ROUTINE
             if material.mtype != "IncrementalLinearElastic" and \
-                material.mtype != "LinearModel":
-                self.has_prestress = 1
+                material.mtype != "LinearModel" and material.mtype != "TranservselyIsotropicLinearElastic":
+                self.has_prestress = True
             else:
-                self.has_prestress = 0
+                self.has_prestress = False
 
         # GEOMETRY UPDATE FLAGS
         ###########################################################################
         # DO NOT UPDATE THE GEOMETRY IF THE MATERIAL MODEL NAME CONTAINS 
         # INCREMENT (CASE INSENSITIVE). VALID FOR ELECTROMECHANICS FORMULATION. 
-        self.requires_geometry_update = 0
+        self.requires_geometry_update = False
         if formulation.fields == "electro_mechanics":
             if "Increment" in insensitive(material.mtype):
                 # RUN THE SIMULATION WITHIN A NONLINEAR ROUTINE WITHOUT UPDATING THE GEOMETRY
-                self.requires_geometry_update = 0
+                self.requires_geometry_update = False
             else:
-                self.requires_geometry_update = 1
+                self.requires_geometry_update = True
         elif formulation.fields == "mechanics":
             if self.analysis_nature == "nonlinear" or self.has_prestress:
-                self.requires_geometry_update = 1
+                self.requires_geometry_update = True
 
         # CHECK IF MATERIAL MODEL AND ANALYSIS TYPE ARE COMPATIBLE
         #############################################################################
@@ -93,10 +104,24 @@ class FEMSolver(object):
                 "increment" in insensitive(material.mtype):
                 warn("Incompatible material model and analysis type. I'm going to change analysis type")
                 self.analysis_nature = "linear"
+                formulation.analysis_nature = "linear"
 
         if material.is_transversely_isotropic:
             material.GetFibresOrientation(mesh)
         ##############################################################################
+
+
+    def __makeoutput__(self, mesh, TotalDisp, formulation, function_space):
+        post_process = PostProcess(formulation.ndim,formulation.nvar)
+        post_process.SetBases(postdomain=function_space, domain=None, boundary=None)
+        post_process.SetAnalysis(analysis_type=self.analysis_type, 
+            analysis_nature=self.analysis_nature)
+        post_process.SetMesh(mesh)
+        post_process.SetSolution(TotalDisp)
+        if self.analysis_nature == "nonlinear" and self.compute_mesh_qualities:
+            # COMPUTE QUALITY MEASURES
+            self.ScaledJacobian=post_process.MeshQualityMeasures(mesh,TotalDisp,False,False)[3]
+        return post_process
 
 
     @property
@@ -105,13 +130,50 @@ class FEMSolver(object):
 
     @property
     def WhichFEMSolvers():
-        pass
+        print(["IncrementalLinearElasticitySolver","NewtonRaphson","NewtonRaphsonArchLength"])
 
 
-    def Solve(self, function_spaces, formulation, mesh, material, boundary_condition, solver):
+    def Solve(self, formulation=None, mesh=None, 
+        material=None, boundary_condition=None, 
+        function_spaces=None, solver=None):
+        """Main solution routine for FEMSolver """
+
 
         # CHECK DATA CONSISTENCY
-        self.CheckSate(material, formulation, mesh)
+        #---------------------------------------------------------------------------#
+        if mesh is None:
+            raise ValueError("No mesh detected for the analysis")
+        if boundary_condition is None:
+            raise ValueError("No boundary conditions detected for the analysis")
+        if material is None:
+            raise ValueError("No material model chosen for the analysis")
+        if formulation is None:
+            raise ValueError("No variational form specified")
+
+        # GET FUNCTION SPACES FROM THE FORMULATION 
+        if function_spaces is None:
+            if formulation.function_spaces is None:
+                raise ValueError("No interpolation functions specified")
+            else:
+                function_spaces = formulation.function_spaces
+
+        # CHECK IF A SOLVER IS SPECIFIED
+        if solver is None:
+            solver = LinearSolver(linear_solver="direct", linear_solver_type="umfpack")
+
+        self.__checkdata__(material, formulation, mesh)
+        #---------------------------------------------------------------------------#
+
+        print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation info etc...')
+        print('Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*formulation.nvar)
+        if formulation.ndim==2:
+            print('Number of elements is', mesh.elements.shape[0], \
+                 'and number of boundary nodes is', np.unique(mesh.edges).shape[0])
+        elif formulation.ndim==3:
+            print('Number of elements is', mesh.elements.shape[0], \
+                 'and number of boundary nodes is', np.unique(mesh.faces).shape[0])
+        #---------------------------------------------------------------------------#
+
 
         # INITIATE DATA FOR NON-LINEAR ANALYSIS
         NodalForces, Residual = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float32), \
@@ -124,12 +186,11 @@ class FEMSolver(object):
         TotalDisp = np.zeros((mesh.points.shape[0],formulation.nvar,self.number_of_load_increments),dtype=np.float32)
 
         # PRE-ASSEMBLY
-        print 'Assembling the system and acquiring neccessary information for the analysis...'
+        print('Assembling the system and acquiring neccessary information for the analysis...')
         tAssembly=time()
 
         # APPLY DIRICHELT BOUNDARY CONDITIONS AND GET DIRICHLET RELATED FORCES
         boundary_condition.GetDirichletBoundaryConditions(formulation, mesh, material, solver, self)
-        # exit()
 
         # ALLOCATE FOR GEOMETRY - GetDirichletBoundaryConditions CHANGES THE MESH 
         # SO EULERX SHOULD BE ALLOCATED AFTERWARDS 
@@ -149,8 +210,6 @@ class FEMSolver(object):
         if formulation.fields == "mechanics" and self.analysis_nature != "nonlinear":     
             # MAKE A COPY OF MESH, AS MESH POINTS WILL BE OVERWRITTEN
             vmesh = deepcopy(mesh)
-            # TotalDisp = IncrementalLinearElasticitySolver(MainData,vmesh,material,TotalDisp,
-                # Eulerx,LoadIncrement,NeumannForces,ColumnsIn,ColumnsOut,AppliedDirichlet)
             TotalDisp = self.IncrementalLinearElasticitySolver(function_spaces, formulation, vmesh, material,
                 boundary_condition, solver, TotalDisp, Eulerx, NeumannForces)
             del vmesh
@@ -159,7 +218,8 @@ class FEMSolver(object):
             for i in range(TotalDisp.shape[2]-1,0,-1):
                 TotalDisp[:,:,i] = np.sum(TotalDisp[:,:,:i+1],axis=2)
 
-            return TotalDisp
+            # return TotalDisp
+            return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces[1])
 
         # ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES
         K, TractionForces = self.Assemble(function_spaces[0], formulation, mesh, material, solver, 
@@ -174,9 +234,9 @@ class FEMSolver(object):
             # boundary_condition.applied_dirichlet)
 
         if self.analysis_nature == 'nonlinear':
-            print 'Finished all pre-processing stage. Time elapsed was', time()-tAssembly, 'sec'
+            print('Finished all pre-processing stage. Time elapsed was', time()-tAssembly, 'seconds')
         else:
-            print 'Finished the assembly stage. Time elapsed was', time()-tAssembly, 'sec'
+            print('Finished the assembly stage. Time elapsed was', time()-tAssembly, 'seconds')
 
 
         if self.analysis_type != 'static':
@@ -190,7 +250,8 @@ class FEMSolver(object):
 
         self.NRConvergence = ResidualNorm
 
-        return TotalDisp
+        # return TotalDisp
+        return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces[1])
 
 
     def IncrementalLinearElasticitySolver(self, function_spaces, formulation, mesh, material,
@@ -238,7 +299,8 @@ class FEMSolver(object):
                 # ASSEMBLE
                 K = self.Assemble(function_spaces[0], formulation, mesh, material, solver,
                     Eulerx, np.zeros_like(mesh.points))[0]
-            print 'Finished assembling the system of equations. Time elapsed is', time() - t_assembly, 'seconds'
+            print('Finished assembling the system of equations. Time elapsed is', time() - t_assembly, 'seconds')
+
             # APPLY DIRICHLET BOUNDARY CONDITIONS & GET REDUCED MATRICES 
             K_b, F_b = boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,AppliedDirichletInc)[:2]
             
@@ -262,10 +324,11 @@ class FEMSolver(object):
             Eulerx = np.copy(mesh.points)
 
             if LoadIncrement > 1:
-                print "Finished load increment "+str(Increment)+" for incrementally linearised problem. Solver time is", t_solver
+                print("Finished load increment "+str(Increment)+" for incrementally linearised problem. Solver time is", t_solver)
             else:
-                print "Finished load increment "+str(Increment)+" for linear problem. Solver time is", t_solver
+                print("Finished load increment "+str(Increment)+" for linear problem. Solver time is", t_solver)
             gc.collect()
+
 
             # COMPUTE SCALED JACBIAN FOR THE MESH
             if Increment == LoadIncrement - 1:
@@ -326,9 +389,10 @@ class FEMSolver(object):
                     material,boundary_condition,AppliedDirichletInc)
 
 
-                print '\nFinished Load increment', Increment, 'in', time()-t_increment, 'sec'
+                print('\nFinished Load increment', Increment, 'in', time()-t_increment, 'seconds')
                 try:
-                    print 'Norm of Residual is', np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces), '\n'
+                    print('Norm of Residual is', 
+                        np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces), '\n')
                 except RuntimeWarning:
                     print("Invalid value encountered in norm of Newton-Raphson residual")
 
@@ -349,9 +413,7 @@ class FEMSolver(object):
         ResidualNorm,mesh,TotalDisp,Eulerx,material,
         boundary_condition,AppliedDirichletInc):
 
-        # Tolerance = MainData.AssemblyParameters.NRTolerance
         Tolerance = self.newton_raphson_tolerance
-        # LoadIncrement = MainData.AssemblyParameters.LoadIncrements
         LoadIncrement = self.number_of_load_increments
         Iter = 0
 
@@ -373,7 +435,7 @@ class FEMSolver(object):
 
             # SOLVE THE SYSTEM
             # # CHECK FOR THE CONDITION NUMBER OF THE SYSTEM
-            # if Increment==MainData.AssemblyParameters.LoadIncrements-1 and Iter>1:
+            # if Increment==self.number_of_load_increments-1 and Iter>1:
             #     # solver.condA = np.linalg.cond(K_b.todense()) # REMOVE THIS
             #     solver.condA = onenormest(K_b) # REMOVE THIS
             sol = solver.Solve(K_b,-F_b)
@@ -399,8 +461,8 @@ class FEMSolver(object):
             ResidualNorm['Increment_'+str(Increment)] = np.append(ResidualNorm['Increment_'+str(Increment)],\
                 np.abs(la.norm(Residual[boundary_condition.columns_in])/NormForces))
             
-            print 'Iteration number', Iter, 'for load increment', Increment, 'with a residual of \t\t', \
-                np.abs(la.norm(Residual[boundary_condition.columns_in])/NormForces)          
+            print('Iteration number', Iter, 'for load increment', Increment, 'with a residual of \t\t', \
+                np.abs(la.norm(Residual[boundary_condition.columns_in])/NormForces))          
 
             # UPDATE ITERATION NUMBER
             Iter +=1
@@ -448,7 +510,7 @@ class FEMSolver(object):
                 cwd="/home/roman/Dropbox/florence/", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             # p = subprocess.Popen("./mpi_runner.sh", cwd="/home/roman/Dropbox/florence/", shell=True)
             p.wait()
-            print 'MPI took', time() - t_dassembly, 'seconds for distributed assembly'
+            print('MPI took', time() - t_dassembly, 'seconds for distributed assembly')
             Dict = loadmat(os.path.join(tmp_dir,"results.mat"))
 
             try:
@@ -490,13 +552,8 @@ class FEMSolver(object):
             # ParallelTuple = parmap.map(formulation.GetElementalMatrices,np.arange(0,nelem,dtype=np.int32),
                 # function_space, mesh, material, self, Eulerx, TotalPot)
 
-            # import inspect
-            # print(inspect.getargspec(formulation.GetElementalMatrices))
-            # exit()
-
             ParallelTuple = parmap.map(formulation,np.arange(0,nelem,dtype=np.int32),
                 function_space, mesh, material, self, Eulerx, TotalPot)
-            # exit()
 
         for elem in range(nelem):
 
@@ -511,7 +568,6 @@ class FEMSolver(object):
                 I_stiff_elem, J_stiff_elem, V_stiff_elem, t, f, \
                 I_mass_elem, J_mass_elem, V_mass_elem = formulation.GetElementalMatrices(elem, 
                     function_space, mesh, material, self, Eulerx, TotalPot)
-
             # SPARSE ASSEMBLY - STIFFNESS MATRIX
             SparseAssemblyNative(I_stiff_elem,J_stiff_elem,V_stiff_elem,I_stiffness,J_stiffness,V_stiffness,
                 elem,nvar,nodeperelem,mesh.elements)
@@ -536,13 +592,11 @@ class FEMSolver(object):
             del ParallelTuple
         gc.collect()
 
-        # CALL BUILT-IN SPARSE ASSEMBLER 
-        # stiffness = coo_matrix((V_stiffness,(I_stiffness,J_stiffness)),
-            # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64).tocsc()
-
         # REALLY DANGEROUS FOR MULTIPHYSICS PROBLEMS
         # V_stiffness[np.isclose(V_stiffness,0.)] = 0.
 
+        # stiffness = coo_matrix((V_stiffness,(I_stiffness,J_stiffness)),
+            # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64).tocsc()
         stiffness = csc_matrix((V_stiffness,(I_stiffness,J_stiffness)),
             shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float32)
         
@@ -554,10 +608,8 @@ class FEMSolver(object):
         gc.collect()
 
         if self.analysis_type != 'static':
-            # CALL BUILT-IN SPARSE ASSEMBLER
             mass = csc_matrix((V_mass,(I_mass,J_mass)),shape=((nvar*mesh.points.shape[0],
                 nvar*mesh.points.shape[0])),dtype=np.float32)
-
 
         return stiffness, T, F, mass
 
@@ -756,7 +808,7 @@ class FEMSolver(object):
 
         gc.collect()
 
-        print 'Writing the triplets to disk'
+        print('Writing the triplets to disk')
         t_hdf5 = time()
         for elem in range(nelem):
 
@@ -784,29 +836,29 @@ class FEMSolver(object):
                         T[mesh.elements[elem,:]*nvar+iterator,0]+=t[iterator::nvar,0]
 
             if elem % 10000 == 0:
-                print elem
+                print("Processed ", elem, " elements")
 
         hdf_file.close()
-        print 'Finished writing the triplets to disk. Time taken', time() - t_hdf5, 'seconds'
+        print('Finished writing the triplets to disk. Time taken', time() - t_hdf5, 'seconds')
 
 
-        print 'Reading the triplets back from disk'
+        print('Reading the triplets back from disk')
         hdf_file = h5py.File(filename,'r')
         if chunk_size is None:
             chunk_size = mesh.points.shape[0]*nvar // 300
 
-        print 'Creating dask array from triplets'
+        print('Creating dask array from triplets')
         IJV_triplets = da.from_array(hdf_file['IJV_triplets'],chunks=(chunk_size,3))
 
 
-        print 'Creating the sparse matrix'
+        print('Creating the sparse matrix')
         t_sparse = time()
 
         stiffness = csr_matrix((IJV_triplets[:,2].astype(np.float32),
             (IJV_triplets[:,0].astype(np.int32),IJV_triplets[:,1].astype(np.int32))),
             shape=((mesh.points.shape[0]*nvar,mesh.points.shape[0]*nvar)),dtype=np.float32)
 
-        print 'Done creating the sparse matrix, time taken', time() - t_sparse
+        print('Done creating the sparse matrix, time taken', time() - t_sparse)
         
         hdf_file.close()
 

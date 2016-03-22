@@ -1,13 +1,16 @@
 from __future__ import print_function
-import unittest
 import sys, os, imp, time, gc
 from sys import exit
 from datetime import datetime
 from warnings import warn
+
+import os, sys
+sys.path.insert(1,'/home/roman/Dropbox/florence')
+
 import numpy as np
 import scipy as sp
-import multiprocessing as MP
 from scipy.io import loadmat, savemat
+import multiprocessing as MP
 
 # AVOID WRITING .pyc OR .pyo FILES
 sys.dont_write_bytecode
@@ -16,11 +19,10 @@ np.set_printoptions(linewidth=300)
 
 # IMPORT NECESSARY CLASSES FROM BASE
 from Florence import Base as MainData
-from Florence.FiniteElements.PreProcess import PreProcess
+# from Florence.FiniteElements.PreProcess import PreProcess
+# from Florence.FiniteElements.Solvers.Solver import *
 from Florence.FiniteElements.PostProcess import *
-from Florence.FiniteElements.Solvers.Solver import *
-import Florence.MaterialLibrary
-from Florence import Mesh, BoundaryCondition
+from Florence import *
 
 
 
@@ -442,17 +444,8 @@ def TestCaseCylinder():
     print("                       RUNNING Cylinder TEST CASES                         ")
 
     MainData.__NO_DEBUG__ = True
-    # MainData.__VECTORISATION__ = True
     MainData.__PARALLEL__ = True
     MainData.numCPU = MP.cpu_count()
-    # MainData.__PARALLEL__ = False
-    # MainData.__MEMORY__ = 'SHARED'
-    # # MainData.__MEMORY__ = 'DISTRIBUTED'
-    
-    # MainData.norder = 2
-    # MainData.plot = (0, 3)
-    # nrplot = (0, 'last')
-    # MainData.write = 0
 
     import Tests.Cylinder.ProblemData as Pr
 
@@ -467,19 +460,9 @@ def TestCaseCylinder():
 
             # READ PROBLEM DATA FILE
             formulation, mesh, material, boundary_condition, solver, fem_solver = Pr.ProblemData(MainData)
-            # MainData.nvar = material.nvar
-            # MainData.ndim = material.ndim
 
-            
             # PRE-PROCESS
-            print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation bases etc...')
-
-            # mesh = PreProcess(MainData,material,Pr,pwd)
-            # PreProcess(MainData,mesh,material,Pr,pwd)
-            quadrature_rules, function_spaces = PreProcess(MainData,formulation,mesh,material,fem_solver,Pr,pwd)
-
-            # if material.is_transversely_isotropic:
-                # material.GetFibresOrientation(mesh)
+            print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation info etc...')
             
             # Checking higher order mesh generators results
             cfile = os.path.join(mesh.filename.split(".")[0]+"_P"+str(MainData.C+1)+".mat")
@@ -488,8 +471,6 @@ def TestCaseCylinder():
             mesh_checker(mesh,Dict)
             del Dict
             gc.collect()
-            # exit()
-
 
             # Checking Dirichlet data from CAD
             boundary_condition.GetDirichletBoundaryConditions(formulation, mesh, material, solver, fem_solver)
@@ -499,13 +480,14 @@ def TestCaseCylinder():
             del Dict
             gc.collect()
 
-            print('Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*MainData.nvar)
+            print('Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*formulation.nvar)
             print('Number of elements is', mesh.elements.shape[0], \
                      'and number of boundary nodes is', np.unique(mesh.faces).shape[0])
 
             # CALL THE MAIN ROUTINE
             # TotalDisp = MainSolver(MainData,mesh,material,boundary_condition)
-            TotalDisp = fem_solver.Solve(function_spaces, formulation, mesh, material, boundary_condition, solver)
+            TotalDisp = fem_solver.Solve(formulation=formulation, mesh=mesh, 
+                material=material, boundary_condition=boundary_condition, solver=solver)
 
             # if MainData.AssemblyParameters.LoadIncrements != 5:
             # if fem_solver.number_of_load_increments != 5:
@@ -514,7 +496,7 @@ def TestCaseCylinder():
             if material.anisotropic_orientations is None:
                 material.anisotropic_orientations = np.array([np.NAN])
 
-            post_process = PostProcess(MainData.ndim,MainData.nvar)
+            post_process = PostProcess(formulation.ndim,formulation.nvar)
             if material.is_transversely_isotropic:
                 post_process.is_material_anisotropic = True
                 post_process.SetAnisotropicOrientations(material.anisotropic_orientations)
@@ -604,6 +586,8 @@ def F6TestCase():
 
 # RUN TEST-CASES
 # if __name__ == "__main__":
+
+TestCaseCylinder()
 # LeafTestCases()
 # CylinderTestCases()
 # F6TestCase()

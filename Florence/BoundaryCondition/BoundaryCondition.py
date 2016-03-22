@@ -180,9 +180,8 @@ class BoundaryCondition(object):
 
 
 
-    def GetDirichletBoundaryConditions(self, formulation, mesh, material, solver, fem_solver):
+    def GetDirichletBoundaryConditions(self, formulation, mesh, material=None, solver=None, fem_solver=None):
 
-        #######################################################
         nvar = formulation.nvar
         ndim = formulation.ndim
 
@@ -216,7 +215,8 @@ class BoundaryCondition(object):
                         nodesDBC, Dirichlet = self.IGAKitWrapper(mesh)
 
                 else:
-                    nodesDBC, Dirichlet = self.nodesDBC, self.Dirichlet                
+                    nodesDBC, Dirichlet = self.nodesDBC, self.Dirichlet 
+
 
                 # GET DIRICHLET DoFs
                 self.columns_out = (np.repeat(nodesDBC,nvar,axis=1)*nvar +\
@@ -234,7 +234,8 @@ class BoundaryCondition(object):
                             self.columns_out = np.append(self.columns_out,nvar*Rest_DOFs[inode]+i)
                             self.applied_dirichlet = np.append(self.applied_dirichlet,0.0)
 
-                print('Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds')
+                print('Finished identifying Dirichlet boundary conditions from CAD geometry.', 
+                    ' Time taken', time()-tCAD, 'seconds')
 
                 # end = -3
                 # np.savetxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_Dirichlet_"+"P"+str(MainData.C+1)+".dat",AppliedDirichlet,fmt="%9.16f")
@@ -267,10 +268,10 @@ class BoundaryCondition(object):
                 # AppliedDirichlet = AppliedDirichlet*MainData.CurrentIncr/MainData.nStep
                 # AppliedDirichlet = AppliedDirichlet*1.0/MainData.nStep
 
-                print('Finished identifying Dirichlet boundary conditions from CAD geometry. Time taken ', time()-tCAD, 'seconds')
+                print('Finished identifying Dirichlet boundary conditions from CAD geometry.', 
+                    ' Time taken', time()-tCAD, 'seconds')
 
-
-
+  
             ############################
             # print np.max(self.applied_dirichlet), mesh.Bounds 
             # print repr(self.applied_dirichlet)
@@ -315,23 +316,24 @@ class BoundaryCondition(object):
                     #       if Dirichlet[i] is None:
                     #           pass
                     #       else:
-                    #           # ColumnsOut = np.append(ColumnsOut,nvar*inode+i) # THIS IS INVALID
+                    #           # self.columns_out = np.append(self.columns_out,nvar*inode+i) # THIS IS INVALID
                     #           # ACTIVATE THIS FOR DEBUGGING ELECTROMECHANICAL PROBLEMS
-                    #           ColumnsOut = np.append(ColumnsOut,nvar*unique_edge_nodes[inode]+i)
-                    #           AppliedDirichlet = np.append(AppliedDirichlet,Dirichlet[i])
+                    #           self.columns_out = np.append(self.columns_out,nvar*unique_edge_nodes[inode]+i)
+                    #           self.applied_dirichlet = np.append(self.applied_dirichlet,Dirichlet[i])
 
                     if type(Dirichlet) is not None:
                         for i in range(nvar):
                             if Dirichlet[i] is not None:
-                                # ColumnsOut = np.append(ColumnsOut,nvar*inode+i) # THIS IS INVALID
+                                # self.columns_out = np.append(self.columns_out,nvar*inode+i) # THIS IS INVALID
                                 # ACTIVATE THIS FOR DEBUGGING ELECTROMECHANICAL PROBLEMS
-                                ColumnsOut = np.append(ColumnsOut,nvar*unique_edge_nodes[inode]+i)
-                                AppliedDirichlet = np.append(AppliedDirichlet,Dirichlet[i])
+                                self.columns_out = np.append(self.columns_out,nvar*unique_edge_nodes[inode]+i)
+                                self.applied_dirichlet = np.append(self.applied_dirichlet,Dirichlet[i])
 
 
         # GENERAL PROCEDURE - GET REDUCED MATRICES FOR FINAL SOLUTION
         self.columns_out = self.columns_out.astype(np.int64)
         self.columns_in = np.delete(np.arange(0,nvar*mesh.points.shape[0]),self.columns_out)
+
 
 
 
@@ -363,7 +365,6 @@ class BoundaryCondition(object):
             
             # CHOOSE TYPE OF BOUNDARY SPACING 
             boundary_fekete = np.array([[]])
-            # spacing_type = getattr(MainData.BoundaryData,'CurvilinearMeshNodalSpacing',None)
             if self.nodal_spacing_for_cad == 'fekete':
                 boundary_fekete = GaussLobattoQuadrature(C+2)[0]
             else:
@@ -384,14 +385,11 @@ class BoundaryCondition(object):
             # curvilinear_mesh.InferInterpolationPolynomialDegree() 
             curvilinear_mesh.SetNodalSpacing(boundary_fekete)
             curvilinear_mesh.GetBoundaryPointsOrder()
-            # exit()
-            # exit()
             # READ THE GEOMETRY FROM THE IGES FILE
             curvilinear_mesh.ReadIGES(self.cad_file)
             # EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
             geometry_points = curvilinear_mesh.GetGeomVertices()
             # print np.max(geometry_points[:,0]), mesh.Bounds
-            # exit()
             curvilinear_mesh.GetGeomEdges()
             curvilinear_mesh.GetGeomFaces()
             curvilinear_mesh.GetGeomPointsOnCorrespondingEdges()
@@ -402,7 +400,6 @@ class BoundaryCondition(object):
             # FIX IMAGES AND ANTI IMAGES IN PERIODIC CURVES/SURFACES
             curvilinear_mesh.RepairDualProjectedParameters()
             # PERFORM POINT INVERSION FOR THE INTERIOR POINTS
-            # projection_type = getattr(MainData.BoundaryData,'ProjectionType',None)
             if self.projection_type == 'orthogonal':
                 curvilinear_mesh.MeshPointInversionCurve()
             elif self.projection_type == 'arc_length':
@@ -414,10 +411,6 @@ class BoundaryCondition(object):
             curvilinear_mesh.ReturnModifiedMeshPoints(mesh.points)
             # GET DIRICHLET MainData
             nodesDBC, Dirichlet = curvilinear_mesh.GetDirichletData() 
-            # FIND UNIQUE VALUES OF DIRICHLET DATA
-            # posUnique = np.unique(nodesDBC,return_index=True)[1]
-            # nodesDBC, Dirichlet = nodesDBC[posUnique], Dirichlet[posUnique,:]
-
 
             # GET ACTUAL CURVE POINTS - THIS FUNCTION IS EXPENSIVE
             # MainData.ActualCurve = curvilinear_mesh.DiscretiseCurves(100)
@@ -458,11 +451,10 @@ class BoundaryCondition(object):
             # mesh.face_to_surface = None
             if getattr(mesh,"face_to_surface",None) is not None:
                 if mesh.faces.shape[0] == mesh.face_to_surface.shape[0]:
-                    # print mesh.faces.shape, mesh.face_to_surface.shape
                     curvilinear_mesh.SupplySurfacesContainingFaces(mesh.face_to_surface,already_mapped=1)
-                    # exit()
                 else:
-                    raise AssertionError("face-to-surface mapping does not seem correct. Point projection is going to stop")
+                    raise AssertionError("face-to-surface mapping does not seem correct. " 
+                        "Point projection is going to stop")
             else:
                 # curvilinear_mesh.IdentifySurfacesContainingFacesByPureProjection()
                 curvilinear_mesh.IdentifySurfacesContainingFaces() 
@@ -499,28 +491,9 @@ class BoundaryCondition(object):
             # GET DIRICHLET FACES (IF REQUIRED)
             dirichlet_faces = curvilinear_mesh.GetDirichletFaces()
 
-            # np.savetxt("/home/roman/Dropbox/drill_log2",dirichlet_faces)
-            # np.savetxt("/home/roman/Dropbox/valve_log2",dirichlet_faces)
-            # np.savetxt("/home/roman/Dropbox/almond_log",dirichlet_faces)
-            # np.savetxt("/home/roman/Dropbox/f6BL_log3",dirichlet_faces)
-            # np.savetxt("/home/roman/Dropbox/f6_iso_log2",dirichlet_faces)
-
-            # np.savetxt("/home/roman/Dropbox/almond_deb1",dirichlet_faces)
-            # np.savetxt("/home/roman/Dropbox/almond_deb2",dirichlet_faces)        
-            # exit()
-
-            # # FIND UNIQUE VALUES OF DIRICHLET DATA
-            # posUnique = np.unique(nodesDBC,return_index=True)[1]
-            # nodesDBC, Dirichlet = nodesDBC[posUnique], Dirichlet[posUnique
-
-
             # FOR GEOMETRIES CONTAINING PLANAR SURFACES
             planar_mesh_faces = curvilinear_mesh.GetMeshFacesOnPlanarSurfaces()
             # self.planar_mesh_faces = planar_mesh_faces
-
-            # np.savetxt("/home/roman/Dropbox/nodesDBC_.dat",nodesDBC) 
-            # np.savetxt("/home/roman/Dropbox/Dirichlet_.dat",Dirichlet)
-            # np.savetxt("/home/roman/Dropbox/planar_mesh_faces_.dat",planar_mesh_faces)
 
             if self.solve_for_planar_faces:
                 if planar_mesh_faces.shape[0] != 0:
@@ -544,7 +517,7 @@ class BoundaryCondition(object):
         from copy import deepcopy
         from Florence.Tensor import itemfreq, makezero
         from Florence import Mesh
-        from Florence.FiniteElements.Solvers.Solver import MainSolver
+        # from Florence.FiniteElements.Solvers.Solver import MainSolver
         from Florence import FunctionSpace, QuadratureRule
         from Florence.FiniteElements.PostProcess import PostProcess
 
@@ -687,8 +660,10 @@ class BoundaryCondition(object):
                 # TotalDisp = MainSolver(MainData2D,pmesh,pmaterial,pboundary_condition)
                 # TotalDisp = MainSolver(pfunction_spaces, 
                     # pformulation, pmesh, pmaterial, pboundary_condition, psolver, pfem_solver)
-                    TotalDisp = pfem_solver.Solve(pfunction_spaces, 
-                    pformulation, pmesh, pmaterial, pboundary_condition, psolver)
+                    solution = pfem_solver.Solve(function_spaces=pfunction_spaces, 
+                    formulation=pformulation, mesh=pmesh, material=pmaterial, 
+                    boundary_condition=pboundary_condition, solver=psolver)
+                    TotalDisp = solution.sol
             else:
                 # IF THERE IS NO DEGREE OF FREEDOM TO SOLVE FOR (ONE ELEMENT CASE)
                 TotalDisp = Dirichlet2D[:,:,None]
@@ -708,7 +683,7 @@ class BoundaryCondition(object):
                 import matplotlib.pyplot as plt
                 plt.show()
 
-            del pmesh, pboundary_condition
+            del pmesh, pboundary_condition, pfem_solver, pfunction_spaces
 
         gc.collect()
 
