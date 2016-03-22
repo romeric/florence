@@ -12,32 +12,32 @@ from Florence.FiniteElements.ComputeErrorNorms import *
 
 ###########################################################################################################
 # PROBLEM FILE DIRECTORIES
-# import Examples.FiniteElements.Nonlinear_3D_Cube.ProblemData as Pr
-# import Examples.FiniteElements.MultiPhysics_3D_Cube.ProblemData as Pr
-# import Examples.FiniteElements.MultiPhysics_Fibre_3D.ProblemData as Pr
-# import Examples.FiniteElements.Nonlinear_Electromechanics_3D_Ellipse_Cylinder.ProblemData as Pr
-# import Examples.FiniteElements.Nonlinear_Electromechanics_3D_Cube.ProblemData as Pr
-# import Examples.FiniteElements.Nonlinear_Electromechanics_3D_Beam.ProblemData as Pr
+# import examples.FiniteElements.Nonlinear_3D_Cube.ProblemData as Pr
+# import examples.FiniteElements.MultiPhysics_3D_Cube.ProblemData as Pr
+# import examples.FiniteElements.MultiPhysics_Fibre_3D.ProblemData as Pr
+# import examples.FiniteElements.Nonlinear_Electromechanics_3D_Ellipse_Cylinder.ProblemData as Pr
+# import examples.FiniteElements.Nonlinear_Electromechanics_3D_Cube.ProblemData as Pr
+# import examples.FiniteElements.Nonlinear_Electromechanics_3D_Beam.ProblemData as Pr
 
-# import Examples.FiniteElements.Hollow_Arc_Tri.ProblemData as Pr
-# import Examples.FiniteElements.Annular_Circle_Electromechanics.ProblemData as Pr
-# import Examples.FiniteElements.Annular_Circle.ProblemData as Pr
-# import Examples.FiniteElements.Annular_Circle_Nurbs.ProblemData as Pr
-import Examples.FiniteElements.AnnularCircle_MVP.ProblemData as Pr
-# import Examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
-# import Examples.FiniteElements.Wing2D.ProblemData as Pr
-# import Examples.FiniteElements.Naca_Isotropic.ProblemData as Pr
-# import Examples.FiniteElements.RAE2822.ProblemData as Pr
-# import Examples.FiniteElements.Misc.ProblemData as Pr
-# import Examples.FiniteElements.Leaf.ProblemData as Pr
-# import Examples.FiniteElements.Misc3D.ProblemData as Pr
-# import Examples.FiniteElements.Sphere.ProblemData as Pr
-# import Examples.FiniteElements.Almond3D.ProblemData as Pr
-# import Examples.FiniteElements.Falcon3D.ProblemData as Pr
-# import Examples.FiniteElements.F6.ProblemData as Pr
-# import Examples.FiniteElements.Drill.ProblemData as Pr
-# import Examples.FiniteElements.Valve.ProblemData as Pr
-# import Examples.FiniteElements.MechanicalComponent3D.ProblemData as Pr
+# import examples.FiniteElements.Hollow_Arc_Tri.ProblemData as Pr
+# import examples.FiniteElements.Annular_Circle_Electromechanics.ProblemData as Pr
+# import examples.FiniteElements.Annular_Circle.ProblemData as Pr
+# import examples.FiniteElements.Annular_Circle_Nurbs.ProblemData as Pr
+import examples.FiniteElements.AnnularCircle_MVP.ProblemData as Pr
+# import examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
+# import examples.FiniteElements.Wing2D.ProblemData as Pr
+# import examples.FiniteElements.Naca_Isotropic.ProblemData as Pr
+# import examples.FiniteElements.RAE2822.ProblemData as Pr
+# import examples.FiniteElements.Misc.ProblemData as Pr
+# import examples.FiniteElements.Leaf.ProblemData as Pr
+# import examples.FiniteElements.Misc3D.ProblemData as Pr
+# import examples.FiniteElements.Sphere.ProblemData as Pr
+# import examples.FiniteElements.Almond3D.ProblemData as Pr
+# import examples.FiniteElements.Falcon3D.ProblemData as Pr
+# import examples.FiniteElements.F6.ProblemData as Pr
+# import examples.FiniteElements.Drill.ProblemData as Pr
+# import examples.FiniteElements.Valve.ProblemData as Pr
+# import examples.FiniteElements.MechanicalComponent3D.ProblemData as Pr
 
 ###########################################################################################################
 
