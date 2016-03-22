@@ -3,13 +3,14 @@ from Florence import QuadratureRule, FunctionSpace, Mesh
 
 import pyximport
 pyximport.install(setup_args={'include_dirs': np.get_include()})
-from Florence.Formulations.DisplacementApproachIndices import *
+from DisplacementApproachIndices import *
 
 class VariationalPrinciple(object):
 
     def __init__(self, mesh, variables_order=(1,0), 
         analysis_type='static', analysis_nature='nonlinear', fields='mechanics',
-        quadrature_rules=None, median=None):
+        quadrature_rules=None, median=None, quadrature_type=None,
+        function_spaces=None):
 
         self.variables_order = variables_order
         self.nvar = None
@@ -19,6 +20,8 @@ class VariationalPrinciple(object):
             self.variables_order = tuple(self.variables_order)
 
         self.quadrature_rules = quadrature_rules
+        self.quadrature_type = quadrature_type
+        self.function_spaces = function_spaces
         self.median = median
         self.analysis_type = analysis_type
         self.analysis_nature = analysis_nature
@@ -28,35 +31,35 @@ class VariationalPrinciple(object):
         # GET NUMBER OF VARIABLES
         self.GetNumberOfVariables()
 
-        # BUILD MESHES FOR THESE ORDRES
-        p = mesh.InferPolynomialDegree()
+        # # BUILD MESHES FOR THESE ORDRES
+        # p = mesh.InferPolynomialDegree()
 
-        if p != self.variables_order[0] and self.variables_order[0]!=0:
-            mesh.GetHighOrderMesh(C=self.variables_order[0]-1)
+        # if p != self.variables_order[0] and self.variables_order[0]!=0:
+        #     mesh.GetHighOrderMesh(C=self.variables_order[0]-1)
 
-        if len(self.variables_order) == 2: 
-            if self.variables_order[2] == 0 or self.variables_order[1]==0 or self.variables_order[0]==0:
-                # GET MEDIAN OF THE ELEMENTS FOR CONSTANT VARIABLES
-                self.median, self.bases_at_median = mesh.Median
+        # if len(self.variables_order) == 2: 
+        #     if self.variables_order[2] == 0 or self.variables_order[1]==0 or self.variables_order[0]==0:
+        #         # GET MEDIAN OF THE ELEMENTS FOR CONSTANT VARIABLES
+        #         self.median, self.bases_at_median = mesh.Median
 
-            # GET QUADRATURE RULES
-            self.quadrature_rules = [None]*len(self.variables_order)
-            QuadratureOpt = 3
-            for counter, degree in enumerate(self.variables_order):
-                if degree==0:
-                    degree=1
-                # self.quadrature_rules[counter] = list(GetBasesAtInegrationPoints(degree-1, 2*degree,
-                    # QuadratureOpt,mesh.element_type))
-                quadrature = QuadratureRule(optimal=QuadratureOpt, 
-                    norder=2*degree, mesh_type=mesh.element_type)
-                self.quadrature_rules[counter] = quadrature
-                # FunctionSpace(mesh, p=degree, 2*degree, QuadratureOpt,mesh.element_type)
-                # self.quadrature_rules[counter] = list()
+        #     # GET QUADRATURE RULES
+        #     self.quadrature_rules = [None]*len(self.variables_order)
+        #     QuadratureOpt = 3
+        #     for counter, degree in enumerate(self.variables_order):
+        #         if degree==0:
+        #             degree=1
+        #         # self.quadrature_rules[counter] = list(GetBasesAtInegrationPoints(degree-1, 2*degree,
+        #             # QuadratureOpt,mesh.element_type))
+        #         quadrature = QuadratureRule(optimal=QuadratureOpt, 
+        #             norder=2*degree, mesh_type=mesh.element_type)
+        #         self.quadrature_rules[counter] = quadrature
+        #         # FunctionSpace(mesh, p=degree, 2*degree, QuadratureOpt,mesh.element_type)
+        #         # self.quadrature_rules[counter] = list()
 
-            # print dir(self.quadrature_rules[0])
-            # print self.quadrature_rules[0][0].Jm
-            # print self.median
-            # exit()
+        #     # print dir(self.quadrature_rules[0])
+        #     # print self.quadrature_rules[0][0].Jm
+        #     # print self.median
+        #     # exit()
 
 
     def ConstitutiveStiffnessIntegrand(self, B, SpatialGradient, CauchyStressTensor, H_Voigt, 
@@ -72,8 +75,7 @@ class VariationalPrinciple(object):
         t=[]
         if analysis_nature == 'nonlinear' or has_prestress:
             TotalTraction = GetTotalTraction(CauchyStressTensor)
-            t = np.dot(B,TotalTraction)
-
+            t = np.dot(B,TotalTraction) 
                 
         return BDB, t
 
@@ -93,6 +95,31 @@ class VariationalPrinciple(object):
         BDB = np.dot(np.dot(B,S),B.T)
                 
         return BDB
+
+
+    def MassIntegrand(self, Bases, N, material):
+
+        nvar = self.nvar
+        ndim = self.ndim
+        # We will work in total Lagrangian for mass matrix (no update needed)
+        rho = material.rho
+
+        if ndim==3:
+            # # Mechanical
+            # N[0:N.shape[0]:nvar,0] = Bases
+            # B[1:B.shape[0]:nvar,1] = Bases
+            # B[2:B.shape[0]:nvar,2] = Bases
+            # # Electrostatic 
+            # B[3:B.shape[0]:nvar,3] = Bases
+
+            # for ivar in range(0,ndim):
+            #   N[ivar:N.shape[0]:ndim,ivar] = Bases
+            for ivar in range(0,ndim):
+                N[ivar:N.shape[0]:nvar,ivar] = Bases
+        
+        rhoNN = rho*np.dot(N,N.T)
+        return rhoNN
+
 
     @staticmethod
     def FindIndices(A):

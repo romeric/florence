@@ -38,6 +38,9 @@ class PostProcess(object):
         self.is_material_anisotropic = False
         self.directions = None
 
+        self.mesh = None
+        self.sol = None
+
 
     def SetBases(self,domain=None,postdomain=None,boundary=None):
         """Sets bases for all integration points for 'domain', 'postdomain' or 'boundary'
@@ -50,18 +53,22 @@ class PostProcess(object):
         self.postdomain_bases = postdomain
         self.boundary_bases = boundary
 
+    def SetMesh(self,mesh):
+        """Set initial (undeformed) mesh"""
+        self.mesh = mesh
+
     def SetSolution(self,sol):
         self.sol = sol
 
-    def SetAnalysis(self,AnalysisType,AnalysisNature):
-        self.analysis_type = AnalysisType
-        self.analysis_nature = AnalysisNature
+    def SetAnalysis(self,analysis_type=None, analysis_nature=None):
+        self.analysis_type = analysis_type
+        self.analysis_nature = analysis_nature
 
     def SetAnisotropicOrientations(self,Directions):
         self.directions = Directions
 
 
-    def TotalComponentSol(self,sol,ColumnsIn,ColumnsOut,AppliedDirichletInc,Iter,fsize):
+    def TotalComponentSol(self, sol, ColumnsIn, ColumnsOut, AppliedDirichletInc, Iter, fsize):
 
         nvar = self.nvar
         ndim = self.ndim
@@ -81,12 +88,10 @@ class PostProcess(object):
                 TotalSol[ColumnsIn,0] = sol
                 TotalSol[ColumnsOut,0] = AppliedDirichletInc
                 
-
         # RE-ORDER SOLUTION COMPONENTS
         dU = TotalSol.reshape(TotalSol.shape[0]/nvar,nvar)
 
         return dU
-
 
 
     @staticmethod
@@ -551,6 +556,7 @@ class PostProcess(object):
             ScaledFF[elem] = 1.0*np.min(Q1)/np.max(Q1)
             ScaledHH[elem] = 1.0*np.min(Q2)/np.max(Q2)
             # Jacobian[elem] = np.min(detF)
+            print(np.min(Jacobian), np.max(Jacobian))
 
             if self.is_material_anisotropic:
                 ScaledFNFN[elem] = 1.0*np.min(Q4)/np.max(Q4)
@@ -736,20 +742,39 @@ class PostProcess(object):
         plt.show()
 
 
-    def HighOrderCurvedPatchPlot(self,*args,**kwargs):
-        mesh = args[0]
+    def CurvilinearPlot(self,*args,**kwargs):
+        """Curvilinear (or linear) plots for high order finite elements"""
+        if len(args) == 0:
+            if self.mesh is None:
+                raise ValueError("Mesh not set for post-processing")
+            else:
+                mesh = self.mesh
+        else:
+            mesh = args[0]
+
+        if len(args) > 1:
+            TotalDisp = args[1]
+        else:
+            if self.sol is None:
+                raise ValueError("Solution not set for post-processing")
+            else:
+                TotalDisp = self.sol
+
         if mesh.element_type == "tri":
-            self.HighOrderCurvedPatchPlotTri(*args,**kwargs)
+            # self.CurvilinearPlotTri(*args,**kwargs)
+            self.CurvilinearPlotTri(mesh,TotalDisp,**kwargs)
         elif mesh.element_type == "tet":
-            self.HighOrderCurvedPatchPlotTet(*args,**kwargs)
+            # self.CurvilinearPlotTet(*args,**kwargs)
+            self.CurvilinearPlotTet(mesh,TotalDisp,**kwargs)
         else:
             raise ValueError("Unknown mesh type")
 
 
     @staticmethod
-    def HighOrderCurvedPatchPlotTri(mesh,TotalDisp,QuantityToPlot=None,
-        ProjectionFlags=None,InterpolationDegree=40,EquallySpacedPoints=False,
-        TriSurf=False,colorbar=False,PlotActualCurve=False,plot_points=False,save=False,filename=None):
+    def CurvilinearPlotTri(mesh, TotalDisp, QuantityToPlot=None,
+        ProjectionFlags=None, InterpolationDegree=40, EquallySpacedPoints=False,
+        TriSurf=False, colorbar=False, PlotActualCurve=False, 
+        plot_points=False, save=False, filename=None, show_plot=True):
 
         """High order curved triangular mesh plots, based on high order nodal FEM.
             The equally spaced FEM points do not work as good as the Fekete points 
@@ -857,6 +882,9 @@ class PostProcess(object):
         Tplot = np.zeros((nelem,3),dtype=np.int64)
         Uplot = np.zeros(nnode,dtype=np.float64)
 
+        if QuantityToPlot is None:
+            QuantityToPlot = np.zeros(mesh.nelem)
+
         # FOR CURVED ELEMENTS
         for ielem in range(mesh.nelem):
             Xplot[ielem*nsize:(ielem+1)*nsize,:] = np.dot(BasesTri.T, vpoints[mesh.elements[ielem,:],:])
@@ -911,6 +939,9 @@ class PostProcess(object):
         plt.axis('equal')
         plt.axis('off')
 
+        if show_plot:
+            plt.show()
+
 
 
 
@@ -918,7 +949,7 @@ class PostProcess(object):
 
 
     @staticmethod
-    def HighOrderCurvedPatchPlotTet(mesh,TotalDisp,QuantityToPlot=None,
+    def CurvilinearPlotTet(mesh,TotalDisp,QuantityToPlot=None,
         ProjectionFlags=None,InterpolationDegree=20,EquallySpacedPoints=False,PlotActualCurve=False,
         plot_points=False,point_radius=0.1,colorbar=False,color=None,figure=None,
         show_plot=True,save=False,filename=None):

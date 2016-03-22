@@ -1,6 +1,6 @@
-import numpy as np
+from numpy import einsum, asarray, eye
 from .MaterialBase import Material
-from Florence.Tensor import trace
+from Florence.Tensor import trace, Voigt
 
 
 #####################################################################################################
@@ -20,25 +20,39 @@ class NearlyIncompressibleNeoHookean(Material):
         mtype = type(self).__name__
         super(NearlyIncompressibleNeoHookean, self).__init__(mtype, ndim, **kwargs)
 
+        self.kappa = 0
+        self.pressure = [0]
+
         # INITIALISE STRAIN TENSORS
         from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import KinematicMeasures
-        StrainTensors = KinematicMeasures(np.asarray([np.eye(self.ndim,self.ndim)]*2),"Nonlinear")
+        StrainTensors = KinematicMeasures(asarray([eye(self.ndim,self.ndim)]*2),"Nonlinear")
         self.Hessian(StrainTensors)
+
+        self.is_nearly_incompressible = True
+        self.is_compressible = False
         
 
-    def Hessian(self,StrainTensors,elem=0,gcounter=0):
+    def Hessian(self, StrainTensors, ElectricFieldx=0, elem=0, gcounter=0):
+        """Hessian split into isochoroic and volumetric parts"""
         
         I = StrainTensors['I']
-        detF = StrainTensors['J'][gcounter]
+        b = StrainTensors['b'][gcounter]
+        J = StrainTensors['J'][gcounter]
+        mu = self.mu
 
-        mu2 = self.mu/detF- self.lamb*(detF-1.0)
-        lamb2 = self.lamb*(2*detF-1.0) 
+        # ISOCHORIC
+        H_Voigt = 2*mu*J**(-5./3.)*(1./9.*trace(b)*einsum('ij,kl',I,I) - \
+            1./3.*(einsum('ij,kl',b,I) + einsum('ij,kl',I,b)) +\
+            1./6.*trace(b)*(einsum('ik,jl',I,I) + einsum('il,jk',I,I)) )
+        # VOLUMETRIC
+        H_Voigt += self.pressure[elem]*(einsum('ij,kl',I,I) - (einsum('ik,jl',I,I) + einsum('il,jk',I,I))) 
 
-        H_Voigt = lamb2*self.vIijIkl+mu2*self.vIikIjl
+        H_Voigt = Voigt(H_Voigt,1)
 
         self.H_VoigtSize = H_Voigt.shape[0]
 
         return H_Voigt
+
 
     def CauchyStress(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 
@@ -47,9 +61,10 @@ class NearlyIncompressibleNeoHookean(Material):
         b = StrainTensors['b'][gcounter]
 
         mu = self.mu
-        lamb = self.lamb
+        stress = mu*J**(-5./3.)*(b - 1./3.*trace(b)*I) 
+        stress += self.pressure[elem]*I
             
-        return 1.0*mu/J*b + (lamb*(J-1.0)-mu/J)*I
+        return stress
 
 
 

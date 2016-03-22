@@ -1,9 +1,10 @@
 from Base import Base
 from QuadratureRules import QuadratureRule 
 from FunctionSpace import FunctionSpace
-from MaterialLibrary import *
 from MeshGeneration.Mesh import Mesh
-from MaterialLibrary import Material
+from MaterialLibrary import *
+# from VariationalPrinciple import *
+# from MaterialLibrary import Material
 from BoundaryCondition import BoundaryCondition
 from Solver import LinearSolver, FEMSolver
-from debug import debug
+from Utils import PWD
