@@ -556,7 +556,7 @@ class PostProcess(object):
             ScaledFF[elem] = 1.0*np.min(Q1)/np.max(Q1)
             ScaledHH[elem] = 1.0*np.min(Q2)/np.max(Q2)
             # Jacobian[elem] = np.min(detF)
-            print(np.min(Jacobian), np.max(Jacobian))
+            # print(np.min(Jacobian), np.max(Jacobian))
 
             if self.is_material_anisotropic:
                 ScaledFNFN[elem] = 1.0*np.min(Q4)/np.max(Q4)

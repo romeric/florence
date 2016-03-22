@@ -54,14 +54,6 @@ param_run_session.py
 profile_imports_manual.py
 nr.py
 
-# scripts parametric studies
-ComputationalTime.py
-ParametricStudy_ErrorNorms.py
-ParametricStudy_MaterialModelvsNu.py
-ParametricStudy_PvsNu.py
-ParametricStudy_StepsvsNu.py
-WriteCurvedMeshFiles.py
-
 # testfiles not to ignore
 !Tests/Almond3D/
 !Tests/Almond3D/*
