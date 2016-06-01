@@ -773,8 +773,8 @@ class PostProcess(object):
     @staticmethod
     def CurvilinearPlotTri(mesh, TotalDisp, QuantityToPlot=None,
         ProjectionFlags=None, InterpolationDegree=40, EquallySpacedPoints=False,
-        TriSurf=False, colorbar=False, PlotActualCurve=False, 
-        plot_points=False, save=False, filename=None, show_plot=True):
+        TriSurf=False, colorbar=False, PlotActualCurve=False, point_radius = 3,
+        plot_points=False, plot_edges=True, save=False, filename=None, show_plot=True):
 
         """High order curved triangular mesh plots, based on high order nodal FEM.
             The equally spaced FEM points do not work as good as the Fekete points 
@@ -853,14 +853,15 @@ class PostProcess(object):
             vpoints = mesh.points + TotalDisp
 
         # GET X & Y OF CURVED EDGES
-        x_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
-        y_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
+        if plot_edges:
+            x_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
+            y_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
 
-        for iedge in range(smesh.all_edges.shape[0]):
-            ielem = edge_elements[iedge,0]
-            edge = mesh.elements[ielem,reference_edges[edge_elements[iedge,1],:]]
-            coord_edge = vpoints[edge,:]
-            x_edges[:,iedge], y_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
+            for iedge in range(smesh.all_edges.shape[0]):
+                ielem = edge_elements[iedge,0]
+                edge = mesh.elements[ielem,reference_edges[edge_elements[iedge,1],:]]
+                coord_edge = vpoints[edge,:]
+                x_edges[:,iedge], y_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
 
 
         # MAKE FIGURE
@@ -871,8 +872,9 @@ class PostProcess(object):
         else:
             ax = fig.add_subplot(111)
 
-        # PLOT CURVED EDGES
-        ax.plot(x_edges,y_edges,'k')
+        if plot_edges:
+            # PLOT CURVED EDGES
+            ax.plot(x_edges,y_edges,'k')
         
 
         nnode = nsize*mesh.nelem
@@ -906,10 +908,11 @@ class PostProcess(object):
         # PLOT CURVED POINTS
         if plot_points:
             # plt.plot(vpoints[:,0],vpoints[:,1],'o',markersize=3,color='#F88379')
-            plt.plot(vpoints[:,0],vpoints[:,1],'o',markersize=3,color='k')
+            plt.plot(vpoints[:,0],vpoints[:,1],'o',markersize=point_radius,color='k')
 
 
-        plt.set_cmap('viridis')
+        # plt.set_cmap('viridis')
+        plt.set_cmap('viridis_r')
         plt.clim(0,1)
         
 
@@ -930,14 +933,15 @@ class PostProcess(object):
             else:
                 raise KeyError("You have not computed the CAD curve points")
 
+        plt.axis('equal')
+        plt.axis('off')
+
         if save:
             if filename is None:
                 raise ValueError("No filename given. Supply one with extension")
             else:
-                plt.savefig("filename",format="eps",dpi=300)
+                plt.savefig(filename,format="eps",dpi=300, bbox_inches='tight')
 
-        plt.axis('equal')
-        plt.axis('off')
 
         if show_plot:
             plt.show()
@@ -950,9 +954,9 @@ class PostProcess(object):
 
     @staticmethod
     def CurvilinearPlotTet(mesh,TotalDisp,QuantityToPlot=None,
-        ProjectionFlags=None,InterpolationDegree=20,EquallySpacedPoints=False,PlotActualCurve=False,
-        plot_points=False,point_radius=0.1,colorbar=False,color=None,figure=None,
-        show_plot=True,save=False,filename=None):
+        ProjectionFlags=None, InterpolationDegree=20, EquallySpacedPoints=False, PlotActualCurve=False,
+        plot_points=False, plot_edges=True, point_radius=0.1, colorbar=False, color=None, figure=None,
+        show_plot=True, save=False, filename=None):
 
         """High order curved tetrahedral surfaces mesh plots, based on high order nodal FEM.
             The equally spaced FEM points do not work as good as the Fekete points 
@@ -1086,41 +1090,42 @@ class PostProcess(object):
         del vpoints
         gc.collect()
 
-        # GET X, Y & Z OF CURVED EDGES  
-        x_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
-        y_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
-        z_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
-
-        for iedge in range(smesh.all_edges.shape[0]):
-            ielem = edge_elements[iedge,0]
-            edge = smesh.elements[ielem,reference_edges[edge_elements[iedge,1],:]]
-            coord_edge = svpoints[edge,:]
-            x_edges[:,iedge], y_edges[:,iedge], z_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
-
-
         # MAKE A FIGURE
         if figure is None:
             figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(800,600))
-        
-        # PLOT CURVED EDGES
-        connections_elements = np.arange(x_edges.size).reshape(x_edges.shape[1],x_edges.shape[0])
-        connections = np.zeros((x_edges.size,2),dtype=np.int64)
-        for i in range(connections_elements.shape[0]):
-            connections[i*(x_edges.shape[0]-1):(i+1)*(x_edges.shape[0]-1),0] = connections_elements[i,:-1]
-            connections[i*(x_edges.shape[0]-1):(i+1)*(x_edges.shape[0]-1),1] = connections_elements[i,1:]
-        connections = connections[:(i+1)*(x_edges.shape[0]-1),:]
-        # point_cloulds = np.concatenate((x_edges.flatten()[:,None],y_edges.flatten()[:,None],z_edges.flatten()[:,None]),axis=1)
-        
         figure.scene.disable_render = True
-        # src = mlab.pipeline.scalar_scatter(x_edges.flatten(), y_edges.flatten(), z_edges.flatten())
-        src = mlab.pipeline.scalar_scatter(x_edges.T.copy().flatten(), y_edges.T.copy().flatten(), z_edges.T.copy().flatten())
-        src.mlab_source.dataset.lines = connections
-        lines = mlab.pipeline.stripper(src)
-        mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
 
-        # OLDER VERSION
-        # for i in range(x_edges.shape[1]):
-        #     mlab.plot3d(x_edges[:,i],y_edges[:,i],z_edges[:,i],color=(0,0,0),tube_radius=edge_width)
+        if plot_edges:
+            # GET X, Y & Z OF CURVED EDGES  
+            x_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
+            y_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
+            z_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
+
+            for iedge in range(smesh.all_edges.shape[0]):
+                ielem = edge_elements[iedge,0]
+                edge = smesh.elements[ielem,reference_edges[edge_elements[iedge,1],:]]
+                coord_edge = svpoints[edge,:]
+                x_edges[:,iedge], y_edges[:,iedge], z_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
+
+            
+            # PLOT CURVED EDGES
+            connections_elements = np.arange(x_edges.size).reshape(x_edges.shape[1],x_edges.shape[0])
+            connections = np.zeros((x_edges.size,2),dtype=np.int64)
+            for i in range(connections_elements.shape[0]):
+                connections[i*(x_edges.shape[0]-1):(i+1)*(x_edges.shape[0]-1),0] = connections_elements[i,:-1]
+                connections[i*(x_edges.shape[0]-1):(i+1)*(x_edges.shape[0]-1),1] = connections_elements[i,1:]
+            connections = connections[:(i+1)*(x_edges.shape[0]-1),:]
+            # point_cloulds = np.concatenate((x_edges.flatten()[:,None],y_edges.flatten()[:,None],z_edges.flatten()[:,None]),axis=1)
+            
+            # src = mlab.pipeline.scalar_scatter(x_edges.flatten(), y_edges.flatten(), z_edges.flatten())
+            src = mlab.pipeline.scalar_scatter(x_edges.T.copy().flatten(), y_edges.T.copy().flatten(), z_edges.T.copy().flatten())
+            src.mlab_source.dataset.lines = connections
+            lines = mlab.pipeline.stripper(src)
+            mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
+
+            # OLDER VERSION
+            # for i in range(x_edges.shape[1]):
+            #     mlab.plot3d(x_edges[:,i],y_edges[:,i],z_edges[:,i],color=(0,0,0),tube_radius=edge_width)
         
 
         nface = smesh.elements.shape[0]

@@ -21,6 +21,7 @@ class BoundaryCondition(object):
     def __init__(self):
         # TYPE OF BOUNDARY straight OF nurbs
         self.boundary_type = 'straight'
+        self.dirichlet_data_applied_at = 'node' # or 'faces'
         self.requires_cad = False
         self.cad_file = None
         # PROJECTION TYPE FOR CAD EITHER orthogonal OR arc_length
@@ -54,6 +55,8 @@ class BoundaryCondition(object):
         self.columns_out = None
         self.columns_in = None
         self.applied_dirichlet = None
+
+        self.dirichlet_flags = None
 
 
         # NODAL FORCES GENERATED BASED ON DIRICHLET OR NEUMANN ARE NOT 
@@ -175,9 +178,13 @@ class BoundaryCondition(object):
             self.projection_flags = projection_edges
 
 
-    def DirichletCriterion(self,DirichArgs):
-        pass
+    def SetDirichletCriteria(self, func, *args, **kwargs):
+        self.dirichlet_flags = func(*args, **kwargs)
+        return self.dirichlet_flags
 
+
+    def SetNeumannCriteria(self,NeuArgs,Analysis=0,Step=0):
+        pass
 
 
     def GetDirichletBoundaryConditions(self, formulation, mesh, material=None, solver=None, fem_solver=None):
@@ -287,7 +294,7 @@ class BoundaryCondition(object):
 
         elif self.boundary_type == 'straight' or self.boundary_type == 'mixed':
             # IF DIRICHLET BOUNDARY CONDITIONS ARE APPLIED DIRECTLY AT NODES
-            if MainData.BoundaryData().DirichArgs.Applied_at == 'node':
+            if self.dirichlet_data_applied_at == 'node':
                 # GET UNIQUE NODES AT THE BOUNDARY
                 unique_edge_nodes = []
                 if ndim==2:
@@ -297,15 +304,14 @@ class BoundaryCondition(object):
                 # ACTIVATE THIS FOR DEBUGGING ELECTROMECHANICAL PROBLEMS
                 # unique_edge_nodes = np.unique(mesh.elements) 
 
+                # MainData.BoundaryData().DirichArgs.points = mesh.points
+                # MainData.BoundaryData().DirichArgs.edges = mesh.edges
+                # for inode in range(0,unique_edge_nodes.shape[0]):
+                #     coord_node = mesh.points[unique_edge_nodes[inode]]
+                #     MainData.BoundaryData().DirichArgs.node = coord_node
+                #     MainData.BoundaryData().DirichArgs.inode = unique_edge_nodes[inode]
 
-                MainData.BoundaryData().DirichArgs.points = mesh.points
-                MainData.BoundaryData().DirichArgs.edges = mesh.edges
-                for inode in range(0,unique_edge_nodes.shape[0]):
-                    coord_node = mesh.points[unique_edge_nodes[inode]]
-                    MainData.BoundaryData().DirichArgs.node = coord_node
-                    MainData.BoundaryData().DirichArgs.inode = unique_edge_nodes[inode]
-
-                    Dirichlet = MainData.BoundaryData().DirichletCriterion(MainData.BoundaryData().DirichArgs)
+                #     Dirichlet = MainData.BoundaryData().DirichletCriterion(MainData.BoundaryData().DirichArgs)
 
                     # COMMENTED RECENTLY IN FAVOR OF WHAT APPEARS BELOW
                     # if type(Dirichlet) is None:
@@ -320,16 +326,29 @@ class BoundaryCondition(object):
                     #           # ACTIVATE THIS FOR DEBUGGING ELECTROMECHANICAL PROBLEMS
                     #           self.columns_out = np.append(self.columns_out,nvar*unique_edge_nodes[inode]+i)
                     #           self.applied_dirichlet = np.append(self.applied_dirichlet,Dirichlet[i])
+                
+                # Dirichlet = self.dirichlet_flags
+                # if Dirichlet is None:
+                    # Dirichlet.SetDirichletCriteria(unique_edge_nodes)
 
-                    if type(Dirichlet) is not None:
-                        for i in range(nvar):
-                            if Dirichlet[i] is not None:
-                                # self.columns_out = np.append(self.columns_out,nvar*inode+i) # THIS IS INVALID
-                                # ACTIVATE THIS FOR DEBUGGING ELECTROMECHANICAL PROBLEMS
-                                self.columns_out = np.append(self.columns_out,nvar*unique_edge_nodes[inode]+i)
-                                self.applied_dirichlet = np.append(self.applied_dirichlet,Dirichlet[i])
+                # print(self.dirichlet_flags)
+                # exit()
+                self.columns_out = []
+                for inode in range(0,self.dirichlet_flags.shape[0]):
+                    for i in range(nvar):
+                        # print(self.dirichlet_flags[inode, i] is None)
+                        if not np.isnan(self.dirichlet_flags[inode, i]):# or self.dirichlet_flags[inode, i] is not None:
+                            # print(self.dirichlet_flags[inode, i],inode,i)
+                        #     # self.columns_out = np.append(self.columns_out,nvar*inode+i) # THIS IS INVALID
+                        #     # ACTIVATE THIS FOR DEBUGGING ELECTROMECHANICAL PROBLEMS
+                            # self.columns_out = np.append(self.columns_out,nvar*unique_edge_nodes[inode]+i)
+                            # self.applied_dirichlet = np.append(self.applied_dirichlet,Dirichlet[i])
+                            self.columns_out = np.append(self.columns_out,nvar*inode+i)
+                            self.applied_dirichlet = np.append(self.applied_dirichlet,self.dirichlet_flags[inode,i])
 
-
+        # print(self.applied_dirichlet)
+        # print(not np.isnan(self.dirichlet_flags[9,0]))
+        # exit()
         # GENERAL PROCEDURE - GET REDUCED MATRICES FOR FINAL SOLUTION
         self.columns_out = self.columns_out.astype(np.int64)
         self.columns_in = np.delete(np.arange(0,nvar*mesh.points.shape[0]),self.columns_out)
@@ -708,7 +727,7 @@ class BoundaryCondition(object):
         return stiffness_b, F_b, mass_b
 
 
-    def ApplyDirichletGetReducedMatrices(self,stiffness,F,AppliedDirichlet,mass=None):
+    def ApplyDirichletGetReducedMatrices(self, stiffness, F, AppliedDirichlet, mass=None):
         """AppliedDirichlet is a non-member because it can be external incremental Dirichlet,
             which is currently not implemented as member of BoundaryCondition. F also does not 
             correspond to Dirichlet forces, as it can be residual in incrementally linearised
@@ -753,9 +772,6 @@ class BoundaryCondition(object):
 
     def SetNURBSCondition(self,nurbs_func,*args):
         self.nurbs_condition = nurbs_func(*args)
-
-    def NeumannCriterion(self,NeuArgs,Analysis=0,Step=0):
-        pass
 
 
     def GetExternalForces(self,mesh,material):
