@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 """ Parameteric studeis"""
 
+import os, sys
+sys.path.insert(1,'/home/roman/Dropbox/florence')
+
 
 import imp, os, sys, time
 from sys import exit
@@ -135,6 +138,7 @@ if __name__ == '__main__':
                                             3 J**2
             """
 
+
             if which_quality < 1:
                 raise ValueError("which_quality can only be 1, 2 or 3")
 
@@ -142,6 +146,11 @@ if __name__ == '__main__':
             import matplotlib.pyplot as plt
             import matplotlib.cm as cm
             from matplotlib import rc
+
+
+            # after review - change colormap
+            colmap = cm.jet
+            # colmap = cm.viridis
 
             ## for Palatino and other serif fonts use:
             rc('font',**{'family':'serif','serif':['Palatino'],'size':18})
@@ -154,7 +163,8 @@ if __name__ == '__main__':
             # ProblemName = "Mech2D"
             ProblemName = "Almond3D"
             ResultsPath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/'+ProblemName+"/"
-            SavePath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/"+ProblemName+"/"
+            # SavePath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/"+ProblemName+"/"
+            SavePath = "/media/MATLAB/Paper_CompMech2015_After_Review/figures/"+ProblemName+"/"
 
             if which_formulation == 0:
                 if projection_type == 0:
@@ -253,11 +263,11 @@ if __name__ == '__main__':
 
             font_size = 22
             if ProblemName == "Almond3D" and which_formulation >22:
-                plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bicubic', cmap=cm.viridis)
-                # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bilinear', cmap=cm.viridis)
+                plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bicubic', cmap=colmap)
+                # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bilinear', cmap=colmap)
             else:
-                # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bilinear', cmap=cm.viridis)
-                plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='nearest', cmap=cm.viridis)
+                # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bilinear', cmap=colmap)
+                plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='nearest', cmap=colmap)
 
             if interpolate is True:
                 tick_locs = [2,2.8,3.6,4.4,5.2]
@@ -278,7 +288,11 @@ if __name__ == '__main__':
             # USE COLORBAR ONLY FOR THE NONLINEAR - LAST COLUMN IN THE PAPER
             # if which_formulation == 2:
             ax, _ = mpl.colorbar.make_axes(plt.gca(), shrink=0.8)
-            cbar = mpl.colorbar.ColorbarBase(ax, cmap=cm.viridis,
+            # ax, _ = mpl.colorbar.make_axes(plt.gca(), shrink=1.0)
+            # cbar = mpl.colorbar.ColorbarBase(ax, cmap=cm.viridis,
+                           # norm=mpl.colors.Normalize(vmin=-0, vmax=1))
+            # after review
+            cbar = mpl.colorbar.ColorbarBase(ax, cmap=colmap,
                            norm=mpl.colors.Normalize(vmin=-0, vmax=1))
             cbar.set_clim(0, 1)
             # Scale the image
@@ -294,17 +308,17 @@ if __name__ == '__main__':
                 plt.savefig(SavePath+ResultsFile+'.png',bbox_inches='tight',format='png',dpi=100,pad_inches=0.01)
                 print SavePath+ResultsFile+'.png'
 
-            # plt.show()
+            plt.show()
             plt.close()
 
 
-        # plotter(2,0)
-        # plotter(which_formulation=2,projection_type=1, save=True) 
+        plotter(2,0)
+        # plotter(which_formulation=1,projection_type=0, save=True) 
         # Alomnd3D
         # plotter(which_formulation=0,projection_type=1, which_quality=3, save=False)
-        for i in range(3):
-            for j in range(1,4):
-                plotter(which_formulation=i,projection_type=1, which_quality=j, save=False) 
+        # for i in range(3):
+            # for j in range(1,4):
+                # plotter(which_formulation=i,projection_type=1, which_quality=j, save=False) 
 
 
 

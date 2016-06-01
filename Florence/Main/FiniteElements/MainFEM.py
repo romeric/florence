@@ -21,9 +21,9 @@ from Florence.FiniteElements.ComputeErrorNorms import *
 
 # import examples.FiniteElements.Hollow_Arc_Tri.ProblemData as Pr
 # import examples.FiniteElements.Annular_Circle_Electromechanics.ProblemData as Pr
-# import examples.FiniteElements.Annular_Circle.ProblemData as Pr
+import examples.FiniteElements.Annular_Circle.ProblemData as Pr
 # import examples.FiniteElements.Annular_Circle_Nurbs.ProblemData as Pr
-import examples.FiniteElements.AnnularCircle_MVP.ProblemData as Pr
+# import examples.FiniteElements.AnnularCircle_MVP.ProblemData as Pr
 # import examples.FiniteElements.MechanicalComponent2D.ProblemData as Pr
 # import examples.FiniteElements.Wing2D.ProblemData as Pr
 # import examples.FiniteElements.Naca_Isotropic.ProblemData as Pr

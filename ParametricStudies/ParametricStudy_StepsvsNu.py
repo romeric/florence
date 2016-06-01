@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 """ Parameteric studeis"""
 
+import os, sys
+sys.path.insert(1,'/home/roman/Dropbox/florence')
+
 
 import imp, os, sys, time
 from sys import exit
@@ -269,12 +272,17 @@ def plotter_individual_imshow(p=2,which_q=3,save=False):
 
     """
 
+    # after review - change colormap
+    colmap = cm.jet
+    # colmap = cm.viridis
+
     stretch = [25, 50, 100, 200, 400, 800, 1600]
     formulations = ["Linear","Linearised","Nonlinear"]
 
     fpath = '/home/roman/Dropbox/MATLAB_MESHING_PLOTS/RESULTS_DIR/Steps_vs_Nu/Wing2D_Steps_vs_Nu_'
     fname = "P"+str(p)+".mat"
-    spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_Steps_vs_Nu_"
+    # spath = "/home/roman/Dropbox/Repository/LaTeX/2015_HighOrderMeshing/figures/Wing2D/Wing2D_Steps_vs_Nu_"
+    spath = "/media/MATLAB/Paper_CompMech2015_After_Review/figures/Wing2D/Wing2D_Steps_vs_Nu_"
     
     # print fpath+fname
     DictOutput =  loadmat(fpath+fname)   
@@ -374,7 +382,7 @@ def plotter_individual_imshow(p=2,which_q=3,save=False):
 
             # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bicubic', cmap=cm.viridis)
             # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bilinear', cmap=cm.viridis)
-            plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='nearest', cmap=cm.viridis)
+            plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='nearest', cmap=colmap)
             # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='nearest', cmap=cm.jet)
             # plt.imshow(scaledA, extent=(ymin, ymax, xmin, xmax),interpolation='bspline', cmap=cm.viridis)
             # plt.imshow(scaledA)
@@ -387,7 +395,7 @@ def plotter_individual_imshow(p=2,which_q=3,save=False):
             ax, _ = mpl.colorbar.make_axes(plt.gca(), shrink=0.8)
             # cbar = mpl.colorbar.ColorbarBase(ax, cmap=cm.viridis,
                                # norm=mpl.colors.Normalize(vmin=-0, vmax=1))
-            cbar = mpl.colorbar.ColorbarBase(ax, cmap=cm.viridis)
+            cbar = mpl.colorbar.ColorbarBase(ax, cmap=colmap)
             # cbar = mpl.colorbar.ColorbarBase(ax, cmap=cm.jet)
             cbar.set_clim(0, 1)
             cbar.set_ticks([0,0.1,0.2,0.3,0.4,0.5,.6,0.7,0.8,0.9,1])
@@ -411,7 +419,7 @@ def plotter_individual_imshow(p=2,which_q=3,save=False):
             #     # plt.savefig(sname,format='eps',dpi=300)
                 plt.savefig(sname,format='png',dpi=100,bbox_inches='tight',pad_inches=0.01)
 
-            plt.show()
+            # plt.show()
             plt.close()
 
 
@@ -964,9 +972,9 @@ if __name__ == '__main__':
 
 
 
-        p=5
+        p=2
         # plotter_individual_imshow(p)
-        # plotter_individual_imshow(p,which_q=1,save=True)
+        plotter_individual_imshow(p,which_q=2,save=True)
 
 
         # plotter_quality_evolution(p)
@@ -981,7 +989,7 @@ if __name__ == '__main__':
         # plotter_quality_measures(p)
         # plotter_quality_measures(p,save=True)
 
-        plotter_quality_measures_3D(p)
+        # plotter_quality_measures_3D(p)
         # plotter_quality_measures_3D(p,save=True)
 
         # plotter_distribution_q3_3D(p)

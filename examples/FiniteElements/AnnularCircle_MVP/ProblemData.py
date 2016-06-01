@@ -5,7 +5,7 @@ from Florence import *
 from Florence.VariationalPrinciple import *
 
 
-def ProblemData(MainData):
+def ProblemData(*args, **kwargs):
 
     ndim = 2
     p = 2   
