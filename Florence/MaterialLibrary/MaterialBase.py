@@ -1,10 +1,5 @@
 import numpy as np
-
-if getattr(str,'casefold',None) is not None:
-    insensitive = lambda str_name: str_name.casefold()
-else:
-    insensitive = lambda str_name: str_name.upper().lower()  
-
+from Florence.Utils import insensitive
 
 # BASE CLASS FOR ALL MATERIAL MODELS - SHOULD NOT BE USED DIRECTLY 
 class Material(object):
@@ -42,14 +37,15 @@ class Material(object):
         self.mtype = mtype
         self.ndim = ndim
 
-        if 'elec' not in self.mtype:
-            if 'magnet' not in self.mtype:
+
+        if 'elec' not in insensitive(self.mtype):
+            if 'magnet' not in insensitive(self.mtype):
                 self.nvar = self.ndim
-        elif 'elec' in self.mtype and 'magnet' not in self.mtype:
+        elif 'elec' in insensitive(self.mtype) and 'magnet' not in insensitive(self.mtype):
             self.nvar = self.ndim + 1
-        elif 'elec' not in self.mtype and 'magnet' in self.mtype:
+        elif 'elec' not in insensitive(self.mtype) and 'magnet' in insensitive(self.mtype):
             self.nvar = self.ndim + 1
-        elif 'elec' in self.mtype and 'magnet' in self.mtype:
+        elif 'elec' in insensitive(self.mtype) and 'magnet' in insensitive(self.mtype):
             self.nvar = self.ndim + 2
         else:
             self.nvar = self.ndim

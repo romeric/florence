@@ -1619,6 +1619,7 @@ class Mesh(object):
         tri_func = Delaunay(coordinates)
         self.element_type = "tri"
         self.elements = tri_func.simplices
+        self.nelem = self.elements.shape[0] 
         self.points = tri_func.points
         self.GetBoundaryEdgesTri()
 

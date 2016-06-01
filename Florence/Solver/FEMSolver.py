@@ -65,7 +65,7 @@ class FEMSolver(object):
         self.debug = False
 
 
-    def __checkdata__(self, material, formulation, mesh):
+    def __checkdata__(self, material, boundary_condition, formulation, mesh):
         """Checks the state of data for FEMSolver"""
 
         if material.mtype == "LinearModel" and self.number_of_load_increments > 1:
@@ -109,6 +109,13 @@ class FEMSolver(object):
         if material.is_transversely_isotropic:
             material.GetFibresOrientation(mesh)
         ##############################################################################
+
+        # CHANGE MESH DATA TYPE
+        mesh.ChangeType()
+        # ASSIGN ANALYSIS PARAMTER TO BOUNDARY CONDITION
+        boundary_condition.analysis_type = self.analysis_type
+        boundary_condition.analysis_nature = self.analysis_nature
+
 
 
     def __makeoutput__(self, mesh, TotalDisp, formulation, function_space):
@@ -161,7 +168,7 @@ class FEMSolver(object):
         if solver is None:
             solver = LinearSolver(linear_solver="direct", linear_solver_type="umfpack")
 
-        self.__checkdata__(material, formulation, mesh)
+        self.__checkdata__(material, boundary_condition, formulation, mesh)
         #---------------------------------------------------------------------------#
 
         print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation info etc...')
