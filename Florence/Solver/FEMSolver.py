@@ -549,8 +549,10 @@ class FEMSolver(object):
             J_mass=np.zeros((nvar*nodeperelem)**2*mesh.elements.shape[0],dtype=np.int32)
             V_mass=np.zeros((nvar*nodeperelem)**2*mesh.elements.shape[0],dtype=np.float32)
 
-        F = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
-        T = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)  
+        # F = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
+        # T = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
+        F = np.zeros((mesh.points.shape[0]*nvar,1),np.float32)
+        T = np.zeros((mesh.points.shape[0]*nvar,1),np.float32)  
         mass = []
 
 

@@ -242,6 +242,7 @@ class LinearSolver(object):
                 A = A.tocsr()
             
             # AMG METHOD
+            from pyamg import ruge_stuben_solver
             ml = ruge_stuben_solver(A)
             sol = ml.solve(b,tol=self.iterative_solver_tolerance)
 
