@@ -1283,8 +1283,6 @@ class Mesh(object):
         self.GetBoundaryFacesTet()
         self.GetBoundaryEdgesTet()
 
-        self.SimplePlot()
-
         return 
 
         # OTHER VARIANTS OF GMSH
@@ -1567,13 +1565,14 @@ class Mesh(object):
 
         Dict = self.__dict__
 
-        if isinstance(external_fields,dict):
-            Dict.update(external_fields)
-        elif isinstance(external_fields,tuple):            
-            for counter, fields in enumerate(external_fields):
-                Dict['results_'+str(counter)] = fields
-        else:
-            raise AssertionError("Fields should be eirther tuple or a dict")
+        if external_fields is not None:
+            if isinstance(external_fields,dict):
+                Dict.update(external_fields)
+            elif isinstance(external_fields,tuple):            
+                for counter, fields in enumerate(external_fields):
+                    Dict['results_'+str(counter)] = fields
+            else:
+                raise AssertionError("Fields should be eirther tuple or a dict")
 
         for key in Dict.keys():
             if Dict[str(key)] is None:
