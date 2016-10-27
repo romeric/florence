@@ -222,10 +222,26 @@ class BoundaryCondition(object):
                         nodesDBC, Dirichlet = self.IGAKitWrapper(mesh)
 
                 else:
-                    nodesDBC, Dirichlet = self.nodesDBC, self.Dirichlet 
+                    nodesDBC, Dirichlet = self.nodesDBC, self.Dirichlet
+
+                # np.savetxt("/home/roman/DirichletF053.dat", Dirichlet,fmt="%9.9f")
+                # np.savetxt("/home/roman/nodesDBCF053.dat", nodesDBC,fmt="%i")
+                # exit()
+
+                # Dirichlet = np.loadtxt("/home/roman/DirichletF053.dat", dtype=np.float64)
+                # nodesDBC = np.loadtxt("/home/roman/nodesDBCF053.dat", dtype=np.int64)
+
+                # # Dirichlet = np.loadtxt("/media/MATLAB/DirichletF053.dat", dtype=np.float64)
+                # # nodesDBC = np.loadtxt("/media/MATLAB/nodesDBCF053.dat", dtype=np.int64)
+                # # print(nodesDBC.shape, Dirichlet.shape)
+                # nodesDBC = nodesDBC[:,None]
+                # # print(Dirichlet)
+                # # print(np.max(Dirichlet), np.min(Dirichlet))
+                # # exit()
 
 
                 # GET DIRICHLET DoFs
+                # print(nodesDBC.shape[0],formulation.ndim,np.tile(np.arange(nvar)[None,:],nodesDBC.shape[0]).shape)
                 self.columns_out = (np.repeat(nodesDBC,nvar,axis=1)*nvar +\
                  np.tile(np.arange(nvar)[None,:],nodesDBC.shape[0]).reshape(nodesDBC.shape[0],formulation.ndim)).ravel()
                 self.applied_dirichlet = Dirichlet.ravel()
@@ -457,7 +473,8 @@ class BoundaryCondition(object):
             curvilinear_mesh.ReadIGES(self.cad_file)
             # EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
             geometry_points = curvilinear_mesh.GetGeomVertices()
-            # print np.max(geometry_points[:,2]), mesh.Bounds
+            # print(np.max(geometry_points[:,2]), mesh.Bounds)
+            # print(np.max(geometry_points),np.min(geometry_points))
             # exit()
             curvilinear_mesh.GetGeomEdges()
             curvilinear_mesh.GetGeomFaces()

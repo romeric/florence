@@ -773,7 +773,7 @@ class PostProcess(object):
     @staticmethod
     def CurvilinearPlotTri(mesh, TotalDisp, QuantityToPlot=None,
         ProjectionFlags=None, InterpolationDegree=40, EquallySpacedPoints=False,
-        TriSurf=False, colorbar=False, PlotActualCurve=False, point_radius = 3,
+        TriSurf=False, colorbar=False, PlotActualCurve=False, point_radius = 3, color="#C5F1C5",
         plot_points=False, plot_edges=True, save=False, filename=None, show_plot=True):
 
         """High order curved triangular mesh plots, based on high order nodal FEM.
@@ -885,13 +885,15 @@ class PostProcess(object):
         Uplot = np.zeros(nnode,dtype=np.float64)
 
         if QuantityToPlot is None:
-            QuantityToPlot = np.zeros(mesh.nelem)
+            quantity_to_plot = np.zeros(mesh.nelem)
+        else:
+            quantity_to_plot = QuantityToPlot
 
         # FOR CURVED ELEMENTS
         for ielem in range(mesh.nelem):
             Xplot[ielem*nsize:(ielem+1)*nsize,:] = np.dot(BasesTri.T, vpoints[mesh.elements[ielem,:],:])
             Tplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex,:] = Triangles + ielem*nsize
-            Uplot[ielem*nsize:(ielem+1)*nsize] = QuantityToPlot[ielem]
+            Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
 
         # PLOT CURVED ELEMENTS
         if TriSurf is True:
@@ -902,18 +904,23 @@ class PostProcess(object):
             ax.dist = 7
         else:
             # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, np.ones(Xplot.shape[0]), 100,alpha=0.8)
-            plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, 100,alpha=0.8)
+            # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, 100,alpha=0.8)
             # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot[:4,:], np.ones(Xplot.shape[0]),alpha=0.8,origin='lower')
+
+            if QuantityToPlot is None:
+                plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, colors="#C5F1C5")
+            else:
+                plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, 100,alpha=0.8)
 
         # PLOT CURVED POINTS
         if plot_points:
             # plt.plot(vpoints[:,0],vpoints[:,1],'o',markersize=3,color='#F88379')
             plt.plot(vpoints[:,0],vpoints[:,1],'o',markersize=point_radius,color='k')
 
-
-        # plt.set_cmap('viridis')
-        plt.set_cmap('viridis_r')
-        plt.clim(0,1)
+        if QuantityToPlot is not None:
+            # plt.set_cmap('viridis')
+            plt.set_cmap('viridis_r')
+            plt.clim(0,1)
         
 
         if colorbar is True:
@@ -955,7 +962,7 @@ class PostProcess(object):
     @staticmethod
     def CurvilinearPlotTet(mesh,TotalDisp,QuantityToPlot=None,
         ProjectionFlags=None, InterpolationDegree=20, EquallySpacedPoints=False, PlotActualCurve=False,
-        plot_points=False, plot_edges=True, point_radius=0.1, colorbar=False, color=None, figure=None,
+        plot_points=False, plot_edges=True, plot_surfaces=True, point_radius=0.1, colorbar=False, color=None, figure=None,
         show_plot=True, save=False, filename=None):
 
         """High order curved tetrahedral surfaces mesh plots, based on high order nodal FEM.
@@ -1121,71 +1128,76 @@ class PostProcess(object):
             src = mlab.pipeline.scalar_scatter(x_edges.T.copy().flatten(), y_edges.T.copy().flatten(), z_edges.T.copy().flatten())
             src.mlab_source.dataset.lines = connections
             lines = mlab.pipeline.stripper(src)
-            mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
+            # mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
+            mlab.pipeline.surface(lines, color = (0.72,0.72,0.72), line_width=2)
 
             # OLDER VERSION
             # for i in range(x_edges.shape[1]):
             #     mlab.plot3d(x_edges[:,i],y_edges[:,i],z_edges[:,i],color=(0,0,0),tube_radius=edge_width)
         
 
-        nface = smesh.elements.shape[0]
-        nnode = nsize*nface
-        nelem = Triangles.shape[0]*nface
+        # CURVED SURFACES
+        if plot_surfaces:
 
-        Xplot = np.zeros((nnode,3),dtype=np.float64)
-        Tplot = np.zeros((nelem,3),dtype=np.int64)
+            nface = smesh.elements.shape[0]
+            nnode = nsize*nface
+            nelem = Triangles.shape[0]*nface
 
-        # FOR CURVED ELEMENTS
-        for ielem in range(nface):
-            Xplot[ielem*nsize:(ielem+1)*nsize,:] = np.dot(BasesTri.T, svpoints[smesh.elements[ielem,:],:])
-            Tplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex,:] = Triangles + ielem*nsize
+            Xplot = np.zeros((nnode,3),dtype=np.float64)
+            Tplot = np.zeros((nelem,3),dtype=np.int64)
 
-        if QuantityToPlot is not None:
-            Uplot = np.zeros(nnode,dtype=np.float64)
+            # FOR CURVED ELEMENTS
             for ielem in range(nface):
-                Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
+                Xplot[ielem*nsize:(ielem+1)*nsize,:] = np.dot(BasesTri.T, svpoints[smesh.elements[ielem,:],:])
+                Tplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex,:] = Triangles + ielem*nsize
 
-        point_line_width = .002
-        # point_line_width = 0.5
-        # point_line_width = .0008
-        # point_line_width = 2.
-        # point_line_width = .045
-        # point_line_width = .015 # F6
+            if QuantityToPlot is not None:
+                Uplot = np.zeros(nnode,dtype=np.float64)
+                for ielem in range(nface):
+                    Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
+
+            point_line_width = .002
+            # point_line_width = 0.5
+            # point_line_width = .0008
+            # point_line_width = 2.
+            # point_line_width = .045
+            # point_line_width = .015 # F6
 
 
-        if color is None:
-            color=(197/255.,241/255.,197/255.)
+            if color is None:
+                color=(197/255.,241/255.,197/255.)
 
-        if QuantityToPlot is None:
-            trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot,
-                line_width=point_line_width,color=color)
-        else:
-            trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars = Uplot,
-                line_width=point_line_width,colormap='summer')
+            # PLOT SURFACES (CURVED ELEMENTS)
+            if QuantityToPlot is None:
+                trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot,
+                    line_width=point_line_width,color=color)
+            else:
+                trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars = Uplot,
+                    line_width=point_line_width,colormap='summer')
 
-        # trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars=Uplot,line_width=point_line_width,colormap='summer')
+            # trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars=Uplot,line_width=point_line_width,colormap='summer')
 
-        # PLOT POINTS ON CURVED MESH
-        if plot_points:
-            # mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=2.5*point_line_width)
-            mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=point_radius)
+            # PLOT POINTS ON CURVED MESH
+            if plot_points:
+                # mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=2.5*point_line_width)
+                mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=point_radius)
 
-        figure.scene.disable_render = False
+            figure.scene.disable_render = False
 
-        if QuantityToPlot is not None:
-            # CHANGE LIGHTING OPTION
-            trimesh_h.actor.property.interpolation = 'phong'
-            trimesh_h.actor.property.specular = 0.1
-            trimesh_h.actor.property.specular_power = 5
+            if QuantityToPlot is not None:
+                # CHANGE LIGHTING OPTION
+                trimesh_h.actor.property.interpolation = 'phong'
+                trimesh_h.actor.property.specular = 0.1
+                trimesh_h.actor.property.specular_power = 5
 
-            # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO 
-            # GET VIRIDIS COLORMAP FROM MATPLOTLIB
-            color_func = ColorConverter()
-            rgba_lower = color_func.to_rgba_array(cm.viridis.colors)
-            # rgba_lower = color_func.to_rgba_array(cm.viridis_r.colors)
-            RGBA_higher = np.round(rgba_lower*255).astype(np.int64)
-            # UPDATE LUT OF THE COLORMAP
-            trimesh_h.module_manager.scalar_lut_manager.lut.table = RGBA_higher 
+                # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO 
+                # GET VIRIDIS COLORMAP FROM MATPLOTLIB
+                color_func = ColorConverter()
+                rgba_lower = color_func.to_rgba_array(cm.viridis.colors)
+                # rgba_lower = color_func.to_rgba_array(cm.viridis_r.colors)
+                RGBA_higher = np.round(rgba_lower*255).astype(np.int64)
+                # UPDATE LUT OF THE COLORMAP
+                trimesh_h.module_manager.scalar_lut_manager.lut.table = RGBA_higher 
 
         # SAVEFIG
         if save:
@@ -1198,6 +1210,9 @@ class PostProcess(object):
         # CONTROL CAMERA VIEW
         # mlab.view(azimuth=45, elevation=50, distance=80, focalpoint=None,
         #         roll=0, reset_roll=True, figure=None)
+
+        mlab.view(azimuth=45, elevation=50, distance=80, focalpoint=None,
+            roll=0, reset_roll=True, figure=None)
     
         if show_plot is True:
             # FORCE UPDATE MLAB TO UPDATE COLORMAP

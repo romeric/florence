@@ -8,7 +8,7 @@ from Florence.VariationalPrinciple import *
 
 def ProblemData(*args, **kwargs):
 
-    p = 3
+    p = 2
     ndim = 2
 
     # material = LinearModel(MainData.ndim,youngs_modulus=1.0e01,poissons_ratio=0.4)
@@ -46,6 +46,15 @@ def ProblemData(*args, **kwargs):
     mesh.points *=1000.
     mesh.GetHighOrderMesh(p=p)
 
+    # np.savetxt("/home/roman/Dropbox/Fastor/benchmark/benchmark_academic/kernel_quadrature/meshes/mesh_2d_points_p"+str(p)+".dat",
+    #     mesh.points,fmt="%9.5f")
+    # np.savetxt("/home/roman/Dropbox/Fastor/benchmark/benchmark_academic/kernel_quadrature/meshes/mesh_2d_elements_p"+str(p)+".dat",
+    #     mesh.elements,fmt="%d")
+    print mesh.points.shape[0], mesh.nelem
+    # mesh.SimplePlot()
+
+    # exit()
+
 
     # cad_file = ProblemPath + '/Two_Arcs.iges'
     # cad_file = ProblemPath + '/Half_Circle.igs'
@@ -74,8 +83,19 @@ def ProblemData(*args, **kwargs):
     formulation = DisplacementFormulation(mesh)
     fem_solver = FEMSolver(analysis_nature="linear")
 
-    TotalDisp = fem_solver.Solve(formulation=formulation, mesh=mesh, 
+    # print formulation.function_spaces[0].Jm.flatten().shape
+    # print formulation.function_spaces[0].AllGauss.shape
+    # np.savetxt("/home/roman/Dropbox/Fastor/benchmark/benchmark_academic/kernel_quadrature/meshes/p"+str(p)+"_2d_Jm.dat",
+    #     formulation.function_spaces[0].Jm.flatten(),fmt="%9.6f")
+    # np.savetxt("/home/roman/Dropbox/Fastor/benchmark/benchmark_academic/kernel_quadrature/meshes/p"+str(p)+"_2d_AllGauss.dat",
+    #     formulation.function_spaces[0].AllGauss,fmt="%9.6f")
+    # exit()
+
+    solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
         material=material, boundary_condition=boundary_condition)
+
+    # solution.CurvilinearPlot(QuantityToPlot=fem_solver.ScaledJacobian, plot_points=True)
+    solution.CurvilinearPlot(save=True,filename="/home/roman/Dropbox/2d_mesh.eps")
 
 if __name__ == "__main__":
     ProblemData()

@@ -9,7 +9,7 @@ from Florence.VariationalPrinciple import *
 def ProblemData(*args, **kwargs):
 
     ndim=3
-    p=3
+    p=2
 
     # material = LinearModel(MainData.ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
     material = IncrementalLinearElastic(ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
@@ -25,7 +25,7 @@ def ProblemData(*args, **kwargs):
     ProblemPath = PWD(__file__)
 
     # filename = ProblemPath + '/Torus_612.dat' # Torus
-    filename = ProblemPath + '/Hollow_Cylinder.dat'
+    # filename = ProblemPath + '/Hollow_Cylinder.dat'
     # filename = ProblemPath + '/TPipe_4006.dat'
     # filename = ProblemPath + '/TPipe_2262.dat'
     # filename = ProblemPath + "/TPipe_2_1302.dat"
@@ -33,7 +33,7 @@ def ProblemData(*args, **kwargs):
     # filename = ProblemPath + "/FullTPipe.dat"
     # filename = ProblemPath + '/Cylinder.dat'
     # filename = ProblemPath + '/Revolution_1.dat'
-    # filename = ProblemPath + '/Extrusion_116.dat'
+    filename = ProblemPath + '/Extrusion_116.dat'
     # filename = ProblemPath + '/Extrusion_2_416.dat'
     # filename = ProblemPath + '/ufc_206.dat'
     # filename = ProblemPath + '/ucp_206.dat'
@@ -43,28 +43,41 @@ def ProblemData(*args, **kwargs):
 
     # filename = ProblemPath + '/form1.dat'
 
+    # filename = ProblemPath + '/hand.mesh'
+
     mesh = Mesh()
     mesh.Reader(filename=filename, element_type="tet")
+    # mesh.ReadGmsh(filename)
+    # mesh.element_type="tet"
     mesh.GetHighOrderMesh(p=p)
+    # print mesh.points.shape[0], mesh.nelem
     # mesh.SimplePlot()
+
+    # np.savetxt("/home/roman/Dropbox/Fastor/benchmark/benchmark_academic/kernel_quadrature/meshes/mesh_hand_3d_points_p"+str(p)+".dat",
+    #     mesh.points,fmt="%9.5f")
+    # np.savetxt("/home/roman/Dropbox/Fastor/benchmark/benchmark_academic/kernel_quadrature/meshes/mesh_hand_3d_elements_p"+str(p)+".dat",
+    #     mesh.elements,fmt="%d")
+
+    # exit()
+
 
 
     # cad_file = ProblemPath + '/Torus.igs'
-    cad_file = ProblemPath + '/Hollow_Cylinder.igs'
-    # IGES_File = ProblemPath + '/PipeTShape.igs'
-    # IGES_File = ProblemPath + '/TPipe_2.igs'
-    # IGES_File = ProblemPath + '/FullTPipe.igs'
-    # IGES_File = ProblemPath + '/Cylinder.igs'
-    # IGES_File = ProblemPath + '/Revolution_1.igs'
-    # IGES_File = ProblemPath + '/Extrusion.igs'
-    # IGES_File = ProblemPath + '/Extrusion_2.igs'
-    # IGES_File = ProblemPath + '/ufc_206.igs'
-    # IGES_File = ProblemPath + '/ucp_206.igs'
-    # IGES_File = ProblemPath + '/Porta_Canetas.igs'
-    # IGES_File = ProblemPath + '/gopro.igs' #
-    # IGES_File = ProblemPath + '/bracket.igs' #
+    # cad_file = ProblemPath + '/Hollow_Cylinder.igs'
+    # cad_file = ProblemPath + '/PipeTShape.igs'
+    # cad_file = ProblemPath + '/TPipe_2.igs'
+    # cad_file = ProblemPath + '/FullTPipe.igs'
+    # cad_file = ProblemPath + '/Cylinder.igs'
+    # cad_file = ProblemPath + '/Revolution_1.igs'
+    cad_file = ProblemPath + '/Extrusion.igs'
+    # cad_file = ProblemPath + '/Extrusion_2.igs'
+    # cad_file = ProblemPath + '/ufc_206.igs'
+    # cad_file = ProblemPath + '/ucp_206.igs'
+    # cad_file = ProblemPath + '/Porta_Canetas.igs'
+    # cad_file = ProblemPath + '/gopro.igs' #
+    # cad_file = ProblemPath + '/bracket.igs' #
 
-    # IGES_File = ProblemPath + '/form1.igs'
+    # cad_file = ProblemPath + '/form1.igs'
 
     # sphere
     # scale = 1000.
@@ -86,13 +99,22 @@ def ProblemData(*args, **kwargs):
     solver = LinearSolver(linear_solver="multigrid", linear_solver_type="amg",iterative_solver_tolerance=5.0e-07)
 
     formulation = DisplacementFormulation(mesh)
-    fem_solver = FEMSolver(number_of_load_increments=2,analysis_type="static",
+    # function_space = FunctionSpace(mesh, quadrature, p=C+1)
+    # np.savetxt("/home/roman/Dropbox/Fastor/benchmark/benchmark_academic/kernel_quadrature/meshes/p"+str(p)+"_3d_Jm.dat",
+    #     formulation.function_spaces[0].Jm.flatten(),fmt="%9.6f")
+    # np.savetxt("/home/roman/Dropbox/Fastor/benchmark/benchmark_academic/kernel_quadrature/meshes/p"+str(p)+"_3d_AllGauss.dat",
+    #     formulation.function_spaces[0].AllGauss,fmt="%9.6f")
+
+    fem_solver = FEMSolver(number_of_load_increments=1,analysis_type="static",
         analysis_nature="linear",parallelise=False)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition)
 
-    solution.CurvilinearPlot()
+    # solution.sol = np.zeros_like(solution.sol)
+    solution.sol = solution.sol/1.5
+    # solution.CurvilinearPlot()
+    solution.CurvilinearPlot(plot_surfaces=False)
 
 
 if __name__ == "__main__":

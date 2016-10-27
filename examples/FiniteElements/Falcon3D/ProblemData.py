@@ -104,7 +104,6 @@ def ProblemData(*args, **kwargs):
     #         return projection_faces
 
     solver = LinearSolver(linear_solver="multigrid", linear_solver_type="amg",iterative_solver_tolerance=5.0e-07)
-
     formulation = DisplacementFormulation(mesh)
     fem_solver = FEMSolver(number_of_load_increments=1,analysis_type="static",
         analysis_nature="linear",parallelise=False)

@@ -54,7 +54,7 @@ def ProblemData(*args, **kwargs):
 
     solution = fem_solver.Solve(formulation, mesh, material, boundary_condition)
 
-    solution.CurvilinearPlot(QuantityToPlot=fem_solver.ScaledJacobian)
+    # solution.CurvilinearPlot(QuantityToPlot=fem_solver.ScaledJacobian)
 
 
 if __name__ == "__main__":
