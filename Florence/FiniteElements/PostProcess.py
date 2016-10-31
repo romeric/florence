@@ -474,13 +474,28 @@ class PostProcess(object):
 
 
 
-    def Plot(self, configuration="original", colorbar=True, axis_type=None):
+    def Plot(self, figure=None, quantity=0, configuration="original", 
+        colorbar=True, axis_type=None, plot_points=False, point_radius=0.5):
 
 
         if self.mesh is None:
             raise ValueError("Mesh not set for post-processing")
         if self.sol is None:
             raise ValueError("Solution not set for post-processing")
+
+        from copy import deepcopy
+
+        # GET LINEAR MESH
+        mesh = deepcopy(self.mesh)
+        if mesh.element_type == "tri":
+            mesh.elements = mesh.elements[:,:3]
+        elif mesh.element_type == "tet":
+            mesh.elements = mesh.elements[:,:4]
+            mesh.faces = mesh.faces[:,:3]
+        mesh.nnode = int(np.max(mesh.elements)+1)
+        mesh.points = mesh.points[:mesh.nnode,:]
+        # GET LINEAR SOLUTION - [MODIFIES THE SOLUTION]
+        sol = np.copy(self.sol[:mesh.nnode,:])
 
         if self.mesh.element_type == "tri":
 
@@ -492,7 +507,7 @@ class PostProcess(object):
             from Florence.FunctionSpace.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
             from Florence.FunctionSpace.GetBases import GetBases
 
-            from copy import deepcopy
+            
             from scipy.spatial import Delaunay
             from mpl_toolkits.mplot3d import Axes3D
             from matplotlib.colors import LightSource
@@ -501,40 +516,29 @@ class PostProcess(object):
             import matplotlib.tri as mtri
             import matplotlib.cm as cm
             from mpl_toolkits.axes_grid1 import make_axes_locatable
-
-            # GET LINEAR MESH
-            mesh = self.mesh
-            # print np.max(mesh.elements[:,:3])
-            mesh.elements = mesh.elements[:,:3]
-            mesh.nnode = int(np.max(mesh.elements)+1)
-            mesh.points = mesh.points[:mesh.nnode,:]
-            # GET LINEAR SOLUTION - [MODIFIES THE SOLUTION]
-            self.sol = self.sol[:mesh.nnode,:]
             
             fig = plt.figure()
             if configuration == "original":
                 plt.triplot(mesh.points[:,0],mesh.points[:,1], mesh.elements[:,:3],color='k')
             elif configuration == "deformed":
-                plt.triplot(mesh.points[:,0]+self.sol[:,0,-1], mesh.points[:,1]+self.sol[:,1,-1], mesh.elements[:,:3],color='k')
+                plt.triplot(mesh.points[:,0]+sol[:,0,-1], mesh.points[:,1]+sol[:,1,-1], mesh.elements[:,:3],color='k')
             else:
                 raise ValueError("configuration can only be 'original' or 'deformed'")
 
             if configuration == "original":
-                plt.tricontourf(mesh.points[:,0], mesh.points[:,1], mesh.elements, self.sol[:,0,-1],cmap=cm.viridis)
+                plt.tricontourf(mesh.points[:,0], mesh.points[:,1], mesh.elements, sol[:,quantity,-1],cmap=cm.viridis)
+                if plot_points:
+                    plt.plot(self.mesh.points[:,0], self.mesh.points[:,1],'ko')
             else:
-                plt.tricontourf(mesh.points[:,0]+self.sol[:,0,-1], mesh.points[:,1]+self.sol[:,1,-1], 
-                    mesh.elements, self.sol[:,0,-1],cmap=cm.viridis)
+                plt.tricontourf(mesh.points[:,0]+sol[:,0,-1], mesh.points[:,1]+sol[:,1,-1], 
+                    mesh.elements, sol[:,quantity,-1],cmap=cm.viridis)
+                if plot_points:
+                    plt.plot(self.mesh.points[:,0]+self.sol[:,0,4], self.mesh.points[:,1]+self.sol[:,1,4],'ko')
 
 
             if colorbar is True:
                 ax_cbar = mpl.colorbar.make_axes(plt.gca(), shrink=0.8)[0]
                 cbar = mpl.colorbar.ColorbarBase(ax_cbar, cmap=cm.viridis)
-                # DON'T NORMALIZE
-                # cbar = mpl.colorbar.ColorbarBase(ax_cbar, cmap=cm.viridis,
-                                   # norm=mpl.colors.Normalize(vmin=-0, vmax=1))
-                # cbar.set_clim(0, 1)
-                # divider = make_axes_locatable(ax_cbar)
-                # cax = divider.append_axes("right", size="25%", pad=0.005)
             
             if axis_type == "equal":
                 plt.axis(axis_type)
@@ -544,32 +548,38 @@ class PostProcess(object):
 
         elif self.mesh.element_type == "tet":
 
-            # GET LINEAR MESH
-            mesh = self.mesh
-            mesh.elements = mesh.elements[:,:4]
-            mesh.faces = mesh.faces[:,:3]
-            mesh.nnode = int(np.max(mesh.elements)+1)
-            mesh.points = mesh.points[:mesh.nnode,:]
-            # GET LINEAR SOLUTION - [MODIFIES THE SOLUTION]
-            self.sol = self.sol[:mesh.nnode,:]
-
             import os
             os.environ['ETS_TOOLKIT'] = 'qt4'
             from mayavi import mlab
             from matplotlib.colors import ColorConverter
             import matplotlib.cm as cm
+
+            if figure is None:
+                figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(0,0,0),size=(800,600))
             
             if configuration == "original":
                 trimesh_h = mlab.triangular_mesh(mesh.points[:,0], mesh.points[:,1], mesh.points[:,2], 
                     mesh.faces, scalars=self.sol[:,0,-1])
-            elif configuration == "deformed":
-                trimesh_h = mlab.triangular_mesh(mesh.points[:,0]+self.sol[:,0,-1], 
-                    mesh.points[:,1]+self.sol[:,1,-1], mesh.points[:,2]+self.sol[:,2,-1], 
-                    mesh.faces, scalars=self.sol[:,0,-1])
 
-                mlab.triangular_mesh(mesh.points[:,0]+self.sol[:,0,-1], 
-                    mesh.points[:,1]+self.sol[:,1,-1], mesh.points[:,2]+self.sol[:,2,-1], 
+                mlab.triangular_mesh(mesh.points[:,0], mesh.points[:,1], mesh.points[:,2], 
                     mesh.faces, representation="mesh", color=(0,0,0))
+
+                if plot_points:
+                    mlab.points3d(self.mesh.points[:,0],self.mesh.points[:,1],
+                        self.mesh.points[:,2],color=(0,0,0),mode='sphere',scale_factor=point_radius)
+
+            elif configuration == "deformed":
+                trimesh_h = mlab.triangular_mesh(mesh.points[:,0]+sol[:,0,-1], 
+                    mesh.points[:,1]+sol[:,1,-1], mesh.points[:,2]+sol[:,2,-1], 
+                    mesh.faces, scalars=sol[:,quantity,-1])
+
+                mlab.triangular_mesh(mesh.points[:,0]+sol[:,0,-1], 
+                    mesh.points[:,1]+sol[:,1,-1], mesh.points[:,2]+sol[:,2,-1], 
+                    mesh.faces, representation="mesh", color=(0,0,0))
+
+                if plot_points:
+                    mlab.points3d(self.mesh.points[:,0]+self.sol[:,0,-1],self.mesh.points[:,1]+self.sol[:,1,-1],
+                        self.mesh.points[:,2]+self.sol[:,2,-1],color=(0,0,0),mode='sphere',scale_factor=point_radius)
 
 
             # CHANGE LIGHTING OPTION
@@ -584,15 +594,19 @@ class PostProcess(object):
             # rgba_lower = color_func.to_rgba_array(cm.viridis_r.colors)
             RGBA_higher = np.round(rgba_lower*255).astype(np.int64)
             # UPDATE LUT OF THE COLORMAP
-            trimesh_h.module_manager.scalar_lut_manager.lut.table = RGBA_higher 
+            trimesh_h.module_manager.scalar_lut_manager.lut.table = RGBA_higher
+
+
+            if colorbar:
+                cbar = mlab.colorbar(object=trimesh_h, orientation="vertical",label_fmt="%9.2f")
 
             mlab.draw()
-            mlab.show() 
+            mlab.show()
 
 
 
-
-    def Animate(self, quantity=0, configuration="original", colorbar=True, axis_type=None):
+    def Animate(self, figure=None, quantity=0, configuration="original", 
+        colorbar=True, axis_type=None, plot_points=False, point_radius=0.5):
 
         """
             quantity=0 - ux
@@ -605,6 +619,20 @@ class PostProcess(object):
             raise ValueError("Mesh not set for post-processing")
         if self.sol is None:
             raise ValueError("Solution not set for post-processing")
+
+        from copy import deepcopy
+
+        # GET LINEAR MESH
+        mesh = deepcopy(self.mesh)
+        if mesh.element_type == "tri":
+            mesh.elements = mesh.elements[:,:3]
+        elif mesh.element_type == "tet":
+            mesh.elements = mesh.elements[:,:4]
+            mesh.faces = mesh.faces[:,:3]
+        mesh.nnode = int(np.max(mesh.elements)+1)
+        mesh.points = mesh.points[:mesh.nnode,:]
+        # GET LINEAR SOLUTION - [MODIFIES THE SOLUTION]
+        sol = np.copy(self.sol[:mesh.nnode,:])
 
         if self.mesh.element_type == "tri":
 
@@ -627,14 +655,6 @@ class PostProcess(object):
             import matplotlib.cm as cm
             from mpl_toolkits.axes_grid1 import make_axes_locatable
             import matplotlib.animation as animation
-
-            # GET LINEAR MESH
-            # mesh = np.copy(self.mesh)
-            mesh = Mesh()
-            # print np.max(mesh.elements[:,:3])
-            mesh.elements = self.mesh.elements[:,:3]
-            mesh.nnode = int(np.max(self.mesh.elements)+1)
-            mesh.points = self.mesh.points[:self.mesh.nnode,:]
             
             # fig = plt.figure()
             fig, ax = plt.subplots()
@@ -671,6 +691,81 @@ class PostProcess(object):
             if axis_type == "equal":
                 plt.axis(axis_type)
             plt.show()
+
+        elif self.mesh.element_type == "tet":
+
+            import os
+            os.environ['ETS_TOOLKIT'] = 'qt4'
+            from mayavi import mlab
+            from matplotlib.colors import ColorConverter
+            import matplotlib.cm as cm
+
+            if figure is None:
+                figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(0,0,0),size=(800,600))
+            
+            if configuration == "original":
+                trimesh_h = mlab.triangular_mesh(mesh.points[:,0], mesh.points[:,1], mesh.points[:,2], 
+                    mesh.faces, scalars=self.sol[:,quantity,0])
+
+                wire_h = mlab.triangular_mesh(mesh.points[:,0], mesh.points[:,1], mesh.points[:,2], 
+                    mesh.faces, representation="mesh", color=(0,0,0))
+
+                points_h = mlab.points3d(self.mesh.points[:,0],self.mesh.points[:,1],
+                    self.mesh.points[:,2],color=(0,0,0),mode='sphere',scale_factor=point_radius)
+
+            elif configuration == "deformed":
+                trimesh_h = mlab.triangular_mesh(mesh.points[:,0]+sol[:,0,0], 
+                    mesh.points[:,1]+sol[:,1,0], mesh.points[:,2]+sol[:,2,0], 
+                    mesh.faces, scalars=sol[:,quantity,0])
+
+                wire_h = mlab.triangular_mesh(mesh.points[:,0]+sol[:,0,0], 
+                    mesh.points[:,1]+sol[:,1,0], mesh.points[:,2]+sol[:,2,0], 
+                    mesh.faces, representation="mesh", color=(0,0,0))
+
+                points_h = mlab.points3d(self.mesh.points[:,0]+self.sol[:,0,0],self.mesh.points[:,1]+self.sol[:,1,0],
+                    self.mesh.points[:,2]+self.sol[:,2,0],color=(0,0,0),mode='sphere',scale_factor=point_radius)
+
+
+            # CHANGE LIGHTING OPTION
+            trimesh_h.actor.property.interpolation = 'phong'
+            trimesh_h.actor.property.specular = 0.1
+            trimesh_h.actor.property.specular_power = 5
+
+            # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO 
+            # GET VIRIDIS COLORMAP FROM MATPLOTLIB
+            color_func = ColorConverter()
+            rgba_lower = color_func.to_rgba_array(cm.viridis.colors)
+            # rgba_lower = color_func.to_rgba_array(cm.viridis_r.colors)
+            RGBA_higher = np.round(rgba_lower*255).astype(np.int64)
+            # UPDATE LUT OF THE COLORMAP
+            trimesh_h.module_manager.scalar_lut_manager.lut.table = RGBA_higher
+
+
+            if colorbar:
+                cbar = mlab.colorbar(object=trimesh_h, orientation="vertical",label_fmt="%9.2f")
+
+
+            @mlab.animate(delay=1000) 
+            def animator():
+                fig = mlab.gcf()
+                m_trimesh = trimesh_h.mlab_source
+                m_wire = wire_h.mlab_source
+                m_points = points_h.mlab_source
+                for i in range(1,sol.shape[2]):
+                    m_trimesh.reset(x=mesh.points[:,0]+sol[:,0,i], y=mesh.points[:,1]+sol[:,1,i],
+                        z=mesh.points[:,2]+sol[:,2,i], scalars=sol[:,quantity,i])
+
+                    m_wire.reset(x=mesh.points[:,0]+sol[:,0,i], y=mesh.points[:,1]+sol[:,1,i],
+                        z=mesh.points[:,2]+sol[:,2,i])
+
+                    m_points.reset(x=mesh.points[:,0]+sol[:,0,i], y=mesh.points[:,1]+sol[:,1,i],
+                        z=mesh.points[:,2]+sol[:,2,i])
+
+                    fig.scene.reset_zoom()
+                    yield
+
+            animator()
+            mlab.show()
 
 
 
@@ -799,146 +894,6 @@ class PostProcess(object):
             return self.is_scaledjacobian_computed, ScaledFF, ScaledHH, ScaledJacobian, ScaledFNFN, ScaledCNCN
 
 
-
-
-    @staticmethod   
-    def HighOrderPatchPlot(MainData,mesh,TotalDisp):
-
-        import matplotlib.pyplot as plt
-        
-        fig = plt.figure()
-        ax = fig.axes
-
-        # TotalDisp = np.zeros_like(TotalDisp)
-        # MainData.ScaledJacobian = np.ones_like(MainData.ScaledJacobian)
-
-        # print TotalDisp[:,0,-1]
-        # MainData.ScaledJacobian = np.zeros_like(MainData.ScaledJacobian)+1
-        vpoints = np.copy(mesh.points)
-        # print TotalDisp[:,:MainData.ndim,-1]
-        vpoints += TotalDisp[:,:MainData.ndim,-1]
-
-        dum1=[]; dum2=[]; dum3 = []; ddum=np.array([0,1,2,0])
-        for i in range(0,MainData.C):
-            dum1=np.append(dum1,i+3)
-            dum2 = np.append(dum2, 2*MainData.C+3 +i*MainData.C -i*(i-1)/2 )
-            dum3 = np.append(dum3,MainData.C+3 +i*(MainData.C+1) -i*(i-1)/2 )
-
-        if MainData.C>0:
-            ddum = (np.append(np.append(np.append(np.append(np.append(np.append(0,dum1),1),dum2),2),
-                np.fliplr(dum3.reshape(1,dum3.shape[0]))),0) ).astype(np.int32)
-
-        x_avg = []; y_avg = []
-        for i in range(mesh.nelem):
-            dum = vpoints[mesh.elements[i,:],:]
-
-            plt.plot(dum[ddum,0],dum[ddum,1],alpha=0.02)
-            # plt.fill(dum[ddum,0],dum[ddum,1],'#A4DDED')
-            plt.fill(dum[ddum,0],dum[ddum,1],color=(0.75,MainData.ScaledJacobian[i],0.35))
-            # afig = plt.fill(dum[ddum,0],dum[ddum,1],color=(0.75,MainData.Jacobian[i]/4.,0.35))    
-            # afig= plt.fill(dum[ddum,0],dum[ddum,1])   
-
-            # plt.fill(dum[ddum,0],dum[ddum,1],color=(0.75,1.0*i/mesh.elements.shape[0],0.35))  
-            # plt.fill(dum[ddum,0],dum[ddum,1],color=(MainData.ScaledJacobian[i],0,1-MainData.ScaledJacobian[i]))   
-
-            plt.plot(dum[ddum,0],dum[ddum,1],'#000000')
-            
-            # WRITE JACOBIAN VALUES ON ELEMENTS
-            # coord = mesh.points[mesh.elements[i,:],:]
-            # x_avg.append(np.sum(coord[:,0])/mesh.elements.shape[1])
-            # y_avg.append(np.sum(coord[:,1])/mesh.elements.shape[1])
-            # plt.text(x_avg[i],y_avg[i],np.around(MainData.ScaledJacobian[i],decimals=3))
-
-
-        plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#F88379',markersize=5) 
-
-        plt.axis('equal')
-        # plt.xlim([-0.52,-0.43])
-        # plt.ylim([-0.03,0.045])
-        plt.axis('off')
-
-        # ax = plt.gca()
-        # PCM=ax.get_children()[2]
-        # plt.colorbar(afig)
-
-
-
-    @staticmethod
-    def HighOrderPatchPlot3D(MainData,mesh,TotalDisp=0):
-        """ This 3D patch plot works but the elements at background are
-        also shown
-        """
-        from mpl_toolkits.mplot3d import Axes3D
-        from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-        import matplotlib.pyplot as plt
-
-        C = MainData.C
-        a1,a2,a3,a4 = [],[],[],[]
-        if C==1:
-            a1 = [1, 5, 2, 9, 4, 8, 1]
-            a2 = [1, 5, 2, 7, 3, 6, 1]
-            a3 = [1, 6, 3, 10, 4, 8, 1]
-            a4 = [2, 7, 3, 10, 4, 9, 2]
-        elif C==2:
-            a1 = [1, 5, 6, 2, 9, 11, 3, 10, 7, 1]
-            a2 = [1, 5, 6, 2, 14, 19, 4, 18, 12, 1]
-            a3 = [2, 9, 11, 3, 17, 20, 4, 19, 14, 2]
-            a4 = [1, 12, 18, 4, 20, 17, 3, 10, 7, 1]
-        elif C==3:
-            a1 = [1, 5, 6, 7, 2, 20, 29, 34, 4, 33, 27, 17, 1]
-            a2 = [1, 8, 12, 15, 3, 16, 14, 11, 2, 7, 6, 5, 1]
-            a3 = [2, 11, 14, 16, 3, 26, 32, 35, 4, 34, 29, 20, 2]
-            a4 = [1, 8, 12, 15, 3, 26, 32, 35, 4, 33, 27, 17, 1]
-        elif C==4:
-            a1 = [1, 5, 6, 7, 8, 2, 27, 41, 50, 55, 4, 54, 48, 38, 23, 1]
-            a2 = [1, 9, 14, 18, 21, 3, 22, 20, 17, 13, 2, 8, 7, 6, 5, 1]
-            a3 = [2, 13, 17, 20, 22, 3, 37, 47, 53, 56, 4, 55, 50, 41, 27, 2]
-            a4 = [1, 9, 14, 18, 21, 3, 37, 47, 53, 56, 4, 54, 48, 38, 23, 1]
-
-        a1 = np.asarray(a1); a2 = np.asarray(a2); a3 = np.asarray(a3); a4 = np.asarray(a4)
-        a1 -= 1;    a2 -= 1;    a3 -= 1;    a4 -= 1
-        a_list = [a1,a2,a3,a4]
-
-        fig = plt.figure()
-        ax = Axes3D(fig)
-
-        # face_elements = mesh.GetElementsWithBoundaryFacesTet()
-        # elements = mesh.elements[face_elements,:]
-        # print mesh.faces 
-        # mesh.ArrangeFacesTet() 
-
-        # for elem in range(elements.shape[0]):
-        for elem in range(mesh.nelem):
-        # for elem in range(1):
-
-            # LOOP OVER TET FACES
-            num_faces = 4
-            for iface in range(num_faces):
-                a = a_list[iface]
-
-                x = mesh.points[mesh.elements[elem,a],0]
-                y = mesh.points[mesh.elements[elem,a],1]
-                z = mesh.points[mesh.elements[elem,a],2]
-
-                # x = mesh.points[elements[elem,a],0]
-                # y = mesh.points[elements[elem,a],1]
-                # z = mesh.points[elements[elem,a],2]
-
-                vertices = [zip(x,y,z)]
-                poly_object = Poly3DCollection(vertices)
-                poly_object.set_linewidth(1)
-                poly_object.set_linestyle('solid')
-                poly_object.set_facecolor((0.75,1,0.35)) 
-                ax.add_collection3d(poly_object)
-
-
-        # ax.autoscale(enable=True, axis=u'both', tight=None)
-        ax.plot(mesh.points[:,0],mesh.points[:,1],mesh.points[:,2],'o',color='#F88379')
-
-        plt.axis('equal')
-        plt.axis('off')
-        # plt.savefig('/home/roman/Desktop/destination_path.eps', format='eps', dpi=1000)
-        plt.show()
 
 
     def CurvilinearPlot(self,*args,**kwargs):
@@ -1416,4 +1371,186 @@ class PostProcess(object):
         if show_plot is True:
             # FORCE UPDATE MLAB TO UPDATE COLORMAP
             mlab.draw()
-            mlab.show()     
+            mlab.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    ###################################################################################
+    ###################################################################################
+
+    @staticmethod   
+    def HighOrderPatchPlot(MainData,mesh,TotalDisp):
+
+        import matplotlib.pyplot as plt
+        
+        fig = plt.figure()
+        ax = fig.axes
+
+        # TotalDisp = np.zeros_like(TotalDisp)
+        # MainData.ScaledJacobian = np.ones_like(MainData.ScaledJacobian)
+
+        # print TotalDisp[:,0,-1]
+        # MainData.ScaledJacobian = np.zeros_like(MainData.ScaledJacobian)+1
+        vpoints = np.copy(mesh.points)
+        # print TotalDisp[:,:MainData.ndim,-1]
+        vpoints += TotalDisp[:,:MainData.ndim,-1]
+
+        dum1=[]; dum2=[]; dum3 = []; ddum=np.array([0,1,2,0])
+        for i in range(0,MainData.C):
+            dum1=np.append(dum1,i+3)
+            dum2 = np.append(dum2, 2*MainData.C+3 +i*MainData.C -i*(i-1)/2 )
+            dum3 = np.append(dum3,MainData.C+3 +i*(MainData.C+1) -i*(i-1)/2 )
+
+        if MainData.C>0:
+            ddum = (np.append(np.append(np.append(np.append(np.append(np.append(0,dum1),1),dum2),2),
+                np.fliplr(dum3.reshape(1,dum3.shape[0]))),0) ).astype(np.int32)
+
+        x_avg = []; y_avg = []
+        for i in range(mesh.nelem):
+            dum = vpoints[mesh.elements[i,:],:]
+
+            plt.plot(dum[ddum,0],dum[ddum,1],alpha=0.02)
+            # plt.fill(dum[ddum,0],dum[ddum,1],'#A4DDED')
+            plt.fill(dum[ddum,0],dum[ddum,1],color=(0.75,MainData.ScaledJacobian[i],0.35))
+            # afig = plt.fill(dum[ddum,0],dum[ddum,1],color=(0.75,MainData.Jacobian[i]/4.,0.35))    
+            # afig= plt.fill(dum[ddum,0],dum[ddum,1])   
+
+            # plt.fill(dum[ddum,0],dum[ddum,1],color=(0.75,1.0*i/mesh.elements.shape[0],0.35))  
+            # plt.fill(dum[ddum,0],dum[ddum,1],color=(MainData.ScaledJacobian[i],0,1-MainData.ScaledJacobian[i]))   
+
+            plt.plot(dum[ddum,0],dum[ddum,1],'#000000')
+            
+            # WRITE JACOBIAN VALUES ON ELEMENTS
+            # coord = mesh.points[mesh.elements[i,:],:]
+            # x_avg.append(np.sum(coord[:,0])/mesh.elements.shape[1])
+            # y_avg.append(np.sum(coord[:,1])/mesh.elements.shape[1])
+            # plt.text(x_avg[i],y_avg[i],np.around(MainData.ScaledJacobian[i],decimals=3))
+
+
+        plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#F88379',markersize=5) 
+
+        plt.axis('equal')
+        # plt.xlim([-0.52,-0.43])
+        # plt.ylim([-0.03,0.045])
+        plt.axis('off')
+
+        # ax = plt.gca()
+        # PCM=ax.get_children()[2]
+        # plt.colorbar(afig)
+
+
+
+    @staticmethod
+    def HighOrderPatchPlot3D(MainData,mesh,TotalDisp=0):
+        """ This 3D patch plot works but the elements at background are
+        also shown
+        """
+        from mpl_toolkits.mplot3d import Axes3D
+        from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+        import matplotlib.pyplot as plt
+
+        C = MainData.C
+        a1,a2,a3,a4 = [],[],[],[]
+        if C==1:
+            a1 = [1, 5, 2, 9, 4, 8, 1]
+            a2 = [1, 5, 2, 7, 3, 6, 1]
+            a3 = [1, 6, 3, 10, 4, 8, 1]
+            a4 = [2, 7, 3, 10, 4, 9, 2]
+        elif C==2:
+            a1 = [1, 5, 6, 2, 9, 11, 3, 10, 7, 1]
+            a2 = [1, 5, 6, 2, 14, 19, 4, 18, 12, 1]
+            a3 = [2, 9, 11, 3, 17, 20, 4, 19, 14, 2]
+            a4 = [1, 12, 18, 4, 20, 17, 3, 10, 7, 1]
+        elif C==3:
+            a1 = [1, 5, 6, 7, 2, 20, 29, 34, 4, 33, 27, 17, 1]
+            a2 = [1, 8, 12, 15, 3, 16, 14, 11, 2, 7, 6, 5, 1]
+            a3 = [2, 11, 14, 16, 3, 26, 32, 35, 4, 34, 29, 20, 2]
+            a4 = [1, 8, 12, 15, 3, 26, 32, 35, 4, 33, 27, 17, 1]
+        elif C==4:
+            a1 = [1, 5, 6, 7, 8, 2, 27, 41, 50, 55, 4, 54, 48, 38, 23, 1]
+            a2 = [1, 9, 14, 18, 21, 3, 22, 20, 17, 13, 2, 8, 7, 6, 5, 1]
+            a3 = [2, 13, 17, 20, 22, 3, 37, 47, 53, 56, 4, 55, 50, 41, 27, 2]
+            a4 = [1, 9, 14, 18, 21, 3, 37, 47, 53, 56, 4, 54, 48, 38, 23, 1]
+
+        a1 = np.asarray(a1); a2 = np.asarray(a2); a3 = np.asarray(a3); a4 = np.asarray(a4)
+        a1 -= 1;    a2 -= 1;    a3 -= 1;    a4 -= 1
+        a_list = [a1,a2,a3,a4]
+
+        fig = plt.figure()
+        ax = Axes3D(fig)
+
+        # face_elements = mesh.GetElementsWithBoundaryFacesTet()
+        # elements = mesh.elements[face_elements,:]
+        # print mesh.faces 
+        # mesh.ArrangeFacesTet() 
+
+        # for elem in range(elements.shape[0]):
+        for elem in range(mesh.nelem):
+        # for elem in range(1):
+
+            # LOOP OVER TET FACES
+            num_faces = 4
+            for iface in range(num_faces):
+                a = a_list[iface]
+
+                x = mesh.points[mesh.elements[elem,a],0]
+                y = mesh.points[mesh.elements[elem,a],1]
+                z = mesh.points[mesh.elements[elem,a],2]
+
+                # x = mesh.points[elements[elem,a],0]
+                # y = mesh.points[elements[elem,a],1]
+                # z = mesh.points[elements[elem,a],2]
+
+                vertices = [zip(x,y,z)]
+                poly_object = Poly3DCollection(vertices)
+                poly_object.set_linewidth(1)
+                poly_object.set_linestyle('solid')
+                poly_object.set_facecolor((0.75,1,0.35)) 
+                ax.add_collection3d(poly_object)
+
+
+        # ax.autoscale(enable=True, axis=u'both', tight=None)
+        ax.plot(mesh.points[:,0],mesh.points[:,1],mesh.points[:,2],'o',color='#F88379')
+
+        plt.axis('equal')
+        plt.axis('off')
+        # plt.savefig('/home/roman/Desktop/destination_path.eps', format='eps', dpi=1000)
+        plt.show()

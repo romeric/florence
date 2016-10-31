@@ -81,7 +81,7 @@ class VariationalPrinciple(object):
 
 
     def GeometricStiffnessIntegrand(self, SpatialGradient, CauchyStressTensor):
-        """Applies to displacement based and all mixed formulations that involve static condensation"""
+        """Applies to displacement based, displacement potential based and all mixed formulations that involve static condensation"""
 
         ndim = self.ndim
         nvar = self.nvar
