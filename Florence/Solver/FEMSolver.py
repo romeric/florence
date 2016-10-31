@@ -211,7 +211,7 @@ class FEMSolver(object):
         # NeumannForces = AssemblyForces_Cheap(formulation,mesh)
         NeumannForces = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float32)
         # FORCES RESULTING FROM DIRICHLET BOUNDARY CONDITIONS
-        DirichletForces = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float32)
+        # DirichletForces = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float32)
 
         # ADOPT A DIFFERENT PATH FOR INCREMENTAL LINEAR ELASTICITY
         if formulation.fields == "mechanics" and self.analysis_nature != "nonlinear":     
@@ -230,13 +230,18 @@ class FEMSolver(object):
 
         # ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES
         K, TractionForces = self.Assemble(function_spaces[0], formulation, mesh, material, solver, 
-            Eulerx, np.zeros((mesh.points.shape[0],1),dtype=np.float32))[:2]
+            Eulerx, np.zeros((mesh.points.shape[0],1),dtype=np.float64))[:2]
         # K,TractionForces = self.Assemble(MainData,mesh,material,Eulerx,np.zeros((mesh.points.shape[0],1),dtype=np.float64))[:2]
+
+        # K = K.todense()
+        # print(K[:3,:3])
+        # print(np.linalg.norm(K))
+        # exit()
 
         
         # GET DIRICHLET FORCES
-        DirichletForces = boundary_condition.ApplyDirichletGetReducedMatrices(K,DirichletForces,
-            boundary_condition.applied_dirichlet)[2]
+        # DirichletForces = boundary_condition.ApplyDirichletGetReducedMatrices(K,DirichletForces,
+            # boundary_condition.applied_dirichlet)[2]
         # boundary_condition.ApplyDirichletGetReducedMatrices(K,boundary_condition.dirichlet_forces,
             # boundary_condition.applied_dirichlet)
 
@@ -251,8 +256,11 @@ class FEMSolver(object):
                 K, M, DirichletForces,NeumannForces,NodalForces,Residual,
                 ResidualNorm,mesh,TotalDisp,Eulerx,material, boundary_condition)
         else:
+            # TotalDisp = self.StaticSolver(function_spaces, formulation, solver, 
+                # K, DirichletForces,NeumannForces,NodalForces,Residual,
+                # ResidualNorm,mesh,TotalDisp,Eulerx,material, boundary_condition)
             TotalDisp = self.StaticSolver(function_spaces, formulation, solver, 
-                K, DirichletForces,NeumannForces,NodalForces,Residual,
+                K,NeumannForces,NodalForces,Residual,
                 ResidualNorm,mesh,TotalDisp,Eulerx,material, boundary_condition)
 
         self.NRConvergence = ResidualNorm
@@ -283,8 +291,8 @@ class FEMSolver(object):
             # NodalForces = LoadFactor*boundary_condition.neumann_forces
             AppliedDirichletInc = LoadFactor*boundary_condition.applied_dirichlet
             # DIRICHLET FORCES IS SET TO ZERO EVERY TIME
-            # DirichletForces = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64)
-            DirichletForces = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float32)
+            DirichletForces = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64)
+            # DirichletForces = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float32)
             Residual = DirichletForces + NodalForces
             # boundary_condition.dirichlet_forces = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float32)
             # Residual = boundary_condition.dirichlet_forces + NodalForces
@@ -362,8 +370,11 @@ class FEMSolver(object):
         return TotalDisp
 
 
+    # def StaticSolver(self, function_spaces, formulation, solver, K,
+            # DirichletForces,NeumannForces,NodalForces,Residual,
+            # ResidualNorm,mesh,TotalDisp,Eulerx,material, boundary_condition):
     def StaticSolver(self, function_spaces, formulation, solver, K,
-            DirichletForces,NeumannForces,NodalForces,Residual,
+            NeumannForces,NodalForces,Residual,
             ResidualNorm,mesh,TotalDisp,Eulerx,material, boundary_condition):
     
         LoadIncrement = self.number_of_load_increments
@@ -376,7 +387,16 @@ class FEMSolver(object):
             # DeltaF = LoadFactor*boundary_condition.neumann_forces
             NodalForces += DeltaF
             # RESIDUAL FORCES CONTAIN CONTRIBUTION FROM BOTH NEUMANN AND DIRICHLET
-            Residual -= (DeltaF + LoadFactor*DirichletForces)
+            # print(np.linalg.norm(DirichletForces), np.linalg.norm(DeltaF), np.linalg.norm(K.todense()))
+            # exit()
+            DirichletForces = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64)
+            DirichletForces = boundary_condition.ApplyDirichletGetReducedMatrices(K,DirichletForces,
+                boundary_condition.applied_dirichlet)[2]
+            # Residual = np.zeros_like(Residual)
+            Residual -= LoadFactor*DirichletForces
+            # print(np.linalg.norm(K.todense()))
+
+            # Residual -= (DeltaF + LoadFactor*DirichletForces)
             # Residual -= (DeltaF + LoadFactor*boundary_condition.dirichlet_forces)
             AppliedDirichletInc += LoadFactor*boundary_condition.applied_dirichlet
 
@@ -391,7 +411,7 @@ class FEMSolver(object):
                 if Increment==0:
                     self.NormForces = np.linalg.norm(Residual[boundary_condition.columns_out])
 
-                TotalDisp = self.NewtonRaphson(function_spaces, formulation, solver, 
+                TotalDisp, K = self.NewtonRaphson(function_spaces, formulation, solver, 
                     Increment,K,NodalForces,Residual,ResidualNorm,mesh,TotalDisp,Eulerx,
                     material,boundary_condition,AppliedDirichletInc)
 
@@ -445,7 +465,11 @@ class FEMSolver(object):
             # if Increment==self.number_of_load_increments-1 and Iter>1:
             #     # solver.condA = np.linalg.cond(K_b.todense()) # REMOVE THIS
             #     solver.condA = onenormest(K_b) # REMOVE THIS
+            # print(np.linalg.norm(F_b))
+            # print(np.linalg.norm(Eulerx),np.linalg.norm(mesh.points))
             sol = solver.Solve(K_b,-F_b)
+            # print(np.linalg.norm(sol))
+            # exit()
 
             # GET THE TOTAL SOLUTION AND ITS COMPONENTS SUCH AS UX, UY, UZ, PHI ETC
             dU = post_process.TotalComponentSol(sol,boundary_condition.columns_in,
@@ -460,16 +484,26 @@ class FEMSolver(object):
             # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES (BE CAREFUL ABOUT THE -1 INDEX IN HERE)
             K, TractionForces = self.Assemble(function_spaces[0], formulation, mesh, material, solver,
                 Eulerx,TotalDisp[:,formulation.nvar-1,Increment,None])[:2]
+            # print(np.linalg.norm(K.todense()))
+            # print(K.todense()[:3,:3])
+            # exit()
             # FIND THE RESIDUAL
             Residual[boundary_condition.columns_in] = TractionForces[boundary_condition.columns_in] \
             - NodalForces[boundary_condition.columns_in]
+            # print(np.linalg.norm(TractionForces[boundary_condition.columns_in]))
+            # print(boundary_condition.columns_in.shape)
+            # print(np.linalg.norm(Residual[boundary_condition.columns_in]))
+            # print(np.linalg.norm(NodalForces[boundary_condition.columns_in]))
             # SAVE THE NORM 
             NormForces = self.NormForces
             ResidualNorm['Increment_'+str(Increment)] = np.append(ResidualNorm['Increment_'+str(Increment)],\
                 np.abs(la.norm(Residual[boundary_condition.columns_in])/NormForces))
+            # print(K.dtype,TractionForces.dtype)
             
             print('Iteration number', Iter, 'for load increment', Increment, 'with a residual of \t\t', \
-                np.abs(la.norm(Residual[boundary_condition.columns_in])/NormForces))          
+                np.abs(la.norm(Residual[boundary_condition.columns_in])/NormForces)) 
+            # print(la.norm(Residual[boundary_condition.columns_in]))         
+            # exit()
 
             # UPDATE ITERATION NUMBER
             Iter +=1
@@ -486,7 +520,7 @@ class FEMSolver(object):
                 break
 
 
-        return TotalDisp
+        return TotalDisp, K
 
 
 
@@ -540,7 +574,8 @@ class FEMSolver(object):
         # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF STIFFNESS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
         I_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.int32)
         J_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.int32)
-        V_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.float32)
+        # V_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.float32)
+        V_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.float64)
 
         I_mass=[]; J_mass=[]; V_mass=[]
         if self.analysis_type !='static':
@@ -549,10 +584,10 @@ class FEMSolver(object):
             J_mass=np.zeros((nvar*nodeperelem)**2*mesh.elements.shape[0],dtype=np.int32)
             V_mass=np.zeros((nvar*nodeperelem)**2*mesh.elements.shape[0],dtype=np.float32)
 
-        # F = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
-        # T = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
-        F = np.zeros((mesh.points.shape[0]*nvar,1),np.float32)
-        T = np.zeros((mesh.points.shape[0]*nvar,1),np.float32)  
+        F = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
+        T = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
+        # F = np.zeros((mesh.points.shape[0]*nvar,1),np.float32)
+        # T = np.zeros((mesh.points.shape[0]*nvar,1),np.float32)  
         mass = []
 
 
@@ -608,6 +643,8 @@ class FEMSolver(object):
             # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64).tocsc()
         stiffness = csc_matrix((V_stiffness,(I_stiffness,J_stiffness)),
             shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float32)
+        # stiffness = csc_matrix((V_stiffness,(I_stiffness,J_stiffness)),
+            # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
         
         # GET STORAGE/MEMORY DETAILS
         self.spmat = stiffness.data.nbytes/1024./1024.
