@@ -101,6 +101,18 @@ class DisplacementFormulation(VariationalPrinciple):
         # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
         F = np.einsum('ij,kli->kjl', EulerELemCoords, MaterialGradient)
 
+        # from Florence.Tensor import makezero
+        # if elem==0:
+            # print(EulerELemCoords)
+            # print(Jm)
+            # makezero(MaterialGradient)
+            # print((MaterialGradient))
+            # print(F)
+            # print(AllGauss.shape[0], Jm.shape, MaterialGradient.shape)
+            # print dir(function_space)
+            # print(dir(self.quadrature_rules))
+            # exit()
+
 
         # COMPUTE REMAINING KINEMATIC MEASURES
         StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
@@ -145,7 +157,7 @@ class DisplacementFormulation(VariationalPrinciple):
             # INTEGRATE STIFFNESS
             stiffness += BDB_1*detJ[counter]
 
-
+        # print(tractionforce.dtype); exit()
         return stiffness, tractionforce 
 
 

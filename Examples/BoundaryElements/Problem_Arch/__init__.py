@@ -1,1 +1,0 @@
-from ProblemDataBEM_2 import ProblemData_BEM, BoundaryConditions, PlotFunc
