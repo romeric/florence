@@ -9,19 +9,21 @@ cdef inline void FillConstitutiveB_(double *B, const double* SpatialGradient,
     if ndim == 2:
 
         for i in range(rows):
+            # MECHANICAL TERMS
             B[i*cols*nvar] = SpatialGradient[i]
             B[i*cols*nvar+cols+1] = SpatialGradient[i+rows]
             
-            # SEEMS BUGGY
-            # B[i*cols*nvar+(cols-1)] = SpatialGradient[i+rows]
-            # B[i*cols*nvar+(2*cols-1)] = SpatialGradient[i]
-
             B[i*cols*nvar+2] = SpatialGradient[i+rows]
             B[i*cols*nvar+cols+2] = SpatialGradient[i]
+
+            # ELECTROSTATIC TERMS
+            B[i*cols*nvar+2*cols+3] = SpatialGradient[i]
+            B[i*cols*nvar+2*cols+4] = SpatialGradient[i+rows]
 
     elif ndim == 3:
 
         for i in range(rows):
+            # MECHANICAL TERMS
             B[i*cols*nvar] = SpatialGradient[i]
             B[i*cols*nvar+cols+1] = SpatialGradient[i+rows]
             B[i*cols*nvar+2*(cols+1)] = SpatialGradient[i+2*rows]
@@ -34,6 +36,11 @@ cdef inline void FillConstitutiveB_(double *B, const double* SpatialGradient,
 
             B[i*cols*nvar+3] = SpatialGradient[i+rows]
             B[i*cols*nvar+cols+3] = SpatialGradient[i]
+
+            # ELECTROSTATIC TERMS
+            B[i*cols*nvar+3*cols+6] = SpatialGradient[i]
+            B[i*cols*nvar+3*cols+7] = SpatialGradient[i+rows]
+            B[i*cols*nvar+3*cols+8] = SpatialGradient[i+2*rows]
 
             
 
@@ -153,11 +160,16 @@ def FillGeometricB(np.ndarray[double,ndim=2,mode='c'] B,
 
 
 
-cdef inline void GetTotalTraction_(double *TotalTraction, const double *CauchyStressTensor, int ndim):
+cdef inline void GetTotalTraction_(double *TotalTraction, const double *CauchyStressTensor,
+    const double *ElectricDisplacementx, int ndim):
     if ndim == 2:
         TotalTraction[0] = CauchyStressTensor[0]
         TotalTraction[1] = CauchyStressTensor[3]
         TotalTraction[2] = CauchyStressTensor[1]
+        #
+        TotalTraction[3] = ElectricDisplacementx[0]
+        TotalTraction[4] = ElectricDisplacementx[1]
+
     elif ndim==3:
         TotalTraction[0] = CauchyStressTensor[0]
         TotalTraction[1] = CauchyStressTensor[4]
@@ -165,18 +177,24 @@ cdef inline void GetTotalTraction_(double *TotalTraction, const double *CauchySt
         TotalTraction[3] = CauchyStressTensor[1]
         TotalTraction[4] = CauchyStressTensor[2]
         TotalTraction[5] = CauchyStressTensor[5]
+        #
+        TotalTraction[6] = ElectricDisplacementx[0]
+        TotalTraction[7] = ElectricDisplacementx[1]
+        TotalTraction[8] = ElectricDisplacementx[3]
 
 
 
 
 @boundscheck(False)
 @wraparound(False)
-def GetTotalTraction(np.ndarray[double,ndim=2,mode='c'] CauchyStressTensor):
+def GetTotalTraction(np.ndarray[double,ndim=2,mode='c'] CauchyStressTensor,
+    np.ndarray[double,ndim=1,mode='c'] ElectricDisplacementx):
     cdef np.ndarray[double,ndim=2,mode='c'] TotalTraction
     cdef int ndim = CauchyStressTensor.shape[0]
     if ndim == 2:
-        TotalTraction = np.zeros((3,1),dtype=np.float64)
+        TotalTraction = np.zeros((5,1),dtype=np.float64)
     elif ndim == 3:
-        TotalTraction = np.zeros((6,1),dtype=np.float64)
-    GetTotalTraction_(&TotalTraction[0,0], &CauchyStressTensor[0,0], ndim)
+        TotalTraction = np.zeros((9,1),dtype=np.float64)
+    GetTotalTraction_(&TotalTraction[0,0], &CauchyStressTensor[0,0],
+        &ElectricDisplacementx[0], ndim)
     return TotalTraction

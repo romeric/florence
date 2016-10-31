@@ -649,6 +649,8 @@ class Mesh(object):
 
         assert self.elements is not None
         assert self.element_type is not None
+        if self.points.shape[1] == 2:
+            raise ValueError("Computing volumes for 2D mesh is not possible")
         if gpoints is None:
             assert self.points is not None
             gpoints = self.points

@@ -145,6 +145,7 @@ class DisplacementFormulation(VariationalPrinciple):
             # INTEGRATE STIFFNESS
             stiffness += BDB_1*detJ[counter]
 
+
         return stiffness, tractionforce 
 
 
