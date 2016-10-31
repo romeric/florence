@@ -69,7 +69,7 @@ def ReadMesh_NPFROMFILE(filename,MeshType,C=0):
     # READ THE WHOLE FILE
     FileContent = np.fromfile(filename,dtype=np.float64, sep=" ") 
     # GET NO OF NODES AND NELSE (NELES=NO OF FREE EDGES + NO OF FREE FACES + NO OF ELEMENTS)
-    mesh.nnode = np.uint64(FileContent[0]); nelse = np.uint64(FileContent[1])
+    mesh.nnode = np.int64(FileContent[0]); nelse = np.int64(FileContent[1])
     # DETERMINE MULTIPLICITY OF EACH TYPE (i.e. EDGES, FACES, ELEMENTS)
 
     # CALL THE NPFROMFILE_LOOP TO DETERMINE MULTIPLICITY OF EACH TYPE (i.e. EDGES, FACES, ELEMENTS)
@@ -131,7 +131,7 @@ def ReadMesh_NPFROMFILE(filename,MeshType,C=0):
         nelse_type = np.concatenate((nelse_type,np.array([[rows,cols]])),axis=0)
         # READ ELEMENTS
         elem_cols = np.arange(2,int(nelse_type[2,0]-300)+2)
-        mesh.elements = FileContent[(4*mesh.nnode+2)+(2+edge_cols.shape[0])*nelse_type[0,1] + (2+face_cols.shape[0])*nelse_type[1,1]:
+        mesh.elements = FileContent[int((4*mesh.nnode+2)+(2+edge_cols.shape[0])*nelse_type[0,1] + (2+face_cols.shape[0])*nelse_type[1,1]):
         ].reshape(cols,2+elem_cols.shape[0])[:,2:].astype(np.int64) - 1
         # READ NUMBER OF FREE FACES & ELEMENTS IN 3D
         mesh.nface = nelse_type[1,1]

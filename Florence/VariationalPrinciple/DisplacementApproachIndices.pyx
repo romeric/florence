@@ -12,8 +12,12 @@ cdef inline void FillConstitutiveB_(double *B, const double* SpatialGradient,
             B[i*cols*nvar] = SpatialGradient[i]
             B[i*cols*nvar+cols+1] = SpatialGradient[i+rows]
             
-            B[i*cols*nvar+(cols-1)] = SpatialGradient[i+rows]
-            B[i*cols*nvar+(2*cols-1)] = SpatialGradient[i]
+            # SEEMS BUGGY
+            # B[i*cols*nvar+(cols-1)] = SpatialGradient[i+rows]
+            # B[i*cols*nvar+(2*cols-1)] = SpatialGradient[i]
+
+            B[i*cols*nvar+2] = SpatialGradient[i+rows]
+            B[i*cols*nvar+cols+2] = SpatialGradient[i]
 
     elif ndim == 3:
 
