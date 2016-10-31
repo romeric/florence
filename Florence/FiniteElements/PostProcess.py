@@ -474,6 +474,205 @@ class PostProcess(object):
 
 
 
+    def Plot(self, configuration="original", colorbar=True, axis_type=None):
+
+
+        if self.mesh is None:
+            raise ValueError("Mesh not set for post-processing")
+        if self.sol is None:
+            raise ValueError("Solution not set for post-processing")
+
+        if self.mesh.element_type == "tri":
+
+            from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
+            from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
+            from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
+            from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
+            from Florence.FunctionSpace import Tri 
+            from Florence.FunctionSpace.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
+            from Florence.FunctionSpace.GetBases import GetBases
+
+            from copy import deepcopy
+            from scipy.spatial import Delaunay
+            from mpl_toolkits.mplot3d import Axes3D
+            from matplotlib.colors import LightSource
+            import matplotlib as mpl
+            import matplotlib.pyplot as plt
+            import matplotlib.tri as mtri
+            import matplotlib.cm as cm
+            from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+            # GET LINEAR MESH
+            mesh = self.mesh
+            # print np.max(mesh.elements[:,:3])
+            mesh.elements = mesh.elements[:,:3]
+            mesh.nnode = int(np.max(mesh.elements)+1)
+            mesh.points = mesh.points[:mesh.nnode,:]
+            # GET LINEAR SOLUTION - [MODIFIES THE SOLUTION]
+            self.sol = self.sol[:mesh.nnode,:]
+            
+            fig = plt.figure()
+            if configuration == "original":
+                plt.triplot(mesh.points[:,0],mesh.points[:,1], mesh.elements[:,:3],color='k')
+            elif configuration == "deformed":
+                plt.triplot(mesh.points[:,0]+self.sol[:,0,-1], mesh.points[:,1]+self.sol[:,1,-1], mesh.elements[:,:3],color='k')
+            else:
+                raise ValueError("configuration can only be 'original' or 'deformed'")
+
+            if configuration == "original":
+                plt.tricontourf(mesh.points[:,0], mesh.points[:,1], mesh.elements, self.sol[:,0,-1],cmap=cm.viridis)
+            else:
+                plt.tricontourf(mesh.points[:,0]+self.sol[:,0,-1], mesh.points[:,1]+self.sol[:,1,-1], 
+                    mesh.elements, self.sol[:,0,-1],cmap=cm.viridis)
+
+
+            if colorbar is True:
+                ax_cbar = mpl.colorbar.make_axes(plt.gca(), shrink=0.8)[0]
+                cbar = mpl.colorbar.ColorbarBase(ax_cbar, cmap=cm.viridis)
+                # DON'T NORMALIZE
+                # cbar = mpl.colorbar.ColorbarBase(ax_cbar, cmap=cm.viridis,
+                                   # norm=mpl.colors.Normalize(vmin=-0, vmax=1))
+                # cbar.set_clim(0, 1)
+                # divider = make_axes_locatable(ax_cbar)
+                # cax = divider.append_axes("right", size="25%", pad=0.005)
+            
+            if axis_type == "equal":
+                plt.axis(axis_type)
+            plt.show()
+
+
+
+        elif self.mesh.element_type == "tet":
+
+            # GET LINEAR MESH
+            mesh = self.mesh
+            mesh.elements = mesh.elements[:,:4]
+            mesh.faces = mesh.faces[:,:3]
+            mesh.nnode = int(np.max(mesh.elements)+1)
+            mesh.points = mesh.points[:mesh.nnode,:]
+            # GET LINEAR SOLUTION - [MODIFIES THE SOLUTION]
+            self.sol = self.sol[:mesh.nnode,:]
+
+            import os
+            os.environ['ETS_TOOLKIT'] = 'qt4'
+            from mayavi import mlab
+            from matplotlib.colors import ColorConverter
+            import matplotlib.cm as cm
+            
+            if configuration == "original":
+                trimesh_h = mlab.triangular_mesh(mesh.points[:,0], mesh.points[:,1], mesh.points[:,2], 
+                    mesh.faces, scalars=self.sol[:,0,-1])
+            elif configuration == "deformed":
+                trimesh_h = mlab.triangular_mesh(mesh.points[:,0]+self.sol[:,0,-1], 
+                    mesh.points[:,1]+self.sol[:,1,-1], mesh.points[:,2]+self.sol[:,2,-1], 
+                    mesh.faces, scalars=self.sol[:,0,-1])
+
+                mlab.triangular_mesh(mesh.points[:,0]+self.sol[:,0,-1], 
+                    mesh.points[:,1]+self.sol[:,1,-1], mesh.points[:,2]+self.sol[:,2,-1], 
+                    mesh.faces, representation="mesh", color=(0,0,0))
+
+
+            # CHANGE LIGHTING OPTION
+            trimesh_h.actor.property.interpolation = 'phong'
+            trimesh_h.actor.property.specular = 0.1
+            trimesh_h.actor.property.specular_power = 5
+
+            # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO 
+            # GET VIRIDIS COLORMAP FROM MATPLOTLIB
+            color_func = ColorConverter()
+            rgba_lower = color_func.to_rgba_array(cm.viridis.colors)
+            # rgba_lower = color_func.to_rgba_array(cm.viridis_r.colors)
+            RGBA_higher = np.round(rgba_lower*255).astype(np.int64)
+            # UPDATE LUT OF THE COLORMAP
+            trimesh_h.module_manager.scalar_lut_manager.lut.table = RGBA_higher 
+
+            mlab.draw()
+            mlab.show() 
+
+
+
+
+    def Animate(self, quantity=0, configuration="original", colorbar=True, axis_type=None):
+
+        """
+            quantity=0 - ux
+            quantity=0 - uy
+            quantity=0 - uz if 2D, phi if 3D
+        """
+
+
+        if self.mesh is None:
+            raise ValueError("Mesh not set for post-processing")
+        if self.sol is None:
+            raise ValueError("Solution not set for post-processing")
+
+        if self.mesh.element_type == "tri":
+
+            from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
+            from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
+            from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
+            from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
+            from Florence.FunctionSpace import Tri 
+            from Florence.FunctionSpace.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
+            from Florence.FunctionSpace.GetBases import GetBases
+            from Florence import Mesh
+
+            from copy import deepcopy
+            from scipy.spatial import Delaunay
+            from mpl_toolkits.mplot3d import Axes3D
+            from matplotlib.colors import LightSource
+            import matplotlib as mpl
+            import matplotlib.pyplot as plt
+            import matplotlib.tri as mtri
+            import matplotlib.cm as cm
+            from mpl_toolkits.axes_grid1 import make_axes_locatable
+            import matplotlib.animation as animation
+
+            # GET LINEAR MESH
+            # mesh = np.copy(self.mesh)
+            mesh = Mesh()
+            # print np.max(mesh.elements[:,:3])
+            mesh.elements = self.mesh.elements[:,:3]
+            mesh.nnode = int(np.max(self.mesh.elements)+1)
+            mesh.points = self.mesh.points[:self.mesh.nnode,:]
+            
+            # fig = plt.figure()
+            fig, ax = plt.subplots()
+            self.configuration = configuration
+
+            def animator(incr):
+                configuration = self.configuration
+                # GET LINEAR SOLUTION - [MODIFIES THE SOLUTION]
+                sol = self.sol[:mesh.nnode,:]
+
+                ax.clear()
+                if configuration == "deformed":
+                    ax.triplot(mesh.points[:,0]+self.sol[:,0,incr], mesh.points[:,1]+sol[:,1,incr], mesh.elements[:,:3],color='k')
+                    ax.tricontourf(mesh.points[:,0]+sol[:,0,incr], mesh.points[:,1]+sol[:,1,incr], 
+                        mesh.elements, sol[:,quantity,incr],cmap=cm.viridis)
+                    ax.plot(self.mesh.points[:,0]+sol[:,0,incr], self.mesh.points[:,1]+self.sol[:,1,incr],'o',markersize=5  ,color='k')
+                elif configuration == "original":
+                    plt.triplot(mesh.points[:,0],mesh.points[:,1], mesh.elements[:,:3],color='k')
+                    plt.tricontourf(mesh.points[:,0], mesh.points[:,1], mesh.elements, sol[:,quantity,incr],cmap=cm.viridis)
+ 
+            interval = 2#in seconds
+            ani = animation.FuncAnimation(fig,animator,self.sol.shape[2],interval=interval, repeat=True)
+
+            if colorbar is True:
+                ax_cbar = mpl.colorbar.make_axes(plt.gca(), shrink=0.8)[0]
+                cbar = mpl.colorbar.ColorbarBase(ax_cbar, cmap=cm.viridis)
+                # DON'T NORMALIZE
+                # cbar = mpl.colorbar.ColorbarBase(ax_cbar, cmap=cm.viridis,
+                                   # norm=mpl.colors.Normalize(vmin=-0, vmax=1))
+                # cbar.set_clim(0, 1)
+                # divider = make_axes_locatable(ax_cbar)
+                # cax = divider.append_axes("right", size="25%", pad=0.005)
+            
+            if axis_type == "equal":
+                plt.axis(axis_type)
+            plt.show()
+
+
 
     
     def MeshQualityMeasures(self, mesh, TotalDisp, plot=True, show_plot=True):
@@ -1128,8 +1327,8 @@ class PostProcess(object):
             src = mlab.pipeline.scalar_scatter(x_edges.T.copy().flatten(), y_edges.T.copy().flatten(), z_edges.T.copy().flatten())
             src.mlab_source.dataset.lines = connections
             lines = mlab.pipeline.stripper(src)
-            # mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
-            mlab.pipeline.surface(lines, color = (0.72,0.72,0.72), line_width=2)
+            mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
+            # mlab.pipeline.surface(lines, color = (0.72,0.72,0.72), line_width=2)
 
             # OLDER VERSION
             # for i in range(x_edges.shape[1]):
