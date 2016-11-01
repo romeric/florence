@@ -11,7 +11,7 @@ from Florence.VariationalPrinciple import *
 def ProblemData(*args, **kwargs):
 
     ndim=2
-    p=9
+    p=2
 
     # material = IsotropicElectroMechanics_1(ndim,youngs_modulus=1.0,poissons_ratio=0.3, eps_1=1.0)
     # material = MooneyRivlin(ndim,youngs_modulus=1.0,poissons_ratio=0.31)
@@ -23,7 +23,7 @@ def ProblemData(*args, **kwargs):
 
     mesh = Mesh()
     # mesh.Square(n=5)
-    mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,10),nx=4,ny=6)
+    mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,10),nx=10,ny=12)
     mesh.GetHighOrderMesh(p=p)
     # print mesh.points.shape[0], mesh.nelem
     # mesh.SimplePlot()
@@ -49,7 +49,7 @@ def ProblemData(*args, **kwargs):
         # Y_1 = np.where(mesh.points[:,1] == 1)[0]
         Y_1 = np.where(mesh.points[:,1] == 10)[0]
         # boundary_data[Y_1,0] = 0
-        boundary_data[Y_1,1] = 20
+        boundary_data[Y_1,1] = 10
         # boundary_data[Y_1,2] = 1
 
         # boundary_data[2::material.nvar,:] = 0
@@ -62,13 +62,14 @@ def ProblemData(*args, **kwargs):
     boundary_condition.dirichlet_flags = DirichletFunc(mesh)
     formulation = DisplacementFormulation(mesh)
 
-    fem_solver = FEMSolver(number_of_load_increments=10,analysis_type="static",
+    fem_solver = FEMSolver(number_of_load_increments=2,analysis_type="static",
         analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
         newton_raphson_tolerance=1.0e-05)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition)
 
+    exit()
 
     # solution.StressRecovery()
     # qq = formulation.quadrature_rules[0]
@@ -76,12 +77,12 @@ def ProblemData(*args, **kwargs):
     # from Florence.Utils import debug
     # debug(formulation.function_spaces[0], formulation.quadrature_rules[0],mesh,solution.sol)
 
-    # print solution.sol+mesh.points
-    # exit()
-    solution.sol = solution.sol[:,:,None]
+    # print solution.sol[:,:,-1]+mesh.points
+    # solution.sol = solution.sol[:,:,None]
     # print solution.sol[:,:,-1]+mesh.points
     solution.Plot(configuration="deformed", quantity=1)
     # solution.Animate(configuration="deformed")
+    solution.StressRecovery()
 
 
 
@@ -150,7 +151,7 @@ def ProblemData_2(*args, **kwargs):
 def ProblemData_3D(*args, **kwargs):
 
     ndim=3
-    p=1
+    p=3
 
     # material = IsotropicElectroMechanics_2(ndim,youngs_modulus=1.0,poissons_ratio=0.3, c1=1.0, c2=1.0)
     # material = MooneyRivlin(ndim,youngs_modulus=1.0,poissons_ratio=0.41)
@@ -202,7 +203,7 @@ def ProblemData_3D(*args, **kwargs):
         Y_1 = np.where(mesh.points[:,2] == 100)[0]
         boundary_data[Y_1,0] = 0.
         boundary_data[Y_1,1] = 0.
-        boundary_data[Y_1,2] = 10.
+        boundary_data[Y_1,2] = 50.
 
         # boundary_data[:,3] = 0
 
@@ -213,7 +214,7 @@ def ProblemData_3D(*args, **kwargs):
     # formulation = DisplacementPotentialFormulation(mesh)
     formulation = DisplacementFormulation(mesh)
 
-    fem_solver = FEMSolver(number_of_load_increments=1,analysis_type="static",
+    fem_solver = FEMSolver(number_of_load_increments=5,analysis_type="static",
         analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
         newton_raphson_tolerance=1.0e-04)
 
@@ -221,7 +222,6 @@ def ProblemData_3D(*args, **kwargs):
             material=material, boundary_condition=boundary_condition)
 
     # solution.Plot(configuration="deformed")
-    # solution.CurvilinearPlot(QuantityToPlot=solution.sol[:,0])
     # solution.Animate(configuration="deformed")
     solution.StressRecovery()
 

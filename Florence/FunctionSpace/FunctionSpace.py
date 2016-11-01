@@ -6,7 +6,7 @@ class FunctionSpace(object):
         and boundary element analyses
     """
 
-    def __init__(self, mesh, quadrature, p=1, bases_type="nodal", bases_kind="CG"):
+    def __init__(self, mesh, quadrature=None, p=1, bases_type="nodal", bases_kind="CG", evaluate_at_nodes=False):
         """ 
 
             input:
@@ -32,22 +32,30 @@ class FunctionSpace(object):
         if mesh.InferPolynomialDegree() - 1 != C:
             raise ValueError("Function space of the polynomial does not match element type")
 
-        # quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder, mesh_type=mesh.element_type)
-        z = quadrature.points
-        w = quadrature.weights
+        if evaluate_at_nodes is False:
+            if quadrature is None:
+                raise ValueError("Function space requires a quadrature rule")
+            # quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder, mesh_type=mesh.element_type)
+            z = quadrature.points
+            w = quadrature.weights
 
-        if mesh.element_type == "tet" or mesh.element_type == "hex":
-            # GET BASES AT ALL INTEGRATION POINTS (VOLUME)
-            Domain = GetBases3D(C,quadrature,mesh.element_type)
-            # GET BOUNDARY BASES AT ALL INTEGRATION POINTS (LINE)
-            # Boundary = GetBasesBoundary(C,z,ndim)
+        if evaluate_at_nodes is False:
+            if mesh.element_type == "tet" or mesh.element_type == "hex":
+                # GET BASES AT ALL INTEGRATION POINTS (VOLUME)
+                Domain = GetBases3D(C,quadrature,mesh.element_type)
+                # GET BOUNDARY BASES AT ALL INTEGRATION POINTS (LINE)
+                # Boundary = GetBasesBoundary(C,z,ndim)
 
-        elif mesh.element_type == 'tri' or mesh.element_type == 'quad':
-            # GET BASES AT ALL INTEGRATION POINTS (AREA)
-            Domain = GetBases(C,quadrature,mesh.element_type)
-            # GET BOUNDARY BASES AT ALL INTEGRATION POINTS (LINE)
-            # Boundary = GetBasesBoundary(C,z,ndim)
-        Boundary = []
+            elif mesh.element_type == 'tri' or mesh.element_type == 'quad':
+                # GET BASES AT ALL INTEGRATION POINTS (AREA)
+                Domain = GetBases(C,quadrature,mesh.element_type)
+                # GET BOUNDARY BASES AT ALL INTEGRATION POINTS (LINE)
+                # Boundary = GetBasesBoundary(C,z,ndim)
+            Boundary = []
+        else:
+            Domain = GetBasesAtNodes(C,quadrature,mesh.element_type)
+            Boundary = []
+            w = Domain.w
 
 
         # COMPUTING GRADIENTS AND JACOBIAN A PRIORI FOR ALL INTEGRATION POINTS
@@ -60,7 +68,7 @@ class FunctionSpace(object):
             for g1 in range(0,w.shape[0]):
                 for g2 in range(0,w.shape[0]): 
                     for g3 in range(0,w.shape[0]):
-                        # Gradient Tensor in Parent Element [\nabla_\varepsilon (N)]
+                        # GRADIENT TENSOR IN PARENT ELEMENT [\nabla_\varepsilon (N)]
                         Domain.Jm[0,:,counter] = Domain.gBasesx[:,counter]
                         Domain.Jm[1,:,counter] = Domain.gBasesy[:,counter]
                         Domain.Jm[2,:,counter] = Domain.gBasesz[:,counter]
@@ -75,7 +83,7 @@ class FunctionSpace(object):
             counter = 0
             for g1 in range(0,w.shape[0]):
                 for g2 in range(0,w.shape[0]): 
-                    # Gradient Tensor in Parent Element [\nabla_\varepsilon (N)]
+                    # GRADIENT TENSOR IN PARENT ELEMENT [\nabla_\varepsilon (N)]
                     Domain.Jm[0,:,counter] = Domain.gBasesx[:,counter]
                     Domain.Jm[1,:,counter] = Domain.gBasesy[:,counter]
 
@@ -86,7 +94,7 @@ class FunctionSpace(object):
             Domain.Jm = np.zeros((ndim,Domain.Bases.shape[0],w.shape[0]))   
             Domain.AllGauss = np.zeros((w.shape[0],1))  
             for counter in range(0,w.shape[0]):
-                # Gradient Tensor in Parent Element [\nabla_\varepsilon (N)]
+                # GRADIENT TENSOR IN PARENT ELEMENT [\nabla_\varepsilon (N)]
                 Domain.Jm[0,:,counter] = Domain.gBasesx[:,counter]
                 Domain.Jm[1,:,counter] = Domain.gBasesy[:,counter]
                 Domain.Jm[2,:,counter] = Domain.gBasesz[:,counter]
@@ -99,7 +107,7 @@ class FunctionSpace(object):
             Domain.Jm = np.zeros((ndim,Domain.Bases.shape[0],w.shape[0]))   
             Domain.AllGauss = np.zeros((w.shape[0],1))  
             for counter in range(0,w.shape[0]):
-                # Gradient Tensor in Parent Element [\nabla_\varepsilon (N)]
+                # GRADIENT TENSOR IN PARENT ELEMENT [\nabla_\varepsilon (N)]
                 Domain.Jm[0,:,counter] = Domain.gBasesx[:,counter]
                 Domain.Jm[1,:,counter] = Domain.gBasesy[:,counter]
 

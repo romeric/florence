@@ -183,17 +183,19 @@ def GetBasesBoundary(C,z,ndim):
 
 
 
+
 def GetBasesAtNodes(C,Quadrature,info):
 
     ns=[]; Basis=[]; gBasisx=[]; gBasisy=[]; gBasisz=[]
-    if mesh.element_type=='hex' or mesh.element_type == "quad":
+    if info == 'hex' or info == "quad":
+        w=2
         ns = (C+2)**ndim
         # GET THE BASES AT NODES INSTEAD OF GAUSS POINTS
         Basis = np.zeros((ns,w.shape[0]**ndim))
         gBasisx = np.zeros((ns,w.shape[0]**ndim))
         gBasisy = np.zeros((ns,w.shape[0]**ndim))
         gBasisz = np.zeros((ns,w.shape[0]**ndim))
-    elif mesh.element_type=='tet':
+    elif info =='tet':
         p=C+1
         ns = (p+1)*(p+2)*(p+3)/6
         # GET BASES AT NODES INSTEAD OF GAUSS POINTS
@@ -202,7 +204,7 @@ def GetBasesAtNodes(C,Quadrature,info):
         gBasisx = np.zeros((ns,4))
         gBasisy = np.zeros((ns,4))
         gBasisz = np.zeros((ns,4))
-    elif mesh.element_type =='tri':
+    elif info =='tri':
         p=C+1
         ns = (p+1)*(p+2)/2
         # GET BASES AT NODES INSTEAD OF GAUSS POINTS
@@ -213,7 +215,7 @@ def GetBasesAtNodes(C,Quadrature,info):
 
 
     eps=[]
-    if mesh.element_type == 'hex':
+    if info == 'hex':
         counter = 0
         eps = ThreeD.LagrangeGaussLobatto(C,0,0,0)[1]
         for i in range(0,eps.shape[0]):
@@ -224,7 +226,7 @@ def GetBasesAtNodes(C,Quadrature,info):
             gBasisy[:,counter] = dummy[:,1]
             gBasisz[:,counter] = dummy[:,2]
             counter+=1
-    elif mesh.element_type == 'tet':
+    elif info == 'tet':
         counter = 0
         eps = np.array([
             [-1.,-1.,-1.],
@@ -240,7 +242,7 @@ def GetBasesAtNodes(C,Quadrature,info):
             gBasisy[:,counter] = dummy[:,1]
             gBasisz[:,counter] = dummy[:,2]
             counter+=1
-    elif mesh.element_type == 'tri':
+    elif info == 'tri':
         eps = np.array([
             [-1.,-1.],
             [1.,-1.],
@@ -260,6 +262,13 @@ def GetBasesAtNodes(C,Quadrature,info):
         Bases = Basis
         gBasesx = gBasisx
         gBasesy = gBasisy
-        gBasesz = np.zeros(gBasisx.shape)
+        w = np.ones(eps.shape[0])
+
+    if info == "hex" or info == "tet":
+        Domain.gBasesz = gBasisz
+    elif info == "tri" or info == "quad":
+        Domain.gBasesz = np.zeros_like(gBasisx)
+
+    return Domain
 
             
