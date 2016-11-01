@@ -162,44 +162,6 @@ def PreProcess(MainData, formulation, mesh, material, fem_solver, Pr, pwd):
 
 
 
-
-
-    # # COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR ALL ELEMENTAL INTEGRATON
-    # ############################################################################
-    # # FOR DISPLACEMENT-BASED FORMULATIONS (GRADIENT-GRADIENT) WE NEED (P-1)+(P-1) TO EXACTLY
-    # # INTEGRATE THE INTEGRANDS
-    # QuadratureOpt = 3   # OPTION FOR QUADRATURE TECHNIQUE FOR TRIS AND TETS
-    # norder = MainData.C+MainData.C
-    # if norder == 0:
-    #     # TAKE CARE OF C=0 CASE
-    #     norder = 1
-    # # GET QUADRATURE
-    # quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder, mesh_type=mesh.element_type)
-    # # MainData.quadrature = quadrature
-    # function_space = FunctionSpace(mesh, quadrature, p=MainData.C+1)
-    # # MainData.Domain, MainData.Boundary = function_space, function_space.Boundary
-
-    # # COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR POST-PROCESSING
-    # # E.G. FOR COMPUTATION OF SCALED JACOBIAN. NOTE THAT THIS SHOULD ONLY BE USED FOR POST PROCESSING
-    # # FOR ELEMENTAL INTEGRATION ALWAYS USE DOMIAN, BOUNDARY AND QUADRATURE AND NOT POSTDOMAIN, 
-    # # POSTBOUNDARY ETC
-    # # FOR SCALED JACOBIAN WE NEED QUADRATURE FOR P*P 
-    # norder_post = (MainData.C+1)+(MainData.C+1)
-    # post_quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder_post, mesh_type=mesh.element_type)
-
-    # post_function_space = FunctionSpace(mesh, post_quadrature, p=MainData.C+1)
-    # # MainData.PostDomain, MainData.PostBoundary = function_space, function_space.Boundary
-    # # MainData.post_quadrature = post_quadrature
-
-    # quadrature_rules = (quadrature,post_quadrature)
-    # function_spaces = (function_space,post_function_space)
-    # #############################################################################
-
-
-
-
-    #############################################################################
-                            # MATERIAL MODEL PRE-PROCESS
     #############################################################################
     #############################################################################
 
@@ -222,16 +184,5 @@ def PreProcess(MainData, formulation, mesh, material, fem_solver, Pr, pwd):
     #############################################################################
     MainData.IsSymmetricityComputed = False
 
-
-    # # DICTIONARY OF SAVED VARIABLES
-    # #############################################################################
-    # if MainData.write == 1:
-    #     MainData.MainDict = {'ProblemPath': MainData.Path.ProblemResults, 
-    #      'MeshPoints':mesh.points, 'MeshElements':mesh.elements, 'MeshFaces':mesh.faces, 'MeshEdges':mesh.edges,
-    #      'Solution':[], 'DeformationGradient':[], 'CauchyStress':[],
-    #      'SecondPiolaStress':[], 'ElectricField':[], 'ElectricDisplacement':[]}
-
-    # #############################################################################
-
-
-    return quadrature_rules, function_spaces
+    # return quadrature_rules, function_spaces
+    return 

@@ -1937,6 +1937,51 @@ class Mesh(object):
         return self.points.shape[1]
 
 
+    def GetLinearMesh(self):
+        """Returns the linear mesh from a high order mesh. If mesh is already linear returns the same mesh.
+            For safety purposes, always makes a copy"""
+
+        assert self.elements is not None
+        assert self.points is not None
+
+        ndim = self.InferSpatialDimension()
+        if ndim==2:
+            assert self.edges is not None
+        elif ndim==3:
+            assert self.faces is not None
+
+
+        lmesh = Mesh()
+        lmesh.element_type = self.element_type
+        lmesh.degree = 1
+        if self.IsHighOrder is False:
+            return lmesh
+        else:
+            if self.element_type == "tri":
+                lmesh.elements = np.copy(self.elements[:,:3])
+                lmesh.edges = np.copy(self.edges[:,:2])
+                lmesh.nnode = int(np.max(lmesh.elements)+1)
+                lmesh.points = np.copy(self.points[:lmesh.nnode,:])
+            elif self.element_type == "tet":
+                lmesh.elements = np.copy(self.elements[:,:4])
+                lmesh.faces = np.copy(self.facs[:,:3])
+                lmesh.nnode = int(np.max(lmesh.elements)+1)
+                lmesh.points = np.copy(self.points[:lmesh.nnode,:])
+            elif self.element_type == "quad":
+                lmesh.elements = np.copy(self.elements[:,:4])
+                lmesh.edges = np.copy(self.edges[:,:2])
+                lmesh.nnode = int(np.max(lmesh.elements)+1)
+                lmesh.points = np.copy(self.points[:lmesh.nnode,:])
+            elif self.element_type == "hex":
+                lmesh.elements = np.copy(self.elements[:,:8])
+                lmesh.faces = np.copy(self.faces[:,:2])
+                lmesh.nnode = int(np.max(lmesh.elements)+1)
+                lmesh.points = np.copy(self.points[:lmesh.nnode,:])
+
+        return lmesh
+
+
+
 
 
     def BoundaryEdgesfromPhysicalParametrisation(self,points,facets,mesh_points,mesh_edges):

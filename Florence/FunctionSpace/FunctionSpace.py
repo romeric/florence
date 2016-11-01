@@ -21,13 +21,13 @@ class FunctionSpace(object):
         """
     
         # from Florence import QuadratureRule
-        from Florence.FunctionSpace.GetBases import GetBases, GetBases3D, GetBasesBoundary
+        from Florence.FunctionSpace.GetBases import GetBases, GetBases3D, GetBasesBoundary, GetBasesAtNodes
         
 
         QuadratureOpt=3
         norder=5
 
-        ndim = mesh.points.shape[1]
+        ndim = mesh.InferSpatialDimension()
         C = p - 1
         if mesh.InferPolynomialDegree() - 1 != C:
             raise ValueError("Function space of the polynomial does not match element type")
