@@ -177,7 +177,11 @@ class LinearSolver(object):
                 if A.dtype != np.float64:
                     A = A.astype(np.float64)
 
+                # print(np.linalg.norm(b))
+                # print (A.todense()[:3,:3])
                 sol = spsolve(A,b,permc_spec='MMD_AT_PLUS_A',use_umfpack=True)
+                # print(sol)
+                # print(np.linalg.norm(sol))
 
             elif self.solver_subtype=='mumps' and self.has_mumps:
                 # CALL JULIA'S MUMPS WRAPPER

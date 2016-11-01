@@ -2,6 +2,7 @@ import numpy as np
 import numpy.linalg as la
 import gc
 from warnings import warn
+from Florence import QuadratureRule, FunctionSpace
 from Florence.Base import JacobianError, IllConditionedError
 
 # import Florence.FunctionSpace.TwoDimensional.Quad.QuadLagrangeGaussLobatto as TwoD
@@ -12,8 +13,6 @@ from Florence.FunctionSpace import HexLagrangeGaussLobatto as ThreeD
 # import Core.FunctionSpace.TwoDimensional.Tri.hpModal as Tri 
 # import Core.FunctionSpace.ThreeDimensional.Tetrahedral.hpModal as Tet 
 # Nodal Bases
-# import Florence.FunctionSpace.TwoDimensional.Tri.hpNodal as Tri 
-# import Florence.FunctionSpace.ThreeDimensional.Tetrahedral.hpNodal as Tet 
 from Florence.FunctionSpace import Tri
 from Florence.FunctionSpace import Tet
 
@@ -64,6 +63,15 @@ class PostProcess(object):
         self.analysis_type = analysis_type
         self.analysis_nature = analysis_nature
 
+    def SetFormulation(self,formulation):
+        self.formulation = formulation
+
+    def SetMaterial(self,material):
+        self.material = material
+
+    def SetFEMSolver(self,fem_solver):
+        self.fem_solver = fem_solver
+
     def SetAnisotropicOrientations(self,Directions):
         self.directions = Directions
 
@@ -94,95 +102,114 @@ class PostProcess(object):
         return dU
 
 
-    @staticmethod
-    def StressRecovery(MainData,mesh,TotalDisp):
+    def StressRecovery(self):
 
-        # KEEP THE IMPORTS LOCAL AS MATPLOTLIB IMPORT IS SLOW
-        import matplotlib.pyplot as plt
-        from scipy import io 
+        if self.mesh is None:
+            raise ValueError("Mesh not set for post-processing")
+        if self.sol is None:
+            raise ValueError("Solution not set for post-processing")
 
-        C = MainData.C
-        nvar = MainData.nvar
-        ndim = MainData.ndim
-        LoadIncrement = MainData.AssemblyParameters.LoadIncrements
-        w = MainData.Quadrature.weights
-        z = MainData.Quadrature.points
-
-        ns=[]; Basis=[]; gBasisx=[]; gBasisy=[]; gBasisz=[]
-        if mesh.element_type=='hex':
-            ns = (C+2)**ndim
-            # GET THE BASES AT NODES INSTEAD OF GAUSS POINTS
-            Basis = np.zeros((ns,w.shape[0]**ndim))
-            gBasisx = np.zeros((ns,w.shape[0]**ndim))
-            gBasisy = np.zeros((ns,w.shape[0]**ndim))
-            gBasisz = np.zeros((ns,w.shape[0]**ndim))
-        elif mesh.element_type=='tet':
-            p=C+1
-            ns = (p+1)*(p+2)*(p+3)/6
-            # GET BASES AT NODES INSTEAD OF GAUSS POINTS
-            # BE CAREFUL TAHT 4 STANDS FOR 4 VERTEX NODES (FOR HIGHER C CHECK THIS)
-            Basis = np.zeros((ns,4))
-            gBasisx = np.zeros((ns,4))
-            gBasisy = np.zeros((ns,4))
-            gBasisz = np.zeros((ns,4))
-        elif mesh.element_type =='tri':
-            p=C+1
-            ns = (p+1)*(p+2)/2
-            # GET BASES AT NODES INSTEAD OF GAUSS POINTS
-            # BE CAREFUL TAHT 3 STANDS FOR 3 VERTEX NODES (FOR HIGHER C CHECK THIS)
-            Basis = np.zeros((ns,3))
-            gBasisx = np.zeros((ns,3))
-            gBasisy = np.zeros((ns,3))
+        mesh = self.mesh
 
 
-        eps=[]
-        if mesh.element_type == 'hex':
-            counter = 0
-            eps = ThreeD.LagrangeGaussLobatto(C,0,0,0)[1]
-            for i in range(0,eps.shape[0]):
-                ndummy = ThreeD.LagrangeGaussLobatto(C,eps[i,0],eps[i,1],eps[i,2],arrange=1)[0]
-                Basis[:,counter] = ndummy[:,0]
-                dummy = ThreeD.GradLagrangeGaussLobatto(C,eps[i,0],eps[i,1],eps[i,2],arrange=1)
-                gBasisx[:,counter] = dummy[:,0]
-                gBasisy[:,counter] = dummy[:,1]
-                gBasisz[:,counter] = dummy[:,2]
-                counter+=1
-        elif mesh.element_type == 'tet':
-            counter = 0
-            eps = np.array([
-                [-1.,-1.,-1.],
-                [1.,-1.,-1.],
-                [-1.,1.,-1.],
-                [-1.,-1.,1.]
-                ])
-            for i in range(0,eps.shape[0]):
-                ndummy, dummy = Tet.hpBases(C,eps[i,0],eps[i,1],eps[i,2],1,1)
-                ndummy = ndummy.reshape(ndummy.shape[0],1)
-                Basis[:,counter] = ndummy[:,0]
-                gBasisx[:,counter] = dummy[:,0]
-                gBasisy[:,counter] = dummy[:,1]
-                gBasisz[:,counter] = dummy[:,2]
-                counter+=1
-        elif mesh.element_type == 'tri':
-            eps = np.array([
-                [-1.,-1.],
-                [1.,-1.],
-                [-1.,1.]
-                ])
-            for i in range(0,eps.shape[0]):
-                ndummy, dummy = Tri.hpBases(C,eps[i,0],eps[i,1],1,1)
-                ndummy = ndummy.reshape(ndummy.shape[0],1)
-                Basis[:,i] = ndummy[:,0]
-                gBasisx[:,i] = dummy[:,0]
-                gBasisy[:,i] = dummy[:,1]
+        # GET THE UNDERLYING LINEAR MESH
+        lmesh = mesh.GetLinearMesh()
 
-        # elements = mesh.elements[:,:eps.shape[0]]
-        # points = mesh.points[:np.max(elements),:]
-        # TotalDisp = TotalDisp[:np.max(elements),:,:]  # BECAREFUL TOTALDISP IS CHANGING HERE
+         # GET QUADRATURE
+        norder = 2
+        quadrature = QuadratureRule(optimal=optimal_quadrature, norder=norder, mesh_type=mesh.element_type)
+        function_space = FunctionSpace(mesh, quadrature, p=1)
+        # function_space = FunctionSpace(mesh,quadrature_rules) 
+        exit()
+
+        # formulation = self.formulation
+        # quadrature_rules = formulation.quadrature_rules
+        
+
+        C = mesh.InferPolynomialDegree() - 1
+        ndim = mesh.InferSpatialDimension()
+        w = quadrature_rules[0].weights
+        z = quadrature_rules[0].points
+
+        # ns=[]; Basis=[]; gBasisx=[]; gBasisy=[]; gBasisz=[]
+        # if mesh.element_type=='hex' or mesh.element_type == "quad":
+        #     ns = (C+2)**ndim
+        #     # GET THE BASES AT NODES INSTEAD OF GAUSS POINTS
+        #     Basis = np.zeros((ns,w.shape[0]**ndim))
+        #     gBasisx = np.zeros((ns,w.shape[0]**ndim))
+        #     gBasisy = np.zeros((ns,w.shape[0]**ndim))
+        #     gBasisz = np.zeros((ns,w.shape[0]**ndim))
+        # elif mesh.element_type=='tet':
+        #     p=C+1
+        #     ns = (p+1)*(p+2)*(p+3)/6
+        #     # GET BASES AT NODES INSTEAD OF GAUSS POINTS
+        #     # BE CAREFUL TAHT 4 STANDS FOR 4 VERTEX NODES (FOR HIGHER C CHECK THIS)
+        #     Basis = np.zeros((ns,4))
+        #     gBasisx = np.zeros((ns,4))
+        #     gBasisy = np.zeros((ns,4))
+        #     gBasisz = np.zeros((ns,4))
+        # elif mesh.element_type =='tri':
+        #     p=C+1
+        #     ns = (p+1)*(p+2)/2
+        #     # GET BASES AT NODES INSTEAD OF GAUSS POINTS
+        #     # BE CAREFUL TAHT 3 STANDS FOR 3 VERTEX NODES (FOR HIGHER C CHECK THIS)
+        #     Basis = np.zeros((ns,3))
+        #     gBasisx = np.zeros((ns,3))
+        #     gBasisy = np.zeros((ns,3))
+
+
+        # eps=[]
+        # if mesh.element_type == 'hex':
+        #     counter = 0
+        #     eps = ThreeD.LagrangeGaussLobatto(C,0,0,0)[1]
+        #     for i in range(0,eps.shape[0]):
+        #         ndummy = ThreeD.LagrangeGaussLobatto(C,eps[i,0],eps[i,1],eps[i,2],arrange=1)[0]
+        #         Basis[:,counter] = ndummy[:,0]
+        #         dummy = ThreeD.GradLagrangeGaussLobatto(C,eps[i,0],eps[i,1],eps[i,2],arrange=1)
+        #         gBasisx[:,counter] = dummy[:,0]
+        #         gBasisy[:,counter] = dummy[:,1]
+        #         gBasisz[:,counter] = dummy[:,2]
+        #         counter+=1
+        # elif mesh.element_type == 'tet':
+        #     counter = 0
+        #     eps = np.array([
+        #         [-1.,-1.,-1.],
+        #         [1.,-1.,-1.],
+        #         [-1.,1.,-1.],
+        #         [-1.,-1.,1.]
+        #         ])
+        #     for i in range(0,eps.shape[0]):
+        #         ndummy, dummy = Tet.hpBases(C,eps[i,0],eps[i,1],eps[i,2],1,1)
+        #         ndummy = ndummy.reshape(ndummy.shape[0],1)
+        #         Basis[:,counter] = ndummy[:,0]
+        #         gBasisx[:,counter] = dummy[:,0]
+        #         gBasisy[:,counter] = dummy[:,1]
+        #         gBasisz[:,counter] = dummy[:,2]
+        #         counter+=1
+        # elif mesh.element_type == 'tri':
+        #     eps = np.array([
+        #         [-1.,-1.],
+        #         [1.,-1.],
+        #         [-1.,1.]
+        #         ])
+        #     hpBases = Tri.hpNodal.hpBases
+        #     for i in range(0,eps.shape[0]):
+        #         ndummy, dummy = hpBases(C,eps[i,0],eps[i,1],1,1)
+        #         ndummy = ndummy.reshape(ndummy.shape[0],1)
+        #         Basis[:,i] = ndummy[:,0]
+        #         gBasisx[:,i] = dummy[:,0]
+        #         gBasisy[:,i] = dummy[:,1]
+
+
+
+    
         elements = mesh.elements
         points = mesh.points
         nelem = elements.shape[0]; npoint = points.shape[0]
         nodeperelem = elements.shape[1]
+        LoadIncrement = self.fem_solver.number_of_load_increments
+        requires_geometry_update = self.fem_solver.requires_geometry_update
+        TotalDisp = self.sol
 
 
         # FOR AVERAGING SECONDARY VARIABLES AT NODES WE NEED TO KNOW WHICH ELEMENTS SHARE THE SAME NODES
@@ -197,11 +224,12 @@ class PostProcess(object):
                 shared_elements[inode,i] = shared_elems[i]
                 position[inode,i] = pos[i]
 
-        MainData.MainDict['CauchyStress'] = np.zeros((ndim,ndim,npoint,LoadIncrement))
-        MainData.MainDict['DeformationGradient'] = np.zeros((ndim,ndim,npoint,LoadIncrement))
-        MainData.MainDict['ElectricField'] = np.zeros((ndim,1,npoint,LoadIncrement))
-        MainData.MainDict['ElectricDisplacement'] = np.zeros((ndim,1,npoint,LoadIncrement))
-        MainData.MainDict['SmallStrain'] = np.zeros((ndim,ndim,npoint,LoadIncrement))
+        MainDict = {}
+        MainDict['CauchyStress'] = np.zeros((ndim,ndim,npoint,LoadIncrement))
+        MainDict['DeformationGradient'] = np.zeros((ndim,ndim,npoint,LoadIncrement))
+        MainDict['ElectricField'] = np.zeros((ndim,1,npoint,LoadIncrement))
+        MainDict['ElectricDisplacement'] = np.zeros((ndim,1,npoint,LoadIncrement))
+        MainDict['SmallStrain'] = np.zeros((ndim,ndim,npoint,LoadIncrement))
         CauchyStressTensor = np.zeros((ndim,ndim,nodeperelem,nelem))
         ElectricFieldx = np.zeros((ndim,1,nodeperelem,nelem))
         ElectricDisplacementx = np.zeros((ndim,1,nodeperelem,nelem))
@@ -222,7 +250,7 @@ class PostProcess(object):
                 # LOOP OVER ELEMENTS
                 for g in range(0,eps.shape[0]):
                     # GRADIENT TENSOR IN PARENT ELEMENT [\nabla_\varepsilon (N)]
-                    Jm = np.zeros((ndim,MainData.Domain.Bases.shape[0]))    
+                    Jm = np.zeros((ndim,self.domain_bases.Bases.shape[0]))    
                     if ndim==3:
                         Jm[0,:] = gBasisx[:,g]
                         Jm[1,:] = gBasisy[:,g]
@@ -238,7 +266,7 @@ class PostProcess(object):
                     # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
                     F[:,:,g,elem] = np.dot(EulerElemCoords.T,MaterialGradient.T)
                     # UPDATE/NO-UPDATE GEOMETRY
-                    if MainData.GeometryUpdate:
+                    if requires_geometry_update:
                         # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
                         ParentGradientx=np.dot(Jm,EulerElemCoords)
                         # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
@@ -246,27 +274,30 @@ class PostProcess(object):
                     else:
                         SpatialGradient = MaterialGradient.T
 
-                    if MainData.Fields == 'ElectroMechanics':
+                    if self.formulation.fields == "electro_mechanics":
                         # SPATIAL ELECTRIC FIELD
                         ElectricFieldx[:,:,g,elem] = - np.dot(SpatialGradient.T,ElectricPotentialElem)
                         # COMPUTE SPATIAL ELECTRIC DISPLACEMENT
-                        ElectricDisplacementx[:,:,g,elem] = MainData.ElectricDisplacementx(MaterialArgs,
+                        ElectricDisplacementx[:,:,g,elem] = self.material.ElectricDisplacementx(MaterialArgs,
                             StrainTensors,ElectricFieldx[:,:,g,elem])
 
                     # Compute remaining kinematic/deformation measures
-                    # StrainTensors = KinematicMeasures(F[:,:,g,elem])
-                    StrainTensors = KinematicMeasures_NonVectorised(F[:,:,g,elem],MainData.AnalysisType,
-                        MainData.Domain.AllGauss.shape[0])
-                    if MainData.GeometryUpdate is False:
+                    # StrainTensors = KinematicMeasures(F[:,:,g,elem],self.analysis_nature)
+                    StrainTensors = KinematicMeasures(F[:,:,:,elem],self.analysis_nature)
+                    print(StrainTensors)
+                    exit()
+                    # StrainTensors = KinematicMeasures_NonVectorised(F[:,:,g,elem],self.analysis_nature,
+                        # self.domain_bases.AllGauss.shape[0])
+                    if self.analysis_nature=="linear":
                         strain[:,:,g,elem] = StrainTensors['strain'][g]
 
                     # COMPUTE CAUCHY STRESS TENSOR
-                    if MainData.Prestress:
-                        CauchyStressTensor[:,:,g,elem]= MainData.CauchyStress(MainData.MaterialArgs,
-                            StrainTensors,ElectricFieldx[:,:,g,elem])[0] 
+                    if self.fem_solver.has_prestress:
+                        CauchyStressTensor[:,:,g,elem]= self.material.CauchyStress(StrainTensors,
+                            ElectricFieldx[:,:,g,elem])[0] 
                     else:
-                        CauchyStressTensor[:,:,g,elem] = MainData.CauchyStress(MainData.MaterialArgs,
-                            StrainTensors,ElectricFieldx[:,:,g,elem])
+                        CauchyStressTensor[:,:,g,elem] = self.material.CauchyStress(StrainTensors,
+                            ElectricFieldx[:,:,g,elem])
                     
 
 
@@ -280,43 +311,50 @@ class PostProcess(object):
                     myrange = np.linspace(0,elements.shape[1]-1,elements.shape[1])
 
                 for j in myrange:
-                    MainData.MainDict['DeformationGradient'][:,:,inode,Increment] += \
+                    MainDict['DeformationGradient'][:,:,inode,Increment] += \
                         F[:,:,position[inode,j],shared_elements[inode,j]]
-                    MainData.MainDict['CauchyStress'][:,:,inode,Increment] += \
+                    MainDict['CauchyStress'][:,:,inode,Increment] += \
                         CauchyStressTensor[:,:,position[inode,j],shared_elements[inode,j]]
-                    MainData.MainDict['ElectricField'][:,:,inode,Increment] += \
+                    MainDict['ElectricField'][:,:,inode,Increment] += \
                         ElectricFieldx[:,:,position[inode,j],shared_elements[inode,j]]
-                    MainData.MainDict['ElectricDisplacement'][:,:,inode,Increment] += \
+                    MainDict['ElectricDisplacement'][:,:,inode,Increment] += \
                         ElectricDisplacementx[:,:,position[inode,j],shared_elements[inode,j]]
-                    if ~MainData.GeometryUpdate:
-                        MainData.MainDict['SmallStrain'][:,:,inode,Increment] += \
+                    if ~requires_geometry_update:
+                        MainDict['SmallStrain'][:,:,inode,Increment] += \
                             strain[:,:,position[inode,j],shared_elements[inode,j]] 
 
-                MainData.MainDict['DeformationGradient'][:,:,inode,Increment] = \
-                    MainData.MainDict['DeformationGradient'][:,:,inode,Increment]/(1.0*len(myrange))
-                MainData.MainDict['CauchyStress'][:,:,inode,Increment] = \
-                    MainData.MainDict['CauchyStress'][:,:,inode,Increment]/(1.0*len(myrange))
-                MainData.MainDict['ElectricField'][:,:,inode,Increment] = \
-                MainData.MainDict['ElectricField'][:,:,inode,Increment]/(1.0*len(myrange))
-                MainData.MainDict['ElectricDisplacement'][:,:,inode,Increment] = \
-                MainData.MainDict['ElectricDisplacement'][:,:,inode,Increment]/(1.0*len(myrange))
-                if ~MainData.GeometryUpdate:
-                        MainData.MainDict['SmallStrain'][:,:,inode,Increment] = \
-                            MainData.MainDict['SmallStrain'][:,:,inode,Increment]/(1.0*len(myrange))
+                MainDict['DeformationGradient'][:,:,inode,Increment] = \
+                    MainDict['DeformationGradient'][:,:,inode,Increment]/(1.0*len(myrange))
+                MainDict['CauchyStress'][:,:,inode,Increment] = \
+                    MainDict['CauchyStress'][:,:,inode,Increment]/(1.0*len(myrange))
+                MainDict['ElectricField'][:,:,inode,Increment] = \
+                MainDict['ElectricField'][:,:,inode,Increment]/(1.0*len(myrange))
+                MainDict['ElectricDisplacement'][:,:,inode,Increment] = \
+                MainDict['ElectricDisplacement'][:,:,inode,Increment]/(1.0*len(myrange))
+                if ~requires_geometry_update:
+                        MainDict['SmallStrain'][:,:,inode,Increment] = \
+                            MainDict['SmallStrain'][:,:,inode,Increment]/(1.0*len(myrange))
 
 
         # FOR PLOTTING PURPOSES ONLY COMPUTE THE EXTERIOR SOLUTION
         if C>0:
             ns_0 = np.max(elements[:,:eps.shape[0]]) + 1
-            MainData.MainDict['DeformationGradient'] = MainData.MainDict['DeformationGradient'][:,:,:ns_0,:]
-            MainData.MainDict['CauchyStress'] = MainData.MainDict['CauchyStress'][:,:,:ns_0,:]
-            if ~MainData.GeometryUpdate:
-                MainData.MainDict['SmallStrain'] = MainData.MainDict['SmallStrain'][:,:,:ns_0,:]
-            if MainData.Fields == 'ElectroMechanics':
-                MainData.MainDict['ElectricField'] = MainData.MainDict['ElectricField'][:,:,:ns_0,:]
-                MainData.MainDict['ElectricDisplacement'] = MainData.MainDict['ElectricDisplacement'][:,:,:ns_0,:]
+            MainDict['DeformationGradient'] = MainDict['DeformationGradient'][:,:,:ns_0,:]
+            MainDict['CauchyStress'] = MainDict['CauchyStress'][:,:,:ns_0,:]
+            if ~requires_geometry_update:
+                MainDict['SmallStrain'] = MainDict['SmallStrain'][:,:,:ns_0,:]
+            if self.formulation.fields == "electro_mechanics":
+                MainDict['ElectricField'] = MainDict['ElectricField'][:,:,:ns_0,:]
+                MainDict['ElectricDisplacement'] = MainDict['ElectricDisplacement'][:,:,:ns_0,:]
 
 
+
+        exit()
+        #-----------------------------------------------------------------------------------------------------------#
+        #-----------------------------------------------------------------------------------------------------------#
+        # KEEP THE IMPORTS LOCAL AS MATPLOTLIB IMPORT IS SLOW
+        import matplotlib.pyplot as plt
+        from scipy import io 
         # NEWTON-RAPHSON CONVERGENCE PLOT
         if MainData.nrplot[0]:
             if MainData.nrplot[1] == 'first':
@@ -533,15 +571,15 @@ class PostProcess(object):
                 plt.tricontourf(mesh.points[:,0]+sol[:,0,-1], mesh.points[:,1]+sol[:,1,-1], 
                     mesh.elements, sol[:,quantity,-1],cmap=cm.viridis)
                 if plot_points:
-                    plt.plot(self.mesh.points[:,0]+self.sol[:,0,4], self.mesh.points[:,1]+self.sol[:,1,4],'ko')
+                    plt.plot(self.mesh.points[:,0]+self.sol[:,0,-1], self.mesh.points[:,1]+self.sol[:,1,-1],'ko')
 
 
-            if colorbar is True:
-                ax_cbar = mpl.colorbar.make_axes(plt.gca(), shrink=0.8)[0]
-                cbar = mpl.colorbar.ColorbarBase(ax_cbar, cmap=cm.viridis)
+            # if colorbar is True:
+            #     ax_cbar = mpl.colorbar.make_axes(plt.gca(), shrink=0.8)[0]
+            #     cbar = mpl.colorbar.ColorbarBase(ax_cbar, cmap=cm.viridis)
             
-            if axis_type == "equal":
-                plt.axis(axis_type)
+            # if axis_type == "equal":
+            #     plt.axis(axis_type)
             plt.show()
 
 

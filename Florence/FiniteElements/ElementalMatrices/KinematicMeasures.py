@@ -1,12 +1,12 @@
 import numpy as np
 
-def KinematicMeasures(F,AnalysisType):
+def KinematicMeasures(F,analysis_nature):
     """Computes the kinematic measures at all Gauss points for a given element.
 
     input:
 
         F:                  [ndarray (nofGauss x ndim x ndim)] Deformation gradient tensor evaluated at all integration points
-        AnalysisType:       [str] type of analysis i.e. linear or non-linear 
+        analysis_nature:       [str] type of analysis i.e. linear or non-linear 
 
 
     returns:
@@ -21,7 +21,7 @@ def KinematicMeasures(F,AnalysisType):
     'I':np.eye(F.shape[1],F.shape[1],dtype=np.float64)}
 
 
-    # if AnalysisType == 'Nonlinear':
+    # if analysis_nature == 'Nonlinear':
     #   # ADDITIONAL POLYCONVEX MEASURES - ACTIVATE IF NECESSARY
     #   # StrainTensors['H'] = np.einsum('i,ijk->ijk',StrainTensors['J'],np.einsum('ikj',np.linalg.inv(StrainTensors['F'])))
     #   # StrainTensors['g'] = np.einsum('ijk,ilk->ijl',StrainTensors['H'],StrainTensors['H'])
@@ -31,7 +31,7 @@ def KinematicMeasures(F,AnalysisType):
     #   pass
 
 
-    if AnalysisType=='linear':
+    if analysis_nature=='linear':
         # LINEARISED KINEMATICS
         # MATERIAL GRADIENT OF DISPLACEMENT
         StrainTensors['Gradu'] = F - StrainTensors['I']
