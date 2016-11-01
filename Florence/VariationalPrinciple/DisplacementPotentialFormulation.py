@@ -160,11 +160,6 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
             # INTEGRATE STIFFNESS
             stiffness += BDB_1*detJ[counter]
 
-        # from Florence.Tensor import makezero
-        # makezero(stiffness)
-        # print(stiffness[:4,:4])
-        # exit()
-
         return stiffness, tractionforce 
 
 

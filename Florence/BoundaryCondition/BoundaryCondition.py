@@ -754,15 +754,10 @@ class BoundaryCondition(object):
         # APPLY DIRICHLET BOUNDARY CONDITIONS
         for i in range(0,self.columns_out.shape[0]):
             F = F - AppliedDirichlet[i]*stiffness.getcol(self.columns_out[i])
-            # print(AppliedDirichlet[i]*stiffness.getcol(self.columns_out[i]))
 
-
-        # for i in range(0,self.columns_out.shape[0]):
-            # self.dirichlet_forces = self.dirichlet_forces - AppliedDirichlet[i]*stiffness.getcol(self.columns_out[i])
 
         # GET REDUCED FORCE VECTOR
         F_b = F[self.columns_in,0]
-        # F_b = self.dirichlet_forces[self.columns_in,0]
 
         # print int(sp.__version__.split('.')[1] )
         # FOR UMFPACK SOLVER TAKE SPECIAL CARE
@@ -781,8 +776,34 @@ class BoundaryCondition(object):
             mass = mass[self.columns_in,:][:,self.columns_in]
             return stiffness_b, F_b, F, mass_b
 
-        # print(np.linalg.norm(F_b))
         return stiffness_b, F_b, F
+
+
+    def UpdateFixDoFs(self, AppliedDirichletInc, fsize, nvar):
+        """Updates the geometry (DoFs) with incremental Dirichlet boundary conditions 
+            for fixed/constrained degrees of freedom only. Needs to be applied per time steps"""
+
+        # GET TOTAL SOLUTION
+        TotalSol = np.zeros((fsize,1))
+        TotalSol[self.columns_out,0] = AppliedDirichletInc
+                
+        # RE-ORDER SOLUTION COMPONENTS
+        dU = TotalSol.reshape(TotalSol.shape[0]/nvar,nvar)
+
+        return dU
+
+    def UpdateFreeDoFs(self, sol, fsize, nvar):
+        """Updates the geometry with iterative solutions of Newton-Raphson 
+            for free degrees of freedom only. Needs to be applied per time NR iteration"""
+
+        # GET TOTAL SOLUTION
+        TotalSol = np.zeros((fsize,1))
+        TotalSol[self.columns_in,0] = sol
+        
+        # RE-ORDER SOLUTION COMPONENTS
+        dU = TotalSol.reshape(TotalSol.shape[0]/nvar,nvar)
+
+        return dU
 
 
 
