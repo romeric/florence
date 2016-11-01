@@ -118,13 +118,17 @@ class FEMSolver(object):
 
 
 
-    def __makeoutput__(self, mesh, TotalDisp, formulation, function_space):
+    def __makeoutput__(self, mesh, TotalDisp, formulation=None, function_spaces=None, material=None):
         post_process = PostProcess(formulation.ndim,formulation.nvar)
-        post_process.SetBases(postdomain=function_space, domain=None, boundary=None)
+        post_process.SetBases(postdomain=function_spaces[1], domain=function_spaces[0], boundary=None)
         post_process.SetAnalysis(analysis_type=self.analysis_type, 
             analysis_nature=self.analysis_nature)
         post_process.SetMesh(mesh)
         post_process.SetSolution(TotalDisp)
+        post_process.SetFormulation(formulation)
+        post_process.SetMaterial(material)
+        post_process.SetFEMSolver(self)
+
         if self.analysis_nature == "nonlinear" and self.compute_mesh_qualities:
             # COMPUTE QUALITY MEASURES
             self.ScaledJacobian=post_process.MeshQualityMeasures(mesh,TotalDisp,False,False)[3]
@@ -266,7 +270,7 @@ class FEMSolver(object):
         self.NRConvergence = ResidualNorm
 
         # return TotalDisp
-        return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces[1])
+        return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
 
 
     def IncrementalLinearElasticitySolver(self, function_spaces, formulation, mesh, material,
@@ -392,14 +396,18 @@ class FEMSolver(object):
             DirichletForces = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64)
             DirichletForces = boundary_condition.ApplyDirichletGetReducedMatrices(K,DirichletForces,
                 boundary_condition.applied_dirichlet)[2]
+            # print(boundary_condition.applied_dirichlet)
             # Residual = np.zeros_like(Residual)
             Residual -= LoadFactor*DirichletForces
+            # print(np.linalg.norm(DirichletForces[boundary_condition.columns_in]))
+            # print(np.linalg.norm(Residual[boundary_condition.columns_in]))
             # print(np.linalg.norm(K.todense()))
 
             # Residual -= (DeltaF + LoadFactor*DirichletForces)
             # Residual -= (DeltaF + LoadFactor*boundary_condition.dirichlet_forces)
-            AppliedDirichletInc += LoadFactor*boundary_condition.applied_dirichlet
-
+            # AppliedDirichletInc += LoadFactor*boundary_condition.applied_dirichlet
+            AppliedDirichletInc = LoadFactor*boundary_condition.applied_dirichlet
+            # print(AppliedDirichletInc)
 
             # CALL THE LINEAR/NONLINEAR SOLVER
             if self.analysis_nature == 'nonlinear':
@@ -411,7 +419,7 @@ class FEMSolver(object):
                 if Increment==0:
                     self.NormForces = np.linalg.norm(Residual[boundary_condition.columns_out])
 
-                TotalDisp, K = self.NewtonRaphson(function_spaces, formulation, solver, 
+                TotalDisp, K, Eulerx = self.NewtonRaphson(function_spaces, formulation, solver, 
                     Increment,K,NodalForces,Residual,ResidualNorm,mesh,TotalDisp,Eulerx,
                     material,boundary_condition,AppliedDirichletInc)
 
@@ -432,7 +440,8 @@ class FEMSolver(object):
                     solver.scaledAHH = np.NAN
                     break
 
-        return TotalDisp
+        # return TotalDisp
+        return Eulerx - mesh.points
 
 
     def NewtonRaphson(self, function_spaces, formulation, solver, 
@@ -455,10 +464,18 @@ class FEMSolver(object):
         post_process = PostProcess(formulation.ndim,formulation.nvar)
         post_process.SetAnalysis(self.analysis_type,self.analysis_nature)
 
+        IncDisplacement = post_process.TotalComponentSol(np.zeros_like(boundary_condition.columns_in),boundary_condition.columns_in,
+                boundary_condition.columns_out,AppliedDirichletInc,0,K.shape[0])
 
+        # Eulerx = mesh.points + IncDisplacement
+        Eulerx += IncDisplacement
+
+        # TotalDisp = []
         while np.abs(la.norm(Residual[boundary_condition.columns_in])/NormForces) > Tolerance:
             # APPLY INCREMENTAL DIRICHLET BOUNDARY CONDITIONS
             K_b, F_b = boundary_condition.GetReducedMatrices(K,Residual)[:2]
+            # print(np.linalg.norm(Residual[boundary_condition.columns_in]))
+            # print(np.linalg.norm(F_b))
 
             # SOLVE THE SYSTEM
             # # CHECK FOR THE CONDITION NUMBER OF THE SYSTEM
@@ -468,22 +485,37 @@ class FEMSolver(object):
             # print(np.linalg.norm(F_b))
             # print(np.linalg.norm(Eulerx),np.linalg.norm(mesh.points))
             sol = solver.Solve(K_b,-F_b)
+            # print(sol)
             # print(np.linalg.norm(sol))
+            # print(np.linalg.norm(F_b))
+            # print(K_b.todense()[:3,:3])
             # exit()
 
             # GET THE TOTAL SOLUTION AND ITS COMPONENTS SUCH AS UX, UY, UZ, PHI ETC
             dU = post_process.TotalComponentSol(sol,boundary_condition.columns_in,
-                boundary_condition.columns_out,AppliedDirichletInc,Iter,K.shape[0]) 
+                boundary_condition.columns_out,np.zeros_like(AppliedDirichletInc),Iter,K.shape[0]) 
+            # print(dU)
 
             # UPDATE THE FIELDS
             TotalDisp[:,:,Increment] += dU
+            # if Increment >0:
+            #     TotalDisp[:,:,Increment] = TotalDisp[:,:,Increment-1] + dU
+            # else:
+            #     TotalDisp[:,:,Increment] = dU
+
             # UPDATE THE GEOMETRY
-            Eulerx = mesh.points + TotalDisp[:,:formulation.ndim,Increment]            
+            # Eulerx = mesh.points + TotalDisp[:,:formulation.ndim,Increment]
+            # print(Eulerx)
+            Eulerx += dU
+            # print(TotalDisp[:,:formulation.ndim,Increment])    
+            # print(TotalDisp[:,:,Increment])        
             # UPDATE & SAVE ITERATION NUMBER
             # self.IterationNumber +=1
             # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES (BE CAREFUL ABOUT THE -1 INDEX IN HERE)
+            # K, TractionForces = self.Assemble(function_spaces[0], formulation, mesh, material, solver,
+            #     Eulerx,TotalDisp[:,formulation.nvar-1,Increment,None])[:2]
             K, TractionForces = self.Assemble(function_spaces[0], formulation, mesh, material, solver,
-                Eulerx,TotalDisp[:,formulation.nvar-1,Increment,None])[:2]
+                Eulerx,dU)[:2]
             # print(np.linalg.norm(K.todense()))
             # print(K.todense()[:3,:3])
             # exit()
@@ -520,7 +552,7 @@ class FEMSolver(object):
                 break
 
 
-        return TotalDisp, K
+        return TotalDisp, K, Eulerx
 
 
 

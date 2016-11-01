@@ -1,17 +1,13 @@
 import numpy as np 
 import os, sys, imp
 
-# import Florence.FunctionSpace.TwoDimensional.Quad.QuadLagrangeGaussLobatto as TwoD
-# import Florence.FunctionSpace.ThreeDimensional.Hexahedral.HexLagrangeGaussLobatto as ThreeD
+
 from Florence.FunctionSpace import QuadLagrangeGaussLobatto as TwoD
 from Florence.FunctionSpace import HexLagrangeGaussLobatto as ThreeD
 # Modal Bases
 # import Florence.InterpolationFunctions.TwoDimensional.Tri.hpModal as Tri 
 # import Florence.InterpolationFunctions.ThreeDimensional.Tetrahedral.hpModal as Tet 
 # Nodal Bases
-# import Florence.FunctionSpace.TwoDimensional.Tri.hpNodal as Tri 
-# import Florence.FunctionSpace.ThreeDimensional.Tetrahedral.hpNodal as Tet 
-
 from Florence.FunctionSpace import Tri
 from Florence.FunctionSpace import Tet
 
@@ -184,5 +180,86 @@ def GetBasesBoundary(C,z,ndim):
 
 
     return Boundary
+
+
+
+def GetBasesAtNodes(C,Quadrature,info):
+
+    ns=[]; Basis=[]; gBasisx=[]; gBasisy=[]; gBasisz=[]
+    if mesh.element_type=='hex' or mesh.element_type == "quad":
+        ns = (C+2)**ndim
+        # GET THE BASES AT NODES INSTEAD OF GAUSS POINTS
+        Basis = np.zeros((ns,w.shape[0]**ndim))
+        gBasisx = np.zeros((ns,w.shape[0]**ndim))
+        gBasisy = np.zeros((ns,w.shape[0]**ndim))
+        gBasisz = np.zeros((ns,w.shape[0]**ndim))
+    elif mesh.element_type=='tet':
+        p=C+1
+        ns = (p+1)*(p+2)*(p+3)/6
+        # GET BASES AT NODES INSTEAD OF GAUSS POINTS
+        # BE CAREFUL TAHT 4 STANDS FOR 4 VERTEX NODES (FOR HIGHER C CHECK THIS)
+        Basis = np.zeros((ns,4))
+        gBasisx = np.zeros((ns,4))
+        gBasisy = np.zeros((ns,4))
+        gBasisz = np.zeros((ns,4))
+    elif mesh.element_type =='tri':
+        p=C+1
+        ns = (p+1)*(p+2)/2
+        # GET BASES AT NODES INSTEAD OF GAUSS POINTS
+        # BE CAREFUL TAHT 3 STANDS FOR 3 VERTEX NODES (FOR HIGHER C CHECK THIS)
+        Basis = np.zeros((ns,3))
+        gBasisx = np.zeros((ns,3))
+        gBasisy = np.zeros((ns,3))
+
+
+    eps=[]
+    if mesh.element_type == 'hex':
+        counter = 0
+        eps = ThreeD.LagrangeGaussLobatto(C,0,0,0)[1]
+        for i in range(0,eps.shape[0]):
+            ndummy = ThreeD.LagrangeGaussLobatto(C,eps[i,0],eps[i,1],eps[i,2],arrange=1)[0]
+            Basis[:,counter] = ndummy[:,0]
+            dummy = ThreeD.GradLagrangeGaussLobatto(C,eps[i,0],eps[i,1],eps[i,2],arrange=1)
+            gBasisx[:,counter] = dummy[:,0]
+            gBasisy[:,counter] = dummy[:,1]
+            gBasisz[:,counter] = dummy[:,2]
+            counter+=1
+    elif mesh.element_type == 'tet':
+        counter = 0
+        eps = np.array([
+            [-1.,-1.,-1.],
+            [1.,-1.,-1.],
+            [-1.,1.,-1.],
+            [-1.,-1.,1.]
+            ])
+        for i in range(0,eps.shape[0]):
+            ndummy, dummy = Tet.hpBases(C,eps[i,0],eps[i,1],eps[i,2],1,1)
+            ndummy = ndummy.reshape(ndummy.shape[0],1)
+            Basis[:,counter] = ndummy[:,0]
+            gBasisx[:,counter] = dummy[:,0]
+            gBasisy[:,counter] = dummy[:,1]
+            gBasisz[:,counter] = dummy[:,2]
+            counter+=1
+    elif mesh.element_type == 'tri':
+        eps = np.array([
+            [-1.,-1.],
+            [1.,-1.],
+            [-1.,1.]
+            ])
+        hpBases = Tri.hpNodal.hpBases
+        for i in range(0,eps.shape[0]):
+            ndummy, dummy = hpBases(C,eps[i,0],eps[i,1],1,1)
+            ndummy = ndummy.reshape(ndummy.shape[0],1)
+            Basis[:,i] = ndummy[:,0]
+            gBasisx[:,i] = dummy[:,0]
+            gBasisy[:,i] = dummy[:,1]
+
+
+
+    class Domain(object):
+        Bases = Basis
+        gBasesx = gBasisx
+        gBasesy = gBasisy
+        gBasesz = np.zeros(gBasisx.shape)
 
             
