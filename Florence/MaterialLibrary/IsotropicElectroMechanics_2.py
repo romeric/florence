@@ -33,6 +33,7 @@ class IsotropicElectroMechanics_2(Material):
         J = StrainTensors['J'][gcounter]
         b = StrainTensors['b'][gcounter]
         E = ElectricFieldx
+        # print(E.shape, b.shape, np.dot(b,ElectricFieldx).shape)
         be = np.dot(b,ElectricFieldx).reshape(self.ndim)
 
         # Elasticity
