@@ -11,19 +11,19 @@ from Florence.VariationalPrinciple import *
 def ProblemData(*args, **kwargs):
 
     ndim=2
-    p=2
+    p=1
 
     # material = IsotropicElectroMechanics_1(ndim,youngs_modulus=1.0,poissons_ratio=0.3, eps_1=1.0)
-    # material = MooneyRivlin(ndim,youngs_modulus=1.0,poissons_ratio=0.31)
+    material = MooneyRivlin(ndim,youngs_modulus=1000.0,poissons_ratio=0.3)
     # material = NeoHookean_2(ndim,youngs_modulus=1.0,poissons_ratio=0.3)
-    material = NeoHookean_2(ndim,lame_parameter_1=0.4,lame_parameter_2=0.6)
+    # material = NeoHookean_2(ndim,lame_parameter_1=0.4,lame_parameter_2=0.6)
     # print(material.mu, material.lamb)
     # print material.nvar
 
 
     mesh = Mesh()
     # mesh.Square(n=5)
-    mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,10),nx=10,ny=12)
+    mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,10),nx=10,ny=15)
     mesh.GetHighOrderMesh(p=p)
     # print mesh.points.shape[0], mesh.nelem
     # mesh.SimplePlot()
@@ -49,7 +49,7 @@ def ProblemData(*args, **kwargs):
         # Y_1 = np.where(mesh.points[:,1] == 1)[0]
         Y_1 = np.where(mesh.points[:,1] == 10)[0]
         # boundary_data[Y_1,0] = 0
-        boundary_data[Y_1,1] = 10
+        boundary_data[Y_1,1] = -6
         # boundary_data[Y_1,2] = 1
 
         # boundary_data[2::material.nvar,:] = 0
@@ -62,14 +62,14 @@ def ProblemData(*args, **kwargs):
     boundary_condition.dirichlet_flags = DirichletFunc(mesh)
     formulation = DisplacementFormulation(mesh)
 
-    fem_solver = FEMSolver(number_of_load_increments=2,analysis_type="static",
+    fem_solver = FEMSolver(number_of_load_increments=10,analysis_type="static",
         analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
         newton_raphson_tolerance=1.0e-05)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition)
 
-    exit()
+    # exit()
 
     # solution.StressRecovery()
     # qq = formulation.quadrature_rules[0]
@@ -80,9 +80,11 @@ def ProblemData(*args, **kwargs):
     # print solution.sol[:,:,-1]+mesh.points
     # solution.sol = solution.sol[:,:,None]
     # print solution.sol[:,:,-1]+mesh.points
-    solution.Plot(configuration="deformed", quantity=1)
     # solution.Animate(configuration="deformed")
-    solution.StressRecovery()
+    # solution.StressRecovery()
+    solution.WriteVTK("/home/roman/zzchecker/HHH", quantity=1)
+    # solution.Plot(configuration="deformed", quantity=1)
+    # exit()
 
 
 

@@ -10,6 +10,8 @@ from Florence.FunctionSpace import HexLagrangeGaussLobatto as ThreeD
 # Nodal Bases
 from Florence.FunctionSpace import Tri
 from Florence.FunctionSpace import Tet
+from Florence.QuadratureRules.FeketePointsTet import *
+from Florence.QuadratureRules.FeketePointsTri import *
 
 def GetBases(C,Quadrature,info, useLagrange = False):
 
@@ -191,27 +193,38 @@ def GetBasesAtNodes(C,Quadrature,info):
         w=2
         ns = (C+2)**ndim
         # GET THE BASES AT NODES INSTEAD OF GAUSS POINTS
-        Basis = np.zeros((ns,w.shape[0]**ndim))
-        gBasisx = np.zeros((ns,w.shape[0]**ndim))
-        gBasisy = np.zeros((ns,w.shape[0]**ndim))
-        gBasisz = np.zeros((ns,w.shape[0]**ndim))
+        # Basis = np.zeros((ns,w.shape[0]**ndim))
+        # gBasisx = np.zeros((ns,w.shape[0]**ndim))
+        # gBasisy = np.zeros((ns,w.shape[0]**ndim))
+        # gBasisz = np.zeros((ns,w.shape[0]**ndim))
+        Basis = np.zeros((ns,ns))
+        gBasisx = np.zeros((ns,ns))
+        gBasisy = np.zeros((ns,ns))
+        gBasisz = np.zeros((ns,ns))
     elif info =='tet':
         p=C+1
         ns = (p+1)*(p+2)*(p+3)/6
         # GET BASES AT NODES INSTEAD OF GAUSS POINTS
         # BE CAREFUL TAHT 4 STANDS FOR 4 VERTEX NODES (FOR HIGHER C CHECK THIS)
-        Basis = np.zeros((ns,4))
-        gBasisx = np.zeros((ns,4))
-        gBasisy = np.zeros((ns,4))
-        gBasisz = np.zeros((ns,4))
+        # Basis = np.zeros((ns,4))
+        # gBasisx = np.zeros((ns,4))
+        # gBasisy = np.zeros((ns,4))
+        # gBasisz = np.zeros((ns,4))
+        Basis = np.zeros((ns,ns))
+        gBasisx = np.zeros((ns,ns))
+        gBasisy = np.zeros((ns,ns))
+        gBasisz = np.zeros((ns,ns))
     elif info =='tri':
         p=C+1
         ns = (p+1)*(p+2)/2
         # GET BASES AT NODES INSTEAD OF GAUSS POINTS
         # BE CAREFUL TAHT 3 STANDS FOR 3 VERTEX NODES (FOR HIGHER C CHECK THIS)
-        Basis = np.zeros((ns,3))
-        gBasisx = np.zeros((ns,3))
-        gBasisy = np.zeros((ns,3))
+        # Basis = np.zeros((ns,3))
+        # gBasisx = np.zeros((ns,3))
+        # gBasisy = np.zeros((ns,3))
+        Basis = np.zeros((ns,ns))
+        gBasisx = np.zeros((ns,ns))
+        gBasisy = np.zeros((ns,ns))
 
 
     eps=[]
@@ -228,12 +241,13 @@ def GetBasesAtNodes(C,Quadrature,info):
             counter+=1
     elif info == 'tet':
         counter = 0
-        eps = np.array([
-            [-1.,-1.,-1.],
-            [1.,-1.,-1.],
-            [-1.,1.,-1.],
-            [-1.,-1.,1.]
-            ])
+        # eps = np.array([
+            # [-1.,-1.,-1.],
+            # [1.,-1.,-1.],
+            # [-1.,1.,-1.],
+            # [-1.,-1.,1.]
+            # ])
+        eps = FeketePointsTet(C)
         for i in range(0,eps.shape[0]):
             ndummy, dummy = Tet.hpBases(C,eps[i,0],eps[i,1],eps[i,2],1,1)
             ndummy = ndummy.reshape(ndummy.shape[0],1)
@@ -243,11 +257,12 @@ def GetBasesAtNodes(C,Quadrature,info):
             gBasisz[:,counter] = dummy[:,2]
             counter+=1
     elif info == 'tri':
-        eps = np.array([
-            [-1.,-1.],
-            [1.,-1.],
-            [-1.,1.]
-            ])
+        # eps = np.array([
+        #     [-1.,-1.],
+        #     [1.,-1.],
+        #     [-1.,1.]
+        #     ])
+        eps = FeketePointsTri(C)
         hpBases = Tri.hpNodal.hpBases
         for i in range(0,eps.shape[0]):
             ndummy, dummy = hpBases(C,eps[i,0],eps[i,1],1,1)
@@ -270,5 +285,3 @@ def GetBasesAtNodes(C,Quadrature,info):
         Domain.gBasesz = np.zeros_like(gBasisx)
 
     return Domain
-
-            
