@@ -193,8 +193,8 @@ class FEMSolver(object):
         ResidualNorm = { 'Increment_'+str(Increment) : [] for Increment in range(self.number_of_load_increments) }
         
         # ALLOCATE FOR SOLUTION FIELDS
-        # TotalDisp = np.zeros((mesh.points.shape[0],MainData.nvar,LoadIncrement),dtype=np.float64)
-        TotalDisp = np.zeros((mesh.points.shape[0],formulation.nvar,self.number_of_load_increments),dtype=np.float32)
+        # TotalDisp = np.zeros((mesh.points.shape[0],formulation.nvar,self.number_of_load_increments),dtype=np.float32)
+        TotalDisp = np.zeros((mesh.points.shape[0],formulation.nvar,self.number_of_load_increments),dtype=np.float64)
 
         # PRE-ASSEMBLY
         print('Assembling the system and acquiring neccessary information for the analysis...')
@@ -206,6 +206,7 @@ class FEMSolver(object):
         # ALLOCATE FOR GEOMETRY - GetDirichletBoundaryConditions CHANGES THE MESH 
         # SO EULERX SHOULD BE ALLOCATED AFTERWARDS 
         Eulerx = np.copy(mesh.points)
+        Eulerp = np.zeros((mesh.points.shape[0]))
 
         # GET EXTERNAL NODAL FORCES
         # boundary_condition.GetExternalForces(mesh,material)
@@ -234,7 +235,7 @@ class FEMSolver(object):
 
         # ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES
         K, TractionForces = self.Assemble(function_spaces[0], formulation, mesh, material, solver, 
-            Eulerx, np.zeros((mesh.points.shape[0],1),dtype=np.float64))[:2]
+            Eulerx, Eulerp)[:2]
 
         if self.analysis_nature == 'nonlinear':
             print('Finished all pre-processing stage. Time elapsed was', time()-tAssembly, 'seconds')
@@ -249,7 +250,7 @@ class FEMSolver(object):
         else:
             TotalDisp = self.StaticSolver(function_spaces, formulation, solver, 
                 K,NeumannForces,NodalForces,Residual,
-                ResidualNorm,mesh,TotalDisp,Eulerx,material, boundary_condition)
+                ResidualNorm,mesh,TotalDisp,Eulerx,Eulerp,material, boundary_condition)
 
         self.NRConvergence = ResidualNorm
 
@@ -353,7 +354,7 @@ class FEMSolver(object):
 
     def StaticSolver(self, function_spaces, formulation, solver, K,
             NeumannForces,NodalForces,Residual,
-            ResidualNorm,mesh,TotalDisp,Eulerx,material, boundary_condition):
+            ResidualNorm,mesh,TotalDisp,Eulerx,Eulerp,material, boundary_condition):
     
         LoadIncrement = self.number_of_load_increments
         LoadFactor = 1./LoadIncrement
@@ -385,10 +386,11 @@ class FEMSolver(object):
 
                 Eulerx = self.NewtonRaphson(function_spaces, formulation, solver, 
                     Increment,K,NodalForces,Residual,ResidualNorm,mesh,Eulerx,
-                    material,boundary_condition,AppliedDirichletInc)
+                    material,boundary_condition,AppliedDirichletInc,Eulerp)
 
                 # UPDATE DISPLACEMENTS FOR THE CURRENT LOAD INCREMENT
-                TotalDisp[:,:,Increment] = Eulerx - mesh.points
+                TotalDisp[:,:formulation.ndim,Increment] = Eulerx - mesh.points
+                TotalDisp[:,-1,Increment] = Eulerp
 
 
                 print('\nFinished Load increment', Increment, 'in', time()-t_increment, 'seconds')
@@ -411,7 +413,7 @@ class FEMSolver(object):
 
     def NewtonRaphson(self, function_spaces, formulation, solver, 
         Increment,K,NodalForces,Residual,ResidualNorm,mesh,Eulerx,material,
-        boundary_condition,AppliedDirichletInc):
+        boundary_condition,AppliedDirichletInc,Eulerp):
 
         Tolerance = self.newton_raphson_tolerance
         LoadIncrement = self.number_of_load_increments
@@ -425,10 +427,13 @@ class FEMSolver(object):
             NormForces = 1e-14
 
         # APPLY INCREMENTAL DIRICHLET PER LOAD STEP
-        IncDisplacement = boundary_condition.UpdateFixDoFs(AppliedDirichletInc,
+        IncDirichlet = boundary_condition.UpdateFixDoFs(AppliedDirichletInc,
             K.shape[0],formulation.nvar)
         # UPDATE EULERIAN COORDINATE
-        Eulerx += IncDisplacement
+        # Eulerx += IncDirichlet
+        Eulerx += IncDirichlet[:,:formulation.ndim]
+        Eulerp += IncDirichlet[:,-1]
+        # print(IncDisplacement.shape, Eulerx.shape)
 
         while np.abs(la.norm(Residual[boundary_condition.columns_in])/NormForces) > Tolerance:
             # GET THE REDUCED SYSTEM OF EQUATIONS
@@ -441,13 +446,15 @@ class FEMSolver(object):
             dU = boundary_condition.UpdateFreeDoFs(sol,K.shape[0],formulation.nvar) 
 
             # UPDATE THE GEOMETRY
-            Eulerx += dU
+            # Eulerx += dU
+            Eulerx += dU[:,:formulation.ndim]
+            Eulerp += dU[:,-1]
 
             # GET ITERATIVE ELECTRIC POTENTIAL
             TotalPot = np.zeros_like(dU) ####### FIX THIS FOR ELECTRO
             # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
             K, TractionForces = self.Assemble(function_spaces[0], formulation, mesh, material, solver,
-                Eulerx,TotalPot)[:2]
+                Eulerx,Eulerp)[:2]
             # FIND THE RESIDUAL
             Residual[boundary_condition.columns_in] = TractionForces[boundary_condition.columns_in] \
             - NodalForces[boundary_condition.columns_in]
@@ -478,14 +485,14 @@ class FEMSolver(object):
 
 
 
-    def Assemble(self, function_space, formulation, mesh, material, solver, Eulerx, TotalPot):
+    def Assemble(self, function_space, formulation, mesh, material, solver, Eulerx, Eulerp):
 
         if self.memory_model == "shared" or self.memory_model is None:
             if mesh.nelem <= 500000:
-                return self.AssemblySmall(function_space, formulation, mesh, material, Eulerx, TotalPot)
+                return self.AssemblySmall(function_space, formulation, mesh, material, Eulerx, Eulerp)
             elif mesh.nelem > 500000:
                 print("Larger than memory system. Dask on disk parallel assembly is turned on")
-                return self.OutofCoreAssembly(function_space,mesh,material,formulation,Eulerx,TotalPot)
+                return self.OutofCoreAssembly(function_space,mesh,material,formulation,Eulerx,Eulerp)
 
         elif self.memory_model == "distributed":
             # RUN THIS PROGRAM FROM SHELL WITH python RunSession.py INSTEAD
@@ -496,7 +503,7 @@ class FEMSolver(object):
             from time import time
             from Florence.Utils import par_unpickle
 
-            tmp_dir = par_unpickle(function_space,mesh,material,Eulerx,TotalPot)
+            tmp_dir = par_unpickle(function_space,mesh,material,Eulerx,Eulerp)
             pwd = os.path.dirname(os.path.realpath(__file__))
             distributed_caller = os.path.join(pwd,"DistributedAssembly.py")
 
@@ -516,7 +523,7 @@ class FEMSolver(object):
             return Dict['stiffness'], Dict['T'], Dict['F'], []
 
 
-    def AssemblySmall(self, function_space, formulation, mesh, material, Eulerx, TotalPot):
+    def AssemblySmall(self, function_space, formulation, mesh, material, Eulerx, Eulerp):
 
         # GET MESH DETAILS
         C = mesh.InferPolynomialDegree() - 1
@@ -548,10 +555,10 @@ class FEMSolver(object):
         if self.parallel:
             # COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
             # ParallelTuple = parmap.map(formulation.GetElementalMatrices,np.arange(0,nelem,dtype=np.int32),
-                # function_space, mesh, material, self, Eulerx, TotalPot)
+                # function_space, mesh, material, self, Eulerx, Eulerp)
 
             ParallelTuple = parmap.map(formulation,np.arange(0,nelem,dtype=np.int32),
-                function_space, mesh, material, self, Eulerx, TotalPot)
+                function_space, mesh, material, self, Eulerx, Eulerp)
 
         for elem in range(nelem):
 
@@ -565,7 +572,7 @@ class FEMSolver(object):
                 # COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
                 I_stiff_elem, J_stiff_elem, V_stiff_elem, t, f, \
                 I_mass_elem, J_mass_elem, V_mass_elem = formulation.GetElementalMatrices(elem, 
-                    function_space, mesh, material, self, Eulerx, TotalPot)
+                    function_space, mesh, material, self, Eulerx, Eulerp)
             # SPARSE ASSEMBLY - STIFFNESS MATRIX
             SparseAssemblyNative(I_stiff_elem,J_stiff_elem,V_stiff_elem,I_stiffness,J_stiffness,V_stiffness,
                 elem,nvar,nodeperelem,mesh.elements)

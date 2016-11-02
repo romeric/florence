@@ -61,8 +61,7 @@ def FindIndices(A):
 
 
 def GetElementalMatrices(elem,MainData,elements,points,nodeperelem,Eulerx,
-    TotalPot,I_stiff_elem,J_stiff_elem,I_mass_elem,J_mass_elem):
-
+    Eulerp,I_stiff_elem,J_stiff_elem,I_mass_elem,J_mass_elem):
     # ALLOCATE
     Domain = MainData.Domain
 
@@ -71,7 +70,7 @@ def GetElementalMatrices(elem,MainData,elements,points,nodeperelem,Eulerx,
     LagrangeElemCoords = points[elements[elem,:],:]
     EulerElemCoords = Eulerx[elements[elem,:],:]
     if MainData.Fields == 'ElectroMechanics':
-        ElectricPotentialElem = TotalPot[elements[elem,:],:]
+        ElectricPotentialElem = Eulerp[elements[elem,:],:]
     else:
         ElectricPotentialElem = []
 
