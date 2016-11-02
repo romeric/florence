@@ -224,12 +224,12 @@ class BoundaryCondition(object):
                 else:
                     nodesDBC, Dirichlet = self.nodesDBC, self.Dirichlet
 
-                # np.savetxt("/home/roman/DirichletF053.dat", Dirichlet,fmt="%9.9f")
-                # np.savetxt("/home/roman/nodesDBCF053.dat", nodesDBC,fmt="%i")
-                # exit()
+                # np.savetxt("/home/roman/DirichletF2.dat", Dirichlet,fmt="%9.9f")
+                # np.savetxt("/home/roman/nodesDBCF2.dat", nodesDBC,fmt="%i")
+                # # exit()
 
-                # Dirichlet = np.loadtxt("/home/roman/DirichletF053.dat", dtype=np.float64)
-                # nodesDBC = np.loadtxt("/home/roman/nodesDBCF053.dat", dtype=np.int64)
+                # Dirichlet = np.loadtxt("/home/roman/Marks_Meshes/DirichletF.dat", dtype=np.float64)
+                # nodesDBC = np.loadtxt("/home/roman/Marks_Meshes/nodesDBCF.dat", dtype=np.int64)
 
                 # # Dirichlet = np.loadtxt("/media/MATLAB/DirichletF053.dat", dtype=np.float64)
                 # # nodesDBC = np.loadtxt("/media/MATLAB/nodesDBCF053.dat", dtype=np.int64)
@@ -237,7 +237,8 @@ class BoundaryCondition(object):
                 # nodesDBC = nodesDBC[:,None]
                 # # print(Dirichlet)
                 # # print(np.max(Dirichlet), np.min(Dirichlet))
-                # # exit()
+                # print (Dirichlet.shape, nodesDBC.shape, mesh.points.shape)
+                # exit()
 
 
                 # GET DIRICHLET DoFs
