@@ -309,16 +309,17 @@ def GradNormalisedJacobiTet(int C,x,EvalOpt=0):
         double dp_dr, dp_ds, dp_dt
         int nDeg, i, j, k
         double factor
+        double eta_zeta
 
     # THIS MAY RUIN THE CONVERGENCE, BUT FOR POST PROCESSING ITS FINE
     if EvalOpt==1:
         if t==1.:
-            t=0.999999999999
+            t=0.99999999999
         if np.isclose(s,1.):
-            s=0.999999999999
+            s=0.99999999999
 
     if np.isclose(s,1.):
-            s=0.99999999999999
+            s=0.999999999999
 
     eta = (1./2.)*(s-s*t-1.-t)
     xi = -(1./2.)*(r+1)*(eta+t)-1.
@@ -329,8 +330,13 @@ def GradNormalisedJacobiTet(int C,x,EvalOpt=0):
         eta = 1.0e-14
         zeta = 1e-14
 
-    dr_dxi   = -2./(eta+zeta)
-    dr_deta  = 2.*(1.+xi)/(eta+zeta)**2
+    eta_zeta = eta+zeta
+    if np.isclose(eta_zeta,0.):
+        eta_zeta = 0.000000001
+    # dr_dxi   = -2./(eta+zeta)
+    # dr_deta  = 2.*(1.+xi)/(eta+zeta)**2
+    dr_dxi   = -2./eta_zeta
+    dr_deta  = 2.*(1.+xi)/eta_zeta**2
     dr_dzeta = dr_deta
 
     ds_deta  = 2./(1.-zeta)
