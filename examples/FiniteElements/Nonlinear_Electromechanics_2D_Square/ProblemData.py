@@ -153,7 +153,7 @@ def ProblemData_2(*args, **kwargs):
 def ProblemData_3D(*args, **kwargs):
 
     ndim=3
-    p=3
+    p=2
 
     # material = IsotropicElectroMechanics_2(ndim,youngs_modulus=1.0,poissons_ratio=0.3, c1=1.0, c2=1.0)
     # material = MooneyRivlin(ndim,youngs_modulus=1.0,poissons_ratio=0.41)
@@ -216,7 +216,7 @@ def ProblemData_3D(*args, **kwargs):
     # formulation = DisplacementPotentialFormulation(mesh)
     formulation = DisplacementFormulation(mesh)
 
-    fem_solver = FEMSolver(number_of_load_increments=5,analysis_type="static",
+    fem_solver = FEMSolver(number_of_load_increments=10,analysis_type="static",
         analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
         newton_raphson_tolerance=1.0e-04)
 
@@ -225,7 +225,8 @@ def ProblemData_3D(*args, **kwargs):
 
     # solution.Plot(configuration="deformed")
     # solution.Animate(configuration="deformed")
-    solution.StressRecovery()
+    # solution.StressRecovery()
+    solution.WriteVTK("/home/roman/zzchecker/GG")
 
 
 
@@ -233,9 +234,9 @@ def ProblemData_3D(*args, **kwargs):
 
 
 if __name__ == "__main__":
-    ProblemData()
+    # ProblemData()
     # ProblemData_2()
-    # ProblemData_3D()
+    ProblemData_3D()
     
     # from cProfile import run
     # run('ProblemData_3D()')

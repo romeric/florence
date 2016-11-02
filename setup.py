@@ -22,7 +22,7 @@ p.wait()
 
 # BUILD JACOBI MODULE
 print("Building Jacobi module")
-jacobi_path = os.path.join(_pwd_,"Florence/InterpolationFunctions/JacobiPolynomials/")
+jacobi_path = os.path.join(_pwd_,"Florence/FunctionSpace/JacobiPolynomials/")
 p = subprocess.Popen('cd '+jacobi_path+' && ./Makefile.sh', shell=True)
 p.wait()
 
