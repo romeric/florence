@@ -17,7 +17,7 @@ from Florence.FunctionSpace import Tri
 from Florence.FunctionSpace import Tet
 
 from ElementalMatrices.KinematicMeasures import *
-# from Core.MeshGeneration import vtk_writer
+from Florence.MeshGeneration import vtk_writer
 
 class PostProcess(object):
     """Post-process class for finite element solvers"""
@@ -39,6 +39,7 @@ class PostProcess(object):
 
         self.mesh = None
         self.sol = None
+        self.recovered_fields = None
 
 
     def SetBases(self,domain=None,postdomain=None,boundary=None):
@@ -112,27 +113,30 @@ class PostProcess(object):
         mesh = self.mesh
 
         # GET THE UNDERLYING LINEAR MESH
-        lmesh = mesh.GetLinearMesh()
+        # lmesh = mesh.GetLinearMesh()
+        C = mesh.InferPolynomialDegree() - 1
+        ndim = mesh.InferSpatialDimension()
+
 
          # GET QUADRATURE
-        norder = 2
-        Domain = FunctionSpace(lmesh, p=1, evaluate_at_nodes=True)
+        norder = 2*C
+        if norder == 0:
+            norder=1
+        Domain = FunctionSpace(mesh, p=C+1, evaluate_at_nodes=True)
+        w = Domain.AllGauss[:,0]
 
         fem_solver = self.fem_solver
         formulation = self.formulation
         material = self.material
 
-        C = mesh.InferPolynomialDegree() - 1
-        ndim = mesh.InferSpatialDimension()
-        w = Domain.AllGauss[:,0]
 
-        elements = lmesh.elements
-        points = lmesh.points
+        elements = mesh.elements
+        points = mesh.points
         nelem = elements.shape[0]; npoint = points.shape[0]
         nodeperelem = elements.shape[1]
         LoadIncrement = fem_solver.number_of_load_increments
         requires_geometry_update = fem_solver.requires_geometry_update
-        TotalDisp = self.sol[:lmesh.nnode,:]
+        TotalDisp = self.sol[:mesh.nnode,:]
 
 
         F = np.zeros((nelem,nodeperelem,ndim,ndim))
@@ -213,7 +217,7 @@ class PostProcess(object):
         for Increment in range(LoadIncrement):
             for inode in np.unique(elements):
                 Els, Pos = np.where(elements==inode)
-                ncommon_nodes = Els.shape[0];
+                ncommon_nodes = Els.shape[0]
                 for uelem in range(ncommon_nodes):
                     MainDict['F'][Increment,inode,:,:] += F[Els[uelem],Pos[uelem],:,:]
                     if formulation.fields == "electro-mechanics":
@@ -228,9 +232,102 @@ class PostProcess(object):
                     MainDict['ElectricDisplacementx'][Increment,inode,:,:] /= ncommon_nodes
                 MainDict['CauchyStress'][Increment,inode,:,:] /= ncommon_nodes
 
-        exit()
-        #-----------------------------------------------------------------------------------------------------------#
-        #-----------------------------------------------------------------------------------------------------------#
+
+        self.recovered_fields = MainDict
+        return
+
+
+
+
+    def WriteVTK(self,filename=None, quantity=0, compute_recovered_fields=True):
+        """Writes results to a VTK file for Paraview"""
+
+        if compute_recovered_fields == True:
+            self.StressRecovery()
+        if filename is None:
+            warn("file name not specified. I am going to write in the current directory")
+        elif filename is not None :
+            if isinstance(filename,str) is False:
+                raise ValueError("file name should be a string")
+
+        MainDict = self.recovered_fields
+        LoadIncrement = self.sol.shape[2]
+
+        # GET LINEAR MESH
+        lmesh = self.mesh.GetLinearMesh()
+        sol = self.sol[:lmesh.nnode,:,:]
+        if compute_recovered_fields:
+            F = MainDict['F'][:,:lmesh.nnode,:,:]
+            CauchyStress = MainDict['CauchyStress'][:,:lmesh.nnode,:,:]
+            if self.formulation.fields == "electro-mechanics":
+                ElectricFieldx = MainDict['ElectricFieldx'][:,:lmesh.nnode,:,:]
+                ElectricDisplacementx = MainDict['ElectricDisplacementx'][:,:lmesh.nnode,:,:]
+
+        if lmesh.element_type =='tri':
+            cellflag = 5
+        elif lmesh.element_type =='quad':
+            cellflag = 9
+        if lmesh.element_type =='tet':
+            cellflag = 10
+        elif lmesh.element_type == 'hex':
+            cellflag = 12
+
+
+        # COMPONENTS OF F, Cauchy
+        mm = 1
+        nn = 1
+        # COMPONENTS OF E, D
+        rr = 0
+
+        for Increment in range(LoadIncrement):
+            vtk_writer.write_vtu(Verts=lmesh.points+sol[:,:,Increment], 
+                    Cells={cellflag:lmesh.elements}, pdata=sol[:,quantity,Increment],
+                    fname=filename+'_Sol_'+str(Increment)+'.vtu')
+
+        if compute_recovered_fields:
+            for Increment in range(LoadIncrement):
+                vtk_writer.write_vtu(Verts=lmesh.points+sol[:,:,Increment], 
+                    Cells={cellflag:lmesh.elements}, pdata=F[Increment,:,mm,nn],
+                    fname=filename+'_F_'+str(Increment)+'.vtu')
+                vtk_writer.write_vtu(Verts=lmesh.points+sol[:,:,Increment], 
+                    Cells={cellflag:lmesh.elements}, pdata=CauchyStress[Increment,:,mm,nn],
+                    fname=filename+'_Cauchy_'+str(Increment)+'.vtu')
+                if self.formulation.fields == "electro-mechanics":
+                    vtk_writer.write_vtu(Verts=lmesh.points+sol[:,:,Increment], 
+                        Cells={cellflag:lmesh.elements}, pdata=ElectricFieldx[Increment,:,rr,0],
+                    fname=filename+'_E_'+str(Increment)+'.vtu')
+                    vtk_writer.write_vtu(Verts=lmesh.points+sol[:,:,Increment], 
+                        Cells={cellflag:lmesh.elements}, pdata=ElectricDisplacementx[Increment,:,rr,0],
+                        fname=filename+'_D_'+str(Increment)+'.vtu')
+
+        return
+
+
+    def WriteHDF5(self, filename=None, compute_recovered_fields=True):
+        """Writes the solution data to a HDF5 file. Give the extension name while providing filename"""
+
+        if compute_recovered_fields == True:
+            self.StressRecovery()
+        if filename is None:
+            warn("file name not specified. I am going to write in the current directory")
+        elif filename is not None :
+            if isinstance(filename,str) is False:
+                raise ValueError("file name should be a string")
+
+        if compute_recovered_fields is False:
+            MainDict = {}
+            MainDict['Solution'] = self.sol
+            io.savemat(filename,MainDict,do_compression=True)
+        else:
+            MainDict = self.recovered_fields
+            MainDict['Solution'] = self.sol
+            io.savemat(filename,MainDict,do_compression=True)
+        
+
+
+
+    def PlotNewtonRaphsonConvergence(self):
+
         # KEEP THE IMPORTS LOCAL AS MATPLOTLIB IMPORT IS SLOW
         import matplotlib.pyplot as plt
         from scipy import io 
@@ -255,139 +352,6 @@ class PostProcess(object):
             #   format='eps', dpi=1000)
             # Display plot
             plt.show()
-
-
-        #-----------------------------------------------------------------------------------------------------------#
-        #-----------------------------------------------------------------------------------------------------------#
-        # Save the dictionary in .mat file
-        # MainData.MainDict['Solution'] = MainData.TotalDisp
-        # Write to Matlab .mat dictionary
-        # io.savemat(MainData.Path.ProblemResults+MainData.Path.ProblemResultsFileNameMATLAB,MainData.MainDict)
-        #-----------------------------------------------------------------------------------------------------------#
-        #-----------------------------------------------------------------------------------------------------------#
-
-
-        # WRITE IN VTK FILE 
-        if MainData.write:
-            if mesh.element_type =='tri':
-                cellflag = 5
-            elif mesh.element_type =='quad':
-                cellflag = 9
-            if mesh.element_type =='tet':
-                cellflag = 10
-            elif mesh.element_type == 'hex':
-                cellflag = 12
-            for incr in range(0,MainData.AssemblyParameters.LoadIncrements):
-                # PLOTTING ON THE DEFORMED MESH
-                elements = mesh.elements[:,:eps.shape[0]]
-                points = mesh.points[:np.max(elements)+1,:]
-                TotalDisp = TotalDisp[:np.max(elements)+1,:,:] # BECAREFUL TOTALDISP IS CHANGING HERE
-                points[:,:nvar] += TotalDisp[:,:nvar,incr]
-
-                # OLDER APPROACH
-                # points[:,0] += TotalDisp[:,0,incr] 
-                # points[:,1] += TotalDisp[:,1,incr] 
-                # if ndim==3:
-                    # points[:,2] += MainData.TotalDisp[:,2,incr] 
-
-                # WRITE DISPLACEMENTS
-                vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=TotalDisp[:,:,incr],
-                fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
-                MainData.Path.ProblemResultsFileNameVTK+'_U_'+str(incr)+'.vtu')
-                
-                
-                if MainData.Fields == 'ElectroMechanics':
-                    # WRITE ELECTRIC POTENTIAL
-                    vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, pdata=MainData.TotalPot[:,:,incr],
-                    fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
-                    MainData.Path.ProblemResultsFileNameVTK+'_Phi_'+str(incr)+'.vtu')
-
-            # FOR LINEAR STATIC ANALYSIS
-            # vtk_writer.write_vtu(Verts=vmesh.points, Cells={12:vmesh.elements}, 
-            #   pdata=MainData.TotalDisp[:,:,incr], fname=MainData.Path.ProblemResults+'/Results.vtu')
-
-
-            for incr in range(0,MainData.AssemblyParameters.LoadIncrements):
-                # PLOTTING ON THE DEFORMED MESH
-                elements = mesh.elements[:,:eps.shape[0]]
-                points = mesh.points[:np.max(elements)+1,:]
-                TotalDisp = TotalDisp[:np.max(elements)+1,:,:] # BECAREFUL TOTALDISP IS CHANGING HERE
-                points[:,:nvar] += TotalDisp[:,:nvar,incr]
-                npoint = points.shape[0]
-
-                #----------------------------------------------------------------------------------------------------#
-                # CAUCHY STRESS
-                vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
-                    pdata=MainData.MainDict['CauchyStress'][:,0,:,incr].reshape(npoint,ndim),
-                    fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
-                    MainData.Path.ProblemResultsFileNameVTK+'_S_i0_'+str(incr)+'.vtu')
-
-                vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
-                    pdata=MainData.MainDict['CauchyStress'][:,1,:,incr].reshape(npoint,ndim),
-                    fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
-                    MainData.Path.ProblemResultsFileNameVTK+'_S_i1_'+str(incr)+'.vtu')
-
-                if ndim==3:
-                    vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
-                        pdata=MainData.MainDict['CauchyStress'][:,2,:,incr].reshape(npoint,ndim),
-                        fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
-                        MainData.Path.ProblemResultsFileNameVTK+'_S_i2_'+str(incr)+'.vtu')
-                #-------------------------------------------------------------------------------------------------------#
-
-
-                #-------------------------------------------------------------------------------------------------------#
-                if MainData.Fields == 'ElectroMechanics':
-                    # ELECTRIC FIELD
-                    vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
-                        pdata=MainData.MainDict['ElectricField'][:,0,:,incr].reshape(npoint,ndim),
-                        fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
-                        MainData.Path.ProblemResultsFileNameVTK+'_E_'+str(incr)+'.vtu')
-                        #-----------------------------------------------------------------------------------------------------------#
-                        #-----------------------------------------------------------------------------------------------------------#
-                    # ELECTRIC DISPLACEMENT
-                    vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
-                        pdata=MainData.MainDict['ElectricDisplacement'][:,0,:,incr].reshape(npoint,ndim),
-                        fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
-                        MainData.Path.ProblemResultsFileNameVTK+'_D_'+str(incr)+'.vtu')
-                #-----------------------------------------------------------------------------------------------------------#
-
-                #-----------------------------------------------------------------------------------------------------------#
-                # STRAIN/KINEMATICS
-                if ~MainData.GeometryUpdate:
-                    # SMALL STRAINS
-                    vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
-                        pdata=MainData.MainDict['SmallStrain'][:,0,:,incr].reshape(npoint,ndim),
-                        fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
-                        MainData.Path.ProblemResultsFileNameVTK+'_Strain_i0_'+str(incr)+'.vtu')
-
-                    vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
-                        pdata=MainData.MainDict['SmallStrain'][:,1,:,incr].reshape(npoint,ndim),
-                        fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
-                        MainData.Path.ProblemResultsFileNameVTK+'_Strain_i1_'+str(incr)+'.vtu')
-
-                    if ndim==3:
-                        vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
-                            pdata=MainData.MainDict['SmallStrain'][:,2,:,incr].reshape(npoint,ndim),
-                            fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
-                            MainData.Path.ProblemResultsFileNameVTK+'_Strain_i2_'+str(incr)+'.vtu')
-                else:
-                    # DEFORMATION GRADIENT
-                    vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
-                        pdata=MainData.MainDict['DeformationGradient'][:,0,:,incr].reshape(npoint,ndim),
-                        fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
-                        MainData.Path.ProblemResultsFileNameVTK+'_F_i0_'+str(incr)+'.vtu')
-
-                    vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
-                        pdata=MainData.MainDict['DeformationGradient'][:,1,:,incr].reshape(npoint,ndim),
-                        fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
-                        MainData.Path.ProblemResultsFileNameVTK+'_F_i1_'+str(incr)+'.vtu')
-
-                    if ndim==3:
-                        vtk_writer.write_vtu(Verts=points, Cells={cellflag:elements}, 
-                            pdata=MainData.MainDict['DeformationGradient'][:,2,:,incr].reshape(npoint,ndim),
-                            fname=MainData.Path.ProblemResults+MainData.Path.Analysis+MainData.Path.MaterialModel+\
-                            MainData.Path.ProblemResultsFileNameVTK+'_F_i2_'+str(incr)+'.vtu')
-                #-------------------------------------------------------------------------------------------------------#
 
 
 
@@ -449,6 +413,9 @@ class PostProcess(object):
             else:
                 plt.tricontourf(mesh.points[:,0]+sol[:,0,-1], mesh.points[:,1]+sol[:,1,-1], 
                     mesh.elements, sol[:,quantity,-1],cmap=cm.viridis)
+                # stress = self.recovered_fields['F'][-1,:mesh.nnode,0,0]
+                # plt.tricontourf(mesh.points[:,0]+sol[:,0,-1], mesh.points[:,1]+sol[:,1,-1], 
+                #     mesh.elements, stress,cmap=cm.viridis)
                 if plot_points:
                     plt.plot(self.mesh.points[:,0]+self.sol[:,0,-1], self.mesh.points[:,1]+self.sol[:,1,-1],'ko')
 
@@ -1033,7 +1000,7 @@ class PostProcess(object):
     @staticmethod
     def CurvilinearPlotTet(mesh,TotalDisp,QuantityToPlot=None,
         ProjectionFlags=None, InterpolationDegree=20, EquallySpacedPoints=False, PlotActualCurve=False,
-        plot_points=False, plot_edges=True, plot_surfaces=True, point_radius=0.1, colorbar=False, color=None, figure=None,
+        plot_points=False, plot_edges=True, plot_surfaces=True, point_radius=0.02, colorbar=False, color=None, figure=None,
         show_plot=True, save=False, filename=None):
 
         """High order curved tetrahedral surfaces mesh plots, based on high order nodal FEM.

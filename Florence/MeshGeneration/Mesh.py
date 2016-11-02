@@ -1951,12 +1951,12 @@ class Mesh(object):
             assert self.faces is not None
 
 
-        lmesh = Mesh()
-        lmesh.element_type = self.element_type
-        lmesh.degree = 1
         if self.IsHighOrder is False:
-            return lmesh
+            return self
         else:
+            lmesh = Mesh()
+            lmesh.element_type = self.element_type
+            lmesh.degree = 1
             if self.element_type == "tri":
                 lmesh.elements = np.copy(self.elements[:,:3])
                 lmesh.edges = np.copy(self.edges[:,:2])
