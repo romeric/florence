@@ -1964,7 +1964,7 @@ class Mesh(object):
                 lmesh.points = np.copy(self.points[:lmesh.nnode,:])
             elif self.element_type == "tet":
                 lmesh.elements = np.copy(self.elements[:,:4])
-                lmesh.faces = np.copy(self.facs[:,:3])
+                lmesh.faces = np.copy(self.faces[:,:3])
                 lmesh.nnode = int(np.max(lmesh.elements)+1)
                 lmesh.points = np.copy(self.points[:lmesh.nnode,:])
             elif self.element_type == "quad":

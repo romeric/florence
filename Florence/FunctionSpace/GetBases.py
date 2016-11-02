@@ -241,15 +241,10 @@ def GetBasesAtNodes(C,Quadrature,info):
             counter+=1
     elif info == 'tet':
         counter = 0
-        # eps = np.array([
-            # [-1.,-1.,-1.],
-            # [1.,-1.,-1.],
-            # [-1.,1.,-1.],
-            # [-1.,-1.,1.]
-            # ])
+        hpBases = Tet.hpNodal.hpBases
         eps = FeketePointsTet(C)
         for i in range(0,eps.shape[0]):
-            ndummy, dummy = Tet.hpBases(C,eps[i,0],eps[i,1],eps[i,2],1,1)
+            ndummy, dummy = hpBases(C,eps[i,0],eps[i,1],eps[i,2],1,1)
             ndummy = ndummy.reshape(ndummy.shape[0],1)
             Basis[:,counter] = ndummy[:,0]
             gBasisx[:,counter] = dummy[:,0]
@@ -257,11 +252,6 @@ def GetBasesAtNodes(C,Quadrature,info):
             gBasisz[:,counter] = dummy[:,2]
             counter+=1
     elif info == 'tri':
-        # eps = np.array([
-        #     [-1.,-1.],
-        #     [1.,-1.],
-        #     [-1.,1.]
-        #     ])
         eps = FeketePointsTri(C)
         hpBases = Tri.hpNodal.hpBases
         for i in range(0,eps.shape[0]):
