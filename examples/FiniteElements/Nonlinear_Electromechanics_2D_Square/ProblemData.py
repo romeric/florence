@@ -98,7 +98,7 @@ def ProblemData_2(*args, **kwargs):
     material = IsotropicElectroMechanics_2(ndim,youngs_modulus=1.0,poissons_ratio=0.3, c1=1.0, c2=1.0)
 
     mesh = Mesh()
-    mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,10),nx=4,ny=4)
+    mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,10),nx=2,ny=2)
     mesh.GetHighOrderMesh(p=p)
     # print mesh.points.shape[0], mesh.nelem
     # mesh.SimplePlot()
@@ -136,15 +136,19 @@ def ProblemData_2(*args, **kwargs):
     formulation = DisplacementPotentialFormulation(mesh)
     # formulation = DisplacementFormulation(mesh)
 
-    fem_solver = FEMSolver(number_of_load_increments=1,analysis_type="static",
+    fem_solver = FEMSolver(number_of_load_increments=5,analysis_type="static",
         analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
         newton_raphson_tolerance=1.0e-04)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition)
 
-    # solution.Plot(configuration="deformed")
+
+    # print solution.sol[:,2,-1]
+    solution.Plot(configuration="deformed",quantity=2)
     # solution.Animate(configuration="deformed", quantity=2)
+
+    # solution.Plot()
 
     # exit()
 
@@ -235,8 +239,8 @@ def ProblemData_3D(*args, **kwargs):
 
 if __name__ == "__main__":
     # ProblemData()
-    # ProblemData_2()
-    ProblemData_3D()
+    ProblemData_2()
+    # ProblemData_3D()
     
     # from cProfile import run
     # run('ProblemData_3D()')

@@ -52,7 +52,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         self.function_spaces = (function_space,post_function_space)
 
 
-    def GetElementalMatrices(self, elem, function_space, mesh, material, fem_solver, Eulerx, TotalPot):
+    def GetElementalMatrices(self, elem, function_space, mesh, material, fem_solver, Eulerx, Eulerp):
 
         # ALLOCATE
         Domain = function_space
@@ -61,7 +61,8 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         # GET THE FIELDS AT THE ELEMENT LEVEL
         LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
         EulerElemCoords = Eulerx[mesh.elements[elem,:],:]
-        ElectricPotentialElem = TotalPot[mesh.elements[elem,:],:]
+        ElectricPotentialElem = Eulerp[mesh.elements[elem,:]]
+        # print(ElectricPotentialElem.shape)
 
         # COMPUTE THE STIFFNESS MATRIX
         stiffnessel, t = self.GetLocalStiffness(function_space, material, LagrangeElemCoords, 
@@ -134,6 +135,9 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
             # GET ELECTRIC FILED
             ElectricFieldx = - np.dot(SpatialGradient[counter,:,:].T,ElectricPotentialElem)
+            # print(ElectricFieldx.shape)
+            # if ElectricPotentialElem.shape[1]==3:
+            #     print elem, counter
 
             # COMPUTE THE HESSIAN AT THIS GAUSS POINT
             H_Voigt = material.Hessian(StrainTensors,ElectricFieldx, elem, counter)
