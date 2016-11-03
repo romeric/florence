@@ -1,2 +1,3 @@
 from Solver import LinearSolver
 from FEMSolver import FEMSolver
+from StaggeredFEMSolver import StaggeredFEMSolver
