@@ -214,7 +214,7 @@ class FEMSolver(object):
         # FIND PURE NEUMANN (EXTERNAL) NODAL FORCE VECTOR
         # NeumannForces = AssemblyForces(formulation,mesh)
         # NeumannForces = AssemblyForces_Cheap(formulation,mesh)
-        NeumannForces = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float32)
+        NeumannForces = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64)
         # FORCES RESULTING FROM DIRICHLET BOUNDARY CONDITIONS
         # DirichletForces = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float32)
 
@@ -253,7 +253,6 @@ class FEMSolver(object):
                 mesh,TotalDisp,Eulerx,Eulerp,material, boundary_condition)
 
 
-        # return TotalDisp
         return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
 
 
@@ -357,7 +356,7 @@ class FEMSolver(object):
     
         LoadIncrement = self.number_of_load_increments
         LoadFactor = 1./LoadIncrement
-        AppliedDirichletInc = np.zeros(boundary_condition.applied_dirichlet.shape[0],dtype=np.float32)
+        AppliedDirichletInc = np.zeros(boundary_condition.applied_dirichlet.shape[0],dtype=np.float64)
         
         for Increment in range(LoadIncrement):
 
@@ -482,62 +481,6 @@ class FEMSolver(object):
 
 
         return Eulerx
-
-
-
-    def StaggeredSolver(self, function_spaces, formulation, solver, K,
-            NeumannForces,NodalForces,Residual,
-            mesh,TotalDisp,Eulerx,Eulerp,material, boundary_condition):
-    
-        Tolerance = self.newton_raphson_tolerance
-        LoadIncrement = self.number_of_load_increments
-        LoadFactor = 1./LoadIncrement
-        AppliedDirichletInc = np.zeros(boundary_condition.applied_dirichlet.shape[0],dtype=np.float32)
-        
-        for Increment in range(LoadIncrement):
-
-            # APPLY NEUMANN BOUNDARY CONDITIONS
-            DeltaF = LoadFactor*NeumannForces
-            NodalForces += DeltaF
-            # RESIDUAL FORCES CONTAIN CONTRIBUTION FROM BOTH NEUMANN AND DIRICHLET
-            DirichletForces = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64)
-            DirichletForces = boundary_condition.ApplyDirichletGetReducedMatrices(K,DirichletForces,
-                boundary_condition.applied_dirichlet)[2]
-            # OBRTAIN THE INCREMENTAL RESIDUAL
-            Residual -= LoadFactor*DirichletForces
-            # GET THE INCREMENTAL DISPLACEMENT
-            AppliedDirichletInc = LoadFactor*boundary_condition.applied_dirichlet
-
-
-            # GET ONLY NORM OF FIXED DOFs (THAT IS WHERE RESIDUAL FORCES GET GENERATED)
-            if Increment==0:
-                self.NormForces = np.linalg.norm(Residual[boundary_condition.columns_out])
-            # AVOID DIVISION BY ZERO
-            if np.linalg.norm(Residual[boundary_condition.columns_in]) < 1e-14:
-                NormForces = 1e-14
-
-            # APPLY INCREMENTAL DIRICHLET PER LOAD STEP (THIS IS INCREMENTAL NOT ACCUMULATIVE)
-            IncDirichlet = boundary_condition.UpdateFixDoFs(AppliedDirichletInc,
-                K.shape[0],formulation.nvar)
-            # UPDATE EULERIAN COORDINATE
-            Eulerx += IncDirichlet[:,:formulation.ndim]
-            # GET EULERIAN POTENTIAL
-            Eulerp += IncDirichlet[:,-1]
-
-            ##
-            ##
-
-            # Eulerx = self.NewtonRaphson(function_spaces, formulation, solver, 
-            #     Increment,K,NodalForces,Residual,mesh,Eulerx,Eulerp,
-            #     material,boundary_condition,AppliedDirichletInc)
-
-            # UPDATE DISPLACEMENTS FOR THE CURRENT LOAD INCREMENT
-            TotalDisp[:,:formulation.ndim,Increment] = Eulerx - mesh.points
-            TotalDisp[:,-1,Increment] = Eulerp
-
-            print('\nFinished Load increment', Increment, 'in', time()-t_increment, 'seconds')
-
-        return TotalDisp
 
 
 
@@ -1030,4 +973,3 @@ class FEMSolver(object):
 
 
         return F
-
