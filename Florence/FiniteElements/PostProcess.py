@@ -367,15 +367,8 @@ class PostProcess(object):
         from copy import deepcopy
 
         # GET LINEAR MESH
-        mesh = deepcopy(self.mesh)
-        if mesh.element_type == "tri":
-            mesh.elements = mesh.elements[:,:3]
-        elif mesh.element_type == "tet":
-            mesh.elements = mesh.elements[:,:4]
-            mesh.faces = mesh.faces[:,:3]
-        mesh.nnode = int(np.max(mesh.elements)+1)
-        mesh.points = mesh.points[:mesh.nnode,:]
-        # GET LINEAR SOLUTION - [MODIFIES THE SOLUTION]
+        mesh = self.mesh.GetLinearMesh()
+        # GET LINEAR SOLUTION 
         sol = np.copy(self.sol[:mesh.nnode,:])
 
         if self.mesh.element_type == "tri":
@@ -407,25 +400,21 @@ class PostProcess(object):
                 raise ValueError("configuration can only be 'original' or 'deformed'")
 
             if configuration == "original":
-                plt.tricontourf(mesh.points[:,0], mesh.points[:,1], mesh.elements, sol[:,quantity,-1],cmap=cm.viridis)
+                # plt.tricontourf(mesh.points[:,0], mesh.points[:,1], mesh.elements, sol[:,quantity,-1],cmap=cm.viridis)
+                triang = mtri.Triangulation(mesh.points[:,0], mesh.points[:,1], mesh.elements)
+                plt.tripcolor(triang, sol[:,quantity,-1], shading='gouraud', cmap=cm.viridis)
                 if plot_points:
                     plt.plot(self.mesh.points[:,0], self.mesh.points[:,1],'ko')
             else:
-                plt.tricontourf(mesh.points[:,0]+sol[:,0,-1], mesh.points[:,1]+sol[:,1,-1], 
-                    mesh.elements, sol[:,quantity,-1],cmap=cm.viridis)
-                # stress = self.recovered_fields['F'][-1,:mesh.nnode,0,0]
-                # plt.tricontourf(mesh.points[:,0]+sol[:,0,-1], mesh.points[:,1]+sol[:,1,-1], 
-                #     mesh.elements, stress,cmap=cm.viridis)
+                triang = mtri.Triangulation(mesh.points[:,0]+sol[:,0,-1], 
+                    mesh.points[:,1]+sol[:,1,-1], mesh.elements)
+                plt.tripcolor(triang, sol[:,quantity,-1], shading='gouraud', cmap=cm.viridis)
                 if plot_points:
                     plt.plot(self.mesh.points[:,0]+self.sol[:,0,-1], self.mesh.points[:,1]+self.sol[:,1,-1],'ko')
 
-
-            # if colorbar is True:
-            #     ax_cbar = mpl.colorbar.make_axes(plt.gca(), shrink=0.8)[0]
-            #     cbar = mpl.colorbar.ColorbarBase(ax_cbar, cmap=cm.viridis)
-            
-            # if axis_type == "equal":
-            #     plt.axis(axis_type)
+            if axis_type == "equal":
+                plt.axis(axis_type)
+            plt.colorbar()
             plt.show()
 
 
@@ -551,26 +540,33 @@ class PostProcess(object):
 
                 ax.clear()
                 if configuration == "deformed":
-                    ax.triplot(mesh.points[:,0]+self.sol[:,0,incr], mesh.points[:,1]+sol[:,1,incr], mesh.elements[:,:3],color='k')
-                    ax.tricontourf(mesh.points[:,0]+sol[:,0,incr], mesh.points[:,1]+sol[:,1,incr], 
-                        mesh.elements, sol[:,quantity,incr],cmap=cm.viridis)
-                    ax.plot(self.mesh.points[:,0]+sol[:,0,incr], self.mesh.points[:,1]+self.sol[:,1,incr],'o',markersize=5  ,color='k')
+                    triang = mtri.Triangulation(mesh.points[:,0]+sol[:,0,incr], 
+                        mesh.points[:,1]+sol[:,1,incr], mesh.elements)
+                    ax.triplot(mesh.points[:,0]+sol[:,0,incr], mesh.points[:,1]+sol[:,1,incr], 
+                        mesh.elements[:,:3],color='k')
+                    tri_h = ax.tripcolor(triang, sol[:,quantity,incr], shading='gouraud', cmap=cm.viridis)
+                    if plot_points:
+                        ax.plot(self.mesh.points[:,0]+sol[:,0,incr], 
+                            self.mesh.points[:,1]+self.sol[:,1,incr],'o',markersize=5  ,color='k')
                 elif configuration == "original":
                     plt.triplot(mesh.points[:,0],mesh.points[:,1], mesh.elements[:,:3],color='k')
-                    plt.tricontourf(mesh.points[:,0], mesh.points[:,1], mesh.elements, sol[:,quantity,incr],cmap=cm.viridis)
+                    # plt.tricontourf(mesh.points[:,0], mesh.points[:,1], mesh.elements, 
+                    #     sol[:,quantity,incr],cmap=cm.viridis)
+                    triang = mtri.Triangulation(mesh.points[:,0], mesh.points[:,1], mesh.elements)
+                    tri_h = ax.tripcolor(triang, sol[:,quantity,incr], shading='gouraud', cmap=cm.viridis)
+                    if plot_points:
+                        ax.plot(self.mesh.points[:,0],self.mesh.points[:,1],
+                            'o',markersize=5  ,color='k')
+
+                    # return tri_h
  
-            interval = 2#in seconds
+            interval = 2 #in seconds
             ani = animation.FuncAnimation(fig,animator,self.sol.shape[2],interval=interval, repeat=True)
 
-            if colorbar is True:
-                ax_cbar = mpl.colorbar.make_axes(plt.gca(), shrink=0.8)[0]
-                cbar = mpl.colorbar.ColorbarBase(ax_cbar, cmap=cm.viridis)
-                # DON'T NORMALIZE
-                # cbar = mpl.colorbar.ColorbarBase(ax_cbar, cmap=cm.viridis,
-                                   # norm=mpl.colors.Normalize(vmin=-0, vmax=1))
-                # cbar.set_clim(0, 1)
-                # divider = make_axes_locatable(ax_cbar)
-                # cax = divider.append_axes("right", size="25%", pad=0.005)
+            # if colorbar is True:
+                # fig.colorbar()
+                # fig.colorbar(mappable=tri_h,cmap=cm.viridis)
+                # plt.colorbar()
             
             if axis_type == "equal":
                 plt.axis(axis_type)
