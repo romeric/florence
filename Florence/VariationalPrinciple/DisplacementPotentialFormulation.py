@@ -63,10 +63,14 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         EulerElemCoords = Eulerx[mesh.elements[elem,:],:]
         ElectricPotentialElem = Eulerp[mesh.elements[elem,:]]
         # print(ElectricPotentialElem.shape)
+        # print(ElectricPotentialElem)
 
         # COMPUTE THE STIFFNESS MATRIX
         stiffnessel, t = self.GetLocalStiffness(function_space, material, LagrangeElemCoords, 
             EulerElemCoords, ElectricPotentialElem, fem_solver, elem)
+        # print(stiffnessel[0,:])
+        # print(t)
+        # exit()
 
         I_mass_elem = []; J_mass_elem = []; V_mass_elem = []
         if fem_solver.analysis_type != 'static':
@@ -113,7 +117,11 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
         # COMPUTE REMAINING KINEMATIC MEASURES
         StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
-        
+
+        # print(ElectricPotentialElem)
+        # print(EulerELemCoords)
+        # print(F)
+
         # UPDATE/NO-UPDATE GEOMETRY
         if fem_solver.requires_geometry_update:
             # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
@@ -128,7 +136,9 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
             # COMPUTE ONCE detJ
             detJ = np.einsum('i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)))
 
-
+        # print(detJ)
+        # if elem==0:
+            # print(SpatialGradient)
 
         # LOOP OVER GAUSS POINTS
         for counter in range(AllGauss.shape[0]): 
@@ -136,8 +146,13 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
             # GET ELECTRIC FILED
             ElectricFieldx = - np.dot(SpatialGradient[counter,:,:].T,ElectricPotentialElem)
             # print(ElectricFieldx.shape)
-            # if ElectricPotentialElem.shape[1]==3:
-            #     print elem, counter
+            # if counter==0 and elem==0:
+                # print(ElectricPotentialElem)
+                # print(ElectricFieldx)
+            #     # print(SpatialGradient[counter,:,:].T)
+            #     print(SpatialGradient[counter,:,:].T)
+            #     print(ElectricPotentialElem)
+            #     print(np.dot(SpatialGradient[counter,:,:].T,ElectricPotentialElem))
 
             # COMPUTE THE HESSIAN AT THIS GAUSS POINT
             H_Voigt = material.Hessian(StrainTensors,ElectricFieldx, elem, counter)
@@ -164,6 +179,25 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
             # INTEGRATE STIFFNESS
             stiffness += BDB_1*detJ[counter]
 
+            # if elem==0 and counter==0:
+                # print(H_Voigt[:,3:])
+                # print(t.shape)
+                # print(ElectricDisplacementx)
+                # print(BDB_1.shape)
+                # print(BDB_1[0,:])
+
+        # from Florence.Tensor import makezero
+        # makezero(stiffness,tol=1e-10)
+        # print(stiffness[0,:])
+        # print(H_Voigt[:3,3:])
+        # print(np.linalg.norm(t))
+        # print(t[[2,5,8,11,14,17]])
+        # print(np.linalg.norm(t[[2,5,8,11,14,17]]))
+        # print(np.linalg.norm(tractionforce[[2,5,8,11,14,17]]))
+        # print(t)
+        # print(np.linalg.norm(t))
+        # print(np.linalg.norm(tractionforce))
+        # print(tractionforce)
         return stiffness, tractionforce 
 
 
@@ -213,22 +247,22 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         pass
 
 
-    def ConstitutiveStiffnessIntegrand(self, B, SpatialGradient, ElectricDisplacementx,
-        CauchyStressTensor, H_Voigt, analysis_nature="nonlinear", has_prestress=True):
-        """Overrides for electric potential formulation"""
+    # def ConstitutiveStiffnessIntegrand(self, B, SpatialGradient, ElectricDisplacementx,
+    #     CauchyStressTensor, H_Voigt, analysis_nature="nonlinear", has_prestress=True):
+    #     """Overrides for electric potential formulation"""
 
-        # MATRIX FORM
-        SpatialGradient = SpatialGradient.T
+    #     # MATRIX FORM
+    #     SpatialGradient = SpatialGradient.T
 
-        FillConstitutiveB(B,SpatialGradient,self.ndim,self.nvar)
-        BDB = B.dot(H_Voigt.dot(B.T))
+    #     FillConstitutiveB(B,SpatialGradient,self.ndim,self.nvar)
+    #     BDB = B.dot(H_Voigt.dot(B.T))
         
-        t=[]
-        if analysis_nature == 'nonlinear' or has_prestress:
-            TotalTraction = GetTotalTraction(CauchyStressTensor,ElectricDisplacementx.ravel())
-            t = np.dot(B,TotalTraction) 
+    #     t=[]
+    #     if analysis_nature == 'nonlinear' or has_prestress:
+    #         TotalTraction = GetTotalTraction(CauchyStressTensor,ElectricDisplacementx.ravel())
+    #         t = np.dot(B,TotalTraction) 
                 
-        return BDB, t
+    #     return BDB, t
 
 
     # def GeometricStiffnessIntegrand(self, SpatialGradient, CauchyStressTensor):
@@ -270,71 +304,72 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
     ###############################################################################################
     ###############################################################################################
 
-    # def ConstitutiveStiffnessIntegrand(self, B, SpatialGradient, ElectricDisplacementx,
-    #     CauchyStressTensor, H_Voigt, analysis_nature="nonlinear", has_prestress=True):
+    def ConstitutiveStiffnessIntegrand(self, B, SpatialGradient, ElectricDisplacementx,
+        CauchyStressTensor, H_Voigt, analysis_nature="nonlinear", has_prestress=True):
 
-    #     ndim = self.ndim
-    #     nvar = self.nvar
+        ndim = self.ndim
+        nvar = self.nvar
 
-    #     # MATRIX FORM
-    #     SpatialGradient = SpatialGradient.T
-
-
-    #     # THREE DIMENSIONS
-    #     if SpatialGradient.shape[0]==3:
-
-    #         B[0::nvar,0] = SpatialGradient[0,:]
-    #         B[1::nvar,1] = SpatialGradient[1,:]
-    #         B[2::nvar,2] = SpatialGradient[2,:]
-    #         # Mechanical - Shear Terms
-    #         B[1::nvar,5] = SpatialGradient[2,:]
-    #         B[2::nvar,5] = SpatialGradient[1,:]
-
-    #         B[0::nvar,4] = SpatialGradient[2,:]
-    #         B[2::nvar,4] = SpatialGradient[0,:]
-
-    #         B[0::nvar,3] = SpatialGradient[1,:]
-    #         B[1::nvar,3] = SpatialGradient[0,:]
-
-    #         # Electrostatic 
-    #         B[3::nvar,6] = SpatialGradient[0,:]
-    #         B[3::nvar,7] = SpatialGradient[1,:]
-    #         B[3::nvar,8] = SpatialGradient[2,:]
-
-    #         if analysis_nature == 'nonlinear' or has_prestress:
-    #             CauchyStressTensor_Voigt = np.array([
-    #                 CauchyStressTensor[0,0],CauchyStressTensor[1,1],CauchyStressTensor[2,2],
-    #                 CauchyStressTensor[0,1],CauchyStressTensor[0,2],CauchyStressTensor[1,2]
-    #                 ]).reshape(6,1)
-
-    #             TotalTraction = np.concatenate((CauchyStressTensor_Voigt,ElectricDisplacementx),axis=0)
-
-    #     elif SpatialGradient.shape[0]==2:
-
-    #         B[0::nvar,0] = SpatialGradient[0,:]
-    #         B[1::nvar,1] = SpatialGradient[1,:]
-    #         # Mechanical - Shear Terms
-    #         B[0::nvar,2] = SpatialGradient[1,:]
-    #         B[1::nvar,2] = SpatialGradient[0,:]
-
-    #         # Electrostatic 
-    #         B[2::nvar,3] = SpatialGradient[0,:]
-    #         B[2::nvar,4] = SpatialGradient[1,:]
+        # MATRIX FORM
+        SpatialGradient = SpatialGradient.T
 
 
-    #         if analysis_nature == 'nonlinear' or has_prestress:
-    #             CauchyStressTensor_Voigt = np.array([
-    #                 CauchyStressTensor[0,0],CauchyStressTensor[1,1],
-    #                 CauchyStressTensor[0,1]]).reshape(3,1)
+        # THREE DIMENSIONS
+        if SpatialGradient.shape[0]==3:
 
-    #             TotalTraction = np.concatenate((CauchyStressTensor_Voigt,ElectricDisplacementx),axis=0)
+            B[0::nvar,0] = SpatialGradient[0,:]
+            B[1::nvar,1] = SpatialGradient[1,:]
+            B[2::nvar,2] = SpatialGradient[2,:]
+            # Mechanical - Shear Terms
+            B[1::nvar,5] = SpatialGradient[2,:]
+            B[2::nvar,5] = SpatialGradient[1,:]
 
-    #     BDB = np.dot(np.dot(B,H_Voigt),B.T)
-    #     t=[]
-    #     if analysis_nature == 'nonlinear' or has_prestress:
-    #         t = np.dot(B,TotalTraction)
+            B[0::nvar,4] = SpatialGradient[2,:]
+            B[2::nvar,4] = SpatialGradient[0,:]
+
+            B[0::nvar,3] = SpatialGradient[1,:]
+            B[1::nvar,3] = SpatialGradient[0,:]
+
+            # Electrostatic 
+            B[3::nvar,6] = SpatialGradient[0,:]
+            B[3::nvar,7] = SpatialGradient[1,:]
+            B[3::nvar,8] = SpatialGradient[2,:]
+
+            if analysis_nature == 'nonlinear' or has_prestress:
+                CauchyStressTensor_Voigt = np.array([
+                    CauchyStressTensor[0,0],CauchyStressTensor[1,1],CauchyStressTensor[2,2],
+                    CauchyStressTensor[0,1],CauchyStressTensor[0,2],CauchyStressTensor[1,2]
+                    ]).reshape(6,1)
+
+                TotalTraction = np.concatenate((CauchyStressTensor_Voigt,ElectricDisplacementx),axis=0)
+
+        elif SpatialGradient.shape[0]==2:
+
+            B[0::nvar,0] = SpatialGradient[0,:]
+            B[1::nvar,1] = SpatialGradient[1,:]
+            # Mechanical - Shear Terms
+            B[0::nvar,2] = SpatialGradient[1,:]
+            B[1::nvar,2] = SpatialGradient[0,:]
+
+            # Electrostatic 
+            B[2::nvar,3] = SpatialGradient[0,:]
+            B[2::nvar,4] = SpatialGradient[1,:]
+
+            if analysis_nature == 'nonlinear' or has_prestress:
+                CauchyStressTensor_Voigt = np.array([
+                    CauchyStressTensor[0,0],CauchyStressTensor[1,1],
+                    CauchyStressTensor[0,1]]).reshape(3,1)
+
+                TotalTraction = np.concatenate((CauchyStressTensor_Voigt,ElectricDisplacementx[:,None]),axis=0)
+
+        BDB = np.dot(np.dot(B,H_Voigt),B.T)
+        # print(BDB[0,:])
+        # print(H_Voigt[:3,3:])
+        t=[]
+        if analysis_nature == 'nonlinear' or has_prestress:
+            t = np.dot(B,TotalTraction)
                 
-    #     return BDB, t
+        return BDB, t
 
 
     # def GeometricStiffnessIntegrand(self,SpatialGradient,CauchyStressTensor):

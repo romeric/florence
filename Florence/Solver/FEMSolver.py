@@ -432,7 +432,6 @@ class FEMSolver(object):
         Eulerx += IncDirichlet[:,:formulation.ndim]
         Eulerp += IncDirichlet[:,-1]
         # print(IncDisplacement.shape, Eulerx.shape)
-        # print(IncDirichlet)
 
         while np.abs(la.norm(Residual[boundary_condition.columns_in])/NormForces) > Tolerance:
             # GET THE REDUCED SYSTEM OF EQUATIONS
@@ -457,6 +456,9 @@ class FEMSolver(object):
             # FIND THE RESIDUAL
             Residual[boundary_condition.columns_in] = TractionForces[boundary_condition.columns_in] \
             - NodalForces[boundary_condition.columns_in]
+            # print(Residual[boundary_condition.columns_in])
+            # print(Residual[[14,17,23]])
+            # print(boundary_condition.columns_in)
 
             # SAVE THE NORM 
             NormForces = self.NormForces
@@ -599,10 +601,10 @@ class FEMSolver(object):
         # REALLY DANGEROUS FOR MULTIPHYSICS PROBLEMS
         # V_stiffness[np.isclose(V_stiffness,0.)] = 0.
 
-        # stiffness = coo_matrix((V_stiffness,(I_stiffness,J_stiffness)),
-            # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64).tocsc()
-        stiffness = csc_matrix((V_stiffness,(I_stiffness,J_stiffness)),
-            shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float32)
+        stiffness = coo_matrix((V_stiffness,(I_stiffness,J_stiffness)),
+            shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64).tocsc()
+        # stiffness = csc_matrix((V_stiffness,(I_stiffness,J_stiffness)),
+            # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float32)
         # stiffness = csc_matrix((V_stiffness,(I_stiffness,J_stiffness)),
             # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
         

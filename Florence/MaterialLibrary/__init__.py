@@ -22,7 +22,9 @@ from IncrementallyLinearisedNeoHookean import *
 # ELECTROMECHANICAL MATERIAL MODELS
 from LinearModelElectromechanics import *
 from LinearisedElectromechanics import *
+from IsotropicElectroMechanics_0 import *
 from IsotropicElectroMechanics_1 import *
 from IsotropicElectroMechanics_2 import *
+from IsotropicElectroMechanics_3 import *
 from Steinmann import *
 from AnisotropicMooneyRivlin_1_Electromechanics import *
