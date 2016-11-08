@@ -431,7 +431,6 @@ class FEMSolver(object):
         # Eulerx += IncDirichlet
         Eulerx += IncDirichlet[:,:formulation.ndim]
         Eulerp += IncDirichlet[:,-1]
-        # print(IncDisplacement.shape, Eulerx.shape)
 
         while np.abs(la.norm(Residual[boundary_condition.columns_in])/NormForces) > Tolerance:
             # GET THE REDUCED SYSTEM OF EQUATIONS
@@ -449,16 +448,12 @@ class FEMSolver(object):
             Eulerp += dU[:,-1]
 
             # GET ITERATIVE ELECTRIC POTENTIAL
-            # TotalPot = np.zeros_like(dU) ####### FIX THIS FOR ELECTRO
             # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
             K, TractionForces = self.Assemble(function_spaces[0], formulation, mesh, material, solver,
                 Eulerx,Eulerp)[:2]
             # FIND THE RESIDUAL
             Residual[boundary_condition.columns_in] = TractionForces[boundary_condition.columns_in] \
             - NodalForces[boundary_condition.columns_in]
-            # print(Residual[boundary_condition.columns_in])
-            # print(Residual[[14,17,23]])
-            # print(boundary_condition.columns_in)
 
             # SAVE THE NORM 
             NormForces = self.NormForces

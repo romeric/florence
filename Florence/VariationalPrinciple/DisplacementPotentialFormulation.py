@@ -118,10 +118,6 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         # COMPUTE REMAINING KINEMATIC MEASURES
         StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
 
-        # print(ElectricPotentialElem)
-        # print(EulerELemCoords)
-        # print(F)
-
         # UPDATE/NO-UPDATE GEOMETRY
         if fem_solver.requires_geometry_update:
             # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
@@ -136,23 +132,11 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
             # COMPUTE ONCE detJ
             detJ = np.einsum('i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)))
 
-        # print(detJ)
-        # if elem==0:
-            # print(SpatialGradient)
-
         # LOOP OVER GAUSS POINTS
         for counter in range(AllGauss.shape[0]): 
 
             # GET ELECTRIC FILED
             ElectricFieldx = - np.dot(SpatialGradient[counter,:,:].T,ElectricPotentialElem)
-            # print(ElectricFieldx.shape)
-            # if counter==0 and elem==0:
-                # print(ElectricPotentialElem)
-                # print(ElectricFieldx)
-            #     # print(SpatialGradient[counter,:,:].T)
-            #     print(SpatialGradient[counter,:,:].T)
-            #     print(ElectricPotentialElem)
-            #     print(np.dot(SpatialGradient[counter,:,:].T,ElectricPotentialElem))
 
             # COMPUTE THE HESSIAN AT THIS GAUSS POINT
             H_Voigt = material.Hessian(StrainTensors,ElectricFieldx, elem, counter)
@@ -179,25 +163,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
             # INTEGRATE STIFFNESS
             stiffness += BDB_1*detJ[counter]
 
-            # if elem==0 and counter==0:
-                # print(H_Voigt[:,3:])
-                # print(t.shape)
-                # print(ElectricDisplacementx)
-                # print(BDB_1.shape)
-                # print(BDB_1[0,:])
 
-        # from Florence.Tensor import makezero
-        # makezero(stiffness,tol=1e-10)
-        # print(stiffness[0,:])
-        # print(H_Voigt[:3,3:])
-        # print(np.linalg.norm(t))
-        # print(t[[2,5,8,11,14,17]])
-        # print(np.linalg.norm(t[[2,5,8,11,14,17]]))
-        # print(np.linalg.norm(tractionforce[[2,5,8,11,14,17]]))
-        # print(t)
-        # print(np.linalg.norm(t))
-        # print(np.linalg.norm(tractionforce))
-        # print(tractionforce)
         return stiffness, tractionforce 
 
 

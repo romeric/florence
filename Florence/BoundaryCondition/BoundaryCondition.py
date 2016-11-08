@@ -421,7 +421,8 @@ class BoundaryCondition(object):
             curvilinear_mesh.ReadIGES(self.cad_file)
             # EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
             geometry_points = curvilinear_mesh.GetGeomVertices()
-            # print np.max(geometry_points[:,0]), mesh.Bounds
+            # print(np.max(geometry_points[:,0]), mesh.Bounds)
+            # exit()
             curvilinear_mesh.GetGeomEdges()
             curvilinear_mesh.GetGeomFaces()
             curvilinear_mesh.GetGeomPointsOnCorrespondingEdges()
