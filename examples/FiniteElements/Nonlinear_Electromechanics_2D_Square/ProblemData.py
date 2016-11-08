@@ -97,8 +97,8 @@ def ProblemData_2(*args, **kwargs):
     p=2
 
     # material = IsotropicElectroMechanics_2(ndim,youngs_modulus=1.0,poissons_ratio=0.3, c1=1.0, c2=1.0)
-    # material = IsotropicElectroMechanics_0(ndim,youngs_modulus=1.0,poissons_ratio=0.3, eps_1=100.5)
-    material = IsotropicElectroMechanics_3(ndim,youngs_modulus=1.0,poissons_ratio=0.3, eps_1=10.5, eps_2=200.1)
+    material = IsotropicElectroMechanics_0(ndim,youngs_modulus=1.0,poissons_ratio=0.3, eps_1=100.5)
+    # material = IsotropicElectroMechanics_3(ndim,youngs_modulus=1.0,poissons_ratio=0.3, eps_1=10.5, eps_2=200.1)
 
     mesh = Mesh()
     mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,10),nx=2,ny=2)
@@ -173,9 +173,9 @@ def ProblemData_3(*args, **kwargs):
     p=2
 
     # material = IsotropicElectroMechanics_2(ndim,youngs_modulus=1.0,poissons_ratio=0.3, c1=1.0, c2=1.0)
-    # material = IsotropicElectroMechanics_0(ndim,youngs_modulus=1.0,poissons_ratio=0.3, eps_1=100.5)
+    material = IsotropicElectroMechanics_0(ndim,youngs_modulus=1.0,poissons_ratio=0.3, eps_1=100.5)
     # material = IsotropicElectroMechanics_0(ndim,youngs_modulus=10000.0,poissons_ratio=0.3, eps_1=1.5e-02)
-    material = IsotropicElectroMechanics_3(ndim,youngs_modulus=1.0,poissons_ratio=0.3, eps_1=10.5, eps_2=200.1)
+    # material = IsotropicElectroMechanics_3(ndim,youngs_modulus=1.0,poissons_ratio=0.3, eps_1=10.5, eps_2=200.1)
 
     mesh = Mesh()
     mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,10),nx=2,ny=2)
@@ -219,7 +219,7 @@ def ProblemData_3(*args, **kwargs):
     # formulation = DisplacementFormulation(mesh)
 
     # from Florence.Solver.FEMSolver import StaggeredFEMSolver
-    fem_solver = StaggeredFEMSolver(number_of_load_increments=100,analysis_type="static",
+    fem_solver = StaggeredFEMSolver(number_of_load_increments=10,analysis_type="static",
         analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
         newton_raphson_tolerance=1.0e-06)
 
