@@ -942,7 +942,9 @@ class PostProcess(object):
             # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot[:4,:], np.ones(Xplot.shape[0]),alpha=0.8,origin='lower')
 
             if QuantityToPlot is None:
-                plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, colors="#C5F1C5")
+                # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, colors="#C5F1C5")
+                triang = mtri.Triangulation(Xplot[:,0], Xplot[:,1],Tplot)
+                plt.tripcolor(triang, Uplot, shading='gouraud', cmap=cm.viridis)
             else:
                 plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, 100,alpha=0.8)
 

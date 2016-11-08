@@ -116,8 +116,8 @@ class StaggeredFEMSolver(FEMSolver):
 
 
         # INITIATE DATA FOR NON-LINEAR ANALYSIS
-        NodalForces, Residual = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float32), \
-            np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float32)
+        NodalForces, Residual = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64), \
+            np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64)
         # SET NON-LINEAR PARAMETERS
         self.NRConvergence = { 'Increment_'+str(Increment) : [] for Increment in range(self.number_of_load_increments) }
         
@@ -147,6 +147,7 @@ class StaggeredFEMSolver(FEMSolver):
         # ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES
         K, TractionForces = self.Assemble(function_spaces[0], formulation, mesh, material, solver, 
             Eulerx, Eulerp)[:2]
+        # print(K.todense()[:3,:3])
 
         if self.analysis_nature == 'nonlinear':
             print('Finished all pre-processing stage. Time elapsed was', time()-tAssembly, 'seconds')
@@ -178,8 +179,12 @@ class StaggeredFEMSolver(FEMSolver):
         self.GetBoundaryInfo(K,boundary_condition,formulation)
 
         # SOLVE THE FIRST MECHANICAL PROBLEM
-        dUm = self.SolveMechanics(K, LoadFactor, mesh, formulation, solver, Increment=0)
+        dUm = self.SolveMechanics(K, LoadFactor, mesh, formulation, solver, initial_solution=True)
         # print(dUm)
+        # exit()
+        # print(K.todense()[:4,:4])
+        self.force_up = np.zeros(formulation.ndim*mesh.points.shape[0])
+        self.force_pu = np.zeros(mesh.points.shape[0])
   
         for Increment in range(LoadIncrement):
             
@@ -190,14 +195,35 @@ class StaggeredFEMSolver(FEMSolver):
             dirichlet_forces_electric = self.ApplyDirichlet(K[self.electric_dofs,:][:,self.electric_dofs],
                 dirichlet_forces_electric, self.electric_out, self.electric_in,self.applied_dirichlet_electric)
             residual_electric = -LoadFactor*dirichlet_forces_electric
+            # print(dirichlet_forces_electric)
             
             # COMPUTE FORCE TO BE TRANSMITTED TO ELECTROSTATIC
+            # if Increment>0:
+                # dUm = LoadFactor*(Eulerx - mesh.points)
+                # dUm = LoadFactor*(Eulerx - Eulerx_n)
             K_pu = K[self.electric_dofs,:][:,self.mechanical_dofs]
             self.force_pu = K_pu.dot(dUm.flatten())
+            # if Increment==0:
+            #     K_pu = K[self.electric_dofs,:][:,self.mechanical_dofs]
+            #     self.force_pu = K_pu.dot(dUm.flatten())
+            # else:
+            #     K_pu = Ke[self.electric_dofs,:][:,self.mechanical_dofs]
+            #     self.force_pu = K_pu.dot(dUm.flatten())
+            # print(dUm)
+            # print(self.force_pu)
+            # self.force_pu = K_pu.dot(LoadFactor*dUm.flatten())
+            # print(self.force_pu)
 
             
             Eulerp_n = np.copy(Eulerp)
-            Eulerp[self.electric_out] += self.applied_dirichlet_electric
+            # Eulerp[self.electric_out] += self.applied_dirichlet_electric
+            applied_dirichlet_electric_inc = LoadFactor*self.applied_dirichlet_electric
+            Eulerp[self.electric_out] += applied_dirichlet_electric_inc
+            # print(Eulerp)
+            # exit()
+            # if Increment==1:
+            #     print(Eulerp)
+            #     exit()
 
             # GET ONLY NORM OF FIXED DOFs (THAT IS WHERE RESIDUAL FORCES GET GENERATED)
             if Increment==0:
@@ -206,30 +232,100 @@ class StaggeredFEMSolver(FEMSolver):
             if np.abs(la.norm(residual_electric[self.electric_in])) < 1e-14:
                 self.NormForces = 1e-14
 
-            Ke = K
+            # Ke = np.copy(K)
+            Ke = deepcopy(K)
+            # Ke = K
+            # if Increment==0:
+                # Ke = deepcopy(K)
+
+            # print(self.electric_in)
+            # print(self.electric_out)
+            # print(self.NormForces)
 
             Iter = 0
             # ENTER NEWTON-RAPHSON FOR ELECTROSTATICS
+            # xx= np.zeros_like(Eulerp)
             while np.abs(la.norm(residual_electric[self.electric_in])/self.NormForces) > Tolerance:
 
-                dUe = self.SolveElectrostatics(Ke, residual_electric,formulation,solver)
+                # if Increment==0:
+                #     print(Eulerp)
+                #     print(Eulerx)
+                #     exit()
+                # if Increment==1 and Iter==1:
+                #     print(Eulerp)
+                #     print(Eulerx)
+                #     exit()
+
+                dUe = self.SolveElectrostatics(Ke, residual_electric, formulation, solver, Iter)
                 # print(dUe)
+                # exit()
                 # print(Eulerp[self.electric_in])
                 # UPDATE EULERIAN POTENTIAL - GET ITERATIVE ELECTRIC POTENTIAL
                 Eulerp[self.electric_in] += dUe
+                # print(Eulerp)
                 # print(Eulerp[self.electric_in])
+                # exit()
+                # if Increment==0:
+                #     print(Eulerp)
+                #     print(Eulerx)
+                #     exit()
+                # if Increment==1 and Iter==1:
+                # #     print(Eulerp)
+                # #     print(Eulerx)
+                #     print(dUe)
+                #     exit()
+                # if Increment==1:
+                    # Eulerp = np.array([0.,0.,1.,1.,0.49911611,0.50088388,0.,0.49999999, 1.])
+
+                # residual_electric[self.electric_in] = TractionForces[self.columns_in_electric]
 
                 # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
                 # print(Eulerx - mesh.points)
                 Ke, TractionForces = self.Assemble(function_spaces[0], formulation, mesh, material, solver,
                     Eulerx,Eulerp)[:2]
+                # xx[self.electric_in] += dUe
+                # print(xx)
+                # exit()
+                # Ke, TractionForces = self.Assemble(function_spaces[0], formulation, mesh, material, solver,
+                #     Eulerx,xx)[:2]
+                # print(TractionForces)
                 
                 # FIND THE RESIDUAL
                 residual_electric[self.electric_in] = TractionForces[self.columns_in_electric]
+                # print(residual_electric[self.electric_in])
+                # exit()
+                # print(residual_electric[self.electric_in])
+                # print(self.electric_in)
+                # print(residual_electric.shape)
+                # exit()
+                # if Increment==0:
+                    # print(dUe)
+                    # print(Eulerp)
+                    # print(Eulerx)
+                    # print(residual_electric[self.electric_in])
+                    # print(TractionForces.shape)
+                    # print(np.linalg.norm(TractionForces))
+                    # print(self.electric_in)
+                    # print(self.columns_in_electric)
+                    # print(TractionForces)
+                    # print(TractionForces[[2,5,8,11,14,17,20,23,26],0])
+                    # print(TractionForces[[14,17,23]])
+                    # print(Residual[self.columns_in_electric])
+                    # print(la.norm(Residual[self.columns_in_electric]))
+                    # print(la.norm(residual_electric[self.electric_in]))
+                    # exit()
+                # if Increment==1 and Iter==1:
+                #     # print(TractionForces[[14,17,23]])
+                #     # print(Eulerp)
+                #     print(Eulerx)
+                    # exit()
 
                 # SAVE THE NORM 
+                # print(self.NormForces)
+                # self.NRConvergence['Increment_'+str(Increment)] = np.append(self.NRConvergence['Increment_'+str(Increment)],\
+                #     np.abs(la.norm(Residual[self.columns_in_electric])/self.NormForces))
                 self.NRConvergence['Increment_'+str(Increment)] = np.append(self.NRConvergence['Increment_'+str(Increment)],\
-                    np.abs(la.norm(Residual[self.columns_in_electric])/self.NormForces))
+                    np.abs(la.norm(residual_electric[self.electric_in])/self.NormForces))
                 
                 print('Iteration number', Iter, 'for load increment', Increment, 'with a residual of \t\t', \
                     np.abs(la.norm(residual_electric[self.electric_in])/self.NormForces)) 
@@ -252,27 +348,84 @@ class StaggeredFEMSolver(FEMSolver):
                 break
 
 
+            # K = self.Assemble(function_spaces[0], formulation, mesh, material, solver,
+            #         Eulerx,Eulerp)[0]
+            # K = deepcopy(Ke)
+
             # COMPUTE FORCE TO BE TRANSMITTED TO ELECTROSTATIC
-            K_up = K[self.mechanical_dofs,:][:,self.electric_dofs]
+            # K_up = K[self.mechanical_dofs,:][:,self.electric_dofs]
+            K_up = Ke[self.mechanical_dofs,:][:,self.electric_dofs]
             dUe = Eulerp - Eulerp_n
-            self.force_up = K_up.dot(dUe.flatten())
+            # dUe = LoadFactor*Eulerp
+            # dUe = LoadFactor*Eulerp/2.
+            # print(dUe.shape)
+            # print(dUe.flatten())
+            # exit()
+            # print(LoadFactor)
+            # dUe = LoadFactor*(Eulerp - Eulerp_n)
+            # self.force_up = K_up.dot(dUe.flatten())
+            # self.force_up += K_up.dot(dUe.flatten())
+            self.force_up = K_up.dot(dUe)
+            # if Increment==0:
+                # self.force_up = np.zeros_like(self.force_up)
+            # print(K_up.dot(dUe.flatten()).shape, self.force_up.shape)
+            # print(dUe.shape)
+            # print(K_up.todense())
+            # print(K_up.todense()[2,:])
+            # print(self.mechanical_dofs)
+            # print(self.electric_dofs)
+            # print(K[0,2])
+            # print(K.todense()[0,:])
+            # print(self.force_up)
 
             # SOLVE MECHANICS
-            dUm = self.SolveMechanics(K, LoadFactor, mesh, formulation, solver, Increment=0)
+            # applied_dirichlet_mech_inc = LoadFactor*self.applied_dirichlet_mech
+            # xx = np.zeros(Eulerx.shape[0]*formulation.ndim)
+            # xx[self.mech_in] = applied_dirichlet_mech_inc
+            # xx = xx.reshape(Eulerx.shape[0],formulation.ndim)
+            # Eulerx += xx
+            # print(applied_dirichlet_mech_inc.shape, Eulerx.shape, xx.shape)
+            dUm = self.SolveMechanics(K, LoadFactor, mesh, formulation, solver, initial_solution=False)
+            # dUm = self.SolveMechanics(Ke, LoadFactor, mesh, formulation, solver, initial_solution=False)
+            # dUm *= LoadFactor
+            # from Florence.Tensor import makezero
+            # makezero(dUm,tol=1e-10)
+            # print(dUm)
+            # exit()
             # UPDATE THE GEOMETRY NOW
+            # Eulerx_n = np.copy(Eulerx)
             Eulerx += dUm
+            # Eulerx += dUm*LoadFactor
+            # print(Eulerx)
+            # exit()
+            # if Increment == 1:
+            #     print(Eulerx)
+            #     exit()
 
 
             # UPDATE DISPLACEMENTS FOR THE CURRENT LOAD INCREMENT
             TotalDisp[:,:formulation.ndim,Increment] = Eulerx - mesh.points
-            TotalDisp[:,-1,Increment] = Eulerp - Eulerp_n
+            # print(TotalDisp[:,:formulation.ndim,Increment]-dUm)
+            # TotalDisp[:,-1,Increment] = Eulerp - Eulerp_n
+
+            # TotalDisp[:,:formulation.ndim,Increment] = Eulerx
+            TotalDisp[:,-1,Increment] = Eulerp
+
+            # K = Ke
+            # K = deepcopy(Ke)
+            # K, TractionForces = self.Assemble(function_spaces[0], formulation, mesh, material, solver,
+                    # Eulerx,Eulerp)[:2]
+            K = self.Assemble(function_spaces[0], formulation, mesh, material, solver,
+                    Eulerx,Eulerp)[0]
 
             print('\nFinished Load increment', Increment, 'in', time()-t_increment, 'seconds')
+
+        # exit()
 
         return TotalDisp
 
 
-    def ApplyDirichlet(self, stiffness, F, columns_out, columns_in,AppliedDirichlet, mass=None):
+    def ApplyDirichlet(self, stiffness, F, columns_out, columns_in, AppliedDirichlet, mass=None):
         """AppliedDirichlet is a non-member because it can be external incremental Dirichlet,
             which is currently not implemented as member of BoundaryCondition. F also does not 
             correspond to Dirichlet forces, as it can be residual in incrementally linearised
@@ -280,13 +433,22 @@ class StaggeredFEMSolver(FEMSolver):
         """
 
         # APPLY DIRICHLET BOUNDARY CONDITIONS
-        for i in range(0,columns_out.shape[0]):
+        for i in range(columns_out.shape[0]):
             F = F - AppliedDirichlet[i]*stiffness.getcol(columns_out[i])
+        
+        # xx = np.where(AppliedDirichlet==10.2)
+        # if xx[0].shape[0]>0:
+            # print(F,"\n")
+            # print(columns_out)
+            # print(AppliedDirichlet)
+            # yy = stiffness.getcol(columns_out[i])
+            # print(stiffness.todense()[:,1])
+            # print(type(yy))
 
         return F
 
 
-    def SolveMechanics(self, K, LoadFactor, mesh, formulation, solver, Increment=0):
+    def SolveMechanics(self, K, LoadFactor, mesh, formulation, solver, initial_solution=True):
         """ Solves for mechanical variables. This solves the upper row 
             of the following system
 
@@ -309,13 +471,17 @@ class StaggeredFEMSolver(FEMSolver):
             dirichlet_forces_mech, self.mech_out, self.mech_in,self.applied_dirichlet_mech)
         residual_mech = -LoadFactor*dirichlet_forces_mech
         K_uu_b = K[self.columns_in_mech,:][:,self.columns_in_mech]
+        # print(residual_mech)
+        # print(dirichlet_forces_mech)
 
-        if Increment == 0:
+        if initial_solution:
             F_b = residual_mech[self.mech_in,0]
         else:
-            rhs_mech = residual_mech - self.force_up[:,None]
+            rhs_mech = residual_mech + self.force_up[:,None]
             F_b = rhs_mech[self.mech_in]
-
+        # print(residual_mech[self.mech_in,0])
+        # print(F_b)
+        # exit()
         sol = solver.Solve(K_uu_b,-F_b)
         # REARRANGE
         dUm = np.zeros(self.all_mech_dofs.shape[0],dtype=np.float64)
@@ -323,12 +489,13 @@ class StaggeredFEMSolver(FEMSolver):
         dUm[self.mech_out] = LoadFactor*self.applied_dirichlet_mech
         dUm = dUm.reshape(dUm.shape[0]/formulation.ndim,formulation.ndim)
 
+        # print(sol)
         return dUm
         # return sol
 
 
 
-    def SolveElectrostatics(self, K, residual_electric,formulation,solver):
+    def SolveElectrostatics(self, K, residual_electric,formulation,solver,iteration):
         """ Solves for mechanical variables. This solves the lower row 
             of the following system
 
@@ -347,7 +514,13 @@ class StaggeredFEMSolver(FEMSolver):
 
         """
         K_pp_b = K[self.columns_in_electric,:][:,self.columns_in_electric]
-        rhs_electric = residual_electric - self.force_pu[:,None]
+        if iteration == 0:
+            # rhs_electric = residual_electric - self.force_pu[:,None]
+            rhs_electric = residual_electric + self.force_pu[:,None]
+            # print(self.force_pu[self.electric_in])
+        else:
+            rhs_electric = residual_electric           
+
         F_b = rhs_electric[self.electric_in]
         sol = solver.Solve(K_pp_b,-F_b)
         # REARRANGE
