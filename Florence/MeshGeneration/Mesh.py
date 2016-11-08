@@ -1306,13 +1306,28 @@ class Mesh(object):
 
         DictOutput = loadmat(filename)
 
-        self.elements = np.ascontiguousarray(DictOutput['elements']).astype(np.uint64)
-        self.points = np.ascontiguousarray(DictOutput['points'])
-        self.nelem = self.elements.shape[0]
-        # self.element_type = str(DictOutput['element_type'][0])
-        self.element_type = "tet"
-        self.edges = np.ascontiguousarray(DictOutput['edges']).astype(np.uint64)
-        self.faces = np.ascontiguousarray(DictOutput['faces']).astype(np.uint64)
+        # GENERIC READER - READS EVERYTHING FROM HDF5 AND ASSIGNS IT TO MESH OBJECT
+        for key, value in DictOutput.items():
+            if isinstance(DictOutput[key],np.ndarray):
+                if "elements" in DictOutput[key] or "edge" in DictOutput[key] \
+                or "face" in DictOutput[key]:
+                    setattr(self, key, np.ascontiguousarray(value).astype(np.uint64))
+                else:
+                    setattr(self, key, np.ascontiguousarray(value))
+            else:
+                setattr(self, key, value)
+
+
+        # CUSTOM READ - OLD
+        # self.elements = np.ascontiguousarray(DictOutput['elements']).astype(np.uint64)
+        # self.points = np.ascontiguousarray(DictOutput['points'])
+        # self.nelem = self.elements.shape[0]
+        # # self.element_type = str(DictOutput['element_type'][0])
+        # self.element_type = element_type
+        # self.edges = np.ascontiguousarray(DictOutput['edges']).astype(np.uint64)
+        # if self.element_type == "tet":
+        #     self.faces = np.ascontiguousarray(DictOutput['faces']).astype(np.uint64)
+
         # self.all_faces = np.ascontiguousarray(DictOutput['all_faces'])
         # self.all_edges = np.ascontiguousarray(DictOutput['all_edges'])
         # self.face_to_element = np.ascontiguousarray(DictOutput['face_to_element'])
@@ -1330,6 +1345,7 @@ class Mesh(object):
 
         # # self.edge_to_element = np.ascontiguousarray(DictOutput['edge_to_element'])
         # # self.boundary_edge_to_element = np.ascontiguousarray(DictOutput['boundary_edge_to_element'])
+
 
 
 
