@@ -19,7 +19,7 @@ from BonetTranservselyIsotropicHyperElastic import *
 # INCREMENTALLY LINEARISED MATERIAL MODELS
 from IncrementallyLinearisedNeoHookean import *
 
-# ELECTROMECHANICAL MATERIAL MODELS
+# ELECTROMECHANICAL MATERIAL MODELS - ENTHALPY
 from LinearModelElectromechanics import *
 from LinearisedElectromechanics import *
 from IsotropicElectroMechanics_0 import *
@@ -28,3 +28,13 @@ from IsotropicElectroMechanics_2 import *
 from IsotropicElectroMechanics_3 import *
 from Steinmann import *
 from AnisotropicMooneyRivlin_1_Electromechanics import *
+
+# ELECTROMECHANICAL MATERIAL MODELS - INTERNAL ENERGY
+from IsotropicElectroMechanics_100 import *
+from IsotropicElectroMechanics_101 import *
+from IsotropicElectroMechanics_102 import *
+from IsotropicElectroMechanics_103 import *
+from IsotropicElectroMechanics_104 import *
+from IsotropicElectroMechanics_105 import *
+from IsotropicElectroMechanics_106 import *
+from IsotropicElectroMechanics_107 import *
