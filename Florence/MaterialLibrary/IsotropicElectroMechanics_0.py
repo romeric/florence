@@ -14,6 +14,7 @@ class IsotropicElectroMechanics_0(Material):
         super(IsotropicElectroMechanics_0, self).__init__(mtype, ndim, **kwargs)
         # REQUIRES SEPARATELY
         self.nvar = self.ndim+1
+        self.energy_type = "enthalpy"
 
         # INITIALISE STRAIN TENSORS
         from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import KinematicMeasures
@@ -85,5 +86,7 @@ class IsotropicElectroMechanics_0(Material):
 
 
     def ElectricDisplacementx(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
-        varepsilon_1 = self.eps_1      
+        varepsilon_1 = self.eps_1
+        # print (varepsilon_1*ElectricFieldx).shape
+        # exit()
         return varepsilon_1*ElectricFieldx

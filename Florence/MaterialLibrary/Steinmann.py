@@ -14,6 +14,7 @@ class Steinmann(Material):
         super(Steinmann, self).__init__(mtype, ndim, **kwargs)
         # REQUIRES SEPARATELY
         self.nvar = self.ndim+1
+        self.energy_type = "enthalpy"
 
         # INITIALISE STRAIN TENSORS
         from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import KinematicMeasures
