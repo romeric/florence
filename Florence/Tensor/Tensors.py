@@ -314,35 +314,10 @@ def Voigt(A,sym=0):
     # sym returns the symmetrised tensor (only for 3rd and 4th order). Switched off by default.
 
     # GET THE DIMESNIONS
-    if len(A.shape)==4:
+    if A.ndim==4:
         # GIVEN TENSOR IS FOURTH ORDER
-        # C=A
         if sym:
             VoigtA = tovoigt(A)
-
-        #   if C.shape[0]==3:
-        #       VoigtA = 0.5*np.array([
-        #           [2*C[0,0,0,0],2*C[0,0,1,1],2*C[0,0,2,2],C[0,0,0,1]+C[0,0,1,0],C[0,0,0,2]+C[0,0,2,0],C[0,0,1,2]+C[0,0,2,1]],
-        #           [0           ,2*C[1,1,1,1],2*C[1,1,2,2],C[1,1,0,1]+C[1,1,1,0],C[1,1,0,2]+C[1,1,2,0],C[1,1,1,2]+C[1,1,2,1]],
-        #           [0           ,0           ,2*C[2,2,2,2],C[2,2,0,1]+C[2,2,1,0],C[2,2,0,2]+C[2,2,2,0],C[2,2,1,2]+C[2,2,2,1]],
-        #           [0           ,0           ,0           ,C[0,1,0,1]+C[0,1,1,0],C[0,1,0,2]+C[0,1,2,0],C[0,1,1,2]+C[0,1,2,1]],
-        #           [0           ,0           ,0           ,0                    ,C[0,2,0,2]+C[0,2,2,0],C[0,2,1,2]+C[0,2,2,1]],
-        #           [0           ,0           ,0           ,0                    ,0                    ,C[1,2,1,2]+C[1,2,2,1]]
-        #           ])
-
-        #   else:
-        #       VoigtA = 0.5*np.array([
-        #           [2*C[0,0,0,0],2*C[0,0,1,1],C[0,0,0,1]+C[0,0,1,0]],
-        #           [0           ,2*C[1,1,1,1],C[1,1,0,1]+C[1,1,1,0]],
-        #           [0           ,0           ,C[0,1,0,1]+C[0,1,1,0]]
-        #           ])
-
-        #   VoigtA = VoigtA+VoigtA.T 
-        #   for i in range(0,VoigtA.shape[0]):
-        #       VoigtA[i,i] = VoigtA[i,i]/2.0
-
-            
-
         else:
             C=A
             if C.shape[0]==3:
@@ -361,7 +336,7 @@ def Voigt(A,sym=0):
                     [C[0,1,0,0],C[0,1,1,1],C[0,1,0,1]]
                     ])
 
-    elif len(A.shape)==3:
+    elif A.ndim==3:
         e=A
         if e.shape[0]==3:
             if ~sym:
@@ -396,7 +371,7 @@ def Voigt(A,sym=0):
                     [e[0,0,1],e[1,0,1]]
                     ])
 
-    elif len(A.shape)==2:
+    elif A.ndim==2:
         VoigtA = SecondTensor2Vector(A)
 
     else:

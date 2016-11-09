@@ -7,13 +7,13 @@ from .MaterialBase import Material
 
 
 class IsotropicElectroMechanics_3(Material):
-    """docstring for Steinmann"""
     
     def __init__(self, ndim, **kwargs):
         mtype = type(self).__name__
         super(IsotropicElectroMechanics_3, self).__init__(mtype, ndim, **kwargs)
         # REQUIRES SEPARATELY
         self.nvar = self.ndim+1
+        self.energy_type = "enthalpy"
 
         # INITIALISE STRAIN TENSORS
         from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import KinematicMeasures

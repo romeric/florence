@@ -451,6 +451,7 @@ class FEMSolver(object):
             # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
             K, TractionForces = self.Assemble(function_spaces[0], formulation, mesh, material, solver,
                 Eulerx,Eulerp)[:2]
+            # exit()
             # FIND THE RESIDUAL
             Residual[boundary_condition.columns_in] = TractionForces[boundary_condition.columns_in] \
             - NodalForces[boundary_condition.columns_in]

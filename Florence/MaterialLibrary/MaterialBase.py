@@ -1,11 +1,12 @@
 import numpy as np
 from Florence.Utils import insensitive
+from warnings import warn
 
 # BASE CLASS FOR ALL MATERIAL MODELS - SHOULD NOT BE USED DIRECTLY 
 class Material(object):
     """Base class for all material models"""
 
-    def __init__(self,mtype,ndim,
+    def __init__(self, mtype, ndim, energy_type="internal_energy", 
         lame_parameter_1=None, lame_parameter_2=None, poissons_ratio=None, youngs_modulus=None,
         shear_modulus=None, transverse_iso_youngs_modulus=None, transverse_iso_shear_modulus=None,
         bulk_modulus=None, density=None, permittivity=None, permeability=None, **kwargs):
@@ -14,7 +15,11 @@ class Material(object):
         # SAFETY CHECKS
         if not isinstance(mtype, str):
             raise TypeError("Type of material model should be given as a string")
+        if not isinstance(energy_type, str):
+            raise TypeError("Material energy can either be 'internal_energy' or 'enthalpy'")
 
+        self.energy_type = energy_type
+        
         # MATERIAL CONSTANTS
         self.mu = lame_parameter_1
         self.lamb = lame_parameter_2
@@ -56,7 +61,7 @@ class Material(object):
             if self.E is not None and self.nu is not None:
                 self.GetLameParametersFromYoungsPoisson()
             else:
-                raise ValueError("You must set the material constants for problem")
+                warn("You must set the material constants for problem")
 
         if self.mtype == 'LinearModel' or \
             self.mtype == 'IncrementalLinearElastic':

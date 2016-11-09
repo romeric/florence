@@ -3,8 +3,7 @@ from numpy import einsum
 from .MaterialBase import Material
 from Florence.Tensor import trace, Voigt
 #####################################################################################################
-                                # Isotropic Electromechanical Model 2
-                                # W(C,E) = W_n(C) + c1*I: (E 0 E) + c2*C: (E 0 E)  
+                                # NeoHookean
                                 # W_n(C) = mu/2*C:I - mu*lnJ + lamb/2*(J-1)**2
                                 # 0 - stands for outer product
 #####################################################################################################
