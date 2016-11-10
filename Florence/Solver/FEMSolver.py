@@ -132,6 +132,8 @@ class FEMSolver(object):
         if self.analysis_nature == "nonlinear" and self.compute_mesh_qualities:
             # COMPUTE QUALITY MEASURES
             self.ScaledJacobian=post_process.MeshQualityMeasures(mesh,TotalDisp,False,False)[3]
+        if self.analysis_nature == "nonlinear":
+            post_process.newton_raphson_convergence = self.NRConvergence
         return post_process
 
 

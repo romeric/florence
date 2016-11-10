@@ -345,7 +345,7 @@ def ProblemData_3D(*args, **kwargs):
 def ProblemData_4(*args, **kwargs):
 
     ndim=2
-    p=2
+    p=4
 
     # material = IsotropicElectroMechanics_0(ndim,youngs_modulus=10.0, poissons_ratio=0.3, eps_1=10.0)
     # material = IsotropicElectroMechanics_3(ndim,youngs_modulus=10.0, poissons_ratio=0.3, eps_1=10.0, eps_2=1.0)
@@ -391,7 +391,7 @@ def ProblemData_4(*args, **kwargs):
 
     formulation = DisplacementPotentialFormulation(mesh)
 
-    fem_solver = FEMSolver(number_of_load_increments=2,analysis_type="static",
+    fem_solver = FEMSolver(number_of_load_increments=3,analysis_type="static",
         analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
         newton_raphson_tolerance=1.0e-05)
     # fem_solver = StaggeredFEMSolver(number_of_load_increments=6,analysis_type="static",
@@ -406,7 +406,7 @@ def ProblemData_4(*args, **kwargs):
     makezero(sol,tol=1.0e-9)
     # print repr(sol)
     # print sol
-    # solution.Plot(configuration="deformed",quantity=1)
+    solution.Plot(configuration="deformed",quantity=1)
 
 
 

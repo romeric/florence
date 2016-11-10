@@ -159,12 +159,20 @@ def ProblemData(*args, **kwargs):
     plt.grid('on')
     plt.show()
 
+
+
+
+
+
+
+
+
 if __name__ == "__main__":
     
     # for p in range(1,10):
     #     ProblemData_Mesh(p=p)
 
-    p=2
+    p=1
     # ProblemData_Mesh(p=p)
     
-    ProblemData(p=p)
+    # ProblemData(p=p)
