@@ -12,6 +12,7 @@ from NeoHookean_3 import *
 from NeoHookeanCoercive import *
 from NearlyIncompressibleNeoHookean import *
 from MooneyRivlin import *
+from MooneyRivlin_2 import *
 from NearlyIncompressibleMooneyRivlin import *
 from AnisotropicMooneyRivlin import *
 from TranservselyIsotropicHyperElastic import *

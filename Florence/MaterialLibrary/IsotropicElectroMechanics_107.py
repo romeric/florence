@@ -103,16 +103,16 @@ class IsotropicElectroMechanics_107(Material):
         DD = np.dot(D.T,D)[0,0]
         D0D = np.dot(D,D.T)
 
-        simga_mech = 2.0*mu1/J*b + \
+        sigma_mech = 2.0*mu1/J*b + \
             2.0*mu2/J*(trace(b)*b - np.dot(b,b)) -\
             2.0*(mu1+2*mu2+6*mue)/J*I +\
             lamb*(J-1)*I +\
             4.*mue/J*trace(b)*b
         sigma_electric = 1/eps_2*(D0D - 0.5*DD*I)
         # REGULARISATION TERMS
-        simga_reg = 4.*J/eps_e*(DD*b + trace(b)*D0D) + \
+        sigma_reg = 4.*J/eps_e*(DD*b + trace(b)*D0D) + \
             4.0*J**3/mue/eps_e**2*DD*D0D
-        sigma = simga_mech + sigma_electric + simga_reg
+        sigma = sigma_mech + sigma_electric + sigma_reg
 
         return sigma
 

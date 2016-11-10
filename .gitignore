@@ -53,6 +53,7 @@ RunSession.sublime-workspace
 param_run_session.py
 profile_imports_manual.py
 nr.py
+ParametricStudies/*
 
 # testfiles not to ignore
 !tests/Almond3D/

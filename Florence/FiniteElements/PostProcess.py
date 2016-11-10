@@ -326,32 +326,30 @@ class PostProcess(object):
 
 
 
-    def PlotNewtonRaphsonConvergence(self):
+    def PlotNewtonRaphsonConvergence(self, increment=None, save=False, filename=None):
+        """Plots convergence of Newton-Raphson for a given increment"""
 
-        # KEEP THE IMPORTS LOCAL AS MATPLOTLIB IMPORT IS SLOW
+        if increment == None:
+            increment = len(self.newton_raphson_convergence)-1
+
         import matplotlib.pyplot as plt
-        from scipy import io 
         # NEWTON-RAPHSON CONVERGENCE PLOT
-        if MainData.nrplot[0]:
-            if MainData.nrplot[1] == 'first':
-                # First increment convergence
-                plt.semilogy(MainData.NRConvergence['Increment_0'],'-ko')       
-            elif MainData.nrplot[1] == 'last':
-                # Last increment convergence
-                plt.plot(np.log10(MainData.NRConvergence['Increment_'+str(len(MainData.NRConvergence)-1)]),'-ko')   
-            else:
-                # Arbitrary increment convergence
-                plt.plot(np.log10(MainData.NRConvergence['Increment_'+str(MainData.nrplot[1])]),'-ko')  
+        plt.plot(np.log10(self.newton_raphson_convergence['Increment_'+str(increment)]),'-ko') 
+        axis_font = {'size':'18'}
+        plt.xlabel(r'$No\;\; of\;\; Iterations$', **axis_font)
+        plt.ylabel(r'$log_{10}|Residual|$', **axis_font)
+        plt.grid('on')
 
-            axis_font = {'size':'18'}
-            plt.xlabel(r'$No\, of\, Iteration$', **axis_font)
-            plt.ylabel(r'$log_{10}|Residual|$', **axis_font)
-            # Save plot
-            # plt.savefig(MainData.Path.ProblemResults+MainData.Path.Analysis+\
-            #   MainData.Path.MaterialModel+'/NR_convergence_'+MaterialArgs.Type+'.eps',
-            #   format='eps', dpi=1000)
-            # Display plot
-            plt.show()
+        # SAVE
+        if save:
+            from Florence.Utils import RSWD
+            if filename == None:
+                warn("No filename provided. I am going to write one in the current directory")
+                filename = RSWD()
+
+            plt.savefig(filename, format='eps', dpi=500)
+
+        plt.show()
 
 
 
