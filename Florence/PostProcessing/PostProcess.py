@@ -16,7 +16,7 @@ from Florence.FunctionSpace import HexLagrangeGaussLobatto as ThreeD
 from Florence.FunctionSpace import Tri
 from Florence.FunctionSpace import Tet
 
-from ElementalMatrices.KinematicMeasures import *
+from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import *
 from Florence.MeshGeneration import vtk_writer
 
 class PostProcess(object):
