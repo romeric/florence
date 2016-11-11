@@ -1,4 +1,5 @@
 import numpy as np
+from NumericIntegrator import GaussQuadrature
 
 def QuadraturePointsWeightsTet(C,Opt=1):
 
