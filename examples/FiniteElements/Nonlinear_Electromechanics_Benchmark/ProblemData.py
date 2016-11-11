@@ -8,6 +8,92 @@ from Florence.Tensor import makezero
 from Florence.PostProcessing import ErrorNorms
 from scipy.io import savemat, loadmat
 from Florence.Utils import RSWD
+from Florence.PostProcessing import PostProcess
+
+
+
+
+def GetMeshes(p=2):
+
+    # dd = loadmat("/home/roman/CurvedPatch_h"+str(532)+"P"+str(p)+".mat")
+    # dd = loadmat("/home/roman/CurvedPatch_h"+str(26807)+"P"+str(p)+".mat")
+    # dd = loadmat("/home/roman/CurvedPatch_h"+str(9220)+"P"+str(p)+".mat")
+    # dd = loadmat("/home/roman/CurvedPatch_h"+str(6947)+"P"+str(p)+".mat")
+    # mesh = Mesh()
+    # mesh.elements = dd['elements']
+    # mesh.points = dd['points']
+    # mesh.faces = dd['faces']
+    # mesh.element_type = "tet"
+    # mesh.nelem = mesh.elements.shape[0]
+    # TotalDisp = dd['TotalDisp']
+
+    # post_process = PostProcess(3,3)
+    # post_process.SetMesh(mesh)
+    # post_process.SetSolution(TotalDisp)        
+    # post_process.CurvilinearPlot()
+    # # post_process.CurvilinearPlot(plot_edges=False)
+    # exit()
+
+
+    ndim=3
+
+    material = LinearModel(ndim,youngs_modulus=10,poissons_ratio=0.45)
+
+    ProblemPath = PWD(__file__)
+    # filename = ProblemPath + '/Patch.dat'
+    # filename = ProblemPath + '/Patch_3476.dat'
+    filename = ProblemPath + '/Patch_6947.dat'
+    # filename = ProblemPath + '/Patch_9220.dat'
+    # filename = ProblemPath + '/Patch_26807.dat'
+    cad_file = ProblemPath +'/Patch.iges'
+
+
+    mesh = Mesh()
+    mesh.Reader(filename,"tet")
+    mesh.GetHighOrderMesh(p=p)
+    # makezero(mesh.points, tol=1e-12)
+
+    # print mesh.points
+    # mesh.SimplePlot()
+    # mesh.PlotMeshNumbering()
+    # exit()
+
+
+
+    boundary_condition = BoundaryCondition()
+    boundary_condition.SetCADProjectionParameters(cad_file,
+        scale=1000.,condition=20000000.,project_on_curves=True,solve_for_planar_faces=True)
+    # boundary_condition.SetCADProjectionParameters(cad_file,
+        # scale=1000.,condition=20000000.,project_on_curves=False,solve_for_planar_faces=False)
+    boundary_condition.GetProjectionCriteria(mesh)
+    formulation = DisplacementFormulation(mesh)
+
+    fem_solver = FEMSolver(number_of_load_increments=1,analysis_type="static",
+        analysis_nature="linear",parallelise=False, compute_mesh_qualities=True)
+
+    solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
+            material=material, boundary_condition=boundary_condition)
+
+    print solution.sol
+    # solution.Animate(configuration="deformed")
+    # solution.StressRecovery()
+    mesh.WriteHDF5("/home/roman/CurvedPatch_h"+str(mesh.nelem)+"P"+str(p)+".mat", {'TotalDisp':solution.sol})
+    # solution.Plot(configuration="original", quantity=2)
+    # solution.Plot(configuration="deformed", quantity=1)
+    # solution.PlotNewtonRaphsonConvergence()
+    # solution.CurvilinearPlot(plot_edges=False)
+    # solution.CurvilinearPlot()
+
+
+
+
+
+
+
+##########################################################################################
+##########################################################################################
+
+
 
 
 def FindMaxSlop(xs, ys):
@@ -115,53 +201,6 @@ class ExactSolutions(object):
     #             [0.,                             0.,                            1+3*C*points[i,2]**2      ]
     #             ])
     #     return F
-
-
-
-def GetMeshes(p=2):
-
-    p = kwargs['p']
-    ndim=2
-
-    material = LinearModel(ndim,youngs_modulus=10,poissons_ratio=0.45)
-
-    ProblemPath = PWD(__file__)
-    filename = ProblemPath + '/Patch_3476.dat'
-    cad_file = ProblemPath +'/Patch.iges'
-
-    mesh = Mesh()
-    mesh.Reader(filename,"tet")
-    mesh.GetHighOrderMesh(p=p)
-    # makezero(mesh.points, tol=1e-12)
-
-    # print mesh.points
-    # mesh.SimplePlot()
-    # mesh.PlotMeshNumbering()
-    # exit()
-
-
-
-    boundary_condition = BoundaryCondition()
-    boundary_condition.SetCADProjectionParameters(cad_file,
-        scale=1,condition=2,project_on_curves=True,solve_for_planar_faces=True)
-    boundary_condition.GetProjectionCriteria(mesh)
-    formulation = DisplacementFormulation(mesh)
-
-    fem_solver = FEMSolver(number_of_load_increments=1,analysis_type="static",
-        analysis_nature="linear",parallelise=False, compute_mesh_qualities=True)
-
-    solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
-            material=material, boundary_condition=boundary_condition)
-
-    # solution.Animate(configuration="deformed")
-    # solution.StressRecovery()
-    # solution.WriteVTK("/home/roman/zzchecker/HHH", quantity=1)
-    # solution.Plot(configuration="original", quantity=2)
-    # solution.Plot(configuration="deformed", quantity=1)
-    # solution.PlotNewtonRaphsonConvergence()
-    # solution.CurvilinearPlot(plot_edges=False)
-    solution.CurvilinearPlot()
-
  
 
 
@@ -269,7 +308,7 @@ def RunErrorNorms(p=1):
 
 
     # BenchmarkMechanics(args)
-    for mesh_chooser in range(2):
+    for mesh_chooser in range(5):
         args.mesh_chooser = mesh_chooser
         BenchmarkElectroMechanics(args) 
 
@@ -301,12 +340,9 @@ def RunErrorNorms(p=1):
     print FindMaxSlop(args.vols,args.eSd)
 
 
-    sfilename = RSWD() + "/Error_Norms_P" + str(p) + ".mat" 
-    # savemat(sfilename,{'ex':np.array(args.ex),'eF':np.array(eF),'eH':np.array(eH),'eJ':np.array(eJ),
-    #     'ePhi':np.array(ePhi),'eD':np.array(eD),'ed':np.array(ed),'eSF':np.array(eSF),'eSH':np.array(eSH),
-    #     'eSJ':np.array(eSJ),'eSD':np.array(eSD),'eSd':np.array(eSd)})
+    sfilename = PWD(__file__) + "/Error_Norms_P" + str(p) + ".mat" 
     # print sfilename
-    savemat(sfilename,args.__dict__,do_compression=True)
+    # savemat(sfilename,args.__dict__,do_compression=True)
 
 
 
@@ -319,29 +355,3 @@ if __name__ == "__main__":
 
     RunErrorNorms(p=p)
 
-
-
-
-[0.0030902569872664713, 1.7631262616368935e-07, 9.9096676004553359e-10, 5.8928001482098283e-10, 1.1685562734356378e-11]
-[0.0046934423917277838, 6.9761765277152682e-07, 1.1170075755259095e-08, 6.9031128353034029e-09, 3.0105794322159202e-10]
-[0.0057815240422056536, 1.1631485227676551e-06, 2.0807302537257288e-08, 1.3068985241767194e-08, 5.1541253068953567e-10]
-[0.0032725178306228842, 1.4248596249863167e-06, 2.8871799705000912e-08, 1.8385633191743525e-08, 6.2742787196987086e-10]
-[0.00023478816267113735, 5.9119854771377098e-08, 2.9649144644834275e-10, 1.8706502933339191e-10, 3.3990218399843752e-12]
-[0.00072103875385531619, 5.6842918268376727e-08, 3.4523912096474199e-10, 1.7879285523462958e-10, 3.4731864376694646e-12]
-[0.0056372202742033615, 3.3612032167788282e-07, 2.9389188796877811e-09, 1.2439636961350113e-09, 1.6779618689421816e-10]
-[0.0046934423917277838, 6.9761765277152682e-07, 1.1170075755259095e-08, 6.9031128353034029e-09, 3.0105794322159202e-10]
-[0.0057815240422056536, 1.1631485227676551e-06, 2.0807302537257288e-08, 1.3068985241767194e-08, 5.1541253068953567e-10]
-[0.014723510091821775, 1.357442540632285e-05, 3.7570978312009951e-07, 2.1574476506841903e-07, 5.5616445479189257e-09]
-
-(5.2528263825201433, 4.8058233160989134)
-(4.7381070076770548, 4.1712904711231111)
-(4.5753785371930817, 4.0378036245390634)
-(4.1603507431793556, 3.7550207661753241)
-(4.6792608245830989, 4.3616997883420936)
-(5.0790047399041605, 4.7242459029501029)
-(5.2291338942983723, 4.4924088746294313)
-(4.7381070076770548, 4.1712904711231111)
-(4.5753785371930817, 4.0378036245390634)
-(3.833749083745321, 3.4572652513510476)
-(5.0790047399041605, 4.7242459029501029)
-(5.2291338942983723, 4.4924088746294313)

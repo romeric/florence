@@ -25,7 +25,7 @@ class FunctionSpace(object):
         
 
         QuadratureOpt=3
-        norder=5
+        # norder=5 # 2*C for stiffness and 2*(C+1) for mass
 
         ndim = mesh.InferSpatialDimension()
         C = p - 1

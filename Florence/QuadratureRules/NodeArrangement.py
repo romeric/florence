@@ -53,7 +53,7 @@ def NodeArrangementTet(C):
         face_1 = [0,1,3]
         face_2 = [0,2,3]
         face_3 = [1,2,3]
-    if C==1:
+    elif C==1:
         face_0 = [0,1,2,4,5,6]
         face_1 = [0,1,3,4,7,8]
         face_2 = [0,2,3,5,7,9]
@@ -78,6 +78,38 @@ def NodeArrangementTet(C):
         face_1 = [0,1,3,4,5,6,7,8,29,30,31,32,33,34,50,51,52,53,54,65,66,67,68,75,76,77,81,82]
         face_2 = [0,2,3,9,15,20,24,27,29,35,40,44,47,49,50,55,59,62,64,65,69,72,74,75,78,80,81,83]
         face_3 = [1,2,3,14,19,23,26,28,34,39,43,46,48,49,54,58,61,63,64,68,71,73,74,77,79,80,82,83]
+    else:
+
+        # THIS IS A FLOATING POINT BASED
+        from math import sqrt
+        from Florence.QuadratureRules.FeketePointsTet import FeketePointsTet
+        tol=1e-12
+
+        fekete = FeketePointsTet(C)
+        all_nodes = np.arange((C+2)*(C+3)*(C+4)/6)
+        face_0 = all_nodes[np.where(np.abs(fekete[:,2]+1.)<tol)].tolist()
+        face_1 = all_nodes[np.where(np.abs(fekete[:,1]+1.)<tol)].tolist()
+        face_2 = all_nodes[np.where(np.abs(fekete[:,0]+1.)<tol)].tolist()
+        # THE AREA OF FACE_3 TRIANGLE
+        area = np.sqrt(12) 
+        # FIND ALL THE NODES LYING ON THIS FACE
+        l12 = np.repeat((fekete[1,:] - fekete[2,:])[:,None].T,fekete.shape[0],axis=0)
+        l13 = np.repeat((fekete[1,:] - fekete[3,:])[:,None].T,fekete.shape[0],axis=0)
+        l23 = np.repeat((fekete[2,:] - fekete[3,:])[:,None].T,fekete.shape[0],axis=0)
+        l1p = np.repeat(fekete[1,:][:,None].T,fekete.shape[0],axis=0) - fekete
+        l2p = np.repeat(fekete[2,:][:,None].T,fekete.shape[0],axis=0) - fekete
+        area_1p2 = np.linalg.norm(np.cross(l12,l1p),axis=1)/2.
+        area_1p3 = np.linalg.norm(np.cross(l13,l1p),axis=1)/2.
+        area_2p3 = np.linalg.norm(np.cross(l23,l2p),axis=1)/2.
+        areas = area_1p2 + area_1p3 + area_2p3
+
+        # GET ORDER OF THE FACE
+        face_3 = all_nodes[np.where(np.abs(areas-area)<tol)].tolist()
+
+        # SANITY CHECK
+        assert len(face_0) == len(face_1)
+        assert len(face_1) == len(face_2)
+        assert len(face_2) == len(face_3)
 
 
     face_numbering = np.array([face_0,face_1,face_2,face_3])

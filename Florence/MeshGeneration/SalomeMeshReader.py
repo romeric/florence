@@ -81,7 +81,6 @@ def ReadMesh_NPFROMFILE(filename,MeshType,C=0):
 
     # READ MESH POINTS WITH METADATA
     mesh.points = FileContent[2:4*mesh.nnode+2].reshape(mesh.nnode,4)
-
     
     # READ FREE EDGES & ELEMENTS FOR 2D MESHES 
     if MeshType=='tri' or MeshType=='quad':
@@ -141,8 +140,6 @@ def ReadMesh_NPFROMFILE(filename,MeshType,C=0):
     
 
     return mesh 
-
-
 
 
 
@@ -415,7 +412,6 @@ def ReadMesh(filename,MeshType,C=0):
 
     # USE THE NPFROMFILE+CYTHON MESH READER
     mesh = ReadMesh_NPFROMFILE(filename,MeshType,C=0)
-
     # Unsigned 
     # mesh.elements = mesh.elements.astype(np.uint64)
     # mesh.edges = mesh.edges.astype(np.uint64)

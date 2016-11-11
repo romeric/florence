@@ -125,9 +125,6 @@ def HighOrderMeshTet_SEMISTABLE(C,mesh,Decimals=10,Zerofy=True,Parallel=False,nC
         face_to_elements = mesh.GetElementsWithBoundaryFacesTet()
         node_arranger = NodeArrangementTet(C)[0]
 
-        # for i in range(mesh.faces.shape[0]):
-            # refaces[i,:] = reelements[face_to_elements[i,0],node_arranger[face_to_elements[i,1],:]]
-
         refaces = reelements[face_to_elements[:,0][:,None],node_arranger[face_to_elements[:,1],:]].astype(mesh.faces.dtype)
 
         tfaces = time()-tfaces
