@@ -11,7 +11,7 @@ from Florence.Utils import insensitive
 
 from Florence.FiniteElements.SparseAssembly import SparseAssembly_Step_2
 from Florence.FiniteElements.SparseAssemblySmall import SparseAssemblySmall
-from Florence.FiniteElements.PostProcess import *
+from Florence.PostProcessing import *
 from Florence.Solver import LinearSolver
 
 import pyximport
@@ -53,6 +53,7 @@ class FEMSolver(object):
         self.newton_raphson_tolerance = newton_raphson_tolerance
         self.maximum_iteration_for_newton_raphson = maximum_iteration_for_newton_raphson
         self.newton_raphson_failed_to_converge = False
+        self.NRConvergence = None
 
         self.compute_mesh_qualities = compute_mesh_qualities
 

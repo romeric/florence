@@ -5,10 +5,9 @@ from warnings import warn
 from time import time
 import numpy as np
 import scipy as sp
-# from scipy.sparse import coo_matrix, csc_matrix, csr_matrix 
 from Florence.Utils import insensitive
 
-from Florence.FiniteElements.PostProcess import *
+from Florence.PostProcessing import *
 from Florence.Solver import LinearSolver, FEMSolver
 
 class StaggeredFEMSolver(FEMSolver):

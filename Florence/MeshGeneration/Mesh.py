@@ -1357,6 +1357,8 @@ class Mesh(object):
             """
 
         assert self.element_type is not None
+        assert self.elements is not None
+        assert self.points is not None
 
         import matplotlib.pyplot as plt 
         if self.element_type == "tri":
