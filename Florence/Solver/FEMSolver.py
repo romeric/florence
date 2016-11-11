@@ -188,7 +188,6 @@ class FEMSolver(object):
                  'and number of boundary nodes is', np.unique(mesh.faces).shape[0])
         #---------------------------------------------------------------------------#
 
-
         # INITIATE DATA FOR NON-LINEAR ANALYSIS
         NodalForces, Residual = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float32), \
             np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float32)

@@ -364,7 +364,6 @@ class Mesh(object):
 
 
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementTet
-
         node_arranger = NodeArrangementTet(p-1)[0]
 
         # CONCATENATE ALL THE FACES MADE FROM ELEMENTS

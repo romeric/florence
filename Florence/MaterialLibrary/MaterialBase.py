@@ -60,8 +60,8 @@ class Material(object):
         if self.mu is None or self.lamb is None:
             if self.E is not None and self.nu is not None:
                 self.GetLameParametersFromYoungsPoisson()
-            else:
-                warn("You must set the material constants for problem")
+            # else:
+            #     warn("You must set the material constants for problem")
 
         if self.mtype == 'LinearModel' or \
             self.mtype == 'IncrementalLinearElastic':

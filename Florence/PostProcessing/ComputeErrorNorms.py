@@ -91,15 +91,11 @@ class ErrorNorms(PostProcess):
 
 
             # GEOMETRY ERROR
-            # AnalyticalSolNodes = func.Exact_x(LagrangeElemCoords)
-            # AnalyticalSolGauss = func.Exact_x(LagrangeElemGaussCoords)
-            # NumericalSolGauss = np.einsum('ij,ik->kj',AnalyticalSolNodes,Domain.Bases)
             GeomNodes = func.Exact_x(LagrangeElemCoords)
             ExactGeom = func.Exact_x(LagrangeElemGaussCoords)
             NumericalGeom = np.einsum('ij,ik->kj',GeomNodes,Domain.Bases)
 
             # DEFORMATION GRADIENT ERROR
-            # ExactEulerxNodes = AnalyticalSolNodes + LagrangeElemCoords
             ExactEulerxNodes = GeomNodes + LagrangeElemCoords
             ParentGradientX = np.einsum('ijk,jl->kil',Domain.Jm,LagrangeElemCoords)
             MaterialGradient = np.einsum('ijk,kli->ijl',la.inv(ParentGradientX),Domain.Jm)
@@ -154,47 +150,83 @@ class ErrorNorms(PostProcess):
 
 
             for counter in range(0,Domain.AllGauss.shape[0]):
+            # for counter in range(1):    
 
-                # L2_normx += (AnalyticalSolGauss - NumericalSolGauss)**2*Domain.AllGauss[counter,0]
-                # L2_denormx += (AnalyticalSolGauss)**2*Domain.AllGauss[counter,0]
-                L2_normx += (ExactGeom - NumericalGeom)**2*Domain.AllGauss[counter,0]
-                L2_denormx += (ExactGeom)**2*Domain.AllGauss[counter,0]
+                # L2_normx += (ExactGeom - NumericalGeom)**2*Domain.AllGauss[counter,0]
+                # L2_denormx += (ExactGeom)**2*Domain.AllGauss[counter,0]
 
-                # L2_normx += (ExactGeom[counter,:] - NumericalGeom[counter,:])**2*Domain.AllGauss[counter,0]
-                # L2_denormx += (ExactGeom[counter,:])**2*Domain.AllGauss[counter,0]
+                # L2_normF += (F_exact - F)**2*Domain.AllGauss[counter,0]
+                # L2_denormF += (F_exact)**2*Domain.AllGauss[counter,0]
 
-                L2_normF += (F_exact - F)**2*Domain.AllGauss[counter,0]
-                L2_denormF += (F_exact)**2*Domain.AllGauss[counter,0]
+                # L2_normH += (H_exact - H)**2*Domain.AllGauss[counter,0]
+                # L2_denormH += (H_exact)**2*Domain.AllGauss[counter,0]
 
-                L2_normH += (H_exact - H)**2*Domain.AllGauss[counter,0]
-                L2_denormH += (H_exact)**2*Domain.AllGauss[counter,0]
+                # L2_normJ += (J_exact - J)**2*Domain.AllGauss[counter,0]
+                # L2_denormJ += (J_exact)**2*Domain.AllGauss[counter,0]
 
-                L2_normJ += (J_exact - J)**2*Domain.AllGauss[counter,0]
-                L2_denormJ += (J_exact)**2*Domain.AllGauss[counter,0]
+                # L2_normPhi += (ExactPotential - NumericalPotential)**2*Domain.AllGauss[counter,0]
+                # L2_denormPhi += (ExactPotential)**2*Domain.AllGauss[counter,0]
 
-                L2_normPhi += (ExactPotential - NumericalPotential)**2*Domain.AllGauss[counter,0]
-                L2_denormPhi += (ExactPotential)**2*Domain.AllGauss[counter,0]
+                # L2_normD += (D_exact - D)**2*Domain.AllGauss[counter,0]
+                # L2_denormD += (D_exact)**2*Domain.AllGauss[counter,0]
 
-                L2_normD += (D_exact - D)**2*Domain.AllGauss[counter,0]
-                L2_denormD += (D_exact)**2*Domain.AllGauss[counter,0]
+                # L2_normd += (d_exact - d)**2*Domain.AllGauss[counter,0]
+                # L2_denormd += (d_exact)**2*Domain.AllGauss[counter,0]
 
-                L2_normd += (d_exact - d)**2*Domain.AllGauss[counter,0]
-                L2_denormd += (d_exact)**2*Domain.AllGauss[counter,0]
+                # L2_normSF += (SF_exact - SF)**2*Domain.AllGauss[counter,0]
+                # L2_denormSF += (SF_exact)**2*Domain.AllGauss[counter,0]
 
-                L2_normSF += (SF_exact - SF)**2*Domain.AllGauss[counter,0]
-                L2_denormSF += (SF_exact)**2*Domain.AllGauss[counter,0]
+                # L2_normSH += (SH_exact - SH)**2*Domain.AllGauss[counter,0]
+                # L2_denormSH += (SH_exact)**2*Domain.AllGauss[counter,0]
 
-                L2_normSH += (SH_exact - SH)**2*Domain.AllGauss[counter,0]
-                L2_denormSH += (SH_exact)**2*Domain.AllGauss[counter,0]
+                # L2_normSJ += (SJ_exact - SJ)**2*Domain.AllGauss[counter,0]
+                # L2_denormSJ += (SJ_exact)**2*Domain.AllGauss[counter,0]
 
-                L2_normSJ += (SJ_exact - SJ)**2*Domain.AllGauss[counter,0]
-                L2_denormSJ += (SJ_exact)**2*Domain.AllGauss[counter,0]
+                # L2_normSD += (SD_exact - SD)**2*Domain.AllGauss[counter,0]
+                # L2_denormSD += SD_exact**2*Domain.AllGauss[counter,0]
 
-                L2_normSD += (SD_exact - SD)**2*Domain.AllGauss[counter,0]
-                L2_denormSD += SD_exact**2*Domain.AllGauss[counter,0]
+                # L2_normSd += (Sd_exact - Sd)**2*Domain.AllGauss[counter,0]
+                # L2_denormSd += Sd_exact**2*Domain.AllGauss[counter,0]
 
-                L2_normSd += (Sd_exact - Sd)**2*Domain.AllGauss[counter,0]
-                L2_denormSd += Sd_exact**2*Domain.AllGauss[counter,0]
+                ###########################################################
+
+                L2_normx += (ExactGeom[counter,:] - NumericalGeom[counter,:])**2*Domain.AllGauss[counter,0]
+                L2_denormx += (ExactGeom[counter,:])**2*Domain.AllGauss[counter,0]
+
+                L2_normF += (F_exact[counter,:,:] - F[counter,:,:])**2*Domain.AllGauss[counter,0]
+                L2_denormF += (F_exact[counter,:,:])**2*Domain.AllGauss[counter,0]
+
+                L2_normH += (H_exact[counter,:,:] - H[counter,:,:])**2*Domain.AllGauss[counter,0]
+                L2_denormH += (H_exact[counter,:,:])**2*Domain.AllGauss[counter,0]
+
+                L2_normJ += (J_exact[counter] - J[counter])**2*Domain.AllGauss[counter,0]
+                L2_denormJ += (J_exact[counter])**2*Domain.AllGauss[counter,0]
+
+                L2_normPhi += (ExactPotential[counter] - NumericalPotential[counter])**2*Domain.AllGauss[counter,0]
+                L2_denormPhi += (ExactPotential[counter])**2*Domain.AllGauss[counter,0]
+
+                L2_normD += (D_exact[counter,:] - D[counter,:])**2*Domain.AllGauss[counter,0]
+                L2_denormD += (D_exact[counter,:])**2*Domain.AllGauss[counter,0]
+
+                L2_normd += (d_exact[counter,:] - d[counter,:])**2*Domain.AllGauss[counter,0]
+                L2_denormd += (d_exact[counter,:])**2*Domain.AllGauss[counter,0]
+
+                L2_normSF += (SF_exact[counter,:,:] - SF[counter,:,:])**2*Domain.AllGauss[counter,0]
+                L2_denormSF += (SF_exact[counter,:,:])**2*Domain.AllGauss[counter,0]
+
+                L2_normSH += (SH_exact[counter,:,:] - SH[counter,:,:])**2*Domain.AllGauss[counter,0]
+                L2_denormSH += (SH_exact[counter,:,:])**2*Domain.AllGauss[counter,0]
+
+                L2_normSJ += (SJ_exact[counter] - SJ[counter])**2*Domain.AllGauss[counter,0]
+                L2_denormSJ += (SJ_exact[counter])**2*Domain.AllGauss[counter,0]
+
+                L2_normSD += (SD_exact[counter,:] - SD[counter,:])**2*Domain.AllGauss[counter,0]
+                L2_denormSD += SD_exact[counter,:]**2*Domain.AllGauss[counter,0]
+
+                L2_normSd += (Sd_exact[counter,:] - Sd[counter,:])**2*Domain.AllGauss[counter,0]
+                L2_denormSd += Sd_exact[counter,:]**2*Domain.AllGauss[counter,0]
+
+                ###########################################################
 
             # L2_normSH = np.einsum('ijk,i',(SH_exact - SH)**2,Domain.AllGauss[:,0])
             # L2_denormSH = np.einsum('ijk,i',SH_exact**2,Domain.AllGauss[counter,0])

@@ -553,7 +553,7 @@ class BoundaryCondition(object):
         from Florence import Mesh
         # from Florence.FiniteElements.Solvers.Solver import MainSolver
         from Florence import FunctionSpace, QuadratureRule
-        from Florence.FiniteElements.PostProcess import PostProcess
+        from Florence.PostProcessing import PostProcess
 
         surface_flags = itemfreq(planar_mesh_faces[:,1])
         number_of_planar_surfaces = surface_flags.shape[0]
