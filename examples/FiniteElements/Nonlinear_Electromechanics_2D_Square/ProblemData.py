@@ -345,7 +345,7 @@ def ProblemData_3D(*args, **kwargs):
 def ProblemData_4(*args, **kwargs):
 
     ndim=2
-    p=4
+    p=2
 
     # material = IsotropicElectroMechanics_0(ndim,youngs_modulus=10.0, poissons_ratio=0.3, eps_1=10.0)
     # material = IsotropicElectroMechanics_3(ndim,youngs_modulus=10.0, poissons_ratio=0.3, eps_1=10.0, eps_2=1.0)
@@ -393,7 +393,7 @@ def ProblemData_4(*args, **kwargs):
 
     fem_solver = FEMSolver(number_of_load_increments=3,analysis_type="static",
         analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
-        newton_raphson_tolerance=1.0e-05)
+        newton_raphson_tolerance=1.0e-03)
     # fem_solver = StaggeredFEMSolver(number_of_load_increments=6,analysis_type="static",
     #     analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
     #     newton_raphson_tolerance=1.0e-06)
@@ -417,9 +417,9 @@ if __name__ == "__main__":
     # ProblemData()
     # ProblemData_2()
     # ProblemData_3()
-    # ProblemData_3D()
+    ProblemData_3D()
 
-    ProblemData_4()
+    # ProblemData_4()
     
     # from cProfile import run
     # run('ProblemData_3D()')

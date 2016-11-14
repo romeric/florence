@@ -42,9 +42,9 @@ def GetMeshes(p=2):
     ProblemPath = PWD(__file__)
     # filename = ProblemPath + '/Patch.dat'
     # filename = ProblemPath + '/Patch_3476.dat'
-    filename = ProblemPath + '/Patch_6947.dat'
+    # filename = ProblemPath + '/Patch_6947.dat'
     # filename = ProblemPath + '/Patch_9220.dat'
-    # filename = ProblemPath + '/Patch_26807.dat'
+    filename = ProblemPath + '/Patch_26807.dat'
     cad_file = ProblemPath +'/Patch.iges'
 
 
@@ -56,7 +56,8 @@ def GetMeshes(p=2):
     # print mesh.points
     # mesh.SimplePlot()
     # mesh.PlotMeshNumbering()
-    # exit()
+    print 4*mesh.points.shape[0]
+    exit()
 
 
 
@@ -127,17 +128,6 @@ class ExactSolutions(object):
     def Exact_Phi(points):
         phi = 10000.
         exact_sol = phi*np.sin(points[:,0])
-        return exact_sol
-
-    @staticmethod
-    def Exact_E(points):
-
-        phi = 10000.
-        exact_sol = np.zeros_like(points)
-        exact_sol[:,0] = phi*np.cos(points[:,0])
-        exact_sol[:,1] = 0.
-        exact_sol[:,2] = 0.
-
         return exact_sol
 
     @staticmethod
@@ -347,11 +337,98 @@ def RunErrorNorms(p=1):
 
 
 
+################################################################################################
+################################################################################################
+
+
+
+def RunProblems(p=2):
+
+    material = IsotropicElectroMechanics_105(ndim=3,mu1=10.0,mu2=10.0,lamb=20., eps_1=1.0, eps_2=1.0)
+
+    ProblemPath = PWD(__file__)
+    # filename = ProblemPath + '/Patch.dat'
+    filename = ProblemPath + '/Patch_3476.dat'
+    # filename = ProblemPath + '/Patch_6947.dat'
+    # filename = ProblemPath + '/Patch_9220.dat'
+    # filename = ProblemPath + '/Patch_26807.dat'
+
+
+    mesh = Mesh()
+    mesh.Reader(filename,"tet")
+    # mesh.ReadHDF5("/home/roman/CurvedPatch_h"+str(6947)+"P"+str(p)+".mat")
+    # mesh.GetHighOrderMesh(p=p)
+    makezero(mesh.points, tol=1e-09)
+
+    # print mesh.points
+    # mesh.SimplePlot()
+    # mesh.PlotMeshNumbering()
+    # print 4*mesh.points.shape[0]
+
+    # print mesh.Bounds
+    # print mesh.points[np.isclose(mesh.points[:,0],10.),:]
+    # print mesh.points[np.where(mesh.points[:,0]==11.),:].shape
+    # exit()
+
+
+
+    boundary_condition = BoundaryCondition()
+
+    def DirichletFunc(mesh):
+
+        boundary_data = np.zeros((mesh.points.shape[0],material.nvar))+np.NAN
+
+        Y_0 = np.where(mesh.points[:,1] == 0)[0]
+        boundary_data[Y_0,0] = 0.
+        boundary_data[Y_0,1] = 0.
+        boundary_data[Y_0,2] = 0.
+        boundary_data[Y_0,3] = 0.
+
+        Y_1 = np.where(mesh.points[:,1]==20.)[0]
+        boundary_data[Y_1,0] = -30.
+        # boundary_data[Y_1,1] = 0.
+        boundary_data[Y_1,2] = 0.
+        boundary_data[Y_1,3] = 10.
+
+        return boundary_data
+
+
+    # boundary_condition.dirichlet_flags = DirichletFunc(mesh)
+    boundary_condition.SetDirichletCriteria(DirichletFunc,mesh)
+
+    formulation = DisplacementPotentialFormulation(mesh)
+
+    fem_solver = FEMSolver(number_of_load_increments=1,analysis_type="static",
+        analysis_nature="nonlinear", newton_raphson_tolerance=1.0e-02, 
+        compute_mesh_qualities=False, parallelise=False)
+
+    solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
+            material=material, boundary_condition=boundary_condition)
+
+    # print solution.sol
+    # solution.Animate(configuration="deformed")
+    # solution.StressRecovery()
+    # mesh.WriteHDF5("/home/roman/CurvedPatch_h"+str(mesh.nelem)+"P"+str(p)+".mat", {'TotalDisp':solution.sol})
+    # solution.Plot(configuration="original", quantity=2)
+    solution.Plot(configuration="deformed", quantity=1)
+    # solution.PlotNewtonRaphsonConvergence()
+    # solution.CurvilinearPlot(plot_edges=False)
+    # solution.CurvilinearPlot()
+
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
 
-    p=2
-    # GetMeshes(p=p)
+    p=8
+    GetMeshes(p=p)
 
-    RunErrorNorms(p=p)
+    # RunErrorNorms(p=p)
+
+    RunProblems(p=p)
 
