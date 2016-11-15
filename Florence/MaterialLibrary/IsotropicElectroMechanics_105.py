@@ -58,7 +58,7 @@ class IsotropicElectroMechanics_105(Material):
         E_Voigt, P_Voigt, C_Voigt = self.legendre_transform.InternalEnergyToEnthalpy(self.dielectric_tensor, 
             self.coupling_tensor, self.elasticity_tensor, in_voigt=False)
         # E_Voigt, P_Voigt, C_Voigt = self.legendre_transform.InternalEnergyToEnthalpy(self.dielectric_tensor, 
-            # Voigt(self.coupling_tensor,1), Voigt(self.elasticity_tensor,1), in_voigt=True)
+        #     Voigt(self.coupling_tensor,1), Voigt(self.elasticity_tensor,1), in_voigt=True)
 
         # BUILD HESSIAN
         factor = 1.
