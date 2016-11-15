@@ -99,13 +99,13 @@ def ProblemData_2(*args, **kwargs):
 
     # material = IsotropicElectroMechanics_2(ndim,youngs_modulus=1.0,poissons_ratio=0.3, c1=1.0, c2=1.0)
     # material = IsotropicElectroMechanics_0(ndim,youngs_modulus=1.0,poissons_ratio=0.3, eps_1=100.5)
-    # material = IsotropicElectroMechanics_3(ndim,youngs_modulus=1.0e6,poissons_ratio=0.3, eps_1=10.5e-4, eps_2=1e-4)
+    material = IsotropicElectroMechanics_3(ndim,youngs_modulus=1.0e6,poissons_ratio=0.3, eps_1=10.5e-4, eps_2=1e-4)
     # material = IsotropicElectroMechanics_106(ndim,mu1=1.0,mu2=0.5, lamb=1.0, eps_1=10.5, eps_2=200.1)
-    material = IsotropicElectroMechanics_106(ndim,mu1=1.0e6,mu2=0.5e6, lamb=2.0e6, eps_1=1e-03, eps_2=1e-03)
+    # material = IsotropicElectroMechanics_106(ndim,mu1=1.0e6,mu2=0.5e6, lamb=2.0e6, eps_1=1e-03, eps_2=1e-03)
     # material = IsotropicElectroMechanics_107(ndim,mu1=1.0,mu2=0.5, lamb=1.0, eps_1=10.5, eps_2=200.1, mue=1.0, eps_e=1.0)
 
     mesh = Mesh()
-    mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),nx=5,ny=5)
+    mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),nx=2,ny=2)
     mesh.GetHighOrderMesh(p=p)
     # print mesh.points.shape[0], mesh.nelem
     # mesh.SimplePlot()
@@ -125,10 +125,10 @@ def ProblemData_2(*args, **kwargs):
         boundary_data[Y_0,1] = 0.
         boundary_data[Y_0,2] = 0.
 
-        # Y_1 = np.where(mesh.points[:,1] == 4)[0]
+        Y_1 = np.where(mesh.points[:,1] == 4)[0]
         # boundary_data[Y_1,0] = 0.0
-        # boundary_data[Y_1,1] = 0.0
-        # boundary_data[Y_1,2] = 40000.0
+        # boundary_data[Y_1,1] = 4.0
+        # boundary_data[Y_1,2] = 1.
 
         # boundary_data[2::material.nvar,:] = 0
         # boundary_data[:,2] = 0. # fix all electrostatics
@@ -144,8 +144,8 @@ def ProblemData_2(*args, **kwargs):
 
         Y_0 = np.where(mesh.points[:,1] == 4)[0]
         # boundary_data[Y_0,0] = 0.
-        # boundary_data[Y_0,1] = -.02
-        boundary_data[Y_0,2] = 50e-1
+        # boundary_data[Y_0,1] = 2e5
+        boundary_data[Y_0,2] = 0.001
 
         return boundary_data
 
@@ -155,20 +155,17 @@ def ProblemData_2(*args, **kwargs):
     formulation = DisplacementPotentialFormulation(mesh)
     # formulation = DisplacementFormulation(mesh)
 
-    fem_solver = FEMSolver(number_of_load_increments=5,analysis_type="static",
-        analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
-        newton_raphson_tolerance=1.0e-02, maximum_iteration_for_newton_raphson=200)
-    # fem_solver = StaggeredFEMSolver(number_of_load_increments=50,analysis_type="static",
-    #     analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
-    #     newton_raphson_tolerance=1.0e-04)
+    # fem_solver = FEMSolver(number_of_load_increments=1)
+    fem_solver = StaggeredFEMSolver(number_of_load_increments=1)
+    # 7.63415386229
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition)
 
 
-    # sol = np.copy(solution.sol[:,:,-1])
-    # makezero(sol,tol=1.0e-9)
-    # print sol
+    sol = np.copy(solution.sol[:,:,-1])
+    makezero(sol,tol=1.0e-8)
+    print sol
     # print repr(sol)
     # print solution.sol[:,2,-1]
     # print solution.sol[:,1,-1]
@@ -181,7 +178,7 @@ def ProblemData_2(*args, **kwargs):
 
     print np.linalg.norm(solution.sol[:,:2,-1])
     # print np.linalg.norm(solution.sol[:,-1,-1])
-    solution.Plot(configuration="deformed",quantity=1)
+    # solution.Plot(configuration="deformed",quantity=1)
 
 
     # 21.0460889142

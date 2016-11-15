@@ -58,6 +58,7 @@ class BoundaryCondition(object):
         self.applied_dirichlet = None
 
         self.dirichlet_flags = None
+        self.neumann_flags = None
 
 
         # NODAL FORCES GENERATED BASED ON DIRICHLET OR NEUMANN ARE NOT 
@@ -652,7 +653,7 @@ class BoundaryCondition(object):
         return stiffness_b, F_b, mass_b
 
 
-    def ApplyDirichletGetReducedMatrices(self, stiffness, F, AppliedDirichlet, mass=None):
+    def ApplyDirichletGetReducedMatrices(self, stiffness, F, AppliedDirichlet, LoadFactor=1., mass=None):
         """AppliedDirichlet is a non-member because it can be external incremental Dirichlet,
             which is currently not implemented as member of BoundaryCondition. F also does not 
             correspond to Dirichlet forces, as it can be residual in incrementally linearised
@@ -661,7 +662,7 @@ class BoundaryCondition(object):
 
         # APPLY DIRICHLET BOUNDARY CONDITIONS
         for i in range(0,self.columns_out.shape[0]):
-            F = F - AppliedDirichlet[i]*stiffness.getcol(self.columns_out[i])
+            F = F - LoadFactor*AppliedDirichlet[i]*stiffness.getcol(self.columns_out[i])
 
 
         # GET REDUCED FORCE VECTOR
@@ -723,15 +724,20 @@ class BoundaryCondition(object):
         self.nurbs_condition = nurbs_func(*args)
 
 
-    def GetExternalForces(self,mesh,material):
-        # FIND PURE NEUMANN (EXTERNAL) NODAL FORCE VECTOR
-        # NeumannForces = AssemblyForces(MainData,mesh)
-        # NeumannForces = AssemblyForces_Cheap(MainData,mesh)
-        # NeumannForces = np.zeros((mesh.points.shape[0]*MainData.nvar,1),dtype=np.float64)
-        # NeumannForces = np.zeros((mesh.points.shape[0]*MainData.nvar,1),dtype=np.float32)
-        self.neumann_forces = np.zeros((mesh.points.shape[0]*material.nvar,1),dtype=np.float32)
+    def ComputeNeumannForces(self, mesh, material, dynamic_step=0):
+        """A Dirichlet type methodology for applying Neumann boundary conditions"""
 
-        # FORCES RESULTING FROM DIRICHLET BOUNDARY CONDITIONS
-        # DirichletForces = np.zeros((mesh.points.shape[0]*MainData.nvar,1),dtype=np.float64)
-        # DirichletForces = np.zeros((mesh.points.shape[0]*MainData.nvar,1),dtype=np.float32)
-        self.dirichlet_forces = np.zeros((mesh.points.shape[0]*material.nvar,1),dtype=np.float32)
+        if self.neumann_flags == None:
+            return np.zeros((mesh.points.shape[0]*material.nvar,1),dtype=np.float64)
+
+        nvar = material.nvar
+        F = np.zeros((mesh.points.shape[0]*nvar,1))
+
+        if self.neumann_data_applied_at == 'node':
+
+            flat_neu = self.neumann_flags.flatten()
+            to_apply = np.arange(self.neumann_flags.size)[~np.isnan(flat_neu)]
+            applied_neumann = flat_neu[~np.isnan(flat_neu)]
+            F[to_apply,0] = applied_neumann
+
+        return F

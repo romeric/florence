@@ -136,22 +136,14 @@ class StaggeredFEMSolver(FEMSolver):
         Eulerx = np.copy(mesh.points)
         Eulerp = np.zeros((mesh.points.shape[0]))
 
-        # GET EXTERNAL NODAL FORCES
-        # boundary_condition.GetExternalForces(mesh,material)
-
         # FIND PURE NEUMANN (EXTERNAL) NODAL FORCE VECTOR
-        NeumannForces = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64)
-        # FORCES RESULTING FROM DIRICHLET BOUNDARY CONDITIONS
+        NeumannForces = boundary_condition.ComputeNeumannForces(mesh, material)
 
         # ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES
         K, TractionForces = self.Assemble(function_spaces[0], formulation, mesh, material, solver, 
             Eulerx, Eulerp)[:2]
 
-        if self.analysis_nature == 'nonlinear':
-            print('Finished all pre-processing stage. Time elapsed was', time()-tAssembly, 'seconds')
-        else:
-            print('Finished the assembly stage. Time elapsed was', time()-tAssembly, 'seconds')
-
+        print('Finished all pre-processing stage. Time elapsed was', time()-tAssembly, 'seconds')
 
         self.StaggeredSolver(function_spaces, formulation, solver, 
                 K,NeumannForces,NodalForces,Residual,
@@ -177,20 +169,46 @@ class StaggeredFEMSolver(FEMSolver):
         self.GetBoundaryInfo(K,boundary_condition,formulation)
 
         # SOLVE THE FIRST MECHANICAL PROBLEM
-        dUm = self.SolveMechanics(K, LoadFactor, mesh, formulation, solver, initial_solution=True)
+        # self.nodal_forces_mech = np.zeros((mesh.points.shape[0]*formulation.ndim,1),dtype=np.float64)
+        # residual_mech = np.zeros_like(self.nodal_forces_mech)
+        # DeltaF_mech = LoadFactor*NeumannForces[self.mechanical_dofs,:]
+        # self.nodal_forces_mech += DeltaF_mech
+        # residual_mech -= self.ApplyDirichlet(K[self.mechanical_dofs,:][:,self.mechanical_dofs],
+        #     self.nodal_forces_mech, self.mech_out, self.mech_in,self.applied_dirichlet_mech, LoadFactor=LoadFactor)
+
+        # nodal_forces_mech = np.zeros((mesh.points.shape[0]*formulation.ndim,1),dtype=np.float64)
+        # residual_mech = np.zeros_like(nodal_forces_mech)
+        # DeltaF_mech = 
+        nodal_forces_mech = LoadFactor*NeumannForces[self.mechanical_dofs,:]
+        residual_mech = -self.ApplyDirichlet(K[self.mechanical_dofs,:][:,self.mechanical_dofs],
+            nodal_forces_mech, self.mech_out, self.mech_in,self.applied_dirichlet_mech, LoadFactor=LoadFactor)
+
+        # dUm = self.SolveMechanics(mesh, formulation, solver, K, NeumannForces, LoadFactor, initial_solution=True)
+        dUm = self.SolveMechanics(mesh, formulation, solver, K, residual_mech, LoadFactor, initial_solution=True)
+        # exit()
+        # INITIATE TRANSMITTIVE FORCES
         self.force_up = np.zeros(formulation.ndim*mesh.points.shape[0])
         self.force_pu = np.zeros(mesh.points.shape[0])
+
+        # INITIATE ELECTRIC NODAL FORCES AND RESIDUAL
+        nodal_forces_electric = NodalForces[self.electric_dofs]
+        # residual_electric = np.zeros_like(self.nodal_forces_electric)
   
         for Increment in range(LoadIncrement):
             
             t_increment = time()
             
             # UPDATE FIXED DOFs FOR ELECTROSTATICS
-            dirichlet_forces_electric = np.zeros((mesh.points.shape[0],1),dtype=np.float64)
-            dirichlet_forces_electric = self.ApplyDirichlet(K[self.electric_dofs,:][:,self.electric_dofs],
-                dirichlet_forces_electric, self.electric_out, self.electric_in,self.applied_dirichlet_electric)
-            residual_electric = -LoadFactor*dirichlet_forces_electric
-            
+            # dirichlet_forces_electric = np.zeros((mesh.points.shape[0],1),dtype=np.float64)
+            # dirichlet_forces_electric = self.ApplyDirichlet(K[self.electric_dofs,:][:,self.electric_dofs],
+            #     dirichlet_forces_electric, self.electric_out, self.electric_in,self.applied_dirichlet_electric)
+            # residual_electric = -LoadFactor*dirichlet_forces_electric
+
+            DeltaF_electric = LoadFactor*NeumannForces[self.electric_dofs]
+            nodal_forces_electric += DeltaF_electric
+            residual_electric = -self.ApplyDirichlet(K[self.electric_dofs,:][:,self.electric_dofs],
+                nodal_forces_electric, self.electric_out, self.electric_in,self.applied_dirichlet_electric,LoadFactor)
+
             # COMPUTE FORCE TO BE TRANSMITTED TO ELECTROSTATIC
             K_pu = K[self.electric_dofs,:][:,self.mechanical_dofs]
             self.force_pu = K_pu.dot(dUm.flatten())
@@ -203,16 +221,17 @@ class StaggeredFEMSolver(FEMSolver):
 
             # GET ONLY NORM OF FIXED DOFs (THAT IS WHERE RESIDUAL FORCES GET GENERATED)
             if Increment==0:
-                self.NormForces = la.norm(residual_electric[self.electric_in])
+                # self.NormForces = la.norm(residual_electric[self.electric_in])
+                self.NormForces = la.norm(residual_electric)
             # AVOID DIVISION BY ZERO
-            if np.abs(la.norm(residual_electric[self.electric_in])) < 1e-14:
+            # if np.abs(la.norm(residual_electric[self.electric_in])) < 1e-14:
+            if np.abs(self.NormForces) < 1e-14:
                 self.NormForces = 1e-14
 
             Ke = deepcopy(K)
 
             Iter = 0
             # ENTER NEWTON-RAPHSON FOR ELECTROSTATICS
-            # xx= np.zeros_like(Eulerp)
             while np.abs(la.norm(residual_electric[self.electric_in])/self.NormForces) > Tolerance:
 
                 # SOLVE ELECTROSTATIC PROBLEM ITERATIVELY
@@ -226,7 +245,7 @@ class StaggeredFEMSolver(FEMSolver):
                     Eulerx,Eulerp)[:2]
 
                 # FIND THE ITERATIVE RESIDUAL
-                residual_electric[self.electric_in] = TractionForces[self.columns_in_electric]
+                residual_electric[self.electric_in] = TractionForces[self.columns_in_electric] - nodal_forces_electric[self.electric_in]
 
                 self.NRConvergence['Increment_'+str(Increment)] = np.append(self.NRConvergence['Increment_'+str(Increment)],\
                     np.abs(la.norm(residual_electric[self.electric_in])/self.NormForces))
@@ -252,10 +271,18 @@ class StaggeredFEMSolver(FEMSolver):
             K_up = Ke[self.mechanical_dofs,:][:,self.electric_dofs]
             dUe = Eulerp - Eulerp_n
             self.force_up = K_up.dot(dUe)
-            
-            # SOLVE MECHANICS PROBLEM WITH OLD GEOMETRY (K), AND THE FORCE self.force_up AS A RESIDUAL  
-            dUm = self.SolveMechanics(K, LoadFactor, mesh, formulation, solver, initial_solution=False)
 
+            if Increment>0:
+                # DeltaF_mech = LoadFactor*NeumannForces[self.mechanical_dofs,:]
+                # nodal_forces_mech += DeltaF_mech
+                nodal_forces_mech = np.zeros_like(nodal_forces_mech)
+                residual_mech = -self.ApplyDirichlet(K[self.mechanical_dofs,:][:,self.mechanical_dofs],
+                    nodal_forces_mech, self.mech_out, 
+                    self.mech_in,self.applied_dirichlet_mech, LoadFactor=LoadFactor)
+
+            # SOLVE MECHANICS PROBLEM WITH OLD GEOMETRY (K), AND THE FORCE self.force_up AS A RESIDUAL
+            # dUm = self.SolveMechanics(K, LoadFactor, mesh, formulation, solver, initial_solution=False)
+            dUm = self.SolveMechanics(mesh, formulation, solver, K, residual_mech, LoadFactor, initial_solution=False)
             # UPDATE GEOMETRY INCREMENTALLY
             Eulerx += dUm
 
@@ -266,13 +293,14 @@ class StaggeredFEMSolver(FEMSolver):
             K = self.Assemble(function_spaces[0], formulation, mesh, material, solver,
                     Eulerx,Eulerp)[0]
 
+
             print('\nFinished Load increment', Increment, 'in', time()-t_increment, 'seconds')
 
 
         return TotalDisp
 
 
-    def ApplyDirichlet(self, stiffness, F, columns_out, columns_in, AppliedDirichlet, mass=None):
+    def ApplyDirichlet(self, stiffness, F, columns_out, columns_in, AppliedDirichlet, LoadFactor=1., mass=None):
         """AppliedDirichlet is a non-member because it can be external incremental Dirichlet,
             which is currently not implemented as member of BoundaryCondition. F also does not 
             correspond to Dirichlet forces, as it can be residual in incrementally linearised
@@ -281,12 +309,12 @@ class StaggeredFEMSolver(FEMSolver):
 
         # APPLY DIRICHLET BOUNDARY CONDITIONS
         for i in range(columns_out.shape[0]):
-            F = F - AppliedDirichlet[i]*stiffness.getcol(columns_out[i])
+            F = F - LoadFactor*AppliedDirichlet[i]*stiffness.getcol(columns_out[i])
 
         return F
 
 
-    def SolveMechanics(self, K, LoadFactor, mesh, formulation, solver, initial_solution=True):
+    def SolveMechanics(self, mesh, formulation, solver, K, residual_mech, LoadFactor, initial_solution=True):
         """ Solves for mechanical variables. This solves the upper row 
             of the following system
 
@@ -304,10 +332,22 @@ class StaggeredFEMSolver(FEMSolver):
                                 Matrix, no boundary conditions applied
 
         """
-        dirichlet_forces_mech = np.zeros((mesh.points.shape[0]*formulation.ndim,1),dtype=np.float64)
-        dirichlet_forces_mech = self.ApplyDirichlet(K[self.mechanical_dofs,:][:,self.mechanical_dofs],
-            dirichlet_forces_mech, self.mech_out, self.mech_in,self.applied_dirichlet_mech)
-        residual_mech = -LoadFactor*dirichlet_forces_mech
+        # dirichlet_forces_mech = np.zeros((mesh.points.shape[0]*formulation.ndim,1),dtype=np.float64)
+        # dirichlet_forces_mech = self.ApplyDirichlet(K[self.mechanical_dofs,:][:,self.mechanical_dofs],
+            # dirichlet_forces_mech, self.mech_out, self.mech_in,self.applied_dirichlet_mech)
+        # residual_mech = -LoadFactor*dirichlet_forces_mech
+
+        # DeltaF_mech = LoadFactor*NeumannForces[self.mechanical_dofs,:]
+        # if initial_solution:
+        #     self.nodal_forces_mech = np.zeros((mesh.points.shape[0]*formulation.ndim,1),dtype=np.float64)
+        #     self.nodal_forces_mech += DeltaF_mech
+        #     self.residual_mech = np.zeros_like(self.nodal_forces_mech)
+        # else:
+        #     self.nodal_forces_mech += DeltaF_mech
+
+        # self.residual_mech -= self.ApplyDirichlet(K[self.mechanical_dofs,:][:,self.mechanical_dofs],
+        #     self.nodal_forces_mech, self.mech_out, self.mech_in,self.applied_dirichlet_mech, LoadFactor=LoadFactor)
+
         K_uu_b = K[self.columns_in_mech,:][:,self.columns_in_mech]
 
         if initial_solution:
