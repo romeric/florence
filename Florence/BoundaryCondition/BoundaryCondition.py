@@ -22,6 +22,7 @@ class BoundaryCondition(object):
         # TYPE OF BOUNDARY straight OF nurbs
         self.boundary_type = 'straight'
         self.dirichlet_data_applied_at = 'node' # or 'faces'
+        self.neumann_data_applied_at = 'node' # or 'faces'
         self.requires_cad = False
         self.cad_file = None
         # PROJECTION TYPE FOR CAD EITHER orthogonal OR arc_length
@@ -183,8 +184,9 @@ class BoundaryCondition(object):
         return self.dirichlet_flags
 
 
-    def SetNeumannCriteria(self,NeuArgs,Analysis=0,Step=0):
-        pass
+    def SetNeumannCriteria(self, func, *args, **kwargs):
+        self.neumann_flags = func(*args, **kwargs)
+        return self.neumann_flags
 
 
     def GetDirichletBoundaryConditions(self, formulation, mesh, material=None, solver=None, fem_solver=None):
@@ -205,7 +207,6 @@ class BoundaryCondition(object):
 
             IsHighOrder = mesh.IsHighOrder
             # IsDirichletComputed = getattr(MainData.BoundaryData,"IsDirichletComputed",None)
-
                 
             IsHighOrder = False
 
@@ -224,21 +225,7 @@ class BoundaryCondition(object):
                 else:
                     nodesDBC, Dirichlet = self.nodesDBC, self.Dirichlet
 
-                # # np.savetxt("/home/roman/DirichletF2.dat", Dirichlet,fmt="%9.9f")
-                # # np.savetxt("/home/roman/nodesDBCF2.dat", nodesDBC,fmt="%i")
-                # # # exit()
-
-                # Dirichlet = np.loadtxt("/home/roman/DirichletF2.dat", dtype=np.float64)
-                # nodesDBC = np.loadtxt("/home/roman/nodesDBCF2.dat", dtype=np.int64)
-
-                # # # Dirichlet = np.loadtxt("/media/MATLAB/DirichletF053.dat", dtype=np.float64)
-                # # # nodesDBC = np.loadtxt("/media/MATLAB/nodesDBCF053.dat", dtype=np.int64)
-                # nodesDBC = nodesDBC[:,None]
-        
-
-
                 # GET DIRICHLET DoFs
-                # print(nodesDBC.shape[0],formulation.ndim,np.tile(np.arange(nvar)[None,:],nodesDBC.shape[0]).shape)
                 self.columns_out = (np.repeat(nodesDBC,nvar,axis=1)*nvar +\
                  np.tile(np.arange(nvar)[None,:],nodesDBC.shape[0]).reshape(nodesDBC.shape[0],formulation.ndim)).ravel()
                 self.applied_dirichlet = Dirichlet.ravel()
@@ -257,49 +244,14 @@ class BoundaryCondition(object):
                 print('Finished identifying Dirichlet boundary conditions from CAD geometry.', 
                     ' Time taken', time()-tCAD, 'seconds')
 
-                # end = -3
-                # np.savetxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_Dirichlet_"+"P"+str(MainData.C+1)+".dat",AppliedDirichlet,fmt="%9.16f")
-                # np.savetxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_ColumnsOut_"+"P"+str(MainData.C+1)+".dat",ColumnsOut)
-                # # np.savetxt(MainData.MeshInfo.FileName.split(".")[0][:end]+"_PlanarMeshFaces_"+"P"+str(MainData.C+1)+".dat",MainData.planar_mesh_faces)
-
-                # if MainData.ndim==3:
-                #     from scipy.io import savemat
-                #     print(mesh.filename.split(".")[0]+"_DirichletData_P"+str(MainData.C+1)+".mat")
-                #     Dict = {'AppliedDirichlet':self.applied_dirichlet,'ColumnsOut':self.columns_out.astype(np.int64)}
-                #     savemat(mesh.filename.split(".")[0]+"_DirichletData_P"+str(MainData.C+1)+".mat",Dict,do_compression=True)
-                #     # exit()
-
-                # print repr(self.applied_dirichlet.reshape(-1,1))
-                # print repr(mesh.points)
-                # exit()
-
             else:
                 
                 end = -3
                 self.applied_dirichlet = np.loadtxt(mesh.filename.split(".")[0][:end]+"_Dirichlet_"+"P"+str(MainData.C+1)+".dat",dtype=np.float64)
                 self.columns_out = np.loadtxt(mesh.filename.split(".")[0][:end]+"_ColumnsOut_"+"P"+str(MainData.C+1)+".dat")
 
-                # AppliedDirichlet = np.loadtxt("/home/roman/Dropbox/Florence/Examples/FiniteElements/Falcon3D/falcon_big_Dirichlet_P3.dat")
-                # ColumnsOut = np.loadtxt("/home/roman/Dropbox/Florence/Examples/FiniteElements/Falcon3D/falcon_big_ColumnsOut_P3.dat")
-
-                # AppliedDirichlet = np.loadtxt(MainData.DirichletName,dtype=np.float64)
-                # ColumnsOut = np.loadtxt(MainData.ColumnsOutName)
-
-                # AppliedDirichlet = AppliedDirichlet*MainData.CurrentIncr/MainData.nStep
-                # AppliedDirichlet = AppliedDirichlet*1.0/MainData.nStep
-
                 print('Finished identifying Dirichlet boundary conditions from CAD geometry.', 
                     ' Time taken', time()-tCAD, 'seconds')
-
-  
-            ############################
-            # print np.max(self.applied_dirichlet), mesh.Bounds 
-            # print repr(self.applied_dirichlet)
-            # exit()
-            # if MainData.ndim==3:
-                # print np.max(self.applied_dirichlet), mesh.Bounds 
-                # exit()
-            ############################
 
         #----------------------------------------------------------------------------------------------------#
         #------------------------------------- NON-NURBS BASED SOLUTION -------------------------------------#
@@ -308,60 +260,18 @@ class BoundaryCondition(object):
         elif self.boundary_type == 'straight' or self.boundary_type == 'mixed':
             # IF DIRICHLET BOUNDARY CONDITIONS ARE APPLIED DIRECTLY AT NODES
             if self.dirichlet_data_applied_at == 'node':
-                # GET UNIQUE NODES AT THE BOUNDARY
-                unique_edge_nodes = []
-                if ndim==2:
-                    unique_edge_nodes = np.unique(mesh.edges)
-                elif ndim==3:
-                    unique_edge_nodes = np.unique(mesh.faces)
-                # ACTIVATE THIS FOR DEBUGGING ELECTROMECHANICAL PROBLEMS
-                # unique_edge_nodes = np.unique(mesh.elements) 
+  
+                # self.columns_out = []
+                # for inode in range(0,self.dirichlet_flags.shape[0]):
+                #     for i in range(nvar):
+                #         if not np.isnan(self.dirichlet_flags[inode, i]):
+                #             self.columns_out = np.append(self.columns_out,nvar*inode+i)
+                #             self.applied_dirichlet = np.append(self.applied_dirichlet,self.dirichlet_flags[inode,i])
 
-                # MainData.BoundaryData().DirichArgs.points = mesh.points
-                # MainData.BoundaryData().DirichArgs.edges = mesh.edges
-                # for inode in range(0,unique_edge_nodes.shape[0]):
-                #     coord_node = mesh.points[unique_edge_nodes[inode]]
-                #     MainData.BoundaryData().DirichArgs.node = coord_node
-                #     MainData.BoundaryData().DirichArgs.inode = unique_edge_nodes[inode]
+                flat_dirich = self.dirichlet_flags.flatten()
+                self.columns_out = np.arange(self.dirichlet_flags.size)[~np.isnan(flat_dirich)]
+                self.applied_dirichlet = flat_dirich[~np.isnan(flat_dirich)]
 
-                #     Dirichlet = MainData.BoundaryData().DirichletCriterion(MainData.BoundaryData().DirichArgs)
-
-                    # COMMENTED RECENTLY IN FAVOR OF WHAT APPEARS BELOW
-                    # if type(Dirichlet) is None:
-                    #   pass
-                    # else:
-                    #   for i in range(nvar):
-                    #       # if type(Dirichlet[i]) is list:
-                    #       if Dirichlet[i] is None:
-                    #           pass
-                    #       else:
-                    #           # self.columns_out = np.append(self.columns_out,nvar*inode+i) # THIS IS INVALID
-                    #           # ACTIVATE THIS FOR DEBUGGING ELECTROMECHANICAL PROBLEMS
-                    #           self.columns_out = np.append(self.columns_out,nvar*unique_edge_nodes[inode]+i)
-                    #           self.applied_dirichlet = np.append(self.applied_dirichlet,Dirichlet[i])
-                
-                # Dirichlet = self.dirichlet_flags
-                # if Dirichlet is None:
-                    # Dirichlet.SetDirichletCriteria(unique_edge_nodes)
-
-                # print(self.dirichlet_flags)
-                # exit()
-                self.columns_out = []
-                for inode in range(0,self.dirichlet_flags.shape[0]):
-                    for i in range(nvar):
-                        # print(self.dirichlet_flags[inode, i] is None)
-                        if not np.isnan(self.dirichlet_flags[inode, i]):# or self.dirichlet_flags[inode, i] is not None:
-                            # print(self.dirichlet_flags[inode, i],inode,i)
-                        #     # self.columns_out = np.append(self.columns_out,nvar*inode+i) # THIS IS INVALID
-                        #     # ACTIVATE THIS FOR DEBUGGING ELECTROMECHANICAL PROBLEMS
-                            # self.columns_out = np.append(self.columns_out,nvar*unique_edge_nodes[inode]+i)
-                            # self.applied_dirichlet = np.append(self.applied_dirichlet,Dirichlet[i])
-                            self.columns_out = np.append(self.columns_out,nvar*inode+i)
-                            self.applied_dirichlet = np.append(self.applied_dirichlet,self.dirichlet_flags[inode,i])
-
-        # print(self.applied_dirichlet)
-        # print(not np.isnan(self.dirichlet_flags[9,0]))
-        # exit()
         # GENERAL PROCEDURE - GET REDUCED MATRICES FOR FINAL SOLUTION
         self.columns_out = self.columns_out.astype(np.int64)
         self.columns_in = np.delete(np.arange(0,nvar*mesh.points.shape[0]),self.columns_out)

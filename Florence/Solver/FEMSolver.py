@@ -215,8 +215,8 @@ class FEMSolver(object):
 
         # FIND PURE NEUMANN (EXTERNAL) NODAL FORCE VECTOR
         # NeumannForces = AssemblyForces(formulation,mesh)
-        # NeumannForces = AssemblyForces_Cheap(formulation,mesh)
-        NeumannForces = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64)
+        NeumannForces = self.AssemblyForces_Cheap(mesh, boundary_condition, formulation)
+        # NeumannForces = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64)
         # FORCES RESULTING FROM DIRICHLET BOUNDARY CONDITIONS
         # DirichletForces = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float32)
 
@@ -366,11 +366,15 @@ class FEMSolver(object):
             DeltaF = LoadFactor*NeumannForces
             NodalForces += DeltaF
             # RESIDUAL FORCES CONTAIN CONTRIBUTION FROM BOTH NEUMANN AND DIRICHLET
+            # DirichletForces = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64)
+            # DirichletForces = boundary_condition.ApplyDirichletGetReducedMatrices(K,DirichletForces,
+            #     boundary_condition.applied_dirichlet)[2]
             DirichletForces = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64)
             DirichletForces = boundary_condition.ApplyDirichletGetReducedMatrices(K,DirichletForces,
                 boundary_condition.applied_dirichlet)[2]
             # OBRTAIN THE INCREMENTAL RESIDUAL
-            Residual -= LoadFactor*DirichletForces
+            # Residual -= LoadFactor*DirichletForces
+            Residual -= NodalForces + LoadFactor*DirichletForces
             # GET THE INCREMENTAL DISPLACEMENT
             AppliedDirichletInc = LoadFactor*boundary_condition.applied_dirichlet
 
@@ -382,7 +386,11 @@ class FEMSolver(object):
                 # HAVE TO CHECK THE CONVERGENCE OF NEWTON RAPHSON. TYPICALLY THIS IS 
                 # NORM OF NODAL FORCES
                 if Increment==0:
-                    self.NormForces = np.linalg.norm(Residual[boundary_condition.columns_out])
+                    # self.NormForces = np.linalg.norm(Residual[boundary_condition.columns_out])
+                    # self.NormForces = np.linalg.norm(Residual[boundary_condition.columns_in])
+                    self.NormForces = np.linalg.norm(Residual)
+                    # print(self.NormForces)
+                    # exit()
 
                 Eulerx = self.NewtonRaphson(function_spaces, formulation, solver, 
                     Increment,K,NodalForces,Residual,mesh,Eulerx,Eulerp,
@@ -472,7 +480,8 @@ class FEMSolver(object):
             # if Iter==self.maximum_iteration_for_newton_raphson:
                 # raise StopIteration("\n\nNewton Raphson did not converge! Maximum number of iterations reached.")
 
-            if Iter==self.maximum_iteration_for_newton_raphson or self.NRConvergence['Increment_'+str(Increment)][-1] > 500:
+            # if Iter==self.maximum_iteration_for_newton_raphson or self.NRConvergence['Increment_'+str(Increment)][-1] > 1000:
+            if Iter==self.maximum_iteration_for_newton_raphson:
                 self.newton_raphson_failed_to_converge = True
                 break
             if np.isnan(np.abs(la.norm(Residual[boundary_condition.columns_in])/NormForces)):
@@ -916,60 +925,49 @@ class FEMSolver(object):
 
 
     # PRE-ASSEMBLY - ASSEMBLY FOR RHS ONLY (CHEAP)
-    def AssemblyForces_Cheap(self,mesh,Quadrature,Domain,BoundaryData,Boundary,DynStep=0):
+    def AssemblyForces_Cheap(self, mesh, boundary_condition, formulation, dynamic_step=0):
 
         # THIS IS A DIRICHLET TYPE STRATEGY FOR APPLYING NEUMANN BOUNDARY CONDITIONS - MEANING GLOBALY
-        # Get mesh details
-        C = MainData.C
-        nvar = MainData.nvar
-        ndim = MainData.ndim
+        nvar = formulation.nvar
+        ndim = formulation.ndim
 
-        points = np.array(mesh.points)
-        elements = np.array(mesh.elements)
-        edges = np.array(mesh.edges)
-        faces = np.array(mesh.faces)
-        nelem = elements.shape[0]
-        nodeperelem = elements.shape[1]
+        F = np.zeros((mesh.points.shape[0]*nvar,1)) 
 
-        F = np.zeros((points.shape[0]*nvar,1)) 
-        f = []
+        # columns_out = []; AppliedNeumann = []; unique_edge_nodes = []
 
-        columns_out = []; AppliedNeumann = []; unique_edge_nodes = []
+        if boundary_condition.neumann_data_applied_at == 'node':
+            # if ndim==3:
+            #     unique_edge_nodes = np.unique(faces)
+            # else:
+            #     unique_edge_nodes = np.unique(edges)
+            # # We need to know the number of nodes on the face to distribute the force
+            # BoundaryData().NeuArgs.no_nodes = np.zeros(len(BoundaryData().NeuArgs.cond))
+            # pp =  points[unique_edge_nodes,:]
+            # for i in range(0,BoundaryData().NeuArgs.cond.shape[0]):
+            #     x =  np.where(pp[:,BoundaryData().NeuArgs.cond[i,0]]==BoundaryData().NeuArgs.cond[i,1])[0]
+            #     # Number of nodes on which this Neumann is applied, is 
+            #     BoundaryData().NeuArgs.no_nodes[i] = x.shape[0]
 
-        if BoundaryData().NeuArgs.Applied_at == 'node':
-            if MainData.ndim==3:
-                unique_edge_nodes = np.unique(faces)
-            else:
-                unique_edge_nodes = np.unique(edges)
-            # Further optimisation of this function and also a necessity
-            # We need to know the number of nodes on the face to distribute the force
-            BoundaryData().NeuArgs.no_nodes = np.zeros(len(BoundaryData().NeuArgs.cond))
-            pp =  points[unique_edge_nodes,:]
-            for i in range(0,BoundaryData().NeuArgs.cond.shape[0]):
-                x =  np.where(pp[:,BoundaryData().NeuArgs.cond[i,0]]==BoundaryData().NeuArgs.cond[i,1])[0]
-                # Number of nodes on which this Neumann is applied, is 
-                BoundaryData().NeuArgs.no_nodes[i] = x.shape[0]
+            # for inode in range(0,unique_edge_nodes.shape[0]):
+            #     coord_node = points[unique_edge_nodes[inode]]
+            #     BoundaryData().NeuArgs.node = coord_node
+            #     Neumann = BoundaryData().NeumannCriterion(BoundaryData().NeuArgs,MainData.Analysis,DynStep)
 
-            for inode in range(0,unique_edge_nodes.shape[0]):
-                coord_node = points[unique_edge_nodes[inode]]
-                BoundaryData().NeuArgs.node = coord_node
-                Neumann = BoundaryData().NeumannCriterion(BoundaryData().NeuArgs,MainData.Analysis,DynStep)
+            #     for i in range(0,nvar):
+            #         if type(Neumann[i]) is not list:
+            #             columns_out = np.append(columns_out,nvar*inode+i)
+            #             AppliedNeumann = np.append(AppliedNeumann,Neumann[i])
 
-                if type(Neumann) is list:
-                    pass
-                else:
-                    for i in range(0,nvar):
-                        if type(Neumann[i]) is list:
-                            pass
-                        else:
-                            columns_out = np.append(columns_out,nvar*inode+i)
-                            AppliedNeumann = np.append(AppliedNeumann,Neumann[i])
+        # columns_out = columns_out.astype(int)
+        # # In this case columns out is analogous to the rows of F where Neumann data appears
+        # for i in range(0,columns_out.shape[0]):
+        #     if AppliedNeumann[i]!=0.0:
+        #         F[columns_out[i],0] = AppliedNeumann[i]
 
-        columns_out = columns_out.astype(int)
-        # In this case columns out is analogous to the rows of F where Neumann data appears
-        for i in range(0,columns_out.shape[0]):
-            if AppliedNeumann[i]!=0.0:
-                F[columns_out[i],0] = AppliedNeumann[i]
 
+            flat_neu = boundary_condition.neumann_flags.flatten()
+            to_apply = np.arange(boundary_condition.neumann_flags.size)[~np.isnan(flat_neu)]
+            applied_neumann = flat_neu[~np.isnan(flat_neu)]
+            F[to_apply,0] = applied_neumann
 
         return F
