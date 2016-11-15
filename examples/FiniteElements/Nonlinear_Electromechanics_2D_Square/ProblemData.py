@@ -63,7 +63,7 @@ def ProblemData(*args, **kwargs):
     boundary_condition.dirichlet_flags = DirichletFunc(mesh)
     formulation = DisplacementFormulation(mesh)
 
-    fem_solver = FEMSolver(number_of_load_increments=3,analysis_type="static",
+    fem_solver = FEMSolver(number_of_load_increments=1,analysis_type="static",
         analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
         newton_raphson_tolerance=1.0e-05)
 
@@ -79,12 +79,13 @@ def ProblemData(*args, **kwargs):
     # debug(formulation.function_spaces[0], formulation.quadrature_rules[0],mesh,solution.sol)
 
     print solution.sol[:,:,-1]+mesh.points
+    # print solution.sol[:,:,-1]
     # solution.sol = solution.sol[:,:,None]
     # print solution.sol[:,:,-1]+mesh.points
     # solution.Animate(configuration="deformed")
     # solution.StressRecovery()
     # solution.WriteVTK("/home/roman/zzchecker/HHH", quantity=1)
-    solution.Plot(configuration="deformed", quantity=1)
+    # solution.Plot(configuration="deformed", quantity=1)
     # exit()
 
 
@@ -97,11 +98,14 @@ def ProblemData_2(*args, **kwargs):
     p=2
 
     # material = IsotropicElectroMechanics_2(ndim,youngs_modulus=1.0,poissons_ratio=0.3, c1=1.0, c2=1.0)
-    material = IsotropicElectroMechanics_0(ndim,youngs_modulus=1.0,poissons_ratio=0.3, eps_1=100.5)
-    # material = IsotropicElectroMechanics_3(ndim,youngs_modulus=1.0,poissons_ratio=0.3, eps_1=10.5, eps_2=200.1)
+    # material = IsotropicElectroMechanics_0(ndim,youngs_modulus=1.0,poissons_ratio=0.3, eps_1=100.5)
+    # material = IsotropicElectroMechanics_3(ndim,youngs_modulus=1.0e6,poissons_ratio=0.3, eps_1=10.5e-4, eps_2=1e-4)
+    # material = IsotropicElectroMechanics_106(ndim,mu1=1.0,mu2=0.5, lamb=1.0, eps_1=10.5, eps_2=200.1)
+    material = IsotropicElectroMechanics_106(ndim,mu1=1.0e6,mu2=0.5e6, lamb=2.0e6, eps_1=1e-03, eps_2=1e-03)
+    # material = IsotropicElectroMechanics_107(ndim,mu1=1.0,mu2=0.5, lamb=1.0, eps_1=10.5, eps_2=200.1, mue=1.0, eps_e=1.0)
 
     mesh = Mesh()
-    mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,10),nx=2,ny=2)
+    mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),nx=5,ny=5)
     mesh.GetHighOrderMesh(p=p)
     # print mesh.points.shape[0], mesh.nelem
     # mesh.SimplePlot()
@@ -121,11 +125,10 @@ def ProblemData_2(*args, **kwargs):
         boundary_data[Y_0,1] = 0.
         boundary_data[Y_0,2] = 0.
 
-        # Y_1 = np.where(mesh.points[:,1] == 1)[0]
-        Y_1 = np.where(mesh.points[:,1] == 10)[0]
-        boundary_data[Y_1,0] = 0.0
-        boundary_data[Y_1,1] = 1.0
-        boundary_data[Y_1,2] = 0.0
+        # Y_1 = np.where(mesh.points[:,1] == 4)[0]
+        # boundary_data[Y_1,0] = 0.0
+        # boundary_data[Y_1,1] = 0.0
+        # boundary_data[Y_1,2] = 40000.0
 
         # boundary_data[2::material.nvar,:] = 0
         # boundary_data[:,2] = 0. # fix all electrostatics
@@ -135,24 +138,38 @@ def ProblemData_2(*args, **kwargs):
 
         return boundary_data
 
-    boundary_condition.dirichlet_flags = DirichletFunc(mesh)
-    # boundary_condition.SetDirichletCriteria(DirichletCriteria, mesh.points)
+    def NeumannFunc(mesh):
+
+        boundary_data = np.zeros((mesh.points.shape[0],material.nvar))+np.NAN
+
+        Y_0 = np.where(mesh.points[:,1] == 4)[0]
+        # boundary_data[Y_0,0] = 0.
+        # boundary_data[Y_0,1] = -.02
+        boundary_data[Y_0,2] = 50e-1
+
+        return boundary_data
+
+    boundary_condition.SetDirichletCriteria(DirichletFunc, mesh)
+    boundary_condition.SetNeumannCriteria(NeumannFunc,mesh)
 
     formulation = DisplacementPotentialFormulation(mesh)
     # formulation = DisplacementFormulation(mesh)
 
-    fem_solver = FEMSolver(number_of_load_increments=2,analysis_type="static",
+    fem_solver = FEMSolver(number_of_load_increments=5,analysis_type="static",
         analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
-        newton_raphson_tolerance=1.0e-09)
+        newton_raphson_tolerance=1.0e-02, maximum_iteration_for_newton_raphson=200)
+    # fem_solver = StaggeredFEMSolver(number_of_load_increments=50,analysis_type="static",
+    #     analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
+    #     newton_raphson_tolerance=1.0e-04)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition)
 
 
-    sol = np.copy(solution.sol[:,:,-1])
-    makezero(sol,tol=1.0e-9)
+    # sol = np.copy(solution.sol[:,:,-1])
+    # makezero(sol,tol=1.0e-9)
     # print sol
-    print repr(sol)
+    # print repr(sol)
     # print solution.sol[:,2,-1]
     # print solution.sol[:,1,-1]
     # solution.sol = solution.sol[:,:2,:]
@@ -162,7 +179,56 @@ def ProblemData_2(*args, **kwargs):
 
     # solution.Plot()
 
-    # exit()
+    print np.linalg.norm(solution.sol[:,:2,-1])
+    # print np.linalg.norm(solution.sol[:,-1,-1])
+    solution.Plot(configuration="deformed",quantity=1)
+
+
+    # 21.0460889142
+    # 21.0861327294 21.0822980885 21.0841743637
+
+    # import matplotlib as mpl
+    # import matplotlib.pyplot as plt
+    # import matplotlib.cm as cm
+    # from matplotlib import rc
+    # import itertools
+
+    # from mpl_toolkits.mplot3d import Axes3D
+    # from matplotlib.mlab import griddata
+
+    # marker = itertools.cycle(('o', 's', 'x', '+', '*','.'))
+    # linestyle = itertools.cycle(('-','-.','--',':'))
+
+    # rc('font',**{'family':'serif','serif':['Palatino'],'size':26})
+    # rc('text', usetex=True)
+    # params = {'text.latex.preamble' : [r'\usepackage{mathtools}']}
+    # plt.rcParams.update(params)
+
+    # # rc('axes',color_cycle=['#D1655B','#44AA66','#FACD85','#70B9B0','#72B0D7','#E79C5D','#4D5C75','#E79C5D'])
+    # rc('axes',color_cycle=['#D1655B','#FACD85','#72B0D7','#E79C5D','#4D5C75','#E79C5D'])
+    # # rc('axes',**{'prop_cycle':['#D1655B','#FACD85','#70B9B0','#72B0D7','#E79C5D']})
+
+
+    # colors = ['#D1655B','#44AA66','#FACD85','#70B9B0','#72B0D7','#E79C5D',
+    #         '#4D5C75','#FFF056','#558C89','#F5CCBA','#A2AB58','#7E8F7C','#005A31']
+
+
+
+    # 
+
+    # import matplotlib.pyplot as plt
+    # n = np.array([9.68466010533, 9.68466010533, 9.68466010533, 9.68466010533, 9.68466010533])
+    # l = np.array([9.68349405202, 9.68423064463, 9.68459212411, 9.68465365067, 9.6846594632])
+    # norm = np.linalg.norm
+    # log = np.log10
+    # e = np.sqrt((n-l)**2/n**2)
+    # # print e
+    # font_size = 20
+    # plt.plot(log([1,2,10,100,1000]),log(e),'-ko',linewidth=2); plt.grid('on')
+    # plt.ylabel(r'log$_{10}(\mathcal{L}^2\;error)$',fontsize=font_size)
+    # plt.xlabel(r'log$_{10}(Increments)$',fontsize=font_size)
+    # plt.savefig("/home/roman/l2_stagg",format='eps',dpi=300,bbox_inches='tight',pad_inches=0.12)
+    # plt.show()
 
 
 
@@ -378,7 +444,7 @@ def ProblemData_4(*args, **kwargs):
         Y_1 = np.where(mesh.points[:,1] == 10)[0]
         # boundary_data[Y_1,0] = 0.0
         boundary_data[Y_1,1] = 5.0
-        boundary_data[Y_1,2] = 15.0
+        boundary_data[Y_1,2] = 0.0
 
         # boundary_data[2::material.nvar,:] = 0
         # boundary_data[:,2] = 0. # fix all electrostatics
@@ -391,12 +457,12 @@ def ProblemData_4(*args, **kwargs):
 
     formulation = DisplacementPotentialFormulation(mesh)
 
-    fem_solver = FEMSolver(number_of_load_increments=3,analysis_type="static",
+    # fem_solver = FEMSolver(number_of_load_increments=1,analysis_type="static",
+    #     analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
+    #     newton_raphson_tolerance=1.0e-03)
+    fem_solver = StaggeredFEMSolver(number_of_load_increments=3,analysis_type="static",
         analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
         newton_raphson_tolerance=1.0e-03)
-    # fem_solver = StaggeredFEMSolver(number_of_load_increments=6,analysis_type="static",
-    #     analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
-    #     newton_raphson_tolerance=1.0e-06)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition)
@@ -406,18 +472,21 @@ def ProblemData_4(*args, **kwargs):
     makezero(sol,tol=1.0e-9)
     # print repr(sol)
     # print sol
-    solution.Plot(configuration="deformed",quantity=1)
+    print np.linalg.norm(solution.sol[:,:2,-1])
+    # print np.linalg.norm(solution.sol[:,-1,-1])
+    # solution.Plot(configuration="deformed",quantity=1)
 
-
+    # n = np.array([9.63882100718])
+    # l = np.array[9.65172916172, 9.93955034453, 9.64257268545]
 
 
 
 if __name__ == "__main__":
 
     # ProblemData()
-    # ProblemData_2()
+    ProblemData_2()
     # ProblemData_3()
-    ProblemData_3D()
+    # ProblemData_3D()
 
     # ProblemData_4()
     

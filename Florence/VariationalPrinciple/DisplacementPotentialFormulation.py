@@ -69,9 +69,6 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         # COMPUTE THE STIFFNESS MATRIX
         stiffnessel, t = self.GetLocalStiffness(function_space, material, LagrangeElemCoords, 
             EulerElemCoords, ElectricPotentialElem, fem_solver, elem)
-        # print(stiffnessel[0,:])
-        # print(t)
-        # exit()
 
         I_mass_elem = []; J_mass_elem = []; V_mass_elem = []
         if fem_solver.analysis_type != 'static':

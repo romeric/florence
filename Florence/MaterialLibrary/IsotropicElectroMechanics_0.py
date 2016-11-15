@@ -51,7 +51,6 @@ class IsotropicElectroMechanics_0(Material):
             )
 
         e_voigt = Voigt(varepsilon_1*(d('ij,k',I,Ex)+d('ik,j',I,Ex)-d('i,jk',Ex,I)) ,1)
-        # print(e_voigt)
             
         # Dielectric Tensor (Permittivity - 2nd order)
         Permittivity = -varepsilon_1*I 
