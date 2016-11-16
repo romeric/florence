@@ -128,7 +128,7 @@ def ProblemData_2(*args, **kwargs):
         Y_1 = np.where(mesh.points[:,1] == 4)[0]
         # boundary_data[Y_1,0] = 0.0
         # boundary_data[Y_1,1] = 4.0
-        # boundary_data[Y_1,2] = 1.
+        boundary_data[Y_1,2] = 1.
 
         # boundary_data[2::material.nvar,:] = 0
         # boundary_data[:,2] = 0. # fix all electrostatics
@@ -155,8 +155,8 @@ def ProblemData_2(*args, **kwargs):
     formulation = DisplacementPotentialFormulation(mesh)
     # formulation = DisplacementFormulation(mesh)
 
-    # fem_solver = FEMSolver(number_of_load_increments=1)
-    fem_solver = StaggeredFEMSolver(number_of_load_increments=1)
+    fem_solver = FEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=2)
+    # fem_solver = StaggeredFEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=20)
     # 7.63415386229
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
