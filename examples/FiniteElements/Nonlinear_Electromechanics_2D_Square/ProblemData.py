@@ -144,8 +144,8 @@ def ProblemData_2(*args, **kwargs):
 
         Y_0 = np.where(mesh.points[:,1] == 4)[0]
         # boundary_data[Y_0,0] = 0.
-        # boundary_data[Y_0,1] = 2e5
-        boundary_data[Y_0,2] = 0.001
+        boundary_data[Y_0,1] = 2e5
+        # boundary_data[Y_0,2] = 0.001
 
         return boundary_data
 
@@ -155,8 +155,8 @@ def ProblemData_2(*args, **kwargs):
     formulation = DisplacementPotentialFormulation(mesh)
     # formulation = DisplacementFormulation(mesh)
 
-    fem_solver = FEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=2)
-    # fem_solver = StaggeredFEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=20)
+    # fem_solver = FEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=2)
+    fem_solver = StaggeredFEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=20)
     # 7.63415386229
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
