@@ -170,11 +170,12 @@ class StaggeredFEMSolver(FEMSolver):
 
         # SOLVE THE FIRST MECHANICAL PROBLEM
         nodal_forces_mech = np.zeros((self.mechanical_dofs.shape[0],1))
-        residual_mech_neumann = - LoadFactor*NeumannForces[self.mechanical_dofs,:]
+        residual_mech_neumann = -LoadFactor*NeumannForces[self.mechanical_dofs,:]
         residual_mech = residual_mech_neumann - self.ApplyDirichlet(K[self.mechanical_dofs,:][:,self.mechanical_dofs],
             nodal_forces_mech, self.mech_out, self.mech_in,self.applied_dirichlet_mech, LoadFactor=LoadFactor)
 
         dUm = self.SolveMechanics(mesh, formulation, solver, K, residual_mech, LoadFactor, initial_solution=True)
+
         # INITIATE TRANSMITTIVE FORCES
         self.force_up = np.zeros(formulation.ndim*mesh.points.shape[0])
         self.force_pu = np.zeros(mesh.points.shape[0])
@@ -211,6 +212,8 @@ class StaggeredFEMSolver(FEMSolver):
 
             Ke = deepcopy(K)
 
+            traction_forces_mech = np.zeros((self.mechanical_dofs.shape[0],1))
+
             Iter = 0
             # ENTER NEWTON-RAPHSON FOR ELECTROSTATICS
             while np.abs(la.norm(residual_electric[self.electric_in])/self.NormForces) > Tolerance:
@@ -220,13 +223,25 @@ class StaggeredFEMSolver(FEMSolver):
 
                 # UPDATE EULERIAN POTENTIAL - GET ITERATIVE ELECTRIC POTENTIAL
                 Eulerp += dUe
+                # print(dUe)
+                # print(Eulerp)
+                # exit()
 
                 # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES FOR ELECTROSTATICS
                 Ke, TractionForces = self.Assemble(function_spaces[0], formulation, mesh, material, solver,
                     Eulerx,Eulerp)[:2]
+                # print(TractionForces)
+                # exit()
 
                 # FIND THE ITERATIVE RESIDUAL
                 residual_electric[self.electric_in] = TractionForces[self.columns_in_electric] - nodal_forces_electric[self.electric_in]
+                # print(TractionForces[[0,1,3,4,6,7,9,10],0])
+                # exit()
+                # if Increment==0:
+                    # xx = TractionForces[self.mechanical_dofs]
+                    # print(xx)
+                traction_forces_mech += TractionForces[self.mechanical_dofs]
+
 
                 self.NRConvergence['Increment_'+str(Increment)] = np.append(self.NRConvergence['Increment_'+str(Increment)],\
                     np.abs(la.norm(residual_electric[self.electric_in])/self.NormForces))
@@ -247,7 +262,6 @@ class StaggeredFEMSolver(FEMSolver):
             if self.newton_raphson_failed_to_converge:
                 break
 
-
             # COMPUTE FORCE TO BE TRANSMITTED TO MECHANICS
             K_up = Ke[self.mechanical_dofs,:][:,self.electric_dofs]
             dUe = Eulerp - Eulerp_n
@@ -257,10 +271,14 @@ class StaggeredFEMSolver(FEMSolver):
                 nodal_forces_mech = np.zeros_like(nodal_forces_mech)
                 residual_mech = residual_mech_neumann - self.ApplyDirichlet(K[self.mechanical_dofs,:][:,self.mechanical_dofs],
                     nodal_forces_mech, self.mech_out, 
-                    self.mech_in,self.applied_dirichlet_mech, LoadFactor=LoadFactor)
+                    self.mech_in, self.applied_dirichlet_mech, LoadFactor=LoadFactor)
+
+            # print(residual_mech.shape,xx.shape)
+            # exit()
 
             # SOLVE MECHANICS PROBLEM WITH OLD GEOMETRY (K), AND THE FORCE self.force_up AS A RESIDUAL
-            dUm = self.SolveMechanics(mesh, formulation, solver, K, residual_mech, LoadFactor, initial_solution=False)
+            # dUm = self.SolveMechanics(mesh, formulation, solver, K, residual_mech, LoadFactor, initial_solution=False)
+            dUm = self.SolveMechanics(mesh, formulation, solver, K, traction_forces_mech, LoadFactor, initial_solution=False)
             # UPDATE GEOMETRY INCREMENTALLY
             Eulerx += dUm
 

@@ -363,55 +363,48 @@ class FEMSolver(object):
             # APPLY NEUMANN BOUNDARY CONDITIONS
             DeltaF = LoadFactor*NeumannForces
             NodalForces += DeltaF
-            # print(NodalForces[boundary_condition.columns_in])
-            # RESIDUAL FORCES CONTAIN CONTRIBUTION FROM BOTH NEUMANN AND DIRICHLET
-            # DirichletForces = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64)
-            # DirichletForces = boundary_condition.ApplyDirichletGetReducedMatrices(K,DirichletForces,
-            #     boundary_condition.applied_dirichlet)[2]
-            # DirichletForces = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64)
+            # OBRTAIN INCREMENTAL RESIDUAL - CONTRIBUTION FROM BOTH NEUMANN AND DIRICHLET
             Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,NodalForces,
                 boundary_condition.applied_dirichlet,LoadFactor=LoadFactor)[2]
-            # print(Residual)
-            # OBRTAIN THE INCREMENTAL RESIDUAL
-            # Residual -= LoadFactor*DirichletForces
-            # Residual -= NodalForces + LoadFactor*DirichletForces
             # GET THE INCREMENTAL DISPLACEMENT
             AppliedDirichletInc = LoadFactor*boundary_condition.applied_dirichlet
 
             # CALL THE NONLINEAR SOLVER
-            if self.analysis_nature == 'nonlinear':
-                t_increment = time()
+            # if self.analysis_nature == 'nonlinear':
 
-                # LET NORM OF THE FIRST RESIDUAL BE THE NORM WITH RESPECT TO WHICH WE
-                # HAVE TO CHECK THE CONVERGENCE OF NEWTON RAPHSON. TYPICALLY THIS IS 
-                # NORM OF NODAL FORCES
-                if Increment==0:
-                    # self.NormForces = np.linalg.norm(Residual[boundary_condition.columns_out])
-                    self.NormForces = np.linalg.norm(Residual)
+            t_increment = time()
 
-                Eulerx = self.NewtonRaphson(function_spaces, formulation, solver, 
-                    Increment,K,NodalForces,Residual,mesh,Eulerx,Eulerp,
-                    material,boundary_condition,AppliedDirichletInc)
+            # LET NORM OF THE FIRST RESIDUAL BE THE NORM WITH RESPECT TO WHICH WE
+            # HAVE TO CHECK THE CONVERGENCE OF NEWTON RAPHSON. TYPICALLY THIS IS 
+            # NORM OF NODAL FORCES
+            if Increment==0:
+                # self.NormForces = np.linalg.norm(Residual[boundary_condition.columns_out])
+                # self.NormForces = np.linalg.norm(Residual[boundary_condition.columns_in])
+                self.NormForces = np.linalg.norm(Residual)
 
-                # UPDATE DISPLACEMENTS FOR THE CURRENT LOAD INCREMENT
-                TotalDisp[:,:formulation.ndim,Increment] = Eulerx - mesh.points
-                TotalDisp[:,-1,Increment] = Eulerp
+            Eulerx = self.NewtonRaphson(function_spaces, formulation, solver, 
+                Increment,K,NodalForces,Residual,mesh,Eulerx,Eulerp,
+                material,boundary_condition,AppliedDirichletInc)
+
+            # UPDATE DISPLACEMENTS FOR THE CURRENT LOAD INCREMENT
+            TotalDisp[:,:formulation.ndim,Increment] = Eulerx - mesh.points
+            TotalDisp[:,-1,Increment] = Eulerp
 
 
-                print('\nFinished Load increment', Increment, 'in', time()-t_increment, 'seconds')
-                try:
-                    print('Norm of Residual is', 
-                        np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces), '\n')
-                except RuntimeWarning:
-                    print("Invalid value encountered in norm of Newton-Raphson residual")
+            print('\nFinished Load increment', Increment, 'in', time()-t_increment, 'seconds')
+            try:
+                print('Norm of Residual is', 
+                    np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces), '\n')
+            except RuntimeWarning:
+                print("Invalid value encountered in norm of Newton-Raphson residual")
 
-                # STORE THE INFORMATION IF NEWTON-RAPHSON FAILS
-                if self.newton_raphson_failed_to_converge:
-                    solver.condA = np.NAN
-                    solver.scaledA = np.NAN
-                    solver.scaledAFF = np.NAN
-                    solver.scaledAHH = np.NAN
-                    break
+            # STORE THE INFORMATION IF NEWTON-RAPHSON FAILS
+            if self.newton_raphson_failed_to_converge:
+                solver.condA = np.NAN
+                solver.scaledA = np.NAN
+                solver.scaledAFF = np.NAN
+                solver.scaledAHH = np.NAN
+                break
 
         return TotalDisp
 
@@ -424,12 +417,12 @@ class FEMSolver(object):
         LoadIncrement = self.number_of_load_increments
         Iter = 0
 
-        # NormForces = la.norm(NodalForces[ColumnsIn])
-        NormForces = self.NormForces
-
         # AVOID DIVISION BY ZERO
-        if np.linalg.norm(Residual[boundary_condition.columns_in]) < 1e-14:
-            NormForces = 1e-14
+        if self.NormForces < 1e-14:
+            self.NormForces = 1e-14
+        # print(self.NormForces)
+
+        # NormForces = self.NormForces
 
         # APPLY INCREMENTAL DIRICHLET PER LOAD STEP (THIS IS INCREMENTAL NOT ACCUMULATIVE)
         IncDirichlet = boundary_condition.UpdateFixDoFs(AppliedDirichletInc,
@@ -438,7 +431,7 @@ class FEMSolver(object):
         Eulerx += IncDirichlet[:,:formulation.ndim]
         Eulerp += IncDirichlet[:,-1]
 
-        while np.abs(la.norm(Residual[boundary_condition.columns_in])/NormForces) > Tolerance:
+        while np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces) > Tolerance:
             # GET THE REDUCED SYSTEM OF EQUATIONS
             K_b, F_b = boundary_condition.GetReducedMatrices(K,Residual)[:2]
 
@@ -451,6 +444,12 @@ class FEMSolver(object):
             # UPDATE THE GEOMETRY
             Eulerx += dU[:,:formulation.ndim]
             Eulerp += dU[:,-1]
+            # print(Eulerx)
+            # print(Eulerp)
+            # print(sol)
+            # exit()
+            # if Iter==1:
+                # print(K.todense()[:3,:3])
 
             # GET ITERATIVE ELECTRIC POTENTIAL
             # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
@@ -460,14 +459,16 @@ class FEMSolver(object):
             # FIND THE RESIDUAL
             Residual[boundary_condition.columns_in] = TractionForces[boundary_condition.columns_in] \
             - NodalForces[boundary_condition.columns_in]
+            # print(TractionForces[[0,1,3,4,6,7,9,10],0])
+            # exit()
 
             # SAVE THE NORM 
-            NormForces = self.NormForces
+            # NormForces = self.NormForces
             self.NRConvergence['Increment_'+str(Increment)] = np.append(self.NRConvergence['Increment_'+str(Increment)],\
-                np.abs(la.norm(Residual[boundary_condition.columns_in])/NormForces))
+                np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces))
             
             print('Iteration number', Iter, 'for load increment', Increment, 'with a residual of \t\t', \
-                np.abs(la.norm(Residual[boundary_condition.columns_in])/NormForces)) 
+                np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)) 
 
             # UPDATE ITERATION NUMBER
             Iter +=1
@@ -478,7 +479,7 @@ class FEMSolver(object):
             if Iter==self.maximum_iteration_for_newton_raphson:
                 self.newton_raphson_failed_to_converge = True
                 break
-            if np.isnan(np.abs(la.norm(Residual[boundary_condition.columns_in])/NormForces)):
+            if np.isnan(np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)):
                 self.newton_raphson_failed_to_converge = True
                 break
 
