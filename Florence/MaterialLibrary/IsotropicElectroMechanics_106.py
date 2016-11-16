@@ -60,10 +60,10 @@ class IsotropicElectroMechanics_106(Material):
             self.H_VoigtSize = 9
 
         # TRANSFORM TENSORS TO THEIR ENTHALPY COUNTERPART
-        E_Voigt, P_Voigt, C_Voigt = self.legendre_transform.InternalEnergyToEnthalpy(self.dielectric_tensor, 
-            self.coupling_tensor, self.elasticity_tensor, in_voigt=False)
         # E_Voigt, P_Voigt, C_Voigt = self.legendre_transform.InternalEnergyToEnthalpy(self.dielectric_tensor, 
-            # Voigt(self.coupling_tensor,1), Voigt(self.elasticity_tensor,1), in_voigt=True)
+            # self.coupling_tensor, self.elasticity_tensor, in_voigt=False)
+        E_Voigt, P_Voigt, C_Voigt = self.legendre_transform.InternalEnergyToEnthalpy(self.dielectric_tensor, 
+            Voigt(self.coupling_tensor,1), Voigt(self.elasticity_tensor,1), in_voigt=True)
 
         # BUILD HESSIAN
         factor = 1.
@@ -110,6 +110,6 @@ class IsotropicElectroMechanics_106(Material):
         # inverse = np.linalg.inv(J/eps_1*np.linalg.inv(b) + 1./eps_2*I)
         # D_exact = np.dot(inverse,E)
         # print np.linalg.norm(D - D_exact)
-        # # return D_exact
+        # return D_exact
 
         return D
