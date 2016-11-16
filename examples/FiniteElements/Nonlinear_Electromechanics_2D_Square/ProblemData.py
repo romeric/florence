@@ -99,13 +99,16 @@ def ProblemData_2(*args, **kwargs):
 
     # material = IsotropicElectroMechanics_2(ndim,youngs_modulus=1.0,poissons_ratio=0.3, c1=1.0, c2=1.0)
     # material = IsotropicElectroMechanics_0(ndim,youngs_modulus=1.0,poissons_ratio=0.3, eps_1=100.5)
-    material = IsotropicElectroMechanics_3(ndim,youngs_modulus=1.0e6,poissons_ratio=0.3, eps_1=10.5e-4, eps_2=1e-4)
-    # material = IsotropicElectroMechanics_106(ndim,mu1=1.0,mu2=0.5, lamb=1.0, eps_1=10.5, eps_2=200.1)
+    # material = IsotropicElectroMechanics_3(ndim,youngs_modulus=1.0e6,poissons_ratio=0.3, eps_1=10.5e-4, eps_2=1e-4)
+    # material = Steinmann(ndim,youngs_modulus=1.0e6,poissons_ratio=0.3, c1=10.5e-4, c2=1e-4, eps_1=1e-5)
+    # material = IsotropicElectroMechanics_106(ndim,mu1=1.0,mu2=0.5, lamb=1.0, eps_1=10.5, eps_2=2.1)
     # material = IsotropicElectroMechanics_106(ndim,mu1=1.0e6,mu2=0.5e6, lamb=2.0e6, eps_1=1e-03, eps_2=1e-03)
+    material = IsotropicElectroMechanics_106(ndim,mu1=1.0,mu2=0.5, lamb=2.0, eps_1=1e4, eps_2=1e4)
     # material = IsotropicElectroMechanics_107(ndim,mu1=1.0,mu2=0.5, lamb=1.0, eps_1=10.5, eps_2=200.1, mue=1.0, eps_e=1.0)
 
     mesh = Mesh()
     mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),nx=2,ny=2)
+    # mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),nx=5,ny=5)
     mesh.GetHighOrderMesh(p=p)
     # print mesh.points.shape[0], mesh.nelem
     # mesh.SimplePlot()
@@ -128,7 +131,7 @@ def ProblemData_2(*args, **kwargs):
         Y_1 = np.where(mesh.points[:,1] == 4)[0]
         # boundary_data[Y_1,0] = 0.0
         # boundary_data[Y_1,1] = 4.0
-        boundary_data[Y_1,2] = 1.
+        boundary_data[Y_1,2] = 0.01
 
         # boundary_data[2::material.nvar,:] = 0
         # boundary_data[:,2] = 0. # fix all electrostatics
@@ -145,26 +148,25 @@ def ProblemData_2(*args, **kwargs):
         Y_0 = np.where(mesh.points[:,1] == 4)[0]
         # boundary_data[Y_0,0] = 0.
         boundary_data[Y_0,1] = 2e5
+        # boundary_data[Y_0,1] = 2.
         # boundary_data[Y_0,2] = 0.001
 
         return boundary_data
 
     boundary_condition.SetDirichletCriteria(DirichletFunc, mesh)
-    boundary_condition.SetNeumannCriteria(NeumannFunc,mesh)
+    # boundary_condition.SetNeumannCriteria(NeumannFunc,mesh)
 
     formulation = DisplacementPotentialFormulation(mesh)
-    # formulation = DisplacementFormulation(mesh)
 
-    # fem_solver = FEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=2)
-    fem_solver = StaggeredFEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=20)
-    # 7.63415386229
+    # fem_solver = FEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=1)
+    fem_solver = StaggeredFEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=10)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition)
 
 
     sol = np.copy(solution.sol[:,:,-1])
-    makezero(sol,tol=1.0e-8)
+    # makezero(sol,tol=1.0e-8)
     print sol
     # print repr(sol)
     # print solution.sol[:,2,-1]
