@@ -180,6 +180,7 @@ class StaggeredFEMSolver(FEMSolver):
         # residual_mech = np.zeros_like(nodal_forces_mech)
         # DeltaF_mech = 
         nodal_forces_mech = LoadFactor*NeumannForces[self.mechanical_dofs,:]
+        residual_mech_neumann = - nodal_forces_mech
         residual_mech = -self.ApplyDirichlet(K[self.mechanical_dofs,:][:,self.mechanical_dofs],
             nodal_forces_mech, self.mech_out, self.mech_in,self.applied_dirichlet_mech, LoadFactor=LoadFactor)
 
@@ -275,8 +276,15 @@ class StaggeredFEMSolver(FEMSolver):
             if Increment>0:
                 # DeltaF_mech = LoadFactor*NeumannForces[self.mechanical_dofs,:]
                 # nodal_forces_mech += DeltaF_mech
+
+                # nodal_forces_mech = np.zeros_like(nodal_forces_mech)
+                # residual_mech = -self.ApplyDirichlet(K[self.mechanical_dofs,:][:,self.mechanical_dofs],
+                #     nodal_forces_mech, self.mech_out, 
+                #     self.mech_in,self.applied_dirichlet_mech, LoadFactor=LoadFactor)
+                # print(residual_mech)
+
                 nodal_forces_mech = np.zeros_like(nodal_forces_mech)
-                residual_mech = -self.ApplyDirichlet(K[self.mechanical_dofs,:][:,self.mechanical_dofs],
+                residual_mech = residual_mech_neumann - self.ApplyDirichlet(K[self.mechanical_dofs,:][:,self.mechanical_dofs],
                     nodal_forces_mech, self.mech_out, 
                     self.mech_in,self.applied_dirichlet_mech, LoadFactor=LoadFactor)
 
@@ -285,6 +293,9 @@ class StaggeredFEMSolver(FEMSolver):
             dUm = self.SolveMechanics(mesh, formulation, solver, K, residual_mech, LoadFactor, initial_solution=False)
             # UPDATE GEOMETRY INCREMENTALLY
             Eulerx += dUm
+
+            # print(Eulerx)
+            # exit()
 
             # UPDATE SOLUTION FOR THE CURRENT LOAD INCREMENT
             TotalDisp[:,:formulation.ndim,Increment] = Eulerx - mesh.points
@@ -357,6 +368,9 @@ class StaggeredFEMSolver(FEMSolver):
             F_b = rhs_mech[self.mech_in]
  
         sol = solver.Solve(K_uu_b,-F_b)
+
+        # print(sol)
+        # exit()
         # REARRANGE
         dUm = np.zeros(self.all_mech_dofs.shape[0],dtype=np.float64)
         dUm[self.mech_in] = sol
