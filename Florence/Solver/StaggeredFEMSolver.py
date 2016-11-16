@@ -212,7 +212,9 @@ class StaggeredFEMSolver(FEMSolver):
 
             Ke = deepcopy(K)
 
-            traction_forces_mech = np.zeros((self.mechanical_dofs.shape[0],1))
+            residual_mech_from_elec = np.zeros((self.mechanical_dofs.shape[0],1))
+            # DeltaF_mech = LoadFactor*NeumannForces[self.mechanical_dofs]
+            # nodal_forces_mech += DeltaF_mech
 
             Iter = 0
             # ENTER NEWTON-RAPHSON FOR ELECTROSTATICS
@@ -235,12 +237,10 @@ class StaggeredFEMSolver(FEMSolver):
 
                 # FIND THE ITERATIVE RESIDUAL
                 residual_electric[self.electric_in] = TractionForces[self.columns_in_electric] - nodal_forces_electric[self.electric_in]
+                
+                # traction_forces_mech += TractionForces[self.mechanical_dofs]
+                residual_mech_from_elec += TractionForces[self.mechanical_dofs] - nodal_forces_mech
                 # print(TractionForces[[0,1,3,4,6,7,9,10],0])
-                # exit()
-                # if Increment==0:
-                    # xx = TractionForces[self.mechanical_dofs]
-                    # print(xx)
-                traction_forces_mech += TractionForces[self.mechanical_dofs]
 
 
                 self.NRConvergence['Increment_'+str(Increment)] = np.append(self.NRConvergence['Increment_'+str(Increment)],\
@@ -267,18 +267,25 @@ class StaggeredFEMSolver(FEMSolver):
             dUe = Eulerp - Eulerp_n
             self.force_up = K_up.dot(dUe)
 
-            if Increment>0:
-                nodal_forces_mech = np.zeros_like(nodal_forces_mech)
-                residual_mech = residual_mech_neumann - self.ApplyDirichlet(K[self.mechanical_dofs,:][:,self.mechanical_dofs],
-                    nodal_forces_mech, self.mech_out, 
-                    self.mech_in, self.applied_dirichlet_mech, LoadFactor=LoadFactor)
+            # if Increment>0:
+                # nodal_forces_mech = np.zeros_like(nodal_forces_mech)
+                # residual_mech = residual_mech_neumann - self.ApplyDirichlet(K[self.mechanical_dofs,:][:,self.mechanical_dofs],
+                    # nodal_forces_mech, self.mech_out, self.mech_in, self.applied_dirichlet_mech, LoadFactor=LoadFactor)
+
+            # print(self.ApplyDirichlet(K[self.mechanical_dofs,:][:,self.mechanical_dofs],
+            #         nodal_forces_mech, self.mech_out, self.mech_in, self.applied_dirichlet_mech, LoadFactor=LoadFactor))
+            
+            nodal_forces_mech = np.zeros_like(nodal_forces_mech)
+            residual_mech = residual_mech_from_elec + residual_mech_neumann - \
+                self.ApplyDirichlet(K[self.mechanical_dofs,:][:,self.mechanical_dofs],
+                nodal_forces_mech, self.mech_out, self.mech_in, self.applied_dirichlet_mech, LoadFactor=LoadFactor)
 
             # print(residual_mech.shape,xx.shape)
             # exit()
 
             # SOLVE MECHANICS PROBLEM WITH OLD GEOMETRY (K), AND THE FORCE self.force_up AS A RESIDUAL
-            # dUm = self.SolveMechanics(mesh, formulation, solver, K, residual_mech, LoadFactor, initial_solution=False)
-            dUm = self.SolveMechanics(mesh, formulation, solver, K, traction_forces_mech, LoadFactor, initial_solution=False)
+            dUm = self.SolveMechanics(mesh, formulation, solver, K, residual_mech, LoadFactor, initial_solution=False)
+            # dUm = self.SolveMechanics(mesh, formulation, solver, K, traction_forces_mech, LoadFactor, initial_solution=False)
             # UPDATE GEOMETRY INCREMENTALLY
             Eulerx += dUm
 
