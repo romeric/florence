@@ -9,6 +9,7 @@ from Florence.PostProcessing import ErrorNorms
 from scipy.io import savemat, loadmat
 from Florence.Utils import RSWD
 from Florence.PostProcessing import PostProcess
+from math import sin, cos
 
 
 
@@ -51,11 +52,7 @@ def GetMeshes(p=2):
     mesh = Mesh()
     mesh.Reader(filename,"tet")
     mesh.GetHighOrderMesh(p=p)
-    # makezero(mesh.points, tol=1e-12)
 
-    # print mesh.points
-    # mesh.SimplePlot()
-    # mesh.PlotMeshNumbering()
     print 4*mesh.points.shape[0]
     exit()
 
@@ -75,13 +72,7 @@ def GetMeshes(p=2):
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition)
 
-    print solution.sol
-    # solution.Animate(configuration="deformed")
-    # solution.StressRecovery()
-    mesh.WriteHDF5("/home/roman/CurvedPatch_h"+str(mesh.nelem)+"P"+str(p)+".mat", {'TotalDisp':solution.sol})
-    # solution.Plot(configuration="original", quantity=2)
-    # solution.Plot(configuration="deformed", quantity=1)
-    # solution.PlotNewtonRaphsonConvergence()
+    # mesh.WriteHDF5("/home/roman/CurvedPatch_h"+str(mesh.nelem)+"P"+str(p)+".mat", {'TotalDisp':solution.sol})
     # solution.CurvilinearPlot(plot_edges=False)
     # solution.CurvilinearPlot()
 
@@ -97,7 +88,7 @@ def GetMeshes(p=2):
 
 
 
-def FindMaxSlop(xs, ys):
+def find_min_max_slope(xs, ys):
     """Finds maximum logarithmic slope of a loglog plot based on x,y arrays"""
     xs = np.array(xs)
     ys = np.array(ys)
@@ -136,8 +127,8 @@ class ExactSolutions(object):
         phi = 10000.
         exact_sol = np.zeros_like(points)
         exact_sol[:,0] = phi*np.cos(points[:,0])
-        exact_sol[:,1] = 0.
-        exact_sol[:,2] = 0.
+        # exact_sol[:,1] = 0.
+        # exact_sol[:,2] = 0.
 
         return exact_sol
 
@@ -156,43 +147,22 @@ class ExactSolutions(object):
     def Exact_F(points):
         F = np.zeros((points.shape[0],points.shape[1],points.shape[1]))
         A,B,C = 0.1,0.2,0.3
-        for i in range(points.shape[0]):
-            F[i,:,:] = np.array([
-                [1+A*np.cos(points[i,0]),        0.,                            0.                                           ],
-                [0.,                             1-B*np.sin(points[i,1]),       0.                                           ],
-                [0.,                             0.,                            1+C*(np.cos(points[i,2])-np.sin(points[i,2]))]
-                ])
+        # for i in range(points.shape[0]):
+        #     F[i,:,:] = np.array([
+        #         [1+A*np.cos(points[i,0]),        0.,                            0.                                           ],
+        #         [0.,                             1-B*np.sin(points[i,1]),       0.                                           ],
+        #         [0.,                             0.,                            1+C*(np.cos(points[i,2])-np.sin(points[i,2]))]
+        #         ])
+
+        F[:,0,0] = 1+A*np.cos(points[:,0])
+        F[:,1,1] = 1-B*np.sin(points[:,1])
+        F[:,2,2] = 1+C*(np.cos(points[:,2])-np.sin(points[:,2]))
         return F
-
-
-
-
-    # @staticmethod
-    # def Exact_x(points):
-    #     A = 0.1
-    #     B = 0.2
-    #     C = 0.3
-    #     exact_sol = np.zeros_like(points)
-
-    #     exact_sol[:,0] = A*points[:,0]**3
-    #     exact_sol[:,1] = B*points[:,1]**3
-    #     exact_sol[:,2] = C*points[:,2]**3
-        
-    #     return exact_sol
-
-    # @staticmethod
-    # def Exact_F(points):
-    #     F = np.zeros((points.shape[0],points.shape[1],points.shape[1]))
-    #     A = 0.1; B=0.2; C=0.3
-    #     for i in range(points.shape[0]):
-    #         F[i,:,:] = np.array([
-    #             [1+3*A*points[i,0]**2,           0.,                            0.                        ],
-    #             [0.,                             1+3*B*points[i,1]**2,          0.                        ],
-    #             [0.,                             0.,                            1+3*C*points[i,2]**2      ]
-    #             ])
-    #     return F
  
 
+
+##############################################################################################
+##############################################################################################
 
 
 def BenchmarkElectroMechanics(args):
@@ -232,15 +202,8 @@ def BenchmarkElectroMechanics(args):
     mesh.GetHighOrderMesh(p=p)
     makezero(mesh.points, tol=1e-12)
 
-    # print mesh.points
-    # mesh.SimplePlot()
-    # mesh.PlotMeshNumbering()
-    # exit()
-
-
 
     boundary_condition = BoundaryCondition()
-    # formulation = DisplacementFormulation(mesh)
     formulation = DisplacementPotentialFormulation(mesh)
 
     fem_solver = FEMSolver(number_of_load_increments=1,analysis_type="static",
@@ -297,7 +260,6 @@ def RunErrorNorms(p=1):
 
 
 
-    # BenchmarkMechanics(args)
     for mesh_chooser in range(5):
         args.mesh_chooser = mesh_chooser
         BenchmarkElectroMechanics(args) 
@@ -316,18 +278,18 @@ def RunErrorNorms(p=1):
 
     print 
 
-    print FindMaxSlop(args.vols,args.ex)
-    print FindMaxSlop(args.vols,args.eF)
-    print FindMaxSlop(args.vols,args.eH)
-    print FindMaxSlop(args.vols,args.eJ)
-    print FindMaxSlop(args.vols,args.ePhi)
-    print FindMaxSlop(args.vols,args.eD)
-    print FindMaxSlop(args.vols,args.ed)
-    print FindMaxSlop(args.vols,args.eSF)
-    print FindMaxSlop(args.vols,args.eSH)
-    print FindMaxSlop(args.vols,args.eSJ)
-    print FindMaxSlop(args.vols,args.eSD)
-    print FindMaxSlop(args.vols,args.eSd)
+    print find_min_max_slope(args.vols,args.ex)
+    print find_min_max_slope(args.vols,args.eF)
+    print find_min_max_slope(args.vols,args.eH)
+    print find_min_max_slope(args.vols,args.eJ)
+    print find_min_max_slope(args.vols,args.ePhi)
+    print find_min_max_slope(args.vols,args.eD)
+    print find_min_max_slope(args.vols,args.ed)
+    print find_min_max_slope(args.vols,args.eSF)
+    print find_min_max_slope(args.vols,args.eSH)
+    print find_min_max_slope(args.vols,args.eSJ)
+    print find_min_max_slope(args.vols,args.eSD)
+    print find_min_max_slope(args.vols,args.eSd)
 
 
     sfilename = PWD(__file__) + "/Error_Norms_P" + str(p) + ".mat" 
@@ -339,6 +301,140 @@ def RunErrorNorms(p=1):
 
 ################################################################################################
 ################################################################################################
+
+
+
+def BenchmarkElectroMechanics_Objective(args):
+
+    p = args.p
+    mesh_chooser = args.mesh_chooser
+
+    ndim=3
+
+    material = IsotropicElectroMechanics_106(ndim, mu1=1.0, mu2=0.5, lamb=1.0, eps_1=4., eps_2=4.0)
+
+    ProblemPath = PWD(__file__)
+
+    if mesh_chooser==0:
+            filename = ProblemPath + '/Patch.dat'
+    elif mesh_chooser==1:
+        filename = ProblemPath + '/Patch_3476.dat'
+    elif mesh_chooser==2:
+        filename = ProblemPath + '/Patch_6947.dat'
+    elif mesh_chooser==3:
+        filename = ProblemPath + '/Patch_9220.dat'
+    else:
+        filename = ProblemPath + '/Patch_26807.dat'
+
+    mesh = Mesh()
+    mesh.Reader(filename,"tet")
+    mesh.GetHighOrderMesh(p=p)
+    makezero(mesh.points, tol=1e-12)
+
+
+    boundary_condition = BoundaryCondition()
+    quadrature_rule = QuadratureRule(norder=2*p, mesh_type="tet", optimal=3)
+    function_space = FunctionSpace(mesh,quadrature=quadrature_rule,p=p)
+
+    # formulation = DisplacementPotentialFormulation(mesh)
+    formulation = DisplacementPotentialFormulation(mesh, quadrature_rules=(quadrature_rule,None), function_spaces=(function_space,None))
+
+    fem_solver = FEMSolver(number_of_load_increments=1,analysis_type="static",
+        analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
+        newton_raphson_tolerance=1.0e-05)
+
+    TotalDisp = np.zeros_like(mesh.points)
+    TotalDisp = TotalDisp[:,:,None]
+    # TotalDisp[:,:,-1] = ExactSol(mesh)
+    # solution = fem_solver.__makeoutput__(mesh, TotalDisp, 
+        # formulation=formulation, material=material, function_spaces=formulation.function_spaces)
+    solution = fem_solver.__makeoutput__(mesh, TotalDisp, 
+        formulation=formulation, material=material, function_spaces=(function_space,None))
+
+    error_norms = ErrorNorms(solution,ExactSolutions)
+    error_norms.SetMaterial(material)
+    # print('Getting the error norms')
+    ex, eC, eG, edetC, ePhi, eD0, eSC, eSG, eSdetC, eSD0 = error_norms.InterpolationBasedNormNonlinearObjective(mesh,solution.sol)
+    # exit()
+
+    ##
+    args.nelem.append(mesh.nelem)
+    args.nnode.append(mesh.points.shape[0])
+    args.vols.append(np.max(mesh.Volumes()))
+    args.ex.append(ex)
+    args.eC.append(eC)
+    args.eG.append(eG)
+    args.edetC.append(edetC)
+    args.ePhi.append(ePhi)
+    args.eD0.append(eD0)
+    args.eSC.append(eSC)
+    args.eSG.append(eSG)
+    args.eSdetC.append(eSdetC)
+    args.eSD0.append(eSD0)
+
+    args.ndim = formulation.ndim
+    args.ndim = formulation.nvar
+
+
+
+
+
+def RunErrorNorms_Objective(p=1):
+
+    class args(object):
+        p = p
+        mesh_chooser = 0
+        vols = []
+        ex   = []
+        eC,   eG,  edetC, ePhi, eD0 = [],[],[],[],[]
+        eSC, eSG, eSdetC, eSD0 = [],[],[],[]
+        nelem = []
+        nnode = []
+        ndim = []
+        nvar = []
+
+
+    for mesh_chooser in range(5):
+        args.mesh_chooser = mesh_chooser
+        BenchmarkElectroMechanics_Objective(args) 
+
+
+    print args.ex
+    print args.eC
+    print args.eG
+    print args.edetC
+    print args.ePhi
+    print args.eD0
+    print args.eSC
+    print args.eSG
+    print args.eSdetC
+
+    print 
+
+    print 'ex', find_min_max_slope(args.vols,args.ex)
+    print 'eC', find_min_max_slope(args.vols,args.eC)
+    print 'eG', find_min_max_slope(args.vols,args.eG)
+    print 'edetC', find_min_max_slope(args.vols,args.edetC)
+    print 'ePhi', find_min_max_slope(args.vols,args.ePhi)
+    print 'eD0', find_min_max_slope(args.vols,args.eD0)
+    print 'eSC', find_min_max_slope(args.vols,args.eSC)
+    print 'eSG', find_min_max_slope(args.vols,args.eSG)
+    print 'eSdetC', find_min_max_slope(args.vols,args.eSdetC)
+    print 'eSD0', find_min_max_slope(args.vols,args.eSD0)
+
+
+    sfilename = PWD(__file__) + "/Error_Norms_Objective_P" + str(p) + ".mat" 
+    print sfilename
+    # savemat(sfilename,args.__dict__,do_compression=True)
+
+
+
+
+################################################################################################
+################################################################################################
+
+
+
 
 
 
@@ -359,16 +455,6 @@ def RunProblems(p=2):
     # mesh.ReadHDF5("/home/roman/CurvedPatch_h"+str(6947)+"P"+str(p)+".mat")
     # mesh.GetHighOrderMesh(p=p)
     makezero(mesh.points, tol=1e-09)
-
-    # print mesh.points
-    # mesh.SimplePlot()
-    # mesh.PlotMeshNumbering()
-    # print 4*mesh.points.shape[0]
-
-    # print mesh.Bounds
-    # print mesh.points[np.isclose(mesh.points[:,0],10.),:]
-    # print mesh.points[np.where(mesh.points[:,0]==11.),:].shape
-    # exit()
 
 
 
@@ -425,10 +511,11 @@ def RunProblems(p=2):
 
 if __name__ == "__main__":
 
-    p=8
-    GetMeshes(p=p)
+    p=12
+    # GetMeshes(p=p)
 
     # RunErrorNorms(p=p)
+    RunErrorNorms_Objective(p=p)
 
-    RunProblems(p=p)
+    # RunProblems(p=p)
 

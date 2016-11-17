@@ -31,6 +31,8 @@ class ErrorNorms(PostProcess):
 
 
     def InterpolationBasedNormNonlinear(self,mesh,solution):
+        """Compute error norms in convex multi-variable extended kinematic set {F,H,J,D0,d} 
+            and the associated work conjugates - Based on work-conjugates of model 106"""
 
         if self.functors is None:
             raise ValueError("An exact solution functor/lambda function not provided")
@@ -260,6 +262,176 @@ class ErrorNorms(PostProcess):
 
         return L2Normx, L2NormF, L2NormH, L2NormJ, L2NormPhi, L2NormD, L2Normd, L2NormSF, L2NormSH, L2NormSJ, L2NormSD, L2NormSd
 
+
+
+
+
+    def InterpolationBasedNormNonlinearObjective(self,mesh,solution):
+        """Compute error norms in convex multi-variable extended kinematic set {C,G,C,D0} 
+            and the associated work conjugates - Based on work-conjugates of model 106"""
+
+        if self.functors is None:
+            raise ValueError("An exact solution functor/lambda function not provided")
+
+        func = self.functors
+        TotalDisp = solution
+
+        Domain = self.domain_bases
+        nodeperelem = mesh.elements.shape[1] 
+        ndim = mesh.points.shape[1]
+
+        if self.material is not None:
+            mu1 = self.material.mu1
+            mu2 = self.material.mu2
+            lamb = self.material.lamb
+            eps_1 = self.material.eps_1
+            eps_2 = self.material.eps_2
+        else:
+            mu1, mu2, lamb = 1., 0.5, 1 
+            eps_1, eps_2 = 4., 4.
+
+        alpha, beta = 0.2, 0.2
+
+        I = np.zeros((Domain.AllGauss.shape[0],ndim,ndim))
+        for i in range(Domain.AllGauss.shape[0]):
+            I[i,:,:] = np.eye(ndim,ndim)    
+
+
+        L2_normx = 0.; L2_denormx = 0.
+        L2_normC = 0.; L2_denormC = 0.
+        L2_normG = 0.; L2_denormG = 0.
+        L2_normdetC = 0.; L2_denormdetC = 0.
+        L2_normPhi = 0.; L2_denormPhi = 0.
+        L2_normD0 = 0.; L2_denormD0 = 0.
+        L2_normSC = 0.; L2_denormSC = 0.
+        L2_normSG = 0.; L2_denormSG = 0.
+        L2_normSdetC = 0.; L2_denormSdetC = 0.
+        L2_normSD0 = 0.; L2_denormSD0 = 0.
+
+        for elem in range(mesh.nelem):
+
+            # GET ELEMENTAL COORDINATES
+            LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
+            vpoints = mesh.points + TotalDisp[:,:,-1]
+            EulerElemCoords = vpoints[mesh.elements[elem,:],:]
+
+            # GET PHYSICAL ELEMENTAL GAUSS POINTS - USING FE BASES INTERPLOLATE COORDINATES AT GAUSS POINTS
+            LagrangeElemGaussCoords = np.einsum('ij,ik',Domain.Bases,LagrangeElemCoords)
+            EulerElemGaussCoords    = np.einsum('ij,ik',Domain.Bases,EulerElemCoords)
+
+            # GEOMETRY ERROR
+            GeomNodes = func.Exact_x(LagrangeElemCoords)
+            ExactGeom = func.Exact_x(LagrangeElemGaussCoords)
+            NumericalGeom = np.einsum('ij,ik->kj',GeomNodes,Domain.Bases)
+
+            # DEFORMATION GRADIENT ERROR
+            ExactEulerxNodes = GeomNodes + LagrangeElemCoords
+            ParentGradientX = np.einsum('ijk,jl->kil',Domain.Jm,LagrangeElemCoords)
+            MaterialGradient = np.einsum('ijk,kli->ijl',la.inv(ParentGradientX),Domain.Jm)
+            F = np.einsum('ij,kli->kjl', ExactEulerxNodes, MaterialGradient)
+            F_exact = func.Exact_F(LagrangeElemGaussCoords)
+ 
+            # RIGHT CAUCHY GREEN
+            C = np.einsum('ikj,ikl->ijl',F,F)
+            C_exact = np.einsum('ikj,ikl->ijl',F_exact,F_exact)
+            
+            # JACOBIAN ERROR
+            detC = np.abs(np.linalg.det(C))
+            detC_exact = np.abs(np.linalg.det(C_exact))
+
+            # COFACTOR ERROR
+            G = np.einsum('i,ijk->ijk',detC,np.einsum('ikj',np.linalg.inv(C)))
+            G_exact = np.einsum('i,ijk->ijk',detC_exact,np.einsum('ikj',np.linalg.inv(C_exact)))
+
+            # ELECTRIC POTENTIAL ERROR
+            PotenialNodes = func.Exact_Phi(LagrangeElemCoords)
+            ExactPotential = func.Exact_Phi(LagrangeElemGaussCoords)
+            NumericalPotential = np.einsum('i,ij',PotenialNodes,Domain.Bases)
+
+            # ELECTRIC FIELD ERROR
+            ENodes = func.Exact_E(LagrangeElemCoords)
+            E_exact = func.Exact_E(LagrangeElemGaussCoords)
+            E = np.einsum('ij,ik->kj',ENodes,Domain.Bases)
+
+            # ELECTRIC DISPLACEMENT ERROR
+            D = np.einsum('ijk,ik->ij',np.linalg.inv(eps_1*I+eps_2*C),E)
+            D_exact = np.einsum('ijk,ik->ij',np.linalg.inv(eps_1*I+eps_2*C_exact),E_exact)
+
+            # d = FD0 ERROR
+            d = np.einsum('ijk,ik->ij',F,D)
+            d_exact = np.einsum('ijk,ik->ij',F_exact,D_exact)
+
+
+            # KINETICS - WORK CONJUGATES
+            SC = 2.*mu1*I + 4.*mu1*alpha*np.einsum('ijk,ijk',C,I)*I
+            SC_exact = 2.*mu1*I + 4.*mu1*alpha*np.einsum('ijk,ijk',C_exact,I)*I
+
+            SG = 2.*mu2*I + 4.*mu2*beta*np.einsum('ijk,ijk',G,I)*I
+            SG_exact = 2.*mu2*I + 4.*mu2*beta*np.einsum('ijk,ijk',G_exact,I)*I
+
+            SdetC = -2.*(mu1+2*mu2)*1./detC + lamb*(1.-1./detC) - \
+                1/2./eps_1/detC/np.sqrt(detC)*np.einsum('ij,ij->i',d,d)
+            SdetC_exact = -2.*(mu1+2*mu2)*1./detC_exact + lamb*(1.-1./detC_exact) - \
+                1/2./eps_1/detC_exact/np.sqrt(detC_exact)*np.einsum('ij,ij->i',d_exact,d_exact)
+
+            SD = 1./eps_1*D + np.einsum('i,ij->ij',1./eps_2/np.sqrt(detC),np.einsum('ijk,ik->ij',C,D))
+            SD_exact = 1./eps_1*D_exact + np.einsum('i,ij->ij',1./eps_2/np.sqrt(detC_exact),np.einsum('ijk,ik->ij',C_exact,D_exact))
+
+
+            for counter in range(0,Domain.AllGauss.shape[0]):
+            # for counter in range(1):
+  
+                ###########################################################
+
+                L2_normx += (ExactGeom[counter,:] - NumericalGeom[counter,:])**2*Domain.AllGauss[counter,0]
+                L2_denormx += (ExactGeom[counter,:])**2*Domain.AllGauss[counter,0]
+
+                L2_normC += (C_exact[counter,:,:] - C[counter,:,:])**2*Domain.AllGauss[counter,0]
+                L2_denormC += (C_exact[counter,:,:])**2*Domain.AllGauss[counter,0]
+
+                L2_normG += (G_exact[counter,:,:] - G[counter,:,:])**2*Domain.AllGauss[counter,0]
+                L2_denormG += (G_exact[counter,:,:])**2*Domain.AllGauss[counter,0]
+
+                L2_normdetC += (detC_exact[counter] - detC[counter])**2*Domain.AllGauss[counter,0]
+                L2_denormdetC += (detC_exact[counter])**2*Domain.AllGauss[counter,0]
+
+                L2_normPhi += (ExactPotential[counter] - NumericalPotential[counter])**2*Domain.AllGauss[counter,0]
+                L2_denormPhi += (ExactPotential[counter])**2*Domain.AllGauss[counter,0]
+
+                L2_normD0 += (D_exact[counter,:] - D[counter,:])**2*Domain.AllGauss[counter,0]
+                L2_denormD0 += (D_exact[counter,:])**2*Domain.AllGauss[counter,0]
+
+                L2_normSC += (SC_exact[counter,:,:] - SC[counter,:,:])**2*Domain.AllGauss[counter,0]
+                L2_denormSC += (SC_exact[counter,:,:])**2*Domain.AllGauss[counter,0]
+
+                L2_normSG += (SG_exact[counter,:,:] - SG[counter,:,:])**2*Domain.AllGauss[counter,0]
+                L2_denormSG += (SG_exact[counter,:,:])**2*Domain.AllGauss[counter,0]
+
+                L2_normSdetC += (SdetC_exact[counter] - SdetC[counter])**2*Domain.AllGauss[counter,0]
+                L2_denormSdetC += (SdetC_exact[counter])**2*Domain.AllGauss[counter,0]
+
+                L2_normSD0 += (SD_exact[counter,:] - SD[counter,:])**2*Domain.AllGauss[counter,0]
+                L2_denormSD0 += SD_exact[counter,:]**2*Domain.AllGauss[counter,0]
+
+                ###########################################################
+
+            # L2_normSd = np.sum(np.einsum('ij,k',(Sd_exact - Sd)**2,Domain.AllGauss[:,0]),axis=2)
+            # L2_denormSd = np.sum(np.einsum('ij,k',Sd_exact**2,Domain.AllGauss[:,0]),axis=2)
+
+
+        L2Normx = np.sum(L2_normx)/np.sum(L2_denormx)
+        L2NormC = np.sum(L2_normC)/np.sum(L2_denormC)
+        L2NormG = np.sum(L2_normG)/np.sum(L2_denormG)
+        L2NormdetC = np.sum(L2_normdetC)/np.sum(L2_denormdetC)
+        L2NormPhi = np.sum(L2_normPhi)/np.sum(L2_denormPhi)
+        L2NormD0 = np.sum(L2_normD0)/np.sum(L2_denormD0)
+        L2NormSC = np.sum(L2_normSC)/np.sum(L2_denormSC)
+        L2NormSG = np.sum(L2_normSG)/np.sum(L2_denormSG)
+        L2NormSdetC = np.sum(L2_normSdetC)/np.sum(L2_denormSdetC)
+        L2NormSD0 = np.sum(L2_normSD0)/np.sum(L2_denormSD0)
+
+
+        return L2Normx, L2NormC, L2NormG, L2NormdetC, L2NormPhi, L2NormD0, L2NormSC, L2NormSG, L2NormSdetC, L2NormSD0
 
 
 
