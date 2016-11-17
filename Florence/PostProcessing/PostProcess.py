@@ -537,7 +537,13 @@ class PostProcess(object):
                 sol = self.sol[:mesh.nnode,:]
 
                 ax.clear()
+
                 if configuration == "deformed":
+
+                    ax_dum = self.mesh.points+self.sol[:,:,-1]
+                    ax.set_xlim([np.min(ax_dum[:,0]),np.max(ax_dum[:,0])])
+                    ax.set_ylim([np.min(ax_dum[:,1]),np.max(ax_dum[:,1])])
+
                     triang = mtri.Triangulation(mesh.points[:,0]+sol[:,0,incr], 
                         mesh.points[:,1]+sol[:,1,incr], mesh.elements)
                     ax.triplot(mesh.points[:,0]+sol[:,0,incr], mesh.points[:,1]+sol[:,1,incr], 
@@ -558,7 +564,7 @@ class PostProcess(object):
 
                     # return tri_h
  
-            interval = 2 #in seconds
+            interval = 20 #in seconds
             ani = animation.FuncAnimation(fig,animator,self.sol.shape[2],interval=interval, repeat=True)
 
             # if colorbar is True:
