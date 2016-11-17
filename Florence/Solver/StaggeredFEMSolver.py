@@ -266,6 +266,8 @@ class StaggeredFEMSolver(FEMSolver):
             K_up = Ke[self.mechanical_dofs,:][:,self.electric_dofs]
             dUe = Eulerp - Eulerp_n
             self.force_up = K_up.dot(dUe)
+            # self.force_up = K_up.dot(dUe[:,None])
+            # print(self.force_up)
 
             # if Increment>0:
                 # nodal_forces_mech = np.zeros_like(nodal_forces_mech)

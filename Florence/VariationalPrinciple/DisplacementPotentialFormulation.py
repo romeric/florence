@@ -28,29 +28,32 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         self.fields = "electro_mechanics"
         self.nvar = self.ndim+1
 
-        C = mesh.InferPolynomialDegree() - 1               
+        C = mesh.InferPolynomialDegree() - 1
 
-        # OPTION FOR QUADRATURE TECHNIQUE FOR TRIS AND TETS
-        if mesh.element_type == "tri" or mesh.element_type == "tet":
-            optimal_quadrature = 3
+        if quadrature_rules == None and self.quadrature_rules == None:
 
-        norder = 2*C
-        # TAKE CARE OF C=0 CASE
-        if norder == 0:
-            norder = 1
-        # GET QUADRATURE
-        quadrature = QuadratureRule(optimal=optimal_quadrature, norder=norder, mesh_type=mesh.element_type)
-        function_space = FunctionSpace(mesh, quadrature, p=C+1)
+            # OPTION FOR QUADRATURE TECHNIQUE FOR TRIS AND TETS
+            if mesh.element_type == "tri" or mesh.element_type == "tet":
+                optimal_quadrature = 3
 
-        # COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR POST-PROCESSING
-        norder_post = 2*(C+1)
-        post_quadrature = QuadratureRule(optimal=optimal_quadrature, norder=norder_post, mesh_type=mesh.element_type)
+            norder = 2*C
+            # TAKE CARE OF C=0 CASE
+            if norder == 0:
+                norder = 1
+            # GET QUADRATURE
+            quadrature = QuadratureRule(optimal=optimal_quadrature, norder=norder, mesh_type=mesh.element_type)
+            # COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR POST-PROCESSING
+            norder_post = 2*(C+1)
+            post_quadrature = QuadratureRule(optimal=optimal_quadrature, norder=norder_post, mesh_type=mesh.element_type)
 
-        # CREATE FUNCTIONAL SPACES
-        post_function_space = FunctionSpace(mesh, post_quadrature, p=C+1)
+        if function_spaces == None and self.function_spaces == None:
+            function_space = FunctionSpace(mesh, quadrature, p=C+1)
 
-        self.quadrature_rules = (quadrature,post_quadrature)
-        self.function_spaces = (function_space,post_function_space)
+            # CREATE FUNCTIONAL SPACES
+            post_function_space = FunctionSpace(mesh, post_quadrature, p=C+1)
+
+            self.quadrature_rules = (quadrature,post_quadrature)
+            self.function_spaces = (function_space,post_function_space)
 
 
     def GetElementalMatrices(self, elem, function_space, mesh, material, fem_solver, Eulerx, Eulerp):
