@@ -62,7 +62,7 @@ class DisplacementFormulation(VariationalPrinciple):
         I_mass_elem = []; J_mass_elem = []; V_mass_elem = []
         if fem_solver.analysis_type != 'static':
             # COMPUTE THE MASS MATRIX
-            massel = Mass(MainData,LagrangeElemCoords,EulerElemCoords,elem)
+            massel = self.GetLocalMass(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
 
         if fem_solver.has_moving_boundary:
             # COMPUTE FORCE VECTOR
@@ -148,7 +148,7 @@ class DisplacementFormulation(VariationalPrinciple):
 
 
 
-    def GetLocalMass(self, function_space, formulation):
+    def GetLocalMass(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem):
 
         ndim = self.ndim
         nvar = self.nvar
@@ -165,23 +165,10 @@ class DisplacementFormulation(VariationalPrinciple):
             # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
             ParentGradientX=np.dot(Jm,LagrangeElemCoords)
 
-            # UPDATE/NO-UPDATE GEOMETRY
-            if MainData.GeometryUpdate:
-                # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-                ParentGradientx = np.dot(Jm,EulerELemCoords)
-            else:
-                ParentGradientx = ParentGradientX
-
             # COMPUTE THE MASS INTEGRAND
-            rhoNN = self.MassIntegrand(Bases,N,MainData.Minimal,MainData.MaterialArgs)
-
-            if MainData.GeometryUpdate:
-                # INTEGRATE MASS
-                mass += rhoNN*MainData.Domain.AllGauss[counter,0]*np.abs(la.det(ParentGradientX))
-                # mass += rhoNN*w[g1]*w[g2]*w[g3]*np.abs(la.det(ParentGradientX))*np.abs(StrainTensors.J)
-            else:
-                # INTEGRATE MASS
-                mass += rhoNN*MainData.Domain.AllGauss[counter,0]*np.abs(la.det(ParentGradientX))
+            rhoNN = self.MassIntegrand(Bases,N,material)
+            # INTEGRATE MASS
+            mass += rhoNN*Domain.AllGauss[counter,0]*np.abs(np.linalg.det(ParentGradientX))
 
         return mass 
 

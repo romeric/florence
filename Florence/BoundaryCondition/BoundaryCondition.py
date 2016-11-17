@@ -682,7 +682,7 @@ class BoundaryCondition(object):
 
         # GET REDUCED MASS MATRIX
         if self.analysis_type != 'static':
-            mass = mass[self.columns_in,:][:,self.columns_in]
+            mass_b = mass[self.columns_in,:][:,self.columns_in]
             return stiffness_b, F_b, F, mass_b
 
         return stiffness_b, F_b, F
