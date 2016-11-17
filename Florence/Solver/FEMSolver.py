@@ -13,6 +13,7 @@ from Florence.FiniteElements.SparseAssembly import SparseAssembly_Step_2
 from Florence.FiniteElements.SparseAssemblySmall import SparseAssemblySmall
 from Florence.PostProcessing import *
 from Florence.Solver import LinearSolver
+from Florence.TimeIntegrators import StructuralDynamicIntegrators
 
 import pyximport
 pyximport.install(setup_args={'include_dirs': np.get_include()})
@@ -234,8 +235,8 @@ class FEMSolver(object):
             return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
 
         # ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES
-        K, TractionForces = self.Assemble(function_spaces[0], formulation, mesh, material, solver, 
-            Eulerx, Eulerp)[:2]
+        K, TractionForces, _, M = self.Assemble(function_spaces[0], formulation, mesh, material, solver, 
+            Eulerx, Eulerp)
 
         if self.analysis_nature == 'nonlinear':
             print('Finished all pre-processing stage. Time elapsed was', time()-tAssembly, 'seconds')
@@ -244,13 +245,14 @@ class FEMSolver(object):
 
 
         if self.analysis_type != 'static':
-            TotalDisp = self.DynamicSolver(function_spaces, formulation, solver, 
-                K, M, DirichletForces,NeumannForces,NodalForces,Residual,
-                mesh,TotalDisp,Eulerx,material, boundary_condition)
+            structural_integrator = StructuralDynamicIntegrators()
+            TotalDisp = structural_integrator.Solver(function_spaces, formulation, solver, 
+                K, M, NeumannForces, NodalForces, Residual,
+                mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition, self)
         else:
             TotalDisp = self.StaticSolver(function_spaces, formulation, solver, 
                 K,NeumannForces,NodalForces,Residual,
-                mesh,TotalDisp,Eulerx,Eulerp,material, boundary_condition)
+                mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition)
 
 
         return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
@@ -346,8 +348,8 @@ class FEMSolver(object):
         # post_process.is_scaledjacobian_computed
         # fem_solver.isScaledJacobianComputed = True
 
-
         return TotalDisp
+
 
 
     def StaticSolver(self, function_spaces, formulation, solver, K,
@@ -388,7 +390,8 @@ class FEMSolver(object):
 
             # UPDATE DISPLACEMENTS FOR THE CURRENT LOAD INCREMENT
             TotalDisp[:,:formulation.ndim,Increment] = Eulerx - mesh.points
-            TotalDisp[:,-1,Increment] = Eulerp
+            if formulation.fields == "electro_mechanics":
+                TotalDisp[:,-1,Increment] = Eulerp
 
 
             print('\nFinished Load increment', Increment, 'in', time()-t_increment, 'seconds')
@@ -444,12 +447,6 @@ class FEMSolver(object):
             # UPDATE THE GEOMETRY
             Eulerx += dU[:,:formulation.ndim]
             Eulerp += dU[:,-1]
-            # print(Eulerx)
-            # print(Eulerp)
-            # print(sol)
-            # exit()
-            # if Iter==1:
-                # print(K.todense()[:3,:3])
 
             # GET ITERATIVE ELECTRIC POTENTIAL
             # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
@@ -459,8 +456,6 @@ class FEMSolver(object):
             # FIND THE RESIDUAL
             Residual[boundary_condition.columns_in] = TractionForces[boundary_condition.columns_in] \
             - NodalForces[boundary_condition.columns_in]
-            # print(TractionForces[[0,1,3,4,6,7,9,10],0])
-            # exit()
 
             # SAVE THE NORM 
             # NormForces = self.NormForces
@@ -546,13 +541,14 @@ class FEMSolver(object):
             # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF MASS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
             I_mass=np.zeros((nvar*nodeperelem)**2*mesh.elements.shape[0],dtype=np.int32)
             J_mass=np.zeros((nvar*nodeperelem)**2*mesh.elements.shape[0],dtype=np.int32)
-            V_mass=np.zeros((nvar*nodeperelem)**2*mesh.elements.shape[0],dtype=np.float32)
+            V_mass=np.zeros((nvar*nodeperelem)**2*mesh.elements.shape[0],dtype=np.float64)
 
-        F = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
         T = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
-        # F = np.zeros((mesh.points.shape[0]*nvar,1),np.float32)
         # T = np.zeros((mesh.points.shape[0]*nvar,1),np.float32)  
-        mass = []
+
+        mass, F = [], []
+        if self.has_moving_boundary:
+            F = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
 
 
         if self.parallel:
@@ -585,8 +581,10 @@ class FEMSolver(object):
 
             if self.analysis_type != 'static':
                 # SPARSE ASSEMBLY - MASS MATRIX
-                I_mass, J_mass, V_mass = SparseAssemblySmall(I_mass_elem,J_mass_elem,V_mass_elem,
-                    I_mass,J_mass,V_mass,elem,nvar,nodeperelem,mesh.elements)
+                # I_mass, J_mass, V_mass = SparseAssemblySmall(I_mass_elem,J_mass_elem,V_mass_elem,
+                #     I_mass,J_mass,V_mass,elem,ndim,nodeperelem,mesh.elements)
+                SparseAssemblyNative(I_mass_elem,J_mass_elem,V_mass_elem,I_mass,J_mass,V_mass,
+                    elem,ndim,nodeperelem,mesh.elements)
 
             if self.has_moving_boundary:
                 # RHS ASSEMBLY

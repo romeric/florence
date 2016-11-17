@@ -101,21 +101,14 @@ class VariationalPrinciple(object):
 
         nvar = self.nvar
         ndim = self.ndim
-        # We will work in total Lagrangian for mass matrix (no update needed)
         rho = material.rho
+        # print(N)
+        # exit()
+        for ivar in range(ndim):
+            N[ivar::nvar,ivar] = Bases
 
-        if ndim==3:
-            # # Mechanical
-            # N[0:N.shape[0]:nvar,0] = Bases
-            # B[1:B.shape[0]:nvar,1] = Bases
-            # B[2:B.shape[0]:nvar,2] = Bases
-            # # Electrostatic 
-            # B[3:B.shape[0]:nvar,3] = Bases
-
-            # for ivar in range(0,ndim):
-            #   N[ivar:N.shape[0]:ndim,ivar] = Bases
-            for ivar in range(0,ndim):
-                N[ivar:N.shape[0]:nvar,ivar] = Bases
+        # print(N)
+        # exit()
         
         rhoNN = rho*np.dot(N,N.T)
         return rhoNN

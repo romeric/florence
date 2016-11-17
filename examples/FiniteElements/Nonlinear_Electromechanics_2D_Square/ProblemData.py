@@ -15,16 +15,18 @@ def ProblemData(*args, **kwargs):
     p=2
 
     # material = IsotropicElectroMechanics_1(ndim,youngs_modulus=1.0,poissons_ratio=0.3, eps_1=1.0)
-    material = MooneyRivlin(ndim,youngs_modulus=1000.0,poissons_ratio=0.3)
-    # material = NeoHookean_2(ndim,youngs_modulus=1.0,poissons_ratio=0.3)
+    # material = MooneyRivlin(ndim,youngs_modulus=1000.0,poissons_ratio=0.3)
+    material = NeoHookean_2(ndim,youngs_modulus=1.0,poissons_ratio=0.3, rho=1.0)
     # material = NeoHookean_2(ndim,lame_parameter_1=0.4,lame_parameter_2=0.6)
     # print(material.mu, material.lamb)
     # print material.nvar
 
-
+    ProblemPath = PWD(__file__)
     mesh = Mesh()
     # mesh.Square(n=5)
-    mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,10),nx=2,ny=2)
+    # mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,10),nx=10,ny=10)
+    # mesh.Reader(ProblemPath+"/Mesh_Plate_Hole_2D.dat","tri")
+    mesh.Reader(ProblemPath+"/Mesh_Plate_Hole_2D_2.dat","tri")
     mesh.GetHighOrderMesh(p=p)
     # print mesh.points.shape[0], mesh.nelem
     # mesh.SimplePlot()
@@ -50,7 +52,7 @@ def ProblemData(*args, **kwargs):
         Y_1 = np.where(mesh.points[:,1] == 10)[0]
         # boundary_data[Y_1,0] = 0
         # boundary_data[Y_1,1] = -6
-        boundary_data[Y_1,1] = 5
+        boundary_data[Y_1,1] = 6
         # boundary_data[Y_1,2] = 1
 
         # boundary_data[2::material.nvar,:] = 0
@@ -63,7 +65,7 @@ def ProblemData(*args, **kwargs):
     boundary_condition.dirichlet_flags = DirichletFunc(mesh)
     formulation = DisplacementFormulation(mesh)
 
-    fem_solver = FEMSolver(number_of_load_increments=1,analysis_type="static",
+    fem_solver = FEMSolver(number_of_load_increments=50,analysis_type="dynamic",
         analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
         newton_raphson_tolerance=1.0e-05)
 
@@ -78,13 +80,14 @@ def ProblemData(*args, **kwargs):
     # from Florence.Utils import debug
     # debug(formulation.function_spaces[0], formulation.quadrature_rules[0],mesh,solution.sol)
 
-    print solution.sol[:,:,-1]+mesh.points
+    # print solution.sol[:,:,-1]+mesh.points
     # print solution.sol[:,:,-1]
     # solution.sol = solution.sol[:,:,None]
     # print solution.sol[:,:,-1]+mesh.points
-    # solution.Animate(configuration="deformed")
+    solution.Animate(configuration="deformed")
+    # solution.Animate(configuration="original")
     # solution.StressRecovery()
-    # solution.WriteVTK("/home/roman/zzchecker/HHH", quantity=1)
+    # solution.WriteVTK("/home/roman/ZZZchecker/HHH", quantity=1)
     # solution.Plot(configuration="deformed", quantity=1)
     # exit()
 
@@ -136,11 +139,11 @@ def ProblemData_2(*args, **kwargs):
 
         Y_1 = np.where(mesh.points[:,1] == 4)[0]
         # boundary_data[Y_1,0] = 0.0
-        boundary_data[Y_1,1] = 4.0
-        # boundary_data[Y_1,2] = 0.01
+        # boundary_data[Y_1,1] = 4.0
+        boundary_data[Y_1,2] = 0.01
 
         # boundary_data[2::material.nvar,:] = 0
-        boundary_data[:,2] = 0. # fix all electrostatics
+        # boundary_data[:,2] = 0. # fix all electrostatics
         # boundary_data[:,:2] = 0 # fix all mechanics
         # print boundary_data[2::material.nvar,:]
         # exit()
@@ -165,7 +168,7 @@ def ProblemData_2(*args, **kwargs):
     formulation = DisplacementPotentialFormulation(mesh)
 
     # fem_solver = FEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=1)
-    fem_solver = StaggeredFEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=50)
+    fem_solver = StaggeredFEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=20)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition)
@@ -488,8 +491,8 @@ def ProblemData_4(*args, **kwargs):
 
 if __name__ == "__main__":
 
-    # ProblemData()
-    ProblemData_2()
+    ProblemData()
+    # ProblemData_2()
     # ProblemData_3()
     # ProblemData_3D()
 
