@@ -4,6 +4,7 @@ import gc
 from warnings import warn
 from Florence import QuadratureRule, FunctionSpace
 from Florence.Base import JacobianError, IllConditionedError
+from Florence.Utils import PWD, RSWD
 
 # import Florence.FunctionSpace.TwoDimensional.Quad.QuadLagrangeGaussLobatto as TwoD
 # import Florence.FunctionSpace.ThreeDimensional.Hexahedral.HexLagrangeGaussLobatto as ThreeD
@@ -17,6 +18,7 @@ from Florence.FunctionSpace import Tri
 from Florence.FunctionSpace import Tet
 
 from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import *
+from Florence import Mesh
 from Florence.MeshGeneration import vtk_writer
 
 class PostProcess(object):
@@ -109,6 +111,12 @@ class PostProcess(object):
             raise ValueError("Mesh not set for post-processing")
         if self.sol is None:
             raise ValueError("Solution not set for post-processing")
+        if self.formulation is None:
+            raise ValueError("formulation not set for post-processing")
+        if self.material is None:
+            raise ValueError("mesh not set for post-processing")
+        if self.fem_solver is None:
+            raise ValueError("FEM solver not set for post-processing")
 
         mesh = self.mesh
 
@@ -150,6 +158,14 @@ class PostProcess(object):
         inv = np.linalg.inv
         Jm = Domain.Jm
         AllGauss = Domain.AllGauss
+
+
+        MainDict = {}
+        MainDict['F'] = np.zeros((LoadIncrement,npoint,ndim,ndim))
+        # MainDict['strain'] = np.zeros((LoadIncrement,npoint,ndim,ndim))
+        MainDict['CauchyStress'] = np.zeros((LoadIncrement,npoint,ndim,ndim))
+        MainDict['ElectricFieldx'] = np.zeros((LoadIncrement,npoint,ndim,ndim))
+        MainDict['ElectricDisplacementx'] = np.zeros((LoadIncrement,npoint,ndim,ndim))
 
         for Increment in range(LoadIncrement):
             # LOOP OVER ELEMENTS
@@ -207,14 +223,7 @@ class PostProcess(object):
                             ElectricFieldx,elem,counter)
             
 
-        MainDict = {}
-        MainDict['F'] = np.zeros((LoadIncrement,npoint,ndim,ndim))
-        # MainDict['strain'] = np.zeros((LoadIncrement,npoint,ndim,ndim))
-        MainDict['CauchyStress'] = np.zeros((LoadIncrement,npoint,ndim,ndim))
-        MainDict['ElectricFieldx'] = np.zeros((LoadIncrement,npoint,ndim,ndim))
-        MainDict['ElectricDisplacementx'] = np.zeros((LoadIncrement,npoint,ndim,ndim))
 
-        for Increment in range(LoadIncrement):
             for inode in np.unique(elements):
                 Els, Pos = np.where(elements==inode)
                 ncommon_nodes = Els.shape[0]
@@ -235,6 +244,258 @@ class PostProcess(object):
 
         self.recovered_fields = MainDict
         return
+
+
+    def GetAugmentedSolution(self):
+        """Computes all recovered variable and puts them in one big nd.array including with primary variables
+            The following numbering convention is used for storing variables:
+
+            Variables (quantity) numbering:
+
+                quantity    mechanics 2D    mechanics 3D    electro_mechanics 2D    electro_mechanics 3D
+                ----------------------------------------------------------------------------------------
+                0           ux              ux              ux                      ux
+                ----------------------------------------------------------------------------------------
+                1           uy              uy              uy                      uy
+                ----------------------------------------------------------------------------------------
+                2           F_xx            uz              phi                     uz
+                ----------------------------------------------------------------------------------------
+                3           F_xy            F_xx            F_xx                    phi
+                ----------------------------------------------------------------------------------------
+                4           F_yx            F_xy            F_xy                    F_xx
+                ----------------------------------------------------------------------------------------
+                5           F_yy            F_xz            F_yx                    F_xy
+                ----------------------------------------------------------------------------------------
+                6           H_xx            F_yx            F_yy                    F_xz
+                ----------------------------------------------------------------------------------------
+                7           H_xy            F_yy            H_xx                    F_yx
+                ----------------------------------------------------------------------------------------
+                8           H_yx            F_yz            H_xy                    F_yy
+                ----------------------------------------------------------------------------------------
+                9           H_yy            F_zx            H_yx                    F_yz
+                ----------------------------------------------------------------------------------------
+                10          J               F_zy            H_yy                    F_zx
+                ----------------------------------------------------------------------------------------
+                11          C_xx            F_zz            J                       F_zy
+                ----------------------------------------------------------------------------------------
+                12          C_xy            H_xx            C_xx                    F_zz
+                ----------------------------------------------------------------------------------------
+                13          C_yy            H_xy            C_xy                    H_xx
+                ----------------------------------------------------------------------------------------
+                14          G_xx            H_xz            C_yy                    H_xy
+                ----------------------------------------------------------------------------------------
+                15          G_xy            H_yx            G_xx                    H_xz
+                ----------------------------------------------------------------------------------------
+                16          G_yy            H_yy            G_xy                    H_yx
+                ----------------------------------------------------------------------------------------
+                17          detC            H_yz            G_yy                    H_yy
+                ----------------------------------------------------------------------------------------
+                18          S_xx            H_zx            detC                    H_yz
+                ----------------------------------------------------------------------------------------
+                19          S_xy            H_zy            S_xx                    H_zx
+                ----------------------------------------------------------------------------------------
+                20          S_yy            H_zz            S_xy                    H_zy
+                ----------------------------------------------------------------------------------------
+                21                          J               S_yy                    H_zz
+                ----------------------------------------------------------------------------------------
+                22                          C_xx            E_x                     J
+                ----------------------------------------------------------------------------------------
+                23                          C_xy            E_y                     C_xx
+                ----------------------------------------------------------------------------------------
+                24                          C_xz            D_x                     C_xy
+                ----------------------------------------------------------------------------------------
+                25                          C_yy            D_y                     C_xz
+                ----------------------------------------------------------------------------------------
+                26                          C_yz                                    C_yy
+                ----------------------------------------------------------------------------------------
+                27                          C_zz                                    C_yz
+                ----------------------------------------------------------------------------------------
+                28                          G_xx                                    C_zz
+                ----------------------------------------------------------------------------------------
+                29                          G_xy                                    G_xx
+                ----------------------------------------------------------------------------------------
+                30                          G_xz                                    G_xy
+                ----------------------------------------------------------------------------------------
+                31                          G_yy                                    G_xz
+                ----------------------------------------------------------------------------------------
+                32                          G_yz                                    G_yx
+                ----------------------------------------------------------------------------------------
+                33                          G_zz                                    G_yy
+                ----------------------------------------------------------------------------------------
+                34                          detC                                    G_zz
+                ----------------------------------------------------------------------------------------
+                35                          S_xx                                    detC
+                ----------------------------------------------------------------------------------------
+                36                          S_xy                                    S_xx
+                ----------------------------------------------------------------------------------------
+                37                          S_xz                                    S_xy
+                ----------------------------------------------------------------------------------------
+                37                          S_yy                                    S_xz
+                ----------------------------------------------------------------------------------------
+                39                          S_yz                                    S_yy
+                ----------------------------------------------------------------------------------------
+                40                          S_zz                                    S_yz
+                ----------------------------------------------------------------------------------------
+                41                                                                  S_zz
+                ----------------------------------------------------------------------------------------
+                42                                                                  E_x
+                ----------------------------------------------------------------------------------------
+                43                                                                  E_y
+                ----------------------------------------------------------------------------------------
+                44                                                                  E_z
+                ----------------------------------------------------------------------------------------
+                45                                                                  D_x
+                ----------------------------------------------------------------------------------------
+                46                                                                  D_y
+                ----------------------------------------------------------------------------------------
+                47                                                                  D_z
+                ----------------------------------------------------------------------------------------
+
+
+
+
+            where S represents Cauchy stress tensor, E the electric field and D the electric
+            displacements
+        
+
+        """
+
+        # GET RECOVERED VARIABLES ALL VARIABLE CHECKS ARE DONE IN STRESS RECOVERY
+        self.StressRecovery()
+
+        ndim = self.formulation.ndim
+        fields = self.formulation.fields
+        nnode = self.mesh.points.shape[0]
+        increments = self.sol.shape[2]
+
+        F = self.recovered_fields['F']
+        J = np.linalg.det(F)
+        H = np.einsum('ij,ijlk->ijkl',J,np.linalg.inv(F))
+        C = np.einsum('ijlk,ijkm->ijlm',np.einsum('ijlk',F),F)
+        detC = J**2
+        G = np.einsum('ijlk,ijkm->ijlm',np.einsum('ijlk',H),H)
+        Cauchy = self.recovered_fields['CauchyStress']
+
+        mm = 20
+        # print Cauchy[0,mm,:,:]
+        # print Cauchy[1,mm,:,:]
+        # print Cauchy[2,mm,:,:]
+        # print F[1,mm,:,:]
+        # print J[1,mm]
+
+        # print J[1,mm]*np.linalg.inv(F[1,mm,:,:]).T
+        # print
+        # print H[1,mm,:,:]
+
+        # print np.dot(F[1,mm,:,:].T, F[1,mm,:,:])
+        # print 
+        # print C[1,mm,:,:]
+
+        # print Cauchy[1,mm,:,:]
+        # print F[1,mm,:,:]
+        # print F.shape
+        # F = np.einsum('lkij',F) ##
+        # F = np.einsum('lijk',F) ####
+        # x = np.random.rand(2,140,3,3)
+        # exit()
+        F = np.einsum('lijk',F).reshape(nnode,ndim**2,increments)
+        H = np.einsum('lijk',H).reshape(nnode,ndim**2,increments)
+        J = J.reshape(nnode,increments)
+        C = np.einsum('lijk',C).reshape(nnode,ndim**2,increments)
+        G = np.einsum('lijk',G).reshape(nnode,ndim**2,increments)
+        detC = detC.reshape(nnode,increments)
+        Cauchy = np.einsum('lijk',Cauchy).reshape(nnode,ndim**2,increments)
+
+        # F = np.einsum('lkij',F).reshape(ndim**2,nnode,increments)
+        # H = np.einsum('lkij',H).reshape(ndim**2,nnode,increments)
+        # C = np.einsum('lkij',C).reshape(ndim**2,nnode,increments)
+        # G = np.einsum('lkij',G).reshape(ndim**2,nnode,increments)
+        # Cauchy = np.einsum('lkij',Cauchy).reshape(ndim**2,nnode,increments)
+
+        # print F[mm,:,:,1]
+        # print Cauchy[mm,:9,1]
+        # print Cauchy[:9,mm,1]
+        # print ndim**2,nnode,increments
+        # print C.shape
+
+        # exit()
+
+
+        if ndim == 2:
+            C = C[:,[0,1,3],:]
+            G = G[:,[0,1,3],:]
+            Cauchy = Cauchy[:,[0,1,3],:]
+        elif ndim == 3:
+            C = C[:,[0,1,2,4,5,8],:]
+            G = G[:,[0,1,2,4,5,8],:]
+            Cauchy = Cauchy[:,[0,1,2,4,5,8],:]
+
+        # print Cauchy[mm,:9,1]
+        # exit()
+
+        # H = np.einsum('')
+        CauchyStress = self.recovered_fields['CauchyStress'].reshape(ndim**2,nnode,increments)
+        if fields == "electro-mechanics":
+            ElectricFieldx = self.recovered_fields['ElectricFieldx'].reshape(ndim,nnode,increments)
+            ElectricDisplacementx = self.recovered_fields['ElectricDisplacementx'].reshape(ndim,nnode,increments)
+
+
+        if fields == "mechanics" and ndim == 2:
+
+            augmented_sol = np.zeros((nnode,21,increments),dtype=np.float64)
+            augmented_sol[:,:2,:]     = self.sol
+            augmented_sol[:,2:6,:]    = F
+            augmented_sol[:,6:10,:]   = H
+            augmented_sol[:,10,:]     = J
+            augmented_sol[:,11:14,:]  = C
+            augmented_sol[:,14:17,:]  = G
+            augmented_sol[:,17,:]     = detC
+            augmented_sol[:,18:21,:]  = Cauchy
+
+        elif fields == "mechanics" and ndim == 3:
+
+            augmented_sol = np.zeros((nnode,41,increments),dtype=np.float64)
+            augmented_sol[:,:4,:]     = self.sol
+            augmented_sol[:,4:13,:]   = F
+            augmented_sol[:,13:22,:]  = H
+            augmented_sol[:,22,:]     = J
+            augmented_sol[:,23:29,:]  = C
+            augmented_sol[:,29:35,:]  = G
+            augmented_sol[:,35,:]     = detC
+            augmented_sol[:,36:42,:]  = Cauchy
+
+
+        elif fields == "electro_mechanics" and ndim == 2:
+
+            augmented_sol = np.zeros((nnode,26,increments),dtype=np.float64)
+            augmented_sol[:,:3,:]     = self.sol
+            augmented_sol[:,3:7,:]    = F
+            augmented_sol[:,7:11,:]   = H
+            augmented_sol[:,11,:]     = J
+            augmented_sol[:,12:15,:]  = C
+            augmented_sol[:,15:18,:]  = G
+            augmented_sol[:,18,:]     = detC
+            augmented_sol[:,19:22,:]  = Cauchy
+            augmented_sol[:,22:24,:]  = ElectricFieldx
+            augmented_sol[:,24:26,:]  = ElectricDisplacementx
+
+
+        elif fields == "electro_mechanics" and ndim == 3:
+            augmented_sol = np.zeros((nnode,48,increments),dtype=np.float64)
+
+            augmented_sol[:,:4,:]     = self.sol
+            augmented_sol[:,4:13,:]   = F
+            augmented_sol[:,13:22,:]  = H
+            augmented_sol[:,22,:]     = J
+            augmented_sol[:,23:29,:]  = C
+            augmented_sol[:,29:35,:]  = G
+            augmented_sol[:,35,:]     = detC
+            augmented_sol[:,36:42,:]  = Cauchy
+            augmented_sol[:,42:45,:]  = ElectricFieldx
+            augmented_sol[:,45:48,:]  = ElectricDisplacementx
+
+        
+        return augmented_sol
 
 
 
@@ -342,10 +603,9 @@ class PostProcess(object):
 
         # SAVE
         if save:
-            from Florence.Utils import RSWD
             if filename == None:
                 warn("No filename provided. I am going to write one in the current directory")
-                filename = RSWD()
+                filename = PWD(__file__) + 'output.eps'
 
             plt.savefig(filename, format='eps', dpi=500)
 
@@ -353,16 +613,45 @@ class PostProcess(object):
 
 
 
-    def Plot(self, figure=None, quantity=0, configuration="original", 
-        colorbar=True, axis_type=None, plot_points=False, point_radius=0.5):
+    def Plot(self, figure=None, quantity=0, configuration="original", increment=0, colorbar=True, axis_type=None, 
+        plot_points=False, point_radius=0.5, plot_edges=True, plot_on_curvilinear_mesh=True, show_plot=True, save=False, filename=None):
+        """ 
+
+            Input:
+                configuration:                  [str] to plot on original or deformed configuration 
+                increment:                      [int] if results at specific increment needs to be plotted. 
+        """
 
 
-        if self.mesh is None:
-            raise ValueError("Mesh not set for post-processing")
         if self.sol is None:
             raise ValueError("Solution not set for post-processing")
+        if configuration != "deformed" and configuration != "original":
+            raise ValueError("configuration can only be 'original' or 'deformed'")
 
-        from copy import deepcopy
+        # CHECKS ARE DONE HERE
+        if quantity>self.sol.shape[1]:
+            self.sol = self.GetAugmentedSolution()
+
+
+        if save:
+            if filename is None:
+                warn("file name not specified. I am going to write in the current directory")
+                filename = PWD(__file__) + "/output.eps"
+            elif filename is not None :
+                if isinstance(filename,str) is False:
+                    raise ValueError("file name should be a string")
+
+            # DO NOT SAVE THESE IMAGES IN .eps FORMAT 
+            if len(filename.split("."))>1:
+                if filename.split(".")[-1] != "png":
+                    filename = filename.split(".")[0] + ".png"
+            else:
+                filename += ".png"
+
+
+        C = self.mesh.InferPolynomialDegree()
+        if C==0:
+            plot_on_curvilinear_mesh = False
 
         # GET LINEAR MESH
         mesh = self.mesh.GetLinearMesh()
@@ -388,32 +677,84 @@ class PostProcess(object):
             import matplotlib.tri as mtri
             import matplotlib.cm as cm
             from mpl_toolkits.axes_grid1 import make_axes_locatable
-            
-            fig = plt.figure()
-            if configuration == "original":
-                plt.triplot(mesh.points[:,0],mesh.points[:,1], mesh.elements[:,:3],color='k')
-            elif configuration == "deformed":
-                plt.triplot(mesh.points[:,0]+sol[:,0,-1], mesh.points[:,1]+sol[:,1,-1], mesh.elements[:,:3],color='k')
-            else:
-                raise ValueError("configuration can only be 'original' or 'deformed'")
+
+            # FIX FOR TRI MESHES
+            point_radius = 2.
+
+            # IF PLOT ON CURVED MESH IS ACTIVATED 
+            if plot_on_curvilinear_mesh:
+
+                if figure is None:
+                    figure = plt.figure()
+
+                if configuration=="original":
+                    incr = 0
+                    tmesh = PostProcess.CurvilinearPlotTri(self.mesh, np.zeros_like(self.sol), 
+                        InterpolationDegree=20, show_plot=False, figure=figure, 
+                        save_tessellation=True, plot_points=plot_points, plot_edges=plot_edges)[-1]
+                else:
+                    incr = -1
+                    tmesh = PostProcess.CurvilinearPlotTri(self.mesh, self.sol, 
+                        InterpolationDegree=20, show_plot=False, figure=figure, 
+                        save_tessellation=True, plot_points=plot_points, plot_edges=plot_edges)[-1]
+
+                nsize = tmesh.nsize
+                nnode = tmesh.nnode
+                extrapolated_sol = np.zeros((nnode,self.sol.shape[1]),dtype=np.float64)
+
+                for ielem in range(self.mesh.nelem):
+                    extrapolated_sol[ielem*nsize:(ielem+1)*nsize,:] = np.dot(tmesh.bases_2, self.sol[self.mesh.elements[ielem,:],:,incr])
+
+                triang = mtri.Triangulation(tmesh.points[:,0], tmesh.points[:,1], tmesh.elements)
+                h_fig = plt.tripcolor(triang, extrapolated_sol[:,quantity], shading='gouraud', cmap=cm.viridis)
+                # h_fig = plt.tripcolor(triang, extrapolated_sol[:,quantity], shading='flat', cmap=cm.viridis)
+
+                if save:
+                    plt.savefig(filename, format="png", dpi=100, bbox_inches='tight',pad_inches=0.01)
+
+                if colorbar:
+                    plt.colorbar(h_fig,shrink=0.5)
+
+                if show_plot:
+                    plt.show()
+
+                return
+
+
+            # OTHERWISE PLOT ON PLANAR MESH 
+            if figure is None:
+                fig = plt.figure()
 
             if configuration == "original":
-                # plt.tricontourf(mesh.points[:,0], mesh.points[:,1], mesh.elements, sol[:,quantity,-1],cmap=cm.viridis)
+                plt.triplot(mesh.points[:,0],mesh.points[:,1], mesh.elements[:,:3],color='k')
+
                 triang = mtri.Triangulation(mesh.points[:,0], mesh.points[:,1], mesh.elements)
                 plt.tripcolor(triang, sol[:,quantity,-1], shading='gouraud', cmap=cm.viridis)
+
                 if plot_points:
-                    plt.plot(self.mesh.points[:,0], self.mesh.points[:,1],'ko')
+                    plt.plot(mesh.points[:,0], mesh.points[:,1],'o',markersize=point_radius,color='k')
             else:
+                plt.triplot(mesh.points[:,0]+sol[:,0,-1], mesh.points[:,1]+sol[:,1,-1], mesh.elements[:,:3],color='k')
+
                 triang = mtri.Triangulation(mesh.points[:,0]+sol[:,0,-1], 
                     mesh.points[:,1]+sol[:,1,-1], mesh.elements)
                 plt.tripcolor(triang, sol[:,quantity,-1], shading='gouraud', cmap=cm.viridis)
+                
                 if plot_points:
-                    plt.plot(self.mesh.points[:,0]+self.sol[:,0,-1], self.mesh.points[:,1]+self.sol[:,1,-1],'ko')
+                    plt.plot(mesh.points[:,0]+sol[:,0,-1], 
+                        mesh.points[:,1]+sol[:,1,-1],'o',markersize=point_radius,color='k')
 
-            if axis_type == "equal":
-                plt.axis(axis_type)
-            plt.colorbar()
-            plt.show()
+            plt.axis('equal')
+            plt.axis('off')
+            
+            if colorbar:
+                plt.colorbar()
+
+            if save:
+                plt.savefig(filename, format="png", dpi=100, bbox_inches='tight',pad_inches=0.01)
+
+            if show_plot:
+                plt.show()
 
 
 
@@ -476,34 +817,45 @@ class PostProcess(object):
 
 
 
-    def Animate(self, figure=None, quantity=0, configuration="original", 
-        colorbar=True, axis_type=None, plot_points=False, point_radius=0.5):
+    def Animate(self, figure=None, quantity=0, configuration="original", increment=0, colorbar=True, axis_type=None, 
+        plot_points=False, point_radius=0.5, plot_edges=True, plot_on_curvilinear_mesh=True, show_plot=True, save=False, 
+        filename=None):
+        """ 
 
+            Input:
+                configuration:                  [str] to plot on original or deformed configuration 
+                increment:                      [int] if results at specific increment needs to be plotted. 
         """
-            quantity=0 - ux
-            quantity=0 - uy
-            quantity=0 - uz if 2D, phi if 3D
-        """
 
 
-        if self.mesh is None:
-            raise ValueError("Mesh not set for post-processing")
         if self.sol is None:
             raise ValueError("Solution not set for post-processing")
+        if configuration != "deformed" and configuration != "original":
+            raise ValueError("configuration can only be 'original' or 'deformed'")
 
-        from copy import deepcopy
+        # ALL CHECKS ARE DONE HERE
+        if quantity>self.sol.shape[1]:
+            # MODIFIES/EXPANDS SOL
+            self.sol = self.GetAugmentedSolution()
+
+
+        if save:
+            if filename is None:
+                warn("file name not specified. I am going to write in the current directory")
+                filename = PWD(__file__) + "/output.eps"
+            elif filename is not None :
+                if isinstance(filename,str) is False:
+                    raise ValueError("file name should be a string")
+
+
+        C = self.mesh.InferPolynomialDegree()
+        if C==0:
+            plot_on_curvilinear_mesh = False
 
         # GET LINEAR MESH
-        mesh = deepcopy(self.mesh)
-        if mesh.element_type == "tri":
-            mesh.elements = mesh.elements[:,:3]
-        elif mesh.element_type == "tet":
-            mesh.elements = mesh.elements[:,:4]
-            mesh.faces = mesh.faces[:,:3]
-        mesh.nnode = int(np.max(mesh.elements)+1)
-        mesh.points = mesh.points[:mesh.nnode,:]
-        # GET LINEAR SOLUTION - [MODIFIES THE SOLUTION]
-        sol = np.copy(self.sol[:mesh.nnode,:])
+        mesh = self.mesh.GetLinearMesh()
+        # GET LINEAR SOLUTION 
+        sol = np.copy(self.sol[:mesh.nnode,:,:])
 
         if self.mesh.element_type == "tri":
 
@@ -514,67 +866,199 @@ class PostProcess(object):
             from Florence.FunctionSpace import Tri 
             from Florence.FunctionSpace.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
             from Florence.FunctionSpace.GetBases import GetBases
-            from Florence import Mesh
 
             from copy import deepcopy
             from scipy.spatial import Delaunay
+            import matplotlib as mpl
+            # mpl.use('Agg')
             from mpl_toolkits.mplot3d import Axes3D
             from matplotlib.colors import LightSource
-            import matplotlib as mpl
             import matplotlib.pyplot as plt
             import matplotlib.tri as mtri
             import matplotlib.cm as cm
             from mpl_toolkits.axes_grid1 import make_axes_locatable
             import matplotlib.animation as animation
             
-            # fig = plt.figure()
-            fig, ax = plt.subplots()
-            self.configuration = configuration
+            # FIX FOR TRI MESHES
+            point_radius = 2.
+            ndim = 2
+
+            if configuration=="deformed":
+                vpoints = self.mesh.points+self.sol[:,:ndim,-1] 
+            else:
+                vpoints = self.mesh.points
+
+            # IF PLOT ON CURVED MESH IS ACTIVATED 
+            if plot_on_curvilinear_mesh:
+
+                figure, ax = plt.subplots()
+
+                tmesh = PostProcess.CurvilinearPlotTri(self.mesh, np.zeros_like(self.sol), 
+                        InterpolationDegree=10, show_plot=False, 
+                        save_tessellation=True)[-1]
+                plt.close()
+
+                triang = mtri.Triangulation(tmesh.points[:,0], tmesh.points[:,1], tmesh.elements)
+                nsize = tmesh.nsize
+                nnode = tmesh.nnode
+                extrapolated_sol = np.zeros((nnode,self.sol.shape[1]),dtype=np.float64)
+
+                for ielem in range(self.mesh.nelem):
+                    extrapolated_sol[ielem*nsize:(ielem+1)*nsize,:] = np.dot(tmesh.bases_2, self.sol[self.mesh.elements[ielem,:],:,0])
+
+
+                def init_animation():
+                    
+                    pp = 0.2
+                    ax.set_xlim([np.min(vpoints[:,0]) - pp*np.min(vpoints[:,0]), np.max(vpoints[:,0]) + pp*np.max(vpoints[:,0]) ])
+                    ax.set_ylim([np.min(vpoints[:,1]) - pp*np.min(vpoints[:,1]), np.max(vpoints[:,1]) + pp*np.max(vpoints[:,1]) ])
+
+                    if plot_points:
+                        self.h_points, = ax.plot(self.mesh.points[:,0], self.mesh.points[:,1],'o',markersize=point_radius,color='k')
+
+                    if plot_edges:
+                        self.h_edges = ax.plot(tmesh.x_edges,tmesh.y_edges,'k')
+
+                    self.h_fig = ax.tripcolor(triang, extrapolated_sol[:,quantity], shading='gouraud', cmap=cm.viridis)
+                    self.h_fig.set_clim(extrapolated_sol[:,quantity].min(),extrapolated_sol[:,quantity].max())
+
+                    ax.set_aspect('equal',anchor='C')
+                    ax.set_axis_off()
+
+                    if colorbar:
+                        self.cbar = figure.colorbar(self.h_fig, shrink=0.5)
+                        self.cbar.set_clim(extrapolated_sol[:,quantity].min(),extrapolated_sol[:,quantity].max())
+
+
+
+                def animator(incr):
+
+                    if plot_points and configuration=="deformed":
+                        self.h_points.set_xdata(self.mesh.points[:,0]+self.sol[:,0,incr])
+                        self.h_points.set_ydata(self.mesh.points[:,1]+self.sol[:,1,incr])
+
+                    # PLOT EDGES
+                    if plot_edges and configuration=="deformed":
+                        for iedge in range(tmesh.x_edges.shape[1]):
+                            ielem = tmesh.edge_elements[iedge,0]
+                            edge = self.mesh.elements[ielem,tmesh.reference_edges[tmesh.edge_elements[iedge,1],:]]
+                            coord_edge = (self.mesh.points + self.sol[:,:ndim,incr])[edge,:]
+                            tmesh.x_edges[:,iedge], tmesh.y_edges[:,iedge] = np.dot(coord_edge.T,tmesh.bases_1)
+
+                            self.h_edges[iedge].set_xdata(tmesh.x_edges[:,iedge])
+                            self.h_edges[iedge].set_ydata(tmesh.y_edges[:,iedge])
+
+                    extrapolated_sol = np.zeros((nnode,self.sol.shape[1]),dtype=np.float64)
+                    for ielem in range(self.mesh.nelem):
+                        extrapolated_sol[ielem*nsize:(ielem+1)*nsize,:] = np.dot(tmesh.bases_2, self.sol[self.mesh.elements[ielem,:],:,incr])
+
+                    if configuration=="deformed":
+                        triang.x = extrapolated_sol[:,0] + tmesh.points[:,0]
+                        triang.y = extrapolated_sol[:,1] + tmesh.points[:,1]
+                    self.h_fig.set_array(extrapolated_sol[:,quantity])
+
+                    self.h_fig.set_clim(extrapolated_sol[:,quantity].min(),extrapolated_sol[:,quantity].max())
+                    if colorbar:
+                        self.cbar.set_clim(extrapolated_sol[:,quantity].min(),extrapolated_sol[:,quantity].max())
+
+                interval = 0
+                ani = animation.FuncAnimation(figure, animator, frames=range(0,self.sol.shape[2]), init_func=init_animation)
+
+
+                if save:
+                    # Writer = animation.writers['imagemagick']
+                    # writer = Writer(fps=30, metadata=dict(artist='Me'), bitrate=1800)
+                    if filename.split('.')[-1] == "gif":
+                        ani.save(filename,fps=5, writer="imagemagick", savefig_kwargs={'pad_inches':0.01})
+                    else:
+                        ani.save(filename,fps=5, savefig_kwargs={'bbox_inches':'tight','pad_inches':0.01})
+
+                if show_plot:
+                    ax.clear()
+                    if colorbar and save:
+                        self.cbar.ax.cla()
+                        self.cbar.ax.clear()
+                        del self.cbar
+                    plt.show()
+
+                return
+
+
+
+
+            # MAKE FIGURE
+            figure, ax = plt.subplots()
+
+            triang = mtri.Triangulation(mesh.points[:,0], 
+                mesh.points[:,1], mesh.elements)
+
+            def init_animation():
+
+                pp = 0.2
+                ax.set_xlim([np.min(vpoints[:,0]) - pp*np.min(vpoints[:,0]), np.max(vpoints[:,0]) + pp*np.max(vpoints[:,0]) ])
+                ax.set_ylim([np.min(vpoints[:,1]) - pp*np.min(vpoints[:,1]), np.max(vpoints[:,1]) + pp*np.max(vpoints[:,1]) ])
+
+                if plot_edges:
+                    self.h_edges = ax.triplot(triang,color='k')
+                self.h_fig = ax.tripcolor(triang, sol[:,quantity,0], shading='gouraud', cmap=cm.viridis)
+                self.h_fig.set_clim(sol[:,quantity,0].min(),sol[:,quantity,0].max())
+
+                if plot_points:
+                    self.h_points, = ax.plot(mesh.points[:,0], mesh.points[:,1],
+                        'o', markersize=point_radius, color='k')
+
+                if colorbar:
+                    self.cbar = figure.colorbar(self.h_fig, shrink=0.5)
+                    self.cbar.set_clim(sol[:,quantity,0].min(),sol[:,quantity,0].max())
+                
+                ax.set_aspect('equal',anchor='C')
+                ax.set_axis_off()
+
 
             def animator(incr):
-                configuration = self.configuration
-                # GET LINEAR SOLUTION - [MODIFIES THE SOLUTION]
-                sol = self.sol[:mesh.nnode,:]
 
                 ax.clear()
+                    
+                if configuration=="deformed":
+                    vpoints = mesh.points + sol[:,:ndim,incr]
+                    triang.x = vpoints[:,0]
+                    triang.y = vpoints[:,1]
+                else:
+                    vpoints = mesh.points
 
-                if configuration == "deformed":
+                if plot_points:
+                    self.h_points, = ax.plot(vpoints[:,0], vpoints[:,1],
+                        'o', markersize=point_radius, color='k')
 
-                    ax_dum = self.mesh.points+self.sol[:,:,-1]
-                    ax.set_xlim([np.min(ax_dum[:,0]),np.max(ax_dum[:,0])])
-                    ax.set_ylim([np.min(ax_dum[:,1]),np.max(ax_dum[:,1])])
+                if plot_edges:
+                    self.h_edges = ax.triplot(triang,color='k')
 
-                    triang = mtri.Triangulation(mesh.points[:,0]+sol[:,0,incr], 
-                        mesh.points[:,1]+sol[:,1,incr], mesh.elements)
-                    ax.triplot(mesh.points[:,0]+sol[:,0,incr], mesh.points[:,1]+sol[:,1,incr], 
-                        mesh.elements[:,:3],color='k')
-                    tri_h = ax.tripcolor(triang, sol[:,quantity,incr], shading='gouraud', cmap=cm.viridis)
-                    if plot_points:
-                        ax.plot(self.mesh.points[:,0]+sol[:,0,incr], 
-                            self.mesh.points[:,1]+self.sol[:,1,incr],'o',markersize=5  ,color='k')
-                elif configuration == "original":
-                    plt.triplot(mesh.points[:,0],mesh.points[:,1], mesh.elements[:,:3],color='k')
-                    # plt.tricontourf(mesh.points[:,0], mesh.points[:,1], mesh.elements, 
-                    #     sol[:,quantity,incr],cmap=cm.viridis)
-                    triang = mtri.Triangulation(mesh.points[:,0], mesh.points[:,1], mesh.elements)
-                    tri_h = ax.tripcolor(triang, sol[:,quantity,incr], shading='gouraud', cmap=cm.viridis)
-                    if plot_points:
-                        ax.plot(self.mesh.points[:,0],self.mesh.points[:,1],
-                            'o',markersize=5  ,color='k')
+                self.h_fig = ax.tripcolor(triang, sol[:,quantity,incr], shading='gouraud', cmap=cm.viridis)
 
-                    # return tri_h
+                self.h_fig.set_clim(sol[:,quantity,incr].min(),sol[:,quantity,incr].max())
+                
+                if colorbar:
+                    # self.cbar = figure.colorbar(self.h_fig, shrink=0.5)
+                    self.cbar.set_clim(sol[:,quantity,incr].min(),sol[:,quantity,incr].max())
+
+
+                ax.set_aspect('equal',anchor='C')
+                ax.set_axis_off()
+
  
-            interval = 20 #in seconds
-            ani = animation.FuncAnimation(fig,animator,self.sol.shape[2],interval=interval, repeat=True)
-
-            # if colorbar is True:
-                # fig.colorbar()
-                # fig.colorbar(mappable=tri_h,cmap=cm.viridis)
-                # plt.colorbar()
+            ani = animation.FuncAnimation(figure,func=animator, 
+                frames=range(self.sol.shape[2]), init_func=init_animation)
             
-            if axis_type == "equal":
-                plt.axis(axis_type)
-            plt.show()
+            if save:
+                if filename.split('.')[-1] == "gif":
+                    ani.save(filename,fps=5, writer="imagemagick", savefig_kwargs={'pad_inches':0.01})
+                else:
+                    ani.save(filename,fps=5, savefig_kwargs={'bbox_inches':'tight','pad_inches':0.01})
+
+            if show_plot:
+                plt.show()
+
+
 
         elif self.mesh.element_type == "tet":
 
@@ -799,20 +1283,19 @@ class PostProcess(object):
                 TotalDisp = self.sol
 
         if mesh.element_type == "tri":
-            # self.CurvilinearPlotTri(*args,**kwargs)
-            self.CurvilinearPlotTri(mesh,TotalDisp,**kwargs)
+            return self.CurvilinearPlotTri(mesh,TotalDisp,**kwargs)
         elif mesh.element_type == "tet":
-            # self.CurvilinearPlotTet(*args,**kwargs)
-            self.CurvilinearPlotTet(mesh,TotalDisp,**kwargs)
+            return self.CurvilinearPlotTet(mesh,TotalDisp,**kwargs)
         else:
             raise ValueError("Unknown mesh type")
 
 
     @staticmethod
     def CurvilinearPlotTri(mesh, TotalDisp, QuantityToPlot=None,
-        ProjectionFlags=None, InterpolationDegree=40, EquallySpacedPoints=False,
+        ProjectionFlags=None, InterpolationDegree=30, EquallySpacedPoints=False,
         TriSurf=False, colorbar=False, PlotActualCurve=False, point_radius = 3, color="#C5F1C5",
-        plot_points=False, plot_edges=True, save=False, filename=None, show_plot=True):
+        plot_points=False, plot_edges=True, save=False, filename=None, figure=None, show_plot=True, 
+        save_tessellation=False):
 
         """High order curved triangular mesh plots, based on high order nodal FEM.
             The equally spaced FEM points do not work as good as the Fekete points 
@@ -886,9 +1369,9 @@ class PostProcess(object):
 
         # GET EULERIAN GEOMETRY
         if TotalDisp.ndim==3:
-            vpoints = mesh.points + TotalDisp[:,:,-1]
+            vpoints = mesh.points + TotalDisp[:,:ndim,-1]
         else:
-            vpoints = mesh.points + TotalDisp
+            vpoints = mesh.points + TotalDisp[:,:ndim]
 
         # GET X & Y OF CURVED EDGES
         if plot_edges:
@@ -903,8 +1386,13 @@ class PostProcess(object):
 
 
         # MAKE FIGURE
-        fig = plt.figure()
-        ls = LightSource(azdeg=315, altdeg=45)
+        if figure is None:
+            fig = plt.figure()
+        else:
+            fig = figure
+
+        h_surfaces, h_edges, h_points = None, None, None
+        # ls = LightSource(azdeg=315, altdeg=45)
         if TriSurf is True:
             ax = fig.add_subplot(111, projection='3d')
         else:
@@ -912,7 +1400,7 @@ class PostProcess(object):
 
         if plot_edges:
             # PLOT CURVED EDGES
-            ax.plot(x_edges,y_edges,'k')
+            h_edges = ax.plot(x_edges,y_edges,'k')
         
 
         nnode = nsize*mesh.nelem
@@ -944,22 +1432,19 @@ class PostProcess(object):
             # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, np.ones(Xplot.shape[0]), 100,alpha=0.8)
             # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, 100,alpha=0.8)
             # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot[:4,:], np.ones(Xplot.shape[0]),alpha=0.8,origin='lower')
-
             if QuantityToPlot is None:
-                # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, colors="#C5F1C5")
-                triang = mtri.Triangulation(Xplot[:,0], Xplot[:,1],Tplot)
-                plt.tripcolor(triang, Uplot, shading='gouraud', cmap=cm.viridis)
+                h_surfaces = plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, colors="#C5F1C5")
             else:
-                plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, 100,alpha=0.8)
+                h_surfaces = plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, 100,alpha=0.8)
 
         # PLOT CURVED POINTS
         if plot_points:
             # plt.plot(vpoints[:,0],vpoints[:,1],'o',markersize=3,color='#F88379')
-            plt.plot(vpoints[:,0],vpoints[:,1],'o',markersize=point_radius,color='k')
+            h_points = plt.plot(vpoints[:,0],vpoints[:,1],'o',markersize=point_radius,color='k')
 
         if QuantityToPlot is not None:
-            # plt.set_cmap('viridis')
-            plt.set_cmap('viridis_r')
+            plt.set_cmap('viridis')
+            # plt.set_cmap('viridis_r')
             plt.clim(0,1)
         
 
@@ -987,11 +1472,34 @@ class PostProcess(object):
             if filename is None:
                 raise ValueError("No filename given. Supply one with extension")
             else:
-                plt.savefig(filename,format="eps",dpi=300, bbox_inches='tight')
+                plt.savefig(filename, format="eps",dpi=300, bbox_inches='tight')
 
 
         if show_plot:
             plt.show()
+
+        if save_tessellation:
+
+            tmesh = Mesh()
+            tmesh.element_type = "tri"
+            tmesh.elements = Tplot
+            tmesh.points = Xplot
+            tmesh.nelem = nelem
+            tmesh.nnode = nnode
+            tmesh.nsize = nsize
+            tmesh.bases_1 = BasesOneD
+            tmesh.bases_2 = BasesTri.T
+
+            if plot_edges:
+                tmesh.x_edges = x_edges
+                tmesh.y_edges = y_edges
+                tmesh.edge_elements = edge_elements
+                tmesh.reference_edges = reference_edges
+
+            return h_surfaces, h_edges, h_points, tmesh
+
+
+        return h_surfaces, h_edges, h_points
 
 
 
@@ -1018,7 +1526,6 @@ class PostProcess(object):
         from Florence.FunctionSpace import Tri 
         from Florence.FunctionSpace.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
         from Florence.FunctionSpace.GetBases import GetBases
-        from Florence import Mesh
 
         from copy import deepcopy
         from scipy.spatial import Delaunay
@@ -1438,5 +1945,4 @@ class PostProcess(object):
 
         plt.axis('equal')
         plt.axis('off')
-        # plt.savefig('/home/roman/Desktop/destination_path.eps', format='eps', dpi=1000)
         plt.show()

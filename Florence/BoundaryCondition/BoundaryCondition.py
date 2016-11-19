@@ -180,6 +180,37 @@ class BoundaryCondition(object):
             self.projection_flags = projection_edges
 
 
+    def GetGeometryMeshScale(self,gpoints,mesh):
+        """Compares CAD geometry and mesh, to check if the mesh coordinates
+            require scaling
+
+            raises an error if scaling is 
+        """
+
+        gminx, gmaxx = np.min(gpoints[:,0]), np.max(gpoints[:,0])
+        gminy, gmaxy = np.min(gpoints[:,1]), np.max(gpoints[:,1])
+        gmax = np.max(gpoints)
+        mmax = np.max(mesh.points)
+
+        # NOTE THAT THE BOUNDS OF NURBS BOUNDARY ISN'T 
+        # NECESSARILY EXACTLY THE SAME AS THE MESH, EVEN IF 
+        # SCALED APPROPRIATELY 
+        gbounds = np.array([[gminx,gminy],[gmaxx,gmaxy]])
+
+        units_scalar = [1000.,25.4]
+        for scale in units_scalar:
+            if np.isclose(gmax/mmax,scale):
+                if self.scale_value_on_projection != scale:
+                    self.scale_value_on_projection = scale
+                    raise ValueError('Geometry to mesh scale seems incorrect. Change it to %9.3f' % scale)
+                    # A SIMPLE WARNING IS NOT POSSIBLE AT THE MOMENT
+                    # warn('Geometry to mesh scale seems incorrect. Change it to %9.3f' % scale)
+                    # break
+
+        return gbounds
+ 
+
+
     def SetDirichletCriteria(self, func, *args, **kwargs):
         self.dirichlet_flags = func(*args, **kwargs)
         return self.dirichlet_flags
@@ -332,6 +363,7 @@ class BoundaryCondition(object):
             curvilinear_mesh.ReadIGES(self.cad_file)
             # EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
             geometry_points = curvilinear_mesh.GetGeomVertices()
+            self.GetGeometryMeshScale(geometry_points,mesh)
             # print(np.max(geometry_points[:,0]), mesh.Bounds)
             # exit()
             curvilinear_mesh.GetGeomEdges()
@@ -382,8 +414,8 @@ class BoundaryCondition(object):
             curvilinear_mesh.ReadIGES(self.cad_file)
             # EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
             geometry_points = curvilinear_mesh.GetGeomVertices()
+            self.GetGeometryMeshScale(geometry_points,mesh)
             # print(np.max(geometry_points[:,2]), mesh.Bounds)
-            # print(np.max(geometry_points),np.min(geometry_points))
             # exit()
             curvilinear_mesh.GetGeomEdges()
             curvilinear_mesh.GetGeomFaces()
