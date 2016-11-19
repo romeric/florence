@@ -24,6 +24,7 @@ def KinematicMeasures(F,analysis_nature):
     # if analysis_nature == 'Nonlinear':
     #   # ADDITIONAL POLYCONVEX MEASURES - ACTIVATE IF NECESSARY
     #   # StrainTensors['H'] = np.einsum('i,ijk->ijk',StrainTensors['J'],np.einsum('ikj',np.linalg.inv(StrainTensors['F'])))
+    #   # StrainTensors['H'] = np.einsum('i,ikj->ijk',StrainTensors['J'],np.linalg.inv(StrainTensors['F'])) # or
     #   # StrainTensors['g'] = np.einsum('ijk,ilk->ijl',StrainTensors['H'],StrainTensors['H'])
     #   # StrainTensors['C'] = np.einsum('ikj,ikl->ijl',StrainTensors['F'],StrainTensors['F']) 
     #   # StrainTensors['G'] = np.einsum('ikj,ikl->ijl',StrainTensors['H'],StrainTensors['H'])

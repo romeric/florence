@@ -57,6 +57,7 @@ class FEMSolver(object):
         self.NRConvergence = None
 
         self.compute_mesh_qualities = compute_mesh_qualities
+        self.isScaledJacobianComputed = False
 
         self.vectorise = True
         self.parallel = parallelise
@@ -71,7 +72,7 @@ class FEMSolver(object):
         """Checks the state of data for FEMSolver"""
 
         if material.mtype == "LinearModel" and self.number_of_load_increments > 1:
-            warn("Can not solve a linear elastic multiple step. "
+            warn("Can not solve a linear elastic model in multiple step. "
                 "The number of load increments is going to be set to 1")
             self.number_of_load_increments = 1
 
@@ -138,7 +139,11 @@ class FEMSolver(object):
 
         if self.analysis_nature == "nonlinear" and self.compute_mesh_qualities:
             # COMPUTE QUALITY MEASURES
-            self.ScaledJacobian=post_process.MeshQualityMeasures(mesh,TotalDisp,False,False)[3]
+            # self.ScaledJacobian=post_process.MeshQualityMeasures(mesh,TotalDisp,False,False)[3]
+            post_process.ScaledJacobian=post_process.MeshQualityMeasures(mesh,TotalDisp,False,False)[3]
+        elif self.isScaledJacobianComputed:
+            post_process.ScaledJacobian=self.ScaledJacobian
+
         if self.analysis_nature == "nonlinear":
             post_process.newton_raphson_convergence = self.NRConvergence
         return post_process
@@ -231,7 +236,6 @@ class FEMSolver(object):
             for i in range(TotalDisp.shape[2]-1,0,-1):
                 TotalDisp[:,:,i] = np.sum(TotalDisp[:,:,:i+1],axis=2)
 
-            # return TotalDisp
             return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
 
         # ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES
@@ -345,8 +349,6 @@ class FEMSolver(object):
                 gc.collect()
                 
 
-        # post_process.is_scaledjacobian_computed
-        # fem_solver.isScaledJacobianComputed = True
 
         return TotalDisp
 

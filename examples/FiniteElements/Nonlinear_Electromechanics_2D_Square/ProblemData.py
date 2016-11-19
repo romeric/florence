@@ -16,18 +16,24 @@ def ProblemData(*args, **kwargs):
 
     # material = IsotropicElectroMechanics_1(ndim,youngs_modulus=1.0,poissons_ratio=0.3, eps_1=1.0)
     # material = MooneyRivlin(ndim,youngs_modulus=1000.0,poissons_ratio=0.3)
-    material = NeoHookean_2(ndim,youngs_modulus=1.0,poissons_ratio=0.3, rho=1.0)
+    material = NeoHookean_2(ndim,youngs_modulus=1.0e0,poissons_ratio=0.3, rho=1.0)
+    # material = LinearModel(ndim,youngs_modulus=1.0,poissons_ratio=0.495, rho=1.0)
+    # material = IncrementalLinearElastic(ndim,youngs_modulus=1.0,poissons_ratio=0.495, rho=1.0)
     # material = NeoHookean_2(ndim,lame_parameter_1=0.4,lame_parameter_2=0.6)
     # print(material.mu, material.lamb)
     # print material.nvar
 
     ProblemPath = PWD(__file__)
+    cad_file = ProblemPath + "/Plate_Hole_2D.iges"
+
     mesh = Mesh()
     # mesh.Square(n=5)
     # mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,10),nx=10,ny=10)
     # mesh.Reader(ProblemPath+"/Mesh_Plate_Hole_2D.dat","tri")
-    mesh.Reader(ProblemPath+"/Mesh_Plate_Hole_2D_2.dat","tri")
-    mesh.GetHighOrderMesh(p=p)
+    # mesh.Reader(ProblemPath+"/Mesh_Plate_Hole_2D_2.dat","tri")
+    # mesh.GetHighOrderMesh(p=p)
+    mesh.ReadHDF5(ProblemPath+"/Mesh_Plate_Hole_Curved_P"+str(p)+".mat")
+    # mesh.ReadHDF5(ProblemPath+"/Mesh_Plate_Hole_Curved_2_P"+str(p)+".mat")
     # print mesh.points.shape[0], mesh.nelem
     # mesh.SimplePlot()
 
@@ -38,7 +44,6 @@ def ProblemData(*args, **kwargs):
     # mesh.PlotMeshNumbering()
     # exit()
 
-    boundary_condition = BoundaryCondition()
 
     def DirichletFunc(mesh):
         boundary_data = np.zeros((mesh.points.shape[0],material.nvar))+np.NAN
@@ -62,12 +67,17 @@ def ProblemData(*args, **kwargs):
 
         return boundary_data
 
-    boundary_condition.dirichlet_flags = DirichletFunc(mesh)
+    boundary_condition = BoundaryCondition()
+    # boundary_condition.SetCADProjectionParameters(cad_file,scale=1000.,condition=1e10)
+    # boundary_condition.GetProjectionCriteria(mesh)
+
+    boundary_condition.SetDirichletCriteria(DirichletFunc,mesh)
+
     formulation = DisplacementFormulation(mesh)
 
-    fem_solver = FEMSolver(number_of_load_increments=50,analysis_type="dynamic",
+    fem_solver = FEMSolver(number_of_load_increments=2,analysis_type="static",
         analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
-        newton_raphson_tolerance=1.0e-05)
+        newton_raphson_tolerance=1.0e-02)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition)
@@ -84,12 +94,24 @@ def ProblemData(*args, **kwargs):
     # print solution.sol[:,:,-1]
     # solution.sol = solution.sol[:,:,None]
     # print solution.sol[:,:,-1]+mesh.points
-    solution.Animate(configuration="deformed")
-    # solution.Animate(configuration="original")
-    # solution.StressRecovery()
     # solution.WriteVTK("/home/roman/ZZZchecker/HHH", quantity=1)
-    # solution.Plot(configuration="deformed", quantity=1)
+
+    # solution.Plot(configuration="deformed", quantity=20)
+    solution.Plot(configuration="original", quantity=20, plot_points=False, plot_on_curvilinear_mesh=True)
+    # solution.Plot(configuration="deformed", quantity=20, plot_points=True)
+    # solution.Plot(configuration="original", quantity=20, plot_points=True)
+    # solution.Plot(configuration="deformed", quantity=20, save=False, filename="/home/roman/ZZZchecker/HHH")
+
+    # solution.Animate(configuration="original", quantity=20, plot_edges=False, plot_on_curvilinear_mesh=True, colorbar=True)
+    # solution.Animate(configuration="original", quantity=20, plot_points=True)
+    # solution.Animate(configuration="deformed", quantity=20, save=True, filename="/home/roman/ZZZchecker/HHH.gif", plot_edges=False, colorbar=False)
+    # solution.Animate(configuration="deformed", quantity=20, save=True, filename="/home/roman/ZZZchecker/HHH.gif", plot_edges=False)
+    # solution.Animate(configuration="deformed", quantity=20, plot_on_curvilinear_mesh=True, plot_points=True)
     # exit()
+
+    # mesh.points += solution.sol[:,:,-1]
+    # mesh.WriteHDF5(ProblemPath+"/Mesh_Plate_Hole_Curved_P"+str(p)+".mat")
+    # solution.CurvilinearPlot()
 
 
 
@@ -112,8 +134,8 @@ def ProblemData_2(*args, **kwargs):
     # material = IsotropicElectroMechanics_101(ndim,mu=1.0, lamb=2.0, eps_1=1e4)
     # material = IsotropicElectroMechanics_102(ndim,mu=1.0, lamb=2.0, eps_1=1e4)
     # material = IsotropicElectroMechanics_104(ndim,mu=1.0, lamb=2.0, eps_1=1e4, eps_2=1e4)
-    material = IsotropicElectroMechanics_105(ndim,mu1=1.0,mu2=0.005, lamb=2.0, eps_1=1e4, eps_2=1e4)
-    # material = IsotropicElectroMechanics_106(ndim,mu1=1.0,mu2=0.5, lamb=2.0, eps_1=1e4, eps_2=1e4)
+    # material = IsotropicElectroMechanics_105(ndim,mu1=1.0,mu2=0.005, lamb=2.0, eps_1=1e4, eps_2=1e4)
+    material = IsotropicElectroMechanics_106(ndim,mu1=1.0,mu2=0.005, lamb=2.0, eps_1=1e4, eps_2=1e4)
 
     mesh = Mesh()
     mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),nx=2,ny=2)
@@ -167,8 +189,8 @@ def ProblemData_2(*args, **kwargs):
 
     formulation = DisplacementPotentialFormulation(mesh)
 
-    # fem_solver = FEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=1)
-    fem_solver = StaggeredFEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=20)
+    # fem_solver = FEMSolver(newton_raphson_tolerance=1e-04, nbumber_of_load_increments=1)
+    fem_solver = StaggeredFEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=2)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition)
