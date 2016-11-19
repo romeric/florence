@@ -100,7 +100,7 @@ class IsotropicElectroMechanics_3(Material):
         # exit()
 
         D = varepsilon_1*E + 2.*eps_2/J*(ebe)*be
-        return D.flatten()
+        return D
 
 
 

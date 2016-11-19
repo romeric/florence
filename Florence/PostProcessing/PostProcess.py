@@ -137,6 +137,11 @@ class PostProcess(object):
         formulation = self.formulation
         material = self.material
 
+        det = np.linalg.det
+        inv = np.linalg.inv
+        Jm = Domain.Jm
+        AllGauss = Domain.AllGauss
+
 
         elements = mesh.elements
         points = mesh.points
@@ -148,34 +153,29 @@ class PostProcess(object):
 
 
         F = np.zeros((nelem,nodeperelem,ndim,ndim))
-        strain = np.zeros((nelem,nodeperelem,ndim,ndim))
-        ElectricFieldx = np.zeros((nelem,nodeperelem,ndim,1))
         CauchyStressTensor = np.zeros((nelem,nodeperelem,ndim,ndim))
-        ElectricDisplacementx = np.zeros((nelem,nodeperelem,ndim,1))
-
-
-        det = np.linalg.det
-        inv = np.linalg.inv
-        Jm = Domain.Jm
-        AllGauss = Domain.AllGauss
+        if formulation.fields == "electro_mechanics":
+            ElectricFieldx = np.zeros((nelem,nodeperelem,ndim))
+            ElectricDisplacementx = np.zeros((nelem,nodeperelem,ndim))
 
 
         MainDict = {}
         MainDict['F'] = np.zeros((LoadIncrement,npoint,ndim,ndim))
-        # MainDict['strain'] = np.zeros((LoadIncrement,npoint,ndim,ndim))
         MainDict['CauchyStress'] = np.zeros((LoadIncrement,npoint,ndim,ndim))
-        MainDict['ElectricFieldx'] = np.zeros((LoadIncrement,npoint,ndim,ndim))
-        MainDict['ElectricDisplacementx'] = np.zeros((LoadIncrement,npoint,ndim,ndim))
+        if formulation.fields == 'electro_mechanics':
+            MainDict['ElectricFieldx'] = np.zeros((LoadIncrement,npoint,ndim))
+            MainDict['ElectricDisplacementx'] = np.zeros((LoadIncrement,npoint,ndim))
 
         for Increment in range(LoadIncrement):
+            Eulerx = points + TotalDisp[:,:ndim,Increment]
+            Eulerp = TotalDisp[:,ndim,Increment]
             # LOOP OVER ELEMENTS
             for elem in range(0,elements.shape[0]):
                 # GET THE FIELDS AT THE ELEMENT LEVEL
-                Eulerx = points + TotalDisp[:,:,Increment]
                 LagrangeElemCoords = points[elements[elem,:],:]
                 EulerELemCoords = Eulerx[elements[elem,:],:]
-                if self.formulation.fields == 'electro-mechanics':
-                    ElectricPotentialElem =  TotalPot[elements[elem,:],:,Increment]
+                if self.formulation.fields == 'electro_mechanics':
+                    ElectricPotentialElem =  Eulerp[elements[elem,:]]
 
 
                 # GAUSS LOOP IN VECTORISED FORM
@@ -206,21 +206,30 @@ class PostProcess(object):
                 # LOOP OVER GAUSS POINTS
                 for counter in range(AllGauss.shape[0]):
 
-                    if self.formulation.fields == 'electro-mechanics':
+                    if self.formulation.fields == 'electro_mechanics':
                         # GET ELECTRIC FILED
-                        ElectricFieldx[elem,counter,:,:] = - np.dot(SpatialGradient[counter,:,:].T,
+                        ElectricFieldx[elem,counter,:] = - np.dot(SpatialGradient[counter,:,:].T,
                             ElectricPotentialElem)
 
                         # COMPUTE ELECTRIC DISPLACEMENT
-                        ElectricDisplacementx[elem,counter,:,:] = material.ElectricDisplacementx(StrainTensors, 
-                            ElectricFieldx, elem, counter)
-                    else:
-                        ElectricFieldx, ElectricDisplacementx = None, None
+                        ElectricDisplacementx[elem,counter,:] = (material.ElectricDisplacementx(StrainTensors, 
+                            ElectricFieldx[elem,counter,:], elem, counter))[:,0]
 
-                    # COMPUTE CAUCHY STRESS TENSOR
-                    if fem_solver.requires_geometry_update:
-                        CauchyStressTensor[elem,counter,:,:] = material.CauchyStress(StrainTensors,
-                            ElectricFieldx,elem,counter)
+                    if material.energy_type == "enthalpy":
+                        
+                        # COMPUTE CAUCHY STRESS TENSOR
+                        if fem_solver.requires_geometry_update:
+                            CauchyStressTensor[elem,counter,:] = material.CauchyStress(StrainTensors,
+                                ElectricFieldx[elem,counter,:],elem,counter)
+
+                    elif material.energy_type == "internal_energy":
+                        # COMPUTE THE HESSIAN AT THIS GAUSS POINT
+                        # H_Voigt = material.Hessian(StrainTensors,ElectricDisplacementx[elem,counter,:], elem, counter)
+                        
+                        # COMPUTE CAUCHY STRESS TENSOR
+                        if fem_solver.requires_geometry_update:
+                            CauchyStressTensor[elem,counter,:] = material.CauchyStress(StrainTensors,
+                                ElectricDisplacementx[elem,counter,:],elem,counter)
             
 
 
@@ -229,16 +238,16 @@ class PostProcess(object):
                 ncommon_nodes = Els.shape[0]
                 for uelem in range(ncommon_nodes):
                     MainDict['F'][Increment,inode,:,:] += F[Els[uelem],Pos[uelem],:,:]
-                    if formulation.fields == "electro-mechanics":
-                        MainDict['ElectricFieldx'][Increment,inode,:,:] += ElectricFieldx[Els[uelem],Pos[uelem],:,:]
-                        MainDict['ElectricDisplacementx'][Increment,inode,:,:] += ElectricDisplacementx[Els[uelem],Pos[uelem],:,:]
+                    if formulation.fields == "electro_mechanics":
+                        MainDict['ElectricFieldx'][Increment,inode,:] += ElectricFieldx[Els[uelem],Pos[uelem],:]
+                        MainDict['ElectricDisplacementx'][Increment,inode,:] += ElectricDisplacementx[Els[uelem],Pos[uelem],:]
                     MainDict['CauchyStress'][Increment,inode,:,:] += CauchyStressTensor[Els[uelem],Pos[uelem],:,:]
 
                 # AVERAGE OUT
                 MainDict['F'][Increment,inode,:,:] /= ncommon_nodes
-                if formulation.fields == "electro-mechanics":
-                    MainDict['ElectricFieldx'][Increment,inode,:,:] /= ncommon_nodes
-                    MainDict['ElectricDisplacementx'][Increment,inode,:,:] /= ncommon_nodes
+                if formulation.fields == "electro_mechanics":
+                    MainDict['ElectricFieldx'][Increment,inode,:] /= ncommon_nodes
+                    MainDict['ElectricDisplacementx'][Increment,inode,:] /= ncommon_nodes
                 MainDict['CauchyStress'][Increment,inode,:,:] /= ncommon_nodes
 
 
@@ -376,28 +385,10 @@ class PostProcess(object):
         G = np.einsum('ijlk,ijkm->ijlm',np.einsum('ijlk',H),H)
         Cauchy = self.recovered_fields['CauchyStress']
 
-        mm = 20
-        # print Cauchy[0,mm,:,:]
-        # print Cauchy[1,mm,:,:]
-        # print Cauchy[2,mm,:,:]
-        # print F[1,mm,:,:]
-        # print J[1,mm]
+        if self.formulation.fields == "electro_mechanics":
+            ElectricFieldx = self.recovered_fields['ElectricFieldx']
+            ElectricDisplacementx = self.recovered_fields['ElectricDisplacementx']
 
-        # print J[1,mm]*np.linalg.inv(F[1,mm,:,:]).T
-        # print
-        # print H[1,mm,:,:]
-
-        # print np.dot(F[1,mm,:,:].T, F[1,mm,:,:])
-        # print 
-        # print C[1,mm,:,:]
-
-        # print Cauchy[1,mm,:,:]
-        # print F[1,mm,:,:]
-        # print F.shape
-        # F = np.einsum('lkij',F) ##
-        # F = np.einsum('lijk',F) ####
-        # x = np.random.rand(2,140,3,3)
-        # exit()
         F = np.einsum('lijk',F).reshape(nnode,ndim**2,increments)
         H = np.einsum('lijk',H).reshape(nnode,ndim**2,increments)
         J = J.reshape(nnode,increments)
@@ -411,14 +402,10 @@ class PostProcess(object):
         # C = np.einsum('lkij',C).reshape(ndim**2,nnode,increments)
         # G = np.einsum('lkij',G).reshape(ndim**2,nnode,increments)
         # Cauchy = np.einsum('lkij',Cauchy).reshape(ndim**2,nnode,increments)
-
-        # print F[mm,:,:,1]
-        # print Cauchy[mm,:9,1]
-        # print Cauchy[:9,mm,1]
-        # print ndim**2,nnode,increments
-        # print C.shape
-
-        # exit()
+        
+        if self.formulation.fields == "electro_mechanics":
+            ElectricFieldx = ElectricFieldx.reshape(nnode,ndim,increments)
+            ElectricDisplacementx = ElectricDisplacementx.reshape(nnode,ndim,increments)
 
 
         if ndim == 2:
@@ -429,15 +416,6 @@ class PostProcess(object):
             C = C[:,[0,1,2,4,5,8],:]
             G = G[:,[0,1,2,4,5,8],:]
             Cauchy = Cauchy[:,[0,1,2,4,5,8],:]
-
-        # print Cauchy[mm,:9,1]
-        # exit()
-
-        # H = np.einsum('')
-        CauchyStress = self.recovered_fields['CauchyStress'].reshape(ndim**2,nnode,increments)
-        if fields == "electro-mechanics":
-            ElectricFieldx = self.recovered_fields['ElectricFieldx'].reshape(ndim,nnode,increments)
-            ElectricDisplacementx = self.recovered_fields['ElectricDisplacementx'].reshape(ndim,nnode,increments)
 
 
         if fields == "mechanics" and ndim == 2:
@@ -520,7 +498,7 @@ class PostProcess(object):
         if compute_recovered_fields:
             F = MainDict['F'][:,:lmesh.nnode,:,:]
             CauchyStress = MainDict['CauchyStress'][:,:lmesh.nnode,:,:]
-            if self.formulation.fields == "electro-mechanics":
+            if self.formulation.fields == "electro_mechanics":
                 ElectricFieldx = MainDict['ElectricFieldx'][:,:lmesh.nnode,:,:]
                 ElectricDisplacementx = MainDict['ElectricDisplacementx'][:,:lmesh.nnode,:,:]
 
@@ -553,7 +531,7 @@ class PostProcess(object):
                 vtk_writer.write_vtu(Verts=lmesh.points+sol[:,:,Increment], 
                     Cells={cellflag:lmesh.elements}, pdata=CauchyStress[Increment,:,mm,nn],
                     fname=filename+'_Cauchy_'+str(Increment)+'.vtu')
-                if self.formulation.fields == "electro-mechanics":
+                if self.formulation.fields == "electro_mechanics":
                     vtk_writer.write_vtu(Verts=lmesh.points+sol[:,:,Increment], 
                         Cells={cellflag:lmesh.elements}, pdata=ElectricFieldx[Increment,:,rr,0],
                     fname=filename+'_E_'+str(Increment)+'.vtu')

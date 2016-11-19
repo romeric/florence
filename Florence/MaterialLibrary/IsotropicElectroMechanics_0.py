@@ -86,6 +86,4 @@ class IsotropicElectroMechanics_0(Material):
 
     def ElectricDisplacementx(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
         varepsilon_1 = self.eps_1
-        # print (varepsilon_1*ElectricFieldx).shape
-        # exit()
-        return varepsilon_1*ElectricFieldx
+        return (varepsilon_1*ElectricFieldx).reshape(self.ndim,1)

@@ -87,5 +87,5 @@ class IsotropicElectroMechanics_2(Material):
         c1 = self.c1
         c2 = self.c2
 
-        return -2.0/J*np.dot(b,np.dot((c1*I+c2*b),ElectricFieldx))
+        return -2.0/J*np.dot(b,np.dot((c1*I+c2*b),ElectricFieldx)).reshape(self.ndim,1)
         # return -2.0*np.dot(b,np.dot((c1*I+c2*b),ElectricFieldx))
