@@ -138,7 +138,7 @@ def ProblemData_2(*args, **kwargs):
     material = IsotropicElectroMechanics_106(ndim,mu1=1.0,mu2=0.005, lamb=2.0, eps_1=1e4, eps_2=1e4)
 
     mesh = Mesh()
-    mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),nx=2,ny=2)
+    mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),nx=6,ny=6)
     # mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),nx=5,ny=5)
     mesh.GetHighOrderMesh(p=p)
     # print mesh.points.shape[0], mesh.nelem
@@ -189,8 +189,8 @@ def ProblemData_2(*args, **kwargs):
 
     formulation = DisplacementPotentialFormulation(mesh)
 
-    # fem_solver = FEMSolver(newton_raphson_tolerance=1e-04, nbumber_of_load_increments=1)
-    fem_solver = StaggeredFEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=2)
+    fem_solver = FEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=1)
+    # fem_solver = StaggeredFEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=2)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition)
@@ -198,20 +198,22 @@ def ProblemData_2(*args, **kwargs):
 
     sol = np.copy(solution.sol[:,:,-1])
     # makezero(sol,tol=1.0e-8)
-    print sol
+    # print sol
+    # print formulation.fields
+    # exit()
     # print repr(sol)
     # print solution.sol[:,2,-1]
     # print solution.sol[:,1,-1]
     # solution.sol = solution.sol[:,:2,:]
     # solution.Plot(configuration="deformed",quantity=1)
     # solution.CurvilinearPlot(QuantityToPlot=solution.sol[:,1,-1])
-    # solution.Animate(configuration="deformed", quantity=2)
+    # solution.Animate(configuration="deformed", quantity=20)
 
     # solution.Plot()
 
-    print np.linalg.norm(solution.sol[:,:2,-1])
+    # print np.linalg.norm(solution.sol[:,:2,-1])
     # print np.linalg.norm(solution.sol[:,-1,-1])
-    # solution.Plot(configuration="deformed",quantity=1)
+    solution.Plot(configuration="original",quantity=21)
 
 
     # 21.0460889142
@@ -513,8 +515,8 @@ def ProblemData_4(*args, **kwargs):
 
 if __name__ == "__main__":
 
-    ProblemData()
-    # ProblemData_2()
+    # ProblemData()
+    ProblemData_2()
     # ProblemData_3()
     # ProblemData_3D()
 
