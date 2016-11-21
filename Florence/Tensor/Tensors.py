@@ -4,7 +4,7 @@ from Numeric import tovoigt
 
 
 __all__ = ['unique2d','in2d','intersect2d','shuffle_along_axis',
-'itemfreq','SecondTensor2Vector','Voigt','UnVoigt']
+'itemfreq','SecondTensor2Vector','Voigt','UnVoigt', 'remove_duplicates_2D']
 
 
 #-------------------------------------------------------------------------#
@@ -271,6 +271,24 @@ def itemfreq(arr=None,un_arr=None,inv_arr=None,decimals=None):
     unf_arr[:,1] = np.bincount(inv_arr)
 
     return unf_arr
+
+
+
+def remove_duplicates_2D(A, decimals=10):
+    """Removes duplicates from floating point 2D array (A) with rounding
+    """
+
+    assert isinstance(A,np.ndarray)
+    assert (A.dtype == np.float64 or A.dtype == np.float32)
+
+    from Florence.Tensor import makezero
+    makezero(A)
+    rounded_repoints = np.round(A,decimals=decimals)
+    _, idx_repoints, inv_repoints = unique2d(rounded_repoints,order=False,
+        consider_sort=False,return_index=True,return_inverse=True)
+    A = A[idx_repoints,:]
+
+    return A, idx_repoints, inv_repoints 
 
 
 

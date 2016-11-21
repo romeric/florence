@@ -43,6 +43,10 @@ class PostProcess(object):
         self.sol = None
         self.recovered_fields = None
 
+        self.formulation = None
+        self.material = None
+        self.fem_solver = None
+
 
     def SetBases(self,domain=None,postdomain=None,boundary=None):
         """Sets bases for all integration points for 'domain', 'postdomain' or 'boundary'
@@ -154,9 +158,9 @@ class PostProcess(object):
 
         F = np.zeros((nelem,nodeperelem,ndim,ndim))
         CauchyStressTensor = np.zeros((nelem,nodeperelem,ndim,ndim))
-        if formulation.fields == "electro_mechanics":
-            ElectricFieldx = np.zeros((nelem,nodeperelem,ndim))
-            ElectricDisplacementx = np.zeros((nelem,nodeperelem,ndim))
+        # DEFINE FOR MECH AND ELECTROMECH FORMULATIONS
+        ElectricFieldx = np.zeros((nelem,nodeperelem,ndim))
+        ElectricDisplacementx = np.zeros((nelem,nodeperelem,ndim))
 
 
         MainDict = {}
@@ -168,9 +172,11 @@ class PostProcess(object):
 
         for Increment in range(LoadIncrement):
             Eulerx = points + TotalDisp[:,:ndim,Increment]
-            Eulerp = TotalDisp[:,ndim,Increment]
+            if self.formulation.fields == 'electro_mechanics':
+                Eulerp = TotalDisp[:,ndim,Increment]
+
             # LOOP OVER ELEMENTS
-            for elem in range(0,elements.shape[0]):
+            for elem in range(nelem):
                 # GET THE FIELDS AT THE ELEMENT LEVEL
                 LagrangeElemCoords = points[elements[elem,:],:]
                 EulerELemCoords = Eulerx[elements[elem,:],:]
@@ -214,6 +220,8 @@ class PostProcess(object):
                         # COMPUTE ELECTRIC DISPLACEMENT
                         ElectricDisplacementx[elem,counter,:] = (material.ElectricDisplacementx(StrainTensors, 
                             ElectricFieldx[elem,counter,:], elem, counter))[:,0]
+                    # else:
+                        # ElectricFieldx, ElectricDisplacementx = [], []
 
                     if material.energy_type == "enthalpy":
                         
@@ -365,9 +373,15 @@ class PostProcess(object):
 
             where S represents Cauchy stress tensor, E the electric field and D the electric
             displacements
+
+            This function modifies self.sol to augmented_sol and returns the augmented solution 
+            augmented_sol
         
 
         """
+
+        if self.sol.shape[1] > self.nvar:
+            return self.sol
 
         # GET RECOVERED VARIABLES ALL VARIABLE CHECKS ARE DONE IN STRESS RECOVERY
         self.StressRecovery()
@@ -433,14 +447,14 @@ class PostProcess(object):
         elif fields == "mechanics" and ndim == 3:
 
             augmented_sol = np.zeros((nnode,41,increments),dtype=np.float64)
-            augmented_sol[:,:4,:]     = self.sol
-            augmented_sol[:,4:13,:]   = F
-            augmented_sol[:,13:22,:]  = H
-            augmented_sol[:,22,:]     = J
-            augmented_sol[:,23:29,:]  = C
-            augmented_sol[:,29:35,:]  = G
-            augmented_sol[:,35,:]     = detC
-            augmented_sol[:,36:42,:]  = Cauchy
+            augmented_sol[:,:3,:]     = self.sol
+            augmented_sol[:,3:12,:]   = F
+            augmented_sol[:,12:21,:]  = H
+            augmented_sol[:,21,:]     = J
+            augmented_sol[:,22:28,:]  = C
+            augmented_sol[:,28:34,:]  = G
+            augmented_sol[:,34,:]     = detC
+            augmented_sol[:,35:41,:]  = Cauchy
 
 
         elif fields == "electro_mechanics" and ndim == 2:
@@ -473,34 +487,89 @@ class PostProcess(object):
             augmented_sol[:,45:48,:]  = ElectricDisplacementx
 
         
+        self.sol = augmented_sol
         return augmented_sol
 
 
+    def QuantityNamer(self, num):
+        """Returns the quantity (for augmented solution i.e. primary and recovered variables) 
+            name given its number (from numbering order)
+        """
+
+        namer = None
+        if num > 47:
+            print('Quantity corresponds to ' + str(namer))
+            return namer
+
+        lines = []
+        with open(__file__) as f:
+            lines.append(f.readlines())
+        lines = lines[0]
+
+        line_number = len(lines)+1
+
+        for counter, line in enumerate(lines):
+            line = line.strip()
+            if "quantity" in line and "mechanics" in line and "2D" in line and "3D" in line:
+                line_number = counter
+            if counter > line_number+1 and counter < line_number+100:
+                spl = filter(None, line.split(" "))
+                if spl[0] == str(num):
+                    if self.nvar == 2 and self.ndim==2:
+                        namer = spl[1]
+                    elif self.nvar == 3 and self.ndim==2:
+                        namer = spl[3]
+                    elif self.nvar == 3 and self.ndim==3:
+                        namer = spl[2]
+                    elif self.nvar == 4:
+                        namer = spl[4]
+                    break
+
+        print('Quantity corresponds to ' + str(namer))
+        return namer
 
 
-    def WriteVTK(self,filename=None, quantity=0, compute_recovered_fields=True):
-        """Writes results to a VTK file for Paraview"""
 
-        if compute_recovered_fields == True:
-            self.StressRecovery()
+
+
+    def WriteVTK(self,filename=None, quantity="all", configuration="deformed", write_curved_mesh=True):
+        """Writes results to a VTK file for Paraview
+
+            quantity = "all" means write all solution fields, otherwise specific quantities 
+            would be written based on augmented solution numbering order
+        """
+
+        if isinstance(quantity,int):
+            if quantity>=self.sol.shape[1]:
+                self.GetAugmentedSolution()
+                if quantity >= self.sol.shape[1]:
+                    raise ValueError('Plotting quantity not understood') 
+            iterator = range(quantity,quantity+1)
+        elif isinstance(quantity,str):
+            if quantity=="all":
+                self.GetAugmentedSolution()
+                iterator = range(self.sol.shape[1])
+            else:
+                raise ValueError('Plotting quantity not understood')
+        else:
+            raise ValueError('Plotting quantity not understood')
+
+
         if filename is None:
             warn("file name not specified. I am going to write in the current directory")
-        elif filename is not None :
+            filename = PWD(__file__) + "/output.vtu"
+        elif filename is not None:
             if isinstance(filename,str) is False:
                 raise ValueError("file name should be a string")
 
-        MainDict = self.recovered_fields
-        LoadIncrement = self.sol.shape[2]
+        C = self.mesh.InferPolynomialDegree()
+        if C == 0:
+            write_curved_mesh = False
 
-        # GET LINEAR MESH
+
+        # GET LINEAR MESH & SOLUTION 
         lmesh = self.mesh.GetLinearMesh()
         sol = self.sol[:lmesh.nnode,:,:]
-        if compute_recovered_fields:
-            F = MainDict['F'][:,:lmesh.nnode,:,:]
-            CauchyStress = MainDict['CauchyStress'][:,:lmesh.nnode,:,:]
-            if self.formulation.fields == "electro_mechanics":
-                ElectricFieldx = MainDict['ElectricFieldx'][:,:lmesh.nnode,:,:]
-                ElectricDisplacementx = MainDict['ElectricDisplacementx'][:,:lmesh.nnode,:,:]
 
         if lmesh.element_type =='tri':
             cellflag = 5
@@ -511,33 +580,71 @@ class PostProcess(object):
         elif lmesh.element_type == 'hex':
             cellflag = 12
 
+        ndim = lmesh.points.shape[1]
+        LoadIncrement = self.sol.shape[2]
 
-        # COMPONENTS OF F, Cauchy
-        mm = 1
-        nn = 1
-        # COMPONENTS OF E, D
-        rr = 0
 
-        for Increment in range(LoadIncrement):
-            vtk_writer.write_vtu(Verts=lmesh.points+sol[:,:,Increment], 
-                    Cells={cellflag:lmesh.elements}, pdata=sol[:,quantity,Increment],
-                    fname=filename+'_Sol_'+str(Increment)+'.vtu')
+        if write_curved_mesh: 
 
-        if compute_recovered_fields:
-            for Increment in range(LoadIncrement):
-                vtk_writer.write_vtu(Verts=lmesh.points+sol[:,:,Increment], 
-                    Cells={cellflag:lmesh.elements}, pdata=F[Increment,:,mm,nn],
-                    fname=filename+'_F_'+str(Increment)+'.vtu')
-                vtk_writer.write_vtu(Verts=lmesh.points+sol[:,:,Increment], 
-                    Cells={cellflag:lmesh.elements}, pdata=CauchyStress[Increment,:,mm,nn],
-                    fname=filename+'_Cauchy_'+str(Increment)+'.vtu')
-                if self.formulation.fields == "electro_mechanics":
-                    vtk_writer.write_vtu(Verts=lmesh.points+sol[:,:,Increment], 
-                        Cells={cellflag:lmesh.elements}, pdata=ElectricFieldx[Increment,:,rr,0],
-                    fname=filename+'_E_'+str(Increment)+'.vtu')
-                    vtk_writer.write_vtu(Verts=lmesh.points+sol[:,:,Increment], 
-                        Cells={cellflag:lmesh.elements}, pdata=ElectricDisplacementx[Increment,:,rr,0],
-                        fname=filename+'_D_'+str(Increment)+'.vtu')
+            if lmesh.element_type =='tet':
+                
+                cellflag = 5
+
+                tmesh = PostProcess.CurvilinearPlotTet(self.mesh, np.zeros_like(self.mesh.points), 
+                    QuantityToPlot= self.sol[:,0,0],
+                    show_plot=False, plot_on_faces=False, 
+                    plot_points=True, save_tessellation=True)[-1]
+
+                nsize = tmesh.nsize
+                nface = tmesh.nface
+                ssol = self.sol[np.unique(tmesh.faces_to_plot),:,:]
+
+                for Increment in range(LoadIncrement):
+
+                    extrapolated_sol = np.zeros((tmesh.points.shape[0], self.sol.shape[1]))
+                    for ielem in range(nface):
+                        extrapolated_sol[ielem*nsize:(ielem+1)*nsize,:] = np.dot(tmesh.bases_2, 
+                            ssol[tmesh.smesh.elements[ielem,:],:, Increment])
+
+                    svpoints = self.mesh.points[np.unique(tmesh.faces_to_plot),:] + ssol[:,:ndim,Increment]
+
+                    for iedge in range(tmesh.smesh.all_edges.shape[0]):
+                        ielem = tmesh.edge_elements[iedge,0]
+                        edge = tmesh.smesh.elements[ielem,tmesh.reference_edges[tmesh.edge_elements[iedge,1],:]]
+                        coord_edge = svpoints[edge,:]
+                        tmesh.x_edges[:,iedge], tmesh.y_edges[:,iedge], tmesh.z_edges[:,iedge] = np.dot(coord_edge.T,tmesh.bases_1)
+
+                    edge_coords = np.concatenate((tmesh.x_edges.T.copy().flatten()[:,None], 
+                        tmesh.y_edges.T.copy().flatten()[:,None],
+                        tmesh.z_edges.T.copy().flatten()[:,None]),axis=1)
+
+                    vtk_writer.write_vtu(Verts=edge_coords, 
+                        Cells={3:tmesh.connections},
+                        fname=filename.split('.')[0]+'_curved_lines_increment_'+str(Increment)+'.vtu')
+
+                    vtk_writer.write_vtu(Verts=svpoints,
+                        Cells={1:np.arange(svpoints.shape[0])},
+                        fname=filename.split('.')[0]+'_curved_points_increment_'+str(Increment)+'.vtu')
+
+                    for quant in iterator:
+                        vtk_writer.write_vtu(Verts=tmesh.points+extrapolated_sol[:,:ndim], 
+                            Cells={cellflag:tmesh.elements}, pdata=extrapolated_sol[:,quant],
+                            fname=filename.split('.')[0]+'_curved_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu')
+
+        else:
+
+            if configuration == "original":
+                for Increment in range(LoadIncrement):
+                    for quant in iterator:
+                        vtk_writer.write_vtu(Verts=lmesh.points, 
+                            Cells={cellflag:lmesh.elements}, pdata=sol[:,quant,Increment],
+                            fname=filename.split('.')[0]+'_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu')
+            elif configuration == "deformed":
+                for Increment in range(LoadIncrement):
+                    for quant in iterator:
+                        vtk_writer.write_vtu(Verts=lmesh.points+sol[:,:ndim,Increment], 
+                            Cells={cellflag:lmesh.elements}, pdata=sol[:,quant,Increment],
+                            fname=filename.split('.')[0]+'_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu')
 
         return
 
@@ -549,6 +656,7 @@ class PostProcess(object):
             self.StressRecovery()
         if filename is None:
             warn("file name not specified. I am going to write in the current directory")
+            filename = PWD(__file__) + '/output.mat'
         elif filename is not None :
             if isinstance(filename,str) is False:
                 raise ValueError("file name should be a string")
@@ -581,9 +689,9 @@ class PostProcess(object):
 
         # SAVE
         if save:
-            if filename == None:
+            if filename is None:
                 warn("No filename provided. I am going to write one in the current directory")
-                filename = PWD(__file__) + 'output.eps'
+                filename = PWD(__file__) + '/output.eps'
 
             plt.savefig(filename, format='eps', dpi=500)
 
@@ -607,8 +715,10 @@ class PostProcess(object):
             raise ValueError("configuration can only be 'original' or 'deformed'")
 
         # CHECKS ARE DONE HERE
-        if quantity>self.sol.shape[1]:
-            self.sol = self.GetAugmentedSolution()
+        if quantity>=self.sol.shape[1]:
+            self.GetAugmentedSolution()
+            if quantity >= self.sol.shape[1]:
+                raise ValueError('Plotting quantity not understood')
 
 
         if save:
@@ -634,7 +744,7 @@ class PostProcess(object):
         # GET LINEAR MESH
         mesh = self.mesh.GetLinearMesh()
         # GET LINEAR SOLUTION 
-        sol = np.copy(self.sol[:mesh.nnode,:])
+        sol = np.copy(self.sol[:mesh.nnode,:,:])
 
         if self.mesh.element_type == "tri":
 
@@ -738,6 +848,8 @@ class PostProcess(object):
 
         elif self.mesh.element_type == "tet":
 
+            ndim = 3
+
             import os
             os.environ['ETS_TOOLKIT'] = 'qt4'
             from mayavi import mlab
@@ -746,6 +858,26 @@ class PostProcess(object):
 
             if figure is None:
                 figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(0,0,0),size=(800,600))
+
+
+            if plot_on_curvilinear_mesh:
+
+                if configuration == "original":
+                    PostProcess.CurvilinearPlotTet(self.mesh, np.zeros_like(self.mesh.points),
+                        QuantityToPlot = self.sol[:,quantity,increment],
+                        figure=figure, show_plot=show_plot, plot_on_faces=False, 
+                        plot_points=plot_points, point_radius=point_radius, plot_edges=plot_edges, 
+                        colorbar=colorbar, save=save, filename=filename)
+
+                elif configuration=="deformed":
+
+                    PostProcess.CurvilinearPlotTet(self.mesh, self.sol[:,:ndim,-1], 
+                        QuantityToPlot= self.sol[:,quantity,increment],
+                        figure=figure, show_plot=show_plot, plot_on_faces=False, 
+                        plot_points=plot_points, point_radius=point_radius, plot_edges=plot_edges, 
+                        colorbar=colorbar, save=save, filename=filename)
+
+                return 
             
             if configuration == "original":
                 trimesh_h = mlab.triangular_mesh(mesh.points[:,0], mesh.points[:,1], mesh.points[:,2], 
@@ -788,7 +920,8 @@ class PostProcess(object):
 
 
             if colorbar:
-                cbar = mlab.colorbar(object=trimesh_h, orientation="vertical",label_fmt="%9.2f")
+                cbar = mlab.colorbar(object=trimesh_h, title=self.QuantityNamer(quantity), 
+                    orientation="horizontal",label_fmt="%9.2f")
 
             mlab.draw()
             mlab.show()
@@ -812,16 +945,17 @@ class PostProcess(object):
             raise ValueError("configuration can only be 'original' or 'deformed'")
 
         # ALL CHECKS ARE DONE HERE
-        if quantity>self.sol.shape[1]:
-            # MODIFIES/EXPANDS SOL
-            self.sol = self.GetAugmentedSolution()
+        if quantity>=self.sol.shape[1]:
+            self.GetAugmentedSolution()
+            if quantity >= self.sol.shape[1]:
+                raise ValueError('Plotting quantity not understood')
 
 
         if save:
             if filename is None:
                 warn("file name not specified. I am going to write in the current directory")
-                filename = PWD(__file__) + "/output.eps"
-            elif filename is not None :
+                filename = PWD(__file__) + "/output.mp4"
+            elif filename is not None:
                 if isinstance(filename,str) is False:
                     raise ValueError("file name should be a string")
 
@@ -1046,9 +1180,167 @@ class PostProcess(object):
             from matplotlib.colors import ColorConverter
             import matplotlib.cm as cm
 
+            ndim = 3
+
             if figure is None:
                 figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(0,0,0),size=(800,600))
-            
+
+            if plot_on_curvilinear_mesh:
+
+                tmesh = PostProcess.CurvilinearPlotTet(self.mesh, 
+                    np.zeros_like(self.mesh.points),
+                    QuantityToPlot = self.sol[:,quantity,increment],
+                    show_plot=False, plot_on_faces=False, 
+                    plot_points=plot_points, point_radius=point_radius, plot_edges=plot_edges, 
+                    colorbar=colorbar, save_tessellation=True)[-1]
+
+                nsize = tmesh.nsize
+                nface = tmesh.nface
+
+                extrapolated_sol = np.zeros((tmesh.points.shape[0], self.sol.shape[1]))
+                ssol = self.sol[np.unique(tmesh.faces_to_plot),:,:]
+                for ielem in range(nface):
+                    extrapolated_sol[ielem*nsize:(ielem+1)*nsize,:] = np.dot(tmesh.bases_2, 
+                        ssol[tmesh.smesh.elements[ielem,:],:, 0])
+
+                trimesh_h = mlab.triangular_mesh(tmesh.points[:,0], tmesh.points[:,1], 
+                    tmesh.points[:,2], tmesh.elements, scalars = extrapolated_sol[:,quantity],
+                    line_width=0.5)
+
+                if plot_edges:
+                    src = mlab.pipeline.scalar_scatter(tmesh.x_edges.T.copy().flatten(), 
+                        tmesh.y_edges.T.copy().flatten(), tmesh.z_edges.T.copy().flatten())
+                    src.mlab_source.dataset.lines = tmesh.connections
+                    lines = mlab.pipeline.stripper(src)
+                    h_edges = mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
+
+                if plot_points:
+                    svpoints = self.mesh.points[np.unique(tmesh.faces_to_plot),:]
+                    h_points = mlab.points3d(svpoints[:,0], svpoints[:,1], svpoints[:,2],
+                        color=(0,0,0), mode='sphere', scale_factor=point_radius)
+
+                # mlab.view(azimuth=45, elevation=50, distance=90, focalpoint=None,
+                    # roll=0, reset_roll=True, figure=None)
+
+
+                m_trimesh = trimesh_h.mlab_source
+                m_wire = h_edges.mlab_source
+                m_points = h_points.mlab_source
+
+                @mlab.animate(delay=100) 
+                def animator():
+                    # fig = mlab.gcf()
+
+                    # ssol = self.sol[np.unique(tmesh.faces_to_plot),:,:]
+
+                    for i in range(0, self.sol.shape[2]):
+
+                        # GET SOLUTION AT THIS INCREMENT
+                        extrapolated_sol = np.zeros((tmesh.points.shape[0], self.sol.shape[1]))
+                        for ielem in range(nface):
+                            extrapolated_sol[ielem*nsize:(ielem+1)*nsize,:] = np.dot(tmesh.bases_2, 
+                                ssol[tmesh.smesh.elements[ielem,:],:, i])
+
+                        svpoints = self.mesh.points[np.unique(tmesh.faces_to_plot),:] + ssol[:,:ndim,i]
+
+                        if configuration == "deformed":
+
+                            m_trimesh.reset(x=tmesh.points[:,0]+extrapolated_sol[:,0], 
+                                y=tmesh.points[:,1]+extrapolated_sol[:,1],
+                                z=tmesh.points[:,2]+extrapolated_sol[:,2], 
+                                scalars=extrapolated_sol[:,quantity])
+                            
+                            # GET UPDATED EDGE COORDINATES AT THIS INCREMENT
+                            if plot_edges:
+                                for iedge in range(tmesh.smesh.all_edges.shape[0]):
+                                    ielem = tmesh.edge_elements[iedge,0]
+                                    edge = tmesh.smesh.elements[ielem,tmesh.reference_edges[tmesh.edge_elements[iedge,1],:]]
+                                    coord_edge = svpoints[edge,:]
+                                    tmesh.x_edges[:,iedge], tmesh.y_edges[:,iedge], tmesh.z_edges[:,iedge] = np.dot(coord_edge.T,tmesh.bases_1)
+
+                                m_wire.reset(x=tmesh.x_edges.T.copy().flatten(), 
+                                    y=tmesh.y_edges.T.copy().flatten(),
+                                    z=tmesh.z_edges.T.copy().flatten())
+
+                            if plot_points:
+                                m_points.reset(x=svpoints[:,0], y=svpoints[:,1], z=svpoints[:,2])
+
+                        else:
+
+                            m_trimesh.reset(scalars=extrapolated_sol[:,quantity])
+
+                        
+                        if colorbar:
+
+                            cbar = mlab.colorbar(object=trimesh_h, title=self.QuantityNamer(quantity), 
+                                orientation="horizontal",label_fmt="%9.2f")
+
+                            # CHANGE LIGHTING OPTION
+                            trimesh_h.actor.property.interpolation = 'phong'
+                            trimesh_h.actor.property.specular = 0.1
+                            trimesh_h.actor.property.specular_power = 5
+
+                            # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO 
+                            # GET VIRIDIS COLORMAP FROM MATPLOTLIB
+                            color_func = ColorConverter()
+                            rgba_lower = color_func.to_rgba_array(cm.viridis.colors)
+                            # rgba_lower = color_func.to_rgba_array(cm.viridis_r.colors)
+                            RGBA_higher = np.round(rgba_lower*255).astype(np.int64)
+                            # UPDATE LUT OF THE COLORMAP
+                            trimesh_h.module_manager.scalar_lut_manager.lut.table = RGBA_higher
+                        
+
+                        figure.scene.reset_zoom()
+                        # fig.scene.reset_zoom()
+
+                        # SAVE EACH FRAME USING AN EXTERNAL TOOL
+                        if save:
+                            mlab.savefig(filename.split(".")[0]+"_increment_"+str(i)+".png")
+                        
+                        yield
+
+
+                animator()
+
+                mlab.view(azimuth=45, elevation=50, distance=90, focalpoint=None,
+                    roll=0, reset_roll=True, figure=None)
+                
+
+                if show_plot:
+                    # mlab.draw()
+                    mlab.show()
+
+
+                if save:
+                    # mlab.close()
+                    import subprocess
+                    # fname = os.path.basename(filename).split(".")[0]
+                    # ex = os.path.basename(filename).split(".")[-1]
+                    # os.path.join(PWD(filename), os.path.basename(filename))
+
+                    # REMOVE OLD FILE WITH THE SAME NAME
+                    p = subprocess.Popen('rm -f ' + filename, shell=True)
+                    p.wait()
+
+                    fps = 25
+                    p = subprocess.Popen('ffmpeg -framerate ' +str(fps)+ ' -i ' + \
+                        filename.split('.')[0] + '_increment_%00d.png' + \
+                        ' -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p '+ filename, 
+                        shell=True)
+                    p.wait()
+                    # REMOVE TEMPS
+                    p = subprocess.Popen('rm -rf ' + filename.split(".")[0]+"_increment_*", 
+                        shell=True)
+                    p.wait()
+                    # ffmpeg -framerate 25 -i yy_increment_%0d.png -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p output.mp4
+
+
+                # del tmesh
+
+            return 
+
+
+            # FOR PLANAR MESHES
             if configuration == "original":
                 trimesh_h = mlab.triangular_mesh(mesh.points[:,0], mesh.points[:,1], mesh.points[:,2], 
                     mesh.faces, scalars=self.sol[:,quantity,0])
@@ -1270,7 +1562,7 @@ class PostProcess(object):
 
     @staticmethod
     def CurvilinearPlotTri(mesh, TotalDisp, QuantityToPlot=None,
-        ProjectionFlags=None, InterpolationDegree=30, EquallySpacedPoints=False,
+        ProjectionFlags=None, interpolation_degree=30, EquallySpacedPoints=False,
         TriSurf=False, colorbar=False, PlotActualCurve=False, point_radius = 3, color="#C5F1C5",
         plot_points=False, plot_edges=True, save=False, filename=None, figure=None, show_plot=True, 
         save_tessellation=False):
@@ -1301,7 +1593,7 @@ class PostProcess(object):
         # SINCE THIS IS A 2D PLOT
         ndim = 2
 
-        C = InterpolationDegree
+        C = interpolation_degree
         p = C+1
         nsize = int((p+1)*(p+2)/2.)
         CActual = mesh.InferPolynomialDegree() - 1 
@@ -1486,10 +1778,10 @@ class PostProcess(object):
 
 
     @staticmethod
-    def CurvilinearPlotTet(mesh,TotalDisp,QuantityToPlot=None,
-        ProjectionFlags=None, InterpolationDegree=20, EquallySpacedPoints=False, PlotActualCurve=False,
+    def CurvilinearPlotTet(mesh, TotalDisp, QuantityToPlot=None, plot_on_faces=True,
+        ProjectionFlags=None, interpolation_degree=20, EquallySpacedPoints=False, PlotActualCurve=False,
         plot_points=False, plot_edges=True, plot_surfaces=True, point_radius=0.02, colorbar=False, color=None, figure=None,
-        show_plot=True, save=False, filename=None):
+        show_plot=True, save=False, filename=None, save_tessellation=False):
 
         """High order curved tetrahedral surfaces mesh plots, based on high order nodal FEM.
             The equally spaced FEM points do not work as good as the Fekete points 
@@ -1523,7 +1815,7 @@ class PostProcess(object):
         # SINCE THIS IS A 3D PLOT
         ndim=3
 
-        C = InterpolationDegree
+        C = interpolation_degree
         p = C+1
         nsize = int((p+1)*(p+2)/2.)
         CActual = mesh.InferPolynomialDegree() - 1
@@ -1581,7 +1873,7 @@ class PostProcess(object):
 
         faces_to_plot = corr_faces[faces_to_plot_flag.flatten()==1,:]
 
-        if QuantityToPlot is not None:
+        if QuantityToPlot is not None and plot_on_faces:
             quantity_to_plot = QuantityToPlot[face_elements[faces_to_plot_flag.flatten()==1,0]]
 
         # BUILD MESH OF SURFACE
@@ -1593,11 +1885,10 @@ class PostProcess(object):
         smesh.points = mesh.points[np.unique(smesh.elements),:]
 
 
-        # MAP         
+        # MAP TO ORIGIN    
         unique_elements, inv = np.unique(smesh.elements,return_inverse=True)
         mapper = np.arange(unique_elements.shape[0])
         smesh.elements = mapper[inv].reshape(smesh.elements.shape)
-
  
         smesh.GetBoundaryEdgesTri()
         smesh.GetEdgesTri()
@@ -1611,9 +1902,9 @@ class PostProcess(object):
 
         # GET EULERIAN GEOMETRY
         if TotalDisp.ndim == 3:
-            vpoints = mesh.points + TotalDisp[:,:,-1]
+            vpoints = mesh.points + TotalDisp[:,:ndim,-1]
         elif TotalDisp.ndim == 2:
-            vpoints = mesh.points + TotalDisp
+            vpoints = mesh.points + TotalDisp[:,:ndim]
         else:
             raise AssertionError("mesh points and displacment arrays are incompatible")
 
@@ -1626,6 +1917,8 @@ class PostProcess(object):
         if figure is None:
             figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(800,600))
         figure.scene.disable_render = True
+
+        h_points, h_edges, trimesh_h = None, None, None
 
         if plot_edges:
             # GET X, Y & Z OF CURVED EDGES  
@@ -1653,7 +1946,7 @@ class PostProcess(object):
             src = mlab.pipeline.scalar_scatter(x_edges.T.copy().flatten(), y_edges.T.copy().flatten(), z_edges.T.copy().flatten())
             src.mlab_source.dataset.lines = connections
             lines = mlab.pipeline.stripper(src)
-            mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
+            h_edges = mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
             # mlab.pipeline.surface(lines, color = (0.72,0.72,0.72), line_width=2)
 
             # OLDER VERSION
@@ -1678,8 +1971,15 @@ class PostProcess(object):
 
             if QuantityToPlot is not None:
                 Uplot = np.zeros(nnode,dtype=np.float64)
-                for ielem in range(nface):
-                    Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
+                if plot_on_faces:
+                    for ielem in range(nface):
+                        Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
+                else:
+                    # IF QUANTITY IS DEFINED ON NODES
+                    quantity = QuantityToPlot[np.unique(faces_to_plot)]
+                    for ielem in range(nface):
+                        Uplot[ielem*nsize:(ielem+1)*nsize] = np.dot(BasesTri.T, quantity[smesh.elements[ielem,:]])
+
 
             point_line_width = .002
             # point_line_width = 0.5
@@ -1696,16 +1996,16 @@ class PostProcess(object):
             if QuantityToPlot is None:
                 trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot,
                     line_width=point_line_width,color=color)
+
             else:
                 trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars = Uplot,
                     line_width=point_line_width,colormap='summer')
 
-            # trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars=Uplot,line_width=point_line_width,colormap='summer')
 
             # PLOT POINTS ON CURVED MESH
             if plot_points:
                 # mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=2.5*point_line_width)
-                mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=point_radius)
+                h_points = mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=point_radius)
 
             figure.scene.disable_render = False
 
@@ -1724,12 +2024,9 @@ class PostProcess(object):
                 # UPDATE LUT OF THE COLORMAP
                 trimesh_h.module_manager.scalar_lut_manager.lut.table = RGBA_higher 
 
-        # SAVEFIG
-        if save:
-            if filename is None:
-                raise ValueError("No filename given. Supply one with extension")
-            else:
-                mlab.savefig(filename,magnification="auto")
+
+        if colorbar and plot_surfaces:
+            cbar = mlab.colorbar(object=trimesh_h, orientation="horizontal",label_fmt="%9.2f")
 
 
         # CONTROL CAMERA VIEW
@@ -1738,11 +2035,62 @@ class PostProcess(object):
 
         mlab.view(azimuth=45, elevation=50, distance=80, focalpoint=None,
             roll=0, reset_roll=True, figure=None)
+
+        # SAVEFIG
+        if save:
+            if filename is None:
+                raise ValueError("No filename given. Supply one with extension")
+            else:
+                mlab.savefig(filename,magnification="auto")
     
         if show_plot is True:
             # FORCE UPDATE MLAB TO UPDATE COLORMAP
             mlab.draw()
             mlab.show()
+
+
+        if save_tessellation:
+
+            # THIS IS NOT A FLORENCE MESH COMPLIANT MESH
+            tmesh = Mesh()
+            tmesh.element_type = "tri"
+            tmesh.elements = Tplot
+            tmesh.points = Xplot
+            tmesh.nelem = nelem
+            tmesh.nnode = nnode
+            tmesh.nsize = nsize
+            tmesh.bases_1 = BasesOneD
+            tmesh.bases_2 = BasesTri.T
+
+            tmesh.nface = nface
+            tmesh.smesh = smesh
+            tmesh.faces_to_plot = faces_to_plot
+
+            if plot_edges:
+                tmesh.x_edges = x_edges
+                tmesh.y_edges = y_edges
+                tmesh.z_edges = z_edges
+                tmesh.connections = connections
+                tmesh.edge_elements = edge_elements
+                tmesh.reference_edges = reference_edges
+
+            mlab.close()
+
+            return trimesh_h, h_edges, h_points, tmesh
+
+        return trimesh_h, h_edges, h_points
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1788,12 +2136,14 @@ class PostProcess(object):
     ###################################################################################
 
     @staticmethod   
-    def HighOrderPatchPlot(MainData,mesh,TotalDisp):
+    def HighOrderPatchPlot(mesh,TotalDisp):
 
         import matplotlib.pyplot as plt
         
         fig = plt.figure()
         ax = fig.axes
+
+        C = mesh.InferPolynomialDegree()
 
         # TotalDisp = np.zeros_like(TotalDisp)
         # MainData.ScaledJacobian = np.ones_like(MainData.ScaledJacobian)
@@ -1802,15 +2152,15 @@ class PostProcess(object):
         # MainData.ScaledJacobian = np.zeros_like(MainData.ScaledJacobian)+1
         vpoints = np.copy(mesh.points)
         # print TotalDisp[:,:MainData.ndim,-1]
-        vpoints += TotalDisp[:,:MainData.ndim,-1]
+        vpoints += TotalDisp[:,:self.ndim,-1]
 
         dum1=[]; dum2=[]; dum3 = []; ddum=np.array([0,1,2,0])
         for i in range(0,MainData.C):
             dum1=np.append(dum1,i+3)
-            dum2 = np.append(dum2, 2*MainData.C+3 +i*MainData.C -i*(i-1)/2 )
-            dum3 = np.append(dum3,MainData.C+3 +i*(MainData.C+1) -i*(i-1)/2 )
+            dum2 = np.append(dum2, 2*C+3 +i*C -i*(i-1)/2 )
+            dum3 = np.append(dum3,C+3 +i*(C+1) -i*(i-1)/2 )
 
-        if MainData.C>0:
+        if C>0:
             ddum = (np.append(np.append(np.append(np.append(np.append(np.append(0,dum1),1),dum2),2),
                 np.fliplr(dum3.reshape(1,dum3.shape[0]))),0) ).astype(np.int32)
 
@@ -1846,81 +2196,3 @@ class PostProcess(object):
         # ax = plt.gca()
         # PCM=ax.get_children()[2]
         # plt.colorbar(afig)
-
-
-
-    @staticmethod
-    def HighOrderPatchPlot3D(MainData,mesh,TotalDisp=0):
-        """ This 3D patch plot works but the elements at background are
-        also shown
-        """
-        from mpl_toolkits.mplot3d import Axes3D
-        from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-        import matplotlib.pyplot as plt
-
-        C = MainData.C
-        a1,a2,a3,a4 = [],[],[],[]
-        if C==1:
-            a1 = [1, 5, 2, 9, 4, 8, 1]
-            a2 = [1, 5, 2, 7, 3, 6, 1]
-            a3 = [1, 6, 3, 10, 4, 8, 1]
-            a4 = [2, 7, 3, 10, 4, 9, 2]
-        elif C==2:
-            a1 = [1, 5, 6, 2, 9, 11, 3, 10, 7, 1]
-            a2 = [1, 5, 6, 2, 14, 19, 4, 18, 12, 1]
-            a3 = [2, 9, 11, 3, 17, 20, 4, 19, 14, 2]
-            a4 = [1, 12, 18, 4, 20, 17, 3, 10, 7, 1]
-        elif C==3:
-            a1 = [1, 5, 6, 7, 2, 20, 29, 34, 4, 33, 27, 17, 1]
-            a2 = [1, 8, 12, 15, 3, 16, 14, 11, 2, 7, 6, 5, 1]
-            a3 = [2, 11, 14, 16, 3, 26, 32, 35, 4, 34, 29, 20, 2]
-            a4 = [1, 8, 12, 15, 3, 26, 32, 35, 4, 33, 27, 17, 1]
-        elif C==4:
-            a1 = [1, 5, 6, 7, 8, 2, 27, 41, 50, 55, 4, 54, 48, 38, 23, 1]
-            a2 = [1, 9, 14, 18, 21, 3, 22, 20, 17, 13, 2, 8, 7, 6, 5, 1]
-            a3 = [2, 13, 17, 20, 22, 3, 37, 47, 53, 56, 4, 55, 50, 41, 27, 2]
-            a4 = [1, 9, 14, 18, 21, 3, 37, 47, 53, 56, 4, 54, 48, 38, 23, 1]
-
-        a1 = np.asarray(a1); a2 = np.asarray(a2); a3 = np.asarray(a3); a4 = np.asarray(a4)
-        a1 -= 1;    a2 -= 1;    a3 -= 1;    a4 -= 1
-        a_list = [a1,a2,a3,a4]
-
-        fig = plt.figure()
-        ax = Axes3D(fig)
-
-        # face_elements = mesh.GetElementsWithBoundaryFacesTet()
-        # elements = mesh.elements[face_elements,:]
-        # print mesh.faces 
-        # mesh.ArrangeFacesTet() 
-
-        # for elem in range(elements.shape[0]):
-        for elem in range(mesh.nelem):
-        # for elem in range(1):
-
-            # LOOP OVER TET FACES
-            num_faces = 4
-            for iface in range(num_faces):
-                a = a_list[iface]
-
-                x = mesh.points[mesh.elements[elem,a],0]
-                y = mesh.points[mesh.elements[elem,a],1]
-                z = mesh.points[mesh.elements[elem,a],2]
-
-                # x = mesh.points[elements[elem,a],0]
-                # y = mesh.points[elements[elem,a],1]
-                # z = mesh.points[elements[elem,a],2]
-
-                vertices = [zip(x,y,z)]
-                poly_object = Poly3DCollection(vertices)
-                poly_object.set_linewidth(1)
-                poly_object.set_linestyle('solid')
-                poly_object.set_facecolor((0.75,1,0.35)) 
-                ax.add_collection3d(poly_object)
-
-
-        # ax.autoscale(enable=True, axis=u'both', tight=None)
-        ax.plot(mesh.points[:,0],mesh.points[:,1],mesh.points[:,2],'o',color='#F88379')
-
-        plt.axis('equal')
-        plt.axis('off')
-        plt.show()

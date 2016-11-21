@@ -1,5 +1,6 @@
 from time import time
 import numpy as np 
+from warnings import warn
 import multiprocessing as MP
 import imp
 
@@ -7,10 +8,8 @@ import GetInteriorCoordinates as Gett
 import Florence.ParallelProcessing.parmap as parmap
 from Florence.QuadratureRules.FeketePointsTri import *
 from Florence import FunctionSpace
-# import Florence.FunctionSpace.TwoDimensional.Tri.hpNodal
 from Florence.FunctionSpace import Tri
-# import Florence.FunctionSpace.TwoDimensional.Tri.hpNodal as Tri 
-from Florence.Tensor import itemfreq, makezero, unique2d
+from Florence.Tensor import itemfreq, makezero, unique2d, remove_duplicates_2D
 from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
 
 #--------------------------------------------------------------------------------------------------------------------------#
@@ -36,9 +35,8 @@ def HighOrderMeshTri_SEMISTABLE(C,mesh,Decimals=10,Parallel=False,nCPU=1,Compute
     Neval = np.zeros((3,eps.shape[0]),dtype=np.float64)
     for i in range(3,eps.shape[0]):
         Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],1)[0]
-
-    # from Core.Supplementary.Tensors import makezero
-    # np.savetxt("/home/roman/Dropbox/neval.dat",makezero(Neval),delimiter=',')
+    # THIS IS NECESSARY FOR REMOVING DUPLICATES
+    makezero(Neval, tol=1e-12)
 
     nodeperelem = mesh.elements.shape[1]
     renodeperelem = int((C+2.)*(C+3.)/2.)
@@ -105,6 +103,21 @@ def HighOrderMeshTri_SEMISTABLE(C,mesh,Decimals=10,Parallel=False,nCPU=1,Compute
     reelements = unique_reelements[inv_reelements]
     reelements = reelements.reshape(mesh.elements.shape[0],renodeperelem-3) 
     reelements = np.concatenate((mesh.elements,reelements),axis=1)
+
+    # SANITY CHECK FOR DUPLICATES
+    #---------------------------------------------------------------------#
+    # last_shape = repoints.shape[0]
+    # deci = int(Decimals)-2
+    # if Decimals < 6:
+    #     deci = Decimals
+    # repoints, idx_repoints, inv_repoints = remove_duplicates_2D(repoints, decimals=deci)
+    # unique_reelements, inv_reelements = np.unique(reelements,return_inverse=True)
+    # unique_reelements = unique_reelements[inv_repoints]
+    # reelements = unique_reelements[inv_reelements]
+    # reelements = reelements.reshape(mesh.elements.shape[0],renodeperelem) 
+    # if last_shape != repoints.shape[0]:
+    #     warn('Duplicated points generated in high order mesh. Lower the "Decimals". I have fixed it for now')
+    #---------------------------------------------------------------------#
 
     tnodes = time() - tnodes
     #------------------------------------------------------------------------------------------

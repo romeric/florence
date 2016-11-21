@@ -262,6 +262,8 @@ class BoundaryCondition(object):
                  np.tile(np.arange(nvar)[None,:],nodesDBC.shape[0]).reshape(nodesDBC.shape[0],formulation.ndim)).ravel()
                 self.applied_dirichlet = Dirichlet.ravel()
 
+
+
                 # FIX THE DOF IN THE REST OF THE BOUNDARY
                 if self.fix_dof_elsewhere:
                     if ndim==2:
@@ -582,16 +584,12 @@ class BoundaryCondition(object):
             pmesh.edges = None
             pmesh.GetBoundaryEdgesTri()
 
-            # FOR DYNAMICALLY PATCHED ITEMS
+            # GET BONDAR#y CONDITION FOR 2D PROBLEM
             pboundary_condition = BoundaryCondition()
             pboundary_condition.SetCADProjectionParameters()
-            # pboundary_condition = pboundary_condition
             pboundary_condition.is_dirichlet_computed = True
-            # MainData2D.BoundaryData.nodesDBC = nodesDBC2D
-            # MainData2D.BoundaryData.Dirichlet = Dirichlet2D
             pboundary_condition.nodesDBC = nodesDBC2D[:,None]
             pboundary_condition.Dirichlet = Dirichlet2D
-            # MainData2D.MeshInfo.MeshType = "tri"
 
 
             psolver = deepcopy(solver)
@@ -615,28 +613,15 @@ class BoundaryCondition(object):
             # GET QUADRATURE
             quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder, mesh_type=pmesh.element_type)
             pfunction_space = FunctionSpace(pmesh, quadrature, p=C+1)
-            # MainData2D.Domain, MainData2D.Boundary = pfunction_space, pfunction_space.Boundary
 
             norder_post = (C+1)+(C+1)
             post_quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder_post, mesh_type=pmesh.element_type)
 
             ppost_function_space = FunctionSpace(pmesh, post_quadrature, p=C+1)
-            # MainData2D.PostDomain, MainData2D.PostBoundary = ppost_function_space, ppost_function_space.Boundary
-            pfunction_spaces = (pfunction_space,ppost_function_space)
-
-            # MainData2D.Domain, MainData2D.Boundary, MainData2D.Quadrature = GetBasesAtInegrationPoints(MainData2D.C,
-            # norder,QuadratureOpt,"tri")
-            # # SEPARATELY COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR POST-PROCESSING
-            # norder_post = (MainData.C+1)+(MainData.C+1)
-            # MainData2D.PostDomain, MainData2D.PostBoundary, MainData2D.PostQuadrature = GetBasesAtInegrationPoints(MainData2D.C,
-            #     norder_post,QuadratureOpt,"tri")
-            
+            pfunction_spaces = (pfunction_space,ppost_function_space)           
             
             if pmesh.points.shape[0] != Dirichlet2D.shape[0]:
-                # CALL THE MAIN SOLVER FOR SOLVING THE 2D PROBLEM
-                # TotalDisp = MainSolver(MainData2D,pmesh,pmaterial,pboundary_condition)
-                # TotalDisp = MainSolver(pfunction_spaces, 
-                    # pformulation, pmesh, pmaterial, pboundary_condition, psolver, pfem_solver)
+                # CALL THE FEM SOLVER FOR SOLVING THE 2D PROBLEM
                     solution = pfem_solver.Solve(function_spaces=pfunction_spaces, 
                     formulation=pformulation, mesh=pmesh, material=pmaterial, 
                     boundary_condition=pboundary_condition, solver=psolver)
@@ -656,7 +641,8 @@ class BoundaryCondition(object):
 
             if plot:
                 post_process = PostProcess(2,2)
-                post_process.HighOrderCurvedPatchPlot(pmesh,TotalDisp,QuantityToPlot=MainData2D.ScaledJacobian,InterpolationDegree=40)
+                post_process.HighOrderCurvedPatchPlot(pmesh, TotalDisp, 
+                    QuantityToPlot=post_process.ScaledJacobian, InterpolationDegree=40)
                 import matplotlib.pyplot as plt
                 plt.show()
 
