@@ -189,7 +189,7 @@ def ProblemData_2(*args, **kwargs):
 
     formulation = DisplacementPotentialFormulation(mesh)
 
-    fem_solver = FEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=1)
+    fem_solver = FEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=2)
     # fem_solver = StaggeredFEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=2)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
@@ -214,6 +214,7 @@ def ProblemData_2(*args, **kwargs):
     # print np.linalg.norm(solution.sol[:,:2,-1])
     # print np.linalg.norm(solution.sol[:,-1,-1])
     solution.Plot(configuration="original",quantity=21)
+    # solution.Animate(configuration="original",quantity=21)
 
 
     # 21.0460889142
@@ -349,78 +350,110 @@ def ProblemData_3(*args, **kwargs):
 def ProblemData_3D(*args, **kwargs):
 
     ndim=3
-    p=2
+    p=3
+
+
+    # from Florence.PostProcessing import PostProcess
+    # post_process = PostProcess(3,4)
+    # post_process.QuantityNamer(15)
+    # exit()
 
     # material = IsotropicElectroMechanics_2(ndim,youngs_modulus=1.0,poissons_ratio=0.3, c1=1.0, c2=1.0)
     # material = Steinmann(ndim,youngs_modulus=10000.0,poissons_ratio=0.3, c1=1.0, c2=1.0, eps_1=0.05)
     # material = IsotropicElectroMechanics_0(ndim,youngs_modulus=1.0,poissons_ratio=0.3, eps_1=100.5)
-    material = IsotropicElectroMechanics_100(ndim,youngs_modulus=10.0, poissons_ratio=0.3, eps_1=10.0, eps_2=10.0)
+    # material = IsotropicElectroMechanics_100(ndim,youngs_modulus=10.0, poissons_ratio=0.3, eps_1=10.0, eps_2=10.0)
     # material = MooneyRivlin(ndim,youngs_modulus=1.0,poissons_ratio=0.41)
-    # material = NeoHookean_2(ndim,youngs_modulus=1.0,poissons_ratio=0.3)
+    material = NeoHookean_2(ndim,youngs_modulus=1.0,poissons_ratio=0.3)
 
     ProblemPath = PWD(__file__)
     # filename = ProblemPath + '/Mesh_Holes.dat'
-    filename = ProblemPath + '/Mesh_Cyl.dat'
+    # filename = ProblemPath + '/Mesh_Cyl.dat'
+    # filename = ProblemPath + '/Mesh_OneHole.dat'
+    filename = ProblemPath + '/Mesh_Cyl_P'+str(p)+'.mat'
+    # filename = ProblemPath + '/Mesh_OneHole_P'+str(p)+'.mat'
+    cad_file = ProblemPath + '/Cylinder.iges'
+    # cad_file = ProblemPath + '/OneHole.iges'
 
     mesh = Mesh()
-    mesh.Reader(filename=filename, element_type="tet")
-    mesh.GetHighOrderMesh(p=p)
-    from Florence.Tensor import makezero
+    # mesh.Reader(filename=filename, element_type="tet")
+    # makezero(mesh.points)
+    # mesh.GetHighOrderMesh(p=p)
+    mesh.ReadHDF5(filename)
+    # print mesh.points[155,:]
+    # print mesh.points[154,:]
+    # exit()
+    # makezero(mesh.points, tol=1e-7)
     # mesh.SimplePlot()
     # print mesh.Bounds
+    # print mesh.points.shape
+    # mesh.PlotMeshNumbering()
     # exit()
-
-    boundary_condition = BoundaryCondition()
-
-    # def DirichletFunc(mesh):
-
-    #     boundary_data = np.zeros((mesh.points.shape[0],material.nvar))+np.NAN
-
-    #     Y_0 = np.where(mesh.points[:,0] == 0)[0]
-    #     boundary_data[Y_0,0] = -20.
-    #     boundary_data[Y_0,1] = 0.
-    #     boundary_data[Y_0,2] = 0.
-
-    #     Y_1 = np.where(mesh.points[:,0] == 100)[0]
-    #     boundary_data[Y_1,0] = 20.
-    #     boundary_data[Y_1,1] = 0.
-    #     boundary_data[Y_1,2] = 0.
-
-    #     # boundary_data[:,3] = 0
-
-    #     return boundary_data
-
 
 
     def DirichletFunc(mesh):
 
         boundary_data = np.zeros((mesh.points.shape[0],material.nvar))+np.NAN
 
-        Y_0 = np.where(mesh.points[:,2] == 0)[0]
+        # Y_0 = np.where(mesh.points[:,2] == 0)[0]
+        Y_0 = np.isclose(mesh.points[:,2],0.)
         boundary_data[Y_0,0] = 0.
         boundary_data[Y_0,1] = 0.
         boundary_data[Y_0,2] = 0.
-        boundary_data[Y_0,3] = 0.
 
-        Y_1 = np.where(mesh.points[:,2] == 100)[0]
+        Y_1 = np.isclose(mesh.points[:,2], 100)
         boundary_data[Y_1,0] = 0.
         boundary_data[Y_1,1] = 0.
-        boundary_data[Y_1,2] = 0.
-        boundary_data[Y_1,3] = 5.
-
-        # boundary_data[:,3] = 0
-        # boundary_data[Y_0,3] = 0; boundary_data[Y_1,3] = 10.1
+        boundary_data[Y_1,2] = 50.
+        # boundary_data[Y_1,2] = -20.
 
         return boundary_data
 
-    boundary_condition.dirichlet_flags = DirichletFunc(mesh)
 
-    formulation = DisplacementPotentialFormulation(mesh)
-    # formulation = DisplacementFormulation(mesh)
+    # def DirichletFunc(mesh):
 
-    fem_solver = FEMSolver(number_of_load_increments=1,analysis_type="static",
+    #     boundary_data = np.zeros((mesh.points.shape[0],material.nvar))+np.NAN
+
+    #     Y_0 = np.where(mesh.points[:,2] == 0)[0]
+    #     boundary_data[Y_0,0] = 0.
+    #     boundary_data[Y_0,1] = 0.
+    #     boundary_data[Y_0,2] = 0.
+    #     # boundary_data[Y_0,3] = 0.
+
+    #     Y_1 = np.where(mesh.points[:,2] == 100)[0]
+    #     boundary_data[Y_1,0] = 0.
+    #     boundary_data[Y_1,1] = 0.
+    #     boundary_data[Y_1,2] = 1.
+    #     # boundary_data[Y_1,3] = 5.
+
+    #     # boundary_data[:,3] = 0
+    #     # boundary_data[Y_0,3] = 0; boundary_data[Y_1,3] = 10.1
+
+    #     return boundary_data
+
+
+    def NeumannFunc(mesh):
+
+        boundary_data = np.zeros((mesh.points.shape[0],material.nvar))+np.NAN
+        Y_0 = np.where(mesh.points[:,2] == 100)[0]
+        boundary_data[Y_0,2] = .01
+
+        return boundary_data
+
+
+    boundary_condition = BoundaryCondition()
+    boundary_condition.SetDirichletCriteria(DirichletFunc,mesh)
+    # boundary_condition.SetCADProjectionParameters(cad_file,scale=1000.,condition=1e10, 
+    #     solve_for_planar_faces=True, project_on_curves=True)
+    # boundary_condition.GetProjectionCriteria(mesh)
+
+    # boundary_condition.SetNeumannCriteria(NeumannFunc,mesh)
+
+    # formulation = DisplacementPotentialFormulation(mesh)
+    formulation = DisplacementFormulation(mesh)
+
+    fem_solver = FEMSolver(number_of_load_increments=20,analysis_type="static",
         analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
-        newton_raphson_tolerance=1.0e-04)
+        newton_raphson_tolerance=1.0e-02)
     # fem_solver = StaggeredFEMSolver(number_of_load_increments=10,analysis_type="static",
     #     analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
     #     newton_raphson_tolerance=1.0e-04)
@@ -428,14 +461,35 @@ def ProblemData_3D(*args, **kwargs):
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition)
 
-    sol = np.copy(solution.sol[:,:,-1])
-    makezero(sol,tol=1.0e-9)
-    print repr(sol)
+    # sol = np.copy(solution.sol[:,:,-1])
+    # makezero(sol,tol=1.0e-9)
+    # print repr(sol)
 
-    solution.Plot(configuration="deformed", quantity=3)
-    # solution.Animate(configuration="deformed", quantity=3)
+
+    # solution.CurvilinearPlot(mesh,solution.sol[:,:,-1])
+
+
+    # solution.Plot(configuration="original", quantity=0, increment=1)
+    # solution.Plot(configuration="deformed", quantity=2, plot_on_curvilinear_mesh=True, plot_points=True)
+    # solution.Plot(configuration="deformed", quantity=2, plot_on_curvilinear_mesh=True, plot_points=True, 
+        # save=True, filename="/home/roman/ZZZchecker/xx.png")
+
+    # solution.Animate(configuration="deformed", quantity=2, plot_on_curvilinear_mesh=True, plot_points=True, 
+        # save=True, filename="/home/roman/ZZZchecker/yy.mp4")
+    # solution.Animate(configuration="deformed", quantity=2, plot_on_curvilinear_mesh=True, plot_points=True)
+    # solution.Animate(configuration="original", quantity=2, plot_on_curvilinear_mesh=True, plot_points=True)
+    # solution.QuantityNamer(2)
+    # solution.Plot(configuration="deformed", quantity=2, plot_on_curvilinear_mesh=True)
     # solution.StressRecovery()
-    # solution.WriteVTK("/home/roman/zzchecker/GG")
+    solution.WriteVTK("/home/roman/ZZZchecker/GG.vtu", configuration="deformed", quantity=2)
+
+
+    # solution.CurvilinearPlot()
+    # mesh.points += solution.sol[:,:,-1]
+    # mesh.WriteHDF5(ProblemPath+"/Mesh_Cyl_P"+str(p)+".mat")
+    # mesh.WriteHDF5(ProblemPath+"/Mesh_OneHole_P"+str(p)+".mat")
+
+    # solution.WriteVTK("/home/roman/ZZZchecker/ff.vtu", quantity=2)
 
 
 
@@ -516,9 +570,9 @@ def ProblemData_4(*args, **kwargs):
 if __name__ == "__main__":
 
     # ProblemData()
-    ProblemData_2()
+    # ProblemData_2()
     # ProblemData_3()
-    # ProblemData_3D()
+    ProblemData_3D()
 
     # ProblemData_4()
     

@@ -373,9 +373,6 @@ class FEMSolver(object):
             # GET THE INCREMENTAL DISPLACEMENT
             AppliedDirichletInc = LoadFactor*boundary_condition.applied_dirichlet
 
-            # CALL THE NONLINEAR SOLVER
-            # if self.analysis_nature == 'nonlinear':
-
             t_increment = time()
 
             # LET NORM OF THE FIRST RESIDUAL BE THE NORM WITH RESPECT TO WHICH WE
@@ -385,6 +382,15 @@ class FEMSolver(object):
                 # self.NormForces = np.linalg.norm(Residual[boundary_condition.columns_out])
                 # self.NormForces = np.linalg.norm(Residual[boundary_condition.columns_in])
                 self.NormForces = np.linalg.norm(Residual)
+                # AVOID DIVISION BY ZERO
+                # if np.abs(self.NormForces) < 1e-14:
+                if np.isclose(self.NormForces,0.0):
+                    self.NormForces = 1e-14
+
+            if np.isclose(self.NormForces,0.0):
+                self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in]))
+            else:
+                self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)
 
             Eulerx = self.NewtonRaphson(function_spaces, formulation, solver, 
                 Increment,K,NodalForces,Residual,mesh,Eulerx,Eulerp,
@@ -422,12 +428,6 @@ class FEMSolver(object):
         LoadIncrement = self.number_of_load_increments
         Iter = 0
 
-        # AVOID DIVISION BY ZERO
-        if self.NormForces < 1e-14:
-            self.NormForces = 1e-14
-        # print(self.NormForces)
-
-        # NormForces = self.NormForces
 
         # APPLY INCREMENTAL DIRICHLET PER LOAD STEP (THIS IS INCREMENTAL NOT ACCUMULATIVE)
         IncDirichlet = boundary_condition.UpdateFixDoFs(AppliedDirichletInc,
@@ -436,7 +436,9 @@ class FEMSolver(object):
         Eulerx += IncDirichlet[:,:formulation.ndim]
         Eulerp += IncDirichlet[:,-1]
 
-        while np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces) > Tolerance:
+
+        while self.norm_residual > Tolerance:
+        # while np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces) > Tolerance:
             # GET THE REDUCED SYSTEM OF EQUATIONS
             K_b, F_b = boundary_condition.GetReducedMatrices(K,Residual)[:2]
 
@@ -459,13 +461,26 @@ class FEMSolver(object):
             Residual[boundary_condition.columns_in] = TractionForces[boundary_condition.columns_in] \
             - NodalForces[boundary_condition.columns_in]
 
+
             # SAVE THE NORM 
-            # NormForces = self.NormForces
+            if np.isclose(self.NormForces,0.0):
+                self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in]))
+            else:
+                self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)
+
             self.NRConvergence['Increment_'+str(Increment)] = np.append(self.NRConvergence['Increment_'+str(Increment)],\
-                np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces))
+                self.norm_residual)
+
             
-            print('Iteration number', Iter, 'for load increment', Increment, 'with a residual of \t\t', \
-                np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)) 
+            print('Iteration number', Iter, 'for load increment', 
+                Increment, 'with a residual of \t\t', self.norm_residual) 
+
+            # # SAVE THE NORM 
+            # self.NRConvergence['Increment_'+str(Increment)] = np.append(self.NRConvergence['Increment_'+str(Increment)],\
+            #     np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces))
+            
+            # print('Iteration number', Iter, 'for load increment', Increment, 'with a residual of \t\t', \
+            #     np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)) 
 
             # UPDATE ITERATION NUMBER
             Iter +=1
@@ -476,9 +491,20 @@ class FEMSolver(object):
             if Iter==self.maximum_iteration_for_newton_raphson:
                 self.newton_raphson_failed_to_converge = True
                 break
-            if np.isnan(np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)):
+            if np.isnan(self.norm_residual):
                 self.newton_raphson_failed_to_converge = True
                 break
+
+
+            # if Iter==self.maximum_iteration_for_newton_raphson and formulation.fields == "electro_mechanics":
+            #     raise StopIteration("\n\nNewton Raphson did not converge! Maximum number of iterations reached.")
+
+            # if Iter==self.maximum_iteration_for_newton_raphson:
+            #     self.newton_raphson_failed_to_converge = True
+            #     break
+            # if np.isnan(np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)):
+            #     self.newton_raphson_failed_to_converge = True
+            #     break
 
 
         return Eulerx
