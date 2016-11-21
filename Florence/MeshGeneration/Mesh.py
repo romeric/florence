@@ -298,9 +298,7 @@ class Mesh(object):
         faces[2*self.elements.shape[0]:3*self.elements.shape[0],:] = self.elements[:,node_arranger[2,:]]
         faces[3*self.elements.shape[0]:,:] = self.elements[:,node_arranger[3,:]]
 
-        # Cython solution
-        # faces = remove_duplicates(faces)
-        # Much faster than the cython solution
+        # REMOVE DUPLICATES
         self.all_faces, idx = unique2d(faces,consider_sort=True,order=False,return_index=True) 
 
         face_to_element = np.zeros((self.all_faces.shape[0],2),np.int64)
@@ -1506,21 +1504,29 @@ class Mesh(object):
 
             # POINT NUMBERING
             # for i in range(self.points.shape[0]):
-            #     # text_obj = mlab.text3d(self.points[i,0],self.points[i,1],self.points[i,2],str(i),color=(0,0,0.),scale=2)
-            #     # if i==0:
-            #     #     text_obj = mlab.text3d(self.points[i,0],self.points[i,1],self.points[i,2],str(i),color=(0,0,0.),scale=500)
-            #     # else:
-            #     #     text_obj.position = self.points[i,:]
-            #     #     text_obj.text = str(i)
-            #     #     text_obj.scale = [2,2,2]
+                # text_obj = mlab.text3d(self.points[i,0],self.points[i,1],self.points[i,2],str(i),color=(0,0,0.),scale=2)
+                # if i==0:
+                #     text_obj = mlab.text3d(self.points[i,0],self.points[i,1],self.points[i,2],str(i),color=(0,0,0.),scale=500)
+                # else:
+                #     text_obj.position = self.points[i,:]
+                #     text_obj.text = str(i)
+                #     text_obj.scale = [2,2,2]
 
-            #     if self.points[i,2] == 0:
-            #         text_obj = mlab.text3d(self.points[i,0],self.points[i,1],self.points[i,2],str(i),color=(0,0,0.),scale=0.5)
+                # if self.points[i,2] == 0:
+                    # text_obj = mlab.text3d(self.points[i,0],self.points[i,1],self.points[i,2],str(i),color=(0,0,0.),scale=0.5)
+
+            # for i in range(self.faces.shape[0]):
+            #     if i==3:
+            #         for j in self.faces[i,:]:
+            #             text_obj = mlab.text3d(self.points[j,0],self.points[j,1],self.points[j,2],str(j),color=(0,0,0.),scale=10.5)
 
             for i in range(self.faces.shape[0]):
-                if i==3:# or i==441:
-                    for j in self.faces[i,:]:
-                        text_obj = mlab.text3d(self.points[j,0],self.points[j,1],self.points[j,2],str(j),color=(0,0,0.),scale=10.5)
+                for j in range(self.faces.shape[1]):
+                    if self.points[self.faces[i,j],2] < 30:
+                        print i, self.faces[i,:]
+                        text_obj = mlab.text3d(self.points[self.faces[i,j],0],
+                            self.points[self.faces[i,j],1],self.points[self.faces[i,j],2],str(self.faces[i,j]),color=(0,0,0.),scale=0.5)
+
 
 
             figure.scene.disable_render = False
