@@ -273,12 +273,14 @@ def write_vtu(Verts, Cells, pdata=None, pvdata=None, cdata=None, cvdata=None, fn
     # data element
     cells_data = doc.createElementNS('VTK', 'DataArray')
     d = {'type':'Int32', 'Name':'connectivity', 'format':'ascii'}
+    # d = {'type':'UInt8', 'Name':'connectivity', 'format':'ascii'}
     set_attributes(d,cells_data)
     # string for data element
     cells_data_str = doc.createTextNode(a2s(cell_ind))
     # offset data element
     cells_offset_data = doc.createElementNS('VTK', 'DataArray')
     d = {'type':'Int32', 'Name':'offsets', 'format':'ascii'}
+    # d = {'type':'UInt8', 'Name':'offsets', 'format':'ascii'}
     set_attributes(d,cells_offset_data)
     # string for data element
     cells_offset_data_str = doc.createTextNode(a2s(cell_offset.cumsum()))

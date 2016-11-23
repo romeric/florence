@@ -559,17 +559,17 @@ class FEMSolver(object):
         nodeperelem = mesh.elements.shape[1]
 
         # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF STIFFNESS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
-        I_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.int32)
-        J_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.int32)
+        I_stiffness=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
+        J_stiffness=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
         # V_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.float32)
-        V_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.float64)
+        V_stiffness=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.float64)
 
         I_mass=[]; J_mass=[]; V_mass=[]
         if self.analysis_type !='static':
             # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF MASS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
-            I_mass=np.zeros((nvar*nodeperelem)**2*mesh.elements.shape[0],dtype=np.int32)
-            J_mass=np.zeros((nvar*nodeperelem)**2*mesh.elements.shape[0],dtype=np.int32)
-            V_mass=np.zeros((nvar*nodeperelem)**2*mesh.elements.shape[0],dtype=np.float64)
+            I_mass=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.int32)
+            J_mass=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.int32)
+            V_mass=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.float64)
 
         T = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
         # T = np.zeros((mesh.points.shape[0]*nvar,1),np.float32)  

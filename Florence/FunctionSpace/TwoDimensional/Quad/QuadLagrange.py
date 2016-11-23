@@ -1,8 +1,5 @@
 import numpy as np 
-# import scipy as sp 
-
-# import InterpolationFunctions.OneDimensional as OneD 
-import OneDimensional as OneD 
+from Florence.FunctionSpace.OneDimensional import BasisFunctions as OneD
 from Florence.FiniteElements.GetCounterClockwiseIndices import GetCounterClockwiseIndices
 
 
