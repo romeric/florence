@@ -461,6 +461,118 @@ class Mesh(object):
         return interior_faces, face_flags
 
 
+    def GetEdgesQuad(self):
+        """Find the all edges of a quad mesh.
+            Sets all_edges property and returns it
+
+        returns:            
+
+            arr:            numpy ndarray of all edges"""
+
+        p = self.InferPolynomialDegree()
+
+        # DO NOT COMPUTE IF ALREADY COMPUTED
+        # if isinstance(self.all_edges,np.ndarray):
+        #     if self.all_edges.shape[0] > 1:
+        #         # IF LINEAR VERSION IS COMPUTED, DO COMPUTE HIGHER VERSION
+        #         if self.all_edges.shape[1]==2 and p > 1:
+        #             pass
+        #         else:
+        #             return self.all_edges 
+
+        # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY
+        edges = np.concatenate((self.elements[:,:2],self.elements[:,[1,2]],
+                             self.elements[:,[2,3]],self.elements[:,[3,0]]),axis=0)
+
+        from Florence.FiniteElements.GetCounterClockwiseIndices import GetCounterClockwiseIndices
+        # a,b = GetCounterClockwiseIndices(1)
+        # print a
+        # print b
+
+        ####################
+        def foo(p):
+            """ 
+
+                For instance for p=3 the tensorial product of 1D bases produces the 
+                2D bases for quads with the following arrangement:
+
+                    (0,3)   (1,3)   (2,3)   (3,3)
+                    (0,2)   (1,2)   (2,2)   (3,2)
+                    (0,1)   (1,1)   (2,1)   (3,1)
+                    (0,0)   (1,0)   (2,0)   (3,0)
+
+                which this function re-arranges them as
+
+                        [[0,0],
+                         [3,0]
+                         [3,3]
+                         [0,3]
+                         [1,0]
+                         [2,0]
+                         [0,1]
+                         [1,1]
+                         [2,1]
+                         [3,1]
+                         [0,2]
+                         [1,2]
+                         [2,2]
+                         [3,2]
+                         [1,3]
+                         [2,3]]
+
+            """
+
+
+            xs = np.arange(p)
+            ys = np.arange(p)
+            matrix = np.dot(np.arange(p),np.arange(p))
+
+            p = int(p)
+            # if p==1:
+            xs = np.array([0,p,p,0])
+            ys = np.array([0,0,p,p])
+
+            # if p > 1:
+                # LOWEST ROW
+
+
+        ####################
+
+
+        edges = np.zeros((3*self.elements.shape[0],p+1),dtype=np.uint64)
+        edges[:self.elements.shape[0],:] = self.elements[:,node_arranger[0,:]]
+        edges[self.elements.shape[0]:2*self.elements.shape[0],:] = self.elements[:,node_arranger[1,:]]
+        edges[2*self.elements.shape[0]:,:] = self.elements[:,node_arranger[2,:]]
+
+        # REMOVE DUPLICATES
+        edges, idx = unique2d(edges,consider_sort=True,order=False,return_index=True)
+
+        edge_to_element = np.zeros((edges.shape[0],2),np.int64)
+        edge_to_element[:,0] =  idx % self.elements.shape[0]
+        edge_to_element[:,1] =  idx // self.elements.shape[0]
+
+        self.edge_to_element = edge_to_element
+
+
+        # DO NOT SET all_edges IF THE CALLER FUNCTION IS GetBoundaryEdgesTet
+        import inspect
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)[1][3]
+        
+        if calframe != "GetBoundaryEdgesTet":
+            self.all_edges = edges
+
+        return edges
+
+
+        uniques, idx, inv = unique2d(self.all_edges,consider_sort=True,order=False,return_index=True,return_inverse=True)
+        # ROWS THAT APPEAR ONLY ONCE CORRESPOND TO BOUNDARY EDGES
+        freqs_inv = itemfreq(inv)
+        edges_ext_flags = freqs_inv[freqs_inv[:,1]==1,0]
+        # NOT ARRANGED
+        self.edges = uniques[edges_ext_flags,:] 
+
+
     def GetHighOrderMesh(self,p=1,**kwargs):
         """Given a linear tri, tet, quad or hex mesh compute high order mesh based on it.
         This is a static method linked to the HigherOrderMeshing module"""
@@ -605,6 +717,20 @@ class Mesh(object):
             points[:,:2] = gpoints
             # FIND AREAS OF ALL THE ELEMENTS
             area = 0.5*np.linalg.det(points[self.elements[:,:3],:])
+
+        elif self.element_type == "quad":
+            # NODE ORDERING IS IRRELEVANT, AS IT IS THESE AREAS
+            # WHICH DETERMINE NODE ORDERING 
+            # AREA OF QUAD ABCD = AREA OF ABC + AREA OF ACD 
+            points = np.ones((gpoints.shape[0],3),dtype=np.float64)
+            points[:,:2] = gpoints
+            # FIND AREAS ABC
+            area0 = np.linalg.det(points[self.elements[:,:3],:])
+            # FIND AREAS ACD
+            area1 = np.linalg.det(points[self.elements[:,[0,2,3]],:])
+            # FIND AREAS OF ALL THE ELEMENTS
+            area = 0.5*(area0+area1)
+
         elif self.element_type == "tet":
             # GET ALL THE FACES
             faces = self.GetFacesTet()
@@ -620,11 +746,12 @@ class Mesh(object):
             area2 = np.linalg.det(points[faces[:,:3],:])
 
             area = 0.5*np.linalg.norm(area0+area1+area2)
+
         else:
             raise NotImplementedError("Computing areas for", self.element_type, "elements not implemented yet")
 
         if with_sign is False:
-            if self.element_type == "tri":
+            if self.element_type == "tri" or self.element_type == "quad":
                 area = np.abs(area)
             elif self.element_type == "tet":
                 raise NotImplementedError('Numbering order of tetrahedral faces could not be determined')
@@ -647,7 +774,7 @@ class Mesh(object):
         assert self.elements is not None
         assert self.element_type is not None
         if self.points.shape[1] == 2:
-            raise ValueError("Computing volumes for 2D mesh is not possible")
+            raise ValueError("2D mesh does not volume")
         if gpoints is None:
             assert self.points is not None
             gpoints = self.points
@@ -687,7 +814,7 @@ class Mesh(object):
         assert self.points is not None
         assert self.element_type is not None
 
-        if self.element_type != "tet" and self.element_type != "tri":
+        if self.element_type != "tet" and self.element_type != "tri" and self.element_type != "quad":
             raise NotImplementedError("Computing aspect ratio of ", self.element_type, "is not implemented yet")
 
         aspect_ratio = None
@@ -700,6 +827,18 @@ class Mesh(object):
 
                 minimum = np.minimum(np.minimum(AB,AC),BC)
                 maximum = np.maximum(np.maximum(AB,AC),BC)
+
+                aspect_ratio = 1.0*maximum/minimum
+
+            elif self.element_type == "quad":
+                edge_coords = self.points[self.elements[:,:4],:]
+                AB = np.linalg.norm(edge_coords[:,1,:] - edge_coords[:,0,:],axis=1)
+                BC = np.linalg.norm(edge_coords[:,2,:] - edge_coords[:,1,:],axis=1)
+                CD = np.linalg.norm(edge_coords[:,3,:] - edge_coords[:,2,:],axis=1)
+                DA = np.linalg.norm(edge_coords[:,0,:] - edge_coords[:,3,:],axis=1)
+  
+                minimum = np.minimum(np.minimum(np.minimum(AB,BC),CD),DA)
+                maximum = np.maximum(np.maximum(np.maximum(AB,BC),CD),DA)
 
                 aspect_ratio = 1.0*maximum/minimum
 
@@ -773,7 +912,7 @@ class Mesh(object):
   
 
 
-    def CheckNodeNumbering(self,change_order_to='retain'):
+    def CheckNodeNumbering(self,change_order_to='retain', verbose=True):
         """Checks for node numbering order of the imported mesh. Mesh can be tri or tet
 
         input:
@@ -790,9 +929,13 @@ class Mesh(object):
         assert self.points is not None
 
         # CHECK IF IT IS LINEAR MESH
+        # HIGH ORDER CURVED ELEMENTS HAVE AREAS WHICH CAN BE COMPUTED THROUGH BASES FUNCTIONS
         quantity = np.array([])
         if self.element_type == "tri":
             assert self.elements.shape[1]==3
+            quantity = self.Areas(with_sign=True)
+        elif self.element_type == "quad":
+            assert self.elements.shape[1]==4
             quantity = self.Areas(with_sign=True)
         elif self.element_type == "tet":
             assert self.elements.shape[1]==4
@@ -829,11 +972,11 @@ class Mesh(object):
 
     def GetElementsEdgeNumberingTri(self):
         """Finds edges of elements and their flags saying which edge they are [0,1,2].
-            At most a triangle can have all its four edges on the boundary.
+            At most a triangle can have all its three edges on the boundary.
 
         output: 
 
-            edge_elements:              [1D array] array containing elements which have face
+            edge_elements:              [1D array] array containing elements which have edges
                                         on the boundary
 
                                         Note that this method sets the self.edge_to_element to edge_elements,
@@ -1228,9 +1371,6 @@ class Mesh(object):
 
         if self.elements is not None and self.points is not None:
             self.__reset__()
-        # else:
-            # print("Did not read anything")
-            # return
 
         try:
             fid = open(filename, "r")
@@ -1306,8 +1446,7 @@ class Mesh(object):
         # GENERIC READER - READS EVERYTHING FROM HDF5 AND ASSIGNS IT TO MESH OBJECT
         for key, value in DictOutput.items():
             if isinstance(DictOutput[key],np.ndarray):
-                if "elements" in DictOutput[key] or "edge" in DictOutput[key] \
-                or "face" in DictOutput[key]:
+                if "elements" in key or "edge" in key or "face" in key:
                     setattr(self, key, np.ascontiguousarray(value).astype(np.uint64))
                 else:
                     setattr(self, key, np.ascontiguousarray(value))
@@ -1357,7 +1496,12 @@ class Mesh(object):
         assert self.elements is not None
         assert self.points is not None
 
+        if color is None:
+            color=(197/255.,241/255.,197/255.)
+
+        import matplotlib as mpl
         import matplotlib.pyplot as plt 
+
         if self.element_type == "tri":
             fig = plt.figure()
             plt.triplot(self.points[:,0],self.points[:,1], self.elements[:,:3],color='k')
@@ -1409,9 +1553,6 @@ class Mesh(object):
             if figure is None:
                 figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(1000,800))
 
-            if color is None:
-                color=(197/255.,241/255.,197/255.)
-
             mlab.triangular_mesh(self.points[:,0],self.points[:,1],
                 self.points[:,2],self.faces[:,:3],color=color)
             radius = 1e-00
@@ -1424,6 +1565,10 @@ class Mesh(object):
 
             if show_plot:
                 mlab.show()
+
+        elif self.element_type=="quad":
+            x,y = np.meshgrid(self.points[:,0],self.points[:,1])
+            plt.pcolormesh(x,y,np.zeros_like(x), edgecolor='k', linewidth=1, facecolor=color, cmap=mpl.cm.Greens)
 
         else:
             raise NotImplementedError("SimplePlot for "+self.element_type+" not implemented yet")
@@ -1444,6 +1589,7 @@ class Mesh(object):
         """Plots element and node numbers on top of the triangular mesh"""
 
         import matplotlib.pyplot as plt
+        import matplotlib as mpl
 
         if self.element_type == "tri":
 
@@ -1462,6 +1608,23 @@ class Mesh(object):
 
             # plt.axis('equal')
             # plt.show(block=False)
+            plt.show()
+
+        elif self.element_type == "quad":
+
+            fig = plt.figure()
+            x,y = np.meshgrid(self.points[:,0],self.points[:,1])
+            plt.pcolormesh(x,y,np.zeros_like(x), edgecolor='k', linewidth=1, cmap=mpl.cm.Greens)
+            
+            for i in range(self.elements.shape[0]):
+                coord = self.points[self.elements[i,:],:]
+                x_avg = np.sum(coord[:,0])/self.elements.shape[1]
+                y_avg = np.sum(coord[:,1])/self.elements.shape[1]
+                plt.text(x_avg,y_avg,str(i),backgroundcolor='#F88379',ha='center')
+
+            for i in range(0,self.points.shape[0]):
+                plt.text(self.points[i,0],self.points[i,1],str(i),backgroundcolor='#0087BD',ha='center')
+
             plt.show()
 
         elif self.element_type == "tet":
@@ -1621,7 +1784,8 @@ class Mesh(object):
         return triangle.build(info,*args,**kwargs)
 
 
-    def Rectangle(self,lower_left_point=(0,0),upper_right_point=(2,1),nx=5,ny=5):
+    def Rectangle(self,lower_left_point=(0,0), upper_right_point=(2,1), 
+        nx=5, ny=5, element_type="tri"):
         """Create a triangular mesh of on rectangle"""
 
         if self.elements is not None and self.points is not None:
@@ -1634,21 +1798,49 @@ class Mesh(object):
 
         from scipy.spatial import Delaunay
 
-        x=np.linspace(lower_left_point[0],upper_right_point[0],nx)
-        y=np.linspace(lower_left_point[1],upper_right_point[1],ny)
+        x=np.linspace(lower_left_point[0],upper_right_point[0],nx+1)
+        y=np.linspace(lower_left_point[1],upper_right_point[1],ny+1)
 
         X,Y = np.meshgrid(x,y)
         coordinates = np.dstack((X.ravel(),Y.ravel()))[0,:,:]
 
-        tri_func = Delaunay(coordinates)
-        self.element_type = "tri"
-        self.elements = tri_func.simplices
-        self.nelem = self.elements.shape[0] 
-        self.points = tri_func.points
-        self.GetBoundaryEdgesTri()
+        if element_type == "tri":
+            tri_func = Delaunay(coordinates)
+            self.element_type = "tri"
+            self.elements = tri_func.simplices
+            self.nelem = self.elements.shape[0] 
+            self.points = tri_func.points
+            self.GetBoundaryEdgesTri()
+
+        elif element_type == "quad":
+
+            self.nelem = int(nx*ny)
+            elements = np.zeros((self.nelem,4),dtype=np.int64)
+
+            dum_0 = np.arange((nx+1)*ny)
+            dum_1 = np.array([(nx+1)*i+nx for i in range(ny)])
+            col0 = np.delete(dum_0,dum_1)
+            elements[:,0] = col0
+            elements[:,1] = col0 + 1
+            elements[:,2] = col0 +  nx + 2
+            elements[:,3] = col0 +  nx + 1
+
+            self.nnode = int((nx+1)*(ny+1))
+            self.element_type = "quad"
+            self.elements = elements
+            self.points = coordinates
+
+            self.all_edges = np.concatenate((self.elements[:,:2],self.elements[:,[1,2]],
+                             self.elements[:,[2,3]],self.elements[:,[3,0]]),axis=0)
+            uniques, idx, inv = unique2d(self.all_edges,consider_sort=True,order=False,return_index=True,return_inverse=True)
+            # ROWS THAT APPEAR ONLY ONCE CORRESPOND TO BOUNDARY EDGES
+            freqs_inv = itemfreq(inv)
+            edges_ext_flags = freqs_inv[freqs_inv[:,1]==1,0]
+            # NOT ARRANGED
+            self.edges = uniques[edges_ext_flags,:] 
 
 
-    def Square(self,lower_left_point=(0,0),side_length=1,n=5):
+    def Square(self, lower_left_point=(0,0), side_length=1, n=5, element_type="tri"):
         """Create a triangular mesh on a square
 
             input:
@@ -1659,7 +1851,7 @@ class Mesh(object):
 
         upper_right_point = (side_length+lower_left_point[0],side_length+lower_left_point[1])
         self.Rectangle(lower_left_point=lower_left_point,
-            upper_right_point=upper_right_point,nx=n,ny=n)
+            upper_right_point=upper_right_point,nx=n,ny=n,element_type=element_type)
 
 
     def UniformHollowCircle(self,center=(0,0),inner_radius=1.0,outer_radius=2.,element_type='tri',isotropic=True,nrad=5,ncirc=10):
@@ -1897,6 +2089,65 @@ class Mesh(object):
             plt.show()
 
 
+    def MergeWith(self, mesh):
+        """ Merges self with another mesh:
+            NOTE: It is the responsibility of the user to ensure that meshes are conforming
+        """
+        
+        assert self.element_type is not None
+        assert mesh.element_type is not None
+        assert self.elements is not None
+        assert mesh.elements is not None
+        assert self.points is not None
+        assert mesh.points is not None
+
+        if mesh.element_type != self.element_type:
+            raise NotImplementedError('Merging two diffferent meshes is not possible yet')
+
+        if mesh.elements.shape[1] != mesh.elements.shape[1]:
+            warn('Elements are of not the same order. I am going to modify both meshes to their linear variant')
+            self.GetLinearMesh()
+            mesh.GetLinearMesh()
+
+        tol = 1e-10
+        makezero(self.points, tol=tol)
+        makezero(mesh.points, tol=tol)
+
+
+        from Florence.Tensor import remove_duplicates_2D, unique2d
+        points = np.concatenate((self.points,mesh.points),axis=0)
+        rounded_points = np.round(points,decimals=8)
+
+        _, idx_mpoints, inv_mpoints = unique2d(rounded_points,order=False,
+            consider_sort=False,return_index=True,return_inverse=True)
+        mpoints = points[idx_mpoints,:]
+
+        elements = np.concatenate((self.elements, self.elements.max()+1+mesh.elements),axis=0)
+        nelem = elements.shape[0]
+        nodeperelem = elements.shape[1]
+        element_type = self.element_type
+        # print elements.shape
+
+        unique_elements, inv_elements = np.unique(elements,return_inverse=True)
+        unique_elements = unique_elements[inv_mpoints]
+        melements = unique_elements[inv_elements]
+        melements = melements.reshape(nelem,nodeperelem) 
+
+
+        self.__reset__()
+        self.element_type = element_type
+        self.elements = melements
+        self.points = mpoints
+        if element_type == "tet":
+            self.GetBoundaryFacesTet()
+            self.GetBoundaryEdgesTet()
+        elif element_type == "tri":
+            self.GetBoundaryEdgesTri()
+
+
+
+
+
     def ChangeType(self):
         """Change mesh data type from signed to unsigned"""
         if isinstance(self.elements,np.ndarray):
@@ -1936,7 +2187,19 @@ class Mesh(object):
             for i in range(100):
                 if (i+1)*(i+2)/2==self.elements.shape[1]:
                     p = i
-                    break 
+                    break
+
+        elif self.element_type == "hex":
+            for i in range(100):
+                if int((i+1)**3)==self.elements.shape[1]:
+                    p = i
+                    break
+
+        elif self.element_type == "quad":
+            for i in range(100):
+                if int((i+1)**2)==self.elements.shape[1]:
+                    p = i
+                    break
 
         self.degree = p
         return p
@@ -2063,29 +2326,9 @@ class Mesh(object):
 
 
     def __add__(self, other):
-        """TODO: EXLUDE EXTERIOR REGIONS"""
-
-        assert self.element_type is not None
-        assert self.elements is not None
-        assert self.points is not None
-
-        assert other.element_type is not None
-        assert other.elements is not None
-        assert other.points is not None
-
-        if self.element_type != other.element_type:
-            raise NotImplementedError("Hybrid meshes are not supported")
-
-        from scipy.spatial import Delaunay
-
-        self.points = np.concatenate((self.points,other.points),axis=0)
-        self.points = unique2d(self.points,consider_sort=False,order=False)
-
-        tri_func = Delaunay(self.points)
-        self.elements = tri_func.simplices
-        self.points = tri_func.points
-
-        self.SimplePlot()
+        """Add self with other. Hybrid meshes not supported"""
+        self.MergeWith(other)
+        return self
 
 
     def __reset__(self):
