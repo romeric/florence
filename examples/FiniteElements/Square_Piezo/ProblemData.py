@@ -9,10 +9,12 @@ from Florence.Tensor import makezero
 
 def ProblemData(p=1):
 
-    # p=2
+    # p=3
 
     # from Florence.FunctionSpace.GetBases import GetBases, GetBases3D, GetBasesBoundary, GetBasesAtNodes
     # from Florence import QuadratureRule
+    # from Florence.QuadratureRules import GaussLobattoPoints1D, GaussLobattoPointsQuad
+    # # GaussLobattoPointsQuad(2)
 
     # quadrature = QuadratureRule(norder=p+1, mesh_type="quad")
     # Domain = GetBases(p-1,quadrature,"quad")
@@ -34,7 +36,6 @@ def ProblemData(p=1):
     # mesh.elements = elements
     # mesh.CheckNodeNumbering()
     # print mesh.AspectRatios()
-    # print 3333333333333
     # mesh.GetEdgesQuad()
     # exit()
 
@@ -56,6 +57,9 @@ def ProblemData(p=1):
     # mesh.PlotMeshNumbering()
 
 
+    # exit()
+
+
 
 
 
@@ -70,7 +74,7 @@ def ProblemData(p=1):
         boundary_data[Y_0,1] = 0.
         Y_1 = np.isclose(mesh.points[:,1],10.)
         boundary_data[Y_1,0] = 0.0
-        boundary_data[Y_1,1] = 20.
+        boundary_data[Y_1,1] = 5.
 
         # Electromechanics
         # Y_0 = np.isclose(mesh.points[:,1],0.)
@@ -89,7 +93,7 @@ def ProblemData(p=1):
     # formulation = DisplacementPotentialFormulation(mesh)
     formulation = DisplacementFormulation(mesh)
 
-    fem_solver = FEMSolver(number_of_load_increments=5,analysis_type="static",
+    fem_solver = FEMSolver(number_of_load_increments=1,analysis_type="static",
         analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
         newton_raphson_tolerance=1.0e-06)
     # fem_solver = StaggeredFEMSolver(number_of_load_increments=6,analysis_type="static",
