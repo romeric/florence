@@ -1,168 +1,132 @@
-import numpy as np 
+import os, sys
+sys.path.insert(1,'/home/roman/Dropbox/florence')
+from Florence import *
+from Florence.VariationalPrinciple import *
+from scipy.io import loadmat
+from Florence.PostProcessing import PostProcess
+from Florence.Tensor import makezero
 
 
-def ProblemData(general_data):
+def ProblemData(p=1):
 
-	# Degree of continuity 
-	# C = 1
-	C = general_data.C
-	# nvar is the the dimension of vectorial field we are solving for.
-		# for instance in continuum 2d problems nvar is 2 since we solve for ux and uy
-		# for 3d beam problems nvar is 6 since solve for ux, uy, uz, tx, ty and tz
-	nvar = 3
+    # p=2
 
-	# Geometry 
-	class geo_args(object):
-		rin = 1.
-		rout = 2.
-		ndiv = 50.
+    # from Florence.FunctionSpace.GetBases import GetBases, GetBases3D, GetBasesBoundary, GetBasesAtNodes
+    # from Florence import QuadratureRule
 
+    # quadrature = QuadratureRule(norder=p+1, mesh_type="quad")
+    # Domain = GetBases(p-1,quadrature,"quad")
+    # exit()
 
+    ndim = 2
 
+    mesh = Mesh()
+    mesh.Rectangle(upper_right_point=(2,10), element_type="quad", nx=4, ny=5)
+    # mesh.Square(side_length=2, element_type="quad", n=7)
+    # mesh.Square(side_length=2, n=7)
 
-	mu = 1.5
-	lam = 3
+    # print mesh.Areas()
+    # elements = np.copy(mesh.elements)
+    # elements[:,0] = mesh.elements[:,3]
+    # elements[:,1] = mesh.elements[:,2]
+    # elements[:,2] = mesh.elements[:,1]
+    # elements[:,3] = mesh.elements[:,0]
+    # mesh.elements = elements
+    # mesh.CheckNodeNumbering()
+    # print mesh.AspectRatios()
+    # print 3333333333333
+    # mesh.GetEdgesQuad()
+    # exit()
 
+    # material = Steinmann(ndim,mu=2.3*10e+04,lamb=8.0*10.0e+04, eps_1=1505*10.0e-11, c1=0.0, c2=0.0, rho=7.5*10e-6)
+    # material = NeoHookean_2(ndim, youngs_modulus=2.3*1e4, poissons_ratio=0.499999999999)
+    material = NeoHookean_2(ndim, youngs_modulus=2.3*1e4, poissons_ratio=0.4)
 
-	E = mu*(3.0*lam+2.0*mu)/(mu+lam)
-	nu = lam/2.0/(mu+lam)
-	
-	D = 1e+20*E/(1.0+nu)*(1.0-2.0*nu)*np.array([
-    	[1-nu,nu,0], 
-    	[nu,1-nu,0],
-    	[0,0,(1.0-2.0*nu)/2.0]
-    	])
+    # ProblemPath = PWD(__file__)
+    # filename = ProblemPath + '/Mesh_Square_9.dat'                   
 
-
-	P = np.zeros((3,2))
-
-
-	e = np.array([
-		[2.0,0.0],
-		[0.0,3.0]
-		])
-
-
-
-	class material_args(object):
-		"""docstring for material_args"""
-		def __init__(self, arg):
-			super(material_args, self).__init__()
-			self.arg = arg
-		elastic = D 
-		piezoelectric = P
-		electric = e 			
-
-
-	class mesh_info(object):
-		kind = 'quad'
-		mesh_filename = '/home/roman/Dropbox/Python/Problems/FiniteElements/Square_Piezo/Mesh_Square_9.dat'
-		nature = 'straight'
-
-
-
-	class BoundaryData(object):
-		class DirichArgs(object):
-			node1=0
-			node2=0
-			points=0
-			path_potential='/home/roman/Dropbox/Matlab_Files/potential_arc.txt'
-			path_displacement='/home/roman/Dropbox/Matlab_Files/displacement_arc.txt'
-			node = 0
-			Applied_at = 'node' 	# This argument explains if the boundary conditions are to be applied at meshed or initial geometry
-									# In case of initial geometry this would be edges i.e. Applied_at = 'edge'
-
-
-		class NeuArgs(object):
-			node1=0
-			node2=0
-			points=0
-			node = 0
-			p_i = 0.5
-			p_o = -1.0
-			Applied_at = 'node'
-				
-
-		def DirichletCriterion(self,DirichArgs):
-			node = DirichArgs.node 
-			mesh_points = DirichArgs.points 
-			path_potential = DirichArgs.path_potential
-			path_displacement = DirichArgs.path_displacement
-			# displacements = np.loadtxt(path_displacement)
-			# potentials = np.loadtxt(path_potential)
-			# points = DirichArgs.points
-
-			################################################
-			# Electro
-			# if np.allclose(node[1],0):
-			# 	b = np.array([0,0,5.0])
-			# elif np.allclose(node[1],2.0):
-			# 	b = np.array([0,0,10])
-			# else:
-			# 	b=np.array([[[],0,0]]); b = np.fliplr(b);
-			# 	b= b.reshape(b.shape[1])
-
-			# Mech ux
-			# if np.allclose(node[0],0):
-			# 	b = np.array([15.0,0,0.0])
-			# elif np.allclose(node[0],2.0):
-			# 	b = np.array([20.0,0,0])
-			# else:
-			# 	b  = np.array([[],0,0])
-
-			# Mech uy
-			if np.allclose(node[1],0):
-				b = np.array([0.0,1.5,0.0])
-			elif np.allclose(node[1],2.0):
-				b = np.array([0.0,4.0,0])
-			else:
-				b  = np.array([[],[],0])
-				b[0] = 0.0 
-
-			# # Mech ux and uy
-			# if np.allclose(node[0],0):
-			# 	b = np.array([-1.0,1.5,0.0])
-			# elif np.allclose(node[0],2.0):
-			# 	b = np.array([-2.0,3.0,0])
-			# else:
-			# 	b  = np.array([[],[],0])
-
-			return b
-			###################################################
-
-
-		
-		def NeumannCriterion(self,NeuArgs):
-
-			return 0
+    # mesh = Mesh()
+    # mesh.Reader(filename, "quad")
+    # mesh.GetHighOrderMesh(p=p)
+    # print mesh.Bounds
+    # print mesh.elements.shape
+    # mesh.SimplePlot()
+    # print mesh.elements
+    # print mesh.edges
+    # mesh.PlotMeshNumbering()
 
 
 
 
-	class AnalyticalSolution(object):
-		class Args(object):
-			node1 = 0
-			node2 = 0
-			node = 0
-			points = 0
 
-		def Get(self,Args):
-			node = Args.node
+    boundary_condition = BoundaryCondition()
 
-			# Electrostatics
-			# ux=0; uy=0
-			# phi = 2.5*node[1]+5.0
+    def DirichletFunc(mesh):
+        boundary_data = np.zeros((mesh.points.shape[0],material.nvar))+np.NAN
 
-			# Mech Ux
-			# uy=0; phi=0; ux = 2.5*node[0]+15.0
+        # Mechanics
+        Y_0 = np.isclose(mesh.points[:,1],0.)
+        boundary_data[Y_0,0] = 0.
+        boundary_data[Y_0,1] = 0.
+        Y_1 = np.isclose(mesh.points[:,1],10.)
+        boundary_data[Y_1,0] = 0.0
+        boundary_data[Y_1,1] = 20.
 
-			# Mech Uy
-			ux=0; phi=0; uy = 0.75*node[1]+1.5
+        # Electromechanics
+        # Y_0 = np.isclose(mesh.points[:,1],0.)
+        # boundary_data[Y_0,0] = 0.
+        # boundary_data[Y_0,1] = 0.
+        # boundary_data[Y_0,2] = 5.
+        # Y_1 = np.isclose(mesh.points[:,1],2.)
+        # boundary_data[Y_1,0] = 0.0
+        # boundary_data[Y_1,1] = 1.0
+        # boundary_data[Y_1,2] = -5.0
+
+        return boundary_data
+
+    boundary_condition.SetDirichletCriteria(DirichletFunc, mesh)
+
+    # formulation = DisplacementPotentialFormulation(mesh)
+    formulation = DisplacementFormulation(mesh)
+
+    fem_solver = FEMSolver(number_of_load_increments=5,analysis_type="static",
+        analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
+        newton_raphson_tolerance=1.0e-06)
+    # fem_solver = StaggeredFEMSolver(number_of_load_increments=6,analysis_type="static",
+    #     analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
+    #     newton_raphson_tolerance=1.0e-02)
+
+    solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
+            material=material, boundary_condition=boundary_condition)
 
 
-			return np.array([ux,uy,phi])
+    # from Florence.Utils import debug
+    # debug(formulation.function_spaces[0], formulation.quadrature_rules[0], mesh)
 
-			
+
+    solution.Plot(configuration="deformed", quantity=1, plot_points=True, point_radius=2)
+    # solution.WriteVTK(filename="/home/roman/ZZZchecker/QE.vtu", quantity=1)
+    # solution.WriteVTK(filename="/home/roman/Dropbox/HE.vtu", quantity=10)
+
+    # elements = np.concatenate((mesh.elements[:,:3],mesh.elements[:,[0,1,3]],
+    #         mesh.elements[:,[0,2,3]],mesh.elements[:,[1,2,3]]),axis=0)
+    # tmesh = Mesh()
+    # tmesh.elements = elements
+    # tmesh.element_type = "tri"
+    # tmesh.points = mesh.points
+    # tmesh.nelem = tmesh.elements.shape[0]
+    # tmesh.edges = tmesh.GetBoundaryEdgesTri()
+    # from Florence.PostProcessing import PostProcess
+    # # tmesh.GetHighOrderMesh(p=3)
+    # # post_process = PostProcess(2,2)
+    # # post_process
+    # # PostProcess.CurvilinearPlotTri(tmesh,np.zeros_like(tmesh.points))
+    # PostProcess.CurvilinearPlotTri(tmesh,solution.sol[:,:2,-1])
+    # exit()
 
 
-	return C, nvar, geo_args, material_args, mesh_info, BoundaryData, AnalyticalSolution 
+if __name__ == "__main__":
+    class MainData():
+        C = 3
+
+    ProblemData(p=MainData.C+1)

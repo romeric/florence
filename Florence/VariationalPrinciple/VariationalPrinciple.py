@@ -102,13 +102,9 @@ class VariationalPrinciple(object):
         nvar = self.nvar
         ndim = self.ndim
         rho = material.rho
-        # print(N)
-        # exit()
+
         for ivar in range(ndim):
             N[ivar::nvar,ivar] = Bases
-
-        # print(N)
-        # exit()
         
         rhoNN = rho*np.dot(N,N.T)
         return rhoNN

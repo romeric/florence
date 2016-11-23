@@ -570,9 +570,9 @@ def ProblemData_4(*args, **kwargs):
 if __name__ == "__main__":
 
     # ProblemData()
-    # ProblemData_2()
+    ProblemData_2()
     # ProblemData_3()
-    ProblemData_3D()
+    # ProblemData_3D()
 
     # ProblemData_4()
     

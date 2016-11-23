@@ -80,13 +80,13 @@ def NodeArrangementTet(C):
         face_3 = [1,2,3,14,19,23,26,28,34,39,43,46,48,49,54,58,61,63,64,68,71,73,74,77,79,80,82,83]
     else:
 
-        # THIS IS A FLOATING POINT BASED
-        from math import sqrt
+        # THIS IS A FLOATING POINT BASED ALGORITHM
         from Florence.QuadratureRules.FeketePointsTet import FeketePointsTet
         tol=1e-12
+        nsize = int((C+2)*(C+3)*(C+4)/6)
 
         fekete = FeketePointsTet(C)
-        all_nodes = np.arange((C+2)*(C+3)*(C+4)/6)
+        all_nodes = np.arange(nsize)
         face_0 = all_nodes[np.where(np.abs(fekete[:,2]+1.)<tol)].tolist()
         face_1 = all_nodes[np.where(np.abs(fekete[:,1]+1.)<tol)].tolist()
         face_2 = all_nodes[np.where(np.abs(fekete[:,0]+1.)<tol)].tolist()
@@ -121,20 +121,15 @@ def NodeArrangementTet(C):
 
 def NodeArrangementTri(C):
 
-    # GET FACE NUMBERING ORDER FROM TETRAHEDRAL ELEMENT
+    # GET EDGE NUMBERING ORDER FROM TRIANGULAR ELEMENT
     edge0 = []; edge1 = []; edge2 = []
     for i in range(0,C):
         edge0 = np.append(edge0,i+3)
-        edge1 = np.append(edge1, 2*C+3 +i*C -i*(i-1)/2 )
-        edge2 = np.append(edge2,C+3 +i*(C+1) -i*(i-1)/2 )
-
+        edge1 = np.append(edge1, 2*C+3 +i*C -i*int((i-1)/2)  )
+        edge2 = np.append(edge2,C+3 +i*(C+1) -i*int((i-1)/2) )
 
     # TRAVERSING TRIANGULAR ELEMENT VIA EDGES
     traversed_edge_numbering_tri = np.concatenate(([0],edge0,[1],edge1,[2],edge2,[0])).astype(np.int64)
-
-    # edge0 = np.append(np.append(0,edge0),1)
-    # edge1 = np.append(np.append(1,edge1),2)
-    # edge2 = np.append(np.append(2,edge2[::-1]),0)
 
     edge0 = np.append(np.append(0,1),edge0)
     edge1 = np.append(np.append(1,2),edge1)
@@ -143,4 +138,46 @@ def NodeArrangementTri(C):
   
 
     return edge_numbering, traversed_edge_numbering_tri
+
+
+
+def NodeArrangementQuad(C):
+    """Edge node arrangement for quads
+
+                     edge 2
+                 _______________
+                |               |
+                |               |
+        edge 3  |               | edge 1
+                |               |
+                |_______________|
+
+                    edge 0
+    """
+
+    # ELEMENT NODE ARRANGEMENT
+    linear_bases_idx = np.array([0,(C+1),(C+2)**2-(C+2),(C+2)**2-1])
+    element_numbering = np.concatenate((linear_bases_idx, np.delete(np.arange((C+2)**2),linear_bases_idx)))
+
+    # TRAVERSING QUAD ELEMENT VIA EDGES
+    traversed_edge_numbering_quad = None
+
+    # EDGE ARRANGEMENT
+    # GET EDGE NUMBERING ORDER FROM QUAD ELEMENT
+    edge0, edge1, edge2, edge3 = [], [], [], []
+    for i in range(C):
+        edge0 = np.append(edge0,i+4)
+        edge1 = np.append(edge1, 2*C+5 + i*(C+2))
+        edge3 = np.append(edge3, C + 4 + i*(C+2))
+    
+    edge2 = np.arange((C+2)**2-C,(C+2)**2)
+
+    edge0 = np.append(np.append(0,1),edge0)
+    edge1 = np.append(np.append(1,2),edge1)
+    edge2 = np.append(np.append(2,3),edge2[::-1])
+    edge3 = np.append(np.append(3,0),edge3[::-1])
+
+    edge_numbering = np.concatenate((edge0[None,:],edge1[None,:],edge2[None,:],edge3[None,:]),axis=0).astype(np.int64)  
+
+    return edge_numbering, traversed_edge_numbering_quad, element_numbering
 

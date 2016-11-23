@@ -44,7 +44,7 @@ def GetMeshes(*args, **kwargs):
 
     mesh = Mesh()
     mesh.Reader(filename=filename, element_type="tet")
-    mesh.GetHighOrderMesh(p=MainData.C+1)
+    mesh.GetHighOrderMesh(p=MainData.C+1, Decimals=8)
 
     cad_file = ProblemPath + '/Plate_With_Holes.iges'
 
@@ -153,7 +153,7 @@ def ProblemData(p=2):
     # formulation = DisplacementPotentialFormulation(mesh)
     formulation = DisplacementFormulation(mesh)
 
-    fem_solver = FEMSolver(number_of_load_increments=1,analysis_type="static",
+    fem_solver = FEMSolver(number_of_load_increments=60,analysis_type="static",
         analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
         newton_raphson_tolerance=1.0e-01)
     # fem_solver = StaggeredFEMSolver(number_of_load_increments=6,analysis_type="static",
@@ -168,7 +168,9 @@ def ProblemData(p=2):
     # makezero(sol,tol=1.0e-9)
     # print repr(sol)
     # print sol
-    solution.Plot(configuration="deformed",quantity=0, plot_points=True)
+    # solution.Plot(configuration="deformed",quantity=0, plot_points=True)
+    solution.Animate(configuration="deformed",quantity=0, plot_points=True, save=True, filename="/home/roman/ZZZchecker/PP.mp4")
+    solution.WriteVTK(configuration="deformed",quantity=0, write_curved_mesh=True, filename="/home/roman/ZZZchecker/NN.vtu")
     # solution.Plot(configuration="original",quantity=35)
 
 

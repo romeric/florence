@@ -13,7 +13,7 @@ from Florence.FunctionSpace import Tet
 from Florence.QuadratureRules.FeketePointsTet import *
 from Florence.QuadratureRules.FeketePointsTri import *
 
-def GetBases(C,Quadrature,info, useLagrange = False):
+def GetBases(C, Quadrature, info, useLagrange=False):
 
     w = Quadrature.weights
     z = Quadrature.points
@@ -26,7 +26,7 @@ def GetBases(C,Quadrature,info, useLagrange = False):
         gBasisx = np.zeros((ns,w.shape[0]),dtype=np.float64)
         gBasisy = np.zeros((ns,w.shape[0]),dtype=np.float64)
     elif info=='quad':
-        ns = (C+2)**2
+        ns = int((C+2)**2)
         Basis = np.zeros((ns,z.shape[0]*z.shape[0]),dtype=np.float64)
         gBasisx = np.zeros((ns,z.shape[0]*z.shape[0]),dtype=np.float64)
         gBasisy = np.zeros((ns,z.shape[0]*z.shape[0]),dtype=np.float64)
@@ -74,14 +74,14 @@ def GetBases3D(C,Quadrature,info):
 
     ns=[]; Basis=[]; gBasisx=[]; gBasisy=[]; gBasisz=[]
     if info=='hex':
-        ns = (C+2)**ndim
+        ns = int((C+2)**ndim)
         Basis = np.zeros((ns,(z.shape[0])**ndim),dtype=np.float64)
         gBasisx = np.zeros((ns,(z.shape[0])**ndim),dtype=np.float64)
         gBasisy = np.zeros((ns,(z.shape[0])**ndim),dtype=np.float64)
         gBasisz = np.zeros((ns,(z.shape[0])**ndim),dtype=np.float64)
     elif info=='tet':
         p=C+1
-        ns = (p+1)*(p+2)*(p+3)/6
+        ns = int((p+1)*(p+2)*(p+3)/6)
         Basis = np.zeros((ns,w.shape[0]),dtype=np.float64)
         gBasisx = np.zeros((ns,w.shape[0]),dtype=np.float64)
         gBasisy = np.zeros((ns,w.shape[0]),dtype=np.float64)
@@ -90,9 +90,9 @@ def GetBases3D(C,Quadrature,info):
 
     if info=='hex':
         counter = 0
-        for i in range(0,w.shape[0]):
-            for j in range(0,w.shape[0]):
-                for k in range(0,w.shape[0]):
+        for i in range(w.shape[0]):
+            for j in range(w.shape[0]):
+                for k in range(w.shape[0]):
                     ndummy = ThreeD.LagrangeGaussLobatto(C,z[i],z[j],z[k])[0]
                     dummy = ThreeD.GradLagrangeGaussLobatto(C,z[i],z[j],z[k])
 
@@ -191,8 +191,14 @@ def GetBasesAtNodes(C,Quadrature,info):
     ns=[]; Basis=[]; gBasisx=[]; gBasisy=[]; gBasisz=[]
     if info == 'hex' or info == "quad":
         w=2
-        ns = (C+2)**ndim
+        if info=="quad": ndim = 2
+        elif info=="hex": ndim = 3
+        ns = int((C+2)**ndim)
         # GET THE BASES AT NODES INSTEAD OF GAUSS POINTS
+        # Basis = np.zeros((ns,w**ndim))
+        # gBasisx = np.zeros((ns,w**ndim))
+        # gBasisy = np.zeros((ns,w**ndim))
+        # gBasisz = np.zeros((ns,w**ndim))
         # Basis = np.zeros((ns,w.shape[0]**ndim))
         # gBasisx = np.zeros((ns,w.shape[0]**ndim))
         # gBasisy = np.zeros((ns,w.shape[0]**ndim))
@@ -203,25 +209,16 @@ def GetBasesAtNodes(C,Quadrature,info):
         gBasisz = np.zeros((ns,ns))
     elif info =='tet':
         p=C+1
-        ns = (p+1)*(p+2)*(p+3)/6
+        ns = int((p+1)*(p+2)*(p+3)/6)
         # GET BASES AT NODES INSTEAD OF GAUSS POINTS
-        # BE CAREFUL TAHT 4 STANDS FOR 4 VERTEX NODES (FOR HIGHER C CHECK THIS)
-        # Basis = np.zeros((ns,4))
-        # gBasisx = np.zeros((ns,4))
-        # gBasisy = np.zeros((ns,4))
-        # gBasisz = np.zeros((ns,4))
         Basis = np.zeros((ns,ns))
         gBasisx = np.zeros((ns,ns))
         gBasisy = np.zeros((ns,ns))
         gBasisz = np.zeros((ns,ns))
     elif info =='tri':
         p=C+1
-        ns = (p+1)*(p+2)/2
+        ns = int((p+1)*(p+2)/2)
         # GET BASES AT NODES INSTEAD OF GAUSS POINTS
-        # BE CAREFUL TAHT 3 STANDS FOR 3 VERTEX NODES (FOR HIGHER C CHECK THIS)
-        # Basis = np.zeros((ns,3))
-        # gBasisx = np.zeros((ns,3))
-        # gBasisy = np.zeros((ns,3))
         Basis = np.zeros((ns,ns))
         gBasisx = np.zeros((ns,ns))
         gBasisy = np.zeros((ns,ns))
@@ -238,6 +235,15 @@ def GetBasesAtNodes(C,Quadrature,info):
             gBasisx[:,counter] = dummy[:,0]
             gBasisy[:,counter] = dummy[:,1]
             gBasisz[:,counter] = dummy[:,2]
+    elif info == 'quad':
+        counter = 0
+        eps = TwoD.LagrangeGaussLobatto(C,0,0)[1]
+        for i in range(0,eps.shape[0]):
+            ndummy = TwoD.LagrangeGaussLobatto(C,eps[i,0],eps[i,1],arrange=1)[0]
+            Basis[:,counter] = ndummy[:,0]
+            dummy = TwoD.GradLagrangeGaussLobatto(C,eps[i,0],eps[i,1],arrange=1)
+            gBasisx[:,counter] = dummy[:,0]
+            gBasisy[:,counter] = dummy[:,1]
             counter+=1
     elif info == 'tet':
         counter = 0
@@ -273,5 +279,8 @@ def GetBasesAtNodes(C,Quadrature,info):
         Domain.gBasesz = gBasisz
     elif info == "tri" or info == "quad":
         Domain.gBasesz = np.zeros_like(gBasisx)
+
+    if info == "hex" or info == "quad":
+        Domain.w = np.ones(2)
 
     return Domain
