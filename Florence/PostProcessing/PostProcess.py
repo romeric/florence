@@ -138,7 +138,7 @@ class PostProcess(object):
         if norder == 0:
             norder=1
         Domain = FunctionSpace(mesh, p=C+1, evaluate_at_nodes=True)
-        w = Domain.AllGauss[:,0]
+        # w = Domain.AllGauss[:,0]
 
         fem_solver = self.fem_solver
         formulation = self.formulation
@@ -149,6 +149,8 @@ class PostProcess(object):
         Jm = Domain.Jm
         AllGauss = Domain.AllGauss
 
+        # exit()
+
 
         elements = mesh.elements
         points = mesh.points
@@ -156,7 +158,8 @@ class PostProcess(object):
         nodeperelem = elements.shape[1]
         LoadIncrement = fem_solver.number_of_load_increments
         requires_geometry_update = fem_solver.requires_geometry_update
-        TotalDisp = self.sol[:mesh.nnode,:]
+        TotalDisp = self.sol[:,:]
+        # TotalDisp = self.sol[:mesh.nnode,:]
 
 
         F = np.zeros((nelem,nodeperelem,ndim,ndim))
@@ -190,8 +193,13 @@ class PostProcess(object):
                 # GAUSS LOOP IN VECTORISED FORM
                 ParentGradientX = np.einsum('ijk,jl->kil', Jm, LagrangeElemCoords)
                 # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
+                # print inv(ParentGradientX)
+                # print ParentGradientX[-1,:,:]
+                # print LagrangeElemCoords
+                # exit()
                 MaterialGradient = np.einsum('ijk,kli->ijl', inv(ParentGradientX), Jm)
                 # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
+                # print EulerELemCoords.shape, MaterialGradient.shape, Jm.shape
                 F[elem,:,:,:] = np.einsum('ij,kli->kjl', EulerELemCoords, MaterialGradient)
                 # COMPUTE REMAINING KINEMATIC MEASURES
                 StrainTensors = KinematicMeasures(F[elem,:,:,:], fem_solver.analysis_nature)
