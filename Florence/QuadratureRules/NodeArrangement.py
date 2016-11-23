@@ -156,8 +156,13 @@ def NodeArrangementQuad(C):
     """
 
     # ELEMENT NODE ARRANGEMENT
-    linear_bases_idx = np.array([0,(C+1),(C+2)**2-(C+2),(C+2)**2-1])
+    # linear_bases_idx = np.array([0,(C+1),(C+2)**2-(C+2),(C+2)**2-1])
+    # element_numbering = np.concatenate((linear_bases_idx, np.delete(np.arange((C+2)**2),linear_bases_idx)))
+    linear_bases_idx = np.array([0,(C+1),(C+2)**2-1,(C+2)**2-(C+2)])
     element_numbering = np.concatenate((linear_bases_idx, np.delete(np.arange((C+2)**2),linear_bases_idx)))
+    # print linear_bases_idx
+    # print element_numbering
+    # exit()
 
     # TRAVERSING QUAD ELEMENT VIA EDGES
     traversed_edge_numbering_quad = None

@@ -10,8 +10,9 @@ from Florence.FunctionSpace import HexLagrangeGaussLobatto as ThreeD
 # Nodal Bases
 from Florence.FunctionSpace import Tri
 from Florence.FunctionSpace import Tet
-from Florence.QuadratureRules.FeketePointsTet import *
 from Florence.QuadratureRules.FeketePointsTri import *
+from Florence.QuadratureRules.FeketePointsTet import *
+from Florence.QuadratureRules.GaussLobattoPoints import *
 
 def GetBases(C, Quadrature, info, useLagrange=False):
 
@@ -36,7 +37,8 @@ def GetBases(C, Quadrature, info, useLagrange=False):
         counter = 0
         for i in range(0,z.shape[0]):
             for j in range(0,z.shape[0]):
-                ndummy = TwoD.LagrangeGaussLobatto(C,z[i],z[j])[0]
+                # ndummy = TwoD.LagrangeGaussLobatto(C,z[i],z[j])[0]
+                ndummy = TwoD.LagrangeGaussLobatto(C,z[i],z[j])
                 Basis[:,counter] = ndummy[:,0]
                 dummy = TwoD.GradLagrangeGaussLobatto(C,z[i],z[j])
                 gBasisx[:,counter] = dummy[:,0]
@@ -237,9 +239,11 @@ def GetBasesAtNodes(C,Quadrature,info):
             gBasisz[:,counter] = dummy[:,2]
     elif info == 'quad':
         counter = 0
-        eps = TwoD.LagrangeGaussLobatto(C,0,0)[1]
+        # eps = TwoD.LagrangeGaussLobatto(C,0,0)[1]
+        eps = GaussLobattoPointsQuad(C)
         for i in range(0,eps.shape[0]):
-            ndummy = TwoD.LagrangeGaussLobatto(C,eps[i,0],eps[i,1],arrange=1)[0]
+            # ndummy = TwoD.LagrangeGaussLobatto(C,eps[i,0],eps[i,1],arrange=1)[0]
+            ndummy = TwoD.LagrangeGaussLobatto(C,eps[i,0],eps[i,1],arrange=1)
             Basis[:,counter] = ndummy[:,0]
             dummy = TwoD.GradLagrangeGaussLobatto(C,eps[i,0],eps[i,1],arrange=1)
             gBasisx[:,counter] = dummy[:,0]

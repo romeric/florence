@@ -1,6 +1,7 @@
 import numpy as np 
 from Florence.FunctionSpace.OneDimensional import BasisFunctions as OneD
-from Florence.FiniteElements.GetCounterClockwiseIndices import GetCounterClockwiseIndices
+from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
+# from Florence.FiniteElements.GetCounterClockwiseIndices import GetCounterClockwiseIndices
 
 
 def Lagrange(C,zeta,eta,arrange=1):

@@ -1,10 +1,10 @@
-import imp, os
-PathOneD = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
-OneD = imp.load_source('OneDimensional',PathOneD+'/OneDimensional/BasisFunctions.py')
+# import imp, os
+# PathOneD = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
+# OneD = imp.load_source('OneDimensional',PathOneD+'/OneDimensional/BasisFunctions.py')
 
 import numpy as np 
-from Florence.FiniteElements.GetCounterClockwiseIndices import GetCounterClockwiseIndices
-
+from Florence.FunctionSpace.OneDimensional import BasisFunctions as OneD
+from Florence.QuadratureRules.GetCounterClockwiseIndices import GetCounterClockwiseIndices
 
 def LagrangeGaussLobatto(C,zeta,eta,beta,arrange=1):
 
