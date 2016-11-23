@@ -37,7 +37,6 @@ def GetBases(C, Quadrature, info, useLagrange=False):
         counter = 0
         for i in range(0,z.shape[0]):
             for j in range(0,z.shape[0]):
-                # ndummy = TwoD.LagrangeGaussLobatto(C,z[i],z[j])[0]
                 ndummy = TwoD.LagrangeGaussLobatto(C,z[i],z[j])
                 Basis[:,counter] = ndummy[:,0]
                 dummy = TwoD.GradLagrangeGaussLobatto(C,z[i],z[j])
@@ -197,14 +196,6 @@ def GetBasesAtNodes(C,Quadrature,info):
         elif info=="hex": ndim = 3
         ns = int((C+2)**ndim)
         # GET THE BASES AT NODES INSTEAD OF GAUSS POINTS
-        # Basis = np.zeros((ns,w**ndim))
-        # gBasisx = np.zeros((ns,w**ndim))
-        # gBasisy = np.zeros((ns,w**ndim))
-        # gBasisz = np.zeros((ns,w**ndim))
-        # Basis = np.zeros((ns,w.shape[0]**ndim))
-        # gBasisx = np.zeros((ns,w.shape[0]**ndim))
-        # gBasisy = np.zeros((ns,w.shape[0]**ndim))
-        # gBasisz = np.zeros((ns,w.shape[0]**ndim))
         Basis = np.zeros((ns,ns))
         gBasisx = np.zeros((ns,ns))
         gBasisy = np.zeros((ns,ns))
@@ -239,10 +230,8 @@ def GetBasesAtNodes(C,Quadrature,info):
             gBasisz[:,counter] = dummy[:,2]
     elif info == 'quad':
         counter = 0
-        # eps = TwoD.LagrangeGaussLobatto(C,0,0)[1]
         eps = GaussLobattoPointsQuad(C)
         for i in range(0,eps.shape[0]):
-            # ndummy = TwoD.LagrangeGaussLobatto(C,eps[i,0],eps[i,1],arrange=1)[0]
             ndummy = TwoD.LagrangeGaussLobatto(C,eps[i,0],eps[i,1],arrange=1)
             Basis[:,counter] = ndummy[:,0]
             dummy = TwoD.GradLagrangeGaussLobatto(C,eps[i,0],eps[i,1],arrange=1)
@@ -285,6 +274,6 @@ def GetBasesAtNodes(C,Quadrature,info):
         Domain.gBasesz = np.zeros_like(gBasisx)
 
     if info == "hex" or info == "quad":
-        Domain.w = np.ones(2)
+        Domain.w = np.ones(C+2)
 
     return Domain

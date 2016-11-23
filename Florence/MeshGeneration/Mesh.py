@@ -194,8 +194,8 @@ class Mesh(object):
         node_arranger = NodeArrangementTri(p-1)[0]
 
         # CONCATENATE ALL THE EDGES MADE FROM ELEMENTS
-        all_edges = np.concatenate((self.elements[:,:2],self.elements[:,[1,2]],
-                             self.elements[:,[2,0]]),axis=0)
+        all_edges = np.concatenate((self.elements[:,node_arranger[0,:]],self.elements[:,node_arranger[1,:]],
+                             self.elements[:,node_arranger[2,:]]),axis=0)
         # GET UNIQUE ROWS 
         uniques, idx, inv = unique2d(all_edges,consider_sort=True,order=False,return_index=True,return_inverse=True)
 
@@ -462,7 +462,7 @@ class Mesh(object):
 
 
     def GetEdgesQuad(self):
-        """Find the all edges of a quad mesh.
+        """Find the all edges of a quadrilateral mesh.
             Sets all_edges property and returns it
 
         returns:            
@@ -472,77 +472,20 @@ class Mesh(object):
         p = self.InferPolynomialDegree()
 
         # DO NOT COMPUTE IF ALREADY COMPUTED
-        # if isinstance(self.all_edges,np.ndarray):
-        #     if self.all_edges.shape[0] > 1:
-        #         # IF LINEAR VERSION IS COMPUTED, DO COMPUTE HIGHER VERSION
-        #         if self.all_edges.shape[1]==2 and p > 1:
-        #             pass
-        #         else:
-        #             return self.all_edges 
+        if isinstance(self.all_edges,np.ndarray):
+            if self.all_edges.shape[0] > 1:
+                # IF LINEAR VERSION IS COMPUTED, DO COMPUTE HIGHER VERSION
+                if self.all_edges.shape[1]==2 and p > 1:
+                    pass
+                else:
+                    return self.all_edges 
+
+        from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
+        node_arranger = NodeArrangementQuad(p-1)[0]
 
         # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY
-        edges = np.concatenate((self.elements[:,:2],self.elements[:,[1,2]],
-                             self.elements[:,[2,3]],self.elements[:,[3,0]]),axis=0)
-
-        from Florence.FiniteElements.GetCounterClockwiseIndices import GetCounterClockwiseIndices
-        # a,b = GetCounterClockwiseIndices(1)
-        # print a
-        # print b
-
-        ####################
-        def foo(p):
-            """ 
-
-                For instance for p=3 the tensorial product of 1D bases produces the 
-                2D bases for quads with the following arrangement:
-
-                    (0,3)   (1,3)   (2,3)   (3,3)
-                    (0,2)   (1,2)   (2,2)   (3,2)
-                    (0,1)   (1,1)   (2,1)   (3,1)
-                    (0,0)   (1,0)   (2,0)   (3,0)
-
-                which this function re-arranges them as
-
-                        [[0,0],
-                         [3,0]
-                         [3,3]
-                         [0,3]
-                         [1,0]
-                         [2,0]
-                         [0,1]
-                         [1,1]
-                         [2,1]
-                         [3,1]
-                         [0,2]
-                         [1,2]
-                         [2,2]
-                         [3,2]
-                         [1,3]
-                         [2,3]]
-
-            """
-
-
-            xs = np.arange(p)
-            ys = np.arange(p)
-            matrix = np.dot(np.arange(p),np.arange(p))
-
-            p = int(p)
-            # if p==1:
-            xs = np.array([0,p,p,0])
-            ys = np.array([0,0,p,p])
-
-            # if p > 1:
-                # LOWEST ROW
-
-
-        ####################
-
-
-        edges = np.zeros((3*self.elements.shape[0],p+1),dtype=np.uint64)
-        edges[:self.elements.shape[0],:] = self.elements[:,node_arranger[0,:]]
-        edges[self.elements.shape[0]:2*self.elements.shape[0],:] = self.elements[:,node_arranger[1,:]]
-        edges[2*self.elements.shape[0]:,:] = self.elements[:,node_arranger[2,:]]
+        edges = np.concatenate((self.elements[:,node_arranger[0,:]],self.elements[:,node_arranger[1,:]],
+            self.elements[:,node_arranger[2,:]],self.elements[:,node_arranger[3,:]]),axis=0).astype(np.uint64)
 
         # REMOVE DUPLICATES
         edges, idx = unique2d(edges,consider_sort=True,order=False,return_index=True)
@@ -554,23 +497,105 @@ class Mesh(object):
         self.edge_to_element = edge_to_element
 
 
-        # DO NOT SET all_edges IF THE CALLER FUNCTION IS GetBoundaryEdgesTet
+        # DO NOT SET all_edges IF THE CALLER FUNCTION IS GetBoundaryEdgesHex
         import inspect
         curframe = inspect.currentframe()
         calframe = inspect.getouterframes(curframe, 2)[1][3]
         
-        if calframe != "GetBoundaryEdgesTet":
+        if calframe != "GetBoundaryEdgesHex":
             self.all_edges = edges
 
         return edges
 
 
-        uniques, idx, inv = unique2d(self.all_edges,consider_sort=True,order=False,return_index=True,return_inverse=True)
+    def GetBoundaryEdgesQuad(self):
+        """Find boundary edges (lines) of a quadrilateral mesh"""
+
+        p = self.InferPolynomialDegree()
+
+        # DO NOT COMPUTE IF ALREADY COMPUTED
+        if isinstance(self.edges,np.ndarray):
+            if self.edges.shape[0] > 1:
+                # IF LINEAR VERSION IS COMPUTED, DO COMPUTE HIGHER VERSION
+                if self.edges.shape[1] == 2 and p > 1:
+                    pass
+                else:
+                    return
+
+        from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
+        node_arranger = NodeArrangementQuad(p-1)[0]
+
+        # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY
+        all_edges = np.concatenate((self.elements[:,node_arranger[0,:]],self.elements[:,node_arranger[1,:]],
+            self.elements[:,node_arranger[2,:]],self.elements[:,node_arranger[3,:]]),axis=0).astype(np.uint64)
+
+        # GET UNIQUE ROWS 
+        uniques, idx, inv = unique2d(all_edges,consider_sort=True,order=False,return_index=True,return_inverse=True)
+
         # ROWS THAT APPEAR ONLY ONCE CORRESPOND TO BOUNDARY EDGES
         freqs_inv = itemfreq(inv)
         edges_ext_flags = freqs_inv[freqs_inv[:,1]==1,0]
         # NOT ARRANGED
         self.edges = uniques[edges_ext_flags,:] 
+
+        # DETERMINE WHICH FACE OF THE ELEMENT THEY ARE
+        boundary_edge_to_element = np.zeros((edges_ext_flags.shape[0],2),dtype=np.int64)
+
+        # FURTHER RE-ARRANGEMENT / ARANGE THE NODES BASED ON THE ORDER THEY APPEAR
+        # IN ELEMENT CONNECTIVITY
+        # THIS STEP IS NOT NECESSARY INDEED - ITS JUST FOR RE-ARANGMENT OF EDGES
+        all_edges_in_edges = in2d(all_edges,self.edges,consider_sort=True)
+        all_edges_in_edges = np.where(all_edges_in_edges==True)[0]
+
+        boundary_edge_to_element[:,0] = all_edges_in_edges % self.elements.shape[0]
+        boundary_edge_to_element[:,1] = all_edges_in_edges // self.elements.shape[0]
+
+        # ARRANGE FOR ANY ORDER OF BASES/ELEMENTS AND ASSIGN DATA MEMBERS
+        self.edges = self.elements[boundary_edge_to_element[:,0][:,None],node_arranger[boundary_edge_to_element[:,1],:]]
+        self.edges = self.edges.astype(np.uint64)
+        self.boundary_edge_to_element = boundary_edge_to_element
+
+        return self.edges
+
+
+    def GetInteriorEdgesQuad(self):
+        """Computes interior edges of a quadrilateral mesh
+
+            returns:        
+
+                interior_faces          ndarray of interior edges
+                edge_flags              ndarray of edge flags: 0 for interior and 1 for boundary
+
+        """
+
+        if not isinstance(self.all_edges,np.ndarray):
+            self.GetEdgesQuad()
+        if not isinstance(self.edges,np.ndarray):
+            self.GetBoundaryEdgesQuad()
+
+        sorted_all_edges = np.sort(self.all_edges,axis=1)
+        sorted_boundary_edges = np.sort(self.edges,axis=1)
+
+        x = []
+        for i in range(self.edges.shape[0]):
+            current_sorted_boundary_edge = np.tile(sorted_boundary_edges[i,:],
+                self.all_edges.shape[0]).reshape(self.all_edges.shape[0],self.all_edges.shape[1])
+            interior_edges = np.linalg.norm(current_sorted_boundary_edge - sorted_all_edges,axis=1)
+            pos_interior_edges = np.where(interior_edges==0)[0]
+            if pos_interior_edges.shape[0] != 0:
+                x.append(pos_interior_edges)
+
+        edge_aranger = np.arange(self.all_edges.shape[0])
+        edge_aranger = np.setdiff1d(edge_aranger,np.array(x)[:,0])
+        interior_edges = self.all_edges[edge_aranger,:]
+
+        # GET FLAGS FOR BOUNDRAY AND INTERIOR
+        edge_flags = np.ones(self.all_edges.shape[0],dtype=np.int64)
+        edge_flags[edge_aranger] = 0
+
+        self.interior_edges = interior_edges
+        return interior_edges, edge_flags
+
 
 
     def GetHighOrderMesh(self,p=1,**kwargs):
@@ -613,6 +638,26 @@ class Mesh(object):
                     self.all_edges = self.all_edges[:,:2]
                 if self.all_faces is not None:
                     self.all_faces = self.all_faces[:,:3]
+            elif self.element_type == "quad":
+                self.elements = self.elements[:,:4]
+                nmax = self.elements.max() + 1
+                self.points = self.points[:nmax,:]
+                if self.edges is not None:
+                    self.edges = self.edges[:,:2]
+                if self.all_edges is not None:
+                    self.all_edges = self.all_edges[:,:2]
+            elif self.element_type == "hex":
+                self.elements = self.elements[:,:8]
+                nmax = self.elements.max() + 1
+                self.points = self.points[:nmax,:]
+                if self.edges is not None:
+                    self.edges = self.edges[:,:2]
+                if self.faces is not None:
+                    self.faces = self.faces[:,:4]
+                if self.all_edges is not None:
+                    self.all_edges = self.all_edges[:,:2]
+                if self.all_faces is not None:
+                    self.all_faces = self.all_faces[:,:4]
             else:
                 raise NotImplementedError("Creating high order mesh based on another high order mesh for",
                     self.element_type, "elements is not implemented yet")
@@ -1007,7 +1052,7 @@ class Mesh(object):
 
     def GetElementsWithBoundaryEdgesTri(self):
         """Finds elements which have edges on the boundary.
-            At most a triangle can have all its four edges on the boundary.
+            At most a triangle can have all its three edges on the boundary.
 
         output: 
 
@@ -1169,6 +1214,61 @@ class Mesh(object):
             # self.all_faces = self.elements[self.face_to_element[i,0],node_arranger[self.face_to_element[i,1],:]]
 
         self.all_faces = self.elements[self.face_to_element[:,0][:,None],node_arranger[self.face_to_element[:,1],:]]
+
+
+
+    def GetElementsWithBoundaryEdgesQuad(self):
+        """Finds elements which have edges on the boundary.
+            At most a quad can have all its four edges on the boundary.
+
+        output: 
+
+            boundary_edge_to_element:   [2D array] array containing elements which have face
+                                        on the boundary [cloumn 0] and a flag stating which edges they are [column 1]
+
+        """
+
+        if isinstance(self.boundary_edge_to_element,np.ndarray):
+            if self.boundary_edge_to_element.shape[1] > 1 and self.boundary_edge_to_element.shape[0] > 1:
+                return self.boundary_edge_to_element
+
+        assert self.edges is not None or self.elements is not None
+
+        p = self.InferPolynomialDegree()
+        
+        # FIND WHICH FACE NODES ARE IN WHICH ELEMENT
+        from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
+        node_arranger = NodeArrangementQuad(p-1)[0]
+
+        # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY
+        all_edges = np.concatenate((self.elements[:,node_arranger[0,:]],self.elements[:,node_arranger[1,:]],
+            self.elements[:,node_arranger[2,:]],self.elements[:,node_arranger[3,:]]),axis=0).astype(np.int64)
+
+        # GET UNIQUE ROWS 
+        uniques, idx, inv = unique2d(all_edges,consider_sort=True,order=False,return_index=True,return_inverse=True)
+
+        # ROWS THAT APPEAR ONLY ONCE CORRESPOND TO BOUNDARY EDGES
+        freqs_inv = itemfreq(inv)
+        edges_ext_flags = freqs_inv[freqs_inv[:,1]==1,0]
+        # NOT ARRANGED
+        edges = uniques[edges_ext_flags,:] 
+
+        # DETERMINE WHICH FACE OF THE ELEMENT THEY ARE
+        boundary_edge_to_element = np.zeros((edges_ext_flags.shape[0],2),dtype=np.int64)
+
+        # FURTHER RE-ARRANGEMENT / ARANGE THE NODES BASED ON THE ORDER THEY APPEAR
+        # IN ELEMENT CONNECTIVITY
+        # THIS STEP IS NOT NECESSARY INDEED - ITS JUST FOR RE-ARANGMENT OF EDGES
+        all_edges_in_edges = in2d(all_edges,self.edges,consider_sort=True)
+        all_edges_in_edges = np.where(all_edges_in_edges==True)[0]
+
+        boundary_edge_to_element[:,0] = all_edges_in_edges % self.elements.shape[0]
+        boundary_edge_to_element[:,1] = all_edges_in_edges // self.elements.shape[0]
+
+        # ARRANGE FOR ANY ORDER OF BASES/ELEMENTS AND ASSIGN DATA MEMBERS
+        self.boundary_edge_to_element = boundary_edge_to_element
+
+        return self.boundary_edge_to_element
 
 
     def Reader(self, filename=None, element_type="tri", reader_type="Salome", reader_type_format=None, 
@@ -1946,8 +2046,7 @@ class Mesh(object):
             self.elements = connec
             self.nelem = self.elements.shape[0]
             self.element_type = element_type
-            warn('Edges are not computed as GetBoundaryEdgesQuad is not yet implemented')
-
+            self.GetBoundaryEdgesQuad()
 
         # ASSIGN NODAL COORDINATES
         self.points = xy
