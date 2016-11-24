@@ -94,7 +94,8 @@ def GetBases3D(C,Quadrature,info):
         for i in range(w.shape[0]):
             for j in range(w.shape[0]):
                 for k in range(w.shape[0]):
-                    ndummy = ThreeD.LagrangeGaussLobatto(C,z[i],z[j],z[k])[0]
+                    # ndummy = ThreeD.LagrangeGaussLobatto(C,z[i],z[j],z[k])[0]
+                    ndummy = ThreeD.LagrangeGaussLobatto(C,z[i],z[j],z[k])
                     dummy = ThreeD.GradLagrangeGaussLobatto(C,z[i],z[j],z[k])
 
                     Basis[:,counter] = ndummy[:,0]

@@ -344,8 +344,6 @@ class Mesh(object):
 
 
 
-
-
     def GetBoundaryFacesTet(self):
         """Find boundary faces (surfaces) of a tetrahedral mesh"""
 
@@ -418,9 +416,6 @@ class Mesh(object):
                 else:
                     return
 
-        if self.faces is None or self.faces is list:
-            raise AttributeError('Tetrahedral edges cannot be computed independent of tetrahedral faces. Compute faces first')
-
         # FIRST GET BOUNDARY FACES
         if not isinstance(self.faces,np.ndarray):
             self.GetBoundaryFacesTet()
@@ -459,6 +454,29 @@ class Mesh(object):
         interior_faces = self.all_faces[face_flags==False,:]
 
         return interior_faces, face_flags
+
+
+    def GetInteriorEdgesTet(self):
+        """Computes interior faces of a tetrahedral mesh
+
+            returns:        
+
+                interior_edges          ndarray of interior edges
+                edge_flags              1D array of edge flags: 0 for interior and 1 for boundary
+
+        """
+
+        if not isinstance(self.all_edges,np.ndarray):
+            self.GetEdgesTet()
+        if not isinstance(self.edges,np.ndarray):
+            self.GetBoundaryEdgesTet()
+
+        edge_flags = in2d(self.all_edges.astype(self.edges.dtype),self.edges,consider_sort=True)
+        edge_flags[edge_flags==True] = 1
+        edge_flags[edge_flags==False] = 0
+        interior_edges = self.all_edges[edge_flags==False,:]
+
+        return interior_edges, edge_flags
 
 
     def GetEdgesQuad(self):
@@ -596,6 +614,214 @@ class Mesh(object):
         return interior_edges, edge_flags
 
 
+    def GetFacesHex(self):
+        """Find all faces (surfaces) in the hexahedral mesh (boundary & interior).
+            Sets all_faces property and returns it
+
+        returns:            
+
+            arr:            numpy ndarray of all faces
+
+        """
+
+        # DETERMINE DEGREE
+        p = self.InferPolynomialDegree()
+
+        # DO NOT COMPUTE IF ALREADY COMPUTED
+        if isinstance(self.all_faces,np.ndarray):
+            if self.all_faces.shape[0] > 1:
+                # IF LINEAR VERSION IS COMPUTED, DO COMPUTE HIGHER VERSION
+                if self.all_faces.shape[1] == 4 and p > 1:
+                    pass
+                else:
+                    return self.all_faces 
+
+        from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
+
+        node_arranger = NodeArrangementHex(p-1)[0]
+        fsize = int((p+1)**3)
+
+        # GET ALL FACES FROM THE ELEMENT CONNECTIVITY
+        faces = np.concatenate((np.concatenate((
+                np.concatenate((np.concatenate((np.concatenate((self.elements[:,node_arranger[0,:]],
+                self.elements[:,node_arranger[1,:]]),axis=0),self.elements[:,node_arranger[2,:]]),axis=0),
+                self.elements[:,node_arranger[3,:]]),axis=0),self.elements[:,node_arranger[4,:]]),axis=0),
+                self.elements[:,node_arranger[5,:]]),axis=0).astype(np.int64)
+
+        # REMOVE DUPLICATES
+        self.all_faces, idx = unique2d(faces,consider_sort=True,order=False,return_index=True) 
+
+        face_to_element = np.zeros((self.all_faces.shape[0],2),np.int64)
+        face_to_element[:,0] =  idx % self.elements.shape[0]
+        face_to_element[:,1] =  idx // self.elements.shape[0]
+
+        self.face_to_element = face_to_element
+
+        return self.all_faces 
+
+
+    def GetEdgesHex(self):
+        """Find all edges (lines) of tetrahedral mesh (boundary & interior)"""
+
+        p = self.InferPolynomialDegree()
+
+        # DO NOT COMPUTE IF ALREADY COMPUTED
+        if isinstance(self.all_edges,np.ndarray):
+            if self.all_edges.shape[0] > 1:
+                # IF LINEAR VERSION IS COMPUTED, DO COMPUTE HIGHER VERSION
+                if self.all_edges.shape[1] == 2 and p > 1:
+                    pass
+                else:
+                    return self.all_edges 
+
+
+        # FIRST GET BOUNDARY FACES
+        if not isinstance(self.all_faces,np.ndarray):
+            self.GetFacesHex()
+
+        # BUILD A 2D MESH
+        tmesh = Mesh()
+        # tmesh = deepcopy(self) 
+        tmesh.element_type = "quad"
+        tmesh.elements = self.all_faces
+        tmesh.nelem = tmesh.elements.shape[0]
+        del tmesh.faces
+        del tmesh.points
+       
+        # COMPUTE ALL EDGES
+        self.all_edges = tmesh.GetEdgesQuad()
+        return self.all_edges
+
+
+    def GetBoundaryFacesHex(self):
+        """Find boundary faces (surfaces) of a hexahedral mesh"""
+
+        p = self.InferPolynomialDegree()
+
+        # DO NOT COMPUTE IF ALREADY COMPUTED
+        if isinstance(self.faces,np.ndarray):
+            if self.faces.shape[0] > 1:
+                # IF LINEAR VERSION IS COMPUTED, DO COMPUTE HIGHER VERSION
+                if self.faces.shape[1] == 4 and p > 1:
+                    pass
+                else:
+                    return
+
+
+        from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
+        node_arranger = NodeArrangementHex(p-1)[0]
+
+        # CONCATENATE ALL THE FACES MADE FROM ELEMENTS
+        all_faces = np.concatenate((np.concatenate((
+                np.concatenate((np.concatenate((np.concatenate((self.elements[:,node_arranger[0,:]],
+                self.elements[:,node_arranger[1,:]]),axis=0),self.elements[:,node_arranger[2,:]]),axis=0),
+                self.elements[:,node_arranger[3,:]]),axis=0),self.elements[:,node_arranger[4,:]]),axis=0),
+                self.elements[:,node_arranger[5,:]]),axis=0).astype(np.int64)
+        # GET UNIQUE ROWS 
+        uniques, idx, inv = unique2d(all_faces,consider_sort=True,order=False,return_index=True,return_inverse=True)
+
+        # ROWS THAT APPEAR ONLY ONCE CORRESPOND TO BOUNDARY FACES
+        freqs_inv = itemfreq(inv)
+        faces_ext_flags = freqs_inv[freqs_inv[:,1]==1,0]
+        # NOT ARRANGED
+        self.faces = uniques[faces_ext_flags,:] 
+
+        # DETERMINE WHICH FACE OF THE ELEMENT THEY ARE
+        boundary_face_to_element = np.zeros((faces_ext_flags.shape[0],2),dtype=np.int64)
+
+        # FURTHER RE-ARRANGEMENT / ARANGE THE NODES BASED ON THE ORDER THEY APPEAR
+        # IN ELEMENT CONNECTIVITY
+        # THIS STEP IS NOT NECESSARY INDEED - ITS JUST FOR RE-ARANGMENT OF FACES
+        all_faces_in_faces = in2d(all_faces,self.faces,consider_sort=True)
+        all_faces_in_faces = np.where(all_faces_in_faces==True)[0]
+
+        # boundary_face_to_element = np.zeros((all_faces_in_faces.shape[0],2),dtype=np.int64)
+        boundary_face_to_element[:,0] = all_faces_in_faces % self.elements.shape[0]
+        boundary_face_to_element[:,1] = all_faces_in_faces // self.elements.shape[0]
+
+        # ARRANGE FOR ANY ORDER OF BASES/ELEMENTS AND ASSIGN DATA MEMBERS
+        self.faces = self.elements[boundary_face_to_element[:,0][:,None],node_arranger[boundary_face_to_element[:,1],:]]
+        self.faces = self.faces.astype(np.uint64)
+        self.boundary_face_to_element = boundary_face_to_element
+
+
+    def GetBoundaryEdgesHex(self):
+        """Find boundary edges (lines) of hexahedral mesh.
+        """
+
+        p = self.InferPolynomialDegree()
+        # DO NOT COMPUTE IF ALREADY COMPUTED
+        if isinstance(self.edges,np.ndarray):
+            if self.edges.shape[0] > 1:
+                # IF LINEAR VERSION IS COMPUTED, DO COMPUTE HIGHER VERSION
+                if self.edges.shape[1] == 2 and p > 1:
+                    pass
+                else:
+                    return
+
+
+        # FIRST GET BOUNDARY FACES
+        if not isinstance(self.faces,np.ndarray):
+            self.GetBoundaryFacesHex()
+
+        # BUILD A 2D MESH
+        tmesh = Mesh()
+        tmesh.element_type = "quad"
+        tmesh.elements = self.faces
+        tmesh.nelem = tmesh.elements.shape[0]
+        del tmesh.faces
+        del tmesh.points
+        
+        # ALL THE EDGES CORRESPONDING TO THESE BOUNDARY FACES ARE BOUNDARY EDGES
+        self.edges =  tmesh.GetEdgesQuad()
+
+
+    def GetInteriorFacesHex(self):
+        """Computes interior faces of a hexahedral mesh
+
+            returns:        
+
+                interior_faces          ndarray of interior faces
+                face_flags              1D array of face flags: 0 for interior and 1 for boundary
+
+        """
+
+        if not isinstance(self.all_faces,np.ndarray):
+            self.GetFacesHex()
+        if not isinstance(self.faces,np.ndarray):
+            self.GetBoundaryFacesHex()
+
+        face_flags = in2d(self.all_faces.astype(self.faces.dtype),self.faces,consider_sort=True)
+        face_flags[face_flags==True] = 1
+        face_flags[face_flags==False] = 0
+        interior_faces = self.all_faces[face_flags==False,:]
+
+        return interior_faces, face_flags
+
+
+    def GetInteriorEdgesHex(self):
+        """Computes interior faces of a hexahedral mesh
+
+            returns:        
+
+                interior_edges          ndarray of interior edges
+                edge_flags              1D array of edge flags: 0 for interior and 1 for boundary
+
+        """
+
+        if not isinstance(self.all_edges,np.ndarray):
+            self.GetEdgesHex()
+        if not isinstance(self.edges,np.ndarray):
+            self.GetBoundaryEdgesHex()
+
+        edge_flags = in2d(self.all_edges.astype(self.edges.dtype),self.edges,consider_sort=True)
+        edge_flags[edge_flags==True] = 1
+        edge_flags[edge_flags==False] = 0
+        interior_edges = self.all_edges[edge_flags==False,:]
+
+        return interior_edges, edge_flags
+
+
 
     def GetHighOrderMesh(self,p=1,**kwargs):
         """Given a linear tri, tet, quad or hex mesh compute high order mesh based on it.
@@ -681,6 +907,10 @@ class Mesh(object):
         elif self.element_type == 'quad':
             # BUILD A NEW MESH USING THE GAUSS-LOBATTO NODAL POINTS FOR QUADS
             nmesh = HighOrderMeshQuad(C,self,**kwargs)
+
+        elif self.element_type == 'hex':
+            # BUILD A NEW MESH USING THE GAUSS-LOBATTO NODAL POINTS FOR HEXES
+            nmesh = HighOrderMeshHex(C,self,**kwargs)
 
         self.points = nmesh.points
         self.elements = nmesh.elements.astype(np.uint64)
@@ -771,7 +1001,7 @@ class Mesh(object):
             # FIND AREAS ABC
             area0 = np.linalg.det(points[self.elements[:,:3],:])
             # FIND AREAS ACD
-            area1 = np.linalg.det(points[self.elements[:,[0,2,3]],:])
+            area1 = np.linalg.det(points[self.elements[:,[1,2,3]],:])
             # FIND AREAS OF ALL THE ELEMENTS
             area = 0.5*(area0+area1)
 
@@ -790,6 +1020,34 @@ class Mesh(object):
             area2 = np.linalg.det(points[faces[:,:3],:])
 
             area = 0.5*np.linalg.norm(area0+area1+area2)
+
+        elif self.element_type == "hex":
+
+            from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
+            from Florence.Tensor import unique2d
+            C = self.InferPolynomialDegree() - 1
+
+            area = 0
+            node_arranger = NodeArrangementHex(C)[0]
+            for i in range(node_arranger.shape[0]):
+                # print node_arranger[i,:]
+                # AREA OF FACES
+                points = np.ones((gpoints.shape[0],3),dtype=np.float64)
+                if i==0 or i==1:
+                    points[:,:2] = gpoints[:,:2]
+                elif i==2 or i==3:
+                    points[:,:2] = gpoints[:,[0,2]]
+                elif i==4 or i==5:
+                    points[:,:2] = gpoints[:,1:]
+                # FIND AREAS ABC
+                area0 = np.linalg.det(points[self.elements[:,node_arranger[i,:3]],:])
+                # FIND AREAS ACD
+                area1 = np.linalg.det(points[self.elements[:,node_arranger[i,1:]],:])
+                # FIND AREAS OF ALL THE ELEMENTS
+                area += 0.5*np.linalg.norm(area0+area1)
+
+            # print area
+            raise ValueError('Hex ares implementation requires further checks')
 
         else:
             raise NotImplementedError("Computing areas for", self.element_type, "elements not implemented yet")
@@ -1310,6 +1568,69 @@ class Mesh(object):
         self.boundary_edge_to_element = boundary_edge_to_element
 
         return self.boundary_edge_to_element
+
+
+    def GetElementsWithBoundaryFacesHex(self):
+        """Finds elements which have faces on the boundary.
+            At most a hexahedral can have all its 8 faces on the boundary.
+
+        output: 
+
+            boundary_face_to_element:   [2D array] array containing elements which have face
+                                        on the boundary [cloumn 0] and a flag stating which faces they are [column 1]
+
+        """
+
+        assert self.faces is not None or self.elements is not None
+
+        if self.boundary_face_to_element is not None:
+            return self.boundary_face_to_element
+
+        # THIS METHOD ALWAYS RETURNS THE FACE TO ELEMENT ARRAY, AND DOES NOT CHECK
+        # IF THIS HAS BEEN COMPUTED BEFORE, THE REASON BEING THAT THE FACES CAN COME 
+        # EXTERNALLY WHOSE ARRANGEMENT WOULD NOT CORRESPOND TO THE ONE USED INTERNALLY
+        # HENCE THIS MAPPING BECOMES NECESSARY
+
+        from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
+
+        C = self.InferPolynomialDegree() - 1
+        node_arranger = NodeArrangementHex(C)[0]
+        
+        all_faces = np.concatenate((np.concatenate((
+                np.concatenate((np.concatenate((np.concatenate((self.elements[:,node_arranger[0,:]],
+                self.elements[:,node_arranger[1,:]]),axis=0),self.elements[:,node_arranger[2,:]]),axis=0),
+                self.elements[:,node_arranger[3,:]]),axis=0),self.elements[:,node_arranger[4,:]]),axis=0),
+                self.elements[:,node_arranger[5,:]]),axis=0).astype(self.faces.dtype)
+
+        all_faces_in_faces = in2d(all_faces,self.faces[:,:4],consider_sort=True)
+        all_faces_in_faces = np.where(all_faces_in_faces==True)[0]
+
+        boundary_face_to_element = np.zeros((all_faces_in_faces.shape[0],2),dtype=np.int64)
+        boundary_face_to_element[:,0] = all_faces_in_faces % self.elements.shape[0]
+        boundary_face_to_element[:,1] = all_faces_in_faces // self.elements.shape[0]
+
+
+        # SO FAR WE HAVE COMPUTED THE ELEMENTS THAT CONTAIN FACES, HOWEVER 
+        # NOTE THAT WE STILL HAVE NOT COMPUTED A MAPPING BETWEEN ELEMENTS AND 
+        # FACES. WE ONLY KNOW WHICH ELEMENTS CONTAIN FACES FROM in2d.
+        # WE NEED TO FIND THIS MAPPING NOW
+
+        # WE NEED TO DO THIS DUMMY RECONSTRUCTION OF FACES BASED ON ELEMENTS
+        faces = self.elements[boundary_face_to_element[:,0][:,None],
+            node_arranger[boundary_face_to_element[:,1],:]].astype(self.faces.dtype)
+
+        # CHECK FOR THIS CONDITION AS ARRANGEMENT IS NO LONGER MAINTAINED
+        assert np.sum(faces[:,:4].astype(np.int64) - self.faces[:,:4].astype(np.int64)) == 0
+
+        # NOW GET THE ROW MAPPING BETWEEN OLD FACES AND NEW FACES 
+        from Florence.Tensor import shuffle_along_axis
+        row_mapper = shuffle_along_axis(faces[:,:4],self.faces[:,:4],consider_sort=True)
+
+        # UPDATE THE MAP
+        boundary_face_to_element[:,:] = boundary_face_to_element[row_mapper,:]
+        self.boundary_face_to_element = boundary_face_to_element
+        
+        return self.boundary_face_to_element
 
 
     def Reader(self, filename=None, element_type="tri", reader_type="Salome", reader_type_format=None, 
@@ -2148,7 +2469,6 @@ class Mesh(object):
         points = self.points[np.unique(self.faces),:]
         if not np.isclose(np.linalg.norm(points,axis=1),radius).all():
             raise ValueError("MeshPy could not construct a valid linear mesh for sphere")
-
 
 
     def RemoveElements(self,(x_min,y_min,x_max,y_max),element_removal_criterion="all",keep_boundary_only=False,
