@@ -1115,6 +1115,9 @@ class PostProcess(object):
                     ax.set_xlim([x_min - pp*np.abs(x_min), x_max + pp*np.abs(x_max)])
                     ax.set_ylim([y_min - pp*np.abs(y_min), y_max + pp*np.abs(y_max)])
 
+                    # ax.set_xlim([-1, 7.5])
+                    # ax.set_ylim([-9.5, 9.5])
+
                     if plot_points:
                         self.h_points, = ax.plot(self.mesh.points[:,0], self.mesh.points[:,1],'o',markersize=point_radius,color='k')
 
@@ -1174,6 +1177,7 @@ class PostProcess(object):
                         ani.save(filename,fps=5, writer="imagemagick", savefig_kwargs={'pad_inches':0.01})
                     else:
                         ani.save(filename,fps=5, savefig_kwargs={'bbox_inches':'tight','pad_inches':0.01})
+                    # convert column_bending_p04.gif -coalesce -repage 0x0 -crop -250-110 +repage column_bending_p004.gif
 
                 if show_plot:
                     ax.clear()
@@ -1773,6 +1777,8 @@ class PostProcess(object):
             return self.CurvilinearPlotQuad(mesh,TotalDisp,**kwargs)
         elif mesh.element_type == "tet":
             return self.CurvilinearPlotTet(mesh,TotalDisp,**kwargs)
+        elif mesh.element_type == "hex":
+            return self.CurvilinearPlotHex(mesh,TotalDisp,**kwargs)
         else:
             raise ValueError("Unknown mesh type")
 
@@ -2407,6 +2413,332 @@ class PostProcess(object):
 
 
         return h_surfaces, h_edges, h_points
+
+
+
+
+
+
+
+    @staticmethod
+    def CurvilinearPlotHex(mesh, TotalDisp, QuantityToPlot=None, plot_on_faces=True,
+        ProjectionFlags=None, interpolation_degree=20, EquallySpacedPoints=False, PlotActualCurve=False,
+        plot_points=False, plot_edges=True, plot_surfaces=True, point_radius=0.02, colorbar=False, color=None, figure=None,
+        show_plot=True, save=False, filename=None, save_tessellation=False):
+
+        """High order curved hexahedral surfaces mesh plots, based on high order nodal FEM.
+            The equally spaced FEM points do not work as good as the Fekete points 
+        """
+
+
+
+        from Florence.QuadratureRules.GaussLobattoPoints import GaussLobattoPointsQuad
+        from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
+        from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
+        from Florence.FunctionSpace import QuadLagrangeGaussLobatto as Quad
+        from Florence.FunctionSpace.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
+
+
+        from copy import deepcopy
+        from scipy.spatial import Delaunay
+        from mpl_toolkits.mplot3d import Axes3D
+        from matplotlib.colors import LightSource
+        import matplotlib as mpl
+        import matplotlib.pyplot as plt
+        import matplotlib.tri as mtri
+        import matplotlib.cm as cm
+        from matplotlib.colors import ColorConverter
+        from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+        import os
+        os.environ['ETS_TOOLKIT'] = 'qt4'
+        from mayavi import mlab
+
+        # SINCE THIS IS A 3D PLOT
+        ndim=3
+
+        C = interpolation_degree
+        p = C+1
+        nsize = int((C+2)**2)
+        CActual = mesh.InferPolynomialDegree() - 1
+        nsize_2 = int((CActual+2)**2)
+
+        GaussLobattoPoints = GaussLobattoPointsQuad(C)
+
+        # BUILD DELAUNAY TRIANGULATION OF REFERENCE ELEMENTS
+        TrianglesFunc = Delaunay(GaussLobattoPoints)
+        Triangles = TrianglesFunc.simplices.copy()
+
+        # GET EQUALLY-SPACED/GAUSS-LOBATTO POINTS FOR THE EDGES
+        GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0]
+
+        BasesQuad = np.zeros((nsize_2,GaussLobattoPoints.shape[0]),dtype=np.float64)
+        hpBases = Quad.LagrangeGaussLobatto
+        for i in range(GaussLobattoPoints.shape[0]):
+            BasesQuad[:,i] = hpBases(CActual,GaussLobattoPoints[i,0],GaussLobattoPoints[i,1])[:,0]
+
+        BasesOneD = np.zeros((CActual+2,GaussLobattoPointsOneD.shape[0]),dtype=np.float64)
+        for i in range(GaussLobattoPointsOneD.shape[0]):
+            BasesOneD[:,i] = LagrangeGaussLobatto(CActual,GaussLobattoPointsOneD[i])[0]
+
+        # GaussLobattoPoints = GaussLobattoPointsQuad(C)
+        # if EquallySpacedPoints is True:
+        #     FeketePointsTri = EquallySpacedPointsTri(C)
+
+        # # BUILD DELAUNAY TRIANGULATION OF REFERENCE ELEMENTS
+        # TrianglesFunc = Delaunay(FeketePointsTri)
+        # Triangles = TrianglesFunc.simplices.copy()
+        # # plt.triplot(FeketePointsTri[:,0], FeketePointsTri[:,1], Triangles); plt.axis('off')
+
+
+        # # GET EQUALLY-SPACED/GAUSS-LOBATTO POINTS FOR THE EDGES
+        # if EquallySpacedPoints is False:
+        #     GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0]
+        # else:
+        #     GaussLobattoPointsOneD = Lagrange(C,0)[-1]
+
+        # BasesTri = np.zeros((nsize_2,FeketePointsTri.shape[0]),dtype=np.float64)
+        # hpBases = Tri.hpNodal.hpBases
+        # for i in range(FeketePointsTri.shape[0]):
+        #     BasesTri[:,i] = hpBases(CActual,FeketePointsTri[i,0],FeketePointsTri[i,1],
+        #         EvalOpt=1,EquallySpacedPoints=EquallySpacedPoints,Transform=1)[0]
+
+        # BasesOneD = np.zeros((CActual+2,GaussLobattoPointsOneD.shape[0]),dtype=np.float64)
+        # for i in range(GaussLobattoPointsOneD.shape[0]):
+        #     BasesOneD[:,i] = LagrangeGaussLobatto(CActual,GaussLobattoPointsOneD[i])[0]
+
+
+        # GET ONLY THE FACES WHICH NEED TO BE PLOTTED 
+        if ProjectionFlags is None:
+            faces_to_plot_flag = np.ones(mesh.faces.shape[0])
+        else:
+            faces_to_plot_flag = ProjectionFlags.flatten()
+
+        # CHECK IF ALL FACES NEED TO BE PLOTTED OR ONLY BOUNDARY FACES
+        if faces_to_plot_flag.shape[0] > mesh.faces.shape[0]:
+            # ALL FACES
+            corr_faces = mesh.all_faces
+            # FOR MAPPING DATA E.G. SCALED JACOBIAN FROM ELEMENTS TO FACES
+            face_elements = mesh.GetElementsFaceNumberingHex()
+
+        elif faces_to_plot_flag.shape[0] == mesh.faces.shape[0]:
+            # ONLY BOUNDARY FACES
+            corr_faces = mesh.faces
+            # FOR MAPPING DATA E.G. SCALED JACOBIAN FROM ELEMENTS TO FACES
+            face_elements = mesh.GetElementsWithBoundaryFacesHex()
+        else:
+            # raise ValueError("I do not understand what you want to plot")
+            corr_faces = mesh.all_faces
+            face_elements = mesh.GetElementsFaceNumberingHex()
+
+        faces_to_plot = corr_faces[faces_to_plot_flag.flatten()==1,:]
+
+        if QuantityToPlot is not None and plot_on_faces:
+            quantity_to_plot = QuantityToPlot[face_elements[faces_to_plot_flag.flatten()==1,0]]
+
+        # BUILD MESH OF SURFACE
+        smesh = Mesh()
+        smesh.element_type = "quad"
+        # smesh.elements = np.copy(corr_faces)
+        smesh.elements = np.copy(faces_to_plot)
+        smesh.nelem = smesh.elements.shape[0]
+        smesh.points = mesh.points[np.unique(smesh.elements),:]
+
+
+        # MAP TO ORIGIN    
+        unique_elements, inv = np.unique(smesh.elements,return_inverse=True)
+        mapper = np.arange(unique_elements.shape[0])
+        smesh.elements = mapper[inv].reshape(smesh.elements.shape)
+ 
+        smesh.GetBoundaryEdgesTri()
+        smesh.GetEdgesTri()
+        edge_elements = smesh.GetElementsEdgeNumberingTri()
+
+        
+        # GET EDGE ORDERING IN THE REFERENCE ELEMENT
+        reference_edges = NodeArrangementQuad(CActual)[0]
+        reference_edges = np.concatenate((reference_edges,reference_edges[:,1,None]),axis=1)
+        reference_edges = np.delete(reference_edges,1,1)
+
+        # GET EULERIAN GEOMETRY
+        if TotalDisp.ndim == 3:
+            vpoints = mesh.points + TotalDisp[:,:ndim,-1]
+        elif TotalDisp.ndim == 2:
+            vpoints = mesh.points + TotalDisp[:,:ndim]
+        else:
+            raise AssertionError("mesh points and displacment arrays are incompatible")
+
+        # svpoints = vpoints[np.unique(mesh.faces),:]
+        svpoints = vpoints[np.unique(faces_to_plot),:]
+        del vpoints
+        gc.collect()
+
+        # MAKE A FIGURE
+        if figure is None:
+            figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(800,600))
+        figure.scene.disable_render = True
+
+        h_points, h_edges, trimesh_h = None, None, None
+
+        if plot_edges:
+            # GET X, Y & Z OF CURVED EDGES  
+            x_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
+            y_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
+            z_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
+
+            for iedge in range(smesh.all_edges.shape[0]):
+                ielem = edge_elements[iedge,0]
+                edge = smesh.elements[ielem,reference_edges[edge_elements[iedge,1],:]]
+                coord_edge = svpoints[edge,:]
+                x_edges[:,iedge], y_edges[:,iedge], z_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
+
+            
+            # PLOT CURVED EDGES
+            connections_elements = np.arange(x_edges.size).reshape(x_edges.shape[1],x_edges.shape[0])
+            connections = np.zeros((x_edges.size,2),dtype=np.int64)
+            for i in range(connections_elements.shape[0]):
+                connections[i*(x_edges.shape[0]-1):(i+1)*(x_edges.shape[0]-1),0] = connections_elements[i,:-1]
+                connections[i*(x_edges.shape[0]-1):(i+1)*(x_edges.shape[0]-1),1] = connections_elements[i,1:]
+            connections = connections[:(i+1)*(x_edges.shape[0]-1),:]
+            # point_cloulds = np.concatenate((x_edges.flatten()[:,None],y_edges.flatten()[:,None],z_edges.flatten()[:,None]),axis=1)
+            
+            # src = mlab.pipeline.scalar_scatter(x_edges.flatten(), y_edges.flatten(), z_edges.flatten())
+            src = mlab.pipeline.scalar_scatter(x_edges.T.copy().flatten(), y_edges.T.copy().flatten(), z_edges.T.copy().flatten())
+            src.mlab_source.dataset.lines = connections
+            lines = mlab.pipeline.stripper(src)
+            h_edges = mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
+            # mlab.pipeline.surface(lines, color = (0.72,0.72,0.72), line_width=2)
+
+            # OLDER VERSION
+            # for i in range(x_edges.shape[1]):
+            #     mlab.plot3d(x_edges[:,i],y_edges[:,i],z_edges[:,i],color=(0,0,0),tube_radius=edge_width)
+        
+
+        # CURVED SURFACES
+        if plot_surfaces:
+
+            nface = smesh.elements.shape[0]
+            nnode = nsize*nface
+            nelem = Triangles.shape[0]*nface
+
+            Xplot = np.zeros((nnode,3),dtype=np.float64)
+            Tplot = np.zeros((nelem,3),dtype=np.int64)
+
+            # FOR CURVED ELEMENTS
+            for ielem in range(nface):
+                Xplot[ielem*nsize:(ielem+1)*nsize,:] = np.dot(BasesQuad.T, svpoints[smesh.elements[ielem,:],:])
+                Tplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex,:] = Triangles + ielem*nsize
+
+            if QuantityToPlot is not None:
+                Uplot = np.zeros(nnode,dtype=np.float64)
+                if plot_on_faces:
+                    for ielem in range(nface):
+                        Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
+                else:
+                    # IF QUANTITY IS DEFINED ON NODES
+                    quantity = QuantityToPlot[np.unique(faces_to_plot)]
+                    for ielem in range(nface):
+                        Uplot[ielem*nsize:(ielem+1)*nsize] = np.dot(BasesQuad.T, quantity[smesh.elements[ielem,:]])
+
+
+            point_line_width = .002
+            # point_line_width = 0.5
+            # point_line_width = .0008
+            # point_line_width = 2.
+            # point_line_width = .045
+            # point_line_width = .015 # F6
+
+
+            if color is None:
+                color=(197/255.,241/255.,197/255.)
+
+            # PLOT SURFACES (CURVED ELEMENTS)
+            if QuantityToPlot is None:
+                trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot,
+                    line_width=point_line_width,color=color)
+
+            else:
+                trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars = Uplot,
+                    line_width=point_line_width,colormap='summer')
+
+
+            # PLOT POINTS ON CURVED MESH
+            if plot_points:
+                # mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=2.5*point_line_width)
+                h_points = mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=point_radius)
+
+            figure.scene.disable_render = False
+
+            if QuantityToPlot is not None:
+                # CHANGE LIGHTING OPTION
+                trimesh_h.actor.property.interpolation = 'phong'
+                trimesh_h.actor.property.specular = 0.1
+                trimesh_h.actor.property.specular_power = 5
+
+                # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO 
+                # GET VIRIDIS COLORMAP FROM MATPLOTLIB
+                color_func = ColorConverter()
+                rgba_lower = color_func.to_rgba_array(cm.viridis.colors)
+                # rgba_lower = color_func.to_rgba_array(cm.viridis_r.colors)
+                RGBA_higher = np.round(rgba_lower*255).astype(np.int64)
+                # UPDATE LUT OF THE COLORMAP
+                trimesh_h.module_manager.scalar_lut_manager.lut.table = RGBA_higher 
+
+
+        if colorbar and plot_surfaces:
+            cbar = mlab.colorbar(object=trimesh_h, orientation="horizontal",label_fmt="%9.2f")
+
+
+        # CONTROL CAMERA VIEW
+        # mlab.view(azimuth=45, elevation=50, distance=80, focalpoint=None,
+        #         roll=0, reset_roll=True, figure=None)
+
+        mlab.view(azimuth=45, elevation=50, distance=80, focalpoint=None,
+            roll=0, reset_roll=True, figure=None)
+
+        # SAVEFIG
+        if save:
+            if filename is None:
+                raise ValueError("No filename given. Supply one with extension")
+            else:
+                mlab.savefig(filename,magnification="auto")
+    
+        if show_plot is True:
+            # FORCE UPDATE MLAB TO UPDATE COLORMAP
+            mlab.draw()
+            mlab.show()
+
+
+        if save_tessellation:
+
+            # THIS IS NOT A FLORENCE MESH COMPLIANT MESH
+            tmesh = Mesh()
+            tmesh.element_type = "tri"
+            tmesh.elements = Tplot
+            tmesh.points = Xplot
+            tmesh.nelem = nelem
+            tmesh.nnode = nnode
+            tmesh.nsize = nsize
+            tmesh.bases_1 = BasesOneD
+            tmesh.bases_2 = BasesTri.T
+
+            tmesh.nface = nface
+            tmesh.smesh = smesh
+            tmesh.faces_to_plot = faces_to_plot
+
+            if plot_edges:
+                tmesh.x_edges = x_edges
+                tmesh.y_edges = y_edges
+                tmesh.z_edges = z_edges
+                tmesh.connections = connections
+                tmesh.edge_elements = edge_elements
+                tmesh.reference_edges = reference_edges
+
+            mlab.close()
+
+            return trimesh_h, h_edges, h_points, tmesh
+
+        return trimesh_h, h_edges, h_points
 
 
 
