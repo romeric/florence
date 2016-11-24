@@ -9,10 +9,29 @@ from Florence.Tensor import makezero
 
 def ProblemData(p=1):
 
+
+    # from time import time
+    from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
+    from Florence.QuadratureRules.GaussLobattoPoints import GaussLobattoPointsHex
+    from Florence.FunctionSpace import HexLagrangeGaussLobatto as Hex
+
+    # Hex.LagrangeGaussLobatto(0,-1,1,1)
+    # print Hex.GradLagrangeGaussLobatto(0,-1,-1,-1)
+
+    # NodeArrangementHex(1)
+    # t = time()
+    # GaussLobattoPointsHex(20)
+    # print time() - t
+
+    # mesh = Mesh()
+    # mesh.Wing()
+
+
+
     ndim = 3
 
-    material = Steinmann(ndim,mu=2.3*10e+04,lamb=8.0*10.0e+04, eps_1=1505*10.0e-11, c1=0.0, c2=0.0, rho=7.5*10e-6)
-    # material = NeoHookean_2(ndim, mu=2.3*10e+04, lamb=8.0*10.0e+04)
+    # material = Steinmann(ndim,mu=2.3*10e+04,lamb=8.0*10.0e+04, eps_1=1505*10.0e-11, c1=0.0, c2=0.0, rho=7.5*10e-6)
+    material = NeoHookean_2(ndim, mu=2.3*10e+04, lamb=8.0*10.0e+04)
 
     ProblemPath = PWD(__file__)
     # filename = ProblemPath + '/Mesh_125.dat'
@@ -25,9 +44,23 @@ def ProblemData(p=1):
 
     mesh = Mesh()
     mesh.Reader(filename, "hex")
+    # print mesh.edges.shape
     # mesh.GetHighOrderMesh(p=p)
     # print mesh.Bounds
     # print mesh.elements
+    # print mesh.faces
+    # mesh.faces = None
+    # mesh.GetFacesHex()
+    # mesh.GetEdgesHex()
+    # mesh.GetBoundaryEdgesHex()
+    # mesh.GetBoundaryEdgesHex()
+    # print mesh.all_edges
+    # print mesh.edges.shape
+    # print mesh.all_faces.shape
+    # mesh.Areas()
+
+    mesh.GetHighOrderMesh(p=2)
+    # print mesh.faces.shape
     # exit()
 
 
@@ -37,34 +70,35 @@ def ProblemData(p=1):
     def DirichletFunc(mesh):
         boundary_data = np.zeros((mesh.points.shape[0],material.nvar))+np.NAN
 
-        # # Mechanics
-        # Y_0 = np.isclose(mesh.points[:,2],0.)
-        # boundary_data[Y_0,0] = 0.
-        # boundary_data[Y_0,1] = 0.
-        # boundary_data[Y_0,2] = 0.
-        # Y_1 = np.isclose(mesh.points[:,2],10.)
-        # boundary_data[Y_1,0] = 0.0
-        # boundary_data[Y_1,1] = -5.0
-        # boundary_data[Y_1,2] = 0.0
-
-        # Electromechanics
+        # Mechanics
         Y_0 = np.isclose(mesh.points[:,2],0.)
         boundary_data[Y_0,0] = 0.
         boundary_data[Y_0,1] = 0.
         boundary_data[Y_0,2] = 0.
-        boundary_data[Y_0,3] = 1.
         Y_1 = np.isclose(mesh.points[:,2],10.)
         boundary_data[Y_1,0] = 0.0
         boundary_data[Y_1,1] = -5.0
+        # boundary_data[Y_1,2] = -5.0
         boundary_data[Y_1,2] = 0.0
-        boundary_data[Y_1,3] = -1.0
+
+        # Electromechanics
+        # Y_0 = np.isclose(mesh.points[:,2],0.)
+        # boundary_data[Y_0,0] = 0.
+        # boundary_data[Y_0,1] = 0.
+        # boundary_data[Y_0,2] = 0.
+        # boundary_data[Y_0,3] = 1.
+        # Y_1 = np.isclose(mesh.points[:,2],10.)
+        # boundary_data[Y_1,0] = 0.0
+        # boundary_data[Y_1,1] = -5.0
+        # boundary_data[Y_1,2] = 0.0
+        # boundary_data[Y_1,3] = -1.0
 
         return boundary_data
 
     boundary_condition.SetDirichletCriteria(DirichletFunc, mesh)
 
-    formulation = DisplacementPotentialFormulation(mesh)
-    # formulation = DisplacementFormulation(mesh)
+    # formulation = DisplacementPotentialFormulation(mesh)
+    formulation = DisplacementFormulation(mesh)
 
     # from Florence.Utils import debug
     # debug(formulation.function_spaces[0],formulation.quadrature_rules[0],mesh)
@@ -72,7 +106,7 @@ def ProblemData(p=1):
 
     fem_solver = FEMSolver(number_of_load_increments=2,analysis_type="static",
         analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
-        newton_raphson_tolerance=1.0e-01)
+        newton_raphson_tolerance=1.0e-05)
     # fem_solver = StaggeredFEMSolver(number_of_load_increments=6,analysis_type="static",
     #     analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
     #     newton_raphson_tolerance=1.0e-02)
@@ -97,6 +131,7 @@ def ProblemData(p=1):
     # mlab.mesh(x,y,z)
     # mlab.show()
 
+    solution.CurvilinearPlot(QuantityToPlot=solution.sol[:,1,-1],plot_on_faces=False)
     # solution.WriteVTK(filename="/home/roman/ZZZchecker/HE.vtu", quantity=10)
     # solution.WriteVTK(filename="/home/roman/Dropbox/HE.vtu", quantity=10)
 
