@@ -496,7 +496,6 @@ class Mesh(object):
 
         self.edge_to_element = edge_to_element
 
-
         # DO NOT SET all_edges IF THE CALLER FUNCTION IS GetBoundaryEdgesHex
         import inspect
         curframe = inspect.currentframe()
@@ -1040,8 +1039,8 @@ class Mesh(object):
         all_edges = np.concatenate((self.elements[:,:2],self.elements[:,[1,2]],
             self.elements[:,[2,0]]),axis=0).astype(np.int64)
 
-        _,idx = unique2d(all_edges,consider_sort=True,order=False, return_index=True)
-        edge_elements = np.zeros((self.all_faces.shape[0],2),dtype=np.int64)
+        all_edges, idx = unique2d(all_edges,consider_sort=True,order=False, return_index=True)
+        edge_elements = np.zeros((all_edges.shape[0],2),dtype=np.int64)
 
         edge_elements[:,0] = idx % self.elements.shape[0]
         edge_elements[:,1] = idx // self.elements.shape[0]
@@ -1215,6 +1214,48 @@ class Mesh(object):
 
         self.all_faces = self.elements[self.face_to_element[:,0][:,None],node_arranger[self.face_to_element[:,1],:]]
 
+
+    def GetElementsEdgeNumberingQuad(self):
+        """Finds edges of elements and their flags saying which edge they are [0,1,2,3].
+            At most a quad can have all its four edges on the boundary.
+
+        output: 
+
+            edge_elements:              [1D array] array containing elements which have edges
+                                        on the boundary
+
+                                        Note that this method sets the self.edge_to_element to edge_elements,
+                                        so the return value is not strictly necessary
+        """
+
+        if isinstance(self.edge_to_element,np.ndarray):
+            if self.edge_to_element.shape[0] > 1:
+                return self.edge_to_element
+
+        # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY 
+        if self.all_edges is None:
+            self.GetEdgesQuad()
+
+
+        p = self.InferPolynomialDegree()
+        
+        # FIND WHICH FACE NODES ARE IN WHICH ELEMENT
+        from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
+        node_arranger = NodeArrangementQuad(p-1)[0]
+
+        # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY
+        all_edges = np.concatenate((self.elements[:,node_arranger[0,:]],self.elements[:,node_arranger[1,:]],
+            self.elements[:,node_arranger[2,:]],self.elements[:,node_arranger[3,:]]),axis=0).astype(np.int64)
+
+        all_edges, idx = unique2d(all_edges,consider_sort=True,order=False, return_index=True)
+        edge_elements = np.zeros((all_edges.shape[0],2),dtype=np.int64)
+        # edge_elements = np.zeros((self.edges.shape[0],2),dtype=np.int64)
+
+        edge_elements[:,0] = idx % self.elements.shape[0]
+        edge_elements[:,1] = idx // self.elements.shape[0]
+
+        self.edge_to_element = edge_elements
+        return self.edge_to_element
 
 
     def GetElementsWithBoundaryEdgesQuad(self):
@@ -1929,15 +1970,8 @@ class Mesh(object):
             self.element_type = "quad"
             self.elements = elements
             self.points = coordinates
-
-            self.all_edges = np.concatenate((self.elements[:,:2],self.elements[:,[1,2]],
-                             self.elements[:,[2,3]],self.elements[:,[3,0]]),axis=0)
-            uniques, idx, inv = unique2d(self.all_edges,consider_sort=True,order=False,return_index=True,return_inverse=True)
-            # ROWS THAT APPEAR ONLY ONCE CORRESPOND TO BOUNDARY EDGES
-            freqs_inv = itemfreq(inv)
-            edges_ext_flags = freqs_inv[freqs_inv[:,1]==1,0]
-            # NOT ARRANGED
-            self.edges = uniques[edges_ext_flags,:] 
+            self.GetBoundaryEdgesQuad()
+            self.GetEdgesQuad()
 
 
     def Square(self, lower_left_point=(0,0), side_length=1, n=5, element_type="tri"):

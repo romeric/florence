@@ -954,6 +954,25 @@ class PostProcess(object):
             import matplotlib.cm as cm
             import matplotlib.tri as mtri
 
+
+            if plot_on_curvilinear_mesh:
+
+                if configuration=="original":
+                    PostProcess.CurvilinearPlotQuad(self.mesh, np.zeros_like(self.sol), 
+                        QuantityToPlot=self.sol[:,quantity,increment],
+                        interpolation_degree=20, show_plot=show_plot, figure=figure, 
+                        save_tessellation=True, plot_points=plot_points, plot_edges=plot_edges,
+                        colorbar=colorbar, plot_on_faces=False)
+                else:
+                    PostProcess.CurvilinearPlotQuad(self.mesh, self.sol, 
+                        QuantityToPlot=self.sol[:,quantity,increment],
+                        interpolation_degree=20, show_plot=show_plot, figure=figure, 
+                        save_tessellation=True, plot_points=plot_points, plot_edges=plot_edges, 
+                        colorbar=colorbar, plot_on_faces=False)
+
+                return 
+
+            # PLOT ON STRAIGHT MESH
             fig = plt.figure()
 
             elements = np.concatenate((mesh.elements[:,:3],mesh.elements[:,[0,1,3]],
@@ -1046,18 +1065,9 @@ class PostProcess(object):
 
         if self.mesh.element_type == "tri":
 
-            from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
-            from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
-            from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
-            from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
-            from Florence.FunctionSpace import Tri 
-            from Florence.FunctionSpace.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
-            from Florence.FunctionSpace.GetBases import GetBases
-
             from copy import deepcopy
             from scipy.spatial import Delaunay
             import matplotlib as mpl
-            # mpl.use('Agg')
             from mpl_toolkits.mplot3d import Axes3D
             from matplotlib.colors import LightSource
             import matplotlib.pyplot as plt
@@ -1069,11 +1079,17 @@ class PostProcess(object):
             # FIX FOR TRI MESHES
             point_radius = 2.
             ndim = 2
+            pp = .1
 
             if configuration=="deformed":
                 vpoints = self.mesh.points+self.sol[:,:ndim,-1] 
             else:
                 vpoints = self.mesh.points
+
+            x_min = min(np.min(self.mesh.points[:,0]),np.min((self.mesh.points+self.sol[:,:ndim,-1])[:,0]))
+            y_min = min(np.min(self.mesh.points[:,1]),np.min((self.mesh.points+self.sol[:,:ndim,-1])[:,1]))
+            x_max = max(np.max(self.mesh.points[:,0]),np.max((self.mesh.points+self.sol[:,:ndim,-1])[:,0]))
+            y_max = max(np.max(self.mesh.points[:,1]),np.max((self.mesh.points+self.sol[:,:ndim,-1])[:,1]))
 
             # IF PLOT ON CURVED MESH IS ACTIVATED 
             if plot_on_curvilinear_mesh:
@@ -1096,9 +1112,8 @@ class PostProcess(object):
 
                 def init_animation():
                     
-                    pp = 0.2
-                    ax.set_xlim([np.min(vpoints[:,0]) - pp*np.min(vpoints[:,0]), np.max(vpoints[:,0]) + pp*np.max(vpoints[:,0]) ])
-                    ax.set_ylim([np.min(vpoints[:,1]) - pp*np.min(vpoints[:,1]), np.max(vpoints[:,1]) + pp*np.max(vpoints[:,1]) ])
+                    ax.set_xlim([x_min - pp*np.abs(x_min), x_max + pp*np.abs(x_max)])
+                    ax.set_ylim([y_min - pp*np.abs(y_min), y_max + pp*np.abs(y_max)])
 
                     if plot_points:
                         self.h_points, = ax.plot(self.mesh.points[:,0], self.mesh.points[:,1],'o',markersize=point_radius,color='k')
@@ -1181,9 +1196,8 @@ class PostProcess(object):
 
             def init_animation():
 
-                pp = 0.2
-                ax.set_xlim([np.min(vpoints[:,0]) - pp*np.min(vpoints[:,0]), np.max(vpoints[:,0]) + pp*np.max(vpoints[:,0]) ])
-                ax.set_ylim([np.min(vpoints[:,1]) - pp*np.min(vpoints[:,1]), np.max(vpoints[:,1]) + pp*np.max(vpoints[:,1]) ])
+                ax.set_xlim([x_min - pp*np.abs(x_min), x_max + pp*np.abs(x_max)])
+                ax.set_ylim([y_min - pp*np.abs(y_min), y_max + pp*np.abs(y_max)])
 
                 if plot_edges:
                     self.h_edges = ax.triplot(triang,color='k')
@@ -1484,6 +1498,130 @@ class PostProcess(object):
             mlab.show()
 
 
+        if self.mesh.element_type == "quad":
+
+            from copy import deepcopy
+            from scipy.spatial import Delaunay
+            import matplotlib as mpl
+            from mpl_toolkits.mplot3d import Axes3D
+            from matplotlib.colors import LightSource
+            import matplotlib.pyplot as plt
+            import matplotlib.tri as mtri
+            import matplotlib.cm as cm
+            from mpl_toolkits.axes_grid1 import make_axes_locatable
+            import matplotlib.animation as animation
+            
+            # FIX FOR TRI MESHES
+            point_radius = 2.
+            ndim = 2
+            pp = .1
+
+            if configuration=="deformed":
+                vpoints = self.mesh.points+self.sol[:,:ndim,-1] 
+            else:
+                vpoints = self.mesh.points
+
+            x_min = min(np.min(self.mesh.points[:,0]),np.min((self.mesh.points+self.sol[:,:ndim,-1])[:,0]))
+            y_min = min(np.min(self.mesh.points[:,1]),np.min((self.mesh.points+self.sol[:,:ndim,-1])[:,1]))
+            x_max = max(np.max(self.mesh.points[:,0]),np.max((self.mesh.points+self.sol[:,:ndim,-1])[:,0]))
+            y_max = max(np.max(self.mesh.points[:,1]),np.max((self.mesh.points+self.sol[:,:ndim,-1])[:,1]))
+
+            # IF PLOT ON CURVED MESH IS ACTIVATED 
+            if plot_on_curvilinear_mesh:
+
+                figure, ax = plt.subplots()
+
+                tmesh = PostProcess.TessellateQuads(self.mesh, np.zeros_like(self.sol), 
+                        interpolation_degree=10, plot_points=plot_points, plot_edges=plot_edges,
+                        plot_on_faces=False)
+
+                triang = mtri.Triangulation(tmesh.points[:,0], tmesh.points[:,1], tmesh.elements)
+                nsize = tmesh.nsize
+                nnode = tmesh.nnode
+                extrapolated_sol = np.zeros((nnode,self.sol.shape[1]),dtype=np.float64)
+
+                for ielem in range(self.mesh.nelem):
+                    extrapolated_sol[ielem*nsize:(ielem+1)*nsize,:] = np.dot(tmesh.bases_2, self.sol[self.mesh.elements[ielem,:],:,0])
+
+
+                def init_animation():
+                    
+                    ax.set_xlim([x_min - pp*np.abs(x_min), x_max + pp*np.abs(x_max)])
+                    ax.set_ylim([y_min - pp*np.abs(y_min), y_max + pp*np.abs(y_max)])
+
+                    if plot_points:
+                        self.h_points, = ax.plot(self.mesh.points[:,0], self.mesh.points[:,1],'o',markersize=point_radius,color='k')
+
+                    if plot_edges:
+                        self.h_edges = ax.plot(tmesh.x_edges,tmesh.y_edges,'k')
+
+                    self.h_fig = ax.tripcolor(triang, extrapolated_sol[:,quantity], shading='gouraud', cmap=cm.viridis)
+                    self.h_fig.set_clim(extrapolated_sol[:,quantity].min(),extrapolated_sol[:,quantity].max())
+
+                    ax.set_aspect('equal',anchor='C')
+                    ax.set_axis_off()
+
+                    if colorbar:
+                        self.cbar = figure.colorbar(self.h_fig, shrink=0.5)
+                        self.cbar.set_clim(extrapolated_sol[:,quantity].min(),extrapolated_sol[:,quantity].max())
+
+
+
+                def animator(incr):
+
+                    if plot_points and configuration=="deformed":
+                        self.h_points.set_xdata(self.mesh.points[:,0]+self.sol[:,0,incr])
+                        self.h_points.set_ydata(self.mesh.points[:,1]+self.sol[:,1,incr])
+
+                    # PLOT EDGES
+                    if plot_edges and configuration=="deformed":
+                        for iedge in range(tmesh.x_edges.shape[1]):
+                            ielem = tmesh.edge_elements[iedge,0]
+                            edge = self.mesh.elements[ielem,tmesh.reference_edges[tmesh.edge_elements[iedge,1],:]]
+                            coord_edge = (self.mesh.points + self.sol[:,:ndim,incr])[edge,:]
+                            tmesh.x_edges[:,iedge], tmesh.y_edges[:,iedge] = np.dot(coord_edge.T,tmesh.bases_1)
+
+                            self.h_edges[iedge].set_xdata(tmesh.x_edges[:,iedge])
+                            self.h_edges[iedge].set_ydata(tmesh.y_edges[:,iedge])
+
+                    extrapolated_sol = np.zeros((nnode,self.sol.shape[1]),dtype=np.float64)
+                    for ielem in range(self.mesh.nelem):
+                        extrapolated_sol[ielem*nsize:(ielem+1)*nsize,:] = np.dot(tmesh.bases_2, self.sol[self.mesh.elements[ielem,:],:,incr])
+
+                    if configuration=="deformed":
+                        triang.x = extrapolated_sol[:,0] + tmesh.points[:,0]
+                        triang.y = extrapolated_sol[:,1] + tmesh.points[:,1]
+                    self.h_fig.set_array(extrapolated_sol[:,quantity])
+
+                    self.h_fig.set_clim(extrapolated_sol[:,quantity].min(),extrapolated_sol[:,quantity].max())
+                    if colorbar:
+                        self.cbar.set_clim(extrapolated_sol[:,quantity].min(),extrapolated_sol[:,quantity].max())
+
+                interval = 0
+                ani = animation.FuncAnimation(figure, animator, frames=range(0,self.sol.shape[2]), init_func=init_animation)
+
+
+                if save:
+                    # Writer = animation.writers['imagemagick']
+                    # writer = Writer(fps=30, metadata=dict(artist='Me'), bitrate=1800)
+                    if filename.split('.')[-1] == "gif":
+                        ani.save(filename,fps=5, writer="imagemagick", savefig_kwargs={'pad_inches':0.01})
+                    else:
+                        ani.save(filename,fps=5, savefig_kwargs={'bbox_inches':'tight','pad_inches':0.01})
+
+                if show_plot:
+                    ax.clear()
+                    if colorbar and save:
+                        self.cbar.ax.cla()
+                        self.cbar.ax.clear()
+                        del self.cbar
+                    plt.show()
+
+                return
+
+
+
+
     
     def MeshQualityMeasures(self, mesh, TotalDisp, plot=True, show_plot=True):
         """Computes mesh quality measures, Q_1, Q_2, Q_3
@@ -1631,6 +1769,8 @@ class PostProcess(object):
 
         if mesh.element_type == "tri":
             return self.CurvilinearPlotTri(mesh,TotalDisp,**kwargs)
+        elif mesh.element_type == "quad":
+            return self.CurvilinearPlotQuad(mesh,TotalDisp,**kwargs)
         elif mesh.element_type == "tet":
             return self.CurvilinearPlotTet(mesh,TotalDisp,**kwargs)
         else:
@@ -2159,17 +2299,252 @@ class PostProcess(object):
 
 
 
+    @staticmethod
+    def CurvilinearPlotQuad(mesh, TotalDisp, QuantityToPlot=None,
+        ProjectionFlags=None, interpolation_degree=30, EquallySpacedPoints=False,
+        TriSurf=False, colorbar=False, PlotActualCurve=False, point_radius = 3, color="#C5F1C5",
+        plot_points=False, plot_edges=True, save=False, filename=None, figure=None, show_plot=True, 
+        save_tessellation=False, plot_on_faces=True):
+
+        """High order curved quad mesh plots, based on high order nodal FEM.
+        """
+
+        from copy import deepcopy
+        from scipy.spatial import Delaunay
+        from mpl_toolkits.mplot3d import Axes3D
+        import matplotlib as mpl
+        import matplotlib.pyplot as plt
+        import matplotlib.tri as mtri
+        import matplotlib.cm as cm
+        from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+        tmesh = PostProcess.TessellateQuads(mesh, TotalDisp, QuantityToPlot=QuantityToPlot,
+            ProjectionFlags=ProjectionFlags, interpolation_degree=interpolation_degree, 
+            EquallySpacedPoints=EquallySpacedPoints, plot_points=plot_points, 
+            plot_edges=plot_edges, plot_on_faces=plot_on_faces)
+
+        # UNPACK
+        x_edges = tmesh.x_edges
+        y_edges = tmesh.y_edges
+        nnode = tmesh.nnode
+        nelem = tmesh.nelem
+        nsize = tmesh.nsize
+
+        Xplot = tmesh.points
+        Tplot = tmesh.elements
+        Uplot = tmesh.quantity
+        vpoints = tmesh.vpoints
+        BasesQuad = tmesh.bases_2.T
+
+        # MAKE FIGURE
+        if figure is None:
+            fig = plt.figure()
+        else:
+            fig = figure
+
+        h_surfaces, h_edges, h_points = None, None, None
+        # ls = LightSource(azdeg=315, altdeg=45)
+        if TriSurf is True:
+            ax = fig.add_subplot(111, projection='3d')
+        else:
+            ax = fig.add_subplot(111)
+
+        if plot_edges:
+            # PLOT CURVED EDGES
+            h_edges = ax.plot(x_edges,y_edges,'k')
+
+
+        # PLOT CURVED ELEMENTS
+        if QuantityToPlot is None:
+            h_surfaces = plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, colors="#C5F1C5")
+        else:
+            h_surfaces = plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, 100,alpha=0.8)
+
+        # PLOT CURVED POINTS
+        if plot_points:
+            h_points = plt.plot(vpoints[:,0],vpoints[:,1],'o',markersize=point_radius,color='k')
+
+        if QuantityToPlot is not None:
+            plt.set_cmap('viridis')
+            # plt.set_cmap('viridis_r')
+            if plot_on_faces:
+                plt.clim(0,1)
+        
+
+        if colorbar is True:
+            if plot_on_faces:
+                ax_cbar = mpl.colorbar.make_axes(plt.gca(), shrink=1.0)[0]
+                cbar = mpl.colorbar.ColorbarBase(ax_cbar, cmap=cm.viridis,
+                                   norm=mpl.colors.Normalize(vmin=-0, vmax=1))
+                cbar.set_clim(0, 1)
+                divider = make_axes_locatable(ax_cbar)
+                cax = divider.append_axes("right", size="1%", pad=0.005)
+            else:
+                plt.colorbar(shrink=0.5,orientation="vertical")
+        
+        if PlotActualCurve is True:
+            ActualCurve = getattr(MainData,'ActualCurve',None)
+            if ActualCurve is not None:
+                for i in range(len(MainData.ActualCurve)):
+                    actual_curve_points = MainData.ActualCurve[i]
+                    plt.plot(actual_curve_points[:,0],actual_curve_points[:,1],'-r',linewidth=3)
+            else:
+                raise KeyError("You have not computed the CAD curve points")
+
+        plt.axis('equal')
+        plt.axis('off')
+
+        if save:
+            if filename is None:
+                warn("file name not provided. I am going to write one in the current directory")
+                filename = PWD(__file__) + "/output.eps"
+            else:
+                plt.savefig(filename, format="eps",dpi=300, bbox_inches='tight')
+
+
+        if show_plot:
+            plt.show()
+
+
+        return h_surfaces, h_edges, h_points
+
+
 
 
 
     #-----------------------------------------------------------------------------#
     @staticmethod
+    def TessellateQuads(mesh, TotalDisp, QuantityToPlot=None,
+        ProjectionFlags=None, interpolation_degree=30, EquallySpacedPoints=False,
+        plot_points=False, plot_edges=True, plot_on_faces=True):
+
+        """High order curved quadrilaterial tessellation, based on high order nodal FEM.
+        """
+
+
+        from Florence.QuadratureRules.GaussLobattoPoints import GaussLobattoPointsQuad
+        from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
+        from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
+        from Florence.FunctionSpace import QuadLagrangeGaussLobatto as Quad
+        from Florence.FunctionSpace.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
+
+        from copy import deepcopy
+        from scipy.spatial import Delaunay
+        
+        # SINCE THIS IS A 2D PLOT
+        ndim = 2
+
+        C = interpolation_degree
+        p = C+1
+        nsize = int((C+2)**ndim)
+        CActual = mesh.InferPolynomialDegree() - 1 
+        nsize_2 = int((CActual+2)**ndim)
+
+        GaussLobattoPoints = GaussLobattoPointsQuad(C)
+
+        # BUILD DELAUNAY TRIANGULATION OF REFERENCE ELEMENTS
+        TrianglesFunc = Delaunay(GaussLobattoPoints)
+        Triangles = TrianglesFunc.simplices.copy()
+
+        # GET EQUALLY-SPACED/GAUSS-LOBATTO POINTS FOR THE EDGES
+        GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0]
+
+        BasesQuad = np.zeros((nsize_2,GaussLobattoPoints.shape[0]),dtype=np.float64)
+        hpBases = Quad.LagrangeGaussLobatto
+        for i in range(GaussLobattoPoints.shape[0]):
+            BasesQuad[:,i] = hpBases(CActual,GaussLobattoPoints[i,0],GaussLobattoPoints[i,1])[:,0]
+
+        BasesOneD = np.zeros((CActual+2,GaussLobattoPointsOneD.shape[0]),dtype=np.float64)
+        for i in range(GaussLobattoPointsOneD.shape[0]):
+            BasesOneD[:,i] = LagrangeGaussLobatto(CActual,GaussLobattoPointsOneD[i])[0]
+
+        smesh = deepcopy(mesh)
+        smesh.elements = mesh.elements[:,:4]
+        nmax = np.max(smesh.elements)+1
+        smesh.points = mesh.points[:nmax,:]
+        smesh.GetEdgesQuad()
+        edge_elements = smesh.GetElementsEdgeNumberingQuad()
+
+
+        # GET EDGE ORDERING IN THE REFERENCE ELEMENT
+        reference_edges = NodeArrangementQuad(CActual)[0]
+        reference_edges = np.concatenate((reference_edges,reference_edges[:,1,None]),axis=1)
+        reference_edges = np.delete(reference_edges,1,1)
+
+        # GET EULERIAN GEOMETRY
+        if TotalDisp.ndim==3:
+            vpoints = mesh.points + TotalDisp[:,:ndim,-1]
+        else:
+            vpoints = mesh.points + TotalDisp[:,:ndim]
+
+        # GET X & Y OF CURVED EDGES
+        if plot_edges:
+            x_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
+            y_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
+
+            for iedge in range(smesh.all_edges.shape[0]):
+                ielem = edge_elements[iedge,0]
+                edge = mesh.elements[ielem,reference_edges[edge_elements[iedge,1],:]]
+                coord_edge = vpoints[edge,:]
+                x_edges[:,iedge], y_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
+
+
+        nnode = nsize*mesh.nelem
+        nelem = Triangles.shape[0]*mesh.nelem
+
+        Xplot = np.zeros((nnode,2),dtype=np.float64)
+        Tplot = np.zeros((nelem,3),dtype=np.int64)
+        Uplot = np.zeros(nnode,dtype=np.float64)
+
+        if QuantityToPlot is None:
+            if plot_on_faces:
+                quantity_to_plot = np.zeros(mesh.nelem)
+            else:
+                quantity_to_plot = np.zeros(mesh.points.shape[0])
+        else:
+            quantity_to_plot = QuantityToPlot
+
+        # FOR CURVED ELEMENTS
+        for ielem in range(mesh.nelem):
+            Xplot[ielem*nsize:(ielem+1)*nsize,:] = np.dot(BasesQuad.T, vpoints[mesh.elements[ielem,:],:])
+            Tplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex,:] = Triangles + ielem*nsize
+            # Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
+            if plot_on_faces:
+                Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
+            else:
+                # IF QUANTITY IS DEFINED ON NODES
+                Uplot[ielem*nsize:(ielem+1)*nsize] = np.dot(BasesQuad.T, quantity_to_plot[mesh.elements[ielem,:]]).flatten()
+
+        # SAVE TESSELLATION
+        tmesh = Mesh()
+        tmesh.element_type = "tri"
+        tmesh.elements = Tplot
+        tmesh.points = Xplot
+        tmesh.quantity = Uplot
+        tmesh.vpoints = vpoints
+        tmesh.nelem = nelem
+        tmesh.nnode = nnode
+        tmesh.nsize = nsize
+        tmesh.bases_1 = BasesOneD
+        tmesh.bases_2 = BasesQuad.T
+
+        if plot_edges:
+            tmesh.x_edges = x_edges
+            tmesh.y_edges = y_edges
+            tmesh.edge_elements = edge_elements
+            tmesh.reference_edges = reference_edges
+
+            return tmesh
+
+
+
+
+    @staticmethod
     def TessellateTets(mesh, TotalDisp, QuantityToPlot=None, plot_on_faces=True,
         ProjectionFlags=None, interpolation_degree=20, EquallySpacedPoints=False,
         plot_points=False, plot_edges=True, plot_surfaces=True):
 
-        """High order curved tetrahedral surfaces mesh plots, based on high order nodal FEM.
-            The equally spaced FEM points do not work as good as the Fekete points 
+        """High order curved tetrahedral surfaces tessellation, based on high order nodal FEM.
         """
 
         from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
