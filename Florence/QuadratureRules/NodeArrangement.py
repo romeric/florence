@@ -125,8 +125,9 @@ def NodeArrangementTri(C):
     edge0 = []; edge1 = []; edge2 = []
     for i in range(0,C):
         edge0 = np.append(edge0,i+3)
-        edge1 = np.append(edge1, 2*C+3 +i*C -i*int((i-1)/2)  )
-        edge2 = np.append(edge2,C+3 +i*(C+1) -i*int((i-1)/2) )
+        # int MAY CAUSE A PROBLEM (ADDED FOR PYTHON 3) - REMOVE FOR DEBUG
+        edge1 = np.append(edge1, 2*C+3 +i*C   - int(i*(i-1)/2) )
+        edge2 = np.append(edge2, C+3 +i*(C+1) - int(i*(i-1)/2) )
 
     # TRAVERSING TRIANGULAR ELEMENT VIA EDGES
     traversed_edge_numbering_tri = np.concatenate(([0],edge0,[1],edge1,[2],edge2,[0])).astype(np.int64)
