@@ -13,7 +13,7 @@ from DisplacementPotentialApproachIndices import *
 class DisplacementPotentialFormulation(VariationalPrinciple):
 
     def __init__(self, mesh, variables_order=(1,), 
-        quadrature_rules=None, quadrature_type=None, function_spaces=None):
+        quadrature_rules=None, quadrature_type=None, function_spaces=None, compute_post_quadrature=False):
 
         if mesh.element_type != "tet" and mesh.element_type != "tri" and \
             mesh.element_type != "quad" and mesh.element_type != "hex":
@@ -24,7 +24,8 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         self.variables_order = variables_order
 
         super(DisplacementPotentialFormulation, self).__init__(mesh,variables_order=self.variables_order,
-            quadrature_type=quadrature_type,quadrature_rules=quadrature_rules,function_spaces=function_spaces)
+            quadrature_type=quadrature_type,quadrature_rules=quadrature_rules,function_spaces=function_spaces,
+            compute_post_quadrature=compute_post_quadrature)
 
         self.fields = "electro_mechanics"
         self.nvar = self.ndim+1
@@ -49,14 +50,20 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
             # GET QUADRATURE
             quadrature = QuadratureRule(optimal=optimal_quadrature, norder=norder, mesh_type=mesh.element_type)
-            # COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR POST-PROCESSING
-            post_quadrature = QuadratureRule(optimal=optimal_quadrature, norder=norder_post, mesh_type=mesh.element_type)
+            if self.compute_post_quadrature:
+                # COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR POST-PROCESSING
+                post_quadrature = QuadratureRule(optimal=optimal_quadrature, norder=norder_post, mesh_type=mesh.element_type)
+            else:
+                post_quadrature = None
 
         if function_spaces == None and self.function_spaces == None:
 
             # CREATE FUNCTIONAL SPACES
             function_space = FunctionSpace(mesh, quadrature, p=C+1)
-            post_function_space = FunctionSpace(mesh, post_quadrature, p=C+1)
+            if compute_post_quadrature:
+                post_function_space = FunctionSpace(mesh, post_quadrature, p=C+1)
+            else:
+                post_function_space = None
 
         self.quadrature_rules = (quadrature,post_quadrature)
         self.function_spaces = (function_space,post_function_space)
