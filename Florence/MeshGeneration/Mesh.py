@@ -93,6 +93,72 @@ class Mesh(object):
     def SetFaces(self,arr):
         self.faces = arr
 
+    def GetEdges(self):
+        assert self.element_type is not None
+        if self.element_type == "tri":
+            self.GetEdgesTri()
+        elif self.element_type == "quad":
+            self.GetEdgesQuad()
+        elif self.element_type == "tet":
+            self.GetEdgesTet()
+        elif self.element_type == "hex":
+            self.GetEdgesHex()
+        else:
+            raise ValueError('Type of element not understood')
+
+    def GetBoundaryEdges(self):
+        assert self.element_type is not None
+        if self.element_type == "tri":
+            self.GetBoundaryEdgesTri()
+        elif self.element_type == "quad":
+            self.GetBoundaryEdgesQuad()
+        elif self.element_type == "tet":
+            self.GetBoundaryFacesTet()
+        elif self.element_type == "hex":
+            self.GetBoundaryEdgesHex()
+        else:
+            raise ValueError('Type of element not understood')
+
+    def GetBoundaryEdges(self):
+        assert self.element_type is not None
+        if self.element_type == "tri":
+            self.GetInteriorEdgesTri()
+        elif self.element_type == "quad":
+            self.GetInteriorEdgesQuad()
+        elif self.element_type == "tet":
+            self.GetInteriorEdgesQuad()
+        elif self.element_type == "hex":
+            self.GetInteriorEdgesHex()
+        else:
+            raise ValueError('Type of element not understood')
+
+    def GetFaces(self):
+        assert self.element_type is not None
+        if self.element_type == "tet":
+            self.GetFacesTet()
+        elif self.element_type == "hex":
+            self.GetFacesHex()
+        else:
+            raise ValueError('Type of element not understood')
+
+    def GetBoundaryFaces(self):
+        assert self.element_type is not None
+        if self.element_type == "tet":
+            self.GetBoundaryFacesTet()
+        elif self.element_type == "hex":
+            self.GetBoundaryFacesHex() 
+        else:
+            raise ValueError('Type of element not understood')
+
+    def GetInteriorFaces(self):
+        assert self.element_type is not None
+        if self.element_type == "tet":
+            self.GetInteriorFacesTet()
+        elif self.element_type == "hex":
+            self.GetInteriorFacesHex() 
+        else:
+            raise ValueError('Type of element not understood')
+
     @property
     def Bounds(self):
         """Returns bounds of a mesh i.e. the minimum and maximum coordinate values
@@ -936,33 +1002,21 @@ class Mesh(object):
         assert self.points is not None
         assert self.element_type is not None
 
-        if self.element_type != "tet" and self.element_type != "tri":
-            raise NotImplementedError("Computing edge lengths for", self.element_type, "is not implemented yet")
 
         lengths = None
         if which_edges == 'boundary':
-            if self.faces is None:
-                if self.element_type == "tri":
-                    self.GetBoundaryEdgesTri()
-                elif self.element_type == "tet":
-                    self.GetBoundaryEdgesTet()
+            if self.edges is None:
+                self.GetBoundaryEdges()
 
-            if self.element_type == "tri" or self.element_type == "tet":
-                # THE ORDERING OF NODES FOR EDGES IS FOR TRIS AND TETS ONLY
-                edge_coords = self.points[self.edges[:,:2],:]
-                lengths = np.linalg.norm(edge_coords[:,1,:] - edge_coords[:,0,:],axis=1)
+            edge_coords = self.points[self.edges[:,:2],:]
+            lengths = np.linalg.norm(edge_coords[:,1,:] - edge_coords[:,0,:],axis=1)
 
         elif which_edges == 'all':
-            if self.all_faces is None:
-                if self.element_type == "tri":
-                    self.GetEdgesTri()
-                elif self.element_type == "tet":
-                    self.GetEdgesTet()
+            if self.all_edges is None:
+                self.GetEdges()
 
-            if self.element_type == "tri" or self.element_type == "tet":
-                # THE ORDERING OF NODES FOR EDGES IS FOR TRIS AND TETS ONLY
-                edge_coords = self.points[self.all_edges[:,:2],:]
-                lengths = np.linalg.norm(edge_coords[:,1,:] - edge_coords[:,0,:],axis=1)
+            edge_coords = self.points[self.all_edges[:,:2],:]
+            lengths = np.linalg.norm(edge_coords[:,1,:] - edge_coords[:,0,:],axis=1)
 
         return lengths  
 
@@ -1047,7 +1101,7 @@ class Mesh(object):
                 area += 0.5*np.linalg.norm(area0+area1)
 
             # print area
-            raise ValueError('Hex ares implementation requires further checks')
+            raise ValueError('Hex areas implementation requires further checks')
 
         else:
             raise NotImplementedError("Computing areas for", self.element_type, "elements not implemented yet")
@@ -1116,9 +1170,6 @@ class Mesh(object):
         assert self.points is not None
         assert self.element_type is not None
 
-        if self.element_type != "tet" and self.element_type != "tri" and self.element_type != "quad":
-            raise NotImplementedError("Computing aspect ratio of ", self.element_type, "is not implemented yet")
-
         aspect_ratio = None
         if algorithm == 'edge_based':
             if self.element_type == "tri":
@@ -1155,6 +1206,37 @@ class Mesh(object):
 
                 minimum = np.minimum(np.minimum(np.minimum(np.minimum(np.minimum(AB,AC),AD),BC),BD),CD)
                 maximum = np.maximum(np.maximum(np.maximum(np.maximum(np.maximum(AB,AC),AD),BC),BD),CD)
+
+                aspect_ratio = 1.0*maximum/minimum
+
+            elif self.element_type == "hex":
+                edge_coords = self.points[self.elements[:,:8],:]
+                AB = np.linalg.norm(edge_coords[:,1,:] - edge_coords[:,0,:],axis=1)
+                BC = np.linalg.norm(edge_coords[:,2,:] - edge_coords[:,1,:],axis=1)
+                CD = np.linalg.norm(edge_coords[:,3,:] - edge_coords[:,2,:],axis=1)
+                DA = np.linalg.norm(edge_coords[:,0,:] - edge_coords[:,3,:],axis=1)
+
+                minimum0 = np.minimum(np.minimum(np.minimum(AB,BC),CD),DA)
+                maximum0 = np.maximum(np.maximum(np.maximum(AB,BC),CD),DA)
+
+                AB = np.linalg.norm(edge_coords[:,5,:] - edge_coords[:,4,:],axis=1)
+                BC = np.linalg.norm(edge_coords[:,6,:] - edge_coords[:,5,:],axis=1)
+                CD = np.linalg.norm(edge_coords[:,7,:] - edge_coords[:,6,:],axis=1)
+                DA = np.linalg.norm(edge_coords[:,4,:] - edge_coords[:,7,:],axis=1)
+
+                minimum1 = np.minimum(np.minimum(np.minimum(AB,BC),CD),DA)
+                maximum1 = np.maximum(np.maximum(np.maximum(AB,BC),CD),DA)
+
+                AB = np.linalg.norm(edge_coords[:,4,:] - edge_coords[:,0,:],axis=1)
+                BC = np.linalg.norm(edge_coords[:,5,:] - edge_coords[:,1,:],axis=1)
+                CD = np.linalg.norm(edge_coords[:,6,:] - edge_coords[:,2,:],axis=1)
+                DA = np.linalg.norm(edge_coords[:,7,:] - edge_coords[:,3,:],axis=1)
+
+                minimum2 = np.minimum(np.minimum(np.minimum(AB,BC),CD),DA)
+                maximum2 = np.maximum(np.maximum(np.maximum(AB,BC),CD),DA)
+
+                minimum = np.minimum(minimum0,np.minimum(minimum1,minimum2))
+                maximum = np.maximum(maximum0,np.maximum(maximum1,maximum2))
 
                 aspect_ratio = 1.0*maximum/minimum
 
@@ -2471,6 +2553,45 @@ class Mesh(object):
             raise ValueError("MeshPy could not construct a valid linear mesh for sphere")
 
 
+
+    def OneElementCylinder(self,radius=1, length=100, nz=10, element_type="hex"):
+
+        if element_type == "hex":
+            elements = np.arange(0,8)[:,None]
+            for i in range(1,nz):
+                elements = np.concatenate((elements,np.arange(4*i,4*i+8)[:,None]),axis=1)
+            elements = elements.T.copy()
+
+        theta = np.array([225,315,45,135])*np.pi/180
+        
+        xs = np.tile(radius*np.cos(theta),nz+1)
+        ys = np.tile(radius*np.sin(theta),nz+1)
+
+        points = np.array([xs,ys]).T.copy()
+        points = np.concatenate((points,np.zeros((4*(nz+1),1))),axis=1)
+
+        zs = np.linspace(0,length, nz+1)[1:]
+        zs = np.repeat(zs,4)
+        points[4:,-1] = zs
+
+        if element_type == "hex":
+            self.element_type = element_type
+            self.elements = elements
+            self.points = points
+            self.GetBoundaryFacesHex()
+            self.GetBoundaryEdgesHex()
+            self.GetFacesHex()
+            self.GetEdgesHex()
+            self.nelem = self.elements.shape[0]
+            self.nnode = self.points.shape[0]
+
+        elif element_type == "tet":
+            # USE MESHPY
+            pass
+        else:
+            raise ValueError('element type not suppported')
+
+
     def RemoveElements(self,(x_min,y_min,x_max,y_max),element_removal_criterion="all",keep_boundary_only=False,
             compute_edges=True,compute_faces=True,plot_new_mesh=True):
         """Removes elements with some specified criteria
@@ -2674,6 +2795,12 @@ class Mesh(object):
                 print("3D surface mesh of ", self.element_type)
 
         return self.points.shape[1]
+
+
+    def InferElementType(self, element_type=None):
+
+        if element_type is None and self.element_type is None:
+            raise ValueError('Element type not understood')
 
 
     def GetLinearMesh(self):
