@@ -221,14 +221,15 @@ def GetBasesAtNodes(C,Quadrature,info):
     eps=[]
     if info == 'hex':
         counter = 0
-        eps = ThreeD.LagrangeGaussLobatto(C,0,0,0)[1]
+        eps = GaussLobattoPointsHex(C)
         for i in range(0,eps.shape[0]):
-            ndummy = ThreeD.LagrangeGaussLobatto(C,eps[i,0],eps[i,1],eps[i,2],arrange=1)[0]
+            ndummy = ThreeD.LagrangeGaussLobatto(C,eps[i,0],eps[i,1],eps[i,2],arrange=1)
             Basis[:,counter] = ndummy[:,0]
             dummy = ThreeD.GradLagrangeGaussLobatto(C,eps[i,0],eps[i,1],eps[i,2],arrange=1)
             gBasisx[:,counter] = dummy[:,0]
             gBasisy[:,counter] = dummy[:,1]
             gBasisz[:,counter] = dummy[:,2]
+            counter +=1
     elif info == 'quad':
         counter = 0
         eps = GaussLobattoPointsQuad(C)

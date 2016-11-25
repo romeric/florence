@@ -10,7 +10,7 @@ class VariationalPrinciple(object):
     def __init__(self, mesh, variables_order=(1,0), 
         analysis_type='static', analysis_nature='nonlinear', fields='mechanics',
         quadrature_rules=None, median=None, quadrature_type=None,
-        function_spaces=None):
+        function_spaces=None, compute_post_quadrature=True):
 
         self.variables_order = variables_order
         self.nvar = None
@@ -26,6 +26,8 @@ class VariationalPrinciple(object):
         self.analysis_type = analysis_type
         self.analysis_nature = analysis_nature
         self.fields = fields
+
+        self.compute_post_quadrature = compute_post_quadrature
 
 
         # GET NUMBER OF VARIABLES
