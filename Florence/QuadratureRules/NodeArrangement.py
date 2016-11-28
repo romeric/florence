@@ -576,3 +576,112 @@ def __FaceArrangementHex__(fekete,facer3d):
                 face.append(j)
 
     return face
+
+
+
+def NodeArrangementQuadToTri(C):
+
+    nsize = int((C+2)*(C+3)/2.)
+    node_arranger = np.zeros((2,nsize),dtype=np.int64)
+    if C==0:
+        node_arranger[0,:] = [0,1,3]
+        node_arranger[1,:] = [1,2,3]
+    elif C==1:
+        node_arranger[0,:] = [0,1,3,4,5,6]
+        node_arranger[1,:] = [1,2,3,7,6,8]
+    elif C==2:
+        node_arranger[0,:] = [0,1,3,4,5,6,7,8,10,11]
+        node_arranger[1,:] = [1,2,3,9,13,8,12,15,11,14]
+    elif C==3:
+        node_arranger[0,:] = [0,1,3,4,5,6,7,8,9,10,12,13,14,17,18]
+        node_arranger[1,:] = [1,2,3,11,16,21,10,15,20,24,14,19,23,18,22]
+    elif C==4:
+        node_arranger[0,:] = [0,1,3,4,5,6,7,8,9,10,11,12,14,15,16,17,20,21,22,26,27]
+        node_arranger[1,:] = [1,2,3,13,19,25,31,12,18,24,30,35,17,23,29,34,22,28,33,27,32]
+    elif C==5:
+        node_arranger[0,:] = [0,1,3,4,5,6,7,8,9,10,11,12,13,14,16,17,18,19,20,23,24,25,26,30,31,32,37,38]
+        node_arranger[1,:] = [1,2,3,15,22,29,36,43,14,21,28,35,42,48,20,27,34,41,47,26,33,40,46,32,39,45,38,44]
+    else:
+        raise NotImplementedError('Conversion beynond p=6 nodes not implemented yet')
+        # THIS FLOATING POINT APPROACH COMAPRES TRI AND QUAD
+        # POINTS TO GET NUMBERING, BUT DOESNOT WORK FOR NOT 
+        # EQUALLY DISTANCED POINTS AS FEKETE POINTS ON TRIS 
+        # DON'T MATCH GAUSS LOBATTO POINTS OF QUADS FOR THE 
+        # INTERIOR NODES
+        from .GaussLobattoPoints import GaussLobattoPointsQuad
+        from .FeketePointsTri import FeketePointsTri
+        from Florence.Tensor import in2d, makezero, unique2d
+
+        epst = FeketePointsTri(C)
+        epsq = GaussLobattoPointsQuad(C)
+
+        makezero(epst,tol=1e-12)
+        makezero(epsq,tol=1e-12)
+
+
+        aranger = np.arange(int((C+2)**2))
+        # makezero(epst) # TAKES CARE OF -0. AND +0. FOR IN2D
+        # T1_idx = in2d(epsq,epst)
+        # T1 = aranger[T1_idx]
+        T1 = np.array(__QuadToTriArrangement__(epsq,epst))
+
+        # MAP THE OTHER TRIANGLE
+        # MAP: x_n = -y; y_n = 1+x+y
+        epst_mirror = np.zeros_like(epst)
+        epst_mirror[:,0] = -epst[:,1]
+        epst_mirror[:,1] = 1 + epst[:,0] + epst[:,1]
+        # makezero(epst_mirror) # TAKES CARE OF -0. AND +0. FOR IN2D
+        T2 = np.array(__QuadToTriArrangement__(epsq,epst_mirror))
+
+        node_arranger[0,:] = T1
+        node_arranger[1,:] = T2
+
+
+    return node_arranger
+
+
+def __QuadToTriArrangement__(epsq,epst_mirror):
+    face = []
+    # tol = 1e-8
+    for i in range(epst_mirror.shape[0]):
+        current_row = np.repeat(epst_mirror[i,:][None,:],epsq.shape[0],axis=0)
+        x = current_row - epsq
+        for j in range(epsq.shape[0]):
+            if np.isclose(x[j,0],0.0) and np.isclose(x[j,1],0.0):
+            # if np.abs(x[j,0]) < tol and np.abs(x[j,1]) < tol:
+                face.append(j)
+    return face
+
+
+
+def NodeArrangementHexToTet(C):
+    """Node ordering for conversion of a hexahedron into 6 tetrahedra
+
+        refer to: [Julien Dompierre et.al. "How to Subdivide Pyramids, Prisms and Hexahedra into Tetrahedra",
+            8th International Meshing Roundtable, Lake Tahoe, California, 10-13 October 1999.] for only p=1
+        elements. For higher p, the same concept is generalised here
+    """
+
+    nsize = int((C+2)*(C+3)*(C+4)/6.)
+    node_arranger = np.zeros((6,nsize),dtype=np.int64)
+
+    if C==0:
+        node_arranger[0,:] = [0,1,2,7]
+        node_arranger[1,:] = [0,2,3,7]
+        node_arranger[2,:] = [0,1,5,7]
+        node_arranger[3,:] = [0,5,4,7]
+        # node_arranger[4,:] = [1,2,6,7]
+        node_arranger[4,:] = [1,6,2,7]
+        node_arranger[5,:] = [1,5,6,7]
+    elif C==1:
+        node_arranger[0,:] = [0,1,2,7,8,10,11,18,19,21]
+        node_arranger[1,:] = [0,2,3,7,10,9,12,18,21,16]
+        node_arranger[2,:] = [0,1,5,7,8,17,14,18,19,24]
+        node_arranger[3,:] = [0,5,4,7,17,13,22,18,24,23]
+        # node_arranger[4,:] = [1,2,6,7,11,20,15,19,21,26]
+        node_arranger[4,:] = [1,6,2,7,20,11,15,19,26,21]
+        node_arranger[5,:] = [1,5,6,7,14,20,25,19,24,26]
+    else:
+        raise NotImplementedError('Conversion beynond p=2 nodes not implemented yet')
+
+    return node_arranger

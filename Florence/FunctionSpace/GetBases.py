@@ -2,8 +2,8 @@ import numpy as np
 import os, sys, imp
 
 
-from Florence.FunctionSpace import QuadLagrangeGaussLobatto as TwoD
-from Florence.FunctionSpace import HexLagrangeGaussLobatto as ThreeD
+from Florence.FunctionSpace import Quad
+from Florence.FunctionSpace import Hex
 # Modal Bases
 # import Florence.InterpolationFunctions.TwoDimensional.Tri.hpModal as Tri 
 # import Florence.InterpolationFunctions.ThreeDimensional.Tetrahedral.hpModal as Tet 
@@ -37,9 +37,9 @@ def GetBases(C, Quadrature, info, useLagrange=False):
         counter = 0
         for i in range(0,z.shape[0]):
             for j in range(0,z.shape[0]):
-                ndummy = TwoD.LagrangeGaussLobatto(C,z[i],z[j])
+                ndummy = Quad.LagrangeGaussLobatto(C,z[i],z[j])
                 Basis[:,counter] = ndummy[:,0]
-                dummy = TwoD.GradLagrangeGaussLobatto(C,z[i],z[j])
+                dummy = Quad.GradLagrangeGaussLobatto(C,z[i],z[j])
                 gBasisx[:,counter] = dummy[:,0]
                 gBasisy[:,counter] = dummy[:,1]
                 counter+=1
@@ -95,8 +95,8 @@ def GetBases3D(C,Quadrature,info):
             for j in range(w.shape[0]):
                 for k in range(w.shape[0]):
                     # ndummy = ThreeD.LagrangeGaussLobatto(C,z[i],z[j],z[k])[0]
-                    ndummy = ThreeD.LagrangeGaussLobatto(C,z[i],z[j],z[k])
-                    dummy = ThreeD.GradLagrangeGaussLobatto(C,z[i],z[j],z[k])
+                    ndummy = Hex.LagrangeGaussLobatto(C,z[i],z[j],z[k])
+                    dummy = Hex.GradLagrangeGaussLobatto(C,z[i],z[j],z[k])
 
                     Basis[:,counter] = ndummy[:,0]
                     gBasisx[:,counter] = dummy[:,0]
@@ -143,16 +143,16 @@ def GetBasesBoundary(C,z,ndim):
         for i in range(0,z.shape[0]):
             for j in range(0,z.shape[0]):
                 if k==0 or k==1:
-                    ndummy = ThreeD.LagrangeGaussLobatto(C,eps[k],z[i],z[j])[0]
+                    ndummy = Hex.LagrangeGaussLobatto(C,eps[k],z[i],z[j])[0]
                     BasisBoundary[:,counter,k] = ndummy[:,0]
 
-                    dummy = ThreeD.GradLagrangeGaussLobatto(C,eps[k],z[i],z[j])
+                    dummy = Hex.GradLagrangeGaussLobatto(C,eps[k],z[i],z[j])
                     gBasisBoundaryx[:,counter,k] = dummy[:,0]
                     gBasisBoundaryy[:,counter,k] = dummy[:,1]
                     gBasisBoundaryz[:,counter,k] = dummy[:,2]
 
                 elif k==2 or k==3:
-                    ndummy = ThreeD.LagrangeGaussLobatto(C,z[i],eps[k],z[j])[0]
+                    ndummy = Hex.LagrangeGaussLobatto(C,z[i],eps[k],z[j])[0]
                     BasisBoundary[:,counter,k] = ndummy[:,0]
 
                     dummy = ThreeD.GradLagrangeGaussLobatto(C,z[i],eps[k],z[j])
@@ -161,10 +161,10 @@ def GetBasesBoundary(C,z,ndim):
                     gBasisBoundaryz[:,counter,k] = dummy[:,2]
 
                 elif k==4 or k==5:
-                    ndummy = ThreeD.LagrangeGaussLobatto(C,z[i],z[j],eps[k])[0]
+                    ndummy = Hex.LagrangeGaussLobatto(C,z[i],z[j],eps[k])[0]
                     BasisBoundary[:,counter,k] = ndummy[:,0]
 
-                    dummy = ThreeD.GradLagrangeGaussLobatto(C,z[i],z[j],eps[k])
+                    dummy = Hex.GradLagrangeGaussLobatto(C,z[i],z[j],eps[k])
                     gBasisBoundaryx[:,counter,k] = dummy[:,0]
                     gBasisBoundaryy[:,counter,k] = dummy[:,1]
                     gBasisBoundaryz[:,counter,k] = dummy[:,2]
@@ -223,9 +223,9 @@ def GetBasesAtNodes(C,Quadrature,info):
         counter = 0
         eps = GaussLobattoPointsHex(C)
         for i in range(0,eps.shape[0]):
-            ndummy = ThreeD.LagrangeGaussLobatto(C,eps[i,0],eps[i,1],eps[i,2],arrange=1)
+            ndummy = Hex.LagrangeGaussLobatto(C,eps[i,0],eps[i,1],eps[i,2],arrange=1)
             Basis[:,counter] = ndummy[:,0]
-            dummy = ThreeD.GradLagrangeGaussLobatto(C,eps[i,0],eps[i,1],eps[i,2],arrange=1)
+            dummy = Hex.GradLagrangeGaussLobatto(C,eps[i,0],eps[i,1],eps[i,2],arrange=1)
             gBasisx[:,counter] = dummy[:,0]
             gBasisy[:,counter] = dummy[:,1]
             gBasisz[:,counter] = dummy[:,2]
@@ -234,9 +234,9 @@ def GetBasesAtNodes(C,Quadrature,info):
         counter = 0
         eps = GaussLobattoPointsQuad(C)
         for i in range(0,eps.shape[0]):
-            ndummy = TwoD.LagrangeGaussLobatto(C,eps[i,0],eps[i,1],arrange=1)
+            ndummy = Quad.LagrangeGaussLobatto(C,eps[i,0],eps[i,1],arrange=1)
             Basis[:,counter] = ndummy[:,0]
-            dummy = TwoD.GradLagrangeGaussLobatto(C,eps[i,0],eps[i,1],arrange=1)
+            dummy = Quad.GradLagrangeGaussLobatto(C,eps[i,0],eps[i,1],arrange=1)
             gBasisx[:,counter] = dummy[:,0]
             gBasisy[:,counter] = dummy[:,1]
             counter+=1
