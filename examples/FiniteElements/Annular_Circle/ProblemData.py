@@ -54,12 +54,12 @@ def ProblemData(*args, **kwargs):
 
     solution = fem_solver.Solve(formulation, mesh, material, boundary_condition)
 
-    # solution.CurvilinearPlot(QuantityToPlot=fem_solver.ScaledJacobian)
+    solution.CurvilinearPlot(QuantityToPlot=fem_solver.ScaledJacobian)
 
 
 if __name__ == "__main__":
     from time import time
     t = time()
     ProblemData()
-    print time() - t
+    print "Time taken", time() - t, "seconds"
 

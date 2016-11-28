@@ -119,7 +119,7 @@ def ProblemData(*args, **kwargs):
 
 def ProblemData_2(*args, **kwargs):
 
-    ndim=2
+    ndim=3
     p=2
 
     # material = IsotropicElectroMechanics_2(ndim,youngs_modulus=1.0,poissons_ratio=0.3, c1=1.0, c2=1.0)
@@ -135,17 +135,59 @@ def ProblemData_2(*args, **kwargs):
     # material = IsotropicElectroMechanics_102(ndim,mu=1.0, lamb=2.0, eps_1=1e4)
     # material = IsotropicElectroMechanics_104(ndim,mu=1.0, lamb=2.0, eps_1=1e4, eps_2=1e4)
     # material = IsotropicElectroMechanics_105(ndim,mu1=1.0,mu2=0.005, lamb=2.0, eps_1=1e4, eps_2=1e4)
-    material = IsotropicElectroMechanics_106(ndim,mu1=1.0,mu2=0.005, lamb=2.0, eps_1=1e4, eps_2=1e4)
+    # material = IsotropicElectroMechanics_106(ndim,mu1=1.0,mu2=0.005, lamb=2.0, eps_1=1e4, eps_2=1e4) ###
+    material = NeoHookean_2(ndim,youngs_modulus=2.3*1e4, poissons_ratio=0.3)
 
     mesh = Mesh()
-    mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),nx=6,ny=6)
+    # mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),nx=2,ny=2)
+    # mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),nx=50,ny=100)
+    # mesh.Rectangle(lower_left_point=(-1,-1),upper_right_point=(1,1),nx=2,ny=2)
+    # mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),element_type="quad",nx=2,ny=2)
     # mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),nx=5,ny=5)
-    mesh.GetHighOrderMesh(p=p)
-    # print mesh.points.shape[0], mesh.nelem
-    # mesh.SimplePlot()
-    # mesh.PlotMeshNumbering()
-
+    # mesh.GetHighOrderMesh(p=2)
     # exit()
+    # print mesh.points.shape[0], mesh.nelem
+    # mesh.PlotMeshNumbering()
+    # mesh.Sphere()
+    # mesh.Reader("/home/roman/Dropbox/florence/examples/FiniteElements/MechanicalComponent2D/MechanicalComponent2D_192.dat")
+    # mesh.ReadGIDMesh("/home/roman/Dropbox/florence/examples/FiniteElements/MechanicalComponent3D/mechanicalComplex.dat", "tet")
+    # mesh.Reader("/home/roman/Dropbox/florence/examples/FiniteElements/Cylinder/Hollow_Cylinder.dat", "tet")
+    # mesh.Reader("/home/roman/Dropbox/florence/examples/FiniteElements/Nonlinear_Electromechanics_Benchmark/Patch_26807.dat", "tet")
+    # mesh.Reader("/home/roman/Dropbox/florence/examples/FiniteElements/Nonlinear_3D_Cube/Mesh_Cube_12_Tet.dat", "tet")
+    mesh.Reader("/home/roman/Dropbox/florence/examples/FiniteElements/Nonlinear_Electromechanics_3D_Beam/Mesh_64.dat", "hex")
+
+    # mesh.elements = np.array([[0,1,2,3]])
+    # mesh.points = np.array([
+    #     [-1,-1,-1.],
+    #     [ 1,-1,-1.],
+    #     [-1, 1,-1.],
+    #     [-1,-1, 1.],
+    #     ])
+    # mesh.nelem = 1
+    # mesh.element_type = "tet"
+    # mesh.GetBoundaryFacesTet()
+    # mesh.GetBoundaryEdgesTet()
+
+    # mesh.OneElementCylinder(nz=1)
+
+    # print mesh.points
+
+    # print mesh.points.shape, mesh.elements.shape
+    # mesh.ConvertTrisToQuads()
+    # mesh.ConvertQuadsToTris()
+    mesh.ConvertHexesToTets()
+    # mesh.ConvertTetsToHexes()
+    # mesh.GetHighOrderMesh(p=p)
+    # print mesh.nelem
+    # print mesh.points
+    # print mesh.points[mesh.elements[0,:],:]
+    mesh.SimplePlot()
+    # mesh.PlotMeshNumbering()
+    # print mesh.points
+    # print mesh.edges
+    # from Florence.PostProcessing import PostProcess
+    # PostProcess.TessellateHexes(mesh,np.zeros_like(mesh.points),interpolation_degree=0,plot_points=True)
+    exit()
 
     boundary_condition = BoundaryCondition()
 
@@ -159,10 +201,10 @@ def ProblemData_2(*args, **kwargs):
         boundary_data[Y_0,1] = 0.
         boundary_data[Y_0,2] = 0.
 
-        Y_1 = np.where(mesh.points[:,1] == 4)[0]
+        Y_1 = np.where(mesh.points[:,1] == 2)[0]
         # boundary_data[Y_1,0] = 0.0
-        # boundary_data[Y_1,1] = 4.0
-        boundary_data[Y_1,2] = 0.01
+        boundary_data[Y_1,1] = 2.0
+        # boundary_data[Y_1,2] = 0.01
 
         # boundary_data[2::material.nvar,:] = 0
         # boundary_data[:,2] = 0. # fix all electrostatics
@@ -187,16 +229,18 @@ def ProblemData_2(*args, **kwargs):
     boundary_condition.SetDirichletCriteria(DirichletFunc, mesh)
     # boundary_condition.SetNeumannCriteria(NeumannFunc,mesh)
 
-    formulation = DisplacementPotentialFormulation(mesh)
+    # formulation = DisplacementPotentialFormulation(mesh)
+    formulation = DisplacementFormulation(mesh)
 
-    fem_solver = FEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=2)
-    # fem_solver = StaggeredFEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=2)
+    fem_solver = FEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=1)
+    # fem_solver = StaggeredFEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=3)
+    # fem_solver = StaggeredElectromechanicSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=5)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition)
 
 
-    sol = np.copy(solution.sol[:,:,-1])
+    # sol = np.copy(solution.sol[:,:,-1])
     # makezero(sol,tol=1.0e-8)
     # print sol
     # print formulation.fields
@@ -205,20 +249,21 @@ def ProblemData_2(*args, **kwargs):
     # print solution.sol[:,2,-1]
     # print solution.sol[:,1,-1]
     # solution.sol = solution.sol[:,:2,:]
-    # solution.Plot(configuration="deformed",quantity=1)
+    solution.Plot(configuration="deformed",quantity=10)
     # solution.CurvilinearPlot(QuantityToPlot=solution.sol[:,1,-1])
     # solution.Animate(configuration="deformed", quantity=20)
 
     # solution.Plot()
 
-    # print np.linalg.norm(solution.sol[:,:2,-1])
+    print np.linalg.norm(solution.sol[:,:2,-1])
     # print np.linalg.norm(solution.sol[:,-1,-1])
-    solution.Plot(configuration="original",quantity=21)
+    # solution.Plot(configuration="original",quantity=21)
     # solution.Animate(configuration="original",quantity=21)
 
 
-    # 21.0460889142
-    # 21.0861327294 21.0822980885 21.0841743637
+    # 0.0122204689158
+    # 0.0239793477991 0.0141085965428 0.0134785934614
+
 
     # import matplotlib as mpl
     # import matplotlib.pyplot as plt

@@ -20,6 +20,14 @@ def ProblemData(*args, **kwargs):
     mesh.Reader(filename=filename, element_type="tet")
     mesh.GetHighOrderMesh(p=MainData.C+1)
 
+    # mesh.ConvertTetsToHexes()
+    # mesh.GetHighOrderMesh(p=2)
+    # from copy import deepcopy
+    # hmesh = deepcopy(mesh)
+    # mesh.ConvertHexesToTets()
+    # mesh.GetBoundaryEdges()
+    # exit()
+
     cad_file = ProblemPath + '/Hollow_Cylinder.igs'
 
     scale = 1000.
@@ -32,7 +40,8 @@ def ProblemData(*args, **kwargs):
 
     solver = LinearSolver(linear_solver="multigrid", linear_solver_type="amg",iterative_solver_tolerance=5.0e-07)
     formulation = DisplacementFormulation(mesh)
-    fem_solver = FEMSolver(number_of_load_increments=2,analysis_nature="linear")
+    # fem_solver = FEMSolver(number_of_load_increments=2,analysis_nature="linear")
+    fem_solver = FEMSolver(number_of_load_increments=1,analysis_nature="linear")
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition)
@@ -41,7 +50,12 @@ def ProblemData(*args, **kwargs):
     # print solution.sol[:,:,0].shape
     # mesh.WriteHDF5("/home/roman/ZZ_P"+str(MainData.C+1)+".mat",{"TotalDisp":solution.sol})
 
+    # from Florence.PostProcessing import PostProcess
+    # hmesh.points = mesh.points
+    # PostProcess.CurvilinearPlotHex(hmesh,solution.sol, plot_points=True)
+
+
 if __name__ == "__main__":
     class MainData():
-        C = 2
+        C = 1
     ProblemData(MainData)

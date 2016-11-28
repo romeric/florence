@@ -22,8 +22,14 @@ def ProblemData(MainData=None):
     mesh = Mesh()
     mesh.Reader(filename=filename, element_type="tri", reader_type="Salome")
     mesh.points *=1000.
-    mesh.GetHighOrderMesh(p=2)
-    
+    mesh.GetHighOrderMesh(p=p)
+
+    # mesh.ConvertTrisToQuads()
+    # mesh.GetHighOrderMesh(p=3)
+    # from copy import deepcopy
+    # qmesh = deepcopy(mesh)
+    # mesh.ConvertQuadsToTris()
+
 
     # material = LinearModel(ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
     # material = IncrementalLinearElastic(ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
@@ -51,6 +57,10 @@ def ProblemData(MainData=None):
         material=material,boundary_condition=boundary_condition)
 
     solution.CurvilinearPlot(QuantityToPlot=fem_solver.ScaledJacobian)
+
+    # from Florence.PostProcessing import PostProcess
+    # qmesh.points = mesh.points
+    # PostProcess.CurvilinearPlotQuad(qmesh,solution.sol, plot_points=True)
 
 
 if __name__ == "__main__":

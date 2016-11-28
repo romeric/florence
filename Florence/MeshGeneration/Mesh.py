@@ -113,20 +113,20 @@ class Mesh(object):
         elif self.element_type == "quad":
             self.GetBoundaryEdgesQuad()
         elif self.element_type == "tet":
-            self.GetBoundaryFacesTet()
+            self.GetBoundaryEdgesTet()
         elif self.element_type == "hex":
             self.GetBoundaryEdgesHex()
         else:
             raise ValueError('Type of element not understood')
 
-    def GetBoundaryEdges(self):
+    def GetInteriorEdges(self):
         assert self.element_type is not None
         if self.element_type == "tri":
             self.GetInteriorEdgesTri()
         elif self.element_type == "quad":
             self.GetInteriorEdgesQuad()
         elif self.element_type == "tet":
-            self.GetInteriorEdgesQuad()
+            self.GetInteriorEdgesTet()
         elif self.element_type == "hex":
             self.GetInteriorEdgesHex()
         else:
@@ -1246,12 +1246,14 @@ class Mesh(object):
         return aspect_ratio
 
 
-    def Median(self):
+    def Median(self, geometric=True):
         """Computes median of the elements tri, tet, quad, hex based on the interpolation function
 
+            input:
+                geometric           [Bool] geometrically computes median with relying on FEM bases
             retruns:
                 median:             [ndarray] of median of elements
-                bases_at_median:    [1D array] of bases at median            
+                bases_at_median:    [1D array] of (p=1) bases at median            
         """
 
         assert self.element_type is not None
@@ -1260,25 +1262,29 @@ class Mesh(object):
 
         median = None
 
+
+        if geometric == True:
+            median = np.sum(self.points[self.elements,:],axis=1)/self.elements.shape[1]
+            return median
+
         if self.element_type == "tri":
             from Florence.FunctionSpace import Tri
-            from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
+            from Florence.QuadratureRules import FeketePointsTri
 
-            middle_point_isoparametric = FeketePointsTri(2)[6] # check
+            eps = FeketePointsTri(2)
+            middle_point_isoparametric = eps[6,:] # check
             if not np.isclose(sum(middle_point_isoparametric),-0.6666666):
                 raise ValueError("Median of triangle does not match [-0.3333,-0.3333]. "
                     "Did you change your nodal spacing or interpolation functions?")
 
-            # C = self.InferPolynomialDegree() - 1
             hpBases = Tri.hpNodal.hpBases
             bases_for_middle_point = hpBases(0,middle_point_isoparametric[0],
                 middle_point_isoparametric[1])[0]
-
             median = np.einsum('ijk,j',self.points[self.elements[:,:3],:],bases_for_middle_point) 
 
         elif self.element_type == "tet":
             from Florence.FunctionSpace import Tet
-            from Florence.QuadratureRules.FeketePointsTet import FeketePointsTet
+            from Florence.QuadratureRules import FeketePointsTet
 
             middle_point_isoparametric = FeketePointsTet(3)[21]
             if not np.isclose(sum(middle_point_isoparametric),-1.5):
@@ -1291,6 +1297,9 @@ class Mesh(object):
                 middle_point_isoparametric[1],middle_point_isoparametric[2])[0]
 
             median = np.einsum('ijk,j',self.points[self.elements[:,:4],:],bases_for_middle_point) 
+
+        else:
+            raise NotImplementedError('Median for this element type not implemented yet')
 
         return median, bases_for_middle_point
   
@@ -1715,6 +1724,71 @@ class Mesh(object):
         return self.boundary_face_to_element
 
 
+    def GetElementsFaceNumberingHex(self):
+        """Finds which faces belong to which elements and which faces of the elements 
+            they are e.g. 0, 1, 2 or 3.  
+
+            output: 
+
+                face_elements:              [2D array] nfaces x 2 array containing elements which have face
+                                            on the boundary with their flags
+
+                                            Note that this method also sets the self.face_to_element to face_elements,
+                                            so the return value is not strictly necessary   
+        """
+
+        if isinstance(self.face_to_element,np.ndarray):
+            if self.face_to_element.shape[0] > 1:
+                return self.face_to_element
+
+        assert self.elements is not None
+
+        # GET ALL FACES FROM ELEMENT CONNECTIVITY
+        if self.all_faces is None:
+            self.GetFacesHex()
+
+        from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
+
+        C = self.InferPolynomialDegree() - 1
+        node_arranger = NodeArrangementHex(C)[0]
+        
+        all_faces = np.concatenate((np.concatenate((
+                np.concatenate((np.concatenate((np.concatenate((self.elements[:,node_arranger[0,:]],
+                self.elements[:,node_arranger[1,:]]),axis=0),self.elements[:,node_arranger[2,:]]),axis=0),
+                self.elements[:,node_arranger[3,:]]),axis=0),self.elements[:,node_arranger[4,:]]),axis=0),
+                self.elements[:,node_arranger[5,:]]),axis=0).astype(self.all_faces.dtype)
+
+        _,idx = unique2d(all_faces,consider_sort=True,order=False, return_index=True)
+        face_elements = np.zeros((self.all_faces.shape[0],2),dtype=np.int64)
+
+        face_elements[:,0] = idx % self.elements.shape[0]
+        face_elements[:,1] = idx // self.elements.shape[0]
+
+        self.face_to_element = face_elements
+        return self.face_to_element
+
+
+
+    def ArrangeFacesHex(self):
+        """Arranges all the faces of hexahedral elements 
+            with quadrilateral type node ordering """
+
+        from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
+
+        if self.all_faces is None:
+            self.all_faces = self.GetFacesHex()
+        if self.face_to_element is None:
+            self.GetElementsFaceNumberingHex()
+
+        # DETERMINE DEGREE
+        p = self.InferPolynomialDegree()
+
+        node_arranger = NodeArrangementHex(p-1)[0]
+
+        self.all_faces = self.elements[self.face_to_element[:,0][:,None],node_arranger[self.face_to_element[:,1],:]]
+
+
+
     def Reader(self, filename=None, element_type="tri", reader_type="Salome", reader_type_format=None, 
         reader_type_version=None, order=0, **kwargs):
         """Convenience mesh reader method to dispatch call to subsequent apporpriate methods"""
@@ -2029,7 +2103,8 @@ class Mesh(object):
 
 
 
-    def SimplePlot(self,to_plot='faces',color=None,save=False,filename=None,figure=None,show_plot=True):
+    def SimplePlot(self, to_plot='faces', 
+        color=None, save=False, filename=None, figure=None, show_plot=True):
         """Simple mesh plot
 
             to_plot:        [str] only for 3D. 'faces' to plot only boundary faces
@@ -2043,27 +2118,60 @@ class Mesh(object):
         if color is None:
             color=(197/255.,241/255.,197/255.)
 
-        import matplotlib as mpl
-        import matplotlib.pyplot as plt 
+
+        if save:
+            if filename is None:
+                warn('File name not given. I am going to write one in the current directory')
+                filename = PWD(__file__) + "/output.png"
+            else:
+                if filename.split(".")[-1] == filename:
+                    filename += ".png"
+
+        if self.element_type == "tri" or self.element_type == "quad":
+            import matplotlib as mpl
+            import matplotlib.pyplot as plt
+            if figure is None:
+                figure = plt.figure()
+
+        elif self.element_type == "tet" or self.element_type == "hex":
+            import os
+            os.environ['ETS_TOOLKIT'] = 'qt4'
+            from mayavi import mlab 
+
+            if to_plot == 'all_faces':
+                faces = self.all_faces
+                if self.all_faces is None:
+                    self.GetFaces()
+            else:
+                faces = self.faces
+                if self.faces is None:
+                    self.GetBoundaryFaces()
+
+            if figure is None:
+                figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(1000,800))
+
 
         if self.element_type == "tri":
-            fig = plt.figure()
+
             plt.triplot(self.points[:,0],self.points[:,1], self.elements[:,:3],color='k')
             plt.axis("equal")
+            plt.axis('off')
+            if show_plot:
+                plt.show()
 
         elif self.element_type == "tet":
-            if self.faces is None and self.all_faces is None:
-                raise ValueError('Mesh faces not available. Compute them first')
-            # from mpl_toolkits.mplot3d import Axes3D
-            # fig = plt.figure()
 
-            # FOR PLOTTING ELEMENTS
+            # from mpl_toolkits.mplot3d import Axes3D
+            # import matplotlib.pyplot as plt 
+            # figure = plt.figure()
+
+            # # FOR PLOTTING ELEMENTS
             # for elem in range(self.elements.shape[0]):
             #   coords = self.points[self.elements[elem,:],:]
             #   plt.gca(projection='3d')
             #   plt.plot(coords[:,0],coords[:,1],coords[:,2],'-bo')
 
-            # FOR PLOTTING ONLY BOUNDARY FACES - MATPLOTLIB SOLUTION
+            # # FOR PLOTTING ONLY BOUNDARY FACES - MATPLOTLIB SOLUTION
             # if self.faces.shape[1] == 3:
             #     for face in range(self.faces.shape[0]):
             #         coords = self.points[self.faces[face,:3],:]
@@ -2078,25 +2186,11 @@ class Mesh(object):
             #         plt.plot(coords_all[:,0],coords_all[:,1],coords_all[:,2],'ko')
 
             # plt.axis("equal")
-
-            # FOR PLOTTING ONLY BOUNDARY FACES - MAYAVI.MLAB SOLUTION
-            import os
-            os.environ['ETS_TOOLKIT'] = 'qt4'
-            from mayavi import mlab
-
-            if to_plot == 'all_faces':
-                faces = self.all_faces
-                if self.all_faces is None:
-                    raise ValueError("Boundary faces not available")
-            else:
-                faces = self.faces
-                if self.faces is None:
-                    raise ValueError("Faces not available")
+            # plt.show()
+            # return
 
 
-            if figure is None:
-                figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(1000,800))
-
+            # MAYAVI.MLAB SOLUTION
             mlab.triangular_mesh(self.points[:,0],self.points[:,1],
                 self.points[:,2],self.faces[:,:3],color=color)
             radius = 1e-00
@@ -2107,25 +2201,86 @@ class Mesh(object):
             # svpoints = self.points[np.unique(self.faces),:]
             # mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=0.005)
 
+            # mlab.view(azimuth=135, elevation=45, distance=7, focalpoint=None,
+            #     roll=0, reset_roll=True, figure=None)
+
             if show_plot:
                 mlab.show()
 
         elif self.element_type=="quad":
-            x,y = np.meshgrid(self.points[:,0],self.points[:,1])
-            plt.pcolormesh(x,y,np.zeros_like(x), edgecolor='k', linewidth=1, facecolor=color, cmap=mpl.cm.Greens)
+            # x,y = np.meshgrid(self.points[:,0],self.points[:,1])
+
+            # point_radius = 3.
+            # lmesh = self.GetLinearMesh()
+            # x,y = np.meshgrid(lmesh.points[:,0],lmesh.points[:,1])
+            # plt.plot(self.points[:,0],self.points[:,1],'o',markersize=point_radius,color='k')
+            # plt.pcolormesh(x,y,np.zeros_like(x), edgecolor='k', linewidth=1, facecolor=color, cmap=mpl.cm.Greens)
+            # plt.axis('equal')
+
+            # print self.points[self.elements,:].reshape()
+            # exit()
+
+            C = self.InferPolynomialDegree() - 1
+            from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
+
+            edge_elements = self.GetElementsEdgeNumberingQuad()
+            reference_edges = NodeArrangementQuad(C)[0]
+            reference_edges = np.concatenate((reference_edges,reference_edges[:,1,None]),axis=1)
+            reference_edges = np.delete(reference_edges,1,1)
+
+            self.GetEdgesQuad()
+            x_edges = np.zeros((C+2,self.all_edges.shape[0]))
+            y_edges = np.zeros((C+2,self.all_edges.shape[0]))
+
+            BasesOneD = np.eye(2,2)
+            for iedge in range(self.all_edges.shape[0]):
+                ielem = edge_elements[iedge,0]
+                edge = self.elements[ielem,reference_edges[edge_elements[iedge,1],:]]
+                x_edges[:,iedge], y_edges[:,iedge] = self.points[edge,:].T
+
+            plt.plot(x_edges,y_edges,'-k')
+
+            plt.axis('equal')
+            plt.axis('off')
+            if show_plot:
+                plt.show()
+
+
+        elif self.element_type == "hex":
+
+            from Florence.PostProcessing import PostProcess
+            tmesh = PostProcess.TessellateHexes(self,np.zeros_like(self.points),plot_points=True,
+                interpolation_degree=0)
+
+            Xplot = tmesh.points
+            Tplot = tmesh.elements
+            color=(197/255.,241/255.,197/255.)
+            point_line_width = .002
+
+            trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot,
+                    line_width=point_line_width,color=color)
+
+            src = mlab.pipeline.scalar_scatter(tmesh.x_edges.T.copy().flatten(), 
+                tmesh.y_edges.T.copy().flatten(), tmesh.z_edges.T.copy().flatten())
+            src.mlab_source.dataset.lines = tmesh.connections
+            lines = mlab.pipeline.stripper(src)
+            h_edges = mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
+
+            # mlab.view(azimuth=135, elevation=45, distance=7, focalpoint=None,
+                # roll=0, reset_roll=True, figure=None)
+
+            if show_plot:
+                mlab.show()
 
         else:
             raise NotImplementedError("SimplePlot for "+self.element_type+" not implemented yet")
 
-        if save:
-            if filename is None:
-                raise KeyError('File name not given. Supply one')
-            else:
-                if filename.split(".")[-1] == filename:
-                    filename += ".eps"
-                plt.savefig(filename,format="eps",dpi=300)
 
-        plt.show()
+        if save:
+            if self.InferSpatialDimension() == 2:
+                plt.savefig(filename,format="png",dpi=300)
+            else:
+                mlab.savefig(filename,dpi=300)
 
 
 
@@ -2157,8 +2312,32 @@ class Mesh(object):
         elif self.element_type == "quad":
 
             fig = plt.figure()
-            x,y = np.meshgrid(self.points[:,0],self.points[:,1])
-            plt.pcolormesh(x,y,np.zeros_like(x), edgecolor='k', linewidth=1, cmap=mpl.cm.Greens)
+            point_radius = 3.
+            # lmesh = self.GetLinearMesh()
+            # x,y = np.meshgrid(lmesh.points[:,0],lmesh.points[:,1])
+            # plt.plot(self.points[:,0],self.points[:,1],'o',markersize=point_radius,color='k')
+            # plt.pcolormesh(x,y,np.zeros_like(x), edgecolor='k', linewidth=1, cmap=mpl.cm.Greens)
+
+            C = self.InferPolynomialDegree() - 1
+            from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
+
+            edge_elements = self.GetElementsEdgeNumberingQuad()
+            reference_edges = NodeArrangementQuad(C)[0]
+            reference_edges = np.concatenate((reference_edges,reference_edges[:,1,None]),axis=1)
+            reference_edges = np.delete(reference_edges,1,1)
+
+            self.GetEdgesQuad()
+            x_edges = np.zeros((C+2,self.all_edges.shape[0]))
+            y_edges = np.zeros((C+2,self.all_edges.shape[0]))
+
+            BasesOneD = np.eye(2,2)
+            for iedge in range(self.all_edges.shape[0]):
+                ielem = edge_elements[iedge,0]
+                edge = self.elements[ielem,reference_edges[edge_elements[iedge,1],:]]
+                x_edges[:,iedge], y_edges[:,iedge] = self.points[edge,:].T
+
+                
+            plt.plot(x_edges,y_edges,'-k')
             
             for i in range(self.elements.shape[0]):
                 coord = self.points[self.elements[i,:],:]
@@ -2847,6 +3026,272 @@ class Mesh(object):
         return lmesh
 
 
+    def ConvertTrisToQuads(self):
+        """Converts a tri mesh to a quad mesh through refinement/splitting. 
+            This is a simpler version of the the Blossom-quad algorithm implemented in gmsh"""
+
+        self.__do_memebers_exist__()
+        assert self.element_type == "tri"
+        if self.IsHighOrder:
+            raise ValueError('High order triangular elements cannot be converted to low/high order quads')
+
+        tconv = time()
+
+        # SPLIT THE TRIANGLE INTO 3 QUADS BY CONNECTING THE 
+        # MEDIAN AND MIDPOINTS OF THE TRIANGLE
+
+        # FIND MEDIAN OF TRIANGLES
+        # median = self.Median()
+        median = np.sum(self.points[self.elements,:],axis=1)/self.elements.shape[1]
+        # FIND EDGE MIDPOINTS OF TRIANGLES
+        mid0 = np.sum(self.points[self.elements[:,:2],:],axis=1)/2.
+        mid1 = np.sum(self.points[self.elements[:,[1,2]],:],axis=1)/2.
+        mid2 = np.sum(self.points[self.elements[:,[2,0]],:],axis=1)/2.
+
+        # STABLE APPROACH
+        # points = np.zeros((1,2))
+        # for elem in range(self.nelem):
+        #     quad0 = np.concatenate((self.points[self.elements[elem,0],:][None,:],mid0[elem,:][None,:],median[elem,:][None,:],mid2[elem,:][None,:]),axis=0)
+        #     quad1 = np.concatenate((self.points[self.elements[elem,1],:][None,:],mid1[elem,:][None,:],median[elem,:][None,:],mid0[elem,:][None,:]),axis=0)
+        #     quad2 = np.concatenate((self.points[self.elements[elem,2],:][None,:],mid2[elem,:][None,:],median[elem,:][None,:],mid1[elem,:][None,:]),axis=0)
+        #     points = np.concatenate((points,quad0,quad1,quad2))
+        # points = points[1:,:]
+
+        points = np.zeros((3*self.nelem*4,2))
+        points[::3*4,:] = self.points[self.elements[:,0],:]
+        points[1::3*4,:] = mid0
+        points[2::3*4,:] = median
+        points[3::3*4,:] = mid2
+
+        points[4::3*4,:] = self.points[self.elements[:,1],:]
+        points[5::3*4,:] = mid1
+        points[6::3*4,:] = median
+        points[7::3*4,:] = mid0
+
+        points[8::3*4,:] = self.points[self.elements[:,2],:]
+        points[9::3*4,:] = mid2
+        points[10::3*4,:] = median
+        points[11::3*4,:] = mid1
+
+
+        # KEEP ZEROFY ON, OTHERWISE YOU GET STRANGE BEHVAIOUR
+        Decimals = 10
+        rounded_points = points.copy()
+        makezero(rounded_points) 
+        rounded_repoints = np.round(rounded_points,decimals=Decimals)
+        points, idx_points, inv_points = unique2d(rounded_points,order=False,
+            consider_sort=False,return_index=True,return_inverse=True)
+
+        elements = np.arange(points.shape[0])[inv_points].reshape(3*self.nelem,4)
+
+        self.__reset__()
+
+        self.element_type = "quad"
+        self.elements = elements
+        self.points = points
+        self.nelem = self.elements.shape[0]
+        self.nnode = self.points.shape[0]
+        self.GetBoundaryEdgesQuad()
+
+        print "Triangular to quadrilateral mesh conversion took", time() - tconv, "seconds" 
+
+
+    def ConvertTetsToHexes(self):
+        """Converts a tet mesh to a hex mesh through refinement/splitting
+        """
+
+        self.__do_memebers_exist__()
+        assert self.element_type == "tet"
+        if self.IsHighOrder:
+            raise ValueError('High order triangular elements cannot be converted to low/high order quads')
+
+        tconv = time()
+
+        # SPLIT THE TET INTO 4 QUADS
+
+        # FIND MEDIAN OF TETS
+        # median = self.Median()
+        median = np.sum(self.points[self.elements,:],axis=1)/self.elements.shape[1]
+        # FIND EDGE MIDPOINTS OF TETS
+        mid01 = np.sum(self.points[self.elements[:,[0,1]],:],axis=1)/2.
+        mid02 = np.sum(self.points[self.elements[:,[2,0]],:],axis=1)/2.
+        mid03 = np.sum(self.points[self.elements[:,[0,3]],:],axis=1)/2.
+        mid12 = np.sum(self.points[self.elements[:,[1,2]],:],axis=1)/2.
+        mid13 = np.sum(self.points[self.elements[:,[1,3]],:],axis=1)/2.
+        mid23 = np.sum(self.points[self.elements[:,[2,3]],:],axis=1)/2.
+        # FIND MEDIAN OF FACES
+        med012 = np.sum(self.points[self.elements[:,[0,1,2]],:],axis=1)/3.
+        med013 = np.sum(self.points[self.elements[:,[0,1,3]],:],axis=1)/3.
+        med023 = np.sum(self.points[self.elements[:,[0,2,3]],:],axis=1)/3.
+        med123 = np.sum(self.points[self.elements[:,[1,2,3]],:],axis=1)/3.
+
+        # # STABLE APPROACH
+        # points = np.zeros((1,3))
+        # for elem in range(self.nelem):
+        #     hex0 = np.concatenate((self.points[self.elements[elem,0],:][None,:], mid01[elem,:][None,:], 
+        #         med012[elem,:][None,:], mid02[elem,:][None,:], 
+        #         mid03[elem,:][None,:], med013[elem,:][None,:], 
+        #         median[elem,:][None,:], med023[elem,:][None,:]),axis=0)
+
+        #     hex1 = np.concatenate((self.points[self.elements[elem,1],:][None,:], mid13[elem,:][None,:], 
+        #         med123[elem,:][None,:], mid12[elem,:][None,:], 
+        #         mid01[elem,:][None,:], med013[elem,:][None,:],
+        #         median[elem,:][None,:], med012[elem,:][None,:]),axis=0)
+
+        #     hex2 = np.concatenate((self.points[self.elements[elem,3],:][None,:], mid23[elem,:][None,:], 
+        #         med123[elem,:][None,:], mid13[elem,:][None,:], 
+        #         mid03[elem,:][None,:], med023[elem,:][None,:],
+        #         median[elem,:][None,:], med013[elem,:][None,:]),axis=0)
+
+        #     hex3 = np.concatenate((self.points[self.elements[elem,2],:][None,:], mid02[elem,:][None,:], 
+        #         med012[elem,:][None,:], mid12[elem,:][None,:], 
+        #         mid23[elem,:][None,:], med023[elem,:][None,:], 
+        #         median[elem,:][None,:],med123[elem,:][None,:]),axis=0)
+
+        #     points = np.concatenate((points,hex0,hex1,hex2,hex3))
+        # points = points[1:,:]
+
+        points = np.zeros((4*self.nelem*8,3))
+        points[0::4*8,:] = self.points[self.elements[:,0],:]
+        points[1::32,:] = mid01
+        points[2::32,:] = med012
+        points[3::32,:] = mid02
+        points[4::32,:] = mid03
+        points[5::32,:] = med013
+        points[6::32,:] = median
+        points[7::32,:] = med023
+
+        points[8::32,:] = self.points[self.elements[:,1],:]
+        points[9::32,:] = mid13
+        points[10::32,:] = med123
+        points[11::32,:] = mid12
+        points[12::32,:] = mid01
+        points[13::32,:] = med013
+        points[14::32,:] = median
+        points[15::32,:] = med012
+
+        points[16::32,:] = self.points[self.elements[:,3],:]
+        points[17::32,:] = mid23
+        points[18::32,:] = med123
+        points[19::32,:] = mid13
+        points[20::32,:] = mid03
+        points[21::32,:] = med023
+        points[22::32,:] = median
+        points[23::32,:] = med013
+
+        points[24::32,:] = self.points[self.elements[:,2],:]
+        points[25::32,:] = mid02
+        points[26::32,:] = med012
+        points[27::32,:] = mid12
+        points[28::32,:] = mid23
+        points[29::32,:] = med023
+        points[30::32,:] = median
+        points[31::32,:] = med123
+
+        # KEEP ZEROFY ON, OTHERWISE YOU GET STRANGE BEHVAIOUR
+        Decimals = 10
+        rounded_points = points.copy()
+        makezero(rounded_points) 
+        rounded_repoints = np.round(rounded_points,decimals=Decimals)
+        points, inv_points = unique2d(rounded_points,order=False,
+            consider_sort=False,return_inverse=True)
+
+
+        elements = np.arange(points.shape[0])[inv_points].reshape(4*self.nelem,8)
+
+
+        self.__reset__()
+
+        self.element_type = "hex"
+        self.elements = elements
+        self.points = points
+        self.nelem = self.elements.shape[0]
+        self.nnode = self.points.shape[0]
+        self.GetBoundaryFacesHex()
+        self.GetBoundaryEdgesHex()
+
+        print "Tetrahedral to hexahedral mesh conversion took", time() - tconv, "seconds"
+
+
+    def ConvertQuadsToTris(self):
+        """Converts a quad mesh to a tri mesh through refinement/splitting
+
+            NOTE: If only linear elements are required conversion of quads to tris
+            can be done using Delauney triangularation. The following implementation
+            takes care of high order elements as well
+        """
+
+        self.__do_memebers_exist__()
+        assert self.element_type == "quad"
+
+        tconv = time()
+
+        from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuadToTri
+
+        C = self.InferPolynomialDegree() - 1
+        node_arranger = NodeArrangementQuadToTri(C)
+
+        tris = np.concatenate((self.elements[:,node_arranger[0,:]], 
+            self.elements[:,node_arranger[1,:]]),axis=0).astype(self.elements.dtype)
+        
+        points = self.points
+        edges = self.edges
+
+        self.__reset__()
+
+        self.element_type = "tri"
+        self.elements = tris.copy('c')
+        self.points = points
+        self.nelem = self.elements.shape[0]
+        self.nnode = self.points.shape[0]
+        self.edges = edges
+
+        print "Quadrilateral to triangular mesh conversion took", time() - tconv, "seconds"
+
+
+    def ConvertHexesToTets(self):
+        """Converts a hex mesh to a tet mesh through refinement/splitting
+
+            A hexahedron can be split into 5 or 6 tetrahedrons and there are
+            many possible configuration without the edges/faces intersecting each
+            other. This method splits a hex into 6 tets
+        """
+
+        self.__do_memebers_exist__()
+        assert self.element_type == "hex"
+
+        tconv = time()
+
+        from Florence.QuadratureRules.NodeArrangement import NodeArrangementHexToTet
+
+        C = self.InferPolynomialDegree() - 1
+        node_arranger = NodeArrangementHexToTet(C)
+
+        tets = np.concatenate((self.elements[:,node_arranger[0,:]],
+            self.elements[:,node_arranger[1,:]],
+            self.elements[:,node_arranger[2,:]],
+            self.elements[:,node_arranger[3,:]],
+            self.elements[:,node_arranger[4,:]],
+            self.elements[:,node_arranger[5,:]]),axis=0).astype(self.elements.dtype)
+        
+        points = self.points
+        edges = self.edges
+        all_edges = self.all_edges
+
+        self.__reset__()
+
+        self.element_type = "tet"
+        self.elements = tets.copy('c')
+        self.points = points.copy('c')
+        self.nelem = self.elements.shape[0]
+        self.nnode = self.points.shape[0]
+        self.GetBoundaryFacesTet()
+        if edges is not None:
+            self.edges = edges.copy('c')
+        if all_edges is not None:
+            self.all_edges = all_edges
+
+        print "Hexahedral to tetrahedral mesh conversion took", time() - tconv, "seconds"
 
 
 
@@ -2911,13 +3356,23 @@ class Mesh(object):
         return self
 
 
+    def __do_memebers_exist__(self):
+        """Check if essential members exist"""
+        assert self.element_type is not None
+        assert self.elements is not None
+        assert self.points is not None
+        assert self.edges is not None
+        ndim = self.InferSpatialDimension()
+        if ndim==3:
+            assert self.faces is not None
+
+
     def __reset__(self):
         """Class resetter. Resets all elements of the class
         """
 
         for i in self.__dict__.keys():
             self.__dict__[i] = None
-
 
 
 

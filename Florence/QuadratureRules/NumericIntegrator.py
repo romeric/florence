@@ -87,7 +87,6 @@ def GaussQuadratureLogarithmic(N,a=0,b=1):
 
 
 def GaussLobattoQuadrature(C):
-# def TabulatedGaussLobattoQuadrature(C):
     # THIS IS A TABULATED ROUTINE THAT FALL BACKS TO ALGORITHMIC ROUTINE FOR C>20
     zw=[]
     if C < 2:

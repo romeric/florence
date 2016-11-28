@@ -154,8 +154,8 @@ def GetMeshesOneCylinder(p=1):
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition)
 
-    # solution.CurvilinearPlot(QuantityToPlot=solution.sol[:,1,-1],plot_on_faces=False, plot_points=True, point_radius=.08)
-    # solution.Plot(configuration="deformed",quantity=2,plot_points=True)
+    solution.CurvilinearPlot(QuantityToPlot=solution.sol[:,1,-1],plot_on_faces=False, plot_points=True, point_radius=.08)
+    # solution.Plot(configuration="deformed",quantity=20,plot_points=True, point_radius=.08)
     # solution.Animate(configuration="original",quantity=2,plot_points=True)
     # solution.CurvilinearPlot(interpolation_degree=20, plot_points=True, point_radius=.08)
 
@@ -179,9 +179,11 @@ def ProblemOneCylinder(p=1, incr=0):
             mesh.OneElementCylinder(nz=10)
         else:
             mesh.ReadHDF5(filename=PWD(__file__)+"/OneCylinder10_P"+str(p)+".mat")
+            # mesh.GetHighOrderMesh()
     else:
         mesh.ReadHDF5("/home/roman/ZZZchecker/Cylinder_Config_"+str(incr-1)+"_P"+str(p)+".mat")      
     makezero(mesh.points)
+
 
 
 
@@ -238,7 +240,7 @@ def ProblemOneCylinder(p=1, incr=0):
         normals[:,0] = ref[:,1]
         normals[:,1] = -ref[:,0]
 
-        dyf = .2
+        dyf = 0.1
         boundary_data[ZF_Y,:] = dyf*normals
 
         # print boundary_data
@@ -260,13 +262,16 @@ def ProblemOneCylinder(p=1, incr=0):
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition)
 
-    # solution.Plot(configuration="deformed",quantity=0, plot_points=True, colorbar=False, point_radius=.14)
+    solution.Plot(configuration="deformed",quantity=20, plot_points=True, colorbar=False, point_radius=.14)
     # solution.Plot(configuration="deformed",quantity=0,plot_points=True, colorbar=False, save=True, 
         # filename="/home/roman/ZZZchecker/twister_P"+str(p)+"_incr_%03d.png" % incr,show_plot=False, point_radius=.14)
     # solution.Animate(configuration="deformed",quantity=20,plot_points=True, point_radius=.1)
 
     # mesh.points += solution.sol[:,:ndim,-1]
     # mesh.WriteHDF5("/home/roman/ZZZchecker/Cylinder_Config_"+str(incr)+"_P"+str(p)+".mat")
+
+
+    # solution.WriteVTK("/home/roman/ZPlots/HH.vtu", quantity=0)
 
 
 if __name__ == "__main__":

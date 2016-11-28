@@ -5,10 +5,9 @@ import gc
 from time import time
 import multiprocessing as MP
 
-import GetInteriorCoordinates as Gett
-from Florence.QuadratureRules.FeketePointsTet import *
 from Florence.Tensor import itemfreq, makezero, unique2d, remove_duplicates_2D
 import Florence.ParallelProcessing.parmap as parmap
+import GetInteriorCoordinates as Gett
 
 #--------------------------------------------------------------------------------------------------------------------------#
 # SUPPLEMENTARY FUNCTIONS 
@@ -19,8 +18,9 @@ def ElementLoopHex(elem,elements,points,MeshType,eps,Neval):
 
 def HighOrderMeshHex(C,mesh,Decimals=10,Zerofy=True,Parallel=False,nCPU=1,ComputeAll=True):
 
-    from Florence.FunctionSpace import HexLagrangeGaussLobatto as ThreeD
-    from Florence.QuadratureRules.GaussLobattoPoints import GaussLobattoPointsHex
+    from Florence.FunctionSpace import Hex
+    from Florence.QuadratureRules import FeketePointsTet
+    from Florence.QuadratureRules import GaussLobattoPointsHex
     from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
 
     
@@ -33,7 +33,7 @@ def HighOrderMeshHex(C,mesh,Decimals=10,Zerofy=True,Parallel=False,nCPU=1,Comput
 
     # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
     Neval = np.zeros((8,eps.shape[0]),dtype=np.float64)
-    hpBases = ThreeD.LagrangeGaussLobatto
+    hpBases = Hex.LagrangeGaussLobatto
     for i in range(8,eps.shape[0]):
         # print hpBases(0,eps[i,0],eps[i,1],eps[i,2]).shape
         Neval[:,i] = hpBases(0,eps[i,0],eps[i,1],eps[i,2])[:,0]

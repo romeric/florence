@@ -104,8 +104,10 @@ def ProblemData(*args, **kwargs):
     fem_solver = FEMSolver(number_of_load_increments=1,analysis_type="static",
         analysis_nature="linear",parallelise=False)
 
-    TotalDisp = fem_solver.Solve(formulation=formulation, mesh=mesh, 
+    solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition, solver=solver)
+
+    solution.CurvilinearPlot()
 
 
 if __name__ == "__main__":
