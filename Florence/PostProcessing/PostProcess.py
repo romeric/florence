@@ -6,16 +6,14 @@ from Florence import QuadratureRule, FunctionSpace
 from Florence.Base import JacobianError, IllConditionedError
 from Florence.Utils import PWD, RSWD
 
-# import Florence.FunctionSpace.TwoDimensional.Quad.QuadLagrangeGaussLobatto as TwoD
-# import Florence.FunctionSpace.ThreeDimensional.Hexahedral.HexLagrangeGaussLobatto as ThreeD
-from Florence.FunctionSpace import QuadLagrangeGaussLobatto as TwoD
-from Florence.FunctionSpace import HexLagrangeGaussLobatto as ThreeD
 # Modal Bases
 # import Core.FunctionSpace.TwoDimensional.Tri.hpModal as Tri 
 # import Core.FunctionSpace.ThreeDimensional.Tetrahedral.hpModal as Tet 
 # Nodal Bases
 from Florence.FunctionSpace import Tri
 from Florence.FunctionSpace import Tet
+from Florence.FunctionSpace import Quad
+from Florence.FunctionSpace import Hex
 
 from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import *
 from Florence import Mesh
@@ -562,9 +560,6 @@ class PostProcess(object):
             if isinstance(filename,str) is False:
                 raise ValueError("file name should be a string")
 
-        if self.mesh.element_type == "quad" or self.mesh.element_type == "hex":
-            with_curved_mesh = False
-
         C = self.mesh.InferPolynomialDegree() - 1
         if C == 0:
             write_curved_mesh = False
@@ -587,56 +582,56 @@ class PostProcess(object):
         LoadIncrement = self.sol.shape[2]
 
 
-        if write_curved_mesh: 
+        if write_curved_mesh:
 
             if lmesh.element_type =='tet':
-                
                 cellflag = 5
-
-                # tmesh = PostProcess.CurvilinearPlotTet(self.mesh, np.zeros_like(self.mesh.points), 
-                #     QuantityToPlot= self.sol[:,0,0],
-                #     show_plot=False, plot_on_faces=False, 
-                #     plot_points=True, save_tessellation=True)[-1]
-
                 tmesh = PostProcess.TessellateTets(self.mesh, np.zeros_like(self.mesh.points), 
                     QuantityToPlot=self.sol[:,0,0], plot_on_faces=False, plot_points=True,
-                    interpolation_degree=8)
+                    interpolation_degree=10)
+            elif lmesh.element_type =='hex':
+                cellflag = 5 
+                tmesh = PostProcess.TessellateHexes(self.mesh, np.zeros_like(self.mesh.points), 
+                    QuantityToPlot=self.sol[:,0,0], plot_on_faces=False, plot_points=True,
+                    interpolation_degree=10)
+            else:
+                raise ValueError('Not implemented yet. Use in-built visualiser for 2D problems')
 
-                nsize = tmesh.nsize
-                nface = tmesh.nface
-                ssol = self.sol[np.unique(tmesh.faces_to_plot),:,:]
+            nsize = tmesh.nsize
+            nface = tmesh.nface
+            ssol = self.sol[np.unique(tmesh.faces_to_plot),:,:]
 
-                for Increment in range(LoadIncrement):
+            for Increment in range(LoadIncrement):
 
-                    extrapolated_sol = np.zeros((tmesh.points.shape[0], self.sol.shape[1]))
-                    for ielem in range(nface):
-                        extrapolated_sol[ielem*nsize:(ielem+1)*nsize,:] = np.dot(tmesh.bases_2, 
-                            ssol[tmesh.smesh.elements[ielem,:],:, Increment])
+                extrapolated_sol = np.zeros((tmesh.points.shape[0], self.sol.shape[1]))
+                for ielem in range(nface):
+                    extrapolated_sol[ielem*nsize:(ielem+1)*nsize,:] = np.dot(tmesh.bases_2, 
+                        ssol[tmesh.smesh.elements[ielem,:],:, Increment])
 
-                    svpoints = self.mesh.points[np.unique(tmesh.faces_to_plot),:] + ssol[:,:ndim,Increment]
+                svpoints = self.mesh.points[np.unique(tmesh.faces_to_plot),:] + ssol[:,:ndim,Increment]
 
-                    for iedge in range(tmesh.smesh.all_edges.shape[0]):
-                        ielem = tmesh.edge_elements[iedge,0]
-                        edge = tmesh.smesh.elements[ielem,tmesh.reference_edges[tmesh.edge_elements[iedge,1],:]]
-                        coord_edge = svpoints[edge,:]
-                        tmesh.x_edges[:,iedge], tmesh.y_edges[:,iedge], tmesh.z_edges[:,iedge] = np.dot(coord_edge.T,tmesh.bases_1)
+                for iedge in range(tmesh.smesh.all_edges.shape[0]):
+                    ielem = tmesh.edge_elements[iedge,0]
+                    edge = tmesh.smesh.elements[ielem,tmesh.reference_edges[tmesh.edge_elements[iedge,1],:]]
+                    coord_edge = svpoints[edge,:]
+                    tmesh.x_edges[:,iedge], tmesh.y_edges[:,iedge], tmesh.z_edges[:,iedge] = np.dot(coord_edge.T,tmesh.bases_1)
 
-                    edge_coords = np.concatenate((tmesh.x_edges.T.copy().flatten()[:,None], 
-                        tmesh.y_edges.T.copy().flatten()[:,None],
-                        tmesh.z_edges.T.copy().flatten()[:,None]),axis=1)
+                edge_coords = np.concatenate((tmesh.x_edges.T.copy().flatten()[:,None], 
+                    tmesh.y_edges.T.copy().flatten()[:,None],
+                    tmesh.z_edges.T.copy().flatten()[:,None]),axis=1)
 
-                    vtk_writer.write_vtu(Verts=edge_coords, 
-                        Cells={3:tmesh.connections},
-                        fname=filename.split('.')[0]+'_curved_lines_increment_'+str(Increment)+'.vtu')
+                vtk_writer.write_vtu(Verts=edge_coords, 
+                    Cells={3:tmesh.connections},
+                    fname=filename.split('.')[0]+'_curved_lines_increment_'+str(Increment)+'.vtu')
 
-                    vtk_writer.write_vtu(Verts=svpoints,
-                        Cells={1:np.arange(svpoints.shape[0])},
-                        fname=filename.split('.')[0]+'_curved_points_increment_'+str(Increment)+'.vtu')
+                vtk_writer.write_vtu(Verts=svpoints,
+                    Cells={1:np.arange(svpoints.shape[0])},
+                    fname=filename.split('.')[0]+'_curved_points_increment_'+str(Increment)+'.vtu')
 
-                    for quant in iterator:
-                        vtk_writer.write_vtu(Verts=tmesh.points+extrapolated_sol[:,:ndim], 
-                            Cells={cellflag:tmesh.elements}, pdata=extrapolated_sol[:,quant],
-                            fname=filename.split('.')[0]+'_curved_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu')
+                for quant in iterator:
+                    vtk_writer.write_vtu(Verts=tmesh.points+extrapolated_sol[:,:ndim], 
+                        Cells={cellflag:tmesh.elements}, pdata=extrapolated_sol[:,quant],
+                        fname=filename.split('.')[0]+'_curved_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu')
 
         else:
 
@@ -2733,7 +2728,7 @@ class PostProcess(object):
             mlab.draw()
             mlab.show()
 
-        mlab.close()
+        # mlab.close()
 
 
         if save_tessellation:
@@ -2758,7 +2753,7 @@ class PostProcess(object):
         from Florence.QuadratureRules.GaussLobattoPoints import GaussLobattoPointsQuad
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
-        from Florence.FunctionSpace import QuadLagrangeGaussLobatto as Quad
+        from Florence.FunctionSpace import Quad
         from Florence.FunctionSpace.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
 
         from copy import deepcopy
@@ -3077,10 +3072,10 @@ class PostProcess(object):
 
 
 
-        from Florence.QuadratureRules.GaussLobattoPoints import GaussLobattoPointsQuad
+        from Florence.QuadratureRules import GaussLobattoPointsQuad
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
-        from Florence.FunctionSpace import QuadLagrangeGaussLobatto as Quad
+        from Florence.FunctionSpace import Quad
         from Florence.FunctionSpace.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
 
         from copy import deepcopy
@@ -3155,9 +3150,10 @@ class PostProcess(object):
         mapper = np.arange(unique_elements.shape[0])
         smesh.elements = mapper[inv].reshape(smesh.elements.shape)
  
-        smesh.GetBoundaryEdgesTri()
-        smesh.GetEdgesTri()
-        edge_elements = smesh.GetElementsEdgeNumberingTri()
+        smesh.GetBoundaryEdgesQuad()
+        smesh.GetEdgesQuad()
+        edge_elements = smesh.GetElementsEdgeNumberingQuad()
+
 
         
         # GET EDGE ORDERING IN THE REFERENCE ELEMENT
@@ -3208,6 +3204,7 @@ class PostProcess(object):
 
             Xplot = np.zeros((nnode,3),dtype=np.float64)
             Tplot = np.zeros((nelem,3),dtype=np.int64)
+            Uplot = np.zeros(nnode,dtype=np.float64)
 
             # FOR CURVED ELEMENTS
             for ielem in range(nface):
@@ -3215,7 +3212,6 @@ class PostProcess(object):
                 Tplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex,:] = Triangles + ielem*nsize
 
             if QuantityToPlot is not None:
-                Uplot = np.zeros(nnode,dtype=np.float64)
                 if plot_on_faces:
                     for ielem in range(nface):
                         Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]

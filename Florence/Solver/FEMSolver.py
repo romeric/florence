@@ -146,6 +146,7 @@ class FEMSolver(object):
 
         if self.analysis_nature == "nonlinear":
             post_process.newton_raphson_convergence = self.NRConvergence
+            
         return post_process
 
 
@@ -258,7 +259,6 @@ class FEMSolver(object):
                 K,NeumannForces,NodalForces,Residual,
                 mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition)
 
-
         return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
 
 
@@ -308,7 +308,6 @@ class FEMSolver(object):
 
             # APPLY DIRICHLET BOUNDARY CONDITIONS & GET REDUCED MATRICES 
             K_b, F_b = boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,AppliedDirichletInc)[:2]
-            
             # SOLVE THE SYSTEM
             t_solver=time()
             sol = solver.Solve(K_b,F_b)
@@ -347,7 +346,6 @@ class FEMSolver(object):
 
                 del smesh, post_process
                 gc.collect()
-                
 
 
         return TotalDisp

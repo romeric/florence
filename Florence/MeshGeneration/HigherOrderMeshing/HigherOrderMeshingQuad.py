@@ -10,8 +10,8 @@ from Florence.Tensor import itemfreq, makezero, unique2d, remove_duplicates_2D
 
 def HighOrderMeshQuad(C, mesh, Decimals=10, Parallel=False, nCPU=1):
     
-    from Florence.FunctionSpace import QuadLagrangeGaussLobatto as TwoD
-    from Florence.QuadratureRules.GaussLobattoPoints import GaussLobattoPointsQuad
+    from Florence.FunctionSpace import Quad
+    from Florence.QuadratureRules import GaussLobattoPointsQuad
     from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
 
     if mesh.points.shape[1]!=2:
@@ -22,7 +22,7 @@ def HighOrderMeshQuad(C, mesh, Decimals=10, Parallel=False, nCPU=1):
     # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
     Neval = np.zeros((4,eps.shape[0]),dtype=np.float64)
     for i in range(0,eps.shape[0]):
-        Neval[:,i] = TwoD.LagrangeGaussLobatto(0,eps[i,0],eps[i,1],arrange=1)[:,0]
+        Neval[:,i] = Quad.LagrangeGaussLobatto(0,eps[i,0],eps[i,1],arrange=1)[:,0]
     makezero(Neval)
 
     nodeperelem = mesh.elements.shape[1]
