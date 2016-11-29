@@ -119,31 +119,20 @@ def ProblemData(*args, **kwargs):
 
 def ProblemData_2(*args, **kwargs):
 
-    ndim=3
+    ndim=2
     p=2
-
-    # material = IsotropicElectroMechanics_2(ndim,youngs_modulus=1.0,poissons_ratio=0.3, c1=1.0, c2=1.0)
-    # material = IsotropicElectroMechanics_0(ndim,youngs_modulus=1.0,poissons_ratio=0.3, eps_1=100.5)
-    # material = IsotropicElectroMechanics_3(ndim,youngs_modulus=1.0e6,poissons_ratio=0.3, eps_1=10.5e-4, eps_2=1e-4)
-    # material = Steinmann(ndim,youngs_modulus=1.0e6,poissons_ratio=0.3, c1=10.5e-4, c2=1e-4, eps_1=1e-5)
-    # material = IsotropicElectroMechanics_106(ndim,mu1=1.0,mu2=0.5, lamb=1.0, eps_1=10.5, eps_2=2.1)
-    # material = IsotropicElectroMechanics_106(ndim,mu1=1.0e6,mu2=0.5e6, lamb=2.0e6, eps_1=1e-03, eps_2=1e-03)
-    # material = IsotropicElectroMechanics_107(ndim,mu1=1.0,mu2=0.5, lamb=1.0, eps_1=10.5, eps_2=200.1, mue=1.0, eps_e=1.0)
-
-
-    # material = IsotropicElectroMechanics_101(ndim,mu=1.0, lamb=2.0, eps_1=1e4)
-    # material = IsotropicElectroMechanics_102(ndim,mu=1.0, lamb=2.0, eps_1=1e4)
-    # material = IsotropicElectroMechanics_104(ndim,mu=1.0, lamb=2.0, eps_1=1e4, eps_2=1e4)
-    # material = IsotropicElectroMechanics_105(ndim,mu1=1.0,mu2=0.005, lamb=2.0, eps_1=1e4, eps_2=1e4)
-    # material = IsotropicElectroMechanics_106(ndim,mu1=1.0,mu2=0.005, lamb=2.0, eps_1=1e4, eps_2=1e4) ###
-    material = NeoHookean_2(ndim,youngs_modulus=2.3*1e4, poissons_ratio=0.3)
 
     mesh = Mesh()
     # mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),nx=2,ny=2)
-    # mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),nx=50,ny=100)
+    mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),nx=4,ny=8)
+    # mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),nx=4,ny=8, element_type="quad")
     # mesh.Rectangle(lower_left_point=(-1,-1),upper_right_point=(1,1),nx=2,ny=2)
     # mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),element_type="quad",nx=2,ny=2)
     # mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),nx=5,ny=5)
+
+    # mesh.Sphere()
+    # mesh.SimplePlot()
+    # material.GetFibresOrientation(mesh,plot=False)
     # mesh.GetHighOrderMesh(p=2)
     # exit()
     # print mesh.points.shape[0], mesh.nelem
@@ -154,10 +143,11 @@ def ProblemData_2(*args, **kwargs):
     # mesh.Reader("/home/roman/Dropbox/florence/examples/FiniteElements/Cylinder/Hollow_Cylinder.dat", "tet")
     # mesh.Reader("/home/roman/Dropbox/florence/examples/FiniteElements/Nonlinear_Electromechanics_Benchmark/Patch_26807.dat", "tet")
     # mesh.Reader("/home/roman/Dropbox/florence/examples/FiniteElements/Nonlinear_3D_Cube/Mesh_Cube_12_Tet.dat", "tet")
-    mesh.Reader("/home/roman/Dropbox/florence/examples/FiniteElements/Nonlinear_Electromechanics_3D_Beam/Mesh_64.dat", "hex")
+    # mesh.Reader("/home/roman/Dropbox/florence/examples/FiniteElements/Nonlinear_Electromechanics_3D_Beam/Mesh_125.dat", "hex")
 
     # mesh.elements = np.array([[0,1,2,3]])
     # mesh.points = np.array([
+    # exit()
     #     [-1,-1,-1.],
     #     [ 1,-1,-1.],
     #     [-1, 1,-1.],
@@ -175,19 +165,47 @@ def ProblemData_2(*args, **kwargs):
     # print mesh.points.shape, mesh.elements.shape
     # mesh.ConvertTrisToQuads()
     # mesh.ConvertQuadsToTris()
-    mesh.ConvertHexesToTets()
+    # mesh.ConvertHexesToTets()
     # mesh.ConvertTetsToHexes()
     # mesh.GetHighOrderMesh(p=p)
     # print mesh.nelem
     # print mesh.points
     # print mesh.points[mesh.elements[0,:],:]
-    mesh.SimplePlot()
+    # mesh.SimplePlot()
     # mesh.PlotMeshNumbering()
     # print mesh.points
     # print mesh.edges
     # from Florence.PostProcessing import PostProcess
     # PostProcess.TessellateHexes(mesh,np.zeros_like(mesh.points),interpolation_degree=0,plot_points=True)
-    exit()
+    # exit()
+
+
+    # material = IsotropicElectroMechanics_2(ndim,youngs_modulus=1.0,poissons_ratio=0.3, c1=1.0, c2=1.0)
+    # material = IsotropicElectroMechanics_0(ndim,youngs_modulus=1.0,poissons_ratio=0.3, eps_1=100.5)
+    # material = IsotropicElectroMechanics_3(ndim,youngs_modulus=1.0e6,poissons_ratio=0.3, eps_1=10.5e-4, eps_2=1e-4)
+    # material = Steinmann(ndim,youngs_modulus=1.0e6,poissons_ratio=0.3, c1=10.5e-4, c2=1e-4, eps_1=1e-5)
+    # material = IsotropicElectroMechanics_106(ndim,mu1=1.0,mu2=0.5, lamb=1.0, eps_1=10.5, eps_2=2.1)
+    # material = IsotropicElectroMechanics_106(ndim,mu1=1.0e6,mu2=0.5e6, lamb=2.0e6, eps_1=1e-03, eps_2=1e-03)
+    # material = IsotropicElectroMechanics_107(ndim,mu1=1.0,mu2=0.5, lamb=1.0, eps_1=10.5, eps_2=200.1, mue=1.0, eps_e=1.0)
+
+
+    # material = IsotropicElectroMechanics_101(ndim,mu=1.0, lamb=2.0, eps_1=1e4)
+    # material = IsotropicElectroMechanics_102(ndim,mu=1.0, lamb=2.0, eps_1=1e4)
+    # material = IsotropicElectroMechanics_104(ndim,mu=1.0, lamb=2.0, eps_1=1e4, eps_2=1e4)
+    # material = IsotropicElectroMechanics_105(ndim,mu1=1.0,mu2=0.005, lamb=2.0, eps_1=1e4, eps_2=1e4)
+    material = IsotropicElectroMechanics_106(ndim,mu1=1.0,mu2=0.005, lamb=2.0, eps_1=1e4, eps_2=1e4) ###
+    # material = Piezoelectric_100(ndim,mu1=1.0,mu2=0.005, mu3=1.0, lamb=2.0, eps_1=1e4, eps_2=1e4) 
+    # material = NeoHookean_2(ndim,youngs_modulus=2.3*1e4, poissons_ratio=0.3)
+    # material = AnisotropicMooneyRivlin(ndim, alpha=1.0, beta=1.0, lamb=1.0) 
+    # material = AnisotropicMooneyRivlin_0(ndim, mu=1.0, lamb=1.0)
+    # material = AnisotropicMooneyRivlin_1(ndim, mu1=1.0, mu2=1.0, mu3=100.0, lamb=2.0)
+
+    # material.Linearise({'invariant':'u(J-1)**2','coefficient':'u','kinematics':'C','constants':'I'})
+    # material.LineariseInvariant({'invariant':'F:F','coefficient':'lamb / 2 '})
+    # material.LineariseInvariant({'invariant':'lambda / 2* ( J - 1 )**2','coefficient':'lambda/2'})
+    # material.Linearise("u1*C:I+u2*G:I-2*(mu1+2*mu2)*lnJ")
+    # material.GetFibresOrientation(mesh,plot=False)
+    # exit()
 
     boundary_condition = BoundaryCondition()
 
@@ -201,10 +219,10 @@ def ProblemData_2(*args, **kwargs):
         boundary_data[Y_0,1] = 0.
         boundary_data[Y_0,2] = 0.
 
-        Y_1 = np.where(mesh.points[:,1] == 2)[0]
+        Y_1 = np.where(mesh.points[:,1] == 4)[0]
         # boundary_data[Y_1,0] = 0.0
-        boundary_data[Y_1,1] = 2.0
-        # boundary_data[Y_1,2] = 0.01
+        # boundary_data[Y_1,1] = 2.0
+        boundary_data[Y_1,2] = 0.01
 
         # boundary_data[2::material.nvar,:] = 0
         # boundary_data[:,2] = 0. # fix all electrostatics
@@ -229,16 +247,23 @@ def ProblemData_2(*args, **kwargs):
     boundary_condition.SetDirichletCriteria(DirichletFunc, mesh)
     # boundary_condition.SetNeumannCriteria(NeumannFunc,mesh)
 
-    # formulation = DisplacementPotentialFormulation(mesh)
-    formulation = DisplacementFormulation(mesh)
+    formulation = DisplacementPotentialFormulation(mesh)
+    # formulation = DisplacementFormulation(mesh)
 
-    fem_solver = FEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=1)
-    # fem_solver = StaggeredFEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=3)
-    # fem_solver = StaggeredElectromechanicSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=5)
+    # fem_solver = FEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=2)
+    # fem_solver = StaggeredFEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=50)
+    fem_solver = StaggeredElectromechanicSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=10)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition)
 
+
+    # 50 incr
+    # 0.0302276310449 femstag
+    # 0.0320120473061 elecstag
+    # 0.0307196172242 mono
+
+    # 0.0170649814719 0.0363506882861
 
     # sol = np.copy(solution.sol[:,:,-1])
     # makezero(sol,tol=1.0e-8)
@@ -249,7 +274,7 @@ def ProblemData_2(*args, **kwargs):
     # print solution.sol[:,2,-1]
     # print solution.sol[:,1,-1]
     # solution.sol = solution.sol[:,:2,:]
-    solution.Plot(configuration="deformed",quantity=10)
+    # solution.Plot(configuration="deformed",quantity=1)
     # solution.CurvilinearPlot(QuantityToPlot=solution.sol[:,1,-1])
     # solution.Animate(configuration="deformed", quantity=20)
 

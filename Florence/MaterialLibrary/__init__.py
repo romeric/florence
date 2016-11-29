@@ -14,11 +14,15 @@ from NearlyIncompressibleNeoHookean import *
 from MooneyRivlin import *
 from MooneyRivlin_2 import *
 from NearlyIncompressibleMooneyRivlin import *
-from AnisotropicMooneyRivlin import *
-from TranservselyIsotropicHyperElastic import *
-from BonetTranservselyIsotropicHyperElastic import *
+
 # INCREMENTALLY LINEARISED MATERIAL MODELS
 from IncrementallyLinearisedNeoHookean import *
+
+# ANISOTROPIC MODELS
+from TranservselyIsotropicHyperElastic import *
+from BonetTranservselyIsotropicHyperElastic import *
+from AnisotropicMooneyRivlin_0 import *
+from AnisotropicMooneyRivlin_1 import *
 
 # ELECTROMECHANICAL MATERIAL MODELS - ENTHALPY
 from LinearModelElectromechanics import *
@@ -39,3 +43,4 @@ from IsotropicElectroMechanics_104 import *
 from IsotropicElectroMechanics_105 import *
 from IsotropicElectroMechanics_106 import *
 from IsotropicElectroMechanics_107 import *
+from Piezoelectric_100 import *

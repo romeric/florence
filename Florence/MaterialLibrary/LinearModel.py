@@ -15,7 +15,6 @@ class LinearModel(Material):
         super(LinearModel, self).__init__(mtype, ndim, **kwargs)
         
 
-    # def Hessian(self,MaterialArgs,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
     def Hessian(self,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):    
 
         #------------------------------------------------------------------------------------#
@@ -55,7 +54,6 @@ class LinearModel(Material):
         elif self.ndim == 2:
             tre = trace(strain) + 1
 
-        # return 2*mu*strain + lamb*np.trace(strain)*I 
         # USE FASTER TRACE FUNCTION
         return 2*mu*strain + lamb*trace(strain)*I  
         
