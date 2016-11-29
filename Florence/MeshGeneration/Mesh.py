@@ -159,6 +159,43 @@ class Mesh(object):
         else:
             raise ValueError('Type of element not understood')
 
+    def GetElementsEdgeNumbering(self):
+        assert self.element_type is not None
+        if self.element_type == "tri":
+            return self.GetElementsEdgeNumberingTri()
+        elif self.element_type == "quad":
+            return self.GetElementsEdgeNumberingQuad()
+        else:
+            raise ValueError('Type of element not understood')
+
+    def GetElementsWithBoundaryEdges(self):
+        assert self.element_type is not None
+        if self.element_type == "tri":
+            return self.GetElementsWithBoundaryEdgesTri()
+        elif self.element_type == "quad":
+            return self.GetElementsWithBoundaryEdgesQuad()
+        else:
+            raise ValueError('Type of element not understood')
+
+    def GetElementsFaceNumbering(self):
+        assert self.element_type is not None
+        if self.element_type == "tet":
+            return self.GetElementsFaceNumberingTet()
+        elif self.element_type == "hex":
+            return self.GetElementsFaceNumberingHex()
+        else:
+            raise ValueError('Type of element not understood')
+
+    def GetElementsWithBoundaryFaces(self):
+        assert self.element_type is not None
+        if self.element_type == "tet":
+            return self.GetElementsWithBoundaryFacesTet()
+        elif self.element_type == "hex":
+            return self.GetElementsWithBoundaryFacesHex()
+        else:
+            raise ValueError('Type of element not understood')
+
+
     @property
     def Bounds(self):
         """Returns bounds of a mesh i.e. the minimum and maximum coordinate values
@@ -1404,7 +1441,7 @@ class Mesh(object):
 
         output: 
 
-            edge_elements:              [2D array] array containing elements which have face
+            edge_elements:              [2D array] array containing elements which have edge
                                         on the boundary [cloumn 0] and a flag stating which edges they are [column 1]
 
         """
@@ -2422,8 +2459,13 @@ class Mesh(object):
 
 
 
-    def WriteVTK(self,*args,**kwargs):
+    def WriteVTK(self, filename=None, result=None):
         """Write mesh/results to vtu"""
+
+        assert self.elements is not None
+        assert self.points is not None
+
+        elements = np.copy(self.elements)
 
         cellflag = None
         if self.element_type =='tri':
@@ -2437,34 +2479,38 @@ class Mesh(object):
         if self.element_type =='tet':
             cellflag = 10
             if self.elements.shape[1]==10:
-                # CHANGE NUMBERING ORDER FOR PARAVIEW
-                # para_arange = [0,4,1,6,2,5,7,8,9,3]
-                # self.elements = self.elements[:,para_arange]    # NOTE: CHANGES MESH ELEMENT ORDERING
                 cellflag = 24
+                # CHANGE NUMBERING ORDER FOR PARAVIEW
+                para_arange = [0,4,1,6,2,5,7,8,9,3]
+                elements = elements[:,para_arange]    
         elif self.element_type == 'hex':
             cellflag = 12
             if self.elements.shape[1] == 20:
                 cellflag = 25
 
-        # CHECK IF THE OUTPUT FILE NAME IS SPECIFIED 
-        FNAME = False
-        for i in kwargs.items():
-            if 'fname' in i:
-                FNAME = True
-                fname = i
-        for i in range(len(args)):
-            if isinstance(args[i],str):
-                FNAME = True 
-                fname = args[i]
-        if not FNAME:
-            # IF NOT WRITE TO THE TOP LEVEL DIRECTORY
-            pathvtu = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../..'))
-            print pathvtu
-            warnings.warn('No name given to the vtu output file. I am going to write one at the top level directory')
-            fname = pathvtu+str('/output.vtu')
-            write_vtu(Verts=self.points, Cells={cellflag:self.elements},fname=fname,**kwargs)
+        if filename is None:
+            warn('File name not specified. I am going to write one in the current directory')
+            filename = PWD(__file__) + "/output.vtu"
+
+        if result is None:
+            write_vtu(Verts=self.points, Cells={cellflag:elements},fname=filename)
         else:
-                write_vtu(Verts=self.points, Cells={cellflag:self.elements},**kwargs)
+            if isinstance(result, np.ndarray):
+                if result.ndim > 1:
+                    if result.shape[1] == 1:
+                        result = result.flatten()
+
+                if result.ndim > 1:
+                    if result.shape[0] == self.nelem:
+                        write_vtu(Verts=self.points, Cells={cellflag:elements},cvdata=result,fname=filename)
+                    elif result.shape[0] == self.points.shape[0]:
+                        write_vtu(Verts=self.points, Cells={cellflag:elements},pvdata=result,fname=filename)
+                else:
+                    if result.shape[0] == self.nelem:
+                        write_vtu(Verts=self.points, Cells={cellflag:elements},cdata=result,fname=filename)
+                    elif result.shape[0] == self.points.shape[0]:
+                        write_vtu(Verts=self.points, Cells={cellflag:elements},pdata=result,fname=filename)
+
 
 
     def WriteHDF5(self, filename=None, external_fields=None):

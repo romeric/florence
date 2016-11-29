@@ -20,10 +20,10 @@ class IsotropicElectroMechanics_105(Material):
         self.energy_type = "internal_energy"
         self.legendre_transform = LegendreTransform()
 
-        # INITIALISE STRAIN TENSORS
-        from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import KinematicMeasures
-        StrainTensors = KinematicMeasures(np.asarray([np.eye(self.ndim,self.ndim)]*2),"nonlinear")
-        self.Hessian(StrainTensors,np.zeros((self.ndim,1)))
+        if self.ndim == 2:
+            self.H_VoigtSize = 5
+        elif self.ndim == 3:
+            self.H_VoigtSize = 9
 
     def Hessian(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
 
@@ -48,11 +48,6 @@ class IsotropicElectroMechanics_105(Material):
         self.coupling_tensor = J/eps_2*(einsum('ik,j',I,Dx) + einsum('i,jk',Dx,I))
 
         self.dielectric_tensor = J/eps_1*np.linalg.inv(b)  + J/eps_2*I 
-
-        if self.ndim == 2:
-            self.H_VoigtSize = 5
-        elif self.ndim == 3:
-            self.H_VoigtSize = 9
 
         # TRANSFORM TENSORS TO THEIR ENTHALPY COUNTERPART
         E_Voigt, P_Voigt, C_Voigt = self.legendre_transform.InternalEnergyToEnthalpy(self.dielectric_tensor, 
@@ -82,8 +77,13 @@ class IsotropicElectroMechanics_105(Material):
         b = StrainTensors['b'][gcounter]
         D = ElectricDisplacementx.reshape(self.ndim,1)
 
+        if self.ndim==2:
+            trb = trace(b) + 1
+        else:
+            trb = trace(b)
+
         simga_mech = 2.0*mu1/J*b + \
-            2.0*mu2/J*(trace(b)*b - np.dot(b,b)) -\
+            2.0*mu2/J*(trb*b - np.dot(b,b)) -\
             2.0*(mu1+2*mu2)/J*I +\
             lamb*(J-1)*I
         sigma_electric = J/eps_2*np.dot(D,D.T)
