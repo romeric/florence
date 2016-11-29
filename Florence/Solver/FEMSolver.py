@@ -109,12 +109,13 @@ class FEMSolver(object):
                 self.analysis_nature = "linear"
                 formulation.analysis_nature = "linear"
 
-        if material.is_transversely_isotropic:
-            material.GetFibresOrientation(mesh)
+        if material.is_transversely_isotropic or material.is_anisotropic:
+            if material.anisotropic_orientations is None:
+                material.GetFibresOrientation(mesh)
         ##############################################################################
 
         ##############################################################################
-        if formulation.fields == "electro_mechanics":
+        if boundary_condition.boundary_type == "straight":
             self.compute_mesh_qualities = False
         ##############################################################################
 
