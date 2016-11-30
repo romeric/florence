@@ -3,14 +3,14 @@ from numpy import einsum
 from Florence.Tensor import trace, Voigt
 from .MaterialBase import Material
 from Florence.LegendreTransform import LegendreTransform
-#####################################################################################################
-                    # Electromechanical model in terms of internal energy 
-                # W(C,D) = W_mn(C) + 1/2/eps_1 (D0*D0) + 1/2/eps_2/J (FD0*FD0)
-        # W_mn(C) = u1*C:I+u2*G:I - 2*(u1+2*u2+6*mue)*lnJ + lamb/2*(J-1)**2 + mue*(C:I)**2
-#####################################################################################################
 
 
 class IsotropicElectroMechanics_107(Material):
+    """Electromechanical model in terms of internal energy 
+        
+            W(C,D) = W_mn(C) + 1/2/eps_1 (D0*D0) + 1/2/eps_2/J (FD0*FD0)
+            W_mn(C) = u1*C:I+u2*G:I - 2*(u1+2*u2+6*mue)*lnJ + lamb/2*(J-1)**2 + mue*(C:I)**2
+    """
     
     def __init__(self, ndim, **kwargs):
         mtype = type(self).__name__
@@ -20,10 +20,10 @@ class IsotropicElectroMechanics_107(Material):
         self.energy_type = "internal_energy"
         self.legendre_transform = LegendreTransform()
 
-        # INITIALISE STRAIN TENSORS
-        from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import KinematicMeasures
-        StrainTensors = KinematicMeasures(np.asarray([np.eye(self.ndim,self.ndim)]*2),"nonlinear")
-        self.Hessian(StrainTensors,np.zeros((self.ndim,1)))
+        if self.ndim == 2:
+            self.H_VoigtSize = 5
+        elif self.ndim == 3:
+            self.H_VoigtSize = 9
 
     def Hessian(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
 
@@ -44,6 +44,11 @@ class IsotropicElectroMechanics_107(Material):
         DD = np.dot(D.T,D)[0,0]
         D0D = np.dot(D,D.T)
 
+        if self.ndim==2:
+            trb = trace(b) + 1
+        else:
+            trb = trace(b)
+
         C_mech = 2.*mu2/J*(2*einsum('ij,kl',b,b) - einsum('ik,jl',b,b) - einsum('il,jk',b,b)) +\
             2.*(mu1+2.*mu2+6*mue)/J*( einsum("ik,jl",I,I)+einsum("il,jk",I,I) ) + \
             lamb*(2.*J-1.)*einsum("ij,kl",I,I) - lamb*(J-1)*( einsum("ik,jl",I,I)+einsum("il,jk",I,I) ) +\
@@ -59,26 +64,19 @@ class IsotropicElectroMechanics_107(Material):
         self.elasticity_tensor = C_mech + C_elect + C_reg
 
         self.coupling_tensor = 1./eps_2*(einsum('ik,j',I,Dx) + einsum('i,jk',Dx,I) - einsum('ij,k',I,Dx)) + \
-            8*J/eps_e*einsum('ik,j',b,Dx) + 4*J/eps_e*trace(b)*( einsum('ik,j',I,Dx) + einsum('i,jk',Dx,I) ) +\
+            8*J/eps_e*einsum('ik,j',b,Dx) + 4*J/eps_e*trb*( einsum('ik,j',I,Dx) + einsum('i,jk',Dx,I) ) +\
             4.*J**3/mue/eps_e**2*DD* ( einsum('ik,j',I,Dx) + einsum('i,jk',Dx,I) ) + 8.*J**3/mue/eps_e**2*einsum('i,j,k',Dx,Dx,Dx)
 
         self.dielectric_tensor = J/eps_1*np.linalg.inv(b)  + 1./eps_2*I + \
-            4.*J/eps_e*trace(b)*I + \
+            4.*J/eps_e*trb*I + \
             8.*J**3/mue/eps_e**2*(D0D + 0.5*DD*I)
-
-        if self.ndim == 2:
-            self.H_VoigtSize = 5
-        elif self.ndim == 3:
-            self.H_VoigtSize = 9
 
         # TRANSFORM TENSORS TO THEIR ENTHALPY COUNTERPART
         E_Voigt, P_Voigt, C_Voigt = self.legendre_transform.InternalEnergyToEnthalpy(self.dielectric_tensor, 
-            self.coupling_tensor, self.elasticity_tensor, in_voigt=False)
-        # E_Voigt, P_Voigt, C_Voigt = self.legendre_transform.InternalEnergyToEnthalpy(self.dielectric_tensor, 
-            # Voigt(self.coupling_tensor,1), Voigt(self.elasticity_tensor,1), in_voigt=True)
-
+            self.coupling_tensor, self.elasticity_tensor)
+        
         # BUILD HESSIAN
-        factor = 1.
+        factor = -1.
         H1 = np.concatenate((C_Voigt,factor*P_Voigt),axis=1)
         H2 = np.concatenate((factor*P_Voigt.T,E_Voigt),axis=1)
         H_Voigt = np.concatenate((H1,H2),axis=0)
@@ -103,14 +101,19 @@ class IsotropicElectroMechanics_107(Material):
         DD = np.dot(D.T,D)[0,0]
         D0D = np.dot(D,D.T)
 
+        if self.ndim==2:
+            trb = trace(b) + 1
+        else:
+            trb = trace(b)
+
         sigma_mech = 2.0*mu1/J*b + \
-            2.0*mu2/J*(trace(b)*b - np.dot(b,b)) -\
+            2.0*mu2/J*(trb*b - np.dot(b,b)) -\
             2.0*(mu1+2*mu2+6*mue)/J*I +\
             lamb*(J-1)*I +\
-            4.*mue/J*trace(b)*b
+            4.*mue/J*trb*b
         sigma_electric = 1/eps_2*(D0D - 0.5*DD*I)
         # REGULARISATION TERMS
-        sigma_reg = 4.*J/eps_e*(DD*b + trace(b)*D0D) + \
+        sigma_reg = 4.*J/eps_e*(DD*b + trb*D0D) + \
             4.0*J**3/mue/eps_e**2*DD*D0D
         sigma = sigma_mech + sigma_electric + sigma_reg
 
@@ -118,17 +121,4 @@ class IsotropicElectroMechanics_107(Material):
 
     def ElectricDisplacementx(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
         D = self.legendre_transform.GetElectricDisplacement(self, StrainTensors, ElectricFieldx, elem, gcounter)
-
-        # SANITY CHECK FOR IMPLICIT COMPUTATUTAION OF D
-        # I = StrainTensors['I']
-        # J = StrainTensors['J'][gcounter]
-        # b = StrainTensors['b'][gcounter]
-        # E = ElectricFieldx.reshape(self.ndim,1)
-        # eps_1 = self.eps_1
-        # eps_2 = self.eps_2
-        # inverse = np.linalg.inv(J/eps_1*np.linalg.inv(b) + 1./eps_2*I)
-        # D_exact = np.dot(inverse,E)
-        # print np.linalg.norm(D - D_exact)
-        # # return D_exact
-
         return D

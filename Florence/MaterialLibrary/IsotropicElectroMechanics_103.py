@@ -19,10 +19,10 @@ class IsotropicElectroMechanics_103(Material):
         self.energy_type = "internal_energy"
         self.legendre_transform = LegendreTransform()
 
-        # INITIALISE STRAIN TENSORS
-        from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import KinematicMeasures
-        StrainTensors = KinematicMeasures(np.asarray([np.eye(self.ndim,self.ndim)]*2),"nonlinear")
-        self.Hessian(StrainTensors,np.zeros((self.ndim,1)))
+        if self.ndim == 2:
+            self.H_VoigtSize = 5
+        elif self.ndim == 3:
+            self.H_VoigtSize = 9
 
     def Hessian(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
 
@@ -46,19 +46,12 @@ class IsotropicElectroMechanics_103(Material):
 
         self.dielectric_tensor = J/eps_1*np.linalg.inv(b)  + J/eps_2*I 
 
-        if self.ndim == 2:
-            self.H_VoigtSize = 5
-        elif self.ndim == 3:
-            self.H_VoigtSize = 9
-
         # TRANSFORM TENSORS TO THEIR ENTHALPY COUNTERPART
         E_Voigt, P_Voigt, C_Voigt = self.legendre_transform.InternalEnergyToEnthalpy(self.dielectric_tensor, 
-            self.coupling_tensor, self.elasticity_tensor, in_voigt=False)
-        # E_Voigt, P_Voigt, C_Voigt = self.legendre_transform.InternalEnergyToEnthalpy(self.dielectric_tensor, 
-            # Voigt(self.coupling_tensor,1), Voigt(self.elasticity_tensor,1), in_voigt=True)
-
+            self.coupling_tensor, self.elasticity_tensor)
+        
         # BUILD HESSIAN
-        factor = 1.
+        factor = -1.
         H1 = np.concatenate((C_Voigt,factor*P_Voigt),axis=1)
         H2 = np.concatenate((factor*P_Voigt.T,E_Voigt),axis=1)
         H_Voigt = np.concatenate((H1,H2),axis=0)

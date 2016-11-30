@@ -79,8 +79,6 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
         EulerElemCoords = Eulerx[mesh.elements[elem,:],:]
         ElectricPotentialElem = Eulerp[mesh.elements[elem,:]]
-        # print(ElectricPotentialElem.shape)
-        # print(ElectricPotentialElem)
 
         # COMPUTE THE STIFFNESS MATRIX
         stiffnessel, t = self.GetLocalStiffness(function_space, material, LagrangeElemCoords, 
@@ -173,7 +171,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
                 
                 # COMPUTE THE HESSIAN AT THIS GAUSS POINT
                 H_Voigt = material.Hessian(StrainTensors,ElectricDisplacementx, elem, counter)
-                
+
                 # COMPUTE CAUCHY STRESS TENSOR
                 CauchyStressTensor = []
                 if fem_solver.requires_geometry_update:

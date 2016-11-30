@@ -1,6 +1,6 @@
 import numpy as np 
 from warnings import warn
-from Numeric import tovoigt
+from Numeric import tovoigt, tovoigt3
 
 
 __all__ = ['unique2d','in2d','intersect2d','shuffle_along_axis',
@@ -304,7 +304,7 @@ def SecondTensor2Vector(A):
             A[0,0],A[1,1],A[2,2],A[0,1],A[0,2],A[1,2]
             ])
         # Check for symmetry
-        if ~np.allclose(A.T, A, rtol=1e-12,atol=1e-15):
+        if not np.allclose(A.T, A, rtol=1e-12,atol=1e-15):
             # Matrix is non-symmetric
             vecA = np.array([
                 A[0,0],A[1,1],A[2,2],A[0,1],A[0,2],A[1,2],A[1,0],A[2,0],A[2,1]
@@ -315,7 +315,7 @@ def SecondTensor2Vector(A):
             A[0,0],A[1,1],A[0,1]
             ])
         # Check for symmetry
-        if ~np.allclose(A.T, A, rtol=1e-12,atol=1e-15):
+        if not np.allclose(A.T, A, rtol=1e-12,atol=1e-15):
             # Matrix is non-symmetric
             vecA = np.array([
                 A[0,0],A[1,1],A[0,1],A[1,0]
@@ -324,70 +324,80 @@ def SecondTensor2Vector(A):
     return vecA
 
 
-def Voigt(A,sym=0):
-    # Given a 4th order tensor A, puts it in 6x6 format
-    # Given a 3rd order tensor A, puts it in 3x6 format (symmetric wrt the first two indices)
-    # Given a 2nd order tensor A, puts it in 1x6 format
+def Voigt(A,sym=1):
+    """Given a 4th order tensor A, puts it in 6x6 format
+        Given a 3rd order tensor A, puts it in 3x6 format (symmetric wrt the first two indices)
+        Given a 2nd order tensor A, puts it in 1x6 format
 
-    # sym returns the symmetrised tensor (only for 3rd and 4th order). Switched off by default.
+        sym returns the symmetrised tensor (only for 3rd and 4th order). Switched on by default
+        """
 
-    # GET THE DIMESNIONS
+    if sym==0:
+        return __voigt_unsym__(A)
+
+
     if A.ndim==4:
-        # GIVEN TENSOR IS FOURTH ORDER
-        if sym:
-            VoigtA = tovoigt(A)
-        else:
-            C=A
-            if C.shape[0]==3:
-                VoigtA = np.array([
-                    [C[0,0,0,0],C[0,0,1,1],C[0,0,2,2],C[0,0,0,1],C[0,0,0,2],C[0,0,1,2]],
-                    [C[1,1,0,0],C[1,1,1,1],C[1,1,2,2],C[1,1,0,1],C[1,1,0,2],C[1,1,1,2]],
-                    [C[2,2,0,0],C[2,2,1,1],C[2,2,2,2],C[2,2,0,1],C[2,2,0,2],C[2,2,1,2]],
-                    [C[0,1,0,0],C[0,1,1,1],C[0,1,2,2],C[0,1,0,1],C[0,1,0,2],C[0,1,1,2]],
-                    [C[0,2,0,0],C[0,2,1,1],C[0,2,2,2],C[0,2,0,1],C[0,2,0,2],C[0,2,1,2]],
-                    [C[1,2,0,0],C[1,2,1,1],C[1,2,2,2],C[1,2,0,1],C[1,2,0,2],C[1,2,1,2]]
-                    ])
-            elif C.shape[0]==2:
-                VoigtA = np.array([
-                    [C[0,0,0,0],C[0,0,1,1],C[0,0,0,1]],
-                    [C[1,1,0,0],C[1,1,1,1],C[1,1,0,1]],
-                    [C[0,1,0,0],C[0,1,1,1],C[0,1,0,1]]
-                    ])
+         VoigtA = tovoigt(A)
+    elif A.ndim==3:
+        VoigtA = tovoigt3(A)
+        # OLD VERSION
+        # e=A
+        # if e.shape[0]==3:
+        #     VoigtA = 0.5*np.array([
+        #         [2.*e[0,0,0],2.*e[1,0,0],2.*e[2,0,0]],
+        #         [2.*e[0,1,1],2.*e[1,1,1],2.*e[2,1,1]],
+        #         [2.*e[0,2,2],2.*e[1,2,2],2.*e[2,2,2]],
+        #         [e[0,0,1]+e[0,1,0],e[1,0,1]+e[1,1,0],e[2,0,1]+e[2,1,0]],
+        #         [e[0,0,2]+e[0,2,0],e[1,0,2]+e[1,2,0],e[2,0,2]+e[2,2,0]],
+        #         [e[0,1,2]+e[0,2,1],e[1,1,2]+e[1,2,1],e[2,1,2]+e[2,2,1]]
+        #         ])
+        # elif e.shape[0]==2:
+        #     VoigtA = 0.5*np.array([
+        #         [2.*e[0,0,0],2.*e[1,0,0]],
+        #         [2.*e[0,1,1],2.*e[1,1,1]],
+        #         [e[0,0,1]+e[0,1,0],e[1,0,1]+e[1,1,0]]
+        #         ])
+
+    return VoigtA
+
+
+def __voigt_unsym__(A):
+
+    if A.ndim==4:
+        C=A
+        if C.shape[0]==3:
+            VoigtA = np.array([
+                [C[0,0,0,0],C[0,0,1,1],C[0,0,2,2],C[0,0,0,1],C[0,0,0,2],C[0,0,1,2]],
+                [C[1,1,0,0],C[1,1,1,1],C[1,1,2,2],C[1,1,0,1],C[1,1,0,2],C[1,1,1,2]],
+                [C[2,2,0,0],C[2,2,1,1],C[2,2,2,2],C[2,2,0,1],C[2,2,0,2],C[2,2,1,2]],
+                [C[0,1,0,0],C[0,1,1,1],C[0,1,2,2],C[0,1,0,1],C[0,1,0,2],C[0,1,1,2]],
+                [C[0,2,0,0],C[0,2,1,1],C[0,2,2,2],C[0,2,0,1],C[0,2,0,2],C[0,2,1,2]],
+                [C[1,2,0,0],C[1,2,1,1],C[1,2,2,2],C[1,2,0,1],C[1,2,0,2],C[1,2,1,2]]
+                ])
+        elif C.shape[0]==2:
+            VoigtA = np.array([
+                [C[0,0,0,0],C[0,0,1,1],C[0,0,0,1]],
+                [C[1,1,0,0],C[1,1,1,1],C[1,1,0,1]],
+                [C[0,1,0,0],C[0,1,1,1],C[0,1,0,1]]
+                ])
 
     elif A.ndim==3:
-        e=A
+        e = A
         if e.shape[0]==3:
-            if ~sym:
-                VoigtA = 0.5*np.array([
-                    [2.*e[0,0,0],2.*e[1,0,0],2.*e[2,0,0]],
-                    [2.*e[0,1,1],2.*e[1,1,1],2.*e[2,1,1]],
-                    [2.*e[0,2,2],2.*e[1,2,2],2.*e[2,2,2]],
-                    [e[0,0,1]+e[0,1,0],e[1,0,1]+e[1,1,0],e[2,0,1]+e[2,1,0]],
-                    [e[0,0,2]+e[0,2,0],e[1,0,2]+e[1,2,0],e[2,0,2]+e[2,2,0]],
-                    [e[0,1,2]+e[0,2,1],e[1,1,2]+e[1,2,1],e[2,1,2]+e[2,2,1]]
-                    ])
-            else:
-                VoigtA = np.array([
-                    [e[0,0,0],e[1,0,0],e[2,0,0]],
-                    [e[0,1,1],e[1,1,1],e[2,1,1]],
-                    [e[0,2,2],e[1,2,2],e[2,2,2]],
-                    [e[0,0,1],e[1,0,1],e[2,0,1]],
-                    [e[0,0,2],e[1,0,2],e[2,0,2]],
-                    [e[0,1,2],e[1,1,2],e[2,1,2]]
-                    ])
-        elif e.shape[0]==2:
-            if ~sym:
-                VoigtA = 0.5*np.array([
-                    [2.*e[0,0,0],2.*e[1,0,0]],
-                    [2.*e[0,1,1],2.*e[1,1,1]],
-                    [e[0,0,1]+e[0,1,0],e[1,0,1]+e[1,1,0]]
-                    ])
-            else:
-                VoigtA = np.array([
-                    [e[0,0,0],e[1,0,0]],
-                    [e[0,1,1],e[1,1,1]],
-                    [e[0,0,1],e[1,0,1]]
-                    ])
+            VoigtA = np.array([
+                [e[0,0,0],e[1,0,0],e[2,0,0]],
+                [e[0,1,1],e[1,1,1],e[2,1,1]],
+                [e[0,2,2],e[1,2,2],e[2,2,2]],
+                [e[0,0,1],e[1,0,1],e[2,0,1]],
+                [e[0,0,2],e[1,0,2],e[2,0,2]],
+                [e[0,1,2],e[1,1,2],e[2,1,2]]
+                ])
+        else:
+            VoigtA = np.array([
+                [e[0,0,0],e[1,0,0]],
+                [e[0,1,1],e[1,1,1]],
+                [e[0,0,1],e[1,0,1]]
+                ])
 
     elif A.ndim==2:
         VoigtA = SecondTensor2Vector(A)

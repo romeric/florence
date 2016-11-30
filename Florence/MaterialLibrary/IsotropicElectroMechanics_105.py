@@ -51,12 +51,10 @@ class IsotropicElectroMechanics_105(Material):
 
         # TRANSFORM TENSORS TO THEIR ENTHALPY COUNTERPART
         E_Voigt, P_Voigt, C_Voigt = self.legendre_transform.InternalEnergyToEnthalpy(self.dielectric_tensor, 
-            self.coupling_tensor, self.elasticity_tensor, in_voigt=False)
-        # E_Voigt, P_Voigt, C_Voigt = self.legendre_transform.InternalEnergyToEnthalpy(self.dielectric_tensor, 
-        #     Voigt(self.coupling_tensor,1), Voigt(self.elasticity_tensor,1), in_voigt=True)
-
+            self.coupling_tensor, self.elasticity_tensor)
+        
         # BUILD HESSIAN
-        factor = 1.
+        factor = -1.
         H1 = np.concatenate((C_Voigt,factor*P_Voigt),axis=1)
         H2 = np.concatenate((factor*P_Voigt.T,E_Voigt),axis=1)
         H_Voigt = np.concatenate((H1,H2),axis=0)
