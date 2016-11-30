@@ -391,7 +391,7 @@ class FEMSolver(object):
             else:
                 self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)
 
-            Eulerx = self.NewtonRaphson(function_spaces, formulation, solver, 
+            Eulerx, Eulerp = self.NewtonRaphson(function_spaces, formulation, solver, 
                 Increment,K,NodalForces,Residual,mesh,Eulerx,Eulerp,
                 material,boundary_condition,AppliedDirichletInc)
 
@@ -460,7 +460,6 @@ class FEMSolver(object):
             Residual[boundary_condition.columns_in] = TractionForces[boundary_condition.columns_in] \
             - NodalForces[boundary_condition.columns_in]
 
-
             # SAVE THE NORM 
             if np.isclose(self.NormForces,0.0):
                 self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in]))
@@ -506,7 +505,7 @@ class FEMSolver(object):
             #     break
 
 
-        return Eulerx
+        return Eulerx, Eulerp
 
 
 

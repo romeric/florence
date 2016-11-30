@@ -44,3 +44,10 @@ from IsotropicElectroMechanics_105 import *
 from IsotropicElectroMechanics_106 import *
 from IsotropicElectroMechanics_107 import *
 from Piezoelectric_100 import *
+
+
+
+
+# HELMHOLTZ AND INTERNAL ENERGY EQUIVALENT MODELS
+from IsotropicElectroMechanics_200 import * 
+from IsotropicElectroMechanics_201 import * 
