@@ -6,7 +6,7 @@ from Florence.Tensor import *
 class LegendreTransform(object):
 
     def __init__(self, material_internal_energy=None, material_enthalpy=None,
-        newton_raphson_tolerance=1e-08):
+        newton_raphson_tolerance=1e-09):
         self.material_internal_energy = material_internal_energy
         self.material_enthalpy = material_enthalpy
         self.newton_raphson_tolerance = newton_raphson_tolerance
@@ -19,41 +19,24 @@ class LegendreTransform(object):
     def SetEnthalpy(self, enthalpy):
         self.material_enthalpy = enthalpy
 
-    def InternalEnergyToEnthalpy(self,W_dielectric, W_coupling_tensor, W_elasticity, in_voigt=True):
-        """Converts the directional derivatives of the free energy of a system to its electric enthalpy.
-
-            in_voigt=True       operates in Voigt form inputs
-            in_voigt=False      operates in indicial form inputs
-
-
-        Note that the coupling tensor should be symmetric with respect to the first two indices.
-        Irrespective of the input option (in_voigt), the output is always in Voigt form"""
-
+    def InternalEnergyToEnthalpy(self,W_dielectric, W_coupling_tensor, W_elasticity):
+        """Converts the directional derivatives of the internal energy of a system to its electric enthalpy.
+        Note that the transformation needs to be performed first and then the tensors need to be transformed
+        to Voigt form
+        """
 
         # DIELECTRIC TENSOR REMAINS THE SAME IN VOIGT AND INDICIAL NOTATION
         H_dielectric = - np.linalg.inv(W_dielectric)
 
         # COMPUTE THE CONSTITUTIVE TENSORS OF ENTHALPY BASED ON THOSE ON INTERNAL ENERGY
-        if in_voigt:
-            # IF GIVEN IN VOIGT FORM
-            H_coupling_tensor =  - np.dot(H_dielectric,W_coupling_tensor.T)
-            H_elasticity = W_elasticity - np.dot(W_coupling_tensor,H_coupling_tensor)
-            # H_elasticity = W_elasticity + np.dot(W_coupling_tensor,H_coupling_tensor) # not right
-            H_coupling_tensor = H_coupling_tensor.T
+        H_coupling_tensor = - einsum('ij,kli->klj',H_dielectric,W_coupling_tensor)
+        H_elasticity = Voigt(W_elasticity - einsum('ijk,klm->ijlm',W_coupling_tensor,einsum('kji',H_coupling_tensor)),1)
 
-        else: 
-            # IF GIVEN IN INDICIAL FORM
-            # H_coupling_tensor = - einsum('mi,jkm->jki',H_dielectric,W_coupling_tensor)
-            # H_elasticity = Voigt(W_elasticity - einsum('ijm,klm->ijkl',W_coupling_tensor,H_coupling_tensor),1)
+        # print(H_coupling_tensor[:,:,0])
+        # print(W_coupling_tensor[:,:,0])
+        # print("\n")
 
-            H_coupling_tensor = - einsum('ij,kli->klj',H_dielectric,W_coupling_tensor)
-            H_elasticity = Voigt(W_elasticity - einsum('ijk,klm->ijlm',W_coupling_tensor,einsum('kji',H_coupling_tensor)),1)
-  
-            # print(H_coupling_tensor[:,:,0])
-            # print(W_coupling_tensor[:,:,0])
-            # print("\n")
-
-            H_coupling_tensor = Voigt(H_coupling_tensor,1)
+        H_coupling_tensor = Voigt(H_coupling_tensor,1)
 
 
         return H_dielectric, H_coupling_tensor, H_elasticity

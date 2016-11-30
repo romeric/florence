@@ -6,7 +6,7 @@ from libc.math cimport fabs
 from libcpp.vector cimport vector
 from cpython cimport bool
 
-__all__ = ['trace','doublecontract','makezero','issymetric','tovoigt', 'cross2d',
+__all__ = ['trace','doublecontract','makezero','issymetric','tovoigt', 'tovoigt3', 'cross2d',
 'fillin','findfirst','findequal','findequal_approx','findless','findgreater']
 
 # COMPILE USING
@@ -209,6 +209,55 @@ cdef _Voigt2(const Real_t *C, Real_t *VoigtA):
     VoigtA[8] = 0.5*(C[5]+C[6])
 
 
+
+
+@boundscheck(False)
+@wraparound(False)
+def tovoigt3(np.ndarray[Real_t, ndim=3, mode='c'] e):
+    """Convert a 3D array to its Voigt represenation"""
+    cdef np.ndarray[Real_t, ndim=2,mode='c'] VoigtA 
+    cdef int n1dim = e.shape[0]
+    # DISPATCH CALL TO APPROPRIATE FUNCTION
+    if n1dim == 3:
+        VoigtA = np.zeros((6,3),dtype=np.float64)
+        _Voigt33(&e[0,0,0],&VoigtA[0,0])
+    elif n1dim == 2:
+        VoigtA = np.zeros((3,2),dtype=np.float64)
+        _Voigt23(&e[0,0,0],&VoigtA[0,0])
+
+    return VoigtA
+
+
+cdef _Voigt33(const Real_t *e, Real_t *VoigtA):
+    VoigtA[0] = e[0]
+    VoigtA[1] = e[9]
+    VoigtA[2] = e[18]
+    VoigtA[3] = e[4]
+    VoigtA[4] = e[13]
+    VoigtA[5] = e[22]
+    VoigtA[6] = e[8]
+    VoigtA[7] = e[17]
+    VoigtA[8] = e[26]
+    VoigtA[9] = 0.5*(e[1]+e[3])
+    VoigtA[10] = 0.5*(e[10]+e[12])
+    VoigtA[11] = 0.5*(e[19]+e[21])
+    VoigtA[12] = 0.5*(e[2]+e[6])
+    VoigtA[13] = 0.5*(e[11]+e[15])
+    VoigtA[14] = 0.5*(e[20]+e[24])
+    VoigtA[15] = 0.5*(e[5]+e[7])
+    VoigtA[16] = 0.5*(e[14]+e[16])
+    VoigtA[17] = 0.5*(e[23]+e[25])
+    
+    
+cdef _Voigt23(const Real_t *e, Real_t *VoigtA):
+    VoigtA[0] = e[0]
+    VoigtA[1] = e[4]
+    VoigtA[2] = e[3]
+    VoigtA[3] = e[7]
+    VoigtA[4] = 0.5*(e[1]+e[2])
+    VoigtA[5] = 0.5*(e[5]+e[6])
+
+
 @boundscheck(False)
 def cross2d(np.ndarray[double, ndim=2] A, np.ndarray[double, ndim=2] B, str dim="3d", toarray=False):
     """Cross product of second order tensors A_ij x B_ij defined in the sense of R. de Boer
@@ -376,7 +425,7 @@ def findless(np.ndarray A, Real_t num):
     """An equivalent function to numpy.where(A<num). The difference here is that
         numpy.where results in a boolean array of size equal to the original
         array A, even if number of counts is none or a single element. This function
-        allocates and does push_back on per count"""
+        allocates and performs push_back per hit count"""
 
     cdef Real_t[::1] arr = A.ravel()
     cdef vector[Integer_t] idx = FindLessThan(&arr[0],A.size,num)

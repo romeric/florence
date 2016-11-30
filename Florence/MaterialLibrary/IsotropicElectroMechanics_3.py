@@ -22,7 +22,6 @@ class IsotropicElectroMechanics_3(Material):
 
     def Hessian(self,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 
-        # Using Einstein summation (using numpy einsum call)
         d = np.einsum
 
         mu = self.mu

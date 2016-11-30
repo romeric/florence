@@ -679,7 +679,7 @@ class BoundaryCondition(object):
         """
 
         # APPLY DIRICHLET BOUNDARY CONDITIONS
-        for i in range(0,self.columns_out.shape[0]):
+        for i in range(self.columns_out.shape[0]):
             F = F - LoadFactor*AppliedDirichlet[i]*stiffness.getcol(self.columns_out[i])
 
 
