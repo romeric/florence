@@ -1,7 +1,8 @@
+from __future__ import division
 import numpy as np
 from numpy import einsum
 from .MaterialBase import Material
-from Florence.Tensor import trace, Voigt
+from Florence.Tensor import trace, Voigt, makezero
 
 
 class AnisotropicMooneyRivlin_1(Material):
@@ -23,6 +24,15 @@ class AnisotropicMooneyRivlin_1(Material):
         else:
             self.H_VoigtSize = 3
 
+        # LOW LEVEL DISPATCHER
+        self.has_low_level_dispatcher = True
+        # self.has_low_level_dispatcher = False
+
+    def KineticMeasures(self,F,ElectricFieldx=0, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._AnisotropicMooneyRivlin_1_ import KineticMeasures
+        return KineticMeasures(self, F, self.anisotropic_orientations[elem][:,None])
+
+
 
     def Hessian(self,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 
@@ -42,22 +52,22 @@ class AnisotropicMooneyRivlin_1(Material):
         outerHN = einsum('i,j',HN,HN)
 
         H_Voigt = 2.*mu2/J* ( 2.0*einsum('ij,kl',b,b) - einsum('ik,jl',b,b) - einsum('il,jk',b,b) ) + \
-                2.*(mu1+2*mu2+mu3)/J * ( einsum('ik,jl',I,I) + einsum('il,jk',I,I) ) + \
+                2.*(mu1+2.*mu2+mu3)/J * ( einsum('ik,jl',I,I) + einsum('il,jk',I,I) ) + \
                 lamb*(2.*J-1.)*einsum('ij,kl',I,I) - lamb*(J-1.) * ( einsum('ik,jl',I,I) + einsum('il,jk',I,I) ) - \
                 4.*mu3/J * ( einsum('ij,kl',I,outerHN) + einsum('ij,kl',outerHN,I) ) + \
                 2.*mu3/J*innerHN*(2.0*einsum('ij,kl',I,I) - einsum('ik,jl',I,I) - einsum('il,jk',I,I) ) + \
-                2.*mu3/J * ( einsum('il,j,k',I,HN,HN) + einsum('jl,i,k',I,HN,HN) + \
-                einsum('ik,j,l',I,HN,HN) + einsum('jk,i,l',I,HN,HN) )                 
+                2.*mu3/J * ( einsum('ik,jl',I,outerHN) + einsum('il,jk',I,outerHN) + \
+                einsum('ik,jl',outerHN,I) + einsum('il,jk',outerHN,I) )  
+                # 2.*mu3/J * ( einsum('il,j,k',I,HN,HN) + einsum('jl,i,k',I,HN,HN) + \
+                # einsum('ik,j,l',I,HN,HN) + einsum('jk,i,l',I,HN,HN) ) 
 
-        H_Voigt = Voigt(H_Voigt ,1)
+        H_Voigt = Voigt(H_Voigt ,1)              
         
-        self.H_VoigtSize = H_Voigt.shape[0]
-
         return H_Voigt
 
 
 
-    def CauchyStress(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
+    def CauchyStress(self,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 
         I = StrainTensors['I']
         J = StrainTensors['J'][gcounter]
@@ -83,9 +93,9 @@ class AnisotropicMooneyRivlin_1(Material):
 
         stress = 2.*mu1/J*b + \
             2.*mu2/J*(trb*b - np.dot(b,b)) - \
-            2.*(mu1+2*mu2+mu3)/J*I + \
+            2.*(mu1+2.*mu2+mu3)/J*I + \
             lamb*(J-1)*I +\
-            2*mu3/J*outerFN +\
-            2*mu3/J*innerHN*I - 2*mu3/J*outerHN
+            2.*mu3/J*outerFN +\
+            2.*mu3/J*innerHN*I - 2.*mu3/J*outerHN
 
         return stress

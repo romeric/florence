@@ -22,7 +22,7 @@ def GetBases(C, Quadrature, info, useLagrange=False):
     ns=[]; Basis=[]; gBasisx=[]; gBasisy=[]
     if info=='tri':
         p=C+1
-        ns = (p+1)*(p+2)/2
+        ns = int((p+1)*(p+2)/2)
         Basis = np.zeros((ns,w.shape[0]),dtype=np.float64)
         gBasisx = np.zeros((ns,w.shape[0]),dtype=np.float64)
         gBasisy = np.zeros((ns,w.shape[0]),dtype=np.float64)

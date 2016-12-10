@@ -2,40 +2,41 @@ import numpy as np
 from .MaterialBase import Material
 from Florence.Tensor import trace
 
-
-#####################################################################################################
-                                        # NeoHookean Material Model 2
-#####################################################################################################
-
-
 class NeoHookean_2(Material):
-    """Material model for neo-Hookean with the following internal energy:
+    """The fundamental Neo-Hookean internal energy, described in Bonet et. al.
 
-        W(C) = mu/2*(C:I)-mu*lnJ+lamba/2*(J-1)**2
+        W(C) = mu/2*(C:I-3)- mu*lnJ + lamb/2*(J-1)**2
 
-        """
+    """
 
     def __init__(self, ndim, **kwargs):
         mtype = type(self).__name__
         super(NeoHookean_2, self).__init__(mtype, ndim, **kwargs)
 
-        # INITIALISE STRAIN TENSORS
-        from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import KinematicMeasures
-        StrainTensors = KinematicMeasures(np.asarray([np.eye(self.ndim,self.ndim)]*2),"nonlinear")
-        self.Hessian(StrainTensors)
+        if self.ndim==3:
+            self.H_VoigtSize = 6
+        elif self.ndim==2:
+            self.H_VoigtSize = 3
+
+        # LOW LEVEL DISPATCHER
+        self.has_low_level_dispatcher = True
+        # self.has_low_level_dispatcher = False
+
+    def KineticMeasures(self,F,ElectricFieldx=0, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._NeoHookean_2_ import KineticMeasures
+        return KineticMeasures(self,F)
         
 
     def Hessian(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
         
         I = StrainTensors['I']
-        detF = StrainTensors['J'][gcounter]
+        J = StrainTensors['J'][gcounter]
 
-        mu2 = self.mu/detF- self.lamb*(detF-1.0)
-        lamb2 = self.lamb*(2*detF-1.0) 
+        mu2 = self.mu/J- self.lamb*(J-1.0)
+        lamb2 = self.lamb*(2*J-1.0) 
 
         H_Voigt = lamb2*self.vIijIkl+mu2*self.vIikIjl
 
-        # MaterialArgs.H_VoigtSize = H_Voigt.shape[0]
         self.H_VoigtSize = H_Voigt.shape[0]
 
         return H_Voigt

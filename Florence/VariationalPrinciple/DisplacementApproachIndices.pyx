@@ -136,7 +136,7 @@ cdef inline void FillGeometricB_(double *B,double *SpatialGradient,
 @boundscheck(False)
 @wraparound(False)
 def FillGeometricB(np.ndarray[double,ndim=2,mode='c'] B, 
-                     np.ndarray[double,ndim=2] SpatialGradient,
+                     np.ndarray[double,ndim=2, mode='c'] SpatialGradient,
                      np.ndarray[double,ndim=2,mode='c'] S,
                      np.ndarray[double,ndim=2,mode='c'] CauchyStressTensor, int ndim, int nvar):
     

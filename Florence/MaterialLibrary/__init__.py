@@ -11,8 +11,8 @@ from NeoHookean_2 import *
 from NeoHookean_3 import *
 from NeoHookeanCoercive import *
 from NearlyIncompressibleNeoHookean import *
+from MooneyRivlin_0 import *
 from MooneyRivlin import *
-from MooneyRivlin_2 import *
 from NearlyIncompressibleMooneyRivlin import *
 
 # INCREMENTALLY LINEARISED MATERIAL MODELS
@@ -31,7 +31,7 @@ from IsotropicElectroMechanics_0 import *
 from IsotropicElectroMechanics_1 import *
 from IsotropicElectroMechanics_2 import *
 from IsotropicElectroMechanics_3 import *
-from Steinmann import *
+from SteinmannModel import *
 from AnisotropicMooneyRivlin_1_Electromechanics import *
 
 # ELECTROMECHANICAL MATERIAL MODELS - INTERNAL ENERGY

@@ -100,6 +100,8 @@ class Material(object):
         self.is_nonisotropic = False
         self.anisotropic_orientations = None
 
+        self.has_low_level_dispatcher = False
+
 
 
 
