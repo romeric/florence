@@ -257,6 +257,14 @@ class BoundaryCondition(object):
                 else:
                     nodesDBC, Dirichlet = self.nodesDBC, self.Dirichlet
 
+                # if mesh.points.shape[1]==3:
+                #     np.savetxt("/home/roman/DirichletF05_P2_06Dec.dat", Dirichlet,fmt="%9.9f")
+                #     np.savetxt("/home/roman/nodesDBCF05_P2_06Dec.dat", nodesDBC,fmt="%i")
+
+                # Dirichlet = np.loadtxt("/home/roman/DirichletF05_P2_04Dec.dat", dtype=np.float64)
+                # nodesDBC = np.loadtxt("/home/roman/nodesDBCF05_P2_04Dec.dat", dtype=np.int64)
+                # nodesDBC = nodesDBC[:,None]
+
                 # GET DIRICHLET DoFs
                 self.columns_out = (np.repeat(nodesDBC,nvar,axis=1)*nvar +\
                  np.tile(np.arange(nvar)[None,:],nodesDBC.shape[0]).reshape(nodesDBC.shape[0],formulation.ndim)).ravel()
@@ -417,7 +425,7 @@ class BoundaryCondition(object):
             # EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
             geometry_points = curvilinear_mesh.GetGeomVertices()
             self.GetGeometryMeshScale(geometry_points,mesh)
-            # print(np.max(geometry_points[:,2]), mesh.Bounds)
+            # print([np.min(geometry_points[:,2]),np.max(geometry_points[:,2])], mesh.Bounds)
             # exit()
             curvilinear_mesh.GetGeomEdges()
             curvilinear_mesh.GetGeomFaces()
@@ -427,9 +435,10 @@ class BoundaryCondition(object):
             curvilinear_mesh.GetGeomPointsOnCorrespondingFaces()
 
             # FIRST IDENTIFY WHICH SURFACES CONTAIN WHICH FACES
-            # mesh.face_to_surface = None
             if getattr(mesh,"face_to_surface",None) is not None:
-                if mesh.faces.shape[0] == mesh.face_to_surface.shape[0]:
+                if mesh.faces.shape[0] == mesh.face_to_surface.size:
+                    if mesh.face_to_surface.size != mesh.face_to_surface.shape[0]:
+                        mesh.face_to_surface = np.ascontiguousarray(mesh.face_to_surface.flatten(),dtype=np.int64)
                     curvilinear_mesh.SupplySurfacesContainingFaces(mesh.face_to_surface,already_mapped=1)
                 else:
                     raise AssertionError("face-to-surface mapping does not seem correct. " 
@@ -441,7 +450,6 @@ class BoundaryCondition(object):
             # IDENTIFY WHICH EDGES ARE SHARED BETWEEN SURFACES
             curvilinear_mesh.IdentifySurfacesIntersections()
             
-
             # PERFORM POINT INVERSION FOR THE INTERIOR POINTS
             Neval = np.zeros((3,boundary_fekete.shape[0]),dtype=np.float64)
             hpBases = Tri.hpNodal.hpBases
@@ -467,8 +475,10 @@ class BoundaryCondition(object):
                 curvilinear_mesh.ReturnModifiedMeshPoints(mesh.points)
             # GET DIRICHLET DATA
             nodesDBC, Dirichlet = curvilinear_mesh.GetDirichletData()
+            # print(Dirichlet)
             # GET DIRICHLET FACES (IF REQUIRED)
             dirichlet_faces = curvilinear_mesh.GetDirichletFaces()
+            # print(dirichlet_faces[:100,:])
 
             # FOR GEOMETRIES CONTAINING PLANAR SURFACES
             planar_mesh_faces = curvilinear_mesh.GetMeshFacesOnPlanarSurfaces()
@@ -678,10 +688,21 @@ class BoundaryCondition(object):
             framework.
         """
 
-        # APPLY DIRICHLET BOUNDARY CONDITIONS
-        for i in range(self.columns_out.shape[0]):
-            F = F - LoadFactor*AppliedDirichlet[i]*stiffness.getcol(self.columns_out[i])
+        # tt=time()
+        # F1 = np.copy(F)
+        # # APPLY DIRICHLET BOUNDARY CONDITIONS
+        # for i in range(self.columns_out.shape[0]):
+            # F = F - LoadFactor*AppliedDirichlet[i]*stiffness.getcol(self.columns_out[i])
 
+        # MUCH FASTER APPROACH
+        # F = F - (stiffness[:,self.columns_out]*AppliedDirichlet*LoadFactor)[:,None]
+        nnz_cols = ~np.isclose(AppliedDirichlet,0.0)
+        F = F - (stiffness[:,self.columns_out[nnz_cols]]*AppliedDirichlet[nnz_cols]*LoadFactor)[:,None]
+        # F = F - self.__dirichlet_helper__(stiffness,AppliedDirichlet,self.columns_out)
+        # F = F - self.__dirichlet_helper__(stiffness,AppliedDirichlet[nnz_cols],self.columns_out[nnz_cols])
+        # print((F-F1)[:100])
+        # print(time()-tt)
+        # exit()
 
         # GET REDUCED FORCE VECTOR
         F_b = F[self.columns_in,0]
@@ -745,7 +766,7 @@ class BoundaryCondition(object):
     def ComputeNeumannForces(self, mesh, material, dynamic_step=0):
         """A Dirichlet type methodology for applying Neumann boundary conditions"""
 
-        if self.neumann_flags == None:
+        if self.neumann_flags is None:
             return np.zeros((mesh.points.shape[0]*material.nvar,1),dtype=np.float64)
 
         nvar = material.nvar
@@ -759,3 +780,13 @@ class BoundaryCondition(object):
             F[to_apply,0] = applied_neumann
 
         return F
+
+
+
+
+    def __dirichlet_helper__(self,stiffness, AppliedDirichlet, columns_out):
+        from scipy.sparse import csc_matrix
+        M = csc_matrix((AppliedDirichlet,
+            (columns_out,np.zeros_like(columns_out))),
+            shape=(stiffness.shape[1],1))
+        return (stiffness*M).A

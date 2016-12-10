@@ -442,7 +442,9 @@ class FEMSolver(object):
             K_b, F_b = boundary_condition.GetReducedMatrices(K,Residual)[:2]
 
             # SOLVE THE SYSTEM
+            # print(np.linalg.norm(F_b))
             sol = solver.Solve(K_b,-F_b)
+            # print(np.linalg.norm(sol))
 
             # GET ITERATIVE SOLUTION
             dU = boundary_condition.UpdateFreeDoFs(sol,K.shape[0],formulation.nvar) 
@@ -461,17 +463,24 @@ class FEMSolver(object):
             - NodalForces[boundary_condition.columns_in]
 
             # SAVE THE NORM 
-            if np.isclose(self.NormForces,0.0):
-                self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in]))
-            else:
-                self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)
+            self.rel_norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in]))
+            if Iter==0:
+                self.NormForces = np.abs(la.norm(Residual[boundary_condition.columns_in]))
+            self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)
+            
+            # if np.isclose(self.NormForces,0.0):
+            #     self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in]))
+            # else:
+            #     self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)
 
             self.NRConvergence['Increment_'+str(Increment)] = np.append(self.NRConvergence['Increment_'+str(Increment)],\
                 self.norm_residual)
-
             
-            print('Iteration number', Iter, 'for load increment', 
-                Increment, 'with a residual of \t\t', self.norm_residual) 
+            # print('Iteration', Iter, 'for load increment', 
+            #     Increment, 'with <rel> residual of \t\t', self.norm_residual) 
+            print("Iteration {} for increment {}.".format(Iter, Increment) +\
+                " Residual (abs) {0:>16.7g}".format(self.rel_norm_residual), 
+                "\t Residual (rel) {0:>16.7g}".format(self.norm_residual))
 
             # # SAVE THE NORM 
             # self.NRConvergence['Increment_'+str(Increment)] = np.append(self.NRConvergence['Increment_'+str(Increment)],\
@@ -489,7 +498,7 @@ class FEMSolver(object):
             if Iter==self.maximum_iteration_for_newton_raphson:
                 self.newton_raphson_failed_to_converge = True
                 break
-            if np.isnan(self.norm_residual):
+            if np.isnan(self.norm_residual) or self.norm_residual>1e10:
                 self.newton_raphson_failed_to_converge = True
                 break
 

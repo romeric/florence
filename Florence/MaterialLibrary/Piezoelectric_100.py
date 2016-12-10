@@ -5,11 +5,7 @@ from .MaterialBase import Material
 from Florence.LegendreTransform import LegendreTransform
 from math import sqrt
 # from numpy import sqrt
-
-# import pyximport
-# pyximport.install(setup_args={'include_dirs': np.get_include()})
-# from Florence.MaterialLibrary.__LLDispatch__._Piezoelectric_100_ import *
-
+# from Florence.MaterialLibrary.LLDispatch._Piezoelectric_100_ import Piezoelectric_100 as LLModel
 
 class Piezoelectric_100(Material):
     """ 
@@ -34,12 +30,20 @@ class Piezoelectric_100(Material):
         else:
             self.H_VoigtSize = 5
 
+        # LOW LEVEL DISPATCHER
+        self.has_low_level_dispatcher = True
+        # self.has_low_level_dispatcher = False
+        # from Florence.MaterialLibrary.LLDispatch._Piezoelectric_100_ import Piezoelectric_100 as KineticMeasures
+        # self.ll_model = LLModel(self)
+
+    def KineticMeasures(self,F,ElectricFieldx, elem=0):
+        # return self.ll_model.KineticMeasures(F.copy('c'), ElectricFieldx, self.anisotropic_orientations[elem][:,None])
+        # return self.ll_model.KineticMeasures(np.ascontiguousarray(F), ElectricFieldx, self.anisotropic_orientations[elem][:,None])
+        from Florence.MaterialLibrary.LLDispatch._Piezoelectric_100_ import KineticMeasures
+        return KineticMeasures(self,np.ascontiguousarray(F), ElectricFieldx, self.anisotropic_orientations[elem][:,None])
+
 
     def Hessian(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
-
-        # import pyximport
-        # pyximport.install(setup_args={'include_dirs': np.get_include()})
-        # from Florence.MaterialLibrary.__LLDispatch__._Piezoelectric_100_ import _hessian
 
         mu1 = self.mu1
         mu2 = self.mu2
@@ -56,11 +60,6 @@ class Piezoelectric_100(Material):
         H = J*np.linalg.inv(F).T
         N = self.anisotropic_orientations[elem][:,None]
         D  = ElectricDisplacementx.reshape(self.ndim,1)
-
-        # H_Voigt = _hessian(F.copy('c'), H.copy('c'), b.copy('c'), J, D, N, mu1, mu2, mu3, lamb, eps_1, eps_2, eps_3)
-        # self.dielectric_tensor = H_Voigt[3:,3:]
-        # # print H_Voigt
-        # return H_Voigt
 
         FN = np.dot(F,N)[:,0]
         HN = np.dot(H,N)[:,0]
@@ -101,6 +100,8 @@ class Piezoelectric_100(Material):
         H2 = np.concatenate((factor*P_Voigt.T,E_Voigt),axis=1)
         H_Voigt = np.concatenate((H1,H2),axis=0)
 
+
+
         return H_Voigt
 
 
@@ -135,7 +136,7 @@ class Piezoelectric_100(Material):
         if self.ndim == 3:
             trb = trace(b)
         elif self.ndim == 2:
-            trb = trace(b) + 1
+            trb = trace(b) + 1.
 
         sigma_mech = 2.*mu1/J*b + \
             2.*mu2/J*(trb*b - np.dot(b,b)) - \
@@ -148,9 +149,6 @@ class Piezoelectric_100(Material):
             2.*J*sqrt(mu3/eps_3)*D0D + 2*sqrt(mu3/eps_3)*(einsum('i,j',Dx,FN) + einsum('i,j',FN,Dx))
 
         sigma = sigma_mech + sigma_electric
-
-        # print sigma
-        # exit()
 
         return sigma
 
@@ -174,12 +172,12 @@ class Piezoelectric_100(Material):
         E = ElectricFieldx.reshape(self.ndim,1)
         modElectricFieldx = (E - 2.*sqrt(mu3/eps_3)*FN + 2./J*sqrt(mu3/eps_3)*HN) 
 
-        D = self.legendre_transform.GetElectricDisplacement(self, StrainTensors, modElectricFieldx, elem, gcounter)
+        # D = self.legendre_transform.GetElectricDisplacement(self, StrainTensors, modElectricFieldx, elem, gcounter)
         
         # SANITY CHECK FOR IMPLICIT COMPUTATUTAION OF D
-        # inverse = np.linalg.inv(J/eps_1*np.linalg.inv(b) + 1./eps_2*I + 2.*J*sqrt(mu3/eps_3)*I)
-        # D_exact = np.dot(inverse, (E - 2.*sqrt(mu3/eps_3)*FN + 2./J*sqrt(mu3/eps_3)*HN) ) 
+        inverse = np.linalg.inv(J/eps_1*np.linalg.inv(b) + 1./eps_2*I + 2.*J*sqrt(mu3/eps_3)*I)
+        D_exact = np.dot(inverse, (E - 2.*sqrt(mu3/eps_3)*FN + 2./J*sqrt(mu3/eps_3)*HN) ) 
         # print np.linalg.norm(D - D_exact)
-        # return D_exact
+        return D_exact
 
         return D

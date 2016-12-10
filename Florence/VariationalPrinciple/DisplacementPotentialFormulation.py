@@ -3,6 +3,7 @@ from .VariationalPrinciple import VariationalPrinciple
 from Florence import QuadratureRule, FunctionSpace
 
 from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import *
+from Florence.FiniteElements.ElementalMatrices._KinematicMeasures_ import _KinematicMeasures_
 from Florence.Tensor import issymetric
 from Florence.LegendreTransform import LegendreTransform
 
@@ -69,6 +70,12 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         self.function_spaces = (function_space,post_function_space)
 
 
+        local_size = function_space.Bases.shape[0]*self.nvar
+        self.local_rows = np.repeat(np.arange(0,local_size),local_size,axis=0)
+        self.local_columns = np.tile(np.arange(0,local_size),local_size)
+        self.local_size = local_size
+
+
     def GetElementalMatrices(self, elem, function_space, mesh, material, fem_solver, Eulerx, Eulerp):
 
         # ALLOCATE
@@ -81,13 +88,17 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         ElectricPotentialElem = Eulerp[mesh.elements[elem,:]]
 
         # COMPUTE THE STIFFNESS MATRIX
-        stiffnessel, t = self.GetLocalStiffness(function_space, material, LagrangeElemCoords, 
-            EulerElemCoords, ElectricPotentialElem, fem_solver, elem)
+        if material.has_low_level_dispatcher:
+            stiffnessel, t = self.__GetLocalStiffness__(function_space, material, LagrangeElemCoords, 
+                EulerElemCoords, ElectricPotentialElem, fem_solver, elem)
+        else:
+            stiffnessel, t = self.GetLocalStiffness(function_space, material, LagrangeElemCoords, 
+                EulerElemCoords, ElectricPotentialElem, fem_solver, elem)
 
         I_mass_elem = []; J_mass_elem = []; V_mass_elem = []
         if fem_solver.analysis_type != 'static':
             # COMPUTE THE MASS MATRIX
-            massel = Mass(MainData,LagrangeElemCoords,EulerElemCoords,elem)
+            massel = Mass(material,LagrangeElemCoords,EulerElemCoords,elem)
 
         if fem_solver.has_moving_boundary:
             # COMPUTE FORCE VECTOR
@@ -107,17 +118,17 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
         nvar = self.nvar
         ndim = self.ndim
-        Domain = function_space
+        nodeperelem = function_space.Bases.shape[0]
 
         det = np.linalg.det
         inv = np.linalg.inv
-        Jm = Domain.Jm
-        AllGauss = Domain.AllGauss
+        Jm = function_space.Jm
+        AllGauss = function_space.AllGauss
 
         # ALLOCATE
-        stiffness = np.zeros((Domain.Bases.shape[0]*nvar,Domain.Bases.shape[0]*nvar),dtype=np.float64)
-        tractionforce = np.zeros((Domain.Bases.shape[0]*nvar,1),dtype=np.float64)
-        B = np.zeros((Domain.Bases.shape[0]*nvar,material.H_VoigtSize),dtype=np.float64)
+        stiffness = np.zeros((nodeperelem*nvar,nodeperelem*nvar),dtype=np.float64)
+        tractionforce = np.zeros((nodeperelem*nvar,1),dtype=np.float64)
+        B = np.zeros((nodeperelem*nvar,material.H_VoigtSize),dtype=np.float64)
 
         # COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
         # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
@@ -133,7 +144,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         # UPDATE/NO-UPDATE GEOMETRY
         if fem_solver.requires_geometry_update:
             # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-            ParentGradientx = np.einsum('ijk,jl->kil',Domain.Jm,EulerELemCoords)
+            ParentGradientx = np.einsum('ijk,jl->kil',Jm,EulerELemCoords)
             # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
             SpatialGradient = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Jm)
             # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
@@ -144,30 +155,29 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
             # COMPUTE ONCE detJ
             detJ = np.einsum('i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)))
 
+        # GET ELECTRIC FIELD
+        ElectricFieldx = - np.einsum('ijk,j',SpatialGradient,ElectricPotentialElem)
+
         # LOOP OVER GAUSS POINTS
         for counter in range(AllGauss.shape[0]): 
 
-            # GET ELECTRIC FILED
-            ElectricFieldx = - np.dot(SpatialGradient[counter,:,:].T,ElectricPotentialElem)
-
-
             if material.energy_type == "enthalpy":
                 # COMPUTE THE HESSIAN AT THIS GAUSS POINT
-                H_Voigt = material.Hessian(StrainTensors,ElectricFieldx, elem, counter)
+                H_Voigt = material.Hessian(StrainTensors,ElectricFieldx[counter,:], elem, counter)
 
                 # COMPUTE ELECTRIC DISPLACEMENT
-                ElectricDisplacementx = material.ElectricDisplacementx(StrainTensors, ElectricFieldx, elem, counter)
+                ElectricDisplacementx = material.ElectricDisplacementx(StrainTensors, ElectricFieldx[counter,:], elem, counter)
                 
                 # COMPUTE CAUCHY STRESS TENSOR
                 CauchyStressTensor = []
                 if fem_solver.requires_geometry_update:
-                    CauchyStressTensor = material.CauchyStress(StrainTensors,ElectricFieldx,elem,counter)
+                    CauchyStressTensor = material.CauchyStress(StrainTensors,ElectricFieldx[counter,:],elem,counter)
 
             elif material.energy_type == "internal_energy":
                 # THIS REQUIRES LEGENDRE TRANSFORM
 
                 # COMPUTE ELECTRIC DISPLACEMENT IMPLICITLY
-                ElectricDisplacementx = material.ElectricDisplacementx(StrainTensors, ElectricFieldx, elem, counter)
+                ElectricDisplacementx = material.ElectricDisplacementx(StrainTensors, ElectricFieldx[counter,:], elem, counter)
                 
                 # COMPUTE THE HESSIAN AT THIS GAUSS POINT
                 H_Voigt = material.Hessian(StrainTensors,ElectricDisplacementx, elem, counter)
@@ -176,6 +186,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
                 CauchyStressTensor = []
                 if fem_solver.requires_geometry_update:
                     CauchyStressTensor = material.CauchyStress(StrainTensors,ElectricDisplacementx,elem,counter)
+
 
             # COMPUTE THE TANGENT STIFFNESS MATRIX
             BDB_1, t = self.ConstitutiveStiffnessIntegrand(B, SpatialGradient[counter,:,:],
@@ -190,7 +201,6 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
             # INTEGRATE STIFFNESS
             stiffness += BDB_1*detJ[counter]
-
 
         return stiffness, tractionforce 
 
@@ -243,10 +253,12 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
     def ConstitutiveStiffnessIntegrand(self, B, SpatialGradient, ElectricDisplacementx,
         CauchyStressTensor, H_Voigt, analysis_nature="nonlinear", has_prestress=True):
-        """Overrides for electric potential formulation"""
+        """Overrides base for electric potential formulation"""
 
         # MATRIX FORM
-        SpatialGradient = SpatialGradient.T
+        # SpatialGradient = SpatialGradient.T
+        # SpatialGradient = np.ascontiguousarray(SpatialGradient.T)
+        SpatialGradient = SpatialGradient.T.copy()
 
         FillConstitutiveB(B,SpatialGradient,self.ndim,self.nvar)
         BDB = B.dot(H_Voigt.dot(B.T))
@@ -376,4 +388,104 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
     #     BDB = np.dot(np.dot(B,S),B.T)
                 
+    #     return BDB
+
+
+
+
+
+
+
+
+    def __GetLocalStiffness__(self, function_space, material, LagrangeElemCoords, 
+        EulerELemCoords, ElectricPotentialElem, fem_solver, elem=0):
+        """Get stiffness matrix of the system"""
+
+        nvar = self.nvar
+        nodeperelem = function_space.Bases.shape[0]
+        AllGauss = function_space.AllGauss
+
+        # ALLOCATE
+        stiffness = np.zeros((nodeperelem*nvar,nodeperelem*nvar),dtype=np.float64)
+        tractionforce = np.zeros((nodeperelem*nvar,1),dtype=np.float64)
+        B = np.zeros((nodeperelem*nvar,material.H_VoigtSize),dtype=np.float64)
+
+        SpatialGradient, F, detJ = _KinematicMeasures_(function_space.Jm, AllGauss[:,0], LagrangeElemCoords, 
+            EulerELemCoords, fem_solver.requires_geometry_update)
+
+        # GET ELECTRIC FIELD
+        ElectricFieldx = - np.einsum('ijk,j',SpatialGradient,ElectricPotentialElem)
+
+        # COMPUTE WORK-CONJUGATES AND HESSIAN AT THIS GAUSS POINT
+        ElectricDisplacementx, CauchyStressTensor, H_Voigt = material.KineticMeasures(F, ElectricFieldx, elem=elem)
+
+        # LOOP OVER GAUSS POINTS
+        for counter in range(AllGauss.shape[0]): 
+
+            # COMPUTE THE TANGENT STIFFNESS MATRIX
+            BDB_1, t = self.ConstitutiveStiffnessIntegrand(B, SpatialGradient[counter,:,:],
+                ElectricDisplacementx[counter,:,:], CauchyStressTensor[counter,:,:], H_Voigt[counter,:,:], 
+                analysis_nature=fem_solver.analysis_nature, has_prestress=fem_solver.has_prestress)
+
+            
+            if fem_solver.requires_geometry_update:
+                # BDB_1 += self.GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],CauchyStressTensor[counter,:,:])
+                # INTEGRATE TRACTION FORCE
+                tractionforce += t*detJ[counter]
+
+            # INTEGRATE STIFFNESS
+            stiffness += BDB_1*detJ[counter]
+
+        # COMPUTE GEOMETRIC STIFFNESS MATRIX
+        stiffness += self.__GeometricStiffnessIntegrand__(SpatialGradient,CauchyStressTensor,detJ)
+
+        return stiffness, tractionforce
+
+
+
+
+    # def foo(self,SpatialGradient, CauchyStressTensor):
+
+    #     # print SpatialGradient.shape
+    #     B = np.zeros((SpatialGradient.shape[0]*self.nvar,SpatialGradient.shape[0]*self.nvar))
+    #     for a in range(SpatialGradient.shape[0]):
+    #         for b in range(SpatialGradient.shape[0]):
+
+    #             # I = np.eye(self.ndim,self.ndim)
+    #             dum=0.
+    #             for i in range(SpatialGradient.shape[1]):
+    #                 for j in range(SpatialGradient.shape[1]):
+    #                     dum += SpatialGradient[a,i]*CauchyStressTensor[i,j]*SpatialGradient[b,j]
+    #             # B = np.zeros((self.ndim,self.ndim))
+    #             # Bs = dum*I
+
+    #             for i in range(self.ndim):
+    #                 B[a*self.nvar+i,b*self.nvar+i] = dum
+
+
+    #     return B
+
+
+    # def foos(self, SpatialGradient, CauchyStressTensor, detJ):
+
+    #     BDB = np.zeros((SpatialGradient.shape[1]*self.nvar,SpatialGradient.shape[1]*self.nvar))
+    #     for g in range(detJ.shape[0]):
+    #         # BDB_local = np.zeros((SpatialGradient.shape[1]*self.nvar,SpatialGradient.shape[1]*self.nvar))
+    #         for a in range(SpatialGradient.shape[1]):
+    #             for b in range(SpatialGradient.shape[1]):
+
+    #                 dum=0.
+    #                 for i in range(SpatialGradient.shape[2]):
+    #                     for j in range(SpatialGradient.shape[2]):
+    #                         dum += SpatialGradient[g,a,i]*CauchyStressTensor[g,i,j]*SpatialGradient[g,b,j]
+
+    #                 for i in range(self.ndim):
+    #                     # BDB_local[a*self.nvar+i,b*self.nvar+i] += dum
+    #                     BDB[a*self.nvar+i,b*self.nvar+i] += dum*detJ[g]
+
+    #     # BDB[a*self.nvar+i,b*self.nvar+i] += dum*detJ[g]
+
+    #         # BDB += BDB_local#*detJ[g]
+
+
     #     return BDB

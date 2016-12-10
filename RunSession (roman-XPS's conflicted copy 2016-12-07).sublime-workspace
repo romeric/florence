@@ -1,0 +1,5105 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"boudar",
+				"boundary_data"
+			],
+			[
+				"lege",
+				"legendre_transform"
+			],
+			[
+				"tol",
+				"tolerance"
+			],
+			[
+				"newto",
+				"newton_raphson_max_iter"
+			],
+			[
+				"App",
+				"AppliedDirichlet"
+			],
+			[
+				"__d",
+				"__dirichlet_helper__"
+			],
+			[
+				"columns_",
+				"columns_out"
+			],
+			[
+				"node",
+				"nodeperelem"
+			],
+			[
+				"GetBou",
+				"GetBoundaryEdges\t(Mesh.py)"
+			],
+			[
+				"nodes",
+				"nodesDBC"
+			],
+			[
+				"face_t",
+				"face_to_surface"
+			],
+			[
+				"face_to",
+				"face_to_surface\t(Mesh.py)"
+			],
+			[
+				"rebu",
+				"rebuild"
+			],
+			[
+				"Pie",
+				"Piezoelectric_100\t(ProblemData.py)"
+			],
+			[
+				"zeros",
+				"zeros_like\t(ProblemData.py)"
+			],
+			[
+				"Post",
+				"PostProcess(3,3\t(ProblemData.py)"
+			],
+			[
+				"cou",
+				"counter\t(ComputeErrorNorms.py)"
+			],
+			[
+				"Cau",
+				"CauchyStressTensor"
+			],
+			[
+				"Ele",
+				"ElectricDisplacementx"
+			],
+			[
+				"copy",
+				"copy_fastor"
+			],
+			[
+				"off",
+				"offset"
+			],
+			[
+				"return",
+				"return_type\t(_MaterialBase_.h)"
+			],
+			[
+				"FAST",
+				"FASTOR_INLINE\t(_MaterialBase_.h)"
+			],
+			[
+				"Hess",
+				"HessianType\t(_MaterialBase_.h)"
+			],
+			[
+				"sig",
+				"sigma"
+			],
+			[
+				"inn",
+				"innerDD"
+			],
+			[
+				"outer",
+				"outerDD"
+			],
+			[
+				"Spat",
+				"SpatialGradient"
+			],
+			[
+				"Electri",
+				"ElectricFieldx"
+			],
+			[
+				"base",
+				"baseptr"
+			],
+			[
+				"type",
+				"typename"
+			],
+			[
+				"rand",
+				"random"
+			],
+			[
+				"Infer",
+				"InferSpatialDimension\t(BoundaryCondition.py)"
+			],
+			[
+				"FASTOR",
+				"FASTOR_INLINE"
+			],
+			[
+				"FASTO",
+				"FASTOR_INLINE"
+			],
+			[
+				"make",
+				"make_hessian"
+			],
+			[
+				"voi",
+				"voigt"
+			],
+			[
+				"els",
+				"elasticity"
+			],
+			[
+				"H_c",
+				"H_coupling_T"
+			],
+			[
+				"cop",
+				"copy_numpy"
+			],
+			[
+				"ela",
+				"elasticity\t(FEMSolver.py)"
+			],
+			[
+				"num",
+				"numpy"
+			],
+			[
+				"float",
+				"float64\t(FEMSolver.py)"
+			],
+			[
+				"Fastor",
+				"FastorWrapper\t(setup.py)"
+			],
+			[
+				"Fast",
+				"FastorWrapper\t(setup.py)"
+			],
+			[
+				"H_V",
+				"H_Voigt"
+			],
+			[
+				"HV",
+				"H_VoigtSize"
+			],
+			[
+				"Moo",
+				"MooneyRivlin_2\t(ProblemData.py)"
+			],
+			[
+				"Write",
+				"WriteVTK"
+			],
+			[
+				"requires_",
+				"requires_geometry_update"
+			],
+			[
+				"requ",
+				"requires\t(BoundaryCondition.py)"
+			],
+			[
+				"Euler",
+				"Eulerp"
+			],
+			[
+				"bounda",
+				"boundary_condition"
+			],
+			[
+				"sigma_",
+				"simga_mech"
+			],
+			[
+				"imp",
+				"import"
+			],
+			[
+				"H_v",
+				"H_Voigt"
+			],
+			[
+				"E_v",
+				"E_Voigt"
+			],
+			[
+				"coup",
+				"coupling_tensor"
+			],
+			[
+				"_elsa",
+				"_elasticity2D"
+			],
+			[
+				"eps",
+				"eps_1"
+			],
+			[
+				"sigma",
+				"sigma_electric"
+			],
+			[
+				"tov",
+				"tovoigt3\t(Numeric.pyx)"
+			],
+			[
+				"Voit",
+				"VoigtA"
+			],
+			[
+				"__f",
+				"__future__\t(MaterialBase.py)"
+			],
+			[
+				"all",
+				"allclose"
+			],
+			[
+				"form",
+				"formulation\t(ComputeErrorNorms.py)"
+			],
+			[
+				"bound",
+				"boundary_condition"
+			],
+			[
+				"anis",
+				"anisotropic_orientations\t(MaterialBase.py)"
+			],
+			[
+				"fla",
+				"flatten"
+			],
+			[
+				"file",
+				"filename"
+			],
+			[
+				"extra",
+				"external_fields"
+			],
+			[
+				"Tesse",
+				"TessellateTets\t(PostProcess.py)"
+			],
+			[
+				"div",
+				"divider\t(PostProcess.py)"
+			],
+			[
+				"GetElementsWithBounda",
+				"GetElementsWithBoundaryFaces\t(Mesh.py)"
+			],
+			[
+				"interior",
+				"interior_orientation"
+			],
+			[
+				"interio",
+				"interior_orientation"
+			],
+			[
+				"GetElementsWithBoundaryFac",
+				"GetElementsWithBoundaryFacesTet"
+			],
+			[
+				"GetElementsW",
+				"GetElementsWithBoundaryEdgesTri"
+			],
+			[
+				"eleme",
+				"element_type\t(ProblemData.py)"
+			],
+			[
+				"prnt",
+				"print"
+			],
+			[
+				"invari",
+				"invariant_to_linearise"
+			],
+			[
+				"invar",
+				"invariant"
+			],
+			[
+				"inva",
+				"invariant"
+			],
+			[
+				"Anis",
+				"AnisotropicMooneyRivlin_0"
+			],
+			[
+				"compute_",
+				"compute_mesh_qualities"
+			],
+			[
+				"is_",
+				"is_anisotropic\t(MaterialBase.py)"
+			],
+			[
+				"print",
+				"print_function\t(FEMSolver.py)"
+			],
+			[
+				"Curv",
+				"CurvilinearPlot\t(ProblemData.py)"
+			],
+			[
+				"sol",
+				"solution"
+			],
+			[
+				"Sim",
+				"SimplePlot\t(ProblemData.py)"
+			],
+			[
+				"Convert",
+				"ConvertTrisToQuads\t(ProblemData.py)"
+			],
+			[
+				"Not",
+				"NotImplementedError\t(Mesh.py)"
+			],
+			[
+				"epst",
+				"epst_mirror"
+			],
+			[
+				"return_",
+				"return_inverse\t(Mesh.py)"
+			],
+			[
+				"in",
+				"in2d"
+			],
+			[
+				"Gauss",
+				"GaussLobattoPointsQuad"
+			],
+			[
+				"Feke",
+				"FeketePointsTri"
+			],
+			[
+				"Quant",
+				"QuantityToPlot\t(ProblemData.py)"
+			],
+			[
+				"inter",
+				"interpolation\t(Mesh.py)"
+			],
+			[
+				"youn",
+				"youngs_modulus=2.3*1e4\t(ProblemData.py)"
+			],
+			[
+				"midf",
+				"midf2"
+			],
+			[
+				"intre",
+				"interpolation"
+			],
+			[
+				"PostPro",
+				"PostProcessing\t(ProblemData.py)"
+			],
+			[
+				"GetBoundaryEd",
+				"GetBoundaryEdgesHex"
+			],
+			[
+				"mid",
+				"mid0"
+			],
+			[
+				"GetEdges",
+				"GetEdgesQuad"
+			],
+			[
+				"Bases",
+				"BasesOneD"
+			],
+			[
+				"NodeA",
+				"NodeArrangementQuad"
+			],
+			[
+				"show",
+				"show_plot"
+			],
+			[
+				"quad",
+				"quad0"
+			],
+			[
+				"uniq",
+				"unique_elements"
+			],
+			[
+				"uni",
+				"unique_elements"
+			],
+			[
+				"Node",
+				"NodeArrangementTri"
+			],
+			[
+				"element",
+				"elements"
+			],
+			[
+				"mead",
+				"median"
+			],
+			[
+				"ele",
+				"elements"
+			],
+			[
+				"Gau",
+				"GaussLobattoPointsQuad"
+			],
+			[
+				"infer",
+				"InferSpatialDimension"
+			],
+			[
+				"__all",
+				"__all_exist__"
+			],
+			[
+				"residu",
+				"residual_mech_neumann"
+			],
+			[
+				"Sta",
+				"StaggeredElectromechanicSolver\t(ProblemData.py)"
+			],
+			[
+				"Problem",
+				"ProblemOneCylinder"
+			],
+			[
+				"colorbar",
+				"colorbar=False\t(ProblemData.py)"
+			],
+			[
+				"point_ra",
+				"point_radius=.08"
+			],
+			[
+				"maxi",
+				"maximum"
+			],
+			[
+				"GetBoundaryF",
+				"GetBoundaryFacesHex"
+			],
+			[
+				"GetB",
+				"GetBoundaryEdgesHex"
+			],
+			[
+				"GetFa",
+				"GetFacesHex"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "/home/roman/Dropbox/2015_HighOrderMeshing/meshes/runner.py",
+			"settings":
+			{
+				"buffer_size": 8809,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MeshGeneration/Mesh.py",
+			"settings":
+			{
+				"buffer_size": 137781,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/roman/Dropbox/falconFromElas0p05.dat",
+			"settings":
+			{
+				"buffer_size": 35148455,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "Florence/Solver/FEMSolver.py",
+			"settings":
+			{
+				"buffer_size": 44018,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/Solver/Solver.py",
+			"settings":
+			{
+				"buffer_size": 10299,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "ParametricStudies/hpNonlinearElectromechanics/ParametricStudy_ErrorNorms.py",
+			"settings":
+			{
+				"buffer_size": 11220,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "ParametricStudies/hpNonlinearElectromechanics/ParametricStudy_ErrorNorms_Objective.py",
+			"settings":
+			{
+				"buffer_size": 15523,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/PostProcessing/ComputeErrorNorms.py",
+			"settings":
+			{
+				"buffer_size": 30323,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/BoundaryCondition/BoundaryCondition.py",
+			"settings":
+			{
+				"buffer_size": 35038,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "examples/FiniteElements/Nonlinear_Electromechanics_Benchmark/ProblemData.py",
+			"settings":
+			{
+				"buffer_size": 15495,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "examples/FiniteElements/FingerHarvester/ProblemData.py",
+			"settings":
+			{
+				"buffer_size": 6576,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "examples/FiniteElements/Square_Piezo/ProblemData.py",
+			"settings":
+			{
+				"buffer_size": 4788,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "examples/FiniteElements/Nonlinear_Electromechanics_3D_Plate_Holes/ProblemData.py",
+			"settings":
+			{
+				"buffer_size": 7511,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "examples/FiniteElements/Nonlinear_Electromechanics_3D_Beam/ProblemData.py",
+			"settings":
+			{
+				"buffer_size": 9995,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "examples/FiniteElements/Nonlinear_Electromechanics_2D_Square/ProblemData.py",
+			"settings":
+			{
+				"buffer_size": 35965,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/LLDispatch/CythonSource/_helper_.h",
+			"settings":
+			{
+				"buffer_size": 2255,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/LLDispatch/CythonSource/_MaterialBase_.h",
+			"settings":
+			{
+				"buffer_size": 167,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/LLDispatch/CythonSource/_LegendreTransform_.h",
+			"settings":
+			{
+				"buffer_size": 2795,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/LLDispatch/CythonSource/_IsotropicElectroMechanics_107_.h",
+			"settings":
+			{
+				"buffer_size": 6369,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/LLDispatch/CythonSource/_IsotropicElectroMechanics_107_.pyx",
+			"settings":
+			{
+				"buffer_size": 1825,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_107.py",
+			"settings":
+			{
+				"buffer_size": 4948,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/LegendreTransform/LegendreTransform.py",
+			"settings":
+			{
+				"buffer_size": 3145,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/LLDispatch/Makefile.sh",
+			"settings":
+			{
+				"buffer_size": 2661,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/LLDispatch/CythonSource/_MooneyRivlin_0_.h",
+			"settings":
+			{
+				"buffer_size": 2896,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/MooneyRivlin_0.py",
+			"settings":
+			{
+				"buffer_size": 2103,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/LLDispatch/CythonSource/_MooneyRivlin_0_.pyx",
+			"settings":
+			{
+				"buffer_size": 1399,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/LLDispatch/CythonSource/_Piezoelectric_100_.h",
+			"settings":
+			{
+				"buffer_size": 6203,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/LLDispatch/CythonSource/_Piezoelectric_100_.pyx",
+			"settings":
+			{
+				"buffer_size": 3458,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/Piezoelectric_100.py",
+			"settings":
+			{
+				"buffer_size": 7061,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/MaterialBase.py",
+			"settings":
+			{
+				"buffer_size": 17142,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/LLDispatch/_python_tester_.py",
+			"settings":
+			{
+				"buffer_size": 5519,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/VariationalPrinciple/VariationalPrinciple.py",
+			"settings":
+			{
+				"buffer_size": 6336,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/VariationalPrinciple/DisplacementPotentialFormulation.py",
+			"settings":
+			{
+				"buffer_size": 18953,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/VariationalPrinciple/DisplacementFormulation.py",
+			"settings":
+			{
+				"buffer_size": 11673,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_100.py",
+			"settings":
+			{
+				"buffer_size": 2884,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_200.py",
+			"settings":
+			{
+				"buffer_size": 3539,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_201.py",
+			"settings":
+			{
+				"buffer_size": 3656,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_0.py",
+			"settings":
+			{
+				"buffer_size": 3186,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_1.py",
+			"settings":
+			{
+				"buffer_size": 4971,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_2.py",
+			"settings":
+			{
+				"buffer_size": 3298,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_3.py",
+			"settings":
+			{
+				"buffer_size": 6836,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_101.py",
+			"settings":
+			{
+				"buffer_size": 3019,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_102.py",
+			"settings":
+			{
+				"buffer_size": 3253,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_103.py",
+			"settings":
+			{
+				"buffer_size": 3416,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_104.py",
+			"settings":
+			{
+				"buffer_size": 3714,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_105.py",
+			"settings":
+			{
+				"buffer_size": 3891,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_106.py",
+			"settings":
+			{
+				"buffer_size": 4163,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/AnisotropicMooneyRivlin_1.py",
+			"settings":
+			{
+				"buffer_size": 3047,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/Tensor/Tensors.py",
+			"settings":
+			{
+				"buffer_size": 18966,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MeshGeneration/HigherOrderMeshing/HigherOrderMeshingTet.py",
+			"settings":
+			{
+				"buffer_size": 7791,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/Tensor/Numeric.pyx",
+			"settings":
+			{
+				"buffer_size": 14779,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/Utils/debug.py",
+			"settings":
+			{
+				"buffer_size": 3412,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/PostProcessing/PostProcess.py",
+			"settings":
+			{
+				"buffer_size": 143344,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/AnisotropicMooneyRivlin_0.py",
+			"settings":
+			{
+				"buffer_size": 20572,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/MooneyRivlin.py",
+			"settings":
+			{
+				"buffer_size": 2863,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/QuadratureRules/NodeArrangement.py",
+			"settings":
+			{
+				"buffer_size": 33861,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/Solver/StaggeredElectromechanicSolver.py",
+			"settings":
+			{
+				"buffer_size": 16694,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/Solver/StaggeredFEMSolver.py",
+			"settings":
+			{
+				"buffer_size": 17293,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/TimeIntegrators/StructuralDynamicIntegrator.py",
+			"settings":
+			{
+				"buffer_size": 8762,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/FunctionSpace/FunctionSpace.py",
+			"settings":
+			{
+				"buffer_size": 5552,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MeshGeneration/vtk_writer.py",
+			"settings":
+			{
+				"buffer_size": 16829,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/Utils/__init__.py",
+			"settings":
+			{
+				"buffer_size": 150,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/__init__.py",
+			"settings":
+			{
+				"buffer_size": 1748,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/NeoHookean_3.py",
+			"settings":
+			{
+				"buffer_size": 1893,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/Steinmann.py",
+			"settings":
+			{
+				"buffer_size": 9184,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "\\subsection{Convex multi-variable electro-elasticity}\\label{multivariable_electroelasticity}\nFor the closure of the system of equations, two additional constitutive laws are needed relating deformation and electric displacements to stresses and electric field in the continuum. In the case of reversible electro-elasticity, where thermal effects, electric polarisation induced hysteresis and any other possible state variables (i.e. accumulated plastic deformation and remanent strains) are disregarded, the internal energy density $e$ per unit of undeformed volume can be solely defined in terms of the deformation and electric displacement namely $e=e(\\vec{\\nabla}_0\\vec{x},\\vec{D}_0)$.  In this case, the first law of thermodynamics yields\n\\begin{align}\\label{eqn:second_piola_def}\nDe[\\delta\\vec{u}]=\\frac{1}{2}D\\vec{C}[\\delta\\vec{u}]:\\vec{S} + \\vec{E}_0 \\cdot \\delta\\vec{D}_0,\n\\end{align}\n%\nwhere \n\\begin{align}\\label{eqn:piola_and_E}\n\\vec{S} = \\frac{\\partial e(\\vec{\\nabla}_0\\vec{x},\\vec{D}_0)}{\\partial \\vec{C}}; \n\\qquad \n\\vec{E}_0 = \\frac{\\partial e(\\vec{\\nabla}_0\\vec{x},\\vec{D}_0)}{\\partial \\vec{D}_0}\n\\end{align}\nwhere $\\vec{S}$ is the symmetric second Piola-Kirchoff stress tensor and $\\vec{D}_0$ is the material or Lagrangian electric displacement field vector and the directional derivative of $\\vec{C}$ with respect to changes in geometry is given by\n\\begin{align*}\nD\\vec{C}[\\delta\\vec{u}] &= (\\vec{\\nabla}_0\\delta\\vec{u})^T\\vec{F} + \\vec{F}^T \\vec{\\nabla}_0\\delta\\vec{u}. %\\\\ \\notag\n%D^2\\vec{C}[\\delta\\vec{u}] \n\\end{align*} \nSubsequently, the internal energy $e=e(\\vec{\\nabla}_0\\vec{x},\\vec{D}_0)$ can be further linearised leading to a tangent operator defined as follows\n\\begin{align}\nD^2e[\\delta\\vec{u},\\delta\\vec{D}_0; \\vec{u}, \\Delta\\vec{D}_0] &= [\\vec{\\nabla}_0\\delta\\vec{u}: \\;\\; \\delta\\vec{D}_0]\n\\begin{bmatrix}\n\\vec{\\mathcal{C}} & \\vec{\\mathcal{Q}}^T \\\\\n\\vec{\\mathcal{Q}} & \\vec{\\theta}\n\\end{bmatrix}\n\\begin{bmatrix}\n:\\vec{\\nabla}_0\\vec{u} \\\\\n\\Delta\\vec{D}_0\n\\end{bmatrix},\n\\end{align} \nwith the fourth order elasticity tensor $\\vec{\\mathcal{C}}$, the third order coupling tensor $\\vec{\\mathcal{Q}}$ and the second order dielectric tensor $\\vec{\\theta}$ defined as\n\\begin{align}\\label{eqn:second_dd_energy_4}\n\\vec{\\mathcal{C}} = \\frac{\\partial^2 W(\\vec{C},\\vec{D}_0)}{\\partial\\vec{C} \\partial\\vec{C}}; \\qquad \n\\vec{\\mathcal{Q}} = \\frac{\\partial^2 W(\\vec{C},\\vec{D}_0)}{\\partial\\vec{C} \\partial\\vec{D}_0}; \\qquad\n\\vec{\\theta} = \\frac{\\partial^2 W(\\vec{C},\\vec{D}_0)}{\\partial\\vec{D}_0 \\partial\\vec{D}_0}\n\\end{align}\n\nIn the context of pure non-linear elasticity, the concept of polyconvexity, was first introduced by Ball \\cite{BallPolyconvex1976,BallPolyconvex1976b} in order to establish sufficient conditions for the existence of solutions in nonlinear elasticity.  It is recognised these days \\cite{BonetPolyconvex15,BonetPolyconvex15b,SchroderPolyconvex11,Schroder20083486,BonetPolyconvex15c} that polyconvexity is a useful mathematical requirement that can be used to ensure the well-posedness ofthe equations in the large strain regime.  \n%Moreover, polyconvexity implies ellipticity (or rank-one convexity), guaranteeing the existence of real wave speeds \\cite{BonetPolyconvex15,BallPolyconvex1976,BallPolyconvex1976b}. \nExtending the definition of polyconvexity to multi-variable convexity in electromechanics, following Gil and Ortigosa \\cite{Gil2016293,Ortigosa2016329}, the internal energy density including the electromechanical contribution $e$ can be postulated as\n\\begin{align}\\label{eqn:multi-variable_convexity}\ne(\\vec{\\nabla}_0\\vec{x},\\vec{D}_0) = \\tilde{W}(\\vec{F},\\vec{H},J,\\vec{D}_0,\\vec{d}); \\qquad \\vec{d}=\\vec{F}\\vec{D}_0,\n\\end{align}\nwhere $\\tilde{W}$ represents a convex multi-variable functional in terms of the extended set of arguments $\\{\\vec{F},\\vec{H},J,\\vec{D}_0,\\vec{d}\\}$. As mentioned before, in addition, the requirement for objectivity (i.e. invariance with respect to rotations in the material configuration) implies that $\\tilde{W}$ must be independent of the rotational components of $\\vec{F}$ and $\\vec{H}$ and hence the energy can be expressed in terms of an extended symmetric kinematics set \\eqref{eqn:symmetric_kinematics}\n\\begin{align}\\label{eqn:sym_energy}\ne(\\vec{\\nabla}_0\\vec{x},\\vec{D}_0) \\underset{\\Leftarrow}{=} \\tilde{W}(\\vec{F},\\vec{H},J,\\vec{D}_0,\\vec{d}) \\underset{\\Rightarrow}{=} W(\\vec{C},\\vec{D}_0),\n\\end{align}\nwhere $W$ represents a multi-variable functional with respect to the extended set of symmetric mechanical kinematics and the electrostatic counterparts $\\mathcal{V}=\\{\\vec{C},\\vec{D}_0\\}$. It is worth noting that $W$ is not strictly convex with respect to the individual components of the set $\\mathcal{V}$, but rather an objective re-expression of the convex multi-variable functional $\\tilde{W}$. Furthermore, the inclusion of the term $\\vec{d}$ in $\\tilde{W}$ is useful in the context of studying material stability \\cite{Gil2016293} which can be re-expressed in terms of the combination of kinmatics in $\\mathcal{V}$, in that in \\eqref{eqn:sym_energy}, $W$ is identical to $\\tilde{W}$, although the term $\\vec{d}$, has been seeminly dropped. Notice that, constructing a convex multi-variable energy (i.e. $\\tilde{W}$) is a necessary first step for a materially frame indifferent representation (i.e. $W$), but the vice-versa is not true, in that an objective energy may not necessarily be convex with respect to its set of independent kinematics.\n%\n%\n%\n%",
+			"settings":
+			{
+				"buffer_size": 5454,
+				"line_ending": "Unix",
+				"name": "\\subsection{Convex multi-variable electro-elastici"
+			}
+		},
+		{
+			"file": "/home/roman/Dropbox/2016_Linearised_Electromechanics_Paper/bibliography.bib",
+			"settings":
+			{
+				"buffer_size": 109543,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "Bagwell, S., Ledger, P., Gil, A., Mallett, M. & Kruip, M. A linearised hp-Finite Element Framework for Acousto-Magento-Mechanical Coupling in MRI Scanners\n\nE104 form healt insurance",
+			"settings":
+			{
+				"buffer_size": 181,
+				"line_ending": "Unix",
+				"name": "Bagwell, S., Ledger, P., Gil, A., Mallett, M. & Kr"
+			}
+		},
+		{
+			"contents": "Dear Sir/Madam,\n\nAs a recent dual PhD graduate in the field of computational engineering with solid expertise in the field of finite element analysis of mechanical, electro-mechanical and automotive systems, I am thrilled to be applying for the advertised job of Stress Engineer to Ferchau.\n\nMy experience in the field of stress analysis started with my undergraduate thesis in Structural Engineering where I worked on finite element simulations of fracture propagation and fatigue in concrete and masonry structures. My technical writing on the topic was conferred the best research paper in the \"International Conference in Earth Sciences and Engineering\" in India.\n\nDuring my Master (MSc in Computational Mechanics) course in Barcelona, Spain, I worked on a term project on impact simulations of composite aircraft turbines using ANSYS, to optimise the material properties of turbines for safety during take-off and landing.\n\nSince October 2013, I have been employed by the Technical University of Munich (TUM, Germany) and Swansea University (UK) as a part of European Union project to work on a PhD leading research work related to finite element code development and simulation of mechanical and electromechanical systems. My work has involved generating complex FE meshes for the so-called high order accurate finite elements, stress calculations using either in-house or commercial codes, high performance computing and producing technical research papers (Please refer to my CV for relevant work and publications).\n\nFurthermore, I have worked as a research consultant for Siemens Magnet Technology (Oxforad, UK) on FE analysis of MRI scanners to reduce the amount of electromagnetic forces/stresses and vibration caused during the scanning procedure on the machine. \n\nI feel fortunate to have worked with some of the world-leading groups in the field of computational engineering over the last four years in many European countries including Germany, Spain and the United Kingdom. My technical background in this field clubbed with my deep inclination and interests to excel and apply my knowledge in the industrial settings, give me the confidence to apply for a job this nature. I am certain that working as a stress engineer in a renowned aviation company would be a fulfilling experience for me.\n\nHaving worked in Munich for over a year, I am familiar with working environment in the city and I would like to continue working in the area around and my starting date would be ideally around beginning of December, although I am slightly flexible with dates.\n\nPlease do not hesitate to contact me if you need further information,\nYour Sincerely,\nRoman Poya",
+			"settings":
+			{
+				"buffer_size": 2667,
+				"line_ending": "Unix",
+				"name": "Dear Sir/Madam,"
+			}
+		},
+		{
+			"file": "ParametricStudies/ParametricStudy_PvsNu.py",
+			"settings":
+			{
+				"buffer_size": 13016,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/roman/Dropbox/romeric.github.io/index.html",
+			"settings":
+			{
+				"buffer_size": 4675,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/roman/Dropbox/romeric.github.io/about.html",
+			"settings":
+			{
+				"buffer_size": 12764,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/roman/Dropbox/romeric.github.io/research.html",
+			"settings":
+			{
+				"buffer_size": 14143,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/roman/Dropbox/romeric.github.io/publications.html",
+			"settings":
+			{
+				"buffer_size": 6553,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/roman/Dropbox/romeric.github.io/blog.html",
+			"settings":
+			{
+				"buffer_size": 4000,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/NearlyIncompressibleNeoHookean.py",
+			"settings":
+			{
+				"buffer_size": 4585,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Florence/MaterialLibrary/NearlyIncompressibleMooneyRivlin.py",
+			"settings":
+			{
+				"buffer_size": 4892,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "examples/FiniteElements/Annular_Circle_Electromechanics/ProblemData.py",
+			"settings":
+			{
+				"buffer_size": 1732,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "examples/FiniteElements/AnnularCircle_MVP/ProblemData.py",
+			"settings":
+			{
+				"buffer_size": 2243,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "examples/FiniteElements/MechanicalComponent2D/ProblemData.py",
+			"settings":
+			{
+				"buffer_size": 2567,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "examples/FiniteElements/Almond3D/ProblemData.py",
+			"settings":
+			{
+				"buffer_size": 4673,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "examples/FiniteElements/Falcon3D/ProblemData.py",
+			"settings":
+			{
+				"buffer_size": 5242,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "examples/FiniteElements/Misc/ProblemData.py",
+			"settings":
+			{
+				"buffer_size": 4217,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "examples/FiniteElements/Misc3D/ProblemData.py",
+			"settings":
+			{
+				"buffer_size": 4723,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "tests/test.py",
+			"settings":
+			{
+				"buffer_size": 25242,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "tests/Cylinder/ProblemData.py",
+			"settings":
+			{
+				"buffer_size": 1124,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "# all: one\n\none_d: _stiffness.cpp\n\t/opt/gcc-5.3.0/bin/g++ -std=c++11 -fcilkplus -O3 -mavx \\\n\t _stiffness.cpp -o _stiffness \\\n\t -I/home/roman/Dropbox/zdump/ -I/usr/local/include/eigen/ \\\n\t -Wno-deprecated-declarations -fopenmp\n\n# one_d: _stiffness.cpp\n# \t/opt/gcc-5.3.0/bin/g++ -std=c++11 -fcilkplus -O3 -mavx \\\n# \t _stiffness.cpp -o _stiffness \\\n# \t -I/home/roman/Dropbox/zdump/ -I/home/roman/Dropbox/eigen-devel/ \\\n# \t -Wno-deprecated-declarations -fopenmp\t \n\none_l: _stiffness.cpp\n\t/opt/gcc-5.2/bin/g++ -std=c++11 -fcilkplus -O3 -mavx \\\n\t _stiffness.cpp -o _stiffness \\\n\t -I/home/roman/Dropbox/zdump/ -I/home/roman/Dropbox/eigen-devel/ \\\n\t -Wno-deprecated-declarations -fopenmp -funroll-loops -finline-functions -ffast-math #--verbose\n\n\n# one_l: _stiffness.cpp\n# \t/opt/gcc-5.2/bin/g++ -std=c++11 -fcilkplus -O3 -mavx \\\n# \t _stiffness.cpp -o _stiffness \\\n# \t -I/home/roman/Dropbox/zdump/ -I/usr/local/include/eigen/ \\\n# \t -Wno-deprecated-declarations -fopenmp -funroll-loops -finline-functions -ffast-math\n\n\n#############################\n# all: one two # Don't put this in two lines\n\n# one: _stiffness.cpp\n# \t/opt/gcc-5.2/bin/g++ -std=c++11 -fcilkplus -O3 -mavx \\\n# \t _stiffness.cpp -o _stiffness \\\n# \t -I/home/roman/Dropbox/zdump/ -I/usr/local/include/eigen/ \\\n# \t -Wno-deprecated-declarations\n\n# two: _stiffness.cpp\n# \t/opt/gcc-5.2/bin/g++ -std=c++11 -fcilkplus -O3 -mavx \\\n# \t -S _stiffness.cpp -o _stiffness.asm \\\n# \t -I/home/roman/Dropbox/zdump/ -I/usr/local/include/eigen/ \\\n# \t -Wno-deprecated-declarations\n",
+			"file": "/home/roman/Dropbox/zdump/NATIVE/Makefile",
+			"file_size": 1515,
+			"file_write_time": 131046868746198416,
+			"settings":
+			{
+				"buffer_size": 1515,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "#include <iostream>\n#include <vector>\n#include <array>\n#include <string>\n#include <algorithm>\n#include <fstream>\n#include <sstream>\n\n// #define HAS_CLANG\n#ifndef HAS_CLANG\n    // #include <omp.h>\n    #include <cilk/cilk.h>\n    // #include <cilk/reducer_opadd.h>\n#endif\n\n#include <timeit.hpp>\n#include <print.hpp>\n\n#include <Eigen/Dense>\n#include <Eigen/Core>\n\n// CONTROL FUNCTION INLINING\n#if defined(__GNUC__) || defined(__GNUG__)\n    #define ALWAYS_INLINE inline __attribute__((always_inline))\n    #define NEVER_INLINE __attribute__((noinline))\n#elif defined(_MSC_VER)\n    #define ALWAYS_INLINE __forceinline\n    #define NEVER_INLINE __declspec(noinline)\n#endif\n\n#define STATIC static\n\n#define INF std::numeric_limits<double>::infinity()\n\n\nnamespace Eigen {\n// DEFINE Real, Integer AND UInteger BASED MATRICES\n// typedef Eigen::Matrix<double,-1,-1> MatrixR;\n// typedef Eigen::Matrix<long long,-1,-1> MatrixI;\n\ntypedef Eigen::Matrix<double,-1,-1> MatrixR;\ntypedef Eigen::Matrix<long long,-1,-1> MatrixI;\n}\n\ntemplate<typename T>\nSTATIC ALWAYS_INLINE double det(const Eigen::PlainObjectBase<T> & a) {\n    // if a.rows() ==\n    // write this branch free\n    return a(0,0)*a(1,1) - a(0,1)*a(1,0); \n}\n\n\n//! AUXILARY FUNCTIONS FOR POSTMESH\nALWAYS_INLINE std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {\n    //! SPLIT STRINGS\n    std::stringstream ss(s);\n    std::string item;\n    while (std::getline(ss, item, delim)) {\n        elems.push_back(item);\n    }\n    return elems;\n}\n\nALWAYS_INLINE std::vector<std::string> split(const std::string &s, char delim) {\n    //! SPLIT STRINGS\n    std::vector<std::string> elems;\n    split(s, delim, elems);\n    return elems;\n}\n\ndouble parse(const char* str, double a) {\n    return std::atof(str);\n}\nint parse(const char* str, int a) {\n    return std::atoi(str);\n}\nstd::size_t parse(const char* str, std::size_t a) {\n    return std::atoi(str);\n}\n\ntemplate<typename T>\nEigen::Matrix<T,-1,-1> loadtxt(const std::string &filename, char delim, T a)\n{\n    /*Reading 2D floating point row major arrays */\n    std::vector<std::string> arr;\n    arr.clear();\n    std::string temp;\n\n    std::ifstream datafile;\n    datafile.open(filename.c_str());\n\n    if(!datafile)\n    {\n        warn(\"Unable to read file\");\n    }\n    while(datafile)\n    {\n        datafile >> temp;\n        temp += \"\";\n        arr.push_back(temp);\n    }\n\n    datafile.close();\n\n\n    const std::size_t rows = arr.size();\n    const std::size_t cols = (split(arr[0], delim)).size();\n\n\n    Eigen::Matrix<T,-1,-1> out_arr = Eigen::Matrix<T,-1,-1>::Zero(rows,cols);\n\n    for(std::size_t i=0 ; i<rows;i++)\n    {\n        std::vector<std::string> elems;\n        elems = split(arr[i], delim);\n        for(std::size_t j=0 ; j<cols;j++)\n        {\n            // out_arr(i,j) = std::atof(elems[j].c_str());\n            out_arr(i,j) = parse(elems[j].c_str(),a);\n        }\n    }\n\n    // CHECK IF LAST LINE IS READ CORRECTLY\n    bool duplicate_rows = false;\n    for (std::size_t j=0; j<cols; ++j)\n    {\n        if ( out_arr(out_arr.rows()-2,j)==out_arr(out_arr.rows()-1,j) )\n        {\n            duplicate_rows = true;\n        }\n        else\n        {\n            duplicate_rows = false;\n        }\n    }\n    if (duplicate_rows == true)\n    {\n        out_arr = out_arr.block(0,0,out_arr.rows()-1,out_arr.cols()).eval();\n    }\n\n    return out_arr;\n}\n\n\n// using namespace Eigen;\n//\n\n// enum {\n//     NeoHookean\n//     NearlyIncompressibleNeoHookean\n//     MooneyRivlin\n//     NearlyIncompressibleMooneyRivlin\n// }\n\ntemplate<typename T>\nstruct Material {\n    T mu;\n    T lambda;\n    T E;\n    T nu;\n    std::size_t ndim;\n    int type;\n\n    Material(std::size_t ndim, int type) {\n        this->ndim = ndim;\n    }\n};\n\nstatic const double dijdkl[6][6] = {{1.,  1.,  1.,  0.,  0.,  0.},\n        {1.,  1.,  1.,  0.,  0.,  0.},\n        {1.,  1.,  1.,  0.,  0.,  0.},\n        {0.,  0.,  0.,  0.,  0.,  0.},\n        {0.,  0.,  0.,  0.,  0.,  0.},\n        {0.,  0.,  0.,  0.,  0.,  0.}};\n\nstatic const double dikdjl[6][6] = {{1.,  0.,  0.,  0.,  0.,  0.},\n        {0.,  1.,  0.,  0.,  0.,  0.},\n        {0.,  0.,  1.,  0.,  0.,  0.},\n        {0.,  0.,  0.,  0.5,  0.,  0.},\n        {0.,  0.,  0.,  0.,  0.5,  0.},\n        {0.,  0.,  0.,  0.,  0.,  0.5}};\n\n\n// #define nelem 4000\n// #define nnode 2000\n#define nodeperelem 3\n#define ndim 2\n#define nvar 2\n#define ngauss 3\n#define hessian_size 3\n\n\nstatic double Jm_[ndim][nodeperelem][ngauss] = {{{-0.5, -0.5,  -0.5},\n  {0.5,   0.5,   0.5},\n  {0.0,   0.0,   0.0}},\n{{-0.5,  -0.5,  -0.5},\n  {0.0,   0.0,   0.0},\n  {0.5,   0.5,   0.5}}};\n\n// static const Eigen::Matrix<std::size_t,nelem,nodeperelem> elements;\n// static const Eigen::Matrix<double,nnode,ndim> points;\n\n// static const Eigen::Matrix<std::size_t,-1,-1> elements(nelem,nodeperelem);\n// static const Eigen::Matrix<double,-1,-1> points(nnode,ndim);\n\n\ntemplate<typename T>\nvoid _stiffness(T* AllGauss, T *Jm, T *LagrangeElemCoords, T* EulerElemCoords) {\n    // Get \n}\n\ntemplate<typename T, typename U, typename V, typename W>\nEigen::Matrix<double,nodeperelem*nvar,nodeperelem*nvar> \n_stiffness(const Eigen::PlainObjectBase<T> &AllGauss, const Eigen::PlainObjectBase<U> &Jm, \n    const Eigen::PlainObjectBase<V> &LagrangeElemCoords, const Eigen::PlainObjectBase<W> &EulerElemCoords) {\n// template<typename V, typename W>\n// Eigen::Matrix<double,nodeperelem*nvar,nodeperelem*nvar> \n// _stiffness(const Eigen::PlainObjectBase<V> &LagrangeElemCoords, const Eigen::PlainObjectBase<W> &EulerElemCoords) {\n\n    Eigen::Matrix<double,nodeperelem*nvar,nodeperelem*nvar> stiffel;\n    Eigen::Matrix<double,nodeperelem*nvar,hessian_size> B;\n    Eigen::Matrix<double,hessian_size,hessian_size> H_Voigt; \n    // H_Voigt.setRandom(hessian_size,hessian_size);\n\n    // auto counter = 0.;\n\n    // for (std::size_t g=0; g<ngauss; g++) {\n    for (std::size_t g=0; g<AllGauss.rows(); g++) {\n\n        // Eigen::Matrix<double,nodeperelem,ndim> Jm;\n        // for (std::size_t i=0; i<Jm.rows(); i++) {\n        //     for (std::size_t j=0; j<Jm.cols(); j++) {\n        //         Jm(i,j) = Jm_[i][j][g];\n        //     }   \n        // }\n        // Eigen::Matrix<double,nodeperelem,ndim> Jm; //Jm <<-0.5,-0.5,-0.5,0.5,0.5,0.5;\n\n        auto ParentGradientX = Jm.transpose()*LagrangeElemCoords;\n        auto ParentGradientx = Jm.transpose()*EulerElemCoords;\n        auto MaterialGradient = Jm*(ParentGradientX.inverse());\n        auto SpatialGradient = Jm*(ParentGradientx.inverse());\n\n        // auto F = EulerElemCoords.transpose()*MaterialGradient;\n        Eigen::Matrix<double,ndim,ndim> F = EulerElemCoords.transpose()*MaterialGradient;\n        // asm(\"#BEGIN\");\n        // auto J = F.determinant(); // this function is problematic for gcc\n        // asm(\"#END\");\n        double J = det(F);\n        auto b = F.transpose()*F;\n        auto H = J*F.inverse().transpose();\n\n        auto mu=2., lamb=3.; \n        auto Hv = mu/J*b - lamb*Eigen::MatrixXd::Zero(ndim,ndim);\n        H_Voigt(ndim-2,ndim-1) += Hv(ndim-1,ndim-2);\n\n        stiffel += B*(H_Voigt*B.transpose());\n\n        stiffel(g,g) = g+H(0,1);\n        // counter += stiffel(g,0);\n    }\n    // print(counter); \n    // return counter;\n    return stiffel;\n}\n\n// template<typename T, typename U>\n// double _get_element_stiffness(const Eigen::PlainObjectBase<T> &AllGauss, const Eigen::PlainObjectBase<U> &Jm) {\ndouble _fem_assembly(const Eigen::Matrix<std::size_t,-1,-1> &elements, const Eigen::Matrix<double,-1,-1> &points, \n    const Eigen::Matrix<double,ngauss,1> &AllGauss, const Eigen::Matrix<double,nodeperelem,ndim> &Jm) {   \n// double _fem_assembly(const Eigen::Matrix<std::size_t,-1,-1> &elements, \n//     const Eigen::Matrix<double,-1,-1> &points) {    \n\n    const auto number = 0.;\n    using Eigen::Matrix;\n    const auto nelem = elements.rows();\n    const auto estimate_size = (nvar*nodeperelem)*(nvar*nodeperelem)*nelem;\n    std::vector<double> V_stiffness(estimate_size);\n    // std::vector<std::size_t> I_stiffness(estimate_size);\n    // std::vector<unsigned int> I_stiffness(estimate_size);\n    // std::vector<std::size_t> J_stiffness(estimate_size);\n\n    // Both omp and cilk give the same result\n    // #pragma simd\n    #pragma omp parallel for\n    for (auto elem=0; elem<nelem; elem++) {\n    // cilk_for(auto elem=0; elem<nelem; elem++) {\n        Matrix<double,nodeperelem,ndim> LagrangeElemCoords, EulerElemCoords;\n\n        // const double LagrangeElemCoords[nodeperelem][ndim] = {{ points(elements(elem,0),0), points(elements(elem,1),0)},\n        //     {points(elements(elem,2),0), points(elements(elem,0),1)}, {points(elements(elem,1),1),\n        //     points(elements(elem,2),1) }};\n        // const double EulerElemCoords[nodeperelem][ndim] = {{ points(elements(elem,0),0), points(elements(elem,1),0)},\n        //     {points(elements(elem,2),0), points(elements(elem,0),1)}, {points(elements(elem,1),1),\n        //     points(elements(elem,2),1) }};\n\n        // for (std::size_t i=0; i<nodeperelem; i++) {\n        //     for (std::size_t j=0; j<ndim; j++) {\n        //         LagrangeElemCoords(i,j) = points(elements(elem,i),j);\n        //         EulerElemCoords(i,j) = points(elements(elem,i),j);\n        //     }\n        // }\n\n        LagrangeElemCoords << points(elements(elem,0),0), points(elements(elem,1),0),\n            points(elements(elem,2),0), points(elements(elem,0),1), points(elements(elem,1),1),\n            points(elements(elem,2),1);\n        EulerElemCoords << points(elements(elem,0),0), points(elements(elem,1),0),\n            points(elements(elem,2),0), points(elements(elem,0),1), points(elements(elem,1),1),\n            points(elements(elem,2),1);  \n\n        // LagrangeElemCoords << 1.,1.,1. ,1.,1.,1.;\n        // EulerElemCoords << 1.,1.,1. ,1.,1.,1. ; \n\n        // // {\n        //     Eigen::Matrix<double,nodeperelem*nvar,nodeperelem*nvar> stiffel;\n        //     Eigen::Matrix<double,nodeperelem*nvar,hessian_size> B;\n        //     Eigen::Matrix<double,hessian_size,hessian_size> H_Voigt; \n        //     number += stiffel(0,0)+B(0,0)+H_Voigt(0,0);\n        //     // H_Voigt.setRandom(hessian_size,hessian_size);\n        // // }\n\n\n        // auto stiffel = _stiffness(LagrangeElemCoords, EulerElemCoords);\n        auto stiffel = _stiffness(AllGauss, Jm, LagrangeElemCoords, EulerElemCoords);\n\n        unsigned int counter=0;\n        // std::vector<unsigned int> I_priv, J_priv;\n        std::array<unsigned int,nvar*nodeperelem> I_priv, J_priv;\n        for (std::size_t i=0; i<stiffel.cols(); i++) {\n            for (std::size_t j=0; j<stiffel.rows(); j++) {\n        //         // V_stiffness.push_back(stiffel(i,j));\n        //         // V_stiffness[counter] = stiffel(i,j);\n                V_stiffness[counter] = stiffel(j,i);\n                // I_priv.push_back(counter);\n                // J_priv.push_back(counter);\n                I_priv[counter] = counter;\n                J_priv[counter] = counter;\n        //\n                // I_stiffness[counter] = 2;\n                // J_stiffness[counter] = counter;\n                counter++;\n            }\n        }\n    }\n    // print(points.rows());\n    // return I_stiffness[0]+J_stiffness[1]+V_stiffness[2];\n\treturn number;\n}\n\n// python configure.py                            \\\n//    --boost-inc-dir=/usr/include/boost          \\\n//    --boost-lib-dir=/usr/lib                    \\\n//    --no-use-shipped-boost                      \\\n//    --boost-python-libname=boost_python-mt-py26 \\\n//    --cl-inc-dir=/opt/OpenCL-headers/           \\\n//    --cl-lib-dir=/usr/lib/x86_64-linux-gnu/      \\\n//    --cl-libname=OpenCL\n\n\n\n\nvoid RunSession() {\n\n    // std::size_t nelem = 100;\n    // std::size_t nodeperelem = 6;\n    // std::size_t ndim = 3;\n    // std::size_t elements[nelem][nodeperelem];\n    // double points[nnode][ndim];\n\n    // double Jm[nodeperelem][ngauss];\n    // double AllGauss[ngauss];\n\n    // // #pragma simd\n    // for (auto elem=0; elem<nelem; elem++) {\n    //     double LagrangeElemCoords[nodeperelem][ndim], EulerElemCoords[nodeperelem][ndim];\n    //     std::size_t current_nodes[nodeperelem];\n    //     // current_nodes[0:nodeperelem] = elements[elem][0:nodeperelem];\n    //     // LagrangeElemCoords[0:nodeperelem][0:ndim] = points[elements[elem][0:nodeperelem]][0:ndim]; //points[current_nodes[0:nodeperelem]][0:ndim];//\n    //     // EulerElemCoords[0:nodeperelem][0:ndim] = points[elements[elem*nodeperelem:(elem+1)*nodeperelem]][0:ndim];\n\n    //     // for \n    //     // _stiffness(AllGauss, Jm, LagrangeElemCoords, EulerElemCoords);\n    // }\n\n\n    /*---------------------------------------------------------------*/\n    using Eigen::Matrix;\n    // const Matrix<std::size_t,nelem,nodeperelem> elements;\n    // const Matrix<double,nnode,ndim> points;\n\n    // Eigen::Matrix<std::size_t,-1,-1> elements(nelem,nodeperelem);\n    // Eigen::Matrix<double,-1,-1> points(nnode,ndim);\n    // elements.setRandom(nelem,nodeperelem);\n    // points.setRandom(nnode,ndim);\n\n    std::string efile = \"/home/roman/Dropbox/zdump/NATIVE/elements.dat\";\n    std::string pfile = \"/home/roman/Dropbox/zdump/NATIVE/points.dat\";\n\n    // Eigen::Matrix<std::size_t,-1,-1,Eigen::RowMajor> elements = loadtxt(efile,',',(std::size_t)1);\n    // Eigen::Matrix<std::size_t,-1,-1> elements; elements.setRandom(nodeperelem,23365);\n    auto elements = loadtxt(efile,',',(std::size_t)1);\n    auto points = loadtxt(pfile,',',1.0);\n    // print(Eigen::ColMajor, Eigen::RowMajor);\n    // print(points);\n    // print(elements);\n    // print(elements.rows());\n    // exit(0);\n\n    // constexpr auto nodeperelem = elements.cols();\n\n    // const Matrix<double,nodeperelem,ngauss> Jm;\n    // const Matrix<double,nodeperelem,ndim> Jm;\n    Matrix<double,nodeperelem,ndim> Jm; //Jm.setRandom(nodeperelem,ndim);\n    // Jm(0,0) = 1.0;\n    // Jm(1,0) = 1.0;\n    // Jm(2,0) = 1.0;\n\n    // Jm(0,1) = 1.0;\n    // Jm(1,1) = 1.0;\n    // Jm(2,1) = 1.0;\n\n    // const Matrix<double,ngauss,1> AllGauss;\n    const Matrix<double,ngauss,1> AllGauss = {0.66666667, 0.66666667, 0.66666667};\n    // print(elements.rows(),points.rows());\n\n\n\n    // auto xx= _get_element_stiffness(elements, points, AllGauss, Jm);\n    // print(xx);\n    // timeit(static_cast<double (*)(const Matrix<double,ngauss,1>&, \n        // const Matrix<double,nodeperelem,ndim>&)>(&_get_element_stiffness),AllGauss, Jm);\n    // timeit(_fem_assembly,elements,points);\n    timeit(_fem_assembly,elements,points,AllGauss,Jm);\n    // _fem_assembly(elements,points,AllGauss,Jm);\n\n    // // Both omp and cilk give the same result\n    // // #pragma simd\n    // #pragma omp parallel for\n    // for (auto elem=0; elem<nelem; elem++) {\n    //     Matrix<double,nodeperelem,ndim> LagrangeElemCoords, EulerElemCoords;\n    //     // Matrix<std::size_t,nodeperelem,1> current_nodes;\n \n    //     _stiffness(AllGauss, Jm, LagrangeElemCoords, EulerElemCoords);\n    // }\n}\n\n\n\n// constexpr auto n = 1024*100;\n// static Eigen::MatrixXf a(n,1);\n// static Eigen::MatrixXf b(n,1);\n// static Eigen::MatrixXf c(n,1);\n// double add() {\n//     // Eigen::Matrix<double,n,1> a;\n//     // Eigen::Matrix<double,n,1> b;\n//     // Eigen::Matrix<double,n,1> c;\n\n\n//     // a.setRandom(n,1)\n//     asm(\"#BEGIN\");\n//     c.noalias() =a+b;\n//     asm(\"#END\");\n//     return c(1);\n// }\n\n// constexpr auto m = 2;\n// static Eigen::MatrixXd ff(m,m);\n// ALWAYS_INLINE double det() {\n//     return ff.determinant();\n// }\n\nint main() {\n\n    RunSession();\n    // timeit(RunSession);\n\n\n    // auto xx = det();\n    // print(xx);\n\n    // timeit(det);\n\n\n    return EXIT_SUCCESS;\n}\n\n// [1,2,4,8,16]\n// [88,46,33,14,9]\n// [102,51,25,14,8]\n",
+			"file": "/home/roman/Dropbox/zdump/NATIVE/_stiffness.cpp",
+			"file_size": 15575,
+			"file_write_time": 131046875046878145,
+			"settings":
+			{
+				"buffer_size": 15575,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/roman/Dropbox/zdump/dump_studies/cilk_check/cilk_check.cpp",
+			"settings":
+			{
+				"buffer_size": 15722,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/roman/Dropbox/2016_SIMD_Paper/bibliography.bib",
+			"settings":
+			{
+				"buffer_size": 109544,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		}
+	],
+	"build_system": "Packages/NimLime/Support/Nim.sublime-build",
+	"build_system_choices":
+	[
+		[
+			[
+				[
+					"Packages/NimLime/Support/Nim.sublime-build",
+					""
+				],
+				[
+					"Packages/NimLime/Support/Nim.sublime-build",
+					"Run"
+				]
+			],
+			[
+				"Packages/NimLime/Support/Nim.sublime-build",
+				"Run"
+			]
+		],
+		[
+			[
+				[
+					"Packages/Python/Python.sublime-build",
+					""
+				],
+				[
+					"Packages/Python/Python.sublime-build",
+					"Syntax Check"
+				]
+			],
+			[
+				"Packages/Python/Python.sublime-build",
+				""
+			]
+		],
+		[
+			[
+				[
+					"RunSession",
+					""
+				],
+				[
+					"Packages/Python/Python.sublime-build",
+					""
+				],
+				[
+					"Packages/Python/Python.sublime-build",
+					"Syntax Check"
+				]
+			],
+			[
+				"RunSession",
+				""
+			]
+		]
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 390.0,
+		"last_filter": "vir",
+		"selected_items":
+		[
+			[
+				"vir",
+				"Virtualenv: Activate"
+			],
+			[
+				"pack",
+				"Package Control: Remove Package"
+			],
+			[
+				"pac",
+				"Package Control: Enable Package"
+			],
+			[
+				"repl",
+				"SublimeREPL: Python"
+			],
+			[
+				"pa",
+				"Package Control: Remove Package"
+			],
+			[
+				"in",
+				"Package Control: Install Package"
+			],
+			[
+				"up",
+				"Package Control: Upgrade Package"
+			],
+			[
+				"v",
+				"Virtualenv: Activate"
+			],
+			[
+				"inst",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: in",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: re",
+				"Package Control: Remove Package"
+			],
+			[
+				"Package Control: ins",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: ",
+				"Package Control: List Packages"
+			],
+			[
+				"p",
+				"Package Control: Install Package"
+			],
+			[
+				"sublimerepl:p",
+				"SublimeREPL: Python"
+			],
+			[
+				"rena",
+				"File: Rename"
+			],
+			[
+				"Package Control: i",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 467.0
+	},
+	"console":
+	{
+		"height": 132.0,
+		"history":
+		[
+			"import numpy as np",
+			"MainData",
+			"import numpy",
+			"import urllib.request,os,hashlib; h = 'eb2297e1a458f27d836c04bb0cbaf282' + 'd0e7a3098092775ccb37ca9d6b2e4b7d'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/home/roman/Dropbox/florence",
+		"/home/roman/Dropbox/florence/Florence",
+		"/home/roman/Dropbox/florence/Florence/VariationalPrinciple"
+	],
+	"file_history":
+	[
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/LLDispatch/CythonSource/_IsotropicElectromechanics_107_.pyx",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/LLDispatch/CythonSource/_IsotropicElectromechanics_107_.h",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/LLDispatch/CythonSource/_MaterialBase_.h",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/LLDispatch/CythonSource/_LegendreTransform_.cpp",
+		"/run/user/1000/gvfs/sftp:host=137.44.169.95,user=roman/home/roman/Dropbox/florence/Florence/MaterialLibrary/LLDispatch/CythonSource/_IsotropicElectromechanics_107_.h",
+		"/home/roman/Dropbox/_IsotropicElectromechanics_107_.h",
+		"/home/roman/Dropbox/florence/Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pyx",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/TranservselyIsotropicLinearElastic.py",
+		"/home/roman/Dropbox/florence/Florence/VariationalPrinciple/NearlyIncompressibleHuWashizu.py",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/BonetTranservselyIsotropicHyperElastic.py",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/IncrementalLinearElastic.py",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/NeoHookean_2.py",
+		"/home/roman/Dropbox/florence/Florence/VariationalPrinciple/DisplacementApproachIndices.pyx",
+		"/home/roman/Dropbox/florence/Florence/VariationalPrinciple/DisplacementPotentialApproachIndices.pyx",
+		"/home/roman/Dropbox/florence/Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/PostMeshPy.pxd",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/__LLDispatch__/_MooneyRivlin_0_.pyx",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/LLDispatch/CythonSource/rebuilder_p.py",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/LLDispatch/rebuilder_p.py",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/LLDispatch/CythonSource/__init__.py",
+		"/usr/share/qt4/mkspecs/linux-g++/qmake.conf",
+		"/home/roman/Dropbox/florence/Florence/FiniteElements/ElementalMatrices/KinematicMeasures.py",
+		"/home/roman/Dropbox/Fastor/Makefile",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/LLDispatch/_Piezoelectric_100_.h",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/LLDispatch/_Piezoelectric_100_.pyx",
+		"/home/roman/Dropbox/florence/Florence/FiniteElements/ElementalMatrices/GetElementalMatrices.py",
+		"/home/roman/Dropbox/florence/Florence/FunctionSpace/GetBases.py",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/LLDispatch/__Piezoelectric_100__.pyx",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/__LLDispatch__/_python_tester_.py",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/__LLDispatch__/_Piezoelectric_100_.h",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/__LLDispatch__/Makefile.sh",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/LLDispatch/__init__.py",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/__LLDispatch__/__Piezoelectric_100__.pyx",
+		"/home/roman/Dropbox/florence/setup.py",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/__LLDispatch__/_Piezoelectric_100_.pyx",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/__LLDispatch__/chch.py",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/__LLDispatch__/FastorWrapper.pyx",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/__LLDispatch__/setup.py",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/__LLDispatch__/Piezo.cpp",
+		"/home/roman/Dropbox/florence/Florence/BoundaryCondition/CurvilinearMeshing/PostMesh/setup.py",
+		"/home/roman/Dropbox/florence/Florence/Tensor/Makefile.sh",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/__LLDispatch__/FastorWrapper.cpp",
+		"/home/roman/Dropbox/Fastor/Fastor.h",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/__LLDispatch__/_MooneyRivlin_0_.py",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/MooneyRivlin_2.py",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/__LLDispatch__/__init__.py",
+		"/home/roman/Dropbox/florence/Florence/MeshGeneration/SalomeMeshReader.py",
+		"/home/roman/Dropbox/florence/Florence/Tensor/Numeric.pyx",
+		"/home/roman/Dropbox/florence/Florence/QuadratureRules/QuadratureRule.py",
+		"/home/roman/Dropbox/romeric.github.io/css/main.css",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/LinearModel.py",
+		"/home/roman/Dropbox/florence/Florence/Solver/Solver.py",
+		"/home/roman/Dropbox/florence/.gitignore",
+		"/home/roman/Dropbox/florence/Florence/MeshGeneration/HigherOrderMeshing/GetInteriorCoordinates.py",
+		"/home/roman/Dropbox/florence/Florence/MeshGeneration/HigherOrderMeshing/HigherOrderMeshingTri.py",
+		"/home/roman/Dropbox/florence/Florence/MeshGeneration/HigherOrderMeshing/HigherOrderMeshingQuad.py",
+		"/home/roman/Dropbox/florence/Florence/MaterialLibrary/AnisotropicMooneyRivlin.py",
+		"/home/roman/Dropbox/florence/examples/FiniteElements/Cylinder/ProblemData.py",
+		"/home/roman/Dropbox/florence/Florence/FunctionSpace/OneDimensional/BasisFunctions.py",
+		"/home/roman/Dropbox/PostMesh/src/PostMeshBase.cpp",
+		"/home/roman/Dropbox/florence/examples/FiniteElements/Annular_Circle/ProblemData.py",
+		"/home/roman/Dropbox/florence/examples/FiniteElements/Annular_Circle_Nurbs/ProblemData.py",
+		"/home/roman/Dropbox/florence/Florence/QuadratureRules/__init__.py",
+		"/home/roman/Dropbox/florence/Florence/FunctionSpace/__init__.py",
+		"/home/roman/Dropbox/florence/Florence/MeshGeneration/HigherOrderMeshing/HigherOrderMeshingHex.py",
+		"/home/roman/Dropbox/florence/Florence/__init__.py",
+		"/home/roman/Dropbox/florence/Florence/Solver/__init__.py",
+		"/home/roman/Dropbox/florence/Florence/QuadratureRules/GaussLobattoPoints.py",
+		"/home/roman/Dropbox/florence/Florence/FunctionSpace/TwoDimensional/Quad/QuadLagrangeGaussLobatto.py",
+		"/home/roman/Dropbox/florence/Florence/QuadratureRules/NumericIntegrator.py",
+		"/home/roman/Dropbox/florence/Florence/FunctionSpace/ThreeDimensional/Hexahedral/HexLagrangeGaussLobatto.py",
+		"/home/roman/Dropbox/florence/Florence/TimeIntegrators/__init__.py",
+		"/home/roman/Dropbox/florence/Florence/MeshGeneration/HigherOrderMeshing/HigherOrderMeshingTet.py",
+		"/home/roman/Dropbox/florence/Florence/BoundaryCondition/BoundaryCondition.py",
+		"/home/roman/Dropbox/florence/Florence/Solver/StaggeredElectromechanicsSolver.py",
+		"/home/roman/xx.py",
+		"/home/roman/read_tet_nodes.py",
+		"/home/roman/ZZZchecker/twisting/merger/autos.sh",
+		"/home/roman/ZZZchecker/autos.sh",
+		"/home/roman/ZZZchecker/col_twister_P4/converter.sh",
+		"/home/roman/ZZZchecker/col_twister_P2/converter.sh",
+		"/home/roman/ZZZchecker/col_twister_P1/converter.sh",
+		"/home/roman/ZZZchecker/TT_curved_quantity_1_increment_19.vtu",
+		"/home/roman/Dropbox/florence/examples/FiniteElements/MechanicalComponent2D/ProblemData.py",
+		"/home/roman/Dropbox/florence/Florence/MeshGeneration/HigherOrderMeshing/__init__.py",
+		"/home/roman/Dropbox/florence/Florence/FunctionSpace/TwoDimensional/Quad/QuadLagrange.py",
+		"/usr/local/lib/python2.7/dist-packages/matplotlib-1.5.0rc3+207.g54ead93-py2.7-linux-x86_64.egg/matplotlib/mpl-data/matplotlibrc",
+		"/home/roman/Dropbox/romeric.github.io/images/coupled_problems/autos.sh",
+		"/home/roman/Dropbox/florence/Florence/Utils/debug.py",
+		"/home/roman/Dropbox/florence/Florence/QuadratureRules/GetCounterClockwiseIndices.py",
+		"/home/roman/Dropbox/florence/Florence/FiniteElements/GetCounterClockwiseIndices.py",
+		"/home/roman/Dropbox/Fastor/benchmark/benchmark_backend/check.cpp",
+		"/home/roman/Dropbox/Fastor/.gitignore",
+		"/home/roman/Dropbox/Fastor/README.md",
+		"/home/roman/Dropbox/florence/.travis.yml",
+		"/home/roman/Dropbox/zdump/dump_studies/openmp_simd/omp_simd.cpp",
+		"/home/roman/Dropbox/zdump/dump_studies/fastest_prime_challenge/Makefile",
+		"/home/roman/Dropbox/Fastor/benchmark/benchmark_academic/kernel_quadrature/tabulate_results.py",
+		"/home/roman/Dropbox/Fastor/benchmark/benchmark_academic/depthfirst/benchmark_depthfirst.cpp",
+		"/home/roman/Dropbox/Fastor/benchmark/benchmark_academic/depthfirst/benchmark_depthfirst_L1.cpp",
+		"/home/roman/Dropbox/Fastor/benchmark/benchmark_academic/depthfirst/benchmark_depthfirst_2.cpp",
+		"/home/roman/Dropbox/Fastor/benchmark/benchmark_academic/depthfirst/Makefile",
+		"/home/roman/Dropbox/Fastor/benchmark/benchmark_academic/depthfirst/plot_results.py",
+		"/home/roman/Dropbox/Fastor/benchmark/benchmark_academic/kernel_quadrature/all_results2",
+		"/home/roman/Dropbox/zdump/dump_studies/fastest_prime_challenge/primes.py",
+		"/home/roman/Specifications.txt",
+		"/home/roman/Dropbox/florence/examples/FiniteElements/Square_Piezo/ProblemData.py",
+		"/home/roman/Dropbox/florence/examples/FiniteElements/Square_Piezo/Mesh_Square_9.dat",
+		"/home/roman/Dropbox/florence/examples/FiniteElements/Rectangular_Beam_3D/Rectangular_Beam_Mesh_1000.dat",
+		"/home/roman/Dropbox/florence/examples/FiniteElements/Nonlinear_Electromechanics_3D_Beam/ProblemData.py",
+		"/home/roman/Dropbox/florence/RunSession.py",
+		"/home/roman/ZZZchecker/TT_curved_quantity_0_increment_1.vtu",
+		"/media/MATLAB/VE/downloads/numpy/site.cfg",
+		"/home/roman/Dropbox/florence/Florence/Utils/Path.py",
+		"/home/roman/Dropbox/florence/Florence/MeshGeneration/vtk_writer.py",
+		"/home/roman/Dropbox/florence/Florence/Base/FlorenceExceptions.py",
+		"/home/roman/Dropbox/florence/Florence/Base/Base.py",
+		"/home/roman/Dropbox/florence/Florence/Utils/Utils.py",
+		"/home/roman/ZZZchecker/ls",
+		"/usr/local/lib/python2.7/dist-packages/mayavi/tools/helper_functions.py",
+		"/home/roman/Dropbox/florence/Florence/PostProcessing/__init__.py",
+		"/home/roman/Dropbox/florence/Florence/Tensor/Tensors.py",
+		"/home/roman/Dropbox/florence/Florence/Tensor/__init__.py",
+		"/usr/local/lib/python2.7/dist-packages/mayavi/tools/sources.py",
+		"/media/MATLAB/florence/ParametricStudies/MeshGeneration/ParametricStudy_PvsNu.py",
+		"/home/roman/Dropbox/florence/Florence/FiniteElements/SparseAssemblySmall.py",
+		"/home/roman/Dropbox/florence/Florence/FunctionSpace/ThreeDimensional/Tetrahedral/hpNodal.py",
+		"/home/roman/Dropbox/florence/Florence/QuadratureRules/QuadraturePointsWeightsTet.py",
+		"/home/roman/Dropbox/2015_HighOrderMeshing/meshes/runner.py"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 93.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"print",
+			"_IsotropicElectromechanics_107_",
+			"LegendreTransform",
+			"_LegendreTransform_",
+			"_Piezoelectric_100_",
+			"ApplyDirichletGetReducedMatrices",
+			"rand",
+			"Plate",
+			"^",
+			"        if elem==0 and gcounter==0:\n            print C_Voigt",
+			"^",
+			"color=(",
+			"SimplePlot",
+			"cm",
+			"cmap",
+			"import cm",
+			"TessellateQ",
+			"TessellateQuads",
+			"reference_ed",
+			"faces_to_plot",
+			"HighOrderMeshTri_SEMISTABLE",
+			"in2d",
+			"def GetEdgesQuad",
+			"def GetEdgesTri",
+			"edge_to_element",
+			"GetBoundaryEdgesTri",
+			"all",
+			"any",
+			"Interpolat",
+			"def GetBoundaryEdgesTri",
+			"savemat",
+			"Merge",
+			"plot3d",
+			"remove_dup",
+			"Remove Dupli",
+			"PWD",
+			"electro-",
+			"colorbar",
+			"plt.sa",
+			"Mesh",
+			"FindMaxSlop",
+			"ellip",
+			"vu",
+			"FindMaxSlop",
+			"marker",
+			"3",
+			"converg",
+			"all_edges",
+			"dimension",
+			"ColorConverter",
+			"jssora02l",
+			"NME:NME5293",
+			"URL",
+			"ortigosa2",
+			"misc",
+			"clean",
+			")));\n",
+			";\n",
+			"eye",
+			"64",
+			"double",
+			"64",
+			"wells",
+			"in",
+			"generic pro",
+			"generative",
+			"Ortigosa2016",
+			"truly incomp",
+			"GetElementalMatrices",
+			"Gil",
+			"automatic sy",
+			"tensor contraction",
+			"a computational frame",
+			"hirata",
+			"Maleki:2011:EVC:2120965.2121464",
+			"VC",
+			"Solomonik20143176",
+			"Gil",
+			"RubenMeshes",
+			"Write",
+			"benchmark_contraction",
+			"benchmark_contraction_fastor_clang",
+			"outer",
+			"vc",
+			"inbook",
+			"optimal",
+			"poya",
+			"roman",
+			"book",
+			":\n",
+			"performance of ",
+			"voigt",
+			"SIMDMatrix",
+			"Vec",
+			"Exp",
+			"cross",
+			"os",
+			"_ZN10FPTemplate5printINS_2fpILj5ELi0ELb1EEEEEvv",
+			"#if 1\n//   typedef Seq<TEST_DATA_100> TAdvanceType;\n//   typename Sort<TAdvanceType>::ResultType soadvance;\n//   dumpSeqType(soadvance);\n// #endif",
+			"include",
+			"Vu",
+			"size",
+			"nProductivity",
+			"bookti",
+			"INPROCEEDINGS",
+			"inpro",
+			"schro",
+			"ball",
+			"neff",
+			"END",
+			"FIN",
+			"FINISH",
+			"FINIS",
+			"FINI",
+			"_ZN5EigenlsINS_13CwiseBinaryOpINS_8internal20scalar_difference_opIdEEKNS_6MatrixIdLi4ELi4ELi0ELi4ELi4EEES7_EEEERSoS9_RKNS_9DenseBaseIT_EE",
+			"FIN",
+			"_ZN5EigenlsINS_13CwiseBinaryOpINS_8internal20scalar_difference_opIdEEKNS1_IS4_KNS1_IS4_KNS1_IS4_KNS1_IS4_KNS1_IS4_KNS1_INS2_13scalar_sum_opIdEEKNS_7ProductINS_6MatrixIdLin1ELin1ELi0ELin1ELin1EEES9_Li0EEEKS9_EESC_EESC_EESC_EESC_EESC_EESC_EEEERSoSQ_RKNS_9DenseBaseIT_EE",
+			"BEG",
+			"FINISH",
+			"end",
+			"BEG",
+			"type_name",
+			"type",
+			"debug",
+			"nano",
+			"piez",
+			"maxwell",
+			"ledge"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"**",
+			"find_min_max_slope",
+			"find_max_slope",
+			"run",
+			"32",
+			"float",
+			"32",
+			"Fastor",
+			"Tensor",
+			"AbstractTensor",
+			"mesh",
+			"**",
+			"E_A",
+			"PostDomain",
+			"MeshType",
+			"]",
+			"[",
+			"counter",
+			"ColumnsOut",
+			"ColumnsIn",
+			"mesh",
+			"ColumnsOut",
+			"ColumnsIn",
+			"ColumnsOut",
+			"Columnsout",
+			"ColumnsIn",
+			"ColumnsOut",
+			"ColumnsIn",
+			"mesh",
+			"ColumnsOut",
+			"ColumnsIn",
+			"mesh",
+			"numpy",
+			"array",
+			"mesh",
+			"ndim",
+			"MainData"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 33,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "/home/roman/Dropbox/2015_HighOrderMeshing/meshes/runner.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 8809,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2777,
+								2777
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1242.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 21,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "Florence/MeshGeneration/Mesh.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 137781,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								123413,
+								123413
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 55177.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 22,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "/home/roman/Dropbox/falconFromElas0p05.dat",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 35148455,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								33767398,
+								33767398
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage",
+							"tab_size": 6,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 10621499.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 33,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "Florence/Solver/FEMSolver.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 44018,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								17640,
+								17640
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 10840.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 25,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "Florence/Solver/Solver.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 10299,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								7428,
+								7428
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3834.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 24,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "ParametricStudies/hpNonlinearElectromechanics/ParametricStudy_ErrorNorms.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 11220,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								11220,
+								11220
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 2538.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 59,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "ParametricStudies/hpNonlinearElectromechanics/ParametricStudy_ErrorNorms_Objective.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 15523,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5469,
+								5469
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 5994.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 76,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "Florence/PostProcessing/ComputeErrorNorms.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 30323,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								16810,
+								16810
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 6550.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 32,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "Florence/BoundaryCondition/BoundaryCondition.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 35038,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								31447,
+								31447
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 12186.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 8,
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "examples/FiniteElements/Nonlinear_Electromechanics_Benchmark/ProblemData.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 15495,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 39,
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "examples/FiniteElements/FingerHarvester/ProblemData.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6576,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5982,
+								5982
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 2740.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 42,
+					"type": "text"
+				},
+				{
+					"buffer": 11,
+					"file": "examples/FiniteElements/Square_Piezo/ProblemData.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4788,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4755,
+								4755
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 324.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 43,
+					"type": "text"
+				},
+				{
+					"buffer": 12,
+					"file": "examples/FiniteElements/Nonlinear_Electromechanics_3D_Plate_Holes/ProblemData.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7511,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5394,
+								5394
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3281.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 34,
+					"type": "text"
+				},
+				{
+					"buffer": 13,
+					"file": "examples/FiniteElements/Nonlinear_Electromechanics_3D_Beam/ProblemData.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 9995,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6377,
+								6377
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 2806.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 37,
+					"type": "text"
+				},
+				{
+					"buffer": 14,
+					"file": "examples/FiniteElements/Nonlinear_Electromechanics_2D_Square/ProblemData.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 35965,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								35814,
+								35814
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 15660.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 15,
+					"file": "Florence/MaterialLibrary/LLDispatch/CythonSource/_helper_.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2255,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1366,
+								1366
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 1184.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 17,
+					"type": "text"
+				},
+				{
+					"buffer": 16,
+					"file": "Florence/MaterialLibrary/LLDispatch/CythonSource/_MaterialBase_.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 167,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								156,
+								156
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 12,
+					"type": "text"
+				},
+				{
+					"buffer": 17,
+					"file": "Florence/MaterialLibrary/LLDispatch/CythonSource/_LegendreTransform_.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2795,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1744,
+								1744
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 9,
+					"type": "text"
+				},
+				{
+					"buffer": 18,
+					"file": "Florence/MaterialLibrary/LLDispatch/CythonSource/_IsotropicElectroMechanics_107_.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6369,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1733,
+								1733
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 688.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 10,
+					"type": "text"
+				},
+				{
+					"buffer": 19,
+					"file": "Florence/MaterialLibrary/LLDispatch/CythonSource/_IsotropicElectroMechanics_107_.pyx",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1825,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								493,
+								493
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Cython/Cython.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 13,
+					"type": "text"
+				},
+				{
+					"buffer": 20,
+					"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_107.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4948,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1080,
+								1080
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 324.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 21,
+					"file": "Florence/LegendreTransform/LegendreTransform.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3145,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1005,
+								1005
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 648.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 11,
+					"type": "text"
+				},
+				{
+					"buffer": 22,
+					"file": "Florence/MaterialLibrary/LLDispatch/Makefile.sh",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2661,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2157,
+								2157
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/ShellScript/Shell-Unix-Generic.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 810.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 20,
+					"type": "text"
+				},
+				{
+					"buffer": 23,
+					"file": "Florence/MaterialLibrary/LLDispatch/CythonSource/_MooneyRivlin_0_.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2896,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								73,
+								73
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 756.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 15,
+					"type": "text"
+				},
+				{
+					"buffer": 24,
+					"file": "Florence/MaterialLibrary/MooneyRivlin_0.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2103,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								782,
+								782
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 288.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 14,
+					"type": "text"
+				},
+				{
+					"buffer": 25,
+					"file": "Florence/MaterialLibrary/LLDispatch/CythonSource/_MooneyRivlin_0_.pyx",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1399,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								160,
+								160
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Cython/Cython.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 30,
+					"type": "text"
+				},
+				{
+					"buffer": 26,
+					"file": "Florence/MaterialLibrary/LLDispatch/CythonSource/_Piezoelectric_100_.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6203,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4939,
+								4939
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 19,
+					"type": "text"
+				},
+				{
+					"buffer": 27,
+					"file": "Florence/MaterialLibrary/LLDispatch/CythonSource/_Piezoelectric_100_.pyx",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3458,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3458,
+								3458
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Cython/Cython.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 18,
+					"type": "text"
+				},
+				{
+					"buffer": 28,
+					"file": "Florence/MaterialLibrary/Piezoelectric_100.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7061,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1462,
+								1462
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 540.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 16,
+					"type": "text"
+				},
+				{
+					"buffer": 29,
+					"file": "Florence/MaterialLibrary/MaterialBase.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 17142,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4034,
+								4034
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1080.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 30,
+					"file": "Florence/MaterialLibrary/LLDispatch/_python_tester_.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5519,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1846.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 31,
+					"type": "text"
+				},
+				{
+					"buffer": 31,
+					"file": "Florence/VariationalPrinciple/VariationalPrinciple.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6336,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4590,
+								4590
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 2005.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 32,
+					"file": "Florence/VariationalPrinciple/DisplacementPotentialFormulation.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 18953,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								17173,
+								17173
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 7313.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 33,
+					"file": "Florence/VariationalPrinciple/DisplacementFormulation.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 11673,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								11303,
+								11303
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 4505.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 34,
+					"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_100.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2884,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2540,
+								2540
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 972.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 48,
+					"type": "text"
+				},
+				{
+					"buffer": 35,
+					"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_200.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3539,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2074,
+								2074
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1607.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 52,
+					"type": "text"
+				},
+				{
+					"buffer": 36,
+					"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_201.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3656,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2217,
+								2217
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 794.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 51,
+					"type": "text"
+				},
+				{
+					"buffer": 37,
+					"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_0.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3186,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								384,
+								384
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 38,
+					"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_1.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4971,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4029,
+								4029
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 594.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 50,
+					"type": "text"
+				},
+				{
+					"buffer": 39,
+					"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_2.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3298,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1719,
+								1719
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 545.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 49,
+					"type": "text"
+				},
+				{
+					"buffer": 40,
+					"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_3.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6836,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2763,
+								2763
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 799.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 41,
+					"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_101.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3019,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								911,
+								911
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 594.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 56,
+					"type": "text"
+				},
+				{
+					"buffer": 42,
+					"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_102.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3253,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2166,
+								2166
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 648.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 55,
+					"type": "text"
+				},
+				{
+					"buffer": 43,
+					"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_103.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3416,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1996,
+								1996
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 702.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 54,
+					"type": "text"
+				},
+				{
+					"buffer": 44,
+					"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_104.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3714,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2258,
+								2258
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 756.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 53,
+					"type": "text"
+				},
+				{
+					"buffer": 45,
+					"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_105.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3891,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2257,
+								2257
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 810.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 44,
+					"type": "text"
+				},
+				{
+					"buffer": 46,
+					"file": "Florence/MaterialLibrary/IsotropicElectroMechanics_106.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4163,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								726,
+								726
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 26,
+					"type": "text"
+				},
+				{
+					"buffer": 47,
+					"file": "Florence/MaterialLibrary/AnisotropicMooneyRivlin_1.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3047,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3047,
+								3047
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 432.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 47,
+					"type": "text"
+				},
+				{
+					"buffer": 48,
+					"file": "Florence/Tensor/Tensors.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 18966,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								11276,
+								11276
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 5405.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 41,
+					"type": "text"
+				},
+				{
+					"buffer": 49,
+					"file": "Florence/MeshGeneration/HigherOrderMeshing/HigherOrderMeshingTet.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7791,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4678,
+								4678
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1836.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 23,
+					"type": "text"
+				},
+				{
+					"buffer": 50,
+					"file": "Florence/Tensor/Numeric.pyx",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 14779,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								7212,
+								7212
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Cython/Cython.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3893.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 40,
+					"type": "text"
+				},
+				{
+					"buffer": 51,
+					"file": "Florence/Utils/debug.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3412,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3166,
+								3166
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 941.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 57,
+					"type": "text"
+				},
+				{
+					"buffer": 52,
+					"file": "Florence/PostProcessing/PostProcess.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 143344,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								105497,
+								105181
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 41006.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 36,
+					"type": "text"
+				},
+				{
+					"buffer": 53,
+					"file": "Florence/MaterialLibrary/AnisotropicMooneyRivlin_0.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 20572,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1164,
+								1164
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 378.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 61,
+					"type": "text"
+				},
+				{
+					"buffer": 54,
+					"file": "Florence/MaterialLibrary/MooneyRivlin.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2863,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								258,
+								258
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 46,
+					"type": "text"
+				},
+				{
+					"buffer": 55,
+					"file": "Florence/QuadratureRules/NodeArrangement.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 33861,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								33283,
+								33283
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 11882.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 64,
+					"type": "text"
+				},
+				{
+					"buffer": 56,
+					"file": "Florence/Solver/StaggeredElectromechanicSolver.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 16694,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								8355,
+								8355
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1728.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 60,
+					"type": "text"
+				},
+				{
+					"buffer": 57,
+					"file": "Florence/Solver/StaggeredFEMSolver.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 17293,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								17293,
+								17293
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 5109.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 62,
+					"type": "text"
+				},
+				{
+					"buffer": 58,
+					"file": "Florence/TimeIntegrators/StructuralDynamicIntegrator.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 8762,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5354,
+								5354
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1188.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 69,
+					"type": "text"
+				},
+				{
+					"buffer": 59,
+					"file": "Florence/FunctionSpace/FunctionSpace.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5552,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								271,
+								271
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1026.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 38,
+					"type": "text"
+				},
+				{
+					"buffer": 60,
+					"file": "Florence/MeshGeneration/vtk_writer.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 16829,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								329,
+								329
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 63,
+					"type": "text"
+				},
+				{
+					"buffer": 61,
+					"file": "Florence/Utils/__init__.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 150,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								93,
+								93
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 58,
+					"type": "text"
+				},
+				{
+					"buffer": 62,
+					"file": "Florence/MaterialLibrary/__init__.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1748,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								407,
+								407
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 5.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 45,
+					"type": "text"
+				},
+				{
+					"buffer": 63,
+					"file": "Florence/MaterialLibrary/NeoHookean_3.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1893,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1787,
+								1787
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 432.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 81,
+					"type": "text"
+				},
+				{
+					"buffer": 64,
+					"file": "Florence/MaterialLibrary/Steinmann.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 9184,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								367,
+								367
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1890.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 75,
+					"type": "text"
+				},
+				{
+					"buffer": 65,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5454,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5454,
+								5454
+							]
+						],
+						"settings":
+						{
+							"auto_name": "\\subsection{Convex multi-variable electro-elastici",
+							"default_dir": "/home/roman/Dropbox/florence",
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 334.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 79,
+					"type": "text"
+				},
+				{
+					"buffer": 66,
+					"file": "/home/roman/Dropbox/2016_Linearised_Electromechanics_Paper/bibliography.bib",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 109543,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								85622,
+								85622
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/LaTeX/Bibtex.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 49000.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 78,
+					"type": "text"
+				},
+				{
+					"buffer": 67,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 181,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								181,
+								181
+							]
+						],
+						"settings":
+						{
+							"auto_name": "Bagwell, S., Ledger, P., Gil, A., Mallett, M. & Kr",
+							"default_dir": "/home/roman/Dropbox/florence",
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 84,
+					"type": "text"
+				},
+				{
+					"buffer": 68,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2667,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2667,
+								2667
+							]
+						],
+						"settings":
+						{
+							"auto_name": "Dear Sir/Madam,",
+							"default_dir": "/home/roman/Dropbox/florence",
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 85,
+					"type": "text"
+				},
+				{
+					"buffer": 69,
+					"file": "ParametricStudies/ParametricStudy_PvsNu.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 13016,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								12672,
+								12672
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 5014.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 71,
+					"type": "text"
+				},
+				{
+					"buffer": 70,
+					"file": "/home/roman/Dropbox/romeric.github.io/index.html",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4675,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2032,
+								2032
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 90.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 86,
+					"type": "text"
+				},
+				{
+					"buffer": 71,
+					"file": "/home/roman/Dropbox/romeric.github.io/about.html",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 12764,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 216.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 83,
+					"type": "text"
+				},
+				{
+					"buffer": 72,
+					"file": "/home/roman/Dropbox/romeric.github.io/research.html",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 14143,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4793,
+								4793
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 666.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 35,
+					"type": "text"
+				},
+				{
+					"buffer": 73,
+					"file": "/home/roman/Dropbox/romeric.github.io/publications.html",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6553,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1295,
+								1295
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 144.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 77,
+					"type": "text"
+				},
+				{
+					"buffer": 74,
+					"file": "/home/roman/Dropbox/romeric.github.io/blog.html",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4000,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4000,
+								4000
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 36.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 27,
+					"type": "text"
+				},
+				{
+					"buffer": 75,
+					"file": "Florence/MaterialLibrary/NearlyIncompressibleNeoHookean.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4585,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2285,
+								2285
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 563.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 28,
+					"type": "text"
+				},
+				{
+					"buffer": 76,
+					"file": "Florence/MaterialLibrary/NearlyIncompressibleMooneyRivlin.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4892,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1267,
+								1267
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1242.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 29,
+					"type": "text"
+				},
+				{
+					"buffer": 77,
+					"file": "examples/FiniteElements/Annular_Circle_Electromechanics/ProblemData.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1732,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								298,
+								298
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 10.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 82,
+					"type": "text"
+				},
+				{
+					"buffer": 78,
+					"file": "examples/FiniteElements/AnnularCircle_MVP/ProblemData.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2243,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 70,
+					"type": "text"
+				},
+				{
+					"buffer": 79,
+					"file": "examples/FiniteElements/MechanicalComponent2D/ProblemData.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2567,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2353,
+								2353
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 756.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 67,
+					"type": "text"
+				},
+				{
+					"buffer": 80,
+					"file": "examples/FiniteElements/Almond3D/ProblemData.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4673,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3263,
+								3263
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 324.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 68,
+					"type": "text"
+				},
+				{
+					"buffer": 81,
+					"file": "examples/FiniteElements/Falcon3D/ProblemData.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5242,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 756.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 80,
+					"type": "text"
+				},
+				{
+					"buffer": 82,
+					"file": "examples/FiniteElements/Misc/ProblemData.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4217,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 65,
+					"type": "text"
+				},
+				{
+					"buffer": 83,
+					"file": "examples/FiniteElements/Misc3D/ProblemData.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4723,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2835,
+								2835
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1026.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 66,
+					"type": "text"
+				},
+				{
+					"buffer": 84,
+					"file": "tests/test.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 25242,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 89,
+					"type": "text"
+				},
+				{
+					"buffer": 85,
+					"file": "tests/Cylinder/ProblemData.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1124,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 74,
+					"type": "text"
+				},
+				{
+					"buffer": 86,
+					"file": "/home/roman/Dropbox/zdump/NATIVE/Makefile",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1515,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Makefile/Makefile.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 87,
+					"type": "text"
+				},
+				{
+					"buffer": 87,
+					"file": "/home/roman/Dropbox/zdump/NATIVE/_stiffness.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 15575,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 73,
+					"type": "text"
+				},
+				{
+					"buffer": 88,
+					"file": "/home/roman/Dropbox/zdump/dump_studies/cilk_check/cilk_check.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 15722,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 88,
+					"type": "text"
+				},
+				{
+					"buffer": 89,
+					"file": "/home/roman/Dropbox/2016_SIMD_Paper/bibliography.bib",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 109544,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/LaTeX/Bibtex.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 72,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 26.0
+	},
+	"input":
+	{
+		"height": 32.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 400.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"output.unsaved_changes":
+	{
+		"height": 137.0
+	},
+	"pinned_build_system": "RunSession",
+	"project": "RunSession.sublime-project",
+	"replace":
+	{
+		"height": 64.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"leg",
+				"Florence/LegendreTransform/LegendreTransform.py"
+			],
+			[
+				"sol",
+				"Florence/Solver/Solver.py"
+			],
+			[
+				"mater",
+				"Florence/MaterialLibrary/MaterialBase.py"
+			],
+			[
+				"fems",
+				"Florence/Solver/FEMSolver.py"
+			],
+			[
+				"neo",
+				"Florence/MaterialLibrary/NeoHookean_2.py"
+			],
+			[
+				"geth",
+				"Florence/MeshGeneration/HigherOrderMeshing/HigherOrderMeshingTet.py"
+			],
+			[
+				"bo",
+				"Florence/BoundaryCondition/BoundaryCondition.py"
+			],
+			[
+				"boud",
+				"Florence/BoundaryCondition/BoundaryCondition.py"
+			],
+			[
+				"po",
+				"Florence/PostProcessing/PostProcess.py"
+			],
+			[
+				"post",
+				"Florence/PostProcessing/PostProcess.py"
+			],
+			[
+				"mesh",
+				"Florence/MeshGeneration/Mesh.py"
+			],
+			[
+				"kine",
+				"Florence/FiniteElements/ElementalMatrices/KinematicMeasures.py"
+			],
+			[
+				"func",
+				"Florence/FunctionSpace/FunctionSpace.py"
+			],
+			[
+				"getba",
+				"Florence/FunctionSpace/GetBases.py"
+			],
+			[
+				"legen",
+				"Florence/LegendreTransform/LegendreTransform.py"
+			],
+			[
+				"moo",
+				"Florence/MaterialLibrary/MooneyRivlin_2.py"
+			],
+			[
+				"mooney",
+				"Florence/MaterialLibrary/MooneyRivlin.py"
+			],
+			[
+				"postpr",
+				"Florence/PostProcessing/PostProcess.py"
+			],
+			[
+				"disp",
+				"Florence/VariationalPrinciple/DisplacementPotentialFormulation.py"
+			],
+			[
+				"fem",
+				"Florence/Solver/FEMSolver.py"
+			],
+			[
+				"isotropicelectromechanics_2",
+				"Florence/MaterialLibrary/IsotropicElectroMechanics_2.py"
+			],
+			[
+				"isotropicelectromechanics_1",
+				"Florence/MaterialLibrary/IsotropicElectroMechanics_1.py"
+			],
+			[
+				"isotropicelectromechanics_0",
+				"Florence/MaterialLibrary/IsotropicElectroMechanics_0.py"
+			],
+			[
+				"isotropicelectromechanics_107",
+				"Florence/MaterialLibrary/IsotropicElectroMechanics_107.py"
+			],
+			[
+				"debu",
+				"Florence/Utils/debug.py"
+			],
+			[
+				"tens",
+				"Florence/Tensor/Tensors.py"
+			],
+			[
+				"",
+				"Florence/MeshGeneration/vtk_writer.py"
+			],
+			[
+				"moone",
+				"Florence/MaterialLibrary/MooneyRivlin.py"
+			],
+			[
+				"ani",
+				"Florence/MaterialLibrary/AnisotropicMooneyRivlin.py"
+			],
+			[
+				"materia",
+				"Florence/MaterialLibrary/MaterialBase.py"
+			],
+			[
+				"materi",
+				"Florence/MaterialLibrary/MaterialBase.py"
+			],
+			[
+				"basisf",
+				"Florence/FunctionSpace/OneDimensional/BasisFunctions.py"
+			],
+			[
+				"boundary",
+				"Florence/BoundaryCondition/BoundaryCondition.py"
+			],
+			[
+				"node",
+				"Florence/QuadratureRules/NodeArrangement.py"
+			],
+			[
+				"high",
+				"Florence/MeshGeneration/HigherOrderMeshing/HigherOrderMeshingQuad.py"
+			],
+			[
+				"getin",
+				"Florence/MeshGeneration/HigherOrderMeshing/GetInteriorCoordinates.py"
+			],
+			[
+				"sta",
+				"Florence/Solver/StaggeredFEMSolver.py"
+			],
+			[
+				"variation",
+				"Florence/VariationalPrinciple/VariationalPrinciple.py"
+			],
+			[
+				"tensor",
+				"Florence/Tensor/Tensors.py"
+			],
+			[
+				"gethigh",
+				"Florence/MeshGeneration/HigherOrderMeshing/HigherOrderMeshingQuad.py"
+			],
+			[
+				"debug",
+				"Florence/Utils/debug.py"
+			],
+			[
+				"varia",
+				"Florence/VariationalPrinciple/VariationalPrinciple.py"
+			],
+			[
+				"getbas",
+				"Florence/FunctionSpace/GetBases.py"
+			],
+			[
+				"base",
+				"Florence/Base/Base.py"
+			],
+			[
+				"uti",
+				"Florence/Utils/Utils.py"
+			],
+			[
+				"vari",
+				"Florence/VariationalPrinciple/VariationalPrinciple.py"
+			],
+			[
+				"stag",
+				"Florence/Solver/StaggeredFEMSolver.py"
+			],
+			[
+				"feke",
+				"Florence/QuadratureRules/FeketePointsTet.py"
+			],
+			[
+				"funct",
+				"Florence/FunctionSpace/FunctionSpace.py"
+			],
+			[
+				"qu",
+				"Florence/QuadratureRules/QuadratureRule.py"
+			],
+			[
+				"main",
+				"Florence/Main/FiniteElements/MainFEM.py"
+			],
+			[
+				"ki",
+				"Florence/FiniteElements/ElementalMatrices/KinematicMeasures.py"
+			],
+			[
+				"geh",
+				"Florence/MeshGeneration/HigherOrderMeshing/HigherOrderMeshingTet.py"
+			],
+			[
+				"me",
+				"Florence/MeshGeneration/Mesh.py"
+			],
+			[
+				"functi",
+				"Florence/FunctionSpace/FunctionSpace.py"
+			],
+			[
+				"fun",
+				"Florence/FunctionSpace/FunctionSpace.py"
+			],
+			[
+				"pre",
+				"Florence/FiniteElements/PreProcess.py"
+			],
+			[
+				"mes",
+				"Florence/MeshGeneration/Mesh.py"
+			],
+			[
+				"femso",
+				"Florence/Solver/FEMSolver.py"
+			],
+			[
+				"iso",
+				"Florence/MaterialLibrary/IsotropicElectroMechanics_1.py"
+			],
+			[
+				"problemdata",
+				"examples/FiniteElements/Cylinder/ProblemData.py"
+			],
+			[
+				"moon",
+				"Florence/MaterialLibrary/MooneyRivlin.py"
+			],
+			[
+				"tenso",
+				"Florence/Tensor/Tensors.py"
+			],
+			[
+				"numeric",
+				"Florence/Tensor/Numeric.pyx"
+			],
+			[
+				"getbase",
+				"Florence/FunctionSpace/GetBases.py"
+			],
+			[
+				"prob",
+				"tests/Cylinder/ProblemData.py"
+			],
+			[
+				"test",
+				"tests/test.py"
+			],
+			[
+				"pro",
+				"examples/FiniteElements/Almond3D/ProblemData.py"
+			],
+			[
+				"kinema",
+				"Florence/FiniteElements/ElementalMatrices/KinematicMeasures.py"
+			],
+			[
+				"nearl",
+				"Florence/VariationalPrinciple/NearlyIncompressibleHuWashizu.py"
+			],
+			[
+				"nearly",
+				"Florence/MaterialLibrary/NearlyIncompressibleNeoHookean.py"
+			],
+			[
+				"bou",
+				"Florence/BoundaryCondition/BoundaryCondition.py"
+			],
+			[
+				".tra",
+				".travis.yml"
+			],
+			[
+				"path",
+				"Florence/Utils/Path.py"
+			],
+			[
+				"pat",
+				"Florence/Base/Path.py"
+			],
+			[
+				"ele",
+				"Florence/FiniteElements/ElementalMatrices/ElementalStiffness.py"
+			],
+			[
+				"parmap",
+				"Florence/ParallelProcessing/parmap.py"
+			],
+			[
+				"incre",
+				"Florence/FiniteElements/Solvers/IncrementalLinearElasticitySolver.py"
+			],
+			[
+				"increm",
+				"Florence/FiniteElements/Solvers/IncrementalLinearElasticitySolver.py"
+			],
+			[
+				"getele",
+				"Florence/FiniteElements/ElementalMatrices/GetElementalMatricesSmall.py"
+			],
+			[
+				"boun",
+				"Florence/BoundaryCondition/BoundaryCondition.py"
+			],
+			[
+				"lin",
+				"Florence/Tensor/LinAlg.pyx"
+			],
+			[
+				"new",
+				"Florence/FiniteElements/Solvers/NewtonRaphsonStatic.py"
+			],
+			[
+				"newo",
+				"Florence/FiniteElements/Solvers/NewtonRaphsonStatic.py"
+			],
+			[
+				"newto",
+				"Florence/FiniteElements/Solvers/NewtonRaphsonStatic.py"
+			],
+			[
+				"solver",
+				"Florence/FiniteElements/Solvers/Solver.py"
+			],
+			[
+				"staticso",
+				"Florence/FiniteElements/Solvers/StaticSolver.py"
+			],
+			[
+				"getl",
+				"Florence/FiniteElements/ElementalMatrices/GetElementalMatricesSmall.py"
+			],
+			[
+				"quadr",
+				"Florence/QuadratureRules/QuadratureRule.py"
+			],
+			[
+				"higher",
+				"Florence/MeshGeneration/HigherOrderMeshing/HigherOrderMeshingTri.py"
+			],
+			[
+				"mix",
+				"Florence/VariationalPrinciple/MixedFormulations.py"
+			],
+			[
+				"increme",
+				"Florence/FiniteElements/Solvers/IncrementalLinearElasticitySolver.py"
+			],
+			[
+				"boundaryc",
+				"Florence/BoundaryCondition/BoundaryCondition.py"
+			],
+			[
+				"para",
+				"ParametricStudy_StepsvsNu.py"
+			],
+			[
+				"travis",
+				".travis.yml"
+			],
+			[
+				"app",
+				"Florence/FiniteElements/ApplyNeumannBoundaryConditions.py"
+			],
+			[
+				"applyn",
+				"Florence/FiniteElements/ApplyNeumannBoundaryConditions.py"
+			],
+			[
+				"util",
+				"Florence/Utils/Utils.py"
+			],
+			[
+				"setup",
+				"setup.py"
+			],
+			[
+				"ass",
+				"Florence/FiniteElements/Assembly.py"
+			],
+			[
+				"assem",
+				"Florence/FiniteElements/Assembly.py"
+			],
+			[
+				"requ",
+				"requirements.txt"
+			],
+			[
+				"req",
+				"requirements.txt"
+			],
+			[
+				"dis",
+				"Florence/Formulations/DisplacementApproach.py"
+			],
+			[
+				"asse",
+				"Florence/BoundaryElements/Assembly.py"
+			],
+			[
+				"salom",
+				"Florence/MeshGeneration/SalomeMeshReader.py"
+			],
+			[
+				"boudna",
+				"Florence/BoundaryCondition/BoundaryCondition.py"
+			],
+			[
+				"ini",
+				"Florence/FiniteElements/InitiateNonlinearAnalysisData.py"
+			],
+			[
+				"solv",
+				"Florence/Solver/Solver.py"
+			],
+			[
+				"postmesh",
+				"~/Dropbox/PostMesh/PostMeshPy.pxd"
+			],
+			[
+				"git",
+				".gitignore"
+			],
+			[
+				"_lin",
+				"Florence/Tensor/_LinAlg.cpp"
+			],
+			[
+				".gi",
+				".gitignore"
+			],
+			[
+				"elem",
+				"Florence/FiniteElements/ElementalMatrices/ElementalStiffness.py"
+			],
+			[
+				"elementalst",
+				"Florence/FiniteElements/ElementalMatrices/ElementalStiffness.py"
+			],
+			[
+				"elemental",
+				"Florence/FiniteElements/ElementalMatrices/ElementalMass.py"
+			],
+			[
+				"tensors",
+				"Florence/Tensor/Tensors.py"
+			],
+			[
+				"sparsesol",
+				"Florence/FiniteElements/Solvers/SparseSolver.py"
+			],
+			[
+				"bas",
+				"Florence/Base/Base.py"
+			],
+			[
+				"diri",
+				"Florence/FiniteElements/DirichletBoundaryDataFromCAD.py"
+			],
+			[
+				"apply",
+				"Florence/FiniteElements/ApplyDirichletBoundaryConditions.py"
+			],
+			[
+				"postmeshpy",
+				"Florence/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pxd"
+			],
+			[
+				"num",
+				"Florence/Tensor/Numeric.pyx"
+			],
+			[
+				"linear",
+				"Florence/MaterialLibrary/LinearModel.py"
+			],
+			[
+				"transver",
+				"Florence/MaterialLibrary/TranservselyIsotropicLinearElastic.py"
+			],
+			[
+				"bone",
+				"Florence/MaterialLibrary/BonetTranservselyIsotropicHyperElastic.py"
+			],
+			[
+				"postm",
+				"Florence/MeshGeneration/CurvilinearMeshing/PostMesh/PostMeshPy.pyx"
+			],
+			[
+				"nu",
+				"Florence/Tensor/Numeric.pyx"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 392.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 701.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": false,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 330.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

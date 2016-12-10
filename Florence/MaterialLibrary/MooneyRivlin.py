@@ -4,11 +4,6 @@ from .MaterialBase import Material
 from Florence.Tensor import trace, Voigt
 
 
-#####################################################################################################
-                                # Isotropic MooneyRivlin Model
-#####################################################################################################
-
-
 class MooneyRivlin(Material):
     """ Polyconvex compressible MooneyRivlin material model based on the energy:
 

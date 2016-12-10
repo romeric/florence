@@ -3,6 +3,7 @@ from .VariationalPrinciple import VariationalPrinciple
 from Florence import QuadratureRule, FunctionSpace
 
 from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import *
+from Florence.FiniteElements.ElementalMatrices._KinematicMeasures_ import _KinematicMeasures_
 from Florence.Tensor import issymetric
 
 class DisplacementFormulation(VariationalPrinciple):
@@ -62,6 +63,12 @@ class DisplacementFormulation(VariationalPrinciple):
         self.function_spaces = (function_space,post_function_space)
 
 
+        local_size = function_space.Bases.shape[0]*self.nvar
+        self.local_rows = np.repeat(np.arange(0,local_size),local_size,axis=0)
+        self.local_columns = np.tile(np.arange(0,local_size),local_size)
+        self.local_size = local_size
+        
+
     def GetElementalMatrices(self, elem, function_space, mesh, material, fem_solver, Eulerx, TotalPot):
 
         # ALLOCATE
@@ -73,7 +80,12 @@ class DisplacementFormulation(VariationalPrinciple):
         EulerElemCoords = Eulerx[mesh.elements[elem,:],:]
 
         # COMPUTE THE STIFFNESS MATRIX
-        stiffnessel, t = self.GetLocalStiffness(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+        if material.has_low_level_dispatcher:
+            stiffnessel, t = self.__GetLocalStiffness__(function_space,material,
+                LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+        else:
+            stiffnessel, t = self.GetLocalStiffness(function_space,material,
+                LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
 
         I_mass_elem = []; J_mass_elem = []; V_mass_elem = []
         if fem_solver.analysis_type != 'static':
@@ -97,17 +109,17 @@ class DisplacementFormulation(VariationalPrinciple):
 
         nvar = self.nvar
         ndim = self.ndim
-        Domain = function_space
+        nodeperelem = function_space.Bases.shape[0]
 
         det = np.linalg.det
         inv = np.linalg.inv
-        Jm = Domain.Jm
-        AllGauss = Domain.AllGauss
+        Jm = function_space.Jm
+        AllGauss = function_space.AllGauss
 
         # ALLOCATE
-        stiffness = np.zeros((Domain.Bases.shape[0]*nvar,Domain.Bases.shape[0]*nvar),dtype=np.float64)
-        tractionforce = np.zeros((Domain.Bases.shape[0]*nvar,1),dtype=np.float64)
-        B = np.zeros((Domain.Bases.shape[0]*nvar,material.H_VoigtSize),dtype=np.float64)
+        stiffness = np.zeros((nodeperelem*nvar,nodeperelem*nvar),dtype=np.float64)
+        tractionforce = np.zeros((nodeperelem*nvar,1),dtype=np.float64)
+        B = np.zeros((nodeperelem*nvar,material.H_VoigtSize),dtype=np.float64)
 
         # COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
         # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
@@ -123,7 +135,7 @@ class DisplacementFormulation(VariationalPrinciple):
         # UPDATE/NO-UPDATE GEOMETRY
         if fem_solver.requires_geometry_update:
             # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-            ParentGradientx = np.einsum('ijk,jl->kil',Jm,EulerELemCoords)
+            ParentGradientx = np.einsum('ijk,jl->kil',Jm, EulerELemCoords)
             # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
             SpatialGradient = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Jm)
             # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
@@ -194,3 +206,46 @@ class DisplacementFormulation(VariationalPrinciple):
 
     def GetLocalTractions(self):
         pass
+
+
+
+    def __GetLocalStiffness__(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem=0):
+        """Get stiffness matrix of the system"""
+
+        nvar = self.nvar
+        Domain = function_space
+        nodeperelem = function_space.Bases.shape[0]
+        AllGauss = function_space.AllGauss
+
+        # ALLOCATE
+        stiffness = np.zeros((nodeperelem*nvar,nodeperelem*nvar),dtype=np.float64)
+        tractionforce = np.zeros((nodeperelem*nvar,1),dtype=np.float64)
+        B = np.zeros((nodeperelem*nvar,material.H_VoigtSize),dtype=np.float64)
+
+        # GET KINEMATICS
+        SpatialGradient, F, detJ = _KinematicMeasures_(function_space.Jm, AllGauss[:,0], 
+            LagrangeElemCoords, EulerELemCoords, fem_solver.requires_geometry_update)
+
+        # COMPUTE WORK-CONJUGATES AND HESSIAN AT THIS GAUSS POINT
+        CauchyStressTensor, H_Voigt = material.KineticMeasures(F,elem=elem)
+
+        # LOOP OVER GAUSS POINTS
+        for counter in range(AllGauss.shape[0]): 
+            
+            # COMPUTE THE TANGENT STIFFNESS MATRIX
+            BDB_1, t = self.ConstitutiveStiffnessIntegrand(B, SpatialGradient[counter,:,:],
+                CauchyStressTensor[counter,:,:], H_Voigt[counter,:,:], analysis_nature=fem_solver.analysis_nature, 
+                has_prestress=fem_solver.has_prestress)
+            
+            if fem_solver.requires_geometry_update:
+                # BDB_1 += self.GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],CauchyStressTensor[counter,:,:])
+                # INTEGRATE TRACTION FORCE
+                tractionforce += t*detJ[counter]
+
+            # INTEGRATE STIFFNESS
+            stiffness += BDB_1*detJ[counter]
+
+        # ADD GEOMETRIC STIFFNESS MATRIX
+        stiffness += self.__GeometricStiffnessIntegrand__(SpatialGradient,CauchyStressTensor,detJ)
+
+        return stiffness, tractionforce 

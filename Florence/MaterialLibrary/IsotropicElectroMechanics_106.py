@@ -1,3 +1,4 @@
+from __future__ import division
 import numpy as np
 from numpy import einsum
 from Florence.Tensor import trace, Voigt
@@ -24,6 +25,15 @@ class IsotropicElectroMechanics_106(Material):
             self.H_VoigtSize = 5
         elif self.ndim == 3:
             self.H_VoigtSize = 9
+
+        # LOW LEVEL DISPATCHER
+        self.has_low_level_dispatcher = True
+        # self.has_low_level_dispatcher = False
+
+    def KineticMeasures(self,F,ElectricFieldx, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._IsotropicElectroMechanics_106_ import KineticMeasures
+        return KineticMeasures(self,np.ascontiguousarray(F), ElectricFieldx)
+
 
     def Hessian(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
 
@@ -81,16 +91,15 @@ class IsotropicElectroMechanics_106(Material):
         D = ElectricDisplacementx.reshape(self.ndim,1)
         DD = np.dot(D.T,D)[0,0]
 
+        trb = trace(b)
         if self.ndim==2:
-            trb = trace(b) + 1
-        else:
-            trb = trace(b)
+            trb += 1.
 
         simga_mech = 2.0*mu1/J*b + \
             2.0*mu2/J*(trb*b - np.dot(b,b)) -\
             2.0*(mu1+2*mu2)/J*I +\
-            lamb*(J-1)*I
-        sigma_electric = 1/eps_2*(np.dot(D,D.T) - 0.5*DD*I)
+            lamb*(J-1.)*I
+        sigma_electric = 1./eps_2*(np.dot(D,D.T) - 0.5*DD*I)
         sigma = simga_mech + sigma_electric
 
         return sigma

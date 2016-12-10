@@ -858,6 +858,7 @@ typedef npy_clongdouble __pyx_t_5numpy_clongdouble_t;
  */
 typedef npy_cdouble __pyx_t_5numpy_complex_t;
 struct __pyx_opt_args_8Florence_6Tensor_7Numeric_makezero;
+struct __pyx_opt_args_8Florence_6Tensor_7Numeric_makezero3d;
 struct __pyx_opt_args_8Florence_6Tensor_7Numeric_issymetric;
 
 /* "Florence/Tensor/Numeric.pyx":105
@@ -872,7 +873,19 @@ struct __pyx_opt_args_8Florence_6Tensor_7Numeric_makezero {
   __pyx_t_8Florence_6Tensor_7Numeric_Real_t tol;
 };
 
-/* "Florence/Tensor/Numeric.pyx":122
+/* "Florence/Tensor/Numeric.pyx":121
+ * @boundscheck(False)
+ * @wraparound(False)
+ * cpdef void makezero3d(np.ndarray[Real_t, ndim=3] A, Real_t tol=1.0e-14):             # <<<<<<<<<<<<<<
+ *     """Substitute the elements of an array which are close to zero with zero.
+ *         This is an in-place operation and does not return anything"""
+ */
+struct __pyx_opt_args_8Florence_6Tensor_7Numeric_makezero3d {
+  int __pyx_n;
+  __pyx_t_8Florence_6Tensor_7Numeric_Real_t tol;
+};
+
+/* "Florence/Tensor/Numeric.pyx":140
  * @boundscheck(False)
  * @wraparound(False)
  * cpdef bool issymetric(np.ndarray[Real_t, ndim=2] A, Real_t tol=1.0e-12):             # <<<<<<<<<<<<<<
@@ -1106,6 +1119,7 @@ static void __Pyx_WriteUnraisable(const char *name, int clineno,
                                   int lineno, const char *filename,
                                   int full_traceback, int nogil);
 
+#define __Pyx_BufPtrStrided3d(type, buf, i0, s0, i1, s1, i2, s2) (type)((char*)buf + i0 * s0 + i1 * s1 + i2 * s2)
 static CYTHON_INLINE PyObject *__Pyx_GetModuleGlobalName(PyObject *name);
 
 static CYTHON_INLINE int __Pyx_TypeTest(PyObject *obj, PyTypeObject *type);
@@ -1634,6 +1648,7 @@ static PyObject *contiguous = 0;
 static PyObject *indirect_contiguous = 0;
 static CYTHON_INLINE __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_f_8Florence_6Tensor_7Numeric__doublecontract(__pyx_t_8Florence_6Tensor_7Numeric_Real_t *, __pyx_t_8Florence_6Tensor_7Numeric_Real_t *, int); /*proto*/
 static void __pyx_f_8Florence_6Tensor_7Numeric_makezero(PyArrayObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_8Florence_6Tensor_7Numeric_makezero *__pyx_optional_args); /*proto*/
+static void __pyx_f_8Florence_6Tensor_7Numeric_makezero3d(PyArrayObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_8Florence_6Tensor_7Numeric_makezero3d *__pyx_optional_args); /*proto*/
 static PyBoolObject *__pyx_f_8Florence_6Tensor_7Numeric_issymetric(PyArrayObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_8Florence_6Tensor_7Numeric_issymetric *__pyx_optional_args); /*proto*/
 static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6Tensor_7Numeric_Real_t const *, __pyx_t_8Florence_6Tensor_7Numeric_Real_t *); /*proto*/
 static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt2(__pyx_t_8Florence_6Tensor_7Numeric_Real_t const *, __pyx_t_8Florence_6Tensor_7Numeric_Real_t *); /*proto*/
@@ -1808,6 +1823,7 @@ static char __pyx_k_findfirst[] = "findfirst";
 static char __pyx_k_IndexError[] = "IndexError";
 static char __pyx_k_ValueError[] = "ValueError";
 static char __pyx_k_issymetric[] = "issymetric";
+static char __pyx_k_makezero3d[] = "makezero3d";
 static char __pyx_k_pyx_vtable[] = "__pyx_vtable__";
 static char __pyx_k_MemoryError[] = "MemoryError";
 static char __pyx_k_findgreater[] = "findgreater";
@@ -1967,6 +1983,7 @@ static PyObject *__pyx_n_s_itemsize;
 static PyObject *__pyx_kp_s_itemsize_0_for_cython_array;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_makezero;
+static PyObject *__pyx_n_s_makezero3d;
 static PyObject *__pyx_n_s_memview;
 static PyObject *__pyx_n_s_mode;
 static PyObject *__pyx_n_s_n1;
@@ -2012,16 +2029,17 @@ static PyObject *__pyx_n_s_zeros;
 static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_trace(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A); /* proto */
 static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_2doublecontract(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, PyArrayObject *__pyx_v_B); /* proto */
 static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_4makezero(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_tol); /* proto */
-static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_6issymetric(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_tol); /* proto */
-static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_8tovoigt(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_C); /* proto */
-static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_10tovoigt3(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_e); /* proto */
-static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, PyArrayObject *__pyx_v_B, PyObject *__pyx_v_dim, PyObject *__pyx_v_toarray); /* proto */
-static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_14findfirst(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Integer_t __pyx_v_num); /* proto */
-static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_16fillin(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_num); /* proto */
-static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_18findequal(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Integer_t __pyx_v_num); /* proto */
-static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_20findequal_approx(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_num, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_tol); /* proto */
-static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_22findless(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_num); /* proto */
-static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_24findgreater(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_num); /* proto */
+static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_6makezero3d(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_tol); /* proto */
+static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_8issymetric(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_tol); /* proto */
+static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_10tovoigt(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_C); /* proto */
+static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12tovoigt3(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_e); /* proto */
+static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_14cross2d(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, PyArrayObject *__pyx_v_B, PyObject *__pyx_v_dim, PyObject *__pyx_v_toarray); /* proto */
+static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_16findfirst(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Integer_t __pyx_v_num); /* proto */
+static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_18fillin(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_num); /* proto */
+static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_20findequal(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Integer_t __pyx_v_num); /* proto */
+static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_22findequal_approx(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_num, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_tol); /* proto */
+static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_24findless(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_num); /* proto */
+static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_26findgreater(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_num); /* proto */
 static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
@@ -2729,7 +2747,7 @@ static void __pyx_f_8Florence_6Tensor_7Numeric_makezero(PyArrayObject *__pyx_v_A
  *             if fabs(A[i,j]) < tol:
  *                 A[i,j] = 0.             # <<<<<<<<<<<<<<
  * 
- * 
+ * @boundscheck(False)
  */
         __pyx_t_8 = __pyx_v_i;
         __pyx_t_9 = __pyx_v_j;
@@ -2890,7 +2908,300 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_4makezero(CYTHON_UNUSED PyO
   return __pyx_r;
 }
 
-/* "Florence/Tensor/Numeric.pyx":122
+/* "Florence/Tensor/Numeric.pyx":121
+ * @boundscheck(False)
+ * @wraparound(False)
+ * cpdef void makezero3d(np.ndarray[Real_t, ndim=3] A, Real_t tol=1.0e-14):             # <<<<<<<<<<<<<<
+ *     """Substitute the elements of an array which are close to zero with zero.
+ *         This is an in-place operation and does not return anything"""
+ */
+
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_7makezero3d(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static void __pyx_f_8Florence_6Tensor_7Numeric_makezero3d(PyArrayObject *__pyx_v_A, CYTHON_UNUSED int __pyx_skip_dispatch, struct __pyx_opt_args_8Florence_6Tensor_7Numeric_makezero3d *__pyx_optional_args) {
+  __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_tol = ((__pyx_t_8Florence_6Tensor_7Numeric_Real_t)1.0e-14);
+  int __pyx_v_i;
+  int __pyx_v_j;
+  int __pyx_v_k;
+  int __pyx_v_a1;
+  int __pyx_v_a2;
+  int __pyx_v_a3;
+  __Pyx_LocalBuf_ND __pyx_pybuffernd_A;
+  __Pyx_Buffer __pyx_pybuffer_A;
+  __Pyx_RefNannyDeclarations
+  int __pyx_t_1;
+  int __pyx_t_2;
+  int __pyx_t_3;
+  int __pyx_t_4;
+  int __pyx_t_5;
+  int __pyx_t_6;
+  Py_ssize_t __pyx_t_7;
+  Py_ssize_t __pyx_t_8;
+  Py_ssize_t __pyx_t_9;
+  int __pyx_t_10;
+  Py_ssize_t __pyx_t_11;
+  Py_ssize_t __pyx_t_12;
+  Py_ssize_t __pyx_t_13;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("makezero3d", 0);
+  if (__pyx_optional_args) {
+    if (__pyx_optional_args->__pyx_n > 0) {
+      __pyx_v_tol = __pyx_optional_args->tol;
+    }
+  }
+  __pyx_pybuffer_A.pybuffer.buf = NULL;
+  __pyx_pybuffer_A.refcount = 0;
+  __pyx_pybuffernd_A.data = NULL;
+  __pyx_pybuffernd_A.rcbuffer = &__pyx_pybuffer_A;
+  {
+    __Pyx_BufFmt_StackElem __pyx_stack[1];
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_A.rcbuffer->pybuffer, (PyObject*)__pyx_v_A, &__Pyx_TypeInfo_nn___pyx_t_8Florence_6Tensor_7Numeric_Real_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 3, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 121; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
+  __pyx_pybuffernd_A.diminfo[0].strides = __pyx_pybuffernd_A.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_A.diminfo[0].shape = __pyx_pybuffernd_A.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_A.diminfo[1].strides = __pyx_pybuffernd_A.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_A.diminfo[1].shape = __pyx_pybuffernd_A.rcbuffer->pybuffer.shape[1]; __pyx_pybuffernd_A.diminfo[2].strides = __pyx_pybuffernd_A.rcbuffer->pybuffer.strides[2]; __pyx_pybuffernd_A.diminfo[2].shape = __pyx_pybuffernd_A.rcbuffer->pybuffer.shape[2];
+
+  /* "Florence/Tensor/Numeric.pyx":127
+ *     cdef:
+ *         int i,j,k
+ *         int a1 = A.shape[0]             # <<<<<<<<<<<<<<
+ *         int a2 = A.shape[1]
+ *         int a3 = A.shape[2]
+ */
+  __pyx_v_a1 = (__pyx_v_A->dimensions[0]);
+
+  /* "Florence/Tensor/Numeric.pyx":128
+ *         int i,j,k
+ *         int a1 = A.shape[0]
+ *         int a2 = A.shape[1]             # <<<<<<<<<<<<<<
+ *         int a3 = A.shape[2]
+ * 
+ */
+  __pyx_v_a2 = (__pyx_v_A->dimensions[1]);
+
+  /* "Florence/Tensor/Numeric.pyx":129
+ *         int a1 = A.shape[0]
+ *         int a2 = A.shape[1]
+ *         int a3 = A.shape[2]             # <<<<<<<<<<<<<<
+ * 
+ *     for i in range(a1):
+ */
+  __pyx_v_a3 = (__pyx_v_A->dimensions[2]);
+
+  /* "Florence/Tensor/Numeric.pyx":131
+ *         int a3 = A.shape[2]
+ * 
+ *     for i in range(a1):             # <<<<<<<<<<<<<<
+ *         for j in range(a2):
+ *             for k in range(a3):
+ */
+  __pyx_t_1 = __pyx_v_a1;
+  for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
+    __pyx_v_i = __pyx_t_2;
+
+    /* "Florence/Tensor/Numeric.pyx":132
+ * 
+ *     for i in range(a1):
+ *         for j in range(a2):             # <<<<<<<<<<<<<<
+ *             for k in range(a3):
+ *                 if fabs(A[i,j,k]) < tol:
+ */
+    __pyx_t_3 = __pyx_v_a2;
+    for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_3; __pyx_t_4+=1) {
+      __pyx_v_j = __pyx_t_4;
+
+      /* "Florence/Tensor/Numeric.pyx":133
+ *     for i in range(a1):
+ *         for j in range(a2):
+ *             for k in range(a3):             # <<<<<<<<<<<<<<
+ *                 if fabs(A[i,j,k]) < tol:
+ *                     A[i,j,k] = 0.
+ */
+      __pyx_t_5 = __pyx_v_a3;
+      for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
+        __pyx_v_k = __pyx_t_6;
+
+        /* "Florence/Tensor/Numeric.pyx":134
+ *         for j in range(a2):
+ *             for k in range(a3):
+ *                 if fabs(A[i,j,k]) < tol:             # <<<<<<<<<<<<<<
+ *                     A[i,j,k] = 0.
+ * 
+ */
+        __pyx_t_7 = __pyx_v_i;
+        __pyx_t_8 = __pyx_v_j;
+        __pyx_t_9 = __pyx_v_k;
+        __pyx_t_10 = ((fabs((*__Pyx_BufPtrStrided3d(__pyx_t_8Florence_6Tensor_7Numeric_Real_t *, __pyx_pybuffernd_A.rcbuffer->pybuffer.buf, __pyx_t_7, __pyx_pybuffernd_A.diminfo[0].strides, __pyx_t_8, __pyx_pybuffernd_A.diminfo[1].strides, __pyx_t_9, __pyx_pybuffernd_A.diminfo[2].strides))) < __pyx_v_tol) != 0);
+        if (__pyx_t_10) {
+
+          /* "Florence/Tensor/Numeric.pyx":135
+ *             for k in range(a3):
+ *                 if fabs(A[i,j,k]) < tol:
+ *                     A[i,j,k] = 0.             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+          __pyx_t_11 = __pyx_v_i;
+          __pyx_t_12 = __pyx_v_j;
+          __pyx_t_13 = __pyx_v_k;
+          *__Pyx_BufPtrStrided3d(__pyx_t_8Florence_6Tensor_7Numeric_Real_t *, __pyx_pybuffernd_A.rcbuffer->pybuffer.buf, __pyx_t_11, __pyx_pybuffernd_A.diminfo[0].strides, __pyx_t_12, __pyx_pybuffernd_A.diminfo[1].strides, __pyx_t_13, __pyx_pybuffernd_A.diminfo[2].strides) = 0.;
+
+          /* "Florence/Tensor/Numeric.pyx":134
+ *         for j in range(a2):
+ *             for k in range(a3):
+ *                 if fabs(A[i,j,k]) < tol:             # <<<<<<<<<<<<<<
+ *                     A[i,j,k] = 0.
+ * 
+ */
+        }
+      }
+    }
+  }
+
+  /* "Florence/Tensor/Numeric.pyx":121
+ * @boundscheck(False)
+ * @wraparound(False)
+ * cpdef void makezero3d(np.ndarray[Real_t, ndim=3] A, Real_t tol=1.0e-14):             # <<<<<<<<<<<<<<
+ *     """Substitute the elements of an array which are close to zero with zero.
+ *         This is an in-place operation and does not return anything"""
+ */
+
+  /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  { PyObject *__pyx_type, *__pyx_value, *__pyx_tb;
+    __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
+    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_A.rcbuffer->pybuffer);
+  __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
+  __Pyx_WriteUnraisable("Florence.Tensor.Numeric.makezero3d", __pyx_clineno, __pyx_lineno, __pyx_filename, 0, 0);
+  goto __pyx_L2;
+  __pyx_L0:;
+  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_A.rcbuffer->pybuffer);
+  __pyx_L2:;
+  __Pyx_RefNannyFinishContext();
+}
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_7makezero3d(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_8Florence_6Tensor_7Numeric_6makezero3d[] = "Substitute the elements of an array which are close to zero with zero.\n        This is an in-place operation and does not return anything";
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_7makezero3d(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  PyArrayObject *__pyx_v_A = 0;
+  __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_tol;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("makezero3d (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_A,&__pyx_n_s_tol,0};
+    PyObject* values[2] = {0,0};
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_A)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+        case  1:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_tol);
+          if (value) { values[1] = value; kw_args--; }
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "makezero3d") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 121; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      }
+    } else {
+      switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+    }
+    __pyx_v_A = ((PyArrayObject *)values[0]);
+    if (values[1]) {
+      __pyx_v_tol = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_tol == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 121; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    } else {
+      __pyx_v_tol = ((__pyx_t_8Florence_6Tensor_7Numeric_Real_t)1.0e-14);
+    }
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("makezero3d", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 121; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("Florence.Tensor.Numeric.makezero3d", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_A), __pyx_ptype_5numpy_ndarray, 1, "A", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 121; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_8Florence_6Tensor_7Numeric_6makezero3d(__pyx_self, __pyx_v_A, __pyx_v_tol);
+
+  /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_6makezero3d(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_tol) {
+  __Pyx_LocalBuf_ND __pyx_pybuffernd_A;
+  __Pyx_Buffer __pyx_pybuffer_A;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  struct __pyx_opt_args_8Florence_6Tensor_7Numeric_makezero3d __pyx_t_1;
+  PyObject *__pyx_t_2 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("makezero3d", 0);
+  __pyx_pybuffer_A.pybuffer.buf = NULL;
+  __pyx_pybuffer_A.refcount = 0;
+  __pyx_pybuffernd_A.data = NULL;
+  __pyx_pybuffernd_A.rcbuffer = &__pyx_pybuffer_A;
+  {
+    __Pyx_BufFmt_StackElem __pyx_stack[1];
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_A.rcbuffer->pybuffer, (PyObject*)__pyx_v_A, &__Pyx_TypeInfo_nn___pyx_t_8Florence_6Tensor_7Numeric_Real_t, PyBUF_FORMAT| PyBUF_STRIDES, 3, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 121; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
+  __pyx_pybuffernd_A.diminfo[0].strides = __pyx_pybuffernd_A.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_A.diminfo[0].shape = __pyx_pybuffernd_A.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_A.diminfo[1].strides = __pyx_pybuffernd_A.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_A.diminfo[1].shape = __pyx_pybuffernd_A.rcbuffer->pybuffer.shape[1]; __pyx_pybuffernd_A.diminfo[2].strides = __pyx_pybuffernd_A.rcbuffer->pybuffer.strides[2]; __pyx_pybuffernd_A.diminfo[2].shape = __pyx_pybuffernd_A.rcbuffer->pybuffer.shape[2];
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1.__pyx_n = 1;
+  __pyx_t_1.tol = __pyx_v_tol;
+  __pyx_f_8Florence_6Tensor_7Numeric_makezero3d(__pyx_v_A, 0, &__pyx_t_1); 
+  __pyx_t_2 = __Pyx_void_to_None(NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 121; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_r = __pyx_t_2;
+  __pyx_t_2 = 0;
+  goto __pyx_L0;
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_2);
+  { PyObject *__pyx_type, *__pyx_value, *__pyx_tb;
+    __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
+    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_A.rcbuffer->pybuffer);
+  __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
+  __Pyx_AddTraceback("Florence.Tensor.Numeric.makezero3d", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  goto __pyx_L2;
+  __pyx_L0:;
+  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_A.rcbuffer->pybuffer);
+  __pyx_L2:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "Florence/Tensor/Numeric.pyx":140
  * @boundscheck(False)
  * @wraparound(False)
  * cpdef bool issymetric(np.ndarray[Real_t, ndim=2] A, Real_t tol=1.0e-12):             # <<<<<<<<<<<<<<
@@ -2898,7 +3209,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_4makezero(CYTHON_UNUSED PyO
  *     cdef:
  */
 
-static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_7issymetric(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_9issymetric(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static PyBoolObject *__pyx_f_8Florence_6Tensor_7Numeric_issymetric(PyArrayObject *__pyx_v_A, CYTHON_UNUSED int __pyx_skip_dispatch, struct __pyx_opt_args_8Florence_6Tensor_7Numeric_issymetric *__pyx_optional_args) {
   __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_tol = ((__pyx_t_8Florence_6Tensor_7Numeric_Real_t)1.0e-12);
   int __pyx_v_i;
@@ -2935,11 +3246,11 @@ static PyBoolObject *__pyx_f_8Florence_6Tensor_7Numeric_issymetric(PyArrayObject
   __pyx_pybuffernd_A.rcbuffer = &__pyx_pybuffer_A;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_A.rcbuffer->pybuffer, (PyObject*)__pyx_v_A, &__Pyx_TypeInfo_nn___pyx_t_8Florence_6Tensor_7Numeric_Real_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 122; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_A.rcbuffer->pybuffer, (PyObject*)__pyx_v_A, &__Pyx_TypeInfo_nn___pyx_t_8Florence_6Tensor_7Numeric_Real_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_pybuffernd_A.diminfo[0].strides = __pyx_pybuffernd_A.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_A.diminfo[0].shape = __pyx_pybuffernd_A.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_A.diminfo[1].strides = __pyx_pybuffernd_A.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_A.diminfo[1].shape = __pyx_pybuffernd_A.rcbuffer->pybuffer.shape[1];
 
-  /* "Florence/Tensor/Numeric.pyx":126
+  /* "Florence/Tensor/Numeric.pyx":144
  *     cdef:
  *         int i,j
  *         int a1 = A.shape[0]             # <<<<<<<<<<<<<<
@@ -2948,7 +3259,7 @@ static PyBoolObject *__pyx_f_8Florence_6Tensor_7Numeric_issymetric(PyArrayObject
  */
   __pyx_v_a1 = (__pyx_v_A->dimensions[0]);
 
-  /* "Florence/Tensor/Numeric.pyx":127
+  /* "Florence/Tensor/Numeric.pyx":145
  *         int i,j
  *         int a1 = A.shape[0]
  *         int a2 = A.shape[1]             # <<<<<<<<<<<<<<
@@ -2957,7 +3268,7 @@ static PyBoolObject *__pyx_f_8Florence_6Tensor_7Numeric_issymetric(PyArrayObject
  */
   __pyx_v_a2 = (__pyx_v_A->dimensions[1]);
 
-  /* "Florence/Tensor/Numeric.pyx":128
+  /* "Florence/Tensor/Numeric.pyx":146
  *         int a1 = A.shape[0]
  *         int a2 = A.shape[1]
  *         bool issym = True             # <<<<<<<<<<<<<<
@@ -2967,7 +3278,7 @@ static PyBoolObject *__pyx_f_8Florence_6Tensor_7Numeric_issymetric(PyArrayObject
   __Pyx_INCREF(Py_True);
   __pyx_v_issym = ((PyBoolObject *)Py_True);
 
-  /* "Florence/Tensor/Numeric.pyx":130
+  /* "Florence/Tensor/Numeric.pyx":148
  *         bool issym = True
  * 
  *     if a1 != a2:             # <<<<<<<<<<<<<<
@@ -2977,20 +3288,20 @@ static PyBoolObject *__pyx_f_8Florence_6Tensor_7Numeric_issymetric(PyArrayObject
   __pyx_t_1 = ((__pyx_v_a1 != __pyx_v_a2) != 0);
   if (__pyx_t_1) {
 
-    /* "Florence/Tensor/Numeric.pyx":131
+    /* "Florence/Tensor/Numeric.pyx":149
  * 
  *     if a1 != a2:
  *         raise ValueError("Symmetricity of a non-Hermitian (non-square) matrix requested")             # <<<<<<<<<<<<<<
  * 
  *     for i in range(a1):
  */
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 131; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 149; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_Raise(__pyx_t_2, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 131; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 149; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-    /* "Florence/Tensor/Numeric.pyx":130
+    /* "Florence/Tensor/Numeric.pyx":148
  *         bool issym = True
  * 
  *     if a1 != a2:             # <<<<<<<<<<<<<<
@@ -2999,7 +3310,7 @@ static PyBoolObject *__pyx_f_8Florence_6Tensor_7Numeric_issymetric(PyArrayObject
  */
   }
 
-  /* "Florence/Tensor/Numeric.pyx":133
+  /* "Florence/Tensor/Numeric.pyx":151
  *         raise ValueError("Symmetricity of a non-Hermitian (non-square) matrix requested")
  * 
  *     for i in range(a1):             # <<<<<<<<<<<<<<
@@ -3010,7 +3321,7 @@ static PyBoolObject *__pyx_f_8Florence_6Tensor_7Numeric_issymetric(PyArrayObject
   for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_3; __pyx_t_4+=1) {
     __pyx_v_i = __pyx_t_4;
 
-    /* "Florence/Tensor/Numeric.pyx":134
+    /* "Florence/Tensor/Numeric.pyx":152
  * 
  *     for i in range(a1):
  *         for j in range(a2):             # <<<<<<<<<<<<<<
@@ -3021,7 +3332,7 @@ static PyBoolObject *__pyx_f_8Florence_6Tensor_7Numeric_issymetric(PyArrayObject
     for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
       __pyx_v_j = __pyx_t_6;
 
-      /* "Florence/Tensor/Numeric.pyx":135
+      /* "Florence/Tensor/Numeric.pyx":153
  *     for i in range(a1):
  *         for j in range(a2):
  *             if fabs(A[i,j] - A[j,i]) > tol:             # <<<<<<<<<<<<<<
@@ -3035,7 +3346,7 @@ static PyBoolObject *__pyx_f_8Florence_6Tensor_7Numeric_issymetric(PyArrayObject
       __pyx_t_1 = ((fabs(((*__Pyx_BufPtrStrided2d(__pyx_t_8Florence_6Tensor_7Numeric_Real_t *, __pyx_pybuffernd_A.rcbuffer->pybuffer.buf, __pyx_t_7, __pyx_pybuffernd_A.diminfo[0].strides, __pyx_t_8, __pyx_pybuffernd_A.diminfo[1].strides)) - (*__Pyx_BufPtrStrided2d(__pyx_t_8Florence_6Tensor_7Numeric_Real_t *, __pyx_pybuffernd_A.rcbuffer->pybuffer.buf, __pyx_t_9, __pyx_pybuffernd_A.diminfo[0].strides, __pyx_t_10, __pyx_pybuffernd_A.diminfo[1].strides)))) > __pyx_v_tol) != 0);
       if (__pyx_t_1) {
 
-        /* "Florence/Tensor/Numeric.pyx":136
+        /* "Florence/Tensor/Numeric.pyx":154
  *         for j in range(a2):
  *             if fabs(A[i,j] - A[j,i]) > tol:
  *                 issym = False             # <<<<<<<<<<<<<<
@@ -3045,7 +3356,7 @@ static PyBoolObject *__pyx_f_8Florence_6Tensor_7Numeric_issymetric(PyArrayObject
         __Pyx_INCREF(Py_False);
         __Pyx_DECREF_SET(__pyx_v_issym, ((PyBoolObject *)Py_False));
 
-        /* "Florence/Tensor/Numeric.pyx":137
+        /* "Florence/Tensor/Numeric.pyx":155
  *             if fabs(A[i,j] - A[j,i]) > tol:
  *                 issym = False
  *                 break             # <<<<<<<<<<<<<<
@@ -3054,7 +3365,7 @@ static PyBoolObject *__pyx_f_8Florence_6Tensor_7Numeric_issymetric(PyArrayObject
  */
         goto __pyx_L7_break;
 
-        /* "Florence/Tensor/Numeric.pyx":135
+        /* "Florence/Tensor/Numeric.pyx":153
  *     for i in range(a1):
  *         for j in range(a2):
  *             if fabs(A[i,j] - A[j,i]) > tol:             # <<<<<<<<<<<<<<
@@ -3065,19 +3376,19 @@ static PyBoolObject *__pyx_f_8Florence_6Tensor_7Numeric_issymetric(PyArrayObject
     }
     __pyx_L7_break:;
 
-    /* "Florence/Tensor/Numeric.pyx":138
+    /* "Florence/Tensor/Numeric.pyx":156
  *                 issym = False
  *                 break
  *         if issym == True:             # <<<<<<<<<<<<<<
  *             break
  * 
  */
-    __pyx_t_2 = PyObject_RichCompare(((PyObject *)__pyx_v_issym), Py_True, Py_EQ); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_1 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = PyObject_RichCompare(((PyObject *)__pyx_v_issym), Py_True, Py_EQ); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_1 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     if (__pyx_t_1) {
 
-      /* "Florence/Tensor/Numeric.pyx":139
+      /* "Florence/Tensor/Numeric.pyx":157
  *                 break
  *         if issym == True:
  *             break             # <<<<<<<<<<<<<<
@@ -3086,7 +3397,7 @@ static PyBoolObject *__pyx_f_8Florence_6Tensor_7Numeric_issymetric(PyArrayObject
  */
       goto __pyx_L5_break;
 
-      /* "Florence/Tensor/Numeric.pyx":138
+      /* "Florence/Tensor/Numeric.pyx":156
  *                 issym = False
  *                 break
  *         if issym == True:             # <<<<<<<<<<<<<<
@@ -3097,7 +3408,7 @@ static PyBoolObject *__pyx_f_8Florence_6Tensor_7Numeric_issymetric(PyArrayObject
   }
   __pyx_L5_break:;
 
-  /* "Florence/Tensor/Numeric.pyx":141
+  /* "Florence/Tensor/Numeric.pyx":159
  *             break
  * 
  *     return issym             # <<<<<<<<<<<<<<
@@ -3109,7 +3420,7 @@ static PyBoolObject *__pyx_f_8Florence_6Tensor_7Numeric_issymetric(PyArrayObject
   __pyx_r = __pyx_v_issym;
   goto __pyx_L0;
 
-  /* "Florence/Tensor/Numeric.pyx":122
+  /* "Florence/Tensor/Numeric.pyx":140
  * @boundscheck(False)
  * @wraparound(False)
  * cpdef bool issymetric(np.ndarray[Real_t, ndim=2] A, Real_t tol=1.0e-12):             # <<<<<<<<<<<<<<
@@ -3137,9 +3448,9 @@ static PyBoolObject *__pyx_f_8Florence_6Tensor_7Numeric_issymetric(PyArrayObject
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_7issymetric(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_8Florence_6Tensor_7Numeric_6issymetric[] = "Checks if a Hermitian floating point matrix is symmetric within a tolerance";
-static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_7issymetric(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_9issymetric(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_8Florence_6Tensor_7Numeric_8issymetric[] = "Checks if a Hermitian floating point matrix is symmetric within a tolerance";
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_9issymetric(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyArrayObject *__pyx_v_A = 0;
   __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_tol;
   int __pyx_lineno = 0;
@@ -3172,7 +3483,7 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_7issymetric(PyObject *__pyx
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "issymetric") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 122; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "issymetric") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -3184,21 +3495,21 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_7issymetric(PyObject *__pyx
     }
     __pyx_v_A = ((PyArrayObject *)values[0]);
     if (values[1]) {
-      __pyx_v_tol = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_tol == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 122; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_v_tol = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_tol == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     } else {
       __pyx_v_tol = ((__pyx_t_8Florence_6Tensor_7Numeric_Real_t)1.0e-12);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("issymetric", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 122; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("issymetric", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Florence.Tensor.Numeric.issymetric", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_A), __pyx_ptype_5numpy_ndarray, 1, "A", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 122; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_r = __pyx_pf_8Florence_6Tensor_7Numeric_6issymetric(__pyx_self, __pyx_v_A, __pyx_v_tol);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_A), __pyx_ptype_5numpy_ndarray, 1, "A", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_8Florence_6Tensor_7Numeric_8issymetric(__pyx_self, __pyx_v_A, __pyx_v_tol);
 
   /* function exit code */
   goto __pyx_L0;
@@ -3209,7 +3520,7 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_7issymetric(PyObject *__pyx
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_6issymetric(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_tol) {
+static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_8issymetric(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_tol) {
   __Pyx_LocalBuf_ND __pyx_pybuffernd_A;
   __Pyx_Buffer __pyx_pybuffer_A;
   PyObject *__pyx_r = NULL;
@@ -3226,13 +3537,13 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_6issymetric(CYTHON_UNUSED P
   __pyx_pybuffernd_A.rcbuffer = &__pyx_pybuffer_A;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_A.rcbuffer->pybuffer, (PyObject*)__pyx_v_A, &__Pyx_TypeInfo_nn___pyx_t_8Florence_6Tensor_7Numeric_Real_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 122; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_A.rcbuffer->pybuffer, (PyObject*)__pyx_v_A, &__Pyx_TypeInfo_nn___pyx_t_8Florence_6Tensor_7Numeric_Real_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_pybuffernd_A.diminfo[0].strides = __pyx_pybuffernd_A.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_A.diminfo[0].shape = __pyx_pybuffernd_A.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_A.diminfo[1].strides = __pyx_pybuffernd_A.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_A.diminfo[1].shape = __pyx_pybuffernd_A.rcbuffer->pybuffer.shape[1];
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_2.__pyx_n = 1;
   __pyx_t_2.tol = __pyx_v_tol;
-  __pyx_t_1 = ((PyObject *)__pyx_f_8Florence_6Tensor_7Numeric_issymetric(__pyx_v_A, 0, &__pyx_t_2)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 122; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = ((PyObject *)__pyx_f_8Florence_6Tensor_7Numeric_issymetric(__pyx_v_A, 0, &__pyx_t_2)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -3256,7 +3567,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_6issymetric(CYTHON_UNUSED P
   return __pyx_r;
 }
 
-/* "Florence/Tensor/Numeric.pyx":146
+/* "Florence/Tensor/Numeric.pyx":164
  * @boundscheck(False)
  * @wraparound(False)
  * def tovoigt(np.ndarray[Real_t, ndim=4, mode='c'] C):             # <<<<<<<<<<<<<<
@@ -3265,18 +3576,18 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_6issymetric(CYTHON_UNUSED P
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_9tovoigt(PyObject *__pyx_self, PyObject *__pyx_v_C); /*proto*/
-static char __pyx_doc_8Florence_6Tensor_7Numeric_8tovoigt[] = "Convert a 4D array to its Voigt represenation";
-static PyMethodDef __pyx_mdef_8Florence_6Tensor_7Numeric_9tovoigt = {"tovoigt", (PyCFunction)__pyx_pw_8Florence_6Tensor_7Numeric_9tovoigt, METH_O, __pyx_doc_8Florence_6Tensor_7Numeric_8tovoigt};
-static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_9tovoigt(PyObject *__pyx_self, PyObject *__pyx_v_C) {
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_11tovoigt(PyObject *__pyx_self, PyObject *__pyx_v_C); /*proto*/
+static char __pyx_doc_8Florence_6Tensor_7Numeric_10tovoigt[] = "Convert a 4D array to its Voigt represenation";
+static PyMethodDef __pyx_mdef_8Florence_6Tensor_7Numeric_11tovoigt = {"tovoigt", (PyCFunction)__pyx_pw_8Florence_6Tensor_7Numeric_11tovoigt, METH_O, __pyx_doc_8Florence_6Tensor_7Numeric_10tovoigt};
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_11tovoigt(PyObject *__pyx_self, PyObject *__pyx_v_C) {
   CYTHON_UNUSED int __pyx_lineno = 0;
   CYTHON_UNUSED const char *__pyx_filename = NULL;
   CYTHON_UNUSED int __pyx_clineno = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("tovoigt (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_C), __pyx_ptype_5numpy_ndarray, 1, "C", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_r = __pyx_pf_8Florence_6Tensor_7Numeric_8tovoigt(__pyx_self, ((PyArrayObject *)__pyx_v_C));
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_C), __pyx_ptype_5numpy_ndarray, 1, "C", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_8Florence_6Tensor_7Numeric_10tovoigt(__pyx_self, ((PyArrayObject *)__pyx_v_C));
 
   /* function exit code */
   goto __pyx_L0;
@@ -3287,7 +3598,7 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_9tovoigt(PyObject *__pyx_se
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_8tovoigt(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_C) {
+static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_10tovoigt(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_C) {
   PyArrayObject *__pyx_v_VoigtA = 0;
   int __pyx_v_n1dim;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_C;
@@ -3331,11 +3642,11 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_8tovoigt(CYTHON_UNUSED PyOb
   __pyx_pybuffernd_C.rcbuffer = &__pyx_pybuffer_C;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_C.rcbuffer->pybuffer, (PyObject*)__pyx_v_C, &__Pyx_TypeInfo_nn___pyx_t_8Florence_6Tensor_7Numeric_Real_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 4, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_C.rcbuffer->pybuffer, (PyObject*)__pyx_v_C, &__Pyx_TypeInfo_nn___pyx_t_8Florence_6Tensor_7Numeric_Real_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 4, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_pybuffernd_C.diminfo[0].strides = __pyx_pybuffernd_C.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_C.diminfo[0].shape = __pyx_pybuffernd_C.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_C.diminfo[1].strides = __pyx_pybuffernd_C.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_C.diminfo[1].shape = __pyx_pybuffernd_C.rcbuffer->pybuffer.shape[1]; __pyx_pybuffernd_C.diminfo[2].strides = __pyx_pybuffernd_C.rcbuffer->pybuffer.strides[2]; __pyx_pybuffernd_C.diminfo[2].shape = __pyx_pybuffernd_C.rcbuffer->pybuffer.shape[2]; __pyx_pybuffernd_C.diminfo[3].strides = __pyx_pybuffernd_C.rcbuffer->pybuffer.strides[3]; __pyx_pybuffernd_C.diminfo[3].shape = __pyx_pybuffernd_C.rcbuffer->pybuffer.shape[3];
 
-  /* "Florence/Tensor/Numeric.pyx":149
+  /* "Florence/Tensor/Numeric.pyx":167
  *     """Convert a 4D array to its Voigt represenation"""
  *     cdef np.ndarray[Real_t, ndim=2,mode='c'] VoigtA
  *     cdef int n1dim = C.shape[0]             # <<<<<<<<<<<<<<
@@ -3344,7 +3655,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_8tovoigt(CYTHON_UNUSED PyOb
  */
   __pyx_v_n1dim = (__pyx_v_C->dimensions[0]);
 
-  /* "Florence/Tensor/Numeric.pyx":151
+  /* "Florence/Tensor/Numeric.pyx":169
  *     cdef int n1dim = C.shape[0]
  *     # DISPATCH CALL TO APPROPRIATE FUNCTION
  *     if n1dim == 3:             # <<<<<<<<<<<<<<
@@ -3354,32 +3665,32 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_8tovoigt(CYTHON_UNUSED PyOb
   switch (__pyx_v_n1dim) {
     case 3:
 
-    /* "Florence/Tensor/Numeric.pyx":152
+    /* "Florence/Tensor/Numeric.pyx":170
  *     # DISPATCH CALL TO APPROPRIATE FUNCTION
  *     if n1dim == 3:
  *         VoigtA = np.zeros((6,6),dtype=np.float64)             # <<<<<<<<<<<<<<
  *         _Voigt3(&C[0,0,0,0],&VoigtA[0,0])
  *     elif n1dim == 2:
  */
-    __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 152; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 152; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 152; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 152; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_float64); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 152; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_float64); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 152; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__5, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 152; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__5, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 152; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __pyx_t_5 = ((PyArrayObject *)__pyx_t_4);
     {
       __Pyx_BufFmt_StackElem __pyx_stack[1];
@@ -3395,13 +3706,13 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_8tovoigt(CYTHON_UNUSED PyOb
         }
       }
       __pyx_pybuffernd_VoigtA.diminfo[0].strides = __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_VoigtA.diminfo[0].shape = __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_VoigtA.diminfo[1].strides = __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_VoigtA.diminfo[1].shape = __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.shape[1];
-      if (unlikely(__pyx_t_6 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 152; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      if (unlikely(__pyx_t_6 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     }
     __pyx_t_5 = 0;
     __pyx_v_VoigtA = ((PyArrayObject *)__pyx_t_4);
     __pyx_t_4 = 0;
 
-    /* "Florence/Tensor/Numeric.pyx":153
+    /* "Florence/Tensor/Numeric.pyx":171
  *     if n1dim == 3:
  *         VoigtA = np.zeros((6,6),dtype=np.float64)
  *         _Voigt3(&C[0,0,0,0],&VoigtA[0,0])             # <<<<<<<<<<<<<<
@@ -3414,11 +3725,11 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_8tovoigt(CYTHON_UNUSED PyOb
     __pyx_t_13 = 0;
     __pyx_t_14 = 0;
     __pyx_t_15 = 0;
-    __pyx_t_4 = __pyx_f_8Florence_6Tensor_7Numeric__Voigt3((&(*__Pyx_BufPtrCContig4d(__pyx_t_8Florence_6Tensor_7Numeric_Real_t *, __pyx_pybuffernd_C.rcbuffer->pybuffer.buf, __pyx_t_10, __pyx_pybuffernd_C.diminfo[0].strides, __pyx_t_11, __pyx_pybuffernd_C.diminfo[1].strides, __pyx_t_12, __pyx_pybuffernd_C.diminfo[2].strides, __pyx_t_13, __pyx_pybuffernd_C.diminfo[3].strides))), (&(*__Pyx_BufPtrCContig2d(__pyx_t_8Florence_6Tensor_7Numeric_Real_t *, __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.buf, __pyx_t_14, __pyx_pybuffernd_VoigtA.diminfo[0].strides, __pyx_t_15, __pyx_pybuffernd_VoigtA.diminfo[1].strides)))); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 153; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __pyx_f_8Florence_6Tensor_7Numeric__Voigt3((&(*__Pyx_BufPtrCContig4d(__pyx_t_8Florence_6Tensor_7Numeric_Real_t *, __pyx_pybuffernd_C.rcbuffer->pybuffer.buf, __pyx_t_10, __pyx_pybuffernd_C.diminfo[0].strides, __pyx_t_11, __pyx_pybuffernd_C.diminfo[1].strides, __pyx_t_12, __pyx_pybuffernd_C.diminfo[2].strides, __pyx_t_13, __pyx_pybuffernd_C.diminfo[3].strides))), (&(*__Pyx_BufPtrCContig2d(__pyx_t_8Florence_6Tensor_7Numeric_Real_t *, __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.buf, __pyx_t_14, __pyx_pybuffernd_VoigtA.diminfo[0].strides, __pyx_t_15, __pyx_pybuffernd_VoigtA.diminfo[1].strides)))); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 171; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-    /* "Florence/Tensor/Numeric.pyx":151
+    /* "Florence/Tensor/Numeric.pyx":169
  *     cdef int n1dim = C.shape[0]
  *     # DISPATCH CALL TO APPROPRIATE FUNCTION
  *     if n1dim == 3:             # <<<<<<<<<<<<<<
@@ -3427,7 +3738,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_8tovoigt(CYTHON_UNUSED PyOb
  */
     break;
 
-    /* "Florence/Tensor/Numeric.pyx":154
+    /* "Florence/Tensor/Numeric.pyx":172
  *         VoigtA = np.zeros((6,6),dtype=np.float64)
  *         _Voigt3(&C[0,0,0,0],&VoigtA[0,0])
  *     elif n1dim == 2:             # <<<<<<<<<<<<<<
@@ -3436,32 +3747,32 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_8tovoigt(CYTHON_UNUSED PyOb
  */
     case 2:
 
-    /* "Florence/Tensor/Numeric.pyx":155
+    /* "Florence/Tensor/Numeric.pyx":173
  *         _Voigt3(&C[0,0,0,0],&VoigtA[0,0])
  *     elif n1dim == 2:
  *         VoigtA = np.zeros((3,3),dtype=np.float64)             # <<<<<<<<<<<<<<
  *         _Voigt2(&C[0,0,0,0],&VoigtA[0,0])
  * 
  */
-    __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 155; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_zeros); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 155; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_zeros); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 155; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 155; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_float64); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 155; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_float64); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 155; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_tuple__7, __pyx_t_4); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 155; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_tuple__7, __pyx_t_4); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (!(likely(((__pyx_t_3) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_3, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 155; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (!(likely(((__pyx_t_3) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_3, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __pyx_t_5 = ((PyArrayObject *)__pyx_t_3);
     {
       __Pyx_BufFmt_StackElem __pyx_stack[1];
@@ -3477,13 +3788,13 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_8tovoigt(CYTHON_UNUSED PyOb
         }
       }
       __pyx_pybuffernd_VoigtA.diminfo[0].strides = __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_VoigtA.diminfo[0].shape = __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_VoigtA.diminfo[1].strides = __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_VoigtA.diminfo[1].shape = __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.shape[1];
-      if (unlikely(__pyx_t_6 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 155; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      if (unlikely(__pyx_t_6 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     }
     __pyx_t_5 = 0;
     __pyx_v_VoigtA = ((PyArrayObject *)__pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "Florence/Tensor/Numeric.pyx":156
+    /* "Florence/Tensor/Numeric.pyx":174
  *     elif n1dim == 2:
  *         VoigtA = np.zeros((3,3),dtype=np.float64)
  *         _Voigt2(&C[0,0,0,0],&VoigtA[0,0])             # <<<<<<<<<<<<<<
@@ -3496,11 +3807,11 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_8tovoigt(CYTHON_UNUSED PyOb
     __pyx_t_19 = 0;
     __pyx_t_20 = 0;
     __pyx_t_21 = 0;
-    __pyx_t_3 = __pyx_f_8Florence_6Tensor_7Numeric__Voigt2((&(*__Pyx_BufPtrCContig4d(__pyx_t_8Florence_6Tensor_7Numeric_Real_t *, __pyx_pybuffernd_C.rcbuffer->pybuffer.buf, __pyx_t_16, __pyx_pybuffernd_C.diminfo[0].strides, __pyx_t_17, __pyx_pybuffernd_C.diminfo[1].strides, __pyx_t_18, __pyx_pybuffernd_C.diminfo[2].strides, __pyx_t_19, __pyx_pybuffernd_C.diminfo[3].strides))), (&(*__Pyx_BufPtrCContig2d(__pyx_t_8Florence_6Tensor_7Numeric_Real_t *, __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_VoigtA.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_VoigtA.diminfo[1].strides)))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __pyx_f_8Florence_6Tensor_7Numeric__Voigt2((&(*__Pyx_BufPtrCContig4d(__pyx_t_8Florence_6Tensor_7Numeric_Real_t *, __pyx_pybuffernd_C.rcbuffer->pybuffer.buf, __pyx_t_16, __pyx_pybuffernd_C.diminfo[0].strides, __pyx_t_17, __pyx_pybuffernd_C.diminfo[1].strides, __pyx_t_18, __pyx_pybuffernd_C.diminfo[2].strides, __pyx_t_19, __pyx_pybuffernd_C.diminfo[3].strides))), (&(*__Pyx_BufPtrCContig2d(__pyx_t_8Florence_6Tensor_7Numeric_Real_t *, __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_VoigtA.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_VoigtA.diminfo[1].strides)))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 174; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "Florence/Tensor/Numeric.pyx":154
+    /* "Florence/Tensor/Numeric.pyx":172
  *         VoigtA = np.zeros((6,6),dtype=np.float64)
  *         _Voigt3(&C[0,0,0,0],&VoigtA[0,0])
  *     elif n1dim == 2:             # <<<<<<<<<<<<<<
@@ -3511,7 +3822,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_8tovoigt(CYTHON_UNUSED PyOb
     default: break;
   }
 
-  /* "Florence/Tensor/Numeric.pyx":158
+  /* "Florence/Tensor/Numeric.pyx":176
  *         _Voigt2(&C[0,0,0,0],&VoigtA[0,0])
  * 
  *     return VoigtA             # <<<<<<<<<<<<<<
@@ -3523,7 +3834,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_8tovoigt(CYTHON_UNUSED PyOb
   __pyx_r = ((PyObject *)__pyx_v_VoigtA);
   goto __pyx_L0;
 
-  /* "Florence/Tensor/Numeric.pyx":146
+  /* "Florence/Tensor/Numeric.pyx":164
  * @boundscheck(False)
  * @wraparound(False)
  * def tovoigt(np.ndarray[Real_t, ndim=4, mode='c'] C):             # <<<<<<<<<<<<<<
@@ -3555,7 +3866,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_8tovoigt(CYTHON_UNUSED PyOb
   return __pyx_r;
 }
 
-/* "Florence/Tensor/Numeric.pyx":161
+/* "Florence/Tensor/Numeric.pyx":179
  * 
  * 
  * cdef _Voigt3(const Real_t *C, Real_t *VoigtA):             # <<<<<<<<<<<<<<
@@ -3568,7 +3879,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("_Voigt3", 0);
 
-  /* "Florence/Tensor/Numeric.pyx":162
+  /* "Florence/Tensor/Numeric.pyx":180
  * 
  * cdef _Voigt3(const Real_t *C, Real_t *VoigtA):
  *     VoigtA[0] = C[0]             # <<<<<<<<<<<<<<
@@ -3577,7 +3888,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[0]) = (__pyx_v_C[0]);
 
-  /* "Florence/Tensor/Numeric.pyx":163
+  /* "Florence/Tensor/Numeric.pyx":181
  * cdef _Voigt3(const Real_t *C, Real_t *VoigtA):
  *     VoigtA[0] = C[0]
  *     VoigtA[1] = C[4]             # <<<<<<<<<<<<<<
@@ -3586,7 +3897,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[1]) = (__pyx_v_C[4]);
 
-  /* "Florence/Tensor/Numeric.pyx":164
+  /* "Florence/Tensor/Numeric.pyx":182
  *     VoigtA[0] = C[0]
  *     VoigtA[1] = C[4]
  *     VoigtA[2] = C[8]             # <<<<<<<<<<<<<<
@@ -3595,7 +3906,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[2]) = (__pyx_v_C[8]);
 
-  /* "Florence/Tensor/Numeric.pyx":165
+  /* "Florence/Tensor/Numeric.pyx":183
  *     VoigtA[1] = C[4]
  *     VoigtA[2] = C[8]
  *     VoigtA[3] = 0.5*(C[1]+C[3])             # <<<<<<<<<<<<<<
@@ -3604,7 +3915,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[3]) = (0.5 * ((__pyx_v_C[1]) + (__pyx_v_C[3])));
 
-  /* "Florence/Tensor/Numeric.pyx":166
+  /* "Florence/Tensor/Numeric.pyx":184
  *     VoigtA[2] = C[8]
  *     VoigtA[3] = 0.5*(C[1]+C[3])
  *     VoigtA[4] = 0.5*(C[2]+C[6])             # <<<<<<<<<<<<<<
@@ -3613,7 +3924,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[4]) = (0.5 * ((__pyx_v_C[2]) + (__pyx_v_C[6])));
 
-  /* "Florence/Tensor/Numeric.pyx":167
+  /* "Florence/Tensor/Numeric.pyx":185
  *     VoigtA[3] = 0.5*(C[1]+C[3])
  *     VoigtA[4] = 0.5*(C[2]+C[6])
  *     VoigtA[5] = 0.5*(C[5]+C[7])             # <<<<<<<<<<<<<<
@@ -3622,7 +3933,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[5]) = (0.5 * ((__pyx_v_C[5]) + (__pyx_v_C[7])));
 
-  /* "Florence/Tensor/Numeric.pyx":168
+  /* "Florence/Tensor/Numeric.pyx":186
  *     VoigtA[4] = 0.5*(C[2]+C[6])
  *     VoigtA[5] = 0.5*(C[5]+C[7])
  *     VoigtA[6] = VoigtA[1]             # <<<<<<<<<<<<<<
@@ -3631,7 +3942,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[6]) = (__pyx_v_VoigtA[1]);
 
-  /* "Florence/Tensor/Numeric.pyx":169
+  /* "Florence/Tensor/Numeric.pyx":187
  *     VoigtA[5] = 0.5*(C[5]+C[7])
  *     VoigtA[6] = VoigtA[1]
  *     VoigtA[7] = C[40]             # <<<<<<<<<<<<<<
@@ -3640,7 +3951,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[7]) = (__pyx_v_C[40]);
 
-  /* "Florence/Tensor/Numeric.pyx":170
+  /* "Florence/Tensor/Numeric.pyx":188
  *     VoigtA[6] = VoigtA[1]
  *     VoigtA[7] = C[40]
  *     VoigtA[8] = C[44]             # <<<<<<<<<<<<<<
@@ -3649,7 +3960,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[8]) = (__pyx_v_C[44]);
 
-  /* "Florence/Tensor/Numeric.pyx":171
+  /* "Florence/Tensor/Numeric.pyx":189
  *     VoigtA[7] = C[40]
  *     VoigtA[8] = C[44]
  *     VoigtA[9] = 0.5*(C[37]+C[39])             # <<<<<<<<<<<<<<
@@ -3658,7 +3969,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[9]) = (0.5 * ((__pyx_v_C[37]) + (__pyx_v_C[39])));
 
-  /* "Florence/Tensor/Numeric.pyx":172
+  /* "Florence/Tensor/Numeric.pyx":190
  *     VoigtA[8] = C[44]
  *     VoigtA[9] = 0.5*(C[37]+C[39])
  *     VoigtA[10] = 0.5*(C[38]+C[42])             # <<<<<<<<<<<<<<
@@ -3667,7 +3978,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[10]) = (0.5 * ((__pyx_v_C[38]) + (__pyx_v_C[42])));
 
-  /* "Florence/Tensor/Numeric.pyx":173
+  /* "Florence/Tensor/Numeric.pyx":191
  *     VoigtA[9] = 0.5*(C[37]+C[39])
  *     VoigtA[10] = 0.5*(C[38]+C[42])
  *     VoigtA[11] = 0.5*(C[41]+C[43])             # <<<<<<<<<<<<<<
@@ -3676,7 +3987,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[11]) = (0.5 * ((__pyx_v_C[41]) + (__pyx_v_C[43])));
 
-  /* "Florence/Tensor/Numeric.pyx":174
+  /* "Florence/Tensor/Numeric.pyx":192
  *     VoigtA[10] = 0.5*(C[38]+C[42])
  *     VoigtA[11] = 0.5*(C[41]+C[43])
  *     VoigtA[12] = VoigtA[2]             # <<<<<<<<<<<<<<
@@ -3685,7 +3996,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[12]) = (__pyx_v_VoigtA[2]);
 
-  /* "Florence/Tensor/Numeric.pyx":175
+  /* "Florence/Tensor/Numeric.pyx":193
  *     VoigtA[11] = 0.5*(C[41]+C[43])
  *     VoigtA[12] = VoigtA[2]
  *     VoigtA[13] = VoigtA[8]             # <<<<<<<<<<<<<<
@@ -3694,7 +4005,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[13]) = (__pyx_v_VoigtA[8]);
 
-  /* "Florence/Tensor/Numeric.pyx":176
+  /* "Florence/Tensor/Numeric.pyx":194
  *     VoigtA[12] = VoigtA[2]
  *     VoigtA[13] = VoigtA[8]
  *     VoigtA[14] = C[80]             # <<<<<<<<<<<<<<
@@ -3703,7 +4014,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[14]) = (__pyx_v_C[80]);
 
-  /* "Florence/Tensor/Numeric.pyx":177
+  /* "Florence/Tensor/Numeric.pyx":195
  *     VoigtA[13] = VoigtA[8]
  *     VoigtA[14] = C[80]
  *     VoigtA[15] = 0.5*(C[73]+C[75])             # <<<<<<<<<<<<<<
@@ -3712,7 +4023,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[15]) = (0.5 * ((__pyx_v_C[73]) + (__pyx_v_C[75])));
 
-  /* "Florence/Tensor/Numeric.pyx":178
+  /* "Florence/Tensor/Numeric.pyx":196
  *     VoigtA[14] = C[80]
  *     VoigtA[15] = 0.5*(C[73]+C[75])
  *     VoigtA[16] = 0.5*(C[74]+C[78])             # <<<<<<<<<<<<<<
@@ -3721,7 +4032,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[16]) = (0.5 * ((__pyx_v_C[74]) + (__pyx_v_C[78])));
 
-  /* "Florence/Tensor/Numeric.pyx":179
+  /* "Florence/Tensor/Numeric.pyx":197
  *     VoigtA[15] = 0.5*(C[73]+C[75])
  *     VoigtA[16] = 0.5*(C[74]+C[78])
  *     VoigtA[17] = 0.5*(C[77]+C[79])             # <<<<<<<<<<<<<<
@@ -3730,7 +4041,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[17]) = (0.5 * ((__pyx_v_C[77]) + (__pyx_v_C[79])));
 
-  /* "Florence/Tensor/Numeric.pyx":180
+  /* "Florence/Tensor/Numeric.pyx":198
  *     VoigtA[16] = 0.5*(C[74]+C[78])
  *     VoigtA[17] = 0.5*(C[77]+C[79])
  *     VoigtA[18] = VoigtA[3]             # <<<<<<<<<<<<<<
@@ -3739,7 +4050,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[18]) = (__pyx_v_VoigtA[3]);
 
-  /* "Florence/Tensor/Numeric.pyx":181
+  /* "Florence/Tensor/Numeric.pyx":199
  *     VoigtA[17] = 0.5*(C[77]+C[79])
  *     VoigtA[18] = VoigtA[3]
  *     VoigtA[19] = VoigtA[9]             # <<<<<<<<<<<<<<
@@ -3748,7 +4059,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[19]) = (__pyx_v_VoigtA[9]);
 
-  /* "Florence/Tensor/Numeric.pyx":182
+  /* "Florence/Tensor/Numeric.pyx":200
  *     VoigtA[18] = VoigtA[3]
  *     VoigtA[19] = VoigtA[9]
  *     VoigtA[20] = VoigtA[15]             # <<<<<<<<<<<<<<
@@ -3757,7 +4068,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[20]) = (__pyx_v_VoigtA[15]);
 
-  /* "Florence/Tensor/Numeric.pyx":183
+  /* "Florence/Tensor/Numeric.pyx":201
  *     VoigtA[19] = VoigtA[9]
  *     VoigtA[20] = VoigtA[15]
  *     VoigtA[21] = 0.5*(C[10]+C[12])             # <<<<<<<<<<<<<<
@@ -3766,7 +4077,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[21]) = (0.5 * ((__pyx_v_C[10]) + (__pyx_v_C[12])));
 
-  /* "Florence/Tensor/Numeric.pyx":184
+  /* "Florence/Tensor/Numeric.pyx":202
  *     VoigtA[20] = VoigtA[15]
  *     VoigtA[21] = 0.5*(C[10]+C[12])
  *     VoigtA[22] = 0.5*(C[11]+C[15])             # <<<<<<<<<<<<<<
@@ -3775,7 +4086,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[22]) = (0.5 * ((__pyx_v_C[11]) + (__pyx_v_C[15])));
 
-  /* "Florence/Tensor/Numeric.pyx":185
+  /* "Florence/Tensor/Numeric.pyx":203
  *     VoigtA[21] = 0.5*(C[10]+C[12])
  *     VoigtA[22] = 0.5*(C[11]+C[15])
  *     VoigtA[23] = 0.5*(C[14]+C[16])             # <<<<<<<<<<<<<<
@@ -3784,7 +4095,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[23]) = (0.5 * ((__pyx_v_C[14]) + (__pyx_v_C[16])));
 
-  /* "Florence/Tensor/Numeric.pyx":186
+  /* "Florence/Tensor/Numeric.pyx":204
  *     VoigtA[22] = 0.5*(C[11]+C[15])
  *     VoigtA[23] = 0.5*(C[14]+C[16])
  *     VoigtA[24] = VoigtA[4]             # <<<<<<<<<<<<<<
@@ -3793,7 +4104,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[24]) = (__pyx_v_VoigtA[4]);
 
-  /* "Florence/Tensor/Numeric.pyx":187
+  /* "Florence/Tensor/Numeric.pyx":205
  *     VoigtA[23] = 0.5*(C[14]+C[16])
  *     VoigtA[24] = VoigtA[4]
  *     VoigtA[25] = VoigtA[10]             # <<<<<<<<<<<<<<
@@ -3802,7 +4113,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[25]) = (__pyx_v_VoigtA[10]);
 
-  /* "Florence/Tensor/Numeric.pyx":188
+  /* "Florence/Tensor/Numeric.pyx":206
  *     VoigtA[24] = VoigtA[4]
  *     VoigtA[25] = VoigtA[10]
  *     VoigtA[26] = VoigtA[16]             # <<<<<<<<<<<<<<
@@ -3811,7 +4122,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[26]) = (__pyx_v_VoigtA[16]);
 
-  /* "Florence/Tensor/Numeric.pyx":189
+  /* "Florence/Tensor/Numeric.pyx":207
  *     VoigtA[25] = VoigtA[10]
  *     VoigtA[26] = VoigtA[16]
  *     VoigtA[27] = VoigtA[22]             # <<<<<<<<<<<<<<
@@ -3820,7 +4131,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[27]) = (__pyx_v_VoigtA[22]);
 
-  /* "Florence/Tensor/Numeric.pyx":190
+  /* "Florence/Tensor/Numeric.pyx":208
  *     VoigtA[26] = VoigtA[16]
  *     VoigtA[27] = VoigtA[22]
  *     VoigtA[28] = 0.5*(C[20]+C[24])             # <<<<<<<<<<<<<<
@@ -3829,7 +4140,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[28]) = (0.5 * ((__pyx_v_C[20]) + (__pyx_v_C[24])));
 
-  /* "Florence/Tensor/Numeric.pyx":191
+  /* "Florence/Tensor/Numeric.pyx":209
  *     VoigtA[27] = VoigtA[22]
  *     VoigtA[28] = 0.5*(C[20]+C[24])
  *     VoigtA[29] = 0.5*(C[23]+C[25])             # <<<<<<<<<<<<<<
@@ -3838,7 +4149,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[29]) = (0.5 * ((__pyx_v_C[23]) + (__pyx_v_C[25])));
 
-  /* "Florence/Tensor/Numeric.pyx":192
+  /* "Florence/Tensor/Numeric.pyx":210
  *     VoigtA[28] = 0.5*(C[20]+C[24])
  *     VoigtA[29] = 0.5*(C[23]+C[25])
  *     VoigtA[30] = VoigtA[5]             # <<<<<<<<<<<<<<
@@ -3847,7 +4158,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[30]) = (__pyx_v_VoigtA[5]);
 
-  /* "Florence/Tensor/Numeric.pyx":193
+  /* "Florence/Tensor/Numeric.pyx":211
  *     VoigtA[29] = 0.5*(C[23]+C[25])
  *     VoigtA[30] = VoigtA[5]
  *     VoigtA[31] = VoigtA[11]             # <<<<<<<<<<<<<<
@@ -3856,7 +4167,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[31]) = (__pyx_v_VoigtA[11]);
 
-  /* "Florence/Tensor/Numeric.pyx":194
+  /* "Florence/Tensor/Numeric.pyx":212
  *     VoigtA[30] = VoigtA[5]
  *     VoigtA[31] = VoigtA[11]
  *     VoigtA[32] = VoigtA[17]             # <<<<<<<<<<<<<<
@@ -3865,7 +4176,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[32]) = (__pyx_v_VoigtA[17]);
 
-  /* "Florence/Tensor/Numeric.pyx":195
+  /* "Florence/Tensor/Numeric.pyx":213
  *     VoigtA[31] = VoigtA[11]
  *     VoigtA[32] = VoigtA[17]
  *     VoigtA[33] = VoigtA[23]             # <<<<<<<<<<<<<<
@@ -3874,7 +4185,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[33]) = (__pyx_v_VoigtA[23]);
 
-  /* "Florence/Tensor/Numeric.pyx":196
+  /* "Florence/Tensor/Numeric.pyx":214
  *     VoigtA[32] = VoigtA[17]
  *     VoigtA[33] = VoigtA[23]
  *     VoigtA[34] = VoigtA[29]             # <<<<<<<<<<<<<<
@@ -3883,7 +4194,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[34]) = (__pyx_v_VoigtA[29]);
 
-  /* "Florence/Tensor/Numeric.pyx":197
+  /* "Florence/Tensor/Numeric.pyx":215
  *     VoigtA[33] = VoigtA[23]
  *     VoigtA[34] = VoigtA[29]
  *     VoigtA[35] = 0.5*(C[50]+C[52])             # <<<<<<<<<<<<<<
@@ -3892,7 +4203,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[35]) = (0.5 * ((__pyx_v_C[50]) + (__pyx_v_C[52])));
 
-  /* "Florence/Tensor/Numeric.pyx":161
+  /* "Florence/Tensor/Numeric.pyx":179
  * 
  * 
  * cdef _Voigt3(const Real_t *C, Real_t *VoigtA):             # <<<<<<<<<<<<<<
@@ -3907,7 +4218,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt3(__pyx_t_8Florence_6T
   return __pyx_r;
 }
 
-/* "Florence/Tensor/Numeric.pyx":200
+/* "Florence/Tensor/Numeric.pyx":218
  * 
  * 
  * cdef _Voigt2(const Real_t *C, Real_t *VoigtA):             # <<<<<<<<<<<<<<
@@ -3920,7 +4231,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt2(__pyx_t_8Florence_6T
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("_Voigt2", 0);
 
-  /* "Florence/Tensor/Numeric.pyx":201
+  /* "Florence/Tensor/Numeric.pyx":219
  * 
  * cdef _Voigt2(const Real_t *C, Real_t *VoigtA):
  *     VoigtA[0] = C[0]             # <<<<<<<<<<<<<<
@@ -3929,7 +4240,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt2(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[0]) = (__pyx_v_C[0]);
 
-  /* "Florence/Tensor/Numeric.pyx":202
+  /* "Florence/Tensor/Numeric.pyx":220
  * cdef _Voigt2(const Real_t *C, Real_t *VoigtA):
  *     VoigtA[0] = C[0]
  *     VoigtA[1] = C[3]             # <<<<<<<<<<<<<<
@@ -3938,7 +4249,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt2(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[1]) = (__pyx_v_C[3]);
 
-  /* "Florence/Tensor/Numeric.pyx":203
+  /* "Florence/Tensor/Numeric.pyx":221
  *     VoigtA[0] = C[0]
  *     VoigtA[1] = C[3]
  *     VoigtA[2] = 0.5*(C[1]+C[2])             # <<<<<<<<<<<<<<
@@ -3947,7 +4258,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt2(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[2]) = (0.5 * ((__pyx_v_C[1]) + (__pyx_v_C[2])));
 
-  /* "Florence/Tensor/Numeric.pyx":204
+  /* "Florence/Tensor/Numeric.pyx":222
  *     VoigtA[1] = C[3]
  *     VoigtA[2] = 0.5*(C[1]+C[2])
  *     VoigtA[3] = VoigtA[1]             # <<<<<<<<<<<<<<
@@ -3956,7 +4267,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt2(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[3]) = (__pyx_v_VoigtA[1]);
 
-  /* "Florence/Tensor/Numeric.pyx":205
+  /* "Florence/Tensor/Numeric.pyx":223
  *     VoigtA[2] = 0.5*(C[1]+C[2])
  *     VoigtA[3] = VoigtA[1]
  *     VoigtA[4] = C[15]             # <<<<<<<<<<<<<<
@@ -3965,7 +4276,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt2(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[4]) = (__pyx_v_C[15]);
 
-  /* "Florence/Tensor/Numeric.pyx":206
+  /* "Florence/Tensor/Numeric.pyx":224
  *     VoigtA[3] = VoigtA[1]
  *     VoigtA[4] = C[15]
  *     VoigtA[5] = 0.5*(C[13]+C[14])             # <<<<<<<<<<<<<<
@@ -3974,7 +4285,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt2(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[5]) = (0.5 * ((__pyx_v_C[13]) + (__pyx_v_C[14])));
 
-  /* "Florence/Tensor/Numeric.pyx":207
+  /* "Florence/Tensor/Numeric.pyx":225
  *     VoigtA[4] = C[15]
  *     VoigtA[5] = 0.5*(C[13]+C[14])
  *     VoigtA[6] = VoigtA[2]             # <<<<<<<<<<<<<<
@@ -3983,7 +4294,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt2(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[6]) = (__pyx_v_VoigtA[2]);
 
-  /* "Florence/Tensor/Numeric.pyx":208
+  /* "Florence/Tensor/Numeric.pyx":226
  *     VoigtA[5] = 0.5*(C[13]+C[14])
  *     VoigtA[6] = VoigtA[2]
  *     VoigtA[7] = VoigtA[5]             # <<<<<<<<<<<<<<
@@ -3992,7 +4303,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt2(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[7]) = (__pyx_v_VoigtA[5]);
 
-  /* "Florence/Tensor/Numeric.pyx":209
+  /* "Florence/Tensor/Numeric.pyx":227
  *     VoigtA[6] = VoigtA[2]
  *     VoigtA[7] = VoigtA[5]
  *     VoigtA[8] = 0.5*(C[5]+C[6])             # <<<<<<<<<<<<<<
@@ -4001,7 +4312,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt2(__pyx_t_8Florence_6T
  */
   (__pyx_v_VoigtA[8]) = (0.5 * ((__pyx_v_C[5]) + (__pyx_v_C[6])));
 
-  /* "Florence/Tensor/Numeric.pyx":200
+  /* "Florence/Tensor/Numeric.pyx":218
  * 
  * 
  * cdef _Voigt2(const Real_t *C, Real_t *VoigtA):             # <<<<<<<<<<<<<<
@@ -4016,7 +4327,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt2(__pyx_t_8Florence_6T
   return __pyx_r;
 }
 
-/* "Florence/Tensor/Numeric.pyx":216
+/* "Florence/Tensor/Numeric.pyx":234
  * @boundscheck(False)
  * @wraparound(False)
  * def tovoigt3(np.ndarray[Real_t, ndim=3, mode='c'] e):             # <<<<<<<<<<<<<<
@@ -4025,18 +4336,18 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt2(__pyx_t_8Florence_6T
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_11tovoigt3(PyObject *__pyx_self, PyObject *__pyx_v_e); /*proto*/
-static char __pyx_doc_8Florence_6Tensor_7Numeric_10tovoigt3[] = "Convert a 3D array to its Voigt represenation";
-static PyMethodDef __pyx_mdef_8Florence_6Tensor_7Numeric_11tovoigt3 = {"tovoigt3", (PyCFunction)__pyx_pw_8Florence_6Tensor_7Numeric_11tovoigt3, METH_O, __pyx_doc_8Florence_6Tensor_7Numeric_10tovoigt3};
-static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_11tovoigt3(PyObject *__pyx_self, PyObject *__pyx_v_e) {
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_13tovoigt3(PyObject *__pyx_self, PyObject *__pyx_v_e); /*proto*/
+static char __pyx_doc_8Florence_6Tensor_7Numeric_12tovoigt3[] = "Convert a 3D array to its Voigt represenation";
+static PyMethodDef __pyx_mdef_8Florence_6Tensor_7Numeric_13tovoigt3 = {"tovoigt3", (PyCFunction)__pyx_pw_8Florence_6Tensor_7Numeric_13tovoigt3, METH_O, __pyx_doc_8Florence_6Tensor_7Numeric_12tovoigt3};
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_13tovoigt3(PyObject *__pyx_self, PyObject *__pyx_v_e) {
   CYTHON_UNUSED int __pyx_lineno = 0;
   CYTHON_UNUSED const char *__pyx_filename = NULL;
   CYTHON_UNUSED int __pyx_clineno = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("tovoigt3 (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_e), __pyx_ptype_5numpy_ndarray, 1, "e", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 216; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_r = __pyx_pf_8Florence_6Tensor_7Numeric_10tovoigt3(__pyx_self, ((PyArrayObject *)__pyx_v_e));
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_e), __pyx_ptype_5numpy_ndarray, 1, "e", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_8Florence_6Tensor_7Numeric_12tovoigt3(__pyx_self, ((PyArrayObject *)__pyx_v_e));
 
   /* function exit code */
   goto __pyx_L0;
@@ -4047,7 +4358,7 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_11tovoigt3(PyObject *__pyx_
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_10tovoigt3(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_e) {
+static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12tovoigt3(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_e) {
   PyArrayObject *__pyx_v_VoigtA = 0;
   int __pyx_v_n1dim;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_VoigtA;
@@ -4089,11 +4400,11 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_10tovoigt3(CYTHON_UNUSED Py
   __pyx_pybuffernd_e.rcbuffer = &__pyx_pybuffer_e;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_e.rcbuffer->pybuffer, (PyObject*)__pyx_v_e, &__Pyx_TypeInfo_nn___pyx_t_8Florence_6Tensor_7Numeric_Real_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 3, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 216; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_e.rcbuffer->pybuffer, (PyObject*)__pyx_v_e, &__Pyx_TypeInfo_nn___pyx_t_8Florence_6Tensor_7Numeric_Real_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 3, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_pybuffernd_e.diminfo[0].strides = __pyx_pybuffernd_e.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_e.diminfo[0].shape = __pyx_pybuffernd_e.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_e.diminfo[1].strides = __pyx_pybuffernd_e.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_e.diminfo[1].shape = __pyx_pybuffernd_e.rcbuffer->pybuffer.shape[1]; __pyx_pybuffernd_e.diminfo[2].strides = __pyx_pybuffernd_e.rcbuffer->pybuffer.strides[2]; __pyx_pybuffernd_e.diminfo[2].shape = __pyx_pybuffernd_e.rcbuffer->pybuffer.shape[2];
 
-  /* "Florence/Tensor/Numeric.pyx":219
+  /* "Florence/Tensor/Numeric.pyx":237
  *     """Convert a 3D array to its Voigt represenation"""
  *     cdef np.ndarray[Real_t, ndim=2,mode='c'] VoigtA
  *     cdef int n1dim = e.shape[0]             # <<<<<<<<<<<<<<
@@ -4102,7 +4413,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_10tovoigt3(CYTHON_UNUSED Py
  */
   __pyx_v_n1dim = (__pyx_v_e->dimensions[0]);
 
-  /* "Florence/Tensor/Numeric.pyx":221
+  /* "Florence/Tensor/Numeric.pyx":239
  *     cdef int n1dim = e.shape[0]
  *     # DISPATCH CALL TO APPROPRIATE FUNCTION
  *     if n1dim == 3:             # <<<<<<<<<<<<<<
@@ -4112,32 +4423,32 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_10tovoigt3(CYTHON_UNUSED Py
   switch (__pyx_v_n1dim) {
     case 3:
 
-    /* "Florence/Tensor/Numeric.pyx":222
+    /* "Florence/Tensor/Numeric.pyx":240
  *     # DISPATCH CALL TO APPROPRIATE FUNCTION
  *     if n1dim == 3:
  *         VoigtA = np.zeros((6,3),dtype=np.float64)             # <<<<<<<<<<<<<<
  *         _Voigt33(&e[0,0,0],&VoigtA[0,0])
  *     elif n1dim == 2:
  */
-    __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 240; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 240; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 240; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 240; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_float64); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_float64); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 240; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 240; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__9, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__9, __pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 240; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 240; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __pyx_t_5 = ((PyArrayObject *)__pyx_t_4);
     {
       __Pyx_BufFmt_StackElem __pyx_stack[1];
@@ -4153,13 +4464,13 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_10tovoigt3(CYTHON_UNUSED Py
         }
       }
       __pyx_pybuffernd_VoigtA.diminfo[0].strides = __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_VoigtA.diminfo[0].shape = __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_VoigtA.diminfo[1].strides = __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_VoigtA.diminfo[1].shape = __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.shape[1];
-      if (unlikely(__pyx_t_6 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      if (unlikely(__pyx_t_6 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 240; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     }
     __pyx_t_5 = 0;
     __pyx_v_VoigtA = ((PyArrayObject *)__pyx_t_4);
     __pyx_t_4 = 0;
 
-    /* "Florence/Tensor/Numeric.pyx":223
+    /* "Florence/Tensor/Numeric.pyx":241
  *     if n1dim == 3:
  *         VoigtA = np.zeros((6,3),dtype=np.float64)
  *         _Voigt33(&e[0,0,0],&VoigtA[0,0])             # <<<<<<<<<<<<<<
@@ -4171,11 +4482,11 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_10tovoigt3(CYTHON_UNUSED Py
     __pyx_t_12 = 0;
     __pyx_t_13 = 0;
     __pyx_t_14 = 0;
-    __pyx_t_4 = __pyx_f_8Florence_6Tensor_7Numeric__Voigt33((&(*__Pyx_BufPtrCContig3d(__pyx_t_8Florence_6Tensor_7Numeric_Real_t *, __pyx_pybuffernd_e.rcbuffer->pybuffer.buf, __pyx_t_10, __pyx_pybuffernd_e.diminfo[0].strides, __pyx_t_11, __pyx_pybuffernd_e.diminfo[1].strides, __pyx_t_12, __pyx_pybuffernd_e.diminfo[2].strides))), (&(*__Pyx_BufPtrCContig2d(__pyx_t_8Florence_6Tensor_7Numeric_Real_t *, __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.buf, __pyx_t_13, __pyx_pybuffernd_VoigtA.diminfo[0].strides, __pyx_t_14, __pyx_pybuffernd_VoigtA.diminfo[1].strides)))); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 223; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __pyx_f_8Florence_6Tensor_7Numeric__Voigt33((&(*__Pyx_BufPtrCContig3d(__pyx_t_8Florence_6Tensor_7Numeric_Real_t *, __pyx_pybuffernd_e.rcbuffer->pybuffer.buf, __pyx_t_10, __pyx_pybuffernd_e.diminfo[0].strides, __pyx_t_11, __pyx_pybuffernd_e.diminfo[1].strides, __pyx_t_12, __pyx_pybuffernd_e.diminfo[2].strides))), (&(*__Pyx_BufPtrCContig2d(__pyx_t_8Florence_6Tensor_7Numeric_Real_t *, __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.buf, __pyx_t_13, __pyx_pybuffernd_VoigtA.diminfo[0].strides, __pyx_t_14, __pyx_pybuffernd_VoigtA.diminfo[1].strides)))); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-    /* "Florence/Tensor/Numeric.pyx":221
+    /* "Florence/Tensor/Numeric.pyx":239
  *     cdef int n1dim = e.shape[0]
  *     # DISPATCH CALL TO APPROPRIATE FUNCTION
  *     if n1dim == 3:             # <<<<<<<<<<<<<<
@@ -4184,7 +4495,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_10tovoigt3(CYTHON_UNUSED Py
  */
     break;
 
-    /* "Florence/Tensor/Numeric.pyx":224
+    /* "Florence/Tensor/Numeric.pyx":242
  *         VoigtA = np.zeros((6,3),dtype=np.float64)
  *         _Voigt33(&e[0,0,0],&VoigtA[0,0])
  *     elif n1dim == 2:             # <<<<<<<<<<<<<<
@@ -4193,32 +4504,32 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_10tovoigt3(CYTHON_UNUSED Py
  */
     case 2:
 
-    /* "Florence/Tensor/Numeric.pyx":225
+    /* "Florence/Tensor/Numeric.pyx":243
  *         _Voigt33(&e[0,0,0],&VoigtA[0,0])
  *     elif n1dim == 2:
  *         VoigtA = np.zeros((3,2),dtype=np.float64)             # <<<<<<<<<<<<<<
  *         _Voigt23(&e[0,0,0],&VoigtA[0,0])
  * 
  */
-    __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 225; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_zeros); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 225; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_zeros); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 225; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 225; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_float64); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 225; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_float64); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 225; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_tuple__11, __pyx_t_4); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 225; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_tuple__11, __pyx_t_4); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (!(likely(((__pyx_t_3) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_3, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 225; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (!(likely(((__pyx_t_3) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_3, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __pyx_t_5 = ((PyArrayObject *)__pyx_t_3);
     {
       __Pyx_BufFmt_StackElem __pyx_stack[1];
@@ -4234,13 +4545,13 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_10tovoigt3(CYTHON_UNUSED Py
         }
       }
       __pyx_pybuffernd_VoigtA.diminfo[0].strides = __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_VoigtA.diminfo[0].shape = __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_VoigtA.diminfo[1].strides = __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_VoigtA.diminfo[1].shape = __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.shape[1];
-      if (unlikely(__pyx_t_6 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 225; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      if (unlikely(__pyx_t_6 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     }
     __pyx_t_5 = 0;
     __pyx_v_VoigtA = ((PyArrayObject *)__pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "Florence/Tensor/Numeric.pyx":226
+    /* "Florence/Tensor/Numeric.pyx":244
  *     elif n1dim == 2:
  *         VoigtA = np.zeros((3,2),dtype=np.float64)
  *         _Voigt23(&e[0,0,0],&VoigtA[0,0])             # <<<<<<<<<<<<<<
@@ -4252,11 +4563,11 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_10tovoigt3(CYTHON_UNUSED Py
     __pyx_t_17 = 0;
     __pyx_t_18 = 0;
     __pyx_t_19 = 0;
-    __pyx_t_3 = __pyx_f_8Florence_6Tensor_7Numeric__Voigt23((&(*__Pyx_BufPtrCContig3d(__pyx_t_8Florence_6Tensor_7Numeric_Real_t *, __pyx_pybuffernd_e.rcbuffer->pybuffer.buf, __pyx_t_15, __pyx_pybuffernd_e.diminfo[0].strides, __pyx_t_16, __pyx_pybuffernd_e.diminfo[1].strides, __pyx_t_17, __pyx_pybuffernd_e.diminfo[2].strides))), (&(*__Pyx_BufPtrCContig2d(__pyx_t_8Florence_6Tensor_7Numeric_Real_t *, __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.buf, __pyx_t_18, __pyx_pybuffernd_VoigtA.diminfo[0].strides, __pyx_t_19, __pyx_pybuffernd_VoigtA.diminfo[1].strides)))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 226; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __pyx_f_8Florence_6Tensor_7Numeric__Voigt23((&(*__Pyx_BufPtrCContig3d(__pyx_t_8Florence_6Tensor_7Numeric_Real_t *, __pyx_pybuffernd_e.rcbuffer->pybuffer.buf, __pyx_t_15, __pyx_pybuffernd_e.diminfo[0].strides, __pyx_t_16, __pyx_pybuffernd_e.diminfo[1].strides, __pyx_t_17, __pyx_pybuffernd_e.diminfo[2].strides))), (&(*__Pyx_BufPtrCContig2d(__pyx_t_8Florence_6Tensor_7Numeric_Real_t *, __pyx_pybuffernd_VoigtA.rcbuffer->pybuffer.buf, __pyx_t_18, __pyx_pybuffernd_VoigtA.diminfo[0].strides, __pyx_t_19, __pyx_pybuffernd_VoigtA.diminfo[1].strides)))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "Florence/Tensor/Numeric.pyx":224
+    /* "Florence/Tensor/Numeric.pyx":242
  *         VoigtA = np.zeros((6,3),dtype=np.float64)
  *         _Voigt33(&e[0,0,0],&VoigtA[0,0])
  *     elif n1dim == 2:             # <<<<<<<<<<<<<<
@@ -4267,7 +4578,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_10tovoigt3(CYTHON_UNUSED Py
     default: break;
   }
 
-  /* "Florence/Tensor/Numeric.pyx":228
+  /* "Florence/Tensor/Numeric.pyx":246
  *         _Voigt23(&e[0,0,0],&VoigtA[0,0])
  * 
  *     return VoigtA             # <<<<<<<<<<<<<<
@@ -4279,7 +4590,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_10tovoigt3(CYTHON_UNUSED Py
   __pyx_r = ((PyObject *)__pyx_v_VoigtA);
   goto __pyx_L0;
 
-  /* "Florence/Tensor/Numeric.pyx":216
+  /* "Florence/Tensor/Numeric.pyx":234
  * @boundscheck(False)
  * @wraparound(False)
  * def tovoigt3(np.ndarray[Real_t, ndim=3, mode='c'] e):             # <<<<<<<<<<<<<<
@@ -4311,7 +4622,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_10tovoigt3(CYTHON_UNUSED Py
   return __pyx_r;
 }
 
-/* "Florence/Tensor/Numeric.pyx":231
+/* "Florence/Tensor/Numeric.pyx":249
  * 
  * 
  * cdef _Voigt33(const Real_t *e, Real_t *VoigtA):             # <<<<<<<<<<<<<<
@@ -4324,7 +4635,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt33(__pyx_t_8Florence_6
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("_Voigt33", 0);
 
-  /* "Florence/Tensor/Numeric.pyx":232
+  /* "Florence/Tensor/Numeric.pyx":250
  * 
  * cdef _Voigt33(const Real_t *e, Real_t *VoigtA):
  *     VoigtA[0] = e[0]             # <<<<<<<<<<<<<<
@@ -4333,7 +4644,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt33(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[0]) = (__pyx_v_e[0]);
 
-  /* "Florence/Tensor/Numeric.pyx":233
+  /* "Florence/Tensor/Numeric.pyx":251
  * cdef _Voigt33(const Real_t *e, Real_t *VoigtA):
  *     VoigtA[0] = e[0]
  *     VoigtA[1] = e[9]             # <<<<<<<<<<<<<<
@@ -4342,7 +4653,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt33(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[1]) = (__pyx_v_e[9]);
 
-  /* "Florence/Tensor/Numeric.pyx":234
+  /* "Florence/Tensor/Numeric.pyx":252
  *     VoigtA[0] = e[0]
  *     VoigtA[1] = e[9]
  *     VoigtA[2] = e[18]             # <<<<<<<<<<<<<<
@@ -4351,7 +4662,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt33(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[2]) = (__pyx_v_e[18]);
 
-  /* "Florence/Tensor/Numeric.pyx":235
+  /* "Florence/Tensor/Numeric.pyx":253
  *     VoigtA[1] = e[9]
  *     VoigtA[2] = e[18]
  *     VoigtA[3] = e[4]             # <<<<<<<<<<<<<<
@@ -4360,7 +4671,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt33(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[3]) = (__pyx_v_e[4]);
 
-  /* "Florence/Tensor/Numeric.pyx":236
+  /* "Florence/Tensor/Numeric.pyx":254
  *     VoigtA[2] = e[18]
  *     VoigtA[3] = e[4]
  *     VoigtA[4] = e[13]             # <<<<<<<<<<<<<<
@@ -4369,7 +4680,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt33(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[4]) = (__pyx_v_e[13]);
 
-  /* "Florence/Tensor/Numeric.pyx":237
+  /* "Florence/Tensor/Numeric.pyx":255
  *     VoigtA[3] = e[4]
  *     VoigtA[4] = e[13]
  *     VoigtA[5] = e[22]             # <<<<<<<<<<<<<<
@@ -4378,7 +4689,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt33(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[5]) = (__pyx_v_e[22]);
 
-  /* "Florence/Tensor/Numeric.pyx":238
+  /* "Florence/Tensor/Numeric.pyx":256
  *     VoigtA[4] = e[13]
  *     VoigtA[5] = e[22]
  *     VoigtA[6] = e[8]             # <<<<<<<<<<<<<<
@@ -4387,7 +4698,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt33(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[6]) = (__pyx_v_e[8]);
 
-  /* "Florence/Tensor/Numeric.pyx":239
+  /* "Florence/Tensor/Numeric.pyx":257
  *     VoigtA[5] = e[22]
  *     VoigtA[6] = e[8]
  *     VoigtA[7] = e[17]             # <<<<<<<<<<<<<<
@@ -4396,7 +4707,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt33(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[7]) = (__pyx_v_e[17]);
 
-  /* "Florence/Tensor/Numeric.pyx":240
+  /* "Florence/Tensor/Numeric.pyx":258
  *     VoigtA[6] = e[8]
  *     VoigtA[7] = e[17]
  *     VoigtA[8] = e[26]             # <<<<<<<<<<<<<<
@@ -4405,7 +4716,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt33(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[8]) = (__pyx_v_e[26]);
 
-  /* "Florence/Tensor/Numeric.pyx":241
+  /* "Florence/Tensor/Numeric.pyx":259
  *     VoigtA[7] = e[17]
  *     VoigtA[8] = e[26]
  *     VoigtA[9] = 0.5*(e[1]+e[3])             # <<<<<<<<<<<<<<
@@ -4414,7 +4725,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt33(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[9]) = (0.5 * ((__pyx_v_e[1]) + (__pyx_v_e[3])));
 
-  /* "Florence/Tensor/Numeric.pyx":242
+  /* "Florence/Tensor/Numeric.pyx":260
  *     VoigtA[8] = e[26]
  *     VoigtA[9] = 0.5*(e[1]+e[3])
  *     VoigtA[10] = 0.5*(e[10]+e[12])             # <<<<<<<<<<<<<<
@@ -4423,7 +4734,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt33(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[10]) = (0.5 * ((__pyx_v_e[10]) + (__pyx_v_e[12])));
 
-  /* "Florence/Tensor/Numeric.pyx":243
+  /* "Florence/Tensor/Numeric.pyx":261
  *     VoigtA[9] = 0.5*(e[1]+e[3])
  *     VoigtA[10] = 0.5*(e[10]+e[12])
  *     VoigtA[11] = 0.5*(e[19]+e[21])             # <<<<<<<<<<<<<<
@@ -4432,7 +4743,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt33(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[11]) = (0.5 * ((__pyx_v_e[19]) + (__pyx_v_e[21])));
 
-  /* "Florence/Tensor/Numeric.pyx":244
+  /* "Florence/Tensor/Numeric.pyx":262
  *     VoigtA[10] = 0.5*(e[10]+e[12])
  *     VoigtA[11] = 0.5*(e[19]+e[21])
  *     VoigtA[12] = 0.5*(e[2]+e[6])             # <<<<<<<<<<<<<<
@@ -4441,7 +4752,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt33(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[12]) = (0.5 * ((__pyx_v_e[2]) + (__pyx_v_e[6])));
 
-  /* "Florence/Tensor/Numeric.pyx":245
+  /* "Florence/Tensor/Numeric.pyx":263
  *     VoigtA[11] = 0.5*(e[19]+e[21])
  *     VoigtA[12] = 0.5*(e[2]+e[6])
  *     VoigtA[13] = 0.5*(e[11]+e[15])             # <<<<<<<<<<<<<<
@@ -4450,7 +4761,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt33(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[13]) = (0.5 * ((__pyx_v_e[11]) + (__pyx_v_e[15])));
 
-  /* "Florence/Tensor/Numeric.pyx":246
+  /* "Florence/Tensor/Numeric.pyx":264
  *     VoigtA[12] = 0.5*(e[2]+e[6])
  *     VoigtA[13] = 0.5*(e[11]+e[15])
  *     VoigtA[14] = 0.5*(e[20]+e[24])             # <<<<<<<<<<<<<<
@@ -4459,7 +4770,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt33(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[14]) = (0.5 * ((__pyx_v_e[20]) + (__pyx_v_e[24])));
 
-  /* "Florence/Tensor/Numeric.pyx":247
+  /* "Florence/Tensor/Numeric.pyx":265
  *     VoigtA[13] = 0.5*(e[11]+e[15])
  *     VoigtA[14] = 0.5*(e[20]+e[24])
  *     VoigtA[15] = 0.5*(e[5]+e[7])             # <<<<<<<<<<<<<<
@@ -4468,7 +4779,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt33(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[15]) = (0.5 * ((__pyx_v_e[5]) + (__pyx_v_e[7])));
 
-  /* "Florence/Tensor/Numeric.pyx":248
+  /* "Florence/Tensor/Numeric.pyx":266
  *     VoigtA[14] = 0.5*(e[20]+e[24])
  *     VoigtA[15] = 0.5*(e[5]+e[7])
  *     VoigtA[16] = 0.5*(e[14]+e[16])             # <<<<<<<<<<<<<<
@@ -4477,7 +4788,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt33(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[16]) = (0.5 * ((__pyx_v_e[14]) + (__pyx_v_e[16])));
 
-  /* "Florence/Tensor/Numeric.pyx":249
+  /* "Florence/Tensor/Numeric.pyx":267
  *     VoigtA[15] = 0.5*(e[5]+e[7])
  *     VoigtA[16] = 0.5*(e[14]+e[16])
  *     VoigtA[17] = 0.5*(e[23]+e[25])             # <<<<<<<<<<<<<<
@@ -4486,7 +4797,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt33(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[17]) = (0.5 * ((__pyx_v_e[23]) + (__pyx_v_e[25])));
 
-  /* "Florence/Tensor/Numeric.pyx":231
+  /* "Florence/Tensor/Numeric.pyx":249
  * 
  * 
  * cdef _Voigt33(const Real_t *e, Real_t *VoigtA):             # <<<<<<<<<<<<<<
@@ -4501,7 +4812,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt33(__pyx_t_8Florence_6
   return __pyx_r;
 }
 
-/* "Florence/Tensor/Numeric.pyx":252
+/* "Florence/Tensor/Numeric.pyx":270
  * 
  * 
  * cdef _Voigt23(const Real_t *e, Real_t *VoigtA):             # <<<<<<<<<<<<<<
@@ -4514,7 +4825,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt23(__pyx_t_8Florence_6
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("_Voigt23", 0);
 
-  /* "Florence/Tensor/Numeric.pyx":253
+  /* "Florence/Tensor/Numeric.pyx":271
  * 
  * cdef _Voigt23(const Real_t *e, Real_t *VoigtA):
  *     VoigtA[0] = e[0]             # <<<<<<<<<<<<<<
@@ -4523,7 +4834,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt23(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[0]) = (__pyx_v_e[0]);
 
-  /* "Florence/Tensor/Numeric.pyx":254
+  /* "Florence/Tensor/Numeric.pyx":272
  * cdef _Voigt23(const Real_t *e, Real_t *VoigtA):
  *     VoigtA[0] = e[0]
  *     VoigtA[1] = e[4]             # <<<<<<<<<<<<<<
@@ -4532,7 +4843,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt23(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[1]) = (__pyx_v_e[4]);
 
-  /* "Florence/Tensor/Numeric.pyx":255
+  /* "Florence/Tensor/Numeric.pyx":273
  *     VoigtA[0] = e[0]
  *     VoigtA[1] = e[4]
  *     VoigtA[2] = e[3]             # <<<<<<<<<<<<<<
@@ -4541,7 +4852,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt23(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[2]) = (__pyx_v_e[3]);
 
-  /* "Florence/Tensor/Numeric.pyx":256
+  /* "Florence/Tensor/Numeric.pyx":274
  *     VoigtA[1] = e[4]
  *     VoigtA[2] = e[3]
  *     VoigtA[3] = e[7]             # <<<<<<<<<<<<<<
@@ -4550,7 +4861,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt23(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[3]) = (__pyx_v_e[7]);
 
-  /* "Florence/Tensor/Numeric.pyx":257
+  /* "Florence/Tensor/Numeric.pyx":275
  *     VoigtA[2] = e[3]
  *     VoigtA[3] = e[7]
  *     VoigtA[4] = 0.5*(e[1]+e[2])             # <<<<<<<<<<<<<<
@@ -4559,7 +4870,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt23(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[4]) = (0.5 * ((__pyx_v_e[1]) + (__pyx_v_e[2])));
 
-  /* "Florence/Tensor/Numeric.pyx":258
+  /* "Florence/Tensor/Numeric.pyx":276
  *     VoigtA[3] = e[7]
  *     VoigtA[4] = 0.5*(e[1]+e[2])
  *     VoigtA[5] = 0.5*(e[5]+e[6])             # <<<<<<<<<<<<<<
@@ -4568,7 +4879,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt23(__pyx_t_8Florence_6
  */
   (__pyx_v_VoigtA[5]) = (0.5 * ((__pyx_v_e[5]) + (__pyx_v_e[6])));
 
-  /* "Florence/Tensor/Numeric.pyx":252
+  /* "Florence/Tensor/Numeric.pyx":270
  * 
  * 
  * cdef _Voigt23(const Real_t *e, Real_t *VoigtA):             # <<<<<<<<<<<<<<
@@ -4583,7 +4894,7 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt23(__pyx_t_8Florence_6
   return __pyx_r;
 }
 
-/* "Florence/Tensor/Numeric.pyx":262
+/* "Florence/Tensor/Numeric.pyx":280
  * 
  * @boundscheck(False)
  * def cross2d(np.ndarray[double, ndim=2] A, np.ndarray[double, ndim=2] B, str dim="3d", toarray=False):             # <<<<<<<<<<<<<<
@@ -4592,10 +4903,10 @@ static PyObject *__pyx_f_8Florence_6Tensor_7Numeric__Voigt23(__pyx_t_8Florence_6
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_13cross2d(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_8Florence_6Tensor_7Numeric_12cross2d[] = "Cross product of second order tensors A_ij x B_ij defined in the sense of R. de Boer\n        [Vektor- und Tensorrechnung fur Ingenieure] and J. Bonet [A computational framework \n        for polyconvex large strain elasticity]. \n        \n        input:\n            A:                      [ndarray] ndarry of 3x3\n            B:                      [ndarray] ndarry of 3x3\n            dim:                    [str] either \"2d\" or \"3d\". To get a cross product in a 2D \n                                    space you still need to supply the matrices in 3D space\n                                    and specify the dim argument as 2d. The dim=\"2d\" essentially\n                                    assumes that A and B have their zeros in the third direction\n                                    as in:\n                                        A [and B] = np.array([\n                                                            [A00, A01, 0],\n                                                            [A10, A11, 0],\n                                                            [  0,   0, 0],\n                                                            ]) \n\n            toarray:                [bool] The default outupt of this unction is a python list \n                                    and not a numpy array as one would expect. This is for \n                                    performance reason, as numpy for 3x3 array would introduce \n                                    quite a bit of overhead. Specify toarray to true if a numpy\n                                    array is desired as an output \n    ";
-static PyMethodDef __pyx_mdef_8Florence_6Tensor_7Numeric_13cross2d = {"cross2d", (PyCFunction)__pyx_pw_8Florence_6Tensor_7Numeric_13cross2d, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_6Tensor_7Numeric_12cross2d};
-static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_13cross2d(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_15cross2d(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_8Florence_6Tensor_7Numeric_14cross2d[] = "Cross product of second order tensors A_ij x B_ij defined in the sense of R. de Boer\n        [Vektor- und Tensorrechnung fur Ingenieure] and J. Bonet [A computational framework \n        for polyconvex large strain elasticity]. \n        \n        input:\n            A:                      [ndarray] ndarry of 3x3\n            B:                      [ndarray] ndarry of 3x3\n            dim:                    [str] either \"2d\" or \"3d\". To get a cross product in a 2D \n                                    space you still need to supply the matrices in 3D space\n                                    and specify the dim argument as 2d. The dim=\"2d\" essentially\n                                    assumes that A and B have their zeros in the third direction\n                                    as in:\n                                        A [and B] = np.array([\n                                                            [A00, A01, 0],\n                                                            [A10, A11, 0],\n                                                            [  0,   0, 0],\n                                                            ]) \n\n            toarray:                [bool] The default outupt of this unction is a python list \n                                    and not a numpy array as one would expect. This is for \n                                    performance reason, as numpy for 3x3 array would introduce \n                                    quite a bit of overhead. Specify toarray to true if a numpy\n                                    array is desired as an output \n    ";
+static PyMethodDef __pyx_mdef_8Florence_6Tensor_7Numeric_15cross2d = {"cross2d", (PyCFunction)__pyx_pw_8Florence_6Tensor_7Numeric_15cross2d, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_6Tensor_7Numeric_14cross2d};
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_15cross2d(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyArrayObject *__pyx_v_A = 0;
   PyArrayObject *__pyx_v_B = 0;
   PyObject *__pyx_v_dim = 0;
@@ -4630,7 +4941,7 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_13cross2d(PyObject *__pyx_s
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_B)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cross2d", 0, 2, 4, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 262; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("cross2d", 0, 2, 4, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 280; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  2:
         if (kw_args > 0) {
@@ -4644,7 +4955,7 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_13cross2d(PyObject *__pyx_s
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cross2d") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 262; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cross2d") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 280; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -4663,16 +4974,16 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_13cross2d(PyObject *__pyx_s
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cross2d", 0, 2, 4, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 262; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("cross2d", 0, 2, 4, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 280; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Florence.Tensor.Numeric.cross2d", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_A), __pyx_ptype_5numpy_ndarray, 1, "A", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 262; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_B), __pyx_ptype_5numpy_ndarray, 1, "B", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 262; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_dim), (&PyString_Type), 1, "dim", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 262; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_r = __pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(__pyx_self, __pyx_v_A, __pyx_v_B, __pyx_v_dim, __pyx_v_toarray);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_A), __pyx_ptype_5numpy_ndarray, 1, "A", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 280; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_B), __pyx_ptype_5numpy_ndarray, 1, "B", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 280; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_dim), (&PyString_Type), 1, "dim", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 280; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_8Florence_6Tensor_7Numeric_14cross2d(__pyx_self, __pyx_v_A, __pyx_v_B, __pyx_v_dim, __pyx_v_toarray);
 
   /* function exit code */
   goto __pyx_L0;
@@ -4683,7 +4994,7 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_13cross2d(PyObject *__pyx_s
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, PyArrayObject *__pyx_v_B, PyObject *__pyx_v_dim, PyObject *__pyx_v_toarray) {
+static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_14cross2d(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, PyArrayObject *__pyx_v_B, PyObject *__pyx_v_dim, PyObject *__pyx_v_toarray) {
   __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_A00;
   __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_A11;
   __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_A22;
@@ -4769,16 +5080,16 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
   __pyx_pybuffernd_B.rcbuffer = &__pyx_pybuffer_B;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_A.rcbuffer->pybuffer, (PyObject*)__pyx_v_A, &__Pyx_TypeInfo_double, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 262; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_A.rcbuffer->pybuffer, (PyObject*)__pyx_v_A, &__Pyx_TypeInfo_double, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 280; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_pybuffernd_A.diminfo[0].strides = __pyx_pybuffernd_A.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_A.diminfo[0].shape = __pyx_pybuffernd_A.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_A.diminfo[1].strides = __pyx_pybuffernd_A.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_A.diminfo[1].shape = __pyx_pybuffernd_A.rcbuffer->pybuffer.shape[1];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_B.rcbuffer->pybuffer, (PyObject*)__pyx_v_B, &__Pyx_TypeInfo_double, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 262; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_B.rcbuffer->pybuffer, (PyObject*)__pyx_v_B, &__Pyx_TypeInfo_double, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 280; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_pybuffernd_B.diminfo[0].strides = __pyx_pybuffernd_B.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_B.diminfo[0].shape = __pyx_pybuffernd_B.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_B.diminfo[1].strides = __pyx_pybuffernd_B.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_B.diminfo[1].shape = __pyx_pybuffernd_B.rcbuffer->pybuffer.shape[1];
 
-  /* "Florence/Tensor/Numeric.pyx":289
+  /* "Florence/Tensor/Numeric.pyx":307
  * 
  * 
  *     if A.shape[0] != 3 or A.shape[1] != 3:             # <<<<<<<<<<<<<<
@@ -4796,20 +5107,20 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "Florence/Tensor/Numeric.pyx":290
+    /* "Florence/Tensor/Numeric.pyx":308
  * 
  *     if A.shape[0] != 3 or A.shape[1] != 3:
  *         raise ValueError("Dimension of matrix should be 3x3")             # <<<<<<<<<<<<<<
  * 
  *     cdef:
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__12, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 290; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__12, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 308; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 290; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 308; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-    /* "Florence/Tensor/Numeric.pyx":289
+    /* "Florence/Tensor/Numeric.pyx":307
  * 
  * 
  *     if A.shape[0] != 3 or A.shape[1] != 3:             # <<<<<<<<<<<<<<
@@ -4818,7 +5129,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
  */
   }
 
-  /* "Florence/Tensor/Numeric.pyx":293
+  /* "Florence/Tensor/Numeric.pyx":311
  * 
  *     cdef:
  *         Real_t A00=A[0,0]             # <<<<<<<<<<<<<<
@@ -4831,7 +5142,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
   if (__pyx_t_5 < 0) __pyx_t_5 += __pyx_pybuffernd_A.diminfo[1].shape;
   __pyx_v_A00 = (*__Pyx_BufPtrStrided2d(double *, __pyx_pybuffernd_A.rcbuffer->pybuffer.buf, __pyx_t_4, __pyx_pybuffernd_A.diminfo[0].strides, __pyx_t_5, __pyx_pybuffernd_A.diminfo[1].strides));
 
-  /* "Florence/Tensor/Numeric.pyx":294
+  /* "Florence/Tensor/Numeric.pyx":312
  *     cdef:
  *         Real_t A00=A[0,0]
  *         Real_t A11=A[1,1]             # <<<<<<<<<<<<<<
@@ -4844,7 +5155,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
   if (__pyx_t_7 < 0) __pyx_t_7 += __pyx_pybuffernd_A.diminfo[1].shape;
   __pyx_v_A11 = (*__Pyx_BufPtrStrided2d(double *, __pyx_pybuffernd_A.rcbuffer->pybuffer.buf, __pyx_t_6, __pyx_pybuffernd_A.diminfo[0].strides, __pyx_t_7, __pyx_pybuffernd_A.diminfo[1].strides));
 
-  /* "Florence/Tensor/Numeric.pyx":295
+  /* "Florence/Tensor/Numeric.pyx":313
  *         Real_t A00=A[0,0]
  *         Real_t A11=A[1,1]
  *         Real_t A22=A[2,2]             # <<<<<<<<<<<<<<
@@ -4857,7 +5168,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
   if (__pyx_t_9 < 0) __pyx_t_9 += __pyx_pybuffernd_A.diminfo[1].shape;
   __pyx_v_A22 = (*__Pyx_BufPtrStrided2d(double *, __pyx_pybuffernd_A.rcbuffer->pybuffer.buf, __pyx_t_8, __pyx_pybuffernd_A.diminfo[0].strides, __pyx_t_9, __pyx_pybuffernd_A.diminfo[1].strides));
 
-  /* "Florence/Tensor/Numeric.pyx":296
+  /* "Florence/Tensor/Numeric.pyx":314
  *         Real_t A11=A[1,1]
  *         Real_t A22=A[2,2]
  *         Real_t A01=A[0,1]             # <<<<<<<<<<<<<<
@@ -4870,7 +5181,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
   if (__pyx_t_11 < 0) __pyx_t_11 += __pyx_pybuffernd_A.diminfo[1].shape;
   __pyx_v_A01 = (*__Pyx_BufPtrStrided2d(double *, __pyx_pybuffernd_A.rcbuffer->pybuffer.buf, __pyx_t_10, __pyx_pybuffernd_A.diminfo[0].strides, __pyx_t_11, __pyx_pybuffernd_A.diminfo[1].strides));
 
-  /* "Florence/Tensor/Numeric.pyx":297
+  /* "Florence/Tensor/Numeric.pyx":315
  *         Real_t A22=A[2,2]
  *         Real_t A01=A[0,1]
  *         Real_t A02=A[0,2]             # <<<<<<<<<<<<<<
@@ -4883,7 +5194,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
   if (__pyx_t_13 < 0) __pyx_t_13 += __pyx_pybuffernd_A.diminfo[1].shape;
   __pyx_v_A02 = (*__Pyx_BufPtrStrided2d(double *, __pyx_pybuffernd_A.rcbuffer->pybuffer.buf, __pyx_t_12, __pyx_pybuffernd_A.diminfo[0].strides, __pyx_t_13, __pyx_pybuffernd_A.diminfo[1].strides));
 
-  /* "Florence/Tensor/Numeric.pyx":298
+  /* "Florence/Tensor/Numeric.pyx":316
  *         Real_t A01=A[0,1]
  *         Real_t A02=A[0,2]
  *         Real_t A12=A[1,2]             # <<<<<<<<<<<<<<
@@ -4896,7 +5207,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
   if (__pyx_t_15 < 0) __pyx_t_15 += __pyx_pybuffernd_A.diminfo[1].shape;
   __pyx_v_A12 = (*__Pyx_BufPtrStrided2d(double *, __pyx_pybuffernd_A.rcbuffer->pybuffer.buf, __pyx_t_14, __pyx_pybuffernd_A.diminfo[0].strides, __pyx_t_15, __pyx_pybuffernd_A.diminfo[1].strides));
 
-  /* "Florence/Tensor/Numeric.pyx":299
+  /* "Florence/Tensor/Numeric.pyx":317
  *         Real_t A02=A[0,2]
  *         Real_t A12=A[1,2]
  *         Real_t A10=A[1,0]             # <<<<<<<<<<<<<<
@@ -4909,7 +5220,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
   if (__pyx_t_17 < 0) __pyx_t_17 += __pyx_pybuffernd_A.diminfo[1].shape;
   __pyx_v_A10 = (*__Pyx_BufPtrStrided2d(double *, __pyx_pybuffernd_A.rcbuffer->pybuffer.buf, __pyx_t_16, __pyx_pybuffernd_A.diminfo[0].strides, __pyx_t_17, __pyx_pybuffernd_A.diminfo[1].strides));
 
-  /* "Florence/Tensor/Numeric.pyx":300
+  /* "Florence/Tensor/Numeric.pyx":318
  *         Real_t A12=A[1,2]
  *         Real_t A10=A[1,0]
  *         Real_t A20=A[2,0]             # <<<<<<<<<<<<<<
@@ -4922,7 +5233,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
   if (__pyx_t_19 < 0) __pyx_t_19 += __pyx_pybuffernd_A.diminfo[1].shape;
   __pyx_v_A20 = (*__Pyx_BufPtrStrided2d(double *, __pyx_pybuffernd_A.rcbuffer->pybuffer.buf, __pyx_t_18, __pyx_pybuffernd_A.diminfo[0].strides, __pyx_t_19, __pyx_pybuffernd_A.diminfo[1].strides));
 
-  /* "Florence/Tensor/Numeric.pyx":301
+  /* "Florence/Tensor/Numeric.pyx":319
  *         Real_t A10=A[1,0]
  *         Real_t A20=A[2,0]
  *         Real_t A21=A[2,1]             # <<<<<<<<<<<<<<
@@ -4935,7 +5246,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
   if (__pyx_t_21 < 0) __pyx_t_21 += __pyx_pybuffernd_A.diminfo[1].shape;
   __pyx_v_A21 = (*__Pyx_BufPtrStrided2d(double *, __pyx_pybuffernd_A.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_A.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_A.diminfo[1].strides));
 
-  /* "Florence/Tensor/Numeric.pyx":303
+  /* "Florence/Tensor/Numeric.pyx":321
  *         Real_t A21=A[2,1]
  * 
  *         Real_t B00=B[0,0]             # <<<<<<<<<<<<<<
@@ -4948,7 +5259,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
   if (__pyx_t_23 < 0) __pyx_t_23 += __pyx_pybuffernd_B.diminfo[1].shape;
   __pyx_v_B00 = (*__Pyx_BufPtrStrided2d(double *, __pyx_pybuffernd_B.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_B.diminfo[0].strides, __pyx_t_23, __pyx_pybuffernd_B.diminfo[1].strides));
 
-  /* "Florence/Tensor/Numeric.pyx":304
+  /* "Florence/Tensor/Numeric.pyx":322
  * 
  *         Real_t B00=B[0,0]
  *         Real_t B11=B[1,1]             # <<<<<<<<<<<<<<
@@ -4961,7 +5272,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
   if (__pyx_t_25 < 0) __pyx_t_25 += __pyx_pybuffernd_B.diminfo[1].shape;
   __pyx_v_B11 = (*__Pyx_BufPtrStrided2d(double *, __pyx_pybuffernd_B.rcbuffer->pybuffer.buf, __pyx_t_24, __pyx_pybuffernd_B.diminfo[0].strides, __pyx_t_25, __pyx_pybuffernd_B.diminfo[1].strides));
 
-  /* "Florence/Tensor/Numeric.pyx":305
+  /* "Florence/Tensor/Numeric.pyx":323
  *         Real_t B00=B[0,0]
  *         Real_t B11=B[1,1]
  *         Real_t B22=B[2,2]             # <<<<<<<<<<<<<<
@@ -4974,7 +5285,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
   if (__pyx_t_27 < 0) __pyx_t_27 += __pyx_pybuffernd_B.diminfo[1].shape;
   __pyx_v_B22 = (*__Pyx_BufPtrStrided2d(double *, __pyx_pybuffernd_B.rcbuffer->pybuffer.buf, __pyx_t_26, __pyx_pybuffernd_B.diminfo[0].strides, __pyx_t_27, __pyx_pybuffernd_B.diminfo[1].strides));
 
-  /* "Florence/Tensor/Numeric.pyx":306
+  /* "Florence/Tensor/Numeric.pyx":324
  *         Real_t B11=B[1,1]
  *         Real_t B22=B[2,2]
  *         Real_t B01=B[0,1]             # <<<<<<<<<<<<<<
@@ -4987,7 +5298,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
   if (__pyx_t_29 < 0) __pyx_t_29 += __pyx_pybuffernd_B.diminfo[1].shape;
   __pyx_v_B01 = (*__Pyx_BufPtrStrided2d(double *, __pyx_pybuffernd_B.rcbuffer->pybuffer.buf, __pyx_t_28, __pyx_pybuffernd_B.diminfo[0].strides, __pyx_t_29, __pyx_pybuffernd_B.diminfo[1].strides));
 
-  /* "Florence/Tensor/Numeric.pyx":307
+  /* "Florence/Tensor/Numeric.pyx":325
  *         Real_t B22=B[2,2]
  *         Real_t B01=B[0,1]
  *         Real_t B02=B[0,2]             # <<<<<<<<<<<<<<
@@ -5000,7 +5311,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
   if (__pyx_t_31 < 0) __pyx_t_31 += __pyx_pybuffernd_B.diminfo[1].shape;
   __pyx_v_B02 = (*__Pyx_BufPtrStrided2d(double *, __pyx_pybuffernd_B.rcbuffer->pybuffer.buf, __pyx_t_30, __pyx_pybuffernd_B.diminfo[0].strides, __pyx_t_31, __pyx_pybuffernd_B.diminfo[1].strides));
 
-  /* "Florence/Tensor/Numeric.pyx":308
+  /* "Florence/Tensor/Numeric.pyx":326
  *         Real_t B01=B[0,1]
  *         Real_t B02=B[0,2]
  *         Real_t B12=B[1,2]             # <<<<<<<<<<<<<<
@@ -5013,7 +5324,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
   if (__pyx_t_33 < 0) __pyx_t_33 += __pyx_pybuffernd_B.diminfo[1].shape;
   __pyx_v_B12 = (*__Pyx_BufPtrStrided2d(double *, __pyx_pybuffernd_B.rcbuffer->pybuffer.buf, __pyx_t_32, __pyx_pybuffernd_B.diminfo[0].strides, __pyx_t_33, __pyx_pybuffernd_B.diminfo[1].strides));
 
-  /* "Florence/Tensor/Numeric.pyx":309
+  /* "Florence/Tensor/Numeric.pyx":327
  *         Real_t B02=B[0,2]
  *         Real_t B12=B[1,2]
  *         Real_t B10=B[1,0]             # <<<<<<<<<<<<<<
@@ -5026,7 +5337,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
   if (__pyx_t_35 < 0) __pyx_t_35 += __pyx_pybuffernd_B.diminfo[1].shape;
   __pyx_v_B10 = (*__Pyx_BufPtrStrided2d(double *, __pyx_pybuffernd_B.rcbuffer->pybuffer.buf, __pyx_t_34, __pyx_pybuffernd_B.diminfo[0].strides, __pyx_t_35, __pyx_pybuffernd_B.diminfo[1].strides));
 
-  /* "Florence/Tensor/Numeric.pyx":310
+  /* "Florence/Tensor/Numeric.pyx":328
  *         Real_t B12=B[1,2]
  *         Real_t B10=B[1,0]
  *         Real_t B20=B[2,0]             # <<<<<<<<<<<<<<
@@ -5039,7 +5350,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
   if (__pyx_t_37 < 0) __pyx_t_37 += __pyx_pybuffernd_B.diminfo[1].shape;
   __pyx_v_B20 = (*__Pyx_BufPtrStrided2d(double *, __pyx_pybuffernd_B.rcbuffer->pybuffer.buf, __pyx_t_36, __pyx_pybuffernd_B.diminfo[0].strides, __pyx_t_37, __pyx_pybuffernd_B.diminfo[1].strides));
 
-  /* "Florence/Tensor/Numeric.pyx":311
+  /* "Florence/Tensor/Numeric.pyx":329
  *         Real_t B10=B[1,0]
  *         Real_t B20=B[2,0]
  *         Real_t B21=B[2,1]             # <<<<<<<<<<<<<<
@@ -5052,18 +5363,18 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
   if (__pyx_t_39 < 0) __pyx_t_39 += __pyx_pybuffernd_B.diminfo[1].shape;
   __pyx_v_B21 = (*__Pyx_BufPtrStrided2d(double *, __pyx_pybuffernd_B.rcbuffer->pybuffer.buf, __pyx_t_38, __pyx_pybuffernd_B.diminfo[0].strides, __pyx_t_39, __pyx_pybuffernd_B.diminfo[1].strides));
 
-  /* "Florence/Tensor/Numeric.pyx":315
+  /* "Florence/Tensor/Numeric.pyx":333
  *     cdef double AB[3][3]
  * 
  *     if dim == "3d":             # <<<<<<<<<<<<<<
  *         AB[:] = [
  *             [ A11*B22 - A12*B21 - A21*B12 + A22*B11, A12*B20 - A10*B22 + A20*B12 - A22*B10, A10*B21 - A11*B20 - A20*B11 + A21*B10],
  */
-  __pyx_t_1 = (__Pyx_PyString_Equals(__pyx_v_dim, __pyx_kp_s_3d, Py_EQ)); if (unlikely(__pyx_t_1 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 315; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = (__Pyx_PyString_Equals(__pyx_v_dim, __pyx_kp_s_3d, Py_EQ)); if (unlikely(__pyx_t_1 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "Florence/Tensor/Numeric.pyx":317
+    /* "Florence/Tensor/Numeric.pyx":335
  *     if dim == "3d":
  *         AB[:] = [
  *             [ A11*B22 - A12*B21 - A21*B12 + A22*B11, A12*B20 - A10*B22 + A20*B12 - A22*B10, A10*B21 - A11*B20 - A20*B11 + A21*B10],             # <<<<<<<<<<<<<<
@@ -5074,7 +5385,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
     __pyx_t_40[1] = ((((__pyx_v_A12 * __pyx_v_B20) - (__pyx_v_A10 * __pyx_v_B22)) + (__pyx_v_A20 * __pyx_v_B12)) - (__pyx_v_A22 * __pyx_v_B10));
     __pyx_t_40[2] = ((((__pyx_v_A10 * __pyx_v_B21) - (__pyx_v_A11 * __pyx_v_B20)) - (__pyx_v_A20 * __pyx_v_B11)) + (__pyx_v_A21 * __pyx_v_B10));
 
-    /* "Florence/Tensor/Numeric.pyx":318
+    /* "Florence/Tensor/Numeric.pyx":336
  *         AB[:] = [
  *             [ A11*B22 - A12*B21 - A21*B12 + A22*B11, A12*B20 - A10*B22 + A20*B12 - A22*B10, A10*B21 - A11*B20 - A20*B11 + A21*B10],
  *             [ A02*B21 - A01*B22 + A21*B02 - A22*B01, A00*B22 - A02*B20 - A20*B02 + A22*B00, A01*B20 - A00*B21 + A20*B01 - A21*B00],             # <<<<<<<<<<<<<<
@@ -5085,7 +5396,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
     __pyx_t_41[1] = ((((__pyx_v_A00 * __pyx_v_B22) - (__pyx_v_A02 * __pyx_v_B20)) - (__pyx_v_A20 * __pyx_v_B02)) + (__pyx_v_A22 * __pyx_v_B00));
     __pyx_t_41[2] = ((((__pyx_v_A01 * __pyx_v_B20) - (__pyx_v_A00 * __pyx_v_B21)) + (__pyx_v_A20 * __pyx_v_B01)) - (__pyx_v_A21 * __pyx_v_B00));
 
-    /* "Florence/Tensor/Numeric.pyx":319
+    /* "Florence/Tensor/Numeric.pyx":337
  *             [ A11*B22 - A12*B21 - A21*B12 + A22*B11, A12*B20 - A10*B22 + A20*B12 - A22*B10, A10*B21 - A11*B20 - A20*B11 + A21*B10],
  *             [ A02*B21 - A01*B22 + A21*B02 - A22*B01, A00*B22 - A02*B20 - A20*B02 + A22*B00, A01*B20 - A00*B21 + A20*B01 - A21*B00],
  *             [ A01*B12 - A02*B11 - A11*B02 + A12*B01, A02*B10 - A00*B12 + A10*B02 - A12*B00, A00*B11 - A01*B10 - A10*B01 + A11*B00]             # <<<<<<<<<<<<<<
@@ -5096,7 +5407,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
     __pyx_t_42[1] = ((((__pyx_v_A02 * __pyx_v_B10) - (__pyx_v_A00 * __pyx_v_B12)) + (__pyx_v_A10 * __pyx_v_B02)) - (__pyx_v_A12 * __pyx_v_B00));
     __pyx_t_42[2] = ((((__pyx_v_A00 * __pyx_v_B11) - (__pyx_v_A01 * __pyx_v_B10)) - (__pyx_v_A10 * __pyx_v_B01)) + (__pyx_v_A11 * __pyx_v_B00));
 
-    /* "Florence/Tensor/Numeric.pyx":316
+    /* "Florence/Tensor/Numeric.pyx":334
  * 
  *     if dim == "3d":
  *         AB[:] = [             # <<<<<<<<<<<<<<
@@ -5108,7 +5419,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
     memcpy(&(__pyx_t_43[2]), __pyx_t_42, sizeof(__pyx_t_43[0]));
     memcpy(&(__pyx_v_AB[0]), __pyx_t_43, sizeof(__pyx_v_AB[0]) * (3));
 
-    /* "Florence/Tensor/Numeric.pyx":315
+    /* "Florence/Tensor/Numeric.pyx":333
  *     cdef double AB[3][3]
  * 
  *     if dim == "3d":             # <<<<<<<<<<<<<<
@@ -5118,18 +5429,18 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
     goto __pyx_L6;
   }
 
-  /* "Florence/Tensor/Numeric.pyx":322
+  /* "Florence/Tensor/Numeric.pyx":340
  *             ]
  * 
  *     elif dim == "2d":             # <<<<<<<<<<<<<<
  *         # AB[:] = [
  *         #     [ 0., 0., 0.],
  */
-  __pyx_t_2 = (__Pyx_PyString_Equals(__pyx_v_dim, __pyx_kp_s_2d, Py_EQ)); if (unlikely(__pyx_t_2 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 322; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = (__Pyx_PyString_Equals(__pyx_v_dim, __pyx_kp_s_2d, Py_EQ)); if (unlikely(__pyx_t_2 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 340; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "Florence/Tensor/Numeric.pyx":328
+    /* "Florence/Tensor/Numeric.pyx":346
  *         #     [ 0., 0., A00*B11 - A01*B10 - A10*B01 + A11*B00]
  *         #     ]
  *         AB[2][2] = A00*B11 - A01*B10 - A10*B01 + A11*B00             # <<<<<<<<<<<<<<
@@ -5138,7 +5449,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
  */
     ((__pyx_v_AB[2])[2]) = ((((__pyx_v_A00 * __pyx_v_B11) - (__pyx_v_A01 * __pyx_v_B10)) - (__pyx_v_A10 * __pyx_v_B01)) + (__pyx_v_A11 * __pyx_v_B00));
 
-    /* "Florence/Tensor/Numeric.pyx":322
+    /* "Florence/Tensor/Numeric.pyx":340
  *             ]
  * 
  *     elif dim == "2d":             # <<<<<<<<<<<<<<
@@ -5148,17 +5459,17 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
   }
   __pyx_L6:;
 
-  /* "Florence/Tensor/Numeric.pyx":330
+  /* "Florence/Tensor/Numeric.pyx":348
  *         AB[2][2] = A00*B11 - A01*B10 - A10*B01 + A11*B00
  * 
  *     if toarray:             # <<<<<<<<<<<<<<
  *         return np.array(AB,copy=False)
  *     return AB
  */
-  __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_v_toarray); if (unlikely(__pyx_t_1 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 330; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_v_toarray); if (unlikely(__pyx_t_1 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 348; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__pyx_t_1) {
 
-    /* "Florence/Tensor/Numeric.pyx":331
+    /* "Florence/Tensor/Numeric.pyx":349
  * 
  *     if toarray:
  *         return np.array(AB,copy=False)             # <<<<<<<<<<<<<<
@@ -5166,22 +5477,22 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
  * 
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 331; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 349; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_44 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_array); if (unlikely(!__pyx_t_44)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 331; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_44 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_array); if (unlikely(!__pyx_t_44)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 349; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_44);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_carray_to_py_double____3__(__pyx_v_AB, 3); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 331; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_carray_to_py_double____3__(__pyx_v_AB, 3); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 349; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_45 = PyTuple_New(1); if (unlikely(!__pyx_t_45)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 331; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_45 = PyTuple_New(1); if (unlikely(!__pyx_t_45)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 349; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_45);
     __Pyx_GIVEREF(__pyx_t_3);
     PyTuple_SET_ITEM(__pyx_t_45, 0, __pyx_t_3);
     __pyx_t_3 = 0;
-    __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 331; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 349; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 331; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __pyx_t_46 = __Pyx_PyObject_Call(__pyx_t_44, __pyx_t_45, __pyx_t_3); if (unlikely(!__pyx_t_46)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 331; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 349; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_46 = __Pyx_PyObject_Call(__pyx_t_44, __pyx_t_45, __pyx_t_3); if (unlikely(!__pyx_t_46)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 349; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_46);
     __Pyx_DECREF(__pyx_t_44); __pyx_t_44 = 0;
     __Pyx_DECREF(__pyx_t_45); __pyx_t_45 = 0;
@@ -5190,7 +5501,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
     __pyx_t_46 = 0;
     goto __pyx_L0;
 
-    /* "Florence/Tensor/Numeric.pyx":330
+    /* "Florence/Tensor/Numeric.pyx":348
  *         AB[2][2] = A00*B11 - A01*B10 - A10*B01 + A11*B00
  * 
  *     if toarray:             # <<<<<<<<<<<<<<
@@ -5199,7 +5510,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
  */
   }
 
-  /* "Florence/Tensor/Numeric.pyx":332
+  /* "Florence/Tensor/Numeric.pyx":350
  *     if toarray:
  *         return np.array(AB,copy=False)
  *     return AB             # <<<<<<<<<<<<<<
@@ -5207,13 +5518,13 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_46 = __Pyx_carray_to_py_double____3__(__pyx_v_AB, 3); if (unlikely(!__pyx_t_46)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 332; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_46 = __Pyx_carray_to_py_double____3__(__pyx_v_AB, 3); if (unlikely(!__pyx_t_46)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 350; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_46);
   __pyx_r = __pyx_t_46;
   __pyx_t_46 = 0;
   goto __pyx_L0;
 
-  /* "Florence/Tensor/Numeric.pyx":262
+  /* "Florence/Tensor/Numeric.pyx":280
  * 
  * @boundscheck(False)
  * def cross2d(np.ndarray[double, ndim=2] A, np.ndarray[double, ndim=2] B, str dim="3d", toarray=False):             # <<<<<<<<<<<<<<
@@ -5244,7 +5555,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
   return __pyx_r;
 }
 
-/* "Florence/Tensor/Numeric.pyx":338
+/* "Florence/Tensor/Numeric.pyx":356
  * @boundscheck(False)
  * @cdivision(True)
  * def findfirst(np.ndarray A, Integer_t num):             # <<<<<<<<<<<<<<
@@ -5253,10 +5564,10 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_12cross2d(CYTHON_UNUSED PyO
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_15findfirst(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_8Florence_6Tensor_7Numeric_14findfirst[] = "Find the first occurence of a value in an ndarray";
-static PyMethodDef __pyx_mdef_8Florence_6Tensor_7Numeric_15findfirst = {"findfirst", (PyCFunction)__pyx_pw_8Florence_6Tensor_7Numeric_15findfirst, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_6Tensor_7Numeric_14findfirst};
-static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_15findfirst(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_17findfirst(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_8Florence_6Tensor_7Numeric_16findfirst[] = "Find the first occurence of a value in an ndarray";
+static PyMethodDef __pyx_mdef_8Florence_6Tensor_7Numeric_17findfirst = {"findfirst", (PyCFunction)__pyx_pw_8Florence_6Tensor_7Numeric_17findfirst, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_6Tensor_7Numeric_16findfirst};
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_17findfirst(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyArrayObject *__pyx_v_A = 0;
   __pyx_t_8Florence_6Tensor_7Numeric_Integer_t __pyx_v_num;
   int __pyx_lineno = 0;
@@ -5285,11 +5596,11 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_15findfirst(PyObject *__pyx
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_num)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("findfirst", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 338; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("findfirst", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 356; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "findfirst") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 338; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "findfirst") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 356; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -5298,18 +5609,18 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_15findfirst(PyObject *__pyx
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
     __pyx_v_A = ((PyArrayObject *)values[0]);
-    __pyx_v_num = __Pyx_PyInt_As_npy_int64(values[1]); if (unlikely((__pyx_v_num == (npy_int64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 338; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_num = __Pyx_PyInt_As_npy_int64(values[1]); if (unlikely((__pyx_v_num == (npy_int64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 356; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("findfirst", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 338; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("findfirst", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 356; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Florence.Tensor.Numeric.findfirst", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_A), __pyx_ptype_5numpy_ndarray, 1, "A", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 338; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_r = __pyx_pf_8Florence_6Tensor_7Numeric_14findfirst(__pyx_self, __pyx_v_A, __pyx_v_num);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_A), __pyx_ptype_5numpy_ndarray, 1, "A", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 356; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_8Florence_6Tensor_7Numeric_16findfirst(__pyx_self, __pyx_v_A, __pyx_v_num);
 
   /* function exit code */
   goto __pyx_L0;
@@ -5320,7 +5631,7 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_15findfirst(PyObject *__pyx
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_14findfirst(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Integer_t __pyx_v_num) {
+static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_16findfirst(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Integer_t __pyx_v_num) {
   __pyx_t_8Florence_6Tensor_7Numeric_Integer_t __pyx_v_size;
   __pyx_t_8Florence_6Tensor_7Numeric_Integer_t __pyx_v_ndim;
   __Pyx_memviewslice __pyx_v_arr = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -5344,38 +5655,38 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_14findfirst(CYTHON_UNUSED P
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("findfirst", 0);
 
-  /* "Florence/Tensor/Numeric.pyx":341
+  /* "Florence/Tensor/Numeric.pyx":359
  *     """Find the first occurence of a value in an ndarray"""
  * 
  *     if A.dtype != Integer:             # <<<<<<<<<<<<<<
  *         raise TypeError("Expected an array of integers")
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 341; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 359; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_Integer); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 341; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_Integer); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 359; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyObject_RichCompare(__pyx_t_1, __pyx_t_2, Py_NE); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 341; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyObject_RichCompare(__pyx_t_1, __pyx_t_2, Py_NE); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 359; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_4 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 341; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_4 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 359; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if (__pyx_t_4) {
 
-    /* "Florence/Tensor/Numeric.pyx":342
+    /* "Florence/Tensor/Numeric.pyx":360
  * 
  *     if A.dtype != Integer:
  *         raise TypeError("Expected an array of integers")             # <<<<<<<<<<<<<<
  * 
  *     cdef:
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__13, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 342; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__13, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 360; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 342; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 360; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-    /* "Florence/Tensor/Numeric.pyx":341
+    /* "Florence/Tensor/Numeric.pyx":359
  *     """Find the first occurence of a value in an ndarray"""
  * 
  *     if A.dtype != Integer:             # <<<<<<<<<<<<<<
@@ -5384,20 +5695,20 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_14findfirst(CYTHON_UNUSED P
  */
   }
 
-  /* "Florence/Tensor/Numeric.pyx":345
+  /* "Florence/Tensor/Numeric.pyx":363
  * 
  *     cdef:
  *         Integer_t size = A.size             # <<<<<<<<<<<<<<
  *         Integer_t ndim = A.ndim
  *         Integer_t[::1] arr = A.ravel()
  */
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_size); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 345; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_size); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 363; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_5 = __Pyx_PyInt_As_npy_int64(__pyx_t_3); if (unlikely((__pyx_t_5 == (npy_int64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 345; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyInt_As_npy_int64(__pyx_t_3); if (unlikely((__pyx_t_5 == (npy_int64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 363; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_size = __pyx_t_5;
 
-  /* "Florence/Tensor/Numeric.pyx":346
+  /* "Florence/Tensor/Numeric.pyx":364
  *     cdef:
  *         Integer_t size = A.size
  *         Integer_t ndim = A.ndim             # <<<<<<<<<<<<<<
@@ -5407,14 +5718,14 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_14findfirst(CYTHON_UNUSED P
   __pyx_t_6 = __pyx_v_A->nd;
   __pyx_v_ndim = __pyx_t_6;
 
-  /* "Florence/Tensor/Numeric.pyx":347
+  /* "Florence/Tensor/Numeric.pyx":365
  *         Integer_t size = A.size
  *         Integer_t ndim = A.ndim
  *         Integer_t[::1] arr = A.ravel()             # <<<<<<<<<<<<<<
  *         Integer_t col = A.shape[1]
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_ravel); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 347; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_ravel); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 365; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_1 = NULL;
   if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_2))) {
@@ -5427,21 +5738,21 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_14findfirst(CYTHON_UNUSED P
     }
   }
   if (__pyx_t_1) {
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 347; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 365; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   } else {
-    __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 347; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 365; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dc_nn___pyx_t_8Florence_6Tensor_7Numeric_Integer_t(__pyx_t_3);
-  if (unlikely(!__pyx_t_7.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 347; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_7.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 365; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_arr = __pyx_t_7;
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "Florence/Tensor/Numeric.pyx":348
+  /* "Florence/Tensor/Numeric.pyx":366
  *         Integer_t ndim = A.ndim
  *         Integer_t[::1] arr = A.ravel()
  *         Integer_t col = A.shape[1]             # <<<<<<<<<<<<<<
@@ -5450,7 +5761,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_14findfirst(CYTHON_UNUSED P
  */
   __pyx_v_col = (__pyx_v_A->dimensions[1]);
 
-  /* "Florence/Tensor/Numeric.pyx":350
+  /* "Florence/Tensor/Numeric.pyx":368
  *         Integer_t col = A.shape[1]
  * 
  *     cdef Integer_t *idx = find(&arr[0],<Integer_t*>(&arr[-1]+1),num)             # <<<<<<<<<<<<<<
@@ -5463,7 +5774,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_14findfirst(CYTHON_UNUSED P
   if (__pyx_t_9 < 0) __pyx_t_9 += __pyx_v_arr.shape[0];
   __pyx_v_idx = std::find((&(*((__pyx_t_8Florence_6Tensor_7Numeric_Integer_t *) ( /* dim=0 */ ((char *) (((__pyx_t_8Florence_6Tensor_7Numeric_Integer_t *) __pyx_v_arr.data) + __pyx_t_8)) )))), ((__pyx_t_8Florence_6Tensor_7Numeric_Integer_t *)((&(*((__pyx_t_8Florence_6Tensor_7Numeric_Integer_t *) ( /* dim=0 */ ((char *) (((__pyx_t_8Florence_6Tensor_7Numeric_Integer_t *) __pyx_v_arr.data) + __pyx_t_9)) )))) + 1)), __pyx_v_num);
 
-  /* "Florence/Tensor/Numeric.pyx":351
+  /* "Florence/Tensor/Numeric.pyx":369
  * 
  *     cdef Integer_t *idx = find(&arr[0],<Integer_t*>(&arr[-1]+1),num)
  *     cdef Integer_t ret = idx - &arr[0]             # <<<<<<<<<<<<<<
@@ -5474,7 +5785,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_14findfirst(CYTHON_UNUSED P
   if (__pyx_t_10 < 0) __pyx_t_10 += __pyx_v_arr.shape[0];
   __pyx_v_ret = (__pyx_v_idx - (&(*((__pyx_t_8Florence_6Tensor_7Numeric_Integer_t *) ( /* dim=0 */ ((char *) (((__pyx_t_8Florence_6Tensor_7Numeric_Integer_t *) __pyx_v_arr.data) + __pyx_t_10)) )))));
 
-  /* "Florence/Tensor/Numeric.pyx":353
+  /* "Florence/Tensor/Numeric.pyx":371
  *     cdef Integer_t ret = idx - &arr[0]
  * 
  *     if ret == size:             # <<<<<<<<<<<<<<
@@ -5484,7 +5795,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_14findfirst(CYTHON_UNUSED P
   __pyx_t_4 = ((__pyx_v_ret == __pyx_v_size) != 0);
   if (__pyx_t_4) {
 
-    /* "Florence/Tensor/Numeric.pyx":354
+    /* "Florence/Tensor/Numeric.pyx":372
  * 
  *     if ret == size:
  *         return ()             # <<<<<<<<<<<<<<
@@ -5496,7 +5807,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_14findfirst(CYTHON_UNUSED P
     __pyx_r = __pyx_empty_tuple;
     goto __pyx_L0;
 
-    /* "Florence/Tensor/Numeric.pyx":353
+    /* "Florence/Tensor/Numeric.pyx":371
  *     cdef Integer_t ret = idx - &arr[0]
  * 
  *     if ret == size:             # <<<<<<<<<<<<<<
@@ -5505,7 +5816,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_14findfirst(CYTHON_UNUSED P
  */
   }
 
-  /* "Florence/Tensor/Numeric.pyx":356
+  /* "Florence/Tensor/Numeric.pyx":374
  *         return ()
  * 
  *     if ndim == 1:             # <<<<<<<<<<<<<<
@@ -5515,7 +5826,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_14findfirst(CYTHON_UNUSED P
   switch (__pyx_v_ndim) {
     case 1:
 
-    /* "Florence/Tensor/Numeric.pyx":357
+    /* "Florence/Tensor/Numeric.pyx":375
  * 
  *     if ndim == 1:
  *         return ret             # <<<<<<<<<<<<<<
@@ -5523,13 +5834,13 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_14findfirst(CYTHON_UNUSED P
  *         return (ret // col, ret % col)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_3 = __Pyx_PyInt_From_npy_int64(__pyx_v_ret); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 357; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyInt_From_npy_int64(__pyx_v_ret); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 375; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "Florence/Tensor/Numeric.pyx":356
+    /* "Florence/Tensor/Numeric.pyx":374
  *         return ()
  * 
  *     if ndim == 1:             # <<<<<<<<<<<<<<
@@ -5538,7 +5849,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_14findfirst(CYTHON_UNUSED P
  */
     break;
 
-    /* "Florence/Tensor/Numeric.pyx":358
+    /* "Florence/Tensor/Numeric.pyx":376
  *     if ndim == 1:
  *         return ret
  *     elif ndim == 2:             # <<<<<<<<<<<<<<
@@ -5547,7 +5858,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_14findfirst(CYTHON_UNUSED P
  */
     case 2:
 
-    /* "Florence/Tensor/Numeric.pyx":359
+    /* "Florence/Tensor/Numeric.pyx":377
  *         return ret
  *     elif ndim == 2:
  *         return (ret // col, ret % col)             # <<<<<<<<<<<<<<
@@ -5555,11 +5866,11 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_14findfirst(CYTHON_UNUSED P
  *         raise ValueError("Dimension mismatch. Array should be either 1D or 2D")
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_3 = __Pyx_PyInt_From_npy_int64((__pyx_v_ret / __pyx_v_col)); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 359; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyInt_From_npy_int64((__pyx_v_ret / __pyx_v_col)); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 377; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = __Pyx_PyInt_From_npy_int64((__pyx_v_ret % __pyx_v_col)); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 359; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyInt_From_npy_int64((__pyx_v_ret % __pyx_v_col)); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 377; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 359; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 377; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_GIVEREF(__pyx_t_3);
     PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_3);
@@ -5571,7 +5882,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_14findfirst(CYTHON_UNUSED P
     __pyx_t_1 = 0;
     goto __pyx_L0;
 
-    /* "Florence/Tensor/Numeric.pyx":358
+    /* "Florence/Tensor/Numeric.pyx":376
  *     if ndim == 1:
  *         return ret
  *     elif ndim == 2:             # <<<<<<<<<<<<<<
@@ -5581,22 +5892,22 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_14findfirst(CYTHON_UNUSED P
     break;
     default:
 
-    /* "Florence/Tensor/Numeric.pyx":361
+    /* "Florence/Tensor/Numeric.pyx":379
  *         return (ret // col, ret % col)
  *     else:
  *         raise ValueError("Dimension mismatch. Array should be either 1D or 2D")             # <<<<<<<<<<<<<<
  * 
  * 
  */
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__14, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 361; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__14, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 379; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_Raise(__pyx_t_1, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 361; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 379; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     break;
   }
 
-  /* "Florence/Tensor/Numeric.pyx":338
+  /* "Florence/Tensor/Numeric.pyx":356
  * @boundscheck(False)
  * @cdivision(True)
  * def findfirst(np.ndarray A, Integer_t num):             # <<<<<<<<<<<<<<
@@ -5619,7 +5930,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_14findfirst(CYTHON_UNUSED P
   return __pyx_r;
 }
 
-/* "Florence/Tensor/Numeric.pyx":365
+/* "Florence/Tensor/Numeric.pyx":383
  * 
  * @boundscheck(False)
  * def fillin(np.ndarray A, Real_t num):             # <<<<<<<<<<<<<<
@@ -5628,10 +5939,10 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_14findfirst(CYTHON_UNUSED P
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_17fillin(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_8Florence_6Tensor_7Numeric_16fillin[] = "Fill ndarray with a value. This is an in-place operation";
-static PyMethodDef __pyx_mdef_8Florence_6Tensor_7Numeric_17fillin = {"fillin", (PyCFunction)__pyx_pw_8Florence_6Tensor_7Numeric_17fillin, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_6Tensor_7Numeric_16fillin};
-static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_17fillin(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_19fillin(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_8Florence_6Tensor_7Numeric_18fillin[] = "Fill ndarray with a value. This is an in-place operation";
+static PyMethodDef __pyx_mdef_8Florence_6Tensor_7Numeric_19fillin = {"fillin", (PyCFunction)__pyx_pw_8Florence_6Tensor_7Numeric_19fillin, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_6Tensor_7Numeric_18fillin};
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_19fillin(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyArrayObject *__pyx_v_A = 0;
   __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_num;
   int __pyx_lineno = 0;
@@ -5660,11 +5971,11 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_17fillin(PyObject *__pyx_se
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_num)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("fillin", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 365; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("fillin", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 383; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "fillin") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 365; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "fillin") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 383; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -5673,18 +5984,18 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_17fillin(PyObject *__pyx_se
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
     __pyx_v_A = ((PyArrayObject *)values[0]);
-    __pyx_v_num = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_num == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 365; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_num = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_num == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 383; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("fillin", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 365; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("fillin", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 383; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Florence.Tensor.Numeric.fillin", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_A), __pyx_ptype_5numpy_ndarray, 1, "A", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 365; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_r = __pyx_pf_8Florence_6Tensor_7Numeric_16fillin(__pyx_self, __pyx_v_A, __pyx_v_num);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_A), __pyx_ptype_5numpy_ndarray, 1, "A", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 383; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_8Florence_6Tensor_7Numeric_18fillin(__pyx_self, __pyx_v_A, __pyx_v_num);
 
   /* function exit code */
   goto __pyx_L0;
@@ -5695,7 +6006,7 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_17fillin(PyObject *__pyx_se
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_16fillin(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_num) {
+static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_18fillin(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_num) {
   __Pyx_memviewslice __pyx_v_arr = { 0, 0, { 0 }, { 0 }, { 0 } };
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -5712,38 +6023,38 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_16fillin(CYTHON_UNUSED PyOb
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("fillin", 0);
 
-  /* "Florence/Tensor/Numeric.pyx":368
+  /* "Florence/Tensor/Numeric.pyx":386
  *     """Fill ndarray with a value. This is an in-place operation"""
  * 
  *     if A.dtype != Real:             # <<<<<<<<<<<<<<
  *         raise TypeError("Expected an array of doubles")
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 368; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 386; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_Real); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 368; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_Real); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 386; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyObject_RichCompare(__pyx_t_1, __pyx_t_2, Py_NE); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 368; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyObject_RichCompare(__pyx_t_1, __pyx_t_2, Py_NE); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 386; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_4 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 368; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_4 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 386; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if (__pyx_t_4) {
 
-    /* "Florence/Tensor/Numeric.pyx":369
+    /* "Florence/Tensor/Numeric.pyx":387
  * 
  *     if A.dtype != Real:
  *         raise TypeError("Expected an array of doubles")             # <<<<<<<<<<<<<<
  * 
  *     cdef Real_t[::1] arr = A.ravel()
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__15, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 369; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__15, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 387; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 369; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 387; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-    /* "Florence/Tensor/Numeric.pyx":368
+    /* "Florence/Tensor/Numeric.pyx":386
  *     """Fill ndarray with a value. This is an in-place operation"""
  * 
  *     if A.dtype != Real:             # <<<<<<<<<<<<<<
@@ -5752,14 +6063,14 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_16fillin(CYTHON_UNUSED PyOb
  */
   }
 
-  /* "Florence/Tensor/Numeric.pyx":371
+  /* "Florence/Tensor/Numeric.pyx":389
  *         raise TypeError("Expected an array of doubles")
  * 
  *     cdef Real_t[::1] arr = A.ravel()             # <<<<<<<<<<<<<<
  *     fill(&arr[0],<Real_t*>(&arr[-1]+1),num)
  *     arr[-1] = num
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_ravel); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 371; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_ravel); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 389; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_1 = NULL;
   if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_2))) {
@@ -5772,21 +6083,21 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_16fillin(CYTHON_UNUSED PyOb
     }
   }
   if (__pyx_t_1) {
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 371; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 389; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   } else {
-    __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 371; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 389; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_dc_nn___pyx_t_8Florence_6Tensor_7Numeric_Real_t(__pyx_t_3);
-  if (unlikely(!__pyx_t_5.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 371; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_5.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 389; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_arr = __pyx_t_5;
   __pyx_t_5.memview = NULL;
   __pyx_t_5.data = NULL;
 
-  /* "Florence/Tensor/Numeric.pyx":372
+  /* "Florence/Tensor/Numeric.pyx":390
  * 
  *     cdef Real_t[::1] arr = A.ravel()
  *     fill(&arr[0],<Real_t*>(&arr[-1]+1),num)             # <<<<<<<<<<<<<<
@@ -5799,7 +6110,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_16fillin(CYTHON_UNUSED PyOb
   if (__pyx_t_7 < 0) __pyx_t_7 += __pyx_v_arr.shape[0];
   std::fill((&(*((__pyx_t_8Florence_6Tensor_7Numeric_Real_t *) ( /* dim=0 */ ((char *) (((__pyx_t_8Florence_6Tensor_7Numeric_Real_t *) __pyx_v_arr.data) + __pyx_t_6)) )))), ((__pyx_t_8Florence_6Tensor_7Numeric_Real_t *)((&(*((__pyx_t_8Florence_6Tensor_7Numeric_Real_t *) ( /* dim=0 */ ((char *) (((__pyx_t_8Florence_6Tensor_7Numeric_Real_t *) __pyx_v_arr.data) + __pyx_t_7)) )))) + 1)), __pyx_v_num);
 
-  /* "Florence/Tensor/Numeric.pyx":373
+  /* "Florence/Tensor/Numeric.pyx":391
  *     cdef Real_t[::1] arr = A.ravel()
  *     fill(&arr[0],<Real_t*>(&arr[-1]+1),num)
  *     arr[-1] = num             # <<<<<<<<<<<<<<
@@ -5810,7 +6121,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_16fillin(CYTHON_UNUSED PyOb
   if (__pyx_t_8 < 0) __pyx_t_8 += __pyx_v_arr.shape[0];
   *((__pyx_t_8Florence_6Tensor_7Numeric_Real_t *) ( /* dim=0 */ ((char *) (((__pyx_t_8Florence_6Tensor_7Numeric_Real_t *) __pyx_v_arr.data) + __pyx_t_8)) )) = __pyx_v_num;
 
-  /* "Florence/Tensor/Numeric.pyx":365
+  /* "Florence/Tensor/Numeric.pyx":383
  * 
  * @boundscheck(False)
  * def fillin(np.ndarray A, Real_t num):             # <<<<<<<<<<<<<<
@@ -5835,7 +6146,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_16fillin(CYTHON_UNUSED PyOb
   return __pyx_r;
 }
 
-/* "Florence/Tensor/Numeric.pyx":378
+/* "Florence/Tensor/Numeric.pyx":396
  * @boundscheck(False)
  * @wraparound(False)
  * def findequal(np.ndarray A, Integer_t num):             # <<<<<<<<<<<<<<
@@ -5844,10 +6155,10 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_16fillin(CYTHON_UNUSED PyOb
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_19findequal(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_8Florence_6Tensor_7Numeric_18findequal[] = "An equivalent function to numpy.where(A==num). The difference here is that\n        numpy.where results in a boolean array of size equal to the original\n        array A, even if number of counts is none or a single element. This function\n        allocates and does push_back on per count";
-static PyMethodDef __pyx_mdef_8Florence_6Tensor_7Numeric_19findequal = {"findequal", (PyCFunction)__pyx_pw_8Florence_6Tensor_7Numeric_19findequal, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_6Tensor_7Numeric_18findequal};
-static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_19findequal(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_21findequal(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_8Florence_6Tensor_7Numeric_20findequal[] = "An equivalent function to numpy.where(A==num). The difference here is that\n        numpy.where results in a boolean array of size equal to the original\n        array A, even if number of counts is none or a single element. This function\n        allocates and does push_back on per count";
+static PyMethodDef __pyx_mdef_8Florence_6Tensor_7Numeric_21findequal = {"findequal", (PyCFunction)__pyx_pw_8Florence_6Tensor_7Numeric_21findequal, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_6Tensor_7Numeric_20findequal};
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_21findequal(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyArrayObject *__pyx_v_A = 0;
   __pyx_t_8Florence_6Tensor_7Numeric_Integer_t __pyx_v_num;
   int __pyx_lineno = 0;
@@ -5876,11 +6187,11 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_19findequal(PyObject *__pyx
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_num)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("findequal", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 378; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("findequal", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 396; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "findequal") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 378; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "findequal") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 396; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -5889,18 +6200,18 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_19findequal(PyObject *__pyx
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
     __pyx_v_A = ((PyArrayObject *)values[0]);
-    __pyx_v_num = __Pyx_PyInt_As_npy_int64(values[1]); if (unlikely((__pyx_v_num == (npy_int64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 378; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_num = __Pyx_PyInt_As_npy_int64(values[1]); if (unlikely((__pyx_v_num == (npy_int64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 396; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("findequal", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 378; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("findequal", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 396; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Florence.Tensor.Numeric.findequal", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_A), __pyx_ptype_5numpy_ndarray, 1, "A", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 378; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_r = __pyx_pf_8Florence_6Tensor_7Numeric_18findequal(__pyx_self, __pyx_v_A, __pyx_v_num);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_A), __pyx_ptype_5numpy_ndarray, 1, "A", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 396; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_8Florence_6Tensor_7Numeric_20findequal(__pyx_self, __pyx_v_A, __pyx_v_num);
 
   /* function exit code */
   goto __pyx_L0;
@@ -5911,7 +6222,7 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_19findequal(PyObject *__pyx
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_18findequal(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Integer_t __pyx_v_num) {
+static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_20findequal(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Integer_t __pyx_v_num) {
   __Pyx_memviewslice __pyx_v_arr = { 0, 0, { 0 }, { 0 }, { 0 } };
   std::vector<__pyx_t_8Florence_6Tensor_7Numeric_Integer_t>  __pyx_v_idx;
   PyObject *__pyx_v_npidx = NULL;
@@ -5930,38 +6241,38 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_18findequal(CYTHON_UNUSED P
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("findequal", 0);
 
-  /* "Florence/Tensor/Numeric.pyx":384
+  /* "Florence/Tensor/Numeric.pyx":402
  *         allocates and does push_back on per count"""
  * 
  *     if A.dtype != Integer:             # <<<<<<<<<<<<<<
  *         raise TypeError("Type mismatch. Array and value must have the same type")
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 384; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 402; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_Integer); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 384; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_Integer); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 402; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyObject_RichCompare(__pyx_t_1, __pyx_t_2, Py_NE); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 384; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyObject_RichCompare(__pyx_t_1, __pyx_t_2, Py_NE); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 402; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_4 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 384; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_4 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 402; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if (__pyx_t_4) {
 
-    /* "Florence/Tensor/Numeric.pyx":385
+    /* "Florence/Tensor/Numeric.pyx":403
  * 
  *     if A.dtype != Integer:
  *         raise TypeError("Type mismatch. Array and value must have the same type")             # <<<<<<<<<<<<<<
  * 
  *     cdef Integer_t[::1] arr = A.ravel()
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__16, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 385; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__16, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 403; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 385; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 403; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-    /* "Florence/Tensor/Numeric.pyx":384
+    /* "Florence/Tensor/Numeric.pyx":402
  *         allocates and does push_back on per count"""
  * 
  *     if A.dtype != Integer:             # <<<<<<<<<<<<<<
@@ -5970,14 +6281,14 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_18findequal(CYTHON_UNUSED P
  */
   }
 
-  /* "Florence/Tensor/Numeric.pyx":387
+  /* "Florence/Tensor/Numeric.pyx":405
  *         raise TypeError("Type mismatch. Array and value must have the same type")
  * 
  *     cdef Integer_t[::1] arr = A.ravel()             # <<<<<<<<<<<<<<
  *     cdef vector[Integer_t] idx = FindEqual(&arr[0],A.size,num)
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_ravel); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 387; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_ravel); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 405; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_1 = NULL;
   if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_2))) {
@@ -5990,21 +6301,21 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_18findequal(CYTHON_UNUSED P
     }
   }
   if (__pyx_t_1) {
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 387; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 405; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   } else {
-    __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 387; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 405; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_dc_nn___pyx_t_8Florence_6Tensor_7Numeric_Integer_t(__pyx_t_3);
-  if (unlikely(!__pyx_t_5.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 387; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_5.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 405; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_arr = __pyx_t_5;
   __pyx_t_5.memview = NULL;
   __pyx_t_5.data = NULL;
 
-  /* "Florence/Tensor/Numeric.pyx":388
+  /* "Florence/Tensor/Numeric.pyx":406
  * 
  *     cdef Integer_t[::1] arr = A.ravel()
  *     cdef vector[Integer_t] idx = FindEqual(&arr[0],A.size,num)             # <<<<<<<<<<<<<<
@@ -6012,13 +6323,13 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_18findequal(CYTHON_UNUSED P
  *     if A.ndim == 1:
  */
   __pyx_t_6 = 0;
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_size); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 388; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_size); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 406; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_7 = __Pyx_PyInt_As_npy_int64(__pyx_t_3); if (unlikely((__pyx_t_7 == (npy_int64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 388; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_7 = __Pyx_PyInt_As_npy_int64(__pyx_t_3); if (unlikely((__pyx_t_7 == (npy_int64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 406; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_idx = FindEqual((&(*((__pyx_t_8Florence_6Tensor_7Numeric_Integer_t *) ( /* dim=0 */ ((char *) (((__pyx_t_8Florence_6Tensor_7Numeric_Integer_t *) __pyx_v_arr.data) + __pyx_t_6)) )))), __pyx_t_7, __pyx_v_num);
 
-  /* "Florence/Tensor/Numeric.pyx":390
+  /* "Florence/Tensor/Numeric.pyx":408
  *     cdef vector[Integer_t] idx = FindEqual(&arr[0],A.size,num)
  * 
  *     if A.ndim == 1:             # <<<<<<<<<<<<<<
@@ -6028,7 +6339,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_18findequal(CYTHON_UNUSED P
   switch (__pyx_v_A->nd) {
     case 1:
 
-    /* "Florence/Tensor/Numeric.pyx":391
+    /* "Florence/Tensor/Numeric.pyx":409
  * 
  *     if A.ndim == 1:
  *         return np.array(idx,copy=False)             # <<<<<<<<<<<<<<
@@ -6036,22 +6347,22 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_18findequal(CYTHON_UNUSED P
  *         npidx = np.array(idx,copy=False)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 391; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 409; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 391; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 409; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __pyx_convert_vector_to_py___pyx_t_8Florence_6Tensor_7Numeric_Integer_t(__pyx_v_idx); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 391; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __pyx_convert_vector_to_py___pyx_t_8Florence_6Tensor_7Numeric_Integer_t(__pyx_v_idx); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 409; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 391; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 409; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_GIVEREF(__pyx_t_3);
     PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_3);
     __pyx_t_3 = 0;
-    __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 391; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 409; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 391; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 391; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 409; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 409; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -6060,7 +6371,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_18findequal(CYTHON_UNUSED P
     __pyx_t_8 = 0;
     goto __pyx_L0;
 
-    /* "Florence/Tensor/Numeric.pyx":390
+    /* "Florence/Tensor/Numeric.pyx":408
  *     cdef vector[Integer_t] idx = FindEqual(&arr[0],A.size,num)
  * 
  *     if A.ndim == 1:             # <<<<<<<<<<<<<<
@@ -6069,7 +6380,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_18findequal(CYTHON_UNUSED P
  */
     break;
 
-    /* "Florence/Tensor/Numeric.pyx":392
+    /* "Florence/Tensor/Numeric.pyx":410
  *     if A.ndim == 1:
  *         return np.array(idx,copy=False)
  *     elif A.ndim == 2:             # <<<<<<<<<<<<<<
@@ -6078,29 +6389,29 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_18findequal(CYTHON_UNUSED P
  */
     case 2:
 
-    /* "Florence/Tensor/Numeric.pyx":393
+    /* "Florence/Tensor/Numeric.pyx":411
  *         return np.array(idx,copy=False)
  *     elif A.ndim == 2:
  *         npidx = np.array(idx,copy=False)             # <<<<<<<<<<<<<<
  *         return npidx // A.shape[1], npidx % A.shape[1]
  *     else:
  */
-    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 393; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 411; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_array); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 393; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_array); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 411; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-    __pyx_t_8 = __pyx_convert_vector_to_py___pyx_t_8Florence_6Tensor_7Numeric_Integer_t(__pyx_v_idx); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 393; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __pyx_convert_vector_to_py___pyx_t_8Florence_6Tensor_7Numeric_Integer_t(__pyx_v_idx); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 411; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 393; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 411; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_GIVEREF(__pyx_t_8);
     PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_8);
     __pyx_t_8 = 0;
-    __pyx_t_8 = PyDict_New(); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 393; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = PyDict_New(); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 411; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
-    if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 393; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_1, __pyx_t_8); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 393; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 411; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_1, __pyx_t_8); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 411; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -6108,7 +6419,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_18findequal(CYTHON_UNUSED P
     __pyx_v_npidx = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "Florence/Tensor/Numeric.pyx":394
+    /* "Florence/Tensor/Numeric.pyx":412
  *     elif A.ndim == 2:
  *         npidx = np.array(idx,copy=False)
  *         return npidx // A.shape[1], npidx % A.shape[1]             # <<<<<<<<<<<<<<
@@ -6116,17 +6427,17 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_18findequal(CYTHON_UNUSED P
  *         raise ValueError("Dimension mismatch. Array should be either 1D or 2D")
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_A->dimensions[1])); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 394; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_A->dimensions[1])); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 412; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_8 = PyNumber_FloorDivide(__pyx_v_npidx, __pyx_t_2); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 394; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = PyNumber_FloorDivide(__pyx_v_npidx, __pyx_t_2); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 412; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_A->dimensions[1])); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 394; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_A->dimensions[1])); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 412; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = PyNumber_Remainder(__pyx_v_npidx, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 394; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = PyNumber_Remainder(__pyx_v_npidx, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 412; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 394; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 412; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_GIVEREF(__pyx_t_8);
     PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_8);
@@ -6138,7 +6449,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_18findequal(CYTHON_UNUSED P
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "Florence/Tensor/Numeric.pyx":392
+    /* "Florence/Tensor/Numeric.pyx":410
  *     if A.ndim == 1:
  *         return np.array(idx,copy=False)
  *     elif A.ndim == 2:             # <<<<<<<<<<<<<<
@@ -6148,22 +6459,22 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_18findequal(CYTHON_UNUSED P
     break;
     default:
 
-    /* "Florence/Tensor/Numeric.pyx":396
+    /* "Florence/Tensor/Numeric.pyx":414
  *         return npidx // A.shape[1], npidx % A.shape[1]
  *     else:
  *         raise ValueError("Dimension mismatch. Array should be either 1D or 2D")             # <<<<<<<<<<<<<<
  * 
  * 
  */
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__17, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 396; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__17, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 414; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_Raise(__pyx_t_2, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 396; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 414; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     break;
   }
 
-  /* "Florence/Tensor/Numeric.pyx":378
+  /* "Florence/Tensor/Numeric.pyx":396
  * @boundscheck(False)
  * @wraparound(False)
  * def findequal(np.ndarray A, Integer_t num):             # <<<<<<<<<<<<<<
@@ -6188,7 +6499,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_18findequal(CYTHON_UNUSED P
   return __pyx_r;
 }
 
-/* "Florence/Tensor/Numeric.pyx":401
+/* "Florence/Tensor/Numeric.pyx":419
  * @boundscheck(False)
  * @wraparound(False)
  * def findequal_approx(np.ndarray A, Real_t num, Real_t tol=1.0e-14):             # <<<<<<<<<<<<<<
@@ -6197,10 +6508,10 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_18findequal(CYTHON_UNUSED P
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_21findequal_approx(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_8Florence_6Tensor_7Numeric_20findequal_approx[] = "An equivalent function to numpy.where(A==num). The difference here is that\n        numpy.where results in a boolean array of size equal to the original\n        array A, even if number of counts is none or a single element. This function\n        allocates and does push_back on per count";
-static PyMethodDef __pyx_mdef_8Florence_6Tensor_7Numeric_21findequal_approx = {"findequal_approx", (PyCFunction)__pyx_pw_8Florence_6Tensor_7Numeric_21findequal_approx, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_6Tensor_7Numeric_20findequal_approx};
-static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_21findequal_approx(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_23findequal_approx(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_8Florence_6Tensor_7Numeric_22findequal_approx[] = "An equivalent function to numpy.where(A==num). The difference here is that\n        numpy.where results in a boolean array of size equal to the original\n        array A, even if number of counts is none or a single element. This function\n        allocates and does push_back on per count";
+static PyMethodDef __pyx_mdef_8Florence_6Tensor_7Numeric_23findequal_approx = {"findequal_approx", (PyCFunction)__pyx_pw_8Florence_6Tensor_7Numeric_23findequal_approx, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_6Tensor_7Numeric_22findequal_approx};
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_23findequal_approx(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyArrayObject *__pyx_v_A = 0;
   __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_num;
   __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_tol;
@@ -6231,7 +6542,7 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_21findequal_approx(PyObject
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_num)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("findequal_approx", 0, 2, 3, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 401; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("findequal_approx", 0, 2, 3, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 419; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  2:
         if (kw_args > 0) {
@@ -6240,7 +6551,7 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_21findequal_approx(PyObject
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "findequal_approx") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 401; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "findequal_approx") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 419; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -6252,23 +6563,23 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_21findequal_approx(PyObject
       }
     }
     __pyx_v_A = ((PyArrayObject *)values[0]);
-    __pyx_v_num = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_num == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 401; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_num = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_num == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 419; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     if (values[2]) {
-      __pyx_v_tol = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_tol == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 401; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_v_tol = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_tol == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 419; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     } else {
       __pyx_v_tol = ((__pyx_t_8Florence_6Tensor_7Numeric_Real_t)1.0e-14);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("findequal_approx", 0, 2, 3, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 401; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("findequal_approx", 0, 2, 3, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 419; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Florence.Tensor.Numeric.findequal_approx", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_A), __pyx_ptype_5numpy_ndarray, 1, "A", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 401; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_r = __pyx_pf_8Florence_6Tensor_7Numeric_20findequal_approx(__pyx_self, __pyx_v_A, __pyx_v_num, __pyx_v_tol);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_A), __pyx_ptype_5numpy_ndarray, 1, "A", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 419; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_8Florence_6Tensor_7Numeric_22findequal_approx(__pyx_self, __pyx_v_A, __pyx_v_num, __pyx_v_tol);
 
   /* function exit code */
   goto __pyx_L0;
@@ -6279,7 +6590,7 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_21findequal_approx(PyObject
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_20findequal_approx(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_num, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_tol) {
+static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_22findequal_approx(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_num, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_tol) {
   __Pyx_memviewslice __pyx_v_arr = { 0, 0, { 0 }, { 0 }, { 0 } };
   std::vector<__pyx_t_8Florence_6Tensor_7Numeric_Integer_t>  __pyx_v_idx;
   PyObject *__pyx_v_npidx = NULL;
@@ -6298,38 +6609,38 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_20findequal_approx(CYTHON_U
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("findequal_approx", 0);
 
-  /* "Florence/Tensor/Numeric.pyx":407
+  /* "Florence/Tensor/Numeric.pyx":425
  *         allocates and does push_back on per count"""
  * 
  *     if A.dtype != Real:             # <<<<<<<<<<<<<<
  *         raise TypeError("Type mismatch. Array and value must have the same type")
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 407; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 425; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_Real); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 407; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_Real); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 425; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyObject_RichCompare(__pyx_t_1, __pyx_t_2, Py_NE); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 407; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyObject_RichCompare(__pyx_t_1, __pyx_t_2, Py_NE); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 425; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_4 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 407; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_4 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 425; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if (__pyx_t_4) {
 
-    /* "Florence/Tensor/Numeric.pyx":408
+    /* "Florence/Tensor/Numeric.pyx":426
  * 
  *     if A.dtype != Real:
  *         raise TypeError("Type mismatch. Array and value must have the same type")             # <<<<<<<<<<<<<<
  * 
  *     cdef Real_t[::1] arr = A.ravel()
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__18, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 408; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__18, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 426; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 408; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 426; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-    /* "Florence/Tensor/Numeric.pyx":407
+    /* "Florence/Tensor/Numeric.pyx":425
  *         allocates and does push_back on per count"""
  * 
  *     if A.dtype != Real:             # <<<<<<<<<<<<<<
@@ -6338,14 +6649,14 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_20findequal_approx(CYTHON_U
  */
   }
 
-  /* "Florence/Tensor/Numeric.pyx":410
+  /* "Florence/Tensor/Numeric.pyx":428
  *         raise TypeError("Type mismatch. Array and value must have the same type")
  * 
  *     cdef Real_t[::1] arr = A.ravel()             # <<<<<<<<<<<<<<
  *     cdef vector[Integer_t] idx = FindEqualApprox(&arr[0], A.size, num, tol)
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_ravel); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 410; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_ravel); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 428; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_1 = NULL;
   if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_2))) {
@@ -6358,21 +6669,21 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_20findequal_approx(CYTHON_U
     }
   }
   if (__pyx_t_1) {
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 410; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 428; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   } else {
-    __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 410; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 428; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_dc_nn___pyx_t_8Florence_6Tensor_7Numeric_Real_t(__pyx_t_3);
-  if (unlikely(!__pyx_t_5.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 410; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_5.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 428; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_arr = __pyx_t_5;
   __pyx_t_5.memview = NULL;
   __pyx_t_5.data = NULL;
 
-  /* "Florence/Tensor/Numeric.pyx":411
+  /* "Florence/Tensor/Numeric.pyx":429
  * 
  *     cdef Real_t[::1] arr = A.ravel()
  *     cdef vector[Integer_t] idx = FindEqualApprox(&arr[0], A.size, num, tol)             # <<<<<<<<<<<<<<
@@ -6380,13 +6691,13 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_20findequal_approx(CYTHON_U
  *     if A.ndim == 1:
  */
   __pyx_t_6 = 0;
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_size); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 411; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_size); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 429; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_7 = __Pyx_PyInt_As_npy_int64(__pyx_t_3); if (unlikely((__pyx_t_7 == (npy_int64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 411; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_7 = __Pyx_PyInt_As_npy_int64(__pyx_t_3); if (unlikely((__pyx_t_7 == (npy_int64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 429; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_idx = FindEqualApprox((&(*((__pyx_t_8Florence_6Tensor_7Numeric_Real_t *) ( /* dim=0 */ ((char *) (((__pyx_t_8Florence_6Tensor_7Numeric_Real_t *) __pyx_v_arr.data) + __pyx_t_6)) )))), __pyx_t_7, __pyx_v_num, __pyx_v_tol);
 
-  /* "Florence/Tensor/Numeric.pyx":413
+  /* "Florence/Tensor/Numeric.pyx":431
  *     cdef vector[Integer_t] idx = FindEqualApprox(&arr[0], A.size, num, tol)
  * 
  *     if A.ndim == 1:             # <<<<<<<<<<<<<<
@@ -6396,7 +6707,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_20findequal_approx(CYTHON_U
   switch (__pyx_v_A->nd) {
     case 1:
 
-    /* "Florence/Tensor/Numeric.pyx":414
+    /* "Florence/Tensor/Numeric.pyx":432
  * 
  *     if A.ndim == 1:
  *         return np.array(idx,copy=False)             # <<<<<<<<<<<<<<
@@ -6404,22 +6715,22 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_20findequal_approx(CYTHON_U
  *         npidx = np.array(idx,copy=False)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 414; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 432; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 414; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 432; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __pyx_convert_vector_to_py___pyx_t_8Florence_6Tensor_7Numeric_Integer_t(__pyx_v_idx); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 414; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __pyx_convert_vector_to_py___pyx_t_8Florence_6Tensor_7Numeric_Integer_t(__pyx_v_idx); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 432; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 414; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 432; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_GIVEREF(__pyx_t_3);
     PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_3);
     __pyx_t_3 = 0;
-    __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 414; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 432; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 414; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 414; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 432; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 432; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -6428,7 +6739,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_20findequal_approx(CYTHON_U
     __pyx_t_8 = 0;
     goto __pyx_L0;
 
-    /* "Florence/Tensor/Numeric.pyx":413
+    /* "Florence/Tensor/Numeric.pyx":431
  *     cdef vector[Integer_t] idx = FindEqualApprox(&arr[0], A.size, num, tol)
  * 
  *     if A.ndim == 1:             # <<<<<<<<<<<<<<
@@ -6437,7 +6748,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_20findequal_approx(CYTHON_U
  */
     break;
 
-    /* "Florence/Tensor/Numeric.pyx":415
+    /* "Florence/Tensor/Numeric.pyx":433
  *     if A.ndim == 1:
  *         return np.array(idx,copy=False)
  *     elif A.ndim == 2:             # <<<<<<<<<<<<<<
@@ -6446,29 +6757,29 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_20findequal_approx(CYTHON_U
  */
     case 2:
 
-    /* "Florence/Tensor/Numeric.pyx":416
+    /* "Florence/Tensor/Numeric.pyx":434
  *         return np.array(idx,copy=False)
  *     elif A.ndim == 2:
  *         npidx = np.array(idx,copy=False)             # <<<<<<<<<<<<<<
  *         return npidx // A.shape[1], npidx % A.shape[1]
  *     else:
  */
-    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 416; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 434; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_array); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 416; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_array); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 434; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-    __pyx_t_8 = __pyx_convert_vector_to_py___pyx_t_8Florence_6Tensor_7Numeric_Integer_t(__pyx_v_idx); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 416; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __pyx_convert_vector_to_py___pyx_t_8Florence_6Tensor_7Numeric_Integer_t(__pyx_v_idx); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 434; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 416; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 434; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_GIVEREF(__pyx_t_8);
     PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_8);
     __pyx_t_8 = 0;
-    __pyx_t_8 = PyDict_New(); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 416; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = PyDict_New(); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 434; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
-    if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 416; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_1, __pyx_t_8); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 416; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 434; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_1, __pyx_t_8); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 434; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -6476,7 +6787,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_20findequal_approx(CYTHON_U
     __pyx_v_npidx = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "Florence/Tensor/Numeric.pyx":417
+    /* "Florence/Tensor/Numeric.pyx":435
  *     elif A.ndim == 2:
  *         npidx = np.array(idx,copy=False)
  *         return npidx // A.shape[1], npidx % A.shape[1]             # <<<<<<<<<<<<<<
@@ -6484,17 +6795,17 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_20findequal_approx(CYTHON_U
  *         raise ValueError("Dimension mismatch. Array should be either 1D or 2D")
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_A->dimensions[1])); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 417; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_A->dimensions[1])); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 435; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_8 = PyNumber_FloorDivide(__pyx_v_npidx, __pyx_t_2); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 417; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = PyNumber_FloorDivide(__pyx_v_npidx, __pyx_t_2); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 435; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_A->dimensions[1])); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 417; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_A->dimensions[1])); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 435; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = PyNumber_Remainder(__pyx_v_npidx, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 417; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = PyNumber_Remainder(__pyx_v_npidx, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 435; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 417; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 435; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_GIVEREF(__pyx_t_8);
     PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_8);
@@ -6506,7 +6817,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_20findequal_approx(CYTHON_U
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "Florence/Tensor/Numeric.pyx":415
+    /* "Florence/Tensor/Numeric.pyx":433
  *     if A.ndim == 1:
  *         return np.array(idx,copy=False)
  *     elif A.ndim == 2:             # <<<<<<<<<<<<<<
@@ -6516,22 +6827,22 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_20findequal_approx(CYTHON_U
     break;
     default:
 
-    /* "Florence/Tensor/Numeric.pyx":419
+    /* "Florence/Tensor/Numeric.pyx":437
  *         return npidx // A.shape[1], npidx % A.shape[1]
  *     else:
  *         raise ValueError("Dimension mismatch. Array should be either 1D or 2D")             # <<<<<<<<<<<<<<
  * 
  * 
  */
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__19, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 419; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__19, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_Raise(__pyx_t_2, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 419; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     break;
   }
 
-  /* "Florence/Tensor/Numeric.pyx":401
+  /* "Florence/Tensor/Numeric.pyx":419
  * @boundscheck(False)
  * @wraparound(False)
  * def findequal_approx(np.ndarray A, Real_t num, Real_t tol=1.0e-14):             # <<<<<<<<<<<<<<
@@ -6556,7 +6867,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_20findequal_approx(CYTHON_U
   return __pyx_r;
 }
 
-/* "Florence/Tensor/Numeric.pyx":424
+/* "Florence/Tensor/Numeric.pyx":442
  * @boundscheck(False)
  * @wraparound(False)
  * def findless(np.ndarray A, Real_t num):             # <<<<<<<<<<<<<<
@@ -6565,10 +6876,10 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_20findequal_approx(CYTHON_U
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_23findless(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_8Florence_6Tensor_7Numeric_22findless[] = "An equivalent function to numpy.where(A<num). The difference here is that\n        numpy.where results in a boolean array of size equal to the original\n        array A, even if number of counts is none or a single element. This function\n        allocates and performs push_back per hit count";
-static PyMethodDef __pyx_mdef_8Florence_6Tensor_7Numeric_23findless = {"findless", (PyCFunction)__pyx_pw_8Florence_6Tensor_7Numeric_23findless, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_6Tensor_7Numeric_22findless};
-static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_23findless(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_25findless(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_8Florence_6Tensor_7Numeric_24findless[] = "An equivalent function to numpy.where(A<num). The difference here is that\n        numpy.where results in a boolean array of size equal to the original\n        array A, even if number of counts is none or a single element. This function\n        allocates and performs push_back per hit count";
+static PyMethodDef __pyx_mdef_8Florence_6Tensor_7Numeric_25findless = {"findless", (PyCFunction)__pyx_pw_8Florence_6Tensor_7Numeric_25findless, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_6Tensor_7Numeric_24findless};
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_25findless(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyArrayObject *__pyx_v_A = 0;
   __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_num;
   int __pyx_lineno = 0;
@@ -6597,11 +6908,11 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_23findless(PyObject *__pyx_
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_num)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("findless", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 424; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("findless", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 442; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "findless") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 424; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "findless") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 442; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -6610,18 +6921,18 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_23findless(PyObject *__pyx_
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
     __pyx_v_A = ((PyArrayObject *)values[0]);
-    __pyx_v_num = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_num == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 424; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_num = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_num == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 442; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("findless", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 424; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("findless", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 442; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Florence.Tensor.Numeric.findless", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_A), __pyx_ptype_5numpy_ndarray, 1, "A", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 424; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_r = __pyx_pf_8Florence_6Tensor_7Numeric_22findless(__pyx_self, __pyx_v_A, __pyx_v_num);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_A), __pyx_ptype_5numpy_ndarray, 1, "A", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 442; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_8Florence_6Tensor_7Numeric_24findless(__pyx_self, __pyx_v_A, __pyx_v_num);
 
   /* function exit code */
   goto __pyx_L0;
@@ -6632,7 +6943,7 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_23findless(PyObject *__pyx_
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_22findless(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_num) {
+static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_24findless(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_num) {
   __Pyx_memviewslice __pyx_v_arr = { 0, 0, { 0 }, { 0 }, { 0 } };
   std::vector<__pyx_t_8Florence_6Tensor_7Numeric_Integer_t>  __pyx_v_idx;
   PyObject *__pyx_v_npidx = NULL;
@@ -6650,14 +6961,14 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_22findless(CYTHON_UNUSED Py
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("findless", 0);
 
-  /* "Florence/Tensor/Numeric.pyx":430
+  /* "Florence/Tensor/Numeric.pyx":448
  *         allocates and performs push_back per hit count"""
  * 
  *     cdef Real_t[::1] arr = A.ravel()             # <<<<<<<<<<<<<<
  *     cdef vector[Integer_t] idx = FindLessThan(&arr[0],A.size,num)
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_ravel); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 430; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_ravel); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 448; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_2))) {
@@ -6670,21 +6981,21 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_22findless(CYTHON_UNUSED Py
     }
   }
   if (__pyx_t_3) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 430; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 448; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   } else {
-    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 430; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 448; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_4 = __Pyx_PyObject_to_MemoryviewSlice_dc_nn___pyx_t_8Florence_6Tensor_7Numeric_Real_t(__pyx_t_1);
-  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 430; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 448; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_arr = __pyx_t_4;
   __pyx_t_4.memview = NULL;
   __pyx_t_4.data = NULL;
 
-  /* "Florence/Tensor/Numeric.pyx":431
+  /* "Florence/Tensor/Numeric.pyx":449
  * 
  *     cdef Real_t[::1] arr = A.ravel()
  *     cdef vector[Integer_t] idx = FindLessThan(&arr[0],A.size,num)             # <<<<<<<<<<<<<<
@@ -6692,13 +7003,13 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_22findless(CYTHON_UNUSED Py
  *     if A.ndim == 1:
  */
   __pyx_t_5 = 0;
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_size); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 431; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_size); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 449; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_6 = __Pyx_PyInt_As_npy_int64(__pyx_t_1); if (unlikely((__pyx_t_6 == (npy_int64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 431; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_6 = __Pyx_PyInt_As_npy_int64(__pyx_t_1); if (unlikely((__pyx_t_6 == (npy_int64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 449; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_idx = FindLessThan((&(*((__pyx_t_8Florence_6Tensor_7Numeric_Real_t *) ( /* dim=0 */ ((char *) (((__pyx_t_8Florence_6Tensor_7Numeric_Real_t *) __pyx_v_arr.data) + __pyx_t_5)) )))), __pyx_t_6, __pyx_v_num);
 
-  /* "Florence/Tensor/Numeric.pyx":433
+  /* "Florence/Tensor/Numeric.pyx":451
  *     cdef vector[Integer_t] idx = FindLessThan(&arr[0],A.size,num)
  * 
  *     if A.ndim == 1:             # <<<<<<<<<<<<<<
@@ -6708,7 +7019,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_22findless(CYTHON_UNUSED Py
   switch (__pyx_v_A->nd) {
     case 1:
 
-    /* "Florence/Tensor/Numeric.pyx":434
+    /* "Florence/Tensor/Numeric.pyx":452
  * 
  *     if A.ndim == 1:
  *         return np.array(idx,copy=False)             # <<<<<<<<<<<<<<
@@ -6716,22 +7027,22 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_22findless(CYTHON_UNUSED Py
  *         npidx = np.array(idx,copy=False)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 434; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 452; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 434; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 452; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = __pyx_convert_vector_to_py___pyx_t_8Florence_6Tensor_7Numeric_Integer_t(__pyx_v_idx); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 434; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __pyx_convert_vector_to_py___pyx_t_8Florence_6Tensor_7Numeric_Integer_t(__pyx_v_idx); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 452; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 434; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 452; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_GIVEREF(__pyx_t_1);
     PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
     __pyx_t_1 = 0;
-    __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 434; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 452; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
-    if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 434; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 434; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 452; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 452; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -6740,7 +7051,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_22findless(CYTHON_UNUSED Py
     __pyx_t_7 = 0;
     goto __pyx_L0;
 
-    /* "Florence/Tensor/Numeric.pyx":433
+    /* "Florence/Tensor/Numeric.pyx":451
  *     cdef vector[Integer_t] idx = FindLessThan(&arr[0],A.size,num)
  * 
  *     if A.ndim == 1:             # <<<<<<<<<<<<<<
@@ -6749,7 +7060,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_22findless(CYTHON_UNUSED Py
  */
     break;
 
-    /* "Florence/Tensor/Numeric.pyx":435
+    /* "Florence/Tensor/Numeric.pyx":453
  *     if A.ndim == 1:
  *         return np.array(idx,copy=False)
  *     elif A.ndim == 2:             # <<<<<<<<<<<<<<
@@ -6758,29 +7069,29 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_22findless(CYTHON_UNUSED Py
  */
     case 2:
 
-    /* "Florence/Tensor/Numeric.pyx":436
+    /* "Florence/Tensor/Numeric.pyx":454
  *         return np.array(idx,copy=False)
  *     elif A.ndim == 2:
  *         npidx = np.array(idx,copy=False)             # <<<<<<<<<<<<<<
  *         return npidx // A.shape[1], npidx % A.shape[1]
  *     else:
  */
-    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 436; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 454; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_array); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 436; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_array); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 454; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_7 = __pyx_convert_vector_to_py___pyx_t_8Florence_6Tensor_7Numeric_Integer_t(__pyx_v_idx); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 436; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __pyx_convert_vector_to_py___pyx_t_8Florence_6Tensor_7Numeric_Integer_t(__pyx_v_idx); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 454; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 436; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 454; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_GIVEREF(__pyx_t_7);
     PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_7);
     __pyx_t_7 = 0;
-    __pyx_t_7 = PyDict_New(); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 436; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = PyDict_New(); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 454; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
-    if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 436; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_7); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 436; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 454; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_7); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 454; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -6788,7 +7099,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_22findless(CYTHON_UNUSED Py
     __pyx_v_npidx = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "Florence/Tensor/Numeric.pyx":437
+    /* "Florence/Tensor/Numeric.pyx":455
  *     elif A.ndim == 2:
  *         npidx = np.array(idx,copy=False)
  *         return npidx // A.shape[1], npidx % A.shape[1]             # <<<<<<<<<<<<<<
@@ -6796,17 +7107,17 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_22findless(CYTHON_UNUSED Py
  *         raise ValueError("Dimension mismatch. Array should be either 1D or 2D")
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_A->dimensions[1])); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_A->dimensions[1])); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 455; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_7 = PyNumber_FloorDivide(__pyx_v_npidx, __pyx_t_2); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = PyNumber_FloorDivide(__pyx_v_npidx, __pyx_t_2); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 455; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_A->dimensions[1])); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_A->dimensions[1])); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 455; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PyNumber_Remainder(__pyx_v_npidx, __pyx_t_2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = PyNumber_Remainder(__pyx_v_npidx, __pyx_t_2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 455; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 455; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_GIVEREF(__pyx_t_7);
     PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_7);
@@ -6818,7 +7129,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_22findless(CYTHON_UNUSED Py
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "Florence/Tensor/Numeric.pyx":435
+    /* "Florence/Tensor/Numeric.pyx":453
  *     if A.ndim == 1:
  *         return np.array(idx,copy=False)
  *     elif A.ndim == 2:             # <<<<<<<<<<<<<<
@@ -6828,22 +7139,22 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_22findless(CYTHON_UNUSED Py
     break;
     default:
 
-    /* "Florence/Tensor/Numeric.pyx":439
+    /* "Florence/Tensor/Numeric.pyx":457
  *         return npidx // A.shape[1], npidx % A.shape[1]
  *     else:
  *         raise ValueError("Dimension mismatch. Array should be either 1D or 2D")             # <<<<<<<<<<<<<<
  * 
  * 
  */
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__20, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 439; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__20, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 457; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_Raise(__pyx_t_2, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 439; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 457; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     break;
   }
 
-  /* "Florence/Tensor/Numeric.pyx":424
+  /* "Florence/Tensor/Numeric.pyx":442
  * @boundscheck(False)
  * @wraparound(False)
  * def findless(np.ndarray A, Real_t num):             # <<<<<<<<<<<<<<
@@ -6868,7 +7179,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_22findless(CYTHON_UNUSED Py
   return __pyx_r;
 }
 
-/* "Florence/Tensor/Numeric.pyx":444
+/* "Florence/Tensor/Numeric.pyx":462
  * @boundscheck(False)
  * @wraparound(False)
  * def findgreater(np.ndarray A, Real_t num):             # <<<<<<<<<<<<<<
@@ -6877,10 +7188,10 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_22findless(CYTHON_UNUSED Py
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_25findgreater(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_8Florence_6Tensor_7Numeric_24findgreater[] = "An equivalent function to numpy.where(A>num). The difference here is that\n        numpy.where results in a boolean array of size equal to the original\n        array A, even if number of counts is none or a single element. This function\n        allocates and does push_back on per count";
-static PyMethodDef __pyx_mdef_8Florence_6Tensor_7Numeric_25findgreater = {"findgreater", (PyCFunction)__pyx_pw_8Florence_6Tensor_7Numeric_25findgreater, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_6Tensor_7Numeric_24findgreater};
-static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_25findgreater(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_27findgreater(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_8Florence_6Tensor_7Numeric_26findgreater[] = "An equivalent function to numpy.where(A>num). The difference here is that\n        numpy.where results in a boolean array of size equal to the original\n        array A, even if number of counts is none or a single element. This function\n        allocates and does push_back on per count";
+static PyMethodDef __pyx_mdef_8Florence_6Tensor_7Numeric_27findgreater = {"findgreater", (PyCFunction)__pyx_pw_8Florence_6Tensor_7Numeric_27findgreater, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_6Tensor_7Numeric_26findgreater};
+static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_27findgreater(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyArrayObject *__pyx_v_A = 0;
   __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_num;
   int __pyx_lineno = 0;
@@ -6909,11 +7220,11 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_25findgreater(PyObject *__p
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_num)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("findgreater", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 444; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("findgreater", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 462; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "findgreater") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 444; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "findgreater") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 462; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -6922,18 +7233,18 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_25findgreater(PyObject *__p
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
     __pyx_v_A = ((PyArrayObject *)values[0]);
-    __pyx_v_num = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_num == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 444; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_num = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_num == (npy_float64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 462; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("findgreater", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 444; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("findgreater", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 462; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("Florence.Tensor.Numeric.findgreater", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_A), __pyx_ptype_5numpy_ndarray, 1, "A", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 444; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_r = __pyx_pf_8Florence_6Tensor_7Numeric_24findgreater(__pyx_self, __pyx_v_A, __pyx_v_num);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_A), __pyx_ptype_5numpy_ndarray, 1, "A", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 462; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_8Florence_6Tensor_7Numeric_26findgreater(__pyx_self, __pyx_v_A, __pyx_v_num);
 
   /* function exit code */
   goto __pyx_L0;
@@ -6944,7 +7255,7 @@ static PyObject *__pyx_pw_8Florence_6Tensor_7Numeric_25findgreater(PyObject *__p
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_24findgreater(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_num) {
+static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_26findgreater(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_A, __pyx_t_8Florence_6Tensor_7Numeric_Real_t __pyx_v_num) {
   __Pyx_memviewslice __pyx_v_arr = { 0, 0, { 0 }, { 0 }, { 0 } };
   std::vector<__pyx_t_8Florence_6Tensor_7Numeric_Integer_t>  __pyx_v_idx;
   PyObject *__pyx_v_npidx = NULL;
@@ -6962,14 +7273,14 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_24findgreater(CYTHON_UNUSED
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("findgreater", 0);
 
-  /* "Florence/Tensor/Numeric.pyx":450
+  /* "Florence/Tensor/Numeric.pyx":468
  *         allocates and does push_back on per count"""
  * 
  *     cdef Real_t[::1] arr = A.ravel()             # <<<<<<<<<<<<<<
  *     cdef vector[Integer_t] idx = FindGreaterThan(&arr[0],A.size,num)
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_ravel); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 450; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_ravel); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_2))) {
@@ -6982,21 +7293,21 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_24findgreater(CYTHON_UNUSED
     }
   }
   if (__pyx_t_3) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 450; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   } else {
-    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 450; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_4 = __Pyx_PyObject_to_MemoryviewSlice_dc_nn___pyx_t_8Florence_6Tensor_7Numeric_Real_t(__pyx_t_1);
-  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 450; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_t_4.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_arr = __pyx_t_4;
   __pyx_t_4.memview = NULL;
   __pyx_t_4.data = NULL;
 
-  /* "Florence/Tensor/Numeric.pyx":451
+  /* "Florence/Tensor/Numeric.pyx":469
  * 
  *     cdef Real_t[::1] arr = A.ravel()
  *     cdef vector[Integer_t] idx = FindGreaterThan(&arr[0],A.size,num)             # <<<<<<<<<<<<<<
@@ -7004,13 +7315,13 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_24findgreater(CYTHON_UNUSED
  *     if A.ndim == 1:
  */
   __pyx_t_5 = 0;
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_size); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 451; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_A), __pyx_n_s_size); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 469; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_6 = __Pyx_PyInt_As_npy_int64(__pyx_t_1); if (unlikely((__pyx_t_6 == (npy_int64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 451; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_6 = __Pyx_PyInt_As_npy_int64(__pyx_t_1); if (unlikely((__pyx_t_6 == (npy_int64)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 469; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_idx = FindGreaterThan((&(*((__pyx_t_8Florence_6Tensor_7Numeric_Real_t *) ( /* dim=0 */ ((char *) (((__pyx_t_8Florence_6Tensor_7Numeric_Real_t *) __pyx_v_arr.data) + __pyx_t_5)) )))), __pyx_t_6, __pyx_v_num);
 
-  /* "Florence/Tensor/Numeric.pyx":453
+  /* "Florence/Tensor/Numeric.pyx":471
  *     cdef vector[Integer_t] idx = FindGreaterThan(&arr[0],A.size,num)
  * 
  *     if A.ndim == 1:             # <<<<<<<<<<<<<<
@@ -7020,7 +7331,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_24findgreater(CYTHON_UNUSED
   switch (__pyx_v_A->nd) {
     case 1:
 
-    /* "Florence/Tensor/Numeric.pyx":454
+    /* "Florence/Tensor/Numeric.pyx":472
  * 
  *     if A.ndim == 1:
  *         return np.array(idx,copy=False)             # <<<<<<<<<<<<<<
@@ -7028,22 +7339,22 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_24findgreater(CYTHON_UNUSED
  *         npidx = np.array(idx,copy=False)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 454; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 472; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 454; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 472; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = __pyx_convert_vector_to_py___pyx_t_8Florence_6Tensor_7Numeric_Integer_t(__pyx_v_idx); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 454; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __pyx_convert_vector_to_py___pyx_t_8Florence_6Tensor_7Numeric_Integer_t(__pyx_v_idx); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 472; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 454; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 472; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_GIVEREF(__pyx_t_1);
     PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
     __pyx_t_1 = 0;
-    __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 454; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 472; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
-    if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 454; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 454; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 472; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 472; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -7052,7 +7363,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_24findgreater(CYTHON_UNUSED
     __pyx_t_7 = 0;
     goto __pyx_L0;
 
-    /* "Florence/Tensor/Numeric.pyx":453
+    /* "Florence/Tensor/Numeric.pyx":471
  *     cdef vector[Integer_t] idx = FindGreaterThan(&arr[0],A.size,num)
  * 
  *     if A.ndim == 1:             # <<<<<<<<<<<<<<
@@ -7061,7 +7372,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_24findgreater(CYTHON_UNUSED
  */
     break;
 
-    /* "Florence/Tensor/Numeric.pyx":455
+    /* "Florence/Tensor/Numeric.pyx":473
  *     if A.ndim == 1:
  *         return np.array(idx,copy=False)
  *     elif A.ndim == 2:             # <<<<<<<<<<<<<<
@@ -7070,29 +7381,29 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_24findgreater(CYTHON_UNUSED
  */
     case 2:
 
-    /* "Florence/Tensor/Numeric.pyx":456
+    /* "Florence/Tensor/Numeric.pyx":474
  *         return np.array(idx,copy=False)
  *     elif A.ndim == 2:
  *         npidx = np.array(idx,copy=False)             # <<<<<<<<<<<<<<
  *         return npidx // A.shape[1], npidx % A.shape[1]
  *     else:
  */
-    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 456; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 474; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_array); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 456; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_array); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 474; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_7 = __pyx_convert_vector_to_py___pyx_t_8Florence_6Tensor_7Numeric_Integer_t(__pyx_v_idx); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 456; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __pyx_convert_vector_to_py___pyx_t_8Florence_6Tensor_7Numeric_Integer_t(__pyx_v_idx); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 474; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 456; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 474; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_GIVEREF(__pyx_t_7);
     PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_7);
     __pyx_t_7 = 0;
-    __pyx_t_7 = PyDict_New(); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 456; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = PyDict_New(); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 474; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
-    if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 456; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_7); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 456; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_copy, Py_False) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 474; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_7); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 474; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -7100,7 +7411,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_24findgreater(CYTHON_UNUSED
     __pyx_v_npidx = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "Florence/Tensor/Numeric.pyx":457
+    /* "Florence/Tensor/Numeric.pyx":475
  *     elif A.ndim == 2:
  *         npidx = np.array(idx,copy=False)
  *         return npidx // A.shape[1], npidx % A.shape[1]             # <<<<<<<<<<<<<<
@@ -7108,17 +7419,17 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_24findgreater(CYTHON_UNUSED
  *         raise ValueError("Dimension mismatch. Array should be either 1D or 2D")
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_A->dimensions[1])); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 457; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_A->dimensions[1])); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 475; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_7 = PyNumber_FloorDivide(__pyx_v_npidx, __pyx_t_2); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 457; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = PyNumber_FloorDivide(__pyx_v_npidx, __pyx_t_2); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 475; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_A->dimensions[1])); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 457; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_A->dimensions[1])); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 475; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PyNumber_Remainder(__pyx_v_npidx, __pyx_t_2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 457; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = PyNumber_Remainder(__pyx_v_npidx, __pyx_t_2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 475; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 457; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 475; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_GIVEREF(__pyx_t_7);
     PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_7);
@@ -7130,7 +7441,7 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_24findgreater(CYTHON_UNUSED
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "Florence/Tensor/Numeric.pyx":455
+    /* "Florence/Tensor/Numeric.pyx":473
  *     if A.ndim == 1:
  *         return np.array(idx,copy=False)
  *     elif A.ndim == 2:             # <<<<<<<<<<<<<<
@@ -7140,22 +7451,22 @@ static PyObject *__pyx_pf_8Florence_6Tensor_7Numeric_24findgreater(CYTHON_UNUSED
     break;
     default:
 
-    /* "Florence/Tensor/Numeric.pyx":459
+    /* "Florence/Tensor/Numeric.pyx":477
  *         return npidx // A.shape[1], npidx % A.shape[1]
  *     else:
  *         raise ValueError("Dimension mismatch. Array should be either 1D or 2D")             # <<<<<<<<<<<<<<
  * 
  * 
  */
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__21, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 459; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__21, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 477; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_Raise(__pyx_t_2, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 459; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 477; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     break;
   }
 
-  /* "Florence/Tensor/Numeric.pyx":444
+  /* "Florence/Tensor/Numeric.pyx":462
  * @boundscheck(False)
  * @wraparound(False)
  * def findgreater(np.ndarray A, Real_t num):             # <<<<<<<<<<<<<<
@@ -21998,7 +22309,8 @@ static PyTypeObject __pyx_type___pyx_memoryviewslice = {
 
 static PyMethodDef __pyx_methods[] = {
   {"makezero", (PyCFunction)__pyx_pw_8Florence_6Tensor_7Numeric_5makezero, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_6Tensor_7Numeric_4makezero},
-  {"issymetric", (PyCFunction)__pyx_pw_8Florence_6Tensor_7Numeric_7issymetric, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_6Tensor_7Numeric_6issymetric},
+  {"makezero3d", (PyCFunction)__pyx_pw_8Florence_6Tensor_7Numeric_7makezero3d, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_6Tensor_7Numeric_6makezero3d},
+  {"issymetric", (PyCFunction)__pyx_pw_8Florence_6Tensor_7Numeric_9issymetric, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8Florence_6Tensor_7Numeric_8issymetric},
   {0, 0, 0, 0}
 };
 
@@ -22128,6 +22440,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_itemsize_0_for_cython_array, __pyx_k_itemsize_0_for_cython_array, sizeof(__pyx_k_itemsize_0_for_cython_array), 0, 0, 1, 0},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_n_s_makezero, __pyx_k_makezero, sizeof(__pyx_k_makezero), 0, 0, 1, 1},
+  {&__pyx_n_s_makezero3d, __pyx_k_makezero3d, sizeof(__pyx_k_makezero3d), 0, 0, 1, 1},
   {&__pyx_n_s_memview, __pyx_k_memview, sizeof(__pyx_k_memview), 0, 0, 1, 1},
   {&__pyx_n_s_mode, __pyx_k_mode, sizeof(__pyx_k_mode), 0, 0, 1, 1},
   {&__pyx_n_s_n1, __pyx_k_n1, sizeof(__pyx_k_n1), 0, 0, 1, 1},
@@ -22176,7 +22489,7 @@ static int __Pyx_InitCachedBuiltins(void) {
   __pyx_builtin_AssertionError = __Pyx_GetBuiltinName(__pyx_n_s_AssertionError); if (!__pyx_builtin_AssertionError) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 69; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 89; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 342; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 360; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_RuntimeError = __Pyx_GetBuiltinName(__pyx_n_s_RuntimeError); if (!__pyx_builtin_RuntimeError) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 799; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 147; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -22214,180 +22527,180 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
 
-  /* "Florence/Tensor/Numeric.pyx":131
+  /* "Florence/Tensor/Numeric.pyx":149
  * 
  *     if a1 != a2:
  *         raise ValueError("Symmetricity of a non-Hermitian (non-square) matrix requested")             # <<<<<<<<<<<<<<
  * 
  *     for i in range(a1):
  */
-  __pyx_tuple__3 = PyTuple_Pack(1, __pyx_kp_s_Symmetricity_of_a_non_Hermitian); if (unlikely(!__pyx_tuple__3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 131; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__3 = PyTuple_Pack(1, __pyx_kp_s_Symmetricity_of_a_non_Hermitian); if (unlikely(!__pyx_tuple__3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 149; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
 
-  /* "Florence/Tensor/Numeric.pyx":152
+  /* "Florence/Tensor/Numeric.pyx":170
  *     # DISPATCH CALL TO APPROPRIATE FUNCTION
  *     if n1dim == 3:
  *         VoigtA = np.zeros((6,6),dtype=np.float64)             # <<<<<<<<<<<<<<
  *         _Voigt3(&C[0,0,0,0],&VoigtA[0,0])
  *     elif n1dim == 2:
  */
-  __pyx_tuple__4 = PyTuple_Pack(2, __pyx_int_6, __pyx_int_6); if (unlikely(!__pyx_tuple__4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 152; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__4 = PyTuple_Pack(2, __pyx_int_6, __pyx_int_6); if (unlikely(!__pyx_tuple__4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__4);
   __Pyx_GIVEREF(__pyx_tuple__4);
-  __pyx_tuple__5 = PyTuple_Pack(1, __pyx_tuple__4); if (unlikely(!__pyx_tuple__5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 152; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__5 = PyTuple_Pack(1, __pyx_tuple__4); if (unlikely(!__pyx_tuple__5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__5);
   __Pyx_GIVEREF(__pyx_tuple__5);
 
-  /* "Florence/Tensor/Numeric.pyx":155
+  /* "Florence/Tensor/Numeric.pyx":173
  *         _Voigt3(&C[0,0,0,0],&VoigtA[0,0])
  *     elif n1dim == 2:
  *         VoigtA = np.zeros((3,3),dtype=np.float64)             # <<<<<<<<<<<<<<
  *         _Voigt2(&C[0,0,0,0],&VoigtA[0,0])
  * 
  */
-  __pyx_tuple__6 = PyTuple_Pack(2, __pyx_int_3, __pyx_int_3); if (unlikely(!__pyx_tuple__6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 155; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__6 = PyTuple_Pack(2, __pyx_int_3, __pyx_int_3); if (unlikely(!__pyx_tuple__6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__6);
   __Pyx_GIVEREF(__pyx_tuple__6);
-  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_tuple__6); if (unlikely(!__pyx_tuple__7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 155; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_tuple__6); if (unlikely(!__pyx_tuple__7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__7);
   __Pyx_GIVEREF(__pyx_tuple__7);
 
-  /* "Florence/Tensor/Numeric.pyx":222
+  /* "Florence/Tensor/Numeric.pyx":240
  *     # DISPATCH CALL TO APPROPRIATE FUNCTION
  *     if n1dim == 3:
  *         VoigtA = np.zeros((6,3),dtype=np.float64)             # <<<<<<<<<<<<<<
  *         _Voigt33(&e[0,0,0],&VoigtA[0,0])
  *     elif n1dim == 2:
  */
-  __pyx_tuple__8 = PyTuple_Pack(2, __pyx_int_6, __pyx_int_3); if (unlikely(!__pyx_tuple__8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__8 = PyTuple_Pack(2, __pyx_int_6, __pyx_int_3); if (unlikely(!__pyx_tuple__8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 240; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__8);
   __Pyx_GIVEREF(__pyx_tuple__8);
-  __pyx_tuple__9 = PyTuple_Pack(1, __pyx_tuple__8); if (unlikely(!__pyx_tuple__9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__9 = PyTuple_Pack(1, __pyx_tuple__8); if (unlikely(!__pyx_tuple__9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 240; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__9);
   __Pyx_GIVEREF(__pyx_tuple__9);
 
-  /* "Florence/Tensor/Numeric.pyx":225
+  /* "Florence/Tensor/Numeric.pyx":243
  *         _Voigt33(&e[0,0,0],&VoigtA[0,0])
  *     elif n1dim == 2:
  *         VoigtA = np.zeros((3,2),dtype=np.float64)             # <<<<<<<<<<<<<<
  *         _Voigt23(&e[0,0,0],&VoigtA[0,0])
  * 
  */
-  __pyx_tuple__10 = PyTuple_Pack(2, __pyx_int_3, __pyx_int_2); if (unlikely(!__pyx_tuple__10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 225; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__10 = PyTuple_Pack(2, __pyx_int_3, __pyx_int_2); if (unlikely(!__pyx_tuple__10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__10);
   __Pyx_GIVEREF(__pyx_tuple__10);
-  __pyx_tuple__11 = PyTuple_Pack(1, __pyx_tuple__10); if (unlikely(!__pyx_tuple__11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 225; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__11 = PyTuple_Pack(1, __pyx_tuple__10); if (unlikely(!__pyx_tuple__11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__11);
   __Pyx_GIVEREF(__pyx_tuple__11);
 
-  /* "Florence/Tensor/Numeric.pyx":290
+  /* "Florence/Tensor/Numeric.pyx":308
  * 
  *     if A.shape[0] != 3 or A.shape[1] != 3:
  *         raise ValueError("Dimension of matrix should be 3x3")             # <<<<<<<<<<<<<<
  * 
  *     cdef:
  */
-  __pyx_tuple__12 = PyTuple_Pack(1, __pyx_kp_s_Dimension_of_matrix_should_be_3x); if (unlikely(!__pyx_tuple__12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 290; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__12 = PyTuple_Pack(1, __pyx_kp_s_Dimension_of_matrix_should_be_3x); if (unlikely(!__pyx_tuple__12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 308; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__12);
   __Pyx_GIVEREF(__pyx_tuple__12);
 
-  /* "Florence/Tensor/Numeric.pyx":342
+  /* "Florence/Tensor/Numeric.pyx":360
  * 
  *     if A.dtype != Integer:
  *         raise TypeError("Expected an array of integers")             # <<<<<<<<<<<<<<
  * 
  *     cdef:
  */
-  __pyx_tuple__13 = PyTuple_Pack(1, __pyx_kp_s_Expected_an_array_of_integers); if (unlikely(!__pyx_tuple__13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 342; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__13 = PyTuple_Pack(1, __pyx_kp_s_Expected_an_array_of_integers); if (unlikely(!__pyx_tuple__13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 360; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__13);
   __Pyx_GIVEREF(__pyx_tuple__13);
 
-  /* "Florence/Tensor/Numeric.pyx":361
+  /* "Florence/Tensor/Numeric.pyx":379
  *         return (ret // col, ret % col)
  *     else:
  *         raise ValueError("Dimension mismatch. Array should be either 1D or 2D")             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_tuple__14 = PyTuple_Pack(1, __pyx_kp_s_Dimension_mismatch_Array_should); if (unlikely(!__pyx_tuple__14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 361; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__14 = PyTuple_Pack(1, __pyx_kp_s_Dimension_mismatch_Array_should); if (unlikely(!__pyx_tuple__14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 379; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__14);
   __Pyx_GIVEREF(__pyx_tuple__14);
 
-  /* "Florence/Tensor/Numeric.pyx":369
+  /* "Florence/Tensor/Numeric.pyx":387
  * 
  *     if A.dtype != Real:
  *         raise TypeError("Expected an array of doubles")             # <<<<<<<<<<<<<<
  * 
  *     cdef Real_t[::1] arr = A.ravel()
  */
-  __pyx_tuple__15 = PyTuple_Pack(1, __pyx_kp_s_Expected_an_array_of_doubles); if (unlikely(!__pyx_tuple__15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 369; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__15 = PyTuple_Pack(1, __pyx_kp_s_Expected_an_array_of_doubles); if (unlikely(!__pyx_tuple__15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 387; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__15);
   __Pyx_GIVEREF(__pyx_tuple__15);
 
-  /* "Florence/Tensor/Numeric.pyx":385
+  /* "Florence/Tensor/Numeric.pyx":403
  * 
  *     if A.dtype != Integer:
  *         raise TypeError("Type mismatch. Array and value must have the same type")             # <<<<<<<<<<<<<<
  * 
  *     cdef Integer_t[::1] arr = A.ravel()
  */
-  __pyx_tuple__16 = PyTuple_Pack(1, __pyx_kp_s_Type_mismatch_Array_and_value_mu); if (unlikely(!__pyx_tuple__16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 385; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__16 = PyTuple_Pack(1, __pyx_kp_s_Type_mismatch_Array_and_value_mu); if (unlikely(!__pyx_tuple__16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 403; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__16);
   __Pyx_GIVEREF(__pyx_tuple__16);
 
-  /* "Florence/Tensor/Numeric.pyx":396
+  /* "Florence/Tensor/Numeric.pyx":414
  *         return npidx // A.shape[1], npidx % A.shape[1]
  *     else:
  *         raise ValueError("Dimension mismatch. Array should be either 1D or 2D")             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_tuple__17 = PyTuple_Pack(1, __pyx_kp_s_Dimension_mismatch_Array_should); if (unlikely(!__pyx_tuple__17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 396; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__17 = PyTuple_Pack(1, __pyx_kp_s_Dimension_mismatch_Array_should); if (unlikely(!__pyx_tuple__17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 414; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__17);
   __Pyx_GIVEREF(__pyx_tuple__17);
 
-  /* "Florence/Tensor/Numeric.pyx":408
+  /* "Florence/Tensor/Numeric.pyx":426
  * 
  *     if A.dtype != Real:
  *         raise TypeError("Type mismatch. Array and value must have the same type")             # <<<<<<<<<<<<<<
  * 
  *     cdef Real_t[::1] arr = A.ravel()
  */
-  __pyx_tuple__18 = PyTuple_Pack(1, __pyx_kp_s_Type_mismatch_Array_and_value_mu); if (unlikely(!__pyx_tuple__18)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 408; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__18 = PyTuple_Pack(1, __pyx_kp_s_Type_mismatch_Array_and_value_mu); if (unlikely(!__pyx_tuple__18)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 426; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__18);
   __Pyx_GIVEREF(__pyx_tuple__18);
 
-  /* "Florence/Tensor/Numeric.pyx":419
+  /* "Florence/Tensor/Numeric.pyx":437
  *         return npidx // A.shape[1], npidx % A.shape[1]
  *     else:
  *         raise ValueError("Dimension mismatch. Array should be either 1D or 2D")             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_tuple__19 = PyTuple_Pack(1, __pyx_kp_s_Dimension_mismatch_Array_should); if (unlikely(!__pyx_tuple__19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 419; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__19 = PyTuple_Pack(1, __pyx_kp_s_Dimension_mismatch_Array_should); if (unlikely(!__pyx_tuple__19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__19);
   __Pyx_GIVEREF(__pyx_tuple__19);
 
-  /* "Florence/Tensor/Numeric.pyx":439
+  /* "Florence/Tensor/Numeric.pyx":457
  *         return npidx // A.shape[1], npidx % A.shape[1]
  *     else:
  *         raise ValueError("Dimension mismatch. Array should be either 1D or 2D")             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_tuple__20 = PyTuple_Pack(1, __pyx_kp_s_Dimension_mismatch_Array_should); if (unlikely(!__pyx_tuple__20)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 439; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__20 = PyTuple_Pack(1, __pyx_kp_s_Dimension_mismatch_Array_should); if (unlikely(!__pyx_tuple__20)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 457; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__20);
   __Pyx_GIVEREF(__pyx_tuple__20);
 
-  /* "Florence/Tensor/Numeric.pyx":459
+  /* "Florence/Tensor/Numeric.pyx":477
  *         return npidx // A.shape[1], npidx % A.shape[1]
  *     else:
  *         raise ValueError("Dimension mismatch. Array should be either 1D or 2D")             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_tuple__21 = PyTuple_Pack(1, __pyx_kp_s_Dimension_mismatch_Array_should); if (unlikely(!__pyx_tuple__21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 459; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__21 = PyTuple_Pack(1, __pyx_kp_s_Dimension_mismatch_Array_should); if (unlikely(!__pyx_tuple__21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 477; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__21);
   __Pyx_GIVEREF(__pyx_tuple__21);
 
@@ -22627,113 +22940,113 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__43);
   __pyx_codeobj__44 = (PyObject*)__Pyx_PyCode_New(2, 0, 6, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__43, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_roman_Dropbox_florence_Flo, __pyx_n_s_doublecontract, 79, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__44)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 79; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "Florence/Tensor/Numeric.pyx":146
+  /* "Florence/Tensor/Numeric.pyx":164
  * @boundscheck(False)
  * @wraparound(False)
  * def tovoigt(np.ndarray[Real_t, ndim=4, mode='c'] C):             # <<<<<<<<<<<<<<
  *     """Convert a 4D array to its Voigt represenation"""
  *     cdef np.ndarray[Real_t, ndim=2,mode='c'] VoigtA
  */
-  __pyx_tuple__45 = PyTuple_Pack(3, __pyx_n_s_C, __pyx_n_s_VoigtA, __pyx_n_s_n1dim); if (unlikely(!__pyx_tuple__45)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__45 = PyTuple_Pack(3, __pyx_n_s_C, __pyx_n_s_VoigtA, __pyx_n_s_n1dim); if (unlikely(!__pyx_tuple__45)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__45);
   __Pyx_GIVEREF(__pyx_tuple__45);
-  __pyx_codeobj__46 = (PyObject*)__Pyx_PyCode_New(1, 0, 3, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__45, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_roman_Dropbox_florence_Flo, __pyx_n_s_tovoigt, 146, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__46)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__46 = (PyObject*)__Pyx_PyCode_New(1, 0, 3, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__45, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_roman_Dropbox_florence_Flo, __pyx_n_s_tovoigt, 164, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__46)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "Florence/Tensor/Numeric.pyx":216
+  /* "Florence/Tensor/Numeric.pyx":234
  * @boundscheck(False)
  * @wraparound(False)
  * def tovoigt3(np.ndarray[Real_t, ndim=3, mode='c'] e):             # <<<<<<<<<<<<<<
  *     """Convert a 3D array to its Voigt represenation"""
  *     cdef np.ndarray[Real_t, ndim=2,mode='c'] VoigtA
  */
-  __pyx_tuple__47 = PyTuple_Pack(3, __pyx_n_s_e, __pyx_n_s_VoigtA, __pyx_n_s_n1dim); if (unlikely(!__pyx_tuple__47)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 216; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__47 = PyTuple_Pack(3, __pyx_n_s_e, __pyx_n_s_VoigtA, __pyx_n_s_n1dim); if (unlikely(!__pyx_tuple__47)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__47);
   __Pyx_GIVEREF(__pyx_tuple__47);
-  __pyx_codeobj__48 = (PyObject*)__Pyx_PyCode_New(1, 0, 3, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__47, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_roman_Dropbox_florence_Flo, __pyx_n_s_tovoigt3, 216, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__48)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 216; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__48 = (PyObject*)__Pyx_PyCode_New(1, 0, 3, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__47, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_roman_Dropbox_florence_Flo, __pyx_n_s_tovoigt3, 234, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__48)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "Florence/Tensor/Numeric.pyx":262
+  /* "Florence/Tensor/Numeric.pyx":280
  * 
  * @boundscheck(False)
  * def cross2d(np.ndarray[double, ndim=2] A, np.ndarray[double, ndim=2] B, str dim="3d", toarray=False):             # <<<<<<<<<<<<<<
  *     """Cross product of second order tensors A_ij x B_ij defined in the sense of R. de Boer
  *         [Vektor- und Tensorrechnung fur Ingenieure] and J. Bonet [A computational framework
  */
-  __pyx_tuple__49 = PyTuple_Pack(23, __pyx_n_s_A, __pyx_n_s_B, __pyx_n_s_dim, __pyx_n_s_toarray, __pyx_n_s_A00, __pyx_n_s_A11, __pyx_n_s_A22, __pyx_n_s_A01, __pyx_n_s_A02, __pyx_n_s_A12, __pyx_n_s_A10, __pyx_n_s_A20, __pyx_n_s_A21, __pyx_n_s_B00, __pyx_n_s_B11, __pyx_n_s_B22, __pyx_n_s_B01, __pyx_n_s_B02, __pyx_n_s_B12, __pyx_n_s_B10, __pyx_n_s_B20, __pyx_n_s_B21, __pyx_n_s_AB); if (unlikely(!__pyx_tuple__49)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 262; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__49 = PyTuple_Pack(23, __pyx_n_s_A, __pyx_n_s_B, __pyx_n_s_dim, __pyx_n_s_toarray, __pyx_n_s_A00, __pyx_n_s_A11, __pyx_n_s_A22, __pyx_n_s_A01, __pyx_n_s_A02, __pyx_n_s_A12, __pyx_n_s_A10, __pyx_n_s_A20, __pyx_n_s_A21, __pyx_n_s_B00, __pyx_n_s_B11, __pyx_n_s_B22, __pyx_n_s_B01, __pyx_n_s_B02, __pyx_n_s_B12, __pyx_n_s_B10, __pyx_n_s_B20, __pyx_n_s_B21, __pyx_n_s_AB); if (unlikely(!__pyx_tuple__49)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 280; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__49);
   __Pyx_GIVEREF(__pyx_tuple__49);
-  __pyx_codeobj__50 = (PyObject*)__Pyx_PyCode_New(4, 0, 23, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__49, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_roman_Dropbox_florence_Flo, __pyx_n_s_cross2d, 262, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__50)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 262; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__50 = (PyObject*)__Pyx_PyCode_New(4, 0, 23, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__49, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_roman_Dropbox_florence_Flo, __pyx_n_s_cross2d, 280, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__50)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 280; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "Florence/Tensor/Numeric.pyx":338
+  /* "Florence/Tensor/Numeric.pyx":356
  * @boundscheck(False)
  * @cdivision(True)
  * def findfirst(np.ndarray A, Integer_t num):             # <<<<<<<<<<<<<<
  *     """Find the first occurence of a value in an ndarray"""
  * 
  */
-  __pyx_tuple__51 = PyTuple_Pack(8, __pyx_n_s_A, __pyx_n_s_num, __pyx_n_s_size, __pyx_n_s_ndim, __pyx_n_s_arr, __pyx_n_s_col, __pyx_n_s_idx, __pyx_n_s_ret); if (unlikely(!__pyx_tuple__51)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 338; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__51 = PyTuple_Pack(8, __pyx_n_s_A, __pyx_n_s_num, __pyx_n_s_size, __pyx_n_s_ndim, __pyx_n_s_arr, __pyx_n_s_col, __pyx_n_s_idx, __pyx_n_s_ret); if (unlikely(!__pyx_tuple__51)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 356; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__51);
   __Pyx_GIVEREF(__pyx_tuple__51);
-  __pyx_codeobj__52 = (PyObject*)__Pyx_PyCode_New(2, 0, 8, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__51, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_roman_Dropbox_florence_Flo, __pyx_n_s_findfirst, 338, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__52)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 338; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__52 = (PyObject*)__Pyx_PyCode_New(2, 0, 8, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__51, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_roman_Dropbox_florence_Flo, __pyx_n_s_findfirst, 356, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__52)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 356; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "Florence/Tensor/Numeric.pyx":365
+  /* "Florence/Tensor/Numeric.pyx":383
  * 
  * @boundscheck(False)
  * def fillin(np.ndarray A, Real_t num):             # <<<<<<<<<<<<<<
  *     """Fill ndarray with a value. This is an in-place operation"""
  * 
  */
-  __pyx_tuple__53 = PyTuple_Pack(3, __pyx_n_s_A, __pyx_n_s_num, __pyx_n_s_arr); if (unlikely(!__pyx_tuple__53)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 365; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__53 = PyTuple_Pack(3, __pyx_n_s_A, __pyx_n_s_num, __pyx_n_s_arr); if (unlikely(!__pyx_tuple__53)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 383; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__53);
   __Pyx_GIVEREF(__pyx_tuple__53);
-  __pyx_codeobj__54 = (PyObject*)__Pyx_PyCode_New(2, 0, 3, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__53, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_roman_Dropbox_florence_Flo, __pyx_n_s_fillin, 365, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__54)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 365; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__54 = (PyObject*)__Pyx_PyCode_New(2, 0, 3, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__53, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_roman_Dropbox_florence_Flo, __pyx_n_s_fillin, 383, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__54)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 383; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "Florence/Tensor/Numeric.pyx":378
+  /* "Florence/Tensor/Numeric.pyx":396
  * @boundscheck(False)
  * @wraparound(False)
  * def findequal(np.ndarray A, Integer_t num):             # <<<<<<<<<<<<<<
  *     """An equivalent function to numpy.where(A==num). The difference here is that
  *         numpy.where results in a boolean array of size equal to the original
  */
-  __pyx_tuple__55 = PyTuple_Pack(5, __pyx_n_s_A, __pyx_n_s_num, __pyx_n_s_arr, __pyx_n_s_idx, __pyx_n_s_npidx); if (unlikely(!__pyx_tuple__55)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 378; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__55 = PyTuple_Pack(5, __pyx_n_s_A, __pyx_n_s_num, __pyx_n_s_arr, __pyx_n_s_idx, __pyx_n_s_npidx); if (unlikely(!__pyx_tuple__55)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 396; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__55);
   __Pyx_GIVEREF(__pyx_tuple__55);
-  __pyx_codeobj__56 = (PyObject*)__Pyx_PyCode_New(2, 0, 5, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__55, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_roman_Dropbox_florence_Flo, __pyx_n_s_findequal, 378, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__56)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 378; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__56 = (PyObject*)__Pyx_PyCode_New(2, 0, 5, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__55, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_roman_Dropbox_florence_Flo, __pyx_n_s_findequal, 396, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__56)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 396; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "Florence/Tensor/Numeric.pyx":401
+  /* "Florence/Tensor/Numeric.pyx":419
  * @boundscheck(False)
  * @wraparound(False)
  * def findequal_approx(np.ndarray A, Real_t num, Real_t tol=1.0e-14):             # <<<<<<<<<<<<<<
  *     """An equivalent function to numpy.where(A==num). The difference here is that
  *         numpy.where results in a boolean array of size equal to the original
  */
-  __pyx_tuple__57 = PyTuple_Pack(6, __pyx_n_s_A, __pyx_n_s_num, __pyx_n_s_tol, __pyx_n_s_arr, __pyx_n_s_idx, __pyx_n_s_npidx); if (unlikely(!__pyx_tuple__57)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 401; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__57 = PyTuple_Pack(6, __pyx_n_s_A, __pyx_n_s_num, __pyx_n_s_tol, __pyx_n_s_arr, __pyx_n_s_idx, __pyx_n_s_npidx); if (unlikely(!__pyx_tuple__57)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 419; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__57);
   __Pyx_GIVEREF(__pyx_tuple__57);
-  __pyx_codeobj__58 = (PyObject*)__Pyx_PyCode_New(3, 0, 6, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__57, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_roman_Dropbox_florence_Flo, __pyx_n_s_findequal_approx, 401, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__58)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 401; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__58 = (PyObject*)__Pyx_PyCode_New(3, 0, 6, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__57, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_roman_Dropbox_florence_Flo, __pyx_n_s_findequal_approx, 419, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__58)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 419; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "Florence/Tensor/Numeric.pyx":424
+  /* "Florence/Tensor/Numeric.pyx":442
  * @boundscheck(False)
  * @wraparound(False)
  * def findless(np.ndarray A, Real_t num):             # <<<<<<<<<<<<<<
  *     """An equivalent function to numpy.where(A<num). The difference here is that
  *         numpy.where results in a boolean array of size equal to the original
  */
-  __pyx_tuple__59 = PyTuple_Pack(5, __pyx_n_s_A, __pyx_n_s_num, __pyx_n_s_arr, __pyx_n_s_idx, __pyx_n_s_npidx); if (unlikely(!__pyx_tuple__59)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 424; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__59 = PyTuple_Pack(5, __pyx_n_s_A, __pyx_n_s_num, __pyx_n_s_arr, __pyx_n_s_idx, __pyx_n_s_npidx); if (unlikely(!__pyx_tuple__59)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 442; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__59);
   __Pyx_GIVEREF(__pyx_tuple__59);
-  __pyx_codeobj__60 = (PyObject*)__Pyx_PyCode_New(2, 0, 5, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__59, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_roman_Dropbox_florence_Flo, __pyx_n_s_findless, 424, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__60)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 424; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__60 = (PyObject*)__Pyx_PyCode_New(2, 0, 5, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__59, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_roman_Dropbox_florence_Flo, __pyx_n_s_findless, 442, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__60)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 442; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "Florence/Tensor/Numeric.pyx":444
+  /* "Florence/Tensor/Numeric.pyx":462
  * @boundscheck(False)
  * @wraparound(False)
  * def findgreater(np.ndarray A, Real_t num):             # <<<<<<<<<<<<<<
  *     """An equivalent function to numpy.where(A>num). The difference here is that
  *         numpy.where results in a boolean array of size equal to the original
  */
-  __pyx_tuple__61 = PyTuple_Pack(5, __pyx_n_s_A, __pyx_n_s_num, __pyx_n_s_arr, __pyx_n_s_idx, __pyx_n_s_npidx); if (unlikely(!__pyx_tuple__61)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 444; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__61 = PyTuple_Pack(5, __pyx_n_s_A, __pyx_n_s_num, __pyx_n_s_arr, __pyx_n_s_idx, __pyx_n_s_npidx); if (unlikely(!__pyx_tuple__61)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 462; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__61);
   __Pyx_GIVEREF(__pyx_tuple__61);
-  __pyx_codeobj__62 = (PyObject*)__Pyx_PyCode_New(2, 0, 5, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__61, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_roman_Dropbox_florence_Flo, __pyx_n_s_findgreater, 444, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__62)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 444; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__62 = (PyObject*)__Pyx_PyCode_New(2, 0, 5, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__61, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_roman_Dropbox_florence_Flo, __pyx_n_s_findgreater, 462, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__62)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 462; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
   /* "View.MemoryView":278
  *         return self.name
@@ -22964,11 +23277,11 @@ PyMODINIT_FUNC PyInit_Numeric(void)
   /* "Florence/Tensor/Numeric.pyx":9
  * from cpython cimport bool
  * 
- * __all__ = ['trace','doublecontract','makezero','issymetric','tovoigt', 'tovoigt3', 'cross2d',             # <<<<<<<<<<<<<<
+ * __all__ = ['trace','doublecontract','makezero','makezero3d','issymetric','tovoigt', 'tovoigt3', 'cross2d',             # <<<<<<<<<<<<<<
  * 'fillin','findfirst','findequal','findequal_approx','findless','findgreater']
  * 
  */
-  __pyx_t_1 = PyList_New(13); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyList_New(14); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_n_s_trace);
   __Pyx_GIVEREF(__pyx_n_s_trace);
@@ -22979,36 +23292,39 @@ PyMODINIT_FUNC PyInit_Numeric(void)
   __Pyx_INCREF(__pyx_n_s_makezero);
   __Pyx_GIVEREF(__pyx_n_s_makezero);
   PyList_SET_ITEM(__pyx_t_1, 2, __pyx_n_s_makezero);
+  __Pyx_INCREF(__pyx_n_s_makezero3d);
+  __Pyx_GIVEREF(__pyx_n_s_makezero3d);
+  PyList_SET_ITEM(__pyx_t_1, 3, __pyx_n_s_makezero3d);
   __Pyx_INCREF(__pyx_n_s_issymetric);
   __Pyx_GIVEREF(__pyx_n_s_issymetric);
-  PyList_SET_ITEM(__pyx_t_1, 3, __pyx_n_s_issymetric);
+  PyList_SET_ITEM(__pyx_t_1, 4, __pyx_n_s_issymetric);
   __Pyx_INCREF(__pyx_n_s_tovoigt);
   __Pyx_GIVEREF(__pyx_n_s_tovoigt);
-  PyList_SET_ITEM(__pyx_t_1, 4, __pyx_n_s_tovoigt);
+  PyList_SET_ITEM(__pyx_t_1, 5, __pyx_n_s_tovoigt);
   __Pyx_INCREF(__pyx_n_s_tovoigt3);
   __Pyx_GIVEREF(__pyx_n_s_tovoigt3);
-  PyList_SET_ITEM(__pyx_t_1, 5, __pyx_n_s_tovoigt3);
+  PyList_SET_ITEM(__pyx_t_1, 6, __pyx_n_s_tovoigt3);
   __Pyx_INCREF(__pyx_n_s_cross2d);
   __Pyx_GIVEREF(__pyx_n_s_cross2d);
-  PyList_SET_ITEM(__pyx_t_1, 6, __pyx_n_s_cross2d);
+  PyList_SET_ITEM(__pyx_t_1, 7, __pyx_n_s_cross2d);
   __Pyx_INCREF(__pyx_n_s_fillin);
   __Pyx_GIVEREF(__pyx_n_s_fillin);
-  PyList_SET_ITEM(__pyx_t_1, 7, __pyx_n_s_fillin);
+  PyList_SET_ITEM(__pyx_t_1, 8, __pyx_n_s_fillin);
   __Pyx_INCREF(__pyx_n_s_findfirst);
   __Pyx_GIVEREF(__pyx_n_s_findfirst);
-  PyList_SET_ITEM(__pyx_t_1, 8, __pyx_n_s_findfirst);
+  PyList_SET_ITEM(__pyx_t_1, 9, __pyx_n_s_findfirst);
   __Pyx_INCREF(__pyx_n_s_findequal);
   __Pyx_GIVEREF(__pyx_n_s_findequal);
-  PyList_SET_ITEM(__pyx_t_1, 9, __pyx_n_s_findequal);
+  PyList_SET_ITEM(__pyx_t_1, 10, __pyx_n_s_findequal);
   __Pyx_INCREF(__pyx_n_s_findequal_approx);
   __Pyx_GIVEREF(__pyx_n_s_findequal_approx);
-  PyList_SET_ITEM(__pyx_t_1, 10, __pyx_n_s_findequal_approx);
+  PyList_SET_ITEM(__pyx_t_1, 11, __pyx_n_s_findequal_approx);
   __Pyx_INCREF(__pyx_n_s_findless);
   __Pyx_GIVEREF(__pyx_n_s_findless);
-  PyList_SET_ITEM(__pyx_t_1, 11, __pyx_n_s_findless);
+  PyList_SET_ITEM(__pyx_t_1, 12, __pyx_n_s_findless);
   __Pyx_INCREF(__pyx_n_s_findgreater);
   __Pyx_GIVEREF(__pyx_n_s_findgreater);
-  PyList_SET_ITEM(__pyx_t_1, 12, __pyx_n_s_findgreater);
+  PyList_SET_ITEM(__pyx_t_1, 13, __pyx_n_s_findgreater);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_all, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
@@ -23066,112 +23382,112 @@ PyMODINIT_FUNC PyInit_Numeric(void)
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_doublecontract, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 79; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "Florence/Tensor/Numeric.pyx":146
+  /* "Florence/Tensor/Numeric.pyx":164
  * @boundscheck(False)
  * @wraparound(False)
  * def tovoigt(np.ndarray[Real_t, ndim=4, mode='c'] C):             # <<<<<<<<<<<<<<
  *     """Convert a 4D array to its Voigt represenation"""
  *     cdef np.ndarray[Real_t, ndim=2,mode='c'] VoigtA
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8Florence_6Tensor_7Numeric_9tovoigt, NULL, __pyx_n_s_Florence_Tensor_Numeric); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8Florence_6Tensor_7Numeric_11tovoigt, NULL, __pyx_n_s_Florence_Tensor_Numeric); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_tovoigt, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_tovoigt, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "Florence/Tensor/Numeric.pyx":216
+  /* "Florence/Tensor/Numeric.pyx":234
  * @boundscheck(False)
  * @wraparound(False)
  * def tovoigt3(np.ndarray[Real_t, ndim=3, mode='c'] e):             # <<<<<<<<<<<<<<
  *     """Convert a 3D array to its Voigt represenation"""
  *     cdef np.ndarray[Real_t, ndim=2,mode='c'] VoigtA
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8Florence_6Tensor_7Numeric_11tovoigt3, NULL, __pyx_n_s_Florence_Tensor_Numeric); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 216; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8Florence_6Tensor_7Numeric_13tovoigt3, NULL, __pyx_n_s_Florence_Tensor_Numeric); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_tovoigt3, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 216; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_tovoigt3, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "Florence/Tensor/Numeric.pyx":262
+  /* "Florence/Tensor/Numeric.pyx":280
  * 
  * @boundscheck(False)
  * def cross2d(np.ndarray[double, ndim=2] A, np.ndarray[double, ndim=2] B, str dim="3d", toarray=False):             # <<<<<<<<<<<<<<
  *     """Cross product of second order tensors A_ij x B_ij defined in the sense of R. de Boer
  *         [Vektor- und Tensorrechnung fur Ingenieure] and J. Bonet [A computational framework
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8Florence_6Tensor_7Numeric_13cross2d, NULL, __pyx_n_s_Florence_Tensor_Numeric); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 262; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8Florence_6Tensor_7Numeric_15cross2d, NULL, __pyx_n_s_Florence_Tensor_Numeric); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 280; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cross2d, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 262; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cross2d, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 280; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "Florence/Tensor/Numeric.pyx":338
+  /* "Florence/Tensor/Numeric.pyx":356
  * @boundscheck(False)
  * @cdivision(True)
  * def findfirst(np.ndarray A, Integer_t num):             # <<<<<<<<<<<<<<
  *     """Find the first occurence of a value in an ndarray"""
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8Florence_6Tensor_7Numeric_15findfirst, NULL, __pyx_n_s_Florence_Tensor_Numeric); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 338; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8Florence_6Tensor_7Numeric_17findfirst, NULL, __pyx_n_s_Florence_Tensor_Numeric); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 356; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_findfirst, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 338; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_findfirst, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 356; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "Florence/Tensor/Numeric.pyx":365
+  /* "Florence/Tensor/Numeric.pyx":383
  * 
  * @boundscheck(False)
  * def fillin(np.ndarray A, Real_t num):             # <<<<<<<<<<<<<<
  *     """Fill ndarray with a value. This is an in-place operation"""
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8Florence_6Tensor_7Numeric_17fillin, NULL, __pyx_n_s_Florence_Tensor_Numeric); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 365; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8Florence_6Tensor_7Numeric_19fillin, NULL, __pyx_n_s_Florence_Tensor_Numeric); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 383; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_fillin, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 365; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_fillin, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 383; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "Florence/Tensor/Numeric.pyx":378
+  /* "Florence/Tensor/Numeric.pyx":396
  * @boundscheck(False)
  * @wraparound(False)
  * def findequal(np.ndarray A, Integer_t num):             # <<<<<<<<<<<<<<
  *     """An equivalent function to numpy.where(A==num). The difference here is that
  *         numpy.where results in a boolean array of size equal to the original
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8Florence_6Tensor_7Numeric_19findequal, NULL, __pyx_n_s_Florence_Tensor_Numeric); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 378; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8Florence_6Tensor_7Numeric_21findequal, NULL, __pyx_n_s_Florence_Tensor_Numeric); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 396; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_findequal, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 378; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_findequal, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 396; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "Florence/Tensor/Numeric.pyx":401
+  /* "Florence/Tensor/Numeric.pyx":419
  * @boundscheck(False)
  * @wraparound(False)
  * def findequal_approx(np.ndarray A, Real_t num, Real_t tol=1.0e-14):             # <<<<<<<<<<<<<<
  *     """An equivalent function to numpy.where(A==num). The difference here is that
  *         numpy.where results in a boolean array of size equal to the original
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8Florence_6Tensor_7Numeric_21findequal_approx, NULL, __pyx_n_s_Florence_Tensor_Numeric); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 401; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8Florence_6Tensor_7Numeric_23findequal_approx, NULL, __pyx_n_s_Florence_Tensor_Numeric); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 419; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_findequal_approx, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 401; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_findequal_approx, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 419; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "Florence/Tensor/Numeric.pyx":424
+  /* "Florence/Tensor/Numeric.pyx":442
  * @boundscheck(False)
  * @wraparound(False)
  * def findless(np.ndarray A, Real_t num):             # <<<<<<<<<<<<<<
  *     """An equivalent function to numpy.where(A<num). The difference here is that
  *         numpy.where results in a boolean array of size equal to the original
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8Florence_6Tensor_7Numeric_23findless, NULL, __pyx_n_s_Florence_Tensor_Numeric); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 424; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8Florence_6Tensor_7Numeric_25findless, NULL, __pyx_n_s_Florence_Tensor_Numeric); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 442; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_findless, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 424; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_findless, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 442; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "Florence/Tensor/Numeric.pyx":444
+  /* "Florence/Tensor/Numeric.pyx":462
  * @boundscheck(False)
  * @wraparound(False)
  * def findgreater(np.ndarray A, Real_t num):             # <<<<<<<<<<<<<<
  *     """An equivalent function to numpy.where(A>num). The difference here is that
  *         numpy.where results in a boolean array of size equal to the original
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8Florence_6Tensor_7Numeric_25findgreater, NULL, __pyx_n_s_Florence_Tensor_Numeric); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 444; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8Florence_6Tensor_7Numeric_27findgreater, NULL, __pyx_n_s_Florence_Tensor_Numeric); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 462; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_findgreater, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 444; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_findgreater, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 462; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "Florence/Tensor/Numeric.pyx":1

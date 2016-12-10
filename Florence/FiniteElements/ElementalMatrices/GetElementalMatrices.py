@@ -57,7 +57,7 @@ def DistributedMatrices(elem,MainData,mesh,material,Eulerx,I_stiff_elem,J_stiff_
 
 
 def FindIndices(A):
-    return np.repeat(np.arange(0,A.shape[0]),A.shape[0],axis=0), np.tile(np.arange(0,A.shape[0]),A.shape[0]), A.ravel()
+    return np.repeat(np.arange(0,A.shape[0]),A.shape[0],axis=0), np.tile(np.arange(0,A.shape[0]),A.shape[0]), A.flatten()
 
 
 def GetElementalMatrices(elem,MainData,elements,points,nodeperelem,Eulerx,

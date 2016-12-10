@@ -153,7 +153,7 @@ def ReadData(p=2):
     from Florence.PostProcessing import PostProcess
 
     # dd = loadmat("/home/roman/Dropbox/TT.mat")
-    dd = loadmat("/home/roman/ZZZchecker/TT.mat")
+    dd = loadmat("/home/roman/ZPlots/TT.mat")
     # print dd.keys()
 
     ProblemPath = PWD(__file__) 
@@ -166,7 +166,7 @@ def ReadData(p=2):
     post_process.SetSolution(dd['Solution'])
     post_process.SetMesh(mesh)
 
-    post_process.WriteVTK("/home/roman/ZZZchecker/TT.vtu", quantity=1)
+    post_process.WriteVTK("/home/roman/ZPlots/TT.vtu", quantity=1)
     # post_process.Animate(configuration="deformed",quantity=0)
 
 

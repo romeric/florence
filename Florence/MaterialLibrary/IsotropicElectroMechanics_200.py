@@ -2,12 +2,12 @@ import numpy as np
 from numpy import einsum
 from Florence.Tensor import trace, Voigt
 from .MaterialBase import Material
-#####################################################################################################
-                                # Simplest Electromechanical Helmoltz energy
-#####################################################################################################
-
 
 class IsotropicElectroMechanics_200(Material):
+    """Electromechanical model in terms of Helmoltz energy 
+            W(C,D) = W_mn(C) + eps_1/2/J (E*C**(-1)*E)
+            W_mn(C) = u1*C:I+u2*G:I - 2*(u1+2*u2)*lnJ + lamb/2*(J-1)**2
+    """
     
     def __init__(self, ndim, **kwargs):
         mtype = type(self).__name__

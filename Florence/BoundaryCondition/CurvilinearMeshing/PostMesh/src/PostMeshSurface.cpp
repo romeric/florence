@@ -577,10 +577,6 @@ void PostMeshSurface::IdentifyRemainingSurfacesByProjection()
             }
         }
     }
-
-//    print(dirichlet_faces);
-//    print(this->projection_ID);
-//    exit(EXIT_FAILURE);
 }
 
 void PostMeshSurface::IdentifySurfacesContainingFacesByPureProjection()
@@ -748,10 +744,6 @@ void PostMeshSurface::IdentifySurfacesContainingFacesByPureProjection()
             this->dirichlet_faces(i,3) = this->projection_ID(i,0);
         }
     }
-
-//    print(dirichlet_faces);
-//    print(this->projection_ID);
-//    exit(EXIT_FAILURE);
 }
 
 void PostMeshSurface::SupplySurfacesContainingFaces(const Integer *arr, Integer rows, Integer already_mapped, Integer caller)

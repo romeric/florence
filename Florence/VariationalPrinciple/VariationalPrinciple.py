@@ -1,5 +1,6 @@
 import numpy as np
 from Florence import QuadratureRule, FunctionSpace, Mesh
+from Florence.VariationalPrinciple._GeometricStiffness_ import GeometricStiffnessIntegrand as GeomStiffness
 
 import pyximport
 pyximport.install(setup_args={'include_dirs': np.get_include()})
@@ -69,7 +70,9 @@ class VariationalPrinciple(object):
         """Applies to displacement based and all mixed formulations that involve static condensation"""
 
         # MATRIX FORM
-        SpatialGradient = SpatialGradient.T
+        # SpatialGradient = SpatialGradient.T
+        # SpatialGradient = np.ascontiguousarray(SpatialGradient.T)
+        SpatialGradient = SpatialGradient.T.copy()
 
         FillConstitutiveB(B,SpatialGradient,self.ndim,self.nvar)
         BDB = B.dot(H_Voigt.dot(B.T))
@@ -90,13 +93,19 @@ class VariationalPrinciple(object):
 
         B = np.zeros((nvar*SpatialGradient.shape[0],ndim*ndim))
         S = np.zeros((ndim*ndim,ndim*ndim))
-        SpatialGradient = SpatialGradient.T
+        SpatialGradient = SpatialGradient.T.copy('c')
 
         FillGeometricB(B,SpatialGradient,S,CauchyStressTensor,ndim,nvar)
 
         BDB = np.dot(np.dot(B,S),B.T)
                 
         return BDB
+
+
+    def __GeometricStiffnessIntegrand__(self, SpatialGradient, CauchyStressTensor, detJ):
+        """Applies to displacement based, displacement potential based and all mixed formulations that involve static condensation"""
+        return GeomStiffness(np.ascontiguousarray(SpatialGradient),CauchyStressTensor, detJ, self.nvar)
+
 
 
     def MassIntegrand(self, Bases, N, material):
@@ -112,10 +121,14 @@ class VariationalPrinciple(object):
         return rhoNN
 
 
-    @staticmethod
-    def FindIndices(A):
-        return np.repeat(np.arange(0,A.shape[0]),A.shape[0],axis=0),\
-        np.tile(np.arange(0,A.shape[0]),A.shape[0]), A.ravel()
+    # @staticmethod
+    # def FindIndices(A):
+    #     return np.repeat(np.arange(0,A.shape[0]),A.shape[0],axis=0),\
+    #     np.tile(np.arange(0,A.shape[0]),A.shape[0]), A.flatten()
+
+    def FindIndices(self,A):
+        return self.local_rows, self.local_columns, A.flatten()
+
 
 
     def GetNumberOfVariables(self):
