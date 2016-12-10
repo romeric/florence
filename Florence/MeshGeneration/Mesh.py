@@ -1514,7 +1514,6 @@ class Mesh(object):
         boundary_face_to_element[:,0] = all_faces_in_faces % self.elements.shape[0]
         boundary_face_to_element[:,1] = all_faces_in_faces // self.elements.shape[0]
 
-
         # SO FAR WE HAVE COMPUTED THE ELEMENTS THAT CONTAIN FACES, HOWEVER 
         # NOTE THAT WE STILL HAVE NOT COMPUTED A MAPPING BETWEEN ELEMENTS AND 
         # FACES. WE ONLY KNOW WHICH ELEMENTS CONTAIN FACES FROM in2d.
@@ -2020,7 +2019,6 @@ class Mesh(object):
 
 
 
-
     def ReadGmsh(self,filename):
         """Read gmsh (.msh) file"""
 
@@ -2108,6 +2106,8 @@ class Mesh(object):
             else:
                 setattr(self, key, value)
 
+        if isinstance(self.element_type,np.ndarray):
+            self.element_type = str(self.element_type[0])
 
         # CUSTOM READ - OLD
         # self.elements = np.ascontiguousarray(DictOutput['elements']).astype(np.uint64)
@@ -2245,17 +2245,6 @@ class Mesh(object):
                 mlab.show()
 
         elif self.element_type=="quad":
-            # x,y = np.meshgrid(self.points[:,0],self.points[:,1])
-
-            # point_radius = 3.
-            # lmesh = self.GetLinearMesh()
-            # x,y = np.meshgrid(lmesh.points[:,0],lmesh.points[:,1])
-            # plt.plot(self.points[:,0],self.points[:,1],'o',markersize=point_radius,color='k')
-            # plt.pcolormesh(x,y,np.zeros_like(x), edgecolor='k', linewidth=1, facecolor=color, cmap=mpl.cm.Greens)
-            # plt.axis('equal')
-
-            # print self.points[self.elements,:].reshape()
-            # exit()
 
             C = self.InferPolynomialDegree() - 1
             from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
@@ -2350,11 +2339,7 @@ class Mesh(object):
 
             fig = plt.figure()
             point_radius = 3.
-            # lmesh = self.GetLinearMesh()
-            # x,y = np.meshgrid(lmesh.points[:,0],lmesh.points[:,1])
-            # plt.plot(self.points[:,0],self.points[:,1],'o',markersize=point_radius,color='k')
-            # plt.pcolormesh(x,y,np.zeros_like(x), edgecolor='k', linewidth=1, cmap=mpl.cm.Greens)
-
+ 
             C = self.InferPolynomialDegree() - 1
             from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
 
@@ -2400,7 +2385,7 @@ class Mesh(object):
 
             color = mpl.colors.hex2color('#F88379')
 
-            linewidth = 10.
+            linewidth = 3.
             # trimesh_h = mlab.triangular_mesh(self.points[:,0], 
                 # self.points[:,1], self.points[:,2], self.faces[:,:3],
                 # line_width=linewidth,tube_radius=linewidth,color=(0,0.6,0.4),
@@ -2446,9 +2431,9 @@ class Mesh(object):
             for i in range(self.faces.shape[0]):
                 for j in range(self.faces.shape[1]):
                     if self.points[self.faces[i,j],2] < 30:
-                        print i, self.faces[i,:]
+                        # print i, self.faces[i,:]
                         text_obj = mlab.text3d(self.points[self.faces[i,j],0],
-                            self.points[self.faces[i,j],1],self.points[self.faces[i,j],2],str(self.faces[i,j]),color=(0,0,0.),scale=0.5)
+                            self.points[self.faces[i,j],1],self.points[self.faces[i,j],2],str(self.faces[i,j]),color=(0,0,0.),scale=0.05)
 
 
 
@@ -3072,6 +3057,40 @@ class Mesh(object):
         return lmesh
 
 
+    def GetLocalisedMesh(self,elements, solution=None):
+        """Make a new Mesh instance from part of a big mesh
+
+            inputs:
+                elements:           [int, tuple, list, 1D array] of elements in big mesh (self)
+                                    from which a small localised needs to be constructed
+                solution            [1D array having the same length as big mesh points] 
+                                    if a solution also needs to be mapped over the localised element
+        """
+
+        elements = np.array(elements).flatten()
+
+        assert self.element_type is not None
+        assert self.elements is not None
+        assert self.points is not None
+
+        nodeperelem = self.elements.shape[1]
+        tmesh = Mesh()
+        tmesh.element_type = self.element_type
+        tmesh.nelem = elements.shape[0]
+        unnodes, inv = np.unique(self.elements[elements,:nodeperelem], return_inverse=True)
+        aranger = np.arange(tmesh.nelem*nodeperelem)
+        tmesh.elements = inv[aranger].reshape(tmesh.nelem,nodeperelem)
+        tmesh.points = self.points[unnodes,:]
+        tmesh.GetBoundaryFaces()
+        tmesh.GetBoundaryEdges()
+
+        if solution is not None:
+            solution = solution[unnodes,:]
+            return tmesh, solution
+
+        return tmesh
+
+
     def ConvertTrisToQuads(self):
         """Converts a tri mesh to a quad mesh through refinement/splitting. 
             This is a simpler version of the the Blossom-quad algorithm implemented in gmsh"""
@@ -3419,107 +3438,3 @@ class Mesh(object):
 
         for i in self.__dict__.keys():
             self.__dict__[i] = None
-
-
-
-##############===============================
-    def GetBoundaryFacesHigherTet(self):
-        """Get high order planar tetrahedral faces given high order element connectivity
-            and nodal coordinates
-
-            NOT TESTED
-
-            """
-
-        assert self.elements is not None
-        assert self.points is not None
-        assert self.nelem is not None
-
-        from Florence.Tensor import itemfreq
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementTet
-
-
-        # CHANGE TYPE 
-        if isinstance(self.elements[0,0],np.uint64):
-            self.elements = self.elements.astype(np.int64)
-            self.faces = self.faces.astype(np.int64)
-
-        # print self.faces.shape[1]
-        if self.faces.shape[1] == 0:
-            newMesh = Mesh()
-            newMesh.nelem = self.elements.shape[0]
-            newMesh.elements = self.elements[:,:4]
-            newMesh_nnode = np.max(newMesh.elements)+1 # NO MONKEY PATCHING
-            newMesh.points = self.points[:newMesh_nnode]
-            newMesh.GetBoundaryFacesTet()
-            self.faces = newMesh.faces
-
-        if self.faces.shape[1] > 3:
-            raise UserWarning("High order tetrahedral faces seem to be already computed. Do you want me to recompute them?")
-            pass
-
-
-        # INFER POLYNOMIAL DEGREE AND ORDER OF CONTINUITY
-        C = self.InferPolynomialDegree()-1
-        # GET NUMBER OF COLUMNS FOR HIGHER ORDER FACES
-        fsize = int((C+2.)*(C+3.)/2.)
-        # GET THE NODE ARRANGEMENT FOR FACES
-        face_node_arrangment = NodeArrangementTet(C)[0]
-
-        higher_order_faces = np.zeros((self.faces.shape[0],fsize),dtype = np.int64)
-        elements_containing_faces = []
-        counter = 0
-        # FIND IF THE 3 NODES OF THE LINEAR FACE IS IN THE ELEMENT
-        for i in range(self.faces.shape[0]):
-            face_nodes = [];  face_cols = []
-            for j in range(3):
-                # rows, cols = np.where(self.elements[:,:4]==self.faces[i,j])
-                rows, cols = whereEQ(self.elements[:,:4],self.faces[i,j])
-                # STORE ALL THE OCCURENCES OF CURRENT NODAL FACE IN THE ELEMENT CONNECTIVITY
-                face_nodes = np.append(face_nodes,rows)
-                face_cols = np.append(face_cols,cols)
-            # CHANGE TYPE
-            face_nodes = face_nodes.astype(np.int64)
-            face_cols = face_cols.astype(np.int64)
-            # COUNT THE NUMBER OF OCCURENCES
-            occurence_within_an_element = itemfreq(face_nodes)
-            # SEE WHICH ELEMENT CONTAINS ALL THE THREE NODES OF THE FACE
-            counts = np.where(occurence_within_an_element[:,1]==3)[0]
-            if counts.shape[0] != 0:
-                # COMPUTE ONLY IF NEEDED LATER ON
-                # elements_containing_faces = np.append(elements_containing_faces, 
-                #   occurence_within_an_element[counts,0])
-
-                # GET THE POSITIONS FROM CONCATENATION
-                inv_uniques = np.unique(face_nodes,return_inverse=True)[1]
-                which_connectivity_cols_idx = np.where(inv_uniques==counts)[0]
-                # FROM THE POSITIONS GET THE COLUMNS AT WHICH THESE NODES OCCUR IN THE CONNECTIVITY
-                which_connectivity_cols =  face_cols[which_connectivity_cols_idx]
-                if which_connectivity_cols_idx.shape[0] != 0:
-                    # BASED ON THE OCCURENCE, DECIDE WHICH FACE OF THAT ELEMENT WE ARE ON
-                    if which_connectivity_cols[0]==0 and which_connectivity_cols[1]==1 \
-                        and which_connectivity_cols[2]==2:
-                        higher_order_faces[counter,:] = self.elements[
-                        occurence_within_an_element[counts,0],face_node_arrangment[0,:]]
-                        counter += 1
-                    elif which_connectivity_cols[0]==0 and which_connectivity_cols[1]==1 \
-                        and which_connectivity_cols[2]==3:
-                        higher_order_faces[counter,:] = self.elements[
-                        occurence_within_an_element[counts,0],face_node_arrangment[1,:]]
-                        counter += 1
-                    elif which_connectivity_cols[0]==0 and which_connectivity_cols[1]==2 \
-                        and which_connectivity_cols[2]==3:
-                        higher_order_faces[counter,:] = self.elements[
-                        occurence_within_an_element[counts,0],face_node_arrangment[2,:]]
-                        counter += 1
-                    elif which_connectivity_cols[0]==1 and which_connectivity_cols[1]==2 \
-                        and which_connectivity_cols[2]==3:
-                        higher_order_faces[counter,:] = self.elements[
-                        occurence_within_an_element[counts,0],face_node_arrangment[3,:]]
-                        counter += 1
-
-        # CHECK WITH AN ALREADY EXISTING MESH GENERATOR
-        # print np.linalg.norm(np.sort(higher_order_faces,axis=1) - np.sort(self.faces,axis=1))
-                
-        self.faces = higher_order_faces
-        self.ChangeType()

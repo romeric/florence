@@ -6,7 +6,7 @@ from libc.math cimport fabs
 from libcpp.vector cimport vector
 from cpython cimport bool
 
-__all__ = ['trace','doublecontract','makezero','issymetric','tovoigt', 'tovoigt3', 'cross2d',
+__all__ = ['trace','doublecontract','makezero','makezero3d','issymetric','tovoigt', 'tovoigt3', 'cross2d',
 'fillin','findfirst','findequal','findequal_approx','findless','findgreater']
 
 # COMPILE USING
@@ -115,6 +115,24 @@ cpdef void makezero(np.ndarray[Real_t, ndim=2] A, Real_t tol=1.0e-14):
         for j in range(a2):
             if fabs(A[i,j]) < tol:
                 A[i,j] = 0.
+
+@boundscheck(False)
+@wraparound(False)
+cpdef void makezero3d(np.ndarray[Real_t, ndim=3] A, Real_t tol=1.0e-14):
+    """Substitute the elements of an array which are close to zero with zero.
+        This is an in-place operation and does not return anything""" 
+    
+    cdef:
+        int i,j,k
+        int a1 = A.shape[0]
+        int a2 = A.shape[1]
+        int a3 = A.shape[2]
+
+    for i in range(a1):
+        for j in range(a2):
+            for k in range(a3):
+                if fabs(A[i,j,k]) < tol:
+                    A[i,j,k] = 0.
 
 
 @boundscheck(False)

@@ -1,3 +1,4 @@
+from __future__ import division
 import numpy as np
 from numpy import einsum
 from .MaterialBase import Material
@@ -25,15 +26,27 @@ class NearlyIncompressibleMooneyRivlin(Material):
         mtype = type(self).__name__
         super(NearlyIncompressibleMooneyRivlin, self).__init__(mtype, ndim, **kwargs)
 
-        self.gamma=1
+        self.gamma=1.
         self.alpha = self.gamma*self.mu/2.
         self.beta = (self.mu - 2.*self.alpha)/3./sqrt(3.)
         # kappa = lamb+2.0*mu/3.0 # or
         self.kappa = self.lamb+4.0/3.0*self.alpha+2.0*sqrt(3.0)*self.beta
 
-        from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import KinematicMeasures
-        StrainTensors = KinematicMeasures(np.asarray([np.eye(self.ndim,self.ndim)]*2),"Nonlinear")
-        self.Hessian(StrainTensors)
+        self.energy_type = "internal_energy"
+
+        if self.ndim==3:
+            self.H_VoigtSize = 6
+        elif self.ndim==2:
+            self.H_VoigtSize = 3
+
+        # LOW LEVEL DISPATCHER
+        self.has_low_level_dispatcher = True
+        # self.has_low_level_dispatcher = False
+
+    def KineticMeasures(self,F,ElectricFieldx=0, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._NearlyIncompressibleMooneyRivlin_ import KineticMeasures
+        return KineticMeasures(self,np.ascontiguousarray(F))
+
         
 
     def Hessian(self,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
@@ -62,25 +75,25 @@ class NearlyIncompressibleMooneyRivlin(Material):
             trg = trace(g)
 
 
-        # H_Voigt = -4/3.*alpha*J**(-5/3.)*( einsum('ij,kl',b,I) + einsum('ij,kl',I,b) ) + \
-        #           4.*alpha/9.*J**(-5/3.)*trb*einsum('ij,kl',I,I) + \
-        #           2/3.*alpha*J**(-5/3.)*trb*( einsum('il,jk',I,I) + einsum('ik,jl',I,I) ) + \
-        #   beta*J**(-3)*trg**(3./2.)* ( einsum('ij,kl',I,I) - einsum('ik,jl',I,I) - einsum('il,jk',I,I) ) - \
-        #   3.*beta*J**(-3)*trg**(1./2.)*( einsum('ij,kl',I,g) + einsum('ij,kl',g,I) ) + \
-        #   6.*beta*J**(-3)*trg**(1./2.)*( einsum('ik,jl',I,g) + einsum('il,jk',g,I) ) + \
-        #   3.*beta*J**(-3)*trg**(-1./2.)*( einsum('ij,kl',g,g) )   + \
-        #   kappa*(2.0*J-1)*einsum('ij,kl',I,I) - kappa*(J-1)*(einsum('ik,jl',I,I)+einsum('il,jk',I,I))         # #
-
-
-        # WITH PRE-COMPUTED IDENTITY TENSORS
         H_Voigt = -4/3.*alpha*J**(-5/3.)*( einsum('ij,kl',b,I) + einsum('ij,kl',I,b) ) + \
-                    4.*alpha/9.*J**(-5/3.)*trb*self.Iijkl + \
-                    2/3.*alpha*J**(-5/3.)*trb*self.Iikjl + \
-            beta*J**(-3)*trg**(3./2.)*( self.Iijkl - self.Iikjl ) - \
-            3.*beta*J**(-3)*trg**(1./2.)*( einsum('ij,kl',I,g) + einsum('ij,kl',g,I) ) + \
-            6.*beta*J**(-3)*trg**(1./2.)*( einsum('ik,jl',I,g) + einsum('il,jk',g,I) ) + \
-            3.*beta*J**(-3)*trg**(-1./2.)*( einsum('ij,kl',g,g) )   + \
-            kappa*(2.0*J-1)*self.Iijkl - kappa*(J-1)*self.Iikjl 
+                  4.*alpha/9.*J**(-5/3.)*trb*einsum('ij,kl',I,I) + \
+                  2/3.*alpha*J**(-5/3.)*trb*( einsum('il,jk',I,I) + einsum('ik,jl',I,I) ) + \
+          beta*J**(-3)*trg**(3./2.)* ( einsum('ij,kl',I,I) - einsum('ik,jl',I,I) - einsum('il,jk',I,I) ) - \
+          3.*beta*J**(-3)*trg**(1./2.)*( einsum('ij,kl',I,g) + einsum('ij,kl',g,I) ) + \
+          6.*beta*J**(-3)*trg**(1./2.)*( einsum('ik,jl',I,g) + einsum('il,jk',g,I) ) + \
+          3.*beta*J**(-3)*trg**(-1./2.)*( einsum('ij,kl',g,g) )   + \
+          kappa*(2.0*J-1)*einsum('ij,kl',I,I) - kappa*(J-1)*(einsum('ik,jl',I,I)+einsum('il,jk',I,I))         # #
+
+
+        # # WITH PRE-COMPUTED IDENTITY TENSORS
+        # H_Voigt = -4/3.*alpha*J**(-5/3.)*( einsum('ij,kl',b,I) + einsum('ij,kl',I,b) ) + \
+        #             4.*alpha/9.*J**(-5/3.)*trb*self.Iijkl + \
+        #             2/3.*alpha*J**(-5/3.)*trb*self.Iikjl + \
+        #     beta*J**(-3)*trg**(3./2.)*( self.Iijkl - self.Iikjl ) - \
+        #     3.*beta*J**(-3)*trg**(1./2.)*( einsum('ij,kl',I,g) + einsum('ij,kl',g,I) ) + \
+        #     6.*beta*J**(-3)*trg**(1./2.)*( einsum('ik,jl',I,g) + einsum('il,jk',g,I) ) + \
+        #     3.*beta*J**(-3)*trg**(-1./2.)*( einsum('ij,kl',g,g) )   + \
+        #     kappa*(2.0*J-1)*self.Iijkl - kappa*(J-1)*self.Iikjl 
 
 
         H_Voigt = Voigt( H_Voigt ,1)
@@ -125,7 +138,3 @@ class NearlyIncompressibleMooneyRivlin(Material):
                 +(kappa*(J-1.0))*I 
 
         return stress
-
-    def ElectricDisplacementx(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
-        ndim = StrainTensors['I'].shape[0]
-        return np.zeros((ndim,1))

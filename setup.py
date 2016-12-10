@@ -26,6 +26,12 @@ jacobi_path = os.path.join(_pwd_,"Florence/FunctionSpace/JacobiPolynomials/")
 p = subprocess.Popen('cd '+jacobi_path+' && ./Makefile.sh', shell=True)
 p.wait()
 
+# BUILD MATERIAL MODELS
+print("Building material models")
+material_path = os.path.join(_pwd_,"Florence/MaterialLibrary/LLDispatch/")
+p = subprocess.Popen('cd '+material_path+' && ./Makefile.sh', shell=True)
+p.wait()
+
 # BUILD OPENCASCADE FRONT-END
 print("Building OpenCascade front-end")
 occ_path = os.path.join(_pwd_,"Florence/BoundaryCondition/CurvilinearMeshing/PostMesh")
