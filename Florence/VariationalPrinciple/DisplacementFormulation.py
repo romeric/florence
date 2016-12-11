@@ -238,14 +238,15 @@ class DisplacementFormulation(VariationalPrinciple):
                 has_prestress=fem_solver.has_prestress)
             
             if fem_solver.requires_geometry_update:
-                # BDB_1 += self.GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],CauchyStressTensor[counter,:,:])
                 # INTEGRATE TRACTION FORCE
                 tractionforce += t*detJ[counter]
 
             # INTEGRATE STIFFNESS
             stiffness += BDB_1*detJ[counter]
 
-        # ADD GEOMETRIC STIFFNESS MATRIX
-        stiffness += self.__GeometricStiffnessIntegrand__(SpatialGradient,CauchyStressTensor,detJ)
 
-        return stiffness, tractionforce 
+        # ADD GEOMETRIC STIFFNESS MATRIX
+        if fem_solver.requires_geometry_update:
+            stiffness += self.__GeometricStiffnessIntegrand__(SpatialGradient,CauchyStressTensor,detJ)
+
+        return stiffness, tractionforce

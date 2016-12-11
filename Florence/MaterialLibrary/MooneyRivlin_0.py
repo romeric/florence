@@ -29,7 +29,7 @@ class MooneyRivlin_0(Material):
 
     def KineticMeasures(self,F,ElectricFieldx=0, elem=0):
         from Florence.MaterialLibrary.LLDispatch._MooneyRivlin_0_ import KineticMeasures
-        return KineticMeasures(self,np.ascontiguousarray(F))
+        return KineticMeasures(self,F)
 
 
     def Hessian(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):

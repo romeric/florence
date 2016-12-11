@@ -436,8 +436,9 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
             # INTEGRATE STIFFNESS
             stiffness += BDB_1*detJ[counter]
 
-        # COMPUTE GEOMETRIC STIFFNESS MATRIX
-        stiffness += self.__GeometricStiffnessIntegrand__(SpatialGradient,CauchyStressTensor,detJ)
+        # ADD GEOMETRIC STIFFNESS MATRIX
+        if fem_solver.requires_geometry_update:
+            stiffness += self.__GeometricStiffnessIntegrand__(SpatialGradient,CauchyStressTensor,detJ)
 
         return stiffness, tractionforce
 
@@ -489,3 +490,21 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
 
     #     return BDB
+
+
+    # def foo(self,SpatialGradient, H_Voigt, CauchyStressTensor):
+
+    #     B = np.zeros((SpatialGradient.shape[0]*self.nvar,SpatialGradient.shape[0]*self.nvar))
+    #     for a in range(SpatialGradient.shape[0]):
+    #         for b in range(SpatialGradient.shape[0]):
+
+    #             # B[a*self.nvar+i,b*self.nvar+j] += np.dot(SpatialGradient[a,i]*H_Voigt[i,j]*SpatialGradient[b,j]
+    #             for i in range(self.ndim):
+    #                 for j in range(self.ndim):
+    #                     B[a*self.nvar+i,b*self.nvar+j] += SpatialGradient[a,i]*H_Voigt[i,j]*SpatialGradient[b,j]
+
+    #             # for i in range(self.ndim):
+    #                 # B[a*self.nvar+i,b*self.nvar+i] = dum
+
+
+    #     return B

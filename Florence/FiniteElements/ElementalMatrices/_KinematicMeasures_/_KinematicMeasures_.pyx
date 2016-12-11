@@ -4,8 +4,6 @@
 #cython: wraparound=False
 #cython: nonecheck=False
 
-from warnings import warn
-from cython import boundscheck, nonecheck, wraparound, profile, double
 import numpy as np
 cimport numpy as np
 
@@ -31,8 +29,6 @@ def _KinematicMeasures_(np.ndarray[Real, ndim=3, mode='c'] Jm,
 
     cdef np.ndarray[Real, ndim=3, mode='c'] F = np.zeros((ngauss,ndim,ndim),dtype=np.float64)
     cdef np.ndarray[Real, ndim=3, mode='c'] SpatialGradient = np.zeros((ngauss,nodeperelem,ndim),dtype=np.float64)
-    # cdef np.ndarray[Real, ndim=3, mode='fortran'] SpatialGradient = np.zeros((ngauss,nodeperelem,ndim),dtype=np.float64, order='F')
-
     cdef np.ndarray[Real, ndim=1] detJ = np.zeros(ngauss,dtype=np.float64)
 
     KinematicMeasures(&SpatialGradient[0,0,0], &F[0,0,0], &detJ[0], &Jm[0,0,0], &AllGauss[0],
