@@ -1,6 +1,7 @@
 import numpy as np
 from Florence import QuadratureRule, FunctionSpace, Mesh
-from Florence.VariationalPrinciple._GeometricStiffness_ import GeometricStiffnessIntegrand as GeomStiffness
+from Florence.VariationalPrinciple._GeometricStiffness_ import GeometricStiffnessIntegrand as GetGeomStiffness
+# from Florence.VariationalPrinciple._ConstitutiveStiffnessMechanics_ import ConstitutiveStiffnessIntegrand as GetConstitutiveStiffness
 
 import pyximport
 pyximport.install(setup_args={'include_dirs': np.get_include()})
@@ -77,6 +78,7 @@ class VariationalPrinciple(object):
         FillConstitutiveB(B,SpatialGradient,self.ndim,self.nvar)
         BDB = B.dot(H_Voigt.dot(B.T))
         
+        
         t=[]
         if analysis_nature == 'nonlinear' or has_prestress:
             TotalTraction = GetTotalTraction(CauchyStressTensor)
@@ -84,9 +86,16 @@ class VariationalPrinciple(object):
                 
         return BDB, t
 
+    def __ConstitutiveStiffnessIntegrand__(self, SpatialGradient, H_Voigt, CauchyStressTensor, detJ, 
+        analysis_nature="nonlinear", has_prestress=False, requires_geometry_update=True):
+        """Applies to displacement based and displacement potential based formulations"""
+        # return GetConstitutiveStiffness(SpatialGradient,H_Voigt,CauchyStressTensor, detJ, self.nvar)
+        pass
+
 
     def GeometricStiffnessIntegrand(self, SpatialGradient, CauchyStressTensor):
-        """Applies to displacement based, displacement potential based and all mixed formulations that involve static condensation"""
+        """Applies to displacement based, displacement potential based and all mixed 
+        formulations that involve static condensation"""
 
         ndim = self.ndim
         nvar = self.nvar
@@ -103,8 +112,8 @@ class VariationalPrinciple(object):
 
 
     def __GeometricStiffnessIntegrand__(self, SpatialGradient, CauchyStressTensor, detJ):
-        """Applies to displacement based, displacement potential based and all mixed formulations that involve static condensation"""
-        return GeomStiffness(np.ascontiguousarray(SpatialGradient),CauchyStressTensor, detJ, self.nvar)
+        """Applies to displacement based and displacement potential based formulations"""
+        return GetGeomStiffness(np.ascontiguousarray(SpatialGradient),CauchyStressTensor, detJ, self.nvar)
 
 
 

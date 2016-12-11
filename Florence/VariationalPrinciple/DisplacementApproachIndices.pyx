@@ -43,7 +43,7 @@ cdef inline void FillConstitutiveB_(double *B, const double* SpatialGradient,
 @boundscheck(False)
 @wraparound(False)
 def FillConstitutiveB(np.ndarray[double,ndim=2,mode='c'] B, 
-                     np.ndarray[double,ndim=2] SpatialGradient,
+                     np.ndarray[double,ndim=2,mode='c'] SpatialGradient,
                      int ndim, int nvar):
     
     cdef int rows = SpatialGradient.shape[1]

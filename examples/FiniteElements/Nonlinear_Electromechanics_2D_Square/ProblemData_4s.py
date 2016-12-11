@@ -12,7 +12,7 @@ from Florence.Tensor import makezero
 def ProblemData_2D_mech(*args, **kwargs):
 
     ndim=2
-    p=5
+    p=1
 
     material = NeoHookean_2(ndim,mu=1.0,lamb=2.3)
     # material = MooneyRivlin_0(ndim,mu1=1.0,mu2=1.0,lamb=2.3)
@@ -117,7 +117,7 @@ def ProblemData_2D_electro_mech(*args, **kwargs):
 def ProblemData_3D_mech(*args, **kwargs):
 
     ndim=3
-    p=2
+    p=3
 
     ProblemPath = PWD(__file__)
     # filename = ProblemPath + '/Mesh_Holes.dat'
@@ -171,7 +171,7 @@ def ProblemData_3D_mech(*args, **kwargs):
     boundary_condition.SetDirichletCriteria(DirichletFunc,mesh)
     formulation = DisplacementFormulation(mesh)
 
-    fem_solver = FEMSolver(number_of_load_increments=10, newton_raphson_tolerance=1e-05,parallelise=False)
+    fem_solver = FEMSolver(number_of_load_increments=5, newton_raphson_tolerance=1e-05,parallelise=False)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition)
@@ -242,11 +242,72 @@ def ProblemData_3D_electro_mech(*args, **kwargs):
 
 
 
+def Problem_Parallelepiped():
+
+    mesh = Mesh()
+    # mesh.Parallelepiped(element_type="hex")
+    # mesh.Parallelepiped(element_type="tet")
+    mesh.Cube(element_type="hex",nx=16,ny=16,nz=16)
+    # mesh.Cube(element_type="hex",nx=2,ny=2,nz=2)
+    # mesh.Cube()
+    mesh.SimplePlot()
+    ndim = mesh.points.shape[1]
+    # mesh.GetHighOrderMesh(p=3)
+
+    material = NeoHookean_2(ndim,youngs_modulus=10, poissons_ratio=0.4)
+    # material = MooneyRivlin_0(ndim,mu1=1.0,mu2=0.5, lamb=2.0)
+    # material = AnisotropicMooneyRivlin_1(ndim, mu1=1.,mu2=1.5, mu3=2.5,lamb=5.5)
+    # material.anisotropic_orientations = np.zeros((mesh.nelem,mesh.points.shape[1]))
+    # material.anisotropic_orientations = np.random.rand(mesh.nelem,mesh.points.shape[1])
+    # material.anisotropic_orientations[:,0] = 1.
+
+
+
+    def DirichletFunc(mesh):
+
+        boundary_data = np.zeros((mesh.points.shape[0],material.nvar))+np.NAN
+
+        Y_0 = np.isclose(mesh.points[:,2],0.)
+        boundary_data[Y_0,0] = 0.
+        boundary_data[Y_0,1] = 0.
+        boundary_data[Y_0,2] = 0.
+
+        Y_1 = np.isclose(mesh.points[:,2], 1.)
+        boundary_data[Y_1,0] = 0.
+        boundary_data[Y_1,1] = 0.
+        boundary_data[Y_1,2] = -.2
+
+
+        return boundary_data
+
+
+    boundary_condition = BoundaryCondition()
+    boundary_condition.SetDirichletCriteria(DirichletFunc,mesh)
+    formulation = DisplacementFormulation(mesh)
+
+    # print formulation.function_spaces[0].AllGauss.shape
+    # exit()
+    # return
+    # solver = LinearSolver(linear_solver = "multigrid")
+    solver = None
+    fem_solver = FEMSolver(number_of_load_increments=1, newton_raphson_tolerance=1e-05,parallelise=False)
+
+    solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
+            material=material, boundary_condition=boundary_condition, solver=solver)
+
+    print np.linalg.norm(solution.sol)
+    # solution.Animate(configuration="deformed")
+    # solution.WriteVTK("/home/roman/ZPlots/Cylz.vtu", quantity=0)
+
+
+
+
+
 if __name__ == "__main__":
 
     # ProblemData_2D_mech()
     # ProblemData_2D_electro_mech()
-    ProblemData_3D_mech()
+    # ProblemData_3D_mech()
     # ProblemData_3D_electro_mech()
 
     
@@ -255,3 +316,8 @@ if __name__ == "__main__":
     # run('ProblemData_2D_electro_mech()')
     # run('ProblemData_3D_mech()')
     # run('ProblemData_3D_electro_mech()')
+
+
+    Problem_Parallelepiped()
+    # run('Problem_Parallelepiped()')
+
