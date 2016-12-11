@@ -80,39 +80,67 @@ def Legendre(C,xi):
 
 
 
+# def LagrangeGaussLobatto(C,xi):
+    
+#     from Florence.QuadratureRules import GaussLobattoQuadrature
+
+#     n = C+2
+#     nsize = n-1
+#     ndiv = 2.0/nsize
+
+#     eps = GaussLobattoQuadrature(n)[0]
+
+#     A = 1.0*np.zeros((n,n))
+#     A[:,0] = np.ones(n)
+
+    # for i in range(1,n):
+    #     for j in range(0,n):
+    #         A[j,i] = pow(eps[j],i)
+
+
+#     N = 1.0*np.zeros(n); dN=1.0*np.zeros(n)
+
+#     for ishape in range(0,n):
+#         RHS = 1.0*np.zeros(n)
+#         RHS[ishape] = 1.
+
+#         # Solve linear system (dense LU)
+#         coeff = np.linalg.solve(A,RHS)
+#         # Build shape functions 
+#         for incr in range(0,n):
+#             N[ishape] = N[ishape]+coeff[incr]*pow(xi,incr)
+
+#         # Build derivate of shape functions
+#         for incr in range(0,n-1):
+#             dN[ishape] = dN[ishape]+(incr+1)*coeff[incr+1]*pow(xi,incr)
+
+
+#     return (N,dN,eps)
+
+
+
 def LagrangeGaussLobatto(C,xi):
     
     from Florence.QuadratureRules import GaussLobattoQuadrature
 
     n = C+2
-    nsize = n-1
-    ndiv = 2.0/nsize
+    ranger = np.arange(n)
 
-    eps = GaussLobattoQuadrature(n)[0]
+    eps = GaussLobattoQuadrature(n)[0][:,0]
 
-    A = 1.0*np.zeros((n,n))
-    A[:,0] = np.ones(n)
-
+    A = np.zeros((n,n))
+    A[:,0] = 1.
     for i in range(1,n):
-        for j in range(0,n):
-            A[j,i] = pow(eps[j],i)
+        A[:,i] = eps**i
+    # A1[:,1:] = np.array([eps**i for i in range(1,n)]).T[0,:,:]
 
 
-    N = 1.0*np.zeros(n); dN=1.0*np.zeros(n)
-
-    for ishape in range(0,n):
-        RHS = 1.0*np.zeros(n)
-        RHS[ishape] = 1.
-
-        # Solve linear system (dense LU)
-        coeff = np.linalg.solve(A,RHS)
-        # Build shape functions 
-        for incr in range(0,n):
-            N[ishape] = N[ishape]+coeff[incr]*pow(xi,incr)
-
-        # Build derivate of shape functions
-        for incr in range(0,n-1):
-            dN[ishape] = dN[ishape]+(incr+1)*coeff[incr+1]*pow(xi,incr)
-
+    RHS = np.zeros((n,n))
+    np.fill_diagonal(RHS,1)
+    coeff = np.linalg.solve(A,RHS)
+    xis = np.ones(n)*xi**ranger
+    N = np.dot(coeff.T,xis)
+    # dN = np.einsum('i,ij,i',1+ranger[:-1],coeff[1:,:],xis[:-1])
+    dN = np.dot(coeff[1:,:].T,xis[:-1]*(1+ranger[:-1]))
 
     return (N,dN,eps) 

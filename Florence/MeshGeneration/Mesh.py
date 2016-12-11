@@ -2540,7 +2540,7 @@ class Mesh(object):
 
     def Rectangle(self,lower_left_point=(0,0), upper_right_point=(2,1), 
         nx=5, ny=5, element_type="tri"):
-        """Create a triangular mesh of on rectangle"""
+        """Create a qud/tri mesh of on rectangle"""
 
         if self.elements is not None and self.points is not None:
             self.__reset__()
@@ -2587,18 +2587,23 @@ class Mesh(object):
             self.GetEdgesQuad()
 
 
-    def Square(self, lower_left_point=(0,0), side_length=1, n=5, element_type="tri"):
-        """Create a triangular mesh on a square
+    def Square(self, lower_left_point=(0,0), side_length=1, nx=5, ny=5, n=None, element_type="tri"):
+        """Create a quad/tri mesh on a square
 
             input:
-                lower_left_corner           [tuple] of lower left vertex of the square
+                lower_left_point            [tuple] of lower left vertex of the square
                 side_length:                [int] length of side 
-                n:                          [int] number of discretisation
+                nx,ny:                      [int] number of discretisation in each direction
+                n:                          [int] number of discretisation in all directions
+                                            i.e. nx=ny=n. Overrides nx,ny
             """
+
+        if n != None:
+            nx,ny = n,n
 
         upper_right_point = (side_length+lower_left_point[0],side_length+lower_left_point[1])
         self.Rectangle(lower_left_point=lower_left_point,
-            upper_right_point=upper_right_point,nx=n,ny=n,element_type=element_type)
+            upper_right_point=upper_right_point,nx=nx,ny=ny,element_type=element_type)
 
 
     def UniformHollowCircle(self,center=(0,0),inner_radius=1.0,outer_radius=2.,element_type='tri',isotropic=True,nrad=5,ncirc=10):
@@ -2702,6 +2707,78 @@ class Mesh(object):
         self.points[:,1] += center[1]
         # ASSIGN PROPERTIES
         self.nnode = self.points.shape[0]
+
+
+    def Parallelepiped(self,lower_left_rear_point=(0,0,0), upper_right_front_point=(2,4,10), 
+        nx=2, ny=4, nz=10, element_type="tet"):
+        """Create a tet/hex mesh on rectangular parallelepiped"""
+
+        if self.elements is not None and self.points is not None:
+            self.__reset__()
+
+        if element_type != "tet" and element_type != "hex":
+            raise ValueError("Can only generate parallelepiped mesh using tetrahedrals or hexahedrals")
+
+        if (lower_left_rear_point[0] > upper_right_front_point[0]) or \
+            (lower_left_rear_point[1] > upper_right_front_point[1]) or \
+            (lower_left_rear_point[2] > upper_right_front_point[2]):
+            raise ValueError("Incorrect coordinate for lower left rear and upper right front vertices")
+
+
+        x=np.linspace(lower_left_rear_point[0],upper_right_front_point[0],nx+1)
+        y=np.linspace(lower_left_rear_point[1],upper_right_front_point[1],ny+1)
+        z=np.linspace(lower_left_rear_point[2],upper_right_front_point[2],nz+1)
+
+        Y,X,Z = np.meshgrid(y,x,z)
+        coordinates = np.dstack((X.T.flatten(),Y.T.flatten(),Z.T.flatten()))[0,:,:]
+
+        self.element_type = "hex"
+        self.nelem = int(nx*ny*nz)
+        elements = np.zeros((self.nelem,8),dtype=np.int64)
+
+        dum_0 = np.arange((nx+1)*ny)
+        dum_1 = np.array([(nx+1)*i+nx for i in range(ny)])
+        dum_2 = np.delete(dum_0,dum_1)
+        col0 = np.array([dum_2+i*(nx+1)*(ny+1) for i in range(nz)]).flatten()
+
+        elements[:,0] = col0
+        elements[:,1] = col0 + 1
+        elements[:,2] = col0 +  nx + 2
+        elements[:,3] = col0 +  nx + 1
+        elements[:,4] = col0 + (nx + 1) * (ny + 1)
+        elements[:,5] = col0 + (nx + 1) * (ny + 1) + 1
+        elements[:,6] = col0 + (nx + 1) * (ny + 1) + nx + 2
+        elements[:,7] = col0 + (nx + 1) * (ny + 1) + nx + 1
+
+        self.elements = elements
+        self.points = coordinates
+
+        self.GetBoundaryFacesHex()
+        self.GetBoundaryEdgesHex()
+
+        if element_type == "tet":
+            self.ConvertHexesToTets()
+
+
+    def Cube(self, lower_left_rear_point=(0.,0.,0.), side_length=1, nx=5, ny=5, nz=5, n=None, element_type="tet"):
+        """Create a quad/tri mesh on a cube
+
+            input:
+                lower_left_rear_point       [tuple] of lower left rear vertex of the cube
+                side_length:                [int] length of side 
+                nx,ny,nz:                   [int] number of discretisation in each direction
+                n:                          [int] number of discretisation in all directions
+                                            i.e. nx=ny=nz=n. Overrides nx,ny,nz 
+            """
+
+        if n != None:
+            nx,ny,nz = n,n,n
+
+        upper_right_front_point = (side_length+lower_left_rear_point[0],
+            side_length+lower_left_rear_point[1],side_length+lower_left_rear_point[2])
+        self.Parallelepiped(lower_left_rear_point=lower_left_rear_point,
+            upper_right_front_point=upper_right_front_point,nx=nx,ny=ny,nz=nz,element_type=element_type)
+
 
 
 

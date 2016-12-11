@@ -63,7 +63,6 @@ static inline void _GeometricStiffnessFiller_(Real *geometric_stiffness,
 
     if (ndim==3) {
 
-// #pragma omp parallel for
         for (int g=0; g<nguass; ++g) {
 
             for (int a=0; a<nodeperelem; ++a) {
