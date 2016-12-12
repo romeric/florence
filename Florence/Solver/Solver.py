@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 import scipy as sp
 from scipy.sparse import issparse, isspmatrix_coo, isspmatrix_csr, isspmatrix_csc
@@ -131,10 +132,10 @@ class LinearSolver(object):
         """Applies Cuthill-Mckee permutation to reduce the sparse matrix bandwidth
 
             input:
-                A:                    [csc_matrix or csc_matrix]
+                A:                    [csc_matrix or csr_matrix]
 
             returns:
-                perm:                 [1D array] of permutation such that A(perm,perm)
+                perm:                 [1D array] of permutation such that A[perm,:][:,perm]
                                       has its non-zero elements closer to the diagonal
         """
 
@@ -152,6 +153,12 @@ class LinearSolver(object):
         return perm
 
 
+    def SparsityPattern(self,A):
+        import matplotlib.pyplot as plt
+        plt.spy(A)
+        plt.grid('on')
+        plt.show()
+
 
     def Solve(self,A,b):
         """Solves the linear system of equations"""
@@ -162,7 +169,8 @@ class LinearSolver(object):
             if b.shape[0] > 100000:
                 self.solver_type = "multigrid"
                 self.solver_subtype = "amg"
-                print 'Large system of equations. Switching to algebraic multigrid solver'
+                print('Large system of equations. Switching to algebraic multigrid solver')
+                self.switcher_message = True
             # elif mesh.points.shape[0]*MainData.nvar > 50000 and MainData.C < 4:
                 # self.solver_type = "direct"
                 # self.solver_subtype = "MUMPS"

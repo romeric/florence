@@ -2742,6 +2742,136 @@ class PostProcess(object):
 
     #-----------------------------------------------------------------------------#
     @staticmethod
+    def TessellateTris(mesh, TotalDisp, QuantityToPlot=None,
+        ProjectionFlags=None, interpolation_degree=30, EquallySpacedPoints=False,
+        plot_points=False, plot_edges=True):
+
+        """High order curved triangular mesh plots, based on high order nodal FEM.
+            The equally spaced FEM points do not work as good as the Fekete points 
+        """
+
+
+        from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
+        from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
+        from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
+        from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
+        from Florence.FunctionSpace import Tri 
+        from Florence.FunctionSpace.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
+        from Florence.FunctionSpace.GetBases import GetBases
+
+        from copy import deepcopy
+        from scipy.spatial import Delaunay
+        # SINCE THIS IS A 2D PLOT
+        ndim = 2
+
+        C = interpolation_degree
+        p = C+1
+        nsize = int((p+1)*(p+2)/2.)
+        CActual = mesh.InferPolynomialDegree() - 1 
+        nsize_2 = int((CActual+2)*(CActual+3)/2.)
+
+        FeketePointsTri = FeketePointsTri(C)
+        if EquallySpacedPoints is True:
+            FeketePointsTri = EquallySpacedPointsTri(C)
+
+        # BUILD DELAUNAY TRIANGULATION OF REFERENCE ELEMENTS
+        TrianglesFunc = Delaunay(FeketePointsTri)
+        Triangles = TrianglesFunc.simplices.copy()
+
+
+        # GET EQUALLY-SPACED/GAUSS-LOBATTO POINTS FOR THE EDGES
+        if EquallySpacedPoints is False:
+            GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0]
+        else:
+            GaussLobattoPointsOneD = Lagrange(C,0)[-1]
+
+        BasesTri = np.zeros((nsize_2,FeketePointsTri.shape[0]),dtype=np.float64)
+        hpBases = Tri.hpNodal.hpBases
+        for i in range(FeketePointsTri.shape[0]):
+            BasesTri[:,i] = hpBases(CActual,FeketePointsTri[i,0],FeketePointsTri[i,1],
+                EvalOpt=1,EquallySpacedPoints=EquallySpacedPoints,Transform=1)[0]
+
+        BasesOneD = np.zeros((CActual+2,GaussLobattoPointsOneD.shape[0]),dtype=np.float64)
+        for i in range(GaussLobattoPointsOneD.shape[0]):
+            BasesOneD[:,i] = LagrangeGaussLobatto(CActual,GaussLobattoPointsOneD[i])[0]
+
+        smesh = deepcopy(mesh)
+        smesh.elements = mesh.elements[:,:ndim+1]
+        nmax = np.max(smesh.elements)+1
+        smesh.points = mesh.points[:nmax,:]
+        smesh.GetEdgesTri()
+        edge_elements = smesh.GetElementsEdgeNumberingTri()
+
+
+        # GET EDGE ORDERING IN THE REFERENCE ELEMENT
+        reference_edges = NodeArrangementTri(CActual)[0]
+        reference_edges = np.concatenate((reference_edges,reference_edges[:,1,None]),axis=1)
+        reference_edges = np.delete(reference_edges,1,1)
+
+        # GET EULERIAN GEOMETRY
+        if TotalDisp.ndim==3:
+            vpoints = mesh.points + TotalDisp[:,:ndim,-1]
+        else:
+            vpoints = mesh.points + TotalDisp[:,:ndim]
+
+        # GET X & Y OF CURVED EDGES
+        if plot_edges:
+            x_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
+            y_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
+
+            for iedge in range(smesh.all_edges.shape[0]):
+                ielem = edge_elements[iedge,0]
+                edge = mesh.elements[ielem,reference_edges[edge_elements[iedge,1],:]]
+                coord_edge = vpoints[edge,:]
+                x_edges[:,iedge], y_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
+
+
+        nnode = nsize*mesh.nelem
+        nelem = Triangles.shape[0]*mesh.nelem
+
+        Xplot = np.zeros((nnode,2),dtype=np.float64)
+        Tplot = np.zeros((nelem,3),dtype=np.int64)
+        Uplot = np.zeros(nnode,dtype=np.float64)
+
+        if QuantityToPlot is None:
+            quantity_to_plot = np.zeros(mesh.nelem)
+        else:
+            quantity_to_plot = QuantityToPlot
+
+        # FOR CURVED ELEMENTS
+        for ielem in range(mesh.nelem):
+            Xplot[ielem*nsize:(ielem+1)*nsize,:] = np.dot(BasesTri.T, vpoints[mesh.elements[ielem,:],:])
+            Tplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex,:] = Triangles + ielem*nsize
+            Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
+
+
+
+        tmesh = Mesh()
+        tmesh.element_type = "tri"
+        tmesh.elements = Tplot
+        tmesh.points = Xplot
+        tmesh.nelem = nelem
+        tmesh.nnode = nnode
+        tmesh.nsize = nsize
+        tmesh.bases_1 = BasesOneD
+        tmesh.bases_2 = BasesTri.T
+
+        if plot_edges:
+            tmesh.x_edges = x_edges
+            tmesh.y_edges = y_edges
+            tmesh.edge_elements = edge_elements
+            tmesh.reference_edges = reference_edges
+
+
+        return tmesh
+
+
+
+
+
+
+
+    @staticmethod
     def TessellateQuads(mesh, TotalDisp, QuantityToPlot=None,
         ProjectionFlags=None, interpolation_degree=30, EquallySpacedPoints=False,
         plot_points=False, plot_edges=True, plot_on_faces=True):
@@ -2805,6 +2935,7 @@ class PostProcess(object):
         else:
             vpoints = mesh.points + TotalDisp[:,:ndim]
 
+
         # GET X & Y OF CURVED EDGES
         if plot_edges:
             x_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
@@ -2845,7 +2976,7 @@ class PostProcess(object):
 
         # SAVE TESSELLATION
         tmesh = Mesh()
-        tmesh.element_type = "quad"
+        tmesh.element_type = "tri"
         tmesh.elements = Tplot
         tmesh.points = Xplot
         tmesh.quantity = Uplot
@@ -3225,7 +3356,7 @@ class PostProcess(object):
 
         # THIS IS NOT A FLORENCE MESH COMPLIANT MESH
         tmesh = Mesh()
-        tmesh.element_type = "quad"
+        tmesh.element_type = "tri"
         tmesh.elements = Tplot
         tmesh.points = Xplot
         tmesh.quantity = Uplot

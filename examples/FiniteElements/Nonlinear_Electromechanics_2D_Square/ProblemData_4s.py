@@ -12,7 +12,7 @@ from Florence.Tensor import makezero
 def ProblemData_2D_mech(*args, **kwargs):
 
     ndim=2
-    p=1
+    p=2
 
     material = NeoHookean_2(ndim,mu=1.0,lamb=2.3)
     # material = MooneyRivlin_0(ndim,mu1=1.0,mu2=1.0,lamb=2.3)
@@ -23,9 +23,9 @@ def ProblemData_2D_mech(*args, **kwargs):
     cad_file = ProblemPath + "/Plate_Hole_2D.iges"
 
     mesh = Mesh()
-    # mesh.ReadHDF5(ProblemPath+"/Mesh_Plate_Hole_Curved_P"+str(p)+".mat")
-    mesh.Reader(ProblemPath+"/Mesh_Plate_Hole_2D_2.dat","tri")
-    mesh.GetHighOrderMesh(p=p)
+    mesh.ReadHDF5(ProblemPath+"/Mesh_Plate_Hole_Curved_P"+str(p)+".mat")
+    # mesh.Reader(ProblemPath+"/Mesh_Plate_Hole_2D_2.dat","tri")
+    # mesh.GetHighOrderMesh(p=p)
     makezero(mesh.points)
 
 
@@ -53,6 +53,7 @@ def ProblemData_2D_mech(*args, **kwargs):
             material=material, boundary_condition=boundary_condition)
 
     print np.linalg.norm(solution.sol)
+    # solution.Plot(configuration="deformed")
 
 
 
@@ -130,7 +131,9 @@ def ProblemData_3D_mech(*args, **kwargs):
 
 
     mesh = Mesh()
-    mesh.ReadHDF5(filename)
+    # mesh.ReadHDF5(filename)
+    mesh.Cube(side_length=100,element_type="hex",n=2)
+    mesh.GetHighOrderMesh(p=p)
 
     material = MooneyRivlin_0(ndim,mu1=1.0,mu2=0.5, lamb=2.0)
     # material = AnisotropicMooneyRivlin_1(ndim,mu1=1.,mu2=1.5, mu3=2.5,lamb=5.5)
@@ -177,7 +180,7 @@ def ProblemData_3D_mech(*args, **kwargs):
             material=material, boundary_condition=boundary_condition)
 
     print np.linalg.norm(solution.sol)
-    # solution.Animate(configuration="deformed")
+    solution.Animate(configuration="deformed")
     # solution.WriteVTK("/home/roman/ZPlots/Cylz.vtu", quantity=0)
 
 
@@ -245,17 +248,57 @@ def ProblemData_3D_electro_mech(*args, **kwargs):
 def Problem_Parallelepiped():
 
     mesh = Mesh()
-    # mesh.Parallelepiped(element_type="hex")
+    # mesh.Parallelepiped(element_type="hex", nx=6,ny=7,nz=8)
     # mesh.Parallelepiped(element_type="tet")
-    mesh.Cube(element_type="hex",nx=16,ny=16,nz=16)
-    # mesh.Cube(element_type="hex",nx=2,ny=2,nz=2)
+    # mesh.Cube(element_type="hex",n=3)
     # mesh.Cube()
-    mesh.SimplePlot()
-    ndim = mesh.points.shape[1]
-    # mesh.GetHighOrderMesh(p=3)
+    # mesh.SimplePlot()
+    # ndim = mesh.points.shape[1]
 
-    material = NeoHookean_2(ndim,youngs_modulus=10, poissons_ratio=0.4)
-    # material = MooneyRivlin_0(ndim,mu1=1.0,mu2=0.5, lamb=2.0)
+    # -------- TRI ----------
+    # mesh.Square(n=1)
+    # mesh.GetHighOrderMesh(p=2)
+    # print mesh.points
+    # mesh.points[-2,:] = [0.4,1.4]
+    # mesh.points[-3,:] = [0.9,.0]
+    # mesh.LargestSegment(nsamples=50, plot_segment=True, plot_element=True)
+    # ------------------------
+
+    # -------- QUAD ----------
+    # mesh.Square(n=1, element_type="quad")
+    # mesh.GetHighOrderMesh(p=3)
+    # mesh.points[6,:] = [1.4,0.27]
+    # mesh.points[7,:] = [1.5,0.72]
+    # mesh.points[-3,:] = [0.72,0.8]
+    # mesh.points[-8,:] = [0.27,0.05]
+    # mesh.points[-1,:] = [1.0,0.68]
+    # mesh.points[-2,:] = [1.0,0.29]
+    # mesh.LargestSegment(nsamples=50, plot_segment=True, plot_element=True)
+    # ------------------------
+
+    # -------- TET ----------    
+    p=5
+    filename = PWD(__file__) + '/Mesh_Cyl_P'+str(p)+'.mat'
+    mesh.ReadHDF5(filename)
+    mesh.LargestSegment(nsamples=25, plot_segment=True, smallest_element=False)
+    # ------------------------
+
+    # -------- Hex ----------    
+    # mesh.Cube(element_type="hex",nx=1,ny=1,nz=1)
+    # mesh.GetHighOrderMesh(p=2)
+    # mesh.points[5,:] = [-0.2,0.5,1.0]
+    # mesh.points[11,:] = [0.5,-0.2,1.0]
+    # mesh.points[14,:] = [0.5,0.5,1.4]
+    # mesh.points[-4,:] = [1.2,0.5,1.0]
+    # mesh.points[-10,:] = [0.5,1.2,1.0]
+    # mesh.points[12,:] = [0.5,0.5,-0.5]
+    # mesh.LargestSegment(nsamples=25, plot_segment=True)
+    # ------------------------
+
+    exit()
+
+    # material = NeoHookean_2(ndim,youngs_modulus=10, poissons_ratio=0.4)
+    material = MooneyRivlin_0(ndim,mu1=1.0,mu2=0.5, lamb=2.0)
     # material = AnisotropicMooneyRivlin_1(ndim, mu1=1.,mu2=1.5, mu3=2.5,lamb=5.5)
     # material.anisotropic_orientations = np.zeros((mesh.nelem,mesh.points.shape[1]))
     # material.anisotropic_orientations = np.random.rand(mesh.nelem,mesh.points.shape[1])

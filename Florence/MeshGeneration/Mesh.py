@@ -1166,6 +1166,7 @@ class Mesh(object):
 
         assert self.elements is not None
         assert self.element_type is not None
+
         if self.points.shape[1] == 2:
             raise ValueError("2D mesh does not volume")
         if gpoints is None:
@@ -1182,6 +1183,19 @@ class Mesh(object):
             det_array = np.dstack((a-d,b-d,c-d))
             # FIND VOLUME OF ALL THE ELEMENTS
             volume = 1./6.*np.linalg.det(det_array)
+
+        elif self.element_type == "hex":
+
+            # Refer: https://en.wikipedia.org/wiki/Parallelepiped
+            
+            a = gpoints[self.elements[:,0],:]
+            b = gpoints[self.elements[:,1],:]
+            c = gpoints[self.elements[:,3],:]
+            d = gpoints[self.elements[:,4],:]
+
+            det_array = np.dstack((b-a,c-a,d-a))
+            # FIND VOLUME OF ALL THE ELEMENTS
+            volume = np.linalg.det(det_array)
 
         else:
             raise NotImplementedError("Computing volumes for", self.element_type, "elements not implemented yet")
@@ -1309,7 +1323,7 @@ class Mesh(object):
             from Florence.QuadratureRules import FeketePointsTri
 
             eps = FeketePointsTri(2)
-            middle_point_isoparametric = eps[6,:] # check
+            middle_point_isoparametric = eps[6,:] 
             if not np.isclose(sum(middle_point_isoparametric),-0.6666666):
                 raise ValueError("Median of triangle does not match [-0.3333,-0.3333]. "
                     "Did you change your nodal spacing or interpolation functions?")
@@ -1336,9 +1350,157 @@ class Mesh(object):
             median = np.einsum('ijk,j',self.points[self.elements[:,:4],:],bases_for_middle_point) 
 
         else:
-            raise NotImplementedError('Median for this element type not implemented yet')
+            raise NotImplementedError('Median for {} elements not implemented yet'.format(self.element_type))
 
         return median, bases_for_middle_point
+
+
+    def LargestSegment(self, smallest_element=True, nsamples=50, 
+        plot_segment=False, plot_element=False, figure=None, save=False, filename=None):
+        """Finds the largest segment that can fit in an element. For curvilinear elements
+            this measure can be used as (h) for h-refinement studies
+
+            input:
+                smallest_element                [bool] if the largest segment size is to be computed in the
+                                                smallest element (i.e. element with the smallest area in 2D or
+                                                smallest volume in 3D). Default is True. If False, then the largest
+                                                segment in the largest element will be computed. 
+                nsample:                        [int] number of sample points along the curved
+                                                edges of the elements. The maximum distance between
+                                                all combinations of these points is the largest
+                                                segment
+                plot_segment:                   [bool] plots segment on tope of [curved/straight] mesh
+                plot_element:                   [bool] plots the straight/curved element to which the segment
+                                                belongs
+                figure:                         [an instance of matplotlib/mayavi.mlab figure for 2D/3D]
+                save:                           [bool] wether to save the figure or not
+                filename:                       [str] file name for the figure to be save
+            
+            returns:
+                largest_segment_length          [float] maximum segment length that could be fit within either the 
+        """
+
+        self.__do_memebers_exist__()
+        if self.element_type == "hex" or self.element_type == "tet":
+            quantity = self.Volumes()
+        elif self.element_type == "quad" or self.element_type == "tri":
+            quantity = self.Areas()
+
+
+        if smallest_element:
+            omesh = self.GetLocalisedMesh(quantity.argmin())
+        else:
+            omesh = self.GetLocalisedMesh(quantity.argmax())
+
+        try:
+            from Florence.PostProcessing import PostProcess
+        except:
+            raise ImportError('This function requires florence PostProcessing module')
+            return
+
+        if save:
+            if filename is None:
+                raise ValueError("No file name provided. I am going to write one the current directory")
+                filename = PWD(__file__) + "/output.png"
+
+        if self.element_type == "tri":
+            tmesh = PostProcess.TessellateTris(omesh,np.zeros_like(omesh.points),
+                plot_edges=True, interpolation_degree=nsamples)
+        elif self.element_type == "quad":
+            tmesh = PostProcess.TessellateQuads(omesh,np.zeros_like(omesh.points),
+                plot_edges=True, interpolation_degree=nsamples)
+        elif self.element_type == "tet":
+            tmesh = PostProcess.TessellateTets(omesh,np.zeros_like(omesh.points),
+                plot_edges=True, interpolation_degree=nsamples)
+        elif self.element_type == "hex":
+            tmesh = PostProcess.TessellateHexes(omesh,np.zeros_like(omesh.points),
+                plot_edges=True, interpolation_degree=nsamples)  
+
+        ndim = omesh.InferSpatialDimension()
+        nnode = tmesh.points.shape[0]
+        largest_segment_lengths = []
+        nodes = np.array((1,ndim))
+        for i in range(nnode):
+            tiled_points = np.tile(tmesh.points[i,:][:,None],nnode).T
+            segment_lengths = np.linalg.norm(tmesh.points - tiled_points, axis=1)
+            largest_segment_lengths.append(segment_lengths.max())
+            nodes = np.vstack((nodes, np.array([i,segment_lengths.argmax()])[None,:]))
+
+        largest_segment_lengths = np.array(largest_segment_lengths)
+        nodes = nodes[1:,:]
+        largest_segment_length = largest_segment_lengths.max()
+        corresponding_nodes = nodes[largest_segment_lengths.argmax(),:]
+
+
+        if plot_segment:
+            
+            segment_coords = tmesh.points[corresponding_nodes,:]
+
+            if ndim==2:
+                import matplotlib.pyplot as plt
+                if figure == None:
+                    figure = plt.figure()
+
+                if plot_element:
+                    if omesh.element_type == "tri":
+                        PostProcess.CurvilinearPlotTri(omesh,
+                            np.zeros_like(omesh.points),plot_points=True, 
+                            figure=figure, interpolation_degree=nsamples, show_plot=False)
+                    elif omesh.element_type == "quad":
+                        PostProcess.CurvilinearPlotQuad(omesh,
+                            np.zeros_like(omesh.points),plot_points=True, 
+                            figure=figure, interpolation_degree=nsamples, show_plot=False)
+
+                tmesh.SimplePlot(figure=figure,show_plot=False)
+                plt.plot(tmesh.x_edges,tmesh.y_edges,'-o',color="#FF6347")
+                plt.plot(segment_coords[:,0],segment_coords[:,1],'-o',color="#E34234", linewidth=3)
+
+                # fl = "/home/roman/Dropbox/2016_Linearised_Electromechanics_Paper/figures/hp_Benchmark/"
+                # plt.savefig(fl+"ElementSizeTri.eps", bbox_inches="tight",dpi=300)
+                # plt.savefig(fl+"ElementSizeTri_Segment.eps", bbox_inches="tight",dpi=300)
+                # plt.savefig(fl+"ElementSizeQuad.eps", bbox_inches="tight",dpi=300)
+                # plt.savefig(fl+"ElementSizeQuad_Segment.eps", bbox_inches="tight",dpi=300)
+
+                if save:
+                    plt.savefig(filename,bbox_inches="tight",dpi=300)
+                plt.show()
+
+            elif ndim==3:
+
+                import os
+                os.environ['ETS_TOOLKIT'] = 'qt4'
+                from mayavi import mlab
+    
+                if figure is None:
+                    figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(1000,800))
+
+                if not plot_element:
+                    if omesh.element_type == "tet":
+                        PostProcess.CurvilinearPlotTet(omesh,
+                            np.zeros_like(omesh.points),plot_points=True, point_radius=0.13,
+                            figure=figure, interpolation_degree=nsamples, show_plot=False)
+                    elif omesh.element_type == "hex":
+                        PostProcess.CurvilinearPlotHex(omesh,
+                            np.zeros_like(omesh.points),plot_points=True, 
+                            figure=figure, interpolation_degree=nsamples, show_plot=False)
+
+                tmesh.GetEdges()
+                edge_coords = tmesh.points[np.unique(tmesh.all_edges),:]
+                mlab.triangular_mesh(tmesh.points[:,0],tmesh.points[:,1],tmesh.points[:,2],tmesh.elements, representation='wireframe', color=(0,0,0))
+                # mlab.points3d(edge_coords[:,0],edge_coords[:,1],edge_coords[:,2],color=(1., 99/255., 71./255), scale_factor=0.03)
+                # mlab.plot3d(segment_coords[:,0],segment_coords[:,1],segment_coords[:,2], color=(227./255, 66./255, 52./255)) 
+                mlab.points3d(edge_coords[:,0],edge_coords[:,1],edge_coords[:,2],color=(1., 99/255., 71./255), scale_factor=0.17)
+                mlab.plot3d(segment_coords[:,0],segment_coords[:,1],segment_coords[:,2], 
+                    color=(227./255, 66./255, 52./255), line_width=100., representation="wireframe")
+                
+                if save:
+                    mlab.savefig(filename,dpi=300)
+
+                mlab.show()
+
+
+
+        return largest_segment_length  
   
 
 
@@ -1369,6 +1531,9 @@ class Mesh(object):
             quantity = self.Areas(with_sign=True)
         elif self.element_type == "tet":
             assert self.elements.shape[1]==4
+            quantity = self.Volumes(with_sign=True)
+        elif self.element_type == "hex":
+            assert self.elements.shape[1]==8
             quantity = self.Volumes(with_sign=True)
 
         original_order = ''
@@ -2155,7 +2320,6 @@ class Mesh(object):
         if color is None:
             color=(197/255.,241/255.,197/255.)
 
-
         if save:
             if filename is None:
                 warn('File name not given. I am going to write one in the current directory')
@@ -2273,7 +2437,6 @@ class Mesh(object):
 
 
         elif self.element_type == "hex":
-
             from Florence.PostProcessing import PostProcess
             tmesh = PostProcess.TessellateHexes(self,np.zeros_like(self.points),plot_points=True,
                 interpolation_degree=0)
@@ -3158,7 +3321,8 @@ class Mesh(object):
         aranger = np.arange(tmesh.nelem*nodeperelem)
         tmesh.elements = inv[aranger].reshape(tmesh.nelem,nodeperelem)
         tmesh.points = self.points[unnodes,:]
-        tmesh.GetBoundaryFaces()
+        if tmesh.element_type == "hex" or tmesh.element_type == "tet":
+            tmesh.GetBoundaryFaces()
         tmesh.GetBoundaryEdges()
 
         if solution is not None:
