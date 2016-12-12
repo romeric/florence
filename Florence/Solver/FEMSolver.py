@@ -442,9 +442,7 @@ class FEMSolver(object):
             K_b, F_b = boundary_condition.GetReducedMatrices(K,Residual)[:2]
 
             # SOLVE THE SYSTEM
-            # print(np.linalg.norm(F_b))
             sol = solver.Solve(K_b,-F_b)
-            # print(np.linalg.norm(sol))
 
             # GET ITERATIVE SOLUTION
             dU = boundary_condition.UpdateFreeDoFs(sol,K.shape[0],formulation.nvar) 
