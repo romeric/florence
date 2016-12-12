@@ -857,8 +857,7 @@ def ProblemData_4(*args, **kwargs):
 
         return boundary_data
 
-    boundary_condition.dirichlet_flags = DirichletFunc(mesh)
-    # boundary_condition.SetDirichletCriteria(DirichletCriteria, mesh.points)
+    boundary_condition.SetDirichletCriteria(DirichletFunc, mesh)
 
     formulation = DisplacementPotentialFormulation(mesh)
 

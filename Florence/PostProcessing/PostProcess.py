@@ -2339,9 +2339,7 @@ class PostProcess(object):
                 connections[i*(x_edges.shape[0]-1):(i+1)*(x_edges.shape[0]-1),0] = connections_elements[i,:-1]
                 connections[i*(x_edges.shape[0]-1):(i+1)*(x_edges.shape[0]-1),1] = connections_elements[i,1:]
             connections = connections[:(i+1)*(x_edges.shape[0]-1),:]
-            # point_cloulds = np.concatenate((x_edges.flatten()[:,None],y_edges.flatten()[:,None],z_edges.flatten()[:,None]),axis=1)
             
-            # src = mlab.pipeline.scalar_scatter(x_edges.flatten(), y_edges.flatten(), z_edges.flatten())
             src = mlab.pipeline.scalar_scatter(x_edges.T.copy().flatten(), y_edges.T.copy().flatten(), z_edges.T.copy().flatten())
             src.mlab_source.dataset.lines = connections
             lines = mlab.pipeline.stripper(src)
@@ -2399,6 +2397,7 @@ class PostProcess(object):
             else:
                 trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars = Uplot,
                     line_width=point_line_width,colormap='summer')
+                
 
 
             # PLOT POINTS ON CURVED MESH

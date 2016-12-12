@@ -8,3 +8,4 @@ from MaterialLibrary import *
 from BoundaryCondition import BoundaryCondition
 from Solver import LinearSolver, FEMSolver, StaggeredFEMSolver, StaggeredElectromechanicSolver
 from Utils import PWD
+from PostProcessing import *

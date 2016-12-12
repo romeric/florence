@@ -9,7 +9,7 @@ from Florence.Tensor import trace
 
 class IncrementalLinearElastic(Material):
     """This is the linear elastic model with zero stresses and constant Hessian
-        but the geometry is updated incrementally i.e. at every x=x_k
+        but the geometry for this model requires incremental updates at every x=x_k
         """
 
     def __init__(self, ndim, **kwargs):

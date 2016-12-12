@@ -245,42 +245,37 @@ def ProblemData_3D_electro_mech(*args, **kwargs):
 
 
 
-def Problem_Parallelepiped():
+
+
+def LargestSegmentBenchmark():
 
     mesh = Mesh()
-    # mesh.Parallelepiped(element_type="hex", nx=6,ny=7,nz=8)
-    # mesh.Parallelepiped(element_type="tet")
-    # mesh.Cube(element_type="hex",n=3)
-    # mesh.Cube()
-    # mesh.SimplePlot()
-    # ndim = mesh.points.shape[1]
 
     # -------- TRI ----------
     # mesh.Square(n=1)
     # mesh.GetHighOrderMesh(p=2)
-    # print mesh.points
     # mesh.points[-2,:] = [0.4,1.4]
     # mesh.points[-3,:] = [0.9,.0]
     # mesh.LargestSegment(nsamples=50, plot_segment=True, plot_element=True)
     # ------------------------
 
     # -------- QUAD ----------
-    # mesh.Square(n=1, element_type="quad")
-    # mesh.GetHighOrderMesh(p=3)
-    # mesh.points[6,:] = [1.4,0.27]
-    # mesh.points[7,:] = [1.5,0.72]
-    # mesh.points[-3,:] = [0.72,0.8]
-    # mesh.points[-8,:] = [0.27,0.05]
-    # mesh.points[-1,:] = [1.0,0.68]
-    # mesh.points[-2,:] = [1.0,0.29]
-    # mesh.LargestSegment(nsamples=50, plot_segment=True, plot_element=True)
+    mesh.Square(n=1, element_type="quad")
+    mesh.GetHighOrderMesh(p=3)
+    mesh.points[6,:] = [1.4,0.27]
+    mesh.points[7,:] = [1.5,0.72]
+    mesh.points[-3,:] = [0.72,0.8]
+    mesh.points[-8,:] = [0.27,0.05]
+    mesh.points[-1,:] = [1.0,0.68]
+    mesh.points[-2,:] = [1.0,0.29]
+    mesh.LargestSegment(nsamples=50, plot_segment=True, plot_element=True)
     # ------------------------
 
     # -------- TET ----------    
-    p=5
-    filename = PWD(__file__) + '/Mesh_Cyl_P'+str(p)+'.mat'
-    mesh.ReadHDF5(filename)
-    mesh.LargestSegment(nsamples=25, plot_segment=True, smallest_element=False)
+    # p=5
+    # filename = PWD(__file__) + '/Mesh_Cyl_P'+str(p)+'.mat'
+    # mesh.ReadHDF5(filename)
+    # mesh.LargestSegment(nsamples=25, plot_segment=True, smallest_element=False)
     # ------------------------
 
     # -------- Hex ----------    
@@ -295,10 +290,28 @@ def Problem_Parallelepiped():
     # mesh.LargestSegment(nsamples=25, plot_segment=True)
     # ------------------------
 
-    exit()
 
-    # material = NeoHookean_2(ndim,youngs_modulus=10, poissons_ratio=0.4)
-    material = MooneyRivlin_0(ndim,mu1=1.0,mu2=0.5, lamb=2.0)
+
+
+
+
+
+def Problem_Parallelepiped():
+
+    mesh = Mesh()
+    # mesh.Parallelepiped(element_type="hex",nx=8,ny=8,nz=8)
+    # mesh.Parallelepiped(element_type="hex", nx=6,ny=7,nz=8)
+    # mesh.Parallelepiped(element_type="tet")
+    mesh.Cube(element_type="hex",n=4)
+    mesh.GetHighOrderMesh(p=2)
+    # mesh.Cube()
+    # mesh.SimplePlot()
+    ndim = mesh.points.shape[1]
+
+
+
+    material = NeoHookean_2(ndim,youngs_modulus=10, poissons_ratio=0.4)
+    # material = MooneyRivlin_0(ndim,mu1=1.0,mu2=0.5, lamb=2.0)
     # material = AnisotropicMooneyRivlin_1(ndim, mu1=1.,mu2=1.5, mu3=2.5,lamb=5.5)
     # material.anisotropic_orientations = np.zeros((mesh.nelem,mesh.points.shape[1]))
     # material.anisotropic_orientations = np.random.rand(mesh.nelem,mesh.points.shape[1])
@@ -318,7 +331,7 @@ def Problem_Parallelepiped():
         Y_1 = np.isclose(mesh.points[:,2], 1.)
         boundary_data[Y_1,0] = 0.
         boundary_data[Y_1,1] = 0.
-        boundary_data[Y_1,2] = -.2
+        boundary_data[Y_1,2] = -.6
 
 
         return boundary_data
@@ -328,18 +341,15 @@ def Problem_Parallelepiped():
     boundary_condition.SetDirichletCriteria(DirichletFunc,mesh)
     formulation = DisplacementFormulation(mesh)
 
-    # print formulation.function_spaces[0].AllGauss.shape
-    # exit()
-    # return
     # solver = LinearSolver(linear_solver = "multigrid")
     solver = None
-    fem_solver = FEMSolver(number_of_load_increments=1, newton_raphson_tolerance=1e-05,parallelise=False)
+    fem_solver = FEMSolver(number_of_load_increments=5, newton_raphson_tolerance=1e-05,parallelise=False)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition, solver=solver)
 
     print np.linalg.norm(solution.sol)
-    # solution.Animate(configuration="deformed")
+    solution.Animate(configuration="deformed", quantity=18)
     # solution.WriteVTK("/home/roman/ZPlots/Cylz.vtu", quantity=0)
 
 
@@ -361,6 +371,7 @@ if __name__ == "__main__":
     # run('ProblemData_3D_electro_mech()')
 
 
-    Problem_Parallelepiped()
+    LargestSegmentBenchmark()
+    # Problem_Parallelepiped()
     # run('Problem_Parallelepiped()')
 
