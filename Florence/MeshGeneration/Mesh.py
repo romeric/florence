@@ -1452,18 +1452,21 @@ class Mesh(object):
                             figure=figure, interpolation_degree=nsamples, show_plot=False)
 
                 tmesh.SimplePlot(figure=figure,show_plot=False)
-                plt.plot(tmesh.x_edges,tmesh.y_edges,'-o',color="#FF6347")
-                plt.plot(segment_coords[:,0],segment_coords[:,1],'-o',color="#E34234", linewidth=3)
+                # plt.plot(tmesh.x_edges,tmesh.y_edges,'-o',color="#FF6347")
+                # plt.plot(segment_coords[:,0],segment_coords[:,1],'-o',color="#E34234", linewidth=3)
 
-                # fl = "/home/roman/Dropbox/2016_Linearised_Electromechanics_Paper/figures/hp_Benchmark/"
+                fl = "/home/roman/Dropbox/2016_Linearised_Electromechanics_Paper/figures/hp_Benchmark/"
                 # plt.savefig(fl+"ElementSizeTri.eps", bbox_inches="tight",dpi=300)
                 # plt.savefig(fl+"ElementSizeTri_Segment.eps", bbox_inches="tight",dpi=300)
+                # plt.savefig(fl+"ElementSizeTri_Tessellation.eps", bbox_inches="tight",pad_inches=0,dpi=300)
                 # plt.savefig(fl+"ElementSizeQuad.eps", bbox_inches="tight",dpi=300)
+                plt.savefig(fl+"ElementSizeQuad_Tessellation.eps", bbox_inches="tight",pad_inches=0,dpi=300)
                 # plt.savefig(fl+"ElementSizeQuad_Segment.eps", bbox_inches="tight",dpi=300)
 
                 if save:
                     plt.savefig(filename,bbox_inches="tight",dpi=300)
-                plt.show()
+
+                # plt.show()
 
             elif ndim==3:
 
@@ -1474,7 +1477,7 @@ class Mesh(object):
                 if figure is None:
                     figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(1000,800))
 
-                if not plot_element:
+                if plot_element:
                     if omesh.element_type == "tet":
                         PostProcess.CurvilinearPlotTet(omesh,
                             np.zeros_like(omesh.points),plot_points=True, point_radius=0.13,
@@ -1487,11 +1490,11 @@ class Mesh(object):
                 tmesh.GetEdges()
                 edge_coords = tmesh.points[np.unique(tmesh.all_edges),:]
                 mlab.triangular_mesh(tmesh.points[:,0],tmesh.points[:,1],tmesh.points[:,2],tmesh.elements, representation='wireframe', color=(0,0,0))
-                # mlab.points3d(edge_coords[:,0],edge_coords[:,1],edge_coords[:,2],color=(1., 99/255., 71./255), scale_factor=0.03)
-                # mlab.plot3d(segment_coords[:,0],segment_coords[:,1],segment_coords[:,2], color=(227./255, 66./255, 52./255)) 
+                # # mlab.points3d(edge_coords[:,0],edge_coords[:,1],edge_coords[:,2],color=(1., 99/255., 71./255), scale_factor=0.03)
+                # # mlab.plot3d(segment_coords[:,0],segment_coords[:,1],segment_coords[:,2], color=(227./255, 66./255, 52./255)) 
                 mlab.points3d(edge_coords[:,0],edge_coords[:,1],edge_coords[:,2],color=(1., 99/255., 71./255), scale_factor=0.17)
                 mlab.plot3d(segment_coords[:,0],segment_coords[:,1],segment_coords[:,2], 
-                    color=(227./255, 66./255, 52./255), line_width=100., representation="wireframe")
+                    color=(227./255, 66./255, 52./255), line_width=10., representation="wireframe")
                 
                 if save:
                     mlab.savefig(filename,dpi=300)
@@ -3293,6 +3296,7 @@ class Mesh(object):
                 lmesh.faces = np.copy(self.faces[:,:2])
                 lmesh.nnode = int(np.max(lmesh.elements)+1)
                 lmesh.points = np.copy(self.points[:lmesh.nnode,:])
+            lmesh.nelem = lmesh.elements.shape[0]
 
         return lmesh
 

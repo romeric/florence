@@ -45,8 +45,6 @@ void KinematicMeasures(Real *SpatialGradient_, Real *F_, Real *detJ, const Real 
                 for (size_t l=0; l<nodeperelem; ++l) {
                     MaterialGradient[i*ndim*nodeperelem+j*nodeperelem+l] += invParentGradientX[i*ndim*ndim+j*ndim+k]*\
                         Jm_[k*ngauss*nodeperelem+l*ngauss+i];
-                    // SpatialGradient_[i*ndim*nodeperelem+j*nodeperelem+l] += invParentGradientx[i*ndim*ndim+j*ndim+k]*\
-                        // Jm_[k*ngauss*nodeperelem+l*ngauss+i];
                     SpatialGradient_[i*ndim*nodeperelem+l*ndim+j] += invParentGradientx[i*ndim*ndim+j*ndim+k]*\
                         Jm_[k*ngauss*nodeperelem+l*ngauss+i];
                 }
