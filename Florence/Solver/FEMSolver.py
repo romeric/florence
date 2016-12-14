@@ -14,6 +14,7 @@ from Florence.FiniteElements.SparseAssemblySmall import SparseAssemblySmall
 from Florence.PostProcessing import *
 from Florence.Solver import LinearSolver
 from Florence.TimeIntegrators import StructuralDynamicIntegrators
+from Florence import Mesh
 
 import pyximport
 pyximport.install(setup_args={'include_dirs': np.get_include()})
@@ -170,6 +171,8 @@ class FEMSolver(object):
         #---------------------------------------------------------------------------#
         if mesh is None:
             raise ValueError("No mesh detected for the analysis")
+        elif not isinstance(mesh,Mesh):
+            raise ValueError("mesh has to be an instance of Florence.Mesh")
         if boundary_condition is None:
             raise ValueError("No boundary conditions detected for the analysis")
         if material is None:
@@ -184,9 +187,10 @@ class FEMSolver(object):
             else:
                 function_spaces = formulation.function_spaces
 
+        
         # CHECK IF A SOLVER IS SPECIFIED
         if solver is None:
-            solver = LinearSolver(linear_solver="direct", linear_solver_type="umfpack")
+            solver = LinearSolver(linear_solver="direct", linear_solver_type="umfpack", geometric_discretisation=mesh.element_type)
 
         self.__checkdata__(material, boundary_condition, formulation, mesh)
         #---------------------------------------------------------------------------#
@@ -367,8 +371,14 @@ class FEMSolver(object):
             DeltaF = LoadFactor*NeumannForces
             NodalForces += DeltaF
             # OBRTAIN INCREMENTAL RESIDUAL - CONTRIBUTION FROM BOTH NEUMANN AND DIRICHLET
-            Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,NodalForces,
+            # Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,NodalForces,
+            #     boundary_condition.applied_dirichlet,LoadFactor=LoadFactor)[2]
+
+            # Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,np.zeros_like(NodalForces),
+                # boundary_condition.applied_dirichlet,LoadFactor=LoadFactor)[2]
+            Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
                 boundary_condition.applied_dirichlet,LoadFactor=LoadFactor)[2]
+            Residual -= DeltaF
             # GET THE INCREMENTAL DISPLACEMENT
             AppliedDirichletInc = LoadFactor*boundary_condition.applied_dirichlet
 
@@ -378,20 +388,17 @@ class FEMSolver(object):
             # HAVE TO CHECK THE CONVERGENCE OF NEWTON RAPHSON. TYPICALLY THIS IS 
             # NORM OF NODAL FORCES
             if Increment==0:
-                # self.NormForces = np.linalg.norm(Residual[boundary_condition.columns_out])
-                # self.NormForces = np.linalg.norm(Residual[boundary_condition.columns_in])
                 self.NormForces = np.linalg.norm(Residual)
                 # AVOID DIVISION BY ZERO
-                # if np.abs(self.NormForces) < 1e-14:
                 if np.isclose(self.NormForces,0.0):
                     self.NormForces = 1e-14
 
             if np.isclose(self.NormForces,0.0):
-                self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in]))
+                self.norm_residual = la.norm(Residual[boundary_condition.columns_in])
             else:
                 self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)
 
-            Eulerx, Eulerp = self.NewtonRaphson(function_spaces, formulation, solver, 
+            Eulerx, Eulerp, K, Residual = self.NewtonRaphson(function_spaces, formulation, solver, 
                 Increment,K,NodalForces,Residual,mesh,Eulerx,Eulerp,
                 material,boundary_condition,AppliedDirichletInc)
 
@@ -437,7 +444,6 @@ class FEMSolver(object):
 
 
         while self.norm_residual > Tolerance:
-        # while np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces) > Tolerance:
             # GET THE REDUCED SYSTEM OF EQUATIONS
             K_b, F_b = boundary_condition.GetReducedMatrices(K,Residual)[:2]
 
@@ -447,45 +453,34 @@ class FEMSolver(object):
             # GET ITERATIVE SOLUTION
             dU = boundary_condition.UpdateFreeDoFs(sol,K.shape[0],formulation.nvar) 
 
-            # UPDATE THE GEOMETRY
+            # UPDATE THE EULERIAN COMPONENTS
             Eulerx += dU[:,:formulation.ndim]
             Eulerp += dU[:,-1]
 
-            # GET ITERATIVE ELECTRIC POTENTIAL
             # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
             K, TractionForces = self.Assemble(function_spaces[0], formulation, mesh, material, solver,
                 Eulerx,Eulerp)[:2]
 
             # FIND THE RESIDUAL
-            Residual[boundary_condition.columns_in] = TractionForces[boundary_condition.columns_in] \
-            - NodalForces[boundary_condition.columns_in]
+            Residual[boundary_condition.columns_in] = TractionForces[boundary_condition.columns_in] -\
+                NodalForces[boundary_condition.columns_in]
+
+            # SAVE THE NORM
+            self.rel_norm_residual = la.norm(Residual[boundary_condition.columns_in])
+            if Iter==0:
+                self.NormForces = la.norm(Residual[boundary_condition.columns_in])
+            self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces) 
 
             # SAVE THE NORM 
-            self.rel_norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in]))
-            if Iter==0:
-                self.NormForces = np.abs(la.norm(Residual[boundary_condition.columns_in]))
-            self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)
-            
-            # if np.isclose(self.NormForces,0.0):
-            #     self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in]))
-            # else:
-            #     self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)
-
             self.NRConvergence['Increment_'+str(Increment)] = np.append(self.NRConvergence['Increment_'+str(Increment)],\
                 self.norm_residual)
             
-            # print('Iteration', Iter, 'for load increment', 
-            #     Increment, 'with <rel> residual of \t\t', self.norm_residual) 
             print("Iteration {} for increment {}.".format(Iter, Increment) +\
                 " Residual (abs) {0:>16.7g}".format(self.rel_norm_residual), 
                 "\t Residual (rel) {0:>16.7g}".format(self.norm_residual))
 
-            # # SAVE THE NORM 
-            # self.NRConvergence['Increment_'+str(Increment)] = np.append(self.NRConvergence['Increment_'+str(Increment)],\
-            #     np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces))
-            
-            # print('Iteration number', Iter, 'for load increment', Increment, 'with a residual of \t\t', \
-            #     np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)) 
+            if np.abs(self.rel_norm_residual) < Tolerance:
+                break
 
             # UPDATE ITERATION NUMBER
             Iter +=1
@@ -496,23 +491,12 @@ class FEMSolver(object):
             if Iter==self.maximum_iteration_for_newton_raphson:
                 self.newton_raphson_failed_to_converge = True
                 break
-            if np.isnan(self.norm_residual) or self.norm_residual>1e10:
+            if np.isnan(self.norm_residual) or self.norm_residual>1e16:
                 self.newton_raphson_failed_to_converge = True
                 break
 
 
-            # if Iter==self.maximum_iteration_for_newton_raphson and formulation.fields == "electro_mechanics":
-            #     raise StopIteration("\n\nNewton Raphson did not converge! Maximum number of iterations reached.")
-
-            # if Iter==self.maximum_iteration_for_newton_raphson:
-            #     self.newton_raphson_failed_to_converge = True
-            #     break
-            # if np.isnan(np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)):
-            #     self.newton_raphson_failed_to_converge = True
-            #     break
-
-
-        return Eulerx, Eulerp
+        return Eulerx, Eulerp, K, Residual
 
 
 

@@ -14,7 +14,7 @@ class LinearSolver(object):
     def __init__(self,linear_solver="direct", linear_solver_type="umfpack",
         apply_preconditioner=False, preconditioner="amg_smoothed_aggregation", 
         iterative_solver_tolerance=1.0e-12, reduce_matrix_bandwidth=False,
-        out_of_core=False):
+        out_of_core=False, geometric_discretisation=None):
         """
 
             input:
@@ -33,6 +33,11 @@ class LinearSolver(object):
                                         or "incomplete_lu" for scipy's spilu linear 
                                         operator
 
+                geometric_discretisation:
+                                        [str] type of geometric discretisation used, for
+                                        instance for FEM discretisations this would correspond
+                                        to "tri", "quad", "tet", "hex" etc
+
 
         """          
 
@@ -44,6 +49,7 @@ class LinearSolver(object):
         self.apply_preconditioner = apply_preconditioner
         self.preconditioner_type = preconditioner
         self.out_of_core = False
+        self.geometric_discretisation = geometric_discretisation
 
         self.has_amg_solver = True
         try:
@@ -66,7 +72,8 @@ class LinearSolver(object):
 
     def SetSolver(self,linear_solver="direct", linear_solver_type="umfpack",
         apply_preconditioner=False, preconditioner="amg_smoothed_aggregation", 
-        iterative_solver_tolerance=1.0e-12, reduce_matrix_bandwidth=False):
+        iterative_solver_tolerance=1.0e-12, reduce_matrix_bandwidth=False,
+        geometric_discretisation=None):
         """
 
             input:
@@ -85,6 +92,10 @@ class LinearSolver(object):
                                         or "incomplete_lu" for scipy's spilu linear 
                                         operator
 
+                geometric_discretisation:
+                                        [str] type of geometric discretisation used, for
+                                        instance for FEM discretisations this would correspond
+                                        to "tri", "quad", "tet", "hex" etc
 
         """ 
 
@@ -93,6 +104,8 @@ class LinearSolver(object):
         self.iterative_solver_tolerance = iterative_solver_tolerance
         self.apply_preconditioner = apply_preconditioner
         self.requires_cuthill_mckee = reduce_matrix_bandwidth
+        self.geometric_discretisation = geometric_discretisation
+
 
     @property
     def WhichLinearSolver(self):
@@ -175,6 +188,12 @@ class LinearSolver(object):
                 # self.solver_type = "direct"
                 # self.solver_subtype = "MUMPS"
                 # print 'Large system of equations. Switching to MUMPS solver'
+            elif b.shape[0] > 50000 and self.geometric_discretisation=="hex":
+                print(self.geometric_discretisation)
+                self.solver_type = "multigrid"
+                self.solver_subtype = "amg"
+                print('Large system of equations. Switching to algebraic multigrid solver')
+                self.switcher_message = True
             else:
                 self.solver_type = "direct"
                 self.solver_subtype = "umfpack"

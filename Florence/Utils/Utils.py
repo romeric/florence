@@ -114,3 +114,46 @@ def par_pickle(tmp_dir):
     MainData.nvar = int(Dict['nvar'])
 
     return MainData, mesh, material, Eulerx, TotalPot
+
+
+
+
+
+class constant_camera_view(object):
+    """Keeps the camera view for mayavi animations fixed
+    """
+
+    def __init__(self):
+
+        import os
+        os.environ['ETS_TOOLKIT'] = 'qt4'
+        from mayavi import mlab
+
+        self.mlab = mlab
+
+    def __enter__(self):
+        mlab = self.mlab
+        self.orig_no_render = mlab.gcf().scene.disable_render
+        if not self.orig_no_render:
+            mlab.gcf().scene.disable_render = True
+        cc = mlab.gcf().scene.camera
+        self.orig_pos = cc.position
+        self.orig_fp = cc.focal_point
+        self.orig_view_angle = cc.view_angle
+        self.orig_view_up = cc.view_up
+        self.orig_clipping_range = cc.clipping_range
+
+    def __exit__(self, t, val, trace):
+        mlab=self.mlab
+        cc = mlab.gcf().scene.camera
+        cc.position = self.orig_pos
+        cc.focal_point = self.orig_fp
+        cc.view_angle =  self.orig_view_angle 
+        cc.view_up = self.orig_view_up
+        cc.clipping_range = self.orig_clipping_range
+
+        if not self.orig_no_render:
+            mlab.gcf().scene.disable_render = False
+        if t != None:
+            print t, val, trace
+            ipdb.post_mortem(trace)

@@ -82,6 +82,8 @@ class StaggeredFEMSolver(FEMSolver):
         #---------------------------------------------------------------------------#
         if mesh is None:
             raise ValueError("No mesh detected for the analysis")
+        elif not isinstance(mesh,Mesh):
+            raise ValueError("mesh has to be an instance of Florence.Mesh")
         if boundary_condition is None:
             raise ValueError("No boundary conditions detected for the analysis")
         if material is None:
@@ -98,7 +100,7 @@ class StaggeredFEMSolver(FEMSolver):
 
         # CHECK IF A SOLVER IS SPECIFIED
         if solver is None:
-            solver = LinearSolver(linear_solver="direct", linear_solver_type="umfpack")
+            solver = LinearSolver(linear_solver="direct", linear_solver_type="umfpack", geometric_discretisation=mesh.element_type)
 
         self.__checkdata__(material, boundary_condition, formulation, mesh)
         #---------------------------------------------------------------------------#

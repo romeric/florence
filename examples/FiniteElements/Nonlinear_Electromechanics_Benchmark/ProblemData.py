@@ -16,6 +16,8 @@ from math import sin, cos
 
 def GetMeshes(p=2):
 
+
+
     # dd = loadmat("/home/roman/CurvedPatch_h"+str(532)+"P"+str(p)+".mat")
     # dd = loadmat("/home/roman/CurvedPatch_h"+str(26807)+"P"+str(p)+".mat")
     # dd = loadmat("/home/roman/CurvedPatch_h"+str(9220)+"P"+str(p)+".mat")
@@ -53,8 +55,8 @@ def GetMeshes(p=2):
     mesh.Reader(filename,"tet")
     mesh.GetHighOrderMesh(p=p)
 
-    print 4*mesh.points.shape[0]
-    exit()
+    # print 4*mesh.points.shape[0]
+    # exit()
 
 
 
@@ -74,7 +76,7 @@ def GetMeshes(p=2):
 
     # mesh.WriteHDF5("/home/roman/CurvedPatch_h"+str(mesh.nelem)+"P"+str(p)+".mat", {'TotalDisp':solution.sol})
     # solution.CurvilinearPlot(plot_edges=False)
-    # solution.CurvilinearPlot()
+    solution.CurvilinearPlot()
 
 
 
@@ -504,6 +506,221 @@ def RunProblems(p=2):
 
 
 
+def CheckHexes(p=2):
+
+    mesh = Mesh()
+    # mesh.Circle(ncirc=8, nrad=1, radius=10, element_type="quad", center=(5,5))
+    # mesh.Circle(ncirc=40, nrad=20, radius=10)
+    # print mesh.points.max()
+    # mesh.SimplePlot()
+
+
+    # mesh.Cylinder(ncirc=40, nrad=16, nlong=2, length=0.01)
+    mesh.HollowCylinder(ncirc=120, inner_radius=0.9, outer_radius=1., nrad=2, nlong=2, length=0.1)
+    # mesh.Cylinder()
+
+    # print "wow"
+    # mesh.Arc(ncirc=70,nrad=13, element_type="quad", start_angle=3.*np.pi/4., end_angle=7.*np.pi/4.)
+    # mesh.Arc(ncirc=7,nrad=13, element_type="quad", start_angle=2*np.pi, end_angle=np.pi/1.1)
+    # mesh.Arc(ncirc=70,nrad=13, element_type="quad", start_angle=10., end_angle=3.*np.pi/4.)
+    # mesh.Circle(element_type="quad")
+    # mesh.Extrude()
+    # mesh.ArcCylinder(center=(2,3,4))
+    # mesh.SimplePlot()
+    # print mesh.Bounds
+
+    # exit()
+
+
+
+    # # filename1 = PWD(__file__)+"/Patch_Bit.dat"
+    # # filename1 = PWD(__file__)+"/Pipe_Bit.dat"
+
+    # # filename1 = PWD(__file__)+"/Patch_Bit_15000.dat"
+    # filename1 = PWD(__file__)+"/Pipe_Bit_3000.dat"
+
+    # mesh1 = Mesh()
+    # mesh1.Reader(filename1,"hex")
+    # mesh1.element_type = "hex"
+    # # mesh2 = Mesh()
+    # # mesh1.elements = np.loadtxt(PWD(__file__)+"/PiPa_Elements_0.dat",dtype=np.int64)
+    # # mesh1.points = np.loadtxt(PWD(__file__)+"/PiPa_Points_0.dat")
+    # # mesh1.GetBoundaryFaces()
+    # mesh1.SimplePlot()
+    # # mesh2.Reader(filename2,"hex")
+    # # mesh2.SimplePlot()
+    # exit()
+
+
+    # exit()
+
+    ndim=3
+
+    material = NeoHookean_2(ndim,youngs_modulus=10,poissons_ratio=0.4)
+
+    ProblemPath = PWD(__file__)
+    # # filename = ProblemPath + '/Patch.dat'
+    # # filename = ProblemPath + '/Patch_3476.dat'
+    # # filename = ProblemPath + '/Patch_6947.dat'
+    filename = ProblemPath + '/Patch_9220.dat'
+    # filename = ProblemPath + '/Patch_26807.dat'
+    # cad_file = ProblemPath +'/Patch.iges'
+    # cad_file = ProblemPath + "/Sphere.igs"
+    # cad_file = ProblemPath + "/Cyl.igs"
+    cad_file = ProblemPath + "/Cyl_Hex.igs"
+
+    # filename = ProblemPath + '/UnitCube_12.dat'
+    # filename = ProblemPath + '/Cyl_221.dat'
+    # filename = ProblemPath + '/Cyl_625_Hex.dat'
+
+
+
+    # mesh = Mesh()
+    # mesh.elements = np.array([
+    #     [0,1,2,3,4,5,6,7],
+    #     [4,5,6,7,8,9,10,11]
+    #     ])
+    # x = np.arange(2)
+
+    # x=np.linspace(0,2,nx+1)
+    # y=np.linspace(lower_left_rear_point[1],upper_right_front_point[1],ny+1)
+    # z=np.linspace(lower_left_rear_point[2],upper_right_front_point[2],nz+1)
+
+    # Y,X,Z = np.meshgrid(y,x,z)
+    # coordinates = np.dstack((X.T.flatten(),Y.T.flatten(),Z.T.flatten()))[0,:,:]
+
+
+    # mesh.Cube(n=2)
+    # mesh.Reader(filename,"tet")
+    # mesh.Reader(filename,"hex")
+    # mesh.Cube(element_type="hex",n=1)
+    # mesh.Parallelepiped(element_type="hex",nx=1,ny=1,nz=2)
+
+    # mesh.faces=None
+    # mesh.GetBoundaryFacesHex()
+    # mesh.Sphere()
+    # mesh.ConvertTetsToHexes()
+    # mesh.SimplePlot()
+    # exit()
+    # print mesh.elements
+    # mesh.ConvertHexesToTets()
+    # mesh.GetBoundaryFacesTet()
+    # print mesh.elements
+
+
+    ########################################
+
+    def DirichletFunc(mesh):
+        boundary_data = np.zeros((mesh.points.shape[0],material.nvar))+np.NAN
+
+        # Y_0 = np.isclose(mesh.points[:,2],0.)
+        Y_0 = np.isclose(mesh.points[:,1],-1.)
+        boundary_data[Y_0,0] = 0.
+        boundary_data[Y_0,1] = 0.
+        boundary_data[Y_0,2] = 0.
+
+        # Y_1 = np.isclose(mesh.points[:,2],10.)
+        Y_1 = np.isclose(mesh.points[:,1],1.)
+        boundary_data[Y_1,0] = 0.0
+        boundary_data[Y_1,1] = -1.9
+        boundary_data[Y_1,2] = 0.0
+
+        # print boundary_data
+
+        return boundary_data
+
+    boundary_condition = BoundaryCondition()
+    boundary_condition.SetDirichletCriteria(DirichletFunc, mesh)
+
+    formulation = DisplacementFormulation(mesh)
+
+    fem_solver = FEMSolver(number_of_load_increments=11, 
+        newton_raphson_tolerance=1.0e-07, parallelise=False)
+
+    solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
+            material=material, boundary_condition=boundary_condition)
+    # solution.Plot(configuration="deformed")
+    solution.Animate(configuration="deformed")
+
+
+    exit()
+
+    ########################################
+
+
+
+    boundary_condition = BoundaryCondition()
+    boundary_condition.SetCADProjectionParameters(cad_file,
+        scale=1000.,condition=20000000.,project_on_curves=True,solve_for_planar_faces=True)
+    # boundary_condition.SetCADProjectionParameters(cad_file,
+        # scale=1000.,condition=20000000.,project_on_curves=False,solve_for_planar_faces=False)
+    boundary_condition.GetProjectionCriteria(mesh)
+    formulation = DisplacementFormulation(mesh)
+
+    fem_solver = FEMSolver(number_of_load_increments=10,analysis_type="static",
+        analysis_nature="linear",parallelise=False, compute_mesh_qualities=True)
+
+    solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
+            material=material, boundary_condition=boundary_condition)
+
+    # mesh.WriteHDF5("/home/roman/CurvedPatch_h"+str(mesh.nelem)+"P"+str(p)+".mat", {'TotalDisp':solution.sol})
+    # solution.CurvilinearPlot(plot_edges=False)
+    solution.CurvilinearPlot()
+
+
+
+
+
+def GetMeshes_Hexes(p=2):
+
+    ndim=3
+
+    material = LinearModel(ndim,youngs_modulus=10,poissons_ratio=0.45)
+
+    ProblemPath = PWD(__file__)
+    # filename = ProblemPath + '/Patch.dat'
+    # filename = ProblemPath + '/Patch_3476.dat'
+    # filename = ProblemPath + '/Patch_6947.dat'
+    filename = ProblemPath + '/Patch_9220.dat'
+    # filename = ProblemPath + '/Patch_26807.dat'
+    cad_file = ProblemPath +'/Patch.iges'
+
+
+    mesh = Mesh()
+    mesh.Reader(filename,"tet")
+    mesh.ConvertTetsToHexes()
+    # mesh.SimplePlot()
+    # exit()
+    mesh.ConvertHexesToTets()
+    mesh.GetHighOrderMesh(p=p)
+
+    # print 4*mesh.points.shape[0]
+    # exit()
+
+
+
+    boundary_condition = BoundaryCondition()
+    boundary_condition.SetCADProjectionParameters(cad_file,
+        scale=1000.,condition=20000000.,project_on_curves=True,solve_for_planar_faces=True)
+    # boundary_condition.SetCADProjectionParameters(cad_file,
+        # scale=1000.,condition=20000000.,project_on_curves=False,solve_for_planar_faces=False)
+    boundary_condition.GetProjectionCriteria(mesh)
+    formulation = DisplacementFormulation(mesh)
+
+    fem_solver = FEMSolver(number_of_load_increments=1,analysis_type="static",
+        analysis_nature="linear",parallelise=False, compute_mesh_qualities=True)
+
+    solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
+            material=material, boundary_condition=boundary_condition)
+
+    # mesh.WriteHDF5("/home/roman/CurvedPatch_h"+str(mesh.nelem)+"P"+str(p)+".mat", {'TotalDisp':solution.sol})
+    # solution.CurvilinearPlot(plot_edges=False)
+    solution.CurvilinearPlot()
+
+
+
+
+
 
 
 
@@ -511,11 +728,13 @@ def RunProblems(p=2):
 
 if __name__ == "__main__":
 
-    p=12
+    p=2
     # GetMeshes(p=p)
+    CheckHexes(p=p)
+    # GetMeshes_Hexes(p=p)
 
     # RunErrorNorms(p=p)
-    RunErrorNorms_Objective(p=p)
+    # RunErrorNorms_Objective(p=p)
 
     # RunProblems(p=p)
 

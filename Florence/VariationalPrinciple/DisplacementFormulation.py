@@ -172,40 +172,7 @@ class DisplacementFormulation(VariationalPrinciple):
             # INTEGRATE STIFFNESS
             stiffness += BDB_1*detJ[counter]
 
-        return stiffness, tractionforce 
-
-
-
-    def GetLocalMass(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem):
-
-        ndim = self.ndim
-        nvar = self.nvar
-        Domain = function_space
-
-        N = np.zeros((Domain.Bases.shape[0]*nvar,nvar))
-        mass = np.zeros((Domain.Bases.shape[0]*nvar,Domain.Bases.shape[0]*nvar))
-
-        # LOOP OVER GAUSS POINTS
-        for counter in range(0,Domain.AllGauss.shape[0]):
-            # GRADIENT TENSOR IN PARENT ELEMENT [\nabla_\varepsilon (N)]
-            Jm = Domain.Jm[:,:,counter]
-            Bases = Domain.Bases[:,counter]
-            # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-            ParentGradientX=np.dot(Jm,LagrangeElemCoords)
-
-            # COMPUTE THE MASS INTEGRAND
-            rhoNN = self.MassIntegrand(Bases,N,material)
-            # INTEGRATE MASS
-            mass += rhoNN*Domain.AllGauss[counter,0]*np.abs(np.linalg.det(ParentGradientX))
-
-        return mass 
-
-
-    def GetLocalResiduals(self):
-        pass
-
-    def GetLocalTractions(self):
-        pass
+        return stiffness, tractionforce
 
 
 
@@ -249,4 +216,37 @@ class DisplacementFormulation(VariationalPrinciple):
         if fem_solver.requires_geometry_update:
             stiffness += self.__GeometricStiffnessIntegrand__(SpatialGradient,CauchyStressTensor,detJ)
 
-        return stiffness, tractionforce
+        return stiffness, tractionforce 
+
+
+
+    def GetLocalMass(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem):
+
+        ndim = self.ndim
+        nvar = self.nvar
+        Domain = function_space
+
+        N = np.zeros((Domain.Bases.shape[0]*nvar,nvar))
+        mass = np.zeros((Domain.Bases.shape[0]*nvar,Domain.Bases.shape[0]*nvar))
+
+        # LOOP OVER GAUSS POINTS
+        for counter in range(0,Domain.AllGauss.shape[0]):
+            # GRADIENT TENSOR IN PARENT ELEMENT [\nabla_\varepsilon (N)]
+            Jm = Domain.Jm[:,:,counter]
+            Bases = Domain.Bases[:,counter]
+            # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+            ParentGradientX=np.dot(Jm,LagrangeElemCoords)
+
+            # COMPUTE THE MASS INTEGRAND
+            rhoNN = self.MassIntegrand(Bases,N,material)
+            # INTEGRATE MASS
+            mass += rhoNN*Domain.AllGauss[counter,0]*np.abs(np.linalg.det(ParentGradientX))
+
+        return mass 
+
+
+    def GetLocalResiduals(self):
+        pass
+
+    def GetLocalTractions(self):
+        pass

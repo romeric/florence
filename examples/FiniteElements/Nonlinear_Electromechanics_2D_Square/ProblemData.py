@@ -447,7 +447,7 @@ def ProblemData_22(*args, **kwargs):
     # mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,10),nx=2,ny=10,"")
     # mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),nx=3,ny=5)
     # mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),nx=4,ny=8)
-    mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,10),nx=2,ny=10, element_type="quad")
+    mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,10),nx=2,ny=100, element_type="quad")
     # mesh.Rectangle(lower_left_point=(-1,-1),upper_right_point=(1,1),nx=2,ny=2)
     # mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),element_type="quad",nx=2,ny=2)
     # mesh.Rectangle(lower_left_point=(0,0),upper_right_point=(2,4),nx=5,ny=5)
@@ -532,7 +532,7 @@ def ProblemData_22(*args, **kwargs):
     # formulation = DisplacementPotentialFormulation(mesh)
     formulation = DisplacementFormulation(mesh)
 
-    fem_solver = FEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=100, parallelise=False)
+    fem_solver = FEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=10, parallelise=False)
     # fem_solver = StaggeredFEMSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=10)
     # fem_solver = StaggeredElectromechanicSolver(newton_raphson_tolerance=1e-04, number_of_load_increments=4)
 
@@ -984,6 +984,144 @@ def ProblemData_Rogelio(*args, **kwargs):
 
 
 
+
+
+
+
+
+
+def ProblemData_Rogelio2(*args, **kwargs):
+
+    ndim=3
+    p=1
+
+    material = MooneyRivlin_0(ndim, mu1=126.0, mu2=252.0, lamb=815.12)
+    # material = NeoHookean_2(ndim, mu=2*126.0, lamb=81.512)
+    mesh = Mesh()
+
+    mesh.Parallelepiped(element_type="hex",upper_right_front_point=(1,1,10),nx=2,ny=2,nz=10)
+
+    # mesh.SimplePlot()
+    # mesh.WriteHDF5("/home/roman/BeamMesh.mat")
+
+    # print np.where(np.isclose(mesh.points[:,0],0.5))
+    # print mesh.points[94,:]
+    # exit()
+
+    boundary_condition = BoundaryCondition()
+
+    def DirichletFunc(mesh):
+        boundary_data = np.zeros((mesh.points.shape[0],material.nvar))+np.NAN
+
+        Y_0 = np.isclose(mesh.points[:,2],0.)
+        boundary_data[Y_0,0] = 0.
+        boundary_data[Y_0,1] = 0.
+        boundary_data[Y_0,2] = 0.
+
+        # Y_1 = np.isclose(mesh.points[:,2],10.)
+        # boundary_data[Y_1,2] = 10.
+
+        return boundary_data
+
+
+    def NeumannFunc(mesh):
+        boundary_data = np.zeros((mesh.points.shape[0],material.nvar))+np.NAN
+
+        Y_0 = np.isclose(mesh.points[:,2],10.)
+        boundary_data[Y_0,0] = -0.37037
+        boundary_data[Y_0,1] = 0.
+        boundary_data[Y_0,2] = 0.
+
+        return boundary_data
+
+
+    boundary_condition.SetDirichletCriteria(DirichletFunc, mesh)
+    boundary_condition.SetNeumannCriteria(NeumannFunc, mesh)
+
+    formulation = DisplacementFormulation(mesh)
+
+    fem_solver = FEMSolver(number_of_load_increments=2, analysis_nature="nonlinear",parallelise=False,
+        newton_raphson_tolerance=1.0e-06)
+
+    solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
+            material=material, boundary_condition=boundary_condition)
+
+    print solution.sol[94,:]
+
+
+
+
+def ProblemData_Rogelio3(*args, **kwargs):
+
+    ndim=3
+    p=1
+
+    # e0 = 8.8541e-12
+    e0=1.0
+    # material = IsotropicElectroMechanics_105(ndim, mu1=126.0/2., mu2=0.0, lamb=800., eps_1=1.0e5*e0, eps_2=1.0e5*e0)
+    material = IsotropicElectroMechanics_105(ndim, mu1=126.0/2., mu2=0.0, lamb=800., eps_1=1000.0*e0, eps_2=1000.0*e0)
+    
+    # material = IsotropicElectroMechanics_106(ndim, mu1=126.0/2., mu2=0.0, lamb=800., eps_1=1000.0*e0, eps_2=1000.0*e0)
+    # material = IsotropicElectroMechanics_107(ndim, mu1=126.0/2., mu2=0.0, mue=0.1,lamb=800., eps_1=1000.0*e0, eps_2=1000.0*e0, eps_e=1000.0*e0)
+
+    mesh = Mesh()
+    mesh.Parallelepiped(element_type="hex",upper_right_front_point=(1,1,10),nx=2,ny=2,nz=10)
+
+
+
+    boundary_condition = BoundaryCondition()
+
+    def DirichletFunc(mesh):
+        boundary_data = np.zeros((mesh.points.shape[0],material.nvar))+np.NAN
+
+
+        Y_0 = np.isclose(mesh.points[:,0],0.)
+        boundary_data[Y_0,3] = 0.
+        Y_0 = np.isclose(mesh.points[:,0],1.)
+        # boundary_data[Y_0,3] = 1e7
+        boundary_data[Y_0,3] = 1e-2
+
+        Y_0 = np.isclose(mesh.points[:,2],0.)
+        boundary_data[Y_0,0] = 0.
+        boundary_data[Y_0,1] = 0.
+        boundary_data[Y_0,2] = 0.
+
+        # boundary_data[:,:3] = 0.
+
+        return boundary_data
+
+
+    def NeumannFunc(mesh):
+        boundary_data = np.zeros((mesh.points.shape[0],material.nvar))+np.NAN
+
+        Y_0 = np.isclose(mesh.points[:,2],10.)
+        boundary_data[Y_0,0] = -0.37037
+        boundary_data[Y_0,1] = 0.
+        boundary_data[Y_0,2] = 0.
+
+        return boundary_data
+
+
+    boundary_condition.SetDirichletCriteria(DirichletFunc, mesh)
+    # boundary_condition.SetNeumannCriteria(NeumannFunc, mesh)
+
+    formulation = DisplacementPotentialFormulation(mesh)
+
+    fem_solver = FEMSolver(number_of_load_increments=2, analysis_nature="nonlinear",parallelise=False,
+        newton_raphson_tolerance=1.0e-03)
+
+    solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
+            material=material, boundary_condition=boundary_condition)
+
+
+    print solution.sol[94,:]
+    # solution.sol *= 1000.
+    # solution.Plot(configuration="deformed",quantity=1)
+
+
+
+
+
 if __name__ == "__main__":
 
     # ProblemData()
@@ -992,8 +1130,10 @@ if __name__ == "__main__":
     # ProblemData_3()
     # ProblemData_3D()
 
-    ProblemData_4()
+    # ProblemData_4()
     # ProblemData_Rogelio()
+    # ProblemData_Rogelio2()
+    ProblemData_Rogelio3()
     
     from cProfile import run
     # run('ProblemData_3D()')

@@ -202,7 +202,55 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
             # INTEGRATE STIFFNESS
             stiffness += BDB_1*detJ[counter]
 
-        return stiffness, tractionforce 
+
+        return stiffness, tractionforce
+
+
+
+    def __GetLocalStiffness__(self, function_space, material, LagrangeElemCoords, 
+        EulerELemCoords, ElectricPotentialElem, fem_solver, elem=0):
+        """Get stiffness matrix of the system"""
+
+        nvar = self.nvar
+        nodeperelem = function_space.Bases.shape[0]
+        AllGauss = function_space.AllGauss
+
+        # ALLOCATE
+        stiffness = np.zeros((nodeperelem*nvar,nodeperelem*nvar),dtype=np.float64)
+        tractionforce = np.zeros((nodeperelem*nvar,1),dtype=np.float64)
+        B = np.zeros((nodeperelem*nvar,material.H_VoigtSize),dtype=np.float64)
+
+        SpatialGradient, F, detJ = _KinematicMeasures_(function_space.Jm, AllGauss[:,0], LagrangeElemCoords, 
+            EulerELemCoords, fem_solver.requires_geometry_update)
+
+        # GET ELECTRIC FIELD
+        ElectricFieldx = - np.einsum('ijk,j',SpatialGradient,ElectricPotentialElem)
+
+        # COMPUTE WORK-CONJUGATES AND HESSIAN AT THIS GAUSS POINT
+        ElectricDisplacementx, CauchyStressTensor, H_Voigt = material.KineticMeasures(F, ElectricFieldx, elem=elem)
+
+        # LOOP OVER GAUSS POINTS
+        for counter in range(AllGauss.shape[0]): 
+
+            # COMPUTE THE TANGENT STIFFNESS MATRIX
+            BDB_1, t = self.ConstitutiveStiffnessIntegrand(B, SpatialGradient[counter,:,:],
+                ElectricDisplacementx[counter,:,:], CauchyStressTensor[counter,:,:], H_Voigt[counter,:,:], 
+                analysis_nature=fem_solver.analysis_nature, has_prestress=fem_solver.has_prestress)
+
+            
+            if fem_solver.requires_geometry_update:
+                # BDB_1 += self.GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],CauchyStressTensor[counter,:,:])
+                # INTEGRATE TRACTION FORCE
+                tractionforce += t*detJ[counter]
+
+            # INTEGRATE STIFFNESS
+            stiffness += BDB_1*detJ[counter]
+
+        # ADD GEOMETRIC STIFFNESS MATRIX
+        if fem_solver.requires_geometry_update:
+            stiffness += self.__GeometricStiffnessIntegrand__(SpatialGradient,CauchyStressTensor,detJ)
+
+        return stiffness, tractionforce
 
 
 
@@ -241,14 +289,8 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
                 # INTEGRATE MASS
                 mass += rhoNN*MainData.Domain.AllGauss[counter,0]*np.abs(la.det(ParentGradientX))
 
-        return mass 
+        return mass
 
-
-    def GetLocalResiduals(self):
-        pass
-
-    def GetLocalTractions(self):
-        pass
 
 
     def ConstitutiveStiffnessIntegrand(self, B, SpatialGradient, ElectricDisplacementx,
@@ -259,18 +301,29 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         # SpatialGradient = SpatialGradient.T
         # SpatialGradient = np.ascontiguousarray(SpatialGradient.T)
         SpatialGradient = SpatialGradient.T.copy()
+        ElectricDisplacementx = ElectricDisplacementx.copy()
+        # CauchyStressTensor = CauchyStressTensor.copy('c')
+        # H_Voigt = H_Voigt.copy('c')
 
         FillConstitutiveB(B,SpatialGradient,self.ndim,self.nvar)
         BDB = B.dot(H_Voigt.dot(B.T))
         
         t=[]
         if analysis_nature == 'nonlinear' or has_prestress:
-            TotalTraction = GetTotalTraction(CauchyStressTensor,ElectricDisplacementx.ravel())
+            # TotalTraction = GetTotalTraction(CauchyStressTensor,ElectricDisplacementx.ravel())
+            TotalTraction = GetTotalTraction(CauchyStressTensor,ElectricDisplacementx)
             t = np.dot(B,TotalTraction) 
                 
         return BDB, t
 
 
+
+
+    def GetLocalResiduals(self):
+        pass
+
+    def GetLocalTractions(self):
+        pass
 
 
 
@@ -389,122 +442,3 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
     #     BDB = np.dot(np.dot(B,S),B.T)
                 
     #     return BDB
-
-
-
-
-
-
-
-
-    def __GetLocalStiffness__(self, function_space, material, LagrangeElemCoords, 
-        EulerELemCoords, ElectricPotentialElem, fem_solver, elem=0):
-        """Get stiffness matrix of the system"""
-
-        nvar = self.nvar
-        nodeperelem = function_space.Bases.shape[0]
-        AllGauss = function_space.AllGauss
-
-        # ALLOCATE
-        stiffness = np.zeros((nodeperelem*nvar,nodeperelem*nvar),dtype=np.float64)
-        tractionforce = np.zeros((nodeperelem*nvar,1),dtype=np.float64)
-        B = np.zeros((nodeperelem*nvar,material.H_VoigtSize),dtype=np.float64)
-
-        SpatialGradient, F, detJ = _KinematicMeasures_(function_space.Jm, AllGauss[:,0], LagrangeElemCoords, 
-            EulerELemCoords, fem_solver.requires_geometry_update)
-
-        # GET ELECTRIC FIELD
-        ElectricFieldx = - np.einsum('ijk,j',SpatialGradient,ElectricPotentialElem)
-
-        # COMPUTE WORK-CONJUGATES AND HESSIAN AT THIS GAUSS POINT
-        ElectricDisplacementx, CauchyStressTensor, H_Voigt = material.KineticMeasures(F, ElectricFieldx, elem=elem)
-
-        # LOOP OVER GAUSS POINTS
-        for counter in range(AllGauss.shape[0]): 
-
-            # COMPUTE THE TANGENT STIFFNESS MATRIX
-            BDB_1, t = self.ConstitutiveStiffnessIntegrand(B, SpatialGradient[counter,:,:],
-                ElectricDisplacementx[counter,:,:], CauchyStressTensor[counter,:,:], H_Voigt[counter,:,:], 
-                analysis_nature=fem_solver.analysis_nature, has_prestress=fem_solver.has_prestress)
-
-            
-            if fem_solver.requires_geometry_update:
-                # BDB_1 += self.GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],CauchyStressTensor[counter,:,:])
-                # INTEGRATE TRACTION FORCE
-                tractionforce += t*detJ[counter]
-
-            # INTEGRATE STIFFNESS
-            stiffness += BDB_1*detJ[counter]
-
-        # ADD GEOMETRIC STIFFNESS MATRIX
-        if fem_solver.requires_geometry_update:
-            stiffness += self.__GeometricStiffnessIntegrand__(SpatialGradient,CauchyStressTensor,detJ)
-
-        return stiffness, tractionforce
-
-
-
-
-    # def foo(self,SpatialGradient, CauchyStressTensor):
-
-    #     # print SpatialGradient.shape
-    #     B = np.zeros((SpatialGradient.shape[0]*self.nvar,SpatialGradient.shape[0]*self.nvar))
-    #     for a in range(SpatialGradient.shape[0]):
-    #         for b in range(SpatialGradient.shape[0]):
-
-    #             # I = np.eye(self.ndim,self.ndim)
-    #             dum=0.
-    #             for i in range(SpatialGradient.shape[1]):
-    #                 for j in range(SpatialGradient.shape[1]):
-    #                     dum += SpatialGradient[a,i]*CauchyStressTensor[i,j]*SpatialGradient[b,j]
-    #             # B = np.zeros((self.ndim,self.ndim))
-    #             # Bs = dum*I
-
-    #             for i in range(self.ndim):
-    #                 B[a*self.nvar+i,b*self.nvar+i] = dum
-
-
-    #     return B
-
-
-    # def foos(self, SpatialGradient, CauchyStressTensor, detJ):
-
-    #     BDB = np.zeros((SpatialGradient.shape[1]*self.nvar,SpatialGradient.shape[1]*self.nvar))
-    #     for g in range(detJ.shape[0]):
-    #         # BDB_local = np.zeros((SpatialGradient.shape[1]*self.nvar,SpatialGradient.shape[1]*self.nvar))
-    #         for a in range(SpatialGradient.shape[1]):
-    #             for b in range(SpatialGradient.shape[1]):
-
-    #                 dum=0.
-    #                 for i in range(SpatialGradient.shape[2]):
-    #                     for j in range(SpatialGradient.shape[2]):
-    #                         dum += SpatialGradient[g,a,i]*CauchyStressTensor[g,i,j]*SpatialGradient[g,b,j]
-
-    #                 for i in range(self.ndim):
-    #                     # BDB_local[a*self.nvar+i,b*self.nvar+i] += dum
-    #                     BDB[a*self.nvar+i,b*self.nvar+i] += dum*detJ[g]
-
-    #     # BDB[a*self.nvar+i,b*self.nvar+i] += dum*detJ[g]
-
-    #         # BDB += BDB_local#*detJ[g]
-
-
-    #     return BDB
-
-
-    # def foo(self,SpatialGradient, H_Voigt, CauchyStressTensor):
-
-    #     B = np.zeros((SpatialGradient.shape[0]*self.nvar,SpatialGradient.shape[0]*self.nvar))
-    #     for a in range(SpatialGradient.shape[0]):
-    #         for b in range(SpatialGradient.shape[0]):
-
-    #             # B[a*self.nvar+i,b*self.nvar+j] += np.dot(SpatialGradient[a,i]*H_Voigt[i,j]*SpatialGradient[b,j]
-    #             for i in range(self.ndim):
-    #                 for j in range(self.ndim):
-    #                     B[a*self.nvar+i,b*self.nvar+j] += SpatialGradient[a,i]*H_Voigt[i,j]*SpatialGradient[b,j]
-
-    #             # for i in range(self.ndim):
-    #                 # B[a*self.nvar+i,b*self.nvar+i] = dum
-
-
-    #     return B
