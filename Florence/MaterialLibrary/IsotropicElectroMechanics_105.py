@@ -85,16 +85,15 @@ class IsotropicElectroMechanics_105(Material):
         b = StrainTensors['b'][gcounter]
         D = ElectricDisplacementx.reshape(self.ndim,1)
 
+        trb = trace(b)
         if self.ndim==2:
-            trb = trace(b) + 1
-        else:
-            trb = trace(b)
+            trb += 1
 
         simga_mech = 2.0*mu1/J*b + \
             2.0*mu2/J*(trb*b - np.dot(b,b)) -\
             2.0*(mu1+2.*mu2)/J*I +\
             lamb*(J-1.)*I
-        sigma_electric = J/eps_2*np.dot(D,D.T)
+        sigma_electric = 1.0*J/eps_2*np.dot(D,D.T)
         sigma = simga_mech + sigma_electric
 
         return sigma
@@ -102,8 +101,7 @@ class IsotropicElectroMechanics_105(Material):
     def ElectricDisplacementx(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
         D = self.legendre_transform.GetElectricDisplacement(self, StrainTensors, ElectricFieldx, elem, gcounter)
 
-
-        # SANITY CHECK FOR IMPLICIT COMPUTATUTAION OF D
+        # # SANITY CHECK FOR IMPLICIT COMPUTATUTAION OF D
         # I = StrainTensors['I']
         # J = StrainTensors['J'][gcounter]
         # b = StrainTensors['b'][gcounter]
@@ -112,7 +110,7 @@ class IsotropicElectroMechanics_105(Material):
         # eps_2 = self.eps_2
         # inverse = np.linalg.inv(J/eps_1*np.linalg.inv(b) + J/eps_2*I)
         # D_exact = np.dot(inverse,E)
-        # print np.linalg.norm(D - D_exact)
-        # # return D_exact
+        # # print np.linalg.norm(D - D_exact)
+        # return D_exact
 
         return D

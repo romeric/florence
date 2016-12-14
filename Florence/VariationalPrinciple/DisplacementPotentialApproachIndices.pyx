@@ -201,7 +201,7 @@ cdef inline void GetTotalTraction_(double *TotalTraction, const double *CauchySt
 @boundscheck(False)
 @wraparound(False)
 def GetTotalTraction(np.ndarray[double,ndim=2,mode='c'] CauchyStressTensor,
-    np.ndarray[double,ndim=1,mode='c'] ElectricDisplacementx):
+    np.ndarray[double,ndim=2,mode='c'] ElectricDisplacementx):
     cdef np.ndarray[double,ndim=2,mode='c'] TotalTraction
     cdef int ndim = CauchyStressTensor.shape[0]
     if ndim == 2:
@@ -209,5 +209,5 @@ def GetTotalTraction(np.ndarray[double,ndim=2,mode='c'] CauchyStressTensor,
     elif ndim == 3:
         TotalTraction = np.zeros((9,1),dtype=np.float64)
     GetTotalTraction_(&TotalTraction[0,0], &CauchyStressTensor[0,0],
-        &ElectricDisplacementx[0], ndim)
+        &ElectricDisplacementx[0,0], ndim)
     return TotalTraction

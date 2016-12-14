@@ -18,6 +18,8 @@ from Florence.FunctionSpace import Hex
 from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import *
 from Florence import Mesh
 from Florence.MeshGeneration import vtk_writer
+from Florence.Utils import constant_camera_view
+
 
 class PostProcess(object):
     """Post-process class for finite element solvers"""
@@ -525,6 +527,131 @@ class PostProcess(object):
 
         print('Quantity corresponds to ' + str(namer))
         return namer
+
+
+
+    def MeshQualityMeasures(self, mesh, TotalDisp, plot=True, show_plot=True):
+        """Computes mesh quality measures, Q_1, Q_2, Q_3
+
+            input:
+                mesh:                   [Mesh] an instance of class mesh can be any mesh type
+
+        """
+
+        if self.is_scaledjacobian_computed is None:
+            self.is_scaledjacobian_computed = False
+        if self.is_material_anisotropic is None:
+            self.is_material_anisotropic = False
+
+        if self.is_scaledjacobian_computed is True:
+            raise AssertionError('Scaled Jacobian seems to be already computed. Re-Computing it may return incorrect results')
+
+        PostDomain = self.postdomain_bases
+
+        vpoints = mesh.points
+        if TotalDisp.ndim == 3:
+            vpoints = vpoints + TotalDisp[:,:,-1]
+        elif TotalDisp.ndim == 2:
+            vpoints = vpoints + TotalDisp
+        else:
+            raise AssertionError("mesh points and displacment arrays are incompatible")
+
+        elements = mesh.elements
+
+        ScaledJacobian = np.zeros(elements.shape[0])
+        ScaledFF = np.zeros(elements.shape[0])
+        ScaledHH = np.zeros(elements.shape[0])
+
+        if self.is_material_anisotropic:
+            ScaledFNFN = np.zeros(elements.shape[0])
+            ScaledCNCN = np.zeros(elements.shape[0])
+
+        JMax =[]; JMin=[]
+        for elem in range(mesh.nelem):
+            LagrangeElemCoords = mesh.points[elements[elem,:],:]
+            EulerElemCoords = vpoints[elements[elem,:],:]
+
+            # COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
+            # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+            ParentGradientX = np.einsum('ijk,jl->kil',PostDomain.Jm,LagrangeElemCoords)
+            # MAPPING TENSOR [\partial\vec{x}/ \partial\vec{\varepsilon} (ndim x ndim)]
+            ParentGradientx = np.einsum('ijk,jl->kil',PostDomain.Jm,EulerElemCoords)
+            # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
+            MaterialGradient = np.einsum('ijk,kli->ijl',la.inv(ParentGradientX),PostDomain.Jm)
+            # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
+            F = np.einsum('ij,kli->kjl',EulerElemCoords,MaterialGradient)
+            # JACOBIAN OF DEFORMATION GRADIENT TENSOR
+            detF = np.abs(np.linalg.det(F))
+            # COFACTOR OF DEFORMATION GRADIENT TENSOR
+            H = np.einsum('ijk,k->ijk',np.linalg.inv(F).T,detF)
+
+            # FIND JACOBIAN OF SPATIAL GRADIENT
+            # USING ISOPARAMETRIC
+            Jacobian = np.abs(np.linalg.det(ParentGradientx))
+            # USING DETERMINANT OF DEFORMATION GRADIENT TENSOR
+            # THIS GIVES A RESULT MUCH CLOSER TO ONE
+            Jacobian = detF
+            # USING INVARIANT F:F
+            Q1 = np.sqrt(np.einsum('kij,lij->kl',F,F)).diagonal()
+            # USING INVARIANT H:H
+            Q2 = np.sqrt(np.einsum('ijk,ijl->kl',H,H)).diagonal()
+
+            if self.is_material_anisotropic:
+                Q4 = np.einsum('ijk,k',F,self.directions[elem,:])
+                Q4 = np.sqrt(np.dot(Q4,Q4.T)).diagonal()
+
+                C = np.einsum('ikj,ikl->ijl',F,F)
+                Q5 = np.einsum('ijk,k',C,self.directions[elem,:]) 
+                Q5 = np.sqrt(np.dot(Q5,Q5.T)).diagonal()
+
+            # FIND MIN AND MAX VALUES
+            JMin = np.min(Jacobian); JMax = np.max(Jacobian)
+            ScaledJacobian[elem] = 1.0*JMin/JMax
+            ScaledFF[elem] = 1.0*np.min(Q1)/np.max(Q1)
+            ScaledHH[elem] = 1.0*np.min(Q2)/np.max(Q2)
+            # Jacobian[elem] = np.min(detF)
+            # print(np.min(Jacobian), np.max(Jacobian))
+
+            if self.is_material_anisotropic:
+                ScaledFNFN[elem] = 1.0*np.min(Q4)/np.max(Q4)
+                ScaledCNCN[elem] = 1.0*np.min(Q5)/np.max(Q5)
+
+        if np.isnan(ScaledJacobian).any():
+            warn("Jacobian of mapping is close to zero")
+
+        print 'Minimum ScaledJacobian value is', ScaledJacobian.min(), \
+        'corresponding to element', ScaledJacobian.argmin()
+
+        print 'Minimum ScaledFF value is', ScaledFF.min(), \
+        'corresponding to element', ScaledFF.argmin()
+
+        print 'Minimum ScaledHH value is', ScaledHH.min(), \
+        'corresponding to element', ScaledHH.argmin()
+
+        if self.is_material_anisotropic:
+            print 'Minimum ScaledFNFN value is', ScaledFNFN.min(), \
+            'corresponding to element', ScaledFNFN.argmin()
+
+            print 'Minimum ScaledCNCN value is', ScaledCNCN.min(), \
+            'corresponding to element', ScaledCNCN.argmin()
+
+
+        if plot:
+            import matplotlib.pyplot as plt
+            fig = plt.figure()
+            plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),ScaledJacobian,width=1.,alpha=0.4)
+            plt.xlabel(r'$Elements$',fontsize=18)
+            plt.ylabel(r'$Scaled\, Jacobian$',fontsize=18)
+            if show_plot:
+                plt.show()
+
+        # SET COMPUTED TO TRUE
+        self.is_scaledjacobian_computed = True
+
+        if not self.is_material_anisotropic:
+            return self.is_scaledjacobian_computed, ScaledFF, ScaledHH, ScaledJacobian
+        else:
+            return self.is_scaledjacobian_computed, ScaledFF, ScaledHH, ScaledJacobian, ScaledFNFN, ScaledCNCN
 
 
 
@@ -1403,11 +1530,11 @@ class PostProcess(object):
                         
                         yield
 
+                with constant_camera_view():
+                    animator()
 
-                animator()
-
-                mlab.view(azimuth=45, elevation=50, distance=90, focalpoint=None,
-                    roll=0, reset_roll=True, figure=None)
+                # mlab.view(azimuth=45, elevation=50, distance=90, focalpoint=None,
+                    # roll=0, reset_roll=True, figure=None)
                 
 
                 if show_plot:
@@ -1762,8 +1889,8 @@ class PostProcess(object):
                         
                         yield
 
-
-                animator()
+                with constant_camera_view():
+                    animator()
 
                 # mlab.view(azimuth=45, elevation=50, distance=90, focalpoint=None,
                 #     roll=0, reset_roll=True, figure=None)
@@ -1797,136 +1924,6 @@ class PostProcess(object):
                     p.wait()
                     # ffmpeg -framerate 25 -i yy_increment_%0d.png -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p output.mp4
                     # convert -delay 10 -loop 0 plate_with_holes_frame.00*.png plate_with_holes_wireframe.gif
-
-
-
-
-
-    
-    def MeshQualityMeasures(self, mesh, TotalDisp, plot=True, show_plot=True):
-        """Computes mesh quality measures, Q_1, Q_2, Q_3
-
-            input:
-                mesh:                   [Mesh] an instance of class mesh can be any mesh type
-
-        """
-
-        if self.is_scaledjacobian_computed is None:
-            self.is_scaledjacobian_computed = False
-        if self.is_material_anisotropic is None:
-            self.is_material_anisotropic = False
-
-        if self.is_scaledjacobian_computed is True:
-            raise AssertionError('Scaled Jacobian seems to be already computed. Re-Computing it may return incorrect results')
-
-        PostDomain = self.postdomain_bases
-
-        vpoints = mesh.points
-        if TotalDisp.ndim == 3:
-            vpoints = vpoints + TotalDisp[:,:,-1]
-        elif TotalDisp.ndim == 2:
-            vpoints = vpoints + TotalDisp
-        else:
-            raise AssertionError("mesh points and displacment arrays are incompatible")
-
-        elements = mesh.elements
-
-        ScaledJacobian = np.zeros(elements.shape[0])
-        ScaledFF = np.zeros(elements.shape[0])
-        ScaledHH = np.zeros(elements.shape[0])
-
-        if self.is_material_anisotropic:
-            ScaledFNFN = np.zeros(elements.shape[0])
-            ScaledCNCN = np.zeros(elements.shape[0])
-
-        JMax =[]; JMin=[]
-        for elem in range(mesh.nelem):
-            LagrangeElemCoords = mesh.points[elements[elem,:],:]
-            EulerElemCoords = vpoints[elements[elem,:],:]
-
-            # COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
-            # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-            ParentGradientX = np.einsum('ijk,jl->kil',PostDomain.Jm,LagrangeElemCoords)
-            # MAPPING TENSOR [\partial\vec{x}/ \partial\vec{\varepsilon} (ndim x ndim)]
-            ParentGradientx = np.einsum('ijk,jl->kil',PostDomain.Jm,EulerElemCoords)
-            # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
-            MaterialGradient = np.einsum('ijk,kli->ijl',la.inv(ParentGradientX),PostDomain.Jm)
-            # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
-            F = np.einsum('ij,kli->kjl',EulerElemCoords,MaterialGradient)
-            # JACOBIAN OF DEFORMATION GRADIENT TENSOR
-            detF = np.abs(np.linalg.det(F))
-            # COFACTOR OF DEFORMATION GRADIENT TENSOR
-            H = np.einsum('ijk,k->ijk',np.linalg.inv(F).T,detF)
-
-            # FIND JACOBIAN OF SPATIAL GRADIENT
-            # USING ISOPARAMETRIC
-            Jacobian = np.abs(np.linalg.det(ParentGradientx))
-            # USING DETERMINANT OF DEFORMATION GRADIENT TENSOR
-            # THIS GIVES A RESULT MUCH CLOSER TO ONE
-            Jacobian = detF
-            # USING INVARIANT F:F
-            Q1 = np.sqrt(np.einsum('kij,lij->kl',F,F)).diagonal()
-            # USING INVARIANT H:H
-            Q2 = np.sqrt(np.einsum('ijk,ijl->kl',H,H)).diagonal()
-
-            if self.is_material_anisotropic:
-                Q4 = np.einsum('ijk,k',F,self.directions[elem,:])
-                Q4 = np.sqrt(np.dot(Q4,Q4.T)).diagonal()
-
-                C = np.einsum('ikj,ikl->ijl',F,F)
-                Q5 = np.einsum('ijk,k',C,self.directions[elem,:]) 
-                Q5 = np.sqrt(np.dot(Q5,Q5.T)).diagonal()
-
-            # FIND MIN AND MAX VALUES
-            JMin = np.min(Jacobian); JMax = np.max(Jacobian)
-            ScaledJacobian[elem] = 1.0*JMin/JMax
-            ScaledFF[elem] = 1.0*np.min(Q1)/np.max(Q1)
-            ScaledHH[elem] = 1.0*np.min(Q2)/np.max(Q2)
-            # Jacobian[elem] = np.min(detF)
-            # print(np.min(Jacobian), np.max(Jacobian))
-
-            if self.is_material_anisotropic:
-                ScaledFNFN[elem] = 1.0*np.min(Q4)/np.max(Q4)
-                ScaledCNCN[elem] = 1.0*np.min(Q5)/np.max(Q5)
-
-        if np.isnan(ScaledJacobian).any():
-            warn("Jacobian of mapping is close to zero")
-
-        print 'Minimum ScaledJacobian value is', ScaledJacobian.min(), \
-        'corresponding to element', ScaledJacobian.argmin()
-
-        print 'Minimum ScaledFF value is', ScaledFF.min(), \
-        'corresponding to element', ScaledFF.argmin()
-
-        print 'Minimum ScaledHH value is', ScaledHH.min(), \
-        'corresponding to element', ScaledHH.argmin()
-
-        if self.is_material_anisotropic:
-            print 'Minimum ScaledFNFN value is', ScaledFNFN.min(), \
-            'corresponding to element', ScaledFNFN.argmin()
-
-            print 'Minimum ScaledCNCN value is', ScaledCNCN.min(), \
-            'corresponding to element', ScaledCNCN.argmin()
-
-
-        if plot:
-            import matplotlib.pyplot as plt
-            fig = plt.figure()
-            plt.bar(np.linspace(0,elements.shape[0]-1,elements.shape[0]),ScaledJacobian,width=1.,alpha=0.4)
-            plt.xlabel(r'$Elements$',fontsize=18)
-            plt.ylabel(r'$Scaled\, Jacobian$',fontsize=18)
-            if show_plot:
-                plt.show()
-
-        # SET COMPUTED TO TRUE
-        self.is_scaledjacobian_computed = True
-
-        if not self.is_material_anisotropic:
-            return self.is_scaledjacobian_computed, ScaledFF, ScaledHH, ScaledJacobian
-        else:
-            return self.is_scaledjacobian_computed, ScaledFF, ScaledHH, ScaledJacobian, ScaledFNFN, ScaledCNCN
-
-
 
 
     def CurvilinearPlot(self,*args,**kwargs):

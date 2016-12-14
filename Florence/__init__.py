@@ -7,5 +7,5 @@ from MaterialLibrary import *
 # from MaterialLibrary import Material
 from BoundaryCondition import BoundaryCondition
 from Solver import LinearSolver, FEMSolver, StaggeredFEMSolver, StaggeredElectromechanicSolver
-from Utils import PWD
+from Utils import PWD, RSWD
 from PostProcessing import *

@@ -694,18 +694,40 @@ class BoundaryCondition(object):
         # for i in range(self.columns_out.shape[0]):
             # F = F - LoadFactor*AppliedDirichlet[i]*stiffness.getcol(self.columns_out[i])
 
+        # print(np.linalg.norm((stiffness[:,self.columns_out]*AppliedDirichlet*LoadFactor)))
         # MUCH FASTER APPROACH
+        # print(np.linalg.norm(F))
+        # print(AppliedDirichlet.shape, self.columns_in.shape, self.columns_out.shape)
+        # print(AppliedDirichlet, LoadFactor)
         # F = F - (stiffness[:,self.columns_out]*AppliedDirichlet*LoadFactor)[:,None]
-        nnz_cols = ~np.isclose(AppliedDirichlet,0.0)
-        F = F - (stiffness[:,self.columns_out[nnz_cols]]*AppliedDirichlet[nnz_cols]*LoadFactor)[:,None]
+        # F = F - (stiffness[self.columns_in,:][:,self.columns_out]*AppliedDirichlet*LoadFactor)[:,None]
+        # print(np.linalg.norm((stiffness[self.columns_in,:][:,self.columns_out].todense())))
+        # print(stiffness[self.columns_in,:][:,self.columns_out].shape)
+        # F[self.columns_in] = F[self.columns_in] - (stiffness[self.columns_in,:][:,self.columns_out]*AppliedDirichlet*LoadFactor)[:,None]
+        # print(F[self.columns_in])
+        # from scipy.io import savemat
+        # savemat("/home/romanK")
+        # print(stiffness.todense()[302,92])
+        # print(np.linalg.norm(stiffness.todense()))
+        # print(np.linalg.norm(F[self.columns_in]), np.linalg.norm(stiffness[self.columns_in,:][:,self.columns_out].todense()), np.linalg.norm(AppliedDirichlet*LoadFactor))
+        # print(np.linalg.norm(F))
+        # nnz_cols = ~np.isclose(AppliedDirichlet,0.0)
+        # F = F - (stiffness[:,self.columns_out[nnz_cols]]*AppliedDirichlet[nnz_cols]*LoadFactor)[:,None]
         # F = F - self.__dirichlet_helper__(stiffness,AppliedDirichlet,self.columns_out)
         # F = F - self.__dirichlet_helper__(stiffness,AppliedDirichlet[nnz_cols],self.columns_out[nnz_cols])
         # print((F-F1)[:100])
         # print(time()-tt)
         # exit()
+        # print(np.linalg.norm((stiffness[:,self.columns_out]*AppliedDirichlet*LoadFactor)[:,None]), np.linalg.norm(F))
+
+
+        nnz_cols = ~np.isclose(AppliedDirichlet,0.0)
+        F[self.columns_in] = F[self.columns_in] - (stiffness[self.columns_in,:][:,self.columns_out[nnz_cols]]*AppliedDirichlet[nnz_cols]*LoadFactor)[:,None]
 
         # GET REDUCED FORCE VECTOR
         F_b = F[self.columns_in,0]
+        # print(np.linalg.norm(F_b))
+        # print(np.linalg.norm(stiffness.todense().flatten()))
 
         # print int(sp.__version__.split('.')[1] )
         # FOR UMFPACK SOLVER TAKE SPECIAL CARE
