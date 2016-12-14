@@ -71,11 +71,13 @@ public:
         Tensor<T,ndim,ndim> sigma = sigma_mech + sigma_electric;
  
         // FIND ELASTICITY TENSOR
-        auto II_ijkl = einsum<Index<i,j>,Index<k,l>>(I,I);
+        // auto II_ijkl = einsum<Index<i,j>,Index<k,l>>(I,I);
+        auto II_ijkl = outer(I,I);
         auto II_ikjl = permutation<Index<i,k,j,l>>(II_ijkl);
         auto II_iljk = permutation<Index<i,l,j,k>>(II_ijkl); 
 
-        auto bb_ijkl = einsum<Index<i,j>,Index<k,l>>(b,b);
+        // auto bb_ijkl = einsum<Index<i,j>,Index<k,l>>(b,b);
+        auto bb_ijkl = outer(b,b);
         auto bb_ikjl = permutation<Index<i,k,j,l>>(bb_ijkl);
         auto bb_iljk = permutation<Index<i,l,j,k>>(bb_ijkl);
 
@@ -85,7 +87,8 @@ public:
         Tensor<T,ndim,ndim,ndim,ndim> elasticity = C_mech;
 
         // FIND COUPLING TENSOR
-        auto ID_ijk = einsum<Index<i,j>,Index<k>>(I,D); 
+        auto ID_ijk = outer(I,D); 
+        // auto ID_ijk = einsum<Index<i,j>,Index<k>>(I,D); 
         auto ID_ikj = permutation<Index<i,k,j>>(ID_ijk); 
         auto ID_jki = permutation<Index<j,k,i>>(ID_ijk); 
 

@@ -673,6 +673,13 @@ def NodeArrangementHexToTet(C):
         # node_arranger[4,:] = [1,2,6,7]
         node_arranger[4,:] = [1,6,2,7]
         node_arranger[5,:] = [1,5,6,7]
+
+        # node_arranger[0,:] = [0,5,7,4]
+        # node_arranger[1,:] = [0,1,7,5]
+        # node_arranger[2,:] = [1,6,7,5]
+        # node_arranger[3,:] = [0,7,2,3]
+        # node_arranger[4,:] = [0,7,1,2]
+        # node_arranger[5,:] = [1,7,6,2]
     elif C==1:
         node_arranger[0,:] = [0,1,2,7,8,10,11,18,19,21]
         node_arranger[1,:] = [0,2,3,7,10,9,12,18,21,16]

@@ -1,5 +1,5 @@
 from __future__ import division
-import os, warnings
+import os, sys, warnings
 from time import time
 import numpy as np 
 from scipy.io import loadmat, savemat
@@ -1455,12 +1455,12 @@ class Mesh(object):
                 # plt.plot(tmesh.x_edges,tmesh.y_edges,'-o',color="#FF6347")
                 # plt.plot(segment_coords[:,0],segment_coords[:,1],'-o',color="#E34234", linewidth=3)
 
-                fl = "/home/roman/Dropbox/2016_Linearised_Electromechanics_Paper/figures/hp_Benchmark/"
+                # fl = "/home/roman/Dropbox/2016_Linearised_Electromechanics_Paper/figures/hp_Benchmark/"
                 # plt.savefig(fl+"ElementSizeTri.eps", bbox_inches="tight",dpi=300)
                 # plt.savefig(fl+"ElementSizeTri_Segment.eps", bbox_inches="tight",dpi=300)
                 # plt.savefig(fl+"ElementSizeTri_Tessellation.eps", bbox_inches="tight",pad_inches=0,dpi=300)
                 # plt.savefig(fl+"ElementSizeQuad.eps", bbox_inches="tight",dpi=300)
-                plt.savefig(fl+"ElementSizeQuad_Tessellation.eps", bbox_inches="tight",pad_inches=0,dpi=300)
+                # plt.savefig(fl+"ElementSizeQuad_Tessellation.eps", bbox_inches="tight",pad_inches=0,dpi=300)
                 # plt.savefig(fl+"ElementSizeQuad_Segment.eps", bbox_inches="tight",dpi=300)
 
                 if save:
@@ -2277,35 +2277,6 @@ class Mesh(object):
         if isinstance(self.element_type,np.ndarray):
             self.element_type = str(self.element_type[0])
 
-        # CUSTOM READ - OLD
-        # self.elements = np.ascontiguousarray(DictOutput['elements']).astype(np.uint64)
-        # self.points = np.ascontiguousarray(DictOutput['points'])
-        # self.nelem = self.elements.shape[0]
-        # # self.element_type = str(DictOutput['element_type'][0])
-        # self.element_type = element_type
-        # self.edges = np.ascontiguousarray(DictOutput['edges']).astype(np.uint64)
-        # if self.element_type == "tet":
-        #     self.faces = np.ascontiguousarray(DictOutput['faces']).astype(np.uint64)
-
-        # self.all_faces = np.ascontiguousarray(DictOutput['all_faces'])
-        # self.all_edges = np.ascontiguousarray(DictOutput['all_edges'])
-        # self.face_to_element = np.ascontiguousarray(DictOutput['face_to_element'])
-        # # self.edge_to_element = np.ascontiguousarray(DictOutput['edge_to_element'])
-        # self.boundary_face_to_element = np.ascontiguousarray(DictOutput['boundary_face_to_element'])
-        # self.boundary_edge_to_element = np.ascontiguousarray(DictOutput['boundary_edge_to_element'])
-
-        # Tri
-        # self.elements = np.ascontiguousarray(DictOutput['elements'])
-        # self.points = np.ascontiguousarray(DictOutput['points'])
-        # self.nelem = self.elements.shape[0]
-        # self.element_type = str(DictOutput['element_type'][0])
-        # self.edges = np.ascontiguousarray(DictOutput['edges'])
-        # self.all_edges = np.ascontiguousarray(DictOutput['all_edges'])
-
-        # # self.edge_to_element = np.ascontiguousarray(DictOutput['edge_to_element'])
-        # # self.boundary_edge_to_element = np.ascontiguousarray(DictOutput['boundary_edge_to_element'])
-
-
 
 
     def SimplePlot(self, to_plot='faces', 
@@ -2706,7 +2677,7 @@ class Mesh(object):
 
     def Rectangle(self,lower_left_point=(0,0), upper_right_point=(2,1), 
         nx=5, ny=5, element_type="tri"):
-        """Create a qud/tri mesh of on rectangle"""
+        """Creates a qud/tri mesh of on rectangle"""
 
         if self.elements is not None and self.points is not None:
             self.__reset__()
@@ -2754,7 +2725,7 @@ class Mesh(object):
 
 
     def Square(self, lower_left_point=(0,0), side_length=1, nx=5, ny=5, n=None, element_type="tri"):
-        """Create a quad/tri mesh on a square
+        """Creates a quad/tri mesh on a square
 
             input:
                 lower_left_point            [tuple] of lower left vertex of the square
@@ -2770,6 +2741,181 @@ class Mesh(object):
         upper_right_point = (side_length+lower_left_point[0],side_length+lower_left_point[1])
         self.Rectangle(lower_left_point=lower_left_point,
             upper_right_point=upper_right_point,nx=nx,ny=ny,element_type=element_type)
+
+
+
+    def Arc(self, center=(0.,0.), radius=1., nrad=16, ncirc=40, start_angle=0., end_angle=np.pi/2., element_type="tri"):
+        """Creates a structured quad/tri mesh on an arc
+
+            input:
+                angle:                      [float] angle should be given in radian and is 
+                                            measured between the final geometric edge and positive
+                                            x-axis in anticlock-wise fashion  
+
+        """
+
+        # CHECK FOR ANGLE
+        PI = u"\u03C0".encode('utf-8').strip()
+        EPS = np.finfo(np.float64).eps
+        if np.abs(start_angle) + EPS > 2.*np.pi:
+            raise ValueError("The starting angle should be either in range [-2{},0] or [0,2{}]".format(PI,PI))
+        if np.abs(end_angle) + EPS > 2.*np.pi:
+            raise ValueError("The end angle should be either in range [-2{},0] or [0,2{}]".format(PI,PI))
+
+        # if np.sign(start_angle) == -1:
+        #     start_angle += 2*np.pi
+        # if np.sign(end_angle) == -1:
+        #     end_angle += 2*np.pi
+
+        # if start_angle > end_angle:
+        #     start_angle, end_angle = end_angle, start_angle
+
+
+        if np.sign(start_angle) == np.sign(end_angle):
+            total_angle = np.abs(end_angle - start_angle)
+            if np.isclose(total_angle,0.) or total_angle > 2.*np.pi:
+                self.Circle(center=center, radius=radius, nrad=nrad, ncirc=ncirc, element_type=element_type)
+                return 
+
+        if not isinstance(center,tuple):
+            raise ValueError("The center of the arc should be given in a tuple with two elements (x,y)")
+
+        self.__reset__()
+
+        ncirc = int(ncirc)
+        nrad = int(nrad)
+
+        if ncirc % 2 != 0 or ncirc < 2:
+            ncirc = (ncirc // 2)*2 + 2 
+
+        radii = radius
+
+        # APPLY TRANSFORMATION
+        # start_angle = start_angle + np.pi/2/
+        # end_angle = -(end_angle - np.pi/2)
+
+        radius = np.linspace(0,radii,nrad+1)[1:] 
+        t = np.linspace(start_angle,end_angle,ncirc+1) 
+        x = radius[0]*np.sin(t)[::-1]
+        y = radius[0]*np.cos(t)[::-1]
+
+        points = np.zeros((ncirc+2,2),dtype=np.float64)
+        points[0,:] = [0.,0.]
+        points[1:,:] = np.array([x,y]).T
+
+        self.elements = np.zeros((ncirc // 2,4),dtype=np.int64)
+        aranger = np.arange(ncirc // 2)
+        self.elements[:,1] = 2*aranger + 1
+        self.elements[:,2] = 2*aranger + 2
+        self.elements[:,3] = 2*aranger + 3
+
+        for i in range(1,nrad):
+            t = np.linspace(start_angle,end_angle,ncirc+1)
+            x = radius[i]*np.sin(t)[::-1] 
+            y = radius[i]*np.cos(t)[::-1]
+            points = np.vstack((points,np.array([x,y]).T))
+
+        points[:,0] += center[0]
+        points[:,1] += center[1]
+
+        elements = np.zeros((ncirc,4),dtype=np.int64) 
+        for i in range(1,nrad):
+            aranger = np.arange(1+ncirc*(i-1),ncirc*i+1)
+            elements[:,0] = aranger + i - 1
+            elements[:,1] = aranger + i + ncirc
+            elements[:,2] = aranger + i + ncirc + 1
+            elements[:,3] = aranger + i
+
+            self.elements = np.concatenate((self.elements,elements),axis=0)
+
+
+        makezero(points)
+        self.points = points
+        self.elements[:ncirc // 2,:] = self.elements[:ncirc // 2, [1,2,3,0]]
+
+        self.element_type = "quad"
+        self.nelem = self.elements.shape[0]
+        self.nnode = self.points.shape[0]
+        self.GetBoundaryEdges()
+        
+        if element_type == "tri":
+            sys.stdout = open(os.devnull, "w")
+            self.ConvertQuadsToTris()
+            sys.stdout = sys.__stdout__            
+
+
+
+
+
+    def Circle(self, center=(0.,0.), radius=1., nrad=16, ncirc=40, element_type="tri"):
+        """Creates a structured quad/tri mesh on circle 
+
+        """
+
+        if not isinstance(center,tuple):
+            raise ValueError("The center of the circle should be given in a tuple with two elements (x,y)")
+
+        self.__reset__()
+
+        ncirc = int(ncirc)
+        nrad = int(nrad)
+
+        if ncirc % 8 != 0 or ncirc < 8:
+            ncirc = (ncirc // 8)*8 + 8 
+
+        radii = radius
+
+        radius = np.linspace(0,radii,nrad+1)[1:] 
+        t = np.linspace(0,2*np.pi,ncirc+1) 
+        x = radius[0]*np.sin(t)[::-1][:-1] 
+        y = radius[0]*np.cos(t)[::-1][:-1] 
+
+        points = np.zeros((ncirc+1,2),dtype=np.float64)
+        points[0,:] = [0.,0.]
+        points[1:,:] = np.array([x,y]).T
+
+
+        self.elements = np.zeros((ncirc // 2,4),dtype=np.int64)
+        aranger = np.arange(ncirc // 2)
+        self.elements[:,1] = 2*aranger + 1
+        self.elements[:,2] = 2*aranger + 2
+        self.elements[:,3] = 2*aranger + 3
+        self.elements[-1,-1] = 1
+
+        for i in range(1,nrad):
+            t = np.linspace(0,2*np.pi,ncirc+1); 
+            x = radius[i]*np.sin(t)[::-1][:-1]; 
+            y = radius[i]*np.cos(t)[::-1][:-1];
+            points = np.vstack((points,np.array([x,y]).T))
+
+        points[:,0] += center[0]
+        points[:,1] += center[1]
+
+        elements = np.zeros((ncirc,4),dtype=np.int64) 
+        for i in range(1,nrad):
+            aranger = np.arange(1+ncirc*(i-1),ncirc*i+1)
+            elements[:,0] = aranger
+            elements[:,1] = aranger + ncirc
+            elements[:,2] = np.append((aranger + 1 + ncirc)[:-1],i*ncirc+1)
+            elements[:,3] = np.append((aranger + 1)[:-1],1+(i-1)*ncirc)
+
+            self.elements = np.concatenate((self.elements,elements),axis=0)
+
+        makezero(points)
+        self.points = points
+        self.elements[:ncirc // 2,:] = self.elements[:ncirc // 2, [1,2,3,0]]
+
+        self.element_type = "quad"
+        self.nelem = self.elements.shape[0]
+        self.nnode = self.points.shape[0]
+        self.GetBoundaryEdges()
+        
+        if element_type == "tri":
+            sys.stdout = open(os.devnull, "w")
+            self.ConvertQuadsToTris()
+            sys.stdout = sys.__stdout__
+
+
 
 
     def UniformHollowCircle(self,center=(0,0),inner_radius=1.0,outer_radius=2.,element_type='tri',isotropic=True,nrad=5,ncirc=10):
@@ -2877,7 +3023,7 @@ class Mesh(object):
 
     def Parallelepiped(self,lower_left_rear_point=(0,0,0), upper_right_front_point=(2,4,10), 
         nx=2, ny=4, nz=10, element_type="tet"):
-        """Create a tet/hex mesh on rectangular parallelepiped"""
+        """Creates a tet/hex mesh on rectangular parallelepiped"""
 
         if self.elements is not None and self.points is not None:
             self.__reset__()
@@ -2927,7 +3073,7 @@ class Mesh(object):
 
 
     def Cube(self, lower_left_rear_point=(0.,0.,0.), side_length=1, nx=5, ny=5, nz=5, n=None, element_type="tet"):
-        """Create a quad/tri mesh on a cube
+        """Creates a quad/tri mesh on a cube
 
             input:
                 lower_left_rear_point       [tuple] of lower left rear vertex of the cube
@@ -2949,7 +3095,7 @@ class Mesh(object):
 
 
     def Sphere(self,radius=1.0, points=10):
-        """Create a tetrahedral mesh on an sphere
+        """Creates a tetrahedral mesh on a sphere
 
         input:
 
@@ -3008,6 +3154,7 @@ class Mesh(object):
 
 
     def OneElementCylinder(self,radius=1, length=100, nz=10, element_type="hex"):
+        """Creates a mesh on cylinder with one hexahedral element across the cross section"""
 
         if element_type == "hex":
             elements = np.arange(0,8)[:,None]
@@ -3040,9 +3187,153 @@ class Mesh(object):
 
         elif element_type == "tet":
             # USE MESHPY
-            pass
+            raise NotImplementedError('Not implemented yet')
         else:
             raise ValueError('element type not suppported')
+
+
+    def Cylinder(self, center=(0.,0.,0.), radius=1., length=10., nrad=16, ncirc=40, nlong=50, element_type="hex"):
+        """Creates a structured hexahedral mesh on cylinder. The base of cylinder is always in the (X,Y)
+            plane
+        """
+
+        if element_type != "hex":
+            raise NotImplementedError('Generating {} mesh of cylinder is not supported yet'.format(element_type))
+
+        if not isinstance(center,tuple):
+            raise ValueError("The center for the base of the cylinder should be given in a tuple with three elements (x,y,z)")
+
+        self.__reset__()
+
+        nlong = int(nlong)
+        if nlong==0:
+            nlong = 1
+
+        mesh = Mesh()
+        mesh.Circle(center=(center[0],center[1]), radius=radius, nrad=nrad, ncirc=ncirc, element_type="quad")
+
+        self.Extrude(base_mesh=mesh, length=length, nlong=nlong)
+        self.points += center[2]
+
+
+
+    def ArcCylinder(self, center=(0.,0.,0.), radius=1., start_angle=0, end_angle=np.pi/2., 
+        length=10., nrad=16, ncirc=40, nlong=50, element_type="hex"):
+        """Creates a structured hexahedral mesh on cylinder with a base made of arc. 
+            The base of cylinder is always in the (X,Y) plane
+        """
+
+        if element_type != "hex":
+            raise NotImplementedError('Generating {} mesh of cylinder is not supported yet'.format(element_type))
+
+        if not isinstance(center,tuple):
+            raise ValueError("The center for the base of the cylinder should be given in a tuple with three elements (x,y,z)")
+
+        self.__reset__()
+
+        nlong = int(nlong)
+        if nlong==0:
+            nlong = 1
+
+        mesh = Mesh()
+        mesh.Arc(center=(center[0],center[1]), radius=radius, start_angle=start_angle, 
+            end_angle=end_angle, nrad=nrad, ncirc=ncirc, element_type="quad")
+ 
+        self.Extrude(base_mesh=mesh, length=length, nlong=nlong)
+        self.points += center[2]
+
+
+
+    def HollowCylinder(self,center=(0,0,0),inner_radius=1.0,outer_radius=2.,element_type='hex',isotropic=True,nrad=5,ncirc=10, nlong=20,length=10):
+        """Creates a hollow cylindrical mesh. Only hexes are supported for now"""
+
+        if element_type != "hex":
+            raise NotImplementedError('Generating {} mesh of cylinder is not supported yet'.format(element_type))
+
+        if not isinstance(center,tuple):
+            raise ValueError("The center for the base of the cylinder should be given in a tuple with three elements (x,y,z)")
+
+        self.__reset__()
+
+        nlong = int(nlong)
+        if nlong==0:
+            nlong = 1
+
+        mesh = Mesh()
+        mesh.UniformHollowCircle(center=(center[0],center[1]), inner_radius=inner_radius, 
+            outer_radius=outer_radius, element_type="quad", 
+            isotropic=isotropic, nrad=nrad, ncirc=ncirc)
+ 
+        self.Extrude(base_mesh=mesh, length=length, nlong=nlong)
+        self.points += center[2]
+
+
+
+    def Extrude(self, base_mesh=None, length=10, path=None, nlong=10):
+        """Extrude a 2D mesh to 3D. At the moment only quad to hex extrusion is supported
+
+            input:
+                base_mesh:                  [Mesh] an instance of class Mesh to be extruded.
+                                            If base_mesh is not provided (None), then self is 
+                                            taken as base_mesh
+                length:                     length along extrusion
+                path:                       [np.ndarray] the path along which the mesh needs
+                                            to be extruded. If not None overrides length
+                nlong:                      [int] number of discretisation in the extrusion
+                                            direction
+        """
+
+        mesh = base_mesh
+        if mesh != None:
+            if not isinstance(mesh,Mesh):
+                raise ValueError("Base mesh has to be instance of class Florence.Mesh")
+            else:
+                mesh.element_type is not None
+                mesh.elements is not None
+                mesh.points is not None
+                if mesh.element_type !="quad":
+                    raise NotImplementedError("Extrusion for {} mesh not supported yet".format(mesh.element_type))
+        else:
+            self.element_type is not None
+            self.elements is not None
+            self.points is not None
+            if self.element_type !="quad":
+                raise NotImplementedError("Extrusion for {} mesh not supported yet".format(mesh.element_type))
+
+            mesh = deepcopy(self)
+
+
+        nlong = int(nlong)
+        if nlong==0:
+            nlong = 1
+
+        nnode = (nlong+1)*mesh.points.shape[0]
+        nnode_2D = mesh.points.shape[0]
+        node_aranger = np.linspace(0,length,nlong+1)
+        self.points = np.zeros((nnode,3),dtype=np.float64)
+
+        for i in range(nlong+1):
+            self.points[nnode_2D*i:nnode_2D*(i+1),:2] = mesh.points
+            self.points[nnode_2D*i:nnode_2D*(i+1), 2] = node_aranger[i]
+
+
+        nelem= nlong*mesh.nelem
+        nelem_2D = mesh.nelem
+        element_aranger = np.arange(nlong)
+        self.elements = np.zeros((nelem,8),dtype=np.int64)
+
+        for i in range(nlong):
+            self.elements[nelem_2D*i:nelem_2D*(i+1),:4] = mesh.elements + i*nnode_2D
+            self.elements[nelem_2D*i:nelem_2D*(i+1),4:] = mesh.elements + (i+1)*nnode_2D
+
+
+        self.element_type = "hex"
+        self.nelem = nelem
+        self.nnode = nnode
+        self.GetBoundaryFaces()
+        self.GetBoundaryEdges()
+
+
 
 
     def RemoveElements(self,(x_min,y_min,x_max,y_max),element_removal_criterion="all",keep_boundary_only=False,
@@ -3413,7 +3704,7 @@ class Mesh(object):
         self.__do_memebers_exist__()
         assert self.element_type == "tet"
         if self.IsHighOrder:
-            raise ValueError('High order triangular elements cannot be converted to low/high order quads')
+            raise ValueError('High order tetrahedral elements cannot be converted to low/high order hexahedrals')
 
         tconv = time()
 
@@ -3523,6 +3814,9 @@ class Mesh(object):
         print "Tetrahedral to hexahedral mesh conversion took", time() - tconv, "seconds"
 
 
+
+
+
     def ConvertQuadsToTris(self):
         """Converts a quad mesh to a tri mesh through refinement/splitting
 
@@ -3583,7 +3877,8 @@ class Mesh(object):
             self.elements[:,node_arranger[3,:]],
             self.elements[:,node_arranger[4,:]],
             self.elements[:,node_arranger[5,:]]),axis=0).astype(self.elements.dtype)
-        
+
+       
         points = self.points
         edges = self.edges
         all_edges = self.all_edges
