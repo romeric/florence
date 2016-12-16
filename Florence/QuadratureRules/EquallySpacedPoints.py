@@ -1,10 +1,12 @@
 import numpy as np
+from .NodeArrangement import NodeArrangementQuad
 
 def EquallySpacedPoints(ndim=2,C=0):
     """Produce equally spaced points in (ndim-1) dimension, for the boundaries
-        of the mesh. For ndim=2 this is the region is enclosed in [-1,1] range
+        of the mesh. For ndim=2 this is the region enclosed in [-1,1] range
 
-        input:              [int] order of polynomial interpolation
+        input:              
+        C:                  [int] order of polynomial interpolation
         Returns:            [ndarray] array of equally spaced points 
 
         """
@@ -15,6 +17,11 @@ def EquallySpacedPoints(ndim=2,C=0):
         # FOR 2-DIMENSION
         return np.linspace(-1,1,C+2)[:,None]
     elif ndim==3:
+        xs = np.linspace(-1,1,C+2)[:,None]
+        x,y = np.meshgrid(xs,xs)
+        points = np.concatenate((x.flatten()[:,None],y.flatten()[:,None]),axis=1)
+        node_aranger = NodeArrangementQuad(C)[2]
+        return points[node_aranger,:]
         return
 
 

@@ -1,5 +1,11 @@
 import numpy as np
+try:
+    from functools import lru_cache
+except ImportError:
+    from Florence.Utils.backports import lru_cache
 
+
+@lru_cache(maxsize=None)
 def NodeArrangementTet(C):
 
     # NUMBERING IS NOT CONSISTENT WITH FACE NUMBERS
@@ -118,7 +124,7 @@ def NodeArrangementTet(C):
     return face_numbering, traversed_edge_numbering_tet
 
 
-
+@lru_cache(maxsize=None)
 def NodeArrangementTri(C):
 
     # GET EDGE NUMBERING ORDER FROM TRIANGULAR ELEMENT
@@ -142,6 +148,7 @@ def NodeArrangementTri(C):
 
 
 
+@lru_cache(maxsize=None)
 def NodeArrangementQuad(C):
     """Edge node arrangement for quads
 
@@ -187,6 +194,7 @@ def NodeArrangementQuad(C):
 
 
 
+@lru_cache(maxsize=None)
 def NodeArrangementHex(C):
 
     linear_bases_idx = np.array([0,(C+1),(C+2)**2-1,(C+2)**2-(C+2)])
@@ -578,7 +586,7 @@ def __FaceArrangementHex__(fekete,facer3d):
     return face
 
 
-
+@lru_cache(maxsize=None)
 def NodeArrangementQuadToTri(C):
 
     nsize = int((C+2)*(C+3)/2.)
@@ -653,7 +661,7 @@ def __QuadToTriArrangement__(epsq,epst_mirror):
     return face
 
 
-
+@lru_cache(maxsize=None)
 def NodeArrangementHexToTet(C):
     """Node ordering for conversion of a hexahedron into 6 tetrahedra
 
