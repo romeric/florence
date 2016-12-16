@@ -10,10 +10,13 @@ from Florence.Utils import insensitive
 from Florence.PostProcessing import *
 from Florence.Solver import LinearSolver, FEMSolver
 
-class StaggeredElectromechanicSolver(FEMSolver):
+class TractionBasedStaggeredSolver(FEMSolver):
+    """Staggered electromechanical solver based on
+        traction/residual transmision
+    """
 
     def __init__(self,**kwargs):
-        super(StaggeredElectromechanicSolver, self).__init__(**kwargs)
+        super(TractionBasedStaggeredSolver, self).__init__(**kwargs)
 
         self.electric_dofs = None
         self.mechanical_dofs = None
@@ -176,8 +179,7 @@ class StaggeredElectromechanicSolver(FEMSolver):
         residual_mech = residual_mech_neumann - self.ApplyDirichlet(K[self.mechanical_dofs,:][:,self.mechanical_dofs],
             nodal_forces_mech, self.mech_out, self.mech_in,self.applied_dirichlet_mech, LoadFactor=LoadFactor)
 
-        # dUm = self.SolveMechanics(mesh, formulation, solver, K, residual_mech, LoadFactor, initial_solution=True)
-        dUm = np.zeros(self.all_mech_dofs.shape[0],dtype=np.float64) ## DIFFERENCE
+        dUm = self.SolveMechanics(mesh, formulation, solver, K, residual_mech, LoadFactor, initial_solution=True)
 
         # INITIATE TRANSMITTIVE FORCES
         self.force_up = np.zeros(formulation.ndim*mesh.points.shape[0])
@@ -269,15 +271,27 @@ class StaggeredElectromechanicSolver(FEMSolver):
             K_up = Ke[self.mechanical_dofs,:][:,self.electric_dofs]
             dUe = Eulerp - Eulerp_n
             self.force_up = K_up.dot(dUe)
+            # self.force_up = K_up.dot(dUe[:,None])
+            # print(self.force_up)
 
+            # if Increment>0:
+                # nodal_forces_mech = np.zeros_like(nodal_forces_mech)
+                # residual_mech = residual_mech_neumann - self.ApplyDirichlet(K[self.mechanical_dofs,:][:,self.mechanical_dofs],
+                    # nodal_forces_mech, self.mech_out, self.mech_in, self.applied_dirichlet_mech, LoadFactor=LoadFactor)
+
+            # print(self.ApplyDirichlet(K[self.mechanical_dofs,:][:,self.mechanical_dofs],
+            #         nodal_forces_mech, self.mech_out, self.mech_in, self.applied_dirichlet_mech, LoadFactor=LoadFactor))
+            
             nodal_forces_mech = np.zeros_like(nodal_forces_mech)
             residual_mech = residual_mech_from_elec + residual_mech_neumann - \
                 self.ApplyDirichlet(K[self.mechanical_dofs,:][:,self.mechanical_dofs],
                 nodal_forces_mech, self.mech_out, self.mech_in, self.applied_dirichlet_mech, LoadFactor=LoadFactor)
 
+            # print(residual_mech.shape,xx.shape)
+            # exit()
 
             # SOLVE MECHANICS PROBLEM WITH OLD GEOMETRY (K), AND THE FORCE self.force_up AS A RESIDUAL
-            dUm = self.SolveMechanics(mesh, formulation, solver, Ke, residual_mech, LoadFactor, initial_solution=False) ## DIFFERENCE
+            dUm = self.SolveMechanics(mesh, formulation, solver, K, residual_mech, LoadFactor, initial_solution=False)
             # dUm = self.SolveMechanics(mesh, formulation, solver, K, traction_forces_mech, LoadFactor, initial_solution=False)
             # UPDATE GEOMETRY INCREMENTALLY
             Eulerx += dUm
@@ -369,7 +383,7 @@ class StaggeredElectromechanicSolver(FEMSolver):
         """
         K_pp_b = K[self.columns_in_electric,:][:,self.columns_in_electric]
         if iteration == 0:
-            rhs_electric = residual_electric #+ self.force_pu[:,None] ## DIFFERENCE
+            rhs_electric = residual_electric + self.force_pu[:,None]
         else:
             rhs_electric = residual_electric           
 

@@ -4,6 +4,7 @@ from time import time
 import numpy as np 
 from scipy.io import loadmat, savemat
 from Florence.Tensor import makezero, itemfreq, unique2d, in2d
+from Florence.Utils import insensitive
 from vtk_writer import write_vtu
 from NormalDistance import NormalDistance
 try:
@@ -2744,13 +2745,69 @@ class Mesh(object):
 
 
 
-    def Arc(self, center=(0.,0.), radius=1., nrad=16, ncirc=40, start_angle=0., end_angle=np.pi/2., element_type="tri"):
+    def Triangle(self, c1=(0.,0.), c2=(0.,1.), c3=(1.,0.), npoints=10, element_type="tri", equally_spaced=True):
+        """Creates a tri/quad mesh on a triangular region, given coordinates of the three
+            nodes of the triangle
+
+            input:
+                npoints:                    [int] number of discritsation
+        """
+
+        if not isinstance(c1,tuple) or not isinstance(c2,tuple) or not isinstance(c3,tuple):
+            raise ValueError("The coordinates c1, c2 and c3 should be given in tuples of two elements each (x,y)")
+
+        npoints = int(npoints)
+
+
+        npoints = npoints - 1
+        if npoints < 0:
+            npoints = 0 
+
+        opoints = np.array([c1,c2,c3])
+        oelements = np.array([[0,1,2]])
+
+        if element_type=="tri":
+            mesh = self.TriangularProjection(points=opoints, npoints=npoints, equally_spaced=equally_spaced)
+            self.__update__(mesh)
+
+
+        elif element_type == "quad":
+
+            # SPLIT THE TRIANGLE INTO 3 QUADS
+            omesh = Mesh()
+            omesh.element_type="tri"
+            omesh.elements = oelements
+            omesh.nelem = omesh.elements.shape[0]
+            omesh.points = opoints
+            omesh.GetBoundaryEdges()
+
+            sys.stdout = open(os.devnull, "w")
+            omesh.ConvertTrisToQuads()
+            sys.stdout = sys.__stdout__ 
+
+
+            npoints = int(npoints/2) + 1
+            mesh = self.QuadrilateralProjection(points=omesh.points[omesh.elements[0,:],:],
+                npoints=npoints, equally_spaced=equally_spaced)
+            for i in range(1,omesh.nelem):
+                mesh += self.QuadrilateralProjection(points=omesh.points[omesh.elements[i,:],:], 
+                    npoints=npoints, equally_spaced=equally_spaced)
+
+            self.__update__(mesh)
+
+
+
+
+    def Arc(self, center=(0.,0.), radius=1., nrad=16, ncirc=40, 
+        start_angle=0., end_angle=np.pi/2., element_type="tri", refinement=False, refinement_level=2):
         """Creates a structured quad/tri mesh on an arc
 
             input:
                 angle:                      [float] angle should be given in radian and is 
                                             measured between the final geometric edge and positive
-                                            x-axis in anticlock-wise fashion  
+                                            x-axis in anticlock-wise fashion
+                refinement_level:           [int] number of elements that each element has to be 
+                                            splitted to 
 
         """
 
@@ -2782,8 +2839,13 @@ class Mesh(object):
 
         self.__reset__()
 
-        ncirc = int(ncirc)
-        nrad = int(nrad)
+        if refinement:
+            ndivider = refinement_level
+        else:
+            ndivider = 1
+
+        ncirc = int(ncirc/ndivider)
+        nrad = int(nrad/ndivider)
 
         if ncirc % 2 != 0 or ncirc < 2:
             ncirc = (ncirc // 2)*2 + 2 
@@ -2837,6 +2899,12 @@ class Mesh(object):
         self.nelem = self.elements.shape[0]
         self.nnode = self.points.shape[0]
         self.GetBoundaryEdges()
+
+        if refinement:
+            mesh = self.QuadrilateralProjection(points=self.points[self.elements[0,:],:], npoints=ndivider)
+            for i in range(1,self.nelem):
+                mesh += self.QuadrilateralProjection(points=self.points[self.elements[i,:],:], npoints=ndivider)
+            self.__update__(mesh)
         
         if element_type == "tri":
             sys.stdout = open(os.devnull, "w")
@@ -2847,7 +2915,8 @@ class Mesh(object):
 
 
 
-    def Circle(self, center=(0.,0.), radius=1., nrad=16, ncirc=40, element_type="tri"):
+    def Circle(self, center=(0.,0.), radius=1., nrad=16, ncirc=40, 
+        element_type="tri", refinement=False, refinement_level=2):
         """Creates a structured quad/tri mesh on circle 
 
         """
@@ -2857,11 +2926,18 @@ class Mesh(object):
 
         self.__reset__()
 
-        ncirc = int(ncirc)
-        nrad = int(nrad)
+        if refinement:
+            ndivider = refinement_level
+            if nrad==1: nrad=2
+        else:
+            ndivider = 1
+
+        ncirc = int(ncirc/ndivider)
+        nrad = int(nrad/ndivider)
+        
 
         if ncirc % 8 != 0 or ncirc < 8:
-            ncirc = (ncirc // 8)*8 + 8 
+            ncirc = (ncirc // 8)*8 + 8
 
         radii = radius
 
@@ -2909,6 +2985,18 @@ class Mesh(object):
         self.nelem = self.elements.shape[0]
         self.nnode = self.points.shape[0]
         self.GetBoundaryEdges()
+
+        if refinement:
+            mesh = self.QuadrilateralProjection(points=self.points[self.elements[0,:],:], npoints=ndivider)
+            for i in range(1,self.nelem):
+                mesh += self.QuadrilateralProjection(points=self.points[self.elements[i,:],:], npoints=ndivider)
+            self.__update__(mesh)
+
+            # SECOND LEVEL OF REFINEMENT IF NEEDED
+            # mesh = self.QuadrilateralProjection(points=self.points[self.elements[0,:],:], npoints=2)
+            # for i in range(1,self.nelem):
+            #     mesh += self.QuadrilateralProjection(points=self.points[self.elements[i,:],:], npoints=2)
+            # self.__update__(mesh)
         
         if element_type == "tri":
             sys.stdout = open(os.devnull, "w")
@@ -2964,13 +3052,8 @@ class Mesh(object):
         # print np.logspace(0,1.5,nrad+1,base=2)
         
 
-
         xy = np.zeros((radii.shape[0]*t.shape[0],2),dtype=np.float64)
-        # cost = np.cos(t)
-        # sint = np.sin(t)
         for i in range(0,radii.shape[0]):
-            # xy[i*t.shape[0]:(i+1)*t.shape[0],0] = radii[i]*cost
-            # xy[i*t.shape[0]:(i+1)*t.shape[0],1] = radii[i]*sint
             xy[i*t.shape[0]:(i+1)*t.shape[0],0] = radii[i]*np.cos(t)
             xy[i*t.shape[0]:(i+1)*t.shape[0],1] = radii[i]*np.sin(t)
 
@@ -2979,7 +3062,6 @@ class Mesh(object):
         xy = xy[np.setdiff1d( np.arange(xy.shape[0]) , np.linspace(t.shape[0]-1,xy.shape[0]-1,radii.shape[0]).astype(int) ),:]
 
         connec = np.zeros((1,4),dtype=np.int64)
-        # connec = ((),)
 
         for j in range(1,radii.shape[0]):   
             for i in range((j-1)*(t.shape[0]-1),j*(t.shape[0]-1)):
@@ -3094,7 +3176,7 @@ class Mesh(object):
 
 
 
-    def Sphere(self,radius=1.0, points=10):
+    def Sphere(self,radius=1.0, npoints=10):
         """Creates a tetrahedral mesh on a sphere
 
         input:
@@ -3112,6 +3194,7 @@ class Mesh(object):
 
         r = radius
 
+        points = npoints
         dphi = pi/points
 
         def truncate(r):
@@ -3341,8 +3424,8 @@ class Mesh(object):
         """Removes elements with some specified criteria
 
         input:              
-            (x_min,y_min,x_max,y_max)       [tuple of doubles] box selection. Deletes all the elements apart 
-                                            from the one within this box 
+            (x_min,y_min,x_max,y_max)       [tuple of floats] box selection. Deletes all the elements apart 
+                                            from the ones within this box 
             element_removal_criterion       [str]{"all","any"} the criterion for element removal with box selection. 
                                             How many nodes of the element should be within the box in order 
                                             not to be removed. Default is "all". "any" implies at least one node 
@@ -3444,7 +3527,6 @@ class Mesh(object):
         nelem = elements.shape[0]
         nodeperelem = elements.shape[1]
         element_type = self.element_type
-        # print elements.shape
 
         unique_elements, inv_elements = np.unique(elements,return_inverse=True)
         unique_elements = unique_elements[inv_mpoints]
@@ -3455,6 +3537,7 @@ class Mesh(object):
         self.__reset__()
         self.element_type = element_type
         self.elements = melements
+        self.nelem = melements.shape[0]
         self.points = mpoints
         if element_type == "tet":
             self.GetBoundaryFacesTet()
@@ -3462,6 +3545,171 @@ class Mesh(object):
         elif element_type == "tri":
             self.GetBoundaryEdgesTri()
 
+
+    def Smoothing(self, criteria={'aspect_ratio':3}):
+        """Performs mesh smoothing based a given criteria.
+            
+            input:
+                criteria                [dict] criteria can be either None, {'volume':<number>}, 
+                                        {'area':<number>} or {'aspect_ratio':<number>}. The
+                                        number implies that all elements above that number 
+                                        should be refined. Default is {'aspect_ratio':4} 
+        """
+
+        self.__do_essential_memebers_exist__()
+
+        if not isinstance(criteria,dict):
+            raise ValueError("Smoothing criteria should be a dictionry")
+
+        if len(criteria.keys()) > 1:
+            raise ValueError("Smoothing criteria should be a dictionry with only one key")            
+
+        criterion = criteria.keys()[0]
+        number = criteria.values()[0]
+
+        if "aspect_ratio" in insensitive(criterion):
+            quantity = self.AspectRatios()
+        elif "area" in insensitive(criterion):
+            quantity = self.Areas()
+        elif "volume" in insensitive(criterion):
+            quantity = self.Volumes()
+
+        non_smooth_elements_idx = np.where(quantity >= number)[0]
+
+        if non_smooth_elements_idx.shape[0]==0:
+            return 
+
+        if self.element_type == "quad":
+            refiner_func = self.QuadrilateralProjection
+        elif self.element_type == "tri":
+            refiner_func = self.TriangularProjection
+        else:
+            raise ValueError("Smoothing of {} elements not supported yet".format(self.element_type))
+
+
+        mesh = refiner_func(points=self.points[self.elements[non_smooth_elements_idx[0],:],:],npoints=2)
+        for i in range(1,non_smooth_elements_idx.shape[0]):
+            mesh += refiner_func(points=self.points[self.elements[non_smooth_elements_idx[i],:],:],npoints=2)
+
+        smooth_elements_idx = np.where(quantity < number)[0]
+        if smooth_elements_idx.shape[0]>0:
+            mesh += self.GetLocalisedMesh(smooth_elements_idx)
+ 
+        self.__update__(mesh)
+
+
+
+
+    @staticmethod
+    def TriangularProjection(c1=(0,0), c2=(2,0), c3=(2,2), points=None, npoints=10, equally_spaced=True):
+        """Builds an instance of Mesh on a triangular region through FE interpolation
+            given four vertices of the triangular region. Alternatively you can specify 
+            the vertices as numpy array of 3x2. 
+
+            This is a static immutable function, in that it does not modify self 
+        """
+
+        if points is None or not isinstance(points,np.ndarray):
+            if not isinstance(c1,tuple) or not isinstance(c2,tuple) or not isinstance(c3,tuple):
+                raise ValueError("coordinates should be given in tuples of two elements (x,y)")
+            else:
+                opoints = np.array([c1,c2,c3])
+        else:
+            opoints = points
+
+        from scipy.spatial import Delaunay
+        from Florence.FunctionSpace import Tri 
+        from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
+        from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
+        
+        if equally_spaced:
+            points = EquallySpacedPointsTri(npoints)
+        else:
+            points = FeketePointsTri(npoints)
+
+        BasesTri = np.zeros((3,points.shape[0]),dtype=np.float64)
+        hpBases = Tri.hpNodal.hpBases
+        for i in range(points.shape[0]):
+            BasesTri[:,i] = hpBases(0,points[i,0],points[i,1],
+                EvalOpt=1,EquallySpacedPoints=equally_spaced,Transform=1)[0]
+
+        func = Delaunay(points,qhull_options="QJ")
+        triangles = func.simplices
+        nnode = func.points.shape[0]
+        nelem = func.nsimplex
+        nsize = int((npoints+2)*(npoints+3)/2.)
+
+        mesh = Mesh()
+        mesh.element_type="tri"
+        mesh.points = np.dot(BasesTri.T, opoints)
+        mesh.elements = triangles
+        mesh.nelem = mesh.elements.shape[0]
+        mesh.nnode = mesh.points.shape[0]
+        mesh.GetBoundaryEdges()
+
+        return mesh
+
+
+    @staticmethod
+    def QuadrilateralProjection(c1=(0,0), c2=(2,0), c3=(2,2), c4=(0,2), points=None, npoints=10, equally_spaced=True):
+        """Builds an instance of Mesh on a quadrilateral region through FE interpolation
+            given four vertices of the quadrilateral region. Alternatively you can specify 
+            the vertices as numpy array of 4x2. 
+
+            This is a static immutable function, in that it does not modify self 
+        """
+
+        if points is None or not isinstance(points,np.ndarray):
+            if not isinstance(c1,tuple) or not isinstance(c2,tuple) or not isinstance(c3,tuple) or not isinstance(c4,tuple):
+                raise ValueError("coordinates should be given in tuples of two elements (x,y)")
+            else:
+                opoints = np.array([c1,c2,c3,c4])
+        else:
+            opoints = points
+
+        from Florence.FunctionSpace import Quad, QuadES
+        from Florence.QuadratureRules.GaussLobattoPoints import GaussLobattoPointsQuad
+        from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints
+        from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
+
+        npoints = int(npoints)
+        if npoints ==0: npoints=1
+        nsize = int((npoints+2)**2)
+
+        if equally_spaced:
+            points = EquallySpacedPoints(ndim=3,C=npoints-1)
+        else:
+            points = GaussLobattoPointsQuad(npoints-1)
+
+        BasesQuad = np.zeros((4,points.shape[0]),dtype=np.float64)
+        hpBases = QuadES.Lagrange
+        for i in range(points.shape[0]):
+            BasesQuad[:,i] = hpBases(0,points[i,0],points[i,1],arrange=1)[:,0]
+
+        node_arranger = NodeArrangementQuad(npoints-1)[2]
+
+        qmesh = Mesh()
+        qmesh.Square(lower_left_point=(-1.,-1.), side_length=2,n=npoints, element_type="quad")
+        quads = qmesh.elements
+
+
+        nnode = qmesh.nnode
+        nelem = qmesh.nelem
+        nsize = int((npoints+1)**2)
+
+        mesh = Mesh()
+        mesh.points = np.dot(BasesQuad.T, opoints)
+
+        _, inv = np.unique(quads,return_inverse=True)
+        sorter = np.argsort(node_arranger)
+        mesh.elements = sorter[inv].reshape(quads.shape)
+
+        mesh.element_type="quad"
+        mesh.nelem = mesh.elements.shape[0]
+        mesh.nnode = mesh.points.shape[0]
+        mesh.GetBoundaryEdges()
+
+        return mesh
 
 
 
@@ -3960,9 +4208,14 @@ class Mesh(object):
         self.MergeWith(other)
         return self
 
+    def __iadd__(self, other):
+        """Add self with other. Hybrid meshes not supported"""
+        self.MergeWith(other)
+        return self
+
 
     def __do_memebers_exist__(self):
-        """Check if essential members exist"""
+        """Check if fundamental members exist"""
         assert self.element_type is not None
         assert self.elements is not None
         assert self.points is not None
@@ -3970,6 +4223,17 @@ class Mesh(object):
         ndim = self.InferSpatialDimension()
         if ndim==3:
             assert self.faces is not None
+
+
+    def __do_essential_memebers_exist__(self):
+        """Check if essential members exist"""
+        assert self.element_type is not None
+        assert self.elements is not None
+        assert self.points is not None
+
+
+    def __update__(self,other):
+        self.__dict__.update(other.__dict__)
 
 
     def __reset__(self):

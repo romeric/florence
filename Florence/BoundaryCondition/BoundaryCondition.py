@@ -691,8 +691,8 @@ class BoundaryCondition(object):
         # tt=time()
         # F1 = np.copy(F)
         # # APPLY DIRICHLET BOUNDARY CONDITIONS
-        # for i in range(self.columns_out.shape[0]):
-            # F = F - LoadFactor*AppliedDirichlet[i]*stiffness.getcol(self.columns_out[i])
+        for i in range(self.columns_out.shape[0]):
+            F = F - LoadFactor*AppliedDirichlet[i]*stiffness.getcol(self.columns_out[i])
 
         # print(np.linalg.norm((stiffness[:,self.columns_out]*AppliedDirichlet*LoadFactor)))
         # MUCH FASTER APPROACH
@@ -721,8 +721,8 @@ class BoundaryCondition(object):
         # print(np.linalg.norm((stiffness[:,self.columns_out]*AppliedDirichlet*LoadFactor)[:,None]), np.linalg.norm(F))
 
 
-        nnz_cols = ~np.isclose(AppliedDirichlet,0.0)
-        F[self.columns_in] = F[self.columns_in] - (stiffness[self.columns_in,:][:,self.columns_out[nnz_cols]]*AppliedDirichlet[nnz_cols]*LoadFactor)[:,None]
+        # nnz_cols = ~np.isclose(AppliedDirichlet,0.0)
+        # F[self.columns_in] = F[self.columns_in] - (stiffness[self.columns_in,:][:,self.columns_out[nnz_cols]]*AppliedDirichlet[nnz_cols]*LoadFactor)[:,None]
 
         # GET REDUCED FORCE VECTOR
         F_b = F[self.columns_in,0]

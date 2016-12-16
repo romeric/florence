@@ -28,7 +28,8 @@ def LagrangeGaussLobatto(C,zeta,eta,arrange=1):
         Bases = Bases[:,None]
 
     elif arrange==0:
-        Bases[:,0] = np.dot(Nzeta,Neta.T).flatten()
+        # Bases[:,0] = np.dot(Nzeta,Neta.T).flatten()
+        Bases[:,0] = np.dot(Neta,Nzeta.T).flatten()
 
     # check = np.array([
         # 0.25*(1-zeta)*(1-eta),
@@ -75,8 +76,10 @@ def GradLagrangeGaussLobatto(C,zeta,eta,arrange=1):
         gBases[:,1] = g1[node_arranger]
 
     elif arrange==0:
-        gBases[:,0] = np.dot(gNzeta,Neta.T).reshape((C+2)**2)
-        gBases[:,1] = np.dot(Nzeta,gNeta.T).reshape((C+2)**2)
+        # gBases[:,0] = np.dot(gNzeta,Neta.T).reshape((C+2)**2)
+        # gBases[:,1] = np.dot(Nzeta,gNeta.T).reshape((C+2)**2)
+        gBases[:,0] = np.dot(gNeta,Nzeta.T).reshape((C+2)**2)
+        gBases[:,1] = np.dot(Neta,gNzeta.T).reshape((C+2)**2)
 
 
     # check =  0.25*np.array([[eta-1.,1-eta,1+eta,-1.-eta],[zeta-1.,-zeta-1.,1+zeta,1-zeta]])
