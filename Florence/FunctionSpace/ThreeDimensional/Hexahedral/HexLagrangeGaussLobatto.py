@@ -28,10 +28,6 @@ def LagrangeGaussLobatto(C,zeta,eta,beta,arrange=1):
         Bases = np.einsum('i,j,k', Nbeta[:,0], Neta[:,0], Nzeta[:,0]).flatten()
         Bases = Bases[node_arranger]
         Bases = Bases[:,None]
-        # print node_arranger
-        # print Bases
-
-        # exit()
 
     elif arrange==0:
         Bases = np.zeros((C+2,C+2,C+2))

@@ -1,2 +1,2 @@
-from Hexahedral import HexLagrangeGaussLobatto
+from Hexahedral import HexLagrangeGaussLobatto, HexLagrange
 import Tetrahedral

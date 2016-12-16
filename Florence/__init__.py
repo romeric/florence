@@ -6,6 +6,6 @@ from MaterialLibrary import *
 # from VariationalPrinciple import *
 # from MaterialLibrary import Material
 from BoundaryCondition import BoundaryCondition
-from Solver import LinearSolver, FEMSolver, StaggeredFEMSolver, StaggeredElectromechanicSolver
+from Solver import LinearSolver, FEMSolver, TractionBasedStaggeredSolver, PotentialBasedStaggeredSolver
 from Utils import PWD, RSWD
 from PostProcessing import *

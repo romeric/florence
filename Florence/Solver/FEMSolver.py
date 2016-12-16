@@ -379,6 +379,7 @@ class FEMSolver(object):
             Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
                 boundary_condition.applied_dirichlet,LoadFactor=LoadFactor)[2]
             Residual -= DeltaF
+            # print(Residual)
             # GET THE INCREMENTAL DISPLACEMENT
             AppliedDirichletInc = LoadFactor*boundary_condition.applied_dirichlet
 
@@ -393,14 +394,15 @@ class FEMSolver(object):
                 if np.isclose(self.NormForces,0.0):
                     self.NormForces = 1e-14
 
-            if np.isclose(self.NormForces,0.0):
-                self.norm_residual = la.norm(Residual[boundary_condition.columns_in])
-            else:
-                self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)
+            # if np.isclose(self.NormForces,0.0):
+            #     self.norm_residual = la.norm(Residual[boundary_condition.columns_in])
+            # else:
+            #     self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)
+            self.norm_residual = np.linalg.norm(Residual)/self.NormForces
 
             Eulerx, Eulerp, K, Residual = self.NewtonRaphson(function_spaces, formulation, solver, 
-                Increment,K,NodalForces,Residual,mesh,Eulerx,Eulerp,
-                material,boundary_condition,AppliedDirichletInc)
+                Increment, K, NodalForces, Residual, mesh, Eulerx, Eulerp,
+                material, boundary_condition, AppliedDirichletInc)
 
             # UPDATE DISPLACEMENTS FOR THE CURRENT LOAD INCREMENT
             TotalDisp[:,:formulation.ndim,Increment] = Eulerx - mesh.points
@@ -427,8 +429,8 @@ class FEMSolver(object):
 
 
     def NewtonRaphson(self, function_spaces, formulation, solver, 
-        Increment,K,NodalForces,Residual,mesh,Eulerx,Eulerp,material,
-        boundary_condition,AppliedDirichletInc):
+        Increment, K, NodalForces, Residual, mesh, Eulerx, Eulerp, material,
+        boundary_condition, AppliedDirichletInc):
 
         Tolerance = self.newton_raphson_tolerance
         LoadIncrement = self.number_of_load_increments
@@ -479,8 +481,8 @@ class FEMSolver(object):
                 " Residual (abs) {0:>16.7g}".format(self.rel_norm_residual), 
                 "\t Residual (rel) {0:>16.7g}".format(self.norm_residual))
 
-            if np.abs(self.rel_norm_residual) < Tolerance:
-                break
+            # if np.abs(self.rel_norm_residual) < Tolerance:
+            #     break
 
             # UPDATE ITERATION NUMBER
             Iter +=1
@@ -497,6 +499,8 @@ class FEMSolver(object):
 
 
         return Eulerx, Eulerp, K, Residual
+
+
 
 
 

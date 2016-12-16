@@ -508,16 +508,39 @@ def RunProblems(p=2):
 
 def CheckHexes(p=2):
 
+
+
     mesh = Mesh()
-    # mesh.Circle(ncirc=8, nrad=1, radius=10, element_type="quad", center=(5,5))
+    mesh.Circle(ncirc=40, nrad=1, radius=10, element_type="quad", center=(5,5), refinement=True)
     # mesh.Circle(ncirc=40, nrad=20, radius=10)
     # print mesh.points.max()
     # mesh.SimplePlot()
+    # print mesh.AspectRatios()
+
+    # mesh.Triangle(npoints=40, equally_spaced=False)
+    # mesh.Triangle(npoints=50, element_type="quad")
+    # mesh = mesh.QuadrilateralProjection(c1=(-2,-3),c2=(5,-4),c3=(0.8,1),c4=(-3,5),npoints=20)
+    # mesh.Triangle(npoints=5)
+    # print mesh.points
+    # mesh.Triangle(c1=(-2,-3),c2=(5,-4),c3=(1,1))
+    # mesh.Arc()
+    # mesh.Arc(element_type="quad", ncirc=12, nrad=20, refinement=True)
+    # mesh.Sphere(npoints=10)
+    # print mesh.AspectRatios()
+
+    mesh.Smoothing({'aspect_ratio':1.1})
+    mesh.Smoothing({'aspect_ratio':1.1})
+    mesh.Extrude(nlong=2, length=2.2)
+    mesh.SimplePlot()
+
 
 
     # mesh.Cylinder(ncirc=40, nrad=16, nlong=2, length=0.01)
-    mesh.HollowCylinder(ncirc=120, inner_radius=0.9, outer_radius=1., nrad=2, nlong=2, length=0.1)
+    # mesh.HollowCylinder(ncirc=60, inner_radius=0.9, outer_radius=1., nrad=1, nlong=1, length=0.1)
     # mesh.Cylinder()
+
+    # mesh.UniformHollowCircle(element_type="quad")
+    # mesh.Extrude(nlong=20)
 
     # print "wow"
     # mesh.Arc(ncirc=70,nrad=13, element_type="quad", start_angle=3.*np.pi/4., end_angle=7.*np.pi/4.)
@@ -526,10 +549,9 @@ def CheckHexes(p=2):
     # mesh.Circle(element_type="quad")
     # mesh.Extrude()
     # mesh.ArcCylinder(center=(2,3,4))
-    # mesh.SimplePlot()
     # print mesh.Bounds
 
-    # exit()
+    exit()
 
 
 
@@ -622,7 +644,7 @@ def CheckHexes(p=2):
         # Y_1 = np.isclose(mesh.points[:,2],10.)
         Y_1 = np.isclose(mesh.points[:,1],1.)
         boundary_data[Y_1,0] = 0.0
-        boundary_data[Y_1,1] = -1.9
+        boundary_data[Y_1,1] = -1.7
         boundary_data[Y_1,2] = 0.0
 
         # print boundary_data
@@ -737,4 +759,7 @@ if __name__ == "__main__":
     # RunErrorNorms_Objective(p=p)
 
     # RunProblems(p=p)
+
+    from cProfile import run
+    # run('CheckHexes(p=p)')
 

@@ -1060,12 +1060,21 @@ def ProblemData_Rogelio3(*args, **kwargs):
     e0=1.0
     # material = IsotropicElectroMechanics_105(ndim, mu1=126.0/2., mu2=0.0, lamb=800., eps_1=1.0e5*e0, eps_2=1.0e5*e0)
     material = IsotropicElectroMechanics_105(ndim, mu1=126.0/2., mu2=0.0, lamb=800., eps_1=1000.0*e0, eps_2=1000.0*e0)
+    # material = IsotropicElectroMechanics_101(ndim, mu=126.0, lamb=800., eps_1=1000.0*e0)
+    # material = IsotropicElectroMechanics_101(ndim, mu1=126.0, mu2, lamb=800., eps_1=1000.0*e0)
+    # material = IsotropicElectroMechanics_200(ndim, mu1=126.0, mu2=0.0, lamb=800., eps_1=-1000.0*e0)
+    # material = IsotropicElectroMechanics_201(ndim, mu1=126.0, mu2=0.0, lamb=800., eps_1=1000.0*e0)
     
     # material = IsotropicElectroMechanics_106(ndim, mu1=126.0/2., mu2=0.0, lamb=800., eps_1=1000.0*e0, eps_2=1000.0*e0)
     # material = IsotropicElectroMechanics_107(ndim, mu1=126.0/2., mu2=0.0, mue=0.1,lamb=800., eps_1=1000.0*e0, eps_2=1000.0*e0, eps_e=1000.0*e0)
 
     mesh = Mesh()
-    mesh.Parallelepiped(element_type="hex",upper_right_front_point=(1,1,10),nx=2,ny=2,nz=10)
+    # mesh.Parallelepiped(element_type="hex",upper_right_front_point=(1,1,10),nx=2,ny=2,nz=10)
+    mesh.Cube(element_type="hex",n=1)
+    # mesh.SimplePlot()
+    # mesh.WriteHDF5("/home/roman/Dropbox/OneCube.mat")
+    # print mesh.Bounds
+    # exit()
 
 
 
@@ -1079,7 +1088,7 @@ def ProblemData_Rogelio3(*args, **kwargs):
         boundary_data[Y_0,3] = 0.
         Y_0 = np.isclose(mesh.points[:,0],1.)
         # boundary_data[Y_0,3] = 1e7
-        boundary_data[Y_0,3] = 1e-2
+        boundary_data[Y_0,3] = 1.5
 
         Y_0 = np.isclose(mesh.points[:,2],0.)
         boundary_data[Y_0,0] = 0.
@@ -1088,18 +1097,20 @@ def ProblemData_Rogelio3(*args, **kwargs):
 
         # boundary_data[:,:3] = 0.
 
-        return boundary_data
-
-
-    def NeumannFunc(mesh):
-        boundary_data = np.zeros((mesh.points.shape[0],material.nvar))+np.NAN
-
-        Y_0 = np.isclose(mesh.points[:,2],10.)
-        boundary_data[Y_0,0] = -0.37037
-        boundary_data[Y_0,1] = 0.
-        boundary_data[Y_0,2] = 0.
+        # print boundary_data
 
         return boundary_data
+
+
+    # def NeumannFunc(mesh):
+    #     boundary_data = np.zeros((mesh.points.shape[0],material.nvar))+np.NAN
+
+    #     Y_0 = np.isclose(mesh.points[:,2],10.)
+    #     boundary_data[Y_0,0] = -0.37037
+    #     boundary_data[Y_0,1] = 0.
+    #     boundary_data[Y_0,2] = 0.
+
+    #     return boundary_data
 
 
     boundary_condition.SetDirichletCriteria(DirichletFunc, mesh)
@@ -1108,15 +1119,16 @@ def ProblemData_Rogelio3(*args, **kwargs):
     formulation = DisplacementPotentialFormulation(mesh)
 
     fem_solver = FEMSolver(number_of_load_increments=2, analysis_nature="nonlinear",parallelise=False,
-        newton_raphson_tolerance=1.0e-03)
+        newton_raphson_tolerance=1.0e-6)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition)
 
 
-    print solution.sol[94,:]
-    # solution.sol *= 1000.
-    # solution.Plot(configuration="deformed",quantity=1)
+    # print solution.sol[94,:]
+    # solution.sol *= 2.
+    print solution.sol[:,:,-1]
+    # solution.Animate(configuration="deformed",quantity=1)
 
 
 
