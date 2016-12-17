@@ -75,12 +75,6 @@ def HighOrderMeshTet_SEMISTABLE(C,mesh,Decimals=10,Zerofy=True,Parallel=False,nC
 
         repoints[mesh.points.shape[0]+elem*iesize:mesh.points.shape[0]+(elem+1)*iesize] = xycoord_higher[4:,:]
 
-    # from scipy.io import loadmat
-    # dd = loadmat("/home/roman/linearP2Mesh.mat")
-    # ddd = dd['meshNew'][0,0]
-    # repoints = np.ascontiguousarray(ddd[1])
-
-
     if Parallel:
         del ParallelTuple1
 
@@ -115,17 +109,17 @@ def HighOrderMeshTet_SEMISTABLE(C,mesh,Decimals=10,Zerofy=True,Parallel=False,nC
 
     # SANITY CHECK fOR DUPLICATES
     #---------------------------------------------------------------------#
-    # last_shape = repoints.shape[0]
-    # deci = int(Decimals)-2
-    # if Decimals < 6:
-    #     deci = Decimals
-    # repoints, idx_repoints, inv_repoints = remove_duplicates_2D(repoints, decimals=deci)
-    # unique_reelements, inv_reelements = np.unique(reelements,return_inverse=True)
-    # unique_reelements = unique_reelements[inv_repoints]
-    # reelements = unique_reelements[inv_reelements]
-    # reelements = reelements.reshape(mesh.elements.shape[0],renodeperelem) 
-    # if last_shape != repoints.shape[0]:
-    #     warn('Duplicated points generated in high order mesh. Lower the "Decimals". I have fixed it for now')
+    last_shape = repoints.shape[0]
+    deci = int(Decimals)-2
+    if Decimals < 6:
+        deci = Decimals
+    repoints, idx_repoints, inv_repoints = remove_duplicates_2D(repoints, decimals=deci)
+    unique_reelements, inv_reelements = np.unique(reelements,return_inverse=True)
+    unique_reelements = unique_reelements[inv_repoints]
+    reelements = unique_reelements[inv_reelements]
+    reelements = reelements.reshape(mesh.elements.shape[0],renodeperelem) 
+    if last_shape != repoints.shape[0]:
+        warn('Duplicated points generated in high order mesh. Lower the "Decimals". I have fixed it for now')
     # #---------------------------------------------------------------------#
 
     tnodes = time() - tnodes

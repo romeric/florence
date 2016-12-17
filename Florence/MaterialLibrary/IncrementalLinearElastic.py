@@ -23,7 +23,7 @@ class IncrementalLinearElastic(Material):
 
     def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
         # RETURN STRESSES
-        return np.zeros((2,2)),np.zeros((2,2))
+        return np.zeros((self.ndim,self.ndim)),np.zeros((self.ndim,self.ndim))
 
 
     def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx):

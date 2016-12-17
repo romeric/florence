@@ -10,8 +10,8 @@ def ProblemData(*args, **kwargs):
     MainData = args[0]
     ndim = 3
 
-    material = IncrementalLinearElastic(ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
-    # material = MooneyRivlin(ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
+    # material = IncrementalLinearElastic(ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
+    material = MooneyRivlin(ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
 
     ProblemPath = PWD(__file__)
     filename = ProblemPath + '/Hollow_Cylinder.dat'
@@ -26,7 +26,6 @@ def ProblemData(*args, **kwargs):
     # hmesh = deepcopy(mesh)
     # mesh.ConvertHexesToTets()
     # mesh.GetBoundaryEdges()
-    # print mesh.elements
 
     cad_file = ProblemPath + '/Hollow_Cylinder.igs'
 
