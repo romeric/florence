@@ -2006,7 +2006,7 @@ class PostProcess(object):
 
         # GET EQUALLY-SPACED/GAUSS-LOBATTO POINTS FOR THE EDGES
         if EquallySpacedPoints is False:
-            GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0]
+            GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0].flatten()
         else:
             GaussLobattoPointsOneD = Lagrange(C,0)[-1]
 
@@ -2229,7 +2229,7 @@ class PostProcess(object):
 
         # GET EQUALLY-SPACED/GAUSS-LOBATTO POINTS FOR THE EDGES
         if EquallySpacedPoints is False:
-            GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0]
+            GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0].flatten()
         else:
             GaussLobattoPointsOneD = Lagrange(C,0)[-1]
 
@@ -2901,7 +2901,7 @@ class PostProcess(object):
         Triangles = TrianglesFunc.simplices.copy()
 
         # GET EQUALLY-SPACED/GAUSS-LOBATTO POINTS FOR THE EDGES
-        GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0]
+        GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0].flatten()
 
         BasesQuad = np.zeros((nsize_2,GaussLobattoPoints.shape[0]),dtype=np.float64)
         hpBases = Quad.LagrangeGaussLobatto

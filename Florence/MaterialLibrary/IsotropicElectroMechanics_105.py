@@ -27,8 +27,8 @@ class IsotropicElectroMechanics_105(Material):
             self.H_VoigtSize = 9
 
         # LOW LEVEL DISPATCHER
-        # self.has_low_level_dispatcher = True
-        self.has_low_level_dispatcher = False
+        self.has_low_level_dispatcher = True
+        # self.has_low_level_dispatcher = False
 
     def KineticMeasures(self,F,ElectricFieldx, elem=0):
         from Florence.MaterialLibrary.LLDispatch._IsotropicElectroMechanics_105_ import KineticMeasures
