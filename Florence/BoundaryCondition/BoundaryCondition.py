@@ -595,49 +595,22 @@ class BoundaryCondition(object):
             pmesh.edges = None
             pmesh.GetBoundaryEdgesTri()
 
-            # GET BONDAR#y CONDITION FOR 2D PROBLEM
+            # GET BOUNDARY CONDITION FOR 2D PROBLEM
             pboundary_condition = BoundaryCondition()
             pboundary_condition.SetCADProjectionParameters()
             pboundary_condition.is_dirichlet_computed = True
             pboundary_condition.nodesDBC = nodesDBC2D[:,None]
             pboundary_condition.Dirichlet = Dirichlet2D
 
-
-            psolver = deepcopy(solver)
-            # pformulation = deepcopy(formulation)
+            # GET VARIATIONAL FORMULATION FOR 2D PROBLEM
             pformulation_func = getattr(Florence.VariationalPrinciple, type(formulation).__name__,None)
             pformulation = pformulation_func(pmesh)
-            # pformulation.ndim = 2
-            # pformulation.nvar = 2
-            # pfem_solver = deepcopy(fem_solver)
+ 
+            print('Solving planar problem {}. Number of DoF is {}'.format(niter,pmesh.points.shape[0]*pformulation.nvar))
 
 
-            # COMPUTE BASES FOR TRIANGULAR ELEMENTS
-            QuadratureOpt = 3   # OPTION FOR QUADRATURE TECHNIQUE FOR TRIS AND TETS
-            norder = 2*C
-            if norder == 0:
-                # TAKE CARE OF C=0 CASE
-                norder = 1
-
-
-
-            print('Solving planar problem number', niter, 'Number of DoF is', pmesh.points.shape[0]*pformulation.nvar)
-
-            # # GET QUADRATURE
-            # quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder, mesh_type=pmesh.element_type)
-            # pfunction_space = FunctionSpace(pmesh, quadrature, p=C+1)
-
-            # norder_post = (C+1)+(C+1)
-            # post_quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder_post, mesh_type=pmesh.element_type)
-
-            # ppost_function_space = FunctionSpace(pmesh, post_quadrature, p=C+1)
-            # pfunction_spaces = (pfunction_space,ppost_function_space)           
-            
             if pmesh.points.shape[0] != Dirichlet2D.shape[0]:
                 # CALL THE FEM SOLVER FOR SOLVING THE 2D PROBLEM
-                # solution = pfem_solver.Solve(function_spaces=pfunction_spaces, 
-                # formulation=pformulation, mesh=pmesh, material=pmaterial, 
-                # boundary_condition=pboundary_condition, solver=psolver)
                 solution = fem_solver.Solve(formulation=pformulation, 
                     mesh=pmesh, material=pmaterial, 
                     boundary_condition=pboundary_condition)
@@ -662,8 +635,7 @@ class BoundaryCondition(object):
                 import matplotlib.pyplot as plt
                 plt.show()
 
-            # del pmesh, pboundary_condition, pfem_solver, pfunction_spaces
-            del pmesh, pboundary_condition#, pfem_solver
+            del pmesh, pboundary_condition
 
         gc.collect()
 
@@ -696,36 +668,19 @@ class BoundaryCondition(object):
         """
 
         # tt=time()
-        # F1 = np.copy(F)
         # # APPLY DIRICHLET BOUNDARY CONDITIONS
         # for i in range(self.columns_out.shape[0]):
             # F = F - LoadFactor*AppliedDirichlet[i]*stiffness.getcol(self.columns_out[i])
 
-        # print(np.linalg.norm((stiffness[:,self.columns_out]*AppliedDirichlet*LoadFactor)))
         # MUCH FASTER APPROACH
-        # print(np.linalg.norm(F))
-        # print(AppliedDirichlet.shape, self.columns_in.shape, self.columns_out.shape)
-        # print(AppliedDirichlet, LoadFactor)
         # F = F - (stiffness[:,self.columns_out]*AppliedDirichlet*LoadFactor)[:,None]
         # F = F - (stiffness[self.columns_in,:][:,self.columns_out]*AppliedDirichlet*LoadFactor)[:,None]
-        # print(np.linalg.norm((stiffness[self.columns_in,:][:,self.columns_out].todense())))
-        # print(stiffness[self.columns_in,:][:,self.columns_out].shape)
-        # F[self.columns_in] = F[self.columns_in] - (stiffness[self.columns_in,:][:,self.columns_out]*AppliedDirichlet*LoadFactor)[:,None]
-        # print(F[self.columns_in])
-        # from scipy.io import savemat
-        # savemat("/home/romanK")
-        # print(stiffness.todense()[302,92])
-        # print(np.linalg.norm(stiffness.todense()))
-        # print(np.linalg.norm(F[self.columns_in]), np.linalg.norm(stiffness[self.columns_in,:][:,self.columns_out].todense()), np.linalg.norm(AppliedDirichlet*LoadFactor))
-        # print(np.linalg.norm(F))
         # nnz_cols = ~np.isclose(AppliedDirichlet,0.0)
         # F = F - (stiffness[:,self.columns_out[nnz_cols]]*AppliedDirichlet[nnz_cols]*LoadFactor)[:,None]
         # F = F - self.__dirichlet_helper__(stiffness,AppliedDirichlet,self.columns_out)
         # F = F - self.__dirichlet_helper__(stiffness,AppliedDirichlet[nnz_cols],self.columns_out[nnz_cols])
-        # print((F-F1)[:100])
         # print(time()-tt)
         # exit()
-        # print(np.linalg.norm((stiffness[:,self.columns_out]*AppliedDirichlet*LoadFactor)[:,None]), np.linalg.norm(F))
 
 
         nnz_cols = ~np.isclose(AppliedDirichlet,0.0)
@@ -733,9 +688,7 @@ class BoundaryCondition(object):
 
         # GET REDUCED FORCE VECTOR
         F_b = F[self.columns_in,0]
-        # print(np.linalg.norm(stiffness.todense().flatten()))
 
-        # print int(sp.__version__.split('.')[1] )
         # FOR UMFPACK SOLVER TAKE SPECIAL CARE
         if int(sp.__version__.split('.')[1]) < 15:
             F_b_umf = np.zeros(F_b.shape[0])
