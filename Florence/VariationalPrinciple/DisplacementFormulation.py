@@ -67,7 +67,8 @@ class DisplacementFormulation(VariationalPrinciple):
         self.local_rows = np.repeat(np.arange(0,local_size),local_size,axis=0)
         self.local_columns = np.tile(np.arange(0,local_size),local_size)
         self.local_size = local_size
-        
+
+
 
     def GetElementalMatrices(self, elem, function_space, mesh, material, fem_solver, Eulerx, TotalPot):
 
@@ -171,6 +172,7 @@ class DisplacementFormulation(VariationalPrinciple):
 
             # INTEGRATE STIFFNESS
             stiffness += BDB_1*detJ[counter]
+
 
         return stiffness, tractionforce
 

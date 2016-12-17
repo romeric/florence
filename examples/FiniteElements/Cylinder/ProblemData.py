@@ -26,7 +26,7 @@ def ProblemData(*args, **kwargs):
     # hmesh = deepcopy(mesh)
     # mesh.ConvertHexesToTets()
     # mesh.GetBoundaryEdges()
-    # exit()
+    # print mesh.elements
 
     cad_file = ProblemPath + '/Hollow_Cylinder.igs'
 
@@ -35,10 +35,10 @@ def ProblemData(*args, **kwargs):
 
     boundary_condition = BoundaryCondition()
     boundary_condition.SetCADProjectionParameters(cad_file,
-        scale=scale,condition=condition,project_on_curves=True,solve_for_planar_faces=True)
+        scale=scale,condition=condition, project_on_curves=True, solve_for_planar_faces=True)
     boundary_condition.GetProjectionCriteria(mesh)
 
-    solver = LinearSolver(linear_solver="multigrid", linear_solver_type="amg",iterative_solver_tolerance=5.0e-07)
+    solver = LinearSolver(linear_solver="multigrid", linear_solver_type="amg", iterative_solver_tolerance=5.0e-07)
     formulation = DisplacementFormulation(mesh)
     # fem_solver = FEMSolver(number_of_load_increments=2,analysis_nature="linear")
     fem_solver = FEMSolver(number_of_load_increments=1,analysis_nature="linear")

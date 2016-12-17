@@ -399,7 +399,7 @@ class BoundaryCondition(object):
             nodesDBC, Dirichlet = curvilinear_mesh.GetDirichletData() 
 
             # GET ACTUAL CURVE POINTS - THIS FUNCTION IS EXPENSIVE
-            # MainData.ActualCurve = curvilinear_mesh.DiscretiseCurves(100)
+            # self.ActualCurve = curvilinear_mesh.DiscretiseCurves(100)
 
         elif formulation.ndim == 3:
 
@@ -484,6 +484,7 @@ class BoundaryCondition(object):
             planar_mesh_faces = curvilinear_mesh.GetMeshFacesOnPlanarSurfaces()
             # self.planar_mesh_faces = planar_mesh_faces
 
+
             if self.solve_for_planar_faces:
                 if planar_mesh_faces.shape[0] != 0:
                     # SOLVE A 2D PROBLEM FOR PLANAR SURFACES
@@ -534,7 +535,7 @@ class BoundaryCondition(object):
             pmesh.GetBoundaryEdgesTri()
             unique_edges = np.unique(pmesh.edges)
             Dirichlet2D = np.zeros((unique_edges.shape[0],3))
-            nodesDBC2D = np.zeros(unique_edges.shape[0])
+            nodesDBC2D = np.zeros(unique_edges.shape[0]).astype(np.int64)
             
             unique_elements, inv  = np.unique(pmesh.elements, return_inverse=True)
             aranger = np.arange(unique_elements.shape[0],dtype=np.uint64)
@@ -603,10 +604,12 @@ class BoundaryCondition(object):
 
 
             psolver = deepcopy(solver)
-            pformulation = deepcopy(formulation)
-            pformulation.ndim = 2
-            pformulation.nvar = 2
-            pfem_solver = deepcopy(fem_solver)
+            # pformulation = deepcopy(formulation)
+            pformulation_func = getattr(Florence.VariationalPrinciple, type(formulation).__name__,None)
+            pformulation = pformulation_func(pmesh)
+            # pformulation.ndim = 2
+            # pformulation.nvar = 2
+            # pfem_solver = deepcopy(fem_solver)
 
 
             # COMPUTE BASES FOR TRIANGULAR ELEMENTS
@@ -618,24 +621,27 @@ class BoundaryCondition(object):
 
 
 
-            print('Solvingq planar problem number', niter, 'Number of DoF is', pmesh.points.shape[0]*pformulation.nvar)
+            print('Solving planar problem number', niter, 'Number of DoF is', pmesh.points.shape[0]*pformulation.nvar)
 
-            # GET QUADRATURE
-            quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder, mesh_type=pmesh.element_type)
-            pfunction_space = FunctionSpace(pmesh, quadrature, p=C+1)
+            # # GET QUADRATURE
+            # quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder, mesh_type=pmesh.element_type)
+            # pfunction_space = FunctionSpace(pmesh, quadrature, p=C+1)
 
-            norder_post = (C+1)+(C+1)
-            post_quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder_post, mesh_type=pmesh.element_type)
+            # norder_post = (C+1)+(C+1)
+            # post_quadrature = QuadratureRule(optimal=QuadratureOpt, norder=norder_post, mesh_type=pmesh.element_type)
 
-            ppost_function_space = FunctionSpace(pmesh, post_quadrature, p=C+1)
-            pfunction_spaces = (pfunction_space,ppost_function_space)           
+            # ppost_function_space = FunctionSpace(pmesh, post_quadrature, p=C+1)
+            # pfunction_spaces = (pfunction_space,ppost_function_space)           
             
             if pmesh.points.shape[0] != Dirichlet2D.shape[0]:
                 # CALL THE FEM SOLVER FOR SOLVING THE 2D PROBLEM
-                    solution = pfem_solver.Solve(function_spaces=pfunction_spaces, 
-                    formulation=pformulation, mesh=pmesh, material=pmaterial, 
-                    boundary_condition=pboundary_condition, solver=psolver)
-                    TotalDisp = solution.sol
+                # solution = pfem_solver.Solve(function_spaces=pfunction_spaces, 
+                # formulation=pformulation, mesh=pmesh, material=pmaterial, 
+                # boundary_condition=pboundary_condition, solver=psolver)
+                solution = fem_solver.Solve(formulation=pformulation, 
+                    mesh=pmesh, material=pmaterial, 
+                    boundary_condition=pboundary_condition)
+                TotalDisp = solution.sol
             else:
                 # IF THERE IS NO DEGREE OF FREEDOM TO SOLVE FOR (ONE ELEMENT CASE)
                 TotalDisp = Dirichlet2D[:,:,None]
@@ -651,12 +657,13 @@ class BoundaryCondition(object):
 
             if plot:
                 post_process = PostProcess(2,2)
-                post_process.HighOrderCurvedPatchPlot(pmesh, TotalDisp, 
-                    QuantityToPlot=post_process.ScaledJacobian, InterpolationDegree=40)
+                post_process.CurvilinearPlotTri(pmesh, TotalDisp, 
+                    QuantityToPlot=solution.ScaledJacobian, interpolation_degree=40)
                 import matplotlib.pyplot as plt
                 plt.show()
 
-            del pmesh, pboundary_condition, pfem_solver, pfunction_spaces
+            # del pmesh, pboundary_condition, pfem_solver, pfunction_spaces
+            del pmesh, pboundary_condition#, pfem_solver
 
         gc.collect()
 
@@ -691,8 +698,8 @@ class BoundaryCondition(object):
         # tt=time()
         # F1 = np.copy(F)
         # # APPLY DIRICHLET BOUNDARY CONDITIONS
-        for i in range(self.columns_out.shape[0]):
-            F = F - LoadFactor*AppliedDirichlet[i]*stiffness.getcol(self.columns_out[i])
+        # for i in range(self.columns_out.shape[0]):
+            # F = F - LoadFactor*AppliedDirichlet[i]*stiffness.getcol(self.columns_out[i])
 
         # print(np.linalg.norm((stiffness[:,self.columns_out]*AppliedDirichlet*LoadFactor)))
         # MUCH FASTER APPROACH
@@ -721,12 +728,11 @@ class BoundaryCondition(object):
         # print(np.linalg.norm((stiffness[:,self.columns_out]*AppliedDirichlet*LoadFactor)[:,None]), np.linalg.norm(F))
 
 
-        # nnz_cols = ~np.isclose(AppliedDirichlet,0.0)
-        # F[self.columns_in] = F[self.columns_in] - (stiffness[self.columns_in,:][:,self.columns_out[nnz_cols]]*AppliedDirichlet[nnz_cols]*LoadFactor)[:,None]
+        nnz_cols = ~np.isclose(AppliedDirichlet,0.0)
+        F[self.columns_in] = F[self.columns_in] - (stiffness[self.columns_in,:][:,self.columns_out[nnz_cols]]*AppliedDirichlet[nnz_cols]*LoadFactor)[:,None]
 
         # GET REDUCED FORCE VECTOR
         F_b = F[self.columns_in,0]
-        # print(np.linalg.norm(F_b))
         # print(np.linalg.norm(stiffness.todense().flatten()))
 
         # print int(sp.__version__.split('.')[1] )

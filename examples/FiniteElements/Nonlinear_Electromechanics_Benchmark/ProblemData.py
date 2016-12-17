@@ -511,7 +511,8 @@ def CheckHexes(p=2):
 
 
     mesh = Mesh()
-    mesh.Circle(ncirc=40, nrad=1, radius=10, element_type="quad", center=(5,5), refinement=True)
+    # mesh.Circle(ncirc=40, nrad=1, radius=10, element_type="quad", center=(5,5), refinement=True)
+    # mesh.Reader()
     # mesh.Circle(ncirc=40, nrad=20, radius=10)
     # print mesh.points.max()
     # mesh.SimplePlot()
@@ -528,10 +529,25 @@ def CheckHexes(p=2):
     # mesh.Sphere(npoints=10)
     # print mesh.AspectRatios()
 
-    mesh.Smoothing({'aspect_ratio':1.1})
-    mesh.Smoothing({'aspect_ratio':1.1})
-    mesh.Extrude(nlong=2, length=2.2)
-    mesh.SimplePlot()
+
+    # filename = ProblemPath + '/MechanicalComponent2D_192.dat'
+    # filename = ProblemPath + '/MechanicalComponent2D_664.dat'
+    # filename = ProblemPath + '/MechanicalComponent2D_NonSmooth_321.dat'
+    # filename = ProblemPath + '/MechanicalComponent2D_NonSmooth_2672.dat'
+    # filename = ProblemPath + '/MechanicalComponent2D_NonSmooth_236.dat'
+
+    # mesh = Mesh()
+    # mesh.Reader(filename=filename, element_type="tri", reader_type="Salome")
+    # mesh.points *=1000.
+    # mesh.GetHighOrderMesh(p=p)
+
+
+    # GET ACTUAL CURVE POINTS - THIS FUNCTION IS EXPENSIVE
+    # ActualCurve = curvilinear_mesh.DiscretiseCurves(100)
+
+    # mesh.Smoothing({'aspect_ratio':1.1})
+    # mesh.Smoothing({'aspect_ratio':1.1})
+    # mesh.Extrude(nlong=2, length=2.2)
 
 
 
@@ -543,13 +559,14 @@ def CheckHexes(p=2):
     # mesh.Extrude(nlong=20)
 
     # print "wow"
-    # mesh.Arc(ncirc=70,nrad=13, element_type="quad", start_angle=3.*np.pi/4., end_angle=7.*np.pi/4.)
+    mesh.Arc(ncirc=5,nrad=13, element_type="quad", start_angle=3.*np.pi/4., end_angle=7.*np.pi/4.)
     # mesh.Arc(ncirc=7,nrad=13, element_type="quad", start_angle=2*np.pi, end_angle=np.pi/1.1)
     # mesh.Arc(ncirc=70,nrad=13, element_type="quad", start_angle=10., end_angle=3.*np.pi/4.)
-    # mesh.Circle(element_type="quad")
+    # mesh.Circle(element_type="quad", refinement=True)
     # mesh.Extrude()
     # mesh.ArcCylinder(center=(2,3,4))
     # print mesh.Bounds
+    mesh.SimplePlot()
 
     exit()
 
@@ -740,10 +757,108 @@ def GetMeshes_Hexes(p=2):
     solution.CurvilinearPlot()
 
 
+def totuple(arr):
+    """Converts numpy array to tuple"""
+    return tuple(map(tuple, np.atleast_2d(arr)))
+    # return tuple([tuple(row) for row in arr])
+
+
+def CustomMesh():
 
 
 
+    # ##########################
+    # center = np.array([30.6979,20.5])
+    # p1     = np.array([30.,20.])
+    # p2     = np.array([30.,21.])
+    # p1line = p1 - center
+    # p2line = p2 - center
+    # radius = np.linalg.norm(p1line)
+    # pp = np.array([center[0],center[1]+radius])
 
+    # y_line = pp - center
+
+    # # start_angle = np.dot(y_line,p1line)
+    # # end_angle = np.dot(y_line,p2line)
+
+    # start_angle = -np.arccos(np.linalg.norm(y_line*p1line)/np.linalg.norm(y_line)/np.linalg.norm(p1line))
+    # end_angle   = np.pi + np.arccos(np.linalg.norm(y_line*p1line)/np.linalg.norm(y_line)/np.linalg.norm(p1line))
+
+    # # start_angle = -np.pi/2. - start_angle
+    # # start_angle = -np.pi/2. - (np.pi/2 + start_angle)
+    # # print start_angle, end_angle
+
+    # points = np.array([p1,p2,center])
+    # # print points
+
+    # nradial = 8
+    # mesh = Mesh()
+    # mesh.Arc(element_type="quad", radius=radius, start_angle=start_angle, 
+    #     end_angle=end_angle, nrad=nradial, ncirc=60, center=(center[0],center[1]), refinement=True)
+
+    # mesh1 = Mesh()
+    # mesh1.Triangle(element_type="quad",npoints=nradial, c1=totuple(center), c2=totuple(p1), c3=totuple(p2))
+
+    # mesh += mesh1
+
+    # # mesh.Extrude(length=40,nlong=50)
+
+
+    # # mesh.Arc(element_type="quad", radius=radius, nrad=nradial, ncirc=1, end_angle=np.pi/4, center=(center[0],center[1]), refinement=True)
+    # # mesh.SimplePlot()
+    # mesh2 = mesh
+    # mesh2.Extrude()
+    # # exit()
+
+    # ##########################
+
+    mesh = Mesh()
+    # mesh.Square(element_type="quad")
+    mesh.Rectangle(upper_right_point=(40,1),nx=50,ny=10,element_type="quad")
+    # mesh.Circle(element_type="quad", refinement=True)
+
+    # path = GeometricPath()
+    # arc = path.ConstructArc()
+    # arc = GeometricArc(center=(-7.818181,44.22727272), start=(0.,0.), end=(30.,20.))
+    # arc.SetArcAngles(3*np.pi/4,np.pi/4)
+    # arc.SetArcAngles(-3*np.pi/4,5*np.pi/4)
+    # arc = path.ConstructArc(center=(0.,0.), start=(2.,-2.), end=(-2.,-2.))
+
+    # arc = path.ConstructArc(center=(0.,-0.), start=(-2.,-2.), end=(2.,-2.))
+    npoints=30
+    # all_points = arc.ComputeExtrusion(mesh,nlong=npoints)
+    # print mesh.element_type
+    # mesh.points = all_points
+    # print mesh.points.shape, all_points.shape
+
+    # print mesh2.element_type
+    # mesh.SimplePlot()
+
+
+
+    # line = GeometricLine(end=(0,0,50))
+    # points_3d = line.ComputeExtrusion(mesh, nlong=npoints)
+    # arc = GeometricArc()
+    # arc = GeometricArc(start=(-2,3.,-1.),end=(2,3.,1.))
+    # arc = GeometricArc(center=(0.,0.,0.), start=(-2,3.,-10.),end=(2.,3.,10.))
+    arc = GeometricArc(center=(-7.818181,44.22727272, 0.), start=(0.,0.,0.), end=(30.,20.,0.))
+    # arc = GeometricArc(center=(-7.818181, 0., 44.22727272), start=(0.,0.,0.), end=(30.,0.,20.))
+    # arc = GeometricArc(center=(0., -7.818181, 44.22727272), start=(0.,0.,0.), end=(0.,30.,20.))
+    # points_3d = arc.ComputeExtrusion(mesh, nlong=npoints)
+    # print points_3d
+
+    mesh.Extrude(nlong=npoints, path=arc)
+    # mesh.Extrude(nlong=npoints)
+    # mesh.points[:] = points_3d
+    # mesh += mesh2
+    print mesh.Bounds
+
+    # mesh.SimplePlot()
+    exit()
+
+    # print arc.arc_radius
+    # mesh.Rectangle(upper_right_point=(40,1),nx=50,ny=10, element_type="quad")
+    # mesh.SimplePlot()
 
 
 
@@ -752,7 +867,7 @@ if __name__ == "__main__":
 
     p=2
     # GetMeshes(p=p)
-    CheckHexes(p=p)
+    # CheckHexes(p=p)
     # GetMeshes_Hexes(p=p)
 
     # RunErrorNorms(p=p)
@@ -762,4 +877,5 @@ if __name__ == "__main__":
 
     from cProfile import run
     # run('CheckHexes(p=p)')
+    CustomMesh()
 

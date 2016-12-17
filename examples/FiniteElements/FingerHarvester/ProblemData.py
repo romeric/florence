@@ -1,8 +1,8 @@
 import os, sys
+from scipy.io import loadmat
 sys.path.insert(1,'/home/roman/Dropbox/florence')
 from Florence import *
 from Florence.VariationalPrinciple import *
-from scipy.io import loadmat
 from Florence.PostProcessing import PostProcess
 from Florence.Tensor import makezero
 

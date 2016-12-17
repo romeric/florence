@@ -486,7 +486,7 @@ void PostMeshBase::GetGeomEdges()
 
 void PostMeshBase::GetGeomFaces()
 {
-    //!  ITERATE OVER TopoDS_Shape AND EXTRACT ALL THE EDGES. CONVERT THE EDGES TO Geom_Surface AND
+    //!  ITERATE OVER TopoDS_Shape AND EXTRACT ALL THE FACES. CONVERT THE FACES TO Geom_Surface AND
     //! GET THEIR HANDLES
 
     if (!this->geometry_surfaces.empty() && !this->topo_faces.empty())
