@@ -188,14 +188,6 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
                     CauchyStressTensor = material.CauchyStress(StrainTensors,ElectricDisplacementx,elem,counter)
 
 
-                # if elem==0:
-                #     # np.set_printoptions(linewidth=200)
-                #     from Florence.Tensor import makezero3d, makezero
-                #     # makezero3d(F)
-                #     makezero(ElectricDisplacementx)
-                #     print(ElectricDisplacementx)
-
-
             # COMPUTE THE TANGENT STIFFNESS MATRIX
             BDB_1, t = self.ConstitutiveStiffnessIntegrand(B, SpatialGradient[counter,:,:],
                 ElectricDisplacementx, CauchyStressTensor, H_Voigt, analysis_nature=fem_solver.analysis_nature, 
@@ -209,22 +201,8 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
             # INTEGRATE STIFFNESS
             stiffness += BDB_1*detJ[counter]
+            
 
-        # K_uu = stiffness[3::nvar,3::nvar]
-        maranger = [0,1,2,4,5,6,8,9,10,12,13,14,16,17,18,20,21,22,24,25,26,28,29,30]
-        earanger = [3,7,11,15,19,23,27,31]
-        # K_up = stiffness[aranger,3::nvar]
-        # K_u = stiffness[maranger,:][:,maranger]
-        K_up = stiffness[maranger,:][:,earanger]
-        if elem==0:
-            np.set_printoptions(linewidth=200)
-        #     from Florence.Tensor import makezero3d, makezero
-        #     # makezero3d(F)
-        #     makezero3d(ElectricDisplacementx)
-        #     print(F)
-            # print stiffness[3,3]
-            # print K_up
-            # print(np.linalg.norm(K_up),np.linalg.norm(stiffness))
         return stiffness, tractionforce
 
 
