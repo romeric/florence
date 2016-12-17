@@ -323,7 +323,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         # SpatialGradient = SpatialGradient.T
         # SpatialGradient = np.ascontiguousarray(SpatialGradient.T)
         SpatialGradient = SpatialGradient.T.copy()
-        ElectricDisplacementx = ElectricDisplacementx.copy()
+        ElectricDisplacementx = ElectricDisplacementx.flatten().copy()
         # CauchyStressTensor = CauchyStressTensor.copy('c')
         # H_Voigt = H_Voigt.copy('c')
 

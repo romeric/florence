@@ -4,6 +4,7 @@ from copy import deepcopy
 from warnings import warn
 from time import time
 import numpy as np
+from numpy.linalg import norm
 import scipy as sp
 from scipy.io import loadmat, savemat
 from scipy.sparse import coo_matrix, csc_matrix, csr_matrix 
@@ -310,7 +311,6 @@ class FEMSolver(object):
                 K = self.Assemble(function_spaces[0], formulation, mesh, material, solver,
                     Eulerx, np.zeros_like(mesh.points))[0]
             print('Finished assembling the system of equations. Time elapsed is', time() - t_assembly, 'seconds')
-
             # APPLY DIRICHLET BOUNDARY CONDITIONS & GET REDUCED MATRICES 
             K_b, F_b = boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,AppliedDirichletInc)[:2]
             # SOLVE THE SYSTEM
@@ -481,8 +481,8 @@ class FEMSolver(object):
                 " Residual (abs) {0:>16.7g}".format(self.rel_norm_residual), 
                 "\t Residual (rel) {0:>16.7g}".format(self.norm_residual))
 
-            # if np.abs(self.rel_norm_residual) < Tolerance:
-            #     break
+            if np.abs(self.rel_norm_residual) < Tolerance:
+                break
 
             # UPDATE ITERATION NUMBER
             Iter +=1

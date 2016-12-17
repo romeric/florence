@@ -14,6 +14,7 @@ except ImportError:
     has_meshpy = False
 from SalomeMeshReader import ReadMesh
 from HigherOrderMeshing import *
+from GeometricPath import *
 from warnings import warn
 from copy import deepcopy
 
@@ -139,6 +140,8 @@ class Mesh(object):
             self.GetFacesTet()
         elif self.element_type == "hex":
             self.GetFacesHex()
+        elif self.element_type=="tri" or self.element_type=="quad":
+            raise ValueError("2D mesh does not have faces")
         else:
             raise ValueError('Type of element not understood')
 
@@ -148,6 +151,8 @@ class Mesh(object):
             self.GetBoundaryFacesTet()
         elif self.element_type == "hex":
             self.GetBoundaryFacesHex() 
+        elif self.element_type=="tri" or self.element_type=="quad":
+            raise ValueError("2D mesh does not have faces")
         else:
             raise ValueError('Type of element not understood')
 
@@ -157,6 +162,8 @@ class Mesh(object):
             self.GetInteriorFacesTet()
         elif self.element_type == "hex":
             self.GetInteriorFacesHex() 
+        elif self.element_type=="tri" or self.element_type=="quad":
+            raise ValueError("2D mesh does not have faces")
         else:
             raise ValueError('Type of element not understood')
 
@@ -184,6 +191,8 @@ class Mesh(object):
             return self.GetElementsFaceNumberingTet()
         elif self.element_type == "hex":
             return self.GetElementsFaceNumberingHex()
+        elif self.element_type=="tri" or self.element_type=="quad":
+            raise ValueError("2D mesh does not have faces")
         else:
             raise ValueError('Type of element not understood')
 
@@ -193,6 +202,8 @@ class Mesh(object):
             return self.GetElementsWithBoundaryFacesTet()
         elif self.element_type == "hex":
             return self.GetElementsWithBoundaryFacesHex()
+        elif self.element_type=="tri" or self.element_type=="quad":
+            raise ValueError("2D mesh does not have faces")
         else:
             raise ValueError('Type of element not understood')
 
@@ -3360,7 +3371,7 @@ class Mesh(object):
                                             If base_mesh is not provided (None), then self is 
                                             taken as base_mesh
                 length:                     length along extrusion
-                path:                       [np.ndarray] the path along which the mesh needs
+                path:                       [GeometricPath] the path along which the mesh needs
                                             to be extruded. If not None overrides length
                 nlong:                      [int] number of discretisation in the extrusion
                                             direction
@@ -3381,9 +3392,13 @@ class Mesh(object):
             self.elements is not None
             self.points is not None
             if self.element_type !="quad":
-                raise NotImplementedError("Extrusion for {} mesh not supported yet".format(mesh.element_type))
+                raise NotImplementedError("Extrusion for {} mesh not supported yet".format(self.element_type))
 
             mesh = deepcopy(self)
+
+
+        if mesh.IsHighOrder:
+            raise NotImplementedError("Extruding high order meshes is not supported yet")
 
 
         nlong = int(nlong)
@@ -3392,12 +3407,18 @@ class Mesh(object):
 
         nnode = (nlong+1)*mesh.points.shape[0]
         nnode_2D = mesh.points.shape[0]
-        node_aranger = np.linspace(0,length,nlong+1)
-        self.points = np.zeros((nnode,3),dtype=np.float64)
 
-        for i in range(nlong+1):
-            self.points[nnode_2D*i:nnode_2D*(i+1),:2] = mesh.points
-            self.points[nnode_2D*i:nnode_2D*(i+1), 2] = node_aranger[i]
+        if path is None:
+
+            node_aranger = np.linspace(0,length,nlong+1)
+            self.points = np.zeros((nnode,3),dtype=np.float64)
+
+            for i in range(nlong+1):
+                self.points[nnode_2D*i:nnode_2D*(i+1),:2] = mesh.points
+                self.points[nnode_2D*i:nnode_2D*(i+1), 2] = node_aranger[i]
+
+        elif isinstance(path,GeometricPath):
+            self.points = path.ComputeExtrusion(mesh,nlong=nlong)
 
 
         nelem= nlong*mesh.nelem
