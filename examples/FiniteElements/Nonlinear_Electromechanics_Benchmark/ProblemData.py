@@ -768,64 +768,66 @@ def CustomMesh():
 
 
     # ##########################
-    # center = np.array([30.6979,20.5])
-    # p1     = np.array([30.,20.])
-    # p2     = np.array([30.,21.])
-    # p1line = p1 - center
-    # p2line = p2 - center
-    # radius = np.linalg.norm(p1line)
-    # pp = np.array([center[0],center[1]+radius])
+    center = np.array([30.6979,20.5])
+    p1     = np.array([30.,20.])
+    p2     = np.array([30.,21.])
+    p1line = p1 - center
+    p2line = p2 - center
+    radius = np.linalg.norm(p1line)
+    pp = np.array([center[0],center[1]+radius])
 
-    # y_line = pp - center
+    y_line = pp - center
 
-    # # start_angle = np.dot(y_line,p1line)
-    # # end_angle = np.dot(y_line,p2line)
+    # start_angle = np.dot(y_line,p1line)
+    # end_angle = np.dot(y_line,p2line)
 
     # start_angle = -np.arccos(np.linalg.norm(y_line*p1line)/np.linalg.norm(y_line)/np.linalg.norm(p1line))
     # end_angle   = np.pi + np.arccos(np.linalg.norm(y_line*p1line)/np.linalg.norm(y_line)/np.linalg.norm(p1line))
 
-    # # start_angle = -np.pi/2. - start_angle
-    # # start_angle = -np.pi/2. - (np.pi/2 + start_angle)
-    # # print start_angle, end_angle
+    start_angle = -np.pi/2. - np.arccos(np.linalg.norm(y_line*p1line)/np.linalg.norm(y_line)/np.linalg.norm(p1line))
+    end_angle   = np.pi/2. + np.arccos(np.linalg.norm(y_line*p1line)/np.linalg.norm(y_line)/np.linalg.norm(p1line))
 
-    # points = np.array([p1,p2,center])
-    # # print points
+    # start_angle = -np.pi/2. - start_angle
+    # start_angle = -np.pi/2. - (np.pi/2 + start_angle)
+    # print start_angle, end_angle
 
-    # nradial = 8
-    # mesh = Mesh()
-    # mesh.Arc(element_type="quad", radius=radius, start_angle=start_angle, 
-    #     end_angle=end_angle, nrad=nradial, ncirc=60, center=(center[0],center[1]), refinement=True)
+    points = np.array([p1,p2,center])
+    # print points
 
-    # mesh1 = Mesh()
-    # mesh1.Triangle(element_type="quad",npoints=nradial, c1=totuple(center), c2=totuple(p1), c3=totuple(p2))
+    nradial = 8
+    mesh = Mesh()
+    mesh.Arc(element_type="quad", radius=radius, start_angle=start_angle, 
+        end_angle=end_angle, nrad=nradial, ncirc=60, center=(center[0],center[1]), refinement=True)
 
-    # mesh += mesh1
+    mesh1 = Mesh()
+    mesh1.Triangle(element_type="quad",npoints=nradial, c1=totuple(center), c2=totuple(p1), c3=totuple(p2))
 
-    # # mesh.Extrude(length=40,nlong=50)
+    mesh += mesh1
+
+    # mesh.Extrude(length=40,nlong=50)
 
 
-    # # mesh.Arc(element_type="quad", radius=radius, nrad=nradial, ncirc=1, end_angle=np.pi/4, center=(center[0],center[1]), refinement=True)
-    # # mesh.SimplePlot()
+    mesh3 = Mesh()
+    mesh3.Triangle(element_type="quad",npoints=nradial, c2=totuple(p1), c3=totuple(p2), c1=(29.5391,20.295298))
+    mesh += mesh3
+    mesh.SimplePlot()
     # mesh2 = mesh
     # mesh2.Extrude()
-    # # exit()
+    exit()
 
     # ##########################
 
     mesh = Mesh()
     # mesh.Square(element_type="quad")
-    mesh.Rectangle(upper_right_point=(40,1),nx=50,ny=10,element_type="quad")
+    # mesh.Rectangle(upper_right_point=(40,1),nx=50,ny=10,element_type="quad")
     # mesh.Circle(element_type="quad", refinement=True)
 
     # path = GeometricPath()
     # arc = path.ConstructArc()
     # arc = GeometricArc(center=(-7.818181,44.22727272), start=(0.,0.), end=(30.,20.))
-    # arc.SetArcAngles(3*np.pi/4,np.pi/4)
-    # arc.SetArcAngles(-3*np.pi/4,5*np.pi/4)
     # arc = path.ConstructArc(center=(0.,0.), start=(2.,-2.), end=(-2.,-2.))
 
     # arc = path.ConstructArc(center=(0.,-0.), start=(-2.,-2.), end=(2.,-2.))
-    npoints=30
     # all_points = arc.ComputeExtrusion(mesh,nlong=npoints)
     # print mesh.element_type
     # mesh.points = all_points
@@ -835,25 +837,44 @@ def CustomMesh():
     # mesh.SimplePlot()
 
 
+    # npoints=50
+    # mesh.Arc(element_type="quad", refinement=True, ncirc=12, start_angle=-np.pi/4)
+    # mesh.HollowArc(element_type="quad", ncirc=8, nrad=10, refinement=True)
+    # mesh.HollowArc(ncirc=9, nrad=17, refinement=True)
+
+    # mesh.HollowArc(ncirc=50, nrad=3, center=(-7.818181,44.22727272), 
+    #     start_angle=np.arctan(44.22727272/-7.818181), end_angle=np.arctan(-24.22727272/27.818181), 
+    #     element_type="quad", inner_radius=43.92859061, outer_radius=44.9129782)
+    mesh.HollowArc(ncirc=50, nrad=3, center=(-7.818181,44.22727272), 
+        start_angle=np.arctan(44.22727272/-7.818181), end_angle=np.arctan(-24.22727272/27.818181), 
+        element_type="quad", inner_radius=43.92859061, outer_radius=44.92859061)
+    # mesh.HollowArc(ncirc=50, nrad=3, center=(-7.818181,44.22727272), 
+    #     start_angle=np.arctan(43.22727272/-7.818181), end_angle=np.arctan(-23.22727272/27.818181), 
+    #     element_type="quad", inner_radius=43.92859061, outer_radius=44.9129782)
+    # mesh.HollowArc(ncirc=2, nrad=4)
+    # mesh.Arc(ncirc=9, nrad=37, refinement=False)
 
     # line = GeometricLine(end=(0,0,50))
     # points_3d = line.ComputeExtrusion(mesh, nlong=npoints)
     # arc = GeometricArc()
     # arc = GeometricArc(start=(-2,3.,-1.),end=(2,3.,1.))
     # arc = GeometricArc(center=(0.,0.,0.), start=(-2,3.,-10.),end=(2.,3.,10.))
-    arc = GeometricArc(center=(-7.818181,44.22727272, 0.), start=(0.,0.,0.), end=(30.,20.,0.))
+    # arc = GeometricArc(center=(-7.818181,44.22727272, 0.), start=(0.,0.,0.), end=(30.,20.,0.))
     # arc = GeometricArc(center=(-7.818181, 0., 44.22727272), start=(0.,0.,0.), end=(30.,0.,20.))
     # arc = GeometricArc(center=(0., -7.818181, 44.22727272), start=(0.,0.,0.), end=(0.,30.,20.))
     # points_3d = arc.ComputeExtrusion(mesh, nlong=npoints)
     # print points_3d
 
-    mesh.Extrude(nlong=npoints, path=arc)
-    # mesh.Extrude(nlong=npoints)
+    # mesh.Extrude(nlong=npoints, path=arc)
+    # mesh.Extrude(nlong=40, length=40)
     # mesh.points[:] = points_3d
     # mesh += mesh2
     print mesh.Bounds
+    exit()
 
-    # mesh.SimplePlot()
+
+
+    mesh.SimplePlot()
     exit()
 
     # print arc.arc_radius

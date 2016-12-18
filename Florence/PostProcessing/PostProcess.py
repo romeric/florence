@@ -7,8 +7,8 @@ from Florence.Base import JacobianError, IllConditionedError
 from Florence.Utils import PWD, RSWD
 
 # Modal Bases
-# import Core.FunctionSpace.TwoDimensional.Tri.hpModal as Tri 
-# import Core.FunctionSpace.ThreeDimensional.Tetrahedral.hpModal as Tet 
+# import Florence.FunctionSpace.TwoDimensional.Tri.hpModal as Tri 
+# import Florence.FunctionSpace.ThreeDimensional.Tet.hpModal as Tet 
 # Nodal Bases
 from Florence.FunctionSpace import Tri
 from Florence.FunctionSpace import Tet
@@ -892,7 +892,7 @@ class PostProcess(object):
             from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
             from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
             from Florence.FunctionSpace import Tri 
-            from Florence.FunctionSpace.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
+            from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
             from Florence.FunctionSpace.GetBases import GetBases
 
             
@@ -1973,7 +1973,7 @@ class PostProcess(object):
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
         from Florence.FunctionSpace import Tri 
-        from Florence.FunctionSpace.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
+        from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
         from Florence.FunctionSpace.GetBases import GetBases
 
         from copy import deepcopy
@@ -2022,7 +2022,7 @@ class PostProcess(object):
 
         smesh = deepcopy(mesh)
         smesh.elements = mesh.elements[:,:ndim+1]
-        nmax = np.max(smesh.elements)+1
+        nmax = int(np.max(smesh.elements)+1)
         smesh.points = mesh.points[:nmax,:]
         smesh.GetEdgesTri()
         edge_elements = smesh.GetElementsEdgeNumberingTri()
@@ -2190,7 +2190,7 @@ class PostProcess(object):
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
         from Florence.FunctionSpace import Tri 
-        from Florence.FunctionSpace.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
+        from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
         from Florence.FunctionSpace.GetBases import GetBases
 
         from copy import deepcopy
@@ -2752,7 +2752,7 @@ class PostProcess(object):
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
         from Florence.FunctionSpace import Tri 
-        from Florence.FunctionSpace.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
+        from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
         from Florence.FunctionSpace.GetBases import GetBases
 
         from copy import deepcopy
@@ -2880,7 +2880,7 @@ class PostProcess(object):
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
         from Florence.FunctionSpace import Quad
-        from Florence.FunctionSpace.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
+        from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
 
         from copy import deepcopy
         from scipy.spatial import Delaunay
@@ -3007,7 +3007,7 @@ class PostProcess(object):
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
         from Florence.FunctionSpace import Tri 
-        from Florence.FunctionSpace.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
+        from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
 
         from scipy.spatial import Delaunay
 
@@ -3203,7 +3203,7 @@ class PostProcess(object):
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
         from Florence.FunctionSpace import Quad
-        from Florence.FunctionSpace.OneDimensional.BasisFunctions import LagrangeGaussLobatto, Lagrange
+        from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
 
         from copy import deepcopy
         from scipy.spatial import Delaunay

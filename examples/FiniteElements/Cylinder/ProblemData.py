@@ -11,14 +11,15 @@ def ProblemData(*args, **kwargs):
     ndim = 3
 
     # material = IncrementalLinearElastic(ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
-    material = MooneyRivlin(ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
+    # material = MooneyRivlin(ndim,youngs_modulus=1.0e05,poissons_ratio=0.4)
+    material = MooneyRivlin_0(ndim, mu1=1., mu2=1.,lamb=400)
 
     ProblemPath = PWD(__file__)
     filename = ProblemPath + '/Hollow_Cylinder.dat'
 
     mesh = Mesh()
     mesh.Reader(filename=filename, element_type="tet")
-    mesh.GetHighOrderMesh(p=MainData.C+1)
+    mesh.GetHighOrderMesh(p=MainData.C+1, Decimals=7)
 
     # mesh.ConvertTetsToHexes()
     # mesh.GetHighOrderMesh(p=2)
@@ -40,7 +41,7 @@ def ProblemData(*args, **kwargs):
     solver = LinearSolver(linear_solver="multigrid", linear_solver_type="amg", iterative_solver_tolerance=5.0e-07)
     formulation = DisplacementFormulation(mesh)
     # fem_solver = FEMSolver(number_of_load_increments=2,analysis_nature="linear")
-    fem_solver = FEMSolver(number_of_load_increments=1,analysis_nature="linear")
+    fem_solver = FEMSolver(number_of_load_increments=2,analysis_nature="linear")
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
             material=material, boundary_condition=boundary_condition)

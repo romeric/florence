@@ -3,11 +3,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
-import Core.InterpolationFunctions.TwoDimensional.Tri.hpNodal as Tri
-import Core.InterpolationFunctions.ThreeDimensional.Tetrahedral.hpNodal as Tet
-import Core.InterpolationFunctions.TwoDimensional.Quad.QuadLagrangeGaussLobatto as Quad
-import Core.InterpolationFunctions.ThreeDimensional.Hexahedral.HexLagrangeGaussLobatto as Hex
-from Core.MeshGeneration.ReadSalomeMesh import ReadMesh
+import Florence.FunctionSpace.TwoDimensional.Tri.hpNodal as Tri
+import Florence.FunctionSpace.ThreeDimensional.Tet.hpNodal as Tet
+import Florence.FunctionSpace.TwoDimensional.Quad.QuadLagrangeGaussLobatto as Quad
+import Florence.FunctionSpace.ThreeDimensional.Hex.HexLagrangeGaussLobatto as Hex
+from Florence.MeshGeneration.ReadSalomeMesh import ReadMesh
 from scipy import io 
 
 
