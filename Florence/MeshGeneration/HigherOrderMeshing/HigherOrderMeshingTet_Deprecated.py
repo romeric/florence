@@ -4,15 +4,14 @@ from copy import deepcopy
 from time import time
 import multiprocessing as MP
 
-import Core.ParallelProcessing.parmap as parmap
+import Florence.ParallelProcessing.parmap as parmap
 import GetInteriorCoordinates as Gett
-import Core.InterpolationFunctions.TwoDimensional.Quad.QuadLagrangeGaussLobatto as TwoD 
-import Core.InterpolationFunctions.ThreeDimensional.Tetrahedral.hpNodal as Tet 
-from Core.QuadratureRules.FeketePointsTet import *
-from Core.Supplementary.Where import *
-from Core.Supplementary.Tensors import itemfreq_py, makezero, duplicate, get_duplicates
+from Florence.FunctionSpace import Tet 
+from Florence.QuadratureRules.FeketePointsTet import *
+from Florence.Supplementary.Where import *
+from Florence.Tensor import itemfreq, makezero, duplicate, get_duplicates
 from TwoLoopNode_Cython import TwoLoopNode_Cython
-from Core.QuadratureRules.NodeArrangement import NodeArrangementTet
+from Florence.QuadratureRules.NodeArrangement import NodeArrangementTet
 
 
 #--------------------------------------------------------------------------------------------------------------------------#

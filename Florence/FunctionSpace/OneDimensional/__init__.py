@@ -1,1 +1,1 @@
-from BasisFunctions import Lagrange, LagrangeGaussLobatto, Legendre
+from Line import Lagrange, LagrangeGaussLobatto, Legendre
