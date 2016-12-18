@@ -2,14 +2,16 @@ import numpy as np
 import os, sys, imp
 
 
-from Florence.FunctionSpace import Quad
-from Florence.FunctionSpace import Hex
 # Modal Bases
-# import Florence.InterpolationFunctions.TwoDimensional.Tri.hpModal as Tri 
-# import Florence.InterpolationFunctions.ThreeDimensional.Tetrahedral.hpModal as Tet 
+# import Florence.FunctionSpace.TwoDimensional.Tri.hpModal as Tri 
+# import Florence.FunctionSpace.ThreeDimensional.Tet.hpModal as Tet
+
 # Nodal Bases
 from Florence.FunctionSpace import Tri
 from Florence.FunctionSpace import Tet
+from Florence.FunctionSpace import Quad
+from Florence.FunctionSpace import Hex
+
 from Florence.QuadratureRules.FeketePointsTri import *
 from Florence.QuadratureRules.FeketePointsTet import *
 from Florence.QuadratureRules.GaussLobattoPoints import *

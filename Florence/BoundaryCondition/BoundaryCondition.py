@@ -523,7 +523,11 @@ class BoundaryCondition(object):
         # MAKE A SINGLE INSTANCE OF MATERIAL AND UPDATE IF NECESSARY
         import Florence.MaterialLibrary
         pmaterial_func = getattr(Florence.MaterialLibrary,material.mtype,None)
-        pmaterial = pmaterial_func(2,E=material.E,nu=material.nu,E_A=material.E_A,G_A=material.G_A)
+        # pmaterial = pmaterial_func(2,E=material.E,nu=material.nu,E_A=material.E_A,G_A=material.G_A)
+        pmaterial_dict = deepcopy(material.__dict__)
+        del pmaterial_dict['ndim'], pmaterial_dict['mtype']
+        pmaterial = pmaterial_func(2,**pmaterial_dict)
+
         
         print("The problem requires 2D analyses. Solving", number_of_planar_surfaces, "2D problems")
         for niter in range(number_of_planar_surfaces):

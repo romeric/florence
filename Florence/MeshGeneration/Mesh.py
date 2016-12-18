@@ -42,7 +42,7 @@ class Mesh(object):
        (extended here to high order elements) 
     """
 
-    def __init__(self):
+    def __init__(self, element_type=None):
         super(Mesh, self).__init__()
         # self.faces and self.edges ARE BOUNDARY FACES 
         # AND BOUNDARY EDGES, RESPECTIVELY
@@ -56,7 +56,7 @@ class Mesh(object):
         self.points = None
         self.edges = None
         self.faces = None
-        self.element_type = None
+        self.element_type = element_type
 
         self.face_to_element = None
         self.edge_to_element = None
@@ -2037,10 +2037,10 @@ class Mesh(object):
             self.ReadHighOrderMesh(MainData.MeshInfo.FileName.split(".")[0],MainData.C,MainData.MeshInfo.MeshType)
         elif self.reader_type is 'ReadHDF5':
             self.ReadHDF5(filename)
-        elif self.reader_type is 'UniformHollowCircle':
-            # self.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=4,ncirc=12)
-            # self.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=7,ncirc=7) # isotropic
-            self.UniformHollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=False,nrad=7,ncirc=7)
+        elif self.reader_type is 'HollowCircle':
+            # self.HollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=4,ncirc=12)
+            # self.HollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=7,ncirc=7) # isotropic
+            self.HollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=False,nrad=7,ncirc=7)
         elif self.reader_type is 'Sphere':
             # mesh.Sphere()
             self.Sphere(points=10)
@@ -2774,7 +2774,8 @@ class Mesh(object):
         if npoints < 0:
             npoints = 0 
 
-        opoints = np.array([c1,c2,c3])
+        c1 = np.array(c1); c2 = np.array(c2); c3 = np.array(c3)
+        opoints = np.vstack((c1,c2,c3))
         oelements = np.array([[0,1,2]])
 
         if element_type=="tri":
@@ -2814,9 +2815,9 @@ class Mesh(object):
         """Creates a structured quad/tri mesh on an arc
 
             input:
-                angle:                      [float] angle should be given in radian and is 
-                                            measured between the final geometric edge and positive
-                                            x-axis in anticlock-wise fashion
+                start_angle/end_angle:      [float] starting and ending angles in radians. Angle
+                                            is measured anti-clockwise. Default start angle is 
+                                            positive x-axis
                 refinement_level:           [int] number of elements that each element has to be 
                                             splitted to 
 
@@ -2829,14 +2830,6 @@ class Mesh(object):
             raise ValueError("The starting angle should be either in range [-2{},0] or [0,2{}]".format(PI,PI))
         if np.abs(end_angle) + EPS > 2.*np.pi:
             raise ValueError("The end angle should be either in range [-2{},0] or [0,2{}]".format(PI,PI))
-
-        # if np.sign(start_angle) == -1:
-        #     start_angle += 2*np.pi
-        # if np.sign(end_angle) == -1:
-        #     end_angle += 2*np.pi
-
-        # if start_angle > end_angle:
-        #     start_angle, end_angle = end_angle, start_angle
 
 
         if np.sign(start_angle) == np.sign(end_angle):
@@ -2863,14 +2856,10 @@ class Mesh(object):
 
         radii = radius
 
-        # APPLY TRANSFORMATION
-        # start_angle = start_angle + np.pi/2/
-        # end_angle = -(end_angle - np.pi/2)
-
         radius = np.linspace(0,radii,nrad+1)[1:] 
         t = np.linspace(start_angle,end_angle,ncirc+1) 
-        x = radius[0]*np.sin(t)[::-1]
-        y = radius[0]*np.cos(t)[::-1]
+        x = radius[0]*np.cos(t)[::-1]
+        y = radius[0]*np.sin(t)[::-1]
 
         points = np.zeros((ncirc+2,2),dtype=np.float64)
         points[0,:] = [0.,0.]
@@ -2884,8 +2873,8 @@ class Mesh(object):
 
         for i in range(1,nrad):
             t = np.linspace(start_angle,end_angle,ncirc+1)
-            x = radius[i]*np.sin(t)[::-1] 
-            y = radius[i]*np.cos(t)[::-1]
+            x = radius[i]*np.cos(t)[::-1] 
+            y = radius[i]*np.sin(t)[::-1]
             points = np.vstack((points,np.array([x,y]).T))
 
         points[:,0] += center[0]
@@ -2921,8 +2910,6 @@ class Mesh(object):
             sys.stdout = open(os.devnull, "w")
             self.ConvertQuadsToTris()
             sys.stdout = sys.__stdout__            
-
-
 
 
 
@@ -3015,9 +3002,97 @@ class Mesh(object):
             sys.stdout = sys.__stdout__
 
 
+    def HollowArc(self, center=(0.,0.), inner_radius=1., outer_radius=2., nrad=16, ncirc=40, 
+        start_angle=0., end_angle=np.pi/2., element_type="tri", refinement=False, refinement_level=2):
+        """Creates a structured quad/tri mesh on a hollow arc (i.e. two arc bounded by straight lines)
+
+            input:
+                start_angle/end_angle:      [float] starting and ending angles in radians. Angle
+                                            is measured anti-clockwise. Default start angle is 
+                                            positive x-axis
+                refinement_level:           [int] number of elements that each element has to be 
+                                            splitted to 
+
+        """
+
+        # CHECK FOR ANGLE
+        PI = u"\u03C0".encode('utf-8').strip()
+        EPS = np.finfo(np.float64).eps
+        if np.abs(start_angle) + EPS > 2.*np.pi:
+            raise ValueError("The starting angle should be either in range [-2{},0] or [0,2{}]".format(PI,PI))
+        if np.abs(end_angle) + EPS > 2.*np.pi:
+            raise ValueError("The end angle should be either in range [-2{},0] or [0,2{}]".format(PI,PI))
 
 
-    def UniformHollowCircle(self,center=(0,0),inner_radius=1.0,outer_radius=2.,element_type='tri',isotropic=True,nrad=5,ncirc=10):
+        if np.sign(start_angle) == np.sign(end_angle):
+            total_angle = np.abs(end_angle - start_angle)
+            if np.isclose(total_angle,0.) or total_angle > 2.*np.pi:
+                self.Circle(center=center, radius=radius, nrad=nrad, ncirc=ncirc, element_type=element_type)
+                return 
+
+        if not isinstance(center,tuple):
+            raise ValueError("The center of the arc should be given in a tuple with two elements (x,y)")
+
+        self.__reset__()
+
+        if refinement:
+            ndivider = refinement_level
+        else:
+            ndivider = 1
+
+        ncirc = int(ncirc/ndivider)
+        nrad = int(nrad/ndivider) + 2
+
+        if ncirc % 2 != 0 or ncirc < 2:
+            ncirc = (ncirc // 2)*2 + 2 
+
+
+        radius = np.linspace(inner_radius,outer_radius,nrad)
+        points = np.zeros((1,2),dtype=np.float64)
+        for i in range(nrad):
+            t = np.linspace(start_angle,end_angle,ncirc+1)
+            x = radius[i]*np.cos(t)[::-1] 
+            y = radius[i]*np.sin(t)[::-1]
+            points = np.vstack((points,np.array([x,y]).T))
+        points = points[ncirc+2:,:]
+
+        points[:,0] += center[0]
+        points[:,1] += center[1]
+        makezero(points)
+        self.points = points
+
+        self.elements = np.zeros((1,4),dtype=np.int64)
+        elements = np.zeros((ncirc,4),dtype=np.int64) 
+        for i in range(nrad-2):
+            aranger = np.arange(ncirc*i,ncirc*(i+1))
+            elements[:,0] = aranger + i
+            elements[:,1] = aranger + i + ncirc + 1
+            elements[:,2] = aranger + i + ncirc + 2
+            elements[:,3] = aranger + i + 1
+
+            self.elements = np.concatenate((self.elements,elements),axis=0)
+        self.elements = self.elements[1:,:]
+
+
+        self.element_type = "quad"
+        self.nelem = self.elements.shape[0]
+        self.nnode = self.points.shape[0]
+        self.GetBoundaryEdges()
+
+        if refinement:
+            mesh = self.QuadrilateralProjection(points=self.points[self.elements[0,:],:], npoints=ndivider)
+            for i in range(1,self.nelem):
+                mesh += self.QuadrilateralProjection(points=self.points[self.elements[i,:],:], npoints=ndivider)
+            self.__update__(mesh)
+
+
+        if element_type == "tri":
+            sys.stdout = open(os.devnull, "w")
+            self.ConvertQuadsToTris()
+            sys.stdout = sys.__stdout__ 
+
+
+    def HollowCircle(self,center=(0,0),inner_radius=1.0,outer_radius=2.,element_type='tri',isotropic=True,nrad=5,ncirc=10):
         """Generates isotropic and anisotropic tri and quad meshes on a hollow circle.
 
         input:
@@ -3354,7 +3429,7 @@ class Mesh(object):
             nlong = 1
 
         mesh = Mesh()
-        mesh.UniformHollowCircle(center=(center[0],center[1]), inner_radius=inner_radius, 
+        mesh.HollowCircle(center=(center[0],center[1]), inner_radius=inner_radius, 
             outer_radius=outer_radius, element_type="quad", 
             isotropic=isotropic, nrad=nrad, ncirc=ncirc)
  
@@ -3382,15 +3457,11 @@ class Mesh(object):
             if not isinstance(mesh,Mesh):
                 raise ValueError("Base mesh has to be instance of class Florence.Mesh")
             else:
-                mesh.element_type is not None
-                mesh.elements is not None
-                mesh.points is not None
+                mesh.__do_essential_memebers_exist__()
                 if mesh.element_type !="quad":
                     raise NotImplementedError("Extrusion for {} mesh not supported yet".format(mesh.element_type))
         else:
-            self.element_type is not None
-            self.elements is not None
-            self.points is not None
+            self.__do_essential_memebers_exist__()
             if self.element_type !="quad":
                 raise NotImplementedError("Extrusion for {} mesh not supported yet".format(self.element_type))
 
@@ -3408,17 +3479,21 @@ class Mesh(object):
         nnode = (nlong+1)*mesh.points.shape[0]
         nnode_2D = mesh.points.shape[0]
 
+        self.points = np.zeros((nnode,3),dtype=np.float64)
+
         if path is None:
 
             node_aranger = np.linspace(0,length,nlong+1)
-            self.points = np.zeros((nnode,3),dtype=np.float64)
 
             for i in range(nlong+1):
                 self.points[nnode_2D*i:nnode_2D*(i+1),:2] = mesh.points
                 self.points[nnode_2D*i:nnode_2D*(i+1), 2] = node_aranger[i]
 
         elif isinstance(path,GeometricPath):
-            self.points = path.ComputeExtrusion(mesh,nlong=nlong)
+            points = path.ComputeExtrusion(nlong=nlong)
+            for i in range(nlong+1):
+                self.points[nnode_2D*i:nnode_2D*(i+1),:2] = mesh.points + points[i,:2]
+                self.points[nnode_2D*i:nnode_2D*(i+1), 2] = points[i,2]
 
 
         nelem= nlong*mesh.nelem
@@ -3516,12 +3591,8 @@ class Mesh(object):
             NOTE: It is the responsibility of the user to ensure that meshes are conforming
         """
         
-        assert self.element_type is not None
-        assert mesh.element_type is not None
-        assert self.elements is not None
-        assert mesh.elements is not None
-        assert self.points is not None
-        assert mesh.points is not None
+        self.__do_essential_memebers_exist__()
+        mesh.__do_essential_memebers_exist__()
 
         if mesh.element_type != self.element_type:
             raise NotImplementedError('Merging two diffferent meshes is not possible yet')
@@ -3560,11 +3631,13 @@ class Mesh(object):
         self.elements = melements
         self.nelem = melements.shape[0]
         self.points = mpoints
-        if element_type == "tet":
-            self.GetBoundaryFacesTet()
-            self.GetBoundaryEdgesTet()
-        elif element_type == "tri":
-            self.GetBoundaryEdgesTri()
+
+        ndim = self.InferSpatialDimension()
+        if ndim==3:
+            self.GetBoundaryFaces()
+            self.GetBoundaryEdges()
+        elif ndim==2:
+            self.GetBoundaryEdges()
 
 
     def Smoothing(self, criteria={'aspect_ratio':3}):
@@ -3574,7 +3647,10 @@ class Mesh(object):
                 criteria                [dict] criteria can be either None, {'volume':<number>}, 
                                         {'area':<number>} or {'aspect_ratio':<number>}. The
                                         number implies that all elements above that number 
-                                        should be refined. Default is {'aspect_ratio':4} 
+                                        should be refined. Default is {'aspect_ratio':4}
+
+            Note that this is a simple mesh smoothing, and does not perform rigorous check, in
+            particular it does not guarantee mesh conformality
         """
 
         self.__do_essential_memebers_exist__()
@@ -3810,10 +3886,59 @@ class Mesh(object):
         return self.points.shape[1]
 
 
-    def InferElementType(self, element_type=None):
+    def InferNumberOfNodesPerElement(self, p=None, element_type=None):
+        """Infers number of nodes per element. If p and element_type are 
+            not None then returns the number of nodes required for the given
+            element type with the given polynomial degree"""
 
-        if element_type is None and self.element_type is None:
-            raise ValueError('Element type not understood')
+        if p is not None and element_type is not None:
+            if element_type=="tri":
+                return int((p+1)*(p+2)/2)
+            if element_type=="quad":
+                return int((p+1)**2)
+            if element_type=="tet":
+                return int((p+1)*(p+2)*(p+3)/6)
+            elif element_type=="hex":
+                return int((p+1)**3)
+            else:
+                raise ValueError("Did not understand element type")    
+                
+        assert self.elements.shape[0] is not None
+        return self.elements.shape[1]
+
+
+    def InferElementType(self):
+
+        if self.element_type is not None:
+            return self.element_type
+
+        assert self.elements is not None
+        assert self.points is not None
+
+        p = self.InferPolynomialDegree() + 1
+        ndim = InferSpatialDimension()
+        nodeperelem = self.InferNumberOfNodesPerElement()
+
+        if ndim==3:
+            if nodeperelem in [int((i+1)*(i+2)*(i+3)/6) for i in range(1,50)]:
+                self.element_type = "tet"
+            elif nodeperelem in [int((i+1)**3) for i in range(1,50)]:
+                self.element_type = "hex"
+            else:
+                raise ValueError("Element type not understood")
+        elif ndim==2:
+            if nodeperelem in [int((i+1)*(i+2)/2) for i in range(1,100)]:
+                self.element_type = "tri"
+            elif nodeperelem in [int((i+1)**2) for i in range(1,100)]:
+                self.element_type = "quad"
+            else:
+                raise ValueError("Element type not understood")
+        elif ndim==1:
+            element_type = "line"
+        else:
+            raise ValueError("Element type not understood")
+
+        return self.element_type
 
 
     def GetLinearMesh(self):
@@ -4127,7 +4252,9 @@ class Mesh(object):
 
             A hexahedron can be split into 5 or 6 tetrahedrons and there are
             many possible configuration without the edges/faces intersecting each
-            other. This method splits a hex into 6 tets
+            other. This method splits a hex into 6 tets. 
+
+            Note that in principle, this splitting produces non-conformal meshes
         """
 
         self.__do_memebers_exist__()
@@ -4168,8 +4295,8 @@ class Mesh(object):
         print "Hexahedral to tetrahedral mesh conversion took", time() - tconv, "seconds"
 
 
-
-    def BoundaryEdgesfromPhysicalParametrisation(self,points,facets,mesh_points,mesh_edges):
+    @staticmethod
+    def BoundaryEdgesfromPhysicalParametrisation(points, facets, mesh_points, mesh_edges):
         """Given a 2D planar mesh (mesh_points,mesh_edges) and the parametrisation of the physical geometry (points and facets)
             finds boundary edges
 
