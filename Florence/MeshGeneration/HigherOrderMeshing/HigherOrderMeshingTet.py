@@ -48,6 +48,10 @@ def HighOrderMeshTet_SEMISTABLE(C,mesh,Decimals=10,Zerofy=True,Parallel=False,nC
     repoints = np.zeros((mesh.points.shape[0]+iesize*mesh.elements.shape[0],3),dtype=np.float64)
     repoints[:mesh.points.shape[0],:]=mesh.points
 
+    # from scipy.io import loadmat
+    # dd = loadmat("/home/roman/linearP2Mesh.mat")
+    # ddd = dd['meshNew'][0,0]
+    # repoints = np.ascontiguousarray(ddd[1])
 
     telements = time()
 
@@ -90,13 +94,10 @@ def HighOrderMeshTet_SEMISTABLE(C,mesh,Decimals=10,Zerofy=True,Parallel=False,nC
     makezero(rounded_repoints)
     rounded_repoints = np.round(rounded_repoints,decimals=Decimals)
 
-    # flattened_repoints = np.ascontiguousarray(rounded_repoints).view(np.dtype((np.void, 
-        # rounded_repoints.dtype.itemsize * rounded_repoints.shape[1])))
-    # _, idx_repoints, inv_repoints = np.unique(flattened_repoints,return_index=True,return_inverse=True)
     _, idx_repoints, inv_repoints = unique2d(rounded_repoints,order=False,
         consider_sort=False,return_index=True,return_inverse=True)
     # idx_repoints.sort()
-    del rounded_repoints#, flattened_repoints
+    del rounded_repoints
 
     idx_repoints = np.concatenate((np.arange(nnode_linear),idx_repoints+nnode_linear))
     repoints = repoints[idx_repoints,:]
@@ -109,6 +110,7 @@ def HighOrderMeshTet_SEMISTABLE(C,mesh,Decimals=10,Zerofy=True,Parallel=False,nC
 
     # SANITY CHECK fOR DUPLICATES
     #---------------------------------------------------------------------#
+    # NOTE THAT THIS REMAPS THE ELEMENT CONNECTIVITY FOR THE WHOLE MESH
     last_shape = repoints.shape[0]
     deci = int(Decimals)-2
     if Decimals < 6:
@@ -120,13 +122,13 @@ def HighOrderMeshTet_SEMISTABLE(C,mesh,Decimals=10,Zerofy=True,Parallel=False,nC
     reelements = reelements.reshape(mesh.elements.shape[0],renodeperelem) 
     if last_shape != repoints.shape[0]:
         warn('Duplicated points generated in high order mesh. Lower the "Decimals". I have fixed it for now')
-    # #---------------------------------------------------------------------#
+    #---------------------------------------------------------------------#
 
     tnodes = time() - tnodes
     #------------------------------------------------------------------------------------------
 
 
-    # USE ALTERNATIVE APPROACH TO GET MESH EDGES AND FACES
+    # GET MESH EDGES AND FACES
     reedges = np.zeros((mesh.edges.shape[0],C+2))
     fsize = int((C+2.)*(C+3.)/2.)
     refaces = np.zeros((mesh.faces.shape[0],fsize),dtype=mesh.faces.dtype)

@@ -57,6 +57,10 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
             else:
                 post_quadrature = None
 
+            self.quadrature_rules = (quadrature,post_quadrature)
+        else:
+            self.quadrature_rules = quadrature_rules
+
         if function_spaces == None and self.function_spaces == None:
 
             # CREATE FUNCTIONAL SPACES
@@ -66,11 +70,13 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
             else:
                 post_function_space = None
 
-        self.quadrature_rules = (quadrature,post_quadrature)
-        self.function_spaces = (function_space,post_function_space)
+            self.function_spaces = (function_space,post_function_space)
+        else:
+            self.function_spaces = function_spaces
 
 
-        local_size = function_space.Bases.shape[0]*self.nvar
+        # local_size = function_space.Bases.shape[0]*self.nvar
+        local_size = self.function_spaces[0].Bases.shape[0]*self.nvar
         self.local_rows = np.repeat(np.arange(0,local_size),local_size,axis=0)
         self.local_columns = np.tile(np.arange(0,local_size),local_size)
         self.local_size = local_size
