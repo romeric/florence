@@ -224,12 +224,14 @@ class Mesh(object):
                         np.max(self.points[:,2])]])
             makezero(bounds)
             return bounds
-        else:
+        elif self.points.shape[1] == 2:
             bounds = np.array([[np.min(self.points[:,0]),
                         np.min(self.points[:,1])],
                         [np.max(self.points[:,0]),
                         np.max(self.points[:,1])]])
             makezero(bounds)
+        else:
+            raise ValueError("Invalid dimension for mesh coordinates")
             return bounds
 
 
@@ -2429,7 +2431,7 @@ class Mesh(object):
 
             Xplot = tmesh.points
             Tplot = tmesh.elements
-            color=(197/255.,241/255.,197/255.)
+            # color=(197/255.,241/255.,197/255.)
             point_line_width = .002
 
             trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot,
@@ -2439,7 +2441,7 @@ class Mesh(object):
                 tmesh.y_edges.T.copy().flatten(), tmesh.z_edges.T.copy().flatten())
             src.mlab_source.dataset.lines = tmesh.connections
             lines = mlab.pipeline.stripper(src)
-            h_edges = mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
+            h_edges = mlab.pipeline.surface(lines, color = (0,0,0), line_width=3)
 
             # mlab.view(azimuth=135, elevation=45, distance=7, focalpoint=None,
                 # roll=0, reset_roll=True, figure=None)
@@ -3512,6 +3514,9 @@ class Mesh(object):
         self.GetBoundaryFaces()
         self.GetBoundaryEdges()
 
+        if isinstance(path,GeometricPath):
+            return points
+
 
 
 
@@ -3710,7 +3715,8 @@ class Mesh(object):
             if not isinstance(c1,tuple) or not isinstance(c2,tuple) or not isinstance(c3,tuple):
                 raise ValueError("coordinates should be given in tuples of two elements (x,y)")
             else:
-                opoints = np.array([c1,c2,c3])
+                c1 = np.array(c1); c2 = np.array(c2); c3 = np.array(c3)
+                opoints = np.vstack((c1,c2,c3))
         else:
             opoints = points
 
@@ -3760,7 +3766,8 @@ class Mesh(object):
             if not isinstance(c1,tuple) or not isinstance(c2,tuple) or not isinstance(c3,tuple) or not isinstance(c4,tuple):
                 raise ValueError("coordinates should be given in tuples of two elements (x,y)")
             else:
-                opoints = np.array([c1,c2,c3,c4])
+                c1 = np.array(c1); c2 = np.array(c2); c3 = np.array(c3); c4 = np.array(c4)
+                opoints = np.vstack((c1,c2,c3,c4))
         else:
             opoints = points
 
@@ -3771,15 +3778,15 @@ class Mesh(object):
 
         npoints = int(npoints)
         if npoints ==0: npoints=1
-        nsize = int((npoints+2)**2)
 
         if equally_spaced:
             points = EquallySpacedPoints(ndim=3,C=npoints-1)
+            hpBases = QuadES.Lagrange
         else:
             points = GaussLobattoPointsQuad(npoints-1)
+            hpBases = Quad.LagrangeGaussLobatto
 
         BasesQuad = np.zeros((4,points.shape[0]),dtype=np.float64)
-        hpBases = QuadES.Lagrange
         for i in range(points.shape[0]):
             BasesQuad[:,i] = hpBases(0,points[i,0],points[i,1],arrange=1)[:,0]
 
@@ -3810,6 +3817,74 @@ class Mesh(object):
 
 
 
+    @staticmethod
+    def HexahedralProjection(c1=(0,0,0), c2=(2,0,0), c3=(2,2,0), c4=(0,2,0.), 
+        c5=(0,1.8,3.), c6=(0.2,0,3.), c7=(2,0.2,3.), c8=(1.8,2,3.),  points=None, npoints=6, equally_spaced=True):
+        """Builds an instance of Mesh on a hexahedral region through FE interpolation
+            given eight vertices of the quadrilateral region. Alternatively you can specify 
+            the vertices as numpy array of 8x2. 
+
+            This is a static immutable function, in that it does not modify self 
+        """
+
+        if points is None or not isinstance(points,np.ndarray):
+            if not isinstance(c1,tuple) or not isinstance(c2,tuple) or not isinstance(c3,tuple) or not isinstance(c4,tuple) or \
+                not isinstance(c5,tuple) or not isinstance(c6,tuple) or not isinstance(c7,tuple) or not isinstance(c8,tuple):
+                raise ValueError("coordinates should be given in tuples of two elements (x,y,z)")
+            else:
+                c1 = np.array(c1); c2 = np.array(c2); c3 = np.array(c3); c4 = np.array(c4)
+                c5 = np.array(c5); c6 = np.array(c6); c7 = np.array(c7); c8 = np.array(c8)
+                opoints = np.vstack((c1,c2,c3,c4,c5,c6,c7,c8))
+        else:
+            opoints = points
+
+        from Florence.FunctionSpace import Hex, HexES
+        from Florence.QuadratureRules.GaussLobattoPoints import GaussLobattoPointsHex
+        from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints
+        from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
+
+        npoints = int(npoints)
+        if npoints ==0: npoints=1
+
+        if equally_spaced:
+            points = EquallySpacedPoints(ndim=4,C=npoints-1)
+            hpBases = HexES.Lagrange
+        else:
+            points = GaussLobattoPointsHex(npoints-1)
+            hpBases = Hex.LagrangeGaussLobatto
+
+        BasesHex = np.zeros((8,points.shape[0]),dtype=np.float64)
+        for i in range(points.shape[0]):
+            BasesHex[:,i] = hpBases(0,points[i,0],points[i,1],points[i,2],arrange=1)[:,0]
+
+        node_arranger = NodeArrangementHex(npoints-1)[2]
+
+        hmesh = Mesh()
+        hmesh.Cube(lower_left_rear_point=(-1.,-1.,-1.), side_length=2, n=npoints, element_type="hex")
+        hexes = hmesh.elements
+
+
+        nnode = hmesh.nnode
+        nelem = hmesh.nelem
+        nsize = int((npoints+1)**3)
+
+        mesh = Mesh()
+        mesh.points = np.dot(BasesHex.T, opoints)
+
+        _, inv = np.unique(hexes,return_inverse=True)
+        sorter = np.argsort(node_arranger)
+        mesh.elements = sorter[inv].reshape(hexes.shape)
+
+        mesh.element_type="hex"
+        mesh.nelem = mesh.elements.shape[0]
+        mesh.nnode = mesh.points.shape[0]
+        mesh.GetBoundaryFaces()
+        mesh.GetBoundaryEdges()
+
+        return mesh
+
+
+
 
     def ChangeType(self):
         """Change mesh data type from signed to unsigned"""
@@ -3832,6 +3907,8 @@ class Mesh(object):
         assert self.elements is not None
 
         if self.degree is not None:
+            if isinstance(self.degree,np.ndarray):
+                self.degree = np.asscalar(self.degree)
             i = self.degree
             if self.element_type == "tet" and (i+1)*(i+2)*(i+3)/6==self.elements.shape[1]:
                 return self.degree

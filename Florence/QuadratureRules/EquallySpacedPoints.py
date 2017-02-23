@@ -1,29 +1,33 @@
 import numpy as np
-from .NodeArrangement import NodeArrangementQuad
+from .NodeArrangement import NodeArrangementQuad, NodeArrangementHex
 
 def EquallySpacedPoints(ndim=2,C=0):
     """Produce equally spaced points in (ndim-1) dimension, for the boundaries
         of the mesh. For ndim=2 this is the region enclosed in [-1,1] range
 
         input:              
-        C:                  [int] order of polynomial interpolation
-        Returns:            [ndarray] array of equally spaced points 
+            C:                  [int] order of polynomial interpolation
+            Returns:            [ndarray] array of equally spaced points 
 
         """
 
-    assert ndim<4
-
     if ndim==2:
-        # FOR 2-DIMENSION
+        # 1D: FOR 2-DIMENSION BOUNDARIES
         return np.linspace(-1,1,C+2)[:,None]
     elif ndim==3:
+        # 2D: FOR 3-DIMENSION BOUNDARIES
         xs = np.linspace(-1,1,C+2)[:,None]
         x,y = np.meshgrid(xs,xs)
         points = np.concatenate((x.flatten()[:,None],y.flatten()[:,None]),axis=1)
         node_aranger = NodeArrangementQuad(C)[2]
         return points[node_aranger,:]
-        return
-
+    elif ndim==4:
+        # 3D: ACTUAL 3D ELEMENTS
+        xs = np.linspace(-1,1,C+2)[:,None]
+        x,y,z = np.meshgrid(xs,xs,xs)
+        points = np.concatenate((y.T.flatten()[:,None],x.T.flatten()[:,None],z.T.flatten()[:,None]),axis=1)
+        node_aranger = NodeArrangementHex(C)[2]
+        return points[node_aranger,:]
 
 def EquallySpacedPointsTri(C):
     

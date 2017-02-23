@@ -79,7 +79,7 @@ def GaussQuadratureLogarithmic(N,a=0,b=1):
         zl = np.array([0.11200880616697618296, 0.71853931903038444096]) 
         wl = np.array([0.60227690811873810276, 0.28146068096961555933])
     else:
-        warnings.warn("Gauss points and weights are available for selected degree N: 5, 10, 20")
+        warnings.warn("Gauss points and weights are available for selected degree N: 2, 5, 10, 20")
         wl=zl=0
 
     return (zl,wl)
