@@ -26,6 +26,12 @@ jacobi_path = os.path.join(_pwd_,"Florence/FunctionSpace/JacobiPolynomials/")
 p = subprocess.Popen('cd '+jacobi_path+' && ./Makefile.sh', shell=True)
 p.wait()
 
+# BUILD BJORCK PEREYRA BASES
+print("Building Bjorck Pereyra bases")
+bp_path = os.path.join(_pwd_,"Florence/FunctionSpace/OneDimensional/_OneD")
+p = subprocess.Popen('cd '+bp_path+' && ./Makefile.sh', shell=True)
+p.wait()
+
 # BUILD MATERIAL MODELS
 print("Building material models")
 material_path = os.path.join(_pwd_,"Florence/MaterialLibrary/LLDispatch/")

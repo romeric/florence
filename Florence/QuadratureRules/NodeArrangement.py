@@ -510,9 +510,7 @@ def NodeArrangementHex(C):
         1717]])
 
     else:
-
         # THIS IS A FLOATING POINT BASED ALGORITHM
-        # from Florence.Tensor import in2d
         from .NumericIntegrator import GaussLobattoQuadrature
         xs = GaussLobattoQuadrature(C+2)[0]
         x,y,z = np.meshgrid(xs,xs,xs)
@@ -531,33 +529,54 @@ def NodeArrangementHex(C):
         facer3d = np.zeros((facer.shape[0],3))
         facer3d[:,:2] = facer
 
+        from Florence.Tensor import in2d_unsorted
+
         # facer3d[:,2] = xs[0]
-        # face_0 = all_nodes[in2d(fekete,facer3d)]
+        # face_0 = __FaceArrangementHex__(fekete,facer3d)
         # facer3d[:,2] = xs[-1]
-        # face_1 = all_nodes[in2d(fekete,facer3d)]
+        # face_1 = __FaceArrangementHex__(fekete,facer3d)
+
+        # # CONSTANT Y PLANES
+        # facer3d = np.zeros((facer.shape[0],3))
+        # facer3d[:,[0,2]] = facer
+
+        # facer3d[:,1] = xs[0]
+        # face_2 = __FaceArrangementHex__(fekete,facer3d)
+        # facer3d[:,1] = xs[-1]
+        # face_3 = __FaceArrangementHex__(fekete,facer3d)
+
+        # # CONSTANT X PLANES
+        # facer3d = np.zeros((facer.shape[0],3))
+        # facer3d[:,[1,2]] = facer
+
+        # facer3d[:,0] = xs[0]
+        # face_4 = __FaceArrangementHex__(fekete,facer3d)
+        # facer3d[:,0] = xs[-1]
+        # face_5 = __FaceArrangementHex__(fekete,facer3d)
+
 
         facer3d[:,2] = xs[0]
-        face_0 = __FaceArrangementHex__(fekete,facer3d)
+        face_0 = in2d_unsorted(fekete,facer3d)
         facer3d[:,2] = xs[-1]
-        face_1 = __FaceArrangementHex__(fekete,facer3d)
+        face_1 = in2d_unsorted(fekete,facer3d)
 
         # CONSTANT Y PLANES
         facer3d = np.zeros((facer.shape[0],3))
         facer3d[:,[0,2]] = facer
 
         facer3d[:,1] = xs[0]
-        face_2 = __FaceArrangementHex__(fekete,facer3d)
+        face_2 = in2d_unsorted(fekete,facer3d)
         facer3d[:,1] = xs[-1]
-        face_3 = __FaceArrangementHex__(fekete,facer3d)
+        face_3 = in2d_unsorted(fekete,facer3d)
 
         # CONSTANT X PLANES
         facer3d = np.zeros((facer.shape[0],3))
         facer3d[:,[1,2]] = facer
 
         facer3d[:,0] = xs[0]
-        face_4 = __FaceArrangementHex__(fekete,facer3d)
+        face_4 = in2d_unsorted(fekete,facer3d)
         facer3d[:,0] = xs[-1]
-        face_5 = __FaceArrangementHex__(fekete,facer3d)
+        face_5 = in2d_unsorted(fekete,facer3d)
 
         # SANITY CHECK
         assert len(face_0) == len(face_1)
@@ -567,23 +586,32 @@ def NodeArrangementHex(C):
         assert len(face_4) == len(face_5)
 
         face_numbering = np.array([face_0,face_1,face_2,face_3,face_4,face_5])
-        print "face_numbering = ", repr(face_numbering)
+        # print("face_numbering = ", repr(face_numbering))
 
     return face_numbering, traversed_edge_numbering_tet, element_numbering
 
 
 
+# def __FaceArrangementHex__(fekete,facer3d):
+#     face = []
+#     for i in range(facer3d.shape[0]):
+#         current_row = np.repeat(facer3d[i,:][None,:],fekete.shape[0],axis=0)
+#         x = current_row - fekete
+#         for j in range(fekete.shape[0]):
+#             if np.isclose(x[j,0],0.0) and np.isclose(x[j,1],0.0) and np.isclose(x[j,2],0.0):
+#                 face.append(j)
 
-def __FaceArrangementHex__(fekete,facer3d):
-    face = []
-    for i in range(facer3d.shape[0]):
-        current_row = np.repeat(facer3d[i,:][None,:],fekete.shape[0],axis=0)
-        x = current_row - fekete
-        for j in range(fekete.shape[0]):
-            if np.isclose(x[j,0],0.0) and np.isclose(x[j,1],0.0) and np.isclose(x[j,2],0.0):
-                face.append(j)
+#     return face
 
-    return face
+# def __FaceArrangementHex__(arr1,arr2):
+#     t = (arr1[:, None] == arr2).all(-1)
+#     return np.where(t.any(0), t.argmax(0), np.nan).astype(np.int64)
+
+def __FaceArrangementHex__(arr1,arr2):
+    t = np.isclose(arr1[:, None], arr2).all(-1)
+    return np.where(t.any(0), t.argmax(0), np.nan).astype(np.int64)
+
+
 
 
 @lru_cache(maxsize=None)

@@ -89,7 +89,7 @@ def ProblemData(p=2):
     # print mesh.Bounds
     # exit()
 
-    # material = NeoHookean_2(ndim,youngs_modulus=10.0, poissons_ratio=0.3)
+    material = NeoHookean_2(ndim,youngs_modulus=10.0, poissons_ratio=0.3)
     # material = IsotropicElectroMechanics_0(ndim,youngs_modulus=10.0, poissons_ratio=0.3, eps_1=10.0)
     # material = IsotropicElectroMechanics_3(ndim,youngs_modulus=1e8, poissons_ratio=0.3, eps_1=1e-6, eps_2=1e-6)
     # material = IsotropicElectroMechanics_100(ndim,youngs_modulus=10.0, poissons_ratio=0.3, eps_1=10.0)
@@ -104,7 +104,7 @@ def ProblemData(p=2):
     mesh.points /=1000.
     e0 = 8.85*1e-12
     # material = Piezoelectric_100(ndim,mu1=1.0,mu2=0.5, mu3=0.5, lamb=495.0, eps_1=4.68*e0, eps_2=1e6*e0, eps_3=1e3*e0)
-    material = Piezoelectric_100(ndim,mu1=1e9,mu2=0.5e9, mu3=1.5e9, lamb=495e6, eps_1=4.68*e0, eps_2=1e6*e0, eps_3=1e3*e0)
+    # material = Piezoelectric_100(ndim,mu1=1e9,mu2=0.5e9, mu3=1.5e9, lamb=495e6, eps_1=4.68*e0, eps_2=1e6*e0, eps_3=1e3*e0)
     # material = Piezoelectric_100(ndim,mu1=1.,mu2=0.005, mu3=0.5, lamb=.495, eps_1=1.e-1*e0, eps_2=1e-1*e0, eps_3=1e2*e0)
 
 
@@ -122,31 +122,49 @@ def ProblemData(p=2):
     material.anisotropic_orientations[:,:] = np.array([a,b,c])/np.sqrt(a**2+b**2+c**2)
 
 
-
+    print mesh.Bounds
+    # post_process = PostProcess(3,3)
+    # post_process.CurvilinearPlotTet(mesh,np.zeros_like(mesh.points),plot_edges=False)
+    # exit()
 
     boundary_condition = BoundaryCondition()
 
     def DirichletFunc(mesh):
         boundary_data = np.zeros((mesh.points.shape[0],material.nvar))+np.NAN
 
-        # Energy harvesting
+        # Mechanical
         Y_0 = np.isclose(mesh.points[:,0],0.)
         boundary_data[Y_0,0] = 0.
         boundary_data[Y_0,1] = 0.
         boundary_data[Y_0,2] = 0.
-        # boundary_data[Y_0,3] = 0.
+
+        Y_0 = np.isclose(mesh.points[:,0],0.1)
+        # boundary_data[Y_0,0] = 0.00
+        # boundary_data[Y_0,1] = 0.
+        boundary_data[Y_0,2] = -0.06
+        
+
+
+        # ###
+        # # Energy harvesting
+        # Y_0 = np.isclose(mesh.points[:,0],0.)
+        # boundary_data[Y_0,0] = 0.
+        # boundary_data[Y_0,1] = 0.
+        # boundary_data[Y_0,2] = 0.
+        # # boundary_data[Y_0,3] = 0.
+
+        # Y_1 = np.isclose(mesh.points[:,2],0.)
+        # boundary_data[Y_1,3] = 0.0
+
+        # Y_2 = np.isclose(mesh.points[:,2],6.)
+        # boundary_data[Y_1,3] = 3e-4
+        # ####
 
         # Y_0 = np.isclose(mesh.points[:,0],100.)
         # boundary_data[Y_0,0] = 0.
         # boundary_data[Y_0,1] = 0.
         # boundary_data[Y_0,2] = 0.
         # # boundary_data[Y_0,3] = 0.
-
-        Y_1 = np.isclose(mesh.points[:,2],0.)
-        boundary_data[Y_1,3] = 0.0
-
-        Y_2 = np.isclose(mesh.points[:,2],6.)
-        boundary_data[Y_1,3] = 3e-4
 
         # Y_1 = np.isclose(mesh.points[:,0],100.)
         # boundary_data[Y_1,0] = 50.0
@@ -179,10 +197,10 @@ def ProblemData(p=2):
 
     boundary_condition.SetDirichletCriteria(DirichletFunc, mesh)
 
-    formulation = DisplacementPotentialFormulation(mesh)
-    # formulation = DisplacementFormulation(mesh)
+    # formulation = DisplacementPotentialFormulation(mesh)
+    formulation = DisplacementFormulation(mesh)
 
-    fem_solver = FEMSolver(number_of_load_increments=2, newton_raphson_tolerance=1e-02, parallelise=True)
+    fem_solver = FEMSolver(number_of_load_increments=1, newton_raphson_tolerance=1e-02, parallelise=True)
     # fem_solver = StaggeredFEMSolver(number_of_load_increments=6,analysis_type="static",
     #     analysis_nature="nonlinear",parallelise=False, compute_mesh_qualities=False,
     #     newton_raphson_tolerance=1.0e-02)
@@ -196,8 +214,9 @@ def ProblemData(p=2):
     # print repr(sol)
     # print sol
     # solution.Plot(configuration="deformed",quantity=0, plot_points=True)
+    solution.Plot(configuration="deformed",quantity=0, plot_points=False,colorbar=False, point_radius=0.0005, plot_edges=False)
     # solution.Animate(configuration="deformed",quantity=0, plot_points=True, save=True, filename="/home/roman/ZPlots/PP.mp4")
-    solution.WriteVTK(quantity=0, filename="/home/roman/ZPlots/NN.vtu")
+    # solution.WriteVTK(quantity=0, filename="/home/roman/ZPlots/NN.vtu")
     # solution.Plot(configuration="original",quantity=35)
 
 
@@ -207,7 +226,7 @@ def ProblemData(p=2):
 
 if __name__ == "__main__":
     class MainData():
-        C = 1
+        C = 2
     # GetMeshes(MainData)
 
     ProblemData(p=MainData.C+1)

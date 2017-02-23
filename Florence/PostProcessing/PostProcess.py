@@ -1021,8 +1021,9 @@ class PostProcess(object):
                 trimesh_h = mlab.triangular_mesh(mesh.points[:,0], mesh.points[:,1], mesh.points[:,2], 
                     mesh.faces, scalars=self.sol[:,0,-1])
 
-                mlab.triangular_mesh(mesh.points[:,0], mesh.points[:,1], mesh.points[:,2], 
-                    mesh.faces, representation="mesh", color=(0,0,0))
+                if plot_edges:
+                    mlab.triangular_mesh(mesh.points[:,0], mesh.points[:,1], mesh.points[:,2], 
+                        mesh.faces, representation="wireframe", color=(0,0,0)) # representation="mesh"
 
                 if plot_points:
                     mlab.points3d(self.mesh.points[:,0],self.mesh.points[:,1],
@@ -1033,9 +1034,10 @@ class PostProcess(object):
                     mesh.points[:,1]+sol[:,1,-1], mesh.points[:,2]+sol[:,2,-1], 
                     mesh.faces, scalars=sol[:,quantity,-1])
 
-                mlab.triangular_mesh(mesh.points[:,0]+sol[:,0,-1], 
-                    mesh.points[:,1]+sol[:,1,-1], mesh.points[:,2]+sol[:,2,-1], 
-                    mesh.faces, representation="mesh", color=(0,0,0))
+                if plot_edges:
+                    mlab.triangular_mesh(mesh.points[:,0]+sol[:,0,-1], 
+                        mesh.points[:,1]+sol[:,1,-1], mesh.points[:,2]+sol[:,2,-1], 
+                        mesh.faces, representation="wireframe", color=(0,0,0))
 
                 if plot_points:
                     mlab.points3d(self.mesh.points[:,0]+self.sol[:,0,-1],self.mesh.points[:,1]+self.sol[:,1,-1],
@@ -2231,7 +2233,7 @@ class PostProcess(object):
         if EquallySpacedPoints is False:
             GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0].flatten()
         else:
-            GaussLobattoPointsOneD = Lagrange(C,0)[-1]
+            GaussLobattoPointsOneD = Lagrange(C,0)[-1].flatten()
 
         BasesTri = np.zeros((nsize_2,FeketePointsTri.shape[0]),dtype=np.float64)
         hpBases = Tri.hpNodal.hpBases
@@ -2341,6 +2343,7 @@ class PostProcess(object):
             src.mlab_source.dataset.lines = connections
             lines = mlab.pipeline.stripper(src)
             h_edges = mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
+            # h_edges = mlab.pipeline.surface(lines, color = (0,0,0), line_width=1)
             # mlab.pipeline.surface(lines, color = (0.72,0.72,0.72), line_width=2)
 
             # OLDER VERSION
@@ -2384,7 +2387,8 @@ class PostProcess(object):
 
 
             if color is None:
-                color=(197/255.,241/255.,197/255.)
+                # color=(197/255.,241/255.,197/255.)
+                color=( 0, 150/255., 187/255.)
 
             # PLOT SURFACES (CURVED ELEMENTS)
             if QuantityToPlot is None:
@@ -2630,9 +2634,10 @@ class PostProcess(object):
         faces_to_plot = tmesh.faces_to_plot        
         svpoints = tmesh.svpoints
 
-        Uplot = tmesh.quantity
-        Xplot = tmesh.points
-        Tplot = tmesh.elements
+        if plot_surfaces:
+            Uplot = tmesh.quantity
+            Xplot = tmesh.points
+            Tplot = tmesh.elements
         # bases_1 = tmesh.bases_1
         # bases_2 = tmesh.bases_2
 
@@ -2673,9 +2678,9 @@ class PostProcess(object):
                     line_width=point_line_width,colormap='summer')
 
 
-            # PLOT POINTS ON CURVED MESH
-            if plot_points:
-                h_points = mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=point_radius)
+        # PLOT POINTS ON CURVED MESH
+        if plot_points:
+            h_points = mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=point_radius)
 
             figure.scene.disable_render = False
 
@@ -2777,9 +2782,9 @@ class PostProcess(object):
 
         # GET EQUALLY-SPACED/GAUSS-LOBATTO POINTS FOR THE EDGES
         if EquallySpacedPoints is False:
-            GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0]
+            GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0].flatten()
         else:
-            GaussLobattoPointsOneD = Lagrange(C,0)[-1]
+            GaussLobattoPointsOneD = Lagrange(C,0)[-1].flatten()
 
         BasesTri = np.zeros((nsize_2,FeketePointsTri.shape[0]),dtype=np.float64)
         hpBases = Tri.hpNodal.hpBases
@@ -3031,9 +3036,9 @@ class PostProcess(object):
 
         # GET EQUALLY-SPACED/GAUSS-LOBATTO POINTS FOR THE EDGES
         if EquallySpacedPoints is False:
-            GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0]
+            GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0].flatten()
         else:
-            GaussLobattoPointsOneD = Lagrange(C,0)[-1]
+            GaussLobattoPointsOneD = Lagrange(C,0)[-1].flatten()
 
         BasesTri = np.zeros((nsize_2,FeketePointsTri.shape[0]),dtype=np.float64)
         hpBases = Tri.hpNodal.hpBases
@@ -3353,16 +3358,17 @@ class PostProcess(object):
         # THIS IS NOT A FLORENCE MESH COMPLIANT MESH
         tmesh = Mesh()
         tmesh.element_type = "tri"
-        tmesh.elements = Tplot
-        tmesh.points = Xplot
-        tmesh.quantity = Uplot
-        tmesh.nelem = nelem
-        tmesh.nnode = nnode
+        if plot_surfaces:
+            tmesh.elements = Tplot
+            tmesh.points = Xplot
+            tmesh.quantity = Uplot
+            tmesh.nelem = nelem
+            tmesh.nnode = nnode
+            tmesh.nface = nface
         tmesh.nsize = nsize
         tmesh.bases_1 = BasesOneD
         tmesh.bases_2 = BasesQuad.T
 
-        tmesh.nface = nface
         tmesh.smesh = smesh
         tmesh.faces_to_plot = faces_to_plot
         tmesh.svpoints = svpoints

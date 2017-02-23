@@ -8,7 +8,7 @@ from Florence.VariationalPrinciple import *
 
 def ProblemData(*args, **kwargs):
 
-    p = 4
+    p = 1
     ndim = 2
 
     # material = LinearModel(MainData.ndim,youngs_modulus=1.0e01,poissons_ratio=0.4)
@@ -22,7 +22,7 @@ def ProblemData(*args, **kwargs):
         # E_A=2.5e05,G_A=5.0e04)
 
 
-    ProblemPath = os.path.dirname(os.path.realpath(__file__))
+    ProblemPath = PWD(__file__)
     # Reader = 'UniformHollowCircle'
 
     # FileName = ProblemPath + '/TwoArcs_18.dat'
@@ -31,7 +31,7 @@ def ProblemData(*args, **kwargs):
 
     # FileName = ProblemPath + '/Mech2D_Seg0_350.dat'
     # FileName = ProblemPath + '/Mech2D_Seg0_70.dat'
-    FileName = ProblemPath + '/Mech2D_Seg2_6.dat'
+    # FileName = ProblemPath + '/Mech2D_Seg2_6.dat'
     # FileName = ProblemPath + '/Mesh_LeftPartWithCircle_56.dat'
     # FileName = ProblemPath + '/LeftCircle_12.dat'
     # FileName = ProblemPath + '/Leaf_2.dat'
@@ -39,12 +39,18 @@ def ProblemData(*args, **kwargs):
     # FileName = ProblemPath + '/Two_Hole2.dat'
     # FileName = ProblemPath + '/Two_Hole3.dat'
     # FileName = ProblemPath + '/5_Hole.dat'
-    # FileName = ProblemPath + '/5_Hole_273.dat'
+    FileName = ProblemPath + '/5_Hole_273.dat'
 
     mesh = Mesh()
     mesh.Reader(filename=FileName,element_type="tri")
     mesh.points *=1000.
-    mesh.GetHighOrderMesh(p=p)
+    # mesh.GetHighOrderMesh(p=p)
+    mesh.points = mesh.points.copy('c')
+    # mesh.SimplePlot()
+    # print mesh.elements
+    # print mesh.points[42,:]
+    # print mesh.Bounds
+    # exit()
 
     # np.savetxt("/home/roman/Dropbox/Fastor/benchmark/benchmark_academic/kernel_quadrature/meshes/mesh_2d_points_p"+str(p)+".dat",
     #     mesh.points,fmt="%9.5f")
@@ -76,12 +82,29 @@ def ProblemData(*args, **kwargs):
     scale = 1.
     condition = 1e10 
         
+
+    def DirichletFunc(mesh):
+        boundary_data = np.zeros((mesh.points.shape[0],material.nvar))+np.NAN
+
+
+        Y_0 = np.isclose(mesh.points[:,1],-8000.)
+        boundary_data[Y_0,0] = 0.
+        boundary_data[Y_0,1] = 0.
+
+        Y_0 = np.isclose(mesh.points[:,1],8000.)
+        boundary_data[Y_0,0] = 0.
+        boundary_data[Y_0,1] = -1000.
+
+        return boundary_data
+
     boundary_condition = BoundaryCondition()
-    boundary_condition.SetCADProjectionParameters(cad_file, scale=scale,condition=condition)
-    boundary_condition.GetProjectionCriteria(mesh)
+    # boundary_condition.SetCADProjectionParameters(cad_file, scale=scale,condition=condition)
+    # boundary_condition.GetProjectionCriteria(mesh)
+
+    boundary_condition.SetDirichletCriteria(DirichletFunc,mesh)
 
     formulation = DisplacementFormulation(mesh)
-    fem_solver = FEMSolver(analysis_nature="nonlinear",number_of_load_increments = 10,)
+    fem_solver = FEMSolver(analysis_nature="nonlinear",number_of_load_increments = 1)
 
     # print formulation.function_spaces[0].Jm.flatten().shape
     # print formulation.function_spaces[0].AllGauss.shape
@@ -95,7 +118,8 @@ def ProblemData(*args, **kwargs):
         material=material, boundary_condition=boundary_condition)
 
     # solution.CurvilinearPlot(QuantityToPlot=fem_solver.ScaledJacobian, plot_points=True)
-    solution.CurvilinearPlot(save=True,filename="/home/roman/Dropbox/2d_mesh.eps")
+    # solution.CurvilinearPlot(save=True,filename="/home/roman/Dropbox/2d_mesh.eps")
+    # solution.Plot()
 
 if __name__ == "__main__":
     ProblemData()

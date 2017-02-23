@@ -3,7 +3,7 @@ from warnings import warn
 from Numeric import tovoigt, tovoigt3
 
 
-__all__ = ['unique2d','in2d','intersect2d','shuffle_along_axis',
+__all__ = ['unique2d','in2d','intersect2d','in2d_unsorted','shuffle_along_axis',
 'itemfreq','SecondTensor2Vector','Voigt','UnVoigt', 'remove_duplicates_2D']
 
 
@@ -185,6 +185,94 @@ def intersect2d(arr1, arr2,axis=1, consider_sort=False):
     arr2_view = np.ascontiguousarray(arr2).view(np.dtype((np.void, arr2.dtype.itemsize * arr2.shape[1])))
     intersected = np.intersect1d(arr1_view, arr2_view)
     return intersected.view(arr1.dtype).reshape(-1, arr1.shape[1])
+
+
+
+def in2d_unsorted(arr1, arr2, axis=1, consider_sort=False):
+    """Find the elements in arr1 which are also in arr2 and sort them as they
+        appear in arr2
+
+        In principle this is similar to in2d but with two major differences:
+        1. in2d is based on numpy.in1d which finds elements in arr1 which are 
+            also in arr2 but returns a non-sorted boolean array, 
+            for instance consider:
+
+            >>> a=np.array([7, 3, 1, 5, 6, 2, 0, 4])
+            >>> b=np.array([5, 1, 0, 4])
+            >>> in1d(a,b)
+            array([False, False,  True,  True, False, False,  True,  True], dtype=bool)
+
+            whose nonzeros would give the indices as
+            >>> _.nonzero()
+            (array([2, 3, 6, 7]),)
+
+            This is correct but the indices are sorted in the sense that the zeroth
+            element in b (b[0]=5) is the 3rd element of a (a[3]=5) and the first element in 
+            b (b[1]=1) is the 2nd element in a (a[2]=1). This method preserves this ordering
+            and returns 
+
+            (array([3, 2, 6, 7]),)
+
+            instead
+
+        2. This function returns indices instead of boolean array
+
+        NOTE: arr_1 and arr_2 should have the same dtype
+
+        input:
+
+            arr1:
+                2D array
+
+            arr2:
+                2D array
+
+            axis:
+                Axis along which to take unique values, for instance unique 
+                rows (axis=1) or unique columns (axis=0). The axis ordering 
+                should not be confused with the usual numpy style axis argument, 
+                as here since unique values of a 1D type array is finally computed, 
+                numpy style axis hence becomes meaningless. Hence, in this context 
+                axis=0 implies finding unique rows of an array (lumping the rows) and 
+                axis=1 implies finding unique columns of an array (lumping the columns)
+
+            consider_sort:
+                Does permutation of the values in row/column matter. Two rows/columns
+                can have the same elements but with different arrangements. If consider_sort 
+                is True then those rows/columns would be considered equal
+
+        returns:
+
+            1D index array of elements common elements as they appear in arr2
+
+            """
+
+    assert arr1.dtype == arr2.dtype
+
+    if axis == 0:
+        arr1 = np.copy(arr1.T,order='C')
+        arr2 = np.copy(arr2.T,order='C')
+    
+    if consider_sort is True:
+        sorter_arr1 = np.argsort(arr1)
+        arr1 = arr1[np.arange(arr1.shape[0])[:,None],sorter_arr1]
+        sorter_arr2 = np.argsort(arr2)
+        arr2 = arr2[np.arange(arr2.shape[0])[:,None],sorter_arr2]
+
+
+    arr = np.vstack((arr1,arr2))
+    _, inv = unique2d(arr, return_inverse=True)
+
+    size1 = arr1.shape[0]
+    size2 = arr2.shape[0]
+
+    arr3 = inv[:size1]
+    arr4 = inv[-size2:]
+
+    sorter = np.argsort(arr3)
+    idx = sorter[arr3.searchsorted(arr4, sorter=sorter)]
+
+    return idx
 
 
 def shuffle_along_axis(A,B,axis=1,consider_sort=False):

@@ -1070,10 +1070,12 @@ def ProblemData_Rogelio3(*args, **kwargs):
 
     mesh = Mesh()
     mesh.Parallelepiped(element_type="hex",upper_right_front_point=(1,1,10),nx=2,ny=2,nz=10)
+    # mesh.Parallelepiped(element_type="hex",upper_right_front_point=(1,1,10),nx=4,ny=4,nz=400)
     # mesh.Cube(element_type="hex",n=1)
     # mesh.SimplePlot()
     # mesh.WriteHDF5("/home/roman/Dropbox/OneCube.mat")
     # print mesh.Bounds
+    # print mesh.nelem
     # exit()
 
 
@@ -1130,7 +1132,23 @@ def ProblemData_Rogelio3(*args, **kwargs):
     # print solution.sol[:,:,-1]
     # solution.Animate(configuration="deformed",quantity=1)
 
+# /home/roman/PROFILER_CPP/templight_binary/metashell/3rd/templight/build/bin
+# cmake -DCUSTOM_BOOST_PATH:PATH=/media/MATLAB/boost_1_62_0 -DBOOST_LIBRARYDIR=/media/MATLAB/boost_1_62_0/stage/lib ..
+# /usr/bin/time -v clang++ -fconstexpr-steps=16000000 compilation_pair_contraction.cpp -O3 -mavx -std=c++11 -I../../../ -DNINE_INDEX -DCONTRACT_OPT=0
 
+# BinaryMatMulOp<BinaryMatMulOp<UnaryInvOp<BinaryMatMulOp<Tensor<T, ndim, nodeperelem>, Tensor<T, nodeperelem, ndim> > >, 
+    # Tensor<T, ndim, nodeperelem> >, Tensor<T, nodeperelem, ndim> >
+
+
+
+# /media/MATLAB/intel_2017/bin/icpc benchmark_quadrature_scalar.cpp -O3 -xHost -std=c++11 -I../ -I../../../../ -DVECTORISED_CLASSIC_OVERLOADS -DPOLYDEG=1
+# /media/MATLAB/intel_2017/bin/icpc benchmark_quadrature_scalar.cpp -O3 -mavx -std=c++11 -I../ -I../../../../ -DVECTORISED_CLASSIC_OVERLOADS -DPOLYDEG=1
+# BinaryMatMulOp<BinaryMatMulOp<Tensor<T, I, J>, Tensor<T, J, K> >, BinarySubOp<BinaryAddOp<Tensor<double, 2ul>, Tensor<double, 2ul>, 1ul>, double, 1ul> >
+
+# BinaryMatMulOp<BinaryMatMulOp<Tensor<T, 2, 2>, Tensor<double, 2, 2> >,
+#       Fastor::BinaryAddOp<Fastor::Tensor<double, 2>, Fastor::Tensor<double, 2>, 1> >
+
+# git rev-list --all | while read rev; do git ls-tree -lr $rev | cut -c54- | grep -v '^ '; done | sort -u | sort -k 2 > /tmp/files.txt
 
 
 
@@ -1152,3 +1170,14 @@ if __name__ == "__main__":
     # run('ProblemData_2()')
     # run('ProblemData_22()')
     # run('ProblemData_4()')
+
+
+ #[[  1.13797860e-13  -3.60150509e-09]
+ # [ -6.07680573e-13  -2.53353449e-11]
+ # [  7.11162206e-03   2.85507799e-02]
+ # [  2.50000000e-02   4.99999985e-02]]
+
+# Mech
+# [[ -2.12371894e+00  -3.79030902e+00]
+#  [  4.54570825e-11   1.18958177e-11]
+#  [ -2.72262514e-01  -8.98698882e-01]]

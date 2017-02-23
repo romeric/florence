@@ -1,4 +1,5 @@
 import numpy as np
+from LineBP import LagrangeBP_, LagrangeGaussLobattoBP_
 try:
     from functools import lru_cache
 except ImportError:
@@ -78,9 +79,9 @@ def Lagrange(C,xi):
 #     A = 1.0*np.zeros((n,n))
 #     A[:,0] = np.ones(n)
 
-    # for i in range(1,n):
-    #     for j in range(0,n):
-    #         A[j,i] = pow(eps[j],i)
+#     for i in range(1,n):
+#         for j in range(0,n):
+#             A[j,i] = pow(eps[j],i)
 
 
 #     N = 1.0*np.zeros(n); dN=1.0*np.zeros(n)
@@ -133,7 +134,7 @@ def LagrangeGaussLobatto(C,xi):
 
 
 
-
+@lru_cache(maxsize=None)
 def Legendre(C,xi):
     # For Linear Basis Generating Legendre Polynomials is Not Required
     if C==0:
@@ -172,3 +173,64 @@ def Legendre(C,xi):
 
 
     return (N,dN)
+
+
+
+
+
+
+
+
+
+
+# def LagrangeBP(C,xi):
+
+#     n = C+2
+#     eps = np.linspace(-1.,1.,n)
+
+#     N = 1.0*np.zeros(n); dN=1.0*np.zeros(n)
+
+#     for ishape in range(0,n):
+
+#         d = np.zeros(n)
+#         d[ishape] = 1.
+        
+#         # Find the Newton Divided Difference
+#         for k in range(0,n):
+#             for j in reversed(range(k+1,n)):
+#                 d[j] = (d[j]-d[j-1])/(eps[j]-eps[j-k-1])
+
+#         # Convert to Monomials
+#         for k in reversed(range(0,n)):
+#             for j in range(k,n-1):
+#                 d[j] -= eps[k]*d[j+1]
+
+        
+#         # Build shape functions 
+#         for incr in range(0,n):
+#             N[ishape] += d[incr]*pow(xi,incr)
+
+#         # Build derivative of shape functions
+#         for incr in range(0,n-1):
+#             dN[ishape] += (incr+1)*d[incr+1]*pow(xi,incr)
+
+
+#     return (N,dN,eps) 
+
+
+
+# Bjorck Peryra Bases
+# This technique blows faster than Vandermonde matrices specially
+# beyond C=24
+
+@lru_cache(maxsize=None)
+def LagrangeBP(C,xi):
+    return LagrangeBP_(C,xi)
+
+@lru_cache(maxsize=None)
+def LagrangeGaussLobattoBP(C,xi):
+    
+    n = C+2
+    from Florence.QuadratureRules import GaussLobattoQuadrature
+    eps = GaussLobattoQuadrature(n)[0][:,0].copy()
+    return LagrangeGaussLobattoBP_(C,xi,eps)

@@ -28,7 +28,7 @@ function make_material() {
 
     $CXX -std=c++11 -fPIC -shared -pthread -O3 -fwrapv -fno-strict-aliasing -finline-functions \
     -ffast-math -mfpmath=sse -funroll-loops -mavx -DNPY_NO_DEPRECATED_API -DNBOUNDSCHECK \
-    $1.cpp -o $1.so -I$PYINC -l$PYLIB -lm -I$NUMPY -I$FASTOR -Wno-everything
+    $1.cpp -o $1.so -I$PYINC -l$PYLIB -lm -I$NUMPY -I$FASTOR -Wno-everything -DCONTRACT_OPT=2
 
     mv $1.so ../$1.so
     cd ..

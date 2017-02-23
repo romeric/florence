@@ -258,8 +258,8 @@ class BoundaryCondition(object):
                     nodesDBC, Dirichlet = self.nodesDBC, self.Dirichlet
 
                 # if mesh.points.shape[1]==3:
-                #     np.savetxt("/home/roman/DirichletF05_P2_06Dec.dat", Dirichlet,fmt="%9.9f")
-                #     np.savetxt("/home/roman/nodesDBCF05_P2_06Dec.dat", nodesDBC,fmt="%i")
+                    # np.savetxt("/home/roman/DirichletF05_P2_06Dec.dat", Dirichlet,fmt="%9.9f")
+                    # np.savetxt("/home/roman/nodesDBCF05_P2_06Dec.dat", nodesDBC,fmt="%i")
 
                 # Dirichlet = np.loadtxt("/home/roman/DirichletF05_P2_04Dec.dat", dtype=np.float64)
                 # nodesDBC = np.loadtxt("/home/roman/nodesDBCF05_P2_04Dec.dat", dtype=np.int64)
@@ -270,6 +270,9 @@ class BoundaryCondition(object):
                  np.tile(np.arange(nvar)[None,:],nodesDBC.shape[0]).reshape(nodesDBC.shape[0],formulation.ndim)).ravel()
                 self.applied_dirichlet = Dirichlet.ravel()
 
+                # np.savetxt("/home/roman/applied_dirichlet.dat", self.applied_dirichlet,fmt="%9.9f")
+                # np.savetxt("/home/roman/columns_out.dat", self.columns_out,fmt="%i")
+                # # exit()
 
 
                 # FIX THE DOF IN THE REST OF THE BOUNDARY
