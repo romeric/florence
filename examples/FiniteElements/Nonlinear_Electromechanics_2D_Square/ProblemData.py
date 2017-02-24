@@ -58,7 +58,7 @@ def ProblemData(*args, **kwargs):
         Y_1 = np.isclose(mesh.points[:,1],10.)
         # boundary_data[Y_1,0] = 0
         # boundary_data[Y_1,1] = -6
-        boundary_data[Y_1,1] = 3
+        boundary_data[Y_1,1] = 9
         # boundary_data[Y_1,2] = 1
 
         # boundary_data[2::material.nvar,:] = 0
@@ -113,6 +113,7 @@ def ProblemData(*args, **kwargs):
     # mesh.points += solution.sol[:,:,-1]
     # mesh.WriteHDF5(ProblemPath+"/Mesh_Plate_Hole_Curved_P"+str(p)+".mat")
     # solution.CurvilinearPlot()
+    solution.Plot(configuration="deformed",quantity=20)
 
     print np.linalg.norm(solution.sol)
 
@@ -1070,7 +1071,7 @@ def ProblemData_Rogelio3(*args, **kwargs):
 
     mesh = Mesh()
     mesh.Parallelepiped(element_type="hex",upper_right_front_point=(1,1,10),nx=2,ny=2,nz=10)
-    # mesh.Parallelepiped(element_type="hex",upper_right_front_point=(1,1,10),nx=4,ny=4,nz=400)
+    # mesh.Parallelepiped(element_type="hex",upper_right_front_point=(1,1,10),nx=8,ny=8,nz=128)
     # mesh.Cube(element_type="hex",n=1)
     # mesh.SimplePlot()
     # mesh.WriteHDF5("/home/roman/Dropbox/OneCube.mat")
@@ -1120,7 +1121,7 @@ def ProblemData_Rogelio3(*args, **kwargs):
 
     formulation = DisplacementPotentialFormulation(mesh)
 
-    fem_solver = FEMSolver(number_of_load_increments=2, analysis_nature="nonlinear",parallelise=False,
+    fem_solver = FEMSolver(number_of_load_increments=2, analysis_nature="nonlinear",parallelise=True,
         newton_raphson_tolerance=1.0e-6)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
@@ -1154,7 +1155,7 @@ def ProblemData_Rogelio3(*args, **kwargs):
 
 if __name__ == "__main__":
 
-    # ProblemData()
+    ProblemData()
     # ProblemData_2()
     # ProblemData_22()
     # ProblemData_3()
@@ -1163,9 +1164,9 @@ if __name__ == "__main__":
     # ProblemData_4()
     # ProblemData_Rogelio()
     # ProblemData_Rogelio2()
-    ProblemData_Rogelio3()
+    # ProblemData_Rogelio3()
     
-    from cProfile import run
+    # from cProfile import run
     # run('ProblemData_3D()')
     # run('ProblemData_2()')
     # run('ProblemData_22()')

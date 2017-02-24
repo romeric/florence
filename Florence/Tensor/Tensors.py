@@ -4,7 +4,7 @@ from Numeric import tovoigt, tovoigt3
 
 
 __all__ = ['unique2d','in2d','intersect2d','in2d_unsorted','shuffle_along_axis',
-'itemfreq','SecondTensor2Vector','Voigt','UnVoigt', 'remove_duplicates_2D']
+'itemfreq','SecondTensor2Vector','Voigt','UnVoigt', 'remove_duplicates_2D','totuple']
 
 
 #-------------------------------------------------------------------------#
@@ -533,6 +533,20 @@ def UnVoigt(v):
                 ])
 
     return A 
+
+
+
+def totuple(arr):
+    """Converts numpy array to tuple"""
+    return tuple(map(tuple, np.atleast_2d(arr)))
+
+
+
+
+
+
+
+
 
 
 

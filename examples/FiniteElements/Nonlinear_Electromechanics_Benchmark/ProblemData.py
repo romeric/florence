@@ -314,6 +314,7 @@ def BenchmarkElectroMechanics_Objective(args):
 
     p = args.p
     mesh_chooser = args.mesh_chooser
+    element_type=args.element_type
 
     ndim=3
 
@@ -321,26 +322,55 @@ def BenchmarkElectroMechanics_Objective(args):
 
     ProblemPath = PWD(__file__)
 
-    if mesh_chooser==0:
-            filename = ProblemPath + '/Patch.dat'
-    elif mesh_chooser==1:
-        filename = ProblemPath + '/Patch_3476.dat'
-    elif mesh_chooser==2:
-        filename = ProblemPath + '/Patch_6947.dat'
-    elif mesh_chooser==3:
-        filename = ProblemPath + '/Patch_9220.dat'
-    else:
-        filename = ProblemPath + '/Patch_26807.dat'
+    if element_type == "tet":
+        if mesh_chooser==0:
+                filename = ProblemPath + '/Patch.dat'
+        elif mesh_chooser==1:
+            filename = ProblemPath + '/Patch_3476.dat'
+        elif mesh_chooser==2:
+            filename = ProblemPath + '/Patch_6947.dat'
+        elif mesh_chooser==3:
+            filename = ProblemPath + '/Patch_9220.dat'
+        else:
+            filename = ProblemPath + '/Patch_26807.dat'
 
-    mesh = Mesh()
-    mesh.Reader(filename,"tet")
-    mesh.GetHighOrderMesh(p=p)
-    makezero(mesh.points, tol=1e-12)
+        mesh = Mesh()
+        mesh.Reader(filename,"tet")
+        mesh.GetHighOrderMesh(p=p)
+        makezero(mesh.points, tol=1e-12)
+
+        boundary_condition = BoundaryCondition()
+        quadrature_rule = QuadratureRule(norder=2*p, mesh_type="tet", optimal=3)
+        function_space = FunctionSpace(mesh,quadrature=quadrature_rule,p=p)
+
+    elif element_type == "hex":
+        from Florence import HarvesterPatch
+
+        if mesh_chooser==0:
+            mesh = HarvesterPatch(ndisc=4,nradial=4)
+        elif mesh_chooser==1:
+            mesh = HarvesterPatch(ndisc=8,nradial=4)
+        elif mesh_chooser==2:
+            mesh = HarvesterPatch(ndisc=12,nradial=4)
+        elif mesh_chooser==3:
+            mesh = HarvesterPatch(ndisc=17,nradial=4)
+        else:
+            mesh = HarvesterPatch(ndisc=25,nradial=4)
+
+        
+        mesh.GetHighOrderMesh(p=p)
+        # mesh.SimplePlot()
+        # print mesh.nelem
+        # return
 
 
-    boundary_condition = BoundaryCondition()
-    quadrature_rule = QuadratureRule(norder=2*p, mesh_type="tet", optimal=3)
-    function_space = FunctionSpace(mesh,quadrature=quadrature_rule,p=p)
+        boundary_condition = BoundaryCondition()
+        quadrature_rule = QuadratureRule(norder=2*p, mesh_type="hex")
+        function_space = FunctionSpace(mesh,quadrature=quadrature_rule,p=p)
+        # exit()
+
+
+
 
     # formulation = DisplacementPotentialFormulation(mesh)
     formulation = DisplacementPotentialFormulation(mesh, quadrature_rules=(quadrature_rule,None), function_spaces=(function_space,None))
@@ -385,7 +415,7 @@ def BenchmarkElectroMechanics_Objective(args):
 
 
 
-def RunErrorNorms_Objective(p=1):
+def RunErrorNorms_Objective(p=1,etype="tet"):
 
     class args(object):
         p = p
@@ -398,11 +428,12 @@ def RunErrorNorms_Objective(p=1):
         nnode = []
         ndim = []
         nvar = []
+        element_type = etype
 
 
     for mesh_chooser in range(5):
         args.mesh_chooser = mesh_chooser
-        BenchmarkElectroMechanics_Objective(args) 
+        BenchmarkElectroMechanics_Objective(args)
 
 
     print args.ex
@@ -617,40 +648,6 @@ def CheckHexes(p=2):
     # filename = ProblemPath + '/Cyl_625_Hex.dat'
 
 
-
-    # mesh = Mesh()
-    # mesh.elements = np.array([
-    #     [0,1,2,3,4,5,6,7],
-    #     [4,5,6,7,8,9,10,11]
-    #     ])
-    # x = np.arange(2)
-
-    # x=np.linspace(0,2,nx+1)
-    # y=np.linspace(lower_left_rear_point[1],upper_right_front_point[1],ny+1)
-    # z=np.linspace(lower_left_rear_point[2],upper_right_front_point[2],nz+1)
-
-    # Y,X,Z = np.meshgrid(y,x,z)
-    # coordinates = np.dstack((X.T.flatten(),Y.T.flatten(),Z.T.flatten()))[0,:,:]
-
-
-    # mesh.Cube(n=2)
-    # mesh.Reader(filename,"tet")
-    # mesh.Reader(filename,"hex")
-    # mesh.Cube(element_type="hex",n=1)
-    # mesh.Parallelepiped(element_type="hex",nx=1,ny=1,nz=2)
-
-    # mesh.faces=None
-    # mesh.GetBoundaryFacesHex()
-    # mesh.Sphere()
-    # mesh.ConvertTetsToHexes()
-    # mesh.SimplePlot()
-    # exit()
-    # print mesh.elements
-    # mesh.ConvertHexesToTets()
-    # mesh.GetBoundaryFacesTet()
-    # print mesh.elements
-
-
     ########################################
 
     def DirichletFunc(mesh):
@@ -714,7 +711,7 @@ def CheckHexes(p=2):
 
 
 
-def GetMeshes_Hexes(p=2):
+def GetMeshesFromTetVersion(p=2):
 
     ndim=3
 
@@ -761,349 +758,27 @@ def GetMeshes_Hexes(p=2):
     solution.CurvilinearPlot()
 
 
-def totuple(arr):
-    """Converts numpy array to tuple"""
-    return tuple(map(tuple, np.atleast_2d(arr)))
 
-
-def CustomMesh():
-
-
-    # ##########################
-    center = np.array([30.6979,20.5])
-    p1     = np.array([30.,20.])
-    p2     = np.array([30.,21.])
-    p1line = p1 - center
-    p2line = p2 - center
-    radius = np.linalg.norm(p1line)
-    pp = np.array([center[0],center[1]+radius])
-
-    y_line = pp - center
-
-    # start_angle = np.dot(y_line,p1line)
-    # end_angle = np.dot(y_line,p2line)
-
-    # start_angle = -np.arccos(np.linalg.norm(y_line*p1line)/np.linalg.norm(y_line)/np.linalg.norm(p1line))
-    # end_angle   = np.pi + np.arccos(np.linalg.norm(y_line*p1line)/np.linalg.norm(y_line)/np.linalg.norm(p1line))
-
-    start_angle = -np.pi/2. - np.arccos(np.linalg.norm(y_line*p1line)/np.linalg.norm(y_line)/np.linalg.norm(p1line))
-    end_angle   = np.pi/2. + np.arccos(np.linalg.norm(y_line*p1line)/np.linalg.norm(y_line)/np.linalg.norm(p1line))
-
-    # start_angle = -np.pi/2. - start_angle
-    # start_angle = -np.pi/2. - (np.pi/2 + start_angle)
-    # print start_angle, end_angle
-
-    points = np.array([p1,p2,center])
-    # print points
-
-    nradial = 8
-    mesh = Mesh()
-    mesh.Arc(element_type="quad", radius=radius, start_angle=start_angle, 
-        end_angle=end_angle, nrad=nradial, ncirc=40, center=(center[0],center[1]), refinement=True)
-
-    mesh1 = Mesh()
-    mesh1.Triangle(element_type="quad",npoints=nradial, c1=totuple(center), c2=totuple(p1), c3=totuple(p2))
-
-    mesh += mesh1
-
-    # mesh.Extrude(length=40,nlong=50)
-
-
-    mesh3 = Mesh()
-    # mesh3.Triangle(element_type="quad",npoints=nradial, c2=totuple(p1), c3=totuple(p2), c1=(29.5391,20.295298))
-    mesh3.Triangle(element_type="quad",npoints=nradial, c2=totuple(p1), c3=totuple(p2), c1=(29.2515272805, 20.4794903462))
-    # 29.3684762208, 20.4045699297
-    # 29.2515272805 20.4794903462
-
-    mesh += mesh3
-    # mesh.SimplePlot()
-    # # mesh2 = mesh
-    # # mesh2.Extrude()
-    # exit()
-
-    # ##########################
-
-    # mesh = Mesh()
-    # mesh.Square(element_type="quad")
-    # mesh.Rectangle(upper_right_point=(40,1),nx=50,ny=10,element_type="quad")
-    # mesh.Circle(element_type="quad", refinement=True)
-
-    # path = GeometricPath()
-    # arc = path.ConstructArc()
-    # arc = GeometricArc(center=(-7.818181,44.22727272), start=(0.,0.), end=(30.,20.))
-    # arc = path.ConstructArc(center=(0.,0.), start=(2.,-2.), end=(-2.,-2.))
-
-    # arc = path.ConstructArc(center=(0.,-0.), start=(-2.,-2.), end=(2.,-2.))
-    # all_points = arc.ComputeExtrusion(mesh,nlong=npoints)
-    # print mesh.element_type
-    # mesh.points = all_points
-    # print mesh.points.shape, all_points.shape
-
-    # print mesh2.element_type
-    # mesh.SimplePlot()
-
-
-    # npoints=50
-    # mesh.Arc(element_type="quad", refinement=True, ncirc=12, start_angle=-np.pi/4)
-    # mesh.HollowArc(element_type="quad", ncirc=8, nrad=10, refinement=True)
-    # mesh.HollowArc(ncirc=9, nrad=17, refinement=True)
-    tmesh = Mesh()
-    tmesh.HollowArc(ncirc=50, nrad=nradial, center=(-7.818181,44.22727272), 
-        start_angle=np.arctan(44.22727272/-7.818181), end_angle=np.arctan(-24.22727272/37.818181), 
-        element_type="quad", inner_radius=43.9129782, outer_radius=44.9129782)
-    # mesh.HollowArc(ncirc=50, nrad=3, center=(-7.818181,44.22727272), 
-    #     start_angle=np.arctan(44.22727272/-7.818181), end_angle=np.arctan(-24.22727272/27.818181), 
-    #     element_type="quad", inner_radius=43.92859061, outer_radius=44.92859061)
-    # mesh.HollowArc(ncirc=50, nrad=3, center=(-7.818181,44.22727272), 
-    #     start_angle=np.arctan(43.22727272/-7.818181), end_angle=np.arctan(-23.22727272/27.818181), 
-    #     element_type="quad", inner_radius=43.92859061, outer_radius=44.9129782)
-    # mesh.HollowArc(ncirc=2, nrad=4)
-    # mesh.Arc(ncirc=9, nrad=37, refinement=False)
-
-    # line = GeometricLine(end=(0,0,50))
-    # points_3d = line.ComputeExtrusion(mesh, nlong=npoints)
-    # arc = GeometricArc()
-    # arc = GeometricArc(start=(-2,3.,-1.),end=(2,3.,1.))
-    # arc = GeometricArc(center=(0.,0.,0.), start=(-2,3.,-10.),end=(2.,3.,10.))
-    # arc = GeometricArc(center=(-7.818181,44.22727272, 0.), start=(0.,0.,0.), end=(30.,20.,0.))
-    # arc = GeometricArc(center=(-7.818181, 0., 44.22727272), start=(0.,0.,0.), end=(30.,0.,20.))
-    # arc = GeometricArc(center=(0., -7.818181, 44.22727272), start=(0.,0.,0.), end=(0.,30.,20.))
-    # points_3d = arc.ComputeExtrusion(mesh, nlong=npoints)
-    # print points_3d
-
-    # mesh.Extrude(nlong=npoints, path=arc)
-    # mesh.Extrude(nlong=40, length=40)
-    # mesh.points[:] = points_3d
-    # mesh += mesh2
-    # print mesh.Bounds
-    # print np.where(np.isclose(mesh.points[:,1],2.04045699e+01))
-    print tmesh.points[0,0], tmesh.points[0,1]
-    
-    mesh += tmesh
-
-    # radius=44.9129783
-    # t = np.linspace(np.arctan(44.22727272/-7.818181), np.arctan(-24.22727272/37.818181),10)
-    # x = radius*np.cos(t)
-    # y = radius*np.sin(t)
-    # points = np.array([x,y]).T.copy()
-    # points[:,0] += -7.818181
-    # points[:,1] += 44.227272 
-    # # print points
-    # # exit()
-
-    mesh.Extrude(nlong=40,length=40)
-
-
-
-    mesh.SimplePlot(color=(0, 150/255., 187/255.))
-    exit()
-
-    # print arc.arc_radius
-    # mesh.Rectangle(upper_right_point=(40,1),nx=50,ny=10, element_type="quad")
-    # mesh.SimplePlot()
-
-
-
-
-
-
-
-def CustomMesher(ndisc=20, nradial=4):
-    """
-        ndisc:              only one parameter for controlling the mesh
-    """
-
-
-    center = np.array([30.6979,20.5])
-    p1     = np.array([30.,20.])
-    p2     = np.array([30.,21.])
-    p1line = p1 - center
-    p2line = p2 - center
-    radius = np.linalg.norm(p1line)
-    pp = np.array([center[0],center[1]+radius])
-    y_line = pp - center
-    start_angle = -np.pi/2. - np.arccos(np.linalg.norm(y_line*p1line)/np.linalg.norm(y_line)/np.linalg.norm(p1line))
-    end_angle   = np.pi/2. + np.arccos(np.linalg.norm(y_line*p1line)/np.linalg.norm(y_line)/np.linalg.norm(p1line))
-    points = np.array([p1,p2,center])
-
-    # nradial = 4
-    mesh = Mesh()
-    mesh.Arc(element_type="quad", radius=radius, start_angle=start_angle, 
-        end_angle=end_angle, nrad=nradial, ncirc=ndisc, center=(center[0],center[1]), refinement=True)
-
-    mesh1 = Mesh()
-    mesh1.Triangle(element_type="quad",npoints=nradial, c1=totuple(center), c2=totuple(p1), c3=totuple(p2))
-
-    mesh += mesh1
-
-    mesh_patch = Mesh()
-    mesh_patch.HollowArc(ncirc=ndisc, nrad=nradial, center=(-7.818181,44.22727272), 
-        start_angle=np.arctan(44.22727272/-7.818181), end_angle=np.arctan(-24.22727272/37.818181), 
-        element_type="quad", inner_radius=43.9129782, outer_radius=44.9129782)
-
-    mesh3 = Mesh()
-    mesh3.Triangle(element_type="quad",npoints=nradial, c2=totuple(p1), c3=totuple(p2), c1=(mesh_patch.points[0,0], mesh_patch.points[0,1]))
-
-    mesh += mesh3
-    mesh += mesh_patch
-
-
-    mesh.Extrude(nlong=ndisc,length=40)
-
-    print mesh.points.shape, mesh.elements.shape
-    mesh.SimplePlot(color=(0, 150/255., 187/255.))
-
-
-def Torus():
-
-    # MAKE TORUS WORK
-    from copy import deepcopy
-    from numpy.linalg import norm
-    mesh = Mesh()
-    mesh.Circle(element_type="quad", ncirc=2, nrad=2)
-    tmesh = deepcopy(mesh)
-    arc = GeometricArc(start=(10,10,8),end=(10,10,-8))
-    # arc.GeometricArc()
-    nlong = 10
-    points = mesh.Extrude(path=arc, nlong=nlong)
-    # mesh.SimplePlot()
-    # print points
-
-    # elem_nodes = tmesh.elements[0,:]
-    # p1 = tmesh.points[elem_nodes[0],:]
-    # p2 = tmesh.points[elem_nodes[1],:]
-    # p3 = tmesh.points[elem_nodes[2],:]
-    # p4 = tmesh.points[elem_nodes[3],:]
-    
-    # E1 = np.append(p2 - p1, 0.0)
-    # E2 = np.append(p4 - p1, 0.0)
-    # E3 = np.array([0,0,1.])
-
-    # E1 /= norm(E1)
-    # E2 /= norm(E2)
-
-    # # print E1,E2,E3
-
-    # elem_nodes = mesh.elements[0,:]
-    # p1 = mesh.points[elem_nodes[0],:]
-    # p2 = mesh.points[elem_nodes[1],:]
-    # p3 = mesh.points[elem_nodes[2],:]
-    # p4 = mesh.points[elem_nodes[3],:]
-    # p5 = mesh.points[elem_nodes[4],:]
-    # e1 = p2 - p1
-    # e2 = p4 - p1
-    # e3 = p5 - p1
-
-    # e1 /= norm(e1)
-    # e2 /= norm(e2)
-    # e3 /= norm(e3)
-    # # print e1,e2,e3
-
-
-    # # TRANSFORMATION MATRIX
-    # Q = np.array([
-    #     [np.einsum('i,i',e1,E1), np.einsum('i,i',e1,E2), np.einsum('i,i',e1,E3)],
-    #     [np.einsum('i,i',e2,E1), np.einsum('i,i',e2,E2), np.einsum('i,i',e2,E3)],
-    #     [np.einsum('i,i',e3,E1), np.einsum('i,i',e3,E2), np.einsum('i,i',e3,E3)]
-    #     ])
-    # mesh.points = np.dot(mesh.points,Q.T)
-    # points = np.dot(points,Q)
-    # E1 = np.array([1,0,0.])
-    E3 = np.array([0.,0.,1.])
-    nnode_2D = tmesh.points.shape[0]
-    for i in range(nlong+1):
-        # e1 = points[i,:][None,:]/norm(points[i,:])
-        # Q = np.dot(E1[:,None],e1)
-        # vpoints = np.dot(points,Q)
-
-        e3 = points[i+1,:] - points[i,:]; e3 /= norm(e3)
-        Q = np.dot(e3[:,None],E3[None,:])
-        # print Q
-        # print np.dot(Q,points[i,:][:,None])
-        vpoints = np.dot(points,Q)
-
-        # print current_points
-        mesh.points[nnode_2D*i:nnode_2D*(i+1),:2] = tmesh.points + points[i,:2]
-        mesh.points[nnode_2D*i:nnode_2D*(i+1), 2] = vpoints[i,2]
-
-
-    # print Q
-    # print tmesh.points
-
-    # mesh = Mesh.HexahedralProjection()
-    mesh.SimplePlot()
-
-
-def ShapeFuncs():
-
-    # from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
-    # NodeArrangementHex(4)
-    # exit()
-
-    # points = np.array([
-    #     [0,0,0.],
-    #     [1,0,0],
-    #     [1,1,0],
-
-    #     ])
-    # mesh = Mesh.HexahedralProjection(npoints=1)
-    mesh = Mesh()
-    mesh.Cube(n=1, element_type="hex")
-    mesh.GetHighOrderMesh(p=2)
-    # print mesh.points.shape, mesh.elements.shape
-    # mesh.SimplePlot()
-    PostProcess.CurvilinearPlotHex(mesh,np.zeros_like(mesh.points), plot_surfaces=False, plot_points=True, point_radius=0.01)
-    # PostProcess.CurvilinearPlotTet(mesh,np.zeros_like(mesh.points), plot_surfaces=False)
-    exit()
-
-    C = 40
-    xi= 1-.64567
-
-    from Florence.FunctionSpace import Line
-    # CXX_CLANG = /media/MATLAB/intel_2017/bin/icpc
-
-
-
-
-    # N,dN = Line.Lagrange(C,xi)[:2]
-    # N1,dN1 = Line.LagrangeBP(C,xi)[:2]
-
-    # # # print N, dN
-    # # # print N1, dN1
-    # print np.allclose(N,N1)
-    # print np.allclose(dN, dN1) 
-
-
-    for C in range(0,24):
-        for j in np.linspace(-1.,1.,100):
-            N,dN = Line.LagrangeGaussLobatto(C,xi)[:2]
-            N1,dN1 = Line.LagrangeGaussLobattoBP(C,xi)[:2]
-
-            print np.allclose(N,N1)
-            print np.allclose(dN, dN1) 
-            # print np.linalg.norm(N-N1)
-            # print np.linalg.norm(N), np.linalg.norm(N1)/
 
 
 
 
 if __name__ == "__main__":
 
-    p=2
-    GetMeshes(p=p)
+    p=3
+    # GetMeshes(p=p)
     # CheckHexes(p=p)
     # GetMeshes_Hexes(p=p)
 
     # RunErrorNorms(p=p)
     # RunErrorNorms_Objective(p=p)
+    RunErrorNorms_Objective(p=p,etype="hex")
 
     # RunProblems(p=p)
 
     # from cProfile import run
     # run('CheckHexes(p=p)')
     # CustomMesh()
-    # CustomMesher(ndisc=10)
+    # GetMeshesHex(ndisc=20)
     # Torus()
-    # ShapeFuncs()
-    # run('ShapeFuncs()')
 

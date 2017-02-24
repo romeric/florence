@@ -2070,9 +2070,9 @@ class PostProcess(object):
             # PLOT CURVED EDGES
             h_edges = ax.plot(x_edges,y_edges,'k')
         
-
-        nnode = nsize*mesh.nelem
-        nelem = Triangles.shape[0]*mesh.nelem
+        mesh.nelem = int(mesh.nelem)
+        nnode = int(nsize*mesh.nelem)
+        nelem = int(Triangles.shape[0]*mesh.nelem)
 
         Xplot = np.zeros((nnode,2),dtype=np.float64)
         Tplot = np.zeros((nelem,3),dtype=np.int64)
@@ -2387,8 +2387,8 @@ class PostProcess(object):
 
 
             if color is None:
-                # color=(197/255.,241/255.,197/255.)
-                color=( 0, 150/255., 187/255.)
+                color=(197/255.,241/255.,197/255.) # green
+                # color=( 0, 150/255., 187/255.)   # blue
 
             # PLOT SURFACES (CURVED ELEMENTS)
             if QuantityToPlot is None:
