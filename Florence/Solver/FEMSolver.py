@@ -507,11 +507,12 @@ class FEMSolver(object):
     def Assemble(self, function_space, formulation, mesh, material, solver, Eulerx, Eulerp):
 
         if self.memory_model == "shared" or self.memory_model is None:
-            if mesh.nelem <= 500000:
+            if mesh.nelem <= 600000:
                 return self.AssemblySmall(function_space, formulation, mesh, material, Eulerx, Eulerp)
-            elif mesh.nelem > 500000:
+            elif mesh.nelem > 600000:
                 print("Larger than memory system. Dask on disk parallel assembly is turned on")
-                return self.OutofCoreAssembly(function_space,mesh,material,formulation,Eulerx,Eulerp)
+                # return self.OutofCoreAssembly(function_space,mesh,material,formulation,Eulerx,Eulerp)
+                return self.OutofCoreAssembly(function_space, formulation, mesh, material, Eulerx, Eulerp)
 
         elif self.memory_model == "distributed":
             # RUN THIS PROGRAM FROM SHELL WITH python RunSession.py INSTEAD
@@ -759,8 +760,8 @@ class FEMSolver(object):
         return stiffness, T, F, mass
 
 
-
-    def OutofCoreAssembly(MainData, mesh, material, Eulerx, TotalPot, calculate_rhs=True, filename=None, chunk_size=None):
+    def OutofCoreAssembly(self, function_space, formulation, mesh, material, Eulerx, Eulerp, calculate_rhs=True, filename=None, chunk_size=None):
+    # def OutofCoreAssembly(MainData, mesh, material, Eulerx, TotalPot, calculate_rhs=True, filename=None, chunk_size=None):
         """Assembly routine for larger than memory system of equations. 
             Usage of h5py and dask allow us to store the triplets and build a sparse matrix out of 
             them on disk.
@@ -771,11 +772,15 @@ class FEMSolver(object):
         import sys, os
         from warnings import warn
         from time import time
-        import psutil
+        try:
+            import psutil
+        except IOError:
+            has_psutil = False
+            raise ImportError("No module named psutil. Please install it using 'pip install psutil'")
         # from Core.Supplementary.dsparse.sparse import dok_matrix
 
 
-        if MainData.Parallel is True or MainData.__PARALLEL__ is True:
+        if self.parallel:
             warn("Parallel assembly cannot performed on large arrays. \n" 
                 "Out of core 'i.e. Dask' parallelisation is turned on instead. "
                 "This is an innocuous warning")
@@ -799,9 +804,9 @@ class FEMSolver(object):
 
 
         # GET MESH DETAILS
-        C = MainData.C
-        nvar = MainData.nvar
-        ndim = MainData.ndim
+        C = mesh.InferPolynomialDegree() - 1
+        nvar = formulation.nvar
+        ndim = formulation.ndim
 
         nelem = mesh.nelem
         nodeperelem = mesh.elements.shape[1]
