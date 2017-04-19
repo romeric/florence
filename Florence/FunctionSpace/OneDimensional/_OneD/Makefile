@@ -1,0 +1,41 @@
+PYTHON_VERSION = python2.7
+PYTHON_INCLUDE_PATH = /usr/include/
+PYTHON_LD_PATH = /usr/lib/
+CYTHONFLAGS = -DNPY_NO_DEPRECATED_API -Wno-cpp -Wno-unused-function -Wno-maybe-uninitialized
+
+CYTHON = cython --cplus
+REMOVE = rm -rf
+MOVE = mv
+
+INLINE_THRESHOLD = 100000
+CXXSTD=-std=c++14
+OPTFLAGS= -O3 -fno-strict-aliasing -DNDEBUG
+CXXFLAGS= -fPIC -shared -pthread -Wall $(CYTHONFLAGS) $(OPTFLAGS)
+
+# NUMPY_INCLUDE_PATH=python -c "import numpy; print numpy.get_include()"
+NUMPY_INCLUDE_PATH = /usr/local/lib/python2.7/dist-packages/numpy/core/include
+
+ifeq ($(findstring g++,$(CXX)),g++)
+ifneq ($(findstring clang++,$(CXX)),clang++)
+CXXFLAGS += -march=native -ffast-math -fwrapv -mfpmath=sse -funroll-loops -finline-functions -finline-limit=$(INLINE_THRESHOLD) -ffp-contract=fast 
+else
+CXXFLAGS += -march=native -ffast-math -mllvm -inline-threshold=$(INLINE_THRESHOLD) -ffp-contract=fast
+endif
+endif
+ifeq ($(findstring icpc,$(CXX)),icpc)
+CXXFLAGS += -march=native -no-ansi-alias -xHost -fp-model fast=1 -inline-forceinline -inline-factor=$(INLINE_THRESHOLD)
+endif
+
+all: build_module
+
+build_module: 
+	@echo "Building Bjorck Pereyra bases module"
+	$(CYTHON) LineBP.pyx
+	$(CXX) $(CXXSTD) $(CXXFLAGS) LineBP.cpp -o LineBP.so -I. -I../../../Tensor/ -I$(PYTHON_INCLUDE_PATH) -I$(NUMPY_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION)
+	@$(MOVE) LineBP.so ../LineBP.so
+
+clean:
+	$(REMOVE) LineBP.cpp LineBP.so ../LineBP.so
+
+source_clean:
+	$(REMOVE) LineBP.cpp

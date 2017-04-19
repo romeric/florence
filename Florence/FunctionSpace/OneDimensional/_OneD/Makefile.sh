@@ -2,15 +2,12 @@
 
 set -x
 
-clear
-
 # CXX=clang++-3.8
 # CXX=clang++-3.6
 CXX=clang++
 
 
 NUMPY=$(python -c "import numpy; print numpy.get_include()")
-FASTOR=/home/roman/Dropbox/Fastor/
 
 # Python libs/includes
 PYLIB=python2.7

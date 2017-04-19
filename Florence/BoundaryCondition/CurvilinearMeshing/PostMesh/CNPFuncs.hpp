@@ -33,15 +33,15 @@ arange(T b=1)
 
     Integer a = 0;
     return Eigen::Matrix<T,DYNAMIC,1,
-            POSTMESH_ALIGNED>::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
+            POSTMESH_ALIGNED>::LinSpaced(Eigen::Sequential,(Integer(b)-a),a,Integer(b)-1);
 }
 
-template<typename T, typename U>
-Eigen::PlainObjectBase<T>
-STATIC take(const Eigen::PlainObjectBase<T> &arr, const Eigen::PlainObjectBase<U> &arr_row, const Eigen::PlainObjectBase<U> &arr_col)
+template<typename Derived, typename U>
+Derived
+STATIC take(const Eigen::PlainObjectBase<Derived> &arr, const Eigen::PlainObjectBase<U> &arr_row, const Eigen::PlainObjectBase<U> &arr_col)
 {
     //! TAKE OUT PART OF A 2D ARRAY. MAKES A COPY
-    Eigen::PlainObjectBase<T> arr_reduced;
+    Derived arr_reduced;
     arr_reduced.setZero(arr_row.rows(),arr_col.rows());
 
     for (auto i=0; i<arr_row.rows();i++)
@@ -55,15 +55,15 @@ STATIC take(const Eigen::PlainObjectBase<T> &arr, const Eigen::PlainObjectBase<U
     return arr_reduced;
 }
 
-template<typename T>
-Eigen::PlainObjectBase<T>
-STATIC take(const Eigen::PlainObjectBase<T> &arr, const Eigen::MatrixI &arr_idx)
+template<typename Derived>
+Derived
+STATIC take(const Eigen::PlainObjectBase<Derived> &arr, const Eigen::MatrixI &arr_idx)
 {
     //! TAKE OUT PART OF A 2D ARRAY. MAKES A COPY
     assert (arr_idx.rows()<=arr.rows());
     assert (arr_idx.cols()<=arr.cols());
 
-    Eigen::PlainObjectBase<T> arr_reduced;
+    Derived arr_reduced;
     arr_reduced.setZero(arr_idx.rows(),arr_idx.cols());
 
     for (auto i=0; i<arr_idx.rows();i++)
@@ -167,7 +167,7 @@ STATIC void sort_back_rows(Eigen::PlainObjectBase<T> &arr, const Eigen::MatrixI 
 
     for (auto i=0; i<arr.rows(); ++i)
     {
-        Eigen::PlainObjectBase<T> current_row;
+        T current_row;
         current_row.setZero(1,arr.cols());
         for (auto j=0; j<arr.cols(); ++j)
         {
@@ -361,12 +361,12 @@ unique(const std::vector<T> &v, bool return_index=false)
 }
 
 template<typename T>
-Eigen::PlainObjectBase<T> itemfreq(const Eigen::PlainObjectBase<T> &arr)
+T itemfreq(const Eigen::PlainObjectBase<T> &arr)
 {
     //! FINDS THE NUMBER OF OCCURENCE OF EACH VALUE IN AN EIGEN MATRIX
     std::vector<typename Eigen::PlainObjectBase<T>::Scalar> uniques;
     std::tie(uniques,std::ignore) = unique(arr);
-    Eigen::PlainObjectBase<T> freqs;
+    T freqs;
     freqs.setZero(uniques.size(),2);
 
     auto counter = 0;

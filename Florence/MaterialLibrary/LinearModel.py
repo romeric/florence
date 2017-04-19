@@ -39,14 +39,14 @@ class LinearModel(Material):
 
 
 
-    def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
+    def CauchyStress(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 
 
         strain = StrainTensors['strain'][gcounter]
         I = StrainTensors['I']
 
-        mu = MaterialArgs.mu
-        lamb = MaterialArgs.lamb
+        mu = self.mu
+        lamb = self.lamb
 
         # CHECK IF THIS IS NECESSARY
         if self.ndim == 3:
@@ -55,7 +55,7 @@ class LinearModel(Material):
             tre = trace(strain) + 1
 
         # USE FASTER TRACE FUNCTION
-        return 2*mu*strain + lamb*trace(strain)*I  
+        return 2*mu*strain + lamb*tre*I  
         
 
     def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx):

@@ -562,6 +562,8 @@ class PostProcess(object):
         ScaledFF = np.zeros(elements.shape[0])
         ScaledHH = np.zeros(elements.shape[0])
 
+        AverageJacobian = np.zeros(elements.shape[0])
+
         if self.is_material_anisotropic:
             ScaledFNFN = np.zeros(elements.shape[0])
             ScaledCNCN = np.zeros(elements.shape[0])
@@ -611,6 +613,7 @@ class PostProcess(object):
             ScaledHH[elem] = 1.0*np.min(Q2)/np.max(Q2)
             # Jacobian[elem] = np.min(detF)
             # print(np.min(Jacobian), np.max(Jacobian))
+            AverageJacobian[elem] = np.mean(Jacobian)
 
             if self.is_material_anisotropic:
                 ScaledFNFN[elem] = 1.0*np.min(Q4)/np.max(Q4)
@@ -647,6 +650,7 @@ class PostProcess(object):
 
         # SET COMPUTED TO TRUE
         self.is_scaledjacobian_computed = True
+        self.AverageJacobian = AverageJacobian
 
         if not self.is_material_anisotropic:
             return self.is_scaledjacobian_computed, ScaledFF, ScaledHH, ScaledJacobian

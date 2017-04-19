@@ -8,6 +8,45 @@ from Florence.Tensor import makezero
 
 
 
+def ProblemData0(*args, **kwargs):
+
+    ndim=2
+    p=2
+
+    material = MooneyRivlin_0(ndim,mu1=1.0,mu2=1.0,lamb=5)
+
+    mesh = Mesh()
+    mesh.Rectangle(upper_right_point=(1,10), nx=100, ny=1000, element_type="quad")
+    # mesh.SimplePlot()
+ 
+    def DirichletFunc(mesh):
+        boundary_data = np.zeros((mesh.points.shape[0],material.nvar))+np.NAN
+
+        Y_0 = np.isclose(mesh.points[:,1],0.)
+        boundary_data[Y_0,0] = 0.
+        boundary_data[Y_0,1] = 0.
+
+        Y_1 = np.isclose(mesh.points[:,1],10.)
+        boundary_data[Y_1,0] = 1.
+        boundary_data[Y_1,1] = 0.
+
+
+        return boundary_data
+
+    boundary_condition = BoundaryCondition()
+    boundary_condition.SetDirichletCriteria(DirichletFunc,mesh)
+
+    formulation = DisplacementFormulation(mesh)
+
+    fem_solver = FEMSolver(number_of_load_increments=1,analysis_type="static",
+        analysis_nature="nonlinear",parallelise=True,
+        newton_raphson_tolerance=1e-6)
+
+    solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 
+            material=material, boundary_condition=boundary_condition)
+
+
+
 
 def ProblemData(*args, **kwargs):
 
@@ -1155,7 +1194,8 @@ def ProblemData_Rogelio3(*args, **kwargs):
 
 if __name__ == "__main__":
 
-    ProblemData()
+    # ProblemData0()
+    # ProblemData()
     # ProblemData_2()
     # ProblemData_22()
     # ProblemData_3()
@@ -1164,7 +1204,7 @@ if __name__ == "__main__":
     # ProblemData_4()
     # ProblemData_Rogelio()
     # ProblemData_Rogelio2()
-    # ProblemData_Rogelio3()
+    ProblemData_Rogelio3()
     
     # from cProfile import run
     # run('ProblemData_3D()')

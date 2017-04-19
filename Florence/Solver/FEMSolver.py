@@ -146,6 +146,9 @@ class FEMSolver(object):
             post_process.ScaledJacobian=post_process.MeshQualityMeasures(mesh,TotalDisp,False,False)[3]
         elif self.isScaledJacobianComputed:
             post_process.ScaledJacobian=self.ScaledJacobian
+        # self.isScaledJacobianComputed = False
+        # post_process.is_scaledjacobian_computed = False
+        # post_process.ScaledJacobian=post_process.MeshQualityMeasures(mesh,TotalDisp,False,False)[3]
 
         if self.analysis_nature == "nonlinear":
             post_process.newton_raphson_convergence = self.NRConvergence
