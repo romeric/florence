@@ -105,7 +105,7 @@ void _IsotropicElectroMechanics_3_<Real>::KineticMeasures<Real>(Real *Dnp, Real 
         Tensor<Real,3> D;
         Tensor<Real,3,3> stress;
         Tensor<Real,9,9> hessian; 
-        for (size_t g=0; g<ngauss; ++g) {
+        for (int g=0; g<ngauss; ++g) {
             std::tie(D,stress,hessian) =_KineticMeasures_<Real,3>(Fnp+9*g, Enp+3*g);
             copy_fastor(Dnp,D,g*3);
             copy_fastor(Snp,stress,g*9);
@@ -116,7 +116,7 @@ void _IsotropicElectroMechanics_3_<Real>::KineticMeasures<Real>(Real *Dnp, Real 
         Tensor<Real,2> D;
         Tensor<Real,2,2> stress;
         Tensor<Real,5,5> hessian; 
-        for (size_t g=0; g<ngauss; ++g) {
+        for (int g=0; g<ngauss; ++g) {
             std::tie(D,stress,hessian) =_KineticMeasures_<Real,2>(Fnp+4*g, Enp+2*g); 
             copy_fastor(Dnp,D,g*2);
             copy_fastor(Snp,stress,g*4);

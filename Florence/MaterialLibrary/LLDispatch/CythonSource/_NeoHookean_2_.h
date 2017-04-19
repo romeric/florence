@@ -64,7 +64,7 @@ void _NeoHookean_2_<Real>::KineticMeasures<Real>(Real *Snp, Real* Hnp,
         Tensor<Real,3> D;
         Tensor<Real,3,3> stress;
         Tensor<Real,6,6> hessian; 
-        for (size_t g=0; g<ngauss; ++g) {
+        for (int g=0; g<ngauss; ++g) {
             std::tie(stress,hessian) =_KineticMeasures_<Real,3>(Fnp+9*g);
             copy_fastor(Snp,stress,g*9);
             copy_fastor(Hnp,hessian,g*36);    
@@ -74,7 +74,7 @@ void _NeoHookean_2_<Real>::KineticMeasures<Real>(Real *Snp, Real* Hnp,
         Tensor<Real,2> D;
         Tensor<Real,2,2> stress;
         Tensor<Real,3,3> hessian; 
-        for (size_t g=0; g<ngauss; ++g) {
+        for (int g=0; g<ngauss; ++g) {
             std::tie(stress,hessian) =_KineticMeasures_<Real,2>(Fnp+4*g); 
             copy_fastor(Snp,stress,g*4);
             copy_fastor(Hnp,hessian,g*9);    
