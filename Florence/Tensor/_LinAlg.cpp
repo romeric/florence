@@ -41,7 +41,7 @@ void reverse_cuthill_mckee(const Integer *ind, const Integer *ptr, Integer num_r
 
     // loop over zz takes into account possible disconnected graph.
     for (auto zz=0; zz<num_rows; ++zz) {
-        if (inds[zz] != -1) {  // Do BFS with seed=inds[zz]
+        if (int(inds[zz]) != -1) {  // Do BFS with seed=inds[zz]
             seed = inds[zz];
             order[N] = seed;
             N += 1;
@@ -58,7 +58,7 @@ void reverse_cuthill_mckee(const Integer *ind, const Integer *ptr, Integer num_r
                     for (auto jj=ptr[i]; jj<ptr[i + 1]; ++jj) {
                         // j is node number connected to i
                         j = ind[jj];
-                        if (inds[rev_inds[j]] != -1) {
+                        if (int(inds[rev_inds[j]]) != -1) {
                             inds[rev_inds[j]] = -1;
                             order[N] = j;
                             N += 1;

@@ -106,7 +106,7 @@ void _AnisotropicMooneyRivlin_1_<Real>::KineticMeasures<Real>(Real *Snp, Real* H
     if (ndim==3) {
         Tensor<Real,3,3> stress;
         Tensor<Real,6,6> hessian; 
-        for (size_t g=0; g<ngauss; ++g) {
+        for (int g=0; g<ngauss; ++g) {
             std::tie(stress,hessian) =_KineticMeasures_<Real,3>(Fnp+9*g, Nnp);
             copy_fastor(Snp,stress,g*9);
             copy_fastor(Hnp,hessian,g*36);    
@@ -115,7 +115,7 @@ void _AnisotropicMooneyRivlin_1_<Real>::KineticMeasures<Real>(Real *Snp, Real* H
     else if (ndim==2) {
         Tensor<Real,2,2> stress;
         Tensor<Real,3,3> hessian; 
-        for (size_t g=0; g<ngauss; ++g) {
+        for (int g=0; g<ngauss; ++g) {
             std::tie(stress,hessian) =_KineticMeasures_<Real,2>(Fnp+4*g, Nnp); 
             copy_fastor(Snp,stress,g*4);
             copy_fastor(Hnp,hessian,g*9);    

@@ -18,6 +18,9 @@ from NearlyIncompressibleMooneyRivlin import *
 # INCREMENTALLY LINEARISED MATERIAL MODELS
 from IncrementallyLinearisedNeoHookean import *
 
+# REGULARISED MATERIAL MODELS
+from RegularisedNeoHookean import *
+
 # ANISOTROPIC MODELS
 from TranservselyIsotropicHyperElastic import *
 from BonetTranservselyIsotropicHyperElastic import *

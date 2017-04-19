@@ -51,7 +51,7 @@ public:
         // FIND THE KINEMATIC MEASURES
         Tensor<Real,ndim,ndim> I; I.eye();
         auto J = determinant(F);
-        auto H = cofactor(F);
+        // auto H = cofactor(F);
         auto b = matmul(F,transpose(F));
 
         // COMPUTE ELECTRIC DISPLACEMENT
@@ -116,8 +116,8 @@ public:
         auto ID_jki = permutation<Index<j,k,i>>(ID_ijk); 
 
         auto bD_ijk = einsum<Index<i,j>,Index<k>>(b,D); 
-        auto bD_ikj = permutation<Index<i,k,j>>(bD_ijk); 
-        auto bD_jki = permutation<Index<j,k,i>>(bD_ijk); 
+        // auto bD_ikj = permutation<Index<i,k,j>>(bD_ijk); 
+        // auto bD_jki = permutation<Index<j,k,i>>(bD_ijk); 
 
         auto DDD_ijk = outer(D,outerDD); 
 
@@ -173,7 +173,7 @@ void _IsotropicElectroMechanics_107_<Real>::KineticMeasures<Real>(Real *Dnp, Rea
         Tensor<Real,3> D;
         Tensor<Real,3,3> stress;
         Tensor<Real,9,9> hessian; 
-        for (size_t g=0; g<ngauss; ++g) {
+        for (int g=0; g<ngauss; ++g) {
             std::tie(D,stress,hessian) =_KineticMeasures_<Real,3>(Fnp+9*g, Enp+3*g);
             copy_fastor(Dnp,D,g*3);
             copy_fastor(Snp,stress,g*9);
@@ -184,7 +184,7 @@ void _IsotropicElectroMechanics_107_<Real>::KineticMeasures<Real>(Real *Dnp, Rea
         Tensor<Real,2> D;
         Tensor<Real,2,2> stress;
         Tensor<Real,5,5> hessian; 
-        for (size_t g=0; g<ngauss; ++g) {
+        for (int g=0; g<ngauss; ++g) {
             std::tie(D,stress,hessian) =_KineticMeasures_<Real,2>(Fnp+4*g, Enp+2*g); 
             copy_fastor(Dnp,D,g*2);
             copy_fastor(Snp,stress,g*4);
