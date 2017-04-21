@@ -249,7 +249,7 @@ if __name__ == "__main__":
 
     if len(args) > 1:
         for arg in args:
-            if arg == "source_clean" or arg == "clean" or arg == "build":
+            if arg == "source_clean" or arg == "clean" or arg == "build" or arg=="install":
                 if _op is not None:
                     raise RuntimeError("Multiple conflicting arguments passed to setup")
                 _op = arg
@@ -270,7 +270,7 @@ if __name__ == "__main__":
         setup_instance.Clean()
     elif _op == "install":
         setup_instance.Install()
-    else:
-        setup_instance.Build()
+    # else:
+    #     setup_instance.Build()
 
 
