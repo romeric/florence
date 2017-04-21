@@ -216,7 +216,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
     def __GetLocalStiffness__(self, function_space, material, LagrangeElemCoords, 
         EulerELemCoords, ElectricPotentialElem, fem_solver, elem=0):
         """Get stiffness matrix of the system"""
-
+        
         nvar = self.nvar
         nodeperelem = function_space.Bases.shape[0]
         AllGauss = function_space.AllGauss
