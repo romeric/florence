@@ -189,7 +189,7 @@ class FlorenceSetup(object):
                                     "_IsotropicElectroMechanics_107_"
                                 ]
 
-        # low_level_material_list = ["_IsotropicElectroMechanics_105_"]
+        # low_level_material_list = ["_IsotropicElectroMechanics_107_"]
 
         assert self.extension_paths != None
 
