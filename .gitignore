@@ -43,11 +43,11 @@
 .o
 
 # shared libraries
-.so
-.dylib
-.dll
-.a
-.exe
+*.so
+*.dylib
+*.dll
+*.a
+*.exe
 
 # qt creator project files
 *.pro
