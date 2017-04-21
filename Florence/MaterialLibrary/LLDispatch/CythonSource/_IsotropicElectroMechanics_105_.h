@@ -61,12 +61,12 @@ public:
             trb += 1.;
         }
 
-        auto sigma_mech = 2.*mu1/J*b + \
+        Tensor<T,ndim,ndim> sigma_mech = 2.*mu1/J*b + \
             2.*mu2/J*(trb*b - matmul(b,b)) - \
             2.*(mu1+2*mu2)/J*I + \
             lamb*(J-1)*I;
 
-        auto sigma_electric = J/eps_2*outerDD;
+        Tensor<T,ndim,ndim> sigma_electric = J/eps_2*outerDD;
 
         Tensor<T,ndim,ndim> sigma = sigma_mech + sigma_electric;
  
@@ -81,10 +81,14 @@ public:
         auto bb_ikjl = permutation<Index<i,k,j,l>>(bb_ijkl);
         auto bb_iljk = permutation<Index<i,l,j,k>>(bb_ijkl);
 
-        auto C_mech = 2.0*mu2/J*(2.0*bb_ijkl - bb_ikjl - bb_iljk) + \
+        // auto C_mech = 2.0*mu2/J*(2.0*bb_ijkl - bb_ikjl - bb_iljk) + \
+        //     (2.*(mu1+2*mu2)/J - lamb*(J-1.) ) * (II_ikjl + II_iljk) + lamb*(2.*J-1.)*II_ijkl;
+        // Tensor<T,ndim,ndim,ndim,ndim> elasticity = C_mech;
+
+        Tensor<T,ndim,ndim,ndim,ndim> elasticity = 2.0*mu2/J*(2.0*bb_ijkl - bb_ikjl - bb_iljk) + \
             (2.*(mu1+2*mu2)/J - lamb*(J-1.) ) * (II_ikjl + II_iljk) + lamb*(2.*J-1.)*II_ijkl;
 
-        Tensor<T,ndim,ndim,ndim,ndim> elasticity = C_mech;
+
 
         // FIND COUPLING TENSOR
         auto ID_ijk = outer(I,D); 

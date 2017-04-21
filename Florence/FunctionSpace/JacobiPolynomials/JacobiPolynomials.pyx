@@ -1,12 +1,42 @@
 from libc.stdlib cimport malloc, free 
 from cython cimport double, sizeof, boundscheck, wraparound
 
-cdef extern from "jacobi.c":
-    void jacobi(const unsigned short n, const double xi,
-            const double a, const double b, double *P)
-    void diffjacobi(const unsigned short n, const double xi,
-            const double a, const double b, const unsigned short opt, double *dP)
+# cdef extern from "jacobi.c" nogil:
+#     void jacobi(const unsigned short n, const double xi,
+#             const double a, const double b, double *P)
+#     void diffjacobi(const unsigned short n, const double xi,
+#             const double a, const double b, const unsigned short opt, double *dP)
 
+
+cdef void jacobi(const unsigned short n, const double xi, const double a, const double b, double *P) nogil:
+    cdef double a1n,a2n,a3n,a4n;
+    cdef unsigned short p;
+
+    P[0]=1.0
+    if n>0:
+        P[1] = 0.5*((a-b)+(a+b+2)*xi)
+    if n>1:
+        for p in range(1,n):
+            a1n = 2*(p+1)*(p+a+b+1)*(2*p+a+b)
+            a2n = (2*p+a+b+1)*(a*a-b*b)
+            a3n = (2*p+a+b)*(2*p+a+b+1)*(2*p+a+b+2)
+            a4n = 2*(p+a)*(p+b)*(2*p+a+b+2)
+
+            P[p+1] = ((a2n+a3n*xi)*P[p]-a4n*P[p-1])/a1n
+
+
+cdef void diffjacobi(const unsigned short n, const double xi, const double a, const double b, const unsigned short opt, double *dP) nogil:
+    cdef unsigned short p
+    cdef double *P = <double*>malloc( (n+1)*sizeof(double))
+    if opt==1:
+        jacobi(n,xi,a+1,b+1,P)
+    else:
+        jacobi(n,xi,a,b,P)
+
+    for p in range(1,n+1):
+        dP[p] = 0.5*(a+b+p+1)*P[p-1]
+
+    free(P)
 
 
 @boundscheck(False)

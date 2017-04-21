@@ -234,7 +234,6 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
         # COMPUTE WORK-CONJUGATES AND HESSIAN AT THIS GAUSS POINT
         ElectricDisplacementx, CauchyStressTensor, H_Voigt = material.KineticMeasures(F, ElectricFieldx, elem=elem)
-
         # LOOP OVER GAUSS POINTS
         for counter in range(AllGauss.shape[0]): 
 

@@ -10,7 +10,7 @@ cimport numpy as np
 ctypedef double Real
 
 
-cdef extern from "_SteinmannModel_.h":
+cdef extern from "_SteinmannModel_.h" nogil:
     cdef cppclass _SteinmannModel_[Real]:
         _SteinmannModel_() except +
         _SteinmannModel_(Real mu, Real lamb, Real c1, Real c2, Real eps_1) except +

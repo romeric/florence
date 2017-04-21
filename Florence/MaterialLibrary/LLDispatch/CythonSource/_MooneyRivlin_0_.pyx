@@ -10,7 +10,7 @@ cimport numpy as np
 ctypedef double Real
 
 
-cdef extern from "_MooneyRivlin_0_.h":
+cdef extern from "_MooneyRivlin_0_.h" nogil:
     cdef cppclass _MooneyRivlin_0_[Real]:
         _MooneyRivlin_0_() except +
         _MooneyRivlin_0_(Real mu1, Real mu2, Real lamb) except +
