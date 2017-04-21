@@ -15,7 +15,7 @@ ctypedef unsigned long UInteger
 ctypedef double Real
 
 
-cdef extern from "_IsotropicElectroMechanics_107_.h":
+cdef extern from "_IsotropicElectroMechanics_107_.h" nogil:
     cdef cppclass _IsotropicElectroMechanics_107_[Real]:
         _IsotropicElectroMechanics_107_() except +
         _IsotropicElectroMechanics_107_(Real mu1, Real mu2, Real mue, Real lamb, Real eps_1, Real eps_2, Real eps_e) except +

@@ -10,7 +10,7 @@ cimport numpy as np
 ctypedef double Real
 
 
-cdef extern from "_NeoHookean_2_.h":
+cdef extern from "_NeoHookean_2_.h" nogil:
     cdef cppclass _NeoHookean_2_[Real]:
         _NeoHookean_2_() except +
         _NeoHookean_2_(Real mu, Real lamb) except +

@@ -1,7 +1,7 @@
 PYTHON_VERSION = python2.7
 PYTHON_INCLUDE_PATH = /usr/include/
 PYTHON_LD_PATH = /usr/lib/
-CYTHONFLAGS = -DNPY_NO_DEPRECATED_API -Wno-cpp -Wno-unused-function -Wno-maybe-uninitialized
+CYTHONFLAGS = -DNPY_NO_DEPRECATED_API
 
 CYTHON = cython
 REMOVE = rm -rf
@@ -16,9 +16,11 @@ CCFLAGS= -fPIC -shared -pthread -Wall $(CYTHONFLAGS) $(OPTFLAGS) -lm
 NUMPY_INCLUDE_PATH = /usr/local/lib/python2.7/dist-packages/numpy/core/include
 
 ifeq ($(findstring gcc,$(CC)),gcc)
+CCFLAGS += -Wno-cpp -Wno-unused-function -Wno-maybe-uninitialized
 CCFLAGS += -march=native -ffast-math -fwrapv -mfpmath=sse -funroll-loops -finline-functions -finline-limit=$(INLINE_THRESHOLD) -ffp-contract=fast
 endif
 ifeq ($(findstring clang,$(CC)),clang)
+CCFLAGS += -Wno-uninitialized -Wno-#warnings
 CCFLAGS += -march=native -ffast-math -mllvm -inline-threshold=$(INLINE_THRESHOLD) -ffp-contract=fast
 endif
 ifeq ($(findstring icc,$(CC)),icc)

@@ -10,7 +10,7 @@ cimport numpy as np
 ctypedef double Real
 
 
-cdef extern from "_NearlyIncompressibleMooneyRivlin_.h":
+cdef extern from "_NearlyIncompressibleMooneyRivlin_.h" nogil:
     cdef cppclass _NearlyIncompressibleMooneyRivlin_[Real]:
         _NearlyIncompressibleMooneyRivlin_() except +
         _NearlyIncompressibleMooneyRivlin_(Real alpha, Real beta, Real kappa) except +
