@@ -25,14 +25,6 @@ def build_extension(_cc_compiler=None,_cxx_compiler=None):
     # Suppress numpy deprecation warnings
     no_deprecated = ("NPY_NO_DEPRECATED_API",None)
 
-    # if _cc_compiler is None:
-    #     if "darwin" in _os:
-    #         _cc_compiler = "clang"
-    #     elif "linux" in _os:
-    #         _cc_compiler = "gcc"
-    # # Set the compiler
-    # os.environ["CC"] = _cxx_compiler
-
     if _cxx_compiler is None:
         if "darwin" in _os:
             _cxx_compiler = "clang++"
@@ -47,7 +39,7 @@ def build_extension(_cc_compiler=None,_cxx_compiler=None):
         compiler_args = ["-std=c++11","-m64","-march=native","-mtune=native", "-ffp-contract=fast",
                         "-ffast-math", "-flto","-DNPY_NO_DEPRECATED_API","-DNDEBUG", "-Wno-shorten-64-to-32"]
     else:
-        compiler_args = ["-std=c++11","-m64","-march=native","-mtune=native", "-ffp-contract=fast"
+        compiler_args = ["-std=c++11","-m64","-march=native","-mtune=native", "-ffp-contract=fast",
                         "-mfpmath=sse","-ffast-math","-ftree-vectorize", "-finline-limit=100000",
                         "-funroll-loops","-finline-functions","-Wno-unused-function",
                         "-flto","-DNPY_NO_DEPRECATED_API","-Wno-cpp","-DNDEBUG"]
@@ -59,6 +51,8 @@ def build_extension(_cc_compiler=None,_cxx_compiler=None):
                     _pwd_+"/src/PostMeshSurface.cpp"]
 
     # Link to OpenCascade runtime libraries
+    # Search for all subdirectories under /usr/local/lib
+    # Change the directory name if occ is elsewhere 
     occ_dir = "/usr/local/lib"
     all_dir_libs = os.listdir(occ_dir)
     occ_libs = []

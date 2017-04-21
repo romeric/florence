@@ -215,76 +215,11 @@ class FlorenceSetup(object):
 
 
     def Install(self):
-        pass
-
-
-    # def PerformBuild(self):
-
-    #     # BUILD TENSOR MODULE (NUMERIC AND LINALG)
-    #     tensor_path = os.path.join(self._pwd_,"Florence/Tensor/")
-    #     print("Building tensor module")
-    #     p = subprocess.Popen('cd '+tensor_path+' && make clean && make ' + self.cxx_compiler_args, shell=True)
-    #     p.wait()
-
-    #     # BUILD SALOME MESH READER
-    #     print("Building mesh reader for Salome")
-    #     mesh_path = os.path.join(self._pwd_,"Florence/MeshGeneration/")
-    #     p = subprocess.Popen('cd '+mesh_path+' && make clean && make ' + self.cc_compiler_args, shell=True)
-    #     p.wait()
-
-    #     # BUILD JACOBI MODULE
-    #     print("Building Jacobi polynomials module")
-    #     jacobi_path = os.path.join(self._pwd_,"Florence/FunctionSpace/JacobiPolynomials/")
-    #     p = subprocess.Popen('cd '+jacobi_path+' && make clean && make ' + self.cc_compiler_args, shell=True)
-    #     p.wait()
-
-    #     # BUILD BJORCK PEREYRA BASES
-    #     print("Building Bjorck Pereyra bases module")
-    #     bp_path = os.path.join(self._pwd_,"Florence/FunctionSpace/OneDimensional/_OneD")
-    #     p = subprocess.Popen('cd '+bp_path+' && make clean && make ' + self.cxx_compiler_args, shell=True)
-    #     p.wait()
-
-    #     # BUILD KINEMATICS MEASURE
-    #     print("Building low level dispatcher for kinematic measures")
-    #     km_path = os.path.join(self._pwd_,"Florence/FiniteElements/ElementalMatrices/_KinematicMeasures_")
-    #     p = subprocess.Popen('cd '+km_path+' && make clean && make ' + self.cc_compiler_args, shell=True)
-    #     p.wait()
-
-    #     # BUILD GEOMETRIC STIFFNESS 
-    #     print("Building low level dispatcher for nonlinear geometric stiffnesses")
-    #     gm_path = os.path.join(self._pwd_,"Florence/VariationalPrinciple/_GeometricStiffness_")
-    #     p = subprocess.Popen('cd '+gm_path+' && make clean && make ' + self.cc_compiler_args, shell=True)
-    #     p.wait()
-
-    #     # BUILD MATERIAL MODELS
-    #     print("Building low level dispatcher for material models")
-    #     material_path = os.path.join(self._pwd_,"Florence/MaterialLibrary/LLDispatch/")
-    #     # p = subprocess.Popen('cd '+material_path+' && ./Makefile.sh', shell=True)
-    #     low_level_material_list = [ "_NeoHookean_2_", 
-    #                                 "_MooneyRivlin_0_", 
-    #                                 "_NearlyIncompressibleMooneyRivlin_",
-    #                                 "_AnisotropicMooneyRivlin_1_", 
-    #                                 "_IsotropicElectroMechanics_0_", 
-    #                                 "_IsotropicElectroMechanics_3_", 
-    #                                 "_SteinmannModel_",
-    #                                 "_IsotropicElectroMechanics_105_", 
-    #                                 "_IsotropicElectroMechanics_106_", 
-    #                                 "_IsotropicElectroMechanics_107_"
-    #                             ]
-    #     for material in low_level_material_list:
-    #         material = material.lstrip('_').rstrip('_')
-    #         p = subprocess.Popen('cd '+material_path+' && make clean && make ' + self.cxx_compiler_args + " MATERIAL=" + material, shell=True)
-    #         p.wait()
-
-    #     # BUILD OPENCASCADE FRONT-END
-    #     print("Building OpenCascade curvilinear mesh generation front-end")
-    #     occ_path = os.path.join(self._pwd_,"Florence/BoundaryCondition/CurvilinearMeshing/PostMesh")
-    #     p = subprocess.Popen('cd '+occ_path+' && rm PostMeshPy.cpp PostMeshPy.so', shell=True)
-    #     p = subprocess.Popen('cd '+occ_path+' && python setup.py build_ext -ifq', shell=True)
-    #     p = subprocess.Popen('cd '+occ_path+' && rm -rf build', shell=True)
-    #     p.wait()
-
-
+        var = raw_input("This includes florence in your python path. Do you agree (y/n): ")
+        if var=="n" or "no" in var:
+            return
+        execute('export PYTHONPATH="$HOME/florence:$PYTHONPATH" >> ~/.profile && source ~/.profile')
+        execute('export PYTHONPATH="' + self._pwd_ + ':$PYTHONPATH" >> ~/.profile && source ~/.profile')
 
 
 # helper functions

@@ -29,8 +29,10 @@
 
 
 
-typedef int64_t Integer;
-typedef uint64_t UInteger;
+// typedef int64_t Integer;
+// typedef uint64_t UInteger;
+using Integer = long long int;
+using UInteger = unsigned long long int;
 typedef double Real;
 typedef bool Boolean;
 
