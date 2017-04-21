@@ -89,12 +89,12 @@ public:
         Tensor<T,ndim,ndim,ndim,ndim> elasticity = C_mech + C_elect;
 
         // Compiler may not inline
-        // Tensor<T,ndim,ndim,ndim,ndim> elasticity = \
+        // Tensor<T,ndim,ndim,ndim,ndim> elasticity = 
         //     /* C_mech */
-        //     2.0*mu2/J*(2.0*bb_ijkl - bb_ikjl - bb_iljk) + \
-        //     (2.*(mu1+2*mu2)/J - lamb*(J-1.) ) * (II_ikjl + II_iljk) + lamb*(2.*J-1.)*II_ijkl + \ 
+        //     2.0*mu2/J*(2.0*bb_ijkl - bb_ikjl - bb_iljk) + 
+        //     (2.*(mu1+2*mu2)/J - lamb*(J-1.) ) * (II_ikjl + II_iljk) + lamb*(2.*J-1.)*II_ijkl +  
         //     /* C_elect */
-        //     1./eps_2*(0.5*innerDD*( II_ijkl + II_ikjl + II_iljk) - \
+        //     1./eps_2*(0.5*innerDD*( II_ijkl + II_ikjl + II_iljk) - 
         //             IDD_ijkl - DDI_ijkl );
 
         // FIND COUPLING TENSOR
