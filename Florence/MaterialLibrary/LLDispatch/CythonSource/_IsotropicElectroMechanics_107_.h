@@ -69,15 +69,15 @@ public:
 
         auto coeff = J*J*J/mue/(eps_e*eps_e);
 
-        auto sigma_mech = 2.*mu1/J*b + \
+        Tensor<T,ndim,ndim> sigma_mech = 2.*mu1/J*b + \
             2.*mu2/J*(trb*b - matmul(b,b)) - \
             2.*(mu1+2*mu2+6*mue)/J*I + \
             lamb*(J-1)*I + \
             4.*mue/J*trb*b;
 
-        auto sigma_electric = 1./eps_2*(outerDD - 0.5*innerDD*I);
+        Tensor<T,ndim,ndim> sigma_electric = 1./eps_2*(outerDD - 0.5*innerDD*I);
 
-        auto simga_reg = 4.*J/eps_e*(innerDD*b + trb*outerDD) + \
+        Tensor<T,ndim,ndim> simga_reg = 4.*J/eps_e*(innerDD*b + trb*outerDD) + \
             4.0*coeff*innerDD*outerDD;
 
         Tensor<T,ndim,ndim> sigma = sigma_mech + sigma_electric + simga_reg;
@@ -98,14 +98,14 @@ public:
         auto DDb_ijkl = einsum<Index<i,j>,Index<k,l>>(outerDD,b);
         auto DDDD_ijkl = einsum<Index<i,j>,Index<k,l>>(outerDD,outerDD);
 
-        auto C_mech = 2.0*mu2/J*(2.0*bb_ijkl - bb_ikjl - bb_iljk) + \
+        Tensor<T,ndim,ndim,ndim,ndim> C_mech = 2.0*mu2/J*(2.0*bb_ijkl - bb_ikjl - bb_iljk) + \
             (2.*(mu1+2*mu2+6*mue)/J - lamb*(J-1.) ) * (II_ikjl + II_iljk) + lamb*(2.*J-1.)*II_ijkl + \
             8.*mue/J*bb_ijkl;
 
-        auto C_elect = 1./eps_2*(0.5*innerDD*( II_ijkl + II_ikjl + II_iljk) - \
+        Tensor<T,ndim,ndim,ndim,ndim> C_elect = 1./eps_2*(0.5*innerDD*( II_ijkl + II_ikjl + II_iljk) - \
                     IDD_ijkl - DDI_ijkl ); 
      
-        auto C_reg = 8.*J/eps_e*( bDD_ijkl + DDb_ijkl ) + \
+        Tensor<T,ndim,ndim,ndim,ndim> C_reg = 8.*J/eps_e*( bDD_ijkl + DDb_ijkl ) + \
             8.*coeff*DDDD_ijkl;
 
         Tensor<T,ndim,ndim,ndim,ndim> elasticity = C_mech + C_elect + C_reg;
