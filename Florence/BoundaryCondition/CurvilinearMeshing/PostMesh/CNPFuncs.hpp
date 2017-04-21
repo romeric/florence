@@ -17,7 +17,7 @@ template<typename T>
 STATIC ALWAYS_INLINE
 Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED> arange(T a, T b)
 {
-    //! EQUIVALENT TO NUMPY UNIQUE. GET A LINEARLY SPACED VECTOR
+    //! EQUIVALENT TO NUMPY ARANGE. GET A LINEARLY SPACED VECTOR
     return Eigen::Matrix<T,DYNAMIC,1,
             POSTMESH_ALIGNED>::LinSpaced(Eigen::Sequential,(b-a),a,b-1);
 }
@@ -27,18 +27,21 @@ STATIC ALWAYS_INLINE
 Eigen::Matrix<T,DYNAMIC,DYNAMIC,POSTMESH_ALIGNED>
 arange(T b=1)
 {
-    //! EQUIVALENT TO NUMPY UNIQUE. GET A LINEARLY SPACED VECTOR
+    //! EQUIVALENT TO NUMPY ARANGE. GET A LINEARLY SPACED VECTOR
     //! DEFAULT ARANGE STARTING FROM ZERO AND ENDING AT 1.
     //! b IS OPTIONAL AND A IS ALWAYS ZERO
 
     Integer a = 0;
     return Eigen::Matrix<T,DYNAMIC,1,
-            POSTMESH_ALIGNED>::LinSpaced(Eigen::Sequential,(Integer(b)-a),a,Integer(b)-1);
+            POSTMESH_ALIGNED>::LinSpaced(Integer(Integer(b)-a),Integer(a),Integer(Integer(b)-1));
+
+    // Eigen::Matrix<T,DYNAMIC,1,POSTMESH_ALIGNED> out; out.setLinSpaced(Integer(b),Integer(0),Integer(Integer(b)-1));
+    // return out;
 }
 
-template<typename Derived, typename U>
+template<typename Derived, typename U, typename V>
 Derived
-STATIC take(const Eigen::PlainObjectBase<Derived> &arr, const Eigen::PlainObjectBase<U> &arr_row, const Eigen::PlainObjectBase<U> &arr_col)
+STATIC take(const Eigen::PlainObjectBase<Derived> &arr, const Eigen::PlainObjectBase<U> &arr_row, const Eigen::PlainObjectBase<V> &arr_col)
 {
     //! TAKE OUT PART OF A 2D ARRAY. MAKES A COPY
     Derived arr_reduced;
@@ -199,7 +202,8 @@ STATIC where_eq(const Eigen::PlainObjectBase<T> &arr,
     {
         for (Integer j=0; j<arr.cols();++j)
         {
-            if (static_cast<Real>(abs(arr(i,j)-num))<tolerance)
+            // if (static_cast<Real>(std::abs((Integer)arr(i,j)-num))<tolerance)
+            if (Real( std::fabs((Real)arr(i,j)-num) ) < tolerance)
             {
                 idx_rows.push_back(i);
                 idx_cols.push_back(j);

@@ -1,5 +1,6 @@
 import os, sys
-sys.path.insert(1,'/home/roman/Dropbox/florence')
+# sys.path.insert(1,'/home/roman/Dropbox/florence')
+sys.path.insert(1,'/Users/romanpoya/Desktop/Florence')
 
 import numpy as np 
 from Florence import *
@@ -14,9 +15,11 @@ def ProblemData0(*args, **kwargs):
     p=2
 
     material = MooneyRivlin_0(ndim,mu1=1.0,mu2=1.0,lamb=5)
+    # material = NeoHookean_2(ndim,mu=1.0,lamb=5)
 
     mesh = Mesh()
-    mesh.Rectangle(upper_right_point=(1,10), nx=100, ny=1000, element_type="quad")
+    mesh.Rectangle(upper_right_point=(1,10), nx=1, ny=10, element_type="quad")
+    # mesh.Rectangle(upper_right_point=(1,10), nx=100, ny=1000, element_type="quad")
     # mesh.SimplePlot()
  
     def DirichletFunc(mesh):
@@ -1160,7 +1163,7 @@ def ProblemData_Rogelio3(*args, **kwargs):
 
     formulation = DisplacementPotentialFormulation(mesh)
 
-    fem_solver = FEMSolver(number_of_load_increments=2, analysis_nature="nonlinear",parallelise=True,
+    fem_solver = FEMSolver(number_of_load_increments=2, analysis_nature="nonlinear",parallelise=False,
         newton_raphson_tolerance=1.0e-6)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh, 

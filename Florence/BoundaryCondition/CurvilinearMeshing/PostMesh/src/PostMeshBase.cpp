@@ -14,7 +14,7 @@ PostMeshBase::PostMeshBase(const PostMeshBase& other) \
     this->mesh_edges = other.mesh_edges;
     this->mesh_faces = other.mesh_faces;
     this->projection_criteria = other.projection_criteria;
-    this->degree = degree;
+    this->degree = other.degree;
     this->imported_shape = other.imported_shape;
     this->no_of_shapes = other.no_of_shapes;
     this->geometry_points = other.geometry_points;
@@ -43,7 +43,7 @@ noexcept(std::is_copy_assignable<PostMeshBase>::value)
     this->mesh_edges = other.mesh_edges;
     this->mesh_faces = other.mesh_faces;
     this->projection_criteria = other.projection_criteria;
-    this->degree = degree;
+    this->degree = other.degree;
     this->imported_shape = other.imported_shape;
     this->no_of_shapes = other.no_of_shapes;
     this->geometry_points = other.geometry_points;
@@ -71,7 +71,7 @@ PostMeshBase::PostMeshBase(PostMeshBase&& other) noexcept :  \
     this->mesh_edges = std::move(other.mesh_edges);
     this->mesh_faces = std::move(other.mesh_faces);
     this->projection_criteria = std::move(other.projection_criteria);
-    this->degree = degree;
+    this->degree = other.degree;
     this->imported_shape = std::move(other.imported_shape);
     this->no_of_shapes = other.no_of_shapes;
     this->geometry_points = std::move(other.geometry_points);
@@ -104,7 +104,7 @@ PostMeshBase& PostMeshBase::operator=(PostMeshBase&& other) noexcept
     this->mesh_edges = std::move(other.mesh_edges);
     this->mesh_faces = std::move(other.mesh_faces);
     this->projection_criteria = std::move(other.projection_criteria);
-    this->degree = degree;
+    this->degree = other.degree;
     this->imported_shape = std::move(other.imported_shape);
     this->no_of_shapes = other.no_of_shapes;
     this->geometry_points = std::move(other.geometry_points);
@@ -371,8 +371,8 @@ void PostMeshBase::CheckMesh()
     }
     if (flag_p == 1)
     {
-        Eigen::MatrixI a_rows = cnp::arange(this->mesh_points.rows()-1);
-        Eigen::MatrixI a_cols = cnp::arange(this->mesh_points.cols());
+        Eigen::MatrixI a_rows = cnp::arange((Integer)this->mesh_points.rows()-1);
+        Eigen::MatrixI a_cols = cnp::arange((Integer)this->mesh_points.cols());
         this->mesh_points = cnp::take(this->mesh_points,a_rows,a_cols);
     }
 
@@ -388,8 +388,8 @@ void PostMeshBase::CheckMesh()
     }
     if (flag_e == 1)
     {
-        Eigen::MatrixI a_rows = cnp::arange(this->mesh_elements.rows()-1);
-        Eigen::MatrixI a_cols = cnp::arange(this->mesh_elements.cols());
+        Eigen::MatrixI a_rows = cnp::arange((Integer)this->mesh_elements.rows()-1);
+        Eigen::MatrixI a_cols = cnp::arange((Integer)this->mesh_elements.cols());
         this->mesh_elements = cnp::take(this->mesh_elements,a_rows,a_cols);
     }
 
@@ -405,8 +405,8 @@ void PostMeshBase::CheckMesh()
     }
     if (flag_ed == 1)
     {
-        Eigen::MatrixI a_rows = cnp::arange(this->mesh_edges.rows()-1);
-        Eigen::MatrixI a_cols = cnp::arange(this->mesh_edges.cols());
+        Eigen::MatrixI a_rows = cnp::arange((Integer)this->mesh_edges.rows()-1);
+        Eigen::MatrixI a_cols = cnp::arange((Integer)this->mesh_edges.cols());
         this->mesh_edges = cnp::take(this->mesh_edges,a_rows,a_cols);
     }
 
@@ -424,8 +424,8 @@ void PostMeshBase::CheckMesh()
         }
         if (flag_f == 1)
         {
-            Eigen::MatrixI a_rows = cnp::arange(this->mesh_faces.rows()-1);
-            Eigen::MatrixI a_cols = cnp::arange(this->mesh_faces.cols());
+            Eigen::MatrixI a_rows = cnp::arange((Integer)this->mesh_faces.rows()-1);
+            Eigen::MatrixI a_cols = cnp::arange((Integer)this->mesh_faces.cols());
             this->mesh_faces = cnp::take(this->mesh_faces,a_rows,a_cols);
         }
     }

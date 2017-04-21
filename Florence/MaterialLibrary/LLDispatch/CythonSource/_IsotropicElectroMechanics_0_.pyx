@@ -10,7 +10,7 @@ cimport numpy as np
 ctypedef double Real
 
 
-cdef extern from "_IsotropicElectroMechanics_0_.h":
+cdef extern from "_IsotropicElectroMechanics_0_.h" nogil:
     cdef cppclass _IsotropicElectroMechanics_0_[Real]:
         _IsotropicElectroMechanics_0_() except +
         _IsotropicElectroMechanics_0_(Real mu, Real lamb, Real eps_1) except +

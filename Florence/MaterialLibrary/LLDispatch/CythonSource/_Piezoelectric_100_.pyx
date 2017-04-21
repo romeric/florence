@@ -10,7 +10,7 @@ cimport numpy as np
 ctypedef double Real
 
 
-cdef extern from "_Piezoelectric_100_.h":
+cdef extern from "_Piezoelectric_100_.h" nogil:
     cdef cppclass _Piezoelectric_100_[Real]:
         _Piezoelectric_100_() except +
         _Piezoelectric_100_(Real mu1, Real mu2, Real mu3, Real lamb, Real eps_1, Real eps_2, Real eps_3) except +

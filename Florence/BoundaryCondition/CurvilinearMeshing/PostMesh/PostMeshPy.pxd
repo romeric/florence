@@ -3,8 +3,8 @@ from libcpp.vector cimport vector
 from libcpp.string cimport string
 
 
-ctypedef long Integer
-ctypedef unsigned long UInteger
+ctypedef long long Integer
+ctypedef unsigned long long UInteger
 ctypedef double Real
 
 cdef extern from "PyInterface.hpp":

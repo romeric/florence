@@ -1,5 +1,6 @@
 import os, sys
-sys.path.insert(1,'/home/roman/florence')
+# sys.path.insert(1,'/home/roman/florence')
+sys.path.insert(1,'/Users/romanpoya/Desktop/Florence')
 from Florence import *
 from Florence.VariationalPrinciple import *
 

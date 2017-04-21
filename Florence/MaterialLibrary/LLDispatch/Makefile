@@ -1,7 +1,7 @@
 PYTHON_VERSION = python2.7
 PYTHON_INCLUDE_PATH = /usr/include/
 PYTHON_LD_PATH = /usr/lib/
-CYTHONFLAGS = -DNPY_NO_DEPRECATED_API -Wno-cpp -Wno-unused-function -Wno-maybe-uninitialized
+CYTHONFLAGS = -DNPY_NO_DEPRECATED_API
 
 CYTHON = cython --cplus
 REMOVE = rm -rf
@@ -17,7 +17,7 @@ ifeq ($(UNAME_S),Darwin)
     FASTOR_INCLUDE_PATH +=/Users/romanpoya/Dropbox/Fastor
 endif
 
-FASTOR_OPTFLAGS = -DFASTOR_NO_ALIAS -DFASTOR_USE_VECTORISED_EXPR_ASSIGN -DCONTRACT_OPT=2 -DFASTOR_NO_STATIC_WARNING
+FASTOR_OPTFLAGS = -DFASTOR_NO_ALIAS -DFASTOR_USE_VECTORISED_EXPR_ASSIGN -DCONTRACT_OPT=2 -DFASTOR_NO_STATIC_WARNING #-DFASTOR_CONSERVATIVE_ALIGN
 
 INLINE_THRESHOLD = 100000
 CXXSTD=-std=c++14
@@ -29,8 +29,10 @@ NUMPY_INCLUDE_PATH = /usr/local/lib/python2.7/dist-packages/numpy/core/include
 
 ifeq ($(findstring g++,$(CXX)),g++)
 ifneq ($(findstring clang++,$(CXX)),clang++)
+CXXFLAGS += -Wno-cpp -Wno-unused-function -Wno-maybe-uninitialized
 CXXFLAGS += -march=native -ffast-math -fwrapv -mfpmath=sse -funroll-loops -finline-functions -finline-limit=$(INLINE_THRESHOLD) -ffp-contract=fast 
 else
+CXXFLAGS += -Wno-uninitialized -Wno-missing-braces -Wno-#warnings
 CXXFLAGS += -march=native -ffast-math -mllvm -inline-threshold=$(INLINE_THRESHOLD) -ffp-contract=fast
 endif
 endif

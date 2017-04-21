@@ -16,6 +16,7 @@
 #include <chrono>
 #include <memory>
 #include <algorithm>
+#include <numeric>
 #include <utility>
 #include <limits>
 #ifdef WINDOWS

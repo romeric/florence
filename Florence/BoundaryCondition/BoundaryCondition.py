@@ -10,7 +10,6 @@ from Florence.QuadratureRules import GaussLobattoQuadrature
 from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
 from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints
 
-from CurvilinearMeshing.IGAKitPlugin.IdentifyNURBSBoundaries import GetDirichletData
 # from Florence import PostMeshCurvePy as PostMeshCurve 
 # from Florence import PostMeshSurfacePy as PostMeshSurface 
 
@@ -250,9 +249,6 @@ class BoundaryCondition(object):
                     if self.requires_cad:
                         # CALL POSTMESH WRAPPER
                         nodesDBC, Dirichlet = self.PostMeshWrapper(formulation, mesh, material, solver, fem_solver)
-                    else:
-                        # CALL IGAKIT WRAPPER
-                        nodesDBC, Dirichlet = self.IGAKitWrapper(mesh)
 
                 else:
                     nodesDBC, Dirichlet = self.nodesDBC, self.Dirichlet
@@ -701,7 +697,8 @@ class BoundaryCondition(object):
             F_b_umf = np.zeros(F_b.shape[0])
             # F_b_umf[:] = F_b[:,0] # DOESN'T WORK
             for i in range(F_b_umf.shape[0]):
-                F_b_umf[i] = F_b[i,0]
+                # F_b_umf[i] = F_b[i,0]
+                F_b_umf[i] = F_b.flatten()[i]
             F_b = np.copy(F_b_umf)
 
         # GET REDUCED STIFFNESS

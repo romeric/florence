@@ -27,7 +27,7 @@ noexcept(std::is_copy_assignable<PostMeshCurve>::value)
         this->mesh_edges = other.mesh_edges;
         this->mesh_faces = other.mesh_faces;
         this->projection_criteria = other.projection_criteria;
-        this->degree = degree;
+        this->degree = other.degree;
         this->imported_shape = other.imported_shape;
         this->no_of_shapes = other.no_of_shapes;
         this->geometry_points = other.geometry_points;
@@ -76,7 +76,7 @@ PostMeshCurve& PostMeshCurve::operator=(PostMeshCurve&& other) noexcept
         this->mesh_edges = std::move(other.mesh_edges);
         this->mesh_faces = std::move(other.mesh_faces);
         this->projection_criteria = std::move(other.projection_criteria);
-        this->degree = degree;
+        this->degree = other.degree;
         this->imported_shape = std::move(other.imported_shape);
         this->no_of_shapes = other.no_of_shapes;
         this->geometry_points = std::move(other.geometry_points);
@@ -684,7 +684,7 @@ void PostMeshCurve::GetBoundaryPointsOrder()
 
     this->boundary_points_order = Eigen::MatrixI::Zero(this->fekete.rows(),this->fekete.cols());
     this->boundary_points_order(1) = this->fekete.rows()-1;
-    this->boundary_points_order.block(2,0,fekete.rows()-2,1) = cnp::arange(static_cast<Integer>(1),fekete.rows()-1);
+    this->boundary_points_order.block(2,0,fekete.rows()-2,1) = cnp::arange(Integer(1),Integer(fekete.rows()-1));
 
     // FOR ALL THE EDGES
     this->boundary_edges_order = Eigen::MatrixI::Zero(this->mesh_edges.rows(),this->mesh_edges.cols());
@@ -693,7 +693,9 @@ void PostMeshCurve::GetBoundaryPointsOrder()
     for (auto iedge=0;iedge<this->mesh_edges.rows();++iedge)
     {
         Eigen::MatrixUI current_edge = this->mesh_edges.row(iedge).transpose();
-        Eigen::MatrixUI all_points_cols = cnp::arange(static_cast<UInteger>(this->mesh_points.cols()));
+        // Eigen::MatrixUI all_points_cols = cnp::arange(static_cast<UInteger>(this->mesh_points.cols()));
+        // Eigen::MatrixR current_edge_coordinates = cnp::take(this->mesh_points,current_edge,all_points_cols);
+        Eigen::MatrixI all_points_cols = cnp::arange((Integer)this->mesh_points.cols());
         Eigen::MatrixR current_edge_coordinates = cnp::take(this->mesh_points,current_edge,all_points_cols);
         current_edge_coordinates = (current_edge_coordinates.array()/1000.).matrix().eval();
 

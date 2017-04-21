@@ -22,7 +22,7 @@ noexcept(std::is_copy_assignable<PostMeshSurface>::value)
     this->mesh_edges = other.mesh_edges;
     this->mesh_faces = other.mesh_faces;
     this->projection_criteria = other.projection_criteria;
-    this->degree = degree;
+    this->degree = other.degree;
     this->imported_shape = other.imported_shape;
     this->no_of_shapes = other.no_of_shapes;
     this->geometry_points = other.geometry_points;
@@ -63,7 +63,7 @@ PostMeshSurface& PostMeshSurface::operator=(PostMeshSurface&& other) noexcept
     this->mesh_edges = std::move(other.mesh_edges);
     this->mesh_faces = std::move(other.mesh_faces);
     this->projection_criteria = std::move(other.projection_criteria);
-    this->degree = degree;
+    this->degree = other.degree;
     this->imported_shape = std::move(other.imported_shape);
     this->no_of_shapes = other.no_of_shapes;
     this->geometry_points = std::move(other.geometry_points);
@@ -1103,7 +1103,7 @@ void PostMeshSurface::MeshPointInversionSurface(Integer project_on_curves, Integ
     auto arr_col = cnp::arange(no_face_nodes);
     this->nodes_dir = cnp::take(this->mesh_faces,arr_row,arr_col);
     this->nodes_dir = cnp::ravel(this->nodes_dir);
-    this->index_nodes = cnp::arange(no_face_nodes);
+    this->index_nodes = cnp::arange((Integer)no_face_nodes);
     this->displacements_BC = Eigen::MatrixR::Zero(this->no_dir_faces*no_face_nodes,this->ndim);
 
     if (this->curve_surface_projection_flags.rows() != this->dirichlet_faces.rows())
@@ -1218,7 +1218,7 @@ void PostMeshSurface::MeshPointInversionSurfaceArcLength(Integer project_on_curv
     auto arr_col = cnp::arange(no_face_nodes);
     this->nodes_dir = cnp::take(this->mesh_faces,arr_row,arr_col);
     this->nodes_dir = cnp::ravel(this->nodes_dir);
-    this->index_nodes = cnp::arange(no_face_nodes);
+    this->index_nodes = cnp::arange((Integer)no_face_nodes);
     this->displacements_BC = Eigen::MatrixR::Zero(this->no_dir_faces*no_face_nodes,this->ndim);
 
     for (auto idir=0; idir< this->no_dir_faces; ++idir)
