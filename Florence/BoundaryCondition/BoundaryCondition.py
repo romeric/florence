@@ -319,20 +319,6 @@ class BoundaryCondition(object):
 
 
 
-
-    def IGAKitWrapper(self,mesh):
-        """Calls IGAKit wrapper to get exact Dirichlet boundary conditions"""
-
-        # GET THE NURBS CURVE FROM PROBLEMDATA
-        # nurbs = self.NURBSParameterisation()
-        # IDENTIFIY DIRICHLET BOUNDARY CONDITIONS BASED ON THE EXACT GEOMETRY
-        C = mesh.InferPolynomialDegree() - 1
-        nodesDBC, Dirichlet = GetDirichletData(mesh,self.nurbs_info,self,C) 
-
-        return nodesDBC[:,None], Dirichlet
-
-
-
     def PostMeshWrapper(self, formulation, mesh, material, solver, fem_solver):
         """Calls PostMesh wrapper to get exact Dirichlet boundary conditions"""
 
