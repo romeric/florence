@@ -626,11 +626,13 @@ class FEMSolver(object):
         # REALLY DANGEROUS FOR MULTIPHYSICS PROBLEMS
         # V_stiffness[np.isclose(V_stiffness,0.)] = 0.
 
-        stiffness = coo_matrix((V_stiffness,(I_stiffness,J_stiffness)),
-            shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64).tocsc()
+        # stiffness = coo_matrix((V_stiffness,(I_stiffness,J_stiffness)),
+        #     shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64).tocsc()
         # stiffness = csc_matrix((V_stiffness,(I_stiffness,J_stiffness)),
             # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float32)
-        # stiffness = csc_matrix((V_stiffness,(I_stiffness,J_stiffness)),
+        stiffness = csc_matrix((V_stiffness,(I_stiffness,J_stiffness)),
+            shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
+        # stiffness = csr_matrix((V_stiffness,(I_stiffness,J_stiffness)),
             # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
         
         # GET STORAGE/MEMORY DETAILS
