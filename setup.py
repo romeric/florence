@@ -231,11 +231,6 @@ def execute(_cmd):
 
 
 
-
-
-
-
-
 if __name__ == "__main__":
 
     _fc_compiler = None
@@ -270,7 +265,7 @@ if __name__ == "__main__":
         setup_instance.Clean()
     elif _op == "install":
         setup_instance.Install()
-    # else:
-    #     setup_instance.Build()
+    else:
+        setup_instance.Build()
 
 
