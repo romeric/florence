@@ -2,31 +2,25 @@
 #include "_LegendreTransform_.h"
 
 template<typename U>
-class _IsotropicElectroMechanics_105_: public _MaterialBase_<U> {
+class _IsotropicElectroMechanics_101_: public _MaterialBase_<U> {
 public:
-    U mu1;
-    U mu2;
+    U mu;
     U lamb;
     U eps_1;
-    U eps_2;
 
-    _IsotropicElectroMechanics_105_() = default;
+    _IsotropicElectroMechanics_101_() = default;
 
-    _IsotropicElectroMechanics_105_(U mu1, U mu2, U lamb, U eps_1, U eps_2) {
-        this->mu1 = mu1;
-        this->mu2 = mu2;
+    _IsotropicElectroMechanics_101_(U mu, U lamb, U eps_1) {
+        this->mu = mu;
         this->lamb = lamb;
         this->eps_1 = eps_1;
-        this->eps_2 = eps_2;
     }
 
     FASTOR_INLINE
-    void SetParameters(U mu1, U mu2, U lamb, U eps_1, U eps_2){
-        this->mu1 = mu1;
-        this->mu2 = mu2;
+    void SetParameters(U mu, U lamb, U eps_1){
+        this->mu = mu;
         this->lamb = lamb;
         this->eps_1 = eps_1;
-        this->eps_2 = eps_2;
     }
 
 
@@ -49,26 +43,10 @@ public:
         auto b = matmul(F,transpose(F));
 
         // COMPUTE ELECTRIC DISPLACEMENT
-        auto inv = inverse(static_cast<decltype(b)>(J/eps_1*inverse(b) + J/eps_2*I));
-        auto D = matmul(inv, E);
-
-        // auto innerDD = inner(D,D);
-        auto outerDD = outer(D,D);
+        Tensor<T,ndim> D = (eps_1/J)*E;
 
         // COMPUTE CAUCHY STRESS TENSOR
-        T trb = trace(b);
-        if (ndim == 2) {
-            trb += 1.;
-        }
-
-        Tensor<T,ndim,ndim> sigma_mech = 2.*mu1/J*b + \
-            2.*mu2/J*(trb*b - matmul(b,b)) - \
-            2.*(mu1+2*mu2)/J*I + \
-            lamb*(J-1)*I;
-
-        Tensor<T,ndim,ndim> sigma_electric = J/eps_2*outerDD;
-
-        Tensor<T,ndim,ndim> sigma = sigma_mech + sigma_electric;
+        Tensor<T,ndim,ndim> sigma = mu/J*(b - I) + lamb*(J-1)*I + J/eps_1*outer(D,D);
  
         // FIND ELASTICITY TENSOR
         // auto II_ijkl = einsum<Index<i,j>,Index<k,l>>(I,I);
@@ -76,14 +54,7 @@ public:
         auto II_ikjl = permutation<Index<i,k,j,l>>(II_ijkl);
         auto II_iljk = permutation<Index<i,l,j,k>>(II_ijkl); 
 
-        // auto bb_ijkl = einsum<Index<i,j>,Index<k,l>>(b,b);
-        auto bb_ijkl = outer(b,b);
-        auto bb_ikjl = permutation<Index<i,k,j,l>>(bb_ijkl);
-        auto bb_iljk = permutation<Index<i,l,j,k>>(bb_ijkl);
-
-        Tensor<T,ndim,ndim,ndim,ndim> elasticity = 2.0*mu2/J*(2.0*bb_ijkl - bb_ikjl - bb_iljk) + \
-            (2.*(mu1+2*mu2)/J - lamb*(J-1.) ) * (II_ikjl + II_iljk) + lamb*(2.*J-1.)*II_ijkl;
-
+        Tensor<T,ndim,ndim,ndim,ndim> elasticity = lamb*(2.*J-1.)*II_ijkl + (mu/J - lamb*(J-1))*(II_ikjl+II_iljk);
 
 
         // FIND COUPLING TENSOR
@@ -92,10 +63,10 @@ public:
         auto ID_ikj = permutation<Index<i,k,j>>(ID_ijk); 
         auto ID_jki = permutation<Index<j,k,i>>(ID_ijk); 
 
-        Tensor<T,ndim,ndim,ndim> coupling =  J/eps_2*(ID_ikj + ID_jki);
+        Tensor<T,ndim,ndim,ndim> coupling =  J/eps_1*(ID_ikj + ID_jki);
 
         // FIND DIELELCTRIC TENSOR
-        Tensor<T,ndim,ndim> dielectric = J/eps_1*inverse(b)  + J/eps_2*I;
+        Tensor<T,ndim,ndim> dielectric = J/eps_1*I;
 
         // PERFORM LEGENDRE TRANSFORM
         auto legendre_transform = _LegendreTransform_<T>();
@@ -113,7 +84,7 @@ public:
 };
 
 template<> template<>
-void _IsotropicElectroMechanics_105_<Real>::KineticMeasures<Real>(Real *Dnp, Real *Snp, Real* Hnp, 
+void _IsotropicElectroMechanics_101_<Real>::KineticMeasures<Real>(Real *Dnp, Real *Snp, Real* Hnp, 
     int ndim, int ngauss, const Real *Fnp, const Real *Enp) {
 
     if (ndim==3) {
