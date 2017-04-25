@@ -15,8 +15,8 @@ CCFLAGS= -fPIC -shared -pthread -Wall $(CYTHONFLAGS) $(OPTFLAGS)
 # NUMPY_INCLUDE_PATH=python -c "import numpy; print numpy.get_include()"
 NUMPY_INCLUDE_PATH = /usr/local/lib/python2.7/dist-packages/numpy/core/include
 
-ifeq ($(findstring g++,$(CXX)),g++)
-ifneq ($(findstring clang++,$(CXX)),clang++)
+ifeq ($(findstring gcc,$(CC)),gcc)
+ifneq ($(findstring clang,$(CC)),clang)
 CCFLAGS += -Wno-cpp -Wno-unused-function -Wno-maybe-uninitialized 
 CCFLAGS += -march=native -ffast-math -fwrapv -mfpmath=sse -funroll-loops -finline-functions -finline-limit=$(INLINE_THRESHOLD) -ffp-contract=fast
 else
@@ -24,7 +24,7 @@ CCFLAGS += -Wno-uninitialized -Wno-#warnings
 CCFLAGS += -march=native -ffast-math -mllvm -inline-threshold=$(INLINE_THRESHOLD) -ffp-contract=fast
 endif
 endif
-ifeq ($(findstring icpc,$(CXX)),icpc)
+ifeq ($(findstring icc,$(CC)),icc)
 CCFLAGS += -march=native -no-ansi-alias -xHost -fp-model fast=1 -inline-forceinline -inline-factor=$(INLINE_THRESHOLD)
 endif
 
