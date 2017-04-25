@@ -43,7 +43,7 @@ public:
         copy_numpy(E,Enp);
 
         // FIND THE KINEMATIC MEASURES
-        Tensor<Real,ndim,ndim> I; I.eye();
+        Tensor<T,ndim,ndim> I; I.eye();
         auto J = determinant(F);
         // auto H = cofactor(F);
         auto b = matmul(F,transpose(F));

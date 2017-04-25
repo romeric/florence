@@ -68,7 +68,6 @@ class FEMSolver(object):
         self.platform = platform
         self.backend = backend
         self.debug = False
-        self.timer = 0.
 
 
     def __checkdata__(self, material, boundary_condition, formulation, mesh):

@@ -4,6 +4,7 @@ from Florence import QuadratureRule, FunctionSpace
 
 from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import *
 from Florence.FiniteElements.ElementalMatrices._KinematicMeasures_ import _KinematicMeasures_
+from _ConstitutiveStiffnessDF_ import __ConstitutiveStiffnessIntegrandDF__
 from Florence.Tensor import issymetric
 
 class DisplacementFormulation(VariationalPrinciple):
@@ -203,21 +204,23 @@ class DisplacementFormulation(VariationalPrinciple):
         # COMPUTE WORK-CONJUGATES AND HESSIAN AT THIS GAUSS POINT
         CauchyStressTensor, H_Voigt = material.KineticMeasures(F,elem=elem)
 
-        # LOOP OVER GAUSS POINTS
-        for counter in range(AllGauss.shape[0]): 
+        # # LOOP OVER GAUSS POINTS
+        # for counter in range(AllGauss.shape[0]): 
             
-            # COMPUTE THE TANGENT STIFFNESS MATRIX
-            BDB_1, t = self.ConstitutiveStiffnessIntegrand(B, SpatialGradient[counter,:,:],
-                CauchyStressTensor[counter,:,:], H_Voigt[counter,:,:], analysis_nature=fem_solver.analysis_nature, 
-                has_prestress=fem_solver.has_prestress)
+        #     # COMPUTE THE TANGENT STIFFNESS MATRIX
+        #     BDB_1, t = self.ConstitutiveStiffnessIntegrand(B, SpatialGradient[counter,:,:],
+        #         CauchyStressTensor[counter,:,:], H_Voigt[counter,:,:], analysis_nature=fem_solver.analysis_nature, 
+        #         has_prestress=fem_solver.has_prestress)
             
-            if fem_solver.requires_geometry_update:
-                # INTEGRATE TRACTION FORCE
-                tractionforce += t*detJ[counter]
+        #     if fem_solver.requires_geometry_update:
+        #         # INTEGRATE TRACTION FORCE
+        #         tractionforce += t*detJ[counter]
 
-            # INTEGRATE STIFFNESS
-            stiffness += BDB_1*detJ[counter]
+        #     # INTEGRATE STIFFNESS
+        #     stiffness += BDB_1*detJ[counter]
 
+        stiffness, tractionforce = __ConstitutiveStiffnessIntegrandDF__(SpatialGradient,
+            CauchyStressTensor,H_Voigt,detJ,self.nvar,fem_solver.requires_geometry_update)
 
         # ADD GEOMETRIC STIFFNESS MATRIX
         if fem_solver.requires_geometry_update:
