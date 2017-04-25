@@ -47,7 +47,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
                 norder_post = 2*(C+1)
             else:
-                norder = C+3
+                norder = C+2
                 norder_post = 2*(C+2)
 
             # GET QUADRATURE
@@ -235,9 +235,8 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
         # COMPUTE WORK-CONJUGATES AND HESSIAN AT THIS GAUSS POINT
         ElectricDisplacementx, CauchyStressTensor, H_Voigt = material.KineticMeasures(F, ElectricFieldx, elem=elem)
-        # LOOP OVER GAUSS POINTS
-        # from time import time
-        # tt = time()
+        
+        # # LOOP OVER GAUSS POINTS
         # for counter in range(AllGauss.shape[0]): 
 
         #     # COMPUTE THE TANGENT STIFFNESS MATRIX
@@ -254,11 +253,8 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         #     # INTEGRATE STIFFNESS
         #     stiffness += BDB_1*detJ[counter]
         
-        stiffness, tractionforce = __ConstitutiveStiffnessIntegrandDPF__(SpatialGradient,ElectricDisplacementx,CauchyStressTensor,H_Voigt,detJ,self.nvar,
-                fem_solver.requires_geometry_update)
-
-        # tt = time() - tt
-        # fem_solver.timer += tt
+        stiffness, tractionforce = __ConstitutiveStiffnessIntegrandDPF__(SpatialGradient,ElectricDisplacementx,
+            CauchyStressTensor,H_Voigt,detJ,self.nvar,fem_solver.requires_geometry_update)
 
         # ADD GEOMETRIC STIFFNESS MATRIX
         if fem_solver.requires_geometry_update:

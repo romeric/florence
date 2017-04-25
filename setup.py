@@ -42,7 +42,8 @@ class FlorenceSetup(object):
 
     extension_paths = None
 
-    def __init__(self, _fc_compiler=None, _cc_compiler=None, _cxx_compiler=None):
+    def __init__(self, _fc_compiler=None, _cc_compiler=None, _cxx_compiler=None,
+        _blas=None):
 
         # GET THE CURRENT WORKING DIRECTORY
         self._pwd_ = os.path.dirname(os.path.realpath('__file__'))
@@ -51,7 +52,7 @@ class FlorenceSetup(object):
         # Get numpy version and paths to header
         self.GetNumPyPath()
         # Get BLAS version and paths
-        self.GetBLAS()
+        self.GetBLAS(_blas)
         # Set C/Fortran/C++ compiler
         self.SetCompiler(_fc_compiler,_cc_compiler,_cxx_compiler)
         # Set up compiler arguments for all extension modules
@@ -104,7 +105,19 @@ class FlorenceSetup(object):
         else:
             self.blas_version = "openblas"
 
-        dirs = ["/usr/lib/","/usr/local/lib/","/opt/OpenBLAS/lib"]
+        dirs = ["/opt/OpenBLAS/lib","/usr/local/Cellar/openblas/","/usr/lib/","/usr/local/lib/"]
+        aux_path = "/usr/local/Cellar/openblas"
+        if os.path.isdir(aux_path):
+            files = os.listdir(aux_path)
+            if self.blas_version+".dylib" not in files:
+                for d in files:
+                    if os.path.isdir(os.path.join(aux_path,d)):
+                        files2 = os.listdir(os.path.join(aux_path,d))
+                        if self.blas_version+".dylib" not in files:
+                            if os.path.isdir(os.path.join(aux_path,d,"lib")):
+                                dirs.append(os.path.join(aux_path,d,"lib"))
+
+        found_blas = False
         for d in dirs:
             if os.path.isdir(d):
                 libs = os.listdir(d)
@@ -112,8 +125,10 @@ class FlorenceSetup(object):
                     if self.blas_version+".so" in blas or self.blas_version+".dylib" in blas:
                         self.blas_ld_path = d
                         self.blas_include_path = d.replace("lib","include")
+                        found_blas = True
                         break
-                break
+                if found_blas:
+                    break
 
 
     def SetCompiler(self, _fc_compiler=None, _cc_compiler=None, _cxx_compiler=None):
@@ -172,7 +187,7 @@ class FlorenceSetup(object):
 
         self.extension_paths = [tensor_path,mesh_path,jacobi_path,bp_path,km_path,gm_path,cm_path,material_path,occ_path]
 
-        # self.extension_paths = [cm_path]
+        self.extension_paths = [material_path]
 
     def SourceClean(self):
 
@@ -212,12 +227,13 @@ class FlorenceSetup(object):
                                     "_IsotropicElectroMechanics_0_", 
                                     "_IsotropicElectroMechanics_3_", 
                                     "_SteinmannModel_",
+                                    "_IsotropicElectroMechanics_101_", 
                                     "_IsotropicElectroMechanics_105_", 
                                     "_IsotropicElectroMechanics_106_", 
                                     "_IsotropicElectroMechanics_107_"
                                 ]
 
-        # low_level_material_list = ["_IsotropicElectroMechanics_107_"]
+        low_level_material_list = ["_IsotropicElectroMechanics_101_"]
 
         assert self.extension_paths != None
 

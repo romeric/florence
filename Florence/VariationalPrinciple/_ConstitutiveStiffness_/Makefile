@@ -34,15 +34,22 @@ endif
 
 all: build_module
 
-build_module: 
-	@echo "Building low level constitutive stiffness dispatcher modules"
+build_module:
+	@echo "Building low level mechanical constitutive stiffness dispatcher module"
+	$(CYTHON) _ConstitutiveStiffnessDF_.pyx
+	$(CXX) $(CXXSTD) $(CXXFLAGS) _ConstitutiveStiffnessDF_.cpp -o _ConstitutiveStiffnessDF_.so -I. -I$(PYTHON_INCLUDE_PATH) \
+	     -I$(NUMPY_INCLUDE_PATH) -I$(BLAS_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION) -L$(BLAS_LD_PATH) -l$(BLAS_VERSION)
+	@$(MOVE) _ConstitutiveStiffnessDF_.so ../
+
+	@echo "Building low level electromechanical constitutive stiffness dispatcher module"
 	$(CYTHON) _ConstitutiveStiffnessDPF_.pyx
 	$(CXX) $(CXXSTD) $(CXXFLAGS) _ConstitutiveStiffnessDPF_.cpp -o _ConstitutiveStiffnessDPF_.so -I. -I$(PYTHON_INCLUDE_PATH) \
 	     -I$(NUMPY_INCLUDE_PATH) -I$(BLAS_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION) -L$(BLAS_LD_PATH) -l$(BLAS_VERSION)
 	@$(MOVE) _ConstitutiveStiffnessDPF_.so ../
 
 clean:
+	$(REMOVE) _ConstitutiveStiffnessDF_.cpp _ConstitutiveStiffnessDF_.so ../_ConstitutiveStiffnessDF_.so
 	$(REMOVE) _ConstitutiveStiffnessDPF_.cpp _ConstitutiveStiffnessDPF_.so ../_ConstitutiveStiffnessDPF_.so
 
 source_clean:
-	$(REMOVE) _ConstitutiveStiffnessDPF_.cpp
+	$(REMOVE) _ConstitutiveStiffnessDF_.cpp _ConstitutiveStiffnessDPF_.cpp

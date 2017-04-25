@@ -2693,6 +2693,9 @@ class Mesh(object):
         nx=5, ny=5, element_type="tri"):
         """Creates a qud/tri mesh of on rectangle"""
 
+        if element_type != "tri" and element_type != "quad":
+            raise ValueError("Element type should either be tri or quad")
+
         if self.elements is not None and self.points is not None:
             self.__reset__()
 

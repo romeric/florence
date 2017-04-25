@@ -24,6 +24,15 @@ class IsotropicElectroMechanics_101(Material):
         elif self.ndim == 3:
             self.H_VoigtSize = 9
 
+        # LOW LEVEL DISPATCHER
+        self.has_low_level_dispatcher = True
+        # self.has_low_level_dispatcher = False
+
+    def KineticMeasures(self,F,ElectricFieldx, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._IsotropicElectroMechanics_101_ import KineticMeasures
+        return KineticMeasures(self,np.ascontiguousarray(F), ElectricFieldx)
+
+
     def Hessian(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
 
         mu = self.mu
@@ -34,10 +43,10 @@ class IsotropicElectroMechanics_101(Material):
         J = StrainTensors['J'][gcounter]
         b = StrainTensors['b'][gcounter]
 
-        D  = ElectricDisplacementx.reshape(self.ndim,1)
-        Dx = D.reshape(self.ndim)
-        DD = np.dot(D.T,D)[0,0]
-        bb = np.dot(b,b)
+        # D  = ElectricDisplacementx.reshape(self.ndim,1)
+        Dx = ElectricDisplacementx.reshape(self.ndim)
+        # DD = np.dot(D.T,D)[0,0]
+        # bb = np.dot(b,b)
 
         self.elasticity_tensor = lamb*(2.*J-1.)*einsum("ij,kl",I,I) + \
         (mu/J - lamb*(J-1))*( einsum("ik,jl",I,I)+einsum("il,jk",I,I) )
