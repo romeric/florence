@@ -19,9 +19,9 @@ def GeometricStiffnessIntegrand(np.ndarray[Real, ndim=3, mode='c'] SpatialGradie
     np.ndarray[Real, ndim=3, mode='c'] CauchyStressTensor,
     np.ndarray[Real, ndim=1] detJ, int nvar):
 
-    cdef int ndim = SpatialGradient.shape[2]
-    cdef int nodeperelem = SpatialGradient.shape[1]
     cdef int ngauss = SpatialGradient.shape[0]
+    cdef int nodeperelem = SpatialGradient.shape[1]
+    cdef int ndim = SpatialGradient.shape[2]
     cdef int local_size = nvar*nodeperelem
 
     cdef np.ndarray[Real, ndim=2, mode='c'] geometric_stiffness = np.zeros((local_size,
@@ -29,5 +29,6 @@ def GeometricStiffnessIntegrand(np.ndarray[Real, ndim=3, mode='c'] SpatialGradie
 
     _GeometricStiffnessFiller_(&geometric_stiffness[0,0], &SpatialGradient[0,0,0], 
         &CauchyStressTensor[0,0,0], &detJ[0], ndim, nvar, nodeperelem, ngauss)
+
 
     return geometric_stiffness
