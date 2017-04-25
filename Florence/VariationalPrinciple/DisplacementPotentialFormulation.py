@@ -4,6 +4,7 @@ from Florence import QuadratureRule, FunctionSpace
 
 from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import *
 from Florence.FiniteElements.ElementalMatrices._KinematicMeasures_ import _KinematicMeasures_
+from _ConstitutiveStiffnessDPF_ import __ConstitutiveStiffnessIntegrandDPF__
 from Florence.Tensor import issymetric
 from Florence.LegendreTransform import LegendreTransform
 
@@ -46,7 +47,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
                 norder_post = 2*(C+1)
             else:
-                norder = C+2
+                norder = C+3
                 norder_post = 2*(C+2)
 
             # GET QUADRATURE
@@ -236,24 +237,28 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         ElectricDisplacementx, CauchyStressTensor, H_Voigt = material.KineticMeasures(F, ElectricFieldx, elem=elem)
         # LOOP OVER GAUSS POINTS
         # from time import time
-        for counter in range(AllGauss.shape[0]): 
+        # tt = time()
+        # for counter in range(AllGauss.shape[0]): 
 
-            # tt = time()
-            # COMPUTE THE TANGENT STIFFNESS MATRIX
-            BDB_1, t = self.ConstitutiveStiffnessIntegrand(B, SpatialGradient[counter,:,:],
-                ElectricDisplacementx[counter,:,:], CauchyStressTensor[counter,:,:], H_Voigt[counter,:,:], 
-                analysis_nature=fem_solver.analysis_nature, has_prestress=fem_solver.has_prestress)
-            # tt = time() - tt
-            # fem_solver.timer += tt
+        #     # COMPUTE THE TANGENT STIFFNESS MATRIX
+        #     BDB_1, t = self.ConstitutiveStiffnessIntegrand(B, SpatialGradient[counter,:,:],
+        #         ElectricDisplacementx[counter,:,:], CauchyStressTensor[counter,:,:], H_Voigt[counter,:,:], 
+        #         analysis_nature=fem_solver.analysis_nature, has_prestress=fem_solver.has_prestress)
 
             
-            if fem_solver.requires_geometry_update:
-                # BDB_1 += self.GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],CauchyStressTensor[counter,:,:])
-                # INTEGRATE TRACTION FORCE
-                tractionforce += t*detJ[counter]
+        #     if fem_solver.requires_geometry_update:
+        #         # BDB_1 += self.GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],CauchyStressTensor[counter,:,:])
+        #         # INTEGRATE TRACTION FORCE
+        #         tractionforce += t*detJ[counter]
 
-            # INTEGRATE STIFFNESS
-            stiffness += BDB_1*detJ[counter]
+        #     # INTEGRATE STIFFNESS
+        #     stiffness += BDB_1*detJ[counter]
+        
+        stiffness, tractionforce = __ConstitutiveStiffnessIntegrandDPF__(SpatialGradient,ElectricDisplacementx,CauchyStressTensor,H_Voigt,detJ,self.nvar,
+                fem_solver.requires_geometry_update)
+
+        # tt = time() - tt
+        # fem_solver.timer += tt
 
         # ADD GEOMETRIC STIFFNESS MATRIX
         if fem_solver.requires_geometry_update:
@@ -307,19 +312,14 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         """Overrides base for electric potential formulation"""
 
         # MATRIX FORM
-        # SpatialGradient = SpatialGradient.T
-        # SpatialGradient = np.ascontiguousarray(SpatialGradient.T)
         SpatialGradient = SpatialGradient.T.copy()
         ElectricDisplacementx = ElectricDisplacementx.flatten().copy()
-        # CauchyStressTensor = CauchyStressTensor.copy('c')
-        # H_Voigt = H_Voigt.copy('c')
 
         FillConstitutiveB(B,SpatialGradient,self.ndim,self.nvar)
         BDB = B.dot(H_Voigt.dot(B.T))
         
         t=[]
         if analysis_nature == 'nonlinear' or has_prestress:
-            # TotalTraction = GetTotalTraction(CauchyStressTensor,ElectricDisplacementx.ravel())
             TotalTraction = GetTotalTraction(CauchyStressTensor,ElectricDisplacementx)
             t = np.dot(B,TotalTraction) 
                 

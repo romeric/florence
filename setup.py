@@ -36,6 +36,10 @@ class FlorenceSetup(object):
     cc_compiler_args = None
     cxx_compiler_args = None
 
+    blas_version = None
+    blas_include_path = None
+    blas_ld_path = None
+
     extension_paths = None
 
     def __init__(self, _fc_compiler=None, _cc_compiler=None, _cxx_compiler=None):
@@ -46,6 +50,8 @@ class FlorenceSetup(object):
         self.GetPythonPath()
         # Get numpy version and paths to header
         self.GetNumPyPath()
+        # Get BLAS version and paths
+        self.GetBLAS()
         # Set C/Fortran/C++ compiler
         self.SetCompiler(_fc_compiler,_cc_compiler,_cxx_compiler)
         # Set up compiler arguments for all extension modules
@@ -91,6 +97,25 @@ class FlorenceSetup(object):
         self.numpy_include_path = np.get_include()
 
 
+    def GetBLAS(self, _blas=None):
+
+        if _blas is not None:
+            self.blas_version = _blas
+        else:
+            self.blas_version = "openblas"
+
+        dirs = ["/usr/lib/","/usr/local/lib/","/opt/OpenBLAS/lib"]
+        for d in dirs:
+            if os.path.isdir(d):
+                libs = os.listdir(d)
+                for blas in libs:
+                    if self.blas_version+".so" in blas or self.blas_version+".dylib" in blas:
+                        self.blas_ld_path = d
+                        self.blas_include_path = d.replace("lib","include")
+                        break
+                break
+
+
     def SetCompiler(self, _fc_compiler=None, _cc_compiler=None, _cxx_compiler=None):
 
         if not "darwin" in self.os and not "linux" in self.os:
@@ -119,7 +144,9 @@ class FlorenceSetup(object):
         # Generic compiler arguments
         self.compiler_args = "PYTHON_VERSION=" + self.python_interpreter + " PYTHON_INCLUDE_PATH=" + \
             self.python_include_path + " PYTHON_LD_PATH=" + self.python_ld_path + \
-            " NUMPY_INCLUDE_PATH=" + self.numpy_include_path
+            " NUMPY_INCLUDE_PATH=" + self.numpy_include_path + \
+            " BLAS_VERSION=" + self.blas_version + " BLAS_INCLUDE_PATH="+ self.blas_include_path + \
+            " BLAS_LD_PATH=" + self.blas_ld_path
 
         self.fc_compiler_args = "FC=" + self.fc_compiler + " " + self.compiler_args
         self.cc_compiler_args = "CC=" + self.cc_compiler + " " + self.compiler_args
@@ -139,12 +166,13 @@ class FlorenceSetup(object):
         bp_path = os.path.join(_pwd_,"FunctionSpace","OneDimensional","_OneD")
         km_path = os.path.join(_pwd_,"FiniteElements","ElementalMatrices","_KinematicMeasures_")
         gm_path = os.path.join(_pwd_,"VariationalPrinciple","_GeometricStiffness_")
+        cm_path = os.path.join(_pwd_,"VariationalPrinciple","_ConstitutiveStiffness_")
         material_path = os.path.join(_pwd_,"MaterialLibrary","LLDispatch")
         occ_path = os.path.join(_pwd_,"BoundaryCondition","CurvilinearMeshing","PostMesh")
 
-        self.extension_paths = [tensor_path,mesh_path,jacobi_path,bp_path,km_path,gm_path,material_path,occ_path]
+        self.extension_paths = [tensor_path,mesh_path,jacobi_path,bp_path,km_path,gm_path,cm_path,material_path,occ_path]
 
-        # self.extension_paths = [material_path]
+        # self.extension_paths = [cm_path]
 
     def SourceClean(self):
 
@@ -267,5 +295,6 @@ if __name__ == "__main__":
         setup_instance.Install()
     else:
         setup_instance.Build()
+
 
 

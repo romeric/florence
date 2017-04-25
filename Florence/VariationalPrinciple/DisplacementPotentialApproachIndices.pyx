@@ -193,7 +193,7 @@ cdef inline void GetTotalTraction_(double *TotalTraction, const double *CauchySt
         #
         TotalTraction[6] = ElectricDisplacementx[0]
         TotalTraction[7] = ElectricDisplacementx[1]
-        TotalTraction[8] = ElectricDisplacementx[3]
+        TotalTraction[8] = ElectricDisplacementx[2]
 
 
 
