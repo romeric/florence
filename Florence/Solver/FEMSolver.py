@@ -68,6 +68,7 @@ class FEMSolver(object):
         self.platform = platform
         self.backend = backend
         self.debug = False
+        self.timer = 0.
 
 
     def __checkdata__(self, material, boundary_condition, formulation, mesh):
@@ -623,11 +624,11 @@ class FEMSolver(object):
             del ParallelTuple
         gc.collect()
 
-        # REALLY DANGEROUS FOR MULTIPHYSICS PROBLEMS
+        # REALLY DANGEROUS FOR MULTIPHYSICS PROBLEMS - NOTE THAT SCIPY RUNS A PRUNE ANYWAY
         # V_stiffness[np.isclose(V_stiffness,0.)] = 0.
 
         # stiffness = coo_matrix((V_stiffness,(I_stiffness,J_stiffness)),
-        #     shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64).tocsc()
+            # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64).tocsc()
         # stiffness = csc_matrix((V_stiffness,(I_stiffness,J_stiffness)),
             # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float32)
         stiffness = csc_matrix((V_stiffness,(I_stiffness,J_stiffness)),

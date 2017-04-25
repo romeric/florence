@@ -1,9 +1,13 @@
 import numpy as np
+from numpy.polynomial.legendre import leggauss
 import warnings
 from Florence.FunctionSpace.JacobiPolynomials import JacobiPolynomials, DiffJacobiPolynomials
 
 
 def GaussQuadrature(N,a=-1,b=1):
+    if a==-1 and b==1:
+        return leggauss(N)
+    # The following is for historical purposes and when the range is different from [-1,1]
     N0=N-1
     N1 = N0+1
     N2 = N0+2

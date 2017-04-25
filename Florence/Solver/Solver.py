@@ -205,6 +205,8 @@ class LinearSolver(object):
                     A = A.astype(np.float64)
 
                 sol = spsolve(A,b,permc_spec='MMD_AT_PLUS_A',use_umfpack=True)
+                # from scikits import umfpack
+                # sol = umfpack.spsolve(A, b)
 
             elif self.solver_subtype=='mumps' and self.has_mumps:
                 # CALL JULIA'S MUMPS WRAPPER

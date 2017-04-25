@@ -235,12 +235,16 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         # COMPUTE WORK-CONJUGATES AND HESSIAN AT THIS GAUSS POINT
         ElectricDisplacementx, CauchyStressTensor, H_Voigt = material.KineticMeasures(F, ElectricFieldx, elem=elem)
         # LOOP OVER GAUSS POINTS
+        # from time import time
         for counter in range(AllGauss.shape[0]): 
 
+            # tt = time()
             # COMPUTE THE TANGENT STIFFNESS MATRIX
             BDB_1, t = self.ConstitutiveStiffnessIntegrand(B, SpatialGradient[counter,:,:],
                 ElectricDisplacementx[counter,:,:], CauchyStressTensor[counter,:,:], H_Voigt[counter,:,:], 
                 analysis_nature=fem_solver.analysis_nature, has_prestress=fem_solver.has_prestress)
+            # tt = time() - tt
+            # fem_solver.timer += tt
 
             
             if fem_solver.requires_geometry_update:
