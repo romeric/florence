@@ -56,7 +56,7 @@ public:
             // STORE CONVERGENCE RESULT
             iter += 1;
 
-            FASTOR_ASSERT(iter < newton_raphson_max_iter,"Quadrature point based Newton-Raphson did not converge");
+            FASTOR_EXIT_ASSERT(iter < newton_raphson_max_iter,"Quadrature point based Newton-Raphson did not converge");
 
         }
 
