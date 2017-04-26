@@ -49,17 +49,14 @@ public:
         Tensor<T,ndim,ndim> sigma = mu/J*(b - I) + lamb*(J-1)*I + J/eps_1*outer(D,D);
  
         // FIND ELASTICITY TENSOR
-        // auto II_ijkl = einsum<Index<i,j>,Index<k,l>>(I,I);
         auto II_ijkl = outer(I,I);
         auto II_ikjl = permutation<Index<i,k,j,l>>(II_ijkl);
         auto II_iljk = permutation<Index<i,l,j,k>>(II_ijkl); 
 
         Tensor<T,ndim,ndim,ndim,ndim> elasticity = lamb*(2.*J-1.)*II_ijkl + (mu/J - lamb*(J-1))*(II_ikjl+II_iljk);
 
-
         // FIND COUPLING TENSOR
         auto ID_ijk = outer(I,D); 
-        // auto ID_ijk = einsum<Index<i,j>,Index<k>>(I,D); 
         auto ID_ikj = permutation<Index<i,k,j>>(ID_ijk); 
         auto ID_jki = permutation<Index<j,k,i>>(ID_ijk); 
 

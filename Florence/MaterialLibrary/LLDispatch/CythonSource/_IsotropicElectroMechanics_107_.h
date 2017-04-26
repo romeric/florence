@@ -83,20 +83,27 @@ public:
         Tensor<T,ndim,ndim> sigma = sigma_mech + sigma_electric + simga_reg;
  
         // FIND ELASTICITY TENSOR
-        auto II_ijkl = einsum<Index<i,j>,Index<k,l>>(I,I);
+        // auto II_ijkl = einsum<Index<i,j>,Index<k,l>>(I,I);
+        auto II_ijkl = outer(I,I);
         auto II_ikjl = permutation<Index<i,k,j,l>>(II_ijkl);
         auto II_iljk = permutation<Index<i,l,j,k>>(II_ijkl); 
 
-        auto bb_ijkl = einsum<Index<i,j>,Index<k,l>>(b,b);
+        // auto bb_ijkl = einsum<Index<i,j>,Index<k,l>>(b,b);
+        auto bb_ijkl = outer(b,b);
         auto bb_ikjl = permutation<Index<i,k,j,l>>(bb_ijkl);
         auto bb_iljk = permutation<Index<i,l,j,k>>(bb_ijkl);
 
-        auto IDD_ijkl = einsum<Index<i,j>,Index<k,l>>(I,outerDD);
-        auto DDI_ijkl = einsum<Index<i,j>,Index<k,l>>(outerDD,I);
+        // auto IDD_ijkl = einsum<Index<i,j>,Index<k,l>>(I,outerDD);
+        // auto DDI_ijkl = einsum<Index<i,j>,Index<k,l>>(outerDD,I);
+        auto IDD_ijkl = outer(I,outerDD);
+        auto DDI_ijkl = outer(outerDD,I);
 
-        auto bDD_ijkl = einsum<Index<i,j>,Index<k,l>>(b,outerDD);
-        auto DDb_ijkl = einsum<Index<i,j>,Index<k,l>>(outerDD,b);
-        auto DDDD_ijkl = einsum<Index<i,j>,Index<k,l>>(outerDD,outerDD);
+        // auto bDD_ijkl = einsum<Index<i,j>,Index<k,l>>(b,outerDD);
+        // auto DDb_ijkl = einsum<Index<i,j>,Index<k,l>>(outerDD,b);
+        // auto DDDD_ijkl = einsum<Index<i,j>,Index<k,l>>(outerDD,outerDD);
+        auto bDD_ijkl = outer(b,outerDD);
+        auto DDb_ijkl = outer(outerDD,b);
+        auto DDDD_ijkl = outer(outerDD,outerDD);
 
         Tensor<T,ndim,ndim,ndim,ndim> C_mech = 2.0*mu2/J*(2.0*bb_ijkl - bb_ikjl - bb_iljk) + \
             (2.*(mu1+2*mu2+6*mue)/J - lamb*(J-1.) ) * (II_ikjl + II_iljk) + lamb*(2.*J-1.)*II_ijkl + \
@@ -115,7 +122,8 @@ public:
         auto ID_ikj = permutation<Index<i,k,j>>(ID_ijk); 
         auto ID_jki = permutation<Index<j,k,i>>(ID_ijk); 
 
-        auto bD_ijk = einsum<Index<i,j>,Index<k>>(b,D); 
+        // auto bD_ijk = einsum<Index<i,j>,Index<k>>(b,D); 
+        auto bD_ijk = outer(b,D); 
         // auto bD_ikj = permutation<Index<i,k,j>>(bD_ijk); 
         // auto bD_jki = permutation<Index<j,k,i>>(bD_ijk); 
 
