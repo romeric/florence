@@ -1,5 +1,6 @@
+#ifdef __SSE4_2__
 #include <emmintrin.h>
-#include <immintrin.h>
+#endif
 
 typedef double Real;
 
@@ -14,11 +15,10 @@ typedef double Real;
 
 
 
-// #define Scalar 0
-// #define SSE 1
-
 #define ABI 1
+#ifdef __SSE4_2__
 #define Aligned
+#endif
 
 
 static inline __m128d h_add_pd(__m128d a) {

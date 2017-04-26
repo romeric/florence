@@ -46,6 +46,7 @@ from IsotropicElectroMechanics_104 import *
 from IsotropicElectroMechanics_105 import *
 from IsotropicElectroMechanics_106 import *
 from IsotropicElectroMechanics_107 import *
+from IsotropicElectroMechanics_108 import *
 from Piezoelectric_100 import *
 
 

@@ -110,7 +110,8 @@ inline void _ConstitutiveStiffnessIntegrandDPF_Filler_(Real *stiffness, Real *tr
     else if (ndim==2) {
         t = (Real*)malloc(5*sizeof(Real));    
     }
-    Real *local_traction = (Real*)malloc(local_size*sizeof(Real));
+    // Real *local_traction = (Real*)malloc(local_size*sizeof(Real));
+    // std::fill(local_traction,local_traction+local_size,0.);
 
     Real *B = (Real*)malloc(H_VoigtSize*local_size*sizeof(Real));
     Real *HBT = (Real*)malloc(H_VoigtSize*local_size*sizeof(Real));
@@ -143,24 +144,25 @@ inline void _ConstitutiveStiffnessIntegrandDPF_Filler_(Real *stiffness, Real *tr
                 &ElectricDisplacementx[igauss*ndim], ndim);
 
             // Multiply B with traction - for loop is okay
-            std::fill(local_traction,local_traction+local_size,0.);
+            // std::fill(local_traction,local_traction+local_size,0.);
             for (int i=0; i<local_size; ++i) {
                 Real tmp = 0;
                 for (int j=0; j<H_VoigtSize; ++j) {
                     tmp += B[i*H_VoigtSize+j]*t[j];
                 }
-                local_traction[i] = tmp;
+                // local_traction[i] = tmp;
+                traction[i] += tmp*detJ_igauss;
             }
 
-            // Multiply traction with detJ
-            for (int i=0; i<local_size; ++i) {
-                traction[i] += local_traction[i]*detJ_igauss;
-            }
+            // // Multiply traction with detJ
+            // for (int i=0; i<local_size; ++i) {
+            //     traction[i] += local_traction[i]*detJ_igauss;
+            // }
         }
     }
 
     free(t);
-    free(local_traction);
+    // free(local_traction);
 
     free(B);
     free(HBT);
