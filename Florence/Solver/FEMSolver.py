@@ -585,7 +585,7 @@ class FEMSolver(object):
                 # function_space, mesh, material, self, Eulerx, Eulerp)
 
             ParallelTuple = parmap.map(formulation,np.arange(0,nelem,dtype=np.int32),
-                function_space, mesh, material, self, Eulerx, Eulerp)
+                function_space, mesh, material, self, Eulerx, Eulerp, processes=multiprocessing.cpu_count() / 2)
 
         for elem in range(nelem):
 
