@@ -20,6 +20,7 @@ from Florence import Mesh
 import pyximport
 pyximport.install(setup_args={'include_dirs': np.get_include()})
 from Florence.FiniteElements.SparseAssemblyNative import SparseAssemblyNative
+from Florence.FiniteElements.RHSAssemblyNative import RHSAssemblyNative
 
 # PARALLEL PROCESSING ROUTINES
 import multiprocessing
@@ -68,6 +69,8 @@ class FEMSolver(object):
         self.platform = platform
         self.backend = backend
         self.debug = False
+
+        self.fem_timer = 0.
 
 
     def __checkdata__(self, material, boundary_condition, formulation, mesh):
@@ -597,27 +600,27 @@ class FEMSolver(object):
                 I_stiff_elem, J_stiff_elem, V_stiff_elem, t, f, \
                 I_mass_elem, J_mass_elem, V_mass_elem = formulation.GetElementalMatrices(elem, 
                     function_space, mesh, material, self, Eulerx, Eulerp)
+                
             # SPARSE ASSEMBLY - STIFFNESS MATRIX
             SparseAssemblyNative(I_stiff_elem,J_stiff_elem,V_stiff_elem,I_stiffness,J_stiffness,V_stiffness,
                 elem,nvar,nodeperelem,mesh.elements)
 
-            # SparseAssemblySmall(I_stiff_elem,J_stiff_elem,V_stiff_elem,
-            #   I_stiffness,J_stiffness,V_stiffness,elem,nvar,nodeperelem,mesh.elements)
-
             if self.analysis_type != 'static':
                 # SPARSE ASSEMBLY - MASS MATRIX
-                # I_mass, J_mass, V_mass = SparseAssemblySmall(I_mass_elem,J_mass_elem,V_mass_elem,
-                #     I_mass,J_mass,V_mass,elem,ndim,nodeperelem,mesh.elements)
                 SparseAssemblyNative(I_mass_elem,J_mass_elem,V_mass_elem,I_mass,J_mass,V_mass,
                     elem,ndim,nodeperelem,mesh.elements)
 
             if self.has_moving_boundary:
                 # RHS ASSEMBLY
-                for iterator in range(0,nvar):
-                    F[mesh.elements[elem,:]*nvar+iterator,0]+=f[iterator::nvar,0]
+                # for iterator in range(0,nvar):
+                #     F[mesh.elements[elem,:]*nvar+iterator,0]+=f[iterator::nvar,0]
+                RHSAssemblyNative(F,f,elem,nvar,nodeperelem,mesh.elements)
+
             # INTERNAL TRACTION FORCE ASSEMBLY
-            for iterator in range(0,nvar):
-                T[mesh.elements[elem,:]*nvar+iterator,0]+=t[iterator::nvar,0]
+            # for iterator in range(0,nvar):
+                # T[mesh.elements[elem,:]*nvar+iterator,0]+=t[iterator::nvar,0]
+            RHSAssemblyNative(T,t,elem,nvar,nodeperelem,mesh.elements)
+
 
         if self.parallel:
             del ParallelTuple

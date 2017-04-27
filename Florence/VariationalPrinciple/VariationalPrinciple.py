@@ -136,7 +136,8 @@ class VariationalPrinciple(object):
     #     np.tile(np.arange(0,A.shape[0]),A.shape[0]), A.flatten()
 
     def FindIndices(self,A):
-        return self.local_rows, self.local_columns, A.flatten()
+        return self.local_rows, self.local_columns, A.ravel()
+        # return self.local_rows, self.local_columns, A.flatten()
 
 
 

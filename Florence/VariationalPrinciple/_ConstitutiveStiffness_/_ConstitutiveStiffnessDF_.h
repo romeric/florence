@@ -1,7 +1,10 @@
-// #include <iostream>
 #include <cblas.h>
 #include <algorithm>
 #include <numeric>
+
+#ifdef __SSE4_2__
+#include <emmintrin.h>
+#endif
 
 typedef double Real;
 
@@ -86,17 +89,29 @@ inline void _ConstitutiveStiffnessIntegrandDF_Filler_(Real *stiffness, Real *tra
     int local_size = nvar*noderpelem;
 
     Real *t;
+
+#ifdef __SSE4_2__
+    if (ndim==3) {
+        t = (Real*)_mm_malloc(6*sizeof(Real),32);
+    }
+    else if (ndim==2) {
+        t = (Real*)_mm_malloc(3*sizeof(Real),32);    
+    }
+
+    Real *B = (Real*)_mm_malloc(H_VoigtSize*local_size*sizeof(Real),32);
+    Real *HBT = (Real*)_mm_malloc(H_VoigtSize*local_size*sizeof(Real),32);
+    Real *BDB_1 = (Real*)_mm_malloc(local_size*local_size*sizeof(Real),32);
+#else
     if (ndim==3) {
         t = (Real*)malloc(6*sizeof(Real));
     }
     else if (ndim==2) {
         t = (Real*)malloc(3*sizeof(Real));    
     }
-    // Real *local_traction = (Real*)malloc(local_size*sizeof(Real));
-
     Real *B = (Real*)malloc(H_VoigtSize*local_size*sizeof(Real));
     Real *HBT = (Real*)malloc(H_VoigtSize*local_size*sizeof(Real));
     Real *BDB_1 = (Real*)malloc(local_size*local_size*sizeof(Real));
+#endif
     
     std::fill(B,B+H_VoigtSize*local_size,0.);
     
@@ -122,7 +137,6 @@ inline void _ConstitutiveStiffnessIntegrandDF_Filler_(Real *stiffness, Real *tra
             GetTotalTraction_(t, &CauchyStressTensor[igauss*ndim*ndim], ndim);
 
             // Multiply B with traction - for loop is okay
-            // std::fill(local_traction,local_traction+local_size,0.);
             for (int i=0; i<local_size; ++i) {
                 Real tmp = 0;
                 for (int j=0; j<H_VoigtSize; ++j) {
@@ -131,18 +145,18 @@ inline void _ConstitutiveStiffnessIntegrandDF_Filler_(Real *stiffness, Real *tra
                 // local_traction[i] = tmp;
                 traction[i] += tmp*detJ_igauss;
             }
-
-            // // Multiply traction with detJ
-            // for (int i=0; i<local_size; ++i) {
-            //     traction[i] += local_traction[i]*detJ_igauss;
-            // }
         }
     }
 
+#ifdef __SSE4_2__
+    _mm_free(t);
+    _mm_free(B);
+    _mm_free(HBT);
+    _mm_free(BDB_1);
+#else    
     free(t);
-    // free(local_traction);
-
     free(B);
     free(HBT);
     free(BDB_1);
+#endif
 }
