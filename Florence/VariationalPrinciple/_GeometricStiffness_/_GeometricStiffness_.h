@@ -20,11 +20,12 @@ typedef double Real;
 #define Aligned
 #endif
 
-
+#ifdef __SSE4_2__
 static inline __m128d h_add_pd(__m128d a) {
     // 4 cycles
     return _mm_add_pd(a,_mm_shuffle_pd(a,a,0x1));
 }
+#endif
 
 
 

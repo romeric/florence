@@ -1,7 +1,10 @@
-// #include <iostream>
 #include <cblas.h>
 #include <algorithm>
 #include <numeric>
+
+#ifdef __SSE4_2__
+#include <emmintrin.h>
+#endif
 
 typedef double Real;
 
@@ -86,7 +89,6 @@ inline void FillConstitutiveB_(Real *B, const Real* SpatialGradient,
         }
     }
 }
-
 inline void _ConstitutiveStiffnessIntegrandDPF_Filler_(Real *stiffness, Real *traction,
     const Real* SpatialGradient,
     const Real* ElectricDisplacementx,
@@ -104,6 +106,19 @@ inline void _ConstitutiveStiffnessIntegrandDPF_Filler_(Real *stiffness, Real *tr
     int local_size = nvar*noderpelem;
 
     Real *t;
+
+#ifdef __SSE4_2__
+    if (ndim==3) {
+        t = (Real*)_mm_malloc(9*sizeof(Real),32);
+    }
+    else if (ndim==2) {
+        t = (Real*)_mm_malloc(5*sizeof(Real),32);    
+    }
+
+    Real *B = (Real*)_mm_malloc(H_VoigtSize*local_size*sizeof(Real),32);
+    Real *HBT = (Real*)_mm_malloc(H_VoigtSize*local_size*sizeof(Real),32);
+    Real *BDB_1 = (Real*)_mm_malloc(local_size*local_size*sizeof(Real),32);
+#else
     if (ndim==3) {
         t = (Real*)malloc(9*sizeof(Real));
     }
@@ -116,6 +131,7 @@ inline void _ConstitutiveStiffnessIntegrandDPF_Filler_(Real *stiffness, Real *tr
     Real *B = (Real*)malloc(H_VoigtSize*local_size*sizeof(Real));
     Real *HBT = (Real*)malloc(H_VoigtSize*local_size*sizeof(Real));
     Real *BDB_1 = (Real*)malloc(local_size*local_size*sizeof(Real));
+#endif
     
     std::fill(B,B+H_VoigtSize*local_size,0.);
     // std::fill(HBT,HBT+H_VoigtSize*local_size,0.);
@@ -161,12 +177,20 @@ inline void _ConstitutiveStiffnessIntegrandDPF_Filler_(Real *stiffness, Real *tr
         }
     }
 
+#ifdef __SSE4_2__
+    _mm_free(t);
+    _mm_free(B);
+    _mm_free(HBT);
+    _mm_free(BDB_1);
+#else    
     free(t);
     // free(local_traction);
-
     free(B);
     free(HBT);
     free(BDB_1);
+#endif
+
+
 
 
     // Real AA[12]; // 3x4
