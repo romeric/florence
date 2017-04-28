@@ -37,7 +37,7 @@ def SparseAssemblyNative(np.ndarray[long] i, np.ndarray[long] j,
 
 
 cdef void SparseAssemblyNative_(const long *i, const long *j, const double *coeff, Int *I, Int *J,
-    Float *V, Int elem, Int nvar, Int nodeperelem, const unsigned long *elements,long i_shape, long j_shape):
+    Float *V, Int elem, Int nvar, Int nodeperelem, const unsigned long *elements,long i_shape, long j_shape) nogil:
 
     cdef long *current_row_column = <long*>malloc(sizeof(long)*nvar*nodeperelem)
     cdef long *full_current_row = <long*>malloc(sizeof(long)*i_shape)

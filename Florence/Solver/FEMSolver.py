@@ -213,8 +213,8 @@ class FEMSolver(object):
         #---------------------------------------------------------------------------#
 
         # INITIATE DATA FOR THE ANALYSIS
-        NodalForces, Residual = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float32), \
-            np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float32)
+        NodalForces, Residual = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64), \
+            np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64)
         # SET NON-LINEAR PARAMETERS
         self.NRConvergence = { 'Increment_'+str(Increment) : [] for Increment in range(self.number_of_load_increments) }
         
@@ -364,8 +364,8 @@ class FEMSolver(object):
 
 
     def StaticSolver(self, function_spaces, formulation, solver, K,
-            NeumannForces,NodalForces,Residual,
-            mesh,TotalDisp,Eulerx,Eulerp,material, boundary_condition):
+            NeumannForces, NodalForces, Residual,
+            mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition):
     
         LoadIncrement = self.number_of_load_increments
         LoadFactor = 1./LoadIncrement
