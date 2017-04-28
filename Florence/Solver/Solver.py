@@ -176,7 +176,6 @@ class LinearSolver(object):
     def Solve(self,A,b):
         """Solves the linear system of equations"""
 
-
         # DECIDE IF THE SOLVER TYPE IS APPROPRIATE FOR THE PROBLEM
         if self.switcher_message is False:
             if b.shape[0] > 100000:
