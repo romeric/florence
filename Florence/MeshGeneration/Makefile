@@ -1,6 +1,7 @@
 PYTHON_VERSION = python2.7
 PYTHON_INCLUDE_PATH = /usr/include/
 PYTHON_LD_PATH = /usr/lib/
+EXT_POSTFIX= so
 CYTHONFLAGS = -DNPY_NO_DEPRECATED_API
 
 CYTHON = cython
@@ -31,10 +32,10 @@ all: build_module
 build_module: 
 	@echo "Building Salome mesh reader"
 	$(CYTHON) _fromfile_reader.pyx
-	$(CC) $(CCSTD) $(CCFLAGS) _fromfile_reader.c -o _fromfile_reader.so -I. -I$(PYTHON_INCLUDE_PATH) -I$(NUMPY_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION)
+	$(CC) $(CCSTD) $(CCFLAGS) _fromfile_reader.c -o _fromfile_reader.$(EXT_POSTFIX) -I. -I$(PYTHON_INCLUDE_PATH) -I$(NUMPY_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION)
 
 clean:
-	$(REMOVE) _fromfile_reader.c _fromfile_reader.so
+	$(REMOVE) _fromfile_reader.c _fromfile_reader.$(EXT_POSTFIX)
 
 source_clean:
 	$(REMOVE) _fromfile_reader.c

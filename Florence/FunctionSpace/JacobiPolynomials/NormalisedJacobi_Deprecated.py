@@ -1,5 +1,5 @@
 import numpy as np 
-from Core.InterpolationFunctions.JacobiPolynomials.JacobiPolynomials import *
+from JacobiPolynomials import *
 import math
 
 # 1D - LINE

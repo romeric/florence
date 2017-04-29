@@ -2,7 +2,7 @@ from __future__ import division
 import os, sys, warnings
 from time import time
 import numpy as np 
-from scipy.io import loadmat, savemat
+# from scipy.io import loadmat, savemat
 from Florence.Tensor import makezero, itemfreq, unique2d, in2d
 from Florence.Utils import insensitive
 from vtk_writer import write_vtu
