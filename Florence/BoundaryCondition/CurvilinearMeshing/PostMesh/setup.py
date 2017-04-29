@@ -66,20 +66,6 @@ def build_extension(_cc_compiler=None,_cxx_compiler=None):
                 occ_libs.append(":"+i)
 
 
-    # for i in all_dir_libs:
-    #     lib_suffix = i.split(".")[-1]
-    #     if i[:4]=="libT" and lib_suffix == "dylib" and len(i.split("."))==2:
-    #         occ_libs.append(i[3:])
-    #     # if i[:4]=="libT" and (lib_suffix != "a" and lib_suffix != "la" and lib_suffix != "0"):
-    #     #     if "darwin" in _os:
-    #     #         occ_libs.append(i[3:])
-    #     #     elif "linux" in _os:
-    #     #         occ_libs.append(":"+i)
-
-    # print occ_libs
-    # exit()
-
-
     # Create extension module
     extensions = [
         Extension(
@@ -109,9 +95,8 @@ def build_extension(_cc_compiler=None,_cxx_compiler=None):
 
 
 if __name__ == "__main__":
+    
     args = sys.argv
-    # if len(args) > 2:
-    #     raise RuntimeError("Supply only one argument to setup file at a time")
     if len(args) > 1:
         if "clean" in args[1]:
             cleaner = subprocess.Popen('rm -rf PostMeshPy.cpp *.so', shell=True)
