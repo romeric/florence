@@ -4,7 +4,7 @@ import scipy as sp
 from scipy.sparse import issparse, isspmatrix_coo, isspmatrix_csr, isspmatrix_csc
 from scipy.sparse.linalg import spsolve, bicgstab, gmres, lgmres, cg, spilu, LinearOperator, onenormest
 from subprocess import call
-import os
+import os, platform
 
 
 class LinearSolver(object):
@@ -50,11 +50,13 @@ class LinearSolver(object):
         self.out_of_core = False
         self.geometric_discretisation = geometric_discretisation
 
-        self.has_amg_solver = False
-        # try:
-        #     import pyamg
-        # except ImportError:
-        #     self.has_amg_solver = False
+        if platform.python_implemenation() == "PyPy":
+            self.has_amg_solver = False
+        else:
+            try:
+                import pyamg
+            except ImportError:
+                self.has_amg_solver = False
 
         self.has_umfpack = True
         try:

@@ -1,8 +1,9 @@
 from __future__ import division
-import os, sys, warnings
+import os, sys, warnings, platform
 from time import time
 import numpy as np 
-# from scipy.io import loadmat, savemat
+if "PyPy" not in platform.python_implementation:
+    from scipy.io import loadmat, savemat
 from Florence.Tensor import makezero, itemfreq, unique2d, in2d
 from Florence.Utils import insensitive
 from vtk_writer import write_vtu
