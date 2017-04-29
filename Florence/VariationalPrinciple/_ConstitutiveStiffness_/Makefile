@@ -1,6 +1,7 @@
 PYTHON_VERSION = python2.7
 PYTHON_INCLUDE_PATH = /usr/include/python2.7/
 PYTHON_LD_PATH = /usr/lib/
+EXT_POSTFIX= so
 CYTHONFLAGS = -DNPY_NO_DEPRECATED_API
 
 CYTHON = cython --cplus
@@ -37,19 +38,19 @@ all: build_module
 build_module:
 	@echo "Building low level mechanical constitutive stiffness dispatcher module"
 	$(CYTHON) _ConstitutiveStiffnessDF_.pyx
-	$(CXX) $(CXXSTD) $(CXXFLAGS) _ConstitutiveStiffnessDF_.cpp -o _ConstitutiveStiffnessDF_.so -I. -I$(PYTHON_INCLUDE_PATH) \
+	$(CXX) $(CXXSTD) $(CXXFLAGS) _ConstitutiveStiffnessDF_.cpp -o _ConstitutiveStiffnessDF_.$(EXT_POSTFIX) -I. -I$(PYTHON_INCLUDE_PATH) \
 	     -I$(NUMPY_INCLUDE_PATH) -I$(BLAS_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION) -L$(BLAS_LD_PATH) -l$(BLAS_VERSION)
-	@$(MOVE) _ConstitutiveStiffnessDF_.so ../
+	@$(MOVE) _ConstitutiveStiffnessDF_.$(EXT_POSTFIX) ../
 
 	@echo "Building low level electromechanical constitutive stiffness dispatcher module"
 	$(CYTHON) _ConstitutiveStiffnessDPF_.pyx
-	$(CXX) $(CXXSTD) $(CXXFLAGS) _ConstitutiveStiffnessDPF_.cpp -o _ConstitutiveStiffnessDPF_.so -I. -I$(PYTHON_INCLUDE_PATH) \
+	$(CXX) $(CXXSTD) $(CXXFLAGS) _ConstitutiveStiffnessDPF_.cpp -o _ConstitutiveStiffnessDPF_.$(EXT_POSTFIX) -I. -I$(PYTHON_INCLUDE_PATH) \
 	     -I$(NUMPY_INCLUDE_PATH) -I$(BLAS_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION) -L$(BLAS_LD_PATH) -l$(BLAS_VERSION)
-	@$(MOVE) _ConstitutiveStiffnessDPF_.so ../
+	@$(MOVE) _ConstitutiveStiffnessDPF_.$(EXT_POSTFIX) ../
 
 clean:
-	$(REMOVE) _ConstitutiveStiffnessDF_.cpp _ConstitutiveStiffnessDF_.so ../_ConstitutiveStiffnessDF_.so
-	$(REMOVE) _ConstitutiveStiffnessDPF_.cpp _ConstitutiveStiffnessDPF_.so ../_ConstitutiveStiffnessDPF_.so
+	$(REMOVE) _ConstitutiveStiffnessDF_.cpp _ConstitutiveStiffnessDF_.$(EXT_POSTFIX) ../_ConstitutiveStiffnessDF_.$(EXT_POSTFIX)
+	$(REMOVE) _ConstitutiveStiffnessDPF_.cpp _ConstitutiveStiffnessDPF_.$(EXT_POSTFIX) ../_ConstitutiveStiffnessDPF_.$(EXT_POSTFIX)
 
 source_clean:
 	$(REMOVE) _ConstitutiveStiffnessDF_.cpp _ConstitutiveStiffnessDPF_.cpp

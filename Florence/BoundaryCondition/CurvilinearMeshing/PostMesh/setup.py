@@ -114,7 +114,7 @@ if __name__ == "__main__":
     #     raise RuntimeError("Supply only one argument to setup file at a time")
     if len(args) > 1:
         if "clean" in args[1]:
-            cleaner = subprocess.Popen('rm -rf PostMeshPy.cpp PostMeshPy.so', shell=True)
+            cleaner = subprocess.Popen('rm -rf PostMeshPy.cpp *.so', shell=True)
             cleaner.wait()
         else:
             _cc_compiler, _cxx_compiler = None, None    

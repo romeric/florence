@@ -1,6 +1,7 @@
 PYTHON_VERSION = python2.7
 PYTHON_INCLUDE_PATH = /usr/include/
 PYTHON_LD_PATH = /usr/lib/
+EXT_POSTFIX= so
 CYTHONFLAGS = -DNPY_NO_DEPRECATED_API
 
 CYTHON = cython --cplus
@@ -33,11 +34,11 @@ all: build_module
 build_module: 
 	@echo "Building Bjorck Pereyra bases module"
 	$(CYTHON) LineBP.pyx
-	$(CXX) $(CXXSTD) $(CXXFLAGS) LineBP.cpp -o LineBP.so -I. -I../../../Tensor/ -I$(PYTHON_INCLUDE_PATH) -I$(NUMPY_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION)
-	@$(MOVE) LineBP.so ../LineBP.so
+	$(CXX) $(CXXSTD) $(CXXFLAGS) LineBP.cpp -o LineBP.$(EXT_POSTFIX) -I. -I../../../Tensor/ -I$(PYTHON_INCLUDE_PATH) -I$(NUMPY_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION)
+	@$(MOVE) LineBP.$(EXT_POSTFIX) ../LineBP.$(EXT_POSTFIX)
 
 clean:
-	$(REMOVE) LineBP.cpp LineBP.so ../LineBP.so
+	$(REMOVE) LineBP.cpp LineBP.$(EXT_POSTFIX) ../LineBP.$(EXT_POSTFIX)
 
 source_clean:
 	$(REMOVE) LineBP.cpp

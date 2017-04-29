@@ -6,7 +6,6 @@ from time import time
 import numpy as np
 from numpy.linalg import norm
 import scipy as sp
-from scipy.io import loadmat, savemat
 from scipy.sparse import coo_matrix, csc_matrix, csr_matrix 
 from Florence.Utils import insensitive
 
@@ -528,6 +527,7 @@ class FEMSolver(object):
             import subprocess, os, shutil
             from time import time
             from Florence.Utils import par_unpickle
+            from scipy.io import loadmat
 
             tmp_dir = par_unpickle(function_space,mesh,material,Eulerx,Eulerp)
             pwd = os.path.dirname(os.path.realpath(__file__))

@@ -1,6 +1,7 @@
 PYTHON_VERSION = python2.7
 PYTHON_INCLUDE_PATH = /usr/include/
 PYTHON_LD_PATH = /usr/lib/
+EXT_POSTFIX= so
 CYTHONFLAGS = -DNPY_NO_DEPRECATED_API
 
 CYTHON = cython
@@ -32,11 +33,11 @@ all: build_module
 build_module: 
 	@echo echo "Building Jacobi polynomials module"
 	$(CYTHON) JacobiPolynomials.pyx
-	$(CC) $(CCSTD) $(CCFLAGS) JacobiPolynomials.c -o JacobiPolynomials.so -I. -I$(PYTHON_INCLUDE_PATH) \
+	$(CC) $(CCSTD) $(CCFLAGS) JacobiPolynomials.c -o JacobiPolynomials.$(EXT_POSTFIX) -I. -I$(PYTHON_INCLUDE_PATH) \
 	-I$(NUMPY_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION) 
 
 clean:
-	$(REMOVE) JacobiPolynomials.c JacobiPolynomials.so
+	$(REMOVE) JacobiPolynomials.c JacobiPolynomials.$(EXT_POSTFIX)
 
 source_clean:
 	$(REMOVE) JacobiPolynomials.c
