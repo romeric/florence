@@ -1,5 +1,5 @@
 from __future__ import print_function
-import os, platform, sys, subprocess
+import os, platform, sys, subprocess, imp
 from distutils.core import setup
 from distutils.command.clean import clean
 from distutils.extension import Extension
@@ -21,6 +21,7 @@ class FlorenceSetup(object):
 
     python_version = None
     python_interpreter = None
+    python_implementation = None
     python_include_path = None
     python_ld_path = None
 
@@ -41,6 +42,7 @@ class FlorenceSetup(object):
     blas_ld_path = None
 
     extension_paths = None
+    extension_postfix = None
 
     def __init__(self, _fc_compiler=None, _cc_compiler=None, _cxx_compiler=None,
         _blas=None):
@@ -77,7 +79,11 @@ class FlorenceSetup(object):
         py_micro = python_version.micro
         self.python_interpreter  = 'python' + str(py_major) +'.' + str(py_minor)
 
-        # Get python version
+        # Get python implementation e.g. CPython, PyPy etc
+        self.python_implementation = platform.python_implementation()
+
+        # Get python path
+        # Pass 1 - check if pythonX.Y folder exits 
         actual_path = None
         for path in sys.path:
             lpath = path.split("/")
@@ -85,8 +91,32 @@ class FlorenceSetup(object):
                 actual_path = path
                 break
 
+        if actual_path == None:
+            # pass 2 - hook get path through numpy
+            actual_path = "/"
+            import imp
+            np_package_path = imp.find_module("numpy")[1]
+            split_np_path = np_package_path.split("/")
+            for path in split_np_path:
+                if "site-packages" in path or "dist-packages" in path:
+                    break
+                actual_path = os.path.join(actual_path,path)
+            actual_path = os.path.join(actual_path,"lib")
+
         self.python_ld_path = actual_path
         self.python_include_path = self.python_ld_path.replace("lib","include")
+
+
+        if "PyPy" in self.python_implementation:
+            # Hook - get postfix from numpy multiarray extension module
+            self.extension_postfix = "pypy-41.so" 
+            np_linalg_mods = os.listdir(os.path.join(np_package_path,"core"))
+            for _mod in np_linalg_mods:
+                if "multiarray" in _mod:
+                    if not "multiarray_test" in _mod:
+                        self.extension_postfix = _mod.split("multiarray.")[-1]
+        else:
+            self.extension_postfix = "so"
 
 
     def GetNumPyPath(self):
@@ -161,7 +191,7 @@ class FlorenceSetup(object):
             self.python_include_path + " PYTHON_LD_PATH=" + self.python_ld_path + \
             " NUMPY_INCLUDE_PATH=" + self.numpy_include_path + \
             " BLAS_VERSION=" + self.blas_version + " BLAS_INCLUDE_PATH="+ self.blas_include_path + \
-            " BLAS_LD_PATH=" + self.blas_ld_path
+            " BLAS_LD_PATH=" + self.blas_ld_path + " EXT_POSTFIX=" + self.extension_postfix
 
         self.fc_compiler_args = "FC=" + self.fc_compiler + " " + self.compiler_args
         self.cc_compiler_args = "CC=" + self.cc_compiler + " " + self.compiler_args
@@ -193,9 +223,10 @@ class FlorenceSetup(object):
 
         assert self.extension_paths != None
 
+        source_clean_cmd = 'make source_clean ' + self.compiler_args
         for _path in self.extension_paths:
             if "PostMesh" not in _path and "LLDispatch" not in _path:
-                execute('cd '+_path+' && make source_clean')
+                execute('cd '+_path+' && '+source_clean_cmd)
             elif "LLDispatch" in _path:
                 execute('cd '+_path+' && echo rm -rf *.cpp CythonSource/*.cpp && rm -rf *.cpp CythonSource/*.cpp')
             elif "PostMesh" in _path:
@@ -208,13 +239,16 @@ class FlorenceSetup(object):
 
         self.SourceClean()
         # You need to run both make clean and rm -rf as some modules relocate the shared libraries
+        clean_cmd = 'make clean ' + self.compiler_args
         for _path in self.extension_paths:
             if "PostMesh" not in _path and "LLDispatch" not in _path:
-                execute('cd '+_path+' && echo rm -rf *.so && make clean && rm -rf *.so')
+                execute('cd '+_path+' && echo rm -rf *.so && '+clean_cmd+' && rm -rf *.so *.'+self.extension_postfix)
             elif "LLDispatch" in _path:
-                execute('cd '+_path+' && echo rm -rf *.so CythonSource/*.so && rm -rf *.so CythonSource/*.so')
+                execute('cd '+_path+
+                    ' && echo rm -rf *.so CythonSource/*.so && rm -rf *.so CythonSource/*.so CythonSource/*.'+
+                    self.extension_postfix)
             else:
-                execute('cd '+_path+' && echo rm -rf *.so && rm -rf *.so')
+                execute('cd '+_path+' && echo rm -rf *.so && rm -rf *.so *.'+self.extension_postfix)
 
 
     def Build(self):

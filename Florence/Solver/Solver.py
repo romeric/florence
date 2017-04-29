@@ -3,7 +3,6 @@ import numpy as np
 import scipy as sp
 from scipy.sparse import issparse, isspmatrix_coo, isspmatrix_csr, isspmatrix_csc
 from scipy.sparse.linalg import spsolve, bicgstab, gmres, lgmres, cg, spilu, LinearOperator, onenormest
-from scipy.io import savemat, loadmat
 from subprocess import call
 import os
 
@@ -51,11 +50,11 @@ class LinearSolver(object):
         self.out_of_core = False
         self.geometric_discretisation = geometric_discretisation
 
-        self.has_amg_solver = True
-        try:
-            import pyamg
-        except ImportError:
-            self.has_amg_solver = False
+        self.has_amg_solver = False
+        # try:
+        #     import pyamg
+        # except ImportError:
+        #     self.has_amg_solver = False
 
         self.has_umfpack = True
         try:
@@ -209,6 +208,7 @@ class LinearSolver(object):
 
             elif self.solver_subtype=='mumps' and self.has_mumps:
                 # CALL JULIA'S MUMPS WRAPPER
+                from scipy.io import savemat, loadmat
                 pwd = os.path.dirname(os.path.realpath(__file__))
 
                 A = A.tocoo()

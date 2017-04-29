@@ -1,6 +1,7 @@
 PYTHON_VERSION = python2.7
 PYTHON_INCLUDE_PATH = /usr/include/
 PYTHON_LD_PATH = /usr/lib/
+EXT_POSTFIX= so
 CYTHONFLAGS = -DNPY_NO_DEPRECATED_API
 
 CYTHON = cython
@@ -32,11 +33,11 @@ all: build_module
 build_module: 
 	@echo "Building low level geometric stiffness dispatcher module"
 	$(CYTHON) _GeometricStiffness_.pyx
-	$(CC) $(CCSTD) $(CCFLAGS) _GeometricStiffness_.c -o _GeometricStiffness_.so -I. -I$(PYTHON_INCLUDE_PATH) -I$(NUMPY_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION)
-	@$(MOVE) _GeometricStiffness_.so ../
+	$(CC) $(CCSTD) $(CCFLAGS) _GeometricStiffness_.c -o _GeometricStiffness_.$(EXT_POSTFIX) -I. -I$(PYTHON_INCLUDE_PATH) -I$(NUMPY_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION)
+	@$(MOVE) _GeometricStiffness_.$(EXT_POSTFIX) ../
 
 clean:
-	$(REMOVE) _GeometricStiffness_.c _GeometricStiffness_.so ../_GeometricStiffness_.so
+	$(REMOVE) _GeometricStiffness_.c _GeometricStiffness_.$(EXT_POSTFIX) ../_GeometricStiffness_.$(EXT_POSTFIX)
 
 source_clean:
 	$(REMOVE) _GeometricStiffness_.c
