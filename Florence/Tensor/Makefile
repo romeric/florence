@@ -1,4 +1,5 @@
-PYTHON_VERSION = python2.7
+# PYTHON_VERSION = python2.7
+PYTHON_VERSION = 
 PYTHON_INCLUDE_PATH = /usr/include/
 PYTHON_LD_PATH = /usr/lib/
 EXT_POSTFIX= so

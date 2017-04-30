@@ -707,7 +707,7 @@ class BoundaryCondition(object):
         TotalSol[self.columns_out,0] = AppliedDirichletInc
                 
         # RE-ORDER SOLUTION COMPONENTS
-        dU = TotalSol.reshape(TotalSol.shape[0]/nvar,nvar)
+        dU = TotalSol.reshape(int(TotalSol.shape[0]/nvar),nvar)
 
         return dU
 
@@ -720,7 +720,7 @@ class BoundaryCondition(object):
         TotalSol[self.columns_in,0] = sol
         
         # RE-ORDER SOLUTION COMPONENTS
-        dU = TotalSol.reshape(TotalSol.shape[0]/nvar,nvar)
+        dU = TotalSol.reshape(int(TotalSol.shape[0]/nvar),nvar)
 
         return dU
 

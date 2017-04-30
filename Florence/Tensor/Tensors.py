@@ -1,6 +1,6 @@
 import numpy as np 
 from warnings import warn
-from Numeric import tovoigt, tovoigt3
+from .Numeric import tovoigt, tovoigt3
 
 
 __all__ = ['unique2d','in2d','intersect2d','in2d_unsorted','shuffle_along_axis',

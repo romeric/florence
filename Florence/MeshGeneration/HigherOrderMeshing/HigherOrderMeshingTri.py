@@ -4,7 +4,7 @@ from warnings import warn
 import multiprocessing as MP
 import imp
 
-import GetInteriorCoordinates as Gett
+from .GetInteriorCoordinates import GetInteriorNodesCoordinates
 import Florence.ParallelProcessing.parmap as parmap
 from Florence.QuadratureRules.FeketePointsTri import *
 from Florence import FunctionSpace
@@ -15,7 +15,7 @@ from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
 #--------------------------------------------------------------------------------------------------------------------------#
 # SUPPLEMENTARY FUNCTIONS 
 def ElementLoopTri(elem,elements,points,MeshType,eps,Neval):
-    xycoord_higher = Gett.GetInteriorNodesCoordinates(points[elements[elem,:],:],MeshType,elem,eps,Neval)
+    xycoord_higher = GetInteriorNodesCoordinates(points[elements[elem,:],:],MeshType,elem,eps,Neval)
     return xycoord_higher
 
 def HighOrderMeshTri_SEMISTABLE(C,mesh,Decimals=10,Parallel=False,nCPU=1,ComputeAll=False):
@@ -68,7 +68,7 @@ def HighOrderMeshTri_SEMISTABLE(C,mesh,Decimals=10,Parallel=False,nCPU=1,Compute
             xycoord_higher = ParallelTuple1[elem]
         else:
             # xycoord =  mesh.points[mesh.elements[elem,:],:]
-            xycoord_higher = Gett.GetInteriorNodesCoordinates(mesh.points[mesh.elements[elem,:],:],'tri',elem,eps,Neval)
+            xycoord_higher = GetInteriorNodesCoordinates(mesh.points[mesh.elements[elem,:],:],'tri',elem,eps,Neval)
     
         # EXPAND THE ELEMENT CONNECTIVITY
         newElements = np.arange(maxNode+1,maxNode+1+left_over_nodes) 

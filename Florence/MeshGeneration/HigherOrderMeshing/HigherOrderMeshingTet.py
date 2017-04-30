@@ -5,7 +5,7 @@ import gc
 from time import time
 import multiprocessing as MP
 
-import GetInteriorCoordinates as Gett
+from .GetInteriorCoordinates import GetInteriorNodesCoordinates
 from Florence.QuadratureRules.FeketePointsTet import *
 from Florence.Tensor import itemfreq, makezero, unique2d, remove_duplicates_2D
 from Florence.FunctionSpace import Tet
@@ -15,7 +15,7 @@ import Florence.ParallelProcessing.parmap as parmap
 #--------------------------------------------------------------------------------------------------------------------------#
 # SUPPLEMENTARY FUNCTIONS 
 def ElementLoopTet(elem,elements,points,MeshType,eps,Neval):
-    xycoord_higher = Gett.GetInteriorNodesCoordinates(points[elements[elem,:],:],MeshType,elem,eps,Neval)
+    xycoord_higher = GetInteriorNodesCoordinates(points[elements[elem,:],:],MeshType,elem,eps,Neval)
     return xycoord_higher
 
 
@@ -69,7 +69,7 @@ def HighOrderMeshTet_SEMISTABLE(C,mesh,Decimals=10,Zerofy=True,Parallel=False,nC
         else:   
             xycoord =  mesh.points[mesh.elements[elem,:],:]
             # GET HIGHER ORDER COORDINATES
-            xycoord_higher = Gett.GetInteriorNodesCoordinates(xycoord,'tet',elem,eps,Neval)
+            xycoord_higher = GetInteriorNodesCoordinates(xycoord,'tet',elem,eps,Neval)
 
         # EXPAND THE ELEMENT CONNECTIVITY
         newElements = np.arange(maxNode+1,maxNode+1+left_over_nodes)

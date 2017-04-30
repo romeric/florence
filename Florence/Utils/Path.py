@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os, sys
 
 
@@ -30,9 +31,9 @@ def SetPath(Pr,pwd,C,nelem,Analysis,AnalysisType, MaterialArgsType):
 
 
     if os.path.isdir(Path.Problem+'/Results'):
-        print 'Writing results in the problem directory:', Path.Problem
+        print('Writing results in the problem directory:', Path.Problem)
     else:
-        print 'Writing the results in problem directory:', Path.Problem
+        print('Writing the results in problem directory:', Path.Problem)
         os.mkdir(Path.Problem+'/Results')
 
 

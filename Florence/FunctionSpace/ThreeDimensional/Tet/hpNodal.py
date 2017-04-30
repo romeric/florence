@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np 
 from Florence.QuadratureRules.FeketePointsTet import *
 from Florence.FunctionSpace.JacobiPolynomials import *
@@ -42,4 +43,4 @@ def hpBases(C,xi,eta,zeta,Transform=0,EvalOpt=0):
 
 
 def GradhpBases(C,r,s):
-    print 'For nodal tetrahedral bases gradient of bases is computed within the hpBases itself'
+    print('For nodal tetrahedral bases gradient of bases is computed within the hpBases itself')

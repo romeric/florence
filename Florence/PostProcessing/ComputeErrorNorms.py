@@ -540,7 +540,7 @@ def InterpolationBasedNorm(MainData,mesh,TotalDisp):
 
     # L2NormX = L2_normX/L2_denormX
     # L2Normx = L2_normx/L2_denormx
-    print L2NormX, L2Normx
+    print(L2NormX, L2Normx)
     # print np.linalg.norm(L2NormX)
 
     MainData.L2NormX = L2NormX
@@ -668,5 +668,5 @@ def ComputeErrorNorms(MainData,mesh,nmesh,AnalyticalSolution,Domain,Quadrature,M
 
     L2Norm = np.sqrt(L2_nom)/np.sqrt(L2_denom)
     EnergyNorm = np.sqrt(E_nom)/np.sqrt(E_denom)
-    print L2Norm, EnergyNorm
+    print(L2Norm, EnergyNorm)
     return L2Norm, EnergyNorm

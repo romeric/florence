@@ -1,2 +1,2 @@
-from PostProcess import *
-from ComputeErrorNorms import *
+from .PostProcess import *
+from .ComputeErrorNorms import *

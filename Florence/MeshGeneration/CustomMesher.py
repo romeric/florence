@@ -1,7 +1,7 @@
 import numpy as np
 from warnings import warn
-from Mesh import Mesh
-from GeometricPath import *
+from .Mesh import Mesh
+from .GeometricPath import *
 from Florence.Tensor import totuple
 
 
