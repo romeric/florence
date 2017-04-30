@@ -57,6 +57,8 @@
 Session.vim
 RunSession.sublime-project
 RunSession.sublime-workspace
+Florence.sublime-project
+Florence.sublime-workspace
 param_run_session.py
 profile_imports_manual.py
 nr.py

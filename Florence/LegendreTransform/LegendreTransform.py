@@ -35,7 +35,6 @@ class LegendreTransform(object):
         # print(H_coupling_tensor[:,:,0])
         # print(W_coupling_tensor[:,:,0])
         # print("\n")
-        # print np.linalg.norm(H_coupling_tensor)
         H_coupling_tensor = Voigt(H_coupling_tensor,1)
 
 
