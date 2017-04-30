@@ -50,25 +50,12 @@ class IsotropicElectroMechanics_101(Material):
         (mu/J - lamb*(J-1))*( einsum("ik,jl",I,I)+einsum("il,jk",I,I) )
 
         self.coupling_tensor = J/eps_1*(einsum('ik,j',I,Dx) + einsum('i,jk',Dx,I))
-        # print(self.coupling_tensor)
 
         self.dielectric_tensor = J/eps_1*I 
 
         # TRANSFORM TENSORS TO THEIR ENTHALPY COUNTERPART
         E_Voigt, P_Voigt, C_Voigt = self.legendre_transform.InternalEnergyToEnthalpy(self.dielectric_tensor, 
             self.coupling_tensor, self.elasticity_tensor)
-
-        # # D_exact = eps_1/J*E
-        # Ex = J/eps_1*Dx
-        # # P_Voigt = J**(-1.)*eps_1*(einsum('ik,j',I,Ex) + einsum('i,jk',Ex,I))
-        # P_Voigt = np.zeros((3,3,3))
-        # I = np.eye(3,3)
-        # for i in range(3):
-        #     for j in range(3):
-        #         for k in range(3):
-        #             P_Voigt[i,j,k] = J**(-1.)*eps_1*(I[i,k]*Ex[j] + Ex[i]*I[j,k])
-        # # print(P_Voigt)
-        # P_Voigt = Voigt(P_Voigt,1)
 
 
         # BUILD HESSIAN
