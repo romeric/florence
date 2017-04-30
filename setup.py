@@ -240,6 +240,10 @@ class FlorenceSetup(object):
             else:
                 execute('cd '+_path+' && echo rm -rf *.so && rm -rf *.so *.'+self.extension_postfix)
 
+        # clean all crude and ext libs if any - this is dangerous if setup.py is from outside the directory
+        execute("find . -name \*.so -delete")
+        execute("find . -name \*.pyc -delete")
+
 
     def Build(self):
 
