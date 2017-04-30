@@ -217,7 +217,7 @@ class FlorenceSetup(object):
 
         self.extension_paths = [tensor_path,mesh_path,jacobi_path,bp_path,km_path,gm_path,cm_path,material_path,occ_path]
 
-        self.extension_paths = [material_path]
+        # self.extension_paths = [material_path]
 
     def SourceClean(self):
 
