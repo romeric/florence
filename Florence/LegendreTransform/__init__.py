@@ -1,1 +1,1 @@
-from LegendreTransform import LegendreTransform
+from .LegendreTransform import LegendreTransform

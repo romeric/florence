@@ -1,5 +1,6 @@
+from __future__ import print_function
 import numpy as np
-from NumericIntegrator import GaussQuadrature
+from .NumericIntegrator import GaussQuadrature
 import os
 
 def QuadraturePointsWeightsTri(C,Opt=1):
@@ -16,7 +17,7 @@ def QuadraturePointsWeightsTri(C,Opt=1):
 
         # IN CASE OPT WAS CHOSEN TO BE 3
         if Opt==3:
-            print 'Optimal quadrature for C>19 is not available. Falling back to Gaussian quadrature'
+            print('Optimal quadrature for C>19 is not available. Falling back to Gaussian quadrature')
 
         z1D, w1D = GaussQuadrature(C+1,-1.,1.)
         zw = np.zeros((w1D.shape[0]**2,3))

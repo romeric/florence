@@ -7,12 +7,12 @@ import multiprocessing as MP
 
 from Florence.Tensor import itemfreq, makezero, unique2d, remove_duplicates_2D
 import Florence.ParallelProcessing.parmap as parmap
-import GetInteriorCoordinates as Gett
+from .GetInteriorCoordinates import GetInteriorNodesCoordinates
 
 #--------------------------------------------------------------------------------------------------------------------------#
 # SUPPLEMENTARY FUNCTIONS 
 def ElementLoopHex(elem,elements,points,MeshType,eps,Neval):
-    xycoord_higher = Gett.GetInteriorNodesCoordinates(points[elements[elem,:],:],MeshType,elem,eps,Neval)
+    xycoord_higher = GetInteriorNodesCoordinates(points[elements[elem,:],:],MeshType,elem,eps,Neval)
     return xycoord_higher
 
 
@@ -70,7 +70,7 @@ def HighOrderMeshHex(C,mesh,Decimals=10,Zerofy=True,Parallel=False,nCPU=1,Comput
         else:   
             xycoord =  mesh.points[mesh.elements[elem,:],:]
             # GET HIGHER ORDER COORDINATES
-            xycoord_higher = Gett.GetInteriorNodesCoordinates(xycoord,'hex',elem,eps,Neval)
+            xycoord_higher = GetInteriorNodesCoordinates(xycoord,'hex',elem,eps,Neval)
 
         # EXPAND THE ELEMENT CONNECTIVITY
         newElements = np.arange(maxNode+1,maxNode+1+left_over_nodes)

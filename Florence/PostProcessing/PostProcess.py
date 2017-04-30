@@ -1,3 +1,4 @@
+from __future__ import print_function 
 import numpy as np 
 import numpy.linalg as la
 import gc
@@ -622,21 +623,21 @@ class PostProcess(object):
         if np.isnan(ScaledJacobian).any():
             warn("Jacobian of mapping is close to zero")
 
-        print 'Minimum ScaledJacobian value is', ScaledJacobian.min(), \
-        'corresponding to element', ScaledJacobian.argmin()
+        print('Minimum ScaledJacobian value is', ScaledJacobian.min(), \
+        'corresponding to element', ScaledJacobian.argmin())
 
-        print 'Minimum ScaledFF value is', ScaledFF.min(), \
-        'corresponding to element', ScaledFF.argmin()
+        print('Minimum ScaledFF value is', ScaledFF.min(), \
+        'corresponding to element', ScaledFF.argmin())
 
-        print 'Minimum ScaledHH value is', ScaledHH.min(), \
-        'corresponding to element', ScaledHH.argmin()
+        print('Minimum ScaledHH value is', ScaledHH.min(), \
+        'corresponding to element', ScaledHH.argmin())
 
         if self.is_material_anisotropic:
-            print 'Minimum ScaledFNFN value is', ScaledFNFN.min(), \
-            'corresponding to element', ScaledFNFN.argmin()
+            print('Minimum ScaledFNFN value is', ScaledFNFN.min(), \
+            'corresponding to element', ScaledFNFN.argmin())
 
-            print 'Minimum ScaledCNCN value is', ScaledCNCN.min(), \
-            'corresponding to element', ScaledCNCN.argmin()
+            print('Minimum ScaledCNCN value is', ScaledCNCN.min(), \
+            'corresponding to element', ScaledCNCN.argmin())
 
 
         if plot:
@@ -2715,8 +2716,6 @@ class PostProcess(object):
         mlab.view(azimuth=15, elevation=17, distance=80, focalpoint=None,
             roll=20, reset_roll=True, figure=None)
         # cam,foc = mlab.move()
-        # print cam
-        # print foc
         mlab.move(forward=-16, right=-20, up=-20)
 
 
@@ -3457,9 +3456,7 @@ class PostProcess(object):
         # MainData.ScaledJacobian = np.ones_like(MainData.ScaledJacobian)
 
         # print TotalDisp[:,0,-1]
-        # MainData.ScaledJacobian = np.zeros_like(MainData.ScaledJacobian)+1
         vpoints = np.copy(mesh.points)
-        # print TotalDisp[:,:MainData.ndim,-1]
         vpoints += TotalDisp[:,:self.ndim,-1]
 
         dum1=[]; dum2=[]; dum3 = []; ddum=np.array([0,1,2,0])

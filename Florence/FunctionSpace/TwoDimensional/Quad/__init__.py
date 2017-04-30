@@ -1,3 +1,2 @@
-
-from QuadLagrangeGaussLobatto import LagrangeGaussLobatto, GradLagrangeGaussLobatto
-from QuadLagrange import Lagrange, GradLagrange
+from .QuadLagrangeGaussLobatto import LagrangeGaussLobatto, GradLagrangeGaussLobatto
+from .QuadLagrange import Lagrange, GradLagrange

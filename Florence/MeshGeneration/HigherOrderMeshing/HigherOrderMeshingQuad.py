@@ -1,6 +1,6 @@
 import numpy as np 
 from time import time
-import GetInteriorCoordinates as Gett
+from .GetInteriorCoordinates import GetInteriorNodesCoordinates
 from Florence.Tensor import itemfreq, makezero, unique2d, remove_duplicates_2D
 
 
@@ -53,7 +53,7 @@ def HighOrderMeshQuad(C, mesh, Decimals=10, Parallel=False, nCPU=1):
         if Parallel:
             xycoord_higher = ParallelTuple1[elem]
         else:
-            xycoord_higher = Gett.GetInteriorNodesCoordinates(mesh.points[mesh.elements[elem,:],:],'quad',elem,eps,Neval)
+            xycoord_higher = GetInteriorNodesCoordinates(mesh.points[mesh.elements[elem,:],:],'quad',elem,eps,Neval)
     
         # EXPAND THE ELEMENT CONNECTIVITY
         newElements = np.arange(maxNode+1,maxNode+1+left_over_nodes) 

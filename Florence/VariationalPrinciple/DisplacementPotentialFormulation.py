@@ -4,13 +4,13 @@ from Florence import QuadratureRule, FunctionSpace
 
 from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import *
 from Florence.FiniteElements.ElementalMatrices._KinematicMeasures_ import _KinematicMeasures_
-from _ConstitutiveStiffnessDPF_ import __ConstitutiveStiffnessIntegrandDPF__
+from ._ConstitutiveStiffnessDPF_ import __ConstitutiveStiffnessIntegrandDPF__
 from Florence.Tensor import issymetric
 from Florence.LegendreTransform import LegendreTransform
 
 import pyximport
 pyximport.install(setup_args={'include_dirs': np.get_include()})
-from DisplacementPotentialApproachIndices import *
+from .DisplacementPotentialApproachIndices import *
 
 class DisplacementPotentialFormulation(VariationalPrinciple):
 

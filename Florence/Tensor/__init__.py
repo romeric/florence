@@ -1,4 +1,4 @@
 # import Tensors as tensor
-from Tensors import *
-from LinAlg import *
-from Numeric import *
+from .Tensors import *
+from .LinAlg import *
+from .Numeric import *

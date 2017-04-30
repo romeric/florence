@@ -1,1 +1,1 @@
-from PostMesh import PostMeshCurvePy, PostMeshSurfacePy
+from .PostMesh import PostMeshCurvePy, PostMeshSurfacePy
