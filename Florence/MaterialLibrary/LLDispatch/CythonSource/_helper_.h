@@ -97,6 +97,17 @@ make_electromechanical_hessian(Tensor<T,M,M> elasticity, Tensor<T,M,N> coupling,
         }
     }
 
+    /*
+    // View based NumPy style vectorised version
+    // The above for loop style code is more efficient as 
+    // the compiler completely optimises that away, whereas
+    // in the following transpose makes a copy
+    hessian(fseq<0,M>(),fseq<0,M>()) = elasticity;
+    hessian(fseq<0,M>(),fseq<M+1,N>()) = -coupling;
+    hessian(fseq<M+1,N>(),fseq<0,M>()) = -transpose(coupling);
+    hessian(fseq<M+1,N>(),fseq<M+1,N>()) = dielectric;
+    */
+
     return hessian;
 }
 
