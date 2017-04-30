@@ -376,11 +376,6 @@ class FEMSolver(object):
             DeltaF = LoadFactor*NeumannForces
             NodalForces += DeltaF
             # OBRTAIN INCREMENTAL RESIDUAL - CONTRIBUTION FROM BOTH NEUMANN AND DIRICHLET
-            # Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,NodalForces,
-            #     boundary_condition.applied_dirichlet,LoadFactor=LoadFactor)[2]
-
-            # Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,np.zeros_like(NodalForces),
-                # boundary_condition.applied_dirichlet,LoadFactor=LoadFactor)[2]
             Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
                 boundary_condition.applied_dirichlet,LoadFactor=LoadFactor)[2]
             Residual -= DeltaF
@@ -398,10 +393,6 @@ class FEMSolver(object):
                 if np.isclose(self.NormForces,0.0):
                     self.NormForces = 1e-14
 
-            if np.isclose(self.NormForces,0.0):
-                self.norm_residual = la.norm(Residual[boundary_condition.columns_in])
-            else:
-                self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)
             self.norm_residual = np.linalg.norm(Residual)/self.NormForces
 
             Eulerx, Eulerp, K, Residual = self.NewtonRaphson(function_spaces, formulation, solver, 
