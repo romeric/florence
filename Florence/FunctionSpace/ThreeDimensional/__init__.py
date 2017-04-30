@@ -1,2 +1,2 @@
-from Hex import HexLagrangeGaussLobatto, HexLagrange
-import Tet
+from .Hex import HexLagrangeGaussLobatto, HexLagrange
+from . import Tet

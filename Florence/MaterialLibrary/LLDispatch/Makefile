@@ -38,6 +38,10 @@ CXXFLAGS += -Wno-uninitialized -Wno-missing-braces -Wno-#warnings
 CXXFLAGS += -march=native -ffast-math -mllvm -inline-threshold=$(INLINE_THRESHOLD) -ffp-contract=fast
 endif
 endif
+ifeq ($(findstring c++,$(CXX)),c++)
+CXXFLAGS += -Wno-uninitialized -Wno-missing-braces -Wno-#NPY_NO_DEPRECATED_API
+CXXFLAGS += -march=native -ffast-math -mllvm -inline-threshold=$(INLINE_THRESHOLD) -ffp-contract=fast
+endif
 ifeq ($(findstring icpc,$(CXX)),icpc)
 CXXFLAGS += -march=native -no-ansi-alias -xHost -fp-model fast=1 -inline-forceinline -inline-factor=$(INLINE_THRESHOLD)
 endif

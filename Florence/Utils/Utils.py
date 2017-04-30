@@ -1,3 +1,4 @@
+from __future__ import print_function
 
 # COMPARE STRINGS WHICH MIGHT CONTAIN UNICODES
 ############################################################################
@@ -49,7 +50,7 @@ def par_unpickle(MainData,mesh,material,Eulerx,TotalPot):
     del MainData, mesh, material, Eulerx, TotalPot, f
     gc.collect()
 
-    print 'Time taken for unpickling was', time.time() - t_unpickle, 'seconds'
+    print('Time taken for unpickling was', time.time() - t_unpickle, 'seconds')
 
     # try:
     #     # delete directory
@@ -106,7 +107,7 @@ def par_pickle(tmp_dir):
     #     if exc.errno != errno.ENOENT:  
     #         raise  IOError("No directory to delete")
     
-    print 'Time taken for pickling was', time.time() - t_pickle, 'seconds'
+    print ('Time taken for pickling was', time.time() - t_pickle, 'seconds')
 
     Dict = loadmat(os.path.join(tmp_dir,'rest'))
     MainData.C = int(Dict['C'])
@@ -155,5 +156,5 @@ class constant_camera_view(object):
         if not self.orig_no_render:
             mlab.gcf().scene.disable_render = False
         if t != None:
-            print t, val, trace
+            print(t, val, trace)
             ipdb.post_mortem(trace)

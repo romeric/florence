@@ -1,2 +1,2 @@
-from BoundaryCondition import BoundaryCondition
-from CurvilinearMeshing import PostMeshCurvePy, PostMeshSurfacePy
+from .BoundaryCondition import BoundaryCondition
+from .CurvilinearMeshing import PostMeshCurvePy, PostMeshSurfacePy

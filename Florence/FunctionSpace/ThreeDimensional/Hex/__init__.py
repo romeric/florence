@@ -1,1 +1,1 @@
-from HexLagrangeGaussLobatto import LagrangeGaussLobatto, GradLagrangeGaussLobatto
+from .HexLagrangeGaussLobatto import LagrangeGaussLobatto, GradLagrangeGaussLobatto

@@ -1,5 +1,5 @@
 import numpy as np
-from LineBP import LagrangeBP_, LagrangeGaussLobattoBP_
+from .LineBP import LagrangeBP_, LagrangeGaussLobattoBP_
 try:
     from functools import lru_cache
 except ImportError:

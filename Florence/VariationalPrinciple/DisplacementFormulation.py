@@ -4,7 +4,7 @@ from Florence import QuadratureRule, FunctionSpace
 
 from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import *
 from Florence.FiniteElements.ElementalMatrices._KinematicMeasures_ import _KinematicMeasures_
-from _ConstitutiveStiffnessDF_ import __ConstitutiveStiffnessIntegrandDF__
+from ._ConstitutiveStiffnessDF_ import __ConstitutiveStiffnessIntegrandDF__
 from Florence.Tensor import issymetric
 
 class DisplacementFormulation(VariationalPrinciple):

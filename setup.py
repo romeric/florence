@@ -3,7 +3,8 @@ import os, platform, sys, subprocess, imp
 from distutils.core import setup
 from distutils.command.clean import clean
 from distutils.extension import Extension
-from distutils.sysconfig import get_config_vars
+from distutils.sysconfig import get_config_vars, get_python_inc, get_python_lib
+import fnmatch
 try:
     from Cython.Build import cythonize
 except ImportError:
@@ -17,7 +18,7 @@ except ImportError:
 
 class FlorenceSetup(object):
 
-    os = sys.platform
+    _os = sys.platform
 
     python_version = None
     python_interpreter = None
@@ -82,48 +83,38 @@ class FlorenceSetup(object):
         # Get python implementation e.g. CPython, PyPy etc
         self.python_implementation = platform.python_implementation()
 
-        # Get python path
-        # Pass 1 - check if pythonX.Y folder exits 
-        actual_path = None
-        for path in sys.path:
-            lpath = path.split("/")
-            if lpath[-1] == self.python_interpreter:
-                actual_path = path
+        # Get python include path
+        self.python_include_path = get_python_inc()
+
+        # Get python lib path
+        # Note that we need the actual ld path where libpython.so/dylib/dll resides
+        # and this seems like the only portable way at the moment
+        lib_postfix = ".so"
+        if "darwin" in self._os:
+            lib_postfix = ".dylib"
+
+        # The following search is split into two searches for /usr/lib and /usr/local
+        # for speed purposes
+        libpython = "lib"+self.python_interpreter+lib_postfix
+        for root, _, filenames in os.walk('/usr/lib/'):
+            for filename in fnmatch.filter(filenames, libpython):
+                self.python_ld_path = os.path.join(root, filename).rsplit(libpython)[0]
                 break
-
-        if actual_path == None:
-            # pass 2 - hook get path through numpy
-            actual_path = "/"
-            import imp
-            np_package_path = imp.find_module("numpy")[1]
-            split_np_path = np_package_path.split("/")
-            for path in split_np_path:
-                if "site-packages" in path or "dist-packages" in path:
+        if self.python_ld_path == None:
+            for root, _, filenames in os.walk('/usr/local/'):
+                for filename in fnmatch.filter(filenames, libpython):
+                    self.python_ld_path = os.path.join(root, filename).rsplit(libpython)[0]
                     break
-                actual_path = os.path.join(actual_path,path)
-            actual_path = os.path.join(actual_path,"lib")
 
-        self.python_ld_path = actual_path
-        self.python_include_path = self.python_ld_path.replace("lib","include")
-
-
-        if "PyPy" in self.python_implementation:
-            # Hook - get postfix from numpy multiarray extension module
-            self.extension_postfix = "pypy-41.so" 
-            np_linalg_mods = os.listdir(os.path.join(np_package_path,"core"))
-            for _mod in np_linalg_mods:
-                if "multiarray" in _mod:
-                    if not "multiarray_test" in _mod:
-                        self.extension_postfix = _mod.split("multiarray.")[-1]
-        else:
-            self.extension_postfix = "so"
+        # Get postfix for extensions 
+        self.extension_postfix = get_config_vars()['SO'][1:]
 
 
     def GetNumPyPath(self):
         numpy_version = np.__version__
-        if numpy_version.split('.')[0]==1 and numpy_version.split('.')[1] < 8:
+        if int(numpy_version.split('.')[0])==1 and int(numpy_version.split('.')[1]) < 8:
             raise RuntimeError("Numpy version >= 1.8 required")
-        elif numpy_version.split('.')[0] < 1:
+        elif int(numpy_version.split('.')[0]) < 1:
             raise RuntimeError("Numpy version >= 1.8 required")
         self.numpy_include_path = np.get_include()
 
@@ -135,15 +126,19 @@ class FlorenceSetup(object):
         else:
             self.blas_version = "openblas"
 
+        lib_postfix = ".so"
+        if "darwin" in self._os:
+            lib_postfix = ".dylib"
+
         dirs = ["/opt/OpenBLAS/lib","/usr/local/Cellar/openblas/","/usr/lib/","/usr/local/lib/"]
         aux_path = "/usr/local/Cellar/openblas"
         if os.path.isdir(aux_path):
             files = os.listdir(aux_path)
-            if self.blas_version+".dylib" not in files:
+            if self.blas_version+lib_postfix not in files:
                 for d in files:
                     if os.path.isdir(os.path.join(aux_path,d)):
                         files2 = os.listdir(os.path.join(aux_path,d))
-                        if self.blas_version+".dylib" not in files:
+                        if self.blas_version+lib_postfix not in files:
                             if os.path.isdir(os.path.join(aux_path,d,"lib")):
                                 dirs.append(os.path.join(aux_path,d,"lib"))
 
@@ -152,7 +147,7 @@ class FlorenceSetup(object):
             if os.path.isdir(d):
                 libs = os.listdir(d)
                 for blas in libs:
-                    if self.blas_version+".so" in blas or self.blas_version+".dylib" in blas:
+                    if self.blas_version+lib_postfix in blas:
                         self.blas_ld_path = d
                         self.blas_include_path = d.replace("lib","include")
                         found_blas = True
@@ -163,7 +158,7 @@ class FlorenceSetup(object):
 
     def SetCompiler(self, _fc_compiler=None, _cc_compiler=None, _cxx_compiler=None):
 
-        if not "darwin" in self.os and not "linux" in self.os:
+        if not "darwin" in self._os and not "linux" in self._os:
             raise RuntimeError("Florence is not yet tested on any other platform apart from Linux & macOS")
 
         self.fc_compiler = _fc_compiler
@@ -174,16 +169,11 @@ class FlorenceSetup(object):
             self.fc_compiler = "gfortran"
 
         if self.cc_compiler is None:
-            if "darwin" in self.os:
-                self.cc_compiler = "clang"
-            elif "linux" in self.os:
-                self.cc_compiler = "gcc"
+            self.cc_compiler = get_config_vars()['CC'].split(' ')[0]
 
         if self.cxx_compiler is None:
-            if "darwin" in self.os:
-                self.cxx_compiler = "clang++"
-            elif "linux" in self.os:
-                self.cxx_compiler = "g++"
+            self.cxx_compiler = get_config_vars()['CXX'].split(' ')[0]
+
 
     def SetCompilerArgs(self):
         # Generic compiler arguments
@@ -217,7 +207,7 @@ class FlorenceSetup(object):
 
         self.extension_paths = [tensor_path,mesh_path,jacobi_path,bp_path,km_path,gm_path,cm_path,material_path,occ_path]
 
-        # self.extension_paths = [material_path]
+        # self.extension_paths = [jacobi_path]
 
     def SourceClean(self):
 
@@ -272,6 +262,7 @@ class FlorenceSetup(object):
         # low_level_material_list = ["_IsotropicElectroMechanics_101_"]
 
         assert self.extension_paths != None
+        # self.extension_paths = []
 
         for _path in self.extension_paths:
             if "PostMesh" not in _path and "LLDispatch" not in _path:

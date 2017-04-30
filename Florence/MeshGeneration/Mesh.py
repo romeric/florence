@@ -1,4 +1,4 @@
-from __future__ import division
+from __future__ import print_function, division
 import os, sys, warnings, platform
 from time import time
 import numpy as np 
@@ -6,16 +6,16 @@ if "PyPy" not in platform.python_implementation():
     from scipy.io import loadmat, savemat
 from Florence.Tensor import makezero, itemfreq, unique2d, in2d
 from Florence.Utils import insensitive
-from vtk_writer import write_vtu
-from NormalDistance import NormalDistance
+from .vtk_writer import write_vtu
+from .NormalDistance import NormalDistance
 try:
     import meshpy.triangle as triangle
     has_meshpy = True
 except ImportError:
     has_meshpy = False
-from SalomeMeshReader import ReadMesh
-from HigherOrderMeshing import *
-from GeometricPath import *
+from .SalomeMeshReader import ReadMesh
+from .HigherOrderMeshing import *
+from .GeometricPath import *
 from warnings import warn
 from copy import deepcopy
 
@@ -1007,7 +1007,7 @@ class Mesh(object):
 
 
 
-        print 'Generating p = '+str(C+1)+' mesh based on the linear mesh...'
+        print('Generating p = '+str(C+1)+' mesh based on the linear mesh...')
         t_mesh = time()
         # BUILD A NEW MESH BASED ON THE LINEAR MESH
         if self.element_type == 'tri':
@@ -1041,7 +1041,7 @@ class Mesh(object):
 
         self.ChangeType()
         
-        print 'Finished generating the high order mesh. Time taken', time()-t_mesh,'sec'
+        print('Finished generating the high order mesh. Time taken', time()-t_mesh,'sec')
 
 
     def EdgeLengths(self,which_edges='boundary'):
@@ -1574,9 +1574,9 @@ class Mesh(object):
 
 
         if original_order == 'anti-clockwise':
-            print u'\u2713'.encode('utf8')+' : ','Imported mesh has',original_order,'node ordering'
+            print(u'\u2713'.encode('utf8')+' : ','Imported mesh has',original_order,'node ordering')
         else:
-            print u'\u2717'.encode('utf8')+' : ','Imported mesh has',original_order,'node ordering'
+            print(u'\u2717'.encode('utf8')+' : ','Imported mesh has',original_order,'node ordering')
 
         return original_order
 
@@ -2211,7 +2211,7 @@ class Mesh(object):
         try:
             fid = open(filename, "r")
         except IOError:
-            print "File '%s' not found." % (filename)
+            print("File '%s' not found." % (filename))
             sys.exit()
 
         self.filename = filename
@@ -2268,7 +2268,6 @@ class Mesh(object):
         self.points = mesh.Verts
         # print dir(mesh)
         self.elements = mesh.Elmts 
-        print self.elements
 
 
     def ReadHDF5(self,filename):
@@ -2291,6 +2290,8 @@ class Mesh(object):
 
         if isinstance(self.element_type,np.ndarray):
             self.element_type = str(self.element_type[0])
+        if isinstance(self.nelem,np.ndarray):
+            self.nelem = int(self.nelem[0])
 
 
 
@@ -3524,7 +3525,7 @@ class Mesh(object):
 
 
 
-    def RemoveElements(self,(x_min,y_min,x_max,y_max),element_removal_criterion="all",keep_boundary_only=False,
+    def RemoveElements(self,xy_min_max,element_removal_criterion="all",keep_boundary_only=False,
             compute_edges=True,compute_faces=True,plot_new_mesh=True):
         """Removes elements with some specified criteria
 
@@ -3547,6 +3548,11 @@ class Mesh(object):
         assert self.elements != None
         assert self.points != None
         assert self.edges != None
+
+        x_min = xy_min_max[0]
+        y_min = xy_min_max[1]
+        x_max = xy_min_max[2]
+        y_max = xy_min_max[3]
 
         new_elements = np.zeros((1,3),dtype=np.int64)
 
@@ -4169,7 +4175,7 @@ class Mesh(object):
         self.nnode = self.points.shape[0]
         self.GetBoundaryEdgesQuad()
 
-        print "Triangular to quadrilateral mesh conversion took", time() - tconv, "seconds" 
+        print("Triangular to quadrilateral mesh conversion took", time() - tconv, "seconds") 
 
 
     def ConvertTetsToHexes(self):
@@ -4286,7 +4292,7 @@ class Mesh(object):
         self.GetBoundaryFacesHex()
         self.GetBoundaryEdgesHex()
 
-        print "Tetrahedral to hexahedral mesh conversion took", time() - tconv, "seconds"
+        print("Tetrahedral to hexahedral mesh conversion took", time() - tconv, "seconds")
 
 
 
@@ -4325,7 +4331,7 @@ class Mesh(object):
         self.nnode = self.points.shape[0]
         self.edges = edges
 
-        print "Quadrilateral to triangular mesh conversion took", time() - tconv, "seconds"
+        print("Quadrilateral to triangular mesh conversion took", time() - tconv, "seconds")
 
 
     def ConvertHexesToTets(self):
@@ -4373,7 +4379,7 @@ class Mesh(object):
         if all_edges is not None:
             self.all_edges = all_edges
 
-        print "Hexahedral to tetrahedral mesh conversion took", time() - tconv, "seconds"
+        print("Hexahedral to tetrahedral mesh conversion took", time() - tconv, "seconds")
 
 
     @staticmethod

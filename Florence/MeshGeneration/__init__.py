@@ -1,3 +1,3 @@
-from GeometricPath import *
-from Mesh import Mesh
-from CustomMesher import *
+from .GeometricPath import *
+from .Mesh import Mesh
+from .CustomMesher import *

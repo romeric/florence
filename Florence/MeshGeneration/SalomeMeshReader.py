@@ -2,7 +2,7 @@ from __future__ import with_statement
 import imp
 import numpy as np 
 
-from _fromfile_reader import NPFROMFILE_LOOP_Cython
+from ._fromfile_reader import NPFROMFILE_LOOP_Cython
 
 
 #--------------------------------------------------------------------------------------------------#
