@@ -3,13 +3,13 @@ from numpy import einsum
 from Florence.Tensor import trace, Voigt
 from .MaterialBase import Material
 from Florence.LegendreTransform import LegendreTransform
-#####################################################################################################
-                # Simplest electromechanical model in terms of internal energy 
-                        # W(C,D0) = W_neo(C) + 1/2/eps_1 (FD0*FD0)
-#####################################################################################################
 
 
 class IsotropicElectroMechanics_101(Material):
+    """
+                Simplest electromechanical model in terms of internal energy 
+                        W(C,D0) = W_neo(C) + 1/2/eps_1 (FD0*FD0)
+    """
     
     def __init__(self, ndim, **kwargs):
         mtype = type(self).__name__
@@ -45,19 +45,32 @@ class IsotropicElectroMechanics_101(Material):
 
         # D  = ElectricDisplacementx.reshape(self.ndim,1)
         Dx = ElectricDisplacementx.reshape(self.ndim)
-        # DD = np.dot(D.T,D)[0,0]
-        # bb = np.dot(b,b)
 
         self.elasticity_tensor = lamb*(2.*J-1.)*einsum("ij,kl",I,I) + \
         (mu/J - lamb*(J-1))*( einsum("ik,jl",I,I)+einsum("il,jk",I,I) )
 
         self.coupling_tensor = J/eps_1*(einsum('ik,j',I,Dx) + einsum('i,jk',Dx,I))
+        # print(self.coupling_tensor)
 
         self.dielectric_tensor = J/eps_1*I 
 
         # TRANSFORM TENSORS TO THEIR ENTHALPY COUNTERPART
         E_Voigt, P_Voigt, C_Voigt = self.legendre_transform.InternalEnergyToEnthalpy(self.dielectric_tensor, 
             self.coupling_tensor, self.elasticity_tensor)
+
+        # # D_exact = eps_1/J*E
+        # Ex = J/eps_1*Dx
+        # # P_Voigt = J**(-1.)*eps_1*(einsum('ik,j',I,Ex) + einsum('i,jk',Ex,I))
+        # P_Voigt = np.zeros((3,3,3))
+        # I = np.eye(3,3)
+        # for i in range(3):
+        #     for j in range(3):
+        #         for k in range(3):
+        #             P_Voigt[i,j,k] = J**(-1.)*eps_1*(I[i,k]*Ex[j] + Ex[i]*I[j,k])
+        # # print(P_Voigt)
+        # P_Voigt = Voigt(P_Voigt,1)
+
+
         # BUILD HESSIAN
         factor = -1.
         H1 = np.concatenate((C_Voigt,factor*P_Voigt),axis=1)
@@ -88,7 +101,7 @@ class IsotropicElectroMechanics_101(Material):
         # J = StrainTensors['J'][gcounter]
         # E = ElectricFieldx.reshape(self.ndim,1)
         # D_exact = eps_1/J*E
-        # print np.linalg.norm(D - D_exact)
+        # # print np.linalg.norm(D - D_exact)
         # return D_exact
 
         return D

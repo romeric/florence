@@ -35,7 +35,6 @@ from IsotropicElectroMechanics_1 import *
 from IsotropicElectroMechanics_2 import *
 from IsotropicElectroMechanics_3 import *
 from SteinmannModel import *
-from AnisotropicMooneyRivlin_1_Electromechanics import *
 
 # ELECTROMECHANICAL MATERIAL MODELS - INTERNAL ENERGY
 from IsotropicElectroMechanics_100 import *
