@@ -203,11 +203,9 @@ class FlorenceSetup(object):
         gm_path = os.path.join(_pwd_,"VariationalPrinciple","_GeometricStiffness_")
         cm_path = os.path.join(_pwd_,"VariationalPrinciple","_ConstitutiveStiffness_")
         material_path = os.path.join(_pwd_,"MaterialLibrary","LLDispatch")
-        occ_path = os.path.join(_pwd_,"BoundaryCondition","CurvilinearMeshing","PostMesh")
 
-        self.extension_paths = [tensor_path,mesh_path,jacobi_path,bp_path,km_path,gm_path,cm_path,material_path,occ_path]
-
-        # self.extension_paths = [jacobi_path]
+        self.extension_paths = [tensor_path,mesh_path,jacobi_path,bp_path,km_path,gm_path,cm_path,material_path]
+        # self.extension_paths = [material_path]
 
     def SourceClean(self):
 
@@ -219,9 +217,6 @@ class FlorenceSetup(object):
                 execute('cd '+_path+' && '+source_clean_cmd)
             elif "LLDispatch" in _path:
                 execute('cd '+_path+' && echo rm -rf *.cpp CythonSource/*.cpp && rm -rf *.cpp CythonSource/*.cpp')
-            elif "PostMesh" in _path:
-                execute('cd '+_path+' && echo rm -rf PostMeshPy.cpp build/ && rm -rf m PostMeshPy.cpp build')
-
 
     def Clean(self):
 
@@ -231,7 +226,7 @@ class FlorenceSetup(object):
         # You need to run both make clean and rm -rf as some modules relocate the shared libraries
         clean_cmd = 'make clean ' + self.compiler_args
         for _path in self.extension_paths:
-            if "PostMesh" not in _path and "LLDispatch" not in _path:
+            if "LLDispatch" not in _path:
                 execute('cd '+_path+' && echo rm -rf *.so && '+clean_cmd+' && rm -rf *.so *.'+self.extension_postfix)
             elif "LLDispatch" in _path:
                 execute('cd '+_path+
@@ -262,7 +257,6 @@ class FlorenceSetup(object):
                                     "_IsotropicElectroMechanics_108_",
                                     "_Piezoelectric_100_"
                                 ]
-
         # low_level_material_list = ["_IsotropicElectroMechanics_101_"]
 
         assert self.extension_paths != None
@@ -275,10 +269,8 @@ class FlorenceSetup(object):
                 for material in low_level_material_list:
                     material = material.lstrip('_').rstrip('_')
                     execute('cd '+_path+' && make ' + self.compiler_args + " MATERIAL=" + material)
-            elif "PostMesh" in _path:
-                execute('cd '+_path+' && python setup.py build_ext -ifq')
 
-        # Get rid off cython sources
+        # Get rid of cython sources
         sys.stdout = open(os.devnull, 'w')
         self.SourceClean()
         sys.stdout = sys.__stdout__
