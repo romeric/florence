@@ -40,7 +40,7 @@
 *.step
 
 # object files
-.o
+*.o
 
 # shared libraries
 *.so
@@ -59,6 +59,7 @@ RunSession.sublime-project
 RunSession.sublime-workspace
 Florence.sublime-project
 Florence.sublime-workspace
+*.sublime-project
 param_run_session.py
 profile_imports_manual.py
 nr.py
