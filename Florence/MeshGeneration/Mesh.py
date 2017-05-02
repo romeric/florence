@@ -231,6 +231,7 @@ class Mesh(object):
                         [np.max(self.points[:,0]),
                         np.max(self.points[:,1])]])
             makezero(bounds)
+            return bounds
         else:
             raise ValueError("Invalid dimension for mesh coordinates")
             return bounds
