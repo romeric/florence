@@ -636,7 +636,7 @@ class FEMSolver(object):
 
         if self.analysis_type != 'static':
             mass = csc_matrix((V_mass,(I_mass,J_mass)),shape=((nvar*mesh.points.shape[0],
-                nvar*mesh.points.shape[0])),dtype=np.float32)
+                nvar*mesh.points.shape[0])),dtype=np.float64)
 
         return stiffness, T, F, mass
 
@@ -829,8 +829,8 @@ class FEMSolver(object):
             F = []
             T = []
         else:
-            F = np.zeros((mesh.points.shape[0]*nvar,1),np.float32)
-            T = np.zeros((mesh.points.shape[0]*nvar,1),np.float32)  
+            F = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
+            T = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)  
 
         # ASSIGN OTHER NECESSARY MATRICES
         full_current_row_stiff = []; full_current_column_stiff = []; coeff_stiff = [] 
