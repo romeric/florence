@@ -17,6 +17,7 @@ from Florence.FunctionSpace import Quad
 from Florence.FunctionSpace import Hex
 
 from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import *
+from Florence.FiniteElements.ElementalMatrices._KinematicMeasures_ import _KinematicMeasures_
 from Florence import Mesh
 from Florence.MeshGeneration import vtk_writer
 from Florence.Utils import constant_camera_view
@@ -110,7 +111,12 @@ class PostProcess(object):
         return dU
 
 
-    def StressRecovery(self):
+    def StressRecovery(self, steps=None):
+
+        """
+            steps:          [list,np.1darray] for which time steps/increments the data should
+                            be recovered
+        """
 
         if self.mesh is None:
             raise ValueError("Mesh not set for post-processing")
@@ -150,17 +156,19 @@ class PostProcess(object):
         Jm = Domain.Jm
         AllGauss = Domain.AllGauss
 
-        # exit()
-
 
         elements = mesh.elements
         points = mesh.points
         nelem = elements.shape[0]; npoint = points.shape[0]
         nodeperelem = elements.shape[1]
-        LoadIncrement = fem_solver.number_of_load_increments
         requires_geometry_update = fem_solver.requires_geometry_update
         TotalDisp = self.sol[:,:]
-        # TotalDisp = self.sol[:mesh.nnode,:]
+
+        LoadIncrement = fem_solver.number_of_load_increments
+        increments = range(LoadIncrement)
+        if steps!=None:
+            LoadIncrement = len(steps)
+            increments = steps
 
 
         F = np.zeros((nelem,nodeperelem,ndim,ndim))
@@ -177,7 +185,8 @@ class PostProcess(object):
             MainDict['ElectricFieldx'] = np.zeros((LoadIncrement,npoint,ndim))
             MainDict['ElectricDisplacementx'] = np.zeros((LoadIncrement,npoint,ndim))
 
-        for Increment in range(LoadIncrement):
+
+        for incr, Increment in enumerate(increments):
             Eulerx = points + TotalDisp[:,:ndim,Increment]
             if self.formulation.fields == 'electro_mechanics':
                 Eulerp = TotalDisp[:,ndim,Increment]
@@ -190,87 +199,96 @@ class PostProcess(object):
                 if self.formulation.fields == 'electro_mechanics':
                     ElectricPotentialElem =  Eulerp[elements[elem,:]]
 
+                if material.has_low_level_dispatcher:
 
-                # GAUSS LOOP IN VECTORISED FORM
-                ParentGradientX = np.einsum('ijk,jl->kil', Jm, LagrangeElemCoords)
-                # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
-                MaterialGradient = np.einsum('ijk,kli->ijl', inv(ParentGradientX), Jm)
-                # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
-                F[elem,:,:,:] = np.einsum('ij,kli->kjl', EulerELemCoords, MaterialGradient)
-                # COMPUTE REMAINING KINEMATIC MEASURES
-                StrainTensors = KinematicMeasures(F[elem,:,:,:], fem_solver.analysis_nature)
+                    SpatialGradient, F[elem,:,:,:], detJ = _KinematicMeasures_(Jm, AllGauss[:,0], LagrangeElemCoords, 
+                        EulerELemCoords, requires_geometry_update)
+                    # GET ELECTRIC FIELD
+                    ElectricFieldx[elem,:,:] = - np.einsum('ijk,j',SpatialGradient,ElectricPotentialElem)
+                    # COMPUTE WORK-CONJUGATES AND HESSIAN AT THIS GAUSS POINT
+                    _D_dum ,CauchyStressTensor[elem,:,:], _ = material.KineticMeasures(F[elem,:,:,:], ElectricFieldx[elem,:,:], elem=elem)
+                    ElectricDisplacementx[elem,:,:] = _D_dum[:,:,0]
 
-                # UPDATE/NO-UPDATE GEOMETRY
-                if fem_solver.requires_geometry_update:
-                    # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-                    ParentGradientx = np.einsum('ijk,jl->kil',Jm,EulerELemCoords)
-                    # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
-                    SpatialGradient = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Jm)
-                    # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
-                    detJ = np.einsum('i,i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)),
-                        np.abs(StrainTensors['J']))
                 else:
-                    # SPATIAL GRADIENT AND MATERIAL GRADIENT TENSORS ARE EQUAL
-                    SpatialGradient = np.einsum('ikj',MaterialGradient)
-                    # COMPUTE ONCE detJ
-                    detJ = np.einsum('i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)))
+                    # GAUSS LOOP IN VECTORISED FORM
+                    ParentGradientX = np.einsum('ijk,jl->kil', Jm, LagrangeElemCoords)
+                    # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
+                    MaterialGradient = np.einsum('ijk,kli->ijl', inv(ParentGradientX), Jm)
+                    # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
+                    F[elem,:,:,:] = np.einsum('ij,kli->kjl', EulerELemCoords, MaterialGradient)
+                    # COMPUTE REMAINING KINEMATIC MEASURES
+                    StrainTensors = KinematicMeasures(F[elem,:,:,:], fem_solver.analysis_nature)
 
 
-                # LOOP OVER GAUSS POINTS
-                for counter in range(AllGauss.shape[0]):
+                    # UPDATE/NO-UPDATE GEOMETRY
+                    if fem_solver.requires_geometry_update:
+                        # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+                        ParentGradientx = np.einsum('ijk,jl->kil',Jm,EulerELemCoords)
+                        # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
+                        SpatialGradient = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Jm)
+                        # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
+                        detJ = np.einsum('i,i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)),
+                            np.abs(StrainTensors['J']))
+                    else:
+                        # SPATIAL GRADIENT AND MATERIAL GRADIENT TENSORS ARE EQUAL
+                        SpatialGradient = np.einsum('ikj',MaterialGradient)
+                        # COMPUTE ONCE detJ
+                        detJ = np.einsum('i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)))
 
-                    if self.formulation.fields == 'electro_mechanics':
-                        # GET ELECTRIC FILED
-                        ElectricFieldx[elem,counter,:] = - np.dot(SpatialGradient[counter,:,:].T,
-                            ElectricPotentialElem)
+                    # LOOP OVER GAUSS POINTS
+                    for counter in range(AllGauss.shape[0]):
 
-                        # COMPUTE ELECTRIC DISPLACEMENT
-                        ElectricDisplacementx[elem,counter,:] = (material.ElectricDisplacementx(StrainTensors, 
-                            ElectricFieldx[elem,counter,:], elem, counter))[:,0]
-                    # else:
-                        # ElectricFieldx, ElectricDisplacementx = [], []
+                        if self.formulation.fields == 'electro_mechanics':
+                            # GET ELECTRIC FILED
+                            ElectricFieldx[elem,counter,:] = - np.dot(SpatialGradient[counter,:,:].T,
+                                ElectricPotentialElem)
 
-                    if material.energy_type == "enthalpy":
-                        
-                        # COMPUTE CAUCHY STRESS TENSOR
-                        if fem_solver.requires_geometry_update:
-                            CauchyStressTensor[elem,counter,:] = material.CauchyStress(StrainTensors,
-                                ElectricFieldx[elem,counter,:],elem,counter)
+                            # COMPUTE ELECTRIC DISPLACEMENT
+                            ElectricDisplacementx[elem,counter,:] = (material.ElectricDisplacementx(StrainTensors, 
+                                ElectricFieldx[elem,counter,:], elem, counter))[:,0]
+                        # else:
+                            # ElectricFieldx, ElectricDisplacementx = [], []
 
-                    elif material.energy_type == "internal_energy":
-                        # COMPUTE THE HESSIAN AT THIS GAUSS POINT
-                        # H_Voigt = material.Hessian(StrainTensors,ElectricDisplacementx[elem,counter,:], elem, counter)
-                        
-                        # COMPUTE CAUCHY STRESS TENSOR
-                        if fem_solver.requires_geometry_update:
-                            CauchyStressTensor[elem,counter,:] = material.CauchyStress(StrainTensors,
-                                ElectricDisplacementx[elem,counter,:],elem,counter)
-            
+                        if material.energy_type == "enthalpy":
+                            
+                            # COMPUTE CAUCHY STRESS TENSOR
+                            if fem_solver.requires_geometry_update:
+                                CauchyStressTensor[elem,counter,:] = material.CauchyStress(StrainTensors,
+                                    ElectricFieldx[elem,counter,:],elem,counter)
+
+                        elif material.energy_type == "internal_energy":
+                            # COMPUTE THE HESSIAN AT THIS GAUSS POINT
+                            # H_Voigt = material.Hessian(StrainTensors,ElectricDisplacementx[elem,counter,:], elem, counter)
+                            
+                            # COMPUTE CAUCHY STRESS TENSOR
+                            if fem_solver.requires_geometry_update:
+                                CauchyStressTensor[elem,counter,:] = material.CauchyStress(StrainTensors,
+                                    ElectricDisplacementx[elem,counter,:],elem,counter)
 
 
             for inode in np.unique(elements):
                 Els, Pos = np.where(elements==inode)
                 ncommon_nodes = Els.shape[0]
                 for uelem in range(ncommon_nodes):
-                    MainDict['F'][Increment,inode,:,:] += F[Els[uelem],Pos[uelem],:,:]
+                    MainDict['F'][incr,inode,:,:] += F[Els[uelem],Pos[uelem],:,:]
                     if formulation.fields == "electro_mechanics":
-                        MainDict['ElectricFieldx'][Increment,inode,:] += ElectricFieldx[Els[uelem],Pos[uelem],:]
-                        MainDict['ElectricDisplacementx'][Increment,inode,:] += ElectricDisplacementx[Els[uelem],Pos[uelem],:]
-                    MainDict['CauchyStress'][Increment,inode,:,:] += CauchyStressTensor[Els[uelem],Pos[uelem],:,:]
+                        MainDict['ElectricFieldx'][incr,inode,:] += ElectricFieldx[Els[uelem],Pos[uelem],:]
+                        MainDict['ElectricDisplacementx'][incr,inode,:] += ElectricDisplacementx[Els[uelem],Pos[uelem],:]
+                    MainDict['CauchyStress'][incr,inode,:,:] += CauchyStressTensor[Els[uelem],Pos[uelem],:,:]
 
                 # AVERAGE OUT
-                MainDict['F'][Increment,inode,:,:] /= ncommon_nodes
+                MainDict['F'][incr,inode,:,:] /= ncommon_nodes
                 if formulation.fields == "electro_mechanics":
-                    MainDict['ElectricFieldx'][Increment,inode,:] /= ncommon_nodes
-                    MainDict['ElectricDisplacementx'][Increment,inode,:] /= ncommon_nodes
-                MainDict['CauchyStress'][Increment,inode,:,:] /= ncommon_nodes
+                    MainDict['ElectricFieldx'][incr,inode,:] /= ncommon_nodes
+                    MainDict['ElectricDisplacementx'][incr,inode,:] /= ncommon_nodes
+                MainDict['CauchyStress'][incr,inode,:,:] /= ncommon_nodes
 
 
         self.recovered_fields = MainDict
         return
 
 
-    def GetAugmentedSolution(self):
+    def GetAugmentedSolution(self, steps=None):
         """Computes all recovered variable and puts them in one big nd.array including with primary variables
             The following numbering convention is used for storing variables:
 
@@ -354,7 +372,7 @@ class PostProcess(object):
                 ----------------------------------------------------------------------------------------
                 37                          S_xz                                    S_xy
                 ----------------------------------------------------------------------------------------
-                37                          S_yy                                    S_xz
+                38                          S_yy                                    S_xz
                 ----------------------------------------------------------------------------------------
                 39                          S_yz                                    S_yy
                 ----------------------------------------------------------------------------------------
@@ -391,12 +409,14 @@ class PostProcess(object):
             return self.sol
 
         # GET RECOVERED VARIABLES ALL VARIABLE CHECKS ARE DONE IN STRESS RECOVERY
-        self.StressRecovery()
+        self.StressRecovery(steps)
 
         ndim = self.formulation.ndim
         fields = self.formulation.fields
         nnode = self.mesh.points.shape[0]
         increments = self.sol.shape[2]
+        if steps != None:
+            increments = len(steps)
 
         F = self.recovered_fields['F']
         J = np.linalg.det(F)
@@ -436,7 +456,7 @@ class PostProcess(object):
         if fields == "mechanics" and ndim == 2:
 
             augmented_sol = np.zeros((nnode,21,increments),dtype=np.float64)
-            augmented_sol[:,:2,:]     = self.sol
+            augmented_sol[:,:2,:]     = self.sol[:,:2,steps].reshape(augmented_sol[:,:2,:].shape)
             augmented_sol[:,2:6,:]    = F
             augmented_sol[:,6:10,:]   = H
             augmented_sol[:,10,:]     = J
@@ -448,7 +468,7 @@ class PostProcess(object):
         elif fields == "mechanics" and ndim == 3:
 
             augmented_sol = np.zeros((nnode,41,increments),dtype=np.float64)
-            augmented_sol[:,:3,:]     = self.sol
+            augmented_sol[:,:3,:]     = self.sol[:,:3,steps].reshape(augmented_sol[:,:3,:].shape)
             augmented_sol[:,3:12,:]   = F
             augmented_sol[:,12:21,:]  = H
             augmented_sol[:,21,:]     = J
@@ -461,7 +481,7 @@ class PostProcess(object):
         elif fields == "electro_mechanics" and ndim == 2:
 
             augmented_sol = np.zeros((nnode,26,increments),dtype=np.float64)
-            augmented_sol[:,:3,:]     = self.sol
+            augmented_sol[:,:3,:]     = self.sol[:,:3,steps].reshape(augmented_sol[:,:3,:].shape)
             augmented_sol[:,3:7,:]    = F
             augmented_sol[:,7:11,:]   = H
             augmented_sol[:,11,:]     = J
@@ -476,7 +496,7 @@ class PostProcess(object):
         elif fields == "electro_mechanics" and ndim == 3:
             augmented_sol = np.zeros((nnode,48,increments),dtype=np.float64)
 
-            augmented_sol[:,:4,:]     = self.sol
+            augmented_sol[:,:4,:]     = self.sol[:,:4,steps].reshape(augmented_sol[:,:4,:].shape)
             augmented_sol[:,4:13,:]   = F
             augmented_sol[:,13:22,:]  = H
             augmented_sol[:,22,:]     = J
@@ -662,11 +682,12 @@ class PostProcess(object):
 
 
 
-    def WriteVTK(self,filename=None, quantity="all", configuration="deformed", write_curved_mesh=True):
+    def WriteVTK(self,filename=None, quantity="all", configuration="deformed", steps=None, write_curved_mesh=True):
         """Writes results to a VTK file for Paraview
 
             quantity = "all" means write all solution fields, otherwise specific quantities 
             would be written based on augmented solution numbering order
+            step - [list or np.1darray of sequentially aranged steps] which time steps/increments should be written
         """
 
         if isinstance(quantity,int):
@@ -720,12 +741,12 @@ class PostProcess(object):
                 cellflag = 5
                 tmesh = PostProcess.TessellateTets(self.mesh, np.zeros_like(self.mesh.points), 
                     QuantityToPlot=self.sol[:,0,0], plot_on_faces=False, plot_points=True,
-                    interpolation_degree=10)
+                    interpolation_degree=5)
             elif lmesh.element_type =='hex':
                 cellflag = 5 
                 tmesh = PostProcess.TessellateHexes(self.mesh, np.zeros_like(self.mesh.points), 
                     QuantityToPlot=self.sol[:,0,0], plot_on_faces=False, plot_points=True,
-                    interpolation_degree=10)
+                    interpolation_degree=5)
             else:
                 raise ValueError('Not implemented yet. Use in-built visualiser for 2D problems')
 
@@ -733,7 +754,11 @@ class PostProcess(object):
             nface = tmesh.nface
             ssol = self.sol[np.unique(tmesh.faces_to_plot),:,:]
 
-            for Increment in range(LoadIncrement):
+            increments = range(LoadIncrement)
+            if steps!=None:
+                increments = steps
+
+            for Increment in increments:
 
                 extrapolated_sol = np.zeros((tmesh.points.shape[0], self.sol.shape[1]))
                 for ielem in range(nface):
@@ -768,13 +793,13 @@ class PostProcess(object):
         else:
 
             if configuration == "original":
-                for Increment in range(LoadIncrement):
+                for Increment in increments:
                     for quant in iterator:
                         vtk_writer.write_vtu(Verts=lmesh.points, 
                             Cells={cellflag:lmesh.elements}, pdata=sol[:,quant,Increment],
                             fname=filename.split('.')[0]+'_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu')
             elif configuration == "deformed":
-                for Increment in range(LoadIncrement):
+                for Increment in increments:
                     for quant in iterator:
                         vtk_writer.write_vtu(Verts=lmesh.points+sol[:,:ndim,Increment], 
                             Cells={cellflag:lmesh.elements}, pdata=sol[:,quant,Increment],
@@ -843,7 +868,7 @@ class PostProcess(object):
 
 
 
-    def Plot(self, figure=None, quantity=0, configuration="original", increment=-1, colorbar=True, axis_type=None, 
+    def Plot(self, figure=None, quantity=0, configuration="original", increment=-1, colorbar=True, axis_type=None, interpolation_degree=10,
         plot_points=False, point_radius=0.5, plot_edges=True, plot_on_curvilinear_mesh=True, show_plot=True, save=False, filename=None):
         """ 
 
@@ -860,7 +885,10 @@ class PostProcess(object):
 
         # CHECKS ARE DONE HERE
         if quantity>=self.sol.shape[1]:
-            self.GetAugmentedSolution()
+            if increment==-1:
+                self.GetAugmentedSolution(steps=[self.sol.shape[2]-1])
+            else:
+                self.GetAugmentedSolution()
             if quantity >= self.sol.shape[1]:
                 raise ValueError('Plotting quantity not understood')
 
@@ -921,12 +949,12 @@ class PostProcess(object):
                 if configuration=="original":
                     incr = 0
                     tmesh = PostProcess.CurvilinearPlotTri(self.mesh, np.zeros_like(self.sol), 
-                        interpolation_degree=20, show_plot=False, figure=figure, 
+                        interpolation_degree=interpolation_degree, show_plot=False, figure=figure, 
                         save_tessellation=True, plot_points=plot_points, plot_edges=plot_edges)[-1]
                 else:
                     incr = -1
                     tmesh = PostProcess.CurvilinearPlotTri(self.mesh, self.sol, 
-                        interpolation_degree=20, show_plot=False, figure=figure, 
+                        interpolation_degree=interpolation_degree, show_plot=False, figure=figure, 
                         save_tessellation=True, plot_points=plot_points, plot_edges=plot_edges)[-1]
 
                 nsize = tmesh.nsize
@@ -1008,7 +1036,7 @@ class PostProcess(object):
                 if configuration == "original":
                     PostProcess.CurvilinearPlotTet(self.mesh, np.zeros_like(self.mesh.points),
                         QuantityToPlot = self.sol[:,quantity,increment],
-                        figure=figure, show_plot=show_plot, plot_on_faces=False, 
+                        interpolation_degree=interpolation_degree, figure=figure, show_plot=show_plot, plot_on_faces=False, 
                         plot_points=plot_points, point_radius=point_radius, plot_edges=plot_edges, 
                         colorbar=colorbar, save=save, filename=filename)
 
@@ -1016,7 +1044,7 @@ class PostProcess(object):
 
                     PostProcess.CurvilinearPlotTet(self.mesh, self.sol[:,:ndim,-1], 
                         QuantityToPlot= self.sol[:,quantity,increment],
-                        figure=figure, show_plot=show_plot, plot_on_faces=False, 
+                        interpolation_degree=interpolation_degree,figure=figure, show_plot=show_plot, plot_on_faces=False, 
                         plot_points=plot_points, point_radius=point_radius, plot_edges=plot_edges, 
                         colorbar=colorbar, save=save, filename=filename)
 
@@ -1084,13 +1112,13 @@ class PostProcess(object):
                 if configuration=="original":
                     PostProcess.CurvilinearPlotQuad(self.mesh, np.zeros_like(self.sol), 
                         QuantityToPlot=self.sol[:,quantity,increment],
-                        interpolation_degree=20, show_plot=show_plot, figure=figure, 
+                        interpolation_degree=interpolation_degree, show_plot=show_plot, figure=figure, 
                         save_tessellation=True, plot_points=plot_points, plot_edges=plot_edges,
                         colorbar=colorbar, plot_on_faces=False)
                 else:
                     PostProcess.CurvilinearPlotQuad(self.mesh, self.sol, 
                         QuantityToPlot=self.sol[:,quantity,increment],
-                        interpolation_degree=20, show_plot=show_plot, figure=figure, 
+                        interpolation_degree=interpolation_degree, show_plot=show_plot, figure=figure, 
                         save_tessellation=True, plot_points=plot_points, plot_edges=plot_edges, 
                         colorbar=colorbar, plot_on_faces=False)
 
@@ -1152,13 +1180,13 @@ class PostProcess(object):
             if configuration=="original":
                 PostProcess.CurvilinearPlotHex(self.mesh, np.zeros_like(self.sol), 
                     QuantityToPlot=self.sol[:,quantity,increment],
-                    interpolation_degree=20, show_plot=show_plot, figure=figure, 
+                    interpolation_degree=interpolation_degree, show_plot=show_plot, figure=figure, 
                     plot_points=plot_points, point_radius=point_radius, plot_edges=plot_edges,
                     colorbar=colorbar, plot_on_faces=False, save=save, filename=filename)
             else:
                 PostProcess.CurvilinearPlotHex(self.mesh, self.sol, 
                     QuantityToPlot=self.sol[:,quantity,increment],
-                    interpolation_degree=20, show_plot=show_plot, figure=figure, 
+                    interpolation_degree=interpolation_degree, show_plot=show_plot, figure=figure, 
                     plot_points=plot_points, point_radius=point_radius, plot_edges=plot_edges, 
                     colorbar=colorbar, plot_on_faces=False, save=save, filename=filename)
 
@@ -2922,7 +2950,7 @@ class PostProcess(object):
 
         smesh = deepcopy(mesh)
         smesh.elements = mesh.elements[:,:4]
-        nmax = np.max(smesh.elements)+1
+        nmax = int(np.max(smesh.elements)+1)
         smesh.points = mesh.points[:nmax,:]
         smesh.GetEdgesQuad()
         edge_elements = smesh.GetElementsEdgeNumberingQuad()
