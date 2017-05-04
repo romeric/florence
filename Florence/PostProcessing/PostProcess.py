@@ -494,7 +494,7 @@ class PostProcess(object):
 
 
         elif fields == "electro_mechanics" and ndim == 3:
-            augmented_sol = np.zeros((nnode,48,increments),dtype=np.float64)
+            augmented_sol = np.zeros((nnode,49,increments),dtype=np.float64)
 
             augmented_sol[:,:4,:]     = self.sol[:,:4,steps].reshape(augmented_sol[:,:4,:].shape)
             augmented_sol[:,4:13,:]   = F
@@ -506,7 +506,7 @@ class PostProcess(object):
             augmented_sol[:,36:42,:]  = Cauchy
             augmented_sol[:,42:45,:]  = ElectricFieldx
             augmented_sol[:,45:48,:]  = ElectricDisplacementx
-
+            augmented_sol[:,48,:]     = 1./3.*Cauchy[:,[0,3,5],:].sum(axis=1)
         
         self.sol = augmented_sol
         return augmented_sol
@@ -741,12 +741,12 @@ class PostProcess(object):
                 cellflag = 5
                 tmesh = PostProcess.TessellateTets(self.mesh, np.zeros_like(self.mesh.points), 
                     QuantityToPlot=self.sol[:,0,0], plot_on_faces=False, plot_points=True,
-                    interpolation_degree=5)
+                    interpolation_degree=10)
             elif lmesh.element_type =='hex':
                 cellflag = 5 
                 tmesh = PostProcess.TessellateHexes(self.mesh, np.zeros_like(self.mesh.points), 
                     QuantityToPlot=self.sol[:,0,0], plot_on_faces=False, plot_points=True,
-                    interpolation_degree=5)
+                    interpolation_degree=10)
             else:
                 raise ValueError('Not implemented yet. Use in-built visualiser for 2D problems')
 
