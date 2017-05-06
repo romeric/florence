@@ -3526,8 +3526,8 @@ class Mesh(object):
 
 
 
-    def RemoveElements(self,xy_min_max,element_removal_criterion="all",keep_boundary_only=False,
-            compute_edges=True,compute_faces=True,plot_new_mesh=True):
+    def RemoveElements(self,xyz_min_max,element_removal_criterion="all",keep_boundary_only=False,
+            compute_edges=True,compute_faces=True,plot_new_mesh=False):
         """Removes elements with some specified criteria
 
         input:              
@@ -3546,33 +3546,61 @@ class Mesh(object):
         in the boundary which are within a box
         """
 
-        assert self.elements != None
-        assert self.points != None
-        assert self.edges != None
+        self.__do_memebers_exist__()
 
-        x_min = xy_min_max[0]
-        y_min = xy_min_max[1]
-        x_max = xy_min_max[2]
-        y_max = xy_min_max[3]
+        ndim = self.InferSpatialDimension()
+        if ndim==2:
+            assert len(xyz_min_max)==4
+            x_min = xyz_min_max[0]
+            y_min = xyz_min_max[1]
+            x_max = xyz_min_max[2]
+            y_max = xyz_min_max[3]
+        elif ndim == 3:
+            assert len(xyz_min_max)==6
+            x_min = xyz_min_max[0]
+            y_min = xyz_min_max[1]
+            z_min = xyz_min_max[2]
+            x_max = xyz_min_max[3]
+            y_max = xyz_min_max[4]
+            z_max = xyz_min_max[5]
 
-        new_elements = np.zeros((1,3),dtype=np.int64)
+
+        new_elements = np.zeros((1,self.elements.shape[1]),dtype=np.int64)
 
         edge_elements = np.arange(self.nelem)
         if keep_boundary_only == True:
-            if self.element_type == "tri":
-                edge_elements = self.GetElementsWithBoundaryEdgesTri()
+            if ndim==2:
+                edge_elements = self.GetElementsWithBoundaryEdges()
+            elif ndim==3:
+                edge_elements = self.GetElementsWithBoundaryFacesTet()
 
-        for elem in edge_elements:
-            xe = self.points[self.elements[elem,:],0]
-            ye = self.points[self.elements[elem,:],1]
+        if ndim==2:
+            for elem in edge_elements:
+                xe = self.points[self.elements[elem,:],0]
+                ye = self.points[self.elements[elem,:],1]
 
-            if element_removal_criterion == "all":
-                if ( (xe > x_min).all() and (ye > y_min).all() and (xe < x_max).all() and (ye < y_max).all() ):
-                    new_elements = np.vstack((new_elements,self.elements[elem,:]))
+                if element_removal_criterion == "all":
+                    if ( (xe > x_min).all() and (ye > y_min).all() and (xe < x_max).all() and (ye < y_max).all() ):
+                        new_elements = np.vstack((new_elements,self.elements[elem,:]))
 
-            elif element_removal_criterion == "any":
-                if ( (xe > x_min).any() and (ye > y_min).any() and (xe < x_max).any() and (ye < y_max).any() ):
-                    new_elements = np.vstack((new_elements,self.elements[elem,:]))
+                elif element_removal_criterion == "any":
+                    if ( (xe > x_min).any() and (ye > y_min).any() and (xe < x_max).any() and (ye < y_max).any() ):
+                        new_elements = np.vstack((new_elements,self.elements[elem,:]))
+        elif ndim==3:
+            for elem in edge_elements:
+                xe = self.points[self.elements[elem,:],0]
+                ye = self.points[self.elements[elem,:],1]
+                ze = self.points[self.elements[elem,:],2]
+
+                if element_removal_criterion == "all":
+                    if ( (xe > x_min).all() and (ye > y_min).all() and (ze > z_min).all() \
+                        and (xe < x_max).all() and (ye < y_max).all()  and (ze < z_max).all()):
+                        new_elements = np.vstack((new_elements,self.elements[elem,:]))
+
+                elif element_removal_criterion == "any":
+                    if ( (xe > x_min).any() and (ye > y_min).any() and (ze > z_min).any() \
+                        and (xe < x_max).any() and (ye < y_max).any() and  (ze < z_max).any() ):
+                        new_elements = np.vstack((new_elements,self.elements[elem,:]))            
 
         self.elements = new_elements[1:,:]
         self.nelem = self.elements.shape[0]
@@ -3584,22 +3612,16 @@ class Mesh(object):
 
         # RECOMPUTE EDGES 
         if compute_edges == True:
-            if self.element_type == "tri":
-                self.GetBoundaryEdgesTri()
+            self.GetBoundaryEdges()
 
         # RECOMPUTE FACES 
         if compute_faces == True:
-            if self.element_type == "tet":
-                # FACES WILL BE COMPUTED AUTOMATICALLY
-                self.GetBoundaryEdgesTet()
+            # FACES WILL BE COMPUTED AUTOMATICALLY
+            self.GetBoundaryEdges()
 
         # PLOT THE NEW MESH
         if plot_new_mesh == True:
-            import matplotlib.pyplot as plt
-            fig = plt.figure()
-            plt.triplot(self.points[:,0],self.points[:,1],self.elements[:,:3])
-            plt.axis('equal')
-            plt.show()
+            self.SimplePlot()
 
 
     def MergeWith(self, mesh):
