@@ -1,2 +1,1 @@
 from .BoundaryCondition import BoundaryCondition
-from PostMeshPy import PostMeshCurvePy, PostMeshSurfacePy
