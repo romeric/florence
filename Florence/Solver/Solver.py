@@ -50,6 +50,7 @@ class LinearSolver(object):
         self.out_of_core = False
         self.geometric_discretisation = geometric_discretisation
 
+        self.has_amg_solver = True
         if platform.python_implementation() == "PyPy":
             self.has_amg_solver = False
         else:

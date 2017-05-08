@@ -2,17 +2,11 @@ from __future__ import print_function
 import numpy as np, scipy as sp, sys, os, gc
 from warnings import warn
 from time import time
-# import scipy as sp
-# from DirichletBoundaryDataFromCAD import IGAKitWrapper, PostMeshWrapper
-# import numpy as np, sys, gc
 
 from Florence.QuadratureRules import GaussLobattoQuadrature
 from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
 from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints
-
-# from Florence import PostMeshCurvePy as PostMeshCurve 
-# from Florence import PostMeshSurfacePy as PostMeshSurface 
-
+from Florence.QuadratureRules import GaussLobattoPointsQuad
 
 class BoundaryCondition(object):
     """Base class for applying all types of boundary conditions"""
@@ -150,7 +144,8 @@ class BoundaryCondition(object):
         require this type of projection
         """
 
-        if mesh.element_type == "tet":
+        ndim = mesh.InferSpatialDimension()
+        if ndim==3:
             projection_faces = np.zeros((mesh.faces.shape[0],1),dtype=np.uint64)
             num = mesh.faces.shape[1]
             for iface in range(mesh.faces.shape[0]):
@@ -165,7 +160,7 @@ class BoundaryCondition(object):
 
             self.projection_flags = projection_faces
 
-        elif mesh.element_type == "tri":
+        elif ndim==2:
             projection_edges = np.zeros((mesh.edges.shape[0],1),dtype=np.uint64)
             num = mesh.edges.shape[1]
             for iedge in range(mesh.edges.shape[0]):
@@ -322,7 +317,9 @@ class BoundaryCondition(object):
     def PostMeshWrapper(self, formulation, mesh, material, solver, fem_solver):
         """Calls PostMesh wrapper to get exact Dirichlet boundary conditions"""
 
-        from CurvilinearMeshing import (PostMeshCurvePy as PostMeshCurve,
+        # from PostMeshPy import (PostMeshCurvePy as PostMeshCurve,
+        #     PostMeshSurfacePy as PostMeshSurface)
+        from PostMeshPy import (PostMeshCurvePy as PostMeshCurve,
             PostMeshSurfacePy as PostMeshSurface)
 
         C = mesh.InferPolynomialDegree() - 1
@@ -388,7 +385,9 @@ class BoundaryCondition(object):
 
         elif formulation.ndim == 3:
 
-            boundary_fekete = FeketePointsTri(C)
+            boundary_points = FeketePointsTri(C)
+            if mesh.element_type == "hex":                
+                boundary_points = GaussLobattoPointsQuad(C)
 
             curvilinear_mesh = PostMeshSurface(mesh.element_type,dimension=formulation.ndim)
             curvilinear_mesh.SetMeshElements(mesh.elements)
@@ -403,7 +402,7 @@ class BoundaryCondition(object):
             curvilinear_mesh.SetProjectionPrecision(1.0e-04)
             curvilinear_mesh.SetProjectionCriteria(self.projection_flags)
             curvilinear_mesh.ScaleMesh()
-            curvilinear_mesh.SetNodalSpacing(boundary_fekete)
+            curvilinear_mesh.SetNodalSpacing(boundary_points)
             # curvilinear_mesh.GetBoundaryPointsOrder()
             # READ THE GEOMETRY FROM THE IGES FILE
             curvilinear_mesh.ReadIGES(self.cad_file)
@@ -434,18 +433,19 @@ class BoundaryCondition(object):
             
             # IDENTIFY WHICH EDGES ARE SHARED BETWEEN SURFACES
             curvilinear_mesh.IdentifySurfacesIntersections()
-            
+
             # PERFORM POINT INVERSION FOR THE INTERIOR POINTS
-            Neval = np.zeros((3,boundary_fekete.shape[0]),dtype=np.float64)
-            hpBases = Tri.hpNodal.hpBases
-            for i in range(3,boundary_fekete.shape[0]):
-                Neval[:,i]  = hpBases(0,boundary_fekete[i,0],boundary_fekete[i,1],1)[0]
-            # OrthTol = 0.5
-            # project_on_curves = 0
+            if self.projection_type == "arc_length":
+                assert mesh.element_type == "tet"
+
+                Neval = np.zeros((3,boundary_points.shape[0]),dtype=np.float64)
+                hpBases = Tri.hpNodal.hpBases
+                for i in range(3,boundary_points.shape[0]):
+                    Neval[:,i]  = hpBases(0,boundary_points[i,0],boundary_points[i,1],1)[0]
 
             if self.projection_type == 'orthogonal':
                 curvilinear_mesh.MeshPointInversionSurface(self.project_on_curves, self.modify_linear_mesh_on_projection)
-            elif projection_type == 'arc_length':
+            elif self.projection_type == 'arc_length':
                 # PROJECT ALL BOUNDARY POINTS FROM THE MESH TO THE SURFACE
                 curvilinear_mesh.ProjectMeshOnSurface()
                 # curvilinear_mesh.RepairDualProjectedParameters()
@@ -518,10 +518,18 @@ class BoundaryCondition(object):
         for niter in range(number_of_planar_surfaces):
             
             pmesh = Mesh()
-            pmesh.element_type = "tri"
+            if mesh.element_type == "tet":
+                pmesh.element_type = "tri"
+                no_face_vertices = 3
+            elif mesh.element_type == "hex":
+                pmesh.element_type = "quad"
+                no_face_vertices = 4
+            else:
+                raise ValueError("Curvilinear mesher for element type {} not yet implemented".format(mesh.element_type))
+
             pmesh.elements = mesh.faces[planar_mesh_faces[planar_mesh_faces[:,1]==surface_flags[niter,0],0],:]
             pmesh.nelem = np.int64(surface_flags[niter,1])
-            pmesh.GetBoundaryEdgesTri()
+            pmesh.GetBoundaryEdges()
             unique_edges = np.unique(pmesh.edges)
             Dirichlet2D = np.zeros((unique_edges.shape[0],3))
             nodesDBC2D = np.zeros(unique_edges.shape[0]).astype(np.int64)
@@ -552,7 +560,7 @@ class BoundaryCondition(object):
 
             pmesh.points = mesh.points[unique_elements,:]
 
-            one_element_coord = pmesh.points[pmesh.elements[0,:3],:]
+            one_element_coord = pmesh.points[pmesh.elements[0,:no_face_vertices],:]
 
             # FOR COORDINATE TRANSFORMATION
             AB = one_element_coord[0,:] - one_element_coord[1,:]
@@ -582,7 +590,7 @@ class BoundaryCondition(object):
             Dirichlet2D = Dirichlet2D[:,:2]
 
             pmesh.edges = None
-            pmesh.GetBoundaryEdgesTri()
+            pmesh.GetBoundaryEdges()
 
             # GET BOUNDARY CONDITION FOR 2D PROBLEM
             pboundary_condition = BoundaryCondition()
@@ -619,8 +627,12 @@ class BoundaryCondition(object):
 
             if plot:
                 post_process = PostProcess(2,2)
-                post_process.CurvilinearPlotTri(pmesh, TotalDisp, 
-                    QuantityToPlot=solution.ScaledJacobian, interpolation_degree=40)
+                if pmesh.element_type == "tri":
+                    post_process.CurvilinearPlotTri(pmesh, TotalDisp, 
+                        QuantityToPlot=solution.ScaledJacobian, interpolation_degree=40)
+                elif pmesh.element_type == "quad":
+                    post_process.CurvilinearPlotQuad(pmesh, TotalDisp, 
+                        QuantityToPlot=solution.ScaledJacobian, interpolation_degree=40)                    
                 import matplotlib.pyplot as plt
                 plt.show()
 
