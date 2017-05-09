@@ -1,4 +1,5 @@
 import numpy as np
+from copy import deepcopy
 from warnings import warn
 from .Mesh import Mesh
 from .GeometricPath import *
@@ -13,7 +14,7 @@ A series of custom meshes
 
 
 def HarvesterPatch(ndisc=20, nradial=4, show_plot=False):
-    """A custom mesh for an energy harvester patch. [Not to be modiefied]
+    """A custom mesh for an energy harvester patch. [Not to be modified]
         ndisc:              [int] number of discretisation in c
         ndradial:           [int] number of discretisation in radial directions for different
                             components of harevester
@@ -55,6 +56,49 @@ def HarvesterPatch(ndisc=20, nradial=4, show_plot=False):
 
 
     mesh.Extrude(nlong=ndisc,length=40)
+
+    if show_plot:
+        mesh.SimplePlot()
+
+    return mesh
+
+
+def CurvedPlate(ncirc=2, nlong=20, show_plot=False):
+    """Custom mesh for plate with curved edges
+        ncirc           discretisation around circular fillets
+        nlong           discretisation along the length - X
+    """
+
+    mesh_arc = Mesh()
+    mesh_arc.Arc(element_type="quad",nrad=ncirc,ncirc=ncirc, radius=5)
+
+    mesh_arc1 = deepcopy(mesh_arc)
+    mesh_arc1.points[:,1] += 15
+    mesh_arc1.points[:,0] += 95
+    mesh_arc2 = deepcopy(mesh_arc)
+    mesh_arc2.points[:,1] +=15
+    mesh_arc2.points[:,0] *= -1.
+    mesh_arc2.points[:,0] += 5.
+
+    mesh_plate1 = Mesh()
+    mesh_plate1.Rectangle(element_type="quad",lower_left_point=(5,15),upper_right_point=(95,20),ny=ncirc, nx=nlong)
+
+    mesh_plate2 = deepcopy(mesh_plate1)
+    mesh_plate2.points[:,1] -= 5.
+
+    mesh_square1 = Mesh()
+    mesh_square1.Square(element_type="quad",lower_left_point=(0,10), side_length=5,nx=ncirc,ny=ncirc)
+
+    mesh_square2 = deepcopy(mesh_square1)
+    mesh_square2.points[:,0] += 95
+
+    mesh = mesh_plate1 + mesh_plate2 + mesh_arc1 + mesh_arc2 + mesh_square1 + mesh_square2
+
+    mesh.Extrude(length=0.5,nlong=1)
+
+    mesh2 = deepcopy(mesh)
+    mesh2.points[:,2] += 0.5
+    mesh += mesh2
 
     if show_plot:
         mesh.SimplePlot()
