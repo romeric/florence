@@ -401,6 +401,9 @@ class FEMSolver(object):
 
             # UPDATE DISPLACEMENTS FOR THE CURRENT LOAD INCREMENT
             TotalDisp[:,:formulation.ndim,Increment] = Eulerx - mesh.points
+            mesh2 = deepcopy(mesh)
+            mesh2.points = Eulerx
+            print(mesh2.Bounds)
             if formulation.fields == "electro_mechanics":
                 TotalDisp[:,-1,Increment] = Eulerp
 
