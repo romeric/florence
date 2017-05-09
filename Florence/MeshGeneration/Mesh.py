@@ -3602,22 +3602,29 @@ class Mesh(object):
                         and (xe < x_max).any() and (ye < y_max).any() and  (ze < z_max).any() ):
                         new_elements = np.vstack((new_elements,self.elements[elem,:]))            
 
+        new_points = np.copy(self.points)
+        element_type = self.element_type
+        # RESET FIRST OR MESH WILL CONTAIN INCONSISTENT DATA
+        self.__reset__()
+        self.element_type = element_type
         self.elements = new_elements[1:,:]
         self.nelem = self.elements.shape[0]
         unique_elements, inv_elements =  np.unique(self.elements,return_inverse=True)
-        self.points = self.points[unique_elements,:]
+        self.points = new_points[unique_elements,:]
         # RE-ORDER ELEMENT CONNECTIVITY
         remap_elements =  np.arange(self.points.shape[0])
         self.elements = remap_elements[inv_elements].reshape(self.nelem,self.elements.shape[1])
 
+        # self.edges = None
+        # self.faces = None
         # RECOMPUTE EDGES 
         if compute_edges == True:
             self.GetBoundaryEdges()
 
         # RECOMPUTE FACES 
         if compute_faces == True:
-            # FACES WILL BE COMPUTED AUTOMATICALLY
             self.GetBoundaryEdges()
+            self.GetBoundaryFaces()
 
         # PLOT THE NEW MESH
         if plot_new_mesh == True:
