@@ -4412,6 +4412,16 @@ class Mesh(object):
         print("Hexahedral to tetrahedral mesh conversion took", time() - tconv, "seconds")
 
 
+    def SwapAxis(self, axis0, axis1):
+        """Swaps mesh axis axis0 with axis1, i.e. swaps XYZ coordinates
+        """
+
+        axis0 = int(axis0)
+        axis1 = int(axis1)
+
+        self.points[:,[axis0,axis1]] = self.points[:,[axis1,axis0]] 
+
+
     @staticmethod
     def BoundaryEdgesfromPhysicalParametrisation(points, facets, mesh_points, mesh_edges):
         """Given a 2D planar mesh (mesh_points,mesh_edges) and the parametrisation of the physical geometry (points and facets)
