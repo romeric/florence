@@ -40,7 +40,9 @@ class FEMSolver(object):
         has_prestress=True, number_of_load_increments=1, 
         newton_raphson_tolerance=1.0e-6, maximum_iteration_for_newton_raphson=50,
         compute_mesh_qualities=True,  
-        parallelise=False, memory_model="shared", platform="cpu", backend="opencl"):
+        parallelise=False, memory_model="shared", platform="cpu", backend="opencl",
+        print_incremental_log=False,save_incremental_solution=False, incremental_solution_filename=None,
+        break_at_increment=-1):
 
         self.analysis_type = analysis_type
         self.analysis_nature = analysis_nature
@@ -68,6 +70,11 @@ class FEMSolver(object):
         self.platform = platform
         self.backend = backend
         self.debug = False
+
+        self.print_incremental_log = print_incremental_log
+        self.save_incremental_solution = save_incremental_solution
+        self.incremental_solution_filename = incremental_solution_filename
+        self.break_at_increment = break_at_increment
 
         self.fem_timer = 0.
 
@@ -401,11 +408,29 @@ class FEMSolver(object):
 
             # UPDATE DISPLACEMENTS FOR THE CURRENT LOAD INCREMENT
             TotalDisp[:,:formulation.ndim,Increment] = Eulerx - mesh.points
-            mesh2 = deepcopy(mesh)
-            mesh2.points = Eulerx
-            print(mesh2.Bounds)
             if formulation.fields == "electro_mechanics":
                 TotalDisp[:,-1,Increment] = Eulerp
+
+            # PRINT LOG IF ASKED FOR
+            if self.print_incremental_log:
+                dmesh = Mesh()
+                dmesh.points = TotalDisp[:,:formulation.ndim,Increment]
+                dmesh_bounds = dmesh.Bounds
+                if formulation.fields == "electro_mechanics":
+                    _bounds = np.zeros((2,formulation.nvar))
+                    _bounds[:,:formulation.ndim] = dmesh_bounds
+                    _bounds[:,-1] = [TotalDisp[:,-1,Increment].min(),TotalDisp[:,-1,Increment].max()]
+                    print("\nMinimum and maximum incremental solution values at increment {} are \n".format(Increment),_bounds)
+                else:
+                    print("\nMinimum and maximum incremental solution values at increment {} are \n".format(Increment),dmesh_bounds)
+
+            # SAVE INCREMENTAL SOLUTION IF ASKED FOR
+            if self.save_incremental_solution:
+                from scipy.io import savemat
+                if self.incremental_solution_filename is not None:
+                    savemat(self.incremental_solution_filename,{'solution':TotalDisp[:,:,Increment]},do_compression=True)
+                else:
+                    raise ValueError("No file name provided to save incremental solution")
 
 
             print('\nFinished Load increment', Increment, 'in', time()-t_increment, 'seconds')
@@ -422,6 +447,14 @@ class FEMSolver(object):
                 solver.scaledAFF = np.NAN
                 solver.scaledAHH = np.NAN
                 break
+
+            # BREAK AT A SPECIFICED LOAD INCREMENT IF ASKED FOR
+            if self.break_at_increment != -1 and self.break_at_increment is not None:
+                if self.break_at_increment == Increment:
+                    if self.break_at_increment < LoadIncrement - 1:
+                        print("\nStopping at increment {} as specified\n\n".format(Increment))
+                    break
+
 
         return TotalDisp
 
