@@ -3622,7 +3622,7 @@ class Mesh(object):
             self.GetBoundaryEdges()
 
         # RECOMPUTE FACES 
-        if compute_faces == True:
+        if compute_faces == True and self.InferSpatialDimension()==3:
             self.GetBoundaryEdges()
             self.GetBoundaryFaces()
 
@@ -4479,14 +4479,97 @@ class Mesh(object):
 
 
     def __add__(self, other):
-        """Add self with other. Hybrid meshes not supported"""
-        self.MergeWith(other)
-        return self
+        """Add self with other without modifying self. Hybrid meshes not supported"""
+        mesh = deepcopy(self)
+        mesh.MergeWith(other)
+        return mesh
 
     def __iadd__(self, other):
         """Add self with other. Hybrid meshes not supported"""
         self.MergeWith(other)
         return self
+
+
+    def __lt__(self,other):
+        """If mesh1 < mesh2 it means that mesh1 can be fit in mesh2
+        """
+        self_bounds = self.Bounds
+        ndim = self.InferSpatialDimension()
+        
+        if isinstance(other,Mesh):
+            other_bounds = other.Bounds
+            mins = (self_bounds[0,:] > other_bounds[0,:]).all()
+            maxs = (self_bounds[1,:] < other_bounds[1,:]).all()
+            return mins and maxs
+        elif isinstance(other,np.ndarray):
+            # Otherwise check if an element is within a given bounds
+            assert other.shape == (2,ndim)
+            mins = (self_bounds[0,:] > other[0,:]).all()
+            maxs = (self_bounds[1,:] < other[1,:]).all()
+            return mins and maxs
+        else:
+            raise ValueError("Cannot compare mesh with {}".format(type(other)))
+
+    def __le__(self,other):
+        """If mesh1 <= mesh2 it means that mesh1 can be fit in mesh2
+        """
+        self_bounds = self.Bounds
+        ndim = self.InferSpatialDimension()
+        
+        if isinstance(other,Mesh):
+            other_bounds = other.Bounds
+            mins = (self_bounds[0,:] >= other_bounds[0,:]).all()
+            maxs = (self_bounds[1,:] <= other_bounds[1,:]).all()
+            return mins and maxs
+        elif isinstance(other,np.ndarray):
+            # Otherwise check if an element is within a given bounds
+            assert other.shape == (2,ndim)
+            mins = (self_bounds[0,:] >= other[0,:]).all()
+            maxs = (self_bounds[1,:] <= other[1,:]).all()
+            return mins and maxs
+        else:
+            raise ValueError("Cannot compare mesh with {}".format(type(other)))
+
+    def __gt__(self,other):
+        """If mesh1 > mesh2 it means that mesh2 can be fit in mesh1
+        """
+        self_bounds = self.Bounds
+        ndim = self.InferSpatialDimension()
+        
+        if isinstance(other,Mesh):
+            other_bounds = other.Bounds
+            mins = (self_bounds[0,:] < other_bounds[0,:]).all()
+            maxs = (self_bounds[1,:] > other_bounds[1,:]).all()
+            return mins and maxs
+        elif isinstance(other,np.ndarray):
+            # Otherwise check if an element is within a given bounds
+            assert other.shape == (2,ndim)
+            mins = (self_bounds[0,:] < other[0,:]).all()
+            maxs = (self_bounds[1,:] > other[1,:]).all()
+            return mins and maxs
+        else:
+            raise ValueError("Cannot compare mesh with {}".format(type(other)))
+
+    def __ge__(self,other):
+        """If mesh1 >= mesh2 it means that mesh2 can be fit in mesh1
+        """
+        self_bounds = self.Bounds
+        ndim = self.InferSpatialDimension()
+        
+        if isinstance(other,Mesh):
+            other_bounds = other.Bounds
+            mins = (self_bounds[0,:] <= other_bounds[0,:]).all()
+            maxs = (self_bounds[1,:] >= other_bounds[1,:]).all()
+            return mins and maxs
+        elif isinstance(other,np.ndarray):
+            # Otherwise check if an element is within a given bounds
+            assert other.shape == (2,ndim)
+            mins = (self_bounds[0,:] <= other[0,:]).all()
+            maxs = (self_bounds[1,:] >= other[1,:]).all()
+            return mins and maxs
+        else:
+            raise ValueError("Cannot compare mesh with {}".format(type(other)))
+
 
 
     def __do_memebers_exist__(self):
