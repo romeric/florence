@@ -3197,6 +3197,68 @@ class Mesh(object):
         self.nnode = self.points.shape[0]
 
 
+
+    def InverseArc(self, radius=10, start_angle=0, end_angle=np.pi/2., ncirc=3, element_type="tri"):
+        """Generate inverse arc (concave arc with the upper portion being meshed).
+            Note that this routine does not generate CAD-conformal meshes, that is not all the points
+            on the arc would be on the arc
+        """
+
+
+        if np.allclose(radius,0):
+            raise ValueError("Arc radius cannot be zero")
+        if element_type != "tri" and element_type != "quad":
+            raise ValueError("Element type can only be tri or quad")
+
+        if ncirc > 3:
+            ncirc = int(ncirc/2)
+
+
+        t = np.linspace(start_angle,end_angle,ncirc+1) 
+        x = radius*np.cos(t)[::-1]
+        y = radius*np.sin(t)[::-1]
+
+        points = np.zeros((ncirc+2,2),dtype=np.float64)
+        points[:-1,:] = np.array([x,y]).T
+        points[-1,:] = [radius,radius]
+
+        cmesh = Mesh()
+        cmesh.points = points
+        cmesh.elements = np.zeros((ncirc,3),dtype=np.int64)
+
+        for i in range(ncirc):
+            cmesh.elements[i,0] = i
+            cmesh.elements[i,1] = ncirc+1
+            cmesh.elements[i,2] = i+1
+
+        mesh = Mesh()
+        for i in range(ncirc):
+            c0=(cmesh.points[cmesh.elements[i,0],0],cmesh.points[cmesh.elements[i,0],1])
+            c1=(cmesh.points[cmesh.elements[i,1],0],cmesh.points[cmesh.elements[i,1],1])
+            c2=(cmesh.points[cmesh.elements[i,2],0],cmesh.points[cmesh.elements[i,2],1])
+            mesh1 = Mesh()
+            mesh1.Triangle(c0,c1,c2,  element_type="quad", npoints=ncirc)
+            if i==0:
+                mesh = deepcopy(mesh1)
+            mesh += mesh1
+
+        if element_type == "tri":
+            sys.stdout = open(os.devnull, "w")
+            mesh.ConvertQuadsToTris()
+            sys.stdout = sys.__stdout__ 
+
+
+        self.points = mesh.points
+        self.elements = mesh.elements
+        self.element_type = element_type
+        self.nelem = mesh.elements.shape[0]
+        self.nnode = mesh.points.shape[0]
+        
+        self.GetBoundaryEdges()
+    
+
+
+
     def Parallelepiped(self,lower_left_rear_point=(0,0,0), upper_right_front_point=(2,4,10), 
         nx=2, ny=4, nz=10, element_type="tet"):
         """Creates a tet/hex mesh on rectangular parallelepiped"""
