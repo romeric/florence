@@ -81,6 +81,7 @@ class IsotropicElectroMechanics_101(Material):
 
         return 1.0*mu/J*(b - I) + lamb*(J-1)*I + J/eps_1*np.dot(D,D.T)
 
+
     def ElectricDisplacementx(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
         D = self.legendre_transform.GetElectricDisplacement(self, StrainTensors, ElectricFieldx, elem, gcounter)
 

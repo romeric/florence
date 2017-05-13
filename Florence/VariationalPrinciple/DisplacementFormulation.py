@@ -24,6 +24,8 @@ class DisplacementFormulation(VariationalPrinciple):
             quadrature_type=quadrature_type,quadrature_rules=quadrature_rules,function_spaces=function_spaces,
             compute_post_quadrature=compute_post_quadrature)
 
+        self.fields = "mechanics"
+        self.nvar = self.ndim
 
         C = mesh.InferPolynomialDegree() - 1  
 
@@ -187,42 +189,15 @@ class DisplacementFormulation(VariationalPrinciple):
     def __GetLocalStiffness__(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem=0):
         """Get stiffness matrix of the system"""
 
-        nvar = self.nvar
-        Domain = function_space
-        nodeperelem = function_space.Bases.shape[0]
-        AllGauss = function_space.AllGauss
-
-        # ALLOCATE
-        stiffness = np.zeros((nodeperelem*nvar,nodeperelem*nvar),dtype=np.float64)
-        tractionforce = np.zeros((nodeperelem*nvar,1),dtype=np.float64)
-        B = np.zeros((nodeperelem*nvar,material.H_VoigtSize),dtype=np.float64)
-
-        # GET KINEMATICS
-        SpatialGradient, F, detJ = _KinematicMeasures_(function_space.Jm, AllGauss[:,0], 
+        # GET LOCAL KINEMATICS
+        SpatialGradient, F, detJ = _KinematicMeasures_(function_space.Jm, function_space.AllGauss[:,0], 
             LagrangeElemCoords, EulerELemCoords, fem_solver.requires_geometry_update)
-
         # COMPUTE WORK-CONJUGATES AND HESSIAN AT THIS GAUSS POINT
         CauchyStressTensor, H_Voigt = material.KineticMeasures(F,elem=elem)
-
-        # # LOOP OVER GAUSS POINTS
-        # for counter in range(AllGauss.shape[0]): 
-            
-        #     # COMPUTE THE TANGENT STIFFNESS MATRIX
-        #     BDB_1, t = self.ConstitutiveStiffnessIntegrand(B, SpatialGradient[counter,:,:],
-        #         CauchyStressTensor[counter,:,:], H_Voigt[counter,:,:], analysis_nature=fem_solver.analysis_nature, 
-        #         has_prestress=fem_solver.has_prestress)
-            
-        #     if fem_solver.requires_geometry_update:
-        #         # INTEGRATE TRACTION FORCE
-        #         tractionforce += t*detJ[counter]
-
-        #     # INTEGRATE STIFFNESS
-        #     stiffness += BDB_1*detJ[counter]
-
+        # COMPUTE LOCAL CONSTITUTIVE STIFFNESS AND TRACTION
         stiffness, tractionforce = __ConstitutiveStiffnessIntegrandDF__(SpatialGradient,
             CauchyStressTensor,H_Voigt,detJ,self.nvar,fem_solver.requires_geometry_update)
-
-        # ADD GEOMETRIC STIFFNESS MATRIX
+        # COMPUTE GEOMETRIC STIFFNESS
         if fem_solver.requires_geometry_update:
             stiffness += self.__GeometricStiffnessIntegrand__(SpatialGradient,CauchyStressTensor,detJ)
 

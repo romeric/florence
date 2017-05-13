@@ -201,13 +201,19 @@ class PostProcess(object):
 
                 if material.has_low_level_dispatcher:
 
+                    # GET LOCAL KINEMATICS
                     SpatialGradient, F[elem,:,:,:], detJ = _KinematicMeasures_(Jm, AllGauss[:,0], LagrangeElemCoords, 
                         EulerELemCoords, requires_geometry_update)
-                    # GET ELECTRIC FIELD
-                    ElectricFieldx[elem,:,:] = - np.einsum('ijk,j',SpatialGradient,ElectricPotentialElem)
-                    # COMPUTE WORK-CONJUGATES AND HESSIAN AT THIS GAUSS POINT
-                    _D_dum ,CauchyStressTensor[elem,:,:], _ = material.KineticMeasures(F[elem,:,:,:], ElectricFieldx[elem,:,:], elem=elem)
-                    ElectricDisplacementx[elem,:,:] = _D_dum[:,:,0]
+
+                    if self.formulation.fields == "electro_mechanics":
+                        # GET ELECTRIC FIELD
+                        ElectricFieldx[elem,:,:] = - np.einsum('ijk,j',SpatialGradient,ElectricPotentialElem)
+                        # COMPUTE WORK-CONJUGATES AND HESSIAN AT THIS GAUSS POINT
+                        _D_dum ,CauchyStressTensor[elem,:,:], _ = material.KineticMeasures(F[elem,:,:,:], ElectricFieldx[elem,:,:], elem=elem)
+                        ElectricDisplacementx[elem,:,:] = _D_dum[:,:,0]
+                    elif self.formulation.fields == "mechanics":
+                        # COMPUTE WORK-CONJUGATES AND HESSIAN AT THIS GAUSS POINT
+                        CauchyStressTensor[elem,:,:], _ = material.KineticMeasures(F[elem,:,:,:],elem=elem)
 
                 else:
                     # GAUSS LOOP IN VECTORISED FORM
@@ -338,7 +344,7 @@ class PostProcess(object):
                 ----------------------------------------------------------------------------------------
                 20          S_yy            H_zz            S_xy                    H_zy
                 ----------------------------------------------------------------------------------------
-                21                          J               S_yy                    H_zz
+                21          p_hyd           J               S_yy                    H_zz
                 ----------------------------------------------------------------------------------------
                 22                          C_xx            E_x                     J
                 ----------------------------------------------------------------------------------------
@@ -348,7 +354,7 @@ class PostProcess(object):
                 ----------------------------------------------------------------------------------------
                 25                          C_yy            D_y                     C_xz
                 ----------------------------------------------------------------------------------------
-                26                          C_yz                                    C_yy
+                26                          C_yz            p_hyd                   C_yy
                 ----------------------------------------------------------------------------------------
                 27                          C_zz                                    C_yz
                 ----------------------------------------------------------------------------------------
@@ -378,7 +384,7 @@ class PostProcess(object):
                 ----------------------------------------------------------------------------------------
                 40                          S_zz                                    S_yz
                 ----------------------------------------------------------------------------------------
-                41                                                                  S_zz
+                41                          p_hyd                                   S_zz
                 ----------------------------------------------------------------------------------------
                 42                                                                  E_x
                 ----------------------------------------------------------------------------------------
@@ -392,12 +398,14 @@ class PostProcess(object):
                 ----------------------------------------------------------------------------------------
                 47                                                                  D_z
                 ----------------------------------------------------------------------------------------
+                48                                                                  p_hyd
+                ----------------------------------------------------------------------------------------
 
 
 
 
-            where S represents Cauchy stress tensor, E the electric field and D the electric
-            displacements
+            where S represents Cauchy stress tensor, E the electric field, D the electric
+            displacements and p_hyd the hydrostatic pressure
 
             This function modifies self.sol to augmented_sol and returns the augmented solution 
             augmented_sol
@@ -447,15 +455,18 @@ class PostProcess(object):
             C = C[:,[0,1,3],:]
             G = G[:,[0,1,3],:]
             Cauchy = Cauchy[:,[0,1,3],:]
+            # Assuming sigma_zz=0
+            p_hyd = 1./2.*Cauchy[:,[0,2],:].sum(axis=1) 
         elif ndim == 3:
             C = C[:,[0,1,2,4,5,8],:]
             G = G[:,[0,1,2,4,5,8],:]
             Cauchy = Cauchy[:,[0,1,2,4,5,8],:]
+            p_hyd  = 1./3.*Cauchy[:,[0,3,5],:].sum(axis=1)
 
 
         if fields == "mechanics" and ndim == 2:
 
-            augmented_sol = np.zeros((nnode,21,increments),dtype=np.float64)
+            augmented_sol = np.zeros((nnode,22,increments),dtype=np.float64)
             augmented_sol[:,:2,:]     = self.sol[:,:2,steps].reshape(augmented_sol[:,:2,:].shape)
             augmented_sol[:,2:6,:]    = F
             augmented_sol[:,6:10,:]   = H
@@ -464,10 +475,11 @@ class PostProcess(object):
             augmented_sol[:,14:17,:]  = G
             augmented_sol[:,17,:]     = detC
             augmented_sol[:,18:21,:]  = Cauchy
+            augmented_sol[:,21,:]     = p_hyd
 
         elif fields == "mechanics" and ndim == 3:
 
-            augmented_sol = np.zeros((nnode,41,increments),dtype=np.float64)
+            augmented_sol = np.zeros((nnode,42,increments),dtype=np.float64)
             augmented_sol[:,:3,:]     = self.sol[:,:3,steps].reshape(augmented_sol[:,:3,:].shape)
             augmented_sol[:,3:12,:]   = F
             augmented_sol[:,12:21,:]  = H
@@ -476,11 +488,12 @@ class PostProcess(object):
             augmented_sol[:,28:34,:]  = G
             augmented_sol[:,34,:]     = detC
             augmented_sol[:,35:41,:]  = Cauchy
+            augmented_sol[:,41,:]     = p_hyd
 
 
         elif fields == "electro_mechanics" and ndim == 2:
 
-            augmented_sol = np.zeros((nnode,26,increments),dtype=np.float64)
+            augmented_sol = np.zeros((nnode,27,increments),dtype=np.float64)
             augmented_sol[:,:3,:]     = self.sol[:,:3,steps].reshape(augmented_sol[:,:3,:].shape)
             augmented_sol[:,3:7,:]    = F
             augmented_sol[:,7:11,:]   = H
@@ -491,6 +504,7 @@ class PostProcess(object):
             augmented_sol[:,19:22,:]  = Cauchy
             augmented_sol[:,22:24,:]  = ElectricFieldx
             augmented_sol[:,24:26,:]  = ElectricDisplacementx
+            augmented_sol[:,26,:]     = p_hyd
 
 
         elif fields == "electro_mechanics" and ndim == 3:
@@ -506,7 +520,7 @@ class PostProcess(object):
             augmented_sol[:,36:42,:]  = Cauchy
             augmented_sol[:,42:45,:]  = ElectricFieldx
             augmented_sol[:,45:48,:]  = ElectricDisplacementx
-            augmented_sol[:,48,:]     = 1./3.*Cauchy[:,[0,3,5],:].sum(axis=1)
+            augmented_sol[:,48,:]     = p_hyd
         
         self.sol = augmented_sol
         return augmented_sol
