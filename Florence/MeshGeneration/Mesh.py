@@ -2331,13 +2331,13 @@ class Mesh(object):
             from mayavi import mlab 
 
             if to_plot == 'all_faces':
-                faces = self.all_faces
                 if self.all_faces is None:
                     self.GetFaces()
+                faces = self.all_faces
             else:
-                faces = self.faces
                 if self.faces is None:
                     self.GetBoundaryFaces()
+                faces = self.faces
 
             if figure is None:
                 figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(1000,800))
@@ -2384,7 +2384,7 @@ class Mesh(object):
 
             # MAYAVI.MLAB SOLUTION
             mlab.triangular_mesh(self.points[:,0],self.points[:,1],
-                self.points[:,2],self.faces[:,:3],color=color)
+                self.points[:,2],faces[:,:3],color=color)
             radius = 1e-00
             mlab.triangular_mesh(self.points[:,0],self.points[:,1],self.points[:,2], faces[:,:3],
                 line_width=radius,tube_radius=radius,color=(0,0,0),
