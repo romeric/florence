@@ -7,6 +7,7 @@ import numpy as np
 import scipy as sp
 from Florence.Utils import insensitive
 
+from Florence.FiniteElements.Assembly import Assemble
 from Florence.PostProcessing import *
 from Florence.Solver import LinearSolver, FEMSolver
 
@@ -145,7 +146,7 @@ class TractionBasedStaggeredSolver(FEMSolver):
         NeumannForces = boundary_condition.ComputeNeumannForces(mesh, material)
 
         # ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES
-        K, TractionForces = self.Assemble(function_spaces[0], formulation, mesh, material, solver, 
+        K, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material, solver, 
             Eulerx, Eulerp)[:2]
 
         print('Finished all pre-processing stage. Time elapsed was', time()-tAssembly, 'seconds')
@@ -235,7 +236,7 @@ class TractionBasedStaggeredSolver(FEMSolver):
                 # exit()
 
                 # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES FOR ELECTROSTATICS
-                Ke, TractionForces = self.Assemble(function_spaces[0], formulation, mesh, material, solver,
+                Ke, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material, solver,
                     Eulerx,Eulerp)[:2]
                 # print(TractionForces)
                 # exit()
@@ -300,7 +301,7 @@ class TractionBasedStaggeredSolver(FEMSolver):
             TotalDisp[:,:formulation.ndim,Increment] = Eulerx - mesh.points
             TotalDisp[:,-1,Increment] = Eulerp
 
-            K = self.Assemble(function_spaces[0], formulation, mesh, material, solver,
+            K = Assemble(self, function_spaces[0], formulation, mesh, material, solver,
                     Eulerx,Eulerp)[0]
 
 

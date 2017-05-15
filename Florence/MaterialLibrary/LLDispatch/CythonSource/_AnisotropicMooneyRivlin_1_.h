@@ -8,8 +8,9 @@ public:
     U mu3;
     U lamb;
 
-    _AnisotropicMooneyRivlin_1_() = default;
+    FASTOR_INLINE _AnisotropicMooneyRivlin_1_() = default;
 
+    FASTOR_INLINE
     _AnisotropicMooneyRivlin_1_(U mu1, U mu2, U mu3, U lamb) {
         this->mu1 = mu1;
         this->mu2 = mu2;
@@ -27,6 +28,7 @@ public:
 
 
     template<typename T=U, size_t ndim>
+    FASTOR_INLINE
     std::tuple<Tensor<T,ndim,ndim>, typename MechanicsHessianType<T,ndim>::return_type> 
     _KineticMeasures_(const T *Fnp, const T *Nnp) {
 

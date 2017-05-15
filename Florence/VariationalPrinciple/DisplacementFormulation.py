@@ -2,8 +2,8 @@ import numpy as np
 from .VariationalPrinciple import VariationalPrinciple
 from Florence import QuadratureRule, FunctionSpace
 
-from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import *
-from Florence.FiniteElements.ElementalMatrices._KinematicMeasures_ import _KinematicMeasures_
+from Florence.FiniteElements.LocalAssembly.KinematicMeasures import *
+from Florence.FiniteElements.LocalAssembly._KinematicMeasures_ import _KinematicMeasures_
 from ._ConstitutiveStiffnessDF_ import __ConstitutiveStiffnessIntegrandDF__
 from Florence.Tensor import issymetric
 
@@ -76,12 +76,15 @@ class DisplacementFormulation(VariationalPrinciple):
         self.local_columns = np.tile(np.arange(0,local_size),local_size)
         self.local_size = local_size
 
+        # FOR MASS
+        local_size_m = self.function_spaces[0].Bases.shape[0]*self.ndim
+        self.local_rows_mass = np.repeat(np.arange(0,local_size_m),local_size_m,axis=0)
+        self.local_columns_mass = np.tile(np.arange(0,local_size_m),local_size_m)
+        self.local_size_m = local_size_m
+
 
 
     def GetElementalMatrices(self, elem, function_space, mesh, material, fem_solver, Eulerx, TotalPot):
-
-        # ALLOCATE
-        Domain = function_space
 
         massel=[]; f = []
         # GET THE FIELDS AT THE ELEMENT LEVEL

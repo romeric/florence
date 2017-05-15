@@ -1,40 +1,33 @@
 from __future__ import print_function
 import gc, os, sys
+import multiprocessing
 from copy import deepcopy
 from warnings import warn
 from time import time
 import numpy as np
 from numpy.linalg import norm
 import scipy as sp
-from scipy.sparse import coo_matrix, csc_matrix, csr_matrix 
 from Florence.Utils import insensitive
 
-from Florence.FiniteElements.SparseAssembly import SparseAssembly_Step_2
-from Florence.FiniteElements.SparseAssemblySmall import SparseAssemblySmall
+from Florence.FiniteElements.Assembly import Assemble
 from Florence.PostProcessing import *
 from Florence.Solver import LinearSolver
 from Florence.TimeIntegrators import StructuralDynamicIntegrators
 from Florence import Mesh
 
-import pyximport
-pyximport.install(setup_args={'include_dirs': np.get_include()})
-from Florence.FiniteElements.SparseAssemblyNative import SparseAssemblyNative
-from Florence.FiniteElements.RHSAssemblyNative import RHSAssemblyNative
 
-# PARALLEL PROCESSING ROUTINES
-import multiprocessing
-import Florence.ParallelProcessing.parmap as parmap
 
 
 class FEMSolver(object):
     """Solver for linear and non-linear finite elements.
-        This is different from the LinearSolver, as linear solver
-        specifically deals with solution of matrices, whereas FEM
-        solver is essentially responsible for linear, linearised
-        and nonlinear finite element formulations
+        This class is fundamentally different from the LinearSolver, as linear solver
+        specifically deals with the solution of linear system of equations, whereas FEM
+        solver is essentially responsible for building the discretised linear, linearised
+        and nonlinear systems arising from variational formulations
     """
 
-    def __init__(self, analysis_type="static", analysis_nature="nonlinear",
+    def __init__(self, has_low_level_dispatcher=False,
+        analysis_type="static", analysis_nature="nonlinear",
         is_geometrically_linearised=False, requires_geometry_update=True,
         requires_line_search=False, requires_arc_length=False, has_moving_boundary=False,
         has_prestress=True, number_of_load_increments=1, 
@@ -43,6 +36,8 @@ class FEMSolver(object):
         parallelise=False, memory_model="shared", platform="cpu", backend="opencl",
         print_incremental_log=False,save_incremental_solution=False, incremental_solution_filename=None,
         break_at_increment=-1):
+
+        self.has_low_level_dispatcher = has_low_level_dispatcher
 
         self.analysis_type = analysis_type
         self.analysis_nature = analysis_nature
@@ -258,7 +253,7 @@ class FEMSolver(object):
             return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
 
         # ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES
-        K, TractionForces, _, M = self.Assemble(function_spaces[0], formulation, mesh, material, solver, 
+        K, TractionForces, _, M = Assemble(self, function_spaces[0], formulation, mesh, material, solver, 
             Eulerx, Eulerp)
 
         if self.analysis_nature == 'nonlinear':
@@ -311,7 +306,7 @@ class FEMSolver(object):
                 # GET THE MESH COORDINATES FOR LAST INCREMENT 
                 mesh.points -= TotalDisp[:,:formulation.ndim,Increment-1]
                 # ASSEMBLE
-                K, TractionForces = self.Assemble(function_spaces[0], formulation, mesh, material, 
+                K, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material, 
                     solver, Eulerx, np.zeros_like(mesh.points))[:2]
                 # UPDATE MESH AGAIN
                 mesh.points += TotalDisp[:,:formulation.ndim,Increment-1]
@@ -320,7 +315,7 @@ class FEMSolver(object):
                 - NodalForces[boundary_condition.columns_in]
             else:
                 # ASSEMBLE
-                K = self.Assemble(function_spaces[0], formulation, mesh, material, solver,
+                K = Assemble(self, function_spaces[0], formulation, mesh, material, solver,
                     Eulerx, np.zeros_like(mesh.points))[0]
             print('Finished assembling the system of equations. Time elapsed is', time() - t_assembly, 'seconds')
             # APPLY DIRICHLET BOUNDARY CONDITIONS & GET REDUCED MATRICES 
@@ -490,7 +485,7 @@ class FEMSolver(object):
             Eulerp += dU[:,-1]
 
             # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
-            K, TractionForces = self.Assemble(function_spaces[0], formulation, mesh, material, solver,
+            K, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material, solver,
                 Eulerx,Eulerp)[:2]
 
             # FIND THE RESIDUAL
@@ -530,446 +525,3 @@ class FEMSolver(object):
 
         return Eulerx, Eulerp, K, Residual
 
-
-
-
-
-    def Assemble(self, function_space, formulation, mesh, material, solver, Eulerx, Eulerp):
-
-        if self.memory_model == "shared" or self.memory_model is None:
-            if mesh.nelem <= 600000:
-                return self.AssemblySmall(function_space, formulation, mesh, material, Eulerx, Eulerp)
-            elif mesh.nelem > 600000:
-                print("Larger than memory system. Dask on disk parallel assembly is turned on")
-                # return self.OutofCoreAssembly(function_space,mesh,material,formulation,Eulerx,Eulerp)
-                return self.OutofCoreAssembly(function_space, formulation, mesh, material, Eulerx, Eulerp)
-
-        elif self.memory_model == "distributed":
-            # RUN THIS PROGRAM FROM SHELL WITH python RunSession.py INSTEAD
-            if not __PARALLEL__:
-                warn("parallelisation is going to be turned on")
-
-            import subprocess, os, shutil
-            from time import time
-            from Florence.Utils import par_unpickle
-            from scipy.io import loadmat
-
-            tmp_dir = par_unpickle(function_space,mesh,material,Eulerx,Eulerp)
-            pwd = os.path.dirname(os.path.realpath(__file__))
-            distributed_caller = os.path.join(pwd,"DistributedAssembly.py")
-
-            t_dassembly = time()
-            p = subprocess.Popen("time mpirun -np "+str(MP.cpu_count())+" Florence/FiniteElements/DistributedAssembly.py"+" /home/roman/tmp/", 
-                cwd="/home/roman/Dropbox/florence/", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-            # p = subprocess.Popen("./mpi_runner.sh", cwd="/home/roman/Dropbox/florence/", shell=True)
-            p.wait()
-            print('MPI took', time() - t_dassembly, 'seconds for distributed assembly')
-            Dict = loadmat(os.path.join(tmp_dir,"results.mat"))
-
-            try:
-                shutil.rmtree(tmp_dir)
-            except IOError:
-                raise IOError("Could not delete the directory")
-
-            return Dict['stiffness'], Dict['T'], Dict['F'], []
-
-
-    def AssemblySmall(self, function_space, formulation, mesh, material, Eulerx, Eulerp):
-
-        # GET MESH DETAILS
-        C = mesh.InferPolynomialDegree() - 1
-        nvar = formulation.nvar
-        ndim = formulation.ndim
-        nelem = mesh.nelem
-        nodeperelem = mesh.elements.shape[1]
-
-        # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF STIFFNESS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
-        I_stiffness=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
-        J_stiffness=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
-        # V_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.float32)
-        V_stiffness=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.float64)
-
-        I_mass=[]; J_mass=[]; V_mass=[]
-        if self.analysis_type !='static':
-            # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF MASS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
-            I_mass=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.int32)
-            J_mass=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.int32)
-            V_mass=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.float64)
-
-        T = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
-        # T = np.zeros((mesh.points.shape[0]*nvar,1),np.float32)  
-
-        mass, F = [], []
-        if self.has_moving_boundary:
-            F = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
-
-
-        if self.parallel:
-            # COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
-            # ParallelTuple = parmap.map(formulation.GetElementalMatrices,np.arange(0,nelem,dtype=np.int32),
-                # function_space, mesh, material, self, Eulerx, Eulerp)
-
-            ParallelTuple = parmap.map(formulation,np.arange(0,nelem,dtype=np.int32),
-                function_space, mesh, material, self, Eulerx, Eulerp, processes= int(multiprocessing.cpu_count()/2))
-
-        for elem in range(nelem):
-
-            if self.parallel:
-                # UNPACK PARALLEL TUPLE VALUES
-                I_stiff_elem = ParallelTuple[elem][0]; J_stiff_elem = ParallelTuple[elem][1]; V_stiff_elem = ParallelTuple[elem][2]
-                t = ParallelTuple[elem][3]; f = ParallelTuple[elem][4]
-                I_mass_elem = ParallelTuple[elem][5]; J_mass_elem = ParallelTuple[elem][6]; V_mass_elem = ParallelTuple[elem][6]
-
-            else:
-                # COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
-                I_stiff_elem, J_stiff_elem, V_stiff_elem, t, f, \
-                I_mass_elem, J_mass_elem, V_mass_elem = formulation.GetElementalMatrices(elem, 
-                    function_space, mesh, material, self, Eulerx, Eulerp)
-                
-            # SPARSE ASSEMBLY - STIFFNESS MATRIX
-            SparseAssemblyNative(I_stiff_elem,J_stiff_elem,V_stiff_elem,I_stiffness,J_stiffness,V_stiffness,
-                elem,nvar,nodeperelem,mesh.elements)
-
-            if self.analysis_type != 'static':
-                # SPARSE ASSEMBLY - MASS MATRIX
-                SparseAssemblyNative(I_mass_elem,J_mass_elem,V_mass_elem,I_mass,J_mass,V_mass,
-                    elem,ndim,nodeperelem,mesh.elements)
-
-            if self.has_moving_boundary:
-                # RHS ASSEMBLY
-                # for iterator in range(0,nvar):
-                #     F[mesh.elements[elem,:]*nvar+iterator,0]+=f[iterator::nvar,0]
-                RHSAssemblyNative(F,f,elem,nvar,nodeperelem,mesh.elements)
-
-            # INTERNAL TRACTION FORCE ASSEMBLY
-            # for iterator in range(0,nvar):
-                # T[mesh.elements[elem,:]*nvar+iterator,0]+=t[iterator::nvar,0]
-            RHSAssemblyNative(T,t,elem,nvar,nodeperelem,mesh.elements)
-
-
-        if self.parallel:
-            del ParallelTuple
-        gc.collect()
-
-        # REALLY DANGEROUS FOR MULTIPHYSICS PROBLEMS - NOTE THAT SCIPY RUNS A PRUNE ANYWAY
-        # V_stiffness[np.isclose(V_stiffness,0.)] = 0.
-
-        # stiffness = coo_matrix((V_stiffness,(I_stiffness,J_stiffness)),
-            # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64).tocsc()
-        # stiffness = csc_matrix((V_stiffness,(I_stiffness,J_stiffness)),
-            # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float32)
-        stiffness = csc_matrix((V_stiffness,(I_stiffness,J_stiffness)),
-            shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
-        # stiffness = csr_matrix((V_stiffness,(I_stiffness,J_stiffness)),
-            # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
-        
-        # GET STORAGE/MEMORY DETAILS
-        self.spmat = stiffness.data.nbytes/1024./1024.
-        self.ijv = (I_stiffness.nbytes + J_stiffness.nbytes + V_stiffness.nbytes)/1024./1024.
-
-        del I_stiffness, J_stiffness, V_stiffness
-        gc.collect()
-
-        if self.analysis_type != 'static':
-            mass = csc_matrix((V_mass,(I_mass,J_mass)),shape=((nvar*mesh.points.shape[0],
-                nvar*mesh.points.shape[0])),dtype=np.float64)
-
-        return stiffness, T, F, mass
-
-
-
-    #-------------- ASSEMBLY ROUTINE FOR RELATIVELY LARGER MATRICES ( 1e06 < NELEM < 1e07 3D)------------------------#
-    #----------------------------------------------------------------------------------------------------------------#
-
-    def AssemblyLarge(MainData,mesh,material,Eulerx,TotalPot):
-
-        # GET MESH DETAILS
-        C = MainData.C
-        nvar = MainData.nvar
-        ndim = MainData.ndim
-
-        # nelem = mesh.elements.shape[0]
-        nelem = mesh.nelem
-        nodeperelem = mesh.elements.shape[1]
-
-        from tempfile import mkdtemp
-
-        # WRITE TRIPLETS ON DESK
-        pwd = os.path.dirname(os.path.realpath(__file__))
-        tmp_dir = mkdtemp()
-        I_filename = os.path.join(tmp_dir, 'I_stiffness.dat')
-        J_filename = os.path.join(tmp_dir, 'J_stiffness.dat')
-        V_filename = os.path.join(tmp_dir, 'V_stiffness.dat')
-
-        # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF STIFFNESS MATRIX
-        I_stiffness = np.memmap(I_filename,dtype=np.int32,mode='w+',shape=((nvar*nodeperelem)**2*nelem,))
-        J_stiffness = np.memmap(J_filename,dtype=np.int32,mode='w+',shape=((nvar*nodeperelem)**2*nelem,))
-        V_stiffness = np.memmap(V_filename,dtype=np.float32,mode='w+',shape=((nvar*nodeperelem)**2*nelem,))
-
-        # I_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.int64)
-        # J_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.int64)
-        # V_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.float64)
-
-        # THE I & J VECTORS OF LOCAL STIFFNESS MATRIX DO NOT CHANGE, HENCE COMPUTE THEM ONCE
-        I_stiff_elem = np.repeat(np.arange(0,nvar*nodeperelem),nvar*nodeperelem,axis=0)
-        J_stiff_elem = np.tile(np.arange(0,nvar*nodeperelem),nvar*nodeperelem)
-
-        I_mass=[];J_mass=[];V_mass=[]; I_mass_elem = []; J_mass_elem = []
-        if MainData.Analysis !='Static':
-            # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF MASS MATRIX
-            I_mass=np.zeros((nvar*nodeperelem)**2*mesh.elements.shape[0],dtype=np.int64)
-            J_mass=np.zeros((nvar*nodeperelem)**2*mesh.elements.shape[0],dtype=np.int64)
-            V_mass=np.zeros((nvar*nodeperelem)**2*mesh.elements.shape[0],dtype=np.float64)
-
-            # THE I & J VECTORS OF LOCAL MASS MATRIX DO NOT CHANGE, HENCE COMPUTE THEM ONCE
-            I_mass_elem = np.repeat(np.arange(0,nvar*nodeperelem),nvar*nodeperelem,axis=0)
-            J_mass_elem = np.tile(np.arange(0,nvar*nodeperelem),nvar*nodeperelem)
-
-
-        # ALLOCATE RHS VECTORS
-        F = np.zeros((mesh.points.shape[0]*nvar,1)) 
-        T =  np.zeros((mesh.points.shape[0]*nvar,1)) 
-        # ASSIGN OTHER NECESSARY MATRICES
-        full_current_row_stiff = []; full_current_column_stiff = []; coeff_stiff = [] 
-        full_current_row_mass = []; full_current_column_mass = []; coeff_mass = []
-        mass = []
-
-        if MainData.Parallel:
-            # COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
-            ParallelTuple = parmap.map(GetElementalMatrices,np.arange(0,nelem),MainData,mesh.elements,mesh.points,nodeperelem,
-                Eulerx,TotalPot,I_stiff_elem,J_stiff_elem,I_mass_elem,J_mass_elem,pool=MP.Pool(processes=MainData.nCPU))
-
-        for elem in range(nelem):
-
-            if MainData.Parallel:
-                # UNPACK PARALLEL TUPLE VALUES
-                full_current_row_stiff = ParallelTuple[elem][0]; full_current_column_stiff = ParallelTuple[elem][1]
-                coeff_stiff = ParallelTuple[elem][2]; t = ParallelTuple[elem][3]; f = ParallelTuple[elem][4]
-                full_current_row_mass = ParallelTuple[elem][5]; full_current_column_mass = ParallelTuple[elem][6]; coeff_mass = ParallelTuple[elem][6]
-
-            else:
-                # COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
-                full_current_row_stiff, full_current_column_stiff, coeff_stiff, t, f, \
-                full_current_row_mass, full_current_column_mass, coeff_mass = GetElementalMatrices(elem,
-                    MainData,mesh.elements,mesh.points,nodeperelem,Eulerx,TotalPot,I_stiff_elem,J_stiff_elem,I_mass_elem,J_mass_elem)
-
-            # SPARSE ASSEMBLY - STIFFNESS MATRIX
-            # I_stiffness, J_stiffness, V_stiffness = SparseAssembly_Step_2(I_stiffness,J_stiffness,V_stiffness,
-                # full_current_row_stiff,full_current_column_stiff,coeff_stiff,
-            #   nvar,nodeperelem,elem)
-
-            I_stiffness[(nvar*nodeperelem)**2*elem:(nvar*nodeperelem)**2*(elem+1)] = full_current_row_stiff
-            J_stiffness[(nvar*nodeperelem)**2*elem:(nvar*nodeperelem)**2*(elem+1)] = full_current_column_stiff
-            V_stiffness[(nvar*nodeperelem)**2*elem:(nvar*nodeperelem)**2*(elem+1)] = coeff_stiff
-
-            if MainData.Analysis != 'Static':
-                # SPARSE ASSEMBLY - MASS MATRIX
-                I_mass, J_mass, V_mass = SparseAssembly_Step_2(I_mass,J_mass,V_mass,full_current_row_mass,full_current_column_mass,coeff_mass,
-                    nvar,nodeperelem,elem)
-
-            if MainData.AssemblyParameters.ExternalLoadNature == 'Nonlinear':
-                # RHS ASSEMBLY
-                for iterator in range(0,nvar):
-                    F[mesh.elements[elem,:]*nvar+iterator,0]+=f[iterator::nvar]
-            # INTERNAL TRACTION FORCE ASSEMBLY
-            for iterator in range(0,nvar):
-                    T[mesh.elements[elem,:]*nvar+iterator,0]+=t[iterator::nvar,0]
-
-        # CALL BUILT-IN SPARSE ASSEMBLER 
-        stiffness = coo_matrix((V_stiffness,(I_stiffness,J_stiffness)),
-            shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64).tocsc()
-
-        # GET STORAGE/MEMORY DETAILS
-        MainData.spmat = stiffness.data.nbytes/1024./1024.
-        MainData.ijv = (I_stiffness.nbytes + J_stiffness.nbytes + V_stiffness.nbytes)/1024./1024.
-        del I_stiffness, J_stiffness, V_stiffness
-        gc.collect()
-
-        if MainData.Analysis != 'Static':
-            # CALL BUILT-IN SPARSE ASSEMBLER
-            mass = coo_matrix((V_mass,(I_mass,J_mass)),shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0]))).tocsc()
-
-
-        return stiffness, T, F, mass
-
-
-    def OutofCoreAssembly(self, function_space, formulation, mesh, material, Eulerx, Eulerp, calculate_rhs=True, filename=None, chunk_size=None):
-    # def OutofCoreAssembly(MainData, mesh, material, Eulerx, TotalPot, calculate_rhs=True, filename=None, chunk_size=None):
-        """Assembly routine for larger than memory system of equations. 
-            Usage of h5py and dask allow us to store the triplets and build a sparse matrix out of 
-            them on disk.
-
-            Note: The sparse matrix itself is created on the memory.
-        """
-
-        import sys, os
-        from warnings import warn
-        from time import time
-        try:
-            import psutil
-        except IOError:
-            has_psutil = False
-            raise ImportError("No module named psutil. Please install it using 'pip install psutil'")
-        # from Core.Supplementary.dsparse.sparse import dok_matrix
-
-
-        if self.parallel:
-            warn("Parallel assembly cannot performed on large arrays. \n" 
-                "Out of core 'i.e. Dask' parallelisation is turned on instead. "
-                "This is an innocuous warning")
-
-        try:
-            import h5py
-        except ImportError:
-            has_h5py = False
-            raise ImportError('h5py is not installed. Please install it first by running "pip install h5py"')
-
-        try:
-            import dask.array as da
-        except ImportError:
-            has_dask = False
-            raise ImportError('dask is not installed. Please install it first by running "pip install toolz && pip install dask"')
-
-        if filename is None:
-            warn("filename not given. I am going to write the output in the current directory")
-            pwd = os.path.dirname(os.path.realpath(__file__))
-            filename = os.path.join(pwd,"output.hdf5")
-
-
-        # GET MESH DETAILS
-        C = mesh.InferPolynomialDegree() - 1
-        nvar = formulation.nvar
-        ndim = formulation.ndim
-
-        nelem = mesh.nelem
-        nodeperelem = mesh.elements.shape[1]
-
-        # GET MEMORY INFO
-        memory = psutil.virtual_memory()
-        size_of_triplets_gbytes = (mesh.points.shape[0]*nvar)**2*nelem*(4)*(3)//1024**3
-        if memory.available//1024**3 > 2*size_of_triplets_gbytes:
-            warn("Out of core assembly is only efficient for larger than memory "
-                "system of equations. Using it on smaller matrices can be very inefficient")
-
-        # hdf_file = h5py.File(filename,'w')
-        # IJV_triplets = hdf_file.create_dataset("IJV_triplets",((nvar*nodeperelem)**2*nelem,3),dtype=np.float32)
-
-
-        # THE I & J VECTORS OF LOCAL STIFFNESS MATRIX DO NOT CHANGE, HENCE COMPUTE THEM ONCE
-        I_stiff_elem = np.repeat(np.arange(0,nvar*nodeperelem),nvar*nodeperelem,axis=0)
-        J_stiff_elem = np.tile(np.arange(0,nvar*nodeperelem),nvar*nodeperelem)
-
-        I_mass=[];J_mass=[];V_mass=[]; I_mass_elem = []; J_mass_elem = []
-
-        if calculate_rhs is False:
-            F = []
-            T = []
-        else:
-            F = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
-            T = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)  
-
-        # ASSIGN OTHER NECESSARY MATRICES
-        full_current_row_stiff = []; full_current_column_stiff = []; coeff_stiff = [] 
-        full_current_row_mass = []; full_current_column_mass = []; coeff_mass = []
-        mass = []
-
-        gc.collect()
-
-        print('Writing the triplets to disk')
-        t_hdf5 = time()
-        for elem in range(nelem):
-
-            full_current_row_stiff, full_current_column_stiff, coeff_stiff, t, f, \
-                full_current_row_mass, full_current_column_mass, coeff_mass = GetElementalMatrices(elem,
-                    MainData,mesh.elements,mesh.points,nodeperelem,Eulerx,TotalPot,I_stiff_elem,J_stiff_elem,I_mass_elem,J_mass_elem)
-
-            IJV_triplets[(nvar*nodeperelem)**2*elem:(nvar*nodeperelem)**2*(elem+1),0] = full_current_row_stiff.flatten()
-            IJV_triplets[(nvar*nodeperelem)**2*elem:(nvar*nodeperelem)**2*(elem+1),1] = full_current_column_stiff.flatten()
-            IJV_triplets[(nvar*nodeperelem)**2*elem:(nvar*nodeperelem)**2*(elem+1),2] = coeff_stiff.flatten()
-
-            if calculate_rhs is True:
-
-                if MainData.Analysis != 'Static':
-                    # SPARSE ASSEMBLY - MASS MATRIX
-                    I_mass, J_mass, V_mass = SparseAssembly_Step_2(I_mass,J_mass,V_mass,full_current_row_mass,full_current_column_mass,coeff_mass,
-                        nvar,nodeperelem,elem)
-
-                if MainData.AssemblyParameters.ExternalLoadNature == 'Nonlinear':
-                    # RHS ASSEMBLY
-                    for iterator in range(0,nvar):
-                        F[mesh.elements[elem,:]*nvar+iterator,0]+=f[iterator::nvar]
-                # INTERNAL TRACTION FORCE ASSEMBLY
-                for iterator in range(0,nvar):
-                        T[mesh.elements[elem,:]*nvar+iterator,0]+=t[iterator::nvar,0]
-
-            if elem % 10000 == 0:
-                print("Processed ", elem, " elements")
-
-        hdf_file.close()
-        print('Finished writing the triplets to disk. Time taken', time() - t_hdf5, 'seconds')
-
-
-        print('Reading the triplets back from disk')
-        hdf_file = h5py.File(filename,'r')
-        if chunk_size is None:
-            chunk_size = mesh.points.shape[0]*nvar // 300
-
-        print('Creating dask array from triplets')
-        IJV_triplets = da.from_array(hdf_file['IJV_triplets'],chunks=(chunk_size,3))
-
-
-        print('Creating the sparse matrix')
-        t_sparse = time()
-
-        stiffness = csr_matrix((IJV_triplets[:,2].astype(np.float32),
-            (IJV_triplets[:,0].astype(np.int32),IJV_triplets[:,1].astype(np.int32))),
-            shape=((mesh.points.shape[0]*nvar,mesh.points.shape[0]*nvar)),dtype=np.float32)
-
-        print('Done creating the sparse matrix, time taken', time() - t_sparse)
-        
-        hdf_file.close()
-
-        return stiffness, T, F, mass
-
-
-
-    def AssemblyForces(self,mesh,Quadrature,Domain,BoundaryData,Boundary):
-
-        C = MainData.C
-        nvar = MainData.nvar
-        ndim = MainData.ndim
-
-        mesh.points = np.array(mesh.points)
-        mesh.elements = np.array(mesh.elements)
-        nelem = mesh.elements.shape[0]
-        nodeperelem = mesh.elements.shape[1]
-
-
-        F = np.zeros((mesh.points.shape[0]*nvar,1)) 
-        f = []
-
-        for elem in range(0,nelem):
-            LagrangeElemCoords = np.zeros((nodeperelem,ndim))
-            for i in range(0,nodeperelem):
-                LagrangeElemCoords[i,:] = mesh.points[mesh.elements[elem,i],:]
-
-            
-            if ndim==2:
-                # Compute Force vector
-                f = np.zeros(k.shape[0])
-            elif ndim==3:
-                # Compute Force vector
-                f = ApplyNeumannBoundaryConditions3D(MainData, mesh, 
-                    BoundaryData, Domain, Boundary, Quadrature.weights, elem, LagrangeElemCoords)
-
-
-            # Static Condensation
-            # if C>0:
-            #   k,f = St.StaticCondensation(k,f,C,nvar)
-
-            # RHS Assembly
-            for iter in range(0,nvar):
-                F[mesh.elements[elem]*nvar+iter,0]+=f[iter:f.shape[0]:nvar]
-
-
-        return F

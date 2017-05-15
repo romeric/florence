@@ -9,6 +9,7 @@ public:
 
     _NearlyIncompressibleMooneyRivlin_() = default;
 
+    FASTOR_INLINE
     _NearlyIncompressibleMooneyRivlin_(U alpha, U beta, U kappa) {
         this->alpha = alpha;
         this->beta = beta;
@@ -24,6 +25,7 @@ public:
 
 
     template<typename T=U, size_t ndim>
+    FASTOR_INLINE
     std::tuple<Tensor<T,ndim,ndim>, typename MechanicsHessianType<T,ndim>::return_type> 
     _KineticMeasures_(const T *Fnp) {
 

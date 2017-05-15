@@ -47,16 +47,20 @@ cdef void SparseAssemblyNative_(const long *i, const long *j, const double *coef
     # sqrt of local capacity to be precise 
     cdef Int local_capacity = nvar*nodeperelem 
 
+    cdef long const_elem_retriever 
     for counter in range(nodeperelem):
+        const_elem_retriever = nvar*elements[elem*nodeperelem+counter]
         for ncounter in range(nvar):
-            current_row_column[nvar*counter+ncounter] = nvar*elements[elem*nodeperelem+counter]+ncounter
+            current_row_column[nvar*counter+ncounter] = const_elem_retriever+ncounter
 
     memcpy(full_current_row,i,i_shape*sizeof(long))
     memcpy(full_current_column,j,j_shape*sizeof(long))
 
+    cdef long const_I_retriever 
     for counter in range(local_capacity):
+        const_I_retriever = current_row_column[counter]
         for iterator in range(local_capacity):
-            full_current_row[counter*local_capacity+iterator]    = current_row_column[counter]
+            full_current_row[counter*local_capacity+iterator]    = const_I_retriever
             full_current_column[counter*local_capacity+iterator] = current_row_column[iterator]
 
 
