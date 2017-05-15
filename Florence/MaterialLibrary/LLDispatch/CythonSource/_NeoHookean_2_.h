@@ -6,8 +6,9 @@ public:
     U mu;
     U lamb;
 
-    _NeoHookean_2_() = default;
+    FASTOR_INLINE _NeoHookean_2_() = default;
 
+    FASTOR_INLINE
     _NeoHookean_2_(U mu, U lamb) {
         this->mu = mu;
         this->lamb = lamb;       
@@ -21,6 +22,7 @@ public:
 
 
     template<typename T=U, size_t ndim>
+    FASTOR_INLINE
     std::tuple<Tensor<T,ndim,ndim>, typename MechanicsHessianType<T,ndim>::return_type> 
     _KineticMeasures_(const T *Fnp) {
 

@@ -14,6 +14,7 @@ public:
 
     _IsotropicElectroMechanics_107_() = default;
 
+    FASTOR_INLINE
     _IsotropicElectroMechanics_107_(U mu1, U mu2, U mue, U lamb, U eps_1, U eps_2, U eps_e) {
         this->mu1 = mu1;
         this->mu2 = mu2;
@@ -37,6 +38,7 @@ public:
 
 
     template<typename T=U, size_t ndim>
+    FASTOR_INLINE
     std::tuple<Tensor<T,ndim>,Tensor<T,ndim,ndim>, typename ElectroMechanicsHessianType<T,ndim>::return_type> 
     _KineticMeasures_(const T *Fnp, const T *Enp) {
 

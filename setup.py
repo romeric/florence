@@ -199,13 +199,15 @@ class FlorenceSetup(object):
         mesh_path = os.path.join(_pwd_,"MeshGeneration")
         jacobi_path = os.path.join(_pwd_,"FunctionSpace","JacobiPolynomials")
         bp_path = os.path.join(_pwd_,"FunctionSpace","OneDimensional","_OneD")
-        km_path = os.path.join(_pwd_,"FiniteElements","ElementalMatrices","_KinematicMeasures_")
+        km_path = os.path.join(_pwd_,"FiniteElements","LocalAssembly","_KinematicMeasures_")
         gm_path = os.path.join(_pwd_,"VariationalPrinciple","_GeometricStiffness_")
         cm_path = os.path.join(_pwd_,"VariationalPrinciple","_ConstitutiveStiffness_")
         material_path = os.path.join(_pwd_,"MaterialLibrary","LLDispatch")
+        assemble_path = os.path.join(_pwd_,"FiniteElements","Assembly","_Assembly_")
 
-        self.extension_paths = [tensor_path,mesh_path,jacobi_path,bp_path,km_path,gm_path,cm_path,material_path]
-        # self.extension_paths = [material_path]
+        self.extension_paths = [tensor_path,mesh_path,jacobi_path,bp_path,km_path,gm_path,cm_path,material_path,assemble_path]
+        # self.extension_paths = [assemble_path]
+        # self.extension_paths = [km_path]
 
     def SourceClean(self):
 
@@ -213,10 +215,12 @@ class FlorenceSetup(object):
 
         source_clean_cmd = 'make source_clean ' + self.compiler_args
         for _path in self.extension_paths:
-            if "PostMesh" not in _path and "LLDispatch" not in _path:
+            if "_Assembly_" not in _path and "LLDispatch" not in _path:
                 execute('cd '+_path+' && '+source_clean_cmd)
             elif "LLDispatch" in _path:
                 execute('cd '+_path+' && echo rm -rf *.cpp CythonSource/*.cpp && rm -rf *.cpp CythonSource/*.cpp')
+            elif "Assembly" in _path:
+                execute('cd '+_path+' && echo rm -rf *.cpp && rm -rf *.cpp')
 
     def Clean(self):
 
@@ -258,17 +262,30 @@ class FlorenceSetup(object):
                                     "_Piezoelectric_100_"
                                 ]
         # low_level_material_list = ["_IsotropicElectroMechanics_101_"]
+        # low_level_material_list = ["_NeoHookean_2_"]
 
         assert self.extension_paths != None
         # self.extension_paths = []
 
         for _path in self.extension_paths:
-            if "PostMesh" not in _path and "LLDispatch" not in _path:
+            if "LLDispatch" not in _path and not "_Assembly_" in _path:
                 execute('cd '+_path+' && make ' + self.compiler_args)
             elif "LLDispatch" in _path:
                 for material in low_level_material_list:
                     material = material.lstrip('_').rstrip('_')
                     execute('cd '+_path+' && make ' + self.compiler_args + " MATERIAL=" + material)
+            elif "_Assembly_" in _path:
+                execute('cd '+_path+' && python AOT_Assembler.py clean')
+                execute('cd '+_path+' && python AOT_Assembler.py configure')
+
+                ll_material_mech = low_level_material_list[:4]
+                ll_material_electro_mech = low_level_material_list[4:]
+                for material in ll_material_mech:
+                    execute('cd '+_path+' && make ' + self.compiler_args + " ASSEMBLY_NAME=_LowLevelAssemblyDF_"+ material)
+                for material in ll_material_electro_mech:
+                    execute('cd '+_path+' && make ' + self.compiler_args + " ASSEMBLY_NAME=_LowLevelAssemblyDPF_"+ material)
+
+                execute('cd '+_path+' && python AOT_Assembler.py clean')
 
         # Get rid of cython sources
         sys.stdout = open(os.devnull, 'w')
