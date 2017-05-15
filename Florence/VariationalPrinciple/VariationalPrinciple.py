@@ -1,5 +1,6 @@
 import numpy as np
 from Florence import QuadratureRule, FunctionSpace, Mesh
+from Florence.FiniteElements.LocalAssembly._KinematicMeasures_ import _KinematicMeasures_
 from Florence.VariationalPrinciple._GeometricStiffness_ import GeometricStiffnessIntegrand as GetGeomStiffness
 # from Florence.VariationalPrinciple._ConstitutiveStiffnessMechanics_ import ConstitutiveStiffnessIntegrand as GetConstitutiveStiffness
 
@@ -128,6 +129,26 @@ class VariationalPrinciple(object):
         
         rhoNN = rho*np.dot(N,N.T)
         return rhoNN
+
+
+    def GetVolume(self, function_space, LagrangeElemCoords, EulerELemCoords, requires_geometry_update, elem=0):
+        """ Find the volume (area in 2D) of element [could be curved or straight]
+        """
+
+        # GET LOCAL KINEMATICS
+        detJ = _KinematicMeasures_(function_space.Jm, function_space.AllGauss[:,0], 
+            LagrangeElemCoords, EulerELemCoords, requires_geometry_update)[2]
+
+        # volume = 0.
+        # LOOP OVER GAUSS POINTS
+        # for counter in range(function_space.AllGauss.shape[0]):
+            # volume += detJ[counter]
+
+        # return volume
+
+        return detJ.sum()
+
+
 
 
     # @staticmethod
