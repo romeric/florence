@@ -86,9 +86,9 @@ void _GlobalAssemblyDF_(const Real *points,
         }
 
         // COMPUTE KINEMATIC MEASURES
-        std::fill(F,F+ngauss*ndim*ndim,0);
-        std::fill(SpatialGradient,SpatialGradient+ngauss*nodeperelem*ndim,0);
-        std::fill(detJ,detJ+ngauss,0);
+        std::fill(F,F+ngauss*ndim*ndim,0.);
+        std::fill(SpatialGradient,SpatialGradient+ngauss*nodeperelem*ndim,0.);
+        std::fill(detJ,detJ+ngauss,0.);
         KinematicMeasures(  SpatialGradient, 
                             F, 
                             detJ, 
@@ -106,8 +106,8 @@ void _GlobalAssemblyDF_(const Real *points,
         mat_obj.KineticMeasures(stress, hessian, ndim, ngauss, F);
  
         // COMPUTE CONSTITUTIVE STIFFNESS AND TRACTION
-        std::fill(stiffness,stiffness+local_capacity,0);
-        std::fill(traction,traction+ndof,0);
+        std::fill(stiffness,stiffness+local_capacity,0.);
+        std::fill(traction,traction+ndof,0.);
         _ConstitutiveStiffnessIntegrandDF_Filler_(
             stiffness, 
             traction,
@@ -123,7 +123,7 @@ void _GlobalAssemblyDF_(const Real *points,
             requires_geometry_update);
 
         // COMPUTE GEOMETRIC STIFFNESS
-        std::fill(geometric_stiffness,geometric_stiffness+local_capacity,0);
+        std::fill(geometric_stiffness,geometric_stiffness+local_capacity,0.);
         _GeometricStiffnessFiller_( geometric_stiffness, 
                                     SpatialGradient, 
                                     stress, 
@@ -148,9 +148,6 @@ void _GlobalAssemblyDF_(const Real *points,
                     current_row_column[nvar*counter+ncounter] = const_elem_retriever+ncounter;
                 }
             }
-
-            memcpy(full_current_row,local_rows_stiffness,local_capacity*sizeof(Integer));
-            memcpy(full_current_column,local_cols_stiffness,local_capacity*sizeof(Integer));
 
             Integer const_I_retriever; 
             for (Integer counter=0; counter<ndof; ++counter) { 
@@ -180,9 +177,9 @@ void _GlobalAssemblyDF_(const Real *points,
         // ASSEMBLE TRACTIONS
         {
             for (Integer i = 0; i<nodeperelem; ++i) {
+                UInteger T_idx = elements[elem*nodeperelem+i]*nvar;
                 for (Integer iterator = 0; iterator < nvar; ++iterator) {
-                    UInteger T_idx = elements[elem*nodeperelem+i]*nvar+iterator;
-                    T[T_idx] += traction[i*nvar+iterator];
+                    T[T_idx+iterator] += traction[i*nvar+iterator];
                 }
             }
         }

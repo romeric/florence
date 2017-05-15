@@ -26,7 +26,7 @@ using V = Fastor::SIMDVector<Real>;
 // Helper functions
 /*---------------------------------------------------------------------------------------------*/
 template<typename T>
-inline T *allocate(Integer size) {
+FASTOR_INLINE T *allocate(Integer size) {
 #if defined(__AVX__)
     T *out = (T*)_mm_malloc(sizeof(T)*size,32);
 #elif defined(__SSE__)
@@ -38,7 +38,7 @@ inline T *allocate(Integer size) {
 }
 
 template<typename T>
-inline void deallocate(T *a) {
+FASTOR_INLINE void deallocate(T *a) {
 #if defined(__SSE__)
     _mm_free(a);
 #else
@@ -47,8 +47,9 @@ inline void deallocate(T *a) {
 }
 
 
+/*-------------------
 template<typename T>
-inline void fill_(T *__restrict__ a, Integer size, T num) {
+FASTOR_INLINE void fill_(T *__restrict__ a, Integer size, T num) {
     V _vec(num);
     size_t i=0;
     for (; i<ROUND_DOWN(size,V::Size); i+=V::Size) {
@@ -58,6 +59,20 @@ inline void fill_(T *__restrict__ a, Integer size, T num) {
         a[i] = num;
     }
 }
+
+
+
+template<typename T>
+FASTOR_INLINE void iadd_(T *__restrict__ a, const T *__restrict__ b, Integer size) {
+    size_t i=0;
+    for (; i<ROUND_DOWN(size,V::Size); i+=V::Size) {
+        (V(a+i)+V(b+i)).store(a+i);
+    }
+    for (; i<size; ++i) {
+        a[i] += b[i];
+    }
+}
+-------------------*/
 /*---------------------------------------------------------------------------------------------*/
 
 
@@ -79,7 +94,8 @@ inline void fill_(T *__restrict__ a, Integer size, T num) {
 
 // IJV Filler
 /*---------------------------------------------------------------------------------------------*/
-inline void fill_triplet(  const Integer *i, 
+FASTOR_INLINE
+void fill_triplet(  const Integer *i, 
                     const Integer *j, 
                     const Real *coeff, 
                     int *I, 
@@ -107,8 +123,8 @@ inline void fill_triplet(  const Integer *i,
         }
     }
 
-    memcpy(full_current_row,i,i_shape*sizeof(Integer));
-    memcpy(full_current_column,j,j_shape*sizeof(Integer));
+    // memcpy(full_current_row,i,i_shape*sizeof(Integer));
+    // memcpy(full_current_column,j,j_shape*sizeof(Integer));
 
     Integer const_I_retriever; 
     for (Integer counter=0; counter<ndof; ++counter) { 

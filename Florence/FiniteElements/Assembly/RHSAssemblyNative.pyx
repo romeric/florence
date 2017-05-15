@@ -33,10 +33,10 @@ cdef inline void RHSAssemblyNative_(Float *T, const Float *t,
     cdef Int i, T_idx, iterator
 
     # INTERNAL TRACTION FORCE ASSEMBLY
-    for iterator in range(0,nvar):
-        for i in range(nodeperelem):
-            T_idx = elements[elem*nodeperelem+i]*nvar+iterator
-            T[T_idx] += t[i*nvar+iterator]
+    for i in range(nodeperelem):
+        T_idx = elements[elem*nodeperelem+i]*nvar
+        for iterator in range(nvar):
+            T[T_idx+iterator] += t[i*nvar+iterator]
 
     # For the record the following is the numpy equivalent version of above
     # for iterator in range(0,nvar):

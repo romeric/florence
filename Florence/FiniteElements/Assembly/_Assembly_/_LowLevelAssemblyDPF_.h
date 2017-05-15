@@ -119,8 +119,8 @@ void _GlobalAssemblyDPF_(const Real *points,
         mat_obj.KineticMeasures(D, stress, hessian, ndim, ngauss, F, ElectricFieldx);
 
         // COMPUTE CONSTITUTIVE STIFFNESS AND TRACTION
-        std::fill(stiffness,stiffness+local_capacity,0);
-        std::fill(traction,traction+ndof,0);
+        std::fill(stiffness,stiffness+local_capacity,0.);
+        std::fill(traction,traction+ndof,0.);
         _ConstitutiveStiffnessIntegrandDPF_Filler_(
             stiffness, 
             traction,
@@ -163,9 +163,6 @@ void _GlobalAssemblyDPF_(const Real *points,
                 }
             }
 
-            memcpy(full_current_row,local_rows_stiffness,local_capacity*sizeof(Integer));
-            memcpy(full_current_column,local_cols_stiffness,local_capacity*sizeof(Integer));
-
             Integer const_I_retriever; 
             for (Integer counter=0; counter<ndof; ++counter) { 
                 const_I_retriever = current_row_column[counter];
@@ -194,9 +191,9 @@ void _GlobalAssemblyDPF_(const Real *points,
         // ASSEMBLE TRACTIONS
         {
             for (Integer i = 0; i<nodeperelem; ++i) {
+                UInteger T_idx = elements[elem*nodeperelem+i]*nvar;
                 for (Integer iterator = 0; iterator < nvar; ++iterator) {
-                    UInteger T_idx = elements[elem*nodeperelem+i]*nvar+iterator;
-                    T[T_idx] += traction[i*nvar+iterator];
+                    T[T_idx+iterator] += traction[i*nvar+iterator];
                 }
             }
         }
@@ -209,7 +206,7 @@ void _GlobalAssemblyDPF_(const Real *points,
         // hence not mixing this with stiffness and mass integrand is beneficial
         for (Integer elem=0 ; elem<nelem; ++elem) {
 
-            std::fill(mass,mass+local_capacity,0);
+            std::fill(mass,mass+local_capacity,0.);
             // Call MassIntegrand
 
             // Fill IJV

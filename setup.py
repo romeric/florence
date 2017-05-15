@@ -206,7 +206,7 @@ class FlorenceSetup(object):
         assemble_path = os.path.join(_pwd_,"FiniteElements","Assembly","_Assembly_")
 
         self.extension_paths = [tensor_path,mesh_path,jacobi_path,bp_path,km_path,gm_path,cm_path,material_path,assemble_path]
-        self.extension_paths = [assemble_path]
+        # self.extension_paths = [assemble_path]
         # self.extension_paths = [km_path]
 
     def SourceClean(self):
@@ -262,6 +262,7 @@ class FlorenceSetup(object):
                                     "_Piezoelectric_100_"
                                 ]
         # low_level_material_list = ["_IsotropicElectroMechanics_101_"]
+        # low_level_material_list = ["_NeoHookean_2_"]
 
         assert self.extension_paths != None
         # self.extension_paths = []
