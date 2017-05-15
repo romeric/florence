@@ -3307,7 +3307,9 @@ class Mesh(object):
         self.GetBoundaryEdgesHex()
 
         if element_type == "tet":
+            sys.stdout = open(os.devnull, "w")
             self.ConvertHexesToTets()
+            sys.stdout = sys.__stdout__ 
 
 
     def Cube(self, lower_left_rear_point=(0.,0.,0.), side_length=1, nx=5, ny=5, nz=5, n=None, element_type="tet"):
