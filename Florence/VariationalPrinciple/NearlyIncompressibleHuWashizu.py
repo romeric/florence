@@ -3,7 +3,7 @@ import numpy as np
 from .VariationalPrinciple import VariationalPrinciple
 from Florence import QuadratureRule, FunctionSpace
 
-from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import *
+from Florence.FiniteElements.LocalAssembly.KinematicMeasures import *
 from Florence.Tensor import issymetric
 
 

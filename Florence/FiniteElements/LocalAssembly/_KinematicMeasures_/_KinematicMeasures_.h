@@ -13,10 +13,10 @@ void KinematicMeasures(Real *SpatialGradient_, Real *F_, Real *detJ, const Real 
     Real *MaterialGradient    = (Real*)calloc(sizeof(Real),ngauss*ndim*nodeperelem);
 
 
-    for (size_t i=0; i<ndim; ++i) {
-        for (size_t j=0; j<nodeperelem; ++j) {
-            for (size_t k=0; k<ngauss; ++k) {
-                for (size_t l=0; l<ndim; ++l) {
+    for (int i=0; i<ndim; ++i) {
+        for (int j=0; j<nodeperelem; ++j) {
+            for (int k=0; k<ngauss; ++k) {
+                for (int l=0; l<ndim; ++l) {
                     ParentGradientX[k*ndim*ndim+i*ndim+l] += Jm_[i*ngauss*nodeperelem+j*ngauss+k]*LagrangeElemCoords_[j*ndim+l];
                     ParentGradientx[k*ndim*ndim+i*ndim+l] += Jm_[i*ngauss*nodeperelem+j*ngauss+k]*EulerElemCoords_[j*ndim+l];
                 }
@@ -26,23 +26,23 @@ void KinematicMeasures(Real *SpatialGradient_, Real *F_, Real *detJ, const Real 
 
     // Find inverse of the isoparametric mapping (Jacobian) 
     if (ndim==3) {
-        for (size_t g=0; g<ngauss; ++g) {
+        for (int g=0; g<ngauss; ++g) {
             inv3x3(ParentGradientX+g*9, invParentGradientX+g*9);
             inv3x3(ParentGradientx+g*9, invParentGradientx+g*9);
         }
     } 
     else if (ndim==2) {
-        for (size_t g=0; g<ngauss; ++g) {
+        for (int g=0; g<ngauss; ++g) {
             inv2x2(ParentGradientX+g*4, invParentGradientX+g*4);
             inv2x2(ParentGradientx+g*4, invParentGradientx+g*4);
         }
     }
 
     // Find material and spatial gradients 
-    for (size_t i=0; i<ngauss; ++i) {
-        for (size_t j=0; j<ndim; ++j) {
-            for (size_t k=0; k<ndim; ++k) {
-                for (size_t l=0; l<nodeperelem; ++l) {
+    for (int i=0; i<ngauss; ++i) {
+        for (int j=0; j<ndim; ++j) {
+            for (int k=0; k<ndim; ++k) {
+                for (int l=0; l<nodeperelem; ++l) {
                     MaterialGradient[i*ndim*nodeperelem+j*nodeperelem+l] += invParentGradientX[i*ndim*ndim+j*ndim+k]*\
                         Jm_[k*ngauss*nodeperelem+l*ngauss+i];
                     SpatialGradient_[i*ndim*nodeperelem+l*ndim+j] += invParentGradientx[i*ndim*ndim+j*ndim+k]*\
@@ -54,10 +54,10 @@ void KinematicMeasures(Real *SpatialGradient_, Real *F_, Real *detJ, const Real 
 
 
     // Compute deformation gradient F  
-    for (size_t i=0; i<nodeperelem; ++i) {
-        for (size_t j=0; j<ndim; ++j) {
-            for (size_t k=0; k<ngauss; ++k) {
-                for (size_t l=0; l<ndim; ++l) {
+    for (int i=0; i<nodeperelem; ++i) {
+        for (int j=0; j<ndim; ++j) {
+            for (int k=0; k<ngauss; ++k) {
+                for (int l=0; l<ndim; ++l) {
                     F_[k*ndim*ndim+j*ndim+l] += EulerElemCoords_[i*ndim+j]*\
                         MaterialGradient[k*ndim*nodeperelem+l*nodeperelem+i];
                 }
@@ -68,13 +68,13 @@ void KinematicMeasures(Real *SpatialGradient_, Real *F_, Real *detJ, const Real 
 
     if (update==1) {
         if (ndim==3) {
-            for (size_t i=0; i<ngauss; ++i) {
+            for (int i=0; i<ngauss; ++i) {
                 // detJ[i] = AllGauss_[i]*fabs(det3x3(F_+i*9))*fabs(det3x3(ParentGradientX+i*9));
                 detJ[i] = AllGauss_[i]*fabs(det3x3(ParentGradientx+i*9));
             }
         }
         else if (ndim==2) {
-            for (size_t i=0; i<ngauss; ++i) {
+            for (int i=0; i<ngauss; ++i) {
                 // detJ[i] = AllGauss_[i]*fabs(det2x2(F_+i*4))*fabs(det2x2(ParentGradientX+i*4));
                 detJ[i] = AllGauss_[i]*fabs(det2x2(ParentGradientx+i*4));
             }
@@ -82,12 +82,12 @@ void KinematicMeasures(Real *SpatialGradient_, Real *F_, Real *detJ, const Real 
     }
     else if (update==0) {
         if (ndim==3) {
-            for (size_t i=0; i<ngauss; ++i) {
+            for (int i=0; i<ngauss; ++i) {
                 detJ[i] = AllGauss_[i]*fabs(det3x3(ParentGradientX+i*9));
             }
         }
         else if (ndim==2) {
-            for (size_t i=0; i<ngauss; ++i) {
+            for (int i=0; i<ngauss; ++i) {
                 detJ[i] = AllGauss_[i]*fabs(det2x2(ParentGradientX+i*4));
             }
         }

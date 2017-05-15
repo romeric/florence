@@ -1,6 +1,6 @@
 import numpy as np 
 import numpy.linalg as la
-from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import *
+from Florence.FiniteElements.LocalAssembly.KinematicMeasures import *
 from .PostProcess import *
 from copy import copy
 

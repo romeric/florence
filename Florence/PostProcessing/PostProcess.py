@@ -16,8 +16,8 @@ from Florence.FunctionSpace import Tet
 from Florence.FunctionSpace import Quad
 from Florence.FunctionSpace import Hex
 
-from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import *
-from Florence.FiniteElements.ElementalMatrices._KinematicMeasures_ import _KinematicMeasures_
+from Florence.FiniteElements.LocalAssembly.KinematicMeasures import *
+from Florence.FiniteElements.LocalAssembly._KinematicMeasures_ import _KinematicMeasures_
 from Florence import Mesh
 from Florence.MeshGeneration import vtk_writer
 from Florence.Utils import constant_camera_view
