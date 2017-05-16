@@ -46,9 +46,12 @@ def GradLagrange(C,zeta,eta,beta,arrange=1):
     # Ternsorial product
     if arrange==1:
         node_arranger = NodeArrangementHex(C)[2]
-        g0 = np.einsum('i,j,k', gNbeta[:,0], Neta[:,0], Nzeta[:,0]).flatten()
+        # g0 = np.einsum('i,j,k', gNbeta[:,0], Neta[:,0], Nzeta[:,0]).flatten()
+        # g1 = np.einsum('i,j,k', Nbeta[:,0], gNeta[:,0], Nzeta[:,0]).flatten()
+        # g2 = np.einsum('i,j,k', Nbeta[:,0], Neta[:,0], gNzeta[:,0]).flatten()
+        g0 = np.einsum('i,j,k', Nbeta[:,0], Neta[:,0], gNzeta[:,0]).flatten()
         g1 = np.einsum('i,j,k', Nbeta[:,0], gNeta[:,0], Nzeta[:,0]).flatten()
-        g2 = np.einsum('i,j,k', Nbeta[:,0], Neta[:,0], gNzeta[:,0]).flatten()
+        g2 = np.einsum('i,j,k', gNbeta[:,0], Neta[:,0], Nzeta[:,0]).flatten()
         gBases[:,0] = g0[node_arranger]
         gBases[:,1] = g1[node_arranger]
         gBases[:,2] = g2[node_arranger]
@@ -65,6 +68,5 @@ def GradLagrange(C,zeta,eta,beta,arrange=1):
         gBases[:,0]=gBases1
         gBases[:,1]=gBases2
         gBases[:,2]=gBases3
-
 
     return gBases
