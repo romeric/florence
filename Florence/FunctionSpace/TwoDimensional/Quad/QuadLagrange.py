@@ -40,8 +40,10 @@ def GradLagrange(C,zeta,eta,arrange=1):
     # Ternsorial product
     if arrange==1:
         node_arranger = NodeArrangementQuad(C)[2]
-        g0 = np.dot(gNeta,Nzeta.T).flatten()
-        g1 = np.dot(Neta,gNzeta.T).flatten()
+        # g0 = np.dot(gNeta,Nzeta.T).flatten()
+        # g1 = np.dot(Neta,gNzeta.T).flatten()
+        g0 = np.dot(Nzeta,gNeta.T).flatten()
+        g1 = np.dot(gNzeta,Neta.T).flatten()
         gBases[:,0] = g0[node_arranger]
         gBases[:,1] = g1[node_arranger]
     elif arrange==0:

@@ -1371,6 +1371,10 @@ class Mesh(object):
         return median, bases_for_middle_point
 
 
+    def FindElementContainingPoint(self):
+        pass
+
+
     def LargestSegment(self, smallest_element=True, nsamples=50, 
         plot_segment=False, plot_element=False, figure=None, save=False, filename=None):
         """Finds the largest segment that can fit in an element. For curvilinear elements
