@@ -35,6 +35,15 @@ def HighOrderMeshTri_SEMISTABLE(C,mesh,Decimals=10,Parallel=False,nCPU=1,Compute
     Neval = np.zeros((3,eps.shape[0]),dtype=np.float64)
     for i in range(3,eps.shape[0]):
         Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],1)[0]
+    
+    # from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
+    # eps =  EquallySpacedPointsTri(C)
+    # # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
+    # hpBases = Tri.hpNodal.hpBases
+    # Neval = np.zeros((3,eps.shape[0]),dtype=np.float64)
+    # for i in range(3,eps.shape[0]):
+    #     Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],1,0,1)[0]
+
     # THIS IS NECESSARY FOR REMOVING DUPLICATES
     makezero(Neval, tol=1e-12)
 
