@@ -18,7 +18,7 @@ def ElementLoopTri(elem,elements,points,MeshType,eps,Neval):
     xycoord_higher = GetInteriorNodesCoordinates(points[elements[elem,:],:],MeshType,elem,eps,Neval)
     return xycoord_higher
 
-def HighOrderMeshTri_SEMISTABLE(C,mesh,Decimals=10,Parallel=False,nCPU=1,ComputeAll=False):
+def HighOrderMeshTri_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, Parallel=False, nCPU=1, ComputeAll=False):
 
 
     # SWITCH OFF MULTI-PROCESSING FOR SMALLER PROBLEMS WITHOUT GIVING A MESSAGE
@@ -29,20 +29,21 @@ def HighOrderMeshTri_SEMISTABLE(C,mesh,Decimals=10,Parallel=False,nCPU=1,Compute
     if mesh.points.shape[1]!=2:
         raise ValueError('Incompatible mesh coordinates size. mesh.point.shape[1] must be 2')
 
-    eps =  FeketePointsTri(C)
-    # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
-    hpBases = Tri.hpNodal.hpBases
-    Neval = np.zeros((3,eps.shape[0]),dtype=np.float64)
-    for i in range(3,eps.shape[0]):
-        Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],1)[0]
-    
-    # from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
-    # eps =  EquallySpacedPointsTri(C)
-    # # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
-    # hpBases = Tri.hpNodal.hpBases
-    # Neval = np.zeros((3,eps.shape[0]),dtype=np.float64)
-    # for i in range(3,eps.shape[0]):
-    #     Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],1,0,1)[0]
+    if not equally_spaced:
+        eps =  FeketePointsTri(C)
+        # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
+        hpBases = Tri.hpNodal.hpBases
+        Neval = np.zeros((3,eps.shape[0]),dtype=np.float64)
+        for i in range(3,eps.shape[0]):
+            Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],1)[0]
+    else:
+        from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
+        eps =  EquallySpacedPointsTri(C)
+        # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
+        hpBases = Tri.hpNodal.hpBases
+        Neval = np.zeros((3,eps.shape[0]),dtype=np.float64)
+        for i in range(3,eps.shape[0]):
+            Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],1,0,1)[0]
 
     # THIS IS NECESSARY FOR REMOVING DUPLICATES
     makezero(Neval, tol=1e-12)
