@@ -26,7 +26,7 @@ def PointInversionIsoparametricFEM(element_type, C, LagrangeElemCoords, point, e
             Neval = Hex.LagrangeGaussLobatto(C,p_isoparametric[0],p_isoparametric[1],p_isoparametric[2]).flatten()
             gradient = Hex.GradLagrangeGaussLobatto(C,p_isoparametric[0],p_isoparametric[1],p_isoparametric[2])
         elif element_type == "tri":
-            Neval, gradient = Tri.hpNodal.hpBases(C,p_isoparametric[0],p_isoparametric[1],1)
+            Neval, gradient = Tri.hpNodal.hpBases(C,p_isoparametric[0],p_isoparametric[1],True,1)
         elif element_type == "quad":
             Neval = Quad.LagrangeGaussLobatto(C,p_isoparametric[0],p_isoparametric[1]).flatten()
             gradient = Quad.GradLagrangeGaussLobatto(C,p_isoparametric[0],p_isoparametric[1])
@@ -41,11 +41,13 @@ def PointInversionIsoparametricFEM(element_type, C, LagrangeElemCoords, point, e
 
         # Find the residual X - X(N) [i.e. point - FEM interpolated point]
         residual = point - np.dot(Neval,LagrangeElemCoords)
+        print(point,np.dot(Neval,LagrangeElemCoords))
         # Find the isoparametric (Jacobian) matrix dX/d\Xi
         ParentGradientX = np.dot(gradient.T,LagrangeElemCoords)
         # ParentGradientX = np.fliplr(ParentGradientX)
-        print(np.dot(Neval,LagrangeElemCoords))
-        exit()
+        # print(Neval)
+        # print(np.dot(Neval,LagrangeElemCoords))
+        # exit()
         # Solve and update incremental solution
         p_isoparametric += np.dot(np.linalg.inv(ParentGradientX), residual)
         # Check tolerance 
