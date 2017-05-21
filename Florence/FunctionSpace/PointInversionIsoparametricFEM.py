@@ -41,7 +41,7 @@ def PointInversionIsoparametricFEM(element_type, C, LagrangeElemCoords, point, e
 
         # Find the residual X - X(N) [i.e. point - FEM interpolated point]
         residual = point - np.dot(Neval,LagrangeElemCoords)
-        print(point,np.dot(Neval,LagrangeElemCoords))
+        # print(point,np.dot(Neval,LagrangeElemCoords))
         # Find the isoparametric (Jacobian) matrix dX/d\Xi
         ParentGradientX = np.dot(gradient.T,LagrangeElemCoords)
         # ParentGradientX = np.fliplr(ParentGradientX)
@@ -49,9 +49,12 @@ def PointInversionIsoparametricFEM(element_type, C, LagrangeElemCoords, point, e
         # print(np.dot(Neval,LagrangeElemCoords))
         # exit()
         # Solve and update incremental solution
+        old_p_isoparametric = np.copy(p_isoparametric)
         p_isoparametric += np.dot(np.linalg.inv(ParentGradientX), residual)
         # Check tolerance 
-        if np.linalg.norm(residual) < tolerance:
+        # if np.linalg.norm(residual) < tolerance:
+        # print(np.linalg.norm(p_isoparametric - old_p_isoparametric) )
+        if np.linalg.norm(p_isoparametric - old_p_isoparametric) < tolerance:
             break
 
 

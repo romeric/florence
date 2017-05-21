@@ -36,7 +36,6 @@ def hpBases(C,xi,eta,Transform=0,EvalOpt=0,EquallySpacedPoints=False):
         # IF XI,ETA ARE DIRECTLY GIVEN IN QUAD FORMAT
         p,dp_dxi,dp_deta = GradNormalisedJacobiTri(C,np.array([xi,eta]),EvalOpt)
 
-    
     Bases = np.linalg.solve(V.T,p)
     gBases[:,0] = np.linalg.solve(V.T,dp_dxi)
     gBases[:,1] = np.linalg.solve(V.T,dp_deta)
