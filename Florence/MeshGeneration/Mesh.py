@@ -4001,9 +4001,9 @@ class Mesh(object):
         """Change mesh data type from signed to unsigned"""
         if isinstance(self.elements,np.ndarray):
             self.elements = self.elements.astype(np.uint64)
-        if isinstance(self.edges,np.ndarray):
-            self.edges = self.edges.astype(np.uint64)
-        # if self.InferSpatialDimension()==3:
+        if hasattr(self, 'edges'):
+            if isinstance(self.edges,np.ndarray):
+                self.edges = self.edges.astype(np.uint64)
         if hasattr(self, 'faces'):
             if isinstance(self.faces,np.ndarray):
                 self.faces = self.faces.astype(np.uint64)
