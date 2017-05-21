@@ -254,6 +254,12 @@ class BoundaryCondition(object):
 
                 # Dirichlet = np.loadtxt("/home/roman/DirichletF05_P2_04Dec.dat", dtype=np.float64)
                 # nodesDBC = np.loadtxt("/home/roman/nodesDBCF05_P2_04Dec.dat", dtype=np.int64)
+                # print(Dirichlet.shape)
+                # Dirichlet = np.loadtxt("/home/roman/DirichletF05_P2_04Dec.dat", dtype=np.float64)
+                from scipy.io import savemat
+                savemat("/home/roman/NACA400_DBC_P"+str(mesh.InferPolynomialDegree())+".mat",{'DBCnodes':nodesDBC,'DBCvalues':Dirichlet})
+                # exit()
+                # nodesDBC = np.loadtxt("/home/roman/nodesDBCF05_P2_04Dec.dat", dtype=np.int64)
                 # nodesDBC = nodesDBC[:,None]
 
                 # GET DIRICHLET DoFs
@@ -263,7 +269,9 @@ class BoundaryCondition(object):
 
                 # np.savetxt("/home/roman/applied_dirichlet.dat", self.applied_dirichlet,fmt="%9.9f")
                 # np.savetxt("/home/roman/columns_out.dat", self.columns_out,fmt="%i")
-                # # exit()
+                # print(self.applied_dirichlet.shape,mesh.points.shape,self.columns_out.shape)
+                # print(nodesDBC.shape,Dirichlet.shape)
+                # exit()
 
 
                 # FIX THE DOF IN THE REST OF THE BOUNDARY

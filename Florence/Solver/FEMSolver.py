@@ -144,6 +144,7 @@ class FEMSolver(object):
         post_process.SetMaterial(material)
         post_process.SetFEMSolver(self)
 
+        # self.compute_mesh_qualities = True
         if self.analysis_nature == "nonlinear" and self.compute_mesh_qualities:
             # COMPUTE QUALITY MEASURES
             # self.ScaledJacobian=post_process.MeshQualityMeasures(mesh,TotalDisp,False,False)[3]
@@ -307,7 +308,7 @@ class FEMSolver(object):
                 mesh.points -= TotalDisp[:,:formulation.ndim,Increment-1]
                 # ASSEMBLE
                 K, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material, 
-                    solver, Eulerx, np.zeros_like(mesh.points))[:2]
+                    solver, Eulerx, np.zeros(mesh.points.shape[0]))[:2]
                 # UPDATE MESH AGAIN
                 mesh.points += TotalDisp[:,:formulation.ndim,Increment-1]
                 # FIND THE RESIDUAL

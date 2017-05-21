@@ -3670,6 +3670,7 @@ class Mesh(object):
                         and (xe < x_max).any() and (ye < y_max).any() and  (ze < z_max).any() ):
                         new_elements = np.vstack((new_elements,self.elements[elem,:]))            
 
+        new_elements = new_elements.astype(self.elements.dtype)
         new_points = np.copy(self.points)
         element_type = self.element_type
         # RESET FIRST OR MESH WILL CONTAIN INCONSISTENT DATA
@@ -3697,6 +3698,8 @@ class Mesh(object):
         # PLOT THE NEW MESH
         if plot_new_mesh == True:
             self.SimplePlot()
+
+        return unique_elements
 
 
     def MergeWith(self, mesh):
@@ -4000,8 +4003,10 @@ class Mesh(object):
             self.elements = self.elements.astype(np.uint64)
         if isinstance(self.edges,np.ndarray):
             self.edges = self.edges.astype(np.uint64)
-        if isinstance(self.faces,np.ndarray):
-            self.faces = self.faces.astype(np.uint64)
+        # if self.InferSpatialDimension()==3:
+        if hasattr(self, 'faces'):
+            if isinstance(self.faces,np.ndarray):
+                self.faces = self.faces.astype(np.uint64)
 
 
     def InferPolynomialDegree(self):
