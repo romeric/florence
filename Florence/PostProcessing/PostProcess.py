@@ -2018,7 +2018,7 @@ class PostProcess(object):
 
         if not isinstance(mesh,Mesh):
             raise TypeError("mesh has to be an instance of type {}".format(Mesh))
-        if mesh.element_type != "hex":
+        if mesh.element_type != "tri":
             raise RuntimeError("Calling triangular plotting function with element type {}".format(mesh.element_type))
         if TotalDisp is None:
             TotalDisp = np.zeros_like(mesh.points)
@@ -2070,7 +2070,7 @@ class PostProcess(object):
         hpBases = Tri.hpNodal.hpBases
         for i in range(FeketePointsTri.shape[0]):
             BasesTri[:,i] = hpBases(CActual,FeketePointsTri[i,0],FeketePointsTri[i,1],
-                EvalOpt=1,EquallySpacedPoints=EquallySpacedPoints,Transform=1)[0]
+                EvalOpt=1,equally_spaced=EquallySpacedPoints,Transform=1)[0]
 
         BasesOneD = np.zeros((CActual+2,GaussLobattoPointsOneD.shape[0]),dtype=np.float64)
         for i in range(GaussLobattoPointsOneD.shape[0]):
@@ -2241,7 +2241,7 @@ class PostProcess(object):
 
         if not isinstance(mesh,Mesh):
             raise TypeError("mesh has to be an instance of type {}".format(Mesh))
-        if mesh.element_type != "hex":
+        if mesh.element_type != "tet":
             raise RuntimeError("Calling tetrahedral plotting function with element type {}".format(mesh.element_type))
         if TotalDisp is None:
             TotalDisp = np.zeros_like(mesh.points)
@@ -2299,7 +2299,7 @@ class PostProcess(object):
         hpBases = Tri.hpNodal.hpBases
         for i in range(FeketePointsTri.shape[0]):
             BasesTri[:,i] = hpBases(CActual,FeketePointsTri[i,0],FeketePointsTri[i,1],
-                EvalOpt=1,EquallySpacedPoints=EquallySpacedPoints,Transform=1)[0]
+                EvalOpt=1,equally_spaced=EquallySpacedPoints,Transform=1)[0]
 
         BasesOneD = np.zeros((CActual+2,GaussLobattoPointsOneD.shape[0]),dtype=np.float64)
         for i in range(GaussLobattoPointsOneD.shape[0]):
@@ -2553,7 +2553,7 @@ class PostProcess(object):
 
         if not isinstance(mesh,Mesh):
             raise TypeError("mesh has to be an instance of type {}".format(Mesh))
-        if mesh.element_type != "hex":
+        if mesh.element_type != "quad":
             raise RuntimeError("Calling quadrilateral plotting function with element type {}".format(mesh.element_type))
         if TotalDisp is None:
             TotalDisp = np.zeros_like(mesh.points)
@@ -2862,7 +2862,7 @@ class PostProcess(object):
         hpBases = Tri.hpNodal.hpBases
         for i in range(FeketePointsTri.shape[0]):
             BasesTri[:,i] = hpBases(CActual,FeketePointsTri[i,0],FeketePointsTri[i,1],
-                EvalOpt=1,EquallySpacedPoints=EquallySpacedPoints,Transform=1)[0]
+                EvalOpt=1,equally_spaced=EquallySpacedPoints,Transform=1)[0]
 
         BasesOneD = np.zeros((CActual+2,GaussLobattoPointsOneD.shape[0]),dtype=np.float64)
         for i in range(GaussLobattoPointsOneD.shape[0]):
@@ -3116,7 +3116,7 @@ class PostProcess(object):
         hpBases = Tri.hpNodal.hpBases
         for i in range(FeketePointsTri.shape[0]):
             BasesTri[:,i] = hpBases(CActual,FeketePointsTri[i,0],FeketePointsTri[i,1],
-                EvalOpt=1,EquallySpacedPoints=EquallySpacedPoints,Transform=1)[0]
+                EvalOpt=1,equally_spaced=EquallySpacedPoints,Transform=1)[0]
 
         BasesOneD = np.zeros((CActual+2,GaussLobattoPointsOneD.shape[0]),dtype=np.float64)
         for i in range(GaussLobattoPointsOneD.shape[0]):

@@ -5,14 +5,14 @@ from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTet
 from Florence.FunctionSpace.JacobiPolynomials import *
 from Florence.FunctionSpace.DegenerateMappings import MapXiEtaZeta2RST
 
-def hpBases(C, xi, eta, zeta, Transform=0, EvalOpt=0, EquallySpacedPoints=False):
+def hpBases(C, xi, eta, zeta, Transform=0, EvalOpt=0, equally_spaced=False):
     """
         Transform:                  transform to from degenrate quad
         EvalOpt:                    evaluate 1 as an approximation 0.9999999
     """
 
     eps = FeketePointsTet(C)
-    if EquallySpacedPoints:
+    if equally_spaced:
         eps = EquallySpacedPointsTet(C)
 
     N = eps.shape[0]

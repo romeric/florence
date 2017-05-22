@@ -1,22 +1,20 @@
 import numpy as np 
-import os, sys, imp
-
 
 # Modal Bases
 # import Florence.FunctionSpace.TwoDimensional.Tri.hpModal as Tri 
 # import Florence.FunctionSpace.ThreeDimensional.Tet.hpModal as Tet
-
 # Nodal Bases
 from Florence.FunctionSpace import Tri
 from Florence.FunctionSpace import Tet
-from Florence.FunctionSpace import Quad
-from Florence.FunctionSpace import Hex
+from Florence.FunctionSpace import Quad, QuadES
+from Florence.FunctionSpace import Hex, HexES
 
 from Florence.QuadratureRules.FeketePointsTri import *
 from Florence.QuadratureRules.FeketePointsTet import *
 from Florence.QuadratureRules.GaussLobattoPoints import *
+from Florence.QuadratureRules.EquallySpacedPoints import *
 
-def GetBases(C, Quadrature, info, useLagrange=False):
+def GetBases(C, Quadrature, info, bases_type="nodal", equally_spaced=False):
 
     w = Quadrature.weights
     z = Quadrature.points
@@ -36,20 +34,28 @@ def GetBases(C, Quadrature, info, useLagrange=False):
 
 
     if info == 'quad':
+        if not equally_spaced:
+            hpBases = Quad.LagrangeGaussLobatto
+            GradhpBases = Quad.GradLagrangeGaussLobatto
+        else:
+            hpBases = QuadES.Lagrange
+            GradhpBases = QuadES.GradLagrange
+
         counter = 0
         for i in range(0,z.shape[0]):
             for j in range(0,z.shape[0]):
-                ndummy = Quad.LagrangeGaussLobatto(C,z[i],z[j])
+                ndummy = hpBases(C,z[i],z[j])
                 Basis[:,counter] = ndummy[:,0]
-                dummy = Quad.GradLagrangeGaussLobatto(C,z[i],z[j])
+                dummy = GradhpBases(C,z[i],z[j])
                 gBasisx[:,counter] = dummy[:,0]
                 gBasisy[:,counter] = dummy[:,1]
                 counter+=1
+
     elif info == 'tri':
         hpBases = Tri.hpNodal.hpBases
         for i in range(0,w.shape[0]):
             # Better convergence for curved meshes when Quadrature.optimal!=0
-            ndummy, dummy = hpBases(C,z[i,0],z[i,1],Quadrature.optimal) 
+            ndummy, dummy = hpBases(C,z[i,0],z[i,1], Quadrature.optimal, equally_spaced=equally_spaced) 
             # ndummy, dummy = Tri.hpBases(C,z[i,0],z[i,1])
             Basis[:,i] = ndummy
             gBasisx[:,i] = dummy[:,0]
@@ -68,7 +74,7 @@ def GetBases(C, Quadrature, info, useLagrange=False):
 
 
 
-def GetBases3D(C,Quadrature,info):
+def GetBases3D(C, Quadrature, info, bases_type="nodal", equally_spaced=False):
 
     ndim = 3
 
@@ -92,24 +98,31 @@ def GetBases3D(C,Quadrature,info):
     
 
     if info=='hex':
+        if not equally_spaced:
+            hpBases = Hex.LagrangeGaussLobatto
+            GradhpBases = Hex.GradLagrangeGaussLobatto
+        else:
+            hpBases = HexES.Lagrange
+            GradhpBases = HexES.GradLagrange
+
         counter = 0
         for i in range(w.shape[0]):
             for j in range(w.shape[0]):
                 for k in range(w.shape[0]):
-                    # ndummy = ThreeD.LagrangeGaussLobatto(C,z[i],z[j],z[k])[0]
-                    ndummy = Hex.LagrangeGaussLobatto(C,z[i],z[j],z[k])
-                    dummy = Hex.GradLagrangeGaussLobatto(C,z[i],z[j],z[k])
+                    ndummy = hpBases(C,z[i],z[j],z[k])
+                    dummy = GradhpBases(C,z[i],z[j],z[k])
 
                     Basis[:,counter] = ndummy[:,0]
                     gBasisx[:,counter] = dummy[:,0]
                     gBasisy[:,counter] = dummy[:,1]
                     gBasisz[:,counter] = dummy[:,2]
                     counter+=1
+
     elif info=='tet':
         hpBases = Tet.hpNodal.hpBases
         for i in range(0,w.shape[0]):
             # Better convergence for curved meshes when Quadrature.optimal!=0
-            ndummy, dummy = hpBases(C,z[i,0],z[i,1],z[i,2],Quadrature.optimal)
+            ndummy, dummy = hpBases(C,z[i,0],z[i,1],z[i,2],Quadrature.optimal, equally_spaced=equally_spaced)
             # ndummy, dummy = Tet.hpBases(C,z[i,0],z[i,1],z[i,2])
             Basis[:,i] = ndummy
             gBasisx[:,i] = dummy[:,0]
@@ -129,7 +142,7 @@ def GetBases3D(C,Quadrature,info):
 
 
 
-def GetBasesBoundary(C,z,ndim):
+def GetBasesBoundary(C, z, ndim):
 
     BasisBoundary = np.zeros(((C+2)**(ndim),(z.shape[0])**(ndim-1),2*ndim))
     gBasisBoundaryx = np.zeros(((C+2)**(ndim),(z.shape[0])**(ndim-1),2*ndim))
@@ -190,7 +203,7 @@ def GetBasesBoundary(C,z,ndim):
 
 
 
-def GetBasesAtNodes(C,Quadrature,info):
+def GetBasesAtNodes(C, Quadrature, info, bases_type="nodal", equally_spaced=False):
 
     ns=[]; Basis=[]; gBasisx=[]; gBasisy=[]; gBasisz=[]
     if info == 'hex' or info == "quad":
@@ -223,42 +236,69 @@ def GetBasesAtNodes(C,Quadrature,info):
     eps=[]
     if info == 'hex':
         counter = 0
-        eps = GaussLobattoPointsHex(C)
+        if not equally_spaced:
+            eps = GaussLobattoPointsHex(C)
+            hpBases = Hex.LagrangeGaussLobatto
+            GradhpBases = Hex.GradLagrangeGaussLobatto
+        else:
+            eps = EquallySpacedPoints(4,C)
+            hpBases = HexES.Lagrange
+            GradhpBases = HexES.GradLagrange
+
         for i in range(0,eps.shape[0]):
-            ndummy = Hex.LagrangeGaussLobatto(C,eps[i,0],eps[i,1],eps[i,2],arrange=1)
+            ndummy = hpBases(C,eps[i,0],eps[i,1],eps[i,2],arrange=1)
             Basis[:,counter] = ndummy[:,0]
-            dummy = Hex.GradLagrangeGaussLobatto(C,eps[i,0],eps[i,1],eps[i,2],arrange=1)
+            dummy = GradhpBases(C,eps[i,0],eps[i,1],eps[i,2],arrange=1)
             gBasisx[:,counter] = dummy[:,0]
             gBasisy[:,counter] = dummy[:,1]
             gBasisz[:,counter] = dummy[:,2]
             counter +=1
+
     elif info == 'quad':
+        if not equally_spaced:
+            eps = GaussLobattoPointsQuad(C)
+            hpBases = Quad.LagrangeGaussLobatto
+            GradhpBases = Quad.GradLagrangeGaussLobatto
+        else:
+            eps = EquallySpacedPoints(3,C)
+            hpBases = QuadES.Lagrange
+            GradhpBases = QuadES.GradLagrange
+
         counter = 0
-        eps = GaussLobattoPointsQuad(C)
         for i in range(0,eps.shape[0]):
-            ndummy = Quad.LagrangeGaussLobatto(C,eps[i,0],eps[i,1],arrange=1)
+            ndummy = hpBases(C,eps[i,0],eps[i,1],arrange=1)
             Basis[:,counter] = ndummy[:,0]
-            dummy = Quad.GradLagrangeGaussLobatto(C,eps[i,0],eps[i,1],arrange=1)
+            dummy = GradhpBases(C,eps[i,0],eps[i,1],arrange=1)
             gBasisx[:,counter] = dummy[:,0]
             gBasisy[:,counter] = dummy[:,1]
             counter+=1
+
     elif info == 'tet':
-        counter = 0
+        if not equally_spaced:
+            eps = FeketePointsTet(C)
+        else:
+            eps = EquallySpacedPointsTet(C)
         hpBases = Tet.hpNodal.hpBases
-        eps = FeketePointsTet(C)
+        
+        counter = 0
         for i in range(0,eps.shape[0]):
-            ndummy, dummy = hpBases(C,eps[i,0],eps[i,1],eps[i,2],1,1)
+            ndummy, dummy = hpBases(C,eps[i,0],eps[i,1],eps[i,2],1,1, equally_spaced=equally_spaced)
             ndummy = ndummy.reshape(ndummy.shape[0],1)
             Basis[:,counter] = ndummy[:,0]
             gBasisx[:,counter] = dummy[:,0]
             gBasisy[:,counter] = dummy[:,1]
             gBasisz[:,counter] = dummy[:,2]
             counter+=1
+
     elif info == 'tri':
-        eps = FeketePointsTri(C)
+        if not equally_spaced:
+            eps = FeketePointsTri(C)
+        else:
+            eps = EquallySpacedPointsTri(C)
         hpBases = Tri.hpNodal.hpBases
+
         for i in range(0,eps.shape[0]):
-            ndummy, dummy = hpBases(C,eps[i,0],eps[i,1],1,1)
+            ndummy, dummy = hpBases(C,eps[i,0],eps[i,1],1,1, equally_spaced=equally_spaced)
             ndummy = ndummy.reshape(ndummy.shape[0],1)
             Basis[:,i] = ndummy[:,0]
             gBasisx[:,i] = dummy[:,0]

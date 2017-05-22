@@ -10,7 +10,8 @@ from Florence.Tensor import issymetric
 class DisplacementFormulation(VariationalPrinciple):
 
     def __init__(self, mesh, variables_order=(1,), 
-        quadrature_rules=None, quadrature_type=None, function_spaces=None, compute_post_quadrature=True):
+        quadrature_rules=None, quadrature_type=None, function_spaces=None, compute_post_quadrature=True,
+        equally_spaced_bases=False):
 
         if mesh.element_type != "tet" and mesh.element_type != "tri" and \
             mesh.element_type != "quad" and mesh.element_type != "hex":
@@ -60,9 +61,9 @@ class DisplacementFormulation(VariationalPrinciple):
         if function_spaces == None and self.function_spaces == None:
 
             # CREATE FUNCTIONAL SPACES
-            function_space = FunctionSpace(mesh, quadrature, p=C+1)
+            function_space = FunctionSpace(mesh, quadrature, p=C+1, equally_spaced=equally_spaced_bases)
             if self.compute_post_quadrature != None:
-                post_function_space = FunctionSpace(mesh, post_quadrature, p=C+1)
+                post_function_space = FunctionSpace(mesh, post_quadrature, p=C+1, equally_spaced=equally_spaced_bases)
             else:
                 post_function_space = None
 
