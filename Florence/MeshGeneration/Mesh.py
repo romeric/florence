@@ -2301,7 +2301,8 @@ class Mesh(object):
 
 
     def SimplePlot(self, to_plot='faces', 
-        color=None, save=False, filename=None, figure=None, show_plot=True):
+        color=None, plot_points=False, point_radius=0.1, 
+        save=False, filename=None, figure=None, show_plot=True):
         """Simple mesh plot
 
             to_plot:        [str] only for 3D. 'faces' to plot only boundary faces
@@ -2393,6 +2394,10 @@ class Mesh(object):
             mlab.triangular_mesh(self.points[:,0],self.points[:,1],self.points[:,2], faces[:,:3],
                 line_width=radius,tube_radius=radius,color=(0,0,0),
                 representation='wireframe')
+
+            if plot_points:
+                mlab.points3d(self.points[:,0],self.points[:,1],self.points[:,2]
+                    ,color=(0,0,0),mode='sphere',scale_factor=point_radius)
 
             # svpoints = self.points[np.unique(self.faces),:]
             # mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=0.005)
@@ -3816,7 +3821,7 @@ class Mesh(object):
     @staticmethod
     def TriangularProjection(c1=(0,0), c2=(2,0), c3=(2,2), points=None, npoints=10, equally_spaced=True):
         """Builds an instance of Mesh on a triangular region through FE interpolation
-            given four vertices of the triangular region. Alternatively you can specify 
+            given three vertices of the triangular region. Alternatively one can specify 
             the vertices as numpy array of 3x2. 
 
             This is a static immutable function, in that it does not modify self 
@@ -3867,7 +3872,7 @@ class Mesh(object):
     @staticmethod
     def QuadrilateralProjection(c1=(0,0), c2=(2,0), c3=(2,2), c4=(0,2), points=None, npoints=10, equally_spaced=True):
         """Builds an instance of Mesh on a quadrilateral region through FE interpolation
-            given four vertices of the quadrilateral region. Alternatively you can specify 
+            given four vertices of the quadrilateral region. Alternatively one can specify 
             the vertices as numpy array of 4x2. 
 
             This is a static immutable function, in that it does not modify self 
@@ -3929,11 +3934,64 @@ class Mesh(object):
 
 
     @staticmethod
+    def TetrahedralProjection(c1=(0,0,0), c2=(2,0,0), c3=(0,2,0), c4=(0,0,2), points=None, npoints=10, equally_spaced=True):
+        """Builds an instance of Mesh on a tetrahedral region through FE interpolation
+            given four vertices of the tetrahedral region. Alternatively one can specify 
+            the vertices as numpy array of 4x3. 
+
+            This is a static immutable function, in that it does not modify self 
+        """
+
+        if points is None or not isinstance(points,np.ndarray):
+            if not isinstance(c1,tuple) or not isinstance(c2,tuple) or not isinstance(c3,tuple) \
+                or not isinstance(c4,tuple):
+                raise ValueError("coordinates should be given in tuples of two elements (x,y)")
+            else:
+                c1 = np.array(c1); c2 = np.array(c2); c3 = np.array(c3); c4 = np.array(c4)
+                opoints = np.vstack((c1,c2,c3,c4))
+        else:
+            opoints = points
+
+        from scipy.spatial import Delaunay
+        from Florence.FunctionSpace import Tet
+        from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTet
+        from Florence.QuadratureRules.FeketePointsTet import FeketePointsTet
+        
+        if equally_spaced:
+            points = EquallySpacedPointsTet(npoints)
+        else:
+            points = FeketePointsTet(npoints)
+
+        BasesTet = np.zeros((4,points.shape[0]),dtype=np.float64)
+        hpBases = Tet.hpNodal.hpBases
+        for i in range(points.shape[0]):
+            BasesTet[:,i] = hpBases(0,points[i,0],points[i,1],points[i,2],
+                Transform=1,EvalOpt=1,EquallySpacedPoints=equally_spaced)[0]
+        makezero(BasesTet,tol=1e-10)
+
+        # func = Delaunay(points,qhull_options="QJ") # this does not produce the expected connectivity
+        func = Delaunay(points)
+        tets = func.simplices
+
+        mesh = Mesh()
+        mesh.element_type="tet"
+        mesh.points = np.dot(BasesTet.T, opoints)
+        mesh.elements = tets
+        mesh.nelem = mesh.elements.shape[0]
+        mesh.nnode = mesh.points.shape[0]
+        mesh.GetBoundaryFaces()
+        mesh.GetBoundaryEdges()
+
+        return mesh
+
+
+
+    @staticmethod
     def HexahedralProjection(c1=(0,0,0), c2=(2,0,0), c3=(2,2,0), c4=(0,2,0.), 
         c5=(0,1.8,3.), c6=(0.2,0,3.), c7=(2,0.2,3.), c8=(1.8,2,3.),  points=None, npoints=6, equally_spaced=True):
         """Builds an instance of Mesh on a hexahedral region through FE interpolation
-            given eight vertices of the quadrilateral region. Alternatively you can specify 
-            the vertices as numpy array of 8x2. 
+            given eight vertices of the quadrilateral region. Alternatively one can specify 
+            the vertices as numpy array of 8x3. 
 
             This is a static immutable function, in that it does not modify self 
         """
@@ -3974,10 +4032,9 @@ class Mesh(object):
         hmesh.Cube(lower_left_rear_point=(-1.,-1.,-1.), side_length=2, n=npoints, element_type="hex")
         hexes = hmesh.elements
 
-
-        nnode = hmesh.nnode
-        nelem = hmesh.nelem
-        nsize = int((npoints+1)**3)
+        # nnode = hmesh.nnode
+        # nelem = hmesh.nelem
+        # nsize = int((npoints+1)**3)
 
         mesh = Mesh()
         mesh.points = np.dot(BasesHex.T, opoints)

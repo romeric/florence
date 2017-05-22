@@ -1989,7 +1989,7 @@ class PostProcess(object):
             TotalDisp = args[1]
         else:
             if self.sol is None:
-                raise ValueError("Solution not set for post-processing")
+                TotalDisp = np.zeros_like(mesh.points)
             else:
                 TotalDisp = self.sol
 
@@ -2006,7 +2006,7 @@ class PostProcess(object):
 
 
     @staticmethod
-    def CurvilinearPlotTri(mesh, TotalDisp, QuantityToPlot=None,
+    def CurvilinearPlotTri(mesh, TotalDisp=None, QuantityToPlot=None,
         ProjectionFlags=None, interpolation_degree=30, EquallySpacedPoints=False,
         TriSurf=False, colorbar=False, PlotActualCurve=False, point_radius = 3, color="#C5F1C5",
         plot_points=False, plot_edges=True, save=False, filename=None, figure=None, show_plot=True, 
@@ -2015,6 +2015,13 @@ class PostProcess(object):
         """High order curved triangular mesh plots, based on high order nodal FEM.
             The equally spaced FEM points do not work as good as the Fekete points 
         """
+
+        if not isinstance(mesh,Mesh):
+            raise TypeError("mesh has to be an instance of type {}".format(Mesh))
+        if mesh.element_type != "hex":
+            raise RuntimeError("Calling triangular plotting function with element type {}".format(mesh.element_type))
+        if TotalDisp is None:
+            TotalDisp = np.zeros_like(mesh.points)
 
 
         from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
@@ -2223,7 +2230,7 @@ class PostProcess(object):
 
 
     @staticmethod
-    def CurvilinearPlotTet(mesh, TotalDisp, QuantityToPlot=None, plot_on_faces=True,
+    def CurvilinearPlotTet(mesh, TotalDisp=None, QuantityToPlot=None, plot_on_faces=True,
         ProjectionFlags=None, interpolation_degree=20, EquallySpacedPoints=False, PlotActualCurve=False,
         plot_points=False, plot_edges=True, plot_surfaces=True, point_radius=0.02, colorbar=False, color=None, figure=None,
         show_plot=True, save=False, filename=None, save_tessellation=False):
@@ -2232,6 +2239,12 @@ class PostProcess(object):
             The equally spaced FEM points do not work as good as the Fekete points 
         """
 
+        if not isinstance(mesh,Mesh):
+            raise TypeError("mesh has to be an instance of type {}".format(Mesh))
+        if mesh.element_type != "hex":
+            raise RuntimeError("Calling tetrahedral plotting function with element type {}".format(mesh.element_type))
+        if TotalDisp is None:
+            TotalDisp = np.zeros_like(mesh.points)
 
 
         from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
@@ -2529,7 +2542,7 @@ class PostProcess(object):
 
 
     @staticmethod
-    def CurvilinearPlotQuad(mesh, TotalDisp, QuantityToPlot=None,
+    def CurvilinearPlotQuad(mesh, TotalDisp=None, QuantityToPlot=None,
         ProjectionFlags=None, interpolation_degree=30, EquallySpacedPoints=False,
         TriSurf=False, colorbar=False, PlotActualCurve=False, point_radius = 3, color="#C5F1C5",
         plot_points=False, plot_edges=True, save=False, filename=None, figure=None, show_plot=True, 
@@ -2537,6 +2550,13 @@ class PostProcess(object):
 
         """High order curved quad mesh plots, based on high order nodal FEM.
         """
+
+        if not isinstance(mesh,Mesh):
+            raise TypeError("mesh has to be an instance of type {}".format(Mesh))
+        if mesh.element_type != "hex":
+            raise RuntimeError("Calling quadrilateral plotting function with element type {}".format(mesh.element_type))
+        if TotalDisp is None:
+            TotalDisp = np.zeros_like(mesh.points)
 
         from copy import deepcopy
         from scipy.spatial import Delaunay
@@ -2641,7 +2661,7 @@ class PostProcess(object):
 
 
     @staticmethod
-    def CurvilinearPlotHex(mesh, TotalDisp, QuantityToPlot=None, plot_on_faces=True,
+    def CurvilinearPlotHex(mesh, TotalDisp=None, QuantityToPlot=None, plot_on_faces=True,
         ProjectionFlags=None, interpolation_degree=20, EquallySpacedPoints=False, PlotActualCurve=False,
         plot_points=False, plot_edges=True, plot_surfaces=True, point_radius=0.02, colorbar=False, color=None, figure=None,
         show_plot=True, save=False, filename=None, save_tessellation=False):
@@ -2649,6 +2669,13 @@ class PostProcess(object):
         """High order curved hexahedral surfaces mesh plots, based on high order nodal FEM.
             The equally spaced FEM points do not work as good as the Fekete points 
         """
+
+        if not isinstance(mesh,Mesh):
+            raise TypeError("mesh has to be an instance of type {}".format(Mesh))
+        if mesh.element_type != "hex":
+            raise RuntimeError("Calling hexahedral plotting function with element type {}".format(mesh.element_type))
+        if TotalDisp is None:
+            TotalDisp = np.zeros_like(mesh.points)
 
         from copy import deepcopy
         from scipy.spatial import Delaunay

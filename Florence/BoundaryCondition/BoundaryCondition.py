@@ -256,8 +256,9 @@ class BoundaryCondition(object):
                 # nodesDBC = np.loadtxt("/home/roman/nodesDBCF05_P2_04Dec.dat", dtype=np.int64)
                 # print(Dirichlet.shape)
                 # Dirichlet = np.loadtxt("/home/roman/DirichletF05_P2_04Dec.dat", dtype=np.float64)
-                from scipy.io import savemat
-                savemat("/home/roman/NACA400_DBC_P"+str(mesh.InferPolynomialDegree())+".mat",{'DBCnodes':nodesDBC,'DBCvalues':Dirichlet})
+                # from scipy.io import savemat
+                # savemat("/home/roman/NACA400_DBC_P"+str(mesh.InferPolynomialDegree())+".mat",{'DBCnodes':nodesDBC,'DBCvalues':Dirichlet})
+                # savemat("/Users/romanpoya/Dropbox/NACA400_DBC_ES_P"+str(mesh.InferPolynomialDegree())+".mat",{'DBCnodes':nodesDBC,'DBCvalues':Dirichlet})
                 # exit()
                 # nodesDBC = np.loadtxt("/home/roman/nodesDBCF05_P2_04Dec.dat", dtype=np.int64)
                 # nodesDBC = nodesDBC[:,None]

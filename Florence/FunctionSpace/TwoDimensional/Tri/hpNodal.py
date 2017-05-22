@@ -5,7 +5,11 @@ from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
 from Florence.FunctionSpace.JacobiPolynomials.JacobiPolynomials import *
 from Florence.FunctionSpace.DegenerateMappings import MapXiEta2RS
 
-def hpBases(C,xi,eta,Transform=0,EvalOpt=0,EquallySpacedPoints=False):
+def hpBases(C, xi, eta, Transform=0, EvalOpt=0, EquallySpacedPoints=False):
+    """
+        Transform:                  transform to from degenrate quad
+        EvalOpt:                    evaluate 1 as an approximation 0.9999999
+    """
 
     eps = FeketePointsTri(C)
     if EquallySpacedPoints:
