@@ -41,7 +41,7 @@ def HighOrderMeshTet_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, Zero
         hpBases = Tet.hpNodal.hpBases
         Neval = np.zeros((4,eps.shape[0]),dtype=np.float64)
         for i in range(4,eps.shape[0]):
-            Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],eps[i,2],Transform=1,EvalOpt=1,EquallySpacedPoints=True)[0]
+            Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],eps[i,2],Transform=1,EvalOpt=1,equally_spaced=True)[0]
 
     # THIS IS NECESSARY FOR REMOVING DUPLICATES
     makezero(Neval, tol=1e-12)

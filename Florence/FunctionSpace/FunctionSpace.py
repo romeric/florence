@@ -6,7 +6,7 @@ class FunctionSpace(object):
         and boundary element analyses
     """
 
-    def __init__(self, mesh, quadrature=None, p=1, bases_type="nodal", bases_kind="CG", evaluate_at_nodes=False):
+    def __init__(self, mesh, quadrature=None, p=1, bases_type="nodal", bases_kind="CG", evaluate_at_nodes=False, equally_spaced=False):
         """ 
 
             input:
@@ -17,7 +17,11 @@ class FunctionSpace(object):
                                             "modal" for hierarchical bases
                 bases_kind:                 [str] kind of interpolation bases,
                                             either "CG" for continuous Galerkin
-                                            or "DG" for discontinuous Galerkin  
+                                            or "DG" for discontinuous Galerkin 
+                equally_spaced:             Only applicable to nodal bases functions. 
+                                            Wether the position of nodes in the
+                                            isoparametric domain should be equally spaced
+                                            or not  
         """
     
         # from Florence import QuadratureRule
@@ -42,17 +46,17 @@ class FunctionSpace(object):
         if evaluate_at_nodes is False:
             if mesh.element_type == "tet" or mesh.element_type == "hex":
                 # GET BASES AT ALL INTEGRATION POINTS (VOLUME)
-                Domain = GetBases3D(C,quadrature,mesh.element_type)
+                Domain = GetBases3D(C,quadrature,mesh.element_type,equally_spaced=equally_spaced)
                 # GET BOUNDARY BASES AT ALL INTEGRATION POINTS (LINE)
                 # Boundary = GetBasesBoundary(C,z,ndim)
             elif mesh.element_type == 'tri' or mesh.element_type == 'quad':
                 # GET BASES AT ALL INTEGRATION POINTS (AREA)
-                Domain = GetBases(C,quadrature,mesh.element_type)
+                Domain = GetBases(C,quadrature,mesh.element_type,equally_spaced=equally_spaced)
                 # GET BOUNDARY BASES AT ALL INTEGRATION POINTS (LINE)
                 # Boundary = GetBasesBoundary(C,z,ndim)
             Boundary = []
         else:
-            Domain = GetBasesAtNodes(C,quadrature,mesh.element_type)
+            Domain = GetBasesAtNodes(C,quadrature,mesh.element_type,equally_spaced=equally_spaced)
             Boundary = []
             w = Domain.w
 
