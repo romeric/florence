@@ -19,7 +19,7 @@ def ElementLoopTet(elem,elements,points,MeshType,eps,Neval):
     return xycoord_higher
 
 
-def HighOrderMeshTet_SEMISTABLE(C,mesh,Decimals=10,Zerofy=True,Parallel=False,nCPU=1,ComputeAll=True):
+def HighOrderMeshTet_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, Zerofy=True, Parallel=False, nCPU=1, ComputeAll=True):
 
     
     # SWITCH OFF MULTI-PROCESSING FOR SMALLER PROBLEMS WITHOUT GIVING A MESSAGE
@@ -27,13 +27,22 @@ def HighOrderMeshTet_SEMISTABLE(C,mesh,Decimals=10,Zerofy=True,Parallel=False,nC
         Parallel = False
         nCPU = 1
 
-    eps = FeketePointsTet(C)
+    if not equally_spaced:
+        eps = FeketePointsTet(C)
+        # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
+        Neval = np.zeros((4,eps.shape[0]),dtype=np.float64)
+        hpBases = Tet.hpNodal.hpBases
+        for i in range(4,eps.shape[0]):
+            Neval[:,i] = hpBases(0,eps[i,0],eps[i,1],eps[i,2],Transform=1,EvalOpt=1)[0]
+    else:
+        from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTet
+        eps =  EquallySpacedPointsTet(C)
+        # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
+        hpBases = Tet.hpNodal.hpBases
+        Neval = np.zeros((4,eps.shape[0]),dtype=np.float64)
+        for i in range(4,eps.shape[0]):
+            Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],eps[i,2],Transform=1,EvalOpt=1,EquallySpacedPoints=True)[0]
 
-    # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
-    Neval = np.zeros((4,eps.shape[0]),dtype=np.float64)
-    hpBases = Tet.hpNodal.hpBases
-    for i in range(4,eps.shape[0]):
-        Neval[:,i] = hpBases(0,eps[i,0],eps[i,1],eps[i,2],Transform=1,EvalOpt=1)[0]
     # THIS IS NECESSARY FOR REMOVING DUPLICATES
     makezero(Neval, tol=1e-12)
 
@@ -47,11 +56,6 @@ def HighOrderMeshTet_SEMISTABLE(C,mesh,Decimals=10,Zerofy=True,Parallel=False,nC
     iesize = np.int64(C*(C-1)*(C-2)/6. + 6.*C + 2*C*(C-1))
     repoints = np.zeros((mesh.points.shape[0]+iesize*mesh.elements.shape[0],3),dtype=np.float64)
     repoints[:mesh.points.shape[0],:]=mesh.points
-
-    # from scipy.io import loadmat
-    # dd = loadmat("/home/roman/linearP2Mesh.mat")
-    # ddd = dd['meshNew'][0,0]
-    # repoints = np.ascontiguousarray(ddd[1])
 
     telements = time()
 

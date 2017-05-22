@@ -16,11 +16,11 @@ def ElementLoopHex(elem,elements,points,MeshType,eps,Neval):
     return xycoord_higher
 
 
-def HighOrderMeshHex(C,mesh,Decimals=10,Zerofy=True,Parallel=False,nCPU=1,ComputeAll=True):
+def HighOrderMeshHex(C, mesh, Decimals=10, equally_spaced=False, Zerofy=True, Parallel=False, nCPU=1, ComputeAll=True):
 
-    from Florence.FunctionSpace import Hex
-    from Florence.QuadratureRules import FeketePointsTet
+    from Florence.FunctionSpace import Hex, HexES
     from Florence.QuadratureRules import GaussLobattoPointsHex
+    from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints
     from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
 
     
@@ -29,18 +29,23 @@ def HighOrderMeshHex(C,mesh,Decimals=10,Zerofy=True,Parallel=False,nCPU=1,Comput
         Parallel = False
         nCPU = 1
 
-    eps = GaussLobattoPointsHex(C)
+    if not equally_spaced:
+        eps = GaussLobattoPointsHex(C)
+        # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
+        Neval = np.zeros((8,eps.shape[0]),dtype=np.float64)
+        hpBases = Hex.LagrangeGaussLobatto
+        for i in range(8,eps.shape[0]):
+            Neval[:,i] = hpBases(0,eps[i,0],eps[i,1],eps[i,2])[:,0]
+    else:
+        eps = EquallySpacedPoints(4,C)
+        # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
+        Neval = np.zeros((8,eps.shape[0]),dtype=np.float64)
+        hpBases = HexES.Lagrange
+        for i in range(8,eps.shape[0]):
+            Neval[:,i] = hpBases(0,eps[i,0],eps[i,1],eps[i,2])[:,0]
 
-    # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
-    Neval = np.zeros((8,eps.shape[0]),dtype=np.float64)
-    hpBases = Hex.LagrangeGaussLobatto
-    for i in range(8,eps.shape[0]):
-        # print hpBases(0,eps[i,0],eps[i,1],eps[i,2]).shape
-        Neval[:,i] = hpBases(0,eps[i,0],eps[i,1],eps[i,2])[:,0]
     # THIS IS NECESSARY FOR REMOVING DUPLICATES
     makezero(Neval, tol=1e-12)
-    # print Neval
-    # exit()
 
     nodeperelem = mesh.elements.shape[1]
     renodeperelem = int((C+2)**3)

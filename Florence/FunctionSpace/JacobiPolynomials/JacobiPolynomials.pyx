@@ -8,7 +8,7 @@ from cython cimport double, sizeof, boundscheck, wraparound
 #             const double a, const double b, const unsigned short opt, double *dP)
 
 
-cdef void jacobi(const unsigned short n, const double xi, const double a, const double b, double *P) nogil:
+cdef inline void jacobi(const unsigned short n, const double xi, const double a, const double b, double *P) nogil:
     cdef double a1n,a2n,a3n,a4n;
     cdef unsigned short p;
 
@@ -25,7 +25,7 @@ cdef void jacobi(const unsigned short n, const double xi, const double a, const 
             P[p+1] = ((a2n+a3n*xi)*P[p]-a4n*P[p-1])/a1n
 
 
-cdef void diffjacobi(const unsigned short n, const double xi, const double a, const double b, const unsigned short opt, double *dP) nogil:
+cdef inline void diffjacobi(const unsigned short n, const double xi, const double a, const double b, const unsigned short opt, double *dP) nogil:
     cdef unsigned short p
     cdef double *P = <double*>malloc( (n+1)*sizeof(double))
     if opt==1:
@@ -107,7 +107,7 @@ def NormalisedJacobi1D(int C, double x):
 
 @boundscheck(False)
 def NormalisedJacobi2D(int C, x):
-    """Computes the ortogonal base of 2D polynomials of degree less 
+    """Computes the orthogonal base of 2D polynomials of degree less than
         or equal to C+1 at the point x=(r,s) in [-1,1]**2 (i.e. on the reference quad)"""
 
 
@@ -148,7 +148,7 @@ def NormalisedJacobi2D(int C, x):
 
 
 def NormalisedJacobiTri(int C, x):   
-    """Computes the ortogonal base of 2D polynomials of degree less 
+    """Computes the orthogonal base of 2D polynomials of degree less than
         or equal to n at the point x=(xi,eta) in the reference triangle"""
 
     cdef:
@@ -169,7 +169,7 @@ def NormalisedJacobiTri(int C, x):
 
 @boundscheck(False)
 def GradNormalisedJacobiTri(int C,x, EvalOpt=0):
-    """Computes the ortogonal base of 2D polynomials of degree less 
+    """Computes the orthogonal base of 2D polynomials of degree less than
         or equal to n at the point x=(r,s) in [-1,1]**2"""
     
     cdef:
@@ -248,7 +248,7 @@ def GradNormalisedJacobiTri(int C,x, EvalOpt=0):
 @boundscheck(False)
 def NormalisedJacobi3D(int C, x):
 
-    """Computes the ortogonal base of 3D polynomials of degree less 
+    """Computes the orthogonal base of 3D polynomials of degree less than
         or equal to n at the point x=(r,s,t) in [-1,1]**3
     """
 
@@ -296,7 +296,7 @@ def NormalisedJacobi3D(int C, x):
 
 
 def NormalisedJacobiTet(int C,x):
-    """Computes the ortogonal base of 3D polynomials of degree less 
+    """Computes the orthogonal base of 3D polynomials of degree less than
         or equal to n at the point x=(xi,eta,zeta) in the reference tetrahedra"""
 
     cdef:
@@ -322,7 +322,7 @@ def NormalisedJacobiTet(int C,x):
 
 @boundscheck(False)
 def GradNormalisedJacobiTet(int C,x,EvalOpt=0):
-    """Computes the ortogonal base of 3D polynomials of degree less 
+    """Computes the orthogonal base of 3D polynomials of degree less than
         or equal to n at the point x=(r,s,t) in [-1,1]**3"""
 
     cdef:

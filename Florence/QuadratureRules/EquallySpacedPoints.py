@@ -29,6 +29,7 @@ def EquallySpacedPoints(ndim=2,C=0):
         node_aranger = NodeArrangementHex(C)[2]
         return points[node_aranger,:]
 
+
 def EquallySpacedPointsTri(C):
     
     h0 = 2./(C+1)
@@ -46,3 +47,64 @@ def EquallySpacedPointsTri(C):
             nodes = np.concatenate((nodes,[[-1.+i*h0,-1.+(j+1.)*h0]]),axis=0)
 
     return nodes
+
+
+def EquallySpacedPointsTet(C, coordinates=None):
+    """
+        coordinates:            [ndarray] vertices of a tetrahedron
+    """
+
+    if coordinates is not None:
+        xv = coordinates
+    else:
+        xv = np.array([
+            [-1.,-1.,-1.],
+            [ 1.,-1.,-1.],
+            [-1., 1.,-1.],
+            [-1.,-1., 1.],
+            ])
+
+    if C==0:
+        return xv
+
+    n = C+1
+    p = 0
+
+    nsize = int((n+1)*(n+2)*(n+3)/6)
+    # xg = np.zeros((nsize,3))
+
+    # for i in range ( 0, n + 1 ):
+    #     for j in range ( 0, n + 1 - i ):
+    #         for k in range ( 0, n + 1 - i - j ):
+    #             l = n - i - j - k
+    #             xg[p,0] = (i * xv[0,0] + j * xv[1,0] + k * xv[2,0] + l * xv[3,0]) / n 
+    #             xg[p,1] = (i * xv[0,1] + j * xv[1,1] + k * xv[2,1] + l * xv[3,1]) / n 
+    #             xg[p,2] = (i * xv[0,2] + j * xv[1,2] + k * xv[2,2] + l * xv[3,2]) / n 
+    #             # xg[p] = (i * xv[0] + j * xv[1] + k * xv[2] + l * xv[3]) / n
+    #             p = p + 1
+
+    xg = np.empty((nsize,4))
+    for i in range ( 0, n + 1 ):
+        for j in range ( 0, n + 1 - i ):
+            for k in range ( 0, n + 1 - i - j ):
+                l = n - i - j - k
+                xg[p,0] = i
+                xg[p,1] = j
+                xg[p,2] = k
+                xg[p,3] = l
+                p = p + 1
+
+    xg = (xg[:,:,None] * xv).sum(1) / n
+
+    # Sort accordingly
+    xg = np.flipud(xg)
+    msize = int((n)*(n+1)*(n+2)/6)
+    tsize = int((n)*(n+1)/2)
+    ind_vertices = [0,msize,msize+tsize,nsize-1]
+    xg_vertices = xg[ind_vertices,:]
+    xg_non_vertices = np.delete(xg,ind_vertices,axis=0)
+    xg_non_vertices_sort = xg_non_vertices[np.lexsort((xg_non_vertices[:,0], 
+        xg_non_vertices[:,1],xg_non_vertices[:,2])),:]
+    xg_ = np.concatenate((xg_vertices,xg_non_vertices_sort))
+
+    return xg_

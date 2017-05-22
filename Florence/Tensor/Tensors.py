@@ -99,13 +99,13 @@ def in2d(arr1, arr2, axis=1, consider_sort=False):
                 2D array
 
             axis:
-                Axis along which to take unique values, for instance unique 
-                rows (axis=1) or unique columns (axis=0). The axis ordering 
+                Axis along which to np.in1d values, for instance along 
+                rows (axis=1) or along columns (axis=0). The axis ordering 
                 should not be confused with the usual numpy style axis argument, 
-                as here since unique values of a 1D type array is finally computed, 
+                as here since np.in1d values of a 1D type array is finally computed, 
                 numpy style axis hence becomes meaningless. Hence, in this context 
-                axis=0 implies finding unique rows of an array (lumping the rows) and 
-                axis=1 implies finding unique columns of an array (lumping the columns)
+                axis=0 implies finding intersection rows of an array (lumping the rows) and 
+                axis=1 implies finding intersection columns of an array (lumping the columns)
 
             consider_sort:
                 Does permutation of the values in row/column matter. Two rows/columns
@@ -150,13 +150,13 @@ def intersect2d(arr1, arr2,axis=1, consider_sort=False):
                 2D array
 
             axis:
-                Axis along which to take unique values, for instance unique 
-                rows (axis=1) or unique columns (axis=0). The axis ordering 
+                Axis along which to take intersect1d values, for instance along 
+                rows (axis=1) or along columns (axis=0). The axis ordering 
                 should not be confused with the usual numpy style axis argument, 
-                as here since unique values of a 1D type array is finally computed, 
+                as here since intersect1d values of a 1D type array is finally computed, 
                 numpy style axis hence becomes meaningless. Hence, in this context 
-                axis=0 implies finding unique rows of an array (lumping the rows) and 
-                axis=1 implies finding unique columns of an array (lumping the columns)
+                axis=0 implies finding intersection rows of an array (lumping the rows) and 
+                axis=1 implies finding intersection columns of an array (lumping the columns)
 
             consider_sort:
                 Does permutation of the values in row/column matter. Two rows/columns
