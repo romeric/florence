@@ -4,5 +4,4 @@ cython
 numpy>=1.8
 scipy
 scikit-umfpack
-meshpy
-matplotlib
+pyamg
