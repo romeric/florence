@@ -31,7 +31,7 @@ NUMPY_INCLUDE_PATH = /usr/local/lib/python2.7/dist-packages/numpy/core/include
 
 ifeq ($(findstring g++,$(CXX)),g++)
 ifneq ($(findstring clang++,$(CXX)),clang++)
-CXXFLAGS += -Wno-cpp -Wno-unused-function -Wno-maybe-uninitialized
+CXXFLAGS += -Wno-cpp -Wno-unused-function -Wno-maybe-uninitialized -fabi-version=6
 CXXFLAGS += -march=native -ffast-math -fwrapv -funroll-loops -finline-functions -finline-limit=$(INLINE_THRESHOLD) -ffp-contract=fast 
 else
 CXXFLAGS += -Wno-uninitialized -Wno-missing-braces -Wno-#warnings

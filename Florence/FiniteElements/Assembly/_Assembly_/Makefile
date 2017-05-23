@@ -46,7 +46,7 @@ GEO_INC = ../../../VariationalPrinciple/_GeometricStiffness_/
 
 ifeq ($(findstring g++,$(CXX)),g++)
 ifneq ($(findstring clang++,$(CXX)),clang++)
-CXXFLAGS += -Wno-cpp -Wno-unused-function -Wno-maybe-uninitialized
+CXXFLAGS += -Wno-cpp -Wno-unused-function -Wno-maybe-uninitialized -fabi-version=6
 CXXFLAGS += -march=native -ffast-math -fwrapv -funroll-loops -finline-functions -finline-limit=$(INLINE_THRESHOLD) -ffp-contract=fast 
 else
 CXXFLAGS += -Wno-uninitialized -Wno-missing-braces -Wno-#warnings
