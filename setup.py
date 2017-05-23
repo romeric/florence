@@ -175,7 +175,7 @@ class FlorenceSetup(object):
         if self.blas_ld_path == None:
             self.blas_version = "blas"
             self.blas_ld_path = "/usr/lib"
-            self.blas_ld_path = "/usr/include/"
+            self.blas_include_path = "/usr/include/"
 
 
     def SetCompiler(self, _fc_compiler=None, _cc_compiler=None, _cxx_compiler=None):
@@ -199,12 +199,20 @@ class FlorenceSetup(object):
 
     def SetCompilerArgs(self):
         # Generic compiler arguments
+        print(self.python_interpreter)
+        print(self.python_include_path)
+        print(self.numpy_include_path)
+        print(self.fastor_include_path)
+        print(self.blas_version)
+        print(self.blas_include_path)
+        print(self.blas_ld_path)
+        print(self.extension_postfix)
         self.compiler_args = "PYTHON_VERSION=" + self.python_interpreter + " PYTHON_INCLUDE_PATH=" + \
             self.python_include_path + " PYTHON_LD_PATH=" + self.python_ld_path + \
             " NUMPY_INCLUDE_PATH=" + self.numpy_include_path + \
             " FASTOR_INCLUDE_PATH=" + self.fastor_include_path +\
             " BLAS_VERSION=" + self.blas_version + " BLAS_INCLUDE_PATH="+ self.blas_include_path + \
-            " BLAS_LD_PATH=" + self.blas_ld_path #+ " EXT_POSTFIX=" + self.extension_postfix
+            " BLAS_LD_PATH=" + self.blas_ld_path + " EXT_POSTFIX=" + self.extension_postfix
 
         self.fc_compiler_args = "FC=" + self.fc_compiler + " " + self.compiler_args
         self.cc_compiler_args = "CC=" + self.cc_compiler + " " + self.compiler_args
