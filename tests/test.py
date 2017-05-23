@@ -21,7 +21,7 @@ np.set_printoptions(linewidth=300)
 from Florence import Base as MainData
 # from Florence.FiniteElements.PreProcess import PreProcess
 # from Florence.FiniteElements.Solvers.Solver import *
-from Florence.FiniteElements.PostProcess import *
+from Florence.PostProcessing import PostProcess
 from Florence import *
 
 

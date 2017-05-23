@@ -21,7 +21,7 @@ before_install:
   # Install BLAS libraries
   - echo -ne '\n' | sudo apt-get install gfortran libblas-dev liblapack-dev libatlas-base-dev libsuitesparse-dev
   # pypi packages - install before installing PostMesh
-  - cd ~
+  - cd $FLORENCEPATH
   - travis_wait 50 pip install -r "requirements.txt"
   # Install Eigen
   - cd ~
