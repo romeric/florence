@@ -19,7 +19,7 @@ before_install:
   - echo $FLORENCEPATH
   - sudo apt-get update --fix-missing
   # Install BLAS libraries
-  - echo -ne '\n' | sudo apt-get install gfortran libblas-dev liblapack-dev libatlas-base-dev libsuitesparse-dev
+  - echo -ne '\n' | sudo apt-get install gfortran libblas-dev liblapack-dev libatlas-base-dev libsuitesparse-dev swig
   # pypi packages - install before installing PostMesh
   - cd $FLORENCEPATH
   - travis_wait 50 pip install -r "requirements.txt"
