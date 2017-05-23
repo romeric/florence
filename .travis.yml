@@ -20,7 +20,9 @@ before_install:
   - sudo apt-get update --fix-missing
   # Install BLAS libraries
   - echo -ne '\n' | sudo apt-get install gfortran libblas-dev liblapack-dev libatlas-base-dev libsuitesparse-dev
+  # pypi packages - install before installing PostMesh
   - cd ~
+  - travis_wait 50 pip install -r "requirements.txt"
   # Install Eigen
   - cd ~
   - wget http://bitbucket.org/eigen/eigen/get/3.3.3.tar.bz2
@@ -38,10 +40,6 @@ before_install:
   # Fastor
   - git clone https://github.com/romeric/Fastor
   - sudo mv Fastor /usr/local/include/Fastor/
-  # pypi packages
-  - cd ~
-  # - echo -ne '\n' | sudo apt-get install python-numpy python-scipy
-  - travis_wait 50 pip install -r "requirements.txt"
   # update the cache
   - sudo ldconfig
 
