@@ -9,14 +9,14 @@ REMOVE = rm -rf
 MOVE = mv
 ENTER = cd
 
-FASTOR_INCLUDE_PATH=
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Linux)
-    FASTOR_INCLUDE_PATH +=/home/roman/Dropbox/Fastor
-endif
-ifeq ($(UNAME_S),Darwin)
-    FASTOR_INCLUDE_PATH +=/Users/romanpoya/Dropbox/Fastor
-endif
+# FASTOR_INCLUDE_PATH=
+# UNAME_S := $(shell uname -s)
+# ifeq ($(UNAME_S),Linux)
+#     FASTOR_INCLUDE_PATH +=/home/roman/Dropbox/Fastor
+# endif
+# ifeq ($(UNAME_S),Darwin)
+#     FASTOR_INCLUDE_PATH +=/Users/romanpoya/Dropbox/Fastor
+# endif
 
 # ***NOTE***: For python compatibility do NOT supply FASTOR_USE_BREAKING_PERMUTATION
 FASTOR_OPTFLAGS = -DFASTOR_NO_ALIAS -DFASTOR_USE_VECTORISED_EXPR_ASSIGN -DCONTRACT_OPT=2 -DFASTOR_NO_STATIC_WARNING

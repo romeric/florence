@@ -1,5 +1,5 @@
 
-dist: trusty
+dist: xenial
 
 sudo: required
 
@@ -21,24 +21,25 @@ before_install:
   # Install BLAS libraries
   - echo -ne '\n' | sudo apt-get install gfortran libblas-dev liblapack-dev libatlas-base-dev libsuitesparse-dev
   - cd ~
-  # Install OpenCascade
-  - OCETAG="OCE-0.15" 
-  - OCEMAKEPATH="oce/build"
-  # Install all OCC dependencies
-  - sudo apt-get install -fy cmake libx11-dev mesa-common-dev freeglut3-dev libfreetype6-dev libc6-dev libstdc++6 
-  - sudo apt-get install libstdc++-4.8-dev -fy build-essential gcc g++ libftgl-dev xorg-dev tcl-dev tk-dev swig
-  - git clone --branch $OCETAG https://github.com/tpaviot/oce.git
-  - mkdir $OCEMAKEPATH && cd $OCEMAKEPATH
-  - cmake ..
-  - make '-j'$(nproc) 
-  - sudo make install/strip
-  # Eigen install
+  # Install Eigen
   - cd ~
-  - wget http://bitbucket.org/eigen/eigen/get/3.2.7.tar.bz2
-  - tar -xvf 3.2.7.tar.bz2
-  - sudo mv eigen-eigen-b30b87236a1b /usr/local/include/eigen/ 
+  - wget http://bitbucket.org/eigen/eigen/get/3.3.3.tar.bz2
+  - tar -xvf 3.3.3.tar.bz2
+  - sudo mv eigen-eigen-67e894c6cd8f /usr/local/include/eigen/ 
+  # Install OpenCascade
+  - echo -ne '\n' | sudo apt-get install liboce-*
+  # PostMesh
+  - cd ~
+  - git clone https://github.com/romeric/PostMesh
+  - cd PostMesh/PostMeshPy
+  - python setup.py build_ext && python setup.py bdist_wheel
+  - cd .. && pip install PostMeshPy/dist/*.whl
+  - cd .. && rm -rf PostMesh
+  # Fastor
+  - git clone https://github.com/romeric/Fastor
+  - sudo mv Fastor /usr/local/include/Fastor/
   # pypi packages
-  - cd $FLORENCEPATH
+  - cd ~
   # - echo -ne '\n' | sudo apt-get install python-numpy python-scipy
   - travis_wait 50 pip install -r "requirements.txt"
   # update the cache

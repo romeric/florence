@@ -29,6 +29,12 @@ class FlorenceSetup(object):
     numpy_version = None
     numpy_include_path = None
 
+    fastor_include_path = None
+
+    blas_version = None
+    blas_include_path = None
+    blas_ld_path = None
+
     fc_compiler = None
     cc_compiler = None
     cxx_compiler = None
@@ -37,10 +43,6 @@ class FlorenceSetup(object):
     fc_compiler_args = None
     cc_compiler_args = None
     cxx_compiler_args = None
-
-    blas_version = None
-    blas_include_path = None
-    blas_ld_path = None
 
     extension_paths = None
     extension_postfix = None
@@ -54,6 +56,8 @@ class FlorenceSetup(object):
         self.GetPythonPath()
         # Get numpy version and paths to header
         self.GetNumPyPath()
+        # Get Fastor path
+        self.GetFastorPath()
         # Get BLAS version and paths
         self.GetBLAS(_blas)
         # Set C/Fortran/C++ compiler
@@ -119,6 +123,18 @@ class FlorenceSetup(object):
         self.numpy_include_path = np.get_include()
 
 
+    def GetFastorPath(self):
+        if os.path.isdir("/usr/local/include/Fastor"):
+            self.fastor_include_path = "/usr/local/include/Fastor"
+        else:
+            # Local copies
+            if "darwin" in self._os:
+                self.fastor_include_path = "/Users/romanpoya/Dropbox/Fastor"
+            else:
+                self.fastor_include_path = "/home/roman/Dropbox/Fastor"
+
+
+
     def GetBLAS(self, _blas=None):
 
         if _blas is not None:
@@ -155,6 +171,12 @@ class FlorenceSetup(object):
                 if found_blas:
                     break
 
+        # Fall back to reference BLAS if OpenBLAS is not found
+        if self.blas_ld_path == None:
+            self.blas_version = "blas"
+            self.blas_ld_path = "/usr/lib"
+            self.blas_ld_path = "/usr/include/"
+
 
     def SetCompiler(self, _fc_compiler=None, _cc_compiler=None, _cxx_compiler=None):
 
@@ -180,6 +202,7 @@ class FlorenceSetup(object):
         self.compiler_args = "PYTHON_VERSION=" + self.python_interpreter + " PYTHON_INCLUDE_PATH=" + \
             self.python_include_path + " PYTHON_LD_PATH=" + self.python_ld_path + \
             " NUMPY_INCLUDE_PATH=" + self.numpy_include_path + \
+            " FASTOR_INCLUDE_PATH=" + self.fastor_include_path +\
             " BLAS_VERSION=" + self.blas_version + " BLAS_INCLUDE_PATH="+ self.blas_include_path + \
             " BLAS_LD_PATH=" + self.blas_ld_path + " EXT_POSTFIX=" + self.extension_postfix
 
