@@ -46,7 +46,7 @@ before_install:
 
 install:
   # Setup florence - build interfaces
-  - cd $FLORENCEPATH; python setup.py
+  - cd $FLORENCEPATH; python setup.py build
 
 script:
   # Run florence test suite
