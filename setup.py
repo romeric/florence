@@ -204,7 +204,7 @@ class FlorenceSetup(object):
             " NUMPY_INCLUDE_PATH=" + self.numpy_include_path + \
             " FASTOR_INCLUDE_PATH=" + self.fastor_include_path +\
             " BLAS_VERSION=" + self.blas_version + " BLAS_INCLUDE_PATH="+ self.blas_include_path + \
-            " BLAS_LD_PATH=" + self.blas_ld_path + " EXT_POSTFIX=" + self.extension_postfix
+            " BLAS_LD_PATH=" + self.blas_ld_path #+ " EXT_POSTFIX=" + self.extension_postfix
 
         self.fc_compiler_args = "FC=" + self.fc_compiler + " " + self.compiler_args
         self.cc_compiler_args = "CC=" + self.cc_compiler + " " + self.compiler_args
