@@ -44,6 +44,10 @@ class FlorenceSetup(object):
     cc_compiler_args = None
     cxx_compiler_args = None
 
+    fc_version = None
+    cc_version = None
+    cxx_version = None
+
     extension_paths = None
     extension_postfix = None
 
@@ -198,21 +202,20 @@ class FlorenceSetup(object):
 
 
     def SetCompilerArgs(self):
+
+        if "darwin" in self._os:
+            self.cxx_version = "-std=c++14"
+        else:
+            self.cxx_version = "-std=c++11"
+
         # Generic compiler arguments
-        print(self.python_interpreter)
-        print(self.python_include_path)
-        print(self.numpy_include_path)
-        print(self.fastor_include_path)
-        print(self.blas_version)
-        print(self.blas_include_path)
-        print(self.blas_ld_path)
-        print(self.extension_postfix)
         self.compiler_args = "PYTHON_VERSION=" + self.python_interpreter + " PYTHON_INCLUDE_PATH=" + \
             self.python_include_path + " PYTHON_LD_PATH=" + self.python_ld_path + \
             " NUMPY_INCLUDE_PATH=" + self.numpy_include_path + \
             " FASTOR_INCLUDE_PATH=" + self.fastor_include_path +\
             " BLAS_VERSION=" + self.blas_version + " BLAS_INCLUDE_PATH="+ self.blas_include_path + \
-            " BLAS_LD_PATH=" + self.blas_ld_path + " EXT_POSTFIX=" + self.extension_postfix
+            " BLAS_LD_PATH=" + self.blas_ld_path + " EXT_POSTFIX=" + self.extension_postfix +\
+            " CXXSTD=" + self.cxx_version
 
         self.fc_compiler_args = "FC=" + self.fc_compiler + " " + self.compiler_args
         self.cc_compiler_args = "CC=" + self.cc_compiler + " " + self.compiler_args
