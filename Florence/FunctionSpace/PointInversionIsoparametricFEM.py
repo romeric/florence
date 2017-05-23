@@ -12,7 +12,7 @@ def PointInversionIsoparametricFEM(element_type, C, LagrangeElemCoords, point, e
     """
 
 
-    from Florence.FunctionSpace import Tri, Tet, Quad, Hex
+    from Florence.FunctionSpace import Tri, Tet, Quad, QuadES, Hex, HexES
 
     # Initial guess
     p_isoparametric = np.zeros(LagrangeElemCoords.shape[1])
@@ -21,15 +21,24 @@ def PointInversionIsoparametricFEM(element_type, C, LagrangeElemCoords, point, e
 
         # Using the current iterative solution of isoparametric coordinate evaluate bases and gradient of bases
         if element_type == "tet":
-            Neval, gradient = Tet.hpNodal.hpBases(C,p_isoparametric[0],p_isoparametric[1],p_isoparametric[2],True)
+            Neval, gradient = Tet.hpNodal.hpBases(C,p_isoparametric[0],p_isoparametric[1],
+                p_isoparametric[2],True, 1, equally_spaced=equally_spaced)
         elif element_type == "hex":
-            Neval = Hex.LagrangeGaussLobatto(C,p_isoparametric[0],p_isoparametric[1],p_isoparametric[2]).flatten()
-            gradient = Hex.GradLagrangeGaussLobatto(C,p_isoparametric[0],p_isoparametric[1],p_isoparametric[2])
+            if not equally_spaced:
+                Neval = Hex.LagrangeGaussLobatto(C,p_isoparametric[0],p_isoparametric[1],p_isoparametric[2]).flatten()
+                gradient = Hex.GradLagrangeGaussLobatto(C,p_isoparametric[0],p_isoparametric[1],p_isoparametric[2])
+            else:
+                Neval = HexES.Lagrange(C,p_isoparametric[0],p_isoparametric[1],p_isoparametric[2]).flatten()
+                gradient = HexES.GradLagrange(C,p_isoparametric[0],p_isoparametric[1],p_isoparametric[2])
         elif element_type == "tri":
-            Neval, gradient = Tri.hpNodal.hpBases(C,p_isoparametric[0],p_isoparametric[1],True,1)
+            Neval, gradient = Tri.hpNodal.hpBases(C,p_isoparametric[0],p_isoparametric[1],True,1, equally_spaced=equally_spaced)
         elif element_type == "quad":
-            Neval = Quad.LagrangeGaussLobatto(C,p_isoparametric[0],p_isoparametric[1]).flatten()
-            gradient = Quad.GradLagrangeGaussLobatto(C,p_isoparametric[0],p_isoparametric[1])
+            if not equally_spaced:
+                Neval = Quad.LagrangeGaussLobatto(C,p_isoparametric[0],p_isoparametric[1]).flatten()
+                gradient = Quad.GradLagrangeGaussLobatto(C,p_isoparametric[0],p_isoparametric[1])
+            else:
+                Neval = QuadES.Lagrange(C,p_isoparametric[0],p_isoparametric[1]).flatten()
+                gradient = QuadES.GradLagrange(C,p_isoparametric[0],p_isoparametric[1])                
 
         # interp_point = np.dot(Neval,LagrangeElemCoords)
         # residual = point - interp_point

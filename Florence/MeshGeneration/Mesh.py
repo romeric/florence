@@ -1371,8 +1371,48 @@ class Mesh(object):
         return median, bases_for_middle_point
 
 
-    def FindElementContainingPoint(self):
-        pass
+    def FindElementContainingPoint(self, point, algorithm="fem"):
+        """Find which element does a point lie in using specificed algorithm.
+            Choosing 'fem' algorithm finds a point using a point inversion technique
+        """
+
+        self.__do_essential_memebers_exist__()
+        C = self.InferPolynomialDegree() - 1
+
+        ndim = self.InferSpatialDimension()
+        assert len(point) == ndim
+
+        if algorithm == "fem":
+
+            from Florence.FunctionSpace import PointInversionIsoparametricFEM
+
+            candidate_element, candidate_piso = None, None
+
+            if ndim==3:
+                for i in range(self.nelem):
+                    coord = self.points[self.elements[i,:],:]
+                    p_iso = PointInversionIsoparametricFEM(self.element_type, C, coord, point)
+                    if p_iso[0] >= -1. and p_iso[0] <=1. and \
+                        p_iso[1] >= -1. and p_iso[1] <=1. and \
+                            p_iso[2] >= -1. and p_iso[2] <=1. :
+                        candidate_element, candidate_piso = i, p_iso
+                        break
+            elif ndim==2:
+                for i in range(self.nelem):
+                    coord = self.points[self.elements[i,:],:]
+                    p_iso = PointInversionIsoparametricFEM(self.element_type, C, coord, point)
+                    if p_iso[0] >= -1. and p_iso[0] <=1. and \
+                        p_iso[1] >= -1. and p_iso[1] <=1.:
+                        candidate_element, candidate_piso = i, p_iso
+                        break
+
+            if candidate_element == None:
+                raise RuntimeError("Could not find element containing the point")
+
+            return candidate_element, candidate_piso
+
+        else:
+            raise NotImplementedError("Not implemented yet")
 
 
     def LargestSegment(self, smallest_element=True, nsamples=50, 
