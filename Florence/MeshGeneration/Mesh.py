@@ -956,6 +956,8 @@ class Mesh(object):
             del kwargs['C']
 
         # DO NOT COMPUTE IF ALREADY COMPUTED FOR THE SAME ORDER
+        if self.degree == None:
+            self.degree = self.InferPolynomialDegree()
         if self.degree == p:
             return
 
@@ -964,7 +966,7 @@ class Mesh(object):
         if self.degree != 1 and self.degree - 1 != C:
             if self.element_type == "tri":
                 self.elements = self.elements[:,:3]
-                nmax = self.elements.max() + 1
+                nmax = int(self.elements.max() + 1)
                 self.points = self.points[:nmax,:]
                 if self.edges is not None:
                     self.edges = self.edges[:,:2]
@@ -972,7 +974,7 @@ class Mesh(object):
                     self.all_edges = self.all_edges[:,:2]
             elif self.element_type == "tet":
                 self.elements = self.elements[:,:4]
-                nmax = self.elements.max() + 1
+                nmax = int(self.elements.max() + 1)
                 self.points = self.points[:nmax,:]
                 if self.edges is not None:
                     self.edges = self.edges[:,:2]
@@ -984,7 +986,7 @@ class Mesh(object):
                     self.all_faces = self.all_faces[:,:3]
             elif self.element_type == "quad":
                 self.elements = self.elements[:,:4]
-                nmax = self.elements.max() + 1
+                nmax = int(self.elements.max() + 1)
                 self.points = self.points[:nmax,:]
                 if self.edges is not None:
                     self.edges = self.edges[:,:2]
@@ -992,7 +994,7 @@ class Mesh(object):
                     self.all_edges = self.all_edges[:,:2]
             elif self.element_type == "hex":
                 self.elements = self.elements[:,:8]
-                nmax = self.elements.max() + 1
+                nmax = int(self.elements.max() + 1)
                 self.points = self.points[:nmax,:]
                 if self.edges is not None:
                     self.edges = self.edges[:,:2]
@@ -3304,7 +3306,143 @@ class Mesh(object):
         self.nnode = mesh.points.shape[0]
         
         self.GetBoundaryEdges()
-    
+
+
+
+    def CircularArcPlate(self, side_length=15, radius=10, center=(0.,0.), start_angle=0., end_angle=np.pi/4., ncirc=5, nrad=2, element_type="tri"):
+        """Create an arc hole out-boxed by a squared geometry
+        """
+
+        if np.allclose(radius,0):
+            raise ValueError("Arc radius cannot be zero")
+        if element_type != "tri" and element_type != "quad":
+            raise ValueError("Element type can only be tri or quad")
+
+        if not np.isclose(start_angle,0.) and not \
+            (np.isclose(end_angle,np.pi/4.) or np.isclose(end_angle,np.pi/2.) or np.isclose(end_angle,np.pi)):
+            raise ValueError("Start and end angles should be 0 and 45 degrees respectively")
+
+        self.__reset__()
+
+
+        tmp_end_angle = np.pi/4.
+        t = np.linspace(start_angle,tmp_end_angle,ncirc+1) 
+        x = radius*np.cos(t)[::-1]
+        y = radius*np.sin(t)[::-1]
+
+        points = np.array([x,y]).T
+        points = np.flipud(points)
+
+        plate_wall_ys = np.linspace(0.,side_length,ncirc+1)
+        plate_wall_xs = np.zeros(ncirc+1) + side_length
+        wpoints = np.array([plate_wall_xs,plate_wall_ys]).T
+
+        lengths = np.linalg.norm(wpoints - points, axis=1)
+        xs, ys = np.zeros((ncirc+1,nrad+1)), np.zeros((ncirc+1,nrad+1))
+        for j in range(ncirc+1):
+            xs[j,:] = np.linspace(points[j,0],wpoints[j,0],nrad+1)
+            ys[j,:] = np.linspace(points[j,1],wpoints[j,1],nrad+1)
+        self.points = np.array([xs.ravel(),ys.ravel()]).T
+
+
+        self.elements = np.zeros((nrad*ncirc,4),dtype=np.int64)
+        node_arranger = (nrad+1)*np.arange(ncirc)
+        for i in range(nrad):
+            self.elements[ncirc*i:(i+1)*ncirc,0] = node_arranger + i
+            self.elements[ncirc*i:(i+1)*ncirc,1] = node_arranger + i + 1
+            self.elements[ncirc*i:(i+1)*ncirc,2] = node_arranger + i + nrad + 2
+            self.elements[ncirc*i:(i+1)*ncirc,3] = node_arranger + i + nrad + 1
+
+        self.element_type = "quad"
+        if np.isclose(end_angle,np.pi/2.):
+            # First mirror the points along 45 degree axis
+            new_points   = np.copy(self.points)
+            new_elements = np.copy(self.elements)
+
+            dpoints  = np.zeros((2*new_points.shape[0]-1,2))
+            dpoints[:new_points.shape[0],:] = new_points
+            dpoints[new_points.shape[0]:,0] = new_points[:-1,1][::-1]
+            dpoints[new_points.shape[0]:,1] = new_points[:-1,0][::-1]
+
+            self.points = dpoints
+            self.elements = np.vstack((new_elements,new_elements+new_elements.max()))
+
+
+        if np.isclose(end_angle,np.pi):
+            # First mirror the points along 45 degree axis
+            new_points   = np.copy(self.points)
+            new_elements = np.copy(self.elements)
+
+            dpoints  = np.zeros((2*new_points.shape[0]-1,2))
+            dpoints[:new_points.shape[0],:] = new_points
+            dpoints[new_points.shape[0]:,0] = new_points[:-1,1][::-1]
+            dpoints[new_points.shape[0]:,1] = new_points[:-1,0][::-1]
+
+            self.points = dpoints
+            self.elements = np.vstack((new_elements,new_elements+new_elements.max()))
+
+            # Mirror along Y axis
+            nmesh = deepcopy(self)
+            nmesh.points[:,0] *= -1.
+            self += nmesh 
+
+
+        # If called for stetching purposes its best to keep center at (0,0)
+        self.points[:,0] += center[0]
+        self.points[:,1] += center[1]
+
+        # self.element_type = "quad"
+        self.nelem = self.elements.shape[0]
+        self.nnode = self.points.shape[0]
+        self.GetBoundaryEdges()
+
+        if element_type == "tri":
+            sys.stdout = open(os.devnull, "w")
+            self.ConvertQuadsToTris()
+            sys.stdout = sys.__stdout__ 
+ 
+
+
+    def CircularPlate(self, side_length=30, radius=10, center=(0.,0.), ncirc=5, nrad=5, element_type="tri"):
+        """Create a plate with hole
+        """
+
+        self.CircularArcPlate(side_length=side_length, radius=radius, center=(0,0),
+            start_angle=0., end_angle=np.pi/4., ncirc=ncirc, 
+            nrad=nrad, element_type=element_type)
+
+        # First mirror the points along 45 degree axis
+        new_points   = np.copy(self.points)
+        new_elements = np.copy(self.elements)
+        self.__reset__()
+
+        self.element_type = element_type
+
+        dpoints  = np.zeros((2*new_points.shape[0]-1,2))
+        dpoints[:new_points.shape[0],:] = new_points
+        dpoints[new_points.shape[0]:,0] = new_points[:-1,1][::-1]
+        dpoints[new_points.shape[0]:,1] = new_points[:-1,0][::-1]
+
+        self.points = dpoints
+        self.elements = np.vstack((new_elements,new_elements+new_elements.max()))
+
+        # Mirror along Y axis
+        nmesh = deepcopy(self)
+        nmesh.points[:,0] *= -1.
+        self += nmesh 
+
+        # Mirror along X axis
+        nmesh = deepcopy(self)
+        nmesh.points[:,1] *= -1.
+        self += nmesh 
+
+        # This needs to be done here
+        self.points[:,0] += center[0]
+        self.points[:,1] += center[1]
+
+        self.nelem = self.elements.shape[0]
+        self.nnode = self.points.shape[0]
+        self.GetBoundaryEdges()
 
 
 
@@ -3599,6 +3737,7 @@ class Mesh(object):
 
         nnode = (nlong+1)*mesh.points.shape[0]
         nnode_2D = mesh.points.shape[0]
+        mp = mesh.InferPolynomialDegree()
 
         self.points = np.zeros((nnode,3),dtype=np.float64)
 
@@ -3619,12 +3758,14 @@ class Mesh(object):
 
         nelem= nlong*mesh.nelem
         nelem_2D = mesh.nelem
+        nsize_2d = int((mp+1)**2)
+        nsize = int((mp+1)**3)
         element_aranger = np.arange(nlong)
-        self.elements = np.zeros((nelem,8),dtype=np.int64)
+        self.elements = np.zeros((nelem,nsize),dtype=np.int64)
 
         for i in range(nlong):
-            self.elements[nelem_2D*i:nelem_2D*(i+1),:4] = mesh.elements + i*nnode_2D
-            self.elements[nelem_2D*i:nelem_2D*(i+1),4:] = mesh.elements + (i+1)*nnode_2D
+            self.elements[nelem_2D*i:nelem_2D*(i+1),:nsize_2d] = mesh.elements + i*nnode_2D
+            self.elements[nelem_2D*i:nelem_2D*(i+1),nsize_2d:] = mesh.elements + (i+1)*nnode_2D
 
 
         self.element_type = "hex"
