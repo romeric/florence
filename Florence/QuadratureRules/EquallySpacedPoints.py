@@ -96,6 +96,31 @@ def EquallySpacedPointsTet(C, coordinates=None):
 
     xg = (xg[:,:,None] * xv).sum(1) / n
 
+
+    # xv = np.array([
+    #     [-1.,-1.,-1.],
+    #     [ 1.,-1.,-1.],
+    #     [-1., 1.,-1.],
+    #     [-1.,-1., 1.],
+    #     ])
+
+    # # spanning arrays of a 3d grid according to range(0,n+1)
+    # ii,jj,kk = np.ogrid[:n+1,:n+1,:n+1]
+    # # indices of the triples which fall inside the original for loop
+    # inds = (jj < n+1-ii) & (kk < n+1-ii-jj)
+    # # the [i,j,k] indices of the points that fall inside the for loop, in the same order
+    # combs = np.vstack(np.where(inds)).T
+    # # combs is now an (nsize,3)-shaped array
+
+    # # compute "l" column too
+    # lcol = n - combs.sum(axis=1)
+    # combs = np.hstack((combs,lcol[:,None]))
+    # # combs is now an (nsize,4)-shaped array
+
+    # # all we need to do now is to take the matrix product of combs and xv, divide by n in the end
+    # xg = np.matmul(combs,xv)/n
+
+
     # Sort accordingly
     xg = np.flipud(xg)
     msize = int((n)*(n+1)*(n+2)/6)
