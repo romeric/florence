@@ -19,7 +19,8 @@ def ElementLoopTet(elem,elements,points,MeshType,eps,Neval):
     return xycoord_higher
 
 
-def HighOrderMeshTet_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, Zerofy=True, Parallel=False, nCPU=1, ComputeAll=True):
+def HighOrderMeshTet_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, check_duplicates=False, 
+    Zerofy=True, Parallel=False, nCPU=1, ComputeAll=True):
 
     
     # SWITCH OFF MULTI-PROCESSING FOR SMALLER PROBLEMS WITHOUT GIVING A MESSAGE
@@ -115,17 +116,20 @@ def HighOrderMeshTet_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, Zero
     # SANITY CHECK fOR DUPLICATES
     #---------------------------------------------------------------------#
     # NOTE THAT THIS REMAPS THE ELEMENT CONNECTIVITY FOR THE WHOLE MESH
-    last_shape = repoints.shape[0]
-    deci = int(Decimals)-2
-    if Decimals < 6:
-        deci = Decimals
-    repoints, idx_repoints, inv_repoints = remove_duplicates_2D(repoints, decimals=deci)
-    unique_reelements, inv_reelements = np.unique(reelements,return_inverse=True)
-    unique_reelements = unique_reelements[inv_repoints]
-    reelements = unique_reelements[inv_reelements]
-    reelements = reelements.reshape(mesh.elements.shape[0],renodeperelem) 
-    if last_shape != repoints.shape[0]:
-        warn('Duplicated points generated in high order mesh. Lower the "Decimals". I have fixed it for now')
+    # AND AS A RESULT THE FIRST FEW COLUMNS WOULD NO LONGER CORRESPOND TO
+    # LINEAR CONNECTIVITY
+    if check_duplicates:
+        last_shape = repoints.shape[0]
+        deci = int(Decimals)-2
+        if Decimals < 6:
+            deci = Decimals
+        repoints, idx_repoints, inv_repoints = remove_duplicates_2D(repoints, decimals=deci)
+        unique_reelements, inv_reelements = np.unique(reelements,return_inverse=True)
+        unique_reelements = unique_reelements[inv_repoints]
+        reelements = unique_reelements[inv_reelements]
+        reelements = reelements.reshape(mesh.elements.shape[0],renodeperelem) 
+        if last_shape != repoints.shape[0]:
+            warn('Duplicated points generated in high order mesh. Lower the "Decimals". I have fixed it for now')
     #---------------------------------------------------------------------#
 
     tnodes = time() - tnodes

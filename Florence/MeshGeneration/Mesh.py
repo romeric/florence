@@ -4335,6 +4335,38 @@ class Mesh(object):
         return self.elements.shape[1]
 
 
+    def InferNumberOfNodesPerLinearElement(self, element_type=None):
+        """Infers number of nodes per element. If element_type are 
+            not None then returns the number of nodes required for the given
+            element type"""
+
+        if element_type is None and self.element_type is None:
+            raise ValueError("Did not understand element type")
+        if element_type is None:
+            element_type = self.element_type
+
+        tmp = self.element_type
+        if element_type != self.element_type:
+            self.element_type = element_type
+
+        nodeperelem = None
+        if element_type=="tri":
+            nodeperelem = 3
+        elif element_type=="quad":
+            nodeperelem = 4
+        elif element_type=="tet":
+            nodeperelem = 4
+        elif element_type=="hex":
+            nodeperelem = 8
+        else:
+            raise ValueError("Did not understand element type")
+
+        self.element_type = tmp
+
+        return nodeperelem  
+                
+
+
     def InferElementType(self):
 
         if self.element_type is not None:
@@ -4369,8 +4401,9 @@ class Mesh(object):
         return self.element_type
 
 
-    def GetLinearMesh(self):
+    def GetLinearMesh(self, solution=None, remap=False):
         """Returns the linear mesh from a high order mesh. If mesh is already linear returns the same mesh.
+            Also maps any solution vector/tensor of high order mesh to the linear mesh, if supplied.
             For safety purposes, always makes a copy"""
 
         assert self.elements is not None
@@ -4384,32 +4417,57 @@ class Mesh(object):
 
 
         if self.IsHighOrder is False:
-            return self
+            return deepcopy(self)
         else:
-            lmesh = Mesh()
-            lmesh.element_type = self.element_type
-            lmesh.degree = 1
-            if self.element_type == "tri":
-                lmesh.elements = np.copy(self.elements[:,:3])
-                lmesh.edges = np.copy(self.edges[:,:2])
-                lmesh.nnode = int(np.max(lmesh.elements)+1)
-                lmesh.points = np.copy(self.points[:lmesh.nnode,:])
-            elif self.element_type == "tet":
-                lmesh.elements = np.copy(self.elements[:,:4])
-                lmesh.faces = np.copy(self.faces[:,:3])
-                lmesh.nnode = int(np.max(lmesh.elements)+1)
-                lmesh.points = np.copy(self.points[:lmesh.nnode,:])
-            elif self.element_type == "quad":
-                lmesh.elements = np.copy(self.elements[:,:4])
-                lmesh.edges = np.copy(self.edges[:,:2])
-                lmesh.nnode = int(np.max(lmesh.elements)+1)
-                lmesh.points = np.copy(self.points[:lmesh.nnode,:])
-            elif self.element_type == "hex":
-                lmesh.elements = np.copy(self.elements[:,:8])
-                lmesh.faces = np.copy(self.faces[:,:2])
-                lmesh.nnode = int(np.max(lmesh.elements)+1)
-                lmesh.points = np.copy(self.points[:lmesh.nnode,:])
-            lmesh.nelem = lmesh.elements.shape[0]
+            if not remap:
+                # WORKS ONLY IF THE FIST COLUMNS CORRESPOND TO
+                # LINEAR CONNECTIVITY
+                lmesh = Mesh()
+                lmesh.element_type = self.element_type
+                lmesh.degree = 1
+                if self.element_type == "tri":
+                    lmesh.elements = np.copy(self.elements[:,:3])
+                    lmesh.edges = np.copy(self.edges[:,:2])
+                    lmesh.nnode = int(np.max(lmesh.elements)+1)
+                    lmesh.points = np.copy(self.points[:lmesh.nnode,:])
+                elif self.element_type == "tet":
+                    lmesh.elements = np.copy(self.elements[:,:4])
+                    lmesh.faces = np.copy(self.faces[:,:3])
+                    lmesh.nnode = int(np.max(lmesh.elements)+1)
+                    lmesh.points = np.copy(self.points[:lmesh.nnode,:])
+                elif self.element_type == "quad":
+                    lmesh.elements = np.copy(self.elements[:,:4])
+                    lmesh.edges = np.copy(self.edges[:,:2])
+                    lmesh.nnode = int(np.max(lmesh.elements)+1)
+                    lmesh.points = np.copy(self.points[:lmesh.nnode,:])
+                elif self.element_type == "hex":
+                    lmesh.elements = np.copy(self.elements[:,:8])
+                    lmesh.faces = np.copy(self.faces[:,:4])
+                    lmesh.nnode = int(np.max(lmesh.elements)+1)
+                    lmesh.points = np.copy(self.points[:lmesh.nnode,:])
+                lmesh.nelem = lmesh.elements.shape[0]
+
+                if solution is not None:
+                    solution = solution[np.unique(lmesh.elements),:]
+                    return lmesh, solution
+
+            else:
+                # WORKS FOR ALL CASES BUT REMAPS (NO MAPPING BETWEEN LOW AND HIGH ORDER)
+                nodeperelem = self.InferNumberOfNodesPerLinearElement()
+                lmesh = Mesh()
+                lmesh.element_type = self.element_type
+                lmesh.nelem = self.nelem
+                unnodes, inv = np.unique(self.elements[:,:nodeperelem], return_inverse=True)
+                aranger = np.arange(lmesh.nelem*nodeperelem)
+                lmesh.elements = inv[aranger].reshape(lmesh.nelem,nodeperelem)
+                lmesh.points = self.points[unnodes,:]
+                if lmesh.element_type == "hex" or lmesh.element_type == "tet":
+                    lmesh.GetBoundaryFaces()
+                lmesh.GetBoundaryEdges()
+
+                if solution is not None:
+                    solution = solution[unnodes,:]
+                    return lmesh, solution
 
         return lmesh
 

@@ -80,16 +80,18 @@ class IsotropicElectroMechanics_101(Material):
         D = ElectricDisplacementx.reshape(self.ndim,1)
 
         return 1.0*mu/J*(b - I) + lamb*(J-1)*I + J/eps_1*np.dot(D,D.T)
+        # return 1.0*mu*(b - I)  + 1./eps_1*np.dot(D,D.T)
 
 
     def ElectricDisplacementx(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
-        D = self.legendre_transform.GetElectricDisplacement(self, StrainTensors, ElectricFieldx, elem, gcounter)
+        # D = self.legendre_transform.GetElectricDisplacement(self, StrainTensors, ElectricFieldx, elem, gcounter)
 
-        # eps_1 = self.eps_1
-        # J = StrainTensors['J'][gcounter]
-        # E = ElectricFieldx.reshape(self.ndim,1)
-        # D_exact = eps_1/J*E
-        # # print np.linalg.norm(D - D_exact)
-        # return D_exact
+        eps_1 = self.eps_1
+        J = StrainTensors['J'][gcounter]
+        E = ElectricFieldx.reshape(self.ndim,1)
+        D_exact = eps_1/J*E
+        # print np.linalg.norm(D - D_exact)
+        return D_exact
 
         return D
+
