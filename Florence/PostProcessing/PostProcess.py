@@ -111,7 +111,7 @@ class PostProcess(object):
         return dU
 
 
-    def StressRecovery(self, steps=None):
+    def StressRecovery(self, steps=None, average_derived_quantities=True):
 
         """
             steps:          [list,np.1darray] for which time steps/increments the data should
@@ -144,8 +144,9 @@ class PostProcess(object):
         norder = 2*C
         if norder == 0:
             norder=1
+        # quadrature = QuadratureRule(qtype="gauss", norder=norder, mesh_type=mesh.element_type, optimal=3)
+        # Domain = FunctionSpace(mesh, quadrature, p=C+1)
         Domain = FunctionSpace(mesh, p=C+1, evaluate_at_nodes=True)
-        # w = Domain.AllGauss[:,0]
 
         fem_solver = self.fem_solver
         formulation = self.formulation
@@ -271,30 +272,42 @@ class PostProcess(object):
                                 CauchyStressTensor[elem,counter,:] = material.CauchyStress(StrainTensors,
                                     ElectricDisplacementx[elem,counter,:],elem,counter)
 
+            if average_derived_quantities:
+                for inode in np.unique(elements):
+                    Els, Pos = np.where(elements==inode)
+                    ncommon_nodes = Els.shape[0]
+                    for uelem in range(ncommon_nodes):
+                        MainDict['F'][incr,inode,:,:] += F[Els[uelem],Pos[uelem],:,:]
+                        if formulation.fields == "electro_mechanics":
+                            MainDict['ElectricFieldx'][incr,inode,:] += ElectricFieldx[Els[uelem],Pos[uelem],:]
+                            MainDict['ElectricDisplacementx'][incr,inode,:] += ElectricDisplacementx[Els[uelem],Pos[uelem],:]
+                        MainDict['CauchyStress'][incr,inode,:,:] += CauchyStressTensor[Els[uelem],Pos[uelem],:,:]
 
-            for inode in np.unique(elements):
-                Els, Pos = np.where(elements==inode)
-                ncommon_nodes = Els.shape[0]
-                for uelem in range(ncommon_nodes):
-                    MainDict['F'][incr,inode,:,:] += F[Els[uelem],Pos[uelem],:,:]
+                    # AVERAGE OUT
+                    MainDict['F'][incr,inode,:,:] /= ncommon_nodes
                     if formulation.fields == "electro_mechanics":
-                        MainDict['ElectricFieldx'][incr,inode,:] += ElectricFieldx[Els[uelem],Pos[uelem],:]
-                        MainDict['ElectricDisplacementx'][incr,inode,:] += ElectricDisplacementx[Els[uelem],Pos[uelem],:]
-                    MainDict['CauchyStress'][incr,inode,:,:] += CauchyStressTensor[Els[uelem],Pos[uelem],:,:]
+                        MainDict['ElectricFieldx'][incr,inode,:] /= ncommon_nodes
+                        MainDict['ElectricDisplacementx'][incr,inode,:] /= ncommon_nodes
+                    MainDict['CauchyStress'][incr,inode,:,:] /= ncommon_nodes
 
-                # AVERAGE OUT
-                MainDict['F'][incr,inode,:,:] /= ncommon_nodes
-                if formulation.fields == "electro_mechanics":
-                    MainDict['ElectricFieldx'][incr,inode,:] /= ncommon_nodes
-                    MainDict['ElectricDisplacementx'][incr,inode,:] /= ncommon_nodes
-                MainDict['CauchyStress'][incr,inode,:,:] /= ncommon_nodes
+            else:
+                for inode in np.unique(elements):
+                    Els, Pos = np.where(elements==inode)
+                    ncommon_nodes = Els.shape[0]
+                    uelem = 0
+                    MainDict['F'][incr,inode,:,:] = F[Els[uelem],Pos[uelem],:,:]
+                    if formulation.fields == "electro_mechanics":
+                        MainDict['ElectricFieldx'][incr,inode,:] = ElectricFieldx[Els[uelem],Pos[uelem],:]
+                        MainDict['ElectricDisplacementx'][incr,inode,:] = ElectricDisplacementx[Els[uelem],Pos[uelem],:]
+                    MainDict['CauchyStress'][incr,inode,:,:] = CauchyStressTensor[Els[uelem],Pos[uelem],:,:]
+
 
 
         self.recovered_fields = MainDict
         return
 
 
-    def GetAugmentedSolution(self, steps=None):
+    def GetAugmentedSolution(self, steps=None, average_derived_quantities=True):
         """Computes all recovered variable and puts them in one big nd.array including with primary variables
             The following numbering convention is used for storing variables:
 
@@ -417,7 +430,7 @@ class PostProcess(object):
             return self.sol
 
         # GET RECOVERED VARIABLES ALL VARIABLE CHECKS ARE DONE IN STRESS RECOVERY
-        self.StressRecovery(steps)
+        self.StressRecovery(steps=steps,average_derived_quantities=average_derived_quantities)
 
         ndim = self.formulation.ndim
         fields = self.formulation.fields

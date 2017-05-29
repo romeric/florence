@@ -8,7 +8,8 @@ from Florence.Tensor import itemfreq, makezero, unique2d, remove_duplicates_2D
 #---------------------------------------------------------------------------------------------------------------------------------------#
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
-def HighOrderMeshQuad(C, mesh, Decimals=10, equally_spaced=False, Parallel=False, nCPU=1):
+def HighOrderMeshQuad(C, mesh, Decimals=10, equally_spaced=False, check_duplicates=False,
+    Parallel=False, nCPU=1):
     
     from Florence.FunctionSpace import Quad, QuadES
     from Florence.QuadratureRules import GaussLobattoPointsQuad
@@ -97,17 +98,21 @@ def HighOrderMeshQuad(C, mesh, Decimals=10, equally_spaced=False, Parallel=False
 
     # SANITY CHECK FOR DUPLICATES
     #---------------------------------------------------------------------#
-    # last_shape = repoints.shape[0]
-    # deci = int(Decimals)-2
-    # if Decimals < 6:
-    #     deci = Decimals
-    # repoints, idx_repoints, inv_repoints = remove_duplicates_2D(repoints, decimals=deci)
-    # unique_reelements, inv_reelements = np.unique(reelements,return_inverse=True)
-    # unique_reelements = unique_reelements[inv_repoints]
-    # reelements = unique_reelements[inv_reelements]
-    # reelements = reelements.reshape(mesh.elements.shape[0],renodeperelem) 
-    # if last_shape != repoints.shape[0]:
-    #     warn('Duplicated points generated in high order mesh. Lower the "Decimals". I have fixed it for now')
+    # NOTE THAT THIS REMAPS THE ELEMENT CONNECTIVITY FOR THE WHOLE MESH
+    # AND AS A RESULT THE FIRST FEW COLUMNS WOULD NO LONGER CORRESPOND TO
+    # LINEAR CONNECTIVITY
+    if check_duplicates:
+        last_shape = repoints.shape[0]
+        deci = int(Decimals)-2
+        if Decimals < 6:
+            deci = Decimals
+        repoints, idx_repoints, inv_repoints = remove_duplicates_2D(repoints, decimals=deci)
+        unique_reelements, inv_reelements = np.unique(reelements,return_inverse=True)
+        unique_reelements = unique_reelements[inv_repoints]
+        reelements = unique_reelements[inv_reelements]
+        reelements = reelements.reshape(mesh.elements.shape[0],renodeperelem) 
+        if last_shape != repoints.shape[0]:
+            warn('Duplicated points generated in high order mesh. Lower the "Decimals". I have fixed it for now')
     #---------------------------------------------------------------------#
 
     tnodes = time() - tnodes
