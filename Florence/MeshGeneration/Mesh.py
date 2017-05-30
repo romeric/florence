@@ -2719,15 +2719,15 @@ class Mesh(object):
                 for counter, fields in enumerate(external_fields):
                     Dict['results_'+str(counter)] = fields
             else:
-                raise AssertionError("Fields should be eirther tuple or a dict")
-
-        for key in Dict.keys():
-            if Dict[str(key)] is None:
-                del Dict[str(key)]
+                raise AssertionError("Fields should be either tuple or a dict")
 
         if filename is None:
             pwd = os.path.dirname(os.path.realpath(__file__))
             filename = pwd+'/output.mat'
+        
+        for key in Dict.keys():
+            if Dict[str(key)] is None:
+                del Dict[str(key)]
 
         savemat(filename, Dict, do_compression=True)
 
@@ -3356,30 +3356,35 @@ class Mesh(object):
         self.element_type = "quad"
         if np.isclose(end_angle,np.pi/2.):
             # First mirror the points along 45 degree axis
-            new_points   = np.copy(self.points)
-            new_elements = np.copy(self.elements)
+            # new_points   = np.copy(self.points)
+            # new_elements = np.copy(self.elements)
 
-            dpoints  = np.zeros((2*new_points.shape[0]-1,2))
-            dpoints[:new_points.shape[0],:] = new_points
-            dpoints[new_points.shape[0]:,0] = new_points[:-1,1][::-1]
-            dpoints[new_points.shape[0]:,1] = new_points[:-1,0][::-1]
+            # dpoints  = np.zeros((2*new_points.shape[0]-1,2))
+            # dpoints[:new_points.shape[0],:] = new_points
+            # dpoints[new_points.shape[0]:,0] = new_points[:-1,1][::-1]
+            # dpoints[new_points.shape[0]:,1] = new_points[:-1,0][::-1]
 
-            self.points = dpoints
-            self.elements = np.vstack((new_elements,new_elements+new_elements.max()))
+            # self.points = dpoints
+            # self.elements = np.vstack((new_elements,new_elements+new_elements.max()))
+
+            self.elements = np.fliplr(self.elements)
+            mmesh = deepcopy(self)
+            mmesh.points[:,0] = self.points[:,1][::-1]
+            mmesh.points[:,1] = self.points[:,0][::-1]
+            mmesh.elements = np.fliplr(mmesh.elements)
+            self += mmesh
+            
+
 
 
         if np.isclose(end_angle,np.pi):
             # First mirror the points along 45 degree axis
-            new_points   = np.copy(self.points)
-            new_elements = np.copy(self.elements)
-
-            dpoints  = np.zeros((2*new_points.shape[0]-1,2))
-            dpoints[:new_points.shape[0],:] = new_points
-            dpoints[new_points.shape[0]:,0] = new_points[:-1,1][::-1]
-            dpoints[new_points.shape[0]:,1] = new_points[:-1,0][::-1]
-
-            self.points = dpoints
-            self.elements = np.vstack((new_elements,new_elements+new_elements.max()))
+            self.elements = np.fliplr(self.elements)
+            mmesh = deepcopy(self)
+            mmesh.points[:,0] = self.points[:,1][::-1]
+            mmesh.points[:,1] = self.points[:,0][::-1]
+            mmesh.elements = np.fliplr(mmesh.elements)
+            self += mmesh
 
             # Mirror along Y axis
             nmesh = deepcopy(self)
@@ -3412,19 +3417,26 @@ class Mesh(object):
             nrad=nrad, element_type=element_type)
 
         # First mirror the points along 45 degree axis
-        new_points   = np.copy(self.points)
-        new_elements = np.copy(self.elements)
-        self.__reset__()
+        # new_points   = np.copy(self.points)
+        # new_elements = np.copy(self.elements)
+        # self.__reset__()
 
-        self.element_type = element_type
+        # self.element_type = element_type
 
-        dpoints  = np.zeros((2*new_points.shape[0]-1,2))
-        dpoints[:new_points.shape[0],:] = new_points
-        dpoints[new_points.shape[0]:,0] = new_points[:-1,1][::-1]
-        dpoints[new_points.shape[0]:,1] = new_points[:-1,0][::-1]
+        # dpoints  = np.zeros((2*new_points.shape[0]-1,2))
+        # dpoints[:new_points.shape[0],:] = new_points
+        # dpoints[new_points.shape[0]:,0] = new_points[:-1,1][::-1]
+        # dpoints[new_points.shape[0]:,1] = new_points[:-1,0][::-1]
 
-        self.points = dpoints
-        self.elements = np.vstack((new_elements,new_elements+new_elements.max()))
+        # self.points = dpoints
+        # self.elements = np.vstack((new_elements,new_elements+new_elements.max()))
+
+        self.elements = np.fliplr(self.elements)
+        mmesh = deepcopy(self)
+        mmesh.points[:,0] = self.points[:,1][::-1]
+        mmesh.points[:,1] = self.points[:,0][::-1]
+        mmesh.elements = np.fliplr(mmesh.elements)
+        self += mmesh
 
         # Mirror along Y axis
         nmesh = deepcopy(self)
