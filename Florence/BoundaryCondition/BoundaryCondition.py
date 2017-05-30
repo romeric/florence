@@ -472,7 +472,6 @@ class BoundaryCondition(object):
             # print(Dirichlet)
             # GET DIRICHLET FACES (IF REQUIRED)
             dirichlet_faces = curvilinear_mesh.GetDirichletFaces()
-            # print(dirichlet_faces[:100,:])
 
             # FOR GEOMETRIES CONTAINING PLANAR SURFACES
             planar_mesh_faces = curvilinear_mesh.GetMeshFacesOnPlanarSurfaces()

@@ -314,9 +314,9 @@ class FlorenceSetup(object):
                 ll_material_mech = low_level_material_list[:4]
                 ll_material_electro_mech = low_level_material_list[4:]
                 for material in ll_material_mech:
-                    execute('cd '+_path+' && make ' + self.compiler_args + " ASSEMBLY_NAME=_LowLevelAssemblyDF_"+ material)
+                    execute('cd '+_path+' && make ' + self.compiler_args + " ASSEMBLY_NAME=_LowLevelAssemblyDF_"  + material)
                 for material in ll_material_electro_mech:
-                    execute('cd '+_path+' && make ' + self.compiler_args + " ASSEMBLY_NAME=_LowLevelAssemblyDPF_"+ material)
+                    execute('cd '+_path+' && make ' + self.compiler_args + " ASSEMBLY_NAME=_LowLevelAssemblyDPF_" + material)
 
                 execute('cd '+_path+' && python AOT_Assembler.py clean')
 
