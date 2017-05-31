@@ -1213,10 +1213,11 @@ class PostProcess(object):
             else:
                 PostProcess.CurvilinearPlotHex(self.mesh, self.sol, 
                     QuantityToPlot=self.sol[:,quantity,increment],
-                    interpolation_degree=interpolation_degree, show_plot=show_plot, figure=figure, 
+                    interpolation_degree=interpolation_degree, show_plot=show_plot, figure=figure,
                     plot_points=plot_points, point_radius=point_radius, plot_edges=plot_edges, 
                     colorbar=colorbar, plot_on_faces=False, save=save, filename=filename)
 
+            return
 
 
 
@@ -2730,7 +2731,8 @@ class PostProcess(object):
 
         # MAKE A FIGURE
         if figure is None:
-            figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(800,600))
+            # figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(800,600))
+            figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(0,0,0),size=(800,600))
         figure.scene.disable_render = True
 
         h_points, h_edges, trimesh_h = None, None, None
