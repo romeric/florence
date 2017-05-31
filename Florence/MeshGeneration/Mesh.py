@@ -3901,7 +3901,7 @@ class Mesh(object):
         return unique_elements
 
 
-    def MergeWith(self, mesh):
+    def MergeWith(self, mesh, self_solution=None, other_solution=None):
         """ Merges self with another mesh:
             NOTE: It is the responsibility of the user to ensure that meshes are conforming
         """
@@ -3938,7 +3938,7 @@ class Mesh(object):
         unique_elements, inv_elements = np.unique(elements,return_inverse=True)
         unique_elements = unique_elements[inv_mpoints]
         melements = unique_elements[inv_elements]
-        melements = melements.reshape(nelem,nodeperelem) 
+        melements = melements.reshape(nelem,nodeperelem).astype(np.int64) 
 
 
         self.__reset__()
@@ -3953,6 +3953,17 @@ class Mesh(object):
             self.GetBoundaryEdges()
         elif ndim==2:
             self.GetBoundaryEdges()
+
+        if self_solution is not None and other_solution is not None:
+            if isinstance(self_solution,np.ndarray) and isinstance(other_solution,np.ndarray):
+                if self_solution.ndim == 3 and other_solution.ndim == 3:
+                    solution = np.concatenate((self_solution,other_solution),axis=0)
+                    solution = solution[idx_mpoints,:,:]
+                elif self_solution.ndim == 2 and other_solution.ndim == 2:
+                    solution = np.concatenate((self_solution,other_solution),axis=0)
+                    solution = solution[idx_mpoints,:]
+
+            return solution
 
 
     def Smoothing(self, criteria={'aspect_ratio':3}):
