@@ -3737,6 +3737,7 @@ class Mesh(object):
                 raise NotImplementedError("Extrusion for {} mesh not supported yet".format(self.element_type))
 
             mesh = deepcopy(self)
+            self.__reset__()
 
 
         if mesh.IsHighOrder:
