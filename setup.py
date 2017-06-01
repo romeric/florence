@@ -219,6 +219,17 @@ class FlorenceSetup(object):
         else:
             self.cxx_version = "-std=c++11"
 
+        print(self.python_interpreter)
+        print(self.python_ld_path)
+        print(self.python_include_path)
+        print(self.numpy_include_path)
+        print(self.fastor_include_path)
+        print(self.blas_version)
+        print(self.blas_include_path)
+        print(self.blas_ld_path)
+        print(self.extension_postfix)
+        print(self.cxx_version)
+
         # Generic compiler arguments
         self.compiler_args = "PYTHON_VERSION=" + self.python_interpreter + " PYTHON_INCLUDE_PATH=" + \
             self.python_include_path + " PYTHON_LD_PATH=" + self.python_ld_path + \
