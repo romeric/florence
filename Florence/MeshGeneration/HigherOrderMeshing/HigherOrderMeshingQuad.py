@@ -8,7 +8,7 @@ from Florence.Tensor import itemfreq, makezero, unique2d, remove_duplicates_2D
 #---------------------------------------------------------------------------------------------------------------------------------------#
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
-def HighOrderMeshQuad(C, mesh, Decimals=10, equally_spaced=False, check_duplicates=False,
+def HighOrderMeshQuad(C, mesh, Decimals=10, equally_spaced=False, check_duplicates=True,
     Parallel=False, nCPU=1):
     
     from Florence.FunctionSpace import Quad, QuadES

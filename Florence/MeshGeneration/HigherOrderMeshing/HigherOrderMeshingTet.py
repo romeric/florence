@@ -19,7 +19,7 @@ def ElementLoopTet(elem,elements,points,MeshType,eps,Neval):
     return xycoord_higher
 
 
-def HighOrderMeshTet_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, check_duplicates=False, 
+def HighOrderMeshTet_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, check_duplicates=True, 
     Zerofy=True, Parallel=False, nCPU=1, ComputeAll=True):
 
     
