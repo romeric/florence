@@ -88,6 +88,11 @@ class FlorenceSetup(object):
         py_micro = python_version.micro
         self.python_interpreter  = 'python' + str(py_major) +'.' + str(py_minor)
 
+        with_pymalloc = ""
+        if get_config_var("ABIFLAGS") is not None:
+            with_pymalloc = get_config_var("ABIFLAGS")
+        self.python_interpreter += with_pymalloc
+
         # Get python implementation e.g. CPython, PyPy etc
         self.python_implementation = platform.python_implementation()
 
