@@ -819,6 +819,10 @@ class PostProcess(object):
 
         else:
 
+            increments = range(LoadIncrement)
+            if steps!=None:
+                increments = steps
+
             if configuration == "original":
                 for Increment in increments:
                     for quant in iterator:

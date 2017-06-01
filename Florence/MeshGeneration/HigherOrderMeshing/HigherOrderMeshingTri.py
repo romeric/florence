@@ -18,7 +18,8 @@ def ElementLoopTri(elem,elements,points,MeshType,eps,Neval):
     xycoord_higher = GetInteriorNodesCoordinates(points[elements[elem,:],:],MeshType,elem,eps,Neval)
     return xycoord_higher
 
-def HighOrderMeshTri_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, Parallel=False, nCPU=1, ComputeAll=False):
+def HighOrderMeshTri_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, check_duplicates=True,
+    Parallel=False, nCPU=1, ComputeAll=False):
 
 
     # SWITCH OFF MULTI-PROCESSING FOR SMALLER PROBLEMS WITHOUT GIVING A MESSAGE

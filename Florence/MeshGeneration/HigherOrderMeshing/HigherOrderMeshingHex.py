@@ -16,7 +16,7 @@ def ElementLoopHex(elem,elements,points,MeshType,eps,Neval):
     return xycoord_higher
 
 
-def HighOrderMeshHex(C, mesh, Decimals=10, equally_spaced=False, check_duplicates=False,
+def HighOrderMeshHex(C, mesh, Decimals=10, equally_spaced=False, check_duplicates=True,
     Zerofy=True, Parallel=False, nCPU=1, ComputeAll=True):
 
     from Florence.FunctionSpace import Hex, HexES
