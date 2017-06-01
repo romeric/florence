@@ -120,7 +120,9 @@ class FlorenceSetup(object):
                 self.python_ld_path = get_config_var("LIBDIR")
             except:
                 raise RuntimeError("Could not find libpython")
-                
+        execute("ls " + self.python_ld_path + "/")
+        # exit()
+
 
         # Get postfix for extensions 
         self.extension_postfix = get_config_vars()['SO'][1:]
