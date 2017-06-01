@@ -190,7 +190,6 @@ class LinearSolver(object):
                 # self.solver_subtype = "MUMPS"
                 # print 'Large system of equations. Switching to MUMPS solver'
             elif b.shape[0] > 50000 and self.geometric_discretisation=="hex":
-                print(self.geometric_discretisation)
                 self.solver_type = "multigrid"
                 self.solver_subtype = "amg"
                 print('Large system of equations. Switching to algebraic multigrid solver')

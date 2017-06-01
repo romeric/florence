@@ -116,6 +116,11 @@ class FlorenceSetup(object):
 
         # Get postfix for extensions 
         self.extension_postfix = get_config_vars()['SO'][1:]
+        if self.extension_postfix is None:
+            if "darwin" in self._os:
+                self.extension_postfix = "dylib"
+            else:
+                self.extension_postfix = "so"
 
 
     def GetNumPyPath(self):
@@ -199,6 +204,12 @@ class FlorenceSetup(object):
 
         if self.cxx_compiler is None:
             self.cxx_compiler = get_config_vars()['CXX'].split(' ')[0]
+
+        # Sanity check
+        if self.cc_compiler is None:
+            self.cc_compiler = "gcc"
+        if self.cxx_compiler is None:
+            self.cxx_compiler = "g++"
 
 
     def SetCompilerArgs(self):
