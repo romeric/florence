@@ -26,8 +26,8 @@ from Florence import *
 
 
 
-tick = u'\u2713'.encode('utf8')+' : ' 
-cross = u'\u2717'.encode('utf8')+' : '
+tick  = u'\u2713'.encode('utf8')  + b' : ' 
+cross = u'\u2717'.encode('utf8')  + b' : '
 
 
 class run_tests(object):
