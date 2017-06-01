@@ -3,7 +3,7 @@ import os, platform, sys, subprocess, imp
 from distutils.core import setup
 from distutils.command.clean import clean
 from distutils.extension import Extension
-from distutils.sysconfig import get_config_vars, get_python_inc, get_python_lib
+from distutils.sysconfig import get_config_var, get_config_vars, get_python_inc, get_python_lib
 import fnmatch
 try:
     from Cython.Build import cythonize
@@ -108,11 +108,19 @@ class FlorenceSetup(object):
             for filename in fnmatch.filter(filenames, libpython):
                 self.python_ld_path = os.path.join(root, filename).rsplit(libpython)[0]
                 break
-        if self.python_ld_path == None:
+        if self.python_ld_path is None:
             for root, _, filenames in os.walk('/usr/local/'):
                 for filename in fnmatch.filter(filenames, libpython):
                     self.python_ld_path = os.path.join(root, filename).rsplit(libpython)[0]
                     break
+
+        # Sanity check
+        if self.python_ld_path is None:
+            try:
+                self.python_ld_path = get_config_var("LIBDIR")
+            except:
+                raise RuntimeError("Could not find libpython")
+                
 
         # Get postfix for extensions 
         self.extension_postfix = get_config_vars()['SO'][1:]
