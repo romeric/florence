@@ -29,7 +29,8 @@ class IsotropicElectroMechanics_101(Material):
         # self.has_low_level_dispatcher = False
 
     def KineticMeasures(self,F,ElectricFieldx, elem=0):
-        mu = self.mus[elem]
+        self.mu = self.mus[elem]
+        self.lamb = self.lambs[elem]
         # print(self.mus[elem])
         from Florence.MaterialLibrary.LLDispatch._IsotropicElectroMechanics_101_ import KineticMeasures
         return KineticMeasures(self,np.ascontiguousarray(F), ElectricFieldx)
