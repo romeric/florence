@@ -30,7 +30,7 @@ class FEMSolver(object):
         analysis_type="static", analysis_nature="nonlinear",
         is_geometrically_linearised=False, requires_geometry_update=True,
         requires_line_search=False, requires_arc_length=False, has_moving_boundary=False,
-        has_prestress=True, number_of_load_increments=1, 
+        has_prestress=True, number_of_load_increments=1, load_factor=None,
         newton_raphson_tolerance=1.0e-6, maximum_iteration_for_newton_raphson=50,
         compute_mesh_qualities=True,  
         parallelise=False, memory_model="shared", platform="cpu", backend="opencl",
@@ -50,6 +50,7 @@ class FEMSolver(object):
         self.has_prestress = has_prestress
 
         self.number_of_load_increments = number_of_load_increments
+        self.load_factor = load_factor
         self.newton_raphson_tolerance = newton_raphson_tolerance
         self.maximum_iteration_for_newton_raphson = maximum_iteration_for_newton_raphson
         self.newton_raphson_failed_to_converge = False
@@ -123,6 +124,15 @@ class FEMSolver(object):
         ##############################################################################
         if boundary_condition.boundary_type == "straight":
             self.compute_mesh_qualities = False
+        ##############################################################################
+
+        ##############################################################################
+        if self.load_factor is not None:
+            self.load_factor = np.array(self.load_factor).ravel()
+            if self.load_factor.shape[0] != self.number_of_load_increments:
+                raise ValueError("Supplied load factor should have the same length as the number of load increments")
+            if not np.isclose(self.load_factor.sum(),1.0):
+                raise ValueError("Load factor should sum up to one")
         ##############################################################################
 
         # CHANGE MESH DATA TYPE
@@ -375,6 +385,10 @@ class FEMSolver(object):
         
         for Increment in range(LoadIncrement):
 
+            # CHECK ADAPTIVE LOAD FACTOR
+            if self.load_factor is not None:
+                LoadFactor = self.load_factor[Increment]
+
             # APPLY NEUMANN BOUNDARY CONDITIONS
             DeltaF = LoadFactor*NeumannForces
             NodalForces += DeltaF
@@ -439,9 +453,7 @@ class FEMSolver(object):
             # STORE THE INFORMATION IF NEWTON-RAPHSON FAILS
             if self.newton_raphson_failed_to_converge:
                 solver.condA = np.NAN
-                solver.scaledA = np.NAN
-                solver.scaledAFF = np.NAN
-                solver.scaledAHH = np.NAN
+                TotalDisp = TotalDisp[:,:,:Increment]
                 break
 
             # BREAK AT A SPECIFICED LOAD INCREMENT IF ASKED FOR
