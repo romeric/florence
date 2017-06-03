@@ -2344,11 +2344,13 @@ class Mesh(object):
 
     def SimplePlot(self, to_plot='faces', 
         color=None, plot_points=False, point_radius=0.1, 
-        save=False, filename=None, figure=None, show_plot=True):
+        save=False, filename=None, figure=None, show_plot=True, 
+        show_axis=False, grid="off"):
         """Simple mesh plot
 
             to_plot:        [str] only for 3D. 'faces' to plot only boundary faces
                             or 'all_faces' to plot all faces
+            grid:           [str] None, "on" or "off"
             """
 
         assert self.element_type is not None
@@ -2357,6 +2359,8 @@ class Mesh(object):
 
         if color is None:
             color=(197/255.,241/255.,197/255.)
+        if grid is None:
+            grid = "off"
 
         if save:
             if filename is None:
@@ -2394,7 +2398,10 @@ class Mesh(object):
 
             plt.triplot(self.points[:,0],self.points[:,1], self.elements[:,:3],color='k')
             plt.axis("equal")
-            plt.axis('off')
+            if not show_axis:
+                plt.axis('off')
+            if grid == "on":
+                plt.grid("on")
             if show_plot:
                 plt.show()
 
@@ -2473,7 +2480,10 @@ class Mesh(object):
             plt.plot(x_edges,y_edges,'-k')
 
             plt.axis('equal')
-            plt.axis('off')
+            if not show_axis:
+                plt.axis('off')
+            if grid == "on":
+                plt.grid("on")
             if show_plot:
                 plt.show()
 
@@ -3590,6 +3600,77 @@ class Mesh(object):
         points = self.points[np.unique(self.faces),:]
         if not np.isclose(np.linalg.norm(points,axis=1),radius).all():
             raise ValueError("MeshPy could not construct a valid linear mesh for sphere")
+
+
+
+    def SphericalArc(self, center=(0.,0.,0.), inner_radius=9., outer_radius=10., 
+        start_angle=0., end_angle=np.pi/2., ncirc=5, nrad=5, nthick=1, element_type="hex"):
+
+        from Florence.Tensor import makezero, itemfreq
+
+        inner_radius = float(inner_radius)
+        outer_radius = float(outer_radius)
+        if np.allclose(inner_radius,0.):
+            raise ValueError('inner_radius cannot be zero')
+        if inner_radius > outer_radius:
+            raise ValueError('inner_radius cannot be greater than outer_radius')
+        self.__reset__()
+
+        self.Arc(radius=outer_radius, element_type="quad",start_angle=start_angle,
+            end_angle=end_angle,nrad=nrad,ncirc=ncirc)
+        self.Extrude(length=outer_radius-inner_radius,nlong=nthick)
+
+        points = np.copy(self.points)
+        tts = itemfreq(points[:,2])
+        radius = outer_radius
+
+        # Apply projection for all layers through the thickness
+        for i in range(tts.shape[0]):
+            num = tts[i,0]
+            cond = np.where(np.isclose(points[:,2],num))[0]
+
+            layer_points = self.points[cond,:]
+            tmp_radius = radius - num
+            layer_points[:,1] *= tmp_radius/radius
+            layer_points[:,0] *= tmp_radius/radius
+
+            z_radius = tmp_radius**2 - layer_points[:,0]**2  - layer_points[:,1]**2
+            makezero(z_radius[:,None],tol=1e-12)
+            Z = np.sqrt(z_radius) 
+            self.points[cond,0] = layer_points[:,0]
+            self.points[cond,1] = layer_points[:,1]
+            self.points[cond,2] = radius - Z
+
+        # Change back to make center at (0,0,0)
+        self.points[:,2] *= -1.
+        self.points[:,2] += radius
+
+        for i in range(3):
+            self.points[:,i] += center[i]
+
+        self.GetBoundaryFaces()
+        self.GetBoundaryEdges()
+
+        if element_type == "tet":
+            sys.stdout = open(os.devnull, "w")
+            self.ConvertHexesToTets()
+            sys.stdout = sys.__stdout__ 
+
+
+
+    def HollowSphere(self, inner_radius=9., outer_radius=10.,
+        ncirc=5, nrad=5, nthick=1):
+
+        self.SphericalArc(inner_radius=inner_radius, outer_radius=outer_radius, 
+            ncirc=ncirc, nrad=nrad, nthick=nthick)
+
+        # Mirror self in X, Y & Z
+        for i in range(2):
+            mesh = deepcopy(self)
+            mesh.points[:,i] *=-1.
+            self += mesh
+
+
 
 
 
