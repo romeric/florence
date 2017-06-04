@@ -115,6 +115,7 @@ class StructuralDynamicIntegrators(object):
 
             # print(boundary_condition.applied_dirichlet)
             # exit()
+            # K += (1./self.beta/LoadFactor**2)*M
 
             # OBRTAIN INCREMENTAL RESIDUAL - CONTRIBUTION FROM BOTH NEUMANN AND DIRICHLET
             # Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
@@ -151,9 +152,9 @@ class StructuralDynamicIntegrators(object):
 
             self.norm_residual = np.linalg.norm(Residual)/self.NormForces
 
-            Eulerx, Eulerp, K, Residual = self.NewtonRaphson(function_spaces, formulation, solver, 
-                Increment,K,M,NodalForces,Residual,mesh,Eulerx,Eulerp,
-                material,boundary_condition,AppliedDirichletInc, fem_solver, velocities, accelerations)
+            Eulerx, Eulerp, K, Residual, TotalDisp, velocities, accelerations = self.NewtonRaphson(function_spaces, formulation, solver, 
+                Increment, K, M, NodalForces, Residual, mesh, Eulerx, Eulerp,
+                material,boundary_condition,AppliedDirichletInc, fem_solver, TotalDisp, velocities, accelerations)
 
             # UPDATE DISPLACEMENTS FOR THE CURRENT LOAD INCREMENT
             TotalDisp[:,:formulation.ndim,Increment] = Eulerx - mesh.points
@@ -194,17 +195,27 @@ class StructuralDynamicIntegrators(object):
 
     def NewtonRaphson(self, function_spaces, formulation, solver, 
         Increment, K, M, NodalForces, Residual, mesh, Eulerx, Eulerp, material,
-        boundary_condition, AppliedDirichletInc, fem_solver, velocities, accelerations):
+        boundary_condition, AppliedDirichletInc, fem_solver, TotalDisp, velocities, accelerations):
 
         Tolerance = fem_solver.newton_raphson_tolerance
         LoadIncrement = fem_solver.number_of_load_increments
         LoadFactor = 1./fem_solver.number_of_load_increments
         Iter = 0
 
-        if Increment ==1:
-            exit()
+        # if Increment ==1:
+            # exit()
         print(AppliedDirichletInc.min(),AppliedDirichletInc.max())
-        print(Eulerp.min(),Eulerp.max())
+        # print(Eulerp.min(),Eulerp.max())
+
+        EulerV = np.copy(velocities[:,:,Increment])
+        EulerA = np.copy(accelerations[:,:,Increment])
+        EulerGeom = np.copy(Eulerx)
+        # PREDICTOR STEP
+        dumV = (1. - self.gamma/self.beta)*velocities[:,:,Increment] + (1. - self.gamma/2./self.beta)*LoadFactor*accelerations[:,:,Increment]
+        dumA = (-1./self.beta/LoadFactor)*velocities[:,:,Increment] - (1./2./self.beta)*(1.- 2.*self.beta)*accelerations[:,:,Increment]
+        velocities[:,:,Increment]    = dumV
+        accelerations[:,:,Increment] = dumA
+
 
         # APPLY INCREMENTAL DIRICHLET PER LOAD STEP (THIS IS INCREMENTAL NOT ACCUMULATIVE)
         IncDirichlet = boundary_condition.UpdateFixDoFs(AppliedDirichletInc,
@@ -221,7 +232,9 @@ class StructuralDynamicIntegrators(object):
         # velocities[:,:,Increment]    += self.gamma/self.beta/LoadFactor*IncDirichlet[:,:formulation.ndim]
         # accelerations[:,:,Increment] += 1./self.beta/LoadFactor**2*IncDirichlet[:,:formulation.ndim]
 
+
         np.set_printoptions(linewidth=1000,threshold=1000)
+
 
         while np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces) > Tolerance:
             # GET THE REDUCED SYSTEM OF EQUATIONS
@@ -234,7 +247,7 @@ class StructuralDynamicIntegrators(object):
             # print(M.todense())
             # print(K.todense())
             K += (1./self.beta/LoadFactor**2)*M
-            K_b, F_b, _ = boundary_condition.GetReducedMatrices(K,Residual,M)
+            K_b, F_b, _ = boundary_condition.GetReducedMatrices(K,Residual)
             # K1 = K + (1./self.beta/LoadFactor**2)*M
             # K_b, F_b, _ = boundary_condition.GetReducedMatrices(K1,Residual,M)
 
@@ -253,10 +266,34 @@ class StructuralDynamicIntegrators(object):
             Eulerx += dU[:,:formulation.ndim]
             Eulerp += dU[:,-1]
             # print(Eulerp.min(),Eulerp.max())
+            # print(Eulerx.min(),Eulerx.max())
+            # print(dU)
+            # print(1./self.beta/LoadFactor**2*(Eulerx - TotalDisp[:,:formulation.ndim,Increment]))
+
 
             # UPDATE VELOCITY AND ACCELERATION
-            velocities[:,:,Increment]    += self.gamma/self.beta/LoadFactor*dU[:,:formulation.ndim]
-            accelerations[:,:,Increment] += 1./self.beta/LoadFactor**2*dU[:,:formulation.ndim]
+            # dumA = 1./self.beta/LoadFactor**2*(Eulerx - TotalDisp[:,:formulation.ndim,Increment]) -\
+            #     1./self.beta/LoadFactor*velocities[:,:,Increment] -\
+            #     1./2./self.beta*(1. - 2.*self.beta)*accelerations[:,:,Increment]
+            # dumV = (1. - self.gamma/self.beta)*velocities[:,:,Increment] +\
+            #     (1. - self.gamma/2./self.beta)*LoadFactor*accelerations[:,:,Increment] +\
+            #     self.gamma/self.beta/LoadFactor*(Eulerx - TotalDisp[:,:formulation.ndim,Increment])
+            dumA = 1./self.beta/LoadFactor**2*(Eulerx - EulerGeom) -\
+                1./self.beta/LoadFactor*EulerV -\
+                1./2./self.beta*(1. - 2.*self.beta)*EulerA
+            dumV = (1. - self.gamma/self.beta)*EulerV +\
+                (1. - self.gamma/2./self.beta)*LoadFactor*EulerA +\
+                self.gamma/self.beta/LoadFactor*(Eulerx - EulerGeom)
+
+            velocities[:,:,Increment]    = dumV
+            accelerations[:,:,Increment] = dumA
+
+
+            # velocities[:,:,Increment]    += self.gamma/self.beta/LoadFactor*dU[:,:formulation.ndim]
+            # accelerations[:,:,Increment] += 1./self.beta/LoadFactor**2*dU[:,:formulation.ndim]
+
+            # velocities[:,:,Increment]    += self.gamma/self.beta/LoadFactor*dU[:,:formulation.ndim]
+            # accelerations[:,:,Increment] += 1./self.beta/LoadFactor**2*dU[:,:formulation.ndim]
             # accelerations[:,formulation.nvar-1,Increment] = 0.
             # print(accelerations[:,2,Increment])
             # exit()
@@ -266,7 +303,7 @@ class StructuralDynamicIntegrators(object):
             # GET ITERATIVE ELECTRIC POTENTIAL
             # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
             K, TractionForces, _, _ = Assemble(fem_solver,function_spaces[0], formulation, mesh, material, solver,
-                Eulerx,Eulerp)
+                Eulerx, Eulerp)
 
             # FIND THE RESIDUAL
             # Residual[boundary_condition.columns_in,0] = TractionForces[boundary_condition.columns_in,0] \
@@ -289,18 +326,21 @@ class StructuralDynamicIntegrators(object):
             # M_mech = M[mech_aranger,:][:,mech_aranger]
             M_mech = M[self.mechanical_dofs,:][:,self.mechanical_dofs]
             # # print(M_mech.shape,accelerations[:,:,Increment].ravel().shape)
-            InertiaResidual = np.zeros(TractionForces.shape[0])
-            InertiaResidual[self.mechanical_dofs] = M_mech.dot(accelerations[:,:,Increment].ravel())
+            InertiaResidual = np.zeros((TractionForces.shape[0],1))
+            InertiaResidual[self.mechanical_dofs,0] = M_mech.dot(accelerations[:,:,Increment].ravel())
 
             # print(InertiaResidual.shape,TractionForces.shape)
             # print(boundary_condition.columns_in)
             # # hard_coded_aranger = [7,9,11,13,15,17]
             # print(np.linalg.norm(InertiaResidual[boundary_condition.columns_in]))
+            # print(TractionForces[boundary_condition.columns_in].shape)
+            # print(InertiaResidual[boundary_condition.columns_in].shape)
+
 
             # exit()
             # # [boundary_condition.columns_in]
-            Residual[boundary_condition.columns_in,0] = TractionForces[boundary_condition.columns_in,0] \
-            - NodalForces[boundary_condition.columns_in,0] + InertiaResidual[boundary_condition.columns_in]
+            Residual[boundary_condition.columns_in] = TractionForces[boundary_condition.columns_in] \
+            - NodalForces[boundary_condition.columns_in] + InertiaResidual[boundary_condition.columns_in]
             # exit()
 
             # SAVE THE NORM
@@ -334,7 +374,7 @@ class StructuralDynamicIntegrators(object):
                 break
 
 
-        return Eulerx, Eulerp, K, Residual
+        return Eulerx, Eulerp, K, Residual, TotalDisp, velocities, accelerations
 
 
 
