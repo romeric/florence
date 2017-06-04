@@ -97,9 +97,9 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
     I_mass=[]; J_mass=[]; V_mass=[]
     if fem_solver.analysis_type !='static':
         # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF MASS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
-        I_mass=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.int32)
-        J_mass=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.int32)
-        V_mass=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.float64)
+        I_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
+        J_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
+        V_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.float64)
 
     T = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
     # T = np.zeros((mesh.points.shape[0]*nvar,1),np.float32)  
@@ -135,10 +135,10 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
         SparseAssemblyNative(I_stiff_elem,J_stiff_elem,V_stiff_elem,I_stiffness,J_stiffness,V_stiffness,
             elem,nvar,nodeperelem,mesh.elements)
 
-        if fem_solver.analysis_type != 'static':
+        if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed==False:
             # SPARSE ASSEMBLY - MASS MATRIX
             SparseAssemblyNative(I_mass_elem,J_mass_elem,V_mass_elem,I_mass,J_mass,V_mass,
-                elem,ndim,nodeperelem,mesh.elements)
+                elem,nvar,nodeperelem,mesh.elements)
 
         if fem_solver.has_moving_boundary:
             # RHS ASSEMBLY
@@ -176,11 +176,11 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
     del I_stiffness, J_stiffness, V_stiffness
     gc.collect()
 
-    if fem_solver.analysis_type != 'static':
+    if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed==False:
         mass = csc_matrix((V_mass,(I_mass,J_mass)),shape=((nvar*mesh.points.shape[0],
             nvar*mesh.points.shape[0])),dtype=np.float64)
 
-    # print(stiffness)
+        fem_solver.is_mass_computed = True
 
     return stiffness, T, F, mass
 

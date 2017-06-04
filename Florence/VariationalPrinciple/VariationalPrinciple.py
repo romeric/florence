@@ -66,6 +66,23 @@ class VariationalPrinciple(object):
         #     # print self.median
         #     # exit()
 
+    def GetVolume(self, function_space, LagrangeElemCoords, EulerELemCoords, requires_geometry_update, elem=0):
+        """ Find the volume (area in 2D) of element [could be curved or straight]
+        """
+
+        # GET LOCAL KINEMATICS
+        detJ = _KinematicMeasures_(function_space.Jm, function_space.AllGauss[:,0], 
+            LagrangeElemCoords, EulerELemCoords, requires_geometry_update)[2]
+
+        # volume = 0.
+        # LOOP OVER GAUSS POINTS
+        # for counter in range(function_space.AllGauss.shape[0]):
+            # volume += detJ[counter]
+
+        # return volume
+
+        return detJ.sum()
+
 
     def ConstitutiveStiffnessIntegrand(self, B, SpatialGradient, CauchyStressTensor, H_Voigt, 
         analysis_nature="nonlinear", has_prestress=True):
@@ -131,22 +148,10 @@ class VariationalPrinciple(object):
         return rhoNN
 
 
-    def GetVolume(self, function_space, LagrangeElemCoords, EulerELemCoords, requires_geometry_update, elem=0):
-        """ Find the volume (area in 2D) of element [could be curved or straight]
-        """
-
-        # GET LOCAL KINEMATICS
-        detJ = _KinematicMeasures_(function_space.Jm, function_space.AllGauss[:,0], 
-            LagrangeElemCoords, EulerELemCoords, requires_geometry_update)[2]
-
-        # volume = 0.
-        # LOOP OVER GAUSS POINTS
-        # for counter in range(function_space.AllGauss.shape[0]):
-            # volume += detJ[counter]
-
-        # return volume
-
-        return detJ.sum()
+    def VerifyMass(self,density, ndim, mass, detJ):
+        if np.isclose(mass.sum(),ndim*density*detJ.sum()):
+            raise RuntimeError("Local mass matrix is not computed correctly")
+        return
 
 
 

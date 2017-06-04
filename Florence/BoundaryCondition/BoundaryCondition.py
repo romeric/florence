@@ -305,17 +305,24 @@ class BoundaryCondition(object):
         elif self.boundary_type == 'straight' or self.boundary_type == 'mixed':
             # IF DIRICHLET BOUNDARY CONDITIONS ARE APPLIED DIRECTLY AT NODES
             if self.dirichlet_data_applied_at == 'node':
-  
-                # self.columns_out = []
-                # for inode in range(0,self.dirichlet_flags.shape[0]):
-                #     for i in range(nvar):
-                #         if not np.isnan(self.dirichlet_flags[inode, i]):
-                #             self.columns_out = np.append(self.columns_out,nvar*inode+i)
-                #             self.applied_dirichlet = np.append(self.applied_dirichlet,self.dirichlet_flags[inode,i])
+                if self.analysis_type == "dynamic":
+                    # FOR DYNAMIC ANALYSIS IT IS ASSUMED THAT
+                    # self.columns_in and self.columns_out DO NOT CHANGE
+                    # DURING THE ANALYSIS
+                    flat_dirich = self.dirichlet_flags[:,:,0].ravel()
+                    self.columns_out = np.arange(self.dirichlet_flags[:,:,0].size)[~np.isnan(flat_dirich)]
+                    self.applied_dirichlet = np.zeros((self.columns_out.shape[0],self.dirichlet_flags.shape[2]))
 
-                flat_dirich = self.dirichlet_flags.flatten()
-                self.columns_out = np.arange(self.dirichlet_flags.size)[~np.isnan(flat_dirich)]
-                self.applied_dirichlet = flat_dirich[~np.isnan(flat_dirich)]
+                    if self.dirichlet_flags.ndim !=3:
+                        raise ValueError("Dirichlet flags for dynamic analysis should be a 3D array")
+                    for step in range(self.dirichlet_flags.shape[2]):
+                        flat_dirich = self.dirichlet_flags[:,:,step].ravel()
+                        self.applied_dirichlet[:,step] = flat_dirich[~np.isnan(flat_dirich)]
+
+                else:
+                    flat_dirich = self.dirichlet_flags.ravel()
+                    self.columns_out = np.arange(self.dirichlet_flags.size)[~np.isnan(flat_dirich)]
+                    self.applied_dirichlet = flat_dirich[~np.isnan(flat_dirich)]
 
         # GENERAL PROCEDURE - GET REDUCED MATRICES FOR FINAL SOLUTION
         self.columns_out = self.columns_out.astype(np.int64)
@@ -663,13 +670,13 @@ class BoundaryCondition(object):
 
         # GET REDUCED MASS MATRIX
         mass_b = np.array([])
-        if self.analysis_type != 'static':
-            mass_b = mass[self.columns_in,:][:,self.columns_in]
+        # if self.analysis_type != 'static':
+        #     mass_b = mass[self.columns_in,:][:,self.columns_in]
 
         return stiffness_b, F_b, mass_b
 
 
-    def ApplyDirichletGetReducedMatrices(self, stiffness, F, AppliedDirichlet, LoadFactor=1., mass=None):
+    def ApplyDirichletGetReducedMatrices(self, stiffness, F, AppliedDirichlet, LoadFactor=1., mass=None, only_residual=False):
         """AppliedDirichlet is a non-member because it can be external incremental Dirichlet,
             which is currently not implemented as member of BoundaryCondition. F also does not 
             correspond to Dirichlet forces, as it can be residual in incrementally linearised
@@ -695,6 +702,9 @@ class BoundaryCondition(object):
         nnz_cols = ~np.isclose(AppliedDirichlet,0.0)
         F[self.columns_in] = F[self.columns_in] - (stiffness[self.columns_in,:][:,self.columns_out[nnz_cols]]*AppliedDirichlet[nnz_cols]*LoadFactor)[:,None]
 
+        if only_residual:
+            return F
+
         # GET REDUCED FORCE VECTOR
         F_b = F[self.columns_in,0]
 
@@ -706,6 +716,7 @@ class BoundaryCondition(object):
                 # F_b_umf[i] = F_b[i,0]
                 F_b_umf[i] = F_b.flatten()[i]
             F_b = np.copy(F_b_umf)
+
 
         # GET REDUCED STIFFNESS
         stiffness_b = stiffness[self.columns_in,:][:,self.columns_in]

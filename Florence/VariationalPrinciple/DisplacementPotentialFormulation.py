@@ -48,7 +48,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
                 norder_post = 2*(C+1)
             else:
-                norder = C+2
+                norder = C+4
                 norder_post = 2*(C+2)
 
             # GET QUADRATURE
@@ -84,7 +84,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         self.local_size = local_size
 
         # FOR MASS
-        local_size_m = self.function_spaces[0].Bases.shape[0]*self.ndim
+        local_size_m = self.function_spaces[0].Bases.shape[0]*self.nvar
         self.local_rows_mass = np.repeat(np.arange(0,local_size_m),local_size_m,axis=0)
         self.local_columns_mass = np.tile(np.arange(0,local_size_m),local_size_m)
         self.local_size_m = local_size_m
@@ -109,7 +109,8 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         I_mass_elem = []; J_mass_elem = []; V_mass_elem = []
         if fem_solver.analysis_type != 'static':
             # COMPUTE THE MASS MATRIX
-            massel = Mass(material,LagrangeElemCoords,EulerElemCoords,elem)
+            # massel = self.GetLocalMass(material,LagrangeElemCoords,EulerElemCoords,elem)
+            massel = self.GetLocalMass(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
 
         if fem_solver.has_moving_boundary:
             # COMPUTE FORCE VECTOR
@@ -240,7 +241,45 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
 
 
-    def GetLocalMass(self, function_space, formulation):
+    # def GetLocalMass(self, function_space, formulation):
+
+    #     ndim = self.ndim
+    #     nvar = self.nvar
+    #     Domain = function_space
+
+    #     N = np.zeros((Domain.Bases.shape[0]*nvar,nvar))
+    #     mass = np.zeros((Domain.Bases.shape[0]*nvar,Domain.Bases.shape[0]*nvar))
+
+    #     # LOOP OVER GAUSS POINTS
+    #     for counter in range(0,Domain.AllGauss.shape[0]):
+    #         # GRADIENT TENSOR IN PARENT ELEMENT [\nabla_\varepsilon (N)]
+    #         Jm = Domain.Jm[:,:,counter]
+    #         Bases = Domain.Bases[:,counter]
+    #         # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+    #         ParentGradientX=np.dot(Jm,LagrangeElemCoords)
+
+    #         # UPDATE/NO-UPDATE GEOMETRY
+    #         if MainData.GeometryUpdate:
+    #             # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+    #             ParentGradientx = np.dot(Jm,EulerELemCoords)
+    #         else:
+    #             ParentGradientx = ParentGradientX
+
+    #         # COMPUTE THE MASS INTEGRAND
+    #         rhoNN = self.MassIntegrand(Bases,N,MainData.Minimal,MainData.MaterialArgs)
+
+    #         if MainData.GeometryUpdate:
+    #             # INTEGRATE MASS
+    #             mass += rhoNN*MainData.Domain.AllGauss[counter,0]*np.abs(la.det(ParentGradientX))
+    #             # mass += rhoNN*w[g1]*w[g2]*w[g3]*np.abs(la.det(ParentGradientX))*np.abs(StrainTensors.J)
+    #         else:
+    #             # INTEGRATE MASS
+    #             mass += rhoNN*MainData.Domain.AllGauss[counter,0]*np.abs(la.det(ParentGradientX))
+
+    #     return mass
+
+
+    def GetLocalMass(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem):
 
         ndim = self.ndim
         nvar = self.nvar
@@ -257,25 +296,17 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
             # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
             ParentGradientX=np.dot(Jm,LagrangeElemCoords)
 
-            # UPDATE/NO-UPDATE GEOMETRY
-            if MainData.GeometryUpdate:
-                # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-                ParentGradientx = np.dot(Jm,EulerELemCoords)
-            else:
-                ParentGradientx = ParentGradientX
-
             # COMPUTE THE MASS INTEGRAND
-            rhoNN = self.MassIntegrand(Bases,N,MainData.Minimal,MainData.MaterialArgs)
+            rhoNN = self.MassIntegrand(Bases,N,material)
+            # INTEGRATE MASS
+            mass += rhoNN*Domain.AllGauss[counter,0]*np.abs(np.linalg.det(ParentGradientX))
 
-            if MainData.GeometryUpdate:
-                # INTEGRATE MASS
-                mass += rhoNN*MainData.Domain.AllGauss[counter,0]*np.abs(la.det(ParentGradientX))
-                # mass += rhoNN*w[g1]*w[g2]*w[g3]*np.abs(la.det(ParentGradientX))*np.abs(StrainTensors.J)
-            else:
-                # INTEGRATE MASS
-                mass += rhoNN*MainData.Domain.AllGauss[counter,0]*np.abs(la.det(ParentGradientX))
+        # np.set_printoptions(linewidth=10000,threshold=10000)
+        # print(mass)
+        # print(mass.sum())
+        # exit()
 
-        return mass
+        return mass 
 
 
 
