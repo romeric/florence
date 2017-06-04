@@ -48,6 +48,7 @@ class FEMSolver(object):
         self.requires_arc_length = requires_arc_length
         self.has_moving_boundary = has_moving_boundary
         self.has_prestress = has_prestress
+        self.is_mass_computed = False
 
         self.number_of_load_increments = number_of_load_increments
         self.load_factor = load_factor
@@ -393,8 +394,10 @@ class FEMSolver(object):
             DeltaF = LoadFactor*NeumannForces
             NodalForces += DeltaF
             # OBRTAIN INCREMENTAL RESIDUAL - CONTRIBUTION FROM BOTH NEUMANN AND DIRICHLET
+            # Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
+                # boundary_condition.applied_dirichlet,LoadFactor=LoadFactor)[2]
             Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
-                boundary_condition.applied_dirichlet,LoadFactor=LoadFactor)[2]
+                boundary_condition.applied_dirichlet,LoadFactor=LoadFactor,only_residual=True)
             Residual -= DeltaF
             # GET THE INCREMENTAL DISPLACEMENT
             AppliedDirichletInc = LoadFactor*boundary_condition.applied_dirichlet
