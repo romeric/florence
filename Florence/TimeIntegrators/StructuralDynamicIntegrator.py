@@ -452,10 +452,10 @@ class StructuralDynamicIntegrators(object):
         # external_energy = np.dot(TotalDisp[:,:,Increment].ravel(),NeumannForces[:,Increment])
         external_energy = np.dot(TotalDisp[:,:,Increment].ravel(),NeumannForces[:,Increment])
 
-        # return internal_energy + kinetic_energy - external_energy
+        return internal_energy + kinetic_energy - external_energy
         # return external_energy
         # return internal_energy
-        return external_energy
+        # return external_energy
 
 
 
