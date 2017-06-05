@@ -43,7 +43,7 @@ class DisplacementFormulation(VariationalPrinciple):
 
                 norder_post = 2*(C+1)
             else:
-                norder = C+4
+                norder = C+2
                 norder_post = 2*(C+2)
 
             # GET QUADRATURE
