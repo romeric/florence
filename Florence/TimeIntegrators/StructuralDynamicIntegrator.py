@@ -113,7 +113,8 @@ class StructuralDynamicIntegrators(object):
             t_increment = time()
 
             # APPLY NEUMANN BOUNDARY CONDITIONS
-            DeltaF = LoadFactor*NeumannForces
+            # DeltaF = LoadFactor*NeumannForces
+            DeltaF = NeumannForces[:,Increment][:,None]
             NodalForces += DeltaF
 
             # print(boundary_condition.applied_dirichlet)
@@ -159,17 +160,15 @@ class StructuralDynamicIntegrators(object):
                 Increment, K, M, NodalForces, Residual, mesh, Eulerx, Eulerp,
                 material,boundary_condition,AppliedDirichletInc, fem_solver, TotalDisp, velocities, accelerations)
 
-            # M_mech = M[self.mechanical_dofs,:][:,self.mechanical_dofs]
-            # kin = 0.5*np.dot(velocities[:,:,Increment].ravel(),M_mech.dot(velocities[:,:,Increment].ravel()))
-            # pot = 0.5*np.dot(TotalDisp[:,:,Increment].ravel(),K.dot(TotalDisp[:,:,Increment].ravel()))
-            # print(pot+kin)
-            # print(np.max(accelerations[:,:,Increment]))
-
             # UPDATE DISPLACEMENTS FOR THE CURRENT LOAD INCREMENT
             TotalDisp[:,:formulation.ndim,Increment] = Eulerx - mesh.points
             if formulation.fields == "electro_mechanics":
                 TotalDisp[:,-1,Increment] = Eulerp
 
+            if fem_solver.compute_energy_dissipation:
+                energy_dissipation = self.ComputeEnergyDissipation(function_spaces[0],mesh,material,formulation,fem_solver, 
+                    Eulerx, TotalDisp, NeumannForces, M, velocities, Increment)
+                fem_solver.energy_dissipation.append(energy_dissipation)
 
             # PRINT LOG IF ASKED FOR
             if fem_solver.print_incremental_log:
@@ -212,7 +211,11 @@ class StructuralDynamicIntegrators(object):
         LoadFactor = 1./fem_solver.number_of_load_increments
         Iter = 0
 
-        # if Increment ==1:
+        if Increment == 150:
+            M *=10.
+
+        if Increment >= 179 and Increment < 188:
+            M *=1.2
             # exit()
         # print(AppliedDirichletInc.min(),AppliedDirichletInc.max())
         # print(Eulerp.min(),Eulerp.max())
@@ -248,10 +251,11 @@ class StructuralDynamicIntegrators(object):
 
         # K_0 = K.copy()
         
-        # D = 0.1*M
+        D = 0.1*M
 
 
         while np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces) > Tolerance:
+        # for ii in range(7):
 
             # # PREDICTOR STEP
             # dumV = (1. - self.gamma/self.beta)*velocities[:,:,Increment] + (1. - self.gamma/2./self.beta)*LoadFactor*accelerations[:,:,Increment]
@@ -268,8 +272,8 @@ class StructuralDynamicIntegrators(object):
             # exit()
             # print(M.todense())
             # print(K.todense())
-            K += (1./self.beta/LoadFactor**2)*M
-            # K += self.gamma/self.beta/LoadFactor*D + (1./self.beta/LoadFactor**2)*M
+            # K += (1./self.beta/LoadFactor**2)*M
+            K += self.gamma/self.beta/LoadFactor*D + (1./self.beta/LoadFactor**2)*M
             K_b, F_b, _ = boundary_condition.GetReducedMatrices(K,Residual)
             # K1 = K + (1./self.beta/LoadFactor**2)*M
             # K1 = K_0 + (1./self.beta/LoadFactor**2)*M
@@ -364,9 +368,9 @@ class StructuralDynamicIntegrators(object):
                 # # print(M_mech.shape,accelerations[:,:,Increment].ravel().shape)
                 InertiaResidual = np.zeros((TractionForces.shape[0],1))
                 InertiaResidual[self.mechanical_dofs,0] = M_mech.dot(accelerations[:,:,Increment].ravel())
-
-                # InertiaResidual[self.mechanical_dofs,0] += 0.1*M_mech.dot(velocities[:,:,Increment].ravel())
                 # InertiaResidual[self.mechanical_dofs,0] = M_mech.dot(accelerations_prev.ravel())
+
+                InertiaResidual[self.mechanical_dofs,0] += 0.1*M_mech.dot(velocities[:,:,Increment].ravel())
             else:
                 InertiaResidual = np.zeros((TractionForces.shape[0],1))
                 InertiaResidual[:,0] = M.dot(accelerations[:,:,Increment].ravel())
@@ -420,6 +424,38 @@ class StructuralDynamicIntegrators(object):
         return Eulerx, Eulerp, K, Residual, TotalDisp, velocities, accelerations
 
 
+
+    def ComputeEnergyDissipation(self,function_space,mesh,material,formulation,fem_solver, Eulerx, TotalDisp, NeumannForces, M, velocities, Increment):
+
+        internal_energy = 0.
+        for elem in range(mesh.nelem):
+            LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
+            EulerElemCoords = Eulerx[mesh.elements[elem,:],:]
+            
+            internal_energy += formulation.GetEnergy(function_space, material, LagrangeElemCoords, EulerElemCoords, fem_solver, elem)
+
+        # return elemental_internal_energy
+
+        if formulation.fields == "electro_mechanics":
+            M_mech = M[self.mechanical_dofs,:][:,self.mechanical_dofs]
+            kinetic_energy = 0.5*np.dot(velocities[:,:,Increment].ravel(),M_mech.dot(velocities[:,:,Increment].ravel()))
+            # pot = 0.5*np.dot(TotalDisp[:,:,Increment].ravel(),K.dot(TotalDisp[:,:,Increment].ravel()))
+
+        else:
+            kinetic_energy = 0.5*np.dot(velocities[:,:,Increment].ravel(),M.dot(velocities[:,:,Increment].ravel()))
+            # internal_energy = 0.5*np.dot(TotalDisp[:,:,Increment].ravel(),K.dot(TotalDisp[:,:,Increment].ravel()))
+            # print(pot+kin-ext)
+            # fem_solver.dd.append(pot+kin-ext)
+            # print(TotalDisp[:,:,Increment].ravel().shape,NeumannForces[:,Increment].shape)
+            # print(np.max(accelerations[:,:,Increment]))
+
+        # external_energy = np.dot(TotalDisp[:,:,Increment].ravel(),NeumannForces[:,Increment])
+        external_energy = np.dot(TotalDisp[:,:,Increment].ravel(),NeumannForces[:,Increment])
+
+        # return internal_energy + kinetic_energy - external_energy
+        # return external_energy
+        # return internal_energy
+        return external_energy
 
 
 

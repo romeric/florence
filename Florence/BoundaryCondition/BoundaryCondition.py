@@ -772,14 +772,27 @@ class BoundaryCondition(object):
             return np.zeros((mesh.points.shape[0]*material.nvar,1),dtype=np.float64)
 
         nvar = material.nvar
-        F = np.zeros((mesh.points.shape[0]*nvar,1))
 
         if self.neumann_data_applied_at == 'node':
+            if self.analysis_type == "dynamic":
+                if self.neumann_flags.ndim !=3:
+                    raise ValueError("Dirichlet flags for dynamic analysis should be a 3D array")
+                # FOR DYNAMIC ANALYSIS IT IS ASSUMED THAT
+                # to_apply DOOES NOT CHANGE DURING THE ANALYSIS
+                flat_neu = self.neumann_flags[:,:,0].ravel()
+                to_apply = np.arange(self.neumann_flags[:,:,0].size)[~np.isnan(flat_neu)]
+                F = np.zeros((mesh.points.shape[0]*nvar,self.neumann_flags.shape[2]))
 
-            flat_neu = self.neumann_flags.flatten()
-            to_apply = np.arange(self.neumann_flags.size)[~np.isnan(flat_neu)]
-            applied_neumann = flat_neu[~np.isnan(flat_neu)]
-            F[to_apply,0] = applied_neumann
+                for step in range(self.neumann_flags.shape[2]):
+                    flat_neu = self.neumann_flags[:,:,step].ravel()
+                    to_apply = np.arange(self.neumann_flags[:,:,step].size)[~np.isnan(flat_neu)]
+                    F[to_apply,step] = flat_neu[~np.isnan(flat_neu)]
+            else:
+                F = np.zeros((mesh.points.shape[0]*nvar,1))
+                flat_neu = self.neumann_flags.ravel()
+                to_apply = np.arange(self.neumann_flags.size)[~np.isnan(flat_neu)]
+                applied_neumann = flat_neu[~np.isnan(flat_neu)]
+                F[to_apply,0] = applied_neumann
 
         return F
 
