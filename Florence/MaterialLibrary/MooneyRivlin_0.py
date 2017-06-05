@@ -88,6 +88,6 @@ class MooneyRivlin_0(Material):
         C = np.dot(F.T,F)
         G = np.dot(H.T,H)
 
-        energy  = mu1*(einsum('ij,ij',C,I) - 3.) + mu2*(einsum('ij,ij',G,I) - 3.) -2.*(mu1+2.*mu2)*np.log(J) + lamb/2.*(J-1)**2
+        energy  = mu1*(einsum('ij,ij',C,I) - 3.) + mu2*(einsum('ij,ij',G,I) - 3.) - 2.*(mu1+2.*mu2)*np.log(J) + lamb/2.*(J-1)**2
 
         return energy

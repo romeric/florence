@@ -100,6 +100,12 @@ class StructuralDynamicIntegrators(object):
         # accelerations  = np.zeros_like(TotalDisp)
         velocities     = np.zeros((mesh.points.shape[0],formulation.ndim,fem_solver.number_of_load_increments))
         accelerations  = np.zeros((mesh.points.shape[0],formulation.ndim,fem_solver.number_of_load_increments))
+
+        Res = Residual - NeumannForces[:,0][:,None]
+        accelerations[:,:,0] = solver.Solve(M, -Res.ravel() ).reshape(mesh.points.shape[0],formulation.nvar)
+        # print(np.linalg.norm(accelerations[:,:,0]))
+        # print(np.linalg.norm(NeumannForces[:,0]))
+        # exit()
     
         self.NRConvergence = fem_solver.NRConvergence
         LoadIncrement = fem_solver.number_of_load_increments
@@ -115,7 +121,8 @@ class StructuralDynamicIntegrators(object):
             # APPLY NEUMANN BOUNDARY CONDITIONS
             # DeltaF = LoadFactor*NeumannForces
             DeltaF = NeumannForces[:,Increment][:,None]
-            NodalForces += DeltaF
+            # NodalForces += DeltaF
+            NodalForces = DeltaF
 
             # print(boundary_condition.applied_dirichlet)
             # exit()
@@ -127,6 +134,7 @@ class StructuralDynamicIntegrators(object):
             Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
                 boundary_condition.applied_dirichlet[:,Increment],LoadFactor=1.0,mass=M,only_residual=True)
             Residual -= DeltaF
+            # Residual = -DeltaF
             # print(Residual)
             # GET THE INCREMENTAL DISPLACEMENT
             # AppliedDirichletInc = LoadFactor*boundary_condition.applied_dirichlet[:,Increment]
@@ -141,7 +149,8 @@ class StructuralDynamicIntegrators(object):
             # np.arange(0,100)
             # M_mech = 
             # accelerations[:,:,Increment] = solver.Solve(M, Residual.ravel() - \
-                # K.dot(TotalDisp[:,:,Increment].ravel())).reshape(mesh.points.shape[0],formulation.nvar)
+            #     K.dot(TotalDisp[:,:,Increment].ravel())).reshape(mesh.points.shape[0],formulation.nvar)
+            
             # exit()
 
 
@@ -211,11 +220,11 @@ class StructuralDynamicIntegrators(object):
         LoadFactor = 1./fem_solver.number_of_load_increments
         Iter = 0
 
-        if Increment == 150:
-            M *=10.
+        # if Increment == 150:
+        #     M *=10.
 
-        if Increment >= 179 and Increment < 188:
-            M *=1.2
+        # if Increment >= 179 and Increment < 188:
+        #     M *=1.2
             # exit()
         # print(AppliedDirichletInc.min(),AppliedDirichletInc.max())
         # print(Eulerp.min(),Eulerp.max())
@@ -228,6 +237,10 @@ class StructuralDynamicIntegrators(object):
         dumA = (-1./self.beta/LoadFactor)*velocities[:,:,Increment] - (1./2./self.beta)*(1.- 2.*self.beta)*accelerations[:,:,Increment]
         velocities[:,:,Increment]    = dumV
         accelerations[:,:,Increment] = dumA
+
+        InertiaResidual = np.zeros((Residual.shape[0],1))
+        InertiaResidual[:,0] = M.dot(accelerations[:,:,Increment].ravel())
+        Residual[boundary_condition.columns_in] += InertiaResidual[boundary_condition.columns_in]
 
 
         # APPLY INCREMENTAL DIRICHLET PER LOAD STEP (THIS IS INCREMENTAL NOT ACCUMULATIVE)
@@ -251,7 +264,7 @@ class StructuralDynamicIntegrators(object):
 
         # K_0 = K.copy()
         
-        D = 0.1*M
+        # D = 0.1*M
 
 
         while np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces) > Tolerance:
@@ -272,8 +285,9 @@ class StructuralDynamicIntegrators(object):
             # exit()
             # print(M.todense())
             # print(K.todense())
-            # K += (1./self.beta/LoadFactor**2)*M
-            K += self.gamma/self.beta/LoadFactor*D + (1./self.beta/LoadFactor**2)*M
+
+            K += (1./self.beta/LoadFactor**2)*M
+            # K += self.gamma/self.beta/LoadFactor*D + (1./self.beta/LoadFactor**2)*M
             K_b, F_b, _ = boundary_condition.GetReducedMatrices(K,Residual)
             # K1 = K + (1./self.beta/LoadFactor**2)*M
             # K1 = K_0 + (1./self.beta/LoadFactor**2)*M
@@ -285,7 +299,8 @@ class StructuralDynamicIntegrators(object):
 
             # GET ITERATIVE SOLUTION
             dU = boundary_condition.UpdateFreeDoFs(sol,K.shape[0],formulation.nvar) 
-            # print(np.linalg.norm(dU))
+            # print()
+            print(np.linalg.norm(dU))
             # print(dU)
             # exit()
             # print(np.linalg.norm(M.todense()))
@@ -316,19 +331,23 @@ class StructuralDynamicIntegrators(object):
 
             # accelerations_prev = np.copy(accelerations[:,:,Increment])
 
-            dumA = 1./self.beta/LoadFactor**2*(Eulerx - EulerxPrev) -\
-                1./self.beta/LoadFactor*(EulerV) -\
-                1./2./self.beta*(1. - 2.*self.beta)*(EulerA)
-            dumV = (1. - self.gamma/self.beta)*(EulerV) +\
-                (1. - self.gamma/2./self.beta)*LoadFactor*(EulerA) +\
-                self.gamma/self.beta/LoadFactor*(Eulerx - EulerxPrev)
+            # dumA = 1./self.beta/LoadFactor**2*(Eulerx - EulerxPrev) -\
+            #     1./self.beta/LoadFactor*(EulerV) -\
+            #     1./2./self.beta*(1. - 2.*self.beta)*(EulerA)
+            # dumV = (1. - self.gamma/self.beta)*(EulerV) +\
+            #     (1. - self.gamma/2./self.beta)*LoadFactor*(EulerA) +\
+            #     self.gamma/self.beta/LoadFactor*(Eulerx - EulerxPrev)
 
-            velocities[:,:,Increment]    = dumV
-            accelerations[:,:,Increment] = dumA
+            # velocities[:,:,Increment]    = dumV
+            # accelerations[:,:,Increment] = dumA
 
 
-            # velocities[:,:,Increment]    += self.gamma/self.beta/LoadFactor*dU[:,:formulation.ndim]
-            # accelerations[:,:,Increment] += 1./self.beta/LoadFactor**2*dU[:,:formulation.ndim]
+            # velocities[:,:,Increment]    += dU[:,:formulation.ndim]
+            # accelerations[:,:,Increment] = dumA
+
+
+            velocities[:,:,Increment]    += self.gamma/self.beta/LoadFactor*dU[:,:formulation.ndim]
+            accelerations[:,:,Increment] += 1./self.beta/LoadFactor**2*dU[:,:formulation.ndim]
 
             # velocities[:,:,Increment]    += self.gamma/self.beta/LoadFactor*dU[:,:formulation.ndim]
             # accelerations[:,:,Increment] += 1./self.beta/LoadFactor**2*dU[:,:formulation.ndim]
@@ -370,7 +389,7 @@ class StructuralDynamicIntegrators(object):
                 InertiaResidual[self.mechanical_dofs,0] = M_mech.dot(accelerations[:,:,Increment].ravel())
                 # InertiaResidual[self.mechanical_dofs,0] = M_mech.dot(accelerations_prev.ravel())
 
-                InertiaResidual[self.mechanical_dofs,0] += 0.1*M_mech.dot(velocities[:,:,Increment].ravel())
+                # InertiaResidual[self.mechanical_dofs,0] += 0.1*M_mech.dot(velocities[:,:,Increment].ravel())
             else:
                 InertiaResidual = np.zeros((TractionForces.shape[0],1))
                 InertiaResidual[:,0] = M.dot(accelerations[:,:,Increment].ravel())
@@ -453,8 +472,8 @@ class StructuralDynamicIntegrators(object):
         external_energy = np.dot(TotalDisp[:,:,Increment].ravel(),NeumannForces[:,Increment])
 
         return internal_energy + kinetic_energy - external_energy
-        # return external_energy
         # return internal_energy
+        # return kinetic_energy
         # return external_energy
 
 
