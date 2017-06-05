@@ -12,6 +12,8 @@ from time import time
 from Florence.FiniteElements.Assembly import Assemble
 from Florence import Mesh
 
+__all__ = ["StructuralDynamicIntegrators"]
+
 
 class StructuralDynamicIntegrators(object):
     """docstring for StructuralDynamicIntegrators"""
@@ -52,47 +54,48 @@ class StructuralDynamicIntegrators(object):
         self.mechanical_dofs = np.array([],dtype=np.int64)
         self.mechanical_dofs = np.setdiff1d(all_dofs,self.electric_dofs)
 
-        # GET BOUNDARY CONDITON FOR THE REDUCED MECHANICAL SYSTEM
-        self.columns_in_mech = np.intersect1d(boundary_condition.columns_in,self.mechanical_dofs)
-        self.columns_in_mech_idx = np.in1d(self.mechanical_dofs,boundary_condition.columns_in)
+        # # GET BOUNDARY CONDITON FOR THE REDUCED MECHANICAL SYSTEM
+        # self.columns_in_mech = np.intersect1d(boundary_condition.columns_in,self.mechanical_dofs)
+        # self.columns_in_mech_idx = np.in1d(self.mechanical_dofs,boundary_condition.columns_in)
 
-        # GET BOUNDARY CONDITON FOR THE REDUCED ELECTROSTATIC SYSTEM
-        self.columns_in_electric = np.intersect1d(boundary_condition.columns_in,self.electric_dofs)
-        self.columns_in_electric_idx = np.in1d(self.electric_dofs,boundary_condition.columns_in)
-
-
-        # GET FREE MECHANICAL DOFs
-        self.columns_out_mech = np.intersect1d(boundary_condition.columns_out,self.mechanical_dofs)
-        self.columns_out_mech_idx = np.in1d(self.mechanical_dofs,boundary_condition.columns_out)
-
-        # GET FREE ELECTROSTATIC DOFs
-        self.columns_out_electric = np.intersect1d(boundary_condition.columns_out,self.electric_dofs)
-        self.columns_out_electric_idx = np.in1d(self.electric_dofs,boundary_condition.columns_out)
+        # # GET BOUNDARY CONDITON FOR THE REDUCED ELECTROSTATIC SYSTEM
+        # self.columns_in_electric = np.intersect1d(boundary_condition.columns_in,self.electric_dofs)
+        # self.columns_in_electric_idx = np.in1d(self.electric_dofs,boundary_condition.columns_in)
 
 
-        self.applied_dirichlet_mech = boundary_condition.applied_dirichlet[np.in1d(boundary_condition.columns_out,self.columns_out_mech)]
-        self.applied_dirichlet_electric = boundary_condition.applied_dirichlet[np.in1d(boundary_condition.columns_out,self.columns_out_electric)]
+        # # GET FREE MECHANICAL DOFs
+        # self.columns_out_mech = np.intersect1d(boundary_condition.columns_out,self.mechanical_dofs)
+        # self.columns_out_mech_idx = np.in1d(self.mechanical_dofs,boundary_condition.columns_out)
+
+        # # GET FREE ELECTROSTATIC DOFs
+        # self.columns_out_electric = np.intersect1d(boundary_condition.columns_out,self.electric_dofs)
+        # self.columns_out_electric_idx = np.in1d(self.electric_dofs,boundary_condition.columns_out)
+
+
+        # self.applied_dirichlet_mech = boundary_condition.applied_dirichlet[np.in1d(boundary_condition.columns_out,self.columns_out_mech)]
+        # self.applied_dirichlet_electric = boundary_condition.applied_dirichlet[np.in1d(boundary_condition.columns_out,self.columns_out_electric)]
         
-        # MAPPED QUANTITIES
-        out_idx = np.in1d(all_dofs,boundary_condition.columns_out)
-        idx_electric = all_dofs[formulation.nvar-1::formulation.nvar]
-        idx_mech = np.setdiff1d(all_dofs,idx_electric)
+        # # MAPPED QUANTITIES
+        # out_idx = np.in1d(all_dofs,boundary_condition.columns_out)
+        # idx_electric = all_dofs[formulation.nvar-1::formulation.nvar]
+        # idx_mech = np.setdiff1d(all_dofs,idx_electric)
 
-        self.all_electric_dofs = np.arange(mesh.points.shape[0])
-        self.electric_out = self.all_electric_dofs[out_idx[idx_electric]]
-        self.electric_in = np.setdiff1d(self.all_electric_dofs,self.electric_out)
+        # self.all_electric_dofs = np.arange(mesh.points.shape[0])
+        # self.electric_out = self.all_electric_dofs[out_idx[idx_electric]]
+        # self.electric_in = np.setdiff1d(self.all_electric_dofs,self.electric_out)
 
-        self.all_mech_dofs = np.arange(mesh.points.shape[0]*formulation.ndim)
-        self.mech_out = self.all_mech_dofs[out_idx[idx_mech]]
-        self.mech_in = np.setdiff1d(self.all_mech_dofs,self.mech_out)
+        # self.all_mech_dofs = np.arange(mesh.points.shape[0]*formulation.ndim)
+        # self.mech_out = self.all_mech_dofs[out_idx[idx_mech]]
+        # self.mech_in = np.setdiff1d(self.all_mech_dofs,self.mech_out)
 
 
     def Solver(self, function_spaces, formulation, solver, 
         K, M, NeumannForces, NodalForces, Residual,
         mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition, fem_solver):
 
-        # GET BOUNDARY CONDITIONS INFROMATION 
-        self.GetBoundaryInfo(mesh, formulation,boundary_condition)
+        # GET BOUNDARY CONDITIONS INFROMATION
+        if formulation.fields == "electro_mechanics":
+            self.GetBoundaryInfo(mesh, formulation,boundary_condition)
 
         # accelerations  = np.zeros_like(TotalDisp)
         velocities     = np.zeros((mesh.points.shape[0],formulation.ndim,fem_solver.number_of_load_increments))
@@ -156,6 +159,12 @@ class StructuralDynamicIntegrators(object):
                 Increment, K, M, NodalForces, Residual, mesh, Eulerx, Eulerp,
                 material,boundary_condition,AppliedDirichletInc, fem_solver, TotalDisp, velocities, accelerations)
 
+            # M_mech = M[self.mechanical_dofs,:][:,self.mechanical_dofs]
+            # kin = 0.5*np.dot(velocities[:,:,Increment].ravel(),M_mech.dot(velocities[:,:,Increment].ravel()))
+            # pot = 0.5*np.dot(TotalDisp[:,:,Increment].ravel(),K.dot(TotalDisp[:,:,Increment].ravel()))
+            # print(pot+kin)
+            # print(np.max(accelerations[:,:,Increment]))
+
             # UPDATE DISPLACEMENTS FOR THE CURRENT LOAD INCREMENT
             TotalDisp[:,:formulation.ndim,Increment] = Eulerx - mesh.points
             if formulation.fields == "electro_mechanics":
@@ -190,6 +199,7 @@ class StructuralDynamicIntegrators(object):
                 TotalDisp = TotalDisp[:,:,:Increment]
                 break
 
+        # TotalDisp = np.concatenate((np.zeros_like(mesh.points),TotalDisp),axis=2)
         return TotalDisp
 
 
@@ -204,7 +214,7 @@ class StructuralDynamicIntegrators(object):
 
         # if Increment ==1:
             # exit()
-        print(AppliedDirichletInc.min(),AppliedDirichletInc.max())
+        # print(AppliedDirichletInc.min(),AppliedDirichletInc.max())
         # print(Eulerp.min(),Eulerp.max())
 
         EulerV = np.copy(velocities[:,:,Increment])
@@ -224,6 +234,7 @@ class StructuralDynamicIntegrators(object):
         Eulerx += IncDirichlet[:,:formulation.ndim]
         Eulerp += IncDirichlet[:,-1]
         # print(Eulerp.min(),Eulerp.max())
+        # EulerGeom = np.copy(Eulerx)
 
         # UPDATE VELOCITY AND ACCELERATION
         # velocities[:,:,Increment]    += self.gamma/self.beta/LoadFactor*IncDirichlet[:,:]
@@ -324,10 +335,16 @@ class StructuralDynamicIntegrators(object):
             # print(self.mechanical_dofs)
             # exit()
             # M_mech = M[mech_aranger,:][:,mech_aranger]
-            M_mech = M[self.mechanical_dofs,:][:,self.mechanical_dofs]
-            # # print(M_mech.shape,accelerations[:,:,Increment].ravel().shape)
-            InertiaResidual = np.zeros((TractionForces.shape[0],1))
-            InertiaResidual[self.mechanical_dofs,0] = M_mech.dot(accelerations[:,:,Increment].ravel())
+
+            if formulation.fields == "electro_mechanics":
+                M_mech = M[self.mechanical_dofs,:][:,self.mechanical_dofs]
+                # # print(M_mech.shape,accelerations[:,:,Increment].ravel().shape)
+                InertiaResidual = np.zeros((TractionForces.shape[0],1))
+                InertiaResidual[self.mechanical_dofs,0] = M_mech.dot(accelerations[:,:,Increment].ravel())
+            else:
+                InertiaResidual = np.zeros((TractionForces.shape[0],1))
+                InertiaResidual[:,0] = M.dot(accelerations[:,:,Increment].ravel())
+
 
             # print(InertiaResidual.shape,TractionForces.shape)
             # print(boundary_condition.columns_in)

@@ -15,7 +15,7 @@ from .DisplacementPotentialApproachIndices import *
 class DisplacementPotentialFormulation(VariationalPrinciple):
 
     def __init__(self, mesh, variables_order=(1,), 
-        quadrature_rules=None, quadrature_type=None, function_spaces=None, compute_post_quadrature=False,
+        quadrature_rules=None, quadrature_type=None, function_spaces=None, compute_post_quadrature=True,
         equally_spaced_bases=False):
 
         if mesh.element_type != "tet" and mesh.element_type != "tri" and \
@@ -48,7 +48,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
                 norder_post = 2*(C+1)
             else:
-                norder = C+4
+                norder = C+2
                 norder_post = 2*(C+2)
 
             # GET QUADRATURE

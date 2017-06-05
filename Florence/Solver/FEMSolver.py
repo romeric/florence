@@ -264,9 +264,14 @@ class FEMSolver(object):
 
             return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
 
-        # ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES
-        K, TractionForces, _, M = Assemble(self, function_spaces[0], formulation, mesh, material, solver, 
-            Eulerx, Eulerp)
+        # ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES FOR THE FIRST TIME
+        if self.analysis_type == "static":
+            K, TractionForces, _, M = Assemble(self, function_spaces[0], formulation, mesh, material, solver,
+                Eulerx, Eulerp)
+        else:
+            # COMPUTE BOTH STIFFNESS AND MASS USING HIGHER QUADRATURE RULE
+            K, TractionForces, _, M = Assemble(self, function_spaces[1], formulation, mesh, material, solver,
+                Eulerx, Eulerp)
 
         if self.analysis_nature == 'nonlinear':
             print('Finished all pre-processing stage. Time elapsed was', time()-tAssembly, 'seconds')
