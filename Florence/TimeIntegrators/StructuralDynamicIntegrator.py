@@ -219,7 +219,7 @@ class StructuralDynamicIntegrators(object):
 
         EulerV = np.copy(velocities[:,:,Increment])
         EulerA = np.copy(accelerations[:,:,Increment])
-        EulerGeom = np.copy(Eulerx)
+        EulerxPrev = np.copy(Eulerx)
         # PREDICTOR STEP
         dumV = (1. - self.gamma/self.beta)*velocities[:,:,Increment] + (1. - self.gamma/2./self.beta)*LoadFactor*accelerations[:,:,Increment]
         dumA = (-1./self.beta/LoadFactor)*velocities[:,:,Increment] - (1./2./self.beta)*(1.- 2.*self.beta)*accelerations[:,:,Increment]
@@ -246,8 +246,19 @@ class StructuralDynamicIntegrators(object):
 
         np.set_printoptions(linewidth=1000,threshold=1000)
 
+        # K_0 = K.copy()
+        
+        # D = 0.1*M
+
 
         while np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces) > Tolerance:
+
+            # # PREDICTOR STEP
+            # dumV = (1. - self.gamma/self.beta)*velocities[:,:,Increment] + (1. - self.gamma/2./self.beta)*LoadFactor*accelerations[:,:,Increment]
+            # dumA = (-1./self.beta/LoadFactor)*velocities[:,:,Increment] - (1./2./self.beta)*(1.- 2.*self.beta)*accelerations[:,:,Increment]
+            # velocities[:,:,Increment]    = dumV
+            # accelerations[:,:,Increment] = dumA
+
             # GET THE REDUCED SYSTEM OF EQUATIONS
             # K_b, F_b, M_b = boundary_condition.GetReducedMatrices(K,Residual,M)
             # print(M.todense())
@@ -258,8 +269,10 @@ class StructuralDynamicIntegrators(object):
             # print(M.todense())
             # print(K.todense())
             K += (1./self.beta/LoadFactor**2)*M
+            # K += self.gamma/self.beta/LoadFactor*D + (1./self.beta/LoadFactor**2)*M
             K_b, F_b, _ = boundary_condition.GetReducedMatrices(K,Residual)
             # K1 = K + (1./self.beta/LoadFactor**2)*M
+            # K1 = K_0 + (1./self.beta/LoadFactor**2)*M
             # K_b, F_b, _ = boundary_condition.GetReducedMatrices(K1,Residual,M)
 
             # SOLVE THE SYSTEM
@@ -289,12 +302,22 @@ class StructuralDynamicIntegrators(object):
             # dumV = (1. - self.gamma/self.beta)*velocities[:,:,Increment] +\
             #     (1. - self.gamma/2./self.beta)*LoadFactor*accelerations[:,:,Increment] +\
             #     self.gamma/self.beta/LoadFactor*(Eulerx - TotalDisp[:,:formulation.ndim,Increment])
-            dumA = 1./self.beta/LoadFactor**2*(Eulerx - EulerGeom) -\
-                1./self.beta/LoadFactor*EulerV -\
-                1./2./self.beta*(1. - 2.*self.beta)*EulerA
-            dumV = (1. - self.gamma/self.beta)*EulerV +\
-                (1. - self.gamma/2./self.beta)*LoadFactor*EulerA +\
-                self.gamma/self.beta/LoadFactor*(Eulerx - EulerGeom)
+
+            # dumA = 1./self.beta/LoadFactor**2*(Eulerx - EulerxPrev) -\
+            #     1./self.beta/LoadFactor*EulerV -\
+            #     1./2./self.beta*(1. - 2.*self.beta)*EulerA
+            # dumV = (1. - self.gamma/self.beta)*EulerV +\
+            #     (1. - self.gamma/2./self.beta)*LoadFactor*EulerA +\
+            #     self.gamma/self.beta/LoadFactor*(Eulerx - EulerxPrev)
+
+            # accelerations_prev = np.copy(accelerations[:,:,Increment])
+
+            dumA = 1./self.beta/LoadFactor**2*(Eulerx - EulerxPrev) -\
+                1./self.beta/LoadFactor*(EulerV) -\
+                1./2./self.beta*(1. - 2.*self.beta)*(EulerA)
+            dumV = (1. - self.gamma/self.beta)*(EulerV) +\
+                (1. - self.gamma/2./self.beta)*LoadFactor*(EulerA) +\
+                self.gamma/self.beta/LoadFactor*(Eulerx - EulerxPrev)
 
             velocities[:,:,Increment]    = dumV
             accelerations[:,:,Increment] = dumA
@@ -341,6 +364,9 @@ class StructuralDynamicIntegrators(object):
                 # # print(M_mech.shape,accelerations[:,:,Increment].ravel().shape)
                 InertiaResidual = np.zeros((TractionForces.shape[0],1))
                 InertiaResidual[self.mechanical_dofs,0] = M_mech.dot(accelerations[:,:,Increment].ravel())
+
+                # InertiaResidual[self.mechanical_dofs,0] += 0.1*M_mech.dot(velocities[:,:,Increment].ravel())
+                # InertiaResidual[self.mechanical_dofs,0] = M_mech.dot(accelerations_prev.ravel())
             else:
                 InertiaResidual = np.zeros((TractionForces.shape[0],1))
                 InertiaResidual[:,0] = M.dot(accelerations[:,:,Increment].ravel())
