@@ -33,21 +33,6 @@ class StructuralDynamicIntegrators(object):
 
     def GetBoundaryInfo(self, mesh, formulation, boundary_condition):
 
-        # self.geometry_dofs = np.arange(mesh.points.shape[0])
-        # for i in range(1,formulation.ndim):
-        #     self.geometry_dofs = np.concatenate((formulation.nvar*self.geometry_dofs,
-        #         formulation.nvar*self.geometry_dofs+i))
-        # self.geometry_dofs.sort()
-        # self.total_dofs = np.arange(mesh.points.shape[0]*formulation.nvar)
-        # self.non_geometry_dofs = np.delete(self.total_dofs,self.geometry_dofs)
-
-        # # print(mesh.points.shape,formulation.nvar)
-        # # print(self.geometry_dofs.shape, self.non_geometry_dofs.shape, self.total_dofs.shape)
-        # # print(boundary_condition.columns_in.shape)
-        # # print(boundary_condition.columns_out.shape)
-
-        # self.geometry_in = 
-
 
         all_dofs = np.arange(mesh.points.shape[0]*formulation.nvar)
         self.electric_dofs = all_dofs[formulation.nvar-1::formulation.nvar]
@@ -96,13 +81,17 @@ class StructuralDynamicIntegrators(object):
         # GET BOUNDARY CONDITIONS INFROMATION
         if formulation.fields == "electro_mechanics":
             self.GetBoundaryInfo(mesh, formulation,boundary_condition)
+            M_mech = M[self.mechanical_dofs,:][:,self.mechanical_dofs]
 
         # accelerations  = np.zeros_like(TotalDisp)
         velocities     = np.zeros((mesh.points.shape[0],formulation.ndim,fem_solver.number_of_load_increments))
         accelerations  = np.zeros((mesh.points.shape[0],formulation.ndim,fem_solver.number_of_load_increments))
 
         Res = Residual - NeumannForces[:,0][:,None]
-        accelerations[:,:,0] = solver.Solve(M, -Res.ravel() ).reshape(mesh.points.shape[0],formulation.nvar)
+        if formulation.fields == "electro_mechanics":
+            accelerations[:,:,0] = solver.Solve(M_mech, -Res[self.mechanical_dofs].ravel() ).reshape(mesh.points.shape[0],formulation.ndim)
+        else:
+            accelerations[:,:,0] = solver.Solve(M, -Res.ravel() ).reshape(mesh.points.shape[0],formulation.ndim)
         # print(np.linalg.norm(accelerations[:,:,0]))
         # print(np.linalg.norm(NeumannForces[:,0]))
         # exit()
@@ -113,6 +102,12 @@ class StructuralDynamicIntegrators(object):
         AppliedDirichletInc = np.zeros(boundary_condition.applied_dirichlet.shape[0],dtype=np.float64)
         # print(np.isnan(AppliedDirichletInc).any())
         # exit()
+        # print(NeumannForces.shape)
+        # exit()
+        if NeumannForces.ndim == 2 and NeumannForces.shape[1]==1:
+            tmp = np.zeros((NeumannForces.shape[0],LoadIncrement))
+            tmp[:,0] = NeumannForces[:,0]
+            NeumannForces = tmp
         
         for Increment in range(LoadIncrement):
 
@@ -123,6 +118,7 @@ class StructuralDynamicIntegrators(object):
             DeltaF = NeumannForces[:,Increment][:,None]
             # NodalForces += DeltaF
             NodalForces = DeltaF
+            # print(NodalForces.shape)
 
             # print(boundary_condition.applied_dirichlet)
             # exit()
@@ -165,9 +161,9 @@ class StructuralDynamicIntegrators(object):
 
             self.norm_residual = np.linalg.norm(Residual)/self.NormForces
 
-            Eulerx, Eulerp, K, Residual, TotalDisp, velocities, accelerations = self.NewtonRaphson(function_spaces, formulation, solver, 
+            Eulerx, Eulerp, K, Residual, velocities, accelerations = self.NewtonRaphson(function_spaces, formulation, solver, 
                 Increment, K, M, NodalForces, Residual, mesh, Eulerx, Eulerp,
-                material,boundary_condition,AppliedDirichletInc, fem_solver, TotalDisp, velocities, accelerations)
+                material,boundary_condition,AppliedDirichletInc, fem_solver, velocities, accelerations)
 
             # UPDATE DISPLACEMENTS FOR THE CURRENT LOAD INCREMENT
             TotalDisp[:,:formulation.ndim,Increment] = Eulerx - mesh.points
@@ -204,16 +200,19 @@ class StructuralDynamicIntegrators(object):
             # STORE THE INFORMATION IF NEWTON-RAPHSON FAILS
             if fem_solver.newton_raphson_failed_to_converge:
                 solver.condA = np.NAN
-                TotalDisp = TotalDisp[:,:,:Increment]
+                TotalDisp = TotalDisp[:,:,:Increment-1]
+                fem_solver.number_of_load_increments = Increment - 1
                 break
 
         # TotalDisp = np.concatenate((np.zeros_like(mesh.points),TotalDisp),axis=2)
+        # for i in range(TotalDisp.shape[2]-1,0,-1):
+            # TotalDisp[:,:,i] = np.sum(TotalDisp[:,:,:i+1],axis=2)
         return TotalDisp
 
 
     def NewtonRaphson(self, function_spaces, formulation, solver, 
         Increment, K, M, NodalForces, Residual, mesh, Eulerx, Eulerp, material,
-        boundary_condition, AppliedDirichletInc, fem_solver, TotalDisp, velocities, accelerations):
+        boundary_condition, AppliedDirichletInc, fem_solver, velocities, accelerations):
 
         Tolerance = fem_solver.newton_raphson_tolerance
         LoadIncrement = fem_solver.number_of_load_increments
@@ -238,9 +237,20 @@ class StructuralDynamicIntegrators(object):
         velocities[:,:,Increment]    = dumV
         accelerations[:,:,Increment] = dumA
 
-        InertiaResidual = np.zeros((Residual.shape[0],1))
-        InertiaResidual[:,0] = M.dot(accelerations[:,:,Increment].ravel())
+        if formulation.fields == "electro_mechanics":
+            M_mech = M[self.mechanical_dofs,:][:,self.mechanical_dofs]
+            # # print(M_mech.shape,accelerations[:,:,Increment].ravel().shape)
+            InertiaResidual = np.zeros((Residual.shape[0],1))
+            InertiaResidual[self.mechanical_dofs,0] = M_mech.dot(accelerations[:,:,Increment].ravel())
+            # InertiaResidual[self.mechanical_dofs,0] = M_mech.dot(accelerations_prev.ravel())
+
+            # InertiaResidual[self.mechanical_dofs,0] += 0.1*M_mech.dot(velocities[:,:,Increment].ravel())
+        else:
+            InertiaResidual = np.zeros((Residual.shape[0],1))
+            InertiaResidual[:,0] = M.dot(accelerations[:,:,Increment].ravel())
         Residual[boundary_condition.columns_in] += InertiaResidual[boundary_condition.columns_in]
+
+
 
 
         # APPLY INCREMENTAL DIRICHLET PER LOAD STEP (THIS IS INCREMENTAL NOT ACCUMULATIVE)
@@ -300,7 +310,7 @@ class StructuralDynamicIntegrators(object):
             # GET ITERATIVE SOLUTION
             dU = boundary_condition.UpdateFreeDoFs(sol,K.shape[0],formulation.nvar) 
             # print()
-            print(np.linalg.norm(dU))
+            # print(np.linalg.norm(dU))
             # print(dU)
             # exit()
             # print(np.linalg.norm(M.todense()))
@@ -440,7 +450,8 @@ class StructuralDynamicIntegrators(object):
                 break
 
 
-        return Eulerx, Eulerp, K, Residual, TotalDisp, velocities, accelerations
+        return Eulerx, Eulerp, K, Residual, velocities, accelerations
+
 
 
 

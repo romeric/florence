@@ -260,7 +260,7 @@ class FEMSolver(object):
                 boundary_condition, solver, TotalDisp, Eulerx, NeumannForces)
             del vmesh
 
-            # ADD EACH INCREMENTAL CONTRIBUTION TO MAKE IT CONSISTENT WITH THE NONLINEAR ANALYSYS
+            # ADD EACH INCREMENTAL CONTRIBUTION TO MAKE IT CONSISTENT WITH THE NONLINEAR ANALYSIS
             for i in range(TotalDisp.shape[2]-1,0,-1):
                 TotalDisp[:,:,i] = np.sum(TotalDisp[:,:,:i+1],axis=2)
 
