@@ -35,7 +35,7 @@ class FEMSolver(object):
         compute_mesh_qualities=True,  
         parallelise=False, memory_model="shared", platform="cpu", backend="opencl",
         print_incremental_log=False,save_incremental_solution=False, incremental_solution_filename=None,
-        break_at_increment=-1):
+        break_at_increment=-1, compute_energy_dissipation=False):
 
         self.has_low_level_dispatcher = has_low_level_dispatcher
 
@@ -56,6 +56,8 @@ class FEMSolver(object):
         self.maximum_iteration_for_newton_raphson = maximum_iteration_for_newton_raphson
         self.newton_raphson_failed_to_converge = False
         self.NRConvergence = None
+        self.compute_energy_dissipation = compute_energy_dissipation
+        self.energy_dissipation = []
 
         self.compute_mesh_qualities = compute_mesh_qualities
         self.isScaledJacobianComputed = False

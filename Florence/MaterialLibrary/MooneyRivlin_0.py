@@ -73,3 +73,21 @@ class MooneyRivlin_0(Material):
             lamb*(J-1)*I 
 
         return sigma
+
+
+    def InternalEnergy(self,StrainTensors,elem=0,gcounter=0):
+
+        mu1 = self.mu1
+        mu2 = self.mu2
+        lamb = self.lamb
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+        H = J*np.linalg.inv(F).T
+        C = np.dot(F.T,F)
+        G = np.dot(H.T,H)
+
+        energy  = mu1*(einsum('ij,ij',C,I) - 3.) + mu2*(einsum('ij,ij',G,I) - 3.) -2.*(mu1+2.*mu2)*np.log(J) + lamb/2.*(J-1)**2
+
+        return energy
