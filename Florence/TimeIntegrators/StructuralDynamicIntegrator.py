@@ -461,22 +461,13 @@ class StructuralDynamicIntegrators(object):
             
             internal_energy += formulation.GetEnergy(function_space, material, LagrangeElemCoords, EulerElemCoords, fem_solver, elem)
 
-        # return elemental_internal_energy
-
         if formulation.fields == "electro_mechanics":
             M_mech = M[self.mechanical_dofs,:][:,self.mechanical_dofs]
             kinetic_energy = 0.5*np.dot(velocities[:,:,Increment].ravel(),M_mech.dot(velocities[:,:,Increment].ravel()))
-            # pot = 0.5*np.dot(TotalDisp[:,:,Increment].ravel(),K.dot(TotalDisp[:,:,Increment].ravel()))
 
         else:
             kinetic_energy = 0.5*np.dot(velocities[:,:,Increment].ravel(),M.dot(velocities[:,:,Increment].ravel()))
-            # internal_energy = 0.5*np.dot(TotalDisp[:,:,Increment].ravel(),K.dot(TotalDisp[:,:,Increment].ravel()))
-            # print(pot+kin-ext)
-            # fem_solver.dd.append(pot+kin-ext)
-            # print(TotalDisp[:,:,Increment].ravel().shape,NeumannForces[:,Increment].shape)
-            # print(np.max(accelerations[:,:,Increment]))
 
-        # external_energy = np.dot(TotalDisp[:,:,Increment].ravel(),NeumannForces[:,Increment])
         external_energy = np.dot(TotalDisp[:,:,Increment].ravel(),NeumannForces[:,Increment])
 
         return internal_energy + kinetic_energy - external_energy
