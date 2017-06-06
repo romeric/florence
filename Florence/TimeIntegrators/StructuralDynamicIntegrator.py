@@ -98,7 +98,7 @@ class StructuralDynamicIntegrators(object):
     
         self.NRConvergence = fem_solver.NRConvergence
         LoadIncrement = fem_solver.number_of_load_increments
-        LoadFactor = 1./LoadIncrement
+        LoadFactor = 10./LoadIncrement
         AppliedDirichletInc = np.zeros(boundary_condition.applied_dirichlet.shape[0],dtype=np.float64)
         # print(np.isnan(AppliedDirichletInc).any())
         # exit()
@@ -216,7 +216,7 @@ class StructuralDynamicIntegrators(object):
 
         Tolerance = fem_solver.newton_raphson_tolerance
         LoadIncrement = fem_solver.number_of_load_increments
-        LoadFactor = 1./fem_solver.number_of_load_increments
+        LoadFactor = 10./fem_solver.number_of_load_increments
         Iter = 0
 
         # if Increment >= 179 and Increment < 188:
