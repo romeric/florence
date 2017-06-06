@@ -219,9 +219,6 @@ class StructuralDynamicIntegrators(object):
         LoadFactor = 1./fem_solver.number_of_load_increments
         Iter = 0
 
-        # if Increment == 150:
-        #     M *=10.
-
         # if Increment >= 179 and Increment < 188:
         #     M *=1.2
             # exit()
@@ -560,14 +557,17 @@ class StructuralDynamicIntegrators(object):
 # dyn = StructuralDynamicIntegrators()
 # n = 500
 # stiffness = np.random.rand(n,n)
-# mass = np.random.rand(n,n)
+# stiffness += stiffness.T
+# # mass = np.random.rand(n,n)
+# mass = np.eye(n,n)
 # # mass = np.eye(n,n)
 # alpha = 0.2
 # delta=0.5
 # gamma = 0.4
 # freedof = np.arange(0,10)
 # nstep = 2*n
-# F = np.random.rand(nstep,1)
+# # F = np.random.rand(nstep,1)
+# F = np.sin(np.linspace(0,2*np.pi,nstep))
 # napp=8
 # dt = 1.0/nstep
 # U, A, V = dyn.Alpha(stiffness,mass,F,freedof,nstep,dt,napp,alpha,delta,gamma)
