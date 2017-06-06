@@ -35,7 +35,7 @@ class FEMSolver(object):
         compute_mesh_qualities=True,  
         parallelise=False, memory_model="shared", platform="cpu", backend="opencl",
         print_incremental_log=False,save_incremental_solution=False, incremental_solution_filename=None,
-        break_at_increment=-1, compute_energy_dissipation=False):
+        break_at_increment=-1, compute_energy_dissipation=False, total_time=1.):
 
         self.has_low_level_dispatcher = has_low_level_dispatcher
 
@@ -49,6 +49,7 @@ class FEMSolver(object):
         self.has_moving_boundary = has_moving_boundary
         self.has_prestress = has_prestress
         self.is_mass_computed = False
+        self.total_time = total_time
 
         self.number_of_load_increments = number_of_load_increments
         self.load_factor = load_factor
@@ -58,6 +59,9 @@ class FEMSolver(object):
         self.NRConvergence = None
         self.compute_energy_dissipation = compute_energy_dissipation
         self.energy_dissipation = []
+        self.internal_energy = []
+        self.kinetic_energy = []
+        self.external_energy = []
 
         self.compute_mesh_qualities = compute_mesh_qualities
         self.isScaledJacobianComputed = False

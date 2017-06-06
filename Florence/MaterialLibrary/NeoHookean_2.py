@@ -53,3 +53,19 @@ class NeoHookean_2(Material):
         return 1.0*mu/J*b + (lamb*(J-1.0)-mu/J)*I
 
 
+
+    def InternalEnergy(self,StrainTensors,elem=0,gcounter=0):
+
+        mu = self.mu
+        lamb = self.lamb
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+        C = np.dot(F.T,F)
+
+        energy  = mu/2.*(trace(C) - 3.) - mu*np.log(J) + lamb/2.*(J-1.)**2
+
+        return energy
+
+

@@ -269,12 +269,12 @@ class DisplacementFormulation(VariationalPrinciple):
         
         # # UPDATE/NO-UPDATE GEOMETRY
         # if fem_solver.requires_geometry_update:
-        #     # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-        #     ParentGradientx = np.einsum('ijk,jl->kil',Jm, EulerELemCoords)
-        #     # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
-        #     SpatialGradient = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Jm)
-        #     # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
-        #     detJ = np.einsum('i,i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)),np.abs(StrainTensors['J']))
+            # # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+            # ParentGradientx = np.einsum('ijk,jl->kil',Jm, EulerELemCoords)
+            # # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
+            # SpatialGradient = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Jm)
+            # # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
+            # detJ = np.einsum('i,i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)),np.abs(StrainTensors['J']))
         # else:
         #     # SPATIAL GRADIENT AND MATERIAL GRADIENT TENSORS ARE EQUAL
         #     SpatialGradient = np.einsum('ikj',MaterialGradient)
@@ -295,5 +295,63 @@ class DisplacementFormulation(VariationalPrinciple):
             internal_energy += energy*detJ[counter]
 
         return internal_energy
+
+
+
+    def GetPower(self, function_space, material, LagrangeElemCoords, EulerELemCoords, VelocityElem, fem_solver, elem=0):
+        """Get stiffness matrix of the system"""
+
+        nvar = self.nvar
+        ndim = self.ndim
+        nodeperelem = function_space.Bases.shape[0]
+
+        det = np.linalg.det
+        inv = np.linalg.inv
+        Jm = function_space.Jm
+        AllGauss = function_space.AllGauss
+
+        internal_power = 0.
+
+        # COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
+        # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+        ParentGradientX = np.einsum('ijk,jl->kil', Jm, LagrangeElemCoords)
+        # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
+        MaterialGradient = np.einsum('ijk,kli->ijl', inv(ParentGradientX), Jm)
+        # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
+        F = np.einsum('ij,kli->kjl', EulerELemCoords, MaterialGradient)
+        # Velocities
+        Fdot = np.einsum('ij,kli->kjl', VelocityElem, MaterialGradient)
+        # Spatial gradient of velocities
+        # GradV = np.dot(Fdot,np.linalg.inv(F))
+        # print(np.linalg.inv(F).shape)
+        # GradV = np.einsum('ijk,ljk')
+        # print(Fdot.shape,F.shape)
+        # exit()
+
+        # COMPUTE REMAINING KINEMATIC MEASURES
+        StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
+        # # SPATIAL GRADIENT AND MATERIAL GRADIENT TENSORS ARE EQUAL
+        # SpatialGradient = np.einsum('ikj',MaterialGradient)
+        # # COMPUTE ONCE detJ
+        # detJ = np.einsum('i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)))
+
+        # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+        ParentGradientx = np.einsum('ijk,jl->kil',Jm, EulerELemCoords)
+        # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
+        SpatialGradient = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Jm)
+        # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
+        detJ = np.einsum('i,i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)),np.abs(StrainTensors['J']))
+
+
+        # LOOP OVER GAUSS POINTS
+        for counter in range(AllGauss.shape[0]): 
+            # COMPUTE CAUCHY
+            GradV = np.dot(Fdot[counter,:,:],np.linalg.inv(F[counter,:,:]))
+            # energy = material.InternalEnergy(StrainTensors,elem,counter)
+            CauchyStressTensor = material.CauchyStress(StrainTensors,None,elem,counter)
+            # INTEGRATE INTERNAL ENERGY
+            internal_power += np.einsum('ij,ij',CauchyStressTensor,GradV)*detJ[counter]
+
+        return internal_power
 
 
