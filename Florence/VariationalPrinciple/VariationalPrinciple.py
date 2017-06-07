@@ -2,6 +2,7 @@ import numpy as np
 from Florence import QuadratureRule, FunctionSpace, Mesh
 from Florence.FiniteElements.LocalAssembly._KinematicMeasures_ import _KinematicMeasures_
 from Florence.VariationalPrinciple._GeometricStiffness_ import GeometricStiffnessIntegrand as GetGeomStiffness
+from ._MassIntegrand_ import __MassIntegrand__
 
 import pyximport
 pyximport.install(setup_args={'include_dirs': np.get_include()})
@@ -152,6 +153,37 @@ class VariationalPrinciple(object):
         
         rhoNN = rho*np.dot(N,N.T)
         return rhoNN
+
+
+    def GetLocalMass(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem):
+
+        ndim = self.ndim
+        nvar = self.nvar
+        Domain = function_space
+
+        N = np.zeros((Domain.Bases.shape[0]*nvar,nvar))
+        mass = np.zeros((Domain.Bases.shape[0]*nvar,Domain.Bases.shape[0]*nvar))
+
+        # LOOP OVER GAUSS POINTS
+        for counter in range(0,Domain.AllGauss.shape[0]):
+            # GRADIENT TENSOR IN PARENT ELEMENT [\nabla_\varepsilon (N)]
+            Jm = Domain.Jm[:,:,counter]
+            Bases = Domain.Bases[:,counter]
+            # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+            ParentGradientX=np.dot(Jm,LagrangeElemCoords)
+
+            # COMPUTE THE MASS INTEGRAND
+            rhoNN = self.MassIntegrand(Bases,N,material)
+            # INTEGRATE MASS
+            mass += rhoNN*Domain.AllGauss[counter,0]*np.abs(np.linalg.det(ParentGradientX))
+
+        return mass
+
+    def __GetLocalMass__(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem):
+        # GET LOCAL KINEMATICS
+        _, _, detJ = _KinematicMeasures_(function_space.Jm, function_space.AllGauss[:,0], LagrangeElemCoords, 
+            EulerELemCoords, False)
+        return __MassIntegrand__(material.rho,function_space.Bases,detJ,material.ndim,material.nvar)
 
 
     def VerifyMass(self,density, ndim, mass, detJ):

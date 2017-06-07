@@ -125,8 +125,6 @@ class FlorenceSetup(object):
                 self.python_ld_path = get_config_var("LIBDIR")
             except:
                 raise RuntimeError("Could not find libpython")
-        execute("ls " + self.python_ld_path + "/")
-        # exit()
 
 
         # Get postfix for extensions 
@@ -234,17 +232,6 @@ class FlorenceSetup(object):
         else:
             self.cxx_version = "-std=c++11"
 
-        print(self.python_interpreter)
-        print(self.python_ld_path)
-        print(self.python_include_path)
-        print(self.numpy_include_path)
-        print(self.fastor_include_path)
-        print(self.blas_version)
-        print(self.blas_include_path)
-        print(self.blas_ld_path)
-        print(self.extension_postfix)
-        print(self.cxx_version)
-
         # Generic compiler arguments
         self.compiler_args = "PYTHON_VERSION=" + self.python_interpreter + " PYTHON_INCLUDE_PATH=" + \
             self.python_include_path + " PYTHON_LD_PATH=" + self.python_ld_path + \
@@ -273,11 +260,12 @@ class FlorenceSetup(object):
         km_path = os.path.join(_pwd_,"FiniteElements","LocalAssembly","_KinematicMeasures_")
         gm_path = os.path.join(_pwd_,"VariationalPrinciple","_GeometricStiffness_")
         cm_path = os.path.join(_pwd_,"VariationalPrinciple","_ConstitutiveStiffness_")
+        mm_path = os.path.join(_pwd_,"VariationalPrinciple","_Mass_")
         material_path = os.path.join(_pwd_,"MaterialLibrary","LLDispatch")
         assemble_path = os.path.join(_pwd_,"FiniteElements","Assembly","_Assembly_")
 
-        self.extension_paths = [tensor_path,mesh_path,jacobi_path,bp_path,km_path,gm_path,cm_path,material_path,assemble_path]
-        # self.extension_paths = [assemble_path]
+        self.extension_paths = [tensor_path,mesh_path,jacobi_path,bp_path,km_path,gm_path,cm_path,mm_path,material_path,assemble_path]
+        # self.extension_paths = [mm_path]
 
     def SourceClean(self):
 
