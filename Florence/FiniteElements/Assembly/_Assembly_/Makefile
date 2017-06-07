@@ -43,6 +43,7 @@ MAT_INC = ../../../MaterialLibrary/LLDispatch/CythonSource/
 CONDF_INC = ../../../VariationalPrinciple/_ConstitutiveStiffness_/
 CONDPF_INC = ../../../VariationalPrinciple/_ConstitutiveStiffness_/
 GEO_INC = ../../../VariationalPrinciple/_GeometricStiffness_/ 
+MASS_INC = ../../../VariationalPrinciple/_Mass_/
 
 ifeq ($(findstring g++,$(CXX)),g++)
 ifneq ($(findstring clang++,$(CXX)),clang++)
@@ -70,7 +71,7 @@ build_module:
 	$(CYTHON) $(ASSEMBLY_NAME).pyx
 	$(CXX) $(CXXSTD) $(CXXFLAGS) $(ASSEMBLY_NAME).cpp -o $(ASSEMBLY_NAME).$(EXT_POSTFIX) -I. \
 	-I$(PYTHON_INCLUDE_PATH) -I$(NUMPY_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION) -I$(KIN_INC) -I../../../Tensor/ -I$(MAT_INC) \
-	-I$(GEO_INC) -I$(CONDF_INC) -I$(CONDPF_INC) -I$(BLAS_INCLUDE_PATH) -L$(BLAS_LD_PATH) -l$(BLAS_VERSION)
+	-I$(GEO_INC) -I$(CONDF_INC) -I$(CONDPF_INC) -I$(MASS_INC) -I$(BLAS_INCLUDE_PATH) -L$(BLAS_LD_PATH) -l$(BLAS_VERSION)
 	$(MOVE) $(ASSEMBLY_NAME).$(EXT_POSTFIX) ../
 
 clean:

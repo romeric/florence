@@ -38,6 +38,7 @@ class StructuralDynamicIntegrators(object):
         K, M, NeumannForces, NodalForces, Residual,
         mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition, fem_solver):
 
+
         # COMPUTE DAMPING MATRIX BASED ON MASS
         D = 0.0
         if fem_solver.include_physical_damping:
@@ -75,6 +76,11 @@ class StructuralDynamicIntegrators(object):
 
         # TIME LOOP
         for Increment in range(1,LoadIncrement):
+
+            # # print(np.linalg.norm(K.todense()))
+            # print(np.linalg.norm(M.todense()))
+            # # solver.SparsityPattern(M)
+            # # exit()
 
             t_increment = time()
 
@@ -193,10 +199,10 @@ class StructuralDynamicIntegrators(object):
 
         if formulation.fields == "electro_mechanics":
             M_mech = M[self.mechanical_dofs,:][:,self.mechanical_dofs]
-            D_mech = D[self.mechanical_dofs,:][:,self.mechanical_dofs]
             InertiaResidual = np.zeros((Residual.shape[0],1))
             InertiaResidual[self.mechanical_dofs,0] = M_mech.dot(accelerations.ravel())
             if fem_solver.include_physical_damping:
+                D_mech = D[self.mechanical_dofs,:][:,self.mechanical_dofs]
                 InertiaResidual[self.mechanical_dofs,0] += D_mech.dot(velocities.ravel())
         else:
             InertiaResidual = np.zeros((Residual.shape[0],1))

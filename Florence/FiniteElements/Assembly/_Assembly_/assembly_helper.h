@@ -13,6 +13,7 @@
 
 #include "_KinematicMeasures_.h"
 #include "_GeometricStiffness_.h"
+#include "_MassIntegrand_.h"
 
 
 

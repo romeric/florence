@@ -12,6 +12,7 @@ cdef extern from "_LowLevelAssemblyDPF_.h" nogil:
                             const UInteger* elements, 
                             const Real* Eulerx,
                             const Real* Eulerp,
+                            const Real* bases,
                             const Real* Jm,
                             const Real* AllGauss,
                             Integer ndim,
@@ -34,6 +35,7 @@ cdef extern from "_LowLevelAssemblyDPF_.h" nogil:
                             int *I_mass,
                             int *J_mass,
                             Real *V_mass,
+                            Real rho,
                             Real mu,
                             Real mu1,
                             Real mu2,
@@ -61,11 +63,12 @@ def _LowLevelAssemblyDPF_(fem_solver, function_space, formulation, mesh, materia
 
     cdef np.ndarray[UInteger,ndim=2, mode='c'] elements = mesh.elements
     cdef np.ndarray[Real,ndim=2, mode='c'] points       = mesh.points
+    cdef np.ndarray[Real,ndim=2, mode='c'] bases        = function_space.Bases
     cdef np.ndarray[Real,ndim=3, mode='c'] Jm           = function_space.Jm
     cdef np.ndarray[Real,ndim=1, mode='c'] AllGauss     = function_space.AllGauss.flatten()
 
     cdef Integer requires_geometry_update               = fem_solver.requires_geometry_update
-    cdef Integer is_dynamic                             = not fem_solver.analysis_type
+    cdef Integer is_dynamic                             = fem_solver.analysis_type != "static" and fem_solver.is_mass_computed is False
 
     cdef np.ndarray[Integer,ndim=1,mode='c'] local_rows_stiffness   = formulation.local_rows
     cdef np.ndarray[Integer,ndim=1,mode='c'] local_cols_stiffness   = formulation.local_columns
@@ -98,11 +101,13 @@ def _LowLevelAssemblyDPF_(fem_solver, function_space, formulation, mesh, materia
 
     mu, lamb, eps_1 = material.mu, material.lamb, material.eps_1
 
+    cdef Real rho = material.rho
 
     _GlobalAssemblyDPF_(    &points[0,0],
                             &elements[0,0],
                             &Eulerx[0,0],
                             &Eulerp[0],
+                            &bases[0,0],
                             &Jm[0,0,0],
                             &AllGauss[0],
                             ndim,
@@ -125,6 +130,7 @@ def _LowLevelAssemblyDPF_(fem_solver, function_space, formulation, mesh, materia
                             &I_mass[0],
                             &J_mass[0],
                             &V_mass[0],
+                            rho,
                             mu,
                             mu1,
                             mu2,

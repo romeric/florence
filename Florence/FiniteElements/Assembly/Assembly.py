@@ -75,6 +75,8 @@ def LowLevelAssembly(fem_solver,function_space, formulation, mesh, material, Eul
     stiffness, T, F, mass = _LowLevelAssembly_(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
     if isinstance(F,np.ndarray):
         F = F[:,None]
+    if mass is not None:
+        fem_solver.is_mass_computed = True
 
     return stiffness, T[:,None], F, mass
 

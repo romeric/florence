@@ -265,7 +265,7 @@ class FlorenceSetup(object):
         assemble_path = os.path.join(_pwd_,"FiniteElements","Assembly","_Assembly_")
 
         self.extension_paths = [tensor_path,mesh_path,jacobi_path,bp_path,km_path,gm_path,cm_path,mm_path,material_path,assemble_path]
-        # self.extension_paths = [mm_path]
+        # self.extension_paths = [assemble_path]
 
     def SourceClean(self):
 
@@ -319,11 +319,11 @@ class FlorenceSetup(object):
                                     "_IsotropicElectroMechanics_108_",
                                     "_Piezoelectric_100_"
                                 ]
-        # low_level_material_list = ["_IsotropicElectroMechanics_101_"]
+
+        # low_level_material_list = ["_IsotropicElectroMechanics_108_"]
         # low_level_material_list = ["_NeoHookean_2_"]
 
         assert self.extension_paths != None
-        # self.extension_paths = []
 
         for _path in self.extension_paths:
             if "LLDispatch" not in _path and not "_Assembly_" in _path:
@@ -338,6 +338,8 @@ class FlorenceSetup(object):
 
                 ll_material_mech = low_level_material_list[:4]
                 ll_material_electro_mech = low_level_material_list[4:]
+                # ll_material_mech = []
+                # ll_material_electro_mech = low_level_material_list
                 for material in ll_material_mech:
                     execute('cd '+_path+' && make ' + self.compiler_args + " ASSEMBLY_NAME=_LowLevelAssemblyDF_"  + material)
                 for material in ll_material_electro_mech:

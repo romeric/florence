@@ -21,6 +21,9 @@ def MaterialList():
                             "_IsotropicElectroMechanics_108_",
                             "_Piezoelectric_100_"
                         ]
+
+    # ll_materials_mech  = [] 
+    # ll_materials_electro_mech  = ["_IsotropicElectroMechanics_101_"]
     return ll_materials_mech, ll_materials_electro_mech
 
 def execute(_cmd):
@@ -52,18 +55,25 @@ def AOTConfigure():
         contents_h[0] = "#ifndef " + material_specific_assembler.upper() + "_H\n"
         contents_h[1] = "#define " + material_specific_assembler.upper() + "_H\n"
         contents_h[5] = '#include "' + material + '.h"\n'
-        contents_h[7] = contents_h[7].replace("_GlobalAssemblyDF_", "_GlobalAssemblyDF_"+material)
 
-        mline = 72
-        if material == "_NeoHookean_2_":
-            contents_h[mline] = "    auto mat_obj = " + material + "<Real>(mu,lamb);\n"
-        elif material == "_MooneyRivlin_0_":
-            contents_h[mline] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,lamb);\n"
-        elif material == "_NearlyIncompressibleMooneyRivlin_":
-            contents_h[mline] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,lamb);\n"
-        elif material == "_AnisotropicMooneyRivlin_1_":
-            contents_h[mline] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,mu3,lamb);\n"
-            contents_h[105] = "        mat_obj.KineticMeasures(stress, hessian, ndim, ngauss, F, &anisotropic_orientations[elem*ndim]);\n"
+        for counter, line in enumerate(contents_h):
+            if "_GlobalAssemblyDF_" in line:
+                contents_h[counter] = contents_h[counter].replace("_GlobalAssemblyDF_", "_GlobalAssemblyDF_"+material)
+
+            if "auto mat_obj" in line:
+                if material == "_NeoHookean_2_":
+                    contents_h[counter] = "    auto mat_obj = " + material + "<Real>(mu,lamb);\n"
+                elif material == "_MooneyRivlin_0_":
+                    contents_h[counter] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,lamb);\n"
+                elif material == "_NearlyIncompressibleMooneyRivlin_":
+                    contents_h[counter] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,lamb);\n"
+                elif material == "_AnisotropicMooneyRivlin_1_":
+                    contents_h[counter] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,mu3,lamb);\n"
+
+        if material == "_AnisotropicMooneyRivlin_1_":
+            for counter, line in enumerate(contents_h):
+                if "mat_obj.KineticMeasures" in line:
+                    contents_h[counter] = "        mat_obj.KineticMeasures(stress, hessian, ndim, ngauss, F, &anisotropic_orientations[elem*ndim]);\n"
 
         contents_h[-1] = "#endif // " + material_specific_assembler.upper() + "_H"
 
@@ -73,28 +83,27 @@ def AOTConfigure():
             f.write(item)
 
 
-        # Read the header file
+        # Read the cython wrapper file
         f = open(cython_f, "r")
         contents_c = f.readlines()
         f.close()
 
-        rel_line_no = -1
-        # Modify cython source
-        contents_c[rel_line_no+10] = 'cdef extern from "' + header_f + '" nogil:\n'
-        contents_c[rel_line_no+11] = contents_c[rel_line_no+11].replace("_GlobalAssemblyDF_", "_GlobalAssemblyDF_"+material)
-        contents_c[rel_line_no+102] = contents_c[rel_line_no+102].replace("_GlobalAssemblyDF_", "_GlobalAssemblyDF_"+material)
-        contents_c[rel_line_no+51] = contents_c[rel_line_no+51].replace("_LowLevelAssemblyDF_", material_specific_assembler)
 
-        mline = rel_line_no + 99
-        if material == "_NeoHookean_2_":
-            contents_c[mline] = "    mu, lamb = material.mu, material.lamb\n"
-        elif material == "_MooneyRivlin_0_":
-            contents_c[mline] = "    mu1, mu2, lamb = material.mu1, material.mu2, material.lamb\n"
-        elif material == "_NearlyIncompressibleMooneyRivlin_":
-            contents_c[mline] = "    mu1, mu2, lamb = material.mu1, material.mu2, material.lamb\n"
-        elif material == "_AnisotropicMooneyRivlin_1_":
-            contents_c[mline] = "    mu1, mu2, mu3, lamb = material.mu1, material.mu2, material.mu3, material.lamb\n"
+        for counter, line in enumerate(contents_c):
+            if "_LowLevelAssemblyDF_" in line:
+                contents_c[counter] = contents_c[counter].replace("_LowLevelAssemblyDF_", "_LowLevelAssemblyDF_" + material)
+            if "_GlobalAssemblyDF_" in line:
+                contents_c[counter] = contents_c[counter].replace("_GlobalAssemblyDF_", "_GlobalAssemblyDF_" + material)
 
+            if "mu1, mu2, lamb =" in line:
+                if material == "_NeoHookean_2_":
+                    contents_c[counter] = "    mu, lamb = material.mu, material.lamb\n"
+                elif material == "_MooneyRivlin_0_":
+                    contents_c[counter] = "    mu1, mu2, lamb = material.mu1, material.mu2, material.lamb\n"
+                elif material == "_NearlyIncompressibleMooneyRivlin_":
+                    contents_c[counter] = "    mu1, mu2, lamb = material.mu1, material.mu2, material.lamb\n"
+                elif material == "_AnisotropicMooneyRivlin_1_":
+                    contents_c[counter] = "    mu1, mu2, mu3, lamb = material.mu1, material.mu2, material.mu3, material.lamb\n"
 
         # Write
         f = open(cython_f, 'w')
@@ -123,29 +132,58 @@ def AOTConfigure():
         contents_h[0] = "#ifndef " + material_specific_assembler.upper() + "_H\n"
         contents_h[1] = "#define " + material_specific_assembler.upper() + "_H\n"
         contents_h[5] = '#include "' + material + '.h"\n'
-        contents_h[7] = contents_h[7].replace("_GlobalAssemblyDPF_", "_GlobalAssemblyDPF_"+material)
+        # contents_h[7] = contents_h[7].replace("_GlobalAssemblyDPF_", "_GlobalAssemblyDPF_"+material)
 
+        for counter, line in enumerate(contents_h):
+            if "_GlobalAssemblyDPF_" in line:
+                contents_h[counter] = contents_h[counter].replace("_GlobalAssemblyDPF_", "_GlobalAssemblyDPF_"+material)
 
-        mline = 73
-        if material == "_IsotropicElectroMechanics_0_":
-            contents_h[mline] = "    auto mat_obj = " + material + "<Real>(mu,lamb,eps_1);\n"
-        elif material == "_IsotropicElectroMechanics_3_":
-            contents_h[mline] = "    auto mat_obj = " + material + "<Real>(mu,lamb,eps_1,eps_2);\n"
-        elif material == "_SteinmannModel_":
-            contents_h[mline] = "    auto mat_obj = " + material + "<Real>(mu,lamb,eps_3,eps_2,eps_1);\n"
-        elif material == "_IsotropicElectroMechanics_101_":
-            contents_h[mline] = "    auto mat_obj = " + material + "<Real>(mu,lamb,eps_1);\n"
-        elif material == "_IsotropicElectroMechanics_105_":
-            contents_h[mline] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,lamb,eps_1,eps_2);\n"
-        elif material == "_IsotropicElectroMechanics_106_":
-            contents_h[mline] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,lamb,eps_1,eps_2);\n"
-        elif material == "_IsotropicElectroMechanics_107_":
-            contents_h[mline] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,mue,lamb,eps_1,eps_2,eps_e);\n"
-        elif material == "_IsotropicElectroMechanics_108_":
-            contents_h[mline] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,lamb,eps_2);\n"
-        elif material == "_Piezoelectric_100_":
-            contents_h[mline] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,mu3,lamb,eps_1,eps_2,eps_3);\n"
-            contents_h[118] = "        mat_obj.KineticMeasures(D, stress, hessian, ndim, ngauss, F, ElectricFieldx, &anisotropic_orientations[elem*ndim]);\n"
+            if "auto mat_obj" in line:
+                if material == "_IsotropicElectroMechanics_0_":
+                    contents_h[counter] = "    auto mat_obj = " + material + "<Real>(mu,lamb,eps_1);\n"
+                elif material == "_IsotropicElectroMechanics_3_":
+                    contents_h[counter] = "    auto mat_obj = " + material + "<Real>(mu,lamb,eps_1,eps_2);\n"
+                elif material == "_SteinmannModel_":
+                    contents_h[counter] = "    auto mat_obj = " + material + "<Real>(mu,lamb,eps_3,eps_2,eps_1);\n"
+                elif material == "_IsotropicElectroMechanics_101_":
+                    contents_h[counter] = "    auto mat_obj = " + material + "<Real>(mu,lamb,eps_1);\n"
+                elif material == "_IsotropicElectroMechanics_105_":
+                    contents_h[counter] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,lamb,eps_1,eps_2);\n"
+                elif material == "_IsotropicElectroMechanics_106_":
+                    contents_h[counter] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,lamb,eps_1,eps_2);\n"
+                elif material == "_IsotropicElectroMechanics_107_":
+                    contents_h[counter] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,mue,lamb,eps_1,eps_2,eps_e);\n"
+                elif material == "_IsotropicElectroMechanics_108_":
+                    contents_h[counter] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,lamb,eps_2);\n"
+                elif material == "_Piezoelectric_100_":
+                    contents_h[counter] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,mu3,lamb,eps_1,eps_2,eps_3);\n"
+                    
+
+        if material == "_Piezoelectric_100_":
+            for counter, line in enumerate(contents_h):
+                if "mat_obj.KineticMeasures" in line:
+                    contents_h[counter] = "        mat_obj.KineticMeasures(D, stress, hessian, ndim, ngauss, F, ElectricFieldx, &anisotropic_orientations[elem*ndim]);\n"
+
+        # mline = 73
+        # if material == "_IsotropicElectroMechanics_0_":
+        #     contents_h[mline] = "    auto mat_obj = " + material + "<Real>(mu,lamb,eps_1);\n"
+        # elif material == "_IsotropicElectroMechanics_3_":
+        #     contents_h[mline] = "    auto mat_obj = " + material + "<Real>(mu,lamb,eps_1,eps_2);\n"
+        # elif material == "_SteinmannModel_":
+        #     contents_h[mline] = "    auto mat_obj = " + material + "<Real>(mu,lamb,eps_3,eps_2,eps_1);\n"
+        # elif material == "_IsotropicElectroMechanics_101_":
+        #     contents_h[mline] = "    auto mat_obj = " + material + "<Real>(mu,lamb,eps_1);\n"
+        # elif material == "_IsotropicElectroMechanics_105_":
+        #     contents_h[mline] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,lamb,eps_1,eps_2);\n"
+        # elif material == "_IsotropicElectroMechanics_106_":
+        #     contents_h[mline] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,lamb,eps_1,eps_2);\n"
+        # elif material == "_IsotropicElectroMechanics_107_":
+        #     contents_h[mline] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,mue,lamb,eps_1,eps_2,eps_e);\n"
+        # elif material == "_IsotropicElectroMechanics_108_":
+        #     contents_h[mline] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,lamb,eps_2);\n"
+        # elif material == "_Piezoelectric_100_":
+        #     contents_h[mline] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,mu3,lamb,eps_1,eps_2,eps_3);\n"
+        #     contents_h[118] = "        mat_obj.KineticMeasures(D, stress, hessian, ndim, ngauss, F, ElectricFieldx, &anisotropic_orientations[elem*ndim]);\n"
 
         contents_h[-1] = "#endif // " + material_specific_assembler.upper() + "_H"
 
@@ -160,34 +198,62 @@ def AOTConfigure():
         contents_c = f.readlines()
         f.close()
 
-        rel_line_no = -1
+        # rel_line_no = -1
         # Modify cython source
-        contents_c[rel_line_no+10] = 'cdef extern from "' + header_f + '" nogil:\n'
-        contents_c[rel_line_no+11] = contents_c[rel_line_no+11].replace("_GlobalAssemblyDPF_", "_GlobalAssemblyDPF_"+material)
-        contents_c[rel_line_no+102] = contents_c[rel_line_no+102].replace("_GlobalAssemblyDPF_", "_GlobalAssemblyDPF_"+material)
-        contents_c[rel_line_no+51] = contents_c[rel_line_no+51].replace("_LowLevelAssemblyDPF_", material_specific_assembler)
+        # contents_c[rel_line_no+10] = 'cdef extern from "' + header_f + '" nogil:\n'
+        # contents_c[rel_line_no+11] = contents_c[rel_line_no+11].replace("_GlobalAssemblyDPF_", "_GlobalAssemblyDPF_"+material)
+        # contents_c[rel_line_no+102] = contents_c[rel_line_no+102].replace("_GlobalAssemblyDPF_", "_GlobalAssemblyDPF_"+material)
+        # contents_c[rel_line_no+51] = contents_c[rel_line_no+51].replace("_LowLevelAssemblyDPF_", material_specific_assembler)
 
-        mline = rel_line_no + 99
-        if material == "_IsotropicElectroMechanics_0_":
-            contents_c[mline] = "    mu, lamb, eps_1 = material.mu, material.lamb, material.eps_1\n"
-        elif material == "_IsotropicElectroMechanics_3_":
-            contents_c[mline] = "    mu, lamb, eps_1, eps_2 = material.mu, material.lamb, material.eps_1, material.eps_2\n"
-        elif material == "_SteinmannModel_":
-            contents_c[mline] = "    mu, lamb, eps_3, eps_2, eps_1 = material.mu, material.lamb, material.c1, material.c2, material.eps_1\n"
-        elif material == "_IsotropicElectroMechanics_101_":
-            contents_c[mline] = "    mu, lamb, eps_1 = material.mu, material.lamb, material.eps_1\n"
-        elif material == "_IsotropicElectroMechanics_105_":
-            contents_c[mline] = "    mu1, mu2, lamb, eps_1, eps_2 = material.mu1, material.mu2, material.lamb, material.eps_1, material.eps_2\n"
-        elif material == "_IsotropicElectroMechanics_106_":
-            contents_c[mline] = "    mu1, mu2, lamb, eps_1, eps_2 = material.mu1, material.mu2, material.lamb, material.eps_1, material.eps_2\n"
-        elif material == "_IsotropicElectroMechanics_107_":
-            contents_c[mline] = "    mu1, mu2, mue, lamb, eps_1, eps_2, eps_e = material.mu1, " +\
-                "material.mu2, material.mue, material.lamb, material.eps_1, material.eps_2, material.eps_e\n"
-        elif material == "_IsotropicElectroMechanics_108_":
-            contents_c[mline] = "    mu1, mu2, lamb, eps_2 = material.mu1, material.mu2, material.lamb, material.eps_2\n"
-        elif material == "_Piezoelectric_100_":
-            contents_c[mline] = "    mu1, mu2, mu3, lamb, eps_1, eps_2, eps_e = material.mu1, " +\
-                "material.mu2, material.mue, material.lamb, material.eps_1, material.eps_2, material.eps_e\n"
+        for counter, line in enumerate(contents_c):
+            if "_LowLevelAssemblyDPF_" in line:
+                contents_c[counter] = contents_c[counter].replace("_LowLevelAssemblyDPF_", "_LowLevelAssemblyDPF_" + material)
+            if "_GlobalAssemblyDPF_" in line:
+                contents_c[counter] = contents_c[counter].replace("_GlobalAssemblyDPF_", "_GlobalAssemblyDPF_" + material)
+
+            if "mu, lamb, eps_1 =" in line:
+                if material == "_IsotropicElectroMechanics_0_":
+                    contents_c[counter] = "    mu, lamb, eps_1 = material.mu, material.lamb, material.eps_1\n"
+                elif material == "_IsotropicElectroMechanics_3_":
+                    contents_c[counter] = "    mu, lamb, eps_1, eps_2 = material.mu, material.lamb, material.eps_1, material.eps_2\n"
+                elif material == "_SteinmannModel_":
+                    contents_c[counter] = "    mu, lamb, eps_3, eps_2, eps_1 = material.mu, material.lamb, material.c1, material.c2, material.eps_1\n"
+                elif material == "_IsotropicElectroMechanics_101_":
+                    contents_c[counter] = "    mu, lamb, eps_1 = material.mu, material.lamb, material.eps_1\n"
+                elif material == "_IsotropicElectroMechanics_105_":
+                    contents_c[counter] = "    mu1, mu2, lamb, eps_1, eps_2 = material.mu1, material.mu2, material.lamb, material.eps_1, material.eps_2\n"
+                elif material == "_IsotropicElectroMechanics_106_":
+                    contents_c[counter] = "    mu1, mu2, lamb, eps_1, eps_2 = material.mu1, material.mu2, material.lamb, material.eps_1, material.eps_2\n"
+                elif material == "_IsotropicElectroMechanics_107_":
+                    contents_c[counter] = "    mu1, mu2, mue, lamb, eps_1, eps_2, eps_e = material.mu1, " +\
+                        "material.mu2, material.mue, material.lamb, material.eps_1, material.eps_2, material.eps_e\n"
+                elif material == "_IsotropicElectroMechanics_108_":
+                    contents_c[counter] = "    mu1, mu2, lamb, eps_2 = material.mu1, material.mu2, material.lamb, material.eps_2\n"
+                elif material == "_Piezoelectric_100_":
+                    contents_c[counter] = "    mu1, mu2, mu3, lamb, eps_1, eps_2, eps_e = material.mu1, " +\
+                        "material.mu2, material.mue, material.lamb, material.eps_1, material.eps_2, material.eps_e\n"
+
+        # mline = rel_line_no + 99
+        # if material == "_IsotropicElectroMechanics_0_":
+        #     contents_c[mline] = "    mu, lamb, eps_1 = material.mu, material.lamb, material.eps_1\n"
+        # elif material == "_IsotropicElectroMechanics_3_":
+        #     contents_c[mline] = "    mu, lamb, eps_1, eps_2 = material.mu, material.lamb, material.eps_1, material.eps_2\n"
+        # elif material == "_SteinmannModel_":
+        #     contents_c[mline] = "    mu, lamb, eps_3, eps_2, eps_1 = material.mu, material.lamb, material.c1, material.c2, material.eps_1\n"
+        # elif material == "_IsotropicElectroMechanics_101_":
+        #     contents_c[mline] = "    mu, lamb, eps_1 = material.mu, material.lamb, material.eps_1\n"
+        # elif material == "_IsotropicElectroMechanics_105_":
+        #     contents_c[mline] = "    mu1, mu2, lamb, eps_1, eps_2 = material.mu1, material.mu2, material.lamb, material.eps_1, material.eps_2\n"
+        # elif material == "_IsotropicElectroMechanics_106_":
+        #     contents_c[mline] = "    mu1, mu2, lamb, eps_1, eps_2 = material.mu1, material.mu2, material.lamb, material.eps_1, material.eps_2\n"
+        # elif material == "_IsotropicElectroMechanics_107_":
+        #     contents_c[mline] = "    mu1, mu2, mue, lamb, eps_1, eps_2, eps_e = material.mu1, " +\
+        #         "material.mu2, material.mue, material.lamb, material.eps_1, material.eps_2, material.eps_e\n"
+        # elif material == "_IsotropicElectroMechanics_108_":
+        #     contents_c[mline] = "    mu1, mu2, lamb, eps_2 = material.mu1, material.mu2, material.lamb, material.eps_2\n"
+        # elif material == "_Piezoelectric_100_":
+        #     contents_c[mline] = "    mu1, mu2, mu3, lamb, eps_1, eps_2, eps_e = material.mu1, " +\
+        #         "material.mu2, material.mue, material.lamb, material.eps_1, material.eps_2, material.eps_e\n"
 
         # Write
         f = open(cython_f, 'w')
