@@ -34,7 +34,7 @@ class FEMSolver(object):
         newton_raphson_tolerance=1.0e-6, maximum_iteration_for_newton_raphson=50,
         compute_mesh_qualities=True,  
         parallelise=False, memory_model="shared", platform="cpu", backend="opencl",
-        print_incremental_log=False,save_incremental_solution=False, incremental_solution_filename=None,
+        print_incremental_log=False, save_incremental_solution=False, incremental_solution_filename=None,
         break_at_increment=-1,
         include_physical_damping=False, damping_factor=0.1,
         compute_energy_dissipation=False, compute_linear_momentum_dissipation=False, total_time=1.):
@@ -469,7 +469,7 @@ class FEMSolver(object):
             if self.save_incremental_solution:
                 from scipy.io import savemat
                 if self.incremental_solution_filename is not None:
-                    savemat(self.incremental_solution_filename,{'solution':TotalDisp[:,:,Increment]},do_compression=True)
+                    savemat(self.incremental_solution_filename+"_"+str(Increment),{'solution':TotalDisp[:,:,Increment]},do_compression=True)
                 else:
                     raise ValueError("No file name provided to save incremental solution")
 

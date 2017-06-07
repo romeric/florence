@@ -145,6 +145,14 @@ class StructuralDynamicIntegrators(object):
                 else:
                     print("\nMinimum and maximum incremental solution values at increment {} are \n".format(Increment),dmesh_bounds)
 
+            # SAVE INCREMENTAL SOLUTION IF ASKED FOR
+            if fem_solver.save_incremental_solution:
+                from scipy.io import savemat
+                if fem_solver.incremental_solution_filename is not None:
+                    savemat(fem_solver.incremental_solution_filename+"_"+str(Increment),{'solution':TotalDisp[:,:,Increment]},do_compression=True)
+                else:
+                    raise ValueError("No file name provided to save incremental solution")
+
 
             print('\nFinished Load increment', Increment, 'in', time()-t_increment, 'seconds')
 
