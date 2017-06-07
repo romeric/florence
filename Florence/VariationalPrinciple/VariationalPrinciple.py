@@ -2,13 +2,23 @@ import numpy as np
 from Florence import QuadratureRule, FunctionSpace, Mesh
 from Florence.FiniteElements.LocalAssembly._KinematicMeasures_ import _KinematicMeasures_
 from Florence.VariationalPrinciple._GeometricStiffness_ import GeometricStiffnessIntegrand as GetGeomStiffness
-# from Florence.VariationalPrinciple._ConstitutiveStiffnessMechanics_ import ConstitutiveStiffnessIntegrand as GetConstitutiveStiffness
 
 import pyximport
 pyximport.install(setup_args={'include_dirs': np.get_include()})
 from .DisplacementApproachIndices import *
 
 class VariationalPrinciple(object):
+
+    energy_dissipation = []
+    internal_energy = []
+    kinetic_energy = []
+    external_energy = []
+
+    power_dissipation = []
+    internal_power = []
+    kinetic_power = []
+    external_power = []
+
 
     def __init__(self, mesh, variables_order=(1,0), 
         analysis_type='static', analysis_nature='nonlinear', fields='mechanics',
@@ -61,10 +71,6 @@ class VariationalPrinciple(object):
         #         # FunctionSpace(mesh, p=degree, 2*degree, QuadratureOpt,mesh.element_type)
         #         # self.quadrature_rules[counter] = list()
 
-        #     # print dir(self.quadrature_rules[0])
-        #     # print self.quadrature_rules[0][0].Jm
-        #     # print self.median
-        #     # exit()
 
     def GetVolume(self, function_space, LagrangeElemCoords, EulerELemCoords, requires_geometry_update, elem=0):
         """ Find the volume (area in 2D) of element [could be curved or straight]
@@ -153,13 +159,6 @@ class VariationalPrinciple(object):
             raise RuntimeError("Local mass matrix is not computed correctly")
         return
 
-
-
-
-    # @staticmethod
-    # def FindIndices(A):
-    #     return np.repeat(np.arange(0,A.shape[0]),A.shape[0],axis=0),\
-    #     np.tile(np.arange(0,A.shape[0]),A.shape[0]), A.flatten()
 
     def FindIndices(self,A):
         return self.local_rows, self.local_columns, A.ravel()
