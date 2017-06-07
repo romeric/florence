@@ -35,7 +35,9 @@ class FEMSolver(object):
         compute_mesh_qualities=True,  
         parallelise=False, memory_model="shared", platform="cpu", backend="opencl",
         print_incremental_log=False,save_incremental_solution=False, incremental_solution_filename=None,
-        break_at_increment=-1, compute_energy_dissipation=False, total_time=1.):
+        break_at_increment=-1,
+        include_physical_damping=False, damping_factor=0.1,
+        compute_energy_dissipation=False, compute_linear_momentum_dissipation=False, total_time=1.):
 
         self.has_low_level_dispatcher = has_low_level_dispatcher
 
@@ -57,11 +59,10 @@ class FEMSolver(object):
         self.maximum_iteration_for_newton_raphson = maximum_iteration_for_newton_raphson
         self.newton_raphson_failed_to_converge = False
         self.NRConvergence = None
+        self.include_physical_damping = include_physical_damping
+        self.damping_factor = damping_factor
         self.compute_energy_dissipation = compute_energy_dissipation
-        self.energy_dissipation = []
-        self.internal_energy = []
-        self.kinetic_energy = []
-        self.external_energy = []
+        self.compute_linear_momentum_dissipation = compute_linear_momentum_dissipation
 
         self.compute_mesh_qualities = compute_mesh_qualities
         self.isScaledJacobianComputed = False
@@ -142,6 +143,11 @@ class FEMSolver(object):
                 raise ValueError("Load factor should sum up to one")
         ##############################################################################
 
+        ##############################################################################
+        if self.include_physical_damping and self.compute_energy_dissipation:
+            warn("Energy is not going to be preserved due to physical damping")
+        ##############################################################################
+
         # CHANGE MESH DATA TYPE
         mesh.ChangeType()
         # ASSIGN ANALYSIS PARAMTER TO BOUNDARY CONDITION
@@ -164,8 +170,7 @@ class FEMSolver(object):
         # self.compute_mesh_qualities = True
         if self.analysis_nature == "nonlinear" and self.compute_mesh_qualities:
             # COMPUTE QUALITY MEASURES
-            # self.ScaledJacobian=post_process.MeshQualityMeasures(mesh,TotalDisp,False,False)[3]
-            post_process.ScaledJacobian=post_process.MeshQualityMeasures(mesh,TotalDisp,False,False)[3]
+            post_process.ScaledJacobian = post_process.MeshQualityMeasures(mesh,TotalDisp,False,False)[3]
         elif self.isScaledJacobianComputed:
             post_process.ScaledJacobian=self.ScaledJacobian
         # self.isScaledJacobianComputed = False
@@ -174,6 +179,18 @@ class FEMSolver(object):
 
         if self.analysis_nature == "nonlinear":
             post_process.newton_raphson_convergence = self.NRConvergence
+
+        if self.analysis_type == "dynamic":
+            if self.compute_energy_dissipation:
+                post_process.energy_dissipation = formulation.energy_dissipation
+                post_process.internal_energy = formulation.internal_energy
+                post_process.kinetic_energy = formulation.kinetic_energy
+                post_process.external_energy = formulation.external_energy
+            if self.compute_linear_momentum_dissipation:
+                post_process.power_dissipation = formulation.power_dissipation
+                post_process.internal_power = formulation.internal_power
+                post_process.kinetic_power = formulation.kinetic_power
+                post_process.external_power = formulation.external_power
             
         return post_process
 
