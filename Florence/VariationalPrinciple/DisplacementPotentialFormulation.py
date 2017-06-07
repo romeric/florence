@@ -107,17 +107,22 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
                 EulerElemCoords, ElectricPotentialElem, fem_solver, elem)
 
         I_mass_elem = []; J_mass_elem = []; V_mass_elem = []
-        if fem_solver.analysis_type != 'static':
+        if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed is False:
             # COMPUTE THE MASS MATRIX
-            # massel = self.GetLocalMass(material,LagrangeElemCoords,EulerElemCoords,elem)
-            massel = self.GetLocalMass(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+            # massel = self.GetLocalMass(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+            if material.has_low_level_dispatcher:
+                # massel = self.__GetLocalMass__(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+                massel = self.__GetLocalMass__(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+            else:
+                massel = self.GetLocalMass(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+
 
         if fem_solver.has_moving_boundary:
             # COMPUTE FORCE VECTOR
             f = ApplyNeumannBoundaryConditions3D(MainData, mesh, elem, LagrangeElemCoords)
 
         I_stiff_elem, J_stiff_elem, V_stiff_elem = self.FindIndices(stiffnessel)
-        if fem_solver.analysis_type != 'static':
+        if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed is False:
             I_mass_elem, J_mass_elem, V_mass_elem = self.FindIndices(massel)
 
         return I_stiff_elem, J_stiff_elem, V_stiff_elem, t, f, I_mass_elem, J_mass_elem, V_mass_elem
@@ -240,34 +245,29 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         return stiffness, tractionforce
 
 
-    def GetLocalMass(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem):
+    # def GetLocalMass(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem):
 
-        ndim = self.ndim
-        nvar = self.nvar
-        Domain = function_space
+    #     ndim = self.ndim
+    #     nvar = self.nvar
+    #     Domain = function_space
 
-        N = np.zeros((Domain.Bases.shape[0]*nvar,nvar))
-        mass = np.zeros((Domain.Bases.shape[0]*nvar,Domain.Bases.shape[0]*nvar))
+    #     N = np.zeros((Domain.Bases.shape[0]*nvar,nvar))
+    #     mass = np.zeros((Domain.Bases.shape[0]*nvar,Domain.Bases.shape[0]*nvar))
 
-        # LOOP OVER GAUSS POINTS
-        for counter in range(0,Domain.AllGauss.shape[0]):
-            # GRADIENT TENSOR IN PARENT ELEMENT [\nabla_\varepsilon (N)]
-            Jm = Domain.Jm[:,:,counter]
-            Bases = Domain.Bases[:,counter]
-            # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-            ParentGradientX=np.dot(Jm,LagrangeElemCoords)
+    #     # LOOP OVER GAUSS POINTS
+    #     for counter in range(0,Domain.AllGauss.shape[0]):
+    #         # GRADIENT TENSOR IN PARENT ELEMENT [\nabla_\varepsilon (N)]
+    #         Jm = Domain.Jm[:,:,counter]
+    #         Bases = Domain.Bases[:,counter]
+    #         # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+    #         ParentGradientX=np.dot(Jm,LagrangeElemCoords)
 
-            # COMPUTE THE MASS INTEGRAND
-            rhoNN = self.MassIntegrand(Bases,N,material)
-            # INTEGRATE MASS
-            mass += rhoNN*Domain.AllGauss[counter,0]*np.abs(np.linalg.det(ParentGradientX))
+    #         # COMPUTE THE MASS INTEGRAND
+    #         rhoNN = self.MassIntegrand(Bases,N,material)
+    #         # INTEGRATE MASS
+    #         mass += rhoNN*Domain.AllGauss[counter,0]*np.abs(np.linalg.det(ParentGradientX))
 
-        # np.set_printoptions(linewidth=10000,threshold=10000)
-        # print(mass)
-        # print(mass.sum())
-        # exit()
-
-        return mass 
+    #     return mass 
 
 
 
@@ -402,7 +402,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
                 ElectricDisplacementx = material.ElectricDisplacementx(StrainTensors, ElectricFieldx[counter,:], elem, counter)
                 # COMPUTE CAUCHY STRESS TENSOR
                 CauchyStressTensor = material.CauchyStress(StrainTensors,ElectricDisplacementx,elem,counter)
-                
+
             # INTEGRATE INTERNAL VIRTUAL POWER
             internal_power += np.einsum('ij,ij',CauchyStressTensor,GradV)*detJ[counter]
 
