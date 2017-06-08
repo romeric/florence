@@ -213,29 +213,7 @@ class DisplacementFormulation(VariationalPrinciple):
 
 
 
-    # def GetLocalMass(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem):
 
-    #     ndim = self.ndim
-    #     nvar = self.nvar
-    #     Domain = function_space
-
-    #     N = np.zeros((Domain.Bases.shape[0]*nvar,nvar))
-    #     mass = np.zeros((Domain.Bases.shape[0]*nvar,Domain.Bases.shape[0]*nvar))
-
-    #     # LOOP OVER GAUSS POINTS
-    #     for counter in range(0,Domain.AllGauss.shape[0]):
-    #         # GRADIENT TENSOR IN PARENT ELEMENT [\nabla_\varepsilon (N)]
-    #         Jm = Domain.Jm[:,:,counter]
-    #         Bases = Domain.Bases[:,counter]
-    #         # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-    #         ParentGradientX=np.dot(Jm,LagrangeElemCoords)
-
-    #         # COMPUTE THE MASS INTEGRAND
-    #         rhoNN = self.MassIntegrand(Bases,N,material)
-    #         # INTEGRATE MASS
-    #         mass += rhoNN*Domain.AllGauss[counter,0]*np.abs(np.linalg.det(ParentGradientX))
-
-    #     return mass 
 
 
     def GetEnergy(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem=0):

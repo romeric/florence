@@ -109,9 +109,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         I_mass_elem = []; J_mass_elem = []; V_mass_elem = []
         if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed is False:
             # COMPUTE THE MASS MATRIX
-            # massel = self.GetLocalMass(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
             if material.has_low_level_dispatcher:
-                # massel = self.__GetLocalMass__(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
                 massel = self.__GetLocalMass__(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
             else:
                 massel = self.GetLocalMass(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
@@ -244,30 +242,6 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
         return stiffness, tractionforce
 
-
-    # def GetLocalMass(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem):
-
-    #     ndim = self.ndim
-    #     nvar = self.nvar
-    #     Domain = function_space
-
-    #     N = np.zeros((Domain.Bases.shape[0]*nvar,nvar))
-    #     mass = np.zeros((Domain.Bases.shape[0]*nvar,Domain.Bases.shape[0]*nvar))
-
-    #     # LOOP OVER GAUSS POINTS
-    #     for counter in range(0,Domain.AllGauss.shape[0]):
-    #         # GRADIENT TENSOR IN PARENT ELEMENT [\nabla_\varepsilon (N)]
-    #         Jm = Domain.Jm[:,:,counter]
-    #         Bases = Domain.Bases[:,counter]
-    #         # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-    #         ParentGradientX=np.dot(Jm,LagrangeElemCoords)
-
-    #         # COMPUTE THE MASS INTEGRAND
-    #         rhoNN = self.MassIntegrand(Bases,N,material)
-    #         # INTEGRATE MASS
-    #         mass += rhoNN*Domain.AllGauss[counter,0]*np.abs(np.linalg.det(ParentGradientX))
-
-    #     return mass 
 
 
 

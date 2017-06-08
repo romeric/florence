@@ -3,7 +3,8 @@ import gc, os, sys
 import numpy as np 
 import scipy as sp
 import numpy.linalg as la
-import scipy.linalg as sla 
+import scipy.linalg as sla
+from numpy.linalg import norm 
 from time import time
 from copy import deepcopy
 from warnings import warn
@@ -76,11 +77,6 @@ class StructuralDynamicIntegrators(object):
 
         # TIME LOOP
         for Increment in range(1,LoadIncrement):
-
-            # # print(np.linalg.norm(K.todense()))
-            # print(np.linalg.norm(M.todense()))
-            # # solver.SparsityPattern(M)
-            # # exit()
 
             t_increment = time()
 
@@ -217,7 +213,7 @@ class StructuralDynamicIntegrators(object):
             K.shape[0],formulation.nvar)
         # UPDATE EULERIAN COORDINATE
         Eulerx += IncDirichlet[:,:formulation.ndim]
-        Eulerp = IncDirichlet[:,-1]
+        Eulerp[:] = IncDirichlet[:,-1] # ENSURES Eulerp IS CONTIGUOUS - NECESSARY FOR LOW-LEVEL DISPATCHER
 
 
         while np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces) > Tolerance or Iter==0:

@@ -48,6 +48,26 @@ FASTOR_INLINE void deallocate(T *a) {
 }
 
 
+// For checks only
+//-------------------
+template<typename T>
+inline T sum(const T *arr, int size) {
+    T val = 0;
+    for (auto i=0; i<size; ++i)
+        val += arr[i];
+    return val;
+}
+
+template<typename T>
+inline T norm(const T *arr, int size) {
+    T val = 0;
+    for (auto i=0; i<size; ++i)
+        val += arr[i]*arr[i];
+    return std::sqrt(val);
+}
+//-------------------
+
+
 /*-------------------
 template<typename T>
 FASTOR_INLINE void fill_(T *__restrict__ a, Integer size, T num) {
