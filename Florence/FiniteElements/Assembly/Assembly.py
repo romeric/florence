@@ -26,7 +26,6 @@ __all__ = ['Assemble','AssembleForces']
 
 def Assemble(fem_solver, function_space, formulation, mesh, material, solver, Eulerx, Eulerp):
 
-    # fem_solver.has_low_level_dispatcher = True
     if fem_solver.memory_model == "shared" or fem_solver.memory_model is None:
         if not fem_solver.has_low_level_dispatcher:
             if mesh.nelem <= 600000:

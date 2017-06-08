@@ -50,7 +50,7 @@ cdef extern from "_LowLevelAssemblyDF_.h" nogil:
                             )
 
 
-def _LowLevelAssemblyDF_(fem_solver, function_space, formulation, mesh, material, Real[:,::1] Eulerx, Real[:] Eulerp):
+def _LowLevelAssemblyDF_(fem_solver, function_space, formulation, mesh, material, Real[:,::1] Eulerx, Real[::1] Eulerp):
 
     # GET VARIABLES FOR DISPATCHING TO C
     cdef Integer ndim                       = formulation.ndim
