@@ -2587,7 +2587,7 @@ class Mesh(object):
 
             plt.show()
 
-        elif self.element_type == "tet":
+        elif self.element_type == "tet" or self.element_type == "hex":
 
             import matplotlib as mpl
             import os
@@ -4610,6 +4610,54 @@ class Mesh(object):
             return tmesh, solution
 
         return tmesh
+
+
+    def ConvertToLinearMesh(self):
+        """Convert a high order mesh to linear mesh.
+            This is different from GetLinearMesh in that it converts a 
+            high order mesh to linear mesh by tessellation i.e. the number of 
+            points in the mesh do not change
+        """
+
+        self.__do_essential_memebers_exist__()
+        p = self.InferPolynomialDegree()
+
+        if self.element_type !="hex":
+            raise NotImplementedError("Not implemented yet")
+        if p!=2:
+            raise NotImplementedError("Not implemented yet")
+
+
+        a1 = [ 0,  8, 10,  9, 13, 17, 19, 18]
+        a2 = [13, 17, 19, 18,  4, 22, 24, 23]
+        a3 = [ 8,  1, 11, 10, 17, 14, 20, 19]
+        a4 = [17, 14, 20, 19, 22,  5, 25, 24]
+        a5 = [ 9, 10, 12,  3, 18, 19, 21, 16]
+        a6 = [18, 19, 21, 16, 23, 24, 26,  7]
+        a7 = [10, 11,  2, 12, 19, 20, 15, 21]
+        a8 = [19, 20, 15, 21, 24, 25,  6, 26]
+
+
+        lmesh = Mesh()
+        elements = np.copy(self.elements)
+        lmesh.elements = np.concatenate(
+           (elements[:,a1],
+            elements[:,a2],
+            elements[:,a3],
+            elements[:,a4],
+            elements[:,a5],
+            elements[:,a6],
+            elements[:,a7],
+            elements[:,a8]
+            ))
+        lmesh.points = np.copy(self.points)
+        lmesh.degree = 1
+        lmesh.element_type = self.element_type
+        lmesh.nelem = lmesh.elements.shape[0]
+        lmesh.GetBoundaryFaces()
+        lmesh.GetBoundaryEdges()
+
+        return lmesh
 
 
     def ConvertTrisToQuads(self):
