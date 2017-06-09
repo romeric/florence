@@ -709,7 +709,8 @@ class PostProcess(object):
 
 
 
-    def WriteVTK(self,filename=None, quantity="all", configuration="deformed", steps=None, write_curved_mesh=True):
+    def WriteVTK(self,filename=None, quantity="all", configuration="deformed", steps=None, write_curved_mesh=True,
+        interpolation_degree=10):
         """Writes results to a VTK file for Paraview
 
             quantity = "all" means write all solution fields, otherwise specific quantities 
@@ -768,12 +769,12 @@ class PostProcess(object):
                 cellflag = 5
                 tmesh = PostProcess.TessellateTets(self.mesh, np.zeros_like(self.mesh.points), 
                     QuantityToPlot=self.sol[:,0,0], plot_on_faces=False, plot_points=True,
-                    interpolation_degree=10)
+                    interpolation_degree=interpolation_degree)
             elif lmesh.element_type =='hex':
                 cellflag = 5 
                 tmesh = PostProcess.TessellateHexes(self.mesh, np.zeros_like(self.mesh.points), 
                     QuantityToPlot=self.sol[:,0,0], plot_on_faces=False, plot_points=True,
-                    interpolation_degree=10)
+                    interpolation_degree=interpolation_degree)
             else:
                 raise ValueError('Not implemented yet. Use in-built visualiser for 2D problems')
 
@@ -839,12 +840,15 @@ class PostProcess(object):
         return
 
 
-    def WriteHDF5(self, filename=None, compute_recovered_fields=True, dict_wise=False):
+    def WriteHDF5(self, filename=None, compute_recovered_fields=True, dict_wise=False, do_compression=True):
         """Writes the solution data to a HDF5 file. Give the extension name while providing filename
 
             Input:
                 dict_wise:                  saves the dictionary of recovered variables as they are
                                             computed in StressRecovery
+                do_compression:             the reason this is given as input arguments is that big
+                                            arrays fail due to the overflow bug python standard library
+                                            for arrays with more than 2**31 elements
         """
 
         if compute_recovered_fields:
@@ -861,14 +865,14 @@ class PostProcess(object):
         if compute_recovered_fields is False:
             MainDict = {}
             MainDict['Solution'] = self.sol
-            savemat(filename,MainDict,do_compression=True)
+            savemat(filename,MainDict, do_compression=do_compression)
         else:
             if dict_wise:
                 MainDict = self.recovered_fields
             else:
                 MainDict = {}
             MainDict['Solution'] = self.sol
-            savemat(filename,MainDict,do_compression=True)
+            savemat(filename,MainDict, do_compression=do_compression)
         
 
 
