@@ -485,6 +485,7 @@ class FEMSolver(object):
             if self.newton_raphson_failed_to_converge:
                 solver.condA = np.NAN
                 TotalDisp = TotalDisp[:,:,:Increment]
+                self.number_of_load_increments = Increment
                 break
 
             # BREAK AT A SPECIFICED LOAD INCREMENT IF ASKED FOR
@@ -515,7 +516,7 @@ class FEMSolver(object):
         Eulerx += IncDirichlet[:,:formulation.ndim]
         Eulerp += IncDirichlet[:,-1]
 
-        while self.norm_residual > Tolerance:
+        while self.norm_residual > Tolerance or Iter==0:
             # GET THE REDUCED SYSTEM OF EQUATIONS
             K_b, F_b = boundary_condition.GetReducedMatrices(K,Residual)[:2]
 
@@ -558,12 +559,15 @@ class FEMSolver(object):
             Iter +=1
 
             if Iter==self.maximum_iteration_for_newton_raphson and formulation.fields == "electro_mechanics":
-                raise StopIteration("\n\nNewton Raphson did not converge! Maximum number of iterations reached.")
+                # raise StopIteration("\n\nNewton Raphson did not converge! Maximum number of iterations reached.")
+                warn("\n\nNewton Raphson did not converge! Maximum number of iterations reached.")
+                self.newton_raphson_failed_to_converge = True
+                break
 
             if Iter==self.maximum_iteration_for_newton_raphson:
                 self.newton_raphson_failed_to_converge = True
                 break
-            if np.isnan(self.norm_residual) or self.norm_residual>1e16:
+            if np.isnan(self.norm_residual) or self.norm_residual>1e12:
                 self.newton_raphson_failed_to_converge = True
                 break
 
