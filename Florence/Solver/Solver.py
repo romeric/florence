@@ -13,7 +13,7 @@ class LinearSolver(object):
     def __init__(self,linear_solver="direct", linear_solver_type="umfpack",
         apply_preconditioner=False, preconditioner="amg_smoothed_aggregation", 
         iterative_solver_tolerance=1.0e-12, reduce_matrix_bandwidth=False,
-        out_of_core=False, geometric_discretisation=None):
+        out_of_core=False, geometric_discretisation=None, dont_switch_solver=False):
         """
 
             input:
@@ -37,6 +37,8 @@ class LinearSolver(object):
                                         instance for FEM discretisations this would correspond
                                         to "tri", "quad", "tet", "hex" etc
 
+                dont_switch_solver:     Do not switch between solvers automatically
+
 
         """          
 
@@ -49,6 +51,7 @@ class LinearSolver(object):
         self.preconditioner_type = preconditioner
         self.out_of_core = False
         self.geometric_discretisation = geometric_discretisation
+        self.dont_switch_solver = dont_switch_solver
 
         self.has_amg_solver = True
         if platform.python_implementation() == "PyPy":
@@ -179,7 +182,7 @@ class LinearSolver(object):
         """Solves the linear system of equations"""
 
         # DECIDE IF THE SOLVER TYPE IS APPROPRIATE FOR THE PROBLEM
-        if self.switcher_message is False:
+        if self.switcher_message is False and self.dont_switch_solver is False:
             if b.shape[0] > 100000:
                 self.solver_type = "multigrid"
                 self.solver_subtype = "amg"
@@ -189,7 +192,7 @@ class LinearSolver(object):
                 # self.solver_type = "direct"
                 # self.solver_subtype = "MUMPS"
                 # print 'Large system of equations. Switching to MUMPS solver'
-            elif b.shape[0] > 70000 and self.geometric_discretisation=="hex":
+            elif b.shape[0] > 70000 and self.geometric_discretisation=="hex" and self.dont_switch_solver is False:
                 self.solver_type = "multigrid"
                 self.solver_subtype = "amg"
                 print('Large system of equations. Switching to algebraic multigrid solver')
