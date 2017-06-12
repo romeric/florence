@@ -730,6 +730,15 @@ class PostProcess(object):
                 iterator = range(self.sol.shape[1])
             else:
                 raise ValueError('Plotting quantity not understood')
+        elif isinstance(quantity,list):
+            requires_augmented_solution = False
+            for i in quantity:
+                if i >= self.sol.shape[1]:
+                    requires_augmented_solution = True
+                    break
+            if requires_augmented_solution:
+                self.GetAugmentedSolution()
+            iterator = quantity
         else:
             raise ValueError('Plotting quantity not understood')
 
