@@ -5,7 +5,7 @@ from .MaterialBase import Material
 from Florence.LegendreTransform import LegendreTransform
 
 
-class IsotropicElectroMechanics_101(Material):
+class Multi_IsotropicElectroMechanics_101(Material):
     """
                 Simplest electromechanical model in terms of internal energy 
                         W(C,D0) = W_neo(C) + 1/2/eps_1 (FD0*FD0)
@@ -13,7 +13,7 @@ class IsotropicElectroMechanics_101(Material):
     
     def __init__(self, ndim, **kwargs):
         mtype = type(self).__name__
-        super(IsotropicElectroMechanics_101, self).__init__(mtype, ndim, **kwargs)
+        super(Multi_IsotropicElectroMechanics_101, self).__init__(mtype, ndim, **kwargs)
         # REQUIRES SEPARATELY
         self.nvar = self.ndim+1
         self.energy_type = "internal_energy"
@@ -29,21 +29,23 @@ class IsotropicElectroMechanics_101(Material):
         # self.has_low_level_dispatcher = False
 
     def KineticMeasures(self,F,ElectricFieldx, elem=0):
+        self.mu = self.mus[elem]
+        self.lamb = self.lambs[elem]
+        self.eps_1 = self.eps_1s[elem]
         from Florence.MaterialLibrary.LLDispatch._IsotropicElectroMechanics_101_ import KineticMeasures
         return KineticMeasures(self,np.ascontiguousarray(F), ElectricFieldx)
 
 
     def Hessian(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
 
-        mu = self.mu
-        lamb = self.lamb
-        eps_1 = self.eps_1
+        mu = self.mus[elem]
+        lamb = self.lambs[elem]
+        eps_1 = self.eps_1s[elem]
 
         I = StrainTensors['I']
         J = StrainTensors['J'][gcounter]
         b = StrainTensors['b'][gcounter]
 
-        # D  = ElectricDisplacementx.reshape(self.ndim,1)
         Dx = ElectricDisplacementx.reshape(self.ndim)
 
         self.elasticity_tensor = lamb*(2.*J-1.)*einsum("ij,kl",I,I) + \
@@ -70,9 +72,9 @@ class IsotropicElectroMechanics_101(Material):
 
     def CauchyStress(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
 
-        mu = self.mu
-        lamb = self.lamb
-        eps_1 = self.eps_1
+        mu = self.mus[elem]
+        lamb = self.lambs[elem]
+        eps_1 = self.eps_1s[elem]
 
         I = StrainTensors['I']
         J = StrainTensors['J'][gcounter]
@@ -80,18 +82,15 @@ class IsotropicElectroMechanics_101(Material):
         D = ElectricDisplacementx.reshape(self.ndim,1)
 
         return 1.0*mu/J*(b - I) + lamb*(J-1)*I + J/eps_1*np.dot(D,D.T)
-        # return 1.0*mu*(b - I)  + 1./eps_1*np.dot(D,D.T)
 
 
     def ElectricDisplacementx(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
         # D = self.legendre_transform.GetElectricDisplacement(self, StrainTensors, ElectricFieldx, elem, gcounter)
 
-        eps_1 = self.eps_1
+        eps_1 = self.eps_1s[elem]
         J = StrainTensors['J'][gcounter]
         E = ElectricFieldx.reshape(self.ndim,1)
         D_exact = eps_1/J*E
-        # print np.linalg.norm(D - D_exact)
         return D_exact
 
         return D
-

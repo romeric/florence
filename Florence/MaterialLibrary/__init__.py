@@ -53,4 +53,8 @@ from .Piezoelectric_100 import *
 
 # HELMHOLTZ AND INTERNAL ENERGY EQUIVALENT MODELS
 from .IsotropicElectroMechanics_200 import * 
-from .IsotropicElectroMechanics_201 import * 
+from .IsotropicElectroMechanics_201 import *
+
+
+# COMPOSTITES
+from .Multi_IsotropicElectroMechanics_101 import *
