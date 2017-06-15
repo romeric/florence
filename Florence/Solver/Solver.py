@@ -213,6 +213,7 @@ class LinearSolver(object):
 
             elif self.solver_subtype=='mumps' and self.has_mumps:
                 # CALL JULIA'S MUMPS WRAPPER
+                import h5py
                 from scipy.io import savemat, loadmat
                 pwd = os.path.dirname(os.path.realpath(__file__))
 
@@ -234,11 +235,11 @@ class LinearSolver(object):
                     mumps_failed = True
 
                 if not mumps_failed:
-                    sol = np.loadtxt(pwd+"/solution")
-                    os.remove(pwd+"/solution")
+                    # sol = np.loadtxt(pwd+"/solution")
+                    # os.remove(pwd+"/solution")
+                    sol = h5py.File(pwd+"/solution.mat")['solution']
+                    os.remove(pwd+"/solution.mat")
                 
-                # FromJulia = loadmat(pwd+"JuliaDict.mat")
-                # sol = FromJulia["sol"]
 
                 # REMOVE THE FILES
                 os.remove(pwd+"/JuliaDict.mat")
