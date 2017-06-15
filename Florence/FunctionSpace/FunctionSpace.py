@@ -6,7 +6,8 @@ class FunctionSpace(object):
         and boundary element analyses
     """
 
-    def __init__(self, mesh, quadrature=None, p=1, bases_type="nodal", bases_kind="CG", evaluate_at_nodes=False, equally_spaced=False):
+    def __init__(self, mesh, quadrature=None, p=1, bases_type="nodal", bases_kind="CG", 
+        evaluate_at_nodes=False, equally_spaced=False, use_optimal_quadrature=False):
         """ 
 
             input:
@@ -27,8 +28,11 @@ class FunctionSpace(object):
         # from Florence import QuadratureRule
         from Florence.FunctionSpace.GetBases import GetBases, GetBases3D, GetBasesBoundary, GetBasesAtNodes
         
-
         QuadratureOpt=3
+        is_flattened = False
+        if use_optimal_quadrature:
+            QuadratureOpt=3 # always this for tris/tets
+            is_flattened = True
         # norder=5 # 2*C for stiffness and 2*(C+1) for mass
 
         ndim = mesh.InferSpatialDimension()
@@ -46,7 +50,8 @@ class FunctionSpace(object):
         if evaluate_at_nodes is False:
             if mesh.element_type == "tet" or mesh.element_type == "hex":
                 # GET BASES AT ALL INTEGRATION POINTS (VOLUME)
-                Domain = GetBases3D(C,quadrature,mesh.element_type,equally_spaced=equally_spaced)
+                Domain = GetBases3D(C,quadrature,mesh.element_type,equally_spaced=equally_spaced,
+                    is_flattened=use_optimal_quadrature)
                 # GET BOUNDARY BASES AT ALL INTEGRATION POINTS (LINE)
                 # Boundary = GetBasesBoundary(C,z,ndim)
             elif mesh.element_type == 'tri' or mesh.element_type == 'quad':
@@ -65,33 +70,54 @@ class FunctionSpace(object):
         ############################################################################
         Domain.Jm = []; Domain.AllGauss=[]
         if mesh.element_type == 'hex':
-            Domain.Jm = np.zeros((ndim,Domain.Bases.shape[0],w.shape[0]**ndim)) 
-            Domain.AllGauss = np.zeros((w.shape[0]**ndim,1))    
-            counter = 0
-            for g1 in range(w.shape[0]):
-                for g2 in range(w.shape[0]): 
-                    for g3 in range(w.shape[0]):
+            if is_flattened is False:
+                Domain.Jm = np.zeros((ndim,Domain.Bases.shape[0],w.shape[0]**ndim)) 
+                Domain.AllGauss = np.zeros((w.shape[0]**ndim,1))    
+                counter = 0
+                for g1 in range(w.shape[0]):
+                    for g2 in range(w.shape[0]): 
+                        for g3 in range(w.shape[0]):
+                            # GRADIENT TENSOR IN PARENT ELEMENT [\nabla_\varepsilon (N)]
+                            Domain.Jm[0,:,counter] = Domain.gBasesx[:,counter]
+                            Domain.Jm[1,:,counter] = Domain.gBasesy[:,counter]
+                            Domain.Jm[2,:,counter] = Domain.gBasesz[:,counter]
+
+                            Domain.AllGauss[counter,0] = w[g1]*w[g2]*w[g3]
+
+                            counter +=1
+            else:
+                Domain.Jm = np.zeros((ndim,Domain.Bases.shape[0],w.shape[0]))   
+                Domain.AllGauss = np.zeros((w.shape[0],1))  
+                for counter in range(0,w.shape[0]):
+                    # GRADIENT TENSOR IN PARENT ELEMENT [\nabla_\varepsilon (N)]
+                    Domain.Jm[0,:,counter] = Domain.gBasesx[:,counter]
+                    Domain.Jm[1,:,counter] = Domain.gBasesy[:,counter]
+                    Domain.Jm[2,:,counter] = Domain.gBasesz[:,counter]
+
+                    Domain.AllGauss[counter,0] = w[counter]                
+
+        elif mesh.element_type == 'quad':
+            if is_flattened is False:
+                Domain.Jm = np.zeros((ndim,Domain.Bases.shape[0],w.shape[0]**ndim)) 
+                Domain.AllGauss = np.zeros((w.shape[0]**ndim,1))    
+                counter = 0
+                for g1 in range(w.shape[0]):
+                    for g2 in range(w.shape[0]): 
                         # GRADIENT TENSOR IN PARENT ELEMENT [\nabla_\varepsilon (N)]
                         Domain.Jm[0,:,counter] = Domain.gBasesx[:,counter]
                         Domain.Jm[1,:,counter] = Domain.gBasesy[:,counter]
-                        Domain.Jm[2,:,counter] = Domain.gBasesz[:,counter]
 
-                        Domain.AllGauss[counter,0] = w[g1]*w[g2]*w[g3]
-
+                        Domain.AllGauss[counter,0] = w[g1]*w[g2]
                         counter +=1
-
-        elif mesh.element_type == 'quad':
-            Domain.Jm = np.zeros((ndim,Domain.Bases.shape[0],w.shape[0]**ndim)) 
-            Domain.AllGauss = np.zeros((w.shape[0]**ndim,1))    
-            counter = 0
-            for g1 in range(w.shape[0]):
-                for g2 in range(w.shape[0]): 
+            else:
+                Domain.Jm = np.zeros((ndim,Domain.Bases.shape[0],w.shape[0]))   
+                Domain.AllGauss = np.zeros((w.shape[0],1))  
+                for counter in range(0,w.shape[0]):
                     # GRADIENT TENSOR IN PARENT ELEMENT [\nabla_\varepsilon (N)]
                     Domain.Jm[0,:,counter] = Domain.gBasesx[:,counter]
                     Domain.Jm[1,:,counter] = Domain.gBasesy[:,counter]
 
-                    Domain.AllGauss[counter,0] = w[g1]*w[g2]
-                    counter +=1
+                    Domain.AllGauss[counter,0] = w[counter]
 
         elif mesh.element_type == 'tet':
             Domain.Jm = np.zeros((ndim,Domain.Bases.shape[0],w.shape[0]))   
@@ -105,8 +131,6 @@ class FunctionSpace(object):
                 Domain.AllGauss[counter,0] = w[counter]
 
         elif mesh.element_type == 'tri':
-            Domain.Jm = [];  Domain.AllGauss = []
-
             Domain.Jm = np.zeros((ndim,Domain.Bases.shape[0],w.shape[0]))   
             Domain.AllGauss = np.zeros((w.shape[0],1))  
             for counter in range(0,w.shape[0]):
