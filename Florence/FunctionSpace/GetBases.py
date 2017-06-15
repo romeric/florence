@@ -14,7 +14,7 @@ from Florence.QuadratureRules.FeketePointsTet import *
 from Florence.QuadratureRules.GaussLobattoPoints import *
 from Florence.QuadratureRules.EquallySpacedPoints import *
 
-def GetBases(C, Quadrature, info, bases_type="nodal", equally_spaced=False):
+def GetBases(C, Quadrature, info, bases_type="nodal", equally_spaced=False, is_flattened=False):
 
     w = Quadrature.weights
     z = Quadrature.points
@@ -28,10 +28,14 @@ def GetBases(C, Quadrature, info, bases_type="nodal", equally_spaced=False):
         gBasisy = np.zeros((ns,w.shape[0]),dtype=np.float64)
     elif info=='quad':
         ns = int((C+2)**2)
-        Basis = np.zeros((ns,z.shape[0]*z.shape[0]),dtype=np.float64)
-        gBasisx = np.zeros((ns,z.shape[0]*z.shape[0]),dtype=np.float64)
-        gBasisy = np.zeros((ns,z.shape[0]*z.shape[0]),dtype=np.float64)
-
+        if is_flattened is False:
+            Basis = np.zeros((ns,z.shape[0]*z.shape[0]),dtype=np.float64)
+            gBasisx = np.zeros((ns,z.shape[0]*z.shape[0]),dtype=np.float64)
+            gBasisy = np.zeros((ns,z.shape[0]*z.shape[0]),dtype=np.float64)
+        else:
+            Basis = np.zeros((ns,w.shape[0]),dtype=np.float64)
+            gBasisx = np.zeros((ns,w.shape[0]),dtype=np.float64)
+            gBasisy = np.zeros((ns,w.shape[0]),dtype=np.float64)
 
     if info == 'quad':
         if not equally_spaced:
@@ -41,15 +45,23 @@ def GetBases(C, Quadrature, info, bases_type="nodal", equally_spaced=False):
             hpBases = QuadES.Lagrange
             GradhpBases = QuadES.GradLagrange
 
-        counter = 0
-        for i in range(0,z.shape[0]):
-            for j in range(0,z.shape[0]):
-                ndummy = hpBases(C,z[i],z[j])
-                Basis[:,counter] = ndummy[:,0]
-                dummy = GradhpBases(C,z[i],z[j])
-                gBasisx[:,counter] = dummy[:,0]
-                gBasisy[:,counter] = dummy[:,1]
-                counter+=1
+        if is_flattened is False:
+            counter = 0
+            for i in range(0,z.shape[0]):
+                for j in range(0,z.shape[0]):
+                    ndummy = hpBases(C,z[i],z[j])
+                    Basis[:,counter] = ndummy[:,0]
+                    dummy = GradhpBases(C,z[i],z[j])
+                    gBasisx[:,counter] = dummy[:,0]
+                    gBasisy[:,counter] = dummy[:,1]
+                    counter+=1
+        else:
+            for i in range(0,w.shape[0]):
+                ndummy = hpBases(C,z[i,0],z[i,1])
+                dummy = GradhpBases(C,z[i,0],z[i,1])
+                Basis[:,i] = ndummy[:,0]
+                gBasisx[:,i] = dummy[:,0]
+                gBasisy[:,i] = dummy[:,1]     
 
     elif info == 'tri':
         hpBases = Tri.hpNodal.hpBases
@@ -74,7 +86,7 @@ def GetBases(C, Quadrature, info, bases_type="nodal", equally_spaced=False):
 
 
 
-def GetBases3D(C, Quadrature, info, bases_type="nodal", equally_spaced=False):
+def GetBases3D(C, Quadrature, info, bases_type="nodal", equally_spaced=False, is_flattened=False):
 
     ndim = 3
 
@@ -84,10 +96,16 @@ def GetBases3D(C, Quadrature, info, bases_type="nodal", equally_spaced=False):
     ns=[]; Basis=[]; gBasisx=[]; gBasisy=[]; gBasisz=[]
     if info=='hex':
         ns = int((C+2)**ndim)
-        Basis = np.zeros((ns,(z.shape[0])**ndim),dtype=np.float64)
-        gBasisx = np.zeros((ns,(z.shape[0])**ndim),dtype=np.float64)
-        gBasisy = np.zeros((ns,(z.shape[0])**ndim),dtype=np.float64)
-        gBasisz = np.zeros((ns,(z.shape[0])**ndim),dtype=np.float64)
+        if is_flattened is False:        
+            Basis = np.zeros((ns,(z.shape[0])**ndim),dtype=np.float64)
+            gBasisx = np.zeros((ns,(z.shape[0])**ndim),dtype=np.float64)
+            gBasisy = np.zeros((ns,(z.shape[0])**ndim),dtype=np.float64)
+            gBasisz = np.zeros((ns,(z.shape[0])**ndim),dtype=np.float64)
+        else:
+            Basis = np.zeros((ns,w.shape[0]),dtype=np.float64)
+            gBasisx = np.zeros((ns,w.shape[0]),dtype=np.float64)
+            gBasisy = np.zeros((ns,w.shape[0]),dtype=np.float64)
+            gBasisz = np.zeros((ns,w.shape[0]),dtype=np.float64)    
     elif info=='tet':
         p=C+1
         ns = int((p+1)*(p+2)*(p+3)/6)
@@ -105,18 +123,28 @@ def GetBases3D(C, Quadrature, info, bases_type="nodal", equally_spaced=False):
             hpBases = HexES.Lagrange
             GradhpBases = HexES.GradLagrange
 
-        counter = 0
-        for i in range(w.shape[0]):
-            for j in range(w.shape[0]):
-                for k in range(w.shape[0]):
-                    ndummy = hpBases(C,z[i],z[j],z[k])
-                    dummy = GradhpBases(C,z[i],z[j],z[k])
+        if is_flattened is False:
+            counter = 0
+            for i in range(w.shape[0]):
+                for j in range(w.shape[0]):
+                    for k in range(w.shape[0]):
+                        ndummy = hpBases(C,z[i],z[j],z[k])
+                        dummy = GradhpBases(C,z[i],z[j],z[k])
 
-                    Basis[:,counter] = ndummy[:,0]
-                    gBasisx[:,counter] = dummy[:,0]
-                    gBasisy[:,counter] = dummy[:,1]
-                    gBasisz[:,counter] = dummy[:,2]
-                    counter+=1
+                        Basis[:,counter] = ndummy[:,0]
+                        gBasisx[:,counter] = dummy[:,0]
+                        gBasisy[:,counter] = dummy[:,1]
+                        gBasisz[:,counter] = dummy[:,2]
+                        counter+=1
+        else:
+            for i in range(0,w.shape[0]):
+                ndummy = hpBases(C,z[i,0],z[i,1],z[i,2])
+                dummy = GradhpBases(C,z[i,0],z[i,1],z[i,2])
+                Basis[:,i] = ndummy[:,0]
+                gBasisx[:,i] = dummy[:,0]
+                gBasisy[:,i] = dummy[:,1]
+                gBasisz[:,i] = dummy[:,2]
+
 
     elif info=='tet':
         hpBases = Tet.hpNodal.hpBases

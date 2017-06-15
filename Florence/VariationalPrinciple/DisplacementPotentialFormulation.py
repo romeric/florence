@@ -39,6 +39,8 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
             # OPTION FOR QUADRATURE TECHNIQUE FOR TRIS AND TETS
             optimal_quadrature = 3
+            # is_flattened = True
+            is_flattened = False
 
             if mesh.element_type == "tri" or mesh.element_type == "tet":
                 norder = 2*C
@@ -52,7 +54,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
                 norder_post = 2*(C+2)
 
             # GET QUADRATURE
-            quadrature = QuadratureRule(optimal=optimal_quadrature, norder=norder, mesh_type=mesh.element_type)
+            quadrature = QuadratureRule(optimal=optimal_quadrature, norder=norder, mesh_type=mesh.element_type, is_flattened=is_flattened)
             if self.compute_post_quadrature:
                 # COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR POST-PROCESSING
                 post_quadrature = QuadratureRule(optimal=optimal_quadrature, norder=norder_post, mesh_type=mesh.element_type)
@@ -66,7 +68,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         if function_spaces == None and self.function_spaces == None:
 
             # CREATE FUNCTIONAL SPACES
-            function_space = FunctionSpace(mesh, quadrature, p=C+1, equally_spaced=equally_spaced_bases)
+            function_space = FunctionSpace(mesh, quadrature, p=C+1, equally_spaced=equally_spaced_bases, use_optimal_quadrature=is_flattened)
             if compute_post_quadrature:
                 post_function_space = FunctionSpace(mesh, post_quadrature, p=C+1, equally_spaced=equally_spaced_bases)
             else:
