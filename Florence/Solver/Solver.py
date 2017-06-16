@@ -5,6 +5,7 @@ from scipy.sparse import issparse, isspmatrix_coo, isspmatrix_csr, isspmatrix_cs
 from scipy.sparse.linalg import spsolve, bicgstab, gmres, lgmres, cg, spilu, LinearOperator, onenormest
 from subprocess import call
 import os, platform
+from time import time
 
 
 class LinearSolver(object):
@@ -69,6 +70,11 @@ class LinearSolver(object):
             self.has_umfpack = False
 
         self.has_mumps = False
+        try:
+            from mumps.mumps_context import MUMPSContext
+            self.has_mumps = True
+        except ImportError:
+            self.has_umfpack = False
 
         self.switcher_message = False
 
@@ -192,7 +198,7 @@ class LinearSolver(object):
                 # self.solver_type = "direct"
                 # self.solver_subtype = "MUMPS"
                 # print 'Large system of equations. Switching to MUMPS solver'
-            elif b.shape[0] > 70000 and self.geometric_discretisation=="hex" and self.dont_switch_solver is False:
+            elif b.shape[0] > 70000 and self.geometric_discretisation=="hex":
                 self.solver_type = "multigrid"
                 self.solver_subtype = "amg"
                 print('Large system of equations. Switching to algebraic multigrid solver')
@@ -212,6 +218,20 @@ class LinearSolver(object):
                 # sol = umfpack.spsolve(A, b)
 
             elif self.solver_subtype=='mumps' and self.has_mumps:
+
+                from mumps.mumps_context import MUMPSContext
+                t_solve = time()
+                A = A.tocoo()
+                # False means non-symmetric - Do not change it to True means symmetric pos def
+                # which is not the case for electromechanics
+                context = MUMPSContext((A.shape[0], A.row, A.col, A.data, False), verbose=False)
+                context.analyze()
+                context.factorize()
+                sol = context.solve(rhs=b)
+                print("MUMPS solver time is {}".format(time() - t_solve))
+
+                return sol
+
                 # CALL JULIA'S MUMPS WRAPPER
                 import h5py
                 from scipy.io import savemat, loadmat
@@ -249,6 +269,8 @@ class LinearSolver(object):
                 if A.dtype != np.float64:
                     A = A.astype(np.float64)
                 sol = spsolve(A,b,permc_spec='MMD_AT_PLUS_A',use_umfpack=True)
+
+
 
         elif self.solver_type == "iterative":
             # CALL ITERATIVE SOLVER
