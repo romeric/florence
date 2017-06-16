@@ -74,7 +74,7 @@ class LinearSolver(object):
             from mumps.mumps_context import MUMPSContext
             self.has_mumps = True
         except ImportError:
-            self.has_umfpack = False
+            self.has_mumps = False
 
         self.switcher_message = False
 
