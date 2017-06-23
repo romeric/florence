@@ -37,7 +37,8 @@ class FEMSolver(object):
         print_incremental_log=False, save_incremental_solution=False, incremental_solution_filename=None,
         break_at_increment=-1,
         include_physical_damping=False, damping_factor=0.1,
-        compute_energy_dissipation=False, compute_linear_momentum_dissipation=False, total_time=1.):
+        compute_energy_dissipation=False, compute_linear_momentum_dissipation=False, total_time=1.,
+        user_defined_break_func=None, user_defined_stop_func=None):
 
         self.has_low_level_dispatcher = has_low_level_dispatcher
 
@@ -79,6 +80,8 @@ class FEMSolver(object):
         self.save_incremental_solution = save_incremental_solution
         self.incremental_solution_filename = incremental_solution_filename
         self.break_at_increment = break_at_increment
+        self.user_defined_break_func = user_defined_break_func
+        self.user_defined_stop_func = user_defined_stop_func
 
         self.fem_timer = 0.
 
@@ -311,6 +314,11 @@ class FEMSolver(object):
             TotalDisp = self.StaticSolver(function_spaces, formulation, solver, 
                 K,NeumannForces,NodalForces,Residual,
                 mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition)
+
+            # from FEMSolverArcLength import StaticSolverArcLength
+            # TotalDisp = StaticSolverArcLength(self,function_spaces, formulation, solver, 
+            #     K,NeumannForces,NodalForces,Residual,
+            #     mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition)
 
         return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
 
@@ -567,10 +575,22 @@ class FEMSolver(object):
             if Iter==self.maximum_iteration_for_newton_raphson:
                 self.newton_raphson_failed_to_converge = True
                 break
-            if np.isnan(self.norm_residual) or self.norm_residual>1e12:
+            if np.isnan(self.norm_residual) or self.norm_residual>1e10:
                 self.newton_raphson_failed_to_converge = True
                 break
 
+            # USER DEFINED CRITERIA TO BREAK OUT OF NEWTON-RAPHSON
+            if self.user_defined_break_func != None:
+                if self.user_defined_break_func(Increment,Iter,self.norm_residual,self.rel_norm_residual, Tolerance):
+                    break
+
+            # USER DEFINED CRITERIA TO STOP NEWTON-RAPHSON AND THE WHOLE ANALYSIS
+            if self.user_defined_stop_func != None:
+                if self.user_defined_stop_func(Increment,Iter,self.norm_residual,self.rel_norm_residual, Tolerance):
+                    self.newton_raphson_failed_to_converge = True
+                    break
+
 
         return Eulerx, Eulerp, K, Residual
+
 

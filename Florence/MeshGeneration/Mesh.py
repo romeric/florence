@@ -4650,6 +4650,7 @@ class Mesh(object):
             elements[:,a7],
             elements[:,a8]
             ))
+        lmesh.elements = np.ascontiguousarray(lmesh.elements)
         lmesh.points = np.copy(self.points)
         lmesh.degree = 1
         lmesh.element_type = self.element_type
