@@ -317,10 +317,11 @@ class FlorenceSetup(object):
                                     "_IsotropicElectroMechanics_106_", 
                                     "_IsotropicElectroMechanics_107_",
                                     "_IsotropicElectroMechanics_108_",
+                                    "_IsotropicElectroMechanics_109_",
                                     "_Piezoelectric_100_"
                                 ]
 
-        # low_level_material_list = ["_IsotropicElectroMechanics_108_"]
+        # low_level_material_list = ["_IsotropicElectroMechanics_109_"]
         # low_level_material_list = ["_NeoHookean_2_"]
 
         assert self.extension_paths != None
@@ -338,6 +339,7 @@ class FlorenceSetup(object):
 
                 ll_material_mech = low_level_material_list[:4]
                 ll_material_electro_mech = low_level_material_list[4:]
+                ll_material_electro_mech.remove("_IsotropicElectroMechanics_109_")
                 # ll_material_mech = []
                 # ll_material_electro_mech = low_level_material_list
                 for material in ll_material_mech:

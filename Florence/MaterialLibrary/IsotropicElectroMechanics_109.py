@@ -27,17 +27,17 @@ class IsotropicElectroMechanics_109(Material):
             self.H_VoigtSize = 9
 
         # LOW LEVEL DISPATCHER
-        # self.has_low_level_dispatcher = True
-        self.has_low_level_dispatcher = False
+        self.has_low_level_dispatcher = True
+        # self.has_low_level_dispatcher = False
 
     def KineticMeasures(self,F,ElectricFieldx, elem=0):
-        from Florence.MaterialLibrary.LLDispatch._IsotropicElectroMechanics_108_ import KineticMeasures
+        from Florence.MaterialLibrary.LLDispatch._IsotropicElectroMechanics_109_ import KineticMeasures
         return KineticMeasures(self,np.ascontiguousarray(F), ElectricFieldx)
 
 
     def Hessian(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
 
-        mu = self.mu
+        mu_v = self.mu_v
         mu1 = self.mu1
         mu2 = self.mu2
         lamb = self.lamb
@@ -59,7 +59,7 @@ class IsotropicElectroMechanics_109(Material):
                 einsum('ij,k,l',I,Dx,Dx) - einsum('i,j,kl',Dx,Dx,I))
 
         # C_linear = self.H_Voigt
-        C_linear = H_Voigt = lamb*einsum('ij,kl',I,I)+mu*(einsum('ik,jl',I,I)+einsum('il,jk',I,I))
+        C_linear = H_Voigt = lamb*einsum('ij,kl',I,I)+mu_v*(einsum('ik,jl',I,I)+einsum('il,jk',I,I))
 
         self.elasticity_tensor = C_mech + C_elect + C_linear
 
@@ -83,7 +83,7 @@ class IsotropicElectroMechanics_109(Material):
 
     def CauchyStress(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
 
-        mu = self.mu
+        mu_v = self.mu_v
         mu1 = self.mu1
         mu2 = self.mu2
         lamb = self.lamb
@@ -114,7 +114,7 @@ class IsotropicElectroMechanics_109(Material):
             tre = trace(strain) + 1
 
         # USE FASTER TRACE FUNCTION
-        sigma_linear = 2.*mu*strain + lamb*tre*I 
+        sigma_linear = 2.*mu_v*strain + lamb*tre*I 
 
         sigma = simga_mech + sigma_electric + sigma_linear
 
