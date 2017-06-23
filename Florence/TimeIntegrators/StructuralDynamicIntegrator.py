@@ -298,9 +298,21 @@ class StructuralDynamicIntegrators(object):
             if Iter==fem_solver.maximum_iteration_for_newton_raphson:
                 fem_solver.newton_raphson_failed_to_converge = True
                 break
+
             if np.isnan(self.norm_residual) or self.norm_residual>1e12:
                 fem_solver.newton_raphson_failed_to_converge = True
                 break
+
+            # USER DEFINED CRITERIA TO BREAK OUT OF NEWTON-RAPHSON
+            if fem_solver.user_defined_break_func != None:
+                if fem_solver.user_defined_break_func(Increment,Iter,self.norm_residual,self.rel_norm_residual, Tolerance):
+                    break
+
+            # USER DEFINED CRITERIA TO STOP NEWTON-RAPHSON AND THE WHOLE ANALYSIS
+            if fem_solver.user_defined_stop_func != None:
+                if fem_solver.user_defined_stop_func(Increment,Iter,self.norm_residual,self.rel_norm_residual, Tolerance):
+                    fem_solver.newton_raphson_failed_to_converge = True
+                    break
 
         return Eulerx, Eulerp, K, Residual, velocities, accelerations
 
