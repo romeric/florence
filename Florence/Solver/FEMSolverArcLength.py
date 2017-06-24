@@ -257,7 +257,7 @@ def NewtonRaphsonArchLength(self, function_spaces, formulation, solver,
         if Iter==self.maximum_iteration_for_newton_raphson:
             self.newton_raphson_failed_to_converge = True
             break
-        if np.isnan(self.norm_residual) or self.norm_residual>1e10:
+        if np.isnan(self.norm_residual) or self.norm_residual>1e06:
             self.newton_raphson_failed_to_converge = True
             break
 

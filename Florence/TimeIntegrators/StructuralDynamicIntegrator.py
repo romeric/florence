@@ -299,7 +299,7 @@ class StructuralDynamicIntegrators(object):
                 fem_solver.newton_raphson_failed_to_converge = True
                 break
 
-            if np.isnan(self.norm_residual) or self.norm_residual>1e12:
+            if np.isnan(self.norm_residual) or self.norm_residual>1e06:
                 fem_solver.newton_raphson_failed_to_converge = True
                 break
 
