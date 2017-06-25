@@ -2648,10 +2648,10 @@ class Mesh(object):
             pass
         elif fmt is "binary":
             try:
-                from evtk.hl import pointsToVTK, linesToVTK, gridToVTK, unstructuredGridToVTK
-                from evtk.vtk import VtkVertex, VtkLine, VtkTriangle, VtkQuad, VtkTetra, VtkPyramid, VtkHexahedron
+                from pyevtk.hl import pointsToVTK, linesToVTK, gridToVTK, unstructuredGridToVTK
+                from pyevtk.vtk import VtkVertex, VtkLine, VtkTriangle, VtkQuad, VtkTetra, VtkPyramid, VtkHexahedron
             except ImportError:
-                raise ImportError("Could not import evtk")
+                raise ImportError("Could not import evtk. Install it using 'pip install pyevtk'")
         else:
             raise ValueError("Writer format not understood")
 
