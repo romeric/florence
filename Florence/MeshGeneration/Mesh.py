@@ -2081,19 +2081,11 @@ class Mesh(object):
 
             self.ReadSeparate(connectivity_file,coordinates_file,element_type,
                 delimiter_connectivity=',',delimiter_coordinates=',')
-            # self.ReadSeparate(MainData.MeshInfo.ConnectivityFile,MainData.MeshInfo.CoordinatesFile,MainData.MeshInfo.MeshType,
-            #   edges_file=MainData.MeshInfo.EdgesFile,delimiter_connectivity=',',delimiter_coordinates=',')
-        elif self.reader_type is 'ReadHighOrderMesh':
-            self.ReadHighOrderMesh(MainData.MeshInfo.FileName.split(".")[0],MainData.C,MainData.MeshInfo.MeshType)
         elif self.reader_type is 'ReadHDF5':
             self.ReadHDF5(filename)
-        elif self.reader_type is 'HollowCircle':
-            # self.HollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=4,ncirc=12)
-            # self.HollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=True,nrad=7,ncirc=7) # isotropic
-            self.HollowCircle(inner_radius=0.5,outer_radius=2.,isotropic=False,nrad=7,ncirc=7)
-        elif self.reader_type is 'Sphere':
-            # mesh.Sphere()
-            self.Sphere(points=10)
+
+        self.nnode = self.points.shape[0]
+        return
 
 
 
@@ -2192,26 +2184,6 @@ class Mesh(object):
             self.faces = np.loadtxt(faces_file,dtype=np.int64,delimiter=delimiter_edges) - index
             if ignore_cols_faces !=None:
                 self.faces = self.faces[ignore_cols_faces:,:]
-
-
-
-
-    def ReadHighOrderMesh(self,filename,C,element_type="tri"):
-        """Convenience function for reading high order mesh"""
-
-        if element_type=="tri":
-
-            self.elements = np.loadtxt(filename+"_elements_P"+str(C+1)+".dat")
-            self.edges = np.loadtxt(filename+"_edges_P"+str(C+1)+".dat")
-            self.points = np.loadtxt(filename+"_points_P"+str(C+1)+".dat")
-            self.nelem = self.elements.shape[0]
-            self.element_type = element_type
-
-            self.elements = self.elements.astype(np.uint64)
-            self.edges = self.edges.astype(np.uint64)
-
-        elif element_type=="tet":
-            pass
 
 
 
@@ -2659,57 +2631,116 @@ class Mesh(object):
 
 
 
-    def WriteVTK(self, filename=None, result=None):
-        """Write mesh/results to vtu"""
+    def WriteVTK(self, filename=None, result=None, fmt="binary"):
+        """Write mesh/results to vtu
+            
+            inputs:
+                fmt:                    [str] VTK writer format either "binary" or "xml". 
+                                        "xml" files do not support big vtk/vtu files
+                                        typically greater than 2GB whereas "binary" files can.  Also "xml" writer is 
+                                        in-built whereas "binary" writer depends on evtk/pyevtk module
+        """
 
         assert self.elements is not None
         assert self.points is not None
+
+        if fmt is "xml":
+            pass
+        elif fmt is "binary":
+            try:
+                from evtk.hl import pointsToVTK, linesToVTK, gridToVTK, unstructuredGridToVTK
+                from evtk.vtk import VtkVertex, VtkLine, VtkTriangle, VtkQuad, VtkTetra, VtkPyramid, VtkHexahedron
+            except ImportError:
+                raise ImportError("Could not import evtk")
+        else:
+            raise ValueError("Writer format not understood")
 
         elements = np.copy(self.elements)
 
         cellflag = None
         if self.element_type =='tri':
             cellflag = 5
+            offset = 3
             if self.elements.shape[1]==6:
                 cellflag = 22
+                offset = 6
         elif self.element_type =='quad':
             cellflag = 9
+            offset = 4
             if self.elements.shape[1]==8:
                 cellflag = 23
+                offset = 8
         if self.element_type =='tet':
             cellflag = 10
+            offset = 4
             if self.elements.shape[1]==10:
                 cellflag = 24
+                offset = 10
                 # CHANGE NUMBERING ORDER FOR PARAVIEW
                 para_arange = [0,4,1,6,2,5,7,8,9,3]
                 elements = elements[:,para_arange]    
         elif self.element_type == 'hex':
             cellflag = 12
+            offset = 8
             if self.elements.shape[1] == 20:
                 cellflag = 25
+                offset = 20
 
         if filename is None:
             warn('File name not specified. I am going to write one in the current directory')
             filename = PWD(__file__) + "/output.vtu"
+        if ".vtu" in filename and fmt is "binary":
+            filename  = filename.split('.')[0] 
+
+
+        if self.InferSpatialDimension() == 2:
+            points = np.zeros((self.points.shape[0],3))
+            points[:,:2] = self.points
+        else:
+            points = self.points
 
         if result is None:
-            write_vtu(Verts=self.points, Cells={cellflag:elements},fname=filename)
+            if fmt is "xml":
+                write_vtu(Verts=self.points, Cells={cellflag:elements},fname=filename)
+            elif fmt is "binary":
+                unstructuredGridToVTK(filename,
+                    np.ascontiguousarray(points[:,0]),np.ascontiguousarray(points[:,1]),
+                    np.ascontiguousarray(points[:,2]), np.ascontiguousarray(elements.ravel()),
+                    np.arange(0,offset*self.nelem,offset)+offset, np.ones(self.nelem)*cellflag)
         else:
             if isinstance(result, np.ndarray):
                 if result.ndim > 1:
-                    if result.shape[1] == 1:
+                    if result.size == result.shape[0]:
                         result = result.flatten()
 
-                if result.ndim > 1:
-                    if result.shape[0] == self.nelem:
-                        write_vtu(Verts=self.points, Cells={cellflag:elements},cvdata=result,fname=filename)
-                    elif result.shape[0] == self.points.shape[0]:
-                        write_vtu(Verts=self.points, Cells={cellflag:elements},pvdata=result,fname=filename)
-                else:
-                    if result.shape[0] == self.nelem:
-                        write_vtu(Verts=self.points, Cells={cellflag:elements},cdata=result,fname=filename)
-                    elif result.shape[0] == self.points.shape[0]:
-                        write_vtu(Verts=self.points, Cells={cellflag:elements},pdata=result,fname=filename)
+                if fmt is "xml":
+                    if result.ndim > 1:
+                        if result.shape[0] == self.nelem:
+                            write_vtu(Verts=self.points, Cells={cellflag:elements},cvdata=result,fname=filename)
+                        elif result.shape[0] == self.points.shape[0]:
+                            write_vtu(Verts=self.points, Cells={cellflag:elements},pvdata=result,fname=filename)
+                    else:
+                        if result.shape[0] == self.nelem:
+                            write_vtu(Verts=self.points, Cells={cellflag:elements},cdata=result,fname=filename)
+                        elif result.shape[0] == self.points.shape[0]:
+                            write_vtu(Verts=self.points, Cells={cellflag:elements},pdata=result,fname=filename)
+                elif fmt is "binary":
+                    if result.ndim <= 1:
+                        if result.shape[0] == self.nelem:
+                            unstructuredGridToVTK(filename,
+                                np.ascontiguousarray(points[:,0]),np.ascontiguousarray(points[:,1]),
+                                np.ascontiguousarray(points[:,2]), np.ascontiguousarray(elements.ravel()),
+                                np.arange(0,offset*self.nelem,offset)+offset, np.ones(self.nelem)*cellflag,
+                                cellData={'result':np.ascontiguousarray(result.ravel())})
+                        elif result.shape[0] == self.points.shape[0]:
+                            unstructuredGridToVTK(filename,
+                                np.ascontiguousarray(points[:,0]),np.ascontiguousarray(points[:,1]),
+                                np.ascontiguousarray(points[:,2]), np.ascontiguousarray(elements.ravel()),
+                                np.arange(0,offset*self.nelem,offset)+offset, np.ones(self.nelem)*cellflag,
+                                pointData={'result':np.ascontiguousarray(result.ravel())})
+                    else:
+                        raise NotImplementedError("Writing multliple or vector/tensor valued results to binary vtk not supported yet")
+
 
 
 

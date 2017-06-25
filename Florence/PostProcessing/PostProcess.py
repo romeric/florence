@@ -539,14 +539,15 @@ class PostProcess(object):
         return augmented_sol
 
 
-    def QuantityNamer(self, num):
+    def QuantityNamer(self, num, print_name=True):
         """Returns the quantity (for augmented solution i.e. primary and recovered variables) 
             name given its number (from numbering order)
         """
 
         namer = None
-        if num > 47:
-            print('Quantity corresponds to ' + str(namer))
+        if num > 48:
+            if print_name:
+                print('Quantity corresponds to ' + str(namer))
             return namer
 
         lines = []
@@ -564,16 +565,26 @@ class PostProcess(object):
                 spl = filter(None, line.split(" "))
                 if spl[0] == str(num):
                     if self.nvar == 2 and self.ndim==2:
-                        namer = spl[1]
+                        namer = spl[-4]
                     elif self.nvar == 3 and self.ndim==2:
-                        namer = spl[3]
+                        namer = spl[-2]
                     elif self.nvar == 3 and self.ndim==3:
-                        namer = spl[2]
+                        namer = spl[-3]
                     elif self.nvar == 4:
-                        namer = spl[4]
+                        namer = spl[-1]
                     break
 
-        print('Quantity corresponds to ' + str(namer))
+        if print_name:
+            print('Quantity corresponds to ' + str(namer))
+
+        if "ux" in namer:
+            namer = "u_x"
+        elif "uy" in namer:
+            namer = "u_y"
+        elif "uz" in namer:
+            namer = "u_z"
+        elif "phi" in namer:
+            namer = "\phi"
         return namer
 
 
@@ -710,13 +721,31 @@ class PostProcess(object):
 
 
     def WriteVTK(self,filename=None, quantity="all", configuration="deformed", steps=None, write_curved_mesh=True,
-        interpolation_degree=10):
+        interpolation_degree=10, fmt="binary"):
         """Writes results to a VTK file for Paraview
 
             quantity = "all" means write all solution fields, otherwise specific quantities 
             would be written based on augmented solution numbering order
             step - [list or np.1darray of sequentially aranged steps] which time steps/increments should be written
+
+            inputs:
+                fmt:                    [str] VTK writer format either "binary" or "xml". 
+                                        "xml" files do not support big vtk/vtu files
+                                        typically greater than 2GB whereas "binary" files can.  Also "xml" writer is 
+                                        in-built whereas "binary" writer depends on evtk/pyevtk module
         """
+
+        if fmt is "xml":
+            pass
+        elif fmt is "binary":
+            try:
+                from evtk.hl import pointsToVTK, linesToVTK, gridToVTK, unstructuredGridToVTK
+                from evtk.vtk import VtkVertex, VtkLine, VtkTriangle, VtkQuad, VtkTetra, VtkPyramid, VtkHexahedron
+            except ImportError:
+                raise ImportError("Could not import evtk")
+        else:
+            raise ValueError("Writer format not understood")
+        formatter = fmt
 
         if isinstance(quantity,int):
             if quantity>=self.sol.shape[1]:
@@ -761,15 +790,21 @@ class PostProcess(object):
 
         if lmesh.element_type =='tri':
             cellflag = 5
+            offset = 3
         elif lmesh.element_type =='quad':
             cellflag = 9
+            offset = 4
         if lmesh.element_type =='tet':
             cellflag = 10
+            offset = 4
         elif lmesh.element_type == 'hex':
             cellflag = 12
+            offset = 8
 
         ndim = lmesh.points.shape[1]
         LoadIncrement = self.sol.shape[2]
+        q_names = [self.QuantityNamer(quant, print_name=False) for quant in iterator]
+        # q_names = ["$"+self.QuantityNamer(quant, print_name=False)+"$" for quant in iterator]
 
 
         if write_curved_mesh:
@@ -814,18 +849,38 @@ class PostProcess(object):
                     tmesh.y_edges.T.copy().flatten()[:,None],
                     tmesh.z_edges.T.copy().flatten()[:,None]),axis=1)
 
-                vtk_writer.write_vtu(Verts=edge_coords, 
-                    Cells={3:tmesh.connections},
-                    fname=filename.split('.')[0]+'_curved_lines_increment_'+str(Increment)+'.vtu')
+                if formatter is "xml":
+                    vtk_writer.write_vtu(Verts=edge_coords, 
+                        Cells={3:tmesh.connections},
+                        fname=filename.split('.')[0]+'_curved_lines_increment_'+str(Increment)+'.vtu')
 
-                vtk_writer.write_vtu(Verts=svpoints,
-                    Cells={1:np.arange(svpoints.shape[0])},
-                    fname=filename.split('.')[0]+'_curved_points_increment_'+str(Increment)+'.vtu')
+                    vtk_writer.write_vtu(Verts=svpoints,
+                        Cells={1:np.arange(svpoints.shape[0])},
+                        fname=filename.split('.')[0]+'_curved_points_increment_'+str(Increment)+'.vtu')
 
-                for quant in iterator:
-                    vtk_writer.write_vtu(Verts=tmesh.points+extrapolated_sol[:,:ndim], 
-                        Cells={cellflag:tmesh.elements}, pdata=extrapolated_sol[:,quant],
-                        fname=filename.split('.')[0]+'_curved_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu')
+                    for quant in iterator:
+                        vtk_writer.write_vtu(Verts=tmesh.points+extrapolated_sol[:,:ndim], 
+                            Cells={cellflag:tmesh.elements}, pdata=extrapolated_sol[:,quant],
+                            fname=filename.split('.')[0]+'_curved_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu')
+
+                elif formatter is "binary":
+
+                    unstructuredGridToVTK(filename.split('.')[0]+'_curved_lines_increment_'+str(Increment)+'.vtu',
+                        np.ascontiguousarray(edge_coords[:,0]), np.ascontiguousarray(edge_coords[:,1]), np.ascontiguousarray(edge_coords[:,2]),
+                        np.ascontiguousarray(tmesh.connections.ravel()), np.arange(0,2*tmesh.connections.shape[0],2)+2, 
+                        np.ones(tmesh.connections.shape[0])*3)
+
+                    pointsToVTK(filename.split('.')[0]+'_curved_points_increment_'+str(Increment)+'.vtu',
+                        np.ascontiguousarray(svpoints[:,0]), np.ascontiguousarray(svpoints[:,1]), np.ascontiguousarray(svpoints[:,2]),
+                        data=None)
+
+                    points = tmesh.points+extrapolated_sol[:,:ndim]
+                    for counter, quant in enumerate(iterator):
+                        unstructuredGridToVTK(filename.split('.')[0]+'_curved_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu', 
+                            np.ascontiguousarray(points[:,0]), np.ascontiguousarray(points[:,1]), np.ascontiguousarray(points[:,2]), 
+                            np.ascontiguousarray(tmesh.elements.ravel()), np.arange(0,3*tmesh.elements.shape[0],3)+3, 
+                            np.ones(tmesh.elements.shape[0])*cellflag, 
+                            pointData={q_names[counter]: np.ascontiguousarray(extrapolated_sol[:,quant])})
 
         else:
 
@@ -835,16 +890,35 @@ class PostProcess(object):
 
             if configuration == "original":
                 for Increment in increments:
-                    for quant in iterator:
-                        vtk_writer.write_vtu(Verts=lmesh.points, 
-                            Cells={cellflag:lmesh.elements}, pdata=sol[:,quant,Increment],
-                            fname=filename.split('.')[0]+'_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu')
+                    if formatter is "xml":
+                        for quant in iterator:
+                            vtk_writer.write_vtu(Verts=lmesh.points, 
+                                Cells={cellflag:lmesh.elements}, pdata=sol[:,quant,Increment],
+                                fname=filename.split('.')[0]+'_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu')
+                    elif formatter is "binary":
+                        points = lmesh.points
+                        for counter, quant in enumerate(iterator):
+                            unstructuredGridToVTK(filename.split('.')[0]+'_quantity_'+str(quant)+'_increment_'+str(Increment), 
+                                np.ascontiguousarray(points[:,0]), np.ascontiguousarray(points[:,1]), np.ascontiguousarray(points[:,2]), 
+                                np.ascontiguousarray(lmesh.elements.ravel()), np.arange(0,offset*lmesh.nelem,offset)+offset, 
+                                np.ones(lmesh.nelem)*cellflag, 
+                                pointData={q_names[counter]: np.ascontiguousarray(sol[:,quant,Increment])}) 
+
             elif configuration == "deformed":
                 for Increment in increments:
-                    for quant in iterator:
-                        vtk_writer.write_vtu(Verts=lmesh.points+sol[:,:ndim,Increment], 
-                            Cells={cellflag:lmesh.elements}, pdata=sol[:,quant,Increment],
-                            fname=filename.split('.')[0]+'_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu')
+                    if formatter is "xml":
+                        for quant in iterator:
+                            vtk_writer.write_vtu(Verts=lmesh.points+sol[:,:ndim,Increment], 
+                                Cells={cellflag:lmesh.elements}, pdata=sol[:,quant,Increment],
+                                fname=filename.split('.')[0]+'_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu')
+                    elif formatter is "binary":
+                        points = lmesh.points+sol[:,:ndim,Increment]
+                        for counter, quant in enumerate(iterator):
+                            unstructuredGridToVTK(filename.split('.')[0]+'_quantity_'+str(quant)+'_increment_'+str(Increment), 
+                                np.ascontiguousarray(points[:,0]), np.ascontiguousarray(points[:,1]), np.ascontiguousarray(points[:,2]), 
+                                np.ascontiguousarray(lmesh.elements.ravel()), np.arange(0,offset*lmesh.nelem,offset)+offset, 
+                                np.ones(lmesh.nelem)*cellflag, 
+                                pointData={q_names[counter]: np.ascontiguousarray(sol[:,quant,Increment])})  
 
         return
 
