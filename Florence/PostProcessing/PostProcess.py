@@ -789,6 +789,8 @@ class PostProcess(object):
         elif filename is not None:
             if isinstance(filename,str) is False:
                 raise ValueError("file name should be a string")
+        if ".vtu" in filename and fmt is "binary":
+            filename  = filename.split('.')[0]
 
         C = self.mesh.InferPolynomialDegree() - 1
         if C == 0:
