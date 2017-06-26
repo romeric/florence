@@ -1039,6 +1039,7 @@ class Mesh(object):
         if isinstance(self.faces,np.ndarray):
             self.faces = nmesh.faces.astype(np.uint64)
         self.nelem = nmesh.nelem
+        self.nnode = self.points.shape[0]
         self.element_type = nmesh.info
         self.degree = C+1
 
