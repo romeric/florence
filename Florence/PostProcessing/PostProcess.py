@@ -171,6 +171,17 @@ class PostProcess(object):
             LoadIncrement = len(steps)
             increments = steps
 
+        # COMPUTE THE COMMON/NEIGHBOUR NODES ONCE - REQUIRES OPTIMISATION
+        # THIS COULD BE COMPUTED ALSO AS 
+        #   indices = np.where(x[:, None] == x[None, :])[1]  where x is elements.ravel()
+        # BUT FOR RELATIVELY BIG MESHES THIS REQUIRES TERABYTES OF MEMORY 
+        all_nodes = np.unique(elements)
+        Elss, Poss = [], []
+        for inode in all_nodes:
+            Els, Pos = np.where(elements==inode)
+            Elss.append(Els)
+            Poss.append(Pos)
+
 
         F = np.zeros((nelem,nodeperelem,ndim,ndim))
         CauchyStressTensor = np.zeros((nelem,nodeperelem,ndim,ndim))
@@ -273,8 +284,9 @@ class PostProcess(object):
                                     ElectricDisplacementx[elem,counter,:],elem,counter)
 
             if average_derived_quantities:
-                for inode in np.unique(elements):
-                    Els, Pos = np.where(elements==inode)
+                for inode in all_nodes:
+                    # Els, Pos = np.where(elements==inode)
+                    Els, Pos = Elss[inode], Poss[inode]
                     ncommon_nodes = Els.shape[0]
                     for uelem in range(ncommon_nodes):
                         MainDict['F'][incr,inode,:,:] += F[Els[uelem],Pos[uelem],:,:]
@@ -291,8 +303,9 @@ class PostProcess(object):
                     MainDict['CauchyStress'][incr,inode,:,:] /= ncommon_nodes
 
             else:
-                for inode in np.unique(elements):
-                    Els, Pos = np.where(elements==inode)
+                for inode in all_nodes:
+                    # Els, Pos = np.where(elements==inode)
+                    Els, Pos = Elss[inode], Poss[inode]
                     ncommon_nodes = Els.shape[0]
                     uelem = 0
                     MainDict['F'][incr,inode,:,:] = F[Els[uelem],Pos[uelem],:,:]
