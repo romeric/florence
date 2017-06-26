@@ -2346,6 +2346,11 @@ class Mesh(object):
         if isinstance(self.nelem,np.ndarray):
             self.nelem = int(self.nelem[0])
 
+        for key in self.__dict__.keys():
+            if isinstance(self.__dict__[str(key)],np.ndarray):
+                if self.__dict__[str(key)].size == 1:
+                    self.__dict__[str(key)] = np.asscalar(self.__dict__[str(key)])
+
 
 
     def SimplePlot(self, to_plot='faces', 
