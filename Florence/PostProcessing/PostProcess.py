@@ -171,16 +171,14 @@ class PostProcess(object):
             LoadIncrement = len(steps)
             increments = steps
 
-        # COMPUTE THE COMMON/NEIGHBOUR NODES ONCE - REQUIRES OPTIMISATION
-        # THIS COULD BE COMPUTED ALSO AS 
-        #   indices = np.where(x[:, None] == x[None, :])[1]  where x is elements.ravel()
-        # BUT FOR RELATIVELY BIG MESHES THIS REQUIRES TERABYTES OF MEMORY 
+        # COMPUTE THE COMMON/NEIGHBOUR NODES ONCE
         all_nodes = np.unique(elements)
-        Elss, Poss = [], []
-        for inode in all_nodes:
-            Els, Pos = np.where(elements==inode)
-            Elss.append(Els)
-            Poss.append(Pos)
+        # Elss, Poss = [], []
+        # for inode in all_nodes:
+        #     Els, Pos = np.where(elements==inode)
+        #     Elss.append(Els)
+        #     Poss.append(Pos)
+        Elss, Poss = mesh.GetNodeCommonality()[:2]
 
 
         F = np.zeros((nelem,nodeperelem,ndim,ndim))
