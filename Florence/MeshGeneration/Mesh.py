@@ -2120,6 +2120,9 @@ class Mesh(object):
             self.ReadHDF5(filename)
 
         self.nnode = self.points.shape[0]
+        # MAKE SURE MESH DATA IS CONTIGUOUS
+        self.points   = np.ascontiguousarray(self.points)
+        self.elements = np.ascontiguousarray(self.elements)
         return
 
 
