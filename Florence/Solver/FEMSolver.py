@@ -502,6 +502,7 @@ class FEMSolver(object):
                     if self.break_at_increment < LoadIncrement - 1:
                         print("\nStopping at increment {} as specified\n\n".format(Increment))
                         TotalDisp = TotalDisp[:,:,:Increment]
+                        self.number_of_load_increments = Increment
                     break
 
 
