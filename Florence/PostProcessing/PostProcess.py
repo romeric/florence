@@ -878,18 +878,18 @@ class PostProcess(object):
 
                 elif formatter is "binary":
 
-                    unstructuredGridToVTK(filename.split('.')[0]+'_curved_lines_increment_'+str(Increment)+'.vtu',
+                    unstructuredGridToVTK(filename.split('.')[0]+'_curved_lines_increment_'+str(Increment),
                         np.ascontiguousarray(edge_coords[:,0]), np.ascontiguousarray(edge_coords[:,1]), np.ascontiguousarray(edge_coords[:,2]),
                         np.ascontiguousarray(tmesh.connections.ravel()), np.arange(0,2*tmesh.connections.shape[0],2)+2, 
                         np.ones(tmesh.connections.shape[0])*3)
 
-                    pointsToVTK(filename.split('.')[0]+'_curved_points_increment_'+str(Increment)+'.vtu',
+                    pointsToVTK(filename.split('.')[0]+'_curved_points_increment_'+str(Increment),
                         np.ascontiguousarray(svpoints[:,0]), np.ascontiguousarray(svpoints[:,1]), np.ascontiguousarray(svpoints[:,2]),
                         data=None)
 
                     points = tmesh.points+extrapolated_sol[:,:ndim]
                     for counter, quant in enumerate(iterator):
-                        unstructuredGridToVTK(filename.split('.')[0]+'_curved_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu', 
+                        unstructuredGridToVTK(filename.split('.')[0]+'_curved_quantity_'+str(quant)+'_increment_'+str(Increment), 
                             np.ascontiguousarray(points[:,0]), np.ascontiguousarray(points[:,1]), np.ascontiguousarray(points[:,2]), 
                             np.ascontiguousarray(tmesh.elements.ravel()), np.arange(0,3*tmesh.elements.shape[0],3)+3, 
                             np.ones(tmesh.elements.shape[0])*cellflag, 
