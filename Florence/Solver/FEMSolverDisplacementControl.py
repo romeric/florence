@@ -28,24 +28,56 @@ def StaticSolverDisplacementControl(self, function_spaces, formulation, solver, 
 
     # GET TOTAL FORCE
     TotalForce = np.copy(NeumannForces)
-    TotalForce = boundary_condition.ApplyDirichletGetReducedMatrices(K,TotalForce,
-            boundary_condition.applied_dirichlet,LoadFactor=1.0,only_residual=True)
+    # TotalForce = boundary_condition.ApplyDirichletGetReducedMatrices(K,TotalForce,
+            # boundary_condition.applied_dirichlet,LoadFactor=1.0,only_residual=True)
 
-    self.max_prescribed_displacement = np.max(np.abs(boundary_condition.applied_dirichlet))
+    # self.max_prescribed_displacement = np.max(np.abs(boundary_condition.applied_dirichlet))
+    self.max_prescribed_displacement = 20.
+    self.incremental_displacement = self.max_prescribed_displacement/self.number_of_load_increments
+    # print(self.incremental_displacement)
+    # exit()
     
     for Increment in range(LoadIncrement):
 
         # CHECK ADAPTIVE LOAD FACTOR
-        if self.load_factor is not None:
-            self.local_load_factor = self.load_factor[Increment]
-        else:
-            if Increment <= 1:
-                self.local_load_factor = 1./LoadIncrement
-            else:
-                max_occured_displacement = np.max(np.abs((TotalDisp[:,:,Increment-1] - TotalDisp[:,:,Increment-2])))
-                self.local_load_factor = max_occured_displacement/self.max_prescribed_displacement
-                # print(self.local_load_factor)
+        # if self.load_factor is not None:
+        #     self.local_load_factor = self.load_factor[Increment]
+        # else:
+            # if Increment <= 1:
+            #     self.local_load_factor = 1./LoadIncrement
+            # else:
+
+        #         # GET THE REDUCED SYSTEM OF EQUATIONS
+        #         K_b, F_bb = boundary_condition.GetReducedMatrices(K,TotalForce)[:2]
+        #         # SOLVE THE SYSTEM
+        #         sol_b = solver.Solve(K_b,F_bb)
+        #         # GET ITERATIVE SOLUTION
+        #         dU_b = boundary_condition.UpdateFreeDoFs(sol_b,K.shape[0],formulation.nvar)
+
+        #         # max_occured_displacement = np.max(np.abs((TotalDisp[:,:,Increment-1] - TotalDisp[:,:,Increment-2])))
+        #         max_occured_displacement = np.max(np.abs(dU_b))
+        #         self.local_load_factor = max_occured_displacement/self.max_prescribed_displacement
+        #         # print(self.local_load_factor)
+        #         # exit()
+        # self.accumulated_load_factor += self.local_load_factor
+        # # print(self.accumulated_load_factor)
+
+
+
+        # GET THE REDUCED SYSTEM OF EQUATIONS
+        K_b, F_bb = boundary_condition.GetReducedMatrices(K,TotalForce)[:2]
+        # SOLVE THE SYSTEM
+        sol_b = solver.Solve(K_b,F_bb)
+        # GET ITERATIVE SOLUTION
+        dU_b = boundary_condition.UpdateFreeDoFs(sol_b,K.shape[0],formulation.nvar)
+
+        max_occured_displacement = np.max(np.abs(dU_b))
+        self.local_load_factor = self.incremental_displacement/max_occured_displacement
+        if self.local_load_factor > 1.0:
+            raise ValueError("Raise max displacements")
+        # print(self.local_load_factor,max_occured_displacement)
                 # exit()
+
         self.accumulated_load_factor += self.local_load_factor
         # print(self.accumulated_load_factor)
 
@@ -163,20 +195,33 @@ def NewtonRaphsonDisplacementControl(self, function_spaces, formulation, solver,
         # GET ITERATIVE SOLUTION
         dU_b = boundary_condition.UpdateFreeDoFs(sol_b,K.shape[0],formulation.nvar)
 
-        ratio = np.max(np.abs(dU))/np.max(np.abs(dU_b))
+        # ratio = np.max(np.abs(dU))/np.max(np.abs(dU_b))
+        # ratio = np.max(np.abs(dU))/self.max_prescribed_displacement
+        max_occured_displacement = np.max(np.abs(dU_b))
+        ratio = np.max(np.abs(dU))/max_occured_displacement
         iterative_load_factor += ratio
-        self.local_load_factor += iterative_load_factor
+        # self.local_load_factor += iterative_load_factor
+        print(ratio)
         # print(iterative_load_factor)
-        print(self.local_load_factor)
+        # print(self.local_load_factor)
+        # print(self.accumulated_load_factor)
+
+
+        # # GET THE REDUCED SYSTEM OF EQUATIONS
+        # K_b, F_b = boundary_condition.GetReducedMatrices(K, Residual - ratio*TotalForce)[:2]
+        # # SOLVE THE SYSTEM
+        # sol = solver.Solve(K_b,-F_b)
+        # # GET ITERATIVE SOLUTION
+        # dU = boundary_condition.UpdateFreeDoFs(sol,K.shape[0],formulation.nvar)
 
 
         # # UPDATE THE EULERIAN COMPONENTS
-        Eulerx += dU[:,:formulation.ndim]
-        Eulerp += dU[:,-1]
+        # Eulerx += dU[:,:formulation.ndim]
+        # Eulerp += dU[:,-1]
 
         # UPDATE THE EULERIAN COMPONENTS
-        # Eulerx += dU[:,:formulation.ndim] + ratio*dU_b[:,:formulation.ndim]
-        # Eulerp += dU[:,-1] + ratio*dU_b[:,-1]
+        Eulerx += dU[:,:formulation.ndim] + ratio*dU_b[:,:formulation.ndim]
+        Eulerp += dU[:,-1] + ratio*dU_b[:,-1]
 
         # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
         K, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material, solver,
@@ -184,7 +229,7 @@ def NewtonRaphsonDisplacementControl(self, function_spaces, formulation, solver,
 
         # FIND THE RESIDUAL
         Residual[boundary_condition.columns_in] = TractionForces[boundary_condition.columns_in] -\
-            NodalForces[boundary_condition.columns_in]
+            NodalForces[boundary_condition.columns_in] - ratio*TotalForce[boundary_condition.columns_in]
 
         # SAVE THE NORM
         self.rel_norm_residual = la.norm(Residual[boundary_condition.columns_in])
@@ -230,5 +275,11 @@ def NewtonRaphsonDisplacementControl(self, function_spaces, formulation, solver,
                 self.newton_raphson_failed_to_converge = True
                 break
 
+        if self.accumulated_load_factor >= 1.0:
+            print("Load factor: 1.0, Breaking")
+            self.newton_raphson_failed_to_converge = True
+            break
+
+    self.local_load_factor += iterative_load_factor
 
     return Eulerx, Eulerp, K, Residual
