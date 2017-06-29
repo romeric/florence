@@ -832,6 +832,11 @@ class PostProcess(object):
                 tmesh = PostProcess.TessellateHexes(self.mesh, np.zeros_like(self.mesh.points), 
                     QuantityToPlot=self.sol[:,0,0], plot_on_faces=False, plot_points=True,
                     interpolation_degree=interpolation_degree)
+            # elif lmesh.element_type =='quad':
+            #     cellflag = 5 
+            #     tmesh = PostProcess.TessellateQuads(self.mesh, np.zeros_like(self.mesh.points), 
+            #         QuantityToPlot=self.sol[:,0,0], plot_on_faces=False, plot_points=True,
+            #         interpolation_degree=interpolation_degree)
             else:
                 raise ValueError('Not implemented yet. Use in-built visualiser for 2D problems')
 
@@ -887,7 +892,11 @@ class PostProcess(object):
                         np.ascontiguousarray(svpoints[:,0]), np.ascontiguousarray(svpoints[:,1]), np.ascontiguousarray(svpoints[:,2]),
                         data=None)
 
-                    points = tmesh.points+extrapolated_sol[:,:ndim]
+                    if tmesh.points.shape[0] == 2:
+                        points = np.zeros((tmesh.points.shape[0],3))
+                        points[:,:2] = tmesh.points+extrapolated_sol[:,:ndim]
+                    else:
+                        points = tmesh.points+extrapolated_sol[:,:ndim]
                     for counter, quant in enumerate(iterator):
                         unstructuredGridToVTK(filename.split('.')[0]+'_curved_quantity_'+str(quant)+'_increment_'+str(Increment), 
                             np.ascontiguousarray(points[:,0]), np.ascontiguousarray(points[:,1]), np.ascontiguousarray(points[:,2]), 
@@ -909,7 +918,12 @@ class PostProcess(object):
                                 Cells={cellflag:lmesh.elements}, pdata=sol[:,quant,Increment],
                                 fname=filename.split('.')[0]+'_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu')
                     elif formatter is "binary":
-                        points = lmesh.points
+                        # points = lmesh.points
+                        if lmesh.InferSpatialDimension() == 2:
+                            points = np.zeros((lmesh.points.shape[0],3))
+                            points[:,:2] = lmesh.points
+                        else:
+                            points = lmesh.points
                         for counter, quant in enumerate(iterator):
                             unstructuredGridToVTK(filename.split('.')[0]+'_quantity_'+str(quant)+'_increment_'+str(Increment), 
                                 np.ascontiguousarray(points[:,0]), np.ascontiguousarray(points[:,1]), np.ascontiguousarray(points[:,2]), 
@@ -925,7 +939,12 @@ class PostProcess(object):
                                 Cells={cellflag:lmesh.elements}, pdata=sol[:,quant,Increment],
                                 fname=filename.split('.')[0]+'_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu')
                     elif formatter is "binary":
-                        points = lmesh.points+sol[:,:ndim,Increment]
+                        if lmesh.InferSpatialDimension() == 2:
+                            points = np.zeros((lmesh.points.shape[0],3))
+                            points[:,:2] = lmesh.points + sol[:,:ndim,Increment]
+                        else:
+                            points = lmesh.points + sol[:,:ndim,Increment]
+                        # points = lmesh.points+sol[:,:ndim,Increment]
                         for counter, quant in enumerate(iterator):
                             unstructuredGridToVTK(filename.split('.')[0]+'_quantity_'+str(quant)+'_increment_'+str(Increment), 
                                 np.ascontiguousarray(points[:,0]), np.ascontiguousarray(points[:,1]), np.ascontiguousarray(points[:,2]), 
