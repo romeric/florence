@@ -320,6 +320,11 @@ class FEMSolver(object):
             #     K,NeumannForces,NodalForces,Residual,
             #     mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition)
 
+            # from FEMSolverDisplacementControl import StaticSolverDisplacementControl
+            # TotalDisp = StaticSolverDisplacementControl(self,function_spaces, formulation, solver, 
+            #     K,NeumannForces,NodalForces,Residual,
+            #     mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition)
+
         return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
 
 
