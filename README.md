@@ -3,7 +3,7 @@
 **Florence** is a Python-based computational framework for multi-physics simulation of electro-magneto-mechanical systems. The framework also includes Python interfaces to many low-level numerical sub-routines written in C, C++ and Cython.
 
 
-**Dependencies**
+# Dependencies
 The followings are hard dependencies
 - [PostMesh](https://github.com/romeric/PostMesh):      High order curvilinear mesh generator
 - [Fastor](https://github.com/romeric/Fastor):          Data parallel (SIMD) FEM assembler
@@ -11,7 +11,7 @@ The followings are hard dependencies
 - NumPy
 - SciPy
 
-**Installation**
+# Installation
 Have a look at `travis.yml` file directions on installation of core library. Installation of the core library (not external dependencies) is as easy as
 
 ```
@@ -50,5 +50,4 @@ We typically do not recommed adding `anaconda/bin` to your path. Hence, whenever
 ```
 export PATH="/Users/romanpoya/anaconda2/bin:$PATH"
 ```
-then run your problem.
 
