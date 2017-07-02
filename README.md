@@ -39,7 +39,7 @@ python setup.py build
 python setup.py install
 ```
 
-And whenever `MUMPS` solver is needed, just open a new terminal window/tab and do
+And whenever `MUMPS` solver is needed, just open a new terminal window/tab and do (this is the default setting for linuxbrew)
 ```
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/linuxbrew/.linuxbrew/lib
 ```
