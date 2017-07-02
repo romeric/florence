@@ -1,6 +1,12 @@
 [![Build Status](https://travis-ci.com/romeric/florence.svg?token=HFW6d19YsYpKDNwvtqDr&branch=master)](https://travis-ci.com/romeric/florence)
 
-**Florence** is a Python-based computational framework for multi-physics simulation of electro-magneto-mechanical systems. The framework also includes Python interfaces to many low-level numerical sub-routines written in C, C++ and Cython.
+**Florence** is a Python-based computational framework for multi-physics simulation of electro-magneto-mechanical systems. The framework also includes Python interfaces to many low-level numerical sub-routines written in C, C++ and Cython. 
+
+# Platform support
+Florence supports Linux and macOS for now under
+- Python 2.7
+- Ptyhon 3.5/3.6
+- PyPy > v5.7.0
 
 
 # Dependencies
