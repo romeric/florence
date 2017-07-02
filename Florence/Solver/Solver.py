@@ -271,12 +271,12 @@ class LinearSolver(object):
                 # REMOVE THE FILES
                 os.remove(pwd+"/JuliaDict.mat")
 
-            elif self.solver_subtype == "paradiso" and self.has_pardiso:
+            elif self.solver_subtype == "pardiso" and self.has_pardiso:
                 import pypardiso
                 A = A.tocsr()
                 t_solve = time()
                 sol = pypardiso.spsolve(A,b)
-                print("Paradiso solver time is {}".format(time() - t_solve))
+                print("Pardiso solver time is {}".format(time() - t_solve))
 
             else:
                 # FOR 'super_lu'
