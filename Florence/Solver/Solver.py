@@ -76,6 +76,13 @@ class LinearSolver(object):
         except ImportError:
             self.has_mumps = False
 
+        self.has_pardiso = False
+        try:
+            import pypardiso
+            self.has_pardiso = True
+        except ImportError:
+            self.has_pardiso = False
+
         self.switcher_message = False
 
         # self.analysis_type = "static"
@@ -263,6 +270,13 @@ class LinearSolver(object):
 
                 # REMOVE THE FILES
                 os.remove(pwd+"/JuliaDict.mat")
+
+            elif self.solver_subtype == "paradiso" and self.has_pardiso:
+                import pypardiso
+                A = A.tocsr()
+                t_solve = time()
+                sol = pypardiso.spsolve(A,b)
+                print("Paradiso solver time is {}".format(time() - t_solve))
 
             else:
                 # FOR 'super_lu'

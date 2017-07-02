@@ -17,6 +17,10 @@ BLAS_VERSION = openblas
 BLAS_INCLUDE_PATH = /opt/OpenBLAS/include/
 BLAS_LD_PATH = /opt/OpenBLAS/lib/
 
+ifeq ($(findstring mkl,$(BLAS_VERSION)),mkl)
+CXXFLAGS += -DHAS_MKL
+endif
+
 # NUMPY_INCLUDE_PATH=python -c "import numpy; print numpy.get_include()"
 NUMPY_INCLUDE_PATH = /usr/local/lib/python2.7/dist-packages/numpy/core/include
 

@@ -1,6 +1,11 @@
-#include <cblas.h>
 #include <algorithm>
 #include <numeric>
+
+#ifdef HAS_MKL
+#include <mkl.h>
+#else
+#include <cblas.h>
+#endif
 
 #ifdef __SSE4_2__
 #include <emmintrin.h>
