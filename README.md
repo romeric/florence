@@ -18,6 +18,7 @@ Have a look at `travis.yml` file directions on installation of core library. Ins
 git clone https://github.com/romeric/florence
 cd florence
 python setup.py build
+export PYTHONPATH="/path/to/florence:$PYTHONPATH"
 ```
 
 This builds many low-level cython modules ahead of time. Options can be given to `setup.py` for instance
