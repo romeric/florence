@@ -39,10 +39,9 @@ python setup.py install
 ```
 
 The direct sparse solver shipped with `MKL`, `Pardiso` can be used if `MKL` is available.  Both Anaconda and Intel distribution for python ship these.
-If `MKL` is installed, the FEM assembler in florence is also automatically linked to it during compilation, as long as "BLAS=mkl" flag is issued to `setup.py`.
+If `MKL` is installed, the FEM assembler in florence is also automatically linked to it during compilation, as long as "`BLAS=mkl`" flag is issued to `setup.py`.
 
 ```shell
-# Install conda first 
 conda install -c haasad pypardiso
 ```
 We typically do not recommed adding `anaconda/bin` to your path. Hence, whenever `MKL` features or `Pardiso` solver is needed, just open a new terminal window/tab and do
