@@ -31,7 +31,7 @@ class FlorenceSetup(object):
 
     fastor_include_path = None
 
-    blas_version = None
+    blas_version = "openblas"
     blas_include_path = None
     blas_ld_path = None
 
@@ -119,6 +119,10 @@ class FlorenceSetup(object):
                     self.python_ld_path = os.path.join(root, filename).rsplit(libpython)[0]
                     break
 
+        # For conda envs change python_ld_path 
+        if "conda" in sys.version or "Continuum" in sys.version or "Intel" in sys.version:
+            self.python_ld_path = get_config_var("LIBDIR")
+
         # Sanity check
         if self.python_ld_path is None:
             try:
@@ -161,37 +165,43 @@ class FlorenceSetup(object):
 
         if _blas is not None:
             self.blas_version = _blas
-        else:
-            self.blas_version = "openblas"
 
         lib_postfix = ".so"
         if "darwin" in self._os:
             lib_postfix = ".dylib"
 
-        dirs = ["/opt/OpenBLAS/lib","/usr/local/Cellar/openblas/","/usr/lib/","/usr/local/lib/"]
-        aux_path = "/usr/local/Cellar/openblas"
-        if os.path.isdir(aux_path):
-            files = os.listdir(aux_path)
-            if self.blas_version+lib_postfix not in files:
-                for d in files:
-                    if os.path.isdir(os.path.join(aux_path,d)):
-                        files2 = os.listdir(os.path.join(aux_path,d))
-                        if self.blas_version+lib_postfix not in files:
-                            if os.path.isdir(os.path.join(aux_path,d,"lib")):
-                                dirs.append(os.path.join(aux_path,d,"lib"))
+        if self.blas_version == "openblas":
 
-        found_blas = False
-        for d in dirs:
-            if os.path.isdir(d):
-                libs = os.listdir(d)
-                for blas in libs:
-                    if self.blas_version+lib_postfix in blas:
-                        self.blas_ld_path = d
-                        self.blas_include_path = d.replace("lib","include")
-                        found_blas = True
+            dirs = ["/opt/OpenBLAS/lib","/usr/local/Cellar/openblas/","/usr/lib/","/usr/local/lib/"]
+            aux_path = "/usr/local/Cellar/openblas"
+            if os.path.isdir(aux_path):
+                files = os.listdir(aux_path)
+                if self.blas_version+lib_postfix not in files:
+                    for d in files:
+                        if os.path.isdir(os.path.join(aux_path,d)):
+                            files2 = os.listdir(os.path.join(aux_path,d))
+                            if self.blas_version+lib_postfix not in files:
+                                if os.path.isdir(os.path.join(aux_path,d,"lib")):
+                                    dirs.append(os.path.join(aux_path,d,"lib"))
+
+            found_blas = False
+            for d in dirs:
+                if os.path.isdir(d):
+                    libs = os.listdir(d)
+                    for blas in libs:
+                        if self.blas_version+lib_postfix in blas:
+                            self.blas_ld_path = d
+                            self.blas_include_path = d.replace("lib","include")
+                            found_blas = True
+                            break
+                    if found_blas:
                         break
-                if found_blas:
-                    break
+
+        elif self.blas_version == "mkl":
+            self.blas_ld_path = get_config_vars()['LIBDIR']
+            self.blas_include_path = get_config_vars()['INCLUDEDIR']
+            self.blas_version = "mkl_rt"
+
 
         # Fall back to reference BLAS if OpenBLAS is not found
         if self.blas_ld_path == None:
@@ -382,6 +392,7 @@ if __name__ == "__main__":
     _fc_compiler = None
     _cc_compiler = None
     _cxx_compiler = None
+    _blas = None
 
     args = sys.argv
 
@@ -401,9 +412,11 @@ if __name__ == "__main__":
                 _cc_compiler = arg.split("=")[-1]
             elif "CXX" in arg:
                 _cxx_compiler = arg.split("=")[-1]
+            if "BLAS" in arg:
+                _blas = arg.split("=")[-1]
 
     setup_instance = FlorenceSetup(_fc_compiler=_fc_compiler, 
-        _cc_compiler=_cc_compiler, _cxx_compiler=_cxx_compiler)
+        _cc_compiler=_cc_compiler, _cxx_compiler=_cxx_compiler, _blas=_blas)
 
     if _op == "source_clean":
         setup_instance.SourceClean()

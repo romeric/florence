@@ -30,13 +30,13 @@ CXXFLAGS= -fPIC -shared -pthread -Wall $(CYTHONFLAGS) $(OPTFLAGS)
 # NUMPY_INCLUDE_PATH = /usr/local/lib/python2.7/dist-packages/numpy/core/include
 NUMPY_INCLUDE_PATH =  /Users/romanpoya/VE/env1/lib/python2.7/site-packages/numpy/core/include/
 
-# BLAS_VERSION = openblas
-# BLAS_INCLUDE_PATH = /opt/OpenBLAS/include/
-# BLAS_LD_PATH = /opt/OpenBLAS/lib/
-
 BLAS_VERSION = openblas
-BLAS_INCLUDE_PATH = /usr/local/Cellar/openblas/0.2.18_2/include/
-BLAS_LD_PATH = /usr/local/Cellar/openblas/0.2.18_2/lib/
+BLAS_INCLUDE_PATH = /opt/OpenBLAS/include/
+BLAS_LD_PATH = /opt/OpenBLAS/lib/
+
+ifeq ($(findstring mkl,$(BLAS_VERSION)),mkl)
+CXXFLAGS += -DHAS_MKL
+endif
 
 KIN_INC = ../../LocalAssembly/_KinematicMeasures_/
 MAT_INC = ../../../MaterialLibrary/LLDispatch/CythonSource/
