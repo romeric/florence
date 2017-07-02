@@ -29,7 +29,7 @@ python setup.py build BLAS=mkl CXX=/usr/local/bin/g++ CC=~/LLVM/clang
 
 Optional external dependies such as `MUMPS` solver, `Pardiso` solver and `mayavi` typically need special care for installation.
 
-To install `MUMPS` use `homebrew` on macOS and `linuxbrew` on linux:
+To install `MUMPS`, use `homebrew` on macOS and `linuxbrew` on linux:
 
 ```
 brew install mumps --without-mpi --with-openblas
@@ -44,8 +44,8 @@ And whenever `MUMPS` solver is needed, just open a new terminal window/tab and d
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/linuxbrew/.linuxbrew/lib
 ```
 
-The direct sparse solver shipped with `MKL`, `Pardiso` can be used if `MKL` is available.  Both Anaconda and Intel distribution for python ship these.
-If `MKL` is installed, the FEM assembler in florence is also automatically linked to it during compilation, as long as "`BLAS=mkl`" flag is issued to `setup.py`.
+The direct sparse solver shipped with `MKL`, `Pardiso` can be used if `MKL` is available. Both Anaconda and Intel distribution for python ship these.
+If `MKL` is installed, the low-level FEM assembler in florence is also automatically linked to it during compilation, as long as "`BLAS=mkl`" flag is issued to `setup.py`.
 
 ```shell
 conda install -c haasad pypardiso
