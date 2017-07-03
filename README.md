@@ -10,7 +10,7 @@ Florence supports Linux and macOS for now under
 
 
 # Dependencies
-The followings are hard dependencies
+The following packages are hard dependencies
 - [PostMesh](https://github.com/romeric/PostMesh):      High order curvilinear mesh generator
 - [Fastor](https://github.com/romeric/Fastor):          Data parallel (SIMD) FEM assembler
 - Cython
@@ -18,7 +18,7 @@ The followings are hard dependencies
 - SciPy
 
 # Installation
-Have a look at `travis.yml` file directions on installation of core library. Installation of the core library (not external dependencies) is as easy as
+Have a look at `travis.yml` file for directions on installing florence's core library. Installation of the core library (not external dependencies) is as easy as
 
 ```
 git clone https://github.com/romeric/florence
