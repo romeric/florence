@@ -27,13 +27,13 @@ python setup.py build
 export PYTHONPATH="/path/to/florence:$PYTHONPATH"
 ```
 
-This builds many low-level cython modules ahead of time. Options can be given to `setup.py` for instance
+This builds many low-level cython modules, ahead of time. Options can be given to `setup.py` for instance
 
 ```
 python setup.py build BLAS=mkl CXX=/usr/local/bin/g++ CC=~/LLVM/clang
 ```
 
-Optional external dependies such as `MUMPS` solver, `Pardiso` solver and `mayavi` typically need special care for installation.
+Installation of optional external dependencies such as `MUMPS` direct sparse solver, `Pardiso` direct sparse solver and `mayavi` 3D visualisation library typically need special care.
 
 To install `MUMPS`, use `homebrew` on macOS and `linuxbrew` on linux:
 
