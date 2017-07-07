@@ -40,11 +40,21 @@ def hpBases(C, xi, eta, zeta, Transform=0, EvalOpt=0, equally_spaced=False):
         # IF XI,ETA,ZETA ARE DIRECTLY GIVEN IN HEX FORMAT
         p, dp_dxi, dp_deta, dp_dzeta = GradNormalisedJacobiTet(C,np.array([xi,eta,zeta]),EvalOpt)
 
+    # ACTUAL WAY
+    # Bases = np.linalg.solve(V.T,p)
+    # gBases[:,0] = np.linalg.solve(V.T,dp_dxi)
+    # gBases[:,1] = np.linalg.solve(V.T,dp_deta)
+    # gBases[:,2] = np.linalg.solve(V.T,dp_dzeta)
 
-    Bases = np.linalg.solve(V.T,p)
-    gBases[:,0] = np.linalg.solve(V.T,dp_dxi)
-    gBases[:,1] = np.linalg.solve(V.T,dp_deta)
-    gBases[:,2] = np.linalg.solve(V.T,dp_dzeta)
+    # SOLVE FOR MULTIPLE RIGHT HAND SIDES
+    # ps = np.concatenate((p[:,None],dp_dxi[:,None],dp_deta[:,None],dp_dzeta[:,None]),axis=1)
+    ps = np.concatenate((p,dp_dxi,dp_deta,dp_dzeta)).reshape(4,p.shape[0]).T
+    tup = np.linalg.solve(V.T,ps)
+    Bases = tup[:,0]
+    gBases[:,0] = tup[:,1]
+    gBases[:,1] = tup[:,2]
+    gBases[:,2] = tup[:,3]
+
 
     return Bases, gBases
 
