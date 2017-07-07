@@ -1,7 +1,9 @@
 from __future__ import print_function 
+import os, sys, gc
+from time import time
+from copy import deepcopy
 import numpy as np 
 import numpy.linalg as la
-import gc
 from warnings import warn
 from Florence import QuadratureRule, FunctionSpace
 from Florence.Base import JacobianError, IllConditionedError
@@ -13,8 +15,8 @@ from Florence.Utils import PWD, RSWD
 # Nodal Bases
 from Florence.FunctionSpace import Tri
 from Florence.FunctionSpace import Tet
-from Florence.FunctionSpace import Quad
-from Florence.FunctionSpace import Hex
+from Florence.FunctionSpace import Quad, QuadES
+from Florence.FunctionSpace import Hex, HexES
 
 from Florence.FiniteElements.LocalAssembly.KinematicMeasures import *
 from Florence.FiniteElements.LocalAssembly._KinematicMeasures_ import _KinematicMeasures_
@@ -597,6 +599,185 @@ class PostProcess(object):
         elif "phi" in namer:
             namer = "\phi"
         return namer
+
+
+    def ConstructDifferentOrderSolution(self, mesh=None, sol=None, p=2, equally_spaced=False):
+        """Build a solution for a different polynomial degree
+            This is an immutable function and does not modify self
+            input:
+                mesh:               [np.ndarray] actual mesh
+                sol:                [Mesh] actual solution
+                p:                  [int] desired polynomial degree to construct the solution for
+                equally_spaced:     [bool] Construct other order solution wit equally spaced or Gauss Lobatto/Fekete points
+
+            output:
+                ho_mesh:            [Mesh] Mesh of desired degree on which the desired solution is built
+                ho_sol:             [np.ndarray] desired solution
+        """
+
+        from Florence.QuadratureRules import GaussLobattoPointsHex, GaussLobattoPointsQuad
+        from Florence.QuadratureRules.FeketePointsTet import FeketePointsTet
+        from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
+        from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints, EquallySpacedPointsTet, EquallySpacedPointsTri
+        from Florence.Tensor import makezero
+
+        if mesh is None and self.mesh is None:
+            raise ValueError("Mesh not set for post-processing")
+        if self.mesh is not None and mesh is None:
+            mesh = self.mesh
+        if sol is None and self.sol is None:
+            raise ValueError("Solution not set for post-processing")
+        if self.sol is not None and sol is None:
+            sol = self.sol
+
+        C = p - 1
+        actual_p = mesh.InferPolynomialDegree()
+        print("Constructing solution of degree p={} from solution of degree p={}".format(p,actual_p))
+        t_sol = time()
+
+        if p == actual_p:
+            print("Finished constructing p={} solution. Time elapsed is {} seconds".format(p,time() - t_sol))
+            return mesh, sol
+
+        et = mesh.element_type
+
+        if et == "hex":
+            nsize = (actual_p+1)**3
+            ho_nsize = (p+1)**3
+
+            if not equally_spaced:
+                eps = GaussLobattoPointsHex(C)
+                # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
+                Neval = np.zeros((nsize,eps.shape[0]),dtype=np.float64)
+                hpBases = Hex.LagrangeGaussLobatto
+                for i in range(eps.shape[0]):
+                    Neval[:,i] = hpBases(actual_p-1,eps[i,0],eps[i,1],eps[i,2])[:,0]
+            else:
+                eps = EquallySpacedPoints(4,C)
+                # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
+                Neval = np.zeros((nsize,eps.shape[0]),dtype=np.float64)
+                hpBases = HexES.Lagrange
+                for i in range(eps.shape[0]):
+                    Neval[:,i] = hpBases(actual_p-1,eps[i,0],eps[i,1],eps[i,2])[:,0]
+
+        elif et == "tet":
+            nsize = (actual_p+1)*(actual_p+2)*(actual_p+3) // 6
+            ho_nsize = (p+1)*(p+2)*(p+3) // 6
+
+            if not equally_spaced:
+                eps = FeketePointsTet(C)
+                # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
+                Neval = np.zeros((nsize,eps.shape[0]),dtype=np.float64)
+                hpBases = Tet.hpNodal.hpBases
+                for i in range(eps.shape[0]):
+                    Neval[:,i] = hpBases(actual_p-1,eps[i,0],eps[i,1],eps[i,2],Transform=1,EvalOpt=1)[0]
+            else:
+                eps =  EquallySpacedPointsTet(C)
+                # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
+                hpBases = Tet.hpNodal.hpBases
+                Neval = np.zeros((nsize,eps.shape[0]),dtype=np.float64)
+                for i in range(eps.shape[0]):
+                    Neval[:,i]  = hpBases(actual_p-1,eps[i,0],eps[i,1],eps[i,2],Transform=1,EvalOpt=1,equally_spaced=True)[0]
+
+        elif et == "tri":
+            nsize = (actual_p+1)*(actual_p+2) // 2
+            ho_nsize = (p+1)*(p+2) // 2
+
+            if not equally_spaced:
+                eps =  FeketePointsTri(C)
+                # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
+                hpBases = Tri.hpNodal.hpBases
+                Neval = np.zeros((nsize,eps.shape[0]),dtype=np.float64)
+                for i in range(eps.shape[0]):
+                    Neval[:,i]  = hpBases(actual_p-1,eps[i,0],eps[i,1],1)[0]
+            else:
+                eps =  EquallySpacedPointsTri(C)
+                # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
+                hpBases = Tri.hpNodal.hpBases
+                Neval = np.zeros((nsize,eps.shape[0]),dtype=np.float64)
+                for i in range(eps.shape[0]):
+                    Neval[:,i]  = hpBases(actual_p-1,eps[i,0],eps[i,1],Transform=1,EvalOpt=1,equally_spaced=True)[0]
+
+        elif et == "quad":
+            nsize = (actual_p+1)**2
+            ho_nsize = (p+1)**2
+
+            if not equally_spaced:
+                eps = GaussLobattoPointsQuad(C)
+                # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
+                Neval = np.zeros((nsize,eps.shape[0]),dtype=np.float64)
+                for i in range(eps.shape[0]):
+                    Neval[:,i] = Quad.LagrangeGaussLobatto(actual_p-1,eps[i,0],eps[i,1],arrange=1)[:,0]
+            else:
+                eps = EquallySpacedPoints(3,C)
+                # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
+                Neval = np.zeros((nsize,eps.shape[0]),dtype=np.float64)
+                for i in range(eps.shape[0]):
+                    Neval[:,i] = QuadES.Lagrange(actual_p-1,eps[i,0],eps[i,1],arrange=1)[:,0]
+        else:
+            raise ValueError("Element type not understood")
+        makezero(Neval,tol=1e-11)
+
+        ho_mesh = deepcopy(mesh)
+        sys.stdout = open(os.devnull, "w")
+        ho_mesh.GetHighOrderMesh(p=p)
+        sys.stdout = sys.__stdout__ 
+
+        if sol.ndim == 2:
+            sol = sol[:,:,None]
+        increments = range(sol.shape[2])
+
+        try:
+            import psutil
+        except IOError:
+            has_psutil = False
+            raise ImportError("No module named psutil. Please install it using 'pip install psutil'")
+        # GET MEMORY INFO
+        memory = psutil.virtual_memory()
+        sol_size = ho_mesh.nnode*sol.shape[1]*sol.shape[2]//1024**3
+        if memory.available//1024**3 > 8*sol_size:
+            ho_sol = np.zeros((ho_mesh.nnode,sol.shape[1],sol.shape[2]),dtype=np.float64)
+        elif memory.available//1024**3 > 4*sol_size:
+            ho_sol = np.zeros((ho_mesh.nnode,sol.shape[1],sol.shape[2]),dtype=np.float32)
+        elif memory.available//1024**3 < 4*sol_size:
+            warn("Not enough memory to store the solution. Going to activate out of core procedure. As a remedy limiting the solution specific quantity/ies")
+            try:
+                import h5py
+            except ImportError:
+                has_h5py = False
+                raise ImportError('h5py is not installed. Please install it first by running "pip install h5py"')
+
+            filename = os.path.join(os.path.expanduser('~'),"output.hdf5")
+
+            hdf_file = h5py.File(filename,'w')
+            ho_sol = hdf_file.create_dataset("Solution",(ho_mesh.nnode,sol.shape[1],sol.shape[2]),dtype=np.float32)
+            
+            for ielem in range(mesh.nelem):
+                ho_sol[ho_mesh.elements[ielem,:],:,:] = np.tensordot(Neval, sol[mesh.elements[ielem,:],:,:], axes=(0,0))
+            # for inc in increments:
+                # for ielem in range(mesh.nelem):
+                    # ho_sol[ho_mesh.elements[ielem,:],:,inc] = np.dot(Neval.T, sol[mesh.elements[ielem,:],:,inc])
+            
+            hdf_file.close()
+            print("Results written in {}".format(filename))
+            print("Finished constructing p={} solution. Time elapsed is {} seconds".format(p,time() - t_sol))
+            return ho_mesh, ho_sol
+        else:
+            ho_sol = np.zeros((ho_mesh.nnode,sol.shape[1],sol.shape[2]),dtype=np.float64)
+
+        # DO NOT VECTORISE THE ELEMENT LOOP AS IT LEADS TO AN EXPENSIVE OPERATION 
+        for ielem in range(mesh.nelem):
+            ho_sol[ho_mesh.elements[ielem,:],:,:] = np.tensordot(Neval, sol[mesh.elements[ielem,:],:,:], axes=(0,0))
+            # ho_sol[ho_mesh.elements[ielem,:],:,:] = np.einsum("ij,ikl", Neval, sol[mesh.elements[ielem,:],:,:], optimize=True)
+
+        # EXPENSIVE VECTORISED VERSION
+        # for inc in increments:
+        #     for ielem in range(mesh.nelem):
+        #         ho_sol[ho_mesh.elements[ielem,:],:,inc] = np.dot(Neval.T, sol[mesh.elements[ielem,:],:,inc])
+
+        print("Finished constructing p={} solution. Time elapsed is {} seconds".format(p,time() - t_sol))
+        return ho_mesh, ho_sol
+
 
 
 
