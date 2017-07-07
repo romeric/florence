@@ -360,8 +360,8 @@ def OutofCoreAssembly(fem_solver, function_space, formulation, mesh, material, E
         warn("Out of core assembly is only efficient for larger than memory "
             "system of equations. Using it on smaller matrices can be very inefficient")
 
-    # hdf_file = h5py.File(filename,'w')
-    # IJV_triplets = hdf_file.create_dataset("IJV_triplets",((nvar*nodeperelem)**2*nelem,3),dtype=np.float32)
+    hdf_file = h5py.File(filename,'w')
+    IJV_triplets = hdf_file.create_dataset("IJV_triplets",((nvar*nodeperelem)**2*nelem,3),dtype=np.float32)
 
 
     # THE I & J VECTORS OF LOCAL STIFFNESS MATRIX DO NOT CHANGE, HENCE COMPUTE THEM ONCE

@@ -5,7 +5,7 @@
 # Platform support
 Florence supports Linux and macOS for now under
 - Python 2.7
-- Ptyhon 3.5/3.6
+- Python 3.5/3.6
 - PyPy > v5.7.0
 
 
