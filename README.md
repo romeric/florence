@@ -59,6 +59,6 @@ conda install -c haasad pypardiso
 We typically do not recommed adding `anaconda/bin` to your path. Hence, whenever `MKL` features or `Pardiso` solver is needed, just open a new terminal window/tab and do
 
 ```
-export PATH="/Users/romanpoya/anaconda2/bin:$PATH"
+export PATH="/path/to/anaconda2/bin:$PATH"
 ```
 
