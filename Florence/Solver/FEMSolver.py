@@ -292,7 +292,7 @@ class FEMSolver(object):
 
         # ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES FOR THE FIRST TIME
         if self.analysis_type == "static":
-            K, TractionForces, _, M = Assemble(self, function_spaces[0], formulation, mesh, material, solver,
+            K, TractionForces, _, _ = Assemble(self, function_spaces[0], formulation, mesh, material, solver,
                 Eulerx, Eulerp)
         else:
             # COMPUTE BOTH STIFFNESS AND MASS USING HIGHER QUADRATURE RULE

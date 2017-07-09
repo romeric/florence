@@ -3709,7 +3709,8 @@ class Mesh(object):
             layer_points[:,0] *= tmp_radius/radius
 
             z_radius = tmp_radius**2 - layer_points[:,0]**2  - layer_points[:,1]**2
-            makezero(z_radius[:,None],tol=1e-12)
+            makezero(z_radius[:,None],tol=1e-10)
+            z_radius[z_radius<0] = 0. 
             Z = np.sqrt(z_radius) 
             self.points[cond,0] = layer_points[:,0]
             self.points[cond,1] = layer_points[:,1]
