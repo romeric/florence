@@ -2,7 +2,7 @@ from __future__ import print_function
 import numpy as np
 import scipy as sp
 from scipy.sparse import issparse, isspmatrix_coo, isspmatrix_csr, isspmatrix_csc
-from scipy.sparse.linalg import spsolve, bicgstab, gmres, lgmres, cg, spilu, LinearOperator, onenormest
+from scipy.sparse.linalg import spsolve, cg, cgs, bicgstab, gmres, lgmres, spilu, LinearOperator, onenormest
 from subprocess import call
 import os, platform
 from time import time
@@ -12,7 +12,7 @@ class LinearSolver(object):
     """Base class for all linear sparse direct and iterative solvers"""
 
     def __init__(self,linear_solver="direct", linear_solver_type="umfpack",
-        apply_preconditioner=False, preconditioner="amg_smoothed_aggregation", 
+        apply_preconditioner=False, preconditioner="smoothed_aggregation", 
         iterative_solver_tolerance=1.0e-12, reduce_matrix_bandwidth=False,
         out_of_core=False, geometric_discretisation=None, dont_switch_solver=False):
         """
@@ -28,7 +28,8 @@ class LinearSolver(object):
                                         multigrid solver. See WhichSolvers method for
                                         the complete set of available linear solvers 
 
-                preconditioner:         [str] either "amg_smoothed_aggregation" for 
+                preconditioner:         [str] either "amg_smoothed_aggregation",
+                                        or "ruge_stuben" or "rootnode" for 
                                         a preconditioner based on algebraic multigrid
                                         or "incomplete_lu" for scipy's spilu linear 
                                         operator
@@ -290,7 +291,7 @@ class LinearSolver(object):
             # CALL ITERATIVE SOLVER
             # sol = bicgstab(A,b,tol=tol)[0]
             # sol = gmres(A,b,tol=tol)[0]
-            sol = cg(A,b,tol=1e-04)[0]
+            sol = cg(A,b,tol=self.iterative_solver_tolerance)[0]
 
             # PRECONDITIONED ITERATIVE SOLVER - CHECK
             # P = spilu(A, drop_tol=1e-5)
@@ -303,6 +304,7 @@ class LinearSolver(object):
         elif self.solver_type == "multigrid":
             if self.has_amg_solver is False:
                 raise ImportError('A multigrid solver was not found')
+            from pyamg import ruge_stuben_solver, rootnode_solver, smoothed_aggregation_solver
 
             if A.dtype != b.dtype:
                 # DOWN-CAST
@@ -311,18 +313,33 @@ class LinearSolver(object):
             if not isspmatrix_csr(A):
                 A = A.tocsr()
             
+            t_solve = time()
             # AMG METHOD
-            from pyamg import ruge_stuben_solver
-            ml = ruge_stuben_solver(A)
-            sol = ml.solve(b,tol=self.iterative_solver_tolerance)
+            if self.preconditioner_type=="smoothed_aggregation":
+                # EXPLICIT CALL TO KYROLOV SOLVERS WITH AMG PRECONDITIONER
+                # THIS IS TYPICALLY FASTER BUT THE TOLERANCE NEED TO BE SMALLER, TYPICALLY 1e-10
+                # GMRES IS TYPICALLY THE FASTEST
+                ml = smoothed_aggregation_solver(A)
+                M = ml.aspreconditioner()
+                if self.iterative_solver_tolerance > 1e-9:
+                    self.iterative_solver_tolerance = 1e-10
+                # sol, info = bicgstab(A, b, M=M, tol=self.iterative_solver_tolerance)
+                # sol, info = cgs(A, b, M=M, tol=self.iterative_solver_tolerance)
+                sol, info = gmres(A, b, M=M, tol=self.iterative_solver_tolerance)
+            elif self.preconditioner_type == "ruge_stuben":
+                ml = ruge_stuben_solver(A)
+                sol = ml.solve(b,tol=self.iterative_solver_tolerance)
+            elif self.preconditioner_type == "rootnode":
+                # EXPLICIT CALL TO KYROLOV SOLVERS WITH AMG PRECONDITIONER
+                # ml = rootnode_solver(A, smooth=('energy', {'degree':2}), strength='evolution' )
+                # M = ml.aspreconditioner(cycle='V')
+                ml = rootnode_solver(A)
+                M = ml.aspreconditioner()
+                if self.iterative_solver_tolerance > 1e-9:
+                    self.iterative_solver_tolerance = 1e-10
+                sol, info = gmres(A, b, M=M, tol=self.iterative_solver_tolerance)
 
-            # EXPLICIT CALL TO KYROLOV SOLVERS WITH AMG PRECONDITIONER
-            # THIS IS TYPICALLY FASTER BUT THE TOLERANCE NEED TO BE SMALLER, TYPICALLY 1e-10
-            # ml = smoothed_aggregation_solver(A)
-            # M = ml.aspreconditioner()
-            # if tol > 1e-9:
-            #     tol = 1e-10
-            # sol, info = gmres(A, b, M=M, tol=tol)
+            print("AMG solver time is {}".format(time() - t_solve))
 
         return sol
 
