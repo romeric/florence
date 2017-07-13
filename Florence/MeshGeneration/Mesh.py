@@ -3232,7 +3232,9 @@ class Mesh(object):
         if element_type == "tri":
             sys.stdout = open(os.devnull, "w")
             self.ConvertQuadsToTris()
-            sys.stdout = sys.__stdout__ 
+            sys.stdout = sys.__stdout__
+
+        self.points = np.ascontiguousarray(self.points)
 
 
     def HollowCircle(self,center=(0,0),inner_radius=1.0,outer_radius=2.,element_type='tri',isotropic=True,nrad=5,ncirc=10):
