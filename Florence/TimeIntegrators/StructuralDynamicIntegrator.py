@@ -171,6 +171,15 @@ class StructuralDynamicIntegrators(object):
                 fem_solver.number_of_load_increments = Increment - 1
                 break
 
+            # BREAK AT A SPECIFICED LOAD INCREMENT IF ASKED FOR
+            if fem_solver.break_at_increment != -1 and fem_solver.break_at_increment is not None:
+                if fem_solver.break_at_increment == Increment:
+                    if fem_solver.break_at_increment < LoadIncrement - 1:
+                        print("\nStopping at increment {} as specified\n\n".format(Increment))
+                        TotalDisp = TotalDisp[:,:,:Increment]
+                        fem_solver.number_of_load_increments = Increment
+                    break
+
         return TotalDisp
 
 
