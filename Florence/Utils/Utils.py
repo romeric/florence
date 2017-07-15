@@ -12,7 +12,9 @@ def insensitive(string):
     return insen(string)
 
 
-def par_unpickle(MainData,mesh,material,Eulerx,TotalPot):
+def par_unpickle(fem_solver, mesh, material, formulation, 
+    Eulerx, Eulerp, NeumannForces, NodalForces, Residual, K,
+    TotalDisp, velocities, accelrations):
     """unpickle tuple of objects"""
 
     import pickle, gc, time, os, shutil, errno
@@ -25,25 +27,25 @@ def par_unpickle(MainData,mesh,material,Eulerx,TotalPot):
     if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)
 
-    main_data_file = os.path.join(tmp_dir,'main_data')
+    fem_solver_file = os.path.join(tmp_dir,'fem_solver')
     mesh_file = os.path.join(tmp_dir,'mesh')
     material_file = os.path.join(tmp_dir,'material')
     Eulerx_file = os.path.join(tmp_dir,'Eulerx')
-    TotalPot_file = os.path.join(tmp_dir,'TotalPot')
+    Eulerp_file = os.path.join(tmp_dir,'Eulerp')
 
     t_unpickle = time.time()
 
     # main_data = MainData
-    f = file(main_data_file, 'wb')
-    pickle.dump(MainData,f,pickle.HIGHEST_PROTOCOL)
+    f = file(fem_solver_file, 'wb')
+    pickle.dump(fem_solver,f,pickle.HIGHEST_PROTOCOL)
     f = file(mesh_file, 'wb')
     pickle.dump(mesh,f,pickle.HIGHEST_PROTOCOL)
     f = file(material_file, 'wb')
     pickle.dump(material,f,pickle.HIGHEST_PROTOCOL)
     f = file(Eulerx_file, 'wb')
     pickle.dump(Eulerx,f,pickle.HIGHEST_PROTOCOL)
-    f = file(TotalPot_file, 'wb')
-    pickle.dump(TotalPot,f,pickle.HIGHEST_PROTOCOL)
+    f = file(Eulerp_file, 'wb')
+    pickle.dump(Eulerp,f,pickle.HIGHEST_PROTOCOL)
     
     savemat(os.path.join(tmp_dir,'rest.mat'),
         {'C':MainData.C,'ndim':MainData.ndim,'nvar':MainData.nvar},do_compression=True)
