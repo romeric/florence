@@ -632,11 +632,11 @@ class PostProcess(object):
 
         C = p - 1
         actual_p = mesh.InferPolynomialDegree()
-        print("Constructing solution of degree p={} from solution of degree p={}".format(p,actual_p))
+        print("Constructing solution of degree p = {} from solution of degree p = {}".format(p,actual_p))
         t_sol = time()
 
         if p == actual_p:
-            print("Finished constructing p={} solution. Time elapsed is {} seconds".format(p,time() - t_sol))
+            print("Finished constructing p = {} solution. Time elapsed is {} seconds".format(p,time() - t_sol))
             return mesh, sol
 
         et = mesh.element_type
@@ -720,7 +720,7 @@ class PostProcess(object):
 
         ho_mesh = deepcopy(mesh)
         sys.stdout = open(os.devnull, "w")
-        ho_mesh.GetHighOrderMesh(p=p)
+        ho_mesh.GetHighOrderMesh(p=p, check_duplicates=False)
         sys.stdout = sys.__stdout__ 
 
         if sol.ndim == 2:
@@ -760,7 +760,7 @@ class PostProcess(object):
             
             hdf_file.close()
             print("Results written in {}".format(filename))
-            print("Finished constructing p={} solution. Time elapsed is {} seconds".format(p,time() - t_sol))
+            print("Finished constructing p = {} solution. Time elapsed is {} seconds".format(p,time() - t_sol))
             return ho_mesh, ho_sol
         else:
             ho_sol = np.zeros((ho_mesh.nnode,sol.shape[1],sol.shape[2]),dtype=np.float64)
@@ -775,7 +775,7 @@ class PostProcess(object):
         #     for ielem in range(mesh.nelem):
         #         ho_sol[ho_mesh.elements[ielem,:],:,inc] = np.dot(Neval.T, sol[mesh.elements[ielem,:],:,inc])
 
-        print("Finished constructing p={} solution. Time elapsed is {} seconds".format(p,time() - t_sol))
+        print("Finished constructing p = {} solution. Time elapsed is {} seconds".format(p,time() - t_sol))
         return ho_mesh, ho_sol
 
 
