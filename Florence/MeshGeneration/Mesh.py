@@ -2974,10 +2974,11 @@ class Mesh(object):
         if np.abs(end_angle) + EPS > 2.*np.pi:
             raise ValueError("The end angle should be either in range [-2{},0] or [0,2{}]".format(PI,PI))
 
-
-        if np.sign(start_angle) == np.sign(end_angle):
+        a1 = np.sign(start_angle) if np.sign(start_angle)!=0. else np.sign(end_angle)
+        a2 = np.sign(end_angle) if np.sign(end_angle)!=0. else np.sign(start_angle)
+        if a1 == a2:
             total_angle = np.abs(end_angle - start_angle)
-            if np.isclose(total_angle,0.) or total_angle > 2.*np.pi:
+            if np.isclose(total_angle,0.) or np.isclose(total_angle,2.*np.pi) or total_angle > 2.*np.pi:
                 self.Circle(center=center, radius=radius, nrad=nrad, ncirc=ncirc, element_type=element_type)
                 return 
 
