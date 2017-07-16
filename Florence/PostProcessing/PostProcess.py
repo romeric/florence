@@ -638,6 +638,9 @@ class PostProcess(object):
         if p == actual_p:
             print("Finished constructing p = {} solution. Time elapsed is {} seconds".format(p,time() - t_sol))
             return mesh, sol
+        if p == 1 and actual_p > 1:
+            print("Finished constructing p = {} solution. Time elapsed is {} seconds".format(p,time() - t_sol))
+            return mesh.GetLinearMesh(solution=sol)
 
         et = mesh.element_type
 
@@ -720,7 +723,7 @@ class PostProcess(object):
 
         ho_mesh = deepcopy(mesh)
         sys.stdout = open(os.devnull, "w")
-        ho_mesh.GetHighOrderMesh(p=p, check_duplicates=False)
+        ho_mesh.GetHighOrderMesh(p=p, equally_spaced=equally_spaced, check_duplicates=False)
         sys.stdout = sys.__stdout__ 
 
         if sol.ndim == 2:
