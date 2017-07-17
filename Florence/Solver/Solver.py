@@ -8,6 +8,9 @@ import os, platform
 from time import time
 
 
+__all__ = ["LinearSolver"]
+
+
 class LinearSolver(object):
     """Base class for all linear sparse direct and iterative solvers"""
 
