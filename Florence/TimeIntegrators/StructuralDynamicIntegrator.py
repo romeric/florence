@@ -188,6 +188,7 @@ class StructuralDynamicIntegrators(object):
         boundary_condition, AppliedDirichletInc, fem_solver, velocities, accelerations):
 
         Tolerance = fem_solver.newton_raphson_tolerance
+        DispTolerance = 10.*fem_solver.newton_raphson_tolerance
         LoadIncrement = fem_solver.number_of_load_increments
         LoadFactor = fem_solver.total_time/fem_solver.number_of_load_increments
         Iter = 0
@@ -226,7 +227,6 @@ class StructuralDynamicIntegrators(object):
 
 
         while np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces) > Tolerance or Iter==0:
-        # for ii in range(7):
 
             # GET EFFECTIVE STIFFNESS
             # K += (1./self.beta/LoadFactor**2)*M
@@ -238,8 +238,9 @@ class StructuralDynamicIntegrators(object):
             sol = solver.Solve(K_b,-F_b)
 
             # GET ITERATIVE SOLUTION
-            dU = boundary_condition.UpdateFreeDoFs(sol,K.shape[0],formulation.nvar) 
+            dU = boundary_condition.UpdateFreeDoFs(sol,K.shape[0],formulation.nvar)
 
+            # UPDATE THE EULERIAN COMPONENTS
             # UPDATE THE GEOMETRY
             Eulerx += dU[:,:formulation.ndim]
             # GET ITERATIVE ELECTRIC POTENTIAL
@@ -295,7 +296,13 @@ class StructuralDynamicIntegrators(object):
                 " Residual (abs) {0:>16.7g}".format(self.rel_norm_residual), 
                 "\t Residual (rel) {0:>16.7g}".format(self.norm_residual))
 
+            # BREAK BASED ON RELATIVE NORM
             if np.abs(self.rel_norm_residual) < Tolerance:
+                break
+
+            # BREAK BASED ON INCREMENTAL SOLUTION - KEEP IT AFTER UPDATE 
+            if norm(dU) <=  DispTolerance:
+                print("Incremental solution within tolerance i.e. norm(dU): {}".format(norm(dU)))
                 break
 
             # UPDATE ITERATION NUMBER
