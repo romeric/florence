@@ -1,6 +1,5 @@
 import numpy as np
 cimport numpy as np
-from scipy.sparse import csr_matrix, csc_matrix
 
 ctypedef long long Integer
 ctypedef unsigned long long UInteger
@@ -145,16 +144,7 @@ def _LowLevelAssemblyDPF_(fem_solver, function_space, formulation, mesh, materia
                             )
 
 
-    stiffness = csc_matrix((V_stiffness,(I_stiffness,J_stiffness)),
-        shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
-
-    F, mass = [], []
-
-    if is_dynamic:
-        mass = csc_matrix((V_mass,(I_mass,J_mass)),
-            shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
-
-    return stiffness, T, F, mass
+    return I_stiffness, J_stiffness, V_stiffness, I_mass, J_mass, V_mass, T
 
 
 

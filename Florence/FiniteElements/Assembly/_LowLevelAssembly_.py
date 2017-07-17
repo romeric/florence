@@ -1,4 +1,6 @@
 from warnings import warn
+import numpy as np
+from scipy.sparse import csr_matrix, csc_matrix
 
 try:
     from ._LowLevelAssemblyDF__NeoHookean_2_ import _LowLevelAssemblyDF__NeoHookean_2_
@@ -31,7 +33,21 @@ def _LowLevelAssembly_(fem_solver, function_space, formulation, mesh, material, 
 
     assembly_func = prefix + type(material).__name__ + "_"
 
-    return eval(assembly_func)(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
+    # CALL LOW LEVEL ASSEMBLER
+    I_stiffness, J_stiffness, V_stiffness, I_mass, J_mass, V_mass, \
+        T = eval(assembly_func)(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
+
+    nvar = formulation.nvar
+    stiffness = csr_matrix((V_stiffness,(I_stiffness,J_stiffness)),
+        shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
+
+    F, mass = [], []
+
+    if fem_solver.analysis_type != "static" and fem_solver.is_mass_computed is False:
+        mass = csr_matrix((V_mass,(I_mass,J_mass)),
+            shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
+
+    return stiffness, T, F, mass
 
 
 
