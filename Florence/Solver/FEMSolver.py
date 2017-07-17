@@ -522,6 +522,7 @@ class FEMSolver(object):
         boundary_condition, AppliedDirichletInc):
 
         Tolerance = self.newton_raphson_tolerance
+        DispTolerance = 10.*self.newton_raphson_tolerance
         LoadIncrement = self.number_of_load_increments
         Iter = 0
 
@@ -541,10 +542,12 @@ class FEMSolver(object):
             sol = solver.Solve(K_b,-F_b)
 
             # GET ITERATIVE SOLUTION
-            dU = boundary_condition.UpdateFreeDoFs(sol,K.shape[0],formulation.nvar) 
+            dU = boundary_condition.UpdateFreeDoFs(sol,K.shape[0],formulation.nvar)
 
             # UPDATE THE EULERIAN COMPONENTS
+            # UPDATE THE GEOMETRY
             Eulerx += dU[:,:formulation.ndim]
+            # GET ITERATIVE ELECTRIC POTENTIAL
             Eulerp += dU[:,-1]
 
             # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
@@ -569,7 +572,13 @@ class FEMSolver(object):
                 " Residual (abs) {0:>16.7g}".format(self.rel_norm_residual), 
                 "\t Residual (rel) {0:>16.7g}".format(self.norm_residual))
 
+            # BREAK BASED ON RELATIVE NORM
             if np.abs(self.rel_norm_residual) < Tolerance:
+                break
+
+            # BREAK BASED ON INCREMENTAL SOLUTION - KEEP IT AFTER UPDATE
+            if norm(dU) <=  DispTolerance:
+                print("Incremental solution within tolerance i.e. norm(dU): {}".format(norm(dU)))
                 break
 
             # UPDATE ITERATION NUMBER
