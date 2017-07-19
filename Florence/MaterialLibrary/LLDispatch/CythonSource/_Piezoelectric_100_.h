@@ -79,14 +79,14 @@ public:
             trb += 1.;
         }
 
-        auto sigma_mech = 2.*mu1/J*b + \
+        Tensor<T,ndim,ndim> sigma_mech = 2.*mu1/J*b + \
             2.*mu2/J*(trb*b - matmul(b,b)) - \
             2.*(mu1+2*mu2+mu3)/J*I + \
             lamb*(J-1)*I +\
             2*mu3/J*outerFN +\
             2*mu3/J*innerHN*I - 2*mu3/J*outerHN;
 
-        auto sigma_electric = 1./eps_2*(outerDD - 0.5*innerDD*I) +\
+        Tensor<T,ndim,ndim> sigma_electric = 1./eps_2*(outerDD - 0.5*innerDD*I) +\
             2.*J*coeff*outerDD + 2.*coeff*( DFN + FND );
 
         Tensor<T,ndim,ndim> sigma = sigma_mech + sigma_electric;
