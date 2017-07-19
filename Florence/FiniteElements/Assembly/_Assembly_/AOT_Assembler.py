@@ -202,8 +202,8 @@ def AOTConfigure():
                 elif material == "_IsotropicElectroMechanics_108_":
                     contents_c[counter] = "    mu1, mu2, lamb, eps_2 = material.mu1, material.mu2, material.lamb, material.eps_2\n"
                 elif material == "_Piezoelectric_100_":
-                    contents_c[counter] = "    mu1, mu2, mu3, lamb, eps_1, eps_2, eps_e = material.mu1, " +\
-                        "material.mu2, material.mue, material.lamb, material.eps_1, material.eps_2, material.eps_e\n"
+                    contents_c[counter] = "    mu1, mu2, mu3, lamb, eps_1, eps_2, eps_3 = material.mu1, " +\
+                        "material.mu2, material.mu3, material.lamb, material.eps_1, material.eps_2, material.eps_3\n"
 
         # Write
         f = open(cython_f, 'w')
