@@ -33,14 +33,12 @@ class Piezoelectric_100(Material):
         # LOW LEVEL DISPATCHER
         self.has_low_level_dispatcher = True
         # self.has_low_level_dispatcher = False
-        # from Florence.MaterialLibrary.LLDispatch._Piezoelectric_100_ import Piezoelectric_100 as KineticMeasures
-        # self.ll_model = LLModel(self)
 
     def KineticMeasures(self,F,ElectricFieldx, elem=0):
-        # return self.ll_model.KineticMeasures(F.copy('c'), ElectricFieldx, self.anisotropic_orientations[elem][:,None])
-        # return self.ll_model.KineticMeasures(np.ascontiguousarray(F), ElectricFieldx, self.anisotropic_orientations[elem][:,None])
         from Florence.MaterialLibrary.LLDispatch._Piezoelectric_100_ import KineticMeasures
         return KineticMeasures(self,np.ascontiguousarray(F), ElectricFieldx, self.anisotropic_orientations[elem][:,None])
+        # return KineticMeasures(self,np.ascontiguousarray(F), np.ascontiguousarray(ElectricFieldx), 
+            # np.ascontiguousarray(self.anisotropic_orientations[elem][:,None]))
 
 
     def Hessian(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
