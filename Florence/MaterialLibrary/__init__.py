@@ -59,3 +59,4 @@ from .IsotropicElectroMechanics_201 import *
 
 # COMPOSTITES
 from .Multi_IsotropicElectroMechanics_101 import *
+from .Multi_Piezoelectric_100 import *
