@@ -67,6 +67,8 @@ class Mesh(object):
         self.all_edges = None
         self.interior_faces = None
         self.interior_edges = None
+        # TYPE OF BOUNDARY FACES/EDGES
+        self.boundary_element_type = None 
 
         # FOR GEOMETRICAL CURVES/SURFACES
         self.edge_to_curve = None
@@ -232,9 +234,13 @@ class Mesh(object):
                         np.max(self.points[:,1])]])
             makezero(bounds)
             return bounds
+        elif self.points.shape[1] == 1:
+            bounds = np.array([[np.min(self.points[:,0])],
+                        [np.max(self.points[:,0])]])
+            makezero(bounds)
+            return bounds
         else:
             raise ValueError("Invalid dimension for mesh coordinates")
-            return bounds
 
 
     def GetEdgesTri(self):
@@ -2827,9 +2833,24 @@ class Mesh(object):
         return triangle.build(info,*args,**kwargs)
 
 
+    def Line(self, left_point=0., right_point=1., n=10, p=1):
+        """Creates a mesh of on a line for 1D rods/beams"""
+
+        self.__reset__()
+        assert p > 0
+
+        self.element_type = "line"
+        self.points = np.linspace(left_point,right_point,p*n+1)[:,None]
+        self.elements = np.zeros((n,p+1),dtype=np.int64)
+        for i in range(p+1):
+            self.elements[:,i] = p*np.arange(0,n)+i
+        self.nelem = self.elements.shape[0]
+        self.nnode = self.points.shape[0]
+
+
     def Rectangle(self,lower_left_point=(0,0), upper_right_point=(2,1), 
         nx=5, ny=5, element_type="tri"):
-        """Creates a qud/tri mesh of on rectangle"""
+        """Creates a quad/tri mesh of a rectangle"""
 
         if element_type != "tri" and element_type != "quad":
             raise ValueError("Element type should either be tri or quad")
@@ -4475,6 +4496,12 @@ class Mesh(object):
                     p = i
                     break
 
+        elif self.element_type == "line":
+            for i in range(100):
+                if int(i+1)==self.elements.shape[1]:
+                    p = i
+                    break
+
         self.degree = p
         return p
 
@@ -4503,11 +4530,13 @@ class Mesh(object):
             element type with the given polynomial degree"""
 
         if p is not None and element_type is not None:
-            if element_type=="tri":
+            if element_type=="line":
+                return int(p+1)
+            elif element_type=="tri":
                 return int((p+1)*(p+2)/2)
-            if element_type=="quad":
+            elif element_type=="quad":
                 return int((p+1)**2)
-            if element_type=="tet":
+            elif element_type=="tet":
                 return int((p+1)*(p+2)*(p+3)/6)
             elif element_type=="hex":
                 return int((p+1)**3)
@@ -4533,7 +4562,9 @@ class Mesh(object):
             self.element_type = element_type
 
         nodeperelem = None
-        if element_type=="tri":
+        if element_type=="line":
+            nodeperelem = 1
+        elif element_type=="tri":
             nodeperelem = 3
         elif element_type=="quad":
             nodeperelem = 4
@@ -4577,11 +4608,29 @@ class Mesh(object):
             else:
                 raise ValueError("Element type not understood")
         elif ndim==1:
-            element_type = "line"
+            self.element_type = "line"
         else:
             raise ValueError("Element type not understood")
 
         return self.element_type
+
+
+    def InferBoundaryElementType(self):
+
+        self.InferElementType()
+        if self.element_type == "hex":
+            self.boundary_element_type = "quad"
+        elif self.element_type == "tet":
+            self.boundary_element_type = "tri"
+        elif self.element_type == "quad" or self.element_type == "tri":
+            self.boundary_element_type = "line"
+        elif self.element_type == "line":
+            self.boundary_element_type = "point"
+        else:
+            raise ValueError("Could not understand element type")
+
+        return self.boundary_element_type
+
 
 
     def GetLinearMesh(self, solution=None, remap=False):
@@ -5011,6 +5060,25 @@ class Mesh(object):
             self.all_edges = all_edges
 
         print("Hexahedral to tetrahedral mesh conversion took", time() - tconv, "seconds")
+
+
+    def CreateDummyLowerDimensionalMesh(self):
+        """Create a dummy lower dimensional mesh that would have some specific mesh attributes at least.
+            The objective is that the lower dimensional mesh should have the same element type as the 
+            boundary faces/edges of the actual mesh and be the same order"""
+
+        p = self.InferPolynomialDegree()
+        mesh = Mesh()
+        if self.element_type == "tet":
+            mesh.Rectangle(nx=1,ny=1, element_type="tri")
+            mesh.GetHighOrderMesh(p=p)
+        elif self.element_type == "hex":
+            mesh.Rectangle(nx=1,ny=1, element_type="quad")
+            mesh.GetHighOrderMesh(p=p)
+        elif self.element_type == "tri" or self.element_type == "quad":
+            mesh.Line(n=1, p=p)
+
+        return mesh
 
 
     def SwapAxis(self, axis0, axis1):

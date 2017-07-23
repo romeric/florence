@@ -11,6 +11,8 @@ from Florence.FiniteElements.Assembly import Assemble
 from Florence.PostProcessing import *
 from Florence.Solver import LinearSolver, FEMSolver
 
+__all__ = ["TractionBasedStaggeredSolver"]
+
 class TractionBasedStaggeredSolver(FEMSolver):
     """Staggered electromechanical solver based on
         traction/residual transmision
@@ -84,29 +86,7 @@ class TractionBasedStaggeredSolver(FEMSolver):
 
         # CHECK DATA CONSISTENCY
         #---------------------------------------------------------------------------#
-        if mesh is None:
-            raise ValueError("No mesh detected for the analysis")
-        elif not isinstance(mesh,Mesh):
-            raise ValueError("mesh has to be an instance of Florence.Mesh")
-        if boundary_condition is None:
-            raise ValueError("No boundary conditions detected for the analysis")
-        if material is None:
-            raise ValueError("No material model chosen for the analysis")
-        if formulation is None:
-            raise ValueError("No variational form specified")
-
-        # GET FUNCTION SPACES FROM THE FORMULATION 
-        if function_spaces is None:
-            if formulation.function_spaces is None:
-                raise ValueError("No interpolation functions specified")
-            else:
-                function_spaces = formulation.function_spaces
-
-        # CHECK IF A SOLVER IS SPECIFIED
-        if solver is None:
-            solver = LinearSolver(linear_solver="direct", linear_solver_type="umfpack", geometric_discretisation=mesh.element_type)
-
-        self.__checkdata__(material, boundary_condition, formulation, mesh)
+        function_spaces, solver = self.__checkdata__(material, boundary_condition, formulation, mesh, function_spaces, solver)
         #---------------------------------------------------------------------------#
 
         print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation info etc...')

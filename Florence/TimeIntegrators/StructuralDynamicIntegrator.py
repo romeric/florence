@@ -188,7 +188,6 @@ class StructuralDynamicIntegrators(object):
         boundary_condition, AppliedDirichletInc, fem_solver, velocities, accelerations):
 
         Tolerance = fem_solver.newton_raphson_tolerance
-        DispTolerance = 10.*fem_solver.newton_raphson_tolerance
         LoadIncrement = fem_solver.number_of_load_increments
         LoadFactor = fem_solver.total_time/fem_solver.number_of_load_increments
         Iter = 0
@@ -301,7 +300,7 @@ class StructuralDynamicIntegrators(object):
                 break
 
             # BREAK BASED ON INCREMENTAL SOLUTION - KEEP IT AFTER UPDATE 
-            if norm(dU) <=  DispTolerance:
+            if norm(dU) <=  fem_solver.newton_raphson_solution_tolerance:
                 print("Incremental solution within tolerance i.e. norm(dU): {}".format(norm(dU)))
                 break
 

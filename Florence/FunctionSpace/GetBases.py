@@ -4,6 +4,7 @@ import numpy as np
 # import Florence.FunctionSpace.TwoDimensional.Tri.hpModal as Tri 
 # import Florence.FunctionSpace.ThreeDimensional.Tet.hpModal as Tet
 # Nodal Bases
+from Florence.FunctionSpace import Line
 from Florence.FunctionSpace import Tri
 from Florence.FunctionSpace import Tet
 from Florence.FunctionSpace import Quad, QuadES
@@ -14,7 +15,40 @@ from Florence.QuadratureRules.FeketePointsTet import *
 from Florence.QuadratureRules.GaussLobattoPoints import *
 from Florence.QuadratureRules.EquallySpacedPoints import *
 
-def GetBases(C, Quadrature, info, bases_type="nodal", equally_spaced=False, is_flattened=False):
+
+def GetBases1D(C, Quadrature, info=None, bases_type="nodal", equally_spaced=False, is_flattened=False):
+
+    w = Quadrature.weights
+    z = Quadrature.points
+
+    ns=[]; Basis=[]; gBasis = []
+    ns = int(C+2)
+    Basis = np.zeros((ns,z.shape[0]),dtype=np.float64)
+    gBasis = np.zeros((ns,z.shape[0]),dtype=np.float64)
+
+    if not equally_spaced:
+        hpBases = Line.LagrangeGaussLobatto
+    else:
+        hpBases = Line.Lagrange
+
+    for i in range(0,w.shape[0]):
+        ndummy, dummy = hpBases(C,z[i])[:2]
+        Basis[:,i] = ndummy[:]
+        gBasis[:,i] = dummy[:]
+
+
+    class Domain(object):
+        Bases = Basis
+        gBasesx = gBasis
+        gBasesy = np.zeros(gBasis.shape)
+        gBasesz = np.zeros(gBasis.shape)
+
+
+    return Domain
+
+
+
+def GetBases2D(C, Quadrature, info, bases_type="nodal", equally_spaced=False, is_flattened=False):
 
     w = Quadrature.weights
     z = Quadrature.points
@@ -170,66 +204,6 @@ def GetBases3D(C, Quadrature, info, bases_type="nodal", equally_spaced=False, is
 
 
 
-def GetBasesBoundary(C, z, ndim):
-
-    BasisBoundary = np.zeros(((C+2)**(ndim),(z.shape[0])**(ndim-1),2*ndim))
-    gBasisBoundaryx = np.zeros(((C+2)**(ndim),(z.shape[0])**(ndim-1),2*ndim))
-    gBasisBoundaryy = np.zeros(((C+2)**(ndim),(z.shape[0])**(ndim-1),2*ndim))
-    gBasisBoundaryz = np.zeros(((C+2)**(ndim),(z.shape[0])**(ndim-1),2*ndim))
-
-    # eps = OneD.LagrangeGaussLobatto(C,0)
-    eps = np.array([-1.,1.,-1.,1.,-1.,1.])
-    
-
-    for k in range(0,eps.shape[0]):
-        counter = 0
-        for i in range(0,z.shape[0]):
-            for j in range(0,z.shape[0]):
-                if k==0 or k==1:
-                    ndummy = Hex.LagrangeGaussLobatto(C,eps[k],z[i],z[j])[0]
-                    BasisBoundary[:,counter,k] = ndummy[:,0]
-
-                    dummy = Hex.GradLagrangeGaussLobatto(C,eps[k],z[i],z[j])
-                    gBasisBoundaryx[:,counter,k] = dummy[:,0]
-                    gBasisBoundaryy[:,counter,k] = dummy[:,1]
-                    gBasisBoundaryz[:,counter,k] = dummy[:,2]
-
-                elif k==2 or k==3:
-                    ndummy = Hex.LagrangeGaussLobatto(C,z[i],eps[k],z[j])[0]
-                    BasisBoundary[:,counter,k] = ndummy[:,0]
-
-                    dummy = ThreeD.GradLagrangeGaussLobatto(C,z[i],eps[k],z[j])
-                    gBasisBoundaryx[:,counter,k] = dummy[:,0]
-                    gBasisBoundaryy[:,counter,k] = dummy[:,1]
-                    gBasisBoundaryz[:,counter,k] = dummy[:,2]
-
-                elif k==4 or k==5:
-                    ndummy = Hex.LagrangeGaussLobatto(C,z[i],z[j],eps[k])[0]
-                    BasisBoundary[:,counter,k] = ndummy[:,0]
-
-                    dummy = Hex.GradLagrangeGaussLobatto(C,z[i],z[j],eps[k])
-                    gBasisBoundaryx[:,counter,k] = dummy[:,0]
-                    gBasisBoundaryy[:,counter,k] = dummy[:,1]
-                    gBasisBoundaryz[:,counter,k] = dummy[:,2]
-
-                
-                counter+=1
-
-    class Boundary(object):
-        """docstring for BasisBoundary"""
-        def __init__(self, arg):
-            super(BasisBoundary, self).__init__()
-            self.arg = arg
-        Basis  = BasisBoundary
-        gBasisx = gBasisBoundaryx
-        gBasisy = gBasisBoundaryy
-        gBasisz = gBasisBoundaryz
-
-
-    return Boundary
-
-
-
 
 def GetBasesAtNodes(C, Quadrature, info, bases_type="nodal", equally_spaced=False):
 
@@ -349,4 +323,95 @@ def GetBasesAtNodes(C, Quadrature, info, bases_type="nodal", equally_spaced=Fals
         Domain.w = np.ones(C+2)
 
     return Domain
+
+
+
+def GetBoundaryBases(C, Quadrature, info, bases_type="nodal", equally_spaced=False, is_flattened=False):
+
+    binfo, ndim = None, None
+    if info == "hex":
+        binfo = "quad"
+        ndim == 3
+    elif info == "tet":
+        binfo = "tri"
+        ndim == 3
+    elif info == "quad" or info == "tri":
+        binfo = "line"
+        ndim == 2
+
+    if Quadrature is None:
+        norder = C+2
+        from Florence import QuadratureRule
+        Quadrature = QuadratureRule(norder=norder, mesh_type=binfo, is_flattened=is_flattened)
+
+
+    if ndim == 3:
+        return GetBases2D(C, Quadrature, info, bases_type=bases_type, equally_spaced=equally_spaced, is_flattened=is_flattened)
+    elif ndim == 2:
+        return GetBases1D(C, Quadrature, info, bases_type=bases_type, equally_spaced=equally_spaced, is_flattened=is_flattened)
+
+
+
+
+
+
+########################################################
+# DEPRECATED
+# def GetBasesBoundary(C, z, ndim):
+
+#     BasisBoundary = np.zeros(((C+2)**(ndim),(z.shape[0])**(ndim-1),2*ndim))
+#     gBasisBoundaryx = np.zeros(((C+2)**(ndim),(z.shape[0])**(ndim-1),2*ndim))
+#     gBasisBoundaryy = np.zeros(((C+2)**(ndim),(z.shape[0])**(ndim-1),2*ndim))
+#     gBasisBoundaryz = np.zeros(((C+2)**(ndim),(z.shape[0])**(ndim-1),2*ndim))
+
+#     # eps = OneD.LagrangeGaussLobatto(C,0)
+#     eps = np.array([-1.,1.,-1.,1.,-1.,1.])
+    
+
+#     for k in range(0,eps.shape[0]):
+#         counter = 0
+#         for i in range(0,z.shape[0]):
+#             for j in range(0,z.shape[0]):
+#                 if k==0 or k==1:
+#                     ndummy = Hex.LagrangeGaussLobatto(C,eps[k],z[i],z[j])[0]
+#                     BasisBoundary[:,counter,k] = ndummy[:,0]
+
+#                     dummy = Hex.GradLagrangeGaussLobatto(C,eps[k],z[i],z[j])
+#                     gBasisBoundaryx[:,counter,k] = dummy[:,0]
+#                     gBasisBoundaryy[:,counter,k] = dummy[:,1]
+#                     gBasisBoundaryz[:,counter,k] = dummy[:,2]
+
+#                 elif k==2 or k==3:
+#                     ndummy = Hex.LagrangeGaussLobatto(C,z[i],eps[k],z[j])[0]
+#                     BasisBoundary[:,counter,k] = ndummy[:,0]
+
+#                     dummy = ThreeD.GradLagrangeGaussLobatto(C,z[i],eps[k],z[j])
+#                     gBasisBoundaryx[:,counter,k] = dummy[:,0]
+#                     gBasisBoundaryy[:,counter,k] = dummy[:,1]
+#                     gBasisBoundaryz[:,counter,k] = dummy[:,2]
+
+#                 elif k==4 or k==5:
+#                     ndummy = Hex.LagrangeGaussLobatto(C,z[i],z[j],eps[k])[0]
+#                     BasisBoundary[:,counter,k] = ndummy[:,0]
+
+#                     dummy = Hex.GradLagrangeGaussLobatto(C,z[i],z[j],eps[k])
+#                     gBasisBoundaryx[:,counter,k] = dummy[:,0]
+#                     gBasisBoundaryy[:,counter,k] = dummy[:,1]
+#                     gBasisBoundaryz[:,counter,k] = dummy[:,2]
+
+                
+#                 counter+=1
+
+#     class Boundary(object):
+#         """docstring for BasisBoundary"""
+#         def __init__(self, arg):
+#             super(BasisBoundary, self).__init__()
+#             self.arg = arg
+#         Basis  = BasisBoundary
+#         gBasisx = gBasisBoundaryx
+#         gBasisy = gBasisBoundaryy
+#         gBasisz = gBasisBoundaryz
+
+
+#     return Boundary
 

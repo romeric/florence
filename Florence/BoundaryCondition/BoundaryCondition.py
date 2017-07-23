@@ -12,7 +12,7 @@ class BoundaryCondition(object):
     """Base class for applying all types of boundary conditions"""
 
     def __init__(self):
-        # TYPE OF BOUNDARY straight OF nurbs
+        # TYPE OF BOUNDARY: straight or nurbs
         self.boundary_type = 'straight'
         self.dirichlet_data_applied_at = 'node' # or 'faces'
         self.neumann_data_applied_at = 'node' # or 'faces'
@@ -52,6 +52,7 @@ class BoundaryCondition(object):
 
         self.dirichlet_flags = None
         self.neumann_flags = None
+        self.applied_neumann = None
 
 
         # NODAL FORCES GENERATED BASED ON DIRICHLET OR NEUMANN ARE NOT 
@@ -211,8 +212,18 @@ class BoundaryCondition(object):
 
 
     def SetNeumannCriteria(self, func, *args, **kwargs):
-        self.neumann_flags = func(*args, **kwargs)
-        return self.neumann_flags
+        tups = func(*args, **kwargs)
+        if not isinstance(tups,tuple) and self.neumann_data_applied_at == "node":
+            self.neumann_flags = tups
+            return self.neumann_flags
+        else:
+            self.neumann_data_applied_at == "face"
+            tups = func(*args, **kwargs)
+            if len(tups) !=2:
+                raise ValueError("User-defined Neumann criterion function {} should return one flag and one data array".format(func.__name__))
+            self.neumann_flags = tups[0]
+            self.applied_neumann = tups[1]
+            return tups
 
 
     def GetDirichletBoundaryConditions(self, formulation, mesh, material=None, solver=None, fem_solver=None):
@@ -267,12 +278,6 @@ class BoundaryCondition(object):
                 self.columns_out = (np.repeat(nodesDBC,nvar,axis=1)*nvar +\
                  np.tile(np.arange(nvar)[None,:],nodesDBC.shape[0]).reshape(nodesDBC.shape[0],formulation.ndim)).ravel()
                 self.applied_dirichlet = Dirichlet.ravel()
-
-                # np.savetxt("/home/roman/applied_dirichlet.dat", self.applied_dirichlet,fmt="%9.9f")
-                # np.savetxt("/home/roman/columns_out.dat", self.columns_out,fmt="%i")
-                # print(self.applied_dirichlet.shape,mesh.points.shape,self.columns_out.shape)
-                # print(nodesDBC.shape,Dirichlet.shape)
-                # exit()
 
 
                 # FIX THE DOF IN THE REST OF THE BOUNDARY
@@ -683,24 +688,16 @@ class BoundaryCondition(object):
             framework.
         """
 
-        # tt=time()
         # # APPLY DIRICHLET BOUNDARY CONDITIONS
         # for i in range(self.columns_out.shape[0]):
             # F = F - LoadFactor*AppliedDirichlet[i]*stiffness.getcol(self.columns_out[i])
 
         # MUCH FASTER APPROACH
         # F = F - (stiffness[:,self.columns_out]*AppliedDirichlet*LoadFactor)[:,None]
-        # F = F - (stiffness[self.columns_in,:][:,self.columns_out]*AppliedDirichlet*LoadFactor)[:,None]
-        # nnz_cols = ~np.isclose(AppliedDirichlet,0.0)
-        # F = F - (stiffness[:,self.columns_out[nnz_cols]]*AppliedDirichlet[nnz_cols]*LoadFactor)[:,None]
-        # F = F - self.__dirichlet_helper__(stiffness,AppliedDirichlet,self.columns_out)
-        # F = F - self.__dirichlet_helper__(stiffness,AppliedDirichlet[nnz_cols],self.columns_out[nnz_cols])
-        # print(time()-tt)
-        # exit()
-
 
         nnz_cols = ~np.isclose(AppliedDirichlet,0.0)
-        F[self.columns_in] = F[self.columns_in] - (stiffness[self.columns_in,:][:,self.columns_out[nnz_cols]]*AppliedDirichlet[nnz_cols]*LoadFactor)[:,None]
+        F[self.columns_in] = F[self.columns_in] - (stiffness[self.columns_in,:][:,
+            self.columns_out[nnz_cols]]*AppliedDirichlet[nnz_cols]*LoadFactor)[:,None]
 
         if only_residual:
             return F
@@ -764,16 +761,83 @@ class BoundaryCondition(object):
     def SetNURBSCondition(self,nurbs_func,*args):
         self.nurbs_condition = nurbs_func(*args)
 
-
-    def ComputeNeumannForces(self, mesh, material, dynamic_step=0):
-        """A Dirichlet type methodology for applying Neumann boundary conditions"""
+        # dynamic_step=0
+    def ComputeNeumannForces(self, mesh, material, function_spaces, compute_traction_forces=True, compute_body_forces=False):
+        """Compute/assemble traction and body forces"""
 
         if self.neumann_flags is None:
             return np.zeros((mesh.points.shape[0]*material.nvar,1),dtype=np.float64)
 
         nvar = material.nvar
+        ndim = mesh.InferSpatialDimension()
 
-        if self.neumann_data_applied_at == 'node':
+        if self.neumann_flags.shape[0] == mesh.points.shape[0]:
+            self.neumann_data_applied_at = "node"
+        else:
+            if self.neumann_flags.shape[0] == mesh.faces.shape[0] and ndim==3:
+                self.neumann_data_applied_at = "face"
+            elif self.neumann_flags.shape[0] == mesh.edges.shape[0] and ndim==2:
+                self.neumann_data_applied_at = "face"
+
+
+        if self.neumann_data_applied_at == 'face':
+            from Florence.FiniteElements.Assembly import AssembleForces
+            if not isinstance(function_spaces,tuple):
+                raise ValueError("Correct functional spaces not passed for computing Neumman and body forces")
+            else:
+                if len(function_spaces) !=3:
+                    raise ValueError("Correct functional spaces not passed for computing Neumman and body forces")
+
+            if self.analysis_type == "static":
+                F = AssembleForces(self, mesh, material, function_spaces, 
+                    compute_traction_forces=compute_traction_forces, compute_body_forces=compute_body_forces)
+            elif self.analysis_type == "dynamic":
+                # THE POSITION OF NEUMANN DATA APPLIED AT FACES CAN CHANGE DYNAMICALLY
+                tmp_flags = np.copy(self.neumann_flags)
+                tmp_data = np.copy(self.applied_neumann)
+                F = np.zeros((mesh.points.shape[0]*nvar,self.neumann_flags.shape[1]))
+                for step in range(self.neumann_flags.shape[1]):
+                    self.neumann_flags = tmp_flags[:,step]
+                    self.applied_neumann = tmp_data[:,:,step]
+                    F[:,step] = AssembleForces(self, mesh, material, function_spaces,
+                        compute_traction_forces=compute_traction_forces, compute_body_forces=compute_body_forces).flatten()
+
+                self.neumann_flags = tmp_flags
+                self.applied_neumann = tmp_data
+            # exit()
+
+            # if ndim == 2:
+            #     faces = np.copy(mesh.edges)
+            #     nodeperelem = mesh.edges.shape[1]
+            # else:
+            #     faces = np.copy(mesh.faces)
+            #     nodeperelem = mesh.faces.shape[1]
+
+            # F = np.zeros((mesh.points.shape[0]*nvar,1))
+            # for face in range(faces.shape[0]):
+            #     if self.neumann_flags[face] == True:
+            #         LagrangeFaceCoords = mesh.points[faces[face,:],:]
+            #         ElemTraction = self.applied_neumann[face,:]
+
+            #         # ParentGradientX = np.einsum('ijk,jl->kil', function_space.Jm, LagrangeFaceCoords)
+            #         # detJ = np.einsum('i,i->i',function_space.AllGauss[:,0],np.abs(np.linalg.det(ParentGradientX)))
+
+            #         external_traction = np.zeros((nodeperelem*nvar))
+            #         N = np.zeros((nodeperelem*nvar,nvar))
+            #         for counter in range(function_space.AllGauss.shape[0]):
+            #             for i in range(nvar):
+            #                 N[i::nvar,i] = function_space.Bases[:,counter]
+
+            #             external_traction += np.dot(N,ElemTraction)*function_space.AllGauss[counter,0]
+
+            #        # RHS ASSEMBLY
+            #         # for iterator in range(0,nvar):
+            #             # F[faces[face,:]*nvar+iterator,0]+=external_traction[iterator::nvar]
+            #         RHSAssemblyNative(F,external_traction[:,None],face,nvar,nodeperelem,faces)
+
+
+        elif self.neumann_data_applied_at == 'node':
+            # A DIRICHLET TYPE METHODOLGY FOR APPLYING NEUMANN BOUNDARY CONDITONS (i.e. AT NODES)
             if self.analysis_type == "dynamic":
                 if self.neumann_flags.ndim !=3:
                     raise ValueError("Dirichlet flags for dynamic analysis should be a 3D array")

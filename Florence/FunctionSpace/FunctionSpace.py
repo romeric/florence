@@ -26,15 +26,15 @@ class FunctionSpace(object):
         """
     
         # from Florence import QuadratureRule
-        from Florence.FunctionSpace.GetBases import GetBases, GetBases3D, GetBasesBoundary, GetBasesAtNodes
+        from Florence.FunctionSpace.GetBases import GetBases1D, GetBases2D, GetBases3D, GetBoundaryBases, GetBasesAtNodes
         
         QuadratureOpt=3
         is_flattened = False
         if use_optimal_quadrature:
             QuadratureOpt=3 # always this for tris/tets
             is_flattened = True
-        # norder=5 # 2*C for stiffness and 2*(C+1) for mass
 
+        # mesh.InferBoundaryElementType()
         ndim = mesh.InferSpatialDimension()
         C = p - 1
         if mesh.InferPolynomialDegree() - 1 != C:
@@ -52,18 +52,20 @@ class FunctionSpace(object):
                 # GET BASES AT ALL INTEGRATION POINTS (VOLUME)
                 Domain = GetBases3D(C,quadrature,mesh.element_type,equally_spaced=equally_spaced,
                     is_flattened=use_optimal_quadrature)
-                # GET BOUNDARY BASES AT ALL INTEGRATION POINTS (LINE)
-                # Boundary = GetBasesBoundary(C,z,ndim)
             elif mesh.element_type == 'tri' or mesh.element_type == 'quad':
                 # GET BASES AT ALL INTEGRATION POINTS (AREA)
-                Domain = GetBases(C,quadrature,mesh.element_type,equally_spaced=equally_spaced)
-                # GET BOUNDARY BASES AT ALL INTEGRATION POINTS (LINE)
-                # Boundary = GetBasesBoundary(C,z,ndim)
-            Boundary = []
+                Domain = GetBases2D(C,quadrature,mesh.element_type,equally_spaced=equally_spaced)
+            elif mesh.element_type == 'line':
+                # GET BASES AT ALL INTEGRATION POINTS (LINE)
+                Domain = GetBases1D(C,quadrature,mesh.element_type,equally_spaced=equally_spaced)
+            # Boundary = []
+            # # PUT QUADRATURE NONE AS BASES QUADRATURE RULE IS DIFFERENT
+            # Boundary = GetBoundaryBases(C,None,mesh.boundary_element_type,equally_spaced=equally_spaced,
+                # is_flattened=use_optimal_quadrature)
         else:
             Domain = GetBasesAtNodes(C,quadrature,mesh.element_type,equally_spaced=equally_spaced)
-            Boundary = []
             w = Domain.w
+            # Boundary = []
 
 
         # COMPUTING GRADIENTS AND JACOBIAN A PRIORI FOR ALL INTEGRATION POINTS
@@ -140,6 +142,15 @@ class FunctionSpace(object):
 
                 Domain.AllGauss[counter,0] = w[counter]
 
+        elif mesh.element_type == "line":
+            Domain.Jm = np.zeros((ndim,Domain.Bases.shape[0],w.shape[0]))   
+            Domain.AllGauss = np.zeros((w.shape[0],1))  
+            for counter in range(0,w.shape[0]):
+                # GRADIENT TENSOR IN PARENT ELEMENT [\nabla_\varepsilon (N)]
+                Domain.Jm[0,:,counter] = Domain.gBasesx[:,counter]
+
+                Domain.AllGauss[counter,0] = w[counter]            
+
 
         self.Jm = Domain.Jm
         self.AllGauss = Domain.AllGauss
@@ -147,6 +158,3 @@ class FunctionSpace(object):
         self.gBasesx = Domain.gBasesx 
         self.gBasesy = Domain.gBasesy
         self.gBasesz = Domain.gBasesz
-
-        self.Boundary = Boundary
-
