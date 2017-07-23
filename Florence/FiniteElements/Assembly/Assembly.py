@@ -24,7 +24,7 @@ __all__ = ['Assemble','AssembleForces']
 
 
 
-def Assemble(fem_solver, function_space, formulation, mesh, material, solver, Eulerx, Eulerp):
+def Assemble(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
 
     if fem_solver.memory_model == "shared" or fem_solver.memory_model is None:
         if not fem_solver.has_low_level_dispatcher:
@@ -446,10 +446,43 @@ def OutofCoreAssembly(fem_solver, function_space, formulation, mesh, material, E
 
 
 
+#----------------- ASSEMBLY ROUTINE FOR TRACTION FORCES ONLY - FOR MODIFIED NEWTON RAPHSON ----------------------#
+#----------------------------------------------------------------------------------------------------------------#
+
+
+def AssembleInternalTractionForces(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
+
+    # GET MESH DETAILS
+    C = mesh.InferPolynomialDegree() - 1
+    nvar = formulation.nvar
+    ndim = formulation.ndim
+    nelem = mesh.nelem
+    nodeperelem = mesh.elements.shape[1]
+
+    T = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
+    # T = np.zeros((mesh.points.shape[0]*nvar,1),np.float32)  
+
+    for elem in range(nelem):
+
+        t = formulation.GetElementalMatrices(elem, 
+            function_space, mesh, material, fem_solver, Eulerx, Eulerp)[3]
+            
+        # INTERNAL TRACTION FORCE ASSEMBLY
+        # for iterator in range(0,nvar):
+            # T[mesh.elements[elem,:]*nvar+iterator,0]+=t[iterator::nvar,0]
+        RHSAssemblyNative(T,t,elem,nvar,nodeperelem,mesh.elements)
+
+
+    return T
 
 
 
 
+
+
+
+#------------------------------- ASSEMBLY ROUTINE FOR EXTERNAL TRACTION FORCES ----------------------------------#
+#----------------------------------------------------------------------------------------------------------------#
 
 
 def AssembleForces(boundary_condition, mesh, material, function_spaces, compute_traction_forces=True, compute_body_forces=False):

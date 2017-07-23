@@ -184,7 +184,7 @@ def NewtonRaphsonArchLength(self, function_spaces, formulation, solver,
         # print(self.accumulated_load_factor)
 
         # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
-        K, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material, solver,
+        K, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material,
             Eulerx,Eulerp)[:2]
 
         # FIND THE RESIDUAL
@@ -349,7 +349,7 @@ def NewtonRaphsonArchLength(self, function_spaces, formulation, solver,
 #         # Eulerp += dU_iter[:,-1]
 
 #         # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
-#         K, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material, solver,
+#         K, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material,
 #             Eulerx,Eulerp)[:2]
 
 #         # FIND THE RESIDUAL

@@ -259,8 +259,8 @@ class StructuralDynamicIntegrators(object):
             # velocities    = dumV
             # accelerations = dumA
 
-            # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
-            K, TractionForces, _, _ = Assemble(fem_solver,function_spaces[0], formulation, mesh, material, solver,
+            # RE-ASSEMBLE - COMPUTE STIFFNESS AND INTERNAL TRACTION FORCES
+            K, TractionForces, _, _ = Assemble(fem_solver,function_spaces[0], formulation, mesh, material,
                 Eulerx, Eulerp)
 
             # FIND INITIAL RESIDUAL
@@ -649,7 +649,7 @@ class StructuralDynamicIntegrators(object):
 #             # accelerations[:,:,Increment] = dumA
 
 #             # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
-#             K, TractionForces, _, _ = Assemble(fem_solver,function_spaces[0], formulation, mesh, material, solver,
+#             K, TractionForces, _, _ = Assemble(fem_solver,function_spaces[0], formulation, mesh, material,
 #                 Eulerx, Eulerp)
 
 #             # FIND INITIAL RESIDUAL
