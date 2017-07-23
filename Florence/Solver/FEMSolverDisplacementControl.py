@@ -224,7 +224,7 @@ def NewtonRaphsonDisplacementControl(self, function_spaces, formulation, solver,
         Eulerp += dU[:,-1] + ratio*dU_b[:,-1]
 
         # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
-        K, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material, solver,
+        K, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material,
             Eulerx,Eulerp)[:2]
 
         # FIND THE RESIDUAL
