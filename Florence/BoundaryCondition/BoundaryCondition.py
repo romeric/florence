@@ -804,36 +804,6 @@ class BoundaryCondition(object):
 
                 self.neumann_flags = tmp_flags
                 self.applied_neumann = tmp_data
-            # exit()
-
-            # if ndim == 2:
-            #     faces = np.copy(mesh.edges)
-            #     nodeperelem = mesh.edges.shape[1]
-            # else:
-            #     faces = np.copy(mesh.faces)
-            #     nodeperelem = mesh.faces.shape[1]
-
-            # F = np.zeros((mesh.points.shape[0]*nvar,1))
-            # for face in range(faces.shape[0]):
-            #     if self.neumann_flags[face] == True:
-            #         LagrangeFaceCoords = mesh.points[faces[face,:],:]
-            #         ElemTraction = self.applied_neumann[face,:]
-
-            #         # ParentGradientX = np.einsum('ijk,jl->kil', function_space.Jm, LagrangeFaceCoords)
-            #         # detJ = np.einsum('i,i->i',function_space.AllGauss[:,0],np.abs(np.linalg.det(ParentGradientX)))
-
-            #         external_traction = np.zeros((nodeperelem*nvar))
-            #         N = np.zeros((nodeperelem*nvar,nvar))
-            #         for counter in range(function_space.AllGauss.shape[0]):
-            #             for i in range(nvar):
-            #                 N[i::nvar,i] = function_space.Bases[:,counter]
-
-            #             external_traction += np.dot(N,ElemTraction)*function_space.AllGauss[counter,0]
-
-            #        # RHS ASSEMBLY
-            #         # for iterator in range(0,nvar):
-            #             # F[faces[face,:]*nvar+iterator,0]+=external_traction[iterator::nvar]
-            #         RHSAssemblyNative(F,external_traction[:,None],face,nvar,nodeperelem,faces)
 
 
         elif self.neumann_data_applied_at == 'node':
