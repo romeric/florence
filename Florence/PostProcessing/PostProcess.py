@@ -1260,7 +1260,6 @@ class PostProcess(object):
             from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
             from Florence.FunctionSpace import Tri 
             from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
-            from Florence.FunctionSpace.GetBases import GetBases
 
             
             from scipy.spatial import Delaunay
@@ -2351,7 +2350,6 @@ class PostProcess(object):
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
         from Florence.FunctionSpace import Tri 
         from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
-        from Florence.FunctionSpace.GetBases import GetBases
 
         from copy import deepcopy
         from scipy.spatial import Delaunay
@@ -2574,7 +2572,6 @@ class PostProcess(object):
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
         from Florence.FunctionSpace import Tri 
         from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
-        from Florence.FunctionSpace.GetBases import GetBases
 
         from copy import deepcopy
         from scipy.spatial import Delaunay
@@ -3152,7 +3149,6 @@ class PostProcess(object):
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
         from Florence.FunctionSpace import Tri 
         from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
-        from Florence.FunctionSpace.GetBases import GetBases
 
         from copy import deepcopy
         from scipy.spatial import Delaunay

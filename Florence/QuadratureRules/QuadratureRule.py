@@ -39,6 +39,8 @@ class QuadratureRule(object):
         elif mesh_type == "tri":
             zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(norder,optimal)
             z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
+        elif mesh_type == "line":
+            z, w = GaussQuadrature(norder,-1.,1.)
 
         self.points = z
         self.weights = w 

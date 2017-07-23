@@ -28,7 +28,8 @@ class DisplacementFormulation(VariationalPrinciple):
         self.fields = "mechanics"
         self.nvar = self.ndim
 
-        C = mesh.InferPolynomialDegree() - 1  
+        C = mesh.InferPolynomialDegree() - 1
+        mesh.InferBoundaryElementType()
 
         if quadrature_rules == None and self.quadrature_rules == None:
 
@@ -55,8 +56,11 @@ class DisplacementFormulation(VariationalPrinciple):
                 post_quadrature = QuadratureRule(optimal=optimal_quadrature, norder=norder_post, mesh_type=mesh.element_type)
             else:
                 post_quadrature = None
+
+            # BOUNDARY QUADRATURE
+            bquadrature = QuadratureRule(optimal=optimal_quadrature, norder=C+2, mesh_type=mesh.boundary_element_type, is_flattened=is_flattened)
             
-            self.quadrature_rules = (quadrature,post_quadrature)
+            self.quadrature_rules = (quadrature,post_quadrature,bquadrature)
         else:
             self.quadrature_rules = quadrature_rules
 
@@ -69,7 +73,11 @@ class DisplacementFormulation(VariationalPrinciple):
             else:
                 post_function_space = None
 
-            self.function_spaces = (function_space,post_function_space)
+            # CREATE BOUNDARY FUNCTIONAL SPACES
+            bfunction_space = FunctionSpace(mesh.CreateDummyLowerDimensionalMesh(), 
+                bquadrature, p=C+1, equally_spaced=equally_spaced_bases, use_optimal_quadrature=is_flattened)
+
+            self.function_spaces = (function_space,post_function_space,bfunction_space)
         else:
             self.function_spaces = function_spaces
 

@@ -16,6 +16,7 @@ from Florence.TimeIntegrators import StructuralDynamicIntegrators
 from Florence import Mesh
 
 
+__all__ = ["FEMSolver"]
 
 
 class FEMSolver(object):
@@ -31,7 +32,9 @@ class FEMSolver(object):
         is_geometrically_linearised=False, requires_geometry_update=True,
         requires_line_search=False, requires_arc_length=False, has_moving_boundary=False,
         has_prestress=True, number_of_load_increments=1, load_factor=None,
-        newton_raphson_tolerance=1.0e-6, maximum_iteration_for_newton_raphson=50,
+        newton_raphson_tolerance=1.0e-6, newton_raphson_solution_tolerance=None, 
+        maximum_iteration_for_newton_raphson=50, iterative_technique="newton_raphson",
+        add_self_weight=False,
         compute_mesh_qualities=True,  
         parallelise=False, memory_model="shared", platform="cpu", backend="opencl",
         print_incremental_log=False, save_incremental_solution=False, incremental_solution_filename=None,
@@ -57,11 +60,15 @@ class FEMSolver(object):
         self.number_of_load_increments = number_of_load_increments
         self.load_factor = load_factor
         self.newton_raphson_tolerance = newton_raphson_tolerance
+        self.newton_raphson_solution_tolerance = newton_raphson_solution_tolerance
         self.maximum_iteration_for_newton_raphson = maximum_iteration_for_newton_raphson
         self.newton_raphson_failed_to_converge = False
         self.NRConvergence = None
+        self.iterative_technique = iterative_technique
         self.include_physical_damping = include_physical_damping
         self.damping_factor = damping_factor
+        self.add_self_weight = add_self_weight
+
         self.compute_energy_dissipation = compute_energy_dissipation
         self.compute_linear_momentum_dissipation = compute_linear_momentum_dissipation
 
@@ -85,9 +92,42 @@ class FEMSolver(object):
 
         self.fem_timer = 0.
 
+        if self.newton_raphson_solution_tolerance is None:
+            self.newton_raphson_solution_tolerance = 10.*self.newton_raphson_tolerance
 
-    def __checkdata__(self, material, boundary_condition, formulation, mesh):
+
+    def __checkdata__(self, material, boundary_condition, formulation, mesh, function_spaces, solver):
         """Checks the state of data for FEMSolver"""
+
+        # INITIAL CHECKS
+        ###########################################################################
+        if mesh is None:
+            raise ValueError("No mesh detected for the analysis")
+        elif not isinstance(mesh,Mesh):
+            raise ValueError("mesh has to be an instance of Florence.Mesh")
+        if boundary_condition is None:
+            raise ValueError("No boundary conditions detected for the analysis")
+        if material is None:
+            raise ValueError("No material model chosen for the analysis")
+        if formulation is None:
+            raise ValueError("No variational form specified")
+
+        # GET FUNCTION SPACES FROM THE FORMULATION 
+        if function_spaces is None:
+            if formulation.function_spaces is None:
+                raise ValueError("No interpolation functions specified")
+            else:
+                function_spaces = formulation.function_spaces
+
+        # CHECK IF A SOLVER IS SPECIFIED
+        if solver is None:
+            solver = LinearSolver(linear_solver="direct", linear_solver_type="umfpack", geometric_discretisation=mesh.element_type)
+
+        if material.ndim != mesh.InferSpatialDimension():
+            # THIS HAS TO BE AN ERROR BECAUSE OF THE DYNAMIC NATURE OF MATERIAL
+            raise ValueError("Material model and mesh are incompatible. Change the dimensionality of the material")
+        ###########################################################################
+
 
         if material.mtype == "LinearModel" and self.number_of_load_increments > 1:
             warn("Can not solve a linear elastic model in multiple step. "
@@ -157,6 +197,8 @@ class FEMSolver(object):
         boundary_condition.analysis_type = self.analysis_type
         boundary_condition.analysis_nature = self.analysis_nature
 
+        return function_spaces, solver
+
 
 
     def __makeoutput__(self, mesh, TotalDisp, formulation=None, function_spaces=None, material=None):
@@ -200,11 +242,26 @@ class FEMSolver(object):
 
     @property
     def WhichFEMSolver():
-        pass
+        solver = None
+        if self.analysis_type == "dynamic":
+            solver = "StructuralDynamicIntegrator"
+        else:
+            if self.analysis_nature == "linear":
+                if self.number_of_load_increments > 1:
+                    solver = "IncrementalLinearElasticitySolver"
+                else:
+                    solver = "LinearElasticity"
+            else:
+                solver = self.iterative_technique
+        print(solver)
+        return solver
 
     @property
     def WhichFEMSolvers():
-        print(["IncrementalLinearElasticitySolver","NewtonRaphson","NewtonRaphsonArchLength"])
+        solvers = ["LinearElasticity","IncrementalLinearElasticitySolver","NewtonRaphson",
+            "NewtonRaphsonLineSearch","NewtonRaphsonArchLength","StructuralDynamicIntegrator"]
+        print(solvers)
+        return solvers
 
 
     def Solve(self, formulation=None, mesh=None, 
@@ -215,30 +272,7 @@ class FEMSolver(object):
 
         # CHECK DATA CONSISTENCY
         #---------------------------------------------------------------------------#
-        if mesh is None:
-            raise ValueError("No mesh detected for the analysis")
-        elif not isinstance(mesh,Mesh):
-            raise ValueError("mesh has to be an instance of Florence.Mesh")
-        if boundary_condition is None:
-            raise ValueError("No boundary conditions detected for the analysis")
-        if material is None:
-            raise ValueError("No material model chosen for the analysis")
-        if formulation is None:
-            raise ValueError("No variational form specified")
-
-        # GET FUNCTION SPACES FROM THE FORMULATION 
-        if function_spaces is None:
-            if formulation.function_spaces is None:
-                raise ValueError("No interpolation functions specified")
-            else:
-                function_spaces = formulation.function_spaces
-
-        
-        # CHECK IF A SOLVER IS SPECIFIED
-        if solver is None:
-            solver = LinearSolver(linear_solver="direct", linear_solver_type="umfpack", geometric_discretisation=mesh.element_type)
-
-        self.__checkdata__(material, boundary_condition, formulation, mesh)
+        function_spaces, solver = self.__checkdata__(material, boundary_condition, formulation, mesh, function_spaces, solver)
         #---------------------------------------------------------------------------#
 
         print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation info etc...')
@@ -274,7 +308,8 @@ class FEMSolver(object):
         Eulerp = np.zeros((mesh.points.shape[0]))
 
         # FIND PURE NEUMANN (EXTERNAL) NODAL FORCE VECTOR
-        NeumannForces = boundary_condition.ComputeNeumannForces(mesh, material)
+        NeumannForces = boundary_condition.ComputeNeumannForces(mesh, material, function_spaces,
+            compute_traction_forces=True, compute_body_forces=self.add_self_weight)
 
         # ADOPT A DIFFERENT PATH FOR INCREMENTAL LINEAR ELASTICITY
         if formulation.fields == "mechanics" and self.analysis_nature != "nonlinear":     
@@ -311,14 +346,15 @@ class FEMSolver(object):
                 K, M, NeumannForces, NodalForces, Residual,
                 mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition, self)
         else:
-            TotalDisp = self.StaticSolver(function_spaces, formulation, solver, 
-                K,NeumannForces,NodalForces,Residual,
-                mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition)
-
-            # from FEMSolverArcLength import StaticSolverArcLength
-            # TotalDisp = StaticSolverArcLength(self,function_spaces, formulation, solver, 
-            #     K,NeumannForces,NodalForces,Residual,
-            #     mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition)
+            if self.iterative_technique == "newton_raphson":
+                TotalDisp = self.StaticSolver(function_spaces, formulation, solver, 
+                    K,NeumannForces,NodalForces,Residual,
+                    mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition)
+            elif self.iterative_technique == "arc_length":
+                from FEMSolverArcLength import StaticSolverArcLength
+                TotalDisp = StaticSolverArcLength(self,function_spaces, formulation, solver, 
+                    K,NeumannForces,NodalForces,Residual,
+                    mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition)
 
             # from FEMSolverDisplacementControl import StaticSolverDisplacementControl
             # TotalDisp = StaticSolverDisplacementControl(self,function_spaces, formulation, solver, 
@@ -522,7 +558,6 @@ class FEMSolver(object):
         boundary_condition, AppliedDirichletInc):
 
         Tolerance = self.newton_raphson_tolerance
-        DispTolerance = 10.*self.newton_raphson_tolerance
         LoadIncrement = self.number_of_load_increments
         Iter = 0
 
@@ -577,7 +612,7 @@ class FEMSolver(object):
                 break
 
             # BREAK BASED ON INCREMENTAL SOLUTION - KEEP IT AFTER UPDATE
-            if norm(dU) <=  DispTolerance:
+            if norm(dU) <=  self.newton_raphson_solution_tolerance:
                 print("Incremental solution within tolerance i.e. norm(dU): {}".format(norm(dU)))
                 break
 
