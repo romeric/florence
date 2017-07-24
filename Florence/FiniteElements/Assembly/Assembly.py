@@ -501,65 +501,117 @@ def AssembleForces(boundary_condition, mesh, material, function_spaces, compute_
 
 def AssembleExternalTractionForces(boundary_condition, mesh, material, function_space):
 
+
     nvar = material.nvar
     ndim = material.ndim
+    ngauss = function_space.AllGauss.shape[0]
 
     if ndim == 2:
-        faces = np.copy(mesh.edges)
+        faces = mesh.edges
         nodeperelem = mesh.edges.shape[1]
     else:
-        faces = np.copy(mesh.faces)
+        faces = mesh.faces
         nodeperelem = mesh.faces.shape[1]
+
+    if boundary_condition.is_applied_neumann_shape_functions_computed is False:
+        N = np.zeros((nodeperelem*nvar,nvar,ngauss))
+        for i in range(nvar):
+            N[i::nvar,i,:] = function_space.Bases
+        boundary_condition.__Nt__ = N
+        boundary_condition.is_applied_neumann_shape_functions_computed = True
+    else:
+        N = boundary_condition.__Nt__
+
 
     F = np.zeros((mesh.points.shape[0]*nvar,1))
     for face in range(faces.shape[0]):
         if boundary_condition.neumann_flags[face] == True:
             ElemTraction = boundary_condition.applied_neumann[face,:]
-            # LagrangeFaceCoords = mesh.points[faces[face,:],:]
-            # ParentGradientX = np.einsum('ijk,jl->kil', function_space.Jm, LagrangeFaceCoords)
-            # detJ = np.einsum('i,i->i',function_space.AllGauss[:,0],np.abs(np.linalg.det(ParentGradientX)))
-
-            external_traction = np.zeros((nodeperelem*nvar))
-            N = np.zeros((nodeperelem*nvar,nvar))
-            for counter in range(function_space.AllGauss.shape[0]):
-                for i in range(nvar):
-                    N[i::nvar,i] = function_space.Bases[:,counter]
-
-                external_traction += np.dot(N,ElemTraction)*function_space.AllGauss[counter,0]
-
-           # RHS ASSEMBLY
-            # for iterator in range(0,nvar):
-                # F[faces[face,:]*nvar+iterator,0]+=external_traction[iterator::nvar]
+            external_traction = np.einsum("ijk,j,k->ik",N,ElemTraction,function_space.AllGauss[:,0]).sum(axis=1)
             RHSAssemblyNative(F,np.ascontiguousarray(external_traction[:,None]),face,nvar,nodeperelem,faces)
 
+
+    # nvar = material.nvar
+    # ndim = material.ndim
+
+    # if ndim == 2:
+    #     faces = np.copy(mesh.edges)
+    #     nodeperelem = mesh.edges.shape[1]
+    # else:
+    #     faces = np.copy(mesh.faces)
+    #     nodeperelem = mesh.faces.shape[1]
+
+    # F = np.zeros((mesh.points.shape[0]*nvar,1))
+    # for face in range(faces.shape[0]):
+    #     if boundary_condition.neumann_flags[face] == True:
+    #         ElemTraction = boundary_condition.applied_neumann[face,:]
+    #         # LagrangeFaceCoords = mesh.points[faces[face,:],:]
+    #         # ParentGradientX = np.einsum('ijk,jl->kil', function_space.Jm, LagrangeFaceCoords)
+    #         # detJ = np.einsum('i,i->i',function_space.AllGauss[:,0],np.abs(np.linalg.det(ParentGradientX)))
+
+    #         external_traction = np.zeros((nodeperelem*nvar))
+    #         N = np.zeros((nodeperelem*nvar,nvar))
+    #         for counter in range(function_space.AllGauss.shape[0]):
+    #             for i in range(nvar):
+    #                 N[i::nvar,i] = function_space.Bases[:,counter]
+
+    #             external_traction += np.dot(N,ElemTraction)*function_space.AllGauss[counter,0]
+
+    #        # RHS ASSEMBLY
+    #         # for iterator in range(0,nvar):
+    #             # F[faces[face,:]*nvar+iterator,0]+=external_traction[iterator::nvar]
+    #         RHSAssemblyNative(F,np.ascontiguousarray(external_traction[:,None]),face,nvar,nodeperelem,faces)
 
     return F
 
 
 def AssembleBodyForces(boundary_condition, mesh, material, function_space):
 
+
     nvar = material.nvar
     ndim = material.ndim
     nodeperelem = mesh.elements.shape[1]
+    ngauss = function_space.AllGauss.shape[0]
+
+    if boundary_condition.is_body_force_shape_functions_computed is False:
+        N = np.zeros((nodeperelem*nvar,nvar,ngauss))
+        for i in range(nvar):
+            N[i::nvar,i,:] = function_space.Bases
+        boundary_condition.__Nb__ = N
+        boundary_condition.is_body_force_shape_functions_computed = True
+    else:
+        N = boundary_condition.__Nb__
 
     F = np.zeros((mesh.points.shape[0]*nvar,1))
     # BODY FORCE IS APPLIED IN THE Z-DIRECTION
     ElemTraction = np.zeros(nvar); ElemTraction[ndim-1] = -material.rho 
     for elem in range(mesh.nelem):
-        # LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
-
-        body_force = np.zeros((nodeperelem*nvar))
-        N = np.zeros((nodeperelem*nvar,nvar))
-        for counter in range(function_space.AllGauss.shape[0]):
-            for i in range(nvar):
-                N[i::nvar,i] = function_space.Bases[:,counter]
-
-            body_force += np.dot(N,ElemTraction)*function_space.AllGauss[counter,0]
-
-       # RHS ASSEMBLY
-        # for iterator in range(0,nvar):
-            # F[faces[elem,:]*nvar+iterator,0]+=body_force[iterator::nvar]
+        body_force = np.einsum("ijk,j,k->ik",N,ElemTraction,function_space.AllGauss[:,0]).sum(axis=1)
         RHSAssemblyNative(F,np.ascontiguousarray(body_force[:,None]),elem,nvar,nodeperelem,mesh.elements)
+
+
+    # nvar = material.nvar
+    # ndim = material.ndim
+    # nodeperelem = mesh.elements.shape[1]
+
+    # F = np.zeros((mesh.points.shape[0]*nvar,1))
+    # # BODY FORCE IS APPLIED IN THE Z-DIRECTION
+    # ElemTraction = np.zeros(nvar); ElemTraction[ndim-1] = -material.rho 
+    # for elem in range(mesh.nelem):
+    #     # LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
+
+    #     body_force = np.zeros((nodeperelem*nvar))
+    #     N = np.zeros((nodeperelem*nvar,nvar))
+    #     for counter in range(function_space.AllGauss.shape[0]):
+    #         for i in range(nvar):
+    #             N[i::nvar,i] = function_space.Bases[:,counter]
+
+    #         body_force += np.dot(N,ElemTraction)*function_space.AllGauss[counter,0]
+
+    #    # RHS ASSEMBLY
+    #     # for iterator in range(0,nvar):
+    #         # F[faces[elem,:]*nvar+iterator,0]+=body_force[iterator::nvar]
+    #     RHSAssemblyNative(F,np.ascontiguousarray(body_force[:,None]),elem,nvar,nodeperelem,mesh.elements)
 
 
     return F

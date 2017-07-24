@@ -53,6 +53,8 @@ class BoundaryCondition(object):
         self.dirichlet_flags = None
         self.neumann_flags = None
         self.applied_neumann = None
+        self.is_applied_neumann_shape_functions_computed = False
+        self.is_body_force_shape_functions_computed = False
 
 
         # NODAL FORCES GENERATED BASED ON DIRICHLET OR NEUMANN ARE NOT 
@@ -774,10 +776,12 @@ class BoundaryCondition(object):
         if self.neumann_flags.shape[0] == mesh.points.shape[0]:
             self.neumann_data_applied_at = "node"
         else:
-            if self.neumann_flags.shape[0] == mesh.faces.shape[0] and ndim==3:
-                self.neumann_data_applied_at = "face"
-            elif self.neumann_flags.shape[0] == mesh.edges.shape[0] and ndim==2:
-                self.neumann_data_applied_at = "face"
+            if ndim==3:
+                if self.neumann_flags.shape[0] == mesh.faces.shape[0]:
+                    self.neumann_data_applied_at = "face"
+            elif ndim==2:
+                if self.neumann_flags.shape[0] == mesh.edges.shape[0]:
+                    self.neumann_data_applied_at = "face"
 
 
         if self.neumann_data_applied_at == 'face':
@@ -788,6 +792,7 @@ class BoundaryCondition(object):
                 if len(function_spaces) !=3:
                     raise ValueError("Correct functional spaces not passed for computing Neumman and body forces")
 
+            t_tassembly = time()
             if self.analysis_type == "static":
                 F = AssembleForces(self, mesh, material, function_spaces, 
                     compute_traction_forces=compute_traction_forces, compute_body_forces=compute_body_forces)
@@ -804,6 +809,7 @@ class BoundaryCondition(object):
 
                 self.neumann_flags = tmp_flags
                 self.applied_neumann = tmp_data
+            print("Assembled external traction forces. Time elapsed is {} seconds".format(time()-t_tassembly))
 
 
         elif self.neumann_data_applied_at == 'node':
