@@ -2362,6 +2362,24 @@ class Mesh(object):
                     self.__dict__[str(key)] = np.asscalar(self.__dict__[str(key)])
 
 
+    def ReadDCM(self, filename, element_type="quad"):
+        """ EZ4U mesh reader
+        """
+
+        if element_type != "quad":
+            raise NotImplementedError("DCM/EZ4U reader for {} elements not yet implemented".format(element_type))
+
+        self.__reset__()
+        self.element_type = element_type
+
+        content = np.fromfile(filename, dtype=np.float64, sep=" ")
+        self.nnode = int(content[0])
+        self.nelem = int(content[1])
+        self.points = content[3:self.nnode*4+3].reshape(self.nnode,4)[:,[1,2]]
+        self.elements = content[self.nnode*4+3:].astype(np.int64).reshape(self.nelem,11)[:,7:] - 1
+        self.GetEdgesQuad()
+
+
 
     def SimplePlot(self, to_plot='faces', 
         color=None, plot_points=False, point_radius=0.1, 
@@ -2391,8 +2409,8 @@ class Mesh(object):
                 if filename.split(".")[-1] == filename:
                     filename += ".png"
 
+        import matplotlib as mpl
         if self.element_type == "tri" or self.element_type == "quad":
-            import matplotlib as mpl
             import matplotlib.pyplot as plt
             if figure is None:
                 figure = plt.figure()
@@ -2413,6 +2431,15 @@ class Mesh(object):
 
             if figure is None:
                 figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(1000,800))
+
+            if color is not None:
+                if isinstance(color,tuple):
+                    if len(color) != 3:
+                        raise ValueError("Color should be given in a rgb/RGB tuple format with 3 values i.e. (x,y,z)")
+                    if color[0] > 1.0 or color[1] > 1.0 or color[2] > 1.0:
+                        color = (color[0]/255.,color[1]/255.,color[2]/255.)
+                elif isinstance(color,str):
+                    color = mpl.colors.hex2color(color)
 
 
         if self.element_type == "tri":
@@ -5067,6 +5094,8 @@ class Mesh(object):
             The objective is that the lower dimensional mesh should have the same element type as the 
             boundary faces/edges of the actual mesh and be the same order"""
 
+
+        sys.stdout = open(os.devnull, "w")
         p = self.InferPolynomialDegree()
         mesh = Mesh()
         if self.element_type == "tet":
@@ -5077,6 +5106,7 @@ class Mesh(object):
             mesh.GetHighOrderMesh(p=p)
         elif self.element_type == "tri" or self.element_type == "quad":
             mesh.Line(n=1, p=p)
+        sys.stdout = sys.__stdout__ 
 
         return mesh
 

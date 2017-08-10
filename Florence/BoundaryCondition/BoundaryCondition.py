@@ -649,14 +649,21 @@ class BoundaryCondition(object):
 
             if plot:
                 post_process = PostProcess(2,2)
-                if pmesh.element_type == "tri":
-                    post_process.CurvilinearPlotTri(pmesh, TotalDisp, 
-                        QuantityToPlot=solution.ScaledJacobian, interpolation_degree=40)
-                elif pmesh.element_type == "quad":
-                    post_process.CurvilinearPlotQuad(pmesh, TotalDisp, 
-                        QuantityToPlot=solution.ScaledJacobian, interpolation_degree=40)                    
+                post_process.CurvilinearPlot(pmesh, TotalDisp, 
+                    QuantityToPlot=solution.ScaledJacobian, interpolation_degree=40)
                 import matplotlib.pyplot as plt
                 plt.show()
+
+
+            # import matplotlib.pyplot as plt
+            # figure = plt.figure(figsize=(8, 8))
+            # TotalDisp = np.zeros_like(TotalDisp)
+            # TotalDisp[pboundary_condition.nodesDBC,:,-1] = Dirichlet2D[:,:,None].reshape(36,1,2)
+            # figure=None
+            # post_process = PostProcess(2,2)
+            # post_process.CurvilinearPlot(pmesh, TotalDisp, interpolation_degree=40, figure=figure, color="#E3A933", plot_points=True, point_radius=2.0)
+            # post_process.CurvilinearPlot(pmesh, TotalDisp, interpolation_degree=40, figure=figure, color="#E3A933", plot_points=True, point_radius=2.0, plot_surfaces=False)           
+            # plt.show()
 
             del pmesh, pboundary_condition
 

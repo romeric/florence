@@ -2330,7 +2330,7 @@ class PostProcess(object):
         ProjectionFlags=None, interpolation_degree=30, EquallySpacedPoints=False,
         TriSurf=False, colorbar=False, PlotActualCurve=False, point_radius = 3, color="#C5F1C5",
         plot_points=False, plot_edges=True, save=False, filename=None, figure=None, show_plot=True, 
-        save_tessellation=False):
+        save_tessellation=False, plot_surfaces=True):
 
         """High order curved triangular mesh plots, based on high order nodal FEM.
             The equally spaced FEM points do not work as good as the Fekete points 
@@ -2432,6 +2432,16 @@ class PostProcess(object):
         else:
             fig = figure
 
+        if color is not None:
+            if isinstance(color,tuple):
+                if len(color) != 3:
+                    raise ValueError("Color should be given in a rgb/RGB tuple format with 3 values i.e. (x,y,z)")
+                if color[0] > 1.0 or color[1] > 1.0 or color[2] > 1.0:
+                    color = (color[0]/255.,color[1]/255.,color[2]/255.)
+                color = mpl.colors.rgb2hex(color)
+            elif isinstance(color,str):
+                pass
+
         h_surfaces, h_edges, h_points = None, None, None
         # ls = LightSource(azdeg=315, altdeg=45)
         if TriSurf is True:
@@ -2443,40 +2453,41 @@ class PostProcess(object):
             # PLOT CURVED EDGES
             h_edges = ax.plot(x_edges,y_edges,'k')
         
-        mesh.nelem = int(mesh.nelem)
-        nnode = int(nsize*mesh.nelem)
-        nelem = int(Triangles.shape[0]*mesh.nelem)
+        if plot_surfaces:
+            mesh.nelem = int(mesh.nelem)
+            nnode = int(nsize*mesh.nelem)
+            nelem = int(Triangles.shape[0]*mesh.nelem)
 
-        Xplot = np.zeros((nnode,2),dtype=np.float64)
-        Tplot = np.zeros((nelem,3),dtype=np.int64)
-        Uplot = np.zeros(nnode,dtype=np.float64)
+            Xplot = np.zeros((nnode,2),dtype=np.float64)
+            Tplot = np.zeros((nelem,3),dtype=np.int64)
+            Uplot = np.zeros(nnode,dtype=np.float64)
 
-        if QuantityToPlot is None:
-            quantity_to_plot = np.zeros(mesh.nelem)
-        else:
-            quantity_to_plot = QuantityToPlot
-
-        # FOR CURVED ELEMENTS
-        for ielem in range(mesh.nelem):
-            Xplot[ielem*nsize:(ielem+1)*nsize,:] = np.dot(BasesTri.T, vpoints[mesh.elements[ielem,:],:])
-            Tplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex,:] = Triangles + ielem*nsize
-            Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
-
-        # PLOT CURVED ELEMENTS
-        if TriSurf is True:
-            # ax.plot_trisurf(Tplot,Xplot[:,0], Xplot[:,1], Xplot[:,1]*0)
-            triang = mtri.Triangulation(Xplot[:,0], Xplot[:,1],Tplot)
-            ax.plot_trisurf(triang,Xplot[:,0]*0, edgecolor="none",facecolor="#ffddbb")
-            ax.view_init(90,-90)
-            ax.dist = 7
-        else:
-            # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, np.ones(Xplot.shape[0]), 100,alpha=0.8)
-            # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, 100,alpha=0.8)
-            # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot[:4,:], np.ones(Xplot.shape[0]),alpha=0.8,origin='lower')
             if QuantityToPlot is None:
-                h_surfaces = plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, colors="#C5F1C5")
+                quantity_to_plot = np.zeros(mesh.nelem)
             else:
-                h_surfaces = plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, 100,alpha=0.8)
+                quantity_to_plot = QuantityToPlot
+
+            # FOR CURVED ELEMENTS
+            for ielem in range(mesh.nelem):
+                Xplot[ielem*nsize:(ielem+1)*nsize,:] = np.dot(BasesTri.T, vpoints[mesh.elements[ielem,:],:])
+                Tplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex,:] = Triangles + ielem*nsize
+                Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
+
+            # PLOT CURVED ELEMENTS
+            if TriSurf is True:
+                # ax.plot_trisurf(Tplot,Xplot[:,0], Xplot[:,1], Xplot[:,1]*0)
+                triang = mtri.Triangulation(Xplot[:,0], Xplot[:,1],Tplot)
+                ax.plot_trisurf(triang,Xplot[:,0]*0, edgecolor="none",facecolor="#ffddbb")
+                ax.view_init(90,-90)
+                ax.dist = 7
+            else:
+                # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, np.ones(Xplot.shape[0]), 100,alpha=0.8)
+                # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, 100,alpha=0.8)
+                # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot[:4,:], np.ones(Xplot.shape[0]),alpha=0.8,origin='lower')
+                if QuantityToPlot is None:
+                    h_surfaces = plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, colors=color)
+                else:
+                    h_surfaces = plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, 100,alpha=0.8)
 
         # PLOT CURVED POINTS
         if plot_points:
@@ -2488,14 +2499,14 @@ class PostProcess(object):
             # plt.set_cmap('viridis_r')
             plt.clim(0,1)
         
-
-        if colorbar is True:
-            ax_cbar = mpl.colorbar.make_axes(plt.gca(), shrink=1.0)[0]
-            cbar = mpl.colorbar.ColorbarBase(ax_cbar, cmap=cm.viridis,
-                               norm=mpl.colors.Normalize(vmin=-0, vmax=1))
-            cbar.set_clim(0, 1)
-            divider = make_axes_locatable(ax_cbar)
-            cax = divider.append_axes("right", size="1%", pad=0.005)
+        if plot_surfaces:
+            if colorbar is True:
+                ax_cbar = mpl.colorbar.make_axes(plt.gca(), shrink=1.0)[0]
+                cbar = mpl.colorbar.ColorbarBase(ax_cbar, cmap=cm.viridis,
+                                   norm=mpl.colors.Normalize(vmin=-0, vmax=1))
+                cbar.set_clim(0, 1)
+                divider = make_axes_locatable(ax_cbar)
+                cax = divider.append_axes("right", size="1%", pad=0.005)
         
         if PlotActualCurve is True:
             ActualCurve = getattr(MainData,'ActualCurve',None)
@@ -2507,6 +2518,8 @@ class PostProcess(object):
                 raise KeyError("You have not computed the CAD curve points")
 
         plt.axis('equal')
+        # plt.xlim([-11,11.])
+        # plt.ylim([-11,11.])
         plt.axis('off')
 
         if save:
@@ -2694,6 +2707,15 @@ class PostProcess(object):
             figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(800,600))
         figure.scene.disable_render = True
 
+        if color is not None:
+            if isinstance(color,tuple):
+                if len(color) != 3:
+                    raise ValueError("Color should be given in a rgb/RGB tuple format with 3 values i.e. (x,y,z)")
+                if color[0] > 1.0 or color[1] > 1.0 or color[2] > 1.0:
+                    color = (color[0]/255.,color[1]/255.,color[2]/255.)
+            elif isinstance(color,str):
+                color = mpl.colors.hex2color(color)
+
         h_points, h_edges, trimesh_h = None, None, None
 
         if plot_edges:
@@ -2864,7 +2886,7 @@ class PostProcess(object):
         ProjectionFlags=None, interpolation_degree=30, EquallySpacedPoints=False,
         TriSurf=False, colorbar=False, PlotActualCurve=False, point_radius = 3, color="#C5F1C5",
         plot_points=False, plot_edges=True, save=False, filename=None, figure=None, show_plot=True, 
-        save_tessellation=False, plot_on_faces=True):
+        save_tessellation=False, plot_on_faces=True, plot_surfaces=True):
 
         """High order curved quad mesh plots, based on high order nodal FEM.
         """
@@ -2909,6 +2931,16 @@ class PostProcess(object):
         else:
             fig = figure
 
+        if color is not None:
+            if isinstance(color,tuple):
+                if len(color) != 3:
+                    raise ValueError("Color should be given in a rgb/RGB tuple format with 3 values i.e. (x,y,z)")
+                if color[0] > 1.0 or color[1] > 1.0 or color[2] > 1.0:
+                    color = (color[0]/255.,color[1]/255.,color[2]/255.)
+                color = mpl.colors.rgb2hex(color)
+            elif isinstance(color,str):
+                pass
+
         h_surfaces, h_edges, h_points = None, None, None
         # ls = LightSource(azdeg=315, altdeg=45)
         if TriSurf is True:
@@ -2920,34 +2952,34 @@ class PostProcess(object):
             # PLOT CURVED EDGES
             h_edges = ax.plot(x_edges,y_edges,'k')
 
-
-        # PLOT CURVED ELEMENTS
-        if QuantityToPlot is None:
-            h_surfaces = plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, colors="#C5F1C5")
-        else:
-            h_surfaces = plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, 100,alpha=0.8)
-
-        # PLOT CURVED POINTS
-        if plot_points:
-            h_points = plt.plot(vpoints[:,0],vpoints[:,1],'o',markersize=point_radius,color='k')
-
-        if QuantityToPlot is not None:
-            plt.set_cmap('viridis')
-            # plt.set_cmap('viridis_r')
-            if plot_on_faces:
-                plt.clim(0,1)
-        
-
-        if colorbar is True:
-            if plot_on_faces:
-                ax_cbar = mpl.colorbar.make_axes(plt.gca(), shrink=1.0)[0]
-                cbar = mpl.colorbar.ColorbarBase(ax_cbar, cmap=cm.viridis,
-                                   norm=mpl.colors.Normalize(vmin=-0, vmax=1))
-                cbar.set_clim(0, 1)
-                divider = make_axes_locatable(ax_cbar)
-                cax = divider.append_axes("right", size="1%", pad=0.005)
+        if plot_surfaces:
+            # PLOT CURVED ELEMENTS
+            if QuantityToPlot is None:
+                h_surfaces = plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, colors=color)
             else:
-                plt.colorbar(shrink=0.5,orientation="vertical")
+                h_surfaces = plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, 100,alpha=0.8)
+
+            # PLOT CURVED POINTS
+            if plot_points:
+                h_points = plt.plot(vpoints[:,0],vpoints[:,1],'o',markersize=point_radius,color='k')
+
+            if QuantityToPlot is not None:
+                plt.set_cmap('viridis')
+                # plt.set_cmap('viridis_r')
+                if plot_on_faces:
+                    plt.clim(0,1)
+            
+
+            if colorbar is True:
+                if plot_on_faces:
+                    ax_cbar = mpl.colorbar.make_axes(plt.gca(), shrink=1.0)[0]
+                    cbar = mpl.colorbar.ColorbarBase(ax_cbar, cmap=cm.viridis,
+                                       norm=mpl.colors.Normalize(vmin=-0, vmax=1))
+                    cbar.set_clim(0, 1)
+                    divider = make_axes_locatable(ax_cbar)
+                    cax = divider.append_axes("right", size="1%", pad=0.005)
+                else:
+                    plt.colorbar(shrink=0.5,orientation="vertical")
         
         if PlotActualCurve is True:
             ActualCurve = getattr(MainData,'ActualCurve',None)
@@ -3037,6 +3069,16 @@ class PostProcess(object):
         if figure is None:
             # figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(800,600))
             figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(0,0,0),size=(800,600))
+
+        if color is not None:
+            if isinstance(color,tuple):
+                if len(color) != 3:
+                    raise ValueError("Color should be given in a rgb/RGB tuple format with 3 values i.e. (x,y,z)")
+                if color[0] > 1.0 or color[1] > 1.0 or color[2] > 1.0:
+                    color = (color[0]/255.,color[1]/255.,color[2]/255.)
+            elif isinstance(color,str):
+                color = mpl.colors.hex2color(color)
+
         figure.scene.disable_render = True
 
         h_points, h_edges, trimesh_h = None, None, None
