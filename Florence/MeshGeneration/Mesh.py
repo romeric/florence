@@ -2377,7 +2377,7 @@ class Mesh(object):
         self.nelem = int(content[1])
         self.points = content[3:self.nnode*4+3].reshape(self.nnode,4)[:,[1,2]]
         self.elements = content[self.nnode*4+3:].astype(np.int64).reshape(self.nelem,11)[:,7:] - 1
-        self.GetEdgesQuad()
+        self.GetBoundaryEdgesQuad()
 
 
 
