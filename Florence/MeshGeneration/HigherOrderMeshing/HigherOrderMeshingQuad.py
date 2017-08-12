@@ -1,5 +1,6 @@
 import numpy as np 
 from time import time
+from warnings import warn
 from .GetInteriorCoordinates import GetInteriorNodesCoordinates
 from Florence.Tensor import itemfreq, makezero, unique2d, remove_duplicates_2D
 

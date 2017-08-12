@@ -988,15 +988,19 @@ class PostProcess(object):
         if lmesh.element_type =='tri':
             cellflag = 5
             offset = 3
+            actual_ndim = 2
         elif lmesh.element_type =='quad':
             cellflag = 9
             offset = 4
+            actual_ndim = 2
         if lmesh.element_type =='tet':
             cellflag = 10
             offset = 4
+            actual_ndim = 3
         elif lmesh.element_type == 'hex':
             cellflag = 12
             offset = 8
+            actual_ndim = 3
 
         ndim = lmesh.points.shape[1]
         LoadIncrement = self.sol.shape[2]
@@ -1016,16 +1020,36 @@ class PostProcess(object):
                 tmesh = PostProcess.TessellateHexes(self.mesh, np.zeros_like(self.mesh.points), 
                     QuantityToPlot=self.sol[:,0,0], plot_on_faces=False, plot_points=True,
                     interpolation_degree=interpolation_degree)
-            # elif lmesh.element_type =='quad':
-            #     cellflag = 5 
-            #     tmesh = PostProcess.TessellateQuads(self.mesh, np.zeros_like(self.mesh.points), 
-            #         QuantityToPlot=self.sol[:,0,0], plot_on_faces=False, plot_points=True,
-            #         interpolation_degree=interpolation_degree)
+            elif lmesh.element_type =='quad':
+                cellflag = 5 
+                tmesh = PostProcess.TessellateQuads(self.mesh, np.zeros_like(self.mesh.points), 
+                    QuantityToPlot=self.sol[:,0,0], plot_points=True,
+                    interpolation_degree=interpolation_degree)
+            elif lmesh.element_type =='tri':
+                cellflag = 5
+                tmesh = PostProcess.TessellateTris(self.mesh, np.zeros_like(self.mesh.points), 
+                    QuantityToPlot=self.sol[:,0,0], plot_points=True,
+                    interpolation_degree=interpolation_degree)
             else:
-                raise ValueError('Not implemented yet. Use in-built visualiser for 2D problems')
+                raise ValueError('Not implemented yet. Use in-built visualiser')
 
             nsize = tmesh.nsize
-            nface = tmesh.nface
+            if actual_ndim == 3:
+                nface = tmesh.nface
+            elif actual_ndim == 2:
+                tmesh.smesh = self.mesh
+                tmesh.faces_to_plot = tmesh.smesh.elements
+                nface = tmesh.smesh.elements.shape[0]
+                tmesh.smesh.GetEdges()
+
+                connections_elements = np.arange(tmesh.x_edges.size).reshape(tmesh.x_edges.shape[1],tmesh.x_edges.shape[0])
+                connections = np.zeros((tmesh.x_edges.size,2),dtype=np.int64)
+                for i in range(connections_elements.shape[0]):
+                    connections[i*(tmesh.x_edges.shape[0]-1):(i+1)*(tmesh.x_edges.shape[0]-1),0] = connections_elements[i,:-1]
+                    connections[i*(tmesh.x_edges.shape[0]-1):(i+1)*(tmesh.x_edges.shape[0]-1),1] = connections_elements[i,1:]
+                connections = connections[:(i+1)*(tmesh.x_edges.shape[0]-1),:]
+                tmesh.connections = connections
+
             ssol = self.sol[np.unique(tmesh.faces_to_plot),:,:]
 
             increments = range(LoadIncrement)
@@ -1045,11 +1069,19 @@ class PostProcess(object):
                     ielem = tmesh.edge_elements[iedge,0]
                     edge = tmesh.smesh.elements[ielem,tmesh.reference_edges[tmesh.edge_elements[iedge,1],:]]
                     coord_edge = svpoints[edge,:]
-                    tmesh.x_edges[:,iedge], tmesh.y_edges[:,iedge], tmesh.z_edges[:,iedge] = np.dot(coord_edge.T,tmesh.bases_1)
+                    if actual_ndim == 3:
+                        tmesh.x_edges[:,iedge], tmesh.y_edges[:,iedge], tmesh.z_edges[:,iedge] = np.dot(coord_edge.T,tmesh.bases_1)
+                    elif actual_ndim == 2:
+                        tmesh.x_edges[:,iedge], tmesh.y_edges[:,iedge] = np.dot(coord_edge.T,tmesh.bases_1)
 
-                edge_coords = np.concatenate((tmesh.x_edges.T.copy().flatten()[:,None], 
-                    tmesh.y_edges.T.copy().flatten()[:,None],
-                    tmesh.z_edges.T.copy().flatten()[:,None]),axis=1)
+                if actual_ndim == 3:
+                    edge_coords = np.concatenate((tmesh.x_edges.T.copy().flatten()[:,None], 
+                        tmesh.y_edges.T.copy().flatten()[:,None],
+                        tmesh.z_edges.T.copy().flatten()[:,None]),axis=1)
+                elif actual_ndim == 2:
+                    edge_coords = np.concatenate((tmesh.x_edges.T.copy().flatten()[:,None], 
+                        tmesh.y_edges.T.copy().flatten()[:,None], np.zeros_like(tmesh.y_edges.T.copy().flatten()[:,None])),axis=1)
+                    svpoints = np.concatenate((svpoints, np.zeros((svpoints.shape[0],1))),axis=1)
 
                 if formatter is "xml":
                     vtk_writer.write_vtu(Verts=edge_coords, 
@@ -1076,7 +1108,7 @@ class PostProcess(object):
                         np.ascontiguousarray(svpoints[:,0]), np.ascontiguousarray(svpoints[:,1]), np.ascontiguousarray(svpoints[:,2]),
                         data=None)
 
-                    if tmesh.points.shape[0] == 2:
+                    if tmesh.points.shape[1] == 2:
                         points = np.zeros((tmesh.points.shape[0],3))
                         points[:,:2] = tmesh.points+extrapolated_sol[:,:ndim]
                     else:
@@ -3230,7 +3262,7 @@ class PostProcess(object):
 
         smesh = deepcopy(mesh)
         smesh.elements = mesh.elements[:,:ndim+1]
-        nmax = np.max(smesh.elements)+1
+        nmax = int(np.max(smesh.elements)+1)
         smesh.points = mesh.points[:nmax,:]
         smesh.GetEdgesTri()
         edge_elements = smesh.GetElementsEdgeNumberingTri()
