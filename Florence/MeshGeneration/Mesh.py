@@ -2362,7 +2362,7 @@ class Mesh(object):
                     self.__dict__[str(key)] = np.asscalar(self.__dict__[str(key)])
 
 
-    def ReadDCM(self, filename, element_type="quad"):
+    def ReadDCM(self, filename, element_type="quad", ndim=2):
         """ EZ4U mesh reader
         """
 
@@ -2375,8 +2375,12 @@ class Mesh(object):
         content = np.fromfile(filename, dtype=np.float64, sep=" ")
         self.nnode = int(content[0])
         self.nelem = int(content[1])
-        self.points = content[3:self.nnode*4+3].reshape(self.nnode,4)[:,[1,2]]
+        if ndim==2:
+            self.points = content[3:self.nnode*4+3].reshape(self.nnode,4)[:,[1,2]]
+        else:
+            self.points = content[3:self.nnode*4+3].reshape(self.nnode,4)[:,1:]
         self.elements = content[self.nnode*4+3:].astype(np.int64).reshape(self.nelem,11)[:,7:] - 1
+        self.GetEdgesQuad()
         self.GetBoundaryEdgesQuad()
 
 

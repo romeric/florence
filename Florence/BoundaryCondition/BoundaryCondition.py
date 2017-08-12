@@ -345,6 +345,15 @@ class BoundaryCondition(object):
         from PostMeshPy import (PostMeshCurvePy as PostMeshCurve,
             PostMeshSurfacePy as PostMeshSurface)
 
+        def ReadCAD(curvilinear_mesh,filename):
+            from Florence.Utils import insensitive
+            if insensitive(filename.split(".")[-1]) == "igs" or insensitive(filename.split(".")[-1]) == "iges":
+                curvilinear_mesh.ReadIGES(filename)
+            elif insensitive(filename.split(".")[-1]) == "stp" or insensitive(filename.split(".")[-1]) == "step":
+                curvilinear_mesh.ReadSTEP(filename)
+            else:
+                raise ValueError("CAD file should be either in IGES or STEP format")
+
         C = mesh.InferPolynomialDegree() - 1
 
         from Florence.FunctionSpace import Tri
@@ -375,11 +384,13 @@ class BoundaryCondition(object):
             curvilinear_mesh.SetNodalSpacing(boundary_fekete)
             curvilinear_mesh.GetBoundaryPointsOrder()
             # READ THE GEOMETRY FROM THE IGES FILE
-            curvilinear_mesh.ReadIGES(self.cad_file)
+            ReadCAD(curvilinear_mesh,self.cad_file)
+            # curvilinear_mesh.ReadIGES(self.cad_file)
+            # curvilinear_mesh.ReadSTEP(self.cad_file)
             # EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
             geometry_points = curvilinear_mesh.GetGeomVertices()
             self.GetGeometryMeshScale(geometry_points,mesh)
-            # print(np.max(geometry_points[:,0]), mesh.Bounds)
+            # print([np.min(geometry_points[:,0]),np.max(geometry_points[:,0])], mesh.Bounds)
             # exit()
             curvilinear_mesh.GetGeomEdges()
             curvilinear_mesh.GetGeomFaces()
@@ -428,7 +439,8 @@ class BoundaryCondition(object):
             curvilinear_mesh.SetNodalSpacing(boundary_points)
             # curvilinear_mesh.GetBoundaryPointsOrder()
             # READ THE GEOMETRY FROM THE IGES FILE
-            curvilinear_mesh.ReadIGES(self.cad_file)
+            ReadCAD(curvilinear_mesh,self.cad_file)
+            # curvilinear_mesh.ReadIGES(self.cad_file)
             # EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
             geometry_points = curvilinear_mesh.GetGeomVertices()
             self.GetGeometryMeshScale(geometry_points,mesh)
