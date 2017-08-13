@@ -2268,8 +2268,8 @@ class Mesh(object):
     def ReadGmsh(self,filename):
         """Read gmsh (.msh) file"""
 
-        if self.elements is not None and self.points is not None:
-            self.__reset__()
+        # if self.elements is not None and self.points is not None:
+        #     self.__reset__()
 
         try:
             fid = open(filename, "r")
@@ -2279,6 +2279,41 @@ class Mesh(object):
 
         self.filename = filename
 
+        # OTHER VARIANTS OF GMSH
+        # --------------------------------------------
+        has_gmsh = False
+        try:
+            # THIS IS BUILT-IN
+            from gmsh import Mesh as msh
+            has_gmsh = True
+        except IOError:
+            has_gmsh= False
+
+        if has_gmsh:
+            mesh = msh()
+            mesh.read_msh(filename)
+            self.points = np.array(mesh.Verts,copy=True)
+            self.elements = np.array(mesh.Elmts[3][1], copy=True)
+            self.nelem = self.elements.shape[0]
+            self.nnode = self.points.shape[0]
+
+            if self.points.shape[1] == 3:
+                if np.allclose(self.points[:,2],0.):
+                    self.points = np.ascontiguousarray(self.points[:,:2])
+            self.InferElementType()
+            ndim = self.InferSpatialDimension()
+            if ndim == 2:
+                self.GetEdges()
+                self.GetBoundaryEdges()
+            elif ndim == 3:
+                self.GetFaces()
+                self.GetBoundaryFaces()
+
+            return
+        # --------------------------------------------
+
+        # ONLY TETS
+        var = 0 # var = 0 tets, var = 1 quads, but needs check with different gmsh versions
         rem_nnode, rem_nelem, rem_faces = long(1e09), long(1e09), long(1e09)
         face_counter = 0
         for line_counter, line in enumerate(open(filename)):
@@ -2289,11 +2324,18 @@ class Mesh(object):
             elif plist[0] == "Vertices":
                 rem_nnode = line_counter+1
                 continue
+            elif plist[0] == "$Nodes":
+                rem_nnode = line_counter+1
+                continue
             elif plist[0] == "Triangles":
                 rem_faces = line_counter+1
                 continue
             elif plist[0] == "Tetrahedra":
                 rem_nelem = line_counter+1
+                continue
+            elif plist[0] == "$Elements":
+                rem_nelem = line_counter+1
+                var = 1
                 continue
             if rem_nnode == line_counter:
                 self.nnode = int(plist[0])
@@ -2308,29 +2350,38 @@ class Mesh(object):
         for line_counter, line in enumerate(open(filename)):
             item = line.rstrip()
             plist = item.split()
-            if line_counter > rem_nnode and line_counter < self.nnode+rem_nnode+1:
-                points.append([float(i) for i in plist[:3]])
-            if line_counter > rem_nelem and line_counter < self.nelem+rem_nelem+1:
-                elements.append([long(i) for i in plist[:4]])
+            if var == 0:
+                if line_counter > rem_nnode and line_counter < self.nnode+rem_nnode+1:
+                    points.append([float(i) for i in plist[:3]])
+                if line_counter > rem_nelem and line_counter < self.nelem+rem_nelem+1:
+                    elements.append([int(i) for i in plist[:4]])
+            elif var == 1:
+                if line_counter > rem_nnode and line_counter < self.nnode+rem_nnode+1:
+                    points.append([float(i) for i in plist[1:]])
+                if line_counter > rem_nelem and line_counter < self.nelem+rem_nelem+1:
+                    if int(plist[1]) == 3:
+                        elements.append([int(i) for i in plist[5:]])
 
         self.points = np.array(points,copy=True)
         self.elements = np.array(elements,copy=True) - 1
+        # CORRECT
+        self.nelem = self.elements.shape[0]
+        self.nnode = self.points.shape[0]
 
-        # print self.ndim, self.nnode, self.nelem, rem_nnode, rem_nelem, rem_faces
-        self.element_type = "tet"
-        self.GetBoundaryFacesTet()
-        self.GetBoundaryEdgesTet()
+        # print(self.ndim, self.nnode, self.nelem, rem_nnode, rem_nelem, rem_faces)
+        if self.points.shape[1] == 3:
+            if np.allclose(self.points[:,2],0.):
+                self.points = np.ascontiguousarray(self.points[:,:2])
+        self.InferElementType()
+        ndim = self.InferSpatialDimension()
+        if ndim == 2:
+            self.GetEdges()
+            self.GetBoundaryEdges()
+        elif ndim == 3:
+            self.GetFaces()
+            self.GetBoundaryFaces()
 
         return 
-
-        # OTHER VARIANTS OF GMSH
-        from gmsh import Mesh as msh
-        self.meshname = mshfile
-        mesh = msh()
-        mesh.read_msh(filename)
-        self.points = mesh.Verts
-        # print dir(mesh)
-        self.elements = mesh.Elmts 
 
 
     def ReadHDF5(self,filename):
@@ -4472,14 +4523,17 @@ class Mesh(object):
 
     def ChangeType(self):
         """Change mesh data type from signed to unsigned"""
+        
+        self.__do_essential_memebers_exist__()
+        self.points = np.ascontiguousarray(self.points.astype(np.float64))
         if isinstance(self.elements,np.ndarray):
-            self.elements = self.elements.astype(np.uint64)
+            self.elements = np.ascontiguousarray(self.elements.astype(np.uint64))
         if hasattr(self, 'edges'):
             if isinstance(self.edges,np.ndarray):
-                self.edges = self.edges.astype(np.uint64)
+                self.edges = np.ascontiguousarray(self.edges.astype(np.uint64))
         if hasattr(self, 'faces'):
             if isinstance(self.faces,np.ndarray):
-                self.faces = self.faces.astype(np.uint64)
+                self.faces = np.ascontiguousarray(self.faces.astype(np.uint64))
 
 
     def InferPolynomialDegree(self):
@@ -4620,8 +4674,8 @@ class Mesh(object):
         assert self.elements is not None
         assert self.points is not None
 
-        p = self.InferPolynomialDegree() + 1
-        ndim = InferSpatialDimension()
+        # p = self.InferPolynomialDegree() + 1
+        ndim = self.InferSpatialDimension()
         nodeperelem = self.InferNumberOfNodesPerElement()
 
         if ndim==3:

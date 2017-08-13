@@ -32,6 +32,8 @@ def _LowLevelAssembly_(fem_solver, function_space, formulation, mesh, material, 
         prefix = "_LowLevelAssemblyDPF__"
 
     assembly_func = prefix + type(material).__name__ + "_"
+    # MAKE MESH DATA CONTIGUOUS
+    mesh.ChangeType()
 
     # CALL LOW LEVEL ASSEMBLER
     I_stiffness, J_stiffness, V_stiffness, I_mass, J_mass, V_mass, \
