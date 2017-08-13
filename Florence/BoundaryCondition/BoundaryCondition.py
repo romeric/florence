@@ -261,20 +261,6 @@ class BoundaryCondition(object):
                 else:
                     nodesDBC, Dirichlet = self.nodesDBC, self.Dirichlet
 
-                # if mesh.points.shape[1]==3:
-                    # np.savetxt("/home/roman/DirichletF05_P2_06Dec.dat", Dirichlet,fmt="%9.9f")
-                    # np.savetxt("/home/roman/nodesDBCF05_P2_06Dec.dat", nodesDBC,fmt="%i")
-
-                # Dirichlet = np.loadtxt("/home/roman/DirichletF05_P2_04Dec.dat", dtype=np.float64)
-                # nodesDBC = np.loadtxt("/home/roman/nodesDBCF05_P2_04Dec.dat", dtype=np.int64)
-                # print(Dirichlet.shape)
-                # Dirichlet = np.loadtxt("/home/roman/DirichletF05_P2_04Dec.dat", dtype=np.float64)
-                # from scipy.io import savemat
-                # savemat("/home/roman/NACA400_DBC_P"+str(mesh.InferPolynomialDegree())+".mat",{'DBCnodes':nodesDBC,'DBCvalues':Dirichlet})
-                # savemat("/Users/romanpoya/Dropbox/NACA400_DBC_ES_P"+str(mesh.InferPolynomialDegree())+".mat",{'DBCnodes':nodesDBC,'DBCvalues':Dirichlet})
-                # exit()
-                # nodesDBC = np.loadtxt("/home/roman/nodesDBCF05_P2_04Dec.dat", dtype=np.int64)
-                # nodesDBC = nodesDBC[:,None]
 
                 # GET DIRICHLET DoFs
                 self.columns_out = (np.repeat(nodesDBC,nvar,axis=1)*nvar +\
