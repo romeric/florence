@@ -1,7 +1,7 @@
 from __future__ import print_function, division
 import os, sys, warnings, platform
 from time import time
-import numpy as np 
+import numpy as np
 if "PyPy" not in platform.python_implementation():
     from scipy.io import loadmat, savemat
 from Florence.Tensor import makezero, itemfreq, unique2d, in2d
@@ -31,23 +31,23 @@ Roman Poya - 13/06/2015
 
 class Mesh(object):
 
-    """Mesh class provides the following functionalities:  
+    """Mesh class provides the following functionalities:
     1. Generating higher order meshes based on a linear mesh, for tris, tets, quads and hexes
     2. Generating linear tri and tet meshes based on meshpy back-end
     3. Generating linear tri meshes based on distmesh back-end
     4. Finding bounary edges and faces for tris and tets, in case they are not provided by the mesh generator
     5. Reading Salome meshes in binary (.dat/.txt/etc) format
-    6. Reading gmsh files .msh 
+    6. Reading gmsh files .msh
     7. Checking for node numbering order of elements and fixing it if desired
-    8. Writing meshes to unstructured vtk file format (.vtu) based on the original script by Luke Olson 
-       (extended here to high order elements) 
+    8. Writing meshes to unstructured vtk file format (.vtu) based on the original script by Luke Olson
+       (extended here to high order elements)
     """
 
     def __init__(self, element_type=None):
         super(Mesh, self).__init__()
-        # self.faces and self.edges ARE BOUNDARY FACES 
+        # self.faces and self.edges ARE BOUNDARY FACES
         # AND BOUNDARY EDGES, RESPECTIVELY
-        
+
         self.degree = None
         self.ndim = None
         self.nelem = None
@@ -68,7 +68,7 @@ class Mesh(object):
         self.interior_faces = None
         self.interior_edges = None
         # TYPE OF BOUNDARY FACES/EDGES
-        self.boundary_element_type = None 
+        self.boundary_element_type = None
 
         # FOR GEOMETRICAL CURVES/SURFACES
         self.edge_to_curve = None
@@ -153,7 +153,7 @@ class Mesh(object):
         if self.element_type == "tet":
             self.GetBoundaryFacesTet()
         elif self.element_type == "hex":
-            self.GetBoundaryFacesHex() 
+            self.GetBoundaryFacesHex()
         elif self.element_type=="tri" or self.element_type=="quad":
             raise ValueError("2D mesh does not have faces")
         else:
@@ -164,7 +164,7 @@ class Mesh(object):
         if self.element_type == "tet":
             self.GetInteriorFacesTet()
         elif self.element_type == "hex":
-            self.GetInteriorFacesHex() 
+            self.GetInteriorFacesHex()
         elif self.element_type=="tri" or self.element_type=="quad":
             raise ValueError("2D mesh does not have faces")
         else:
@@ -247,7 +247,7 @@ class Mesh(object):
         """Find the all edges of a triangular mesh.
             Sets all_edges property and returns it
 
-        returns:            
+        returns:
 
             arr:            numpy ndarray of all edges"""
 
@@ -260,10 +260,10 @@ class Mesh(object):
                 if self.all_edges.shape[1]==2 and p > 1:
                     pass
                 else:
-                    return self.all_edges 
+                    return self.all_edges
 
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
-        
+
         node_arranger = NodeArrangementTri(p-1)[0]
 
         # CHECK IF FACES ARE ALREADY AVAILABLE
@@ -292,7 +292,7 @@ class Mesh(object):
         import inspect
         curframe = inspect.currentframe()
         calframe = inspect.getouterframes(curframe, 2)[1][3]
-        
+
         if calframe != "GetBoundaryEdgesTet":
             self.all_edges = edges
 
@@ -321,14 +321,14 @@ class Mesh(object):
         # CONCATENATE ALL THE EDGES MADE FROM ELEMENTS
         all_edges = np.concatenate((self.elements[:,node_arranger[0,:]],self.elements[:,node_arranger[1,:]],
                              self.elements[:,node_arranger[2,:]]),axis=0)
-        # GET UNIQUE ROWS 
+        # GET UNIQUE ROWS
         uniques, idx, inv = unique2d(all_edges,consider_sort=True,order=False,return_index=True,return_inverse=True)
 
         # ROWS THAT APPEAR ONLY ONCE CORRESPOND TO BOUNDARY EDGES
         freqs_inv = itemfreq(inv)
         edges_ext_flags = freqs_inv[freqs_inv[:,1]==1,0]
         # NOT ARRANGED
-        self.edges = uniques[edges_ext_flags,:] 
+        self.edges = uniques[edges_ext_flags,:]
 
         # DETERMINE WHICH FACE OF THE ELEMENT THEY ARE
         boundary_edge_to_element = np.zeros((edges_ext_flags.shape[0],2),dtype=np.int64)
@@ -353,7 +353,7 @@ class Mesh(object):
     def GetInteriorEdgesTri(self):
         """Computes interior edges of a triangular mesh
 
-            returns:        
+            returns:
 
                 interior_faces          ndarray of interior edges
                 edge_flags              ndarray of edge flags: 0 for interior and 1 for boundary
@@ -393,7 +393,7 @@ class Mesh(object):
         """Find all faces (surfaces) in the tetrahedral mesh (boundary & interior).
             Sets all_faces property and returns it
 
-        returns:            
+        returns:
 
             arr:            numpy ndarray of all faces
 
@@ -409,7 +409,7 @@ class Mesh(object):
                 if self.all_faces.shape[1] == 3 and p > 1:
                     pass
                 else:
-                    return self.all_faces 
+                    return self.all_faces
 
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementTet
 
@@ -424,7 +424,7 @@ class Mesh(object):
         faces[3*self.elements.shape[0]:,:] = self.elements[:,node_arranger[3,:]]
 
         # REMOVE DUPLICATES
-        self.all_faces, idx = unique2d(faces,consider_sort=True,order=False,return_index=True) 
+        self.all_faces, idx = unique2d(faces,consider_sort=True,order=False,return_index=True)
 
         face_to_element = np.zeros((self.all_faces.shape[0],2),np.int64)
         face_to_element[:,0] =  idx % self.elements.shape[0]
@@ -432,7 +432,7 @@ class Mesh(object):
 
         self.face_to_element = face_to_element
 
-        return self.all_faces 
+        return self.all_faces
 
 
     def GetEdgesTet(self):
@@ -447,7 +447,7 @@ class Mesh(object):
                 if self.all_edges.shape[1] == 2 and p > 1:
                     pass
                 else:
-                    return self.all_edges 
+                    return self.all_edges
 
 
         # FIRST GET BOUNDARY FACES
@@ -456,13 +456,13 @@ class Mesh(object):
 
         # BUILD A 2D MESH
         tmesh = Mesh()
-        # tmesh = deepcopy(self) 
+        # tmesh = deepcopy(self)
         tmesh.element_type = "tri"
         tmesh.elements = self.all_faces
         tmesh.nelem = tmesh.elements.shape[0]
         del tmesh.faces
         del tmesh.points
-       
+
         # COMPUTE ALL EDGES
         self.all_edges = tmesh.GetEdgesTri()
         return self.all_edges
@@ -490,18 +490,18 @@ class Mesh(object):
         # CONCATENATE ALL THE FACES MADE FROM ELEMENTS
         all_faces = np.concatenate((self.elements[:,:3],self.elements[:,[0,1,3]],
                              self.elements[:,[0,2,3]],self.elements[:,[1,2,3]]),axis=0)
-        # GET UNIQUE ROWS 
+        # GET UNIQUE ROWS
         uniques, idx, inv = unique2d(all_faces,consider_sort=True,order=False,return_index=True,return_inverse=True)
 
         # ROWS THAT APPEAR ONLY ONCE CORRESPOND TO BOUNDARY FACES
         freqs_inv = itemfreq(inv)
         faces_ext_flags = freqs_inv[freqs_inv[:,1]==1,0]
         # NOT ARRANGED
-        self.faces = uniques[faces_ext_flags,:] 
+        self.faces = uniques[faces_ext_flags,:]
 
         # DETERMINE WHICH FACE OF THE ELEMENT THEY ARE
         boundary_face_to_element = np.zeros((faces_ext_flags.shape[0],2),dtype=np.int64)
-        # THE FOLLOWING WILL COMPUTE FACES BASED ON SORTING AND NOT TAKING INTO ACCOUNT 
+        # THE FOLLOWING WILL COMPUTE FACES BASED ON SORTING AND NOT TAKING INTO ACCOUNT
         # THE ELEMENT CONNECTIVITY
         # boundary_face_to_element[:,0] = np.remainder(idx[faces_ext_flags],self.elements.shape[0])
         # boundary_face_to_element[:,1] = np.floor_divide(idx[faces_ext_flags],self.elements.shape[0])
@@ -552,7 +552,7 @@ class Mesh(object):
         tmesh.nelem = tmesh.elements.shape[0]
         del tmesh.faces
         del tmesh.points
-        
+
         # ALL THE EDGES CORRESPONDING TO THESE BOUNDARY FACES ARE BOUNDARY EDGES
         self.edges =  tmesh.GetEdgesTri()
 
@@ -561,7 +561,7 @@ class Mesh(object):
     def GetInteriorFacesTet(self):
         """Computes interior faces of a tetrahedral mesh
 
-            returns:        
+            returns:
 
                 interior_faces          ndarray of interior faces
                 face_flags              1D array of face flags: 0 for interior and 1 for boundary
@@ -584,7 +584,7 @@ class Mesh(object):
     def GetInteriorEdgesTet(self):
         """Computes interior faces of a tetrahedral mesh
 
-            returns:        
+            returns:
 
                 interior_edges          ndarray of interior edges
                 edge_flags              1D array of edge flags: 0 for interior and 1 for boundary
@@ -608,7 +608,7 @@ class Mesh(object):
         """Find the all edges of a quadrilateral mesh.
             Sets all_edges property and returns it
 
-        returns:            
+        returns:
 
             arr:            numpy ndarray of all edges"""
 
@@ -621,7 +621,7 @@ class Mesh(object):
                 if self.all_edges.shape[1]==2 and p > 1:
                     pass
                 else:
-                    return self.all_edges 
+                    return self.all_edges
 
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
         node_arranger = NodeArrangementQuad(p-1)[0]
@@ -643,7 +643,7 @@ class Mesh(object):
         import inspect
         curframe = inspect.currentframe()
         calframe = inspect.getouterframes(curframe, 2)[1][3]
-        
+
         if calframe != "GetBoundaryEdgesHex":
             self.all_edges = edges
 
@@ -671,14 +671,14 @@ class Mesh(object):
         all_edges = np.concatenate((self.elements[:,node_arranger[0,:]],self.elements[:,node_arranger[1,:]],
             self.elements[:,node_arranger[2,:]],self.elements[:,node_arranger[3,:]]),axis=0).astype(np.uint64)
 
-        # GET UNIQUE ROWS 
+        # GET UNIQUE ROWS
         uniques, idx, inv = unique2d(all_edges,consider_sort=True,order=False,return_index=True,return_inverse=True)
 
         # ROWS THAT APPEAR ONLY ONCE CORRESPOND TO BOUNDARY EDGES
         freqs_inv = itemfreq(inv)
         edges_ext_flags = freqs_inv[freqs_inv[:,1]==1,0]
         # NOT ARRANGED
-        self.edges = uniques[edges_ext_flags,:] 
+        self.edges = uniques[edges_ext_flags,:]
 
         # DETERMINE WHICH FACE OF THE ELEMENT THEY ARE
         boundary_edge_to_element = np.zeros((edges_ext_flags.shape[0],2),dtype=np.int64)
@@ -703,7 +703,7 @@ class Mesh(object):
     def GetInteriorEdgesQuad(self):
         """Computes interior edges of a quadrilateral mesh
 
-            returns:        
+            returns:
 
                 interior_faces          ndarray of interior edges
                 edge_flags              ndarray of edge flags: 0 for interior and 1 for boundary
@@ -743,7 +743,7 @@ class Mesh(object):
         """Find all faces (surfaces) in the hexahedral mesh (boundary & interior).
             Sets all_faces property and returns it
 
-        returns:            
+        returns:
 
             arr:            numpy ndarray of all faces
 
@@ -759,7 +759,7 @@ class Mesh(object):
                 if self.all_faces.shape[1] == 4 and p > 1:
                     pass
                 else:
-                    return self.all_faces 
+                    return self.all_faces
 
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
 
@@ -774,7 +774,7 @@ class Mesh(object):
                 self.elements[:,node_arranger[5,:]]),axis=0).astype(np.int64)
 
         # REMOVE DUPLICATES
-        self.all_faces, idx = unique2d(faces,consider_sort=True,order=False,return_index=True) 
+        self.all_faces, idx = unique2d(faces,consider_sort=True,order=False,return_index=True)
 
         face_to_element = np.zeros((self.all_faces.shape[0],2),np.int64)
         face_to_element[:,0] =  idx % self.elements.shape[0]
@@ -782,7 +782,7 @@ class Mesh(object):
 
         self.face_to_element = face_to_element
 
-        return self.all_faces 
+        return self.all_faces
 
 
     def GetEdgesHex(self):
@@ -797,7 +797,7 @@ class Mesh(object):
                 if self.all_edges.shape[1] == 2 and p > 1:
                     pass
                 else:
-                    return self.all_edges 
+                    return self.all_edges
 
 
         # FIRST GET BOUNDARY FACES
@@ -806,13 +806,13 @@ class Mesh(object):
 
         # BUILD A 2D MESH
         tmesh = Mesh()
-        # tmesh = deepcopy(self) 
+        # tmesh = deepcopy(self)
         tmesh.element_type = "quad"
         tmesh.elements = self.all_faces
         tmesh.nelem = tmesh.elements.shape[0]
         del tmesh.faces
         del tmesh.points
-       
+
         # COMPUTE ALL EDGES
         self.all_edges = tmesh.GetEdgesQuad()
         return self.all_edges
@@ -842,14 +842,14 @@ class Mesh(object):
                 self.elements[:,node_arranger[1,:]]),axis=0),self.elements[:,node_arranger[2,:]]),axis=0),
                 self.elements[:,node_arranger[3,:]]),axis=0),self.elements[:,node_arranger[4,:]]),axis=0),
                 self.elements[:,node_arranger[5,:]]),axis=0).astype(np.int64)
-        # GET UNIQUE ROWS 
+        # GET UNIQUE ROWS
         uniques, idx, inv = unique2d(all_faces,consider_sort=True,order=False,return_index=True,return_inverse=True)
 
         # ROWS THAT APPEAR ONLY ONCE CORRESPOND TO BOUNDARY FACES
         freqs_inv = itemfreq(inv)
         faces_ext_flags = freqs_inv[freqs_inv[:,1]==1,0]
         # NOT ARRANGED
-        self.faces = uniques[faces_ext_flags,:] 
+        self.faces = uniques[faces_ext_flags,:]
 
         # DETERMINE WHICH FACE OF THE ELEMENT THEY ARE
         boundary_face_to_element = np.zeros((faces_ext_flags.shape[0],2),dtype=np.int64)
@@ -896,7 +896,7 @@ class Mesh(object):
         tmesh.nelem = tmesh.elements.shape[0]
         del tmesh.faces
         del tmesh.points
-        
+
         # ALL THE EDGES CORRESPONDING TO THESE BOUNDARY FACES ARE BOUNDARY EDGES
         self.edges =  tmesh.GetEdgesQuad()
 
@@ -904,7 +904,7 @@ class Mesh(object):
     def GetInteriorFacesHex(self):
         """Computes interior faces of a hexahedral mesh
 
-            returns:        
+            returns:
 
                 interior_faces          ndarray of interior faces
                 face_flags              1D array of face flags: 0 for interior and 1 for boundary
@@ -927,7 +927,7 @@ class Mesh(object):
     def GetInteriorEdgesHex(self):
         """Computes interior faces of a hexahedral mesh
 
-            returns:        
+            returns:
 
                 interior_edges          ndarray of interior edges
                 edge_flags              1D array of edge flags: 0 for interior and 1 for boundary
@@ -1020,7 +1020,7 @@ class Mesh(object):
         t_mesh = time()
         # BUILD A NEW MESH BASED ON THE LINEAR MESH
         if self.element_type == 'tri':
-            # BUILD A NEW MESH USING THE FEKETE NODAL POINTS FOR TRIANGLES  
+            # BUILD A NEW MESH USING THE FEKETE NODAL POINTS FOR TRIANGLES
             # nmesh = HighOrderMeshTri(C,self,**kwargs)
             # nmesh = HighOrderMeshTri_UNSTABLE(C,self,**kwargs)
             nmesh = HighOrderMeshTri_SEMISTABLE(C,self,**kwargs)
@@ -1050,14 +1050,14 @@ class Mesh(object):
         self.degree = C+1
 
         self.ChangeType()
-        
+
         print('Finished generating the high order mesh. Time taken', time()-t_mesh,'sec')
 
 
     def EdgeLengths(self,which_edges='boundary'):
         """Computes length of edges, for 2D and 3D meshes
 
-        which_edges:            [str] 'boundary' for boundary edges only 
+        which_edges:            [str] 'boundary' for boundary edges only
                                 and 'all' for all edges
         """
 
@@ -1080,12 +1080,12 @@ class Mesh(object):
             edge_coords = self.points[self.all_edges[:,:2],:]
             lengths = np.linalg.norm(edge_coords[:,1,:] - edge_coords[:,0,:],axis=1)
 
-        return lengths  
+        return lengths
 
 
     def Areas(self, with_sign=False, gpoints=None):
-        """Find areas of all 2D elements [tris, quads]. 
-            For 3D elements returns surface areas of faces 
+        """Find areas of all 2D elements [tris, quads].
+            For 3D elements returns surface areas of faces
 
             input:
                 with_sign:              [str] compute with/without sign
@@ -1110,8 +1110,8 @@ class Mesh(object):
 
         elif self.element_type == "quad":
             # NODE ORDERING IS IRRELEVANT, AS IT IS THESE AREAS
-            # WHICH DETERMINE NODE ORDERING 
-            # AREA OF QUAD ABCD = AREA OF ABC + AREA OF ACD 
+            # WHICH DETERMINE NODE ORDERING
+            # AREA OF QUAD ABCD = AREA OF ABC + AREA OF ACD
             points = np.ones((gpoints.shape[0],3),dtype=np.float64)
             points[:,:2] = gpoints
             # FIND AREAS ABC
@@ -1212,7 +1212,7 @@ class Mesh(object):
         elif self.element_type == "hex":
 
             # Refer: https://en.wikipedia.org/wiki/Parallelepiped
-            
+
             a = gpoints[self.elements[:,0],:]
             b = gpoints[self.elements[:,1],:]
             c = gpoints[self.elements[:,3],:]
@@ -1233,15 +1233,15 @@ class Mesh(object):
 
     def AspectRatios(self,algorithm='edge_based'):
         """Compute aspect ratio of the mesh element-by-element.
-            For 2D meshes aspect ratio is aspect ratio is defined as 
+            For 2D meshes aspect ratio is aspect ratio is defined as
             the ratio of maximum edge length to minimum edge length.
-            For 3D meshes aspect ratio can be either length or area based. 
+            For 3D meshes aspect ratio can be either length or area based.
 
             input:
                 algorithm:                  [str] 'edge_based' or 'face_based'
             returns:
                 aspect_ratio:               [1D array] of size (self.nelem) containing aspect ratio of elements
-        """ 
+        """
 
         assert self.points is not None
         assert self.element_type is not None
@@ -1265,7 +1265,7 @@ class Mesh(object):
                 BC = np.linalg.norm(edge_coords[:,2,:] - edge_coords[:,1,:],axis=1)
                 CD = np.linalg.norm(edge_coords[:,3,:] - edge_coords[:,2,:],axis=1)
                 DA = np.linalg.norm(edge_coords[:,0,:] - edge_coords[:,3,:],axis=1)
-  
+
                 minimum = np.minimum(np.minimum(np.minimum(AB,BC),CD),DA)
                 maximum = np.maximum(np.maximum(np.maximum(AB,BC),CD),DA)
 
@@ -1329,7 +1329,7 @@ class Mesh(object):
                 geometric           [Bool] geometrically computes median with relying on FEM bases
             retruns:
                 median:             [ndarray] of median of elements
-                bases_at_median:    [1D array] of (p=1) bases at median            
+                bases_at_median:    [1D array] of (p=1) bases at median
         """
 
         assert self.element_type is not None
@@ -1348,7 +1348,7 @@ class Mesh(object):
             from Florence.QuadratureRules import FeketePointsTri
 
             eps = FeketePointsTri(2)
-            middle_point_isoparametric = eps[6,:] 
+            middle_point_isoparametric = eps[6,:]
             if not np.isclose(sum(middle_point_isoparametric),-0.6666666):
                 raise ValueError("Median of triangle does not match [-0.3333,-0.3333]. "
                     "Did you change your nodal spacing or interpolation functions?")
@@ -1356,7 +1356,7 @@ class Mesh(object):
             hpBases = Tri.hpNodal.hpBases
             bases_for_middle_point = hpBases(0,middle_point_isoparametric[0],
                 middle_point_isoparametric[1])[0]
-            median = np.einsum('ijk,j',self.points[self.elements[:,:3],:],bases_for_middle_point) 
+            median = np.einsum('ijk,j',self.points[self.elements[:,:3],:],bases_for_middle_point)
 
         elif self.element_type == "tet":
             from Florence.FunctionSpace import Tet
@@ -1372,7 +1372,7 @@ class Mesh(object):
             bases_for_middle_point = hpBases(0,middle_point_isoparametric[0],
                 middle_point_isoparametric[1],middle_point_isoparametric[2])[0]
 
-            median = np.einsum('ijk,j',self.points[self.elements[:,:4],:],bases_for_middle_point) 
+            median = np.einsum('ijk,j',self.points[self.elements[:,:4],:],bases_for_middle_point)
 
         else:
             raise NotImplementedError('Median for {} elements not implemented yet'.format(self.element_type))
@@ -1424,7 +1424,7 @@ class Mesh(object):
             raise NotImplementedError("Not implemented yet")
 
 
-    def LargestSegment(self, smallest_element=True, nsamples=50, 
+    def LargestSegment(self, smallest_element=True, nsamples=50,
         plot_segment=False, plot_element=False, figure=None, save=False, filename=None):
         """Finds the largest segment that can fit in an element. For curvilinear elements
             this measure can be used as (h) for h-refinement studies
@@ -1433,7 +1433,7 @@ class Mesh(object):
                 smallest_element                [bool] if the largest segment size is to be computed in the
                                                 smallest element (i.e. element with the smallest area in 2D or
                                                 smallest volume in 3D). Default is True. If False, then the largest
-                                                segment in the largest element will be computed. 
+                                                segment in the largest element will be computed.
                 nsample:                        [int] number of sample points along the curved
                                                 edges of the elements. The maximum distance between
                                                 all combinations of these points is the largest
@@ -1444,9 +1444,9 @@ class Mesh(object):
                 figure:                         [an instance of matplotlib/mayavi.mlab figure for 2D/3D]
                 save:                           [bool] wether to save the figure or not
                 filename:                       [str] file name for the figure to be save
-            
+
             returns:
-                largest_segment_length          [float] maximum segment length that could be fit within either the 
+                largest_segment_length          [float] maximum segment length that could be fit within either the
         """
 
         self.__do_memebers_exist__()
@@ -1483,7 +1483,7 @@ class Mesh(object):
                 plot_edges=True, interpolation_degree=nsamples)
         elif self.element_type == "hex":
             tmesh = PostProcess.TessellateHexes(omesh,np.zeros_like(omesh.points),
-                plot_edges=True, interpolation_degree=nsamples)  
+                plot_edges=True, interpolation_degree=nsamples)
 
         ndim = omesh.InferSpatialDimension()
         nnode = tmesh.points.shape[0]
@@ -1502,7 +1502,7 @@ class Mesh(object):
 
 
         if plot_segment:
-            
+
             segment_coords = tmesh.points[corresponding_nodes,:]
 
             if ndim==2:
@@ -1513,11 +1513,11 @@ class Mesh(object):
                 if plot_element:
                     if omesh.element_type == "tri":
                         PostProcess.CurvilinearPlotTri(omesh,
-                            np.zeros_like(omesh.points),plot_points=True, 
+                            np.zeros_like(omesh.points),plot_points=True,
                             figure=figure, interpolation_degree=nsamples, show_plot=False)
                     elif omesh.element_type == "quad":
                         PostProcess.CurvilinearPlotQuad(omesh,
-                            np.zeros_like(omesh.points),plot_points=True, 
+                            np.zeros_like(omesh.points),plot_points=True,
                             figure=figure, interpolation_degree=nsamples, show_plot=False)
 
                 tmesh.SimplePlot(figure=figure,show_plot=False)
@@ -1542,7 +1542,7 @@ class Mesh(object):
                 import os
                 os.environ['ETS_TOOLKIT'] = 'qt4'
                 from mayavi import mlab
-    
+
                 if figure is None:
                     figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(1000,800))
 
@@ -1553,18 +1553,18 @@ class Mesh(object):
                             figure=figure, interpolation_degree=nsamples, show_plot=False)
                     elif omesh.element_type == "hex":
                         PostProcess.CurvilinearPlotHex(omesh,
-                            np.zeros_like(omesh.points),plot_points=True, 
+                            np.zeros_like(omesh.points),plot_points=True,
                             figure=figure, interpolation_degree=nsamples, show_plot=False)
 
                 tmesh.GetEdges()
                 edge_coords = tmesh.points[np.unique(tmesh.all_edges),:]
                 mlab.triangular_mesh(tmesh.points[:,0],tmesh.points[:,1],tmesh.points[:,2],tmesh.elements, representation='wireframe', color=(0,0,0))
                 # # mlab.points3d(edge_coords[:,0],edge_coords[:,1],edge_coords[:,2],color=(1., 99/255., 71./255), scale_factor=0.03)
-                # # mlab.plot3d(segment_coords[:,0],segment_coords[:,1],segment_coords[:,2], color=(227./255, 66./255, 52./255)) 
+                # # mlab.plot3d(segment_coords[:,0],segment_coords[:,1],segment_coords[:,2], color=(227./255, 66./255, 52./255))
                 mlab.points3d(edge_coords[:,0],edge_coords[:,1],edge_coords[:,2],color=(1., 99/255., 71./255), scale_factor=0.17)
-                mlab.plot3d(segment_coords[:,0],segment_coords[:,1],segment_coords[:,2], 
+                mlab.plot3d(segment_coords[:,0],segment_coords[:,1],segment_coords[:,2],
                     color=(227./255, 66./255, 52./255), line_width=10., representation="wireframe")
-                
+
                 if save:
                     mlab.savefig(filename,dpi=300)
 
@@ -1572,8 +1572,8 @@ class Mesh(object):
 
 
 
-        return largest_segment_length  
-  
+        return largest_segment_length
+
 
 
     def CheckNodeNumbering(self,change_order_to='retain', verbose=True):
@@ -1581,10 +1581,10 @@ class Mesh(object):
 
         input:
 
-            change_order_to:            [str] {'clockwise','anti-clockwise','retain'} changes the order to clockwise, 
-                                        anti-clockwise or retains the numbering order - default is 'retain' 
+            change_order_to:            [str] {'clockwise','anti-clockwise','retain'} changes the order to clockwise,
+                                        anti-clockwise or retains the numbering order - default is 'retain'
 
-        output: 
+        output:
 
             original_order:             [str] {'clockwise','anti-clockwise','retain'} returns the original numbering order"""
 
@@ -1641,7 +1641,7 @@ class Mesh(object):
         """Finds edges of elements and their flags saying which edge they are [0,1,2].
             At most a triangle can have all its three edges on the boundary.
 
-        output: 
+        output:
 
             edge_elements:              [1D array] array containing elements which have edges
                                         on the boundary
@@ -1654,7 +1654,7 @@ class Mesh(object):
             if self.edge_to_element.shape[0] > 1:
                 return self.edge_to_element
 
-        # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY 
+        # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY
         if self.all_edges is None:
             self.GetEdgesTri()
 
@@ -1676,7 +1676,7 @@ class Mesh(object):
         """Finds elements which have edges on the boundary.
             At most an element can have all its three edges on the boundary.
 
-        output: 
+        output:
 
             edge_elements:              [2D array] array containing elements which have edge
                                         on the boundary [cloumn 0] and a flag stating which edges they are [column 1]
@@ -1690,7 +1690,7 @@ class Mesh(object):
         assert self.edges is not None or self.elements is not None
 
         edge_elements = np.zeros((self.edges.shape[0],2),dtype=np.int64)
-        
+
         # FIND WHICH FACE NODES ARE IN WHICH ELEMENT
         for i in range(self.edges.shape[0]):
             x = []
@@ -1705,8 +1705,8 @@ class Mesh(object):
 
             # CHOOSE ONLY ONE OF THESE ELEMENTS
             edge_elements[i,0] = z[0]
-            # WHICH COLUMNS IN THAT ELEMENT ARE THE FACE NODES LOCATED 
-            cols = np.array([np.where(self.elements[z[0],:]==self.edges[i,0])[0], 
+            # WHICH COLUMNS IN THAT ELEMENT ARE THE FACE NODES LOCATED
+            cols = np.array([np.where(self.elements[z[0],:]==self.edges[i,0])[0],
                             np.where(self.elements[z[0],:]==self.edges[i,1])[0]
                             ])
 
@@ -1727,7 +1727,7 @@ class Mesh(object):
         """Finds elements which have faces on the boundary.
             At most an element can have all its four faces on the boundary.
 
-        output: 
+        output:
 
             boundary_face_to_element:   [2D array] array containing elements which have face
                                         on the boundary [cloumn 0] and a flag stating which faces they are [column 1]
@@ -1737,10 +1737,10 @@ class Mesh(object):
         assert self.faces is not None or self.elements is not None
 
         # THIS METHOD ALWAYS RETURNS THE FACE TO ELEMENT ARRAY, AND DOES NOT CHECK
-        # IF THIS HAS BEEN COMPUTED BEFORE, THE REASON BEING THAT THE FACES CAN COME 
+        # IF THIS HAS BEEN COMPUTED BEFORE, THE REASON BEING THAT THE FACES CAN COME
         # EXTERNALLY WHOSE ARRANGEMENT WOULD NOT CORRESPOND TO THE ONE USED INTERNALLY
         # HENCE THIS MAPPING BECOMES NECESSARY
-        
+
         all_faces = np.concatenate((self.elements[:,:3],self.elements[:,[0,1,3]],
             self.elements[:,[0,2,3]],self.elements[:,[1,2,3]]),axis=0).astype(self.faces.dtype)
 
@@ -1751,8 +1751,8 @@ class Mesh(object):
         boundary_face_to_element[:,0] = all_faces_in_faces % self.elements.shape[0]
         boundary_face_to_element[:,1] = all_faces_in_faces // self.elements.shape[0]
 
-        # SO FAR WE HAVE COMPUTED THE ELEMENTS THAT CONTAIN FACES, HOWEVER 
-        # NOTE THAT WE STILL HAVE NOT COMPUTED A MAPPING BETWEEN ELEMENTS AND 
+        # SO FAR WE HAVE COMPUTED THE ELEMENTS THAT CONTAIN FACES, HOWEVER
+        # NOTE THAT WE STILL HAVE NOT COMPUTED A MAPPING BETWEEN ELEMENTS AND
         # FACES. WE ONLY KNOW WHICH ELEMENTS CONTAIN FACES FROM in2d.
         # WE NEED TO FIND THIS MAPPING NOW
 
@@ -1768,28 +1768,28 @@ class Mesh(object):
         # CHECK FOR THIS CONDITION AS ARRANGEMENT IS NO LONGER MAINTAINED
         assert np.sum(faces[:,:3].astype(np.int64) - self.faces[:,:3].astype(np.int64)) == 0
 
-        # NOW GET THE ROW MAPPING BETWEEN OLD FACES AND NEW FACES 
+        # NOW GET THE ROW MAPPING BETWEEN OLD FACES AND NEW FACES
         from Florence.Tensor import shuffle_along_axis
         row_mapper = shuffle_along_axis(faces[:,:3],self.faces[:,:3],consider_sort=True)
 
         # UPDATE THE MAP
         boundary_face_to_element[:,:] = boundary_face_to_element[row_mapper,:]
         self.boundary_face_to_element = boundary_face_to_element
-        
+
         return self.boundary_face_to_element
 
 
     def GetElementsFaceNumberingTet(self):
-        """Finds which faces belong to which elements and which faces of the elements 
-            they are e.g. 0, 1, 2 or 3.  
+        """Finds which faces belong to which elements and which faces of the elements
+            they are e.g. 0, 1, 2 or 3.
 
-            output: 
+            output:
 
                 face_elements:              [2D array] nfaces x 2 array containing elements which have face
                                             on the boundary with their flags
 
                                             Note that this method also sets the self.face_to_element to face_elements,
-                                            so the return value is not strictly necessary   
+                                            so the return value is not strictly necessary
         """
 
         if isinstance(self.face_to_element,np.ndarray):
@@ -1817,7 +1817,7 @@ class Mesh(object):
 
 
     def ArrangeFacesTet(self):
-        """Arranges all the faces of tetrahedral elements 
+        """Arranges all the faces of tetrahedral elements
             with triangular type node ordering """
 
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementTet
@@ -1841,7 +1841,7 @@ class Mesh(object):
         """Finds edges of elements and their flags saying which edge they are [0,1,2,3].
             At most a quad can have all its four edges on the boundary.
 
-        output: 
+        output:
 
             edge_elements:              [1D array] array containing elements which have edges
                                         on the boundary
@@ -1854,13 +1854,13 @@ class Mesh(object):
             if self.edge_to_element.shape[0] > 1:
                 return self.edge_to_element
 
-        # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY 
+        # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY
         if self.all_edges is None:
             self.GetEdgesQuad()
 
 
         p = self.InferPolynomialDegree()
-        
+
         # FIND WHICH FACE NODES ARE IN WHICH ELEMENT
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
         node_arranger = NodeArrangementQuad(p-1)[0]
@@ -1884,7 +1884,7 @@ class Mesh(object):
         """Finds elements which have edges on the boundary.
             At most a quad can have all its four edges on the boundary.
 
-        output: 
+        output:
 
             boundary_edge_to_element:   [2D array] array containing elements which have face
                                         on the boundary [cloumn 0] and a flag stating which edges they are [column 1]
@@ -1898,7 +1898,7 @@ class Mesh(object):
         assert self.edges is not None or self.elements is not None
 
         p = self.InferPolynomialDegree()
-        
+
         # FIND WHICH FACE NODES ARE IN WHICH ELEMENT
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
         node_arranger = NodeArrangementQuad(p-1)[0]
@@ -1907,14 +1907,14 @@ class Mesh(object):
         all_edges = np.concatenate((self.elements[:,node_arranger[0,:]],self.elements[:,node_arranger[1,:]],
             self.elements[:,node_arranger[2,:]],self.elements[:,node_arranger[3,:]]),axis=0).astype(np.int64)
 
-        # GET UNIQUE ROWS 
+        # GET UNIQUE ROWS
         uniques, idx, inv = unique2d(all_edges,consider_sort=True,order=False,return_index=True,return_inverse=True)
 
         # ROWS THAT APPEAR ONLY ONCE CORRESPOND TO BOUNDARY EDGES
         freqs_inv = itemfreq(inv)
         edges_ext_flags = freqs_inv[freqs_inv[:,1]==1,0]
         # NOT ARRANGED
-        edges = uniques[edges_ext_flags,:] 
+        edges = uniques[edges_ext_flags,:]
 
         # DETERMINE WHICH FACE OF THE ELEMENT THEY ARE
         boundary_edge_to_element = np.zeros((edges_ext_flags.shape[0],2),dtype=np.int64)
@@ -1938,7 +1938,7 @@ class Mesh(object):
         """Finds elements which have faces on the boundary.
             At most a hexahedral can have all its 8 faces on the boundary.
 
-        output: 
+        output:
 
             boundary_face_to_element:   [2D array] array containing elements which have face
                                         on the boundary [cloumn 0] and a flag stating which faces they are [column 1]
@@ -1951,7 +1951,7 @@ class Mesh(object):
             return self.boundary_face_to_element
 
         # THIS METHOD ALWAYS RETURNS THE FACE TO ELEMENT ARRAY, AND DOES NOT CHECK
-        # IF THIS HAS BEEN COMPUTED BEFORE, THE REASON BEING THAT THE FACES CAN COME 
+        # IF THIS HAS BEEN COMPUTED BEFORE, THE REASON BEING THAT THE FACES CAN COME
         # EXTERNALLY WHOSE ARRANGEMENT WOULD NOT CORRESPOND TO THE ONE USED INTERNALLY
         # HENCE THIS MAPPING BECOMES NECESSARY
 
@@ -1959,7 +1959,7 @@ class Mesh(object):
 
         C = self.InferPolynomialDegree() - 1
         node_arranger = NodeArrangementHex(C)[0]
-        
+
         all_faces = np.concatenate((np.concatenate((
                 np.concatenate((np.concatenate((np.concatenate((self.elements[:,node_arranger[0,:]],
                 self.elements[:,node_arranger[1,:]]),axis=0),self.elements[:,node_arranger[2,:]]),axis=0),
@@ -1974,8 +1974,8 @@ class Mesh(object):
         boundary_face_to_element[:,1] = all_faces_in_faces // self.elements.shape[0]
 
 
-        # SO FAR WE HAVE COMPUTED THE ELEMENTS THAT CONTAIN FACES, HOWEVER 
-        # NOTE THAT WE STILL HAVE NOT COMPUTED A MAPPING BETWEEN ELEMENTS AND 
+        # SO FAR WE HAVE COMPUTED THE ELEMENTS THAT CONTAIN FACES, HOWEVER
+        # NOTE THAT WE STILL HAVE NOT COMPUTED A MAPPING BETWEEN ELEMENTS AND
         # FACES. WE ONLY KNOW WHICH ELEMENTS CONTAIN FACES FROM in2d.
         # WE NEED TO FIND THIS MAPPING NOW
 
@@ -1986,28 +1986,28 @@ class Mesh(object):
         # CHECK FOR THIS CONDITION AS ARRANGEMENT IS NO LONGER MAINTAINED
         assert np.sum(faces[:,:4].astype(np.int64) - self.faces[:,:4].astype(np.int64)) == 0
 
-        # NOW GET THE ROW MAPPING BETWEEN OLD FACES AND NEW FACES 
+        # NOW GET THE ROW MAPPING BETWEEN OLD FACES AND NEW FACES
         from Florence.Tensor import shuffle_along_axis
         row_mapper = shuffle_along_axis(faces[:,:4],self.faces[:,:4],consider_sort=True)
 
         # UPDATE THE MAP
         boundary_face_to_element[:,:] = boundary_face_to_element[row_mapper,:]
         self.boundary_face_to_element = boundary_face_to_element
-        
+
         return self.boundary_face_to_element
 
 
     def GetElementsFaceNumberingHex(self):
-        """Finds which faces belong to which elements and which faces of the elements 
-            they are e.g. 0, 1, 2 or 3.  
+        """Finds which faces belong to which elements and which faces of the elements
+            they are e.g. 0, 1, 2 or 3.
 
-            output: 
+            output:
 
                 face_elements:              [2D array] nfaces x 2 array containing elements which have face
                                             on the boundary with their flags
 
                                             Note that this method also sets the self.face_to_element to face_elements,
-                                            so the return value is not strictly necessary   
+                                            so the return value is not strictly necessary
         """
 
         if isinstance(self.face_to_element,np.ndarray):
@@ -2024,7 +2024,7 @@ class Mesh(object):
 
         C = self.InferPolynomialDegree() - 1
         node_arranger = NodeArrangementHex(C)[0]
-        
+
         all_faces = np.concatenate((np.concatenate((
                 np.concatenate((np.concatenate((np.concatenate((self.elements[:,node_arranger[0,:]],
                 self.elements[:,node_arranger[1,:]]),axis=0),self.elements[:,node_arranger[2,:]]),axis=0),
@@ -2043,7 +2043,7 @@ class Mesh(object):
 
 
     def ArrangeFacesHex(self):
-        """Arranges all the faces of hexahedral elements 
+        """Arranges all the faces of hexahedral elements
             with quadrilateral type node ordering """
 
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
@@ -2066,12 +2066,12 @@ class Mesh(object):
         """Finds the elements sharing a node.
             The return values are linked lists [list of numpy of arrays].
             Each numpy array within the list gives the elements that contain a given node.
-            As a result the size of the linked list is nnode 
+            As a result the size of the linked list is nnode
 
             outputs:
                 els:                        [list of numpy arrays] element numbers containing nodes
                 pos:                        [list of numpy arrays] elemental positions of the nodes
-                res_flat:                   [list of numpy arrays] position of nodes in the 
+                res_flat:                   [list of numpy arrays] position of nodes in the
                                             flattened element connectivity.
         """
 
@@ -2080,11 +2080,11 @@ class Mesh(object):
         elements = self.elements.flatten()
         idx_sort = np.argsort(elements)
         sorted_elements = elements[idx_sort]
-        # vals, idx_start, count = np.unique(sorted_elements, return_counts=True, return_index=True) 
-        vals, idx_start = np.unique(sorted_elements, return_index=True) 
+        # vals, idx_start, count = np.unique(sorted_elements, return_counts=True, return_index=True)
+        vals, idx_start = np.unique(sorted_elements, return_index=True)
 
         # Sets of indices
-        flat_pos = np.split(idx_sort, idx_start[1:])  
+        flat_pos = np.split(idx_sort, idx_start[1:])
         els = np.split(idx_sort // int(self.elements.shape[1]), idx_start[1:])
         pos = np.split(idx_sort %  int(self.elements.shape[1]), idx_start[1:])
 
@@ -2096,7 +2096,7 @@ class Mesh(object):
 
 
 
-    def Reader(self, filename=None, element_type="tri", reader_type="Salome", reader_type_format=None, 
+    def Reader(self, filename=None, element_type="tri", reader_type="Salome", reader_type_format=None,
         reader_type_version=None, order=0, **kwargs):
         """Convenience mesh reader method to dispatch call to subsequent apporpriate methods"""
 
@@ -2105,7 +2105,7 @@ class Mesh(object):
         self.reader_type_format = reader_type_format
         self.reader_type_version = reader_type_version
 
-        if self.reader_type is 'Salome': 
+        if self.reader_type is 'Salome':
             self.Read(filename,element_type,order)
         elif reader_type is 'GID':
             self.ReadGIDMesh(filename,element_type,order)
@@ -2148,7 +2148,7 @@ class Mesh(object):
         if isinstance(mesh.faces,np.ndarray):
             self.faces = mesh.faces.astype(np.int64)
         self.nelem = np.int64(mesh.nelem)
-        self.element_type = mesh.info 
+        self.element_type = mesh.info
 
         # RETRIEVE FACE/EDGE ATTRIBUTE
         if self.element_type == 'tri' and self.edges is None:
@@ -2174,16 +2174,16 @@ class Mesh(object):
 
             connectivity_file:              [str] filename containing element connectivity
             coordinates_file:               [str] filename containing nodal coordinates
-            mesh_type:                      [str] type of mesh tri/tet/quad/hex 
+            mesh_type:                      [str] type of mesh tri/tet/quad/hex
             edges_file:                     [str] filename containing edges of the mesh (if not given gets computed)
             faces_file:                     [str] filename containing faces of the mesh (if not given gets computed)
             delimiter_connectivity:         [str] delimiter for connectivity_file - default is white space/tab
             delimiter_coordinates:          [str] delimiter for coordinates_file - default is white space/tab
             delimiter_edges:                [str] delimiter for edges_file - default is white space/tab
             delimiter_faces:                [str] delimiter for faces_file - default is white space/tab
-            ignore_cols_connectivity:       [int] no of columns to be ignored (from the start) in the connectivity_file 
+            ignore_cols_connectivity:       [int] no of columns to be ignored (from the start) in the connectivity_file
             ignore_cols_coordinates:        [int] no of columns to be ignored (from the start) in the coordinates_file
-            ignore_cols_edges:              [int] no of columns to be ignored (from the start) in the connectivity_file 
+            ignore_cols_edges:              [int] no of columns to be ignored (from the start) in the connectivity_file
             ignore_cols_faces:              [int] no of columns to be ignored (from the start) in the coordinates_file
             index_style:                    [str] either 'c' C-based (zero based) indexing or 'f' fortran-based
                                                   (one based) indexing for elements connectivity - default is 'c'
@@ -2194,8 +2194,8 @@ class Mesh(object):
         if index_style == 'c':
             index = 1
 
-        from time import time; t1=time()    
-        self.elements = np.loadtxt(connectivity_file,dtype=np.int64,delimiter=delimiter_connectivity) - index 
+        from time import time; t1=time()
+        self.elements = np.loadtxt(connectivity_file,dtype=np.int64,delimiter=delimiter_connectivity) - index
         # self.elements = np.fromfile(connectivity_file,dtype=np.int64,count=-1) - index
         self.points = np.loadtxt(coordinates_file,dtype=np.float64,delimiter=delimiter_coordinates)
 
@@ -2210,7 +2210,7 @@ class Mesh(object):
 
         self.element_type = mesh_type
         self.nelem = self.elements.shape[0]
-        # self.edges = None 
+        # self.edges = None
         if edges_file is None:
             if mesh_type == "tri":
                 self.GetBoundaryEdgesTri()
@@ -2219,7 +2219,7 @@ class Mesh(object):
         else:
             self.edges = np.loadtxt(edges_file,dtype=np.int64,delimiter=delimiter_edges) - index
             if ignore_cols_edges !=None:
-                self.edges = self.edges[ignore_cols_edges:,:] 
+                self.edges = self.edges[ignore_cols_edges:,:]
 
         if faces_file is None:
             if mesh_type == "tet":
@@ -2240,12 +2240,12 @@ class Mesh(object):
 
         self.element_type = mesh_type
         ndim, self.nelem, nnode, nboundary = np.fromfile(filename,dtype=np.int64,count=4,sep=' ')
-    
+
         if ndim==2 and mesh_type=="tri":
             content = np.fromfile(filename,dtype=np.float64,count=4+3*nnode+4*self.nelem,sep=' ')
             self.points = content[4:4+3*nnode].reshape(nnode,3)[:,1:]
             self.elements = content[4+3*nnode:4+3*nnode+4*self.nelem].reshape(self.nelem,4)[:,1:].astype(np.int64)
-            self.elements -= 1 
+            self.elements -= 1
 
             self.GetBoundaryEdgesTri()
 
@@ -2381,7 +2381,7 @@ class Mesh(object):
             self.GetFaces()
             self.GetBoundaryFaces()
 
-        return 
+        return
 
 
     def ReadHDF5(self,filename):
@@ -2436,9 +2436,9 @@ class Mesh(object):
 
 
 
-    def SimplePlot(self, to_plot='faces', 
-        color=None, plot_points=False, point_radius=0.1, 
-        save=False, filename=None, figure=None, show_plot=True, 
+    def SimplePlot(self, to_plot='faces',
+        color=None, plot_points=False, point_radius=0.1,
+        save=False, filename=None, figure=None, show_plot=True,
         show_axis=False, grid="off"):
         """Simple mesh plot
 
@@ -2473,7 +2473,7 @@ class Mesh(object):
         elif self.element_type == "tet" or self.element_type == "hex":
             import os
             os.environ['ETS_TOOLKIT'] = 'qt4'
-            from mayavi import mlab 
+            from mayavi import mlab
 
             if to_plot == 'all_faces':
                 if self.all_faces is None:
@@ -2511,7 +2511,7 @@ class Mesh(object):
         elif self.element_type == "tet":
 
             # from mpl_toolkits.mplot3d import Axes3D
-            # import matplotlib.pyplot as plt 
+            # import matplotlib.pyplot as plt
             # figure = plt.figure()
 
             # # FOR PLOTTING ELEMENTS
@@ -2604,7 +2604,7 @@ class Mesh(object):
             trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot,
                     line_width=point_line_width,color=color)
 
-            src = mlab.pipeline.scalar_scatter(tmesh.x_edges.T.copy().flatten(), 
+            src = mlab.pipeline.scalar_scatter(tmesh.x_edges.T.copy().flatten(),
                 tmesh.y_edges.T.copy().flatten(), tmesh.z_edges.T.copy().flatten())
             src.mlab_source.dataset.lines = tmesh.connections
             lines = mlab.pipeline.stripper(src)
@@ -2657,7 +2657,7 @@ class Mesh(object):
 
             fig = plt.figure()
             point_radius = 3.
- 
+
             C = self.InferPolynomialDegree() - 1
             from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
 
@@ -2676,9 +2676,9 @@ class Mesh(object):
                 edge = self.elements[ielem,reference_edges[edge_elements[iedge,1],:]]
                 x_edges[:,iedge], y_edges[:,iedge] = self.points[edge,:].T
 
-                
+
             plt.plot(x_edges,y_edges,'-k')
-            
+
             for i in range(self.elements.shape[0]):
                 coord = self.points[self.elements[i,:],:]
                 x_avg = np.sum(coord[:,0])/self.elements.shape[1]
@@ -2704,11 +2704,11 @@ class Mesh(object):
             color = mpl.colors.hex2color('#F88379')
 
             linewidth = 3.
-            # trimesh_h = mlab.triangular_mesh(self.points[:,0], 
+            # trimesh_h = mlab.triangular_mesh(self.points[:,0],
                 # self.points[:,1], self.points[:,2], self.faces[:,:3],
                 # line_width=linewidth,tube_radius=linewidth,color=(0,0.6,0.4),
                 # representation='surface') # representation='surface'
-            trimesh_h = mlab.triangular_mesh(self.points[:,0], 
+            trimesh_h = mlab.triangular_mesh(self.points[:,0],
                 self.points[:,1], self.points[:,2], self.faces[:,:3],
                 line_width=linewidth,tube_radius=linewidth,color=(0,0.6,0.4),
                 representation='wireframe') # representation='surface'
@@ -2724,7 +2724,7 @@ class Mesh(object):
             #     x_avg = np.sum(coord[:,0])/self.elements.shape[1]
             #     y_avg = np.sum(coord[:,1])/self.elements.shape[1]
             #     z_avg = np.sum(coord[:,2])/self.elements.shape[1]
-                
+
             #     # mlab.text3d(x_avg,y_avg,z_avg,str(i),color=color)
             #     mlab.text3d(x_avg,y_avg,z_avg,str(i),color=(0,0,0.),scale=2)
 
@@ -2764,16 +2764,15 @@ class Mesh(object):
 
     def WriteVTK(self, filename=None, result=None, fmt="binary"):
         """Write mesh/results to vtu
-            
+
             inputs:
-                fmt:                    [str] VTK writer format either "binary" or "xml". 
+                fmt:                    [str] VTK writer format either "binary" or "xml".
                                         "xml" files do not support big vtk/vtu files
-                                        typically greater than 2GB whereas "binary" files can.  Also "xml" writer is 
+                                        typically greater than 2GB whereas "binary" files can.  Also "xml" writer is
                                         in-built whereas "binary" writer depends on evtk/pyevtk module
         """
 
-        assert self.elements is not None
-        assert self.points is not None
+        self.__do_essential_memebers_exist__()
 
         if fmt is "xml":
             pass
@@ -2809,7 +2808,7 @@ class Mesh(object):
                 offset = 10
                 # CHANGE NUMBERING ORDER FOR PARAVIEW
                 para_arange = [0,4,1,6,2,5,7,8,9,3]
-                elements = elements[:,para_arange]    
+                elements = elements[:,para_arange]
         elif self.element_type == 'hex':
             cellflag = 12
             offset = 8
@@ -2821,7 +2820,21 @@ class Mesh(object):
             warn('File name not specified. I am going to write one in the current directory')
             filename = PWD(__file__) + "/output.vtu"
         if ".vtu" in filename and fmt is "binary":
-            filename  = filename.split('.')[0] 
+            filename  = filename.split('.')[0]
+
+
+        if self.InferPolynomialDegree() > 1:
+            try:
+                from Florence.PostProcessing import PostProcess
+            except IOError:
+                raise RuntimeError("Writing high order elements to VTK is not supported yet")
+            pp = PostProcess(3,3)
+            pp.SetMesh(self)
+            if result is None:
+                result = np.zeros_like(self.points)[:,:,None]
+            pp.SetSolution(result)
+            pp.WriteVTK(filename,quantity=0)
+            return
 
 
         if self.InferSpatialDimension() == 2:
@@ -2887,7 +2900,7 @@ class Mesh(object):
         if external_fields is not None:
             if isinstance(external_fields,dict):
                 Dict.update(external_fields)
-            elif isinstance(external_fields,tuple):            
+            elif isinstance(external_fields,tuple):
                 for counter, fields in enumerate(external_fields):
                     Dict['results_'+str(counter)] = fields
             else:
@@ -2896,7 +2909,7 @@ class Mesh(object):
         if filename is None:
             pwd = os.path.dirname(os.path.realpath(__file__))
             filename = pwd+'/output.mat'
-        
+
         for key in Dict.keys():
             if Dict[str(key)] is None:
                 del Dict[str(key)]
@@ -2930,7 +2943,7 @@ class Mesh(object):
         self.nnode = self.points.shape[0]
 
 
-    def Rectangle(self,lower_left_point=(0,0), upper_right_point=(2,1), 
+    def Rectangle(self,lower_left_point=(0,0), upper_right_point=(2,1),
         nx=5, ny=5, element_type="tri"):
         """Creates a quad/tri mesh of a rectangle"""
 
@@ -2957,7 +2970,7 @@ class Mesh(object):
             tri_func = Delaunay(coordinates)
             self.element_type = "tri"
             self.elements = tri_func.simplices
-            self.nelem = self.elements.shape[0] 
+            self.nelem = self.elements.shape[0]
             self.points = tri_func.points
             self.GetBoundaryEdgesTri()
 
@@ -2987,7 +3000,7 @@ class Mesh(object):
 
             input:
                 lower_left_point            [tuple] of lower left vertex of the square
-                side_length:                [int] length of side 
+                side_length:                [int] length of side
                 nx,ny:                      [int] number of discretisation in each direction
                 n:                          [int] number of discretisation in all directions
                                             i.e. nx=ny=n. Overrides nx,ny
@@ -3018,7 +3031,7 @@ class Mesh(object):
 
         npoints = npoints - 1
         if npoints < 0:
-            npoints = 0 
+            npoints = 0
 
         c1 = np.array(c1); c2 = np.array(c2); c3 = np.array(c3)
         opoints = np.vstack((c1,c2,c3))
@@ -3041,14 +3054,14 @@ class Mesh(object):
 
             sys.stdout = open(os.devnull, "w")
             omesh.ConvertTrisToQuads()
-            sys.stdout = sys.__stdout__ 
+            sys.stdout = sys.__stdout__
 
 
             npoints = int(npoints/2) + 1
             mesh = self.QuadrilateralProjection(points=omesh.points[omesh.elements[0,:],:],
                 npoints=npoints, equally_spaced=equally_spaced)
             for i in range(1,omesh.nelem):
-                mesh += self.QuadrilateralProjection(points=omesh.points[omesh.elements[i,:],:], 
+                mesh += self.QuadrilateralProjection(points=omesh.points[omesh.elements[i,:],:],
                     npoints=npoints, equally_spaced=equally_spaced)
 
             self.__update__(mesh)
@@ -3056,16 +3069,16 @@ class Mesh(object):
 
 
 
-    def Arc(self, center=(0.,0.), radius=1., nrad=16, ncirc=40, 
+    def Arc(self, center=(0.,0.), radius=1., nrad=16, ncirc=40,
         start_angle=0., end_angle=np.pi/2., element_type="tri", refinement=False, refinement_level=2):
         """Creates a structured quad/tri mesh on an arc
 
             input:
                 start_angle/end_angle:      [float] starting and ending angles in radians. Angle
-                                            is measured anti-clockwise. Default start angle is 
+                                            is measured anti-clockwise. Default start angle is
                                             positive x-axis
-                refinement_level:           [int] number of elements that each element has to be 
-                                            splitted to 
+                refinement_level:           [int] number of elements that each element has to be
+                                            splitted to
 
         """
 
@@ -3083,7 +3096,7 @@ class Mesh(object):
             total_angle = np.abs(end_angle - start_angle)
             if np.isclose(total_angle,0.) or np.isclose(total_angle,2.*np.pi) or total_angle > 2.*np.pi:
                 self.Circle(center=center, radius=radius, nrad=nrad, ncirc=ncirc, element_type=element_type)
-                return 
+                return
 
         if not isinstance(center,tuple):
             raise ValueError("The center of the arc should be given in a tuple with two elements (x,y)")
@@ -3099,12 +3112,12 @@ class Mesh(object):
         nrad = int(nrad/ndivider)
 
         if ncirc % 2 != 0 or ncirc < 2:
-            ncirc = (ncirc // 2)*2 + 2 
+            ncirc = (ncirc // 2)*2 + 2
 
         radii = radius
 
-        radius = np.linspace(0,radii,nrad+1)[1:] 
-        t = np.linspace(start_angle,end_angle,ncirc+1) 
+        radius = np.linspace(0,radii,nrad+1)[1:]
+        t = np.linspace(start_angle,end_angle,ncirc+1)
         x = radius[0]*np.cos(t)[::-1]
         y = radius[0]*np.sin(t)[::-1]
 
@@ -3120,14 +3133,14 @@ class Mesh(object):
 
         for i in range(1,nrad):
             t = np.linspace(start_angle,end_angle,ncirc+1)
-            x = radius[i]*np.cos(t)[::-1] 
+            x = radius[i]*np.cos(t)[::-1]
             y = radius[i]*np.sin(t)[::-1]
             points = np.vstack((points,np.array([x,y]).T))
 
         points[:,0] += center[0]
         points[:,1] += center[1]
 
-        elements = np.zeros((ncirc,4),dtype=np.int64) 
+        elements = np.zeros((ncirc,4),dtype=np.int64)
         for i in range(1,nrad):
             aranger = np.arange(1+ncirc*(i-1),ncirc*i+1)
             elements[:,0] = aranger + i - 1
@@ -3152,17 +3165,17 @@ class Mesh(object):
             for i in range(1,self.nelem):
                 mesh += self.QuadrilateralProjection(points=self.points[self.elements[i,:],:], npoints=ndivider)
             self.__update__(mesh)
-        
+
         if element_type == "tri":
             sys.stdout = open(os.devnull, "w")
             self.ConvertQuadsToTris()
-            sys.stdout = sys.__stdout__            
+            sys.stdout = sys.__stdout__
 
 
 
-    def Circle(self, center=(0.,0.), radius=1., nrad=16, ncirc=40, 
+    def Circle(self, center=(0.,0.), radius=1., nrad=16, ncirc=40,
         element_type="tri", refinement=False, refinement_level=2):
-        """Creates a structured quad/tri mesh on circle 
+        """Creates a structured quad/tri mesh on circle
 
         """
 
@@ -3179,17 +3192,17 @@ class Mesh(object):
 
         ncirc = int(ncirc/ndivider)
         nrad = int(nrad/ndivider)
-        
+
 
         if ncirc % 8 != 0 or ncirc < 8:
             ncirc = (ncirc // 8)*8 + 8
 
         radii = radius
 
-        radius = np.linspace(0,radii,nrad+1)[1:] 
-        t = np.linspace(0,2*np.pi,ncirc+1) 
-        x = radius[0]*np.sin(t)[::-1][:-1] 
-        y = radius[0]*np.cos(t)[::-1][:-1] 
+        radius = np.linspace(0,radii,nrad+1)[1:]
+        t = np.linspace(0,2*np.pi,ncirc+1)
+        x = radius[0]*np.sin(t)[::-1][:-1]
+        y = radius[0]*np.cos(t)[::-1][:-1]
 
         points = np.zeros((ncirc+1,2),dtype=np.float64)
         points[0,:] = [0.,0.]
@@ -3204,15 +3217,15 @@ class Mesh(object):
         self.elements[-1,-1] = 1
 
         for i in range(1,nrad):
-            t = np.linspace(0,2*np.pi,ncirc+1); 
-            x = radius[i]*np.sin(t)[::-1][:-1]; 
+            t = np.linspace(0,2*np.pi,ncirc+1);
+            x = radius[i]*np.sin(t)[::-1][:-1];
             y = radius[i]*np.cos(t)[::-1][:-1];
             points = np.vstack((points,np.array([x,y]).T))
 
         points[:,0] += center[0]
         points[:,1] += center[1]
 
-        elements = np.zeros((ncirc,4),dtype=np.int64) 
+        elements = np.zeros((ncirc,4),dtype=np.int64)
         for i in range(1,nrad):
             aranger = np.arange(1+ncirc*(i-1),ncirc*i+1)
             elements[:,0] = aranger
@@ -3242,23 +3255,23 @@ class Mesh(object):
             # for i in range(1,self.nelem):
             #     mesh += self.QuadrilateralProjection(points=self.points[self.elements[i,:],:], npoints=2)
             # self.__update__(mesh)
-        
+
         if element_type == "tri":
             sys.stdout = open(os.devnull, "w")
             self.ConvertQuadsToTris()
             sys.stdout = sys.__stdout__
 
 
-    def HollowArc(self, center=(0.,0.), inner_radius=1., outer_radius=2., nrad=16, ncirc=40, 
+    def HollowArc(self, center=(0.,0.), inner_radius=1., outer_radius=2., nrad=16, ncirc=40,
         start_angle=0., end_angle=np.pi/2., element_type="tri", refinement=False, refinement_level=2):
         """Creates a structured quad/tri mesh on a hollow arc (i.e. two arc bounded by straight lines)
 
             input:
                 start_angle/end_angle:      [float] starting and ending angles in radians. Angle
-                                            is measured anti-clockwise. Default start angle is 
+                                            is measured anti-clockwise. Default start angle is
                                             positive x-axis
-                refinement_level:           [int] number of elements that each element has to be 
-                                            splitted to 
+                refinement_level:           [int] number of elements that each element has to be
+                                            splitted to
 
         """
 
@@ -3275,7 +3288,7 @@ class Mesh(object):
             total_angle = np.abs(end_angle - start_angle)
             if np.isclose(total_angle,0.) or total_angle > 2.*np.pi:
                 self.Circle(center=center, radius=radius, nrad=nrad, ncirc=ncirc, element_type=element_type)
-                return 
+                return
 
         if not isinstance(center,tuple):
             raise ValueError("The center of the arc should be given in a tuple with two elements (x,y)")
@@ -3291,14 +3304,14 @@ class Mesh(object):
         nrad = int(nrad/ndivider) + 2
 
         if ncirc % 2 != 0 or ncirc < 2:
-            ncirc = (ncirc // 2)*2 + 2 
+            ncirc = (ncirc // 2)*2 + 2
 
 
         radius = np.linspace(inner_radius,outer_radius,nrad)
         points = np.zeros((1,2),dtype=np.float64)
         for i in range(nrad):
             t = np.linspace(start_angle,end_angle,ncirc+1)
-            x = radius[i]*np.cos(t)[::-1] 
+            x = radius[i]*np.cos(t)[::-1]
             y = radius[i]*np.sin(t)[::-1]
             points = np.vstack((points,np.array([x,y]).T))
         points = points[ncirc+2:,:]
@@ -3309,7 +3322,7 @@ class Mesh(object):
         self.points = points
 
         self.elements = np.zeros((1,4),dtype=np.int64)
-        elements = np.zeros((ncirc,4),dtype=np.int64) 
+        elements = np.zeros((ncirc,4),dtype=np.int64)
         for i in range(nrad-2):
             aranger = np.arange(ncirc*i,ncirc*(i+1))
             elements[:,0] = aranger + i
@@ -3347,14 +3360,14 @@ class Mesh(object):
         input:
 
             center:             [tuple] containing the (x,y) coordinates of the center of the circle
-            inner_radius:       [double] radius of inner circle 
+            inner_radius:       [double] radius of inner circle
             outer_radius:       [double] radius of outer circle
-            element_type:       [str] tri for triangular mesh and quad for quadrilateral mesh 
-            isotropic:          [boolean] option for isotropy or anisotropy of the mesh 
+            element_type:       [str] tri for triangular mesh and quad for quadrilateral mesh
+            isotropic:          [boolean] option for isotropy or anisotropy of the mesh
             nrad:               [int] number of disrectisation in the radial direction
             ncirc:              [int] number of disrectisation in the circumferential direction
 
-        output:                 [Mesh] an instance of the Mesh class  
+        output:                 [Mesh] an instance of the Mesh class
         """
 
         # FOR SAFETY, RESET THE CLASS
@@ -3376,7 +3389,7 @@ class Mesh(object):
 
             # base = 3
             # mm = np.linspace(np.power(inner_radius,1./base),np.power(2.,1./base),nrad+1)
-            # mm = np.append(mm,np.linspace(2,outer_radius,nrad+1)) 
+            # mm = np.append(mm,np.linspace(2,outer_radius,nrad+1))
             # radii = np.zeros(mm.shape[0],dtype=np.float64)
             # for i in range(0,mm.shape[0]):
             #   radii[i] = mm[i]**base
@@ -3385,7 +3398,7 @@ class Mesh(object):
         # dd =   np.logspace(inner_radius,outer_radius,nrad+1,base=2)/2**np.linspace(inner_radius,outer_radius,nrad+1)
         # print dd*np.linspace(inner_radius,outer_radius,nrad+1)
         # print np.logspace(0,1.5,nrad+1,base=2)
-        
+
 
         xy = np.zeros((radii.shape[0]*t.shape[0],2),dtype=np.float64)
         for i in range(0,radii.shape[0]):
@@ -3398,7 +3411,7 @@ class Mesh(object):
 
         connec = np.zeros((1,4),dtype=np.int64)
 
-        for j in range(1,radii.shape[0]):   
+        for j in range(1,radii.shape[0]):
             for i in range((j-1)*(t.shape[0]-1),j*(t.shape[0]-1)):
                 if i<j*(t.shape[0]-1)-1:
                     connec = np.concatenate((connec,np.array([[i,t.shape[0]-1+i,t.shape[0]+i,i+1 ]])),axis=0)
@@ -3455,7 +3468,7 @@ class Mesh(object):
             ncirc = int(ncirc/2)
 
 
-        t = np.linspace(start_angle,end_angle,ncirc+1) 
+        t = np.linspace(start_angle,end_angle,ncirc+1)
         x = radius*np.cos(t)[::-1]
         y = radius*np.sin(t)[::-1]
 
@@ -3486,7 +3499,7 @@ class Mesh(object):
         if element_type == "tri":
             sys.stdout = open(os.devnull, "w")
             mesh.ConvertQuadsToTris()
-            sys.stdout = sys.__stdout__ 
+            sys.stdout = sys.__stdout__
 
 
         self.points = mesh.points
@@ -3494,7 +3507,7 @@ class Mesh(object):
         self.element_type = element_type
         self.nelem = mesh.elements.shape[0]
         self.nnode = mesh.points.shape[0]
-        
+
         self.GetBoundaryEdges()
 
 
@@ -3516,7 +3529,7 @@ class Mesh(object):
 
 
         tmp_end_angle = np.pi/4.
-        t = np.linspace(start_angle,tmp_end_angle,ncirc+1) 
+        t = np.linspace(start_angle,tmp_end_angle,ncirc+1)
         x = radius*np.cos(t)[::-1]
         y = radius*np.sin(t)[::-1]
 
@@ -3563,7 +3576,7 @@ class Mesh(object):
             mmesh.points[:,1] = self.points[:,0][::-1]
             mmesh.elements = np.fliplr(mmesh.elements)
             self += mmesh
-            
+
 
 
 
@@ -3579,7 +3592,7 @@ class Mesh(object):
             # Mirror along Y axis
             nmesh = deepcopy(self)
             nmesh.points[:,0] *= -1.
-            self += nmesh 
+            self += nmesh
 
 
         # If called for stetching purposes its best to keep center at (0,0)
@@ -3594,8 +3607,8 @@ class Mesh(object):
         if element_type == "tri":
             sys.stdout = open(os.devnull, "w")
             self.ConvertQuadsToTris()
-            sys.stdout = sys.__stdout__ 
- 
+            sys.stdout = sys.__stdout__
+
 
 
     def CircularPlate(self, side_length=30, radius=10, center=(0.,0.), ncirc=5, nrad=5, element_type="tri"):
@@ -3603,7 +3616,7 @@ class Mesh(object):
         """
 
         self.CircularArcPlate(side_length=side_length, radius=radius, center=(0,0),
-            start_angle=0., end_angle=np.pi/4., ncirc=ncirc, 
+            start_angle=0., end_angle=np.pi/4., ncirc=ncirc,
             nrad=nrad, element_type=element_type)
 
         # First mirror the points along 45 degree axis
@@ -3631,12 +3644,12 @@ class Mesh(object):
         # Mirror along Y axis
         nmesh = deepcopy(self)
         nmesh.points[:,0] *= -1.
-        self += nmesh 
+        self += nmesh
 
         # Mirror along X axis
         nmesh = deepcopy(self)
         nmesh.points[:,1] *= -1.
-        self += nmesh 
+        self += nmesh
 
         # This needs to be done here
         self.points[:,0] += center[0]
@@ -3648,7 +3661,7 @@ class Mesh(object):
 
 
 
-    def Parallelepiped(self,lower_left_rear_point=(0,0,0), upper_right_front_point=(2,4,10), 
+    def Parallelepiped(self,lower_left_rear_point=(0,0,0), upper_right_front_point=(2,4,10),
         nx=2, ny=4, nz=10, element_type="tet"):
         """Creates a tet/hex mesh on rectangular parallelepiped"""
 
@@ -3698,7 +3711,7 @@ class Mesh(object):
         if element_type == "tet":
             sys.stdout = open(os.devnull, "w")
             self.ConvertHexesToTets()
-            sys.stdout = sys.__stdout__ 
+            sys.stdout = sys.__stdout__
 
 
     def Cube(self, lower_left_rear_point=(0.,0.,0.), side_length=1, nx=5, ny=5, nz=5, n=None, element_type="tet"):
@@ -3706,10 +3719,10 @@ class Mesh(object):
 
             input:
                 lower_left_rear_point       [tuple] of lower left rear vertex of the cube
-                side_length:                [int] length of side 
+                side_length:                [int] length of side
                 nx,ny,nz:                   [int] number of discretisation in each direction
                 n:                          [int] number of discretisation in all directions
-                                            i.e. nx=ny=nz=n. Overrides nx,ny,nz 
+                                            i.e. nx=ny=nz=n. Overrides nx,ny,nz
             """
 
         if n != None:
@@ -3769,7 +3782,7 @@ class Mesh(object):
         self.element_type = "tet"
 
 
-        # GET EDGES & FACES - NONE ASSIGNMENT IS NECESSARY OTHERWISE IF FACES/EDGES ALREADY EXIST 
+        # GET EDGES & FACES - NONE ASSIGNMENT IS NECESSARY OTHERWISE IF FACES/EDGES ALREADY EXIST
         # THEY WON'T GET UPDATED
         self.faces = None
         self.edges = None
@@ -3783,7 +3796,7 @@ class Mesh(object):
 
 
 
-    def SphericalArc(self, center=(0.,0.,0.), inner_radius=9., outer_radius=10., 
+    def SphericalArc(self, center=(0.,0.,0.), inner_radius=9., outer_radius=10.,
         start_angle=0., end_angle=np.pi/2., ncirc=5, nrad=5, nthick=1, element_type="hex"):
 
         from Florence.Tensor import makezero, itemfreq
@@ -3816,8 +3829,8 @@ class Mesh(object):
 
             z_radius = tmp_radius**2 - layer_points[:,0]**2  - layer_points[:,1]**2
             makezero(z_radius[:,None],tol=1e-10)
-            z_radius[z_radius<0] = 0. 
-            Z = np.sqrt(z_radius) 
+            z_radius[z_radius<0] = 0.
+            Z = np.sqrt(z_radius)
             self.points[cond,0] = layer_points[:,0]
             self.points[cond,1] = layer_points[:,1]
             self.points[cond,2] = radius - Z
@@ -3835,14 +3848,14 @@ class Mesh(object):
         if element_type == "tet":
             sys.stdout = open(os.devnull, "w")
             self.ConvertHexesToTets()
-            sys.stdout = sys.__stdout__ 
+            sys.stdout = sys.__stdout__
 
 
 
     def HollowSphere(self, inner_radius=9., outer_radius=10.,
         ncirc=5, nrad=5, nthick=1):
 
-        self.SphericalArc(inner_radius=inner_radius, outer_radius=outer_radius, 
+        self.SphericalArc(inner_radius=inner_radius, outer_radius=outer_radius,
             ncirc=ncirc, nrad=nrad, nthick=nthick)
 
         # Mirror self in X, Y & Z
@@ -3865,7 +3878,7 @@ class Mesh(object):
             elements = elements.T.copy()
 
         theta = np.array([225,315,45,135])*np.pi/180
-        
+
         xs = np.tile(radius*np.cos(theta),nz+1)
         ys = np.tile(radius*np.sin(theta),nz+1)
 
@@ -3919,9 +3932,9 @@ class Mesh(object):
 
 
 
-    def ArcCylinder(self, center=(0.,0.,0.), radius=1., start_angle=0, end_angle=np.pi/2., 
+    def ArcCylinder(self, center=(0.,0.,0.), radius=1., start_angle=0, end_angle=np.pi/2.,
         length=10., nrad=16, ncirc=40, nlong=50, element_type="hex"):
-        """Creates a structured hexahedral mesh on cylinder with a base made of arc. 
+        """Creates a structured hexahedral mesh on cylinder with a base made of arc.
             The base of cylinder is always in the (X,Y) plane
         """
 
@@ -3938,9 +3951,9 @@ class Mesh(object):
             nlong = 1
 
         mesh = Mesh()
-        mesh.Arc(center=(center[0],center[1]), radius=radius, start_angle=start_angle, 
+        mesh.Arc(center=(center[0],center[1]), radius=radius, start_angle=start_angle,
             end_angle=end_angle, nrad=nrad, ncirc=ncirc, element_type="quad")
- 
+
         self.Extrude(base_mesh=mesh, length=length, nlong=nlong)
         self.points += center[2]
 
@@ -3962,10 +3975,10 @@ class Mesh(object):
             nlong = 1
 
         mesh = Mesh()
-        mesh.HollowCircle(center=(center[0],center[1]), inner_radius=inner_radius, 
-            outer_radius=outer_radius, element_type="quad", 
+        mesh.HollowCircle(center=(center[0],center[1]), inner_radius=inner_radius,
+            outer_radius=outer_radius, element_type="quad",
             isotropic=isotropic, nrad=nrad, ncirc=ncirc)
- 
+
         self.Extrude(base_mesh=mesh, length=length, nlong=nlong)
         self.points += center[2]
 
@@ -3976,7 +3989,7 @@ class Mesh(object):
 
             input:
                 base_mesh:                  [Mesh] an instance of class Mesh to be extruded.
-                                            If base_mesh is not provided (None), then self is 
+                                            If base_mesh is not provided (None), then self is
                                             taken as base_mesh
                 length:                     length along extrusion
                 path:                       [GeometricPath] the path along which the mesh needs
@@ -4059,18 +4072,18 @@ class Mesh(object):
             compute_edges=True,compute_faces=True,plot_new_mesh=False):
         """Removes elements with some specified criteria
 
-        input:              
-            (x_min,y_min,x_max,y_max)       [tuple of floats] box selection. Deletes all the elements apart 
-                                            from the ones within this box 
-            element_removal_criterion       [str]{"all","any"} the criterion for element removal with box selection. 
-                                            How many nodes of the element should be within the box in order 
-                                            not to be removed. Default is "all". "any" implies at least one node 
-            keep_boundary_only              [bool] delete all elements apart from the boundary ones 
+        input:
+            (x_min,y_min,x_max,y_max)       [tuple of floats] box selection. Deletes all the elements apart
+                                            from the ones within this box
+            element_removal_criterion       [str]{"all","any"} the criterion for element removal with box selection.
+                                            How many nodes of the element should be within the box in order
+                                            not to be removed. Default is "all". "any" implies at least one node
+            keep_boundary_only              [bool] delete all elements apart from the boundary ones
             compute_edges                   [bool] if True also compute new edges
             compute_faces                   [bool] if True also compute new faces (only 3D)
             plot_new_mesh                   [bool] if True also plot the new mesh
 
-        1. Note that this method computes a new mesh without maintaining a copy of the original 
+        1. Note that this method computes a new mesh without maintaining a copy of the original
         2. Different criteria can be mixed for instance removing all elements in the mesh apart from the ones
         in the boundary which are within a box
         """
@@ -4129,7 +4142,7 @@ class Mesh(object):
                 elif element_removal_criterion == "any":
                     if ( (xe > x_min).any() and (ye > y_min).any() and (ze > z_min).any() \
                         and (xe < x_max).any() and (ye < y_max).any() and  (ze < z_max).any() ):
-                        new_elements = np.vstack((new_elements,self.elements[elem,:]))            
+                        new_elements = np.vstack((new_elements,self.elements[elem,:]))
 
         new_elements = new_elements.astype(self.elements.dtype)
         new_points = np.copy(self.points)
@@ -4147,11 +4160,11 @@ class Mesh(object):
 
         # self.edges = None
         # self.faces = None
-        # RECOMPUTE EDGES 
+        # RECOMPUTE EDGES
         if compute_edges == True:
             self.GetBoundaryEdges()
 
-        # RECOMPUTE FACES 
+        # RECOMPUTE FACES
         if compute_faces == True and self.InferSpatialDimension()==3:
             self.GetBoundaryEdges()
             self.GetBoundaryFaces()
@@ -4167,17 +4180,19 @@ class Mesh(object):
         """ Merges self with another mesh:
             NOTE: It is the responsibility of the user to ensure that meshes are conforming
         """
-        
+
         self.__do_essential_memebers_exist__()
         mesh.__do_essential_memebers_exist__()
 
         if mesh.element_type != self.element_type:
             raise NotImplementedError('Merging two diffferent meshes is not possible yet')
 
-        if mesh.elements.shape[1] != mesh.elements.shape[1]:
-            warn('Elements are of not the same order. I am going to modify both meshes to their linear variant')
-            self.GetLinearMesh()
-            mesh.GetLinearMesh()
+        if self.elements.shape[1] != mesh.elements.shape[1]:
+            warn('Elements are of not the same order. I am going to modify both meshes to their linear variants')
+            if self.InferPolynomialDegree() > 1:
+                self = self.GetLinearMesh(remap=True)
+            if mesh.InferPolynomialDegree() > 1:
+                mesh = mesh.GetLinearMesh(remap=True)
 
         tol = 1e-10
         makezero(self.points, tol=tol)
@@ -4200,7 +4215,7 @@ class Mesh(object):
         unique_elements, inv_elements = np.unique(elements,return_inverse=True)
         unique_elements = unique_elements[inv_mpoints]
         melements = unique_elements[inv_elements]
-        melements = melements.reshape(nelem,nodeperelem).astype(np.int64) 
+        melements = melements.reshape(nelem,nodeperelem).astype(np.int64)
 
 
         self.__reset__()
@@ -4208,6 +4223,7 @@ class Mesh(object):
         self.elements = melements
         self.nelem = melements.shape[0]
         self.points = mpoints
+        self.nnode = mpoints.shape[0]
 
         ndim = self.InferSpatialDimension()
         if ndim==3:
@@ -4230,11 +4246,11 @@ class Mesh(object):
 
     def Smoothing(self, criteria={'aspect_ratio':3}):
         """Performs mesh smoothing based a given criteria.
-            
+
             input:
-                criteria                [dict] criteria can be either None, {'volume':<number>}, 
+                criteria                [dict] criteria can be either None, {'volume':<number>},
                                         {'area':<number>} or {'aspect_ratio':<number>}. The
-                                        number implies that all elements above that number 
+                                        number implies that all elements above that number
                                         should be refined. Default is {'aspect_ratio':4}
 
             Note that this is a simple mesh smoothing, and does not perform rigorous check, in
@@ -4247,7 +4263,7 @@ class Mesh(object):
             raise ValueError("Smoothing criteria should be a dictionry")
 
         if len(criteria.keys()) > 1:
-            raise ValueError("Smoothing criteria should be a dictionry with only one key")            
+            raise ValueError("Smoothing criteria should be a dictionry with only one key")
 
         criterion = criteria.keys()[0]
         number = criteria.values()[0]
@@ -4262,7 +4278,7 @@ class Mesh(object):
         non_smooth_elements_idx = np.where(quantity >= number)[0]
 
         if non_smooth_elements_idx.shape[0]==0:
-            return 
+            return
 
         if self.element_type == "quad":
             refiner_func = self.QuadrilateralProjection
@@ -4279,7 +4295,7 @@ class Mesh(object):
         smooth_elements_idx = np.where(quantity < number)[0]
         if smooth_elements_idx.shape[0]>0:
             mesh += self.GetLocalisedMesh(smooth_elements_idx)
- 
+
         self.__update__(mesh)
 
 
@@ -4288,10 +4304,10 @@ class Mesh(object):
     @staticmethod
     def TriangularProjection(c1=(0,0), c2=(2,0), c3=(2,2), points=None, npoints=10, equally_spaced=True):
         """Builds an instance of Mesh on a triangular region through FE interpolation
-            given three vertices of the triangular region. Alternatively one can specify 
-            the vertices as numpy array of 3x2. 
+            given three vertices of the triangular region. Alternatively one can specify
+            the vertices as numpy array of 3x2.
 
-            This is a static immutable function, in that it does not modify self 
+            This is a static immutable function, in that it does not modify self
         """
 
         if points is None or not isinstance(points,np.ndarray):
@@ -4304,10 +4320,10 @@ class Mesh(object):
             opoints = points
 
         from scipy.spatial import Delaunay
-        from Florence.FunctionSpace import Tri 
+        from Florence.FunctionSpace import Tri
         from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
         from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
-        
+
         if equally_spaced:
             points = EquallySpacedPointsTri(npoints)
         else:
@@ -4339,10 +4355,10 @@ class Mesh(object):
     @staticmethod
     def QuadrilateralProjection(c1=(0,0), c2=(2,0), c3=(2,2), c4=(0,2), points=None, npoints=10, equally_spaced=True):
         """Builds an instance of Mesh on a quadrilateral region through FE interpolation
-            given four vertices of the quadrilateral region. Alternatively one can specify 
-            the vertices as numpy array of 4x2. 
+            given four vertices of the quadrilateral region. Alternatively one can specify
+            the vertices as numpy array of 4x2.
 
-            This is a static immutable function, in that it does not modify self 
+            This is a static immutable function, in that it does not modify self
         """
 
         if points is None or not isinstance(points,np.ndarray):
@@ -4403,10 +4419,10 @@ class Mesh(object):
     @staticmethod
     def TetrahedralProjection(c1=(0,0,0), c2=(2,0,0), c3=(0,2,0), c4=(0,0,2), points=None, npoints=10, equally_spaced=True):
         """Builds an instance of Mesh on a tetrahedral region through FE interpolation
-            given four vertices of the tetrahedral region. Alternatively one can specify 
-            the vertices as numpy array of 4x3. 
+            given four vertices of the tetrahedral region. Alternatively one can specify
+            the vertices as numpy array of 4x3.
 
-            This is a static immutable function, in that it does not modify self 
+            This is a static immutable function, in that it does not modify self
         """
 
         if points is None or not isinstance(points,np.ndarray):
@@ -4423,7 +4439,7 @@ class Mesh(object):
         from Florence.FunctionSpace import Tet
         from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTet
         from Florence.QuadratureRules.FeketePointsTet import FeketePointsTet
-        
+
         if equally_spaced:
             points = EquallySpacedPointsTet(npoints)
         else:
@@ -4454,13 +4470,13 @@ class Mesh(object):
 
 
     @staticmethod
-    def HexahedralProjection(c1=(0,0,0), c2=(2,0,0), c3=(2,2,0), c4=(0,2,0.), 
+    def HexahedralProjection(c1=(0,0,0), c2=(2,0,0), c3=(2,2,0), c4=(0,2,0.),
         c5=(0,1.8,3.), c6=(0.2,0,3.), c7=(2,0.2,3.), c8=(1.8,2,3.),  points=None, npoints=6, equally_spaced=True):
         """Builds an instance of Mesh on a hexahedral region through FE interpolation
-            given eight vertices of the quadrilateral region. Alternatively one can specify 
-            the vertices as numpy array of 8x3. 
+            given eight vertices of the quadrilateral region. Alternatively one can specify
+            the vertices as numpy array of 8x3.
 
-            This is a static immutable function, in that it does not modify self 
+            This is a static immutable function, in that it does not modify self
         """
 
         if points is None or not isinstance(points,np.ndarray):
@@ -4523,7 +4539,7 @@ class Mesh(object):
 
     def ChangeType(self):
         """Change mesh data type from signed to unsigned"""
-        
+
         self.__do_essential_memebers_exist__()
         self.points = np.ascontiguousarray(self.points.astype(np.float64))
         if isinstance(self.elements,np.ndarray):
@@ -4537,7 +4553,7 @@ class Mesh(object):
 
 
     def InferPolynomialDegree(self):
-        """Infer the degree of interpolation (p) based on the shape of 
+        """Infer the degree of interpolation (p) based on the shape of
             self.elements
 
             returns:        [int] polynomial degree
@@ -4554,7 +4570,7 @@ class Mesh(object):
                 return self.degree
             if self.element_type == "tri" and (i+1)*(i+2)/2==self.elements.shape[1]:
                 return self.degree
-        
+
 
         p = 0
         if self.element_type == "tet":
@@ -4610,7 +4626,7 @@ class Mesh(object):
 
 
     def InferNumberOfNodesPerElement(self, p=None, element_type=None):
-        """Infers number of nodes per element. If p and element_type are 
+        """Infers number of nodes per element. If p and element_type are
             not None then returns the number of nodes required for the given
             element type with the given polynomial degree"""
 
@@ -4626,14 +4642,14 @@ class Mesh(object):
             elif element_type=="hex":
                 return int((p+1)**3)
             else:
-                raise ValueError("Did not understand element type")    
-                
+                raise ValueError("Did not understand element type")
+
         assert self.elements.shape[0] is not None
         return self.elements.shape[1]
 
 
     def InferNumberOfNodesPerLinearElement(self, element_type=None):
-        """Infers number of nodes per element. If element_type are 
+        """Infers number of nodes per element. If element_type are
             not None then returns the number of nodes required for the given
             element type"""
 
@@ -4662,8 +4678,8 @@ class Mesh(object):
 
         self.element_type = tmp
 
-        return nodeperelem  
-                
+        return nodeperelem
+
 
 
     def InferElementType(self):
@@ -4795,7 +4811,7 @@ class Mesh(object):
             inputs:
                 elements:           [int, tuple, list, 1D array] of elements in big mesh (self)
                                     from which a small localised needs to be constructed
-                solution            [1D array having the same length as big mesh points] 
+                solution            [1D array having the same length as big mesh points]
                                     if a solution also needs to be mapped over the localised element
         """
 
@@ -4826,8 +4842,8 @@ class Mesh(object):
 
     def ConvertToLinearMesh(self):
         """Convert a high order mesh to linear mesh.
-            This is different from GetLinearMesh in that it converts a 
-            high order mesh to linear mesh by tessellation i.e. the number of 
+            This is different from GetLinearMesh in that it converts a
+            high order mesh to linear mesh by tessellation i.e. the number of
             points in the mesh do not change
         """
 
@@ -4874,7 +4890,7 @@ class Mesh(object):
 
 
     def ConvertTrisToQuads(self):
-        """Converts a tri mesh to a quad mesh through refinement/splitting. 
+        """Converts a tri mesh to a quad mesh through refinement/splitting.
             This is a simpler version of the the Blossom-quad algorithm implemented in gmsh"""
 
         self.__do_memebers_exist__()
@@ -4884,7 +4900,7 @@ class Mesh(object):
 
         tconv = time()
 
-        # SPLIT THE TRIANGLE INTO 3 QUADS BY CONNECTING THE 
+        # SPLIT THE TRIANGLE INTO 3 QUADS BY CONNECTING THE
         # MEDIAN AND MIDPOINTS OF THE TRIANGLE
 
         # FIND MEDIAN OF TRIANGLES
@@ -4924,7 +4940,7 @@ class Mesh(object):
         # KEEP ZEROFY ON, OTHERWISE YOU GET STRANGE BEHVAIOUR
         Decimals = 10
         rounded_points = points.copy()
-        makezero(rounded_points) 
+        makezero(rounded_points)
         rounded_repoints = np.round(rounded_points,decimals=Decimals)
         points, idx_points, inv_points = unique2d(rounded_points,order=False,
             consider_sort=False,return_index=True,return_inverse=True)
@@ -4940,7 +4956,7 @@ class Mesh(object):
         self.nnode = self.points.shape[0]
         self.GetBoundaryEdgesQuad()
 
-        print("Triangular to quadrilateral mesh conversion took", time() - tconv, "seconds") 
+        print("Triangular to quadrilateral mesh conversion took", time() - tconv, "seconds")
 
 
     def ConvertTetsToHexes(self):
@@ -4975,24 +4991,24 @@ class Mesh(object):
         # # STABLE APPROACH
         # points = np.zeros((1,3))
         # for elem in range(self.nelem):
-        #     hex0 = np.concatenate((self.points[self.elements[elem,0],:][None,:], mid01[elem,:][None,:], 
-        #         med012[elem,:][None,:], mid02[elem,:][None,:], 
-        #         mid03[elem,:][None,:], med013[elem,:][None,:], 
+        #     hex0 = np.concatenate((self.points[self.elements[elem,0],:][None,:], mid01[elem,:][None,:],
+        #         med012[elem,:][None,:], mid02[elem,:][None,:],
+        #         mid03[elem,:][None,:], med013[elem,:][None,:],
         #         median[elem,:][None,:], med023[elem,:][None,:]),axis=0)
 
-        #     hex1 = np.concatenate((self.points[self.elements[elem,1],:][None,:], mid13[elem,:][None,:], 
-        #         med123[elem,:][None,:], mid12[elem,:][None,:], 
+        #     hex1 = np.concatenate((self.points[self.elements[elem,1],:][None,:], mid13[elem,:][None,:],
+        #         med123[elem,:][None,:], mid12[elem,:][None,:],
         #         mid01[elem,:][None,:], med013[elem,:][None,:],
         #         median[elem,:][None,:], med012[elem,:][None,:]),axis=0)
 
-        #     hex2 = np.concatenate((self.points[self.elements[elem,3],:][None,:], mid23[elem,:][None,:], 
-        #         med123[elem,:][None,:], mid13[elem,:][None,:], 
+        #     hex2 = np.concatenate((self.points[self.elements[elem,3],:][None,:], mid23[elem,:][None,:],
+        #         med123[elem,:][None,:], mid13[elem,:][None,:],
         #         mid03[elem,:][None,:], med023[elem,:][None,:],
         #         median[elem,:][None,:], med013[elem,:][None,:]),axis=0)
 
-        #     hex3 = np.concatenate((self.points[self.elements[elem,2],:][None,:], mid02[elem,:][None,:], 
-        #         med012[elem,:][None,:], mid12[elem,:][None,:], 
-        #         mid23[elem,:][None,:], med023[elem,:][None,:], 
+        #     hex3 = np.concatenate((self.points[self.elements[elem,2],:][None,:], mid02[elem,:][None,:],
+        #         med012[elem,:][None,:], mid12[elem,:][None,:],
+        #         mid23[elem,:][None,:], med023[elem,:][None,:],
         #         median[elem,:][None,:],med123[elem,:][None,:]),axis=0)
 
         #     points = np.concatenate((points,hex0,hex1,hex2,hex3))
@@ -5038,7 +5054,7 @@ class Mesh(object):
         # KEEP ZEROFY ON, OTHERWISE YOU GET STRANGE BEHVAIOUR
         Decimals = 10
         rounded_points = points.copy()
-        makezero(rounded_points) 
+        makezero(rounded_points)
         rounded_repoints = np.round(rounded_points,decimals=Decimals)
         points, inv_points = unique2d(rounded_points,order=False,
             consider_sort=False,return_inverse=True)
@@ -5081,9 +5097,9 @@ class Mesh(object):
         C = self.InferPolynomialDegree() - 1
         node_arranger = NodeArrangementQuadToTri(C)
 
-        tris = np.concatenate((self.elements[:,node_arranger[0,:]], 
+        tris = np.concatenate((self.elements[:,node_arranger[0,:]],
             self.elements[:,node_arranger[1,:]]),axis=0).astype(self.elements.dtype)
-        
+
         points = self.points
         edges = self.edges
 
@@ -5104,7 +5120,7 @@ class Mesh(object):
 
             A hexahedron can be split into 5 or 6 tetrahedrons and there are
             many possible configuration without the edges/faces intersecting each
-            other. This method splits a hex into 6 tets. 
+            other. This method splits a hex into 6 tets.
 
             Note that in principle, this splitting produces non-conformal meshes
         """
@@ -5126,7 +5142,7 @@ class Mesh(object):
             self.elements[:,node_arranger[4,:]],
             self.elements[:,node_arranger[5,:]]),axis=0).astype(self.elements.dtype)
 
-       
+
         points = self.points
         edges = self.edges
         all_edges = self.all_edges
@@ -5149,7 +5165,7 @@ class Mesh(object):
 
     def CreateDummyLowerDimensionalMesh(self):
         """Create a dummy lower dimensional mesh that would have some specific mesh attributes at least.
-            The objective is that the lower dimensional mesh should have the same element type as the 
+            The objective is that the lower dimensional mesh should have the same element type as the
             boundary faces/edges of the actual mesh and be the same order"""
 
 
@@ -5164,7 +5180,7 @@ class Mesh(object):
             mesh.GetHighOrderMesh(p=p)
         elif self.element_type == "tri" or self.element_type == "quad":
             mesh.Line(n=1, p=p)
-        sys.stdout = sys.__stdout__ 
+        sys.stdout = sys.__stdout__
 
         return mesh
 
@@ -5176,7 +5192,7 @@ class Mesh(object):
         axis0 = int(axis0)
         axis1 = int(axis1)
 
-        self.points[:,[axis0,axis1]] = self.points[:,[axis1,axis0]] 
+        self.points[:,[axis0,axis1]] = self.points[:,[axis1,axis0]]
 
 
     @staticmethod
@@ -5217,7 +5233,7 @@ class Mesh(object):
                 mesh_x1 = mesh_edge_coord[0,0];         mesh_y1 = mesh_edge_coord[0,1]
                 mesh_x2 = mesh_edge_coord[1,0];         mesh_y2 = mesh_edge_coord[1,1]
 
-                # FIND SLOPE OF THIS LINE 
+                # FIND SLOPE OF THIS LINE
                 mesh_angle = np.arctan((mesh_y2-mesh_y1)/(mesh_x2-mesh_x1))
 
                 # CHECK IF GEOMETRY AND MESH EDGES ARE PARALLEL
@@ -5252,7 +5268,7 @@ class Mesh(object):
         """
         self_bounds = self.Bounds
         ndim = self.InferSpatialDimension()
-        
+
         if isinstance(other,Mesh):
             other_bounds = other.Bounds
             mins = (self_bounds[0,:] > other_bounds[0,:]).all()
@@ -5272,7 +5288,7 @@ class Mesh(object):
         """
         self_bounds = self.Bounds
         ndim = self.InferSpatialDimension()
-        
+
         if isinstance(other,Mesh):
             other_bounds = other.Bounds
             mins = (self_bounds[0,:] >= other_bounds[0,:]).all()
@@ -5292,7 +5308,7 @@ class Mesh(object):
         """
         self_bounds = self.Bounds
         ndim = self.InferSpatialDimension()
-        
+
         if isinstance(other,Mesh):
             other_bounds = other.Bounds
             mins = (self_bounds[0,:] < other_bounds[0,:]).all()
@@ -5312,7 +5328,7 @@ class Mesh(object):
         """
         self_bounds = self.Bounds
         ndim = self.InferSpatialDimension()
-        
+
         if isinstance(other,Mesh):
             other_bounds = other.Bounds
             mins = (self_bounds[0,:] <= other_bounds[0,:]).all()
