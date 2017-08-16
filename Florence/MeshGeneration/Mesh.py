@@ -4014,35 +4014,20 @@ class Mesh(object):
             mesh = deepcopy(self)
             self.__reset__()
 
-
-        if mesh.IsHighOrder:
-            raise NotImplementedError("Extruding high order meshes is not supported yet")
-
+        # if mesh.IsHighOrder:
+            # raise NotImplementedError("Extruding high order meshes is not supported yet")
 
         nlong = int(nlong)
         if nlong==0:
             nlong = 1
 
-        nnode = (nlong+1)*mesh.points.shape[0]
-        nnode_2D = mesh.points.shape[0]
         mp = mesh.InferPolynomialDegree()
-
-        self.points = np.zeros((nnode,3),dtype=np.float64)
-
-        if path is None:
-
-            node_aranger = np.linspace(0,length,nlong+1)
-
-            for i in range(nlong+1):
-                self.points[nnode_2D*i:nnode_2D*(i+1),:2] = mesh.points
-                self.points[nnode_2D*i:nnode_2D*(i+1), 2] = node_aranger[i]
-
-        elif isinstance(path,GeometricPath):
-            points = path.ComputeExtrusion(nlong=nlong)
-            for i in range(nlong+1):
-                self.points[nnode_2D*i:nnode_2D*(i+1),:2] = mesh.points + points[i,:2]
-                self.points[nnode_2D*i:nnode_2D*(i+1), 2] = points[i,2]
-
+        # LAYERS ONLY HOLD FOR UNIFORM (HEXAHEDRAL TYPE) EXTRUSIONS, BUT
+        # THEN TETRAHEDRAL OR OTHER TYPES OF EXTRUSIONS ARE PROBABLY NOT
+        # GOING TO MAKE IT TO THIS FUNCTION - USED FOR HIGH P EXTRUSIONS ONLY
+        nlayer = mp
+        nnode = (nlong + 1 + nlong*(nlayer-1))*mesh.points.shape[0]
+        nnode_2D = mesh.points.shape[0]
 
         nelem= nlong*mesh.nelem
         nelem_2D = mesh.nelem
@@ -4051,14 +4036,60 @@ class Mesh(object):
         element_aranger = np.arange(nlong)
         self.elements = np.zeros((nelem,nsize),dtype=np.int64)
 
-        for i in range(nlong):
-            self.elements[nelem_2D*i:nelem_2D*(i+1),:nsize_2d] = mesh.elements + i*nnode_2D
-            self.elements[nelem_2D*i:nelem_2D*(i+1),nsize_2d:] = mesh.elements + (i+1)*nnode_2D
+        self.points = np.zeros((nnode,3),dtype=np.float64)
+
+        if mp == 1:
+            # LINEAR MESH EXTRUSION
+            if path is None:
+                node_aranger = np.linspace(0,length,nlong+1)
+                for i in range(nlong+1):
+                    self.points[nnode_2D*i:nnode_2D*(i+1),:2] = mesh.points
+                    self.points[nnode_2D*i:nnode_2D*(i+1), 2] = node_aranger[i]
+
+            elif isinstance(path,GeometricPath):
+                points = path.ComputeExtrusion(nlong=nlong)
+                for i in range(nlong+1):
+                    self.points[nnode_2D*i:nnode_2D*(i+1),:2] = mesh.points + points[i,:2]
+                    self.points[nnode_2D*i:nnode_2D*(i+1), 2] = points[i,2]
+
+            for i in range(nlong):
+                self.elements[nelem_2D*i:nelem_2D*(i+1),:nsize_2d] = mesh.elements + i*nnode_2D
+                self.elements[nelem_2D*i:nelem_2D*(i+1),nsize_2d:] = mesh.elements + (i+1)*nnode_2D
+
+        else:
+            # HIGH ORDER MESH EXTRUSION
+            if path is None:
+                node_aranger = np.linspace(0,length,nlong+1)
+                counter = 0
+                for i in range(nlong):
+                    node_aranger_2d = np.linspace(node_aranger[i],node_aranger[i+1],nlayer+1)
+                    for j in range(nlayer):
+                        self.points[nnode_2D*counter:nnode_2D*(counter+1),:2] = mesh.points
+                        self.points[nnode_2D*counter:nnode_2D*(counter+1), 2] = node_aranger_2d[j]
+                        counter += 1
+                # LAST COUNTER
+                self.points[nnode_2D*counter:nnode_2D*(counter+1),:2] = mesh.points
+                self.points[nnode_2D*counter:nnode_2D*(counter+1), 2] = length
+            else:
+                raise NotImplementedError("Extruding high order elements along specified geometric path is not implemented yet")
+
+            from Florence.QuadratureRules.NodeArrangement import NodeArrangementLayeredToHex
+            node_aranger = NodeArrangementLayeredToHex(mp-1)
+            dum_e = np.zeros((nelem_2D,nsize))
+            counter = 0
+            for i in range(nlong):
+                for j in range(nlayer+1):
+                    dum_e[:,j*nsize_2d:(j+1)*nsize_2d] = mesh.elements + (counter+0)*nnode_2D
+                    counter += 1
+                counter -= 1
+                self.elements[nelem_2D*i:nelem_2D*(i+1),:] = dum_e
+            self.elements = self.elements[:,node_aranger]
 
 
         self.element_type = "hex"
         self.nelem = nelem
         self.nnode = nnode
+        self.degree = mp
         self.GetBoundaryFaces()
         self.GetBoundaryEdges()
 
