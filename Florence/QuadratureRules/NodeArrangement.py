@@ -97,7 +97,7 @@ def NodeArrangementTet(C):
         face_1 = all_nodes[np.where(np.abs(fekete[:,1]+1.)<tol)].tolist()
         face_2 = all_nodes[np.where(np.abs(fekete[:,0]+1.)<tol)].tolist()
         # THE AREA OF FACE_3 TRIANGLE
-        area = np.sqrt(12) 
+        area = np.sqrt(12)
         # FIND ALL THE NODES LYING ON THIS FACE
         l12 = np.repeat((fekete[1,:] - fekete[2,:])[:,None].T,fekete.shape[0],axis=0)
         l13 = np.repeat((fekete[1,:] - fekete[3,:])[:,None].T,fekete.shape[0],axis=0)
@@ -142,7 +142,7 @@ def NodeArrangementTri(C):
     edge1 = np.append(np.append(1,2),edge1)
     edge2 = np.append(np.append(2,0),edge2[::-1])
     edge_numbering = np.concatenate((edge0[None,:],edge1[None,:],edge2[None,:]),axis=0).astype(np.int64)
-  
+
 
     return edge_numbering, traversed_edge_numbering_tri
 
@@ -180,7 +180,7 @@ def NodeArrangementQuad(C):
         edge0 = np.append(edge0,i+4)
         edge1 = np.append(edge1, 2*C+5 + i*(C+2))
         edge3 = np.append(edge3, C + 4 + i*(C+2))
-    
+
     edge2 = np.arange((C+2)**2-C,(C+2)**2)
 
     edge0 = np.append(np.append(0,1),edge0)
@@ -188,7 +188,7 @@ def NodeArrangementQuad(C):
     edge2 = np.append(np.append(2,3),edge2[::-1])
     edge3 = np.append(np.append(3,0),edge3[::-1])
 
-    edge_numbering = np.concatenate((edge0[None,:],edge1[None,:],edge2[None,:],edge3[None,:]),axis=0).astype(np.int64)  
+    edge_numbering = np.concatenate((edge0[None,:],edge1[None,:],edge2[None,:],edge3[None,:]),axis=0).astype(np.int64)
 
     return edge_numbering, traversed_edge_numbering_quad, element_numbering
 
@@ -206,13 +206,13 @@ def NodeArrangementHex(C):
         if i==C:
             element_numbering = element_numbering[~np.in1d(element_numbering,faces_z[:4])]
             element_numbering = np.concatenate((element_numbering[:4],faces_z[:4],element_numbering[4:]))
-    traversed_edge_numbering_tet = None
+    traversed_edge_numbering_hex = None
 
 
     # GET FACE NUMBERING ORDER FROM TETRAHEDRAL ELEMENT
     face_0,face_1,face_2,face_3 = [],[],[],[]
     if C==0:
-        face_0 = [0,1,2,3]  # constant Z =-1 plane 
+        face_0 = [0,1,2,3]  # constant Z =-1 plane
         face_1 = [4,5,6,7]  # constant Z = 1 plane
         face_2 = [0,1,5,4]  # constant Y =-1 plane
         face_3 = [3,2,6,7]  # constant Y = 1 plane
@@ -588,7 +588,7 @@ def NodeArrangementHex(C):
         face_numbering = np.array([face_0,face_1,face_2,face_3,face_4,face_5])
         # print("face_numbering = ", repr(face_numbering))
 
-    return face_numbering, traversed_edge_numbering_tet, element_numbering
+    return face_numbering, traversed_edge_numbering_hex, element_numbering
 
 
 
@@ -640,9 +640,9 @@ def NodeArrangementQuadToTri(C):
     else:
         raise NotImplementedError('Conversion beynond p=6 nodes not implemented yet')
         # THIS FLOATING POINT APPROACH COMAPRES TRI AND QUAD
-        # POINTS TO GET NUMBERING, BUT DOESNOT WORK FOR NOT 
-        # EQUALLY DISTANCED POINTS AS FEKETE POINTS ON TRIS 
-        # DON'T MATCH GAUSS LOBATTO POINTS OF QUADS FOR THE 
+        # POINTS TO GET NUMBERING, BUT DOESNOT WORK FOR NOT
+        # EQUALLY DISTANCED POINTS AS FEKETE POINTS ON TRIS
+        # DON'T MATCH GAUSS LOBATTO POINTS OF QUADS FOR THE
         # INTERIOR NODES
         from .GaussLobattoPoints import GaussLobattoPointsQuad
         from .FeketePointsTri import FeketePointsTri
@@ -726,5 +726,25 @@ def NodeArrangementHexToTet(C):
         node_arranger[5,:] = [1,5,6,7,14,20,25,19,24,26]
     else:
         raise NotImplementedError('Conversion beynond p=2 nodes not implemented yet')
+
+    return node_arranger
+
+
+@lru_cache(maxsize=None)
+def NodeArrangementLayeredToHex(C):
+    """Map nodes from layered projection to hex type node numbering.
+        Used for high order mesh extrusion of quads to hexes
+    """
+
+    # n = C+1
+    # from Florence import Mesh
+    # mesh = Mesh()
+    # mesh.Parallelepiped(lower_left_rear_point=(-1,-1,-1), upper_right_front_point=(1,1,1),nx=n,ny=n,nz=n)
+    # print(mesh.points)
+
+    nsize_2d = (C+2)**2
+    nsize = (C+2)**3
+    node_arranger = np.concatenate(([0,1,2,3],np.arange(nsize - nsize_2d, nsize - nsize_2d + 4),
+        np.arange(4,nsize - nsize_2d),np.arange(nsize - nsize_2d + 4,nsize)))
 
     return node_arranger
