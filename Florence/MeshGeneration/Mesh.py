@@ -2762,7 +2762,7 @@ class Mesh(object):
 
 
 
-    def WriteVTK(self, filename=None, result=None, fmt="binary"):
+    def WriteVTK(self, filename=None, result=None, fmt="binary", interpolation_degree=10):
         """Write mesh/results to vtu
 
             inputs:
@@ -2770,6 +2770,7 @@ class Mesh(object):
                                         "xml" files do not support big vtk/vtu files
                                         typically greater than 2GB whereas "binary" files can.  Also "xml" writer is
                                         in-built whereas "binary" writer depends on evtk/pyevtk module
+                interpolation_degree:   [int] used only for writing high order curved meshes
         """
 
         self.__do_essential_memebers_exist__()
@@ -2833,7 +2834,7 @@ class Mesh(object):
             if result is None:
                 result = np.zeros_like(self.points)[:,:,None]
             pp.SetSolution(result)
-            pp.WriteVTK(filename,quantity=0)
+            pp.WriteVTK(filename,quantity=0,interpolation_degree=interpolation_degree)
             return
 
 
