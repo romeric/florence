@@ -15,26 +15,26 @@ class LinearSolver(object):
     """Base class for all linear sparse direct and iterative solvers"""
 
     def __init__(self,linear_solver="direct", linear_solver_type="umfpack",
-        apply_preconditioner=False, preconditioner="smoothed_aggregation", 
+        apply_preconditioner=False, preconditioner="smoothed_aggregation",
         iterative_solver_tolerance=1.0e-12, reduce_matrix_bandwidth=False,
         out_of_core=False, geometric_discretisation=None, dont_switch_solver=False):
         """
 
             input:
-                linear_solver:          [str] type of solver either "direct", 
+                linear_solver:          [str] type of solver either "direct",
                                         "iterative" or "multigrid"
 
                 linear_solver_type      [str] type of direct or linear solver to
-                                        use, for instance "umfpack", "superlu" or 
+                                        use, for instance "umfpack", "superlu" or
                                         "mumps" for direct solvers, or "cg", "gmres"
                                         etc for iterative solvers or "amg" for algebraic
                                         multigrid solver. See WhichSolvers method for
-                                        the complete set of available linear solvers 
+                                        the complete set of available linear solvers
 
                 preconditioner:         [str] either "amg_smoothed_aggregation",
-                                        or "ruge_stuben" or "rootnode" for 
+                                        or "ruge_stuben" or "rootnode" for
                                         a preconditioner based on algebraic multigrid
-                                        or "incomplete_lu" for scipy's spilu linear 
+                                        or "incomplete_lu" for scipy's spilu linear
                                         operator
 
                 geometric_discretisation:
@@ -45,7 +45,7 @@ class LinearSolver(object):
                 dont_switch_solver:     Do not switch between solvers automatically
 
 
-        """          
+        """
 
         self.is_sparse = True
         self.solver_type = linear_solver
@@ -93,25 +93,25 @@ class LinearSolver(object):
         # self.analysis_nature = "linear"
 
     def SetSolver(self,linear_solver="direct", linear_solver_type="umfpack",
-        apply_preconditioner=False, preconditioner="amg_smoothed_aggregation", 
+        apply_preconditioner=False, preconditioner="amg_smoothed_aggregation",
         iterative_solver_tolerance=1.0e-12, reduce_matrix_bandwidth=False,
         geometric_discretisation=None):
         """
 
             input:
-                linear_solver:          [str] type of solver either "direct", 
+                linear_solver:          [str] type of solver either "direct",
                                         "iterative" or "multigrid"
 
                 linear_solver_type      [str] type of direct or linear solver to
-                                        use, for instance "umfpack", "superlu" or 
+                                        use, for instance "umfpack", "superlu" or
                                         "mumps" for direct solvers, or "cg", "gmres"
                                         etc for iterative solvers or "amg" for algebraic
                                         multigrid solver. See WhichSolvers method for
-                                        the complete set of available linear solvers 
+                                        the complete set of available linear solvers
 
-                preconditioner:         [str] either "amg_smoothed_aggregation" for 
+                preconditioner:         [str] either "amg_smoothed_aggregation" for
                                         a preconditioner based on algebraic multigrid
-                                        or "incomplete_lu" for scipy's spilu linear 
+                                        or "incomplete_lu" for scipy's spilu linear
                                         operator
 
                 geometric_discretisation:
@@ -119,7 +119,7 @@ class LinearSolver(object):
                                         instance for FEM discretisations this would correspond
                                         to "tri", "quad", "tet", "hex" etc
 
-        """ 
+        """
 
         self.solver_type = linear_solver
         self.solver_subtype = "umfpack"
@@ -146,14 +146,14 @@ class LinearSolver(object):
 
             input:
                 A:                      [csc_matrix or csc_matrix]
-                type:                   [str] either "amg_smoothed_aggregation" for 
+                type:                   [str] either "amg_smoothed_aggregation" for
                                         a preconditioner based on algebraic multigrid
-                                        or "incomplete_lu" for scipy's spilu linear 
+                                        or "incomplete_lu" for scipy's spilu linear
                                         operator
 
             returns:                    A preconditioner that can be used in conjunction
-                                        with scipy's sparse linear iterative solvers 
-                                        (the M keyword in scipy's iterative solver) 
+                                        with scipy's sparse linear iterative solvers
+                                        (the M keyword in scipy's iterative solver)
         """
 
         if not (isspmatrix_csc(A) or isspmatrix_csr(A)):
@@ -270,7 +270,7 @@ class LinearSolver(object):
                     # os.remove(pwd+"/solution")
                     sol = h5py.File(pwd+"/solution.mat")['solution']
                     os.remove(pwd+"/solution.mat")
-                
+
 
                 # REMOVE THE FILES
                 os.remove(pwd+"/JuliaDict.mat")
@@ -315,7 +315,7 @@ class LinearSolver(object):
 
             if not isspmatrix_csr(A):
                 A = A.tocsr()
-            
+
             t_solve = time()
             # AMG METHOD
             if self.preconditioner_type=="smoothed_aggregation":
