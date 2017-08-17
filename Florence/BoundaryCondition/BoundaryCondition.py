@@ -29,7 +29,7 @@ class BoundaryCondition(object):
         self.has_planar_surfaces = False
         self.solve_for_planar_faces = True
         self.projection_flags = None
-        # FIX DEGREES OF FREEDOM EVERY WHERE CAD PROJECTION IS NOT APPLIED 
+        # FIX DEGREES OF FREEDOM EVERY WHERE CAD PROJECTION IS NOT APPLIED
         self.fix_dof_elsewhere = None
         # FOR 3D ARC-LENGTH PROJECTION
         self.orthogonal_fallback_tolerance = 1.0
@@ -57,13 +57,13 @@ class BoundaryCondition(object):
         self.is_body_force_shape_functions_computed = False
 
 
-        # NODAL FORCES GENERATED BASED ON DIRICHLET OR NEUMANN ARE NOT 
+        # NODAL FORCES GENERATED BASED ON DIRICHLET OR NEUMANN ARE NOT
         # IMPLEMENTED AS PART OF BOUNDARY CONDITION YET. THIS ESSENTIALLY
         # MEANS SAVING MULTIPLE RHS VALUES
         # self.dirichlet_forces = None
         # self.neumann_forces = None
 
-        # # THE FOLLOWING MEMBERS ARE NOT UPDATED, TO REDUCE MEMORY FOOTPRINT 
+        # # THE FOLLOWING MEMBERS ARE NOT UPDATED, TO REDUCE MEMORY FOOTPRINT
         # self.external_nodal_forces = None
         # self.internal_traction_forces = None
         # self.residual = None
@@ -82,8 +82,8 @@ class BoundaryCondition(object):
 
 
 
-    def SetCADProjectionParameters(self, cad_file=None, requires_cad=True, projection_type='orthogonal', 
-        nodal_spacing='equal', project_on_curves=False, has_planar_surfaces=False, solve_for_planar_faces=True, 
+    def SetCADProjectionParameters(self, cad_file=None, requires_cad=True, projection_type='orthogonal',
+        nodal_spacing='equal', project_on_curves=False, has_planar_surfaces=False, solve_for_planar_faces=True,
         scale=1.0,condition=1.0e20, projection_flags=None, fix_dof_elsewhere=True,
         orthogonal_fallback_tolerance=1.0, surface_identification_algorithm='minimisation',
         modify_linear_mesh_on_projection=True):
@@ -113,13 +113,13 @@ class BoundaryCondition(object):
 
 
     def SetProjectionCriteria(self, proj_func, mesh, takes_self=False, **kwargs):
-        """Factory function for setting projection criteria specific 
+        """Factory function for setting projection criteria specific
             to a problem
 
             input:
                 func                [function] function that computes projection criteria
                 mesh                [Mesh] an instance of mesh class
-                **kwargs            optional keyword arguments 
+                **kwargs            optional keyword arguments
         """
 
         if takes_self:
@@ -173,7 +173,7 @@ class BoundaryCondition(object):
                 y *= self.scale_value_on_projection
                 if np.sqrt(x*x+y*y)< self.condition_for_projection:
                     projection_edges[iedge,0]=1
-            
+
             self.projection_flags = projection_edges
 
 
@@ -181,7 +181,7 @@ class BoundaryCondition(object):
         """Compares CAD geometry and mesh, to check if the mesh coordinates
             require scaling
 
-            raises an error if scaling is 
+            raises an error if scaling is
         """
 
         gminx, gmaxx = np.min(gpoints[:,0]), np.max(gpoints[:,0])
@@ -189,9 +189,9 @@ class BoundaryCondition(object):
         gmax = np.max(gpoints)
         mmax = np.max(mesh.points)
 
-        # NOTE THAT THE BOUNDS OF NURBS BOUNDARY ISN'T 
-        # NECESSARILY EXACTLY THE SAME AS THE MESH, EVEN IF 
-        # SCALED APPROPRIATELY 
+        # NOTE THAT THE BOUNDS OF NURBS BOUNDARY ISN'T
+        # NECESSARILY EXACTLY THE SAME AS THE MESH, EVEN IF
+        # SCALED APPROPRIATELY
         gbounds = np.array([[gminx,gminy],[gmaxx,gmaxy]])
 
         units_scalar = [1000.,25.4]
@@ -205,7 +205,7 @@ class BoundaryCondition(object):
                     # break
 
         return gbounds
- 
+
 
 
     def SetDirichletCriteria(self, func, *args, **kwargs):
@@ -246,7 +246,7 @@ class BoundaryCondition(object):
 
             IsHighOrder = mesh.IsHighOrder
             # IsDirichletComputed = getattr(MainData.BoundaryData,"IsDirichletComputed",None)
-                
+
             IsHighOrder = False
 
             if IsHighOrder is False:
@@ -279,16 +279,16 @@ class BoundaryCondition(object):
                             self.columns_out = np.append(self.columns_out,nvar*Rest_DOFs[inode]+i)
                             self.applied_dirichlet = np.append(self.applied_dirichlet,0.0)
 
-                print('Finished identifying Dirichlet boundary conditions from CAD geometry.', 
+                print('Finished identifying Dirichlet boundary conditions from CAD geometry.',
                     ' Time taken', time()-tCAD, 'seconds')
 
             else:
-                
+
                 end = -3
                 self.applied_dirichlet = np.loadtxt(mesh.filename.split(".")[0][:end]+"_Dirichlet_"+"P"+str(MainData.C+1)+".dat",dtype=np.float64)
                 self.columns_out = np.loadtxt(mesh.filename.split(".")[0][:end]+"_ColumnsOut_"+"P"+str(MainData.C+1)+".dat")
 
-                print('Finished identifying Dirichlet boundary conditions from CAD geometry.', 
+                print('Finished identifying Dirichlet boundary conditions from CAD geometry.',
                     ' Time taken', time()-tCAD, 'seconds')
 
         #----------------------------------------------------------------------------------------------------#
@@ -346,8 +346,8 @@ class BoundaryCondition(object):
 
         # GET BOUNDARY FEKETE POINTS
         if formulation.ndim == 2:
-            
-            # CHOOSE TYPE OF BOUNDARY SPACING 
+
+            # CHOOSE TYPE OF BOUNDARY SPACING
             boundary_fekete = np.array([[]])
             if self.nodal_spacing_for_cad == 'fekete':
                 boundary_fekete = GaussLobattoQuadrature(C+2)[0]
@@ -366,7 +366,7 @@ class BoundaryCondition(object):
             curvilinear_mesh.SetProjectionPrecision(1.0e-04)
             curvilinear_mesh.SetProjectionCriteria(self.projection_flags)
             curvilinear_mesh.ScaleMesh()
-            # curvilinear_mesh.InferInterpolationPolynomialDegree() 
+            # curvilinear_mesh.InferInterpolationPolynomialDegree()
             curvilinear_mesh.SetNodalSpacing(boundary_fekete)
             curvilinear_mesh.GetBoundaryPointsOrder()
             # READ THE GEOMETRY FROM THE IGES FILE
@@ -393,12 +393,12 @@ class BoundaryCondition(object):
             elif self.projection_type == 'arc_length':
                 curvilinear_mesh.MeshPointInversionCurveArcLength()
             else:
-                print("projection type not understood. Arc length based projection is going to be used")
+                # print("projection type not understood. Arc length based projection is going to be used")
                 curvilinear_mesh.MeshPointInversionCurveArcLength()
             # OBTAIN MODIFIED MESH POINTS - THIS IS NECESSARY TO ENSURE LINEAR MESH IS ALSO CORRECT
             curvilinear_mesh.ReturnModifiedMeshPoints(mesh.points)
             # GET DIRICHLET MainData
-            nodesDBC, Dirichlet = curvilinear_mesh.GetDirichletData() 
+            nodesDBC, Dirichlet = curvilinear_mesh.GetDirichletData()
 
             # GET ACTUAL CURVE POINTS - THIS FUNCTION IS EXPENSIVE
             # self.ActualCurve = curvilinear_mesh.DiscretiseCurves(100)
@@ -406,16 +406,17 @@ class BoundaryCondition(object):
         elif formulation.ndim == 3:
 
             boundary_points = FeketePointsTri(C)
-            if mesh.element_type == "hex":                
+            if mesh.element_type == "hex":
                 boundary_points = GaussLobattoPointsQuad(C)
 
             curvilinear_mesh = PostMeshSurface(mesh.element_type,dimension=formulation.ndim)
             curvilinear_mesh.SetMeshElements(mesh.elements)
             curvilinear_mesh.SetMeshPoints(mesh.points)
-            if mesh.edges.ndim == 2 and mesh.edges.shape[1]==0:
-                mesh.edges = np.zeros((1,4),dtype=np.uint64)
-            else:
-                curvilinear_mesh.SetMeshEdges(mesh.edges)
+            if mesh.edges is not None:
+                if mesh.edges.ndim == 2 and mesh.edges.shape[1]==0:
+                    mesh.edges = np.zeros((1,4),dtype=np.uint64)
+                else:
+                    curvilinear_mesh.SetMeshEdges(mesh.edges)
             curvilinear_mesh.SetMeshFaces(mesh.faces)
             curvilinear_mesh.SetScale(self.scale_value_on_projection)
             curvilinear_mesh.SetCondition(self.condition_for_projection)
@@ -446,12 +447,12 @@ class BoundaryCondition(object):
                         mesh.face_to_surface = np.ascontiguousarray(mesh.face_to_surface.flatten(),dtype=np.int64)
                     curvilinear_mesh.SupplySurfacesContainingFaces(mesh.face_to_surface,already_mapped=1)
                 else:
-                    raise AssertionError("face-to-surface mapping does not seem correct. " 
+                    raise AssertionError("face-to-surface mapping does not seem correct. "
                         "Point projection is going to stop")
             else:
                 # curvilinear_mesh.IdentifySurfacesContainingFacesByPureProjection()
-                curvilinear_mesh.IdentifySurfacesContainingFaces() 
-            
+                curvilinear_mesh.IdentifySurfacesContainingFaces()
+
             # IDENTIFY WHICH EDGES ARE SHARED BETWEEN SURFACES
             curvilinear_mesh.IdentifySurfacesIntersections()
 
@@ -505,7 +506,7 @@ class BoundaryCondition(object):
 
 
     @staticmethod
-    def GetDirichletDataForPlanarFaces(formulation, material, 
+    def GetDirichletDataForPlanarFaces(formulation, material,
         mesh, solver, fem_solver, planar_mesh_faces, nodesDBC, Dirichlet, plot=False):
         """Solve a 2D problem for planar faces. Modifies Dirichlet"""
 
@@ -533,10 +534,10 @@ class BoundaryCondition(object):
         del pmaterial_dict['ndim'], pmaterial_dict['mtype']
         pmaterial = pmaterial_func(2,**pmaterial_dict)
 
-        
+
         print("The problem requires 2D analyses. Solving", number_of_planar_surfaces, "2D problems")
         for niter in range(number_of_planar_surfaces):
-            
+
             pmesh = Mesh()
             if mesh.element_type == "tet":
                 pmesh.element_type = "tri"
@@ -553,7 +554,7 @@ class BoundaryCondition(object):
             unique_edges = np.unique(pmesh.edges)
             Dirichlet2D = np.zeros((unique_edges.shape[0],3))
             nodesDBC2D = np.zeros(unique_edges.shape[0]).astype(np.int64)
-            
+
             unique_elements, inv  = np.unique(pmesh.elements, return_inverse=True)
             aranger = np.arange(unique_elements.shape[0],dtype=np.uint64)
             pmesh.elements = aranger[inv].reshape(pmesh.elements.shape)
@@ -622,14 +623,14 @@ class BoundaryCondition(object):
             # GET VARIATIONAL FORMULATION FOR 2D PROBLEM
             pformulation_func = getattr(Florence.VariationalPrinciple, type(formulation).__name__,None)
             pformulation = pformulation_func(pmesh)
- 
+
             print('Solving planar problem {}. Number of DoF is {}'.format(niter,pmesh.points.shape[0]*pformulation.nvar))
 
 
             if pmesh.points.shape[0] != Dirichlet2D.shape[0]:
                 # CALL THE FEM SOLVER FOR SOLVING THE 2D PROBLEM
-                solution = fem_solver.Solve(formulation=pformulation, 
-                    mesh=pmesh, material=pmaterial, 
+                solution = fem_solver.Solve(formulation=pformulation,
+                    mesh=pmesh, material=pmaterial,
                     boundary_condition=pboundary_condition)
                 TotalDisp = solution.sol
             else:
@@ -647,7 +648,7 @@ class BoundaryCondition(object):
 
             if plot:
                 post_process = PostProcess(2,2)
-                post_process.CurvilinearPlot(pmesh, TotalDisp, 
+                post_process.CurvilinearPlot(pmesh, TotalDisp,
                     QuantityToPlot=solution.ScaledJacobian, interpolation_degree=40)
                 import matplotlib.pyplot as plt
                 plt.show()
@@ -660,7 +661,7 @@ class BoundaryCondition(object):
             # figure=None
             # post_process = PostProcess(2,2)
             # post_process.CurvilinearPlot(pmesh, TotalDisp, interpolation_degree=40, figure=figure, color="#E3A933", plot_points=True, point_radius=2.0)
-            # post_process.CurvilinearPlot(pmesh, TotalDisp, interpolation_degree=40, figure=figure, color="#E3A933", plot_points=True, point_radius=2.0, plot_surfaces=False)           
+            # post_process.CurvilinearPlot(pmesh, TotalDisp, interpolation_degree=40, figure=figure, color="#E3A933", plot_points=True, point_radius=2.0, plot_surfaces=False)
             # plt.show()
 
             del pmesh, pboundary_condition
@@ -690,7 +691,7 @@ class BoundaryCondition(object):
 
     def ApplyDirichletGetReducedMatrices(self, stiffness, F, AppliedDirichlet, LoadFactor=1., mass=None, only_residual=False):
         """AppliedDirichlet is a non-member because it can be external incremental Dirichlet,
-            which is currently not implemented as member of BoundaryCondition. F also does not 
+            which is currently not implemented as member of BoundaryCondition. F also does not
             correspond to Dirichlet forces, as it can be residual in incrementally linearised
             framework.
         """
@@ -734,26 +735,26 @@ class BoundaryCondition(object):
 
 
     def UpdateFixDoFs(self, AppliedDirichletInc, fsize, nvar):
-        """Updates the geometry (DoFs) with incremental Dirichlet boundary conditions 
+        """Updates the geometry (DoFs) with incremental Dirichlet boundary conditions
             for fixed/constrained degrees of freedom only. Needs to be applied per time steps"""
 
         # GET TOTAL SOLUTION
         TotalSol = np.zeros((fsize,1))
         TotalSol[self.columns_out,0] = AppliedDirichletInc
-                
+
         # RE-ORDER SOLUTION COMPONENTS
         dU = TotalSol.reshape(int(TotalSol.shape[0]/nvar),nvar)
 
         return dU
 
     def UpdateFreeDoFs(self, sol, fsize, nvar):
-        """Updates the geometry with iterative solutions of Newton-Raphson 
+        """Updates the geometry with iterative solutions of Newton-Raphson
             for free degrees of freedom only. Needs to be applied per time NR iteration"""
 
         # GET TOTAL SOLUTION
         TotalSol = np.zeros((fsize,1))
         TotalSol[self.columns_in,0] = sol
-        
+
         # RE-ORDER SOLUTION COMPONENTS
         dU = TotalSol.reshape(int(TotalSol.shape[0]/nvar),nvar)
 
@@ -763,7 +764,7 @@ class BoundaryCondition(object):
 
     def SetNURBSParameterisation(self,nurbs_func,*args):
         self.nurbs_info = nurbs_func(*args)
-        
+
 
     def SetNURBSCondition(self,nurbs_func,*args):
         self.nurbs_condition = nurbs_func(*args)
@@ -799,7 +800,7 @@ class BoundaryCondition(object):
 
             t_tassembly = time()
             if self.analysis_type == "static":
-                F = AssembleForces(self, mesh, material, function_spaces, 
+                F = AssembleForces(self, mesh, material, function_spaces,
                     compute_traction_forces=compute_traction_forces, compute_body_forces=compute_body_forces)
             elif self.analysis_type == "dynamic":
                 # THE POSITION OF NEUMANN DATA APPLIED AT FACES CAN CHANGE DYNAMICALLY

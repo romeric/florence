@@ -2265,11 +2265,11 @@ class Mesh(object):
 
 
 
-    def ReadGmsh(self,filename):
+    def ReadGmsh(self, filename, element_type):
         """Read gmsh (.msh) file"""
 
-        # if self.elements is not None and self.points is not None:
-        #     self.__reset__()
+        if self.elements is not None and self.points is not None:
+            self.__reset__()
 
         try:
             fid = open(filename, "r")
@@ -2278,6 +2278,15 @@ class Mesh(object):
             sys.exit()
 
         self.filename = filename
+
+        if element_type == "tri":
+            el = 2
+        elif element_type == "quad":
+            el = 3
+        elif element_type == "tet":
+            el = 4
+        elif element_type == "hex":
+            el = 5
 
         # OTHER VARIANTS OF GMSH
         # --------------------------------------------
@@ -2293,7 +2302,7 @@ class Mesh(object):
             mesh = msh()
             mesh.read_msh(filename)
             self.points = np.array(mesh.Verts,copy=True)
-            self.elements = np.array(mesh.Elmts[3][1], copy=True)
+            self.elements = np.array(mesh.Elmts[el][1], copy=True)
             self.nelem = self.elements.shape[0]
             self.nnode = self.points.shape[0]
 
