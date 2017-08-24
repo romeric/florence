@@ -11,7 +11,7 @@ from Florence.QuadratureRules import GaussLobattoPointsQuad
 class BoundaryCondition(object):
     """Base class for applying all types of boundary conditions"""
 
-    def __init__(self):
+    def __init__(self, save_dirichlet_data=False, filename=None):
         # TYPE OF BOUNDARY: straight or nurbs
         self.boundary_type = 'straight'
         self.dirichlet_data_applied_at = 'node' # or 'faces'
@@ -49,6 +49,8 @@ class BoundaryCondition(object):
         self.columns_out = None
         self.columns_in = None
         self.applied_dirichlet = None
+        self.save_dirichlet_data = save_dirichlet_data
+        self.filename = filename
 
         self.dirichlet_flags = None
         self.neumann_flags = None
@@ -321,13 +323,18 @@ class BoundaryCondition(object):
         self.columns_out = self.columns_out.astype(np.int64)
         self.columns_in = np.delete(np.arange(0,nvar*mesh.points.shape[0]),self.columns_out)
 
+        if self.save_dirichlet_data:
+            from scipy.io import savemat
+            diri_dict = {'columns_in':self.columns_in,
+                'columns_out':self.columns_out,
+                'applied_dirichlet':self.applied_dirichlet}
+            savemat(self.filename,diri_dict, do_compression=True)
+
 
 
     def PostMeshWrapper(self, formulation, mesh, material, solver, fem_solver):
         """Calls PostMesh wrapper to get exact Dirichlet boundary conditions"""
 
-        # from PostMeshPy import (PostMeshCurvePy as PostMeshCurve,
-        #     PostMeshSurfacePy as PostMeshSurface)
         from PostMeshPy import (PostMeshCurvePy as PostMeshCurve,
             PostMeshSurfacePy as PostMeshSurface)
 
