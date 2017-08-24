@@ -11,7 +11,7 @@ from Florence.QuadratureRules import GaussLobattoPointsQuad
 class BoundaryCondition(object):
     """Base class for applying all types of boundary conditions"""
 
-    def __init__(self, save_dirichlet_data=False, filename=None):
+    def __init__(self, save_dirichlet_data=False, save_nurbs_data=False, filename=None):
         # TYPE OF BOUNDARY: straight or nurbs
         self.boundary_type = 'straight'
         self.dirichlet_data_applied_at = 'node' # or 'faces'
@@ -50,6 +50,7 @@ class BoundaryCondition(object):
         self.columns_in = None
         self.applied_dirichlet = None
         self.save_dirichlet_data = save_dirichlet_data
+        self.save_nurbs_data = save_nurbs_data
         self.filename = filename
 
         self.dirichlet_flags = None
@@ -410,6 +411,11 @@ class BoundaryCondition(object):
             # GET ACTUAL CURVE POINTS - THIS FUNCTION IS EXPENSIVE
             # self.ActualCurve = curvilinear_mesh.DiscretiseCurves(100)
 
+            if self.save_nurbs_data:
+                from scipy.io import savemat
+                nurbs_dict = {'nodesDBC':nodesDBC, 'Dirichlet':Dirichlet}
+                savemat(self.filename, nurbs_dict, do_compression=True)
+
         elif formulation.ndim == 3:
 
             boundary_points = FeketePointsTri(C)
@@ -497,6 +503,12 @@ class BoundaryCondition(object):
             planar_mesh_faces = curvilinear_mesh.GetMeshFacesOnPlanarSurfaces()
             # self.planar_mesh_faces = planar_mesh_faces
 
+            if self.save_nurbs_data:
+                from scipy.io import savemat
+                nurbs_dict = {'nodesDBC':nodesDBC,
+                    'Dirichlet':Dirichlet,
+                    'dirichlet_faces':dirichlet_faces}
+                savemat(self.filename, nurbs_dict, do_compression=True)
 
             if self.solve_for_planar_faces:
                 if planar_mesh_faces.shape[0] != 0:
