@@ -2275,10 +2275,10 @@ class Mesh(object):
                     self.points = np.ascontiguousarray(self.points[:,:2])
             self.InferElementType()
             ndim = self.InferSpatialDimension()
-            if ndim == 2:
+            if self.element_type == "tri" or self.element_type == "quad":
                 self.GetEdges()
                 self.GetBoundaryEdges()
-            elif ndim == 3:
+            elif self.element_type == "tet" or self.element_type == "hex":
                 self.GetFaces()
                 self.GetBoundaryFaces()
                 self.GetBoundaryEdges()
@@ -2348,10 +2348,10 @@ class Mesh(object):
                 self.points = np.ascontiguousarray(self.points[:,:2])
         self.InferElementType()
         ndim = self.InferSpatialDimension()
-        if ndim == 2:
+        if self.element_type == "tri" or self.element_type == "quad":
             self.GetEdges()
             self.GetBoundaryEdges()
-        elif ndim == 3:
+        elif self.element_type == "tet" or self.element_type == "hex":
             self.GetFaces()
             self.GetBoundaryFaces()
             self.GetBoundaryEdges()
