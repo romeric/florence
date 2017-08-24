@@ -2317,6 +2317,7 @@ class Mesh(object):
             elif ndim == 3:
                 self.GetFaces()
                 self.GetBoundaryFaces()
+                self.GetBoundaryEdges()
 
             return
         # --------------------------------------------
@@ -2389,6 +2390,7 @@ class Mesh(object):
         elif ndim == 3:
             self.GetFaces()
             self.GetBoundaryFaces()
+            self.GetBoundaryEdges()
 
         return
 
