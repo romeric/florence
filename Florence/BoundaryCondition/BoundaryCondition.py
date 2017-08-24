@@ -352,7 +352,6 @@ class BoundaryCondition(object):
 
         from Florence.FunctionSpace import Tri
 
-        # GET BOUNDARY FEKETE POINTS
         if formulation.ndim == 2:
 
             # CHOOSE TYPE OF BOUNDARY SPACING
