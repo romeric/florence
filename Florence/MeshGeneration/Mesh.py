@@ -970,51 +970,7 @@ class Mesh(object):
         # SITUATIONS WHEN ANOTHER HIGH ORDER MESH IS REQUIRED, WITH ONE HIGH
         # ORDER MESH ALREADY AVAILABLE
         if self.degree != 1 and self.degree - 1 != C:
-            if self.element_type == "tri":
-                self.elements = self.elements[:,:3]
-                nmax = int(self.elements.max() + 1)
-                self.points = self.points[:nmax,:]
-                if self.edges is not None:
-                    self.edges = self.edges[:,:2]
-                if self.all_edges is not None:
-                    self.all_edges = self.all_edges[:,:2]
-            elif self.element_type == "tet":
-                self.elements = self.elements[:,:4]
-                nmax = int(self.elements.max() + 1)
-                self.points = self.points[:nmax,:]
-                if self.edges is not None:
-                    self.edges = self.edges[:,:2]
-                if self.faces is not None:
-                    self.faces = self.faces[:,:3]
-                if self.all_edges is not None:
-                    self.all_edges = self.all_edges[:,:2]
-                if self.all_faces is not None:
-                    self.all_faces = self.all_faces[:,:3]
-            elif self.element_type == "quad":
-                self.elements = self.elements[:,:4]
-                nmax = int(self.elements.max() + 1)
-                self.points = self.points[:nmax,:]
-                if self.edges is not None:
-                    self.edges = self.edges[:,:2]
-                if self.all_edges is not None:
-                    self.all_edges = self.all_edges[:,:2]
-            elif self.element_type == "hex":
-                self.elements = self.elements[:,:8]
-                nmax = int(self.elements.max() + 1)
-                self.points = self.points[:nmax,:]
-                if self.edges is not None:
-                    self.edges = self.edges[:,:2]
-                if self.faces is not None:
-                    self.faces = self.faces[:,:4]
-                if self.all_edges is not None:
-                    self.all_edges = self.all_edges[:,:2]
-                if self.all_faces is not None:
-                    self.all_faces = self.all_faces[:,:4]
-            else:
-                raise NotImplementedError("Creating high order mesh based on another high order mesh for",
-                    self.element_type, "elements is not implemented yet")
-
-
+            self = self.GetLinearMesh(remap=True)
 
         print('Generating p = '+str(C+1)+' mesh based on the linear mesh...')
         t_mesh = time()
@@ -1687,7 +1643,9 @@ class Mesh(object):
             if self.boundary_edge_to_element.shape[1] > 1 and self.boundary_edge_to_element.shape[0] > 1:
                 return self.boundary_edge_to_element
 
-        assert self.edges is not None or self.elements is not None
+        # DO NOT COMPUTE EDGES AND RAISE BECAUSE OF CYCLIC DEPENDENCIES
+        assert self.elements is not None
+        assert self.edges is not None
 
         edge_elements = np.zeros((self.edges.shape[0],2),dtype=np.int64)
 
@@ -1734,7 +1692,9 @@ class Mesh(object):
 
         """
 
-        assert self.faces is not None or self.elements is not None
+        # DO NOT COMPUTE FACES AND RAISE BECAUSE OF CYCLIC DEPENDENCIES
+        assert self.elements is not None
+        assert self.faces is not None
 
         # THIS METHOD ALWAYS RETURNS THE FACE TO ELEMENT ARRAY, AND DOES NOT CHECK
         # IF THIS HAS BEEN COMPUTED BEFORE, THE REASON BEING THAT THE FACES CAN COME
@@ -1895,7 +1855,9 @@ class Mesh(object):
             if self.boundary_edge_to_element.shape[1] > 1 and self.boundary_edge_to_element.shape[0] > 1:
                 return self.boundary_edge_to_element
 
-        assert self.edges is not None or self.elements is not None
+        # DO NOT COMPUTE EDGES AND RAISE BECAUSE OF CYCLIC DEPENDENCIES
+        assert self.elements is not None
+        assert self.edges is not None
 
         p = self.InferPolynomialDegree()
 
@@ -1945,7 +1907,9 @@ class Mesh(object):
 
         """
 
-        assert self.faces is not None or self.elements is not None
+        # DO NOT COMPUTE FACES AND RAISE BECAUSE OF CYCLIC DEPENDENCIES
+        assert self.elements is not None
+        assert self.faces is not None
 
         if self.boundary_face_to_element is not None:
             return self.boundary_face_to_element
@@ -2740,30 +2704,11 @@ class Mesh(object):
             #     mlab.text3d(x_avg,y_avg,z_avg,str(i),color=(0,0,0.),scale=2)
 
             # POINT NUMBERING
-            # for i in range(self.points.shape[0]):
-                # text_obj = mlab.text3d(self.points[i,0],self.points[i,1],self.points[i,2],str(i),color=(0,0,0.),scale=2)
-                # if i==0:
-                #     text_obj = mlab.text3d(self.points[i,0],self.points[i,1],self.points[i,2],str(i),color=(0,0,0.),scale=500)
-                # else:
-                #     text_obj.position = self.points[i,:]
-                #     text_obj.text = str(i)
-                #     text_obj.scale = [2,2,2]
-
-                # if self.points[i,2] == 0:
-                    # text_obj = mlab.text3d(self.points[i,0],self.points[i,1],self.points[i,2],str(i),color=(0,0,0.),scale=0.5)
-
-            # for i in range(self.faces.shape[0]):
-            #     if i==3:
-            #         for j in self.faces[i,:]:
-            #             text_obj = mlab.text3d(self.points[j,0],self.points[j,1],self.points[j,2],str(j),color=(0,0,0.),scale=10.5)
-
             for i in range(self.faces.shape[0]):
                 for j in range(self.faces.shape[1]):
                     if self.points[self.faces[i,j],2] < 30:
-                        # print i, self.faces[i,:]
                         text_obj = mlab.text3d(self.points[self.faces[i,j],0],
                             self.points[self.faces[i,j],1],self.points[self.faces[i,j],2],str(self.faces[i,j]),color=(0,0,0.),scale=0.05)
-
 
 
             figure.scene.disable_render = False
@@ -2906,6 +2851,12 @@ class Mesh(object):
             external_fields:        [dict or tuple] of fields to save together with the mesh
                                     for instance desired results. If a tuple is given keys in
                                     dictionary will be named results_0, results_1 and so on"""
+
+        # DO NOT WRITE IF POINTS DO NOT EXIST - THIS IS TO PREVENT ACCIDENTAL WRITING OF
+        # POTENTIALLU EMPTY MESH OBJECT
+        if self.points is None:
+            warn("Nothing to write")
+            return
 
         Dict = self.__dict__
 
@@ -4661,9 +4612,9 @@ class Mesh(object):
         """Infer the spatial dimension of the mesh"""
 
         assert self.points is not None
-        if self.points.shape[1] == 3:
-            if self.element_type == "tri" or self.element_type == "quad":
-                print("3D surface mesh of ", self.element_type)
+        # if self.points.shape[1] == 3:
+        #     if self.element_type == "tri" or self.element_type == "quad":
+        #         print("3D surface mesh of ", self.element_type)
 
         return self.points.shape[1]
 
@@ -4733,21 +4684,26 @@ class Mesh(object):
         assert self.elements is not None
         assert self.points is not None
 
-        # p = self.InferPolynomialDegree() + 1
         ndim = self.InferSpatialDimension()
         nodeperelem = self.InferNumberOfNodesPerElement()
+        nn = 20
 
         if ndim==3:
-            if nodeperelem in [int((i+1)*(i+2)*(i+3)/6) for i in range(1,50)]:
+            if nodeperelem in [int((i+1)*(i+2)*(i+3)/6) for i in range(1,nn)]:
                 self.element_type = "tet"
-            elif nodeperelem in [int((i+1)**3) for i in range(1,50)]:
+            elif nodeperelem in [int((i+1)**3) for i in range(1,nn)]:
                 self.element_type = "hex"
             else:
-                raise ValueError("Element type not understood")
+                if nodeperelem in [int((i+1)*(i+2)/2) for i in range(1,nn)]:
+                    self.element_type = "tri"
+                elif nodeperelem in [int((i+1)**2) for i in range(1,nn)]:
+                    self.element_type = "quad"
+                else:
+                    raise ValueError("Element type not understood")
         elif ndim==2:
-            if nodeperelem in [int((i+1)*(i+2)/2) for i in range(1,100)]:
+            if nodeperelem in [int((i+1)*(i+2)/2) for i in range(1,nn)]:
                 self.element_type = "tri"
-            elif nodeperelem in [int((i+1)**2) for i in range(1,100)]:
+            elif nodeperelem in [int((i+1)**2) for i in range(1,nn)]:
                 self.element_type = "quad"
             else:
                 raise ValueError("Element type not understood")
@@ -4755,6 +4711,19 @@ class Mesh(object):
             self.element_type = "line"
         else:
             raise ValueError("Element type not understood")
+
+        # IF POINTS ARE CO-PLANAR THEN IT IS NOT TET BUT QUAD
+        if ndim == 3 and self.element_type == "tet":
+            a = self.points[self.elements[:,0],:]
+            b = self.points[self.elements[:,1],:]
+            c = self.points[self.elements[:,2],:]
+            d = self.points[self.elements[:,3],:]
+
+            det_array = np.dstack((a-d,b-d,c-d))
+            # FIND VOLUME OF ALL THE ELEMENTS
+            volume = 1./6.*np.linalg.det(det_array)
+            if np.allclose(volume,0.0):
+                self.element_type = "quad"
 
         return self.element_type
 
@@ -4787,9 +4756,11 @@ class Mesh(object):
 
         ndim = self.InferSpatialDimension()
         if ndim==2:
-            assert self.edges is not None
+            if self.element_type == "tri" or self.element_type == "quad":
+                assert self.edges is not None
         elif ndim==3:
-            assert self.faces is not None
+            if self.element_type == "tet" or self.element_type == "hex":
+                assert self.faces is not None
 
 
         if self.IsHighOrder is False:
