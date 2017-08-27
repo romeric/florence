@@ -1,8 +1,8 @@
-from __future__ import print_function 
+from __future__ import print_function
 import os, sys, gc
 from time import time
 from copy import deepcopy
-import numpy as np 
+import numpy as np
 import numpy.linalg as la
 from warnings import warn
 from Florence import QuadratureRule, FunctionSpace
@@ -10,8 +10,8 @@ from Florence.Base import JacobianError, IllConditionedError
 from Florence.Utils import PWD, RSWD
 
 # Modal Bases
-# import Florence.FunctionSpace.TwoDimensional.Tri.hpModal as Tri 
-# import Florence.FunctionSpace.ThreeDimensional.Tet.hpModal as Tet 
+# import Florence.FunctionSpace.TwoDimensional.Tri.hpModal as Tri
+# import Florence.FunctionSpace.ThreeDimensional.Tet.hpModal as Tet
 # Nodal Bases
 from Florence.FunctionSpace import Tri
 from Florence.FunctionSpace import Tet
@@ -57,7 +57,7 @@ class PostProcess(object):
         """
 
         if domain is None and postdomain is None and boundary is None:
-            warn("Nothing to be set") 
+            warn("Nothing to be set")
 
         self.domain_bases = domain
         self.postdomain_bases = postdomain
@@ -106,7 +106,7 @@ class PostProcess(object):
         elif self.analysis_nature == 'linear':
                 TotalSol[ColumnsIn,0] = sol
                 TotalSol[ColumnsOut,0] = AppliedDirichletInc
-                
+
         # RE-ORDER SOLUTION COMPONENTS
         dU = TotalSol.reshape(TotalSol.shape[0]/nvar,nvar)
 
@@ -132,7 +132,7 @@ class PostProcess(object):
             raise ValueError("FEM solver not set for post-processing")
 
         if self.sol.shape[1] > self.nvar:
-            return 
+            return
 
         mesh = self.mesh
 
@@ -214,7 +214,7 @@ class PostProcess(object):
                 if material.has_low_level_dispatcher:
 
                     # GET LOCAL KINEMATICS
-                    SpatialGradient, F[elem,:,:,:], detJ = _KinematicMeasures_(Jm, AllGauss[:,0], LagrangeElemCoords, 
+                    SpatialGradient, F[elem,:,:,:], detJ = _KinematicMeasures_(Jm, AllGauss[:,0], LagrangeElemCoords,
                         EulerELemCoords, requires_geometry_update)
 
                     if self.formulation.fields == "electro_mechanics":
@@ -262,13 +262,13 @@ class PostProcess(object):
                                 ElectricPotentialElem)
 
                             # COMPUTE ELECTRIC DISPLACEMENT
-                            ElectricDisplacementx[elem,counter,:] = (material.ElectricDisplacementx(StrainTensors, 
+                            ElectricDisplacementx[elem,counter,:] = (material.ElectricDisplacementx(StrainTensors,
                                 ElectricFieldx[elem,counter,:], elem, counter))[:,0]
                         # else:
                             # ElectricFieldx, ElectricDisplacementx = [], []
 
                         if material.energy_type == "enthalpy":
-                            
+
                             # COMPUTE CAUCHY STRESS TENSOR
                             if fem_solver.requires_geometry_update:
                                 CauchyStressTensor[elem,counter,:] = material.CauchyStress(StrainTensors,
@@ -277,7 +277,7 @@ class PostProcess(object):
                         elif material.energy_type == "internal_energy":
                             # COMPUTE THE HESSIAN AT THIS GAUSS POINT
                             # H_Voigt = material.Hessian(StrainTensors,ElectricDisplacementx[elem,counter,:], elem, counter)
-                            
+
                             # COMPUTE CAUCHY STRESS TENSOR
                             if fem_solver.requires_geometry_update:
                                 CauchyStressTensor[elem,counter,:] = material.CauchyStress(StrainTensors,
@@ -433,9 +433,9 @@ class PostProcess(object):
             where S represents Cauchy stress tensor, E the electric field, D the electric
             displacements and p_hyd the hydrostatic pressure
 
-            This function modifies self.sol to augmented_sol and returns the augmented solution 
+            This function modifies self.sol to augmented_sol and returns the augmented solution
             augmented_sol
-        
+
 
         """
 
@@ -482,7 +482,7 @@ class PostProcess(object):
             G = G[:,[0,1,3],:]
             Cauchy = Cauchy[:,[0,1,3],:]
             # Assuming sigma_zz=0
-            p_hyd = 1./2.*Cauchy[:,[0,2],:].sum(axis=1) 
+            p_hyd = 1./2.*Cauchy[:,[0,2],:].sum(axis=1)
         elif ndim == 3:
             C = C[:,[0,1,2,4,5,8],:]
             G = G[:,[0,1,2,4,5,8],:]
@@ -547,13 +547,13 @@ class PostProcess(object):
             augmented_sol[:,42:45,:]  = ElectricFieldx
             augmented_sol[:,45:48,:]  = ElectricDisplacementx
             augmented_sol[:,48,:]     = p_hyd
-        
+
         self.sol = augmented_sol
         return augmented_sol
 
 
     def QuantityNamer(self, num, print_name=True):
-        """Returns the quantity (for augmented solution i.e. primary and recovered variables) 
+        """Returns the quantity (for augmented solution i.e. primary and recovered variables)
             name given its number (from numbering order)
         """
 
@@ -724,7 +724,7 @@ class PostProcess(object):
         ho_mesh = deepcopy(mesh)
         sys.stdout = open(os.devnull, "w")
         ho_mesh.GetHighOrderMesh(p=p, equally_spaced=equally_spaced, check_duplicates=False)
-        sys.stdout = sys.__stdout__ 
+        sys.stdout = sys.__stdout__
 
         if sol.ndim == 2:
             sol = sol[:,:,None]
@@ -754,13 +754,13 @@ class PostProcess(object):
 
             hdf_file = h5py.File(filename,'w')
             ho_sol = hdf_file.create_dataset("Solution",(ho_mesh.nnode,sol.shape[1],sol.shape[2]),dtype=np.float32)
-            
+
             for ielem in range(mesh.nelem):
                 ho_sol[ho_mesh.elements[ielem,:],:,:] = np.tensordot(Neval, sol[mesh.elements[ielem,:],:,:], axes=(0,0))
             # for inc in increments:
                 # for ielem in range(mesh.nelem):
                     # ho_sol[ho_mesh.elements[ielem,:],:,inc] = np.dot(Neval.T, sol[mesh.elements[ielem,:],:,inc])
-            
+
             hdf_file.close()
             print("Results written in {}".format(filename))
             print("Finished constructing p = {} solution. Time elapsed is {} seconds".format(p,time() - t_sol))
@@ -768,7 +768,7 @@ class PostProcess(object):
         else:
             ho_sol = np.zeros((ho_mesh.nnode,sol.shape[1],sol.shape[2]),dtype=np.float64)
 
-        # DO NOT VECTORISE THE ELEMENT LOOP AS IT LEADS TO AN EXPENSIVE OPERATION 
+        # DO NOT VECTORISE THE ELEMENT LOOP AS IT LEADS TO AN EXPENSIVE OPERATION
         for ielem in range(mesh.nelem):
             ho_sol[ho_mesh.elements[ielem,:],:,:] = np.tensordot(Neval, sol[mesh.elements[ielem,:],:,:], axes=(0,0))
             # ho_sol[ho_mesh.elements[ielem,:],:,:] = np.einsum("ij,ikl", Neval, sol[mesh.elements[ielem,:],:,:], optimize=True)
@@ -857,7 +857,7 @@ class PostProcess(object):
                 Q4 = np.sqrt(np.dot(Q4,Q4.T)).diagonal()
 
                 C = np.einsum('ikj,ikl->ijl',F,F)
-                Q5 = np.einsum('ijk,k',C,self.directions[elem,:]) 
+                Q5 = np.einsum('ijk,k',C,self.directions[elem,:])
                 Q5 = np.sqrt(np.dot(Q5,Q5.T)).diagonal()
 
             # FIND MIN AND MAX VALUES
@@ -919,14 +919,14 @@ class PostProcess(object):
         interpolation_degree=10, fmt="binary"):
         """Writes results to a VTK file for Paraview
 
-            quantity = "all" means write all solution fields, otherwise specific quantities 
+            quantity = "all" means write all solution fields, otherwise specific quantities
             would be written based on augmented solution numbering order
             step - [list or np.1darray of sequentially aranged steps] which time steps/increments should be written
 
             inputs:
-                fmt:                    [str] VTK writer format either "binary" or "xml". 
+                fmt:                    [str] VTK writer format either "binary" or "xml".
                                         "xml" files do not support big vtk/vtu files
-                                        typically greater than 2GB whereas "binary" files can.  Also "xml" writer is 
+                                        typically greater than 2GB whereas "binary" files can.  Also "xml" writer is
                                         in-built whereas "binary" writer depends on evtk/pyevtk module
         """
 
@@ -946,7 +946,7 @@ class PostProcess(object):
             if quantity>=self.sol.shape[1]:
                 self.GetAugmentedSolution()
                 if quantity >= self.sol.shape[1]:
-                    raise ValueError('Plotting quantity not understood') 
+                    raise ValueError('Plotting quantity not understood')
             iterator = range(quantity,quantity+1)
         elif isinstance(quantity,str):
             if quantity=="all":
@@ -981,7 +981,7 @@ class PostProcess(object):
             write_curved_mesh = False
 
 
-        # GET LINEAR MESH & SOLUTION 
+        # GET LINEAR MESH & SOLUTION
         lmesh = self.mesh.GetLinearMesh()
         sol = self.sol[:lmesh.nnode,:,:]
 
@@ -1001,6 +1001,7 @@ class PostProcess(object):
             cellflag = 12
             offset = 8
             actual_ndim = 3
+        actual_ndim = lmesh.points.shape[1]
 
         ndim = lmesh.points.shape[1]
         LoadIncrement = self.sol.shape[2]
@@ -1012,31 +1013,32 @@ class PostProcess(object):
 
             if lmesh.element_type =='tet':
                 cellflag = 5
-                tmesh = PostProcess.TessellateTets(self.mesh, np.zeros_like(self.mesh.points), 
+                tmesh = PostProcess.TessellateTets(self.mesh, np.zeros_like(self.mesh.points),
                     QuantityToPlot=self.sol[:,0,0], plot_on_faces=False, plot_points=True,
                     interpolation_degree=interpolation_degree)
             elif lmesh.element_type =='hex':
-                cellflag = 5 
-                tmesh = PostProcess.TessellateHexes(self.mesh, np.zeros_like(self.mesh.points), 
+                cellflag = 5
+                tmesh = PostProcess.TessellateHexes(self.mesh, np.zeros_like(self.mesh.points),
                     QuantityToPlot=self.sol[:,0,0], plot_on_faces=False, plot_points=True,
                     interpolation_degree=interpolation_degree)
             elif lmesh.element_type =='quad':
-                cellflag = 5 
-                tmesh = PostProcess.TessellateQuads(self.mesh, np.zeros_like(self.mesh.points), 
+                cellflag = 5
+                tmesh = PostProcess.TessellateQuads(self.mesh, np.zeros_like(self.mesh.points),
                     QuantityToPlot=self.sol[:,0,0], plot_points=True,
                     interpolation_degree=interpolation_degree)
             elif lmesh.element_type =='tri':
                 cellflag = 5
-                tmesh = PostProcess.TessellateTris(self.mesh, np.zeros_like(self.mesh.points), 
+                tmesh = PostProcess.TessellateTris(self.mesh, np.zeros_like(self.mesh.points),
                     QuantityToPlot=self.sol[:,0,0], plot_points=True,
                     interpolation_degree=interpolation_degree)
             else:
                 raise ValueError('Not implemented yet. Use in-built visualiser')
 
             nsize = tmesh.nsize
-            if actual_ndim == 3:
+            if hasattr(tmesh,'nface'):
+                # FOR 3D ELEMENTS E.G. TETS AND HEXES
                 nface = tmesh.nface
-            elif actual_ndim == 2:
+            else:
                 tmesh.smesh = self.mesh
                 tmesh.faces_to_plot = tmesh.smesh.elements
                 nface = tmesh.smesh.elements.shape[0]
@@ -1051,6 +1053,7 @@ class PostProcess(object):
                 tmesh.connections = connections
 
             ssol = self.sol[np.unique(tmesh.faces_to_plot),:,:]
+            # ssol = self.sol
 
             increments = range(LoadIncrement)
             if steps!=None:
@@ -1060,31 +1063,32 @@ class PostProcess(object):
 
                 extrapolated_sol = np.zeros((tmesh.points.shape[0], self.sol.shape[1]))
                 for ielem in range(nface):
-                    extrapolated_sol[ielem*nsize:(ielem+1)*nsize,:] = np.dot(tmesh.bases_2, 
+                    extrapolated_sol[ielem*nsize:(ielem+1)*nsize,:] = np.dot(tmesh.bases_2,
                         ssol[tmesh.smesh.elements[ielem,:],:, Increment])
 
-                svpoints = self.mesh.points[np.unique(tmesh.faces_to_plot),:] + ssol[:,:ndim,Increment]
+                svpoints = self.mesh.points[np.unique(tmesh.faces_to_plot),:] + ssol[:,:tmesh.points.shape[1],Increment]
+                # svpoints = self.mesh.points + ssol[:,:tmesh.points.shape[1],Increment]
 
                 for iedge in range(tmesh.smesh.all_edges.shape[0]):
                     ielem = tmesh.edge_elements[iedge,0]
                     edge = tmesh.smesh.elements[ielem,tmesh.reference_edges[tmesh.edge_elements[iedge,1],:]]
                     coord_edge = svpoints[edge,:]
-                    if actual_ndim == 3:
+                    if tmesh.points.shape[1] == 3:
                         tmesh.x_edges[:,iedge], tmesh.y_edges[:,iedge], tmesh.z_edges[:,iedge] = np.dot(coord_edge.T,tmesh.bases_1)
-                    elif actual_ndim == 2:
+                    elif tmesh.points.shape[1] == 2:
                         tmesh.x_edges[:,iedge], tmesh.y_edges[:,iedge] = np.dot(coord_edge.T,tmesh.bases_1)
 
-                if actual_ndim == 3:
-                    edge_coords = np.concatenate((tmesh.x_edges.T.copy().flatten()[:,None], 
+                if tmesh.points.shape[1] == 3:
+                    edge_coords = np.concatenate((tmesh.x_edges.T.copy().flatten()[:,None],
                         tmesh.y_edges.T.copy().flatten()[:,None],
                         tmesh.z_edges.T.copy().flatten()[:,None]),axis=1)
-                elif actual_ndim == 2:
-                    edge_coords = np.concatenate((tmesh.x_edges.T.copy().flatten()[:,None], 
+                elif tmesh.points.shape[1] == 2:
+                    edge_coords = np.concatenate((tmesh.x_edges.T.copy().flatten()[:,None],
                         tmesh.y_edges.T.copy().flatten()[:,None], np.zeros_like(tmesh.y_edges.T.copy().flatten()[:,None])),axis=1)
                     svpoints = np.concatenate((svpoints, np.zeros((svpoints.shape[0],1))),axis=1)
 
                 if formatter is "xml":
-                    vtk_writer.write_vtu(Verts=edge_coords, 
+                    vtk_writer.write_vtu(Verts=edge_coords,
                         Cells={3:tmesh.connections},
                         fname=filename.split('.')[0]+'_curved_lines_increment_'+str(Increment)+'.vtu')
 
@@ -1093,7 +1097,7 @@ class PostProcess(object):
                         fname=filename.split('.')[0]+'_curved_points_increment_'+str(Increment)+'.vtu')
 
                     for quant in iterator:
-                        vtk_writer.write_vtu(Verts=tmesh.points+extrapolated_sol[:,:ndim], 
+                        vtk_writer.write_vtu(Verts=tmesh.points+extrapolated_sol[:,:ndim],
                             Cells={cellflag:tmesh.elements}, pdata=extrapolated_sol[:,quant],
                             fname=filename.split('.')[0]+'_curved_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu')
 
@@ -1101,7 +1105,7 @@ class PostProcess(object):
 
                     unstructuredGridToVTK(filename.split('.')[0]+'_curved_lines_increment_'+str(Increment),
                         np.ascontiguousarray(edge_coords[:,0]), np.ascontiguousarray(edge_coords[:,1]), np.ascontiguousarray(edge_coords[:,2]),
-                        np.ascontiguousarray(tmesh.connections.ravel()), np.arange(0,2*tmesh.connections.shape[0],2)+2, 
+                        np.ascontiguousarray(tmesh.connections.ravel()), np.arange(0,2*tmesh.connections.shape[0],2)+2,
                         np.ones(tmesh.connections.shape[0])*3)
 
                     pointsToVTK(filename.split('.')[0]+'_curved_points_increment_'+str(Increment),
@@ -1114,10 +1118,10 @@ class PostProcess(object):
                     else:
                         points = tmesh.points+extrapolated_sol[:,:ndim]
                     for counter, quant in enumerate(iterator):
-                        unstructuredGridToVTK(filename.split('.')[0]+'_curved_quantity_'+str(quant)+'_increment_'+str(Increment), 
-                            np.ascontiguousarray(points[:,0]), np.ascontiguousarray(points[:,1]), np.ascontiguousarray(points[:,2]), 
-                            np.ascontiguousarray(tmesh.elements.ravel()), np.arange(0,3*tmesh.elements.shape[0],3)+3, 
-                            np.ones(tmesh.elements.shape[0])*cellflag, 
+                        unstructuredGridToVTK(filename.split('.')[0]+'_curved_quantity_'+str(quant)+'_increment_'+str(Increment),
+                            np.ascontiguousarray(points[:,0]), np.ascontiguousarray(points[:,1]), np.ascontiguousarray(points[:,2]),
+                            np.ascontiguousarray(tmesh.elements.ravel()), np.arange(0,3*tmesh.elements.shape[0],3)+3,
+                            np.ones(tmesh.elements.shape[0])*cellflag,
                             pointData={q_names[counter]: np.ascontiguousarray(extrapolated_sol[:,quant])})
 
         else:
@@ -1130,7 +1134,7 @@ class PostProcess(object):
                 for Increment in increments:
                     if formatter is "xml":
                         for quant in iterator:
-                            vtk_writer.write_vtu(Verts=lmesh.points, 
+                            vtk_writer.write_vtu(Verts=lmesh.points,
                                 Cells={cellflag:lmesh.elements}, pdata=sol[:,quant,Increment],
                                 fname=filename.split('.')[0]+'_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu')
                     elif formatter is "binary":
@@ -1141,17 +1145,17 @@ class PostProcess(object):
                         else:
                             points = lmesh.points
                         for counter, quant in enumerate(iterator):
-                            unstructuredGridToVTK(filename.split('.')[0]+'_quantity_'+str(quant)+'_increment_'+str(Increment), 
-                                np.ascontiguousarray(points[:,0]), np.ascontiguousarray(points[:,1]), np.ascontiguousarray(points[:,2]), 
-                                np.ascontiguousarray(lmesh.elements.ravel()), np.arange(0,offset*lmesh.nelem,offset)+offset, 
-                                np.ones(lmesh.nelem)*cellflag, 
-                                pointData={q_names[counter]: np.ascontiguousarray(sol[:,quant,Increment])}) 
+                            unstructuredGridToVTK(filename.split('.')[0]+'_quantity_'+str(quant)+'_increment_'+str(Increment),
+                                np.ascontiguousarray(points[:,0]), np.ascontiguousarray(points[:,1]), np.ascontiguousarray(points[:,2]),
+                                np.ascontiguousarray(lmesh.elements.ravel()), np.arange(0,offset*lmesh.nelem,offset)+offset,
+                                np.ones(lmesh.nelem)*cellflag,
+                                pointData={q_names[counter]: np.ascontiguousarray(sol[:,quant,Increment])})
 
             elif configuration == "deformed":
                 for Increment in increments:
                     if formatter is "xml":
                         for quant in iterator:
-                            vtk_writer.write_vtu(Verts=lmesh.points+sol[:,:ndim,Increment], 
+                            vtk_writer.write_vtu(Verts=lmesh.points+sol[:,:ndim,Increment],
                                 Cells={cellflag:lmesh.elements}, pdata=sol[:,quant,Increment],
                                 fname=filename.split('.')[0]+'_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu')
                     elif formatter is "binary":
@@ -1162,11 +1166,11 @@ class PostProcess(object):
                             points = lmesh.points + sol[:,:ndim,Increment]
                         # points = lmesh.points+sol[:,:ndim,Increment]
                         for counter, quant in enumerate(iterator):
-                            unstructuredGridToVTK(filename.split('.')[0]+'_quantity_'+str(quant)+'_increment_'+str(Increment), 
-                                np.ascontiguousarray(points[:,0]), np.ascontiguousarray(points[:,1]), np.ascontiguousarray(points[:,2]), 
-                                np.ascontiguousarray(lmesh.elements.ravel()), np.arange(0,offset*lmesh.nelem,offset)+offset, 
-                                np.ones(lmesh.nelem)*cellflag, 
-                                pointData={q_names[counter]: np.ascontiguousarray(sol[:,quant,Increment])})  
+                            unstructuredGridToVTK(filename.split('.')[0]+'_quantity_'+str(quant)+'_increment_'+str(Increment),
+                                np.ascontiguousarray(points[:,0]), np.ascontiguousarray(points[:,1]), np.ascontiguousarray(points[:,2]),
+                                np.ascontiguousarray(lmesh.elements.ravel()), np.arange(0,offset*lmesh.nelem,offset)+offset,
+                                np.ones(lmesh.nelem)*cellflag,
+                                pointData={q_names[counter]: np.ascontiguousarray(sol[:,quant,Increment])})
 
         return
 
@@ -1204,7 +1208,7 @@ class PostProcess(object):
                 MainDict = {}
             MainDict['Solution'] = self.sol
             savemat(filename,MainDict, do_compression=do_compression)
-        
+
 
 
 
@@ -1216,7 +1220,7 @@ class PostProcess(object):
 
         import matplotlib.pyplot as plt
         # NEWTON-RAPHSON CONVERGENCE PLOT
-        plt.plot(np.log10(self.newton_raphson_convergence['Increment_'+str(increment)]),'-ko') 
+        plt.plot(np.log10(self.newton_raphson_convergence['Increment_'+str(increment)]),'-ko')
         axis_font = {'size':'18'}
         plt.xlabel(r'$No\;\; of\;\; Iterations$', **axis_font)
         plt.ylabel(r'$log_{10}|Residual|$', **axis_font)
@@ -1236,11 +1240,11 @@ class PostProcess(object):
 
     def Plot(self, figure=None, quantity=0, configuration="original", increment=-1, colorbar=True, axis_type=None, interpolation_degree=10,
         plot_points=False, point_radius=0.5, plot_edges=True, plot_on_curvilinear_mesh=True, show_plot=True, save=False, filename=None):
-        """ 
+        """
 
             Input:
-                configuration:                  [str] to plot on original or deformed configuration 
-                increment:                      [int] if results at specific increment needs to be plotted. 
+                configuration:                  [str] to plot on original or deformed configuration
+                increment:                      [int] if results at specific increment needs to be plotted.
         """
 
 
@@ -1267,7 +1271,7 @@ class PostProcess(object):
                 if isinstance(filename,str) is False:
                     raise ValueError("file name should be a string")
 
-            # DO NOT SAVE THESE IMAGES IN .eps FORMAT 
+            # DO NOT SAVE THESE IMAGES IN .eps FORMAT
             if len(filename.split("."))>1:
                 if filename.split(".")[-1] != "png":
                     filename = filename.split(".")[0] + ".png"
@@ -1281,7 +1285,7 @@ class PostProcess(object):
 
         # GET LINEAR MESH
         mesh = self.mesh.GetLinearMesh()
-        # GET LINEAR SOLUTION 
+        # GET LINEAR SOLUTION
         sol = np.copy(self.sol[:mesh.nnode,:,:])
 
         if self.mesh.element_type == "tri":
@@ -1290,10 +1294,10 @@ class PostProcess(object):
             from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
             from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
             from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
-            from Florence.FunctionSpace import Tri 
+            from Florence.FunctionSpace import Tri
             from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
 
-            
+
             from scipy.spatial import Delaunay
             from mpl_toolkits.mplot3d import Axes3D
             import matplotlib as mpl
@@ -1305,7 +1309,7 @@ class PostProcess(object):
             # FIX FOR TRI MESHES
             point_radius = 2.
 
-            # IF PLOT ON CURVED MESH IS ACTIVATED 
+            # IF PLOT ON CURVED MESH IS ACTIVATED
             if plot_on_curvilinear_mesh:
 
                 if figure is None:
@@ -1313,13 +1317,13 @@ class PostProcess(object):
 
                 if configuration=="original":
                     incr = 0
-                    tmesh = PostProcess.CurvilinearPlotTri(self.mesh, np.zeros_like(self.sol), 
-                        interpolation_degree=interpolation_degree, show_plot=False, figure=figure, 
+                    tmesh = PostProcess.CurvilinearPlotTri(self.mesh, np.zeros_like(self.sol),
+                        interpolation_degree=interpolation_degree, show_plot=False, figure=figure,
                         save_tessellation=True, plot_points=plot_points, plot_edges=plot_edges)[-1]
                 else:
                     incr = -1
-                    tmesh = PostProcess.CurvilinearPlotTri(self.mesh, self.sol, 
-                        interpolation_degree=interpolation_degree, show_plot=False, figure=figure, 
+                    tmesh = PostProcess.CurvilinearPlotTri(self.mesh, self.sol,
+                        interpolation_degree=interpolation_degree, show_plot=False, figure=figure,
                         save_tessellation=True, plot_points=plot_points, plot_edges=plot_edges)[-1]
 
                 nsize = tmesh.nsize
@@ -1345,7 +1349,7 @@ class PostProcess(object):
                 return
 
 
-            # OTHERWISE PLOT ON PLANAR MESH 
+            # OTHERWISE PLOT ON PLANAR MESH
             if figure is None:
                 fig = plt.figure()
 
@@ -1360,17 +1364,17 @@ class PostProcess(object):
             else:
                 plt.triplot(mesh.points[:,0]+sol[:,0,-1], mesh.points[:,1]+sol[:,1,-1], mesh.elements[:,:3],color='k')
 
-                triang = mtri.Triangulation(mesh.points[:,0]+sol[:,0,-1], 
+                triang = mtri.Triangulation(mesh.points[:,0]+sol[:,0,-1],
                     mesh.points[:,1]+sol[:,1,-1], mesh.elements)
                 plt.tripcolor(triang, sol[:,quantity,-1], shading='gouraud', cmap=cm.viridis)
-                
+
                 if plot_points:
-                    plt.plot(mesh.points[:,0]+sol[:,0,-1], 
+                    plt.plot(mesh.points[:,0]+sol[:,0,-1],
                         mesh.points[:,1]+sol[:,1,-1],'o',markersize=point_radius,color='k')
 
             plt.axis('equal')
             plt.axis('off')
-            
+
             if colorbar:
                 plt.colorbar()
 
@@ -1401,26 +1405,26 @@ class PostProcess(object):
                 if configuration == "original":
                     PostProcess.CurvilinearPlotTet(self.mesh, np.zeros_like(self.mesh.points),
                         QuantityToPlot = self.sol[:,quantity,increment],
-                        interpolation_degree=interpolation_degree, figure=figure, show_plot=show_plot, plot_on_faces=False, 
-                        plot_points=plot_points, point_radius=point_radius, plot_edges=plot_edges, 
+                        interpolation_degree=interpolation_degree, figure=figure, show_plot=show_plot, plot_on_faces=False,
+                        plot_points=plot_points, point_radius=point_radius, plot_edges=plot_edges,
                         colorbar=colorbar, save=save, filename=filename)
 
                 elif configuration=="deformed":
 
-                    PostProcess.CurvilinearPlotTet(self.mesh, self.sol[:,:ndim,-1], 
+                    PostProcess.CurvilinearPlotTet(self.mesh, self.sol[:,:ndim,-1],
                         QuantityToPlot= self.sol[:,quantity,increment],
-                        interpolation_degree=interpolation_degree,figure=figure, show_plot=show_plot, plot_on_faces=False, 
-                        plot_points=plot_points, point_radius=point_radius, plot_edges=plot_edges, 
+                        interpolation_degree=interpolation_degree,figure=figure, show_plot=show_plot, plot_on_faces=False,
+                        plot_points=plot_points, point_radius=point_radius, plot_edges=plot_edges,
                         colorbar=colorbar, save=save, filename=filename)
 
-                return 
-            
+                return
+
             if configuration == "original":
-                trimesh_h = mlab.triangular_mesh(mesh.points[:,0], mesh.points[:,1], mesh.points[:,2], 
+                trimesh_h = mlab.triangular_mesh(mesh.points[:,0], mesh.points[:,1], mesh.points[:,2],
                     mesh.faces, scalars=self.sol[:,0,-1])
 
                 if plot_edges:
-                    mlab.triangular_mesh(mesh.points[:,0], mesh.points[:,1], mesh.points[:,2], 
+                    mlab.triangular_mesh(mesh.points[:,0], mesh.points[:,1], mesh.points[:,2],
                         mesh.faces, representation="wireframe", color=(0,0,0)) # representation="mesh"
 
                 if plot_points:
@@ -1428,13 +1432,13 @@ class PostProcess(object):
                         self.mesh.points[:,2],color=(0,0,0),mode='sphere',scale_factor=point_radius)
 
             elif configuration == "deformed":
-                trimesh_h = mlab.triangular_mesh(mesh.points[:,0]+sol[:,0,-1], 
-                    mesh.points[:,1]+sol[:,1,-1], mesh.points[:,2]+sol[:,2,-1], 
+                trimesh_h = mlab.triangular_mesh(mesh.points[:,0]+sol[:,0,-1],
+                    mesh.points[:,1]+sol[:,1,-1], mesh.points[:,2]+sol[:,2,-1],
                     mesh.faces, scalars=sol[:,quantity,-1])
 
                 if plot_edges:
-                    mlab.triangular_mesh(mesh.points[:,0]+sol[:,0,-1], 
-                        mesh.points[:,1]+sol[:,1,-1], mesh.points[:,2]+sol[:,2,-1], 
+                    mlab.triangular_mesh(mesh.points[:,0]+sol[:,0,-1],
+                        mesh.points[:,1]+sol[:,1,-1], mesh.points[:,2]+sol[:,2,-1],
                         mesh.faces, representation="wireframe", color=(0,0,0))
 
                 if plot_points:
@@ -1447,7 +1451,7 @@ class PostProcess(object):
             trimesh_h.actor.property.specular = 0.1
             trimesh_h.actor.property.specular_power = 5
 
-            # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO 
+            # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO
             # GET VIRIDIS COLORMAP FROM MATPLOTLIB
             color_func = ColorConverter()
             rgba_lower = color_func.to_rgba_array(cm.viridis.colors)
@@ -1458,7 +1462,7 @@ class PostProcess(object):
 
 
             if colorbar:
-                cbar = mlab.colorbar(object=trimesh_h, title=self.QuantityNamer(quantity), 
+                cbar = mlab.colorbar(object=trimesh_h, title=self.QuantityNamer(quantity),
                     orientation="horizontal",label_fmt="%9.2f")
 
             mlab.draw()
@@ -1475,19 +1479,19 @@ class PostProcess(object):
             if plot_on_curvilinear_mesh:
 
                 if configuration=="original":
-                    PostProcess.CurvilinearPlotQuad(self.mesh, np.zeros_like(self.sol), 
+                    PostProcess.CurvilinearPlotQuad(self.mesh, np.zeros_like(self.sol),
                         QuantityToPlot=self.sol[:,quantity,increment],
-                        interpolation_degree=interpolation_degree, show_plot=show_plot, figure=figure, 
+                        interpolation_degree=interpolation_degree, show_plot=show_plot, figure=figure,
                         save_tessellation=True, plot_points=plot_points, plot_edges=plot_edges,
                         colorbar=colorbar, plot_on_faces=False)
                 else:
-                    PostProcess.CurvilinearPlotQuad(self.mesh, self.sol, 
+                    PostProcess.CurvilinearPlotQuad(self.mesh, self.sol,
                         QuantityToPlot=self.sol[:,quantity,increment],
-                        interpolation_degree=interpolation_degree, show_plot=show_plot, figure=figure, 
-                        save_tessellation=True, plot_points=plot_points, plot_edges=plot_edges, 
+                        interpolation_degree=interpolation_degree, show_plot=show_plot, figure=figure,
+                        save_tessellation=True, plot_points=plot_points, plot_edges=plot_edges,
                         colorbar=colorbar, plot_on_faces=False)
 
-                return 
+                return
 
             # PLOT ON STRAIGHT MESH
             fig = plt.figure()
@@ -1500,7 +1504,7 @@ class PostProcess(object):
                 h_fig = plt.tripcolor(triang, sol[:,quantity,increment], shading='gouraud', cmap=cm.viridis)
 
                 if plot_points:
-                    h_points = plt.plot(mesh.points[:,0], mesh.points[:,1], 'o', 
+                    h_points = plt.plot(mesh.points[:,0], mesh.points[:,1], 'o',
                         markersize=point_radius,color='k')
 
                 if plot_edges:
@@ -1514,7 +1518,7 @@ class PostProcess(object):
                 h_fig = plt.tripcolor(triang, sol[:,quantity,increment], shading='gouraud', cmap=cm.viridis)
 
                 if plot_points:
-                    h_points = plt.plot(mesh.points[:,0]+sol[:,0,-1], 
+                    h_points = plt.plot(mesh.points[:,0]+sol[:,0,-1],
                         mesh.points[:,1]+sol[:,1,-1],'o',markersize=point_radius,color='k')
 
                 if plot_edges:
@@ -1524,7 +1528,7 @@ class PostProcess(object):
                     y_edges = vpoints[round_elements,1]
                     h_edges = plt.plot(x_edges.T, y_edges.T, 'k')
 
-                
+
             plt.axis('equal')
             plt.axis('off')
 
@@ -1543,30 +1547,30 @@ class PostProcess(object):
             ndim = 3
 
             if configuration=="original":
-                PostProcess.CurvilinearPlotHex(self.mesh, np.zeros_like(self.sol), 
+                PostProcess.CurvilinearPlotHex(self.mesh, np.zeros_like(self.sol),
                     QuantityToPlot=self.sol[:,quantity,increment],
-                    interpolation_degree=interpolation_degree, show_plot=show_plot, figure=figure, 
+                    interpolation_degree=interpolation_degree, show_plot=show_plot, figure=figure,
                     plot_points=plot_points, point_radius=point_radius, plot_edges=plot_edges,
                     colorbar=colorbar, plot_on_faces=False, save=save, filename=filename)
             else:
-                PostProcess.CurvilinearPlotHex(self.mesh, self.sol, 
+                PostProcess.CurvilinearPlotHex(self.mesh, self.sol,
                     QuantityToPlot=self.sol[:,quantity,increment],
                     interpolation_degree=interpolation_degree, show_plot=show_plot, figure=figure,
-                    plot_points=plot_points, point_radius=point_radius, plot_edges=plot_edges, 
+                    plot_points=plot_points, point_radius=point_radius, plot_edges=plot_edges,
                     colorbar=colorbar, plot_on_faces=False, save=save, filename=filename)
 
             return
 
 
 
-    def Animate(self, figure=None, quantity=0, configuration="original", increment=0, colorbar=True, axis_type=None, 
-        plot_points=False, point_radius=0.5, plot_edges=True, plot_on_curvilinear_mesh=True, show_plot=True, save=False, 
+    def Animate(self, figure=None, quantity=0, configuration="original", increment=0, colorbar=True, axis_type=None,
+        plot_points=False, point_radius=0.5, plot_edges=True, plot_on_curvilinear_mesh=True, show_plot=True, save=False,
         filename=None):
-        """ 
+        """
 
             Input:
-                configuration:                  [str] to plot on original or deformed configuration 
-                increment:                      [int] if results at specific increment needs to be plotted. 
+                configuration:                  [str] to plot on original or deformed configuration
+                increment:                      [int] if results at specific increment needs to be plotted.
         """
 
 
@@ -1597,7 +1601,7 @@ class PostProcess(object):
 
         # GET LINEAR MESH
         mesh = self.mesh.GetLinearMesh()
-        # GET LINEAR SOLUTION 
+        # GET LINEAR SOLUTION
         sol = np.copy(self.sol[:mesh.nnode,:,:])
 
         if self.mesh.element_type == "tri":
@@ -1612,14 +1616,14 @@ class PostProcess(object):
             import matplotlib.cm as cm
             from mpl_toolkits.axes_grid1 import make_axes_locatable
             import matplotlib.animation as animation
-            
+
             # FIX FOR TRI MESHES
             point_radius = 2.
             ndim = 2
             pp = .1
 
             if configuration=="deformed":
-                vpoints = self.mesh.points+self.sol[:,:ndim,-1] 
+                vpoints = self.mesh.points+self.sol[:,:ndim,-1]
             else:
                 vpoints = self.mesh.points
 
@@ -1628,13 +1632,13 @@ class PostProcess(object):
             x_max = max(np.max(self.mesh.points[:,0]),np.max((self.mesh.points+self.sol[:,:ndim,-1])[:,0]))
             y_max = max(np.max(self.mesh.points[:,1]),np.max((self.mesh.points+self.sol[:,:ndim,-1])[:,1]))
 
-            # IF PLOT ON CURVED MESH IS ACTIVATED 
+            # IF PLOT ON CURVED MESH IS ACTIVATED
             if plot_on_curvilinear_mesh:
 
                 figure, ax = plt.subplots()
 
-                tmesh = PostProcess.CurvilinearPlotTri(self.mesh, np.zeros_like(self.sol), 
-                        interpolation_degree=10, show_plot=False, 
+                tmesh = PostProcess.CurvilinearPlotTri(self.mesh, np.zeros_like(self.sol),
+                        interpolation_degree=10, show_plot=False,
                         save_tessellation=True)[-1]
                 plt.close()
 
@@ -1648,7 +1652,7 @@ class PostProcess(object):
 
 
                 def init_animation():
-                    
+
                     ax.set_xlim([x_min - pp*np.abs(x_min), x_max + pp*np.abs(x_max)])
                     ax.set_ylim([y_min - pp*np.abs(y_min), y_max + pp*np.abs(y_max)])
 
@@ -1732,7 +1736,7 @@ class PostProcess(object):
             # MAKE FIGURE
             figure, ax = plt.subplots()
 
-            triang = mtri.Triangulation(mesh.points[:,0], 
+            triang = mtri.Triangulation(mesh.points[:,0],
                 mesh.points[:,1], mesh.elements)
 
             def init_animation():
@@ -1752,7 +1756,7 @@ class PostProcess(object):
                 if colorbar:
                     self.cbar = figure.colorbar(self.h_fig, shrink=0.5)
                     self.cbar.set_clim(sol[:,quantity,0].min(),sol[:,quantity,0].max())
-                
+
                 ax.set_aspect('equal',anchor='C')
                 ax.set_axis_off()
 
@@ -1760,7 +1764,7 @@ class PostProcess(object):
             def animator(incr):
 
                 ax.clear()
-                    
+
                 if configuration=="deformed":
                     vpoints = mesh.points + sol[:,:ndim,incr]
                     triang.x = vpoints[:,0]
@@ -1778,7 +1782,7 @@ class PostProcess(object):
                 self.h_fig = ax.tripcolor(triang, sol[:,quantity,incr], shading='gouraud', cmap=cm.viridis)
 
                 self.h_fig.set_clim(sol[:,quantity,incr].min(),sol[:,quantity,incr].max())
-                
+
                 if colorbar:
                     # self.cbar = figure.colorbar(self.h_fig, shrink=0.5)
                     self.cbar.set_clim(sol[:,quantity,incr].min(),sol[:,quantity,incr].max())
@@ -1787,10 +1791,10 @@ class PostProcess(object):
                 ax.set_aspect('equal',anchor='C')
                 ax.set_axis_off()
 
- 
-            ani = animation.FuncAnimation(figure,func=animator, 
+
+            ani = animation.FuncAnimation(figure,func=animator,
                 frames=range(self.sol.shape[2]), init_func=init_animation)
-            
+
             if save:
                 if filename.split('.')[-1] == "gif":
                     ani.save(filename,fps=5, writer="imagemagick", savefig_kwargs={'pad_inches':0.01})
@@ -1817,11 +1821,11 @@ class PostProcess(object):
 
             if plot_on_curvilinear_mesh:
 
-                tmesh = PostProcess.CurvilinearPlotTet(self.mesh, 
+                tmesh = PostProcess.CurvilinearPlotTet(self.mesh,
                     np.zeros_like(self.mesh.points),
                     QuantityToPlot = self.sol[:,quantity,increment],
-                    show_plot=False, plot_on_faces=False, 
-                    plot_points=plot_points, point_radius=point_radius, plot_edges=plot_edges, 
+                    show_plot=False, plot_on_faces=False,
+                    plot_points=plot_points, point_radius=point_radius, plot_edges=plot_edges,
                     colorbar=colorbar, save_tessellation=True)[-1]
 
                 nsize = tmesh.nsize
@@ -1830,15 +1834,15 @@ class PostProcess(object):
                 extrapolated_sol = np.zeros((tmesh.points.shape[0], self.sol.shape[1]))
                 ssol = self.sol[np.unique(tmesh.faces_to_plot),:,:]
                 for ielem in range(nface):
-                    extrapolated_sol[ielem*nsize:(ielem+1)*nsize,:] = np.dot(tmesh.bases_2, 
+                    extrapolated_sol[ielem*nsize:(ielem+1)*nsize,:] = np.dot(tmesh.bases_2,
                         ssol[tmesh.smesh.elements[ielem,:],:, 0])
 
-                trimesh_h = mlab.triangular_mesh(tmesh.points[:,0], tmesh.points[:,1], 
+                trimesh_h = mlab.triangular_mesh(tmesh.points[:,0], tmesh.points[:,1],
                     tmesh.points[:,2], tmesh.elements, scalars = extrapolated_sol[:,quantity],
                     line_width=0.5)
 
                 if plot_edges:
-                    src = mlab.pipeline.scalar_scatter(tmesh.x_edges.T.copy().flatten(), 
+                    src = mlab.pipeline.scalar_scatter(tmesh.x_edges.T.copy().flatten(),
                         tmesh.y_edges.T.copy().flatten(), tmesh.z_edges.T.copy().flatten())
                     src.mlab_source.dataset.lines = tmesh.connections
                     lines = mlab.pipeline.stripper(src)
@@ -1859,7 +1863,7 @@ class PostProcess(object):
                 if plot_points:
                     m_points = h_points.mlab_source
 
-                @mlab.animate(delay=100) 
+                @mlab.animate(delay=100)
                 def animator():
                     # fig = mlab.gcf()
 
@@ -1870,18 +1874,18 @@ class PostProcess(object):
                         # GET SOLUTION AT THIS INCREMENT
                         extrapolated_sol = np.zeros((tmesh.points.shape[0], self.sol.shape[1]))
                         for ielem in range(nface):
-                            extrapolated_sol[ielem*nsize:(ielem+1)*nsize,:] = np.dot(tmesh.bases_2, 
+                            extrapolated_sol[ielem*nsize:(ielem+1)*nsize,:] = np.dot(tmesh.bases_2,
                                 ssol[tmesh.smesh.elements[ielem,:],:, i])
 
                         svpoints = self.mesh.points[np.unique(tmesh.faces_to_plot),:] + ssol[:,:ndim,i]
 
                         if configuration == "deformed":
 
-                            m_trimesh.reset(x=tmesh.points[:,0]+extrapolated_sol[:,0], 
+                            m_trimesh.reset(x=tmesh.points[:,0]+extrapolated_sol[:,0],
                                 y=tmesh.points[:,1]+extrapolated_sol[:,1],
-                                z=tmesh.points[:,2]+extrapolated_sol[:,2], 
+                                z=tmesh.points[:,2]+extrapolated_sol[:,2],
                                 scalars=extrapolated_sol[:,quantity])
-                            
+
                             # GET UPDATED EDGE COORDINATES AT THIS INCREMENT
                             if plot_edges:
                                 for iedge in range(tmesh.smesh.all_edges.shape[0]):
@@ -1890,7 +1894,7 @@ class PostProcess(object):
                                     coord_edge = svpoints[edge,:]
                                     tmesh.x_edges[:,iedge], tmesh.y_edges[:,iedge], tmesh.z_edges[:,iedge] = np.dot(coord_edge.T,tmesh.bases_1)
 
-                                m_wire.reset(x=tmesh.x_edges.T.copy().flatten(), 
+                                m_wire.reset(x=tmesh.x_edges.T.copy().flatten(),
                                     y=tmesh.y_edges.T.copy().flatten(),
                                     z=tmesh.z_edges.T.copy().flatten())
 
@@ -1901,10 +1905,10 @@ class PostProcess(object):
 
                             m_trimesh.reset(scalars=extrapolated_sol[:,quantity])
 
-                        
+
                         if colorbar:
 
-                            cbar = mlab.colorbar(object=trimesh_h, title=self.QuantityNamer(quantity), 
+                            cbar = mlab.colorbar(object=trimesh_h, title=self.QuantityNamer(quantity),
                                 orientation="horizontal",label_fmt="%9.2f")
 
                             # CHANGE LIGHTING OPTION
@@ -1912,7 +1916,7 @@ class PostProcess(object):
                             trimesh_h.actor.property.specular = 0.1
                             trimesh_h.actor.property.specular_power = 5
 
-                            # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO 
+                            # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO
                             # GET VIRIDIS COLORMAP FROM MATPLOTLIB
                             color_func = ColorConverter()
                             rgba_lower = color_func.to_rgba_array(cm.viridis.colors)
@@ -1920,7 +1924,7 @@ class PostProcess(object):
                             RGBA_higher = np.round(rgba_lower*255).astype(np.int64)
                             # UPDATE LUT OF THE COLORMAP
                             trimesh_h.module_manager.scalar_lut_manager.lut.table = RGBA_higher
-                        
+
 
                         figure.scene.reset_zoom()
                         # fig.scene.reset_zoom()
@@ -1928,7 +1932,7 @@ class PostProcess(object):
                         # SAVE EACH FRAME USING AN EXTERNAL TOOL
                         if save:
                             mlab.savefig(filename.split(".")[0]+"_increment_"+str(i)+".png")
-                        
+
                         yield
 
                 with constant_camera_view():
@@ -1936,7 +1940,7 @@ class PostProcess(object):
 
                 # mlab.view(azimuth=45, elevation=50, distance=90, focalpoint=None,
                     # roll=0, reset_roll=True, figure=None)
-                
+
 
                 if show_plot:
                     # mlab.draw()
@@ -1957,11 +1961,11 @@ class PostProcess(object):
                     fps = 25
                     p = subprocess.Popen('ffmpeg -framerate ' +str(fps)+ ' -i ' + \
                         filename.split('.')[0] + '_increment_%00d.png' + \
-                        ' -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p '+ filename, 
+                        ' -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p '+ filename,
                         shell=True)
                     p.wait()
                     # REMOVE TEMPS
-                    p = subprocess.Popen('rm -rf ' + filename.split(".")[0]+"_increment_*", 
+                    p = subprocess.Popen('rm -rf ' + filename.split(".")[0]+"_increment_*",
                         shell=True)
                     p.wait()
                     # ffmpeg -framerate 25 -i yy_increment_%0d.png -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p output.mp4
@@ -1970,27 +1974,27 @@ class PostProcess(object):
 
                 # del tmesh
 
-            return 
+            return
 
 
             # FOR PLANAR MESHES
             if configuration == "original":
-                trimesh_h = mlab.triangular_mesh(mesh.points[:,0], mesh.points[:,1], mesh.points[:,2], 
+                trimesh_h = mlab.triangular_mesh(mesh.points[:,0], mesh.points[:,1], mesh.points[:,2],
                     mesh.faces, scalars=self.sol[:,quantity,0])
 
-                wire_h = mlab.triangular_mesh(mesh.points[:,0], mesh.points[:,1], mesh.points[:,2], 
+                wire_h = mlab.triangular_mesh(mesh.points[:,0], mesh.points[:,1], mesh.points[:,2],
                     mesh.faces, representation="mesh", color=(0,0,0))
 
                 points_h = mlab.points3d(self.mesh.points[:,0],self.mesh.points[:,1],
                     self.mesh.points[:,2],color=(0,0,0),mode='sphere',scale_factor=point_radius)
 
             elif configuration == "deformed":
-                trimesh_h = mlab.triangular_mesh(mesh.points[:,0]+sol[:,0,0], 
-                    mesh.points[:,1]+sol[:,1,0], mesh.points[:,2]+sol[:,2,0], 
+                trimesh_h = mlab.triangular_mesh(mesh.points[:,0]+sol[:,0,0],
+                    mesh.points[:,1]+sol[:,1,0], mesh.points[:,2]+sol[:,2,0],
                     mesh.faces, scalars=sol[:,quantity,0])
 
-                wire_h = mlab.triangular_mesh(mesh.points[:,0]+sol[:,0,0], 
-                    mesh.points[:,1]+sol[:,1,0], mesh.points[:,2]+sol[:,2,0], 
+                wire_h = mlab.triangular_mesh(mesh.points[:,0]+sol[:,0,0],
+                    mesh.points[:,1]+sol[:,1,0], mesh.points[:,2]+sol[:,2,0],
                     mesh.faces, representation="mesh", color=(0,0,0))
 
                 points_h = mlab.points3d(self.mesh.points[:,0]+self.sol[:,0,0],self.mesh.points[:,1]+self.sol[:,1,0],
@@ -2002,7 +2006,7 @@ class PostProcess(object):
             trimesh_h.actor.property.specular = 0.1
             trimesh_h.actor.property.specular_power = 5
 
-            # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO 
+            # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO
             # GET VIRIDIS COLORMAP FROM MATPLOTLIB
             color_func = ColorConverter()
             rgba_lower = color_func.to_rgba_array(cm.viridis.colors)
@@ -2016,7 +2020,7 @@ class PostProcess(object):
                 cbar = mlab.colorbar(object=trimesh_h, orientation="vertical",label_fmt="%9.2f")
 
 
-            @mlab.animate(delay=1000) 
+            @mlab.animate(delay=1000)
             def animator():
                 fig = mlab.gcf()
                 m_trimesh = trimesh_h.mlab_source
@@ -2051,14 +2055,14 @@ class PostProcess(object):
             import matplotlib.cm as cm
             from mpl_toolkits.axes_grid1 import make_axes_locatable
             import matplotlib.animation as animation
-            
+
             # FIX FOR TRI MESHES
             point_radius = 2.
             ndim = 2
             pp = .1
 
             if configuration=="deformed":
-                vpoints = self.mesh.points+self.sol[:,:ndim,-1] 
+                vpoints = self.mesh.points+self.sol[:,:ndim,-1]
             else:
                 vpoints = self.mesh.points
 
@@ -2067,12 +2071,12 @@ class PostProcess(object):
             x_max = max(np.max(self.mesh.points[:,0]),np.max((self.mesh.points+self.sol[:,:ndim,-1])[:,0]))
             y_max = max(np.max(self.mesh.points[:,1]),np.max((self.mesh.points+self.sol[:,:ndim,-1])[:,1]))
 
-            # IF PLOT ON CURVED MESH IS ACTIVATED 
+            # IF PLOT ON CURVED MESH IS ACTIVATED
             if plot_on_curvilinear_mesh:
 
                 figure, ax = plt.subplots()
 
-                tmesh = PostProcess.TessellateQuads(self.mesh, np.zeros_like(self.sol), 
+                tmesh = PostProcess.TessellateQuads(self.mesh, np.zeros_like(self.sol),
                         interpolation_degree=10, plot_points=plot_points, plot_edges=plot_edges,
                         plot_on_faces=False)
 
@@ -2086,7 +2090,7 @@ class PostProcess(object):
 
 
                 def init_animation():
-                    
+
                     ax.set_xlim([x_min - pp*np.abs(x_min), x_max + pp*np.abs(x_max)])
                     ax.set_ylim([y_min - pp*np.abs(y_min), y_max + pp*np.abs(y_max)])
 
@@ -2177,10 +2181,10 @@ class PostProcess(object):
 
             if plot_on_curvilinear_mesh:
 
-                tmesh = PostProcess.TessellateHexes(self.mesh, 
+                tmesh = PostProcess.TessellateHexes(self.mesh,
                     np.zeros_like(self.mesh.points),
                     QuantityToPlot = self.sol[:,quantity,increment],
-                    plot_on_faces=False, plot_points=plot_points, 
+                    plot_on_faces=False, plot_points=plot_points,
                     plot_edges=plot_edges, plot_surfaces=True)
 
                 nsize = tmesh.nsize
@@ -2189,15 +2193,15 @@ class PostProcess(object):
                 extrapolated_sol = np.zeros((tmesh.points.shape[0], self.sol.shape[1]))
                 ssol = self.sol[np.unique(tmesh.faces_to_plot),:,:]
                 for ielem in range(nface):
-                    extrapolated_sol[ielem*nsize:(ielem+1)*nsize,:] = np.dot(tmesh.bases_2, 
+                    extrapolated_sol[ielem*nsize:(ielem+1)*nsize,:] = np.dot(tmesh.bases_2,
                         ssol[tmesh.smesh.elements[ielem,:],:, 0])
 
-                trimesh_h = mlab.triangular_mesh(tmesh.points[:,0], tmesh.points[:,1], 
+                trimesh_h = mlab.triangular_mesh(tmesh.points[:,0], tmesh.points[:,1],
                     tmesh.points[:,2], tmesh.elements, scalars = extrapolated_sol[:,quantity],
                     line_width=0.5)
 
                 if plot_edges:
-                    src = mlab.pipeline.scalar_scatter(tmesh.x_edges.T.copy().flatten(), 
+                    src = mlab.pipeline.scalar_scatter(tmesh.x_edges.T.copy().flatten(),
                         tmesh.y_edges.T.copy().flatten(), tmesh.z_edges.T.copy().flatten())
                     src.mlab_source.dataset.lines = tmesh.connections
                     lines = mlab.pipeline.stripper(src)
@@ -2218,7 +2222,7 @@ class PostProcess(object):
                 if plot_points:
                     m_points = h_points.mlab_source
 
-                @mlab.animate(delay=100) 
+                @mlab.animate(delay=100)
                 def animator():
                     # fig = mlab.gcf()
 
@@ -2229,18 +2233,18 @@ class PostProcess(object):
                         # GET SOLUTION AT THIS INCREMENT
                         extrapolated_sol = np.zeros((tmesh.points.shape[0], self.sol.shape[1]))
                         for ielem in range(nface):
-                            extrapolated_sol[ielem*nsize:(ielem+1)*nsize,:] = np.dot(tmesh.bases_2, 
+                            extrapolated_sol[ielem*nsize:(ielem+1)*nsize,:] = np.dot(tmesh.bases_2,
                                 ssol[tmesh.smesh.elements[ielem,:],:, i])
 
                         svpoints = self.mesh.points[np.unique(tmesh.faces_to_plot),:] + ssol[:,:ndim,i]
 
                         if configuration == "deformed":
 
-                            m_trimesh.reset(x=tmesh.points[:,0]+extrapolated_sol[:,0], 
+                            m_trimesh.reset(x=tmesh.points[:,0]+extrapolated_sol[:,0],
                                 y=tmesh.points[:,1]+extrapolated_sol[:,1],
-                                z=tmesh.points[:,2]+extrapolated_sol[:,2], 
+                                z=tmesh.points[:,2]+extrapolated_sol[:,2],
                                 scalars=extrapolated_sol[:,quantity])
-                            
+
                             # GET UPDATED EDGE COORDINATES AT THIS INCREMENT
                             if plot_edges:
                                 for iedge in range(tmesh.smesh.all_edges.shape[0]):
@@ -2249,7 +2253,7 @@ class PostProcess(object):
                                     coord_edge = svpoints[edge,:]
                                     tmesh.x_edges[:,iedge], tmesh.y_edges[:,iedge], tmesh.z_edges[:,iedge] = np.dot(coord_edge.T,tmesh.bases_1)
 
-                                m_wire.reset(x=tmesh.x_edges.T.copy().flatten(), 
+                                m_wire.reset(x=tmesh.x_edges.T.copy().flatten(),
                                     y=tmesh.y_edges.T.copy().flatten(),
                                     z=tmesh.z_edges.T.copy().flatten())
 
@@ -2260,10 +2264,10 @@ class PostProcess(object):
 
                             m_trimesh.reset(scalars=extrapolated_sol[:,quantity])
 
-                        
+
                         if colorbar:
 
-                            cbar = mlab.colorbar(object=trimesh_h, title=self.QuantityNamer(quantity), 
+                            cbar = mlab.colorbar(object=trimesh_h, title=self.QuantityNamer(quantity),
                                 orientation="horizontal",label_fmt="%9.2f")
 
                             # CHANGE LIGHTING OPTION
@@ -2271,7 +2275,7 @@ class PostProcess(object):
                             trimesh_h.actor.property.specular = 0.1
                             trimesh_h.actor.property.specular_power = 5
 
-                            # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO 
+                            # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO
                             # GET VIRIDIS COLORMAP FROM MATPLOTLIB
                             color_func = ColorConverter()
                             rgba_lower = color_func.to_rgba_array(cm.viridis.colors)
@@ -2279,7 +2283,7 @@ class PostProcess(object):
                             RGBA_higher = np.round(rgba_lower*255).astype(np.int64)
                             # UPDATE LUT OF THE COLORMAP
                             trimesh_h.module_manager.scalar_lut_manager.lut.table = RGBA_higher
-                        
+
 
                         figure.scene.reset_zoom()
                         # fig.scene.reset_zoom()
@@ -2287,7 +2291,7 @@ class PostProcess(object):
                         # SAVE EACH FRAME USING AN EXTERNAL TOOL
                         if save:
                             mlab.savefig(filename.split(".")[0]+"_increment_"+str(i)+".png")
-                        
+
                         yield
 
                 with constant_camera_view():
@@ -2295,7 +2299,7 @@ class PostProcess(object):
 
                 # mlab.view(azimuth=45, elevation=50, distance=90, focalpoint=None,
                 #     roll=0, reset_roll=True, figure=None)
-                
+
 
                 if show_plot:
                     # mlab.draw()
@@ -2316,11 +2320,11 @@ class PostProcess(object):
                     fps = 25
                     p = subprocess.Popen('ffmpeg -framerate ' +str(fps)+ ' -i ' + \
                         filename.split('.')[0] + '_increment_%00d.png' + \
-                        ' -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p '+ filename, 
+                        ' -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p '+ filename,
                         shell=True)
                     p.wait()
                     # REMOVE TEMPS
-                    p = subprocess.Popen('rm -rf ' + filename.split(".")[0]+"_increment_*", 
+                    p = subprocess.Popen('rm -rf ' + filename.split(".")[0]+"_increment_*",
                         shell=True)
                     p.wait()
                     # ffmpeg -framerate 25 -i yy_increment_%0d.png -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p output.mp4
@@ -2361,11 +2365,11 @@ class PostProcess(object):
     def CurvilinearPlotTri(mesh, TotalDisp=None, QuantityToPlot=None,
         ProjectionFlags=None, interpolation_degree=30, EquallySpacedPoints=False,
         TriSurf=False, colorbar=False, PlotActualCurve=False, point_radius = 3, color="#C5F1C5",
-        plot_points=False, plot_edges=True, save=False, filename=None, figure=None, show_plot=True, 
+        plot_points=False, plot_edges=True, save=False, filename=None, figure=None, show_plot=True,
         save_tessellation=False, plot_surfaces=True):
 
         """High order curved triangular mesh plots, based on high order nodal FEM.
-            The equally spaced FEM points do not work as good as the Fekete points 
+            The equally spaced FEM points do not work as good as the Fekete points
         """
 
         if not isinstance(mesh,Mesh):
@@ -2380,7 +2384,7 @@ class PostProcess(object):
         from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
-        from Florence.FunctionSpace import Tri 
+        from Florence.FunctionSpace import Tri
         from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
 
         from copy import deepcopy
@@ -2392,14 +2396,14 @@ class PostProcess(object):
         import matplotlib.tri as mtri
         import matplotlib.cm as cm
         from mpl_toolkits.axes_grid1 import make_axes_locatable
-        
+
         # SINCE THIS IS A 2D PLOT
         ndim = 2
 
         C = interpolation_degree
         p = C+1
         nsize = int((p+1)*(p+2)/2.)
-        CActual = mesh.InferPolynomialDegree() - 1 
+        CActual = mesh.InferPolynomialDegree() - 1
         nsize_2 = int((CActual+2)*(CActual+3)/2.)
 
         FeketePointsTri = FeketePointsTri(C)
@@ -2440,22 +2444,27 @@ class PostProcess(object):
         reference_edges = np.concatenate((reference_edges,reference_edges[:,1,None]),axis=1)
         reference_edges = np.delete(reference_edges,1,1)
 
+        pdim = mesh.points.shape[1]
         # GET EULERIAN GEOMETRY
         if TotalDisp.ndim==3:
-            vpoints = mesh.points + TotalDisp[:,:ndim,-1]
+            vpoints = mesh.points + TotalDisp[:,:pdim,-1]
         else:
-            vpoints = mesh.points + TotalDisp[:,:ndim]
+            vpoints = mesh.points + TotalDisp[:,:pdim]
 
         # GET X & Y OF CURVED EDGES
         if plot_edges:
             x_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
             y_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
+            z_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
 
             for iedge in range(smesh.all_edges.shape[0]):
                 ielem = edge_elements[iedge,0]
                 edge = mesh.elements[ielem,reference_edges[edge_elements[iedge,1],:]]
                 coord_edge = vpoints[edge,:]
-                x_edges[:,iedge], y_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
+                if pdim == 2:
+                    x_edges[:,iedge], y_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
+                elif pdim == 3:
+                    x_edges[:,iedge], y_edges[:,iedge], z_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
 
 
         # MAKE FIGURE
@@ -2484,13 +2493,13 @@ class PostProcess(object):
         if plot_edges:
             # PLOT CURVED EDGES
             h_edges = ax.plot(x_edges,y_edges,'k')
-        
+
         if plot_surfaces:
             mesh.nelem = int(mesh.nelem)
             nnode = int(nsize*mesh.nelem)
             nelem = int(Triangles.shape[0]*mesh.nelem)
 
-            Xplot = np.zeros((nnode,2),dtype=np.float64)
+            Xplot = np.zeros((nnode,pdim),dtype=np.float64)
             Tplot = np.zeros((nelem,3),dtype=np.int64)
             Uplot = np.zeros(nnode,dtype=np.float64)
 
@@ -2530,7 +2539,7 @@ class PostProcess(object):
             plt.set_cmap('viridis')
             # plt.set_cmap('viridis_r')
             plt.clim(0,1)
-        
+
         if plot_surfaces:
             if colorbar is True:
                 ax_cbar = mpl.colorbar.make_axes(plt.gca(), shrink=1.0)[0]
@@ -2539,7 +2548,7 @@ class PostProcess(object):
                 cbar.set_clim(0, 1)
                 divider = make_axes_locatable(ax_cbar)
                 cax = divider.append_axes("right", size="1%", pad=0.005)
-        
+
         if PlotActualCurve is True:
             ActualCurve = getattr(MainData,'ActualCurve',None)
             if ActualCurve is not None:
@@ -2600,7 +2609,7 @@ class PostProcess(object):
         show_plot=True, save=False, filename=None, save_tessellation=False):
 
         """High order curved tetrahedral surfaces mesh plots, based on high order nodal FEM.
-            The equally spaced FEM points do not work as good as the Fekete points 
+            The equally spaced FEM points do not work as good as the Fekete points
         """
 
         if not isinstance(mesh,Mesh):
@@ -2615,7 +2624,7 @@ class PostProcess(object):
         from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
-        from Florence.FunctionSpace import Tri 
+        from Florence.FunctionSpace import Tri
         from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
 
         from copy import deepcopy
@@ -2669,7 +2678,7 @@ class PostProcess(object):
             BasesOneD[:,i] = LagrangeGaussLobatto(CActual,GaussLobattoPointsOneD[i])[0]
 
 
-        # GET ONLY THE FACES WHICH NEED TO BE PLOTTED 
+        # GET ONLY THE FACES WHICH NEED TO BE PLOTTED
         if ProjectionFlags is None:
             faces_to_plot_flag = np.ones(mesh.faces.shape[0])
         else:
@@ -2706,16 +2715,16 @@ class PostProcess(object):
         smesh.points = mesh.points[np.unique(smesh.elements),:]
 
 
-        # MAP TO ORIGIN    
+        # MAP TO ORIGIN
         unique_elements, inv = np.unique(smesh.elements,return_inverse=True)
         mapper = np.arange(unique_elements.shape[0])
         smesh.elements = mapper[inv].reshape(smesh.elements.shape)
- 
+
         smesh.GetBoundaryEdgesTri()
         smesh.GetEdgesTri()
         edge_elements = smesh.GetElementsEdgeNumberingTri()
 
-        
+
         # GET EDGE ORDERING IN THE REFERENCE ELEMENT
         reference_edges = NodeArrangementTri(CActual)[0]
         reference_edges = np.concatenate((reference_edges,reference_edges[:,1,None]),axis=1)
@@ -2751,7 +2760,7 @@ class PostProcess(object):
         h_points, h_edges, trimesh_h = None, None, None
 
         if plot_edges:
-            # GET X, Y & Z OF CURVED EDGES  
+            # GET X, Y & Z OF CURVED EDGES
             x_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
             y_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
             z_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
@@ -2762,7 +2771,7 @@ class PostProcess(object):
                 coord_edge = svpoints[edge,:]
                 x_edges[:,iedge], y_edges[:,iedge], z_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
 
-            
+
             # PLOT CURVED EDGES
             connections_elements = np.arange(x_edges.size).reshape(x_edges.shape[1],x_edges.shape[0])
             connections = np.zeros((x_edges.size,2),dtype=np.int64)
@@ -2770,7 +2779,7 @@ class PostProcess(object):
                 connections[i*(x_edges.shape[0]-1):(i+1)*(x_edges.shape[0]-1),0] = connections_elements[i,:-1]
                 connections[i*(x_edges.shape[0]-1):(i+1)*(x_edges.shape[0]-1),1] = connections_elements[i,1:]
             connections = connections[:(i+1)*(x_edges.shape[0]-1),:]
-            
+
             src = mlab.pipeline.scalar_scatter(x_edges.T.copy().flatten(), y_edges.T.copy().flatten(), z_edges.T.copy().flatten())
             src.mlab_source.dataset.lines = connections
             lines = mlab.pipeline.stripper(src)
@@ -2781,7 +2790,7 @@ class PostProcess(object):
             # OLDER VERSION
             # for i in range(x_edges.shape[1]):
             #     mlab.plot3d(x_edges[:,i],y_edges[:,i],z_edges[:,i],color=(0,0,0),tube_radius=edge_width)
-        
+
 
         # CURVED SURFACES
         if plot_surfaces:
@@ -2830,7 +2839,7 @@ class PostProcess(object):
             else:
                 trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars = Uplot,
                     line_width=point_line_width,colormap='summer')
-                
+
 
 
             # PLOT POINTS ON CURVED MESH
@@ -2846,14 +2855,14 @@ class PostProcess(object):
                 trimesh_h.actor.property.specular = 0.1
                 trimesh_h.actor.property.specular_power = 5
 
-                # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO 
+                # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO
                 # GET VIRIDIS COLORMAP FROM MATPLOTLIB
                 color_func = ColorConverter()
                 rgba_lower = color_func.to_rgba_array(cm.viridis.colors)
                 # rgba_lower = color_func.to_rgba_array(cm.viridis_r.colors)
                 RGBA_higher = np.round(rgba_lower*255).astype(np.int64)
                 # UPDATE LUT OF THE COLORMAP
-                trimesh_h.module_manager.scalar_lut_manager.lut.table = RGBA_higher 
+                trimesh_h.module_manager.scalar_lut_manager.lut.table = RGBA_higher
 
 
         if colorbar and plot_surfaces:
@@ -2873,7 +2882,7 @@ class PostProcess(object):
                 raise ValueError("No filename given. Supply one with extension")
             else:
                 mlab.savefig(filename,magnification="auto")
-    
+
         if show_plot is True:
             # FORCE UPDATE MLAB TO UPDATE COLORMAP
             mlab.draw()
@@ -2917,7 +2926,7 @@ class PostProcess(object):
     def CurvilinearPlotQuad(mesh, TotalDisp=None, QuantityToPlot=None,
         ProjectionFlags=None, interpolation_degree=30, EquallySpacedPoints=False,
         TriSurf=False, colorbar=False, PlotActualCurve=False, point_radius = 3, color="#C5F1C5",
-        plot_points=False, plot_edges=True, save=False, filename=None, figure=None, show_plot=True, 
+        plot_points=False, plot_edges=True, save=False, filename=None, figure=None, show_plot=True,
         save_tessellation=False, plot_on_faces=True, plot_surfaces=True):
 
         """High order curved quad mesh plots, based on high order nodal FEM.
@@ -2940,13 +2949,14 @@ class PostProcess(object):
         from mpl_toolkits.axes_grid1 import make_axes_locatable
 
         tmesh = PostProcess.TessellateQuads(mesh, TotalDisp, QuantityToPlot=QuantityToPlot,
-            ProjectionFlags=ProjectionFlags, interpolation_degree=interpolation_degree, 
-            EquallySpacedPoints=EquallySpacedPoints, plot_points=plot_points, 
+            ProjectionFlags=ProjectionFlags, interpolation_degree=interpolation_degree,
+            EquallySpacedPoints=EquallySpacedPoints, plot_points=plot_points,
             plot_edges=plot_edges, plot_on_faces=plot_on_faces)
 
         # UNPACK
         x_edges = tmesh.x_edges
         y_edges = tmesh.y_edges
+        z_edges = tmesh.z_edges
         nnode = tmesh.nnode
         nelem = tmesh.nelem
         nsize = tmesh.nsize
@@ -3000,7 +3010,7 @@ class PostProcess(object):
                 # plt.set_cmap('viridis_r')
                 if plot_on_faces:
                     plt.clim(0,1)
-            
+
 
             if colorbar is True:
                 if plot_on_faces:
@@ -3012,7 +3022,7 @@ class PostProcess(object):
                     cax = divider.append_axes("right", size="1%", pad=0.005)
                 else:
                     plt.colorbar(shrink=0.5,orientation="vertical")
-        
+
         if PlotActualCurve is True:
             ActualCurve = getattr(MainData,'ActualCurve',None)
             if ActualCurve is not None:
@@ -3049,7 +3059,7 @@ class PostProcess(object):
         show_plot=True, save=False, filename=None, save_tessellation=False):
 
         """High order curved hexahedral surfaces mesh plots, based on high order nodal FEM.
-            The equally spaced FEM points do not work as good as the Fekete points 
+            The equally spaced FEM points do not work as good as the Fekete points
         """
 
         if not isinstance(mesh,Mesh):
@@ -3074,9 +3084,9 @@ class PostProcess(object):
         os.environ['ETS_TOOLKIT'] = 'qt4'
         from mayavi import mlab
 
-        tmesh = PostProcess.TessellateHexes(mesh, TotalDisp, QuantityToPlot=QuantityToPlot, 
-            plot_on_faces=plot_on_faces, ProjectionFlags=ProjectionFlags, 
-            interpolation_degree=interpolation_degree, 
+        tmesh = PostProcess.TessellateHexes(mesh, TotalDisp, QuantityToPlot=QuantityToPlot,
+            plot_on_faces=plot_on_faces, ProjectionFlags=ProjectionFlags,
+            interpolation_degree=interpolation_degree,
             EquallySpacedPoints=EquallySpacedPoints,
             plot_points=plot_points, plot_edges=plot_edges, plot_surfaces=plot_surfaces)
 
@@ -3087,7 +3097,7 @@ class PostProcess(object):
         p = C+1
         nsize = int((C+2)**2)
 
-        faces_to_plot = tmesh.faces_to_plot        
+        faces_to_plot = tmesh.faces_to_plot
         svpoints = tmesh.svpoints
 
         if plot_surfaces:
@@ -3120,7 +3130,7 @@ class PostProcess(object):
             y_edges = tmesh.y_edges
             z_edges = tmesh.z_edges
             connections = tmesh.connections
-            
+
             src = mlab.pipeline.scalar_scatter(x_edges.T.copy().flatten(), y_edges.T.copy().flatten(), z_edges.T.copy().flatten())
             src.mlab_source.dataset.lines = connections
             lines = mlab.pipeline.stripper(src)
@@ -3157,14 +3167,14 @@ class PostProcess(object):
                 trimesh_h.actor.property.specular = 0.1
                 trimesh_h.actor.property.specular_power = 5
 
-                # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO 
+                # MAYAVI MLAB DOES NOT HAVE VIRIDIS AS OF NOW SO
                 # GET VIRIDIS COLORMAP FROM MATPLOTLIB
                 color_func = ColorConverter()
                 rgba_lower = color_func.to_rgba_array(cm.viridis.colors)
                 # rgba_lower = color_func.to_rgba_array(cm.viridis_r.colors)
                 RGBA_higher = np.round(rgba_lower*255).astype(np.int64)
                 # UPDATE LUT OF THE COLORMAP
-                trimesh_h.module_manager.scalar_lut_manager.lut.table = RGBA_higher 
+                trimesh_h.module_manager.scalar_lut_manager.lut.table = RGBA_higher
 
 
         if colorbar and plot_surfaces:
@@ -3188,7 +3198,7 @@ class PostProcess(object):
                 filename = PWD(__file__) + "/output.png"
             else:
                 mlab.savefig(filename,magnification="auto")
-    
+
         if show_plot is True:
             # FORCE UPDATE MLAB TO UPDATE COLORMAP
             mlab.draw()
@@ -3213,7 +3223,7 @@ class PostProcess(object):
         plot_points=False, plot_edges=True):
 
         """High order curved triangular mesh plots, based on high order nodal FEM.
-            The equally spaced FEM points do not work as good as the Fekete points 
+            The equally spaced FEM points do not work as good as the Fekete points
         """
 
 
@@ -3221,7 +3231,7 @@ class PostProcess(object):
         from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
-        from Florence.FunctionSpace import Tri 
+        from Florence.FunctionSpace import Tri
         from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
 
         from copy import deepcopy
@@ -3232,7 +3242,7 @@ class PostProcess(object):
         C = interpolation_degree
         p = C+1
         nsize = int((p+1)*(p+2)/2.)
-        CActual = mesh.InferPolynomialDegree() - 1 
+        CActual = mesh.InferPolynomialDegree() - 1
         nsize_2 = int((CActual+2)*(CActual+3)/2.)
 
         FeketePointsTri = FeketePointsTri(C)
@@ -3261,7 +3271,7 @@ class PostProcess(object):
             BasesOneD[:,i] = LagrangeGaussLobatto(CActual,GaussLobattoPointsOneD[i])[0]
 
         smesh = deepcopy(mesh)
-        smesh.elements = mesh.elements[:,:ndim+1]
+        smesh.elements = mesh.elements[:,:3]
         nmax = int(np.max(smesh.elements)+1)
         smesh.points = mesh.points[:nmax,:]
         smesh.GetEdgesTri()
@@ -3273,28 +3283,33 @@ class PostProcess(object):
         reference_edges = np.concatenate((reference_edges,reference_edges[:,1,None]),axis=1)
         reference_edges = np.delete(reference_edges,1,1)
 
+        pdim = mesh.points.shape[1]
         # GET EULERIAN GEOMETRY
         if TotalDisp.ndim==3:
-            vpoints = mesh.points + TotalDisp[:,:ndim,-1]
+            vpoints = mesh.points + TotalDisp[:,:pdim,-1]
         else:
-            vpoints = mesh.points + TotalDisp[:,:ndim]
+            vpoints = mesh.points + TotalDisp[:,:pdim]
 
         # GET X & Y OF CURVED EDGES
         if plot_edges:
             x_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
             y_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
+            z_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
 
             for iedge in range(smesh.all_edges.shape[0]):
                 ielem = edge_elements[iedge,0]
                 edge = mesh.elements[ielem,reference_edges[edge_elements[iedge,1],:]]
                 coord_edge = vpoints[edge,:]
-                x_edges[:,iedge], y_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
+                if pdim == 2:
+                    x_edges[:,iedge], y_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
+                elif pdim == 3:
+                    x_edges[:,iedge], y_edges[:,iedge], z_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
 
 
         nnode = nsize*mesh.nelem
         nelem = Triangles.shape[0]*mesh.nelem
 
-        Xplot = np.zeros((nnode,2),dtype=np.float64)
+        Xplot = np.zeros((nnode,pdim),dtype=np.float64)
         Tplot = np.zeros((nelem,3),dtype=np.int64)
         Uplot = np.zeros(nnode,dtype=np.float64)
 
@@ -3324,6 +3339,7 @@ class PostProcess(object):
         if plot_edges:
             tmesh.x_edges = x_edges
             tmesh.y_edges = y_edges
+            tmesh.z_edges = z_edges
             tmesh.edge_elements = edge_elements
             tmesh.reference_edges = reference_edges
 
@@ -3353,14 +3369,14 @@ class PostProcess(object):
 
         from copy import deepcopy
         from scipy.spatial import Delaunay
-        
+
         # SINCE THIS IS A 2D PLOT
         ndim = 2
 
         C = interpolation_degree
         p = C+1
         nsize = int((C+2)**ndim)
-        CActual = mesh.InferPolynomialDegree() - 1 
+        CActual = mesh.InferPolynomialDegree() - 1
         nsize_2 = int((CActual+2)**ndim)
 
         GaussLobattoPoints = GaussLobattoPointsQuad(C)
@@ -3394,29 +3410,34 @@ class PostProcess(object):
         reference_edges = np.concatenate((reference_edges,reference_edges[:,1,None]),axis=1)
         reference_edges = np.delete(reference_edges,1,1)
 
+        pdim = mesh.points.shape[1]
         # GET EULERIAN GEOMETRY
         if TotalDisp.ndim==3:
-            vpoints = mesh.points + TotalDisp[:,:ndim,-1]
+            vpoints = mesh.points + TotalDisp[:,:pdim,-1]
         else:
-            vpoints = mesh.points + TotalDisp[:,:ndim]
+            vpoints = mesh.points + TotalDisp[:,:pdim]
 
 
         # GET X & Y OF CURVED EDGES
         if plot_edges:
             x_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
             y_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
+            z_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
 
             for iedge in range(smesh.all_edges.shape[0]):
                 ielem = edge_elements[iedge,0]
                 edge = mesh.elements[ielem,reference_edges[edge_elements[iedge,1],:]]
                 coord_edge = vpoints[edge,:]
-                x_edges[:,iedge], y_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
+                if pdim == 2:
+                    x_edges[:,iedge], y_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
+                else:
+                    x_edges[:,iedge], y_edges[:,iedge], z_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
 
 
         nnode = nsize*mesh.nelem
         nelem = Triangles.shape[0]*mesh.nelem
 
-        Xplot = np.zeros((nnode,2),dtype=np.float64)
+        Xplot = np.zeros((nnode,pdim),dtype=np.float64)
         Tplot = np.zeros((nelem,3),dtype=np.int64)
         Uplot = np.zeros(nnode,dtype=np.float64)
 
@@ -3455,6 +3476,7 @@ class PostProcess(object):
         if plot_edges:
             tmesh.x_edges = x_edges
             tmesh.y_edges = y_edges
+            tmesh.y_edges = z_edges
             tmesh.edge_elements = edge_elements
             tmesh.reference_edges = reference_edges
 
@@ -3475,7 +3497,7 @@ class PostProcess(object):
         from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
         from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
-        from Florence.FunctionSpace import Tri 
+        from Florence.FunctionSpace import Tri
         from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
 
         from scipy.spatial import Delaunay
@@ -3515,7 +3537,7 @@ class PostProcess(object):
             BasesOneD[:,i] = LagrangeGaussLobatto(CActual,GaussLobattoPointsOneD[i])[0]
 
 
-        # GET ONLY THE FACES WHICH NEED TO BE PLOTTED 
+        # GET ONLY THE FACES WHICH NEED TO BE PLOTTED
         if ProjectionFlags is None:
             faces_to_plot_flag = np.ones(mesh.faces.shape[0])
         else:
@@ -3552,16 +3574,16 @@ class PostProcess(object):
         smesh.points = mesh.points[np.unique(smesh.elements),:]
 
 
-        # MAP TO ORIGIN    
+        # MAP TO ORIGIN
         unique_elements, inv = np.unique(smesh.elements,return_inverse=True)
         mapper = np.arange(unique_elements.shape[0])
         smesh.elements = mapper[inv].reshape(smesh.elements.shape)
- 
+
         smesh.GetBoundaryEdgesTri()
         smesh.GetEdgesTri()
         edge_elements = smesh.GetElementsEdgeNumberingTri()
 
-        
+
         # GET EDGE ORDERING IN THE REFERENCE ELEMENT
         reference_edges = NodeArrangementTri(CActual)[0]
         reference_edges = np.concatenate((reference_edges,reference_edges[:,1,None]),axis=1)
@@ -3581,7 +3603,7 @@ class PostProcess(object):
         gc.collect()
 
         if plot_edges:
-            # GET X, Y & Z OF CURVED EDGES  
+            # GET X, Y & Z OF CURVED EDGES
             x_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
             y_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
             z_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
@@ -3592,7 +3614,7 @@ class PostProcess(object):
                 coord_edge = svpoints[edge,:]
                 x_edges[:,iedge], y_edges[:,iedge], z_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
 
-            
+
             # PLOT CURVED EDGES
             connections_elements = np.arange(x_edges.size).reshape(x_edges.shape[1],x_edges.shape[0])
             connections = np.zeros((x_edges.size,2),dtype=np.int64)
@@ -3663,7 +3685,7 @@ class PostProcess(object):
         plot_points=False, plot_edges=True, plot_surfaces=True):
 
         """High order curved hexahedral surfaces mesh plots, based on high order nodal FEM.
-            The equally spaced FEM points do not work as good as the Fekete points 
+            The equally spaced FEM points do not work as good as the Fekete points
         """
 
 
@@ -3704,7 +3726,7 @@ class PostProcess(object):
         for i in range(GaussLobattoPointsOneD.shape[0]):
             BasesOneD[:,i] = LagrangeGaussLobatto(CActual,GaussLobattoPointsOneD[i])[0]
 
-        # GET ONLY THE FACES WHICH NEED TO BE PLOTTED 
+        # GET ONLY THE FACES WHICH NEED TO BE PLOTTED
         if ProjectionFlags is None:
             faces_to_plot_flag = np.ones(mesh.faces.shape[0])
         else:
@@ -3741,17 +3763,17 @@ class PostProcess(object):
         smesh.points = mesh.points[np.unique(smesh.elements),:]
 
 
-        # MAP TO ORIGIN    
+        # MAP TO ORIGIN
         unique_elements, inv = np.unique(smesh.elements,return_inverse=True)
         mapper = np.arange(unique_elements.shape[0])
         smesh.elements = mapper[inv].reshape(smesh.elements.shape)
- 
+
         smesh.GetBoundaryEdgesQuad()
         smesh.GetEdgesQuad()
         edge_elements = smesh.GetElementsEdgeNumberingQuad()
 
 
-        
+
         # GET EDGE ORDERING IN THE REFERENCE ELEMENT
         reference_edges = NodeArrangementQuad(CActual)[0]
         reference_edges = np.concatenate((reference_edges,reference_edges[:,1,None]),axis=1)
@@ -3771,7 +3793,7 @@ class PostProcess(object):
         gc.collect()
 
         if plot_edges:
-            # GET X, Y & Z OF CURVED EDGES  
+            # GET X, Y & Z OF CURVED EDGES
             x_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
             y_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
             z_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
@@ -3782,7 +3804,7 @@ class PostProcess(object):
                 coord_edge = svpoints[edge,:]
                 x_edges[:,iedge], y_edges[:,iedge], z_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
 
-            
+
             # PLOT CURVED EDGES
             connections_elements = np.arange(x_edges.size).reshape(x_edges.shape[1],x_edges.shape[0])
             connections = np.zeros((x_edges.size,2),dtype=np.int64)
@@ -3903,11 +3925,11 @@ class PostProcess(object):
     ###################################################################################
     ###################################################################################
 
-    @staticmethod   
+    @staticmethod
     def HighOrderPatchPlot(mesh,TotalDisp):
 
         import matplotlib.pyplot as plt
-        
+
         fig = plt.figure()
         ax = fig.axes
 
@@ -3937,14 +3959,14 @@ class PostProcess(object):
             plt.plot(dum[ddum,0],dum[ddum,1],alpha=0.02)
             # plt.fill(dum[ddum,0],dum[ddum,1],'#A4DDED')
             plt.fill(dum[ddum,0],dum[ddum,1],color=(0.75,MainData.ScaledJacobian[i],0.35))
-            # afig = plt.fill(dum[ddum,0],dum[ddum,1],color=(0.75,MainData.Jacobian[i]/4.,0.35))    
-            # afig= plt.fill(dum[ddum,0],dum[ddum,1])   
+            # afig = plt.fill(dum[ddum,0],dum[ddum,1],color=(0.75,MainData.Jacobian[i]/4.,0.35))
+            # afig= plt.fill(dum[ddum,0],dum[ddum,1])
 
-            # plt.fill(dum[ddum,0],dum[ddum,1],color=(0.75,1.0*i/mesh.elements.shape[0],0.35))  
-            # plt.fill(dum[ddum,0],dum[ddum,1],color=(MainData.ScaledJacobian[i],0,1-MainData.ScaledJacobian[i]))   
+            # plt.fill(dum[ddum,0],dum[ddum,1],color=(0.75,1.0*i/mesh.elements.shape[0],0.35))
+            # plt.fill(dum[ddum,0],dum[ddum,1],color=(MainData.ScaledJacobian[i],0,1-MainData.ScaledJacobian[i]))
 
             plt.plot(dum[ddum,0],dum[ddum,1],'#000000')
-            
+
             # WRITE JACOBIAN VALUES ON ELEMENTS
             # coord = mesh.points[mesh.elements[i,:],:]
             # x_avg.append(np.sum(coord[:,0])/mesh.elements.shape[1])
@@ -3952,7 +3974,7 @@ class PostProcess(object):
             # plt.text(x_avg[i],y_avg[i],np.around(MainData.ScaledJacobian[i],decimals=3))
 
 
-        plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#F88379',markersize=5) 
+        plt.plot(vpoints[:,0],vpoints[:,1],'o',color='#F88379',markersize=5)
 
         plt.axis('equal')
         # plt.xlim([-0.52,-0.43])

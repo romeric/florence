@@ -1903,7 +1903,7 @@ class Mesh(object):
         output:
 
             boundary_face_to_element:   [2D array] array containing elements which have face
-                                        on the boundary [cloumn 0] and a flag stating which faces they are [column 1]
+                                        on the boundary [column 0] and a flag stating which faces they are [column 1]
 
         """
 
@@ -2412,7 +2412,7 @@ class Mesh(object):
 
 
     def SimplePlot(self, to_plot='faces',
-        color=None, plot_points=False, point_radius=0.1,
+        color=None, plot_points=False, plot_edges=True, point_radius=0.1,
         save=False, filename=None, figure=None, show_plot=True,
         show_axis=False, grid="off"):
         """Simple mesh plot
@@ -2422,9 +2422,7 @@ class Mesh(object):
             grid:           [str] None, "on" or "off"
             """
 
-        assert self.element_type is not None
-        assert self.elements is not None
-        assert self.points is not None
+        self.__do_essential_memebers_exist__()
 
         if color is None:
             color=(197/255.,241/255.,197/255.)
@@ -2458,7 +2456,6 @@ class Mesh(object):
                 if self.faces is None:
                     self.GetBoundaryFaces()
                 faces = self.faces
-
             if figure is None:
                 figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(1000,800))
 
@@ -2518,9 +2515,10 @@ class Mesh(object):
             mlab.triangular_mesh(self.points[:,0],self.points[:,1],
                 self.points[:,2],faces[:,:3],color=color)
             radius = 1e-00
-            mlab.triangular_mesh(self.points[:,0],self.points[:,1],self.points[:,2], faces[:,:3],
-                line_width=radius,tube_radius=radius,color=(0,0,0),
-                representation='wireframe')
+            if plot_edges:
+                mlab.triangular_mesh(self.points[:,0],self.points[:,1],self.points[:,2], faces[:,:3],
+                    line_width=radius,tube_radius=radius,color=(0,0,0),
+                    representation='wireframe')
 
             if plot_points:
                 mlab.points3d(self.points[:,0],self.points[:,1],self.points[:,2]
@@ -2579,11 +2577,12 @@ class Mesh(object):
             trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot,
                     line_width=point_line_width,color=color)
 
-            src = mlab.pipeline.scalar_scatter(tmesh.x_edges.T.copy().flatten(),
-                tmesh.y_edges.T.copy().flatten(), tmesh.z_edges.T.copy().flatten())
-            src.mlab_source.dataset.lines = tmesh.connections
-            lines = mlab.pipeline.stripper(src)
-            h_edges = mlab.pipeline.surface(lines, color = (0,0,0), line_width=3)
+            if plot_edges:
+                src = mlab.pipeline.scalar_scatter(tmesh.x_edges.T.copy().flatten(),
+                    tmesh.y_edges.T.copy().flatten(), tmesh.z_edges.T.copy().flatten())
+                src.mlab_source.dataset.lines = tmesh.connections
+                lines = mlab.pipeline.stripper(src)
+                h_edges = mlab.pipeline.surface(lines, color = (0,0,0), line_width=3)
 
             # mlab.view(azimuth=135, elevation=45, distance=7, focalpoint=None,
                 # roll=0, reset_roll=True, figure=None)
@@ -2592,11 +2591,12 @@ class Mesh(object):
                 mlab.show()
 
         else:
-            raise NotImplementedError("SimplePlot for "+self.element_type+" not implemented yet")
+            raise NotImplementedError("SimplePlot for {} not implemented yet".format(self.element_type))
 
 
         if save:
-            if self.InferSpatialDimension() == 2:
+            ndim = self.InferSpatialDimension()
+            if ndim == 2:
                 plt.savefig(filename,format="png",dpi=300)
             else:
                 mlab.savefig(filename,dpi=300)
@@ -4220,10 +4220,10 @@ class Mesh(object):
         self.nnode = mpoints.shape[0]
 
         ndim = self.InferSpatialDimension()
-        if ndim==3:
+        if self.element_type == "tet" or self.element_type == "hex":
             self.GetBoundaryFaces()
             self.GetBoundaryEdges()
-        elif ndim==2:
+        elif self.element_type == "tri" or self.element_type == "quad":
             self.GetBoundaryEdges()
 
         if self_solution is not None and other_solution is not None:
@@ -5366,7 +5366,7 @@ class Mesh(object):
         assert self.points is not None
         assert self.edges is not None
         ndim = self.InferSpatialDimension()
-        if ndim==3:
+        if self.element_type == "tet" or self.element_type == "hex":
             assert self.faces is not None
 
 
