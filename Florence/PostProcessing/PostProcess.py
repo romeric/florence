@@ -2508,6 +2508,7 @@ class PostProcess(object):
             else:
                 quantity_to_plot = QuantityToPlot
 
+
             # FOR CURVED ELEMENTS
             for ielem in range(mesh.nelem):
                 Xplot[ielem*nsize:(ielem+1)*nsize,:] = np.dot(BasesTri.T, vpoints[mesh.elements[ielem,:],:])
@@ -2516,14 +2517,11 @@ class PostProcess(object):
 
             # PLOT CURVED ELEMENTS
             if TriSurf is True:
-                # ax.plot_trisurf(Tplot,Xplot[:,0], Xplot[:,1], Xplot[:,1]*0)
                 triang = mtri.Triangulation(Xplot[:,0], Xplot[:,1],Tplot)
                 ax.plot_trisurf(triang,Xplot[:,0]*0, edgecolor="none",facecolor="#ffddbb")
                 ax.view_init(90,-90)
                 ax.dist = 7
             else:
-                # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, np.ones(Xplot.shape[0]), 100,alpha=0.8)
-                # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, 100,alpha=0.8)
                 # plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot[:4,:], np.ones(Xplot.shape[0]),alpha=0.8,origin='lower')
                 if QuantityToPlot is None:
                     h_surfaces = plt.tricontourf(Xplot[:,0], Xplot[:,1], Tplot, Uplot, colors=color)
@@ -2550,10 +2548,9 @@ class PostProcess(object):
                 cax = divider.append_axes("right", size="1%", pad=0.005)
 
         if PlotActualCurve is True:
-            ActualCurve = getattr(MainData,'ActualCurve',None)
             if ActualCurve is not None:
-                for i in range(len(MainData.ActualCurve)):
-                    actual_curve_points = MainData.ActualCurve[i]
+                for i in range(len(ActualCurve)):
+                    actual_curve_points = ActualCurve[i]
                     plt.plot(actual_curve_points[:,0],actual_curve_points[:,1],'-r',linewidth=3)
             else:
                 raise KeyError("You have not computed the CAD curve points")
@@ -2588,6 +2585,7 @@ class PostProcess(object):
             if plot_edges:
                 tmesh.x_edges = x_edges
                 tmesh.y_edges = y_edges
+                tmesh.z_edges = z_edges
                 tmesh.edge_elements = edge_elements
                 tmesh.reference_edges = reference_edges
 
@@ -3030,10 +3028,9 @@ class PostProcess(object):
                     plt.colorbar(shrink=0.5,orientation="vertical")
 
         if PlotActualCurve is True:
-            ActualCurve = getattr(MainData,'ActualCurve',None)
             if ActualCurve is not None:
-                for i in range(len(MainData.ActualCurve)):
-                    actual_curve_points = MainData.ActualCurve[i]
+                for i in range(len(ActualCurve)):
+                    actual_curve_points = ActualCurve[i]
                     plt.plot(actual_curve_points[:,0],actual_curve_points[:,1],'-r',linewidth=3)
             else:
                 raise KeyError("You have not computed the CAD curve points")
@@ -3489,7 +3486,7 @@ class PostProcess(object):
         if plot_edges:
             tmesh.x_edges = x_edges
             tmesh.y_edges = y_edges
-            tmesh.y_edges = z_edges
+            tmesh.z_edges = z_edges
             tmesh.edge_elements = edge_elements
             tmesh.reference_edges = reference_edges
 

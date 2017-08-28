@@ -1869,7 +1869,7 @@ class Mesh(object):
 
         # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY
         all_edges = np.concatenate((self.elements[:,node_arranger[0,:]],self.elements[:,node_arranger[1,:]],
-            self.elements[:,node_arranger[2,:]],self.elements[:,node_arranger[3,:]]),axis=0).astype(np.int64)
+            self.elements[:,node_arranger[2,:]],self.elements[:,node_arranger[3,:]]),axis=0).astype(self.edges.dtype)
 
         # GET UNIQUE ROWS
         uniques, idx, inv = unique2d(all_edges,consider_sort=True,order=False,return_index=True,return_inverse=True)
@@ -4846,17 +4846,15 @@ class Mesh(object):
         """Make a new Mesh instance from part of a big mesh
 
             inputs:
-                elements:           [int, tuple, list, 1D array] of elements in big mesh (self)
+                elements:           [int, tuple, list, 1D array] list of elements in big mesh (self)
                                     from which a small localised needs to be constructed
                 solution            [1D array having the same length as big mesh points]
                                     if a solution also needs to be mapped over the localised element
         """
 
-        elements = np.array(elements).flatten()
+        self.__do_essential_memebers_exist__()
 
-        assert self.element_type is not None
-        assert self.elements is not None
-        assert self.points is not None
+        elements = np.array(elements).flatten()
 
         nodeperelem = self.elements.shape[1]
         tmesh = Mesh()
