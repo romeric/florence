@@ -5,9 +5,9 @@ def EquallySpacedPoints(ndim=2,C=0):
     """Produce equally spaced points in (ndim-1) dimension, for the boundaries
         of the mesh. For ndim=2 this is the region enclosed in [-1,1] range
 
-        input:              
+        input:
             C:                  [int] order of polynomial interpolation
-            Returns:            [ndarray] array of equally spaced points 
+            Returns:            [ndarray] array of equally spaced points
 
         """
 
@@ -31,7 +31,7 @@ def EquallySpacedPoints(ndim=2,C=0):
 
 
 def EquallySpacedPointsTri(C):
-    
+
     h0 = 2./(C+1)
 
     nodes = np.array([
@@ -77,9 +77,9 @@ def EquallySpacedPointsTet(C, coordinates=None):
     #     for j in range ( 0, n + 1 - i ):
     #         for k in range ( 0, n + 1 - i - j ):
     #             l = n - i - j - k
-    #             xg[p,0] = (i * xv[0,0] + j * xv[1,0] + k * xv[2,0] + l * xv[3,0]) / n 
-    #             xg[p,1] = (i * xv[0,1] + j * xv[1,1] + k * xv[2,1] + l * xv[3,1]) / n 
-    #             xg[p,2] = (i * xv[0,2] + j * xv[1,2] + k * xv[2,2] + l * xv[3,2]) / n 
+    #             xg[p,0] = (i * xv[0,0] + j * xv[1,0] + k * xv[2,0] + l * xv[3,0]) / n
+    #             xg[p,1] = (i * xv[0,1] + j * xv[1,1] + k * xv[2,1] + l * xv[3,1]) / n
+    #             xg[p,2] = (i * xv[0,2] + j * xv[1,2] + k * xv[2,2] + l * xv[3,2]) / n
     #             # xg[p] = (i * xv[0] + j * xv[1] + k * xv[2] + l * xv[3]) / n
     #             p = p + 1
 
@@ -128,7 +128,7 @@ def EquallySpacedPointsTet(C, coordinates=None):
     ind_vertices = [0,msize,msize+tsize,nsize-1]
     xg_vertices = xg[ind_vertices,:]
     xg_non_vertices = np.delete(xg,ind_vertices,axis=0)
-    xg_non_vertices_sort = xg_non_vertices[np.lexsort((xg_non_vertices[:,0], 
+    xg_non_vertices_sort = xg_non_vertices[np.lexsort((xg_non_vertices[:,0],
         xg_non_vertices[:,1],xg_non_vertices[:,2])),:]
     xg_ = np.concatenate((xg_vertices,xg_non_vertices_sort))
 

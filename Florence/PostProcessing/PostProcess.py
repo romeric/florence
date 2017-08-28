@@ -2780,12 +2780,18 @@ class PostProcess(object):
                 connections[i*(x_edges.shape[0]-1):(i+1)*(x_edges.shape[0]-1),1] = connections_elements[i,1:]
             connections = connections[:(i+1)*(x_edges.shape[0]-1),:]
 
+            # REDIRECT FILTER NOISE TO /dev/null
+            devnull = open('/dev/null', 'w')
+            oldstdout_fno = os.dup(sys.stdout.fileno())
+            os.dup2(devnull.fileno(), 1)
+
             src = mlab.pipeline.scalar_scatter(x_edges.T.copy().flatten(), y_edges.T.copy().flatten(), z_edges.T.copy().flatten())
             src.mlab_source.dataset.lines = connections
             lines = mlab.pipeline.stripper(src)
             h_edges = mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
             # h_edges = mlab.pipeline.surface(lines, color = (0,0,0), line_width=1)
             # mlab.pipeline.surface(lines, color = (0.72,0.72,0.72), line_width=2)
+            os.dup2(oldstdout_fno, 1)
 
             # OLDER VERSION
             # for i in range(x_edges.shape[1]):
@@ -3131,10 +3137,17 @@ class PostProcess(object):
             z_edges = tmesh.z_edges
             connections = tmesh.connections
 
+            # REDIRECT FILTER NOISE TO /dev/null
+            devnull = open('/dev/null', 'w')
+            oldstdout_fno = os.dup(sys.stdout.fileno())
+            os.dup2(devnull.fileno(), 1)
+
             src = mlab.pipeline.scalar_scatter(x_edges.T.copy().flatten(), y_edges.T.copy().flatten(), z_edges.T.copy().flatten())
             src.mlab_source.dataset.lines = connections
             lines = mlab.pipeline.stripper(src)
             h_edges = mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
+
+            os.dup2(oldstdout_fno, 1)
 
 
         # CURVED SURFACES
