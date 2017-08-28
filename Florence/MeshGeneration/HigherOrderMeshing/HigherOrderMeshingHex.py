@@ -1,4 +1,4 @@
-import numpy as np 
+import numpy as np
 from copy import deepcopy
 from warnings import warn
 import gc
@@ -10,7 +10,7 @@ import Florence.ParallelProcessing.parmap as parmap
 from .GetInteriorCoordinates import GetInteriorNodesCoordinates
 
 #--------------------------------------------------------------------------------------------------------------------------#
-# SUPPLEMENTARY FUNCTIONS 
+# SUPPLEMENTARY FUNCTIONS
 def ElementLoopHex(elem,elements,points,MeshType,eps,Neval):
     xycoord_higher = GetInteriorNodesCoordinates(points[elements[elem,:],:],MeshType,elem,eps,Neval)
     return xycoord_higher
@@ -24,7 +24,7 @@ def HighOrderMeshHex(C, mesh, Decimals=10, equally_spaced=False, check_duplicate
     from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints
     from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
 
-    
+
     # SWITCH OFF MULTI-PROCESSING FOR SMALLER PROBLEMS WITHOUT GIVING A MESSAGE
     if (mesh.elements.shape[0] < 500) and (C < 5):
         Parallel = False
@@ -54,7 +54,7 @@ def HighOrderMeshHex(C, mesh, Decimals=10, equally_spaced=False, check_duplicate
 
     reelements = -1*np.ones((mesh.elements.shape[0],renodeperelem),dtype=np.int64)
     reelements[:,:8] = mesh.elements
-    # TOTAL NUMBER OF (INTERIOR+EDGE+FACE) NODES 
+    # TOTAL NUMBER OF (INTERIOR+EDGE+FACE) NODES
     iesize = renodeperelem - 8
     repoints = np.zeros((mesh.points.shape[0]+iesize*mesh.elements.shape[0],3),dtype=np.float64)
     repoints[:mesh.points.shape[0],:]=mesh.points
@@ -67,13 +67,13 @@ def HighOrderMeshHex(C, mesh, Decimals=10, equally_spaced=False, check_duplicate
         # GET HIGHER ORDER COORDINATES - PARALLEL
         ParallelTuple1 = parmap.map(ElementLoopTet,np.arange(0,mesh.elements.shape[0]),mesh.elements,mesh.points,'hex',eps,
             Neval,pool=MP.Pool(processes=nCPU))
-    
+
     maxNode = np.max(reelements)
     for elem in range(0,mesh.elements.shape[0]):
         # maxNode = np.max(reelements) # BIG BOTTLENECK
         if Parallel:
             xycoord_higher = ParallelTuple1[elem]
-        else:   
+        else:
             xycoord =  mesh.points[mesh.elements[elem,:],:]
             # GET HIGHER ORDER COORDINATES
             xycoord_higher = GetInteriorNodesCoordinates(xycoord,'hex',elem,eps,Neval)
@@ -96,7 +96,7 @@ def HighOrderMeshHex(C, mesh, Decimals=10, equally_spaced=False, check_duplicate
 
     nnode_linear = mesh.points.shape[0]
     # KEEP ZEROFY ON, OTHERWISE YOU GET STRANGE BEHVAIOUR
-    # rounded_repoints = makezero(repoints[nnode_linear:,:].copy()) 
+    # rounded_repoints = makezero(repoints[nnode_linear:,:].copy())
     rounded_repoints = repoints[nnode_linear:,:].copy()
     makezero(rounded_repoints)
     rounded_repoints = np.round(rounded_repoints,decimals=Decimals)
@@ -112,7 +112,7 @@ def HighOrderMeshHex(C, mesh, Decimals=10, equally_spaced=False, check_duplicate
     unique_reelements, inv_reelements = np.unique(reelements[:,8:],return_inverse=True)
     unique_reelements = unique_reelements[inv_repoints]
     reelements = unique_reelements[inv_reelements]
-    reelements = reelements.reshape(mesh.elements.shape[0],renodeperelem-8) 
+    reelements = reelements.reshape(mesh.elements.shape[0],renodeperelem-8)
     reelements = np.concatenate((mesh.elements,reelements),axis=1)
 
     # SANITY CHECK fOR DUPLICATES
@@ -129,7 +129,7 @@ def HighOrderMeshHex(C, mesh, Decimals=10, equally_spaced=False, check_duplicate
         unique_reelements, inv_reelements = np.unique(reelements,return_inverse=True)
         unique_reelements = unique_reelements[inv_repoints]
         reelements = unique_reelements[inv_reelements]
-        reelements = reelements.reshape(mesh.elements.shape[0],renodeperelem) 
+        reelements = reelements.reshape(mesh.elements.shape[0],renodeperelem)
         if last_shape != repoints.shape[0]:
             warn('Duplicated points generated in high order mesh. Lower the "Decimals". I have fixed it for now')
     #---------------------------------------------------------------------#
@@ -143,14 +143,14 @@ def HighOrderMeshHex(C, mesh, Decimals=10, equally_spaced=False, check_duplicate
     fsize = int((C+2.)*(C+3.)/2.)
     refaces = np.zeros((mesh.faces.shape[0],fsize),dtype=mesh.faces.dtype)
 
-    # ComputeAll = False
+
     if ComputeAll == True:
         #------------------------------------------------------------------------------------------
         # BUILD FACES NOW
         tfaces = time()
 
         refaces = np.zeros((mesh.faces.shape[0],fsize))
-        # DO NOT CHANGE THE FACES, BY RECOMPUTING THEM, AS THE LINEAR FACES CAN COME FROM 
+        # DO NOT CHANGE THE FACES, BY RECOMPUTING THEM, AS THE LINEAR FACES CAN COME FROM
         # AN EXTERNAL MESH GENERATOR, WHOSE ORDERING MAY NOT BE THE SAME, SO JUST FIND WHICH
         # ELEMENTS CONTAIN THESE FACES
         face_to_elements = mesh.GetElementsWithBoundaryFacesHex()
@@ -171,7 +171,7 @@ def HighOrderMeshHex(C, mesh, Decimals=10, equally_spaced=False, check_duplicate
         tmesh.element_type = "quad"
         tmesh.elements = refaces
         tmesh.nelem = tmesh.elements.shape[0]
-        # GET BOUNDARY EDGES        
+        # GET BOUNDARY EDGES
         reedges = tmesh.GetEdgesQuad()
         del tmesh
 
@@ -197,5 +197,5 @@ def HighOrderMeshHex(C, mesh, Decimals=10, equally_spaced=False, check_duplicate
     # print '\nHigh order meshing timing:\n\t\tElement loop:\t '+str(telements)+' seconds\n\t\tNode loop:\t\t '+str(tnodes)+\
     #  ' seconds'+'\n\t\tEdge loop:\t\t '+str(tedges)+' seconds'+\
     #  '\n\t\tFace loop:\t\t '+str(tfaces)+' seconds\n'
-    
+
     return nmesh

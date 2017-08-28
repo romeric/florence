@@ -39,8 +39,8 @@ class Mesh(object):
     5. Reading Salome meshes in binary (.dat/.txt/etc) format
     6. Reading gmsh files .msh
     7. Checking for node numbering order of elements and fixing it if desired
-    8. Writing meshes to unstructured vtk file format (.vtu) based on the original script by Luke Olson
-       (extended here to high order elements)
+    8. Writing meshes to unstructured vtk file format (.vtu) in xml and binary formats,
+        including high order elements
     """
 
     def __init__(self, element_type=None):
@@ -970,7 +970,8 @@ class Mesh(object):
         # SITUATIONS WHEN ANOTHER HIGH ORDER MESH IS REQUIRED, WITH ONE HIGH
         # ORDER MESH ALREADY AVAILABLE
         if self.degree != 1 and self.degree - 1 != C:
-            self = self.GetLinearMesh(remap=True)
+            dum = self.GetLinearMesh(remap=True)
+            self.__dict__.update(dum.__dict__)
 
         print('Generating p = '+str(C+1)+' mesh based on the linear mesh...')
         t_mesh = time()
@@ -999,7 +1000,8 @@ class Mesh(object):
         self.elements = nmesh.elements.astype(np.uint64)
         self.edges = nmesh.edges.astype(np.uint64)
         if isinstance(self.faces,np.ndarray):
-            self.faces = nmesh.faces.astype(np.uint64)
+            if isinstance(nmesh.faces,np.ndarray):
+                self.faces = nmesh.faces.astype(np.uint64)
         self.nelem = nmesh.nelem
         self.nnode = self.points.shape[0]
         self.element_type = nmesh.info
@@ -2229,7 +2231,7 @@ class Mesh(object):
 
 
 
-    def ReadGmsh(self, filename, element_type):
+    def ReadGmsh(self, filename, element_type, write_surface_info=False):
         """Read gmsh (.msh) file"""
 
         if self.elements is not None and self.points is not None:
@@ -2243,51 +2245,56 @@ class Mesh(object):
 
         self.filename = filename
 
+        bel = -1
         if element_type == "tri":
             el = 2
+            bel = 2
         elif element_type == "quad":
             el = 3
+            bel = 3
         elif element_type == "tet":
             el = 4
+            bel = 2
         elif element_type == "hex":
             el = 5
+            bel = 3
 
-        # OTHER VARIANTS OF GMSH
-        # --------------------------------------------
-        has_gmsh = False
-        try:
-            # THIS IS BUILT-IN
-            from gmsh import Mesh as msh
-            has_gmsh = True
-        except IOError:
-            has_gmsh= False
+        # # LUKE OLSON'S READER - VERY SLOW
+        # # --------------------------------------------
+        # has_gmsh = False
+        # try:
+        #     # THIS IS BUILT-IN
+        #     from gmsh import Mesh as msh
+        #     has_gmsh = True
+        # except IOError:
+        #     has_gmsh= False
 
-        if has_gmsh:
-            mesh = msh()
-            mesh.read_msh(filename)
-            self.points = np.array(mesh.Verts,copy=True)
-            self.elements = np.array(mesh.Elmts[el][1], copy=True)
-            self.nelem = self.elements.shape[0]
-            self.nnode = self.points.shape[0]
+        # if not has_gmsh:
+        #     mesh = msh()
+        #     mesh.read_msh(filename)
+        #     self.points = np.array(mesh.Verts,copy=True)
+        #     self.elements = np.array(mesh.Elmts[el][1], copy=True)
+        #     self.nelem = self.elements.shape[0]
+        #     self.nnode = self.points.shape[0]
 
-            if self.points.shape[1] == 3:
-                if np.allclose(self.points[:,2],0.):
-                    self.points = np.ascontiguousarray(self.points[:,:2])
-            self.InferElementType()
-            ndim = self.InferSpatialDimension()
-            if self.element_type == "tri" or self.element_type == "quad":
-                self.GetEdges()
-                self.GetBoundaryEdges()
-            elif self.element_type == "tet" or self.element_type == "hex":
-                self.GetFaces()
-                self.GetBoundaryFaces()
-                self.GetBoundaryEdges()
+        #     if self.points.shape[1] == 3:
+        #         if np.allclose(self.points[:,2],0.):
+        #             self.points = np.ascontiguousarray(self.points[:,:2])
+        #     self.InferElementType()
+        #     ndim = self.InferSpatialDimension()
+        #     if self.element_type == "tri" or self.element_type == "quad":
+        #         self.GetEdges()
+        #         self.GetBoundaryEdges()
+        #     elif self.element_type == "tet" or self.element_type == "hex":
+        #         self.GetFaces()
+        #         self.GetBoundaryFaces()
+        #         self.GetBoundaryEdges()
 
-            return
-        # --------------------------------------------
+        #     return
+        # # --------------------------------------------
 
-        # ONLY TETS
-        var = 0 # var = 0 tets, var = 1 quads, but needs check with different gmsh versions
+        # NEW FAST READER
+        var = 0 # for old gmsh versions - needs checks
         rem_nnode, rem_nelem, rem_faces = long(1e09), long(1e09), long(1e09)
         face_counter = 0
         for line_counter, line in enumerate(open(filename)):
@@ -2320,7 +2327,7 @@ class Mesh(object):
                 break
 
         # Re-read
-        points, elements = [],[]
+        points, elements, faces, face_to_surface = [],[], [], []
         for line_counter, line in enumerate(open(filename)):
             item = line.rstrip()
             plist = item.split()
@@ -2333,20 +2340,35 @@ class Mesh(object):
                 if line_counter > rem_nnode and line_counter < self.nnode+rem_nnode+1:
                     points.append([float(i) for i in plist[1:]])
                 if line_counter > rem_nelem and line_counter < self.nelem+rem_nelem+1:
-                    if int(plist[1]) == 3:
+                    if int(plist[1]) == el:
                         elements.append([int(i) for i in plist[5:]])
+
+                    # WRITE SURFACE INFO - CERTAINLY ONLY IF ELEMENT TYPE IS QUADS/TRIS
+                    if write_surface_info:
+                        if int(plist[1]) == bel:
+                            faces.append([int(i) for i in plist[5:]])
+                            face_to_surface.append(int(plist[4]))
+
 
         self.points = np.array(points,copy=True)
         self.elements = np.array(elements,copy=True) - 1
         # CORRECT
         self.nelem = self.elements.shape[0]
         self.nnode = self.points.shape[0]
+        if self.nelem == 0:
+            raise ValueError("msh file does not contain {} elements".format(element_type))
+
+        if write_surface_info:
+            self.faces = np.array(faces,copy=True) - 1
+            self.face_to_surface = np.array(face_to_surface, dtype=np.int64, copy=True).flatten()
+            self.face_to_surface -= 1 # NEEDS TO BE A SEPARATE LINE AS FLATTEN IS A VIEW
 
         # print(self.ndim, self.nnode, self.nelem, rem_nnode, rem_nelem, rem_faces)
         if self.points.shape[1] == 3:
             if np.allclose(self.points[:,2],0.):
                 self.points = np.ascontiguousarray(self.points[:,:2])
-        self.InferElementType()
+        # self.InferElementType()
+        self.element_type = element_type
         ndim = self.InferSpatialDimension()
         if self.element_type == "tri" or self.element_type == "quad":
             self.GetEdges()
@@ -2355,6 +2377,7 @@ class Mesh(object):
             self.GetFaces()
             self.GetBoundaryFaces()
             self.GetBoundaryEdges()
+
 
         return
 
@@ -4184,7 +4207,8 @@ class Mesh(object):
         if self.elements.shape[1] != mesh.elements.shape[1]:
             warn('Elements are of not the same order. I am going to modify both meshes to their linear variants')
             if self.InferPolynomialDegree() > 1:
-                self = self.GetLinearMesh(remap=True)
+                dum = self.GetLinearMesh(remap=True)
+                self.__dict__.update(dum.__dict__)
             if mesh.InferPolynomialDegree() > 1:
                 mesh = mesh.GetLinearMesh(remap=True)
 
@@ -4751,8 +4775,7 @@ class Mesh(object):
             Also maps any solution vector/tensor of high order mesh to the linear mesh, if supplied.
             For safety purposes, always makes a copy"""
 
-        assert self.elements is not None
-        assert self.points is not None
+        self.__do_essential_memebers_exist__()
 
         ndim = self.InferSpatialDimension()
         if ndim==2:
