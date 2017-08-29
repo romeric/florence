@@ -4929,6 +4929,8 @@ class Mesh(object):
             This is a simpler version of the the Blossom-quad algorithm implemented in gmsh"""
 
         self.__do_memebers_exist__()
+        if self.element_type == "quad":
+            return
         assert self.element_type == "tri"
         if self.IsHighOrder:
             raise ValueError('High order triangular elements cannot be converted to low/high order quads')
@@ -4999,6 +5001,8 @@ class Mesh(object):
         """
 
         self.__do_memebers_exist__()
+        if self.element_type == "hex":
+            return
         assert self.element_type == "tet"
         if self.IsHighOrder:
             raise ValueError('High order tetrahedral elements cannot be converted to low/high order hexahedrals')
@@ -5123,6 +5127,8 @@ class Mesh(object):
         """
 
         self.__do_memebers_exist__()
+        if self.element_type == "tri":
+            return
         assert self.element_type == "quad"
 
         tconv = time()
@@ -5161,6 +5167,8 @@ class Mesh(object):
         """
 
         self.__do_memebers_exist__()
+        if self.element_type == "tet":
+            return
         assert self.element_type == "hex"
 
         tconv = time()
