@@ -11,7 +11,9 @@ from Florence.QuadratureRules import GaussLobattoPointsQuad
 class BoundaryCondition(object):
     """Base class for applying all types of boundary conditions"""
 
-    def __init__(self, save_dirichlet_data=False, save_nurbs_data=False, filename=None):
+    def __init__(self, surface_identification_algorithm='minimisation',
+        save_dirichlet_data=False, save_nurbs_data=False, filename=None):
+
         # TYPE OF BOUNDARY: straight or nurbs
         self.boundary_type = 'straight'
         self.dirichlet_data_applied_at = 'node' # or 'faces'
@@ -34,7 +36,7 @@ class BoundaryCondition(object):
         # FOR 3D ARC-LENGTH PROJECTION
         self.orthogonal_fallback_tolerance = 1.0
         # WHICH ALGORITHM TO USE FOR SURFACE IDENTIFICATION, EITHER 'minimisation' or 'pure_projection'
-        self.surface_identification_algorithm = 'minimisation'
+        self.surface_identification_algorithm = surface_identification_algorithm
         # MODIFY LINEAR MESH ON PROJECTION
         self.modify_linear_mesh_on_projection = 1
 
@@ -336,17 +338,8 @@ class BoundaryCondition(object):
     def PostMeshWrapper(self, formulation, mesh, material, solver, fem_solver):
         """Calls PostMesh wrapper to get exact Dirichlet boundary conditions"""
 
-        from PostMeshPy import (PostMeshCurvePy as PostMeshCurve,
-            PostMeshSurfacePy as PostMeshSurface)
-
-        def ReadCAD(curvilinear_mesh,filename):
-            from Florence.Utils import insensitive
-            if insensitive(filename.split(".")[-1]) == "igs" or insensitive(filename.split(".")[-1]) == "iges":
-                curvilinear_mesh.ReadIGES(filename)
-            elif insensitive(filename.split(".")[-1]) == "stp" or insensitive(filename.split(".")[-1]) == "step":
-                curvilinear_mesh.ReadSTEP(filename)
-            else:
-                raise ValueError("CAD file should be either in IGES or STEP format")
+        from PostMeshPy import (PostMeshCurvePy as PostMeshCurve, PostMeshSurfacePy as PostMeshSurface)
+        # from .PostMeshPy import (PostMeshCurvePy as PostMeshCurve, PostMeshSurfacePy as PostMeshSurface)
 
         C = mesh.InferPolynomialDegree() - 1
 
@@ -377,9 +370,7 @@ class BoundaryCondition(object):
             curvilinear_mesh.SetNodalSpacing(boundary_fekete)
             curvilinear_mesh.GetBoundaryPointsOrder()
             # READ THE GEOMETRY FROM THE IGES FILE
-            ReadCAD(curvilinear_mesh,self.cad_file)
-            # curvilinear_mesh.ReadIGES(self.cad_file)
-            # curvilinear_mesh.ReadSTEP(self.cad_file)
+            curvilinear_mesh.ReadGeometry(self.cad_file)
             # EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
             geometry_points = curvilinear_mesh.GetGeomVertices()
             self.GetGeometryMeshScale(geometry_points,mesh)
@@ -400,7 +391,7 @@ class BoundaryCondition(object):
             elif self.projection_type == 'arc_length':
                 curvilinear_mesh.MeshPointInversionCurveArcLength()
             else:
-                # print("projection type not understood. Arc length based projection is going to be used")
+                # warn("projection type not understood. Arc length based projection is going to be used")
                 curvilinear_mesh.MeshPointInversionCurveArcLength()
             # OBTAIN MODIFIED MESH POINTS - THIS IS NECESSARY TO ENSURE LINEAR MESH IS ALSO CORRECT
             curvilinear_mesh.ReturnModifiedMeshPoints(mesh.points)
@@ -438,7 +429,7 @@ class BoundaryCondition(object):
             curvilinear_mesh.SetNodalSpacing(boundary_points)
             # curvilinear_mesh.GetBoundaryPointsOrder()
             # READ THE GEOMETRY FROM THE IGES FILE
-            ReadCAD(curvilinear_mesh,self.cad_file)
+            curvilinear_mesh.ReadGeometry(self.cad_file)
             # curvilinear_mesh.ReadIGES(self.cad_file)
             # EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
             geometry_points = curvilinear_mesh.GetGeomVertices()
@@ -462,11 +453,19 @@ class BoundaryCondition(object):
                     raise AssertionError("face-to-surface mapping does not seem correct. "
                         "Point projection is going to stop")
             else:
-                # curvilinear_mesh.IdentifySurfacesContainingFacesByPureProjection()
-                curvilinear_mesh.IdentifySurfacesContainingFaces()
+                if self.surface_identification_algorithm == 'minimisation':
+                    curvilinear_mesh.IdentifySurfacesContainingFaces()
+                elif self.surface_identification_algorithm == 'pure_projection':
+                    curvilinear_mesh.IdentifySurfacesContainingFacesByPureProjection()
+                else:
+                    # warn("surface identification algorithm not understood. minimisation algorithm is going to be used")
+                    curvilinear_mesh.IdentifySurfacesContainingFaces()
 
-            # IDENTIFY WHICH EDGES ARE SHARED BETWEEN SURFACES
-            curvilinear_mesh.IdentifySurfacesIntersections()
+            if self.project_on_curves:
+                tt = time()
+                # IDENTIFY WHICH EDGES ARE SHARED BETWEEN SURFACES
+                curvilinear_mesh.IdentifySurfacesIntersections()
+                print(time()-tt)
 
             # PERFORM POINT INVERSION FOR THE INTERIOR POINTS
             if self.projection_type == "arc_length":
@@ -494,7 +493,6 @@ class BoundaryCondition(object):
                 curvilinear_mesh.ReturnModifiedMeshPoints(mesh.points)
             # GET DIRICHLET DATA
             nodesDBC, Dirichlet = curvilinear_mesh.GetDirichletData()
-            # print(Dirichlet)
             # GET DIRICHLET FACES (IF REQUIRED)
             dirichlet_faces = curvilinear_mesh.GetDirichletFaces()
 
