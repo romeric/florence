@@ -12,6 +12,8 @@ class BoundaryCondition(object):
     """Base class for applying all types of boundary conditions"""
 
     def __init__(self, surface_identification_algorithm='minimisation',
+        modify_linear_mesh_on_projection=False, project_on_curves=True,
+        has_planar_surfaces=True, solve_for_planar_faces=True,
         save_dirichlet_data=False, save_nurbs_data=False, filename=None):
 
         # TYPE OF BOUNDARY: straight or nurbs
@@ -24,12 +26,12 @@ class BoundaryCondition(object):
         self.projection_type = 'orthogonal'
         # WHAT TYPE OF ARC LENGTH BASED PROJECTION, EITHER 'equal' OR 'fekete'
         self.nodal_spacing_for_cad = 'equal'
-        self.project_on_curves = False
+        self.project_on_curves = project_on_curves
         self.scale_mesh_on_projection = False
         self.scale_value_on_projection = 1.0
         self.condition_for_projection = 1.0e20
         self.has_planar_surfaces = False
-        self.solve_for_planar_faces = True
+        self.solve_for_planar_faces = solve_for_planar_faces
         self.projection_flags = None
         # FIX DEGREES OF FREEDOM EVERY WHERE CAD PROJECTION IS NOT APPLIED
         self.fix_dof_elsewhere = None
@@ -38,7 +40,7 @@ class BoundaryCondition(object):
         # WHICH ALGORITHM TO USE FOR SURFACE IDENTIFICATION, EITHER 'minimisation' or 'pure_projection'
         self.surface_identification_algorithm = surface_identification_algorithm
         # MODIFY LINEAR MESH ON PROJECTION
-        self.modify_linear_mesh_on_projection = 1
+        self.modify_linear_mesh_on_projection = modify_linear_mesh_on_projection
 
         # FOR IGAKit WRAPPER
         self.nurbs_info = None
@@ -88,7 +90,7 @@ class BoundaryCondition(object):
 
 
     def SetCADProjectionParameters(self, cad_file=None, requires_cad=True, projection_type='orthogonal',
-        nodal_spacing='equal', project_on_curves=False, has_planar_surfaces=False, solve_for_planar_faces=True,
+        nodal_spacing='equal', project_on_curves=True, has_planar_surfaces=True, solve_for_planar_faces=True,
         scale=1.0,condition=1.0e20, projection_flags=None, fix_dof_elsewhere=True,
         orthogonal_fallback_tolerance=1.0, surface_identification_algorithm='minimisation',
         modify_linear_mesh_on_projection=True):
@@ -462,10 +464,10 @@ class BoundaryCondition(object):
                     curvilinear_mesh.IdentifySurfacesContainingFaces()
 
             if self.project_on_curves:
-                tt = time()
+                t_proj = time()
                 # IDENTIFY WHICH EDGES ARE SHARED BETWEEN SURFACES
                 curvilinear_mesh.IdentifySurfacesIntersections()
-                print(time()-tt)
+                print("Curve intersection recognition took {} seconds".format(time()-t_proj))
 
             # PERFORM POINT INVERSION FOR THE INTERIOR POINTS
             if self.projection_type == "arc_length":
