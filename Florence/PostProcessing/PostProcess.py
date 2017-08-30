@@ -3136,8 +3136,10 @@ class PostProcess(object):
 
             # REDIRECT FILTER NOISE TO /dev/null
             devnull = open('/dev/null', 'w')
-            oldstdout_fno = os.dup(sys.stdout.fileno())
-            os.dup2(devnull.fileno(), 1)
+            # oldstdout_fno = os.dup(sys.stdout.fileno())
+            oldstdout_fno = os.dup(sys.stderr.fileno())
+            # os.dup2(devnull.fileno(), 1)
+            os.dup2(devnull.fileno(), 2)
 
             src = mlab.pipeline.scalar_scatter(x_edges.T.copy().flatten(), y_edges.T.copy().flatten(), z_edges.T.copy().flatten())
             src.mlab_source.dataset.lines = connections
@@ -3280,8 +3282,9 @@ class PostProcess(object):
         for i in range(GaussLobattoPointsOneD.shape[0]):
             BasesOneD[:,i] = LagrangeGaussLobatto(CActual,GaussLobattoPointsOneD[i])[0]
 
+
         smesh = deepcopy(mesh)
-        smesh.elements = mesh.elements[:,:3]
+        smesh.elements = mesh.elements[:,:ndim+1]
         nmax = int(np.max(smesh.elements)+1)
         smesh.points = mesh.points[:nmax,:]
         smesh.GetEdgesTri()
@@ -3651,8 +3654,12 @@ class PostProcess(object):
             if QuantityToPlot is not None:
                 Uplot = np.zeros(nnode,dtype=np.float64)
                 if plot_on_faces:
+                    # for ielem in range(nface):
+                    #     Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
+                    # NEW APPROACH FOR CELL DATA - CHECK
+                    Uplot = np.zeros(nelem,dtype=np.float64)
                     for ielem in range(nface):
-                        Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
+                        Uplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex] = quantity_to_plot[ielem]
                 else:
                     # IF QUANTITY IS DEFINED ON NODES
                     quantity = QuantityToPlot[np.unique(faces_to_plot)]
@@ -3674,6 +3681,9 @@ class PostProcess(object):
         tmesh.nface = nface
         tmesh.smesh = smesh
         tmesh.faces_to_plot = faces_to_plot
+
+        if QuantityToPlot is not None:
+            tmesh.quantity = Uplot
 
         if plot_edges:
             tmesh.x_edges = x_edges
@@ -3841,8 +3851,12 @@ class PostProcess(object):
 
             if QuantityToPlot is not None:
                 if plot_on_faces:
+                    # for ielem in range(nface):
+                    #     Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
+                    # NEW APPROACH FOR CELL DATA - CHECK
+                    Uplot = np.zeros(nelem,dtype=np.float64)
                     for ielem in range(nface):
-                        Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
+                        Uplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex] = quantity_to_plot[ielem]
                 else:
                     # IF QUANTITY IS DEFINED ON NODES
                     quantity = QuantityToPlot[np.unique(faces_to_plot)]

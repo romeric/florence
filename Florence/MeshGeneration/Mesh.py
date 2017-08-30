@@ -1690,7 +1690,7 @@ class Mesh(object):
         output:
 
             boundary_face_to_element:   [2D array] array containing elements which have face
-                                        on the boundary [cloumn 0] and a flag stating which faces they are [column 1]
+                                        on the boundary [column 0] and a flag stating which faces they are [column 1]
 
         """
 
@@ -2258,6 +2258,8 @@ class Mesh(object):
         elif element_type == "hex":
             el = 5
             bel = 3
+        else:
+            raise ValueError("Element type not understood")
 
         # # LUKE OLSON'S READER - VERY SLOW
         # # --------------------------------------------
@@ -2559,6 +2561,7 @@ class Mesh(object):
         elif self.element_type=="quad":
 
             C = self.InferPolynomialDegree() - 1
+            pdim = self.points.shape[1]
             from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
 
             edge_elements = self.GetElementsEdgeNumberingQuad()
@@ -2569,12 +2572,16 @@ class Mesh(object):
             self.GetEdgesQuad()
             x_edges = np.zeros((C+2,self.all_edges.shape[0]))
             y_edges = np.zeros((C+2,self.all_edges.shape[0]))
+            z_edges = np.zeros((C+2,self.all_edges.shape[0]))
 
             BasesOneD = np.eye(2,2)
             for iedge in range(self.all_edges.shape[0]):
                 ielem = edge_elements[iedge,0]
                 edge = self.elements[ielem,reference_edges[edge_elements[iedge,1],:]]
-                x_edges[:,iedge], y_edges[:,iedge] = self.points[edge,:].T
+                if pdim == 2:
+                    x_edges[:,iedge], y_edges[:,iedge] = self.points[edge,:].T
+                elif pdim == 3:
+                    x_edges[:,iedge], y_edges[:,iedge], z_edges[:,iedge] = self.points[edge,:].T
 
             plt.plot(x_edges,y_edges,'-k')
 
@@ -4134,32 +4141,35 @@ class Mesh(object):
                 edge_elements = self.GetElementsWithBoundaryFacesTet()
 
         if ndim==2:
-            for elem in edge_elements:
-                xe = self.points[self.elements[elem,:],0]
-                ye = self.points[self.elements[elem,:],1]
+            xe = self.points[self.elements,0]
+            ye = self.points[self.elements,1]
 
-                if element_removal_criterion == "all":
-                    if ( (xe > x_min).all() and (ye > y_min).all() and (xe < x_max).all() and (ye < y_max).all() ):
-                        new_elements = np.vstack((new_elements,self.elements[elem,:]))
+            if element_removal_criterion == "all":
+                cond =  np.logical_and(np.logical_and(np.logical_and(
+                            (xe > x_min).all(axis=1),(ye > y_min).all(axis=1)),
+                            (xe < x_max).all(axis=1)),(ye < y_max).all(axis=1))
+            elif element_removal_criterion == "any":
+                cond =  np.logical_and(np.logical_and(np.logical_and(
+                            (xe > x_min).any(axis=1),(ye > y_min).any(axis=1)),
+                            (xe < x_max).any(axis=1)),(ye < y_max).any(axis=1))
+            new_elements = self.elements[cond,:]
 
-                elif element_removal_criterion == "any":
-                    if ( (xe > x_min).any() and (ye > y_min).any() and (xe < x_max).any() and (ye < y_max).any() ):
-                        new_elements = np.vstack((new_elements,self.elements[elem,:]))
         elif ndim==3:
-            for elem in edge_elements:
-                xe = self.points[self.elements[elem,:],0]
-                ye = self.points[self.elements[elem,:],1]
-                ze = self.points[self.elements[elem,:],2]
+            xe = self.points[self.elements,0]
+            ye = self.points[self.elements,1]
+            ze = self.points[self.elements,2]
 
-                if element_removal_criterion == "all":
-                    if ( (xe > x_min).all() and (ye > y_min).all() and (ze > z_min).all() \
-                        and (xe < x_max).all() and (ye < y_max).all()  and (ze < z_max).all()):
-                        new_elements = np.vstack((new_elements,self.elements[elem,:]))
-
-                elif element_removal_criterion == "any":
-                    if ( (xe > x_min).any() and (ye > y_min).any() and (ze > z_min).any() \
-                        and (xe < x_max).any() and (ye < y_max).any() and  (ze < z_max).any() ):
-                        new_elements = np.vstack((new_elements,self.elements[elem,:]))
+            if element_removal_criterion == "all":
+                cond =  np.logical_and(np.logical_and(np.logical_and(np.logical_and(np.logical_and(
+                            (xe > x_min).all(axis=1),(ye > y_min).all(axis=1)),
+                            (ze > z_min).all(axis=1)),(xe < x_max).all(axis=1)),
+                            (ye < y_max).all(axis=1)), (ze < z_max).all(axis=1))
+            elif element_removal_criterion == "any":
+                cond =  np.logical_and(np.logical_and(np.logical_and(np.logical_and(np.logical_and(
+                            (xe > x_min).any(axis=1),(ye > y_min).any(axis=1)),
+                            (ze > z_min).any(axis=1)),(xe < x_max).any(axis=1)),
+                            (ye < y_max).any(axis=1)), (ze < z_max).any(axis=1))
+            new_elements = self.elements[cond,:]
 
         new_elements = new_elements.astype(self.elements.dtype)
         new_points = np.copy(self.points)
@@ -4182,9 +4192,11 @@ class Mesh(object):
             self.GetBoundaryEdges()
 
         # RECOMPUTE FACES
-        if compute_faces == True and self.InferSpatialDimension()==3:
-            self.GetBoundaryEdges()
-            self.GetBoundaryFaces()
+        if compute_faces == True:
+            if self.element_type == "tet" or self.element_type == "hex":
+                self.GetBoundaryFaces()
+            if self.edges is not None:
+                self.GetBoundaryEdges()
 
         # PLOT THE NEW MESH
         if plot_new_mesh == True:
@@ -5393,7 +5405,8 @@ class Mesh(object):
         assert self.element_type is not None
         assert self.elements is not None
         assert self.points is not None
-        assert self.edges is not None
+        if self.element_type == "tri" or self.element_type == "quad":
+            assert self.edges is not None
         ndim = self.InferSpatialDimension()
         if self.element_type == "tet" or self.element_type == "hex":
             assert self.faces is not None
