@@ -784,7 +784,7 @@ class PostProcess(object):
 
 
 
-    def MeshQualityMeasures(self, mesh, TotalDisp, plot=True, show_plot=True):
+    def MeshQualityMeasures(self, mesh, TotalDisp, plot=False, show_plot=False):
         """Computes mesh quality measures, Q_1, Q_2, Q_3
 
             input:
@@ -801,6 +801,8 @@ class PostProcess(object):
             raise AssertionError('Scaled Jacobian seems to be already computed. Re-Computing it may return incorrect results')
 
         PostDomain = self.postdomain_bases
+        if self.postdomain_bases is None:
+            raise ValueError("Function spaces/bases not set for post-processing")
 
         vpoints = mesh.points
         if TotalDisp.ndim == 3:
@@ -3515,6 +3517,8 @@ class PostProcess(object):
 
         from scipy.spatial import Delaunay
 
+        assert mesh.element_type == "tet"
+
         # SINCE THIS IS A 3D PLOT
         ndim=3
 
@@ -3718,6 +3722,8 @@ class PostProcess(object):
 
         from copy import deepcopy
         from scipy.spatial import Delaunay
+
+        assert mesh.element_type == "hex"
 
         # SINCE THIS IS A 3D PLOT
         ndim=3

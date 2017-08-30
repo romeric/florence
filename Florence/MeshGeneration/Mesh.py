@@ -4092,7 +4092,7 @@ class Mesh(object):
 
 
 
-    def RemoveElements(self,xyz_min_max,element_removal_criterion="all",keep_boundary_only=False,
+    def RemoveElements(self,xyz_min_max,element_removal_criterion="all",keep_boundary_only=False, return_removed_mesh=False,
             compute_edges=True,compute_faces=True,plot_new_mesh=False):
         """Removes elements with some specified criteria
 
@@ -4103,6 +4103,7 @@ class Mesh(object):
                                             How many nodes of the element should be within the box in order
                                             not to be removed. Default is "all". "any" implies at least one node
             keep_boundary_only              [bool] delete all elements apart from the boundary ones
+            return_removed_mesh             [bool] return the mesh of removed [inverse of what is selected] mesh
             compute_edges                   [bool] if True also compute new edges
             compute_faces                   [bool] if True also compute new faces (only 3D)
             plot_new_mesh                   [bool] if True also plot the new mesh
@@ -4174,6 +4175,10 @@ class Mesh(object):
         new_elements = new_elements.astype(self.elements.dtype)
         new_points = np.copy(self.points)
         element_type = self.element_type
+
+        if return_removed_mesh:
+            omesh = deepcopy(self)
+
         # RESET FIRST OR MESH WILL CONTAIN INCONSISTENT DATA
         self.__reset__()
         self.element_type = element_type
@@ -4198,11 +4203,43 @@ class Mesh(object):
             if self.edges is not None:
                 self.GetBoundaryEdges()
 
+        if return_removed_mesh:
+            new_elements = omesh.elements[~cond,:]
+            new_elements = new_elements.astype(omesh.elements.dtype)
+            new_points = np.copy(omesh.points)
+            element_type = omesh.element_type
+            # RESET FIRST OR MESH WILL CONTAIN INCONSISTENT DATA
+            mesh = Mesh()
+            mesh.__reset__()
+            mesh.element_type = element_type
+            mesh.elements = new_elements[1:,:]
+            mesh.nelem = mesh.elements.shape[0]
+            unique_elements_inv, inv_elements =  np.unique(mesh.elements,return_inverse=True)
+            mesh.points = new_points[unique_elements_inv,:]
+            # RE-ORDER ELEMENT CONNECTIVITY
+            remap_elements =  np.arange(mesh.points.shape[0])
+            mesh.elements = remap_elements[inv_elements].reshape(mesh.nelem,mesh.elements.shape[1])
+
+            # RECOMPUTE EDGES
+            if compute_edges == True:
+                mesh.GetBoundaryEdges()
+
+            # RECOMPUTE FACES
+            if compute_faces == True:
+                if mesh.element_type == "tet" or mesh.element_type == "hex":
+                    mesh.GetBoundaryFaces()
+                mesh.GetBoundaryEdges()
+
+
+
         # PLOT THE NEW MESH
         if plot_new_mesh == True:
             self.SimplePlot()
 
-        return unique_elements
+        if return_removed_mesh:
+            return unique_elements, mesh
+        else:
+            return unique_elements
 
 
     def MergeWith(self, mesh, self_solution=None, other_solution=None):
