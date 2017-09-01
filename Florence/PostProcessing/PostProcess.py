@@ -3343,7 +3343,7 @@ class PostProcess(object):
                 Uplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex] = quantity_to_plot[ielem]
             else:
                 # IF QUANTITY IS DEFINED ON NODES
-                Uplot[ielem*nsize:(ielem+1)*nsize] = np.dot(BasesQuad.T, quantity_to_plot[mesh.elements[ielem,:]]).flatten()
+                Uplot[ielem*nsize:(ielem+1)*nsize] = np.dot(BasesTri.T, quantity_to_plot[mesh.elements[ielem,:]]).flatten()
 
 
 
