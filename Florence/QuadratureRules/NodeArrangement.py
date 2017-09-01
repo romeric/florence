@@ -6,6 +6,12 @@ except ImportError:
 
 
 @lru_cache(maxsize=None)
+def NodeArrangementLine(C):
+    element_numbering = np.concatenate((np.array([0,C+1]),np.arange(1,C+1)))
+    return element_numbering
+
+
+@lru_cache(maxsize=None)
 def NodeArrangementTet(C):
 
     # NUMBERING IS NOT CONSISTENT WITH FACE NUMBERS

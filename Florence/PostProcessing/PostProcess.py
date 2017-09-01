@@ -868,7 +868,6 @@ class PostProcess(object):
             ScaledFF[elem] = 1.0*np.min(Q1)/np.max(Q1)
             ScaledHH[elem] = 1.0*np.min(Q2)/np.max(Q2)
             # Jacobian[elem] = np.min(detF)
-            # print(np.min(Jacobian), np.max(Jacobian))
             AverageJacobian[elem] = np.mean(Jacobian)
 
             if self.is_material_anisotropic:
@@ -878,20 +877,20 @@ class PostProcess(object):
         if np.isnan(ScaledJacobian).any():
             warn("Jacobian of mapping is close to zero")
 
-        print('Minimum ScaledJacobian value is', ScaledJacobian.min(), \
-        'corresponding to element', ScaledJacobian.argmin())
-
-        print('Minimum ScaledFF value is', ScaledFF.min(), \
+        print('Minimum scaled F:F value is', ScaledFF.min(), \
         'corresponding to element', ScaledFF.argmin())
 
-        print('Minimum ScaledHH value is', ScaledHH.min(), \
+        print('Minimum scaled H:H value is', ScaledHH.min(), \
         'corresponding to element', ScaledHH.argmin())
 
+        print('Minimum scaled Jacobian value is', ScaledJacobian.min(), \
+        'corresponding to element', ScaledJacobian.argmin())
+
         if self.is_material_anisotropic:
-            print('Minimum ScaledFNFN value is', ScaledFNFN.min(), \
+            print('Minimum scaled FN.FN value is', ScaledFNFN.min(), \
             'corresponding to element', ScaledFNFN.argmin())
 
-            print('Minimum ScaledCNCN value is', ScaledCNCN.min(), \
+            print('Minimum scaled CN.CN value is', ScaledCNCN.min(), \
             'corresponding to element', ScaledCNCN.argmin())
 
 
@@ -3234,7 +3233,7 @@ class PostProcess(object):
     @staticmethod
     def TessellateTris(mesh, TotalDisp, QuantityToPlot=None,
         ProjectionFlags=None, interpolation_degree=30, EquallySpacedPoints=False,
-        plot_points=False, plot_edges=True):
+        plot_points=False, plot_edges=True, plot_on_faces=False):
 
         """High order curved triangular mesh plots, based on high order nodal FEM.
             The equally spaced FEM points do not work as good as the Fekete points
@@ -3327,6 +3326,8 @@ class PostProcess(object):
         Xplot = np.zeros((nnode,pdim),dtype=np.float64)
         Tplot = np.zeros((nelem,3),dtype=np.int64)
         Uplot = np.zeros(nnode,dtype=np.float64)
+        if plot_on_faces:
+            Uplot = np.zeros(nelem,dtype=np.float64)
 
         if QuantityToPlot is None:
             quantity_to_plot = np.zeros(mesh.nelem)
@@ -3337,7 +3338,13 @@ class PostProcess(object):
         for ielem in range(mesh.nelem):
             Xplot[ielem*nsize:(ielem+1)*nsize,:] = np.dot(BasesTri.T, vpoints[mesh.elements[ielem,:],:])
             Tplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex,:] = Triangles + ielem*nsize
-            Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
+            if plot_on_faces:
+                # Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
+                Uplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex] = quantity_to_plot[ielem]
+            else:
+                # IF QUANTITY IS DEFINED ON NODES
+                Uplot[ielem*nsize:(ielem+1)*nsize] = np.dot(BasesQuad.T, quantity_to_plot[mesh.elements[ielem,:]]).flatten()
+
 
 
 
@@ -3345,6 +3352,7 @@ class PostProcess(object):
         tmesh.element_type = "tri"
         tmesh.elements = Tplot
         tmesh.points = Xplot
+        tmesh.quantity = Uplot
         tmesh.nelem = nelem
         tmesh.nnode = nnode
         tmesh.nsize = nsize
@@ -3455,6 +3463,8 @@ class PostProcess(object):
         Xplot = np.zeros((nnode,pdim),dtype=np.float64)
         Tplot = np.zeros((nelem,3),dtype=np.int64)
         Uplot = np.zeros(nnode,dtype=np.float64)
+        if plot_on_faces:
+            Uplot = np.zeros(nelem,dtype=np.float64)
 
         if QuantityToPlot is None:
             if plot_on_faces:
@@ -3468,9 +3478,9 @@ class PostProcess(object):
         for ielem in range(mesh.nelem):
             Xplot[ielem*nsize:(ielem+1)*nsize,:] = np.dot(BasesQuad.T, vpoints[mesh.elements[ielem,:],:])
             Tplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex,:] = Triangles + ielem*nsize
-            # Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
             if plot_on_faces:
-                Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
+                # Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
+                Uplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex] = quantity_to_plot[ielem]
             else:
                 # IF QUANTITY IS DEFINED ON NODES
                 Uplot[ielem*nsize:(ielem+1)*nsize] = np.dot(BasesQuad.T, quantity_to_plot[mesh.elements[ielem,:]]).flatten()
