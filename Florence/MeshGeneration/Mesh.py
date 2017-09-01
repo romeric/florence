@@ -55,6 +55,7 @@ class Mesh(object):
 
         self.elements = None
         self.points = None
+        self.corners = None
         self.edges = None
         self.faces = None
         self.element_type = element_type
@@ -976,29 +977,26 @@ class Mesh(object):
         print('Generating p = '+str(C+1)+' mesh based on the linear mesh...')
         t_mesh = time()
         # BUILD A NEW MESH BASED ON THE LINEAR MESH
+        if self.element_type == 'line':
+            nmesh = HighOrderMeshLine(C,self,**kwargs)
         if self.element_type == 'tri':
-            # BUILD A NEW MESH USING THE FEKETE NODAL POINTS FOR TRIANGLES
             # nmesh = HighOrderMeshTri(C,self,**kwargs)
-            # nmesh = HighOrderMeshTri_UNSTABLE(C,self,**kwargs)
             nmesh = HighOrderMeshTri_SEMISTABLE(C,self,**kwargs)
-
         elif self.element_type == 'tet':
-            # BUILD A NEW MESH USING THE FEKETE NODAL POINTS FOR TETRAHEDRALS
             # nmesh = HighOrderMeshTet(C,self,**kwargs)
-            # nmesh = HighOrderMeshTet_UNSTABLE(C,self,**kwargs)
             nmesh = HighOrderMeshTet_SEMISTABLE(C,self,**kwargs)
-
         elif self.element_type == 'quad':
-            # BUILD A NEW MESH USING THE GAUSS-LOBATTO NODAL POINTS FOR QUADS
             nmesh = HighOrderMeshQuad(C,self,**kwargs)
-
         elif self.element_type == 'hex':
-            # BUILD A NEW MESH USING THE GAUSS-LOBATTO NODAL POINTS FOR HEXES
             nmesh = HighOrderMeshHex(C,self,**kwargs)
 
         self.points = nmesh.points
         self.elements = nmesh.elements.astype(np.uint64)
-        self.edges = nmesh.edges.astype(np.uint64)
+        if isinstance(self.corners,np.ndarray):
+            # NOT NECESSARY BUT GENERIC
+            self.corners = nmesh.corners.astype(np.uint64)
+        if isinstance(self.edges,np.ndarray):
+            self.edges = nmesh.edges.astype(np.uint64)
         if isinstance(self.faces,np.ndarray):
             if isinstance(nmesh.faces,np.ndarray):
                 self.faces = nmesh.faces.astype(np.uint64)
@@ -2246,7 +2244,9 @@ class Mesh(object):
         self.filename = filename
 
         bel = -1
-        if element_type == "tri":
+        if element_type == "line":
+            el = 1
+        elif element_type == "tri":
             el = 2
             bel = 2
         elif element_type == "quad":
@@ -2620,6 +2620,37 @@ class Mesh(object):
             if show_plot:
                 mlab.show()
 
+        elif self.element_type == "line":
+
+            import os
+            os.environ['ETS_TOOLKIT'] = 'qt4'
+            from mayavi import mlab
+
+            if figure is None:
+                figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(1000,800))
+
+            if self.points.ndim == 1:
+                self.points = self.points[:,None]
+
+            points = np.zeros((self.points.shape[0],3))
+            if self.points.shape[1] == 1:
+                points[:,0] = np.copy(self.points[:,0])
+            if self.points.shape[1] == 2:
+                points[:,:2] = np.copy(self.points)
+            elif self.points.shape[1] == 3:
+                points = np.copy(self.points)
+
+            if plot_edges:
+                src = mlab.pipeline.scalar_scatter(points[:,0],points[:,1],points[:,2])
+                src.mlab_source.dataset.lines = self.elements[:,:2]
+                lines = mlab.pipeline.stripper(src)
+                h_edges = mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
+
+            if plot_points:
+                h_points = mlab.points3d(points[:,0],points[:,1],points[:,2],color=(0,0,0),mode='sphere',scale_factor=point_radius)
+
+            mlab.show()
+
         else:
             raise NotImplementedError("SimplePlot for {} not implemented yet".format(self.element_type))
 
@@ -2802,6 +2833,9 @@ class Mesh(object):
             if self.elements.shape[1] == 20:
                 cellflag = 25
                 offset = 20
+        elif self.element_type == 'line':
+            cellflag = 3
+            offset = 2
 
         if filename is None:
             warn('File name not specified. I am going to write one in the current directory')
