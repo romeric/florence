@@ -2779,7 +2779,7 @@ class Mesh(object):
 
 
 
-    def WriteVTK(self, filename=None, result=None, fmt="binary", interpolation_degree=10):
+    def WriteVTK(self, filename=None, result=None, fmt="binary", interpolation_degree=10, ProjectionFlags=None):
         """Write mesh/results to vtu
 
             inputs:
@@ -2854,7 +2854,7 @@ class Mesh(object):
             if result is None:
                 result = np.zeros_like(self.points)[:,:,None]
             pp.SetSolution(result)
-            pp.WriteVTK(filename,quantity=0,interpolation_degree=interpolation_degree)
+            pp.WriteVTK(filename,quantity=0,interpolation_degree=interpolation_degree, ProjectionFlags=ProjectionFlags)
             return
 
 

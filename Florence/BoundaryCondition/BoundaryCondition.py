@@ -34,7 +34,7 @@ class BoundaryCondition(object):
         self.solve_for_planar_faces = solve_for_planar_faces
         self.projection_flags = None
         # FIX DEGREES OF FREEDOM EVERY WHERE CAD PROJECTION IS NOT APPLIED
-        self.fix_dof_elsewhere = None
+        self.fix_dof_elsewhere = True
         # FOR 3D ARC-LENGTH PROJECTION
         self.orthogonal_fallback_tolerance = 1.0
         # WHICH ALGORITHM TO USE FOR SURFACE IDENTIFICATION, EITHER 'minimisation' or 'pure_projection'
@@ -119,20 +119,17 @@ class BoundaryCondition(object):
         self.modify_linear_mesh_on_projection = int(self.modify_linear_mesh_on_projection)
 
 
-    def SetProjectionCriteria(self, proj_func, mesh, takes_self=False, **kwargs):
+    def SetProjectionCriteria(self, proj_func, mesh, *args, **kwargs):
         """Factory function for setting projection criteria specific
             to a problem
 
             input:
                 func                [function] function that computes projection criteria
                 mesh                [Mesh] an instance of mesh class
-                **kwargs            optional keyword arguments
         """
 
-        if takes_self:
-            self.projection_flags  = proj_func(mesh,self)
-        else:
-            self.projection_flags = proj_func(mesh)
+
+        self.projection_flags = proj_func(mesh, *args, **kwargs)
 
         if isinstance(self.projection_flags,np.ndarray):
             if self.projection_flags.ndim==1:
@@ -278,13 +275,21 @@ class BoundaryCondition(object):
                 # FIX THE DOF IN THE REST OF THE BOUNDARY
                 if self.fix_dof_elsewhere:
                     if ndim==2:
-                        Rest_DOFs = np.setdiff1d(np.unique(mesh.edges),nodesDBC)
+                        rest_dofs = np.setdiff1d(np.unique(mesh.edges),nodesDBC)
                     elif ndim==3:
-                        Rest_DOFs = np.setdiff1d(np.unique(mesh.faces),nodesDBC)
-                    for inode in range(Rest_DOFs.shape[0]):
-                        for i in range(nvar):
-                            self.columns_out = np.append(self.columns_out,nvar*Rest_DOFs[inode]+i)
-                            self.applied_dirichlet = np.append(self.applied_dirichlet,0.0)
+                        rest_dofs = np.setdiff1d(np.unique(mesh.faces),nodesDBC)
+                    # for inode in range(rest_dofs.shape[0]):
+                    #     for i in range(nvar):
+                    #         self.columns_out = np.append(self.columns_out,nvar*rest_dofs[inode]+i)
+                    #         self.applied_dirichlet = np.append(self.applied_dirichlet,0.0)
+
+                    rest_out = np.repeat(rest_dofs,nvar)*nvar + np.tile(np.arange(nvar),rest_dofs.shape[0])
+                    rest_app = np.zeros(rest_dofs.shape[0]*nvar)
+
+                    self.columns_out = np.concatenate((self.columns_out,rest_out)).astype(np.int64)
+                    self.applied_dirichlet = np.concatenate((self.applied_dirichlet,rest_app))
+
+                exit()
 
                 print('Finished identifying Dirichlet boundary conditions from CAD geometry.',
                     ' Time taken', time()-tCAD, 'seconds')
