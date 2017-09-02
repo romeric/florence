@@ -2229,7 +2229,7 @@ class Mesh(object):
 
 
 
-    def ReadGmsh(self, filename, element_type, write_surface_info=False):
+    def ReadGmsh(self, filename, element_type, read_surface_info=False):
         """Read gmsh (.msh) file"""
 
         if self.elements is not None and self.points is not None:
@@ -2346,7 +2346,7 @@ class Mesh(object):
                         elements.append([int(i) for i in plist[5:]])
 
                     # WRITE SURFACE INFO - CERTAINLY ONLY IF ELEMENT TYPE IS QUADS/TRIS
-                    if write_surface_info:
+                    if read_surface_info:
                         if int(plist[1]) == bel:
                             faces.append([int(i) for i in plist[5:]])
                             face_to_surface.append(int(plist[4]))
@@ -2360,7 +2360,7 @@ class Mesh(object):
         if self.nelem == 0:
             raise ValueError("msh file does not contain {} elements".format(element_type))
 
-        if write_surface_info:
+        if read_surface_info:
             self.faces = np.array(faces,copy=True) - 1
             self.face_to_surface = np.array(face_to_surface, dtype=np.int64, copy=True).flatten()
             self.face_to_surface -= 1 # NEEDS TO BE A SEPARATE LINE AS FLATTEN IS A VIEW
