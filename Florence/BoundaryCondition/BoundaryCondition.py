@@ -289,7 +289,6 @@ class BoundaryCondition(object):
                     self.columns_out = np.concatenate((self.columns_out,rest_out)).astype(np.int64)
                     self.applied_dirichlet = np.concatenate((self.applied_dirichlet,rest_app))
 
-                exit()
 
                 print('Finished identifying Dirichlet boundary conditions from CAD geometry.',
                     ' Time taken', time()-tCAD, 'seconds')
