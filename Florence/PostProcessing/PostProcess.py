@@ -3109,8 +3109,6 @@ class PostProcess(object):
             Uplot = tmesh.quantity
             Xplot = tmesh.points
             Tplot = tmesh.elements
-        # bases_1 = tmesh.bases_1
-        # bases_2 = tmesh.bases_2
 
         # MAKE A FIGURE
         if figure is None:
