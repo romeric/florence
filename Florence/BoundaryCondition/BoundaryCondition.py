@@ -153,32 +153,16 @@ class BoundaryCondition(object):
 
         ndim = mesh.InferSpatialDimension()
         if ndim==3:
-            projection_faces = np.zeros((mesh.faces.shape[0],1),dtype=np.uint64)
-            num = mesh.faces.shape[1]
-            for iface in range(mesh.faces.shape[0]):
-                x = np.sum(mesh.points[mesh.faces[iface,:],0])/num
-                y = np.sum(mesh.points[mesh.faces[iface,:],1])/num
-                z = np.sum(mesh.points[mesh.faces[iface,:],2])/num
-                x *= self.scale_value_on_projection
-                y *= self.scale_value_on_projection
-                z *= self.scale_value_on_projection
-                if np.sqrt(x*x+y*y+z*z)< self.condition_for_projection:
-                    projection_faces[iface]=1
-
-            self.projection_flags = projection_faces
-
+            boundaries = mesh.faces
         elif ndim==2:
-            projection_edges = np.zeros((mesh.edges.shape[0],1),dtype=np.uint64)
-            num = mesh.edges.shape[1]
-            for iedge in range(mesh.edges.shape[0]):
-                x = np.sum(mesh.points[mesh.edges[iedge,:],0])/num
-                y = np.sum(mesh.points[mesh.edges[iedge,:],1])/num
-                x *= self.scale_value_on_projection
-                y *= self.scale_value_on_projection
-                if np.sqrt(x*x+y*y)< self.condition_for_projection:
-                    projection_edges[iedge,0]=1
+            boundaries = mesh.edges
 
-            self.projection_flags = projection_edges
+        projection_flags = np.zeros((boundaries.shape[0],1),dtype=np.uint64)
+        num = boundaries.shape[1]
+
+        xyz = (self.scale_value_on_projection/num)*np.sum(mesh.points[boundaries,:],axis=1)
+        projection_flags[:,0] = np.linalg.norm(xyz,axis=1) < self.condition_for_projection
+        self.projection_flags = projection_flags
 
 
     def GetGeometryMeshScale(self,gpoints,mesh):
@@ -346,10 +330,9 @@ class BoundaryCondition(object):
 
         from PostMeshPy import (PostMeshCurvePy as PostMeshCurve, PostMeshSurfacePy as PostMeshSurface)
         # from .PostMeshPy import (PostMeshCurvePy as PostMeshCurve, PostMeshSurfacePy as PostMeshSurface)
+        from Florence.FunctionSpace import Tri
 
         C = mesh.InferPolynomialDegree() - 1
-
-        from Florence.FunctionSpace import Tri
 
         if formulation.ndim == 2:
 
@@ -376,7 +359,7 @@ class BoundaryCondition(object):
             curvilinear_mesh.SetNodalSpacing(boundary_fekete)
             curvilinear_mesh.GetBoundaryPointsOrder()
             # READ THE GEOMETRY FROM THE IGES FILE
-            curvilinear_mesh.ReadGeometry(self.cad_file)
+            curvilinear_mesh.ReadCAD(self.cad_file)
             # EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
             geometry_points = curvilinear_mesh.GetGeomVertices()
             self.GetGeometryMeshScale(geometry_points,mesh)
@@ -401,7 +384,7 @@ class BoundaryCondition(object):
                 curvilinear_mesh.MeshPointInversionCurveArcLength()
             # OBTAIN MODIFIED MESH POINTS - THIS IS NECESSARY TO ENSURE LINEAR MESH IS ALSO CORRECT
             curvilinear_mesh.ReturnModifiedMeshPoints(mesh.points)
-            # GET DIRICHLET MainData
+            # GET DIRICHLET DATA
             nodesDBC, Dirichlet = curvilinear_mesh.GetDirichletData()
 
             # GET ACTUAL CURVE POINTS - THIS FUNCTION IS EXPENSIVE
@@ -413,6 +396,8 @@ class BoundaryCondition(object):
                 savemat(self.filename, nurbs_dict, do_compression=True)
 
         elif formulation.ndim == 3:
+
+            t_all_proj = time()
 
             boundary_points = FeketePointsTri(C)
             if mesh.element_type == "hex":
@@ -435,8 +420,7 @@ class BoundaryCondition(object):
             curvilinear_mesh.SetNodalSpacing(boundary_points)
             # curvilinear_mesh.GetBoundaryPointsOrder()
             # READ THE GEOMETRY FROM THE IGES FILE
-            curvilinear_mesh.ReadGeometry(self.cad_file)
-            # curvilinear_mesh.ReadIGES(self.cad_file)
+            curvilinear_mesh.ReadCAD(self.cad_file)
             # EXTRACT GEOMETRY INFORMATION FROM THE IGES FILE
             geometry_points = curvilinear_mesh.GetGeomVertices()
             self.GetGeometryMeshScale(geometry_points,mesh)
@@ -512,6 +496,8 @@ class BoundaryCondition(object):
                     'Dirichlet':Dirichlet,
                     'dirichlet_faces':dirichlet_faces}
                 savemat(self.filename, nurbs_dict, do_compression=True)
+
+            print("3D multi-level projection (excluding mesh deformation) took {} seconds".format(time()-t_all_proj))
 
             if self.solve_for_planar_faces:
                 if planar_mesh_faces.shape[0] != 0:
