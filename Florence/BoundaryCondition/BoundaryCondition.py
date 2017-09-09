@@ -93,7 +93,7 @@ class BoundaryCondition(object):
         nodal_spacing='equal', project_on_curves=True, has_planar_surfaces=True, solve_for_planar_faces=True,
         scale=1.0,condition=1.0e20, projection_flags=None, fix_dof_elsewhere=True,
         orthogonal_fallback_tolerance=1.0, surface_identification_algorithm='minimisation',
-        modify_linear_mesh_on_projection=True):
+        modify_linear_mesh_on_projection=False):
         """Set parameters for CAD projection in order to obtain dirichlet boundary
             conditinos
         """
@@ -328,8 +328,8 @@ class BoundaryCondition(object):
     def PostMeshWrapper(self, formulation, mesh, material, solver, fem_solver):
         """Calls PostMesh wrapper to get exact Dirichlet boundary conditions"""
 
-        from PostMeshPy import (PostMeshCurvePy as PostMeshCurve, PostMeshSurfacePy as PostMeshSurface)
         # from .PostMeshPy import (PostMeshCurvePy as PostMeshCurve, PostMeshSurfacePy as PostMeshSurface)
+        from PostMeshPy import (PostMeshCurvePy as PostMeshCurve, PostMeshSurfacePy as PostMeshSurface)
         from Florence.FunctionSpace import Tri
 
         C = mesh.InferPolynomialDegree() - 1
