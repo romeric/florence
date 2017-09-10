@@ -2922,7 +2922,7 @@ class Mesh(object):
             warn("Nothing to write")
             return
 
-        Dict = self.__dict__
+        Dict = deepcopy(self.__dict__)
 
         if external_fields is not None:
             if isinstance(external_fields,dict):
@@ -5311,8 +5311,17 @@ class Mesh(object):
         return mesh
 
 
+    def MakeCoordinates3D(self):
+        """Change the coordinates/points of the mesh to 3D by appending
+            a zero Z-axis
+        """
+
+        self.points = np.concatenate((self.points, np.zeros((self.points.shape[0],1)) ), axis=1)
+        self.points = np.ascontiguousarray(self.points)
+
+
     def SwapAxis(self, axis0, axis1):
-        """Swaps mesh axis axis0 with axis1, i.e. swaps XYZ coordinates
+        """Swap mesh axis axis0 with axis1, i.e. swap XYZ coordinates
         """
 
         axis0 = int(axis0)
