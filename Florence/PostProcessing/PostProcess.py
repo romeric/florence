@@ -1054,6 +1054,7 @@ class PostProcess(object):
                 connections = connections[:(i+1)*(tmesh.x_edges.shape[0]-1),:]
                 tmesh.connections = connections
 
+
             ssol = self.sol[np.unique(tmesh.faces_to_plot),:,:]
             # ssol = self.sol
 

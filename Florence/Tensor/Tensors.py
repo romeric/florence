@@ -1,4 +1,4 @@
-import numpy as np 
+import numpy as np
 from warnings import warn
 from .Numeric import tovoigt, tovoigt3
 
@@ -20,17 +20,17 @@ def unique2d(arr,axis=1,consider_sort=False,order=True,return_index=False,return
                 2D array
 
             axis:
-                Axis along which to take unique values, for instance unique 
-                rows (axis=1) or unique columns (axis=0). The axis ordering 
-                should not be confused with the usual numpy style axis argument, 
-                as here since unique values of a 1D type array is finally computed, 
-                numpy style axis hence becomes meaningless. Hence, in this context 
-                axis=0 implies finding unique rows of an array (lumping the rows) and 
+                Axis along which to take unique values, for instance unique
+                rows (axis=1) or unique columns (axis=0). The axis ordering
+                should not be confused with the usual numpy style axis argument,
+                as here since unique values of a 1D type array is finally computed,
+                numpy style axis hence becomes meaningless. Hence, in this context
+                axis=0 implies finding unique rows of an array (lumping the rows) and
                 axis=1 implies finding unique columns of an array (lumping the columns)
 
             consider_sort:
                 Does permutation of the values in row/column matter. Two rows/columns
-                can have the same elements but with different arrangements. If consider_sort 
+                can have the same elements but with different arrangements. If consider_sort
                 is True then those rows/columns would be considered equal
 
             order:
@@ -47,7 +47,7 @@ def unique2d(arr,axis=1,consider_sort=False,order=True,return_index=False,return
 
             2D array of unique values
             If return_index is True also returns indices
-            If return_inverse is True also returns the inverse array 
+            If return_inverse is True also returns the inverse array
 
             """
 
@@ -99,17 +99,17 @@ def in2d(arr1, arr2, axis=1, consider_sort=False):
                 2D array
 
             axis:
-                Axis along which to np.in1d values, for instance along 
-                rows (axis=1) or along columns (axis=0). The axis ordering 
-                should not be confused with the usual numpy style axis argument, 
-                as here since np.in1d values of a 1D type array is finally computed, 
-                numpy style axis hence becomes meaningless. Hence, in this context 
-                axis=0 implies finding intersection rows of an array (lumping the rows) and 
+                Axis along which to np.in1d values, for instance along
+                rows (axis=1) or along columns (axis=0). The axis ordering
+                should not be confused with the usual numpy style axis argument,
+                as here since np.in1d values of a 1D type array is finally computed,
+                numpy style axis hence becomes meaningless. Hence, in this context
+                axis=0 implies finding intersection rows of an array (lumping the rows) and
                 axis=1 implies finding intersection columns of an array (lumping the columns)
 
             consider_sort:
                 Does permutation of the values in row/column matter. Two rows/columns
-                can have the same elements but with different arrangements. If consider_sort 
+                can have the same elements but with different arrangements. If consider_sort
                 is True then those rows/columns would be considered equal
 
         returns:
@@ -123,13 +123,13 @@ def in2d(arr1, arr2, axis=1, consider_sort=False):
     if axis == 0:
         arr1 = np.copy(arr1.T,order='C')
         arr2 = np.copy(arr2.T,order='C')
-    
+
     if consider_sort is True:
         sorter_arr1 = np.argsort(arr1)
         arr1 = arr1[np.arange(arr1.shape[0])[:,None],sorter_arr1]
         sorter_arr2 = np.argsort(arr2)
         arr2 = arr2[np.arange(arr2.shape[0])[:,None],sorter_arr2]
-        
+
     arr1_view = np.ascontiguousarray(arr1).view(np.dtype((np.void, arr1.dtype.itemsize * arr1.shape[1])))
     arr2_view = np.ascontiguousarray(arr2).view(np.dtype((np.void, arr2.dtype.itemsize * arr2.shape[1])))
     intersected = np.in1d(arr1_view, arr2_view)
@@ -140,7 +140,7 @@ def intersect2d(arr1, arr2,axis=1, consider_sort=False):
     """Generalisation of numpy.intersect1d to 2D arrays
 
         NOTE: arr_1 and arr_2 should have the same dtype
-    
+
         input:
 
             arr1:
@@ -150,31 +150,31 @@ def intersect2d(arr1, arr2,axis=1, consider_sort=False):
                 2D array
 
             axis:
-                Axis along which to take intersect1d values, for instance along 
-                rows (axis=1) or along columns (axis=0). The axis ordering 
-                should not be confused with the usual numpy style axis argument, 
-                as here since intersect1d values of a 1D type array is finally computed, 
-                numpy style axis hence becomes meaningless. Hence, in this context 
-                axis=0 implies finding intersection rows of an array (lumping the rows) and 
+                Axis along which to take intersect1d values, for instance along
+                rows (axis=1) or along columns (axis=0). The axis ordering
+                should not be confused with the usual numpy style axis argument,
+                as here since intersect1d values of a 1D type array is finally computed,
+                numpy style axis hence becomes meaningless. Hence, in this context
+                axis=0 implies finding intersection rows of an array (lumping the rows) and
                 axis=1 implies finding intersection columns of an array (lumping the columns)
 
             consider_sort:
                 Does permutation of the values in row/column matter. Two rows/columns
-                can have the same elements but with different arrangements. If consider_sort 
+                can have the same elements but with different arrangements. If consider_sort
                 is True then those rows/columns would be considered equal
 
         returns:
 
             2D array of intersection
-            
+
             """
 
     assert arr1.dtype == arr2.dtype
-    
+
     if axis == 0:
         arr1 = np.copy(arr1.T,order='C')
         arr2 = np.copy(arr2.T,order='C')
-    
+
     if consider_sort is True:
         sorter_arr1 = np.argsort(arr1)
         arr1 = arr1[np.arange(arr1.shape[0])[:,None],sorter_arr1]
@@ -193,8 +193,8 @@ def in2d_unsorted(arr1, arr2, axis=1, consider_sort=False):
         appear in arr2
 
         In principle this is similar to in2d but with two major differences:
-        1. in2d is based on numpy.in1d which finds elements in arr1 which are 
-            also in arr2 but returns a non-sorted boolean array, 
+        1. in2d is based on numpy.in1d which finds elements in arr1 which are
+            also in arr2 but returns a non-sorted boolean array,
             for instance consider:
 
             >>> a=np.array([7, 3, 1, 5, 6, 2, 0, 4])
@@ -207,9 +207,9 @@ def in2d_unsorted(arr1, arr2, axis=1, consider_sort=False):
             (array([2, 3, 6, 7]),)
 
             This is correct but the indices are sorted in the sense that the zeroth
-            element in b (b[0]=5) is the 3rd element of a (a[3]=5) and the first element in 
+            element in b (b[0]=5) is the 3rd element of a (a[3]=5) and the first element in
             b (b[1]=1) is the 2nd element in a (a[2]=1). This method preserves this ordering
-            and returns 
+            and returns
 
             (array([3, 2, 6, 7]),)
 
@@ -228,17 +228,17 @@ def in2d_unsorted(arr1, arr2, axis=1, consider_sort=False):
                 2D array
 
             axis:
-                Axis along which to take unique values, for instance unique 
-                rows (axis=1) or unique columns (axis=0). The axis ordering 
-                should not be confused with the usual numpy style axis argument, 
-                as here since unique values of a 1D type array is finally computed, 
-                numpy style axis hence becomes meaningless. Hence, in this context 
-                axis=0 implies finding unique rows of an array (lumping the rows) and 
+                Axis along which to take unique values, for instance unique
+                rows (axis=1) or unique columns (axis=0). The axis ordering
+                should not be confused with the usual numpy style axis argument,
+                as here since unique values of a 1D type array is finally computed,
+                numpy style axis hence becomes meaningless. Hence, in this context
+                axis=0 implies finding unique rows of an array (lumping the rows) and
                 axis=1 implies finding unique columns of an array (lumping the columns)
 
             consider_sort:
                 Does permutation of the values in row/column matter. Two rows/columns
-                can have the same elements but with different arrangements. If consider_sort 
+                can have the same elements but with different arrangements. If consider_sort
                 is True then those rows/columns would be considered equal
 
         returns:
@@ -252,7 +252,7 @@ def in2d_unsorted(arr1, arr2, axis=1, consider_sort=False):
     if axis == 0:
         arr1 = np.copy(arr1.T,order='C')
         arr2 = np.copy(arr2.T,order='C')
-    
+
     if consider_sort is True:
         sorter_arr1 = np.argsort(arr1)
         arr1 = arr1[np.arange(arr1.shape[0])[:,None],sorter_arr1]
@@ -276,8 +276,8 @@ def in2d_unsorted(arr1, arr2, axis=1, consider_sort=False):
 
 
 def shuffle_along_axis(A,B,axis=1,consider_sort=False):
-    """Given to 2D arrays A and B, shuffles B along an specified
-        axis (rows or columns) such that B==A 
+    """Given two equal (but shuffled) 2D arrays A and B, shuffles B along an specified
+        axis (rows or columns) such that B==A
 
         input:
             A:
@@ -287,23 +287,23 @@ def shuffle_along_axis(A,B,axis=1,consider_sort=False):
                 2D array to shuffle
 
             axis:
-                Axis along which to take unique values, for instance unique 
-                rows (axis=1) or unique columns (axis=0). The axis ordering 
-                should not be confused with the usual numpy style axis argument, 
-                as here since unique values of a 1D type array is finally computed, 
-                numpy style axis hence becomes meaningless. Hence, in this context 
-                axis=0 implies finding unique rows of an array (lumping the rows) and 
+                Axis along which to take unique values, for instance unique
+                rows (axis=1) or unique columns (axis=0). The axis ordering
+                should not be confused with the usual numpy style axis argument,
+                as here since unique values of a 1D type array is finally computed,
+                numpy style axis hence becomes meaningless. Hence, in this context
+                axis=0 implies finding unique rows of an array (lumping the rows) and
                 axis=1 implies finding unique columns of an array (lumping the columns)
 
             consider_sort:
                 Does permutation of the values in row/column matter. Two rows/columns
-                can have the same elements but with different arrangements. If consider_sort 
+                can have the same elements but with different arrangements. If consider_sort
                 is True then those rows/columns would be considered equal
 
 
         returns:
-            A_to_B: 
-                A mapper such that A[A_to_B] == B 
+            A_to_B:
+                A mapper such that A[A_to_B] == B
     """
 
     assert A.dtype == B.dtype
@@ -376,7 +376,7 @@ def remove_duplicates_2D(A, decimals=10):
         consider_sort=False,return_index=True,return_inverse=True)
     A = A[idx_repoints,:]
 
-    return A, idx_repoints, inv_repoints 
+    return A, idx_repoints, inv_repoints
 
 
 
@@ -532,7 +532,7 @@ def UnVoigt(v):
                 [v[2],v[1]]
                 ])
 
-    return A 
+    return A
 
 
 
@@ -558,7 +558,7 @@ def IncrementallyLinearisedStress(Stress_k,H_Voigt_k,I,strain,Gradu):
     V_strain =  Voigt(strain)[:,None]
                     # STRESS                        HESSSIAN 'I_W:GRADU'
     return np.dot(Stress_k,(I+strain)) + UnVoigt( np.dot(H_Voigt_k,V_strain) )
-    
+
 
 
 
@@ -575,8 +575,8 @@ def AijBkl(A,B):
     A=1.0*A; B=1.0*B
     A00=A[0,0]; A11=A[1,1]; A22=A[2,2]; A01=A[0,1]; A02=A[0,2]; A12=A[1,2]; A10=A[1,0]; A20=A[2,0]; A21=A[2,1]
     B00=B[0,0]; B11=B[1,1]; B22=B[2,2]; B01=B[0,1]; B02=B[0,2]; B12=B[1,2]; B10=B[1,0]; B20=B[2,0]; B21=B[2,1]
-    
-    Tens = 1.0*np.array([ 
+
+    Tens = 1.0*np.array([
         [ A00*B00, A00*B11, A00*B22, A00*B01, A00*B02, A00*B12],
         [ A11*B00, A11*B11, A11*B22, A11*B01, A11*B02, A11*B12],
         [ A22*B00, A22*B11, A22*B22, A22*B01, A22*B02, A22*B12],
@@ -586,7 +586,7 @@ def AijBkl(A,B):
         ])
 
 
-    return Tens 
+    return Tens
 
 
 def AikBjl(A,B):

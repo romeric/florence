@@ -519,11 +519,9 @@ class BoundaryCondition(object):
         """Solve a 2D problem for planar faces. Modifies Dirichlet"""
 
         from copy import deepcopy
-        from Florence.Tensor import itemfreq, makezero
-        from Florence import Mesh
-        # from Florence.FiniteElements.Solvers.Solver import MainSolver
-        from Florence import FunctionSpace, QuadratureRule
+        from Florence import Mesh, FunctionSpace, QuadratureRule
         from Florence.PostProcessing import PostProcess
+        from Florence.Tensor import itemfreq, makezero, in2d_unsorted
 
         surface_flags = itemfreq(planar_mesh_faces[:,1])
         number_of_planar_surfaces = surface_flags.shape[0]
@@ -559,33 +557,29 @@ class BoundaryCondition(object):
             pmesh.elements = mesh.faces[planar_mesh_faces[planar_mesh_faces[:,1]==surface_flags[niter,0],0],:]
             pmesh.nelem = np.int64(surface_flags[niter,1])
             pmesh.GetBoundaryEdges()
-            unique_edges = np.unique(pmesh.edges)
-            Dirichlet2D = np.zeros((unique_edges.shape[0],3))
-            nodesDBC2D = np.zeros(unique_edges.shape[0]).astype(np.int64)
+            unique_edges = np.unique(pmesh.edges).astype(nodesDBC.dtype)
+            # Dirichlet2D = np.zeros((unique_edges.shape[0],3))
+            # nodesDBC2D = np.zeros(unique_edges.shape[0]).astype(np.int64)
 
             unique_elements, inv  = np.unique(pmesh.elements, return_inverse=True)
             aranger = np.arange(unique_elements.shape[0],dtype=np.uint64)
             pmesh.elements = aranger[inv].reshape(pmesh.elements.shape)
 
-            # elements = np.zeros_like(pmesh.elements)
-            # unique_elements = np.unique(pmesh.elements)
             # counter = 0
-            # for i in unique_elements:
-            #     elements[pmesh.elements==i] = counter
+            # for i in unique_edges:
+            #     nodesDBC2D[counter] = np.where(nodesDBC==i)[0][0]
+            #     Dirichlet2D[counter,:] = Dirichlet[nodesDBC2D[counter],:]
             #     counter += 1
-            # pmesh.elements = elements
+            # nodesDBC2D = nodesDBC2D.astype(np.int64)
 
-            counter = 0
-            for i in unique_edges:
-                nodesDBC2D[counter] = np.where(nodesDBC==i)[0][0]
-                Dirichlet2D[counter,:] = Dirichlet[nodesDBC2D[counter],:]
-                counter += 1
-            nodesDBC2D = nodesDBC2D.astype(np.int64)
+            # temp_dict = []
+            # for i in nodesDBC[nodesDBC2D].flatten():
+            #     temp_dict.append(np.where(unique_elements==i)[0][0])
+            # nodesDBC2D = np.array(temp_dict,copy=False)
 
-            temp_dict = []
-            for i in nodesDBC[nodesDBC2D].flatten():
-                temp_dict.append(np.where(unique_elements==i)[0][0])
-            nodesDBC2D = np.array(temp_dict,copy=False)
+            dirichlet_edges = in2d_unsorted(nodesDBC,unique_edges[:,None]).flatten()
+            nodesDBC2D = in2d_unsorted(unique_elements.astype(nodesDBC.dtype)[:,None],nodesDBC[dirichlet_edges]).flatten()
+            Dirichlet2D = Dirichlet[dirichlet_edges,:]
 
             pmesh.points = mesh.points[unique_elements,:]
 
