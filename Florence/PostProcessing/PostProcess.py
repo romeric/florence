@@ -1024,7 +1024,6 @@ class PostProcess(object):
                     interpolation_degree=interpolation_degree, ProjectionFlags=ProjectionFlags)
             elif lmesh.element_type =='quad':
                 cellflag = 5
-                print(ProjectionFlags)
                 tmesh = PostProcess.TessellateQuads(self.mesh, np.zeros_like(self.mesh.points),
                     QuantityToPlot=self.sol[:,0,0], plot_points=True,
                     interpolation_degree=interpolation_degree, ProjectionFlags=ProjectionFlags)
@@ -1054,9 +1053,18 @@ class PostProcess(object):
                 connections = connections[:(i+1)*(tmesh.x_edges.shape[0]-1),:]
                 tmesh.connections = connections
 
+            un_faces_to_plot = np.unique(tmesh.faces_to_plot)
+            fail_flag = False
+            try:
+                ssol = self.sol[un_faces_to_plot,:,:]
+            except:
+                fail_flag = True
 
-            ssol = self.sol[np.unique(tmesh.faces_to_plot),:,:]
-            # ssol = self.sol
+            if fail_flag is False:
+                if tmesh.smesh.elements.max() > un_faces_to_plot.shape[0]:
+                    ssol = self.sol
+                    fail_flag = True
+                    warn("Something went wrong with mesh tessellation for VTK writer. I will proceed anyway")
 
             increments = range(LoadIncrement)
             if steps!=None:
@@ -1069,8 +1077,10 @@ class PostProcess(object):
                     extrapolated_sol[ielem*nsize:(ielem+1)*nsize,:] = np.dot(tmesh.bases_2,
                         ssol[tmesh.smesh.elements[ielem,:],:, Increment])
 
-                svpoints = self.mesh.points[np.unique(tmesh.faces_to_plot),:] + ssol[:,:tmesh.points.shape[1],Increment]
-                # svpoints = self.mesh.points + ssol[:,:tmesh.points.shape[1],Increment]
+                if not fail_flag:
+                    svpoints = self.mesh.points[np.unique(tmesh.faces_to_plot),:] + ssol[:,:tmesh.points.shape[1],Increment]
+                else:
+                    svpoints = self.mesh.points + ssol[:,:tmesh.points.shape[1],Increment]
 
                 for iedge in range(tmesh.smesh.all_edges.shape[0]):
                     ielem = tmesh.edge_elements[iedge,0]
