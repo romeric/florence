@@ -663,7 +663,6 @@ class BoundaryCondition(object):
             # figure=None
             # post_process = PostProcess(2,2)
             # post_process.CurvilinearPlot(pmesh, TotalDisp, interpolation_degree=40, figure=figure, color="#E3A933", plot_points=True, point_radius=2.0)
-            # post_process.CurvilinearPlot(pmesh, TotalDisp, interpolation_degree=40, figure=figure, color="#E3A933", plot_points=True, point_radius=2.0, plot_surfaces=False)
             # plt.show()
 
             del pmesh, pboundary_condition
