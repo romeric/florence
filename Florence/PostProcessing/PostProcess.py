@@ -1033,7 +1033,7 @@ class PostProcess(object):
                     QuantityToPlot=self.sol[:,0,0], plot_points=True,
                     interpolation_degree=interpolation_degree, ProjectionFlags=ProjectionFlags)
             else:
-                raise ValueError('Not implemented yet. Use in-built visualiser')
+                raise ValueError('Element type not understood')
 
             nsize = tmesh.nsize
             if hasattr(tmesh,'nface'):
@@ -1065,6 +1065,11 @@ class PostProcess(object):
                     ssol = self.sol
                     fail_flag = True
                     warn("Something went wrong with mesh tessellation for VTK writer. I will proceed anyway")
+
+            if tmesh.smesh.all_edges.shape[0] > tmesh.edge_elements.shape[0]:
+                tmesh.smesh.all_edges = tmesh.edge_elements
+                fail_flag = True
+                warn("Something went wrong with mesh tessellation for VTK writer. I will proceed anyway")
 
             increments = range(LoadIncrement)
             if steps!=None:
