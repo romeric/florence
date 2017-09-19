@@ -14,7 +14,8 @@ class BoundaryCondition(object):
     def __init__(self, surface_identification_algorithm='minimisation',
         modify_linear_mesh_on_projection=False, project_on_curves=True,
         has_planar_surfaces=True, solve_for_planar_faces=True,
-        save_dirichlet_data=False, save_nurbs_data=False, filename=None):
+        save_dirichlet_data=False, save_nurbs_data=False, filename=None,
+        read_dirichlet_from_file=False):
 
         # TYPE OF BOUNDARY: straight or nurbs
         self.boundary_type = 'straight'
@@ -56,6 +57,7 @@ class BoundaryCondition(object):
         self.save_dirichlet_data = save_dirichlet_data
         self.save_nurbs_data = save_nurbs_data
         self.filename = filename
+        self.read_dirichlet_from_file = read_dirichlet_from_file
 
         self.dirichlet_flags = None
         self.neumann_flags = None
@@ -220,8 +222,6 @@ class BoundaryCondition(object):
 
         nvar = formulation.nvar
         ndim = formulation.ndim
-
-        # ColumnsOut = []; AppliedDirichlet = []
         self.columns_in, self.applied_dirichlet = [], []
 
 
@@ -232,12 +232,7 @@ class BoundaryCondition(object):
 
             tCAD = time()
 
-            IsHighOrder = mesh.IsHighOrder
-            # IsDirichletComputed = getattr(MainData.BoundaryData,"IsDirichletComputed",None)
-
-            IsHighOrder = False
-
-            if IsHighOrder is False:
+            if self.read_dirichlet_from_file is False:
 
                 if not self.is_dirichlet_computed:
 
@@ -262,10 +257,6 @@ class BoundaryCondition(object):
                         rest_dofs = np.setdiff1d(np.unique(mesh.edges),nodesDBC)
                     elif ndim==3:
                         rest_dofs = np.setdiff1d(np.unique(mesh.faces),nodesDBC)
-                    # for inode in range(rest_dofs.shape[0]):
-                    #     for i in range(nvar):
-                    #         self.columns_out = np.append(self.columns_out,nvar*rest_dofs[inode]+i)
-                    #         self.applied_dirichlet = np.append(self.applied_dirichlet,0.0)
 
                     rest_out = np.repeat(rest_dofs,nvar)*nvar + np.tile(np.arange(nvar),rest_dofs.shape[0])
                     rest_app = np.zeros(rest_dofs.shape[0]*nvar)

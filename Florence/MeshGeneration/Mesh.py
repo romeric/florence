@@ -4434,7 +4434,7 @@ class Mesh(object):
         hpBases = Tri.hpNodal.hpBases
         for i in range(points.shape[0]):
             BasesTri[:,i] = hpBases(0,points[i,0],points[i,1],
-                EvalOpt=1,EquallySpacedPoints=equally_spaced,Transform=1)[0]
+                EvalOpt=1,equally_spaced=equally_spaced,Transform=1)[0]
 
         func = Delaunay(points,qhull_options="QJ")
         triangles = func.simplices
