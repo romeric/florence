@@ -553,6 +553,7 @@ class BoundaryCondition(object):
             # nodesDBC2D = np.zeros(unique_edges.shape[0]).astype(np.int64)
 
             unique_elements, inv  = np.unique(pmesh.elements, return_inverse=True)
+            unique_elements = unique_elements.astype(nodesDBC.dtype)
             aranger = np.arange(unique_elements.shape[0],dtype=np.uint64)
             pmesh.elements = aranger[inv].reshape(pmesh.elements.shape)
 
@@ -567,7 +568,6 @@ class BoundaryCondition(object):
             # for i in nodesDBC[nodesDBC2D].flatten():
             #     temp_dict.append(np.where(unique_elements==i)[0][0])
             # nodesDBC2D = np.array(temp_dict,copy=False)
-
             dirichlet_edges = in2d_unsorted(nodesDBC,unique_edges[:,None]).flatten()
             nodesDBC2D = in2d_unsorted(unique_elements.astype(nodesDBC.dtype)[:,None],nodesDBC[dirichlet_edges]).flatten()
             Dirichlet2D = Dirichlet[dirichlet_edges,:]
@@ -617,8 +617,8 @@ class BoundaryCondition(object):
             pformulation_func = getattr(Florence.VariationalPrinciple, type(formulation).__name__,None)
             pformulation = pformulation_func(pmesh)
 
-            print('Solving planar problem {}. Number of DoF is {}'.format(niter,pmesh.points.shape[0]*pformulation.nvar))
 
+            print('Solving planar problem {}. Number of DoF is {}'.format(niter,pmesh.points.shape[0]*pformulation.nvar))
 
             if pmesh.points.shape[0] != Dirichlet2D.shape[0]:
                 # CALL THE FEM SOLVER FOR SOLVING THE 2D PROBLEM
@@ -633,10 +633,10 @@ class BoundaryCondition(object):
             Disp = np.zeros((TotalDisp.shape[0],3))
             Disp[:,:2] = TotalDisp[:,:,-1]
 
-            temp_dict = []
-            for i in unique_elements:
-                temp_dict.append(np.where(nodesDBC==i)[0][0])
-
+            # temp_dict = []
+            # for i in unique_elements:
+            #     temp_dict.append(np.where(nodesDBC==i)[0][0])
+            temp_dict = in2d_unsorted(nodesDBC,unique_elements[:,None]).flatten()
             Dirichlet[temp_dict,:] = np.dot(Disp,Q)
 
             if plot:
