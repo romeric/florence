@@ -2384,6 +2384,44 @@ class Mesh(object):
         return
 
 
+    def ReadFRO(self, filename, element_type):
+        """Read fro mesh"""
+
+        if self.elements is not None and self.points is not None:
+            self.__reset__()
+
+        if element_type == "tri":
+            el = 5
+        else:
+            raise NotImplementedError("Reading FRO files for {} elements not yet implemented".format(element_type))
+
+        content = np.fromfile(filename, dtype=np.float64, sep=" ")
+        nelem = int(content[0])
+        nnode = int(content[1])
+        nsurface = int(content[3])
+
+        points = content[8:8+4*nnode].reshape(nnode,4)[:,1:]
+        elements = content[8+4*nnode::].reshape(nelem,el)[:,1:-1].astype(np.int64) - 1
+        face_to_surface = content[8+4*nnode::].reshape(nelem,el)[:,-1].astype(np.int64) - 1
+
+        self.nelem = nelem
+        self.nnode = nnode
+        self.elements = np.ascontiguousarray(elements)
+        self.element_type = element_type
+        self.points = np.ascontiguousarray(points)
+
+        if self.element_type == "tri" or self.element_type == "quad":
+            self.GetEdges()
+            self.GetBoundaryEdges()
+        elif self.element_type == "tet" or self.element_type == "hex":
+            self.GetFaces()
+            self.GetBoundaryFaces()
+            self.GetBoundaryEdges()
+
+        self.face_to_surface = np.ascontiguousarray(face_to_surface)
+
+        return
+
     def ReadHDF5(self,filename):
         """Read mesh from MATLAB HDF5 file format"""
 
@@ -4916,7 +4954,9 @@ class Mesh(object):
                 lmesh.points = self.points[unnodes,:]
                 if lmesh.element_type == "hex" or lmesh.element_type == "tet":
                     lmesh.GetBoundaryFaces()
-                lmesh.GetBoundaryEdges()
+                    lmesh.GetBoundaryEdges()
+                if lmesh.element_type == "quad" or lmesh.element_type == "tri":
+                    lmesh.GetBoundaryEdges()
 
                 if solution is not None:
                     solution = solution[unnodes,:]
