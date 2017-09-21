@@ -22,7 +22,7 @@ def HighOrderMeshHex(C, mesh, Decimals=10, equally_spaced=False, check_duplicate
     from Florence.FunctionSpace import Hex, HexES
     from Florence.QuadratureRules import GaussLobattoPointsHex
     from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints
-    from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
+    from Florence.MeshGeneration.NodeArrangement import NodeArrangementHex
 
 
     # SWITCH OFF MULTI-PROCESSING FOR SMALLER PROBLEMS WITHOUT GIVING A MESSAGE

@@ -1311,7 +1311,7 @@ class PostProcess(object):
             from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
             from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
             from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
-            from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
+            from Florence.MeshGeneration.NodeArrangement import NodeArrangementTri
             from Florence.FunctionSpace import Tri
             from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
 
@@ -2401,7 +2401,7 @@ class PostProcess(object):
         from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
         from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
+        from Florence.MeshGeneration.NodeArrangement import NodeArrangementTri
         from Florence.FunctionSpace import Tri
         from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
 
@@ -2639,7 +2639,7 @@ class PostProcess(object):
         from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
         from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
+        from Florence.MeshGeneration.NodeArrangement import NodeArrangementTri
         from Florence.FunctionSpace import Tri
         from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
 
@@ -3258,7 +3258,7 @@ class PostProcess(object):
         from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
         from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
+        from Florence.MeshGeneration.NodeArrangement import NodeArrangementTri
         from Florence.FunctionSpace import Tri
         from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
 
@@ -3401,7 +3401,7 @@ class PostProcess(object):
 
         from Florence.QuadratureRules.GaussLobattoPoints import GaussLobattoPointsQuad
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
+        from Florence.MeshGeneration.NodeArrangement import NodeArrangementQuad
         from Florence.FunctionSpace import Quad
         from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
 
@@ -3536,7 +3536,7 @@ class PostProcess(object):
         from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
         from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
+        from Florence.MeshGeneration.NodeArrangement import NodeArrangementTri
         from Florence.FunctionSpace import Tri
         from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
 
@@ -3741,7 +3741,7 @@ class PostProcess(object):
 
         from Florence.QuadratureRules import GaussLobattoPointsQuad
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
+        from Florence.MeshGeneration.NodeArrangement import NodeArrangementQuad
         from Florence.FunctionSpace import Quad
         from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
 

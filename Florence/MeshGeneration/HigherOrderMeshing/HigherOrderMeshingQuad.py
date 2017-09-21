@@ -15,7 +15,7 @@ def HighOrderMeshQuad(C, mesh, Decimals=10, equally_spaced=False, check_duplicat
     from Florence.FunctionSpace import Quad, QuadES
     from Florence.QuadratureRules import GaussLobattoPointsQuad
     from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints
-    from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
+    from Florence.MeshGeneration.NodeArrangement import NodeArrangementQuad
 
     if not equally_spaced:
         eps = GaussLobattoPointsQuad(C)

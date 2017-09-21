@@ -1,6 +1,6 @@
-import numpy as np 
+import numpy as np
 from Florence.FunctionSpace.OneDimensional import Line as OneD
-from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
+from Florence.MeshGeneration.NodeArrangement import NodeArrangementQuad
 
 
 def Lagrange(C,zeta,eta,arrange=1):
