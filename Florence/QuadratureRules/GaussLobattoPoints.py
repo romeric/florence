@@ -1,6 +1,6 @@
 import numpy as np
 from .NumericIntegrator import GaussLobattoQuadrature
-from .NodeArrangement import NodeArrangementQuad, NodeArrangementHex
+from Florence.MeshGeneration.NodeArrangement import NodeArrangementQuad, NodeArrangementHex
 
 def GaussLobattoPoints1D(C):
     return GaussLobattoQuadrature(C+2)[0]

@@ -3,11 +3,11 @@ import numpy as np
 from Florence.Utils import insensitive
 from warnings import warn
 
-# BASE CLASS FOR ALL MATERIAL MODELS - SHOULD NOT BE USED DIRECTLY 
+# BASE CLASS FOR ALL MATERIAL MODELS - SHOULD NOT BE USED DIRECTLY
 class Material(object):
     """Base class for all material models"""
 
-    def __init__(self, mtype, ndim, energy_type="internal_energy", 
+    def __init__(self, mtype, ndim, energy_type="internal_energy",
         lame_parameter_1=None, lame_parameter_2=None, poissons_ratio=None, youngs_modulus=None,
         shear_modulus=None, transverse_iso_youngs_modulus=None, transverse_iso_shear_modulus=None,
         bulk_modulus=None, density=None, permittivity=None, permeability=None, **kwargs):
@@ -20,7 +20,7 @@ class Material(object):
             raise TypeError("Material energy can either be 'internal_energy' or 'enthalpy'")
 
         self.energy_type = energy_type
-        
+
         # MATERIAL CONSTANTS
         self.mu = lame_parameter_1
         self.lamb = lame_parameter_2
@@ -32,7 +32,7 @@ class Material(object):
         self.rho = density
         if self.rho is None:
             self.rho = 0.0
-        
+
         self.e = permittivity
         self.u = permeability
 
@@ -84,10 +84,10 @@ class Material(object):
                 block_1 = np.zeros((6,6),dtype=np.float64); block_1[:3,:3] = np.ones((3,3))
                 block_2 = np.eye(6,6); block_2[0,0],block_2[1,1],block_2[2,2]=2.,2.,2.
                 self.vIijIkl = block_1
-                self.vIikIjl = block_2 
+                self.vIikIjl = block_2
 
             I = np.eye(self.ndim,self.ndim)
-            self.Iijkl = np.einsum('ij,kl',I,I)    
+            self.Iijkl = np.einsum('ij,kl',I,I)
             self.Iikjl = np.einsum('ik,jl',I,I) + np.einsum('il,jk',I,I)
 
         if self.H_Voigt is not None:
@@ -115,12 +115,12 @@ class Material(object):
         """Convenience function for computing anisotropic orientations of fibres
             in a transversely isotropic material.
             The orientation is computed based on the popular concept of reinforced composites
-            where for the elements at the boundary, the fibres are perpendicular to the boundary 
+            where for the elements at the boundary, the fibres are perpendicular to the boundary
             edge/face
 
             input:
                 mesh:                           [Mesh]
-                interior_orientation:           [1D numpy.array or list] orientation of all interior 
+                interior_orientation:           [1D numpy.array or list] orientation of all interior
                                                 fibres. Default is negative X-axis i.e [-1.,0.] for 2D
                                                 and [-1.,0.,0.] for 3D
         """
@@ -128,7 +128,7 @@ class Material(object):
         ndim = mesh.InferSpatialDimension()
         if self.ndim != ndim:
             raise ValueError('Mesh object and material model do not have the same spatial dimension')
-            
+
         if self.ndim == 2:
 
             edge_elements = mesh.GetElementsWithBoundaryEdges()
@@ -140,7 +140,7 @@ class Material(object):
                 dist = (coords[0,0:]-coords[1,:])/np.linalg.norm(coords[0,0:]-coords[1,:])
 
                 if min_x != coords[0,0]:
-                    dist *= -1 
+                    dist *= -1
 
                 self.anisotropic_orientations[edge_elements[iedge],:] = dist
 
@@ -148,11 +148,11 @@ class Material(object):
                 interior_orientation = [-1.,0.]
             for i in range(mesh.nelem):
                 if np.allclose(self.anisotropic_orientations[i,:],0.):
-                    self.anisotropic_orientations[i,:] = interior_orientation 
+                    self.anisotropic_orientations[i,:] = interior_orientation
 
 
             if plot:
-                
+
                 Xs,Ys = [],[]
                 for i in range(mesh.nelem):
                     x_avg = np.sum(mesh.points[mesh.elements[i,:],0])/mesh.points[mesh.elements[i,:],0].shape[0]
@@ -163,14 +163,14 @@ class Material(object):
 
                 import matplotlib.pyplot as plt
                 figure = plt.figure()
-                q = plt.quiver(Xs, Ys, self.anisotropic_orientations[:,0], 
-                    self.anisotropic_orientations[:,1], color='Teal', 
+                q = plt.quiver(Xs, Ys, self.anisotropic_orientations[:,0],
+                    self.anisotropic_orientations[:,1], color='Teal',
                            headlength=5,width=0.004)
 
                 if mesh.element_type == "tri":
                     plt.triplot(mesh.points[:,0],mesh.points[:,1], mesh.elements[:,:3],color='k')
                 else:
-                    from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
+                    from Florence.MeshGeneration.NodeArrangement import NodeArrangementQuad
                     C = mesh.InferPolynomialDegree() - 1
                     reference_edges = NodeArrangementQuad(C)[0]
                     reference_edges = np.concatenate((reference_edges,reference_edges[:,1,None]),axis=1)
@@ -207,7 +207,7 @@ class Material(object):
                 fibre = (coords[0,:]-coords[1,:])/np.linalg.norm(coords[0,:]-coords[1,:])
 
                 if min_x != coords[0,0]:
-                    fibre *= -1 
+                    fibre *= -1
 
                 self.anisotropic_orientations[face_elements[iface],:] = fibre
 
@@ -236,7 +236,7 @@ class Material(object):
                     Ys[face_elements[i,0]] = np.sum(mesh.points[mesh.faces[i,:],1])/divider
                     Zs[face_elements[i,0]] = np.sum(mesh.points[mesh.faces[i,:],2])/divider
 
-  
+
 
                 import os
                 os.environ['ETS_TOOLKIT'] = 'qt4'
@@ -252,18 +252,18 @@ class Material(object):
 
                 figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(1000,800))
 
-                mlab.quiver3d(Xs, Ys, Zs, self.anisotropic_orientations[:,0], 
-                    self.anisotropic_orientations[:,1], self.anisotropic_orientations[:,2], 
+                mlab.quiver3d(Xs, Ys, Zs, self.anisotropic_orientations[:,0],
+                    self.anisotropic_orientations[:,1], self.anisotropic_orientations[:,2],
                     color=(0.,128./255,128./255),line_width=2)
 
-                src = mlab.pipeline.scalar_scatter(tmesh.x_edges.T.copy().flatten(), 
+                src = mlab.pipeline.scalar_scatter(tmesh.x_edges.T.copy().flatten(),
                 tmesh.y_edges.T.copy().flatten(), tmesh.z_edges.T.copy().flatten())
                 src.mlab_source.dataset.lines = tmesh.connections
                 lines = mlab.pipeline.stripper(src)
                 h_edges = mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
 
                 mlab.show()
-            
+
 
     def Linearise(self,energy):
         """Linearises a material model, by dispatching invariants to self.LineariseInvariant"""
@@ -304,7 +304,7 @@ class Material(object):
         else:
             coefficient = "".join(invariant_to_linearise['coefficient'].split())
             invariant = strip_invariant.split(coefficient)
-        
+
         if len(invariant) > 1:
             if invariant[0] == '':
                 if invariant[1][0] == '*':
@@ -349,11 +349,11 @@ class Material(object):
             elasticity = "NIL"
             warn("I could not linearise the invariant %s" % invariant)
 
-        print("Cauchy stress tensor:\t\t\t", cauchy) 
+        print("Cauchy stress tensor:\t\t\t", cauchy)
         print("Spatial Hessian:\t\t\t\t", elasticity)
 
         return cauchy, elasticity
-                
+
 
     def GetYoungsPoissonsFromLameParameters(self):
 
@@ -406,7 +406,7 @@ class Material(object):
 
         import pandas
         from copy import deepcopy
-        Dict = deepcopy(self.__dict__) 
+        Dict = deepcopy(self.__dict__)
         for key in Dict.keys():
             if Dict[key] is None:
                 Dict[key] = np.NAN

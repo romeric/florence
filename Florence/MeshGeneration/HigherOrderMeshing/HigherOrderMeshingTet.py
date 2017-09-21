@@ -6,10 +6,7 @@ from time import time
 import multiprocessing as MP
 
 from .GetInteriorCoordinates import GetInteriorNodesCoordinates
-from Florence.QuadratureRules.FeketePointsTet import *
 from Florence.Tensor import itemfreq, makezero, unique2d, remove_duplicates_2D
-from Florence.FunctionSpace import Tet
-from Florence.QuadratureRules.NodeArrangement import NodeArrangementTet
 import Florence.ParallelProcessing.parmap as parmap
 
 #--------------------------------------------------------------------------------------------------------------------------#
@@ -22,6 +19,9 @@ def ElementLoopTet(elem,elements,points,MeshType,eps,Neval):
 def HighOrderMeshTet_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, check_duplicates=True,
     Zerofy=True, Parallel=False, nCPU=1, ComputeAll=True):
 
+    from Florence.FunctionSpace import Tet
+    from Florence.QuadratureRules.FeketePointsTet import FeketePointsTet
+    from Florence.MeshGeneration.NodeArrangement import NodeArrangementTet
 
     # SWITCH OFF MULTI-PROCESSING FOR SMALLER PROBLEMS WITHOUT GIVING A MESSAGE
     if (mesh.elements.shape[0] < 500) and (C < 5):

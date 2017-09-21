@@ -1,5 +1,5 @@
 import numpy as np
-from .NodeArrangement import NodeArrangementQuad, NodeArrangementHex
+from Florence.MeshGeneration.NodeArrangement import NodeArrangementQuad, NodeArrangementHex
 
 def EquallySpacedPoints(ndim=2,C=0):
     """Produce equally spaced points in (ndim-1) dimension, for the boundaries

@@ -15,6 +15,7 @@ except ImportError:
     has_meshpy = False
 from .SalomeMeshReader import ReadMesh
 from .HigherOrderMeshing import *
+from .NodeArrangement import *
 from .GeometricPath import *
 from warnings import warn
 from copy import deepcopy
@@ -263,7 +264,6 @@ class Mesh(object):
                 else:
                     return self.all_edges
 
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
 
         node_arranger = NodeArrangementTri(p-1)[0]
 
@@ -314,8 +314,6 @@ class Mesh(object):
                 else:
                     return
 
-
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
 
         node_arranger = NodeArrangementTri(p-1)[0]
 
@@ -412,8 +410,6 @@ class Mesh(object):
                 else:
                     return self.all_faces
 
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementTet
-
         node_arranger = NodeArrangementTet(p-1)[0]
         fsize = int((p+1.)*(p+2.)/2.)
 
@@ -484,8 +480,6 @@ class Mesh(object):
                 else:
                     return
 
-
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementTet
         node_arranger = NodeArrangementTet(p-1)[0]
 
         # CONCATENATE ALL THE FACES MADE FROM ELEMENTS
@@ -624,7 +618,6 @@ class Mesh(object):
                 else:
                     return self.all_edges
 
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
         node_arranger = NodeArrangementQuad(p-1)[0]
 
         # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY
@@ -665,7 +658,6 @@ class Mesh(object):
                 else:
                     return
 
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
         node_arranger = NodeArrangementQuad(p-1)[0]
 
         # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY
@@ -762,8 +754,6 @@ class Mesh(object):
                 else:
                     return self.all_faces
 
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
-
         node_arranger = NodeArrangementHex(p-1)[0]
         fsize = int((p+1)**3)
 
@@ -833,8 +823,6 @@ class Mesh(object):
                 else:
                     return
 
-
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
         node_arranger = NodeArrangementHex(p-1)[0]
 
         # CONCATENATE ALL THE FACES MADE FROM ELEMENTS
@@ -1095,7 +1083,6 @@ class Mesh(object):
 
         elif self.element_type == "hex":
 
-            from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
             from Florence.Tensor import unique2d
             C = self.InferPolynomialDegree() - 1
 
@@ -1683,7 +1670,7 @@ class Mesh(object):
 
     def GetElementsWithBoundaryFacesTet(self):
         """Finds elements which have faces on the boundary.
-            At most an element can have all its four faces on the boundary.
+            At most a tetrahedral element can have all its four faces on the boundary.
 
         output:
 
@@ -1715,8 +1702,6 @@ class Mesh(object):
         # NOTE THAT WE STILL HAVE NOT COMPUTED A MAPPING BETWEEN ELEMENTS AND
         # FACES. WE ONLY KNOW WHICH ELEMENTS CONTAIN FACES FROM in2d.
         # WE NEED TO FIND THIS MAPPING NOW
-
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementTet
 
         C = self.InferPolynomialDegree() - 1
         node_arranger = NodeArrangementTet(C)[0]
@@ -1780,8 +1765,6 @@ class Mesh(object):
         """Arranges all the faces of tetrahedral elements
             with triangular type node ordering """
 
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementTet
-
         if self.all_faces is None:
             self.all_faces = self.GetFacesTet()
         if self.face_to_element is None:
@@ -1822,7 +1805,6 @@ class Mesh(object):
         p = self.InferPolynomialDegree()
 
         # FIND WHICH FACE NODES ARE IN WHICH ELEMENT
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
         node_arranger = NodeArrangementQuad(p-1)[0]
 
         # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY
@@ -1862,7 +1844,6 @@ class Mesh(object):
         p = self.InferPolynomialDegree()
 
         # FIND WHICH FACE NODES ARE IN WHICH ELEMENT
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
         node_arranger = NodeArrangementQuad(p-1)[0]
 
         # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY
@@ -1918,8 +1899,6 @@ class Mesh(object):
         # IF THIS HAS BEEN COMPUTED BEFORE, THE REASON BEING THAT THE FACES CAN COME
         # EXTERNALLY WHOSE ARRANGEMENT WOULD NOT CORRESPOND TO THE ONE USED INTERNALLY
         # HENCE THIS MAPPING BECOMES NECESSARY
-
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
 
         C = self.InferPolynomialDegree() - 1
         node_arranger = NodeArrangementHex(C)[0]
@@ -1984,8 +1963,6 @@ class Mesh(object):
         if self.all_faces is None:
             self.GetFacesHex()
 
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
-
         C = self.InferPolynomialDegree() - 1
         node_arranger = NodeArrangementHex(C)[0]
 
@@ -2009,8 +1986,6 @@ class Mesh(object):
     def ArrangeFacesHex(self):
         """Arranges all the faces of hexahedral elements
             with quadrilateral type node ordering """
-
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
 
         if self.all_faces is None:
             self.all_faces = self.GetFacesHex()
@@ -2600,7 +2575,6 @@ class Mesh(object):
 
             C = self.InferPolynomialDegree() - 1
             pdim = self.points.shape[1]
-            from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
 
             edge_elements = self.GetElementsEdgeNumberingQuad()
             reference_edges = NodeArrangementQuad(C)[0]
@@ -2733,7 +2707,6 @@ class Mesh(object):
             point_radius = 3.
 
             C = self.InferPolynomialDegree() - 1
-            from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
 
             edge_elements = self.GetElementsEdgeNumberingQuad()
             reference_edges = NodeArrangementQuad(C)[0]
@@ -4138,7 +4111,6 @@ class Mesh(object):
             else:
                 raise NotImplementedError("Extruding high order elements along specified geometric path is not implemented yet")
 
-            from Florence.QuadratureRules.NodeArrangement import NodeArrangementLayeredToHex
             node_aranger = NodeArrangementLayeredToHex(mp-1)
             dum_e = np.zeros((nelem_2D,nsize))
             counter = 0
@@ -4512,7 +4484,6 @@ class Mesh(object):
         from Florence.FunctionSpace import Quad, QuadES
         from Florence.QuadratureRules.GaussLobattoPoints import GaussLobattoPointsQuad
         from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuad
 
         npoints = int(npoints)
         if npoints ==0: npoints=1
@@ -4632,7 +4603,6 @@ class Mesh(object):
         from Florence.FunctionSpace import Hex, HexES
         from Florence.QuadratureRules.GaussLobattoPoints import GaussLobattoPointsHex
         from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
 
         npoints = int(npoints)
         if npoints ==0: npoints=1
@@ -4955,7 +4925,7 @@ class Mesh(object):
                 if lmesh.element_type == "hex" or lmesh.element_type == "tet":
                     lmesh.GetBoundaryFaces()
                     lmesh.GetBoundaryEdges()
-                if lmesh.element_type == "quad" or lmesh.element_type == "tri":
+                elif lmesh.element_type == "quad" or lmesh.element_type == "tri":
                     lmesh.GetBoundaryEdges()
 
                 if solution is not None:
@@ -4966,11 +4936,13 @@ class Mesh(object):
 
 
     def GetLocalisedMesh(self,elements, solution=None):
-        """Make a new Mesh instance from part of a big mesh
+        """Make a new Mesh instance from part of a big mesh.
+            Makes a copy and does not modify self
 
             inputs:
                 elements:           [int, tuple, list, 1D array] list of elements in big mesh (self)
-                                    from which a small localised needs to be constructed
+                                    from which a small localised mesh needs to be extract.
+                                    It could also be an array of boolean of size self.nelem
                 solution            [1D array having the same length as big mesh points]
                                     if a solution also needs to be mapped over the localised element
         """
@@ -4978,6 +4950,12 @@ class Mesh(object):
         self.__do_essential_memebers_exist__()
 
         elements = np.array(elements).flatten()
+
+        if elements.dtype == np.bool:
+            if elements.shape[0] != self.elements.shape[0]:
+                raise ValueError("Boolean array should be the same size as number of elements")
+                return
+            elements = np.where(elements==True)[0]
 
         nodeperelem = self.elements.shape[1]
         tmesh = Mesh()
@@ -4989,7 +4967,9 @@ class Mesh(object):
         tmesh.points = self.points[unnodes,:]
         if tmesh.element_type == "hex" or tmesh.element_type == "tet":
             tmesh.GetBoundaryFaces()
-        tmesh.GetBoundaryEdges()
+            tmesh.GetBoundaryEdges()
+        elif tmesh.element_type == "quad" or tmesh.element_type == "tri":
+            tmesh.GetBoundaryEdges()
 
         if solution is not None:
             solution = solution[unnodes,:]
@@ -5256,8 +5236,6 @@ class Mesh(object):
 
         tconv = time()
 
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementQuadToTri
-
         C = self.InferPolynomialDegree() - 1
         node_arranger = NodeArrangementQuadToTri(C)
 
@@ -5296,8 +5274,6 @@ class Mesh(object):
 
         tconv = time()
 
-        from Florence.QuadratureRules.NodeArrangement import NodeArrangementHexToTet
-
         C = self.InferPolynomialDegree() - 1
         node_arranger = NodeArrangementHexToTet(C)
 
@@ -5327,6 +5303,27 @@ class Mesh(object):
             self.all_edges = all_edges
 
         print("Hexahedral to tetrahedral mesh conversion took", time() - tconv, "seconds")
+
+
+    def NodeArranger(self,C=None):
+        """Calls NodeArrangment"""
+
+        assert self.element_type is not None
+
+        if C is None:
+            C = self.InferPolynomialDegree() - 1
+
+        if self.element_type == "hex":
+            return NodeArrangementHex(C)
+        elif self.element_type == "tet":
+            return NodeArrangementTet(C)
+        elif self.element_type == "quad":
+            return NodeArrangementQuad(C)
+        elif self.element_type == "tri":
+            return NodeArrangementTri(C)
+        else:
+            raise ValueError("Element type not understood")
+
 
 
     def CreateDummyLowerDimensionalMesh(self):

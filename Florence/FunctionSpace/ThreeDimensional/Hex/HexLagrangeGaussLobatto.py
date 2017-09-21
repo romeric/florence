@@ -1,6 +1,6 @@
-import numpy as np 
+import numpy as np
 from Florence.FunctionSpace.OneDimensional import Line as OneD
-from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
+from Florence.MeshGeneration.NodeArrangement import NodeArrangementHex
 
 def LagrangeGaussLobatto(C,zeta,eta,beta,arrange=1):
     """This routine computes stable higher order Lagrangian bases with Gauss-Lobatto-Legendre points

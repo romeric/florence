@@ -6,11 +6,7 @@ import imp
 
 from .GetInteriorCoordinates import GetInteriorNodesCoordinates
 import Florence.ParallelProcessing.parmap as parmap
-from Florence.QuadratureRules.FeketePointsTri import *
-from Florence import FunctionSpace
-from Florence.FunctionSpace import Tri
 from Florence.Tensor import itemfreq, makezero, unique2d, remove_duplicates_2D
-from Florence.QuadratureRules.NodeArrangement import NodeArrangementTri
 
 #--------------------------------------------------------------------------------------------------------------------------#
 # SUPPLEMENTARY FUNCTIONS
@@ -21,6 +17,9 @@ def ElementLoopTri(elem,elements,points,MeshType,eps,Neval):
 def HighOrderMeshTri_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, check_duplicates=True,
     Parallel=False, nCPU=1, ComputeAll=False):
 
+    from Florence.FunctionSpace import Tri
+    from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
+    from Florence.MeshGeneration.NodeArrangement import NodeArrangementTri
 
     # SWITCH OFF MULTI-PROCESSING FOR SMALLER PROBLEMS WITHOUT GIVING A MESSAGE
     if (mesh.elements.shape[0] < 1000) and (C < 8):

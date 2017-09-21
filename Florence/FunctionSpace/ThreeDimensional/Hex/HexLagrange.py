@@ -1,6 +1,6 @@
-import numpy as np 
+import numpy as np
 from Florence.FunctionSpace.OneDimensional import Line as OneD
-from Florence.QuadratureRules.NodeArrangement import NodeArrangementHex
+from Florence.MeshGeneration.NodeArrangement import NodeArrangementHex
 
 def Lagrange(C,zeta,eta,beta,arrange=1):
     """Computes higher order Lagrangian bases with equally spaced points
