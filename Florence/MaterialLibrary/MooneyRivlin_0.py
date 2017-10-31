@@ -8,10 +8,10 @@ from Florence.LegendreTransform import LegendreTransform
 class MooneyRivlin_0(Material):
     """The fundamental MooneyRivlin model from Gil and Ortigosa et. al.
 
-        W_mn(C) = u1*C:I+u2*G:I - 2*(u1+2*u2)*lnJ + lamb/2*(J-1)**2 
+        W_mn(C) = u1*C:I+u2*G:I - 2*(u1+2*u2)*lnJ + lamb/2*(J-1)**2
 
     """
-    
+
     def __init__(self, ndim, **kwargs):
         mtype = type(self).__name__
         super(MooneyRivlin_0, self).__init__(mtype, ndim, **kwargs)
@@ -44,7 +44,7 @@ class MooneyRivlin_0(Material):
 
         C_Voigt = 2.*mu2/J*(2*einsum('ij,kl',b,b) - einsum('ik,jl',b,b) - einsum('il,jk',b,b)) +\
             2.*(mu1+2.*mu2)/J*( einsum("ik,jl",I,I)+einsum("il,jk",I,I) ) + \
-            lamb*(2.*J-1.)*einsum("ij,kl",I,I) - lamb*(J-1)*( einsum("ik,jl",I,I)+einsum("il,jk",I,I) ) 
+            lamb*(2.*J-1.)*einsum("ij,kl",I,I) - lamb*(J-1)*( einsum("ik,jl",I,I)+einsum("il,jk",I,I) )
 
         C_Voigt = Voigt(C_Voigt,1)
 
@@ -70,7 +70,7 @@ class MooneyRivlin_0(Material):
         sigma = 2.0*mu1/J*b + \
             2.0*mu2/J*(trb*b - np.dot(b,b)) -\
             2.0*(mu1+2*mu2)/J*I +\
-            lamb*(J-1)*I 
+            lamb*(J-1)*I
 
         return sigma
 
