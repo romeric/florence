@@ -4,7 +4,7 @@ from copy import deepcopy
 from warnings import warn
 from time import time
 import numpy as np
-from scipy.sparse import coo_matrix, csc_matrix, csr_matrix 
+from scipy.sparse import coo_matrix, csc_matrix, csr_matrix
 
 from .SparseAssembly import SparseAssembly_Step_2
 from .SparseAssemblySmall import SparseAssemblySmall
@@ -51,7 +51,7 @@ def Assemble(fem_solver, function_space, formulation, mesh, material, Eulerx, Eu
         distributed_caller = os.path.join(pwd,"DistributedAssembly.py")
 
         t_dassembly = time()
-        p = subprocess.Popen("time mpirun -np "+str(MP.cpu_count())+" Florence/FiniteElements/DistributedAssembly.py"+" /home/roman/tmp/", 
+        p = subprocess.Popen("time mpirun -np "+str(MP.cpu_count())+" Florence/FiniteElements/DistributedAssembly.py"+" /home/roman/tmp/",
             cwd="/home/roman/Dropbox/florence/", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         # p = subprocess.Popen("./mpi_runner.sh", cwd="/home/roman/Dropbox/florence/", shell=True)
         p.wait()
@@ -103,7 +103,7 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
         V_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.float64)
 
     T = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
-    # T = np.zeros((mesh.points.shape[0]*nvar,1),np.float32)  
+    # T = np.zeros((mesh.points.shape[0]*nvar,1),np.float32)
 
     mass, F = [], []
     if fem_solver.has_moving_boundary:
@@ -129,9 +129,9 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
         else:
             # COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
             I_stiff_elem, J_stiff_elem, V_stiff_elem, t, f, \
-            I_mass_elem, J_mass_elem, V_mass_elem = formulation.GetElementalMatrices(elem, 
+            I_mass_elem, J_mass_elem, V_mass_elem = formulation.GetElementalMatrices(elem,
                 function_space, mesh, material, fem_solver, Eulerx, Eulerp)
-            
+
         # SPARSE ASSEMBLY - STIFFNESS MATRIX
         SparseAssemblyNative(I_stiff_elem,J_stiff_elem,V_stiff_elem,I_stiffness,J_stiffness,V_stiffness,
             elem,nvar,nodeperelem,mesh.elements)
@@ -155,21 +155,17 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
 
     if fem_solver.parallel:
         del ParallelTuple
-    gc.collect()
-
+        gc.collect()
 
     # REALLY DANGEROUS FOR MULTIPHYSICS PROBLEMS - NOTE THAT SCIPY RUNS A PRUNE ANYWAY
     # V_stiffness[np.isclose(V_stiffness,0.)] = 0.
 
-    # stiffness = coo_matrix((V_stiffness,(I_stiffness,J_stiffness)),
-        # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64).tocsc()
+    stiffness = coo_matrix((V_stiffness,(I_stiffness,J_stiffness)),
+        shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64).tocsr()
+
     # stiffness = csc_matrix((V_stiffness,(I_stiffness,J_stiffness)),
-        # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float32)
-    stiffness = csc_matrix((V_stiffness,(I_stiffness,J_stiffness)),
-        shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
-    # stiffness = csr_matrix((V_stiffness,(I_stiffness,J_stiffness)),
-        # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
-    
+    #     shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
+
     # GET STORAGE/MEMORY DETAILS
     fem_solver.spmat = stiffness.data.nbytes/1024./1024.
     fem_solver.ijv = (I_stiffness.nbytes + J_stiffness.nbytes + V_stiffness.nbytes)/1024./1024.
@@ -236,10 +232,10 @@ def AssemblyLarge(MainData,mesh,material,Eulerx,TotalPot):
 
 
     # ALLOCATE RHS VECTORS
-    F = np.zeros((mesh.points.shape[0]*nvar,1)) 
-    T =  np.zeros((mesh.points.shape[0]*nvar,1)) 
+    F = np.zeros((mesh.points.shape[0]*nvar,1))
+    T =  np.zeros((mesh.points.shape[0]*nvar,1))
     # ASSIGN OTHER NECESSARY MATRICES
-    full_current_row_stiff = []; full_current_column_stiff = []; coeff_stiff = [] 
+    full_current_row_stiff = []; full_current_column_stiff = []; coeff_stiff = []
     full_current_row_mass = []; full_current_column_mass = []; coeff_mass = []
     mass = []
 
@@ -284,7 +280,7 @@ def AssemblyLarge(MainData,mesh,material,Eulerx,TotalPot):
         for iterator in range(0,nvar):
                 T[mesh.elements[elem,:]*nvar+iterator,0]+=t[iterator::nvar,0]
 
-    # CALL BUILT-IN SPARSE ASSEMBLER 
+    # CALL BUILT-IN SPARSE ASSEMBLER
     stiffness = coo_matrix((V_stiffness,(I_stiffness,J_stiffness)),
         shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64).tocsc()
 
@@ -304,8 +300,8 @@ def AssemblyLarge(MainData,mesh,material,Eulerx,TotalPot):
 
 def OutofCoreAssembly(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp, calculate_rhs=True, filename=None, chunk_size=None):
 # def OutofCoreAssembly(MainData, mesh, material, Eulerx, TotalPot, calculate_rhs=True, filename=None, chunk_size=None):
-    """Assembly routine for larger than memory system of equations. 
-        Usage of h5py and dask allow us to store the triplets and build a sparse matrix out of 
+    """Assembly routine for larger than memory system of equations.
+        Usage of h5py and dask allow us to store the triplets and build a sparse matrix out of
         them on disk.
 
         Note: The sparse matrix itfem_solver is created on the memory.
@@ -323,7 +319,7 @@ def OutofCoreAssembly(fem_solver, function_space, formulation, mesh, material, E
 
 
     if fem_solver.parallel:
-        warn("Parallel assembly cannot performed on large arrays. \n" 
+        warn("Parallel assembly cannot performed on large arrays. \n"
             "Out of core 'i.e. Dask' parallelisation is turned on instead. "
             "This is an innocuous warning")
 
@@ -375,10 +371,10 @@ def OutofCoreAssembly(fem_solver, function_space, formulation, mesh, material, E
         T = []
     else:
         F = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
-        T = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)  
+        T = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
 
     # ASSIGN OTHER NECESSARY MATRICES
-    full_current_row_stiff = []; full_current_column_stiff = []; coeff_stiff = [] 
+    full_current_row_stiff = []; full_current_column_stiff = []; coeff_stiff = []
     full_current_row_mass = []; full_current_column_mass = []; coeff_mass = []
     mass = []
 
@@ -435,7 +431,7 @@ def OutofCoreAssembly(fem_solver, function_space, formulation, mesh, material, E
         shape=((mesh.points.shape[0]*nvar,mesh.points.shape[0]*nvar)),dtype=np.float32)
 
     print('Done creating the sparse matrix, time taken', time() - t_sparse)
-    
+
     hdf_file.close()
 
     return stiffness, T, F, mass
@@ -460,13 +456,13 @@ def AssembleInternalTractionForces(fem_solver, function_space, formulation, mesh
     nodeperelem = mesh.elements.shape[1]
 
     T = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
-    # T = np.zeros((mesh.points.shape[0]*nvar,1),np.float32)  
+    # T = np.zeros((mesh.points.shape[0]*nvar,1),np.float32)
 
     for elem in range(nelem):
 
-        t = formulation.GetElementalMatrices(elem, 
+        t = formulation.GetElementalMatrices(elem,
             function_space, mesh, material, fem_solver, Eulerx, Eulerp)[3]
-            
+
         # INTERNAL TRACTION FORCE ASSEMBLY
         # for iterator in range(0,nvar):
             # T[mesh.elements[elem,:]*nvar+iterator,0]+=t[iterator::nvar,0]
@@ -584,7 +580,7 @@ def AssembleBodyForces(boundary_condition, mesh, material, function_space):
 
     F = np.zeros((mesh.points.shape[0]*nvar,1))
     # BODY FORCE IS APPLIED IN THE Z-DIRECTION
-    ElemTraction = np.zeros(nvar); ElemTraction[ndim-1] = -material.rho 
+    ElemTraction = np.zeros(nvar); ElemTraction[ndim-1] = -material.rho
     for elem in range(mesh.nelem):
         body_force = np.einsum("ijk,j,k->ik",N,ElemTraction,function_space.AllGauss[:,0]).sum(axis=1)
         RHSAssemblyNative(F,np.ascontiguousarray(body_force[:,None]),elem,nvar,nodeperelem,mesh.elements)
@@ -596,7 +592,7 @@ def AssembleBodyForces(boundary_condition, mesh, material, function_space):
 
     # F = np.zeros((mesh.points.shape[0]*nvar,1))
     # # BODY FORCE IS APPLIED IN THE Z-DIRECTION
-    # ElemTraction = np.zeros(nvar); ElemTraction[ndim-1] = -material.rho 
+    # ElemTraction = np.zeros(nvar); ElemTraction[ndim-1] = -material.rho
     # for elem in range(mesh.nelem):
     #     # LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
 

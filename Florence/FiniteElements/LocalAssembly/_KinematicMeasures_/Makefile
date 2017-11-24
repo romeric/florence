@@ -1,44 +1,55 @@
 PYTHON_VERSION = python2.7
 PYTHON_INCLUDE_PATH = /usr/include/python2.7/
 PYTHON_LD_PATH = /usr/lib/
-EXT_POSTFIX= so
+EXT_POSTFIX = so
 CYTHONFLAGS = -DNPY_NO_DEPRECATED_API
 
-CYTHON = cython
+CYTHON = cython --cplus
 REMOVE = rm -rf
 MOVE = mv
 
+FASTOR_OPTFLAGS = -DFASTOR_NO_ALIAS -DFASTOR_USE_VECTORISED_EXPR_ASSIGN -DCONTRACT_OPT=2 -DFASTOR_NO_STATIC_WARNING
+KINEMATICS =
+
 INLINE_THRESHOLD = 100000
-CCSTD=-std=c99
+CXXSTD=-std=c++14
 OPTFLAGS= -O3 -fno-strict-aliasing -DNDEBUG
-CCFLAGS= -fPIC -shared -pthread -Wall $(CYTHONFLAGS) $(OPTFLAGS) -lm
+CXXFLAGS= -fPIC -shared -pthread -Wall $(CYTHONFLAGS) $(OPTFLAGS)
 
 # NUMPY_INCLUDE_PATH=python -c "import numpy; print numpy.get_include()"
 NUMPY_INCLUDE_PATH = /usr/local/lib/python2.7/dist-packages/numpy/core/include
 
-ifeq ($(findstring gcc,$(CC)),gcc)
-CCFLAGS += -Wno-cpp -Wno-unused-function -Wno-maybe-uninitialized
-CCFLAGS += -march=native -ffast-math -fwrapv -mfpmath=sse -funroll-loops -finline-functions -finline-limit=$(INLINE_THRESHOLD) -ffp-contract=fast
+ifeq ($(findstring g++,$(CXX)),g++)
+ifneq ($(findstring clang++,$(CXX)),clang++)
+CXXFLAGS += -Wno-cpp -Wno-unused-function -Wno-maybe-uninitialized -fabi-version=6
+CXXFLAGS += -march=native -ffast-math -fwrapv -funroll-loops -finline-functions -finline-limit=$(INLINE_THRESHOLD) -ffp-contract=fast
+else
+CXXFLAGS += -Wno-uninitialized -Wno-missing-braces -Wno-#warnings
+CXXFLAGS += -march=native -ffast-math -mllvm -inline-threshold=$(INLINE_THRESHOLD) -ffp-contract=fast
 endif
-ifeq ($(findstring clang,$(CC)),clang)
-CCFLAGS += -Wno-uninitialized -Wno-#warnings
-CCFLAGS += -march=native -ffast-math -mllvm -inline-threshold=$(INLINE_THRESHOLD) -ffp-contract=fast
 endif
-ifeq ($(findstring icc,$(CC)),icc)
-CCFLAGS += -march=native -no-ansi-alias -xHost -fp-model fast=1 -inline-forceinline -inline-factor=$(INLINE_THRESHOLD)
+ifeq ($(findstring c++,$(CXX)),c++)
+CXXFLAGS += -Wno-uninitialized -Wno-missing-braces -Wno-#NPY_NO_DEPRECATED_API
+CXXFLAGS += -march=native -ffast-math -mllvm -inline-threshold=$(INLINE_THRESHOLD) -ffp-contract=fast
 endif
+ifeq ($(findstring icpc,$(CXX)),icpc)
+CXXFLAGS += -march=native -no-ansi-alias -xHost -fp-model fast=1 -inline-forceinline -inline-factor=$(INLINE_THRESHOLD)
+endif
+
+CXXFLAGS += $(FASTOR_OPTFLAGS) -I$(FASTOR_INCLUDE_PATH)
+CXXFLAGS += $(KINEMATICS)
 
 all: build_module
 
-build_module: 
+build_module:
 	@echo "Building SIMD optimised kinematics module"
 	$(CYTHON) _KinematicMeasures_.pyx
-	$(CC) $(CCSTD) $(CCFLAGS) _KinematicMeasures_.c -o _KinematicMeasures_.$(EXT_POSTFIX) -I../../../Tensor/ -I. -I$(PYTHON_INCLUDE_PATH) \
+	$(CXX) $(CXXSTD) $(CXXFLAGS) _KinematicMeasures_.cpp -o _KinematicMeasures_.$(EXT_POSTFIX) -I../../../Tensor/ -I. -I$(PYTHON_INCLUDE_PATH) \
 	-I$(NUMPY_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION)
 	@$(MOVE) _KinematicMeasures_.$(EXT_POSTFIX) ../_KinematicMeasures_.$(EXT_POSTFIX)
 
 clean:
-	$(REMOVE) _KinematicMeasures_.c _KinematicMeasures_.$(EXT_POSTFIX) ../_KinematicMeasures_.$(EXT_POSTFIX)
+	$(REMOVE) _KinematicMeasures_.cpp _KinematicMeasures_.$(EXT_POSTFIX) ../_KinematicMeasures_.$(EXT_POSTFIX)
 
 source_clean:
-	$(REMOVE) _KinematicMeasures_.c
+	$(REMOVE) _KinematicMeasures_.cpp

@@ -32,10 +32,10 @@ class FEMSolver(object):
         is_geometrically_linearised=False, requires_geometry_update=True,
         requires_line_search=False, requires_arc_length=False, has_moving_boundary=False,
         has_prestress=True, number_of_load_increments=1, load_factor=None,
-        newton_raphson_tolerance=1.0e-6, newton_raphson_solution_tolerance=None, 
+        newton_raphson_tolerance=1.0e-6, newton_raphson_solution_tolerance=None,
         maximum_iteration_for_newton_raphson=50, iterative_technique="newton_raphson",
         add_self_weight=False,
-        compute_mesh_qualities=True,  
+        compute_mesh_qualities=True,
         parallelise=False, memory_model="shared", platform="cpu", backend="opencl",
         print_incremental_log=False, save_incremental_solution=False, incremental_solution_filename=None,
         break_at_increment=-1,
@@ -112,7 +112,7 @@ class FEMSolver(object):
         if formulation is None:
             raise ValueError("No variational form specified")
 
-        # GET FUNCTION SPACES FROM THE FORMULATION 
+        # GET FUNCTION SPACES FROM THE FORMULATION
         if function_spaces is None:
             if formulation.function_spaces is None:
                 raise ValueError("No interpolation functions specified")
@@ -145,8 +145,8 @@ class FEMSolver(object):
 
         # GEOMETRY UPDATE FLAGS
         ###########################################################################
-        # DO NOT UPDATE THE GEOMETRY IF THE MATERIAL MODEL NAME CONTAINS 
-        # INCREMENT (CASE INSENSITIVE). VALID FOR ELECTROMECHANICS FORMULATION. 
+        # DO NOT UPDATE THE GEOMETRY IF THE MATERIAL MODEL NAME CONTAINS
+        # INCREMENT (CASE INSENSITIVE). VALID FOR ELECTROMECHANICS FORMULATION.
         self.requires_geometry_update = False
         if formulation.fields == "electro_mechanics":
             if "Increment" in insensitive(material.mtype):
@@ -204,7 +204,7 @@ class FEMSolver(object):
     def __makeoutput__(self, mesh, TotalDisp, formulation=None, function_spaces=None, material=None):
         post_process = PostProcess(formulation.ndim,formulation.nvar)
         post_process.SetBases(postdomain=function_spaces[1], domain=function_spaces[0], boundary=None)
-        post_process.SetAnalysis(analysis_type=self.analysis_type, 
+        post_process.SetAnalysis(analysis_type=self.analysis_type,
             analysis_nature=self.analysis_nature)
         post_process.SetMesh(mesh)
         post_process.SetSolution(TotalDisp)
@@ -236,7 +236,7 @@ class FEMSolver(object):
                 post_process.internal_power = formulation.internal_power
                 post_process.kinetic_power = formulation.kinetic_power
                 post_process.external_power = formulation.external_power
-            
+
         return post_process
 
 
@@ -264,8 +264,8 @@ class FEMSolver(object):
         return solvers
 
 
-    def Solve(self, formulation=None, mesh=None, 
-        material=None, boundary_condition=None, 
+    def Solve(self, formulation=None, mesh=None,
+        material=None, boundary_condition=None,
         function_spaces=None, solver=None):
         """Main solution routine for FEMSolver """
 
@@ -290,7 +290,7 @@ class FEMSolver(object):
             np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64)
         # SET NON-LINEAR PARAMETERS
         self.NRConvergence = { 'Increment_'+str(Increment) : [] for Increment in range(self.number_of_load_increments) }
-        
+
         # ALLOCATE FOR SOLUTION FIELDS
         # TotalDisp = np.zeros((mesh.points.shape[0],formulation.nvar,self.number_of_load_increments),dtype=np.float32)
         TotalDisp = np.zeros((mesh.points.shape[0],formulation.nvar,self.number_of_load_increments),dtype=np.float64)
@@ -302,8 +302,8 @@ class FEMSolver(object):
         # APPLY DIRICHELT BOUNDARY CONDITIONS AND GET DIRICHLET RELATED FORCES
         boundary_condition.GetDirichletBoundaryConditions(formulation, mesh, material, solver, self)
 
-        # ALLOCATE FOR GEOMETRY - GetDirichletBoundaryConditions CHANGES THE MESH 
-        # SO EULERX SHOULD BE ALLOCATED AFTERWARDS 
+        # ALLOCATE FOR GEOMETRY - GetDirichletBoundaryConditions CHANGES THE MESH
+        # SO EULERX SHOULD BE ALLOCATED AFTERWARDS
         Eulerx = np.copy(mesh.points)
         Eulerp = np.zeros((mesh.points.shape[0]))
 
@@ -312,7 +312,7 @@ class FEMSolver(object):
             compute_traction_forces=True, compute_body_forces=self.add_self_weight)
 
         # ADOPT A DIFFERENT PATH FOR INCREMENTAL LINEAR ELASTICITY
-        if formulation.fields == "mechanics" and self.analysis_nature != "nonlinear":     
+        if formulation.fields == "mechanics" and self.analysis_nature != "nonlinear":
             # MAKE A COPY OF MESH, AS MESH POINTS WILL BE OVERWRITTEN
             vmesh = deepcopy(mesh)
             TotalDisp = self.IncrementalLinearElasticitySolver(function_spaces, formulation, vmesh, material,
@@ -342,22 +342,22 @@ class FEMSolver(object):
 
         if self.analysis_type != 'static':
             structural_integrator = StructuralDynamicIntegrators()
-            TotalDisp = structural_integrator.Solver(function_spaces, formulation, solver, 
+            TotalDisp = structural_integrator.Solver(function_spaces, formulation, solver,
                 K, M, NeumannForces, NodalForces, Residual,
                 mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition, self)
         else:
             if self.iterative_technique == "newton_raphson" or self.iterative_technique == "modified_newton_raphson":
-                TotalDisp = self.StaticSolver(function_spaces, formulation, solver, 
+                TotalDisp = self.StaticSolver(function_spaces, formulation, solver,
                     K,NeumannForces,NodalForces,Residual,
                     mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition)
             elif self.iterative_technique == "arc_length":
                 from FEMSolverArcLength import StaticSolverArcLength
-                TotalDisp = StaticSolverArcLength(self,function_spaces, formulation, solver, 
+                TotalDisp = StaticSolverArcLength(self,function_spaces, formulation, solver,
                     K,NeumannForces,NodalForces,Residual,
                     mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition)
 
             # from FEMSolverDisplacementControl import StaticSolverDisplacementControl
-            # TotalDisp = StaticSolverDisplacementControl(self,function_spaces, formulation, solver, 
+            # TotalDisp = StaticSolverDisplacementControl(self,function_spaces, formulation, solver,
             #     K,NeumannForces,NodalForces,Residual,
             #     mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition)
 
@@ -366,8 +366,8 @@ class FEMSolver(object):
 
     def IncrementalLinearElasticitySolver(self, function_spaces, formulation, mesh, material,
                 boundary_condition, solver, TotalDisp, Eulerx, NeumannForces):
-        """An icremental linear elasticity solver, in which the geometry is updated 
-            and the remaining quantities such as stresses and Hessians are based on Prestress flag. 
+        """An icremental linear elasticity solver, in which the geometry is updated
+            and the remaining quantities such as stresses and Hessians are based on Prestress flag.
             In this approach instead of solving the problem inside a non-linear routine,
             a somewhat explicit and more efficient way is adopted to avoid pre-assembly of the system
             of equations needed for non-linear analysis
@@ -390,12 +390,12 @@ class FEMSolver(object):
             Residual = DirichletForces + NodalForces
 
             t_assembly = time()
-            # IF STRESSES ARE TO BE CALCULATED 
+            # IF STRESSES ARE TO BE CALCULATED
             if self.has_prestress:
-                # GET THE MESH COORDINATES FOR LAST INCREMENT 
+                # GET THE MESH COORDINATES FOR LAST INCREMENT
                 mesh.points -= TotalDisp[:,:formulation.ndim,Increment-1]
                 # ASSEMBLE
-                K, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material, 
+                K, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material,
                     Eulerx, np.zeros(mesh.points.shape[0]))[:2]
                 # UPDATE MESH AGAIN
                 mesh.points += TotalDisp[:,:formulation.ndim,Increment-1]
@@ -407,7 +407,7 @@ class FEMSolver(object):
                 K = Assemble(self, function_spaces[0], formulation, mesh, material,
                     Eulerx, np.zeros_like(mesh.points))[0]
             print('Finished assembling the system of equations. Time elapsed is', time() - t_assembly, 'seconds')
-            # APPLY DIRICHLET BOUNDARY CONDITIONS & GET REDUCED MATRICES 
+            # APPLY DIRICHLET BOUNDARY CONDITIONS & GET REDUCED MATRICES
             K_b, F_b = boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,AppliedDirichletInc)[:2]
             # SOLVE THE SYSTEM
             t_solver=time()
@@ -415,13 +415,13 @@ class FEMSolver(object):
             t_solver = time()-t_solver
 
             dU = post_process.TotalComponentSol(sol, boundary_condition.columns_in,
-                boundary_condition.columns_out, AppliedDirichletInc,0,K.shape[0]) 
+                boundary_condition.columns_out, AppliedDirichletInc,0,K.shape[0])
 
             # STORE TOTAL SOLUTION DATA
             TotalDisp[:,:,Increment] += dU
 
             # UPDATE MESH GEOMETRY
-            mesh.points += TotalDisp[:,:formulation.ndim,Increment]    
+            mesh.points += TotalDisp[:,:formulation.ndim,Increment]
             Eulerx = np.copy(mesh.points)
 
             if LoadIncrement > 1:
@@ -434,13 +434,13 @@ class FEMSolver(object):
             # COMPUTE SCALED JACBIAN FOR THE MESH
             if Increment == LoadIncrement - 1:
                 smesh = deepcopy(mesh)
-                smesh.points -= TotalDisp[:,:,-1] 
+                smesh.points -= TotalDisp[:,:,-1]
 
                 if material.is_transversely_isotropic:
                     post_process.is_material_anisotropic = True
                     post_process.SetAnisotropicOrientations(material.anisotropic_orientations)
 
-                post_process.SetBases(postdomain=function_spaces[1])    
+                post_process.SetBases(postdomain=function_spaces[1])
                 qualities = post_process.MeshQualityMeasures(smesh,TotalDisp,plot=False,show_plot=False)
                 self.isScaledJacobianComputed = qualities[0]
                 self.ScaledJacobian = qualities[3]
@@ -456,11 +456,11 @@ class FEMSolver(object):
     def StaticSolver(self, function_spaces, formulation, solver, K,
             NeumannForces, NodalForces, Residual,
             mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition):
-    
+
         LoadIncrement = self.number_of_load_increments
         LoadFactor = 1./LoadIncrement
         AppliedDirichletInc = np.zeros(boundary_condition.applied_dirichlet.shape[0],dtype=np.float64)
-        
+
         for Increment in range(LoadIncrement):
 
             # CHECK ADAPTIVE LOAD FACTOR
@@ -482,7 +482,7 @@ class FEMSolver(object):
             t_increment = time()
 
             # LET NORM OF THE FIRST RESIDUAL BE THE NORM WITH RESPECT TO WHICH WE
-            # HAVE TO CHECK THE CONVERGENCE OF NEWTON RAPHSON. TYPICALLY THIS IS 
+            # HAVE TO CHECK THE CONVERGENCE OF NEWTON RAPHSON. TYPICALLY THIS IS
             # NORM OF NODAL FORCES
             if Increment==0:
                 self.NormForces = np.linalg.norm(Residual)
@@ -493,15 +493,15 @@ class FEMSolver(object):
             self.norm_residual = np.linalg.norm(Residual)/self.NormForces
 
             if self.iterative_technique == "newton_raphson":
-                Eulerx, Eulerp, K, Residual = self.NewtonRaphson(function_spaces, formulation, solver, 
+                Eulerx, Eulerp, K, Residual = self.NewtonRaphson(function_spaces, formulation, solver,
                     Increment, K, NodalForces, Residual, mesh, Eulerx, Eulerp,
                     material, boundary_condition, AppliedDirichletInc)
             elif self.iterative_technique == "modified_newton_raphson":
-                Eulerx, Eulerp, K, Residual = self.ModifiedNewtonRaphson(function_spaces, formulation, solver, 
+                Eulerx, Eulerp, K, Residual = self.ModifiedNewtonRaphson(function_spaces, formulation, solver,
                     Increment, K, NodalForces, Residual, mesh, Eulerx, Eulerp,
                     material, boundary_condition, AppliedDirichletInc)
 
-            # Eulerx, Eulerp, K, Residual = self.NewtonRaphsonLineSearch(function_spaces, formulation, solver, 
+            # Eulerx, Eulerp, K, Residual = self.NewtonRaphsonLineSearch(function_spaces, formulation, solver,
             #     Increment, K, NodalForces, Residual, mesh, Eulerx, Eulerp,
             #     material, boundary_condition, AppliedDirichletInc)
 
@@ -534,7 +534,7 @@ class FEMSolver(object):
 
             print('\nFinished Load increment', Increment, 'in', time()-t_increment, 'seconds')
             try:
-                print('Norm of Residual is', 
+                print('Norm of Residual is',
                     np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces), '\n')
             except RuntimeWarning:
                 print("Invalid value encountered in norm of Newton-Raphson residual")
@@ -559,7 +559,7 @@ class FEMSolver(object):
         return TotalDisp
 
 
-    def NewtonRaphson(self, function_spaces, formulation, solver, 
+    def NewtonRaphson(self, function_spaces, formulation, solver,
         Increment, K, NodalForces, Residual, mesh, Eulerx, Eulerp, material,
         boundary_condition, AppliedDirichletInc):
 
@@ -603,14 +603,14 @@ class FEMSolver(object):
             self.rel_norm_residual = la.norm(Residual[boundary_condition.columns_in])
             if Iter==0:
                 self.NormForces = la.norm(Residual[boundary_condition.columns_in])
-            self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces) 
+            self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)
 
-            # SAVE THE NORM 
+            # SAVE THE NORM
             self.NRConvergence['Increment_'+str(Increment)] = np.append(self.NRConvergence['Increment_'+str(Increment)],\
                 self.norm_residual)
-            
+
             print("Iteration {} for increment {}.".format(Iter, Increment) +\
-                " Residual (abs) {0:>16.7g}".format(self.rel_norm_residual), 
+                " Residual (abs) {0:>16.7g}".format(self.rel_norm_residual),
                 "\t Residual (rel) {0:>16.7g}".format(self.norm_residual))
 
             # BREAK BASED ON RELATIVE NORM
@@ -656,7 +656,7 @@ class FEMSolver(object):
 
 
 
-    def ModifiedNewtonRaphson(self, function_spaces, formulation, solver, 
+    def ModifiedNewtonRaphson(self, function_spaces, formulation, solver,
         Increment, K, NodalForces, Residual, mesh, Eulerx, Eulerp, material,
         boundary_condition, AppliedDirichletInc):
 
@@ -706,14 +706,14 @@ class FEMSolver(object):
             self.rel_norm_residual = la.norm(Residual[boundary_condition.columns_in])
             if Iter==0:
                 self.NormForces = la.norm(Residual[boundary_condition.columns_in])
-            self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces) 
+            self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)
 
-            # SAVE THE NORM 
+            # SAVE THE NORM
             self.NRConvergence['Increment_'+str(Increment)] = np.append(self.NRConvergence['Increment_'+str(Increment)],\
                 self.norm_residual)
-            
+
             print("Iteration {} for increment {}.".format(Iter, Increment) +\
-                " Residual (abs) {0:>16.7g}".format(self.rel_norm_residual), 
+                " Residual (abs) {0:>16.7g}".format(self.rel_norm_residual),
                 "\t Residual (rel) {0:>16.7g}".format(self.norm_residual))
 
             # BREAK BASED ON RELATIVE NORM
@@ -758,7 +758,7 @@ class FEMSolver(object):
 
 
 
-    def NewtonRaphsonLineSearch(self, function_spaces, formulation, solver, 
+    def NewtonRaphsonLineSearch(self, function_spaces, formulation, solver,
         Increment, K, NodalForces, Residual, mesh, Eulerx, Eulerp, material,
         boundary_condition, AppliedDirichletInc):
 
@@ -784,7 +784,7 @@ class FEMSolver(object):
             sol = solver.Solve(K_b,-F_b)
 
             # GET ITERATIVE SOLUTION
-            dU = boundary_condition.UpdateFreeDoFs(sol,K.shape[0],formulation.nvar) 
+            dU = boundary_condition.UpdateFreeDoFs(sol,K.shape[0],formulation.nvar)
 
             # UPDATE THE EULERIAN COMPONENTS
             Eulerx += eta*dU[:,:formulation.ndim]
@@ -834,14 +834,14 @@ class FEMSolver(object):
             self.rel_norm_residual = la.norm(Residual[boundary_condition.columns_in])
             if Iter==0:
                 self.NormForces = la.norm(Residual[boundary_condition.columns_in])
-            self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces) 
+            self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)
 
-            # SAVE THE NORM 
+            # SAVE THE NORM
             self.NRConvergence['Increment_'+str(Increment)] = np.append(self.NRConvergence['Increment_'+str(Increment)],\
                 self.norm_residual)
-            
+
             print("Iteration {} for increment {}.".format(Iter, Increment) +\
-                " Residual (abs) {0:>16.7g}".format(self.rel_norm_residual), 
+                " Residual (abs) {0:>16.7g}".format(self.rel_norm_residual),
                 "\t Residual (rel) {0:>16.7g}".format(self.norm_residual))
 
             if np.abs(self.rel_norm_residual) < Tolerance:

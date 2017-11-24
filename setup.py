@@ -51,8 +51,10 @@ class FlorenceSetup(object):
     extension_paths = None
     extension_postfix = None
 
+    kinematics_version = "-DUSE_AVX_VERSION"
+
     def __init__(self, _fc_compiler=None, _cc_compiler=None, _cxx_compiler=None,
-        _blas=None):
+        _blas=None, _kinematics_version=None):
 
         # GET THE CURRENT WORKING DIRECTORY
         self._pwd_ = os.path.dirname(os.path.realpath('__file__'))
@@ -64,6 +66,8 @@ class FlorenceSetup(object):
         self.GetFastorPath()
         # Get BLAS version and paths
         self.GetBLAS(_blas)
+        # Get kinematics version
+        self.GetKinematicsVersion(_kinematics_version)
         # Set C/Fortran/C++ compiler
         self.SetCompiler(_fc_compiler,_cc_compiler,_cxx_compiler)
         # Set up compiler arguments for all extension modules
@@ -119,7 +123,7 @@ class FlorenceSetup(object):
                     self.python_ld_path = os.path.join(root, filename).rsplit(libpython)[0]
                     break
 
-        # For conda envs change python_ld_path 
+        # For conda envs change python_ld_path
         if "conda" in sys.version or "Continuum" in sys.version or "Intel" in sys.version:
             self.python_ld_path = get_config_var("LIBDIR")
 
@@ -131,7 +135,7 @@ class FlorenceSetup(object):
                 raise RuntimeError("Could not find libpython")
 
 
-        # Get postfix for extensions 
+        # Get postfix for extensions
         self.extension_postfix = get_config_vars()['SO'][1:]
         if self.extension_postfix is None:
             if "darwin" in self._os:
@@ -210,6 +214,13 @@ class FlorenceSetup(object):
             self.blas_include_path = "/usr/include/"
 
 
+    def GetKinematicsVersion(self,_kinematics_version=None):
+        if _kinematics_version == "scalar" or _kinematics_version == "None":
+            self.kinematics_version = ""
+        else:
+            self.kinematics_version = "-DUSE_AVX_VERSION"
+
+
     def SetCompiler(self, _fc_compiler=None, _cc_compiler=None, _cxx_compiler=None):
 
         if not "darwin" in self._os and not "linux" in self._os:
@@ -249,7 +260,7 @@ class FlorenceSetup(object):
             " FASTOR_INCLUDE_PATH=" + self.fastor_include_path +\
             " BLAS_VERSION=" + self.blas_version + " BLAS_INCLUDE_PATH="+ self.blas_include_path + \
             " BLAS_LD_PATH=" + self.blas_ld_path + " EXT_POSTFIX=" + self.extension_postfix +\
-            " CXXSTD=" + self.cxx_version
+            " CXXSTD=" + self.cxx_version + " KINEMATICS=" + self.kinematics_version
 
         self.fc_compiler_args = "FC=" + self.fc_compiler + " " + self.compiler_args
         self.cc_compiler_args = "CC=" + self.cc_compiler + " " + self.compiler_args
@@ -275,7 +286,7 @@ class FlorenceSetup(object):
         assemble_path = os.path.join(_pwd_,"FiniteElements","Assembly","_Assembly_")
 
         self.extension_paths = [tensor_path,mesh_path,jacobi_path,bp_path,km_path,gm_path,cm_path,mm_path,material_path,assemble_path]
-        # self.extension_paths = [assemble_path]
+        # self.extension_paths = [km_path]
 
     def SourceClean(self):
 
@@ -315,16 +326,16 @@ class FlorenceSetup(object):
     def Build(self):
 
 
-        low_level_material_list = [ "_NeoHookean_2_", 
-                                    "_MooneyRivlin_0_", 
+        low_level_material_list = [ "_NeoHookean_2_",
+                                    "_MooneyRivlin_0_",
                                     "_NearlyIncompressibleMooneyRivlin_",
-                                    "_AnisotropicMooneyRivlin_1_", 
-                                    "_IsotropicElectroMechanics_0_", 
-                                    "_IsotropicElectroMechanics_3_", 
+                                    "_AnisotropicMooneyRivlin_1_",
+                                    "_IsotropicElectroMechanics_0_",
+                                    "_IsotropicElectroMechanics_3_",
                                     "_SteinmannModel_",
-                                    "_IsotropicElectroMechanics_101_", 
-                                    "_IsotropicElectroMechanics_105_", 
-                                    "_IsotropicElectroMechanics_106_", 
+                                    "_IsotropicElectroMechanics_101_",
+                                    "_IsotropicElectroMechanics_105_",
+                                    "_IsotropicElectroMechanics_106_",
                                     "_IsotropicElectroMechanics_107_",
                                     "_IsotropicElectroMechanics_108_",
                                     "_IsotropicElectroMechanics_109_",
@@ -393,6 +404,7 @@ if __name__ == "__main__":
     _cc_compiler = None
     _cxx_compiler = None
     _blas = None
+    _kinematics_version = None
 
     args = sys.argv
 
@@ -414,9 +426,13 @@ if __name__ == "__main__":
                 _cxx_compiler = arg.split("=")[-1]
             if "BLAS" in arg:
                 _blas = arg.split("=")[-1]
+            if "KINEMATICS" in arg:
+                _kinematics_version = arg.split("=")[-1]
 
-    setup_instance = FlorenceSetup(_fc_compiler=_fc_compiler, 
-        _cc_compiler=_cc_compiler, _cxx_compiler=_cxx_compiler, _blas=_blas)
+
+    setup_instance = FlorenceSetup(_fc_compiler=_fc_compiler,
+        _cc_compiler=_cc_compiler, _cxx_compiler=_cxx_compiler, _blas=_blas,
+        _kinematics_version=_kinematics_version)
 
     if _op == "source_clean":
         setup_instance.SourceClean()
