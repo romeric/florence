@@ -1,5 +1,145 @@
 #include "_det_inv_.h"
+#include "_matmul_.h"
 #include <math.h>
+
+#ifdef USE_AVX_VERSION
+
+template<int ndim, typename std::enable_if<ndim==2,bool>::type = 0>
+FASTOR_INLINE void KinematicMeasures_(Real *SpatialGradient_, Real *F_, Real *detJ, const Real *Jm_,
+    const Real *AllGauss_, const Real *LagrangeElemCoords_, const Real *EulerElemCoords_,
+    int ngauss, int nodeperelem, int update)  {
+
+    Real ParentGradientX[ndim*ndim];
+    Real invParentGradientX[ndim*ndim];
+    Real ParentGradientx[ndim*ndim];
+    Real invParentGradientx[ndim*ndim];
+    Real current_F[ndim*ndim];
+    Real current_Ft[ndim*ndim];
+
+    Real *MaterialGradient    = (Real*)malloc(sizeof(Real)*ndim*nodeperelem);
+    Real *current_sp          = (Real*)malloc(sizeof(Real)*ndim*nodeperelem);
+    Real *current_Jm          = (Real*)malloc(sizeof(Real)*nodeperelem*ndim);
+
+    for (int g=0; g<ngauss; ++g) {
+
+        for (int j=0; j<nodeperelem; ++j) {
+            current_Jm[j] = Jm_[j*ngauss+g];
+            current_Jm[nodeperelem+j] = Jm_[ngauss*nodeperelem+j*ngauss+g];
+        }
+
+        _matmul_(ndim,ndim,nodeperelem,current_Jm,LagrangeElemCoords_,ParentGradientX);
+        _matmul_(ndim,ndim,nodeperelem,current_Jm,EulerElemCoords_,ParentGradientx);
+
+        const Real detX = invdet2x2(ParentGradientX,invParentGradientX);
+        const Real detx = invdet2x2(ParentGradientx,invParentGradientx);
+
+        if (update==1) {
+            detJ[g] = AllGauss_[g]*fabs(detx);
+        }
+        else {
+            detJ[g] = AllGauss_[g]*fabs(detX);
+        }
+
+        _matmul_(ndim,nodeperelem,ndim,invParentGradientX,current_Jm,MaterialGradient);
+        _matmul_(ndim,nodeperelem,ndim,invParentGradientx,current_Jm,current_sp);
+
+        for (int i=0; i<nodeperelem; ++i) {
+            SpatialGradient_[g*ndim*nodeperelem+i*ndim] = current_sp[i];
+            SpatialGradient_[g*ndim*nodeperelem+i*ndim+1] = current_sp[nodeperelem+i];
+        }
+
+        // Compute deformation gradient F
+        _matmul_(ndim,ndim,nodeperelem,MaterialGradient,EulerElemCoords_,current_F);
+        Fastor::_transpose<Real,ndim,ndim>(current_F,current_Ft);
+        std::copy(current_Ft,current_Ft+ndim*ndim,&F_[g*ndim*ndim]);
+    }
+
+    free(MaterialGradient);
+    free(current_Jm);
+    free(current_sp);
+}
+
+
+
+template<int ndim, typename std::enable_if<ndim==3,bool>::type = 0>
+FASTOR_INLINE void KinematicMeasures_(Real *SpatialGradient_, Real *F_, Real *detJ, const Real *Jm_,
+    const Real *AllGauss_, const Real *LagrangeElemCoords_, const Real *EulerElemCoords_,
+    int ngauss, int nodeperelem, int update)  {
+
+    Real ParentGradientX[ndim*ndim];
+    Real invParentGradientX[ndim*ndim];
+    Real ParentGradientx[ndim*ndim];
+    Real invParentGradientx[ndim*ndim];
+    Real current_F[ndim*ndim];
+    Real current_Ft[ndim*ndim];
+
+    Real *MaterialGradient    = (Real*)malloc(sizeof(Real)*ndim*nodeperelem);
+    Real *current_sp          = (Real*)malloc(sizeof(Real)*ndim*nodeperelem);
+    Real *current_Jm          = (Real*)malloc(sizeof(Real)*nodeperelem*ndim);
+
+    for (int g=0; g<ngauss; ++g) {
+
+        for (int j=0; j<nodeperelem; ++j) {
+            current_Jm[j] = Jm_[j*ngauss+g];
+            current_Jm[nodeperelem+j] = Jm_[ngauss*nodeperelem+j*ngauss+g];
+            current_Jm[2*nodeperelem+j] = Jm_[2*ngauss*nodeperelem+j*ngauss+g];
+        }
+
+        _matmul_(ndim,ndim,nodeperelem,current_Jm,LagrangeElemCoords_,ParentGradientX);
+        _matmul_(ndim,ndim,nodeperelem,current_Jm,EulerElemCoords_,ParentGradientx);
+
+        const Real detX = invdet3x3(ParentGradientX,invParentGradientX);
+        const Real detx = invdet3x3(ParentGradientx,invParentGradientx);
+
+        if (update==1) {
+            detJ[g] = AllGauss_[g]*fabs(detx);
+        }
+        else {
+            detJ[g] = AllGauss_[g]*fabs(detX);
+        }
+
+        _matmul_(ndim,nodeperelem,ndim,invParentGradientX,current_Jm,MaterialGradient);
+        _matmul_(ndim,nodeperelem,ndim,invParentGradientx,current_Jm,current_sp);
+
+        for (int i=0; i<nodeperelem; ++i) {
+            SpatialGradient_[g*ndim*nodeperelem+i*ndim] = current_sp[i];
+            SpatialGradient_[g*ndim*nodeperelem+i*ndim+1] = current_sp[nodeperelem+i];
+            SpatialGradient_[g*ndim*nodeperelem+i*ndim+2] = current_sp[2*nodeperelem+i];
+        }
+
+        // Compute deformation gradient F
+        _matmul_(ndim,ndim,nodeperelem,MaterialGradient,EulerElemCoords_,current_F);
+        Fastor::_transpose<Real,ndim,ndim>(current_F,current_Ft);
+        std::copy(current_Ft,current_Ft+ndim*ndim,&F_[g*ndim*ndim]);
+    }
+
+    free(MaterialGradient);
+    free(current_Jm);
+    free(current_sp);
+}
+
+
+
+inline
+void KinematicMeasures(Real *SpatialGradient_, Real *F_, Real *detJ, const Real *Jm_,
+    const Real *AllGauss_, const Real *LagrangeElemCoords_, const Real *EulerElemCoords_,
+    int ngauss, int ndim, int nodeperelem, int update)  {
+
+    if (ndim == 3) {
+        KinematicMeasures_<3>(SpatialGradient_, F_, detJ, Jm_,
+            AllGauss_, LagrangeElemCoords_, EulerElemCoords_,
+            ngauss, nodeperelem, update);
+    }
+    else {
+        KinematicMeasures_<2>(SpatialGradient_, F_, detJ, Jm_,
+            AllGauss_, LagrangeElemCoords_, EulerElemCoords_,
+            ngauss, nodeperelem, update);
+    }
+}
+
+
+
+#else
 
 
 void KinematicMeasures(Real *SpatialGradient_, Real *F_, Real *detJ, const Real *Jm_,
@@ -24,13 +164,13 @@ void KinematicMeasures(Real *SpatialGradient_, Real *F_, Real *detJ, const Real 
         }
     }
 
-    // Find inverse of the isoparametric mapping (Jacobian) 
+    // Find inverse of the isoparametric mapping (Jacobian)
     if (ndim==3) {
         for (int g=0; g<ngauss; ++g) {
             inv3x3(ParentGradientX+g*9, invParentGradientX+g*9);
             inv3x3(ParentGradientx+g*9, invParentGradientx+g*9);
         }
-    } 
+    }
     else if (ndim==2) {
         for (int g=0; g<ngauss; ++g) {
             inv2x2(ParentGradientX+g*4, invParentGradientX+g*4);
@@ -38,7 +178,7 @@ void KinematicMeasures(Real *SpatialGradient_, Real *F_, Real *detJ, const Real 
         }
     }
 
-    // Find material and spatial gradients 
+    // Find material and spatial gradients
     for (int i=0; i<ngauss; ++i) {
         for (int j=0; j<ndim; ++j) {
             for (int k=0; k<ndim; ++k) {
@@ -53,7 +193,7 @@ void KinematicMeasures(Real *SpatialGradient_, Real *F_, Real *detJ, const Real 
     }
 
 
-    // Compute deformation gradient F  
+    // Compute deformation gradient F
     for (int i=0; i<nodeperelem; ++i) {
         for (int j=0; j<ndim; ++j) {
             for (int k=0; k<ngauss; ++k) {
@@ -93,21 +233,6 @@ void KinematicMeasures(Real *SpatialGradient_, Real *F_, Real *detJ, const Real 
         }
     }
 
-
-
-    // for (size_t i=0; i<ndim*ndim*ngauss; ++i) {
-    //     printf("%9.9f, ",ParentGradientx[i]);
-    //     // printf("%9.9f, ", invParentGradientX[i]);
-    //     // printf("%9.9f, ", F_[i]);
-    // }
-
-    // printf("\n\n");
-    // for (size_t i=0; i<ndim*nodeperelem*ngauss; ++i) {
-    //     printf("%9.9f, ", MaterialGradient[i]);
-    // }
-    // printf("\n\n");
-
-
     free(ParentGradientX);
     free(invParentGradientX);
     free(ParentGradientx);
@@ -115,3 +240,6 @@ void KinematicMeasures(Real *SpatialGradient_, Real *F_, Real *detJ, const Real 
     free(MaterialGradient);
 
 }
+
+
+#endif
