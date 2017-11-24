@@ -14,7 +14,7 @@ from .DisplacementPotentialApproachIndices import *
 
 class DisplacementPotentialFormulation(VariationalPrinciple):
 
-    def __init__(self, mesh, variables_order=(1,), 
+    def __init__(self, mesh, variables_order=(1,),
         quadrature_rules=None, quadrature_type=None, function_spaces=None, compute_post_quadrature=True,
         equally_spaced_bases=False):
 
@@ -64,7 +64,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
             # BOUNDARY QUADRATURE
             bquadrature = QuadratureRule(optimal=optimal_quadrature, norder=C+2, mesh_type=mesh.boundary_element_type, is_flattened=is_flattened)
-            
+
             self.quadrature_rules = (quadrature,post_quadrature,bquadrature)
         else:
             self.quadrature_rules = quadrature_rules
@@ -79,7 +79,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
                 post_function_space = None
 
             # CREATE BOUNDARY FUNCTIONAL SPACES
-            bfunction_space = FunctionSpace(mesh.CreateDummyLowerDimensionalMesh(), 
+            bfunction_space = FunctionSpace(mesh.CreateDummyLowerDimensionalMesh(),
                 bquadrature, p=C+1, equally_spaced=equally_spaced_bases, use_optimal_quadrature=is_flattened)
 
             self.function_spaces = (function_space,post_function_space,bfunction_space)
@@ -110,10 +110,10 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
         # COMPUTE THE STIFFNESS MATRIX
         if material.has_low_level_dispatcher:
-            stiffnessel, t = self.__GetLocalStiffness__(function_space, material, LagrangeElemCoords, 
+            stiffnessel, t = self.__GetLocalStiffness__(function_space, material, LagrangeElemCoords,
                 EulerElemCoords, ElectricPotentialElem, fem_solver, elem)
         else:
-            stiffnessel, t = self.GetLocalStiffness(function_space, material, LagrangeElemCoords, 
+            stiffnessel, t = self.GetLocalStiffness(function_space, material, LagrangeElemCoords,
                 EulerElemCoords, ElectricPotentialElem, fem_solver, elem)
 
         I_mass_elem = []; J_mass_elem = []; V_mass_elem = []
@@ -137,7 +137,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
 
 
-    def GetLocalStiffness(self, function_space, material, LagrangeElemCoords, 
+    def GetLocalStiffness(self, function_space, material, LagrangeElemCoords,
         EulerELemCoords, ElectricPotentialElem, fem_solver, elem=0):
         """Get stiffness matrix of the system"""
 
@@ -184,7 +184,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         ElectricFieldx = - np.einsum('ijk,j',SpatialGradient,ElectricPotentialElem)
 
         # LOOP OVER GAUSS POINTS
-        for counter in range(AllGauss.shape[0]): 
+        for counter in range(AllGauss.shape[0]):
 
             if material.energy_type == "enthalpy":
                 # COMPUTE THE HESSIAN AT THIS GAUSS POINT
@@ -192,7 +192,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
                 # COMPUTE ELECTRIC DISPLACEMENT
                 ElectricDisplacementx = material.ElectricDisplacementx(StrainTensors, ElectricFieldx[counter,:], elem, counter)
-                
+
                 # COMPUTE CAUCHY STRESS TENSOR
                 CauchyStressTensor = []
                 if fem_solver.requires_geometry_update:
@@ -203,7 +203,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
                 # COMPUTE ELECTRIC DISPLACEMENT IMPLICITLY
                 ElectricDisplacementx = material.ElectricDisplacementx(StrainTensors, ElectricFieldx[counter,:], elem, counter)
-                
+
                 # COMPUTE THE HESSIAN AT THIS GAUSS POINT
                 H_Voigt = material.Hessian(StrainTensors,ElectricDisplacementx, elem, counter)
 
@@ -215,9 +215,9 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
             # COMPUTE THE TANGENT STIFFNESS MATRIX
             BDB_1, t = self.ConstitutiveStiffnessIntegrand(B, SpatialGradient[counter,:,:],
-                ElectricDisplacementx, CauchyStressTensor, H_Voigt, analysis_nature=fem_solver.analysis_nature, 
+                ElectricDisplacementx, CauchyStressTensor, H_Voigt, analysis_nature=fem_solver.analysis_nature,
                 has_prestress=fem_solver.has_prestress)
-            
+
             # COMPUTE GEOMETRIC STIFFNESS MATRIX
             if fem_solver.requires_geometry_update:
                 BDB_1 += self.GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],CauchyStressTensor)
@@ -226,18 +226,18 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
             # INTEGRATE STIFFNESS
             stiffness += BDB_1*detJ[counter]
-            
+
 
         return stiffness, tractionforce
 
 
 
-    def __GetLocalStiffness__(self, function_space, material, LagrangeElemCoords, 
+    def __GetLocalStiffness__(self, function_space, material, LagrangeElemCoords,
         EulerELemCoords, ElectricPotentialElem, fem_solver, elem=0):
-        """Get stiffness matrix of the system""" 
+        """Get stiffness matrix of the system"""
 
         # GET LOCAL KINEMATICS
-        SpatialGradient, F, detJ = _KinematicMeasures_(function_space.Jm, function_space.AllGauss[:,0], LagrangeElemCoords, 
+        SpatialGradient, F, detJ = _KinematicMeasures_(function_space.Jm, function_space.AllGauss[:,0], LagrangeElemCoords,
             EulerELemCoords, fem_solver.requires_geometry_update)
         # GET ELECTRIC FIELD
         ElectricFieldx = - np.einsum('ijk,j',SpatialGradient,ElectricPotentialElem)
@@ -265,20 +265,20 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
         FillConstitutiveB(B,SpatialGradient,self.ndim,self.nvar)
         BDB = B.dot(H_Voigt.dot(B.T))
-        
+
         t=[]
         if analysis_nature == 'nonlinear' or has_prestress:
             TotalTraction = GetTotalTraction(CauchyStressTensor,ElectricDisplacementx)
-            t = np.dot(B,TotalTraction) 
-                
+            t = np.dot(B,TotalTraction)
+
         return BDB, t
 
 
 
-    def GetEnergy(self, function_space, material, LagrangeElemCoords, 
+    def GetEnergy(self, function_space, material, LagrangeElemCoords,
         EulerELemCoords, ElectricPotentialElem, fem_solver, elem=0):
         """Get virtual energy of the system. For dynamic analysis this is handy for computing conservation of energy.
-            The routine computes the global form of virtual internal energy i.e. integral of "W(C,G,C)"". This can be 
+            The routine computes the global form of virtual internal energy i.e. integral of "W(C,G,C)"". This can be
             computed purely in a Lagrangian configuration.
         """
 
@@ -303,7 +303,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
         # COMPUTE REMAINING KINEMATIC MEASURES
         StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
-        
+
         # SPATIAL GRADIENT AND MATERIAL GRADIENT TENSORS ARE EQUAL
         SpatialGradient = np.einsum('ikj',MaterialGradient)
         # COMPUTE ONCE detJ
@@ -313,7 +313,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         ElectricFieldx = - np.einsum('ijk,j',SpatialGradient,ElectricPotentialElem)
 
         # LOOP OVER GAUSS POINTS
-        for counter in range(AllGauss.shape[0]): 
+        for counter in range(AllGauss.shape[0]):
             if material.energy_type == "enthalpy":
                 # COMPUTE THE INTERNAL ENERGY AT THIS GAUSS POINT
                 energy = material.InternalEnergy(StrainTensors,ElectricFieldx[counter,:],elem,counter)
@@ -322,7 +322,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
                 ElectricDisplacementx = material.ElectricDisplacementx(StrainTensors, ElectricFieldx[counter,:], elem, counter)
                 # COMPUTE THE INTERNAL ENERGY AT THIS GAUSS POINT
                 energy = material.InternalEnergy(StrainTensors,ElectricDisplacementx[counter,:],elem,counter)
-    
+
             # INTEGRATE INTERNAL ENERGY
             internal_energy += energy*detJ[counter]
 
@@ -330,7 +330,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
 
 
-    def GetLinearMomentum(self, function_space, material, LagrangeElemCoords, 
+    def GetLinearMomentum(self, function_space, material, LagrangeElemCoords,
         EulerELemCoords, VelocityElem, ElectricPotentialElem, fem_solver, elem=0):
         """Get linear momentum or virtual power of the system. For dynamic analysis this is handy for computing conservation of linear momentum.
             The routine computes the global form of virtual power i.e. integral of "P:Grad_0(V)"" where P is first Piola-Kirchhoff
@@ -373,7 +373,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         ElectricFieldx = - np.einsum('ijk,j',SpatialGradient,ElectricPotentialElem)
 
         # LOOP OVER GAUSS POINTS
-        for counter in range(AllGauss.shape[0]): 
+        for counter in range(AllGauss.shape[0]):
             GradV = np.dot(Fdot[counter,:,:],np.linalg.inv(F[counter,:,:]))
 
             if material.energy_type == "enthalpy":
@@ -432,7 +432,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
     #         B[0::nvar,3] = SpatialGradient[1,:]
     #         B[1::nvar,3] = SpatialGradient[0,:]
 
-    #         # Electrostatic 
+    #         # Electrostatic
     #         B[3::nvar,6] = SpatialGradient[0,:]
     #         B[3::nvar,7] = SpatialGradient[1,:]
     #         B[3::nvar,8] = SpatialGradient[2,:]
@@ -454,7 +454,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
     #         B[0::nvar,2] = SpatialGradient[1,:]
     #         B[1::nvar,2] = SpatialGradient[0,:]
 
-    #         # Electrostatic 
+    #         # Electrostatic
     #         B[2::nvar,3] = SpatialGradient[0,:]
     #         B[2::nvar,4] = SpatialGradient[1,:]
 
@@ -469,7 +469,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
     #     t=[]
     #     if analysis_nature == 'nonlinear' or has_prestress:
     #         t = np.dot(B,TotalTraction)
-                
+
     #     return BDB, t
 
 
@@ -517,5 +517,5 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
 
     #     BDB = np.dot(np.dot(B,S),B.T)
-                
+
     #     return BDB

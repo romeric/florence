@@ -164,11 +164,15 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
         shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64).tocsr()
 
     # stiffness = csc_matrix((V_stiffness,(I_stiffness,J_stiffness)),
+<<<<<<< HEAD
+    #     shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
+=======
         # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float32)
     stiffness = csc_matrix((V_stiffness,(I_stiffness,J_stiffness)),
         shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
     # stiffness = csr_matrix((V_stiffness,(I_stiffness,J_stiffness)),
         # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
+>>>>>>> 3dc15f06ad8b25b5895bb05d6aea821aa6382ca3
 
     # GET STORAGE/MEMORY DETAILS
     fem_solver.spmat = stiffness.data.nbytes/1024./1024.
