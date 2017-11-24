@@ -15,7 +15,7 @@ public:
         this->mu1 = mu1;
         this->mu2 = mu2;
         this->mu3 = mu3;
-        this->lamb = lamb;       
+        this->lamb = lamb;
     }
 
     FASTOR_INLINE
@@ -29,7 +29,7 @@ public:
 
     template<typename T=U, size_t ndim>
     FASTOR_INLINE
-    std::tuple<Tensor<T,ndim,ndim>, typename MechanicsHessianType<T,ndim>::return_type> 
+    std::tuple<Tensor<T,ndim,ndim>, typename MechanicsHessianType<T,ndim>::return_type>
     _KineticMeasures_(const T *Fnp, const T *Nnp) {
 
         // CREATE FASTOR TENSORS
@@ -40,7 +40,7 @@ public:
         copy_numpy(N,Nnp);
 
         // FIND THE KINEMATIC MEASURES
-        Tensor<Real,ndim,ndim> I; I.eye();
+        Tensor<Real,ndim,ndim> I; I.eye2();
         auto J = determinant(F);
         auto H = cofactor(F);
         auto b = matmul(F,transpose(F));
@@ -63,11 +63,11 @@ public:
             2.*mu3/J*outerFN +\
             2.*mu3/J*innerHN*I - 2.*mu3/J*outerHN;
 
- 
+
         // FIND ELASTICITY TENSOR
         auto II_ijkl = einsum<Index<i,j>,Index<k,l>>(I,I);
         auto II_ikjl = permutation<Index<i,k,j,l>>(II_ijkl);
-        auto II_iljk = permutation<Index<i,l,j,k>>(II_ijkl); 
+        auto II_iljk = permutation<Index<i,l,j,k>>(II_ijkl);
 
         auto bb_ijkl = einsum<Index<i,j>,Index<k,l>>(b,b);
         auto bb_ikjl = permutation<Index<i,k,j,l>>(bb_ijkl);
@@ -102,25 +102,25 @@ public:
 };
 
 template<> template<>
-void _AnisotropicMooneyRivlin_1_<Real>::KineticMeasures<Real>(Real *Snp, Real* Hnp, 
+void _AnisotropicMooneyRivlin_1_<Real>::KineticMeasures<Real>(Real *Snp, Real* Hnp,
     int ndim, int ngauss, const Real *Fnp, const Real *Nnp) {
 
     if (ndim==3) {
         Tensor<Real,3,3> stress;
-        Tensor<Real,6,6> hessian; 
+        Tensor<Real,6,6> hessian;
         for (int g=0; g<ngauss; ++g) {
             std::tie(stress,hessian) =_KineticMeasures_<Real,3>(Fnp+9*g, Nnp);
             copy_fastor(Snp,stress,g*9);
-            copy_fastor(Hnp,hessian,g*36);    
-        } 
+            copy_fastor(Hnp,hessian,g*36);
+        }
     }
     else if (ndim==2) {
         Tensor<Real,2,2> stress;
-        Tensor<Real,3,3> hessian; 
+        Tensor<Real,3,3> hessian;
         for (int g=0; g<ngauss; ++g) {
-            std::tie(stress,hessian) =_KineticMeasures_<Real,2>(Fnp+4*g, Nnp); 
+            std::tie(stress,hessian) =_KineticMeasures_<Real,2>(Fnp+4*g, Nnp);
             copy_fastor(Snp,stress,g*4);
-            copy_fastor(Hnp,hessian,g*9);    
+            copy_fastor(Hnp,hessian,g*9);
         }
     }
 }
