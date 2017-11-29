@@ -726,6 +726,19 @@ class BoundaryCondition(object):
         return stiffness_b, F_b, F
 
 
+    def GetReducedVectors(self,F,mass=None):
+
+        # GET REDUCED FORCE VECTOR
+        F_b = F[self.columns_in,0]
+
+        # GET REDUCED MASS MATRIX
+        mass_b = []
+        if self.analysis_type != 'static':
+            mass_b = mass[self.columns_in,0]
+
+        return F_b, mass_b
+
+
     def UpdateFixDoFs(self, AppliedDirichletInc, fsize, nvar):
         """Updates the geometry (DoFs) with incremental Dirichlet boundary conditions
             for fixed/constrained degrees of freedom only. Needs to be applied per time steps"""

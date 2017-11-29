@@ -517,7 +517,7 @@ def NodeArrangementHex(C):
 
     else:
         # THIS IS A FLOATING POINT BASED ALGORITHM
-        from .NumericIntegrator import GaussLobattoQuadrature
+        from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
         xs = GaussLobattoQuadrature(C+2)[0]
         x,y,z = np.meshgrid(xs,xs,xs)
         fekete = np.concatenate((y.T.flatten()[:,None],x.T.flatten()[:,None],z.T.flatten()[:,None]),axis=1)

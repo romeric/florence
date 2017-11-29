@@ -1,1 +1,1 @@
-from .Assembly import Assemble, AssembleForces, AssembleInternalTractionForces
+from .Assembly import Assemble, AssembleForces, AssembleInternalTractionForces, AssembleExplicit

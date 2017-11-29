@@ -615,3 +615,122 @@ def AssembleBodyForces(boundary_condition, mesh, material, function_space):
 
 
     return F
+
+
+
+
+
+
+
+
+
+
+# def AssembleExplicit(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
+
+#     # GET MESH DETAILS
+#     C = mesh.InferPolynomialDegree() - 1
+#     nvar = formulation.nvar
+#     ndim = formulation.ndim
+#     nelem = mesh.nelem
+#     nodeperelem = mesh.elements.shape[1]
+
+#     T = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
+#     M = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
+
+#     mass, F = [], []
+#     if fem_solver.has_moving_boundary:
+#         F = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
+
+#     # # from joblib import Parallel, delayed
+#     # if fem_solver.parallel:
+#     #     # COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
+#     #     ParallelTuple = parmap.map(formulation,np.arange(0,nelem,dtype=np.int32),
+#     #         function_space, mesh, material, fem_solver, Eulerx, Eulerp, processes= int(multiprocessing.cpu_count()))
+
+#     # for elem in range(nelem):
+
+#     #     if fem_solver.parallel:
+#     #         # UNPACK PARALLEL TUPLE VALUES
+#     #         t, f, mass = ParallelTuple[elem][0], ParallelTuple[elem][1], ParallelTuple[elem][2]
+
+#     #     else:
+#     #         # COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
+#     #         t, f, mass = formulation.GetElementalMatricesInVectorForm(elem,
+#     #             function_space, mesh, material, fem_solver, Eulerx, Eulerp)
+
+#     for elem in range(nelem):
+
+#         t, f, mass = formulation.GetElementalMatricesInVectorForm(elem,
+#                 function_space, mesh, material, fem_solver, Eulerx, Eulerp)
+
+#         if fem_solver.has_moving_boundary:
+#             # RHS ASSEMBLY
+#             RHSAssemblyNative(F,f,elem,nvar,nodeperelem,mesh.elements)
+
+#         # LUMPED MASS ASSEMBLY
+#         if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed==False:
+#             RHSAssemblyNative(M,mass,elem,nvar,nodeperelem,mesh.elements)
+#             fem_solver.is_mass_computed = True
+
+#         # INTERNAL TRACTION FORCE ASSEMBLY
+#         RHSAssemblyNative(T,t,elem,nvar,nodeperelem,mesh.elements)
+
+
+#     return T, F, M
+
+
+
+
+
+
+def AssembleExplicit(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
+
+    # GET MESH DETAILS
+    nvar = formulation.nvar
+    ndim = formulation.ndim
+    nelem = mesh.nelem
+    nodeperelem = mesh.elements.shape[1]
+
+    T = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
+    M = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
+
+    mass, F = [], []
+    if fem_solver.has_moving_boundary:
+        F = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
+
+    if fem_solver.parallel:
+        # from joblib import Parallel, delayed
+        # Parallel(n_jobs=2)(delayed(funcer)(elem, nvar,
+        #     nodeperelem, T, F, M, formulation, function_space, mesh, material,
+        #     fem_solver, Eulerx, Eulerp) for elem in range(0,nelem))
+
+        parmap.map(AssembleExplicitFunctor,np.arange(0,nelem,dtype=np.int32),
+            nvar, nodeperelem, T, F, M, formulation, function_space, mesh, material,
+            fem_solver, Eulerx, Eulerp, processes= int(multiprocessing.cpu_count()))
+    else:
+        for elem in range(nelem):
+            AssembleExplicitFunctor(elem, nvar, nodeperelem, T, F, M, formulation,
+                function_space, mesh, material, fem_solver, Eulerx, Eulerp)
+
+        # SET MASS FLAG HERE
+        if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed==False:
+            fem_solver.is_mass_computed = True
+
+
+    return T, F, M
+
+
+def AssembleExplicitFunctor(elem, nvar, nodeperelem, T, F, M, formulation, function_space, mesh, material, fem_solver, Eulerx, Eulerp):
+
+    t, f, mass = formulation.GetElementalMatricesInVectorForm(elem,
+            function_space, mesh, material, fem_solver, Eulerx, Eulerp)
+
+    if fem_solver.has_moving_boundary:
+        # RHS ASSEMBLY
+        RHSAssemblyNative(F,f,elem,nvar,nodeperelem,mesh.elements)
+    # INTERNAL TRACTION FORCE ASSEMBLY
+    RHSAssemblyNative(T,t,elem,nvar,nodeperelem,mesh.elements)
+
+    # LUMPED MASS ASSEMBLY
+    if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed==False:
+        RHSAssemblyNative(M,mass,elem,nvar,nodeperelem,mesh.elements)

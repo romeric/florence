@@ -281,12 +281,15 @@ class FlorenceSetup(object):
         km_path = os.path.join(_pwd_,"FiniteElements","LocalAssembly","_KinematicMeasures_")
         gm_path = os.path.join(_pwd_,"VariationalPrinciple","_GeometricStiffness_")
         cm_path = os.path.join(_pwd_,"VariationalPrinciple","_ConstitutiveStiffness_")
+        tm_path = os.path.join(_pwd_,"VariationalPrinciple","_Traction_")
         mm_path = os.path.join(_pwd_,"VariationalPrinciple","_Mass_")
         material_path = os.path.join(_pwd_,"MaterialLibrary","LLDispatch")
         assemble_path = os.path.join(_pwd_,"FiniteElements","Assembly","_Assembly_")
 
-        self.extension_paths = [tensor_path,mesh_path,jacobi_path,bp_path,km_path,gm_path,cm_path,mm_path,material_path,assemble_path]
-        # self.extension_paths = [km_path]
+        self.extension_paths = [tensor_path,mesh_path,jacobi_path,bp_path,
+            km_path,gm_path,cm_path,tm_path,mm_path,material_path,assemble_path]
+        # self.extension_paths = [tm_path]
+        # self.extension_paths = [material_path]
 
     def SourceClean(self):
 
@@ -344,6 +347,7 @@ class FlorenceSetup(object):
 
         # low_level_material_list = ["_IsotropicElectroMechanics_109_"]
         # low_level_material_list = ["_NeoHookean_2_"]
+        # low_level_material_list = ["_ExplicitMooneyRivlin_0_"]
 
         assert self.extension_paths != None
 
@@ -363,6 +367,8 @@ class FlorenceSetup(object):
                 ll_material_electro_mech.remove("_IsotropicElectroMechanics_109_")
                 # ll_material_mech = []
                 # ll_material_electro_mech = low_level_material_list
+                # ll_material_mech = low_level_material_list
+                # ll_material_electro_mech = []
                 for material in ll_material_mech:
                     execute('cd '+_path+' && make ' + self.compiler_args + " ASSEMBLY_NAME=_LowLevelAssemblyDF_"  + material)
                 for material in ll_material_electro_mech:

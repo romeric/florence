@@ -136,6 +136,39 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         return I_stiff_elem, J_stiff_elem, V_stiff_elem, t, f, I_mass_elem, J_mass_elem, V_mass_elem
 
 
+    def GetElementalMatricesInVectorForm(self, elem, function_space, mesh, material, fem_solver, Eulerx, Eulerp):
+
+        massel=[]; f = []
+        # GET THE FIELDS AT THE ELEMENT LEVEL
+        LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
+        EulerElemCoords = Eulerx[mesh.elements[elem,:],:]
+        ElectricPotentialElem = Eulerp[mesh.elements[elem,:]]
+
+        # COMPUTE THE TRACTION VECTOR
+        if material.has_low_level_dispatcher:
+            t = self.__GetLocalTraction__(function_space, material, LagrangeElemCoords,
+                EulerElemCoords, ElectricPotentialElem, fem_solver, elem)
+        else:
+            t = self.GetLocalTraction(function_space, material, LagrangeElemCoords,
+                EulerElemCoords, ElectricPotentialElem, fem_solver, elem)
+
+        if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed is False:
+            # COMPUTE THE MASS MATRIX
+            if material.has_low_level_dispatcher:
+                massel = self.__GetLocalMass__(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+            else:
+                massel = self.GetLocalMass(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+
+            massel = self.GetLumpedMass(massel)
+
+
+        if fem_solver.has_moving_boundary:
+            # COMPUTE FORCE VECTOR
+            f = self.ApplyNeumannBoundaryConditions3D(fem_solver, mesh, elem, LagrangeElemCoords, ElectricPotentialElem)
+
+        return t, f, massel
+
+
 
     def GetLocalStiffness(self, function_space, material, LagrangeElemCoords,
         EulerELemCoords, ElectricPotentialElem, fem_solver, elem=0):
@@ -253,8 +286,6 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         return stiffness, tractionforce
 
 
-
-
     def ConstitutiveStiffnessIntegrand(self, B, SpatialGradient, ElectricDisplacementx,
         CauchyStressTensor, H_Voigt, analysis_nature="nonlinear", has_prestress=True):
         """Overrides base for electric potential formulation"""
@@ -272,6 +303,38 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
             t = np.dot(B,TotalTraction)
 
         return BDB, t
+
+
+    def GetLocalTraction(self, function_space, material, LagrangeElemCoords,
+        EulerELemCoords, ElectricPotentialElem, fem_solver, elem=0):
+        """Get traction vector of the system"""
+        pass
+
+    def __GetLocalTraction__(self, function_space, material, LagrangeElemCoords,
+        EulerELemCoords, ElectricPotentialElem, fem_solver, elem=0):
+        """Get traction vector of the system"""
+        pass
+
+    def TractionIntegrand(self, B, SpatialGradient, ElectricDisplacementx,
+        CauchyStressTensor, analysis_nature="nonlinear", has_prestress=True):
+        """Applies to displacement potential based formulation"""
+
+        # MATRIX FORM
+        SpatialGradient = SpatialGradient.T.copy()
+        ElectricDisplacementx = ElectricDisplacementx.flatten().copy()
+
+        FillConstitutiveB(B,SpatialGradient,self.ndim,self.nvar)
+
+        t=[]
+        if analysis_nature == 'nonlinear' or has_prestress:
+            TotalTraction = GetTotalTraction(CauchyStressTensor,ElectricDisplacementx)
+            t = np.dot(B,TotalTraction)
+
+        return t
+
+
+    def GetLocalResidual(self):
+        pass
 
 
 
@@ -391,15 +454,6 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
             internal_power += np.einsum('ij,ij',CauchyStressTensor,GradV)*detJ[counter]
 
         return internal_power
-
-
-
-
-    def GetLocalResiduals(self):
-        pass
-
-    def GetLocalTractions(self):
-        pass
 
 
 

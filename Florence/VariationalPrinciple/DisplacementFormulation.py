@@ -5,7 +5,12 @@ from Florence import QuadratureRule, FunctionSpace
 from Florence.FiniteElements.LocalAssembly.KinematicMeasures import *
 from Florence.FiniteElements.LocalAssembly._KinematicMeasures_ import _KinematicMeasures_
 from ._ConstitutiveStiffnessDF_ import __ConstitutiveStiffnessIntegrandDF__
+from ._TractionDF_ import __TractionIntegrandDF__
 from Florence.Tensor import issymetric
+
+import pyximport
+pyximport.install(setup_args={'include_dirs': np.get_include()})
+from .DisplacementApproachIndices import *
 
 class DisplacementFormulation(VariationalPrinciple):
 
@@ -114,8 +119,8 @@ class DisplacementFormulation(VariationalPrinciple):
         if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed is False:
             # COMPUTE THE MASS MATRIX
             if material.has_low_level_dispatcher:
-                # massel = self.__GetLocalMass__(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
-                massel = self.GetLocalMass(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+                massel = self.__GetLocalMass__(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+                # massel = self.GetLocalMass(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
             else:
                 massel = self.GetLocalMass(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
 
@@ -128,6 +133,39 @@ class DisplacementFormulation(VariationalPrinciple):
             I_mass_elem, J_mass_elem, V_mass_elem = self.FindIndices(massel)
 
         return I_stiff_elem, J_stiff_elem, V_stiff_elem, t, f, I_mass_elem, J_mass_elem, V_mass_elem
+
+
+
+    def GetElementalMatricesInVectorForm(self, elem, function_space, mesh, material, fem_solver, Eulerx, TotalPot):
+
+        massel=[]; f = []
+        # GET THE FIELDS AT THE ELEMENT LEVEL
+        LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
+        EulerElemCoords = Eulerx[mesh.elements[elem,:],:]
+
+        # COMPUTE THE TRACTION VECTOR
+        if material.has_low_level_dispatcher:
+            t = self.__GetLocalTraction__(function_space,material,
+            # t = self.GetLocalTraction(function_space,material,
+                LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+        else:
+            t = self.GetLocalTraction(function_space,material,
+                LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+
+        if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed is False:
+            # COMPUTE THE MASS MATRIX
+            if material.has_low_level_dispatcher:
+                massel = self.__GetLocalMass__(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+            else:
+                massel = self.GetLocalMass(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+
+            massel = self.GetLumpedMass(massel)
+
+        if fem_solver.has_moving_boundary:
+            # COMPUTE FORCE VECTOR
+            f = self.ApplyNeumannBoundaryConditions3D(fem_solver, mesh, elem, LagrangeElemCoords)
+
+        return t, f, massel
 
 
 
@@ -222,7 +260,126 @@ class DisplacementFormulation(VariationalPrinciple):
         return stiffness, tractionforce
 
 
+    def ConstitutiveStiffnessIntegrand(self, B, SpatialGradient, CauchyStressTensor, H_Voigt,
+        analysis_nature="nonlinear", has_prestress=True):
+        """Applies to displacement based formulation"""
 
+        # MATRIX FORM
+        # SpatialGradient = SpatialGradient.T
+        # SpatialGradient = np.ascontiguousarray(SpatialGradient.T)
+        SpatialGradient = SpatialGradient.T.copy()
+
+        FillConstitutiveB(B,SpatialGradient,self.ndim,self.nvar)
+        BDB = B.dot(H_Voigt.dot(B.T))
+
+
+        t=[]
+        if analysis_nature == 'nonlinear' or has_prestress:
+            TotalTraction = GetTotalTraction(CauchyStressTensor)
+            t = np.dot(B,TotalTraction)
+
+        return BDB, t
+
+
+    def GetLocalTraction(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem=0):
+        """Get traction vector of the system"""
+
+        nvar = self.nvar
+        ndim = self.ndim
+        nodeperelem = function_space.Bases.shape[0]
+
+        det = np.linalg.det
+        inv = np.linalg.inv
+        Jm = function_space.Jm
+        AllGauss = function_space.AllGauss
+
+        # ALLOCATE
+        tractionforce = np.zeros((nodeperelem*nvar,1),dtype=np.float64)
+        B = np.zeros((nodeperelem*nvar,material.H_VoigtSize),dtype=np.float64)
+
+        # COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
+        # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+        ParentGradientX = np.einsum('ijk,jl->kil', Jm, LagrangeElemCoords)
+        # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
+        MaterialGradient = np.einsum('ijk,kli->ijl', inv(ParentGradientX), Jm)
+        # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
+        F = np.einsum('ij,kli->kjl', EulerELemCoords, MaterialGradient)
+
+        # COMPUTE REMAINING KINEMATIC MEASURES
+        StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
+
+        # UPDATE/NO-UPDATE GEOMETRY
+        if fem_solver.requires_geometry_update:
+            # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+            ParentGradientx = np.einsum('ijk,jl->kil',Jm, EulerELemCoords)
+            # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
+            SpatialGradient = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Jm)
+            # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
+            detJ = np.einsum('i,i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)),np.abs(StrainTensors['J']))
+        else:
+            # SPATIAL GRADIENT AND MATERIAL GRADIENT TENSORS ARE EQUAL
+            SpatialGradient = np.einsum('ikj',MaterialGradient)
+            # COMPUTE ONCE detJ
+            detJ = np.einsum('i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)))
+
+
+        # LOOP OVER GAUSS POINTS
+        for counter in range(AllGauss.shape[0]):
+
+            # COMPUTE CAUCHY STRESS TENSOR
+            CauchyStressTensor = []
+            if fem_solver.requires_geometry_update:
+                CauchyStressTensor = material.CauchyStress(StrainTensors,None,elem,counter)
+
+            # COMPUTE THE TANGENT STIFFNESS MATRIX
+            t = self.TractionIntegrand(B, SpatialGradient[counter,:,:],
+                CauchyStressTensor, analysis_nature=fem_solver.analysis_nature,
+                has_prestress=fem_solver.has_prestress)
+
+            # COMPUTE GEOMETRIC STIFFNESS MATRIX
+            if fem_solver.requires_geometry_update:
+                # INTEGRATE TRACTION FORCE
+                tractionforce += t*detJ[counter]
+
+
+        return tractionforce
+
+
+
+    def __GetLocalTraction__(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem=0):
+        """Get traction vector of the system"""
+
+        # GET LOCAL KINEMATICS
+        SpatialGradient, F, detJ = _KinematicMeasures_(function_space.Jm, function_space.AllGauss[:,0],
+            LagrangeElemCoords, EulerELemCoords, fem_solver.requires_geometry_update)
+        # COMPUTE WORK-CONJUGATES AND HESSIAN AT THIS GAUSS POINT
+        if "Explicit" in material.mtype:
+            CauchyStressTensor = material.KineticMeasures(F,elem=elem)
+        else:
+            CauchyStressTensor, _ = material.KineticMeasures(F,elem=elem)
+        # COMPUTE LOCAL CONSTITUTIVE STIFFNESS AND TRACTION
+        tractionforce = __TractionIntegrandDF__(SpatialGradient,
+            CauchyStressTensor,detJ,material.H_VoigtSize,self.nvar,fem_solver.requires_geometry_update)
+
+        return tractionforce
+
+
+    def TractionIntegrand(self, B, SpatialGradient, CauchyStressTensor,
+        analysis_nature="nonlinear", has_prestress=True):
+        """Applies to displacement based formulation"""
+
+        SpatialGradient = SpatialGradient.T.copy()
+        t=[]
+        if analysis_nature == 'nonlinear' or has_prestress:
+            TotalTraction = GetTotalTraction(CauchyStressTensor)
+            t = np.dot(B,TotalTraction)
+
+        return t
+
+
+
+    def GetLocalResidual(self):
+        pass
 
 
 
@@ -268,6 +425,7 @@ class DisplacementFormulation(VariationalPrinciple):
             internal_energy += energy*detJ[counter]
 
         return internal_energy
+
 
 
 
@@ -318,12 +476,3 @@ class DisplacementFormulation(VariationalPrinciple):
             internal_power += np.einsum('ij,ij',CauchyStressTensor,GradV)*detJ[counter]
 
         return internal_power
-
-
-
-
-    def GetLocalResiduals(self):
-        pass
-
-    def GetLocalTractions(self):
-        pass

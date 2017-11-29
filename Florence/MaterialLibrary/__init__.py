@@ -1,5 +1,5 @@
 from .MaterialBase import Material
- 
+
 # LINEAR MATERIAL MODELS
 from .LinearModel import *
 from .IncrementalLinearElastic import *
@@ -53,10 +53,13 @@ from .IsotropicElectroMechanics_109 import *
 
 
 # HELMHOLTZ AND INTERNAL ENERGY EQUIVALENT MODELS
-from .IsotropicElectroMechanics_200 import * 
+from .IsotropicElectroMechanics_200 import *
 from .IsotropicElectroMechanics_201 import *
 
 
 # COMPOSTITES
 from .Multi_IsotropicElectroMechanics_101 import *
 from .Multi_Piezoelectric_100 import *
+
+# EXPLICIT MODELS
+from .ExplicitMooneyRivlin_0 import *
