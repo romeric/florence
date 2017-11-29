@@ -9,10 +9,11 @@ from numpy.linalg import norm
 import scipy as sp
 from Florence.Utils import insensitive
 
-from Florence.FiniteElements.Assembly import Assemble
+from Florence.FiniteElements.Assembly import Assemble, AssembleExplicit
 from Florence.PostProcessing import *
 from Florence.Solver import LinearSolver
 from Florence.TimeIntegrators import StructuralDynamicIntegrators
+from Florence.TimeIntegrators import ExplicitStructuralDynamicIntegrators
 from Florence import Mesh
 
 
@@ -28,7 +29,7 @@ class FEMSolver(object):
     """
 
     def __init__(self, has_low_level_dispatcher=False,
-        analysis_type="static", analysis_nature="nonlinear",
+        analysis_type="static", analysis_nature="nonlinear", analysis_subtype="implicit",
         is_geometrically_linearised=False, requires_geometry_update=True,
         requires_line_search=False, requires_arc_length=False, has_moving_boundary=False,
         has_prestress=True, number_of_load_increments=1, load_factor=None,
@@ -45,8 +46,9 @@ class FEMSolver(object):
 
         self.has_low_level_dispatcher = has_low_level_dispatcher
 
-        self.analysis_type = analysis_type
         self.analysis_nature = analysis_nature
+        self.analysis_type = analysis_type
+        self.analysis_subtype = analysis_subtype
 
         self.is_geometrically_linearised = is_geometrically_linearised
         self.requires_geometry_update = requires_geometry_update
@@ -55,7 +57,7 @@ class FEMSolver(object):
         self.has_moving_boundary = has_moving_boundary
         self.has_prestress = has_prestress
         self.is_mass_computed = False
-        self.total_time = total_time
+        self.total_time = float(total_time)
 
         self.number_of_load_increments = number_of_load_increments
         self.load_factor = load_factor
@@ -142,6 +144,10 @@ class FEMSolver(object):
                 self.has_prestress = True
             else:
                 self.has_prestress = False
+
+        if "Explicit" in material.mtype:
+            if self.analysis_subtype == "implicit":
+                raise ValueError("Incorrect material model ({}) used for implicit analysis".format(material.mtype))
 
         # GEOMETRY UPDATE FLAGS
         ###########################################################################
@@ -330,9 +336,15 @@ class FEMSolver(object):
             K, TractionForces, _, _ = Assemble(self, function_spaces[0], formulation, mesh, material,
                 Eulerx, Eulerp)
         else:
-            # COMPUTE BOTH STIFFNESS AND MASS USING HIGHER QUADRATURE RULE
-            K, TractionForces, _, M = Assemble(self, function_spaces[1], formulation, mesh, material,
-                Eulerx, Eulerp)
+            if self.analysis_subtype != "explicit":
+                # COMPUTE BOTH STIFFNESS AND MASS USING HIGHER QUADRATURE RULE
+                K, TractionForces, _, M = Assemble(self, function_spaces[1], formulation, mesh, material,
+                    Eulerx, Eulerp)
+            else:
+                # COMPUTE BOTH STIFFNESS AND MASS USING HIGHER QUADRATURE RULE
+                fspace = function_spaces[0] if (mesh.element_type=="hex" or mesh.element_type=="quad") else function_spaces[1]
+                TractionForces, _, M = AssembleExplicit(self, fspace, formulation, mesh, material,
+                    Eulerx, Eulerp)
 
         if self.analysis_nature == 'nonlinear':
             print('Finished all pre-processing stage. Time elapsed was', time()-tAssembly, 'seconds')
@@ -341,10 +353,17 @@ class FEMSolver(object):
 
 
         if self.analysis_type != 'static':
-            structural_integrator = StructuralDynamicIntegrators()
-            TotalDisp = structural_integrator.Solver(function_spaces, formulation, solver,
-                K, M, NeumannForces, NodalForces, Residual,
-                mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition, self)
+            if self.analysis_subtype != "explicit":
+                structural_integrator = StructuralDynamicIntegrators()
+                TotalDisp = structural_integrator.Solver(function_spaces, formulation, solver,
+                    K, M, NeumannForces, NodalForces, Residual,
+                    mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition, self)
+            else:
+                structural_integrator = ExplicitStructuralDynamicIntegrators()
+                TotalDisp = structural_integrator.Solver(function_spaces, formulation, solver,
+                    TractionForces, M, NeumannForces, NodalForces, Residual,
+                    mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition, self)
+
         else:
             if self.iterative_technique == "newton_raphson" or self.iterative_technique == "modified_newton_raphson":
                 TotalDisp = self.StaticSolver(function_spaces, formulation, solver,

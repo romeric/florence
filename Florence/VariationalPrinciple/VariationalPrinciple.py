@@ -6,7 +6,10 @@ from ._MassIntegrand_ import __MassIntegrand__
 
 import pyximport
 pyximport.install(setup_args={'include_dirs': np.get_include()})
-from .DisplacementApproachIndices import *
+from .DisplacementApproachIndices import FillGeometricB
+
+
+
 
 class VariationalPrinciple(object):
 
@@ -21,7 +24,7 @@ class VariationalPrinciple(object):
     external_power = []
 
 
-    def __init__(self, mesh, variables_order=(1,0), 
+    def __init__(self, mesh, variables_order=(1,0),
         analysis_type='static', analysis_nature='nonlinear', fields='mechanics',
         quadrature_rules=None, median=None, quadrature_type=None,
         function_spaces=None, compute_post_quadrature=True):
@@ -53,7 +56,7 @@ class VariationalPrinciple(object):
         # if p != self.variables_order[0] and self.variables_order[0]!=0:
         #     mesh.GetHighOrderMesh(C=self.variables_order[0]-1)
 
-        # if len(self.variables_order) == 2: 
+        # if len(self.variables_order) == 2:
         #     if self.variables_order[2] == 0 or self.variables_order[1]==0 or self.variables_order[0]==0:
         #         # GET MEDIAN OF THE ELEMENTS FOR CONSTANT VARIABLES
         #         self.median, self.bases_at_median = mesh.Median
@@ -66,7 +69,7 @@ class VariationalPrinciple(object):
         #             degree=1
         #         # self.quadrature_rules[counter] = list(GetBasesAtInegrationPoints(degree-1, 2*degree,
         #             # QuadratureOpt,mesh.element_type))
-        #         quadrature = QuadratureRule(optimal=QuadratureOpt, 
+        #         quadrature = QuadratureRule(optimal=QuadratureOpt,
         #             norder=2*degree, mesh_type=mesh.element_type)
         #         self.quadrature_rules[counter] = quadrature
         #         # FunctionSpace(mesh, p=degree, 2*degree, QuadratureOpt,mesh.element_type)
@@ -78,7 +81,7 @@ class VariationalPrinciple(object):
         """
 
         # GET LOCAL KINEMATICS
-        detJ = _KinematicMeasures_(function_space.Jm, function_space.AllGauss[:,0], 
+        detJ = _KinematicMeasures_(function_space.Jm, function_space.AllGauss[:,0],
             LagrangeElemCoords, EulerELemCoords, requires_geometry_update)[2]
 
         # volume = 0.
@@ -91,35 +94,19 @@ class VariationalPrinciple(object):
         return detJ.sum()
 
 
-    def ConstitutiveStiffnessIntegrand(self, B, SpatialGradient, CauchyStressTensor, H_Voigt, 
+    def ConstitutiveStiffnessIntegrand(self, B, SpatialGradient, CauchyStressTensor, H_Voigt,
         analysis_nature="nonlinear", has_prestress=True):
-        """Applies to displacement based and all mixed formulations that involve static condensation"""
+        """Applies to displacement based formulation"""
+        pass
 
-        # MATRIX FORM
-        # SpatialGradient = SpatialGradient.T
-        # SpatialGradient = np.ascontiguousarray(SpatialGradient.T)
-        SpatialGradient = SpatialGradient.T.copy()
-
-        FillConstitutiveB(B,SpatialGradient,self.ndim,self.nvar)
-        BDB = B.dot(H_Voigt.dot(B.T))
-        
-        
-        t=[]
-        if analysis_nature == 'nonlinear' or has_prestress:
-            TotalTraction = GetTotalTraction(CauchyStressTensor)
-            t = np.dot(B,TotalTraction) 
-                
-        return BDB, t
-
-    def __ConstitutiveStiffnessIntegrand__(self, SpatialGradient, H_Voigt, CauchyStressTensor, detJ, 
+    def __ConstitutiveStiffnessIntegrand__(self, SpatialGradient, H_Voigt, CauchyStressTensor, detJ,
         analysis_nature="nonlinear", has_prestress=False, requires_geometry_update=True):
-        """Applies to displacement based and displacement potential based formulations"""
-        # return GetConstitutiveStiffness(SpatialGradient,H_Voigt,CauchyStressTensor, detJ, self.nvar)
+        """Applies to displacement based formulation"""
         pass
 
 
     def GeometricStiffnessIntegrand(self, SpatialGradient, CauchyStressTensor):
-        """Applies to displacement based, displacement potential based and all mixed 
+        """Applies to displacement based, displacement potential based and all mixed
         formulations that involve static condensation"""
 
         ndim = self.ndim
@@ -132,14 +119,38 @@ class VariationalPrinciple(object):
         FillGeometricB(B,SpatialGradient,S,CauchyStressTensor,ndim,nvar)
 
         BDB = np.dot(np.dot(B,S),B.T)
-                
+
         return BDB
 
 
     def __GeometricStiffnessIntegrand__(self, SpatialGradient, CauchyStressTensor, detJ):
-        """Applies to displacement based and displacement potential based formulations"""
+        """Applies to displacement based formulation"""
         return GetGeomStiffness(np.ascontiguousarray(SpatialGradient),CauchyStressTensor, detJ, self.nvar)
 
+
+    # def TractionIntegrand(self, B, SpatialGradient, CauchyStressTensor,
+    #     analysis_nature="nonlinear", has_prestress=True):
+    #     """Applies to displacement based formulation"""
+
+    #     SpatialGradient = SpatialGradient.T.copy()
+    #     t=[]
+    #     if analysis_nature == 'nonlinear' or has_prestress:
+    #         TotalTraction = GetTotalTraction(CauchyStressTensor)
+    #         t = np.dot(B,TotalTraction)
+
+    #     return t
+
+
+    def TractionIntegrand(self, B, SpatialGradient, CauchyStressTensor,
+        analysis_nature="nonlinear", has_prestress=True):
+        """Applies to displacement based formulation"""
+        pass
+
+
+    def __TractionIntegrand__(self, B, SpatialGradient, CauchyStressTensor,
+        analysis_nature="nonlinear", has_prestress=True):
+        """Applies to displacement based formulation"""
+        pass
 
 
     def MassIntegrand(self, Bases, N, material):
@@ -150,7 +161,7 @@ class VariationalPrinciple(object):
 
         for ivar in range(ndim):
             N[ivar::nvar,ivar] = Bases
-        
+
         rhoNN = rho*np.dot(N,N.T)
         return rhoNN
 
@@ -181,10 +192,12 @@ class VariationalPrinciple(object):
 
     def __GetLocalMass__(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem):
         # GET LOCAL KINEMATICS
-        _, _, detJ = _KinematicMeasures_(function_space.Jm, function_space.AllGauss[:,0], LagrangeElemCoords, 
+        _, _, detJ = _KinematicMeasures_(function_space.Jm, function_space.AllGauss[:,0], LagrangeElemCoords,
             EulerELemCoords, False)
         return __MassIntegrand__(material.rho,function_space.Bases,detJ,material.ndim,material.nvar)
 
+    def GetLumpedMass(self,mass):
+        return np.sum(mass,1)[:,None]
 
     def VerifyMass(self,density, ndim, mass, detJ):
         if np.isclose(mass.sum(),ndim*density*detJ.sum()):
@@ -219,12 +232,13 @@ class VariationalPrinciple(object):
         # nvar = sum(self.variables_order)
         if self.nvar == None:
             self.nvar = self.ndim
-        return self.nvar 
+        return self.nvar
 
 
     def __call__(self,*args,**kwargs):
         """This is purely to get around pickling while parallelising"""
         return self.GetElementalMatrices(*args,**kwargs)
+        # return self.GetElementalMatricesInVectorForm(*args,**kwargs)
 
 
 
@@ -267,6 +281,5 @@ class FiveFieldPenalty(VariationalPrinciple):
             self.submeshes[0].element_type = "tri"
 
 
-            
 
-            
+
