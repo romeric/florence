@@ -712,9 +712,9 @@ def AssembleExplicit(fem_solver, function_space, formulation, mesh, material, Eu
             AssembleExplicitFunctor(elem, nvar, nodeperelem, T, F, M, formulation,
                 function_space, mesh, material, fem_solver, Eulerx, Eulerp)
 
-        # SET MASS FLAG HERE
-        if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed==False:
-            fem_solver.is_mass_computed = True
+    # SET MASS FLAG HERE
+    if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed==False:
+        fem_solver.is_mass_computed = True
 
 
     return T, F, M
@@ -731,6 +731,6 @@ def AssembleExplicitFunctor(elem, nvar, nodeperelem, T, F, M, formulation, funct
     # INTERNAL TRACTION FORCE ASSEMBLY
     RHSAssemblyNative(T,t,elem,nvar,nodeperelem,mesh.elements)
 
-    # LUMPED MASS ASSEMBLY
-    if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed==False:
-        RHSAssemblyNative(M,mass,elem,nvar,nodeperelem,mesh.elements)
+    # # LUMPED MASS ASSEMBLY
+    # if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed==False:
+    #     RHSAssemblyNative(M,mass,elem,nvar,nodeperelem,mesh.elements)
