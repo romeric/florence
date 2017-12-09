@@ -100,8 +100,9 @@ class ExplicitStructuralDynamicIntegrators(object):
             #     Eulerx, Eulerp)[0].ravel()
             # print("Explicit assembly time is {} seconds".format(time()-t_assembly))
 
-            Residual += NodalForces - TractionForces
-            Residual += (2./dt**2)*M*TotalDisp[:,:,Increment-1].ravel() - (1./dt**2)*M*TotalDisp[:,:,Increment-2].ravel()
+            # Residual += NodalForces - TractionForces
+            Residual[:] = NodalForces - TractionForces
+            Residual   += (2./dt**2)*M*TotalDisp[:,:,Increment-1].ravel() - (1./dt**2)*M*TotalDisp[:,:,Increment-2].ravel()
 
             U = dt**2*invM*Residual
             U = boundary_condition.UpdateFreeDoFs(U[boundary_condition.columns_in],TractionForces.shape[0],formulation.nvar)
@@ -114,8 +115,10 @@ class ExplicitStructuralDynamicIntegrators(object):
             # # exit()
 
             # ASSEMBLE INTERNAL TRACTIONS
-            Eulerx += U[:,:formulation.ndim]
-            Eulerx += IncDirichlet[:,:formulation.ndim]
+            # Eulerx += U[:,:formulation.ndim]
+            # Eulerx += IncDirichlet[:,:formulation.ndim]
+            Eulerx[:,:] = mesh.points + U[:,:formulation.ndim]
+            Eulerx[boundary_condition.columns_out,:] = mesh.points[boundary_condition.columns_out,:] + IncDirichlet[boundary_condition.columns_out,:formulation.ndim]
             TotalDisp[:,:,Increment] = Eulerx - mesh.points
 
             t_assembly = time()
@@ -178,8 +181,8 @@ class ExplicitStructuralDynamicIntegrators(object):
                         fem_solver.number_of_load_increments = Increment
                     break
 
-            print("HARD STOP: Explicit solver implementation is not complete yet")
-            exit()
+            # print("HARD STOP: Explicit solver implementation is not complete yet")
+            # exit()
 
         return TotalDisp
 
