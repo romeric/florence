@@ -288,15 +288,20 @@ class BoundaryCondition(object):
                     # FOR DYNAMIC ANALYSIS IT IS ASSUMED THAT
                     # self.columns_in and self.columns_out DO NOT CHANGE
                     # DURING THE ANALYSIS
-                    flat_dirich = self.dirichlet_flags[:,:,0].ravel()
-                    self.columns_out = np.arange(self.dirichlet_flags[:,:,0].size)[~np.isnan(flat_dirich)]
-                    self.applied_dirichlet = np.zeros((self.columns_out.shape[0],self.dirichlet_flags.shape[2]))
+                    if self.dirichlet_flags.ndim == 3:
+                        flat_dirich = self.dirichlet_flags[:,:,0].ravel()
+                        self.columns_out = np.arange(self.dirichlet_flags[:,:,0].size)[~np.isnan(flat_dirich)]
+                        self.applied_dirichlet = np.zeros((self.columns_out.shape[0],self.dirichlet_flags.shape[2]))
 
-                    if self.dirichlet_flags.ndim !=3:
-                        raise ValueError("Dirichlet flags for dynamic analysis should be a 3D array")
-                    for step in range(self.dirichlet_flags.shape[2]):
-                        flat_dirich = self.dirichlet_flags[:,:,step].ravel()
-                        self.applied_dirichlet[:,step] = flat_dirich[~np.isnan(flat_dirich)]
+                        for step in range(self.dirichlet_flags.shape[2]):
+                            flat_dirich = self.dirichlet_flags[:,:,step].ravel()
+                            self.applied_dirichlet[:,step] = flat_dirich[~np.isnan(flat_dirich)]
+                    elif self.dirichlet_flags.ndim == 2:
+                        flat_dirich = self.dirichlet_flags.ravel()
+                        self.columns_out = np.arange(self.dirichlet_flags.size)[~np.isnan(flat_dirich)]
+                        self.applied_dirichlet = flat_dirich[~np.isnan(flat_dirich)]
+                    else:
+                        raise ValueError("Incorrect Dirichlet flags for dynamic analysis")
 
                 else:
                     flat_dirich = self.dirichlet_flags.ravel()
@@ -653,7 +658,8 @@ class BoundaryCondition(object):
             # TotalDisp[pboundary_condition.nodesDBC,:,-1] = Dirichlet2D[:,:,None].reshape(36,1,2)
             # figure=None
             # post_process = PostProcess(2,2)
-            # post_process.CurvilinearPlot(pmesh, TotalDisp, interpolation_degree=40, figure=figure, color="#E3A933", plot_points=True, point_radius=2.0)
+            # post_process.CurvilinearPlot(pmesh, TotalDisp, interpolation_degree=40,
+            # figure=figure, color="#E3A933", plot_points=True, point_radius=2.0)
             # plt.show()
 
             del pmesh, pboundary_condition
@@ -726,14 +732,14 @@ class BoundaryCondition(object):
         return stiffness_b, F_b, F
 
 
-    def GetReducedVectors(self,F,mass=None):
+    def GetReducedVectors(self, F, mass=None, only_residual=False):
 
         # GET REDUCED FORCE VECTOR
         F_b = F[self.columns_in,0]
 
         # GET REDUCED MASS MATRIX
         mass_b = []
-        if self.analysis_type != 'static':
+        if self.analysis_type != 'static' and not only_residual:
             mass_b = mass[self.columns_in,0]
 
         return F_b, mass_b
@@ -808,36 +814,47 @@ class BoundaryCondition(object):
                 F = AssembleForces(self, mesh, material, function_spaces,
                     compute_traction_forces=compute_traction_forces, compute_body_forces=compute_body_forces)
             elif self.analysis_type == "dynamic":
-                # THE POSITION OF NEUMANN DATA APPLIED AT FACES CAN CHANGE DYNAMICALLY
-                tmp_flags = np.copy(self.neumann_flags)
-                tmp_data = np.copy(self.applied_neumann)
-                F = np.zeros((mesh.points.shape[0]*nvar,self.neumann_flags.shape[1]))
-                for step in range(self.neumann_flags.shape[1]):
-                    self.neumann_flags = tmp_flags[:,step]
-                    self.applied_neumann = tmp_data[:,:,step]
-                    F[:,step] = AssembleForces(self, mesh, material, function_spaces,
-                        compute_traction_forces=compute_traction_forces, compute_body_forces=compute_body_forces).flatten()
+                if self.neumann_flags.ndim==2:
+                    # THE POSITION OF NEUMANN DATA APPLIED AT FACES CAN CHANGE DYNAMICALLY
+                    tmp_flags = np.copy(self.neumann_flags)
+                    tmp_data = np.copy(self.applied_neumann)
+                    F = np.zeros((mesh.points.shape[0]*nvar,self.neumann_flags.shape[1]))
+                    for step in range(self.neumann_flags.shape[1]):
+                        self.neumann_flags = tmp_flags[:,step]
+                        self.applied_neumann = tmp_data[:,:,step]
+                        F[:,step] = AssembleForces(self, mesh, material, function_spaces,
+                            compute_traction_forces=compute_traction_forces, compute_body_forces=compute_body_forces).flatten()
 
-                self.neumann_flags = tmp_flags
-                self.applied_neumann = tmp_data
+                    self.neumann_flags = tmp_flags
+                    self.applied_neumann = tmp_data
+                else:
+                    # THE POSITION OF NEUMANN DATA APPLIED AT FACES CAN CHANGE DYNAMICALLY
+                    F = AssembleForces(self, mesh, material, function_spaces,
+                            compute_traction_forces=compute_traction_forces, compute_body_forces=compute_body_forces).flatten()
+
             print("Assembled external traction forces. Time elapsed is {} seconds".format(time()-t_tassembly))
 
 
         elif self.neumann_data_applied_at == 'node':
             # A DIRICHLET TYPE METHODOLGY FOR APPLYING NEUMANN BOUNDARY CONDITONS (i.e. AT NODES)
             if self.analysis_type == "dynamic":
-                if self.neumann_flags.ndim !=3:
-                    raise ValueError("Dirichlet flags for dynamic analysis should be a 3D array")
-                # FOR DYNAMIC ANALYSIS IT IS ASSUMED THAT
-                # to_apply DOOES NOT CHANGE DURING THE ANALYSIS
-                flat_neu = self.neumann_flags[:,:,0].ravel()
-                to_apply = np.arange(self.neumann_flags[:,:,0].size)[~np.isnan(flat_neu)]
-                F = np.zeros((mesh.points.shape[0]*nvar,self.neumann_flags.shape[2]))
+                if self.neumann_flags.ndim ==3:
+                    # FOR DYNAMIC ANALYSIS IT IS ASSUMED THAT
+                    # to_apply DOOES NOT CHANGE DURING THE ANALYSIS
+                    flat_neu = self.neumann_flags[:,:,0].ravel()
+                    to_apply = np.arange(self.neumann_flags[:,:,0].size)[~np.isnan(flat_neu)]
+                    F = np.zeros((mesh.points.shape[0]*nvar,self.neumann_flags.shape[2]))
 
-                for step in range(self.neumann_flags.shape[2]):
-                    flat_neu = self.neumann_flags[:,:,step].ravel()
-                    to_apply = np.arange(self.neumann_flags[:,:,step].size)[~np.isnan(flat_neu)]
-                    F[to_apply,step] = flat_neu[~np.isnan(flat_neu)]
+                    for step in range(self.neumann_flags.shape[2]):
+                        flat_neu = self.neumann_flags[:,:,step].ravel()
+                        to_apply = np.arange(self.neumann_flags[:,:,step].size)[~np.isnan(flat_neu)]
+                        F[to_apply,step] = flat_neu[~np.isnan(flat_neu)]
+                else:
+                    F = np.zeros((mesh.points.shape[0]*nvar,1))
+                    flat_neu = self.neumann_flags.ravel()
+                    to_apply = np.arange(self.neumann_flags.size)[~np.isnan(flat_neu)]
+                    applied_neumann = flat_neu[~np.isnan(flat_neu)]
+                    F[to_apply,0] = applied_neumann
             else:
                 F = np.zeros((mesh.points.shape[0]*nvar,1))
                 flat_neu = self.neumann_flags.ravel()

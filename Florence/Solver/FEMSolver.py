@@ -35,14 +35,15 @@ class FEMSolver(object):
         has_prestress=True, number_of_load_increments=1, load_factor=None,
         newton_raphson_tolerance=1.0e-6, newton_raphson_solution_tolerance=None,
         maximum_iteration_for_newton_raphson=50, iterative_technique="newton_raphson",
-        add_self_weight=False,
+        add_self_weight=False, mass_type=None,
         compute_mesh_qualities=True,
         parallelise=False, memory_model="shared", platform="cpu", backend="opencl",
         print_incremental_log=False, save_incremental_solution=False, incremental_solution_filename=None,
         break_at_increment=-1,
         include_physical_damping=False, damping_factor=0.1,
         compute_energy_dissipation=False, compute_linear_momentum_dissipation=False, total_time=1.,
-        user_defined_break_func=None, user_defined_stop_func=None):
+        user_defined_break_func=None, user_defined_stop_func=None,
+        save_results=True, save_frequency=1):
 
         self.has_low_level_dispatcher = has_low_level_dispatcher
 
@@ -57,7 +58,11 @@ class FEMSolver(object):
         self.has_moving_boundary = has_moving_boundary
         self.has_prestress = has_prestress
         self.is_mass_computed = False
+        self.mass_type = mass_type # "consistent" or "lumped"
         self.total_time = float(total_time)
+        self.save_results = save_results
+        # SAVE AT EVERY N TIME STEP WHERE N=save_frequency
+        self.save_frequency = int(save_frequency)
 
         self.number_of_load_increments = number_of_load_increments
         self.load_factor = load_factor
@@ -148,6 +153,19 @@ class FEMSolver(object):
         if "Explicit" in material.mtype:
             if self.analysis_subtype == "implicit":
                 raise ValueError("Incorrect material model ({}) used for implicit analysis".format(material.mtype))
+        if self.analysis_subtype == "exlicit":
+            if self.mass_type is None:
+                self.mass_type == "lumped"
+        if self.analysis_type == "static":
+            if self.save_frequency != 1:
+                warn("save_frequency must be one")
+                self.save_frequency = 1
+        if self.analysis_type == "dynamics" and self.analysis_subtype=="implicit":
+            if self.save_frequency != 1:
+                warn("save_frequency must be one")
+                self.save_frequency = 1
+
+
 
         # GEOMETRY UPDATE FLAGS
         ###########################################################################
@@ -298,8 +316,12 @@ class FEMSolver(object):
         self.NRConvergence = { 'Increment_'+str(Increment) : [] for Increment in range(self.number_of_load_increments) }
 
         # ALLOCATE FOR SOLUTION FIELDS
-        # TotalDisp = np.zeros((mesh.points.shape[0],formulation.nvar,self.number_of_load_increments),dtype=np.float32)
-        TotalDisp = np.zeros((mesh.points.shape[0],formulation.nvar,self.number_of_load_increments),dtype=np.float64)
+        if self.save_frequency == 1:
+            # TotalDisp = np.zeros((mesh.points.shape[0],formulation.nvar,self.number_of_load_increments),dtype=np.float32)
+            TotalDisp = np.zeros((mesh.points.shape[0],formulation.nvar,self.number_of_load_increments),dtype=np.float64)
+        else:
+            TotalDisp = np.zeros((mesh.points.shape[0],formulation.nvar,
+                int(self.number_of_load_increments/self.save_frequency)),dtype=np.float64)
 
         # PRE-ASSEMBLY
         print('Assembling the system and acquiring neccessary information for the analysis...')
@@ -336,13 +358,18 @@ class FEMSolver(object):
             K, TractionForces, _, _ = Assemble(self, function_spaces[0], formulation, mesh, material,
                 Eulerx, Eulerp)
         else:
+            # fspace = function_spaces[0] if (mesh.element_type=="hex" or mesh.element_type=="quad") else function_spaces[1]
+            fspace = function_spaces[1]
+            # COMPUTE CONSTANT PART OF MASS MATRIX
+            formulation.GetConstantMassIntegrand(fspace,material)
+
             if self.analysis_subtype != "explicit":
                 # COMPUTE BOTH STIFFNESS AND MASS USING HIGHER QUADRATURE RULE
-                K, TractionForces, _, M = Assemble(self, function_spaces[1], formulation, mesh, material,
+                K, TractionForces, _, M = Assemble(self, fspace, formulation, mesh, material,
                     Eulerx, Eulerp)
             else:
+                # lmesh = mesh.ConvertToLinearMesh()
                 # COMPUTE BOTH STIFFNESS AND MASS USING HIGHER QUADRATURE RULE
-                fspace = function_spaces[0] if (mesh.element_type=="hex" or mesh.element_type=="quad") else function_spaces[1]
                 TractionForces, _, M = AssembleExplicit(self, fspace, formulation, mesh, material,
                     Eulerx, Eulerp)
 

@@ -2,7 +2,7 @@ import numpy as np
 from Florence import QuadratureRule, FunctionSpace, Mesh
 from Florence.FiniteElements.LocalAssembly._KinematicMeasures_ import _KinematicMeasures_
 from Florence.VariationalPrinciple._GeometricStiffness_ import GeometricStiffnessIntegrand as GetGeomStiffness
-from ._MassIntegrand_ import __MassIntegrand__
+from ._MassIntegrand_ import __MassIntegrand__, __ConstantMassIntegrand__
 
 import pyximport
 pyximport.install(setup_args={'include_dirs': np.get_include()})
@@ -165,6 +165,29 @@ class VariationalPrinciple(object):
         rhoNN = rho*np.dot(N,N.T)
         return rhoNN
 
+    def GetConstantMassIntegrand(self, Domain, material):
+        # COMPUTE THE CONSTANT PART OF MASS MATRIX 'rho*np.dot(N,N.T)'
+        # THIS SHOULD BE CALLED ONCE AS IT IS THE SAME FOR EVERY ELEMENT
+        # N = np.zeros((Domain.Bases.shape[0]*self.nvar,self.nvar))
+        # rhoNN_all = np.zeros((Domain.Bases.shape[0]*self.nvar,Domain.Bases.shape[0]*self.nvar,Domain.AllGauss.shape[0]))
+        # # LOOP OVER GAUSS POINTS
+        # for counter in range(0,Domain.AllGauss.shape[0]):
+        #     # COMPUTE THE MASS INTEGRAND
+        #     rhoNN_all[:,:,counter] = self.MassIntegrand(Domain.Bases[:,counter],N,material)
+
+        # self.constant_mass_integrand = rhoNN_all
+        # return rhoNN_all
+
+        N = np.zeros((Domain.Bases.shape[0]*self.nvar,self.nvar))
+        rhoNN_all = np.zeros((Domain.AllGauss.shape[0],Domain.Bases.shape[0]*self.nvar,Domain.Bases.shape[0]*self.nvar))
+        # LOOP OVER GAUSS POINTS
+        for counter in range(0,Domain.AllGauss.shape[0]):
+            # COMPUTE THE MASS INTEGRAND
+            rhoNN_all[counter,:,:] = self.MassIntegrand(Domain.Bases[:,counter],N,material)
+
+        self.constant_mass_integrand = rhoNN_all
+        return rhoNN_all
+
 
     def GetLocalMass(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem):
 
@@ -195,6 +218,35 @@ class VariationalPrinciple(object):
         _, _, detJ = _KinematicMeasures_(function_space.Jm, function_space.AllGauss[:,0], LagrangeElemCoords,
             EulerELemCoords, False)
         return __MassIntegrand__(material.rho,function_space.Bases,detJ,material.ndim,material.nvar)
+
+
+    def GetLocalMass_Efficient(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem):
+        """Computes elemental mass matrix in a very efficient way by computing rhoNN only once"""
+
+        Domain = function_space
+        # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+        ParentGradientX = np.einsum('ijk,jl->kil', Domain.Jm, LagrangeElemCoords)
+        # COMPUTE ONCE detJ
+        detJ = np.einsum('i,i->i',Domain.AllGauss[:,0],np.abs(np.linalg.det(ParentGradientX)))
+        # INTEGRATE MASS
+        # mass = np.einsum("ijk,k",self.constant_mass_integrand,detJ)
+        return np.einsum("ijk,i",self.constant_mass_integrand,detJ)
+
+        # Domain = function_space
+        # rhoNN_all = self.constant_mass_integrand
+        # mass = np.zeros((Domain.Bases.shape[0]*self.nvar,Domain.Bases.shape[0]*self.nvar))
+        # LOOP OVER GAUSS POINTS
+        # for counter in range(0,Domain.AllGauss.shape[0]):
+        #     # INTEGRATE MASS
+        #     mass += rhoNN_all[:,:,counter]*detJ[counter]
+        # return mass
+
+    def __GetLocalMass_Efficient__(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem):
+        """Computes elemental mass matrix in a very efficient way by computing rhoNN only once"""
+        # GET LOCAL KINEMATICS
+        _, _, detJ = _KinematicMeasures_(function_space.Jm, function_space.AllGauss[:,0], LagrangeElemCoords,
+            EulerELemCoords, False)
+        return __ConstantMassIntegrand__(self.constant_mass_integrand,detJ)
 
     def GetLumpedMass(self,mass):
         return np.sum(mass,1)[:,None]
