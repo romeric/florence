@@ -14,6 +14,7 @@ from Florence.PostProcessing import *
 from Florence.Solver import LinearSolver
 from Florence.TimeIntegrators import StructuralDynamicIntegrators
 from Florence.TimeIntegrators import ExplicitStructuralDynamicIntegrators
+from .LaplacianSolver import LaplacianSolver
 from Florence import Mesh
 
 
@@ -309,6 +310,14 @@ class FEMSolver(object):
                  'and number of boundary nodes is', np.unique(mesh.faces).shape[0])
         #---------------------------------------------------------------------------#
 
+        # QUICK REDIRECT TO LAPLACIAN SOLVER
+        if formulation.fields == "electrostatics":
+            laplacian_solver = LaplacianSolver(self)
+            return laplacian_solver.Solve(formulation=formulation, mesh=mesh,
+                material=material, boundary_condition=boundary_condition,
+                function_spaces=function_spaces, solver=solver)
+
+
         # INITIATE DATA FOR THE ANALYSIS
         NodalForces, Residual = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64), \
             np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64)
@@ -358,8 +367,8 @@ class FEMSolver(object):
             K, TractionForces, _, _ = Assemble(self, function_spaces[0], formulation, mesh, material,
                 Eulerx, Eulerp)
         else:
-            # fspace = function_spaces[0] if (mesh.element_type=="hex" or mesh.element_type=="quad") else function_spaces[1]
-            fspace = function_spaces[1]
+            fspace = function_spaces[0] if (mesh.element_type=="hex" or mesh.element_type=="quad") else function_spaces[1]
+            # fspace = function_spaces[1]
             # COMPUTE CONSTANT PART OF MASS MATRIX
             formulation.GetConstantMassIntegrand(fspace,material)
 
