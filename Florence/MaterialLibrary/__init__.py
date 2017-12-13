@@ -63,3 +63,7 @@ from .Multi_Piezoelectric_100 import *
 
 # EXPLICIT MODELS
 from .ExplicitMooneyRivlin_0 import *
+
+
+# ELECTROSTATIC MODELS
+from .IdealDielectric import *

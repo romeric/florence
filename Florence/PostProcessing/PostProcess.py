@@ -943,6 +943,14 @@ class PostProcess(object):
             raise ValueError("Writer format not understood")
         formatter = fmt
 
+        if self.formulation.fields == "electrostatics":
+            configuration = "original"
+            tmp = np.copy(self.sol)
+            self.sol = np.zeros((self.sol.shape[0],self.formulation.ndim+1,self.sol.shape[1]))
+            # self.sol[:,:self.formulation.ndim,:] = 0.
+            self.sol[:,-1,:] = tmp
+            quantity = self.formulation.ndim
+
         if isinstance(quantity,int):
             if quantity>=self.sol.shape[1]:
                 self.GetAugmentedSolution()
@@ -984,7 +992,8 @@ class PostProcess(object):
 
         # GET LINEAR MESH & SOLUTION
         lmesh = self.mesh.GetLinearMesh()
-        sol = self.sol[:lmesh.nnode,:,:]
+        # sol = self.sol[:lmesh.nnode,:,:]
+        sol = self.sol[:lmesh.nnode,...]
 
         if lmesh.element_type =='tri':
             cellflag = 5
@@ -1005,9 +1014,15 @@ class PostProcess(object):
         actual_ndim = lmesh.points.shape[1]
 
         ndim = lmesh.points.shape[1]
+        if self.formulation.fields == "electrostatics":
+            sol = self.sol[:lmesh.nnode,...]
+            q_names = ["phi","phi","phi","phi"]
+        else:
+            # q_names = ["$"+self.QuantityNamer(quant, print_name=False)+"$" for quant in iterator]
+            q_names = [self.QuantityNamer(quant, print_name=False) for quant in iterator]
+
         LoadIncrement = self.sol.shape[2]
-        q_names = [self.QuantityNamer(quant, print_name=False) for quant in iterator]
-        # q_names = ["$"+self.QuantityNamer(quant, print_name=False)+"$" for quant in iterator]
+
 
 
         if write_curved_mesh:
