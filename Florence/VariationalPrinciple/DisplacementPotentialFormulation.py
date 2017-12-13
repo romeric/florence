@@ -5,6 +5,7 @@ from Florence import QuadratureRule, FunctionSpace
 from Florence.FiniteElements.LocalAssembly.KinematicMeasures import *
 from Florence.FiniteElements.LocalAssembly._KinematicMeasures_ import _KinematicMeasures_
 from ._ConstitutiveStiffnessDPF_ import __ConstitutiveStiffnessIntegrandDPF__
+from ._TractionDPF_ import __TractionIntegrandDPF__
 from Florence.Tensor import issymetric
 from Florence.LegendreTransform import LegendreTransform
 
@@ -155,9 +156,11 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
         if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed is False:
             # COMPUTE THE MASS MATRIX
             if material.has_low_level_dispatcher:
-                massel = self.__GetLocalMass__(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+                # massel = self.__GetLocalMass__(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+                massel = self.__GetLocalMass_Efficient__(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
             else:
-                massel = self.GetLocalMass(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+                # massel = self.GetLocalMass(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+                massel = self.GetLocalMass_Efficient(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
 
             if fem_solver.analysis_subtype == "explicit" and fem_solver.mass_type == "lumped":
                 massel = self.GetLumpedMass(massel)
@@ -309,12 +312,107 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
     def GetLocalTraction(self, function_space, material, LagrangeElemCoords,
         EulerELemCoords, ElectricPotentialElem, fem_solver, elem=0):
         """Get traction vector of the system"""
-        pass
+
+        nvar = self.nvar
+        ndim = self.ndim
+        nodeperelem = function_space.Bases.shape[0]
+
+        det = np.linalg.det
+        inv = np.linalg.inv
+        Jm = function_space.Jm
+        AllGauss = function_space.AllGauss
+
+        # ALLOCATE
+        tractionforce = np.zeros((nodeperelem*nvar,1),dtype=np.float64)
+        B = np.zeros((nodeperelem*nvar,material.H_VoigtSize),dtype=np.float64)
+
+        # COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
+        # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+        ParentGradientX = np.einsum('ijk,jl->kil', Jm, LagrangeElemCoords)
+        # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
+        MaterialGradient = np.einsum('ijk,kli->ijl', inv(ParentGradientX), Jm)
+        # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
+        F = np.einsum('ij,kli->kjl', EulerELemCoords, MaterialGradient)
+
+        # COMPUTE REMAINING KINEMATIC MEASURES
+        StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
+
+        # UPDATE/NO-UPDATE GEOMETRY
+        if fem_solver.requires_geometry_update:
+            # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+            ParentGradientx = np.einsum('ijk,jl->kil',Jm,EulerELemCoords)
+            # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
+            SpatialGradient = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Jm)
+            # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
+            detJ = np.einsum('i,i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)),np.abs(StrainTensors['J']))
+        else:
+            # SPATIAL GRADIENT AND MATERIAL GRADIENT TENSORS ARE EQUAL
+            SpatialGradient = np.einsum('ikj',MaterialGradient)
+            # COMPUTE ONCE detJ
+            detJ = np.einsum('i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)))
+
+        # GET ELECTRIC FIELD
+        ElectricFieldx = - np.einsum('ijk,j',SpatialGradient,ElectricPotentialElem)
+
+        # LOOP OVER GAUSS POINTS
+        for counter in range(AllGauss.shape[0]):
+
+            if material.energy_type == "enthalpy":
+                # COMPUTE THE HESSIAN AT THIS GAUSS POINT
+                H_Voigt = material.Hessian(StrainTensors,ElectricFieldx[counter,:], elem, counter)
+
+                # COMPUTE ELECTRIC DISPLACEMENT
+                ElectricDisplacementx = material.ElectricDisplacementx(StrainTensors, ElectricFieldx[counter,:], elem, counter)
+
+                # COMPUTE CAUCHY STRESS TENSOR
+                CauchyStressTensor = []
+                if fem_solver.requires_geometry_update:
+                    CauchyStressTensor = material.CauchyStress(StrainTensors,ElectricFieldx[counter,:],elem,counter)
+
+            elif material.energy_type == "internal_energy":
+                # THIS REQUIRES LEGENDRE TRANSFORM
+
+                # COMPUTE ELECTRIC DISPLACEMENT IMPLICITLY
+                ElectricDisplacementx = material.ElectricDisplacementx(StrainTensors, ElectricFieldx[counter,:], elem, counter)
+
+                # COMPUTE THE HESSIAN AT THIS GAUSS POINT
+                H_Voigt = material.Hessian(StrainTensors,ElectricDisplacementx, elem, counter)
+
+                # COMPUTE CAUCHY STRESS TENSOR
+                CauchyStressTensor = []
+                if fem_solver.requires_geometry_update:
+                    CauchyStressTensor = material.CauchyStress(StrainTensors,ElectricDisplacementx,elem,counter)
+
+
+            # COMPUTE THE TANGENT STIFFNESS MATRIX
+            t = self.TractionIntegrand(B, SpatialGradient[counter,:,:],
+                ElectricDisplacementx, CauchyStressTensor, H_Voigt, analysis_nature=fem_solver.analysis_nature,
+                has_prestress=fem_solver.has_prestress)
+
+            if fem_solver.requires_geometry_update:
+                # INTEGRATE TRACTION FORCE
+                tractionforce += t*detJ[counter]
+
+        return tractionforce
+
 
     def __GetLocalTraction__(self, function_space, material, LagrangeElemCoords,
         EulerELemCoords, ElectricPotentialElem, fem_solver, elem=0):
         """Get traction vector of the system"""
-        pass
+
+        # GET LOCAL KINEMATICS
+        SpatialGradient, F, detJ = _KinematicMeasures_(function_space.Jm, function_space.AllGauss[:,0], LagrangeElemCoords,
+            EulerELemCoords, fem_solver.requires_geometry_update)
+        # GET ELECTRIC FIELD
+        ElectricFieldx = - np.einsum('ijk,j',SpatialGradient,ElectricPotentialElem)
+        # COMPUTE WORK-CONJUGATES AND HESSIAN AT THIS GAUSS POINT
+        ElectricDisplacementx, CauchyStressTensor, _ = material.KineticMeasures(F, ElectricFieldx, elem=elem)
+        # COMPUTE LOCAL CONSTITUTIVE STIFFNESS AND TRACTION
+        tractionforce = __TractionIntegrandDPF__(SpatialGradient,ElectricDisplacementx,
+            CauchyStressTensor,detJ,material.H_VoigtSize,self.nvar,fem_solver.requires_geometry_update)
+
+        return tractionforce
+
 
     def TractionIntegrand(self, B, SpatialGradient, ElectricDisplacementx,
         CauchyStressTensor, analysis_nature="nonlinear", has_prestress=True):

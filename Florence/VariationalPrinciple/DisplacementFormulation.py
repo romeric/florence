@@ -338,7 +338,6 @@ class DisplacementFormulation(VariationalPrinciple):
                 CauchyStressTensor, analysis_nature=fem_solver.analysis_nature,
                 has_prestress=fem_solver.has_prestress)
 
-            # COMPUTE GEOMETRIC STIFFNESS MATRIX
             if fem_solver.requires_geometry_update:
                 # INTEGRATE TRACTION FORCE
                 tractionforce += t*detJ[counter]

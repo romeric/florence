@@ -37,7 +37,7 @@ class ExplicitStructuralDynamicIntegrators(object):
 
         # CHECK FORMULATION
         if formulation.fields != "mechanics":
-            raise NotImplementedError("Explicit solver for electromechanics is not implemented yet")
+            raise NotImplementedError("Explicit solver for {} is not implemented yet".format(formulation.fields))
 
         # COMPUTE DAMPING MATRIX BASED ON MASS
         if fem_solver.include_physical_damping:

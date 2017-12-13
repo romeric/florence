@@ -722,8 +722,6 @@ def AssembleExplicitFunctor(elem, nvar, nodeperelem, T, F, I_mass, J_mass, V_mas
 
     t, f, mass = formulation.GetElementalMatricesInVectorForm(elem,
             function_space, mesh, material, fem_solver, Eulerx, Eulerp)
-    # print(mass[:5,:5])
-    # exit()
 
 
     if fem_solver.has_moving_boundary:
