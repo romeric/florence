@@ -154,9 +154,9 @@ class FEMSolver(object):
         if "Explicit" in material.mtype:
             if self.analysis_subtype == "implicit":
                 raise ValueError("Incorrect material model ({}) used for implicit analysis".format(material.mtype))
-        if self.analysis_subtype == "exlicit":
+        if self.analysis_subtype == "explicit":
             if self.mass_type is None:
-                self.mass_type == "lumped"
+                self.mass_type = "lumped"
         if self.analysis_type == "static":
             if self.save_frequency != 1:
                 warn("save_frequency must be one")
@@ -291,7 +291,8 @@ class FEMSolver(object):
 
     def Solve(self, formulation=None, mesh=None,
         material=None, boundary_condition=None,
-        function_spaces=None, solver=None):
+        function_spaces=None, solver=None,
+        Eulerx=None, Eulerp=None):
         """Main solution routine for FEMSolver """
 
 
@@ -315,7 +316,7 @@ class FEMSolver(object):
             laplacian_solver = LaplacianSolver(self)
             return laplacian_solver.Solve(formulation=formulation, mesh=mesh,
                 material=material, boundary_condition=boundary_condition,
-                function_spaces=function_spaces, solver=solver)
+                function_spaces=function_spaces, solver=solver, Eulerx=Eulerx, Eulerp=Eulerp)
 
 
         # INITIATE DATA FOR THE ANALYSIS
