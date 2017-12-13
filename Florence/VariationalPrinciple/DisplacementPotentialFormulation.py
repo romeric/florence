@@ -159,7 +159,8 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
             else:
                 massel = self.GetLocalMass(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
 
-            massel = self.GetLumpedMass(massel)
+            if fem_solver.analysis_subtype == "explicit" and fem_solver.mass_type == "lumped":
+                massel = self.GetLumpedMass(massel)
 
 
         if fem_solver.has_moving_boundary:

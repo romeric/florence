@@ -165,8 +165,8 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
 
     # stiffness = csc_matrix((V_stiffness,(I_stiffness,J_stiffness)),
         # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float32)
-    stiffness = csc_matrix((V_stiffness,(I_stiffness,J_stiffness)),
-        shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
+    # stiffness = csc_matrix((V_stiffness,(I_stiffness,J_stiffness)),
+        # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
     # stiffness = csr_matrix((V_stiffness,(I_stiffness,J_stiffness)),
         # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
 
@@ -178,7 +178,7 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
     gc.collect()
 
     if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed==False:
-        mass = csc_matrix((V_mass,(I_mass,J_mass)),shape=((nvar*mesh.points.shape[0],
+        mass = csr_matrix((V_mass,(I_mass,J_mass)),shape=((nvar*mesh.points.shape[0],
             nvar*mesh.points.shape[0])),dtype=np.float64)
 
         fem_solver.is_mass_computed = True
@@ -276,7 +276,7 @@ def AssemblyLarge(MainData,mesh,material,Eulerx,TotalPot):
             I_mass, J_mass, V_mass = SparseAssembly_Step_2(I_mass,J_mass,V_mass,full_current_row_mass,full_current_column_mass,coeff_mass,
                 nvar,nodeperelem,elem)
 
-        if MainData.AssemblyParameters.ExternalLoadNature == 'Nonlinear':
+        if fem_solver.has_moving_boundary:
             # RHS ASSEMBLY
             for iterator in range(0,nvar):
                 F[mesh.elements[elem,:]*nvar+iterator,0]+=f[iterator::nvar]
@@ -289,12 +289,12 @@ def AssemblyLarge(MainData,mesh,material,Eulerx,TotalPot):
         shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64).tocsc()
 
     # GET STORAGE/MEMORY DETAILS
-    MainData.spmat = stiffness.data.nbytes/1024./1024.
-    MainData.ijv = (I_stiffness.nbytes + J_stiffness.nbytes + V_stiffness.nbytes)/1024./1024.
+    fem_solver.spmat = stiffness.data.nbytes/1024./1024.
+    fem_solver.ijv = (I_stiffness.nbytes + J_stiffness.nbytes + V_stiffness.nbytes)/1024./1024.
     del I_stiffness, J_stiffness, V_stiffness
     gc.collect()
 
-    if MainData.Analysis != 'Static':
+    if fem_solver.analysis_type != 'static':
         # CALL BUILT-IN SPARSE ASSEMBLER
         mass = coo_matrix((V_mass,(I_mass,J_mass)),shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0]))).tocsc()
 
@@ -677,9 +677,18 @@ def AssembleExplicit(fem_solver, function_space, formulation, mesh, material, Eu
     nodeperelem = mesh.elements.shape[1]
 
     T = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
-    M = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
 
-    mass, F = [], []
+    I_mass=[]; J_mass=[]; V_mass=[]
+    if fem_solver.analysis_type !='static' and fem_solver.mass_type == "consistent":
+        # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF MASS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
+        I_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
+        J_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
+        V_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.float64)
+        M = []
+    else:
+        M = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
+
+    F = []
     if fem_solver.has_moving_boundary:
         F = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
 
@@ -690,25 +699,32 @@ def AssembleExplicit(fem_solver, function_space, formulation, mesh, material, Eu
         #     fem_solver, Eulerx, Eulerp) for elem in range(0,nelem))
 
         parmap.map(AssembleExplicitFunctor,np.arange(0,nelem,dtype=np.int32),
-            nvar, nodeperelem, T, F, M, formulation, function_space, mesh, material,
+            nvar, nodeperelem, T, F, I_mass, J_mass, V_mass, M, formulation, function_space, mesh, material,
             fem_solver, Eulerx, Eulerp, processes= int(multiprocessing.cpu_count()))
     else:
         for elem in range(nelem):
-            AssembleExplicitFunctor(elem, nvar, nodeperelem, T, F, M, formulation,
+            AssembleExplicitFunctor(elem, nvar, nodeperelem, T, F, I_mass, J_mass, V_mass, M, formulation,
                 function_space, mesh, material, fem_solver, Eulerx, Eulerp)
 
     # SET MASS FLAG HERE
     if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed==False:
+        if fem_solver.mass_type == "consistent":
+            M = csr_matrix((V_mass,(I_mass,J_mass)),shape=((nvar*mesh.points.shape[0],
+            nvar*mesh.points.shape[0])),dtype=np.float64)
         fem_solver.is_mass_computed = True
 
 
     return T, F, M
 
 
-def AssembleExplicitFunctor(elem, nvar, nodeperelem, T, F, M, formulation, function_space, mesh, material, fem_solver, Eulerx, Eulerp):
+def AssembleExplicitFunctor(elem, nvar, nodeperelem, T, F, I_mass, J_mass, V_mass, M,
+    formulation, function_space, mesh, material, fem_solver, Eulerx, Eulerp):
 
     t, f, mass = formulation.GetElementalMatricesInVectorForm(elem,
             function_space, mesh, material, fem_solver, Eulerx, Eulerp)
+    # print(mass[:5,:5])
+    # exit()
+
 
     if fem_solver.has_moving_boundary:
         # RHS ASSEMBLY
@@ -718,4 +734,11 @@ def AssembleExplicitFunctor(elem, nvar, nodeperelem, T, F, M, formulation, funct
 
     # LUMPED MASS ASSEMBLY
     if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed==False:
-        RHSAssemblyNative(M,mass,elem,nvar,nodeperelem,mesh.elements)
+        # MASS ASSEMBLY
+        if fem_solver.mass_type == "lumped":
+            RHSAssemblyNative(M,mass,elem,nvar,nodeperelem,mesh.elements)
+        else:
+            # SPARSE ASSEMBLY - MASS MATRIX
+            I_mass_elem, J_mass_elem, V_mass_elem = formulation.FindIndices(mass)
+            SparseAssemblyNative(I_mass_elem,J_mass_elem,V_mass_elem,I_mass,J_mass,V_mass,
+                elem,nvar,nodeperelem,mesh.elements)

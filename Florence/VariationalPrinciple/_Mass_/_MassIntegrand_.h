@@ -13,14 +13,13 @@
 
 typedef double Real;
 
-#include <iostream>
 
 inline void _MassIntegrand_Filler_(Real *mass,
     const Real* bases,
     const Real* detJ,
-    int ngauss, 
-    int noderpelem, 
-    int ndim, 
+    int ngauss,
+    int noderpelem,
+    int ndim,
     int nvar,
     Real rho) {
 
@@ -34,11 +33,11 @@ inline void _MassIntegrand_Filler_(Real *mass,
     Real *N = (Real*)malloc(nvar*local_size*sizeof(Real));
     Real *rhoNN = (Real*)malloc(local_size*local_size*sizeof(Real));
 #endif
-    
+
     std::fill(N,N+nvar*local_size,0.);
 
     for (int igauss = 0; igauss < ngauss; ++igauss) {
-        
+
         // Fill mass integrand
         for (int j=0; j<noderpelem; ++j) {
             const Real bases_j = bases[j*ngauss+igauss];
@@ -61,8 +60,26 @@ inline void _MassIntegrand_Filler_(Real *mass,
 #ifdef __SSE4_2__
     _mm_free(N);
     _mm_free(rhoNN);
-#else    
+#else
     free(N);
     free(rhoNN);
 #endif
+}
+
+
+
+
+inline void _ConstantMassIntegrand_Filler_(Real *mass,
+    const Real* constant_mass_integrand,
+    const Real* detJ,
+    int ngauss,
+    int local_capacity) {
+
+    for (int igauss = 0; igauss < ngauss; ++igauss) {
+        // Multiply mass with detJ
+        const Real detJ_igauss = detJ[igauss];
+        for (int i=0; i<local_capacity; ++i) {
+            mass[i] += constant_mass_integrand[igauss*local_capacity+i]*detJ_igauss;
+        }
+    }
 }

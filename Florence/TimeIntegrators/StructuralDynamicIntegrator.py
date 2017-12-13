@@ -1,10 +1,10 @@
 from __future__ import print_function
 import gc, os, sys
-import numpy as np 
+import numpy as np
 import scipy as sp
 import numpy.linalg as la
 import scipy.linalg as sla
-from numpy.linalg import norm 
+from numpy.linalg import norm
 from time import time
 from copy import deepcopy
 from warnings import warn
@@ -35,7 +35,7 @@ class StructuralDynamicIntegrators(object):
         self.mechanical_dofs = np.setdiff1d(all_dofs,self.electric_dofs)
 
 
-    def Solver(self, function_spaces, formulation, solver, 
+    def Solver(self, function_spaces, formulation, solver,
         K, M, NeumannForces, NodalForces, Residual,
         mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition, fem_solver):
 
@@ -59,7 +59,7 @@ class StructuralDynamicIntegrators(object):
         # COMPUTE INITIAL ACCELERATION FOR TIME STEP 0
         InitResidual = Residual - NeumannForces[:,0][:,None]
         if formulation.fields == "electro_mechanics":
-            accelerations[:,:] = solver.Solve(M_mech, -InitResidual[self.mechanical_dofs].ravel() 
+            accelerations[:,:] = solver.Solve(M_mech, -InitResidual[self.mechanical_dofs].ravel()
                 ).reshape(mesh.points.shape[0],formulation.ndim)
         else:
             accelerations[:,:] = solver.Solve(M, -InitResidual.ravel() ).reshape(mesh.points.shape[0],formulation.ndim)
@@ -97,7 +97,7 @@ class StructuralDynamicIntegrators(object):
             #     K.dot(TotalDisp[:,:,Increment].ravel())).reshape(mesh.points.shape[0],formulation.nvar)
 
             # LET NORM OF THE FIRST RESIDUAL BE THE NORM WITH RESPECT TO WHICH WE
-            # HAVE TO CHECK THE CONVERGENCE OF NEWTON RAPHSON. TYPICALLY THIS IS 
+            # HAVE TO CHECK THE CONVERGENCE OF NEWTON RAPHSON. TYPICALLY THIS IS
             # NORM OF NODAL FORCES
             if Increment==1:
                 self.NormForces = np.linalg.norm(Residual)
@@ -107,7 +107,7 @@ class StructuralDynamicIntegrators(object):
             self.norm_residual = np.linalg.norm(Residual)/self.NormForces
 
 
-            Eulerx, Eulerp, K, Residual, velocities, accelerations = self.NewtonRaphson(function_spaces, formulation, solver, 
+            Eulerx, Eulerp, K, Residual, velocities, accelerations = self.NewtonRaphson(function_spaces, formulation, solver,
                 Increment, K, D, M, NodalForces, Residual, mesh, Eulerx, Eulerp,
                 material,boundary_condition,AppliedDirichletInc, fem_solver, velocities, accelerations)
 
@@ -118,7 +118,7 @@ class StructuralDynamicIntegrators(object):
 
             # COMPUTE DISSIPATION OF ENERGY THROUGH TIME
             if fem_solver.compute_energy_dissipation:
-                energy_info = self.ComputeEnergyDissipation(function_spaces[0],mesh,material,formulation,fem_solver, 
+                energy_info = self.ComputeEnergyDissipation(function_spaces[0],mesh,material,formulation,fem_solver,
                     Eulerx, TotalDisp, NeumannForces, M, velocities, Increment)
                 formulation.energy_dissipation.append(energy_info[0])
                 formulation.internal_energy.append(energy_info[1])
@@ -126,12 +126,12 @@ class StructuralDynamicIntegrators(object):
                 formulation.external_energy.append(energy_info[3])
             # COMPUTE DISSIPATION OF LINEAR MOMENTUM THROUGH TIME
             if fem_solver.compute_linear_momentum_dissipation:
-                power_info = self.ComputePowerDissipation(function_spaces[0],mesh,material,formulation,fem_solver, 
+                power_info = self.ComputePowerDissipation(function_spaces[0],mesh,material,formulation,fem_solver,
                     Eulerx, TotalDisp, NeumannForces, M, velocities, accelerations, Increment)
                 formulation.power_dissipation.append(power_info[0])
-                formulation.power_energy.append(power_info[1])
-                formulation.power_energy.append(power_info[2])
-                formulation.power_energy.append(power_info[3])
+                formulation.internal_power.append(power_info[1])
+                formulation.kinetic_power.append(power_info[2])
+                formulation.external_power.append(power_info[3])
 
 
             # PRINT LOG IF ASKED FOR
@@ -159,7 +159,7 @@ class StructuralDynamicIntegrators(object):
             print('\nFinished Load increment', Increment, 'in', time()-t_increment, 'seconds')
 
             try:
-                print('Norm of Residual is', 
+                print('Norm of Residual is',
                     np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces), '\n')
             except RuntimeWarning:
                 print("Invalid value encountered in norm of Newton-Raphson residual")
@@ -183,7 +183,7 @@ class StructuralDynamicIntegrators(object):
         return TotalDisp
 
 
-    def NewtonRaphson(self, function_spaces, formulation, solver, 
+    def NewtonRaphson(self, function_spaces, formulation, solver,
         Increment, K, D, M, NodalForces, Residual, mesh, Eulerx, Eulerp, material,
         boundary_condition, AppliedDirichletInc, fem_solver, velocities, accelerations):
 
@@ -215,7 +215,7 @@ class StructuralDynamicIntegrators(object):
             if fem_solver.include_physical_damping:
                 InertiaResidual[:,0] += D.dot(velocities.ravel())
         Residual[boundary_condition.columns_in] += InertiaResidual[boundary_condition.columns_in]
-        
+
 
         # APPLY INCREMENTAL DIRICHLET PER LOAD STEP (THIS IS INCREMENTAL NOT ACCUMULATIVE)
         IncDirichlet = boundary_condition.UpdateFixDoFs(AppliedDirichletInc,
@@ -285,21 +285,21 @@ class StructuralDynamicIntegrators(object):
             self.rel_norm_residual = la.norm(Residual[boundary_condition.columns_in])
             if Iter==0:
                 self.NormForces = la.norm(Residual[boundary_condition.columns_in])
-            self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces) 
+            self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)
 
-            # SAVE THE NORM 
+            # SAVE THE NORM
             self.NRConvergence['Increment_'+str(Increment)] = np.append(self.NRConvergence['Increment_'+str(Increment)],\
                 self.norm_residual)
-            
+
             print("Iteration {} for increment {}.".format(Iter, Increment) +\
-                " Residual (abs) {0:>16.7g}".format(self.rel_norm_residual), 
+                " Residual (abs) {0:>16.7g}".format(self.rel_norm_residual),
                 "\t Residual (rel) {0:>16.7g}".format(self.norm_residual))
 
             # BREAK BASED ON RELATIVE NORM
             if np.abs(self.rel_norm_residual) < Tolerance:
                 break
 
-            # BREAK BASED ON INCREMENTAL SOLUTION - KEEP IT AFTER UPDATE 
+            # BREAK BASED ON INCREMENTAL SOLUTION - KEEP IT AFTER UPDATE
             if norm(dU) <=  fem_solver.newton_raphson_solution_tolerance:
                 print("Incremental solution within tolerance i.e. norm(dU): {}".format(norm(dU)))
                 break
@@ -335,15 +335,15 @@ class StructuralDynamicIntegrators(object):
 
 
 
-    def ComputeEnergyDissipation(self,function_space,mesh,material,formulation,fem_solver, 
+    def ComputeEnergyDissipation(self,function_space,mesh,material,formulation,fem_solver,
         Eulerx, TotalDisp, NeumannForces, M, velocities, Increment):
 
         internal_energy = 0.
         for elem in range(mesh.nelem):
             LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
             EulerElemCoords = Eulerx[mesh.elements[elem,:],:]
-            
-            internal_energy += formulation.GetEnergy(function_space, material, 
+
+            internal_energy += formulation.GetEnergy(function_space, material,
                 LagrangeElemCoords, EulerElemCoords, fem_solver, elem)
 
         if formulation.fields == "electro_mechanics":
@@ -359,7 +359,7 @@ class StructuralDynamicIntegrators(object):
 
 
 
-    def ComputePowerDissipation(self,function_space,mesh,material,formulation,fem_solver, Eulerx, TotalDisp, 
+    def ComputePowerDissipation(self,function_space,mesh,material,formulation,fem_solver, Eulerx, TotalDisp,
         NeumannForces, M, velocities, accelerations, Increment):
 
         internal_energy = 0.
@@ -367,8 +367,8 @@ class StructuralDynamicIntegrators(object):
             LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
             EulerElemCoords    = Eulerx[mesh.elements[elem,:],:]
             VelocityElem       = velocities[mesh.elements[elem,:],:]
-            
-            internal_energy += formulation.GetPower(function_space, material, 
+
+            internal_energy += formulation.GetLinearMomentum(function_space, material,
                 LagrangeElemCoords, EulerElemCoords, VelocityElem, fem_solver, elem)
 
         if formulation.fields == "electro_mechanics":
@@ -409,10 +409,10 @@ class StructuralDynamicIntegrators(object):
 
 # from __future__ import print_function
 # import gc, os, sys
-# import numpy as np 
+# import numpy as np
 # import scipy as sp
 # import numpy.linalg as la
-# import scipy.linalg as sla 
+# import scipy.linalg as sla
 # from time import time
 # from copy import deepcopy
 # from warnings import warn
@@ -443,7 +443,7 @@ class StructuralDynamicIntegrators(object):
 #         self.mechanical_dofs = np.setdiff1d(all_dofs,self.electric_dofs)
 
 
-#     def Solver(self, function_spaces, formulation, solver, 
+#     def Solver(self, function_spaces, formulation, solver,
 #         K, M, NeumannForces, NodalForces, Residual,
 #         mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition, fem_solver):
 
@@ -503,7 +503,7 @@ class StructuralDynamicIntegrators(object):
 #             #     K.dot(TotalDisp[:,:,Increment].ravel())).reshape(mesh.points.shape[0],formulation.nvar)
 
 #             # LET NORM OF THE FIRST RESIDUAL BE THE NORM WITH RESPECT TO WHICH WE
-#             # HAVE TO CHECK THE CONVERGENCE OF NEWTON RAPHSON. TYPICALLY THIS IS 
+#             # HAVE TO CHECK THE CONVERGENCE OF NEWTON RAPHSON. TYPICALLY THIS IS
 #             # NORM OF NODAL FORCES
 #             if Increment==1:
 #                 self.NormForces = np.linalg.norm(Residual)
@@ -513,7 +513,7 @@ class StructuralDynamicIntegrators(object):
 #             self.norm_residual = np.linalg.norm(Residual)/self.NormForces
 
 
-#             Eulerx, Eulerp, K, Residual, velocities, accelerations = self.NewtonRaphson(function_spaces, formulation, solver, 
+#             Eulerx, Eulerp, K, Residual, velocities, accelerations = self.NewtonRaphson(function_spaces, formulation, solver,
 #                 Increment, K, D, M, NodalForces, Residual, mesh, Eulerx, Eulerp,
 #                 material,boundary_condition,AppliedDirichletInc, fem_solver, velocities, accelerations)
 
@@ -524,7 +524,7 @@ class StructuralDynamicIntegrators(object):
 
 #             # COMPUTE DISSIPATION OF ENERGY THROUGH TIME
 #             if fem_solver.compute_energy_dissipation:
-#                 energy_info = self.ComputeEnergyDissipation(function_spaces[0],mesh,material,formulation,fem_solver, 
+#                 energy_info = self.ComputeEnergyDissipation(function_spaces[0],mesh,material,formulation,fem_solver,
 #                     Eulerx, TotalDisp, NeumannForces, M, velocities, Increment)
 #                 formulation.energy_dissipation.append(energy_info[0])
 #                 formulation.internal_energy.append(energy_info[1])
@@ -532,7 +532,7 @@ class StructuralDynamicIntegrators(object):
 #                 formulation.external_energy.append(energy_info[3])
 #             # COMPUTE DISSIPATION OF LINEAR MOMENTUM THROUGH TIME
 #             if fem_solver.compute_linear_momentum_dissipation:
-#                 power_info = self.ComputePowerDissipation(function_spaces[0],mesh,material,formulation,fem_solver, 
+#                 power_info = self.ComputePowerDissipation(function_spaces[0],mesh,material,formulation,fem_solver,
 #                     Eulerx, TotalDisp, NeumannForces, M, velocities, accelerations, Increment)
 #                 formulation.power_dissipation.append(power_info[0])
 #                 formulation.power_energy.append(power_info[1])
@@ -557,7 +557,7 @@ class StructuralDynamicIntegrators(object):
 #             print('\nFinished Load increment', Increment, 'in', time()-t_increment, 'seconds')
 
 #             try:
-#                 print('Norm of Residual is', 
+#                 print('Norm of Residual is',
 #                     np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces), '\n')
 #             except RuntimeWarning:
 #                 print("Invalid value encountered in norm of Newton-Raphson residual")
@@ -572,7 +572,7 @@ class StructuralDynamicIntegrators(object):
 #         return TotalDisp
 
 
-#     def NewtonRaphson(self, function_spaces, formulation, solver, 
+#     def NewtonRaphson(self, function_spaces, formulation, solver,
 #         Increment, K, D, M, NodalForces, Residual, mesh, Eulerx, Eulerp, material,
 #         boundary_condition, AppliedDirichletInc, fem_solver, velocities, accelerations):
 
@@ -604,7 +604,7 @@ class StructuralDynamicIntegrators(object):
 #             if fem_solver.include_physical_damping:
 #                 InertiaResidual[:,0] += D.dot(velocities[:,:,Increment].ravel())
 #         Residual[boundary_condition.columns_in] += InertiaResidual[boundary_condition.columns_in]
-        
+
 
 #         # APPLY INCREMENTAL DIRICHLET PER LOAD STEP (THIS IS INCREMENTAL NOT ACCUMULATIVE)
 #         IncDirichlet = boundary_condition.UpdateFixDoFs(AppliedDirichletInc,
@@ -627,7 +627,7 @@ class StructuralDynamicIntegrators(object):
 #             sol = solver.Solve(K_b,-F_b)
 
 #             # GET ITERATIVE SOLUTION
-#             dU = boundary_condition.UpdateFreeDoFs(sol,K.shape[0],formulation.nvar) 
+#             dU = boundary_condition.UpdateFreeDoFs(sol,K.shape[0],formulation.nvar)
 
 #             # UPDATE THE GEOMETRY
 #             Eulerx += dU[:,:formulation.ndim]
@@ -676,14 +676,14 @@ class StructuralDynamicIntegrators(object):
 #             self.rel_norm_residual = la.norm(Residual[boundary_condition.columns_in])
 #             if Iter==0:
 #                 self.NormForces = la.norm(Residual[boundary_condition.columns_in])
-#             self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces) 
+#             self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)
 
-#             # SAVE THE NORM 
+#             # SAVE THE NORM
 #             self.NRConvergence['Increment_'+str(Increment)] = np.append(self.NRConvergence['Increment_'+str(Increment)],\
 #                 self.norm_residual)
-            
+
 #             print("Iteration {} for increment {}.".format(Iter, Increment) +\
-#                 " Residual (abs) {0:>16.7g}".format(self.rel_norm_residual), 
+#                 " Residual (abs) {0:>16.7g}".format(self.rel_norm_residual),
 #                 "\t Residual (rel) {0:>16.7g}".format(self.norm_residual))
 
 #             if np.abs(self.rel_norm_residual) < Tolerance:
@@ -708,15 +708,15 @@ class StructuralDynamicIntegrators(object):
 
 
 
-#     def ComputeEnergyDissipation(self,function_space,mesh,material,formulation,fem_solver, 
+#     def ComputeEnergyDissipation(self,function_space,mesh,material,formulation,fem_solver,
 #         Eulerx, TotalDisp, NeumannForces, M, velocities, Increment):
 
 #         internal_energy = 0.
 #         for elem in range(mesh.nelem):
 #             LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
 #             EulerElemCoords = Eulerx[mesh.elements[elem,:],:]
-            
-#             internal_energy += formulation.GetEnergy(function_space, material, 
+
+#             internal_energy += formulation.GetEnergy(function_space, material,
 #                 LagrangeElemCoords, EulerElemCoords, fem_solver, elem)
 
 #         if formulation.fields == "electro_mechanics":
@@ -733,7 +733,7 @@ class StructuralDynamicIntegrators(object):
 
 
 
-#     def ComputePowerDissipation(self,function_space,mesh,material,formulation,fem_solver, Eulerx, TotalDisp, 
+#     def ComputePowerDissipation(self,function_space,mesh,material,formulation,fem_solver, Eulerx, TotalDisp,
 #         NeumannForces, M, velocities, accelerations, Increment):
 
 #         internal_energy = 0.
@@ -741,8 +741,8 @@ class StructuralDynamicIntegrators(object):
 #             LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
 #             EulerElemCoords    = Eulerx[mesh.elements[elem,:],:]
 #             VelocityElem       = velocities[mesh.elements[elem,:],:,Increment]
-            
-#             internal_energy += formulation.GetPower(function_space, material, 
+
+#             internal_energy += formulation.GetPower(function_space, material,
 #                 LagrangeElemCoords, EulerElemCoords, VelocityElem, fem_solver, elem)
 
 #         if formulation.fields == "electro_mechanics":

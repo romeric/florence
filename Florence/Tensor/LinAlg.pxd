@@ -14,14 +14,14 @@ cdef invT3(double *A)
 #----------------------------------------------------------------------------------------------------
 # cpdef determinant(double [:,:] A)
 cpdef determinant(np.ndarray[double,ndim=2] A)
-cdef inline double det2(const double *A)
-cdef inline double det3(const double *A)
+cdef double det2(const double *A)
+cdef double det3(const double *A)
 
 # DO NOT USE THESE - NO PAY OFF AS NUMPY DOT IS VERY GOOD EVEN FOR 2X2 ARRAYS
 #----------------------------------------------------------------------------------------------------
 cpdef dgemm(np.ndarray[double,ndim=2] A, np.ndarray[double,ndim=2] B)
-cdef inline dgemm2(const double *A, const double *B)
-cdef inline dgemm3(const double *A, const double *B)
+cdef dgemm2(const double *A, const double *B)
+cdef dgemm3(const double *A, const double *B)
 #----------------------------------------------------------------------------------------------------
 cpdef daxpy(np.ndarray[double,ndim=2] A, np.ndarray[double,ndim=1] b)
 cdef daxpy2(const double *A, const double *b)

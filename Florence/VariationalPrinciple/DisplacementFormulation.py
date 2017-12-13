@@ -120,7 +120,6 @@ class DisplacementFormulation(VariationalPrinciple):
             # COMPUTE THE MASS MATRIX
             if material.has_low_level_dispatcher:
                 massel = self.__GetLocalMass__(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
-                # massel = self.GetLocalMass(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
             else:
                 massel = self.GetLocalMass(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
 
@@ -155,11 +154,14 @@ class DisplacementFormulation(VariationalPrinciple):
         if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed is False:
             # COMPUTE THE MASS MATRIX
             if material.has_low_level_dispatcher:
-                massel = self.__GetLocalMass__(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+                # massel = self.__GetLocalMass__(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+                massel = self.__GetLocalMass_Efficient__(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
             else:
-                massel = self.GetLocalMass(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+                # massel = self.GetLocalMass(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+                massel = self.GetLocalMass_Efficient(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
 
-            massel = self.GetLumpedMass(massel)
+            if fem_solver.analysis_subtype == "explicit" and fem_solver.mass_type == "lumped":
+                massel = self.GetLumpedMass(massel)
 
         if fem_solver.has_moving_boundary:
             # COMPUTE FORCE VECTOR
@@ -353,10 +355,7 @@ class DisplacementFormulation(VariationalPrinciple):
         SpatialGradient, F, detJ = _KinematicMeasures_(function_space.Jm, function_space.AllGauss[:,0],
             LagrangeElemCoords, EulerELemCoords, fem_solver.requires_geometry_update)
         # COMPUTE WORK-CONJUGATES AND HESSIAN AT THIS GAUSS POINT
-        if "Explicit" in material.mtype:
-            CauchyStressTensor = material.KineticMeasures(F,elem=elem)
-        else:
-            CauchyStressTensor, _ = material.KineticMeasures(F,elem=elem)
+        CauchyStressTensor, _ = material.KineticMeasures(F,elem=elem)
         # COMPUTE LOCAL CONSTITUTIVE STIFFNESS AND TRACTION
         tractionforce = __TractionIntegrandDF__(SpatialGradient,
             CauchyStressTensor,detJ,material.H_VoigtSize,self.nvar,fem_solver.requires_geometry_update)
