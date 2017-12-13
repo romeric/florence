@@ -107,15 +107,17 @@ class IsotropicElectroMechanics_108(Material):
         D = self.legendre_transform.GetElectricDisplacement(self, StrainTensors, ElectricFieldx, elem, gcounter)
 
         # SANITY CHECK FOR IMPLICIT COMPUTATUTAION OF D
-        # I = StrainTensors['I']
-        # J = StrainTensors['J'][gcounter]
-        # b = StrainTensors['b'][gcounter]
-        # E = ElectricFieldx.reshape(self.ndim,1)
-        # eps_1 = self.eps_1
         # eps_2 = self.eps_2
-        # inverse = np.linalg.inv(J/eps_1*np.linalg.inv(b) + 1./eps_2*I)
-        # D_exact = np.dot(inverse,E)
-        # print np.linalg.norm(D - D_exact)
-        # return D_exact
+        # J = StrainTensors['J'][gcounter]
+        # E = ElectricFieldx.reshape(self.ndim,1)
+        # D_exact = eps_2*E
+        # D = D_exact
 
         return D
+
+
+    def Permittivity(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
+        eps_2 = self.eps_2
+        I = StrainTensors['I']
+        self.dielectric_tensor = 1./eps_2*I
+        return self.dielectric_tensor

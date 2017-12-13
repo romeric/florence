@@ -32,7 +32,7 @@ class LaplacianSolver(object):
 
     def Solve(self, formulation=None, mesh=None,
         material=None, boundary_condition=None,
-        function_spaces=None, solver=None):
+        function_spaces=None, solver=None, Eulerx=None, Eulerp=None):
         """Main solution routine for LaplacianSolver """
 
         # INITIATE DATA FOR THE ANALYSIS
@@ -58,8 +58,10 @@ class LaplacianSolver(object):
 
         # ALLOCATE FOR GEOMETRY - GetDirichletBoundaryConditions CHANGES THE MESH
         # SO EULERX SHOULD BE ALLOCATED AFTERWARDS
-        Eulerx = np.copy(mesh.points)
-        Eulerp = np.zeros((mesh.points.shape[0]))
+        if Eulerx is None:
+            Eulerx = np.copy(mesh.points)
+        if Eulerp is None:
+            Eulerp = np.zeros((mesh.points.shape[0]))
 
         # FIND PURE NEUMANN (EXTERNAL) NODAL FORCE VECTOR
         NeumannForces = boundary_condition.ComputeNeumannForces(mesh, material, function_spaces,
@@ -174,7 +176,10 @@ class LaplacianSolver(object):
             # STORE THE INFORMATION IF NEWTON-RAPHSON FAILS
             if self.newton_raphson_failed_to_converge:
                 solver.condA = np.NAN
-                TotalDisp = TotalDisp[:,:,:Increment]
+                if Increment==0:
+                    TotalDisp = TotalDisp.ravel()
+                else:
+                    TotalDisp = TotalDisp[:,:Increment]
                 self.number_of_load_increments = Increment
                 break
 
@@ -187,7 +192,7 @@ class LaplacianSolver(object):
                         self.number_of_load_increments = Increment
                     break
 
-
+        # print(TotalDisp.shape)
         return TotalDisp
 
 
@@ -204,8 +209,9 @@ class LaplacianSolver(object):
         IncDirichlet = boundary_condition.UpdateFixDoFs(AppliedDirichletInc,
             K.shape[0],formulation.nvar)
         # UPDATE EULERIAN COORDINATE
-        Eulerx += IncDirichlet[:,:formulation.ndim]
-        Eulerp += IncDirichlet[:,-1]
+        # Eulerx += IncDirichlet[:,:formulation.ndim]
+        # Eulerp += IncDirichlet[:,-1]
+        Eulerp += IncDirichlet[:,0]
 
         while self.norm_residual > Tolerance or Iter==0:
             # GET THE REDUCED SYSTEM OF EQUATIONS
@@ -218,10 +224,11 @@ class LaplacianSolver(object):
             dU = boundary_condition.UpdateFreeDoFs(sol,K.shape[0],formulation.nvar)
 
             # UPDATE THE EULERIAN COMPONENTS
-            # UPDATE THE GEOMETRY
-            Eulerx += dU[:,:formulation.ndim]
-            # GET ITERATIVE ELECTRIC POTENTIAL
-            Eulerp += dU[:,-1]
+            # # UPDATE THE GEOMETRY
+            # Eulerx += dU[:,:formulation.ndim]
+            # # GET ITERATIVE ELECTRIC POTENTIAL
+            # Eulerp += dU[:,-1]
+            Eulerp += dU[:,0]
 
             # RE-ASSEMBLE - COMPUTE STIFFNESS AND INTERNAL TRACTION FORCES
             K, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material,
