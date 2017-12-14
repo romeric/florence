@@ -22,12 +22,20 @@ class IdealDielectric(Material):
         self.H_VoigtSize = self.ndim
 
         # LOW LEVEL DISPATCHER
-        # self.has_low_level_dispatcher = True
-        self.has_low_level_dispatcher = False
+        self.has_low_level_dispatcher = True
+        # self.has_low_level_dispatcher = False
 
     def KineticMeasures(self,F,ElectricFieldx, elem=0):
-        from Florence.MaterialLibrary.LLDispatch._IdealDielectric_ import KineticMeasures
-        return KineticMeasures(self,np.ascontiguousarray(F), ElectricFieldx)
+        # from Florence.MaterialLibrary.LLDispatch._IdealDielectric_ import KineticMeasures
+        # D, H_Voigt = KineticMeasures(self,np.ascontiguousarray(F), ElectricFieldx)
+        # return D, None, H_Voigt
+        ndim = self.ndim
+        eps_1 = self.eps_1
+        J = np.linalg.det(F)
+        I = np.eye(ndim,ndim)
+        D = eps_1*einsum("i,ij->ij",J,ElectricFieldx)[...,None]
+        H_Voigt = np.broadcast_to(1./eps_1*I,(J.shape[0],ndim,ndim))
+        return np.ascontiguousarray(D), None, np.ascontiguousarray(H_Voigt)
 
     def Hessian(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
         I = StrainTensors['I']
@@ -44,3 +52,12 @@ class IdealDielectric(Material):
         E = ElectricFieldx.reshape(self.ndim,1)
         D_exact = eps_1/J*E
         return D_exact
+
+    def Permittivity(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
+        I = StrainTensors['I']
+        eps_1 = self.eps_1
+        self.dielectric_tensor = 1./eps_1*I
+        return self.dielectric_tensor
+
+    def ElectrostaticMeasures(self,F,ElectricFieldx, elem=0):
+        return self.KineticMeasures(F,ElectricFieldx, elem)

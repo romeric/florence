@@ -9,12 +9,11 @@ cimport numpy as np
 
 ctypedef double Real
 
-cdef extern from "_ConstitutiveStiffnessDPF_.h":
+cdef extern from "_ConstitutiveStiffnessLaplacian_.h":
 
-    inline void _ConstitutiveStiffnessIntegrandDPF_Filler_(Real *stiffness, Real *traction,
+    inline void _ConstitutiveStiffnessLaplacian_Filler_(Real *stiffness, Real *traction,
         const Real* SpatialGradient,
         const Real* ElectricDisplacementx,
-        const Real* CauchyStressTensor,
         const Real* H_Voigt,
         const Real* detJ,
         int ngauss,
@@ -25,9 +24,8 @@ cdef extern from "_ConstitutiveStiffnessDPF_.h":
         int requires_geometry_update) nogil
 
 
-def __ConstitutiveStiffnessIntegrandDPF__(np.ndarray[Real, ndim=3, mode='c'] SpatialGradient,
+def __ConstitutiveStiffnessIntegrandLaplacian__(np.ndarray[Real, ndim=3, mode='c'] SpatialGradient,
     np.ndarray[Real, ndim=3, mode='c'] ElectricDisplacementx,
-    np.ndarray[Real, ndim=3, mode='c'] CauchyStressTensor,
     np.ndarray[Real, ndim=3, mode='c'] H_Voigt,
     np.ndarray[Real, ndim=1] detJ,
     int nvar,
@@ -43,10 +41,9 @@ def __ConstitutiveStiffnessIntegrandDPF__(np.ndarray[Real, ndim=3, mode='c'] Spa
     cdef np.ndarray[Real, ndim=2, mode='c'] stiffness = np.zeros((local_size,
         local_size),dtype=np.float64)
 
-    _ConstitutiveStiffnessIntegrandDPF_Filler_(&stiffness[0,0], &traction[0,0],
+    _ConstitutiveStiffnessLaplacian_Filler_(&stiffness[0,0], &traction[0,0],
         &SpatialGradient[0,0,0],
         &ElectricDisplacementx[0,0,0],
-        &CauchyStressTensor[0,0,0],
         &H_Voigt[0,0,0], &detJ[0],
         ngauss,
         nodeperelem,
