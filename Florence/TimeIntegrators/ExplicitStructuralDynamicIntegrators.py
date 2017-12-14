@@ -221,7 +221,7 @@ class ExplicitStructuralDynamicIntegrators(object):
             if np.isnan(norm(U)) or np.abs(U.max()/(U0.max()+1e-14)) > tol:
                 print("Explicit solver blew up! Norm of incremental solution is too large")
                 TotalDisp = TotalDisp[:,:,:Increment]
-                self.number_of_load_increments = Increment
+                fem_solver.number_of_load_increments = Increment
                 break
 
             # UPDATE RESULTS FOR NEXT STEP
