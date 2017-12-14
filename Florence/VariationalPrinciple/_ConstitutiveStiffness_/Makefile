@@ -52,9 +52,16 @@ build_module:
 	     -I$(NUMPY_INCLUDE_PATH) -I$(BLAS_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION) -L$(BLAS_LD_PATH) -l$(BLAS_VERSION)
 	@$(MOVE) _ConstitutiveStiffnessDPF_.$(EXT_POSTFIX) ../
 
+	@echo "Building low level electrostatic constitutive stiffness dispatcher module"
+	$(CYTHON) _ConstitutiveStiffnessLaplacian_.pyx
+	$(CXX) $(CXXSTD) $(CXXFLAGS) _ConstitutiveStiffnessLaplacian_.cpp -o _ConstitutiveStiffnessLaplacian_.$(EXT_POSTFIX) -I. -I$(PYTHON_INCLUDE_PATH) \
+	     -I$(NUMPY_INCLUDE_PATH) -I$(BLAS_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION) -L$(BLAS_LD_PATH) -l$(BLAS_VERSION)
+	@$(MOVE) _ConstitutiveStiffnessLaplacian_.$(EXT_POSTFIX) ../
+
 clean:
 	$(REMOVE) _ConstitutiveStiffnessDF_.cpp _ConstitutiveStiffnessDF_.$(EXT_POSTFIX) ../_ConstitutiveStiffnessDF_.$(EXT_POSTFIX)
 	$(REMOVE) _ConstitutiveStiffnessDPF_.cpp _ConstitutiveStiffnessDPF_.$(EXT_POSTFIX) ../_ConstitutiveStiffnessDPF_.$(EXT_POSTFIX)
+	$(REMOVE)  _ConstitutiveStiffnessLaplacian_.cpp _ConstitutiveStiffnessLaplacian_.$(EXT_POSTFIX) ../_ConstitutiveStiffnessLaplacian_.$(EXT_POSTFIX)
 
 source_clean:
-	$(REMOVE) _ConstitutiveStiffnessDF_.cpp _ConstitutiveStiffnessDPF_.cpp
+	$(REMOVE) _ConstitutiveStiffnessDF_.cpp _ConstitutiveStiffnessDPF_.cpp _ConstitutiveStiffnessLaplacian_.cpp

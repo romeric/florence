@@ -121,3 +121,10 @@ class IsotropicElectroMechanics_108(Material):
         I = StrainTensors['I']
         self.dielectric_tensor = 1./eps_2*I
         return self.dielectric_tensor
+
+    def ElectrostaticMeasures(self,F,ElectricFieldx, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._IsotropicElectroMechanics_108_ import KineticMeasures
+        D, _, H_Voigt = KineticMeasures(self,np.ascontiguousarray(F), ElectricFieldx)
+        H_Voigt = np.linalg.inv(np.ascontiguousarray(H_Voigt[:,-self.ndim:,-self.ndim:]))
+        return D, None, H_Voigt
+

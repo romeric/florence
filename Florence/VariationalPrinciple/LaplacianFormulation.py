@@ -4,7 +4,7 @@ from Florence import QuadratureRule, FunctionSpace
 
 from Florence.FiniteElements.LocalAssembly.KinematicMeasures import *
 from Florence.FiniteElements.LocalAssembly._KinematicMeasures_ import _KinematicMeasures_
-# from ._ConstitutiveStiffnessDPF_ import __ConstitutiveStiffnessIntegrandDPF__
+from ._ConstitutiveStiffnessLaplacian_ import __ConstitutiveStiffnessIntegrandLaplacian__
 from Florence.Tensor import issymetric
 from Florence.LegendreTransform import LegendreTransform
 
@@ -223,10 +223,26 @@ class LaplacianFormulation(VariationalPrinciple):
 
             # INTEGRATE TRACTION FORCE
             tractionforce += t*detJ[counter]
-
             # INTEGRATE STIFFNESS
             stiffness += BDB_1*detJ[counter]
 
+        return stiffness, tractionforce
+
+
+    def __GetLocalStiffness__(self, function_space, material, LagrangeElemCoords,
+        EulerELemCoords, ElectricPotentialElem, fem_solver, elem=0):
+        """Get stiffness matrix of the system"""
+
+        # GET LOCAL KINEMATICS
+        SpatialGradient, F, detJ = _KinematicMeasures_(function_space.Jm, function_space.AllGauss[:,0], LagrangeElemCoords,
+            EulerELemCoords, fem_solver.requires_geometry_update)
+        # GET ELECTRIC FIELD
+        ElectricFieldx = - np.einsum('ijk,j',SpatialGradient,ElectricPotentialElem)
+        # COMPUTE WORK-CONJUGATES AND HESSIAN AT THIS GAUSS POINT
+        ElectricDisplacementx, _, H_Voigt = material.KineticMeasures(F, ElectricFieldx, elem=elem)
+        # COMPUTE LOCAL CONSTITUTIVE STIFFNESS AND TRACTION
+        stiffness, tractionforce = __ConstitutiveStiffnessIntegrandLaplacian__(SpatialGradient,ElectricDisplacementx,
+            H_Voigt,detJ,self.nvar,fem_solver.requires_geometry_update)
 
         return stiffness, tractionforce
 
@@ -253,52 +269,11 @@ class LaplacianFormulation(VariationalPrinciple):
                 B[::nvar,0] = SpatialGradient[0,:]
                 B[::nvar,1] = SpatialGradient[1,:]
 
-
             BDB = np.dot(np.dot(B,H_Voigt),B.T)
             t = np.dot(B,TotalTraction)
 
             return BDB, t
 
-
-
-    # def __GetLocalStiffness__(self, function_space, material, LagrangeElemCoords,
-    #     EulerELemCoords, ElectricPotentialElem, fem_solver, elem=0):
-    #     """Get stiffness matrix of the system"""
-
-    #     # GET LOCAL KINEMATICS
-    #     SpatialGradient, F, detJ = _KinematicMeasures_(function_space.Jm, function_space.AllGauss[:,0], LagrangeElemCoords,
-    #         EulerELemCoords, fem_solver.requires_geometry_update)
-    #     # GET ELECTRIC FIELD
-    #     ElectricFieldx = - np.einsum('ijk,j',SpatialGradient,ElectricPotentialElem)
-    #     # COMPUTE WORK-CONJUGATES AND HESSIAN AT THIS GAUSS POINT
-    #     ElectricDisplacementx, CauchyStressTensor, H_Voigt = material.KineticMeasures(F, ElectricFieldx, elem=elem)
-    #     # COMPUTE LOCAL CONSTITUTIVE STIFFNESS AND TRACTION
-    #     stiffness, tractionforce = __ConstitutiveStiffnessIntegrandDPF__(SpatialGradient,ElectricDisplacementx,
-    #         CauchyStressTensor,H_Voigt,detJ,self.nvar,fem_solver.requires_geometry_update)
-    #     # COMPUTE LOCAL GEOMETRIC STIFFNESS
-    #     if fem_solver.requires_geometry_update:
-    #         stiffness += self.__GeometricStiffnessIntegrand__(SpatialGradient,CauchyStressTensor,detJ)
-
-    #     return stiffness, tractionforce
-
-
-    # def ConstitutiveStiffnessIntegrand(self, B, SpatialGradient, ElectricDisplacementx,
-    #     CauchyStressTensor, H_Voigt, analysis_nature="nonlinear", has_prestress=True):
-    #     """Overrides base for electric potential formulation"""
-
-    #     # MATRIX FORM
-    #     SpatialGradient = SpatialGradient.T.copy()
-    #     ElectricDisplacementx = ElectricDisplacementx.flatten().copy()
-
-    #     FillConstitutiveB(B,SpatialGradient,self.ndim,self.nvar)
-    #     BDB = B.dot(H_Voigt.dot(B.T))
-
-    #     t=[]
-    #     if analysis_nature == 'nonlinear' or has_prestress:
-    #         TotalTraction = GetTotalTraction(CauchyStressTensor,ElectricDisplacementx)
-    #         t = np.dot(B,TotalTraction)
-
-    #     return BDB, t
 
 
     def GetLocalTraction(self, function_space, material, LagrangeElemCoords,

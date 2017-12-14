@@ -150,7 +150,7 @@ class ExplicitStructuralDynamicIntegrators(object):
         TotalDisp[:,:formulation.ndim,0] = U00
         TotalDisp[:,:formulation.ndim,1] = U0
 
-        # SETUP THE ELECTROSTATIC SOLVER PARAMETERS ONCE
+        # SET UP THE ELECTROSTATICS SOLVER PARAMETERS ONCE
         if formulation.fields == "electro_mechanics":
             self.SetupElectrostaticsImplicit(mesh, formulation, boundary_condition, material, solver, Eulerx)
 
@@ -207,10 +207,6 @@ class ExplicitStructuralDynamicIntegrators(object):
             if formulation.fields == "electro_mechanics":
                 Eulerp[:] = self.SolveElectrostaticsImplicit(mesh, formulation, boundary_condition, material, solver, Eulerx)
 
-            # UPDATE RESULTS FOR NEXT STEP
-            U00[:,:formulation.ndim] = U0
-            U0[:,:formulation.ndim]  = U
-
             # SAVE RESULTS
             if Increment % fem_solver.save_frequency == 0 or\
                 (Increment == LoadIncrement - 1 and save_counter<TotalDisp.shape[2]):
@@ -220,11 +216,17 @@ class ExplicitStructuralDynamicIntegrators(object):
                 save_counter += 1
 
             # STORE THE INFORMATION IF EXPLICIT BLOWS UP
-            if np.isnan(norm(U)) or norm(U[:,:formulation.ndim] - U0)/(norm(U0)+1e-12)>1e04:
+            tol = 1e200 if Increment < 5 else 10.
+            # if np.isnan(norm(U)) or norm(U - U0)/(norm(U0)+1e-14)> tol:
+            if np.isnan(norm(U)) or np.abs(U.max()/(U0.max()+1e-14)) > tol:
                 print("Explicit solver blew up! Norm of incremental solution is too large")
                 TotalDisp = TotalDisp[:,:,:Increment]
                 self.number_of_load_increments = Increment
                 break
+
+            # UPDATE RESULTS FOR NEXT STEP
+            U00[:,:formulation.ndim] = U0
+            U0[:,:formulation.ndim]  = U
 
             # ASSEMBLE INTERNAL TRACTION FORCES
             t_assembly = time()
@@ -294,6 +296,83 @@ class ExplicitStructuralDynamicIntegrators(object):
         return TotalDisp
 
 
+    def SetupElectrostaticsImplicit(self, mesh, formulation, boundary_condition, material, solver, Eulerx):
+        """setup implicit electrostatic problem
+        """
+
+        from Florence import BoundaryCondition, FEMSolver, IdealDielectric
+        from Florence.VariationalPrinciple import LaplacianFormulation
+        emesh = deepcopy(mesh)
+        emesh.points = np.copy(Eulerx)
+        # ematerial = IdealDielectric(emesh.InferSpatialDimension(),eps_1=material.eps_2)
+        ematerial = deepcopy(material)
+        # ematerial.has_low_level_dispatcher = False
+        ematerial.Hessian = ematerial.Permittivity
+        ematerial.KineticMeasures = ematerial.ElectrostaticMeasures
+        ematerial.H_VoigtSize = formulation.ndim
+        ematerial.nvar = 1
+
+        eboundary_condition = BoundaryCondition()
+        # ONLY CONSTANT LOAD AT THE MOMENT
+        eboundary_condition.dirichlet_flags = boundary_condition.dirichlet_flags[:,-1]
+        if boundary_condition.neumann_flags is not None:
+            eboundary_condition.neumann_flags = boundary_condition.neumann_flags[:,-1]
+        eformulation = LaplacianFormulation(mesh)
+        efem_solver = FEMSolver(number_of_load_increments=1,analysis_nature="nonlinear")
+
+        self.emesh = emesh
+        self.ematerial = ematerial
+        self.eformulation = eformulation
+        self.eboundary_condition = eboundary_condition
+        self.efem_solver = efem_solver
+
+
+    def SolveElectrostaticsImplicit(self, mesh, formulation, boundary_condition, material, solver, Eulerx):
+        """Solve implicit electrostatic problem
+        """
+
+        # IF ALL ELECTRIC DoFs ARE FIXED
+        if mesh.points.shape[0] == self.electric_out.shape[0]:
+            return self.applied_dirichlet_electric
+
+        print("\nSolving the electrostatics problem iteratively")
+        esolution = self.efem_solver.Solve(formulation=self.eformulation, mesh=self.emesh,
+            material=self.ematerial, boundary_condition=self.eboundary_condition, solver=solver, Eulerx=Eulerx)
+        print("Finished solving the electrostatics problem\n")
+
+        return esolution.sol.ravel()
+
+
+
+    def UpdateFixMechanicalDoFs(self, AppliedDirichletInc, fsize, nvar):
+        """Updates the geometry (DoFs) with incremental Dirichlet boundary conditions
+            for fixed/constrained degrees of freedom only. Needs to be applied per time steps"""
+
+        # GET TOTAL SOLUTION
+        TotalSol = np.zeros((fsize,1))
+        TotalSol[self.mech_out,0] = AppliedDirichletInc
+
+        # RE-ORDER SOLUTION COMPONENTS
+        dU = TotalSol.reshape(int(TotalSol.shape[0]/nvar),nvar)
+
+        return dU
+
+    def UpdateFreeMechanicalDoFs(self, sol, fsize, nvar):
+        """Updates the geometry with iterative solutions of Newton-Raphson
+            for free degrees of freedom only. Needs to be applied per time NR iteration"""
+
+        # GET TOTAL SOLUTION
+        TotalSol = np.zeros((fsize,1))
+        TotalSol[self.mech_in,0] = sol
+
+        # RE-ORDER SOLUTION COMPONENTS
+        dU = TotalSol.reshape(int(TotalSol.shape[0]/nvar),nvar)
+
+        return dU
+
+
+
+
 
     def ComputeEnergyDissipation(self,function_space,mesh,material,formulation,fem_solver,
         Eulerx, TotalDisp, NeumannForces, M, velocities, Increment):
@@ -346,110 +425,3 @@ class ExplicitStructuralDynamicIntegrators(object):
 
         total_energy = internal_energy + kinetic_energy - external_energy
         return total_energy, internal_energy, kinetic_energy, external_energy
-
-
-    def SetupElectrostaticsImplicit(self, mesh, formulation, boundary_condition, material, solver, Eulerx):
-        """setup implicit electrostatic problem
-        """
-
-        from Florence import BoundaryCondition, FEMSolver, IdealDielectric
-        from Florence.VariationalPrinciple import LaplacianFormulation
-        emesh = deepcopy(mesh)
-        emesh.points = np.copy(Eulerx)
-        ematerial = IdealDielectric(emesh.InferSpatialDimension(),eps_1=material.eps_2)
-        # ematerial = deepcopy(material)
-        # ematerial.has_low_level_dispatcher = False
-        # ematerial.Hessian = ematerial.Permittivity
-        # ematerial.H_VoigtSize = formulation.ndim
-
-        eboundary_condition = BoundaryCondition()
-        # eboundary_condition.columns_in  = self.electric_in
-        # eboundary_condition.columns_out = self.electric_out
-        # eboundary_condition.applied_dirichlet = self.applied_dirichlet_electric
-        eboundary_condition.dirichlet_flags = boundary_condition.dirichlet_flags[:,-1]
-
-        # print(eboundary_condition.columns_in)
-        # print(eboundary_condition.columns_out)
-        # print(eboundary_condition.applied_dirichlet)
-        # print(boundary_condition.dirichlet_flags)
-        # exit()
-
-        eformulation = LaplacianFormulation(mesh)
-        efem_solver = FEMSolver(number_of_load_increments=1)
-
-        self.emesh = emesh
-        self.ematerial = ematerial
-        self.eformulation = eformulation
-        self.eboundary_condition = eboundary_condition
-        self.efem_solver = efem_solver
-
-
-    def SolveElectrostaticsImplicit(self, mesh, formulation, boundary_condition, material, solver, Eulerx):
-        """Solve implicit electrostatic problem
-        """
-        # from Florence import BoundaryCondition, FEMSolver, IdealDielectric
-        # from Florence.VariationalPrinciple import LaplacianFormulation
-        # emesh = deepcopy(mesh)
-        # emesh.points = np.copy(Eulerx)
-        # # ematerial = deepcopy(material)
-        # ematerial = IdealDielectric(emesh.InferSpatialDimension(),eps_1=material.eps_2)
-
-        # eboundary_condition = BoundaryCondition()
-        # # eboundary_condition.columns_in  = self.electric_in
-        # # eboundary_condition.columns_out = self.electric_out
-        # # eboundary_condition.applied_dirichlet = self.applied_dirichlet_electric
-        # eboundary_condition.dirichlet_flags = boundary_condition.dirichlet_flags[:,-1]
-
-        # # print(eboundary_condition.columns_in)
-        # # print(eboundary_condition.columns_out)
-        # # print(eboundary_condition.applied_dirichlet)
-        # # exit()
-
-        # eformulation = LaplacianFormulation(mesh)
-        # efem_solver = FEMSolver(number_of_load_increments=1)
-        # esolution = efem_solver.Solve(formulation=eformulation, mesh=emesh,
-        #     material=ematerial, boundary_condition=eboundary_condition, solver=solver)
-
-        # # print(esolution.sol.shape)
-        # return esolution.sol.ravel()
-
-        # print(mesh.points.shape[0],self.eboundary_condition.columns_out.shape)
-        # print(mesh.points.shape[0],self.electric_out.shape)
-        # exit()
-
-        # IF ALL ELECTRIC DoFs ARE FIXED
-        if mesh.points.shape[0] == self.electric_out.shape[0]:
-            return self.applied_dirichlet_electric
-
-        esolution = self.efem_solver.Solve(formulation=self.eformulation, mesh=self.emesh,
-            material=self.ematerial, boundary_condition=self.eboundary_condition, solver=solver, Eulerx=Eulerx)
-
-        return esolution.sol.ravel()
-
-
-
-    def UpdateFixMechanicalDoFs(self, AppliedDirichletInc, fsize, nvar):
-        """Updates the geometry (DoFs) with incremental Dirichlet boundary conditions
-            for fixed/constrained degrees of freedom only. Needs to be applied per time steps"""
-
-        # GET TOTAL SOLUTION
-        TotalSol = np.zeros((fsize,1))
-        TotalSol[self.mech_out,0] = AppliedDirichletInc
-
-        # RE-ORDER SOLUTION COMPONENTS
-        dU = TotalSol.reshape(int(TotalSol.shape[0]/nvar),nvar)
-
-        return dU
-
-    def UpdateFreeMechanicalDoFs(self, sol, fsize, nvar):
-        """Updates the geometry with iterative solutions of Newton-Raphson
-            for free degrees of freedom only. Needs to be applied per time NR iteration"""
-
-        # GET TOTAL SOLUTION
-        TotalSol = np.zeros((fsize,1))
-        TotalSol[self.mech_in,0] = sol
-
-        # RE-ORDER SOLUTION COMPONENTS
-        dU = TotalSol.reshape(int(TotalSol.shape[0]/nvar),nvar)
-
-        return dU
