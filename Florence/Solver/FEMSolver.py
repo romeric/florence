@@ -172,7 +172,7 @@ class FEMSolver(object):
             if self.save_frequency != 1:
                 warn("save_frequency must be one")
                 self.save_frequency = 1
-        if self.analysis_type == "dynamics" and self.analysis_subtype=="implicit":
+        if self.analysis_type == "dynamic" and self.analysis_subtype=="implicit":
             if self.save_frequency != 1:
                 warn("save_frequency must be one")
                 self.save_frequency = 1
