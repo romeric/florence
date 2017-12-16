@@ -13,6 +13,9 @@ import pyximport
 pyximport.install(setup_args={'include_dirs': np.get_include()})
 from .DisplacementPotentialApproachIndices import *
 
+
+__all__ = ["DisplacementPotentialFormulation"]
+
 class DisplacementPotentialFormulation(VariationalPrinciple):
 
     def __init__(self, mesh, variables_order=(1,),

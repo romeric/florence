@@ -82,8 +82,8 @@ class ExplicitStructuralDynamicIntegrators(object):
         mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition, fem_solver):
 
         # CHECK FORMULATION
-        # if formulation.fields != "mechanics":
-            # raise NotImplementedError("Explicit solver for {} is not implemented yet".format(formulation.fields))
+        if formulation.fields != "mechanics" and formulation.fields != "electro_mechanics":
+            raise NotImplementedError("Explicit solver for {} is not available".format(formulation.fields))
 
         # GET BOUNDARY CONDITIONS INFROMATION
         self.GetBoundaryInfo(mesh, formulation,boundary_condition)
@@ -232,7 +232,17 @@ class ExplicitStructuralDynamicIntegrators(object):
             t_assembly = time()
             TractionForces = AssembleExplicit(fem_solver,function_spaces[0], formulation, mesh, material,
                 Eulerx, Eulerp)[0].ravel()
-            # TractionForces += self.TContact(mesh,material,Eulerx).ravel()
+            # CHECK CONTACT AND ASSEMBLE IF DETECTED
+            if fem_solver.has_contact:
+                TractionForcesContact = np.zeros_like(TractionForces)
+                TractionForcesContact = fem_solver.contact_formulation.AssembleTractions(mesh,material,Eulerx).ravel()
+                if formulation.fields == "electro_mechanics":
+                    TractionForces[self.mechanical_dofs] += TractionForcesContact
+                elif formulation.fields == "mechanics":
+                    TractionForces += TractionForcesContact
+                else:
+                    raise NotImplementedError("Contact algorithm for {} is not available".format(formulation.fields))
+
             print("Explicit assembly time is {} seconds".format(time()-t_assembly))
 
 
@@ -302,9 +312,10 @@ class ExplicitStructuralDynamicIntegrators(object):
         """
 
         from Florence import BoundaryCondition, FEMSolver, IdealDielectric
-        from Florence.VariationalPrinciple import LaplacianFormulation
+        from Florence.VariationalPrinciple import LaplacianFormulation, ExplicitPenaltyContactFormulation
         emesh = deepcopy(mesh)
-        emesh.points = np.copy(Eulerx)
+        # emesh.points = np.copy(Eulerx)
+        emesh.points = mesh.points
         # ematerial = IdealDielectric(emesh.InferSpatialDimension(),eps_1=material.eps_2)
         ematerial = deepcopy(material)
         # ematerial.has_low_level_dispatcher = False
@@ -427,44 +438,3 @@ class ExplicitStructuralDynamicIntegrators(object):
         total_energy = internal_energy + kinetic_energy - external_energy
         return total_energy, internal_energy, kinetic_energy, external_energy
 
-
-
-    def TContact(self,mesh,material,Eulerx):
-
-        # wall situtated at x=5
-        # L = 1+1e-6
-        L = 3
-        normal = np.array([-1.,0.])
-        # normal = np.array([1.,0.])
-        # k = 1e5/2.
-        k = 1e4
-        # k= 1e6
-        ndim = mesh.points.shape[1]
-
-
-
-        boundary_surface = mesh.edges
-        surfNodes_no, surfNodes_idx, surfNodes_inv = np.unique(boundary_surface, return_index=True, return_inverse=True)
-        surfNodes = Eulerx[surfNodes_no,:]
-        gNx = surfNodes.dot(normal) + L
-
-        T_contact = np.zeros((mesh.points.shape[0]*ndim,1))
-        contactNodes_idx = gNx < 1e-6
-        # contactNodes = mesh.points[contactNodes_idx,:]
-        contactNodes = surfNodes[contactNodes_idx,:]
-        # print(contactNodes.shape)
-        # print(T_contact.shape)
-        if contactNodes.shape[0] == 0:
-            return T_contact
-
-
-        contactNodes_global_idx = surfNodes_no[contactNodes_idx].astype(np.int64)
-
-        normal_gap = gNx[contactNodes_idx]
-        for node in range(contactNodes.shape[0]):
-            t_local = k*normal_gap[node]*normal
-            T_contact[contactNodes_global_idx[node]*ndim:(contactNodes_global_idx[node]+1)*ndim,0] += t_local
-        # print T_contact
-
-        # print(norm(T_contact))
-        return -T_contact

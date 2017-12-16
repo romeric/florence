@@ -1,2 +1,2 @@
 from .StructuralDynamicIntegrator import StructuralDynamicIntegrators
-from .ExplicitStructuralDynamicIntegrators import ExplicitStructuralDynamicIntegrators
+from .ExplicitStructuralDynamicIntegrator import ExplicitStructuralDynamicIntegrators

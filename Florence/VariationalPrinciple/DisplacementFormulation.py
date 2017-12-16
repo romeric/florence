@@ -12,6 +12,8 @@ import pyximport
 pyximport.install(setup_args={'include_dirs': np.get_include()})
 from .DisplacementApproachIndices import *
 
+__all__ = ["DisplacementFormulation"]
+
 class DisplacementFormulation(VariationalPrinciple):
 
     def __init__(self, mesh, variables_order=(1,),

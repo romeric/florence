@@ -108,7 +108,6 @@ class IsotropicElectroMechanics_108(Material):
 
         # SANITY CHECK FOR IMPLICIT COMPUTATUTAION OF D
         # eps_2 = self.eps_2
-        # J = StrainTensors['J'][gcounter]
         # E = ElectricFieldx.reshape(self.ndim,1)
         # D_exact = eps_2*E
         # D = D_exact
@@ -120,11 +119,13 @@ class IsotropicElectroMechanics_108(Material):
         eps_2 = self.eps_2
         I = StrainTensors['I']
         self.dielectric_tensor = 1./eps_2*I
-        return self.dielectric_tensor
+        # Negative definite inverse is needed due to Legendre transform
+        return -eps_2*I
 
     def ElectrostaticMeasures(self,F,ElectricFieldx, elem=0):
         from Florence.MaterialLibrary.LLDispatch._IsotropicElectroMechanics_108_ import KineticMeasures
         D, _, H_Voigt = KineticMeasures(self,np.ascontiguousarray(F), ElectricFieldx)
-        H_Voigt = np.linalg.inv(np.ascontiguousarray(H_Voigt[:,-self.ndim:,-self.ndim:]))
+        # H_Voigt = np.linalg.inv(np.ascontiguousarray(H_Voigt[:,-self.ndim:,-self.ndim:]))
+        H_Voigt = np.ascontiguousarray(H_Voigt[:,-self.ndim:,-self.ndim:])
         return D, None, H_Voigt
 
