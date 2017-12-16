@@ -30,17 +30,23 @@ class IdealDielectric(Material):
         # D, H_Voigt = KineticMeasures(self,np.ascontiguousarray(F), ElectricFieldx)
         # return D, None, H_Voigt
         ndim = self.ndim
-        eps_1 = self.eps_1
+        eps_1 = float(self.eps_1)
         J = np.linalg.det(F)
         I = np.eye(ndim,ndim)
-        D = eps_1*einsum("i,ij->ij",J,ElectricFieldx)[...,None]
-        H_Voigt = np.broadcast_to(1./eps_1*I,(J.shape[0],ndim,ndim))
+        D = einsum("i,ij->ij",eps_1/J,ElectricFieldx)[...,None]
+        # H_Voigt = np.broadcast_to(1./eps_1*I,(J.shape[0],ndim,ndim))
+        # Negative definite inverse is needed due to Legendre transform
+        H_Voigt = np.einsum("i,jk",-eps_1/J,I)
+
         return np.ascontiguousarray(D), None, np.ascontiguousarray(H_Voigt)
 
     def Hessian(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
-        I = StrainTensors['I']
         eps_1 = self.eps_1
-        self.dielectric_tensor = 1./eps_1*I
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        # self.dielectric_tensor = 1./eps_1*I
+        # Negative definite inverse is needed due to Legendre transform
+        self.dielectric_tensor = -eps_1/J*I
         return self.dielectric_tensor
 
     def ElectricDisplacementx(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
@@ -54,9 +60,12 @@ class IdealDielectric(Material):
         return D_exact
 
     def Permittivity(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
-        I = StrainTensors['I']
         eps_1 = self.eps_1
-        self.dielectric_tensor = 1./eps_1*I
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        # self.dielectric_tensor = 1./eps_1*I
+        # Negative definite inverse is needed due to Legendre transform
+        self.dielectric_tensor = -eps_1/J*I
         return self.dielectric_tensor
 
     def ElectrostaticMeasures(self,F,ElectricFieldx, elem=0):

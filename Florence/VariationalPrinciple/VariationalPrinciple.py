@@ -9,6 +9,7 @@ pyximport.install(setup_args={'include_dirs': np.get_include()})
 from .DisplacementApproachIndices import FillGeometricB
 
 
+__all__ = ["VariationalPrinciple"]
 
 
 class VariationalPrinciple(object):

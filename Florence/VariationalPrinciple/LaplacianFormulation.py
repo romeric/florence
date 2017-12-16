@@ -8,9 +8,7 @@ from ._ConstitutiveStiffnessLaplacian_ import __ConstitutiveStiffnessIntegrandLa
 from Florence.Tensor import issymetric
 from Florence.LegendreTransform import LegendreTransform
 
-# import pyximport
-# pyximport.install(setup_args={'include_dirs': np.get_include()})
-# from .DisplacementPotentialApproachIndices import *
+__all__ = ["LaplacianFormulation"]
 
 class LaplacianFormulation(VariationalPrinciple):
 

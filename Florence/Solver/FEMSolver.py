@@ -44,7 +44,8 @@ class FEMSolver(object):
         include_physical_damping=False, damping_factor=0.1,
         compute_energy_dissipation=False, compute_linear_momentum_dissipation=False, total_time=1.,
         user_defined_break_func=None, user_defined_stop_func=None,
-        save_results=True, save_frequency=1):
+        save_results=True, save_frequency=1,
+        has_contact=False):
 
         self.has_low_level_dispatcher = has_low_level_dispatcher
 
@@ -98,13 +99,16 @@ class FEMSolver(object):
         self.user_defined_break_func = user_defined_break_func
         self.user_defined_stop_func = user_defined_stop_func
 
+        self.has_contact = has_contact
+
         self.fem_timer = 0.
 
         if self.newton_raphson_solution_tolerance is None:
             self.newton_raphson_solution_tolerance = 10.*self.newton_raphson_tolerance
 
 
-    def __checkdata__(self, material, boundary_condition, formulation, mesh, function_spaces, solver):
+    def __checkdata__(self, material, boundary_condition,
+        formulation, mesh, function_spaces, solver, contact_formulation=None):
         """Checks the state of data for FEMSolver"""
 
         # INITIAL CHECKS
@@ -119,6 +123,13 @@ class FEMSolver(object):
             raise ValueError("No material model chosen for the analysis")
         if formulation is None:
             raise ValueError("No variational form specified")
+        # MONKEY PATCH CONTACT FORMULATION
+        if contact_formulation is not None:
+            self.contact_formulation = contact_formulation
+            self.has_contact = True
+        else:
+            self.contact_formulation = None
+            self.has_contact = False
 
         # GET FUNCTION SPACES FROM THE FORMULATION
         if function_spaces is None:
@@ -292,13 +303,15 @@ class FEMSolver(object):
     def Solve(self, formulation=None, mesh=None,
         material=None, boundary_condition=None,
         function_spaces=None, solver=None,
+        contact_formulation=None,
         Eulerx=None, Eulerp=None):
         """Main solution routine for FEMSolver """
 
 
         # CHECK DATA CONSISTENCY
         #---------------------------------------------------------------------------#
-        function_spaces, solver = self.__checkdata__(material, boundary_condition, formulation, mesh, function_spaces, solver)
+        function_spaces, solver = self.__checkdata__(material, boundary_condition,
+            formulation, mesh, function_spaces, solver, contact_formulation=contact_formulation)
         #---------------------------------------------------------------------------#
 
         print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation info etc...')
