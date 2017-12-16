@@ -152,7 +152,7 @@ class ExplicitStructuralDynamicIntegrators(object):
 
         # SET UP THE ELECTROSTATICS SOLVER PARAMETERS ONCE
         if formulation.fields == "electro_mechanics":
-            self.SetupElectrostaticsImplicit(mesh, formulation, boundary_condition, material, solver, Eulerx)
+            self.SetupElectrostaticsImplicit(mesh, formulation, boundary_condition, material, solver, Eulerx, 0)
 
         save_counter = 1
         # TIME LOOP
@@ -205,7 +205,7 @@ class ExplicitStructuralDynamicIntegrators(object):
 
             # SOLVE ELECTROSTATICS PROBLEM
             if formulation.fields == "electro_mechanics":
-                Eulerp[:] = self.SolveElectrostaticsImplicit(mesh, formulation, boundary_condition, material, solver, Eulerx)
+                Eulerp[:] = self.SolveElectrostaticsImplicit(mesh, formulation, boundary_condition, material, solver, Eulerx, Increment)
 
             # SAVE RESULTS
             if Increment % fem_solver.save_frequency == 0 or\
@@ -307,7 +307,7 @@ class ExplicitStructuralDynamicIntegrators(object):
         return TotalDisp
 
 
-    def SetupElectrostaticsImplicit(self, mesh, formulation, boundary_condition, material, solver, Eulerx):
+    def SetupElectrostaticsImplicit(self, mesh, formulation, boundary_condition, material, solver, Eulerx, Increment):
         """setup implicit electrostatic problem
         """
 
@@ -324,11 +324,9 @@ class ExplicitStructuralDynamicIntegrators(object):
         ematerial.H_VoigtSize = formulation.ndim
         ematerial.nvar = 1
 
+        # SET UP BOUNDARY CONDITION DURING SOLUTION
         eboundary_condition = BoundaryCondition()
-        # ONLY CONSTANT LOAD AT THE MOMENT
-        eboundary_condition.dirichlet_flags = boundary_condition.dirichlet_flags[:,-1]
-        if boundary_condition.neumann_flags is not None:
-            eboundary_condition.neumann_flags = boundary_condition.neumann_flags[:,-1]
+
         eformulation = LaplacianFormulation(mesh)
         efem_solver = FEMSolver(number_of_load_increments=1,analysis_nature="nonlinear")
 
@@ -339,13 +337,26 @@ class ExplicitStructuralDynamicIntegrators(object):
         self.efem_solver = efem_solver
 
 
-    def SolveElectrostaticsImplicit(self, mesh, formulation, boundary_condition, material, solver, Eulerx):
+    def SolveElectrostaticsImplicit(self, mesh, formulation, boundary_condition, material, solver, Eulerx, Increment):
         """Solve implicit electrostatic problem
         """
 
         # IF ALL ELECTRIC DoFs ARE FIXED
         if mesh.points.shape[0] == self.electric_out.shape[0]:
-            return self.applied_dirichlet_electric
+            if self.applied_dirichlet_electric.ndim == 2:
+                return self.applied_dirichlet_electric[Increment]
+            else:
+                return self.applied_dirichlet_electric
+
+        if boundary_condition.dirichlet_flags.ndim==3:
+            self.eboundary_condition.dirichlet_flags = boundary_condition.dirichlet_flags[:,-1,Increment]
+        else:
+            self.eboundary_condition.dirichlet_flags = boundary_condition.dirichlet_flags[:,-1]
+        if boundary_condition.neumann_flags is not None:
+            if boundary_condition.dirichlet_flags.ndim==3:
+                self.eboundary_condition.neumann_flags = boundary_condition.neumann_flags[:,-1, Increment]
+            else:
+                self.eboundary_condition.neumann_flags = boundary_condition.neumann_flags[:,-1]
 
         print("\nSolving the electrostatics problem iteratively")
         esolution = self.efem_solver.Solve(formulation=self.eformulation, mesh=self.emesh,
