@@ -127,7 +127,7 @@ class PostProcess(object):
         if self.formulation is None:
             raise ValueError("formulation not set for post-processing")
         if self.material is None:
-            raise ValueError("mesh not set for post-processing")
+            raise ValueError("material not set for post-processing")
         if self.fem_solver is None:
             raise ValueError("FEM solver not set for post-processing")
 
@@ -943,6 +943,8 @@ class PostProcess(object):
             raise ValueError("Writer format not understood")
         formatter = fmt
 
+        if self.formulation is None:
+            raise ValueError("formulation not set for post-processing")
         if self.formulation.fields == "electrostatics":
             configuration = "original"
             tmp = np.copy(self.sol)

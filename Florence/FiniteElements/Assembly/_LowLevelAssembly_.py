@@ -22,6 +22,14 @@ except IOError:
     warn("Cannot use low level dispatchers for Assembly")
 
 
+try:
+    from ._LowLevelAssemblyExplicit_DF_DPF_ import _LowLevelAssemblyExplicit_DF_DPF_
+    has_low_level_dispatcher = True
+except IOError:
+    has_low_level_dispatcher = False
+    warn("Cannot use low level dispatchers for Assembly")
+
+
 __all__ = ['_LowLevelAssembly_']
 
 
@@ -50,6 +58,25 @@ def _LowLevelAssembly_(fem_solver, function_space, formulation, mesh, material, 
             shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
 
     return stiffness, T, F, mass
+
+
+def _LowLevelAssemblyExplicit_(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
+
+    # MAKE MESH DATA CONTIGUOUS
+    mesh.ChangeType()
+
+    # CALL LOW LEVEL ASSEMBLER
+    I_mass, J_mass, V_mass, \
+        T = _LowLevelAssemblyExplicit_DF_DPF_(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
+
+    F, mass = [], []
+
+    if fem_solver.analysis_type != "static" and fem_solver.is_mass_computed is False:
+        nvar = formulation.nvar
+        mass = csr_matrix((V_mass,(I_mass,J_mass)),
+            shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
+
+    return T, F, mass
 
 
 

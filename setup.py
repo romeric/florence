@@ -289,7 +289,7 @@ class FlorenceSetup(object):
         self.extension_paths = [tensor_path,mesh_path,jacobi_path,bp_path,
             km_path,gm_path,cm_path,tm_path,mm_path,material_path,assemble_path]
         # self.extension_paths = [cm_path]
-        # self.extension_paths = [material_path]
+        # self.extension_paths = [assemble_path]
 
     def SourceClean(self):
 
@@ -377,6 +377,11 @@ class FlorenceSetup(object):
                     execute('cd '+_path+' && make ' + self.compiler_args + " ASSEMBLY_NAME=_LowLevelAssemblyDPF_" + material)
 
                 execute('cd '+_path+' && python AOT_Assembler.py clean')
+
+                # Explicit assembler
+                execute('cd '+_path+' && make ' + self.compiler_args +\
+                    " ASSEMBLY_NAME=_LowLevelAssemblyExplicit_DF_DPF_ CONDF_INC=../../../VariationalPrinciple/_Traction_/\
+                    CONDF_INC=../../../VariationalPrinciple/_Traction_/")
 
         # Get rid of cython sources
         sys.stdout = open(os.devnull, 'w')

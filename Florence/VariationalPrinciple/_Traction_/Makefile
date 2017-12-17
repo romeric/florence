@@ -32,13 +32,13 @@ endif
 all: build_module
 
 build_module:
-	@echo "Building low level constitutive stiffness dispatcher modules"
+	@echo "Building low level mechanical traction dispatcher modules"
 	$(CYTHON) _TractionDF_.pyx
 	$(CXX) $(CXXSTD) $(CXXFLAGS) _TractionDF_.cpp -o _TractionDF_.$(EXT_POSTFIX) -I. -I$(PYTHON_INCLUDE_PATH) \
 	     -I$(NUMPY_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION)
 	@$(MOVE) _TractionDF_.$(EXT_POSTFIX) ../
 
-	@echo "Building low level electromechanical constitutive stiffness dispatcher module"
+	@echo "Building low level electromechanical traction dispatcher module"
 	$(CYTHON) _TractionDPF_.pyx
 	$(CXX) $(CXXSTD) $(CXXFLAGS) _TractionDPF_.cpp -o _TractionDPF_.$(EXT_POSTFIX) -I. -I$(PYTHON_INCLUDE_PATH) \
 	     -I$(NUMPY_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION)
