@@ -152,7 +152,10 @@ class ExplicitPenaltyContactFormulation(VariationalPrinciple):
         k = self.kappa
         ndim = mesh.points.shape[1]
 
-        boundary_surface = mesh.edges
+        if ndim == 2:
+            boundary_surface = mesh.edges
+        else:
+            boundary_surface = mesh.faces
         surfNodes_no, surfNodes_idx, surfNodes_inv = np.unique(boundary_surface, return_index=True, return_inverse=True)
         surfNodes = Eulerx[surfNodes_no,:]
         gNx = surfNodes.dot(normal) + L
