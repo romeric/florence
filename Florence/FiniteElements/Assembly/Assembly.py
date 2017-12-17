@@ -8,7 +8,7 @@ from scipy.sparse import coo_matrix, csc_matrix, csr_matrix
 
 from .SparseAssembly import SparseAssembly_Step_2
 from .SparseAssemblySmall import SparseAssemblySmall
-from ._LowLevelAssembly_ import _LowLevelAssembly_
+from ._LowLevelAssembly_ import _LowLevelAssembly_, _LowLevelAssemblyExplicit_
 
 import pyximport
 pyximport.install(setup_args={'include_dirs': np.get_include()})
@@ -20,7 +20,7 @@ import multiprocessing
 import Florence.ParallelProcessing.parmap as parmap
 
 
-__all__ = ['Assemble','AssembleForces']
+__all__ = ['Assemble', 'AssembleForces', 'AssembleExplicit']
 
 
 
@@ -669,6 +669,20 @@ def AssembleBodyForces(boundary_condition, mesh, material, function_space):
 
 
 def AssembleExplicit(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
+
+    if fem_solver.has_low_level_dispatcher and fem_solver.is_mass_computed is True:
+
+        if not material.has_low_level_dispatcher:
+            raise RuntimeError("Cannot dispatch to low level module, since material {} does not support it".format(type(material).__name__))
+
+        T, F, M = _LowLevelAssemblyExplicit_(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
+        if isinstance(F,np.ndarray):
+            F = F[:,None]
+        if M is not None:
+            fem_solver.is_mass_computed = True
+
+        return T[:,None], F, M
+
 
     # GET MESH DETAILS
     nvar = formulation.nvar

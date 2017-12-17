@@ -8,7 +8,7 @@
 typedef double Real;
 
 
-inline void GetTotalTraction_(Real *TotalTraction, const Real *CauchyStressTensor, int ndim) {
+inline void GetTotalTraction_DF_(Real *TotalTraction, const Real *CauchyStressTensor, int ndim) {
     if (ndim==3) {
         TotalTraction[0] = CauchyStressTensor[0];
         TotalTraction[1] = CauchyStressTensor[4];
@@ -25,7 +25,7 @@ inline void GetTotalTraction_(Real *TotalTraction, const Real *CauchyStressTenso
 }
 
 
-inline void FillConstitutiveB_(Real *B, const Real* SpatialGradient,
+inline void FillConstitutiveB_DF_(Real *B, const Real* SpatialGradient,
                      int ndim, int nvar, int rows, int cols) {
     int i = 0;
 
@@ -111,11 +111,11 @@ inline void _TractionDF_Filler_(Real *traction,
 
     for (int igauss = 0; igauss < ngauss; ++igauss) {
 
-        FillConstitutiveB_(B,&SpatialGradient[igauss*ndim*noderpelem],ndim,nvar,noderpelem,H_VoigtSize);
+        FillConstitutiveB_DF_(B,&SpatialGradient[igauss*ndim*noderpelem],ndim,nvar,noderpelem,H_VoigtSize);
 
         if (requires_geometry_update==1) {
             // Compute tractions
-            GetTotalTraction_(t, &CauchyStressTensor[igauss*ndim*ndim], ndim);
+            GetTotalTraction_DF_(t, &CauchyStressTensor[igauss*ndim*ndim], ndim);
 
             // Multiply B with traction - for loop is okay
             const Real detJ_igauss = detJ[igauss];

@@ -8,7 +8,7 @@
 typedef double Real;
 
 
-inline void GetTotalTraction_(Real *TotalTraction, const Real *CauchyStressTensor,
+inline void GetTotalTraction_DPF_(Real *TotalTraction, const Real *CauchyStressTensor,
     const Real *ElectricDisplacementx, int ndim) {
     if (ndim==3) {
         TotalTraction[0] = CauchyStressTensor[0];
@@ -33,7 +33,7 @@ inline void GetTotalTraction_(Real *TotalTraction, const Real *CauchyStressTenso
 }
 
 
-inline void FillConstitutiveB_(Real *B, const Real* SpatialGradient,
+inline void FillConstitutiveB_DPF_(Real *B, const Real* SpatialGradient,
                      int ndim, int nvar, int rows, int cols) {
     int i = 0;
 
@@ -129,11 +129,11 @@ inline void _TractionDPF_Filler_(Real *traction,
 
     for (int igauss = 0; igauss < ngauss; ++igauss) {
 
-        FillConstitutiveB_(B,&SpatialGradient[igauss*ndim*noderpelem],ndim,nvar,noderpelem,H_VoigtSize);
+        FillConstitutiveB_DPF_(B,&SpatialGradient[igauss*ndim*noderpelem],ndim,nvar,noderpelem,H_VoigtSize);
 
         if (requires_geometry_update==1) {
             // Compute tractions
-            GetTotalTraction_(t,
+            GetTotalTraction_DPF_(t,
                 &CauchyStressTensor[igauss*ndim*ndim],
                 &ElectricDisplacementx[igauss*ndim], ndim);
 

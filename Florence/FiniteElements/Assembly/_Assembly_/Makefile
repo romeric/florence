@@ -42,13 +42,14 @@ KIN_INC = ../../LocalAssembly/_KinematicMeasures_/
 MAT_INC = ../../../MaterialLibrary/LLDispatch/CythonSource/
 CONDF_INC = ../../../VariationalPrinciple/_ConstitutiveStiffness_/
 CONDPF_INC = ../../../VariationalPrinciple/_ConstitutiveStiffness_/
-GEO_INC = ../../../VariationalPrinciple/_GeometricStiffness_/ 
+GEO_INC = ../../../VariationalPrinciple/_GeometricStiffness_/
 MASS_INC = ../../../VariationalPrinciple/_Mass_/
+TRAC_INC = ../../../VariationalPrinciple/_Traction_/
 
 ifeq ($(findstring g++,$(CXX)),g++)
 ifneq ($(findstring clang++,$(CXX)),clang++)
 CXXFLAGS += -Wno-cpp -Wno-unused-function -Wno-maybe-uninitialized -fabi-version=6
-CXXFLAGS += -march=native -ffast-math -fwrapv -funroll-loops -finline-functions -finline-limit=$(INLINE_THRESHOLD) -ffp-contract=fast 
+CXXFLAGS += -march=native -ffast-math -fwrapv -funroll-loops -finline-functions -finline-limit=$(INLINE_THRESHOLD) -ffp-contract=fast
 else
 CXXFLAGS += -Wno-uninitialized -Wno-missing-braces -Wno-#warnings
 CXXFLAGS += -march=native -ffast-math -mllvm -inline-threshold=$(INLINE_THRESHOLD) -ffp-contract=fast
@@ -66,7 +67,7 @@ CXXFLAGS += $(FASTOR_OPTFLAGS) -I$(FASTOR_INCLUDE_PATH)
 
 all: build_module
 
-build_module: 
+build_module:
 	@echo "Building florence FEM assembly module: " $(ASSEMBLY_NAME)
 	$(CYTHON) $(ASSEMBLY_NAME).pyx
 	$(CXX) $(CXXSTD) $(CXXFLAGS) $(ASSEMBLY_NAME).cpp -o $(ASSEMBLY_NAME).$(EXT_POSTFIX) -I. \

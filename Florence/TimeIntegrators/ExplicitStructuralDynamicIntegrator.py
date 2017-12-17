@@ -152,7 +152,7 @@ class ExplicitStructuralDynamicIntegrators(object):
 
         # SET UP THE ELECTROSTATICS SOLVER PARAMETERS ONCE
         if formulation.fields == "electro_mechanics":
-            self.SetupElectrostaticsImplicit(mesh, formulation, boundary_condition, material, solver, Eulerx, 0)
+            self.SetupElectrostaticsImplicit(mesh, formulation, boundary_condition, material, fem_solver, solver, Eulerx, 0)
 
         save_counter = 1
         # TIME LOOP
@@ -205,7 +205,7 @@ class ExplicitStructuralDynamicIntegrators(object):
 
             # SOLVE ELECTROSTATICS PROBLEM
             if formulation.fields == "electro_mechanics":
-                Eulerp[:] = self.SolveElectrostaticsImplicit(mesh, formulation, boundary_condition, material, solver, Eulerx, Increment)
+                Eulerp[:] = self.SolveElectrostaticsImplicit(mesh, formulation, boundary_condition, material, fem_solver, solver, Eulerx, Increment)
 
             # SAVE RESULTS
             if Increment % fem_solver.save_frequency == 0 or\
@@ -306,7 +306,7 @@ class ExplicitStructuralDynamicIntegrators(object):
         return TotalDisp
 
 
-    def SetupElectrostaticsImplicit(self, mesh, formulation, boundary_condition, material, solver, Eulerx, Increment):
+    def SetupElectrostaticsImplicit(self, mesh, formulation, boundary_condition, material, fem_solver, solver, Eulerx, Increment):
         """setup implicit electrostatic problem
         """
 
@@ -327,7 +327,8 @@ class ExplicitStructuralDynamicIntegrators(object):
         eboundary_condition = BoundaryCondition()
 
         eformulation = LaplacianFormulation(mesh)
-        efem_solver = FEMSolver(number_of_load_increments=1,analysis_nature="nonlinear")
+        efem_solver = FEMSolver(number_of_load_increments=1,analysis_nature="nonlinear",
+            newton_raphson_tolerance=fem_solver.newton_raphson_tolerance)
 
         self.emesh = emesh
         self.ematerial = ematerial
@@ -336,7 +337,7 @@ class ExplicitStructuralDynamicIntegrators(object):
         self.efem_solver = efem_solver
 
 
-    def SolveElectrostaticsImplicit(self, mesh, formulation, boundary_condition, material, solver, Eulerx, Increment):
+    def SolveElectrostaticsImplicit(self, mesh, formulation, boundary_condition, material, fem_solver, solver, Eulerx, Increment):
         """Solve implicit electrostatic problem
         """
 
