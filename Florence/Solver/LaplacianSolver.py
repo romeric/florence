@@ -111,8 +111,6 @@ class LaplacianSolver(object):
             DeltaF = LoadFactor*NeumannForces
             NodalForces += DeltaF
             # OBRTAIN INCREMENTAL RESIDUAL - CONTRIBUTION FROM BOTH NEUMANN AND DIRICHLET
-            # Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
-                # boundary_condition.applied_dirichlet,LoadFactor=LoadFactor)[2]
             Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
                 boundary_condition.applied_dirichlet,LoadFactor=LoadFactor,only_residual=True)
             Residual -= DeltaF

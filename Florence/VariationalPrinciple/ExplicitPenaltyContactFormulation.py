@@ -167,8 +167,16 @@ class ExplicitPenaltyContactFormulation(VariationalPrinciple):
 
         contactNodes_global_idx = surfNodes_no[contactNodes_idx].astype(np.int64)
         normal_gap = gNx[contactNodes_idx]
-        for node in range(contactNodes.shape[0]):
-            t_local = k*normal_gap[node]*normal
-            T_contact[contactNodes_global_idx[node]*ndim:(contactNodes_global_idx[node]+1)*ndim,0] += t_local
+
+        # LOOP VERSION
+        # for node in range(contactNodes.shape[0]):
+        #     t_local = k*normal_gap[node]*normal
+        #     T_contact[contactNodes_global_idx[node]*ndim:(contactNodes_global_idx[node]+1)*ndim,0] += t_local
+
+        # VECTORISED VERSION
+        T_contact = T_contact.reshape(mesh.points.shape[0],ndim)
+        t_local = k*np.outer(normal_gap,normal)
+        T_contact[contactNodes_global_idx,:] = t_local
+        T_contact = T_contact.ravel()
 
         return T_contact
