@@ -217,7 +217,6 @@ class ExplicitStructuralDynamicIntegrators(object):
 
             # STORE THE INFORMATION IF EXPLICIT BLOWS UP
             tol = 1e200 if Increment < 5 else 10.
-            # if np.isnan(norm(U)) or norm(U - U0)/(norm(U0)+1e-14)> tol:
             if np.isnan(norm(U)) or np.abs(U.max()/(U0.max()+1e-14)) > tol:
                 print("Explicit solver blew up! Norm of incremental solution is too large")
                 TotalDisp = TotalDisp[:,:,:Increment]
@@ -299,8 +298,8 @@ class ExplicitStructuralDynamicIntegrators(object):
         if fem_solver.save_frequency != 1:
             if TotalDisp.shape[2] > save_counter:
                 # IN CASE EXPLICIT SOLVER BLEW UP
-                fem_solver.number_of_load_increments = TotalDisp.shape[2]
                 TotalDisp = TotalDisp[:,:,:save_counter]
+                fem_solver.number_of_load_increments = TotalDisp.shape[2]
             else:
                 fem_solver.number_of_load_increments = save_counter
 
@@ -344,10 +343,11 @@ class ExplicitStructuralDynamicIntegrators(object):
         # IF ALL ELECTRIC DoFs ARE FIXED
         if mesh.points.shape[0] == self.electric_out.shape[0]:
             if self.applied_dirichlet_electric.ndim == 2:
-                return self.applied_dirichlet_electric[Increment]
+                return self.applied_dirichlet_electric[:,Increment]
             else:
                 return self.applied_dirichlet_electric
 
+        # GET BOUNDARY CONDITIONS
         if boundary_condition.dirichlet_flags.ndim==3:
             self.eboundary_condition.dirichlet_flags = boundary_condition.dirichlet_flags[:,-1,Increment]
         else:
@@ -357,6 +357,12 @@ class ExplicitStructuralDynamicIntegrators(object):
                 self.eboundary_condition.neumann_flags = boundary_condition.neumann_flags[:,-1, Increment]
             else:
                 self.eboundary_condition.neumann_flags = boundary_condition.neumann_flags[:,-1]
+
+        # FILTER OUT CASES WHERE BOUNDARY CONDITION IS APPLIED BUT IS ZERO - RELEASE LOAD CYCLE IN DYNAMICS
+        if np.allclose(self.eboundary_condition.dirichlet_flags[~np.isnan(self.eboundary_condition.dirichlet_flags)],0.):
+            if self.eboundary_condition.neumann_flags is not None:
+                if np.allclose(self.eboundary_condition.neumann_flags[~np.isnan(self.eboundary_condition.neumann_flags)],0.):
+                    return 0.
 
         print("\nSolving the electrostatics problem iteratively")
         esolution = self.efem_solver.Solve(formulation=self.eformulation, mesh=self.emesh,
