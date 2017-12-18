@@ -1333,7 +1333,6 @@ class PostProcess(object):
             from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
 
 
-            from scipy.spatial import Delaunay
             from mpl_toolkits.mplot3d import Axes3D
             import matplotlib as mpl
             import matplotlib.pyplot as plt
@@ -1642,7 +1641,6 @@ class PostProcess(object):
         if self.mesh.element_type == "tri":
 
             from copy import deepcopy
-            from scipy.spatial import Delaunay
             import matplotlib as mpl
             from mpl_toolkits.mplot3d import Axes3D
             from matplotlib.colors import LightSource
@@ -2081,7 +2079,6 @@ class PostProcess(object):
         if self.mesh.element_type == "quad":
 
             from copy import deepcopy
-            from scipy.spatial import Delaunay
             import matplotlib as mpl
             from mpl_toolkits.mplot3d import Axes3D
             from matplotlib.colors import LightSource
