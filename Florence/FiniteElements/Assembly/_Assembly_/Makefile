@@ -20,6 +20,7 @@ ENTER = cd
 
 # ***NOTE***: For python compatibility do NOT supply FASTOR_USE_BREAKING_PERMUTATION
 FASTOR_OPTFLAGS = -DFASTOR_NO_ALIAS -DFASTOR_USE_VECTORISED_EXPR_ASSIGN -DCONTRACT_OPT=2 -DFASTOR_NO_STATIC_WARNING
+KINEMATICS =
 
 INLINE_THRESHOLD = 100000
 CXXSTD=-std=c++14
@@ -64,6 +65,7 @@ CXXFLAGS += -march=native -no-ansi-alias -xHost -fp-model fast=1 -inline-forcein
 endif
 
 CXXFLAGS += $(FASTOR_OPTFLAGS) -I$(FASTOR_INCLUDE_PATH)
+CXXFLAGS += $(KINEMATICS)
 
 all: build_module
 
