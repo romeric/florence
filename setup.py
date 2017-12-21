@@ -360,8 +360,6 @@ class FlorenceSetup(object):
                     material = material.lstrip('_').rstrip('_')
                     execute('cd '+_path+' && make ' + self.compiler_args + " MATERIAL=" + material)
             elif "_Assembly_" in _path:
-                execute('cd '+_path+' && python AOT_Assembler.py clean')
-                execute('cd '+_path+' && python AOT_Assembler.py configure')
 
                 ll_material_mech = low_level_material_list[:4]
                 ll_material_electro_mech = low_level_material_list[4:]
@@ -371,6 +369,10 @@ class FlorenceSetup(object):
                 # ll_material_electro_mech = low_level_material_list
                 # ll_material_mech = low_level_material_list
                 # ll_material_electro_mech = []
+
+                execute('cd '+_path+' && python AOT_Assembler.py clean')
+                execute('cd '+_path+' && python AOT_Assembler.py configure')
+
                 for material in ll_material_mech:
                     execute('cd '+_path+' && make ' + self.compiler_args + " ASSEMBLY_NAME=_LowLevelAssemblyDF_"  + material)
                 for material in ll_material_electro_mech:
