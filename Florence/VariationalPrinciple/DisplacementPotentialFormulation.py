@@ -389,12 +389,13 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
             # COMPUTE THE TANGENT STIFFNESS MATRIX
             t = self.TractionIntegrand(B, SpatialGradient[counter,:,:],
-                ElectricDisplacementx, CauchyStressTensor, H_Voigt, analysis_nature=fem_solver.analysis_nature,
+                ElectricDisplacementx, CauchyStressTensor, analysis_nature=fem_solver.analysis_nature,
                 has_prestress=fem_solver.has_prestress)
 
             if fem_solver.requires_geometry_update:
                 # INTEGRATE TRACTION FORCE
                 tractionforce += t*detJ[counter]
+
 
         return tractionforce
 

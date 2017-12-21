@@ -4941,8 +4941,9 @@ class Mesh(object):
 
             inputs:
                 elements:           [int, tuple, list, 1D array] list of elements in big mesh (self)
-                                    from which a small localised mesh needs to be extract.
-                                    It could also be an array of boolean of size self.nelem
+                                    from which a small localised mesh needs to be extracted.
+                                    It could also be an array of boolean of size self.nelem (in which case
+                                    the dtype of array has to be strictly np.bool)
                 solution            [1D array having the same length as big mesh points]
                                     if a solution also needs to be mapped over the localised element
         """
@@ -4960,11 +4961,12 @@ class Mesh(object):
         nodeperelem = self.elements.shape[1]
         tmesh = Mesh()
         tmesh.element_type = self.element_type
-        tmesh.nelem = elements.shape[0]
         unnodes, inv = np.unique(self.elements[elements,:nodeperelem], return_inverse=True)
-        aranger = np.arange(tmesh.nelem*nodeperelem)
-        tmesh.elements = inv[aranger].reshape(tmesh.nelem,nodeperelem)
+        aranger = np.arange(elements.shape[0]*nodeperelem)
+        tmesh.elements = inv[aranger].reshape(elements.shape[0],nodeperelem)
         tmesh.points = self.points[unnodes,:]
+        tmesh.nelem = tmesh.elements.shape[0]
+        tmesh.nnode = tmesh.points.shape[0]
         if tmesh.element_type == "hex" or tmesh.element_type == "tet":
             tmesh.GetBoundaryFaces()
             tmesh.GetBoundaryEdges()
