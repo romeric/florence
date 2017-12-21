@@ -268,14 +268,10 @@ class DisplacementFormulation(VariationalPrinciple):
         analysis_nature="nonlinear", has_prestress=True):
         """Applies to displacement based formulation"""
 
-        # MATRIX FORM
-        # SpatialGradient = SpatialGradient.T
-        # SpatialGradient = np.ascontiguousarray(SpatialGradient.T)
         SpatialGradient = SpatialGradient.T.copy()
-
         FillConstitutiveB(B,SpatialGradient,self.ndim,self.nvar)
-        BDB = B.dot(H_Voigt.dot(B.T))
 
+        BDB = B.dot(H_Voigt.dot(B.T))
 
         t=[]
         if analysis_nature == 'nonlinear' or has_prestress:
@@ -369,6 +365,8 @@ class DisplacementFormulation(VariationalPrinciple):
         """Applies to displacement based formulation"""
 
         SpatialGradient = SpatialGradient.T.copy()
+        FillConstitutiveB(B,SpatialGradient,self.ndim,self.nvar)
+
         t=[]
         if analysis_nature == 'nonlinear' or has_prestress:
             TotalTraction = GetTotalTraction(CauchyStressTensor)
