@@ -151,10 +151,10 @@ void _matmul_22k(size_t N, const T* FASTOR_RESTRICT a, const T* FASTOR_RESTRICT 
     using V128 = SIMDVector<T,128>;
     constexpr size_t M = 2;
 
-    constexpr int SIZE_AVX = V256::Size;
-    constexpr int SIZE_SSE = V128::Size;
-    const int ROUND_AVX = ROUND_DOWN(N,(int)SIZE_AVX);
-    const int ROUND_SSE = ROUND_DOWN(N,(int)SIZE_SSE);
+    constexpr size_t SIZE_AVX = V256::Size;
+    constexpr size_t SIZE_SSE = V128::Size;
+    const size_t ROUND_AVX = ROUND_DOWN(N,SIZE_AVX);
+    const size_t ROUND_SSE = ROUND_DOWN(N,SIZE_SSE);
 
     size_t k=0;
     for (; k<ROUND_AVX; k+=SIZE_AVX) {
@@ -217,10 +217,10 @@ void _matmul_33k(size_t N, const T* FASTOR_RESTRICT a, const T* FASTOR_RESTRICT 
     using V128 = SIMDVector<T,128>;
     constexpr size_t M = 3;
 
-    constexpr int SIZE_AVX = V256::Size;
-    constexpr int SIZE_SSE = V128::Size;
-    const int ROUND_AVX = ROUND_DOWN(N,(int)SIZE_AVX);
-    const int ROUND_SSE = ROUND_DOWN(N,(int)SIZE_SSE);
+    constexpr size_t SIZE_AVX = V256::Size;
+    constexpr size_t SIZE_SSE = V128::Size;
+    const size_t ROUND_AVX = ROUND_DOWN(N,SIZE_AVX);
+    const size_t ROUND_SSE = ROUND_DOWN(N,SIZE_SSE);
 
     size_t k=0;
     for (; k<ROUND_AVX; k+=SIZE_AVX) {
@@ -315,10 +315,10 @@ void _matmul_(size_t M, size_t N, size_t K, const T * FASTOR_RESTRICT a, const T
     using V256 = SIMDVector<T,256>;
     using V128 = SIMDVector<T,128>;
 
-    constexpr int SIZE_AVX = V256::Size;
-    constexpr int SIZE_SSE = V128::Size;
-    const int ROUND_AVX = ROUND_DOWN(N,(int)SIZE_AVX);
-    const int ROUND_SSE = ROUND_DOWN(N,(int)SIZE_SSE);
+    constexpr size_t SIZE_AVX = V256::Size;
+    constexpr size_t SIZE_SSE = V128::Size;
+    const size_t ROUND_AVX = ROUND_DOWN(N,SIZE_AVX);
+    const size_t ROUND_SSE = ROUND_DOWN(N,SIZE_SSE);
 
     for (size_t j=0; j<M; ++j) {
         size_t k=0;
