@@ -104,8 +104,8 @@ class PostProcess(object):
                 TotalSol[ColumnsOut,0] = AppliedDirichletInc
 
         elif self.analysis_nature == 'linear':
-                TotalSol[ColumnsIn,0] = sol
-                TotalSol[ColumnsOut,0] = AppliedDirichletInc
+            TotalSol[ColumnsIn,0] = sol
+            TotalSol[ColumnsOut,0] = AppliedDirichletInc
 
         # RE-ORDER SOLUTION COMPONENTS
         dU = TotalSol.reshape(TotalSol.shape[0]/nvar,nvar)

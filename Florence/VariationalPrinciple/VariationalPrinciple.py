@@ -77,6 +77,18 @@ class VariationalPrinciple(object):
         #         # self.quadrature_rules[counter] = list()
 
 
+    def GetQuadratureOrder(self,C,element_type):
+        """Finds quadrature degree/strength for a given polynomial order C=p-1 [where is polynomial degree]"""
+        if element_type == "tri" or element_type == "tet":
+            norder = 2*C if C > 0 else 1
+            norder_post = 2*(C+1)
+        else:
+            norder = C+2
+            norder_post = 2*(C+2)
+
+        return norder, norder_post
+
+
     def GetVolume(self, function_space, LagrangeElemCoords, EulerELemCoords, requires_geometry_update, elem=0):
         """ Find the volume (area in 2D) of element [could be curved or straight]
         """
