@@ -13,9 +13,9 @@ class LinearModel(Material):
     def __init__(self, ndim, **kwargs):
         mtype = type(self).__name__
         super(LinearModel, self).__init__(mtype, ndim, **kwargs)
-        
 
-    def Hessian(self,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):    
+
+    def Hessian(self,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 
         #------------------------------------------------------------------------------------#
         # GET MATERIAL CONSTANTS
@@ -31,7 +31,7 @@ class LinearModel(Material):
 
         # return H_Voigt
         #------------------------------------------------------------------------------------#
-        
+
         # MaterialArgs.H_VoigtSize = MaterialArgs.H_Voigt.shape[0]
         # return MaterialArgs.H_Voigt
 
@@ -55,8 +55,8 @@ class LinearModel(Material):
             tre = trace(strain) + 1
 
         # USE FASTER TRACE FUNCTION
-        return 2*mu*strain + lamb*tre*I  
-        
+        return 2*mu*strain + lamb*tre*I
+
 
     def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx):
         ndim = StrainTensors['I'].shape[0]

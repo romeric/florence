@@ -993,9 +993,10 @@ class PostProcess(object):
 
 
         # GET LINEAR MESH & SOLUTION
-        lmesh = self.mesh.GetLinearMesh()
-        # sol = self.sol[:lmesh.nnode,:,:]
-        sol = self.sol[:lmesh.nnode,...]
+        # lmesh = self.mesh.GetLinearMesh()
+        # sol = self.sol[:lmesh.nnode,...]
+        lmesh, sol = self.mesh.GetLinearMesh(remap=True,solution=self.sol)
+
 
         if lmesh.element_type =='tri':
             cellflag = 5
@@ -1199,7 +1200,7 @@ class PostProcess(object):
                             points[:,:2] = lmesh.points + sol[:,:ndim,Increment]
                         else:
                             points = lmesh.points + sol[:,:ndim,Increment]
-                        # points = lmesh.points+sol[:,:ndim,Increment]
+
                         for counter, quant in enumerate(iterator):
                             unstructuredGridToVTK(filename.split('.')[0]+'_quantity_'+str(quant)+'_increment_'+str(Increment),
                                 np.ascontiguousarray(points[:,0]), np.ascontiguousarray(points[:,1]), np.ascontiguousarray(points[:,2]),

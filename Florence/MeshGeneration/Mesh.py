@@ -4909,7 +4909,7 @@ class Mesh(object):
                 lmesh.nelem = lmesh.elements.shape[0]
 
                 if solution is not None:
-                    solution = solution[np.unique(lmesh.elements),:]
+                    solution = solution[np.unique(lmesh.elements),...]
                     return lmesh, solution
 
             else:
@@ -4929,7 +4929,7 @@ class Mesh(object):
                     lmesh.GetBoundaryEdges()
 
                 if solution is not None:
-                    solution = solution[unnodes,:]
+                    solution = solution[unnodes,...]
                     return lmesh, solution
 
         return lmesh

@@ -475,6 +475,7 @@ class FEMSolver(object):
                 # ASSEMBLE
                 K = Assemble(self, function_spaces[0], formulation, mesh, material,
                     Eulerx, np.zeros_like(mesh.points))[0]
+
             print('Finished assembling the system of equations. Time elapsed is', time() - t_assembly, 'seconds')
             # APPLY DIRICHLET BOUNDARY CONDITIONS & GET REDUCED MATRICES
             K_b, F_b = boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,AppliedDirichletInc)[:2]
