@@ -232,6 +232,6 @@ class CoupleStressSolver(FEMSolver):
                 1./self.beta/LoadFactor*velocities + (1.-0.5/self.beta)*accelerations
             velocities += LoadFactor*(self.gamma*accelerations + (1-self.gamma)*accelerations_old)
 
-            print('\nFinished Load increment', Increment, 'in', time()-t_increment, 'seconds')
+            print('Finished Load increment', Increment, 'in', time()-t_increment, 'seconds\n')
 
         return TotalDisp
