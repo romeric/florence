@@ -97,6 +97,7 @@ class CoupleStressSolver(FEMSolver):
         # SO EULERX SHOULD BE ALLOCATED AFTERWARDS
         Eulerx = np.copy(formulation.meshes[0].points)
         Eulerw = np.zeros_like(formulation.meshes[1].points)
+        Eulers = np.zeros_like(formulation.meshes[1].points)
         Eulerp = np.zeros((formulation.meshes[0].points.shape[0]))
 
         # FIND PURE NEUMANN (EXTERNAL) NODAL FORCE VECTOR
@@ -106,9 +107,9 @@ class CoupleStressSolver(FEMSolver):
         # ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES
         if self.analysis_type != 'static':
             # M = AssembleMass(fem_solver, function_space, formulation, mesh, material, Eulerx)
-            K, TractionForces, _, M = formulation.Assemble(self, material, Eulerx, Eulerw, Eulerp)
+            K, TractionForces, _, M = formulation.Assemble(self, material, Eulerx, Eulerw, Eulers, Eulerp)
         else:
-            K, TractionForces = formulation.Assemble(self, material, Eulerx, Eulerw, Eulerp)[:2]
+            K, TractionForces = formulation.Assemble(self, material, Eulerx, Eulerw, Eulers, Eulerp)[:2]
 
         print('Finished all pre-processing stage. Time elapsed was', time()-tAssembly, 'seconds')
 
@@ -116,11 +117,11 @@ class CoupleStressSolver(FEMSolver):
 
             self.DynamicSolver(formulation, solver,
                 K, M, NeumannForces, NodalForces, Residual,
-                mesh, TotalDisp, Eulerx, Eulerw, Eulerp, material, boundary_condition)
+                mesh, TotalDisp, Eulerx, Eulerw, Eulers, Eulerp, material, boundary_condition)
         else:
             self.StaticSolver(formulation, solver,
                 K, NeumannForces, NodalForces, Residual,
-                mesh, TotalDisp, Eulerx, Eulerw, Eulerp, material, boundary_condition)
+                mesh, TotalDisp, Eulerx, Eulerw, Eulers, Eulerp, material, boundary_condition)
 
 
         return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
@@ -129,7 +130,7 @@ class CoupleStressSolver(FEMSolver):
 
     def StaticSolver(self, formulation, solver, K,
             NeumannForces, NodalForces, Residual,
-            mesh, TotalDisp, Eulerx, Eulerw, Eulerp, material, boundary_condition):
+            mesh, TotalDisp, Eulerx, Eulerw, Eulers, Eulerp, material, boundary_condition):
 
 
         LoadIncrement = self.number_of_load_increments
@@ -169,7 +170,7 @@ class CoupleStressSolver(FEMSolver):
 
     def DynamicSolver(self, formulation, solver, K, M,
             NeumannForces, NodalForces, Residual,
-            mesh, TotalDisp, Eulerx, Eulerw, Eulerp, material, boundary_condition):
+            mesh, TotalDisp, Eulerx, Eulerw, Eulers, Eulerp, material, boundary_condition):
 
 
         LoadIncrement = self.number_of_load_increments

@@ -122,14 +122,14 @@ class CoupleStressFormulation(VariationalPrinciple):
         self.local_size_m = local_size_m
 
 
-    def GetElementalMatrices(self, elem, function_space, mesh, material, fem_solver, Eulerx, Eulerw, Eulerp):
+    def GetElementalMatrices(self, elem, function_space, mesh, material, fem_solver, Eulerx, Eulerw, Eulers, Eulerp):
 
         massel=[]; f = []
         # COMPUTE THE STIFFNESS MATRIX
         if material.has_low_level_dispatcher:
-            stiffnessel, t = self.__GetLocalStiffness__(material, fem_solver, Eulerx, Eulerw, Eulerp, elem)
+            stiffnessel, t = self.__GetLocalStiffness__(material, fem_solver, Eulerx, Eulerw, Eulers, Eulerp, elem)
         else:
-            stiffnessel, t = self.GetLocalStiffness(material, fem_solver, Eulerx, Eulerw, Eulerp, elem)
+            stiffnessel, t = self.GetLocalStiffness(material, fem_solver, Eulerx, Eulerw, Eulers, Eulerp, elem)
 
         I_mass_elem = []; J_mass_elem = []; V_mass_elem = []
         if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed is False:
@@ -170,7 +170,7 @@ class CoupleStressFormulation(VariationalPrinciple):
         return I_mass_elem, J_mass_elem, V_mass_elem
 
 
-    def GetLocalStiffness(self, material, fem_solver, Eulerx, Eulerw, Eulerp=None, elem=0):
+    def GetLocalStiffness(self, material, fem_solver, Eulerx, Eulerw, Eulers, Eulerp=None, elem=0):
         """Get stiffness matrix of the system"""
 
         if self.subtype=="lagrange_multiplier":
@@ -483,10 +483,34 @@ class CoupleStressFormulation(VariationalPrinciple):
         return -stiffness
 
 
-    def K_ss(self, material, fem_solver, Eulerw, Eulerp=None, elem=0):
+    def K_ss(self, material, fem_solver, Eulers, Eulerp=None, elem=0):
         """Get stiffness matrix of the system"""
         stiffness = np.zeros((self.function_spaces[2].Bases.shape[0]*self.ndim,self.function_spaces[2].Bases.shape[0]*self.ndim),dtype=np.float64)
         tractionforce = np.zeros((self.function_spaces[2].Bases.shape[0]*self.ndim,1),dtype=np.float64)
+
+        EulerELemS = Eulers[self.meshes[2].elements[elem,:],:]
+        Bases_s = self.function_spaces[2].Bases
+        Ns = np.zeros((self.ndim,Bases_s.shape[0]*self.ndim),dtype=np.float64)
+        AllGauss = self.function_spaces[2].AllGauss
+
+        # FIND LAGRANGE MULTIPLIER AT ALL GAUSS POINTS
+        EulerGaussS = np.dot(Bases_s.T,EulerELemS)
+
+        # LOOP OVER GAUSS POINTS
+        for counter in range(AllGauss.shape[0]):
+
+            # COMPUTE STRESS
+            LagrangeMultiplierStressVector = material.LagrangeMultiplierStress(EulerGaussS,elem=elem,gcounter=counter)
+            # COMPUTE THE TANGENT STIFFNESS MATRIX
+            NDN, t = self.K_ss_Integrand(Ns, Bases_s[:,counter], 0, LagrangeMultiplierStressVector, 0,
+                analysis_nature=fem_solver.analysis_nature, has_prestress=fem_solver.has_prestress)
+            # INTEGRATE STIFFNESS
+            stiffness += NDN*self.detJ[counter]  ## CAREFUL ABOUT [CHECK] self.detJ[counter] ####################
+            # INTEGRAGE TRACTION
+            if fem_solver.requires_geometry_update:
+                # INTEGRATE TRACTION FORCE
+                tractionforce += t*detJ[counter]
+
         return stiffness, tractionforce
 
 
@@ -738,6 +762,22 @@ class CoupleStressFormulation(VariationalPrinciple):
         return Nw_Ns
 
 
+    def K_ss_Integrand(self, Ns, Bases_s, ElectricDisplacementx,
+        LagrangeMultiplierStressVector, H_Voigt, analysis_nature="nonlinear", has_prestress=True):
+
+        ndim = self.ndim
+        nvar = ndim
+
+        for ivar in range(ndim):
+            Ns[ivar,ivar::nvar] = Bases_s
+
+        NDN = np.zeros((self.function_spaces[2].Bases.shape[0]*self.ndim,self.function_spaces[2].Bases.shape[0]*self.ndim),dtype=np.float64)
+        t=[]
+        if analysis_nature == 'nonlinear' or has_prestress:
+            t = np.dot(Ns,LagrangeMultiplierStressVector)
+        return NDN, t
+
+
     def K_uu_Penalty_Integrand(self, Bu, SpatialGradient):
 
         ndim = self.ndim
@@ -815,7 +855,7 @@ class CoupleStressFormulation(VariationalPrinciple):
 
 
 
-    def Assemble(self, fem_solver, material, Eulerx, Eulerw, Eulerp):
+    def Assemble(self, fem_solver, material, Eulerx, Eulerw, Eulers, Eulerp):
 
         # GET MESH DETAILS
         # C = mesh.InferPolynomialDegree() - 1
@@ -870,7 +910,7 @@ class CoupleStressFormulation(VariationalPrinciple):
                 # COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
                 I_stiff_elem, J_stiff_elem, V_stiff_elem, t, f, \
                 I_mass_elem, J_mass_elem, V_mass_elem = formulation.GetElementalMatrices(elem,
-                    formulation.function_spaces, formulation.meshes, material, fem_solver, Eulerx, Eulerw, Eulerp)
+                    formulation.function_spaces, formulation.meshes, material, fem_solver, Eulerx, Eulerw, Eulers, Eulerp)
 
             # SPARSE ASSEMBLY - STIFFNESS MATRIX
             SparseAssemblyNative(I_stiff_elem,J_stiff_elem,V_stiff_elem,I_stiffness,J_stiffness,V_stiffness,

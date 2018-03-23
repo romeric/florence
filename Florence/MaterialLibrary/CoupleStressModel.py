@@ -85,3 +85,21 @@ class CoupleStressModel(Material):
 
         couple_stress = 2*eta*k
         return couple_stress
+
+
+    def LagrangeMultiplierStress(self,S,ElectricDisplacementx=None,elem=0,gcounter=0):
+
+        lm_stress = 0.5*S
+        return lm_stress
+
+
+    def TotalStress(self,StrainTensors,S,ElectricDisplacementx=None,elem=0,gcounter=0):
+
+        cauchy_stress = self.CauchyStress(StrainTensors,ElectricDisplacementx,elem=elem,gcounter=gcounter)
+        lm_stress     = self.LagrangeMultiplierStress(S,ElectricDisplacementx,elem=elem,gcounter=gcounter)
+        lm_stress     = np.array([
+            [0.,lm_stress[0],lm_stress[1]],
+            [-lm_stress[0],0.,lm_stress[2]],
+            [-lm_stress[1],-lm_stress[2],0.]
+            ])
+        return cauchy_stress + lm_stress
