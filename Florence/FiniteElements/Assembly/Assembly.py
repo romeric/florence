@@ -443,6 +443,41 @@ def OutofCoreAssembly(fem_solver, function_space, formulation, mesh, material, E
 
 
 
+#--------------------- ASSEMBLY ROUTINE FOR MASS MATRIX ONLY - FOR MODIFIED NEWTON RAPHSON ----------------------#
+#----------------------------------------------------------------------------------------------------------------#
+
+
+def AssembleMass(fem_solver, function_space, formulation, mesh, material, Eulerx):
+
+    # GET MESH DETAILS
+    C = mesh.InferPolynomialDegree() - 1
+    nvar = formulation.nvar
+    ndim = formulation.ndim
+    nelem = mesh.nelem
+    nodeperelem = mesh.elements.shape[1]
+
+    # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF MASS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
+    I_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
+    J_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
+    V_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.float64)
+
+    # COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
+    ParallelTuple = parmap.map(formulation,np.arange(0,nelem,dtype=np.int32),
+        function_space, mesh, material, fem_solver, Eulerx, Eulerp, processes= int(multiprocessing.cpu_count()/2))
+
+    for elem in range(nelem):
+        # COMPUATE LOCAL ELEMENTAL MASS MATRIX
+        I_mass_elem, J_mass_elem, V_mass_elem = formulation.GetMassMatrix(elem,
+            function_space, mesh, material, fem_solver, Eulerx, Eulerp)
+        # SPARSE ASSEMBLY - MASS MATRIX
+        SparseAssemblyNative(I_mass_elem,J_mass_elem,V_mass_elem,I_mass,J_mass,V_mass,
+            elem,nvar,nodeperelem,mesh.elements)
+
+    mass = csr_matrix((V_mass,(I_mass,J_mass)),shape=((nvar*mesh.points.shape[0],
+        nvar*mesh.points.shape[0])),dtype=np.float64)
+
+    return mass
+
 
 
 

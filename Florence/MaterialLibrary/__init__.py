@@ -67,3 +67,7 @@ from .ExplicitMooneyRivlin_0 import *
 
 # ELECTROSTATIC MODELS
 from .IdealDielectric import *
+
+
+# COUPLE STRESS MODELS
+from .CoupleStressModel import *

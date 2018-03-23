@@ -133,11 +133,15 @@ class CoupleStressFormulation(VariationalPrinciple):
 
         I_mass_elem = []; J_mass_elem = []; V_mass_elem = []
         if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed is False:
+            # GET THE FIELDS AT THE ELEMENT LEVEL
+            LagrangeElemCoords = mesh[0].points[mesh[0].elements[elem,:],:]
+            EulerElemCoords = Eulerx[mesh[0].elements[elem,:],:]
             # COMPUTE THE MASS MATRIX
             if material.has_low_level_dispatcher:
                 massel = self.__GetLocalMass__(material,fem_solver,elem)
             else:
-                massel = self.GetLocalMass(material,fem_solver,elem)
+                # massel = self.GetLocalMass(material,fem_solver,elem)
+                massel = self.GetLocalMass(function_space[0], material, LagrangeElemCoords, EulerElemCoords, fem_solver, elem)
 
 
         if fem_solver.has_moving_boundary:
@@ -149,6 +153,21 @@ class CoupleStressFormulation(VariationalPrinciple):
             I_mass_elem, J_mass_elem, V_mass_elem = self.FindIndices(massel)
 
         return I_stiff_elem, J_stiff_elem, V_stiff_elem, t, f, I_mass_elem, J_mass_elem, V_mass_elem
+
+
+    def GetMassMatrix(self, elem, function_space, mesh, material, fem_solver, Eulerx, Eulerw, Eulerp):
+
+        massel=[]
+        # COMPUTE THE MASS MATRIX
+        # if material.has_low_level_dispatcher:
+        #     massel = self.__GetLocalMass__(material,fem_solver,elem)
+        # else:
+        #     massel = self.GetLocalMass(material,fem_solver,elem)
+        massel = self.__GetLocalMass__(material,fem_solver,elem)
+
+        I_mass_elem, J_mass_elem, V_mass_elem = self.FindIndices(massel)
+
+        return I_mass_elem, J_mass_elem, V_mass_elem
 
 
     def GetLocalStiffness(self, material, fem_solver, Eulerx, Eulerw, Eulerp=None, elem=0):
@@ -439,11 +458,8 @@ class CoupleStressFormulation(VariationalPrinciple):
 
 
         # # SAVE AT THIS GAUSS POINT
-        # self.StrainTensors = StrainTensors
         # self.SpatialGradient = SpatialGradient
         # self.detJ = detJ
-        # print stiffness.shape
-        # print material.CoupleStress(StrainTensors,None,elem,counter).reshape(self.ndim,1)
 
         return stiffness, tractionforce
 

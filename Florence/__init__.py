@@ -5,6 +5,6 @@ from .MeshGeneration import *
 from .MaterialLibrary import *
 # from VariationalPrinciple import *
 from .BoundaryCondition import BoundaryCondition
-from .Solver import LinearSolver, FEMSolver, TractionBasedStaggeredSolver, PotentialBasedStaggeredSolver
+from .Solver import *
 from .Utils import PWD, RSWD
 from .PostProcessing import *
