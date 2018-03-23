@@ -164,7 +164,8 @@ class PostProcess(object):
         points = mesh.points
         nelem = elements.shape[0]; npoint = points.shape[0]
         nodeperelem = elements.shape[1]
-        requires_geometry_update = fem_solver.requires_geometry_update
+        # requires_geometry_update = fem_solver.requires_geometry_update
+        requires_geometry_update = True # ALWAYS TRUE FOR THIS ROUTINE
         TotalDisp = self.sol[:,:]
 
         LoadIncrement = fem_solver.number_of_load_increments
@@ -238,20 +239,14 @@ class PostProcess(object):
                     StrainTensors = KinematicMeasures(F[elem,:,:,:], fem_solver.analysis_nature)
 
 
-                    # UPDATE/NO-UPDATE GEOMETRY
-                    if fem_solver.requires_geometry_update:
-                        # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-                        ParentGradientx = np.einsum('ijk,jl->kil',Jm,EulerELemCoords)
-                        # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
-                        SpatialGradient = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Jm)
-                        # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
-                        detJ = np.einsum('i,i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)),
-                            np.abs(StrainTensors['J']))
-                    else:
-                        # SPATIAL GRADIENT AND MATERIAL GRADIENT TENSORS ARE EQUAL
-                        SpatialGradient = np.einsum('ikj',MaterialGradient)
-                        # COMPUTE ONCE detJ
-                        detJ = np.einsum('i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)))
+                    # GEOMETRY UPDATE IS A MUST
+                    # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+                    ParentGradientx = np.einsum('ijk,jl->kil',Jm,EulerELemCoords)
+                    # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
+                    SpatialGradient = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Jm)
+                    # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
+                    detJ = np.einsum('i,i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)),
+                        np.abs(StrainTensors['J']))
 
                     # LOOP OVER GAUSS POINTS
                     for counter in range(AllGauss.shape[0]):
@@ -264,24 +259,16 @@ class PostProcess(object):
                             # COMPUTE ELECTRIC DISPLACEMENT
                             ElectricDisplacementx[elem,counter,:] = (material.ElectricDisplacementx(StrainTensors,
                                 ElectricFieldx[elem,counter,:], elem, counter))[:,0]
-                        # else:
-                            # ElectricFieldx, ElectricDisplacementx = [], []
 
                         if material.energy_type == "enthalpy":
-
                             # COMPUTE CAUCHY STRESS TENSOR
-                            if fem_solver.requires_geometry_update:
-                                CauchyStressTensor[elem,counter,:] = material.CauchyStress(StrainTensors,
-                                    ElectricFieldx[elem,counter,:],elem,counter)
+                            CauchyStressTensor[elem,counter,:] = material.CauchyStress(StrainTensors,
+                                ElectricFieldx[elem,counter,:],elem,counter)
 
                         elif material.energy_type == "internal_energy":
-                            # COMPUTE THE HESSIAN AT THIS GAUSS POINT
-                            # H_Voigt = material.Hessian(StrainTensors,ElectricDisplacementx[elem,counter,:], elem, counter)
-
                             # COMPUTE CAUCHY STRESS TENSOR
-                            if fem_solver.requires_geometry_update:
-                                CauchyStressTensor[elem,counter,:] = material.CauchyStress(StrainTensors,
-                                    ElectricDisplacementx[elem,counter,:],elem,counter)
+                            CauchyStressTensor[elem,counter,:] = material.CauchyStress(StrainTensors,
+                                ElectricDisplacementx[elem,counter,:],elem,counter)
 
             if average_derived_quantities:
                 for inode in all_nodes:
