@@ -487,6 +487,7 @@ class CoupleStressFormulation(VariationalPrinciple):
         """Get stiffness matrix of the system"""
         stiffness = np.zeros((self.function_spaces[2].Bases.shape[0]*self.ndim,self.function_spaces[2].Bases.shape[0]*self.ndim),dtype=np.float64)
         tractionforce = np.zeros((self.function_spaces[2].Bases.shape[0]*self.ndim,1),dtype=np.float64)
+        # return stiffness, tractionforce
 
         EulerELemS = Eulers[self.meshes[2].elements[elem,:],:]
         Bases_s = self.function_spaces[2].Bases
@@ -923,14 +924,13 @@ class CoupleStressFormulation(VariationalPrinciple):
 
             if fem_solver.has_moving_boundary:
                 # RHS ASSEMBLY
-                # for iterator in range(0,nvar):
-                #     F[mesh.elements[elem,:]*nvar+iterator,0]+=f[iterator::nvar,0]
                 RHSAssemblyNative(F,f,elem,nvar,nodeperelem,mesh.elements)
 
             # INTERNAL TRACTION FORCE ASSEMBLY
-            # for iterator in range(0,nvar):
-                # T[mesh.elements[elem,:]*nvar+iterator,0]+=t[iterator::nvar,0]
             RHSAssemblyNative(T,t,elem,nvar,nodeperelem,mesh.elements)
+
+            if elem % fem_solver.assembly_print_counter == 0 and elem != 0:
+                print('Assembled {} element matrices').format(elem)
 
 
         if fem_solver.parallel:

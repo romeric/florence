@@ -25,6 +25,7 @@ class CoupleStressSolver(FEMSolver):
 
         self.gamma   = 0.5
         self.beta    = 0.25
+        self.assembly_print_counter = 500
 
     def GetBoundaryInfo(self,K,boundary_condition,formulation):
         pass
@@ -158,7 +159,7 @@ class CoupleStressSolver(FEMSolver):
             # STORE TOTAL SOLUTION DATA
             TotalDisp[:,:,Increment] += dU
 
-            print('\nFinished Load increment', Increment, 'in', time()-t_increment, 'seconds')
+            print('Finished Load increment', Increment, 'in', time()-t_increment, 'seconds\n')
 
         # ADD EACH INCREMENTAL CONTRIBUTION TO MAKE IT CONSISTENT WITH THE NONLINEAR ANALYSIS
         for i in range(TotalDisp.shape[2]-1,0,-1):
@@ -171,7 +172,6 @@ class CoupleStressSolver(FEMSolver):
     def DynamicSolver(self, formulation, solver, K, M,
             NeumannForces, NodalForces, Residual,
             mesh, TotalDisp, Eulerx, Eulerw, Eulers, Eulerp, material, boundary_condition):
-
 
         LoadIncrement = self.number_of_load_increments
         LoadFactor = self.total_time/LoadIncrement
