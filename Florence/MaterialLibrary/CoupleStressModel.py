@@ -64,7 +64,7 @@ class CoupleStressModel(Material):
         I = StrainTensors['I']
         e = StrainTensors['strain'][gcounter]
 
-        tre = trace(b)
+        tre = trace(e)
         if self.ndim==2:
             tre +=1.
 
