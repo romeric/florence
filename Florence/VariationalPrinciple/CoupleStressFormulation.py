@@ -174,13 +174,8 @@ class CoupleStressFormulation(VariationalPrinciple):
         """Get stiffness matrix of the system"""
 
         if self.subtype=="lagrange_multiplier":
-            # from Florence.Tensor import issymetric
-            # k_uu, tu = self.K_uu(material, fem_solver, Eulerx, Eulerp, elem=0)
-            # print issymetric(k_uu)
-            # print tu
-            # print k_uu
             # return self.K_uu(material, fem_solver, Eulerx, Eulerp, elem=0)
-            # exit()
+
             tractionforce = []
             k_uu, tu = self.K_uu(material, fem_solver, Eulerx, Eulerp, elem)
             k_uw = self.K_uw(material, fem_solver, Eulerx, Eulerp, elem)
@@ -390,7 +385,6 @@ class CoupleStressFormulation(VariationalPrinciple):
 
         Jm = function_spaces[1].Jm
         AllGauss = function_space.AllGauss
-
 
         # # GET LOCAL KINEMATICS
         # SpatialGradient, F, detJ = _KinematicMeasures_(Jm, AllGauss[:,0],
