@@ -102,8 +102,9 @@ class CoupleStressSolver(FEMSolver):
         Eulerp = np.zeros((formulation.meshes[0].points.shape[0]))
 
         # FIND PURE NEUMANN (EXTERNAL) NODAL FORCE VECTOR
-        #NeumannForces = boundary_condition.ComputeNeumannForces(mesh, material)
-        NeumannForces = np.zeros((mesh.points.shape[0]*formulation.ndim))
+        NeumannForces = boundary_condition.ComputeNeumannForces(mesh, material, function_spaces,
+            compute_traction_forces=True, compute_body_forces=self.add_self_weight)
+        # NeumannForces = np.zeros((mesh.points.shape[0]*formulation.ndim))
 
         # ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES
         if self.analysis_type != 'static':
@@ -142,6 +143,9 @@ class CoupleStressSolver(FEMSolver):
         post_process = PostProcess(formulation.ndim,formulation.nvar)
         post_process.SetAnalysis(analysis_type=self.analysis_type, analysis_nature=self.analysis_nature)
 
+        # APPLY NEUMANN BOUNDARY CONDITIONS
+        DeltaF = LoadFactor*NeumannForces
+        Residual[:,:] += DeltaF
 
         K_b, F_b, _ = boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
                 boundary_condition.applied_dirichlet,LoadFactor=LoadFactor)
@@ -158,6 +162,13 @@ class CoupleStressSolver(FEMSolver):
 
             # STORE TOTAL SOLUTION DATA
             TotalDisp[:,:,Increment] += dU
+
+            # REDUCED ACCUMULATED FORCE
+            Residual[:,:] = DeltaF
+            F_b = boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
+                AppliedDirichletInc,LoadFactor=1.0,
+                only_residual=True)[boundary_condition.columns_in,0]
+            # F_b = boundary_condition.GetReducedVectors(Residual,only_residual=True)[0]
 
             print('Finished Load increment', Increment, 'in', time()-t_increment, 'seconds\n')
 
@@ -179,6 +190,11 @@ class CoupleStressSolver(FEMSolver):
         post_process = PostProcess(formulation.ndim,formulation.nvar)
         post_process.SetAnalysis(analysis_type=self.analysis_type, analysis_nature=self.analysis_nature)
 
+        if NeumannForces.ndim == 2 and NeumannForces.shape[1]==1:
+            tmp = np.zeros((NeumannForces.shape[0],LoadIncrement))
+            tmp[:,0] = NeumannForces[:,0]
+            NeumannForces = tmp
+
         dumU = np.zeros((mesh.points.shape[0]*formulation.ndim))
         dumU[boundary_condition.columns_out] = boundary_condition.applied_dirichlet[:,0]
         TotalDisp[:,:,0] = dumU.reshape(mesh.points.shape[0],formulation.ndim)
@@ -188,7 +204,7 @@ class CoupleStressSolver(FEMSolver):
 
         # COMPUTE INITIAL ACCELERATION FOR TIME STEP 0
         Residual = np.zeros_like(Residual)
-        InitResidual = Residual + NeumannForces[:,None]
+        InitResidual = Residual + NeumannForces[:,0][:,None]
         if formulation.fields == "electro_mechanics":
             accelerations[:] = solver.Solve(M_mech, -InitResidual[self.mechanical_dofs].ravel())
         else:
@@ -209,9 +225,14 @@ class CoupleStressSolver(FEMSolver):
             # FIXED INCREMENTAL DIRICHLET
             AppliedDirichletInc = boundary_condition.applied_dirichlet[:,Increment-1]
 
+            # APPLY NEUMANN BOUNDARY CONDITIONS
+            DeltaF = NeumannForces[:,Increment][:,None]
+            NodalForces = DeltaF
+
             # ACCUMULATED FORCE
             Residual[:,0] = (1./self.beta/LoadFactor**2)*M.dot(TotalDisp[:,:,Increment-1].ravel()) +\
                 (1./self.beta/LoadFactor)*M.dot(velocities) + (0.5/self.beta - 1.)*M.dot(accelerations)
+            Residual += DeltaF
 
             # REDUCED ACCUMULATED FORCE
             F_b = boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
