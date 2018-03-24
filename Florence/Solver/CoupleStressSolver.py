@@ -119,11 +119,11 @@ class CoupleStressSolver(FEMSolver):
 
         if self.analysis_type != 'static':
 
-            self.DynamicSolver(formulation, solver,
+            TotalDisp = self.DynamicSolver(formulation, solver,
                 K, M, NeumannForces, NodalForces, Residual,
                 mesh, TotalDisp, Eulerx, Eulerw, Eulers, Eulerp, material, boundary_condition)
         else:
-            self.StaticSolver(formulation, solver,
+            TotalDisp = self.StaticSolver(formulation, solver,
                 K, NeumannForces, NodalForces, Residual,
                 mesh, TotalDisp, Eulerx, Eulerw, Eulers, Eulerp, material, boundary_condition)
 

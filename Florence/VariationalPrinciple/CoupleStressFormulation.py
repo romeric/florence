@@ -930,7 +930,8 @@ class CoupleStressFormulation(VariationalPrinciple):
             RHSAssemblyNative(T,t,elem,nvar,nodeperelem,mesh.elements)
 
             if (elem % fem_solver.assembly_print_counter == 0 or elem==nelem-1) and elem != 0:
-                print('Assembled {} element matrices').format(elem)
+                nume = elem+1 if elem==nelem-1 else elem
+                print('Assembled {} element matrices').format(nume)
 
 
         if fem_solver.parallel:
