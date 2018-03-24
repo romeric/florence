@@ -42,7 +42,7 @@ class CoupleStressFormulation(VariationalPrinciple):
             quadrature_type=quadrature_type,quadrature_rules=quadrature_rules,function_spaces=function_spaces,
             compute_post_quadrature=compute_post_quadrature)
 
-        self.fields = "flexoelectric"
+        self.fields = "couple_stress"
         # self.nvar = 3*self.ndim
         self.nvar = self.ndim
         self.subtype = subtype
@@ -929,7 +929,7 @@ class CoupleStressFormulation(VariationalPrinciple):
             # INTERNAL TRACTION FORCE ASSEMBLY
             RHSAssemblyNative(T,t,elem,nvar,nodeperelem,mesh.elements)
 
-            if elem % fem_solver.assembly_print_counter == 0 and elem != 0:
+            if (elem % fem_solver.assembly_print_counter == 0 or elem==nelem-1) and elem != 0:
                 print('Assembled {} element matrices').format(elem)
 
 

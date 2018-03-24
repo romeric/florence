@@ -33,14 +33,16 @@ class CoupleStressSolver(FEMSolver):
 
     def Solve(self, formulation=None, mesh=None,
         material=None, boundary_condition=None,
-        function_spaces=None, solver=None):
+        function_spaces=None, solver=None,
+        contact_formulation=None):
         """Main solution routine for FEMSolver """
 
 
         # CHECK DATA CONSISTENCY
         mesh = formulation.meshes[0]
         #---------------------------------------------------------------------------#
-        function_spaces, solver = self.__checkdata__(material, boundary_condition, formulation, mesh, function_spaces, solver)
+        function_spaces, solver = self.__checkdata__(material, boundary_condition,
+            formulation, mesh, function_spaces, solver, contact_formulation=contact_formulation)
         #---------------------------------------------------------------------------#
 
         print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation info etc...')
@@ -170,6 +172,19 @@ class CoupleStressSolver(FEMSolver):
                 only_residual=True)[boundary_condition.columns_in,0]
             # F_b = boundary_condition.GetReducedVectors(Residual,only_residual=True)[0]
 
+
+            # LOG REQUESTS
+            self.LogSave(formulation, TotalDisp, Increment)
+
+            # BREAK AT A SPECIFICED LOAD INCREMENT IF ASKED FOR
+            if self.break_at_increment != -1 and self.break_at_increment is not None:
+                if self.break_at_increment == Increment:
+                    if self.break_at_increment < LoadIncrement - 1:
+                        print("\nStopping at increment {} as specified\n\n".format(Increment))
+                        TotalDisp = TotalDisp[:,:,:Increment]
+                        self.number_of_load_increments = Increment
+                    break
+
             print('Finished Load increment', Increment, 'in', time()-t_increment, 'seconds\n')
 
         # ADD EACH INCREMENTAL CONTRIBUTION TO MAKE IT CONSISTENT WITH THE NONLINEAR ANALYSIS
@@ -219,6 +234,7 @@ class CoupleStressSolver(FEMSolver):
         # GET REDUCED VARIABLES
         K_b, F_b, _ = boundary_condition.GetReducedMatrices(K,Residual)
 
+
         for Increment in range(1,LoadIncrement):
             t_increment=time()
 
@@ -233,6 +249,19 @@ class CoupleStressSolver(FEMSolver):
             Residual[:,0] = (1./self.beta/LoadFactor**2)*M.dot(TotalDisp[:,:,Increment-1].ravel()) +\
                 (1./self.beta/LoadFactor)*M.dot(velocities) + (0.5/self.beta - 1.)*M.dot(accelerations)
             Residual += DeltaF
+
+            # CHECK CONTACT AND ASSEMBLE IF DETECTED
+            if self.has_contact:
+                Eulerx = mesh.points + TotalDisp[:,:,Increment-1]
+                TractionForcesContact = np.zeros_like(Residual)
+                TractionForcesContact = self.contact_formulation.AssembleTractions(mesh,material,Eulerx).ravel()*LoadFactor
+
+                if formulation.fields == "electro_mechanics" or formulation.fields == "flexoelectric":
+                    Residual[self.mechanical_dofs,0] -= TractionForcesContact
+                elif formulation.fields == "mechanics" or formulation.fields == "couple_stress":
+                    Residual[:,0] -= TractionForcesContact
+                else:
+                    raise NotImplementedError("Contact algorithm for {} is not available".format(formulation.fields))
 
             # REDUCED ACCUMULATED FORCE
             F_b = boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
@@ -253,6 +282,18 @@ class CoupleStressSolver(FEMSolver):
             accelerations = (1./self.beta/LoadFactor**2)*(TotalDisp[:,:,Increment] - TotalDisp[:,:,Increment-1]).ravel() -\
                 1./self.beta/LoadFactor*velocities + (1.-0.5/self.beta)*accelerations
             velocities += LoadFactor*(self.gamma*accelerations + (1-self.gamma)*accelerations_old)
+
+            # LOG REQUESTS
+            self.LogSave(formulation, TotalDisp, Increment)
+
+            # BREAK AT A SPECIFICED LOAD INCREMENT IF ASKED FOR
+            if self.break_at_increment != -1 and self.break_at_increment is not None:
+                if self.break_at_increment == Increment:
+                    if self.break_at_increment < LoadIncrement - 1:
+                        print("\nStopping at increment {} as specified\n\n".format(Increment))
+                        TotalDisp = TotalDisp[:,:,:Increment]
+                        self.number_of_load_increments = Increment
+                    break
 
             print('Finished Load increment', Increment, 'in', time()-t_increment, 'seconds\n')
 
