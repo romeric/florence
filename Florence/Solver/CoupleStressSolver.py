@@ -17,15 +17,27 @@ __all__ = ["CoupleStressSolver"]
 class CoupleStressSolver(FEMSolver):
 
     def __init__(self,**kwargs):
-        super(CoupleStressSolver, self).__init__(**kwargs)
         if 'static_condensation' in kwargs.keys():
             self.static_condensation = kwargs['static_condensation']
         else:
             self.static_condensation = True
 
+        if 'assembly_print_counter' in kwargs.keys():
+            self.assembly_print_counter = kwargs['assembly_print_counter']
+            del kwargs['assembly_print_counter']
+        else:
+            self.assembly_print_counter = 500
+
+        if 'lump_rhs' in kwargs.keys():
+            self.lump_rhs = kwargs['lump_rhs']
+            del kwargs['lump_rhs']
+        else:
+            self.lump_rhs = False
+
+
+        super(CoupleStressSolver, self).__init__(**kwargs)
         self.gamma   = 0.5
         self.beta    = 0.25
-        self.assembly_print_counter = 500
 
     def GetBoundaryInfo(self,K,boundary_condition,formulation):
         pass
@@ -234,6 +246,10 @@ class CoupleStressSolver(FEMSolver):
         # GET REDUCED VARIABLES
         K_b, F_b, _ = boundary_condition.GetReducedMatrices(K,Residual)
 
+        if self.lump_rhs:
+            M = M.sum(axis=1).A.ravel() # FOR CSR
+            # M = M.sum(axis=0).ravel() # FOR CSC
+
 
         for Increment in range(1,LoadIncrement):
             t_increment=time()
@@ -246,8 +262,12 @@ class CoupleStressSolver(FEMSolver):
             NodalForces = DeltaF
 
             # ACCUMULATED FORCE
-            Residual[:,0] = (1./self.beta/LoadFactor**2)*M.dot(TotalDisp[:,:,Increment-1].ravel()) +\
-                (1./self.beta/LoadFactor)*M.dot(velocities) + (0.5/self.beta - 1.)*M.dot(accelerations)
+            if self.lump_rhs:
+                Residual[:,0] = (1./self.beta/LoadFactor**2)*M*TotalDisp[:,:,Increment-1].ravel() +\
+                    (1./self.beta/LoadFactor)*M*velocities + (0.5/self.beta - 1.)*M*accelerations
+            else:
+                Residual[:,0] = (1./self.beta/LoadFactor**2)*M.dot(TotalDisp[:,:,Increment-1].ravel()) +\
+                    (1./self.beta/LoadFactor)*M.dot(velocities) + (0.5/self.beta - 1.)*M.dot(accelerations)
             Residual += DeltaF
 
             # CHECK CONTACT AND ASSEMBLE IF DETECTED

@@ -43,7 +43,6 @@ class CoupleStressFormulation(VariationalPrinciple):
             compute_post_quadrature=compute_post_quadrature)
 
         self.fields = "couple_stress"
-        # self.nvar = 3*self.ndim
         self.nvar = self.ndim
         self.subtype = subtype
 
@@ -68,19 +67,22 @@ class CoupleStressFormulation(VariationalPrinciple):
         mesh2.GetHighOrderMesh(p=p-1)
         # ALL MESHES
         self.meshes = (mesh0,mesh1,mesh2)
-        # self.meshes = (deepcopy(mesh0),mesh1,mesh2)
 
 
         # GET QUADRATURE RULES
+        norder = C+2
+        if mesh.element_type == "quad" or mesh.element_type == "hex":
+            norder = C+1
+
         if quadrature_rules == None and self.quadrature_rules == None:
             # FOR DISPLACEMENT
-            quadrature0 = QuadratureRule(optimal=3, norder=self.GetQuadratureOrder(C+1,mesh.element_type)[0],
+            quadrature0 = QuadratureRule(optimal=3, norder=self.GetQuadratureOrder(norder,mesh.element_type)[0],
                 mesh_type=mesh.element_type, is_flattened=False)
             # FOR ROTATIONS
-            quadrature1 = QuadratureRule(optimal=3, norder=self.GetQuadratureOrder(C+1,mesh.element_type)[0],
+            quadrature1 = QuadratureRule(optimal=3, norder=self.GetQuadratureOrder(norder,mesh.element_type)[0],
                 mesh_type=mesh.element_type, is_flattened=False)
             # FOR LAGRANGE MULTIPLIER
-            quadrature2 = QuadratureRule(optimal=3, norder=self.GetQuadratureOrder(C+1,mesh.element_type)[0],
+            quadrature2 = QuadratureRule(optimal=3, norder=self.GetQuadratureOrder(norder,mesh.element_type)[0],
                 mesh_type=mesh.element_type, is_flattened=False)
             # BOUNDARY
             bquadrature = None
