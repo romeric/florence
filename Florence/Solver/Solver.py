@@ -1,11 +1,12 @@
 from __future__ import print_function
+import os, platform
+from time import time
+from warnings import warn
 import numpy as np
 import scipy as sp
 from scipy.sparse import issparse, isspmatrix_coo, isspmatrix_csr, isspmatrix_csc
-from scipy.sparse.linalg import spsolve, cg, cgs, bicgstab, gmres, lgmres, spilu, LinearOperator, onenormest
+from scipy.sparse.linalg import spsolve, cg, cgs, bicgstab, gmres, lgmres, splu, spilu, LinearOperator, onenormest
 from subprocess import call
-import os, platform
-from time import time
 
 
 __all__ = ["LinearSolver"]
@@ -57,6 +58,8 @@ class LinearSolver(object):
         self.out_of_core = False
         self.geometric_discretisation = geometric_discretisation
         self.dont_switch_solver = dont_switch_solver
+        self.reuse_factorisation = False
+        self.solver_context_manager = None
 
         self.has_amg_solver = True
         if platform.python_implementation() == "PyPy":
@@ -195,8 +198,12 @@ class LinearSolver(object):
         plt.show()
 
 
-    def Solve(self,A,b):
+    def Solve(self, A, b, reuse_factorisation=False):
         """Solves the linear system of equations"""
+
+        self.reuse_factorisation = reuse_factorisation
+        if self.solver_type != "direct" and self.reuse_factorisation is True:
+            warn("Re-using factorisation for non-direct solvers is not possible. The pre-conditioner is going to be reused instead")
 
         # DECIDE IF THE SOLVER TYPE IS APPROPRIATE FOR THE PROBLEM
         if self.switcher_message is False and self.dont_switch_solver is False:
@@ -224,21 +231,38 @@ class LinearSolver(object):
                 if A.dtype != np.float64:
                     A = A.astype(np.float64)
 
-                sol = spsolve(A,b,permc_spec='MMD_AT_PLUS_A',use_umfpack=True)
-                # from scikits import umfpack
-                # sol = umfpack.spsolve(A, b)
+                if self.solver_context_manager is None:
+                    if self.reuse_factorisation is False:
+                        sol = spsolve(A,b,permc_spec='MMD_AT_PLUS_A',use_umfpack=True)
+                        # from scikits import umfpack
+                        # sol = umfpack.spsolve(A, b)
+                    else:
+                        from scikits import umfpack
+                        lu = umfpack.splu(A)
+                        sol = lu.solve(b)
+                        self.solver_context_manager = lu
+                else:
+                    sol = self.solver_context_manager.solve(b)
+
 
             elif self.solver_subtype=='mumps' and self.has_mumps:
 
                 from mumps.mumps_context import MUMPSContext
                 t_solve = time()
                 A = A.tocoo()
-                # False means non-symmetric - Do not change it to True means symmetric pos def
+                # False means non-symmetric - Do not change it to True. True means symmetric pos def
                 # which is not the case for electromechanics
-                context = MUMPSContext((A.shape[0], A.row, A.col, A.data, False), verbose=False)
-                context.analyze()
-                context.factorize()
-                sol = context.solve(rhs=b)
+                if self.solver_context_manager is None:
+                    context = MUMPSContext((A.shape[0], A.row, A.col, A.data, False), verbose=False)
+                    context.analyze()
+                    context.factorize()
+                    sol = context.solve(rhs=b)
+
+                    if self.reuse_factorisation:
+                        self.solver_context_manager = context
+                else:
+                    sol = self.solver_context_manager.solve(rhs=b)
+
                 print("MUMPS solver time is {}".format(time() - t_solve))
 
                 return sol
@@ -276,6 +300,7 @@ class LinearSolver(object):
                 os.remove(pwd+"/JuliaDict.mat")
 
             elif self.solver_subtype == "pardiso" and self.has_pardiso:
+                # NOTE THAT THIS PARDISO SOLVER AUTOMATICALLY SAVES THE RIGHT FACTORISATION
                 import pypardiso
                 A = A.tocsr()
                 t_solve = time()
@@ -286,7 +311,17 @@ class LinearSolver(object):
                 # FOR 'super_lu'
                 if A.dtype != np.float64:
                     A = A.astype(np.float64)
-                sol = spsolve(A,b,permc_spec='MMD_AT_PLUS_A',use_umfpack=True)
+                A = A.tocsc()
+
+                if self.solver_context_manager is None:
+                    if self.reuse_factorisation is False:
+                        sol = spsolve(A,b,permc_spec='MMD_AT_PLUS_A',use_umfpack=True)
+                    else:
+                        lu = splu(A)
+                        sol = lu.solve(b)
+                        self.solver_context_manager = lu
+                else:
+                    sol = self.solver_context_manager.solve(b)
 
 
 
@@ -318,34 +353,57 @@ class LinearSolver(object):
 
             t_solve = time()
             # AMG METHOD
-            if self.preconditioner_type=="smoothed_aggregation":
-                # EXPLICIT CALL TO KYROLOV SOLVERS WITH AMG PRECONDITIONER
-                # THIS IS TYPICALLY FASTER BUT THE TOLERANCE NEED TO BE SMALLER, TYPICALLY 1e-10
-                # GMRES IS TYPICALLY THE FASTEST
-                ml = smoothed_aggregation_solver(A)
-                M = ml.aspreconditioner()
-                if self.iterative_solver_tolerance > 1e-9:
-                    self.iterative_solver_tolerance = 1e-10
-                # sol, info = bicgstab(A, b, M=M, tol=self.iterative_solver_tolerance)
-                # sol, info = cgs(A, b, M=M, tol=self.iterative_solver_tolerance)
-                sol, info = gmres(A, b, M=M, tol=self.iterative_solver_tolerance)
-            elif self.preconditioner_type == "ruge_stuben":
-                ml = ruge_stuben_solver(A)
-                sol = ml.solve(b,tol=self.iterative_solver_tolerance)
-            elif self.preconditioner_type == "rootnode":
-                # EXPLICIT CALL TO KYROLOV SOLVERS WITH AMG PRECONDITIONER
-                # ml = rootnode_solver(A, smooth=('energy', {'degree':2}), strength='evolution' )
-                # M = ml.aspreconditioner(cycle='V')
-                ml = rootnode_solver(A)
-                M = ml.aspreconditioner()
-                if self.iterative_solver_tolerance > 1e-9:
-                    self.iterative_solver_tolerance = 1e-10
-                sol, info = gmres(A, b, M=M, tol=self.iterative_solver_tolerance)
+            if self.solver_context_manager is None:
+                if self.preconditioner_type=="smoothed_aggregation":
+                    # EXPLICIT CALL TO KYROLOV SOLVERS WITH AMG PRECONDITIONER
+                    # THIS IS TYPICALLY FASTER BUT THE TOLERANCE NEED TO BE SMALLER, TYPICALLY 1e-10
+                    # GMRES IS TYPICALLY THE FASTEST
+                    ml = smoothed_aggregation_solver(A)
+                    M = ml.aspreconditioner()
+                    if self.iterative_solver_tolerance > 1e-9:
+                        self.iterative_solver_tolerance = 1e-10
+                    # sol, info = bicgstab(A, b, M=M, tol=self.iterative_solver_tolerance)
+                    # sol, info = cgs(A, b, M=M, tol=self.iterative_solver_tolerance)
+                    sol, info = gmres(A, b, M=M, tol=self.iterative_solver_tolerance)
+                elif self.preconditioner_type == "ruge_stuben":
+                    M = ruge_stuben_solver(A)
+                    sol = M.solve(b,tol=self.iterative_solver_tolerance)
+                elif self.preconditioner_type == "rootnode":
+                    # EXPLICIT CALL TO KYROLOV SOLVERS WITH AMG PRECONDITIONER
+                    # ml = rootnode_solver(A, smooth=('energy', {'degree':2}), strength='evolution' )
+                    # M = ml.aspreconditioner(cycle='V')
+                    ml = rootnode_solver(A)
+                    M = ml.aspreconditioner()
+                    if self.iterative_solver_tolerance > 1e-9:
+                        self.iterative_solver_tolerance = 1e-10
+                    sol, info = gmres(A, b, M=M, tol=self.iterative_solver_tolerance)
+
+
+                if self.reuse_factorisation:
+                    self.solver_context_manager = M
+
+            else:
+                M = self.solver_context_manager
+                if self.preconditioner_type=="smoothed_aggregation":
+                    sol, info = gmres(A, b, M=M, tol=self.iterative_solver_tolerance)
+                elif self.preconditioner_type == "ruge_stuben":
+                    sol = M.solve(b,tol=self.iterative_solver_tolerance)
+                elif self.preconditioner_type == "rootnode":
+                    sol, info = gmres(A, b, M=M, tol=self.iterative_solver_tolerance)
+
 
             print("AMG solver time is {}".format(time() - t_solve))
 
         return sol
 
+
     def GetConditionNumber(self,A):
         self.matrix_condition_number = onenormest(K_b)
         return self.matrix_condition_number
+
+
+    def CleanUp(self):
+        import gc
+        del self.solver_context_manager
+        gc.collect()
+        self.solver_context_manager = None

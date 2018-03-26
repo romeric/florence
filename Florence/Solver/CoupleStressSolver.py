@@ -168,7 +168,7 @@ class CoupleStressSolver(FEMSolver):
         for Increment in range(LoadIncrement):
             t_increment=time()
             # SOLVE THE SYSTEM
-            sol = solver.Solve(K_b,F_b)
+            sol = solver.Solve(K_b, F_b, reuse_factorisation=True)
 
             AppliedDirichletInc = LoadFactor*boundary_condition.applied_dirichlet
             dU = post_process.TotalComponentSol(sol, boundary_condition.columns_in,
@@ -202,6 +202,8 @@ class CoupleStressSolver(FEMSolver):
         # ADD EACH INCREMENTAL CONTRIBUTION TO MAKE IT CONSISTENT WITH THE NONLINEAR ANALYSIS
         for i in range(TotalDisp.shape[2]-1,0,-1):
             TotalDisp[:,:,i] = np.sum(TotalDisp[:,:,:i+1],axis=2)
+
+        solver.CleanUp()
 
         return TotalDisp
 
@@ -289,7 +291,7 @@ class CoupleStressSolver(FEMSolver):
                 mass=M,only_residual=True)[boundary_condition.columns_in,0]
 
             # SOLVE THE SYSTEM
-            sol = solver.Solve(K_b,F_b)
+            sol = solver.Solve(K_b, F_b, reuse_factorisation=True)
 
             dU = post_process.TotalComponentSol(sol, boundary_condition.columns_in,
                 boundary_condition.columns_out, AppliedDirichletInc,0,K.shape[0])
@@ -316,5 +318,7 @@ class CoupleStressSolver(FEMSolver):
                     break
 
             print('Finished Load increment', Increment, 'in', time()-t_increment, 'seconds\n')
+
+        solver.CleanUp()
 
         return TotalDisp
