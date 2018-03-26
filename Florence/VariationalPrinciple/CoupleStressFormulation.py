@@ -23,7 +23,7 @@ class CoupleStressFormulation(VariationalPrinciple):
 
     def __init__(self, mesh, variables_order=(1,0,0), subtype="lagrange_multiplier",
         quadrature_rules=None, quadrature_type=None, function_spaces=None, compute_post_quadrature=False,
-        equally_spaced_bases=False):
+        equally_spaced_bases=False, save_condensed_matrices=True):
         """
 
             Input:
@@ -45,6 +45,7 @@ class CoupleStressFormulation(VariationalPrinciple):
         self.fields = "couple_stress"
         self.nvar = self.ndim
         self.subtype = subtype
+        self.save_condensed_matrices = save_condensed_matrices
 
         C = mesh.InferPolynomialDegree() - 1
         mesh.InferBoundaryElementType()
@@ -124,6 +125,26 @@ class CoupleStressFormulation(VariationalPrinciple):
         self.local_size_m = local_size_m
 
 
+        if self.save_condensed_matrices:
+            # elist = [0]*mesh.nelem # CANT USE ONE PRE-CREATED LIST AS IT GETS MODIFIED
+            # KEEP VECTORS AND MATRICES SEPARATE BECAUSE OF THE SAME REASON
+            if self.subtype == "lagrange_multiplier":
+                self.condensed_matrices = {'k_uu':[0]*mesh.nelem,'k_us':[0]*mesh.nelem,
+                'k_ww':[0]*mesh.nelem,'k_ws':[0]*mesh.nelem,'inv_k_ws':[0]*mesh.nelem}
+                self.condensed_vectors = {'tu':[0]*mesh.nelem,'tw':[0]*mesh.nelem,'ts':[0]*mesh.nelem}
+            elif self.subtype == "augmented_lagrange":
+                self.condensed_matrices = {'k_uu':[0]*mesh.nelem,'k_us':[0]*mesh.nelem,
+                'k_ww':[0]*mesh.nelem,'k_ws':[0]*mesh.nelem,'k_ss':[0]*mesh.nelem,'inv_k_ws':[0]*mesh.nelem}
+                self.condensed_vectors = {'tu':[0]*mesh.nelem,'tw':[0]*mesh.nelem,'ts':[0]*mesh.nelem}
+            elif self.subtype == "penalty":
+                self.condensed_matrices = {'k_uu':[0]*mesh.nelem,'k_uw':[0]*mesh.nelem,'k_ww':[0]*mesh.nelem}
+                self.condensed_vectors = {'tu':[0]*mesh.nelem,'tw':[0]*mesh.nelem}
+
+        # COMPUTE THE COMMON/NEIGHBOUR NODES ONCE
+        self.all_nodes = np.unique(self.meshes[1].elements)
+        self.Elss, self.Poss = self.meshes[1].GetNodeCommonality()[:2]
+
+
     def GetElementalMatrices(self, elem, function_space, mesh, material, fem_solver, Eulerx, Eulerw, Eulers, Eulerp):
 
         massel=[]; f = []
@@ -183,6 +204,7 @@ class CoupleStressFormulation(VariationalPrinciple):
             k_uw = self.K_uw(material, fem_solver, Eulerx, Eulerp, elem)
             k_us = self.K_us(material, fem_solver, Eulerx, Eulerp, elem)
 
+
             # k_ww, tw = self.K_ww(material, fem_solver, Eulerw, Eulerp, elem)
             k_ww, tw = self.K_ww(material, fem_solver, Eulerx, Eulerp, elem)    # CHECK Eulerx vs Eulerw
             k_ws = self.K_ws(material, fem_solver, Eulerw, Eulerp, elem)
@@ -207,6 +229,16 @@ class CoupleStressFormulation(VariationalPrinciple):
                     t0 = tw - np.dot(k0,ts)
                     tractionforce = tu - np.dot(np.dot(k_us,inv_k_ws),t0)
 
+                    if self.save_condensed_matrices:
+                        self.condensed_matrices['k_uu'][elem] = k_uu
+                        self.condensed_matrices['k_us'][elem] = k_us
+                        self.condensed_matrices['k_ww'][elem] = k_ww
+                        self.condensed_matrices['k_ws'][elem] = k_ws
+                        self.condensed_matrices['inv_k_ws'][elem] = inv_k_ws
+                        self.condensed_vectors['tu'][elem] = tu
+                        self.condensed_vectors['tw'][elem] = tw
+                        self.condensed_vectors['ts'][elem] = ts
+
                 elif self.subtype=="augmented_lagrange":
                     # IF NO STATIC CONDITON
                     inv_k_ws = inv(k_ws)
@@ -217,6 +249,18 @@ class CoupleStressFormulation(VariationalPrinciple):
 
                     t0 = tw - np.dot(k0,ts)
                     tractionforce = tu - np.dot(np.dot(k_us,k2),t0)
+
+                    if self.save_condensed_matrices:
+                        self.condensed_matrices['k_uu'][elem] = k_uu
+                        self.condensed_matrices['k_us'][elem] = k_us
+                        self.condensed_matrices['k_ww'][elem] = k_ww
+                        self.condensed_matrices['k_ws'][elem] = k_ws
+                        self.condensed_matrices['k_ss'][elem] = k_ss
+                        self.condensed_matrices['inv_k_ws'][elem] = inv_k_ws
+                        self.condensed_vectors['tu'][elem] = tu
+                        self.condensed_vectors['tw'][elem] = tw
+                        self.condensed_vectors['ts'][elem] = ts
+
 
 
         elif self.subtype=="penalty":
@@ -575,7 +619,8 @@ class CoupleStressFormulation(VariationalPrinciple):
         tractionforce = np.zeros((nodeperelem*nvar,1),dtype=np.float64)
         Bases_w = self.function_spaces[1].Bases
         Nw = np.zeros((self.ndim,Bases_w.shape[0]*self.ndim),dtype=np.float64)
-        detJ = AllGauss[:,0]
+        # detJ = AllGauss[:,0]
+        detJ = self.detJ
 
         # LOOP OVER GAUSS POINTS
         for counter in range(AllGauss.shape[0]):
@@ -927,4 +972,80 @@ class CoupleStressFormulation(VariationalPrinciple):
 
         return stiffness, T, F, mass
 
+
+
+    def GetAugmentedSolution(self, fem_solver, material, TotalDisp, Eulerx, Eulerw, Eulers, Eulerp):
+
+        if self.save_condensed_matrices is False:
+            return
+
+        mesh = self.meshes[0]
+        elements = mesh.elements
+        points = mesh.points
+        nelem = mesh.nelem
+        nodeperelem = mesh.elements.shape[1]
+
+        C = mesh.InferPolynomialDegree() - 1
+        ndim = mesh.InferSpatialDimension()
+
+        function_space = FunctionSpace(mesh, p=C+1, evaluate_at_nodes=True)
+
+        Jm = function_space.Jm
+        AllGauss = function_space.AllGauss
+
+        AllEulerW = np.zeros((nelem,self.meshes[1].elements.shape[1],ndim))
+        AllEulerS = np.zeros((nelem,self.meshes[2].elements.shape[1],ndim))
+
+        NodalEulerW = np.zeros((self.meshes[1].points.shape[0],ndim))
+        NodalEulerS = np.zeros((self.meshes[2].points.shape[0],ndim))
+
+        # LOOP OVER ELEMENTS
+        for elem in range(nelem):
+            # GET THE FIELDS AT THE ELEMENT LEVEL
+            LagrangeElemCoords = points[elements[elem,:],:]
+            EulerELemCoords = Eulerx[elements[elem,:],:]
+            if self.fields == 'electro_mechanics':
+                ElectricPotentialElem =  Eulerp[elements[elem,:]]
+
+            if self.subtype == "lagrange_multiplier":
+                k_uu = self.condensed_matrices['k_uu'][elem]
+                k_us = self.condensed_matrices['k_us'][elem]
+                k_ww = self.condensed_matrices['k_ww'][elem]
+                k_ws = self.condensed_matrices['k_ws'][elem]
+                inv_k_ws = self.condensed_matrices['inv_k_ws'][elem]
+                tu = self.condensed_vectors['tu'][elem]
+                tw = self.condensed_vectors['tw'][elem]
+                ts = self.condensed_vectors['ts'][elem]
+
+                EulerElemW = np.dot(inv_k_ws,(ts - np.dot(k_us.T,EulerELemCoords.ravel())[:,None])).ravel()
+                EulerElemS = np.dot(inv_k_ws,(tw - np.dot(k_ww,EulerElemW)[:,None])).ravel()
+
+                # SAVE
+                AllEulerW[elem,:,:] = EulerElemW.reshape(self.meshes[1].elements.shape[1],ndim)
+                AllEulerS[elem,:,:] = EulerElemW.reshape(self.meshes[2].elements.shape[1],ndim)
+
+
+        for inode in self.all_nodes:
+            Els, Pos = self.Elss[inode], self.Poss[inode]
+            ncommon_nodes = Els.shape[0]
+            for uelem in range(ncommon_nodes):
+                NodalEulerW += AllEulerW[Els[uelem],Pos[uelem],:]
+                NodalEulerS += AllEulerS[Els[uelem],Pos[uelem],:]
+            # AVERAGE OUT
+            NodalEulerW[inode,:] /= ncommon_nodes
+            NodalEulerS[inode,:] /= ncommon_nodes
+
+        # NAKE SURE TO UPDATE THESE INSTEAD OF CREATING THEM IN WHICH CASE YOU HAVE TO RETURN THEM
+        Eulerw[:,:] += NodalEulerW
+        Eulers[:,:] += NodalEulerS
+
+        # if self.fields != 'electro_mechanics':
+        #     TotalDisp[:,ndim:,Increment] = NodalEulerW
+        #     TotalDisp[:,2*ndim:,Increment] = NodalEulerS
+        # else:
+        #     TotalDisp[:,ndim+1:,Increment] = NodalEulerW
+        #     TotalDisp[:,2*ndim+1:,Increment] = NodalEulerS
+
+
+        return NodalEulerW, NodalEulerS
 

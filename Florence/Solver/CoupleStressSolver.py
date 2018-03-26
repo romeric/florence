@@ -98,8 +98,10 @@ class CoupleStressSolver(FEMSolver):
         self.NRConvergence = { 'Increment_'+str(Increment) : [] for Increment in range(self.number_of_load_increments) }
 
         # ALLOCATE FOR SOLUTION FIELDS
-        # TotalDisp = np.zeros((mesh.points.shape[0],formulation.nvar,self.number_of_load_increments),dtype=np.float32)
         TotalDisp = np.zeros((mesh.points.shape[0],formulation.nvar,self.number_of_load_increments),dtype=np.float64)
+        TotalW = np.zeros((formulation.meshes[1].points.shape[0],formulation.nvar,self.number_of_load_increments),dtype=np.float64)
+        TotalS = np.zeros((formulation.meshes[2].points.shape[0],formulation.nvar,self.number_of_load_increments),dtype=np.float64)
+        # TotalDisp = np.zeros((mesh.points.shape[0],int(formulation.ndim**2),self.number_of_load_increments),dtype=np.float64)
 
         # PRE-ASSEMBLY
         print('Assembling the system and acquiring neccessary information for the analysis...')
@@ -131,22 +133,26 @@ class CoupleStressSolver(FEMSolver):
 
         if self.analysis_type != 'static':
 
-            TotalDisp = self.DynamicSolver(formulation, solver,
+            TotalDisp, TotalW, TotalS = self.DynamicSolver(formulation, solver,
                 K, M, NeumannForces, NodalForces, Residual,
-                mesh, TotalDisp, Eulerx, Eulerw, Eulers, Eulerp, material, boundary_condition)
+                mesh, TotalDisp, TotalW, TotalS, Eulerx, Eulerw, Eulers, Eulerp, material, boundary_condition)
         else:
-            TotalDisp = self.StaticSolver(formulation, solver,
+            TotalDisp, TotalW, TotalS = self.StaticSolver(formulation, solver,
                 K, NeumannForces, NodalForces, Residual,
-                mesh, TotalDisp, Eulerx, Eulerw, Eulers, Eulerp, material, boundary_condition)
+                mesh, TotalDisp, TotalW, TotalS, Eulerx, Eulerw, Eulers, Eulerp, material, boundary_condition)
 
-
-        return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
+        # return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
+        return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material), TotalW, TotalS
+        # solU = self.__makeoutput__(formulation.meshes[0], TotalDisp, formulation, function_spaces, material)
+        # solW = self.__makeoutput__(formulation.meshes[1], TotalW, formulation, function_spaces, material)
+        # solS = self.__makeoutput__(formulation.meshes[2], TotalS, formulation, function_spaces, material)
+        # return solU, solW, solS
 
 
 
     def StaticSolver(self, formulation, solver, K,
             NeumannForces, NodalForces, Residual,
-            mesh, TotalDisp, Eulerx, Eulerw, Eulers, Eulerp, material, boundary_condition):
+            mesh, TotalDisp, TotalW, TotalS, Eulerx, Eulerw, Eulers, Eulerp, material, boundary_condition):
 
 
         LoadIncrement = self.number_of_load_increments
@@ -175,7 +181,7 @@ class CoupleStressSolver(FEMSolver):
                 boundary_condition.columns_out, AppliedDirichletInc,0,K.shape[0])
 
             # STORE TOTAL SOLUTION DATA
-            TotalDisp[:,:,Increment] += dU
+            TotalDisp[:,:formulation.ndim,Increment] += dU
 
             # REDUCED ACCUMULATED FORCE
             Residual[:,:] = DeltaF
@@ -184,6 +190,10 @@ class CoupleStressSolver(FEMSolver):
                 only_residual=True)[boundary_condition.columns_in,0]
             # F_b = boundary_condition.GetReducedVectors(Residual,only_residual=True)[0]
 
+            # UPDATE
+            Eulerx += dU[:,:formulation.ndim]
+            Eulerp += dU[:,-1]
+            TotalW[:,:,Increment], TotalW[:,:,Increment] = formulation.GetAugmentedSolution(self, material, TotalDisp, Eulerx, Eulerw, Eulers, Eulerp)
 
             # LOG REQUESTS
             self.LogSave(formulation, TotalDisp, Increment)
@@ -205,13 +215,13 @@ class CoupleStressSolver(FEMSolver):
 
         solver.CleanUp()
 
-        return TotalDisp
+        return TotalDisp, TotalW, TotalS
 
 
 
     def DynamicSolver(self, formulation, solver, K, M,
             NeumannForces, NodalForces, Residual,
-            mesh, TotalDisp, Eulerx, Eulerw, Eulers, Eulerp, material, boundary_condition):
+            mesh, TotalDisp, TotalW, TotalS, Eulerx, Eulerw, Eulers, Eulerp, material, boundary_condition):
 
         LoadIncrement = self.number_of_load_increments
         LoadFactor = self.total_time/LoadIncrement
@@ -226,7 +236,7 @@ class CoupleStressSolver(FEMSolver):
 
         dumU = np.zeros((mesh.points.shape[0]*formulation.ndim))
         dumU[boundary_condition.columns_out] = boundary_condition.applied_dirichlet[:,0]
-        TotalDisp[:,:,0] = dumU.reshape(mesh.points.shape[0],formulation.ndim)
+        TotalDisp[:,:formulation.ndim,0] = dumU.reshape(mesh.points.shape[0],formulation.ndim)
         # INITIALISE VELOCITY AND ACCELERATION
         velocities     = np.zeros((mesh.points.shape[0]*formulation.ndim))
         accelerations  = np.zeros((mesh.points.shape[0]*formulation.ndim))
@@ -265,16 +275,16 @@ class CoupleStressSolver(FEMSolver):
 
             # ACCUMULATED FORCE
             if self.lump_rhs:
-                Residual[:,0] = (1./self.beta/LoadFactor**2)*M*TotalDisp[:,:,Increment-1].ravel() +\
+                Residual[:,0] = (1./self.beta/LoadFactor**2)*M*TotalDisp[:,:formulation.ndim,Increment-1].ravel() +\
                     (1./self.beta/LoadFactor)*M*velocities + (0.5/self.beta - 1.)*M*accelerations
             else:
-                Residual[:,0] = (1./self.beta/LoadFactor**2)*M.dot(TotalDisp[:,:,Increment-1].ravel()) +\
+                Residual[:,0] = (1./self.beta/LoadFactor**2)*M.dot(TotalDisp[:,:formulation.ndim,Increment-1].ravel()) +\
                     (1./self.beta/LoadFactor)*M.dot(velocities) + (0.5/self.beta - 1.)*M.dot(accelerations)
             Residual += DeltaF
 
             # CHECK CONTACT AND ASSEMBLE IF DETECTED
             if self.has_contact:
-                Eulerx = mesh.points + TotalDisp[:,:,Increment-1]
+                Eulerx = mesh.points + TotalDisp[:,:formulation.ndim,Increment-1]
                 TractionForcesContact = np.zeros_like(Residual)
                 TractionForcesContact = self.contact_formulation.AssembleTractions(mesh,material,Eulerx).ravel()*LoadFactor
 
@@ -297,13 +307,18 @@ class CoupleStressSolver(FEMSolver):
                 boundary_condition.columns_out, AppliedDirichletInc,0,K.shape[0])
 
             # STORE TOTAL SOLUTION DATA
-            TotalDisp[:,:,Increment] += dU
+            TotalDisp[:,:formulation.ndim,Increment] += dU
 
             # UPDATE VELOCITY AND ACCELERATION
             accelerations_old = np.copy(accelerations)
-            accelerations = (1./self.beta/LoadFactor**2)*(TotalDisp[:,:,Increment] - TotalDisp[:,:,Increment-1]).ravel() -\
+            accelerations = (1./self.beta/LoadFactor**2)*(TotalDisp[:,:formulation.ndim,Increment] - TotalDisp[:,:formulation.ndim,Increment-1]).ravel() -\
                 1./self.beta/LoadFactor*velocities + (1.-0.5/self.beta)*accelerations
             velocities += LoadFactor*(self.gamma*accelerations + (1-self.gamma)*accelerations_old)
+
+            # UPDATE
+            Eulerx += dU[:,:formulation.ndim]
+            Eulerp += dU[:,-1]
+            TotalW[:,:,Increment], TotalW[:,:,Increment] = formulation.GetAugmentedSolution(self, material, TotalDisp, Eulerx, Eulerw, Eulers, Eulerp)
 
             # LOG REQUESTS
             self.LogSave(formulation, TotalDisp, Increment)
@@ -321,4 +336,4 @@ class CoupleStressSolver(FEMSolver):
 
         solver.CleanUp()
 
-        return TotalDisp
+        return TotalDisp, TotalW, TotalS
