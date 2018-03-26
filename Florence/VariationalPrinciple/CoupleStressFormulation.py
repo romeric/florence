@@ -27,7 +27,7 @@ class CoupleStressFormulation(VariationalPrinciple):
         """
 
             Input:
-                subtype:                    [str] either "lagrange_multiplier" or "penalty"
+                subtype:                    [str] either "lagrange_multiplier", "augmented_lagrange" or "penalty"
         """
 
         if mesh.element_type != "tet" and mesh.element_type != "tri" and \
@@ -175,7 +175,7 @@ class CoupleStressFormulation(VariationalPrinciple):
     def GetLocalStiffness(self, material, fem_solver, Eulerx, Eulerw, Eulers, Eulerp=None, elem=0):
         """Get stiffness matrix of the system"""
 
-        if self.subtype=="lagrange_multiplier":
+        if self.subtype=="lagrange_multiplier" or self.subtype=="augmented_lagrange":
             # return self.K_uu(material, fem_solver, Eulerx, Eulerp, elem=0)
 
             tractionforce = []
@@ -189,7 +189,6 @@ class CoupleStressFormulation(VariationalPrinciple):
 
             k_ss, ts = self.K_ss(material, fem_solver, Eulerw, Eulerp, elem)
 
-
             # IF NO STATIC CONDITON
             if fem_solver.static_condensation is False:
                 k0 = np.concatenate((k_uu,k_uw, k_us),axis=1)
@@ -198,13 +197,26 @@ class CoupleStressFormulation(VariationalPrinciple):
                 stiffness = np.concatenate((k0,k1, k2),axis=0)
                 tractionforce = np.concatenate((tu,tw,ts))
             else:
-                inv_k_ws = inv(k_ws)
-                k0 = k_ww.dot(inv_k_ws)
-                k1 = k0.dot(k_us.T)
-                stiffness = k_uu + np.dot(np.dot(k_us,inv_k_ws),k1)
+                if self.subtype=="lagrange_multiplier":
+                    # IF NO STATIC CONDITON
+                    inv_k_ws = inv(k_ws)
+                    k0 = k_ww.dot(inv_k_ws)
+                    k1 = k0.dot(k_us.T)
+                    stiffness = k_uu + np.dot(np.dot(k_us,inv_k_ws),k1)
 
-                t0 = tw - np.dot(k0,ts)
-                tractionforce = tu - np.dot(np.dot(k_us,inv_k_ws),t0)
+                    t0 = tw - np.dot(k0,ts)
+                    tractionforce = tu - np.dot(np.dot(k_us,inv_k_ws),t0)
+
+                elif self.subtype=="augmented_lagrange":
+                    # IF NO STATIC CONDITON
+                    inv_k_ws = inv(k_ws)
+                    k0 = k_ww.dot(inv_k_ws)
+                    k1 = k0.dot(k_us.T)
+                    k2 = inv(k_ws - k0.dot(k_ss))
+                    stiffness = k_uu + np.dot(np.dot(k_us,k2),k1)
+
+                    t0 = tw - np.dot(k0,ts)
+                    tractionforce = tu - np.dot(np.dot(k_us,k2),t0)
 
 
         elif self.subtype=="penalty":
@@ -505,7 +517,7 @@ class CoupleStressFormulation(VariationalPrinciple):
             # COMPUTE STRESS
             LagrangeMultiplierStressVector = material.LagrangeMultiplierStress(EulerGaussS,elem=elem,gcounter=counter)
             # COMPUTE THE TANGENT STIFFNESS MATRIX
-            NDN, t = self.K_ss_Integrand(Ns, Bases_s[:,counter], 0, LagrangeMultiplierStressVector, 0,
+            NDN, t = self.K_ss_Integrand(Ns, Bases_s[:,counter], 0, LagrangeMultiplierStressVector, material.kappa,
                 analysis_nature=fem_solver.analysis_nature, has_prestress=fem_solver.has_prestress)
             # INTEGRATE STIFFNESS
             stiffness += NDN*self.detJ[counter]  ## CAREFUL ABOUT [CHECK] self.detJ[counter] ####################
@@ -547,19 +559,13 @@ class CoupleStressFormulation(VariationalPrinciple):
 
         meshes = self.meshes
         mesh = self.meshes[1]
-        # print mesh.degree, mesh.nelem, mesh.nnode
-        # exit()
+
         function_spaces = self.function_spaces
         function_space = self.function_spaces[1]
 
         ndim = self.ndim
         nvar = ndim
         nodeperelem = meshes[1].elements.shape[1]
-        # print nodeperelem
-
-        # GET THE FIELDS AT THE ELEMENT LEVEL
-        LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
-        EulerELemCoords = Eulerw[mesh.elements[elem,:],:]
 
         Jm = function_spaces[1].Jm
         AllGauss = function_space.AllGauss
@@ -567,33 +573,9 @@ class CoupleStressFormulation(VariationalPrinciple):
         # ALLOCATE
         stiffness = np.zeros((nodeperelem*nvar,nodeperelem*nvar),dtype=np.float64)
         tractionforce = np.zeros((nodeperelem*nvar,1),dtype=np.float64)
-        B = np.zeros((nodeperelem*nvar,material.gradient_elasticity_tensor_size),dtype=np.float64)
-
-        # COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
-        # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-        ParentGradientX = np.einsum('ijk,jl->kil', Jm, LagrangeElemCoords)
-        # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
-        MaterialGradient = np.einsum('ijk,kli->ijl', inv(ParentGradientX), Jm)
-        # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
-        F = np.einsum('ij,kli->kjl', EulerELemCoords, MaterialGradient)
-
-        # COMPUTE REMAINING KINEMATIC MEASURES
-        StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
-
-        # UPDATE/NO-UPDATE GEOMETRY
-        if fem_solver.requires_geometry_update:
-            # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-            ParentGradientx = np.einsum('ijk,jl->kil',Jm,EulerELemCoords)
-            # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
-            SpatialGradient = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Jm)
-            # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
-            detJ = np.einsum('i,i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)),np.abs(StrainTensors['J']))
-        else:
-            # SPATIAL GRADIENT AND MATERIAL GRADIENT TENSORS ARE EQUAL
-            SpatialGradient = np.einsum('ikj',MaterialGradient)
-            # COMPUTE ONCE detJ
-            detJ = np.einsum('i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)))
-
+        Bases_w = self.function_spaces[1].Bases
+        Nw = np.zeros((self.ndim,Bases_w.shape[0]*self.ndim),dtype=np.float64)
+        detJ = AllGauss[:,0]
 
         # LOOP OVER GAUSS POINTS
         for counter in range(AllGauss.shape[0]):
@@ -605,8 +587,8 @@ class CoupleStressFormulation(VariationalPrinciple):
 
 
             # COMPUTE THE TANGENT STIFFNESS MATRIX
-            BDB_1, t = self.K_ww_Penalty_Integrand(B, SpatialGradient[counter,:,:],
-                None, CoupleStressVector, analysis_nature=fem_solver.analysis_nature,
+            BDB_1, t = self.K_ww_Penalty_Integrand(Nw, Bases_w[:,counter],
+                0, CoupleStressVector, material.kappa, analysis_nature=fem_solver.analysis_nature,
                 has_prestress=fem_solver.has_prestress)
 
             # COMPUTE GEOMETRIC STIFFNESS MATRIX
@@ -766,7 +748,7 @@ class CoupleStressFormulation(VariationalPrinciple):
 
 
     def K_ss_Integrand(self, Ns, Bases_s, ElectricDisplacementx,
-        LagrangeMultiplierStressVector, H_Voigt, analysis_nature="nonlinear", has_prestress=True):
+        LagrangeMultiplierStressVector, kappa, analysis_nature="nonlinear", has_prestress=True):
 
         ndim = self.ndim
         nvar = ndim
@@ -774,7 +756,10 @@ class CoupleStressFormulation(VariationalPrinciple):
         for ivar in range(ndim):
             Ns[ivar,ivar::nvar] = Bases_s
 
-        NDN = np.zeros((self.function_spaces[2].Bases.shape[0]*self.ndim,self.function_spaces[2].Bases.shape[0]*self.ndim),dtype=np.float64)
+        if self.subtype == "augmented_lagrange":
+            NDN = np.dot(Ns.T,Ns)/(1.0*kappa)
+        else:
+            NDN = np.zeros((self.function_spaces[2].Bases.shape[0]*self.ndim,self.function_spaces[2].Bases.shape[0]*self.ndim),dtype=np.float64)
         t=[]
         if analysis_nature == 'nonlinear' or has_prestress:
             t = np.dot(Ns,LagrangeMultiplierStressVector)
@@ -812,39 +797,20 @@ class CoupleStressFormulation(VariationalPrinciple):
         return BDB
 
 
-    def K_ww_Penalty_Integrand(self, B, SpatialGradient, ElectricDisplacementx,
-        CoupleStressVector, analysis_nature="nonlinear", has_prestress=True):
+    def K_ww_Penalty_Integrand(self, Nw, Bases_w, ElectricDisplacementx,
+        CoupleStressVector, kappa, analysis_nature="nonlinear", has_prestress=True):
 
         ndim = self.ndim
         nvar = ndim
 
-        # MATRIX FORM
-        SpatialGradient = SpatialGradient.T
+        for ivar in range(ndim):
+            Nw[ivar,ivar::nvar] = Bases_w
 
-        # THREE DIMENSIONS
-        if SpatialGradient.shape[0]==3:
-
-            # VORTICITY TERMS
-            B[1::nvar,0] = -SpatialGradient[2,:]
-            B[2::nvar,0] = SpatialGradient[1,:]
-
-            B[0::nvar,1] = SpatialGradient[2,:]
-            B[2::nvar,1] = -SpatialGradient[0,:]
-
-            B[0::nvar,2] = -SpatialGradient[1,:]
-            B[1::nvar,2] = SpatialGradient[0,:]
-
-        elif SpatialGradient.shape[0]==2:
-            # VORTICITY TERMS
-            B[0::nvar,0] = -SpatialGradient[1,:]
-            B[1::nvar,0] = SpatialGradient[0,:]
-
-
-        BDB = np.dot(B,B.T)
+        NDN = kappa*np.dot(Nw.T,Nw)
         t=[]
         if analysis_nature == 'nonlinear' or has_prestress:
-            t = np.dot(B,CoupleStressVector)
-        return BDB, t
+            t = np.dot(Nw,CoupleStressVector)
+        return NDN, t
 
 
 
