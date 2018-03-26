@@ -207,7 +207,14 @@ class LinearSolver(object):
 
         # DECIDE IF THE SOLVER TYPE IS APPROPRIATE FOR THE PROBLEM
         if self.switcher_message is False and self.dont_switch_solver is False:
-            if b.shape[0] > 100000:
+            # PREFER PARDISO OR MUMPS IF AVAILABLE
+            if self.has_pardiso:
+                self.solver_type = "direct"
+                self.solver_subtype = "pardiso"
+            elif self.has_mumps:
+                self.solver_type = "direct"
+                self.solver_subtype = "mumps"
+            elif b.shape[0] > 100000 and self.has_amg_solver:
                 self.solver_type = "multigrid"
                 self.solver_subtype = "amg"
                 print('Large system of equations. Switching to algebraic multigrid solver')
@@ -216,7 +223,7 @@ class LinearSolver(object):
                 # self.solver_type = "direct"
                 # self.solver_subtype = "MUMPS"
                 # print 'Large system of equations. Switching to MUMPS solver'
-            elif b.shape[0] > 70000 and self.geometric_discretisation=="hex":
+            elif b.shape[0] > 70000 and self.geometric_discretisation=="hex" and self.has_amg_solver:
                 self.solver_type = "multigrid"
                 self.solver_subtype = "amg"
                 print('Large system of equations. Switching to algebraic multigrid solver')
@@ -224,6 +231,7 @@ class LinearSolver(object):
             else:
                 self.solver_type = "direct"
                 self.solver_subtype = "umfpack"
+
 
         if self.solver_type == 'direct':
             # CALL DIRECT SOLVER
