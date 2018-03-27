@@ -40,7 +40,111 @@ class CoupleStressSolver(FEMSolver):
         self.beta    = 0.25
 
     def GetBoundaryInfo(self,K,boundary_condition,formulation):
-        pass
+
+        all_dofs = np.arange(mesh.points.shape[0]*formulation.nvar)
+        if formulation.fields == "electro_mechanics":
+            self.electric_dofs = all_dofs[formulation.nvar-1::formulation.nvar]
+            self.mechanical_dofs = np.array([],dtype=np.int64)
+            self.mechanical_dofs = np.setdiff1d(all_dofs,self.electric_dofs)
+
+            # GET BOUNDARY CONDITON FOR THE REDUCED MECHANICAL SYSTEM
+            self.columns_in_mech = np.intersect1d(boundary_condition.columns_in,self.mechanical_dofs)
+            self.columns_in_mech_idx = np.in1d(self.mechanical_dofs,boundary_condition.columns_in)
+
+            # GET BOUNDARY CONDITON FOR THE REDUCED ELECTROSTATIC SYSTEM
+            self.columns_in_electric = np.intersect1d(boundary_condition.columns_in,self.electric_dofs)
+            self.columns_in_electric_idx = np.in1d(self.electric_dofs,boundary_condition.columns_in)
+
+
+            # GET FREE MECHANICAL DOFs
+            self.columns_out_mech = np.intersect1d(boundary_condition.columns_out,self.mechanical_dofs)
+            self.columns_out_mech_idx = np.in1d(self.mechanical_dofs,boundary_condition.columns_out)
+
+            # GET FREE ELECTROSTATIC DOFs
+            self.columns_out_electric = np.intersect1d(boundary_condition.columns_out,self.electric_dofs)
+            self.columns_out_electric_idx = np.in1d(self.electric_dofs,boundary_condition.columns_out)
+
+            self.applied_dirichlet_mech = boundary_condition.applied_dirichlet[np.in1d(boundary_condition.columns_out,self.columns_out_mech)]
+            self.applied_dirichlet_electric = boundary_condition.applied_dirichlet[np.in1d(boundary_condition.columns_out,self.columns_out_electric)]
+
+            # MAPPED QUANTITIES
+            # all_dofs = np.arange(0,K.shape[0])
+            out_idx = np.in1d(all_dofs,boundary_condition.columns_out)
+            idx_electric = all_dofs[formulation.nvar-1::formulation.nvar]
+            idx_mech = np.setdiff1d(all_dofs,idx_electric)
+
+            # self.all_electric_dofs = np.arange(M.shape[0]/formulation.nvar)
+            self.all_electric_dofs = np.arange(mesh.points.shape[0])
+            self.electric_out = self.all_electric_dofs[out_idx[idx_electric]]
+            self.electric_in = np.setdiff1d(self.all_electric_dofs,self.electric_out)
+
+            self.all_mech_dofs = np.arange(mesh.points.shape[0]*formulation.ndim)
+            self.mech_out = self.all_mech_dofs[out_idx[idx_mech]]
+            self.mech_in = np.setdiff1d(self.all_mech_dofs,self.mech_out)
+
+        elif formulation.fields == "mechanics":
+            self.electric_dofs = []
+            self.mechanical_dofs = all_dofs
+            self.columns_out_mech = boundary_condition.columns_out
+
+            self.mech_in = boundary_condition.columns_in
+            self.mech_out = boundary_condition.columns_out
+
+            self.applied_dirichlet_mech = boundary_condition.applied_dirichlet
+
+
+
+    def __checkdata__(self, material, boundary_condition,
+        formulation, mesh, function_spaces, solver, contact_formulation=None):
+
+        function_spaces, solver = super(CoupleStressSolver,self).__checkdata__(material, boundary_condition,
+            formulation, mesh, function_spaces, solver, contact_formulation=contact_formulation)
+
+        ## IMPORTANT
+        self.requires_geometry_update = False
+        self.analysis_nature = "linear"
+
+        # BUILD THE TANGENT OPERATORS BEFORE HAND
+        if material.mtype == "CoupleStressModel":
+            I = np.eye(material.ndim,material.ndim)
+
+            material.elasticity_tensor = Voigt(material.lamb*np.einsum('ij,kl',I,I)+material.mu*(np.einsum('ik,jl',I,I)+np.einsum('il,jk',I,I)),1)
+            material.gradient_elasticity_tensor = 2.*material.eta*I
+            material.coupling_tensor0 = np.zeros((material.elasticity_tensor.shape[0],
+                material.gradient_elasticity_tensor.shape[0]))
+
+            # print material.elasticity_tensor
+            ngauss = function_spaces[0].AllGauss.shape[0]
+            d0 = material.elasticity_tensor.shape[0]
+            d1 = material.elasticity_tensor.shape[1]
+            d2 = material.gradient_elasticity_tensor.shape[0]
+            d3 = material.gradient_elasticity_tensor.shape[1]
+            material.elasticity_tensors = np.tile(material.elasticity_tensor.ravel(),ngauss).reshape(ngauss,d0,d1)
+            material.gradient_elasticity_tensors = np.tile(material.gradient_elasticity_tensor.ravel(),ngauss).reshape(ngauss,d2,d3)
+
+        elif material.mtype == "IsotropicLinearFlexoelectricModel":
+            I = np.eye(material.ndim,material.ndim)
+
+            material.elasticity_tensor = Voigt(material.lamb*np.einsum('ij,kl',I,I)+material.mu*(np.einsum('ik,jl',I,I)+np.einsum('il,jk',I,I)),1)
+            material.gradient_elasticity_tensor = 2.*material.eta*I
+            material.coupling_tensor0 = np.zeros((material.elasticity_tensor.shape[0],
+                material.gradient_elasticity_tensor.shape[0]))
+            material.piezoelectric_tensor = material.P
+            material.dielectric_tensor = material.eps*np.eye(material.ndim,material.ndim)
+
+            # print material.elasticity_tensor
+            ngauss = function_spaces[0].AllGauss.shape[0]
+            d0 = material.elasticity_tensor.shape[0]
+            d1 = material.elasticity_tensor.shape[1]
+            d2 = material.gradient_elasticity_tensor.shape[0]
+            d3 = material.gradient_elasticity_tensor.shape[1]
+            material.elasticity_tensors = np.tile(material.elasticity_tensor.ravel(),ngauss).reshape(ngauss,d0,d1)
+            material.gradient_elasticity_tensors = np.tile(material.gradient_elasticity_tensor.ravel(),ngauss).reshape(ngauss,d2,d3)
+            material.piezoelectric_tensors = np.tile(material.P.ravel(),ngauss).reshape(ngauss,material.P.shape[0],material.P.shape[1])
+            material.dielectric_tensors = np.tile(material.dielectric_tensor.ravel(),ngauss).reshape(ngauss,material.ndim,material.ndim)
+
+        return function_spaces, solver
+
 
 
     def Solve(self, formulation=None, mesh=None,
@@ -66,29 +170,6 @@ class CoupleStressSolver(FEMSolver):
             print('Number of elements is', mesh.elements.shape[0], \
                  'and number of boundary nodes is', np.unique(mesh.faces).shape[0])
         #---------------------------------------------------------------------------#
-
-        ## IMPORTANT
-        self.requires_geometry_update = False
-        self.analysis_nature = "linear"
-
-        # BUILD THE TANGENT OPERATORS BEFORE HAND
-        if material.mtype == "CoupleStressModel":
-            I = np.eye(material.ndim,material.ndim)
-
-            material.elasticity_tensor = Voigt(material.lamb*np.einsum('ij,kl',I,I)+material.mu*(np.einsum('ik,jl',I,I)+np.einsum('il,jk',I,I)),1)
-            material.gradient_elasticity_tensor = 2.*material.eta*I
-            material.coupling_tensor0 = np.zeros((material.elasticity_tensor.shape[0],
-                material.gradient_elasticity_tensor.shape[0]))
-
-            # print material.elasticity_tensor
-            ngauss = function_spaces[0].AllGauss.shape[0]
-            d0 = material.elasticity_tensor.shape[0]
-            d1 = material.elasticity_tensor.shape[1]
-            d2 = material.gradient_elasticity_tensor.shape[0]
-            d3 = material.gradient_elasticity_tensor.shape[1]
-            material.elasticity_tensors = np.tile(material.elasticity_tensor.ravel(),ngauss).reshape(ngauss,d0,d1)
-            material.gradient_elasticity_tensors = np.tile(material.gradient_elasticity_tensor.ravel(),ngauss).reshape(ngauss,d2,d3)
-
 
 
         # INITIATE DATA FOR NON-LINEAR ANALYSIS

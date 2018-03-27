@@ -18,12 +18,13 @@ class CoupleStressModel(Material):
         # REQUIRES SEPARATELY
         self.energy_type = "internal_energy"
 
+        # FOR STATICALLY CONDENSED FORMULATION
         if self.ndim==3:
             self.elasticity_tensor_size = 6
-            self.H_VoigtSize = 12
+            self.H_VoigtSize = 6
         elif self.ndim==2:
             self.elasticity_tensor_size = 3
-            self.H_VoigtSize = 9
+            self.H_VoigtSize = 3
         self.gradient_elasticity_tensor_size = ndim
 
         # LOW LEVEL DISPATCHER

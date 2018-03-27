@@ -71,3 +71,6 @@ from .IdealDielectric import *
 
 # COUPLE STRESS MODELS
 from .CoupleStressModel import *
+
+# COUPLE STRESS BASED FLEXOELECTRIC MODELS
+from .IsotropicLinearFlexoelectricModel import *
