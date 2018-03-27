@@ -274,12 +274,26 @@ class CoupleStressSolver(FEMSolver):
             NodalForces = DeltaF
 
             # ACCUMULATED FORCE
-            if self.lump_rhs:
-                Residual[:,0] = (1./self.beta/LoadFactor**2)*M*TotalDisp[:,:formulation.ndim,Increment-1].ravel() +\
-                    (1./self.beta/LoadFactor)*M*velocities + (0.5/self.beta - 1.)*M*accelerations
+            if self.include_physical_damping:
+                if self.lump_rhs:
+                    Residual[:,0] = (1./self.beta/LoadFactor**2)*M*TotalDisp[:,:formulation.ndim,Increment-1].ravel() +\
+                        (1./self.beta/LoadFactor)*M*velocities + (0.5/self.beta - 1.)*M*accelerations +\
+                        (self.gamma/self.beta/LoadFactor)*D*TotalDisp[:,:formulation.ndim,Increment-1].ravel() +\
+                        (self.gamma/self.beta - 1.)*D*velocities -\
+                        LoadFactor*((1-self.gamma)-self.gamma*(0.5/self.beta - 1.))*D*accelerations
+                else:
+                    Residual[:,0] = (1./self.beta/LoadFactor**2)*M.dot(TotalDisp[:,:formulation.ndim,Increment-1].ravel()) +\
+                        (1./self.beta/LoadFactor)*M.dot(velocities) + (0.5/self.beta - 1.)*M.dot(accelerations) +\
+                        (self.gamma/self.beta/LoadFactor)*D.dot(TotalDisp[:,:formulation.ndim,Increment-1].ravel()) +\
+                        (self.gamma/self.beta - 1.)*D.dot(velocities) -\
+                        LoadFactor*((1-self.gamma)-self.gamma*(0.5/self.beta - 1.))*D.dot(accelerations)
             else:
-                Residual[:,0] = (1./self.beta/LoadFactor**2)*M.dot(TotalDisp[:,:formulation.ndim,Increment-1].ravel()) +\
-                    (1./self.beta/LoadFactor)*M.dot(velocities) + (0.5/self.beta - 1.)*M.dot(accelerations)
+                if self.lump_rhs:
+                    Residual[:,0] = (1./self.beta/LoadFactor**2)*M*TotalDisp[:,:formulation.ndim,Increment-1].ravel() +\
+                        (1./self.beta/LoadFactor)*M*velocities + (0.5/self.beta - 1.)*M*accelerations
+                else:
+                    Residual[:,0] = (1./self.beta/LoadFactor**2)*M.dot(TotalDisp[:,:formulation.ndim,Increment-1].ravel()) +\
+                        (1./self.beta/LoadFactor)*M.dot(velocities) + (0.5/self.beta - 1.)*M.dot(accelerations)
             Residual += DeltaF
 
             # CHECK CONTACT AND ASSEMBLE IF DETECTED

@@ -975,9 +975,11 @@ class CoupleStressFormulation(VariationalPrinciple):
 
 
     def GetAugmentedSolution(self, fem_solver, material, TotalDisp, Eulerx, Eulerw, Eulers, Eulerp):
+        """Get condensed variables
+        """
 
         if self.save_condensed_matrices is False:
-            return
+            return 0., 0.
 
         mesh = self.meshes[0]
         elements = mesh.elements
@@ -996,8 +998,8 @@ class CoupleStressFormulation(VariationalPrinciple):
         AllEulerW = np.zeros((nelem,self.meshes[1].elements.shape[1],ndim))
         AllEulerS = np.zeros((nelem,self.meshes[2].elements.shape[1],ndim))
 
-        NodalEulerW = np.zeros((self.meshes[1].points.shape[0],ndim))
-        NodalEulerS = np.zeros((self.meshes[2].points.shape[0],ndim))
+        NodalEulerW = np.zeros((self.meshes[1].points.shape[0],self.ndim))
+        NodalEulerS = np.zeros((self.meshes[2].points.shape[0],self.ndim))
 
         # LOOP OVER ELEMENTS
         for elem in range(nelem):
