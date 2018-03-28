@@ -648,7 +648,7 @@ class FlexoelectricFormulation(VariationalPrinciple):
 
 
         # LOOP OVER GAUSS POINTS
-        for counter in range(AllGauss.shape[0]):
+        for counter in range(function_spaces[0].AllGauss.shape[0]):
 
             # COMPUTE THE TANGENT STIFFNESS MATRIX
             BDB = self.K_wp_Integrand(B_w, B_p, SpatialGradient_w[counter,:,:], SpatialGradient_p[counter,:,:],H_Voigt[counter,:,:])
