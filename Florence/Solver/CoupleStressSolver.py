@@ -339,33 +339,45 @@ class CoupleStressSolver(FEMSolver):
             tmp[:,0] = NeumannForces[:,0]
             NeumannForces = tmp
 
-        dumU = np.zeros((mesh.points.shape[0]*formulation.ndim))
+        dumU = np.zeros((mesh.points.shape[0]*formulation.nvar))
         dumU[boundary_condition.columns_out] = boundary_condition.applied_dirichlet[:,0]
-        TotalDisp[:,:formulation.ndim,0] = dumU.reshape(mesh.points.shape[0],formulation.ndim)
+        TotalDisp[:,:formulation.nvar,0] = dumU.reshape(mesh.points.shape[0],formulation.nvar)
         # INITIALISE VELOCITY AND ACCELERATION
         velocities     = np.zeros((mesh.points.shape[0]*formulation.ndim))
         accelerations  = np.zeros((mesh.points.shape[0]*formulation.ndim))
-
-        # COMPUTE INITIAL ACCELERATION FOR TIME STEP 0
-        Residual = np.zeros_like(Residual)
-        InitResidual = Residual + NeumannForces[:,0][:,None]
-        if formulation.fields == "electro_mechanics":
-            accelerations[:] = solver.Solve(M_mech, -InitResidual[self.mechanical_dofs].ravel())
-        else:
-            accelerations[:] = solver.Solve(M, InitResidual.ravel() )
 
         # COMPUTE DAMPING MATRIX BASED ON MASS
         D = 0.0
         if self.include_physical_damping:
             D = self.damping_factor*M
+
+        if formulation.fields == "electro_mechanics" or formulation.fields == "flexoelectric":
+            # self.GetBoundaryInfo(mesh, formulation,boundary_condition)
+            M_mech = M[self.mechanical_dofs,:][:,self.mechanical_dofs]
+            if self.include_physical_damping:
+                D_mech = D[self.mechanical_dofs,:][:,self.mechanical_dofs]
+        else:
+            M_mech = M
+            D_mech = D
+
+        # COMPUTE INITIAL ACCELERATION FOR TIME STEP 0
+        Residual = np.zeros_like(Residual)
+        InitResidual = Residual + NeumannForces[:,0][:,None]
+        if formulation.fields == "electro_mechanics" or formulation.fields == "flexoelectric":
+            accelerations[:] = solver.Solve(M_mech, -InitResidual[self.mechanical_dofs].ravel())
+        else:
+            accelerations[:] = solver.Solve(M, InitResidual.ravel() )
+
         # COMPUTE AUGMENTED K (INCLUDES INERTIA EFFECT)
         K          += (self.gamma/self.beta/LoadFactor)*D + (1./self.beta/LoadFactor**2)*M
         # GET REDUCED VARIABLES
         K_b, F_b, _ = boundary_condition.GetReducedMatrices(K,Residual)
 
         if self.lump_rhs:
-            M = M.sum(axis=1).A.ravel() # FOR CSR
-            # M = M.sum(axis=0).ravel() # FOR CSC
+            M_mech = M_mech.sum(axis=1).A.ravel() # FOR CSR
+            # M_mech = M_mech.sum(axis=0).ravel() # FOR CSC
+            if self.include_physical_damping:
+                D_mech = D_mech.sum(axis=1).A.ravel()
 
 
         for Increment in range(1,LoadIncrement):
@@ -381,24 +393,24 @@ class CoupleStressSolver(FEMSolver):
             # ACCUMULATED FORCE
             if self.include_physical_damping:
                 if self.lump_rhs:
-                    Residual[:,0] = (1./self.beta/LoadFactor**2)*M*TotalDisp[:,:formulation.ndim,Increment-1].ravel() +\
-                        (1./self.beta/LoadFactor)*M*velocities + (0.5/self.beta - 1.)*M*accelerations +\
-                        (self.gamma/self.beta/LoadFactor)*D*TotalDisp[:,:formulation.ndim,Increment-1].ravel() +\
-                        (self.gamma/self.beta - 1.)*D*velocities -\
-                        LoadFactor*((1-self.gamma)-self.gamma*(0.5/self.beta - 1.))*D*accelerations
+                    Residual[self.mechanical_dofs,0] = (1./self.beta/LoadFactor**2)*M_mech*TotalDisp[:,:formulation.ndim,Increment-1].ravel() +\
+                        (1./self.beta/LoadFactor)*M_mech*velocities + (0.5/self.beta - 1.)*M_mech*accelerations +\
+                        (self.gamma/self.beta/LoadFactor)*D_mech*TotalDisp[:,:formulation.ndim,Increment-1].ravel() +\
+                        (self.gamma/self.beta - 1.)*D_mech*velocities -\
+                        LoadFactor*((1-self.gamma)-self.gamma*(0.5/self.beta - 1.))*D_mech*accelerations
                 else:
-                    Residual[:,0] = (1./self.beta/LoadFactor**2)*M.dot(TotalDisp[:,:formulation.ndim,Increment-1].ravel()) +\
-                        (1./self.beta/LoadFactor)*M.dot(velocities) + (0.5/self.beta - 1.)*M.dot(accelerations) +\
-                        (self.gamma/self.beta/LoadFactor)*D.dot(TotalDisp[:,:formulation.ndim,Increment-1].ravel()) +\
-                        (self.gamma/self.beta - 1.)*D.dot(velocities) -\
-                        LoadFactor*((1-self.gamma)-self.gamma*(0.5/self.beta - 1.))*D.dot(accelerations)
+                    Residual[self.mechanical_dofs,0] = (1./self.beta/LoadFactor**2)*M_mech.dot(TotalDisp[:,:formulation.ndim,Increment-1].ravel()) +\
+                        (1./self.beta/LoadFactor)*M_mech.dot(velocities) + (0.5/self.beta - 1.)*M_mech.dot(accelerations) +\
+                        (self.gamma/self.beta/LoadFactor)*D_mech.dot(TotalDisp[:,:formulation.ndim,Increment-1].ravel()) +\
+                        (self.gamma/self.beta - 1.)*D_mech.dot(velocities) -\
+                        LoadFactor*((1-self.gamma)-self.gamma*(0.5/self.beta - 1.))*D_mech.dot(accelerations)
             else:
                 if self.lump_rhs:
-                    Residual[:,0] = (1./self.beta/LoadFactor**2)*M*TotalDisp[:,:formulation.ndim,Increment-1].ravel() +\
-                        (1./self.beta/LoadFactor)*M*velocities + (0.5/self.beta - 1.)*M*accelerations
+                    Residual[self.mechanical_dofs,0] = (1./self.beta/LoadFactor**2)*M_mech*TotalDisp[:,:formulation.ndim,Increment-1].ravel() +\
+                        (1./self.beta/LoadFactor)*M_mech*velocities + (0.5/self.beta - 1.)*M_mech*accelerations
                 else:
-                    Residual[:,0] = (1./self.beta/LoadFactor**2)*M.dot(TotalDisp[:,:formulation.ndim,Increment-1].ravel()) +\
-                        (1./self.beta/LoadFactor)*M.dot(velocities) + (0.5/self.beta - 1.)*M.dot(accelerations)
+                    Residual[self.mechanical_dofs,0] = (1./self.beta/LoadFactor**2)*M_mech.dot(TotalDisp[:,:formulation.ndim,Increment-1].ravel()) +\
+                        (1./self.beta/LoadFactor)*M_mech.dot(velocities) + (0.5/self.beta - 1.)*M_mech.dot(accelerations)
             Residual += DeltaF
 
             # CHECK CONTACT AND ASSEMBLE IF DETECTED
@@ -426,7 +438,7 @@ class CoupleStressSolver(FEMSolver):
                 boundary_condition.columns_out, AppliedDirichletInc,0,K.shape[0])
 
             # STORE TOTAL SOLUTION DATA
-            TotalDisp[:,:formulation.ndim,Increment] += dU
+            TotalDisp[:,:,Increment] += dU
 
             # UPDATE VELOCITY AND ACCELERATION
             accelerations_old = np.copy(accelerations)

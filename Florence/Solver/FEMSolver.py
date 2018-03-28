@@ -965,7 +965,7 @@ class FEMSolver(object):
                 dmesh = Mesh()
                 dmesh.points = TotalDisp[:,:formulation.ndim,Increment]
                 dmesh_bounds = dmesh.Bounds
-                if formulation.fields == "electro_mechanics":
+                if formulation.fields == "electro_mechanics" or formulation.fields == "flexoelectric":
                     _bounds = np.zeros((2,formulation.nvar))
                     _bounds[:,:formulation.ndim] = dmesh_bounds
                     _bounds[:,-1] = [TotalDisp[:,-1,Increment].min(),TotalDisp[:,-1,Increment].max()]
