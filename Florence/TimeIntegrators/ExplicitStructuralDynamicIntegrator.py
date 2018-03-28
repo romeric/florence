@@ -52,12 +52,10 @@ class ExplicitStructuralDynamicIntegrators(object):
             self.applied_dirichlet_electric = boundary_condition.applied_dirichlet[np.in1d(boundary_condition.columns_out,self.columns_out_electric)]
 
             # MAPPED QUANTITIES
-            # all_dofs = np.arange(0,K.shape[0])
             out_idx = np.in1d(all_dofs,boundary_condition.columns_out)
             idx_electric = all_dofs[formulation.nvar-1::formulation.nvar]
             idx_mech = np.setdiff1d(all_dofs,idx_electric)
 
-            # self.all_electric_dofs = np.arange(M.shape[0]/formulation.nvar)
             self.all_electric_dofs = np.arange(mesh.points.shape[0])
             self.electric_out = self.all_electric_dofs[out_idx[idx_electric]]
             self.electric_in = np.setdiff1d(self.all_electric_dofs,self.electric_out)

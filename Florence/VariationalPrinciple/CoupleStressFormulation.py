@@ -608,7 +608,7 @@ class CoupleStressFormulation(VariationalPrinciple):
         function_space = self.function_spaces[1]
 
         ndim = self.ndim
-        nvar = ndim
+        nvar = self.ndim
         nodeperelem = meshes[1].elements.shape[1]
 
         Jm = function_spaces[1].Jm
@@ -657,7 +657,7 @@ class CoupleStressFormulation(VariationalPrinciple):
         CauchyStressTensor, H_Voigt, analysis_nature="nonlinear", has_prestress=True):
 
         ndim = self.ndim
-        nvar = ndim
+        nvar = self.nvar
 
         # MATRIX FORM
         SpatialGradient = SpatialGradient.T
@@ -712,7 +712,7 @@ class CoupleStressFormulation(VariationalPrinciple):
     def K_us_Integrand(self, Bu, Ns, SpatialGradient, Bases_s):
 
         ndim = self.ndim
-        nvar = ndim
+        nvar = self.nvar
 
         # MATRIX FORM
         SpatialGradient = SpatialGradient.T
@@ -746,7 +746,7 @@ class CoupleStressFormulation(VariationalPrinciple):
         CoupleStressVector, H_Voigt, analysis_nature="nonlinear", has_prestress=True):
 
         ndim = self.ndim
-        nvar = ndim
+        nvar = self.nvar
 
         # MATRIX FORM
         SpatialGradient = SpatialGradient.T
@@ -780,7 +780,7 @@ class CoupleStressFormulation(VariationalPrinciple):
     def K_ws_Integrand(self, Nw, Ns, Bases_w, Bases_s):
 
         ndim = self.ndim
-        nvar = ndim
+        nvar = self.nvar
 
         for ivar in range(ndim):
             Nw[ivar::nvar,ivar] = Bases_w
@@ -796,7 +796,7 @@ class CoupleStressFormulation(VariationalPrinciple):
         LagrangeMultiplierStressVector, kappa, analysis_nature="nonlinear", has_prestress=True):
 
         ndim = self.ndim
-        nvar = ndim
+        nvar = self.nvar
 
         for ivar in range(ndim):
             Ns[ivar,ivar::nvar] = Bases_s
@@ -814,7 +814,7 @@ class CoupleStressFormulation(VariationalPrinciple):
     def K_uu_Penalty_Integrand(self, Bu, SpatialGradient):
 
         ndim = self.ndim
-        nvar = ndim
+        nvar = self.nvar
 
         # MATRIX FORM
         SpatialGradient = SpatialGradient.T
@@ -846,7 +846,7 @@ class CoupleStressFormulation(VariationalPrinciple):
         CoupleStressVector, kappa, analysis_nature="nonlinear", has_prestress=True):
 
         ndim = self.ndim
-        nvar = ndim
+        nvar = self.nvar
 
         for ivar in range(ndim):
             Nw[ivar,ivar::nvar] = Bases_w

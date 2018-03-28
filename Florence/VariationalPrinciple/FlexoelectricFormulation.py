@@ -200,19 +200,29 @@ class FlexoelectricFormulation(VariationalPrinciple):
             # return self.K_uu(material, fem_solver, Eulerx, Eulerp, elem=0)
 
             tractionforce = []
-            k_uu, tu = self.K_uu(material, fem_solver, Eulerx, Eulerp, elem)
+            k_uupp, tup = self.K_uu(material, fem_solver, Eulerx, Eulerp, elem)
             k_uw = self.K_uw(material, fem_solver, Eulerx, Eulerp, elem)
             k_us = self.K_us(material, fem_solver, Eulerx, Eulerp, elem)
-
 
             # k_ww, tw = self.K_ww(material, fem_solver, Eulerw, Eulerp, elem)
             k_ww, tw = self.K_ww(material, fem_solver, Eulerx, Eulerp, elem)    # CHECK Eulerx vs Eulerw
             k_ws = self.K_ws(material, fem_solver, Eulerw, Eulerp, elem)
+            k_wp = self.K_wp(material, fem_solver, Eulerx, Eulerw, Eulerp, elem)
 
             k_ss, ts = self.K_ss(material, fem_solver, Eulerw, Eulerp, elem)
 
+
+            # SEPARATE MECHANICAL AND ELECTRICAL
+            k_uu = k_uupp[fem_solver.all_local_mech_dofs,:][:,fem_solver.all_local_mech_dofs]
+            k_up = k_uupp[fem_solver.all_local_mech_dofs][:,fem_solver.all_local_electric_dofs]
+            k_pu = k_uupp[fem_solver.all_local_electric_dofs,:][:,fem_solver.all_local_mech_dofs]
+            k_pp = k_uupp[fem_solver.all_local_electric_dofs,:][:,fem_solver.all_local_electric_dofs]
+            tu = tup[fem_solver.all_local_mech_dofs]
+            tp = tup[fem_solver.all_local_electric_dofs]
+
             # IF NO STATIC CONDITON
             if fem_solver.static_condensation is False:
+                raise NotImplementedError("Not implemented yet")
                 k0 = np.concatenate((k_uu,k_uw, k_us),axis=1)
                 k1 = np.concatenate((k_uw.T,k_ww, k_ws),axis=1)
                 k2 = np.concatenate((k_us.T,k_ws.T, k_ss),axis=1)
@@ -222,22 +232,37 @@ class FlexoelectricFormulation(VariationalPrinciple):
                 if self.subtype=="lagrange_multiplier":
                     # IF NO STATIC CONDITON
                     inv_k_ws = inv(k_ws)
-                    k0 = k_ww.dot(inv_k_ws)
-                    k1 = k0.dot(k_us.T)
-                    stiffness = k_uu + np.dot(np.dot(k_us,inv_k_ws),k1)
+                    k1 = inv_k_ws
+                    k2 = k1.dot(k_ww.dot(inv_k_ws))
+                    kuu_eq = k_uu + k_us.dot(k2.dot(k_us.T))
+                    kup_eq = k_up - k_us.dot(k1.dot(k_wp))
 
-                    t0 = tw - np.dot(k0,ts)
-                    tractionforce = tu - np.dot(np.dot(k_us,inv_k_ws),t0)
+                    tu_eq = tu - k_us.dot(k1.dot((tw-k_ww.dot(inv_k_ws.dot(ts)))))
+                    tp_eq = tp - k_wp.T.dot(inv_k_ws.dot(ts))
+
+                    stiffness = np.zeros((self.meshes[0].elements.shape[1]*self.nvar,self.meshes[0].elements.shape[1]*self.nvar))
+                    np.put(stiffness.ravel(),fem_solver.idx_uu,kuu_eq.ravel())
+                    np.put(stiffness.ravel(),fem_solver.idx_up,kup_eq.ravel())
+                    np.put(stiffness.ravel(),fem_solver.idx_pu,kup_eq.T.ravel())
+                    np.put(stiffness.ravel(),fem_solver.idx_pp,k_pp.ravel())
+
+                    tractionforce = np.zeros((self.meshes[0].elements.shape[1]*self.nvar,1))
+                    tractionforce[fem_solver.all_local_mech_dofs] = tu_eq
+                    tractionforce[fem_solver.all_local_electric_dofs] = tp_eq
 
                     if self.save_condensed_matrices:
                         self.condensed_matrices['k_uu'][elem] = k_uu
+                        self.condensed_matrices['k_up'][elem] = k_up
                         self.condensed_matrices['k_us'][elem] = k_us
                         self.condensed_matrices['k_ww'][elem] = k_ww
                         self.condensed_matrices['k_ws'][elem] = k_ws
+                        self.condensed_matrices['k_wp'][elem] = k_wp
+                        self.condensed_matrices['k_pp'][elem] = k_pp
                         self.condensed_matrices['inv_k_ws'][elem] = inv_k_ws
                         self.condensed_vectors['tu'][elem] = tu
                         self.condensed_vectors['tw'][elem] = tw
                         self.condensed_vectors['ts'][elem] = ts
+                        self.condensed_vectors['tp'][elem] = tp
 
                 elif self.subtype=="augmented_lagrange":
                     # IF NO STATIC CONDITON
@@ -312,19 +337,87 @@ class FlexoelectricFormulation(VariationalPrinciple):
         AllGauss = function_space.AllGauss
 
 
-        # # GET LOCAL KINEMATICS
-        # SpatialGradient, F, detJ = _KinematicMeasures_(Jm, AllGauss[:,0],
-        #     LagrangeElemCoords, EulerELemCoords, fem_solver.requires_geometry_update)
+        # GET LOCAL KINEMATICS
+        SpatialGradient, F, detJ = _KinematicMeasures_(Jm, AllGauss[:,0],
+            LagrangeElemCoords, EulerELemCoords, fem_solver.requires_geometry_update)
+        # GET ELECTRIC FIELD
+        ElectricFieldx = - np.einsum('ijk,j',SpatialGradient,ElectricPotentialElem)
+        # COMPUTE WORK-CONJUGATES AND HESSIAN AT THIS GAUSS POINT
+        ElectricDisplacementx, CauchyStressTensor, H_Voigt, _, _, _, _, _ = material.KineticMeasures(F,ElectricFieldx,elem=elem)
+        # COMPUTE LOCAL CONSTITUTIVE STIFFNESS AND TRACTION
+        stiffness, tractionforce = __ConstitutiveStiffnessIntegrandDPF__(SpatialGradient,ElectricDisplacementx,
+            CauchyStressTensor,H_Voigt,detJ,self.nvar,fem_solver.requires_geometry_update)
+        # # COMPUTE GEOMETRIC STIFFNESS
+        # if fem_solver.requires_geometry_update:
+        #     stiffness += self.__GeometricStiffnessIntegrand__(SpatialGradient,CauchyStressTensor,detJ)
+
+        # SAVE AT THIS GAUSS POINT
+        self.SpatialGradient = SpatialGradient
+        self.ElectricFieldx = ElectricFieldx
+        self.detJ = detJ
+
+        return stiffness, tractionforce
+
+        # # ALLOCATE
+        # stiffness = np.zeros((nodeperelem*nvar,nodeperelem*nvar),dtype=np.float64)
+        # tractionforce = np.zeros((nodeperelem*nvar,1),dtype=np.float64)
+        # B = np.zeros((nodeperelem*nvar,material.H_VoigtSize),dtype=np.float64)
+
+        # # COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
+        # # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+        # ParentGradientX = np.einsum('ijk,jl->kil', Jm, LagrangeElemCoords)
+        # # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
+        # MaterialGradient = np.einsum('ijk,kli->ijl', inv(ParentGradientX), Jm)
+        # # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
+        # F = np.einsum('ij,kli->kjl', EulerELemCoords, MaterialGradient)
+
+        # # COMPUTE REMAINING KINEMATIC MEASURES
+        # StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
+
+        # # UPDATE/NO-UPDATE GEOMETRY
+        # if fem_solver.requires_geometry_update:
+        #     # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+        #     ParentGradientx = np.einsum('ijk,jl->kil',Jm,EulerELemCoords)
+        #     # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
+        #     SpatialGradient = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Jm)
+        #     # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
+        #     detJ = np.einsum('i,i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)),np.abs(StrainTensors['J']))
+        # else:
+        #     # SPATIAL GRADIENT AND MATERIAL GRADIENT TENSORS ARE EQUAL
+        #     SpatialGradient = np.einsum('ikj',MaterialGradient)
+        #     # COMPUTE ONCE detJ
+        #     detJ = np.einsum('i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)))
+
         # # GET ELECTRIC FIELD
         # ElectricFieldx = - np.einsum('ijk,j',SpatialGradient,ElectricPotentialElem)
-        # # COMPUTE WORK-CONJUGATES AND HESSIAN AT THIS GAUSS POINT
-        # ElectricDisplacementx, CauchyStressTensor, H_Voigt, _, _, _ = material.KineticMeasures(F,ElectricFieldx,elem=elem)
-        # # COMPUTE LOCAL CONSTITUTIVE STIFFNESS AND TRACTION
-        # stiffness, tractionforce = __ConstitutiveStiffnessIntegrandDPF__(SpatialGradient,ElectricDisplacementx,
-        #     CauchyStressTensor,H_Voigt,detJ,self.nvar,fem_solver.requires_geometry_update)
-        # # # COMPUTE GEOMETRIC STIFFNESS
-        # # if fem_solver.requires_geometry_update:
-        # #     stiffness += self.__GeometricStiffnessIntegrand__(SpatialGradient,CauchyStressTensor,detJ)
+
+
+        # # LOOP OVER GAUSS POINTS
+        # for counter in range(AllGauss.shape[0]):
+
+        #     # COMPUTE THE HESSIAN AT THIS GAUSS POINT
+        #     H_Voigt = material.Hessian(StrainTensors,ElectricFieldx[counter,:], elem, counter)
+
+        #     # COMPUTE CAUCHY STRESS TENSOR
+        #     CauchyStressTensor = []
+        #     if fem_solver.requires_geometry_update:
+        #         CauchyStressTensor = material.CauchyStress(StrainTensors,ElectricFieldx[counter,:],elem,counter)
+
+
+        #     # COMPUTE THE TANGENT STIFFNESS MATRIX
+        #     BDB_1, t = self.K_uu_Integrand(B, SpatialGradient[counter,:,:],
+        #         ElectricFieldx[counter,:], CauchyStressTensor, H_Voigt, analysis_nature=fem_solver.analysis_nature,
+        #         has_prestress=fem_solver.has_prestress)
+
+        #     # COMPUTE GEOMETRIC STIFFNESS MATRIX
+        #     if fem_solver.requires_geometry_update:
+        #         # BDB_1 += self.GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],CauchyStressTensor)
+        #         # INTEGRATE TRACTION FORCE
+        #         tractionforce += t*detJ[counter]
+
+        #     # INTEGRATE STIFFNESS
+        #     stiffness += BDB_1*detJ[counter]
+
 
         # # SAVE AT THIS GAUSS POINT
         # self.SpatialGradient = SpatialGradient
@@ -332,76 +425,6 @@ class FlexoelectricFormulation(VariationalPrinciple):
         # self.detJ = detJ
 
         # return stiffness, tractionforce
-
-        # ALLOCATE
-        stiffness = np.zeros((nodeperelem*nvar,nodeperelem*nvar),dtype=np.float64)
-        tractionforce = np.zeros((nodeperelem*nvar,1),dtype=np.float64)
-        B = np.zeros((nodeperelem*nvar,material.H_VoigtSize),dtype=np.float64)
-
-        # COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
-        # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-        ParentGradientX = np.einsum('ijk,jl->kil', Jm, LagrangeElemCoords)
-        # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
-        MaterialGradient = np.einsum('ijk,kli->ijl', inv(ParentGradientX), Jm)
-        # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
-        F = np.einsum('ij,kli->kjl', EulerELemCoords, MaterialGradient)
-
-        # COMPUTE REMAINING KINEMATIC MEASURES
-        StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
-
-        # UPDATE/NO-UPDATE GEOMETRY
-        if fem_solver.requires_geometry_update:
-            # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-            ParentGradientx = np.einsum('ijk,jl->kil',Jm,EulerELemCoords)
-            # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
-            SpatialGradient = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Jm)
-            # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
-            detJ = np.einsum('i,i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)),np.abs(StrainTensors['J']))
-        else:
-            # SPATIAL GRADIENT AND MATERIAL GRADIENT TENSORS ARE EQUAL
-            SpatialGradient = np.einsum('ikj',MaterialGradient)
-            # COMPUTE ONCE detJ
-            detJ = np.einsum('i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)))
-
-        # GET ELECTRIC FIELD
-        ElectricFieldx = - np.einsum('ijk,j',SpatialGradient,ElectricPotentialElem)
-
-
-        # LOOP OVER GAUSS POINTS
-        for counter in range(AllGauss.shape[0]):
-
-            # COMPUTE THE HESSIAN AT THIS GAUSS POINT
-            H_Voigt = material.Hessian(StrainTensors,ElectricFieldx[counter,:], elem, counter)
-
-            # COMPUTE CAUCHY STRESS TENSOR
-            CauchyStressTensor = []
-            if fem_solver.requires_geometry_update:
-                CauchyStressTensor = material.CauchyStress(StrainTensors,ElectricFieldx[counter,:],elem,counter)
-
-
-            # COMPUTE THE TANGENT STIFFNESS MATRIX
-            BDB_1, t = self.K_uu_Integrand(B, SpatialGradient[counter,:,:],
-                ElectricFieldx[counter,:], CauchyStressTensor, H_Voigt, analysis_nature=fem_solver.analysis_nature,
-                has_prestress=fem_solver.has_prestress)
-
-            # COMPUTE GEOMETRIC STIFFNESS MATRIX
-            if fem_solver.requires_geometry_update:
-                # BDB_1 += self.GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],CauchyStressTensor)
-                # INTEGRATE TRACTION FORCE
-                tractionforce += t*detJ[counter]
-
-            # INTEGRATE STIFFNESS
-            stiffness += BDB_1*detJ[counter]
-
-
-        # SAVE AT THIS GAUSS POINT
-        self.SpatialGradient = SpatialGradient
-        self.ElectricFieldx = ElectricFieldx
-        self.detJ = detJ
-
-        print(stiffness.shape,norm(stiffness))
-        exit()
-        return stiffness, tractionforce
 
 
     def K_uw(self, material, fem_solver, Eulerx, Eulerp=None, elem=0):
@@ -449,6 +472,7 @@ class FlexoelectricFormulation(VariationalPrinciple):
         # GET THE FIELDS AT THE ELEMENT LEVEL
         LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
         EulerELemCoords = Eulerw[mesh.elements[elem,:],:]
+        ElectricPotentialElem = Eulerp[mesh.elements[elem,:]]
 
         Jm = function_spaces[1].Jm
         AllGauss = function_space.AllGauss
@@ -489,6 +513,9 @@ class FlexoelectricFormulation(VariationalPrinciple):
             SpatialGradient = np.einsum('ikj',MaterialGradient)
             # COMPUTE ONCE detJ
             detJ = np.einsum('i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)))
+
+        # GET ELECTRIC FIELD
+        ElectricFieldx = - np.einsum('ijk,j',SpatialGradient,ElectricPotentialElem)
 
 
         # LOOP OVER GAUSS POINTS
@@ -548,6 +575,88 @@ class FlexoelectricFormulation(VariationalPrinciple):
 
 
         return -stiffness
+
+
+    def K_wp(self, material, fem_solver, Eulerx, Eulerw, Eulerp, elem=0):
+        """Get stiffness matrix of the system"""
+
+        meshes = self.meshes
+        mesh = self.meshes[1]
+
+        function_spaces = self.function_spaces
+        function_space = self.function_spaces[1]
+
+        ndim = self.ndim
+        nodeperelem = meshes[1].elements.shape[1]
+
+        # GET THE FIELDS AT THE ELEMENT LEVEL
+        LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
+        EulerELemCoords = Eulerw[mesh.elements[elem,:],:]
+        ElectricPotentialElem = Eulerp[self.meshes[0].elements[elem,:]]
+
+        Jm = function_spaces[1].Jm
+        AllGauss = function_space.AllGauss
+
+        # ALLOCATE
+        stiffness = np.zeros((nodeperelem*ndim,self.meshes[0].elements.shape[1]),dtype=np.float64)
+        B_w = np.zeros((nodeperelem*ndim,material.flexoelectric_tensor.shape[0]),dtype=np.float64)
+        B_p = np.zeros((self.meshes[0].elements.shape[1],ndim),dtype=np.float64)
+
+        # GIVES WRONG ANSWER FOR SOME REASON
+        # # GET LOCAL KINEMATICS - EVALUATED FOR W SHAPE FUNCTIONS
+        # SpatialGradient_w, F_w, detJ_w = _KinematicMeasures_(Jm, AllGauss[:,0],
+        #     LagrangeElemCoords, EulerELemCoords, fem_solver.requires_geometry_update)
+
+        # USE THIS INSTEAD
+        # COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
+        # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+        ParentGradientX = np.einsum('ijk,jl->kil', Jm, LagrangeElemCoords)
+        # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
+        MaterialGradient = np.einsum('ijk,kli->ijl', inv(ParentGradientX), Jm)
+        # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
+        F_w = np.einsum('ij,kli->kjl', EulerELemCoords, MaterialGradient)
+
+        # COMPUTE REMAINING KINEMATIC MEASURES
+        StrainTensors = KinematicMeasures(F_w, fem_solver.analysis_nature)
+
+        # UPDATE/NO-UPDATE GEOMETRY
+        if fem_solver.requires_geometry_update:
+            # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+            ParentGradientx = np.einsum('ijk,jl->kil',Jm,EulerELemCoords)
+            # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
+            SpatialGradient_w = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Jm)
+            # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
+            detJ_w = np.einsum('i,i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)),np.abs(StrainTensors['J']))
+        else:
+            # SPATIAL GRADIENT AND MATERIAL GRADIENT TENSORS ARE EQUAL
+            SpatialGradient_w = np.einsum('ikj',MaterialGradient)
+            # COMPUTE ONCE detJ
+            detJ_w = np.einsum('i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)))
+
+
+        # GET LOCAL KINEMATICS - EVALUATED FOR W SHAPE FUNCTIONS
+        SpatialGradient_p, F_p, detJ_p = _KinematicMeasures_(function_spaces[0].Jm, function_spaces[0].AllGauss[:,0],
+            self.meshes[0].points[self.meshes[0].elements[elem,:],:], Eulerx[self.meshes[0].elements[elem,:],:],
+            fem_solver.requires_geometry_update)
+
+        # GET ELECTRIC FIELD
+        ElectricFieldx = - np.einsum('ijk,j',SpatialGradient_p,ElectricPotentialElem)
+
+        # COMPUTE WORK-CONJUGATES AND HESSIAN AT THIS GAUSS POINT
+        material.KineticMeasures(F_w,ElectricFieldx,elem=elem)
+        H_Voigt = material.flexoelectric_tensors
+
+
+        # LOOP OVER GAUSS POINTS
+        for counter in range(AllGauss.shape[0]):
+
+            # COMPUTE THE TANGENT STIFFNESS MATRIX
+            BDB = self.K_wp_Integrand(B_w, B_p, SpatialGradient_w[counter,:,:], SpatialGradient_p[counter,:,:],H_Voigt[counter,:,:])
+
+            # INTEGRATE STIFFNESS
+            stiffness += BDB*detJ_p[counter]
+
+        return stiffness
 
 
     def K_ss(self, material, fem_solver, Eulers, Eulerp=None, elem=0):
@@ -666,7 +775,7 @@ class FlexoelectricFormulation(VariationalPrinciple):
         CauchyStressTensor, H_Voigt, analysis_nature="nonlinear", has_prestress=True):
 
         ndim = self.ndim
-        nvar = ndim
+        nvar = self.nvar
 
         # MATRIX FORM
         SpatialGradient = SpatialGradient.T
@@ -755,7 +864,7 @@ class FlexoelectricFormulation(VariationalPrinciple):
         CoupleStressVector, H_Voigt, analysis_nature="nonlinear", has_prestress=True):
 
         ndim = self.ndim
-        nvar = ndim
+        nvar = self.ndim
 
         # MATRIX FORM
         SpatialGradient = SpatialGradient.T
@@ -784,6 +893,47 @@ class FlexoelectricFormulation(VariationalPrinciple):
         if analysis_nature == 'nonlinear' or has_prestress:
             t = np.dot(B,CoupleStressVector)
         return BDB, t
+
+
+    def K_wp_Integrand(self, B_w, B_p, SpatialGradient_w, SpatialGradient_p, H_Voigt):
+
+        ndim = self.ndim
+        nvar = self.ndim
+
+        # MATRIX FORM
+        SpatialGradient_w = SpatialGradient_w.T
+        SpatialGradient_p = SpatialGradient_p.T
+
+        # THREE DIMENSIONS
+        if SpatialGradient_w.shape[0]==3:
+
+            # VORTICITY TERMS
+            B_w[1::nvar,0] = -SpatialGradient_w[2,:]
+            B_w[2::nvar,0] = SpatialGradient_w[1,:]
+
+            B_w[0::nvar,1] = SpatialGradient_w[2,:]
+            B_w[2::nvar,1] = -SpatialGradient_w[0,:]
+
+            B_w[0::nvar,2] = -SpatialGradient_w[1,:]
+            B_w[1::nvar,2] = SpatialGradient_w[0,:]
+
+            # Electrostatic
+            B_p[:,0] = SpatialGradient_p[0,:]
+            B_p[:,1] = SpatialGradient_p[1,:]
+            B_p[:,2] = SpatialGradient_p[2,:]
+
+        elif SpatialGradient_w.shape[0]==2:
+            # VORTICITY TERMS
+            B_w[0::nvar,0] = -SpatialGradient_w[1,:]
+            B_w[1::nvar,0] = SpatialGradient_w[0,:]
+
+            # Electrostatic
+            B_p[:,0] = SpatialGradient_p[0,:]
+            B_p[:,1] = SpatialGradient_p[1,:]
+
+
+        BDB = np.dot(np.dot(B_w,H_Voigt),B_p.T)
+        return BDB
 
 
     def K_ws_Integrand(self, Nw, Ns, Bases_w, Bases_s):

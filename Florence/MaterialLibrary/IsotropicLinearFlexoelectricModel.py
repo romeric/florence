@@ -1,7 +1,7 @@
 import numpy as np
 from numpy import einsum
 from .MaterialBase import Material
-from Florence.Tensor import trace, Voigt
+from Florence.Tensor import trace, Voigt, UnVoigt
 
 __all__ = ["IsotropicLinearFlexoelectricModel"]
 
@@ -34,7 +34,8 @@ class IsotropicLinearFlexoelectricModel(Material):
     def KineticMeasures(self,F,ElectricFieldx=0, elem=0):
         D = self.eps*ElectricFieldx.reshape(ElectricFieldx.shape[0],ElectricFieldx.shape[1],1) # CHECK
         sigma = np.zeros((ElectricFieldx.shape[0],self.ndim,self.ndim))
-        return D, sigma, self.elasticity_tensors, self.gradient_elasticity_tensors, self.piezoelectric_tensors, self.dielectric_tensors
+        return (D, sigma, self.H_Voigt, self.elasticity_tensors, self.gradient_elasticity_tensors,
+            self.piezoelectric_tensors, self.flexoelectric_tensors, self.dielectric_tensors)
 
 
     def Hessian(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
@@ -69,6 +70,7 @@ class IsotropicLinearFlexoelectricModel(Material):
         lamb = self.lamb
         eta = self.eta
         piezoelectric_tensor = self.P
+        flexoelectric_tensor = self.f
         I = StrainTensors['I']
         e = StrainTensors['strain'][gcounter]
         E = ElectricFieldx.reshape(self.ndim,1)
@@ -77,7 +79,7 @@ class IsotropicLinearFlexoelectricModel(Material):
         if self.ndim==2:
             tre +=1.
 
-        sigma = lamb*tre*I + 2.0*mu*e - np.dot(piezoelectric_tensor,E)
+        sigma = lamb*tre*I + 2.0*mu*e - UnVoigt(np.dot(piezoelectric_tensor,E)) + UnVoigt(np.dot(flexoelectric_tensor,E))
         return sigma
 
 
@@ -114,6 +116,6 @@ class IsotropicLinearFlexoelectricModel(Material):
         return cauchy_stress + lm_stress
 
 
-    def ElectricDisplacementx(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
+    def ElectricDisplacementx(self,StrainTensors,ElectricFieldx,EulerW=0,elem=0,gcounter=0):
         # CHECK
-        return self.eps*ElectricFieldx.reshape(self.ndim,1)
+        return self.eps*ElectricFieldx.reshape(self.ndim,1) +  UnVoigt(np.dot(flexoelectric_tensor.T,EulerW))

@@ -39,12 +39,11 @@ class CoupleStressSolver(FEMSolver):
         self.gamma   = 0.5
         self.beta    = 0.25
 
-    def GetBoundaryInfo(self,K,boundary_condition,formulation):
+    def GetBoundaryInfo(self, mesh, formulation, boundary_condition):
 
         all_dofs = np.arange(mesh.points.shape[0]*formulation.nvar)
-        if formulation.fields == "electro_mechanics":
+        if formulation.fields == "electro_mechanics" or formulation.fields == "flexoelectric":
             self.electric_dofs = all_dofs[formulation.nvar-1::formulation.nvar]
-            self.mechanical_dofs = np.array([],dtype=np.int64)
             self.mechanical_dofs = np.setdiff1d(all_dofs,self.electric_dofs)
 
             # GET BOUNDARY CONDITON FOR THE REDUCED MECHANICAL SYSTEM
@@ -68,12 +67,10 @@ class CoupleStressSolver(FEMSolver):
             self.applied_dirichlet_electric = boundary_condition.applied_dirichlet[np.in1d(boundary_condition.columns_out,self.columns_out_electric)]
 
             # MAPPED QUANTITIES
-            # all_dofs = np.arange(0,K.shape[0])
             out_idx = np.in1d(all_dofs,boundary_condition.columns_out)
             idx_electric = all_dofs[formulation.nvar-1::formulation.nvar]
             idx_mech = np.setdiff1d(all_dofs,idx_electric)
 
-            # self.all_electric_dofs = np.arange(M.shape[0]/formulation.nvar)
             self.all_electric_dofs = np.arange(mesh.points.shape[0])
             self.electric_out = self.all_electric_dofs[out_idx[idx_electric]]
             self.electric_in = np.setdiff1d(self.all_electric_dofs,self.electric_out)
@@ -82,7 +79,20 @@ class CoupleStressSolver(FEMSolver):
             self.mech_out = self.all_mech_dofs[out_idx[idx_mech]]
             self.mech_in = np.setdiff1d(self.all_mech_dofs,self.mech_out)
 
-        elif formulation.fields == "mechanics":
+            # LOCAL NUMBERING OF FIELDS
+            self.all_local_dofs = np.arange(mesh.elements.shape[1]*formulation.nvar)
+            self.all_local_electric_dofs = self.all_local_dofs[formulation.nvar-1::formulation.nvar]
+            self.all_local_mech_dofs = np.setdiff1d(self.all_local_dofs,self.all_local_electric_dofs)
+
+            # INTERMIX RAVELLED LOCAL INDICES
+            matrix_shape = (mesh.elements.shape[1]*formulation.nvar,mesh.elements.shape[1]*formulation.nvar)
+            self.idx_uu = np.ravel_multi_index(np.meshgrid(self.all_local_mech_dofs,self.all_local_mech_dofs), matrix_shape)
+            self.idx_up = np.ravel_multi_index(np.meshgrid(self.all_local_mech_dofs,self.all_local_electric_dofs), matrix_shape)
+            self.idx_pu = np.ravel_multi_index(np.meshgrid(self.all_local_electric_dofs,self.all_local_mech_dofs), matrix_shape)
+            self.idx_pp = np.ravel_multi_index(np.meshgrid(self.all_local_electric_dofs,self.all_local_electric_dofs), matrix_shape)
+
+
+        elif formulation.fields == "mechanics" or formulation.fields == "couple_stress":
             self.electric_dofs = []
             self.mechanical_dofs = all_dofs
             self.columns_out_mech = boundary_condition.columns_out
@@ -130,7 +140,8 @@ class CoupleStressSolver(FEMSolver):
             material.coupling_tensor0 = np.zeros((material.elasticity_tensor.shape[0],
                 material.gradient_elasticity_tensor.shape[0]))
             material.piezoelectric_tensor = material.P
-            material.dielectric_tensor = material.eps*np.eye(material.ndim,material.ndim)
+            material.flexoelectric_tensor = material.f
+            material.dielectric_tensor = -material.eps*np.eye(material.ndim,material.ndim)
 
             # print material.elasticity_tensor
             ngauss = function_spaces[0].AllGauss.shape[0]
@@ -141,7 +152,17 @@ class CoupleStressSolver(FEMSolver):
             material.elasticity_tensors = np.tile(material.elasticity_tensor.ravel(),ngauss).reshape(ngauss,d0,d1)
             material.gradient_elasticity_tensors = np.tile(material.gradient_elasticity_tensor.ravel(),ngauss).reshape(ngauss,d2,d3)
             material.piezoelectric_tensors = np.tile(material.P.ravel(),ngauss).reshape(ngauss,material.P.shape[0],material.P.shape[1])
+            material.flexoelectric_tensors = np.tile(material.f.ravel(),ngauss).reshape(ngauss,material.f.shape[0],material.f.shape[1])
             material.dielectric_tensors = np.tile(material.dielectric_tensor.ravel(),ngauss).reshape(ngauss,material.ndim,material.ndim)
+
+            factor = -1.
+            material.H_Voigt = np.zeros((ngauss,material.H_VoigtSize,material.H_VoigtSize))
+            for i in range(ngauss):
+                H1 = np.concatenate((material.elasticity_tensor,factor*material.piezoelectric_tensor),axis=1)
+                H2 = np.concatenate((factor*material.piezoelectric_tensor.T,material.dielectric_tensor),axis=1)
+                H_Voigt = np.concatenate((H1,H2),axis=0)
+                material.H_Voigt[i,:,:] = H_Voigt
+
 
         return function_spaces, solver
 
@@ -171,7 +192,6 @@ class CoupleStressSolver(FEMSolver):
                  'and number of boundary nodes is', np.unique(mesh.faces).shape[0])
         #---------------------------------------------------------------------------#
 
-
         # INITIATE DATA FOR NON-LINEAR ANALYSIS
         NodalForces, Residual = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64), \
             np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64)
@@ -190,6 +210,9 @@ class CoupleStressSolver(FEMSolver):
 
         # APPLY DIRICHELT BOUNDARY CONDITIONS AND GET DIRICHLET RELATED FORCES
         boundary_condition.GetDirichletBoundaryConditions(formulation, mesh, material, solver, self)
+
+        # GET BOUNDARY INFO
+        self.GetBoundaryInfo(mesh,formulation,boundary_condition)
 
         # ALLOCATE FOR GEOMETRY - GetDirichletBoundaryConditions CHANGES THE MESH
         # SO EULERX SHOULD BE ALLOCATED AFTERWARDS
@@ -262,7 +285,8 @@ class CoupleStressSolver(FEMSolver):
                 boundary_condition.columns_out, AppliedDirichletInc,0,K.shape[0])
 
             # STORE TOTAL SOLUTION DATA
-            TotalDisp[:,:formulation.ndim,Increment] += dU
+            # TotalDisp[:,:formulation.ndim,Increment] += dU[:,:formulation.ndim]
+            TotalDisp[:,:,Increment] += dU
 
             # REDUCED ACCUMULATED FORCE
             Residual[:,:] = DeltaF
