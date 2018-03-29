@@ -318,6 +318,12 @@ class CoupleStressSolver(FEMSolver):
         for i in range(TotalDisp.shape[2]-1,0,-1):
             TotalDisp[:,:,i] = np.sum(TotalDisp[:,:,:i+1],axis=2)
 
+        # COMPUTE DISSIPATION OF ENERGY THROUGH TIME
+        if self.compute_energy:
+            energy_info = self.ComputeEnergy(formulation.function_spaces[0],mesh,material,formulation,Eulerx,Eulerp)
+            formulation.strain_energy = energy_info[0]
+            formulation.electrical_energy = energy_info[1]
+
         solver.CleanUp()
 
         return TotalDisp, TotalW, TotalS
@@ -468,3 +474,72 @@ class CoupleStressSolver(FEMSolver):
         solver.CleanUp()
 
         return TotalDisp, TotalW, TotalS
+
+
+
+
+
+    def ComputeEnergy(self,function_space,mesh,material,formulation,Eulerx,Eulerp):
+
+        strain_energy = 0.
+        electrical_energy = 0.
+        for elem in range(mesh.nelem):
+            LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
+            EulerElemCoords = Eulerx[mesh.elements[elem,:],:]
+            ElectricPotentialElem = Eulerp[mesh.elements[elem,:]]
+
+            energy = formulation.GetEnergy(function_space, material,
+                LagrangeElemCoords, EulerElemCoords, ElectricPotentialElem, self, elem)
+            strain_energy += energy[0]
+            electrical_energy += energy[1]
+
+        return strain_energy, electrical_energy
+
+
+
+    def ComputeEnergyDissipation(self,function_space,mesh,material,formulation,fem_solver,
+        Eulerx, TotalDisp, NeumannForces, M, velocities, Increment):
+
+        internal_energy = 0.
+        for elem in range(mesh.nelem):
+            LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
+            EulerElemCoords = Eulerx[mesh.elements[elem,:],:]
+
+            internal_energy += formulation.GetEnergy(function_space, material,
+                LagrangeElemCoords, EulerElemCoords, fem_solver, elem)
+
+        if formulation.fields == "flexoelectric":
+            M_mech = M[self.mechanical_dofs,:][:,self.mechanical_dofs]
+            kinetic_energy = 0.5*np.dot(velocities.ravel(),M_mech.dot(velocities.ravel()))
+        else:
+            kinetic_energy = 0.5*np.dot(velocities.ravel(),M.dot(velocities.ravel()))
+
+        external_energy = np.dot(TotalDisp[:,:,Increment].ravel(),NeumannForces[:,Increment])
+
+        total_energy = internal_energy + kinetic_energy - external_energy
+        return total_energy, internal_energy, kinetic_energy, external_energy
+
+
+
+    def ComputePowerDissipation(self,function_space,mesh,material,formulation,fem_solver, Eulerx, TotalDisp,
+        NeumannForces, M, velocities, accelerations, Increment):
+
+        internal_energy = 0.
+        for elem in range(mesh.nelem):
+            LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
+            EulerElemCoords    = Eulerx[mesh.elements[elem,:],:]
+            VelocityElem       = velocities[mesh.elements[elem,:],:]
+
+            internal_energy += formulation.GetLinearMomentum(function_space, material,
+                LagrangeElemCoords, EulerElemCoords, VelocityElem, fem_solver, elem)
+
+        if formulation.fields == "electro_mechanics":
+            M_mech = M[self.mechanical_dofs,:][:,self.mechanical_dofs]
+            kinetic_energy = np.dot(velocities.ravel(),M_mech.dot(accelerations.ravel()))
+        else:
+            kinetic_energy = np.dot(velocities.ravel(),M.dot(accelerations.ravel()))
+
+        external_energy = np.dot(velocities.ravel(),NeumannForces[:,Increment])
+
+        total_energy = internal_energy + kinetic_energy - external_energy
+        return total_energy, internal_energy, kinetic_energy, external_energy

@@ -42,7 +42,7 @@ class FEMSolver(object):
         print_incremental_log=False, save_incremental_solution=False, incremental_solution_filename=None,
         break_at_increment=-1,
         include_physical_damping=False, damping_factor=0.1,
-        compute_energy_dissipation=False, compute_linear_momentum_dissipation=False, total_time=1.,
+        compute_energy=False, compute_energy_dissipation=False, compute_linear_momentum_dissipation=False, total_time=1.,
         user_defined_break_func=None, user_defined_stop_func=None,
         save_results=True, save_frequency=1,
         has_contact=False):
@@ -78,6 +78,7 @@ class FEMSolver(object):
         self.damping_factor = damping_factor
         self.add_self_weight = add_self_weight
 
+        self.compute_energy = compute_energy
         self.compute_energy_dissipation = compute_energy_dissipation
         self.compute_linear_momentum_dissipation = compute_linear_momentum_dissipation
 

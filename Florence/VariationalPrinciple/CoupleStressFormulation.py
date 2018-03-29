@@ -866,6 +866,58 @@ class CoupleStressFormulation(VariationalPrinciple):
 
 
 
+    def GetEnergy(self, function_space, material, LagrangeElemCoords,
+        EulerELemCoords, ElectricPotentialElem, fem_solver, elem=0):
+        """Get virtual energy of the system. For dynamic analysis this is handy for computing conservation of energy.
+            The routine computes the global form of virtual internal energy i.e. integral of "W(C,G,C)"". This can be
+            computed purely in a Lagrangian configuration.
+        """
+
+        nvar = self.nvar
+        ndim = self.ndim
+        nodeperelem = function_space.Bases.shape[0]
+
+        det = np.linalg.det
+        inv = np.linalg.inv
+        Jm = function_space.Jm
+        AllGauss = function_space.AllGauss
+
+        internal_energy = 0.
+
+        # COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
+        # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+        ParentGradientX = np.einsum('ijk,jl->kil', Jm, LagrangeElemCoords)
+        # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
+        MaterialGradient = np.einsum('ijk,kli->ijl', inv(ParentGradientX), Jm)
+        # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
+        F = np.einsum('ij,kli->kjl', EulerELemCoords, MaterialGradient)
+
+        # COMPUTE REMAINING KINEMATIC MEASURES
+        StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
+
+        # SPATIAL GRADIENT AND MATERIAL GRADIENT TENSORS ARE EQUAL
+        SpatialGradient = np.einsum('ikj',MaterialGradient)
+        # COMPUTE ONCE detJ
+        detJ = np.einsum('i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)))
+
+        # GET ELECTRIC FIELD
+        ElectricFieldx = - np.einsum('ijk,j',SpatialGradient,ElectricPotentialElem)
+
+        # LOOP OVER GAUSS POINTS
+        for counter in range(AllGauss.shape[0]):
+            if material.energy_type == "enthalpy":
+                # COMPUTE THE INTERNAL ENERGY AT THIS GAUSS POINT
+                energy = material.InternalEnergy(StrainTensors,ElectricFieldx[counter,:],0,elem,counter)
+            elif material.energy_type == "internal_energy":
+                # COMPUTE ELECTRIC DISPLACEMENT IMPLICITLY
+                ElectricDisplacementx = material.ElectricDisplacementx(StrainTensors, ElectricFieldx[counter,:], elem, counter)
+                # COMPUTE THE INTERNAL ENERGY AT THIS GAUSS POINT
+                energy = material.InternalEnergy(StrainTensors,ElectricDisplacementx[counter,:],elem,counter)
+
+            # INTEGRATE INTERNAL ENERGY
+            internal_energy += energy*detJ[counter]
+
+        return internal_energy
 
 
 

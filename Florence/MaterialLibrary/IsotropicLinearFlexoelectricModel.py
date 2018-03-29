@@ -119,3 +119,22 @@ class IsotropicLinearFlexoelectricModel(Material):
     def ElectricDisplacementx(self,StrainTensors,ElectricFieldx,EulerW=0,elem=0,gcounter=0):
         # CHECK
         return self.eps*ElectricFieldx.reshape(self.ndim,1) +  UnVoigt(np.dot(flexoelectric_tensor.T,EulerW))
+
+
+    def InternalEnergy(self,StrainTensors,ElectricFieldx,EulerW=0,elem=0,gcounter=0):
+
+        mu = self.mu
+        lamb = self.lamb
+        eta = self.eta
+        eps = self.eps
+
+        e = StrainTensors['strain'][gcounter]
+        E = ElectricFieldx.reshape(self.ndim)
+
+        tre = trace(e)
+        if self.ndim==2:
+            tre +=1.
+
+        self.strain_energy = mu*einsum("ij,ij",e,e) + lamb*tre**2
+        self.electrical_energy = eps*mu*einsum("i,i",E,E)
+        return self.strain_energy, self.electrical_energy
