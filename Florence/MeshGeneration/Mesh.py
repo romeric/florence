@@ -2858,6 +2858,7 @@ class Mesh(object):
         if self.InferPolynomialDegree() > 1:
             try:
                 from Florence.PostProcessing import PostProcess
+                from Florence.VariationalPrinciple import DisplacementFormulation
             except IOError:
                 raise RuntimeError("Writing high order elements to VTK is not supported yet")
             pp = PostProcess(3,3)
@@ -2865,6 +2866,7 @@ class Mesh(object):
             if result is None:
                 result = np.zeros_like(self.points)[:,:,None]
             pp.SetSolution(result)
+            pp.SetFormulation(DisplacementFormulation(self,compute_post_quadrature=False))
             pp.WriteVTK(filename,quantity=0,interpolation_degree=interpolation_degree, ProjectionFlags=ProjectionFlags)
             return
 
