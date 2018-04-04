@@ -107,12 +107,12 @@ class CoupleStressSolver(FEMSolver):
     def __checkdata__(self, material, boundary_condition,
         formulation, mesh, function_spaces, solver, contact_formulation=None):
 
-        function_spaces, solver = super(CoupleStressSolver,self).__checkdata__(material, boundary_condition,
-            formulation, mesh, function_spaces, solver, contact_formulation=contact_formulation)
-
         ## IMPORTANT
         self.requires_geometry_update = False
         self.analysis_nature = "linear"
+
+        function_spaces, solver = super(CoupleStressSolver,self).__checkdata__(material, boundary_condition,
+            formulation, mesh, function_spaces, solver, contact_formulation=contact_formulation)
 
         # BUILD THE TANGENT OPERATORS BEFORE HAND
         if material.mtype == "CoupleStressModel":

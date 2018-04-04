@@ -291,20 +291,44 @@ class FlexoelectricFormulation(VariationalPrinciple):
         elif self.subtype=="penalty":
 
             tractionforce = []
-            k_uu, tu = self.K_uu(material, fem_solver, Eulerx, Eulerp, elem)
+            k_uupp, tup = self.K_uu(material, fem_solver, Eulerx, Eulerp, elem)
             k_uu2, tu2 = self.K_uu_Penalty(material, fem_solver, Eulerx, Eulerp, elem)
             k_uw = material.kappa*self.K_us(material, fem_solver, Eulerx, Eulerp, elem)
             k_ww, tw = self.K_ww_Penalty(material, fem_solver, Eulerw, Eulerp, elem)
+            k_wp = self.K_wp(material, fem_solver, Eulerx, Eulerw, Eulerp, elem)
+
+            # SEPARATE MECHANICAL AND ELECTRICAL
+            k_uu = k_uupp[fem_solver.all_local_mech_dofs,:][:,fem_solver.all_local_mech_dofs]
+            k_up = k_uupp[fem_solver.all_local_mech_dofs][:,fem_solver.all_local_electric_dofs]
+            k_pu = k_uupp[fem_solver.all_local_electric_dofs,:][:,fem_solver.all_local_mech_dofs]
+            k_pp = k_uupp[fem_solver.all_local_electric_dofs,:][:,fem_solver.all_local_electric_dofs]
+            tu = tup[fem_solver.all_local_mech_dofs]
+            tp = tup[fem_solver.all_local_electric_dofs]
+
 
             # IF NO STATIC CONDITON
             if fem_solver.static_condensation is False:
+                raise NotImplementedError("Not implemented yet")
                 k0 = np.concatenate((k_uu+k_uu2,-k_uw),axis=1)
                 stiffness = np.concatenate((-k_uw.T,-k_ww),axis=1)
                 tractionforce = np.concatenate((tu,tw))
             else:
                 inv_k_ww = inv(k_ww)
-                stiffness = k_uu - np.dot(np.dot(k_uw,inv_k_ww),k_uw.T)
-                tractionforce = tu - np.dot(np.dot(k_uw,inv_k_ww),tw)
+                kuu_eq = k_uu + k_uu2 - np.dot(np.dot(k_uw,inv_k_ww),k_uw.T)
+                kup_eq = k_up - np.dot(np.dot(k_uw,inv_k_ww),k_wp)
+                kpp_eq = k_pp - np.dot(np.dot(k_wp.T,inv_k_ww),k_wp)
+                tu_eq = tu + tu2 - np.dot(np.dot(k_uw,inv_k_ww),tw)
+                tp_eq = tp - np.dot(np.dot(k_wp.T,inv_k_ww),tw)
+
+                stiffness = np.zeros((self.meshes[0].elements.shape[1]*self.nvar,self.meshes[0].elements.shape[1]*self.nvar))
+                np.put(stiffness.ravel(),fem_solver.idx_uu,kuu_eq.ravel())
+                np.put(stiffness.ravel(),fem_solver.idx_up,kup_eq.ravel())
+                np.put(stiffness.ravel(),fem_solver.idx_pu,kup_eq.T.ravel())
+                np.put(stiffness.ravel(),fem_solver.idx_pp,k_pp.ravel())
+
+                tractionforce = np.zeros((self.meshes[0].elements.shape[1]*self.nvar,1))
+                tractionforce[fem_solver.all_local_mech_dofs] = tu_eq
+                tractionforce[fem_solver.all_local_electric_dofs] = tp_eq
 
         else:
             raise ValueError("subtype of this variational formulation should be 'lagrange_multiplier' or 'penalty'")
@@ -712,7 +736,7 @@ class FlexoelectricFormulation(VariationalPrinciple):
 
 
         # THIS CONTRIBUTES TO TRACTION AS WELL
-        tractionforce = []
+        tractionforce = np.zeros((self.meshes[0].elements.shape[1]*self.ndim,1))
         return stiffness, tractionforce
 
 

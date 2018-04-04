@@ -278,8 +278,9 @@ class CoupleStressFormulation(VariationalPrinciple):
                 tractionforce = np.concatenate((tu,tw))
             else:
                 inv_k_ww = inv(k_ww)
-                stiffness = k_uu - np.dot(np.dot(k_uw,inv_k_ww),k_uw.T)
-                tractionforce = tu - np.dot(np.dot(k_uw,inv_k_ww),tw)
+                # stiffness = k_uu - np.dot(np.dot(k_uw,inv_k_ww),k_uw.T)
+                stiffness = k_uu + k_uu2 - np.dot(np.dot(k_uw,inv_k_ww),k_uw.T)
+                tractionforce = tu + tu2 - np.dot(np.dot(k_uw,inv_k_ww),tw)
 
         else:
             raise ValueError("subtype of this variational formulation should be 'lagrange_multiplier' or 'penalty'")
@@ -594,7 +595,7 @@ class CoupleStressFormulation(VariationalPrinciple):
 
 
         # THIS CONTRIBUTES TO TRACTION AS WELL
-        tractionforce = []
+        tractionforce = np.zeros((self.meshes[0].elements.shape[1]*self.ndim,1))
         return stiffness, tractionforce
 
 
