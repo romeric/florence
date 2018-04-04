@@ -211,16 +211,9 @@ class CoupleStressFormulation(VariationalPrinciple):
 
             k_ss, ts = self.K_ss(material, fem_solver, Eulerw, Eulerp, elem)
 
-            # IF NO STATIC CONDITON
-            if fem_solver.static_condensation is False:
-                k0 = np.concatenate((k_uu,k_uw, k_us),axis=1)
-                k1 = np.concatenate((k_uw.T,k_ww, k_ws),axis=1)
-                k2 = np.concatenate((k_us.T,k_ws.T, k_ss),axis=1)
-                stiffness = np.concatenate((k0,k1, k2),axis=0)
-                tractionforce = np.concatenate((tu,tw,ts))
-            else:
+            if fem_solver.static_condensation is True:
+                # IF STATIC CONDENSATION
                 if self.subtype=="lagrange_multiplier":
-                    # IF NO STATIC CONDITON
                     inv_k_ws = inv(k_ws)
                     k0 = k_ww.dot(inv_k_ws)
                     k1 = k0.dot(k_us.T)
@@ -240,7 +233,6 @@ class CoupleStressFormulation(VariationalPrinciple):
                         self.condensed_vectors['ts'][elem] = ts
 
                 elif self.subtype=="augmented_lagrange":
-                    # IF NO STATIC CONDITON
                     inv_k_ws = inv(k_ws)
                     k0 = k_ww.dot(inv_k_ws)
                     k1 = k0.dot(k_us.T)
@@ -261,6 +253,15 @@ class CoupleStressFormulation(VariationalPrinciple):
                         self.condensed_vectors['tw'][elem] = tw
                         self.condensed_vectors['ts'][elem] = ts
 
+            else:
+                # IF NO STATIC CONDENSATION
+                raise NotImplementedError("Not implemented yet")
+                k0 = np.concatenate((k_uu,k_uw, k_us),axis=1)
+                k1 = np.concatenate((k_uw.T,k_ww, k_ws),axis=1)
+                k2 = np.concatenate((k_us.T,k_ws.T, k_ss),axis=1)
+                stiffness = np.concatenate((k0,k1, k2),axis=0)
+                tractionforce = np.concatenate((tu,tw,ts))
+
 
 
         elif self.subtype=="penalty":
@@ -271,16 +272,19 @@ class CoupleStressFormulation(VariationalPrinciple):
             k_uw = material.kappa*self.K_us(material, fem_solver, Eulerx, Eulerp, elem)
             k_ww, tw = self.K_ww_Penalty(material, fem_solver, Eulerw, Eulerp, elem)
 
-            # IF NO STATIC CONDITON
-            if fem_solver.static_condensation is False:
-                k0 = np.concatenate((k_uu+k_uu2,-k_uw),axis=1)
-                stiffness = np.concatenate((-k_uw.T,-k_ww),axis=1)
-                tractionforce = np.concatenate((tu,tw))
-            else:
+            if fem_solver.static_condensation is True:
+                # IF STATIC CONDENSATION
                 inv_k_ww = inv(k_ww)
                 # stiffness = k_uu - np.dot(np.dot(k_uw,inv_k_ww),k_uw.T)
                 stiffness = k_uu + k_uu2 - np.dot(np.dot(k_uw,inv_k_ww),k_uw.T)
                 tractionforce = tu + tu2 - np.dot(np.dot(k_uw,inv_k_ww),tw)
+            else:
+                # IF NO STATIC CONDENSATION
+                raise NotImplementedError("Not implemented yet")
+                k0 = np.concatenate((k_uu+k_uu2,-k_uw),axis=1)
+                stiffness = np.concatenate((-k_uw.T,-k_ww),axis=1)
+                tractionforce = np.concatenate((tu,tw))
+
 
         else:
             raise ValueError("subtype of this variational formulation should be 'lagrange_multiplier' or 'penalty'")
@@ -546,7 +550,8 @@ class CoupleStressFormulation(VariationalPrinciple):
         """Get stiffness matrix of the system"""
         stiffness = np.zeros((self.function_spaces[2].Bases.shape[0]*self.ndim,self.function_spaces[2].Bases.shape[0]*self.ndim),dtype=np.float64)
         tractionforce = np.zeros((self.function_spaces[2].Bases.shape[0]*self.ndim,1),dtype=np.float64)
-        # return stiffness, tractionforce
+        if self.subtype == "lagrange_multiplier":
+            return stiffness, tractionforce
 
         EulerELemS = Eulers[self.meshes[2].elements[elem,:],:]
         Bases_s = self.function_spaces[2].Bases

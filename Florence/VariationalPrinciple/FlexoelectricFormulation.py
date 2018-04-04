@@ -220,17 +220,9 @@ class FlexoelectricFormulation(VariationalPrinciple):
             tu = tup[fem_solver.all_local_mech_dofs]
             tp = tup[fem_solver.all_local_electric_dofs]
 
-            # IF NO STATIC CONDITON
-            if fem_solver.static_condensation is False:
-                raise NotImplementedError("Not implemented yet")
-                k0 = np.concatenate((k_uu,k_uw, k_us),axis=1)
-                k1 = np.concatenate((k_uw.T,k_ww, k_ws),axis=1)
-                k2 = np.concatenate((k_us.T,k_ws.T, k_ss),axis=1)
-                stiffness = np.concatenate((k0,k1, k2),axis=0)
-                tractionforce = np.concatenate((tu,tw,ts))
-            else:
+            if fem_solver.static_condensation is True:
+                # IF NO STATIC CONDENSATION
                 if self.subtype=="lagrange_multiplier":
-                    # IF NO STATIC CONDITON
                     inv_k_ws = inv(k_ws)
                     k1 = inv_k_ws
                     k2 = k1.dot(k_ww.dot(inv_k_ws))
@@ -265,26 +257,46 @@ class FlexoelectricFormulation(VariationalPrinciple):
                         self.condensed_vectors['tp'][elem] = tp
 
                 elif self.subtype=="augmented_lagrange":
-                    # IF NO STATIC CONDITON
                     inv_k_ws = inv(k_ws)
-                    k0 = k_ww.dot(inv_k_ws)
-                    k1 = k0.dot(k_us.T)
-                    k2 = inv(k_ws - k0.dot(k_ss))
-                    stiffness = k_uu + np.dot(np.dot(k_us,k2),k1)
+                    k1 = inv(k_ws - k_ww.dot(inv_k_ws.dot(k_ss)))
+                    k2 = k1.dot(k_ww.dot(inv_k_ws))
+                    kuu_eq = k_uu + k_us.dot(k2.dot(k_us.T))
+                    k3 = k_wp.T.dot(inv_k_ws.dot(k_ss))
+                    k4 = k_ww.dot(inv_k_ws.dot(k_us.T))
+                    kup_eq = k_up - k_us.dot(k1.dot(k_wp))
+                    kpu_eq = k_up.T - k_wp.T.dot(inv_k_ws.dot(k_us.T)) - k3.dot(k1.dot(k4))
+                    kpp_eq = k_pp + k3.dot(k1.dot(k_wp))
 
-                    t0 = tw - np.dot(k0,ts)
-                    tractionforce = tu - np.dot(np.dot(k_us,k2),t0)
+                    tu_eq = tu - k_us.dot(k1.dot((tw-k_ww.dot(inv_k_ws.dot(ts)))))
+                    tp_eq = tp - k_wp.T.dot(inv_k_ws.dot(ts)) - k3.dot(k1.dot((tw-k_ww.dot(inv_k_ws.dot(ts)))))
+
+                    stiffness = np.zeros((self.meshes[0].elements.shape[1]*self.nvar,self.meshes[0].elements.shape[1]*self.nvar))
+                    np.put(stiffness.ravel(),fem_solver.idx_uu,kuu_eq.ravel())
+                    np.put(stiffness.ravel(),fem_solver.idx_up,kup_eq.ravel())
+                    np.put(stiffness.ravel(),fem_solver.idx_pu,kpu_eq.ravel())
+                    np.put(stiffness.ravel(),fem_solver.idx_pp,kpp_eq.ravel())
+
+                    tractionforce = np.zeros((self.meshes[0].elements.shape[1]*self.nvar,1))
+                    tractionforce[fem_solver.all_local_mech_dofs] = tu_eq
+                    tractionforce[fem_solver.all_local_electric_dofs] = tp_eq
 
                     if self.save_condensed_matrices:
                         self.condensed_matrices['k_uu'][elem] = k_uu
+                        self.condensed_matrices['k_up'][elem] = k_up
                         self.condensed_matrices['k_us'][elem] = k_us
                         self.condensed_matrices['k_ww'][elem] = k_ww
                         self.condensed_matrices['k_ws'][elem] = k_ws
-                        self.condensed_matrices['k_ss'][elem] = k_ss
+                        self.condensed_matrices['k_wp'][elem] = k_wp
+                        self.condensed_matrices['k_pp'][elem] = k_pp
                         self.condensed_matrices['inv_k_ws'][elem] = inv_k_ws
                         self.condensed_vectors['tu'][elem] = tu
                         self.condensed_vectors['tw'][elem] = tw
                         self.condensed_vectors['ts'][elem] = ts
+                        self.condensed_vectors['tp'][elem] = tp
+
+            else:
+                # IF NO STATIC CONDENSATION
+                raise NotImplementedError("Not implemented yet")
 
 
 
@@ -309,9 +321,6 @@ class FlexoelectricFormulation(VariationalPrinciple):
             # IF NO STATIC CONDITON
             if fem_solver.static_condensation is False:
                 raise NotImplementedError("Not implemented yet")
-                k0 = np.concatenate((k_uu+k_uu2,-k_uw),axis=1)
-                stiffness = np.concatenate((-k_uw.T,-k_ww),axis=1)
-                tractionforce = np.concatenate((tu,tw))
             else:
                 inv_k_ww = inv(k_ww)
                 kuu_eq = k_uu + k_uu2 - np.dot(np.dot(k_uw,inv_k_ww),k_uw.T)
@@ -687,7 +696,8 @@ class FlexoelectricFormulation(VariationalPrinciple):
         """Get stiffness matrix of the system"""
         stiffness = np.zeros((self.function_spaces[2].Bases.shape[0]*self.ndim,self.function_spaces[2].Bases.shape[0]*self.ndim),dtype=np.float64)
         tractionforce = np.zeros((self.function_spaces[2].Bases.shape[0]*self.ndim,1),dtype=np.float64)
-        # return stiffness, tractionforce
+        if self.subtype == "lagrange_multiplier":
+            return stiffness, tractionforce
 
         EulerELemS = Eulers[self.meshes[2].elements[elem,:],:]
         Bases_s = self.function_spaces[2].Bases
