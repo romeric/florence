@@ -2974,6 +2974,15 @@ class Mesh(object):
         self.__reset__()
         assert p > 0
 
+        if not isinstance(left_point,float):
+            if not isinstance(left_point,int):
+                raise ValueError("left_point must be a number")
+        if not isinstance(right_point,float):
+            if not isinstance(right_point,int):
+                raise ValueError("right_point must be a number")
+        left_point = float(left_point)
+        right_point = float(right_point)
+
         self.element_type = "line"
         self.points = np.linspace(left_point,right_point,p*n+1)[:,None]
         self.elements = np.zeros((n,p+1),dtype=np.int64)

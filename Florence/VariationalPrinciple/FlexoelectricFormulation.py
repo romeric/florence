@@ -50,6 +50,9 @@ class FlexoelectricFormulation(VariationalPrinciple):
         C = mesh.InferPolynomialDegree() - 1
         mesh.InferBoundaryElementType()
 
+        if C < 1:
+            raise ValueError("Incorrect initial mesh provided for the formulation. Mesh has to be at least order 2")
+
         # CHECK IF MESH IS APPROPRIATE
         # if C == 0:
             # warn('Mesh not appropriate for formulation')
@@ -196,8 +199,8 @@ class FlexoelectricFormulation(VariationalPrinciple):
     def GetLocalStiffness(self, material, fem_solver, Eulerx, Eulerw, Eulers, Eulerp=None, elem=0):
         """Get stiffness matrix of the system"""
 
+        # return self.K_uu(material, fem_solver, Eulerx, Eulerp, elem=0)
         if self.subtype=="lagrange_multiplier" or self.subtype=="augmented_lagrange":
-            # return self.K_uu(material, fem_solver, Eulerx, Eulerp, elem=0)
 
             tractionforce = []
             k_uupp, tup = self.K_uu(material, fem_solver, Eulerx, Eulerp, elem)
@@ -720,7 +723,7 @@ class FlexoelectricFormulation(VariationalPrinciple):
             # INTEGRAGE TRACTION
             if fem_solver.requires_geometry_update:
                 # INTEGRATE TRACTION FORCE
-                tractionforce += t*detJ[counter]
+                tractionforce += t*self.detJ[counter]
 
         return stiffness, tractionforce
 
@@ -1191,7 +1194,7 @@ class FlexoelectricFormulation(VariationalPrinciple):
 
             if (elem % fem_solver.assembly_print_counter == 0 or elem==nelem-1) and elem != 0:
                 nume = elem+1 if elem==nelem-1 else elem
-                print('Assembled {} element matrices').format(nume)
+                print(('Assembled {} element matrices').format(nume))
 
 
         if fem_solver.parallel:

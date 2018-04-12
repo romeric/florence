@@ -285,11 +285,10 @@ class CoupleStressSolver(FEMSolver):
                 boundary_condition.columns_out, AppliedDirichletInc,0,K.shape[0])
 
             # STORE TOTAL SOLUTION DATA
-            # TotalDisp[:,:formulation.ndim,Increment] += dU[:,:formulation.ndim]
             TotalDisp[:,:,Increment] += dU
 
             # REDUCED ACCUMULATED FORCE
-            Residual[:,:] = DeltaF
+            Residual[:,:] += DeltaF
             F_b = boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
                 AppliedDirichletInc,LoadFactor=1.0,
                 only_residual=True)[boundary_condition.columns_in,0]

@@ -108,7 +108,7 @@ class PostProcess(object):
             TotalSol[ColumnsOut,0] = AppliedDirichletInc
 
         # RE-ORDER SOLUTION COMPONENTS
-        dU = TotalSol.reshape(TotalSol.shape[0]/nvar,nvar)
+        dU = TotalSol.reshape(int(TotalSol.shape[0]/nvar),nvar)
 
         return dU
 
