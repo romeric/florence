@@ -64,6 +64,13 @@ ifeq ($(findstring icpc,$(CXX)),icpc)
 CXXFLAGS += -march=native -no-ansi-alias -xHost -fp-model fast=1 -inline-forceinline -inline-factor=$(INLINE_THRESHOLD)
 endif
 
+# On some architectures -march=native does not define -mfma
+HAS_FMA := $(shell $(CXX) -march=native -dM -E - < /dev/null | egrep "AVX2" | sort)
+ifeq ($(HAS_FMA),)
+else
+CXXFLAGS += -mfma
+endif
+
 CXXFLAGS += $(FASTOR_OPTFLAGS) -I$(FASTOR_INCLUDE_PATH)
 CXXFLAGS += $(KINEMATICS)
 
