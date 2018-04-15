@@ -428,6 +428,8 @@ def Voigt(A,sym=1):
          VoigtA = tovoigt(A)
     elif A.ndim==3:
         VoigtA = tovoigt3(A)
+    elif A.ndim==2:
+        VoigtA = SecondTensor2Vector(A)
         # PURE PYTHON VERSION
         # e=A
         # if e.shape[0]==3:
