@@ -4889,6 +4889,8 @@ class Mesh(object):
 
 
         if self.IsHighOrder is False:
+            if solution is not None:
+                return deepcopy(self), deepcopy(solution)    
             return deepcopy(self)
         else:
             if not remap:
