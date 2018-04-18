@@ -562,7 +562,7 @@ class PostProcess(object):
             if "quantity" in line and "mechanics" in line and "2D" in line and "3D" in line:
                 line_number = counter
             if counter > line_number+1 and counter < line_number+100:
-                spl = filter(None, line.split(" "))
+                spl = list(filter(None, line.split(" ")))
                 if spl[0] == str(num):
                     if self.nvar == 2 and self.ndim==2:
                         namer = spl[-4]
