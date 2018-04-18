@@ -2272,7 +2272,7 @@ class Mesh(object):
 
         # NEW FAST READER
         var = 0 # for old gmsh versions - needs checks
-        rem_nnode, rem_nelem, rem_faces = long(1e09), long(1e09), long(1e09)
+        rem_nnode, rem_nelem, rem_faces = int(1e09), int(1e09), int(1e09)
         face_counter = 0
         for line_counter, line in enumerate(open(filename)):
             item = line.rstrip()
