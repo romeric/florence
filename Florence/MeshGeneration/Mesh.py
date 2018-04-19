@@ -2950,7 +2950,7 @@ class Mesh(object):
             pwd = os.path.dirname(os.path.realpath(__file__))
             filename = pwd+'/output.mat'
 
-        for key in Dict.keys():
+        for key in list(Dict.keys()):
             if Dict[str(key)] is None:
                 del Dict[str(key)]
 
