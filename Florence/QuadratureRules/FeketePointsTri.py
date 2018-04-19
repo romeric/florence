@@ -6,7 +6,7 @@ import numpy as np
 
 def FeketePointsTri(C):
     
-    from NumericIntegrator import GaussLobattoQuadrature
+    from .NumericIntegrator import GaussLobattoQuadrature
     
     # FEKETE POINTS ON A TRIANGLE ARE BUILD BASED ON 1D GAUSS-LOBATTO POINTS - SEE THE ALGORITHM
     FeketePoints = []
