@@ -503,6 +503,11 @@ class FEMSolver(object):
                 print("Finished load increment "+str(Increment)+" for linear problem. Solver time is", t_solver)
             gc.collect()
 
+            # LOG REQUESTS
+            if self.print_incremental_log:
+                dumT = np.copy(TotalDisp)
+                dumT[:,:,Increment] = np.sum(dumT[:,:,:Increment+1],axis=2)
+                self.LogSave(formulation, dumT, Increment)
 
             # COMPUTE SCALED JACBIAN FOR THE MESH
             if Increment == LoadIncrement - 1:
