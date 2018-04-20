@@ -151,7 +151,8 @@ class FEMSolver(object):
 
         if material.mtype == "LinearModel" and self.number_of_load_increments > 1:
             warn("Can not solve a linear elastic model in multiple step. "
-                "The number of load increments is going to be set to 1")
+                "The number of load increments is going to be set to one (1). "
+                "Use IncrementalLinearElastic model for incremental soluiton.")
             self.number_of_load_increments = 1
 
         self.has_prestress = False
@@ -249,15 +250,11 @@ class FEMSolver(object):
         post_process.SetMaterial(material)
         post_process.SetFEMSolver(self)
 
-        # self.compute_mesh_qualities = True
         if self.analysis_nature == "nonlinear" and self.compute_mesh_qualities:
             # COMPUTE QUALITY MEASURES
             post_process.ScaledJacobian = post_process.MeshQualityMeasures(mesh,TotalDisp,False,False)[3]
         elif self.isScaledJacobianComputed:
             post_process.ScaledJacobian=self.ScaledJacobian
-        # self.isScaledJacobianComputed = False
-        # post_process.is_scaledjacobian_computed = False
-        # post_process.ScaledJacobian=post_process.MeshQualityMeasures(mesh,TotalDisp,False,False)[3]
 
         if self.analysis_nature == "nonlinear":
             post_process.newton_raphson_convergence = self.NRConvergence
@@ -448,20 +445,20 @@ class FEMSolver(object):
         post_process.SetAnalysis(self.analysis_type, self.analysis_nature)
 
         LoadIncrement = self.number_of_load_increments
-
         LoadFactor = 1./LoadIncrement
-        for Increment in range(LoadIncrement):
-            # COMPUTE INCREMENTAL FORCES
-            NodalForces = LoadFactor*NeumannForces
-            # NodalForces = LoadFactor*boundary_condition.neumann_forces
-            AppliedDirichletInc = LoadFactor*boundary_condition.applied_dirichlet
-            # DIRICHLET FORCES IS SET TO ZERO EVERY TIME
-            DirichletForces = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64)
-            Residual = DirichletForces + NodalForces
 
+        # COMPUTE INCREMENTAL FORCES - FOR ADAPTIVE LOAD STEPPING THIS NEEDS TO BE INSIDE THE LOOP
+        NodalForces = LoadFactor*NeumannForces
+        AppliedDirichletInc = LoadFactor*boundary_condition.applied_dirichlet
+
+        for Increment in range(LoadIncrement):
             t_assembly = time()
-            # IF STRESSES ARE TO BE CALCULATED
+
+            # RESET EVERY TIME
+            Residual = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64)
+
             if self.has_prestress:
+                # IF STRESSES ARE TO BE CALCULATED - FOR ALL LINEARISED MODELS
                 # GET THE MESH COORDINATES FOR LAST INCREMENT
                 mesh.points -= TotalDisp[:,:formulation.ndim,Increment-1]
                 # ASSEMBLE
@@ -469,13 +466,18 @@ class FEMSolver(object):
                     Eulerx, np.zeros(mesh.points.shape[0]))[:2]
                 # UPDATE MESH AGAIN
                 mesh.points += TotalDisp[:,:formulation.ndim,Increment-1]
-                # FIND THE RESIDUAL
+                # FIND THE RESIDUAL - LOOKS NON-INTUITIVE BUT IT IS CORRECT
+                # THE + SIGN IS BECAUSE mesh.points IS UPDATED AND THE APPEARANCE OF LoadFactor
+                # IS BECAUSE THIS PROCEDURE IS INCREMENTAL NOT ACCUMULATIVE
                 Residual[boundary_condition.columns_in] = TractionForces[boundary_condition.columns_in] \
-                - NodalForces[boundary_condition.columns_in]
+                + NodalForces[boundary_condition.columns_in]*LoadFactor
             else:
+                # IF STRESSES ARE NOT TO BE CALCULATED - FOR LinearModel and IncrementalLinearElastic
                 # ASSEMBLE
                 K = Assemble(self, function_spaces[0], formulation, mesh, material,
                     Eulerx, np.zeros_like(mesh.points))[0]
+                # NO NEED FOR LoadFactor HERE AS mesh.points IS NOT UPDATED
+                Residual += NodalForces
 
             print('Finished assembling the system of equations. Time elapsed is', time() - t_assembly, 'seconds')
             # APPLY DIRICHLET BOUNDARY CONDITIONS & GET REDUCED MATRICES
@@ -511,10 +513,11 @@ class FEMSolver(object):
                     post_process.is_material_anisotropic = True
                     post_process.SetAnisotropicOrientations(material.anisotropic_orientations)
 
-                post_process.SetBases(postdomain=function_spaces[1])
-                qualities = post_process.MeshQualityMeasures(smesh,TotalDisp,plot=False,show_plot=False)
-                self.isScaledJacobianComputed = qualities[0]
-                self.ScaledJacobian = qualities[3]
+                if self.compute_mesh_qualities:
+                    post_process.SetBases(postdomain=function_spaces[1])
+                    qualities = post_process.MeshQualityMeasures(smesh,TotalDisp,plot=False,show_plot=False)
+                    self.isScaledJacobianComputed = qualities[0]
+                    self.ScaledJacobian = qualities[3]
 
                 del smesh, post_process
                 gc.collect()
@@ -542,8 +545,6 @@ class FEMSolver(object):
             DeltaF = LoadFactor*NeumannForces
             NodalForces += DeltaF
             # OBRTAIN INCREMENTAL RESIDUAL - CONTRIBUTION FROM BOTH NEUMANN AND DIRICHLET
-            # Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
-                # boundary_condition.applied_dirichlet,LoadFactor=LoadFactor)[2]
             Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
                 boundary_condition.applied_dirichlet,LoadFactor=LoadFactor,only_residual=True)
             Residual -= DeltaF

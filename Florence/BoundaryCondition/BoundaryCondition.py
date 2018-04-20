@@ -700,7 +700,6 @@ class BoundaryCondition(object):
 
         # MUCH FASTER APPROACH
         # F = F - (stiffness[:,self.columns_out]*AppliedDirichlet*LoadFactor)[:,None]
-
         nnz_cols = ~np.isclose(AppliedDirichlet,0.0)
         F[self.columns_in] = F[self.columns_in] - (stiffness[self.columns_in,:][:,
             self.columns_out[nnz_cols]]*AppliedDirichlet[nnz_cols]*LoadFactor)[:,None]
@@ -711,14 +710,14 @@ class BoundaryCondition(object):
         # GET REDUCED FORCE VECTOR
         F_b = F[self.columns_in,0]
 
-        # FOR UMFPACK SOLVER TAKE SPECIAL CARE
-        if int(sp.__version__.split('.')[1]) < 15:
-            F_b_umf = np.zeros(F_b.shape[0])
-            # F_b_umf[:] = F_b[:,0] # DOESN'T WORK
-            for i in range(F_b_umf.shape[0]):
-                # F_b_umf[i] = F_b[i,0]
-                F_b_umf[i] = F_b.flatten()[i]
-            F_b = np.copy(F_b_umf)
+        # # FOR UMFPACK SOLVER TAKE SPECIAL CARE
+        # if int(sp.__version__.split('.')[1]) < 15:
+        #     F_b_umf = np.zeros(F_b.shape[0])
+        #     # F_b_umf[:] = F_b[:,0] # DOESN'T WORK
+        #     for i in range(F_b_umf.shape[0]):
+        #         # F_b_umf[i] = F_b[i,0]
+        #         F_b_umf[i] = F_b.flatten()[i]
+        #     F_b = np.copy(F_b_umf)
 
 
         # GET REDUCED STIFFNESS

@@ -16,31 +16,10 @@ class LinearModel(Material):
 
 
     def Hessian(self,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
-
-        #------------------------------------------------------------------------------------#
-        # GET MATERIAL CONSTANTS
-        # mu = MaterialArgs.mu
-        # lamb = MaterialArgs.lamb
-
-        # FOURTH ORDER ELASTICITY TENSOR
-        # USING EINSUM
-        # d = np.einsum
-        # I = StrainTensors['I']
-        # H_Voigt = Voigt(lamb*d('ij,kl',I,I)+mu*(d('ik,jl',I,I)+d('il,jk',I,I)) ,1)
-        # MaterialArgs.H_VoigtSize = H_Voigt.shape[0]
-
-        # return H_Voigt
-        #------------------------------------------------------------------------------------#
-
-        # MaterialArgs.H_VoigtSize = MaterialArgs.H_Voigt.shape[0]
-        # return MaterialArgs.H_Voigt
-
         return self.H_Voigt
 
 
-
     def CauchyStress(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
-
 
         strain = StrainTensors['strain'][gcounter]
         I = StrainTensors['I']
@@ -59,5 +38,4 @@ class LinearModel(Material):
 
 
     def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx):
-        ndim = StrainTensors['I'].shape[0]
-        return np.zeros((ndim,1))
+        return np.zeros((self.ndim,1))

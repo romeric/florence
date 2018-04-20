@@ -69,7 +69,7 @@ def Assemble(fem_solver, function_space, formulation, mesh, material, Eulerx, Eu
 def LowLevelAssembly(fem_solver,function_space, formulation, mesh, material, Eulerx, Eulerp):
 
     if not material.has_low_level_dispatcher:
-        raise RuntimeError("Cannot dispatch to low level module, since material {} does not support it".format(type(material).__name__))
+        raise RuntimeError("Cannot dispatch to low level module since material {} does not support it".format(type(material).__name__))
 
     stiffness, T, F, mass = _LowLevelAssembly_(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
     if isinstance(F,np.ndarray):

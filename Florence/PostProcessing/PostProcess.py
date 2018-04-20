@@ -791,11 +791,12 @@ class PostProcess(object):
         if self.postdomain_bases is None:
             raise ValueError("Function spaces/bases not set for post-processing")
 
+        ndim = mesh.InferSpatialDimension()
         vpoints = mesh.points
         if TotalDisp.ndim == 3:
-            vpoints = vpoints + TotalDisp[:,:,-1]
+            vpoints = vpoints + TotalDisp[:,:ndim,-1]
         elif TotalDisp.ndim == 2:
-            vpoints = vpoints + TotalDisp
+            vpoints = vpoints + TotalDisp[:,:ndim]
         else:
             raise AssertionError("mesh points and displacment arrays are incompatible")
 
