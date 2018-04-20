@@ -509,6 +509,17 @@ class FEMSolver(object):
                 dumT[:,:,Increment] = np.sum(dumT[:,:,:Increment+1],axis=2)
                 self.LogSave(formulation, dumT, Increment)
 
+            # STORE THE INFORMATION IF THE SOLVER BLOWS UP
+            if Increment > 0:
+                U0 = TotalDisp[:,:,Increment-1].ravel()
+                U = TotalDisp[:,:,Increment].ravel()
+                tol = 1e200 if Increment < 5 else 10.
+                if np.isnan(norm(U)) or np.abs(U.max()/(U0.max()+1e-14)) > tol:
+                    print("Solver blew up! Norm of incremental solution is too large")
+                    TotalDisp = TotalDisp[:,:,:Increment]
+                    self.number_of_load_increments = Increment
+                    break
+
             # COMPUTE SCALED JACBIAN FOR THE MESH
             if Increment == LoadIncrement - 1:
                 smesh = deepcopy(mesh)
