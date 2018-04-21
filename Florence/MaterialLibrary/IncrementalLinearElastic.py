@@ -29,3 +29,18 @@ class IncrementalLinearElastic(Material):
     def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx):
         ndim = StrainTensors['I'].shape[0]
         return np.zeros((ndim,1))
+
+
+    def InternalEnergy(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
+
+        mu = self.mu
+        lamb = self.lamb
+        strain = StrainTensors['strain'][gcounter]
+
+        if self.ndim == 3:
+            tre = trace(strain)
+        elif self.ndim == 2:
+            tre = trace(strain) + 1
+
+        energy = lamb/2.*tre**2 + mu*np.einsum("ij,ij",strain,strain)
+        return energy

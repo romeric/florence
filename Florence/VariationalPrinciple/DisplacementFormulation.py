@@ -409,11 +409,12 @@ class DisplacementFormulation(VariationalPrinciple):
         # COMPUTE REMAINING KINEMATIC MEASURES
         StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
 
-        # SPATIAL GRADIENT AND MATERIAL GRADIENT TENSORS ARE EQUAL
-        SpatialGradient = np.einsum('ikj',MaterialGradient)
-        # COMPUTE ONCE detJ
-        detJ = np.einsum('i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)))
-
+        # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+        ParentGradientx = np.einsum('ijk,jl->kil',Jm, EulerELemCoords)
+        # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
+        SpatialGradient = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Jm)
+        # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
+        detJ = np.einsum('i,i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)),np.abs(StrainTensors['J']))
 
         # LOOP OVER GAUSS POINTS
         for counter in range(AllGauss.shape[0]):

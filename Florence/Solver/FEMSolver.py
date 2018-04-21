@@ -368,10 +368,6 @@ class FEMSolver(object):
                 boundary_condition, solver, TotalDisp, Eulerx, NeumannForces)
             del vmesh
 
-            # ADD EACH INCREMENTAL CONTRIBUTION TO MAKE IT CONSISTENT WITH THE NONLINEAR ANALYSIS
-            for i in range(TotalDisp.shape[2]-1,0,-1):
-                TotalDisp[:,:,i] = np.sum(TotalDisp[:,:,:i+1],axis=2)
-
             return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
 
         # ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES FOR THE FIRST TIME
@@ -537,6 +533,18 @@ class FEMSolver(object):
 
                 del smesh, post_process
                 gc.collect()
+
+
+        # ADD EACH INCREMENTAL CONTRIBUTION TO MAKE IT CONSISTENT WITH THE NONLINEAR ANALYSIS
+        for i in range(TotalDisp.shape[2]-1,0,-1):
+            TotalDisp[:,:,i] = np.sum(TotalDisp[:,:,:i+1],axis=2)
+
+        # COMPUTE DISSIPATION OF ENERGY THROUGH TIME
+        if self.compute_energy:
+            Eulerx = mesh.points + TotalDisp[:,:,-1]
+            energy_info = self.ComputeEnergy(formulation.function_spaces[0],mesh,material,formulation,Eulerx,None)
+            formulation.strain_energy = energy_info[0]
+            formulation.electrical_energy = energy_info[1]
 
 
         return TotalDisp
@@ -969,6 +977,27 @@ class FEMSolver(object):
 
 
 
+    def ComputeEnergy(self,function_space,mesh,material,formulation,Eulerx,Eulerp):
+
+        strain_energy = 0.
+        electrical_energy = 0.
+
+        for elem in range(mesh.nelem):
+            LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
+            EulerElemCoords = Eulerx[mesh.elements[elem,:],:]
+
+            if formulation.fields == "electro_mechanics":
+                ElectricPotentialElem = Eulerp[mesh.elements[elem,:]]
+                energy = formulation.GetEnergy(function_space, material,
+                    LagrangeElemCoords, EulerElemCoords, ElectricPotentialElem, ElectricPotentialElem, self, elem)
+                strain_energy += energy[0]
+                electrical_energy += energy[1]
+            else:
+                energy = formulation.GetEnergy(function_space, material,
+                    LagrangeElemCoords, EulerElemCoords, self, elem)
+                strain_energy += energy
+
+        return strain_energy, electrical_energy
 
 
 

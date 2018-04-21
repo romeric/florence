@@ -2,13 +2,13 @@ import numpy as np
 from .MaterialBase import Material
 from Florence.Tensor import trace
 
-#####################################################################################################
-                                # Isotropic Linear Model
-#####################################################################################################
-
 
 class LinearModel(Material):
-    """docstring for LinearModel"""
+    """Classical linear elastic material model
+
+        W = lamb/2.*trace(e)**2 + mu*e*e
+
+    """
 
     def __init__(self, ndim, **kwargs):
         mtype = type(self).__name__
@@ -27,15 +27,28 @@ class LinearModel(Material):
         mu = self.mu
         lamb = self.lamb
 
-        # CHECK IF THIS IS NECESSARY
         if self.ndim == 3:
             tre = trace(strain)
         elif self.ndim == 2:
             tre = trace(strain) + 1
 
-        # USE FASTER TRACE FUNCTION
         return 2*mu*strain + lamb*tre*I
 
 
-    def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx):
+    def ElectricDisplacementx(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
         return np.zeros((self.ndim,1))
+
+
+    def InternalEnergy(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
+
+        mu = self.mu
+        lamb = self.lamb
+        strain = StrainTensors['strain'][gcounter]
+
+        if self.ndim == 3:
+            tre = trace(strain)
+        elif self.ndim == 2:
+            tre = trace(strain) + 1
+
+        energy = lamb/2.*tre**2 + mu*np.einsum("ij,ij",strain,strain)
+        return energy
