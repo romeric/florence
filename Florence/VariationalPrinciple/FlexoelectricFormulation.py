@@ -132,9 +132,9 @@ class FlexoelectricFormulation(VariationalPrinciple):
             # elist = [0]*mesh.nelem # CANT USE ONE PRE-CREATED LIST AS IT GETS MODIFIED
             # KEEP VECTORS AND MATRICES SEPARATE BECAUSE OF THE SAME REASON
             if self.subtype == "lagrange_multiplier":
-                self.condensed_matrices = {'k_uu':[0]*mesh.nelem,'k_us':[0]*mesh.nelem,
-                'k_ww':[0]*mesh.nelem,'k_ws':[0]*mesh.nelem,'inv_k_ws':[0]*mesh.nelem}
-                self.condensed_vectors = {'tu':[0]*mesh.nelem,'tw':[0]*mesh.nelem,'ts':[0]*mesh.nelem}
+                self.condensed_matrices = {'k_uu':[0]*mesh.nelem, 'k_up':[0]*mesh.nelem, 'k_pp':[0]*mesh.nelem, 'k_us':[0]*mesh.nelem,
+                'k_ww':[0]*mesh.nelem, 'k_wp':[0]*mesh.nelem, 'k_ws':[0]*mesh.nelem,'inv_k_ws':[0]*mesh.nelem}
+                self.condensed_vectors = {'tu':[0]*mesh.nelem,'tw':[0]*mesh.nelem,'ts':[0]*mesh.nelem,'tp':[0]*mesh.nelem}
             elif self.subtype == "augmented_lagrange":
                 self.condensed_matrices = {'k_uu':[0]*mesh.nelem,'k_us':[0]*mesh.nelem,
                 'k_ww':[0]*mesh.nelem,'k_ws':[0]*mesh.nelem,'k_ss':[0]*mesh.nelem,'inv_k_ws':[0]*mesh.nelem}

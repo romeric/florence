@@ -297,7 +297,7 @@ class CoupleStressSolver(FEMSolver):
             # UPDATE
             Eulerx += dU[:,:formulation.ndim]
             Eulerp += dU[:,-1]
-            TotalW[:,:,Increment], TotalW[:,:,Increment] = formulation.GetAugmentedSolution(self, material, TotalDisp, Eulerx, Eulerw, Eulers, Eulerp)
+            TotalW[:,:formulation.ndim,Increment], TotalS[:,:formulation.ndim,Increment] = formulation.GetAugmentedSolution(self, material, TotalDisp, Eulerx, Eulerw, Eulers, Eulerp)
 
             # LOG REQUESTS
             self.LogSave(formulation, TotalDisp, Increment)
