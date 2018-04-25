@@ -803,10 +803,15 @@ class BoundaryCondition(object):
         if self.neumann_data_applied_at == 'face':
             from Florence.FiniteElements.Assembly import AssembleForces
             if not isinstance(function_spaces,tuple):
-                raise ValueError("Correct functional spaces not passed for computing Neumman and body forces")
+                raise ValueError("Boundary functional spaces not available for computing Neumman and body forces")
             else:
-                if len(function_spaces) !=3:
-                    raise ValueError("Correct functional spaces not passed for computing Neumman and body forces")
+                has_boundary_spaces = False
+                for fs in function_spaces:
+                    if ndim == 3 and fs.ndim == 2:
+                        has_boundary_spaces = True
+                        break
+                if not has_boundary_spaces:
+                    raise ValueError("Boundary functional spaces not available for computing Neumman and body forces")
 
             t_tassembly = time()
             if self.analysis_type == "static":

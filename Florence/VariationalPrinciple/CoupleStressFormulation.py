@@ -89,7 +89,7 @@ class CoupleStressFormulation(VariationalPrinciple):
             quadrature2 = QuadratureRule(optimal=3, norder=self.GetQuadratureOrder(norder,mesh.element_type)[0],
                 mesh_type=mesh.element_type, is_flattened=False)
             # BOUNDARY
-            bquadrature = None
+            bquadrature = QuadratureRule(optimal=3, norder=C+2, mesh_type=mesh.boundary_element_type, is_flattened=False)
 
             self.quadrature_rules = (quadrature0,quadrature1,quadrature2,bquadrature)
         else:
@@ -108,7 +108,8 @@ class CoupleStressFormulation(VariationalPrinciple):
             function_space2 = FunctionSpace(mesh2, self.quadrature_rules[2], p=mesh2.degree,
                 equally_spaced=equally_spaced_bases, use_optimal_quadrature=False)
             # BOUNDARY
-            bfunction_space = None
+            bfunction_space = FunctionSpace(mesh0.CreateDummyLowerDimensionalMesh(), self.quadrature_rules[3], p=mesh0.degree,
+                equally_spaced=equally_spaced_bases, use_optimal_quadrature=False)
 
             self.function_spaces = (function_space0, function_space1, function_space2, bfunction_space)
         else:

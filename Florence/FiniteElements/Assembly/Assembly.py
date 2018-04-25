@@ -526,7 +526,7 @@ def AssembleForces(boundary_condition, mesh, material, function_spaces, compute_
     Fb = np.zeros((mesh.points.shape[0]*material.nvar,1))
 
     if compute_traction_forces:
-        Ft = AssembleExternalTractionForces(boundary_condition, mesh, material, function_spaces[2])
+        Ft = AssembleExternalTractionForces(boundary_condition, mesh, material, function_spaces[-1])
     if compute_body_forces:
         Fb = AssembleBodyForces(boundary_condition, mesh, material, function_spaces[0])
 
