@@ -894,6 +894,7 @@ class PostProcess(object):
         # SET COMPUTED TO TRUE
         self.is_scaledjacobian_computed = True
         self.AverageJacobian = AverageJacobian
+        self.ScaledJacobian = ScaledJacobian
 
         if not self.is_material_anisotropic:
             return self.is_scaledjacobian_computed, ScaledFF, ScaledHH, ScaledJacobian
@@ -3481,8 +3482,8 @@ class PostProcess(object):
         Xplot = np.zeros((nnode,pdim),dtype=np.float64)
         Tplot = np.zeros((nelem,3),dtype=np.int64)
         Uplot = np.zeros(nnode,dtype=np.float64)
-        if plot_on_faces and QuantityToPlot is not None:
-            Uplot = np.zeros(nelem,dtype=np.float64)
+        # if plot_on_faces and QuantityToPlot is not None:
+            # Uplot = np.zeros(nelem,dtype=np.float64)
 
         if QuantityToPlot is None:
             if plot_on_faces:
