@@ -1136,7 +1136,7 @@ class Mesh(object):
         assert self.element_type is not None
 
         if self.points.shape[1] == 2:
-            raise ValueError("2D mesh does not volume")
+            raise ValueError("2D mesh does not have volume")
         if gpoints is None:
             assert self.points is not None
             gpoints = self.points
@@ -1323,48 +1323,162 @@ class Mesh(object):
         return median, bases_for_middle_point
 
 
-    def FindElementContainingPoint(self, point, algorithm="fem"):
+    def FindElementContainingPoint(self, point, algorithm="fem", find_parametric_coordinate=True,
+        scaling_factor=5., tolerance=1.0e-7, maxiter=20, use_simple_bases=False):
         """Find which element does a point lie in using specificed algorithm.
-            Choosing 'fem' algorithm finds a point using a point inversion technique
+            The FEM isoparametric coordinate of the point is returned as well.
+            If the isoparametric coordinate of the point is not required, issue find_parametric_coordinate=False
+
+            input:
+                point:                  [tuple] XYZ of enquiry point
+                algorithm:              [str] either 'fem' or 'geometric'. The 'fem' algorithm uses k-d tree
+                                        search to get the right bounding box around as few elements as possible.
+                                        The size of the box can be specified by the user through the keyword scaling_factor.
+                                        The geometric algorithm is a lot more stable and converges much quicker.
+                                        The geomtric algorithm first identifies the right element using volume check,
+                                        then tries all possible combination of initial guesses to get the FEM
+                                        isoparametric point. Trying all possible combination with FEM can be potentially
+                                        more costly since bounding box size can be large.
+            return:
+                element_index           [int/1D array of ints] element(s) containing the point.
+                                        If the point is shared between many elements a 1D array is returned
+                iso_parametric_point    [1D array] the parametric coordinate of the point within the element.
+                                        return only if find_parametric_coordinate=True
         """
 
         self.__do_essential_memebers_exist__()
         C = self.InferPolynomialDegree() - 1
+        if C > 0:
+            warn("Note that finding a point within higher order curved mesh is not supported yet")
+        if C > 0 and algorithm == "geometric":
+            warn("High order meshes are not supported using geometric algorthims. I am going to operate on linear mesh")
 
         ndim = self.InferSpatialDimension()
         assert len(point) == ndim
 
+        from Florence.FunctionSpace import PointInversionIsoparametricFEM
+        candidate_element, candidate_piso = None, None
+
+        if self.element_type == "tet" and algorithm == "fem":
+            algorithm = "geometric"
+
         if algorithm == "fem":
-
-            from Florence.FunctionSpace import PointInversionIsoparametricFEM
-
-            candidate_element, candidate_piso = None, None
+            scaling_factor = float(scaling_factor)
+            max_h = self.EdgeLengths().max()
+            # FOR CURVED ELEMENTS
+            # max_h = self.LargestSegment().max()
+            # GET A BOUNDING BOX AROUND THE POINT, n TIMES LARGER THAN MAXIMUM h, WHERE n is the SCALING FACTOR
+            if ndim==3:
+                bounding_box = (point[0]-scaling_factor*max_h,
+                                point[1]-scaling_factor*max_h,
+                                point[2]-scaling_factor*max_h,
+                                point[0]+scaling_factor*max_h,
+                                point[1]+scaling_factor*max_h,
+                                point[2]+scaling_factor*max_h)
+            elif ndim==2:
+                bounding_box = (point[0]-scaling_factor*max_h,
+                                point[1]-scaling_factor*max_h,
+                                point[0]+scaling_factor*max_h,
+                                point[1]+scaling_factor*max_h)
+            # SELECT ELEMENTS ONLY WITHIN THE BOUNDING BOX
+            mesh = deepcopy(self)
+            idx_kept_element = self.RemoveElements(bounding_box)[1]
 
             if ndim==3:
                 for i in range(self.nelem):
                     coord = self.points[self.elements[i,:],:]
-                    p_iso = PointInversionIsoparametricFEM(self.element_type, C, coord, point)
-                    if p_iso[0] >= -1. and p_iso[0] <=1. and \
-                        p_iso[1] >= -1. and p_iso[1] <=1. and \
-                            p_iso[2] >= -1. and p_iso[2] <=1. :
-                        candidate_element, candidate_piso = i, p_iso
-                        break
+                    p_iso, converged = PointInversionIsoparametricFEM(self.element_type, C, coord, point,
+                        tolerance=tolerance, maxiter=maxiter, verbose=True)
+
+                    if converged:
+                        # if p_iso[0] >= -1. and p_iso[0] <=1. and \
+                        #     p_iso[1] >= -1. and p_iso[1] <=1. and \
+                        #         p_iso[2] >= -1. and p_iso[2] <=1. :
+
+                        if  (p_iso[0] > -1. or np.isclose(p_iso[0],-1.,rtol=tolerance)) and \
+                            (p_iso[0] < 1.  or np.isclose(p_iso[0], 1.,rtol=tolerance)) and \
+                            (p_iso[1] > -1. or np.isclose(p_iso[1],-1.,rtol=tolerance)) and \
+                            (p_iso[1] < 1.  or np.isclose(p_iso[1],-1.,rtol=tolerance)) and \
+                            (p_iso[2] > -1. or np.isclose(p_iso[2],-1.,rtol=tolerance)) and \
+                            (p_iso[2] < 1.  or np.isclose(p_iso[2], 1.,rtol=tolerance)) :
+                            candidate_element, candidate_piso = i, p_iso
+                            break
             elif ndim==2:
                 for i in range(self.nelem):
                     coord = self.points[self.elements[i,:],:]
-                    p_iso = PointInversionIsoparametricFEM(self.element_type, C, coord, point)
+                    p_iso = PointInversionIsoparametricFEM(self.element_type, C, coord, point,
+                        tolerance=tolerance, maxiter=maxiter, verbose=True)
                     if p_iso[0] >= -1. and p_iso[0] <=1. and \
                         p_iso[1] >= -1. and p_iso[1] <=1.:
                         candidate_element, candidate_piso = i, p_iso
                         break
 
-            if candidate_element == None:
-                raise RuntimeError("Could not find element containing the point")
+            # if candidate_element is None:
+                # raise RuntimeError("Could not find element containing the point")
 
-            return candidate_element, candidate_piso
+            self.__update__(mesh)
+            # print(candidate_element)
+            if candidate_element is not None:
+                candidate_element = idx_kept_element[candidate_element]
+
+            if find_parametric_coordinate:
+                return candidate_element, candidate_piso
+            else:
+                return candidate_element
 
         else:
-            raise NotImplementedError("Not implemented yet")
+            if self.element_type == "tet":
+
+                from Florence.QuadratureRules.FeketePointsTet import FeketePointsTet
+                initial_guesses = FeketePointsTet(C)
+
+                def GetVolTet(a0,b0,c0,d0):
+                    det_array = np.dstack((a0-d0,b0-d0,c0-d0))
+                    # FIND VOLUME OF ALL THE ELEMENTS
+                    volume = 1./6.*np.abs(np.linalg.det(det_array))
+                    return volume
+
+                a = self.points[self.elements[:,0],:]
+                b = self.points[self.elements[:,1],:]
+                c = self.points[self.elements[:,2],:]
+                d = self.points[self.elements[:,3],:]
+                o = np.tile(point,self.nelem).reshape(self.nelem,a.shape[1])
+
+                # TOTAL VOLUME
+                vol = self.Volumes()
+                # PARTS' VOLUMES
+                vol0 = GetVolTet(a,b,c,o)
+                vol1 = GetVolTet(a,b,o,d)
+                vol2 = GetVolTet(a,o,c,d)
+                vol3 = GetVolTet(o,b,c,d)
+
+                criterion_check = vol0+vol1+vol2+vol3-vol
+                elems = np.isclose(criterion_check,0.,rtol=tolerance)
+                elems_idx = np.where(elems==True)[0]
+
+                for i in range(len(elems_idx)):
+                    coord = self.points[self.elements[elems_idx[i],:],:]
+                    # TRY ALL POSSIBLE INITIAL GUESSES - THIS IS CHEAP AS THE SEARCH SPACE CONTAINS ONLY A
+                    # FEW ELEMENTS
+                    for guess in initial_guesses:
+                        p_iso, converged = PointInversionIsoparametricFEM(self.element_type, C, coord, point,
+                            tolerance=tolerance, maxiter=maxiter, verbose=True,
+                            use_simple_bases=use_simple_bases, initial_guess=guess)
+                        if converged:
+                            break
+
+                    if converged:
+                        candidate_element, candidate_piso = elems_idx[i], p_iso
+                        break
+
+                if find_parametric_coordinate:
+                    return candidate_element, candidate_piso
+                else:
+                    return candidate_element
+
+            else:
+                raise NotImplementedError("Not implemented yet")
+
 
 
     def LargestSegment(self, smallest_element=True, nsamples=50,
@@ -4152,16 +4266,19 @@ class Mesh(object):
         """Removes elements with some specified criteria
 
         input:
-            (x_min,y_min,x_max,y_max)       [tuple of floats] box selection. Deletes all the elements apart
-                                            from the ones within this box
-            element_removal_criterion       [str]{"all","any"} the criterion for element removal with box selection.
-                                            How many nodes of the element should be within the box in order
-                                            not to be removed. Default is "all". "any" implies at least one node
-            keep_boundary_only              [bool] delete all elements apart from the boundary ones
-            return_removed_mesh             [bool] return the mesh of removed [inverse of what is selected] mesh
-            compute_edges                   [bool] if True also compute new edges
-            compute_faces                   [bool] if True also compute new faces (only 3D)
-            plot_new_mesh                   [bool] if True also plot the new mesh
+            (x_min,y_min,z_min,x_max,y_max,z_max)       [tuple of floats] box selection. Deletes all the elements apart
+                                                        from the ones within this box
+            element_removal_criterion                   [str]{"all","any"} the criterion for element removal with box selection.
+                                                        How many nodes of the element should be within the box in order
+                                                        not to be removed. Default is "all". "any" implies at least one node
+            keep_boundary_only                          [bool] delete all elements apart from the boundary ones
+            return_removed_mesh                         [bool] return the removed mesh [inverse of what is selected]
+            compute_edges                               [bool] if True also compute new edges
+            compute_faces                               [bool] if True also compute new faces (only 3D)
+            plot_new_mesh                               [bool] if True also plot the new mesh
+
+        return:
+            idx_kept_elements:                          [1D array] indices of kept element
 
         1. Note that this method computes a new mesh without maintaining a copy of the original
         2. Different criteria can be mixed for instance removing all elements in the mesh apart from the ones
@@ -4187,8 +4304,7 @@ class Mesh(object):
             z_max = xyz_min_max[5]
 
 
-        new_elements = np.zeros((1,self.elements.shape[1]),dtype=np.int64)
-
+        all_nelems = self.nelem
         edge_elements = np.arange(self.nelem)
         if keep_boundary_only == True:
             if ndim==2:
@@ -4237,10 +4353,10 @@ class Mesh(object):
         # RESET FIRST OR MESH WILL CONTAIN INCONSISTENT DATA
         self.__reset__()
         self.element_type = element_type
-        self.elements = new_elements[1:,:]
+        self.elements = np.copy(new_elements)
         self.nelem = self.elements.shape[0]
-        unique_elements, inv_elements =  np.unique(self.elements,return_inverse=True)
-        self.points = new_points[unique_elements,:]
+        unique_nodes, inv_elements =  np.unique(self.elements,return_inverse=True)
+        self.points = new_points[unique_nodes,:]
         # RE-ORDER ELEMENT CONNECTIVITY
         remap_elements =  np.arange(self.points.shape[0])
         self.elements = remap_elements[inv_elements].reshape(self.nelem,self.elements.shape[1])
@@ -4267,7 +4383,7 @@ class Mesh(object):
             mesh = Mesh()
             mesh.__reset__()
             mesh.element_type = element_type
-            mesh.elements = new_elements[1:,:]
+            mesh.elements = np.copy(new_elements)
             mesh.nelem = mesh.elements.shape[0]
             unique_elements_inv, inv_elements =  np.unique(mesh.elements,return_inverse=True)
             mesh.points = new_points[unique_elements_inv,:]
@@ -4291,10 +4407,12 @@ class Mesh(object):
         if plot_new_mesh == True:
             self.SimplePlot()
 
+        aranger = np.arange(all_nelems)
+        idx_kept_elements = aranger[cond]
         if return_removed_mesh:
-            return unique_elements, mesh
+            return unique_nodes, idx_kept_elements, mesh
         else:
-            return unique_elements
+            return unique_nodes, idx_kept_elements
 
 
     def MergeWith(self, mesh, self_solution=None, other_solution=None):
@@ -4890,7 +5008,7 @@ class Mesh(object):
 
         if self.IsHighOrder is False:
             if solution is not None:
-                return deepcopy(self), deepcopy(solution)    
+                return deepcopy(self), deepcopy(solution)
             return deepcopy(self)
         else:
             if not remap:
