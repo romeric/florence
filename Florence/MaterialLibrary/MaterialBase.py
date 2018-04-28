@@ -30,8 +30,8 @@ class Material(object):
         self.G_A = transverse_iso_shear_modulus
         self.K = bulk_modulus
         self.rho = density
-        if self.rho is None:
-            self.rho = 0.0
+        # if self.rho is None:
+        #     self.rho = 0.0
 
         self.e = permittivity
         self.u = permeability

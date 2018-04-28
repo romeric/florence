@@ -225,6 +225,11 @@ class FEMSolver(object):
         ##############################################################################
 
         ##############################################################################
+        if self.analysis_type == "dynamic" and material.rho is None:
+            raise ValueError("Material does not have seem to have density. Mass matrix cannot be computed")
+        ##############################################################################
+
+        ##############################################################################
         if self.include_physical_damping and self.compute_energy_dissipation:
             warn("Energy is not going to be preserved due to physical damping")
         ##############################################################################
