@@ -1352,6 +1352,9 @@ class Mesh(object):
             warn("Note that finding a point within higher order curved mesh is not supported yet")
         if C > 0 and algorithm == "geometric":
             warn("High order meshes are not supported using geometric algorthims. I am going to operate on linear mesh")
+            if use_simple_bases:
+                raise ValueError("Simple bases for high order elements are not available")
+                return
 
         ndim = self.InferSpatialDimension()
         assert len(point) == ndim
