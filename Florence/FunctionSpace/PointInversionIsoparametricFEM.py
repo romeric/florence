@@ -92,8 +92,12 @@ def PointInversionIsoparametricFEM(element_type, C, LagrangeElemCoords, point,
         # Solve and update incremental solution
         old_p_isoparametric = np.copy(p_isoparametric)
         # print(p_isoparametric)
-        # p_isoparametric += np.dot(np.linalg.inv(ParentGradientX), residual)
-        p_isoparametric += np.linalg.solve(ParentGradientX, residual)
+        try:
+            # p_isoparametric += np.dot(np.linalg.inv(ParentGradientX), residual)
+            p_isoparametric += np.linalg.solve(ParentGradientX, residual)
+        except:
+            convergence_info = False
+            break
 
         # CHECK IF WITHIN TOLERANCE
         if norm(p_isoparametric - old_p_isoparametric) < tolerance:

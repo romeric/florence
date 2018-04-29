@@ -1615,7 +1615,8 @@ class Mesh(object):
 
                 tmesh.GetEdges()
                 edge_coords = tmesh.points[np.unique(tmesh.all_edges),:]
-                mlab.triangular_mesh(tmesh.points[:,0],tmesh.points[:,1],tmesh.points[:,2],tmesh.elements, representation='wireframe', color=(0,0,0))
+                mlab.triangular_mesh(tmesh.points[:,0],tmesh.points[:,1],tmesh.points[:,2],
+                    tmesh.elements, representation='wireframe', color=(0,0,0))
                 # # mlab.points3d(edge_coords[:,0],edge_coords[:,1],edge_coords[:,2],color=(1., 99/255., 71./255), scale_factor=0.03)
                 # # mlab.plot3d(segment_coords[:,0],segment_coords[:,1],segment_coords[:,2], color=(227./255, 66./255, 52./255))
                 mlab.points3d(edge_coords[:,0],edge_coords[:,1],edge_coords[:,2],color=(1., 99/255., 71./255), scale_factor=0.17)
@@ -2576,6 +2577,13 @@ class Mesh(object):
 
         self.__do_essential_memebers_exist__()
 
+        # REDIRECT FOR 3D SURFACE MESHES
+        if self.element_type == "tri" or self.element_type == "quad":
+            if self.points.ndim == 2 and self.points.shape[1] == 3:
+                mesh = self.CreateDummy3DMeshfrom2DMesh()
+                mesh.SimplePlot()
+                return
+
         if color is None:
             color=(197/255.,241/255.,197/255.)
         if grid is None:
@@ -2975,14 +2983,20 @@ class Mesh(object):
                 from Florence.VariationalPrinciple import DisplacementFormulation
             except IOError:
                 raise RuntimeError("Writing high order elements to VTK is not supported yet")
-            pp = PostProcess(3,3)
-            pp.SetMesh(self)
-            if result is None:
-                result = np.zeros_like(self.points)[:,:,None]
-            pp.SetSolution(result)
-            pp.SetFormulation(DisplacementFormulation(self,compute_post_quadrature=False))
-            pp.WriteVTK(filename,quantity=0,interpolation_degree=interpolation_degree, ProjectionFlags=ProjectionFlags)
-            return
+            if result is not None and result.ndim > 1:
+                raise NotImplementedError("Writing multliple or vector/tensor valued results to binary vtk not supported yet")
+                return
+            else:
+                if result is None:
+                    result = np.zeros_like(self.points)[:,:,None]
+                if result.ndim == 1:
+                    result = result.reshape(result.shape[0],1,1)
+                pp = PostProcess(3,3)
+                pp.SetMesh(self)
+                pp.SetSolution(result)
+                pp.SetFormulation(DisplacementFormulation(self,compute_post_quadrature=False))
+                pp.WriteVTK(filename,quantity=0,interpolation_degree=interpolation_degree, ProjectionFlags=ProjectionFlags)
+                return
 
 
         if self.InferSpatialDimension() == 2:
@@ -3675,7 +3689,8 @@ class Mesh(object):
 
 
 
-    def CircularArcPlate(self, side_length=15, radius=10, center=(0.,0.), start_angle=0., end_angle=np.pi/4., ncirc=5, nrad=2, element_type="tri"):
+    def CircularArcPlate(self, side_length=15, radius=10, center=(0.,0.),
+        start_angle=0., end_angle=np.pi/4., ncirc=5, nrad=2, element_type="tri"):
         """Create an arc hole out-boxed by a squared geometry
         """
 
@@ -4122,7 +4137,8 @@ class Mesh(object):
 
 
 
-    def HollowCylinder(self,center=(0,0,0),inner_radius=1.0,outer_radius=2.,element_type='hex',isotropic=True,nrad=5,ncirc=10, nlong=20,length=10):
+    def HollowCylinder(self,center=(0,0,0),inner_radius=1.0,outer_radius=2.,
+        element_type='hex',isotropic=True,nrad=5,ncirc=10, nlong=20,length=10):
         """Creates a hollow cylindrical mesh. Only hexes are supported for now"""
 
         if element_type != "hex":
@@ -5207,9 +5223,12 @@ class Mesh(object):
         # STABLE APPROACH
         # points = np.zeros((1,2))
         # for elem in range(self.nelem):
-        #     quad0 = np.concatenate((self.points[self.elements[elem,0],:][None,:],mid0[elem,:][None,:],median[elem,:][None,:],mid2[elem,:][None,:]),axis=0)
-        #     quad1 = np.concatenate((self.points[self.elements[elem,1],:][None,:],mid1[elem,:][None,:],median[elem,:][None,:],mid0[elem,:][None,:]),axis=0)
-        #     quad2 = np.concatenate((self.points[self.elements[elem,2],:][None,:],mid2[elem,:][None,:],median[elem,:][None,:],mid1[elem,:][None,:]),axis=0)
+        #     quad0 = np.concatenate((self.points[self.elements[elem,0],:][None,:],mid0[elem,:][None,:],
+                    # median[elem,:][None,:],mid2[elem,:][None,:]),axis=0)
+        #     quad1 = np.concatenate((self.points[self.elements[elem,1],:][None,:],mid1[elem,:][None,:],
+                    # median[elem,:][None,:],mid0[elem,:][None,:]),axis=0)
+        #     quad2 = np.concatenate((self.points[self.elements[elem,2],:][None,:],mid2[elem,:][None,:],
+                    # median[elem,:][None,:],mid1[elem,:][None,:]),axis=0)
         #     points = np.concatenate((points,quad0,quad1,quad2))
         # points = points[1:,:]
 
@@ -5499,6 +5518,56 @@ class Mesh(object):
         sys.stdout = sys.__stdout__
 
         return mesh
+
+
+    def CreateDummyUpperDimensionalMesh(self):
+        """Create a dummy upper dimensional mesh that would have some specific mesh attributes at least.
+            The objective is that the upper dimensional mesh should have its bounary element type the same as
+            the element type of actual mesh and be the same order. For 1D (line) elements a quad mesh is generated"""
+
+
+        sys.stdout = open(os.devnull, "w")
+        p = self.InferPolynomialDegree()
+        mesh = Mesh()
+        if self.element_type == "tri":
+            mesh.Parallelepiped(nx=1,ny=1,nz=1, element_type="tet")
+            mesh.GetHighOrderMesh(p=p)
+        elif self.element_type == "quad":
+            mesh.Parallelepiped(nx=1,ny=1,nz=1, element_type="hex")
+            mesh.GetHighOrderMesh(p=p)
+        elif self.element_type == "line":
+            mesh.Rectangle(nx=1,ny=1, element_type="quad")
+            mesh.GetHighOrderMesh(p=p)
+        sys.stdout = sys.__stdout__
+
+        return mesh
+
+
+    def CreateDummy3DMeshfrom2DMesh(self):
+        """Create a dummy 3D mesh from the surfaces of 2D mesh. No volume elements are generated
+            This is used for plotting and generating curvilinear elements for surface mesh using florence
+        """
+
+        sys.stdout = open(os.devnull, "w")
+
+        p = self.InferPolynomialDegree()
+        mm = Mesh()
+        if self.element_type == "quad":
+            mm.element_type = "hex"
+            mm.elements = np.zeros((1,int((p+1)**3)))
+        elif self.element_type == "tri":
+            mm.element_type = "tet"
+            mm.elements = np.zeros((1,int((p+1)*(p+2)*(p+3)/6)))
+        mm.edges = np.zeros((1,p+1))
+        mm.nelem = 1
+        mm.points = np.copy(self.points)
+        mm.faces = np.copy(self.elements)
+        mm.boundary_face_to_element = np.zeros((mm.faces.shape[0],2))
+        mm.boundary_face_to_element[:,0] = 1
+
+        sys.stdout = sys.__stdout__
+
+        return mm
 
 
     def MakeCoordinates3D(self):

@@ -971,7 +971,6 @@ class PostProcess(object):
         else:
             raise ValueError('Plotting quantity not understood')
 
-
         if filename is None:
             warn("file name not specified. I am going to write in the current directory")
             filename = PWD(__file__) + "/output.vtu"
