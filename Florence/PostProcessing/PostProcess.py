@@ -438,6 +438,9 @@ class PostProcess(object):
         increments = self.sol.shape[2]
         if steps != None:
             increments = len(steps)
+        else:
+            if increments != self.fem_solver.number_of_load_increments:
+                raise ValueError("Incosistent number of load increments between FEMSolver and provided solution")
 
         F = self.recovered_fields['F']
         J = np.linalg.det(F)
@@ -934,6 +937,8 @@ class PostProcess(object):
 
         if self.formulation is None:
             raise ValueError("formulation not set for post-processing")
+        if self.sol is None:
+            raise ValueError("solution not set for post-processing")
         if self.formulation.fields == "electrostatics":
             configuration = "original"
             tmp = np.copy(self.sol)
