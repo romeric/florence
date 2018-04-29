@@ -1257,23 +1257,36 @@ class FlexoelectricFormulation(VariationalPrinciple):
             # GET THE FIELDS AT THE ELEMENT LEVEL
             LagrangeElemCoords = points[elements[elem,:],:]
             EulerELemCoords = Eulerx[elements[elem,:],:]
+            ElectricPotentialElem = Eulerp[elements[elem,:]]
 
-            if self.subtype == "lagrange_multiplier":
+            if self.subtype == "lagrange_multiplier" or self.subtype == "augmented_lagrange":
                 k_uu = self.condensed_matrices['k_uu'][elem]
+                k_up = self.condensed_matrices['k_up'][elem]
                 k_us = self.condensed_matrices['k_us'][elem]
                 k_ww = self.condensed_matrices['k_ww'][elem]
                 k_ws = self.condensed_matrices['k_ws'][elem]
+                k_wp = self.condensed_matrices['k_wp'][elem]
+                k_pp = self.condensed_matrices['k_pp'][elem]
                 inv_k_ws = self.condensed_matrices['inv_k_ws'][elem]
                 tu = self.condensed_vectors['tu'][elem]
                 tw = self.condensed_vectors['tw'][elem]
                 ts = self.condensed_vectors['ts'][elem]
+                tp = self.condensed_vectors['tp'][elem]
 
-                EulerElemW = np.dot(inv_k_ws,(ts - np.dot(k_us.T,EulerELemCoords.ravel())[:,None])).ravel()
-                EulerElemS = np.dot(inv_k_ws,(tw - np.dot(k_ww,EulerElemW)[:,None])).ravel()
-
-                # SAVE
-                AllEulerW[elem,:,:] = EulerElemW.reshape(self.meshes[1].elements.shape[1],ndim)
-                AllEulerS[elem,:,:] = EulerElemW.reshape(self.meshes[2].elements.shape[1],ndim)
+                if self.subtype == "lagrange_multiplier":
+                    EulerElemW = np.dot(inv_k_ws,(ts - np.dot(k_us.T,EulerELemCoords.ravel())[:,None])).ravel()
+                    EulerElemS = np.dot(inv_k_ws,(tw - np.dot(k_ww,EulerElemW)[:,None] -\
+                        np.dot(k_wp,ElectricPotentialElem)[:,None])).ravel()
+                elif self.subtype == "augmented_lagrange":
+                    raise RuntimeError("Not implemented yet")
+                    EulerElemW = np.dot(inv_k_ws,(ts - np.dot(k_us.T,EulerELemCoords.ravel())[:,None])).ravel()
+                    EulerElemS = np.dot(inv_k_ws,(tw - np.dot(k_ww,EulerElemW)[:,None] -\
+                        np.dot(k_wp,ElectricPotentialElem)[:,None])).ravel()
+            else:
+                raise RuntimeError("Not implemented yet")
+            # SAVE
+            AllEulerW[elem,:,:] = EulerElemW.reshape(self.meshes[1].elements.shape[1],ndim)
+            AllEulerS[elem,:,:] = EulerElemW.reshape(self.meshes[2].elements.shape[1],ndim)
 
 
         for inode in self.all_nodes:

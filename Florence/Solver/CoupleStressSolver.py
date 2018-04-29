@@ -200,8 +200,8 @@ class CoupleStressSolver(FEMSolver):
 
         # ALLOCATE FOR SOLUTION FIELDS
         TotalDisp = np.zeros((mesh.points.shape[0],formulation.nvar,self.number_of_load_increments),dtype=np.float64)
-        TotalW = np.zeros((formulation.meshes[1].points.shape[0],formulation.nvar,self.number_of_load_increments),dtype=np.float64)
-        TotalS = np.zeros((formulation.meshes[2].points.shape[0],formulation.nvar,self.number_of_load_increments),dtype=np.float64)
+        TotalW = np.zeros((formulation.meshes[1].points.shape[0],formulation.ndim,self.number_of_load_increments),dtype=np.float64)
+        TotalS = np.zeros((formulation.meshes[2].points.shape[0],formulation.ndim,self.number_of_load_increments),dtype=np.float64)
         # TotalDisp = np.zeros((mesh.points.shape[0],int(formulation.ndim**2),self.number_of_load_increments),dtype=np.float64)
 
         # PRE-ASSEMBLY
@@ -245,12 +245,11 @@ class CoupleStressSolver(FEMSolver):
                 K, NeumannForces, NodalForces, Residual,
                 mesh, TotalDisp, TotalW, TotalS, Eulerx, Eulerw, Eulers, Eulerp, material, boundary_condition)
 
-        # return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
-        return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material), TotalW, TotalS
-        # solU = self.__makeoutput__(formulation.meshes[0], TotalDisp, formulation, function_spaces, material)
-        # solW = self.__makeoutput__(formulation.meshes[1], TotalW, formulation, function_spaces, material)
-        # solS = self.__makeoutput__(formulation.meshes[2], TotalS, formulation, function_spaces, material)
-        # return solU, solW, solS
+
+        solution = self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
+        solution.solW = TotalW
+        solution.solS = TotalS
+        return solution
 
 
 
@@ -297,7 +296,8 @@ class CoupleStressSolver(FEMSolver):
             # UPDATE
             Eulerx += dU[:,:formulation.ndim]
             Eulerp += dU[:,-1]
-            TotalW[:,:formulation.ndim,Increment], TotalS[:,:formulation.ndim,Increment] = formulation.GetAugmentedSolution(self, material, TotalDisp, Eulerx, Eulerw, Eulers, Eulerp)
+            TotalW[:,:,Increment], TotalS[:,:,Increment] = formulation.GetAugmentedSolution(self,
+                material, TotalDisp, Eulerx, Eulerw, Eulers, Eulerp)
 
             # LOG REQUESTS
             self.LogSave(formulation, TotalDisp, Increment)
