@@ -227,6 +227,9 @@ class FEMSolver(object):
         ##############################################################################
         if self.analysis_type == "dynamic" and material.rho is None:
             raise ValueError("Material does not have seem to have density. Mass matrix cannot be computed")
+        if self.analysis_type == "static" and material.rho is None and self.has_low_level_dispatcher:
+            # FOR LOW-LEVEL DISPATCHER
+            material.rho = 1.0
         ##############################################################################
 
         ##############################################################################
