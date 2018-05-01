@@ -3190,7 +3190,6 @@ class PostProcess(object):
                 trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot, scalars = Uplot,
                     line_width=point_line_width,colormap='summer')
 
-
         # PLOT POINTS ON CURVED MESH
         if plot_points:
             h_points = mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=point_radius)

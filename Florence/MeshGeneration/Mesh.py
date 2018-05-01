@@ -5557,15 +5557,15 @@ class Mesh(object):
         mm = Mesh()
         if self.element_type == "quad":
             mm.element_type = "hex"
-            mm.elements = np.zeros((1,int((p+1)**3)))
+            mm.elements = np.zeros((1,int((p+1)**3))).astype(np.int64)
         elif self.element_type == "tri":
             mm.element_type = "tet"
-            mm.elements = np.zeros((1,int((p+1)*(p+2)*(p+3)/6)))
-        mm.edges = np.zeros((1,p+1))
+            mm.elements = np.zeros((1,int((p+1)*(p+2)*(p+3)/6))).astype(np.int64)
+        mm.edges = np.zeros((1,p+1)).astype(np.int64)
         mm.nelem = 1
         mm.points = np.copy(self.points)
         mm.faces = np.copy(self.elements)
-        mm.boundary_face_to_element = np.zeros((mm.faces.shape[0],2))
+        mm.boundary_face_to_element = np.zeros((mm.faces.shape[0],2)).astype(np.int64)
         mm.boundary_face_to_element[:,0] = 1
 
         sys.stdout = sys.__stdout__
