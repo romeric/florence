@@ -470,6 +470,12 @@ class CoupleStressSolver(FEMSolver):
 
             print('Finished Load increment', Increment, 'in', time()-t_increment, 'seconds\n')
 
+        # COMPUTE DISSIPATION OF ENERGY THROUGH TIME
+        if self.compute_energy:
+            energy_info = self.ComputeEnergy(formulation.function_spaces[0],mesh,material,formulation,Eulerx,Eulerp)
+            formulation.strain_energy = energy_info[0]
+            formulation.electrical_energy = energy_info[1]
+
         solver.CleanUp()
 
         return TotalDisp, TotalW, TotalS
