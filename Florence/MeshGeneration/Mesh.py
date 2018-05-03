@@ -2786,7 +2786,8 @@ class Mesh(object):
             if plot_points:
                 h_points = mlab.points3d(points[:,0],points[:,1],points[:,2],color=(0,0,0),mode='sphere',scale_factor=point_radius)
 
-            mlab.show()
+            if show_plot:
+                mlab.show()
 
         else:
             raise NotImplementedError("SimplePlot for {} not implemented yet".format(self.element_type))
