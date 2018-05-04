@@ -5,7 +5,7 @@ from datetime import datetime
 from warnings import warn
 
 import os, sys
-sys.path.insert(1,'/home/roman/Dropbox/florence')
+sys.path.insert(1,os.path.join(os.path.expanduser("~"),"florence"))
 
 import numpy as np
 import scipy as sp
@@ -18,11 +18,9 @@ sys.dont_write_bytecode
 np.set_printoptions(linewidth=300)
 
 # IMPORT NECESSARY CLASSES FROM BASE
-from Florence import Base as MainData
-# from Florence.FiniteElements.PreProcess import PreProcess
-# from Florence.FiniteElements.Solvers.Solver import *
-from Florence.PostProcessing import PostProcess
 from Florence import *
+from Florence import Base as MainData
+from Florence.PostProcessing import PostProcess
 
 
 
