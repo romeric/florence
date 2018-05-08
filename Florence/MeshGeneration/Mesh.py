@@ -4299,7 +4299,9 @@ class Mesh(object):
             plot_new_mesh                               [bool] if True also plot the new mesh
 
         return:
+            nodal_map:                                  [1D array] numbering of nodes in old mesh
             idx_kept_elements:                          [1D array] indices of kept element
+            removed_mesh:                               [Mesh] an instance of removed mesh, returned only if return_removed_mesh=True
 
         1. Note that this method computes a new mesh without maintaining a copy of the original
         2. Different criteria can be mixed for instance removing all elements in the mesh apart from the ones
@@ -4403,8 +4405,8 @@ class Mesh(object):
         self.element_type = element_type
         self.elements = np.copy(new_elements)
         self.nelem = self.elements.shape[0]
-        unique_nodes, inv_elements =  np.unique(self.elements,return_inverse=True)
-        self.points = new_points[unique_nodes,:]
+        nodal_map, inv_elements =  np.unique(self.elements,return_inverse=True)
+        self.points = new_points[nodal_map,:]
         # RE-ORDER ELEMENT CONNECTIVITY
         remap_elements =  np.arange(self.points.shape[0])
         self.elements = remap_elements[inv_elements].reshape(self.nelem,self.elements.shape[1])
@@ -4458,9 +4460,9 @@ class Mesh(object):
         aranger = np.arange(all_nelems)
         idx_kept_elements = aranger[cond]
         if return_removed_mesh:
-            return unique_nodes, idx_kept_elements, mesh
+            return nodal_map, idx_kept_elements, mesh
         else:
-            return unique_nodes, idx_kept_elements
+            return nodal_map, idx_kept_elements
 
 
     def MergeWith(self, mesh, self_solution=None, other_solution=None):
