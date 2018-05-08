@@ -4281,13 +4281,14 @@ class Mesh(object):
 
 
 
-    def RemoveElements(self,xyz_min_max,element_removal_criterion="all",keep_boundary_only=False, return_removed_mesh=False,
-            compute_edges=True,compute_faces=True,plot_new_mesh=False):
-        """Removes elements with some specified criteria
+    def RemoveElements(self, xyz_min_max, element_removal_criterion="all", keep_boundary_only=False, return_removed_mesh=False,
+            compute_edges=True, compute_faces=True, plot_new_mesh=False):
+        """Removes elements from the mesh given some specified criteria
 
         input:
-            (x_min,y_min,z_min,x_max,y_max,z_max)       [tuple of floats] box selection. Deletes all the elements apart
-                                                        from the ones within this box
+            (x_min,y_min,z_min,x_max,y_max,z_max)       [tuple of floats or np.ndarray] of box selection. Deletes all the elements
+                                                        apart from the ones within this box, either a tuple of 4/6 floats (2D/3D)
+                                                        or 2D numpy array of shape (2,ndim) where ndim=2,3
             element_removal_criterion                   [str]{"all","any"} the criterion for element removal with box selection.
                                                         How many nodes of the element should be within the box in order
                                                         not to be removed. Default is "all". "any" implies at least one node
@@ -4308,29 +4309,45 @@ class Mesh(object):
         self.__do_memebers_exist__()
 
         ndim = self.InferSpatialDimension()
-        if ndim==2:
-            assert len(xyz_min_max)==4
-            x_min = xyz_min_max[0]
-            y_min = xyz_min_max[1]
-            x_max = xyz_min_max[2]
-            y_max = xyz_min_max[3]
-        elif ndim == 3:
-            assert len(xyz_min_max)==6
-            x_min = xyz_min_max[0]
-            y_min = xyz_min_max[1]
-            z_min = xyz_min_max[2]
-            x_max = xyz_min_max[3]
-            y_max = xyz_min_max[4]
-            z_max = xyz_min_max[5]
+        if isinstance(xyz_min_max,tuple):
+            if ndim==2:
+                assert len(xyz_min_max)==4
+                x_min = xyz_min_max[0]
+                y_min = xyz_min_max[1]
+                x_max = xyz_min_max[2]
+                y_max = xyz_min_max[3]
+            elif ndim == 3:
+                assert len(xyz_min_max)==6
+                x_min = xyz_min_max[0]
+                y_min = xyz_min_max[1]
+                z_min = xyz_min_max[2]
+                x_max = xyz_min_max[3]
+                y_max = xyz_min_max[4]
+                z_max = xyz_min_max[5]
+        elif isinstance(xyz_min_max,np.ndarray):
+            assert xyz_min_max.shape == (2,ndim)
+            if ndim==2:
+                x_min = xyz_min_max[0,0]
+                y_min = xyz_min_max[0,1]
+                x_max = xyz_min_max[1,0]
+                y_max = xyz_min_max[1,1]
+            elif ndim == 3:
+                x_min = xyz_min_max[0,0]
+                y_min = xyz_min_max[0,1]
+                z_min = xyz_min_max[0,2]
+                x_max = xyz_min_max[1,0]
+                y_max = xyz_min_max[1,1]
+                z_max = xyz_min_max[1,2]
 
+        if x_min >= x_max:
+            raise ValueError("Invalid range for mesh removal")
+        if y_min >= y_max:
+            raise ValueError("Invalid range for mesh removal")
+        if ndim == 3:
+            if z_min >= z_max:
+                raise ValueError("Invalid range for mesh removal")
 
         all_nelems = self.nelem
-        edge_elements = np.arange(self.nelem)
-        if keep_boundary_only == True:
-            if ndim==2:
-                edge_elements = self.GetElementsWithBoundaryEdges()
-            elif ndim==3:
-                edge_elements = self.GetElementsWithBoundaryFacesTet()
 
         if ndim==2:
             xe = self.points[self.elements,0]
@@ -4344,7 +4361,6 @@ class Mesh(object):
                 cond =  np.logical_and(np.logical_and(np.logical_and(
                             (xe > x_min).any(axis=1),(ye > y_min).any(axis=1)),
                             (xe < x_max).any(axis=1)),(ye < y_max).any(axis=1))
-            new_elements = self.elements[cond,:]
 
         elif ndim==3:
             xe = self.points[self.elements,0]
@@ -4361,6 +4377,18 @@ class Mesh(object):
                             (xe > x_min).any(axis=1),(ye > y_min).any(axis=1)),
                             (ze > z_min).any(axis=1)),(xe < x_max).any(axis=1)),
                             (ye < y_max).any(axis=1)), (ze < z_max).any(axis=1))
+
+        boundary_elements = np.arange(self.nelem)
+        if keep_boundary_only == True:
+            if ndim==2:
+                boundary_elements = self.GetElementsWithBoundaryEdges()
+            elif ndim==3:
+                boundary_elements = self.GetElementsWithBoundaryFaces()
+            cond_boundary = np.zeros(all_nelems,dtype=bool)
+            cond_boundary[boundary_elements[:,0]] = True
+            cond = np.logical_and(cond,cond_boundary)
+            new_elements = self.elements[cond,:]
+        else:
             new_elements = self.elements[cond,:]
 
         new_elements = new_elements.astype(self.elements.dtype)
