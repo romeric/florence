@@ -849,17 +849,17 @@ def FeketePointsTri(C):
         x = np.array([0., 1., 0.]); x=np.append(x,X[1:-1])
         y = np.array([0., 0., 1.]); y=np.append(y,np.zeros(C,dtype=np.float64))
 
-        ii = np.zeros((C+1)*(C+2)/2 -1,dtype=np.int32)
-        jj = np.zeros((C+1)*(C+2)/2 -1,dtype=np.int32)
+        ii = np.zeros(int((C+1)*(C+2)/2-1),dtype=np.int64)
+        jj = np.zeros(int((C+1)*(C+2)/2-1),dtype=np.int64)
 
         for j in range(1,C+1):
-            b = -((C-j+1)*(C-j+1+1)/2 -1)
+            b = int(-((C-j+1)*(C-j+1+1)/2-1))
             if b==0:
-                ii[-((C-j+1+1)*(C-j+1+2)/2 -1):] = np.arange(0,C-j+2)
-                jj[-((C-j+1+1)*(C-j+1+2)/2 -1):] = np.tile(j,C-j+2)
+                ii[-int(((C-j+1+1)*(C-j+1+2)/2-1)):] = np.arange(0,C-j+2)
+                jj[-int(((C-j+1+1)*(C-j+1+2)/2-1)):] = np.tile(j,C-j+2)
             else:
-                ii[-((C-j+1+1)*(C-j+1+2)/2 -1):b] = np.arange(0,C-j+2)
-                jj[-((C-j+1+1)*(C-j+1+2)/2 -1):b] = np.tile(j,C-j+2)
+                ii[int(-((C-j+1+1)*(C-j+1+2)/2-1)):b] = np.arange(0,C-j+2)
+                jj[int(-((C-j+1+1)*(C-j+1+2)/2-1)):b] = np.tile(j,C-j+2)
 
         Xc = (2.*X[ii] + X[(ii+jj)] - X[jj])/3.
         Yc = (2.*X[jj] + X[(ii+jj)] - X[ii])/3.
