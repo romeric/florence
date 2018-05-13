@@ -5155,7 +5155,13 @@ class Mesh(object):
             tmesh.GetBoundaryEdges()
 
         if solution is not None:
-            solution = solution[unnodes,:]
+            if self.nelem != solution.shape[0]:
+                solution = solution[unnodes,...]
+            else:
+                if solution.ndim == 1:
+                    solution = solution[elements]
+                else:
+                    solution = solution[elements,...]
             return tmesh, solution
 
         return tmesh
