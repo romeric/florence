@@ -38,7 +38,7 @@ def high_order_curved_mesh_generation(p=2):
     # solution.CurvilinearPlot(plot_points=True, point_radius=0.2, color="#E3A933")
     # Write the results to VTK
     mesh.points += solution.sol[:,:,-1]
-    # mesh.WriteVTK("cylinder_mesh")
+    mesh.WriteVTK("cylinder_mesh")
 
 
 
