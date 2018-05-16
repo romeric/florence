@@ -22,16 +22,16 @@
 # ipython notebooks
 *.ipynb
 
-# gmsh files 
-*.msh 
+# gmsh files
+*.msh
 *.geo
 
-# hdf5 files 
+# hdf5 files
 *.mat
 *.hdf
 *.hdf5
 
-# cad files 
+# cad files
 *.igs
 *.iges
 *.IGES
@@ -66,8 +66,11 @@ nr.py
 ParametricStudies/
 ParametricStudies/*
 
-# testfiles not to ignore
+# test files not to ignore
 !tests/Almond3D/
 !tests/Almond3D/*
 !tests/Cylinder/
 !tests/Cylinder/*
+
+# example files not to ignore
+!examples/curved_mesh_generation/Hollow_Cylinder.*
