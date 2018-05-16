@@ -2375,7 +2375,9 @@ class PostProcess(object):
             else:
                 TotalDisp = self.sol
 
-        if mesh.element_type == "tri":
+        if mesh.element_type == "line":
+            return self.CurvilinearPlotLine(mesh,TotalDisp,**kwargs)
+        elif mesh.element_type == "tri":
             return self.CurvilinearPlotTri(mesh,TotalDisp,**kwargs)
         elif mesh.element_type == "quad":
             return self.CurvilinearPlotQuad(mesh,TotalDisp,**kwargs)
@@ -2385,6 +2387,69 @@ class PostProcess(object):
             return self.CurvilinearPlotHex(mesh,TotalDisp,**kwargs)
         else:
             raise ValueError("Unknown mesh type")
+
+
+
+    @staticmethod
+    def CurvilinearPlotLine(mesh, TotalDisp=None, QuantityToPlot=None, plot_on_faces=True,
+        ProjectionFlags=None, interpolation_degree=20, EquallySpacedPoints=False, PlotActualCurve=False,
+        plot_points=False, plot_edges=True, plot_surfaces=True, point_radius=0.02, colorbar=False, color=None, figure=None,
+        show_plot=True, save=False, filename=None, save_tessellation=False):
+
+        """High order curved line mesh plots, based on high order nodal FEM.
+        """
+
+        if not isinstance(mesh,Mesh):
+            raise TypeError("mesh has to be an instance of type {}".format(Mesh))
+        if mesh.element_type != "line":
+            raise RuntimeError("Calling line plotting function with element type {}".format(mesh.element_type))
+        if TotalDisp is None:
+            TotalDisp = np.zeros_like(mesh.points)
+
+
+        tmesh = PostProcess.TessellateLines(mesh, TotalDisp, QuantityToPlot=QuantityToPlot,
+            ProjectionFlags=ProjectionFlags, interpolation_degree=interpolation_degree,
+            EquallySpacedPoints=EquallySpacedPoints, plot_points=plot_points,
+            plot_edges=plot_edges, plot_on_faces=plot_on_faces)
+
+        # UNPACK
+        x_edges = tmesh.x_edges
+        y_edges = tmesh.y_edges
+        z_edges = tmesh.z_edges
+        nnode = tmesh.nnode
+        nelem = tmesh.nelem
+        nsize = tmesh.nsize
+
+        # Xplot = tmesh.points
+        # Tplot = tmesh.elements
+        vpoints = tmesh.vpoints
+        connections = tmesh.elements
+
+
+        import os
+        os.environ['ETS_TOOLKIT'] = 'qt4'
+        from mayavi import mlab
+
+        if figure is None:
+            figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(1000,800))
+
+        # PLOT LINES
+        if plot_points:
+            h_points = mlab.points3d(vpoints[:,0],vpoints[:,1],vpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=point_radius)
+
+        # PLOT CURVED EDGES
+        if plot_edges:
+            src = mlab.pipeline.scalar_scatter(x_edges.T.copy().flatten(), y_edges.T.copy().flatten(), z_edges.T.copy().flatten())
+            src.mlab_source.dataset.lines = connections
+            lines = mlab.pipeline.stripper(src)
+            h_edges = mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
+
+
+        mlab.view(azimuth=0, roll=0)
+        mlab.show()
+        return
+
+
 
 
     @staticmethod
@@ -3252,6 +3317,101 @@ class PostProcess(object):
 
 
     #-----------------------------------------------------------------------------#
+    @staticmethod
+    def TessellateLines(mesh, TotalDisp, QuantityToPlot=None,
+        ProjectionFlags=None, interpolation_degree=10, EquallySpacedPoints=False,
+        plot_points=False, plot_edges=True, plot_on_faces=None):
+
+        """High order curved line tessellation, based on high order nodal FEM.
+        """
+
+
+        from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints as ESPoints
+        from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
+        from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
+
+        # SINCE THIS IS A 1D PLOT
+        ndim = 1
+
+        C = interpolation_degree
+        p = C+1
+        nsize = int((C+2)**ndim)
+        CActual = mesh.InferPolynomialDegree() - 1
+        nsize_2 = int((CActual+2)**ndim)
+
+        # GET EQUALLY-SPACED/GAUSS-LOBATTO POINTS FOR THE EDGES
+        GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0].flatten()
+        if EquallySpacedPoints is True:
+            GaussLobattoPointsOneD = ESPoints(2,C).flatten()
+            # GaussLobattoPointsOneD = np.linspace(-1,1,C+2)
+
+        BasesOneD = np.zeros((CActual+2,GaussLobattoPointsOneD.shape[0]),dtype=np.float64)
+        if EquallySpacedPoints is False:
+            for i in range(GaussLobattoPointsOneD.shape[0]):
+                BasesOneD[:,i] = LagrangeGaussLobatto(CActual,GaussLobattoPointsOneD[i])[0]
+        else:
+            for i in range(GaussLobattoPointsOneD.shape[0]):
+                BasesOneD[:,i] = Lagrange(CActual,GaussLobattoPointsOneD[i])[0]
+
+        pdim = mesh.points.shape[1]
+        # GET EULERIAN GEOMETRY
+        if TotalDisp.ndim==3:
+            vpoints = mesh.points + TotalDisp[:,:pdim,-1]
+        else:
+            vpoints = mesh.points + TotalDisp[:,:pdim]
+
+
+        # GET X & Y OF CURVED EDGES
+        if plot_edges:
+            x_edges = np.zeros((C+2,mesh.nelem))
+            y_edges = np.zeros((C+2,mesh.nelem))
+            z_edges = np.zeros((C+2,mesh.nelem))
+
+            for iedge in range(mesh.nelem):
+                edge = mesh.elements[iedge,:]
+                coord_edge = vpoints[edge,:]
+                if pdim == 2:
+                    x_edges[:,iedge], y_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
+                else:
+                    x_edges[:,iedge], y_edges[:,iedge], z_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
+
+        # PLOT CURVED EDGES
+        if plot_edges:
+            connections_elements = np.arange(x_edges.size).reshape(x_edges.shape[1],x_edges.shape[0])
+            connections = np.zeros((x_edges.size,2),dtype=np.int64)
+            for i in range(connections_elements.shape[0]):
+                connections[i*(x_edges.shape[0]-1):(i+1)*(x_edges.shape[0]-1),0] = connections_elements[i,:-1]
+                connections[i*(x_edges.shape[0]-1):(i+1)*(x_edges.shape[0]-1),1] = connections_elements[i,1:]
+            connections = connections[:(i+1)*(x_edges.shape[0]-1),:]
+
+
+        # SAVE TESSELLATION
+        tmesh = Mesh()
+        tmesh.element_type = "line"
+        tmesh.elements = connections
+        tmesh.points = np.concatenate((x_edges.T.ravel()[:,None],y_edges.T.ravel()[:,None],z_edges.T.ravel()[:,None]))
+        tmesh.vpoints = vpoints
+        tmesh.nelem = connections.shape[0]
+        tmesh.nnode = tmesh.points.shape[0]
+        tmesh.nsize = nsize
+        tmesh.bases_1 = BasesOneD
+        tmesh.bases_2 = None
+
+        if plot_edges:
+            tmesh.x_edges = x_edges
+            tmesh.y_edges = y_edges
+            tmesh.z_edges = z_edges
+            tmesh.edge_elements = mesh.elements
+            tmesh.reference_edges = np.array([[0,1]])
+
+            return tmesh
+
+
+
+
+
+
+
     @staticmethod
     def TessellateTris(mesh, TotalDisp, QuantityToPlot=None,
         ProjectionFlags=None, interpolation_degree=30, EquallySpacedPoints=False,

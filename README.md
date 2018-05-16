@@ -1,21 +1,42 @@
 [![Build Status](https://travis-ci.com/romeric/florence.svg?token=HFW6d19YsYpKDNwvtqDr&branch=master)](https://travis-ci.com/romeric/florence)
 
-**Florence** is a Python-based computational framework for multi-physics simulation of electro-magneto-mechanical systems. The framework also includes Python interfaces to many low-level numerical sub-routines written in C, C++ and Cython. 
+**Florence** is a Python-based computational framework for multi-physics simulation of electro-magneto-mechanical systems using finite element and boundary element methods. The framework also includes Python interfaces to many low-level numerical sub-routines written in C, C++ and Cython.
+
+# Features
+A non-exhaustive list of core features:
+- High order planar and curved finite and boundary elements (line, tri, quad, tet, hex)
+- In-built CAD-conformal curvilinear mesh generator
+- Powerful in-built pre and post processor
+- Poisson, electrostatic and heat transfer solvers
+- Linear, linearised and nonlinear solid/structural mechanics solvers
+- Linear, linearised and nonlinear electromechanics solvers
+- Strain gradient and micropolar solvers for mechanical and electromechanical problems
+- Implicit and explicit dynamic solver with contact formulation
+- A suite of advanced hyperelastic, electric, electro-hyperelastic material models
+- Ability to read/write mesh/simulation data to/from gmsh, Salome, Tetgen, VTK and HDF5
+
 
 # Platform support
 Florence supports Linux and macOS for now under
 - Python 2.7
-- Python 3.5/3.6
+- Python > 3.5
 - PyPy > v5.7.0
 
 
 # Dependencies
 The following packages are hard dependencies
-- [PostMesh](https://github.com/romeric/PostMesh):      High order curvilinear mesh generator
 - [Fastor](https://github.com/romeric/Fastor):          Data parallel (SIMD) FEM assembler
 - Cython
 - NumPy
 - SciPy
+
+The following packages are optional (but recommended) dependencies
+- [PostMesh](https://github.com/romeric/PostMesh):      High order curvilinear mesh generator
+- pyevtk
+- matplotlib
+- mayavi
+- pyamg
+
 
 # Installation
 Have a look at `travis.yml` file for directions on installing florence's core library. Installation of the core library (not external dependencies) is as easy as

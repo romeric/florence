@@ -324,8 +324,12 @@ class BoundaryCondition(object):
     def PostMeshWrapper(self, formulation, mesh, material, solver, fem_solver):
         """Calls PostMesh wrapper to get exact Dirichlet boundary conditions"""
 
-        # from .PostMeshPy import (PostMeshCurvePy as PostMeshCurve, PostMeshSurfacePy as PostMeshSurface)
-        from PostMeshPy import (PostMeshCurvePy as PostMeshCurve, PostMeshSurfacePy as PostMeshSurface)
+        try:
+            # from .PostMeshPy import (PostMeshCurvePy as PostMeshCurve, PostMeshSurfacePy as PostMeshSurface)
+            from PostMeshPy import (PostMeshCurvePy as PostMeshCurve, PostMeshSurfacePy as PostMeshSurface)
+        except ImportError:
+            raise ImportError("PostMesh is not installed. Please install it from 'https://github.com/romeric/PostMesh'")
+
         from Florence.FunctionSpace import Tri
 
         C = mesh.InferPolynomialDegree() - 1
