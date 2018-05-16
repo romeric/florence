@@ -72,9 +72,3 @@ def explicit_dynamics_mechanics():
 
 if __name__ == "__main__":
     explicit_dynamics_mechanics()
-
-
-
-
-
-
