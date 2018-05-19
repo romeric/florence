@@ -43,7 +43,7 @@ def write_vtu(Verts, Cells, pdata=None, pvdata=None, cdata=None, cvdata=None, fn
 
     Notes
     -----
-    - Poly data not supported 
+    - Poly data not supported
     - Non-Poly data is stored in Numpy array: Ncell x vtk_cell_info
     - Each I1 must be >=3
     - pdata = Ndof x Nfields
@@ -110,7 +110,7 @@ def write_vtu(Verts, Cells, pdata=None, pvdata=None, cdata=None, cvdata=None, fn
     See Also
     --------
     write_basic_mesh
-       
+
     """
     # number of indices per cell for each cell type
     # vtk_cell_info = [-1, 1, None, 2, None, 3, None, None, 4, 4, 4, 8, 8, 6, 5]
@@ -157,7 +157,7 @@ def write_vtu(Verts, Cells, pdata=None, pvdata=None, cdata=None, cvdata=None, fn
             n_pdata=pdata.shape[1]
         else:
             n_pdata = 1
-            pdata = pdata.reshape((pdata.size,1)) 
+            pdata = pdata.reshape((pdata.size,1))
         if pdata.shape[0] != Ndof:
             raise ValueError('pdata array should be of length %d (it is now %d)'%(Ndof,pdata.shape[0]))
 
@@ -194,7 +194,7 @@ def write_vtu(Verts, Cells, pdata=None, pvdata=None, cdata=None, cvdata=None, fn
     # check cvdata
     # must be NCells*3 x n_cdata for each key
     n_cvdata = 0
-    if cvdata !=None:
+    if cvdata is not None:
         for key in Cells:   # all valid now
             if numpy.ndim(cvdata[key])>1:
                 if n_cvdata==0:
@@ -206,9 +206,9 @@ def write_vtu(Verts, Cells, pdata=None, pvdata=None, cdata=None, cvdata=None, fn
                 cvdata[key] = cvdata[key].reshape((cvdata[key].size,1))
             if cvdata[key].shape[0]!=3*Cells[key].shape[0]:
                 raise ValueError('size mismatch with cvdata and Cells')
-            if cvdata[key] == None:
+            if cvdata[key] is None:
                 raise ValueError('cvdata array cannot be empty for key %d'%(key))
-            
+
     Ncells = 0
     idx_min = 1
 
@@ -227,7 +227,7 @@ def write_vtu(Verts, Cells, pdata=None, pvdata=None, cdata=None, cvdata=None, fn
             cell_ind    = numpy.hstack((cell_ind,Cells[key].ravel()))
             cell_offset = numpy.hstack((cell_offset,offset*numpy.ones((sz,),dtype='uint8')))
             cell_type   = numpy.hstack((cell_type,key*numpy.ones((sz,),dtype='uint8')))
-            
+
             if cdata != None:
                 if cdata_all==None:
                     cdata_all=cdata[key]
@@ -446,7 +446,7 @@ def write_basic_mesh(Verts, E2V=None, mesh_type='tri', \
 
     if mesh_type not in map_type_to_key:
         raise ValueError('unknown mesh_type=%s' % mesh_type)
-    
+
     key = map_type_to_key[mesh_type]
 
     if mesh_type=='vertex':
@@ -455,8 +455,8 @@ def write_basic_mesh(Verts, E2V=None, mesh_type='tri', \
         E2V = { key : E2V }
 
     if cdata != None:
-        cdata = {key: cdata} 
-    
+        cdata = {key: cdata}
+
     if cvdata != None:
         cvdata = {key: cvdata}
 

@@ -1265,7 +1265,52 @@ class Mesh(object):
         return aspect_ratio
 
 
-    def Median(self, geometric=True):
+    def FaceNormals(self):
+        """Computes outward unit normals on faces.
+            This is a generic method for all element types apart from lines. If the mesh is in 2D plane
+            then the unit outward normals will point in Z direction.
+            This is different from the method self.Normals() as the latter computes normals for 2D elements
+            in-plane
+        """
+
+        self.__do_memebers_exist__()
+
+        points = np.copy(self.points)
+        if points.shape[1] < 3:
+            dum = np.zeros((points.shape[0],3))
+            dum[:,:points.shape[1]] = points
+            points = dum
+
+        if self.element_type == "tet" or self.element_type == "hex":
+            faces = self.faces
+        elif self.element_type == "tri" or self.element_type == "quad":
+            faces = self.elements
+        else:
+            raise ValueError("Cannot compute face normals on {}".format(self.element_type))
+
+
+        face_coords = self.points[faces[:,:3],:]
+
+        p1p0 = face_coords[:,1,:] - face_coords[:,0,:]
+        p2p0 = face_coords[:,2,:] - face_coords[:,0,:]
+
+        normals = np.cross(p1p0,p2p0)
+        norm_normals = np.linalg.norm(normals,axis=1)
+        normals[:,0] /= norm_normals
+        normals[:,1] /= norm_normals
+        normals[:,2] /= norm_normals
+
+        return normals
+
+
+
+    def Normals(self):
+        """Computes unit outward normals of the boundary
+        """
+        pass
+
+
+    def Medians(self, geometric=True):
         """Computes median of the elements tri, tet, quad, hex based on the interpolation function
 
             input:
@@ -2325,14 +2370,14 @@ class Mesh(object):
     def ReadGmsh(self, filename, element_type, read_surface_info=False):
         """Read gmsh (.msh) file"""
 
-        if self.elements is not None and self.points is not None:
-            self.__reset__()
-
         try:
             fid = open(filename, "r")
         except IOError:
             print("File '%s' not found." % (filename))
             sys.exit()
+
+        if self.elements is not None and self.points is not None:
+            self.__reset__()
 
         self.filename = filename
 
@@ -2477,6 +2522,83 @@ class Mesh(object):
         return
 
 
+    def ReadOBJ(self, filename, element_type="tri"):
+
+        try:
+            fid = open(filename, "r")
+        except IOError:
+            print("File '%s' not found." % (filename))
+            sys.exit()
+
+        if self.elements is not None and self.points is not None:
+            self.__reset__()
+
+        self.filename = filename
+
+
+        bel = -1
+        if element_type == "line":
+            el = 2
+        elif element_type == "tri":
+            el = 3
+            bel = 2
+        elif element_type == "quad":
+            el = 4
+            bel = 2
+        elif element_type == "tet":
+            el = 4
+            bel = 3
+        elif element_type == "hex":
+            el = 8
+            bel = 4
+        else:
+            raise ValueError("Element type not understood")
+
+
+        # Read
+        points, elements, faces = [],[], []
+        vertex_normal, vertex_texture = [], []
+        for line_counter, line in enumerate(open(filename)):
+            item = line.rstrip()
+            plist = item.split()
+
+            if plist[0] == 'v':
+                points.append([float(i) for i in plist[1:4]])
+            if plist[0] == 'f':
+                for i in range(1,el+1):
+                    if "/" in plist[i]:
+                        plist[i] = plist[i].split("//")[0]
+                elements.append([int(i) for i in plist[1:el+1]])
+            if plist[0] == 'vn':
+                vertex_normal.append([float(i) for i in plist[1:4]])
+
+
+        self.points = np.array(points,copy=True)
+        self.elements = np.array(elements,copy=True) - 1
+        if not vertex_normal:
+            self.vertex_normal = np.array(vertex_normal,copy=True)
+
+        # CORRECT
+        self.nelem = self.elements.shape[0]
+        self.nnode = self.points.shape[0]
+        if self.nelem == 0:
+            raise ValueError("obj file does not contain {} elements".format(element_type))
+
+        if self.points.shape[1] == 3:
+            if np.allclose(self.points[:,2],0.):
+                self.points = np.ascontiguousarray(self.points[:,:2])
+
+        self.element_type = element_type
+        ndim = self.InferSpatialDimension()
+        if self.element_type == "tri" or self.element_type == "quad":
+            self.GetEdges()
+            self.GetBoundaryEdges()
+        elif self.element_type == "tet" or self.element_type == "hex":
+            self.GetFaces()
+            self.GetBoundaryFaces()
+            self.GetBoundaryEdges()
+
+
     def ReadFRO(self, filename, element_type):
         """Read fro mesh"""
 
@@ -2584,7 +2706,10 @@ class Mesh(object):
         if self.element_type == "tri" or self.element_type == "quad":
             if self.points.ndim == 2 and self.points.shape[1] == 3:
                 mesh = self.CreateDummy3DMeshfrom2DMesh()
-                mesh.SimplePlot()
+                mesh.SimplePlot(to_plot=to_plot, color=color, plot_points=plot_points,
+                    plot_edges=plot_edges, point_radius=point_radius,
+                    save=save, filename=filename, figure=figure, show_plot=show_plot,
+                    show_axis=show_axis, grid=grid)
                 return
 
         if color is None:
@@ -3026,9 +3151,11 @@ class Mesh(object):
                 if fmt is "xml":
                     if result.ndim > 1:
                         if result.shape[0] == self.nelem:
-                            write_vtu(Verts=self.points, Cells={cellflag:elements},cvdata=result,fname=filename)
+                            write_vtu(Verts=self.points, Cells={cellflag:elements},
+                                cvdata={cellflag:result.ravel()},fname=filename)
                         elif result.shape[0] == self.points.shape[0]:
-                            write_vtu(Verts=self.points, Cells={cellflag:elements},pvdata=result,fname=filename)
+                            write_vtu(Verts=self.points, Cells={cellflag:elements},
+                                pvdata=result,fname=filename)
                     else:
                         if result.shape[0] == self.nelem:
                             write_vtu(Verts=self.points, Cells={cellflag:elements},cdata=result,fname=filename)
