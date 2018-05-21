@@ -968,12 +968,16 @@ class Mesh(object):
         if self.element_type == 'line':
             nmesh = HighOrderMeshLine(C,self,**kwargs)
         if self.element_type == 'tri':
+            if self.edges is None:
+                self.GetBoundaryEdgesTri()
             # nmesh = HighOrderMeshTri(C,self,**kwargs)
             nmesh = HighOrderMeshTri_SEMISTABLE(C,self,**kwargs)
         elif self.element_type == 'tet':
             # nmesh = HighOrderMeshTet(C,self,**kwargs)
             nmesh = HighOrderMeshTet_SEMISTABLE(C,self,**kwargs)
         elif self.element_type == 'quad':
+            if self.edges is None:
+                self.GetBoundaryEdgesTri()
             nmesh = HighOrderMeshQuad(C,self,**kwargs)
         elif self.element_type == 'hex':
             nmesh = HighOrderMeshHex(C,self,**kwargs)
@@ -3104,6 +3108,8 @@ class Mesh(object):
             filename = PWD(__file__) + "/output.vtu"
         if ".vtu" in filename and fmt is "binary":
             filename  = filename.split('.')[0]
+        if ".vtu" not in filename and fmt is "xml":
+            filename  = filename + ".vtu"
 
 
         if self.InferPolynomialDegree() > 1:
