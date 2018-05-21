@@ -29,24 +29,51 @@ class FEMSolver(object):
         and nonlinear systems arising from variational formulations
     """
 
-    def __init__(self, has_low_level_dispatcher=False,
-        analysis_type="static", analysis_nature="nonlinear", analysis_subtype="implicit",
-        is_geometrically_linearised=False, requires_geometry_update=True,
-        requires_line_search=False, requires_arc_length=False, has_moving_boundary=False,
-        has_prestress=True, number_of_load_increments=1, load_factor=None,
-        newton_raphson_tolerance=1.0e-6, newton_raphson_solution_tolerance=None,
-        maximum_iteration_for_newton_raphson=50, iterative_technique="newton_raphson",
-        add_self_weight=False, mass_type=None,
+    def __init__(self,
+        has_low_level_dispatcher=False,
+        optimise=False,
+        analysis_type="static",
+        analysis_nature="nonlinear",
+        analysis_subtype="implicit",
+        is_geometrically_linearised=False,
+        requires_geometry_update=True,
+        requires_line_search=False,
+        requires_arc_length=False,
+        has_moving_boundary=False,
+        has_prestress=True,
+        number_of_load_increments=1,
+        load_factor=None,
+        newton_raphson_tolerance=1.0e-6,
+        newton_raphson_solution_tolerance=None,
+        maximum_iteration_for_newton_raphson=50,
+        iterative_technique="newton_raphson",
+        add_self_weight=False,
+        mass_type=None,
         compute_mesh_qualities=True,
-        parallelise=False, memory_model="shared", platform="cpu", backend="opencl",
-        print_incremental_log=False, save_incremental_solution=False, incremental_solution_filename=None,
+        parallelise=False,
+        memory_model="shared",
+        platform="cpu",
+        backend="opencl",
+        print_incremental_log=False,
+        save_incremental_solution=False,
+        incremental_solution_filename=None,
         break_at_increment=-1,
-        include_physical_damping=False, damping_factor=0.1,
-        compute_energy=False, compute_energy_dissipation=False, compute_linear_momentum_dissipation=False, total_time=1.,
-        user_defined_break_func=None, user_defined_stop_func=None,
-        save_results=True, save_frequency=1,
+        break_at_stagnation=True,
+        include_physical_damping=False,
+        damping_factor=0.1,
+        compute_energy=False,
+        compute_energy_dissipation=False,
+        compute_linear_momentum_dissipation=False,
+        total_time=1.,
+        user_defined_break_func=None,
+        user_defined_stop_func=None,
+        save_results=True,
+        save_frequency=1,
         has_contact=False):
 
+        # ASSUME TRUE IF AT LEAST ONE IS TRUE
+        if has_low_level_dispatcher != optimise:
+            has_low_level_dispatcher = True
         self.has_low_level_dispatcher = has_low_level_dispatcher
 
         self.analysis_nature = analysis_nature
@@ -97,6 +124,7 @@ class FEMSolver(object):
         self.save_incremental_solution = save_incremental_solution
         self.incremental_solution_filename = incremental_solution_filename
         self.break_at_increment = break_at_increment
+        self.break_at_stagnation = break_at_stagnation
         self.user_defined_break_func = user_defined_break_func
         self.user_defined_stop_func = user_defined_stop_func
 
@@ -670,6 +698,7 @@ class FEMSolver(object):
         Tolerance = self.newton_raphson_tolerance
         LoadIncrement = self.number_of_load_increments
         Iter = 0
+        self.iterative_norm_history = []
 
 
         # APPLY INCREMENTAL DIRICHLET PER LOAD STEP (THIS IS INCREMENTAL NOT ACCUMULATIVE)
@@ -741,6 +770,13 @@ class FEMSolver(object):
             if np.isnan(self.norm_residual) or self.norm_residual>1e06:
                 self.newton_raphson_failed_to_converge = True
                 break
+
+            # IF BREAK WHEN NEWTON RAPHSON STAGNATES IS ACTIVATED
+            if self.break_at_stagnation:
+                self.iterative_norm_history.append(self.rel_norm_residual)
+                if Iter >= 5:
+                    if np.mean(self.iterative_norm_history) < 1.:
+                        break
 
             # USER DEFINED CRITERIA TO BREAK OUT OF NEWTON-RAPHSON
             if self.user_defined_break_func != None:
