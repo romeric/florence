@@ -29,7 +29,7 @@ def high_order_curved_mesh_generation(p=2):
 
     solver = LinearSolver(linear_solver="multigrid", linear_solver_type="amg", iterative_solver_tolerance=5.0e-07)
     formulation = DisplacementFormulation(mesh)
-    fem_solver = FEMSolver(number_of_load_increments=2, analysis_nature="linear", has_low_level_dispatcher=False)
+    fem_solver = FEMSolver(number_of_load_increments=2, analysis_nature="linear", optimise=True)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh,
             material=material, boundary_condition=boundary_condition)

@@ -56,7 +56,7 @@ def crash_analysis():
         analysis_subtype="explicit",
         mass_type="lumped",
         analysis_nature="nonlinear",
-        has_low_level_dispatcher=True,
+        optimise=True,
         save_frequency=50)
 
     solution = fem_solver.Solve(formulation=formulation, material=material, mesh=mesh,

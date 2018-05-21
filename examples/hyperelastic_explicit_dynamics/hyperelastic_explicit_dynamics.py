@@ -53,7 +53,7 @@ def explicit_dynamics_mechanics():
                             analysis_type="dynamic",
                             analysis_subtype="explicit",
                             mass_type="lumped",
-                            has_low_level_dispatcher=True,
+                            optimise=True,
                             print_incremental_log=True,
                             save_frequency=10)
 
@@ -64,8 +64,8 @@ def explicit_dynamics_mechanics():
     # solution.WriteVTK("explicit_dynamics_mechanics",quantity=2)
     # Write to HDF5/MATLAB(.mat)
     # solution.WriteHDF5("explicit_dynamics_mechanics",compute_recovered_fields=False)
-    # In-built plotter
-    solution.Plot(quantity=2,configuration='deformed')
+    # In-built plotter - requires mayavi
+    # solution.Plot(quantity=2,configuration='deformed')
 
 
 

@@ -54,14 +54,14 @@ def dielectric_wrinkling():
         analysis_type="static",
         newton_raphson_tolerance=1e-5,
         maximum_iteration_for_newton_raphson=200,
-        has_low_level_dispatcher=True,
+        optimise=True,
         print_incremental_log=True)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh,
             material=material, boundary_condition=boundary_condition)
 
-    # Plot the deformation process
-    solution.Plot(quantity=0, configuration='deformed')
+    # Plot the deformation process - requires mayavi
+    # solution.Plot(quantity=0, configuration='deformed')
 
 
 
