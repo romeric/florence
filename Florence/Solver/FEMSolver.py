@@ -773,7 +773,7 @@ class FEMSolver(object):
 
             # IF BREAK WHEN NEWTON RAPHSON STAGNATES IS ACTIVATED
             if self.break_at_stagnation:
-                self.iterative_norm_history.append(self.rel_norm_residual)
+                self.iterative_norm_history.append(self.norm_residual)
                 if Iter >= 5:
                     if np.mean(self.iterative_norm_history) < 1.:
                         break
