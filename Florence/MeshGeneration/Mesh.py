@@ -2505,7 +2505,9 @@ class Mesh(object):
         if read_surface_info:
             self.faces = np.array(faces,copy=True) - 1
             self.face_to_surface = np.array(face_to_surface, dtype=np.int64, copy=True).flatten()
-            self.face_to_surface -= 1 # NEEDS TO BE A SEPARATE LINE AS FLATTEN IS A VIEW
+            self.face_to_surface -= 1
+            if not self.face_to_surface:
+                self.face_to_surface = None
 
         # print(self.ndim, self.nnode, self.nelem, rem_nnode, rem_nelem, rem_faces)
         if self.points.shape[1] == 3:
@@ -2521,7 +2523,6 @@ class Mesh(object):
             self.GetFaces()
             self.GetBoundaryFaces()
             self.GetBoundaryEdges()
-
 
         return
 
