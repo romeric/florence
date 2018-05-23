@@ -275,7 +275,6 @@ class FlorenceSetup(object):
         _pwd_ = os.path.join(self._pwd_,"Florence")
 
         tensor_path = os.path.join(_pwd_,"Tensor")
-        mesh_path = os.path.join(_pwd_,"MeshGeneration")
         jacobi_path = os.path.join(_pwd_,"FunctionSpace","JacobiPolynomials")
         bp_path = os.path.join(_pwd_,"FunctionSpace","OneDimensional","_OneD")
         km_path = os.path.join(_pwd_,"FiniteElements","LocalAssembly","_KinematicMeasures_")
@@ -286,7 +285,7 @@ class FlorenceSetup(object):
         material_path = os.path.join(_pwd_,"MaterialLibrary","LLDispatch")
         assemble_path = os.path.join(_pwd_,"FiniteElements","Assembly","_Assembly_")
 
-        self.extension_paths = [tensor_path,mesh_path,jacobi_path,bp_path,
+        self.extension_paths = [tensor_path,jacobi_path,bp_path,
             km_path,gm_path,cm_path,tm_path,mm_path,material_path,assemble_path]
         # self.extension_paths = [cm_path]
         # self.extension_paths = [assemble_path]

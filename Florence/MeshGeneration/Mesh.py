@@ -13,7 +13,6 @@ try:
     has_meshpy = True
 except ImportError:
     has_meshpy = False
-from .SalomeMeshReader import ReadMesh
 from .HigherOrderMeshing import *
 from .NodeArrangement import *
 from .GeometricPath import *
@@ -2202,20 +2201,51 @@ class Mesh(object):
 
 
 
-    def Reader(self, filename=None, element_type="tri", reader_type="Salome", reader_type_format=None,
-        reader_type_version=None, order=0, **kwargs):
+    def Read(self, filename=None, element_type="tri", reader_type=None, reader_type_format=None,
+        reader_type_version=None, order=0, read_surface_info=False, **kwargs):
         """Convenience mesh reader method to dispatch call to subsequent apporpriate methods"""
+
+        if not isinstance(filename,str):
+            raise ValueError("filename must be a string")
+            return
+        if reader_type is not None:
+            if not isinstance(filename,str):
+                raise ValueError("filename must be a string")
+                return
+
+        if reader_type is None:
+            if filename.split('.')[-1] == "msh":
+                reader_type == "gmsh"
+            elif filename.split('.')[-1] == "obj":
+                reader_type == "obj"
+            elif filename.split('.')[-1] == "fro":
+                reader_type == "fro"
+            elif filename.split('.')[-1] == "dat":
+                for key in kwargs.keys():
+                    inkey = insensitive(key)
+                    if "connectivity" in inkey and "delimiter" not in inkey:
+                        reader_type == "read_separate"
+                        break
+            if reader_type is None:
+                raise ValueError("Mesh file format was not undertood. Please specify it using reader_type keyword")
+
 
         self.filename = filename
         self.reader_type = reader_type
         self.reader_type_format = reader_type_format
         self.reader_type_version = reader_type_version
 
-        if self.reader_type is 'Salome':
-            self.Read(filename,element_type,order)
+        if self.reader_type is 'salome':
+            self.ReadSalome(filename, element_type=element_type, read_surface_info=read_surface_info)
         elif reader_type is 'GID':
-            self.ReadGIDMesh(filename,element_type,order)
-        elif self.reader_type is 'ReadSeparate':
+            self.ReadGIDMesh(filename, element_type, order)
+        elif self.reader_type is 'gmsh':
+            self.ReadGmsh(filename, element_type=element_type, read_surface_info=read_surface_info)
+        elif self.reader_type is 'obj':
+            self.ReadOBJ(filename, element_type=element_type, read_surface_info=read_surface_info)
+        elif self.reader_type is 'fro':
+            self.ReadFRO(filename, element_type)
+        elif self.reader_type is 'read_separate':
             # READ MESH FROM SEPARATE FILES FOR CONNECTIVITY AND COORDINATES
             from Florence.Utils import insensitive
             # return insensitive(kwargs.keys())
@@ -2238,36 +2268,70 @@ class Mesh(object):
         return
 
 
+    def ReadSalome(self, filename, element_type="tri", read_surface_info=False):
+        """Salome .dat format mesh reader"""
+
+        if element_type == "line":
+            el = "102"
+            bel = ""
+        elif element_type == "tri":
+            el = "203"
+            bel = "102"
+        elif element_type == "quad":
+            el = "204"
+            bel = "102"
+        elif element_type == "tet":
+            el = "304"
+            bel = "203"
+        elif element_type == "hex":
+            el = "308"
+            bel = "204"
+
+        if read_surface_info is True and element_type == "line":
+            warn("No surface info for lines. I am going to ignore this")
+            read_surface_info = False
 
 
+        with open(filename,'r') as f:
+            lines = f.readlines()
 
-    def Read(self,*args,**kwargs):
-        """Default mesh reader for binary and text files used for reading Salome meshes mainly.
-        The method checks if edges/faces are provided by the mesh generator and if not computes them"""
+        info = lines[0].rstrip().split()
 
-        mesh = ReadMesh(*args,**kwargs)
+        self.nnode = int(info[0])
+        all_nelem  = int(info[1])
 
-        self.points = mesh.points
-        self.elements = mesh.elements.astype(np.int64)
-        if isinstance(mesh.edges,np.ndarray):
-            self.edges = mesh.edges.astype(np.int64)
-        if isinstance(mesh.faces,np.ndarray):
-            self.faces = mesh.faces.astype(np.int64)
-        self.nelem = np.int64(mesh.nelem)
-        self.element_type = mesh.info
+        nodes = lines[1:self.nnode+1]
 
-        # RETRIEVE FACE/EDGE ATTRIBUTE
-        if self.element_type == 'tri' and self.edges is None:
-            # COMPUTE EDGES
-            self.GetBoundaryEdgesTri()
+        points = []
+        for line in nodes:
+            points.append([float(i) for i in line.rstrip().split()[1:4]])
+        self.points = np.array(points,copy=True)
+        self.nnode = self.points.shape[0]
 
-        # DO NOT RELY ON SALOME FACE GENERATER
-        if self.element_type == 'tet':
-            self.edges = None
-            self.faces = None
-            # COMPUTE FACES & EDGES
-            self.GetBoundaryFacesTet()
-            self.GetBoundaryEdgesTet()
+        edges, faces, elements = [], [], []
+        for counter in range(self.nnode+1,len(lines)):
+            line = lines[counter].rstrip().split()
+            if read_surface_info:
+                if bel == line[1]:
+                    faces.append([int(i) for i in line[2:]])
+            if el == line[1]:
+                elements.append([int(i) for i in line[2:]])
+
+        self.element_type = element_type
+        self.elements = np.array(elements,dtype=np.int64,copy=True) - 1
+        self.nelem = self.elements.shape[0]
+        if self.nelem == 0:
+            raise ValueError("file does not contain {} elements".format(element_type))
+
+        ndim = self.InferSpatialDimension()
+        if self.element_type == "tri" or self.element_type == "quad":
+            self.GetEdges()
+            self.GetBoundaryEdges()
+        elif self.element_type == "tet" or self.element_type == "hex":
+            self.GetFaces()
+            self.GetBoundaryFaces()
+            self.GetBoundaryEdges()
+
 
 
     def ReadSeparate(self,connectivity_file,coordinates_file,mesh_type, edges_file = None, faces_file = None,
