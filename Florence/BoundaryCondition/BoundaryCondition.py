@@ -11,10 +11,17 @@ from Florence.QuadratureRules import GaussLobattoPointsQuad
 class BoundaryCondition(object):
     """Base class for applying all types of boundary conditions"""
 
-    def __init__(self, surface_identification_algorithm='minimisation',
-        modify_linear_mesh_on_projection=False, project_on_curves=True,
-        has_planar_surfaces=True, solve_for_planar_faces=True,
-        save_dirichlet_data=False, save_nurbs_data=False, filename=None,
+    def __init__(self,
+        surface_identification_algorithm='minimisation',
+        modify_linear_mesh_on_projection=False,
+        project_on_curves=True,
+        activate_bounding_box=False,
+        bounding_box_padding=1e-3,
+        has_planar_surfaces=True,
+        solve_for_planar_faces=True,
+        save_dirichlet_data=False,
+        save_nurbs_data=False,
+        filename=None,
         read_dirichlet_from_file=False):
 
         # TYPE OF BOUNDARY: straight or nurbs
@@ -42,6 +49,9 @@ class BoundaryCondition(object):
         self.surface_identification_algorithm = surface_identification_algorithm
         # MODIFY LINEAR MESH ON PROJECTION
         self.modify_linear_mesh_on_projection = modify_linear_mesh_on_projection
+        # COMPUTE A BOUNDING BOX FOR EACH CAD SURFACE
+        self.activate_bounding_box = activate_bounding_box
+        self.bounding_box_padding = float(bounding_box_padding)
 
         # FOR IGAKit WRAPPER
         self.nurbs_info = None
@@ -95,7 +105,7 @@ class BoundaryCondition(object):
         nodal_spacing='equal', project_on_curves=True, has_planar_surfaces=True, solve_for_planar_faces=True,
         scale=1.0,condition=1.0e20, projection_flags=None, fix_dof_elsewhere=True,
         orthogonal_fallback_tolerance=1.0, surface_identification_algorithm='minimisation',
-        modify_linear_mesh_on_projection=False):
+        modify_linear_mesh_on_projection=False, activate_bounding_box=False, bounding_box_padding=1e-3):
         """Set parameters for CAD projection in order to obtain dirichlet boundary
             conditinos
         """
@@ -116,6 +126,8 @@ class BoundaryCondition(object):
         self.surface_identification_algorithm = surface_identification_algorithm
         self.modify_linear_mesh_on_projection = modify_linear_mesh_on_projection
         self.nodal_spacing_for_cad = nodal_spacing
+        self.activate_bounding_box = activate_bounding_box
+        self.bounding_box_padding = float(bounding_box_padding)
 
         self.project_on_curves = int(self.project_on_curves)
         self.modify_linear_mesh_on_projection = int(self.modify_linear_mesh_on_projection)
@@ -429,8 +441,7 @@ class BoundaryCondition(object):
             curvilinear_mesh.GetGeomEdges()
             curvilinear_mesh.GetGeomFaces()
             print("CAD geometry has", curvilinear_mesh.NbPoints, "points,", \
-            curvilinear_mesh.NbCurves, "curves and", curvilinear_mesh.NbSurfaces, \
-            "surfaces")
+            curvilinear_mesh.NbCurves, "curves and", curvilinear_mesh.NbSurfaces, "surfaces")
             curvilinear_mesh.GetGeomPointsOnCorrespondingFaces()
 
             # FIRST IDENTIFY WHICH SURFACES CONTAIN WHICH FACES
@@ -444,12 +455,14 @@ class BoundaryCondition(object):
                         "Point projection is going to stop")
             else:
                 if self.surface_identification_algorithm == 'minimisation':
-                    curvilinear_mesh.IdentifySurfacesContainingFaces()
+                    curvilinear_mesh.IdentifySurfacesContainingFaces(int(self.activate_bounding_box),
+                        self.bounding_box_padding)
                 elif self.surface_identification_algorithm == 'pure_projection':
-                    curvilinear_mesh.IdentifySurfacesContainingFacesByPureProjection()
+                    curvilinear_mesh.IdentifySurfacesContainingFacesByPureProjection(int(self.activate_bounding_box),
+                        self.bounding_box_padding)
                 else:
                     # warn("surface identification algorithm not understood. minimisation algorithm is going to be used")
-                    curvilinear_mesh.IdentifySurfacesContainingFaces()
+                    curvilinear_mesh.IdentifySurfacesContainingFaces(int(self.activate_bounding_box))
 
             if self.project_on_curves:
                 t_proj = time()

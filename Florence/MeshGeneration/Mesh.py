@@ -2506,8 +2506,13 @@ class Mesh(object):
             self.faces = np.array(faces,copy=True) - 1
             self.face_to_surface = np.array(face_to_surface, dtype=np.int64, copy=True).flatten()
             self.face_to_surface -= 1
-            if not self.face_to_surface:
-                self.face_to_surface = None
+            # CHECK IF FILLED
+            if isinstance(self.face_to_surface,list):
+                if not self.face_to_surface:
+                    self.face_to_surface = None
+            elif isinstance(self.face_to_surface,np.ndarray):
+                if self.face_to_surface.shape[0]==0:
+                    self.face_to_surface = None
 
         # print(self.ndim, self.nnode, self.nelem, rem_nnode, rem_nelem, rem_faces)
         if self.points.shape[1] == 3:
