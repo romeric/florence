@@ -2,16 +2,14 @@ import numpy as np
 from numpy import einsum
 from .MaterialBase import Material
 from Florence.Tensor import trace, Voigt
-#####################################################################################################
-                                # Isotropic Electromechanical Model 2
-                                # W(C,E) = W_n(C) + c1*I: (E 0 E) + c2*C: (E 0 E)  
-                                # W_n(C) = mu/2*C:I - mu*lnJ + lamb/2*(J-1)**2
-                                # 0 - stands for outer product
-#####################################################################################################
 
 
 class IsotropicElectroMechanics_2(Material):
-    """docstring for IsotropicElectroMechanics"""
+    """Isotropic Electromechanical Model 2
+                W(C,E) = W_n(C) + c1*I: (E 0 E) + c2*C: (E 0 E)  
+                W_n(C) = mu/2*C:I - mu*lnJ + lamb/2*(J-1)**2
+                0 - stands for outer product
+    """
 
     def __init__(self, ndim, **kwargs):
         mtype = type(self).__name__
@@ -19,6 +17,16 @@ class IsotropicElectroMechanics_2(Material):
         # REQUIRES SEPARATELY
         self.nvar = self.ndim+1
         self.energy_type = "enthalpy"
+        self.nature = "nonlinear"
+        self.fields = "electro_mechanics"
+
+        if self.ndim == 2:
+            self.H_VoigtSize = 5
+        elif self.ndim == 3:
+            self.H_VoigtSize = 9
+
+        # LOW LEVEL DISPATCHER
+        self.has_low_level_dispatcher = False
 
         # INITIALISE STRAIN TENSORS
         from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import KinematicMeasures

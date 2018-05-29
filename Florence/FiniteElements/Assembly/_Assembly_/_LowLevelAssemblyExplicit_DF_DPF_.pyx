@@ -88,13 +88,13 @@ def _LowLevelAssemblyExplicit_DF_DPF_(fem_solver, function_space, formulation, m
     cdef Real mu=0.,mu1=0.,mu2=0.,mu3=0.,mue=0.,lamb=0.,eps_1=0.,eps_2=0., eps_3=0., eps_e=0.
 
     cdef int material_number
-    if material.mtype == "NeoHookean_2":
+    if material.mtype == "NeoHookean":
         mu, lamb = material.mu, material.lamb
         material_number = 0
-    elif material.mtype == "MooneyRivlin_0":
+    elif material.mtype == "MooneyRivlin":
         mu1, mu2, lamb = material.mu1, material.mu2, material.lamb
         material_number = 1
-    elif material.mtype == "ExplicitMooneyRivlin_0":
+    elif material.mtype == "ExplicitMooneyRivlin":
         mu1, mu2, lamb = material.mu1, material.mu2, material.lamb
         material_number = 2
     elif material.mtype == "IsotropicElectroMechanics_101":

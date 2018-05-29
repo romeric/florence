@@ -17,6 +17,8 @@ class IsotropicLinearFlexoelectricModel(Material):
         super(IsotropicLinearFlexoelectricModel, self).__init__(mtype, ndim, **kwargs)
         # REQUIRES SEPARATELY
         self.energy_type = "enthalpy"
+        self.nature = "linear"
+        self.fields = "flexoelectric"
 
         # FOR STATICALLY CONDENSED FORMULATION
         if self.ndim==3:

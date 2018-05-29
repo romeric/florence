@@ -19,6 +19,10 @@ class AnisotropicMooneyRivlin_1(Material):
         super(AnisotropicMooneyRivlin_1, self).__init__(mtype, ndim, **kwargs)
         self.nvar = self.ndim
         self.is_transversely_isotropic = True
+        self.energy_type = "internal_energy"
+        self.nature = "nonlinear"
+        self.fields = "mechanics"
+        
         if self.ndim==3:
             self.H_VoigtSize = 6
         else:

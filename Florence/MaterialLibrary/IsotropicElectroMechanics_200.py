@@ -15,6 +15,16 @@ class IsotropicElectroMechanics_200(Material):
         # REQUIRES SEPARATELY
         self.nvar = self.ndim+1
         self.energy_type = "enthalpy"
+        self.nature = "nonlinear"
+        self.fields = "electro_mechanics"
+
+        if self.ndim == 2:
+            self.H_VoigtSize = 5
+        elif self.ndim == 3:
+            self.H_VoigtSize = 9
+
+        # LOW LEVEL DISPATCHER
+        self.has_low_level_dispatcher = False
 
         # INITIALISE STRAIN TENSORS
         from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import KinematicMeasures

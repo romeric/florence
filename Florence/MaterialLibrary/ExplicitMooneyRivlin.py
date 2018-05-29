@@ -5,7 +5,7 @@ from .MaterialBase import Material
 from Florence.LegendreTransform import LegendreTransform
 
 
-class MooneyRivlin_0(Material):
+class ExplicitMooneyRivlin(Material):
     """The fundamental MooneyRivlin model from Gil and Ortigosa et. al.
 
         W_mn(C) = u1*C:I+u2*G:I - 2*(u1+2*u2)*lnJ + lamb/2*(J-1)**2
@@ -14,9 +14,11 @@ class MooneyRivlin_0(Material):
 
     def __init__(self, ndim, **kwargs):
         mtype = type(self).__name__
-        super(MooneyRivlin_0, self).__init__(mtype, ndim, **kwargs)
-        # REQUIRES SEPARATELY
+        super(ExplicitMooneyRivlin, self).__init__(mtype, ndim, **kwargs)
+        self.is_transversely_isotropic = False
         self.energy_type = "internal_energy"
+        self.nature = "nonlinear"
+        self.fields = "mechanics"
 
         if self.ndim==3:
             self.H_VoigtSize = 6
@@ -28,8 +30,8 @@ class MooneyRivlin_0(Material):
         # self.has_low_level_dispatcher = False
 
     def KineticMeasures(self,F,ElectricFieldx=0, elem=0):
-        from Florence.MaterialLibrary.LLDispatch._MooneyRivlin_0_ import KineticMeasures
-        return KineticMeasures(self,F)
+        from Florence.MaterialLibrary.LLDispatch._ExplicitMooneyRivlin_ import KineticMeasures
+        return KineticMeasures(self,F), None
 
 
     def Hessian(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):

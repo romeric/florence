@@ -10,11 +10,11 @@ cimport numpy as np
 ctypedef double Real
 
 
-cdef extern from "_MooneyRivlin_0_.h" nogil:
-    cdef cppclass _MooneyRivlin_0_[Real]:
-        _MooneyRivlin_0_() except +
-        _MooneyRivlin_0_(Real mu1, Real mu2, Real lamb) except +
-        void SetParameters(Real mu1, Real mu2, Real lamb) except +
+cdef extern from "_NeoHookean_.h" nogil:
+    cdef cppclass _NeoHookean_[Real]:
+        _NeoHookean_() except +
+        _NeoHookean_(Real mu, Real lamb) except +
+        void SetParameters(Real mu, Real lamb) except +
         void KineticMeasures(Real *Snp, Real* Hnp, int ndim, int ngauss, const Real *Fnp) except +
 
 
@@ -31,8 +31,8 @@ def KineticMeasures(material, np.ndarray[Real, ndim=3, mode='c'] F):
     elif ndim==2:
         hessian = np.zeros((ngauss,3,3),dtype=np.float64)
 
-    cdef _MooneyRivlin_0_[Real] mat_obj = _MooneyRivlin_0_()
-    mat_obj.SetParameters(material.mu1,material.mu2,material.lamb)
+    cdef _NeoHookean_[Real] mat_obj = _NeoHookean_()
+    mat_obj.SetParameters(material.mu,material.lamb)
     mat_obj.KineticMeasures(&stress[0,0,0], &hessian[0,0,0], ndim, ngauss, &F[0,0,0])
 
     return stress, hessian

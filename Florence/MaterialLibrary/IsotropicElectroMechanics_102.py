@@ -18,11 +18,16 @@ class IsotropicElectroMechanics_102(Material):
         self.nvar = self.ndim+1
         self.energy_type = "internal_energy"
         self.legendre_transform = LegendreTransform()
+        self.nature = "nonlinear"
+        self.fields = "electro_mechanics"  
 
         if self.ndim == 2:
             self.H_VoigtSize = 5
         elif self.ndim == 3:
             self.H_VoigtSize = 9
+
+        # LOW LEVEL DISPATCHER
+        self.has_low_level_dispatcher = False
 
     def Hessian(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
 

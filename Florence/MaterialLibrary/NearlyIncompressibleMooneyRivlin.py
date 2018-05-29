@@ -29,10 +29,13 @@ class NearlyIncompressibleMooneyRivlin(Material):
         self.gamma=1.
         self.alpha = self.gamma*self.mu/2.
         self.beta = (self.mu - 2.*self.alpha)/3./sqrt(3.)
-        # kappa = lamb+2.0*mu/3.0 # or
+        # self.kappa = self.lamb+2.0*self.mu/3.0 # or
         self.kappa = self.lamb+4.0/3.0*self.alpha+2.0*sqrt(3.0)*self.beta
 
+        self.is_transversely_isotropic = False
         self.energy_type = "internal_energy"
+        self.nature = "nonlinear"
+        self.fields = "mechanics"  
 
         if self.ndim==3:
             self.H_VoigtSize = 6

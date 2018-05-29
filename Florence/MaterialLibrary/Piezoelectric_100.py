@@ -23,6 +23,8 @@ class Piezoelectric_100(Material):
         self.nvar = self.ndim+1
         self.energy_type = "internal_energy"
         self.legendre_transform = LegendreTransform()
+        self.nature = "nonlinear"
+        self.fields = "electro_mechanics"
         
         self.is_transversely_isotropic = True
         if self.ndim==3:

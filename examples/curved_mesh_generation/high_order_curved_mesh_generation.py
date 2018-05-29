@@ -13,11 +13,11 @@ def high_order_curved_mesh_generation(p=2):
     cad_file = ProblemPath + '/Hollow_Cylinder.igs'
 
     mesh = Mesh()
-    mesh.Reader(filename=mesh_file, element_type="tet")
+    mesh.Read(filename=mesh_file, reader_type="salome", element_type="tet")
     mesh.GetHighOrderMesh(p=p, Decimals=7)
     ndim = mesh.InferSpatialDimension()
 
-    material = NeoHookean_2(ndim, youngs_modulus=1e5, poissons_ratio=0.48)
+    material = NeoHookean(ndim, youngs_modulus=1e5, poissons_ratio=0.48)
 
     scale = 1000.
     condition = 1.e020
@@ -29,7 +29,7 @@ def high_order_curved_mesh_generation(p=2):
 
     solver = LinearSolver(linear_solver="multigrid", linear_solver_type="amg", iterative_solver_tolerance=5.0e-07)
     formulation = DisplacementFormulation(mesh)
-    fem_solver = FEMSolver(number_of_load_increments=2, analysis_nature="linear", optimise=True)
+    fem_solver = FEMSolver(number_of_load_increments=2, analysis_nature="linear", optimise=False)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh,
             material=material, boundary_condition=boundary_condition)
@@ -37,8 +37,8 @@ def high_order_curved_mesh_generation(p=2):
     # In-built fancy curvilinear mesh plotter
     # solution.CurvilinearPlot(plot_points=True, point_radius=0.2, color="#E3A933")
     # Write the results to VTK
-    mesh.points += solution.sol[:,:,-1]
-    mesh.WriteVTK("cylinder_mesh")
+    # mesh.points += solution.sol[:,:,-1]
+    # mesh.WriteVTK("cylinder_mesh")
 
 
 

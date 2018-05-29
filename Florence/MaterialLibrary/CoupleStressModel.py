@@ -17,6 +17,8 @@ class CoupleStressModel(Material):
         super(CoupleStressModel, self).__init__(mtype, ndim, **kwargs)
         # REQUIRES SEPARATELY
         self.energy_type = "internal_energy"
+        self.nature = "linear"
+        self.fields = "couple_stress"
 
         # FOR STATICALLY CONDENSED FORMULATION
         if self.ndim==3:

@@ -7,9 +7,9 @@
 #include "_TractionDF_.h"
 #include "_TractionDPF_.h"
 
-#include "_NeoHookean_2_.h"
-#include "_MooneyRivlin_0_.h"
-#include "_ExplicitMooneyRivlin_0_.h"
+#include "_NeoHookean_.h"
+#include "_MooneyRivlin_.h"
+#include "_ExplicitMooneyRivlin_.h"
 #include "_IsotropicElectroMechanics_101_.h"
 #include "_IsotropicElectroMechanics_108_.h"
 
@@ -161,9 +161,9 @@ void _GlobalAssemblyExplicit_DF_DPF_<2>(const Real *points,
     Real *traction                  = allocate<Real>(ndof);
 
 
-    auto mat_obj0 = _NeoHookean_2_<Real>(mu,lamb);
-    auto mat_obj1 = _MooneyRivlin_0_<Real>(mu1,mu2,lamb);
-    auto mat_obj2 = _ExplicitMooneyRivlin_0_<Real>(mu1,mu2,lamb);
+    auto mat_obj0 = _NeoHookean_<Real>(mu,lamb);
+    auto mat_obj1 = _MooneyRivlin_<Real>(mu1,mu2,lamb);
+    auto mat_obj2 = _ExplicitMooneyRivlin_<Real>(mu1,mu2,lamb);
     auto mat_obj3 = _IsotropicElectroMechanics_101_<Real>(mu,lamb,eps_1);
     auto mat_obj4 = _IsotropicElectroMechanics_108_<Real>(mu1,mu2,lamb,eps_2);
 
@@ -355,9 +355,9 @@ void _GlobalAssemblyExplicit_DF_DPF_<3>(const Real *points,
     Real *traction                  = allocate<Real>(ndof);
 
 
-    auto mat_obj0 = _NeoHookean_2_<Real>(mu,lamb);
-    auto mat_obj1 = _MooneyRivlin_0_<Real>(mu1,mu2,lamb);
-    auto mat_obj2 = _ExplicitMooneyRivlin_0_<Real>(mu1,mu2,lamb);
+    auto mat_obj0 = _NeoHookean_<Real>(mu,lamb);
+    auto mat_obj1 = _MooneyRivlin_<Real>(mu1,mu2,lamb);
+    auto mat_obj2 = _ExplicitMooneyRivlin_<Real>(mu1,mu2,lamb);
     auto mat_obj3 = _IsotropicElectroMechanics_101_<Real>(mu,lamb,eps_1);
     auto mat_obj4 = _IsotropicElectroMechanics_108_<Real>(mu1,mu2,lamb,eps_2);
 
@@ -698,9 +698,9 @@ void _GlobalAssemblyExplicit_DF_DPF_(const Real *points,
     Real *mass                      = allocate<Real>(local_capacity);
 
 
-    auto mat_obj0 = _NeoHookean_2_<Real>(mu,lamb);
-    auto mat_obj1 = _MooneyRivlin_0_<Real>(mu1,mu2,lamb);
-    auto mat_obj2 = _ExplicitMooneyRivlin_0_<Real>(mu1,mu2,lamb);
+    auto mat_obj0 = _NeoHookean_<Real>(mu,lamb);
+    auto mat_obj1 = _MooneyRivlin_<Real>(mu1,mu2,lamb);
+    auto mat_obj2 = _ExplicitMooneyRivlin_<Real>(mu1,mu2,lamb);
     auto mat_obj3 = _IsotropicElectroMechanics_101_<Real>(mu,lamb,eps_1);
     auto mat_obj4 = _IsotropicElectroMechanics_108_<Real>(mu1,mu2,lamb,eps_2);
 
@@ -938,7 +938,7 @@ void _GlobalAssemblyExplicit_DF_DPF_(const Real *points,
 
 
 
-// TWO GENERATION ORIGINAL NON-UNROLLED VERSION
+// TWO GENERATION OLD - ORIGINAL NON-UNROLLED VERSION
 
 
 // #ifndef _LOWLEVELASSEMBLYDPF__H
@@ -948,9 +948,9 @@ void _GlobalAssemblyExplicit_DF_DPF_(const Real *points,
 // #include "_TractionDF_.h"
 // #include "_TractionDPF_.h"
 
-// #include "_NeoHookean_2_.h"
-// #include "_MooneyRivlin_0_.h"
-// #include "_ExplicitMooneyRivlin_0_.h"
+// #include "_NeoHookean_.h"
+// #include "_MooneyRivlin_.h"
+// #include "_ExplicitMooneyRivlin_.h"
 // #include "_IsotropicElectroMechanics_101_.h"
 // #include "_IsotropicElectroMechanics_108_.h"
 
@@ -1014,9 +1014,9 @@ void _GlobalAssemblyExplicit_DF_DPF_(const Real *points,
 //     Real *mass                      = allocate<Real>(local_capacity);
 
 
-//     auto mat_obj0 = _NeoHookean_2_<Real>(mu,lamb);
-//     auto mat_obj1 = _MooneyRivlin_0_<Real>(mu1,mu2,lamb);
-//     auto mat_obj2 = _ExplicitMooneyRivlin_0_<Real>(mu1,mu2,lamb);
+//     auto mat_obj0 = _NeoHookean_<Real>(mu,lamb);
+//     auto mat_obj1 = _MooneyRivlin_<Real>(mu1,mu2,lamb);
+//     auto mat_obj2 = _ExplicitMooneyRivlin_<Real>(mu1,mu2,lamb);
 //     auto mat_obj3 = _IsotropicElectroMechanics_101_<Real>(mu,lamb,eps_1);
 //     auto mat_obj4 = _IsotropicElectroMechanics_108_<Real>(mu1,mu2,lamb,eps_2);
 

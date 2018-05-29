@@ -1,54 +1,76 @@
 import numpy as np
+from .MaterialBase import Material
 from Florence.Tensor import trace
 
-#####################################################################################################
-										# NeoHookean Material Model 1
-#####################################################################################################
+class NeoHookean(Material):
+    """The fundamental Neo-Hookean internal energy, described in Bonet et. al.
+
+        W(C) = mu/2*(C:I-3)- mu*lnJ + lamb/2*(J-1)**2
+
+    """
+
+    def __init__(self, ndim, **kwargs):
+        mtype = type(self).__name__
+        super(NeoHookean, self).__init__(mtype, ndim, **kwargs)
+
+        self.is_transversely_isotropic = False
+        self.energy_type = "internal_energy"
+        self.nature = "nonlinear"
+        self.fields = "mechanics"  
+
+        if self.ndim==3:
+            self.H_VoigtSize = 6
+        elif self.ndim==2:
+            self.H_VoigtSize = 3
+
+        # LOW LEVEL DISPATCHER
+        self.has_low_level_dispatcher = True
+        # self.has_low_level_dispatcher = False
+
+    def KineticMeasures(self,F,ElectricFieldx=0, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._NeoHookean_ import KineticMeasures
+        return KineticMeasures(self,F)
+        
+
+    def Hessian(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
+        
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+
+        mu2 = self.mu/J- self.lamb*(J-1.0)
+        lamb2 = self.lamb*(2*J-1.0) 
+
+        H_Voigt = lamb2*self.vIijIkl+mu2*self.vIikIjl
+
+        self.H_VoigtSize = H_Voigt.shape[0]
+
+        return H_Voigt
+
+    def CauchyStress(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        b = StrainTensors['b'][gcounter]
+
+        mu = self.mu
+        lamb = self.lamb
+            
+        return 1.0*mu/J*b + (lamb*(J-1.0)-mu/J)*I
 
 
-class NeoHookean(object):
-	"""docstring for NeoHookean"""
 
-	def __init__(self, ndim, MaterialArgs=None):
-		super(NeoHookean, self).__init__()
-		self.ndim = ndim
-		self.nvar = self.ndim
+    def InternalEnergy(self,StrainTensors,elem=0,gcounter=0):
 
-	def Hessian(self,MaterialArgs,ndim,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
-		mu = MaterialArgs.mu
-		lamb = MaterialArgs.lamb
-		detF = StrainTensors.J
+        mu = self.mu
+        lamb = self.lamb
 
-		mu1 = 1.0*(mu-lamb*np.log(detF))/detF 
-		lamb1 = 1.0*lamb/detF 
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+        C = np.dot(F.T,F)
 
-		delta = np.eye(ndim,ndim)
-		# Hessian is the fourth order elasticity tensor in this case
-		C = np.zeros((ndim,ndim,ndim,ndim))
-		for i in range(0,ndim):
-			for j in range(0,ndim):
-				for k in range(0,ndim):
-					for l in range(0,ndim):
-						# C[i,j,k,l] += lamb1*delta[i,j]*delta[k,l]+2.0*mu1*delta[i,k]*delta[j,l]
-						C[i,j,k,l] += lamb1*delta[i,j]*delta[k,l]+mu1*(delta[i,k]*delta[j,l] + delta[i,l]*delta[j,k])
+        energy  = mu/2.*(trace(C) - 3.) - mu*np.log(J) + lamb/2.*(J-1.)**2
 
+        return energy
 
-		C_Voigt = Voigt(C,1)
-
-
-		MaterialArgs.H_VoigtSize = C_Voigt.shape[0]
-		
-		return C_Voigt
-
-
-	def CauchyStress(self,MaterialArgs,StrainTensors):
-
-		b = StrainTensors.b 
-		J = StrainTensors.J
-		I = StrainTensors.I
-
-		mu = MaterialArgs.mu
-		lamb = MaterialArgs.lamb
-
-		return 1.0*((mu/J)*(b-I)+(lamb/J)*np.log(J)*I)
 

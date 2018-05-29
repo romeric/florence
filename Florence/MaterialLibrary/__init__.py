@@ -7,16 +7,11 @@ from .TranservselyIsotropicLinearElastic import *
 # NONLINEAR MATERIAL MODELS
 from .NeoHookean import *
 from .NeoHookean_1 import *
-from .NeoHookean_2 import *
-from .NeoHookean_3 import *
 from .NeoHookeanCoercive import *
 from .NearlyIncompressibleNeoHookean import *
-from .MooneyRivlin_0 import *
 from .MooneyRivlin import *
+from .MooneyRivlin_1 import *
 from .NearlyIncompressibleMooneyRivlin import *
-
-# INCREMENTALLY LINEARISED MATERIAL MODELS
-from .IncrementallyLinearisedNeoHookean import *
 
 # REGULARISED MATERIAL MODELS
 from .RegularisedNeoHookean import *
@@ -28,8 +23,6 @@ from .AnisotropicMooneyRivlin_0 import *
 from .AnisotropicMooneyRivlin_1 import *
 
 # ELECTROMECHANICAL MATERIAL MODELS - ENTHALPY
-from .LinearModelElectromechanics import *
-from .LinearisedElectromechanics import *
 from .IsotropicElectroMechanics_0 import *
 from .IsotropicElectroMechanics_1 import *
 from .IsotropicElectroMechanics_2 import *
@@ -62,7 +55,7 @@ from .Multi_IsotropicElectroMechanics_101 import *
 from .Multi_Piezoelectric_100 import *
 
 # EXPLICIT MODELS
-from .ExplicitMooneyRivlin_0 import *
+from .ExplicitMooneyRivlin import *
 
 
 # ELECTROSTATIC MODELS

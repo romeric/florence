@@ -25,6 +25,12 @@ class BonetTranservselyIsotropicHyperElastic(Material):
         self.Hessian(StrainTensors)
         self.anisotropic_orientations = None
 
+        self.energy_type = "internal_energy"
+        self.nature = "nonlinear"
+        self.fields = "mechanics"
+        # LOW LEVEL DISPATCHER
+        self.has_low_level_dispatcher = False
+
 
     def Hessian(self,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 

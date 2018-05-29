@@ -3,7 +3,7 @@
 
 #include "assembly_helper.h"
 #include "_ConstitutiveStiffnessDF_.h"
-#include "_MooneyRivlin_0_.h"
+#include "_MooneyRivlin_.h"
 
 void _GlobalAssemblyDF_(const Real *points, 
                         const UInteger* elements, 
@@ -72,7 +72,7 @@ void _GlobalAssemblyDF_(const Real *points,
     Integer *full_current_row       = allocate<Integer>(local_capacity);
     Integer *full_current_column    = allocate<Integer>(local_capacity);
 
-    auto mat_obj = _MooneyRivlin_0_<Real>(mu1,mu2,lam);
+    auto mat_obj = _MooneyRivlin_<Real>(mu1,mu2,lam);
 
 
     // LOOP OVER ELEMETNS

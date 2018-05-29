@@ -20,6 +20,9 @@ class IsotropicElectroMechanics_0(Material):
         # REQUIRES SEPARATELY
         self.nvar = self.ndim+1
         self.energy_type = "enthalpy"
+        self.legendre_transform = LegendreTransform()
+        self.nature = "nonlinear"
+        self.fields = "electro_mechanics"  
 
         if self.ndim == 2:
             self.H_VoigtSize = 5

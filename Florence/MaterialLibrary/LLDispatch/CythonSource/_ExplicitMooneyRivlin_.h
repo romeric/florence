@@ -1,16 +1,16 @@
 #include "_MaterialBase_.h"
 
 template<typename U>
-class _ExplicitMooneyRivlin_0_ : public _MaterialBase_<U> {
+class _ExplicitMooneyRivlin_ : public _MaterialBase_<U> {
 public:
     U mu1;
     U mu2;
     U lamb;
 
-    _ExplicitMooneyRivlin_0_() = default;
+    _ExplicitMooneyRivlin_() = default;
 
     FASTOR_INLINE
-    _ExplicitMooneyRivlin_0_(U mu1, U mu2, U lamb) {
+    _ExplicitMooneyRivlin_(U mu1, U mu2, U lamb) {
         this->mu1 = mu1;
         this->mu2 = mu2;
         this->lamb = lamb;
@@ -62,7 +62,7 @@ public:
 };
 
 template<> template<>
-void _ExplicitMooneyRivlin_0_<Real>::KineticMeasures<Real>(Real *Snp,
+void _ExplicitMooneyRivlin_<Real>::KineticMeasures<Real>(Real *Snp,
     int ndim, int ngauss, const Real *Fnp) {
 
     if (ndim==3) {

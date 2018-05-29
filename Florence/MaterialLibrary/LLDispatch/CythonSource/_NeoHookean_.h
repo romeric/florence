@@ -1,15 +1,15 @@
 #include "_MaterialBase_.h"
 
 template<typename U>
-class _NeoHookean_2_ : public _MaterialBase_<U> {
+class _NeoHookean_ : public _MaterialBase_<U> {
 public:
     U mu;
     U lamb;
 
-    FASTOR_INLINE _NeoHookean_2_() = default;
+    FASTOR_INLINE _NeoHookean_() = default;
 
     FASTOR_INLINE
-    _NeoHookean_2_(U mu, U lamb) {
+    _NeoHookean_(U mu, U lamb) {
         this->mu = mu;
         this->lamb = lamb;
     }
@@ -59,7 +59,7 @@ public:
 };
 
 template<> template<>
-void _NeoHookean_2_<Real>::KineticMeasures<Real>(Real *Snp, Real* Hnp,
+void _NeoHookean_<Real>::KineticMeasures<Real>(Real *Snp, Real* Hnp,
     int ndim, int ngauss, const Real *Fnp) {
 
     if (ndim==3) {

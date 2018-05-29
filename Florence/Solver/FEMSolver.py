@@ -226,12 +226,11 @@ class FEMSolver(object):
 
         # CHECK IF MATERIAL MODEL AND ANALYSIS TYPE ARE COMPATIBLE
         #############################################################################
-        if "nonlinear" in insensitive(self.analysis_nature):
-            if "linear" in  insensitive(material.mtype) or \
-                "increment" in insensitive(material.mtype):
-                warn("Incompatible material model and analysis type. I'm going to change analysis type")
-                self.analysis_nature = "linear"
-                formulation.analysis_nature = "linear"
+        if material.nature == "linear" and self.analysis_nature == "nonlinear":
+            raise RuntimeError("Cannot perform nonlinear analysis with linear model")
+
+        if material.fields != formulation.fields:
+            raise RuntimeError("Incompatible material model and formulation type")
 
         if material.is_transversely_isotropic or material.is_anisotropic:
             if material.anisotropic_orientations is None:

@@ -21,6 +21,8 @@ class IsotropicElectroMechanics_107(Material):
         self.nvar = self.ndim+1
         self.energy_type = "internal_energy"
         self.legendre_transform = LegendreTransform()
+        self.nature = "nonlinear"
+        self.fields = "electro_mechanics"
 
         if self.ndim == 2:
             self.H_VoigtSize = 5

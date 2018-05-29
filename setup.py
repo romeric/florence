@@ -328,11 +328,11 @@ class FlorenceSetup(object):
     def Build(self):
 
 
-        low_level_material_list = [ "_NeoHookean_2_",
-                                    "_MooneyRivlin_0_",
+        low_level_material_list = [ "_NeoHookean_",
+                                    "_MooneyRivlin_",
                                     "_NearlyIncompressibleMooneyRivlin_",
                                     "_AnisotropicMooneyRivlin_1_",
-                                    "_ExplicitMooneyRivlin_0_",
+                                    "_ExplicitMooneyRivlin_",
                                     "_IsotropicElectroMechanics_0_",
                                     "_IsotropicElectroMechanics_3_",
                                     "_SteinmannModel_",
@@ -346,8 +346,8 @@ class FlorenceSetup(object):
                                 ]
 
         # low_level_material_list = ["_IsotropicElectroMechanics_109_"]
-        # low_level_material_list = ["_NeoHookean_2_"]
-        # low_level_material_list = ["_ExplicitMooneyRivlin_0_"]
+        # low_level_material_list = ["_NeoHookean_"]
+        # low_level_material_list = ["_ExplicitMooneyRivlin_"]
 
         assert self.extension_paths != None
 
@@ -362,7 +362,7 @@ class FlorenceSetup(object):
 
                 ll_material_mech = low_level_material_list[:4]
                 ll_material_electro_mech = low_level_material_list[4:]
-                ll_material_electro_mech.remove("_ExplicitMooneyRivlin_0_")
+                ll_material_electro_mech.remove("_ExplicitMooneyRivlin_")
                 ll_material_electro_mech.remove("_IsotropicElectroMechanics_109_")
                 # ll_material_mech = []
                 # ll_material_electro_mech = low_level_material_list

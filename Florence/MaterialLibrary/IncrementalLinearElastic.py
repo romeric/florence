@@ -2,10 +2,6 @@ import numpy as np
 from .MaterialBase import Material
 from Florence.Tensor import trace
 
-#####################################################################################################
-                            # INCREMENTAL LINEAR ELASTIC ISOTROPIC MODEL
-#####################################################################################################
-
 
 class IncrementalLinearElastic(Material):
     """This is the linear elastic model with zero stresses and constant Hessian
@@ -15,6 +11,17 @@ class IncrementalLinearElastic(Material):
     def __init__(self, ndim, **kwargs):
         mtype = type(self).__name__
         super(IncrementalLinearElastic, self).__init__(mtype,ndim,**kwargs)
+        self.energy_type = "internal_energy"
+        self.nature = "linear"
+        self.fields = "mechanics"
+
+        if self.ndim==3:
+            self.H_VoigtSize = 6
+        elif self.ndim==2:
+            self.H_VoigtSize = 3
+
+        # LOW LEVEL DISPATCHER
+        self.has_low_level_dispatcher = False 
 
     def Hessian(self,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
         # RETURN THE 4TH ORDER ELASTICITY TENSOR (VOIGT FORM)

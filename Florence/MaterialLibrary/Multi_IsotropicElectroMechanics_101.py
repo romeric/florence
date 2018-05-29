@@ -7,8 +7,8 @@ from Florence.LegendreTransform import LegendreTransform
 
 class Multi_IsotropicElectroMechanics_101(Material):
     """
-                Simplest electromechanical model in terms of internal energy 
-                        W(C,D0) = W_neo(C) + 1/2/eps_1 (FD0*FD0)
+        Electromechanical model in terms of internal energy for composites
+            W(C,D0) = W_neo(C) + 1/2/eps_1 (FD0*FD0)
     """
     
     def __init__(self, ndim, **kwargs):
@@ -18,6 +18,8 @@ class Multi_IsotropicElectroMechanics_101(Material):
         self.nvar = self.ndim+1
         self.energy_type = "internal_energy"
         self.legendre_transform = LegendreTransform()
+        self.nature = "nonlinear"
+        self.fields = "electro_mechanics"
 
         if self.ndim == 2:
             self.H_VoigtSize = 5

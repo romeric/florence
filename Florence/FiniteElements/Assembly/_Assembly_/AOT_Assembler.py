@@ -6,8 +6,8 @@ __all__ = ['AOTConfigure','AOTClean']
 
 
 def MaterialList():
-    ll_materials_mech  = [ "_NeoHookean_2_", 
-                            "_MooneyRivlin_0_", 
+    ll_materials_mech  = [ "_NeoHookean_", 
+                            "_MooneyRivlin_", 
                             "_NearlyIncompressibleMooneyRivlin_",
                             "_AnisotropicMooneyRivlin_1_"
                             ] 
@@ -61,9 +61,9 @@ def AOTConfigure():
                 contents_h[counter] = contents_h[counter].replace("_GlobalAssemblyDF_", "_GlobalAssemblyDF_"+material)
 
             if "auto mat_obj" in line:
-                if material == "_NeoHookean_2_":
+                if material == "_NeoHookean_":
                     contents_h[counter] = "    auto mat_obj = " + material + "<Real>(mu,lamb);\n"
-                elif material == "_MooneyRivlin_0_":
+                elif material == "_MooneyRivlin_":
                     contents_h[counter] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,lamb);\n"
                 elif material == "_NearlyIncompressibleMooneyRivlin_":
                     contents_h[counter] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,lamb);\n"
@@ -96,9 +96,9 @@ def AOTConfigure():
                 contents_c[counter] = contents_c[counter].replace("_GlobalAssemblyDF_", "_GlobalAssemblyDF_" + material)
 
             if "mu1, mu2, lamb =" in line:
-                if material == "_NeoHookean_2_":
+                if material == "_NeoHookean_":
                     contents_c[counter] = "    mu, lamb = material.mu, material.lamb\n"
-                elif material == "_MooneyRivlin_0_":
+                elif material == "_MooneyRivlin_":
                     contents_c[counter] = "    mu1, mu2, lamb = material.mu1, material.mu2, material.lamb\n"
                 elif material == "_NearlyIncompressibleMooneyRivlin_":
                     contents_c[counter] = "    mu1, mu2, lamb = material.mu1, material.mu2, material.lamb\n"

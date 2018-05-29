@@ -18,6 +18,8 @@ class IdealDielectric(Material):
         self.nvar = 1
         self.energy_type = "internal_energy"
         self.legendre_transform = LegendreTransform()
+        self.nature = "linear"
+        self.fields = "electrostatics"
 
         self.H_VoigtSize = self.ndim
 

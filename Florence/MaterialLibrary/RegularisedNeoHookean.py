@@ -13,7 +13,11 @@ class RegularisedNeoHookean(Material):
     def __init__(self, ndim, **kwargs):
         mtype = type(self).__name__
         super(RegularisedNeoHookean, self).__init__(mtype, ndim, **kwargs)
-
+        self.is_transversely_isotropic = False
+        self.energy_type = "internal_energy"
+        self.nature = "nonlinear"
+        self.fields = "mechanics"  
+        
         if self.ndim==3:
             self.H_VoigtSize = 6
         elif self.ndim==2:

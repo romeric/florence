@@ -3,10 +3,6 @@ from numpy import einsum
 from .MaterialBase import Material
 from Florence.Tensor import trace, Voigt, UnVoigt
 
-#####################################################################################################
-                                # Anisotropic MooneyRivlin Model
-#####################################################################################################
-
 
 class TranservselyIsotropicLinearElastic(Material):
     """A linear elastic transervely isotropic material model, with 4 material constants
@@ -21,6 +17,17 @@ class TranservselyIsotropicLinearElastic(Material):
         # MUST BE SET AFTER CALLING BASE __init__
         self.is_transversely_isotropic = True
         self.is_nonisotropic = True
+        self.energy_type = "internal_energy"
+        self.nature = "linear"
+        self.fields = "mechanics"
+
+        if self.ndim==3:
+            self.H_VoigtSize = 6
+        elif self.ndim==2:
+            self.H_VoigtSize = 3
+
+        # LOW LEVEL DISPATCHER
+        self.has_low_level_dispatcher = False 
 
         from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import KinematicMeasures
         StrainTensors = KinematicMeasures(np.asarray([np.eye(self.ndim,self.ndim)]*2),"Linear")

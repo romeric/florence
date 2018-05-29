@@ -3,8 +3,8 @@ import numpy as np
 from scipy.sparse import csr_matrix, csc_matrix
 
 try:
-    from ._LowLevelAssemblyDF__NeoHookean_2_ import _LowLevelAssemblyDF__NeoHookean_2_
-    from ._LowLevelAssemblyDF__MooneyRivlin_0_ import _LowLevelAssemblyDF__MooneyRivlin_0_
+    from ._LowLevelAssemblyDF__NeoHookean_ import _LowLevelAssemblyDF__NeoHookean_
+    from ._LowLevelAssemblyDF__MooneyRivlin_ import _LowLevelAssemblyDF__MooneyRivlin_
     from ._LowLevelAssemblyDF__AnisotropicMooneyRivlin_1_ import _LowLevelAssemblyDF__AnisotropicMooneyRivlin_1_
     from ._LowLevelAssemblyDF__NearlyIncompressibleMooneyRivlin_ import _LowLevelAssemblyDF__NearlyIncompressibleMooneyRivlin_
     from ._LowLevelAssemblyDPF__IsotropicElectroMechanics_0_ import _LowLevelAssemblyDPF__IsotropicElectroMechanics_0_

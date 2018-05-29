@@ -2,9 +2,6 @@ import numpy as np
 from numpy import einsum
 from .MaterialBase import Material
 from Florence.Tensor import trace, Voigt
-#####################################################################################################
-                                # Isotropic Electromechanical Model 1
-#####################################################################################################
 
 
 class IsotropicElectroMechanics_1(Material):
@@ -18,6 +15,18 @@ class IsotropicElectroMechanics_1(Material):
         from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import KinematicMeasures
         StrainTensors = KinematicMeasures(np.asarray([np.eye(self.ndim,self.ndim)]*2),"nonlinear")
         self.Hessian(StrainTensors,np.zeros((self.ndim,1)))
+        self.nvar = self.ndim+1
+        self.energy_type = "enthalpy"
+        self.nature = "nonlinear"
+        self.fields = "electro_mechanics"
+
+        if self.ndim == 2:
+            self.H_VoigtSize = 5
+        elif self.ndim == 3:
+            self.H_VoigtSize = 9
+
+        # LOW LEVEL DISPATCHER
+        self.has_low_level_dispatcher = False
 
     def Hessian(self,StrainTensors, ElectricFieldx=0, elem=0, gcounter=0):
 

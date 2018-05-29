@@ -16,7 +16,7 @@ def crash_analysis():
     mu2 = 0.
     v = 0.495
     lamb = 2.*mu*v/(1-2.*v)
-    material = ExplicitMooneyRivlin_0(2, mu1=mu1, mu2=mu2, lamb=lamb, rho=8000.)
+    material = ExplicitMooneyRivlin(2, mu1=mu1, mu2=mu2, lamb=lamb, rho=8000.)
 
 
     def DirichletFunc(mesh, time_step):

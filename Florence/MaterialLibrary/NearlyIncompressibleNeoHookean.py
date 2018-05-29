@@ -30,6 +30,19 @@ class NearlyIncompressibleNeoHookean(Material):
 
         self.is_nearly_incompressible = True
         self.is_compressible = False
+
+        self.is_transversely_isotropic = False
+        self.energy_type = "internal_energy"
+        self.nature = "nonlinear"
+        self.fields = "mechanics"
+
+        if self.ndim==3:
+            self.H_VoigtSize = 6
+        elif self.ndim==2:
+            self.H_VoigtSize = 3
+
+        # LOW LEVEL DISPATCHER
+        self.has_low_level_dispatcher = False
         
 
     def Hessian(self, StrainTensors, ElectricFieldx=0, elem=0, gcounter=0):
