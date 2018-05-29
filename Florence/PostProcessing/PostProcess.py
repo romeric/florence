@@ -3389,7 +3389,7 @@ class PostProcess(object):
         tmesh = Mesh()
         tmesh.element_type = "line"
         tmesh.elements = connections
-        tmesh.points = np.concatenate((x_edges.T.ravel()[:,None],y_edges.T.ravel()[:,None],z_edges.T.ravel()[:,None]))
+        tmesh.points = np.concatenate((x_edges.T.ravel()[:,None],y_edges.T.ravel()[:,None],z_edges.T.ravel()[:,None]),1)
         tmesh.vpoints = vpoints
         tmesh.nelem = connections.shape[0]
         tmesh.nnode = tmesh.points.shape[0]

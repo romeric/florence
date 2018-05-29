@@ -4792,6 +4792,145 @@ class Mesh(object):
         self.__update__(mesh)
 
 
+    def UniformRefinement(self, level=2):
+        """Refines a given mesh (self) to specified level.
+
+            Note that uniform refinement implies two things:
+            1. "ALL" elements will refinement, otherwise non-conformal elements will be created
+            2. Equal refinement takes place in every direction
+        """
+
+        from scipy.spatial import Delaunay
+        try:
+            from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints, EquallySpacedPointsTri, EquallySpacedPointsTet
+            from Florence.FunctionSpace import Tri, Quad, Tet, Hex
+            from Florence.Tensor import remove_duplicates_2D
+        except IOError:
+            raise IOError("This functionality requires florence's support")
+
+
+        # WE NEED AN ACTUAL NDIM
+        # ndim = self.InferSpatialDimension()
+        if self.element_type == "tri" or self.element_type == "quad":
+            ndim = 2
+        elif self.element_type == "tet" or self.element_type == "hex":
+            ndim = 3
+
+        mesh = deepcopy(self)
+        if mesh.InferPolynomialDegree() > 1:
+            mesh = mesh.GetLinearMesh(remap=True)
+
+        C = level - 1
+        p = C+1
+        # CActual = self.InferPolynomialDegree() - 1
+        CActual = 0 # MUST BE ALWAYS ZERO
+        if self.element_type == "tri":
+            nsize = int((p+1)*(p+2)/2.)
+            nsize_2 = int((CActual+2)*(CActual+3)/2.)
+        elif self.element_type == "quad":
+            nsize = int((C+2)**2)
+            nsize_2 = int((CActual+2)**2)
+        elif self.element_type == "tet":
+            nsize = int((p+1)*(p+2)*(p+3)/6.)
+            nsize_2 = int((CActual+2)*(CActual+3)*(CActual+4)/6.)
+        elif self.element_type == "hex":
+            nsize = int((C+2)**3)
+            nsize_2 = int((CActual+2)**3)
+
+        if self.element_type == "quad" or self.element_type == "hex":
+            SingleElementPoints = EquallySpacedPoints(ndim+1,C)
+            # RE-ARANGE NODES PROVIDED BY EquallySpacedPoints
+            if ndim == 2:
+                node_aranger = np.lexsort((SingleElementPoints[:,0],SingleElementPoints[:,1]))
+            elif ndim == 3:
+                node_aranger = np.lexsort((SingleElementPoints[:,0],SingleElementPoints[:,1],SingleElementPoints[:,2]))
+            SingleElementPoints = SingleElementPoints[node_aranger,:]
+
+        elif self.element_type == "tri":
+            SingleElementPoints = EquallySpacedPointsTri(C)
+            simplices = Delaunay(SingleElementPoints).simplices.copy()
+            nsimplices = simplices.shape[0]
+
+        elif self.element_type == "tet":
+            SingleElementPoints = EquallySpacedPointsTet(C)
+            simplices = Delaunay(SingleElementPoints).simplices.copy()
+            nsimplices = simplices.shape[0]
+
+        Bases = np.zeros((nsize_2,SingleElementPoints.shape[0]),dtype=np.float64)
+
+        if mesh.element_type == "tri":
+            hpBases = Tri.hpNodal.hpBases
+            for i in range(SingleElementPoints.shape[0]):
+                Bases[:,i] = hpBases(CActual,SingleElementPoints[i,0],SingleElementPoints[i,1],
+                    EvalOpt=1,equally_spaced=True,Transform=1)[0]
+
+        elif mesh.element_type == "quad":
+            smesh = Mesh()
+            smesh.Rectangle(element_type="quad", nx=level, ny=level)
+            simplices = smesh.elements
+            nsimplices = smesh.nelem
+
+            hpBases = Quad.LagrangeGaussLobatto
+            for i in range(SingleElementPoints.shape[0]):
+                Bases[:,i] = hpBases(CActual,SingleElementPoints[i,0],SingleElementPoints[i,1])[:,0]
+
+        if mesh.element_type == "tet":
+            hpBases = Tet.hpNodal.hpBases
+            for i in range(SingleElementPoints.shape[0]):
+                Bases[:,i] = hpBases(CActual,SingleElementPoints[i,0],SingleElementPoints[i,1],
+                    SingleElementPoints[i,2],EvalOpt=1,equally_spaced=True,Transform=1)[0]
+
+        elif mesh.element_type == "hex":
+            smesh = Mesh()
+            smesh.Parallelepiped(element_type="hex", nx=level, ny=level, nz=level)
+            simplices = smesh.elements
+            nsimplices = smesh.nelem
+
+            hpBases = Hex.LagrangeGaussLobatto
+            for i in range(SingleElementPoints.shape[0]):
+                Bases[:,i] = hpBases(CActual,SingleElementPoints[i,0],SingleElementPoints[i,1],SingleElementPoints[i,2])[:,0]
+
+
+        nnode = nsize*mesh.nelem
+        nelem = nsimplices*mesh.nelem
+        X = np.zeros((nnode,mesh.points.shape[1]),dtype=np.float64)
+        T = np.zeros((nelem,mesh.elements.shape[1]),dtype=np.int64)
+
+        for ielem in range(mesh.nelem):
+            X[ielem*nsize:(ielem+1)*nsize,:] = np.dot(Bases.T, mesh.points[mesh.elements[ielem,:],:])
+            T[ielem*nsimplices:(ielem+1)*nsimplices,:] = simplices + ielem*nsize
+
+        # REMOVE DUPLICATES
+        repoints, idx_repoints, inv_repoints = remove_duplicates_2D(X, decimals=10)
+        unique_reelements, inv_reelements = np.unique(T,return_inverse=True)
+        unique_reelements = unique_reelements[inv_repoints]
+        reelements = unique_reelements[inv_reelements]
+        reelements = reelements.reshape(nelem,mesh.elements.shape[1])
+
+        self.elements = np.ascontiguousarray(reelements)
+        self.points = np.ascontiguousarray(repoints)
+        self.nelem = self.elements.shape[0]
+        self.nnode = self.points.shape[0]
+
+        self.edges = None
+        self.faces = None
+        self.all_edges = None
+        self.all_faces = None
+
+        if self.element_type == "tri" or self.element_type == "quad":
+            self.GetEdges()
+            self.GetBoundaryEdges()
+        elif self.element_type == "tet" or self.element_type == "hex":
+            self.GetFaces()
+            self.GetBoundaryFaces()
+            self.GetBoundaryEdges()
+
+        if CActual > 0:
+            sys.stdout = open(os.devnull, "w")
+            self.GetHighOrderMesh(p=CActual+1)
+            # self.GetHighOrderMesh(p=CActual+1, equally_spaced=equally_spaced, check_duplicates=False)
+            sys.stdout = sys.__stdout__
+
 
 
     @staticmethod
