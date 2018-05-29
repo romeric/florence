@@ -4738,7 +4738,7 @@ class Mesh(object):
 
 
     def Smooth(self, criteria={'aspect_ratio':3}):
-        """Performs mesh smoothing based a given criteria.
+        """Performs mesh smoothing based on a given criteria.
 
             input:
                 criteria                [dict] criteria can be either None, {'volume':<number>},
