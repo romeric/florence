@@ -5,21 +5,21 @@
 #include "_ConstitutiveStiffnessDF_.h"
 #include "_MooneyRivlin_.h"
 
-void _GlobalAssemblyDF_(const Real *points, 
-                        const UInteger* elements, 
+void _GlobalAssemblyDF_(const Real *points,
+                        const UInteger* elements,
                         const Real* Eulerx,
                         const Real* Eulerp,
                         const Real* bases,
                         const Real* Jm,
                         const Real* AllGauss,
                         Integer ndim,
-                        Integer nvar,  
-                        Integer ngauss, 
-                        Integer nelem, 
+                        Integer nvar,
+                        Integer ngauss,
+                        Integer nelem,
                         Integer nodeperelem,
                         Integer nnode,
                         Integer H_VoigtSize,
-                        Integer requires_geometry_update, 
+                        Integer requires_geometry_update,
                         Integer* local_rows_stiffness,
                         Integer* local_cols_stiffness,
                         int *I_stiff,
@@ -91,31 +91,31 @@ void _GlobalAssemblyDF_(const Real *points,
         std::fill(F,F+ngauss*ndim*ndim,0.);
         std::fill(SpatialGradient,SpatialGradient+ngauss*nodeperelem*ndim,0.);
         std::fill(detJ,detJ+ngauss,0.);
-        KinematicMeasures(  SpatialGradient, 
-                            F, 
-                            detJ, 
-                            Jm, 
+        KinematicMeasures(  SpatialGradient,
+                            F,
+                            detJ,
+                            Jm,
                             AllGauss,
-                            LagrangeElemCoords, 
-                            EulerElemCoords, 
-                            ngauss, 
-                            ndim, 
-                            nodeperelem, 
+                            LagrangeElemCoords,
+                            EulerElemCoords,
+                            ngauss,
+                            ndim,
+                            nodeperelem,
                             requires_geometry_update
                             );
 
         // COMPUTE KINETIC MEASURES
         mat_obj.KineticMeasures(stress, hessian, ndim, ngauss, F);
- 
+
         // COMPUTE CONSTITUTIVE STIFFNESS AND TRACTION
         std::fill(stiffness,stiffness+local_capacity,0.);
         std::fill(traction,traction+ndof,0.);
         _ConstitutiveStiffnessIntegrandDF_Filler_(
-            stiffness, 
+            stiffness,
             traction,
-            SpatialGradient, 
-            stress, 
-            hessian, 
+            SpatialGradient,
+            stress,
+            hessian,
             detJ,
             ngauss,
             nodeperelem,
@@ -126,13 +126,13 @@ void _GlobalAssemblyDF_(const Real *points,
 
         // COMPUTE GEOMETRIC STIFFNESS
         std::fill(geometric_stiffness,geometric_stiffness+local_capacity,0.);
-        _GeometricStiffnessFiller_( geometric_stiffness, 
-                                    SpatialGradient, 
-                                    stress, 
-                                    detJ, 
-                                    ndim, 
-                                    nvar, 
-                                    nodeperelem, 
+        _GeometricStiffnessFiller_( geometric_stiffness,
+                                    SpatialGradient,
+                                    stress,
+                                    detJ,
+                                    ndim,
+                                    nvar,
+                                    nodeperelem,
                                     ngauss);
 
 
@@ -144,17 +144,17 @@ void _GlobalAssemblyDF_(const Real *points,
         {
 
             Integer const_elem_retriever;
-            for (Integer counter=0; counter<nodeperelem; ++counter) {   
+            for (Integer counter=0; counter<nodeperelem; ++counter) {
                 const_elem_retriever = nvar*elements[elem*nodeperelem+counter];
-                for (Integer ncounter=0; ncounter<nvar; ++ncounter) { 
+                for (Integer ncounter=0; ncounter<nvar; ++ncounter) {
                     current_row_column[nvar*counter+ncounter] = const_elem_retriever+ncounter;
                 }
             }
 
-            Integer const_I_retriever; 
-            for (Integer counter=0; counter<ndof; ++counter) { 
+            Integer const_I_retriever;
+            for (Integer counter=0; counter<ndof; ++counter) {
                 const_I_retriever = current_row_column[counter];
-                for (Integer iterator=0; iterator<ndof; ++iterator) { 
+                for (Integer iterator=0; iterator<ndof; ++iterator) {
                     full_current_row[counter*ndof+iterator]    = const_I_retriever;
                     full_current_column[counter*ndof+iterator] = current_row_column[iterator];
                 }
@@ -207,16 +207,16 @@ void _GlobalAssemblyDF_(const Real *points,
             std::fill(F,F+ngauss*ndim*ndim,0.);
             std::fill(SpatialGradient,SpatialGradient+ngauss*nodeperelem*ndim,0.);
             std::fill(detJ,detJ+ngauss,0.);
-            KinematicMeasures(  SpatialGradient, 
-                                F, 
-                                detJ, 
-                                Jm, 
+            KinematicMeasures(  SpatialGradient,
+                                F,
+                                detJ,
+                                Jm,
                                 AllGauss,
-                                LagrangeElemCoords, 
-                                EulerElemCoords, 
-                                ngauss, 
-                                ndim, 
-                                nodeperelem, 
+                                LagrangeElemCoords,
+                                EulerElemCoords,
+                                ngauss,
+                                ndim,
+                                nodeperelem,
                                 1
                                 );
 
@@ -224,7 +224,7 @@ void _GlobalAssemblyDF_(const Real *points,
 
             // Call MassIntegrand
             _MassIntegrand_Filler_( mass,
-                                    bases, 
+                                    bases,
                                     detJ,
                                     ngauss,
                                     nodeperelem,
@@ -233,18 +233,18 @@ void _GlobalAssemblyDF_(const Real *points,
                                     rho);
 
             // Fill IJV
-            fill_triplet(   local_rows_mass, 
-                            local_cols_mass, 
-                            mass, 
-                            I_mass, 
+            fill_triplet(   local_rows_mass,
+                            local_cols_mass,
+                            mass,
+                            I_mass,
                             J_mass,
                             V_mass,
-                            elem, 
-                            nvar, 
-                            nodeperelem, 
+                            elem,
+                            nvar,
+                            nodeperelem,
                             elements,
-                            local_capacity, 
-                            local_capacity); 
+                            local_capacity,
+                            local_capacity);
         }
     }
 

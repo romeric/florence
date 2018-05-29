@@ -6,23 +6,24 @@ __all__ = ['AOTConfigure','AOTClean']
 
 
 def MaterialList():
-    ll_materials_mech  = [ "_NeoHookean_", 
-                            "_MooneyRivlin_", 
-                            "_NearlyIncompressibleMooneyRivlin_",
-                            "_AnisotropicMooneyRivlin_1_"
-                            ] 
-    ll_materials_electro_mech  = ["_IsotropicElectroMechanics_0_", 
-                            "_IsotropicElectroMechanics_3_", 
-                            "_SteinmannModel_",
-                            "_IsotropicElectroMechanics_101_", 
-                            "_IsotropicElectroMechanics_105_", 
-                            "_IsotropicElectroMechanics_106_", 
-                            "_IsotropicElectroMechanics_107_",
-                            "_IsotropicElectroMechanics_108_",
-                            "_Piezoelectric_100_"
-                        ]
+    ll_materials_mech          = [  "_LinearElastic_",
+                                    "_NeoHookean_",
+                                    "_MooneyRivlin_",
+                                    "_NearlyIncompressibleMooneyRivlin_",
+                                    "_AnisotropicMooneyRivlin_1_"
+                                    ]
+    ll_materials_electro_mech  = [  "_IsotropicElectroMechanics_0_",
+                                    "_IsotropicElectroMechanics_3_",
+                                    "_SteinmannModel_",
+                                    "_IsotropicElectroMechanics_101_",
+                                    "_IsotropicElectroMechanics_105_",
+                                    "_IsotropicElectroMechanics_106_",
+                                    "_IsotropicElectroMechanics_107_",
+                                    "_IsotropicElectroMechanics_108_",
+                                    "_Piezoelectric_100_"
+                                    ]
 
-    # ll_materials_mech  = [] 
+    # ll_materials_mech  = []
     # ll_materials_electro_mech  = ["_IsotropicElectroMechanics_108_"]
     return ll_materials_mech, ll_materials_electro_mech
 
@@ -61,7 +62,7 @@ def AOTConfigure():
                 contents_h[counter] = contents_h[counter].replace("_GlobalAssemblyDF_", "_GlobalAssemblyDF_"+material)
 
             if "auto mat_obj" in line:
-                if material == "_NeoHookean_":
+                if material == "_NeoHookean_" or material == "_LinearElastic_":
                     contents_h[counter] = "    auto mat_obj = " + material + "<Real>(mu,lamb);\n"
                 elif material == "_MooneyRivlin_":
                     contents_h[counter] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,lamb);\n"
@@ -74,6 +75,16 @@ def AOTConfigure():
             for counter, line in enumerate(contents_h):
                 if "mat_obj.KineticMeasures" in line:
                     contents_h[counter] = "        mat_obj.KineticMeasures(stress, hessian, ndim, ngauss, F, &anisotropic_orientations[elem*ndim]);\n"
+
+        # Turn off geometric stiffness
+        if material == "_LinearElastic_":
+            for counter, line in enumerate(contents_h):
+                if "std::fill" in line and "geometric_stiffness" in line:
+                    contents_h[counter] = ""
+                # DANGEROUS - this is relative to current line - we delete 13 lines down
+                if "_GeometricStiffnessFiller_" in line:
+                    contents_h[counter:counter+13] = ""
+
 
         contents_h[-1] = "#endif // " + material_specific_assembler.upper() + "_H"
 
@@ -96,7 +107,7 @@ def AOTConfigure():
                 contents_c[counter] = contents_c[counter].replace("_GlobalAssemblyDF_", "_GlobalAssemblyDF_" + material)
 
             if "mu1, mu2, lamb =" in line:
-                if material == "_NeoHookean_":
+                if material == "_NeoHookean_" or material == "_LinearElastic_":
                     contents_c[counter] = "    mu, lamb = material.mu, material.lamb\n"
                 elif material == "_MooneyRivlin_":
                     contents_c[counter] = "    mu1, mu2, lamb = material.mu1, material.mu2, material.lamb\n"
@@ -157,7 +168,7 @@ def AOTConfigure():
                     contents_h[counter] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,lamb,eps_2);\n"
                 elif material == "_Piezoelectric_100_":
                     contents_h[counter] = "    auto mat_obj = " + material + "<Real>(mu1,mu2,mu3,lamb,eps_1,eps_2,eps_3);\n"
-                    
+
 
         if material == "_Piezoelectric_100_":
             for counter, line in enumerate(contents_h):

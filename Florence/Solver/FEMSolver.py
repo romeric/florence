@@ -506,7 +506,7 @@ class FEMSolver(object):
                 # IF STRESSES ARE NOT TO BE CALCULATED - FOR LinearElastic and IncrementalLinearElastic
                 # ASSEMBLE
                 K = Assemble(self, function_spaces[0], formulation, mesh, material,
-                    Eulerx, np.zeros_like(mesh.points))[0]
+                    Eulerx, np.zeros(mesh.points.shape[0]))[0]
                 # NO NEED FOR LoadFactor HERE AS mesh.points IS NOT UPDATED
                 Residual += NodalForces
 

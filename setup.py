@@ -365,7 +365,6 @@ class FlorenceSetup(object):
                 ll_material_mech = low_level_material_list[:6]
                 ll_material_electro_mech = low_level_material_list[6:]
 
-                ll_material_mech.remove("_LinearElastic_")
                 ll_material_mech.remove("_ExplicitMooneyRivlin_")
                 ll_material_electro_mech.remove("_IsotropicElectroMechanics_109_")
 

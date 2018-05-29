@@ -3,6 +3,8 @@ import numpy as np
 from scipy.sparse import csr_matrix, csc_matrix
 
 try:
+    from ._LowLevelAssemblyDF__LinearElastic_ import _LowLevelAssemblyDF__LinearElastic_
+    from ._LowLevelAssemblyDF__LinearElastic_ import _LowLevelAssemblyDF__LinearElastic_ as _LowLevelAssemblyDF__IncrementalLinearElastic_
     from ._LowLevelAssemblyDF__NeoHookean_ import _LowLevelAssemblyDF__NeoHookean_
     from ._LowLevelAssemblyDF__MooneyRivlin_ import _LowLevelAssemblyDF__MooneyRivlin_
     from ._LowLevelAssemblyDF__AnisotropicMooneyRivlin_1_ import _LowLevelAssemblyDF__AnisotropicMooneyRivlin_1_
@@ -40,6 +42,16 @@ def _LowLevelAssembly_(fem_solver, function_space, formulation, mesh, material, 
         prefix = "_LowLevelAssemblyDPF__"
 
     assembly_func = prefix + type(material).__name__ + "_"
+    # CHECK IF LOW LEVEL ASSEMBLY EXISTS FOR MATERIAL
+    ll_exists = False
+    for key in globals().keys():
+        if assembly_func == key:
+            ll_exists = True
+            break
+    if ll_exists is False:
+        raise NotImplementedError("Turning optimise option on for {} material is not supported yet. Consider 'optimise=False' for now".format(type(material).__name__))
+
+
     # MAKE MESH DATA CONTIGUOUS
     mesh.ChangeType()
 
