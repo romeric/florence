@@ -1,7 +1,7 @@
 from .MaterialBase import Material
 
 # LINEAR MATERIAL MODELS
-from .LinearModel import *
+from .LinearElastic import *
 from .IncrementalLinearElastic import *
 from .TranservselyIsotropicLinearElastic import *
 # NONLINEAR MATERIAL MODELS

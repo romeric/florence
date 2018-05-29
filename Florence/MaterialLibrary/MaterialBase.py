@@ -66,7 +66,7 @@ class Material(object):
             # else:
             #     warn("You must set the material constants for problem")
 
-        if self.mtype == 'LinearModel' or \
+        if self.mtype == 'LinearElastic' or \
             self.mtype == 'IncrementalLinearElastic':
 
             if self.ndim == 2:

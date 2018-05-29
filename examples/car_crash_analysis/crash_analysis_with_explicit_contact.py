@@ -63,7 +63,7 @@ def crash_analysis():
         boundary_condition=boundary_condition, contact_formulation=contact_formulation)
 
     # Write results to vtk file
-    solution.WriteVTK("crash_analysis_results", quantity=0)
+    # solution.WriteVTK("crash_analysis_results", quantity=0)
 
 
 if __name__ == "__main__":

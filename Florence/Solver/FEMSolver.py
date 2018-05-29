@@ -151,7 +151,7 @@ class FEMSolver(object):
         if material is None:
             raise ValueError("No material model chosen for the analysis")
         if formulation is None:
-            raise ValueError("No variational form specified")
+            raise ValueError("No variational formulation specified")
         # MONKEY PATCH CONTACT FORMULATION
         if contact_formulation is not None:
             self.contact_formulation = contact_formulation
@@ -177,7 +177,7 @@ class FEMSolver(object):
         ###########################################################################
 
 
-        if material.mtype == "LinearModel" and self.number_of_load_increments > 1:
+        if material.mtype == "LinearElastic" and self.number_of_load_increments > 1:
             warn("Can not solve a linear elastic model in multiple step. "
                 "The number of load increments is going to be set to one (1). "
                 "Use IncrementalLinearElastic model for incremental soluiton.")
@@ -187,7 +187,7 @@ class FEMSolver(object):
         if "nonlinear" not in insensitive(self.analysis_nature) and formulation.fields == "mechanics":
             # RUN THE SIMULATION WITHIN A NONLINEAR ROUTINE
             if material.mtype != "IncrementalLinearElastic" and \
-                material.mtype != "LinearModel" and material.mtype != "TranservselyIsotropicLinearElastic":
+                material.mtype != "LinearElastic" and material.mtype != "TranservselyIsotropicLinearElastic":
                 self.has_prestress = True
             else:
                 self.has_prestress = False
@@ -503,7 +503,7 @@ class FEMSolver(object):
                 Residual[boundary_condition.columns_in] = TractionForces[boundary_condition.columns_in] \
                 + NodalForces[boundary_condition.columns_in]*LoadFactor
             else:
-                # IF STRESSES ARE NOT TO BE CALCULATED - FOR LinearModel and IncrementalLinearElastic
+                # IF STRESSES ARE NOT TO BE CALCULATED - FOR LinearElastic and IncrementalLinearElastic
                 # ASSEMBLE
                 K = Assemble(self, function_spaces[0], formulation, mesh, material,
                     Eulerx, np.zeros_like(mesh.points))[0]

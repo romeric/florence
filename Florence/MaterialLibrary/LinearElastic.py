@@ -3,7 +3,7 @@ from .MaterialBase import Material
 from Florence.Tensor import trace
 
 
-class LinearModel(Material):
+class LinearElastic(Material):
     """Classical linear elastic material model
 
         W = lamb/2.*trace(e)**2 + mu*e*e
@@ -12,7 +12,7 @@ class LinearModel(Material):
 
     def __init__(self, ndim, **kwargs):
         mtype = type(self).__name__
-        super(LinearModel, self).__init__(mtype, ndim, **kwargs)
+        super(LinearElastic, self).__init__(mtype, ndim, **kwargs)
         self.energy_type = "internal_energy"
         self.nature = "linear"
         self.fields = "mechanics"
@@ -23,7 +23,13 @@ class LinearModel(Material):
             self.H_VoigtSize = 3
 
         # LOW LEVEL DISPATCHER
-        self.has_low_level_dispatcher = False 
+        # self.has_low_level_dispatcher = False
+        self.has_low_level_dispatcher = True
+
+    def KineticMeasures(self, F, ElectricFieldx=0, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._LinearElastic_ import KineticMeasures
+        # STRAIN TENSOR IS COMPUTED WITHIN THE LOW LEVEL VERSION OF THE MATERIAL
+        return KineticMeasures(self,F)
 
 
     def Hessian(self,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):

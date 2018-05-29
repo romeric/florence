@@ -21,7 +21,14 @@ class IncrementalLinearElastic(Material):
             self.H_VoigtSize = 3
 
         # LOW LEVEL DISPATCHER
-        self.has_low_level_dispatcher = False 
+        # self.has_low_level_dispatcher = False
+        self.has_low_level_dispatcher = True
+
+    def KineticMeasures(self, F, ElectricFieldx=0, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._LinearElastic_ import KineticMeasures
+        # STRAIN TENSOR IS COMPUTED WITHIN THE LOW LEVEL VERSION OF THE MATERIAL
+        return KineticMeasures(self,F)
+
 
     def Hessian(self,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
         # RETURN THE 4TH ORDER ELASTICITY TENSOR (VOIGT FORM)

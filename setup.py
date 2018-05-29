@@ -287,7 +287,7 @@ class FlorenceSetup(object):
 
         self.extension_paths = [tensor_path,jacobi_path,bp_path,
             km_path,gm_path,cm_path,tm_path,mm_path,material_path,assemble_path]
-        # self.extension_paths = [cm_path]
+        # self.extension_paths = [material_path]
         # self.extension_paths = [assemble_path]
 
     def SourceClean(self):
@@ -328,7 +328,8 @@ class FlorenceSetup(object):
     def Build(self):
 
 
-        low_level_material_list = [ "_NeoHookean_",
+        low_level_material_list = [ "_LinearElastic_",
+                                    "_NeoHookean_",
                                     "_MooneyRivlin_",
                                     "_NearlyIncompressibleMooneyRivlin_",
                                     "_AnisotropicMooneyRivlin_1_",
@@ -347,6 +348,7 @@ class FlorenceSetup(object):
 
         # low_level_material_list = ["_IsotropicElectroMechanics_109_"]
         # low_level_material_list = ["_NeoHookean_"]
+        # low_level_material_list = ["_LinearElastic_"]
         # low_level_material_list = ["_ExplicitMooneyRivlin_"]
 
         assert self.extension_paths != None
@@ -360,10 +362,13 @@ class FlorenceSetup(object):
                     execute('cd '+_path+' && make ' + self.compiler_args + " MATERIAL=" + material)
             elif "_Assembly_" in _path:
 
-                ll_material_mech = low_level_material_list[:4]
-                ll_material_electro_mech = low_level_material_list[4:]
-                ll_material_electro_mech.remove("_ExplicitMooneyRivlin_")
+                ll_material_mech = low_level_material_list[:6]
+                ll_material_electro_mech = low_level_material_list[6:]
+
+                ll_material_mech.remove("_LinearElastic_")
+                ll_material_mech.remove("_ExplicitMooneyRivlin_")
                 ll_material_electro_mech.remove("_IsotropicElectroMechanics_109_")
+
                 # ll_material_mech = []
                 # ll_material_electro_mech = low_level_material_list
                 # ll_material_mech = low_level_material_list
