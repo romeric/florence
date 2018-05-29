@@ -1,3 +1,4 @@
+import os
 from Florence import *
 from Florence.VariationalPrinciple import *
 
@@ -8,7 +9,7 @@ def crash_analysis():
     """
 
     mesh = Mesh()
-    mesh.ReadGmsh("Car2D.msh",element_type="quad")
+    mesh.ReadGmsh(os.path.join(PWD(__file__),"Car2D.msh"),element_type="quad")
     mesh.points /=1000.
 
     mu = 1.0e6
