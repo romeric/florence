@@ -4803,7 +4803,8 @@ class Mesh(object):
         from scipy.spatial import Delaunay
         try:
             from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints, EquallySpacedPointsTri, EquallySpacedPointsTet
-            from Florence.FunctionSpace import Tri, Quad, Tet, Hex
+            from Florence.FunctionSpace import Line, Tri, Quad, Tet, Hex
+            from Florence.FunctionSpace.OneDimensional.Line import Lagrange
             from Florence.Tensor import remove_duplicates_2D
         except IOError:
             raise IOError("This functionality requires florence's support")
@@ -4811,6 +4812,8 @@ class Mesh(object):
 
         # WE NEED AN ACTUAL NDIM
         # ndim = self.InferSpatialDimension()
+        if self.element_type == "line":
+            ndim = 1
         if self.element_type == "tri" or self.element_type == "quad":
             ndim = 2
         elif self.element_type == "tet" or self.element_type == "hex":
@@ -4824,7 +4827,10 @@ class Mesh(object):
         p = C+1
         # CActual = self.InferPolynomialDegree() - 1
         CActual = 0 # MUST BE ALWAYS ZERO
-        if self.element_type == "tri":
+        if self.element_type == "line":
+            nsize = int(C+2)
+            nsize_2 = int(CActual+2)
+        elif self.element_type == "tri":
             nsize = int((p+1)*(p+2)/2.)
             nsize_2 = int((CActual+2)*(CActual+3)/2.)
         elif self.element_type == "quad":
@@ -4836,8 +4842,13 @@ class Mesh(object):
         elif self.element_type == "hex":
             nsize = int((C+2)**3)
             nsize_2 = int((CActual+2)**3)
+        else:
+            raise ValueError("Element type not undersood")
 
-        if self.element_type == "quad" or self.element_type == "hex":
+        if self.element_type == "line":
+            SingleElementPoints = EquallySpacedPoints(ndim+1,C).ravel()
+
+        elif self.element_type == "quad" or self.element_type == "hex":
             SingleElementPoints = EquallySpacedPoints(ndim+1,C)
             # RE-ARANGE NODES PROVIDED BY EquallySpacedPoints
             if ndim == 2:
@@ -4856,9 +4867,20 @@ class Mesh(object):
             simplices = Delaunay(SingleElementPoints).simplices.copy()
             nsimplices = simplices.shape[0]
 
+
         Bases = np.zeros((nsize_2,SingleElementPoints.shape[0]),dtype=np.float64)
 
-        if mesh.element_type == "tri":
+        if mesh.element_type == "line":
+            smesh = Mesh()
+            smesh.Line(n=level)
+            simplices = smesh.elements
+            nsimplices = smesh.nelem
+
+            hpBases = Line.Lagrange
+            for i in range(SingleElementPoints.shape[0]):
+                Bases[:,i] = hpBases(CActual,SingleElementPoints[i])[0]
+
+        elif mesh.element_type == "tri":
             hpBases = Tri.hpNodal.hpBases
             for i in range(SingleElementPoints.shape[0]):
                 Bases[:,i] = hpBases(CActual,SingleElementPoints[i,0],SingleElementPoints[i,1],
@@ -4874,7 +4896,7 @@ class Mesh(object):
             for i in range(SingleElementPoints.shape[0]):
                 Bases[:,i] = hpBases(CActual,SingleElementPoints[i,0],SingleElementPoints[i,1])[:,0]
 
-        if mesh.element_type == "tet":
+        elif mesh.element_type == "tet":
             hpBases = Tet.hpNodal.hpBases
             for i in range(SingleElementPoints.shape[0]):
                 Bases[:,i] = hpBases(CActual,SingleElementPoints[i,0],SingleElementPoints[i,1],
