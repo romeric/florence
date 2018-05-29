@@ -4737,7 +4737,7 @@ class Mesh(object):
             return solution
 
 
-    def Smoothing(self, criteria={'aspect_ratio':3}):
+    def Smooth(self, criteria={'aspect_ratio':3}):
         """Performs mesh smoothing based a given criteria.
 
             input:
@@ -4792,8 +4792,8 @@ class Mesh(object):
         self.__update__(mesh)
 
 
-    def UniformRefinement(self, level=2):
-        """Refines a given mesh (self) to specified level.
+    def Refine(self, level=2):
+        """Refines a given mesh (self) to specified level uniformly.
 
             Note that uniform refinement implies two things:
             1. "ALL" elements will refinement, otherwise non-conformal elements will be created
@@ -4929,15 +4929,12 @@ class Mesh(object):
         reelements = unique_reelements[inv_reelements]
         reelements = reelements.reshape(nelem,mesh.elements.shape[1])
 
+        self.__reset__()
         self.elements = np.ascontiguousarray(reelements)
         self.points = np.ascontiguousarray(repoints)
+        self.element_type = mesh.element_type
         self.nelem = self.elements.shape[0]
         self.nnode = self.points.shape[0]
-
-        self.edges = None
-        self.faces = None
-        self.all_edges = None
-        self.all_faces = None
 
         if self.element_type == "tri" or self.element_type == "quad":
             self.GetEdges()
