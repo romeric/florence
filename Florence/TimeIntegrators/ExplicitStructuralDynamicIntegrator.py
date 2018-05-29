@@ -310,6 +310,8 @@ class ExplicitStructuralDynamicIntegrators(object):
 
         from Florence import BoundaryCondition, FEMSolver, IdealDielectric
         from Florence.VariationalPrinciple import LaplacianFormulation, ExplicitPenaltyContactFormulation
+
+        # EMULATE ELECTROSTATICS MODEL
         emesh = deepcopy(mesh)
         # emesh.points = np.copy(Eulerx)
         emesh.points = mesh.points
@@ -320,6 +322,7 @@ class ExplicitStructuralDynamicIntegrators(object):
         ematerial.KineticMeasures = ematerial.ElectrostaticMeasures
         ematerial.H_VoigtSize = formulation.ndim
         ematerial.nvar = 1
+        ematerial.fields = "electrostatics"
 
         # SET UP BOUNDARY CONDITION DURING SOLUTION
         eboundary_condition = BoundaryCondition()
