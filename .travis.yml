@@ -48,7 +48,7 @@ before_install:
 
 install:
   # build florence modules
-  - cd $FLORENCEPATH; python setup.py build KINEMATICS=scalar
+  - cd $FLORENCEPATH; python setup.py build
 
 script:
   # Run florence test suite
