@@ -54,7 +54,7 @@ script:
   # Run florence test suite
   - cd ~
   - export PYTHONPATH=$FLORENCEPATH:$PYTHONPATH
-  - cd $FLORENCEPATH/tests; nosetests -x --with-coverage test.py
+  - cd $FLORENCEPATH/tests; nosetests -x --with-coverage --cover-package=Florence test.py
 
 notifications:
   email: false
