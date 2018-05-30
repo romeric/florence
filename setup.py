@@ -157,12 +157,8 @@ class FlorenceSetup(object):
         if os.path.isdir("/usr/local/include/Fastor"):
             self.fastor_include_path = "/usr/local/include/Fastor"
         else:
-            # Local copies
-            if "darwin" in self._os:
-                self.fastor_include_path = "/Users/romanpoya/Dropbox/Fastor"
-            else:
-                self.fastor_include_path = "/home/roman/Dropbox/Fastor"
-
+            raise RuntimeError("Florence expects Fastor headers to be under '/usr/local/include/Fastor/' directory")
+            return
 
 
     def GetBLAS(self, _blas=None):
