@@ -30,7 +30,7 @@ before_install:
   - cd ~
   - wget http://bitbucket.org/eigen/eigen/get/3.3.3.tar.bz2
   - tar -xvf 3.3.3.tar.bz2
-  - sudo mv eigen-eigen-67e894c6cd8f /usr/local/include/eigen/ 
+  - sudo mv eigen-eigen-67e894c6cd8f /usr/local/include/eigen/
   # Install OpenCascade
   - echo -ne '\n' | sudo apt-get install liboce-*
   # PostMesh
@@ -47,8 +47,8 @@ before_install:
   - sudo ldconfig
 
 install:
-  # Setup florence - build interfaces
-  - cd $FLORENCEPATH; python setup.py build
+  # build florence modules
+  - cd $FLORENCEPATH; python setup.py build KINEMATICS=scalar
 
 script:
   # Run florence test suite
