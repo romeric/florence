@@ -5990,61 +5990,6 @@ class Mesh(object):
         self.points[:,[axis0,axis1]] = self.points[:,[axis1,axis0]]
 
 
-    @staticmethod
-    def BoundaryEdgesfromPhysicalParametrisation(points, facets, mesh_points, mesh_edges):
-        """Given a 2D planar mesh (mesh_points,mesh_edges) and the parametrisation of the physical geometry (points and facets)
-            finds boundary edges
-
-        input:
-
-            points:         nx2 numpy array of points given to meshpy/distmesh/etc API for the actual geometry
-            facets:         mx2 numpy array connectivity of points given to meshpy/distmesh/etc API for the actual geometry
-            mesh_points:    px2 numpy array of points taken from the mesh generator
-            mesh_edges:     qx2 numpy array of edges taken from the mesh generator
-
-        returns:
-
-            arr_1:          nx2 numpy array of boundary edges
-
-        Note that this method could be useful for finding arbitrary edges not necessarily lying on the boundary"""
-
-        # COMPUTE SLOPE OF THE GEOMETRY EDGE
-        geo_edges = np.array(facets); geo_points = np.array(points)
-        # ALLOCATE
-        mesh_boundary_edges = np.zeros((1,2),dtype=int)
-        # LOOP OVER GEOMETRY EDGES
-        for i in range(geo_edges.shape[0]):
-            # GET COORDINATES OF BOTH NODES AT THE EDGE
-            geo_edge_coord = geo_points[geo_edges[i]]
-            geo_x1 = geo_edge_coord[0,0];       geo_y1 = geo_edge_coord[0,1]
-            geo_x2 = geo_edge_coord[1,0];       geo_y2 = geo_edge_coord[1,1]
-
-            # COMPUTE SLOPE OF THIS LINE
-            geo_angle = np.arctan((geo_y2-geo_y1)/(geo_x2-geo_x1)) #*180/np.pi
-
-            # NOW FOR EACH OF THESE GEOMETRY LINES LOOP OVER ALL MESH EDGES
-            for j in range(0,mesh_edges.shape[0]):
-                mesh_edge_coord = mesh_points[mesh_edges[j]]
-                mesh_x1 = mesh_edge_coord[0,0];         mesh_y1 = mesh_edge_coord[0,1]
-                mesh_x2 = mesh_edge_coord[1,0];         mesh_y2 = mesh_edge_coord[1,1]
-
-                # FIND SLOPE OF THIS LINE
-                mesh_angle = np.arctan((mesh_y2-mesh_y1)/(mesh_x2-mesh_x1))
-
-                # CHECK IF GEOMETRY AND MESH EDGES ARE PARALLEL
-                if np.allclose(geo_angle,mesh_angle,atol=1e-12):
-                    # IF SO THEN FIND THE NORMAL DISTANCE BETWEEN THEM
-                    P1 = np.array([geo_x1,geo_y1,0]);               P2 = np.array([geo_x2,geo_y2,0])        # 1st line's coordinates
-                    P3 = np.array([mesh_x1,mesh_y1,0]);             P4 = np.array([mesh_x2,mesh_y2,0])      # 2nd line's coordinates
-
-                    dist = NormalDistance(P1,P2,P3,P4)
-                    # IF NORMAL DISTANCE IS ZEROS THEN MESH EDGE IS ON THE BOUNDARY
-                    if np.allclose(dist,0,atol=1e-14):
-                        mesh_boundary_edges = np.append(mesh_boundary_edges,mesh_edges[j].reshape(1,2),axis=0)
-
-        # return np.delete(mesh_boundary_edges,0,0)
-        return mesh_boundary_edges[1:,:]
-
 
     def __add__(self, other):
         """Add self with other without modifying self. Hybrid meshes not supported"""
