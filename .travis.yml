@@ -52,6 +52,8 @@ install:
 
 script:
   # Run florence test suite
+  - cd ~
+  - export PYTHONPATH=$FLORENCEPATH:$PYTHONPATH
   - cd $FLORENCEPATH/tests; nosetests -x --with-coverage test.py
 
 notifications:
