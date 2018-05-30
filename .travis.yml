@@ -52,7 +52,7 @@ install:
 
 script:
   # Run florence test suite
-  - cd $FLORENCEPATH; nosetests -x --with-coverage tests/test.py
+  - cd $FLORENCEPATH/tests; nosetests -x --with-coverage test.py
 
 notifications:
   email: false
