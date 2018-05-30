@@ -7,7 +7,6 @@ if "PyPy" not in platform.python_implementation():
 from Florence.Tensor import makezero, itemfreq, unique2d, in2d
 from Florence.Utils import insensitive
 from .vtk_writer import write_vtu
-from .NormalDistance import NormalDistance
 try:
     import meshpy.triangle as triangle
     has_meshpy = True
