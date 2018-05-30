@@ -56,5 +56,8 @@ script:
   - export PYTHONPATH=$FLORENCEPATH:$PYTHONPATH
   - cd $FLORENCEPATH/tests; nosetests -x --with-coverage --cover-package=Florence test.py
 
+after_success:
+  - coveralls
+
 notifications:
   email: false
