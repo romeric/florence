@@ -1,5 +1,5 @@
 from __future__ import print_function
-import gc, os, sys
+import gc, os, sys, inspect
 from copy import deepcopy
 from warnings import warn
 from time import time
@@ -181,15 +181,16 @@ class CoupleStressSolver(FEMSolver):
         function_spaces, solver = self.__checkdata__(material, boundary_condition,
             formulation, mesh, function_spaces, solver, contact_formulation=contact_formulation)
         #---------------------------------------------------------------------------#
-
-        print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation info etc...')
-        print('Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*formulation.nvar)
-        if formulation.ndim==2:
-            print('Number of elements is', mesh.elements.shape[0], \
-                 'and number of boundary nodes is', np.unique(mesh.edges).shape[0])
-        elif formulation.ndim==3:
-            print('Number of elements is', mesh.elements.shape[0], \
-                 'and number of boundary nodes is', np.unique(mesh.faces).shape[0])
+        caller = inspect.getouterframes(inspect.currentframe(), 2)[1][3]
+        if caller != "Solve":
+            print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation info etc...')
+            print('Number of nodes is',mesh.points.shape[0], 'number of DoFs is', mesh.points.shape[0]*formulation.nvar)
+            if formulation.ndim==2:
+                print('Number of elements is', mesh.elements.shape[0], \
+                     'and number of boundary nodes is', np.unique(mesh.edges).shape[0])
+            elif formulation.ndim==3:
+                print('Number of elements is', mesh.elements.shape[0], \
+                     'and number of boundary nodes is', np.unique(mesh.faces).shape[0])
         #---------------------------------------------------------------------------#
 
         # INITIATE DATA FOR NON-LINEAR ANALYSIS
@@ -205,7 +206,8 @@ class CoupleStressSolver(FEMSolver):
         # TotalDisp = np.zeros((mesh.points.shape[0],int(formulation.ndim**2),self.number_of_load_increments),dtype=np.float64)
 
         # PRE-ASSEMBLY
-        print('Assembling the system and acquiring neccessary information for the analysis...')
+        if caller != "Solve":
+            print('Assembling the system and acquiring neccessary information for the analysis...')
         tAssembly=time()
 
         # APPLY DIRICHELT BOUNDARY CONDITIONS AND GET DIRICHLET RELATED FORCES
@@ -228,8 +230,14 @@ class CoupleStressSolver(FEMSolver):
 
         # ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES
         if self.analysis_type != 'static':
-            # M = AssembleMass(fem_solver, function_space, formulation, mesh, material, Eulerx)
-            K, TractionForces, _, M = formulation.Assemble(self, material, Eulerx, Eulerw, Eulers, Eulerp)
+            if formulation.fields == "couple_stress" or formulation.fields == "flexoelectric":
+                K, TractionForces, _, M = formulation.Assemble(self, material, Eulerx, Eulerw, Eulers, Eulerp)
+            elif formulation.fields == "mechanics" or formulation.fields == "electro_mechanics":
+                # STANDARD MECHANINCS ELECTROMECHANICS DYNAMIC ANALYSIS ARE DISPATCHED HERE
+                from Florence.FiniteElements.Assembly import Assemble
+                fspace = function_spaces[0] if (mesh.element_type=="hex" or mesh.element_type=="quad") else function_spaces[1]
+                K, TractionForces, _, M = Assemble(self, fspace, formulation, mesh, material,
+                    Eulerx, Eulerp)
         else:
             K, TractionForces = formulation.Assemble(self, material, Eulerx, Eulerw, Eulers, Eulerp)[:2]
 
@@ -247,8 +255,9 @@ class CoupleStressSolver(FEMSolver):
 
 
         solution = self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
-        solution.solW = TotalW
-        solution.solS = TotalS
+        if formulation.fields == "couple_stress" or formulation.fields == "flexoelectric":
+            solution.solW = TotalW
+            solution.solS = TotalS
         return solution
 
 
@@ -447,14 +456,17 @@ class CoupleStressSolver(FEMSolver):
 
             # UPDATE VELOCITY AND ACCELERATION
             accelerations_old = np.copy(accelerations)
-            accelerations = (1./self.beta/LoadFactor**2)*(TotalDisp[:,:formulation.ndim,Increment] - TotalDisp[:,:formulation.ndim,Increment-1]).ravel() -\
+            accelerations = (1./self.beta/LoadFactor**2)*(TotalDisp[:,:formulation.ndim,Increment] -\
+                TotalDisp[:,:formulation.ndim,Increment-1]).ravel() -\
                 1./self.beta/LoadFactor*velocities + (1.-0.5/self.beta)*accelerations
             velocities += LoadFactor*(self.gamma*accelerations + (1-self.gamma)*accelerations_old)
 
             # UPDATE
             Eulerx += dU[:,:formulation.ndim]
             Eulerp += dU[:,-1]
-            TotalW[:,:,Increment], TotalW[:,:,Increment] = formulation.GetAugmentedSolution(self, material, TotalDisp, Eulerx, Eulerw, Eulers, Eulerp)
+            if formulation.fields == "couple_stress" or formulation.fields == "flexoelectric":
+                TotalW[:,:,Increment], TotalW[:,:,Increment] = formulation.GetAugmentedSolution(self, material,
+                    TotalDisp, Eulerx, Eulerw, Eulers, Eulerp)
 
             # LOG REQUESTS
             self.LogSave(formulation, TotalDisp, Increment)

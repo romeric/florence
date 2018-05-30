@@ -302,7 +302,6 @@ class PostProcess(object):
                     MainDict['CauchyStress'][incr,inode,:,:] = CauchyStressTensor[Els[uelem],Pos[uelem],:,:]
 
 
-
         self.recovered_fields = MainDict
         return
 
@@ -429,6 +428,7 @@ class PostProcess(object):
         if self.sol.shape[1] > self.nvar:
             return self.sol
 
+        print("Computing recovered quantities. This is going to take some time...")
         # GET RECOVERED VARIABLES ALL VARIABLE CHECKS ARE DONE IN STRESS RECOVERY
         self.StressRecovery(steps=steps,average_derived_quantities=average_derived_quantities)
 

@@ -1,7 +1,5 @@
 from __future__ import print_function
-import importlib
-import sys, os, imp, time, gc
-import os, sys
+import sys, os, imp, time, gc, importlib
 from sys import exit
 from datetime import datetime
 from warnings import warn
@@ -9,7 +7,6 @@ from warnings import warn
 import numpy as np
 import scipy as sp
 # from scipy.io import loadmat, savemat
-import multiprocessing as MP
 
 # AVOID WRITING .pyc OR .pyo FILES
 sys.dont_write_bytecode
@@ -23,6 +20,7 @@ sys.path.append('../examples/car_crash_analysis/')
 sys.path.append('../examples/curved_mesh_generation/')
 sys.path.append('../examples/hyperelastic_explicit_dynamics/')
 sys.path.append('../examples/wrinkling_of_soft_dielectric_film/')
+sys.path.append('../examples/linear_elastic_dynamics/')
 
 # IMPORT FLORENCE
 from Florence import *
@@ -34,6 +32,7 @@ from crash_analysis_with_explicit_contact import crash_analysis
 from high_order_curved_mesh_generation import high_order_curved_mesh_generation
 from hyperelastic_explicit_dynamics import explicit_dynamics_mechanics
 from wrinkling_of_soft_dielectric_film import dielectric_wrinkling
+from linear_elastic_dynamics import linear_elastic_dynamics
 
 tick  = u'\u2713'.encode('utf8')  + b' : '
 cross = u'\u2717'.encode('utf8')  + b' : '
@@ -180,6 +179,7 @@ def run_examples():
     high_order_curved_mesh_generation()
     explicit_dynamics_mechanics()
     dielectric_wrinkling()
+    linear_elastic_dynamics()
 
 
 # RUN EXAPLES AS TEST CASES

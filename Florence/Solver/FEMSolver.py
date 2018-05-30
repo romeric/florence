@@ -177,7 +177,7 @@ class FEMSolver(object):
         ###########################################################################
 
 
-        if material.mtype == "LinearElastic" and self.number_of_load_increments > 1:
+        if material.mtype == "LinearElastic" and self.number_of_load_increments > 1 and self.analysis_type=="static":
             warn("Can not solve a linear elastic model in multiple step. "
                 "The number of load increments is going to be set to one (1). "
                 "Use IncrementalLinearElastic model for incremental soluiton.")
@@ -348,7 +348,7 @@ class FEMSolver(object):
         #---------------------------------------------------------------------------#
 
         print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation info etc...')
-        print('Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*formulation.nvar)
+        print('Number of nodes is',mesh.points.shape[0], 'number of DoFs is', mesh.points.shape[0]*formulation.nvar)
         if formulation.ndim==2:
             print('Number of elements is', mesh.elements.shape[0], \
                  'and number of boundary nodes is', np.unique(mesh.edges).shape[0])
@@ -397,13 +397,31 @@ class FEMSolver(object):
 
         # ADOPT A DIFFERENT PATH FOR INCREMENTAL LINEAR ELASTICITY
         if formulation.fields == "mechanics" and self.analysis_nature != "nonlinear":
-            # MAKE A COPY OF MESH, AS MESH POINTS WILL BE OVERWRITTEN
-            vmesh = deepcopy(mesh)
-            TotalDisp = self.IncrementalLinearElasticitySolver(function_spaces, formulation, vmesh, material,
-                boundary_condition, solver, TotalDisp, Eulerx, NeumannForces)
-            del vmesh
+            if self.analysis_type == "static":
+                # MAKE A COPY OF MESH, AS MESH POINTS WILL BE OVERWRITTEN
+                vmesh = deepcopy(mesh)
+                TotalDisp = self.IncrementalLinearElasticitySolver(function_spaces, formulation, vmesh, material,
+                    boundary_condition, solver, TotalDisp, Eulerx, NeumannForces)
 
-            return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
+                del vmesh
+                return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
+
+            elif self.analysis_type == "dynamic":
+                # DISPATCH TO DYNAMIC SOLVER FOR COUPLE STRESS
+                from Florence.Solver import CoupleStressSolver
+
+                formulation.meshes = [mesh,mesh,mesh]
+
+                cs_solver = CoupleStressSolver(total_time=self.total_time,
+                    number_of_load_increments=self.number_of_load_increments,
+                    analysis_type = "dynamic",
+                    print_incremental_log=self.print_incremental_log,
+                    optimise=self.has_low_level_dispatcher)
+
+                return cs_solver.Solve(formulation=formulation, mesh=mesh,
+                        material=material, boundary_condition=boundary_condition,
+                        contact_formulation=contact_formulation, solver=solver)
+
 
         # ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES FOR THE FIRST TIME
         if self.analysis_type == "static":
