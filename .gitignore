@@ -9,6 +9,7 @@
 .*
 !.gitignore
 !.travis.yml
+!.coveralls.yml
 
 # results files
 *.vtu
