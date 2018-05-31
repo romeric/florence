@@ -2214,16 +2214,16 @@ class Mesh(object):
 
         if reader_type is None:
             if filename.split('.')[-1] == "msh":
-                reader_type == "gmsh"
+                reader_type = "gmsh"
             elif filename.split('.')[-1] == "obj":
-                reader_type == "obj"
+                reader_type = "obj"
             elif filename.split('.')[-1] == "fro":
-                reader_type == "fro"
+                reader_type = "fro"
             elif filename.split('.')[-1] == "dat":
                 for key in kwargs.keys():
                     inkey = insensitive(key)
                     if "connectivity" in inkey and "delimiter" not in inkey:
-                        reader_type == "read_separate"
+                        reader_type = "read_separate"
                         break
             if reader_type is None:
                 raise ValueError("Mesh file format was not undertood. Please specify it using reader_type keyword")
