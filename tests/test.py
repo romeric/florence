@@ -22,11 +22,6 @@ sys.path.append('../examples/hyperelastic_explicit_dynamics/')
 sys.path.append('../examples/wrinkling_of_soft_dielectric_film/')
 sys.path.append('../examples/linear_elastic_dynamics/')
 
-sys.path.append('examples/car_crash_analysis/')
-sys.path.append('examples/curved_mesh_generation/')
-sys.path.append('examples/hyperelastic_explicit_dynamics/')
-sys.path.append('examples/wrinkling_of_soft_dielectric_film/')
-sys.path.append('examples/linear_elastic_dynamics/')
 
 # IMPORT FLORENCE
 from Florence import *

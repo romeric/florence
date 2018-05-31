@@ -54,7 +54,7 @@ script:
   # Run florence test suite
   - cd ~
   - export PYTHONPATH=$FLORENCEPATH:$PYTHONPATH
-  - cd $FLORENCEPATH; nosetests -x --with-coverage --cover-package=Florence tests/test.py
+  - cd $FLORENCEPATH/tests; nosetests -x --with-coverage --cover-package=Florence test.py
 
 after_success:
   - coveralls
