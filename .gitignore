@@ -23,14 +23,17 @@
 # ipython notebooks
 *.ipynb
 
-# gmsh files
-*.msh
-*.geo
-
 # hdf5 files
 *.mat
 *.hdf
 *.hdf5
+
+# mesh files
+*.msh
+*.geo
+*.obj
+*.mesh
+*.stl
 
 # cad files
 *.igs
@@ -54,24 +57,6 @@
 *.pro
 *.user
 
-# top level project files
-Session.vim
-RunSession.sublime-project
-RunSession.sublime-workspace
-Florence.sublime-project
-Florence.sublime-workspace
-*.sublime-project
-param_run_session.py
-profile_imports_manual.py
-nr.py
-ParametricStudies/
-ParametricStudies/*
-
-# test files not to ignore
-!tests/Almond3D/
-!tests/Almond3D/*
-!tests/Cylinder/
-!tests/Cylinder/*
 
 # example files not to ignore
 !examples/curved_mesh_generation/Hollow_Cylinder.*
