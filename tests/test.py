@@ -179,7 +179,7 @@ def final_solution_checker(material,solver,fem_solver,TotalDisp,Dict):
 
 
 
-def run_examples():
+def test_examples():
     # RUN EXAMPLES AT TEST CASES
     crash_analysis()
     high_order_curved_mesh_generation()
@@ -190,6 +190,6 @@ def run_examples():
 
 # RUN EXAPLES AS TEST CASES
 if __name__ == "__main__":
-    run_examples()
+    test_examples()
 
 
