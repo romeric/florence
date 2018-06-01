@@ -635,9 +635,9 @@ class BoundaryCondition(object):
             pboundary_condition.Dirichlet = Dirichlet2D
 
             # GET VARIATIONAL FORMULATION FOR 2D PROBLEM
-            pformulation_func = getattr(Florence.VariationalPrinciple, type(formulation).__name__,None)
+            # pformulation_func = getattr(Florence.VariationalPrinciple, type(formulation).__name__, None)
+            pformulation_func = formulation.__class__
             pformulation = pformulation_func(pmesh)
-
 
             print('Solving planar problem {}. Number of DoF is {}'.format(niter,pmesh.points.shape[0]*pformulation.nvar))
 

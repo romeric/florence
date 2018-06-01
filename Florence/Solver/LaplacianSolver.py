@@ -35,6 +35,18 @@ class LaplacianSolver(object):
         function_spaces=None, solver=None, Eulerx=None, Eulerp=None):
         """Main solution routine for LaplacianSolver """
 
+        # CHECK FOR ATTRIBUTE FOR LOWLEVEL ASSEMBLY
+        if material.nature == "linear" and material.has_low_level_dispatcher and self.has_low_level_dispatcher:
+            if hasattr(material,'e'):
+                if material.e is None or isinstance(material.e, float):
+                    if material.mtype == "IdealDielectric":
+                        material.e = material.eps_1*np.eye(formulation.ndim, formulation.ndim)
+                    else:
+                        raise ValueError("For optimise=True, you need to provide the material permittivity tensor (ndimxndim)")
+            else:
+                raise ValueError("For optimise=True, you need to provide the material permittivity tensor (ndimxndim)")
+
+
         # INITIATE DATA FOR THE ANALYSIS
         NodalForces, Residual = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64), \
             np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64)
@@ -228,6 +240,10 @@ class LaplacianSolver(object):
             # Eulerp += dU[:,-1]
             Eulerp += dU[:,0]
 
+            # BREAK FROM HERE IF ANALYSIS IS LINEAR
+            if material.nature == 'linear':
+                break
+
             # RE-ASSEMBLE - COMPUTE STIFFNESS AND INTERNAL TRACTION FORCES
             K, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material,
                 Eulerx,Eulerp)[:2]
@@ -240,6 +256,9 @@ class LaplacianSolver(object):
             self.rel_norm_residual = la.norm(Residual[boundary_condition.columns_in])
             if Iter==0:
                 self.NormForces = la.norm(Residual[boundary_condition.columns_in])
+                # AVOID DIVISION BY ZERO
+                if np.isclose(self.NormForces,0.0):
+                    self.NormForces = 1e-14
             self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)
 
             # SAVE THE NORM

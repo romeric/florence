@@ -2,20 +2,16 @@
 #define _LOWLEVELASSEMBLYDPF__H
 
 
-
 #include "assembly_helper.h"
-#include "_TractionDF_.h"
-#include "_TractionDPF_.h"
 
-#include "_NeoHookean_2_.h"
-#include "_MooneyRivlin_0_.h"
-#include "_ExplicitMooneyRivlin_0_.h"
-#include "_IsotropicElectroMechanics_101_.h"
-#include "_IsotropicElectroMechanics_108_.h"
+FASTOR_INLINE void _transpose_(int M, int N, const Real * FASTOR_RESTRICT a, Real * FASTOR_RESTRICT out) {
+    for (size_t i=0; i< M; ++i)
+        for (size_t j=0; j<N; ++j)
+            out[j*M+i] = a[i*N+j];
+}
 
 
 // Kinematics
-//
 template<int ndim, typename std::enable_if<ndim==2,bool>::type = 0>
 FASTOR_INLINE void KinematicMeasures__(Real *MaterialGradient, Real &detJ,
     const Real *current_Jm, Real AllGauss_, const Real *LagrangeElemCoords_,
@@ -23,20 +19,11 @@ FASTOR_INLINE void KinematicMeasures__(Real *MaterialGradient, Real &detJ,
 
     Real FASTOR_ALIGN ParentGradientX[ndim*ndim];
     Real FASTOR_ALIGN invParentGradientX[ndim*ndim];
-    // Real FASTOR_ALIGN ParentGradientx[ndim*ndim];
-    // Real FASTOR_ALIGN invParentGradientx[ndim*ndim];
-    // Real FASTOR_ALIGN current_Ft[ndim*ndim];
 
     _matmul_(ndim,ndim,nodeperelem,current_Jm,LagrangeElemCoords_,ParentGradientX);
-    // _matmul_(ndim,ndim,nodeperelem,current_Jm,EulerElemCoords_,ParentGradientx);
-
     const Real detX = invdet2x2(ParentGradientX,invParentGradientX);
-    // const Real detx = invdet2x2(ParentGradientx,invParentGradientx);
-
     detJ = AllGauss_*fabs(detX);
-
     _matmul_(ndim,nodeperelem,ndim,invParentGradientX,current_Jm,MaterialGradient);
-    // _matmul_(ndim,nodeperelem,ndim,invParentGradientx,current_Jm,current_sp);
 }
 
 template<int ndim, typename std::enable_if<ndim==3,bool>::type = 0>
@@ -52,13 +39,13 @@ FASTOR_INLINE void KinematicMeasures__(Real *MaterialGradient, Real &detJ,
     detJ = AllGauss_*fabs(detX);
     _matmul_(ndim,nodeperelem,ndim,invParentGradientX,current_Jm,MaterialGradient);
 }
-// // //
+//
 
 
 
 
 template<Integer ndim>
-void _GlobalAssemblyPerfectLaplacian_(const Real *points,
+void _GlobalAssemblyPerfectLaplacian__(const Real *points,
                         const UInteger* elements,
                         const Real* Eulerp,
                         const Real* bases,
@@ -68,19 +55,17 @@ void _GlobalAssemblyPerfectLaplacian_(const Real *points,
                         Integer nelem,
                         Integer nodeperelem,
                         Integer nnode,
-                        Real eps_1,
-                        Real eps_2,
-                        Real eps_3,
-                        Real eps_e,
-                        const Real *anisotropic_orientations,
-                        int material_number,
-                        int formulation_number
+                        int *I_stiff,
+                        int *J_stiff,
+                        Real *V_stiff,
+                        Real *e_tensor,
+                        Integer is_hessian_symmetric
                         );
 
 
 
 template<>
-void _GlobalAssemblyPerfectLaplacian_<2>(const Real *points,
+void _GlobalAssemblyPerfectLaplacian__<2>(const Real *points,
                         const UInteger* elements,
                         const Real* Eulerp,
                         const Real* bases,
@@ -90,31 +75,32 @@ void _GlobalAssemblyPerfectLaplacian_<2>(const Real *points,
                         Integer nelem,
                         Integer nodeperelem,
                         Integer nnode,
-                        Real eps_1,
-                        Real eps_2,
-                        Real eps_3,
-                        Real eps_e,
-                        const Real *anisotropic_orientations,
-                        int material_number
+                        int *I_stiff,
+                        int *J_stiff,
+                        Real *V_stiff,
+                        Real *e_tensor,
+                        Integer is_hessian_symmetric
                         ) {
 
     constexpr Integer ndim = 2;
-    constexpr Integer nvar = 1;
-    Integer ndof = nvar*nodeperelem;
+    Integer ndof = nodeperelem;
+    Integer local_capacity = ndof*ndof;
 
     Real *LagrangeElemCoords        = allocate<Real>(nodeperelem*ndim);
     Real *ElectricPotentialElem     = allocate<Real>(nodeperelem);
 
     Real *current_Jm                = allocate<Real>(nodeperelem*ndim);
     Real *MaterialGradient          = allocate<Real>(ndim*nodeperelem);
-    Real *MaterialGradientT         = allocate<Real>(ndim*nodeperelem);
+    Real *eM                        = allocate<Real>(ndim*nodeperelem);
     Real detJ                       = 0;
 
-    Tensor<Real,ndim> ElectricFieldx;
-    Tensor<Real,ndim> D;
-    // Tensor<Real,ndim,ndim> I; I.eye2();
+    Real *BDB                       = allocate<Real>(local_capacity);
+    Real *stiffness                 = allocate<Real>(local_capacity);
 
-    Real *stiffness                 = allocate<Real>(ndof*ndof);
+    Integer *current_row_column     = allocate<Integer>(ndof);
+    Integer *full_current_row       = allocate<Integer>(local_capacity);
+    Integer *full_current_column    = allocate<Integer>(local_capacity);
+
 
     // LOOP OVER ELEMETNS
     for (Integer elem=0; elem < nelem; ++elem) {
@@ -129,7 +115,8 @@ void _GlobalAssemblyPerfectLaplacian_<2>(const Real *points,
             ElectricPotentialElem[i] = Eulerp[inode];
         }
 
-        std::fill(stiffness,stiffness+ndof*ndof,0.);
+        std::fill(stiffness,stiffness+local_capacity,0.);
+        std::fill(BDB,BDB+local_capacity,0.);
 
         for (int g=0; g<ngauss; ++g) {
 
@@ -138,12 +125,10 @@ void _GlobalAssemblyPerfectLaplacian_<2>(const Real *points,
                 current_Jm[nodeperelem+j] = Jm[ngauss*nodeperelem+j*ngauss+g];
             }
 
-
             // COMPUTE KINEMATIC MEASURES
             std::fill(MaterialGradient,MaterialGradient+nodeperelem*ndim,0.);
 
             KinematicMeasures__<2>(  MaterialGradient,
-                                    F,
                                     detJ,
                                     current_Jm,
                                     AllGauss[g],
@@ -151,32 +136,87 @@ void _GlobalAssemblyPerfectLaplacian_<2>(const Real *points,
                                     nodeperelem
                                     );
 
-
-            // // COMPUTE ELECTRIC FIELD
-            // Real iE0 = 0, iE1 = 0;
-            // for (Integer j=0; j<nodeperelem; ++j) {
-            //     const Real potE = ElectricPotentialElem[j];
-            //     iE0 += MaterialGradient[j]*potE;
-            //     iE1 += MaterialGradient[nodeperelem+j]*potE;
+            // Extremely consise way
+            // _transpose_(ndim,nodeperelem,MaterialGradient,MaterialGradientT);
+            // _matmul_(ndof,ndim,ndim,MaterialGradientT,e_tensor,eM);
+            // _matmul_(ndof,ndof,ndim,eM,MaterialGradient,BDB);
+            // for (int i=0; i<local_capacity; ++i) {
+            //     stiffness[i] += BDB[i]*detJ;
             // }
-            // ElectricFieldx[0] = -iE0;
-            // ElectricFieldx[1] = -iE1;
 
-            // // COMPUTE KINETIC MEASURES
-            // // if (material_number==0) {
-            // //     // std::tie(D,hessian) = mat_obj0.template _KineticMeasures_<Real,ndim>(F);
-            // //     // D = eps_1*ElectricFieldx;
-            // //     // hessian = -eps_1*I;
-            // // }
+            if (is_hessian_symmetric) {
+                _matmul_(ndim,nodeperelem,ndim,e_tensor,MaterialGradient,eM);
+                for (int i=0; i<nodeperelem; ++i) {
+                    const Real a0 = MaterialGradient[i];
+                    const Real a1 = MaterialGradient[i+nodeperelem];
 
-            // D = eps_1*ElectricFieldx;
+                    for (int j=i; j<nodeperelem; ++j) {
+                        const Real b0 = eM[j];
+                        const Real b1 = eM[j+nodeperelem];
 
-            _matmul_(ndof,ndof,ndim,MaterialGradient,MaterialGradientT,stiffness);
+                        BDB[i*nodeperelem+j] += (a0*b0 + a1*b1)*detJ;
+                    }
+                }
+            }
+            else {
+                _matmul_(ndim,nodeperelem,ndim,e_tensor,MaterialGradient,eM);
+                for (int i=0; i<nodeperelem; ++i) {
+                    const Real a0 = MaterialGradient[i];
+                    const Real a1 = MaterialGradient[i+nodeperelem];
 
-            for (int i=0; i<ndof*ndof; ++i) {
-                stiffness[i] *= eps_1*detJ;
+                    for (int j=0; j<nodeperelem; ++j) {
+                        const Real b0 = eM[j];
+                        const Real b1 = eM[j+nodeperelem];
+
+                        BDB[i*nodeperelem+j] = a0*b0 + a1*b1;
+                    }
+                }
+
+                for (int i=0; i<local_capacity; ++i) {
+                    stiffness[i] += BDB[i]*detJ;
+                }
             }
         }
+
+        if (is_hessian_symmetric) {
+            // Fill the lower half now
+            std::copy(BDB,BDB+local_capacity,stiffness);
+            for (int i=0; i<nodeperelem; ++i) {
+                for (int j=i; j<nodeperelem; ++j) {
+                    stiffness[j*nodeperelem+i] = BDB[i*nodeperelem+j];
+                }
+            }
+        }
+
+        // ASSEMBLE CONSTITUTIVE STIFFNESS
+        {
+            for (Integer counter=0; counter<nodeperelem; ++counter) {
+                current_row_column[counter] = elements[elem*nodeperelem+counter];
+            }
+
+            Integer const_I_retriever;
+            for (Integer counter=0; counter<ndof; ++counter) {
+                const_I_retriever = current_row_column[counter];
+                for (Integer iterator=0; iterator<ndof; ++iterator) {
+                    full_current_row[counter*ndof+iterator]    = const_I_retriever;
+                    full_current_column[counter*ndof+iterator] = current_row_column[iterator];
+                }
+            }
+
+            Integer low, high;
+            low = local_capacity*elem;
+            high = local_capacity*(elem+1);
+
+            Integer incrementer = 0;
+            for (Integer counter = low; counter < high; ++counter) {
+                I_stiff[counter] = full_current_row[incrementer];
+                J_stiff[counter] = full_current_column[incrementer];
+                V_stiff[counter] = stiffness[incrementer];
+
+                incrementer += 1;
+            }
+        }
+
     }
 
 
@@ -184,14 +224,20 @@ void _GlobalAssemblyPerfectLaplacian_<2>(const Real *points,
     deallocate(ElectricPotentialElem);
     deallocate(current_Jm);
     deallocate(MaterialGradient);
-    deallocate(MaterialGradientT);
+    deallocate(eM);
+
+    deallocate(BDB);
     deallocate(stiffness);
+
+    deallocate(full_current_row);
+    deallocate(full_current_column);
+    deallocate(current_row_column);
 }
 
 
 
 template<>
-void _GlobalAssemblyExplicit_DF_DPF_<3>(const Real *points,
+void _GlobalAssemblyPerfectLaplacian__<3>(const Real *points,
                         const UInteger* elements,
                         const Real* Eulerp,
                         const Real* bases,
@@ -201,28 +247,33 @@ void _GlobalAssemblyExplicit_DF_DPF_<3>(const Real *points,
                         Integer nelem,
                         Integer nodeperelem,
                         Integer nnode,
-                        Real eps_1,
-                        Real eps_2,
-                        Real eps_3,
-                        Real eps_e,
-                        const Real *anisotropic_orientations,
-                        int material_number,
-                        int formulation_number
+                        int *I_stiff,
+                        int *J_stiff,
+                        Real *V_stiff,
+                        Real *e_tensor,
+                        Integer is_hessian_symmetric
                         ) {
 
     constexpr Integer ndim = 3;
-    constexpr Integer nvar = 1;
-    Integer ndof = nvar*nodeperelem;
+    Integer ndof = nodeperelem;
+    Integer local_capacity = ndof*ndof;
 
     Real *LagrangeElemCoords        = allocate<Real>(nodeperelem*ndim);
     Real *ElectricPotentialElem     = allocate<Real>(nodeperelem);
 
     Real *current_Jm                = allocate<Real>(nodeperelem*ndim);
     Real *MaterialGradient          = allocate<Real>(ndim*nodeperelem);
+    // Real *MaterialGradientT         = allocate<Real>(ndim*nodeperelem);
+    Real *eM                        = allocate<Real>(ndim*nodeperelem);
     Real detJ                       = 0;
 
-    Tensor<Real,ndim> ElectricFieldx, D;
-    // Tensor<Real,ndim,ndim> hessian;
+    Real *BDB                       = allocate<Real>(local_capacity);
+    Real *stiffness                 = allocate<Real>(local_capacity);
+
+    Integer *current_row_column     = allocate<Integer>(ndof);
+    Integer *full_current_row       = allocate<Integer>(local_capacity);
+    Integer *full_current_column    = allocate<Integer>(local_capacity);
+
 
     // LOOP OVER ELEMETNS
     for (Integer elem=0; elem < nelem; ++elem) {
@@ -238,7 +289,8 @@ void _GlobalAssemblyExplicit_DF_DPF_<3>(const Real *points,
             ElectricPotentialElem[i] = Eulerp[inode];
         }
 
-        std::fill(stiffness,stiffness+ndof,0.);
+        std::fill(stiffness,stiffness+local_capacity,0.);
+        std::fill(BDB,BDB+local_capacity,0.);
 
         for (int g=0; g<ngauss; ++g) {
 
@@ -247,7 +299,6 @@ void _GlobalAssemblyExplicit_DF_DPF_<3>(const Real *points,
                 current_Jm[nodeperelem+j] = Jm[ngauss*nodeperelem+j*ngauss+g];
                 current_Jm[2*nodeperelem+j] = Jm[2*ngauss*nodeperelem+j*ngauss+g];
             }
-
 
             // COMPUTE KINEMATIC MEASURES
             std::fill(MaterialGradient,MaterialGradient+nodeperelem*ndim,0.);
@@ -260,48 +311,90 @@ void _GlobalAssemblyExplicit_DF_DPF_<3>(const Real *points,
                                     nodeperelem
                                     );
 
-
-            // // COMPUTE ELECTRIC FIELD
-            // Real iE0 = 0, iE1 = 0, iE2 = 0;
-            // for (Integer j=0; j<nodeperelem; ++j) {
-            //     const Real potE = ElectricPotentialElem[j];
-            //     iE0 += SpatialGradient[j]*potE;
-            //     iE1 += SpatialGradient[nodeperelem+j]*potE;
-            //     iE2 += SpatialGradient[2*nodeperelem+j]*potE;
-            // }
-            // ElectricFieldx[0] = -iE0;
-            // ElectricFieldx[1] = -iE1;
-            // ElectricFieldx[2] = -iE2;
-
-
-            // // COMPUTE KINETIC MEASURES
-            // if (material_number==0) {
-            //     D = eps_1*ElectricFieldx;
-            //     // hessian = -eps_1*I;
+            // Extremely consise way - Gives almost identical timing
+            // _transpose_(ndim,nodeperelem,MaterialGradient,MaterialGradientT);
+            // _matmul_(ndof,ndim,ndim,MaterialGradientT,e_tensor,eM);
+            // _matmul_(ndof,ndof,ndim,eM,MaterialGradient,BDB);
+            // for (int i=0; i<local_capacity; ++i) {
+            //     stiffness[i] += BDB[i]*detJ;
             // }
 
-            // _matmul_(ndof,ndof,ndim,MaterialGradient,MaterialGradientT,stiffness);
+            if (is_hessian_symmetric) {
+                _matmul_(ndim,nodeperelem,ndim,e_tensor,MaterialGradient,eM);
+                for (int i=0; i<nodeperelem; ++i) {
+                    const Real a0 = MaterialGradient[i];
+                    const Real a1 = MaterialGradient[i+nodeperelem];
+                    const Real a2 = MaterialGradient[i+2*nodeperelem];
 
-            // int counter = 0;
+                    for (int j=i; j<nodeperelem; ++j) {
+                        const Real b0 = eM[j];
+                        const Real b1 = eM[j+nodeperelem];
+                        const Real b2 = eM[j+2*nodeperelem];
+
+                        BDB[i*nodeperelem+j] += (a0*b0 + a1*b1 + a2*b2)*detJ;
+                    }
+                }
+            }
+            else {
+                _matmul_(ndim,nodeperelem,ndim,e_tensor,MaterialGradient,eM);
+                for (int i=0; i<nodeperelem; ++i) {
+                    const Real a0 = MaterialGradient[i];
+                    const Real a1 = MaterialGradient[i+nodeperelem];
+                    const Real a2 = MaterialGradient[i+2*nodeperelem];
+
+                    for (int j=0; j<nodeperelem; ++j) {
+                        const Real b0 = eM[j];
+                        const Real b1 = eM[j+nodeperelem];
+                        const Real b2 = eM[j+2*nodeperelem];
+
+                        BDB[i*nodeperelem+j] = a0*b0 + a1*b1 + a2*b2;
+                    }
+                }
+
+                for (int i=0; i<local_capacity; ++i) {
+                    stiffness[i] += BDB[i]*detJ;
+                }
+            }
+        }
+
+        if (is_hessian_symmetric) {
+            // Fill the lower half now
+            std::copy(BDB,BDB+local_capacity,stiffness);
             for (int i=0; i<nodeperelem; ++i) {
-                const Real a0 = MaterialGradient[i];
-                const Real a1 = MaterialGradient[i+nodeperelem];
-                const Real a2 = MaterialGradient[i+2*nodeperelem];
+                for (int j=i; j<nodeperelem; ++j) {
+                    stiffness[j*nodeperelem+i] = BDB[i*nodeperelem+j];
+                }
+            }
+        }
 
-                for (j=i; j<nodeperelem; ++j) {
-                    const Real b0 = MaterialGradient[j];
-                    const Real b1 = MaterialGradient[j+nodeperelem];
-                    const Real b2 = MaterialGradient[j+2*nodeperelem];
 
-                    // stiffness[counter] = a0*b0 + a1*b1;
-                    stiffness[i*nodeperelem+j] = a0*b0 + a1*b1 + a2*b2;
-                    // counter = i*nodeperelem + j;
+        // ASSEMBLE CONSTITUTIVE STIFFNESS
+        {
+            for (Integer counter=0; counter<nodeperelem; ++counter) {
+                current_row_column[counter] = elements[elem*nodeperelem+counter];
+            }
+
+            Integer const_I_retriever;
+            for (Integer counter=0; counter<ndof; ++counter) {
+                const_I_retriever = current_row_column[counter];
+                for (Integer iterator=0; iterator<ndof; ++iterator) {
+                    full_current_row[counter*ndof+iterator]    = const_I_retriever;
+                    full_current_column[counter*ndof+iterator] = current_row_column[iterator];
                 }
             }
 
-            // for (int i=0; i<ndof*ndof; ++i) {
-                // stiffness[i] *= eps_1*detJ;
-            // }
+            Integer low, high;
+            low = local_capacity*elem;
+            high = local_capacity*(elem+1);
+
+            Integer incrementer = 0;
+            for (Integer counter = low; counter < high; ++counter) {
+                I_stiff[counter] = full_current_row[incrementer];
+                J_stiff[counter] = full_current_column[incrementer];
+                V_stiff[counter] = stiffness[incrementer];
+
+                incrementer += 1;
+            }
         }
 
 
@@ -311,8 +404,15 @@ void _GlobalAssemblyExplicit_DF_DPF_<3>(const Real *points,
     deallocate(LagrangeElemCoords);
     deallocate(ElectricPotentialElem);
     deallocate(MaterialGradient);
-    deallocate(MaterialGradientT);
+    // deallocate(MaterialGradientT);
+    deallocate(eM);
+
+    deallocate(BDB);
     deallocate(stiffness);
+
+    deallocate(full_current_row);
+    deallocate(full_current_column);
+    deallocate(current_row_column);
 }
 
 
@@ -324,7 +424,7 @@ void _GlobalAssemblyExplicit_DF_DPF_<3>(const Real *points,
 
 
 
-void _GlobalAssemblyExplicit_DF_DPF_(const Real *points,
+void _GlobalAssemblyPerfectLaplacian_(const Real *points,
                         const UInteger* elements,
                         const Real* Eulerp,
                         const Real* bases,
@@ -335,22 +435,15 @@ void _GlobalAssemblyExplicit_DF_DPF_(const Real *points,
                         Integer nelem,
                         Integer nodeperelem,
                         Integer nnode,
-                        Real *T,
-                        Integer* local_rows_mass,
-                        Integer* local_cols_mass,
-                        int *I_mass,
-                        int *J_mass,
-                        Real *V_mass,
-                        Real eps_1,
-                        Real eps_2,
-                        Real eps_3,
-                        Real eps_e,
-                        const Real *anisotropic_orientations,
-                        int material_number
+                        int *I_stiff,
+                        int *J_stiff,
+                        Real *V_stiff,
+                        Real *e_tensor,
+                        Integer is_hessian_symmetric
                         ) {
 
     if (ndim==3) {
-        _GlobalAssemblyExplicit_DF_DPF_<3>(points,
+        _GlobalAssemblyPerfectLaplacian__<3>(points,
                         elements,
                         Eulerp,
                         bases,
@@ -360,33 +453,29 @@ void _GlobalAssemblyExplicit_DF_DPF_(const Real *points,
                         nelem,
                         nodeperelem,
                         nnode,
-                        eps_1,
-                        eps_2,
-                        eps_3,
-                        eps_e,
-                        anisotropic_orientations,
-                        material_number
+                        I_stiff,
+                        J_stiff,
+                        V_stiff,
+                        e_tensor,
+                        is_hessian_symmetric
                         );
     }
     else {
-
-        _GlobalAssemblyExplicit_DF_DPF_<2>(points,
+        _GlobalAssemblyPerfectLaplacian__<2>(points,
                         elements,
                         Eulerp,
                         bases,
                         Jm,
                         AllGauss,
-                        nvar,
                         ngauss,
                         nelem,
                         nodeperelem,
                         nnode,
-                        eps_1,
-                        eps_2,
-                        eps_3,
-                        eps_e,
-                        anisotropic_orientations,
-                        material_number
+                        I_stiff,
+                        J_stiff,
+                        V_stiff,
+                        e_tensor,
+                        is_hessian_symmetric
                         );
 
     }

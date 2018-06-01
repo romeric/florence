@@ -131,6 +131,7 @@ class FEMSolver(object):
         self.has_contact = has_contact
 
         self.fem_timer = 0.
+        self.assembly_time = 0.
 
         if self.newton_raphson_solution_tolerance is None:
             self.newton_raphson_solution_tolerance = 10.*self.newton_raphson_tolerance
@@ -227,7 +228,8 @@ class FEMSolver(object):
         # CHECK IF MATERIAL MODEL AND ANALYSIS TYPE ARE COMPATIBLE
         #############################################################################
         if material.nature == "linear" and self.analysis_nature == "nonlinear":
-            raise RuntimeError("Cannot perform nonlinear analysis with linear model")
+            if formulation.fields != "electrostatics":
+                raise RuntimeError("Cannot perform nonlinear analysis with linear model")
 
         if material.fields != formulation.fields:
             raise RuntimeError("Incompatible material model and formulation type")
@@ -306,6 +308,8 @@ class FEMSolver(object):
                 post_process.kinetic_power = formulation.kinetic_power
                 post_process.external_power = formulation.external_power
 
+        post_process.assembly_time = self.assembly_time
+
         return post_process
 
 
@@ -360,9 +364,11 @@ class FEMSolver(object):
         # QUICK REDIRECT TO LAPLACIAN SOLVER
         if formulation.fields == "electrostatics":
             laplacian_solver = LaplacianSolver(self)
-            return laplacian_solver.Solve(formulation=formulation, mesh=mesh,
+            solution = laplacian_solver.Solve(formulation=formulation, mesh=mesh,
                 material=material, boundary_condition=boundary_condition,
                 function_spaces=function_spaces, solver=solver, Eulerx=Eulerx, Eulerp=Eulerp)
+            solution.assembly_time = laplacian_solver.assembly_time
+            return solution
 
 
         # INITIATE DATA FOR THE ANALYSIS

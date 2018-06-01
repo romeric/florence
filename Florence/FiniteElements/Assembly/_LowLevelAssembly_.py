@@ -31,8 +31,15 @@ except IOError:
     has_low_level_dispatcher = False
     warn("Cannot use low level dispatchers for Assembly")
 
+try:
+    from ._LowLevelAssemblyPerfectLaplacian_ import _LowLevelAssemblyPerfectLaplacian_
+    has_low_level_dispatcher = True
+except IOError:
+    has_low_level_dispatcher = False
+    warn("Cannot use low level dispatchers for Assembly")
 
-__all__ = ['_LowLevelAssembly_']
+
+__all__ = ['_LowLevelAssembly_', '_LowLevelAssemblyExplicit_', '_LowLevelAssemblyLaplacian_']
 
 
 def _LowLevelAssembly_(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
@@ -89,6 +96,20 @@ def _LowLevelAssemblyExplicit_(fem_solver, function_space, formulation, mesh, ma
             shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
 
     return T, F, mass
+
+
+
+def _LowLevelAssemblyLaplacian_(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
+
+    mesh.GetNumberOfNodes()
+    # MAKE MESH DATA CONTIGUOUS
+    mesh.ChangeType()
+
+    # CALL LOW LEVEL ASSEMBLER
+    I, J, V = _LowLevelAssemblyPerfectLaplacian_(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
+    stiffness = csr_matrix((V,(I,J)), shape=((mesh.nnode,mesh.nnode)),dtype=np.float64)
+
+    return stiffness, np.zeros(mesh.nnode,np.float64)
 
 
 

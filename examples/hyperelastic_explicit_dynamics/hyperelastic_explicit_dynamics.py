@@ -1,7 +1,5 @@
-from __future__ import division
-import os, sys
+import numpy as np
 from Florence import *
-from Florence.VariationalPrinciple import *
 
 
 def explicit_dynamics_mechanics():

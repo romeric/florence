@@ -16,6 +16,7 @@ np.set_printoptions(linewidth=300)
 
 # APPEND ALL REQUIRED PATHS
 sys.path.append(os.path.join(os.path.expanduser("~"),"florence"))
+sys.path.append('../examples/simple_laplace/')
 sys.path.append('../examples/car_crash_analysis/')
 sys.path.append('../examples/curved_mesh_generation/')
 sys.path.append('../examples/hyperelastic_explicit_dynamics/')
@@ -25,10 +26,9 @@ sys.path.append('../examples/linear_elastic_dynamics/')
 
 # IMPORT FLORENCE
 from Florence import *
-from Florence import Base as MainData
-from Florence.PostProcessing import PostProcess
 
 # IMPORT EXAMPLES
+from simple_laplace import simple_laplace
 from crash_analysis_with_explicit_contact import crash_analysis
 from high_order_curved_mesh_generation import high_order_curved_mesh_generation
 from hyperelastic_explicit_dynamics import explicit_dynamics_mechanics
@@ -163,11 +163,9 @@ def final_solution_checker(material,solver,fem_solver,TotalDisp,Dict):
 
     Dict['ScaledJacobian'] = Dict['ScaledJacobian'].flatten()
     fem_solver.ScaledJacobian = fem_solver.ScaledJacobian.flatten()
-    # if entity_checker(MainData.ScaledJacobian,Dict['ScaledJacobian'],tol):
     if np.abs((fem_solver.ScaledJacobian.min() - Dict['ScaledJacobian'].min())<tol):
         print(tick,"Final mesh quality is correct")
     else:
-        # print(np.linalg.norm(MainData.ScaledJacobian - Dict['ScaledJacobian']))
         print(cross,"Final mesh quality does not match")
         exit()
 
@@ -176,6 +174,7 @@ def final_solution_checker(material,solver,fem_solver,TotalDisp,Dict):
 
 def test_examples():
     # RUN EXAMPLES AT TEST CASES
+    simple_laplace()
     crash_analysis()
     high_order_curved_mesh_generation()
     explicit_dynamics_mechanics()

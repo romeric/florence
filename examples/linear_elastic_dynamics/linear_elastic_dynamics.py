@@ -1,6 +1,5 @@
 import numpy as np
 from Florence import *
-from Florence.VariationalPrinciple import *
 
 
 def linear_elastic_dynamics():

@@ -384,6 +384,10 @@ class FlorenceSetup(object):
                     " ASSEMBLY_NAME=_LowLevelAssemblyExplicit_DF_DPF_ CONDF_INC=../../../VariationalPrinciple/_Traction_/\
                     CONDF_INC=../../../VariationalPrinciple/_Traction_/")
 
+                # Perfect Laplacian assembler
+                execute('cd '+_path+' && make ' + self.compiler_args +\
+                    " ASSEMBLY_NAME=_LowLevelAssemblyPerfectLaplacian_ ")
+
         # Get rid of cython sources
         sys.stdout = open(os.devnull, 'w')
         self.SourceClean()

@@ -5184,7 +5184,6 @@ class Mesh(object):
 
 
 
-
     def ChangeType(self):
         """Change mesh data type from signed to unsigned"""
 
@@ -5254,12 +5253,29 @@ class Mesh(object):
         self.degree = p
         return p
 
+
     @property
     def IsHighOrder(self):
         is_high_order = False
         if self.InferPolynomialDegree() > 1:
             is_high_order = True
         return is_high_order
+
+
+    def GetNumberOfElements(self):
+        if self.nelem != None:
+            return self.nelem
+        assert self.elements is not None
+        self.nelem = self.elements.shape[0]
+        return self.nelem
+
+
+    def GetNumberOfNodes(self):
+        if self.nnode != None:
+            return self.nnode
+        assert self.points is not None
+        self.nnode = self.points.shape[0]
+        return self.nnode
 
 
     def InferSpatialDimension(self):
@@ -5312,7 +5328,7 @@ class Mesh(object):
 
         nodeperelem = None
         if element_type=="line":
-            nodeperelem = 1
+            nodeperelem = 2
         elif element_type=="tri":
             nodeperelem = 3
         elif element_type=="quad":

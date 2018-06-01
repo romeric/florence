@@ -8,7 +8,7 @@ from scipy.sparse import coo_matrix, csc_matrix, csr_matrix
 
 from .SparseAssembly import SparseAssembly_Step_2
 from .SparseAssemblySmall import SparseAssemblySmall
-from ._LowLevelAssembly_ import _LowLevelAssembly_, _LowLevelAssemblyExplicit_
+from ._LowLevelAssembly_ import _LowLevelAssembly_, _LowLevelAssemblyExplicit_, _LowLevelAssemblyLaplacian_
 
 import pyximport
 pyximport.install(setup_args={'include_dirs': np.get_include()})
@@ -66,10 +66,17 @@ def Assemble(fem_solver, function_space, formulation, mesh, material, Eulerx, Eu
         return Dict['stiffness'], Dict['T'], Dict['F'], []
 
 
-def LowLevelAssembly(fem_solver,function_space, formulation, mesh, material, Eulerx, Eulerp):
+def LowLevelAssembly(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
+
+    t_assembly = time()
 
     if not material.has_low_level_dispatcher:
         raise RuntimeError("Cannot dispatch to low level module since material {} does not support it".format(type(material).__name__))
+
+    if formulation.fields == "electrostatics":
+        stiffness, T = _LowLevelAssemblyLaplacian_(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
+        fem_solver.assembly_time = time() - t_assembly
+        return stiffness, T[:,None], None, None
 
     stiffness, T, F, mass = _LowLevelAssembly_(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
     if isinstance(F,np.ndarray):
@@ -77,10 +84,14 @@ def LowLevelAssembly(fem_solver,function_space, formulation, mesh, material, Eul
     if mass is not None:
         fem_solver.is_mass_computed = True
 
+    fem_solver.assembly_time = time() - t_assembly
+
     return stiffness, T[:,None], F, mass
 
 
 def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
+
+    t_assembly = time()
 
     # GET MESH DETAILS
     C = mesh.InferPolynomialDegree() - 1
@@ -182,6 +193,8 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
             nvar*mesh.points.shape[0])),dtype=np.float64)
 
         fem_solver.is_mass_computed = True
+
+    fem_solver.assembly_time = time() - t_assembly
 
     return stiffness, T, F, mass
 

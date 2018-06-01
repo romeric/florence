@@ -1,6 +1,5 @@
+import numpy as np
 from Florence import *
-from Florence.VariationalPrinciple import *
-from Florence.Tensor import makezero, makezero3d
 
 
 def dielectric_wrinkling():

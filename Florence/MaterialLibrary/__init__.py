@@ -44,7 +44,6 @@ from .Piezoelectric_100 import *
 from .IsotropicElectroMechanics_109 import *
 
 
-
 # HELMHOLTZ AND INTERNAL ENERGY EQUIVALENT MODELS
 from .IsotropicElectroMechanics_200 import *
 from .IsotropicElectroMechanics_201 import *
@@ -60,6 +59,7 @@ from .ExplicitMooneyRivlin import *
 
 # ELECTROSTATIC MODELS
 from .IdealDielectric import *
+from .AnisotropicIdealDielectric import *
 
 
 # COUPLE STRESS MODELS
