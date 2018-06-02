@@ -36,17 +36,17 @@ def check_dispatch():
     for g in range(ngauss):
         stress_py[g,:,:] = material.CauchyStress(StrainTensors,elem=0,gcounter=g)
         hessian_py[g,:,:] = material.Hessian(StrainTensors,elem=0,gcounter=g)
-    
+
     stress_cpp, hessian_cpp = KineticMeasures(material,F,N[0][:,None])
     makezero3d(stress_cpp)
     makezero3d(hessian_cpp)
     makezero3d(hessian_py)
     makezero3d(hessian_cpp)
 
-    # print stress_py - stress_cpp
-    # print hessian_py - hessian_cpp
-    print np.allclose(hessian_cpp,hessian_py)
-    print np.allclose(stress_cpp,stress_py)
+    # print(stress_py - stress_cpp)
+    # print(hessian_py - hessian_cpp)
+    print(np.allclose(hessian_cpp,hessian_py))
+    print(np.allclose(stress_cpp,stress_py))
 
 
 
@@ -84,23 +84,23 @@ def check_dispatch_electro():
         D_py[g,:,:] = material.ElectricDisplacementx(StrainTensors,E[g,:],elem=0,gcounter=g)
         stress_py[g,:,:] = material.CauchyStress(StrainTensors,D_py[g,:,:],elem=0,gcounter=g)
         hessian_py[g,:,:] = material.Hessian(StrainTensors,D_py[g,:,:],elem=0,gcounter=g)
-    
+
     # stress_cpp, hessian_cpp = KineticMeasures(material,F,N[0][:,None])
     D_cpp, stress_cpp, hessian_cpp = KineticMeasures(material,F,E)
-    
+
     makezero3d(D_py)
-    makezero3d(D_cpp)    
+    makezero3d(D_cpp)
     makezero3d(stress_cpp)
     makezero3d(hessian_cpp)
     makezero3d(hessian_py)
     makezero3d(hessian_cpp)
 
-    # print D_py - D_cpp
-    # print stress_py - stress_cpp
-    # print hessian_py - hessian_cpp
-    print np.allclose(D_cpp,D_py)
-    print np.allclose(stress_cpp,stress_py)
-    print np.allclose(hessian_cpp,hessian_py)
+    # print(D_py - D_cpp)
+    # print(stress_py - stress_cpp)
+    # print(hessian_py - hessian_cpp)
+    print(np.allclose(D_cpp,D_py))
+    print(np.allclose(stress_cpp,stress_py))
+    print(np.allclose(hessian_cpp,hessian_py))
 
 
 
