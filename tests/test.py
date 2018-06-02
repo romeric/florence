@@ -175,11 +175,13 @@ def final_solution_checker(material,solver,fem_solver,TotalDisp,Dict):
 def test_examples():
     # RUN EXAMPLES AT TEST CASES
     simple_laplace()
-    crash_analysis()
     high_order_curved_mesh_generation()
-    explicit_dynamics_mechanics()
-    dielectric_wrinkling()
+    sys.stdout = open(os.devnull, "w")
     linear_elastic_dynamics()
+    crash_analysis()
+    explicit_dynamics_mechanics()
+    sys.stdout = sys.__stdout__
+    dielectric_wrinkling()
 
 
 # RUN EXAPLES AS TEST CASES

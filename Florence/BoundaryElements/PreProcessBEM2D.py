@@ -1,11 +1,11 @@
 import numpy as np
 import scipy as sp
 import warnings, sys
-from Core.InterpolationFunctions.OneDimensional import LagrangeGaussLobatto
 
 def GenerateCoordinates(boundary_elements,boundary_points,C,z):
-	# Generate the entire coordinate system for higher order elements 
+	# Generate the entire coordinate system for higher order elements
 
+	from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
 	# Get nodal position at the parent coordinate
 	# eps = Lagrange(C,0)[2]
 	eps = LagrangeGaussLobatto(C,0)[2]
@@ -22,11 +22,11 @@ def GenerateCoordinates(boundary_elements,boundary_points,C,z):
 		# Get their coordinates
 		node_i_coord = boundary_points[node_i,0:2]
 		node_j_coord = boundary_points[node_j,0:2]
-		# Get length of the element 
+		# Get length of the element
 		le = sp.linalg.norm(node_j_coord-node_i_coord)
 		angle = np.arccos((node_j_coord[0]-node_i_coord[0])/le)
 		# for higher order elements divide the boundary element into corresponding pieces (i.e. interior nodes)
-		eps_physical = le*(eps+1)/2.0  # eps_physical contains le, so don't include it 
+		eps_physical = le*(eps+1)/2.0  # eps_physical contains le, so don't include it
 
 		coord = np.zeros((len(eps_physical),2))
 		for i in range(0,len(eps_physical)):
@@ -47,9 +47,9 @@ def GenerateCoordinates(boundary_elements,boundary_points,C,z):
 def CoordsJacobianRadiusatGaussPoints(boundary_elements,global_coord,C,Basis,dN,w):
 
 	# Allocate
-	XCO = np.zeros((w.shape[0],boundary_elements.shape[0])); YCO = np.zeros((w.shape[0],boundary_elements.shape[0])) 
+	XCO = np.zeros((w.shape[0],boundary_elements.shape[0])); YCO = np.zeros((w.shape[0],boundary_elements.shape[0]))
 	nx = np.zeros((w.shape[0],boundary_elements.shape[0])); ny = np.zeros((w.shape[0],boundary_elements.shape[0]))
-	Jacobian = np.zeros((w.shape[0],boundary_elements.shape[0])) 
+	Jacobian = np.zeros((w.shape[0],boundary_elements.shape[0]))
 
 	# Loop over elements
 	for elem in range(0,boundary_elements.shape[0]):
@@ -61,7 +61,7 @@ def CoordsJacobianRadiusatGaussPoints(boundary_elements,global_coord,C,Basis,dN,
 			elif elem == boundary_elements[-1,0]:
 				XCO[g,elem] = np.dot(Basis[0:,g],np.append(global_coord[(C+1)*elem:(C+1)*(elem+1)+1,0],global_coord[0,0]))
 				YCO[g,elem] = np.dot(Basis[0:,g],np.append(global_coord[(C+1)*elem:(C+1)*(elem+1)+1,1],global_coord[0,1]))
-				
+
 			# Get the derivatives at Gauss points
 			if elem != boundary_elements[-1,0]:
 				dx_by_dxi = np.dot(dN[0:,g],global_coord[(C+1)*elem:(C+1)*(elem+1)+1,0])
@@ -88,9 +88,9 @@ def CoordsJacobianRadiusatGaussPoints(boundary_elements,global_coord,C,Basis,dN,
 def CoordsJacobianRadiusatGaussPoints_LM(boundary_elements,global_coord,C,Basis,dN,w,element_connectivity):
 
 	# Allocate
-	XCO = np.zeros((w.shape[0],boundary_elements.shape[0])); YCO = np.zeros((w.shape[0],boundary_elements.shape[0])) 
+	XCO = np.zeros((w.shape[0],boundary_elements.shape[0])); YCO = np.zeros((w.shape[0],boundary_elements.shape[0]))
 	nx = np.zeros((w.shape[0],boundary_elements.shape[0])); ny = np.zeros((w.shape[0],boundary_elements.shape[0]))
-	Jacobian = np.zeros((w.shape[0],boundary_elements.shape[0])) 
+	Jacobian = np.zeros((w.shape[0],boundary_elements.shape[0]))
 
 	# Loop over elements
 	for elem in range(0,boundary_elements.shape[0]):
@@ -104,7 +104,7 @@ def CoordsJacobianRadiusatGaussPoints_LM(boundary_elements,global_coord,C,Basis,
 			elif elem == boundary_elements[-1,0]:
 				XCO[g,elem] = np.dot(Basis[0:,g],np.append(coord[:,0],coord[0,0]))
 				YCO[g,elem] = np.dot(Basis[0:,g],np.append(coord[:,1],coord[0,1]))
-				
+
 			# Get the derivatives at Gauss points
 			if elem != boundary_elements[-1,0]:
 				dx_by_dxi = np.dot(dN[0:,g],coord[:,0])

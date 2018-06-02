@@ -8,7 +8,7 @@ import imp
 # Pr = imp.load_source('Problem_Arch','/home/roman/Dropbox/Python/Problems/BoundaryElements/Problem_Rectangle/ProblemDataBEM_1.py')
 # Pr = imp.load_source('Problem_Arch','/home/roman/Dropbox/Python/Problems/BoundaryElements/Problem_Arch/ProblemDataBEM_2.py')
 # Pr = imp.load_source('Problem_Arch','/home/roman/Dropbox/Python/Problems/BoundaryElements/Problem_Rectangle_LM/ProblemDataBEM_LM_1.py')
-Pr = imp.load_source('Problem_Arch','/home/roman/Dropbox/Python/Problems/BoundaryElements/Problem_Arch_LM/ProblemDataBEM_LM_2.py')
+# Pr = imp.load_source('Problem_Arch','/home/roman/Dropbox/Python/Problems/BoundaryElements/Problem_Arch_LM/ProblemDataBEM_LM_2.py')
 
 
 
@@ -20,25 +20,25 @@ def WritePlotBEM2D(sol,total_sol,POT,FLUX1,FLUX2,LHS2LHS,LHS2RHS,mesh,printt=1,p
 
 	if write==1:
 		np.savetxt('Results.txt',total_sol)
-		print 'The BE solution at boundary point is written in text file "Results.txt" - both potential and flux'
+		print('The BE solution at boundary point is written in text file "Results.txt" - both potential and flux')
 		np.savetxt('POT.txt',total_sol)
-		print 'The potential values at internal points are written in text file "POT.txt"'
+		print('The potential values at internal points are written in text file "POT.txt"')
 		np.savetxt('FLUX1.txt',total_sol)
-		print 'The X-direction flux values at internal points are written in text file "FLUX1.txt"'
+		print('The X-direction flux values at internal points are written in text file "FLUX1.txt"')
 		np.savetxt('FLUX2.txt',total_sol)
-		print 'The X-direction flux values at internal points are written in text file "FLUX2.txt"'
+		print('The X-direction flux values at internal points are written in text file "FLUX2.txt"')
 
 
 	if plot==1:
 		# Call the plot function from the problem data file
 		Pr.PlotFunc(mesh,POT,FLUX1,FLUX2,plotopt)
 
-		
+
 
 
 	if printt ==1:
-		# print pot[0:pot.shape[0]/2]
-		# print dpot[0:dpot.shape[0]]
-		print POT
-		# print FLUX1
-		# print FLUX2
+		# print(pot[0:pot.shape[0]/2])
+		# print(dpot[0:dpot.shape[0]])
+		print(POT)
+		# print(FLUX1)
+		# print(FLUX2)
