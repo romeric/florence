@@ -233,6 +233,11 @@ def GetBasesAtNodes(C, Quadrature, info, bases_type="nodal", equally_spaced=Fals
         Basis = np.zeros((ns,ns))
         gBasisx = np.zeros((ns,ns))
         gBasisy = np.zeros((ns,ns))
+    elif info == 'line':
+        ns = int(C+2)
+        # GET THE BASES AT NODES INSTEAD OF GAUSS POINTS
+        Basis = np.zeros((ns,ns))
+        gBasisx = np.zeros((ns,ns))
 
 
     eps=[]
@@ -306,6 +311,22 @@ def GetBasesAtNodes(C, Quadrature, info, bases_type="nodal", equally_spaced=Fals
             gBasisx[:,i] = dummy[:,0]
             gBasisy[:,i] = dummy[:,1]
 
+    elif info == 'line':
+        if not equally_spaced:
+            eps = GaussLobattoQuadrature(C+2)[0]
+            hpBases = Line.LagrangeGaussLobatto
+        else:
+            eps = EquallySpacedPoints(2,C)
+            hpBases = Line.Lagrange
+
+        # We probably need node arrangment for lines
+        counter = 0
+        for i in range(0,eps.shape[0]):
+            ndummy = hpBases(C,eps[i,0])
+            Basis[:,counter] = ndummy[0][i]
+            gBasisx[:,counter] = ndummy[1][i]
+            counter+=1
+
 
 
     class Domain(object):
@@ -317,6 +338,9 @@ def GetBasesAtNodes(C, Quadrature, info, bases_type="nodal", equally_spaced=Fals
     if info == "hex" or info == "tet":
         Domain.gBasesz = gBasisz
     elif info == "tri" or info == "quad":
+        Domain.gBasesz = np.zeros_like(gBasisx)
+    elif info == "line":
+        Domain.gBasesy = np.zeros_like(gBasisx)
         Domain.gBasesz = np.zeros_like(gBasisx)
 
     if info == "hex" or info == "quad":

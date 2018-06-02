@@ -939,6 +939,12 @@ class Mesh(object):
         """Given a linear tri, tet, quad or hex mesh compute high order mesh based on it.
         This is a static method linked to the HigherOrderMeshing module"""
 
+        if not isinstance(p,int):
+            raise ValueError("p must be an integer")
+        else:
+            if p < 1:
+                raise ValueError("Value of p={} is not acceptable. Provide p>=1.".format(p))
+
         if self.degree is None:
             self.InferPolynomialDegree()
 

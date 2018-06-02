@@ -3,6 +3,48 @@ from Florence import *
 
 
 
+def test_quadrature_functionspace():
+
+    print("Running tests on QuadratureRule and FunctionSpace modules")
+
+    mesh = Mesh()
+    etypes = ["line","tri","quad","tet","hex"]
+    for etype in etypes:
+
+        if etype == "line":
+            mesh.Line()
+        elif etype == "tri":
+            mesh.Circle(element_type="tri")
+        elif etype == "quad":
+            mesh.Circle(element_type="quad")
+        elif etype == "tet":
+            mesh.Cube(element_type="tet",nx=1,ny=1,nz=1)
+        elif etype == "hex":
+            mesh.Cube(element_type="hex",nx=1,ny=1,nz=1)
+
+        for p in range(2,7):
+            mesh.GetHighOrderMesh(p=p, check_duplicates=False)
+
+            q = QuadratureRule(mesh_type=etype, norder=p+2, is_flattened=False)
+            FunctionSpace(mesh, q, p=p, equally_spaced=False, use_optimal_quadrature=False)
+            FunctionSpace(mesh, q, p=p, equally_spaced=True, use_optimal_quadrature=False)
+
+            FunctionSpace(mesh, q, p=p, equally_spaced=False, evaluate_at_nodes=True)
+            FunctionSpace(mesh, q, p=p, equally_spaced=True, evaluate_at_nodes=True)
+
+
+            q = QuadratureRule(mesh_type=etype, norder=p+2, is_flattened=True)
+            FunctionSpace(mesh, q, p=p, equally_spaced=False, use_optimal_quadrature=True)
+            FunctionSpace(mesh, q, p=p, equally_spaced=True, use_optimal_quadrature=True)
+
+            FunctionSpace(mesh, q, p=p, equally_spaced=False, evaluate_at_nodes=True)
+            FunctionSpace(mesh, q, p=p, equally_spaced=True, evaluate_at_nodes=True)
+
+
+    print("Successfully finished running tests on QuadratureRule and FunctionSpace modules\n")
+
+
+
 def test_mesh_postprocess_material():
 
     print("Running tests on Mesh, PostProcess and Material modules")
@@ -33,7 +75,7 @@ def test_mesh_postprocess_material():
     etypes = ["tri", "quad"]
 
     for etype in etypes:
-        
+
         mesh = Mesh()
         mesh.Square(element_type=etype, nx=5,ny=5)
         mesh.GetEdges()
@@ -56,7 +98,7 @@ def test_mesh_postprocess_material():
         pp.Tessellate(interpolation_degree=3)
         mesh.__reset__()
 
-        
+
         mesh.CircularPlate(element_type=etype)
         mesh.RemoveElements(mesh.Bounds)
         mesh.GetHighOrderMesh(p=2, check_duplicates=False)
@@ -133,7 +175,7 @@ def test_mesh_postprocess_material():
         pp.SetMaterial(IsotropicElectroMechanics_108(2,mu1=1.,mu2=2.,lamb=10.,eps_2=1e-7))
         pp.GetAugmentedSolution()
         pp.SetSolution(np.zeros((mesh.nnode,3)))
-        pp.SetMaterial(Piezoelectric_100(2,mu1=1.,mu2=2.,mu3=0.5,lamb=10.,eps_1=1e-5,eps_2=1e-5,eps_3=1e-7, 
+        pp.SetMaterial(Piezoelectric_100(2,mu1=1.,mu2=2.,mu3=0.5,lamb=10.,eps_1=1e-5,eps_2=1e-5,eps_3=1e-7,
             anisotropic_orientations=np.zeros((mesh.nelem,2))))
         pp.GetAugmentedSolution()
         mesh.__reset__()
@@ -155,7 +197,7 @@ def test_mesh_postprocess_material():
     etypes = ["tet", "hex"]
 
     for etype in etypes:
-        
+
         mesh = Mesh()
         mesh.Cube(element_type=etype, nx=5,ny=5,nz=5)
         mesh.Refine()
@@ -178,7 +220,7 @@ def test_mesh_postprocess_material():
         pp.Tessellate(interpolation_degree=3)
         mesh.__reset__()
 
-        
+
         mesh.SphericalArc(element_type=etype)
         mesh.RemoveElements(mesh.Bounds)
         mesh.GetHighOrderMesh(p=2, check_duplicates=False)
@@ -273,7 +315,7 @@ def test_mesh_postprocess_material():
         pp.SetMaterial(IsotropicElectroMechanics_108(3,mu1=1.,mu2=2.,lamb=10.,eps_2=1e-7))
         pp.GetAugmentedSolution()
         pp.SetSolution(np.zeros((mesh.nnode,4)))
-        pp.SetMaterial(Piezoelectric_100(3,mu1=1.,mu2=2.,mu3=0.5,lamb=10.,eps_1=1e-5,eps_2=1e-5,eps_3=1e-7, 
+        pp.SetMaterial(Piezoelectric_100(3,mu1=1.,mu2=2.,mu3=0.5,lamb=10.,eps_1=1e-5,eps_2=1e-5,eps_3=1e-7,
             anisotropic_orientations=np.zeros((mesh.nelem,3))))
         pp.GetAugmentedSolution()
         mesh.__reset__()
@@ -310,9 +352,10 @@ def test_mesh_postprocess_material():
     mesh.ConvertHexesToTets()
 
 
-    print("Successfully finished running tests on Mesh, PostProcess and Material modules")
+    print("Successfully finished running tests on Mesh, PostProcess and Material modules\n")
 
 
 
 if __name__ == "__main__":
+    test_quadrature_functionspace()
     test_mesh_postprocess_material()

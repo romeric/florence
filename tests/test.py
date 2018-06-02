@@ -40,7 +40,7 @@ from wrinkling_of_soft_dielectric_film import dielectric_wrinkling
 from linear_elastic_dynamics import linear_elastic_dynamics
 from electro_hyperelastic_explicit_dynamics import electro_hyperelastic_explicit_dynamics
 
-from test_basics import test_mesh_postprocess_material
+from test_basics import test_quadrature_functionspace, test_mesh_postprocess_material
 
 tick  = u'\u2713'.encode('utf8')  + b' : '
 cross = u'\u2717'.encode('utf8')  + b' : '
@@ -189,6 +189,7 @@ def test_examples():
     dielectric_wrinkling()
 
     # RUN BASICS TESTSUITE
+    test_quadrature_functionspace()
     test_mesh_postprocess_material()
 
 
