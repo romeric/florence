@@ -10,7 +10,6 @@ def test_mesh_postprocess_material():
     mesh = Mesh()
     mesh.Line()
     mesh.GetHighOrderMesh(p=5, check_duplicates=False)
-    mesh.Smooth()
     mesh.Refine()
     mesh.GetNumberOfElements()
     mesh.GetNumberOfNodes()

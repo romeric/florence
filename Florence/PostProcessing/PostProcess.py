@@ -600,7 +600,7 @@ class PostProcess(object):
         return namer
 
 
-    def ConstructDifferentOrderSolution(self, mesh=None, sol=None, p=2, equally_spaced=False):
+    def ConstructDifferentOrderSolution(self, mesh=None, sol=None, p=2, equally_spaced=False, filename=None):
         """Build a solution for a different polynomial degree
             This is an immutable function and does not modify self
             input:
@@ -608,6 +608,7 @@ class PostProcess(object):
                 sol:                [Mesh] actual solution
                 p:                  [int] desired polynomial degree to construct the solution for
                 equally_spaced:     [bool] Construct other order solution wit equally spaced or Gauss Lobatto/Fekete points
+                filename            [str] name of the file where the solution has to be stored in case it is to big to fit in memory
 
             output:
                 ho_mesh:            [Mesh] Mesh of desired degree on which the desired solution is built
@@ -742,14 +743,16 @@ class PostProcess(object):
         elif memory.available//1024**3 > 4*sol_size:
             ho_sol = np.zeros((ho_mesh.nnode,sol.shape[1],sol.shape[2]),dtype=np.float32)
         elif memory.available//1024**3 < 4*sol_size:
-            warn("Not enough memory to store the solution. Going to activate out of core procedure. As a remedy limiting the solution specific quantity/ies")
+            warn("Not enough memory to store the solution. Going to activate out of core procedure."
+                " As a remedy limit the solution to specific quantity/ies")
             try:
                 import h5py
             except ImportError:
                 has_h5py = False
                 raise ImportError('h5py is not installed. Please install it first by running "pip install h5py"')
 
-            filename = os.path.join(os.path.expanduser('~'),"output.hdf5")
+            if filename == None:
+                filename = os.path.join(os.path.expanduser('~'),"output.hdf5")
 
             hdf_file = h5py.File(filename,'w')
             ho_sol = hdf_file.create_dataset("Solution",(ho_mesh.nnode,sol.shape[1],sol.shape[2]),dtype=np.float32)

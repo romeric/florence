@@ -1261,6 +1261,9 @@ class Mesh(object):
 
                 aspect_ratio = 1.0*maximum/minimum
 
+            elif self.element_type == "line":
+                raise ValueError("Line elments do no have aspect ratio")
+
         elif algorithm == 'face_based':
             raise NotImplementedError("Face/area based aspect ratio is not implemented yet")
 
@@ -4757,8 +4760,9 @@ class Mesh(object):
         if len(criteria.keys()) > 1:
             raise ValueError("Smoothing criteria should be a dictionry with only one key")
 
-        criterion = criteria.keys()[0]
-        number = criteria.values()[0]
+
+        criterion = list(criteria.keys())[0]
+        number = list(criteria.values())[0]
 
         if "aspect_ratio" in insensitive(criterion):
             quantity = self.AspectRatios()
@@ -4766,6 +4770,8 @@ class Mesh(object):
             quantity = self.Areas()
         elif "volume" in insensitive(criterion):
             quantity = self.Volumes()
+        else:
+            quantity = self.AspectRatios()
 
         non_smooth_elements_idx = np.where(quantity >= number)[0]
 
