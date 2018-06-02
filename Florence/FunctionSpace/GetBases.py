@@ -1,7 +1,7 @@
-import numpy as np 
+import numpy as np
 
 # Modal Bases
-# import Florence.FunctionSpace.TwoDimensional.Tri.hpModal as Tri 
+# import Florence.FunctionSpace.TwoDimensional.Tri.hpModal as Tri
 # import Florence.FunctionSpace.ThreeDimensional.Tet.hpModal as Tet
 # Nodal Bases
 from Florence.FunctionSpace import Line
@@ -95,13 +95,13 @@ def GetBases2D(C, Quadrature, info, bases_type="nodal", equally_spaced=False, is
                 dummy = GradhpBases(C,z[i,0],z[i,1])
                 Basis[:,i] = ndummy[:,0]
                 gBasisx[:,i] = dummy[:,0]
-                gBasisy[:,i] = dummy[:,1]     
+                gBasisy[:,i] = dummy[:,1]
 
     elif info == 'tri':
         hpBases = Tri.hpNodal.hpBases
         for i in range(0,w.shape[0]):
             # Better convergence for curved meshes when Quadrature.optimal!=0
-            ndummy, dummy = hpBases(C,z[i,0],z[i,1], Quadrature.optimal, equally_spaced=equally_spaced) 
+            ndummy, dummy = hpBases(C,z[i,0],z[i,1], Quadrature.optimal, equally_spaced=equally_spaced)
             # ndummy, dummy = Tri.hpBases(C,z[i,0],z[i,1])
             Basis[:,i] = ndummy
             gBasisx[:,i] = dummy[:,0]
@@ -130,7 +130,7 @@ def GetBases3D(C, Quadrature, info, bases_type="nodal", equally_spaced=False, is
     ns=[]; Basis=[]; gBasisx=[]; gBasisy=[]; gBasisz=[]
     if info=='hex':
         ns = int((C+2)**ndim)
-        if is_flattened is False:        
+        if is_flattened is False:
             Basis = np.zeros((ns,(z.shape[0])**ndim),dtype=np.float64)
             gBasisx = np.zeros((ns,(z.shape[0])**ndim),dtype=np.float64)
             gBasisy = np.zeros((ns,(z.shape[0])**ndim),dtype=np.float64)
@@ -139,15 +139,15 @@ def GetBases3D(C, Quadrature, info, bases_type="nodal", equally_spaced=False, is
             Basis = np.zeros((ns,w.shape[0]),dtype=np.float64)
             gBasisx = np.zeros((ns,w.shape[0]),dtype=np.float64)
             gBasisy = np.zeros((ns,w.shape[0]),dtype=np.float64)
-            gBasisz = np.zeros((ns,w.shape[0]),dtype=np.float64)    
+            gBasisz = np.zeros((ns,w.shape[0]),dtype=np.float64)
     elif info=='tet':
         p=C+1
         ns = int((p+1)*(p+2)*(p+3)/6)
         Basis = np.zeros((ns,w.shape[0]),dtype=np.float64)
         gBasisx = np.zeros((ns,w.shape[0]),dtype=np.float64)
         gBasisy = np.zeros((ns,w.shape[0]),dtype=np.float64)
-        gBasisz = np.zeros((ns,w.shape[0]),dtype=np.float64)    
-    
+        gBasisz = np.zeros((ns,w.shape[0]),dtype=np.float64)
+
 
     if info=='hex':
         if not equally_spaced:
@@ -198,7 +198,7 @@ def GetBases3D(C, Quadrature, info, bases_type="nodal", equally_spaced=False, is
         gBasesx = gBasisx
         gBasesy = gBasisy
         gBasesz = gBasisz
-            
+
 
     return Domain
 
@@ -281,7 +281,7 @@ def GetBasesAtNodes(C, Quadrature, info, bases_type="nodal", equally_spaced=Fals
         else:
             eps = EquallySpacedPointsTet(C)
         hpBases = Tet.hpNodal.hpBases
-        
+
         counter = 0
         for i in range(0,eps.shape[0]):
             ndummy, dummy = hpBases(C,eps[i,0],eps[i,1],eps[i,2],1,1, equally_spaced=equally_spaced)
@@ -366,7 +366,7 @@ def GetBoundaryBases(C, Quadrature, info, bases_type="nodal", equally_spaced=Fal
 
 #     # eps = OneD.LagrangeGaussLobatto(C,0)
 #     eps = np.array([-1.,1.,-1.,1.,-1.,1.])
-    
+
 
 #     for k in range(0,eps.shape[0]):
 #         counter = 0
@@ -399,7 +399,7 @@ def GetBoundaryBases(C, Quadrature, info, bases_type="nodal", equally_spaced=Fal
 #                     gBasisBoundaryy[:,counter,k] = dummy[:,1]
 #                     gBasisBoundaryz[:,counter,k] = dummy[:,2]
 
-                
+
 #                 counter+=1
 
 #     class Boundary(object):

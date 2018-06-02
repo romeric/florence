@@ -57,7 +57,8 @@ class FunctionSpace(object):
                     is_flattened=use_optimal_quadrature)
             elif mesh.element_type == 'tri' or mesh.element_type == 'quad':
                 # GET BASES AT ALL INTEGRATION POINTS (AREA)
-                Domain = GetBases2D(C,quadrature,mesh.element_type,equally_spaced=equally_spaced)
+                Domain = GetBases2D(C,quadrature,mesh.element_type,equally_spaced=equally_spaced,
+                    is_flattened=use_optimal_quadrature)
             elif mesh.element_type == 'line':
                 # GET BASES AT ALL INTEGRATION POINTS (LINE)
                 Domain = GetBases1D(C,quadrature,mesh.element_type,equally_spaced=equally_spaced)
