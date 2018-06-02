@@ -176,20 +176,7 @@ def final_solution_checker(material,solver,fem_solver,TotalDisp,Dict):
         print(cross,"Final mesh quality does not match")
         exit()
 
-import contextlib
-from contextlib import contextmanager
-# import sys, os
 
-@contextmanager
-def suppress_stdout():
-    with open(os.devnull, "w") as devnull:
-        old_stdout = sys.stdout
-        sys.stdout = devnull
-        try:  
-            yield
-        finally:
-            sys.stdout = old_stdout
-from cStringIO import StringIO
 
 def test_examples():
     # RUN EXAMPLES AT TEST CASES
