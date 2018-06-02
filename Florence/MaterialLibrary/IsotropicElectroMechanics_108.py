@@ -4,14 +4,13 @@ from numpy import einsum
 from Florence.Tensor import trace, Voigt
 from .MaterialBase import Material
 from Florence.LegendreTransform import LegendreTransform
-#####################################################################################################
-                        # Electromechanical model in terms of internal energy
-                        # W(C,D) = W_mn(C) + 1/2/eps_2/J (FD0*FD0)
-                        # W_mn(C) = u1*C:I+u2*G:I - 2*(u1+2*u2)*lnJ + lamb/2*(J-1)**2
-#####################################################################################################
 
 
 class IsotropicElectroMechanics_108(Material):
+    """ Electromechanical model in terms of internal energy
+                        W(C,D) = W_mn(C) + 1/2/eps_2/J (FD0*FD0)
+                        W_mn(C) = u1*C:I+u2*G:I - 2*(u1+2*u2)*lnJ + lamb/2*(J-1)**2
+    """
 
     def __init__(self, ndim, **kwargs):
         mtype = type(self).__name__

@@ -4,11 +4,11 @@
 
 #include "assembly_helper.h"
 
-FASTOR_INLINE void _transpose_(int M, int N, const Real * FASTOR_RESTRICT a, Real * FASTOR_RESTRICT out) {
-    for (size_t i=0; i< M; ++i)
-        for (size_t j=0; j<N; ++j)
-            out[j*M+i] = a[i*N+j];
-}
+// FASTOR_INLINE void _transpose_(int M, int N, const Real * FASTOR_RESTRICT a, Real * FASTOR_RESTRICT out) {
+//     for (int i=0; i< M; ++i)
+//         for (int j=0; j<N; ++j)
+//             out[j*M+i] = a[i*N+j];
+// }
 
 
 // Kinematics

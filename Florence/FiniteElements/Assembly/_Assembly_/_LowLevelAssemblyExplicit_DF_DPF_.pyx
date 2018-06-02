@@ -88,23 +88,37 @@ def _LowLevelAssemblyExplicit_DF_DPF_(fem_solver, function_space, formulation, m
     cdef Real mu=0.,mu1=0.,mu2=0.,mu3=0.,mue=0.,lamb=0.,eps_1=0.,eps_2=0., eps_3=0., eps_e=0.
 
     cdef int material_number
-    if material.mtype == "NeoHookean":
-        mu, lamb = material.mu, material.lamb
+    if material.mtype == "ExplicitMooneyRivlin":
+        mu1, mu2, lamb = material.mu1, material.mu2, material.lamb
         material_number = 0
+    elif material.mtype == "NeoHookean":
+        mu, lamb = material.mu, material.lamb
+        material_number = 1
     elif material.mtype == "MooneyRivlin":
         mu1, mu2, lamb = material.mu1, material.mu2, material.lamb
-        material_number = 1
-    elif material.mtype == "ExplicitMooneyRivlin":
-        mu1, mu2, lamb = material.mu1, material.mu2, material.lamb
         material_number = 2
+    elif material.mtype == "NearlyIncompressibleMooneyRivlin":
+        mu1, mu2, mu3 = material.alpha, material.beta, material.kappa
+        material_number = 3
     elif material.mtype == "IsotropicElectroMechanics_101":
         mu, lamb, eps_1 = material.mu, material.lamb, material.eps_1
-        material_number = 3
+        material_number = 4
+    elif material.mtype == "IsotropicElectroMechanics_105":
+        mu1, mu2, lamb, eps_1, eps_2 = material.mu1, material.mu2, material.lamb, material.eps_1, material.eps_2
+        material_number = 5
+    elif material.mtype == "IsotropicElectroMechanics_106":
+        mu1, mu2, lamb, eps_1, eps_2 = material.mu1, material.mu2, material.lamb, material.eps_1, material.eps_2
+        material_number = 6
+    elif material.mtype == "IsotropicElectroMechanics_107":
+        mu1, mu2, mue, lamb, eps_1, eps_2, eps_e = material.mu1, material.mu2, material.mue, material.lamb, \
+            material.eps_1, material.eps_2, material.eps_e
+        material_number = 7
     elif material.mtype == "IsotropicElectroMechanics_108":
         mu1, mu2, lamb, eps_2 = material.mu1, material.mu2, material.lamb, material.eps_2
-        material_number = 4
+        material_number = 8
     else:
-        raise NotImplementedError("Low level assembly for material {} not available".format(material.mtype))
+        raise NotImplementedError("Low level assembly for material {} not available for explicit analysis."
+            " Consider 'optimise=False' for now".format(material.mtype))
 
     cdef Real rho = material.rho
 

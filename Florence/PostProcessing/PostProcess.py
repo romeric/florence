@@ -200,9 +200,15 @@ class PostProcess(object):
 
 
         for incr, Increment in enumerate(increments):
-            Eulerx = points + TotalDisp[:,:ndim,Increment]
+            if TotalDisp.ndim == 3:
+                Eulerx = points + TotalDisp[:,:ndim,Increment]
+            else:
+                Eulerx = points + TotalDisp[:,:ndim]
             if self.formulation.fields == 'electro_mechanics':
-                Eulerp = TotalDisp[:,ndim,Increment]
+                if TotalDisp.ndim == 3:
+                    Eulerp = TotalDisp[:,ndim,Increment]
+                else:
+                    Eulerp = TotalDisp[:,ndim]
 
             # LOOP OVER ELEMENTS
             for elem in range(nelem):
@@ -435,7 +441,10 @@ class PostProcess(object):
         ndim = self.formulation.ndim
         fields = self.formulation.fields
         nnode = self.mesh.points.shape[0]
-        increments = self.sol.shape[2]
+        if self.sol.ndim == 3:
+            increments = self.sol.shape[2]
+        else:
+            increments = 1
         if steps != None:
             increments = len(steps)
         else:
@@ -682,7 +691,7 @@ class PostProcess(object):
                 hpBases = Tri.hpNodal.hpBases
                 Neval = np.zeros((nsize,eps.shape[0]),dtype=np.float64)
                 for i in range(eps.shape[0]):
-                    Neval[:,i]  = hpBases(actual_p-1,eps[i,0],eps[i,1],1)[0]
+                    Neval[:,i]  = hpBases(actual_p-1,eps[i,0],eps[i,1],Transform=1,EvalOpt=1,equally_spaced=True)[0]
             else:
                 eps =  EquallySpacedPointsTri(C)
                 # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
@@ -1682,9 +1691,6 @@ class PostProcess(object):
 
                     ax.set_xlim([x_min - pp*np.abs(x_min), x_max + pp*np.abs(x_max)])
                     ax.set_ylim([y_min - pp*np.abs(y_min), y_max + pp*np.abs(y_max)])
-
-                    # ax.set_xlim([-1, 7.5])
-                    # ax.set_ylim([-9.5, 9.5])
 
                     if plot_points:
                         self.h_points, = ax.plot(self.mesh.points[:,0], self.mesh.points[:,1],'o',markersize=point_radius,color='k')
@@ -3317,6 +3323,39 @@ class PostProcess(object):
 
 
     #-----------------------------------------------------------------------------#
+    def Tessellate(self,*args,**kwargs):
+        """Tesselate meshes"""
+        if len(args) == 0:
+            if self.mesh is None:
+                raise ValueError("Mesh not set for post-processing")
+            else:
+                mesh = self.mesh
+        else:
+            mesh = args[0]
+
+        if len(args) > 1:
+            TotalDisp = args[1]
+        else:
+            if self.sol is None:
+                TotalDisp = np.zeros_like(mesh.points)
+            else:
+                TotalDisp = self.sol
+
+        if mesh.element_type == "line":
+            return self.TessellateLines(mesh,TotalDisp,**kwargs)
+        elif mesh.element_type == "tri":
+            return self.TessellateTris(mesh,TotalDisp,**kwargs)
+        elif mesh.element_type == "quad":
+            return self.TessellateQuads(mesh,TotalDisp,**kwargs)
+        elif mesh.element_type == "tet":
+            return self.TessellateTets(mesh,TotalDisp,**kwargs)
+        elif mesh.element_type == "hex":
+            return self.TessellateHexes(mesh,TotalDisp,**kwargs)
+        else:
+            raise ValueError("Unknown mesh type")
+
+
+
     @staticmethod
     def TessellateLines(mesh, TotalDisp, QuantityToPlot=None,
         ProjectionFlags=None, interpolation_degree=10, EquallySpacedPoints=False,
@@ -3370,7 +3409,9 @@ class PostProcess(object):
             for iedge in range(mesh.nelem):
                 edge = mesh.elements[iedge,:]
                 coord_edge = vpoints[edge,:]
-                if pdim == 2:
+                if pdim == 1:
+                    x_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
+                elif pdim == 2:
                     x_edges[:,iedge], y_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
                 else:
                     x_edges[:,iedge], y_edges[:,iedge], z_edges[:,iedge] = np.dot(coord_edge.T,BasesOneD)
@@ -3508,11 +3549,14 @@ class PostProcess(object):
         Xplot = np.zeros((nnode,pdim),dtype=np.float64)
         Tplot = np.zeros((nelem,3),dtype=np.int64)
         Uplot = np.zeros(nnode,dtype=np.float64)
-        if plot_on_faces and QuantityToPlot is not None:
-            Uplot = np.zeros(nelem,dtype=np.float64)
+        # if plot_on_faces and QuantityToPlot is not None:
+        #     Uplot = np.zeros(nelem,dtype=np.float64)
 
         if QuantityToPlot is None:
-            quantity_to_plot = np.zeros(mesh.nelem)
+            if plot_on_faces:
+                quantity_to_plot = np.zeros(mesh.nelem)
+            else:
+                quantity_to_plot = np.zeros(mesh.points.shape[0])
         else:
             quantity_to_plot = QuantityToPlot
 

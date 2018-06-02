@@ -4,14 +4,15 @@ from numpy import einsum
 from Florence.Tensor import trace, Voigt
 from .MaterialBase import Material
 from Florence.LegendreTransform import LegendreTransform
-#####################################################################################################
-                        # Electromechanical model in terms of internal energy 
-                        # W(C,D) = W_mn(C) + 1/2/eps_1 (D0*D0) + 1/2/eps_2/J (FD0*FD0)
-                        # W_mn(C) = u1*C:I+u2*G:I - 2*(u1+2*u2)*lnJ + lamb/2*(J-1)**2
-#####################################################################################################
 
 
 class IsotropicElectroMechanics_106(Material):
+    """ Electromechanical model in terms of internal energy
+    
+                        W(C,D) = W_mn(C) + 1/2/eps_1 (D0*D0) + 1/2/eps_2/J (FD0*FD0)
+                        W_mn(C) = u1*C:I+u2*G:I - 2*(u1+2*u2)*lnJ + lamb/2*(J-1)**2
+
+    """
     
     def __init__(self, ndim, **kwargs):
         mtype = type(self).__name__
@@ -122,3 +123,31 @@ class IsotropicElectroMechanics_106(Material):
         # return D_exact
 
         return D
+
+
+
+    def Permittivity(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
+
+        mu1 = self.mu1
+        mu2 = self.mu2
+        lamb = self.lamb
+        eps_1 = self.eps_1
+        eps_2 = self.eps_2
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        b = StrainTensors['b'][gcounter]
+
+        self.dielectric_tensor = J/eps_1*np.linalg.inv(b)  + 1./eps_2*I 
+
+        # TRANSFORM TENSORS TO THEIR ENTHALPY COUNTERPART
+        H_Voigt = -np.linalg.inv(self.dielectric_tensor)
+
+        return H_Voigt
+
+
+    def ElectrostaticMeasures(self,F,ElectricFieldx, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._IsotropicElectroMechanics_106_ import KineticMeasures
+        D, _, H_Voigt = KineticMeasures(self,np.ascontiguousarray(F), ElectricFieldx)
+        H_Voigt = np.ascontiguousarray(H_Voigt[:,-self.ndim:,-self.ndim:])
+        return D, None, H_Voigt

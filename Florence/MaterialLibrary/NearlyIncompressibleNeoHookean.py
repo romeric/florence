@@ -20,14 +20,6 @@ class NearlyIncompressibleNeoHookean(Material):
         mtype = type(self).__name__
         super(NearlyIncompressibleNeoHookean, self).__init__(mtype, ndim, **kwargs)
 
-        self.kappa = 0
-        self.pressure = [0]
-
-        # INITIALISE STRAIN TENSORS
-        from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import KinematicMeasures
-        StrainTensors = KinematicMeasures(asarray([eye(self.ndim,self.ndim)]*2),"Nonlinear")
-        self.Hessian(StrainTensors)
-
         self.is_nearly_incompressible = True
         self.is_compressible = False
 

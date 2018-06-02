@@ -37,6 +37,7 @@ class IsotropicElectroMechanics_107(Material):
         from Florence.MaterialLibrary.LLDispatch._IsotropicElectroMechanics_107_ import KineticMeasures
         return KineticMeasures(self,np.ascontiguousarray(F), ElectricFieldx)
 
+
     def Hessian(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
 
         mu1 = self.mu1
@@ -134,3 +135,44 @@ class IsotropicElectroMechanics_107(Material):
     def ElectricDisplacementx(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
         D = self.legendre_transform.GetElectricDisplacement(self, StrainTensors, ElectricFieldx, elem, gcounter)
         return D
+
+
+
+    def Permittivity(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
+
+        mu1 = self.mu1
+        mu2 = self.mu2
+        mue = self.mue
+        lamb = self.lamb
+        eps_1 = self.eps_1
+        eps_2 = self.eps_2
+        eps_e = self.eps_e
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        b = StrainTensors['b'][gcounter]
+
+        D  = ElectricDisplacementx.reshape(self.ndim,1)
+        Dx = D.reshape(self.ndim)
+        DD = np.dot(D.T,D)[0,0]
+        D0D = np.dot(D,D.T)
+
+        if self.ndim==2:
+            trb = trace(b) + 1
+        else:
+            trb = trace(b)
+
+        self.dielectric_tensor = J/eps_1*np.linalg.inv(b)  + 1./eps_2*I + \
+            4.*J/eps_e*trb*I + \
+            8.*J**3/mue/eps_e**2*(D0D + 0.5*DD*I)
+
+        # TRANSFORM TENSORS TO THEIR ENTHALPY COUNTERPART
+        H_Voigt = -np.linalg.inv(self.dielectric_tensor)
+        return H_Voigt
+
+
+    def ElectrostaticMeasures(self,F,ElectricFieldx, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._IsotropicElectroMechanics_107_ import KineticMeasures
+        D, _, H_Voigt = KineticMeasures(self,np.ascontiguousarray(F), ElectricFieldx)
+        H_Voigt = np.ascontiguousarray(H_Voigt[:,-self.ndim:,-self.ndim:])
+        return D, None, H_Voigt

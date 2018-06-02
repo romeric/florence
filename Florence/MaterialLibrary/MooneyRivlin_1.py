@@ -19,10 +19,6 @@ class MooneyRivlin_1(Material):
         self.alpha = self.mu/4.0
         self.beta = self.mu/4.0
 
-        from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import KinematicMeasures
-        StrainTensors = KinematicMeasures(np.asarray([np.eye(self.ndim,self.ndim)]*2),"Nonlinear")
-        self.Hessian(StrainTensors)
-
         self.is_transversely_isotropic = False
         self.energy_type = "internal_energy"
         self.nature = "nonlinear"

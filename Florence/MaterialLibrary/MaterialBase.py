@@ -10,7 +10,10 @@ class Material(object):
     def __init__(self, mtype, ndim, energy_type="internal_energy",
         lame_parameter_1=None, lame_parameter_2=None, poissons_ratio=None, youngs_modulus=None,
         shear_modulus=None, transverse_iso_youngs_modulus=None, transverse_iso_shear_modulus=None,
-        bulk_modulus=None, density=None, permittivity=None, permeability=None, **kwargs):
+        bulk_modulus=None, density=None, permittivity=None, permeability=None, 
+        is_compressible=True, is_incompressible=False, is_nearly_incompressible=False,
+        is_nonisotropic=True,is_anisotropic=False,is_transversely_isotropic=False, anisotropic_orientations=None,
+        **kwargs):
 
 
         # SAFETY CHECKS
@@ -93,14 +96,14 @@ class Material(object):
         if self.H_Voigt is not None:
             self.H_VoigtSize = self.H_Voigt.shape[0]
 
-        self.is_compressible = True
-        self.is_incompressible = False
-        self.is_nearly_incompressible = False
+        self.is_compressible = is_compressible
+        self.is_nearly_incompressible = is_nearly_incompressible
+        self.is_incompressible = is_incompressible
 
-        self.is_anisotropic = False
-        self.is_transversely_isotropic = False
-        self.is_nonisotropic = False
-        self.anisotropic_orientations = None
+        self.is_anisotropic = is_anisotropic
+        self.is_transversely_isotropic = is_transversely_isotropic
+        self.is_nonisotropic = is_nonisotropic
+        self.anisotropic_orientations = anisotropic_orientations
 
         self.has_low_level_dispatcher = False
 

@@ -27,11 +27,7 @@ class IsotropicElectroMechanics_2(Material):
 
         # LOW LEVEL DISPATCHER
         self.has_low_level_dispatcher = False
-
-        # INITIALISE STRAIN TENSORS
-        from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import KinematicMeasures
-        StrainTensors = KinematicMeasures(np.asarray([np.eye(self.ndim,self.ndim)]*2),"nonlinear")
-        self.Hessian(StrainTensors,np.zeros((self.ndim,1)))
+        
 
     def Hessian(self,StrainTensors, ElectricFieldx=0, elem=0, gcounter=0):
 

@@ -7,14 +7,14 @@ from Florence.Tensor import trace
 #####################################################################################################
 
 
-class NeoHookeanCoercive(object):
+class NeoHookeanCoercive(Material):
     """Material model for neo-Hookean with the following internal energy:
 
         W(C) = mu/2*(C:I)+mu*e**(1-J)/J+lamba/2*(J-1)**2
 
         """
 
-    def __init__(self, mtype, ndim, **kwargs):
+    def __init__(self, ndim, **kwargs):
     # def __init__(self, ndim, MaterialArgs=None):
         mtype = type(self).__name__
         super(NeoHookeanCoercive, self).__init__(mtype, ndim, **kwargs)

@@ -12,7 +12,7 @@ def explicit_dynamics_mechanics():
     mesh.GetHighOrderMesh(p=3)
     ndim = mesh.InferSpatialDimension()
 
-    material = ExplicitMooneyRivlin(ndim, mu1=1e5, mu2=1e5, lamb=4e5, rho=1100)
+    material = NearlyIncompressibleMooneyRivlin(ndim, mu=4e5, lamb=2e6, rho=1100)
 
     def DirichletFuncDyn(mesh, time_step):
 

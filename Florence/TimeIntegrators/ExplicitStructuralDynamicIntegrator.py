@@ -308,7 +308,7 @@ class ExplicitStructuralDynamicIntegrators(object):
         """setup implicit electrostatic problem
         """
 
-        from Florence import BoundaryCondition, FEMSolver, IdealDielectric
+        from Florence import BoundaryCondition, FEMSolver, LaplacianSolver, IdealDielectric, AnisotropicIdealDielectric
         from Florence.VariationalPrinciple import LaplacianFormulation, ExplicitPenaltyContactFormulation
 
         # EMULATE ELECTROSTATICS MODEL

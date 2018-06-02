@@ -11,10 +11,6 @@ class IsotropicElectroMechanics_1(Material):
         mtype = type(self).__name__
         super(IsotropicElectroMechanics_1, self).__init__(mtype, ndim, **kwargs)
 
-        # INITIALISE STRAIN TENSORS
-        from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import KinematicMeasures
-        StrainTensors = KinematicMeasures(np.asarray([np.eye(self.ndim,self.ndim)]*2),"nonlinear")
-        self.Hessian(StrainTensors,np.zeros((self.ndim,1)))
         self.nvar = self.ndim+1
         self.energy_type = "enthalpy"
         self.nature = "nonlinear"
@@ -27,6 +23,7 @@ class IsotropicElectroMechanics_1(Material):
 
         # LOW LEVEL DISPATCHER
         self.has_low_level_dispatcher = False
+
 
     def Hessian(self,StrainTensors, ElectricFieldx=0, elem=0, gcounter=0):
 
@@ -118,14 +115,14 @@ class IsotropicElectroMechanics_1(Material):
 
         be = np.dot(b,ElectricFieldx)
 
-        return 1.0*mu/J*b+(lamb*(J-1.0)-mu)*I + varepsilon_1*(np.dot(E,E.T)-0.5*np.dot(E.T,E)[0,0]*I) ## 
+        return 1.0*mu/J*b+(lamb*(J-1.0)-mu)*I + varepsilon_1*(np.dot(E,E.T)-0.5*np.dot(E.T,E)*I) ## 
         # return 1.0*mu/J*b+(lamb*(J-1.0)-mu)*I - (2.0*varepsilon_1/J)*np.dot(be,be.T)
 
 
     def ElectricDisplacementx(self, StrainTensors, ElectricFieldx, elem=0, gcounter=0):
         
         varepsilon_1 = self.eps_1
-        return varepsilon_1*ElectricFieldx ##
+        return varepsilon_1*ElectricFieldx[:,None] ##
 
         # J = StrainTensors['J'][gcounter]
         # b = StrainTensors['b'][gcounter]

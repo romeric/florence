@@ -4046,7 +4046,7 @@ class Mesh(object):
 
 
     def Parallelepiped(self,lower_left_rear_point=(0,0,0), upper_right_front_point=(2,4,10),
-        nx=2, ny=4, nz=10, element_type="tet"):
+        nx=2, ny=4, nz=10, element_type="hex"):
         """Creates a tet/hex mesh on rectangular parallelepiped"""
 
         if self.elements is not None and self.points is not None:
@@ -4098,7 +4098,7 @@ class Mesh(object):
             sys.stdout = sys.__stdout__
 
 
-    def Cube(self, lower_left_rear_point=(0.,0.,0.), side_length=1, nx=5, ny=5, nz=5, n=None, element_type="tet"):
+    def Cube(self, lower_left_rear_point=(0.,0.,0.), side_length=1, nx=5, ny=5, nz=5, n=None, element_type="hex"):
         """Creates a quad/tri mesh on a cube
 
             input:
@@ -4237,10 +4237,10 @@ class Mesh(object):
 
 
     def HollowSphere(self, inner_radius=9., outer_radius=10.,
-        ncirc=5, nrad=5, nthick=1):
+        ncirc=5, nrad=5, nthick=1, element_type="hex"):
 
         self.SphericalArc(inner_radius=inner_radius, outer_radius=outer_radius,
-            ncirc=ncirc, nrad=nrad, nthick=nthick)
+            ncirc=ncirc, nrad=nrad, nthick=nthick, element_type=element_type)
 
         # Mirror self in X, Y & Z
         for i in range(2):
@@ -5098,7 +5098,7 @@ class Mesh(object):
         hpBases = Tet.hpNodal.hpBases
         for i in range(points.shape[0]):
             BasesTet[:,i] = hpBases(0,points[i,0],points[i,1],points[i,2],
-                Transform=1,EvalOpt=1,EquallySpacedPoints=equally_spaced)[0]
+                Transform=1,EvalOpt=1,equally_spaced=equally_spaced)[0]
         makezero(BasesTet,tol=1e-10)
 
         # func = Delaunay(points,qhull_options="QJ") # this does not produce the expected connectivity
@@ -5601,11 +5601,12 @@ class Mesh(object):
             raise NotImplementedError("Converting to linear mesh with not implemented yet")
 
 
-        lmesh.elements = np.ascontiguousarray(lmesh.elements)
+        lmesh.elements = np.ascontiguousarray(lmesh.elements,dtype=np.int64)
         lmesh.points = np.copy(self.points)
         lmesh.degree = 1
         lmesh.element_type = self.element_type
         lmesh.nelem = lmesh.elements.shape[0]
+        lmesh.nnode = lmesh.points.shape[0]
         lmesh.GetBoundaryFaces()
         lmesh.GetBoundaryEdges()
 
@@ -5909,6 +5910,8 @@ class Mesh(object):
             return NodeArrangementQuad(C)
         elif self.element_type == "tri":
             return NodeArrangementTri(C)
+        elif self.element_type == "line":
+            return NodeArrangementLine(C)
         else:
             raise ValueError("Element type not understood")
 

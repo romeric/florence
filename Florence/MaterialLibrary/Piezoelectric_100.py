@@ -4,8 +4,7 @@ from Florence.Tensor import trace, Voigt
 from .MaterialBase import Material
 from Florence.LegendreTransform import LegendreTransform
 from math import sqrt
-# from numpy import sqrt
-# from Florence.MaterialLibrary.LLDispatch._Piezoelectric_100_ import Piezoelectric_100 as LLModel
+
 
 class Piezoelectric_100(Material):
     """ 

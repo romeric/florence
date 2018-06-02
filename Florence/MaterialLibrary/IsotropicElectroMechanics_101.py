@@ -97,3 +97,17 @@ class IsotropicElectroMechanics_101(Material):
 
         return D
 
+
+    def Permittivity(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
+        eps_1 = self.eps_1
+        I = StrainTensors['I']
+        J = StrainTensors['J']
+        self.dielectric_tensor = J/eps_1*I
+        # Negative definite inverse is needed due to Legendre transform
+        return -eps_1/J*I
+
+    def ElectrostaticMeasures(self,F,ElectricFieldx, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._IsotropicElectroMechanics_101_ import KineticMeasures
+        D, _, H_Voigt = KineticMeasures(self,np.ascontiguousarray(F), ElectricFieldx)
+        H_Voigt = np.ascontiguousarray(H_Voigt[:,-self.ndim:,-self.ndim:])
+        return D, None, H_Voigt

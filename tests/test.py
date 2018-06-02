@@ -16,12 +16,16 @@ np.set_printoptions(linewidth=300)
 
 # APPEND ALL REQUIRED PATHS
 sys.path.append(os.path.join(os.path.expanduser("~"),"florence"))
+
 sys.path.append('../examples/simple_laplace/')
-sys.path.append('../examples/car_crash_analysis/')
-sys.path.append('../examples/curved_mesh_generation/')
-sys.path.append('../examples/hyperelastic_explicit_dynamics/')
-sys.path.append('../examples/wrinkling_of_soft_dielectric_film/')
 sys.path.append('../examples/linear_elastic_dynamics/')
+sys.path.append('../examples/curved_mesh_generation/')
+sys.path.append('../examples/car_crash_analysis/')
+sys.path.append('../examples/hyperelastic_explicit_dynamics/')
+sys.path.append('../examples/electro_hyperelastic_explicit_dynamics')
+sys.path.append('../examples/wrinkling_of_soft_dielectric_film/')
+
+sys.path.append('./test_basics')
 
 
 # IMPORT FLORENCE
@@ -34,6 +38,9 @@ from high_order_curved_mesh_generation import high_order_curved_mesh_generation
 from hyperelastic_explicit_dynamics import explicit_dynamics_mechanics
 from wrinkling_of_soft_dielectric_film import dielectric_wrinkling
 from linear_elastic_dynamics import linear_elastic_dynamics
+from electro_hyperelastic_explicit_dynamics import electro_hyperelastic_explicit_dynamics
+
+from test_basics import test_mesh_postprocess_material
 
 tick  = u'\u2713'.encode('utf8')  + b' : '
 cross = u'\u2717'.encode('utf8')  + b' : '
@@ -169,19 +176,33 @@ def final_solution_checker(material,solver,fem_solver,TotalDisp,Dict):
         print(cross,"Final mesh quality does not match")
         exit()
 
+import contextlib
+from contextlib import contextmanager
+# import sys, os
 
-
+@contextmanager
+def suppress_stdout():
+    with open(os.devnull, "w") as devnull:
+        old_stdout = sys.stdout
+        sys.stdout = devnull
+        try:  
+            yield
+        finally:
+            sys.stdout = old_stdout
+from cStringIO import StringIO
 
 def test_examples():
     # RUN EXAMPLES AT TEST CASES
     simple_laplace()
     high_order_curved_mesh_generation()
-    sys.stdout = open(os.devnull, "w")
     linear_elastic_dynamics()
     crash_analysis()
     explicit_dynamics_mechanics()
-    sys.stdout = sys.__stdout__
+    electro_hyperelastic_explicit_dynamics()
     dielectric_wrinkling()
+
+    # RUN BASICS TESTSUITE
+    test_mesh_postprocess_material()
 
 
 # RUN EXAPLES AS TEST CASES
