@@ -48,7 +48,7 @@ before_install:
 
 install:
   # build florence modules
-  - cd $FLORENCEPATH; python setup.py build
+  - cd $FLORENCEPATH; echo -ne '\n' | python setup.py build
 
 script:
   # Run florence test suite

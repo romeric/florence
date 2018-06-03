@@ -14,6 +14,8 @@ try:
 except ImportError:
     raise ImportError("Could not import numpy. Please install numpy first")
 
+from multiprocessing import Pool, cpu_count
+
 
 
 class FlorenceSetup(object):
@@ -51,12 +53,15 @@ class FlorenceSetup(object):
     extension_paths = None
     extension_postfix = None
 
+    parallel = True
+    num_cpu = cpu_count()
+
     kinematics_version = "-DUSE_AVX_VERSION"
 
     def __init__(self, _fc_compiler=None, _cc_compiler=None, _cxx_compiler=None,
-        _blas=None, _kinematics_version=None):
+        _blas=None, _kinematics_version=None, _ncpu=1):
 
-        # GET THE CURRENT WORKING DIRECTORY
+        # Get current working working directory
         self._pwd_ = os.path.dirname(os.path.realpath('__file__'))
         # Get python version and paths to header
         self.GetPythonPath()
@@ -74,6 +79,8 @@ class FlorenceSetup(object):
         self.SetCompilerArgs()
         # Collect all extension module paths
         self.CollectExtensionModulePaths()
+        # Determine parallel builds
+        self.SetParallelism(_ncpu)
 
 
     def GetPythonPath(self):
@@ -286,6 +293,14 @@ class FlorenceSetup(object):
         # self.extension_paths = [jacobi_path]
         # self.extension_paths = [assemble_path]
 
+    def SetParallelism(self,_ncpu=1):
+        if _ncpu > 1:
+            self.parallel = True
+            self.num_cpu = int(_ncpu)
+        elif _ncpu == 1:
+            self.parallel = False
+            self.num_cpu = 1
+
     def SourceClean(self):
 
         assert self.extension_paths != None
@@ -347,46 +362,116 @@ class FlorenceSetup(object):
         # low_level_material_list = ["_LinearElastic_"]
         # low_level_material_list = ["_ExplicitMooneyRivlin_"]
 
+
         assert self.extension_paths != None
 
-        for _path in self.extension_paths:
-            if "LLDispatch" not in _path and not "_Assembly_" in _path:
-                execute('cd '+_path+' && make ' + self.compiler_args)
-            elif "LLDispatch" in _path:
-                for material in low_level_material_list:
-                    material = material.lstrip('_').rstrip('_')
-                    execute('cd '+_path+' && make ' + self.compiler_args + " MATERIAL=" + material)
-            elif "_Assembly_" in _path:
+        if self.parallel == False:
+            for _path in self.extension_paths:
+                if "LLDispatch" not in _path and "_Assembly_" not in _path:
+                    execute('cd '+_path+' && make ' + self.compiler_args)
+                if "LLDispatch" in _path:
+                    _cmds = []
+                    for material in low_level_material_list:
+                        material = material.lstrip('_').rstrip('_')
+                        execute('cd '+_path+' && make ' + self.compiler_args + " MATERIAL=" + material)
+                elif "_Assembly_" in _path:
 
-                ll_material_mech = low_level_material_list[:6]
-                ll_material_electro_mech = low_level_material_list[6:]
+                    ll_material_mech = low_level_material_list[:6]
+                    ll_material_electro_mech = low_level_material_list[6:]
 
-                ll_material_mech.remove("_ExplicitMooneyRivlin_")
-                ll_material_electro_mech.remove("_IsotropicElectroMechanics_109_")
+                    ll_material_mech.remove("_ExplicitMooneyRivlin_")
+                    ll_material_electro_mech.remove("_IsotropicElectroMechanics_109_")
 
-                # ll_material_mech = []
-                # ll_material_electro_mech = low_level_material_list
-                # ll_material_mech = low_level_material_list
-                # ll_material_electro_mech = []
+                    # ll_material_mech = []
+                    # ll_material_electro_mech = low_level_material_list
+                    # ll_material_mech = low_level_material_list
+                    # ll_material_electro_mech = []
 
-                execute('cd '+_path+' && python AOT_Assembler.py clean')
-                execute('cd '+_path+' && python AOT_Assembler.py configure')
+                    execute('cd '+_path+' && python AOT_Assembler.py clean')
+                    execute('cd '+_path+' && python AOT_Assembler.py configure')
 
-                for material in ll_material_mech:
-                    execute('cd '+_path+' && make ' + self.compiler_args + " ASSEMBLY_NAME=_LowLevelAssemblyDF_"  + material)
-                for material in ll_material_electro_mech:
-                    execute('cd '+_path+' && make ' + self.compiler_args + " ASSEMBLY_NAME=_LowLevelAssemblyDPF_" + material)
+                    for material in ll_material_mech:
+                        execute('cd '+_path+' && make ' + self.compiler_args + " ASSEMBLY_NAME=_LowLevelAssemblyDF_"  + material)
+                    for material in ll_material_electro_mech:
+                        execute('cd '+_path+' && make ' + self.compiler_args + " ASSEMBLY_NAME=_LowLevelAssemblyDPF_" + material)
 
-                execute('cd '+_path+' && python AOT_Assembler.py clean')
+                    execute('cd '+_path+' && python AOT_Assembler.py clean')
 
-                # Explicit assembler
-                execute('cd '+_path+' && make ' + self.compiler_args +\
-                    " ASSEMBLY_NAME=_LowLevelAssemblyExplicit_DF_DPF_ CONDF_INC=../../../VariationalPrinciple/_Traction_/\
-                    CONDF_INC=../../../VariationalPrinciple/_Traction_/")
+                    # Explicit assembler
+                    execute('cd '+_path+' && make ' + self.compiler_args +\
+                        " ASSEMBLY_NAME=_LowLevelAssemblyExplicit_DF_DPF_ CONDF_INC=../../../VariationalPrinciple/_Traction_/\
+                        CONDF_INC=../../../VariationalPrinciple/_Traction_/")
 
-                # Perfect Laplacian assembler
-                execute('cd '+_path+' && make ' + self.compiler_args +\
-                    " ASSEMBLY_NAME=_LowLevelAssemblyPerfectLaplacian_ ")
+                    # Perfect Laplacian assembler
+                    execute('cd '+_path+' && make ' + self.compiler_args +\
+                        " ASSEMBLY_NAME=_LowLevelAssemblyPerfectLaplacian_ ")
+
+        else:
+            # Parallel build
+            pool = Pool(self.num_cpu)
+
+            # All modules apart from LLDispatch and _Assembly_ modules
+            _cmds = []
+            for _path in self.extension_paths:
+                if "LLDispatch" not in _path and "_Assembly_" not in _path:
+                    _cmds.append('cd '+_path+' && make ' + self.compiler_args)
+
+            pool.map(execute,_cmds)
+
+
+            # LLDispatch modules
+            _cmds = []
+            for _path in self.extension_paths:
+                if "LLDispatch" in _path:
+                    for material in low_level_material_list:
+                        material = material.lstrip('_').rstrip('_')
+                        _cmds.append('cd '+_path+' && make ' + self.compiler_args + " MATERIAL=" + material)
+
+            pool.map(execute,_cmds)
+
+
+            # _Assembly_ modules
+            _cmds = []
+            for _path in self.extension_paths:
+                if "_Assembly_" in _path:
+
+                    ll_material_mech = low_level_material_list[:6]
+                    ll_material_electro_mech = low_level_material_list[6:]
+
+                    ll_material_mech.remove("_ExplicitMooneyRivlin_")
+                    ll_material_electro_mech.remove("_IsotropicElectroMechanics_109_")
+
+                    # ll_material_mech = []
+                    # ll_material_electro_mech = low_level_material_list
+                    # ll_material_mech = low_level_material_list
+                    # ll_material_electro_mech = []
+
+                    execute('cd '+_path+' && python AOT_Assembler.py clean')
+                    execute('cd '+_path+' && python AOT_Assembler.py configure')
+
+                    for material in ll_material_mech:
+                        _cmds.append('cd '+_path+' && make ' + self.compiler_args + " ASSEMBLY_NAME=_LowLevelAssemblyDF_"  + material)
+                    for material in ll_material_electro_mech:
+                        _cmds.append('cd '+_path+' && make ' + self.compiler_args + " ASSEMBLY_NAME=_LowLevelAssemblyDPF_" + material)
+
+            pool.map(execute,_cmds)
+            execute('cd '+_path+' && python AOT_Assembler.py clean')
+
+
+            # Modules built sequentially
+            for _path in self.extension_paths:
+                if "_Assembly_" in _path:
+                    # Explicit assembler
+                    execute('cd '+_path+' && make ' + self.compiler_args +\
+                        " ASSEMBLY_NAME=_LowLevelAssemblyExplicit_DF_DPF_ CONDF_INC=../../../VariationalPrinciple/_Traction_/\
+                        CONDF_INC=../../../VariationalPrinciple/_Traction_/")
+
+                    # Perfect Laplacian assembler
+                    execute('cd '+_path+' && make ' + self.compiler_args +\
+                        " ASSEMBLY_NAME=_LowLevelAssemblyPerfectLaplacian_ ")
+
+            pool.close()
+
 
         # Get rid of cython sources
         sys.stdout = open(os.devnull, 'w')
@@ -407,6 +492,8 @@ class FlorenceSetup(object):
         execute('export PYTHONPATH="' + self._pwd_ + ':$PYTHONPATH" >> ~/.profile && source ~/.profile')
 
 
+
+
 # helper functions
 def execute(_cmd):
     _process = subprocess.Popen(_cmd, shell=True)
@@ -423,6 +510,7 @@ if __name__ == "__main__":
     _cxx_compiler = None
     _blas = None
     _kinematics_version = None
+    _ncpu = cpu_count()
 
     args = sys.argv
 
@@ -446,11 +534,12 @@ if __name__ == "__main__":
                 _blas = arg.split("=")[-1]
             if "KINEMATICS" in arg:
                 _kinematics_version = arg.split("=")[-1]
-
+            if "np=" in arg:
+                _ncpu = int(arg.split("=")[-1])
 
     setup_instance = FlorenceSetup(_fc_compiler=_fc_compiler,
         _cc_compiler=_cc_compiler, _cxx_compiler=_cxx_compiler, _blas=_blas,
-        _kinematics_version=_kinematics_version)
+        _kinematics_version=_kinematics_version, _ncpu=_ncpu)
 
     if _op == "source_clean":
         setup_instance.SourceClean()
