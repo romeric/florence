@@ -229,7 +229,7 @@ class FEMSolver(object):
         #############################################################################
         if material.nature == "linear" and self.analysis_nature == "nonlinear":
             if formulation.fields != "electrostatics":
-                raise RuntimeError("Cannot perform nonlinear analysis with linear model")
+                raise RuntimeError("Cannot perform nonlinear analysis with linear material model")
 
         if material.fields != formulation.fields:
             raise RuntimeError("Incompatible material model and formulation type")
