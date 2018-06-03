@@ -356,6 +356,91 @@ def test_mesh_postprocess_material():
 
 
 
+
+
+def test_material():
+
+    print("Running tests on high and low level Material modules")
+
+
+    material_list = [
+                        "IdealDielectric",
+                        "LinearElastic",
+                        "IncrementalLinearElastic",
+                        "NeoHookean",
+                        "NeoHookean_1",
+                        "RegularisedNeoHookean",
+                        "NeoHookeanCoercive",
+                        "MooneyRivlin",
+                        "MooneyRivlin_1",
+                        "NearlyIncompressibleNeoHookean",
+                        "NearlyIncompressibleMooneyRivlin",
+                        "AnisotropicMooneyRivlin_0",
+                        "AnisotropicMooneyRivlin_1",
+                        "BonetTranservselyIsotropicHyperElastic",
+                        "TranservselyIsotropicHyperElastic",
+                        "TranservselyIsotropicLinearElastic",
+                        "ExplicitMooneyRivlin",
+                        "IsotropicElectroMechanics_0",
+                        "IsotropicElectroMechanics_3",
+                        "SteinmannModel",
+                        "IsotropicElectroMechanics_200",
+                        "IsotropicElectroMechanics_201",
+                        "IsotropicElectroMechanics_101",
+                        "IsotropicElectroMechanics_105",
+                        "IsotropicElectroMechanics_106",
+                        "IsotropicElectroMechanics_107",
+                        "IsotropicElectroMechanics_108",
+                        "IsotropicElectroMechanics_109",
+                        "Piezoelectric_100",
+                        "Multi_IsotropicElectroMechanics_101",
+                        "Multi_Piezoelectric_100",
+                        "CoupleStressModel",
+                        "IsotropicLinearFlexoelectricModel",
+                    ]
+
+    mu,mu1,mu2,mu3,mue,mu_v,lamb,eps,eps_1,eps_2,eps_3,eps_e,c1,c2,eta,kappa,E,E_A,G_A,nu = [1.]*20
+    gamma = 0.5
+
+    # The outer loop is not necessary - done for the purpose of coverage
+    for i in range(5):
+        for ndim in [2,3]:
+            P = np.zeros((6,3)) if ndim==3 else np.zeros((3,2))
+            f = np.eye(ndim,ndim)
+            for material_name in material_list:
+                material = eval(material_name)(ndim,mu=mu,mu1=mu1,mu2=mu2,mu3=mu3,mue=mue,mu_v=mu_v,lamb=lamb,
+                    E=E,E_A=E_A,G_A=G_A,nu=nu, gamma=gamma, Jbar=[0],
+                    mus=[mu],mu1s=[mu1],mu2s=[mu2],mu3s=[mu3],lambs=[lamb],eps_1s=[eps_1],eps_2s=[eps_2],eps_3s=[eps_3],
+                    eps=eps,eps_1=eps_1,eps_2=eps_2,eps_3=eps_3,eps_e=eps_e,c1=c1,c2=c2,
+                    eta=eta,kappa=kappa, P=P, f=f,
+                    pressure=[0],anisotropic_orientations=np.random.rand(1,ndim))
+                F = np.eye(material.ndim,material.ndim)[None,:,:]
+                E = np.random.rand(material.ndim)
+                StrainTensor = KinematicMeasures(F,material.nature)
+
+                # Python level
+                material.CauchyStress(StrainTensor,E)
+                material.Hessian(StrainTensor,E)
+                if hasattr(material,"ElectricDisplacementx"):
+                    material.ElectricDisplacementx(StrainTensor,E)
+                if hasattr(material,"InternalEnergy"):
+                    material.InternalEnergy(StrainTensor,E)
+
+
+                # Check low level
+                if hasattr(material,"KineticMeasures"):
+                    if material.mtype != "CoupleStressModel" and material.mtype !="IsotropicLinearFlexoelectricModel":
+                        E = np.random.rand(material.ndim)[None,:]
+                        material.KineticMeasures(F,E)
+
+
+
+
+    print("Successfully finished running tests on high and low level Material modules\n")
+
+
+
 if __name__ == "__main__":
-    test_quadrature_functionspace()
-    test_mesh_postprocess_material()
+    # test_quadrature_functionspace()
+    # test_mesh_postprocess_material()
+    test_material()

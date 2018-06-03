@@ -1,47 +1,60 @@
 import numpy as np
 from numpy import einsum
-from Florence.Tensor import trace
+from .MaterialBase import Material
+from Florence.Tensor import trace, Voigt
 
-#####################################################################################################
-                                # Anisotropic MooneyRivlin Model
-#####################################################################################################
-
-
-class TranservselyIsotropicHyperElastic(object):
+class TranservselyIsotropicHyperElastic(Material):
     """A compressible transervely isotropic model with the isotropic part being Mooney-Rivlin
         The energy is given by:
 
-            W(C) =  gamma * ( alpha*(C:I) + beta*(G:I) ) + 
+            W(C) =  gamma * ( alpha*(C:I) + beta*(G:I) ) +
                     eta*(1-alpha)*( (N C N)**2 + N G N) - ut*J + lambda/2*(J-1)**2
 
-            ut = 2.*gamma*(alpha+2.0*beta) + 2.*(1. - gamma)*eta  # for the stress to be 
+            ut = 2.*gamma*(alpha+2.0*beta) + 2.*(1. - gamma)*eta  # for the stress to be
                 zero at the origin
 
-        the parameter "gamma" controls the amount of anisotropy and the vector N(ndim,1) is 
+        the parameter "gamma" controls the amount of anisotropy and the vector N(ndim,1) is
         the direction of anisotropy
 
     """
 
-    def __init__(self, ndim, gamma=0.5):
-        super(TranservselyIsotropicHyperElastic, self).__init__()
+    def __init__(self, ndim, **kwargs):
+        mtype = type(self).__name__
+        super(TranservselyIsotropicHyperElastic, self).__init__(mtype, ndim, **kwargs)
         self.ndim = ndim
         self.nvar = self.ndim
-        self.gamma = gamma
+
+        self.is_transversely_isotropic = True
+        self.is_nonisotropic = True
+        self.energy_type = "internal_energy"
+        self.nature = "linear"
+        self.fields = "mechanics"
+
+        if self.ndim==3:
+            self.H_VoigtSize = 6
+        elif self.ndim==2:
+            self.H_VoigtSize = 3
+
+        # LOW LEVEL DISPATCHER
+        self.has_low_level_dispatcher = False
+
+        self.gamma = 0.5
 
 
-    def Hessian(self,MaterialArgs,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
+
+    def Hessian(self,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
 
         # Get material constants (5 in this case)
-        E = MaterialArgs.E
-        E_A = MaterialArgs.E_A
-        v = MaterialArgs.nu
+        E = self.E
+        E_A = self.E_A
+        v = self.nu
 
         I = StrainTensors['I']
         J = StrainTensors['J'][gcounter]
         b = StrainTensors['b'][gcounter]
         F = StrainTensors['F'][gcounter]
         H = J*np.linalg.inv(F).T
-        N = np.array([-1.,0.]).reshape(2,1)
+        N = self.anisotropic_orientations[elem][:,None]
         FN = np.dot(F,N)[:,0]
         HN = np.dot(H,N)[:,0]
         innerFN = einsum('i,i',FN,FN)
@@ -62,19 +75,19 @@ class TranservselyIsotropicHyperElastic(object):
 
         H_Voigt = 2.*gamma*beta/J* ( 2.0*einsum('ij,kl',b,b) - einsum('ik,jl',b,b) - einsum('il,jk',b,b) ) - \
                 (- lamb*(2.*J-1.) ) *einsum('ij,kl',I,I) + \
-                (ut - lamb*(J-1.) ) * ( einsum('ik,jl',I,I) + einsum('il,jk',I,I) ) 
+                (ut - lamb*(J-1.) ) * ( einsum('ik,jl',I,I) + einsum('il,jk',I,I) )
 
-        
+
 
         for m in range(2,4):
             H_Voigt += self.TransverseHessianNCN(StrainTensors,m,eta[m-2],gamma,FN,innerFN,elem,gcounter)
-        
+
         H_Voigt += self.TransverseHessianNGN(StrainTensors,1.,eta_1,gamma,HN,innerHN,elem,gcounter)
-        H_Voigt += self.TransverseHessianNGN(StrainTensors,1.,eta_2,gamma,HN,innerHN,elem,gcounter) 
+        H_Voigt += self.TransverseHessianNGN(StrainTensors,1.,eta_2,gamma,HN,innerHN,elem,gcounter)
 
         H_Voigt = Voigt(H_Voigt ,1)
-        
-        MaterialArgs.H_VoigtSize = H_Voigt.shape[0]
+
+        self.H_VoigtSize = H_Voigt.shape[0]
 
         return H_Voigt
 
@@ -84,7 +97,7 @@ class TranservselyIsotropicHyperElastic(object):
         I = StrainTensors['I']
         J = StrainTensors['J'][gcounter]
 
-        H_VoigtNCN = 4.*(1-gamma)*eta/J *(m-1)*(innerFN)**(m-2)*einsum('i,j,k,l',FN,FN,FN,FN) 
+        H_VoigtNCN = 4.*(1-gamma)*eta/J *(m-1)*(innerFN)**(m-2)*einsum('i,j,k,l',FN,FN,FN,FN)
 
         return H_VoigtNCN
 
@@ -107,24 +120,23 @@ class TranservselyIsotropicHyperElastic(object):
 
 
 
-    def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
+    def CauchyStress(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 
         I = StrainTensors['I']
         J = StrainTensors['J'][gcounter]
         b = StrainTensors['b'][gcounter]
         F = StrainTensors['F'][gcounter]
         H = J*np.linalg.inv(F).T
-        N = np.array([-1.,0.]).reshape(2,1)
-        # N = np.array([0.,0.]).reshape(2,1)
+        N = self.anisotropic_orientations[elem][:,None]
         FN = np.dot(F,N)
         HN = np.dot(H,N)[:,0]
         innerFN = np.dot(FN.T,FN)[0][0]
         innerHN = einsum('i,i',HN,HN)
         outerHN = einsum('i,j',HN,HN)
 
-        E = MaterialArgs.E
-        E_A = MaterialArgs.E_A
-        v = MaterialArgs.nu
+        E = self.E
+        E_A = self.E_A
+        v = self.nu
 
         gamma = self.gamma
 
@@ -150,12 +162,12 @@ class TranservselyIsotropicHyperElastic(object):
         # m=2
         # stressNCN_1 = self.CauchyStressNCN(StrainTensors,m,eta,gamma,FN,innerFN,elem,gcounter)
         # stressNGN_1 = self.CauchyStressNGN(StrainTensors,n,eta,gamma,innerHN,outerHN,elem,gcounter)
-        # stress += stressNCN_1 
+        # stress += stressNCN_1
         # stress += stressNGN_1
 
         for m in range(2,4):
             stress += self.CauchyStressNCN(StrainTensors,m,eta[m-2],gamma,FN,innerFN,elem,gcounter)
-        
+
         stress += self.CauchyStressNGN(StrainTensors,1.,eta_1,gamma,innerHN,outerHN,elem,gcounter)
         stress += self.CauchyStressNGN(StrainTensors,1.,eta_2,gamma,innerHN,outerHN,elem,gcounter)
 
@@ -178,4 +190,4 @@ class TranservselyIsotropicHyperElastic(object):
         return 2.*(1.- gamma)*eta/J*(innerHN)**(n-1)*(innerHN*I - outerHN)
 
 
-    
+

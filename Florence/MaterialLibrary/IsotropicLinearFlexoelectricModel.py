@@ -81,7 +81,20 @@ class IsotropicLinearFlexoelectricModel(Material):
         if self.ndim==2:
             tre +=1.
 
-        sigma = lamb*tre*I + 2.0*mu*e - UnVoigt(np.dot(piezoelectric_tensor,E)) + UnVoigt(np.dot(flexoelectric_tensor,E))
+
+        # REQUIRES CHECKS
+        if self.ndim == 3:
+            sigma_f = np.dot(flexoelectric_tensor,E)
+            sigma_f = np.array([
+                [0.,-sigma_f[2],sigma_f[1]],
+                [sigma_f[2],0.,-sigma_f[0]],
+                [-sigma_f[1],sigma_f[0],0.],
+                ])
+        else:
+            # THIRD COMPONENT WHICH DOES NOT EXITS?
+            sigma_f = np.zeros((self.ndim,self.ndim))
+
+        sigma = lamb*tre*I + 2.0*mu*e - UnVoigt(np.dot(piezoelectric_tensor,E)) + sigma_f
         return sigma
 
 
@@ -120,7 +133,9 @@ class IsotropicLinearFlexoelectricModel(Material):
 
     def ElectricDisplacementx(self,StrainTensors,ElectricFieldx,EulerW=0,elem=0,gcounter=0):
         # CHECK
-        return self.eps*ElectricFieldx.reshape(self.ndim,1) +  UnVoigt(np.dot(flexoelectric_tensor.T,EulerW))
+        piezoelectric_tensor = self.P
+        flexoelectric_tensor = self.f
+        return self.eps*ElectricFieldx.reshape(self.ndim,1) +  np.dot(flexoelectric_tensor.T,EulerW)
 
 
     def InternalEnergy(self,StrainTensors,ElectricFieldx,EulerW=0,elem=0,gcounter=0):

@@ -269,7 +269,7 @@ class FEMSolver(object):
         ##############################################################################
         # AT THE MOMENT ALL HESSIANS SEEMINGLY HAVE THE SAME SIGNATURE SO THIS IS O.K.
         try:
-            F = np.random.rand(1,material.ndim,material.ndim)
+            F = np.eye(material.ndim,material.ndim)[None,:,:]
             E = np.random.rand(material.ndim)
             material.Hessian(KinematicMeasures(F,self.analysis_nature),E)
         except TypeError:

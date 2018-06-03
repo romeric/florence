@@ -38,7 +38,7 @@ class CoupleStressModel(Material):
         return None, self.elasticity_tensors, self.gradient_elasticity_tensors
 
 
-    def Hessian(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
+    def Hessian(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 
         mu = self.mu
         lamb = self.lamb
@@ -59,7 +59,7 @@ class CoupleStressModel(Material):
 
 
 
-    def CauchyStress(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
+    def CauchyStress(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 
         mu = self.mu
         lamb = self.lamb
@@ -75,7 +75,7 @@ class CoupleStressModel(Material):
         return sigma
 
 
-    def CoupleStress(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
+    def CoupleStress(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
 
         mu = self.mu
         lamb = self.lamb
@@ -90,16 +90,16 @@ class CoupleStressModel(Material):
         return couple_stress
 
 
-    def LagrangeMultiplierStress(self,S,ElectricDisplacementx=None,elem=0,gcounter=0):
+    def LagrangeMultiplierStress(self,S,ElectricFieldx=None,elem=0,gcounter=0):
 
         lm_stress = 0.5*S
         return lm_stress
 
 
-    def TotalStress(self,StrainTensors,S,ElectricDisplacementx=None,elem=0,gcounter=0):
+    def TotalStress(self,StrainTensors,S,ElectricFieldx=None,elem=0,gcounter=0):
 
-        cauchy_stress = self.CauchyStress(StrainTensors,ElectricDisplacementx,elem=elem,gcounter=gcounter)
-        lm_stress     = self.LagrangeMultiplierStress(S,ElectricDisplacementx,elem=elem,gcounter=gcounter)
+        cauchy_stress = self.CauchyStress(StrainTensors,ElectricFieldx,elem=elem,gcounter=gcounter)
+        lm_stress     = self.LagrangeMultiplierStress(S,ElectricFieldx,elem=elem,gcounter=gcounter)
         lm_stress     = np.array([
             [0.,lm_stress[0],lm_stress[1]],
             [-lm_stress[0],0.,lm_stress[2]],

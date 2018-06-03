@@ -27,11 +27,7 @@ class TranservselyIsotropicLinearElastic(Material):
             self.H_VoigtSize = 3
 
         # LOW LEVEL DISPATCHER
-        self.has_low_level_dispatcher = False 
-
-        from Florence.FiniteElements.ElementalMatrices.KinematicMeasures import KinematicMeasures
-        StrainTensors = KinematicMeasures(np.asarray([np.eye(self.ndim,self.ndim)]*2),"Linear")
-        self.Hessian(StrainTensors)
+        self.has_low_level_dispatcher = False
 
 
     def Hessian(self,StrainTensors,ElectricFieldx=0,elem=0,gcounter=0):
@@ -52,12 +48,12 @@ class TranservselyIsotropicLinearElastic(Material):
 
         if self.ndim == 2:
             # CAREFUL WITH THIS SLICING AS SOME MATERIAL CONSTANTS WOULD BE REMOVED.
-            # ESSENTIALLY IN PLANE STRAIN ANISOTROPY THE BEHAVIOUR OF MATERIAL 
-            # PERPENDICULAR TO THE PLANE IS LOST  
+            # ESSENTIALLY IN PLANE STRAIN ANISOTROPY THE BEHAVIOUR OF MATERIAL
+            # PERPENDICULAR TO THE PLANE IS LOST
 
             H_Voigt = H_Voigt[np.array([2,1,-1])[:,None],[2,1,-1]]
 
-        
+
         self.H_VoigtSize = H_Voigt.shape[0]
 
 
@@ -86,8 +82,8 @@ class TranservselyIsotropicLinearElastic(Material):
 
         if self.ndim == 2:
             # CAREFUL WITH THIS SLICING AS SOME MATERIAL CONSTANTS WOULD BE REMOVED.
-            # ESSENTIALLY IN PLANE STRAIN ANISOTROPY THE BEHAVIOUR OF MATERIAL 
-            # PERPENDICULAR TO THE PLANE IS LOST  
+            # ESSENTIALLY IN PLANE STRAIN ANISOTROPY THE BEHAVIOUR OF MATERIAL
+            # PERPENDICULAR TO THE PLANE IS LOST
 
             H_Voigt = H_Voigt[np.array([2,1,-1])[:,None],[2,1,-1]]
 
@@ -96,4 +92,4 @@ class TranservselyIsotropicLinearElastic(Material):
         return stress
 
 
-    
+

@@ -35,12 +35,12 @@ class IncrementalLinearElastic(Material):
         return self.H_Voigt
 
 
-    def CauchyStress(self,MaterialArgs,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
+    def CauchyStress(self,StrainTensors,ElectricFieldx,elem=0,gcounter=0):
         # RETURN STRESSES
         return np.zeros((self.ndim,self.ndim))
 
 
-    def ElectricDisplacementx(self,MaterialArgs,StrainTensors,ElectricFieldx):
+    def ElectricDisplacementx(self,StrainTensors,ElectricFieldx):
         ndim = StrainTensors['I'].shape[0]
         return np.zeros((ndim,1))
 
