@@ -732,7 +732,7 @@ class PostProcess(object):
 
         try:
             import psutil
-        except IOError:
+        except ImportError:
             has_psutil = False
             raise ImportError("No module named psutil. Please install it using 'pip install psutil'")
         # GET MEMORY INFO

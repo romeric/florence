@@ -266,6 +266,17 @@ class FEMSolver(object):
             warn("Energy is not going to be preserved due to physical damping")
         ##############################################################################
 
+        ##############################################################################
+        # AT THE MOMENT ALL HESSIANS SEEMINGLY HAVE THE SAME SIGNATURE SO THIS IS O.K.
+        try:
+            F = np.random.rand(1,material.ndim,material.ndim)
+            E = np.random.rand(material.ndim)
+            material.Hessian(KinematicMeasures(F,self.analysis_nature),E)
+        except TypeError:
+            # CATCH ONLY TypeError. OTHER MATERIAL CONSTANT RELATED ERRORS ARE SELF EXPLANATORY
+            raise ValueError("Material constants for {} does not seem correct".format(material.mtype))
+        ##############################################################################
+
         # CHANGE MESH DATA TYPE
         mesh.ChangeType()
         # ASSIGN ANALYSIS PARAMTER TO BOUNDARY CONDITION

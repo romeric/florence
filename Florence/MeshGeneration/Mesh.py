@@ -2475,40 +2475,6 @@ class Mesh(object):
         else:
             raise ValueError("Element type not understood")
 
-        # # LUKE OLSON'S READER - VERY SLOW
-        # # --------------------------------------------
-        # has_gmsh = False
-        # try:
-        #     # THIS IS BUILT-IN
-        #     from gmsh import Mesh as msh
-        #     has_gmsh = True
-        # except IOError:
-        #     has_gmsh= False
-
-        # if not has_gmsh:
-        #     mesh = msh()
-        #     mesh.read_msh(filename)
-        #     self.points = np.array(mesh.Verts,copy=True)
-        #     self.elements = np.array(mesh.Elmts[el][1], copy=True)
-        #     self.nelem = self.elements.shape[0]
-        #     self.nnode = self.points.shape[0]
-
-        #     if self.points.shape[1] == 3:
-        #         if np.allclose(self.points[:,2],0.):
-        #             self.points = np.ascontiguousarray(self.points[:,:2])
-        #     self.InferElementType()
-        #     ndim = self.InferSpatialDimension()
-        #     if self.element_type == "tri" or self.element_type == "quad":
-        #         self.GetEdges()
-        #         self.GetBoundaryEdges()
-        #     elif self.element_type == "tet" or self.element_type == "hex":
-        #         self.GetFaces()
-        #         self.GetBoundaryFaces()
-        #         self.GetBoundaryEdges()
-
-        #     return
-        # # --------------------------------------------
-
         # NEW FAST READER
         var = 0 # for old gmsh versions - needs checks
         rem_nnode, rem_nelem, rem_faces = int(1e09), int(1e09), int(1e09)
@@ -3194,7 +3160,7 @@ class Mesh(object):
             try:
                 from Florence.PostProcessing import PostProcess
                 from Florence.VariationalPrinciple import DisplacementFormulation
-            except IOError:
+            except ImportError:
                 raise RuntimeError("Writing high order elements to VTK is not supported yet")
             if result is not None and result.ndim > 1:
                 raise NotImplementedError("Writing multliple or vector/tensor valued results to binary vtk not supported yet")
@@ -4817,8 +4783,8 @@ class Mesh(object):
             from Florence.FunctionSpace import Line, Tri, Quad, Tet, Hex
             from Florence.FunctionSpace.OneDimensional.Line import Lagrange
             from Florence.Tensor import remove_duplicates_2D
-        except IOError:
-            raise IOError("This functionality requires florence's support")
+        except ImportError:
+            raise ImportError("This functionality requires florence's support")
 
 
         # WE NEED AN ACTUAL NDIM

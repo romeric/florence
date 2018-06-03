@@ -329,7 +329,7 @@ def OutofCoreAssembly(fem_solver, function_space, formulation, mesh, material, E
     from time import time
     try:
         import psutil
-    except IOError:
+    except ImportError:
         has_psutil = False
         raise ImportError("No module named psutil. Please install it using 'pip install psutil'")
     # from Core.Supplementary.dsparse.sparse import dok_matrix

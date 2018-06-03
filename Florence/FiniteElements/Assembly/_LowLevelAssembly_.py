@@ -19,7 +19,7 @@ try:
     from ._LowLevelAssemblyDPF__IsotropicElectroMechanics_108_ import _LowLevelAssemblyDPF__IsotropicElectroMechanics_108_
     from ._LowLevelAssemblyDPF__Piezoelectric_100_ import _LowLevelAssemblyDPF__Piezoelectric_100_
     has_low_level_dispatcher = True
-except IOError:
+except ImportError:
     has_low_level_dispatcher = False
     warn("Cannot use low level dispatchers for Assembly")
 
@@ -27,14 +27,14 @@ except IOError:
 try:
     from ._LowLevelAssemblyExplicit_DF_DPF_ import _LowLevelAssemblyExplicit_DF_DPF_
     has_low_level_dispatcher = True
-except IOError:
+except ImportError:
     has_low_level_dispatcher = False
     warn("Cannot use low level dispatchers for Assembly")
 
 try:
     from ._LowLevelAssemblyPerfectLaplacian_ import _LowLevelAssemblyPerfectLaplacian_
     has_low_level_dispatcher = True
-except IOError:
+except ImportError:
     has_low_level_dispatcher = False
     warn("Cannot use low level dispatchers for Assembly")
 
