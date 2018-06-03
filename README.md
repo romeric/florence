@@ -40,6 +40,7 @@ The following packages are optional (but recommended) dependencies
 - pyamg
 - psutil
 
+In addition, it is recommended to have an optimised BLAS library such as OpenBLAS or MKL installed and configured on your machine.
 
 # Installation
 Have a look at `travis.yml` file for directions on installing florence's core library. Installation of the core library (not external dependencies) is as easy as
@@ -55,6 +56,12 @@ This builds many low-level cython modules, ahead of time. Options can be given t
 
 ```
 python setup.py build BLAS=mkl CXX=/usr/local/bin/g++ CC=~/LLVM/clang
+```
+
+By default florence builds in parallel using all the machine's cpu cores. To limit the build process to a specific number of cores use the `np` flag, for instance for serial build once can trigger the build process as
+
+```
+python setup.py build np=1
 ```
 
 Installation of optional external dependencies such as `MUMPS` direct sparse solver, `Pardiso` direct sparse solver and `mayavi` 3D visualisation library typically need special care.
