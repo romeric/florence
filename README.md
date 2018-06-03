@@ -58,7 +58,7 @@ This builds many low-level cython modules, ahead of time. Options can be given t
 python setup.py build BLAS=mkl CXX=/usr/local/bin/g++ CC=~/LLVM/clang
 ```
 
-By default florence builds in parallel using all the machine's cpu cores. To limit the build process to a specific number of cores use the `np` flag, for instance for serial build once can trigger the build process as
+By default, florence builds in parallel using all the machine's CPU cores. To limit the build process to a specific number of cores, use the `np` flag for instance, for serial build one can trigger the build process as
 
 ```
 python setup.py build np=1
