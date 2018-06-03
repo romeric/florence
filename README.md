@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.com/romeric/florence.svg?token=HFW6d19YsYpKDNwvtqDr&branch=master)](https://travis-ci.com/romeric/florence)
 [![Coverage Status](https://coveralls.io/repos/github/romeric/florence/badge.svg?branch=master&service=github)](https://coveralls.io/github/romeric/florence?branch=master)
 
-**Florence** is a Python-based computational framework for multi-physics simulation of electro-magneto-mechanical systems using finite element and boundary element methods. The framework also includes Python interfaces to many low-level numerical sub-routines written in C, C++ and Cython.
+**Florence** is a Python-based computational framework for multi-physics simulation of electro-magneto-mechanical systems using the finite element and boundary element methods.
 
 # Features
 A non-exhaustive list of core features:
@@ -16,12 +16,13 @@ A non-exhaustive list of core features:
 - A suite of advanced hyperelastic, electric, electro-hyperelastic material models
 - Ability to read/write mesh/simulation data to/from gmsh, Salome, Tetgen, VTK and HDF5
 
+In addition, the framework also provides Python interfaces to many low-level numerical sub-routines written in C, C++ and Cython.
 
 # Platform support
 Florence supports Linux and macOS for now under
 - Python 2.7
-- Python > 3.5
-- PyPy > v5.7.0
+- Python >= 3.5
+- PyPy >= v5.7.0
 
 
 # Dependencies
@@ -37,6 +38,7 @@ The following packages are optional (but recommended) dependencies
 - matplotlib
 - mayavi
 - pyamg
+- psutil
 
 
 # Installation
