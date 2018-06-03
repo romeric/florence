@@ -14,7 +14,7 @@ A non-exhaustive list of core features:
 - Strain gradient and micropolar solvers for mechanical and electromechanical problems
 - Implicit and explicit dynamic solver with contact formulation
 - A suite of advanced hyperelastic, electric, electro-hyperelastic material models
-- Ability to read/write mesh/simulation data to/from gmsh, Salome, Tetgen, VTK and HDF5
+- Ability to read/write mesh/simulation data to/from gmsh, Salome, GID, Tetgen, obj, VTK and HDF5
 
 In addition, the framework also provides Python interfaces to many low-level numerical sub-routines written in C, C++ and Cython.
 
