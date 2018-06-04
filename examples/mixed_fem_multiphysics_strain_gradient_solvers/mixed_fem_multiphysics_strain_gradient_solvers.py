@@ -5,8 +5,9 @@ from Florence import *
 def strain_gradient_elastodynamics():
     """An example of strain gradient elasticity under explicit dynamics with penalty
         contact. The strain gradient model is based the couple stress (constrained Cosserat) theory
-        for solids. The couple stress model in florence is implemented using standard C0 continuous
-        elements using both penalty or Lagrange multiplier approaches
+        for solids. The couple stress strain gradient model in florence is implemented using
+        standard C0 continuous elements with penalty, Lagrange multiplier and augmented Lagrangian
+        techniques. These variational forms are also available for coupled electromechanical problems
     """
 
     mesh = Mesh()

@@ -1035,6 +1035,19 @@ class Mesh(object):
         return lengths
 
 
+    def Lengths(self,):
+        """Computes length of 1D elements
+        """
+
+        assert self.points is not None
+        assert self.element_type is not None
+
+        coords = self.points[self.elements[:,:2],:]
+        lengths = np.linalg.norm(coords[:,1,:] - coords[:,0,:],axis=1)
+
+        return lengths
+
+
     def Areas(self, with_sign=False, gpoints=None):
         """Find areas of all 2D elements [tris, quads].
             For 3D elements returns surface areas of faces
@@ -1180,6 +1193,34 @@ class Mesh(object):
             volume = np.abs(volume)
 
         return volume
+
+
+    def Sizes(self):
+        """Computes the size of elements for all element types.
+            This is a generic method that for 1D=lengths, for 2D=areas and for 3D=volumes.
+            It works for planar and curved elements
+        """
+
+        self.__do_essential_memebers_exist__()
+
+        try:
+            from Florence import DisplacementFormulation
+        except ImportError:
+            raise ValueError("This functionality requires Florence's support")
+
+        if self.element_type != "line":
+            # FOR LINE ELEMENTS THIS APPROACH DOES NOT WORK AS JACOBIAN IS NOT WELL DEFINED
+            formulation = DisplacementFormulation(self)
+            sizes = np.zeros(self.nelem)
+            for elem in range(self.nelem):
+                LagrangeElemCoords = self.points[self.elements[elem,:],:]
+                sizes[elem] = formulation.GetVolume(formulation.function_spaces[0],
+                    LagrangeElemCoords, LagrangeElemCoords, False, elem=elem)
+            return sizes
+
+        else:
+            warn("Sizes of line elements could be incorrect if the mesh is curvilinear")
+            return self.Lengths()
 
 
     def AspectRatios(self,algorithm='edge_based'):
@@ -2552,13 +2593,11 @@ class Mesh(object):
                 if self.face_to_surface.shape[0]==0:
                     self.face_to_surface = None
 
-        # print(self.ndim, self.nnode, self.nelem, rem_nnode, rem_nelem, rem_faces)
         if self.points.shape[1] == 3:
             if np.allclose(self.points[:,2],0.):
                 self.points = np.ascontiguousarray(self.points[:,:2])
-        # self.InferElementType()
+
         self.element_type = element_type
-        ndim = self.InferSpatialDimension()
         if self.element_type == "tri" or self.element_type == "quad":
             self.GetEdges()
             self.GetBoundaryEdges()
@@ -4456,6 +4495,37 @@ class Mesh(object):
             return points
 
 
+    def RemoveDuplicateNodes(self, deci=8, tol=1e-08):
+        """Remove duplicate points in the mesh
+        """
+
+        self.__do_essential_memebers_exist__()
+
+        from Florence.Tensor import remove_duplicates_2D, makezero
+
+        makezero(self.points,tol=1e-10)
+
+        points, idx_points, inv_points = remove_duplicates_2D(self.points, decimals=8)
+        if points.shape[0] == self.points.shape[0]:
+            return
+
+        unique_elements, inv_elements = np.unique(self.elements,return_inverse=True)
+        unique_elements = unique_elements[inv_points]
+        elements = unique_elements[inv_elements]
+        elements = elements.reshape(self.elements.shape)
+
+        # RECOMPUTE EVERYTHING
+        self.elements = np.ascontiguousarray(elements, dtype=np.int64)
+        self.points = np.ascontiguousarray(points, dtype=np.float64)
+        self.nnode = self.points.shape[0]
+
+        if self.element_type == "tri" or self.element_type == "quad":
+            self.GetEdges()
+            self.GetBoundaryEdges()
+        elif self.element_type == "tet" or self.element_type == "hex":
+            self.GetFaces()
+            self.GetBoundaryFaces()
+            self.GetBoundaryEdges()
 
 
     def RemoveElements(self, xyz_min_max, element_removal_criterion="all", keep_boundary_only=False, return_removed_mesh=False,
@@ -5245,43 +5315,40 @@ class Mesh(object):
 
         self.__do_essential_memebers_exist__()
 
-        try:
-            from Florence import DisplacementFormulation
-            from Florence import QuadratureRule, FunctionSpace, VariationalPrinciple
-        except ImportError:
-            raise ValueError("This functionality requires Florence's support")
-
         ndim = self.InferSpatialDimension()
         p = self.InferPolynomialDegree()
 
         is_curvilinear = False
 
         if self.element_type != "line":
-            formulation = DisplacementFormulation(self)
-            # formulation = VariationalPrinciple(self)
-            # quadrature = QuadratureRule(optimal=3, norder=2*p+1, mesh_type=self.element_type, is_flattened=False)
-            # function_space = FunctionSpace(self, quadrature, p=p, equally_spaced=False, use_optimal_quadrature=False)
+            # FOR LINE ELEMENTS THIS APPROACH DOES NOT WORK AS JACOBIAN IS NOT WELL DEFINED
 
-            curved_vol = 0.
-            for elem in range(self.nelem):
-                LagrangeElemCoords = self.points[self.elements[elem,:],:]
-                curved_vol += formulation.GetVolume(formulation.function_spaces[0],
-                    LagrangeElemCoords, LagrangeElemCoords, False, elem=elem)
-                # curved_vol += formulation.GetVolume(function_space,
-                #     LagrangeElemCoords, LagrangeElemCoords, False, elem=elem)
-
-            if ndim == 3:
+            # GET CURVED VOLUME
+            curved_vol = self.Sizes().sum()
+            # GET PLANAR VOLUME
+            if self.element_type == "tet" and self.element_type == "hex":
                 planar_vols = self.Volumes()
-            elif ndim == 2:
+            elif self.element_type == "tri" and self.element_type == "quad":
                 planar_vols = self.Areas()
-            elif ndim == 1:
+            elif self.element_type == "line":
                 planar_vols = self.Lengths()
             planar_vol = planar_vols.sum()
-
+            # COMPARE THE TWO
             if not np.isclose(planar_vol, curved_vol, rtol=1e-6, atol=1e-6):
                 is_curvilinear = True
 
             return is_curvilinear
+
+        # else:
+        #     # ANOTHER PROMISING TECHNIQUE FOR ALL TYPES OF ELEMENTS.
+        #     # BUT IT ALSO DOES NOT WORK FOR LINES
+        #     # IT ALSO DOES NOT WORK FOR 3D ELEMENTS AS WE ONLY TESSELATE SURFACES NOT VOLUMES
+        #     from Florence.PostProcessing import PostProcess
+        #     tmesh = PostProcess(ndim,ndim).Tessellate(self,np.zeros_like(self.points),interpolation_degree=0)
+        #     tmesh.RemoveDuplicateNodes()
+        #     error = tmesh.Lengths().sum() - self.Lengths().sum()
+        #     if not np.isclose(error, 0., rtol=1e-6, atol=1e-6):
+        #         is_curvilinear = True
 
 
         # ACTIVE ONLY FOR LINE ELEMENTS RIGHT NOW,
@@ -5291,6 +5358,8 @@ class Mesh(object):
         if p == 1:
             is_curvilinear = False
         else:
+            sys.stdout = open(os.devnull, "w")
+
             mesh = deepcopy(self)
             mesh = mesh.GetLinearMesh(remap=True)
             # NOTE THAT IF OTHER ARGS WERE PASSED TO GetHighOrderMesh
@@ -5307,7 +5376,11 @@ class Mesh(object):
                 if not np.isclose(error, 0., rtol=1e-6, atol=1e-6):
                     is_curvilinear = True
 
+            sys.stdout = sys.__stdout__
+
+
         return is_curvilinear
+
 
 
     @property
