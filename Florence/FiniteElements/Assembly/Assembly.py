@@ -6,8 +6,6 @@ from time import time
 import numpy as np
 from scipy.sparse import coo_matrix, csc_matrix, csr_matrix
 
-from .SparseAssembly import SparseAssembly_Step_2
-from .SparseAssemblySmall import SparseAssemblySmall
 from ._LowLevelAssembly_ import _LowLevelAssembly_, _LowLevelAssemblyExplicit_, _LowLevelAssemblyLaplacian_
 
 import pyximport
