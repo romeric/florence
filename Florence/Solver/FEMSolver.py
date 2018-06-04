@@ -139,6 +139,17 @@ class FEMSolver(object):
             self.newton_raphson_solution_tolerance = 10.*self.newton_raphson_tolerance
 
 
+        # STORE A COPY OF SELF AT THE START
+        self.__save_state__()
+
+
+    def __save_state__(self):
+        self.__initialdict__ = deepcopy(self.__dict__)
+
+    def __reset_state__(self):
+        self.__dict__.update(self.__initialdict__)
+
+
     def __checkdata__(self, material, boundary_condition,
         formulation, mesh, function_spaces, solver, contact_formulation=None):
         """Checks the state of data for FEMSolver"""
@@ -269,6 +280,11 @@ class FEMSolver(object):
         ##############################################################################
 
         ##############################################################################
+        if self.analysis_type == "static" and self.contact_formulation is not None:
+            warn("Contact formulation does not get activated under static problems")
+        ##############################################################################
+
+        ##############################################################################
         # AT THE MOMENT ALL HESSIANS SEEMINGLY HAVE THE SAME SIGNATURE SO THIS IS O.K.
         try:
             F = np.eye(material.ndim,material.ndim)[None,:,:]
@@ -327,7 +343,12 @@ class FEMSolver(object):
                 post_process.kinetic_power = formulation.kinetic_power
                 post_process.external_power = formulation.external_power
 
+
         post_process.assembly_time = self.assembly_time
+
+        # AT THE END, WE CALL THE __reset_state__ TO RESET TO INITIAL STATE.
+        # THIS WAY WE CLEAR MONKEY PATCHED AND OTHER DATA STORED DURING RUN TIME
+        self.__reset_state__()
 
         return post_process
 
@@ -384,6 +405,19 @@ class FEMSolver(object):
                 material=material, boundary_condition=boundary_condition,
                 function_spaces=function_spaces, solver=solver, Eulerx=Eulerx, Eulerp=Eulerp)
             solution.assembly_time = laplacian_solver.assembly_time
+            return solution
+
+        # QUICK REDIRECT TO COUPLE STRESS SOLVER
+        if formulation.fields == "couple_stress" or formulation.fields == "flexoelectric":
+            from Florence.Solver import CoupleStressSolver
+            cs_solver = CoupleStressSolver()
+            cs_solver.__dict__.update(self.__dict__)
+            solution = cs_solver.Solve(formulation=formulation, mesh=mesh,
+                material=material, boundary_condition=boundary_condition,
+                function_spaces=function_spaces, solver=solver,
+                contact_formulation=contact_formulation)
+            solution.assembly_time = cs_solver.assembly_time
+            self.__dict__.update(cs_solver.__dict__)
             return solution
 
 

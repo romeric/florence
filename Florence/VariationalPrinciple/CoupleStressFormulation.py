@@ -1013,8 +1013,6 @@ class CoupleStressFormulation(VariationalPrinciple):
             del ParallelTuple
             gc.collect()
 
-        # REALLY DANGEROUS FOR MULTIPHYSICS PROBLEMS - NOTE THAT SCIPY RUNS A PRUNE ANYWAY
-        # V_stiffness[np.isclose(V_stiffness,0.)] = 0.
 
         stiffness = coo_matrix((V_stiffness,(I_stiffness,J_stiffness)),
             shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64).tocsr()
@@ -1100,13 +1098,6 @@ class CoupleStressFormulation(VariationalPrinciple):
         # NAKE SURE TO UPDATE THESE INSTEAD OF CREATING THEM IN WHICH CASE YOU HAVE TO RETURN THEM
         Eulerw[:,:] += NodalEulerW
         Eulers[:,:] += NodalEulerS
-
-        # if self.fields != 'electro_mechanics':
-        #     TotalDisp[:,ndim:,Increment] = NodalEulerW
-        #     TotalDisp[:,2*ndim:,Increment] = NodalEulerS
-        # else:
-        #     TotalDisp[:,ndim+1:,Increment] = NodalEulerW
-        #     TotalDisp[:,2*ndim+1:,Increment] = NodalEulerS
 
 
         return NodalEulerW, NodalEulerS

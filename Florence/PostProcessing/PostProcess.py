@@ -3058,9 +3058,10 @@ class PostProcess(object):
             plot_edges=plot_edges, plot_on_faces=plot_on_faces)
 
         # UNPACK
-        x_edges = tmesh.x_edges
-        y_edges = tmesh.y_edges
-        z_edges = tmesh.z_edges
+        if plot_edges:
+            x_edges = tmesh.x_edges
+            y_edges = tmesh.y_edges
+            z_edges = tmesh.z_edges
         nnode = tmesh.nnode
         nelem = tmesh.nelem
         nsize = tmesh.nsize
@@ -3575,8 +3576,6 @@ class PostProcess(object):
                 Uplot[ielem*nsize:(ielem+1)*nsize] = np.dot(BasesTri.T, quantity_to_plot[mesh.elements[ielem,:]]).flatten()
 
 
-
-
         tmesh = Mesh()
         tmesh.element_type = "tri"
         tmesh.elements = Tplot
@@ -3734,7 +3733,7 @@ class PostProcess(object):
             tmesh.edge_elements = edge_elements
             tmesh.reference_edges = reference_edges
 
-            return tmesh
+        return tmesh
 
 
 

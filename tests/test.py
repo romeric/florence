@@ -25,6 +25,8 @@ sys.path.append('../examples/hyperelastic_explicit_dynamics/')
 sys.path.append('../examples/electro_hyperelastic_explicit_dynamics')
 sys.path.append('../examples/wrinkling_of_soft_dielectric_film/')
 sys.path.append('../examples/staggered_multiphysics_solver')
+sys.path.append('../examples/mixed_fem_multiphysics_strain_gradient_solvers')
+
 
 sys.path.append('./test_basics')
 sys.path.append('./test_BEM')
@@ -42,6 +44,7 @@ from wrinkling_of_soft_dielectric_film import dielectric_wrinkling
 from linear_elastic_dynamics import linear_elastic_dynamics
 from electro_hyperelastic_explicit_dynamics import electro_hyperelastic_explicit_dynamics
 from staggered_multiphysics_solver import staggered_multiphysics_solver
+from mixed_fem_multiphysics_strain_gradient_solvers import strain_gradient_elastodynamics
 
 from test_basics import test_quadrature_functionspace, test_mesh_postprocess_material, test_material
 from test_BEM import test_BEM
@@ -195,6 +198,7 @@ def test_examples():
     electro_hyperelastic_explicit_dynamics()
     dielectric_wrinkling()
     staggered_multiphysics_solver()
+    strain_gradient_elastodynamics()
 
     # RUN BASICS TESTSUITE
     test_quadrature_functionspace()
