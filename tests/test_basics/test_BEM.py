@@ -7,7 +7,7 @@ def test_BEM():
     """
 
 
-    from Florence.BoundaryElements import GetBases as GetBasesBEM2D
+    from Florence.BoundaryElements import GetBasesBEM2D
     from Florence.BoundaryElements import GenerateCoordinates
     from Florence.BoundaryElements import CoordsJacobianRadiusatGaussPoints, CoordsJacobianRadiusatGaussPoints_LM
     from Florence.BoundaryElements import AssemblyBEM2D
