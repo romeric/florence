@@ -275,37 +275,6 @@ class LinearSolver(object):
 
                 return sol
 
-                # CALL JULIA'S MUMPS WRAPPER
-                import h5py
-                from scipy.io import savemat, loadmat
-                pwd = os.path.dirname(os.path.realpath(__file__))
-
-                A = A.tocoo()
-                # SAVE I, J & V TO FILES
-                JuliaDict = {'rowIndA':A.row.astype(np.int64)+1,
-                            'colPtrA':A.col.astype(np.int64)+1,
-                            'valuesA':A.data,'shapeA':A.shape,
-                            'rhs':b}
-
-                savemat(pwd+"/JuliaDict.mat",JuliaDict)
-
-                del A, b
-
-                mumps_failed = False
-                try:
-                    call(["julia",pwd+"/JuliaMUMPS.jl"])
-                except AssertionError:
-                    mumps_failed = True
-
-                if not mumps_failed:
-                    # sol = np.loadtxt(pwd+"/solution")
-                    # os.remove(pwd+"/solution")
-                    sol = h5py.File(pwd+"/solution.mat")['solution']
-                    os.remove(pwd+"/solution.mat")
-
-
-                # REMOVE THE FILES
-                os.remove(pwd+"/JuliaDict.mat")
 
             elif self.solver_subtype == "pardiso" and self.has_pardiso:
                 # NOTE THAT THIS PARDISO SOLVER AUTOMATICALLY SAVES THE RIGHT FACTORISATION
