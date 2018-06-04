@@ -396,6 +396,9 @@ def test_material():
                         "IsotropicElectroMechanics_200",
                         "IsotropicElectroMechanics_201",
                         "IsotropicElectroMechanics_101",
+                        "IsotropicElectroMechanics_102",
+                        "IsotropicElectroMechanics_103",
+                        "IsotropicElectroMechanics_104",
                         "IsotropicElectroMechanics_105",
                         "IsotropicElectroMechanics_106",
                         "IsotropicElectroMechanics_107",
@@ -450,6 +453,6 @@ def test_material():
 
 
 if __name__ == "__main__":
-    test_quadrature_functionspace()
-    test_mesh_postprocess_material()
+    # test_quadrature_functionspace()
+    # test_mesh_postprocess_material()
     test_material()
