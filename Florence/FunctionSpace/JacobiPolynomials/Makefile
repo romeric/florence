@@ -31,7 +31,7 @@ endif
 all: build_module
 
 build_module: 
-	@echo echo "Building Jacobi polynomials module"
+	@echo "Building Jacobi polynomials module"
 	$(CYTHON) JacobiPolynomials.pyx
 	$(CC) $(CCSTD) $(CCFLAGS) JacobiPolynomials.c -o JacobiPolynomials.$(EXT_POSTFIX) -I. -I$(PYTHON_INCLUDE_PATH) \
 	-I$(NUMPY_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION) 
