@@ -328,7 +328,7 @@ class PotentialBasedStaggeredSolver(FEMSolver):
         dUm = np.zeros(self.all_mech_dofs.shape[0],dtype=np.float64)
         dUm[self.mech_in] = sol.ravel()
         dUm[self.mech_out] = LoadFactor*self.applied_dirichlet_mech
-        dUm = dUm.reshape(dUm.shape[0]/formulation.ndim,formulation.ndim)
+        dUm = dUm.reshape(int(dUm.shape[0]/formulation.ndim),formulation.ndim)
 
         return dUm
 
