@@ -5240,6 +5240,169 @@ class Mesh(object):
         return is_high_order
 
 
+    @property
+    def IsCurvilinear(self):
+
+        self.__do_essential_memebers_exist__()
+
+        try:
+            from Florence import DisplacementFormulation
+            from Florence import QuadratureRule, FunctionSpace, VariationalPrinciple
+        except ImportError:
+            raise ValueError("This functionality requires Florence's support")
+
+        ndim = self.InferSpatialDimension()
+        p = self.InferPolynomialDegree()
+
+        is_curvilinear = False
+
+        if self.element_type != "line":
+            formulation = DisplacementFormulation(self)
+            # formulation = VariationalPrinciple(self)
+            # quadrature = QuadratureRule(optimal=3, norder=2*p+1, mesh_type=self.element_type, is_flattened=False)
+            # function_space = FunctionSpace(self, quadrature, p=p, equally_spaced=False, use_optimal_quadrature=False)
+
+            curved_vol = 0.
+            for elem in range(self.nelem):
+                LagrangeElemCoords = self.points[self.elements[elem,:],:]
+                curved_vol += formulation.GetVolume(formulation.function_spaces[0],
+                    LagrangeElemCoords, LagrangeElemCoords, False, elem=elem)
+                # curved_vol += formulation.GetVolume(function_space,
+                #     LagrangeElemCoords, LagrangeElemCoords, False, elem=elem)
+
+            if ndim == 3:
+                planar_vols = self.Volumes()
+            elif ndim == 2:
+                planar_vols = self.Areas()
+            elif ndim == 1:
+                planar_vols = self.Lengths()
+            planar_vol = planar_vols.sum()
+
+            if not np.isclose(planar_vol, curved_vol, rtol=1e-6, atol=1e-6):
+                is_curvilinear = True
+
+            return is_curvilinear
+
+
+        # ACTIVE ONLY FOR LINE ELEMENTS RIGHT NOW,
+        # ALTERNATIVELY FOR LINE WE CAN CHECK COLINEARITY
+        # THAT WAY THIS FUNCTION WOULD NOT DEPEND ON IsEquallySpaced
+        # VERY SIMPLE WAY TO CHECK IF A MESH IS CURVED
+        if p == 1:
+            is_curvilinear = False
+        else:
+            mesh = deepcopy(self)
+            mesh = mesh.GetLinearMesh(remap=True)
+            # NOTE THAT IF OTHER ARGS WERE PASSED TO GetHighOrderMesh
+            # THIS WILL FAIL
+            if not self.IsEquallySpaced:
+                mesh.GetHighOrderMesh(p=p, equally_spaced=False)
+                error = np.linalg.norm(mesh.points - self.points)
+                if not np.isclose(error, 0., rtol=1e-6, atol=1e-6):
+                    is_curvilinear = True
+            else:
+                mesh = mesh.GetLinearMesh(remap=True)
+                mesh.GetHighOrderMesh(p=p, equally_spaced=True)
+                error = np.linalg.norm(mesh.points - self.points)
+                if not np.isclose(error, 0., rtol=1e-6, atol=1e-6):
+                    is_curvilinear = True
+
+        return is_curvilinear
+
+
+    @property
+    def IsEquallySpaced(self):
+
+        self.__do_essential_memebers_exist__()
+
+        # FOR CURVILINEAR MESHES THIS STRATEGY WILL FAIL
+        # HOWEVER AT THE MOMENT CALLING self.IsCurvilinear INTRODUCES
+        # CYCLIC DEPENDENCY FOR LINES. IN ESSENCE, SINCE WE FEA ARE DONE
+        # MAINLY ON FEKETE POINTS IF A CURVED MESH COMES IN IT WILL BE
+        # AUTOMATICALLY FALSE
+        is_equally_spaced = False
+        p = self.InferPolynomialDegree()
+        if p == 1:
+            # FOR p=1 THIS NEEDS TO BE FALSE - AFFECTS ELSEWHERE (TRACTION COMPUTATION)
+            is_equally_spaced = False
+        elif p == 2:
+            # FOR p=2 THIS IS ALWAYS TRUE
+            is_equally_spaced = True
+        elif p > 2:
+            try:
+                from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints, EquallySpacedPointsTri, EquallySpacedPointsTet
+                from Florence.FunctionSpace import Line, Tri, QuadES, Tet, HexES
+                from Florence.MeshGeneration.NodeArrangement import NodeArrangementLine
+            except ImportError:
+                raise ValueError("This functionality requires Florence's support")
+
+
+            if self.element_type == "line":
+                ndim = 1
+                nsize = 2
+                eps = EquallySpacedPoints(ndim+1,p-1).ravel()
+                # ARRANGE NODES FOR LINES HERE (DONE ONLY FOR LINES) - IMPORTANT
+                node_aranger = NodeArrangementLine(p-1)
+                eps = eps[node_aranger]
+                # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
+                Neval = np.zeros((nsize,eps.shape[0]),dtype=np.float64)
+                for i in range(0,eps.shape[0]):
+                    Neval[:,i] = Line.Lagrange(0,eps[i])[0]
+
+            elif self.element_type == "tri":
+                ndim = 2
+                nsize = 3
+                eps =  EquallySpacedPointsTri(p-1)
+                # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
+                hpBases = Tri.hpNodal.hpBases
+                Neval = np.zeros((nsize,eps.shape[0]),dtype=np.float64)
+                for i in range(0,eps.shape[0]):
+                    Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],Transform=1,EvalOpt=1,equally_spaced=True)[0]
+
+            elif self.element_type == "quad":
+                ndim = 2
+                nsize = 4
+                eps = EquallySpacedPoints(ndim+1,p-1)
+                # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
+                Neval = np.zeros((nsize,eps.shape[0]),dtype=np.float64)
+                for i in range(0,eps.shape[0]):
+                    Neval[:,i] = QuadES.Lagrange(0,eps[i,0],eps[i,1],arrange=1)[:,0]
+
+            elif self.element_type == "tet":
+                ndim = 3
+                nsize = 4
+                eps =  EquallySpacedPointsTet(p-1)
+                # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
+                hpBases = Tet.hpNodal.hpBases
+                Neval = np.zeros((nsize,eps.shape[0]),dtype=np.float64)
+                for i in range(0,eps.shape[0]):
+                    Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],eps[i,2],Transform=1,EvalOpt=1,equally_spaced=True)[0]
+
+            elif self.element_type == "hex":
+                ndim = 3
+                nsize = 8
+                eps = EquallySpacedPoints(ndim+1,p-1)
+                # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
+                Neval = np.zeros((nsize,eps.shape[0]),dtype=np.float64)
+                for i in range(0,eps.shape[0]):
+                    Neval[:,i] = HexES.Lagrange(0,eps[i,0],eps[i,1],eps[i,2],arrange=1)[:,0]
+
+
+            linear_points = self.points[self.elements[0,:nsize],:]
+            bench_points = np.dot(Neval.T,linear_points)
+
+            candidate_points = self.points[self.elements[0,:],:]
+
+            # CHECK IF MESH POINTS AND LINEAR PROJECTION POINTS MATCH
+            error = np.linalg.norm(bench_points - candidate_points)
+
+            if np.isclose(error, 0., rtol=1e-6, atol=1e-6):
+                is_equally_spaced = True
+
+
+        return is_equally_spaced
+
+
     def GetNumberOfElements(self):
         if self.nelem != None:
             return self.nelem

@@ -22,7 +22,9 @@ class BoundaryCondition(object):
         save_dirichlet_data=False,
         save_nurbs_data=False,
         filename=None,
-        read_dirichlet_from_file=False):
+        read_dirichlet_from_file=False,
+        make_loading="ramp"
+        ):
 
         # TYPE OF BOUNDARY: straight or nurbs
         self.boundary_type = 'straight'
@@ -74,6 +76,8 @@ class BoundaryCondition(object):
         self.applied_neumann = None
         self.is_applied_neumann_shape_functions_computed = False
         self.is_body_force_shape_functions_computed = False
+
+        self.make_loading = make_loading # "ramp" or "constant"
 
 
         # NODAL FORCES GENERATED BASED ON DIRICHLET OR NEUMANN ARE NOT
@@ -295,6 +299,9 @@ class BoundaryCondition(object):
 
         elif self.boundary_type == 'straight' or self.boundary_type == 'mixed':
             # IF DIRICHLET BOUNDARY CONDITIONS ARE APPLIED DIRECTLY AT NODES
+            if self.dirichlet_flags is None:
+                raise RuntimeError("Dirichlet boundary conditions are not set for the analysis")
+
             if self.dirichlet_data_applied_at == 'node':
                 if self.analysis_type == "dynamic":
                     # FOR DYNAMIC ANALYSIS IT IS ASSUMED THAT
@@ -330,6 +337,69 @@ class BoundaryCondition(object):
                 'columns_out':self.columns_out,
                 'applied_dirichlet':self.applied_dirichlet}
             savemat(self.filename,diri_dict, do_compression=True)
+
+
+
+    def ConvertStaticsToDynamics(self, mesh, nincr):
+        """Convert static boundary condition data to dynamic
+        """
+
+        if self.analysis_type == "dynamic":
+            # AVOID ZERO DIVISION FOR RAMP (LINSPACE TYPE) LOADING
+            nincr_last = float(nincr-1) if nincr !=1 else 1
+
+            if self.dirichlet_flags is not None:
+                if self.dirichlet_flags.ndim == 2:
+                    dum = np.zeros((self.dirichlet_flags.shape[0],self.dirichlet_flags.shape[1],nincr))
+                    for incr in range(nincr):
+                        if self.make_loading == "constant":
+                            dum[:,:,incr] = self.dirichlet_flags/float(nincr)
+                        else:
+                            dum[:,:,incr] = incr*self.dirichlet_flags/nincr_last
+                    self.dirichlet_flags = np.copy(dum)
+                else:
+                    return
+
+            if self.neumann_flags is not None:
+
+                ndim = mesh.InferSpatialDimension()
+                if self.neumann_flags.shape[0] == mesh.points.shape[0]:
+                    self.neumann_data_applied_at = "node"
+                else:
+                    if ndim==3:
+                        if self.neumann_flags.shape[0] == mesh.faces.shape[0]:
+                            self.neumann_data_applied_at = "face"
+                    elif ndim==2:
+                        if self.neumann_flags.shape[0] == mesh.edges.shape[0]:
+                            self.neumann_data_applied_at = "face"
+
+                if self.neumann_data_applied_at == "node":
+                    if self.neumann_flags.ndim == 2:
+                        dum = np.zeros((self.neumann_flags.shape[0],self.neumann_flags.shape[1],nincr))
+                        for incr in range(nincr):
+                            if self.make_loading == "constant":
+                                dum[:,:,incr] = self.neumann_flags/float(nincr)
+                            else:
+                                dum[:,:,incr] = incr*self.neumann_flags/nincr_last
+                        self.neumann_flags = np.copy(dum)
+                    else:
+                        return
+                elif self.neumann_data_applied_at == "face":
+                    if self.applied_neumann is None:
+                        raise ValueError("Incorrect Neumann data supplied")
+                    if self.neumann_flags.ndim == 1:
+                        tmp_flags = np.zeros((self.neumann_flags.shape[0],nincr))
+                        tmp_data = np.zeros((self.applied_neumann.shape[0],self.applied_neumann.shape[1],nincr))
+                        for incr in range(nincr):
+                            if self.make_loading == "constant":
+                                tmp_data[:,:,incr] = self.applied_neumann/float(nincr)
+                            else:
+                                tmp_data[:,:,incr] = incr*self.applied_neumann/nincr_last
+                            tmp_flags[:,incr] = self.neumann_flags
+                        self.neumann_flags = np.copy(tmp_flags)
+                        self.applied_neumann = np.copy(tmp_data)
+                    else:
+                        return
 
 
 
@@ -760,6 +830,7 @@ class BoundaryCondition(object):
         return F_b, mass_b
 
 
+
     def UpdateFixDoFs(self, AppliedDirichletInc, fsize, nvar):
         """Updates the geometry (DoFs) with incremental Dirichlet boundary conditions
             for fixed/constrained degrees of freedom only. Needs to be applied per time steps"""
@@ -821,13 +892,25 @@ class BoundaryCondition(object):
             if not isinstance(function_spaces,tuple):
                 raise ValueError("Boundary functional spaces not available for computing Neumman and body forces")
             else:
+                # CHECK IF A FUNCTION SPACE FOR BOUNDARY EXISTS - SAFEGAURDS AGAINST FORMULATIONS THAT DO NO PROVIDE ONE
                 has_boundary_spaces = False
                 for fs in function_spaces:
                     if ndim == 3 and fs.ndim == 2:
                         has_boundary_spaces = True
                         break
+                    elif ndim == 2 and fs.ndim == 1:
+                        has_boundary_spaces = True
+                        break
                 if not has_boundary_spaces:
-                    raise ValueError("Boundary functional spaces not available for computing Neumman and body forces")
+                    from Florence import QuadratureRule, FunctionSpace
+                    # COMPUTE BOUNDARY FUNCTIONAL SPACES
+                    p = mesh.InferPolynomialDegree()
+                    bquadrature = QuadratureRule(optimal=3, norder=2*p+1,
+                        mesh_type=mesh.boundary_element_type, is_flattened=False)
+                    bfunction_space = FunctionSpace(mesh.CreateDummyLowerDimensionalMesh(),
+                        bquadrature, p=p, equally_spaced=mesh.IsEquallySpaced, use_optimal_quadrature=False)
+                    function_spaces = (function_spaces[0],bfunction_space)
+                    # raise ValueError("Boundary functional spaces not available for computing Neumman and body forces")
 
             t_tassembly = time()
             if self.analysis_type == "static":

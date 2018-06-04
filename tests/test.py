@@ -24,6 +24,7 @@ sys.path.append('../examples/car_crash_analysis/')
 sys.path.append('../examples/hyperelastic_explicit_dynamics/')
 sys.path.append('../examples/electro_hyperelastic_explicit_dynamics')
 sys.path.append('../examples/wrinkling_of_soft_dielectric_film/')
+sys.path.append('../examples/staggered_multiphysics_solver')
 
 sys.path.append('./test_basics')
 
@@ -39,6 +40,7 @@ from hyperelastic_explicit_dynamics import explicit_dynamics_mechanics
 from wrinkling_of_soft_dielectric_film import dielectric_wrinkling
 from linear_elastic_dynamics import linear_elastic_dynamics
 from electro_hyperelastic_explicit_dynamics import electro_hyperelastic_explicit_dynamics
+from staggered_multiphysics_solver import staggered_multiphysics_solver
 
 from test_basics import test_quadrature_functionspace, test_mesh_postprocess_material, test_material
 
@@ -179,6 +181,9 @@ def final_solution_checker(material,solver,fem_solver,TotalDisp,Dict):
 
 
 def test_examples():
+
+    print("Statrting to run the test suite")
+
     # RUN EXAMPLES AT TEST CASES
     simple_laplace()
     high_order_curved_mesh_generation()
@@ -187,15 +192,17 @@ def test_examples():
     explicit_dynamics_mechanics()
     electro_hyperelastic_explicit_dynamics()
     dielectric_wrinkling()
+    staggered_multiphysics_solver()
 
     # RUN BASICS TESTSUITE
     test_quadrature_functionspace()
     test_mesh_postprocess_material()
     test_material()
 
+    print("Successfully finished running all tests")
+
 
 # RUN EXAPLES AS TEST CASES
 if __name__ == "__main__":
     test_examples()
-
 

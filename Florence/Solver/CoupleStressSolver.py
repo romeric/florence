@@ -183,14 +183,7 @@ class CoupleStressSolver(FEMSolver):
         #---------------------------------------------------------------------------#
         caller = inspect.getouterframes(inspect.currentframe(), 2)[1][3]
         if caller != "Solve":
-            print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation info etc...')
-            print('Number of nodes is',mesh.points.shape[0], 'number of DoFs is', mesh.points.shape[0]*formulation.nvar)
-            if formulation.ndim==2:
-                print('Number of elements is', mesh.elements.shape[0], \
-                     'and number of boundary nodes is', np.unique(mesh.edges).shape[0])
-            elif formulation.ndim==3:
-                print('Number of elements is', mesh.elements.shape[0], \
-                     'and number of boundary nodes is', np.unique(mesh.faces).shape[0])
+            self.PrintPreAnalysisInfo(mesh, formulation)
         #---------------------------------------------------------------------------#
 
         # INITIATE DATA FOR NON-LINEAR ANALYSIS

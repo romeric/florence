@@ -1,5 +1,5 @@
 from __future__ import print_function
-import gc, os, sys
+import gc, os, sys, inspect
 from copy import deepcopy
 from warnings import warn
 from time import time
@@ -75,8 +75,8 @@ class PotentialBasedStaggeredSolver(FEMSolver):
 
 
 
-    def Solve(self, formulation=None, mesh=None, 
-        material=None, boundary_condition=None, 
+    def Solve(self, formulation=None, mesh=None,
+        material=None, boundary_condition=None,
         function_spaces=None, solver=None):
         """Main solution routine for FEMSolver """
 
@@ -85,15 +85,9 @@ class PotentialBasedStaggeredSolver(FEMSolver):
         #---------------------------------------------------------------------------#
         function_spaces, solver = self.__checkdata__(material, boundary_condition, formulation, mesh, function_spaces, solver)
         #---------------------------------------------------------------------------#
-
-        print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation info etc...')
-        print('Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*formulation.nvar)
-        if formulation.ndim==2:
-            print('Number of elements is', mesh.elements.shape[0], \
-                 'and number of boundary nodes is', np.unique(mesh.edges).shape[0])
-        elif formulation.ndim==3:
-            print('Number of elements is', mesh.elements.shape[0], \
-                 'and number of boundary nodes is', np.unique(mesh.faces).shape[0])
+        caller = inspect.getouterframes(inspect.currentframe(), 2)[1][3]
+        if caller != "Solve":
+            self.PrintPreAnalysisInfo(mesh, formulation)
         #---------------------------------------------------------------------------#
 
 
@@ -102,7 +96,7 @@ class PotentialBasedStaggeredSolver(FEMSolver):
             np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64)
         # SET NON-LINEAR PARAMETERS
         self.NRConvergence = { 'Increment_'+str(Increment) : [] for Increment in range(self.number_of_load_increments) }
-        
+
         # ALLOCATE FOR SOLUTION FIELDS
         # TotalDisp = np.zeros((mesh.points.shape[0],formulation.nvar,self.number_of_load_increments),dtype=np.float32)
         TotalDisp = np.zeros((mesh.points.shape[0],formulation.nvar,self.number_of_load_increments),dtype=np.float64)
@@ -114,21 +108,21 @@ class PotentialBasedStaggeredSolver(FEMSolver):
         # APPLY DIRICHELT BOUNDARY CONDITIONS AND GET DIRICHLET RELATED FORCES
         boundary_condition.GetDirichletBoundaryConditions(formulation, mesh, material, solver, self)
 
-        # ALLOCATE FOR GEOMETRY - GetDirichletBoundaryConditions CHANGES THE MESH 
-        # SO EULERX SHOULD BE ALLOCATED AFTERWARDS 
+        # ALLOCATE FOR GEOMETRY - GetDirichletBoundaryConditions CHANGES THE MESH
+        # SO EULERX SHOULD BE ALLOCATED AFTERWARDS
         Eulerx = np.copy(mesh.points)
         Eulerp = np.zeros((mesh.points.shape[0]))
 
         # FIND PURE NEUMANN (EXTERNAL) NODAL FORCE VECTOR
-        NeumannForces = boundary_condition.ComputeNeumannForces(mesh, material)
+        NeumannForces = boundary_condition.ComputeNeumannForces(mesh, material, function_spaces)
 
         # ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES
-        K, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material, 
+        K, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material,
             Eulerx, Eulerp)[:2]
 
         print('Finished all pre-processing stage. Time elapsed was', time()-tAssembly, 'seconds')
 
-        self.StaggeredSolver(function_spaces, formulation, solver, 
+        TotalDisp = self.StaggeredSolver(function_spaces, formulation, solver,
                 K,NeumannForces,NodalForces,Residual,
                 mesh,TotalDisp,Eulerx,Eulerp,material, boundary_condition)
 
@@ -142,7 +136,7 @@ class PotentialBasedStaggeredSolver(FEMSolver):
     def StaggeredSolver(self, function_spaces, formulation, solver, K,
             NeumannForces,NodalForces,Residual,
             mesh,TotalDisp,Eulerx,Eulerp,material, boundary_condition):
-    
+
         Tolerance = self.newton_raphson_tolerance
         LoadIncrement = self.number_of_load_increments
         LoadFactor = 1./LoadIncrement
@@ -166,11 +160,11 @@ class PotentialBasedStaggeredSolver(FEMSolver):
 
         # INITIATE ELECTRIC NODAL FORCES AND RESIDUAL
         nodal_forces_electric = NodalForces[self.electric_dofs]
-  
+
         for Increment in range(LoadIncrement):
-            
+
             t_increment = time()
-            
+
             # UPDATE FIXED DOFs FOR ELECTROSTATICS
             DeltaF_electric = LoadFactor*NeumannForces[self.electric_dofs]
             nodal_forces_electric += DeltaF_electric
@@ -209,19 +203,14 @@ class PotentialBasedStaggeredSolver(FEMSolver):
 
                 # UPDATE EULERIAN POTENTIAL - GET ITERATIVE ELECTRIC POTENTIAL
                 Eulerp += dUe
-                # print(dUe)
-                # print(Eulerp)
-                # exit()
 
                 # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES FOR ELECTROSTATICS
                 Ke, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material,
                     Eulerx,Eulerp)[:2]
-                # print(TractionForces)
-                # exit()
 
                 # FIND THE ITERATIVE RESIDUAL
                 residual_electric[self.electric_in] = TractionForces[self.columns_in_electric] - nodal_forces_electric[self.electric_in]
-                
+
                 # traction_forces_mech += TractionForces[self.mechanical_dofs]
                 residual_mech_from_elec += TractionForces[self.mechanical_dofs] - nodal_forces_mech
                 # print(TractionForces[[0,1,3,4,6,7,9,10],0])
@@ -229,9 +218,9 @@ class PotentialBasedStaggeredSolver(FEMSolver):
 
                 self.NRConvergence['Increment_'+str(Increment)] = np.append(self.NRConvergence['Increment_'+str(Increment)],\
                     np.abs(la.norm(residual_electric[self.electric_in])/self.NormForces))
-                
+
                 print('Iteration number', Iter, 'for load increment', Increment, 'with a residual of \t\t', \
-                    np.abs(la.norm(residual_electric[self.electric_in])/self.NormForces)) 
+                    np.abs(la.norm(residual_electric[self.electric_in])/self.NormForces))
 
                 # UPDATE ITERATION NUMBER
                 Iter +=1
@@ -244,7 +233,12 @@ class PotentialBasedStaggeredSolver(FEMSolver):
                     break
 
             if self.newton_raphson_failed_to_converge:
-                break
+                print("Solver blew up! Norm of incremental solution is too large")
+                solver.condA = np.NAN
+                Increment = Increment if Increment!=0 else 1
+                TotalDisp = TotalDisp[:,:,:Increment]
+                self.number_of_load_increments = Increment
+                return TotalDisp
 
             # COMPUTE FORCE TO BE TRANSMITTED TO MECHANICS
             K_up = Ke[self.mechanical_dofs,:][:,self.electric_dofs]
@@ -270,16 +264,26 @@ class PotentialBasedStaggeredSolver(FEMSolver):
             K = Assemble(self, function_spaces[0], formulation, mesh, material,
                     Eulerx,Eulerp)[0]
 
+            # LOG REULTS
+            self.LogSave(formulation, TotalDisp, Increment)
 
             print('\nFinished Load increment', Increment, 'in', time()-t_increment, 'seconds')
 
+            # BREAK AT A SPECIFICED LOAD INCREMENT IF ASKED FOR
+            if self.break_at_increment != -1 and self.break_at_increment is not None:
+                if self.break_at_increment == Increment:
+                    if self.break_at_increment < LoadIncrement - 1:
+                        print("\nStopping at increment {} as specified\n\n".format(Increment))
+                        TotalDisp = TotalDisp[:,:,:Increment]
+                        self.number_of_load_increments = Increment
+                    break
 
         return TotalDisp
 
 
     def ApplyDirichlet(self, stiffness, F, columns_out, columns_in, AppliedDirichlet, LoadFactor=1., mass=None):
         """AppliedDirichlet is a non-member because it can be external incremental Dirichlet,
-            which is currently not implemented as member of BoundaryCondition. F also does not 
+            which is currently not implemented as member of BoundaryCondition. F also does not
             correspond to Dirichlet forces, as it can be residual in incrementally linearised
             framework.
         """
@@ -292,13 +296,13 @@ class PotentialBasedStaggeredSolver(FEMSolver):
 
 
     def SolveMechanics(self, mesh, formulation, solver, K, residual_mech, LoadFactor, initial_solution=True):
-        """ Solves for mechanical variables. This solves the upper row 
+        """ Solves for mechanical variables. This solves the upper row
             of the following system
 
                 [K_uu K_up][U_u] = [F_u]
                 [K_pu K_pp][U_p] = [F_p]
 
-            i.e. 
+            i.e.
 
                 K_uu*U_u = F_u - K_up*U_p
 
@@ -317,12 +321,12 @@ class PotentialBasedStaggeredSolver(FEMSolver):
         else:
             rhs_mech = residual_mech + self.force_up[:,None]
             F_b = rhs_mech[self.mech_in]
- 
+
         sol = solver.Solve(K_uu_b,-F_b)
 
         # REARRANGE
         dUm = np.zeros(self.all_mech_dofs.shape[0],dtype=np.float64)
-        dUm[self.mech_in] = sol
+        dUm[self.mech_in] = sol.ravel()
         dUm[self.mech_out] = LoadFactor*self.applied_dirichlet_mech
         dUm = dUm.reshape(dUm.shape[0]/formulation.ndim,formulation.ndim)
 
@@ -331,13 +335,13 @@ class PotentialBasedStaggeredSolver(FEMSolver):
 
 
     def SolveElectrostatics(self, K, residual_electric,formulation,solver,iteration):
-        """ Solves for mechanical variables. This solves the lower row 
+        """ Solves for mechanical variables. This solves the lower row
             of the following system
 
                 [K_uu K_up][U_u] = [F_u]
                 [K_pu K_pp][U_p] = [F_p]
 
-            i.e. 
+            i.e.
 
                 K_uu*U_u = F_u - K_up*U_p
 
@@ -352,12 +356,12 @@ class PotentialBasedStaggeredSolver(FEMSolver):
         if iteration == 0:
             rhs_electric = residual_electric #+ self.force_pu[:,None] ## DIFFERENCE
         else:
-            rhs_electric = residual_electric           
+            rhs_electric = residual_electric
 
         F_b = rhs_electric[self.electric_in]
         sol = solver.Solve(K_pp_b,-F_b)
         # REARRANGE
         dUe = np.zeros(self.all_electric_dofs.shape[0])
-        dUe[self.electric_in] = sol
+        dUe[self.electric_in] = sol.ravel()
 
         return dUe

@@ -64,6 +64,9 @@ def test_mesh_postprocess_material():
     mesh.NodeArranger(C=2)
     mesh.CreateDummyLowerDimensionalMesh()
     mesh.CreateDummyUpperDimensionalMesh()
+    mesh.IsHighOrder
+    mesh.IsCurvilinear
+    mesh.IsEquallySpaced
 
     pp = PostProcess(2,2)
     pp.SetMesh(mesh)
@@ -92,6 +95,9 @@ def test_mesh_postprocess_material():
         mesh.NodeArranger(C=2)
         mesh.CreateDummyLowerDimensionalMesh()
         mesh.CreateDummyUpperDimensionalMesh()
+        mesh.IsHighOrder
+        mesh.IsCurvilinear
+        mesh.IsEquallySpaced
 
         pp = PostProcess(2,2)
         pp.SetMesh(mesh)
@@ -246,6 +252,9 @@ def test_mesh_postprocess_material():
         mesh <= mesh
         mesh > mesh
         mesh >= mesh
+        mesh.IsHighOrder
+        mesh.IsCurvilinear
+        mesh.IsEquallySpaced
 
         pp = PostProcess(3,3)
         pp.SetMesh(mesh)
@@ -441,6 +450,6 @@ def test_material():
 
 
 if __name__ == "__main__":
-    # test_quadrature_functionspace()
-    # test_mesh_postprocess_material()
+    test_quadrature_functionspace()
+    test_mesh_postprocess_material()
     test_material()

@@ -35,6 +35,7 @@ class FEMSolver(object):
         analysis_type="static",
         analysis_nature="nonlinear",
         analysis_subtype="implicit",
+        linearised_electromechanics_solver="traction_based",
         is_geometrically_linearised=False,
         requires_geometry_update=True,
         requires_line_search=False,
@@ -80,6 +81,7 @@ class FEMSolver(object):
         self.analysis_type = analysis_type
         self.analysis_subtype = analysis_subtype
 
+        self.linearised_electromechanics_solver=linearised_electromechanics_solver # "traction_based" or "potential_based"
         self.is_geometrically_linearised = is_geometrically_linearised
         self.requires_geometry_update = requires_geometry_update
         self.requires_line_search = requires_line_search
@@ -279,15 +281,21 @@ class FEMSolver(object):
 
         # CHANGE MESH DATA TYPE
         mesh.ChangeType()
+
         # ASSIGN ANALYSIS PARAMTER TO BOUNDARY CONDITION
         boundary_condition.analysis_type = self.analysis_type
         boundary_condition.analysis_nature = self.analysis_nature
+        ##############################################################################
+        if self.analysis_type == "dynamic":
+            boundary_condition.ConvertStaticsToDynamics(mesh, self.number_of_load_increments)
+        ##############################################################################
 
         return function_spaces, solver
 
 
 
     def __makeoutput__(self, mesh, TotalDisp, formulation=None, function_spaces=None, material=None):
+
         post_process = PostProcess(formulation.ndim,formulation.nvar)
         post_process.SetBases(postdomain=function_spaces[1], domain=function_spaces[0], boundary=None)
         post_process.SetAnalysis(analysis_type=self.analysis_type,
@@ -328,7 +336,10 @@ class FEMSolver(object):
     def WhichFEMSolver():
         solver = None
         if self.analysis_type == "dynamic":
-            solver = "StructuralDynamicIntegrator"
+            if self.analysis_subtype == "explicit":
+                solver = "ExplicitStructuralDynamicIntegrator"
+            else:
+                solver = "StructuralDynamicIntegrator"
         else:
             if self.analysis_nature == "linear":
                 if self.number_of_load_increments > 1:
@@ -342,8 +353,10 @@ class FEMSolver(object):
 
     @property
     def WhichFEMSolvers():
-        solvers = ["LinearElasticity","IncrementalLinearElasticitySolver","NewtonRaphson","ModifiedNewtonRaphson",
-            "NewtonRaphsonLineSearch","NewtonRaphsonArchLength","StructuralDynamicIntegrator"]
+        solvers = ["LinearElasticity","IncrementalLinearElasticitySolver",
+            "NewtonRaphson","ModifiedNewtonRaphson",
+            "NewtonRaphsonLineSearch","NewtonRaphsonArchLength",
+            "StructuralDynamicIntegrator", "ExplicitStructuralDynamicIntegrator"]
         print(solvers)
         return solvers
 
@@ -361,15 +374,7 @@ class FEMSolver(object):
         function_spaces, solver = self.__checkdata__(material, boundary_condition,
             formulation, mesh, function_spaces, solver, contact_formulation=contact_formulation)
         #---------------------------------------------------------------------------#
-
-        print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation info etc...')
-        print('Number of nodes is',mesh.points.shape[0], 'number of DoFs is', mesh.points.shape[0]*formulation.nvar)
-        if formulation.ndim==2:
-            print('Number of elements is', mesh.elements.shape[0], \
-                 'and number of boundary nodes is', np.unique(mesh.edges).shape[0])
-        elif formulation.ndim==3:
-            print('Number of elements is', mesh.elements.shape[0], \
-                 'and number of boundary nodes is', np.unique(mesh.faces).shape[0])
+        self.PrintPreAnalysisInfo(mesh, formulation)
         #---------------------------------------------------------------------------#
 
         # QUICK REDIRECT TO LAPLACIAN SOLVER
@@ -380,6 +385,30 @@ class FEMSolver(object):
                 function_spaces=function_spaces, solver=solver, Eulerx=Eulerx, Eulerp=Eulerp)
             solution.assembly_time = laplacian_solver.assembly_time
             return solution
+
+
+        # QUICK REDIRECT TO LINEARISED ELECTROMECHANICS SOLVERS
+        if formulation.fields == "electro_mechanics" and self.analysis_nature == "linear":
+            if self.analysis_type == "static":
+                from Florence.Solver import TractionBasedStaggeredSolver, PotentialBasedStaggeredSolver
+                if self.linearised_electromechanics_solver=="potential_based":
+                    linearised_solver = PotentialBasedStaggeredSolver()
+                else:
+                    linearised_solver = TractionBasedStaggeredSolver()
+                linearised_solver.__dict__.update(self.__dict__)
+
+                solution = linearised_solver.Solve(formulation=formulation, mesh=mesh,
+                    material=material, boundary_condition=boundary_condition,
+                    function_spaces=function_spaces, solver=solver)
+                solution.assembly_time = linearised_solver.assembly_time
+                self.__dict__.update(linearised_solver.__dict__)
+                return solution
+            elif self.analysis_type == "dynamic":
+                self.analysis_subtype = "explicit"
+                if self.mass_type == None:
+                    self.mass_type = "lumped"
+                boundary_condition.ConvertStaticsToDynamics(mesh, self.number_of_load_increments)
+
 
 
         # INITIATE DATA FOR THE ANALYSIS
@@ -708,6 +737,7 @@ class FEMSolver(object):
             # STORE THE INFORMATION IF NEWTON-RAPHSON FAILS
             if self.newton_raphson_failed_to_converge:
                 solver.condA = np.NAN
+                Increment = Increment if Increment!=0 else 1
                 TotalDisp = TotalDisp[:,:,:Increment]
                 self.number_of_load_increments = Increment
                 break
@@ -1080,6 +1110,16 @@ class FEMSolver(object):
 
 
 
+    def PrintPreAnalysisInfo(self, mesh, formulation):
+
+        print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation info etc...')
+        print('Number of nodes is',mesh.points.shape[0], 'number of DoFs is', mesh.points.shape[0]*formulation.nvar)
+        if formulation.ndim==2:
+            print('Number of elements is', mesh.elements.shape[0], \
+                 'and number of boundary nodes is', np.unique(mesh.edges).shape[0])
+        elif formulation.ndim==3:
+            print('Number of elements is', mesh.elements.shape[0], \
+                 'and number of boundary nodes is', np.unique(mesh.faces).shape[0])
 
 
 

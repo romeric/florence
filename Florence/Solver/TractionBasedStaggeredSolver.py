@@ -1,5 +1,5 @@
 from __future__ import print_function
-import gc, os, sys
+import gc, os, sys, inspect
 from copy import deepcopy
 from warnings import warn
 from time import time
@@ -88,15 +88,9 @@ class TractionBasedStaggeredSolver(FEMSolver):
         #---------------------------------------------------------------------------#
         function_spaces, solver = self.__checkdata__(material, boundary_condition, formulation, mesh, function_spaces, solver)
         #---------------------------------------------------------------------------#
-
-        print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation info etc...')
-        print('Number of nodes is',mesh.points.shape[0], 'number of DoFs', mesh.points.shape[0]*formulation.nvar)
-        if formulation.ndim==2:
-            print('Number of elements is', mesh.elements.shape[0], \
-                 'and number of boundary nodes is', np.unique(mesh.edges).shape[0])
-        elif formulation.ndim==3:
-            print('Number of elements is', mesh.elements.shape[0], \
-                 'and number of boundary nodes is', np.unique(mesh.faces).shape[0])
+        caller = inspect.getouterframes(inspect.currentframe(), 2)[1][3]
+        if caller != "Solve":
+            self.PrintPreAnalysisInfo(mesh, formulation)
         #---------------------------------------------------------------------------#
 
 
@@ -123,7 +117,7 @@ class TractionBasedStaggeredSolver(FEMSolver):
         Eulerp = np.zeros((mesh.points.shape[0]))
 
         # FIND PURE NEUMANN (EXTERNAL) NODAL FORCE VECTOR
-        NeumannForces = boundary_condition.ComputeNeumannForces(mesh, material)
+        NeumannForces = boundary_condition.ComputeNeumannForces(mesh, material, function_spaces)
 
         # ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES
         K, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material,
@@ -131,7 +125,7 @@ class TractionBasedStaggeredSolver(FEMSolver):
 
         print('Finished all pre-processing stage. Time elapsed was', time()-tAssembly, 'seconds')
 
-        self.StaggeredSolver(function_spaces, formulation, solver,
+        TotalDisp = self.StaggeredSolver(function_spaces, formulation, solver,
                 K,NeumannForces,NodalForces,Residual,
                 mesh,TotalDisp,Eulerx,Eulerp,material, boundary_condition)
 
@@ -239,7 +233,13 @@ class TractionBasedStaggeredSolver(FEMSolver):
                     break
 
             if self.newton_raphson_failed_to_converge:
-                break
+                print("Solver blew up! Norm of incremental solution is too large")
+                solver.condA = np.NAN
+                Increment = Increment if Increment!=0 else 1
+                TotalDisp = TotalDisp[:,:,:Increment]
+                self.number_of_load_increments = Increment
+                return TotalDisp
+
 
             # COMPUTE FORCE TO BE TRANSMITTED TO MECHANICS
             K_up = Ke[self.mechanical_dofs,:][:,self.electric_dofs]
@@ -271,8 +271,19 @@ class TractionBasedStaggeredSolver(FEMSolver):
             K = Assemble(self, function_spaces[0], formulation, mesh, material,
                     Eulerx,Eulerp)[0]
 
+            # LOG REULTS
+            self.LogSave(formulation, TotalDisp, Increment)
 
             print('\nFinished Load increment', Increment, 'in', time()-t_increment, 'seconds')
+
+            # BREAK AT A SPECIFICED LOAD INCREMENT IF ASKED FOR
+            if self.break_at_increment != -1 and self.break_at_increment is not None:
+                if self.break_at_increment == Increment:
+                    if self.break_at_increment < LoadIncrement - 1:
+                        print("\nStopping at increment {} as specified\n\n".format(Increment))
+                        TotalDisp = TotalDisp[:,:,:Increment]
+                        self.number_of_load_increments = Increment
+                    break
 
 
         return TotalDisp
@@ -323,7 +334,7 @@ class TractionBasedStaggeredSolver(FEMSolver):
 
         # REARRANGE
         dUm = np.zeros(self.all_mech_dofs.shape[0],dtype=np.float64)
-        dUm[self.mech_in] = sol
+        dUm[self.mech_in] = sol.ravel()
         dUm[self.mech_out] = LoadFactor*self.applied_dirichlet_mech
         dUm = dUm.reshape(dUm.shape[0]/formulation.ndim,formulation.ndim)
 
@@ -359,6 +370,6 @@ class TractionBasedStaggeredSolver(FEMSolver):
         sol = solver.Solve(K_pp_b,-F_b)
         # REARRANGE
         dUe = np.zeros(self.all_electric_dofs.shape[0])
-        dUe[self.electric_in] = sol
+        dUe[self.electric_in] = sol.ravel()
 
         return dUe

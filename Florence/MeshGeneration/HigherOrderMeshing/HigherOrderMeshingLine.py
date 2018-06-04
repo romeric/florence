@@ -15,20 +15,27 @@ def HighOrderMeshLine(C, mesh, Decimals=10, equally_spaced=False, check_duplicat
     from Florence.FunctionSpace import Line
     from Florence.QuadratureRules import GaussLobattoPoints1D
     from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints
+    from Florence.MeshGeneration.NodeArrangement import NodeArrangementLine
+
+    # ARRANGE NODES FOR LINES HERE (DONE ONLY FOR LINES) - IMPORTANT
+    node_aranger = NodeArrangementLine(C)
 
     if not equally_spaced:
         eps = GaussLobattoPoints1D(C).ravel()
+        eps = eps[node_aranger]
         # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
         Neval = np.zeros((2,eps.shape[0]),dtype=np.float64)
         for i in range(0,eps.shape[0]):
             Neval[:,i] = Line.LagrangeGaussLobatto(0,eps[i])[0]
     else:
         eps = EquallySpacedPoints(2,C).ravel()
+        eps = eps[node_aranger]
         # COMPUTE BASES FUNCTIONS AT ALL NODAL POINTS
         Neval = np.zeros((2,eps.shape[0]),dtype=np.float64)
         for i in range(0,eps.shape[0]):
             Neval[:,i] = Line.Lagrange(0,eps[i])[0]
     makezero(Neval)
+
 
     nodeperelem = mesh.elements.shape[1]
     renodeperelem = int(C+2)
@@ -39,7 +46,6 @@ def HighOrderMeshLine(C, mesh, Decimals=10, equally_spaced=False, check_duplicat
     iesize = int(C)
     repoints = np.zeros((mesh.points.shape[0]+iesize*mesh.elements.shape[0],mesh.points.shape[1]),dtype=np.float64)
     repoints[:mesh.points.shape[0],:]=mesh.points
-
 
     #--------------------------------------------------------------------------------------
     telements = time()

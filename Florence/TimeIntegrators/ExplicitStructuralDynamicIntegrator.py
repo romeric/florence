@@ -355,10 +355,20 @@ class ExplicitStructuralDynamicIntegrators(object):
         else:
             self.eboundary_condition.dirichlet_flags = boundary_condition.dirichlet_flags[:,-1]
         if boundary_condition.neumann_flags is not None:
-            if boundary_condition.dirichlet_flags.ndim==3:
-                self.eboundary_condition.neumann_flags = boundary_condition.neumann_flags[:,-1, Increment]
-            else:
-                self.eboundary_condition.neumann_flags = boundary_condition.neumann_flags[:,-1]
+            if boundary_condition.neumann_data_applied_at == "node":
+                if boundary_condition.neumann_flags.ndim==3:
+                    self.eboundary_condition.neumann_flags = boundary_condition.neumann_flags[:,-1, Increment]
+                else:
+                    self.eboundary_condition.neumann_flags = boundary_condition.neumann_flags[:,-1]
+            if boundary_condition.neumann_data_applied_at == "face":
+                if boundary_condition.neumann_flags.ndim==2:
+                    self.eboundary_condition.neumann_flags = boundary_condition.neumann_flags[:,Increment]
+                    self.eboundary_condition.applied_neumann = boundary_condition.applied_neumann[:,-1, Increment]
+                    self.eboundary_condition.applied_neumann = self.eboundary_condition.applied_neumann[:,None]
+                else:
+                    self.eboundary_condition.neumann_flags = boundary_condition.neumann_flags[:]
+                    self.eboundary_condition.applied_neumann = boundary_condition.applied_neumann[:,-1]
+                    self.eboundary_condition.applied_neumann = self.eboundary_condition.applied_neumann[:,None]
 
         # FILTER OUT CASES WHERE BOUNDARY CONDITION IS APPLIED BUT IS ZERO - RELEASE LOAD CYCLE IN DYNAMICS
         if np.allclose(self.eboundary_condition.dirichlet_flags[~np.isnan(self.eboundary_condition.dirichlet_flags)],0.):
