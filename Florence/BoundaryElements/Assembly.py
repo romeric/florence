@@ -1,3 +1,4 @@
+from __future__ import print_function, division
 import numpy as np
 from scipy.sparse import coo_matrix, csc_matrix, lil_matrix
 

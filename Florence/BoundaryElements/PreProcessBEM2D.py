@@ -1,3 +1,4 @@
+from __future__ import print_function, division
 import numpy as np
 import scipy as sp
 import warnings, sys
@@ -10,7 +11,7 @@ def GenerateCoordinates(boundary_elements,boundary_points,C,z):
     # eps = Lagrange(C,0)[2]
     eps = LagrangeGaussLobatto(C,0)[2]
     # Check if Gauss point and interior nodes coincide
-    if eps[C]==z[z.shape[0]/2]:
+    if eps[C]==z[int(z.shape[0]/2)]:
         sys.exit("Error: At least one Gauss point and an interior node coincide. Change the order of integration to one order higher or lower")
 
     # Allocate

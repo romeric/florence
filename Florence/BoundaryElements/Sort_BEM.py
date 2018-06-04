@@ -1,3 +1,4 @@
+from __future__ import print_function, division
 import numpy as np
 
 def Sort_BEM(boundary_data,stiffness_K1,stiffness_K2):
@@ -19,10 +20,13 @@ def Sort_BEM(boundary_data,stiffness_K1,stiffness_K2):
         else:
             RHS2RHS = np.append(RHS2RHS,i)
 
+    LHS2RHS = np.copy(LHS2RHS).astype(np.int64)
+    RHS2RHS = np.copy(RHS2RHS).astype(np.int64)
+
 
     # Make total LHS and RHS sizes and which columns comes from where
-    total_LHS = np.zeros((LHS2LHS.shape[0]+RHS2LHS.shape[0],2))
-    total_RHS = np.zeros((LHS2RHS.shape[0]+RHS2RHS.shape[0],2))
+    total_LHS = np.zeros((LHS2LHS.shape[0]+RHS2LHS.shape[0],2),dtype=np.int64)
+    total_RHS = np.zeros((LHS2RHS.shape[0]+RHS2RHS.shape[0],2),dtype=np.int64)
 
     # In second columns of total_LHS and total_RHS a 1 means in-place columns and a 0 means
     # columns coming from the other side

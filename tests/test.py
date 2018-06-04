@@ -27,6 +27,7 @@ sys.path.append('../examples/wrinkling_of_soft_dielectric_film/')
 sys.path.append('../examples/staggered_multiphysics_solver')
 
 sys.path.append('./test_basics')
+sys.path.append('./test_BEM')
 
 
 # IMPORT FLORENCE
@@ -43,6 +44,7 @@ from electro_hyperelastic_explicit_dynamics import electro_hyperelastic_explicit
 from staggered_multiphysics_solver import staggered_multiphysics_solver
 
 from test_basics import test_quadrature_functionspace, test_mesh_postprocess_material, test_material
+from test_BEM import test_BEM
 
 tick  = u'\u2713'.encode('utf8')  + b' : '
 cross = u'\u2717'.encode('utf8')  + b' : '
@@ -198,6 +200,7 @@ def test_examples():
     test_quadrature_functionspace()
     test_mesh_postprocess_material()
     test_material()
+    test_BEM()
 
     print("Successfully finished running all tests")
 
