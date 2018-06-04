@@ -67,11 +67,11 @@ class TractionBasedStaggeredSolver(FEMSolver):
         idx_electric = all_dofs[formulation.nvar-1::formulation.nvar]
         idx_mech = np.setdiff1d(all_dofs,idx_electric)
 
-        self.all_electric_dofs = np.arange(K.shape[0]/formulation.nvar)
+        self.all_electric_dofs = np.arange(int(K.shape[0]/formulation.nvar))
         self.electric_out = self.all_electric_dofs[out_idx[idx_electric]]
         self.electric_in = np.setdiff1d(self.all_electric_dofs,self.electric_out)
 
-        self.all_mech_dofs = np.arange(K.shape[0]/formulation.nvar*formulation.ndim)
+        self.all_mech_dofs = np.arange(int(K.shape[0]/formulation.nvar*formulation.ndim))
         self.mech_out = self.all_mech_dofs[out_idx[idx_mech]]
         self.mech_in = np.setdiff1d(self.all_mech_dofs,self.mech_out)
 
