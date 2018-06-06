@@ -5326,9 +5326,9 @@ class Mesh(object):
             # GET CURVED VOLUME
             curved_vol = self.Sizes().sum()
             # GET PLANAR VOLUME
-            if self.element_type == "tet" and self.element_type == "hex":
+            if self.element_type == "tet" or self.element_type == "hex":
                 planar_vols = self.Volumes()
-            elif self.element_type == "tri" and self.element_type == "quad":
+            elif self.element_type == "tri" or self.element_type == "quad":
                 planar_vols = self.Areas()
             elif self.element_type == "line":
                 planar_vols = self.Lengths()
