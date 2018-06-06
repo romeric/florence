@@ -306,7 +306,7 @@ class FEMSolver(object):
         boundary_condition.analysis_type = self.analysis_type
         boundary_condition.analysis_nature = self.analysis_nature
         ##############################################################################
-        if self.analysis_type == "dynamic":
+        if self.analysis_type == "dynamic" and self.analysis_subtype != "explicit":
             boundary_condition.ConvertStaticsToDynamics(mesh, self.number_of_load_increments)
         ##############################################################################
 
