@@ -313,23 +313,35 @@ class ExplicitStructuralDynamicIntegrators(object):
 
         # EMULATE ELECTROSTATICS MODEL
         emesh = deepcopy(mesh)
-        # emesh.points = np.copy(Eulerx)
-        emesh.points = mesh.points
-        # ematerial = IdealDielectric(emesh.InferSpatialDimension(),eps_1=material.eps_2)
-        ematerial = deepcopy(material)
-        # ematerial.has_low_level_dispatcher = False
-        ematerial.Hessian = ematerial.Permittivity
-        ematerial.KineticMeasures = ematerial.ElectrostaticMeasures
-        ematerial.H_VoigtSize = formulation.ndim
-        ematerial.nvar = 1
-        ematerial.fields = "electrostatics"
+
+        if fem_solver.activate_explicit_decoupling:
+            # WE GET THE MAX EPS - NOT ELEGANT BUT SEEMINGLY WORKS WELL
+            eps_s = []
+            for key, value in list(material.__dict__.items()):
+                if "eps" in key:
+                    eps_s.append(value)
+            max_eps = max(eps_s)
+            ematerial = IdealDielectric(emesh.InferSpatialDimension(),eps_1=max_eps)
+
+            eanalysis_nature = "linear"
+            eoptimise = True
+        else:
+            ematerial = deepcopy(material)
+            ematerial.Hessian = ematerial.Permittivity
+            ematerial.KineticMeasures = ematerial.ElectrostaticMeasures
+            ematerial.H_VoigtSize = formulation.ndim
+            ematerial.nvar = 1
+            ematerial.fields = "electrostatics"
+
+            eanalysis_nature = "nonlinear"
+            eoptimise = False
 
         # SET UP BOUNDARY CONDITION DURING SOLUTION
         eboundary_condition = BoundaryCondition()
 
         eformulation = LaplacianFormulation(mesh)
-        efem_solver = FEMSolver(number_of_load_increments=1,analysis_nature="nonlinear",
-            newton_raphson_tolerance=fem_solver.newton_raphson_tolerance)
+        efem_solver = FEMSolver(number_of_load_increments=1,analysis_nature=eanalysis_nature,
+            newton_raphson_tolerance=fem_solver.newton_raphson_tolerance,optimise=eoptimise)
 
         self.emesh = emesh
         self.ematerial = ematerial

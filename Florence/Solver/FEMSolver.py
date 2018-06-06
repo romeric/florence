@@ -70,7 +70,8 @@ class FEMSolver(object):
         user_defined_stop_func=None,
         save_results=True,
         save_frequency=1,
-        has_contact=False):
+        has_contact=False,
+        activate_explicit_decoupling=False):
 
         # ASSUME TRUE IF AT LEAST ONE IS TRUE
         if has_low_level_dispatcher != optimise:
@@ -131,6 +132,7 @@ class FEMSolver(object):
         self.user_defined_stop_func = user_defined_stop_func
 
         self.has_contact = has_contact
+        self.activate_explicit_decoupling = activate_explicit_decoupling
 
         self.fem_timer = 0.
         self.assembly_time = 0.
@@ -283,7 +285,9 @@ class FEMSolver(object):
         if self.analysis_type == "static" and self.contact_formulation is not None:
             warn("Contact formulation does not get activated under static problems")
         ##############################################################################
-
+        if self.analysis_type == "dynamic" and self.analysis_subtype == "explicit":
+            if self.number_of_load_increments < self.save_frequency:
+                raise ValueError("Number of load increments cannot be less than load frequency")
         ##############################################################################
         # AT THE MOMENT ALL HESSIANS SEEMINGLY HAVE THE SAME SIGNATURE SO THIS IS O.K.
         try:
