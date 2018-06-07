@@ -67,6 +67,8 @@ def test_mesh_postprocess_material():
     mesh.IsHighOrder
     mesh.IsCurvilinear
     mesh.IsEquallySpaced
+    mesh.IsSimilar(mesh)
+    mesh.IsEqualOrder(mesh)
 
     pp = PostProcess(2,2)
     pp.SetMesh(mesh)
@@ -386,6 +388,7 @@ def test_material():
 
     material_list = [
                         "IdealDielectric",
+                        "AnisotropicIdealDielectric",
                         "LinearElastic",
                         "IncrementalLinearElastic",
                         "NeoHookean",
@@ -434,12 +437,13 @@ def test_material():
         for ndim in [2,3]:
             P = np.zeros((6,3)) if ndim==3 else np.zeros((3,2))
             f = np.eye(ndim,ndim)
+            e = np.eye(ndim,ndim)
             for material_name in material_list:
                 material = eval(material_name)(ndim,mu=mu,mu1=mu1,mu2=mu2,mu3=mu3,mue=mue,mu_v=mu_v,lamb=lamb,
                     E=E,E_A=E_A,G_A=G_A,nu=nu, gamma=gamma, Jbar=[0],
                     mus=[mu],mu1s=[mu1],mu2s=[mu2],mu3s=[mu3],lambs=[lamb],eps_1s=[eps_1],eps_2s=[eps_2],eps_3s=[eps_3],
                     eps=eps,eps_1=eps_1,eps_2=eps_2,eps_3=eps_3,eps_e=eps_e,c1=c1,c2=c2,
-                    eta=eta,kappa=kappa, P=P, f=f,
+                    eta=eta,kappa=kappa, P=P, e=e, f=f,
                     pressure=[0],anisotropic_orientations=np.random.rand(1,ndim))
                 F = np.eye(material.ndim,material.ndim)[None,:,:]
                 E = np.random.rand(material.ndim)
@@ -453,14 +457,11 @@ def test_material():
                 if hasattr(material,"InternalEnergy"):
                     material.InternalEnergy(StrainTensor,E)
 
-
                 # Check low level
                 if hasattr(material,"KineticMeasures"):
                     if material.mtype != "CoupleStressModel" and material.mtype !="IsotropicLinearFlexoelectricModel":
                         E = np.random.rand(material.ndim)[None,:]
                         material.KineticMeasures(F,E)
-
-
 
 
     print("Successfully finished running tests on high and low level Material modules\n")

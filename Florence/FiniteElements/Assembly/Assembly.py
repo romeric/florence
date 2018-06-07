@@ -711,13 +711,9 @@ def AssembleBodyForces(boundary_condition, mesh, material, function_space):
 
 
 
-
-
-
 def AssembleExplicit(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
 
     if fem_solver.has_low_level_dispatcher and fem_solver.is_mass_computed is True:
-
         if not material.has_low_level_dispatcher:
             raise RuntimeError("Cannot dispatch to low level module, since material {} does not support it".format(type(material).__name__))
 
@@ -754,7 +750,7 @@ def AssembleExplicit(fem_solver, function_space, formulation, mesh, material, Eu
 
     if fem_solver.parallel:
         # from joblib import Parallel, delayed
-        # Parallel(n_jobs=2)(delayed(funcer)(elem, nvar,
+        # Parallel(n_jobs=2)(delayed(AssembleExplicitFunctor)(elem, nvar,
         #     nodeperelem, T, F, M, formulation, function_space, mesh, material,
         #     fem_solver, Eulerx, Eulerp) for elem in range(0,nelem))
 
@@ -775,6 +771,7 @@ def AssembleExplicit(fem_solver, function_space, formulation, mesh, material, Eu
 
 
     return T, F, M
+
 
 
 def AssembleExplicitFunctor(elem, nvar, nodeperelem, T, F, I_mass, J_mass, V_mass, M,

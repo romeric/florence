@@ -93,3 +93,5 @@ We typically do not recommed adding `anaconda/bin` to your path. Hence, whenever
 export PATH="/path/to/anaconda2/bin:$PATH"
 ```
 
+# Documentation
+A series of well explained examples are provided in the example folder that cover most of the functionality of florence.

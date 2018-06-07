@@ -1253,29 +1253,33 @@ class PostProcess(object):
 
 
 
-    def PlotNewtonRaphsonConvergence(self, increment=None, save=False, filename=None):
+    def PlotNewtonRaphsonConvergence(self, increment=None, figure=None, show_plot=True, save=False, filename=None):
         """Plots convergence of Newton-Raphson for a given increment"""
 
+        if self.fem_solver is None:
+            raise ValueError("FEM solver not set for post-processing")
+
         if increment == None:
-            increment = len(self.newton_raphson_convergence)-1
+            increment = len(self.fem_solver.NRConvergence)-1
 
         import matplotlib.pyplot as plt
-        # NEWTON-RAPHSON CONVERGENCE PLOT
-        plt.plot(np.log10(self.newton_raphson_convergence['Increment_'+str(increment)]),'-ko')
+        if figure is None:
+            figure = plt.figure()
+
+        plt.plot(np.log10(self.fem_solver.NRConvergence['Increment_'+str(increment)]),'-ko')
         axis_font = {'size':'18'}
         plt.xlabel(r'$No\;\; of\;\; Iterations$', **axis_font)
         plt.ylabel(r'$log_{10}|Residual|$', **axis_font)
         plt.grid('on')
 
-        # SAVE
         if save:
             if filename is None:
                 warn("No filename provided. I am going to write one in the current directory")
                 filename = PWD(__file__) + '/output.eps'
-
             plt.savefig(filename, format='eps', dpi=500)
 
-        plt.show()
+        if show_plot:
+            plt.show()
 
 
 
