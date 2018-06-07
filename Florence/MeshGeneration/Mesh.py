@@ -1420,7 +1420,7 @@ class Mesh(object):
 
 
     def FindElementContainingPoint(self, point, algorithm="fem", find_parametric_coordinate=True,
-        scaling_factor=5., tolerance=1.0e-7, maxiter=20, use_simple_bases=False):
+        scaling_factor=5., tolerance=1.0e-7, maxiter=20, use_simple_bases=False, return_on_geometric_finds=False):
         """Find which element does a point lie in using specificed algorithm.
             The FEM isoparametric coordinate of the point is returned as well.
             If the isoparametric coordinate of the point is not required, issue find_parametric_coordinate=False
@@ -1435,6 +1435,14 @@ class Mesh(object):
                                         then tries all possible combination of initial guesses to get the FEM
                                         isoparametric point. Trying all possible combination with FEM can be potentially
                                         more costly since bounding box size can be large.
+
+                return_on_geometric_finds:
+                                        [bool] if geometric algorithm is chosen and this option is on, then it returns
+                                        the indices of elements as soon as the volume check and no further checks are
+                                        done. This is useful for situations when searching for points that are meant to
+                                        be in the interior of the elements rather than at the boundaries or nodes
+                                        otherwise the number of elements returned by geometric algorithm is going to be
+                                        more than one
             return:
                 element_index           [int/1D array of ints] element(s) containing the point.
                                         If the point is shared between many elements a 1D array is returned
@@ -1447,7 +1455,7 @@ class Mesh(object):
         if C > 0:
             warn("Note that finding a point within higher order curved mesh is not supported yet")
         if C > 0 and algorithm == "geometric":
-            warn("High order meshes are not supported using geometric algorthims. I am going to operate on linear mesh")
+            warn("High order meshes are not supported using geometric algorithim. I am going to operate on linear mesh")
             if use_simple_bases:
                 raise ValueError("Simple bases for high order elements are not available")
                 return
@@ -1601,6 +1609,8 @@ class Mesh(object):
             else:
                 raise NotImplementedError("Not implemented yet")
 
+            if return_on_geometric_finds:
+                return elems_idx
 
             for i in range(len(elems_idx)):
                 coord = self.points[self.elements[elems_idx[i],:],:]
