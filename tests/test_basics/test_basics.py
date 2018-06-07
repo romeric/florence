@@ -74,7 +74,6 @@ def test_mesh_postprocess_material():
     mesh.__reset__()
 
 
-
     etypes = ["tri", "quad"]
 
     for etype in etypes:
@@ -350,7 +349,6 @@ def test_mesh_postprocess_material():
     mesh.__reset__()
 
 
-
     mesh = mesh.TriangularProjection()
     mesh.ConvertTrisToQuads()
     mesh = mesh.QuadrilateralProjection()
@@ -359,6 +357,20 @@ def test_mesh_postprocess_material():
     mesh.ConvertTetsToHexes()
     mesh = mesh.HexahedralProjection()
     mesh.ConvertHexesToTets()
+
+
+    mesh.Square(element_type="quad")
+    mesh.points *= 1+np.random.rand(mesh.nnode,mesh.points.shape[1])/20.
+    assert np.isclose(mesh.Areas().sum(), mesh.Sizes().sum(),atol=1e-6,rtol=1e-6)
+    mesh.Square(element_type="quad")
+    idx0 = mesh.FindElementContainingPoint([.31,.55],algorithm="fem")
+    idx1 = mesh.FindElementContainingPoint([.31,.55],algorithm="geometric")
+    assert idx0[0] == idx1[0]
+
+    mesh.Cube(element_type="tet")
+    idx0 = mesh.FindElementContainingPoint([.31,.55,0.27],algorithm="fem")
+    idx1 = mesh.FindElementContainingPoint([.31,.55,0.27],algorithm="geometric")
+    assert idx0[0] == idx1[0]
 
 
     print("Successfully finished running tests on Mesh, PostProcess and Material modules\n")
@@ -453,6 +465,6 @@ def test_material():
 
 
 if __name__ == "__main__":
-    # test_quadrature_functionspace()
-    # test_mesh_postprocess_material()
+    test_quadrature_functionspace()
+    test_mesh_postprocess_material()
     test_material()

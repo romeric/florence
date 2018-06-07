@@ -1082,7 +1082,7 @@ class Mesh(object):
             # FIND AREAS ABC
             area0 = np.linalg.det(points[self.elements[:,:3],:])
             # FIND AREAS ACD
-            area1 = np.linalg.det(points[self.elements[:,[1,2,3]],:])
+            area1 = np.linalg.det(points[self.elements[:,[0,2,3]],:])
             # FIND AREAS OF ALL THE ELEMENTS
             area = 0.5*(area0+area1)
 
@@ -1366,56 +1366,55 @@ class Mesh(object):
         """Computes median of the elements tri, tet, quad, hex based on the interpolation function
 
             input:
-                geometric           [Bool] geometrically computes median with relying on FEM bases
+                geometric           [Bool] geometrically computes median without relying on FEM bases
             retruns:
                 median:             [ndarray] of median of elements
                 bases_at_median:    [1D array] of (p=1) bases at median
         """
 
-        assert self.element_type is not None
-        assert self.elements is not None
-        assert self.points is not None
+        self.__do_essential_memebers_exist__()
 
         median = None
-
-
         if geometric == True:
             median = np.sum(self.points[self.elements,:],axis=1)/self.elements.shape[1]
             return median
 
-        if self.element_type == "tri":
-            from Florence.FunctionSpace import Tri
-            from Florence.QuadratureRules import FeketePointsTri
-
-            eps = FeketePointsTri(2)
-            middle_point_isoparametric = eps[6,:]
-            if not np.isclose(sum(middle_point_isoparametric),-0.6666666):
-                raise ValueError("Median of triangle does not match [-0.3333,-0.3333]. "
-                    "Did you change your nodal spacing or interpolation functions?")
-
-            hpBases = Tri.hpNodal.hpBases
-            bases_for_middle_point = hpBases(0,middle_point_isoparametric[0],
-                middle_point_isoparametric[1])[0]
-            median = np.einsum('ijk,j',self.points[self.elements[:,:3],:],bases_for_middle_point)
-
-        elif self.element_type == "tet":
-            from Florence.FunctionSpace import Tet
-            from Florence.QuadratureRules import FeketePointsTet
-
-            middle_point_isoparametric = FeketePointsTet(3)[21]
-            if not np.isclose(sum(middle_point_isoparametric),-1.5):
-                raise ValueError("Median of tetrahedral does not match [-0.5,-0.5,-0.5]. "
-                    "Did you change your nodal spacing or interpolation functions?")
-
-            # C = self.InferPolynomialDegree() - 1
-            hpBases = Tet.hpNodal.hpBases
-            bases_for_middle_point = hpBases(0,middle_point_isoparametric[0],
-                middle_point_isoparametric[1],middle_point_isoparametric[2])[0]
-
-            median = np.einsum('ijk,j',self.points[self.elements[:,:4],:],bases_for_middle_point)
-
         else:
-            raise NotImplementedError('Median for {} elements not implemented yet'.format(self.element_type))
+            try:
+                from Florence.FunctionSpace import Tri, Tet
+                from Florence.QuadratureRules import FeketePointsTri, FeketePointsTet
+            except ImportError:
+                raise ImportError("This functionality requires florence's support")
+
+            if self.element_type == "tri":
+
+                eps = FeketePointsTri(2)
+                middle_point_isoparametric = eps[6,:]
+                if not np.isclose(sum(middle_point_isoparametric),-0.6666666):
+                    raise ValueError("Median of triangle does not match [-0.3333,-0.3333]. "
+                        "Did you change your nodal spacing or interpolation functions?")
+
+                hpBases = Tri.hpNodal.hpBases
+                bases_for_middle_point = hpBases(0,middle_point_isoparametric[0],
+                    middle_point_isoparametric[1])[0]
+                median = np.einsum('ijk,j',self.points[self.elements[:,:3],:],bases_for_middle_point)
+
+            elif self.element_type == "tet":
+
+                middle_point_isoparametric = FeketePointsTet(3)[21]
+                if not np.isclose(sum(middle_point_isoparametric),-1.5):
+                    raise ValueError("Median of tetrahedral does not match [-0.5,-0.5,-0.5]. "
+                        "Did you change your nodal spacing or interpolation functions?")
+
+                # C = self.InferPolynomialDegree() - 1
+                hpBases = Tet.hpNodal.hpBases
+                bases_for_middle_point = hpBases(0,middle_point_isoparametric[0],
+                    middle_point_isoparametric[1],middle_point_isoparametric[2])[0]
+
+                median = np.einsum('ijk,j',self.points[self.elements[:,:4],:],bases_for_middle_point)
+
+            else:
+                raise NotImplementedError('Median for {} elements not implemented yet'.format(self.element_type))
 
         return median, bases_for_middle_point
 
@@ -1506,10 +1505,16 @@ class Mesh(object):
             elif ndim==2:
                 for i in range(self.nelem):
                     coord = self.points[self.elements[i,:],:]
-                    p_iso = PointInversionIsoparametricFEM(self.element_type, C, coord, point,
+                    p_iso, converged = PointInversionIsoparametricFEM(self.element_type, C, coord, point,
                         tolerance=tolerance, maxiter=maxiter, verbose=True)
-                    if p_iso[0] >= -1. and p_iso[0] <=1. and \
-                        p_iso[1] >= -1. and p_iso[1] <=1.:
+                    # if p_iso[0] >= -1. and p_iso[0] <=1. and \
+                    #     p_iso[1] >= -1. and p_iso[1] <=1.:
+                    #     candidate_element, candidate_piso = i, p_iso
+                    #     break
+                    if  (p_iso[0] > -1. or np.isclose(p_iso[0],-1.,rtol=tolerance)) and \
+                        (p_iso[0] < 1.  or np.isclose(p_iso[0], 1.,rtol=tolerance)) and \
+                        (p_iso[1] > -1. or np.isclose(p_iso[1],-1.,rtol=tolerance)) and \
+                        (p_iso[1] < 1.  or np.isclose(p_iso[1],-1.,rtol=tolerance)) :
                         candidate_element, candidate_piso = i, p_iso
                         break
 
@@ -1556,28 +1561,66 @@ class Mesh(object):
                 elems = np.isclose(criterion_check,0.,rtol=tolerance)
                 elems_idx = np.where(elems==True)[0]
 
-                for i in range(len(elems_idx)):
-                    coord = self.points[self.elements[elems_idx[i],:],:]
-                    # TRY ALL POSSIBLE INITIAL GUESSES - THIS IS CHEAP AS THE SEARCH SPACE CONTAINS ONLY A
-                    # FEW ELEMENTS
-                    for guess in initial_guesses:
-                        p_iso, converged = PointInversionIsoparametricFEM(self.element_type, C, coord, point,
-                            tolerance=tolerance, maxiter=maxiter, verbose=True,
-                            use_simple_bases=use_simple_bases, initial_guess=guess)
-                        if converged:
-                            break
+            elif self.element_type == "quad":
 
-                    if converged:
-                        candidate_element, candidate_piso = elems_idx[i], p_iso
-                        break
+                from Florence.QuadratureRules.GaussLobattoPoints import GaussLobattoPointsQuad
+                initial_guesses = GaussLobattoPointsQuad(C)
 
-                if find_parametric_coordinate:
-                    return candidate_element, candidate_piso
-                else:
-                    return candidate_element
+                def GetAreaQuad(a0,b0,c0,d0):
+                    # AREA OF QUAD ABCD = AREA OF ABC + AREA OF ACD
+                    a00 = np.ones((a0.shape[0],3),dtype=np.float64); a00[:,:2] = a0
+                    b00 = np.ones((b0.shape[0],3),dtype=np.float64); b00[:,:2] = b0
+                    c00 = np.ones((c0.shape[0],3),dtype=np.float64); c00[:,:2] = c0
+                    d00 = np.ones((d0.shape[0],3),dtype=np.float64); d00[:,:2] = d0
+
+                    # FIND AREAS ABC
+                    area0 = np.abs(np.linalg.det(np.dstack((a00,b00,c00))))
+                    # FIND AREAS ACD
+                    area1 = np.abs(np.linalg.det(np.dstack((a00,c00,d00))))
+                    # FIND AREAS OF ALL THE ELEMENTS
+                    area = 0.5*(area0+area1)
+
+                    return area
+
+                a = self.points[self.elements[:,0],:]
+                b = self.points[self.elements[:,1],:]
+                c = self.points[self.elements[:,2],:]
+                d = self.points[self.elements[:,3],:]
+                o = np.tile(point,self.nelem).reshape(self.nelem,a.shape[1])
+
+                # TOTAL VOLUME
+                vol = self.Areas()
+                # PARTS' VOLUMES - DONT CHANGE THE ORDERING OF SPECIALLY vol1
+                vol0 = GetAreaQuad(o,c,b,a)
+                vol1 = GetAreaQuad(o,a,d,c)
+
+                criterion_check = vol0+vol1-vol
+                elems = np.isclose(criterion_check,0.,rtol=tolerance)
+                elems_idx = np.where(elems==True)[0]
 
             else:
                 raise NotImplementedError("Not implemented yet")
+
+
+            for i in range(len(elems_idx)):
+                coord = self.points[self.elements[elems_idx[i],:],:]
+                # TRY ALL POSSIBLE INITIAL GUESSES - THIS IS CHEAP AS THE SEARCH SPACE CONTAINS ONLY A
+                # FEW ELEMENTS
+                for guess in initial_guesses:
+                    p_iso, converged = PointInversionIsoparametricFEM(self.element_type, C, coord, point,
+                        tolerance=tolerance, maxiter=maxiter, verbose=True,
+                        use_simple_bases=use_simple_bases, initial_guess=guess)
+                    if converged:
+                        break
+
+                if converged:
+                    candidate_element, candidate_piso = elems_idx[i], p_iso
+                    break
+
+            if find_parametric_coordinate:
+                return candidate_element, candidate_piso
+            else:
+                return candidate_element
 
 
 
