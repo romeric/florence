@@ -354,6 +354,7 @@ class ExplicitStructuralDynamicIntegrators(object):
         """Solve implicit electrostatic problem
         """
 
+        LoadIncrement = fem_solver.number_of_load_increments
         # IF ALL ELECTRIC DoFs ARE FIXED
         if mesh.points.shape[0] == self.electric_out.shape[0]:
             if self.applied_dirichlet_electric.ndim == 2:
@@ -362,7 +363,6 @@ class ExplicitStructuralDynamicIntegrators(object):
                 # RAMP TYPE
                 return self.applied_dirichlet_electric*(1.*Increment/LoadIncrement)
 
-        LoadIncrement = fem_solver.number_of_load_increments
         # GET BOUNDARY CONDITIONS
         if boundary_condition.dirichlet_flags.ndim==3:
             self.eboundary_condition.dirichlet_flags = boundary_condition.dirichlet_flags[:,-1,Increment]
