@@ -3756,15 +3756,23 @@ class Mesh(object):
         if ncirc % 2 != 0 or ncirc < 2:
             ncirc = (ncirc // 2)*2 + 2
 
+        # radius = np.linspace(inner_radius,outer_radius,nrad)
+        # points = np.zeros((1,2),dtype=np.float64)
+        # for i in range(nrad):
+        #     t = np.linspace(start_angle,end_angle,ncirc+1)
+        #     x = radius[i]*np.cos(t)[::-1]
+        #     y = radius[i]*np.sin(t)[::-1]
+        #     points = np.vstack((points,np.array([x,y]).T))
+        # points = points[ncirc+2:,:]
 
-        radius = np.linspace(inner_radius,outer_radius,nrad)
+        radius = np.linspace(inner_radius,outer_radius,nrad-1)
         points = np.zeros((1,2),dtype=np.float64)
-        for i in range(nrad):
+        for i in range(nrad-1):
             t = np.linspace(start_angle,end_angle,ncirc+1)
             x = radius[i]*np.cos(t)[::-1]
             y = radius[i]*np.sin(t)[::-1]
             points = np.vstack((points,np.array([x,y]).T))
-        points = points[ncirc+2:,:]
+        points = points[1:,:]
 
         points[:,0] += center[0]
         points[:,1] += center[1]
