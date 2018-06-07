@@ -5537,6 +5537,25 @@ class Mesh(object):
         return is_equally_spaced
 
 
+    def IsSimilar(self,other):
+        """Checks if two meshes are similar. 
+            Similarity is established in terms of element type.
+            This is not a property, since property methods can 
+            take variables
+        """
+        self.__do_essential_memebers_exist__()
+        other.__do_essential_memebers_exist__()
+        return self.element_type == other.element_type
+
+
+    def IsEqualOrder(self,other):
+        """Checks if two meshes are equal order. 
+            This is not a property, since property methods can 
+            take variables
+        """
+        return self.InferPolynomialDegree() == other.InferPolynomialDegree()
+
+
     def GetNumberOfElements(self):
         if self.nelem != None:
             return self.nelem
