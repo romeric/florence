@@ -359,7 +359,8 @@ class ExplicitStructuralDynamicIntegrators(object):
             if self.applied_dirichlet_electric.ndim == 2:
                 return self.applied_dirichlet_electric[:,Increment]
             else:
-                return self.applied_dirichlet_electric
+                # RAMP TYPE
+                return self.applied_dirichlet_electric*(1.*Increment/LoadIncrement)
 
         LoadIncrement = fem_solver.number_of_load_increments
         # GET BOUNDARY CONDITIONS
