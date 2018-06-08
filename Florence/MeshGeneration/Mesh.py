@@ -5060,6 +5060,61 @@ class Mesh(object):
 
 
 
+    def Partition(self, n=2, figure=None, show_plot=False):
+        """Partitions any type of mesh low and high order
+            into a set of meshes.
+            Returns a list of partitioned meshes and their index map
+            into the origin mesh
+        """
+
+        num_par = n
+        partitioned_indices = np.array_split(np.arange(self.nelem),num_par)
+        nelems = [a.shape[0] for a in partitioned_indices]
+
+        pmesh = []
+        for i in range(len(nelems)):
+            pmesh.append(self.GetLocalisedMesh(partitioned_indices[i]))
+
+
+        if show_plot:
+
+            import itertools
+            colors = itertools.cycle(('#D1655B','#44AA66','#FACD85','#70B9B0','#72B0D7','#E79C5D',
+                    '#4D5C75','#FFF056','#558C89','#F5CCBA','#A2AB58','#7E8F7C','#005A31'))
+
+            if self.element_type == "tri" or self.element_type == "quad":
+                try:
+                    from Florence.PostProcessing import PostProcess
+                except ImportError:
+                    raise ImportError("This functionality requires florence's support")
+
+                import matplotlib.pyplot as plt
+                if figure is None:
+                    figure = plt.figure()
+
+                pp = PostProcess(2,2)
+                for mesh in pmesh:
+                    pp.CurvilinearPlot(mesh,figure=figure,show_plot=False,color=colors.next(),interpolation_degree=0)
+
+                plt.show()
+
+            elif self.element_type == "tet" or self.element_type == "hex" or self.element_type == "line":
+                import os
+                os.environ['ETS_TOOLKIT'] = 'qt4'
+                from mayavi import mlab
+
+                if figure is None:
+                    figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(1000,800))
+
+                for mesh in pmesh:
+                    mesh.SimplePlot(figure=figure,show_plot=False,color=colors.next())
+
+                mlab.show()
+
+        return pmesh, partitioned_indices
+
+
+
     @staticmethod
     def TriangularProjection(c1=(0,0), c2=(2,0), c3=(2,2), points=None, npoints=10, equally_spaced=True):
         """Builds an instance of Mesh on a triangular region through FE interpolation
@@ -5538,9 +5593,9 @@ class Mesh(object):
 
 
     def IsSimilar(self,other):
-        """Checks if two meshes are similar. 
+        """Checks if two meshes are similar.
             Similarity is established in terms of element type.
-            This is not a property, since property methods can 
+            This is not a property, since property methods can
             take variables
         """
         self.__do_essential_memebers_exist__()
@@ -5549,8 +5604,8 @@ class Mesh(object):
 
 
     def IsEqualOrder(self,other):
-        """Checks if two meshes are equal order. 
-            This is not a property, since property methods can 
+        """Checks if two meshes are equal order.
+            This is not a property, since property methods can
             take variables
         """
         return self.InferPolynomialDegree() == other.InferPolynomialDegree()

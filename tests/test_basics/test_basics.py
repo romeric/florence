@@ -69,6 +69,7 @@ def test_mesh_postprocess_material():
     mesh.IsEquallySpaced
     mesh.IsSimilar(mesh)
     mesh.IsEqualOrder(mesh)
+    mesh.Partition(10)
 
     pp = PostProcess(2,2)
     pp.SetMesh(mesh)
@@ -99,6 +100,7 @@ def test_mesh_postprocess_material():
         mesh.IsHighOrder
         mesh.IsCurvilinear
         mesh.IsEquallySpaced
+        mesh.Partition(7)
 
         pp = PostProcess(2,2)
         pp.SetMesh(mesh)
@@ -256,6 +258,7 @@ def test_mesh_postprocess_material():
         mesh.IsHighOrder
         mesh.IsCurvilinear
         mesh.IsEquallySpaced
+        mesh.Partition(7)
 
         pp = PostProcess(3,3)
         pp.SetMesh(mesh)
