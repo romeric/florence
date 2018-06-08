@@ -101,7 +101,6 @@ class TractionBasedStaggeredSolver(FEMSolver):
         self.NRConvergence = { 'Increment_'+str(Increment) : [] for Increment in range(self.number_of_load_increments) }
 
         # ALLOCATE FOR SOLUTION FIELDS
-        # TotalDisp = np.zeros((mesh.points.shape[0],formulation.nvar,self.number_of_load_increments),dtype=np.float32)
         TotalDisp = np.zeros((mesh.points.shape[0],formulation.nvar,self.number_of_load_increments),dtype=np.float64)
 
         # PRE-ASSEMBLY

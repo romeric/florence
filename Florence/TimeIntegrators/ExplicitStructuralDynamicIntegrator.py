@@ -314,7 +314,7 @@ class ExplicitStructuralDynamicIntegrators(object):
         # EMULATE ELECTROSTATICS MODEL
         emesh = deepcopy(mesh)
 
-        if fem_solver.activate_explicit_decoupling:
+        if fem_solver.activate_explicit_multigrid:
             # WE GET THE MAX EPS - NOT ELEGANT BUT SEEMINGLY WORKS WELL
             eps_s = []
             for key, value in list(material.__dict__.items()):

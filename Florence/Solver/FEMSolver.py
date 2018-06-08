@@ -71,7 +71,7 @@ class FEMSolver(object):
         save_results=True,
         save_frequency=1,
         has_contact=False,
-        activate_explicit_decoupling=False):
+        activate_explicit_multigrid=False):
 
         # ASSUME TRUE IF AT LEAST ONE IS TRUE
         if has_low_level_dispatcher != optimise:
@@ -132,7 +132,7 @@ class FEMSolver(object):
         self.user_defined_stop_func = user_defined_stop_func
 
         self.has_contact = has_contact
-        self.activate_explicit_decoupling = activate_explicit_decoupling
+        self.activate_explicit_multigrid = activate_explicit_multigrid
 
         self.fem_timer = 0.
         self.assembly_time = 0.
@@ -187,11 +187,15 @@ class FEMSolver(object):
         if solver is None:
             solver = LinearSolver(linear_solver="direct", linear_solver_type="umfpack", geometric_discretisation=mesh.element_type)
 
+        # TURN OFF PARALLELISM FOR NOW
+        if self.parallel:
+            warn("Parallelism cannot be activated right now")
+            self.parallel = False
+
         if material.ndim != mesh.InferSpatialDimension():
             # THIS HAS TO BE AN ERROR BECAUSE OF THE DYNAMIC NATURE OF MATERIAL
             raise ValueError("Material model and mesh are incompatible. Change the dimensionality of the material")
         ###########################################################################
-
 
         if material.mtype == "LinearElastic" and self.number_of_load_increments > 1 and self.analysis_type=="static":
             warn("Can not solve a linear elastic model in multiple step. "
@@ -208,6 +212,8 @@ class FEMSolver(object):
             else:
                 self.has_prestress = False
 
+
+        ##############################################################################
         if "Explicit" in material.mtype:
             if self.analysis_subtype == "implicit":
                 raise ValueError("Incorrect material model ({}) used for implicit analysis".format(material.mtype))
@@ -222,7 +228,10 @@ class FEMSolver(object):
             if self.save_frequency != 1:
                 warn("save_frequency must be one")
                 self.save_frequency = 1
-
+        if self.analysis_type == "dynamic" and self.analysis_subtype == "explicit":
+            if self.number_of_load_increments < self.save_frequency:
+                raise ValueError("Number of load increments cannot be less than save frequency")
+        ##############################################################################
 
 
         # GEOMETRY UPDATE FLAGS
@@ -282,12 +291,10 @@ class FEMSolver(object):
         ##############################################################################
 
         ##############################################################################
-        if self.analysis_type == "static" and self.contact_formulation is not None:
+        if self.analysis_type == "static" and self.has_contact is True:
             warn("Contact formulation does not get activated under static problems")
         ##############################################################################
-        if self.analysis_type == "dynamic" and self.analysis_subtype == "explicit":
-            if self.number_of_load_increments < self.save_frequency:
-                raise ValueError("Number of load increments cannot be less than load frequency")
+
         ##############################################################################
         # AT THE MOMENT ALL HESSIANS SEEMINGLY HAVE THE SAME SIGNATURE SO THIS IS O.K.
         try:
