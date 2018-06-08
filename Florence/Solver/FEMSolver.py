@@ -751,26 +751,7 @@ class FEMSolver(object):
                 TotalDisp[:,-1,Increment] = Eulerp
 
             # PRINT LOG IF ASKED FOR
-            if self.print_incremental_log:
-                dmesh = Mesh()
-                dmesh.points = TotalDisp[:,:formulation.ndim,Increment]
-                dmesh_bounds = dmesh.Bounds
-                if formulation.fields == "electro_mechanics":
-                    _bounds = np.zeros((2,formulation.nvar))
-                    _bounds[:,:formulation.ndim] = dmesh_bounds
-                    _bounds[:,-1] = [TotalDisp[:,-1,Increment].min(),TotalDisp[:,-1,Increment].max()]
-                    print("\nMinimum and maximum incremental solution values at increment {} are \n".format(Increment),_bounds)
-                else:
-                    print("\nMinimum and maximum incremental solution values at increment {} are \n".format(Increment),dmesh_bounds)
-
-            # SAVE INCREMENTAL SOLUTION IF ASKED FOR
-            if self.save_incremental_solution:
-                from scipy.io import savemat
-                if self.incremental_solution_filename is not None:
-                    savemat(self.incremental_solution_filename+"_"+str(Increment),{'solution':TotalDisp[:,:,Increment]},do_compression=True)
-                else:
-                    raise ValueError("No file name provided to save incremental solution")
-
+            self.LogSave(formulation, TotalDisp, Increment)
 
             print('\nFinished Load increment', Increment, 'in', time()-t_increment, 'seconds')
             try:
@@ -1186,7 +1167,11 @@ class FEMSolver(object):
             # SAVE INCREMENTAL SOLUTION IF ASKED FOR
             if self.save_incremental_solution:
                 from scipy.io import savemat
-                if self.incremental_solution_filename is not None:
-                    savemat(self.incremental_solution_filename+"_"+str(Increment),{'solution':TotalDisp[:,:,Increment]},do_compression=True)
+                filename = self.incremental_solution_filename
+                if filename is not None:
+                    if ".mat" in filename:
+                        filename = filename.split(".")[0]
+                    savemat(filename+"_"+str(Increment),
+                        {'solution':TotalDisp[:,:,Increment]},do_compression=True)
                 else:
                     raise ValueError("No file name provided to save incremental solution")

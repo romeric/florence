@@ -261,26 +261,8 @@ class ExplicitStructuralDynamicIntegrators(object):
                 formulation.external_power.append(power_info[3])
 
 
-            # PRINT LOG IF ASKED FOR
-            if fem_solver.print_incremental_log:
-                dmesh = Mesh()
-                dmesh.points = U
-                dmesh_bounds = dmesh.Bounds
-                if formulation.fields == "electro_mechanics":
-                    _bounds = np.zeros((2,formulation.nvar))
-                    _bounds[:,:formulation.ndim] = dmesh_bounds
-                    _bounds[:,-1] = [Eulerp.min(),Eulerp.max()]
-                    print("\nMinimum and maximum incremental solution values at increment {} are \n".format(Increment),_bounds)
-                else:
-                    print("\nMinimum and maximum incremental solution values at increment {} are \n".format(Increment),dmesh_bounds)
-
-            # SAVE INCREMENTAL SOLUTION IF ASKED FOR
-            if fem_solver.save_incremental_solution:
-                from scipy.io import savemat
-                if fem_solver.incremental_solution_filename is not None:
-                    savemat(fem_solver.incremental_solution_filename+"_"+str(Increment),{'solution':U},do_compression=True)
-                else:
-                    raise ValueError("No file name provided to save incremental solution")
+            # LOG IF ASKED FOR
+            self.LogSave(fem_solver, formulation, U, Eulerp, Increment)
 
             print('\nFinished Load increment', Increment, 'in', time()-t_increment, 'seconds')
 
@@ -484,3 +466,30 @@ class ExplicitStructuralDynamicIntegrators(object):
         total_energy = internal_energy + kinetic_energy - external_energy
         return total_energy, internal_energy, kinetic_energy, external_energy
 
+
+
+
+    def LogSave(self, fem_solver, formulation, U, Eulerp, Increment):
+        if fem_solver.print_incremental_log:
+            dmesh = Mesh()
+            dmesh.points = U
+            dmesh_bounds = dmesh.Bounds
+            if formulation.fields == "electro_mechanics":
+                _bounds = np.zeros((2,formulation.nvar))
+                _bounds[:,:formulation.ndim] = dmesh_bounds
+                _bounds[:,-1] = [Eulerp.min(),Eulerp.max()]
+                print("\nMinimum and maximum incremental solution values at increment {} are \n".format(Increment),_bounds)
+            else:
+                print("\nMinimum and maximum incremental solution values at increment {} are \n".format(Increment),dmesh_bounds)
+
+        # SAVE INCREMENTAL SOLUTION IF ASKED FOR
+        if fem_solver.save_incremental_solution:
+            from scipy.io import savemat
+            filename = fem_solver.incremental_solution_filename
+            if filename is not None:
+                if ".mat" in filename:
+                    filename = filename.split(".")[0]
+                savemat(filename+"_"+str(Increment),
+                    {'solution':np.hstack((U,Eulerp[:,None]))},do_compression=True)
+            else:
+                raise ValueError("No file name provided to save incremental solution")
