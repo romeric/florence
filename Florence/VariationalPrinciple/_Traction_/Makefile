@@ -5,8 +5,14 @@ EXT_POSTFIX= so
 CYTHONFLAGS = -DNPY_NO_DEPRECATED_API
 
 CYTHON = cython --cplus
+
+ifeq ($(OS),Windows_NT)
+REMOVE = del
+MOVE = move
+else
 REMOVE = rm -rf
 MOVE = mv
+endif
 
 INLINE_THRESHOLD = 100000
 CXXSTD=-std=c++11
@@ -27,6 +33,10 @@ endif
 endif
 ifeq ($(findstring icpc,$(CXX)),icpc)
 CXXFLAGS += -march=native -no-ansi-alias -xHost -fp-model fast=1 -inline-forceinline -inline-factor=$(INLINE_THRESHOLD)
+endif
+
+ifeq ($(OS),Windows_NT)
+CXXFLAGS += -D_hypot=hypot -m64 -Wno-format-extra-args -Wno-format
 endif
 
 all: build_module

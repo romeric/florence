@@ -5,8 +5,14 @@ EXT_POSTFIX = so
 CYTHONFLAGS = -DNPY_NO_DEPRECATED_API
 
 CYTHON = cython --cplus
+
+ifeq ($(OS),Windows_NT)
+REMOVE = del
+MOVE = move
+else
 REMOVE = rm -rf
 MOVE = mv
+endif
 
 FASTOR_OPTFLAGS = -DFASTOR_NO_ALIAS -DFASTOR_USE_VECTORISED_EXPR_ASSIGN -DCONTRACT_OPT=2 -DFASTOR_NO_STATIC_WARNING
 KINEMATICS =
@@ -45,6 +51,10 @@ endif
 
 CXXFLAGS += $(FASTOR_OPTFLAGS) -I$(FASTOR_INCLUDE_PATH)
 CXXFLAGS += $(KINEMATICS)
+
+ifeq ($(OS),Windows_NT)
+CXXFLAGS += -D_hypot=hypot -m64 -Wno-format-extra-args -Wno-format
+endif
 
 all: build_module
 

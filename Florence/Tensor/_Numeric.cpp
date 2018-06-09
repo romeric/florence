@@ -2,11 +2,14 @@
 #include <cmath>
 #include <vector>
 #include <tuple>
+#include <cstdint>
+
+using Long = std::int64_t;
 
 template<typename T>
-std::vector<long int> 
-FindEqual(const T *arr, long int size,T num) {
-    std::vector<long int> counts;
+std::vector<Long> 
+FindEqual(const T *arr, Long size,T num) {
+    std::vector<Long> counts;
     auto p = std::find_if(arr,arr+size,[&](T j){return j==num;});
     if (p-arr==size) {
         return counts;
@@ -22,9 +25,9 @@ FindEqual(const T *arr, long int size,T num) {
 }
 
 template<typename T>
-std::vector<long int> 
-FindEqualApprox(const T *arr, long int size,T num, double tolerance) {
-    std::vector<long int> counts;
+std::vector<Long> 
+FindEqualApprox(const T *arr, Long size,T num, double tolerance) {
+    std::vector<Long> counts;
     auto p = std::find_if(arr,arr+size,[&](T j){return std::abs(j - num) < tolerance;});
     if (p-arr==size) {
         return counts;
@@ -40,9 +43,9 @@ FindEqualApprox(const T *arr, long int size,T num, double tolerance) {
 }
 
 template<typename T>
-std::vector<long int> 
-FindLessThan(const T *arr, long int size,T num) {
-    std::vector<long int> counts;
+std::vector<Long> 
+FindLessThan(const T *arr, Long size,T num) {
+    std::vector<Long> counts;
     auto p = std::find_if(arr,arr+size,[&](T j){return j < num;});
     if (p-arr==size) {
         return counts;
@@ -59,9 +62,9 @@ FindLessThan(const T *arr, long int size,T num) {
 
 
 template<typename T>
-std::vector<long int> 
-FindGreaterThan(const T *arr, long int size,T num) {
-    std::vector<long int> counts;
+std::vector<Long> 
+FindGreaterThan(const T *arr, Long size,T num) {
+    std::vector<Long> counts;
     auto p = std::find_if(arr,arr+size,[&](T j){return j > num;});
     if (p-arr==size) {
         return counts;
