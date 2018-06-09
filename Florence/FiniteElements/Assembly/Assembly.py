@@ -6,7 +6,7 @@ from time import time
 import numpy as np
 from scipy.sparse import coo_matrix, csc_matrix, csr_matrix
 
-from ._LowLevelAssembly_ import _LowLevelAssembly_, _LowLevelAssemblyExplicit_, _LowLevelAssemblyLaplacian_
+from ._LowLevelAssembly_ import _LowLevelAssembly_, _LowLevelAssemblyExplicit_, _LowLevelAssemblyExplicit_Par_, _LowLevelAssemblyLaplacian_
 
 import pyximport
 pyximport.install(setup_args={'include_dirs': np.get_include()})
@@ -717,13 +717,12 @@ def AssembleExplicit(fem_solver, function_space, formulation, mesh, material, Eu
         if not material.has_low_level_dispatcher:
             raise RuntimeError("Cannot dispatch to low level module, since material {} does not support it".format(type(material).__name__))
 
-        T, F, M = _LowLevelAssemblyExplicit_(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
-        if isinstance(F,np.ndarray):
-            F = F[:,None]
-        if M is not None:
-            fem_solver.is_mass_computed = True
-
-        return T[:,None], F, M
+        if fem_solver.parallel:
+            T = ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
+            return T[:,None], [], []
+        else:
+            T, F, M = _LowLevelAssemblyExplicit_(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
+            return T[:,None], F, M
 
 
     # GET MESH DETAILS
@@ -748,19 +747,9 @@ def AssembleExplicit(fem_solver, function_space, formulation, mesh, material, Eu
     if fem_solver.has_moving_boundary:
         F = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
 
-    if fem_solver.parallel:
-        # from joblib import Parallel, delayed
-        # Parallel(n_jobs=2)(delayed(AssembleExplicitFunctor)(elem, nvar,
-        #     nodeperelem, T, F, M, formulation, function_space, mesh, material,
-        #     fem_solver, Eulerx, Eulerp) for elem in range(0,nelem))
-
-        parmap.map(AssembleExplicitFunctor,np.arange(0,nelem,dtype=np.int32),
-            nvar, nodeperelem, T, F, I_mass, J_mass, V_mass, M, formulation, function_space, mesh, material,
-            fem_solver, Eulerx, Eulerp, processes= int(multiprocessing.cpu_count()))
-    else:
-        for elem in range(nelem):
-            AssembleExplicitFunctor(elem, nvar, nodeperelem, T, F, I_mass, J_mass, V_mass, M, formulation,
-                function_space, mesh, material, fem_solver, Eulerx, Eulerp)
+    for elem in range(nelem):
+        AssembleExplicitFunctor(elem, nvar, nodeperelem, T, F, I_mass, J_mass, V_mass, M, formulation,
+            function_space, mesh, material, fem_solver, Eulerx, Eulerp)
 
     # SET MASS FLAG HERE
     if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed==False:
@@ -797,3 +786,59 @@ def AssembleExplicitFunctor(elem, nvar, nodeperelem, T, F, I_mass, J_mass, V_mas
             I_mass_elem, J_mass_elem, V_mass_elem = formulation.FindIndices(mass)
             SparseAssemblyNative(I_mass_elem,J_mass_elem,V_mass_elem,I_mass,J_mass,V_mass,
                 elem,nvar,nodeperelem,mesh.elements)
+
+
+
+
+
+class ExplicitParallelZipper(object):
+
+    def __init__(self, function_space, formulation, mesh, material, Eulerx, Eulerp):
+        self.function_space = function_space
+        self.formulation = formulation
+        self.mesh = mesh
+        self.material = material
+        self.Eulerx = Eulerx
+        self.Eulerp = Eulerp
+        self.T = np.zeros(mesh.points.shape[0]*formulation.nvar,np.float64)
+
+
+def ExplicitParallelExecuter(functor):
+    return _LowLevelAssemblyExplicit_Par_(functor.function_space,
+        functor.formulation, functor.mesh, functor.material, functor.Eulerx, functor.Eulerp, functor.T)
+
+
+def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
+
+    from multiprocessing import Pool
+    from contextlib import closing
+
+    # pmesh, pelement_indices, pnode_indices = mesh.Partition(fem_solver.no_of_cpu_cores)
+    pmesh, pelement_indices, pnode_indices = fem_solver.pmesh, fem_solver.pelement_indices, fem_solver.pnode_indices
+    T_all = np.zeros((mesh.points.shape[0],formulation.nvar),np.float64)
+
+    funcs = []
+    for proc in range(fem_solver.no_of_cpu_cores):
+        pnodes = pnode_indices[proc]
+        Eulerx_current = Eulerx[pnodes,:]
+        Eulerp_current = Eulerp[pnodes]
+        funcs.append(ExplicitParallelZipper(function_space, formulation,
+            pmesh[proc], material, Eulerx_current, Eulerp_current))
+
+    # for proc in range(fem_solver.no_of_cpu_cores):
+    #     ExplicitParallelExecuter(funcs[proc])
+    #     pnodes = pnode_indices[proc]
+    #     T_all[pnodes,:] += funcs[proc].T.reshape(pnodes.shape[0],formulation.nvar)
+
+    # pool = Pool(fem_solver.no_of_cpu_cores)
+    # pool.map(ExplicitParallelExecuter,funcs)
+    with closing(Pool(processes=fem_solver.no_of_cpu_cores)) as pool:
+        Ts = pool.map(ExplicitParallelExecuter,funcs)
+        pool.terminate()
+
+    for proc in range(fem_solver.no_of_cpu_cores):
+        pnodes = pnode_indices[proc]
+        # T_all[pnodes,:] += funcs[proc].T.reshape(pnodes.shape[0],formulation.nvar)
+        T_all[pnodes,:] += Ts[proc].reshape(pnodes.shape[0],formulation.nvar)
+
+    return T_all.ravel()

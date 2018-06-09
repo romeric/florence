@@ -8,6 +8,7 @@
 #include "_TractionDPF_.h"
 
 #include "_ExplicitMooneyRivlin_.h"
+#include "_ExplicitIsotropicElectroMechanics_108_.h"
 #include "_NeoHookean_.h"
 #include "_MooneyRivlin_.h"
 #include "_NearlyIncompressibleMooneyRivlin_.h"
@@ -174,6 +175,7 @@ void _GlobalAssemblyExplicit_DF_DPF_<2>(const Real *points,
     auto mat_obj6 = _IsotropicElectroMechanics_106_<Real>(mu1,mu2,lamb,eps_1,eps_2);
     auto mat_obj7 = _IsotropicElectroMechanics_107_<Real>(mu1,mu2,mue,lamb,eps_1,eps_2,eps_e);
     auto mat_obj8 = _IsotropicElectroMechanics_108_<Real>(mu1,mu2,lamb,eps_2);
+    auto mat_obj9 = _ExplicitIsotropicElectroMechanics_108_<Real>(mu1,mu2,lamb,eps_2);
 
 
     // LOOP OVER ELEMETNS
@@ -235,6 +237,9 @@ void _GlobalAssemblyExplicit_DF_DPF_<2>(const Real *points,
             // COMPUTE KINETIC MEASURES
             if (material_number==0) {
                 stress = mat_obj0.template _KineticMeasures_<Real,ndim>(F);
+            }
+            else if (material_number==9) {
+                std::tie(D,stress) = mat_obj9.template _KineticMeasures_<Real,ndim>(F,ElectricFieldx);
             }
             else if (material_number==1) {
                 std::tie(stress,std::ignore) = mat_obj1.template _KineticMeasures_<Real,ndim>(F);
@@ -384,6 +389,7 @@ void _GlobalAssemblyExplicit_DF_DPF_<3>(const Real *points,
     auto mat_obj6 = _IsotropicElectroMechanics_106_<Real>(mu1,mu2,lamb,eps_1,eps_2);
     auto mat_obj7 = _IsotropicElectroMechanics_107_<Real>(mu1,mu2,mue,lamb,eps_1,eps_2,eps_e);
     auto mat_obj8 = _IsotropicElectroMechanics_108_<Real>(mu1,mu2,lamb,eps_2);
+    auto mat_obj9 = _ExplicitIsotropicElectroMechanics_108_<Real>(mu1,mu2,lamb,eps_2);
 
 
     // LOOP OVER ELEMETNS
@@ -450,6 +456,9 @@ void _GlobalAssemblyExplicit_DF_DPF_<3>(const Real *points,
             // COMPUTE KINETIC MEASURES
             if (material_number==0) {
                 stress = mat_obj0.template _KineticMeasures_<Real,ndim>(F);
+            }
+            else if (material_number==9) {
+                std::tie(D,stress) = mat_obj9.template _KineticMeasures_<Real,ndim>(F,ElectricFieldx);
             }
             else if (material_number==1) {
                 std::tie(stress,std::ignore) = mat_obj1.template _KineticMeasures_<Real,ndim>(F);

@@ -426,6 +426,7 @@ def test_material():
                         "IsotropicElectroMechanics_108",
                         "IsotropicElectroMechanics_109",
                         "Piezoelectric_100",
+                        "ExplicitIsotropicElectroMechanics_108",
                         "Multi_IsotropicElectroMechanics_101",
                         "Multi_Piezoelectric_100",
                         "CoupleStressModel",

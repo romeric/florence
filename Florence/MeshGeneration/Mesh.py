@@ -5064,16 +5064,17 @@ class Mesh(object):
         """Partitions any type of mesh low and high order
             into a set of meshes.
             Returns a list of partitioned meshes and their index map
-            into the origin mesh
+            into the origin mesh as well as list of node maps
         """
 
         num_par = n
         partitioned_indices = np.array_split(np.arange(self.nelem),num_par)
         nelems = [a.shape[0] for a in partitioned_indices]
 
-        pmesh = []
+        pmesh, partitioned_nodes_indices = [], []
         for i in range(len(nelems)):
             pmesh.append(self.GetLocalisedMesh(partitioned_indices[i]))
+            partitioned_nodes_indices.append(np.unique(self.elements[partitioned_indices[i],:]))
 
 
         if show_plot:
@@ -5111,7 +5112,7 @@ class Mesh(object):
 
                 mlab.show()
 
-        return pmesh, partitioned_indices
+        return pmesh, partitioned_indices, partitioned_nodes_indices
 
 
 

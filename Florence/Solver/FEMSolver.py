@@ -52,6 +52,7 @@ class FEMSolver(object):
         mass_type=None,
         compute_mesh_qualities=True,
         parallelise=False,
+        ncpu=None,
         memory_model="shared",
         platform="cpu",
         backend="opencl",
@@ -117,7 +118,7 @@ class FEMSolver(object):
 
         self.vectorise = True
         self.parallel = parallelise
-        self.no_of_cpu_cores = multiprocessing.cpu_count()
+        self.no_of_cpu_cores = ncpu
         self.memory_model = memory_model
         self.platform = platform
         self.backend = backend
@@ -187,10 +188,22 @@ class FEMSolver(object):
         if solver is None:
             solver = LinearSolver(linear_solver="direct", linear_solver_type="umfpack", geometric_discretisation=mesh.element_type)
 
-        # TURN OFF PARALLELISM FOR NOW
+        # TURN OFF PARALLELISM IF NOT EXPLICIT
         if self.parallel:
-            warn("Parallelism cannot be activated right now")
-            self.parallel = False
+            if self.analysis_type == "dynamic" and self.analysis_subtype == "explicit" \
+                and (formulation.fields == "mechanics" or formulation.fields == "electro_mechanics") \
+                and self.analysis_nature =="nonlinear":
+                pass
+            else:
+                warn("Parallelism cannot be activated right now")
+                self.parallel = False
+
+        if self.parallel:
+            if self.no_of_cpu_cores is None:
+                self.no_of_cpu_cores = multiprocessing.cpu_count()
+            # PARTITION THE MESH
+            self.pmesh, self.pelement_indices, self.pnode_indices = mesh.Partition(self.no_of_cpu_cores)
+
 
         if material.ndim != mesh.InferSpatialDimension():
             # THIS HAS TO BE AN ERROR BECAUSE OF THE DYNAMIC NATURE OF MATERIAL

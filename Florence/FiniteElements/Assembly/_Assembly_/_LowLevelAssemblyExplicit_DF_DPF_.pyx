@@ -46,7 +46,7 @@ cdef extern from "_LowLevelAssemblyExplicit_DF_DPF_.h" nogil:
                         ) nogil
 
 
-def _LowLevelAssemblyExplicit_DF_DPF_(fem_solver, function_space, formulation, mesh, material, Real[:,::1] Eulerx, Real[::1] Eulerp):
+def _LowLevelAssemblyExplicit_DF_DPF_(function_space, formulation, mesh, material, Real[:,::1] Eulerx, Real[::1] Eulerp):
 
     # GET VARIABLES FOR DISPATCHING TO C
     cdef Integer ndim                       = formulation.ndim
@@ -63,8 +63,8 @@ def _LowLevelAssemblyExplicit_DF_DPF_(fem_solver, function_space, formulation, m
     cdef np.ndarray[Real,ndim=3, mode='c'] Jm           = function_space.Jm
     cdef np.ndarray[Real,ndim=1, mode='c'] AllGauss     = function_space.AllGauss.flatten()
 
-    cdef Integer requires_geometry_update               = fem_solver.requires_geometry_update
-    cdef Integer is_dynamic                             = fem_solver.analysis_type != "static" and fem_solver.is_mass_computed is False
+    cdef Integer requires_geometry_update               = True
+    cdef Integer is_dynamic                             = False
 
     cdef np.ndarray[Integer,ndim=1,mode='c'] local_rows_mass        = formulation.local_rows_mass
     cdef np.ndarray[Integer,ndim=1,mode='c'] local_cols_mass        = formulation.local_columns_mass
@@ -116,6 +116,9 @@ def _LowLevelAssemblyExplicit_DF_DPF_(fem_solver, function_space, formulation, m
     elif material.mtype == "IsotropicElectroMechanics_108":
         mu1, mu2, lamb, eps_2 = material.mu1, material.mu2, material.lamb, material.eps_2
         material_number = 8
+    elif material.mtype == "ExplicitIsotropicElectroMechanics_108":
+        mu1, mu2, lamb, eps_2 = material.mu1, material.mu2, material.lamb, material.eps_2
+        material_number = 9
     else:
         raise NotImplementedError("Low level assembly for material {} not available for explicit analysis."
             " Consider 'optimise=False' for now".format(material.mtype))

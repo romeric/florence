@@ -79,6 +79,7 @@ def _LowLevelAssembly_(fem_solver, function_space, formulation, mesh, material, 
     return stiffness, T, F, mass
 
 
+
 def _LowLevelAssemblyExplicit_(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
 
     # MAKE MESH DATA CONTIGUOUS
@@ -86,7 +87,7 @@ def _LowLevelAssemblyExplicit_(fem_solver, function_space, formulation, mesh, ma
 
     # CALL LOW LEVEL ASSEMBLER
     I_mass, J_mass, V_mass, \
-        T = _LowLevelAssemblyExplicit_DF_DPF_(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
+        T = _LowLevelAssemblyExplicit_DF_DPF_(function_space, formulation, mesh, material, Eulerx, Eulerp)
 
     F, mass = [], []
 
@@ -96,6 +97,16 @@ def _LowLevelAssemblyExplicit_(fem_solver, function_space, formulation, mesh, ma
             shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
 
     return T, F, mass
+
+
+def _LowLevelAssemblyExplicit_Par_(function_space, formulation, mesh, material, Eulerx, Eulerp, T):
+    # MAKE MESH DATA CONTIGUOUS
+    mesh.ChangeType()
+    # CALL LOW LEVEL ASSEMBLER
+    T[:] = _LowLevelAssemblyExplicit_DF_DPF_(function_space, formulation, mesh, material, Eulerx, Eulerp)[-1]
+    # THE RETURN IS NECESSARY
+    return T
+
 
 
 
