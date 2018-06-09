@@ -806,15 +806,20 @@ def ExplicitParallelExecuter_PoolBased(functor):
     return _LowLevelAssemblyExplicit_Par_(functor.function_space,
         functor.formulation, functor.mesh, functor.material, functor.Eulerx, functor.Eulerp)
 
-def ExplicitParallelExecuter_ProcessBased(proc, functor, Ts):
+def ExplicitParallelExecuter_ProcessBased(functor, proc, Ts):
     T = _LowLevelAssemblyExplicit_Par_(functor.function_space,
         functor.formulation, functor.mesh, functor.material, functor.Eulerx, functor.Eulerp)
     Ts[proc] = T
 
+def ExplicitParallelExecuter_ProcessQueueBased(functor, queue):
+    T = _LowLevelAssemblyExplicit_Par_(functor.function_space,
+        functor.formulation, functor.mesh, functor.material, functor.Eulerx, functor.Eulerp)
+    queue.put(T)
+
 
 def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
 
-    from multiprocessing import Process, Pool
+    from multiprocessing import Process, Pool, Manager, Queue
     from contextlib import closing
 
     # pmesh, pelement_indices, pnode_indices = mesh.Partition(fem_solver.no_of_cpu_cores)
@@ -840,9 +845,11 @@ def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
     #     Ts = pool.map(ExplicitParallelExecuter_PoolBased,funcs)
     #     pool.terminate()
 
-    procs, Ts = [], []*fem_solver.no_of_cpu_cores
+    # PROCESS AND MANAGER BASED
+    procs = []
+    manager = Manager(); Ts = manager.dict() # SPAWNS A NEW PROCESS
     for i, func in enumerate(funcs):
-        proc = Process(target=ExplicitParallelExecuter_ProcessBased, args=(i,func,Ts))
+        proc = Process(target=ExplicitParallelExecuter_ProcessBased, args=(func,i,Ts))
         procs.append(proc)
         proc.start()
     for proc in procs:
@@ -851,5 +858,19 @@ def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
     for proc in range(fem_solver.no_of_cpu_cores):
         pnodes = pnode_indices[proc]
         T_all[pnodes,:] += Ts[proc].reshape(pnodes.shape[0],formulation.nvar)
+
+    # PROCESS AND QUEUE BASED
+    # procs = []
+    # for i, func in enumerate(funcs):
+    #     queue = Queue()
+    #     proc = Process(target=ExplicitParallelExecuter_ProcessQueueBased, args=(func,queue))
+    #     proc.daemon = True
+    #     procs.append(proc)
+    #     proc.start()
+    #     pnodes = pnode_indices[i]
+    #     T = queue.get()
+    #     T_all[pnodes,:] += T.reshape(pnodes.shape[0],formulation.nvar)
+    #     proc.join()
+
 
     return T_all.ravel()
