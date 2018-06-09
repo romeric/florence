@@ -800,17 +800,21 @@ class ExplicitParallelZipper(object):
         self.material = material
         self.Eulerx = Eulerx
         self.Eulerp = Eulerp
-        self.T = np.zeros(mesh.points.shape[0]*formulation.nvar,np.float64)
 
 
-def ExplicitParallelExecuter(functor):
+def ExplicitParallelExecuter_PoolBased(functor):
     return _LowLevelAssemblyExplicit_Par_(functor.function_space,
-        functor.formulation, functor.mesh, functor.material, functor.Eulerx, functor.Eulerp, functor.T)
+        functor.formulation, functor.mesh, functor.material, functor.Eulerx, functor.Eulerp)
+
+def ExplicitParallelExecuter_ProcessBased(proc, functor, Ts):
+    T = _LowLevelAssemblyExplicit_Par_(functor.function_space,
+        functor.formulation, functor.mesh, functor.material, functor.Eulerx, functor.Eulerp)
+    Ts[proc] = T
 
 
 def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
 
-    from multiprocessing import Pool
+    from multiprocessing import Process, Pool
     from contextlib import closing
 
     # pmesh, pelement_indices, pnode_indices = mesh.Partition(fem_solver.no_of_cpu_cores)
@@ -825,20 +829,27 @@ def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
         funcs.append(ExplicitParallelZipper(function_space, formulation,
             pmesh[proc], material, Eulerx_current, Eulerp_current))
 
+    # SERIAL
     # for proc in range(fem_solver.no_of_cpu_cores):
-    #     ExplicitParallelExecuter(funcs[proc])
+    #     T = ExplicitParallelExecuter_PoolBased(funcs[proc])
     #     pnodes = pnode_indices[proc]
-    #     T_all[pnodes,:] += funcs[proc].T.reshape(pnodes.shape[0],formulation.nvar)
+    #     T_all[pnodes,:] += T.reshape(pnodes.shape[0],formulation.nvar)
 
-    # pool = Pool(fem_solver.no_of_cpu_cores)
-    # pool.map(ExplicitParallelExecuter,funcs)
-    with closing(Pool(processes=fem_solver.no_of_cpu_cores)) as pool:
-        Ts = pool.map(ExplicitParallelExecuter,funcs)
-        pool.terminate()
+    # POOL BASED
+    # with closing(Pool(processes=fem_solver.no_of_cpu_cores)) as pool:
+    #     Ts = pool.map(ExplicitParallelExecuter_PoolBased,funcs)
+    #     pool.terminate()
+
+    procs, Ts = [], []*fem_solver.no_of_cpu_cores
+    for i, func in enumerate(funcs):
+        proc = Process(target=ExplicitParallelExecuter_ProcessBased, args=(i,func,Ts))
+        procs.append(proc)
+        proc.start()
+    for proc in procs:
+        proc.join()
 
     for proc in range(fem_solver.no_of_cpu_cores):
         pnodes = pnode_indices[proc]
-        # T_all[pnodes,:] += funcs[proc].T.reshape(pnodes.shape[0],formulation.nvar)
         T_all[pnodes,:] += Ts[proc].reshape(pnodes.shape[0],formulation.nvar)
 
     return T_all.ravel()

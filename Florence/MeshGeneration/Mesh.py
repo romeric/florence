@@ -5842,7 +5842,7 @@ class Mesh(object):
         return lmesh
 
 
-    def GetLocalisedMesh(self,elements, solution=None):
+    def GetLocalisedMesh(self, elements, solution=None):
         """Make a new Mesh instance from part of a big mesh.
             Makes a copy and does not modify self
 
@@ -5889,6 +5889,9 @@ class Mesh(object):
                 else:
                     solution = solution[elements,...]
             return tmesh, solution
+
+        # MAKE MESH DATA CONTIGUOUS
+        tmesh.ChangeType()
 
         return tmesh
 

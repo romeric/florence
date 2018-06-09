@@ -99,14 +99,9 @@ def _LowLevelAssemblyExplicit_(fem_solver, function_space, formulation, mesh, ma
     return T, F, mass
 
 
-def _LowLevelAssemblyExplicit_Par_(function_space, formulation, mesh, material, Eulerx, Eulerp, T):
-    # MAKE MESH DATA CONTIGUOUS
-    mesh.ChangeType()
+def _LowLevelAssemblyExplicit_Par_(function_space, formulation, mesh, material, Eulerx, Eulerp):
     # CALL LOW LEVEL ASSEMBLER
-    T[:] = _LowLevelAssemblyExplicit_DF_DPF_(function_space, formulation, mesh, material, Eulerx, Eulerp)[-1]
-    # THE RETURN IS NECESSARY
-    return T
-
+    return _LowLevelAssemblyExplicit_DF_DPF_(function_space, formulation, mesh, material, Eulerx, Eulerp)[-1]
 
 
 
