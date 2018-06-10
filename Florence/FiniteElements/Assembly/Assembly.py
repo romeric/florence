@@ -775,10 +775,24 @@ def ImplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
         with closing(Pool(processes=fem_solver.no_of_cpu_cores)) as pool:
             tups = pool.map(ImplicitParallelExecuter_PoolBased,funcs)
             pool.terminate()
+
+    # JOBLIB BASED
     elif fem_solver.parallel_model == "joblib":
-        from joblib import Parallel, delayed
+        try:
+            from joblib import Parallel, delayed
+        except ImportError:
+            raise ImportError("Joblib is not installed. Install it 'using pip install joblib'")
         tups = Parallel(n_jobs=fem_solver.no_of_cpu_cores)(delayed(ImplicitParallelExecuter_PoolBased)(func) for func in funcs)
         # tups = Parallel(n_jobs=10, backend="threading")(delayed(ImplicitParallelExecuter_PoolBased)(func) for func in funcs)
+
+    # SCOOP BASED
+    elif fem_solver.parallel_model == "scoop":
+        try:
+            from scoop import futures
+        except ImportError:
+            raise ImportError("Scoop is not installed. Install it 'using pip install scoop'")
+        # tups = futures.map(ImplicitParallelExecuter_PoolBased, funcs)
+        tups = list(futures.map(ImplicitParallelExecuter_PoolBased, funcs))
 
     # PROCESS AND MANAGER BASED
     elif fem_solver.parallel_model == "context_manager":
@@ -814,7 +828,8 @@ def ImplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
                 V_mass[pelements,:] = tups[5].reshape(pmesh[i].nelem,local_capacity)
             proc.join()
 
-    if fem_solver.parallel_model == "pool" or fem_solver.parallel_model == "context_manager" or fem_solver.parallel_model == "joblib":
+    if fem_solver.parallel_model == "pool" or fem_solver.parallel_model == "context_manager" \
+        or fem_solver.parallel_model == "joblib" or fem_solver.parallel_model == "scoop":
         for i in range(fem_solver.no_of_cpu_cores):
             pnodes = pnode_indices[i]
             pelements = pelement_indices[i]
