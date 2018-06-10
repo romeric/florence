@@ -921,37 +921,66 @@ def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
     #     pnodes = pnode_indices[proc]
     #     T_all[pnodes,:] += T.reshape(pnodes.shape[0],formulation.nvar)
 
-    # POOL BASED
-    # with closing(Pool(processes=fem_solver.no_of_cpu_cores)) as pool:
-    #     Ts = pool.map(ExplicitParallelExecuter_PoolBased,funcs)
-    #     pool.terminate()
-
     # PROCESS AND MANAGER BASED
-    procs = []
-    manager = Manager(); Ts = manager.dict() # SPAWNS A NEW PROCESS
-    for i, func in enumerate(funcs):
-        proc = Process(target=ExplicitParallelExecuter_ProcessBased, args=(func,i,Ts))
-        procs.append(proc)
-        proc.start()
-    for proc in procs:
-        proc.join()
+    if fem_solver.parallel_model == "context_manager":
+        procs = []
+        manager = Manager(); Ts = manager.dict() # SPAWNS A NEW PROCESS
+        for i, func in enumerate(funcs):
+            proc = Process(target=ExplicitParallelExecuter_ProcessBased, args=(func,i,Ts))
+            procs.append(proc)
+            proc.start()
+        for proc in procs:
+            proc.join()
 
-    for proc in range(fem_solver.no_of_cpu_cores):
-        pnodes = pnode_indices[proc]
-        T_all[pnodes,:] += Ts[proc].reshape(pnodes.shape[0],formulation.nvar)
+    # POOL BASED
+    elif fem_solver.parallel_model == "pool":
+        with closing(Pool(processes=fem_solver.no_of_cpu_cores)) as pool:
+            Ts = pool.map(ExplicitParallelExecuter_PoolBased,funcs)
+            pool.terminate()
+            # DOESN'T SCALE WELL
+            # Ts = pool.map_async(ExplicitParallelExecuter_PoolBased,funcs)
+            # Ts.wait()
+            # Ts = Ts.get()
+
+    # JOBLIB BASED
+    elif fem_solver.parallel_model == "joblib":
+        try:
+            from joblib import Parallel, delayed
+        except ImportError:
+            raise ImportError("Joblib is not installed. Install it 'using pip install joblib'")
+        Ts = Parallel(n_jobs=fem_solver.no_of_cpu_cores)(delayed(ExplicitParallelExecuter_PoolBased)(func) for func in funcs)
+        # Ts = Parallel(n_jobs=10, backend="threading")(delayed(ImplicitParallelExecuter_PoolBased)(func) for func in funcs)
+
+    # SCOOP BASED
+    elif fem_solver.parallel_model == "scoop":
+        try:
+            from scoop import futures
+        except ImportError:
+            raise ImportError("Scoop is not installed. Install it 'using pip install scoop'")
+        Ts = list(futures.map(ExplicitParallelExecuter_PoolBased, funcs))
 
     # PROCESS AND QUEUE BASED
-    # procs = []
-    # for i, func in enumerate(funcs):
-    #     queue = Queue()
-    #     proc = Process(target=ExplicitParallelExecuter_ProcessQueueBased, args=(func,queue))
-    #     proc.daemon = True
-    #     procs.append(proc)
-    #     proc.start()
-    #     pnodes = pnode_indices[i]
-    #     T = queue.get()
-    #     T_all[pnodes,:] += T.reshape(pnodes.shape[0],formulation.nvar)
-    #     proc.join()
+    elif fem_solver.parallel_model == "queue":
+        procs = []
+        for i, func in enumerate(funcs):
+            queue = Queue()
+            proc = Process(target=ExplicitParallelExecuter_ProcessQueueBased, args=(func,queue))
+            proc.daemon = True
+            procs.append(proc)
+            proc.start()
+            pnodes = pnode_indices[i]
+            T = queue.get()
+            T_all[pnodes,:] += T.reshape(pnodes.shape[0],formulation.nvar)
+            proc.join()
+
+
+    if fem_solver.parallel_model == "pool" or fem_solver.parallel_model == "context_manager" \
+        or fem_solver.parallel_model == "joblib" or fem_solver.parallel_model == "scoop":
+
+        for proc in range(fem_solver.no_of_cpu_cores):
+            pnodes = pnode_indices[proc]
+            T_all[pnodes,:] += Ts[proc].reshape(pnodes.shape[0],formulation.nvar)
+
 
 
     return T_all.ravel()

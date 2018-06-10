@@ -485,7 +485,7 @@ class ExplicitStructuralDynamicIntegrators(object):
         # SAVE INCREMENTAL SOLUTION IF ASKED FOR
         if fem_solver.save_incremental_solution:
             # FOR BIG MESHES
-            if U.shape[0] > int(1e6) and Increment % 50 !=0:
+            if Increment % fem_solver.incremental_solution_save_frequency !=0:
                 return
             from scipy.io import savemat
             filename = fem_solver.incremental_solution_filename

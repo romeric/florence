@@ -60,6 +60,7 @@ class FEMSolver(object):
         print_incremental_log=False,
         save_incremental_solution=False,
         incremental_solution_filename=None,
+        incremental_solution_save_frequency=50,
         break_at_increment=-1,
         break_at_stagnation=True,
         include_physical_damping=False,
@@ -97,6 +98,7 @@ class FEMSolver(object):
         self.save_results = save_results
         # SAVE AT EVERY N TIME STEP WHERE N=save_frequency
         self.save_frequency = int(save_frequency)
+        self.incremental_solution_save_frequency = incremental_solution_save_frequency
 
         self.number_of_load_increments = number_of_load_increments
         self.load_factor = load_factor
@@ -1185,6 +1187,9 @@ class FEMSolver(object):
 
             # SAVE INCREMENTAL SOLUTION IF ASKED FOR
             if self.save_incremental_solution:
+                # FOR BIG MESHES
+                if Increment % self.incremental_solution_save_frequency !=0:
+                    return
                 from scipy.io import savemat
                 filename = self.incremental_solution_filename
                 if filename is not None:
