@@ -6,7 +6,8 @@ from time import time
 import numpy as np
 from scipy.sparse import coo_matrix, csc_matrix, csr_matrix
 
-from ._LowLevelAssembly_ import _LowLevelAssembly_, _LowLevelAssemblyExplicit_, _LowLevelAssemblyExplicit_Par_, _LowLevelAssemblyLaplacian_
+from ._LowLevelAssembly_ import _LowLevelAssembly_, _LowLevelAssemblyExplicit_, _LowLevelAssemblyLaplacian_
+from ._LowLevelAssembly_ import _LowLevelAssembly_Par_, _LowLevelAssemblyExplicit_Par_
 
 import pyximport
 pyximport.install(setup_args={'include_dirs': np.get_include()})
@@ -76,7 +77,11 @@ def LowLevelAssembly(fem_solver, function_space, formulation, mesh, material, Eu
         fem_solver.assembly_time = time() - t_assembly
         return stiffness, T[:,None], None, None
 
-    stiffness, T, F, mass = _LowLevelAssembly_(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
+    if fem_solver.parallel:
+        stiffness, T, F, mass = ImplicitParallelLauncher(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
+    else:
+        stiffness, T, F, mass = _LowLevelAssembly_(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
+
     if isinstance(F,np.ndarray):
         F = F[:,None]
     if mass is not None:
@@ -85,6 +90,7 @@ def LowLevelAssembly(fem_solver, function_space, formulation, mesh, material, Eu
     fem_solver.assembly_time = time() - t_assembly
 
     return stiffness, T[:,None], F, mass
+
 
 
 def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
@@ -105,7 +111,7 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
     V_stiffness=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.float64)
 
     I_mass=[]; J_mass=[]; V_mass=[]
-    if fem_solver.analysis_type !='static':
+    if fem_solver.analysis_type !='static' and fem_solver.is_mass_computed is False:
         # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF MASS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
         I_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
         J_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
@@ -197,120 +203,6 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
     return stiffness, T, F, mass
 
 
-
-#-------------- ASSEMBLY ROUTINE FOR RELATIVELY LARGER MATRICES ( 1e06 < NELEM < 1e07 3D)------------------------#
-#----------------------------------------------------------------------------------------------------------------#
-
-def AssemblyLarge(MainData,mesh,material,Eulerx,TotalPot):
-
-    # GET MESH DETAILS
-    C = MainData.C
-    nvar = MainData.nvar
-    ndim = MainData.ndim
-
-    # nelem = mesh.elements.shape[0]
-    nelem = mesh.nelem
-    nodeperelem = mesh.elements.shape[1]
-
-    from tempfile import mkdtemp
-
-    # WRITE TRIPLETS ON DESK
-    pwd = os.path.dirname(os.path.realpath(__file__))
-    tmp_dir = mkdtemp()
-    I_filename = os.path.join(tmp_dir, 'I_stiffness.dat')
-    J_filename = os.path.join(tmp_dir, 'J_stiffness.dat')
-    V_filename = os.path.join(tmp_dir, 'V_stiffness.dat')
-
-    # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF STIFFNESS MATRIX
-    I_stiffness = np.memmap(I_filename,dtype=np.int32,mode='w+',shape=((nvar*nodeperelem)**2*nelem,))
-    J_stiffness = np.memmap(J_filename,dtype=np.int32,mode='w+',shape=((nvar*nodeperelem)**2*nelem,))
-    V_stiffness = np.memmap(V_filename,dtype=np.float32,mode='w+',shape=((nvar*nodeperelem)**2*nelem,))
-
-    # I_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.int64)
-    # J_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.int64)
-    # V_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.float64)
-
-    # THE I & J VECTORS OF LOCAL STIFFNESS MATRIX DO NOT CHANGE, HENCE COMPUTE THEM ONCE
-    I_stiff_elem = np.repeat(np.arange(0,nvar*nodeperelem),nvar*nodeperelem,axis=0)
-    J_stiff_elem = np.tile(np.arange(0,nvar*nodeperelem),nvar*nodeperelem)
-
-    I_mass=[];J_mass=[];V_mass=[]; I_mass_elem = []; J_mass_elem = []
-    if MainData.Analysis !='Static':
-        # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF MASS MATRIX
-        I_mass=np.zeros((nvar*nodeperelem)**2*mesh.elements.shape[0],dtype=np.int64)
-        J_mass=np.zeros((nvar*nodeperelem)**2*mesh.elements.shape[0],dtype=np.int64)
-        V_mass=np.zeros((nvar*nodeperelem)**2*mesh.elements.shape[0],dtype=np.float64)
-
-        # THE I & J VECTORS OF LOCAL MASS MATRIX DO NOT CHANGE, HENCE COMPUTE THEM ONCE
-        I_mass_elem = np.repeat(np.arange(0,nvar*nodeperelem),nvar*nodeperelem,axis=0)
-        J_mass_elem = np.tile(np.arange(0,nvar*nodeperelem),nvar*nodeperelem)
-
-
-    # ALLOCATE RHS VECTORS
-    F = np.zeros((mesh.points.shape[0]*nvar,1))
-    T =  np.zeros((mesh.points.shape[0]*nvar,1))
-    # ASSIGN OTHER NECESSARY MATRICES
-    full_current_row_stiff = []; full_current_column_stiff = []; coeff_stiff = []
-    full_current_row_mass = []; full_current_column_mass = []; coeff_mass = []
-    mass = []
-
-    if MainData.Parallel:
-        # COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
-        ParallelTuple = parmap.map(GetElementalMatrices,np.arange(0,nelem),MainData,mesh.elements,mesh.points,nodeperelem,
-            Eulerx,TotalPot,I_stiff_elem,J_stiff_elem,I_mass_elem,J_mass_elem,pool=MP.Pool(processes=MainData.nCPU))
-
-    for elem in range(nelem):
-
-        if MainData.Parallel:
-            # UNPACK PARALLEL TUPLE VALUES
-            full_current_row_stiff = ParallelTuple[elem][0]; full_current_column_stiff = ParallelTuple[elem][1]
-            coeff_stiff = ParallelTuple[elem][2]; t = ParallelTuple[elem][3]; f = ParallelTuple[elem][4]
-            full_current_row_mass = ParallelTuple[elem][5]; full_current_column_mass = ParallelTuple[elem][6]; coeff_mass = ParallelTuple[elem][6]
-
-        else:
-            # COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
-            full_current_row_stiff, full_current_column_stiff, coeff_stiff, t, f, \
-            full_current_row_mass, full_current_column_mass, coeff_mass = GetElementalMatrices(elem,
-                MainData,mesh.elements,mesh.points,nodeperelem,Eulerx,TotalPot,I_stiff_elem,J_stiff_elem,I_mass_elem,J_mass_elem)
-
-        # SPARSE ASSEMBLY - STIFFNESS MATRIX
-        # I_stiffness, J_stiffness, V_stiffness = SparseAssembly_Step_2(I_stiffness,J_stiffness,V_stiffness,
-            # full_current_row_stiff,full_current_column_stiff,coeff_stiff,
-        #   nvar,nodeperelem,elem)
-
-        I_stiffness[(nvar*nodeperelem)**2*elem:(nvar*nodeperelem)**2*(elem+1)] = full_current_row_stiff
-        J_stiffness[(nvar*nodeperelem)**2*elem:(nvar*nodeperelem)**2*(elem+1)] = full_current_column_stiff
-        V_stiffness[(nvar*nodeperelem)**2*elem:(nvar*nodeperelem)**2*(elem+1)] = coeff_stiff
-
-        if MainData.Analysis != 'Static':
-            # SPARSE ASSEMBLY - MASS MATRIX
-            I_mass, J_mass, V_mass = SparseAssembly_Step_2(I_mass,J_mass,V_mass,full_current_row_mass,full_current_column_mass,coeff_mass,
-                nvar,nodeperelem,elem)
-
-        if fem_solver.has_moving_boundary:
-            # RHS ASSEMBLY
-            for iterator in range(0,nvar):
-                F[mesh.elements[elem,:]*nvar+iterator,0]+=f[iterator::nvar]
-        # INTERNAL TRACTION FORCE ASSEMBLY
-        for iterator in range(0,nvar):
-                T[mesh.elements[elem,:]*nvar+iterator,0]+=t[iterator::nvar,0]
-
-    # CALL BUILT-IN SPARSE ASSEMBLER
-    stiffness = coo_matrix((V_stiffness,(I_stiffness,J_stiffness)),
-        shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64).tocsc()
-
-    # GET STORAGE/MEMORY DETAILS
-    fem_solver.spmat = stiffness.data.nbytes/1024./1024.
-    fem_solver.ijv = (I_stiffness.nbytes + J_stiffness.nbytes + V_stiffness.nbytes)/1024./1024.
-    del I_stiffness, J_stiffness, V_stiffness
-    gc.collect()
-
-    if fem_solver.analysis_type != 'static':
-        # CALL BUILT-IN SPARSE ASSEMBLER
-        mass = coo_matrix((V_mass,(I_mass,J_mass)),shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0]))).tocsc()
-
-
-    return stiffness, T, F, mass
 
 
 def OutofCoreAssembly(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp, calculate_rhs=True, filename=None, chunk_size=None):
@@ -523,10 +415,6 @@ def AssembleInternalTractionForces(fem_solver, function_space, formulation, mesh
 
 
 
-
-
-
-
 #------------------------------- ASSEMBLY ROUTINE FOR EXTERNAL TRACTION FORCES ----------------------------------#
 #----------------------------------------------------------------------------------------------------------------#
 
@@ -667,8 +555,8 @@ def AssembleBodyForces(boundary_condition, mesh, material, function_space):
 
 
 
-
-
+#---------------------------------------- EXPLICIT ASSEMBLY ROUTINES --------------------------------------------#
+#----------------------------------------------------------------------------------------------------------------#
 
 
 # def AssembleExplicit(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
@@ -786,6 +674,184 @@ def AssembleExplicitFunctor(elem, nvar, nodeperelem, T, F, I_mass, J_mass, V_mas
             I_mass_elem, J_mass_elem, V_mass_elem = formulation.FindIndices(mass)
             SparseAssemblyNative(I_mass_elem,J_mass_elem,V_mass_elem,I_mass,J_mass,V_mass,
                 elem,nvar,nodeperelem,mesh.elements)
+
+
+
+
+
+
+
+
+#---------------------------------------- PARALLEL ASSEMBLY ROUTINES --------------------------------------------#
+#----------------------------------------------------------------------------------------------------------------#
+
+class ImplicitParallelZipper(object):
+
+    def __init__(self, fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
+        self.fem_solver = fem_solver.__class__(analysis_type=fem_solver.analysis_type,
+                                                analysis_nature=fem_solver.analysis_nature)
+        self.function_space = function_space
+        self.formulation = formulation
+        self.mesh = mesh
+        self.material = material
+        self.Eulerx = Eulerx
+        self.Eulerp = Eulerp
+
+def ImplicitParallelExecuter_PoolBased(functor):
+    return _LowLevelAssembly_Par_(functor.fem_solver, functor.function_space,
+        functor.formulation, functor.mesh, functor.material, functor.Eulerx, functor.Eulerp)
+
+def ImplicitParallelExecuter_ProcessBased(functor, proc, tups):
+    tup = _LowLevelAssembly_Par_(functor.fem_solver, functor.function_space,
+        functor.formulation, functor.mesh, functor.material, functor.Eulerx, functor.Eulerp)
+    tups[proc] = tup
+    # tups.append(tup) # FOR SERIAL CHECKS
+
+def ImplicitParallelExecuter_ProcessQueueBased(functor, queue):
+    tups = _LowLevelAssembly_Par_(functor.fem_solver, functor.function_space,
+        functor.formulation, functor.mesh, functor.material, functor.Eulerx, functor.Eulerp)
+    queue.put(tups)
+
+
+def ImplicitParallelLauncher(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
+
+    from multiprocessing import Process, Pool, Manager, Queue
+    from contextlib import closing
+
+    # GET MESH DETAILS
+    nvar = formulation.nvar
+    ndim = formulation.ndim
+    nelem = mesh.nelem
+    nnode = mesh.points.shape[0]
+    nodeperelem = mesh.elements.shape[1]
+    local_capacity = int((nvar*nodeperelem)**2)
+
+    pmesh, pelement_indices, pnode_indices, partitioned_maps = fem_solver.pmesh, \
+        fem_solver.pelement_indices, fem_solver.pnode_indices, fem_solver.partitioned_maps
+
+
+    # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF STIFFNESS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
+    I_stiffness=np.zeros((nelem,local_capacity),dtype=np.int32)
+    J_stiffness=np.zeros((nelem,local_capacity),dtype=np.int32)
+    V_stiffness=np.zeros((nelem,local_capacity),dtype=np.float64)
+
+    I_mass=[]; J_mass=[]; V_mass=[]
+    if fem_solver.analysis_type !='static' and fem_solver.is_mass_computed is False:
+        # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF MASS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
+        I_mass=np.zeros((nelem,local_capacity),dtype=np.int32)
+        J_mass=np.zeros((nelem,local_capacity),dtype=np.int32)
+        V_mass=np.zeros((nelem,local_capacity),dtype=np.float64)
+
+    T = np.zeros((mesh.points.shape[0],nvar),np.float64)
+
+    funcs = []
+    for proc in range(fem_solver.no_of_cpu_cores):
+        pnodes = pnode_indices[proc]
+        Eulerx_current = Eulerx[pnodes,:]
+        Eulerp_current = Eulerp[pnodes]
+        funcs.append(ImplicitParallelZipper(fem_solver, function_space, formulation,
+            pmesh[proc], material, Eulerx_current, Eulerp_current))
+
+    # # SERIAL
+    # tups = []
+    # for i in range(fem_solver.no_of_cpu_cores):
+    #     ImplicitParallelExecuter_ProcessBased(funcs[i], i, tups)
+    # for i in range(fem_solver.no_of_cpu_cores):
+    #     pnodes = pnode_indices[i]
+    #     pelements = pelement_indices[i]
+    #     I_stiffness[pelements,:] = partitioned_maps[i][tups[i][0]].reshape(pmesh[i].nelem,local_capacity)
+    #     J_stiffness[pelements,:] = partitioned_maps[i][tups[i][1]].reshape(pmesh[i].nelem,local_capacity)
+    #     V_stiffness[pelements,:] = tups[i][2].reshape(pmesh[i].nelem,local_capacity)
+    #     T[pnodes,:] += tups[i][-1].reshape(pnodes.shape[0],nvar)
+
+    #     if fem_solver.analysis_type != "static" and fem_solver.is_mass_computed is False:
+    #         I_stiffness[pelements,:] = partitioned_maps[i][tups[i][3]].reshape(pmesh[i].nelem,local_capacity)
+    #         J_stiffness[pelements,:] = partitioned_maps[i][tups[i][4]].reshape(pmesh[i].nelem,local_capacity)
+    #         V_stiffness[pelements,:] = tups[i][5].reshape(pmesh[i].nelem,local_capacity)
+
+
+    # POOL BASED
+    if fem_solver.parallel_model == "pool":
+        with closing(Pool(processes=fem_solver.no_of_cpu_cores)) as pool:
+            tups = pool.map(ImplicitParallelExecuter_PoolBased,funcs)
+            pool.terminate()
+    elif fem_solver.parallel_model == "joblib":
+        from joblib import Parallel, delayed
+        tups = Parallel(n_jobs=fem_solver.no_of_cpu_cores)(delayed(ImplicitParallelExecuter_PoolBased)(func) for func in funcs)
+        # tups = Parallel(n_jobs=10, backend="threading")(delayed(ImplicitParallelExecuter_PoolBased)(func) for func in funcs)
+
+    # PROCESS AND MANAGER BASED
+    elif fem_solver.parallel_model == "context_manager":
+        procs = []
+        manager = Manager(); tups = manager.dict() # SPAWNS A NEW PROCESS
+        for i, func in enumerate(funcs):
+            proc = Process(target=ImplicitParallelExecuter_ProcessBased, args=(func,i,tups))
+            procs.append(proc)
+            proc.start()
+        for proc in procs:
+            proc.join()
+
+    # PROCESS AND QUEUE BASED
+    elif fem_solver.parallel_model == "queue":
+        procs = []
+        for i, func in enumerate(funcs):
+            queue = Queue()
+            proc = Process(target=ImplicitParallelExecuter_ProcessQueueBased, args=(func,queue))
+            proc.daemon = True
+            procs.append(proc)
+            proc.start()
+            tups = queue.get()
+            pnodes = pnode_indices[i]
+            pelements = pelement_indices[i]
+            I_stiffness[pelements,:] = partitioned_maps[i][tups[0]].reshape(pmesh[i].nelem,local_capacity)
+            J_stiffness[pelements,:] = partitioned_maps[i][tups[1]].reshape(pmesh[i].nelem,local_capacity)
+            V_stiffness[pelements,:] = tups[2].reshape(pmesh[i].nelem,local_capacity)
+            T[pnodes,:] += tups[-1].reshape(pnodes.shape[0],nvar)
+
+            if fem_solver.analysis_type != "static" and fem_solver.is_mass_computed is False:
+                I_mass[pelements,:] = partitioned_maps[i][tups[3]].reshape(pmesh[i].nelem,local_capacity)
+                J_mass[pelements,:] = partitioned_maps[i][tups[4]].reshape(pmesh[i].nelem,local_capacity)
+                V_mass[pelements,:] = tups[5].reshape(pmesh[i].nelem,local_capacity)
+            proc.join()
+
+    if fem_solver.parallel_model == "pool" or fem_solver.parallel_model == "context_manager" or fem_solver.parallel_model == "joblib":
+        for i in range(fem_solver.no_of_cpu_cores):
+            pnodes = pnode_indices[i]
+            pelements = pelement_indices[i]
+            I_stiffness[pelements,:] = partitioned_maps[i][tups[i][0]].reshape(pmesh[i].nelem,local_capacity)
+            J_stiffness[pelements,:] = partitioned_maps[i][tups[i][1]].reshape(pmesh[i].nelem,local_capacity)
+            V_stiffness[pelements,:] = tups[i][2].reshape(pmesh[i].nelem,local_capacity)
+            T[pnodes,:] += tups[i][-1].reshape(pnodes.shape[0],nvar)
+
+            if fem_solver.analysis_type != "static" and fem_solver.is_mass_computed is False:
+                I_mass[pelements,:] = partitioned_maps[i][tups[i][3]].reshape(pmesh[i].nelem,local_capacity)
+                J_mass[pelements,:] = partitioned_maps[i][tups[i][4]].reshape(pmesh[i].nelem,local_capacity)
+                V_mass[pelements,:] = tups[i][5].reshape(pmesh[i].nelem,local_capacity)
+
+
+    stiffness = csr_matrix((V_stiffness.ravel(),(I_stiffness.ravel(),J_stiffness.ravel())),
+        shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
+
+    F, mass = [], []
+
+    if fem_solver.analysis_type != "static" and fem_solver.is_mass_computed is False:
+        mass = csr_matrix((V_mass.ravel(),(I_mass.ravel(),J_mass.ravel())),
+            shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
+
+
+    return stiffness, T.ravel(), F, mass
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

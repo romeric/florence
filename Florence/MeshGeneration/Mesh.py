@@ -3422,6 +3422,7 @@ class Mesh(object):
             self.elements = tri_func.simplices
             self.nelem = self.elements.shape[0]
             self.points = tri_func.points
+            self.nnode = self.points.shape[0]
             self.GetBoundaryEdgesTri()
 
         elif element_type == "quad":
@@ -3441,6 +3442,7 @@ class Mesh(object):
             self.element_type = "quad"
             self.elements = elements
             self.points = coordinates
+            self.nnode = self.points.shape[0]
             self.GetBoundaryEdgesQuad()
             self.GetEdgesQuad()
 
@@ -4163,6 +4165,7 @@ class Mesh(object):
 
         self.elements = elements
         self.points = coordinates
+        self.nnode = self.points.shape[0]
 
         self.GetBoundaryFacesHex()
         self.GetBoundaryEdgesHex()

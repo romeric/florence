@@ -53,6 +53,7 @@ class FEMSolver(object):
         compute_mesh_qualities=True,
         parallelise=False,
         ncpu=None,
+        parallel_model=None,
         memory_model="shared",
         platform="cpu",
         backend="opencl",
@@ -119,6 +120,7 @@ class FEMSolver(object):
         self.vectorise = True
         self.parallel = parallelise
         self.no_of_cpu_cores = ncpu
+        self.parallel_model = parallel_model # "pool", "context_manager", "queue", "joblib"
         self.memory_model = memory_model
         self.platform = platform
         self.backend = backend
@@ -188,21 +190,25 @@ class FEMSolver(object):
         if solver is None:
             solver = LinearSolver(linear_solver="direct", linear_solver_type="umfpack", geometric_discretisation=mesh.element_type)
 
-        # TURN OFF PARALLELISM IF NOT EXPLICIT
+        # TURN OFF PARALLELISM IF NOT AVAILABLE
         if self.parallel:
-            if self.analysis_type == "dynamic" and self.analysis_subtype == "explicit" \
-                and (formulation.fields == "mechanics" or formulation.fields == "electro_mechanics") \
-                and self.analysis_nature =="nonlinear":
-                pass
+            if (formulation.fields == "mechanics" or formulation.fields == "electro_mechanics") \
+                and self.has_low_level_dispatcher:
+                if self.parallel_model is None:
+                    if self.analysis_type == "dynamic" and self.analysis_subtype == "explicit":
+                        self.parallel_model = "context_manager"
+                    else:
+                        self.parallel_model = "pool"
             else:
                 warn("Parallelism cannot be activated right now")
                 self.parallel = False
+                self.no_of_cpu_cores = 1
 
         if self.parallel:
             if self.no_of_cpu_cores is None:
                 self.no_of_cpu_cores = multiprocessing.cpu_count()
-            # PARTITION THE MESH
-            self.pmesh, self.pelement_indices, self.pnode_indices = mesh.Partition(self.no_of_cpu_cores)
+            # PARTITION THE MESH AND PREPARE
+            self.PartitionMeshForParallelFEM(mesh,self.no_of_cpu_cores,formulation.nvar)
 
 
         if material.ndim != mesh.InferSpatialDimension():
@@ -1188,3 +1194,27 @@ class FEMSolver(object):
                         {'solution':TotalDisp[:,:,Increment]},do_compression=True)
                 else:
                     raise ValueError("No file name provided to save incremental solution")
+
+
+
+    def PartitionMeshForParallelFEM(self, mesh, n, nvar):
+
+        nnode = mesh.nnode
+        pmesh, pelement_indices, pnode_indices = mesh.Partition(n)
+        map_facilitator = np.arange(nnode*nvar,dtype=np.int32).reshape(nnode,nvar)
+
+        partitioned_maps = []
+        for i, mesh in enumerate(pmesh):
+            pnodes = pnode_indices[i]
+            global_dofs = np.unique(pnodes[mesh.elements.ravel()])
+            local_dofs = np.unique(mesh.elements.ravel())
+            # global_to_local_dof_map = np.zeros((global_dofs.shape[0]*nvar,2),dtype=np.int32)
+            # global_to_local_dof_map[:,0] = map_facilitator[local_dofs,:].ravel()
+            # global_to_local_dof_map[:,1] = map_facilitator[global_dofs,:].ravel()
+
+            global_to_local_dof_map = map_facilitator[global_dofs,:].ravel()
+            partitioned_maps.append(global_to_local_dof_map)
+
+        self.pmesh, self.pelement_indices, self.pnode_indices, \
+            self.partitioned_maps = pmesh, pelement_indices, pnode_indices, partitioned_maps
+        # return pmesh, pelement_indices, pnode_indices, partitioned_maps
