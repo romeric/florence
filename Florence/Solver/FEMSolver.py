@@ -192,6 +192,18 @@ class FEMSolver(object):
         if solver is None:
             solver = LinearSolver(linear_solver="direct", linear_solver_type="umfpack", geometric_discretisation=mesh.element_type)
 
+        # CHECK MESH DIMENSION BEFORE ANY FURTHER ANALYSIS
+        if mesh.points.shape[1] == 3 and (mesh.element_type == "tri" or mesh.element_type == "quad"):
+            if np.allclose(mesh.points[:,2],0.):
+                mesh.points = np.ascontiguousarray(mesh.points[:,:2])
+            elif np.allclose(mesh.points[:,1],0.):
+                mesh.points = np.ascontiguousarray(mesh.points[:,[0,2]])
+            elif np.allclose(mesh.points[:,0],0.):
+                mesh.points = np.ascontiguousarray(mesh.points[:,1:])
+            else:
+                warn("Mesh spatial dimensionality is not correct for 2D. I will ignore Z coordinates")
+                mesh.points = np.ascontiguousarray(mesh.points[:,:2])
+
         # TURN OFF PARALLELISM IF NOT AVAILABLE
         if self.parallel:
             if (formulation.fields == "mechanics" or formulation.fields == "electro_mechanics") \
@@ -336,6 +348,21 @@ class FEMSolver(object):
         ##############################################################################
         if self.analysis_type == "dynamic" and self.analysis_subtype != "explicit":
             boundary_condition.ConvertStaticsToDynamics(mesh, self.number_of_load_increments)
+        ##############################################################################
+
+        ##############################################################################
+        if boundary_condition.dirichlet_flags is not None:
+            # SPECIFIC CHECKS TO AVOID CONFUSING ERRORS OCCURING DOWN STREAM
+            ndim = mesh.InferSpatialDimension()
+            if boundary_condition.dirichlet_flags.ndim == 2:
+                if boundary_condition.dirichlet_flags.shape[1] != formulation.nvar:
+                    raise ValueError("Essential boundary conditions are not imposed correctly")
+            if formulation.fields == "mechanics":
+                if boundary_condition.dirichlet_flags.shape[1] != ndim:
+                    raise ValueError("Essential boundary conditions are not imposed correctly")
+            elif formulation.fields == "electro_mechanics":
+                if boundary_condition.dirichlet_flags.shape[1] != ndim+1:
+                    raise ValueError("Essential boundary conditions are not imposed correctly")
         ##############################################################################
 
         return function_spaces, solver
