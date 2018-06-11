@@ -3302,7 +3302,7 @@ class Mesh(object):
                                 cvdata={cellflag:result.ravel()},fname=filename)
                         elif result.shape[0] == self.points.shape[0]:
                             write_vtu(Verts=self.points, Cells={cellflag:elements},
-                                pvdata=result,fname=filename)
+                                pvdata=result.ravel(),fname=filename)
                     else:
                         if result.shape[0] == self.nelem:
                             write_vtu(Verts=self.points, Cells={cellflag:elements},cdata=result,fname=filename)
