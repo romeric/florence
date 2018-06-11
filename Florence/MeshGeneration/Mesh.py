@@ -1036,14 +1036,19 @@ class Mesh(object):
 
 
     def Lengths(self,):
-        """Computes length of 1D elements
+        """Computes length of all types of elements
         """
 
-        assert self.points is not None
-        assert self.element_type is not None
+        self.__do_essential_memebers_exist__()
 
-        coords = self.points[self.elements[:,:2],:]
-        lengths = np.linalg.norm(coords[:,1,:] - coords[:,0,:],axis=1)
+        if self.element_type == "line":
+            coords = self.points[self.elements[:,:2],:]
+            lengths = np.linalg.norm(coords[:,1,:] - coords[:,0,:],axis=1)
+        else:
+            self.GetEdges()
+            coord = self.all_edges
+            coords = self.points[self.elements[:,:2],:]
+            lengths = np.linalg.norm(coords[:,1,:] - coords[:,0,:],axis=1)
 
         return lengths
 
