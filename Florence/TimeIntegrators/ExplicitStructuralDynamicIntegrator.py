@@ -43,13 +43,16 @@ class ExplicitStructuralDynamicIntegrators(object):
             # GET FREE MECHANICAL DOFs
             self.columns_out_mech = np.intersect1d(boundary_condition.columns_out,self.mechanical_dofs)
             self.columns_out_mech_idx = np.in1d(self.mechanical_dofs,boundary_condition.columns_out)
+            self.columns_out_mech_reverse_idx = np.in1d(boundary_condition.columns_out,self.columns_out_mech)
 
             # GET FREE ELECTROSTATIC DOFs
             self.columns_out_electric = np.intersect1d(boundary_condition.columns_out,self.electric_dofs)
             self.columns_out_electric_idx = np.in1d(self.electric_dofs,boundary_condition.columns_out)
+            self.columns_out_electric_reverse_idx = np.in1d(boundary_condition.columns_out,
+                self.columns_out_electric)
 
-            self.applied_dirichlet_mech = boundary_condition.applied_dirichlet[np.in1d(boundary_condition.columns_out,self.columns_out_mech)]
-            self.applied_dirichlet_electric = boundary_condition.applied_dirichlet[np.in1d(boundary_condition.columns_out,self.columns_out_electric)]
+            self.applied_dirichlet_mech = boundary_condition.applied_dirichlet[self.columns_out_mech_reverse_idx]
+            self.applied_dirichlet_electric = boundary_condition.applied_dirichlet[self.columns_out_electric_reverse_idx]
 
             # MAPPED QUANTITIES
             out_idx = np.in1d(all_dofs,boundary_condition.columns_out)
@@ -180,7 +183,7 @@ class ExplicitStructuralDynamicIntegrators(object):
                 Residual   += (2./dt**2)*M_mech*U0.ravel() - (1./dt**2)*M_mech*U00.ravel()
                 U = dt**2*invM[self.mechanical_dofs]*Residual
                 U = self.UpdateFreeMechanicalDoFs(U[self.mech_in],formulation.ndim*nnode,formulation.ndim)
-                IncDirichlet = self.UpdateFixMechanicalDoFs(AppliedDirichletInc[np.in1d(boundary_condition.columns_out,self.columns_out_mech)],
+                IncDirichlet = self.UpdateFixMechanicalDoFs(AppliedDirichletInc[self.columns_out_mech_reverse_idx],
                     formulation.ndim*nnode,formulation.ndim)
 
             elif fem_solver.mass_type == "consistent":
@@ -190,7 +193,7 @@ class ExplicitStructuralDynamicIntegrators(object):
                 F_b = Residual[:,None][self.mech_in,0]
                 U = solver.Solve(M_b,F_b*dt**2)
                 U = self.UpdateFreeMechanicalDoFs(U,formulation.ndim*nnode,formulation.ndim)
-                IncDirichlet = self.UpdateFixMechanicalDoFs(AppliedDirichletInc[np.in1d(boundary_condition.columns_out,self.columns_out_mech)],
+                IncDirichlet = self.UpdateFixMechanicalDoFs(AppliedDirichletInc[self.columns_out_mech_reverse_idx],
                     formulation.ndim*nnode,formulation.ndim)
 
             # COMPUTE VELOCITY AND ACCELERATION
