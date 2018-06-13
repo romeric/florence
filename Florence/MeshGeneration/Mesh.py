@@ -5068,7 +5068,7 @@ class Mesh(object):
 
 
 
-    def Partition(self, n=2, figure=None, show_plot=False):
+    def Partition(self, n=2, figure=None, show_plot=False, compute_boundary_info=True):
         """Partitions any type of mesh low and high order
             into a set of meshes.
             Returns a list of partitioned meshes and their index map
@@ -5081,7 +5081,7 @@ class Mesh(object):
 
         pmesh, partitioned_nodes_indices = [], []
         for i in range(len(nelems)):
-            pmesh.append(self.GetLocalisedMesh(partitioned_indices[i]))
+            pmesh.append(self.GetLocalisedMesh(partitioned_indices[i], compute_boundary_info=compute_boundary_info))
             partitioned_nodes_indices.append(np.unique(self.elements[partitioned_indices[i],:]))
 
 
@@ -5850,7 +5850,7 @@ class Mesh(object):
         return lmesh
 
 
-    def GetLocalisedMesh(self, elements, solution=None):
+    def GetLocalisedMesh(self, elements, solution=None, compute_boundary_info=True):
         """Make a new Mesh instance from part of a big mesh.
             Makes a copy and does not modify self
 
@@ -5882,11 +5882,13 @@ class Mesh(object):
         tmesh.points = self.points[unnodes,:]
         tmesh.nelem = tmesh.elements.shape[0]
         tmesh.nnode = tmesh.points.shape[0]
-        if tmesh.element_type == "hex" or tmesh.element_type == "tet":
-            tmesh.GetBoundaryFaces()
-            tmesh.GetBoundaryEdges()
-        elif tmesh.element_type == "quad" or tmesh.element_type == "tri":
-            tmesh.GetBoundaryEdges()
+
+        if compute_boundary_info:
+            if tmesh.element_type == "hex" or tmesh.element_type == "tet":
+                tmesh.GetBoundaryFaces()
+                tmesh.GetBoundaryEdges()
+            elif tmesh.element_type == "quad" or tmesh.element_type == "tri":
+                tmesh.GetBoundaryEdges()
 
         if solution is not None:
             if self.nelem != solution.shape[0]:

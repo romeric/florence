@@ -1232,7 +1232,7 @@ class FEMSolver(object):
     def PartitionMeshForParallelFEM(self, mesh, n, nvar):
 
         nnode = mesh.nnode
-        pmesh, pelement_indices, pnode_indices = mesh.Partition(n)
+        pmesh, pelement_indices, pnode_indices = mesh.Partition(n, compute_boundary_info=False)
         map_facilitator = np.arange(nnode*nvar,dtype=np.int32).reshape(nnode,nvar)
 
         partitioned_maps = []

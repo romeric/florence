@@ -71,6 +71,7 @@ class ExplicitStructuralDynamicIntegrators(object):
             self.electric_dofs = []
             self.mechanical_dofs = all_dofs
             self.columns_out_mech = boundary_condition.columns_out
+            self.columns_out_mech_reverse_idx = np.ones_like(self.columns_out_mech).astype(bool)
 
             self.mech_in = boundary_condition.columns_in
             self.mech_out = boundary_condition.columns_out
@@ -88,6 +89,7 @@ class ExplicitStructuralDynamicIntegrators(object):
 
         # GET BOUNDARY CONDITIONS INFROMATION
         self.GetBoundaryInfo(mesh, formulation,boundary_condition)
+        print(self.columns_out_mech_reverse_idx)
 
         # COMPUTE INVERSE OF LUMPED MASS MATRIX
         if formulation.fields == "electro_mechanics":
