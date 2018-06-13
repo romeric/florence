@@ -410,7 +410,7 @@ class BoundaryCondition(object):
             # from .PostMeshPy import (PostMeshCurvePy as PostMeshCurve, PostMeshSurfacePy as PostMeshSurface)
             from PostMeshPy import (PostMeshCurvePy as PostMeshCurve, PostMeshSurfacePy as PostMeshSurface)
         except ImportError:
-            raise ImportError("PostMesh is not installed. Please install it from 'https://github.com/romeric/PostMesh'")
+            raise ImportError("PostMesh is not installed. Please install using 'pip install PostMeshPy'")
 
         from Florence.FunctionSpace import Tri
 
