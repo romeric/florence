@@ -873,7 +873,6 @@ def ImplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
 
 
 class ExplicitParallelZipper(object):
-
     def __init__(self, function_space, formulation, mesh, material, Eulerx, Eulerp):
         self.function_space = function_space
         self.formulation = formulation
@@ -881,6 +880,13 @@ class ExplicitParallelZipper(object):
         self.material = material
         self.Eulerx = Eulerx
         self.Eulerp = Eulerp
+
+class ExplicitParallelZipperMPI(object):
+    def __init__(self, formulation, mesh, material, pnodes):
+        self.formulation = formulation
+        self.material = material
+        self.mesh = mesh
+        self.pnodes = pnodes
 
 
 def ExplicitParallelExecuter_PoolBased(functor):
@@ -903,23 +909,61 @@ def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
     from multiprocessing import Process, Pool, Manager, Queue
     from contextlib import closing
 
-    # pmesh, pelement_indices, pnode_indices = mesh.Partition(fem_solver.no_of_cpu_cores)
     pmesh, pelement_indices, pnode_indices = fem_solver.pmesh, fem_solver.pelement_indices, fem_solver.pnode_indices
     T_all = np.zeros((mesh.points.shape[0],formulation.nvar),np.float64)
+
+    # MPI BASED
+    if fem_solver.parallel_model == "mpi":
+        try:
+            from mpi4py import MPI
+        except ImportError:
+            raise ImportError("mpi4py is not installed. Install it 'using pip install mpi4py'")
+        from Florence import PWD
+        comm = MPI.COMM_SELF.Spawn(sys.executable,
+                                   args=[PWD(__file__)+'/MPIParallelExplicitAssembler.py'],
+                                   maxprocs=fem_solver.no_of_cpu_cores)
+
+        funcs = []
+        for proc in range(fem_solver.no_of_cpu_cores):
+            obj = ExplicitParallelZipperMPI(formulation, pmesh[proc], material, pnode_indices[proc])
+            funcs.append(obj)
+
+        T_all_size = np.array([mesh.points.shape[0],formulation.ndim, formulation.nvar],dtype="i")
+        comm.Bcast([T_all_size, MPI.INT], root=MPI.ROOT)
+        comm.bcast(funcs, root=MPI.ROOT)
+        comm.Bcast([Eulerx, MPI.DOUBLE], root=MPI.ROOT)
+        comm.Bcast([Eulerp, MPI.DOUBLE], root=MPI.ROOT)
+
+        # for proc in range(fem_solver.no_of_cpu_cores):
+        #     globals()['points%s' % proc] = pmesh[proc].points
+        #     globals()['elements%s' % proc] = pmesh[proc].elements
+        #     globals()['nelems%s' % proc] = pmesh[proc].elements.nelem
+        #     globals()['nnodes%s' % proc] = pmesh[proc].points.nnode
+
+        # Main T_all TO BE FILLED
+        comm.Reduce(None, [T_all, MPI.DOUBLE], root=MPI.ROOT)
+
+        comm.Disconnect()
+
+        return T_all.ravel()
+
+
 
     funcs = []
     for proc in range(fem_solver.no_of_cpu_cores):
         pnodes = pnode_indices[proc]
         Eulerx_current = Eulerx[pnodes,:]
         Eulerp_current = Eulerp[pnodes]
-        funcs.append(ExplicitParallelZipper(function_space, formulation,
-            pmesh[proc], material, Eulerx_current, Eulerp_current))
+        obj = ExplicitParallelZipper(function_space, formulation,
+            pmesh[proc], material, Eulerx_current, Eulerp_current)
+        funcs.append(obj)
 
     # SERIAL
     # for proc in range(fem_solver.no_of_cpu_cores):
     #     T = ExplicitParallelExecuter_PoolBased(funcs[proc])
     #     pnodes = pnode_indices[proc]
     #     T_all[pnodes,:] += T.reshape(pnodes.shape[0],formulation.nvar)
+
 
     # PROCESS AND MANAGER BASED
     if fem_solver.parallel_model == "context_manager":
