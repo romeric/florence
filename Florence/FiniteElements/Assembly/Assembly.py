@@ -612,42 +612,64 @@ def AssembleExplicit(fem_solver, function_space, formulation, mesh, material, Eu
             T, F, M = _LowLevelAssemblyExplicit_(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
             return T[:,None], F, M
 
-
-    # GET MESH DETAILS
-    nvar = formulation.nvar
-    ndim = formulation.ndim
-    nelem = mesh.nelem
-    nodeperelem = mesh.elements.shape[1]
-
-    T = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
-
-    I_mass=[]; J_mass=[]; V_mass=[]
-    if fem_solver.analysis_type !='static' and fem_solver.mass_type == "consistent":
-        # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF MASS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
-        I_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
-        J_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
-        V_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.float64)
-        M = []
     else:
-        M = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
 
-    F = []
-    if fem_solver.has_moving_boundary:
-        F = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
+        if fem_solver.parallel:
+            T = ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
+        else:
+            T = _LowLevelAssemblyExplicit_(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)[0]
 
-    for elem in range(nelem):
-        AssembleExplicitFunctor(elem, nvar, nodeperelem, T, F, I_mass, J_mass, V_mass, M, formulation,
-            function_space, mesh, material, fem_solver, Eulerx, Eulerp)
+        # GET MESH DETAILS
+        nvar = formulation.nvar
+        ndim = formulation.ndim
+        nelem = mesh.nelem
+        nodeperelem = mesh.elements.shape[1]
 
-    # SET MASS FLAG HERE
-    if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed==False:
-        if fem_solver.mass_type == "consistent":
-            M = csr_matrix((V_mass,(I_mass,J_mass)),shape=((nvar*mesh.points.shape[0],
-            nvar*mesh.points.shape[0])),dtype=np.float64)
-        fem_solver.is_mass_computed = True
+        F = []
+        I_mass=[]; J_mass=[]; V_mass=[]
+        if fem_solver.mass_type == "lumped":
+            M = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
+        else:
+            # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF MASS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
+            I_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
+            J_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
+            V_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.float64)
+            M = []
+
+        for elem in range(nelem):
+
+            LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
+            EulerElemCoords = Eulerx[mesh.elements[elem,:],:]
+            if formulation.fields == "electro_mechanics":
+                ElectricPotentialElem = Eulerp[mesh.elements[elem,:]]
+            else:
+                ElectricPotentialElem = []
+
+            # COMPUTE THE MASS MATRIX
+            if material.has_low_level_dispatcher:
+                mass = formulation.__GetLocalMass_Efficient__(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+            else:
+                mass = formulation.GetLocalMass_Efficient(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
+
+            if fem_solver.mass_type == "lumped":
+                mass = formulation.GetLumpedMass(mass)
+                RHSAssemblyNative(M,mass,elem,nvar,nodeperelem,mesh.elements)
+            else:
+                # SPARSE ASSEMBLY - MASS MATRIX
+                I_mass_elem, J_mass_elem, V_mass_elem = formulation.FindIndices(mass)
+                SparseAssemblyNative(I_mass_elem,J_mass_elem,V_mass_elem,I_mass,J_mass,V_mass,
+                    elem,nvar,nodeperelem,mesh.elements)
+
+        # SET MASS FLAG HERE
+        if fem_solver.is_mass_computed is False:
+            if fem_solver.mass_type == "consistent":
+                M = csr_matrix((V_mass,(I_mass,J_mass)),shape=((nvar*mesh.points.shape[0],
+                nvar*mesh.points.shape[0])),dtype=np.float64)
+            fem_solver.is_mass_computed = True
 
 
-    return T, F, M
+    return T[:,None], F, M
+
 
 
 

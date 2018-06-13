@@ -89,7 +89,6 @@ class ExplicitStructuralDynamicIntegrators(object):
 
         # GET BOUNDARY CONDITIONS INFROMATION
         self.GetBoundaryInfo(mesh, formulation,boundary_condition)
-        print(self.columns_out_mech_reverse_idx)
 
         # COMPUTE INVERSE OF LUMPED MASS MATRIX
         if formulation.fields == "electro_mechanics":
