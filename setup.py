@@ -59,7 +59,7 @@ class FlorenceSetup(object):
     kinematics_version = "-DUSE_AVX_VERSION"
 
     def __init__(self, _fc_compiler=None, _cc_compiler=None, _cxx_compiler=None,
-        _blas=None, _kinematics_version=None, _ncpu=1):
+        _blas=None, _kinematics_version=None, _fastor_path=None, _ncpu=1):
 
         # Get current working working directory
         self._pwd_ = os.path.dirname(os.path.realpath('__file__'))
@@ -68,7 +68,7 @@ class FlorenceSetup(object):
         # Get numpy version and paths to header
         self.GetNumPyPath()
         # Get Fastor path
-        self.GetFastorPath()
+        self.GetFastorPath(_fastor_path)
         # Get BLAS version and paths
         self.GetBLAS(_blas)
         # Get kinematics version
@@ -160,7 +160,12 @@ class FlorenceSetup(object):
         self.numpy_include_path = np.get_include()
 
 
-    def GetFastorPath(self):
+    def GetFastorPath(self, _fastor_path=None):
+        if _fastor_path is not None:
+            if os.path.isdir(_fastor_path):
+                self.fastor_include_path = _fastor_path
+                return
+
         if os.path.isdir("/usr/local/include/Fastor"):
             self.fastor_include_path = "/usr/local/include/Fastor"
         else:
@@ -513,6 +518,7 @@ if __name__ == "__main__":
     _cxx_compiler = None
     _blas = None
     _kinematics_version = None
+    _fastor_path = None
     _ncpu = cpu_count()
 
     args = sys.argv
@@ -537,12 +543,14 @@ if __name__ == "__main__":
                 _blas = arg.split("=")[-1]
             if "KINEMATICS" in arg:
                 _kinematics_version = arg.split("=")[-1]
+            if "FASTORPATH=" in arg:
+                _fastor_path = int(arg.split("=")[-1])
             if "np=" in arg:
                 _ncpu = int(arg.split("=")[-1])
 
     setup_instance = FlorenceSetup(_fc_compiler=_fc_compiler,
         _cc_compiler=_cc_compiler, _cxx_compiler=_cxx_compiler, _blas=_blas,
-        _kinematics_version=_kinematics_version, _ncpu=_ncpu)
+        _kinematics_version=_kinematics_version, _fastor_path=_fastor_path,_ncpu=_ncpu)
 
     if _op == "source_clean":
         setup_instance.SourceClean()
