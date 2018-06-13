@@ -34,12 +34,7 @@ before_install:
   # Install OpenCascade
   - echo -ne '\n' | sudo apt-get install liboce-*
   # PostMesh
-  - cd ~
-  - git clone https://github.com/romeric/PostMesh
-  - cd PostMesh/PostMeshPy
-  - python setup.py build_ext && python setup.py bdist_wheel
-  - cd .. && pip install PostMeshPy/dist/*.whl
-  - cd .. && rm -rf PostMesh
+  - pip install PostMeshPy
   # Fastor
   - git clone https://github.com/romeric/Fastor
   - sudo mv Fastor /usr/local/include/Fastor/
