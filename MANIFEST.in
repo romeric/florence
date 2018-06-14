@@ -1,0 +1,13 @@
+include MANIFEST.in
+include *.txt *.md
+# Top-level build scripts
+include setup.py
+# All source files
+recursive-include Florence *
+# Exclude
+global-exclude *.pyc *~ *.bak *.swp *.pyo *.so *.dylib *.dll *.c *.cpp
+# Exclude Unnecessary data files
+global-exclude *.vtk *.vtu *.mat
+# Include the necessary cpp files
+include Florence/Tensor/_LinAlg.cpp
+include Florence/Tensor/_Numeric.cpp
