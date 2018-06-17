@@ -266,6 +266,9 @@ class FEMSolver(object):
         if self.analysis_type == "dynamic" and self.analysis_subtype == "explicit":
             if self.number_of_load_increments < self.save_frequency:
                 raise ValueError("Number of load increments cannot be less than save frequency")
+            if self.number_of_load_increments < 3:
+                warn("Time step is excessively large for dynamic analysis. I will increase it by a bit")
+                self.number_of_load_increments = 3
         ##############################################################################
 
 
