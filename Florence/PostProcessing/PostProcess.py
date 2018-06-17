@@ -67,6 +67,9 @@ class PostProcess(object):
         """Set initial (undeformed) mesh"""
         self.mesh = mesh
 
+    def SetSolutionVectors(self,sol):
+        self.sol = sol
+
     def SetSolution(self,sol):
         self.sol = sol
 
@@ -86,26 +89,25 @@ class PostProcess(object):
     def SetAnisotropicOrientations(self,Directions):
         self.directions = Directions
 
+    def GetSolutionVectors(self):
+        if self.sol is None:
+            warn("Solution is not yet computed")
+        return self.sol
+
+    def GetSolution(self):
+        # FOR COMAPTABILITY WITH SetSolution
+        return self.GetSolutionVectors()
+
 
     def TotalComponentSol(self, sol, ColumnsIn, ColumnsOut, AppliedDirichletInc, Iter, fsize):
 
         nvar = self.nvar
         ndim = self.ndim
-        TotalSol = np.zeros((fsize,1))
 
         # GET TOTAL SOLUTION
-        if self.analysis_nature == 'nonlinear':
-            if self.analysis_type =='static':
-                TotalSol[ColumnsIn,0] = sol
-                if Iter==0:
-                    TotalSol[ColumnsOut,0] = AppliedDirichletInc
-            if self.analysis_type !='static':
-                TotalSol = np.copy(sol)
-                TotalSol[ColumnsOut,0] = AppliedDirichletInc
-
-        elif self.analysis_nature == 'linear':
-            TotalSol[ColumnsIn,0] = sol
-            TotalSol[ColumnsOut,0] = AppliedDirichletInc
+        TotalSol = np.zeros((fsize,1))
+        TotalSol[ColumnsIn,0] = sol
+        TotalSol[ColumnsOut,0] = AppliedDirichletInc
 
         # RE-ORDER SOLUTION COMPONENTS
         dU = TotalSol.reshape(int(TotalSol.shape[0]/nvar),nvar)
@@ -787,7 +789,7 @@ class PostProcess(object):
 
 
     def MeshQualityMeasures(self, mesh, TotalDisp, plot=False, show_plot=False):
-        """Computes mesh quality measures, Q_1, Q_2, Q_3
+        """Computes mesh quality measures, Q_1, Q_2, Q_3 [edge distortion, face distortion, Jacobian]
 
             input:
                 mesh:                   [Mesh] an instance of class mesh can be any mesh type
@@ -800,7 +802,7 @@ class PostProcess(object):
             self.is_material_anisotropic = False
 
         if self.is_scaledjacobian_computed is True:
-            raise AssertionError('Scaled Jacobian seems to be already computed. Re-Computing it may return incorrect results')
+            raise AssertionError('Scaled Jacobian seems to have been already computed. Re-computing it may return incorrect results')
 
         PostDomain = self.postdomain_bases
         if self.postdomain_bases is None:
@@ -853,9 +855,9 @@ class PostProcess(object):
             # THIS GIVES A RESULT MUCH CLOSER TO ONE
             Jacobian = detF
             # USING INVARIANT F:F
-            Q1 = np.sqrt(np.einsum('kij,lij->kl',F,F)).diagonal()
+            Q1 = np.sqrt(np.abs(np.einsum('kij,lij->kl',F,F))).diagonal()
             # USING INVARIANT H:H
-            Q2 = np.sqrt(np.einsum('ijk,ijl->kl',H,H)).diagonal()
+            Q2 = np.sqrt(np.abs(np.einsum('ijk,ijl->kl',H,H))).diagonal()
 
             if self.is_material_anisotropic:
                 Q4 = np.einsum('ijk,k',F,self.directions[elem,:])

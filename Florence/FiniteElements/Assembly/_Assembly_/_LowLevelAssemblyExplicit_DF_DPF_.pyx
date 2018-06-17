@@ -119,6 +119,9 @@ def _LowLevelAssemblyExplicit_DF_DPF_(function_space, formulation, mesh, materia
     elif material.mtype == "ExplicitIsotropicElectroMechanics_108":
         mu1, mu2, lamb, eps_2 = material.mu1, material.mu2, material.lamb, material.eps_2
         material_number = 9
+    elif material.mtype == "LinearElastic" or material.mtype == "IncrementalLinearElastic":
+        mu, lamb = material.mu, material.lamb
+        material_number = 10
     else:
         raise NotImplementedError("Low level assembly for material {} not available for explicit analysis."
             " Consider 'optimise=False' for now".format(material.mtype))

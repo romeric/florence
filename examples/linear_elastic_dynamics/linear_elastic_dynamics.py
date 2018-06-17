@@ -35,18 +35,37 @@ def linear_elastic_dynamics():
 
     formulation = DisplacementFormulation(mesh)
 
-    fem_solver = FEMSolver(total_time=60.,
+    # Solve with performance optimisation off
+    implicit_fem_solver_1 = FEMSolver(total_time=60.,
         number_of_load_increments=time_step,
         analysis_nature="linear",
         analysis_type="dynamic",
-        optimise=True,
+        optimise=False,
         print_incremental_log=True)
 
-    solution = fem_solver.Solve(formulation=formulation, mesh=mesh,
+    implicit_fem_solver_results_1 = implicit_fem_solver_1.Solve(formulation=formulation, mesh=mesh,
             material=material, boundary_condition=boundary_condition)
 
-    # Write results
-    # solution.WriteVTK("linear_dynamic_results", quantity=3)
+    # Solve with performance optimisation on
+    implicit_fem_solver_2 = FEMSolver(total_time=60.,
+        number_of_load_increments=time_step,
+        analysis_nature="linear",
+        analysis_type="dynamic",
+        optimise=False,
+        print_incremental_log=True)
+
+    implicit_fem_solver_results_2 = implicit_fem_solver_2.Solve(formulation=formulation, mesh=mesh,
+            material=material, boundary_condition=boundary_condition)
+
+    # Get underlying solution vectors
+    solution_1 = implicit_fem_solver_results_1.GetSolutionVectors()
+    solution_2 = implicit_fem_solver_results_1.GetSolutionVectors()
+
+    assert np.isclose(np.linalg.norm(solution_1),np.linalg.norm(solution_2), rtol=1e-5, atol=1e-5)
+
+    # Write results to plot in paraview
+    # implicit_fem_solver_results_1.WriteVTK("linear_dynamic_results_1", quantity=1)
+    # implicit_fem_solver_results_2.WriteVTK("linear_dynamic_results_2", quantity=1)
 
 
 if __name__ == "__main__":

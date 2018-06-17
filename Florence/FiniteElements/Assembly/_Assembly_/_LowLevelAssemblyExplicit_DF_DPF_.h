@@ -17,6 +17,7 @@
 #include "_IsotropicElectroMechanics_106_.h"
 #include "_IsotropicElectroMechanics_107_.h"
 #include "_IsotropicElectroMechanics_108_.h"
+#include "_LinearElastic_.h"
 
 
 #ifndef EXPLICIT_OLD
@@ -176,6 +177,7 @@ void _GlobalAssemblyExplicit_DF_DPF_<2>(const Real *points,
     auto mat_obj7 = _IsotropicElectroMechanics_107_<Real>(mu1,mu2,mue,lamb,eps_1,eps_2,eps_e);
     auto mat_obj8 = _IsotropicElectroMechanics_108_<Real>(mu1,mu2,lamb,eps_2);
     auto mat_obj9 = _ExplicitIsotropicElectroMechanics_108_<Real>(mu1,mu2,lamb,eps_2);
+    auto mat_obj10 = _LinearElastic_<Real>(mu,lamb);
 
 
     // LOOP OVER ELEMETNS
@@ -264,6 +266,9 @@ void _GlobalAssemblyExplicit_DF_DPF_<2>(const Real *points,
             }
             else if (material_number==8) {
                 std::tie(D,stress,std::ignore) = mat_obj8.template _KineticMeasures_<Real,ndim>(F,ElectricFieldx);
+            }
+            else if (material_number==10) {
+                std::tie(stress,std::ignore) = mat_obj10.template _KineticMeasures_<Real,ndim>(F);
             }
 
 
@@ -390,6 +395,7 @@ void _GlobalAssemblyExplicit_DF_DPF_<3>(const Real *points,
     auto mat_obj7 = _IsotropicElectroMechanics_107_<Real>(mu1,mu2,mue,lamb,eps_1,eps_2,eps_e);
     auto mat_obj8 = _IsotropicElectroMechanics_108_<Real>(mu1,mu2,lamb,eps_2);
     auto mat_obj9 = _ExplicitIsotropicElectroMechanics_108_<Real>(mu1,mu2,lamb,eps_2);
+    auto mat_obj10 = _LinearElastic_<Real>(mu,lamb);
 
 
     // LOOP OVER ELEMETNS
@@ -483,6 +489,9 @@ void _GlobalAssemblyExplicit_DF_DPF_<3>(const Real *points,
             }
             else if (material_number==8) {
                 std::tie(D,stress,std::ignore) = mat_obj8.template _KineticMeasures_<Real,ndim>(F,ElectricFieldx);
+            }
+            else if (material_number==10) {
+                std::tie(stress,std::ignore) = mat_obj10.template _KineticMeasures_<Real,ndim>(F);
             }
 
 

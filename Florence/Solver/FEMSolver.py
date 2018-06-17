@@ -12,8 +12,9 @@ from Florence.Utils import insensitive
 from Florence.FiniteElements.Assembly import Assemble, AssembleExplicit
 from Florence.PostProcessing import *
 from Florence.Solver import LinearSolver
-from Florence.TimeIntegrators import StructuralDynamicIntegrators
-from Florence.TimeIntegrators import ExplicitStructuralDynamicIntegrators
+from Florence.TimeIntegrators import LinearImplicitStructuralDynamicIntegrator
+from Florence.TimeIntegrators import NonlinearImplicitStructuralDynamicIntegrator
+from Florence.TimeIntegrators import ExplicitStructuralDynamicIntegrator
 from .LaplacianSolver import LaplacianSolver
 from Florence import Mesh
 
@@ -50,7 +51,7 @@ class FEMSolver(object):
         iterative_technique="newton_raphson",
         add_self_weight=False,
         mass_type=None,
-        compute_mesh_qualities=True,
+        compute_mesh_qualities=False,
         parallelise=False,
         ncpu=None,
         parallel_model=None,
@@ -117,7 +118,7 @@ class FEMSolver(object):
         self.compute_linear_momentum_dissipation = compute_linear_momentum_dissipation
 
         self.compute_mesh_qualities = compute_mesh_qualities
-        self.isScaledJacobianComputed = False
+        self.is_scaled_jacobian_computed = False
 
         self.vectorise = True
         self.parallel = parallelise
@@ -146,8 +147,10 @@ class FEMSolver(object):
             self.newton_raphson_solution_tolerance = 10.*self.newton_raphson_tolerance
 
 
-        # STORE A COPY OF SELF AT THE START
+        # STORE A COPY OF SELF AT THE START TO RESET TO AT THE END
         self.__save_state__()
+        # FOR INTERNAL PURPOSES WHEN WE DO NOT WANT TO REST
+        self.do_not_reset = False
 
 
     def __save_state__(self):
@@ -229,7 +232,6 @@ class FEMSolver(object):
             # THIS HAS TO BE AN ERROR BECAUSE OF THE DYNAMIC NATURE OF MATERIAL
             raise ValueError("Material model and mesh are incompatible. Change the dimensionality of the material")
         ###########################################################################
-
         if material.mtype == "LinearElastic" and self.number_of_load_increments > 1 and self.analysis_type=="static":
             warn("Can not solve a linear elastic model in multiple step. "
                 "The number of load increments is going to be set to one (1). "
@@ -269,18 +271,21 @@ class FEMSolver(object):
 
         # GEOMETRY UPDATE FLAGS
         ###########################################################################
-        # DO NOT UPDATE THE GEOMETRY IF THE MATERIAL MODEL NAME CONTAINS
-        # INCREMENT (CASE INSENSITIVE). VALID FOR ELECTROMECHANICS FORMULATION.
-        self.requires_geometry_update = False
-        if formulation.fields == "electro_mechanics":
-            if "Increment" in insensitive(material.mtype):
-                # RUN THE SIMULATION WITHIN A NONLINEAR ROUTINE WITHOUT UPDATING THE GEOMETRY
-                self.requires_geometry_update = False
-            else:
-                self.requires_geometry_update = True
-        elif formulation.fields == "mechanics":
+        self.requires_geometry_update = True
+        if formulation.fields == "mechanics":
             if self.analysis_nature == "nonlinear" or self.has_prestress:
                 self.requires_geometry_update = True
+            else:
+                self.requires_geometry_update = False
+        # FOR DYNAMIC PROBLEMS GEOMETRY NEEDS TO BE UPDATED ALWAYS
+        if self.analysis_type == "dynamic":
+            if formulation.fields == "mechanics" or formulation.fields == "electro_mechanics":
+                self.requires_geometry_update = True
+        # FOR THESE FORMULATIONS ITS ALWAYS FALSE
+        if formulation.fields == "couple_stress" or formulation.fields == "flexoelectric" or formulation.fields == "electrostatics":
+            self.requires_geometry_update = False
+        # self.requires_geometry_update = False
+
 
         # CHECK IF MATERIAL MODEL AND ANALYSIS TYPE ARE COMPATIBLE
         #############################################################################
@@ -297,8 +302,8 @@ class FEMSolver(object):
         ##############################################################################
 
         ##############################################################################
-        if boundary_condition.boundary_type == "straight":
-            self.compute_mesh_qualities = False
+        if boundary_condition.boundary_type == "nurbs":
+            self.compute_mesh_qualities = True
         ##############################################################################
 
         ##############################################################################
@@ -381,10 +386,10 @@ class FEMSolver(object):
         post_process.SetMaterial(material)
         post_process.SetFEMSolver(self)
 
-        if self.analysis_nature == "nonlinear" and self.compute_mesh_qualities:
+        if self.compute_mesh_qualities and self.is_scaled_jacobian_computed is False:
             # COMPUTE QUALITY MEASURES
             post_process.ScaledJacobian = post_process.MeshQualityMeasures(mesh,TotalDisp,False,False)[3]
-        elif self.isScaledJacobianComputed:
+        elif self.is_scaled_jacobian_computed:
             post_process.ScaledJacobian=self.ScaledJacobian
 
         if self.analysis_nature == "nonlinear":
@@ -407,7 +412,8 @@ class FEMSolver(object):
 
         # AT THE END, WE CALL THE __reset_state__ TO RESET TO INITIAL STATE.
         # THIS WAY WE CLEAR MONKEY PATCHED AND OTHER DATA STORED DURING RUN TIME
-        self.__reset_state__()
+        if self.do_not_reset is False:
+            self.__reset_state__()
 
         return post_process
 
@@ -483,6 +489,7 @@ class FEMSolver(object):
         # QUICK REDIRECT TO LINEARISED ELECTROMECHANICS SOLVERS
         if formulation.fields == "electro_mechanics" and self.analysis_nature == "linear":
             if self.analysis_type == "static":
+                # DISPATCH TO LINEARISED STATIC SOLVERS
                 from Florence.Solver import TractionBasedStaggeredSolver, PotentialBasedStaggeredSolver
                 if self.linearised_electromechanics_solver=="potential_based":
                     linearised_solver = PotentialBasedStaggeredSolver()
@@ -497,6 +504,7 @@ class FEMSolver(object):
                 self.__dict__.update(linearised_solver.__dict__)
                 return solution
             elif self.analysis_type == "dynamic":
+                # CONTINUE DOWN FOR EXPLICIT DYNAMIC SOLVER
                 self.analysis_subtype = "explicit"
                 if self.mass_type == None:
                     self.mass_type = "lumped"
@@ -537,29 +545,10 @@ class FEMSolver(object):
         # ADOPT A DIFFERENT PATH FOR INCREMENTAL LINEAR ELASTICITY
         if formulation.fields == "mechanics" and self.analysis_nature != "nonlinear":
             if self.analysis_type == "static":
-                # MAKE A COPY OF MESH, AS MESH POINTS WILL BE OVERWRITTEN
-                vmesh = deepcopy(mesh)
-                TotalDisp = self.IncrementalLinearElasticitySolver(function_spaces, formulation, vmesh, material,
+                # DISPATCH INCREMENTAL LINEAR ELASTICITY SOLVER
+                TotalDisp = self.IncrementalLinearElasticitySolver(function_spaces, formulation, mesh, material,
                     boundary_condition, solver, TotalDisp, Eulerx, NeumannForces)
-
-                del vmesh
                 return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
-
-            elif self.analysis_type == "dynamic":
-                # DISPATCH TO DYNAMIC SOLVER FOR COUPLE STRESS
-                from Florence.Solver import CoupleStressSolver
-
-                formulation.meshes = [mesh,mesh,mesh]
-
-                cs_solver = CoupleStressSolver(total_time=self.total_time,
-                    number_of_load_increments=self.number_of_load_increments,
-                    analysis_type = "dynamic",
-                    print_incremental_log=self.print_incremental_log,
-                    optimise=self.has_low_level_dispatcher)
-
-                return cs_solver.Solve(formulation=formulation, mesh=mesh,
-                        material=material, boundary_condition=boundary_condition,
-                        contact_formulation=contact_formulation, solver=solver)
 
 
         # ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES FOR THE FIRST TIME
@@ -590,12 +579,19 @@ class FEMSolver(object):
 
         if self.analysis_type != 'static':
             if self.analysis_subtype != "explicit":
-                structural_integrator = StructuralDynamicIntegrators()
-                TotalDisp = structural_integrator.Solver(function_spaces, formulation, solver,
-                    K, M, NeumannForces, NodalForces, Residual,
-                    mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition, self)
+                boundary_condition.ConvertStaticsToDynamics(mesh, self.number_of_load_increments)
+                if self.analysis_nature == "nonlinear":
+                    structural_integrator = NonlinearImplicitStructuralDynamicIntegrator()
+                    TotalDisp = structural_integrator.Solver(function_spaces, formulation, solver,
+                        K, M, NeumannForces, NodalForces, Residual,
+                        mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition, self)
+                elif self.analysis_nature == "linear":
+                    structural_integrator = LinearImplicitStructuralDynamicIntegrator()
+                    TotalDisp = structural_integrator.Solver(function_spaces, formulation, solver,
+                        K, M, NeumannForces, NodalForces, Residual,
+                        mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition, self)
             else:
-                structural_integrator = ExplicitStructuralDynamicIntegrators()
+                structural_integrator = ExplicitStructuralDynamicIntegrator()
                 TotalDisp = structural_integrator.Solver(function_spaces, formulation, solver,
                     TractionForces, M, NeumannForces, NodalForces, Residual,
                     mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition, self)
@@ -619,7 +615,7 @@ class FEMSolver(object):
         return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
 
 
-    def IncrementalLinearElasticitySolver(self, function_spaces, formulation, mesh, material,
+    def IncrementalLinearElasticitySolver(self, function_spaces, formulation, omesh, material,
                 boundary_condition, solver, TotalDisp, Eulerx, NeumannForces):
         """An icremental linear elasticity solver, in which the geometry is updated
             and the remaining quantities such as stresses and Hessians are based on Prestress flag.
@@ -627,6 +623,9 @@ class FEMSolver(object):
             a somewhat explicit and more efficient way is adopted to avoid pre-assembly of the system
             of equations needed for non-linear analysis
         """
+
+        # CREATE A COPY OF ORIGINAL MESH AS WE MODIFY IT
+        mesh = deepcopy(omesh)
 
         # CREATE POST-PROCESS OBJECT ONCE
         post_process = PostProcess(formulation.ndim,formulation.nvar)
@@ -708,23 +707,18 @@ class FEMSolver(object):
                     self.number_of_load_increments = Increment
                     break
 
-            # COMPUTE SCALED JACBIAN FOR THE MESH
+            # COMPUTE MESH QAULITY MEASURES
             if Increment == LoadIncrement - 1:
-                smesh = deepcopy(mesh)
-                smesh.points -= TotalDisp[:,:,-1]
-
                 if material.is_transversely_isotropic:
                     post_process.is_material_anisotropic = True
                     post_process.SetAnisotropicOrientations(material.anisotropic_orientations)
 
                 if self.compute_mesh_qualities:
                     post_process.SetBases(postdomain=function_spaces[1])
-                    qualities = post_process.MeshQualityMeasures(smesh,TotalDisp,plot=False,show_plot=False)
-                    self.isScaledJacobianComputed = qualities[0]
+                    dumTotalDisp = np.sum(TotalDisp[:,:,:Increment+1],axis=2)
+                    qualities = post_process.MeshQualityMeasures(omesh,dumTotalDisp,plot=False,show_plot=False)
+                    self.is_scaled_jacobian_computed = qualities[0]
                     self.ScaledJacobian = qualities[3]
-
-                del smesh, post_process
-                gc.collect()
 
 
         # ADD EACH INCREMENTAL CONTRIBUTION TO MAKE IT CONSISTENT WITH THE NONLINEAR ANALYSIS

@@ -125,9 +125,6 @@ class DisplacementFormulation(VariationalPrinciple):
             else:
                 massel = self.GetLocalMass(function_space,material,LagrangeElemCoords,EulerElemCoords,fem_solver,elem)
 
-        if fem_solver.has_moving_boundary:
-            # COMPUTE FORCE VECTOR
-            f = ApplyNeumannBoundaryConditions3D(MainData, mesh, elem, LagrangeElemCoords)
 
         I_stiff_elem, J_stiff_elem, V_stiff_elem = self.FindIndices(stiffnessel)
         if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed is False:
@@ -165,9 +162,6 @@ class DisplacementFormulation(VariationalPrinciple):
             if fem_solver.analysis_subtype == "explicit" and fem_solver.mass_type == "lumped":
                 massel = self.GetLumpedMass(massel)
 
-        if fem_solver.has_moving_boundary:
-            # COMPUTE FORCE VECTOR
-            f = self.ApplyNeumannBoundaryConditions3D(fem_solver, mesh, elem, LagrangeElemCoords)
 
         return t, f, massel
 
@@ -229,13 +223,13 @@ class DisplacementFormulation(VariationalPrinciple):
 
             # COMPUTE THE TANGENT STIFFNESS MATRIX
             BDB_1, t = self.ConstitutiveStiffnessIntegrand(B, SpatialGradient[counter,:,:],
-                CauchyStressTensor, H_Voigt, analysis_nature=fem_solver.analysis_nature,
-                has_prestress=fem_solver.has_prestress)
+                CauchyStressTensor, H_Voigt, requires_geometry_update=fem_solver.requires_geometry_update)
 
             # COMPUTE GEOMETRIC STIFFNESS MATRIX
-            if fem_solver.requires_geometry_update:
+            if material.nature != "linear":
                 BDB_1 += self.GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],CauchyStressTensor)
-                # INTEGRATE TRACTION FORCE
+            # INTEGRATE TRACTION FORCE
+            if fem_solver.requires_geometry_update:
                 tractionforce += t*detJ[counter]
 
             # INTEGRATE STIFFNESS
@@ -258,14 +252,14 @@ class DisplacementFormulation(VariationalPrinciple):
         stiffness, tractionforce = __ConstitutiveStiffnessIntegrandDF__(SpatialGradient,
             CauchyStressTensor,H_Voigt,detJ,self.nvar,fem_solver.requires_geometry_update)
         # COMPUTE GEOMETRIC STIFFNESS
-        if fem_solver.requires_geometry_update:
+        if material.nature != "linear":
             stiffness += self.__GeometricStiffnessIntegrand__(SpatialGradient,CauchyStressTensor,detJ)
 
         return stiffness, tractionforce
 
 
     def ConstitutiveStiffnessIntegrand(self, B, SpatialGradient, CauchyStressTensor, H_Voigt,
-        analysis_nature="nonlinear", has_prestress=True):
+        requires_geometry_update=True):
         """Applies to displacement based formulation"""
 
         SpatialGradient = SpatialGradient.T.copy()
@@ -273,8 +267,8 @@ class DisplacementFormulation(VariationalPrinciple):
 
         BDB = B.dot(H_Voigt.dot(B.T))
 
-        t=[]
-        if analysis_nature == 'nonlinear' or has_prestress:
+        t=np.zeros((B.shape[0],1))
+        if requires_geometry_update:
             TotalTraction = GetTotalTraction(CauchyStressTensor)
             t = np.dot(B,TotalTraction)
 
@@ -333,8 +327,7 @@ class DisplacementFormulation(VariationalPrinciple):
 
             # COMPUTE THE TANGENT STIFFNESS MATRIX
             t = self.TractionIntegrand(B, SpatialGradient[counter,:,:],
-                CauchyStressTensor, analysis_nature=fem_solver.analysis_nature,
-                has_prestress=fem_solver.has_prestress)
+                CauchyStressTensor, requires_geometry_update=fem_solver.requires_geometry_update)
 
             if fem_solver.requires_geometry_update:
                 # INTEGRATE TRACTION FORCE
@@ -361,14 +354,14 @@ class DisplacementFormulation(VariationalPrinciple):
 
 
     def TractionIntegrand(self, B, SpatialGradient, CauchyStressTensor,
-        analysis_nature="nonlinear", has_prestress=True):
+        requires_geometry_update=True):
         """Applies to displacement based formulation"""
 
         SpatialGradient = SpatialGradient.T.copy()
         FillConstitutiveB(B,SpatialGradient,self.ndim,self.nvar)
 
-        t=[]
-        if analysis_nature == 'nonlinear' or has_prestress:
+        t=np.zeros((B.shape[0],1))
+        if requires_geometry_update:
             TotalTraction = GetTotalTraction(CauchyStressTensor)
             t = np.dot(B,TotalTraction)
 

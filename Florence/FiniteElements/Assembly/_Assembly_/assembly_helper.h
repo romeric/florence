@@ -35,7 +35,7 @@ FASTOR_INLINE T *allocate(Integer size) {
 #else
     T *out = (T*)malloc(sizeof(T)*size);
 #endif
-    return out; 
+    return out;
 }
 
 template<typename T>
@@ -59,8 +59,8 @@ inline T sum(const T *arr, int size) {
 }
 
 template<typename T>
-inline T norm(const T *arr, int size) {
-    T val = 0;
+inline Real norm(const T *arr, int size) {
+    Real val = 0;
     for (auto i=0; i<size; ++i)
         val += arr[i]*arr[i];
     return std::sqrt(val);
@@ -116,17 +116,17 @@ FASTOR_INLINE void iadd_(T *__restrict__ a, const T *__restrict__ b, Integer siz
 // IJV Filler
 /*---------------------------------------------------------------------------------------------*/
 FASTOR_INLINE
-void fill_triplet(  const Integer *i, 
-                    const Integer *j, 
-                    const Real *coeff, 
-                    int *I, 
+void fill_triplet(  const Integer *i,
+                    const Integer *j,
+                    const Real *coeff,
+                    int *I,
                     int *J,
-                    Real *V, 
-                    Integer elem, 
-                    Integer nvar, 
-                    Integer nodeperelem, 
+                    Real *V,
+                    Integer elem,
+                    Integer nvar,
+                    Integer nodeperelem,
                     const UInteger *elements,
-                    Integer i_shape, 
+                    Integer i_shape,
                     Integer j_shape
                     ) {
 
@@ -137,9 +137,9 @@ void fill_triplet(  const Integer *i,
     Integer ndof = nvar*nodeperelem;
 
     Integer const_elem_retriever;
-    for (Integer counter=0; counter<nodeperelem; ++counter) {   
+    for (Integer counter=0; counter<nodeperelem; ++counter) {
         const_elem_retriever = nvar*elements[elem*nodeperelem+counter];
-        for (Integer ncounter=0; ncounter<nvar; ++ncounter) { 
+        for (Integer ncounter=0; ncounter<nvar; ++ncounter) {
             current_row_column[nvar*counter+ncounter] = const_elem_retriever+ncounter;
         }
     }
@@ -147,10 +147,10 @@ void fill_triplet(  const Integer *i,
     // memcpy(full_current_row,i,i_shape*sizeof(Integer));
     // memcpy(full_current_column,j,j_shape*sizeof(Integer));
 
-    Integer const_I_retriever; 
-    for (Integer counter=0; counter<ndof; ++counter) { 
+    Integer const_I_retriever;
+    for (Integer counter=0; counter<ndof; ++counter) {
         const_I_retriever = current_row_column[counter];
-        for (Integer iterator=0; iterator<ndof; ++iterator) { 
+        for (Integer iterator=0; iterator<ndof; ++iterator) {
             full_current_row[counter*ndof+iterator]    = const_I_retriever;
             full_current_column[counter*ndof+iterator] = current_row_column[iterator];
         }

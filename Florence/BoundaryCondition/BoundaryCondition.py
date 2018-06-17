@@ -251,12 +251,10 @@ class BoundaryCondition(object):
             if self.read_dirichlet_from_file is False:
 
                 if not self.is_dirichlet_computed:
-
                     # GET DIRICHLET BOUNDARY CONDITIONS BASED ON THE EXACT GEOMETRY FROM CAD
                     if self.requires_cad:
                         # CALL POSTMESH WRAPPER
                         nodesDBC, Dirichlet = self.PostMeshWrapper(formulation, mesh, material, solver, fem_solver)
-
                 else:
                     nodesDBC, Dirichlet = self.nodesDBC, self.Dirichlet
 
@@ -347,18 +345,31 @@ class BoundaryCondition(object):
         if self.analysis_type == "dynamic":
             # AVOID ZERO DIVISION FOR RAMP (LINSPACE TYPE) LOADING
             nincr_last = float(nincr-1) if nincr !=1 else 1
+            if self.boundary_type != "nurbs":
+                if self.dirichlet_flags is not None:
+                    if self.dirichlet_flags.ndim == 2:
+                        dum = np.zeros((self.dirichlet_flags.shape[0],self.dirichlet_flags.shape[1],nincr))
+                        for incr in range(nincr):
+                            if self.make_loading == "constant":
+                                dum[:,:,incr] = self.dirichlet_flags/float(nincr)
+                            else:
+                                dum[:,:,incr] = incr*self.dirichlet_flags/nincr_last
+                        self.dirichlet_flags = np.copy(dum)
+                    else:
+                        return
+            else:
+                if self.applied_dirichlet is not None:
+                    if self.applied_dirichlet.ndim == 1:
+                        dum = np.zeros((self.applied_dirichlet.shape[0],nincr))
+                        for incr in range(nincr):
+                            if self.make_loading == "constant":
+                                dum[:,incr] = self.applied_dirichlet/float(nincr)
+                            else:
+                                dum[:,incr] = incr*self.applied_dirichlet/nincr_last
+                        self.applied_dirichlet = np.copy(dum)
+                    else:
+                        return
 
-            if self.dirichlet_flags is not None:
-                if self.dirichlet_flags.ndim == 2:
-                    dum = np.zeros((self.dirichlet_flags.shape[0],self.dirichlet_flags.shape[1],nincr))
-                    for incr in range(nincr):
-                        if self.make_loading == "constant":
-                            dum[:,:,incr] = self.dirichlet_flags/float(nincr)
-                        else:
-                            dum[:,:,incr] = incr*self.dirichlet_flags/nincr_last
-                    self.dirichlet_flags = np.copy(dum)
-                else:
-                    return
 
             if self.neumann_flags is not None:
 
@@ -705,15 +716,18 @@ class BoundaryCondition(object):
             pboundary_condition.Dirichlet = Dirichlet2D
 
             # GET VARIATIONAL FORMULATION FOR 2D PROBLEM
-            # pformulation_func = getattr(Florence.VariationalPrinciple, type(formulation).__name__, None)
+            # from Florence import DisplacementFormulation
+            # pformulation = DisplacementFormulation(pmesh)
             pformulation_func = formulation.__class__
             pformulation = pformulation_func(pmesh)
 
-            print('Solving planar problem {}. Number of DoF is {}'.format(niter,pmesh.points.shape[0]*pformulation.nvar))
+            pfem_solver = deepcopy(fem_solver)
+            pfem_solver.do_not_reset = True
 
+            print('Solving planar problem {}. Number of DoF is {}'.format(niter,pmesh.points.shape[0]*pformulation.nvar))
             if pmesh.points.shape[0] != Dirichlet2D.shape[0]:
                 # CALL THE FEM SOLVER FOR SOLVING THE 2D PROBLEM
-                solution = fem_solver.Solve(formulation=pformulation,
+                solution = pfem_solver.Solve(formulation=pformulation,
                     mesh=pmesh, material=pmaterial,
                     boundary_condition=pboundary_condition)
                 TotalDisp = solution.sol

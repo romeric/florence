@@ -174,7 +174,6 @@ class CoupleStressSolver(FEMSolver):
         contact_formulation=None):
         """Main solution routine for FEMSolver """
 
-
         # CHECK DATA CONSISTENCY
         mesh = formulation.meshes[0]
         #---------------------------------------------------------------------------#
@@ -237,7 +236,7 @@ class CoupleStressSolver(FEMSolver):
         print('Finished all pre-processing stage. Time elapsed was', time()-tAssembly, 'seconds')
 
         if self.analysis_type != 'static':
-
+            boundary_condition.ConvertStaticsToDynamics(mesh, self.number_of_load_increments)
             TotalDisp, TotalW, TotalS = self.DynamicSolver(formulation, solver,
                 K, M, NeumannForces, NodalForces, Residual,
                 mesh, TotalDisp, TotalW, TotalS, Eulerx, Eulerw, Eulers, Eulerp, material, boundary_condition)
@@ -352,7 +351,6 @@ class CoupleStressSolver(FEMSolver):
         # INITIALISE VELOCITY AND ACCELERATION
         velocities     = np.zeros((mesh.points.shape[0]*formulation.ndim))
         accelerations  = np.zeros((mesh.points.shape[0]*formulation.ndim))
-
         # COMPUTE DAMPING MATRIX BASED ON MASS
         D = 0.0
         if self.include_physical_damping:
@@ -420,6 +418,7 @@ class CoupleStressSolver(FEMSolver):
                         (1./self.beta/LoadFactor)*M_mech.dot(velocities) + (0.5/self.beta - 1.)*M_mech.dot(accelerations)
             Residual += DeltaF
 
+
             # CHECK CONTACT AND ASSEMBLE IF DETECTED
             if self.has_contact:
                 Eulerx = mesh.points + TotalDisp[:,:formulation.ndim,Increment-1]
@@ -451,7 +450,7 @@ class CoupleStressSolver(FEMSolver):
             accelerations_old = np.copy(accelerations)
             accelerations = (1./self.beta/LoadFactor**2)*(TotalDisp[:,:formulation.ndim,Increment] -\
                 TotalDisp[:,:formulation.ndim,Increment-1]).ravel() -\
-                1./self.beta/LoadFactor*velocities + (1.-0.5/self.beta)*accelerations
+                1./self.beta/LoadFactor*velocities + (1.-0.5/self.beta)*accelerations_old
             velocities += LoadFactor*(self.gamma*accelerations + (1-self.gamma)*accelerations_old)
 
             # UPDATE
@@ -471,6 +470,17 @@ class CoupleStressSolver(FEMSolver):
                         print("\nStopping at increment {} as specified\n\n".format(Increment))
                         TotalDisp = TotalDisp[:,:,:Increment]
                         self.number_of_load_increments = Increment
+                    break
+
+            # STORE THE INFORMATION IF THE SOLVER BLOWS UP
+            if Increment > 0:
+                U0 = TotalDisp[:,:,Increment-1].ravel()
+                U = TotalDisp[:,:,Increment].ravel()
+                tol = 1e200 if Increment < 5 else 10.
+                if np.isnan(norm(U)) or np.abs(U.max()/(U0.max()+1e-14)) > tol:
+                    print("Solver blew up! Norm of incremental solution is too large")
+                    TotalDisp = TotalDisp[:,:,:Increment]
+                    self.number_of_load_increments = Increment
                     break
 
             print('Finished Load increment', Increment, 'in', time()-t_increment, 'seconds\n')

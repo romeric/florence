@@ -2829,6 +2829,11 @@ class Mesh(object):
         else:
             self.points = content[3:self.nnode*4+3].reshape(self.nnode,4)[:,1:]
         self.elements = content[self.nnode*4+3:].astype(np.int64).reshape(self.nelem,11)[:,7:] - 1
+
+        if self.points.shape[1] == 3:
+            if np.allclose(self.points[:,2],0.):
+                self.points = np.ascontiguousarray(self.points[:,:2])
+
         self.GetEdgesQuad()
         self.GetBoundaryEdgesQuad()
 
@@ -4467,7 +4472,7 @@ class Mesh(object):
         """
 
         mesh = base_mesh
-        if mesh != None:
+        if mesh is not None:
             if not isinstance(mesh,Mesh):
                 raise ValueError("Base mesh has to be instance of class Florence.Mesh")
             else:
@@ -4482,8 +4487,9 @@ class Mesh(object):
             mesh = deepcopy(self)
             self.__reset__()
 
-        # if mesh.IsHighOrder:
-            # raise NotImplementedError("Extruding high order meshes is not supported yet")
+        if mesh.points.ndim == 2:
+            if mesh.points.shape[1] == 3:
+                raise ValueError("Cannot extrude a mesh which already has 3D nodal coordinates")
 
         nlong = int(nlong)
         if nlong==0:
