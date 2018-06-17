@@ -1,6 +1,7 @@
 from __future__ import print_function
+from setuptools import setup
+from setuptools import find_packages
 import os, platform, sys, subprocess, imp
-from distutils.core import setup
 from distutils.command.clean import clean
 from distutils.extension import Extension
 from distutils.sysconfig import get_config_var, get_config_vars, get_python_inc, get_python_lib
@@ -328,17 +329,20 @@ class FlorenceSetup(object):
         clean_cmd = 'make clean ' + self.compiler_args
         for _path in self.extension_paths:
             if "LLDispatch" not in _path:
-                execute('cd '+_path+' && echo rm -rf *.so && '+clean_cmd+' && rm -rf *.so *.'+self.extension_postfix)
+                execute('cd '+_path+' && echo rm -rf *.'+self.extension_postfix+' && '+
+                    clean_cmd+' && rm -rf *.'+self.extension_postfix)
             elif "LLDispatch" in _path:
                 execute('cd '+_path+
-                    ' && echo rm -rf *.so CythonSource/*.so && rm -rf *.so CythonSource/*.so CythonSource/*.'+
+                    ' && echo rm -rf *.'+self.extension_postfix+' CythonSource/*.'+self.extension_postfix
+                    +' && rm -rf *.'+self.extension_postfix+' CythonSource/*.'+
                     self.extension_postfix)
             else:
-                execute('cd '+_path+' && echo rm -rf *.so && rm -rf *.so *.'+self.extension_postfix)
+                execute('cd '+_path+' && echo rm -rf *.'+self.extension_postfix+' && rm -rf *.'+self.extension_postfix)
 
-        # clean all crude and ext libs if any - this is dangerous if setup.py is from outside the directory
-        execute("find . -name \*.so -delete")
-        execute("find . -name \*.pyc -delete")
+        # # clean all crude and ext libs if any - this is dangerous if setup.py is ever invoked from outside the directory
+        # # which is certainly never the case
+        # execute("find . -name \*.so -delete")
+        # execute("find . -name \*.pyc -delete")
 
 
     def Build(self):
@@ -501,17 +505,13 @@ class FlorenceSetup(object):
 
 
 
-
-# helper functions
 def execute(_cmd):
     _process = subprocess.Popen(_cmd, shell=True)
     _process.wait()
 
 
 
-
-
-if __name__ == "__main__":
+def setup_package():
 
     _fc_compiler = None
     _cc_compiler = None
@@ -528,7 +528,7 @@ if __name__ == "__main__":
 
     if len(args) > 1:
         for arg in args:
-            if arg == "source_clean" or arg == "clean" or arg == "build" or arg=="install":
+            if arg == "source_clean" or arg == "clean" or arg == "build" or arg=="manual_install":
                 if _op is not None:
                     raise RuntimeError("Multiple conflicting arguments passed to setup")
                 _op = arg
@@ -556,10 +556,41 @@ if __name__ == "__main__":
         setup_instance.SourceClean()
     elif _op == "clean":
         setup_instance.Clean()
-    elif _op == "install":
+    elif _op == "manual_install":
         setup_instance.Install()
     else:
-        setup_instance.Build()
+        # setup_instance.Build()
+
+        with open("README.md", "r") as fh:
+            long_description = fh.read()
+
+        setup(
+                ext_modules = setup_instance.Build(),
+                name = "Florence",
+                version = "0.1",
+                description = """A Python based computational framework for integrated computer aided design,
+                    curvilinear mesh generation and finite and boundary element methods for linear and nonlinear
+                    analysis of solids and coupled multiphysics problems""",
+                long_description=long_description,
+                long_description_content_type="text/markdown",
+                author="Roman Poya",
+                author_email = "roman_poya@yahoo.com",
+                url = "https://github.com/romeric/florence",
+                license="MIT",
+                platforms=["Linux", "macOS", "Unix", "Windows"],
+                python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*',
+                install_requires=[
+                  'cython>=0.23',
+                  'numpy>=1.9',
+                  'scipy>=0.14'],
+                packages=find_packages(),
+                include_package_data=True,
+                package_data={'': ['*.pyx', '*.pxd', '*.h', '*.hpp', '*.py', '*.md', 'Makefile']},
+                extra_files = "LICENSE.md"
+            )
 
 
 
+
+if __name__ == "__main__":
+    setup_package()
