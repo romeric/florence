@@ -884,6 +884,12 @@ class ExplicitParallelZipperMPI(object):
         self.mesh = mesh
         self.pnodes = pnodes
 
+class ExplicitParallelZipperHDF5(object):
+    def __init__(self, formulation, mesh, material):
+        self.formulation = formulation
+        self.material = material
+        self.mesh = mesh
+
 
 def ExplicitParallelExecuter_PoolBased(functor):
     return _LowLevelAssemblyExplicit_Par_(functor.function_space,
@@ -898,6 +904,26 @@ def ExplicitParallelExecuter_ProcessQueueBased(functor, queue):
     T = _LowLevelAssemblyExplicit_Par_(functor.function_space,
         functor.formulation, functor.mesh, functor.material, functor.Eulerx, functor.Eulerp)
     queue.put(T)
+
+def ExplicitParallelExecuter_HDF5Based(functor, proc, fname_in, fname_out):
+
+    import h5py
+
+    h5f_out = h5py.File(fname_out+str(proc)+'.h5','r')
+    Eulerx = h5f_out['Geometry']['Eulerx'][:]
+    Eulerp = h5f_out['Geometry']['Eulerp'][:]
+    functor.mesh.points = h5f_out['Geometry']['points'][:]
+    functor.mesh.elements = h5f_out['Geometry']['elements'][:]
+
+    T = _LowLevelAssemblyExplicit_Par_(functor.formulation.function_spaces[0],
+        functor.formulation, functor.mesh, functor.material, Eulerx, Eulerp)
+
+    # T = _LowLevelAssemblyExplicit_Par_(functor.formulation.function_spaces[0],
+    #     functor.formulation, functor.mesh, functor.material, functor.Eulerx, functor.Eulerp)
+
+    h5f = h5py.File(fname_in+str(proc)+'.h5','w')
+    h5f.create_dataset('T', data=T)
+    h5f.close()
 
 
 def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
@@ -942,6 +968,73 @@ def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
         comm.Disconnect()
 
         return T_all.ravel()
+
+
+    # PROCESS AND HDF5 BASED
+    elif fem_solver.parallel_model == "hdf5":
+
+        import shutil
+        import h5py
+        from Florence import Mesh
+
+        home = os.path.expanduser("~")
+        tmp_folder = os.path.join(home,".florence_tmp000")
+        if not os.path.exists(tmp_folder):
+            os.makedirs(tmp_folder)
+
+        fname_in = os.path.join(tmp_folder,"results_explicit")
+        fname_out = os.path.join(tmp_folder,"geometry_explicit")
+
+        # funcs = []
+        # for proc in range(fem_solver.no_of_cpu_cores):
+        #     pnodes = pnode_indices[proc]
+        #     Eulerx_current = Eulerx[pnodes,:]
+        #     Eulerp_current = Eulerp[pnodes]
+        #     obj = ExplicitParallelZipper(function_space, formulation,
+        #         pmesh[proc], material, Eulerx_current, Eulerp_current)
+        #     funcs.append(obj)
+
+        funcs = []
+        for proc in range(fem_solver.no_of_cpu_cores):
+            pnodes = pnode_indices[proc]
+            Eulerx_current = Eulerx[pnodes,:]
+            Eulerp_current = Eulerp[pnodes]
+
+
+            h5f_out = h5py.File(fname_out+str(proc)+'.h5','w')
+            grp = h5f_out.create_group('Geometry')
+
+            grp.create_dataset('elements', data=pmesh[proc].elements)
+            grp.create_dataset('points', data=pmesh[proc].points)
+            grp.create_dataset('Eulerx', data=Eulerx_current)
+            grp.create_dataset('Eulerp', data=Eulerp_current)
+
+            h5f_out.close()
+
+            imesh = Mesh()
+            imesh.nnode, imesh.nelem, imesh.element_type = pmesh[proc].nnode, pmesh[proc].nelem, pmesh[proc].element_type
+
+            obj = ExplicitParallelZipperHDF5(formulation, imesh, material)
+            funcs.append(obj)
+
+        procs = []
+        for i, func in enumerate(funcs):
+            proc = Process(target=ExplicitParallelExecuter_HDF5Based, args=(func, i, fname_in, fname_out))
+            procs.append(proc)
+            proc.start()
+        for proc in procs:
+            proc.join()
+
+        for proc in range(fem_solver.no_of_cpu_cores):
+            h5f = h5py.File(fname_in+str(proc)+'.h5','r')
+            T = h5f['T'][:]
+            pnodes = pnode_indices[proc]
+            T_all[pnodes,:] += T.reshape(pnodes.shape[0],formulation.nvar)
+
+        shutil.rmtree(tmp_folder)
+
+        return T_all.ravel()
+
 
 
 
@@ -1012,6 +1105,7 @@ def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
             T = queue.get()
             T_all[pnodes,:] += T.reshape(pnodes.shape[0],formulation.nvar)
             proc.join()
+
 
 
     if fem_solver.parallel_model == "pool" or fem_solver.parallel_model == "context_manager" \
