@@ -1,7 +1,7 @@
 PYTHON_VERSION = python2.7
 PYTHON_INCLUDE_PATH = /usr/include/python2.7/
 PYTHON_LD_PATH = /usr/lib/
-EXT_POSTFIX= so
+EXT_POSTFIX = so
 CYTHONFLAGS = -DNPY_NO_DEPRECATED_API
 
 CYTHON = cython --cplus
@@ -13,6 +13,7 @@ else
 REMOVE = rm -rf
 MOVE = mv
 endif
+ENTER = cd
 
 INLINE_THRESHOLD = 100000
 CXXSTD=-std=c++11
@@ -27,7 +28,6 @@ ifeq ($(findstring mkl,$(BLAS_VERSION)),mkl)
 CXXFLAGS += -DHAS_MKL
 endif
 
-# NUMPY_INCLUDE_PATH=python -c "import numpy; print numpy.get_include()"
 NUMPY_INCLUDE_PATH = /usr/local/lib/python2.7/dist-packages/numpy/core/include
 
 ifeq ($(findstring g++,$(CXX)),g++)
@@ -50,11 +50,23 @@ endif
 all: build_module
 
 build_module:
-	@echo "Building low level constitutive stiffness dispatcher modules"
+	@echo "Building low level mechanical constitutive stiffness integrands"
+	$(CYTHON) DisplacementApproachIndices.pyx
+	$(CXX) $(CXXSTD) $(CXXFLAGS) DisplacementApproachIndices.cpp -o DisplacementApproachIndices.$(EXT_POSTFIX) -I. -I$(PYTHON_INCLUDE_PATH) \
+	     -I$(NUMPY_INCLUDE_PATH) -I$(BLAS_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION) -L$(BLAS_LD_PATH) -l$(BLAS_VERSION)
+	@$(MOVE) DisplacementApproachIndices.$(EXT_POSTFIX) ../
+
+	@echo "Building low level mechanical constitutive stiffness dispatcher modules"
 	$(CYTHON) _ConstitutiveStiffnessDF_.pyx
 	$(CXX) $(CXXSTD) $(CXXFLAGS) _ConstitutiveStiffnessDF_.cpp -o _ConstitutiveStiffnessDF_.$(EXT_POSTFIX) -I. -I$(PYTHON_INCLUDE_PATH) \
 	     -I$(NUMPY_INCLUDE_PATH) -I$(BLAS_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION) -L$(BLAS_LD_PATH) -l$(BLAS_VERSION)
 	@$(MOVE) _ConstitutiveStiffnessDF_.$(EXT_POSTFIX) ../
+
+	@echo "Building low level electromechanical constitutive stiffness integrands"
+	$(CYTHON) DisplacementPotentialApproachIndices.pyx
+	$(CXX) $(CXXSTD) $(CXXFLAGS) DisplacementPotentialApproachIndices.cpp -o DisplacementPotentialApproachIndices.$(EXT_POSTFIX) -I. -I$(PYTHON_INCLUDE_PATH) \
+	     -I$(NUMPY_INCLUDE_PATH) -I$(BLAS_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION) -L$(BLAS_LD_PATH) -l$(BLAS_VERSION)
+	@$(MOVE) DisplacementPotentialApproachIndices.$(EXT_POSTFIX) ../
 
 	@echo "Building low level electromechanical constitutive stiffness dispatcher module"
 	$(CYTHON) _ConstitutiveStiffnessDPF_.pyx
@@ -69,9 +81,12 @@ build_module:
 	@$(MOVE) _ConstitutiveStiffnessLaplacian_.$(EXT_POSTFIX) ../
 
 clean:
+	$(REMOVE) DisplacementApproachIndices.cpp DisplacementApproachIndices.$(EXT_POSTFIX) ../DisplacementApproachIndices.$(EXT_POSTFIX)
 	$(REMOVE) _ConstitutiveStiffnessDF_.cpp _ConstitutiveStiffnessDF_.$(EXT_POSTFIX) ../_ConstitutiveStiffnessDF_.$(EXT_POSTFIX)
+	$(REMOVE) DisplacementPotentialApproachIndices.cpp DisplacementPotentialApproachIndices.$(EXT_POSTFIX) ../DisplacementPotentialApproachIndices.$(EXT_POSTFIX)
 	$(REMOVE) _ConstitutiveStiffnessDPF_.cpp _ConstitutiveStiffnessDPF_.$(EXT_POSTFIX) ../_ConstitutiveStiffnessDPF_.$(EXT_POSTFIX)
 	$(REMOVE)  _ConstitutiveStiffnessLaplacian_.cpp _ConstitutiveStiffnessLaplacian_.$(EXT_POSTFIX) ../_ConstitutiveStiffnessLaplacian_.$(EXT_POSTFIX)
 
 source_clean:
+	$(REMOVE) DisplacementApproachIndices.cpp DisplacementPotentialApproachIndices.cpp
 	$(REMOVE) _ConstitutiveStiffnessDF_.cpp _ConstitutiveStiffnessDPF_.cpp _ConstitutiveStiffnessLaplacian_.cpp

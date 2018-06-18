@@ -4,13 +4,10 @@ from Florence import QuadratureRule, FunctionSpace
 
 from Florence.FiniteElements.LocalAssembly.KinematicMeasures import *
 from Florence.FiniteElements.LocalAssembly._KinematicMeasures_ import _KinematicMeasures_
+from .DisplacementApproachIndices import *
 from ._ConstitutiveStiffnessDF_ import __ConstitutiveStiffnessIntegrandDF__
 from ._TractionDF_ import __TractionIntegrandDF__
 from Florence.Tensor import issymetric
-
-import pyximport
-pyximport.install(setup_args={'include_dirs': np.get_include()})
-from .DisplacementApproachIndices import *
 
 __all__ = ["DisplacementFormulation"]
 

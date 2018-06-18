@@ -232,7 +232,7 @@ class FlorenceSetup(object):
 
     def SetCompiler(self, _fc_compiler=None, _cc_compiler=None, _cxx_compiler=None):
 
-        if not "darwin" in self._os and not "linux" in self._os:
+        if not "darwin" in self._os and not "linux" in self._os and not "cygwin" in self._os:
             raise RuntimeError("Florence is not yet tested on any other platform apart from Linux & macOS")
 
         self.fc_compiler = _fc_compiler
@@ -271,12 +271,15 @@ class FlorenceSetup(object):
             " BLAS_LD_PATH=" + self.blas_ld_path + " EXT_POSTFIX=" + self.extension_postfix +\
             " CXXSTD=" + self.cxx_version + " KINEMATICS=" + self.kinematics_version
 
+        self.compiler_args = self.compiler_args + ' REMOVE="rm -rf" MOVE=mv '
+
         self.fc_compiler_args = "FC=" + self.fc_compiler + " " + self.compiler_args
         self.cc_compiler_args = "CC=" + self.cc_compiler + " " + self.compiler_args
         self.cxx_compiler_args = "CXX=" + self.cxx_compiler + " " + self.compiler_args
 
         self.compiler_args = "FC=" + self.fc_compiler + " " + "CC=" + self.cc_compiler + " " +\
             "CXX=" + self.cxx_compiler + " " + self.compiler_args
+
 
 
     def CollectExtensionModulePaths(self):
@@ -384,7 +387,11 @@ class FlorenceSetup(object):
                     for material in low_level_material_list:
                         material = material.lstrip('_').rstrip('_')
                         execute('cd '+_path+' && make ' + self.compiler_args + " MATERIAL=" + material)
+
                 elif "_Assembly_" in _path:
+
+                    # Sparse and RHS assembler
+                    execute('cd '+_path+' && make cython_assembler_build ' + self.compiler_args)
 
                     ll_material_mech = low_level_material_list[:6]
                     ll_material_electro_mech = low_level_material_list[6:]
@@ -473,6 +480,9 @@ class FlorenceSetup(object):
             # Modules built sequentially
             for _path in self.extension_paths:
                 if "_Assembly_" in _path:
+                    # Sparse and RHS assembler
+                    execute('cd '+_path+' && make cython_assembler_build ' + self.compiler_args)
+
                     # Explicit assembler
                     execute('cd '+_path+' && make ' + self.compiler_args +\
                         " ASSEMBLY_NAME=_LowLevelAssemblyExplicit_DF_DPF_ CONDF_INC=../../../VariationalPrinciple/_Traction_/\

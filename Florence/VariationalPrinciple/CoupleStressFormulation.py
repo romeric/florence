@@ -10,8 +10,6 @@ from Florence.LegendreTransform import LegendreTransform
 from scipy.sparse import coo_matrix, csc_matrix, csr_matrix
 from .VariationalPrinciple import *
 
-import pyximport
-pyximport.install(setup_args={'include_dirs': np.get_include()})
 from Florence.FiniteElements.Assembly.SparseAssemblyNative import SparseAssemblyNative
 from Florence.FiniteElements.Assembly.RHSAssemblyNative import RHSAssemblyNative
 

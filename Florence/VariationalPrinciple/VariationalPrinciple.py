@@ -2,11 +2,8 @@ import numpy as np
 from Florence import QuadratureRule, FunctionSpace, Mesh
 from Florence.FiniteElements.LocalAssembly._KinematicMeasures_ import _KinematicMeasures_
 from Florence.VariationalPrinciple._GeometricStiffness_ import GeometricStiffnessIntegrand as GetGeomStiffness
-from ._MassIntegrand_ import __MassIntegrand__, __ConstantMassIntegrand__
-
-import pyximport
-pyximport.install(setup_args={'include_dirs': np.get_include()})
 from .DisplacementApproachIndices import FillGeometricB
+from ._MassIntegrand_ import __MassIntegrand__, __ConstantMassIntegrand__
 
 
 __all__ = ["VariationalPrinciple"]

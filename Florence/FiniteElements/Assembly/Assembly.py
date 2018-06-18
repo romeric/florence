@@ -9,8 +9,6 @@ from scipy.sparse import coo_matrix, csc_matrix, csr_matrix
 from ._LowLevelAssembly_ import _LowLevelAssembly_, _LowLevelAssemblyExplicit_, _LowLevelAssemblyLaplacian_
 from ._LowLevelAssembly_ import _LowLevelAssembly_Par_, _LowLevelAssemblyExplicit_Par_
 
-import pyximport
-pyximport.install(setup_args={'include_dirs': np.get_include()})
 from .SparseAssemblyNative import SparseAssemblyNative
 from .RHSAssemblyNative import RHSAssemblyNative
 
