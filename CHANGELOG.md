@@ -1,5 +1,8 @@
 # Change Log
 
+**V0.1.4**
+Highly bumped version. Proper support for PyPi from this release onwards. Please refer to the very recent 0.1 version for major updates.
+
 **V0.1**
 
 The first official release of Florence is here. A lot of fundamental changes have been done compared to the beta releases and indeed almost 80% of Florence's functionality was developed since the last beta release, so it is impossible to enumerate the changes and new features. Nevertheless, here are the ones that stand one and make Florence what it is 
