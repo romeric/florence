@@ -258,6 +258,11 @@ class FlorenceSetup(object):
         if self.cxx_compiler is None:
             self.cxx_compiler = get_config_vars()['CXX'].split(' ')[0]
 
+        if self.cc_compiler == "cc" and "linux" in self._os:
+            self.cc_compiler = "gcc"
+        if self.cxx_compiler == "c++" and "linux" in self._os:
+            self.cxx_compiler = "g++"
+
         # Sanity check
         if self.cc_compiler is None:
             self.cc_compiler = "gcc"
@@ -582,7 +587,7 @@ def setup_package():
         setup(
                 ext_modules = setup_instance.Build(),
                 name = "Florence",
-                version = "0.1.1",
+                version = "0.1.2",
                 description = """A Python based computational framework for integrated computer aided design,
                     curvilinear mesh generation and finite and boundary element methods for linear and nonlinear
                     analysis of solids and coupled multiphysics problems""",
@@ -599,8 +604,7 @@ def setup_package():
                   'cython>=0.23',
                   'numpy>=1.9',
                   'scipy>=0.14',
-                  'scikit-umfpack>=0.2',
-                  'psutil'],
+                  'scikit-umfpack>=0.2'],
                 packages=find_packages(),
                 include_package_data=True,
                 package_data={'': ['*.pyx', '*.pxd', '*.h', '*.hpp', '*.py', '*.md', 'Makefile']},
