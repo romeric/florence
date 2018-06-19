@@ -11,13 +11,14 @@ A non-exhaustive list of core features:
 - Poisson, electrostatic and heat transfer solvers
 - Linear, geometrically linearised and fully nonlinear solid/structural mechanics solvers
 - Linear, geometrically linearised and fully nonlinear electromechanics solvers
-- Strain gradient and micropolar elasticity and electro-elasticty solvers
 - Implicit and explicit dynamic solver with contact formulation
-- A suite of advanced hyperelastic, electric, electro-hyperelastic material models
+- Generic monolithic, staggered and multigrid solvers for coupled multiphysics drive problems
+- Strain gradient and micropolar elasticity and electro-elasticty solvers
+- A suite of advanced hyperelastic, electrostatic and electro-hyperelastic material models
 - Ability to read/write mesh/simulation data to/from gmsh, Salome, GID, Tetgen, obj, FRO, VTK and HDF5
 - Support for heterogeneous computing using SIMD, shared parallelism, cloud-based parallelism and cluster-based parallelism
 
-In addition, the framework also provides Python interfaces to many low-level numerical sub-routines written in C, C++ and Cython.
+In addition, the framework also provides Python interfaces to many low-level numerical subroutines written in C, C++ and Cython.
 
 # Platform support
 Florence supports Linux, macOS and Windows (under Cygwin) under
@@ -175,7 +176,7 @@ def simple_laplace():
                                 mesh=mesh)
 
     # write results to vtk file
-    # results.WriteVTK("laplacian_results")
+    results.WriteVTK("laplacian_results")
 
 
 if __name__ == "__main__":
