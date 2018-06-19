@@ -585,7 +585,7 @@ def setup_package():
 
         metadata =  dict(
                         name = "Florence",
-                        version = "0.1.2",
+                        version = "0.1.4",
                         description = """A Python based computational framework for integrated computer aided design,
                             curvilinear mesh generation and finite and boundary element methods for linear and nonlinear
                             analysis of solids and coupled multiphysics problems""",

@@ -12,7 +12,7 @@ A non-exhaustive list of core features:
 - Linear, geometrically linearised and fully nonlinear solid/structural mechanics solvers
 - Linear, geometrically linearised and fully nonlinear electromechanics solvers
 - Implicit and explicit dynamic solver with contact formulation
-- Generic monolithic, staggered and multigrid solvers for coupled multiphysics drive problems
+- Generic monolithic, staggered and multigrid solvers for coupled multiphysics driven problems
 - Strain gradient and micropolar elasticity and electro-elasticty solvers
 - A suite of advanced hyperelastic, electrostatic and electro-hyperelastic material models
 - Ability to read/write mesh/simulation data to/from gmsh, Salome, GID, Tetgen, obj, FRO, VTK and HDF5
@@ -49,13 +49,13 @@ In addition, it is recommended to have an optimised BLAS library such as OpenBLA
 
 # Installation
 ## The easy way
-using `pip`
+using pip
 
 ```
 pip install Florence
 ```
 
-For `pip` installation to work you need to have `Fastor` installed. You can achieve this by
+For pip installation to work you need to have `Fastor` installed. You can achieve this by
 
 ```
 cd ~
@@ -63,7 +63,7 @@ git clone https://github.com/romeric/Fastor
 mv Fastor/ /usr/local/include/Fastor/
 ```
 
-It is also a good practice to set your compilers before `pip` installing florence
+It is also a good practice to set your compilers before pip installing florence
 
 ```
 export CC=/path/to/c/compiler
