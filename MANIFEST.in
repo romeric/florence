@@ -3,11 +3,13 @@ include *.txt *.md
 # Top-level build scripts
 include setup.py
 # All source files
-recursive-include Florence *
+recursive-include Florence *.pyx *.pxd *.h Makefile
 # Exclude
-global-exclude *.pyc *~ *.bak *.swp *.pyo *.so *.dylib *.dll *.c *.cpp
+global-exclude *.pyc *~ *.bak *.swp *.pyo *.c *.cpp
 # Exclude Unnecessary data files
 global-exclude *.vtk *.vtu *.mat
 # Include the necessary cpp files
 include Florence/Tensor/_LinAlg.cpp
 include Florence/Tensor/_Numeric.cpp
+# Include .py files that do not get picked up
+include Florence/FiniteElements/Assembly/_Assembly_/AOT_Assembler.py

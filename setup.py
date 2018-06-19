@@ -548,11 +548,8 @@ def setup_package():
 
     if len(args) > 1:
         for arg in args:
-            if arg == "source_clean" or arg == "clean" or arg == "build" or arg=="manual_install":
-                if _op is not None:
-                    raise RuntimeError("Multiple conflicting arguments passed to setup")
+            if arg == "source_clean" or arg == "clean" or arg == "build" or arg=="manual_install" or "dist" in arg:
                 _op = arg
-
             if "FC" in arg:
                 _fc_compiler = arg.split("=")[-1]
             elif "CC" in arg:
@@ -572,6 +569,9 @@ def setup_package():
         _cc_compiler=_cc_compiler, _cxx_compiler=_cxx_compiler, _blas=_blas,
         _kinematics_version=_kinematics_version, _fastor_path=_fastor_path,_ncpu=_ncpu)
 
+    if _op is None:
+        _op = ""
+
     if _op == "source_clean":
         setup_instance.SourceClean()
     elif _op == "clean":
@@ -579,38 +579,41 @@ def setup_package():
     elif _op == "manual_install":
         setup_instance.Install()
     else:
-        # setup_instance.Build()
 
         with open("README.md", "r") as fh:
             long_description = fh.read()
 
-        setup(
-                ext_modules = setup_instance.Build(),
-                name = "Florence",
-                version = "0.1.2",
-                description = """A Python based computational framework for integrated computer aided design,
-                    curvilinear mesh generation and finite and boundary element methods for linear and nonlinear
-                    analysis of solids and coupled multiphysics problems""",
-                long_description_content_type="text/markdown",
-                long_description=long_description,
-                author="Roman Poya",
-                author_email = "roman_poya@yahoo.com",
-                url = "https://github.com/romeric/florence",
-                license="MIT",
-                platforms=["Linux", "macOS", "Unix", "Windows"],
-                cmdclass={'bdist_wheel': bdist_wheel},
-                python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*',
-                install_requires=[
-                  'cython>=0.23',
-                  'numpy>=1.9',
-                  'scipy>=0.14',
-                  'scikit-umfpack>=0.2'],
-                packages=find_packages(),
-                include_package_data=True,
-                package_data={'': ['*.pyx', '*.pxd', '*.h', '*.hpp', '*.py', '*.md', 'Makefile']},
-            )
+        metadata =  dict(
+                        name = "Florence",
+                        version = "0.1.2",
+                        description = """A Python based computational framework for integrated computer aided design,
+                            curvilinear mesh generation and finite and boundary element methods for linear and nonlinear
+                            analysis of solids and coupled multiphysics problems""",
+                        long_description_content_type="text/markdown",
+                        long_description=long_description,
+                        author="Roman Poya",
+                        author_email = "roman_poya@yahoo.com",
+                        url = "https://github.com/romeric/florence",
+                        license="MIT",
+                        platforms=["Linux", "macOS", "Unix", "Windows"],
+                        cmdclass={'bdist_wheel': bdist_wheel},
+                        python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*',
+                        install_requires=[
+                          'cython>=0.23',
+                          'numpy>=1.9',
+                          'scipy>=0.14',
+                          'scikit-umfpack>=0.2'],
+                        packages=find_packages(),
+                        include_package_data=True,
+                        package_data={'': ['*.pyx', '*.pxd', '*.h', '*.hpp', '*.dll', '*.dylib', '*.so',
+                            '*.py', '*.txt', '*.md', 'Makefile']},
+                    )
 
 
+        if "build" in _op or "dist" in _op:
+            metadata['ext_modules'] = setup_instance.Build()
+
+        setup(**metadata)
 
 
 if __name__ == "__main__":
