@@ -17,6 +17,7 @@ A non-exhaustive list of core features:
 - A suite of advanced hyperelastic, electrostatic and electro-hyperelastic material models
 - Ability to read/write mesh/simulation data to/from gmsh, Salome, GID, Tetgen, obj, FRO, VTK and HDF5
 - Support for heterogeneous computing using SIMD, shared parallelism, cloud-based parallelism and cluster-based parallelism
+- Interface to a suite of sparse direct and iterative solvers including MUMPS, Pardiso & AMG
 
 In addition, the framework also provides Python interfaces to many low-level numerical subroutines written in C, C++ and Cython.
 
@@ -99,9 +100,8 @@ By default, florence builds in parallel using all the machine's CPU cores. To li
 python setup.py build np=1
 ```
 
-Installation of optional external dependencies such as `MUMPS` direct sparse solver, `Pardiso` direct sparse solver and `mayavi` 3D visualisation library typically need special care.
-
-To install `MUMPS`, use `homebrew` on macOS and `linuxbrew` on linux:
+## Configuring MUMPS direct sparse solver
+Florence can automatically switch to `MUMPS` sparse direct solver if available. To install `MUMPS`, the easiest way is to use `homebrew` on macOS and `linuxbrew` on linux:
 
 ```
 brew install mumps --without-mpi --with-openblas
@@ -116,13 +116,14 @@ And whenever `MUMPS` solver is needed, just open a new terminal window/tab and d
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/linuxbrew/.linuxbrew/lib
 ```
 
+## Configuring Pardiso direct sparse solver
 The direct sparse solver shipped with `MKL`, `Pardiso` can be used if `MKL` is available. Both Anaconda and Intel distribution for python ship these.
 If `MKL` is installed, the low-level FEM assembler in florence is also automatically linked to it during compilation, as long as "`BLAS=mkl`" flag is issued to `setup.py`.
 
 ```shell
 conda install -c haasad pypardiso
 ```
-We typically do not recommed adding `anaconda/bin` to your path. Hence, whenever `MKL` features or `Pardiso` solver is needed, just open a new terminal window/tab and do
+We typically do not recommed adding `anaconda/bin` to your path. Hence, whenever `MKL` features or `Pardiso` solver is needed, just open a new terminal window/tab and type
 
 ```
 export PATH="/path/to/anaconda2/bin:$PATH"
