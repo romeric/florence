@@ -1,5 +1,24 @@
 # Change Log
 
+**V0.1**
+
+The first official release of Florence is here. A lot of fundamental changes have been done compared to the beta releases and indeed almost 80% of Florence's functionality was developed since the last beta release, so it is impossible to enumerate the changes and new features. Nevertheless, here are the ones that stand one and make Florence what it is 
+
+1. Florence has a complete C++ level interface (and we really mean *complete*... *this time*) for assembling implicit and explicit FEM problems
+2. Yes, on that note, extremely efficient explicit FEM solvers for mechanical and electromechanical problem are available which can solve millions of DoFs in seconds on a single core.
+3. Modular explicit penalty contact formulation is available for all types of formulations.
+4. Strain gradient, couple stress and micropolar based elasticity and electro-elasticity solvers using mixed low and high order FEM.
+5. Florence now supports SIMD, shared parallelism, could/network based parallelism and cluster based parallelism for all types of problems.
+6. Support for Python 2 and 3 under Linux, macOS and Windows (under Cygwin).
+7. A comprehensive Mesh module. Way too many changes/new features in this module to list.
+8. Interface to MUMPS and Pardiso direct sparse solvers.
+9. Automatic unit testing and code coverage.
+10. Incredibly lean and lightweight source package (~1.8MB). Note that, as a result of this clean up, older *tags* may have been broken. 
+11. Parallel build configuration for `setup.py`
+12. And, we are finally on PyPI. `pip install Florence`
+
+and enjoy!   
+
 **V0.1rc04**
 
 More fundamental changes in this release:
