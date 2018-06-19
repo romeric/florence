@@ -19,6 +19,10 @@ class IdealDielectric(Material):
         self.nature = "linear"
         self.fields = "electrostatics"
 
+        if not hasattr(self,'eps_1'):
+            if hasattr(self,'eps'):
+                self.eps_1 = self.eps
+
         self.H_VoigtSize = self.ndim
 
         # LOW LEVEL DISPATCHER

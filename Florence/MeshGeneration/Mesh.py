@@ -1450,12 +1450,7 @@ class Mesh(object):
 
                 mlab.show()
 
-
-
         return normals
-
-
-
 
 
 

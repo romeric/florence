@@ -937,7 +937,7 @@ def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
         try:
             from mpi4py import MPI
         except ImportError:
-            raise ImportError("mpi4py is not installed. Install it 'using pip install mpi4py'")
+            raise ImportError("mpi4py is not installed. Install it using 'pip install mpi4py'")
         from Florence import PWD
         comm = MPI.COMM_SELF.Spawn(sys.executable,
                                    args=[PWD(__file__)+'/MPIParallelExplicitAssembler.py'],
@@ -971,8 +971,11 @@ def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
     # PROCESS AND HDF5 BASED
     elif fem_solver.parallel_model == "hdf5":
 
+        try:
+            import h5py
+        except ImportError:
+            raise ImportError("h5py is not installed. Install it using 'pip install h5py'")
         import shutil
-        import h5py
         from Florence import Mesh
 
         home = os.path.expanduser("~")
@@ -1078,7 +1081,7 @@ def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
         try:
             from joblib import Parallel, delayed
         except ImportError:
-            raise ImportError("Joblib is not installed. Install it 'using pip install joblib'")
+            raise ImportError("Joblib is not installed. Install it using 'pip install joblib'")
         Ts = Parallel(n_jobs=fem_solver.no_of_cpu_cores)(delayed(ExplicitParallelExecuter_PoolBased)(func) for func in funcs)
         # Ts = Parallel(n_jobs=10, backend="threading")(delayed(ImplicitParallelExecuter_PoolBased)(func) for func in funcs)
 
@@ -1087,7 +1090,7 @@ def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
         try:
             from scoop import futures
         except ImportError:
-            raise ImportError("Scoop is not installed. Install it 'using pip install scoop'")
+            raise ImportError("Scoop is not installed. Install it using 'pip install scoop'")
         Ts = list(futures.map(ExplicitParallelExecuter_PoolBased, funcs))
 
     # PROCESS AND QUEUE BASED
