@@ -1325,9 +1325,11 @@ class Mesh(object):
     def FaceNormals(self):
         """Computes outward unit normals on faces.
             This is a generic method for all element types apart from lines. If the mesh is in 2D plane
-            then the unit outward normals will point in Z direction.
-            This is different from the method self.Normals() as the latter computes normals for 2D elements
-            in-plane
+            then the unit outward normals will point in Z direction. If the mesh is quad or tri type but
+            in 3D plane, this will still compute the correct unit outward normals. outwardness can only
+            be guaranteed for volume meshes.
+            This method is different from the method self.Normals() as the latter can compute normals
+            for 1D/2D elements in-plane
         """
 
         self.__do_memebers_exist__()
@@ -1357,14 +1359,104 @@ class Mesh(object):
         normals[:,1] /= norm_normals
         normals[:,2] /= norm_normals
 
+        # CHECK IF THE NORMAL IS OUTWARD - FOR LINES DIRECTIONALITY DOES NOT MATTER
+        if self.element_type == "tet" or self.element_type == "hex":
+            self.GetElementsWithBoundaryFaces()
+            meds = self.Medians()
+            face_element_meds = meds[self.boundary_face_to_element[:,0],:]
+            p1pm = face_coords[:,1,:] - face_element_meds
+            # IF THE DOT PROUCT OF NORMALS AND EDGE-MED NODE VECTOR IS NEGATIVE THEN FLIP
+            _check = np.einsum("ij,ij->i",normals,p1pm)
+            normals[np.less(_check,0.)] = -normals[np.less(_check,0.)]
+
         return normals
 
 
 
-    def Normals(self):
-        """Computes unit outward normals of the boundary
+    def Normals(self, show_plot=False):
+        """Computes unit outward normals to the boundary for all element types.
+            Unity and outwardness are guaranteed
         """
-        pass
+
+        self.__do_memebers_exist__()
+        ndim = self.InferSpatialDimension()
+
+        if self.element_type == "tet" or self.element_type == "hex":
+            normals = self.FaceNormals()
+        elif self.element_type == "tri" or self.element_type == "quad" or self.element_type == "line":
+            if self.points.shape[1] == 3:
+                normals = self.FaceNormals()
+            else:
+                if self.element_type == "tri" or self.element_type == "quad":
+                    edges = self.edges
+                elif self.element_type == "line":
+                    edges = self.elements
+
+                edge_coords = self.points[edges[:,:2],:]
+                p1p0 = edge_coords[:,1,:] - edge_coords[:,0,:]
+
+                normals = np.zeros_like(p1p0)
+                normals[:,0] = -p1p0[:,1]
+                normals[:,1] =  p1p0[:,0]
+                norm_normals = np.linalg.norm(normals,axis=1)
+                normals[:,0] /= norm_normals
+                normals[:,1] /= norm_normals
+
+                # CHECK IF THE NORMAL IS OUTWARD - FOR LINES DIRECTIONALITY DOES NOT MATTER
+                if self.element_type == "tri" or self.element_type == "quad":
+                    self.GetElementsWithBoundaryEdges()
+                    meds = self.Medians()
+                    edge_element_meds = meds[self.boundary_edge_to_element[:,0],:]
+                    p1pm = edge_coords[:,1,:] - edge_element_meds
+                    # IF THE DOT PROUCT OF NORMALS AND EDGE-MED NODE VECTOR IS NEGATIVE THEN FLIP
+                    _check = np.einsum("ij,ij->i",normals,p1pm)
+                    normals[np.less(_check,0.)] = -normals[np.less(_check,0.)]
+
+
+        if show_plot:
+
+            if ndim == 2:
+                mid_edge_coords = 0.5*(edge_coords[:,1,:] + edge_coords[:,0,:])
+
+                import matplotlib.pyplot as plt
+                figure = plt.figure()
+
+                self.SimplePlot(figure=figure, show_plot=False)
+
+                q = plt.quiver(mid_edge_coords[:,0], mid_edge_coords[:,1],
+                    normals[:,0], normals[:,1],
+                    color='Teal', headlength=5, width=0.004)
+
+                plt.axis('equal')
+                plt.axis('off')
+                plt.tight_layout()
+                plt.show()
+
+
+            elif ndim == 3:
+                mid_face_coords = np.sum(self.points[self.faces,:3],axis=1)/self.faces.shape[1]
+
+                import os
+                os.environ['ETS_TOOLKIT'] = 'qt4'
+                from mayavi import mlab
+
+                figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(1000,800))
+
+                self.SimplePlot(figure=figure, show_plot=False)
+
+                mlab.quiver3d(mid_face_coords[:,0], mid_face_coords[:,1], mid_face_coords[:,2],
+                    normals[:,0], normals[:,1], normals[:,2],
+                    color=(0.,128./255,128./255),line_width=2)
+
+                mlab.show()
+
+
+
+        return normals
+
+
+
+
 
 
     def Medians(self, geometric=True):
