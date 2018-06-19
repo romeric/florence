@@ -18,6 +18,16 @@ except ImportError:
 from multiprocessing import Pool, cpu_count
 
 
+try:
+    from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
+    class bdist_wheel(_bdist_wheel):
+        def finalize_options(self):
+            _bdist_wheel.finalize_options(self)
+            self.root_is_pure = False
+except ImportError:
+    bdist_wheel = None
+
+
 
 class FlorenceSetup(object):
 
@@ -501,11 +511,6 @@ class FlorenceSetup(object):
         sys.stdout = sys.__stdout__
 
 
-        sys.path.insert(1,self._pwd_)
-        from Florence import Mesh, MaterialLibrary, FEMSolver
-        from Florence.VariationalPrinciple import VariationalPrinciple
-
-
     def Install(self):
         var = raw_input("This includes florence in your python path. Do you agree (y/n): ")
         if var=="n" or "no" in var:
@@ -577,7 +582,7 @@ def setup_package():
         setup(
                 ext_modules = setup_instance.Build(),
                 name = "Florence",
-                version = "0.1",
+                version = "0.1.1",
                 description = """A Python based computational framework for integrated computer aided design,
                     curvilinear mesh generation and finite and boundary element methods for linear and nonlinear
                     analysis of solids and coupled multiphysics problems""",
@@ -588,6 +593,7 @@ def setup_package():
                 url = "https://github.com/romeric/florence",
                 license="MIT",
                 platforms=["Linux", "macOS", "Unix", "Windows"],
+                cmdclass={'bdist_wheel': bdist_wheel},
                 python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*',
                 install_requires=[
                   'cython>=0.23',
