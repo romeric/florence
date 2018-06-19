@@ -71,7 +71,7 @@ export CXX=/path/to/c++/compiler
 ```
 
 ## Building from source
-Have a look at `travis.yml` file for directions on installing florence's core library. First install `cython`, `numpy` and `scipy`. Install `Fastor` using
+Have a look at `travis.yml` file for directions on installing florence's core library. First install `cython`, `numpy` and `scipy`. Download `Fastor` headers and place them under their default location `/usr/local/include/Fastor`
 
 ```
 cd ~

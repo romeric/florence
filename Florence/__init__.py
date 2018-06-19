@@ -9,4 +9,4 @@ from .Solver import *
 from .Utils import PWD, RSWD
 from .PostProcessing import *
 
-__version__ = "0.1.4"
+__version__ = "0.1.4.dev"
