@@ -581,8 +581,8 @@ def setup_package():
                 description = """A Python based computational framework for integrated computer aided design,
                     curvilinear mesh generation and finite and boundary element methods for linear and nonlinear
                     analysis of solids and coupled multiphysics problems""",
-                long_description=long_description,
                 long_description_content_type="text/markdown",
+                long_description=long_description,
                 author="Roman Poya",
                 author_email = "roman_poya@yahoo.com",
                 url = "https://github.com/romeric/florence",
@@ -592,11 +592,12 @@ def setup_package():
                 install_requires=[
                   'cython>=0.23',
                   'numpy>=1.9',
-                  'scipy>=0.14'],
+                  'scipy>=0.14',
+                  'scikit-umfpack>=0.2',
+                  'psutil'],
                 packages=find_packages(),
                 include_package_data=True,
                 package_data={'': ['*.pyx', '*.pxd', '*.h', '*.hpp', '*.py', '*.md', 'Makefile']},
-                extra_files = "LICENSE.md"
             )
 
 
