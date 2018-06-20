@@ -74,6 +74,7 @@ class FEMSolver(object):
         user_defined_stop_func=None,
         save_results=True,
         save_frequency=1,
+        memory_store_fequency=1,
         has_contact=False,
         activate_explicit_multigrid=False):
 
@@ -100,6 +101,12 @@ class FEMSolver(object):
         # SAVE AT EVERY N TIME STEP WHERE N=save_frequency
         self.save_frequency = int(save_frequency)
         self.incremental_solution_save_frequency = incremental_solution_save_frequency
+        if save_frequency != 1:
+            warn("save_frequency keyword is deprecated. Please use memory_store_fequency instead")
+        if save_frequency !=1 and memory_store_fequency !=1:
+            raise ValueError("Please use either save_frequency or memory_store_fequency, but not both")
+        if memory_store_fequency != 1:
+            self.save_frequency = int(memory_store_fequency)
 
         self.number_of_load_increments = number_of_load_increments
         self.load_factor = load_factor
@@ -257,15 +264,15 @@ class FEMSolver(object):
                 self.mass_type = "lumped"
         if self.analysis_type == "static":
             if self.save_frequency != 1:
-                warn("save_frequency must be one")
+                warn("memory_store_fequency must be one")
                 self.save_frequency = 1
         if self.analysis_type == "dynamic" and self.analysis_subtype=="implicit":
             if self.save_frequency != 1:
-                warn("save_frequency must be one")
+                warn("memory_store_fequency must be one")
                 self.save_frequency = 1
         if self.analysis_type == "dynamic" and self.analysis_subtype == "explicit":
             if self.number_of_load_increments < self.save_frequency:
-                raise ValueError("Number of load increments cannot be less than save frequency")
+                raise ValueError("Number of load increments cannot be less than memory store fequency")
             if self.number_of_load_increments < 3:
                 warn("Time step is excessively large for dynamic analysis. I will increase it by a bit")
                 self.number_of_load_increments = 3
