@@ -159,7 +159,9 @@ class DetachedParallelFEMSolver(FEMSolver):
             procs = []
             manager = Manager(); solutions = manager.dict() # SPAWNS A NEW PROCESS
             for proc in range(self.no_of_cpu_cores):
-                self.incremental_solution_filename = fnames[proc]
+                if self.save_incremental_solution is True:
+                    self.incremental_solution_filename = fnames[proc]
+
                 proc = Process(target=self.__DetachedFEMRunner_ContextManager__,
                     args=(formulation, pmesh[proc],
                     material, pboundary_conditions[proc],
