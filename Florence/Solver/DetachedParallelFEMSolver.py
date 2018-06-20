@@ -68,6 +68,9 @@ class DetachedParallelFEMSolver(FEMSolver):
         if boundary_condition.applied_neumann is not None:
             raise NotImplementedError("Problems with Neumann BC are not supported yet by detached solver")
         #---------------------------------------------------------------------------#
+        #---------------------------------------------------------------------------#
+        self.PrintPreAnalysisInfo(mesh, formulation)
+        #---------------------------------------------------------------------------#
 
         self.PartitionMeshForParallelFEM(mesh,self.no_of_cpu_cores,formulation.nvar)
         pmesh, pelement_indices, pnode_indices, partitioned_maps = self.pmesh, self.pelement_indices, \
