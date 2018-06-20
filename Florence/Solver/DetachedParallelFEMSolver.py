@@ -1,5 +1,6 @@
-import numpy as np
+from copy import deepcopy
 from time import time
+import numpy as np
 from .FEMSolver import FEMSolver
 from Florence import BoundaryCondition
 
@@ -33,6 +34,13 @@ class DetachedParallelFEMSolver(FEMSolver):
             del kwargs['force_solution']
         else:
             self.force_solution = False
+
+
+        if 'do_not_sync' in kwargs.keys():
+            self.do_not_sync = kwargs['do_not_sync']
+            del kwargs['do_not_sync']
+        else:
+            self.do_not_sync = False
 
         super(DetachedParallelFEMSolver, self).__init__(**kwargs)
 
@@ -136,6 +144,11 @@ class DetachedParallelFEMSolver(FEMSolver):
         # TURN OFF PARALLELISATION
         self.parallel = False
 
+        if self.save_incremental_solution is True:
+            fname = deepcopy(self.incremental_solution_filename)
+            fnames = []
+            for proc in range(self.no_of_cpu_cores):
+                fnames.append(fname.split(".")[0]+"_proc"+str(proc))
 
         self.parallel_model = "context_manager"
 
@@ -143,6 +156,7 @@ class DetachedParallelFEMSolver(FEMSolver):
             procs = []
             manager = Manager(); solutions = manager.dict() # SPAWNS A NEW PROCESS
             for proc in range(self.no_of_cpu_cores):
+                self.incremental_solution_filename = fnames[proc]
                 proc = Process(target=self.__DetachedFEMRunner_ContextManager__,
                     args=(formulation, pmesh[proc],
                     material, pboundary_conditions[proc],
@@ -164,19 +178,22 @@ class DetachedParallelFEMSolver(FEMSolver):
             raise RuntimeError("MPI based detached parallelism not implemented yet")
 
 
-        # FIND LOWEST AVAILABLE SOLUTION ACROSS ALL PARTITIONS
-        min_nincr = 1e20
-        for proc in range(self.no_of_cpu_cores):
-            incr = solutions[proc].sol.shape[2]
-            if incr < min_nincr:
-                min_nincr = incr
+        if not self.do_not_sync:
+            # FIND COMMON AVAILABLE SOLUTION ACROSS ALL PARTITIONS
+            min_nincr = 1e20
+            for proc in range(self.no_of_cpu_cores):
+                incr = solutions[proc].sol.shape[2]
+                if incr < min_nincr:
+                    min_nincr = incr
 
-        TotalDisp = np.zeros((mesh.points.shape[0], formulation.nvar, min_nincr))
-        for proc in range(self.no_of_cpu_cores):
-            pnodes = pnode_indices[proc]
-            TotalDisp[pnodes,:,:] = solutions[proc].sol[:,:,:min_nincr]
+            TotalDisp = np.zeros((mesh.points.shape[0], formulation.nvar, min_nincr))
+            for proc in range(self.no_of_cpu_cores):
+                pnodes = pnode_indices[proc]
+                TotalDisp[pnodes,:,:] = solutions[proc].sol[:,:,:min_nincr]
 
-        return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
+            return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
+        else:
+            return self.__makeoutput__(mesh, np.zeros_like(mesh.points), formulation, function_spaces, material)
 
 
 
