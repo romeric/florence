@@ -2661,6 +2661,7 @@ class Mesh(object):
         else:
             raise ValueError("Element type not understood")
 
+
         # NEW FAST READER
         var = 0 # for old gmsh versions - needs checks
         rem_nnode, rem_nelem, rem_faces = int(1e09), int(1e09), int(1e09)
@@ -2694,6 +2695,7 @@ class Mesh(object):
                 self.nelem = int(plist[0])
                 break
 
+        ns = self.InferNumberOfNodesPerElement(p=1,element_type=element_type)
         # Re-read
         points, elements, faces, face_to_surface = [],[], [], []
         for line_counter, line in enumerate(open(filename)):
@@ -2709,14 +2711,14 @@ class Mesh(object):
                     points.append([float(i) for i in plist[1:]])
                 if line_counter > rem_nelem and line_counter < self.nelem+rem_nelem+1:
                     if int(plist[1]) == el:
-                        elements.append([int(i) for i in plist[5:]])
+                        # elements.append([int(i) for i in plist[5:]])
+                        elements.append([int(i) for i in plist[-ns:]])
 
                     # WRITE SURFACE INFO - CERTAINLY ONLY IF ELEMENT TYPE IS QUADS/TRIS
                     if read_surface_info:
                         if int(plist[1]) == bel:
                             faces.append([int(i) for i in plist[5:]])
                             face_to_surface.append(int(plist[4]))
-
 
         self.points = np.array(points,copy=True)
         self.elements = np.array(elements,copy=True) - 1
