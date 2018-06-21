@@ -49,6 +49,7 @@ class FEMSolver(object):
         newton_raphson_solution_tolerance=None,
         maximum_iteration_for_newton_raphson=50,
         iterative_technique="newton_raphson",
+        reduce_quadrature_for_quads_hexes=True,
         add_self_weight=False,
         mass_type=None,
         compute_mesh_qualities=False,
@@ -119,6 +120,7 @@ class FEMSolver(object):
         self.include_physical_damping = include_physical_damping
         self.damping_factor = damping_factor
         self.add_self_weight = add_self_weight
+        self.reduce_quadrature_for_quads_hexes = reduce_quadrature_for_quads_hexes
 
         self.compute_energy = compute_energy
         self.compute_energy_dissipation = compute_energy_dissipation
@@ -566,8 +568,10 @@ class FEMSolver(object):
             K, TractionForces, _, _ = Assemble(self, function_spaces[0], formulation, mesh, material,
                 Eulerx, Eulerp)
         else:
-            fspace = function_spaces[0] if (mesh.element_type=="hex" or mesh.element_type=="quad") else function_spaces[1]
-            # fspace = function_spaces[1]
+            if self.reduce_quadrature_for_quads_hexes:
+                fspace = function_spaces[0] if (mesh.element_type=="hex" or mesh.element_type=="quad") else function_spaces[1]
+            else:
+                fspace = function_spaces[1]
             # COMPUTE CONSTANT PART OF MASS MATRIX
             formulation.GetConstantMassIntegrand(fspace,material)
 
