@@ -532,7 +532,6 @@ class FEMSolver(object):
 
         # ALLOCATE FOR SOLUTION FIELDS
         if self.save_frequency == 1:
-            # TotalDisp = np.zeros((mesh.points.shape[0],formulation.nvar,self.number_of_load_increments),dtype=np.float32)
             TotalDisp = np.zeros((mesh.points.shape[0],formulation.nvar,self.number_of_load_increments),dtype=np.float64)
         else:
             TotalDisp = np.zeros((mesh.points.shape[0],formulation.nvar,

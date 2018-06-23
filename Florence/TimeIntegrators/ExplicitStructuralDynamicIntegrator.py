@@ -96,7 +96,9 @@ class ExplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
         U00  = self.UpdateFreeMechanicalDoFs(U00[self.mech_in],formulation.ndim*nnode,formulation.ndim)
 
         TotalDisp[:,:formulation.ndim,0] = U00
-        TotalDisp[:,:formulation.ndim,1] = U0
+        if TotalDisp.ndim==2:
+            if TotalDisp.shape[2] > 1:
+                TotalDisp[:,:formulation.ndim,1] = U0
 
         # SET UP THE ELECTROSTATICS SOLVER PARAMETERS ONCE
         if formulation.fields == "electro_mechanics":
@@ -126,7 +128,6 @@ class ExplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
             Residual = Residual[self.mechanical_dofs]
 
             if fem_solver.mass_type == "lumped":
-                # Residual   += (2./dt**2)*M*TotalDisp[:,:,Increment-1].ravel() - (1./dt**2)*M*TotalDisp[:,:,Increment-2].ravel()
                 Residual   += (2./dt**2)*M_mech*U0.ravel() - (1./dt**2)*M_mech*U00.ravel()
                 U = dt**2*invM[self.mechanical_dofs]*Residual
                 U = self.UpdateFreeMechanicalDoFs(U[self.mech_in],formulation.ndim*nnode,formulation.ndim)
