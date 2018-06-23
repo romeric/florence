@@ -1093,6 +1093,17 @@ def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
             raise ImportError("Scoop is not installed. Install it using 'pip install scoop'")
         Ts = list(futures.map(ExplicitParallelExecuter_PoolBased, funcs))
 
+    # TBB BASED
+    elif fem_solver.parallel_model == "tbb":
+        try:
+            from TBB import Pool as tbbpool
+        except ImportError:
+            raise ImportError("TBB is not installed. The easiest way to install it is using ananconda - 'conda install intel tbb'")
+
+        with closing(tbbpool(nworkers=fem_solver.no_of_cpu_cores)) as pool:
+            Ts = pool.map(ExplicitParallelExecuter_PoolBased,funcs)
+            pool.terminate()
+
     # PROCESS AND QUEUE BASED
     elif fem_solver.parallel_model == "queue":
         procs = []
@@ -1110,7 +1121,7 @@ def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
 
 
     if fem_solver.parallel_model == "pool" or fem_solver.parallel_model == "context_manager" \
-        or fem_solver.parallel_model == "joblib" or fem_solver.parallel_model == "scoop":
+        or fem_solver.parallel_model == "joblib" or fem_solver.parallel_model == "scoop" or fem_solver.parallel_model == "tbb":
 
         for proc in range(fem_solver.no_of_cpu_cores):
             pnodes = pnode_indices[proc]
