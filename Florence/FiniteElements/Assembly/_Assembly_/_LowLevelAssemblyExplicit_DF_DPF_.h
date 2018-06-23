@@ -261,7 +261,7 @@ void _GlobalAssemblyExplicit_DF_DPF_<2>(const Real *points,
     Real detJ                       = 0;
 
     Real FASTOR_ALIGN F[ndim*ndim];
-    Real FASTOR_ALIGN ElectricFieldx[ndim];
+    Real FASTOR_ALIGN ElectricFieldx[ndim]; std::fill_n(ElectricFieldx,ndim,0.);
     Tensor<Real,ndim> D;
     Tensor<Real,ndim,ndim> stress;
 
@@ -326,15 +326,17 @@ void _GlobalAssemblyExplicit_DF_DPF_<2>(const Real *points,
                                     );
 
 
-            // COMPUTE ELECTRIC FIELD
-            Real iE0 = 0, iE1 = 0;
-            for (Integer j=0; j<nodeperelem; ++j) {
-                const Real potE = ElectricPotentialElem[j];
-                iE0 += SpatialGradient[j]*potE;
-                iE1 += SpatialGradient[nodeperelem+j]*potE;
+            if (formulation_number==1) {
+                // COMPUTE ELECTRIC FIELD
+                Real iE0 = 0, iE1 = 0;
+                for (Integer j=0; j<nodeperelem; ++j) {
+                    const Real potE = ElectricPotentialElem[j];
+                    iE0 += SpatialGradient[j]*potE;
+                    iE1 += SpatialGradient[nodeperelem+j]*potE;
+                }
+                ElectricFieldx[0] = -iE0;
+                ElectricFieldx[1] = -iE1;
             }
-            ElectricFieldx[0] = -iE0;
-            ElectricFieldx[1] = -iE1;
 
 
             // COMPUTE KINETIC MEASURES
@@ -478,7 +480,7 @@ void _GlobalAssemblyExplicit_DF_DPF_<3>(const Real *points,
     Real detJ                       = 0;
 
     Real FASTOR_ALIGN F[ndim*ndim];
-    Real FASTOR_ALIGN ElectricFieldx[ndim];
+    Real FASTOR_ALIGN ElectricFieldx[ndim]; std::fill_n(ElectricFieldx,ndim,0.);
     Tensor<Real,ndim> D;
     Tensor<Real,ndim,ndim> stress;
 
@@ -546,17 +548,19 @@ void _GlobalAssemblyExplicit_DF_DPF_<3>(const Real *points,
                                     );
 
 
-            // COMPUTE ELECTRIC FIELD
-            Real iE0 = 0, iE1 = 0, iE2 = 0;
-            for (Integer j=0; j<nodeperelem; ++j) {
-                const Real potE = ElectricPotentialElem[j];
-                iE0 += SpatialGradient[j]*potE;
-                iE1 += SpatialGradient[nodeperelem+j]*potE;
-                iE2 += SpatialGradient[2*nodeperelem+j]*potE;
+            if (formulation_number == 1) {
+                // COMPUTE ELECTRIC FIELD
+                Real iE0 = 0, iE1 = 0, iE2 = 0;
+                for (Integer j=0; j<nodeperelem; ++j) {
+                    const Real potE = ElectricPotentialElem[j];
+                    iE0 += SpatialGradient[j]*potE;
+                    iE1 += SpatialGradient[nodeperelem+j]*potE;
+                    iE2 += SpatialGradient[2*nodeperelem+j]*potE;
+                }
+                ElectricFieldx[0] = -iE0;
+                ElectricFieldx[1] = -iE1;
+                ElectricFieldx[2] = -iE2;
             }
-            ElectricFieldx[0] = -iE0;
-            ElectricFieldx[1] = -iE1;
-            ElectricFieldx[2] = -iE2;
 
 
             // COMPUTE KINETIC MEASURES
