@@ -41,6 +41,46 @@ def test_quadrature_functionspace():
             FunctionSpace(mesh, q, p=p, equally_spaced=True, evaluate_at_nodes=True)
 
 
+    # now test all Fekete/ES point creation
+    from Florence.QuadratureRules import FeketePointsTri
+    from Florence.QuadratureRules.QuadraturePointsWeightsTri import QuadraturePointsWeightsTri
+    from Florence.QuadratureRules import FeketePointsTet
+    from Florence.QuadratureRules.QuadraturePointsWeightsTet import QuadraturePointsWeightsTet
+    from Florence.QuadratureRules import GaussLobattoPoints1D, GaussLobattoPointsQuad, GaussLobattoPointsHex
+    from Florence.QuadratureRules.QuadraturePointsWeightsTri import QuadraturePointsWeightsTri
+    from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints, EquallySpacedPointsTri, EquallySpacedPointsTet
+    from Florence.MeshGeneration.NodeArrangement import NodeArrangementLine, NodeArrangementTri, NodeArrangementQuad
+    from Florence.MeshGeneration.NodeArrangement import NodeArrangementTet, NodeArrangementHex, NodeArrangementQuadToTri
+    from Florence.MeshGeneration.NodeArrangement import NodeArrangementHexToTet, NodeArrangementLayeredToHex
+
+
+    for i in range(21):
+        FeketePointsTri(i)
+        QuadraturePointsWeightsTri(i,3)
+        QuadraturePointsWeightsTet(i)
+        EquallySpacedPoints(2,i)
+        EquallySpacedPoints(3,i)
+        EquallySpacedPoints(4,i)
+        EquallySpacedPointsTri(i)
+        EquallySpacedPointsTet(i)
+
+        NodeArrangementLine(i)
+        NodeArrangementTri(i)
+        NodeArrangementQuad(i)
+        NodeArrangementHex(i)
+        NodeArrangementLayeredToHex(i)
+
+        if i<6:
+            NodeArrangementQuadToTri(i)
+
+        if i<2:
+            NodeArrangementHexToTet(i)
+
+        if i<18:
+            FeketePointsTet(i)
+            NodeArrangementTet(i)
+
+
     print("Successfully finished running tests on QuadratureRule and FunctionSpace modules\n")
 
 
