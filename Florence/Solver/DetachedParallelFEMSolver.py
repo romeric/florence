@@ -173,6 +173,7 @@ class DetachedParallelFEMSolver(FEMSolver):
             for proc in procs:
                 proc.join()
 
+
         elif self.parallel_model == "pool":
             # with closing(Pool(processes=fem_solver.no_of_cpu_cores)) as pool:
             #     tups = pool.map(super(DetachedParallelFEMSolver, self).Solve,funcs)
@@ -181,6 +182,21 @@ class DetachedParallelFEMSolver(FEMSolver):
 
         elif self.parallel_model == "mpi":
             raise RuntimeError("MPI based detached parallelism not implemented yet")
+
+        else:
+            # SERIAL
+            procs = []
+            solutions = [0]*self.no_of_cpu_cores
+            for proc in range(self.no_of_cpu_cores):
+                if self.save_incremental_solution is True:
+                    self.incremental_solution_filename = fnames[proc]
+
+                self.__DetachedFEMRunner_ContextManager__(
+                    formulation, pmesh[proc],
+                    material, pboundary_conditions[proc],
+                    function_spaces, solver,
+                    contact_formulation,
+                    Eulerx, Eulerp, proc, solutions)
 
 
         if not self.do_not_sync:
@@ -207,6 +223,7 @@ class DetachedParallelFEMSolver(FEMSolver):
                 function_spaces, solver,
                 contact_formulation,
                 Eulerx, Eulerp, proc, solutions):
+
         solution = super(DetachedParallelFEMSolver, self).Solve(formulation=formulation, mesh=mesh,
             material=material, boundary_condition=boundary_condition,
             function_spaces=function_spaces, solver=solver,

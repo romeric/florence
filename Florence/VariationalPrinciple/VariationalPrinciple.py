@@ -172,7 +172,9 @@ class VariationalPrinciple(object):
         for ivar in range(ndim):
             N[ivar::nvar,ivar] = Bases
 
-        rhoNN = rho*np.dot(N,N.T)
+        rhoNN = rho*np.einsum("ij,kj->ik",N,N)
+        # causes issues when called from detached parallel solver
+        # rhoNN = rho*np.dot(N,N.T)
         return rhoNN
 
     def GetConstantMassIntegrand(self, Domain, material):
