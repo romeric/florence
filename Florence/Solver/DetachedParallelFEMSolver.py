@@ -118,7 +118,8 @@ class DetachedParallelFEMSolver(FEMSolver):
             # IF NORMALS ARE NOT ORIENTED WITH X/Y/Z WE NEED CONTACT FORMULATION
             if self.force_solution is False:
                 for i in range(ndim):
-                    if not np.any(np.logical_or(np.isclose(unit_outward_normals[:,i],0.),np.isclose(unit_outward_normals[:,i],1.))):
+                    if not np.all(np.logical_or(np.isclose(unit_outward_normals[:,i],0.),
+                        np.isclose(np.abs(unit_outward_normals[:,i]),1.))):
                         raise RuntimeError("Cannot run detached parallel solver as a contact formulation is needed")
                         return
 
