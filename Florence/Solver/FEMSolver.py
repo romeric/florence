@@ -610,7 +610,9 @@ class FEMSolver(object):
                     mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition, self)
 
         else:
-            if self.iterative_technique == "newton_raphson" or self.iterative_technique == "modified_newton_raphson":
+            if self.iterative_technique == "newton_raphson" or \
+                self.iterative_technique == "modified_newton_raphson" or \
+                self.iterative_technique == "snes":
                 TotalDisp = self.StaticSolver(function_spaces, formulation, solver,
                     K,NeumannForces,NodalForces,Residual,
                     mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition)
@@ -619,6 +621,8 @@ class FEMSolver(object):
                 TotalDisp = StaticSolverArcLength(self,function_spaces, formulation, solver,
                     K,NeumannForces,NodalForces,Residual,
                     mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition)
+            else:
+                raise RuntimeError("Iterative technique for nonlinear solver not understood")
 
             # from FEMSolverDisplacementControl import StaticSolverDisplacementControl
             # TotalDisp = StaticSolverDisplacementControl(self,function_spaces, formulation, solver,
@@ -795,10 +799,8 @@ class FEMSolver(object):
                 Eulerx, Eulerp, K, Residual = self.ModifiedNewtonRaphson(function_spaces, formulation, solver,
                     Increment, K, NodalForces, Residual, mesh, Eulerx, Eulerp,
                     material, boundary_condition, AppliedDirichletInc)
-
-            # Eulerx, Eulerp, K, Residual = self.NewtonRaphsonLineSearch(function_spaces, formulation, solver,
-            #     Increment, K, NodalForces, Residual, mesh, Eulerx, Eulerp,
-            #     material, boundary_condition, AppliedDirichletInc)
+            else:
+                raise RuntimeError("Iterative technique for nonlinear solver not understood")
 
             # UPDATE DISPLACEMENTS FOR THE CURRENT LOAD INCREMENT
             TotalDisp[:,:formulation.ndim,Increment] = Eulerx - mesh.points

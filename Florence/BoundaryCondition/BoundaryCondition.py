@@ -771,10 +771,12 @@ class BoundaryCondition(object):
 
 
 
-    def GetReducedMatrices(self,stiffness,F,mass=None):
+    def GetReducedMatrices(self, stiffness, F, mass=None, only_residual=False):
 
         # GET REDUCED FORCE VECTOR
         F_b = F[self.columns_in,0]
+        if only_residual:
+            return F_b
 
         # GET REDUCED STIFFNESS MATRIX
         stiffness_b = stiffness[self.columns_in,:][:,self.columns_in]
