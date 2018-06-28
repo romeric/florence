@@ -410,6 +410,24 @@ class LinearSolver(object):
             # print('Converged in', ksp.getIterationNumber(), 'iterations.')
             print("Petsc linear iterative solver time is {}".format(time() - t_solve))
 
+        else:
+            warn("{} solver is not available. Default solver is going to be used".format(self.solver_type))
+            # FOR 'super_lu'
+            if A.dtype != np.float64:
+                A = A.astype(np.float64)
+            A = A.tocsc()
+
+            if self.solver_context_manager is None:
+                if self.reuse_factorisation is False:
+                    sol = spsolve(A,b,permc_spec='MMD_AT_PLUS_A',use_umfpack=True)
+                else:
+                    lu = splu(A)
+                    sol = lu.solve(b)
+                    self.solver_context_manager = lu
+            else:
+                sol = self.solver_context_manager.solve(b)
+
+
         return sol
 
 
