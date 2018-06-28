@@ -85,7 +85,6 @@ class Mesh(object):
         # self.has_meshpy = has_meshpy
 
 
-
     def SetElements(self,arr):
         self.elements = arr
 
@@ -97,6 +96,13 @@ class Mesh(object):
 
     def SetFaces(self,arr):
         self.faces = arr
+
+
+    def GetElements(self):
+        return self.elements
+
+    def GetPoints(self):
+        return self.points
 
     def GetEdges(self):
         assert self.element_type is not None
@@ -110,6 +116,7 @@ class Mesh(object):
             self.GetEdgesHex()
         else:
             raise ValueError('Type of element not understood')
+        return self.all_edges
 
     def GetBoundaryEdges(self):
         assert self.element_type is not None
@@ -123,6 +130,7 @@ class Mesh(object):
             self.GetBoundaryEdgesHex()
         else:
             raise ValueError('Type of element not understood')
+        return self.edges
 
     def GetInteriorEdges(self):
         assert self.element_type is not None
@@ -136,6 +144,7 @@ class Mesh(object):
             self.GetInteriorEdgesHex()
         else:
             raise ValueError('Type of element not understood')
+        return self.interior_edges
 
     def GetFaces(self):
         assert self.element_type is not None
@@ -147,6 +156,7 @@ class Mesh(object):
             raise ValueError("2D mesh does not have faces")
         else:
             raise ValueError('Type of element not understood')
+        return self.all_faces
 
     def GetBoundaryFaces(self):
         assert self.element_type is not None
@@ -158,6 +168,7 @@ class Mesh(object):
             raise ValueError("2D mesh does not have faces")
         else:
             raise ValueError('Type of element not understood')
+        return self.faces
 
     def GetInteriorFaces(self):
         assert self.element_type is not None
@@ -169,6 +180,7 @@ class Mesh(object):
             raise ValueError("2D mesh does not have faces")
         else:
             raise ValueError('Type of element not understood')
+        return self.interior_faces
 
     def GetElementsEdgeNumbering(self):
         assert self.element_type is not None
@@ -178,6 +190,7 @@ class Mesh(object):
             return self.GetElementsEdgeNumberingQuad()
         else:
             raise ValueError('Type of element not understood')
+        return self.edge_to_element
 
     def GetElementsWithBoundaryEdges(self):
         assert self.element_type is not None
@@ -187,6 +200,7 @@ class Mesh(object):
             return self.GetElementsWithBoundaryEdgesQuad()
         else:
             raise ValueError('Type of element not understood')
+        return self.boundary_edge_to_element
 
     def GetElementsFaceNumbering(self):
         assert self.element_type is not None
@@ -198,6 +212,7 @@ class Mesh(object):
             raise ValueError("2D mesh does not have faces")
         else:
             raise ValueError('Type of element not understood')
+        return self.face_to_element
 
     def GetElementsWithBoundaryFaces(self):
         assert self.element_type is not None
@@ -209,6 +224,7 @@ class Mesh(object):
             raise ValueError("2D mesh does not have faces")
         else:
             raise ValueError('Type of element not understood')
+        return self.boundary_face_to_element
 
 
     @property
