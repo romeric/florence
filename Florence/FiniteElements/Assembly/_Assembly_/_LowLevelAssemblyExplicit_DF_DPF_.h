@@ -80,6 +80,7 @@ FASTOR_INLINE void KinematicMeasures__(
     int nodeperelem,
     int update)  {
 
+
     Real FASTOR_ALIGN ParentGradientX[ndim*ndim];
     Real FASTOR_ALIGN invParentGradientX[ndim*ndim];
     Real FASTOR_ALIGN ParentGradientx[ndim*ndim];
@@ -105,7 +106,6 @@ FASTOR_INLINE void KinematicMeasures__(
     // Compute deformation gradient F
     _matmul_3k3(nodeperelem,MaterialGradient,EulerElemCoords_,current_Ft);
     Fastor::_transpose<Real,ndim,ndim>(current_Ft,current_F);
-
 }
 
 
@@ -255,7 +255,6 @@ void _GlobalAssemblyExplicit_DF_DPF_<2>(const Real *points,
     Real *EulerElemCoords           = allocate<Real>(nodeperelem*ndim);
     Real *ElectricPotentialElem     = allocate<Real>(nodeperelem);
 
-    Real *current_Jm                = allocate<Real>(nodeperelem*ndim);
     Real *MaterialGradient          = allocate<Real>(ndim*nodeperelem);
     Real *SpatialGradient           = allocate<Real>(nodeperelem*ndim);
     Real detJ                       = 0;
@@ -281,6 +280,16 @@ void _GlobalAssemblyExplicit_DF_DPF_<2>(const Real *points,
     auto mat_obj9 = _ExplicitIsotropicElectroMechanics_108_<Real>(mu1,mu2,lamb,eps_2);
     auto mat_obj10 = _LinearElastic_<Real>(mu,lamb);
 
+    // PRE-COMPUTE ISOPARAMETRIC GRADIENTS
+    std::vector<std::vector<Real>> current_Jms(ngauss);
+    for (int g=0; g<ngauss; ++g) {
+        std::vector<Real> current_Jm(ndim*nodeperelem);
+        for (int j=0; j<nodeperelem; ++j) {
+            current_Jm[j] = Jm[j*ngauss+g];
+            current_Jm[nodeperelem+j] = Jm[ngauss*nodeperelem+j*ngauss+g];
+        }
+        current_Jms[g] = current_Jm;
+    }
 
     // LOOP OVER ELEMETNS
     for (Integer elem=0; elem < nelem; ++elem) {
@@ -302,22 +311,16 @@ void _GlobalAssemblyExplicit_DF_DPF_<2>(const Real *points,
 
         for (int g=0; g<ngauss; ++g) {
 
-            for (int j=0; j<nodeperelem; ++j) {
-                current_Jm[j] = Jm[j*ngauss+g];
-                current_Jm[nodeperelem+j] = Jm[ngauss*nodeperelem+j*ngauss+g];
-            }
-
-
             // COMPUTE KINEMATIC MEASURES
             std::fill(F,F+ndim*ndim,0.);
             std::fill(MaterialGradient,MaterialGradient+nodeperelem*ndim,0.);
             std::fill(SpatialGradient,SpatialGradient+nodeperelem*ndim,0.);
 
-            KinematicMeasures__<2>(  MaterialGradient,
+            KinematicMeasures__<2>( MaterialGradient,
                                     SpatialGradient,
                                     F,
                                     detJ,
-                                    current_Jm,
+                                    current_Jms[g].data(),
                                     AllGauss[g],
                                     LagrangeElemCoords,
                                     EulerElemCoords,
@@ -427,7 +430,6 @@ void _GlobalAssemblyExplicit_DF_DPF_<2>(const Real *points,
     deallocate(LagrangeElemCoords);
     deallocate(EulerElemCoords);
     deallocate(ElectricPotentialElem);
-    deallocate(current_Jm);
     deallocate(MaterialGradient);
     deallocate(SpatialGradient);
     deallocate(local_traction);
@@ -474,7 +476,6 @@ void _GlobalAssemblyExplicit_DF_DPF_<3>(const Real *points,
     Real *EulerElemCoords           = allocate<Real>(nodeperelem*ndim);
     Real *ElectricPotentialElem     = allocate<Real>(nodeperelem);
 
-    Real *current_Jm                = allocate<Real>(nodeperelem*ndim);
     Real *MaterialGradient          = allocate<Real>(ndim*nodeperelem);
     Real *SpatialGradient           = allocate<Real>(nodeperelem*ndim);
     Real detJ                       = 0;
@@ -500,6 +501,17 @@ void _GlobalAssemblyExplicit_DF_DPF_<3>(const Real *points,
     auto mat_obj9 = _ExplicitIsotropicElectroMechanics_108_<Real>(mu1,mu2,lamb,eps_2);
     auto mat_obj10 = _LinearElastic_<Real>(mu,lamb);
 
+    // PRE-COMPUTE ISOPARAMETRIC GRADIENTS
+    std::vector<std::vector<Real>> current_Jms(ngauss);
+    for (int g=0; g<ngauss; ++g) {
+        std::vector<Real> current_Jm(ndim*nodeperelem);
+        for (int j=0; j<nodeperelem; ++j) {
+            current_Jm[j] = Jm[j*ngauss+g];
+            current_Jm[nodeperelem+j] = Jm[ngauss*nodeperelem+j*ngauss+g];
+            current_Jm[2*nodeperelem+j] = Jm[2*ngauss*nodeperelem+j*ngauss+g];
+        }
+        current_Jms[g] = current_Jm;
+    }
 
     // LOOP OVER ELEMETNS
     for (Integer elem=0; elem < nelem; ++elem) {
@@ -523,23 +535,16 @@ void _GlobalAssemblyExplicit_DF_DPF_<3>(const Real *points,
 
         for (int g=0; g<ngauss; ++g) {
 
-            for (int j=0; j<nodeperelem; ++j) {
-                current_Jm[j] = Jm[j*ngauss+g];
-                current_Jm[nodeperelem+j] = Jm[ngauss*nodeperelem+j*ngauss+g];
-                current_Jm[2*nodeperelem+j] = Jm[2*ngauss*nodeperelem+j*ngauss+g];
-            }
-
-
             // COMPUTE KINEMATIC MEASURES
             std::fill(F,F+ndim*ndim,0.);
             std::fill(MaterialGradient,MaterialGradient+nodeperelem*ndim,0.);
             std::fill(SpatialGradient,SpatialGradient+nodeperelem*ndim,0.);
 
-            KinematicMeasures__<3>(  MaterialGradient,
+            KinematicMeasures__<3>( MaterialGradient,
                                     SpatialGradient,
                                     F,
                                     detJ,
-                                    current_Jm,
+                                    current_Jms[g].data(),
                                     AllGauss[g],
                                     LagrangeElemCoords,
                                     EulerElemCoords,
@@ -663,7 +668,6 @@ void _GlobalAssemblyExplicit_DF_DPF_<3>(const Real *points,
 
     }
 
-    deallocate(current_Jm);
     deallocate(LagrangeElemCoords);
     deallocate(EulerElemCoords);
     deallocate(ElectricPotentialElem);
