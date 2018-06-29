@@ -410,9 +410,31 @@ void _GlobalAssemblyExplicit_DF_DPF_<2>(const Real *points,
                 }
             }
 
+#ifdef __AVX__
+            V _va, _vb, _vout;
+            _vb.set(detJ);
+            int Vsize = V::Size;
+            int ROUND_ = ROUND_DOWN(ndof,Vsize);
+            int i=0;
+            for (; i<ROUND_; i+=Vsize) {
+                _va.load(&local_traction[i]);
+                _vout.load(&traction[i]);
+#ifdef __FMA__
+                _vout = fmadd(_va,_vb,_vout);
+#else
+                _vout += _va*_vb;
+#endif
+                _vout.store(&traction[i],false);
+            }
+            for (; i<ndof; ++i) {
+                traction[i] += local_traction[i]*detJ;
+            }
+
+#else
             for (int i=0; i<ndof; ++i) {
                 traction[i] += local_traction[i]*detJ;
             }
+#endif
         }
 
 
@@ -650,9 +672,31 @@ void _GlobalAssemblyExplicit_DF_DPF_<3>(const Real *points,
                 }
             }
 
+#ifdef __AVX__
+            V _va, _vb, _vout;
+            _vb.set(detJ);
+            int Vsize = V::Size;
+            int ROUND_ = ROUND_DOWN(ndof,Vsize);
+            int i=0;
+            for (; i<ROUND_; i+=Vsize) {
+                _va.load(&local_traction[i]);
+                _vout.load(&traction[i]);
+#ifdef __FMA__
+                _vout = fmadd(_va,_vb,_vout);
+#else
+                _vout += _va*_vb;
+#endif
+                _vout.store(&traction[i],false);
+            }
+            for (; i<ndof; ++i) {
+                traction[i] += local_traction[i]*detJ;
+            }
+
+#else
             for (int i=0; i<ndof; ++i) {
                 traction[i] += local_traction[i]*detJ;
             }
+#endif
 
         }
 
