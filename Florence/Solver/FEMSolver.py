@@ -281,7 +281,8 @@ class FEMSolver(object):
             if self.number_of_load_increments < self.save_frequency:
                 raise ValueError("Number of load increments cannot be less than memory store frequency")
             if self.number_of_load_increments < 3:
-                warn("Time step is excessively large for dynamic analysis. I will increase it by a bit")
+                warn("Number of load steps={} is excessively low for dynamic analysis. "
+                    "I will increase it by a bit".format(self.number_of_load_increments))
                 self.number_of_load_increments = 3
         ##############################################################################
 

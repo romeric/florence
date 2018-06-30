@@ -5,7 +5,8 @@ from Florence.QuadratureRules import GaussQuadrature, QuadraturePointsWeightsTet
 
 class QuadratureRule(object):
 
-    def __init__(self, qtype="gauss", norder=2, mesh_type="tri", optimal=3, is_flattened=False):
+
+    def __init__(self, qtype="gauss", norder=2, mesh_type="tri", optimal=3, is_flattened=False, evaluate=True):
         """
             input:
                 is_flattened:           [bool] only used for quads and hexes as tensor based
@@ -14,8 +15,15 @@ class QuadratureRule(object):
 
         self.qtype = qtype
         self.norder = norder
+        self.element_type = mesh_type
+        self.points = []
+        self.weights = []
+        self.is_flattened = is_flattened
         # OPTIMAL QUADRATURE POINTS FOR TRIS AND TETS
         self.optimal = optimal
+
+        if evaluate is False:
+            return
 
         if optimal is False or optimal is None:
             self.qtype = None
@@ -25,10 +33,10 @@ class QuadratureRule(object):
         if mesh_type == "quad" or mesh_type == "hex":
             z, w = GaussQuadrature(self.norder,-1.,1.)
         elif mesh_type == "tet":
-            zw = QuadraturePointsWeightsTet.QuadraturePointsWeightsTet(self.norder,optimal)
+            zw = QuadraturePointsWeightsTet.QuadraturePointsWeightsTet(self.norder,self.optimal)
             z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
         elif mesh_type == "tri":
-            zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(self.norder,optimal)
+            zw = QuadraturePointsWeightsTri.QuadraturePointsWeightsTri(self.norder,self.optimal)
             z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
         elif mesh_type == "line":
             z, w = GaussQuadrature(self.norder,-1.,1.)
@@ -37,9 +45,8 @@ class QuadratureRule(object):
         self.weights = w
 
         if mesh_type == "quad" or mesh_type == "hex":
-            if is_flattened:
+            if self.is_flattened:
                 self.Flatten(mesh_type=mesh_type)
-
 
 
     def Flatten(self, mesh_type=None):
@@ -79,6 +86,12 @@ class QuadratureRule(object):
         else:
             raise ValueError("Element type not understood")
 
-
         self.points = z
         self.weights = w
+
+
+    def GetRule(self):
+        return self.__dict__
+
+    def SetRule(self, in_dict):
+        return self.__dict__.update(in_dict)
