@@ -8,9 +8,9 @@ import numpy as np
 cimport numpy as np
 from libc.stdint cimport int64_t, uint64_t
 
-ctypedef double Real
 ctypedef int64_t Integer
 ctypedef uint64_t UInteger
+ctypedef double Real
 
 
 cdef extern from "_MassIntegrand_.h":

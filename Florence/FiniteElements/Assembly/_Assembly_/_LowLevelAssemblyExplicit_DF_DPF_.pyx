@@ -1,8 +1,9 @@
 import numpy as np
 cimport numpy as np
+from libc.stdint cimport int64_t, uint64_t
 
-ctypedef long long Integer
-ctypedef unsigned long long UInteger
+ctypedef int64_t Integer
+ctypedef uint64_t UInteger
 ctypedef double Real
 
 

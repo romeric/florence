@@ -1,27 +1,28 @@
 import numpy as np
 cimport numpy as np
+from libc.stdint cimport int64_t, uint64_t
 
-ctypedef long long Integer
-ctypedef unsigned long long UInteger
+ctypedef int64_t Integer
+ctypedef uint64_t UInteger
 ctypedef double Real
 
 
 cdef extern from "_LowLevelAssemblyDPF_.h" nogil:
-    void _GlobalAssemblyDPF_(const Real *points, 
-                            const UInteger* elements, 
+    void _GlobalAssemblyDPF_(const Real *points,
+                            const UInteger* elements,
                             const Real* Eulerx,
                             const Real* Eulerp,
                             const Real* bases,
                             const Real* Jm,
                             const Real* AllGauss,
                             Integer ndim,
-                            Integer nvar,  
-                            Integer ngauss, 
-                            Integer nelem, 
+                            Integer nvar,
+                            Integer ngauss,
+                            Integer nelem,
                             Integer nodeperelem,
                             Integer nnode,
                             Integer H_VoigtSize,
-                            Integer requires_geometry_update, 
+                            Integer requires_geometry_update,
                             Integer* local_rows_stiff,
                             Integer* local_cols_stiff,
                             int *I_stiff,
