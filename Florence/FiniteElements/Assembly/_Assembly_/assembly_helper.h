@@ -16,10 +16,12 @@
 #include "_MassIntegrand_.h"
 
 
-
-using Integer = long long;
-using UInteger = unsigned long long;
+#ifndef LL_TYPES
+#define LL_TYPES
 using Real = double;
+using Integer = std::int64_t;
+using UInteger = std::uint64_t;
+#endif
 
 using V = Fastor::SIMDVector<Real>;
 

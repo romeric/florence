@@ -21,9 +21,12 @@
 #include "_det_inv_.h"
 #include "_matmul_.h"
 
+#ifndef LL_TYPES
+#define LL_TYPES
 using Real = double;
 using Integer = std::int64_t;
 using UInteger = std::uint64_t;
+#endif
 
 
 
