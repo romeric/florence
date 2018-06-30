@@ -1,3 +1,6 @@
+#ifndef __MATMUL__H
+#define __MATMUL__H
+
 #include <Fastor.h>
 
 using Fastor::SIMDVector;
@@ -360,3 +363,4 @@ void _matmul_(size_t M, size_t N, size_t K, const T * FASTOR_RESTRICT a, const T
     }
 }
 
+#endif

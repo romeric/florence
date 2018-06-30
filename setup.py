@@ -314,7 +314,7 @@ class FlorenceSetup(object):
 
         self.extension_paths = [tensor_path,jacobi_path,bp_path,
             km_path,gm_path,cm_path,tm_path,mm_path,material_path,assemble_path]
-        # self.extension_paths = [tensor_path]
+        # self.extension_paths = [mm_path]
         # self.extension_paths = [assemble_path]
 
     def SetParallelism(self,_ncpu=1):
@@ -431,13 +431,10 @@ class FlorenceSetup(object):
                     execute('cd '+_path+' && python AOT_Assembler.py clean')
 
                     # Explicit assembler
-                    execute('cd '+_path+' && make ' + self.compiler_args +\
-                        " ASSEMBLY_NAME=_LowLevelAssemblyExplicit_DF_DPF_ CONDF_INC=../../../VariationalPrinciple/_Traction_/\
-                        CONDF_INC=../../../VariationalPrinciple/_Traction_/")
+                    execute('cd '+_path+' && make ' + self.compiler_args +" ASSEMBLY_NAME=_LowLevelAssemblyExplicit_DF_DPF_")
 
                     # Perfect Laplacian assembler
-                    execute('cd '+_path+' && make ' + self.compiler_args +\
-                        " ASSEMBLY_NAME=_LowLevelAssemblyPerfectLaplacian_ ")
+                    execute('cd '+_path+' && make ' + self.compiler_args +" ASSEMBLY_NAME=_LowLevelAssemblyPerfectLaplacian_ ")
 
         else:
             # Parallel build
@@ -499,13 +496,10 @@ class FlorenceSetup(object):
                     execute('cd '+_path+' && make cython_assembler_build ' + self.compiler_args)
 
                     # Explicit assembler
-                    execute('cd '+_path+' && make ' + self.compiler_args +\
-                        " ASSEMBLY_NAME=_LowLevelAssemblyExplicit_DF_DPF_ CONDF_INC=../../../VariationalPrinciple/_Traction_/\
-                        CONDF_INC=../../../VariationalPrinciple/_Traction_/")
+                    execute('cd '+_path+' && make ' + self.compiler_args +" ASSEMBLY_NAME=_LowLevelAssemblyExplicit_DF_DPF_")
 
                     # Perfect Laplacian assembler
-                    execute('cd '+_path+' && make ' + self.compiler_args +\
-                        " ASSEMBLY_NAME=_LowLevelAssemblyPerfectLaplacian_ ")
+                    execute('cd '+_path+' && make ' + self.compiler_args +" ASSEMBLY_NAME=_LowLevelAssemblyPerfectLaplacian_ ")
 
             pool.close()
 

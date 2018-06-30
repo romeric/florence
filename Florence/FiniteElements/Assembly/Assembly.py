@@ -620,6 +620,14 @@ def AssembleExplicit(fem_solver, function_space, formulation, mesh, material, Eu
         else:
             return AssembleExplicit_NoLLD(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
 
+        if fem_solver.has_low_level_dispatcher and fem_solver.mass_type == "lumped":
+            from Florence.VariationalPrinciple._MassIntegrand_ import __ExplicitConstantMassIntegrand__
+            M = __ExplicitConstantMassIntegrand__(mesh, function_space, formulation.nvar, formulation.constant_mass_integrand)
+            # SET MASS FLAG HERE
+            if fem_solver.is_mass_computed is False:
+                fem_solver.is_mass_computed = True
+            return T[:,None], [], M
+
 
         # GET MESH DETAILS
         nvar = formulation.nvar

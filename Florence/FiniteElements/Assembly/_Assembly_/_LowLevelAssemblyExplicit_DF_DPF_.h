@@ -1,11 +1,7 @@
 #ifndef _LOWLEVELASSEMBLYDPF__H
 #define _LOWLEVELASSEMBLYDPF__H
 
-
-
 #include "assembly_helper.h"
-#include "_TractionDF_.h"
-#include "_TractionDPF_.h"
 
 #include "_ExplicitMooneyRivlin_.h"
 #include "_ExplicitIsotropicElectroMechanics_108_.h"
@@ -841,7 +837,12 @@ void _GlobalAssemblyExplicit_DF_DPF_(const Real *points,
 #else
 
 
-
+/*
+// Requires the follfowing in setup.py
+// execute('cd '+_path+' && make ' + self.compiler_args +\
+//    " ASSEMBLY_NAME=_LowLevelAssemblyExplicit_DF_DPF_ CONDF_INC=../../../VariationalPrinciple/_Traction_/\
+//      CONDF_INC=../../../VariationalPrinciple/_Traction_/").
+*/
 
 
 // COMPATIBLE TO ASSEMBLY FOR IMPLICIT ROUTINES - WELL TESTED

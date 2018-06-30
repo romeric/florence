@@ -26,6 +26,8 @@ using V = Fastor::SIMDVector<Real>;
 
 // Helper functions
 /*---------------------------------------------------------------------------------------------*/
+#ifndef CUSTOM_ALLOCATION_
+#define CUSTOM_ALLOCATION_
 template<typename T>
 FASTOR_INLINE T *allocate(Integer size) {
 #if defined(__AVX__)
@@ -46,6 +48,7 @@ FASTOR_INLINE void deallocate(T *a) {
     free(a);
 #endif
 }
+#endif
 
 
 // For checks only
