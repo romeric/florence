@@ -261,9 +261,14 @@ class FEMSolver(object):
         if "Explicit" in material.mtype:
             if self.analysis_subtype == "implicit":
                 raise ValueError("Incorrect material model ({}) used for implicit analysis".format(material.mtype))
-        if self.analysis_subtype == "explicit":
-            if self.mass_type is None:
+        if self.mass_type is None:
+            if self.analysis_subtype == "explicit":
                 self.mass_type = "lumped"
+            else:
+                self.mass_type = "consistent"
+        if self.analysis_type == "dynamic" and self.analysis_subtype == "implicit" and self.mass_type == "lumped":
+            warn("Cannot use lumped mass matrix for implicit analysis. Changing to consistent mass matrix")
+            self.mass_type = "consistent"
         if self.analysis_type == "static":
             if self.save_frequency != 1:
                 warn("memory_store_frequency must be one")
@@ -343,6 +348,9 @@ class FEMSolver(object):
         ##############################################################################
         if self.analysis_type == "static" and self.has_contact is True:
             warn("Contact formulation does not get activated under static problems")
+        if self.analysis_type == "dynamic" and self.analysis_nature == "nonlinear" \
+            and self.analysis_subtype == "implicit" and self.has_contact is True:
+            raise ValueError("Implicit contact formulation for nonlinear implicit dynamics is not supported")
         ##############################################################################
 
         ##############################################################################

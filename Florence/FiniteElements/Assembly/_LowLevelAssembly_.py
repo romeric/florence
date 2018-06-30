@@ -56,7 +56,8 @@ def _LowLevelAssembly_(fem_solver, function_space, formulation, mesh, material, 
             ll_exists = True
             break
     if ll_exists is False:
-        raise NotImplementedError("Turning optimise option on for {} material is not supported yet. Consider 'optimise=False' for now".format(type(material).__name__))
+        raise NotImplementedError("Turning optimise option on for {} material is not supported yet. "
+            "Consider 'optimise=False' for now".format(type(material).__name__))
 
 
     # MAKE MESH DATA CONTIGUOUS
@@ -85,7 +86,7 @@ def _LowLevelAssembly_Par_(fem_solver, function_space, formulation, mesh, materi
     prefix = "_LowLevelAssemblyDF__"
     if formulation.fields == "electro_mechanics":
         prefix = "_LowLevelAssemblyDPF__"
-        
+
     assembly_func = prefix + type(material).__name__ + "_"
     # CHECK IF LOW LEVEL ASSEMBLY EXISTS FOR MATERIAL
     ll_exists = False
@@ -94,7 +95,8 @@ def _LowLevelAssembly_Par_(fem_solver, function_space, formulation, mesh, materi
             ll_exists = True
             break
     if ll_exists is False:
-        raise NotImplementedError("Turning optimise option on for {} material is not supported yet. Consider 'optimise=False' for now".format(type(material).__name__))
+        raise NotImplementedError("Turning optimise option on for {} material is not supported yet. "
+            "Consider 'optimise=False' for now".format(type(material).__name__))
 
     # CALL LOW LEVEL ASSEMBLER
     return eval(assembly_func)(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)

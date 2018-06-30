@@ -26,6 +26,9 @@ using Integer = std::int64_t;
 using UInteger = std::uint64_t;
 
 
+
+
+/*---------------------------------------------------------------------------------------------*/
 #ifndef CUSTOM_ALLOCATION_
 #define CUSTOM_ALLOCATION_
 template<typename T>
@@ -49,6 +52,81 @@ FASTOR_INLINE void deallocate(T *a) {
 #endif
 }
 #endif
+/*---------------------------------------------------------------------------------------------*/
+
+
+
+
+/*---------------------------------------------------------------------------------------------*/
+#ifndef SPARSE_TRIPLET_FILLER
+#define SPARSE_TRIPLET_FILLER
+// IJV Filler
+FASTOR_INLINE
+void fill_triplet(  const Integer *i,
+                    const Integer *j,
+                    const Real *coeff,
+                    int *I,
+                    int *J,
+                    Real *V,
+                    Integer elem,
+                    Integer nvar,
+                    Integer nodeperelem,
+                    const UInteger *elements,
+                    Integer i_shape,
+                    Integer j_shape
+                    ) {
+
+    Integer *current_row_column = allocate<Integer>(nvar*nodeperelem);
+    Integer *full_current_row = allocate<Integer>(i_shape);
+    Integer *full_current_column = allocate<Integer>(j_shape);
+
+    Integer ndof = nvar*nodeperelem;
+
+    Integer const_elem_retriever;
+    for (Integer counter=0; counter<nodeperelem; ++counter) {
+        const_elem_retriever = nvar*elements[elem*nodeperelem+counter];
+        for (Integer ncounter=0; ncounter<nvar; ++ncounter) {
+            current_row_column[nvar*counter+ncounter] = const_elem_retriever+ncounter;
+        }
+    }
+
+    Integer const_I_retriever;
+    for (Integer counter=0; counter<ndof; ++counter) {
+        const_I_retriever = current_row_column[counter];
+        for (Integer iterator=0; iterator<ndof; ++iterator) {
+            full_current_row[counter*ndof+iterator]    = const_I_retriever;
+            full_current_column[counter*ndof+iterator] = current_row_column[iterator];
+        }
+    }
+
+
+    Integer low, high;
+    low = ndof*ndof*elem;
+    high = ndof*ndof*(elem+1);
+
+    Integer incrementer = 0;
+    for (Integer counter = low; counter < high; ++counter) {
+        I[counter] = full_current_row[incrementer];
+        J[counter] = full_current_column[incrementer];
+        V[counter] = coeff[incrementer];
+
+        incrementer += 1;
+    }
+
+    deallocate(full_current_row);
+    deallocate(full_current_column);
+    deallocate(current_row_column);
+}
+#endif
+/*---------------------------------------------------------------------------------------------*/
+
+
+
+
+
+
+
+
 
 
 
@@ -122,13 +200,20 @@ inline void _ExplicitConstantMassIntegrand_(
     const Real* Jm,
     const Real* AllGauss,
     const Real* constant_mass_integrand,
-    Real *mass,
     Integer nelem,
     Integer ndim,
     Integer nvar,
     Integer ngauss,
     Integer nodeperelem,
-    Integer local_capacity) {
+    Integer local_capacity,
+    Integer mass_type,
+    const Integer* local_rows_mass,
+    const Integer* local_cols_mass,
+    int *I_mass,
+    int *J_mass,
+    Real *V_mass,
+    Real *mass
+    ) {
 
 
     Integer ndof                    = nodeperelem*nvar;
@@ -171,7 +256,7 @@ inline void _ExplicitConstantMassIntegrand_(
                 // USING A STL BASED FILLER REMOVES THE ANNOYING BUG
                 std::fill_n(ParentGradientX,ndim*ndim,0.);
                 _matmul_(ndim,ndim,nodeperelem,current_Jms[igauss].data(),LagrangeElemCoords,ParentGradientX);
-                const Real detX = det3x3(ParentGradientX);
+                const Real detX = _det_(ndim, ParentGradientX);
                 detJ = AllGauss[igauss]*std::abs(detX);
             }
 
@@ -203,19 +288,36 @@ inline void _ExplicitConstantMassIntegrand_(
 #endif
         }
 
-        // LUMP MASS
-        for (Integer i=0; i<ndof; ++i) {
-            massel_lumped[i] = std::accumulate(&massel[i*ndof], &massel[(i+1)*ndof],0.);
-        }
+        // FOR LUMP MASS MATRIX
+        if (mass_type == 0) {
+            // LUMP MASS
+            for (Integer i=0; i<ndof; ++i) {
+                massel_lumped[i] = std::accumulate(&massel[i*ndof], &massel[(i+1)*ndof],0.);
+            }
 
-        // ASSEMBLE LUMPED MASS
-        {
-            for (Integer i = 0; i<nodeperelem; ++i) {
-                UInteger T_idx = elements[elem*nodeperelem+i]*nvar;
-                for (Integer iterator = 0; iterator < nvar; ++iterator) {
-                    mass[T_idx+iterator] += massel_lumped[i*nvar+iterator];
+            // ASSEMBLE LUMPED MASS
+            {
+                for (Integer i = 0; i<nodeperelem; ++i) {
+                    UInteger T_idx = elements[elem*nodeperelem+i]*nvar;
+                    for (Integer iterator = 0; iterator < nvar; ++iterator) {
+                        mass[T_idx+iterator] += massel_lumped[i*nvar+iterator];
+                    }
                 }
             }
+        }
+        else {
+            fill_triplet(   local_rows_mass,
+                            local_cols_mass,
+                            massel,
+                            I_mass,
+                            J_mass,
+                            V_mass,
+                            elem,
+                            nvar,
+                            nodeperelem,
+                            elements,
+                            local_capacity,
+                            local_capacity);
         }
     }
 

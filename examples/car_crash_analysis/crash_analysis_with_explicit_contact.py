@@ -17,7 +17,8 @@ def crash_analysis():
     mu2 = 0.
     v = 0.495
     lamb = 2.*mu*v/(1-2.*v)
-    material = ExplicitMooneyRivlin(2, mu1=mu1, mu2=mu2, lamb=lamb, rho=8000.)
+
+    material = MooneyRivlin(2, mu1=mu1, mu2=mu2, lamb=lamb, rho=8000.)
 
 
     def DirichletFunc(mesh, time_step):
@@ -64,7 +65,7 @@ def crash_analysis():
         boundary_condition=boundary_condition, contact_formulation=contact_formulation)
 
     # Write results to vtk file
-    # solution.WriteVTK("crash_analysis_results", quantity=0)
+    solution.WriteVTK("crash_analysis_results", quantity=0)
 
 
 if __name__ == "__main__":
