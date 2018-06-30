@@ -1,5 +1,6 @@
 from __future__ import print_function
 import numpy as np, scipy as sp, sys, os, gc
+from copy import deepcopy
 from warnings import warn
 from time import time
 
@@ -90,6 +91,18 @@ class BoundaryCondition(object):
         # self.external_nodal_forces = None
         # self.internal_traction_forces = None
         # self.residual = None
+
+        # STORE A COPY OF SELF AT THE START TO RESET TO AT THE END
+        self.__save_state__()
+        # FOR INTERNAL PURPOSES WHEN WE DO NOT WANT TO REST
+        self.do_not_reset = False
+
+
+    def __save_state__(self):
+        self.__initialdict__ = deepcopy(self.__dict__)
+
+    def __reset_state__(self):
+        self.__dict__.update(self.__initialdict__)
 
 
     def SetAnalysisParameters(self,analysis_type='static',analysis_nature='linear',
