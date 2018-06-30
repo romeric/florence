@@ -80,12 +80,15 @@ def LowLevelAssembly(fem_solver, function_space, formulation, mesh, material, Eu
     M = []
     if fem_solver.analysis_type != "static" and fem_solver.is_mass_computed is False:
         try:
+            t_mass_assembly = time()
             from Florence.VariationalPrinciple._MassIntegrand_ import __ExplicitConstantMassIntegrand__
             I_mass, J_mass, V_mass = __ExplicitConstantMassIntegrand__(mesh, function_space, formulation, fem_solver.mass_type)[1:]
             M = csr_matrix((V_mass,(I_mass,J_mass)),shape=((formulation.nvar*mesh.points.shape[0],
                     formulation.nvar*mesh.points.shape[0])),dtype=np.float64)
             if M is not None:
                 fem_solver.is_mass_computed = True
+            t_mass_assembly = time() - t_mass_assembly
+            print("Assembled mass matrix. Time elapsed was {} seconds".format(t_mass_assembly))
         except ImportError:
             # CONTINUE DOWN
             warn("Low level mass assembly not available. Falling back to python version")
@@ -643,6 +646,7 @@ def AssembleExplicit(fem_solver, function_space, formulation, mesh, material, Eu
 
         if fem_solver.has_low_level_dispatcher:
             try:
+                t_mass_assembly = time()
                 from Florence.VariationalPrinciple._MassIntegrand_ import __ExplicitConstantMassIntegrand__
                 M, I_mass, J_mass, V_mass = __ExplicitConstantMassIntegrand__(mesh, function_space, formulation, fem_solver.mass_type)
 
@@ -652,6 +656,8 @@ def AssembleExplicit(fem_solver, function_space, formulation, mesh, material, Eu
                 # SET MASS FLAG HERE
                 if fem_solver.is_mass_computed is False:
                     fem_solver.is_mass_computed = True
+                t_mass_assembly = time() - t_mass_assembly
+                print("Assembled mass matrix. Time elapsed was {} seconds".format(t_mass_assembly))
                 return T[:,None], [], M
             except ImportError:
                 # CONTINUE DOWN
