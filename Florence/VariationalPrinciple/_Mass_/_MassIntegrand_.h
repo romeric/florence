@@ -76,11 +76,8 @@ void fill_triplet(  const Integer *i,
                     Integer j_shape
                     ) {
 
-    Integer *current_row_column = allocate<Integer>(nvar*nodeperelem);
-    Integer *full_current_row = allocate<Integer>(i_shape);
-    Integer *full_current_column = allocate<Integer>(j_shape);
-
     Integer ndof = nvar*nodeperelem;
+    Integer *current_row_column = allocate<Integer>(nvar*nodeperelem);
 
     Integer const_elem_retriever;
     for (Integer counter=0; counter<nodeperelem; ++counter) {
@@ -90,35 +87,89 @@ void fill_triplet(  const Integer *i,
         }
     }
 
+    Integer icounter = 0;
+    Integer ncounter = ndof*ndof*elem;
+
     Integer const_I_retriever;
     for (Integer counter=0; counter<ndof; ++counter) {
         const_I_retriever = current_row_column[counter];
         for (Integer iterator=0; iterator<ndof; ++iterator) {
-            full_current_row[counter*ndof+iterator]    = const_I_retriever;
-            full_current_column[counter*ndof+iterator] = current_row_column[iterator];
+            I[ncounter] = const_I_retriever;
+            J[ncounter] = current_row_column[iterator];
+            V[ncounter] = coeff[icounter];
+            ncounter++;
+            icounter++;
         }
     }
 
-
-    Integer low, high;
-    low = ndof*ndof*elem;
-    high = ndof*ndof*(elem+1);
-
-    Integer incrementer = 0;
-    for (Integer counter = low; counter < high; ++counter) {
-        I[counter] = full_current_row[incrementer];
-        J[counter] = full_current_column[incrementer];
-        V[counter] = coeff[incrementer];
-
-        incrementer += 1;
-    }
-
-    deallocate(full_current_row);
-    deallocate(full_current_column);
     deallocate(current_row_column);
 }
 #endif
 /*---------------------------------------------------------------------------------------------*/
+
+
+
+// /*---------------------------------------------------------------------------------------------*/
+// #ifndef SPARSE_TRIPLET_FILLER
+// #define SPARSE_TRIPLET_FILLER
+// // IJV Filler
+// FASTOR_INLINE
+// void fill_triplet(  const Integer *i,
+//                     const Integer *j,
+//                     const Real *coeff,
+//                     int *I,
+//                     int *J,
+//                     Real *V,
+//                     Integer elem,
+//                     Integer nvar,
+//                     Integer nodeperelem,
+//                     const UInteger *elements,
+//                     Integer i_shape,
+//                     Integer j_shape
+//                     ) {
+
+//     Integer *current_row_column = allocate<Integer>(nvar*nodeperelem);
+//     int *full_current_row = allocate<int>(i_shape);
+//     int *full_current_column = allocate<int>(j_shape);
+
+//     Integer ndof = nvar*nodeperelem;
+
+//     Integer const_elem_retriever;
+//     for (Integer counter=0; counter<nodeperelem; ++counter) {
+//         const_elem_retriever = nvar*elements[elem*nodeperelem+counter];
+//         for (Integer ncounter=0; ncounter<nvar; ++ncounter) {
+//             current_row_column[nvar*counter+ncounter] = const_elem_retriever+ncounter;
+//         }
+//     }
+
+//     Integer const_I_retriever;
+//     for (Integer counter=0; counter<ndof; ++counter) {
+//         const_I_retriever = current_row_column[counter];
+//         for (Integer iterator=0; iterator<ndof; ++iterator) {
+//             full_current_row[counter*ndof+iterator]    = const_I_retriever;
+//             full_current_column[counter*ndof+iterator] = current_row_column[iterator];
+//         }
+//     }
+
+//     Integer low, high;
+//     low = ndof*ndof*elem;
+//     high = ndof*ndof*(elem+1);
+
+//     Integer incrementer = 0;
+//     for (Integer counter = low; counter < high; ++counter) {
+//         I[counter] = full_current_row[incrementer];
+//         J[counter] = full_current_column[incrementer];
+//         V[counter] = coeff[incrementer];
+
+//         incrementer += 1;
+//     }
+
+//     deallocate(full_current_row);
+//     deallocate(full_current_column);
+//     deallocate(current_row_column);
+// }
+// #endif
+// /*---------------------------------------------------------------------------------------------*/
 
 
 

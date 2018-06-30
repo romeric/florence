@@ -214,7 +214,8 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
         IncDirichlet = boundary_condition.UpdateFixDoFs(AppliedDirichletInc,
             K.shape[0],formulation.nvar)
         # UPDATE EULERIAN COORDINATE
-        Eulerx += IncDirichlet[:,:formulation.ndim]
+        # Eulerx += IncDirichlet[:,:formulation.ndim]
+        Eulerx[:,:] = mesh.points + IncDirichlet[:,:formulation.ndim]
         Eulerp[:] = IncDirichlet[:,-1] # ENSURES Eulerp IS CONTIGUOUS - NECESSARY FOR LOW-LEVEL DISPATCHER
 
 
