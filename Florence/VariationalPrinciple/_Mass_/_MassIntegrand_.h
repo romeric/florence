@@ -325,8 +325,8 @@ inline void _ExplicitConstantMassIntegrand_(
             int ROUND_ = ROUND_DOWN(local_capacity,Vsize);
             int i=0;
             for (; i<ROUND_; i+=Vsize) {
-                _va.load(&constant_mass_integrand[igauss*local_capacity+i]);
-                _vout.load(&massel[i]);
+                _va.load(&constant_mass_integrand[igauss*local_capacity+i],false);
+                _vout.load(&massel[i],false);
 #ifdef __FMA__
                 _vout = fmadd(_va,_vb,_vout);
 #else
