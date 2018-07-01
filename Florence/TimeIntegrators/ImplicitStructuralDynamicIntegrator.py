@@ -389,7 +389,7 @@ class LinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
 
         if formulation.fields == "electro_mechanics":
             M_mech = M[self.mechanical_dofs,:][:,self.mechanical_dofs]
-            if self.include_physical_damping:
+            if fem_solver.include_physical_damping:
                 D_mech = D[self.mechanical_dofs,:][:,self.mechanical_dofs]
         else:
             M_mech = M

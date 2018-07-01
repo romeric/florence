@@ -524,9 +524,8 @@ class FEMSolver(object):
                 solution.assembly_time = linearised_solver.assembly_time
                 self.__dict__.update(linearised_solver.__dict__)
                 return solution
-            elif self.analysis_type == "dynamic":
+            elif self.analysis_type == "dynamic" and self.analysis_subtype == "explicit":
                 # CONTINUE DOWN FOR EXPLICIT DYNAMIC SOLVER
-                self.analysis_subtype = "explicit"
                 if self.mass_type == None:
                     self.mass_type = "lumped"
                 boundary_condition.ConvertStaticsToDynamics(mesh, self.number_of_load_increments)
