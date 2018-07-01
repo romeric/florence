@@ -273,7 +273,9 @@ inline void _ExplicitConstantMassIntegrand_(
     Integer ndof                    = nodeperelem*nvar;
     Real *LagrangeElemCoords        = allocate<Real>(nodeperelem*ndim);
     Real *MaterialGradient          = allocate<Real>(ndim*nodeperelem);
-    Real *ParentGradientX           = allocate<Real>(ndim*ndim);
+    // +1 TO AVOID OVERSTEPPONG IN MATMUL UNALIGNED STORE - EXTREMELY DANGEROUSE BUG
+    int plus1                       = ndim == 2 ? 0 : 1;
+    Real *ParentGradientX           = allocate<Real>(ndim*ndim+plus1);
     Real detJ                       = 0.;
     Real *massel                    = allocate<Real>(local_capacity);
     Real *massel_lumped             = allocate<Real>(ndof);
@@ -308,7 +310,7 @@ inline void _ExplicitConstantMassIntegrand_(
 
             {
                 // USING A STL BASED FILLER REMOVES THE ANNOYING BUG
-                std::fill_n(ParentGradientX,ndim*ndim,0.);
+                std::fill_n(ParentGradientX,ndim*ndim+plus1,0.);
                 _matmul_(ndim,ndim,nodeperelem,current_Jms[igauss].data(),LagrangeElemCoords,ParentGradientX);
                 const Real detX = _det_(ndim, ParentGradientX);
                 detJ = AllGauss[igauss]*std::abs(detX);
