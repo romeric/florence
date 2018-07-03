@@ -64,6 +64,11 @@ def crash_analysis():
     solution = fem_solver.Solve(formulation=formulation, material=material, mesh=mesh,
         boundary_condition=boundary_condition, contact_formulation=contact_formulation)
 
+    # check validity
+    solution_vectors = solution.GetSolutionVectors()
+    assert np.linalg.norm(solution_vectors) > 21610
+    assert np.linalg.norm(solution_vectors) < 21630
+
     # Write results to vtk file
     # solution.WriteVTK("crash_analysis_results", quantity=0)
 
