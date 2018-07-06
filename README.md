@@ -1,13 +1,13 @@
 [![Build Status](https://travis-ci.com/romeric/florence.svg?token=HFW6d19YsYpKDNwvtqDr&branch=master)](https://travis-ci.com/romeric/florence)
 [![Coverage Status](https://coveralls.io/repos/github/romeric/florence/badge.svg?branch=master&service=github)](https://coveralls.io/github/romeric/florence?branch=master)
 
-**Florence** is a Python-based computational framework for multi-physics simulation of electro-magneto-mechanical systems using the finite element and boundary element methods.
+**Florence** is a Python-based computational framework for multi-physics simulations using the finite element and boundary element methods.
 
 # Features
 A non-exhaustive list of core features:
 - High order planar and curved finite and boundary elements (line, tri, quad, tet, hex)
 - In-built CAD-conformal curvilinear mesh generator
-- Powerful in-built pre and post processor
+- Powerful in-built pre and post processor with the ability to visualise high order curved meshes
 - Poisson, electrostatic and heat transfer solvers
 - Linear, geometrically linearised and fully nonlinear solid/structural mechanics solvers
 - Linear, geometrically linearised and fully nonlinear electromechanics solvers
@@ -22,7 +22,7 @@ A non-exhaustive list of core features:
 In addition, the framework also provides Python interfaces to many low-level numerical subroutines written in C, C++ and Cython.
 
 # Platform support
-Florence supports Linux, macOS and Windows (under Cygwin) under
+Florence supports Linux, macOS and Windows (under Cygwin/MinGW) under
 - Python 2.7
 - Python >= 3.5
 - PyPy >= v5.7.0
@@ -130,7 +130,9 @@ export PATH="/path/to/anaconda2/bin:$PATH"
 ```
 
 # Documentation
-A series of well explained examples are provided in the example folder that cover most of the functionality of florence. As an example, setting up and solving the Laplace equation using fourth order hexahedral Lagrange shape functions over a cube is as simple as
+Documentation is available under [wiki](https://github.com/romeric/florence/wiki) pages. Furthermore, a series of well explained examples are provided in the example folder that cover most of the functionality of florence.
+
+To get a quick taste of Florence, let us consider the Laplacian for example. Setting up and solving the Laplace equation using fourth order hexahedral Lagrange shape functions over a cube is as simple as
 
 ~~~python
 import numpy as np

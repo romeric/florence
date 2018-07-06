@@ -359,6 +359,9 @@ class LinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
         # CHECK FORMULATION
         if formulation.fields != "mechanics" and formulation.fields != "electro_mechanics":
             raise NotImplementedError("Linear implicit solver for {} is not available".format(formulation.fields))
+        if formulation.fields == "electro_mechanics":
+            warn("Linear implicit solver for electromechanics formulation is not thoroughly checked and may return incorrect results. "
+                "Please use nonlinear explicit dynamic solver instead")
 
         # GET BOUNDARY CONDITIONS INFROMATION
         self.GetBoundaryInfo(mesh, formulation, boundary_condition)
@@ -374,10 +377,8 @@ class LinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
             tmp[:,0] = NeumannForces[:,0]
             NeumannForces = tmp
 
-        # dU = np.zeros((mesh.points.shape[0]*formulation.nvar))
-        # dU[boundary_condition.columns_out] = boundary_condition.applied_dirichlet[:,0]
-        # TotalDisp[:,:formulation.nvar,0] = dU.reshape(mesh.points.shape[0],formulation.nvar)
-        dU = boundary_condition.UpdateFixDoFs(boundary_condition.applied_dirichlet[:,0], mesh.points.shape[0]*formulation.nvar, formulation.nvar)
+        dU = boundary_condition.UpdateFixDoFs(boundary_condition.applied_dirichlet[:,0],
+            mesh.points.shape[0]*formulation.nvar, formulation.nvar)
         TotalDisp[:,:formulation.nvar,0] = dU
         # INITIALISE VELOCITY AND ACCELERATION
         velocities     = np.zeros((mesh.points.shape[0]*formulation.ndim))
@@ -414,6 +415,7 @@ class LinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
             if self.include_physical_damping:
                 D_mech = D_mech.sum(axis=1).A.ravel()
 
+        reuse_factorisation = False if formulation.fields == "electro_mechanics" else True
 
         for Increment in range(1,LoadIncrement):
             t_increment=time()
@@ -448,6 +450,9 @@ class LinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
                         (1./self.beta/LoadFactor)*M_mech.dot(velocities) + (0.5/self.beta - 1.)*M_mech.dot(accelerations)
             Residual += DeltaF
 
+            if formulation.fields == "electro_mechanics":
+                K           = Assemble(fem_solver,function_spaces[0], formulation, mesh, material, Eulerx, Eulerp)[0]
+                K          += (self.gamma/self.beta/LoadFactor)*D + (1./self.beta/LoadFactor**2)*M
 
             # CHECK CONTACT AND ASSEMBLE IF DETECTED
             if fem_solver.has_contact:
@@ -463,12 +468,17 @@ class LinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
                     raise NotImplementedError("Contact algorithm for {} is not available".format(formulation.fields))
 
             # REDUCED ACCUMULATED FORCE
-            F_b = boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
-                boundary_condition.applied_dirichlet[:,Increment],LoadFactor=1.0,
-                mass=M,only_residual=True)[boundary_condition.columns_in,0]
+            if formulation.fields == "mechanics":
+                F_b = boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
+                    boundary_condition.applied_dirichlet[:,Increment],LoadFactor=1.0,
+                    mass=M,only_residual=True)[boundary_condition.columns_in,0]
+            else:
+                K_b, F_b = boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
+                    boundary_condition.applied_dirichlet[:,Increment],LoadFactor=1.0,
+                    mass=M)[:2]
 
             # SOLVE THE SYSTEM
-            sol = solver.Solve(K_b, F_b, reuse_factorisation=True)
+            sol = solver.Solve(K_b, F_b, reuse_factorisation=reuse_factorisation)
 
             dU = post_process.TotalComponentSol(sol, boundary_condition.columns_in,
                 boundary_condition.columns_out, AppliedDirichletInc,0,K.shape[0])
