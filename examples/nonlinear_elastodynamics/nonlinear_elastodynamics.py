@@ -52,7 +52,9 @@ def nonlinear_elastodynamics(optimise=True):
         analysis_type="dynamic",
         analysis_subtype="explicit",
         mass_type="consistent",
-        optimise=optimise
+        optimise=optimise,
+        compute_energy_dissipation=True,
+        compute_linear_momentum_dissipation=True
         )
 
     results_explicit_consistent_mass = explicit_solver_consistent_mass.Solve(formulation=formulation, mesh=mesh,

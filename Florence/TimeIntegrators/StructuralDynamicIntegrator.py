@@ -86,10 +86,10 @@ class StructuralDynamicIntegrator(object):
 
 
     def ComputeEnergyDissipation(self, function_space, mesh, material, formulation, fem_solver,
-        Eulerx, TotalDisp, NeumannForces, M, velocities, Increment):
+        Eulerx, U, NeumannForces, M, velocities):
 
         if formulation.fields == "electro_mechanics":
-            Eulerp = TotalDisp[:,-1,Increment]
+            Eulerp = U[:,-1]
 
         internal_energy = 0.
         for elem in range(mesh.nelem):
@@ -109,7 +109,7 @@ class StructuralDynamicIntegrator(object):
 
             kinetic_energy = 0.5*np.dot(velocities.ravel(),M.dot(velocities.ravel()))
 
-        external_energy = np.dot(TotalDisp[:,:,Increment].ravel(),NeumannForces[:,Increment])
+        external_energy = np.dot(U.ravel(),NeumannForces.ravel())
 
         total_energy = internal_energy + kinetic_energy - external_energy
         return total_energy, internal_energy, kinetic_energy, external_energy
@@ -117,10 +117,12 @@ class StructuralDynamicIntegrator(object):
 
 
     def ComputePowerDissipation(self, function_space, mesh, material, formulation, fem_solver,
-        Eulerx, TotalDisp, NeumannForces, M, velocities, accelerations, Increment):
+        Eulerx, U, NeumannForces, M, velocities, accelerations):
 
         if formulation.fields == "electro_mechanics":
-            Eulerp = TotalDisp[:,-1,Increment]
+            Eulerp = U[:,-1]
+        if velocities.ndim == 1:
+            velocities = velocities.reshape(U.shape[0],formulation.ndim)
 
         internal_energy = 0.
         for elem in range(mesh.nelem):
@@ -141,7 +143,7 @@ class StructuralDynamicIntegrator(object):
 
             kinetic_energy = np.dot(velocities.ravel(),M.dot(accelerations.ravel()))
 
-        external_energy = np.dot(velocities.ravel(),NeumannForces[self.mechanical_dofs,Increment])
+        external_energy = np.dot(velocities.ravel(),NeumannForces[self.mechanical_dofs].ravel())
 
         total_energy = internal_energy + kinetic_energy - external_energy
         return total_energy, internal_energy, kinetic_energy, external_energy

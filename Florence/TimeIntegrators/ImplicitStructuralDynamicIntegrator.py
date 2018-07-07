@@ -112,7 +112,7 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
             # COMPUTE DISSIPATION OF ENERGY THROUGH TIME
             if fem_solver.compute_energy_dissipation:
                 energy_info = self.ComputeEnergyDissipation(function_spaces[0], mesh, material, formulation, fem_solver,
-                    Eulerx, TotalDisp, NeumannForces, M, velocities, Increment)
+                    Eulerx, TotalDisp[:,:,Increment], NodalForces, M, velocities)
                 formulation.energy_dissipation.append(energy_info[0])
                 formulation.internal_energy.append(energy_info[1])
                 formulation.kinetic_energy.append(energy_info[2])
@@ -120,7 +120,7 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
             # COMPUTE DISSIPATION OF LINEAR MOMENTUM THROUGH TIME
             if fem_solver.compute_linear_momentum_dissipation:
                 power_info = self.ComputePowerDissipation(function_spaces[0], mesh, material, formulation, fem_solver,
-                    Eulerx, TotalDisp, NeumannForces, M, velocities, accelerations, Increment)
+                    Eulerx, TotalDisp[:,:,Increment], NodalForces, M, velocities, accelerations)
                 formulation.power_dissipation.append(power_info[0])
                 formulation.internal_power.append(power_info[1])
                 formulation.kinetic_power.append(power_info[2])
