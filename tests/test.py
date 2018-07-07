@@ -47,6 +47,7 @@ from linear_elastic_dynamics import linear_elastic_dynamics
 from electro_hyperelastic_explicit_dynamics import electro_hyperelastic_explicit_dynamics
 from staggered_multiphysics_solver import staggered_multiphysics_solver
 from mixed_fem_multiphysics_strain_gradient_solvers import strain_gradient_elastodynamics
+from mixed_fem_multiphysics_strain_gradient_solvers import strain_gradient_electroelastodynamics
 from nonlinear_elastodynamics import nonlinear_elastodynamics
 from nonlinear_electroelastodynamics import nonlinear_electroelastodynamics
 
@@ -204,6 +205,7 @@ def test_examples():
     dielectric_wrinkling()
     staggered_multiphysics_solver()
     strain_gradient_elastodynamics()
+    strain_gradient_electroelastodynamics()
     nonlinear_elastodynamics()
     nonlinear_electroelastodynamics()
 
