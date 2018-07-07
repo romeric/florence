@@ -2,7 +2,7 @@ import numpy as np
 from Florence import *
 
 
-def nonlinear_elastodynamics():
+def nonlinear_elastodynamics(optimise=True):
 
     n=6
     mesh = Mesh()
@@ -34,7 +34,9 @@ def nonlinear_elastodynamics():
         analysis_type="dynamic",
         analysis_subtype="implicit",
         newton_raphson_tolerance=1e-10,
-        optimise=True
+        optimise=optimise,
+        compute_energy_dissipation=True,
+        compute_linear_momentum_dissipation=True
         )
 
     results_implicit = implicit_solver.Solve(formulation=formulation, mesh=mesh,
@@ -50,7 +52,7 @@ def nonlinear_elastodynamics():
         analysis_type="dynamic",
         analysis_subtype="explicit",
         mass_type="consistent",
-        optimise=True
+        optimise=optimise
         )
 
     results_explicit_consistent_mass = explicit_solver_consistent_mass.Solve(formulation=formulation, mesh=mesh,
@@ -66,7 +68,7 @@ def nonlinear_elastodynamics():
         analysis_type="dynamic",
         analysis_subtype="explicit",
         mass_type="lumped",
-        optimise=True
+        optimise=optimise
         )
 
     results_explicit_lumped_mass = explicit_solver_lumped_mass.Solve(formulation=formulation, mesh=mesh,
@@ -90,4 +92,5 @@ def nonlinear_elastodynamics():
 
 
 if __name__ == "__main__":
-    nonlinear_elastodynamics()
+    nonlinear_elastodynamics(optimise=False)
+    nonlinear_elastodynamics(optimise=True)

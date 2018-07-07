@@ -2,7 +2,7 @@ from Florence import *
 import numpy as np
 
 
-def nonlinear_electroelastodynamics():
+def nonlinear_electroelastodynamics(optimise=True):
     """This example checks all variants of nonlinear electromechanics formulation i.e.
         (linearised/nonlinear) static/implicit dynamics/explicit dynamics
     """
@@ -51,7 +51,7 @@ def nonlinear_electroelastodynamics():
         analysis_type="static",
         newton_raphson_tolerance=1e-5,
         newton_raphson_solution_tolerance=1e-11,
-        optimise=True,
+        optimise=optimise,
         print_incremental_log=True,
         )
 
@@ -65,8 +65,10 @@ def nonlinear_electroelastodynamics():
         analysis_type="dynamic",
         newton_raphson_tolerance=1e-5,
         newton_raphson_solution_tolerance=1e-11,
-        optimise=True,
+        optimise=optimise,
         print_incremental_log=True,
+        compute_energy_dissipation=True,
+        compute_linear_momentum_dissipation=True,
         )
 
     nonlinear_dynamic_results = nonlinear_dynamic_solver.Solve(formulation=formulation, mesh=mesh,
@@ -84,7 +86,7 @@ def nonlinear_electroelastodynamics():
     #     analysis_subtype="explicit",
     #     newton_raphson_tolerance=1e-5,
     #     newton_raphson_solution_tolerance=1e-11,
-    #     optimise=True,
+    #     optimise=optimise,
     #     print_incremental_log=True,
     #     )
 
@@ -101,7 +103,7 @@ def nonlinear_electroelastodynamics():
         analysis_type="static",
         newton_raphson_tolerance=1e-5,
         newton_raphson_solution_tolerance=1e-11,
-        optimise=True,
+        optimise=optimise,
         print_incremental_log=True,
         )
 
@@ -118,7 +120,7 @@ def nonlinear_electroelastodynamics():
         analysis_type="dynamic",
         newton_raphson_tolerance=1e-5,
         newton_raphson_solution_tolerance=1e-11,
-        optimise=True,
+        optimise=optimise,
         print_incremental_log=True,
         break_at_increment=100,
         )
@@ -141,4 +143,5 @@ def nonlinear_electroelastodynamics():
 
 
 if __name__ == "__main__":
-    nonlinear_electroelastodynamics()
+    nonlinear_electroelastodynamics(optimise=False)
+    nonlinear_electroelastodynamics(optimise=True)

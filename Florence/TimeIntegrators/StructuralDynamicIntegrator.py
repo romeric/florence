@@ -84,21 +84,29 @@ class StructuralDynamicIntegrator(object):
 
 
 
-    def ComputeEnergyDissipation(self,function_space,mesh,material,formulation,fem_solver,
+
+    def ComputeEnergyDissipation(self, function_space, mesh, material, formulation, fem_solver,
         Eulerx, TotalDisp, NeumannForces, M, velocities, Increment):
+
+        if formulation.fields == "electro_mechanics":
+            Eulerp = TotalDisp[:,-1,Increment]
 
         internal_energy = 0.
         for elem in range(mesh.nelem):
             LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
             EulerElemCoords = Eulerx[mesh.elements[elem,:],:]
 
-            internal_energy += formulation.GetEnergy(function_space, material,
-                LagrangeElemCoords, EulerElemCoords, fem_solver, elem)
-
         if formulation.fields == "electro_mechanics":
+            ElectricPotentialElem = Eulerp[mesh.elements[elem,:]]
+            internal_energy += formulation.GetEnergy(function_space, material,
+                LagrangeElemCoords, EulerElemCoords, ElectricPotentialElem, fem_solver, elem)
+
             M_mech = M[self.mechanical_dofs,:][:,self.mechanical_dofs]
             kinetic_energy = 0.5*np.dot(velocities.ravel(),M_mech.dot(velocities.ravel()))
         else:
+            internal_energy += formulation.GetEnergy(function_space, material,
+                LagrangeElemCoords, EulerElemCoords, fem_solver, elem)
+
             kinetic_energy = 0.5*np.dot(velocities.ravel(),M.dot(velocities.ravel()))
 
         external_energy = np.dot(TotalDisp[:,:,Increment].ravel(),NeumannForces[:,Increment])
@@ -108,8 +116,11 @@ class StructuralDynamicIntegrator(object):
 
 
 
-    def ComputePowerDissipation(self,function_space,mesh,material,formulation,fem_solver, Eulerx, TotalDisp,
-        NeumannForces, M, velocities, accelerations, Increment):
+    def ComputePowerDissipation(self, function_space, mesh, material, formulation, fem_solver,
+        Eulerx, TotalDisp, NeumannForces, M, velocities, accelerations, Increment):
+
+        if formulation.fields == "electro_mechanics":
+            Eulerp = TotalDisp[:,-1,Increment]
 
         internal_energy = 0.
         for elem in range(mesh.nelem):
@@ -117,16 +128,20 @@ class StructuralDynamicIntegrator(object):
             EulerElemCoords    = Eulerx[mesh.elements[elem,:],:]
             VelocityElem       = velocities[mesh.elements[elem,:],:]
 
-            internal_energy += formulation.GetLinearMomentum(function_space, material,
-                LagrangeElemCoords, EulerElemCoords, VelocityElem, fem_solver, elem)
-
         if formulation.fields == "electro_mechanics":
+            ElectricPotentialElem = Eulerp[mesh.elements[elem,:]]
+            internal_energy += formulation.GetLinearMomentum(function_space, material,
+                LagrangeElemCoords, EulerElemCoords, VelocityElem, ElectricPotentialElem, fem_solver, elem)
+
             M_mech = M[self.mechanical_dofs,:][:,self.mechanical_dofs]
             kinetic_energy = np.dot(velocities.ravel(),M_mech.dot(accelerations.ravel()))
         else:
+            internal_energy += formulation.GetLinearMomentum(function_space, material,
+                LagrangeElemCoords, EulerElemCoords, VelocityElem, fem_solver, elem)
+
             kinetic_energy = np.dot(velocities.ravel(),M.dot(accelerations.ravel()))
 
-        external_energy = np.dot(velocities.ravel(),NeumannForces[:,Increment])
+        external_energy = np.dot(velocities.ravel(),NeumannForces[self.mechanical_dofs,Increment])
 
         total_energy = internal_energy + kinetic_energy - external_energy
         return total_energy, internal_energy, kinetic_energy, external_energy

@@ -475,7 +475,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
                 # COMPUTE ELECTRIC DISPLACEMENT IMPLICITLY
                 ElectricDisplacementx = material.ElectricDisplacementx(StrainTensors, ElectricFieldx[counter,:], elem, counter)
                 # COMPUTE THE INTERNAL ENERGY AT THIS GAUSS POINT
-                energy = material.InternalEnergy(StrainTensors,ElectricDisplacementx[counter,:],elem,counter)
+                energy = material.InternalEnergy(StrainTensors,ElectricDisplacementx,elem,counter)
 
             # INTEGRATE INTERNAL ENERGY
             internal_energy += energy*detJ[counter]

@@ -130,3 +130,29 @@ class IsotropicElectroMechanics_108(Material):
         H_Voigt = np.ascontiguousarray(H_Voigt[:,-self.ndim:,-self.ndim:])
         return D, None, H_Voigt
 
+
+
+    def InternalEnergy(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
+
+        mu1 = self.mu1
+        mu2 = self.mu2
+        lamb = self.lamb
+        eps_2 = self.eps_2
+
+        I = StrainTensors['I']
+        F = StrainTensors['F'][gcounter]
+        J = StrainTensors['J'][gcounter]
+        C = np.dot(F.T,F)
+        H = J*np.linalg.inv(F).T
+        G = np.dot(H.T,H)
+
+        D  = ElectricDisplacementx.reshape(self.ndim,1)
+        D0 = np.dot(H.T,D)
+        FD0 = np.dot(F,D0).ravel()
+        FD0FD0 = np.einsum("i,i",FD0,FD0)
+
+        energy = mu1*(np.einsum("ij,ij",C,I)-3)+mu2*(np.einsum("ij,ij",G,I)-3) - \
+            2.*(mu1+2*mu2)*np.log(J) + lamb/2*(J-1)**2 + 1/2./eps_2/J *(FD0FD0)
+
+        return energy
+

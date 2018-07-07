@@ -39,8 +39,8 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
             D = fem_solver.damping_factor*M
 
         # GET BOUNDARY CONDITIONS INFROMATION
+        self.GetBoundaryInfo(mesh, formulation,boundary_condition)
         if formulation.fields == "electro_mechanics":
-            self.GetBoundaryInfo(mesh, formulation,boundary_condition)
             M_mech = M[self.mechanical_dofs,:][:,self.mechanical_dofs]
             if fem_solver.include_physical_damping:
                 D_mech = D[self.mechanical_dofs,:][:,self.mechanical_dofs]
@@ -111,7 +111,7 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
 
             # COMPUTE DISSIPATION OF ENERGY THROUGH TIME
             if fem_solver.compute_energy_dissipation:
-                energy_info = self.ComputeEnergyDissipation(function_spaces[0],mesh,material,formulation,fem_solver,
+                energy_info = self.ComputeEnergyDissipation(function_spaces[0], mesh, material, formulation, fem_solver,
                     Eulerx, TotalDisp, NeumannForces, M, velocities, Increment)
                 formulation.energy_dissipation.append(energy_info[0])
                 formulation.internal_energy.append(energy_info[1])
@@ -119,7 +119,7 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
                 formulation.external_energy.append(energy_info[3])
             # COMPUTE DISSIPATION OF LINEAR MOMENTUM THROUGH TIME
             if fem_solver.compute_linear_momentum_dissipation:
-                power_info = self.ComputePowerDissipation(function_spaces[0],mesh,material,formulation,fem_solver,
+                power_info = self.ComputePowerDissipation(function_spaces[0], mesh, material, formulation, fem_solver,
                     Eulerx, TotalDisp, NeumannForces, M, velocities, accelerations, Increment)
                 formulation.power_dissipation.append(power_info[0])
                 formulation.internal_power.append(power_info[1])

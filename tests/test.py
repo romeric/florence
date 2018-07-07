@@ -206,8 +206,10 @@ def test_examples():
     staggered_multiphysics_solver()
     strain_gradient_elastodynamics()
     strain_gradient_electroelastodynamics()
-    nonlinear_elastodynamics()
-    nonlinear_electroelastodynamics()
+    nonlinear_elastodynamics(optimise=False)
+    nonlinear_elastodynamics(optimise=True)
+    nonlinear_electroelastodynamics(optimise=False)
+    nonlinear_electroelastodynamics(optimise=True)
 
     # RUN BASICS TESTSUITE
     test_quadrature_functionspace()
