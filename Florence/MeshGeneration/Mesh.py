@@ -2389,10 +2389,9 @@ class Mesh(object):
 
         self.__do_essential_memebers_exist__()
 
-        elements = self.elements.flatten()
+        elements = self.elements.ravel()
         idx_sort = np.argsort(elements)
         sorted_elements = elements[idx_sort]
-        # vals, idx_start, count = np.unique(sorted_elements, return_counts=True, return_index=True)
         vals, idx_start = np.unique(sorted_elements, return_index=True)
 
         # Sets of indices
@@ -2401,6 +2400,7 @@ class Mesh(object):
         pos = np.split(idx_sort %  int(self.elements.shape[1]), idx_start[1:])
 
         # In case one wants to return only the duplicates i.e. filter keeping only items occurring more than once
+        # vals, idx_start, count = np.unique(sorted_elements, return_counts=True, return_index=True)
         # vals = vals[count > 1]
         # res = filter(lambda x: x.size > 1, res)
 
