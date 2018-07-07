@@ -1908,23 +1908,20 @@ class Mesh(object):
             original_order:             [str] {'clockwise','anti-clockwise','retain'} returns the original numbering order"""
 
 
-        assert self.elements is not None
-        assert self.points is not None
+        self.__do_essential_memebers_exist__()
 
         # CHECK IF IT IS LINEAR MESH
-        # HIGH ORDER CURVED ELEMENTS HAVE AREAS WHICH CAN BE COMPUTED THROUGH BASES FUNCTIONS
+        nodeperelem = self.InferNumberOfNodesPerLinearElement()
+        assert self.elements.shape[1] == nodeperelem
+
         quantity = np.array([])
         if self.element_type == "tri":
-            assert self.elements.shape[1]==3
             quantity = self.Areas(with_sign=True)
         elif self.element_type == "quad":
-            assert self.elements.shape[1]==4
             quantity = self.Areas(with_sign=True)
         elif self.element_type == "tet":
-            assert self.elements.shape[1]==4
             quantity = self.Volumes(with_sign=True)
         elif self.element_type == "hex":
-            assert self.elements.shape[1]==8
             quantity = self.Volumes(with_sign=True)
 
         original_order = ''
