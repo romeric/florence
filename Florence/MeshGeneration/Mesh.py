@@ -1947,9 +1947,9 @@ class Mesh(object):
 
 
         if original_order == 'anti-clockwise':
-            print(u'\u2713'.encode('utf8')+' : ','Imported mesh has',original_order,'node ordering')
+            print(u'\u2713'.encode('utf8')+b' : ','Imported mesh has',original_order,'node ordering')
         else:
-            print(u'\u2717'.encode('utf8')+' : ','Imported mesh has',original_order,'node ordering')
+            print(u'\u2717'.encode('utf8')+b' : ','Imported mesh has',original_order,'node ordering')
 
         return original_order
 
