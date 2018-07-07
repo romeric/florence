@@ -564,6 +564,6 @@ def test_material():
 
 
 if __name__ == "__main__":
-    # test_quadrature_functionspace()
+    test_quadrature_functionspace()
     test_mesh_postprocess_material()
-    # test_material()
+    test_material()
