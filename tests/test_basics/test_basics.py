@@ -126,6 +126,8 @@ def test_mesh_postprocess_material():
         mesh = Mesh()
         mesh.Square(element_type=etype, nx=5,ny=5)
         mesh.GetEdges()
+        mesh.GetInteriorEdges()
+        mesh.GetBoundaryEdges()
         mesh.Smooth()
         mesh.Refine()
         mesh.GetNumberOfElements()
@@ -143,6 +145,14 @@ def test_mesh_postprocess_material():
         mesh.IsCurvilinear
         mesh.IsEquallySpaced
         mesh.Partition(7)
+        mesh.Normals()
+        mesh.Areas()
+        mesh.Lengths()
+        mesh.EdgeLengths()
+        mesh.AspectRatios()
+        mesh.Medians()
+        mesh.LargestSegment()
+        mesh.CheckNodeNumbering()
 
         pp = PostProcess(2,2)
         pp.SetMesh(mesh)
@@ -253,7 +263,11 @@ def test_mesh_postprocess_material():
         mesh.Cube(element_type=etype, nx=5,ny=5,nz=5)
         mesh.Refine()
         mesh.GetFaces()
+        mesh.GetInteriorFaces()
+        mesh.GetBoundaryFaces()
         mesh.GetEdges()
+        mesh.GetInteriorEdges()
+        mesh.GetBoundaryEdges()
         mesh.GetNumberOfElements()
         mesh.GetNumberOfNodes()
         mesh.InferElementType()
@@ -265,6 +279,15 @@ def test_mesh_postprocess_material():
         mesh.NodeArranger(C=2)
         mesh.CreateDummyLowerDimensionalMesh()
         mesh.CreateDummyUpperDimensionalMesh()
+        mesh.Normals()
+        mesh.FaceNormals()
+        mesh.Volumes()
+        mesh.Lengths()
+        mesh.EdgeLengths()
+        mesh.AspectRatios()
+        mesh.Medians()
+        mesh.LargestSegment()
+        mesh.CheckNodeNumbering()
 
         pp = PostProcess(3,3)
         pp.SetMesh(mesh)
@@ -398,12 +421,27 @@ def test_mesh_postprocess_material():
 
     mesh = mesh.TriangularProjection()
     mesh.ConvertTrisToQuads()
+    mesh.edge_to_element, mesh.boundary_edge_to_element = None, None
+    mesh.GetElementsEdgeNumbering()
+    mesh.GetElementsWithBoundaryEdges()
+
     mesh = mesh.QuadrilateralProjection()
     mesh.ConvertQuadsToTris()
+    mesh.edge_to_element, mesh.boundary_edge_to_element = None, None
+    mesh.GetElementsEdgeNumbering()
+    mesh.GetElementsWithBoundaryEdges()
+
     mesh = mesh.TetrahedralProjection()
     mesh.ConvertTetsToHexes()
+    mesh.face_to_element, mesh.boundary_face_to_element = None, None
+    mesh.GetElementsFaceNumbering()
+    mesh.GetElementsWithBoundaryFaces()
+
     mesh = mesh.HexahedralProjection()
     mesh.ConvertHexesToTets()
+    mesh.face_to_element, mesh.boundary_face_to_element = None, None
+    mesh.GetElementsFaceNumbering()
+    mesh.GetElementsWithBoundaryFaces()
 
 
     mesh.Square(element_type="quad")
@@ -418,6 +456,17 @@ def test_mesh_postprocess_material():
     idx0 = mesh.FindElementContainingPoint([.31,.55,0.27],algorithm="fem")
     idx1 = mesh.FindElementContainingPoint([.31,.55,0.27],algorithm="geometric")
     assert idx0[0] == idx1[0]
+
+
+    try:
+        mesh.ReadDCM("None",element_type="tri")
+        mesh.ReadFRO("None",element_type="tri")
+        mesh.ReadGIDMesh("None",element_type="tri")
+        mesh.ReadOBJ("None",element_type="tri")
+        mesh.ReadGmsh("None",element_type="tri")
+        mesh.ReadSalome("None",element_type="tri")
+    except:
+        pass
 
 
     print("Successfully finished running tests on Mesh, PostProcess and Material modules\n")
@@ -515,6 +564,6 @@ def test_material():
 
 
 if __name__ == "__main__":
-    test_quadrature_functionspace()
+    # test_quadrature_functionspace()
     test_mesh_postprocess_material()
-    test_material()
+    # test_material()
