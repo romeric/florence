@@ -11,7 +11,7 @@ def WVQuadraturePointsWeightsHex(C):
 
 
     if C == 0:
-        np.array([
+        zw = np.array([
             [0.,  0.,  0.,  8.]
             ])
     elif C == 2:
