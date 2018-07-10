@@ -34,33 +34,7 @@ def Assemble(fem_solver, function_space, formulation, mesh, material, Eulerx, Eu
             return LowLevelAssembly(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
 
     elif fem_solver.memory_model == "distributed":
-        # RUN THIS PROGRAM FROM SHELL WITH python RunSession.py INSTEAD
-        if not __PARALLEL__:
-            warn("parallelisation is going to be turned on")
-
-        import subprocess, os, shutil
-        from time import time
-        from Florence.Utils import par_unpickle
-        from scipy.io import loadmat
-
-        tmp_dir = par_unpickle(function_space,mesh,material,Eulerx,Eulerp)
-        pwd = os.path.dirname(os.path.realpath(__file__))
-        distributed_caller = os.path.join(pwd,"DistributedAssembly.py")
-
-        t_dassembly = time()
-        p = subprocess.Popen("time mpirun -np "+str(MP.cpu_count())+" Florence/FiniteElements/DistributedAssembly.py"+" /home/roman/tmp/",
-            cwd="/home/roman/Dropbox/florence/", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        # p = subprocess.Popen("./mpi_runner.sh", cwd="/home/roman/Dropbox/florence/", shell=True)
-        p.wait()
-        print('MPI took', time() - t_dassembly, 'seconds for distributed assembly')
-        Dict = loadmat(os.path.join(tmp_dir,"results.mat"))
-
-        try:
-            shutil.rmtree(tmp_dir)
-        except IOError:
-            raise IOError("Could not delete the directory")
-
-        return Dict['stiffness'], Dict['T'], Dict['F'], []
+        raise RuntimeError("This memory model is not used anymore, not even under MPI. Use memory_model='shared' instead")
 
 
 def LowLevelAssembly(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
@@ -129,7 +103,6 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
     # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF STIFFNESS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
     I_stiffness=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
     J_stiffness=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
-    # V_stiffness=np.zeros((nvar*nodeperelem)**2*nelem,dtype=np.float32)
     V_stiffness=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.float64)
 
     I_mass=[]; J_mass=[]; V_mass=[]
@@ -140,7 +113,6 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
         V_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.float64)
 
     T = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
-    # T = np.zeros((mesh.points.shape[0]*nvar,1),np.float32)
 
     mass, F = [], []
     if fem_solver.has_moving_boundary:
@@ -148,10 +120,7 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
 
 
     if fem_solver.parallel:
-        # COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
-        # ParallelTuple = parmap.map(formulation.GetElementalMatrices,np.arange(0,nelem,dtype=np.int32),
-            # function_space, mesh, material, fem_solver, Eulerx, Eulerp)
-
+        # COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES)
         ParallelTuple = parmap.map(formulation,np.arange(0,nelem,dtype=np.int32),
             function_space, mesh, material, fem_solver, Eulerx, Eulerp, processes= int(multiprocessing.cpu_count()/2))
 
@@ -194,18 +163,8 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
         del ParallelTuple
         gc.collect()
 
-    # REALLY DANGEROUS FOR MULTIPHYSICS PROBLEMS - NOTE THAT SCIPY RUNS A PRUNE ANYWAY
-    # V_stiffness[np.isclose(V_stiffness,0.)] = 0.
-
     stiffness = coo_matrix((V_stiffness,(I_stiffness,J_stiffness)),
         shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64).tocsr()
-
-    # stiffness = csc_matrix((V_stiffness,(I_stiffness,J_stiffness)),
-        # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float32)
-    # stiffness = csc_matrix((V_stiffness,(I_stiffness,J_stiffness)),
-        # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
-    # stiffness = csr_matrix((V_stiffness,(I_stiffness,J_stiffness)),
-        # shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
 
     # GET STORAGE/MEMORY DETAILS
     fem_solver.spmat = stiffness.data.nbytes/1024./1024.
@@ -227,8 +186,8 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
 
 
 
-def OutofCoreAssembly(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp, calculate_rhs=True, filename=None, chunk_size=None):
-# def OutofCoreAssembly(MainData, mesh, material, Eulerx, TotalPot, calculate_rhs=True, filename=None, chunk_size=None):
+def OutofCoreAssembly(fem_solver, function_space, formulation, mesh, material,
+    Eulerx, Eulerp, calculate_rhs=True, filename=None, chunk_size=None):
     """Assembly routine for larger than memory system of equations.
         Usage of h5py and dask allow us to store the triplets and build a sparse matrix out of
         them on disk.
