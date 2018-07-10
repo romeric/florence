@@ -3182,6 +3182,8 @@ class Mesh(object):
     def PlotMeshNumbering(self):
         """Plots element and node numbers on top of the triangular mesh"""
 
+        self.__do_essential_memebers_exist__()
+
         import matplotlib.pyplot as plt
         import matplotlib as mpl
 

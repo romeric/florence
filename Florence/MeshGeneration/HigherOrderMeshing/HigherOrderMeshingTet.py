@@ -136,16 +136,14 @@ def HighOrderMeshTet_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, chec
     #------------------------------------------------------------------------------------------
 
 
-    # GET MESH EDGES AND FACES
-    reedges = np.zeros((mesh.edges.shape[0],C+2))
-    fsize = int((C+2.)*(C+3.)/2.)
-    refaces = np.zeros((mesh.faces.shape[0],fsize),dtype=mesh.faces.dtype)
-
-    # ComputeAll = False
     if ComputeAll == True:
         #------------------------------------------------------------------------------------------
         # BUILD FACES NOW
         tfaces = time()
+        # GET MESH EDGES AND FACES
+        reedges = np.zeros((mesh.edges.shape[0],C+2))
+        fsize = int((C+2.)*(C+3.)/2.)
+        refaces = np.zeros((mesh.faces.shape[0],fsize),dtype=mesh.faces.dtype)
 
         refaces = np.zeros((mesh.faces.shape[0],fsize))
         # DO NOT CHANGE THE FACES, BY RECOMPUTING THEM, AS THE LINEAR FACES CAN COME FROM

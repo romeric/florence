@@ -142,8 +142,6 @@ def HighOrderMeshTri_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, chec
     edge_to_elements = mesh.GetElementsWithBoundaryEdgesTri()
     node_arranger = NodeArrangementTri(C)[0]
     reedges = np.zeros((mesh.edges.shape[0],C+2),dtype=np.int64)
-    # for i in range(mesh.edges.shape[0]):
-        # reedges[i,:] = reelements[edge_to_elements[i,0],node_arranger[edge_to_elements[i,1],:]]
     reedges = reelements[edge_to_elements[:,0][:,None],node_arranger[edge_to_elements[:,1],:]]
 
     tedges = time()-tedges

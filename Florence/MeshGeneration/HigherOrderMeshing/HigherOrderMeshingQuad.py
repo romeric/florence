@@ -128,8 +128,6 @@ def HighOrderMeshQuad(C, mesh, Decimals=10, equally_spaced=False, check_duplicat
     tedges = time()-tedges
     #------------------------------------------------------------------------------------------
 
-
-
     class nmesh(object):
         points = repoints
         elements = reelements
