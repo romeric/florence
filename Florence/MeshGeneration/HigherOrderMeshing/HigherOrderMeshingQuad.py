@@ -10,12 +10,14 @@ from Florence.Tensor import itemfreq, makezero, unique2d, remove_duplicates_2D
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 def HighOrderMeshQuad(C, mesh, Decimals=10, equally_spaced=False, check_duplicates=True,
-    Parallel=False, nCPU=1, ComputeAll=True):
+    parallelise=False, nCPU=1, compute_boundary_info=True):
 
     from Florence.FunctionSpace import Quad, QuadES
     from Florence.QuadratureRules import GaussLobattoPointsQuad
     from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints
     from Florence.MeshGeneration.NodeArrangement import NodeArrangementQuad
+
+    Parallel = parallelise
 
     if not equally_spaced:
         eps = GaussLobattoPointsQuad(C)
@@ -118,7 +120,7 @@ def HighOrderMeshQuad(C, mesh, Decimals=10, equally_spaced=False, check_duplicat
 
     #------------------------------------------------------------------------------------------
     reedges = np.array([])
-    if ComputeAll:
+    if compute_boundary_info:
         # BUILD EDGES NOW
         tedges = time()
 
@@ -138,5 +140,9 @@ def HighOrderMeshQuad(C, mesh, Decimals=10, equally_spaced=False, check_duplicat
         nnode = repoints.shape[0]
         nelem = reelements.shape[0]
         info = 'quad'
+
+    # print('\npMeshing timing:\n\t\tElement loop 1:\t '+str(telements)+' seconds\n\t\tNode loop:\t\t '+str(tnodes)+\
+    #  ' seconds'+'\n\t\tElement loop 2:\t '+str(telements_2)+' seconds\n\t\tEdge loop:\t\t '+str(tedges)+' seconds\n')
+
 
     return nmesh

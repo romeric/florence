@@ -15,12 +15,13 @@ def ElementLoopTri(elem,elements,points,MeshType,eps,Neval):
     return xycoord_higher
 
 def HighOrderMeshTri_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, check_duplicates=True,
-    Parallel=False, nCPU=1, ComputeAll=True):
+    parallelise=False, nCPU=1, compute_boundary_info=True):
 
     from Florence.FunctionSpace import Tri
     from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
     from Florence.MeshGeneration.NodeArrangement import NodeArrangementTri
 
+    Parallel = parallelise
     # SWITCH OFF MULTI-PROCESSING FOR SMALLER PROBLEMS WITHOUT GIVING A MESSAGE
     if (mesh.elements.shape[0] < 1000) and (C < 8):
         Parallel = False
@@ -135,7 +136,7 @@ def HighOrderMeshTri_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, chec
     # BUILD EDGES NOW
     #------------------------------------------------------------------------------------------
     reedges = np.array([])
-    if ComputeAll:
+    if compute_boundary_info:
         tedges = time()
 
         edge_to_elements = mesh.GetElementsWithBoundaryEdgesTri()
@@ -156,8 +157,7 @@ def HighOrderMeshTri_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, chec
         nelem = reelements.shape[0]
         info = 'tri'
 
-    # print '\npMeshing timing:\n\t\tElement loop 1:\t '+str(telements)+' seconds\n\t\tNode loop:\t\t '+str(tnodes)+\
-    #  ' seconds'+'\n\t\tElement loop 2:\t '+str(telements_2)+' seconds\n\t\tEdge loop:\t\t '+str(tedges)+' seconds\n'
-
+    # print('\npMeshing timing:\n\t\tElement loop 1:\t '+str(telements)+' seconds\n\t\tNode loop:\t\t '+str(tnodes)+\
+    #  ' seconds'+'\n\t\tElement loop 2:\t '+str(telements_2)+' seconds\n\t\tEdge loop:\t\t '+str(tedges)+' seconds\n')
 
     return nmesh

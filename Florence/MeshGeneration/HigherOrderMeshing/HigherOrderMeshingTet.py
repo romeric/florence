@@ -17,13 +17,14 @@ def ElementLoopTet(elem,elements,points,MeshType,eps,Neval):
 
 
 def HighOrderMeshTet_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, check_duplicates=True,
-    Zerofy=True, Parallel=False, nCPU=1, ComputeAll=True):
+    parallelise=False, nCPU=1, compute_boundary_info=True):
 
     from Florence.FunctionSpace import Tet
     from Florence.QuadratureRules.FeketePointsTet import FeketePointsTet
     from Florence.MeshGeneration.NodeArrangement import NodeArrangementTet
 
     # SWITCH OFF MULTI-PROCESSING FOR SMALLER PROBLEMS WITHOUT GIVING A MESSAGE
+    Parallel = parallelise
     if (mesh.elements.shape[0] < 500) and (C < 5):
         Parallel = False
         nCPU = 1
@@ -137,7 +138,7 @@ def HighOrderMeshTet_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, chec
 
 
     #------------------------------------------------------------------------------------------
-    if ComputeAll:
+    if compute_boundary_info:
         # BUILD FACES NOW
         tfaces = time()
         # GET MESH EDGES AND FACES
@@ -183,7 +184,7 @@ def HighOrderMeshTet_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, chec
         nnode = repoints.shape[0]
         nelem = reelements.shape[0]
         info = 'tet'
-    if ComputeAll is True:
+    if compute_boundary_info:
         nmesh.edges = reedges
         nmesh.faces = refaces
 

@@ -17,7 +17,7 @@ def ElementLoopHex(elem,elements,points,MeshType,eps,Neval):
 
 
 def HighOrderMeshHex(C, mesh, Decimals=10, equally_spaced=False, check_duplicates=True,
-    Zerofy=True, Parallel=False, nCPU=1, ComputeAll=True):
+    parallelise=False, nCPU=1, compute_boundary_info=True):
 
     from Florence.FunctionSpace import Hex, HexES
     from Florence.QuadratureRules import GaussLobattoPointsHex
@@ -26,6 +26,7 @@ def HighOrderMeshHex(C, mesh, Decimals=10, equally_spaced=False, check_duplicate
 
 
     # SWITCH OFF MULTI-PROCESSING FOR SMALLER PROBLEMS WITHOUT GIVING A MESSAGE
+    Parallel = parallelise
     if (mesh.elements.shape[0] < 500) and (C < 5):
         Parallel = False
         nCPU = 1
@@ -140,7 +141,7 @@ def HighOrderMeshHex(C, mesh, Decimals=10, equally_spaced=False, check_duplicate
 
 
     #------------------------------------------------------------------------------------------
-    if ComputeAll:
+    if compute_boundary_info:
         # BUILD FACES NOW
         tfaces = time()
         # USE ALTERNATIVE APPROACH TO GET MESH EDGES AND FACES
@@ -186,7 +187,7 @@ def HighOrderMeshHex(C, mesh, Decimals=10, equally_spaced=False, check_duplicate
         nnode = repoints.shape[0]
         nelem = reelements.shape[0]
         info = 'hex'
-    if ComputeAll is True:
+    if compute_boundary_info:
         nmesh.edges = reedges
         nmesh.faces = refaces
 
