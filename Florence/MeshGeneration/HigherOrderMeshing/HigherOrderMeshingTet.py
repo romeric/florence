@@ -136,8 +136,8 @@ def HighOrderMeshTet_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, chec
     #------------------------------------------------------------------------------------------
 
 
-    if ComputeAll == True:
-        #------------------------------------------------------------------------------------------
+    #------------------------------------------------------------------------------------------
+    if ComputeAll:
         # BUILD FACES NOW
         tfaces = time()
         # GET MESH EDGES AND FACES
@@ -172,7 +172,7 @@ def HighOrderMeshTet_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, chec
         del tmesh
 
         tedges = time()-tedges
-        #------------------------------------------------------------------------------------------
+    #------------------------------------------------------------------------------------------
 
     class nmesh(object):
         # """Construct pMesh"""

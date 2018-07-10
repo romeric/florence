@@ -15,7 +15,7 @@ def ElementLoopTri(elem,elements,points,MeshType,eps,Neval):
     return xycoord_higher
 
 def HighOrderMeshTri_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, check_duplicates=True,
-    Parallel=False, nCPU=1, ComputeAll=False):
+    Parallel=False, nCPU=1, ComputeAll=True):
 
     from Florence.FunctionSpace import Tri
     from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
@@ -96,9 +96,6 @@ def HighOrderMeshTri_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, chec
     rounded_repoints = repoints[nnode_linear:,:].copy()
     makezero(rounded_repoints)
     rounded_repoints = np.round(rounded_repoints,decimals=Decimals)
-    # flattened_repoints = np.ascontiguousarray(rounded_repoints).view(np.dtype((np.void,
-        # rounded_repoints.dtype.itemsize * rounded_repoints.shape[1])))
-    # _, idx_repoints, inv_repoints = np.unique(flattened_repoints,return_index=True,return_inverse=True)
     _, idx_repoints, inv_repoints = unique2d(rounded_repoints,order=False,
         consider_sort=False,return_index=True,return_inverse=True)
     del rounded_repoints
@@ -137,14 +134,16 @@ def HighOrderMeshTri_SEMISTABLE(C, mesh, Decimals=10, equally_spaced=False, chec
 
     # BUILD EDGES NOW
     #------------------------------------------------------------------------------------------
-    tedges = time()
+    reedges = np.array([])
+    if ComputeAll:
+        tedges = time()
 
-    edge_to_elements = mesh.GetElementsWithBoundaryEdgesTri()
-    node_arranger = NodeArrangementTri(C)[0]
-    reedges = np.zeros((mesh.edges.shape[0],C+2),dtype=np.int64)
-    reedges = reelements[edge_to_elements[:,0][:,None],node_arranger[edge_to_elements[:,1],:]]
+        edge_to_elements = mesh.GetElementsWithBoundaryEdgesTri()
+        node_arranger = NodeArrangementTri(C)[0]
+        reedges = np.zeros((mesh.edges.shape[0],C+2),dtype=np.int64)
+        reedges = reelements[edge_to_elements[:,0][:,None],node_arranger[edge_to_elements[:,1],:]]
 
-    tedges = time()-tedges
+        tedges = time()-tedges
     #------------------------------------------------------------------------------------------
 
     class nmesh(object):

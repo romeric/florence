@@ -10,7 +10,7 @@ from Florence.Tensor import itemfreq, makezero, unique2d, remove_duplicates_2D
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 def HighOrderMeshQuad(C, mesh, Decimals=10, equally_spaced=False, check_duplicates=True,
-    Parallel=False, nCPU=1):
+    Parallel=False, nCPU=1, ComputeAll=True):
 
     from Florence.FunctionSpace import Quad, QuadES
     from Florence.QuadratureRules import GaussLobattoPointsQuad
@@ -117,15 +117,17 @@ def HighOrderMeshQuad(C, mesh, Decimals=10, equally_spaced=False, check_duplicat
     #------------------------------------------------------------------------------------------
 
     #------------------------------------------------------------------------------------------
-    # BUILD EDGES NOW
-    tedges = time()
+    reedges = np.array([])
+    if ComputeAll:
+        # BUILD EDGES NOW
+        tedges = time()
 
-    edge_to_elements = mesh.GetElementsWithBoundaryEdgesQuad()
-    node_arranger = NodeArrangementQuad(C)[0]
-    reedges = np.zeros((mesh.edges.shape[0],C+2),dtype=np.int64)
-    reedges = reelements[edge_to_elements[:,0][:,None],node_arranger[edge_to_elements[:,1],:]]
+        edge_to_elements = mesh.GetElementsWithBoundaryEdgesQuad()
+        node_arranger = NodeArrangementQuad(C)[0]
+        reedges = np.zeros((mesh.edges.shape[0],C+2),dtype=np.int64)
+        reedges = reelements[edge_to_elements[:,0][:,None],node_arranger[edge_to_elements[:,1],:]]
 
-    tedges = time()-tedges
+        tedges = time()-tedges
     #------------------------------------------------------------------------------------------
 
     class nmesh(object):

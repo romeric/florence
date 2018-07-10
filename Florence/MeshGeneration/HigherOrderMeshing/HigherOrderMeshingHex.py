@@ -139,8 +139,8 @@ def HighOrderMeshHex(C, mesh, Decimals=10, equally_spaced=False, check_duplicate
 
 
 
-    if ComputeAll == True:
-        #------------------------------------------------------------------------------------------
+    #------------------------------------------------------------------------------------------
+    if ComputeAll:
         # BUILD FACES NOW
         tfaces = time()
         # USE ALTERNATIVE APPROACH TO GET MESH EDGES AND FACES
@@ -175,7 +175,7 @@ def HighOrderMeshHex(C, mesh, Decimals=10, equally_spaced=False, check_duplicate
         del tmesh
 
         tedges = time()-tedges
-        #------------------------------------------------------------------------------------------
+    #------------------------------------------------------------------------------------------
 
     class nmesh(object):
         # """Construct pMesh"""
