@@ -9,8 +9,9 @@ from scipy.sparse import coo_matrix, csc_matrix, csr_matrix
 from ._LowLevelAssembly_ import _LowLevelAssembly_, _LowLevelAssemblyExplicit_, _LowLevelAssemblyLaplacian_
 from ._LowLevelAssembly_ import _LowLevelAssembly_Par_, _LowLevelAssemblyExplicit_Par_
 
-from .SparseAssemblyNative import SparseAssemblyNative
+from .SparseAssemblyNative import SparseAssemblyNative, SparseAssemblyNativeCSR, SparseAssemblyNativeCSR_RecomputeDataIndex
 from .RHSAssemblyNative import RHSAssemblyNative
+from .ComputeSparsityPattern import ComputeSparsityPattern
 
 # PARALLEL PROCESSING ROUTINES
 import multiprocessing
@@ -99,18 +100,32 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
     ndim = formulation.ndim
     nelem = mesh.nelem
     nodeperelem = mesh.elements.shape[1]
+    ndof = nodeperelem*nvar
+    local_capacity = ndof*ndof
 
-    # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF STIFFNESS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
-    I_stiffness=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
-    J_stiffness=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
-    V_stiffness=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.float64)
+    if fem_solver.recompute_sparsity_pattern is False:
+        indices, indptr = fem_solver.indices, fem_solver.indptr
+        if fem_solver.squeeze_sparsity_pattern is False:
+            data_global_indices = fem_solver.data_global_indices
+            data_local_indices = fem_solver.data_local_indices
 
-    I_mass=[]; J_mass=[]; V_mass=[]
-    if fem_solver.analysis_type !='static' and fem_solver.is_mass_computed is False:
-        # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF MASS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
-        I_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
-        J_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
-        V_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.float64)
+    if fem_solver.recompute_sparsity_pattern:
+        # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF STIFFNESS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
+        I_stiffness=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
+        J_stiffness=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
+        V_stiffness=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.float64)
+
+        I_mass=[]; J_mass=[]; V_mass=[]
+        if fem_solver.analysis_type !='static' and fem_solver.is_mass_computed is False:
+            # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF MASS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
+            I_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
+            J_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
+            V_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.float64)
+    else:
+        V_stiffness=np.zeros(indices.shape[0],dtype=np.float64)
+        if fem_solver.analysis_type !='static' and fem_solver.is_mass_computed is False:
+            V_mass=np.zeros(indices.shape[0],dtype=np.float64)
+
 
     T = np.zeros((mesh.points.shape[0]*nvar,1),np.float64)
 
@@ -138,14 +153,33 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
             I_mass_elem, J_mass_elem, V_mass_elem = formulation.GetElementalMatrices(elem,
                 function_space, mesh, material, fem_solver, Eulerx, Eulerp)
 
-        # SPARSE ASSEMBLY - STIFFNESS MATRIX
-        SparseAssemblyNative(I_stiff_elem,J_stiff_elem,V_stiff_elem,I_stiffness,J_stiffness,V_stiffness,
-            elem,nvar,nodeperelem,mesh.elements)
-
-        if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed==False:
-            # SPARSE ASSEMBLY - MASS MATRIX
-            SparseAssemblyNative(I_mass_elem,J_mass_elem,V_mass_elem,I_mass,J_mass,V_mass,
+        if fem_solver.recompute_sparsity_pattern:
+            # SPARSE ASSEMBLY - STIFFNESS MATRIX
+            SparseAssemblyNative(I_stiff_elem,J_stiff_elem,V_stiff_elem,I_stiffness,J_stiffness,V_stiffness,
                 elem,nvar,nodeperelem,mesh.elements)
+
+            if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed==False:
+                # SPARSE ASSEMBLY - MASS MATRIX
+                SparseAssemblyNative(I_mass_elem,J_mass_elem,V_mass_elem,I_mass,J_mass,V_mass,
+                    elem,nvar,nodeperelem,mesh.elements)
+
+        else:
+            if fem_solver.squeeze_sparsity_pattern:
+                # SPARSE ASSEMBLY - STIFFNESS MATRIX
+                SparseAssemblyNativeCSR_RecomputeDataIndex(mesh,V_stiff_elem,indices,indptr,V_stiffness,elem,nvar)
+
+                if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed==False:
+                    # SPARSE ASSEMBLY - MASS MATRIX
+                    SparseAssemblyNativeCSR_RecomputeDataIndex(V_mass_elem,indptr,V_mass,elem,nvar)
+            else:
+                # SPARSE ASSEMBLY - STIFFNESS MATRIX
+                V_stiffness[data_global_indices[elem*local_capacity:(elem+1)*local_capacity]] \
+                    += V_stiff_elem[data_local_indices[elem*local_capacity:(elem+1)*local_capacity]]
+
+                if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed==False:
+                    # SPARSE ASSEMBLY - MASS MATRIX
+                    V_mass[data_global_indices[elem*local_capacity:(elem+1)*local_capacity]] \
+                    += V_mass_elem[data_local_indices[elem*local_capacity:(elem+1)*local_capacity]]
 
         if fem_solver.has_moving_boundary:
             # RHS ASSEMBLY
@@ -163,21 +197,37 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
         del ParallelTuple
         gc.collect()
 
-    stiffness = coo_matrix((V_stiffness,(I_stiffness,J_stiffness)),
-        shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64).tocsr()
+    if fem_solver.recompute_sparsity_pattern:
+        stiffness = coo_matrix((V_stiffness,(I_stiffness,J_stiffness)),
+            shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64).tocsr()
 
-    # GET STORAGE/MEMORY DETAILS
-    fem_solver.spmat = stiffness.data.nbytes/1024./1024.
-    fem_solver.ijv = (I_stiffness.nbytes + J_stiffness.nbytes + V_stiffness.nbytes)/1024./1024.
+        # GET STORAGE/MEMORY DETAILS
+        fem_solver.spmat = stiffness.data.nbytes/1024./1024.
+        fem_solver.ijv = (I_stiffness.nbytes + J_stiffness.nbytes + V_stiffness.nbytes)/1024./1024.
 
-    del I_stiffness, J_stiffness, V_stiffness
-    gc.collect()
+        del I_stiffness, J_stiffness, V_stiffness
+        gc.collect()
 
-    if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed==False:
-        mass = csr_matrix((V_mass,(I_mass,J_mass)),shape=((nvar*mesh.points.shape[0],
-            nvar*mesh.points.shape[0])),dtype=np.float64)
+        if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed==False:
+            mass = csr_matrix((V_mass,(I_mass,J_mass)),shape=((nvar*mesh.points.shape[0],
+                nvar*mesh.points.shape[0])),dtype=np.float64)
 
-        fem_solver.is_mass_computed = True
+            fem_solver.is_mass_computed = True
+
+    else:
+        # tt = time()
+        stiffness = csr_matrix((V_stiffness,indices,indptr),
+            shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])))
+
+        # GET STORAGE/MEMORY DETAILS
+        fem_solver.spmat = stiffness.data.nbytes/1024./1024.
+        fem_solver.ijv = (indptr.nbytes + indices.nbytes + V_stiffness.nbytes)/1024./1024.
+
+        if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed==False:
+            mass = csr_matrix((V_mass,indices,indptr),
+                shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])))
+
+            fem_solver.is_mass_computed = True
 
     fem_solver.assembly_time = time() - t_assembly
 

@@ -105,10 +105,18 @@ cython_assembler_build:
 	-I$(PYTHON_INCLUDE_PATH) -I$(NUMPY_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION)
 	$(MOVE) RHSAssemblyNative.$(EXT_POSTFIX) ../
 
+	@echo "Building florence FEM sparsity pattern estimator module"
+	$(CYTHON) ComputeSparsityPattern.pyx
+	$(CXX) $(CXXSTD) $(CXXFLAGS) ComputeSparsityPattern.cpp -o ComputeSparsityPattern.$(EXT_POSTFIX) -I. \
+	-I$(PYTHON_INCLUDE_PATH) -I$(NUMPY_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION)
+	$(MOVE) ComputeSparsityPattern.$(EXT_POSTFIX) ../
+
 cython_assembler_clean:
 	$(REMOVE) SparseAssemblyNative.cpp SparseAssemblyNative.$(EXT_POSTFIX) ../SparseAssemblyNative.$(EXT_POSTFIX)
 	$(REMOVE) RHSAssemblyNative.cpp RHSAssemblyNative.$(EXT_POSTFIX) ../RHSAssemblyNative.$(EXT_POSTFIX)
+	$(REMOVE) ComputeSparsityPattern.cpp ComputeSparsityPattern.$(EXT_POSTFIX) ../ComputeSparsityPattern.$(EXT_POSTFIX)
 
 cython_assembler_source_clean:
 	$(REMOVE) SparseAssemblyNative.cpp
 	$(REMOVE) RHSAssemblyNative.cpp
+	$(REMOVE) ComputeSparsityPattern.cpp

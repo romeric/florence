@@ -77,7 +77,9 @@ class FEMSolver(object):
         save_frequency=1,
         memory_store_frequency=1,
         has_contact=False,
-        activate_explicit_multigrid=False):
+        activate_explicit_multigrid=False,
+        recompute_sparsity_pattern=True,
+        squeeze_sparsity_pattern=False):
 
         # ASSUME TRUE IF AT LEAST ONE IS TRUE
         if has_low_level_dispatcher != optimise:
@@ -148,6 +150,9 @@ class FEMSolver(object):
 
         self.has_contact = has_contact
         self.activate_explicit_multigrid = activate_explicit_multigrid
+
+        self.recompute_sparsity_pattern = recompute_sparsity_pattern
+        self.squeeze_sparsity_pattern = squeeze_sparsity_pattern
 
         self.fem_timer = 0.
         self.assembly_time = 0.
@@ -409,9 +414,12 @@ class FEMSolver(object):
 
         if self.compute_mesh_qualities and self.is_scaled_jacobian_computed is False:
             # COMPUTE QUALITY MEASURES
-            post_process.ScaledJacobian = post_process.MeshQualityMeasures(mesh,TotalDisp,False,False)[3]
+            post_process.ScaledFF, post_process.ScaledHH, post_process.ScaledJacobian \
+                = post_process.MeshQualityMeasures(mesh,TotalDisp,False,False)[1:4]
         elif self.is_scaled_jacobian_computed:
             post_process.ScaledJacobian=self.ScaledJacobian
+            post_process.ScaledHH=self.ScaledHH
+            post_process.ScaledFF=self.ScaledFF
 
         if self.analysis_nature == "nonlinear":
             post_process.newton_raphson_convergence = self.NRConvergence
@@ -480,9 +488,30 @@ class FEMSolver(object):
         #---------------------------------------------------------------------------#
         function_spaces, solver = self.__checkdata__(material, boundary_condition,
             formulation, mesh, function_spaces, solver, contact_formulation=contact_formulation)
+
+        # PRINT INFO
         #---------------------------------------------------------------------------#
         self.PrintPreAnalysisInfo(mesh, formulation)
         #---------------------------------------------------------------------------#
+
+        # COMPUTE SPARSITY PATTERN
+        #---------------------------------------------------------------------------#
+        if self.recompute_sparsity_pattern is False and self.analysis_subtype != "explicit":
+            if self.parallel:
+                warn("Parallel model cannot use precomputed sparsity pattern due to partitioning. Turn this off")
+            t_sp = time()
+            from Florence.FiniteElements.Assembly.ComputeSparsityPattern import ComputeSparsityPattern
+            if self.squeeze_sparsity_pattern:
+                self.indices, self.indptr = ComputeSparsityPattern(mesh, formulation.nvar, self.squeeze_sparsity_pattern)
+                mesh.element_sorter = np.argsort(mesh.elements,axis=1)
+                mesh.sorted_elements = mesh.elements[np.arange(mesh.nelem)[:,None], mesh.element_sorter]
+                # self.sorted_elements = np.sort(mesh.elements,axis=1)
+            else:
+                self.indices, self.indptr, self.data_local_indices, \
+                    self.data_global_indices = ComputeSparsityPattern(mesh, formulation.nvar)
+            print("Computed sparsity pattern for the mesh. Time elapsed is {} seconds".format(time()-t_sp))
+        #---------------------------------------------------------------------------#
+
 
         # QUICK REDIRECT TO LAPLACIAN SOLVER
         if formulation.fields == "electrostatics":
@@ -743,6 +772,8 @@ class FEMSolver(object):
                     dumTotalDisp = np.sum(TotalDisp[:,:,:Increment+1],axis=2)
                     qualities = post_process.MeshQualityMeasures(omesh,dumTotalDisp,plot=False,show_plot=False)
                     self.is_scaled_jacobian_computed = qualities[0]
+                    self.ScaledFF = qualities[1]
+                    self.ScaledHH = qualities[2]
                     self.ScaledJacobian = qualities[3]
 
 

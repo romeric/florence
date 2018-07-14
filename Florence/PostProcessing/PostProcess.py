@@ -912,6 +912,8 @@ class PostProcess(object):
         self.is_scaledjacobian_computed = True
         self.AverageJacobian = AverageJacobian
         self.ScaledJacobian = ScaledJacobian
+        self.ScaledFF = ScaledFF
+        self.ScaledHH = ScaledHH
 
         if not self.is_material_anisotropic:
             return self.is_scaledjacobian_computed, ScaledFF, ScaledHH, ScaledJacobian
