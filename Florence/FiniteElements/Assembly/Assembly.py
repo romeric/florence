@@ -215,7 +215,6 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
             fem_solver.is_mass_computed = True
 
     else:
-        # tt = time()
         stiffness = csr_matrix((V_stiffness,indices,indptr),
             shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])))
 

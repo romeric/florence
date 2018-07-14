@@ -51,6 +51,48 @@ cdef extern from "_MassIntegrand_.h":
         Real *mass
         ) nogil
 
+    void _SymmetricConstantMassIntegrand_(
+        const UInteger* elements,
+        const Real* points,
+        const Real* Jm,
+        const Real* AllGauss,
+        const Real* constant_mass_integrand,
+        Integer nelem,
+        Integer ndim,
+        Integer nvar,
+        Integer ngauss,
+        Integer nodeperelem,
+        Integer local_capacity,
+        Integer mass_type,
+        const Integer* local_rows_mass,
+        const Integer* local_cols_mass,
+        int *I_mass,
+        int *J_mass,
+        Real *V_mass,
+        Real *mass
+        ) nogil
+
+    void _SymmetricNonZeroConstantMassIntegrand_(
+        const UInteger* elements,
+        const Real* points,
+        const Real* Jm,
+        const Real* AllGauss,
+        const Real* constant_mass_integrand,
+        Integer nelem,
+        Integer ndim,
+        Integer nvar,
+        Integer ngauss,
+        Integer nodeperelem,
+        Integer local_capacity,
+        Integer mass_type,
+        const Integer* local_rows_mass,
+        const Integer* local_cols_mass,
+        int *I_mass,
+        int *J_mass,
+        Real *V_mass,
+        Real *mass
+        ) nogil
+
 
 
 
@@ -138,25 +180,45 @@ def __ExplicitConstantMassIntegrand__(
     cdef np.ndarray[Real, ndim=2, mode='c'] mass        = np.zeros((1,1),dtype=np.float64)
     if c_mass_type == 0:
         mass                                            = np.zeros((nvar*mesh.points.shape[0],1),dtype=np.float64)
-
-    _ExplicitConstantMassIntegrand_(    &elements[0,0],
-                                        &points[0,0],
-                                        &Jm[0,0,0],
-                                        &AllGauss[0],
-                                        &constant_mass_integrand[0,0,0],
-                                        nelem,
-                                        ndim,
-                                        nvar,
-                                        ngauss,
-                                        nodeperelem,
-                                        local_capacity,
-                                        c_mass_type,
-                                        &local_rows_mass[0],
-                                        &local_cols_mass[0],
-                                        &I_mass[0],
-                                        &J_mass[0],
-                                        &V_mass[0],
-                                        &mass[0,0]
-                                        )
+    if mesh.element_type == "quad" or mesh.element_type == "hex":
+        _SymmetricNonZeroConstantMassIntegrand_(    &elements[0,0],
+                                                    &points[0,0],
+                                                    &Jm[0,0,0],
+                                                    &AllGauss[0],
+                                                    &constant_mass_integrand[0,0,0],
+                                                    nelem,
+                                                    ndim,
+                                                    nvar,
+                                                    ngauss,
+                                                    nodeperelem,
+                                                    local_capacity,
+                                                    c_mass_type,
+                                                    &local_rows_mass[0],
+                                                    &local_cols_mass[0],
+                                                    &I_mass[0],
+                                                    &J_mass[0],
+                                                    &V_mass[0],
+                                                    &mass[0,0]
+                                                    )
+    else:
+        _SymmetricConstantMassIntegrand_(           &elements[0,0],
+                                                    &points[0,0],
+                                                    &Jm[0,0,0],
+                                                    &AllGauss[0],
+                                                    &constant_mass_integrand[0,0,0],
+                                                    nelem,
+                                                    ndim,
+                                                    nvar,
+                                                    ngauss,
+                                                    nodeperelem,
+                                                    local_capacity,
+                                                    c_mass_type,
+                                                    &local_rows_mass[0],
+                                                    &local_cols_mass[0],
+                                                    &I_mass[0],
+                                                    &J_mass[0],
+                                                    &V_mass[0],
+                                                    &mass[0,0]
+                                                    )
 
     return mass, I_mass, J_mass, V_mass
