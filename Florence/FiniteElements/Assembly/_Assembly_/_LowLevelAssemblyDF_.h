@@ -49,7 +49,6 @@ void _GlobalAssemblyDF_(const Real *points,
     Integer ndof = nvar*nodeperelem;
     Integer local_capacity = ndof*ndof;
 
-
     Real *LagrangeElemCoords        = allocate<Real>(nodeperelem*ndim);
     Real *EulerElemCoords           = allocate<Real>(nodeperelem*ndim);
     Real *ElectricPotentialElem     = allocate<Real>(nodeperelem);
@@ -68,12 +67,7 @@ void _GlobalAssemblyDF_(const Real *points,
     Real *geometric_stiffness       = allocate<Real>(local_capacity);
     Real *mass                      = allocate<Real>(local_capacity);
 
-    Integer *current_row_column     = allocate<Integer>(ndof);
-    Integer *full_current_row       = allocate<Integer>(local_capacity);
-    Integer *full_current_column    = allocate<Integer>(local_capacity);
-
     auto mat_obj = _MooneyRivlin_<Real>(mu1,mu2,lam);
-
 
     // LOOP OVER ELEMETNS
     for (Integer elem=0; elem < nelem; ++elem) {
@@ -140,41 +134,19 @@ void _GlobalAssemblyDF_(const Real *points,
             stiffness[i] += geometric_stiffness[i];
         }
 
-        // ASSEMBLE CONSTITUTIVE STIFFNESS
-        {
-
-            Integer const_elem_retriever;
-            for (Integer counter=0; counter<nodeperelem; ++counter) {
-                const_elem_retriever = nvar*elements[elem*nodeperelem+counter];
-                for (Integer ncounter=0; ncounter<nvar; ++ncounter) {
-                    current_row_column[nvar*counter+ncounter] = const_elem_retriever+ncounter;
-                }
-            }
-
-            Integer const_I_retriever;
-            for (Integer counter=0; counter<ndof; ++counter) {
-                const_I_retriever = current_row_column[counter];
-                for (Integer iterator=0; iterator<ndof; ++iterator) {
-                    full_current_row[counter*ndof+iterator]    = const_I_retriever;
-                    full_current_column[counter*ndof+iterator] = current_row_column[iterator];
-                }
-            }
-
-
-            Integer low, high;
-            low = local_capacity*elem;
-            high = local_capacity*(elem+1);
-
-            Integer incrementer = 0;
-            for (Integer counter = low; counter < high; ++counter) {
-                I_stiff[counter] = full_current_row[incrementer];
-                J_stiff[counter] = full_current_column[incrementer];
-                V_stiff[counter] = stiffness[incrementer];
-
-                incrementer += 1;
-            }
-
-        }
+        // ASSEMBLE CONSTITUTIVE STIFFNESS - Fill IJV
+        fill_triplet(   local_rows_stiffness,
+                        local_cols_stiffness,
+                        stiffness,
+                        I_stiff,
+                        J_stiff,
+                        V_stiff,
+                        elem,
+                        nvar,
+                        nodeperelem,
+                        elements,
+                        local_capacity,
+                        local_capacity);
 
         // ASSEMBLE TRACTIONS
         {
@@ -263,11 +235,6 @@ void _GlobalAssemblyDF_(const Real *points,
     deallocate(stiffness);
     deallocate(geometric_stiffness);
     deallocate(mass);
-
-    deallocate(full_current_row);
-    deallocate(full_current_column);
-    deallocate(current_row_column);
-
 }
 
 
