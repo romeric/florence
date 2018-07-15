@@ -66,7 +66,8 @@ build_module:
 	@echo "Building low level mass dispatcher module"
 	$(CYTHON) _MassIntegrand_.pyx
 	$(CXX) $(CXXSTD) $(CXXFLAGS) _MassIntegrand_.cpp -o _MassIntegrand_.$(EXT_POSTFIX) -I. -I../../Tensor/ -I$(PYTHON_INCLUDE_PATH) \
-	-I$(NUMPY_INCLUDE_PATH) -I$(BLAS_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION) -L$(BLAS_LD_PATH) -l$(BLAS_VERSION)
+	-I$(NUMPY_INCLUDE_PATH) -I$(BLAS_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION) -L$(BLAS_LD_PATH) -l$(BLAS_VERSION) \
+	-I../../FiniteElements/Assembly/_Assembly_/
 	@$(MOVE) _MassIntegrand_.$(EXT_POSTFIX) ../
 
 clean:

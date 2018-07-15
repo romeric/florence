@@ -2,7 +2,7 @@ import numpy as np
 from Florence import *
 
 
-def electro_hyperelastic_explicit_dynamics():
+def electro_hyperelastic_explicit_dynamics(recompute_sparsity_pattern=True, squeeze_sparsity_pattern=False):
     """A an example of multiphysics nonlinear explicit dynamics with nonlinear
         electro-hyperelastic material
     """
@@ -47,14 +47,23 @@ def electro_hyperelastic_explicit_dynamics():
         analysis_subtype="explicit",
         mass_type="consistent",
         optimise=True,
+        activate_explicit_multigrid=True,
+        recompute_sparsity_pattern=recompute_sparsity_pattern,
+        squeeze_sparsity_pattern=squeeze_sparsity_pattern,
         save_frequency=5)
 
-    solution = fem_solver.Solve(formulation=formulation, material=material, mesh=mesh,
+    results = fem_solver.Solve(formulation=formulation, material=material, mesh=mesh,
         boundary_condition=boundary_condition)
 
+    # check results
+    assert np.linalg.norm(results.GetSolutionVectors()[:,2,-1]) > 0.9
+    assert np.linalg.norm(results.GetSolutionVectors()[:,2,-1]) < 1.2
+
     # Write results to paraview
-    # solution.WriteVTK("explicit_electro_elastodynamics", quantity=2)
+    # results.WriteVTK("explicit_electro_elastodynamics", quantity=2)
 
 
 if __name__ == "__main__":
     electro_hyperelastic_explicit_dynamics()
+    electro_hyperelastic_explicit_dynamics(recompute_sparsity_pattern=False, squeeze_sparsity_pattern=False)
+    electro_hyperelastic_explicit_dynamics(recompute_sparsity_pattern=False, squeeze_sparsity_pattern=True)

@@ -197,11 +197,28 @@ def test_examples():
 
     # RUN EXAMPLES AT TEST CASES
     simple_laplace()
-    high_order_curved_mesh_generation()
+
+    high_order_curved_mesh_generation(p=2, analysis_nature="linear")
+    high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear")
+    high_order_curved_mesh_generation(p=2, analysis_nature="linear", optimise=False)
+    high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=False)
+    high_order_curved_mesh_generation(p=2, analysis_nature="linear", optimise=False,
+        recompute_sparsity_pattern=False)
+    high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=False,
+        recompute_sparsity_pattern=False)
+    high_order_curved_mesh_generation(p=2, analysis_nature="linear", optimise=False,
+        recompute_sparsity_pattern=False, squeeze_sparsity_pattern=True)
+    high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=False,
+        recompute_sparsity_pattern=False, squeeze_sparsity_pattern=True)
+
     linear_elastic_dynamics()
     crash_analysis()
     explicit_dynamics_mechanics()
+
     electro_hyperelastic_explicit_dynamics()
+    electro_hyperelastic_explicit_dynamics(recompute_sparsity_pattern=False, squeeze_sparsity_pattern=False)
+    electro_hyperelastic_explicit_dynamics(recompute_sparsity_pattern=False, squeeze_sparsity_pattern=True)
+
     dielectric_wrinkling()
     staggered_multiphysics_solver()
     strain_gradient_elastodynamics()

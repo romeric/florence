@@ -56,10 +56,20 @@ def LowLevelAssembly(fem_solver, function_space, formulation, mesh, material, Eu
     if fem_solver.analysis_type != "static" and fem_solver.is_mass_computed is False:
         try:
             t_mass_assembly = time()
-            from Florence.VariationalPrinciple._MassIntegrand_ import __ExplicitConstantMassIntegrand__
-            I_mass, J_mass, V_mass = __ExplicitConstantMassIntegrand__(mesh, function_space, formulation, fem_solver.mass_type)[1:]
-            M = csr_matrix((V_mass,(I_mass,J_mass)),shape=((formulation.nvar*mesh.points.shape[0],
-                    formulation.nvar*mesh.points.shape[0])),dtype=np.float64)
+            from Florence.VariationalPrinciple._MassIntegrand_ import __TotalConstantMassIntegrand__
+            if fem_solver.recompute_sparsity_pattern:
+                M, I_mass, J_mass, V_mass = __TotalConstantMassIntegrand__(mesh, function_space, formulation, fem_solver.mass_type)
+                if fem_solver.mass_type == "consistent":
+                    M = csr_matrix((V_mass,(I_mass,J_mass)),shape=((formulation.nvar*mesh.points.shape[0],
+                        formulation.nvar*mesh.points.shape[0])),dtype=np.float64)
+            else:
+                M, V_mass = __TotalConstantMassIntegrand__(mesh, function_space,
+                    formulation, fem_solver.mass_type, fem_solver.recompute_sparsity_pattern,
+                    fem_solver.squeeze_sparsity_pattern, fem_solver.indices, fem_solver.indptr,
+                    fem_solver.data_global_indices, fem_solver.data_local_indices)
+                if fem_solver.mass_type == "consistent":
+                    M = csr_matrix((V_mass,fem_solver.indices,fem_solver.indptr),shape=((formulation.nvar*mesh.points.shape[0],
+                        formulation.nvar*mesh.points.shape[0])),dtype=np.float64)
             if M is not None:
                 fem_solver.is_mass_computed = True
             t_mass_assembly = time() - t_mass_assembly
@@ -170,7 +180,7 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
 
                 if fem_solver.analysis_type != 'static' and fem_solver.is_mass_computed==False:
                     # SPARSE ASSEMBLY - MASS MATRIX
-                    SparseAssemblyNativeCSR_RecomputeDataIndex(V_mass_elem,indptr,V_mass,elem,nvar)
+                    SparseAssemblyNativeCSR_RecomputeDataIndex(mesh,V_mass_elem,indices,indptr,V_mass,elem,nvar)
             else:
                 # SPARSE ASSEMBLY - STIFFNESS MATRIX
                 V_stiffness[data_global_indices[elem*local_capacity:(elem+1)*local_capacity]] \
@@ -372,44 +382,6 @@ def OutofCoreAssembly(fem_solver, function_space, formulation, mesh, material,
     hdf_file.close()
 
     return stiffness, T, F, mass
-
-
-
-
-#--------------------- ASSEMBLY ROUTINE FOR MASS MATRIX ONLY - FOR MODIFIED NEWTON RAPHSON ----------------------#
-#----------------------------------------------------------------------------------------------------------------#
-
-
-def AssembleMass(fem_solver, function_space, formulation, mesh, material, Eulerx):
-
-    # GET MESH DETAILS
-    C = mesh.InferPolynomialDegree() - 1
-    nvar = formulation.nvar
-    ndim = formulation.ndim
-    nelem = mesh.nelem
-    nodeperelem = mesh.elements.shape[1]
-
-    # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF MASS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
-    I_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
-    J_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
-    V_mass=np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.float64)
-
-    # COMPUATE ALL LOCAL ELEMENTAL MATRICES (STIFFNESS, MASS, INTERNAL & EXTERNAL TRACTION FORCES )
-    ParallelTuple = parmap.map(formulation,np.arange(0,nelem,dtype=np.int32),
-        function_space, mesh, material, fem_solver, Eulerx, Eulerp, processes= int(multiprocessing.cpu_count()/2))
-
-    for elem in range(nelem):
-        # COMPUATE LOCAL ELEMENTAL MASS MATRIX
-        I_mass_elem, J_mass_elem, V_mass_elem = formulation.GetMassMatrix(elem,
-            function_space, mesh, material, fem_solver, Eulerx, Eulerp)
-        # SPARSE ASSEMBLY - MASS MATRIX
-        SparseAssemblyNative(I_mass_elem,J_mass_elem,V_mass_elem,I_mass,J_mass,V_mass,
-            elem,nvar,nodeperelem,mesh.elements)
-
-    mass = csr_matrix((V_mass,(I_mass,J_mass)),shape=((nvar*mesh.points.shape[0],
-        nvar*mesh.points.shape[0])),dtype=np.float64)
-
-    return mass
 
 
 
@@ -699,12 +671,20 @@ def AssembleExplicit(fem_solver, function_space, formulation, mesh, material, Eu
 
             try:
                 t_mass_assembly = time()
-                from Florence.VariationalPrinciple._MassIntegrand_ import __ExplicitConstantMassIntegrand__
-                M, I_mass, J_mass, V_mass = __ExplicitConstantMassIntegrand__(mesh, function_space, formulation, fem_solver.mass_type)
-
-                if fem_solver.mass_type == "consistent":
-                    M = csr_matrix((V_mass,(I_mass,J_mass)),shape=((formulation.nvar*mesh.points.shape[0],
-                        formulation.nvar*mesh.points.shape[0])),dtype=np.float64)
+                from Florence.VariationalPrinciple._MassIntegrand_ import __TotalConstantMassIntegrand__
+                if fem_solver.recompute_sparsity_pattern:
+                    M, I_mass, J_mass, V_mass = __TotalConstantMassIntegrand__(mesh, function_space, formulation, fem_solver.mass_type)
+                    if fem_solver.mass_type == "consistent":
+                        M = csr_matrix((V_mass,(I_mass,J_mass)),shape=((formulation.nvar*mesh.points.shape[0],
+                            formulation.nvar*mesh.points.shape[0])),dtype=np.float64)
+                else:
+                    M, V_mass = __TotalConstantMassIntegrand__(mesh, function_space,
+                        formulation, fem_solver.mass_type, fem_solver.recompute_sparsity_pattern,
+                        fem_solver.squeeze_sparsity_pattern, fem_solver.indices, fem_solver.indptr,
+                        fem_solver.data_global_indices, fem_solver.data_local_indices)
+                    if fem_solver.mass_type == "consistent":
+                        M = csr_matrix((V_mass,fem_solver.indices,fem_solver.indptr),shape=((formulation.nvar*mesh.points.shape[0],
+                            formulation.nvar*mesh.points.shape[0])),dtype=np.float64)
                 # SET MASS FLAG HERE
                 if fem_solver.is_mass_computed is False:
                     fem_solver.is_mass_computed = True
@@ -1179,3 +1159,101 @@ def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
 
 
     return T_all.ravel()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#---------------------------------------- HIIGHER LEVEL ASSEMBLY ROUTINE ----------------------------------------#
+#----------------------------------------------------------------------------------------------------------------#
+
+
+def AssembleMass(formulation, mesh, fem_solver, rho=1.0, material=None, mass_type="lumped", Eulerx=None):
+
+    t_mass_assembly = time()
+
+    if mesh.element_type == "tri" or mesh.element_type == "tet":
+        function_space = formulation.function_spaces[1]
+    else:
+        function_space = formulation.function_spaces[0]
+
+    try:
+        from Florence.VariationalPrinciple._MassIntegrand_ import __TotalConstantMassIntegrand__
+        if fem_solver.recompute_sparsity_pattern:
+            M, I_mass, J_mass, V_mass = __TotalConstantMassIntegrand__(mesh, function_space, formulation, fem_solver.mass_type)
+            if fem_solver.mass_type == "consistent":
+                M = csr_matrix((V_mass,(I_mass,J_mass)),shape=((formulation.nvar*mesh.points.shape[0],
+                    formulation.nvar*mesh.points.shape[0])),dtype=np.float64)
+        else:
+            M, V_mass = __TotalConstantMassIntegrand__(mesh, function_space,
+                formulation, fem_solver.mass_type, fem_solver.recompute_sparsity_pattern,
+                fem_solver.squeeze_sparsity_pattern, fem_solver.indices, fem_solver.indptr,
+                fem_solver.data_global_indices, fem_solver.data_local_indices)
+            if fem_solver.mass_type == "consistent":
+                M = csr_matrix((V_mass,fem_solver.indices,fem_solver.indptr),shape=((formulation.nvar*mesh.points.shape[0],
+                    formulation.nvar*mesh.points.shape[0])),dtype=np.float64)
+
+    except:
+        if Eulerx is None:
+            Eulerx = np.zeros_like(mesh.points)
+        M = AssembleExplicit_NoLLD_Mass(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
+
+    t_mass_assembly = time() - t_mass_assembly
+
+    return M
+
+
+
+
+
+def AssembleForm(formulation, mesh, material, fem_solver, Eulerx=None, Eulerp=None):
+
+    if Eulerx is None:
+        Eulerx = np.zeros_like(mesh.points)
+    if Eulerp is None:
+        Eulerp = np.zeros(mesh.points.shape[0])
+    function_space = formulation.function_spaces[0]
+
+    return Assemble(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)

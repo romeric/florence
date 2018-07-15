@@ -1,3 +1,7 @@
+#ifndef SPARSEASSEMBLYNATIVE_H
+#define SPARSEASSEMBLYNATIVE_H
+
+
 #include <algorithm>
 #include <cstdint>
 #include <cstdlib>
@@ -96,3 +100,6 @@ void SparseAssemblyNativeCSR_RecomputeDataIndex_(
     free(current_row_column_local);
     free(full_current_column_local);
 }
+
+
+#endif

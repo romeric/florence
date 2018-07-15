@@ -18,6 +18,7 @@
 #include <mm_malloc.h>
 #endif
 
+#include "SparseAssemblyNative.h"
 #include "_det_inv_.h"
 #include "_matmul_.h"
 
@@ -107,6 +108,63 @@ void fill_triplet(  const Integer *i,
 
     deallocate(current_row_column);
 }
+
+
+
+FASTOR_INLINE
+void fill_global_data(
+                    const Integer *i,
+                    const Integer *j,
+                    const Real *coeff,
+                    int *I,
+                    int *J,
+                    Real *V,
+                    Integer elem,
+                    Integer nvar,
+                    Integer nodeperelem,
+                    const UInteger *elements,
+                    Integer i_shape,
+                    Integer j_shape,
+                    int recompute_sparsity_pattern,
+                    int squeeze_sparsity_pattern,
+                    const int *data_local_indices,
+                    const int *data_global_indices,
+                    const unsigned long *sorted_elements,
+                    const long *sorter
+    )
+{
+
+    if (recompute_sparsity_pattern) {
+        fill_triplet(i,j,coeff,I,J,V,elem,nvar,nodeperelem,elements,i_shape,j_shape);
+    }
+    else {
+        if (squeeze_sparsity_pattern) {
+            SparseAssemblyNativeCSR_RecomputeDataIndex_(
+                coeff,
+                J,
+                I,
+                V,
+                elem,
+                nvar,
+                nodeperelem,
+                sorted_elements,
+                sorter);
+        }
+        else {
+            const int ndof = nvar*nodeperelem;
+            const int local_capacity = ndof*ndof;
+            SparseAssemblyNativeCSR_(
+                coeff,
+                data_local_indices,
+                data_global_indices,
+                elem,
+                local_capacity,
+                V
+                );
+        }
+    }
+}
+
 #endif
 /*---------------------------------------------------------------------------------------------*/
 
@@ -188,7 +246,7 @@ inline void _ConstantMassIntegrand_Filler_(Real *mass,
 
 
 
-inline void _ExplicitConstantMassIntegrand_(
+inline void _GenericConstantMassIntegrand_(
     const UInteger* elements,
     const Real* points,
     const Real* Jm,
@@ -206,7 +264,13 @@ inline void _ExplicitConstantMassIntegrand_(
     int *I_mass,
     int *J_mass,
     Real *V_mass,
-    Real *mass
+    Real *mass,
+    int recompute_sparsity_pattern,
+    int squeeze_sparsity_pattern,
+    const int *data_local_indices,
+    const int *data_global_indices,
+    const unsigned long *sorted_elements,
+    const long *sorter
     ) {
 
 
@@ -302,18 +366,24 @@ inline void _ExplicitConstantMassIntegrand_(
             }
         }
         else {
-            fill_triplet(   local_rows_mass,
-                            local_cols_mass,
-                            massel,
-                            I_mass,
-                            J_mass,
-                            V_mass,
-                            elem,
-                            nvar,
-                            nodeperelem,
-                            elements,
-                            local_capacity,
-                            local_capacity);
+            fill_global_data(   local_rows_mass,
+                                local_cols_mass,
+                                massel,
+                                I_mass,
+                                J_mass,
+                                V_mass,
+                                elem,
+                                nvar,
+                                nodeperelem,
+                                elements,
+                                local_capacity,
+                                local_capacity,
+                                recompute_sparsity_pattern,
+                                squeeze_sparsity_pattern,
+                                data_local_indices,
+                                data_global_indices,
+                                sorted_elements,
+                                sorter);
         }
     }
 
@@ -348,7 +418,13 @@ inline void _SymmetricConstantMassIntegrand_(
     int *I_mass,
     int *J_mass,
     Real *V_mass,
-    Real *mass
+    Real *mass,
+    int recompute_sparsity_pattern,
+    int squeeze_sparsity_pattern,
+    const int *data_local_indices,
+    const int *data_global_indices,
+    const unsigned long *sorted_elements,
+    const long *sorter
     ) {
 
 
@@ -470,18 +546,24 @@ inline void _SymmetricConstantMassIntegrand_(
             }
         }
         else {
-            fill_triplet(   local_rows_mass,
-                            local_cols_mass,
-                            massel,
-                            I_mass,
-                            J_mass,
-                            V_mass,
-                            elem,
-                            nvar,
-                            nodeperelem,
-                            elements,
-                            local_capacity,
-                            local_capacity);
+            fill_global_data(   local_rows_mass,
+                                local_cols_mass,
+                                massel,
+                                I_mass,
+                                J_mass,
+                                V_mass,
+                                elem,
+                                nvar,
+                                nodeperelem,
+                                elements,
+                                local_capacity,
+                                local_capacity,
+                                recompute_sparsity_pattern,
+                                squeeze_sparsity_pattern,
+                                data_local_indices,
+                                data_global_indices,
+                                sorted_elements,
+                                sorter);
         }
     }
 
@@ -517,7 +599,13 @@ inline void _SymmetricNonZeroConstantMassIntegrand_(
     int *I_mass,
     int *J_mass,
     Real *V_mass,
-    Real *mass
+    Real *mass,
+    int recompute_sparsity_pattern,
+    int squeeze_sparsity_pattern,
+    const int *data_local_indices,
+    const int *data_global_indices,
+    const unsigned long *sorted_elements,
+    const long *sorter
     ) {
 
 
@@ -653,18 +741,24 @@ inline void _SymmetricNonZeroConstantMassIntegrand_(
             }
         }
         else {
-            fill_triplet(   local_rows_mass,
-                            local_cols_mass,
-                            massel,
-                            I_mass,
-                            J_mass,
-                            V_mass,
-                            elem,
-                            nvar,
-                            nodeperelem,
-                            elements,
-                            local_capacity,
-                            local_capacity);
+            fill_global_data(   local_rows_mass,
+                                local_cols_mass,
+                                massel,
+                                I_mass,
+                                J_mass,
+                                V_mass,
+                                elem,
+                                nvar,
+                                nodeperelem,
+                                elements,
+                                local_capacity,
+                                local_capacity,
+                                recompute_sparsity_pattern,
+                                squeeze_sparsity_pattern,
+                                data_local_indices,
+                                data_global_indices,
+                                sorted_elements,
+                                sorter);
         }
     }
 
