@@ -53,8 +53,8 @@ cdef extern from "_MassIntegrand_.h":
         int squeeze_sparsity_pattern,
         const int *data_local_indices,
         const int *data_global_indices,
-        const unsigned long *sorted_elements,
-        const long *sorter
+        const UInteger *sorted_elements,
+        const Integer *sorter
         ) nogil
 
     void _SymmetricConstantMassIntegrand_(
@@ -80,8 +80,8 @@ cdef extern from "_MassIntegrand_.h":
         int squeeze_sparsity_pattern,
         const int *data_local_indices,
         const int *data_global_indices,
-        const unsigned long *sorted_elements,
-        const long *sorter
+        const UInteger *sorted_elements,
+        const Integer *sorter
         ) nogil
 
     void _SymmetricNonZeroConstantMassIntegrand_(
@@ -107,8 +107,8 @@ cdef extern from "_MassIntegrand_.h":
         int squeeze_sparsity_pattern,
         const int *data_local_indices,
         const int *data_global_indices,
-        const unsigned long *sorted_elements,
-        const long *sorter
+        const UInteger *sorted_elements,
+        const Integer *sorter
         ) nogil
 
 
@@ -191,8 +191,8 @@ def __TotalConstantMassIntegrand__(
     cdef np.ndarray[Integer,ndim=1,mode='c'] local_rows_mass        = formulation.local_rows_mass
     cdef np.ndarray[Integer,ndim=1,mode='c'] local_cols_mass        = formulation.local_columns_mass
 
-    cdef np.ndarray[long,ndim=2, mode='c'] sorter                   = np.zeros((1,1),np.int64)
-    cdef np.ndarray[unsigned long,ndim=2, mode='c'] sorted_elements = np.zeros((1,1),np.uint64)
+    cdef np.ndarray[Integer,ndim=2, mode='c'] sorter                = np.zeros((1,1),np.int64)
+    cdef np.ndarray[UInteger,ndim=2, mode='c'] sorted_elements      = np.zeros((1,1),np.uint64)
 
     # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF MASS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
     cdef np.ndarray[int,ndim=1,mode='c'] I_mass         = np.zeros(1,np.int32)

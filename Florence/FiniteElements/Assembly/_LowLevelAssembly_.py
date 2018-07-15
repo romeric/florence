@@ -100,27 +100,19 @@ def _LowLevelAssembly_Par_(fem_solver, function_space, formulation, mesh, materi
 
 
 def _LowLevelAssemblyExplicit_(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
-
     # MAKE MESH DATA CONTIGUOUS
     mesh.ChangeType()
-
     # CALL LOW LEVEL ASSEMBLER
-    I_mass, J_mass, V_mass, T = _LowLevelAssemblyExplicit_DF_DPF_(function_space,
-        formulation, mesh, material, Eulerx, Eulerp)
+    T = _LowLevelAssemblyExplicit_DF_DPF_(function_space, formulation, mesh, material, Eulerx, Eulerp)
 
     F, mass = [], []
-
-    if fem_solver.analysis_type != "static" and fem_solver.is_mass_computed is False:
-        nvar = formulation.nvar
-        mass = csr_matrix((V_mass,(I_mass,J_mass)),
-            shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
 
     return T, F, mass
 
 
 def _LowLevelAssemblyExplicit_Par_(function_space, formulation, mesh, material, Eulerx, Eulerp):
     # CALL LOW LEVEL ASSEMBLER
-    return _LowLevelAssemblyExplicit_DF_DPF_(function_space, formulation, mesh, material, Eulerx, Eulerp)[-1]
+    return _LowLevelAssemblyExplicit_DF_DPF_(function_space, formulation, mesh, material, Eulerx, Eulerp)
 
 
 
@@ -131,8 +123,13 @@ def _LowLevelAssemblyLaplacian_(fem_solver, function_space, formulation, mesh, m
     mesh.ChangeType()
 
     # CALL LOW LEVEL ASSEMBLER
-    I, J, V = _LowLevelAssemblyPerfectLaplacian_(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
-    stiffness = csr_matrix((V,(I,J)), shape=((mesh.nnode,mesh.nnode)),dtype=np.float64)
+    if fem_solver.recompute_sparsity_pattern:
+        I, J, V = _LowLevelAssemblyPerfectLaplacian_(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
+        stiffness = csr_matrix((V,(I,J)), shape=((mesh.nnode,mesh.nnode)),dtype=np.float64)
+    else:
+        V = _LowLevelAssemblyPerfectLaplacian_(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
+        stiffness = csr_matrix((V,fem_solver.indices,fem_solver.indptr), shape=((mesh.nnode,mesh.nnode)),dtype=np.float64)
+
 
     return stiffness, np.zeros(mesh.nnode,np.float64)
 

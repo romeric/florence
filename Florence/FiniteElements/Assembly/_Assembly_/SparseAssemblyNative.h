@@ -1,10 +1,17 @@
 #ifndef SPARSEASSEMBLYNATIVE_H
 #define SPARSEASSEMBLYNATIVE_H
 
-
 #include <algorithm>
 #include <cstdint>
 #include <cstdlib>
+
+#ifndef LL_TYPES
+#define LL_TYPES
+using Real = double;
+using Integer = std::int64_t;
+using UInteger = std::uint64_t;
+#endif
+
 
 
 template<class RandomIt, class T>
@@ -46,8 +53,8 @@ void SparseAssemblyNativeCSR_RecomputeDataIndex_(
     int elem,
     int nvar,
     int nodeperelem,
-    const unsigned long *elements,
-    const long *sorter) {
+    const UInteger *elements,
+    const Integer *sorter) {
 
     int ndof = nvar*nodeperelem;
     int local_capacity = ndof*ndof;

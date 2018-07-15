@@ -129,8 +129,8 @@ void fill_global_data(
                     int squeeze_sparsity_pattern,
                     const int *data_local_indices,
                     const int *data_global_indices,
-                    const unsigned long *sorted_elements,
-                    const long *sorter
+                    const UInteger *sorted_elements,
+                    const Integer *sorter
     )
 {
 
@@ -269,8 +269,8 @@ inline void _GenericConstantMassIntegrand_(
     int squeeze_sparsity_pattern,
     const int *data_local_indices,
     const int *data_global_indices,
-    const unsigned long *sorted_elements,
-    const long *sorter
+    const UInteger *sorted_elements,
+    const Integer *sorter
     ) {
 
 
@@ -423,8 +423,8 @@ inline void _SymmetricConstantMassIntegrand_(
     int squeeze_sparsity_pattern,
     const int *data_local_indices,
     const int *data_global_indices,
-    const unsigned long *sorted_elements,
-    const long *sorter
+    const UInteger *sorted_elements,
+    const Integer *sorter
     ) {
 
 
@@ -604,8 +604,8 @@ inline void _SymmetricNonZeroConstantMassIntegrand_(
     int squeeze_sparsity_pattern,
     const int *data_local_indices,
     const int *data_global_indices,
-    const unsigned long *sorted_elements,
-    const long *sorter
+    const UInteger *sorted_elements,
+    const Integer *sorter
     ) {
 
 

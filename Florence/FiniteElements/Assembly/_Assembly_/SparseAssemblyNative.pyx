@@ -3,6 +3,14 @@ import numpy as np
 cimport numpy as np
 from libc.stdlib cimport malloc, free
 from libc.string cimport memcpy
+from libc.stdint cimport int64_t, uint64_t
+
+ctypedef int64_t Integer
+ctypedef uint64_t UInteger
+ctypedef double Real
+
+ctypedef np.int32_t Int # for I, J storage indices
+ctypedef np.float64_t Float
 
 
 cdef extern from "SparseAssemblyNative.h":
@@ -14,8 +22,8 @@ cdef extern from "SparseAssemblyNative.h":
         int elem,
         int nvar,
         int nodeperelem,
-        const unsigned long *elements,
-        const long *sorter)
+        const UInteger *elements,
+        const Integer *sorter)
 
     void SparseAssemblyNativeCSR_(
             const double *coeff,
@@ -27,15 +35,13 @@ cdef extern from "SparseAssemblyNative.h":
         )
 
 
-ctypedef np.int32_t Int # for I, J storage indices
-ctypedef np.float64_t Float
 
 @boundscheck(False)
 @wraparound(False)
 def SparseAssemblyNative(np.ndarray[long] i, np.ndarray[long] j,
     np.ndarray[double] coeff, np.ndarray[Int] I, np.ndarray[Int] J,
     np.ndarray[Float] V, Int elem, Int nvar, Int nodeperelem,
-    np.ndarray[unsigned long,ndim=2, mode='c'] elements):
+    np.ndarray[UInteger,ndim=2, mode='c'] elements):
 
     cdef long i_shape = i.shape[0]
     cdef long j_shape = j.shape[0]
@@ -47,8 +53,19 @@ def SparseAssemblyNative(np.ndarray[long] i, np.ndarray[long] j,
 
 
 
-cdef void SparseAssemblyNative_(const long *i, const long *j, const double *coeff, Int *I, Int *J,
-    Float *V, Int elem, Int nvar, Int nodeperelem, const unsigned long *elements,long i_shape, long j_shape) nogil:
+cdef void SparseAssemblyNative_(
+    const long *i,
+    const long *j,
+    const double *coeff,
+    Int *I,
+    Int *J,
+    Float *V,
+    Int elem,
+    Int nvar,
+    Int nodeperelem,
+    const UInteger *elements,
+    long i_shape,
+    long j_shape) nogil:
 
     cdef long iterator, counter, ncounter
     cdef Int ndof = nvar*nodeperelem
@@ -121,7 +138,8 @@ def SparseAssemblyNativeCSR(
 
 
 @boundscheck(False)
-def SparseAssemblyNativeCSR_RecomputeDataIndex(mesh,
+def SparseAssemblyNativeCSR_RecomputeDataIndex(
+    mesh,
     np.ndarray[double] coeff,
     np.ndarray[int] indices,
     np.ndarray[int] indptr,
@@ -133,8 +151,8 @@ def SparseAssemblyNativeCSR_RecomputeDataIndex(mesh,
     # cdef np.ndarray[long,ndim=2, mode='c'] sorter = np.argsort(elements,axis=1)
     # cdef np.ndarray[unsigned long,ndim=2, mode='c'] to_c_elements = np.copy(elements)
     # to_c_elements.sort(axis=1)
-    cdef np.ndarray[long,ndim=2, mode='c'] sorter = mesh.element_sorter
-    cdef np.ndarray[unsigned long,ndim=2, mode='c'] to_c_elements = mesh.sorted_elements
+    cdef np.ndarray[Integer,ndim=2, mode='c'] sorter = mesh.element_sorter
+    cdef np.ndarray[UInteger,ndim=2, mode='c'] to_c_elements = mesh.sorted_elements
 
     SparseAssemblyNativeCSR_RecomputeDataIndex_(&coeff[0],&indices[0], &indptr[0],&data[0],
         elem,nvar,nodeperelem,&to_c_elements[0,0],&sorter[0,0])
