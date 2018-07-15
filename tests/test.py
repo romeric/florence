@@ -196,7 +196,12 @@ def test_examples():
     print("Statrting to run the test suite")
 
     # RUN EXAMPLES AT TEST CASES
-    simple_laplace()
+    simple_laplace(optimise=False, recompute_sparsity_pattern=True, squeeze_sparsity_pattern=False)
+    simple_laplace(optimise=False, recompute_sparsity_pattern=False, squeeze_sparsity_pattern=False)
+    simple_laplace(optimise=False, recompute_sparsity_pattern=False, squeeze_sparsity_pattern=True)
+    simple_laplace(optimise=True, recompute_sparsity_pattern=True, squeeze_sparsity_pattern=False)
+    simple_laplace(optimise=True, recompute_sparsity_pattern=False, squeeze_sparsity_pattern=False)
+    simple_laplace(optimise=True, recompute_sparsity_pattern=False, squeeze_sparsity_pattern=True)
 
     high_order_curved_mesh_generation(p=2, analysis_nature="linear")
     high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear")
