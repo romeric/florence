@@ -29,12 +29,6 @@ cdef extern from "_LowLevelAssemblyDPF_.h" nogil:
                             int *J_stiff,
                             Real *V_stiff,
                             Real *T,
-                            Integer is_dynamic,
-                            Integer* local_rows_mass,
-                            Integer* local_cols_mass,
-                            int *I_mass,
-                            int *J_mass,
-                            Real *V_mass,
                             Real rho,
                             Real mu,
                             Real mu1,
@@ -68,7 +62,6 @@ def _LowLevelAssemblyDPF_(fem_solver, function_space, formulation, mesh, materia
     cdef np.ndarray[Real,ndim=1, mode='c'] AllGauss     = function_space.AllGauss.flatten()
 
     cdef Integer requires_geometry_update               = fem_solver.requires_geometry_update
-    cdef Integer is_dynamic                             = fem_solver.analysis_type != "static" and fem_solver.is_mass_computed is False
 
     cdef np.ndarray[Integer,ndim=1,mode='c'] local_rows_stiffness   = formulation.local_rows
     cdef np.ndarray[Integer,ndim=1,mode='c'] local_cols_stiffness   = formulation.local_columns
@@ -84,12 +77,6 @@ def _LowLevelAssemblyDPF_(fem_solver, function_space, formulation, mesh, materia
     cdef np.ndarray[int,ndim=1,mode='c'] I_mass         = np.zeros(1,np.int32)
     cdef np.ndarray[int,ndim=1,mode='c'] J_mass         = np.zeros(1,np.int32)
     cdef np.ndarray[Real,ndim=1,mode='c'] V_mass        = np.zeros(1,np.float64)
-
-    if is_dynamic:
-        I_mass          = np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
-        J_mass          = np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
-        V_mass          = np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.float64)
-
 
     cdef np.ndarray[Real,ndim=1,mode='c'] T = np.zeros(mesh.points.shape[0]*nvar,np.float64)
 
@@ -124,12 +111,6 @@ def _LowLevelAssemblyDPF_(fem_solver, function_space, formulation, mesh, materia
                             &J_stiffness[0],
                             &V_stiffness[0],
                             &T[0],
-                            is_dynamic,
-                            &local_rows_mass[0],
-                            &local_cols_mass[0],
-                            &I_mass[0],
-                            &J_mass[0],
-                            &V_mass[0],
                             rho,
                             mu,
                             mu1,
@@ -145,7 +126,7 @@ def _LowLevelAssemblyDPF_(fem_solver, function_space, formulation, mesh, materia
                             )
 
 
-    return I_stiffness, J_stiffness, V_stiffness, I_mass, J_mass, V_mass, T
+    return I_stiffness, J_stiffness, V_stiffness, T
 
 
 

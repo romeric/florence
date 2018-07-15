@@ -498,14 +498,13 @@ class FEMSolver(object):
         #---------------------------------------------------------------------------#
         if self.recompute_sparsity_pattern is False and self.mass_type != "lumped":
             if self.parallel:
-                warn("Parallel model cannot use precomputed sparsity pattern due to partitioning. Turn this off")
+                raise ValueError("Parallel model cannot use precomputed sparsity pattern due to partitioning. Turn this off")
             t_sp = time()
             from Florence.FiniteElements.Assembly.ComputeSparsityPattern import ComputeSparsityPattern
             if self.squeeze_sparsity_pattern:
                 self.indices, self.indptr = ComputeSparsityPattern(mesh, formulation.nvar, self.squeeze_sparsity_pattern)
                 mesh.element_sorter = np.argsort(mesh.elements,axis=1)
                 mesh.sorted_elements = mesh.elements[np.arange(mesh.nelem)[:,None], mesh.element_sorter]
-                # self.sorted_elements = np.sort(mesh.elements,axis=1)
 
                 self.data_local_indices = self.data_global_indices = np.zeros(1,np.int32)
             else:
