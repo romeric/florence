@@ -6104,7 +6104,7 @@ class Mesh(object):
         """Converts a tri mesh to a quad mesh through refinement/splitting.
             This is a simpler version of the the Blossom-quad algorithm implemented in gmsh"""
 
-        self.__do_memebers_exist__()
+        self.__do_essential_memebers_exist__()
         if self.element_type == "quad":
             return
         assert self.element_type == "tri"
@@ -6179,7 +6179,7 @@ class Mesh(object):
         """Converts a tet mesh to a hex mesh through refinement/splitting
         """
 
-        self.__do_memebers_exist__()
+        self.__do_essential_memebers_exist__()
         if self.element_type == "hex":
             return
         assert self.element_type == "tet"
@@ -6305,7 +6305,7 @@ class Mesh(object):
             takes care of high order elements as well
         """
 
-        self.__do_memebers_exist__()
+        self.__do_essential_memebers_exist__()
         if self.element_type == "tri":
             return
         assert self.element_type == "quad"
@@ -6343,7 +6343,7 @@ class Mesh(object):
             Note that in principle, this splitting produces non-conformal meshes
         """
 
-        self.__do_memebers_exist__()
+        self.__do_essential_memebers_exist__()
         if self.element_type == "tet":
             return
         assert self.element_type == "hex"
