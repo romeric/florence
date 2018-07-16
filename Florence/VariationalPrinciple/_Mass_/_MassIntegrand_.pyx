@@ -112,6 +112,34 @@ cdef extern from "_MassIntegrand_.h":
         ) nogil
 
 
+    void _SymmetricNonZeroOneElementConstantMassIntegrand_(
+        const UInteger* elements,
+        const Real* points,
+        const Real* Jm,
+        const Real* AllGauss,
+        const Real* constant_mass_integrand,
+        Integer nelem,
+        Integer ndim,
+        Integer nvar,
+        Integer ngauss,
+        Integer nodeperelem,
+        Integer local_capacity,
+        Integer mass_type,
+        const Integer* local_rows_mass,
+        const Integer* local_cols_mass,
+        int *I_mass,
+        int *J_mass,
+        Real *V_mass,
+        Real *mass,
+        int recompute_sparsity_pattern,
+        int squeeze_sparsity_pattern,
+        const int *data_local_indices,
+        const int *data_global_indices,
+        const UInteger *sorted_elements,
+        const Integer *sorter
+        ) nogil
+
+
 
 
 
@@ -175,7 +203,7 @@ def __TotalConstantMassIntegrand__(
     ):
 
     cdef np.ndarray[Real, ndim=3, mode='c'] constant_mass_integrand = formulation.constant_mass_integrand
-    cdef Integer ndim                                   = mesh.points.shape[1]
+    cdef Integer ndim                                   = mesh.InferSpatialDimension()
     cdef Integer nvar                                   = formulation.nvar
     cdef Integer ngauss                                 = function_space.AllGauss.shape[0]
     cdef Integer nelem                                  = mesh.nelem
@@ -217,6 +245,49 @@ def __TotalConstantMassIntegrand__(
     if c_mass_type == 0:
         mass                                            = np.zeros((nvar*mesh.points.shape[0],1),dtype=np.float64)
 
+
+    structured_grid = False
+    if ndim == 3:
+        sizes = mesh.Volumes()
+    elif ndim == 2:
+        sizes = mesh.Areas()
+    elif ndim == 1:
+        sizes = mesh.Lengths()
+    if np.allclose(sizes,sizes[0]):
+        structured_grid = True
+
+    if structured_grid:
+        _SymmetricNonZeroOneElementConstantMassIntegrand_(
+                                                    &elements[0,0],
+                                                    &points[0,0],
+                                                    &Jm[0,0,0],
+                                                    &AllGauss[0],
+                                                    &constant_mass_integrand[0,0,0],
+                                                    nelem,
+                                                    ndim,
+                                                    nvar,
+                                                    ngauss,
+                                                    nodeperelem,
+                                                    local_capacity,
+                                                    c_mass_type,
+                                                    &local_rows_mass[0],
+                                                    &local_cols_mass[0],
+                                                    &I_mass[0],
+                                                    &J_mass[0],
+                                                    &V_mass[0],
+                                                    &mass[0,0],
+                                                    recompute_sparsity_pattern,
+                                                    squeeze_sparsity_pattern,
+                                                    &data_local_indices[0],
+                                                    &data_global_indices[0],
+                                                    &sorted_elements[0,0],
+                                                    &sorter[0,0]
+                                                    )
+
+        if recompute_sparsity_pattern:
+            return mass, I_mass, J_mass, V_mass
+        else:
+            return mass, V_mass
 
 
     if mesh.element_type == "quad" or mesh.element_type == "hex":

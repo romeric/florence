@@ -773,4 +773,204 @@ inline void _SymmetricNonZeroConstantMassIntegrand_(
 
 
 
+
+
+inline void _SymmetricNonZeroOneElementConstantMassIntegrand_(
+    const UInteger* elements,
+    const Real* points,
+    const Real* Jm,
+    const Real* AllGauss,
+    const Real* constant_mass_integrand,
+    Integer nelem,
+    Integer ndim,
+    Integer nvar,
+    Integer ngauss,
+    Integer nodeperelem,
+    Integer local_capacity,
+    Integer mass_type,
+    const Integer* local_rows_mass,
+    const Integer* local_cols_mass,
+    int *I_mass,
+    int *J_mass,
+    Real *V_mass,
+    Real *mass,
+    int recompute_sparsity_pattern,
+    int squeeze_sparsity_pattern,
+    const int *data_local_indices,
+    const int *data_global_indices,
+    const UInteger *sorted_elements,
+    const Integer *sorter
+    ) {
+
+
+    const Integer ndof                      = nodeperelem*nvar;
+    Real *LagrangeElemCoords                = allocate<Real>(nodeperelem*ndim);
+    Real *MaterialGradient                  = allocate<Real>(ndim*nodeperelem);
+    // +1 TO AVOID OVERSTEPPONG IN MATMUL UNALIGNED STORE - EXTREMELY DANGEROUSE BUG
+    int plus1                               = ndim == 2 ? 0 : 1;
+    Real *ParentGradientX                   = allocate<Real>(ndim*ndim+plus1);
+    Real detJ                               = 0.;
+    Real *massel                            = allocate<Real>(local_capacity);
+    Real *massel_lumped                     = allocate<Real>(ndof);
+
+    // PRE-COMPUTE SPARSITY PATTERN OF THE LOCAL MATRIX -
+    // LOCAL MASS MATRICES TYPICALLY HAVE LOTS OF NONZEROS
+    constexpr Real tolerance = 1e-12;
+    std::vector<Integer> nonzero_i_indices, nonzero_j_indices;
+    Integer counter = 0;
+    for (Integer i=0; i<ndof; ++i) {
+        for (Integer j=i; j<ndof; ++j) {
+            if (std::abs(constant_mass_integrand[i*ndof+j]) > tolerance) {
+                nonzero_i_indices.push_back(i);
+                nonzero_j_indices.push_back(j);
+            }
+        }
+    }
+    // PRE-COMPUTE SYMMETRIC PART OF CONSTANT MASS WITHOUT ZEROS
+    const Integer symmetric_local_capacity = nonzero_i_indices.size();
+    Real *symmetric_massel                  = allocate<Real>(symmetric_local_capacity);
+    Real *symmetric_constant_mass_integrand = allocate<Real>(ngauss*symmetric_local_capacity);
+    counter = 0;
+    for (Integer igauss = 0; igauss < ngauss; ++igauss) {
+        for (Integer i=0; i<symmetric_local_capacity; ++i) {
+            const Real value = constant_mass_integrand[igauss*ndof*ndof+nonzero_i_indices[i]*ndof+nonzero_j_indices[i]];
+            symmetric_constant_mass_integrand[counter] = value;
+            counter++;
+        }
+    }
+
+    // PRE-COMPUTE ISOPARAMETRIC GRADIENTS
+    std::vector<std::vector<Real>> current_Jms(ngauss);
+    for (int g=0; g<ngauss; ++g) {
+        std::vector<Real> current_Jm(ndim*nodeperelem);
+        for (int j=0; j<nodeperelem; ++j) {
+            for (int k=0; k<ndim; ++k) {
+                current_Jm[k*nodeperelem+j] = Jm[k*ngauss*nodeperelem+j*ngauss+g];
+            }
+        }
+        current_Jms[g] = current_Jm;
+    }
+
+    // COMPUTE MASS FOR ONE ELEMENT ONLY
+    for (Integer elem=0; elem < 1; ++elem) {
+
+        // GET THE FIELDS AT THE ELEMENT LEVEL
+        for (Integer i=0; i<nodeperelem; ++i) {
+            const Integer inode = elements[elem*nodeperelem+i];
+            for (Integer j=0; j<ndim; ++j) {
+                LagrangeElemCoords[i*ndim+j] = points[inode*ndim+j];
+            }
+        }
+
+        std::fill_n(massel,local_capacity,0.);
+        std::fill_n(symmetric_massel,symmetric_local_capacity,0.);
+
+        for (Integer igauss = 0; igauss < ngauss; ++igauss) {
+
+            {
+                // USING A STL BASED FILLER REMOVES THE ANNOYING BUG
+                std::fill_n(ParentGradientX,ndim*ndim+plus1,0.);
+                _matmul_(ndim,ndim,nodeperelem,current_Jms[igauss].data(),LagrangeElemCoords,ParentGradientX);
+                const Real detX = _det_(ndim, ParentGradientX);
+                detJ = AllGauss[igauss]*std::abs(detX);
+            }
+
+            // Multiply constant part of mass with detJ
+#ifdef __AVX__
+            using V2 = Fastor::SIMDVector<Real>;
+            V2 _va, _vb, _vout;
+            _vb.set(detJ);
+            int Vsize = V2::Size;
+            int ROUND_ = ROUND_DOWN(symmetric_local_capacity,Vsize);
+            int i=0;
+            for (; i<ROUND_; i+=Vsize) {
+                _va.load(&symmetric_constant_mass_integrand[igauss*symmetric_local_capacity+i],false);
+                _vout.load(&symmetric_massel[i],false);
+#ifdef __FMA__
+                _vout = fmadd(_va,_vb,_vout);
+#else
+                _vout += _va*_vb;
+#endif
+                _vout.store(&symmetric_massel[i],false);
+            }
+            for ( ; i<symmetric_local_capacity; ++i) {
+                symmetric_massel[i] += symmetric_constant_mass_integrand[igauss*symmetric_local_capacity+i]*detJ;
+            }
+#else
+            for (int i=0; i<symmetric_local_capacity; ++i) {
+                symmetric_massel[i] += symmetric_constant_mass_integrand[igauss*symmetric_local_capacity+i]*detJ;
+            }
+#endif
+        }
+
+        // BUILD TOTAL LOCAL MASS MATRIX
+        for (Integer i=0; i<symmetric_local_capacity; ++i) {
+            const Real value = symmetric_massel[i];
+            massel[nonzero_i_indices[i]*ndof+nonzero_j_indices[i]] = value;
+        }
+
+        for (Integer i=0; i<ndof; ++i) {
+            for (Integer j=i; j<ndof; ++j) {
+                massel[j*ndof+i] = massel[i*ndof+j];
+            }
+        }
+
+        // FOR LUMP MASS MATRIX
+        if (mass_type == 0) {
+            // LUMP MASS
+            for (Integer i=0; i<ndof; ++i) {
+                massel_lumped[i] = std::accumulate(&massel[i*ndof], &massel[(i+1)*ndof],0.);
+            }
+        }
+    }
+
+
+    // LOOP OVER ELEMETNS
+    for (Integer elem=0; elem < nelem; ++elem) {
+
+        // FOR LUMP MASS MATRIX
+        if (mass_type == 0) {
+            // ASSEMBLE LUMPED MASS
+            {
+                for (Integer i = 0; i<nodeperelem; ++i) {
+                    UInteger T_idx = elements[elem*nodeperelem+i]*nvar;
+                    for (Integer iterator = 0; iterator < nvar; ++iterator) {
+                        mass[T_idx+iterator] += massel_lumped[i*nvar+iterator];
+                    }
+                }
+            }
+        }
+        else {
+            fill_global_data(   local_rows_mass,
+                                local_cols_mass,
+                                massel,
+                                I_mass,
+                                J_mass,
+                                V_mass,
+                                elem,
+                                nvar,
+                                nodeperelem,
+                                elements,
+                                local_capacity,
+                                local_capacity,
+                                recompute_sparsity_pattern,
+                                squeeze_sparsity_pattern,
+                                data_local_indices,
+                                data_global_indices,
+                                sorted_elements,
+                                sorter);
+        }
+    }
+
+    deallocate(ParentGradientX);
+    deallocate(MaterialGradient);
+    deallocate(LagrangeElemCoords);
+    deallocate(massel);
+    deallocate(symmetric_constant_mass_integrand);
+    deallocate(symmetric_massel);
+    deallocate(massel_lumped);
+}
+
+
+
 #endif

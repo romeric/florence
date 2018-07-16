@@ -15,7 +15,7 @@ using UInteger = std::uint64_t;
 
 
 template<class RandomIt, class T>
-RandomIt binary_locate(RandomIt first, RandomIt last, const T& val) {
+inline RandomIt binary_locate(RandomIt first, RandomIt last, const T& val) {
   if(val == *first) return first;
   auto d = std::distance(first, last);
   if(d==1) return first;
@@ -45,7 +45,7 @@ inline void SparseAssemblyNativeCSR_(
 
 
 
-void SparseAssemblyNativeCSR_RecomputeDataIndex_(
+inline void SparseAssemblyNativeCSR_RecomputeDataIndex_(
     const double *coeff,
     int *indices,
     int *indptr,

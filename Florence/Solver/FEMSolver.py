@@ -79,7 +79,8 @@ class FEMSolver(object):
         has_contact=False,
         activate_explicit_multigrid=False,
         recompute_sparsity_pattern=True,
-        squeeze_sparsity_pattern=False):
+        squeeze_sparsity_pattern=False,
+        ensure_structured_grid=False):
 
         # ASSUME TRUE IF AT LEAST ONE IS TRUE
         if has_low_level_dispatcher != optimise:
@@ -153,6 +154,7 @@ class FEMSolver(object):
 
         self.recompute_sparsity_pattern = recompute_sparsity_pattern
         self.squeeze_sparsity_pattern = squeeze_sparsity_pattern
+        self.ensure_structured_grid = ensure_structured_grid
 
         self.fem_timer = 0.
         self.assembly_time = 0.
