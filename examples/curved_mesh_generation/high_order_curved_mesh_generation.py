@@ -4,7 +4,7 @@ from Florence.VariationalPrinciple import *
 
 
 def high_order_curved_mesh_generation(p=2, analysis_nature="linear",
-    optimise=True, recompute_sparsity_pattern=True, squeeze_sparsity_pattern=False):
+    optimise=True, parallelise=False, recompute_sparsity_pattern=True, squeeze_sparsity_pattern=False):
     """An example of high order curved mesh generation on a hollow cylinder
         with unstructured tetrahedral elements
     """
@@ -34,7 +34,8 @@ def high_order_curved_mesh_generation(p=2, analysis_nature="linear",
         analysis_nature=analysis_nature,
         optimise=optimise,
         recompute_sparsity_pattern=recompute_sparsity_pattern,
-        squeeze_sparsity_pattern=squeeze_sparsity_pattern)
+        squeeze_sparsity_pattern=squeeze_sparsity_pattern,
+        parallelise=parallelise)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh,
             material=material, boundary_condition=boundary_condition)
@@ -57,8 +58,18 @@ def high_order_curved_mesh_generation(p=2, analysis_nature="linear",
 
 if __name__ == "__main__":
     # With optimisation ON
-    high_order_curved_mesh_generation(p=2, analysis_nature="linear")
-    high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear")
+    high_order_curved_mesh_generation(p=2, analysis_nature="linear", optimise=True)
+    high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=True)
+
+    high_order_curved_mesh_generation(p=2, analysis_nature="linear", optimise=True,
+        recompute_sparsity_pattern=False)
+    high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=True,
+        recompute_sparsity_pattern=False)
+
+    high_order_curved_mesh_generation(p=2, analysis_nature="linear", optimise=True,
+        recompute_sparsity_pattern=False, squeeze_sparsity_pattern=True)
+    high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=True,
+        recompute_sparsity_pattern=False, squeeze_sparsity_pattern=True)
 
     # With optimisation OFF
     high_order_curved_mesh_generation(p=2, analysis_nature="linear", optimise=False)
@@ -73,5 +84,9 @@ if __name__ == "__main__":
         recompute_sparsity_pattern=False, squeeze_sparsity_pattern=True)
     high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=False,
         recompute_sparsity_pattern=False, squeeze_sparsity_pattern=True)
+
+    # With parallelisation ON
+    high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=False, parallelise=True)
+    high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=True, parallelise=True)
 
 

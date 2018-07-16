@@ -2,7 +2,7 @@ import numpy as np
 from Florence import *
 
 
-def dielectric_wrinkling():
+def dielectric_wrinkling(recompute_sparsity_pattern=True, squeeze_sparsity_pattern=False):
     """ Implicit quasi-static analysis of large deformation in a soft dielectric elastomer
         undergoing potential wrinkling using the couple electromechanics formulation
     """
@@ -54,15 +54,25 @@ def dielectric_wrinkling():
         newton_raphson_tolerance=1e-5,
         maximum_iteration_for_newton_raphson=200,
         optimise=True,
-        print_incremental_log=True)
+        recompute_sparsity_pattern=recompute_sparsity_pattern,
+        squeeze_sparsity_pattern=squeeze_sparsity_pattern,
+        print_incremental_log=True
+        )
 
-    solution = fem_solver.Solve(formulation=formulation, mesh=mesh,
+    results = fem_solver.Solve(formulation=formulation, mesh=mesh,
             material=material, boundary_condition=boundary_condition)
 
+    # Check results
+    norm = lambda s: np.linalg.norm(s[:,:3,:])
+    assert norm(results.GetSolutionVectors()) > 900.
+    assert norm(results.GetSolutionVectors()) < 910.
+
     # Plot the deformation process - requires mayavi
-    # solution.Plot(quantity=0, configuration='deformed')
+    # results.Plot(quantity=0, configuration='deformed')
 
 
 
 if __name__ == "__main__":
     dielectric_wrinkling()
+    dielectric_wrinkling(recompute_sparsity_pattern=False, squeeze_sparsity_pattern=False)
+    dielectric_wrinkling(recompute_sparsity_pattern=False, squeeze_sparsity_pattern=True)

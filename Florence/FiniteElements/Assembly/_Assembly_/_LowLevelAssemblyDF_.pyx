@@ -29,6 +29,12 @@ cdef extern from "_LowLevelAssemblyDF_.h" nogil:
                             int *J_stiff,
                             Real *V_stiff,
                             Real *T,
+                            int recompute_sparsity_pattern,
+                            int squeeze_sparsity_pattern,
+                            const int *data_local_indices,
+                            const int *data_global_indices,
+                            const UInteger *sorted_elements,
+                            const Integer *sorter,
                             Real rho,
                             Real mu,
                             Real mu1,
@@ -69,10 +75,30 @@ def _LowLevelAssemblyDF_(fem_solver, function_space, formulation, mesh, material
     cdef np.ndarray[Integer,ndim=1,mode='c'] local_rows_mass        = formulation.local_rows_mass
     cdef np.ndarray[Integer,ndim=1,mode='c'] local_cols_mass        = formulation.local_columns_mass
 
-    # ALLOCATE VECTORS FOR SPARSE ASSEMBLY OF STIFFNESS MATRIX - CHANGE TYPES TO INT64 FOR DoF > 1e09
-    cdef np.ndarray[int,ndim=1,mode='c'] I_stiffness    = np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
-    cdef np.ndarray[int,ndim=1,mode='c'] J_stiffness    = np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.int32)
-    cdef np.ndarray[Real,ndim=1,mode='c'] V_stiffness   = np.zeros(int((nvar*nodeperelem)**2*nelem),dtype=np.float64)
+    cdef np.ndarray[int,ndim=1,mode='c'] I_stiff        = np.zeros(1,np.int32)
+    cdef np.ndarray[int,ndim=1,mode='c'] J_stiff        = np.zeros(1,np.int32)
+    cdef np.ndarray[Real,ndim=1,mode='c'] V_stiff       = np.zeros(1,np.float64)
+
+    cdef np.ndarray[Integer,ndim=2, mode='c'] sorter                    = np.zeros((1,1),np.int64)
+    cdef np.ndarray[UInteger,ndim=2, mode='c'] sorted_elements          = np.zeros((1,1),np.uint64)
+    cdef np.ndarray[int,ndim=1,mode='c'] data_global_indices            = np.zeros(1,np.int32)
+    cdef np.ndarray[int,ndim=1,mode='c'] data_local_indices             = np.zeros(1,np.int32)
+    cdef int squeeze_sparsity_pattern                                   = fem_solver.squeeze_sparsity_pattern
+    cdef int recompute_sparsity_pattern                                 = fem_solver.recompute_sparsity_pattern
+
+    if fem_solver.recompute_sparsity_pattern:
+        I_stiff        = np.zeros(int((nvar*nodeperelem)**2*nelem),np.int32)
+        J_stiff        = np.zeros(int((nvar*nodeperelem)**2*nelem),np.int32)
+        V_stiff        = np.zeros(int((nvar*nodeperelem)**2*nelem),np.float64)
+    else:
+        I_stiff = fem_solver.indptr
+        J_stiff = fem_solver.indices
+        V_stiff = np.zeros(fem_solver.indices.shape[0],dtype=np.float64)
+        data_global_indices = fem_solver.data_global_indices
+        data_local_indices = fem_solver.data_local_indices
+        if fem_solver.squeeze_sparsity_pattern:
+            sorter = mesh.element_sorter
+            sorted_elements = mesh.sorted_elements
 
     cdef np.ndarray[Real,ndim=1,mode='c'] T = np.zeros(mesh.points.shape[0]*nvar,np.float64)
 
@@ -103,10 +129,16 @@ def _LowLevelAssemblyDF_(fem_solver, function_space, formulation, mesh, material
                             requires_geometry_update,
                             &local_rows_stiffness[0],
                             &local_cols_stiffness[0],
-                            &I_stiffness[0],
-                            &J_stiffness[0],
-                            &V_stiffness[0],
+                            &I_stiff[0],
+                            &J_stiff[0],
+                            &V_stiff[0],
                             &T[0],
+                            recompute_sparsity_pattern,
+                            squeeze_sparsity_pattern,
+                            &data_local_indices[0],
+                            &data_global_indices[0],
+                            &sorted_elements[0,0],
+                            &sorter[0,0],
                             rho,
                             mu,
                             mu1,
@@ -122,4 +154,7 @@ def _LowLevelAssemblyDF_(fem_solver, function_space, formulation, mesh, material
                             )
 
 
-    return I_stiffness, J_stiffness, V_stiffness, T
+    if fem_solver.recompute_sparsity_pattern:
+        return I_stiff, J_stiff, V_stiff, T
+    else:
+        return V_stiff, T

@@ -26,6 +26,12 @@ void _GlobalAssemblyDF_(const Real *points,
                         int *J_stiff,
                         Real *V_stiff,
                         Real *T,
+                        int recompute_sparsity_pattern,
+                        int squeeze_sparsity_pattern,
+                        const int *data_local_indices,
+                        const int *data_global_indices,
+                        const UInteger *sorted_elements,
+                        const Integer *sorter,
                         Real rho,
                         Real mu,
                         Real mu1,
@@ -123,19 +129,26 @@ void _GlobalAssemblyDF_(const Real *points,
             stiffness[i] += geometric_stiffness[i];
         }
 
-        // ASSEMBLE CONSTITUTIVE STIFFNESS - Fill IJV
-        fill_triplet(   local_rows_stiffness,
-                        local_cols_stiffness,
-                        stiffness,
-                        I_stiff,
-                        J_stiff,
-                        V_stiff,
-                        elem,
-                        nvar,
-                        nodeperelem,
-                        elements,
-                        local_capacity,
-                        local_capacity);
+        // ASSEMBLE CONSTITUTIVE STIFFNESS
+        fill_global_data(
+                nullptr,
+                nullptr,
+                stiffness,
+                I_stiff,
+                J_stiff,
+                V_stiff,
+                elem,
+                nvar,
+                nodeperelem,
+                elements,
+                local_capacity,
+                local_capacity,
+                recompute_sparsity_pattern,
+                squeeze_sparsity_pattern,
+                data_local_indices,
+                data_global_indices,
+                sorted_elements,
+                sorter);
 
         // ASSEMBLE TRACTIONS
         {

@@ -59,17 +59,24 @@ def _LowLevelAssembly_(fem_solver, function_space, formulation, mesh, material, 
         raise NotImplementedError("Turning optimise option on for {} material is not supported yet. "
             "Consider 'optimise=False' for now".format(type(material).__name__))
 
+    nvar = formulation.nvar
 
     # MAKE MESH DATA CONTIGUOUS
     mesh.ChangeType()
-
     # CALL LOW LEVEL ASSEMBLER
-    I_stiffness, J_stiffness, V_stiffness, T = eval(assembly_func)(fem_solver,
-        function_space, formulation, mesh, material, Eulerx, Eulerp)
+    if fem_solver.recompute_sparsity_pattern:
+        I_stiffness, J_stiffness, V_stiffness, T = eval(assembly_func)(fem_solver,
+            function_space, formulation, mesh, material, Eulerx, Eulerp)
 
-    nvar = formulation.nvar
-    stiffness = csr_matrix((V_stiffness,(I_stiffness,J_stiffness)),
-        shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
+        stiffness = csr_matrix((V_stiffness,(I_stiffness,J_stiffness)),
+            shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
+    else:
+        V_stiffness, T = eval(assembly_func)(fem_solver,
+            function_space, formulation, mesh, material, Eulerx, Eulerp)
+
+        stiffness = csr_matrix((V_stiffness,fem_solver.indices,fem_solver.indptr),
+            shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64)
+
 
     F, mass = [], []
 
