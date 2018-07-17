@@ -8,5 +8,6 @@ from .BoundaryCondition import BoundaryCondition
 from .Solver import *
 from .Utils import PWD, RSWD
 from .PostProcessing import *
+from .FiniteElements import AssembleMass, AssembleForm
 
-__version__ = "0.1.4.dev"
+__version__ = "0.1.4.dev0"

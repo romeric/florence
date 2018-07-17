@@ -18,7 +18,7 @@ import multiprocessing
 import Florence.ParallelProcessing.parmap as parmap
 
 
-__all__ = ['Assemble', 'AssembleForces', 'AssembleExplicit']
+__all__ = ['Assemble', 'AssembleForces', 'AssembleExplicit', 'AssembleMass', 'AssembleForm']
 
 
 
@@ -1210,7 +1210,7 @@ def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
 #----------------------------------------------------------------------------------------------------------------#
 
 
-def AssembleMass(formulation, mesh, fem_solver, rho=1.0, material=None, mass_type="lumped", Eulerx=None):
+def AssembleMass(formulation, mesh, material, fem_solver, rho=1.0, mass_type="lumped", Eulerx=None):
 
     t_mass_assembly = time()
 
@@ -1218,6 +1218,10 @@ def AssembleMass(formulation, mesh, fem_solver, rho=1.0, material=None, mass_typ
         function_space = formulation.function_spaces[1]
     else:
         function_space = formulation.function_spaces[0]
+
+    mesh.ChangeType()
+    formulation.GetConstantMassIntegrand(function_space, material)
+    fem_solver.ComputeSparsityFEM(mesh, formulation)
 
     try:
         from Florence.VariationalPrinciple._MassIntegrand_ import __TotalConstantMassIntegrand__
@@ -1234,10 +1238,10 @@ def AssembleMass(formulation, mesh, fem_solver, rho=1.0, material=None, mass_typ
             if fem_solver.mass_type == "consistent":
                 M = csr_matrix((V_mass,fem_solver.indices,fem_solver.indptr),shape=((formulation.nvar*mesh.points.shape[0],
                     formulation.nvar*mesh.points.shape[0])),dtype=np.float64)
-
     except:
         if Eulerx is None:
-            Eulerx = np.zeros_like(mesh.points)
+            Eulerx = np.copy(mesh.points)
+            Eulerp = np.zeros(mesh.points.shape[0])
         M = AssembleExplicit_NoLLD_Mass(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
 
     t_mass_assembly = time() - t_mass_assembly
@@ -1251,9 +1255,11 @@ def AssembleMass(formulation, mesh, fem_solver, rho=1.0, material=None, mass_typ
 def AssembleForm(formulation, mesh, material, fem_solver, Eulerx=None, Eulerp=None):
 
     if Eulerx is None:
-        Eulerx = np.zeros_like(mesh.points)
+        Eulerx = np.copy(mesh.points)
     if Eulerp is None:
         Eulerp = np.zeros(mesh.points.shape[0])
     function_space = formulation.function_spaces[0]
+
+    fem_solver.ComputeSparsityFEM(mesh, formulation)
 
     return Assemble(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)

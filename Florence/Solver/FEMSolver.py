@@ -498,21 +498,7 @@ class FEMSolver(object):
 
         # COMPUTE SPARSITY PATTERN
         #---------------------------------------------------------------------------#
-        if self.recompute_sparsity_pattern is False and self.mass_type != "lumped":
-            if self.parallel:
-                raise ValueError("Parallel model cannot use precomputed sparsity pattern due to partitioning. Turn this off")
-            t_sp = time()
-            from Florence.FiniteElements.Assembly.ComputeSparsityPattern import ComputeSparsityPattern
-            if self.squeeze_sparsity_pattern:
-                self.indices, self.indptr = ComputeSparsityPattern(mesh, formulation.nvar, self.squeeze_sparsity_pattern)
-                mesh.element_sorter = np.argsort(mesh.elements,axis=1)
-                mesh.sorted_elements = mesh.elements[np.arange(mesh.nelem)[:,None], mesh.element_sorter]
-
-                self.data_local_indices = self.data_global_indices = np.zeros(1,np.int32)
-            else:
-                self.indices, self.indptr, self.data_local_indices, \
-                    self.data_global_indices = ComputeSparsityPattern(mesh, formulation.nvar)
-            print("Computed sparsity pattern for the mesh. Time elapsed is {} seconds".format(time()-t_sp))
+        self.ComputeSparsityFEM(mesh, formulation)
         #---------------------------------------------------------------------------#
 
 
@@ -612,7 +598,7 @@ class FEMSolver(object):
             else:
                 fspace = function_spaces[1]
             # COMPUTE CONSTANT PART OF MASS MATRIX
-            formulation.GetConstantMassIntegrand(fspace,material)
+            formulation.GetConstantMassIntegrand(fspace, material)
 
             if self.analysis_subtype != "explicit":
                 # COMPUTE BOTH STIFFNESS AND MASS USING HIGHER QUADRATURE RULE
@@ -1301,3 +1287,21 @@ class FEMSolver(object):
         self.pmesh, self.pelement_indices, self.pnode_indices, \
             self.partitioned_maps = pmesh, pelement_indices, pnode_indices, partitioned_maps
         # return pmesh, pelement_indices, pnode_indices, partitioned_maps
+
+
+    def ComputeSparsityFEM(self, mesh, formulation):
+        if self.recompute_sparsity_pattern is False and self.mass_type != "lumped":
+            if self.parallel:
+                raise ValueError("Parallel model cannot use precomputed sparsity pattern due to partitioning. Turn this off")
+            t_sp = time()
+            from Florence.FiniteElements.Assembly.ComputeSparsityPattern import ComputeSparsityPattern
+            if self.squeeze_sparsity_pattern:
+                self.indices, self.indptr = ComputeSparsityPattern(mesh, formulation.nvar, self.squeeze_sparsity_pattern)
+                mesh.element_sorter = np.argsort(mesh.elements,axis=1)
+                mesh.sorted_elements = mesh.elements[np.arange(mesh.nelem)[:,None], mesh.element_sorter]
+
+                self.data_local_indices = self.data_global_indices = np.zeros(1,np.int32)
+            else:
+                self.indices, self.indptr, self.data_local_indices, \
+                    self.data_global_indices = ComputeSparsityPattern(mesh, formulation.nvar)
+            print("Computed sparsity pattern for the mesh. Time elapsed is {} seconds".format(time()-t_sp))
