@@ -17,7 +17,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
 
     def __init__(self, mesh, variables_order=(1,),
         quadrature_rules=None, quadrature_type=None, function_spaces=None, compute_post_quadrature=True,
-        equally_spaced_bases=False):
+        equally_spaced_bases=False, quadrature_degree=None):
 
         if mesh.element_type != "tet" and mesh.element_type != "tri" and \
             mesh.element_type != "quad" and mesh.element_type != "hex":
@@ -44,16 +44,7 @@ class DisplacementPotentialFormulation(VariationalPrinciple):
             # is_flattened = True
             is_flattened = False
 
-            if mesh.element_type == "tri" or mesh.element_type == "tet":
-                norder = 2*C
-                # TAKE CARE OF C=0 CASE
-                if norder == 0:
-                    norder = 1
-
-                norder_post = 2*(C+1)
-            else:
-                norder = C+2
-                norder_post = 2*(C+2)
+            norder, norder_post = self.GetQuadratureOrder(C, mesh.element_type, quadrature_degree=quadrature_degree)
 
             # GET QUADRATURE
             quadrature = QuadratureRule(optimal=optimal_quadrature, norder=norder, mesh_type=mesh.element_type, is_flattened=is_flattened)

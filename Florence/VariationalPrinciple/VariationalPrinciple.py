@@ -74,14 +74,18 @@ class VariationalPrinciple(object):
         #         # self.quadrature_rules[counter] = list()
 
 
-    def GetQuadratureOrder(self,C,element_type):
-        """Finds quadrature degree/strength for a given polynomial order C=p-1 [where is polynomial degree]"""
-        if element_type == "tri" or element_type == "tet":
-            norder = 2*C if C > 0 else 1
-            norder_post = 2*(C+1)
+    def GetQuadratureOrder(self, C, element_type, quadrature_degree=None):
+        """Finds quadrature degree/strength for a given polynomial order C=p-1 [where p is polynomial degree]"""
+        if quadrature_degree is None:
+            if element_type == "tri" or element_type == "tet":
+                norder = 2*C if C > 0 else 1
+                norder_post = 2*(C+1)
+            else:
+                norder = C+2
+                norder_post = 2*(C+2)
         else:
-            norder = C+2
-            norder_post = 2*(C+2)
+            norder = quadrature_degree
+            norder_post = 2*quadrature_degree
 
         return norder, norder_post
 

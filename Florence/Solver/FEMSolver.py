@@ -155,6 +155,7 @@ class FEMSolver(object):
         self.recompute_sparsity_pattern = recompute_sparsity_pattern
         self.squeeze_sparsity_pattern = squeeze_sparsity_pattern
         self.ensure_structured_grid = ensure_structured_grid
+        self.is_sparsity_pattern_computed = False
 
         self.fem_timer = 0.
         self.assembly_time = 0.
@@ -1290,18 +1291,23 @@ class FEMSolver(object):
 
 
     def ComputeSparsityFEM(self, mesh, formulation):
-        if self.recompute_sparsity_pattern is False and self.mass_type != "lumped":
-            if self.parallel:
-                raise ValueError("Parallel model cannot use precomputed sparsity pattern due to partitioning. Turn this off")
-            t_sp = time()
-            from Florence.FiniteElements.Assembly.ComputeSparsityPattern import ComputeSparsityPattern
-            if self.squeeze_sparsity_pattern:
-                self.indices, self.indptr = ComputeSparsityPattern(mesh, formulation.nvar, self.squeeze_sparsity_pattern)
-                mesh.element_sorter = np.argsort(mesh.elements,axis=1)
-                mesh.sorted_elements = mesh.elements[np.arange(mesh.nelem)[:,None], mesh.element_sorter]
 
-                self.data_local_indices = self.data_global_indices = np.zeros(1,np.int32)
-            else:
-                self.indices, self.indptr, self.data_local_indices, \
-                    self.data_global_indices = ComputeSparsityPattern(mesh, formulation.nvar)
-            print("Computed sparsity pattern for the mesh. Time elapsed is {} seconds".format(time()-t_sp))
+        if self.is_sparsity_pattern_computed is False:
+            if self.recompute_sparsity_pattern is False and self.mass_type != "lumped":
+                if self.parallel:
+                    raise ValueError("Parallel model cannot use precomputed sparsity pattern due to partitioning. Turn this off")
+                t_sp = time()
+                from Florence.FiniteElements.Assembly.ComputeSparsityPattern import ComputeSparsityPattern
+                if self.squeeze_sparsity_pattern:
+                    self.indices, self.indptr = ComputeSparsityPattern(mesh, formulation.nvar, self.squeeze_sparsity_pattern)
+                    mesh.element_sorter = np.argsort(mesh.elements,axis=1)
+                    mesh.sorted_elements = mesh.elements[np.arange(mesh.nelem)[:,None], mesh.element_sorter]
+
+                    self.data_local_indices = self.data_global_indices = np.zeros(1,np.int32)
+                else:
+                    self.indices, self.indptr, self.data_local_indices, \
+                        self.data_global_indices = ComputeSparsityPattern(mesh, formulation.nvar)
+
+                self.is_sparsity_pattern_computed = True
+                print("Computed sparsity pattern for the mesh. Time elapsed is {} seconds".format(time()-t_sp))
+

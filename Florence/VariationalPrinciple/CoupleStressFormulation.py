@@ -21,7 +21,7 @@ class CoupleStressFormulation(VariationalPrinciple):
 
     def __init__(self, mesh, variables_order=(1,0,0), subtype="lagrange_multiplier",
         quadrature_rules=None, quadrature_type=None, function_spaces=None, compute_post_quadrature=False,
-        equally_spaced_bases=False, save_condensed_matrices=True):
+        equally_spaced_bases=False, save_condensed_matrices=True, quadrature_degree=None):
         """
 
             Input:
