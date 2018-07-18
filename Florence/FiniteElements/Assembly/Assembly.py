@@ -1210,7 +1210,7 @@ def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
 #----------------------------------------------------------------------------------------------------------------#
 
 
-def AssembleMass(formulation, mesh, material, fem_solver, rho=1.0, mass_type="lumped", Eulerx=None):
+def AssembleMass(formulation, mesh, material, fem_solver, rho=1.0, mass_type=None, Eulerx=None):
 
     t_mass_assembly = time()
 
@@ -1222,6 +1222,8 @@ def AssembleMass(formulation, mesh, material, fem_solver, rho=1.0, mass_type="lu
     mesh.ChangeType()
     formulation.GetConstantMassIntegrand(function_space, material)
     fem_solver.ComputeSparsityFEM(mesh, formulation)
+    if fem_solver.mass_type == None:
+        fem_solver.mass_type = "consistent"
 
     try:
         from Florence.VariationalPrinciple._MassIntegrand_ import __TotalConstantMassIntegrand__
@@ -1259,7 +1261,8 @@ def AssembleForm(formulation, mesh, material, fem_solver, Eulerx=None, Eulerp=No
     if Eulerp is None:
         Eulerp = np.zeros(mesh.points.shape[0])
     function_space = formulation.function_spaces[0]
+    fem_solver.is_mass_computed = True
 
     fem_solver.ComputeSparsityFEM(mesh, formulation)
 
-    return Assemble(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
+    return Assemble(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)[:2]
