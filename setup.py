@@ -337,6 +337,7 @@ class FlorenceSetup(object):
                 execute('cd '+_path+' && echo rm -rf *.cpp CythonSource/*.cpp && rm -rf *.cpp CythonSource/*.cpp')
             elif "Assembly" in _path:
                 execute('cd '+_path+' && echo rm -rf *.cpp && rm -rf *.cpp')
+                execute('cd '+_path+' && python AOT_Assembler.py clean')
 
     def Clean(self):
 
