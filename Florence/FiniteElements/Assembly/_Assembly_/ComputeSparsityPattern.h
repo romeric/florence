@@ -34,7 +34,7 @@ inline void _ComputeSparsityPattern_  (
         counts[i-1] = local_nodes.size();
 
         for (int j=0; j<nvar; ++j) {
-            for (int k=0; k<local_nodes.size(); ++k) {
+            for (int k=0; k<(int)local_nodes.size(); ++k) {
                 const int const_elem_retriever = local_nodes[k];
                 for (int l=0; l<nvar; ++l) {
                     indices[nnz] = nvar*const_elem_retriever+l;
@@ -82,18 +82,20 @@ inline void _ComputeDataIndices_  (
             }
         }
 
-
         for (int i=0; i<ndof; ++i) {
-            const int nnz = indptr[current_row_column[i]+1] - indptr[current_row_column[i]];
+            const int current_local_ndof = current_row_column_local[i]*ndof;
+            const int current_global_ndof = current_row_column[i];
+            const int current_global_row = indptr[current_global_ndof];
+            const int nnz = indptr[current_global_ndof+1] - current_global_row;
             int *search_space = (int*)malloc(sizeof(int)*nnz);
             for (int k=0; k<nnz; ++k) {
-                search_space[k] = indices[indptr[current_row_column[i]]+k];
+                search_space[k] = indices[current_global_row+k];
             }
 
             for (int j=0; j<ndof; ++j) {
                 int Iterr = std::find(search_space,search_space+nnz,current_row_column[j]) - search_space;
-                data_global_indices[elem*local_capacity+i*ndof+j] = indptr[current_row_column[i]] + Iterr;
-                data_local_indices[elem*local_capacity+i*ndof+j] = current_row_column_local[i]*ndof+current_row_column_local[j];
+                data_global_indices[elem*local_capacity+i*ndof+j] = current_global_row + Iterr;
+                data_local_indices[elem*local_capacity+i*ndof+j] = current_local_ndof+current_row_column_local[j];
             }
             free(search_space);
         }

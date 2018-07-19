@@ -79,15 +79,15 @@ class CoupleStressFormulation(VariationalPrinciple):
         if quadrature_rules == None and self.quadrature_rules == None:
             # FOR DISPLACEMENT
             quadrature0 = QuadratureRule(optimal=3, norder=self.GetQuadratureOrder(norder,mesh.element_type)[0],
-                mesh_type=mesh.element_type, is_flattened=False)
+                mesh_type=mesh.element_type)
             # FOR ROTATIONS
             quadrature1 = QuadratureRule(optimal=3, norder=self.GetQuadratureOrder(norder,mesh.element_type)[0],
-                mesh_type=mesh.element_type, is_flattened=False)
+                mesh_type=mesh.element_type)
             # FOR LAGRANGE MULTIPLIER
             quadrature2 = QuadratureRule(optimal=3, norder=self.GetQuadratureOrder(norder,mesh.element_type)[0],
-                mesh_type=mesh.element_type, is_flattened=False)
+                mesh_type=mesh.element_type)
             # BOUNDARY
-            bquadrature = QuadratureRule(optimal=3, norder=C+2, mesh_type=mesh.boundary_element_type, is_flattened=False)
+            bquadrature = QuadratureRule(optimal=3, norder=C+2, mesh_type=mesh.boundary_element_type)
 
             self.quadrature_rules = (quadrature0,quadrature1,quadrature2,bquadrature)
         else:
@@ -98,16 +98,16 @@ class CoupleStressFormulation(VariationalPrinciple):
         if function_spaces == None and self.function_spaces == None:
             # FOR DISPLACEMENT
             function_space0 = FunctionSpace(mesh0, self.quadrature_rules[0], p=mesh0.degree,
-                equally_spaced=equally_spaced_bases, use_optimal_quadrature=False)
+                equally_spaced=equally_spaced_bases)
             # FOR ROTATIONS
             function_space1 = FunctionSpace(mesh1, self.quadrature_rules[1], p=mesh1.degree,
-                equally_spaced=equally_spaced_bases, use_optimal_quadrature=False)
+                equally_spaced=equally_spaced_bases)
             # FOR LAGRANGE MULTIPLIER
             function_space2 = FunctionSpace(mesh2, self.quadrature_rules[2], p=mesh2.degree,
-                equally_spaced=equally_spaced_bases, use_optimal_quadrature=False)
+                equally_spaced=equally_spaced_bases)
             # BOUNDARY
             bfunction_space = FunctionSpace(mesh0.CreateDummyLowerDimensionalMesh(), self.quadrature_rules[3], p=mesh0.degree,
-                equally_spaced=equally_spaced_bases, use_optimal_quadrature=False)
+                equally_spaced=equally_spaced_bases)
 
             self.function_spaces = (function_space0, function_space1, function_space2, bfunction_space)
         else:

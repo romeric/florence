@@ -32,61 +32,10 @@ class DisplacementFormulation(VariationalPrinciple):
         self.fields = "mechanics"
         self.nvar = self.ndim
 
-        C = mesh.InferPolynomialDegree() - 1
-        mesh.InferBoundaryElementType()
-
-        if quadrature_rules == None and self.quadrature_rules == None:
-
-            # OPTION FOR QUADRATURE TECHNIQUE FOR TRIS AND TETS
-            optimal_quadrature = 3
-            # is_flattened = True
-            is_flattened = False
-
-            norder, norder_post = self.GetQuadratureOrder(C, mesh.element_type, quadrature_degree=quadrature_degree)
-
-            # GET QUADRATURE
-            quadrature = QuadratureRule(optimal=optimal_quadrature, norder=norder, mesh_type=mesh.element_type, is_flattened=is_flattened)
-            if self.compute_post_quadrature != None:
-                # COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR POST-PROCESSING
-                post_quadrature = QuadratureRule(optimal=optimal_quadrature, norder=norder_post, mesh_type=mesh.element_type)
-            else:
-                post_quadrature = None
-
-            # BOUNDARY QUADRATURE
-            bquadrature = QuadratureRule(optimal=optimal_quadrature, norder=C+2, mesh_type=mesh.boundary_element_type, is_flattened=is_flattened)
-
-            self.quadrature_rules = (quadrature,post_quadrature,bquadrature)
-        else:
-            self.quadrature_rules = quadrature_rules
-
-        if function_spaces == None and self.function_spaces == None:
-
-            # CREATE FUNCTIONAL SPACES
-            function_space = FunctionSpace(mesh, quadrature, p=C+1, equally_spaced=equally_spaced_bases, use_optimal_quadrature=is_flattened)
-            if self.compute_post_quadrature != None:
-                post_function_space = FunctionSpace(mesh, post_quadrature, p=C+1, equally_spaced=equally_spaced_bases)
-            else:
-                post_function_space = None
-
-            # CREATE BOUNDARY FUNCTIONAL SPACES
-            bfunction_space = FunctionSpace(mesh.CreateDummyLowerDimensionalMesh(),
-                bquadrature, p=C+1, equally_spaced=equally_spaced_bases, use_optimal_quadrature=is_flattened)
-
-            self.function_spaces = (function_space,post_function_space,bfunction_space)
-        else:
-            self.function_spaces = function_spaces
-
-        # local_size = function_space.Bases.shape[0]*self.nvar
-        local_size = self.function_spaces[0].Bases.shape[0]*self.nvar
-        self.local_rows = np.repeat(np.arange(0,local_size),local_size,axis=0)
-        self.local_columns = np.tile(np.arange(0,local_size),local_size)
-        self.local_size = local_size
-
-        # FOR MASS
-        local_size_m = self.function_spaces[0].Bases.shape[0]*self.ndim
-        self.local_rows_mass = np.repeat(np.arange(0,local_size_m),local_size_m,axis=0)
-        self.local_columns_mass = np.tile(np.arange(0,local_size_m),local_size_m)
-        self.local_size_m = local_size_m
+        self.GetQuadraturesAndFunctionSpaces(mesh, variables_order=variables_order,
+            quadrature_rules=quadrature_rules, quadrature_type=quadrature_type,
+            function_spaces=function_spaces, compute_post_quadrature=compute_post_quadrature,
+            equally_spaced_bases=equally_spaced_bases, quadrature_degree=quadrature_degree)
 
 
 

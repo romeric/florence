@@ -25,21 +25,13 @@ def test_quadrature_functionspace():
         for p in range(2,7):
             mesh.GetHighOrderMesh(p=p, check_duplicates=False)
 
-            q = QuadratureRule(mesh_type=etype, norder=p+2, is_flattened=False)
-            FunctionSpace(mesh, q, p=p, equally_spaced=False, use_optimal_quadrature=False)
-            FunctionSpace(mesh, q, p=p, equally_spaced=True, use_optimal_quadrature=False)
+            q = QuadratureRule(mesh_type=etype, norder=p+2, flatten=False)
+            FunctionSpace(mesh, q, p=p, equally_spaced=False)
+            FunctionSpace(mesh, q, p=p, equally_spaced=True)
 
-            FunctionSpace(mesh, q, p=p, equally_spaced=False, evaluate_at_nodes=True)
-            FunctionSpace(mesh, q, p=p, equally_spaced=True, evaluate_at_nodes=True)
-
-
-            q = QuadratureRule(mesh_type=etype, norder=p+2, is_flattened=True)
-            FunctionSpace(mesh, q, p=p, equally_spaced=False, use_optimal_quadrature=True)
-            FunctionSpace(mesh, q, p=p, equally_spaced=True, use_optimal_quadrature=True)
-
-            FunctionSpace(mesh, q, p=p, equally_spaced=False, evaluate_at_nodes=True)
-            FunctionSpace(mesh, q, p=p, equally_spaced=True, evaluate_at_nodes=True)
-
+            q = QuadratureRule(mesh_type=etype, norder=p+2, flatten=True)
+            FunctionSpace(mesh, q, p=p, equally_spaced=False)
+            FunctionSpace(mesh, q, p=p, equally_spaced=True)
 
     # now test all Fekete/ES point creation
     from Florence.QuadratureRules import FeketePointsTri

@@ -1,16 +1,21 @@
 import numpy as np
 from warnings import warn
-from Florence.QuadratureRules import GaussQuadrature, QuadraturePointsWeightsTet, QuadraturePointsWeightsTri
+from Florence.QuadratureRules import GaussQuadrature
+from Florence.QuadratureRules import QuadraturePointsWeightsTet
+from Florence.QuadratureRules import QuadraturePointsWeightsTri
+from Florence.QuadratureRules import WVQuadraturePointsWeightsHex
 
 
 class QuadratureRule(object):
 
 
-    def __init__(self, qtype="gauss", norder=2, mesh_type="tri", optimal=3, is_flattened=False, evaluate=True):
+    def __init__(self, qtype="gauss", norder=2, mesh_type="tri", optimal=3, flatten=True, evaluate=True):
         """
             input:
-                is_flattened:           [bool] only used for quads and hexes as tensor based
-                                        quadrature is not flattened where tabulated values are
+                flatten:                [bool] only used for quads and hexes as tensor based
+                                        quadrature is not flattened where tabulated values are.
+                                        Optimal quadrature points for all element types are in a
+                                        flattened representation
         """
 
         self.qtype = qtype
@@ -18,7 +23,7 @@ class QuadratureRule(object):
         self.element_type = mesh_type
         self.points = []
         self.weights = []
-        self.is_flattened = is_flattened
+        self.flatten = flatten
         # OPTIMAL QUADRATURE POINTS FOR TRIS AND TETS
         self.optimal = optimal
 
@@ -30,7 +35,13 @@ class QuadratureRule(object):
 
         z=[]; w=[];
 
-        if mesh_type == "quad" or mesh_type == "hex":
+        if mesh_type == "hex":
+            if self.optimal==4:
+                zw = WVQuadraturePointsWeightsHex.WVQuadraturePointsWeightsHex(self.norder)
+                z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
+            else:
+                z, w = GaussQuadrature(self.norder,-1.,1.)
+        elif mesh_type == "quad":
             z, w = GaussQuadrature(self.norder,-1.,1.)
         elif mesh_type == "tet":
             zw = QuadraturePointsWeightsTet.QuadraturePointsWeightsTet(self.norder,self.optimal)
@@ -45,7 +56,7 @@ class QuadratureRule(object):
         self.weights = w
 
         if mesh_type == "quad" or mesh_type == "hex":
-            if self.is_flattened:
+            if z.ravel().shape[0] == w.ravel().shape[0]:
                 self.Flatten(mesh_type=mesh_type)
 
 

@@ -78,23 +78,23 @@ inline void SparseAssemblyNativeCSR_RecomputeDataIndex_(
         }
     }
 
-
     for (int i=0; i<ndof; ++i) {
-        const int nnz = indptr[current_row_column[i]+1] - indptr[current_row_column[i]];
+        const int current_local_ndof = current_row_column_local[i]*ndof;
+        const int current_global_ndof = current_row_column[i];
+        const int current_global_row = indptr[current_global_ndof];
+        const int nnz = indptr[current_global_ndof+1] - current_global_row;
         int *search_space = (int*)malloc(sizeof(int)*nnz);
         for (int k=0; k<nnz; ++k) {
-            search_space[k] = indices[indptr[current_row_column[i]]+k];
+            search_space[k] = indices[current_global_row+k];
         }
 
         for (int j=0; j<ndof; ++j) {
             int Iterr = std::find(search_space,search_space+nnz,current_row_column[j]) - search_space;
-            // int Iterr = binary_locate(search_space,search_space+nnz,current_row_column[j]) - search_space;
-            full_current_column[i*ndof+j] = indptr[current_row_column[i]] + Iterr;
-            full_current_column_local[i*ndof+j] = current_row_column_local[i]*ndof+current_row_column_local[j];
+            full_current_column[i*ndof+j] = current_global_row + Iterr;
+            full_current_column_local[i*ndof+j] = current_local_ndof+current_row_column_local[j];
         }
         free(search_space);
     }
-
 
     // FILL DATA VALUES FOR CSR
     for (int i=0; i<local_capacity; ++i) {

@@ -48,7 +48,7 @@ def GetBases1D(C, Quadrature, info=None, bases_type="nodal", equally_spaced=Fals
 
 
 
-def GetBases2D(C, Quadrature, info, bases_type="nodal", equally_spaced=False, is_flattened=False):
+def GetBases2D(C, Quadrature, info, bases_type="nodal", equally_spaced=False, is_flattened=True):
 
     w = Quadrature.weights
     z = Quadrature.points
@@ -120,7 +120,7 @@ def GetBases2D(C, Quadrature, info, bases_type="nodal", equally_spaced=False, is
 
 
 
-def GetBases3D(C, Quadrature, info, bases_type="nodal", equally_spaced=False, is_flattened=False):
+def GetBases3D(C, Quadrature, info, bases_type="nodal", equally_spaced=False, is_flattened=True):
 
     ndim = 3
 

@@ -48,31 +48,6 @@ class VariationalPrinciple(object):
         # GET NUMBER OF VARIABLES
         self.GetNumberOfVariables()
 
-        # # BUILD MESHES FOR THESE ORDRES
-        # p = mesh.InferPolynomialDegree()
-
-        # if p != self.variables_order[0] and self.variables_order[0]!=0:
-        #     mesh.GetHighOrderMesh(C=self.variables_order[0]-1)
-
-        # if len(self.variables_order) == 2:
-        #     if self.variables_order[2] == 0 or self.variables_order[1]==0 or self.variables_order[0]==0:
-        #         # GET MEDIAN OF THE ELEMENTS FOR CONSTANT VARIABLES
-        #         self.median, self.bases_at_median = mesh.Median
-
-        #     # GET QUADRATURE RULES
-        #     self.quadrature_rules = [None]*len(self.variables_order)
-        #     QuadratureOpt = 3
-        #     for counter, degree in enumerate(self.variables_order):
-        #         if degree==0:
-        #             degree=1
-        #         # self.quadrature_rules[counter] = list(GetBasesAtInegrationPoints(degree-1, 2*degree,
-        #             # QuadratureOpt,mesh.element_type))
-        #         quadrature = QuadratureRule(optimal=QuadratureOpt,
-        #             norder=2*degree, mesh_type=mesh.element_type)
-        #         self.quadrature_rules[counter] = quadrature
-        #         # FunctionSpace(mesh, p=degree, 2*degree, QuadratureOpt,mesh.element_type)
-        #         # self.quadrature_rules[counter] = list()
-
 
     def GetQuadratureOrder(self, C, element_type, quadrature_degree=None):
         """Finds quadrature degree/strength for a given polynomial order C=p-1 [where p is polynomial degree]"""
@@ -88,6 +63,72 @@ class VariationalPrinciple(object):
             norder_post = 2*quadrature_degree
 
         return norder, norder_post
+
+
+
+    def GetQuadraturesAndFunctionSpaces(self, mesh, variables_order=(1,),
+        quadrature_rules=None, quadrature_type=None, function_spaces=None, compute_post_quadrature=True,
+        equally_spaced_bases=False, quadrature_degree=None):
+        """"The default function for computing quadrature rules and function spaces for equall order single
+            and multi-physics/fields problems"""
+
+        C = mesh.InferPolynomialDegree() - 1
+        mesh.InferBoundaryElementType()
+
+        if quadrature_rules == None and self.quadrature_rules == None:
+
+            # OPTION FOR QUADRATURE TECHNIQUE FOR TRIS AND TETS
+            optimal_quadrature = 3
+            if mesh.element_type == "quad" or mesh.element_type == "hex":
+                if quadrature_type == "wv":
+                    optimal_quadrature = 4
+
+            norder, norder_post = self.GetQuadratureOrder(C, mesh.element_type, quadrature_degree=quadrature_degree)
+
+            # GET QUADRATURE
+            quadrature = QuadratureRule(optimal=optimal_quadrature, norder=norder, mesh_type=mesh.element_type)
+            if self.compute_post_quadrature != None:
+                # COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR POST-PROCESSING
+                post_quadrature = QuadratureRule(optimal=optimal_quadrature, norder=norder_post, mesh_type=mesh.element_type)
+            else:
+                post_quadrature = None
+
+            # BOUNDARY QUADRATURE
+            bquadrature = QuadratureRule(optimal=optimal_quadrature, norder=C+2, mesh_type=mesh.boundary_element_type)
+
+            self.quadrature_rules = (quadrature,post_quadrature,bquadrature)
+        else:
+            self.quadrature_rules = quadrature_rules
+
+        if function_spaces == None and self.function_spaces == None:
+
+            # CREATE FUNCTIONAL SPACES
+            function_space = FunctionSpace(mesh, self.quadrature_rules[0], p=C+1, equally_spaced=equally_spaced_bases)
+            if self.compute_post_quadrature != None:
+                post_function_space = FunctionSpace(mesh, self.quadrature_rules[1], p=C+1, equally_spaced=equally_spaced_bases)
+            else:
+                post_function_space = None
+
+            # CREATE BOUNDARY FUNCTIONAL SPACES
+            bfunction_space = FunctionSpace(mesh.CreateDummyLowerDimensionalMesh(),
+                self.quadrature_rules[2], p=C+1, equally_spaced=equally_spaced_bases)
+
+            self.function_spaces = (function_space,post_function_space,bfunction_space)
+        else:
+            self.function_spaces = function_spaces
+
+
+        local_size = self.function_spaces[0].Bases.shape[0]*self.nvar
+        self.local_rows = np.repeat(np.arange(0,local_size),local_size,axis=0)
+        self.local_columns = np.tile(np.arange(0,local_size),local_size)
+        self.local_size = local_size
+
+        # FOR MASS
+        local_size_m = self.function_spaces[0].Bases.shape[0]*self.ndim
+        self.local_rows_mass = np.repeat(np.arange(0,local_size_m),local_size_m,axis=0)
+        self.local_columns_mass = np.tile(np.arange(0,local_size_m),local_size_m)
+        self.local_size_m = local_size_m
+
 
 
     def GetVolume(self, function_space, LagrangeElemCoords, EulerELemCoords, requires_geometry_update, elem=0):
