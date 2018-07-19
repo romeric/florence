@@ -13,7 +13,8 @@ using UInteger = std::uint64_t;
 #endif
 
 
-
+#ifndef BINARY_LOCATE_DEF_
+#define BINARY_LOCATE_DEF_
 template<class RandomIt, class T>
 inline RandomIt binary_locate(RandomIt first, RandomIt last, const T& val) {
   if(val == *first) return first;
@@ -23,7 +24,7 @@ inline RandomIt binary_locate(RandomIt first, RandomIt last, const T& val) {
   if(val < *center) return binary_locate(first, center, val);
   return binary_locate(center, last, val);
 }
-
+#endif
 
 
 
@@ -89,7 +90,8 @@ inline void SparseAssemblyNativeCSR_RecomputeDataIndex_(
         }
 
         for (int j=0; j<ndof; ++j) {
-            int Iterr = std::find(search_space,search_space+nnz,current_row_column[j]) - search_space;
+            // int Iterr = std::find(search_space,search_space+nnz,current_row_column[j]) - search_space;
+            int Iterr = binary_locate(search_space,search_space+nnz,current_row_column[j]) - search_space;
             full_current_column[i*ndof+j] = current_global_row + Iterr;
             full_current_column_local[i*ndof+j] = current_local_ndof+current_row_column_local[j];
         }

@@ -4,6 +4,21 @@
 #include <functional>
 #include <cstdint>
 
+#ifndef BINARY_LOCATE_DEF_
+#define BINARY_LOCATE_DEF_
+template<class RandomIt, class T>
+inline RandomIt binary_locate(RandomIt first, RandomIt last, const T& val) {
+  if(val == *first) return first;
+  auto d = std::distance(first, last);
+  if(d==1) return first;
+  auto center = (first + (d/2));
+  if(val < *center) return binary_locate(first, center, val);
+  return binary_locate(center, last, val);
+}
+#endif
+
+
+
 inline void _ComputeSparsityPattern_  (
             const int *elements,
             const int *idx_start,
@@ -93,7 +108,8 @@ inline void _ComputeDataIndices_  (
             }
 
             for (int j=0; j<ndof; ++j) {
-                int Iterr = std::find(search_space,search_space+nnz,current_row_column[j]) - search_space;
+                // int Iterr = std::find(search_space,search_space+nnz,current_row_column[j]) - search_space;
+                int Iterr = binary_locate(search_space,search_space+nnz,current_row_column[j]) - search_space;
                 data_global_indices[elem*local_capacity+i*ndof+j] = current_global_row + Iterr;
                 data_local_indices[elem*local_capacity+i*ndof+j] = current_local_ndof+current_row_column_local[j];
             }
