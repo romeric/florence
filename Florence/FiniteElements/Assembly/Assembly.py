@@ -1256,6 +1256,7 @@ def AssembleMass(formulation, mesh, material, fem_solver, rho=1.0, mass_type=Non
 
 def AssembleForm(formulation, mesh, material, fem_solver, Eulerx=None, Eulerp=None):
 
+    mesh.ChangeType()
     if Eulerx is None:
         Eulerx = np.copy(mesh.points)
     if Eulerp is None:

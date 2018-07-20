@@ -32,12 +32,16 @@ NUMPY_INCLUDE_PATH = /usr/local/lib/python2.7/dist-packages/numpy/core/include
 
 ifeq ($(findstring g++,$(CXX)),g++)
 ifneq ($(findstring clang++,$(CXX)),clang++)
-CXXFLAGS += -Wno-cpp -Wno-unused-function -Wno-maybe-uninitialized
-CXXFLAGS += -march=native -ffast-math -fwrapv -mfpmath=sse -funroll-loops -finline-functions -finline-limit=$(INLINE_THRESHOLD) -ffp-contract=fast
+CXXFLAGS += -Wno-cpp -Wno-unused-function -Wno-maybe-uninitialized -fabi-version=6
+CXXFLAGS += -march=native -ffast-math -fwrapv -funroll-loops -finline-functions -finline-limit=$(INLINE_THRESHOLD) -ffp-contract=fast
 else
-CXXFLAGS += -Wno-uninitialized -Wno-#warnings
+CXXFLAGS += -Wno-uninitialized -Wno-missing-braces -Wno-#warnings
 CXXFLAGS += -march=native -ffast-math -mllvm -inline-threshold=$(INLINE_THRESHOLD) -ffp-contract=fast
 endif
+endif
+ifeq ($(findstring c++,$(CXX)),c++)
+CXXFLAGS += -Wno-uninitialized -Wno-missing-braces -Wno-#NPY_NO_DEPRECATED_API
+CXXFLAGS += -march=native -ffast-math -mllvm -inline-threshold=$(INLINE_THRESHOLD) -ffp-contract=fast
 endif
 ifeq ($(findstring icpc,$(CXX)),icpc)
 CXXFLAGS += -march=native -no-ansi-alias -xHost -fp-model fast=1 -inline-forceinline -inline-factor=$(INLINE_THRESHOLD)
@@ -46,6 +50,10 @@ endif
 ifeq ($(OS),Windows_NT)
 CXXFLAGS += -D_hypot=hypot -m64 -Wno-format-extra-args -Wno-format
 endif
+
+FASTOR_OPTFLAGS = -DFASTOR_NO_ALIAS -DFASTOR_USE_VECTORISED_EXPR_ASSIGN -DCONTRACT_OPT=2 -DFASTOR_NO_STATIC_WARNING
+CXXFLAGS += $(FASTOR_OPTFLAGS) -I$(FASTOR_INCLUDE_PATH)
+
 
 all: build_module
 

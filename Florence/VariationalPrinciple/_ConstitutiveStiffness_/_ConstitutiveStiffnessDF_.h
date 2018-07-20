@@ -1,17 +1,15 @@
+#ifndef CONSTITUTIVE_DF_H
+#define CONSTITUTIVE_DF_H
+
 #include <algorithm>
 #include <numeric>
+#include "SIMD_BDB_Integrator.h"
 
 #ifdef HAS_MKL
 #include <mkl.h>
 #else
 #include <cblas.h>
 #endif
-
-#ifdef __SSE4_2__
-#include <emmintrin.h>
-#endif
-
-typedef double Real;
 
 
 inline void GetTotalTraction_(Real *TotalTraction, const Real *CauchyStressTensor, int ndim) {
@@ -71,71 +69,69 @@ inline void FillConstitutiveB_(Real *B, const Real* SpatialGradient,
             // MECHANICAL TERMS
             B[i*cols*nvar]              = a0;
             B[i*cols*nvar+cols+1]       = a1;
-            
+
             B[i*cols*nvar+2]            = a1;
             B[i*cols*nvar+cols+2]       = a0;
         }
     }
 }
 
-inline void _ConstitutiveStiffnessIntegrandDF_Filler_(Real *stiffness, Real *traction,
+
+
+
+
+inline void _ConstitutiveStiffnessIntegrandDF_Filler_(
+    Real *stiffness,
+    Real *traction,
     const Real* SpatialGradient,
     const Real* CauchyStressTensor,
     const Real* H_Voigt,
     const Real* detJ,
-    int ngauss, 
-    int noderpelem, 
-    int ndim, 
-    int nvar, 
+    int ngauss,
+    int noderpelem,
+    int ndim,
+    int nvar,
     int H_VoigtSize,
     int requires_geometry_update) {
-
 
     int local_size = nvar*noderpelem;
 
     Real *t;
+    if (ndim==3) { t = allocate<Real>(6);}
+    else if (ndim==2) { t =  allocate<Real>(3);}
 
-#ifdef __SSE4_2__
-    if (ndim==3) {
-        t = (Real*)_mm_malloc(6*sizeof(Real),32);
-    }
-    else if (ndim==2) {
-        t = (Real*)_mm_malloc(3*sizeof(Real),32);    
-    }
+    Real *B = allocate<Real>(H_VoigtSize*local_size);
+    Real *HBT = allocate<Real>(H_VoigtSize*local_size);
+    Real *BDB_1 = allocate<Real>(local_size*local_size);
 
-    Real *B = (Real*)_mm_malloc(H_VoigtSize*local_size*sizeof(Real),32);
-    Real *HBT = (Real*)_mm_malloc(H_VoigtSize*local_size*sizeof(Real),32);
-    Real *BDB_1 = (Real*)_mm_malloc(local_size*local_size*sizeof(Real),32);
-#else
-    if (ndim==3) {
-        t = (Real*)malloc(6*sizeof(Real));
-    }
-    else if (ndim==2) {
-        t = (Real*)malloc(3*sizeof(Real));    
-    }
-    Real *B = (Real*)malloc(H_VoigtSize*local_size*sizeof(Real));
-    Real *HBT = (Real*)malloc(H_VoigtSize*local_size*sizeof(Real));
-    Real *BDB_1 = (Real*)malloc(local_size*local_size*sizeof(Real));
-#endif
-    
     std::fill(B,B+H_VoigtSize*local_size,0.);
-    
+
     for (int igauss = 0; igauss < ngauss; ++igauss) {
 
         FillConstitutiveB_(B,&SpatialGradient[igauss*ndim*noderpelem],ndim,nvar,noderpelem,H_VoigtSize);
+        // if (ndim == 3) {
+            cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
+                H_VoigtSize, local_size, H_VoigtSize, 1.0, &H_Voigt[igauss*H_VoigtSize*H_VoigtSize], H_VoigtSize, B, H_VoigtSize, 0.0, HBT, local_size);
 
-        cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-            H_VoigtSize, local_size, H_VoigtSize, 1.0, &H_Voigt[igauss*H_VoigtSize*H_VoigtSize], H_VoigtSize, B, H_VoigtSize, 0.0, HBT, local_size);
-
-        cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
-            local_size, local_size, H_VoigtSize, 1.0, B, H_VoigtSize, HBT, local_size, 0.0, BDB_1, local_size);
+            cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
+                local_size, local_size, H_VoigtSize, 1.0, B, H_VoigtSize, HBT, local_size, 0.0, BDB_1, local_size);
+        // }
+        // else
+        // {
+        //     _SIMD_BDB_Integrator_DF_2D_(
+        //         HBT,
+        //         BDB_1,
+        //         &SpatialGradient[igauss*ndim*noderpelem],
+        //         &H_Voigt[igauss*H_VoigtSize*H_VoigtSize],
+        //         noderpelem
+        //         );
+        // }
 
         // Multiply stiffness with detJ
         const Real detJ_igauss = detJ[igauss];
         for (int i=0; i<local_size*local_size; ++i) {
             stiffness[i] += BDB_1[i]*detJ_igauss;
         }
-
 
         if (requires_geometry_update==1) {
             // Compute tractions
@@ -153,15 +149,10 @@ inline void _ConstitutiveStiffnessIntegrandDF_Filler_(Real *stiffness, Real *tra
         }
     }
 
-#ifdef __SSE4_2__
-    _mm_free(t);
-    _mm_free(B);
-    _mm_free(HBT);
-    _mm_free(BDB_1);
-#else    
-    free(t);
-    free(B);
-    free(HBT);
-    free(BDB_1);
-#endif
+    deallocate(t);
+    deallocate(B);
+    deallocate(HBT);
+    deallocate(BDB_1);
 }
+
+#endif
