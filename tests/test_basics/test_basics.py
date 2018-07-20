@@ -40,6 +40,7 @@ def test_quadrature_functionspace():
     from Florence.QuadratureRules.QuadraturePointsWeightsTet import QuadraturePointsWeightsTet
     from Florence.QuadratureRules import GaussLobattoPoints1D, GaussLobattoPointsQuad, GaussLobattoPointsHex
     from Florence.QuadratureRules.QuadraturePointsWeightsTri import QuadraturePointsWeightsTri
+    from Florence.QuadratureRules.WVQuadraturePointsWeightsQuad import WVQuadraturePointsWeightsQuad
     from Florence.QuadratureRules.WVQuadraturePointsWeightsHex import WVQuadraturePointsWeightsHex
     from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints, EquallySpacedPointsTri, EquallySpacedPointsTet
     from Florence.MeshGeneration.NodeArrangement import NodeArrangementLine, NodeArrangementTri, NodeArrangementQuad
@@ -72,6 +73,7 @@ def test_quadrature_functionspace():
         if i<18:
             FeketePointsTet(i)
             NodeArrangementTet(i)
+        WVQuadraturePointsWeightsQuad(i)
         if i<=16:
             WVQuadraturePointsWeightsHex(i)
 

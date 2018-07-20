@@ -3,6 +3,7 @@ from warnings import warn
 from Florence.QuadratureRules import GaussQuadrature
 from Florence.QuadratureRules import QuadraturePointsWeightsTet
 from Florence.QuadratureRules import QuadraturePointsWeightsTri
+from Florence.QuadratureRules import WVQuadraturePointsWeightsQuad
 from Florence.QuadratureRules import WVQuadraturePointsWeightsHex
 
 
@@ -42,7 +43,11 @@ class QuadratureRule(object):
             else:
                 z, w = GaussQuadrature(self.norder,-1.,1.)
         elif mesh_type == "quad":
-            z, w = GaussQuadrature(self.norder,-1.,1.)
+            if self.optimal==4:
+                zw = WVQuadraturePointsWeightsQuad.WVQuadraturePointsWeightsQuad(self.norder)
+                z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
+            else:
+                z, w = GaussQuadrature(self.norder,-1.,1.)
         elif mesh_type == "tet":
             zw = QuadraturePointsWeightsTet.QuadraturePointsWeightsTet(self.norder,self.optimal)
             z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
