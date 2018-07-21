@@ -1256,6 +1256,19 @@ def AssembleMass(formulation, mesh, material, fem_solver, rho=1.0, mass_type=Non
 
 def AssembleForm(formulation, mesh, material, fem_solver, Eulerx=None, Eulerp=None):
 
+
+    # CHECK FOR ATTRIBUTE FOR LOWLEVEL ASSEMBLY
+    if material.nature == "linear" and material.has_low_level_dispatcher and fem_solver.has_low_level_dispatcher:
+        if hasattr(material,'e'):
+            if material.e is None or isinstance(material.e, float):
+                if material.mtype == "IdealDielectric":
+                    material.e = material.eps_1*np.eye(formulation.ndim, formulation.ndim)
+                else:
+                    raise ValueError("For optimise=True, you need to provide the material permittivity tensor (ndimxndim)")
+        else:
+            raise ValueError("For optimise=True, you need to provide the material permittivity tensor (ndimxndim)")
+
+
     mesh.ChangeType()
     if Eulerx is None:
         Eulerx = np.copy(mesh.points)
@@ -1265,5 +1278,11 @@ def AssembleForm(formulation, mesh, material, fem_solver, Eulerx=None, Eulerp=No
     fem_solver.is_mass_computed = True
 
     fem_solver.ComputeSparsityFEM(mesh, formulation)
+
+    if formulation.fields == "couple_stress" or formulation.fields == "flexoelectricity":
+        lmesh = mesh.GetLinearMesh(remap=True)
+        Eulerw = np.zeros_like(lmesh.points)
+        Eulers = np.zeros_like(lmesh.points)
+        return formulation.Assemble(fem_solver, material, Eulerx, Eulerw, Eulers, Eulerp)[:2]
 
     return Assemble(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)[:2]

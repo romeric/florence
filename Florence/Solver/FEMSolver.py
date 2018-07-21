@@ -1302,6 +1302,7 @@ class FEMSolver(object):
                     self.indices, self.indptr = ComputeSparsityPattern(mesh, formulation.nvar, self.squeeze_sparsity_pattern)
                     mesh.element_sorter = np.argsort(mesh.elements,axis=1)
                     mesh.sorted_elements = mesh.elements[np.arange(mesh.nelem)[:,None], mesh.element_sorter]
+                    mesh.sorted_elements = mesh.sorted_elements.astype(np.uint64)
 
                     self.data_local_indices = self.data_global_indices = np.zeros(1,np.int32)
                 else:
