@@ -17,12 +17,12 @@ A non-exhaustive list of core features:
 - A suite of advanced hyperelastic, electrostatic and electro-hyperelastic material models
 - Ability to read/write mesh/simulation data to/from gmsh, Salome, GID, Tetgen, obj, FRO, VTK and HDF5
 - Support for heterogeneous computing using SIMD, shared parallelism, cloud-based parallelism and cluster-based parallelism
-- Interface to a suite of sparse direct and iterative solvers including MUMPS, Pardiso & AMG
+- Interfaces to a suite of sparse direct and iterative solvers including MUMPS, Pardiso & Petsc and hypre
 
 In addition, the framework also provides Python interfaces to many low-level numerical subroutines written in C, C++ and Cython.
 
 # Platform support
-Florence supports Linux, macOS and Windows (under Cygwin/MinGW) under
+Florence supports all major operating systems including Linux, macOS and Windows (under Cygwin/MinGW) under
 - Python 2.7
 - Python >= 3.5
 - PyPy >= v5.7.0
@@ -128,6 +128,9 @@ We typically do not recommed adding `anaconda/bin` to your path. Hence, whenever
 ```
 export PATH="/path/to/anaconda2/bin:$PATH"
 ```
+
+# Philosophy
+Florence follows scipy's philosophy of providing a high level pythonic interface to finite element analysis of partial differential equations. It is a light weight library that depends only on the most ubiquitous python packages namely numpy, scipy and cython. Yet it is aimed to deliver high performance numerical computations on a range modern architectures. It is backend is designed to be configurable for plugging new solvers such as Petsc's and hypre's parallel solvers.
 
 # Documentation
 Documentation is available under [wiki](https://github.com/romeric/florence/wiki) pages. Furthermore, a series of well explained examples are provided in the example folder that cover most of the functionality of florence.
