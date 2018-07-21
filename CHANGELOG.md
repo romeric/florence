@@ -1,5 +1,16 @@
 # Change Log
 
+
+**V0.1.5**
+
+This release brings mainly performance improvements and bug fixes
+
+1. Computing sparsity pattern ahead of time is now available. Florence can now assemble the global FE matrices in many different ways, bypassing scipy's format.
+2. Fast mass matrix assembly. Different flavours of this impelementation is available.
+3. Optimal quad and hex quadrature points
+4. A lot minor improvements and bug fixes
+
+
 **V0.1.4**
 
 Highly bumped version. Proper support for PyPi from this release onwards. Please refer to the very recent 0.1 version for major updates.
