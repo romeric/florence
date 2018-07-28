@@ -147,11 +147,6 @@ void _GlobalAssemblyPerfectLaplacian__<2>(const Real *points,
 
         for (int g=0; g<ngauss; ++g) {
 
-            for (int j=0; j<nodeperelem; ++j) {
-                current_Jm[j] = Jm[j*ngauss+g];
-                current_Jm[nodeperelem+j] = Jm[ngauss*nodeperelem+j*ngauss+g];
-            }
-
             // COMPUTE KINEMATIC MEASURES
             KinematicMeasures__<2>(  MaterialGradient,
                                     detJ,
@@ -169,7 +164,7 @@ void _GlobalAssemblyPerfectLaplacian__<2>(const Real *points,
             //     stiffness[i] += BDB[i]*detJ;
             // }
 
-            _matmul_(ndim,nodeperelem,ndim,e_tensor,MaterialGradient,eM);
+            _matmul_22k(nodeperelem,e_tensor,MaterialGradient,eM);
 
             if (is_hessian_symmetric) {
                 for (int i=0; i<nodeperelem; ++i) {
@@ -338,7 +333,7 @@ void _GlobalAssemblyPerfectLaplacian__<3>(const Real *points,
             //     stiffness[i] += BDB[i]*detJ;
             // }
 
-            _matmul_(ndim,nodeperelem,ndim,e_tensor,MaterialGradient,eM);
+            _matmul_33k(nodeperelem,e_tensor,MaterialGradient,eM);
 
             if (is_hessian_symmetric) {
                 for (int i=0; i<nodeperelem; ++i) {
@@ -550,11 +545,6 @@ void _GlobalAssemblyPerfectLaplacian__<2>(const Real *points,
         std::fill(BDB,BDB+local_capacity,0.);
 
         for (int g=0; g<ngauss; ++g) {
-
-            for (int j=0; j<nodeperelem; ++j) {
-                current_Jm[j] = Jm[j*ngauss+g];
-                current_Jm[nodeperelem+j] = Jm[ngauss*nodeperelem+j*ngauss+g];
-            }
 
             // COMPUTE KINEMATIC MEASURES
             std::fill(MaterialGradient,MaterialGradient+nodeperelem*ndim,0.);
