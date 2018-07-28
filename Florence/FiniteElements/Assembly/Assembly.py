@@ -1257,16 +1257,16 @@ def AssembleMass(formulation, mesh, material, fem_solver, rho=1.0, mass_type=Non
 def AssembleForm(formulation, mesh, material, fem_solver, Eulerx=None, Eulerp=None):
 
 
-    # CHECK FOR ATTRIBUTE FOR LOWLEVEL ASSEMBLY
-    if material.nature == "linear" and material.has_low_level_dispatcher and fem_solver.has_low_level_dispatcher:
-        if hasattr(material,'e'):
-            if material.e is None or isinstance(material.e, float):
-                if material.mtype == "IdealDielectric":
-                    material.e = material.eps_1*np.eye(formulation.ndim, formulation.ndim)
-                else:
-                    raise ValueError("For optimise=True, you need to provide the material permittivity tensor (ndimxndim)")
-        else:
-            raise ValueError("For optimise=True, you need to provide the material permittivity tensor (ndimxndim)")
+    if formulation.fields == "electrostatics":
+        if material.nature == "linear" and material.has_low_level_dispatcher and fem_solver.has_low_level_dispatcher:
+            if hasattr(material,'e'):
+                if material.e is None or isinstance(material.e, float):
+                    if material.mtype == "IdealDielectric":
+                        material.e = material.eps_1*np.eye(formulation.ndim, formulation.ndim)
+                    else:
+                        raise ValueError("For optimise=True, you need to provide the material permittivity tensor (ndimxndim)")
+            else:
+                raise ValueError("For optimise=True, you need to provide the material permittivity tensor (ndimxndim)")
 
 
     mesh.ChangeType()

@@ -2450,6 +2450,8 @@ class Mesh(object):
             self.ReadGmsh(filename, element_type=element_type, read_surface_info=read_surface_info)
         elif self.reader_type is 'obj':
             self.ReadOBJ(filename, element_type=element_type, read_surface_info=read_surface_info)
+        elif self.reader_type is 'fenics':
+            self.ReadFenics(filename, element_type)
         elif self.reader_type is 'fro':
             self.ReadFRO(filename, element_type)
         elif self.reader_type is 'read_separate':
@@ -2836,6 +2838,80 @@ class Mesh(object):
                 self.points = np.ascontiguousarray(self.points[:,:2])
 
         self.element_type = element_type
+        ndim = self.InferSpatialDimension()
+        if self.element_type == "tri" or self.element_type == "quad":
+            self.GetEdges()
+            self.GetBoundaryEdges()
+        elif self.element_type == "tet" or self.element_type == "hex":
+            self.GetFaces()
+            self.GetBoundaryFaces()
+            self.GetBoundaryEdges()
+
+
+    def ReadFenics(self, filename, element_type):
+        """Read ASCII fenics meshes"""
+
+        if element_type == "tet":
+            etype = "tetrahedron"
+        elif element_type == "hex":
+            etype = "hexahedron"
+        elif element_type == "tri":
+            etype = "triangle"
+        elif element_type == "quad":
+            etype = "quadrilateral"
+
+        import xml.etree.ElementTree as ET
+        root = ET.parse(filename).getroot()
+        X = []
+        T = []
+        for child in root:
+            if child.attrib['celltype'] != etype:
+                raise ValueError("xml file does not contain {} elements".format(element_type))
+
+        for child in root:
+            for cchild in child:
+                if cchild.tag == "vertices":
+                    if element_type == "tet" or element_type == "hex":
+                        for child3 in cchild:
+                            x = float(child3.attrib['x'])
+                            y = float(child3.attrib['y'])
+                            z = float(child3.attrib['z'])
+                            X.append([x,y,z])
+                    elif element_type == "tri" or element_type == "quad":
+                        for child3 in cchild:
+                            x = float(child3.attrib['x'])
+                            y = float(child3.attrib['y'])
+                            X.append([x,y])
+
+                elif cchild.tag == "cells":
+                    if element_type == "tet":
+                        for child3 in cchild:
+                            v0 = int(child3.attrib['v0'])
+                            v1 = int(child3.attrib['v1'])
+                            v2 = int(child3.attrib['v2'])
+                            v3 = int(child3.attrib['v3'])
+                            T.append([v0,v1,v2,v3])
+                    elif element_type == "tri":
+                        for child3 in cchild:
+                            v0 = int(child3.attrib['v0'])
+                            v1 = int(child3.attrib['v1'])
+                            v2 = int(child3.attrib['v2'])
+                            T.append([v0,v1,v2])
+
+
+        X = np.array(X)
+        T = np.array(T,dtype=np.int64)
+
+        self.elements = T
+        self.points = X
+        self.element_type = element_type
+        self.nelem = self.elements.shape[0]
+        self.nnode = self.points.shape[0]
+
+        if self.points.shape[1] == 3:
+            if np.allclose(self.points[:,2],0.):
+                self.points = np.ascontiguousarray(self.points[:,:2])
+
         ndim = self.InferSpatialDimension()
         if self.element_type == "tri" or self.element_type == "quad":
             self.GetEdges()
