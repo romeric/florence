@@ -3549,6 +3549,80 @@ class Mesh(object):
 
 
 
+    def WriteMFEM(self, filename):
+        """Write mfem meshes"""
+
+        self.__do_memebers_exist__()
+
+        nodeperelem = self.InferNumberOfNodesPerElement()
+
+        if self.element_type == "tet":
+            etype = 4
+            betype = 2
+        elif self.element_type == "hex":
+            etype = 5
+            betype = 3
+        elif self.element_type == "tri":
+            etype = 2
+            betype = 1
+        elif self.element_type == "quad":
+            etype = 3
+            betype = 1
+        elif self.element_type == "line":
+            etype = 1
+            betype = 0
+
+        if self.element_type == "tet" or self.element_type == "hex":
+            boundary = self.faces
+        elif self.element_type == "tri" or self.element_type == "quad":
+            boundary = self.edges
+        elif self.element_type == "line":
+            boundary = self.corners
+
+        with open(filename, 'w') as f:
+            f.write("MFEM mesh v1.0\n")
+            f.write("#\n\n")
+
+            f.write("dimension\n")
+            f.write('{}'.format(self.InferSpatialDimension()))
+            f.write("\n\n")
+
+            f.write("elements\n")
+            f.write('{}'.format(self.nelem))
+            f.write("\n")
+            for elem in range(self.nelem):
+                f.write('1 {} '.format(etype))
+                for node in range(nodeperelem):
+                    f.write('{} '.format(self.elements[elem,node]))
+                f.write("\n")
+            f.write("\n\n")
+
+
+            f.write("boundary\n")
+            f.write('{}'.format(boundary.shape[0]))
+            f.write("\n")
+            for elem in range(boundary.shape[0]):
+                f.write('1 {} '.format(betype))
+                for node in range(boundary.shape[1]):
+                    f.write('{} '.format(boundary[elem,node]))
+                f.write("\n")
+            f.write("\n\n")
+
+
+            f.write("vertices\n")
+            f.write('{}'.format(self.points.shape[0]))
+            f.write("\n")
+            f.write('{}'.format(self.points.shape[1]))
+            f.write("\n")
+
+            for elem in range(self.points.shape[0]):
+                for node in range(self.points.shape[1]):
+                    f.write('{} '.format(self.points[elem,node]))
+                f.write("\n")
+
+
+
+
     @staticmethod
     def MeshPyTri(points,facets,*args,**kwargs):
         """MeshPy backend for generating linear triangular mesh"""
