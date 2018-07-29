@@ -1268,6 +1268,11 @@ def AssembleForm(formulation, mesh, material, fem_solver, Eulerx=None, Eulerp=No
             else:
                 raise ValueError("For optimise=True, you need to provide the material permittivity tensor (ndimxndim)")
 
+    if fem_solver.analysis_type == "dynamic" and material.rho is None:
+        raise ValueError("Material does not have seem to have density. Mass matrix cannot be computed")
+    if fem_solver.analysis_type == "static" and material.rho is None and fem_solver.has_low_level_dispatcher:
+        # FOR LOW-LEVEL DISPATCHER
+        material.rho = 1.0
 
     mesh.ChangeType()
     if Eulerx is None:
