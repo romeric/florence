@@ -2860,7 +2860,7 @@ class Mesh(object):
         elif element_type == "quad":
             etype = "quadrilateral"
 
-        import xml.etree.ElementTree as ET
+        import xml.etree.cElementTree as ET
         root = ET.parse(filename).getroot()
         X = []
         T = []
