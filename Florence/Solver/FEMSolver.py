@@ -138,6 +138,7 @@ class FEMSolver(object):
         self.parallel_model = parallel_model # "pool", "context_manager", "queue", "joblib"
         self.memory_model = memory_model
         self.platform = platform
+        self.is_partitioned = False
         self.backend = backend
         self.debug = False
 
@@ -1269,25 +1270,27 @@ class FEMSolver(object):
 
     def PartitionMeshForParallelFEM(self, mesh, n, nvar):
 
-        nnode = mesh.nnode
-        pmesh, pelement_indices, pnode_indices = mesh.Partition(n, compute_boundary_info=False)
-        map_facilitator = np.arange(nnode*nvar,dtype=np.int32).reshape(nnode,nvar)
+        if self.is_partitioned is False:
+            nnode = mesh.nnode
+            pmesh, pelement_indices, pnode_indices = mesh.Partition(n, compute_boundary_info=False)
+            map_facilitator = np.arange(nnode*nvar,dtype=np.int32).reshape(nnode,nvar)
 
-        partitioned_maps = []
-        for i, mesh in enumerate(pmesh):
-            pnodes = pnode_indices[i]
-            global_dofs = np.unique(pnodes[mesh.elements.ravel()])
-            local_dofs = np.unique(mesh.elements.ravel())
-            # global_to_local_dof_map = np.zeros((global_dofs.shape[0]*nvar,2),dtype=np.int32)
-            # global_to_local_dof_map[:,0] = map_facilitator[local_dofs,:].ravel()
-            # global_to_local_dof_map[:,1] = map_facilitator[global_dofs,:].ravel()
+            partitioned_maps = []
+            for i, mesh in enumerate(pmesh):
+                pnodes = pnode_indices[i]
+                global_dofs = np.unique(pnodes[mesh.elements.ravel()])
+                local_dofs = np.unique(mesh.elements.ravel())
+                # global_to_local_dof_map = np.zeros((global_dofs.shape[0]*nvar,2),dtype=np.int32)
+                # global_to_local_dof_map[:,0] = map_facilitator[local_dofs,:].ravel()
+                # global_to_local_dof_map[:,1] = map_facilitator[global_dofs,:].ravel()
 
-            global_to_local_dof_map = map_facilitator[global_dofs,:].ravel()
-            partitioned_maps.append(global_to_local_dof_map)
+                global_to_local_dof_map = map_facilitator[global_dofs,:].ravel()
+                partitioned_maps.append(global_to_local_dof_map)
 
-        self.pmesh, self.pelement_indices, self.pnode_indices, \
-            self.partitioned_maps = pmesh, pelement_indices, pnode_indices, partitioned_maps
-        # return pmesh, pelement_indices, pnode_indices, partitioned_maps
+            self.pmesh, self.pelement_indices, self.pnode_indices, \
+                self.partitioned_maps = pmesh, pelement_indices, pnode_indices, partitioned_maps
+
+            self.is_partitioned = True
 
 
     def ComputeSparsityFEM(self, mesh, formulation):

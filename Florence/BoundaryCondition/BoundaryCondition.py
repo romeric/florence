@@ -736,6 +736,7 @@ class BoundaryCondition(object):
 
             pfem_solver = deepcopy(fem_solver)
             pfem_solver.do_not_reset = True
+            pfem_solver.is_partitioned = False
             pfem_solver.is_sparsity_pattern_computed = False
 
             print('Solving planar problem {}. Number of DoF is {}'.format(niter,pmesh.points.shape[0]*pformulation.nvar))

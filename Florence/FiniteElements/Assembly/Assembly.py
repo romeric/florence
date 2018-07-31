@@ -1274,6 +1274,19 @@ def AssembleForm(formulation, mesh, material, fem_solver, Eulerx=None, Eulerp=No
         # FOR LOW-LEVEL DISPATCHER
         material.rho = 1.0
 
+    if fem_solver.parallel:
+        import multiprocessing
+        if fem_solver.no_of_cpu_cores is None:
+            fem_solver.no_of_cpu_cores = multiprocessing.cpu_count()
+
+        if fem_solver.parallel_model is None:
+            if fem_solver.analysis_type == "dynamic" and fem_solver.analysis_subtype == "explicit":
+                fem_solver.parallel_model = "context_manager"
+            else:
+                fem_solver.parallel_model = "pool"
+
+        fem_solver.PartitionMeshForParallelFEM(mesh,fem_solver.no_of_cpu_cores,formulation.nvar)
+
     mesh.ChangeType()
     if Eulerx is None:
         Eulerx = np.copy(mesh.points)
@@ -1282,7 +1295,8 @@ def AssembleForm(formulation, mesh, material, fem_solver, Eulerx=None, Eulerp=No
     function_space = formulation.function_spaces[0]
     fem_solver.is_mass_computed = True
 
-    fem_solver.ComputeSparsityFEM(mesh, formulation)
+    if not fem_solver.parallel:
+        fem_solver.ComputeSparsityFEM(mesh, formulation)
 
     if formulation.fields == "couple_stress" or formulation.fields == "flexoelectricity":
         lmesh = mesh.GetLinearMesh(remap=True)
