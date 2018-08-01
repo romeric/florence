@@ -310,17 +310,22 @@ class LinearSolver(object):
 
         elif self.solver_type == "iterative":
             # CALL ITERATIVE SOLVER
-            # sol = bicgstab(A,b,tol=tol)[0]
-            # sol = gmres(A,b,tol=tol)[0]
-            sol = cg(A,b,tol=self.iterative_solver_tolerance)[0]
+            if self.solver_subtype == "gmres":
+                sol = gmres(A,b,tol=self.iterative_solver_tolerance)[0]
+            if self.solver_subtype == "lgmres":
+                sol = lgmres(A,b,tol=self.iterative_solver_tolerance)[0]
+            elif self.solver_subtype == "bicgstab":
+                sol = bicgstab(A,b,tol=self.iterative_solver_tolerance)[0]
+            else:
+                sol = cg(A,b,tol=self.iterative_solver_tolerance)[0]
 
             # PRECONDITIONED ITERATIVE SOLVER - CHECK
-            # P = spilu(A, drop_tol=1e-5)
+            # P = spilu(A.tocsc(), drop_tol=1e-5)
             # M_x = lambda x: P.solve(x)
-            # n = A.shape[0]
             # m = A.shape[1]
+            # n = A.shape[0]
             # M = LinearOperator((n * m, n * m), M_x)
-            # sol = lgmres(A, b, tol=1e-4, M=M)[0]
+            # sol = cg(A, b, tol=self.iterative_solver_tolerance, M=M)[0]
 
         elif self.solver_type == "multigrid":
             if self.has_amg_solver is False:
@@ -351,7 +356,8 @@ class LinearSolver(object):
                 elif self.preconditioner_type == "ruge_stuben":
                     M = ruge_stuben_solver(A)
                     sol = M.solve(b,tol=self.iterative_solver_tolerance)
-                elif self.preconditioner_type == "rootnode":
+                # elif self.preconditioner_type == "rootnode":
+                else:
                     # EXPLICIT CALL TO KYROLOV SOLVERS WITH AMG PRECONDITIONER
                     # ml = rootnode_solver(A, smooth=('energy', {'degree':2}), strength='evolution' )
                     # M = ml.aspreconditioner(cycle='V')
@@ -371,7 +377,8 @@ class LinearSolver(object):
                     sol, info = gmres(A, b, M=M, tol=self.iterative_solver_tolerance)
                 elif self.preconditioner_type == "ruge_stuben":
                     sol = M.solve(b,tol=self.iterative_solver_tolerance)
-                elif self.preconditioner_type == "rootnode":
+                # elif self.preconditioner_type == "rootnode":
+                else:
                     sol, info = gmres(A, b, M=M, tol=self.iterative_solver_tolerance)
 
 
