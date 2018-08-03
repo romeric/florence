@@ -444,6 +444,9 @@ class FEMSolver(object):
 
         post_process.assembly_time = self.assembly_time
 
+        # CLOSE DASK CLIENT
+        self.CloseDaskDistributedClient()
+
         # AT THE END, WE CALL THE __reset_state__ TO RESET TO INITIAL STATE.
         # THIS WAY WE CLEAR MONKEY PATCHED AND OTHER DATA STORED DURING RUN TIME
         if self.do_not_reset is False:
@@ -1342,4 +1345,9 @@ class FEMSolver(object):
             self.dask_client = client
 
             self.is_dask_scheduler_initialised = True
+
+
+    def CloseDaskDistributedClient(self):
+        if self.parallel and self.parallel_model == "dask" and self.is_dask_scheduler_initialised:
+            self.dask_client.close()
 
