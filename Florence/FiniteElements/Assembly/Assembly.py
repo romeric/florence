@@ -799,6 +799,25 @@ def ImplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
             tups = pool.map(ImplicitParallelExecuter_PoolBased,funcs)
             pool.terminate()
 
+    # DASK BASED
+    elif fem_solver.parallel_model == "dask":
+        try:
+            from dask.distributed import Client, LocalCluster
+        except ImportError:
+            raise ImportError("dask is not installed. Install it 'using pip install dask[complete]'")
+        # CREATE A DUMMY CALLABLE
+        reducer = lambda tups: tups
+        # INITIALISE CLUSTER
+        # cluster = LocalCluster(n_workers=fem_solver.no_of_cpu_cores, processes=False, threads_per_worker=None)
+        # client = Client(cluster)
+        # client = Client() # FOR ACTUAL/REMOTE CLSUTERS
+        client = fem_solver.dask_client
+        future = client.scatter(funcs)
+        job = client.map(ImplicitParallelExecuter_PoolBased, future)
+        total = client.submit(reducer, job)
+        tups = total.result()
+        # client.close() # DONT CLOSE OTHERWISE FEMSOLVER HAS TO RELAUNCH
+
     # JOBLIB BASED
     elif fem_solver.parallel_model == "joblib":
         try:
@@ -852,7 +871,8 @@ def ImplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
             proc.join()
 
     if fem_solver.parallel_model == "pool" or fem_solver.parallel_model == "context_manager" \
-        or fem_solver.parallel_model == "joblib" or fem_solver.parallel_model == "scoop":
+        or fem_solver.parallel_model == "joblib" or fem_solver.parallel_model == "scoop" \
+        or fem_solver.parallel_model == "dask":
         for i in range(fem_solver.no_of_cpu_cores):
             pnodes = pnode_indices[i]
             pelements = pelement_indices[i]
@@ -1105,6 +1125,22 @@ def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
             # Ts.wait()
             # Ts = Ts.get()
 
+    # DASK BASED
+    elif fem_solver.parallel_model == "dask":
+        try:
+            from dask.distributed import Client, LocalCluster
+        except ImportError:
+            raise ImportError("dask is not installed. Install it 'using pip install dask[complete]'")
+        # CREATE A DUMMY CALLABLE
+        reducer = lambda tups: tups
+
+        client = fem_solver.dask_client
+        future = client.scatter(funcs)
+        job = client.map(ExplicitParallelExecuter_PoolBased, future)
+        total = client.submit(reducer, job)
+        Ts = total.result()
+
+
     # JOBLIB BASED
     elif fem_solver.parallel_model == "joblib":
         try:
@@ -1150,7 +1186,8 @@ def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
 
 
     if fem_solver.parallel_model == "pool" or fem_solver.parallel_model == "context_manager" \
-        or fem_solver.parallel_model == "joblib" or fem_solver.parallel_model == "scoop" or fem_solver.parallel_model == "tbb":
+        or fem_solver.parallel_model == "joblib" or fem_solver.parallel_model == "scoop" \
+        or fem_solver.parallel_model == "tbb" or fem_solver.parallel_model == "dask":
 
         for proc in range(fem_solver.no_of_cpu_cores):
             pnodes = pnode_indices[proc]
@@ -1256,6 +1293,8 @@ def AssembleMass(formulation, mesh, material, fem_solver, rho=1.0, mass_type=Non
 
 def AssembleForm(formulation, mesh, material, fem_solver, Eulerx=None, Eulerp=None):
 
+    if fem_solver.parallel and fem_solver.recompute_sparsity_pattern is False:
+        raise ValueError("Parallel model cannot use precomputed sparsity pattern due to partitioning. Turn this off")
 
     if formulation.fields == "electrostatics":
         if material.nature == "linear" and material.has_low_level_dispatcher and fem_solver.has_low_level_dispatcher:
@@ -1286,6 +1325,9 @@ def AssembleForm(formulation, mesh, material, fem_solver, Eulerx=None, Eulerp=No
                 fem_solver.parallel_model = "pool"
 
         fem_solver.PartitionMeshForParallelFEM(mesh,fem_solver.no_of_cpu_cores,formulation.nvar)
+
+        if fem_solver.parallel_model=="dask" and fem_solver.is_dask_scheduler_initialised is False:
+            fem_solver.LaunchDaskDistributedClient()
 
     mesh.ChangeType()
     if Eulerx is None:

@@ -160,6 +160,7 @@ class FEMSolver(object):
 
         self.fem_timer = 0.
         self.assembly_time = 0.
+        self.is_dask_scheduler_initialised = False
 
         if self.newton_raphson_solution_tolerance is None:
             self.newton_raphson_solution_tolerance = 10.*self.newton_raphson_tolerance
@@ -501,6 +502,12 @@ class FEMSolver(object):
         # COMPUTE SPARSITY PATTERN
         #---------------------------------------------------------------------------#
         self.ComputeSparsityFEM(mesh, formulation)
+        #---------------------------------------------------------------------------#
+
+        # LAUNCH DISTRIBUTED SCHEDULER
+        #---------------------------------------------------------------------------#
+        if self.parallel and self.parallel_model=="dask" and self.is_dask_scheduler_initialised is False:
+            self.LaunchDaskDistributedClient()
         #---------------------------------------------------------------------------#
 
 
@@ -1314,4 +1321,25 @@ class FEMSolver(object):
 
                 self.is_sparsity_pattern_computed = True
                 print("Computed sparsity pattern for the mesh. Time elapsed is {} seconds".format(time()-t_sp))
+
+
+    def LaunchDaskDistributedClient(self, scheduler_ip=None, scheduler_port=None):
+
+        if self.parallel and self.parallel_model == "dask" and self.is_dask_scheduler_initialised is False:
+
+            try:
+                from dask.distributed import Client, LocalCluster
+            except ImportError:
+                raise ImportError("dask is not installed. Install it 'using pip install dask[complete]'")
+
+            # INITIALISE CLUSTER
+            if scheduler_ip is None:
+                cluster = LocalCluster(n_workers=self.no_of_cpu_cores, processes=False, threads_per_worker=None)
+                client = Client(cluster)
+            else:
+                client = Client(scheduler_ip)
+
+            self.dask_client = client
+
+            self.is_dask_scheduler_initialised = True
 
