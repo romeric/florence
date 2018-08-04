@@ -806,7 +806,7 @@ def ImplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
         except ImportError:
             raise ImportError("dask is not installed. Install it 'using pip install dask[complete]'")
         # CREATE A DUMMY CALLABLE
-        reducer = lambda tups: tups
+        # reducer = lambda tups: tups
         # INITIALISE CLUSTER
         # cluster = LocalCluster(n_workers=fem_solver.no_of_cpu_cores, processes=False, threads_per_worker=None)
         # client = Client(cluster)
@@ -814,8 +814,11 @@ def ImplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
         client = fem_solver.dask_client
         future = client.scatter(funcs)
         job = client.map(ImplicitParallelExecuter_PoolBased, future)
-        total = client.submit(reducer, job)
-        tups = total.result()
+        # MAP/REDUCE
+        # total = client.submit(reducer, job)
+        # tups = total.result()
+        # OR GATHER
+        tups = client.gather(job)
         # client.close() # DONT CLOSE OTHERWISE FEMSOLVER HAS TO RELAUNCH
 
     # JOBLIB BASED
@@ -1132,13 +1135,14 @@ def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
         except ImportError:
             raise ImportError("dask is not installed. Install it 'using pip install dask[complete]'")
         # CREATE A DUMMY CALLABLE
-        reducer = lambda tups: tups
+        # reducer = lambda tups: tups
 
         client = fem_solver.dask_client
         future = client.scatter(funcs)
         job = client.map(ExplicitParallelExecuter_PoolBased, future)
-        total = client.submit(reducer, job)
-        Ts = total.result()
+        # total = client.submit(reducer, job)
+        # Ts = total.result()
+        Ts = client.gather(job)
 
 
     # JOBLIB BASED
