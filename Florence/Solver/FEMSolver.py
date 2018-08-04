@@ -1330,11 +1330,14 @@ class FEMSolver(object):
 
         if self.parallel and self.parallel_model == "dask" and self.is_dask_scheduler_initialised is False:
 
+            from multiprocessing.pool import ThreadPool
             try:
+                import dask
                 from dask.distributed import Client, LocalCluster
             except ImportError:
                 raise ImportError("dask is not installed. Install it 'using pip install dask[complete]'")
 
+            dask.config.set(pool=ThreadPool(self.no_of_cpu_cores))
             # INITIALISE CLUSTER
             if scheduler_ip is None:
                 cluster = LocalCluster(n_workers=self.no_of_cpu_cores, processes=False, threads_per_worker=None)
