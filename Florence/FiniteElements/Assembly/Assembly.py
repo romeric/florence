@@ -799,6 +799,13 @@ def ImplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
             tups = pool.map(ImplicitParallelExecuter_PoolBased,funcs)
             pool.terminate()
 
+    # THREAD POOL INSTEAD OF PROCESSING POOL
+    elif fem_solver.parallel_model == "thread_pool":
+        import multiprocessing.dummy
+        with closing(multiprocessing.dummy.Pool(fem_solver.no_of_cpu_cores)) as pool:
+            tups = pool.map(ImplicitParallelExecuter_PoolBased,funcs)
+            pool.terminate()
+
     # DASK BASED
     elif fem_solver.parallel_model == "dask":
         try:
@@ -875,7 +882,7 @@ def ImplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
 
     if fem_solver.parallel_model == "pool" or fem_solver.parallel_model == "context_manager" \
         or fem_solver.parallel_model == "joblib" or fem_solver.parallel_model == "scoop" \
-        or fem_solver.parallel_model == "dask":
+        or fem_solver.parallel_model == "dask" or fem_solver.parallel_model == "thread_pool":
         for i in range(fem_solver.no_of_cpu_cores):
             pnodes = pnode_indices[i]
             pelements = pelement_indices[i]
@@ -1128,6 +1135,14 @@ def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
             # Ts.wait()
             # Ts = Ts.get()
 
+    # THREAD POOL INSTEAD OF PROCESSING POOL
+    elif fem_solver.parallel_model == "thread_pool":
+        import multiprocessing.dummy
+        with closing(multiprocessing.dummy.Pool(fem_solver.no_of_cpu_cores)) as pool:
+            Ts = pool.map(ExplicitParallelExecuter_PoolBased,funcs)
+            pool.terminate()
+
+
     # DASK BASED
     elif fem_solver.parallel_model == "dask":
         try:
@@ -1191,7 +1206,8 @@ def ExplicitParallelLauncher(fem_solver, function_space, formulation, mesh, mate
 
     if fem_solver.parallel_model == "pool" or fem_solver.parallel_model == "context_manager" \
         or fem_solver.parallel_model == "joblib" or fem_solver.parallel_model == "scoop" \
-        or fem_solver.parallel_model == "tbb" or fem_solver.parallel_model == "dask":
+        or fem_solver.parallel_model == "tbb" or fem_solver.parallel_model == "dask" \
+        or fem_solver.parallel_model == "thread_pool":
 
         for proc in range(fem_solver.no_of_cpu_cores):
             pnodes = pnode_indices[proc]
