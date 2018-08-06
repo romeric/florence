@@ -87,7 +87,7 @@ class VariationalPrinciple(object):
 
             # GET QUADRATURE
             quadrature = QuadratureRule(optimal=optimal_quadrature, norder=norder, mesh_type=mesh.element_type)
-            if self.compute_post_quadrature != None:
+            if self.compute_post_quadrature:
                 # COMPUTE INTERPOLATION FUNCTIONS AT ALL INTEGRATION POINTS FOR POST-PROCESSING
                 post_quadrature = QuadratureRule(optimal=optimal_quadrature, norder=norder_post, mesh_type=mesh.element_type)
             else:
@@ -104,7 +104,7 @@ class VariationalPrinciple(object):
 
             # CREATE FUNCTIONAL SPACES
             function_space = FunctionSpace(mesh, self.quadrature_rules[0], p=C+1, equally_spaced=equally_spaced_bases)
-            if self.compute_post_quadrature != None:
+            if self.compute_post_quadrature:
                 post_function_space = FunctionSpace(mesh, self.quadrature_rules[1], p=C+1, equally_spaced=equally_spaced_bases)
             else:
                 post_function_space = None
