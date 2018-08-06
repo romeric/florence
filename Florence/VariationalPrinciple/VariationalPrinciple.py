@@ -57,10 +57,16 @@ class VariationalPrinciple(object):
                 norder_post = 2*(C+1)
             else:
                 norder = C+2
-                norder_post = 2*(C+2)
+                # ACTUAL
+                # norder_post = 2*(C+2)
+                # ALTHOUGH THIS INTEGRATES EXACTLY
+                norder_post = C+2
         else:
             norder = quadrature_degree
-            norder_post = 2*quadrature_degree
+            if element_type == "tri" or element_type == "tet":
+                norder_post = 2*quadrature_degree
+            else:
+                norder_post = quadrature_degree
 
         return norder, norder_post
 
