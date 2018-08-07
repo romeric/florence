@@ -345,7 +345,7 @@ class FEMSolver(object):
 
         ##############################################################################
         if self.analysis_type == "dynamic" and material.rho is None:
-            raise ValueError("Material does not have seem to have density. Mass matrix cannot be computed")
+            raise ValueError("Material does not seem to have density. Mass matrix cannot be computed")
         if self.analysis_type == "static" and material.rho is None and self.has_low_level_dispatcher:
             # FOR LOW-LEVEL DISPATCHER
             material.rho = 1.0
@@ -1284,6 +1284,10 @@ class FEMSolver(object):
             nnode = mesh.nnode
             pmesh, pelement_indices, pnode_indices = mesh.Partition(n, compute_boundary_info=False)
             map_facilitator = np.arange(nnode*nvar,dtype=np.int32).reshape(nnode,nvar)
+
+            for idx in pelement_indices:
+                if idx.shape[0] == 0:
+                    raise ValueError("Could not partition the mesh correctly for parallel processing")
 
             partitioned_maps = []
             for i, mesh in enumerate(pmesh):
