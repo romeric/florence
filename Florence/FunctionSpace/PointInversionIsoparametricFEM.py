@@ -79,9 +79,42 @@ def hpBasesQuadSimple(eta,zeta):
     return N, dN
 
 
+def hpBasesPentSimple(e1,e2):
+    """Simple p=1 pentagonal bases taken from:
+        https://onlinelibrary.wiley.com/doi/abs/10.1002/nme.5730
+    """
+
+    N = np.array([  (e1-1.)*(e2-1.)*(2*e1+2*e2-3)/(2*e1+2*e2-e1*e2-3.),
+                    -e1*(e2-1.)*(2*e1+2*e2-3)/(2*e1+2*e2-e1*e2-3.),
+                    2.*e1*e2*(e2-1)/(2*e1+2*e2-e1*e2-3.),
+                    2.*e1*e2*(e1-1)/(2*e1+2*e2-e1*e2-3.),
+                    -e2*(e1-1.)*(2*e1+2*e2-3)/(2*e1+2*e2-e1*e2-3.),
+        ])
+
+    dN = np.array([
+        [(e2 - 1.0)*((e1 - 1.0)*(e2 - 2)*(2*e1 + 2*e2 - 3) + (-4*e1 - 2*e2 + 5.0)*(e1*e2 - 2*e1 - 2*e2 + 3.0))/(e1*e2 - 2*e1 - 2*e2 + 3.0)**2,
+         (e1 - 1.0)*((e1 - 2)*(e2 - 1.0)*(2*e1 + 2*e2 - 3) + (-2*e1 - 4*e2 + 5.0)*(e1*e2 - 2*e1 - 2*e2 + 3.0))/(e1*e2 - 2*e1 - 2*e2 + 3.0)**2],
+
+        [(e2 - 1.0)*(-e1*(e2 - 2)*(2*e1 + 2*e2 - 3) + (4*e1 + 2*e2 - 3)*(e1*e2 - 2*e1 - 2*e2 + 3.0))/(e1*e2 - 2*e1 - 2*e2 + 3.0)**2 ,
+         e1*(-(e1 - 2)*(e2 - 1.0)*(2*e1 + 2*e2 - 3) + (2*e1 + 4*e2 - 5.0)*(e1*e2 - 2*e1 - 2*e2 + 3.0))/(e1*e2 - 2*e1 - 2*e2 + 3.0)**2],
+
+        [2.0*e2*(e2 - 1)*(-e1*e2 + e1*(e2 - 2) + 2*e1 + 2*e2 - 3.0)/(e1*e2 - 2*e1 - 2*e2 + 3.0)**2,
+         2.0*e1*(e2*(e1 - 2)*(e2 - 1) + (-2*e2 + 1)*(e1*e2 - 2*e1 - 2*e2 + 3.0))/(e1*e2 - 2*e1 - 2*e2 + 3.0)**2],
+
+        [2.0*e2*(e1*(e1 - 1)*(e2 - 2) + (-2*e1 + 1)*(e1*e2 - 2*e1 - 2*e2 + 3.0))/(e1*e2 - 2*e1 - 2*e2 + 3.0)**2 ,
+         2.0*e1*(e1 - 1)*(-e1*e2 + 2*e1 + e2*(e1 - 2) + 2*e2 - 3.0)/(e1*e2 - 2*e1 - 2*e2 + 3.0)**2],
+
+        [e2*(-(e1 - 1.0)*(e2 - 2)*(2*e1 + 2*e2 - 3) + (4*e1 + 2*e2 - 5.0)*(e1*e2 - 2*e1 - 2*e2 + 3.0))/(e1*e2 - 2*e1 - 2*e2 + 3.0)**2 ,
+         (e1 - 1.0)*(-e2*(e1 - 2)*(2*e1 + 2*e2 - 3) + (2*e1 + 4*e2 - 3)*(e1*e2 - 2*e1 - 2*e2 + 3.0))/(e1*e2 - 2*e1 - 2*e2 + 3.0)**2]
+        ])
+
+    return N, dN
+
+
 
 def PointInversionIsoparametricFEM(element_type, C, LagrangeElemCoords, point,
-    equally_spaced=False, tolerance=1.0e-7, maxiter=20, verbose=False, use_simple_bases=False, initial_guess=None):
+    equally_spaced=False, tolerance=1.0e-7, maxiter=20, verbose=False, use_simple_bases=False,
+    initial_guess=None):
     """ This is the inverse isoparametric map, in that given a physical point,
         find the isoparametric coordinates, provided that the coordinates of
         physical element 'LagrangeElemCoords' is known
@@ -99,8 +132,10 @@ def PointInversionIsoparametricFEM(element_type, C, LagrangeElemCoords, point,
 
     # INITIAL GUESS - VERY IMPORTANT
     if initial_guess is None:
-        # p_isoparametric = np.zeros(LagrangeElemCoords.shape[1])
-        p_isoparametric = -np.ones(LagrangeElemCoords.shape[1])
+        if use_simple_bases:
+            p_isoparametric = np.zeros(LagrangeElemCoords.shape[1])
+        else:
+            p_isoparametric = -np.ones(LagrangeElemCoords.shape[1])
     else:
         p_isoparametric = initial_guess
     residual = 0.
@@ -138,6 +173,9 @@ def PointInversionIsoparametricFEM(element_type, C, LagrangeElemCoords, point,
                     gradient = QuadES.GradLagrange(C,p_isoparametric[0],p_isoparametric[1])
             else:
                 Neval, gradient = hpBasesQuadSimple(p_isoparametric[0],p_isoparametric[1])
+        elif element_type == "pent":
+            Neval, gradient = hpBasesPentSimple(p_isoparametric[0],p_isoparametric[1])
+
         makezero(np.atleast_2d(Neval))
         makezero(gradient)
 
@@ -161,7 +199,7 @@ def PointInversionIsoparametricFEM(element_type, C, LagrangeElemCoords, point,
         if norm(p_isoparametric - old_p_isoparametric) < tolerance:
             convergence_info = True
             break
-        # print(np.linalg.norm(residual))
+        # print(norm(residual))
         if norm(residual) < tolerance*1e2:
             convergence_info = True
             break

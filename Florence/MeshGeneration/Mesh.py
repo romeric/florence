@@ -1528,7 +1528,8 @@ class Mesh(object):
 
 
     def FindElementContainingPoint(self, point, algorithm="fem", find_parametric_coordinate=True,
-        scaling_factor=5., tolerance=1.0e-7, maxiter=20, use_simple_bases=False, return_on_geometric_finds=False):
+        scaling_factor=5., tolerance=1.0e-7, maxiter=20, use_simple_bases=False, return_on_geometric_finds=False,
+        initial_guess=None, initial_guesses=None, restart=False):
         """Find which element does a point lie in using specificed algorithm.
             The FEM isoparametric coordinate of the point is returned as well.
             If the isoparametric coordinate of the point is not required, issue find_parametric_coordinate=False
@@ -1558,6 +1559,28 @@ class Mesh(object):
                                         return only if find_parametric_coordinate=True
         """
 
+        if restart:
+            if initial_guesses is None:
+                if self.element_type == "pent":
+                    initial_guesses = np.array([
+                        [0.,0.],
+                        [1.,0.],
+                        [1.,0.5],
+                        [0.5,1.],
+                        [0.,1.],
+                        ])
+                else:
+                    raise ValueError("restart option for this element type is only supported if initial_guesses are available")
+            for i in range(initial_guesses.shape[0]):
+                ret_val = self.FindElementContainingPoint(point, algorithm=algorithm,
+                    find_parametric_coordinate=find_parametric_coordinate,
+                    scaling_factor=scaling_factor, tolerance=tolerance, maxiter=maxiter,
+                    use_simple_bases=use_simple_bases, return_on_geometric_finds=return_on_geometric_finds,
+                    initial_guess=initial_guesses[i,:], restart=False)
+                if ret_val[1] is not None:
+                    break
+            return ret_val
+
         self.__do_essential_memebers_exist__()
         C = self.InferPolynomialDegree() - 1
         if C > 0:
@@ -1580,6 +1603,7 @@ class Mesh(object):
         if algorithm == "fem":
             scaling_factor = float(scaling_factor)
             max_h = self.EdgeLengths().max()
+            # max_h=1.
             # FOR CURVED ELEMENTS
             # max_h = self.LargestSegment().max()
             # GET A BOUNDING BOX AROUND THE POINT, n TIMES LARGER THAN MAXIMUM h, WHERE n is the SCALING FACTOR
@@ -1603,7 +1627,8 @@ class Mesh(object):
                 for i in range(self.nelem):
                     coord = self.points[self.elements[i,:],:]
                     p_iso, converged = PointInversionIsoparametricFEM(self.element_type, C, coord, point,
-                        tolerance=tolerance, maxiter=maxiter, verbose=True, use_simple_bases=use_simple_bases)
+                        tolerance=tolerance, maxiter=maxiter, verbose=True, use_simple_bases=use_simple_bases,
+                        initial_guess=initial_guess)
 
                     if converged:
                         # if p_iso[0] >= -1. and p_iso[0] <=1. and \
@@ -1622,7 +1647,8 @@ class Mesh(object):
                 for i in range(self.nelem):
                     coord = self.points[self.elements[i,:],:]
                     p_iso, converged = PointInversionIsoparametricFEM(self.element_type, C, coord, point,
-                        tolerance=tolerance, maxiter=maxiter, verbose=True, use_simple_bases=use_simple_bases)
+                        tolerance=tolerance, maxiter=maxiter, verbose=True, use_simple_bases=use_simple_bases,
+                        initial_guess=initial_guess)
                     # if p_iso[0] >= -1. and p_iso[0] <=1. and \
                     #     p_iso[1] >= -1. and p_iso[1] <=1.:
                     #     candidate_element, candidate_piso = i, p_iso
@@ -1633,9 +1659,6 @@ class Mesh(object):
                         (p_iso[1] < 1.  or np.isclose(p_iso[1],-1.,rtol=tolerance)) :
                         candidate_element, candidate_piso = i, p_iso
                         break
-
-            # if candidate_element is None:
-                # raise RuntimeError("Could not find element containing the point")
 
             self.__update__(mesh)
             # print(candidate_element)
