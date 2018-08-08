@@ -1603,7 +1603,7 @@ class Mesh(object):
                 for i in range(self.nelem):
                     coord = self.points[self.elements[i,:],:]
                     p_iso, converged = PointInversionIsoparametricFEM(self.element_type, C, coord, point,
-                        tolerance=tolerance, maxiter=maxiter, verbose=True)
+                        tolerance=tolerance, maxiter=maxiter, verbose=True, use_simple_bases=use_simple_bases)
 
                     if converged:
                         # if p_iso[0] >= -1. and p_iso[0] <=1. and \
@@ -1622,7 +1622,7 @@ class Mesh(object):
                 for i in range(self.nelem):
                     coord = self.points[self.elements[i,:],:]
                     p_iso, converged = PointInversionIsoparametricFEM(self.element_type, C, coord, point,
-                        tolerance=tolerance, maxiter=maxiter, verbose=True)
+                        tolerance=tolerance, maxiter=maxiter, verbose=True, use_simple_bases=use_simple_bases)
                     # if p_iso[0] >= -1. and p_iso[0] <=1. and \
                     #     p_iso[1] >= -1. and p_iso[1] <=1.:
                     #     candidate_element, candidate_piso = i, p_iso
@@ -1715,7 +1715,7 @@ class Mesh(object):
                 elems_idx = np.where(elems==True)[0]
 
             else:
-                raise NotImplementedError("Not implemented yet")
+                raise NotImplementedError("Geometric algorithm for {} elements not implemented yet".format(self.element_type))
 
             if return_on_geometric_finds:
                 return elems_idx

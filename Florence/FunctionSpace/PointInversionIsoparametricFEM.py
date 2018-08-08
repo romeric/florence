@@ -3,7 +3,8 @@ from numpy.linalg import norm
 
 __all__ = ["PointInversionIsoparametricFEM"]
 
-
+# THE FOLLOWING SHAPE FUNCTIONS ARE BASED ON (0,1)**ndim REFERENCE COORDINATE
+# BUT THIS SHOULDNOT MATTER
 def hpBasesTetSimple(eta,zeta,xi):
     # THESE BASES ARE A BIT NUMERICALLY STABLE BECAUSE THEY ARE NOT BEING ROUNDED OFF
     # LIKE THE ONES COMING FROM Jacobi - ALTHOUGH LOWERING THE TOLERANCE FOR Jacobi GIVES THE SAME
@@ -26,6 +27,57 @@ def hpBasesTetSimple(eta,zeta,xi):
         ])
 
     return N, dN
+
+
+def hpBasesTriSimple(eta,zeta):
+    # THESE BASES ARE A BIT NUMERICALLY STABLE BECAUSE THEY ARE NOT BEING ROUNDED OFF
+    # LIKE THE ONES COMING FROM Jacobi - ALTHOUGH LOWERING THE TOLERANCE FOR Jacobi GIVES THE SAME
+    # MOREOVER THESE ARE ONLY FOR C=0
+
+    # from Florence.FunctionSpace.DegenerateMappings import MapXiEtaZeta2RST
+    # eta, zeta, xi = MapXiEtaZeta2RST(eta,zeta,xi)
+    # eta, zeta, xi = eta[0], zeta[0], xi[0]
+    N = np.array([  1.-eta-zeta,
+                    eta,
+                    zeta
+        ])
+
+    dN = np.array([
+        [-1.,-1.],
+        [1.,0.],
+        [0.,1.],
+        ])
+
+    # N = np.array([  1.-0.5*(eta+1)-0.5*(zeta+1),
+    #                 0.5*(eta+1),
+    #                 0.5*(zeta+1)
+    #     ])
+    # dN = np.array([
+    #     [-0.5,-0.5],
+    #     [ 0.5, 0. ],
+    #     [ 0. , 0.5],
+    #     ])
+
+    return N, dN
+
+
+def hpBasesQuadSimple(eta,zeta):
+
+    N = np.array([  (1.-eta)*(1.-zeta),
+                    eta*(1.-zeta),
+                    eta*zeta,
+                    (1.-eta)*zeta,
+        ])
+
+    dN = np.array([
+        [-(1.-zeta),-(1.-eta)],
+        [ (1.-zeta),-eta],
+        [zeta,eta],
+        [ -zeta,(1-eta)],
+        ])
+
+    return N, dN
+
 
 
 def PointInversionIsoparametricFEM(element_type, C, LagrangeElemCoords, point,
@@ -72,14 +124,20 @@ def PointInversionIsoparametricFEM(element_type, C, LagrangeElemCoords, point,
                 Neval = HexES.Lagrange(C,p_isoparametric[0],p_isoparametric[1],p_isoparametric[2]).flatten()
                 gradient = HexES.GradLagrange(C,p_isoparametric[0],p_isoparametric[1],p_isoparametric[2])
         elif element_type == "tri":
-            Neval, gradient = Tri.hpNodal.hpBases(C,p_isoparametric[0],p_isoparametric[1], False, 1, equally_spaced=equally_spaced)
-        elif element_type == "quad":
-            if not equally_spaced:
-                Neval = Quad.LagrangeGaussLobatto(C,p_isoparametric[0],p_isoparametric[1]).flatten()
-                gradient = Quad.GradLagrangeGaussLobatto(C,p_isoparametric[0],p_isoparametric[1])
+            if not use_simple_bases:
+                Neval, gradient = Tri.hpNodal.hpBases(C,p_isoparametric[0],p_isoparametric[1], True, 1, equally_spaced=equally_spaced)
             else:
-                Neval = QuadES.Lagrange(C,p_isoparametric[0],p_isoparametric[1]).flatten()
-                gradient = QuadES.GradLagrange(C,p_isoparametric[0],p_isoparametric[1])
+                Neval, gradient = hpBasesTriSimple(p_isoparametric[0],p_isoparametric[1])
+        elif element_type == "quad":
+            if not use_simple_bases:
+                if not equally_spaced:
+                    Neval = Quad.LagrangeGaussLobatto(C,p_isoparametric[0],p_isoparametric[1]).flatten()
+                    gradient = Quad.GradLagrangeGaussLobatto(C,p_isoparametric[0],p_isoparametric[1])
+                else:
+                    Neval = QuadES.Lagrange(C,p_isoparametric[0],p_isoparametric[1]).flatten()
+                    gradient = QuadES.GradLagrange(C,p_isoparametric[0],p_isoparametric[1])
+            else:
+                Neval, gradient = hpBasesQuadSimple(p_isoparametric[0],p_isoparametric[1])
         makezero(np.atleast_2d(Neval))
         makezero(gradient)
 
