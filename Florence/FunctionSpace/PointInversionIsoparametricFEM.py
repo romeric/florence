@@ -79,38 +79,6 @@ def hpBasesQuadSimple(eta,zeta):
     return N, dN
 
 
-def hpBasesPentSimple(e1,e2):
-    """Simple p=1 pentagonal bases taken from:
-        https://onlinelibrary.wiley.com/doi/abs/10.1002/nme.5730
-    """
-
-    N = np.array([  (e1-1.)*(e2-1.)*(2*e1+2*e2-3)/(2*e1+2*e2-e1*e2-3.),
-                    -e1*(e2-1.)*(2*e1+2*e2-3)/(2*e1+2*e2-e1*e2-3.),
-                    2.*e1*e2*(e2-1)/(2*e1+2*e2-e1*e2-3.),
-                    2.*e1*e2*(e1-1)/(2*e1+2*e2-e1*e2-3.),
-                    -e2*(e1-1.)*(2*e1+2*e2-3)/(2*e1+2*e2-e1*e2-3.),
-        ])
-
-    dN = np.array([
-        [(e2 - 1.0)*((e1 - 1.0)*(e2 - 2)*(2*e1 + 2*e2 - 3) + (-4*e1 - 2*e2 + 5.0)*(e1*e2 - 2*e1 - 2*e2 + 3.0))/(e1*e2 - 2*e1 - 2*e2 + 3.0)**2,
-         (e1 - 1.0)*((e1 - 2)*(e2 - 1.0)*(2*e1 + 2*e2 - 3) + (-2*e1 - 4*e2 + 5.0)*(e1*e2 - 2*e1 - 2*e2 + 3.0))/(e1*e2 - 2*e1 - 2*e2 + 3.0)**2],
-
-        [(e2 - 1.0)*(-e1*(e2 - 2)*(2*e1 + 2*e2 - 3) + (4*e1 + 2*e2 - 3)*(e1*e2 - 2*e1 - 2*e2 + 3.0))/(e1*e2 - 2*e1 - 2*e2 + 3.0)**2 ,
-         e1*(-(e1 - 2)*(e2 - 1.0)*(2*e1 + 2*e2 - 3) + (2*e1 + 4*e2 - 5.0)*(e1*e2 - 2*e1 - 2*e2 + 3.0))/(e1*e2 - 2*e1 - 2*e2 + 3.0)**2],
-
-        [2.0*e2*(e2 - 1)*(-e1*e2 + e1*(e2 - 2) + 2*e1 + 2*e2 - 3.0)/(e1*e2 - 2*e1 - 2*e2 + 3.0)**2,
-         2.0*e1*(e2*(e1 - 2)*(e2 - 1) + (-2*e2 + 1)*(e1*e2 - 2*e1 - 2*e2 + 3.0))/(e1*e2 - 2*e1 - 2*e2 + 3.0)**2],
-
-        [2.0*e2*(e1*(e1 - 1)*(e2 - 2) + (-2*e1 + 1)*(e1*e2 - 2*e1 - 2*e2 + 3.0))/(e1*e2 - 2*e1 - 2*e2 + 3.0)**2 ,
-         2.0*e1*(e1 - 1)*(-e1*e2 + 2*e1 + e2*(e1 - 2) + 2*e2 - 3.0)/(e1*e2 - 2*e1 - 2*e2 + 3.0)**2],
-
-        [e2*(-(e1 - 1.0)*(e2 - 2)*(2*e1 + 2*e2 - 3) + (4*e1 + 2*e2 - 5.0)*(e1*e2 - 2*e1 - 2*e2 + 3.0))/(e1*e2 - 2*e1 - 2*e2 + 3.0)**2 ,
-         (e1 - 1.0)*(-e2*(e1 - 2)*(2*e1 + 2*e2 - 3) + (2*e1 + 4*e2 - 3)*(e1*e2 - 2*e1 - 2*e2 + 3.0))/(e1*e2 - 2*e1 - 2*e2 + 3.0)**2]
-        ])
-
-    return N, dN
-
-
 
 def PointInversionIsoparametricFEM(element_type, C, LagrangeElemCoords, point,
     equally_spaced=False, tolerance=1.0e-7, maxiter=20, verbose=False, use_simple_bases=False,
@@ -127,7 +95,7 @@ def PointInversionIsoparametricFEM(element_type, C, LagrangeElemCoords, point,
     """
 
 
-    from Florence.FunctionSpace import Tri, Tet, Quad, QuadES, Hex, HexES
+    from Florence.FunctionSpace import Tri, Tet, Quad, QuadES, Hex, HexES, Pent
     from Florence.Tensor import makezero
 
     # INITIAL GUESS - VERY IMPORTANT
@@ -174,7 +142,7 @@ def PointInversionIsoparametricFEM(element_type, C, LagrangeElemCoords, point,
             else:
                 Neval, gradient = hpBasesQuadSimple(p_isoparametric[0],p_isoparametric[1])
         elif element_type == "pent":
-            Neval, gradient = hpBasesPentSimple(p_isoparametric[0],p_isoparametric[1])
+            Neval, gradient = Pent.PentBases(C,p_isoparametric[0],p_isoparametric[1])
 
         makezero(np.atleast_2d(Neval))
         makezero(gradient)

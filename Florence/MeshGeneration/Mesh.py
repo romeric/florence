@@ -110,6 +110,8 @@ class Mesh(object):
             self.GetEdgesTri()
         elif self.element_type == "quad":
             self.GetEdgesQuad()
+        elif self.element_type == "pent":
+            self.GetEdgesPent()
         elif self.element_type == "tet":
             self.GetEdgesTet()
         elif self.element_type == "hex":
@@ -124,6 +126,8 @@ class Mesh(object):
             self.GetBoundaryEdgesTri()
         elif self.element_type == "quad":
             self.GetBoundaryEdgesQuad()
+        elif self.element_type == "pent":
+            self.GetBoundaryEdgesPent()
         elif self.element_type == "tet":
             self.GetBoundaryEdgesTet()
         elif self.element_type == "hex":
@@ -138,6 +142,8 @@ class Mesh(object):
             self.GetInteriorEdgesTri()
         elif self.element_type == "quad":
             self.GetInteriorEdgesQuad()
+        elif self.element_type == "pent":
+            self.GetInteriorEdgesPent()
         elif self.element_type == "tet":
             self.GetInteriorEdgesTet()
         elif self.element_type == "hex":
@@ -947,6 +953,146 @@ class Mesh(object):
         edge_flags[edge_flags==False] = 0
         interior_edges = self.all_edges[edge_flags==False,:]
 
+        return interior_edges, edge_flags
+
+
+    def GetEdgesPent(self):
+        """Find the all edges of a pentagonal mesh.
+            Sets all_edges property and returns it
+
+        returns:
+
+            arr:            numpy ndarray of all edges"""
+
+        p = self.InferPolynomialDegree()
+
+        # DO NOT COMPUTE IF ALREADY COMPUTED
+        if isinstance(self.all_edges,np.ndarray):
+            if self.all_edges.shape[0] > 1:
+                # IF LINEAR VERSION IS COMPUTED, DO COMPUTE HIGHER VERSION
+                if self.all_edges.shape[1]==2 and p > 1:
+                    pass
+                else:
+                    return self.all_edges
+
+        node_arranger = np.array([
+            [0,1],
+            [1,2],
+            [2,3],
+            [3,4],
+            [4,0],
+            ])
+
+        # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY
+        edges = np.concatenate((self.elements[:,node_arranger[0,:]],self.elements[:,node_arranger[1,:]],
+            self.elements[:,node_arranger[2,:]],self.elements[:,node_arranger[3,:]],
+            self.elements[:,node_arranger[4,:]]),axis=0).astype(np.uint64)
+
+        # REMOVE DUPLICATES
+        edges, idx = unique2d(edges,consider_sort=True,order=False,return_index=True)
+
+        edge_to_element = np.zeros((edges.shape[0],2),np.int64)
+        edge_to_element[:,0] =  idx % self.elements.shape[0]
+        edge_to_element[:,1] =  idx // self.elements.shape[0]
+
+        self.edge_to_element = edge_to_element
+        self.all_edges = edges
+
+        return edges
+
+
+    def GetBoundaryEdgesPent(self):
+        """Find boundary edges (lines) of a pentagonal mesh"""
+
+        p = self.InferPolynomialDegree()
+
+        # DO NOT COMPUTE IF ALREADY COMPUTED
+        if isinstance(self.edges,np.ndarray):
+            if self.edges.shape[0] > 1:
+                # IF LINEAR VERSION IS COMPUTED, DO COMPUTE HIGHER VERSION
+                if self.edges.shape[1] == 2 and p > 1:
+                    pass
+                else:
+                    return
+
+        node_arranger = np.array([
+            [0,1],
+            [1,2],
+            [2,3],
+            [3,4],
+            [4,0],
+            ])
+
+        # GET ALL EDGES FROM THE ELEMENT CONNECTIVITY
+        all_edges = np.concatenate((self.elements[:,node_arranger[0,:]],self.elements[:,node_arranger[1,:]],
+            self.elements[:,node_arranger[2,:]],self.elements[:,node_arranger[3,:]],
+            self.elements[:,node_arranger[4,:]]),axis=0).astype(np.uint64)
+
+        # GET UNIQUE ROWS
+        uniques, idx, inv = unique2d(all_edges,consider_sort=True,order=False,return_index=True,return_inverse=True)
+
+        # ROWS THAT APPEAR ONLY ONCE CORRESPOND TO BOUNDARY EDGES
+        freqs_inv = itemfreq(inv)
+        edges_ext_flags = freqs_inv[freqs_inv[:,1]==1,0]
+        # NOT ARRANGED
+        self.edges = uniques[edges_ext_flags,:]
+
+        # DETERMINE WHICH FACE OF THE ELEMENT THEY ARE
+        boundary_edge_to_element = np.zeros((edges_ext_flags.shape[0],2),dtype=np.int64)
+
+        # FURTHER RE-ARRANGEMENT / ARANGE THE NODES BASED ON THE ORDER THEY APPEAR
+        # IN ELEMENT CONNECTIVITY
+        # THIS STEP IS NOT NECESSARY INDEED - ITS JUST FOR RE-ARANGMENT OF EDGES
+        all_edges_in_edges = in2d(all_edges,self.edges,consider_sort=True)
+        all_edges_in_edges = np.where(all_edges_in_edges==True)[0]
+
+        boundary_edge_to_element[:,0] = all_edges_in_edges % self.elements.shape[0]
+        boundary_edge_to_element[:,1] = all_edges_in_edges // self.elements.shape[0]
+
+        # ARRANGE FOR ANY ORDER OF BASES/ELEMENTS AND ASSIGN DATA MEMBERS
+        self.edges = self.elements[boundary_edge_to_element[:,0][:,None],node_arranger[boundary_edge_to_element[:,1],:]]
+        self.edges = self.edges.astype(np.uint64)
+        self.boundary_edge_to_element = boundary_edge_to_element
+
+        return self.edges
+
+
+    def GetInteriorEdgesPent(self):
+        """Computes interior edges of a pentagonal mesh
+
+            returns:
+
+                interior_faces          ndarray of interior edges
+                edge_flags              ndarray of edge flags: 0 for interior and 1 for boundary
+
+        """
+
+        if not isinstance(self.all_edges,np.ndarray):
+            self.GetEdgesPent()
+        if not isinstance(self.edges,np.ndarray):
+            self.GetBoundaryEdgesPent()
+
+        sorted_all_edges = np.sort(self.all_edges,axis=1)
+        sorted_boundary_edges = np.sort(self.edges,axis=1)
+
+        x = []
+        for i in range(self.edges.shape[0]):
+            current_sorted_boundary_edge = np.tile(sorted_boundary_edges[i,:],
+                self.all_edges.shape[0]).reshape(self.all_edges.shape[0],self.all_edges.shape[1])
+            interior_edges = np.linalg.norm(current_sorted_boundary_edge - sorted_all_edges,axis=1)
+            pos_interior_edges = np.where(interior_edges==0)[0]
+            if pos_interior_edges.shape[0] != 0:
+                x.append(pos_interior_edges)
+
+        edge_aranger = np.arange(self.all_edges.shape[0])
+        edge_aranger = np.setdiff1d(edge_aranger,np.array(x)[:,0])
+        interior_edges = self.all_edges[edge_aranger,:]
+
+        # GET FLAGS FOR BOUNDRAY AND INTERIOR
+        edge_flags = np.ones(self.all_edges.shape[0],dtype=np.int64)
+        edge_flags[edge_aranger] = 0
+
+        self.interior_edges = interior_edges
         return interior_edges, edge_flags
 
 
@@ -5719,6 +5865,12 @@ class Mesh(object):
                 if int(i+1)==self.elements.shape[1]:
                     p = i
                     break
+
+        elif self.element_type == "pent":
+            if 5==self.elements.shape[1]:
+                p = 1
+            else:
+                raise NotImplementedError("High order pentagonal elements are not supported yet")
 
         self.degree = p
         return p
