@@ -213,7 +213,7 @@ class LinearSolver(object):
 
         # DECIDE IF THE SOLVER TYPE IS APPROPRIATE FOR THE PROBLEM
         if self.switcher_message is False and self.dont_switch_solver is False:
-            # PREFER PARDISO OR MUMPS IF AVAILABLE
+            # PREFER PARDISO OR MUMPS OVER AMG IF AVAILABLE
             if self.has_pardiso:
                 self.solver_type = "direct"
                 self.solver_subtype = "pardiso"
