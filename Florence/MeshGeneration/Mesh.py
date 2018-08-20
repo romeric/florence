@@ -49,6 +49,7 @@ class Mesh(object):
 
         self.degree = None
         self.ndim = None
+        self.edim = None
         self.nelem = None
         self.nnode = None
 
@@ -1097,7 +1098,7 @@ class Mesh(object):
 
 
 
-    def GetHighOrderMesh(self,p=1,**kwargs):
+    def GetHighOrderMesh(self,p=1, silent=True, **kwargs):
         """Given a linear tri, tet, quad or hex mesh compute high order mesh based on it.
         This is a static method linked to the HigherOrderMeshing module"""
 
@@ -1128,7 +1129,8 @@ class Mesh(object):
             dum = self.GetLinearMesh(remap=True)
             self.__dict__.update(dum.__dict__)
 
-        print('Generating p = '+str(C+1)+' mesh based on the linear mesh...')
+        if not silent:
+            print('Generating p = '+str(C+1)+' mesh based on the linear mesh...')
         t_mesh = time()
         # BUILD A NEW MESH BASED ON THE LINEAR MESH
         if self.element_type == 'line':
@@ -1165,7 +1167,8 @@ class Mesh(object):
 
         self.ChangeType()
 
-        print('Finished generating the high order mesh. Time taken', time()-t_mesh,'sec')
+        if not silent:
+            print('Finished generating the high order mesh. Time taken', time()-t_mesh,'sec')
 
 
     def EdgeLengths(self,which_edges='boundary'):
@@ -3186,10 +3189,9 @@ class Mesh(object):
 
 
 
-    def SimplePlot(self, to_plot='faces',
-        color=None, plot_points=False, plot_edges=True, point_radius=0.1,
-        save=False, filename=None, figure=None, show_plot=True,
-        show_axis=False, grid="off"):
+    def SimplePlot(self, to_plot='faces', color=None, edge_color=None, point_color=None,
+        plot_points=False, plot_faces=True, plot_edges=True, point_radius=0.1,
+        save=False, filename=None, figure=None, show_plot=True, show_axis=False, grid="off"):
         """Simple mesh plot
 
             to_plot:        [str] only for 3D. 'faces' to plot only boundary faces
@@ -3209,10 +3211,17 @@ class Mesh(object):
                     show_axis=show_axis, grid=grid)
                 return
 
+        ndim = self.InferSpatialDimension()
         if color is None:
             color=(197/255.,241/255.,197/255.)
+        if edge_color is None:
+            edge_color = (0,0,0)
+        if point_color is None:
+            point_color = (0,0,0)
         if grid is None:
             grid = "off"
+        if ndim == 2:
+            point_radius = 0.75
 
         if save:
             if filename is None:
@@ -3256,7 +3265,11 @@ class Mesh(object):
 
         if self.element_type == "tri":
 
-            plt.triplot(self.points[:,0],self.points[:,1], self.elements[:,:3],color='k')
+            plt.triplot(self.points[:,0],self.points[:,1], self.elements[:,:3],color=edge_color)
+
+            if plot_points:
+                plt.plot(self.points[:,0],self.points[:,1], "o", color=point_color, markersize=point_radius)
+
             plt.axis("equal")
             if not show_axis:
                 plt.axis('off')
@@ -3297,17 +3310,18 @@ class Mesh(object):
 
 
             # MAYAVI.MLAB SOLUTION
-            mlab.triangular_mesh(self.points[:,0],self.points[:,1],
-                self.points[:,2],faces[:,:3],color=color)
+            if plot_faces:
+                mlab.triangular_mesh(self.points[:,0],self.points[:,1],
+                    self.points[:,2],faces[:,:3],color=color)
             radius = 1e-00
             if plot_edges:
                 mlab.triangular_mesh(self.points[:,0],self.points[:,1],self.points[:,2], faces[:,:3],
-                    line_width=radius,tube_radius=radius,color=(0,0,0),
+                    line_width=radius,tube_radius=radius,color=edge_color,
                     representation='wireframe')
 
             if plot_points:
-                mlab.points3d(self.points[:,0],self.points[:,1],self.points[:,2]
-                    ,color=(0,0,0),mode='sphere',scale_factor=point_radius)
+                mlab.points3d(self.points[:,0],self.points[:,1],self.points[:,2],
+                    color=point_color,mode='sphere',scale_factor=point_radius)
 
             # svpoints = self.points[np.unique(self.faces),:]
             # mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=0.005)
@@ -3342,7 +3356,10 @@ class Mesh(object):
                 elif pdim == 3:
                     x_edges[:,iedge], y_edges[:,iedge], z_edges[:,iedge] = self.points[edge,:].T
 
-            plt.plot(x_edges,y_edges,'-k')
+            plt.plot(x_edges,y_edges,'-', color=edge_color)
+
+            if plot_points:
+                plt.plot(self.points[:,0],self.points[:,1], "o", color=point_color, markersize=point_radius)
 
             plt.axis('equal')
             if not show_axis:
@@ -3354,27 +3371,38 @@ class Mesh(object):
 
 
         elif self.element_type == "hex":
+
+            if to_plot == "all_faces":
+                ProjectionFlags = np.ones(faces.shape[0],dtype=np.int64)
+            else:
+                ProjectionFlags = None
+
             from Florence.PostProcessing import PostProcess
             tmesh = PostProcess.TessellateHexes(self,np.zeros_like(self.points),plot_points=True,
-                interpolation_degree=0)
+                interpolation_degree=0, ProjectionFlags=ProjectionFlags)
 
             Xplot = tmesh.points
             Tplot = tmesh.elements
             # color=(197/255.,241/255.,197/255.)
             point_line_width = .002
 
-            trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot,
-                    line_width=point_line_width,color=color)
+            if plot_faces:
+                trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot,
+                        line_width=point_line_width,color=color)
 
             if plot_edges:
                 src = mlab.pipeline.scalar_scatter(tmesh.x_edges.T.copy().flatten(),
                     tmesh.y_edges.T.copy().flatten(), tmesh.z_edges.T.copy().flatten())
                 src.mlab_source.dataset.lines = tmesh.connections
                 lines = mlab.pipeline.stripper(src)
-                h_edges = mlab.pipeline.surface(lines, color = (0,0,0), line_width=3)
+                h_edges = mlab.pipeline.surface(lines, color = edge_color, line_width=3)
 
             # mlab.view(azimuth=135, elevation=45, distance=7, focalpoint=None,
                 # roll=0, reset_roll=True, figure=None)
+
+            if plot_points:
+                mlab.points3d(self.points[:,0],self.points[:,1],self.points[:,2],
+                    color=point_color,mode='sphere',scale_factor=point_radius)
 
             if show_plot:
                 mlab.show()
@@ -5351,6 +5379,85 @@ class Mesh(object):
         self.__update__(mesh)
 
 
+    def LaplacianSmoothing(self, niter=1, pnodes_movement=None, show_plot=False):
+        """Standard Laplacian smoothing
+
+            input:
+                pnodes_movement:                [str] either "laplacian" or "interpolation"
+        """
+
+        self.__do_memebers_exist__()
+
+        edim = self.InferElementalDimension()
+        ndim = self.InferSpatialDimension()
+        p = self.InferPolynomialDegree()
+        if p > 1:
+            if pnodes_movement is None:
+                raise ValueError("Please specify (pnodes_movement): the strategy for moving high order nodes")
+            if pnodes_movement != "interpolation" and pnodes_movement != "laplacian":
+                raise ValueError('pnodes_movement should be either "laplacian" or "interpolation"')
+
+        if pnodes_movement == "interpolation":
+            lmesh = self.GetLinearMesh(remap=True)
+        else:
+            lmesh = self
+        plot_mesh = self.GetLinearMesh(remap=True)
+
+
+        if show_plot:
+            if ndim == 2:
+                import matplotlib.pyplot as plt
+                figure = plt.figure()
+            else:
+                import os
+                os.environ['ETS_TOOLKIT'] = 'qt4'
+                from mayavi import mlab
+                figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(1000,800))
+
+            plot_mesh.SimplePlot(show_plot=False, figure=figure, plot_points=True,
+                plot_faces=False, to_plot="all_faces")
+
+        element_valency = lmesh.GetNodeCommonality()[0]
+        valency = [0]*lmesh.points.shape[0]
+        for i in range(len(element_valency)):
+            valency[i] = np.unique(lmesh.elements[element_valency[i],:])
+
+        if edim == 3:
+            un_boundary = np.unique(lmesh.faces)
+        elif edim == 2:
+            un_boundary = np.unique(lmesh.edges)
+        else:
+            un_boundary = np.unique(lmesh.corners)
+
+
+        for it in range(niter):
+            new_points = np.zeros_like(lmesh.points)
+            for i in range(lmesh.points.shape[0]):
+                # node_ids = np.unique(self.elements[element_valency[i],:])
+                node_ids = valency[i]
+                nodes_coords = lmesh.points[node_ids,:]
+                new_points[i,:] = nodes_coords.sum(axis=0)/nodes_coords.shape[0]
+
+            new_points[un_boundary,:] = lmesh.points[un_boundary,:]
+            lmesh.points = new_points
+
+        if pnodes_movement == "interpolation":
+            plot_mesh.points = np.copy(lmesh.points)
+            lmesh.GetHighOrderMesh(p=p, silent=True)
+            self.__update__(lmesh)
+        else:
+            plot_mesh = self.GetLinearMesh(remap=True)
+
+
+        if show_plot:
+            plot_mesh.SimplePlot(show_plot=False, figure=figure, plot_points=True,
+                plot_faces=False, edge_color=(1,0,0), point_color=(1,0,0), to_plot="all_faces")
+            if ndim == 2:
+                plt.show()
+            else:
+                mlab.show()
+
+
     def Refine(self, level=2):
         """Refines a given mesh (self) to specified level uniformly.
 
@@ -6096,6 +6203,25 @@ class Mesh(object):
         return self.points.shape[1]
 
 
+    def InferElementalDimension(self):
+        """Infer the actual dimension of the element. This is 3 for tet and hex,
+            2 for tri and quad, 1 for line etc
+        """
+
+        assert self.element_type is not None
+
+        if self.element_type == "tet" or self.element_type == "hex":
+            self.edim = 3
+        elif self.element_type == "tri" or self.element_type == "quad" or self.element_type == "pent":
+            self.edim = 2
+        elif self.element_type == "line":
+            self.edim = 1
+        else:
+            raise RuntimeError("Could not infer element type")
+
+        return self.edim
+
+
     def InferNumberOfNodesPerElement(self, p=None, element_type=None):
         """Infers number of nodes per element. If p and element_type are
             not None then returns the number of nodes required for the given
@@ -6150,7 +6276,6 @@ class Mesh(object):
         self.element_type = tmp
 
         return nodeperelem
-
 
 
     def InferElementType(self):

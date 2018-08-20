@@ -1313,25 +1313,11 @@ def AssembleMass(formulation, mesh, material, fem_solver, rho=1.0, mass_type=Non
 
 def AssembleForm(formulation, mesh, material, fem_solver, Eulerx=None, Eulerp=None):
 
-    if fem_solver.parallel and fem_solver.recompute_sparsity_pattern is False:
-        raise ValueError("Parallel model cannot use precomputed sparsity pattern due to partitioning. Turn this off")
-
-    if formulation.fields == "electrostatics":
-        if material.nature == "linear" and material.has_low_level_dispatcher and fem_solver.has_low_level_dispatcher:
-            if hasattr(material,'e'):
-                if material.e is None or isinstance(material.e, float):
-                    if material.mtype == "IdealDielectric":
-                        material.e = material.eps_1*np.eye(formulation.ndim, formulation.ndim)
-                    else:
-                        raise ValueError("For optimise=True, you need to provide the material permittivity tensor (ndimxndim)")
-            else:
-                raise ValueError("For optimise=True, you need to provide the material permittivity tensor (ndimxndim)")
-
-    if fem_solver.analysis_type == "dynamic" and material.rho is None:
-        raise ValueError("Material does not seem to have density. Mass matrix cannot be computed")
-    if fem_solver.analysis_type == "static" and material.rho is None and fem_solver.has_low_level_dispatcher:
-        # FOR LOW-LEVEL DISPATCHER
-        material.rho = 1.0
+    from Florence import BoundaryCondition
+    boundary_condition = BoundaryCondition()
+    solver=None
+    fem_solver.__checkdata__(material, boundary_condition,
+        formulation, mesh, formulation.function_spaces, solver, contact_formulation=None)
 
     if fem_solver.parallel:
         import multiprocessing
