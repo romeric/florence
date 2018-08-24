@@ -5379,11 +5379,12 @@ class Mesh(object):
         self.__update__(mesh)
 
 
-    def LaplacianSmoothing(self, niter=1, pnodes_movement=None, show_plot=False):
+    def LaplacianSmoothing(self, niter=1, algorithm="jacobi", pnodes_movement=None, show_plot=False):
         """Standard Laplacian smoothing
 
             input:
                 pnodes_movement:                [str] either "laplacian" or "interpolation"
+                pnodes_movement:                [str] either "jacobi" or "gauss_seidal"
         """
 
         self.__do_memebers_exist__()
@@ -5429,17 +5430,25 @@ class Mesh(object):
         else:
             un_boundary = np.unique(lmesh.corners)
 
+        if algorithm == "gauss_seidal":
+            for it in range(niter):
+                new_points = np.zeros_like(lmesh.points)
+                for i in range(lmesh.points.shape[0]):
+                    node_ids = valency[i]
+                    nodes_coords = lmesh.points[node_ids,:]
+                    lmesh.points[i,:] = nodes_coords.sum(axis=0)/nodes_coords.shape[0]
 
-        for it in range(niter):
-            new_points = np.zeros_like(lmesh.points)
-            for i in range(lmesh.points.shape[0]):
-                # node_ids = np.unique(self.elements[element_valency[i],:])
-                node_ids = valency[i]
-                nodes_coords = lmesh.points[node_ids,:]
-                new_points[i,:] = nodes_coords.sum(axis=0)/nodes_coords.shape[0]
+                lmesh.points[un_boundary,:] = plot_mesh.points[un_boundary,:]
+        else:
+            for it in range(niter):
+                new_points = np.zeros_like(lmesh.points)
+                for i in range(lmesh.points.shape[0]):
+                    node_ids = valency[i]
+                    nodes_coords = lmesh.points[node_ids,:]
+                    new_points[i,:] = nodes_coords.sum(axis=0)/nodes_coords.shape[0]
 
-            new_points[un_boundary,:] = lmesh.points[un_boundary,:]
-            lmesh.points = new_points
+                new_points[un_boundary,:] = lmesh.points[un_boundary,:]
+                lmesh.points = new_points
 
         if pnodes_movement == "interpolation":
             plot_mesh.points = np.copy(lmesh.points)
