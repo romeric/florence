@@ -2982,6 +2982,8 @@ class Mesh(object):
         for line_counter, line in enumerate(open(filename)):
             item = line.rstrip()
             plist = item.split()
+            if not plist:
+                continue
 
             if plist[0] == 'v':
                 points.append([float(i) for i in plist[1:4]])
@@ -3743,6 +3745,34 @@ class Mesh(object):
                 del Dict[str(key)]
 
         savemat(filename, Dict, do_compression=True)
+
+
+
+    def WriteOBJ(self, filename):
+
+        elements = np.copy(self.elements).astype(np.int64) + 1
+
+        with open(filename, "w") as f:
+            f.write("# "+ str(self.nnode))
+            f.write('\n')
+            f.write("# "+ str(self.nelem))
+            f.write('\n')
+
+            for i in range(self.nnode):
+                line = "v "
+                for j in range(self.points.shape[1]):
+                    line += str(self.points[i,j])
+                    line += " "
+                f.write(line)
+                f.write('\n')
+
+            for i in range(self.nelem):
+                line = "f "
+                for j in range(elements.shape[1]):
+                    line += str(elements[i,j])
+                    line += " "
+                f.write(line)
+                f.write('\n')
 
 
 
@@ -5429,6 +5459,7 @@ class Mesh(object):
             un_boundary = np.unique(lmesh.edges)
         else:
             un_boundary = np.unique(lmesh.corners)
+
 
         if algorithm == "gauss_seidal":
             for it in range(niter):
