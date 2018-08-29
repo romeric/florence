@@ -3749,8 +3749,17 @@ class Mesh(object):
 
 
     def WriteOBJ(self, filename):
+        """Write obj file. For 3D elements writes the faces only
+        """
 
-        elements = np.copy(self.elements).astype(np.int64) + 1
+        self.__do_essential_memebers_exist__()
+
+        if self.element_type == "tri" or self.element_type == "quad" or self.element_type == "pent":
+            elements = np.copy(self.elements).astype(np.int64) + 1
+        elif self.element_type == "tet" or self.element_type == "hex":
+            elements = np.copy(self.faces).astype(np.int64) + 1
+        else:
+            raise RuntimeError("Writing obj file for {} elements not supported".format(self.element_type))
 
         with open(filename, "w") as f:
             f.write("# "+ str(self.nnode))
