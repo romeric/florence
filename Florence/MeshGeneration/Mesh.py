@@ -3755,11 +3755,20 @@ class Mesh(object):
         self.__do_essential_memebers_exist__()
 
         if self.element_type == "tri" or self.element_type == "quad" or self.element_type == "pent":
-            elements = np.copy(self.elements).astype(np.int64) + 1
+            elements = np.copy(self.elements).astype(np.int64)
         elif self.element_type == "tet" or self.element_type == "hex":
-            elements = np.copy(self.faces).astype(np.int64) + 1
+            elements = np.copy(self.faces).astype(np.int64)
         else:
             raise RuntimeError("Writing obj file for {} elements not supported".format(self.element_type))
+
+        points = self.points[np.unique(elements),:]
+        points_repr = np.zeros((points.shape[0],points.shape[1]+1), dtype=object)
+        points_repr[:,0] = "v "
+        points_repr[:,1:] = points
+
+        elements_repr = np.zeros((elements.shape[0],elements.shape[1]+1), dtype=object)
+        elements_repr[:,0] = "f "
+        elements_repr[:,1:] = elements + 1
 
         with open(filename, "w") as f:
             f.write("# "+ str(self.nnode))
@@ -3767,21 +3776,10 @@ class Mesh(object):
             f.write("# "+ str(self.nelem))
             f.write('\n')
 
-            for i in range(self.nnode):
-                line = "v "
-                for j in range(self.points.shape[1]):
-                    line += str(self.points[i,j])
-                    line += " "
-                f.write(line)
-                f.write('\n')
-
-            for i in range(self.nelem):
-                line = "f "
-                for j in range(elements.shape[1]):
-                    line += str(elements[i,j])
-                    line += " "
-                f.write(line)
-                f.write('\n')
+            np.savetxt(f, points_repr, fmt="%s")
+            f.write('\n')
+            np.savetxt(f, elements_repr, fmt="%s")
+            f.write('\n')
 
 
 
