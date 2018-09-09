@@ -2597,6 +2597,8 @@ class Mesh(object):
                 reader_type = "gmsh"
             elif filename.split('.')[-1] == "obj":
                 reader_type = "obj"
+            elif filename.split('.')[-1] == "unv":
+                reader_type = "unv"
             elif filename.split('.')[-1] == "fro":
                 reader_type = "fro"
             elif filename.split('.')[-1] == "dat":
@@ -2624,6 +2626,8 @@ class Mesh(object):
             self.ReadOBJ(filename, element_type=element_type, read_surface_info=read_surface_info)
         elif self.reader_type is 'fenics':
             self.ReadFenics(filename, element_type)
+        elif self.reader_type is 'unv':
+            self.ReadUNV(filename, element_type)
         elif self.reader_type is 'fro':
             self.ReadFRO(filename, element_type)
         elif self.reader_type is 'read_separate':
@@ -3096,6 +3100,95 @@ class Mesh(object):
             self.GetBoundaryEdges()
 
 
+    def ReadUNV(self, filename, element_type="tri"):
+        """Read I-DEAS unv files
+        """
+
+        try:
+            fid = open(filename, "r")
+        except IOError:
+            print("File '%s' not found." % (filename))
+            sys.exit()
+
+        if self.elements is not None and self.points is not None:
+            self.__reset__()
+
+        self.filename = filename
+
+        elem_counter, point_counter = None, None
+        ecounter, pcounter = 0, 0
+        points, elements = [], []
+
+        fid = open(filename, 'r')
+        for line_counter, line in enumerate(fid):
+            plist = line.rstrip().split()
+            if len(plist) > 0:
+                if plist[0] == '2411':
+                    point_counter = line_counter
+                if plist[0] == '2412':
+                    elem_counter = line_counter
+        fid.close()
+
+        reached_elements = False
+        reached_points = False
+        reached_end = False
+
+        if element_type == "tri":
+            nsize = 3
+        elif element_type == "quad":
+            nsize = 4
+
+        points = np.zeros(( int((elem_counter-2)/2)-1, 3), dtype=np.float64)
+        elements = np.zeros(( int((line_counter - elem_counter)/2), nsize),dtype=np.uint64)
+
+        fid = open(filename, 'r')
+        for line_counter, line in enumerate(fid):
+            plist = line.rstrip().split()
+            if len(plist) > 0:
+                if plist[0] == '2411':
+                    reached_points = True
+                if plist[0] == '2412':
+                    reached_elements = True
+                if plist[0] == '2477':
+                    reached_end = True
+
+                if reached_points and not reached_elements and len(plist) > 1:
+                    if (line_counter - point_counter + 1) % 2:
+                        cpoints = [float(i.replace('D', 'E')) for i in plist]
+                        points[pcounter,:] = cpoints
+                        pcounter += 1
+
+                elif reached_elements and len(plist) > 1:
+                    if (line_counter - elem_counter + 1) % 2:
+                        celems = [int(i)-1 for i in plist]
+                        elements[ecounter,:] = celems
+                        ecounter += 1
+        fid.close()
+
+
+        while True:
+            if np.allclose(elements[-1,:],0.):
+                elements = elements[:-1, :]
+            else:
+                break
+
+        self.points = np.copy(points)
+        self.elements = np.copy(elements)
+        self.element_type = element_type
+        self.nelem = self.elements.shape[0]
+        self.nnode = self.points.shape[0]
+
+        if self.element_type == "tri" or self.element_type == "quad":
+            self.GetEdges()
+            self.GetBoundaryEdges()
+        elif self.element_type == "tet" or self.element_type == "hex":
+            self.GetFaces()
+            self.GetBoundaryFaces()
+            self.GetBoundaryEdges()
+
+        return
+
+
     def ReadFRO(self, filename, element_type):
         """Read fro mesh"""
 
@@ -3133,6 +3226,7 @@ class Mesh(object):
         self.face_to_surface = np.ascontiguousarray(face_to_surface)
 
         return
+
 
     def ReadHDF5(self,filename):
         """Read mesh from MATLAB HDF5 file format"""
