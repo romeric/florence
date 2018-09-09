@@ -111,7 +111,9 @@ def CurvedPlate(ncirc=2, nlong=20, show_plot=False):
 
 def SubdivisionCircle(center=(0.,0.), radius=1., nrad=16, ncirc=40,
         element_type="tri", refinement=False, refinement_level=2):
-    """Creating a mesh on circle using midpoint subdivision
+    """Creating a mesh on circle using midpoint subdivision.
+        This function is internally called from Mesh.Circle if
+        'midpoint_subdivision' algorithm is selected
     """
 
     r = float(radius)

@@ -4134,8 +4134,12 @@ class Mesh(object):
 
 
     def Circle(self, center=(0.,0.), radius=1., nrad=16, ncirc=40,
-        element_type="tri", refinement=False, refinement_level=2):
+        element_type="tri", refinement=False, refinement_level=2, algorithm="standard"):
         """Creates a structured quad/tri mesh on circle
+
+            input:
+                algorithm:                                  [str] either 'standard' or 'midpoint_subdivision'
+                                                            the latter generates quad meshes with 4 singularities
 
         """
 
@@ -4143,6 +4147,13 @@ class Mesh(object):
             raise ValueError("The center of the circle should be given in a tuple with two elements (x,y)")
 
         self.__reset__()
+
+        if algorithm == "midpoint_subdivision":
+            from Florence.MeshGeneration.CustomMesher import SubdivisionCircle
+            mesh = SubdivisionCircle(center=center, radius=radius, nrad=nrad, ncirc=ncirc,
+                element_type=element_type, refinement=refinement, refinement_level=refinement_level)
+            self.__update__(mesh)
+            return
 
         if refinement:
             ndivider = refinement_level
@@ -5416,12 +5427,16 @@ class Mesh(object):
         self.__update__(mesh)
 
 
-    def LaplacianSmoothing(self, niter=1, algorithm="jacobi", pnodes_movement=None, show_plot=False):
+    def LaplacianSmoothing(self, niter=1, algorithm="jacobi", smart=False, quality_assessor=None,
+        pnodes_movement=None, show_plot=False):
         """Standard Laplacian smoothing
 
             input:
                 pnodes_movement:                [str] either "laplacian" or "interpolation"
-                pnodes_movement:                [str] either "jacobi" or "gauss_seidal"
+                algorithm:                      [str] either "jacobi" or "gauss_seidal"
+                smart:                          [bool] wether to use smart Laplacian or not
+                quality_assessor:               [str] quality evaluator for smart Laplacian.
+                                                default is size (area/volume) based
         """
 
         self.__do_memebers_exist__()
@@ -5467,6 +5482,21 @@ class Mesh(object):
         else:
             un_boundary = np.unique(lmesh.corners)
 
+        if smart:
+            mmesh = deepcopy(lmesh)
+            # quality_func = lambda mesh: mesh.Sizes()
+            if quality_assessor is None or quality_assessor == "size":
+                if edim== 3:
+                    quality_func = lambda mesh: mesh.Volumes()
+                elif edim == 2:
+                    quality_func = lambda mesh: mesh.Areas()
+                else:
+                    quality_func = lambda mesh: mesh.Lengths()
+            elif quality_assessor == "aspect_ratio":
+                quality_assessor = lambda mesh: mesh.AspectRatios()
+            else:
+                raise ValueError('quality_assessor not undersood')
+
 
         if algorithm == "gauss_seidal":
             for it in range(niter):
@@ -5474,7 +5504,20 @@ class Mesh(object):
                 for i in range(lmesh.points.shape[0]):
                     node_ids = valency[i]
                     nodes_coords = lmesh.points[node_ids,:]
-                    lmesh.points[i,:] = nodes_coords.sum(axis=0)/nodes_coords.shape[0]
+                    if not smart:
+                        lmesh.points[i,:] = nodes_coords.sum(axis=0)/nodes_coords.shape[0]
+                    else:
+                        pmesh = lmesh.GetLocalisedMesh(element_valency[i])
+                        sizes = quality_func(pmesh)
+                        crit_before = sizes.min()/sizes.max()
+
+                        mmesh.points[i,:] = nodes_coords.sum(axis=0)/nodes_coords.shape[0]
+
+                        pmesh = mmesh.GetLocalisedMesh(element_valency[i])
+                        sizes = quality_func(pmesh)
+                        crit_after = sizes.min()/sizes.max()
+                        if crit_before/crit_after > 0.8 and crit_before/crit_after < 1.2:
+                            lmesh.points[i,:] = mmesh.points[i,:]
 
                 lmesh.points[un_boundary,:] = plot_mesh.points[un_boundary,:]
         else:
@@ -5484,6 +5527,20 @@ class Mesh(object):
                     node_ids = valency[i]
                     nodes_coords = lmesh.points[node_ids,:]
                     new_points[i,:] = nodes_coords.sum(axis=0)/nodes_coords.shape[0]
+
+                    if smart:
+                        pmesh = lmesh.GetLocalisedMesh(element_valency[i])
+                        sizes = quality_func(pmesh)
+                        crit_before = sizes.min()/sizes.max()
+
+                        mmesh.points = np.copy(lmesh.points)
+                        mmesh.points[i,:] = new_points[i,:]
+                        pmesh = mmesh.GetLocalisedMesh(element_valency[i])
+                        sizes = quality_func(pmesh)
+                        crit_after = sizes.min()/sizes.max()
+                        mmesh.points = np.copy(lmesh.points)
+                        if crit_before/crit_after < 0.8 or crit_before/crit_after > 1.2:
+                            new_points[i,:] = lmesh.points[i,:]
 
                 new_points[un_boundary,:] = lmesh.points[un_boundary,:]
                 lmesh.points = new_points
