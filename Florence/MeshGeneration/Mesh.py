@@ -6992,6 +6992,42 @@ class Mesh(object):
         self.points[:,[axis0,axis1]] = self.points[:,[axis1,axis0]]
 
 
+    def Rotate(self, angle, plane=[0,1], copy=False):
+        """Rotate the mesh by an angle in a particular plane.
+        The operation is in-place unless copy is True in which case a copy
+        of the rotated coordinates is returned
+
+            inputs:
+                angle:              [float] angle in radians
+        """
+
+        t = angle
+        if t > 2.*np.pi or t < -2.*np.pi:
+            raise ValueError("Rotation angle must be in radians within [-2*pi,2*pi]")
+
+        Q = np.array([
+            [np.cos(t), np.sin(t)],
+            [-np.sin(t), np.cos(t)]
+            ])
+
+        if self.points.shape[1] == 3:
+            Q3 = np.zeros((3,3))
+            for i in range(2):
+                for j in range(2):
+                    Q3[plane[i],plane[j]] = Q[i,j]
+
+            k = np.delete(np.arange(3),plane)[0]
+            Q3[k,k] = 1.
+            Q = np.copy(Q3)
+
+        npoints = self.points.dot(Q)
+
+        if copy:
+            return npoints
+        else:
+            self.points = npoints
+
+
 
     def __add__(self, other):
         """Add self with other without modifying self. Hybrid meshes not supported"""

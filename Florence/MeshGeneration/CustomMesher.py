@@ -1,3 +1,4 @@
+import os, sys
 import numpy as np
 from copy import deepcopy
 from warnings import warn
@@ -6,7 +7,7 @@ from .GeometricPath import *
 from Florence.Tensor import totuple
 
 
-__all__ = ['HarvesterPatch']
+__all__ = ['HarvesterPatch', 'SubdivisionCircle']
 
 """
 A series of custom meshes
@@ -35,7 +36,7 @@ def HarvesterPatch(ndisc=20, nradial=4, show_plot=False):
 
     # nradial = 4
     mesh = Mesh()
-    mesh.Arc(element_type="quad", radius=radius, start_angle=start_angle, 
+    mesh.Arc(element_type="quad", radius=radius, start_angle=start_angle,
         end_angle=end_angle, nrad=nradial, ncirc=ndisc, center=(center[0],center[1]), refinement=True)
 
     mesh1 = Mesh()
@@ -44,8 +45,8 @@ def HarvesterPatch(ndisc=20, nradial=4, show_plot=False):
     mesh += mesh1
 
     mesh_patch = Mesh()
-    mesh_patch.HollowArc(ncirc=ndisc, nrad=nradial, center=(-7.818181,44.22727272), 
-        start_angle=np.arctan(44.22727272/-7.818181), end_angle=np.arctan(-24.22727272/37.818181), 
+    mesh_patch.HollowArc(ncirc=ndisc, nrad=nradial, center=(-7.818181,44.22727272),
+        start_angle=np.arctan(44.22727272/-7.818181), end_angle=np.arctan(-24.22727272/37.818181),
         element_type="quad", inner_radius=43.9129782, outer_radius=44.9129782)
 
     mesh3 = Mesh()
@@ -107,6 +108,116 @@ def CurvedPlate(ncirc=2, nlong=20, show_plot=False):
 
 
 
+
+def SubdivisionCircle(center=(0.,0.), radius=1., nrad=16, ncirc=40,
+        element_type="tri", refinement=False, refinement_level=2):
+    """Creating a mesh on circle using midpoint subdivision
+    """
+
+    r = float(radius)
+    h_r = float(radius)/2.
+    nx = int(ncirc/4.)
+    ny = int(nrad/2.)
+
+
+    mesh = Mesh()
+    mesh.Rectangle(element_type="quad", lower_left_point=(-1.,-1.),
+        upper_right_point=(1.,1.), nx=nx, ny=ny)
+
+    uv = np.array([
+        [-1.,-1],
+        [1.,-1],
+        [1.,1],
+        [-1.,1],
+        ])
+
+    t = np.pi/4
+    end_points = np.array([
+        [-h_r*np.cos(t),h_r*np.sin(t)],
+        [h_r*np.cos(t),h_r*np.sin(t)],
+        [r*np.cos(t),r*np.sin(t)],
+        [-r*np.cos(t),r*np.sin(t)],
+        ])
+
+    edge_points = mesh.points[np.unique(mesh.edges),:]
+
+    new_end_points = []
+    new_end_points.append(end_points[0,:])
+    new_end_points.append(end_points[1,:])
+    new_end_points.append(end_points[2,:])
+
+    tt = np.linspace(np.pi/4,3*np.pi/4,nx)
+    x = r*np.cos(tt)
+    y = r*np.sin(tt)
+    interp_p = np.vstack((x,y)).T
+
+
+    for i in range(1,len(x)-1):
+        new_end_points.append([x[i], y[i]])
+    new_end_points.append(end_points[3,:])
+    new_end_points = np.array(new_end_points)
+
+    new_uv = []
+    new_uv.append(uv[0,:])
+    new_uv.append(uv[1,:])
+    new_uv.append(uv[2,:])
+
+    L = 0.
+    for i in range(1,interp_p.shape[0]):
+        L += np.linalg.norm(interp_p[i,:] - interp_p[i-1,:])
+
+    interp_uv = []
+    last_uv = uv[2,:]
+    for i in range(1,interp_p.shape[0]-1):
+        val = (uv[3,:] - uv[2,:])*np.linalg.norm(interp_p[i,:] - interp_p[i-1,:])/L + last_uv
+        last_uv = np.copy(val)
+        interp_uv.append(val)
+
+    new_uv = np.array(new_uv)
+    new_uv = np.vstack((new_uv,np.array(interp_uv)))
+    new_uv = np.vstack((new_uv,uv[3,:]))
+
+    from Florence.FunctionSpace import MeanValueCoordinateMapping
+    new_points = np.zeros_like(mesh.points)
+    for i in range(mesh.nnode):
+        point = MeanValueCoordinateMapping(mesh.points[i,:], new_uv, new_end_points)
+        new_points[i,:] = point
+    mesh.points = new_points
+
+    rmesh = deepcopy(mesh)
+    rmesh.points = mesh.Rotate(angle=np.pi/2., copy=True)
+    mesh += rmesh
+    rmesh.points = rmesh.Rotate(angle=np.pi/2., copy=True)
+    mesh += rmesh
+    rmesh.points = rmesh.Rotate(angle=np.pi/2., copy=True)
+    mesh += rmesh
+
+    mesh.LaplacianSmoothing(niter=10)
+    qmesh = Mesh()
+    qmesh.Rectangle(element_type="quad", lower_left_point=(-h_r*np.cos(t),-h_r*np.sin(t)),
+        upper_right_point=(h_r*np.cos(t),h_r*np.sin(t)),
+        nx=nx,
+        ny=nx)
+    mesh += qmesh
+
+    mesh.LaplacianSmoothing(niter=20)
+
+    mesh.points[:,0] += center[0]
+    mesh.points[:,1] += center[1]
+
+    if refinement:
+        mesh.Refine(level=refinement_level)
+
+    if element_type == "tri":
+        sys.stdout = open(os.devnull, "w")
+        mesh.ConvertQuadsToTris()
+        sys.stdout = sys.__stdout__
+
+    return mesh
+
+
+
+
 def Torus(show_plot=False):
     """Custom mesh for torus
     """
@@ -131,7 +242,7 @@ def Torus(show_plot=False):
     # p2 = tmesh.points[elem_nodes[1],:]
     # p3 = tmesh.points[elem_nodes[2],:]
     # p4 = tmesh.points[elem_nodes[3],:]
-    
+
     # E1 = np.append(p2 - p1, 0.0)
     # E2 = np.append(p4 - p1, 0.0)
     # E3 = np.array([0,0,1.])
@@ -192,4 +303,3 @@ def Torus(show_plot=False):
         mesh.SimplePlot()
 
     return mesh
-
