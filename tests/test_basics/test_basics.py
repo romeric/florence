@@ -471,6 +471,7 @@ def test_mesh_postprocess_material():
         mesh.ReadOBJ("None",element_type="tri")
         mesh.ReadGmsh("None",element_type="tri")
         mesh.ReadSalome("None",element_type="tri")
+        mesh.ReadUNV("None",element_type="tri")
     except:
         pass
 
