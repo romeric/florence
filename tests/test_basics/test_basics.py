@@ -1,6 +1,6 @@
 import numpy as np
 from Florence import *
-
+from Florence.MeshGeneration.CustomMesher import SubdivisionCircle, HarvesterPatch
 
 
 def test_quadrature_functionspace():
@@ -156,6 +156,10 @@ def test_mesh_postprocess_material():
 
         mesh.CircularPlate(element_type=etype)
         mesh.RemoveElements(mesh.Bounds)
+        mesh.LaplacianSmoothing(niter=1)
+        mesh.LaplacianSmoothing(niter=1, smart=True)
+        mesh.LaplacianSmoothing(niter=1,algorithm="gauss_seidel")
+        mesh.LaplacianSmoothing(niter=1,algorithm="gauss_seidel", smart=True)
         mesh.GetHighOrderMesh(p=2, check_duplicates=False)
         mesh.GetHighOrderMesh(p=3, check_duplicates=False)
         mesh.LaplacianSmoothing(niter=3,pnodes_movement="laplacian")
@@ -293,6 +297,10 @@ def test_mesh_postprocess_material():
 
         mesh.SphericalArc(element_type=etype)
         mesh.RemoveElements(mesh.Bounds)
+        mesh.LaplacianSmoothing(niter=1)
+        mesh.LaplacianSmoothing(niter=1, smart=True)
+        mesh.LaplacianSmoothing(niter=1,algorithm="gauss_seidel")
+        mesh.LaplacianSmoothing(niter=1,algorithm="gauss_seidel", smart=True)
         mesh.GetHighOrderMesh(p=2, check_duplicates=False)
         mesh.GetHighOrderMesh(p=3, check_duplicates=False)
         mesh.LaplacianSmoothing(niter=3,pnodes_movement="laplacian")
@@ -465,6 +473,10 @@ def test_mesh_postprocess_material():
         mesh.ReadSalome("None",element_type="tri")
     except:
         pass
+
+    mesh = HarvesterPatch()
+    mesh = SubdivisionCircle(element_type="quad")
+    mesh.Circle(algorithm="midpoint_subdivision")
 
 
     print("Successfully finished running tests on Mesh, PostProcess and Material modules\n")
