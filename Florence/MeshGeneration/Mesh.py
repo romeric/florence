@@ -3178,6 +3178,10 @@ class Mesh(object):
         self.nelem = self.elements.shape[0]
         self.nnode = self.points.shape[0]
 
+        if self.points.shape[1] == 3:
+            if np.allclose(self.points[:,2],0.):
+                self.points = np.ascontiguousarray(self.points[:,:2])
+
         if self.element_type == "tri" or self.element_type == "quad":
             self.GetEdges()
             self.GetBoundaryEdges()
@@ -3842,20 +3846,126 @@ class Mesh(object):
 
 
 
+    def WriteGmsh(self, filename, write_surface_info=False):
+        """Write mesh to a .msh (gmsh format) file"""
+
+        self.__do_essential_memebers_exist__()
+
+        mesh = deepcopy(self)
+        p = self.InferPolynomialDegree()
+
+        if p > 1:
+            mesh = self.GetLinearMesh(remap=True)
+
+
+        element_type = mesh.element_type
+        edim = mesh.InferElementalDimension()
+
+        # THESE TAGS ARE DIFFERENT FROM THE GMSH READER TAGS
+        bel = -1
+        if element_type == "line":
+            el = 1
+        elif element_type == "tri":
+            el = 2
+            bel = 1
+        elif element_type == "quad":
+            el = 3
+            bel = 1
+        elif element_type == "tet":
+            el = 4
+            bel = 2
+        elif element_type == "hex":
+            el = 5
+            bel = 3
+        else:
+            raise ValueError("Element type not understood")
+
+
+        elements = np.copy(mesh.elements).astype(np.int64)
+        points = mesh.points[np.unique(elements),:]
+        if points.shape[1] == 2:
+            points = np.hstack((points,np.zeros((points.shape[0],1))))
+
+        points_repr = np.zeros((points.shape[0],points.shape[1]+1), dtype=object)
+        points_repr[:,0] = np.arange(mesh.nnode) + 1
+        points_repr[:,1:] = points
+
+        elements_repr = np.zeros((elements.shape[0],elements.shape[1]+5), dtype=object)
+        elements_repr[:,0] = np.arange(mesh.nelem) + 1
+        elements_repr[:,1] = el
+        elements_repr[:,2] = 2
+        elements_repr[:,3] = 0
+        elements_repr[:,4] = 1
+        elements_repr[:,5:] = elements + 1
+
+        if write_surface_info:
+
+            if edim == 3:
+                boundary = np.copy(mesh.faces).astype(np.int64)
+            elif edim == 2:
+                boundary = np.copy(mesh.edges).astype(np.int64)
+
+            boundary_repr = np.zeros((boundary.shape[0],boundary.shape[1]+5), dtype=object)
+            boundary_repr[:,0] = np.arange(boundary.shape[0]) + 1
+            boundary_repr[:,1] = bel
+            boundary_repr[:,2] = 2
+            boundary_repr[:,3] = 0
+            boundary_repr[:,4] = 1
+            boundary_repr[:,5:] = boundary + 1
+
+            elements_repr[:,0] += boundary.shape[0]
+
+            gmsh_nelem = mesh.nelem + boundary.shape[0]
+        else:
+            gmsh_nelem = mesh.nelem
+
+        with open(filename, 'w') as f:
+            f.write("$MeshFormat\n")
+            f.write("2.2 0 8\n")
+            f.write("$EndMeshFormat\n")
+            f.write("$Nodes\n")
+            f.write(str(mesh.nnode) + "\n")
+
+            np.savetxt(f, points_repr, fmt="%s")
+
+            f.write("$EndNodes\n")
+            f.write("$Elements\n")
+            f.write(str(gmsh_nelem) + "\n")
+
+            if write_surface_info:
+                np.savetxt(f, boundary_repr, fmt="%s")
+
+            np.savetxt(f, elements_repr, fmt="%s")
+
+            f.write("$EndElements\n")
+
+
+
     def WriteOBJ(self, filename):
-        """Write obj file. For 3D elements writes the faces only
+        """Write mesh to an obj file. For 3D elements writes the faces only
         """
 
         self.__do_essential_memebers_exist__()
 
-        if self.element_type == "tri" or self.element_type == "quad" or self.element_type == "pent":
-            elements = np.copy(self.elements).astype(np.int64)
-        elif self.element_type == "tet" or self.element_type == "hex":
-            elements = np.copy(self.faces).astype(np.int64)
-        else:
-            raise RuntimeError("Writing obj file for {} elements not supported".format(self.element_type))
+        mesh = deepcopy(self)
+        p = self.InferPolynomialDegree()
 
-        points = self.points[np.unique(elements),:]
+        if p > 1:
+            mesh = self.GetLinearMesh(remap=True)
+
+        edim = mesh.InferElementalDimension()
+
+        if edim == 2:
+            elements = np.copy(mesh.elements).astype(np.int64)
+        elif edim == 3:
+            elements = np.copy(mesh.faces).astype(np.int64)
+        else:
+            raise RuntimeError("Writing obj file for {} elements not supported".format(mesh.element_type))
+
+        points = mesh.points[np.unique(elements),:]
+        if points.shape[1] == 2:
+            points = np.hstack((points,np.zeros((points.shape[0],1))))
+
         points_repr = np.zeros((points.shape[0],points.shape[1]+1), dtype=object)
         points_repr[:,0] = "v "
         points_repr[:,1:] = points
@@ -3865,9 +3975,9 @@ class Mesh(object):
         elements_repr[:,1:] = elements + 1
 
         with open(filename, "w") as f:
-            f.write("# "+ str(self.nnode))
+            f.write("# "+ str(mesh.nnode))
             f.write('\n')
-            f.write("# "+ str(self.nelem))
+            f.write("# "+ str(mesh.nelem))
             f.write('\n')
 
             np.savetxt(f, points_repr, fmt="%s")
@@ -3878,7 +3988,7 @@ class Mesh(object):
 
 
     def WriteMFEM(self, filename):
-        """Write mfem meshes"""
+        """Write mesh to a mfem file"""
 
         self.__do_memebers_exist__()
 
