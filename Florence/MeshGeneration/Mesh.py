@@ -2626,6 +2626,8 @@ class Mesh(object):
             self.ReadOBJ(filename, element_type=element_type, read_surface_info=read_surface_info)
         elif self.reader_type is 'fenics':
             self.ReadFenics(filename, element_type)
+        elif self.reader_type is 'vtu':
+            self.ReadVTK(filename)
         elif self.reader_type is 'unv':
             self.ReadUNV(filename, element_type)
         elif self.reader_type is 'fro':
@@ -2818,6 +2820,67 @@ class Mesh(object):
             # self.GetBoundaryFacesTet()
             self.GetBoundaryEdgesTet()
 
+
+
+    def ReadVTK(self, filename, element_type=None):
+        """Read mesh from a vtu file"""
+
+        try:
+            import vtkInterface as vtki
+        except IOError:
+            raise IOError("vtkInterface is not installed. Please install it first using 'pip install vtkInterface'")
+
+        self.__reset__()
+
+        vmesh = vtki.UnstructuredGrid(filename)
+        flat_elements = np.copy(np.delete(vmesh.cells, vmesh.offset))
+
+        if not np.all(vmesh.celltypes == vmesh.celltypes[0]):
+            raise IOError("Cannot read VTK files with hybrid elements")
+
+        cellflag = vmesh.celltypes[0]
+
+        if cellflag == 5:
+            self.element_type = "tri"
+            divider = 3
+        elif cellflag == 9:
+            self.element_type = "quad"
+            divider = 4
+        elif cellflag == 10:
+            self.element_type = "tet"
+            divider = 4
+        elif cellflag == 12:
+            self.element_type = "hex"
+            divider = 8
+        elif cellflag == 3:
+            self.element_type = "line"
+            divider = 2
+        else:
+            raise IOError("VTK element type not understood")
+
+        if element_type is not None:
+            if self.element_type != element_type:
+                raise ValueError("VTK file does not contain {} elements".format(element_type))
+
+
+        self.elements = np.ascontiguousarray(flat_elements.reshape(int(flat_elements.shape[0]/divider),divider), dtype=np.uint64)
+        self.points = np.ascontiguousarray(vmesh.points, dtype=np.float64)
+        self.nelem = self.elements.shape[0]
+        self.nnode = self.points.shape[0]
+
+        if self.points.shape[1] == 3:
+            if np.allclose(self.points[:,2],0.):
+                self.points = np.ascontiguousarray(self.points[:,:2])
+
+        if self.element_type == "tri" or self.element_type == "quad":
+            self.GetEdges()
+            self.GetBoundaryEdges()
+        elif self.element_type == "tet" or self.element_type == "hex":
+            self.GetFaces()
+            self.GetBoundaryFaces()
+            self.GetBoundaryEdges()
+
+        return
 
 
     def ReadGmsh(self, filename, element_type, read_surface_info=False):
