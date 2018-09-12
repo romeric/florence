@@ -3054,7 +3054,7 @@ class Mesh(object):
 
             if plist[0] == 'v':
                 points.append([float(i) for i in plist[1:4]])
-            if plist[0] == 'f':
+            if plist[0] == 'f' and len(plist) > el:
                 for i in range(1,el+1):
                     if "/" in plist[i]:
                         plist[i] = plist[i].split("//")[0]
