@@ -3638,8 +3638,7 @@ class Mesh(object):
             for i in range(0,self.points.shape[0]):
                 plt.text(self.points[i,0],self.points[i,1],str(i),backgroundcolor='#0087BD',ha='center')
 
-            # plt.axis('equal')
-            # plt.show(block=False)
+            plt.axis('equal')
             plt.show()
 
         elif self.element_type == "quad":
@@ -3676,6 +3675,7 @@ class Mesh(object):
             for i in range(0,self.points.shape[0]):
                 plt.text(self.points[i,0],self.points[i,1],str(i),backgroundcolor='#0087BD',ha='center')
 
+            plt.axis('equal')
             plt.show()
 
         elif self.element_type == "tet" or self.element_type == "hex":
