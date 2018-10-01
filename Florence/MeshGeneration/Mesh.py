@@ -3615,7 +3615,7 @@ class Mesh(object):
 
 
 
-    def PlotMeshNumbering(self):
+    def PlotMeshNumbering(self, figure=None, show_plot=True):
         """Plots element and node numbers on top of the triangular mesh"""
 
         self.__do_essential_memebers_exist__()
@@ -3625,7 +3625,8 @@ class Mesh(object):
 
         if self.element_type == "tri":
 
-            fig = plt.figure()
+            if figure is None:
+                figure = plt.figure()
             plt.triplot(self.points[:,0],self.points[:,1], self.elements[:,:3])
             plt.tricontourf(self.points[:,0], self.points[:,1], self.elements[:,:3], np.ones(self.points.shape[0]), 100,alpha=0.3)
 
@@ -3639,11 +3640,13 @@ class Mesh(object):
                 plt.text(self.points[i,0],self.points[i,1],str(i),backgroundcolor='#0087BD',ha='center')
 
             plt.axis('equal')
-            plt.show()
+            if show_plot:
+                plt.show()
 
         elif self.element_type == "quad":
 
-            fig = plt.figure()
+            if figure is None:
+                figure = plt.figure()
             point_radius = 3.
 
             C = self.InferPolynomialDegree() - 1
@@ -3676,7 +3679,8 @@ class Mesh(object):
                 plt.text(self.points[i,0],self.points[i,1],str(i),backgroundcolor='#0087BD',ha='center')
 
             plt.axis('equal')
-            plt.show()
+            if show_plot:
+                plt.show()
 
         elif self.element_type == "tet" or self.element_type == "hex":
 
@@ -3685,7 +3689,8 @@ class Mesh(object):
             os.environ['ETS_TOOLKIT'] = 'qt4'
             from mayavi import mlab
 
-            figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(800,600))
+            if figure is None:
+                figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(800,600))
             view = mlab.view()
             figure.scene.disable_render = True
 
@@ -3726,8 +3731,9 @@ class Mesh(object):
 
             figure.scene.disable_render = False
 
-            # mlab.view(*view)
-            mlab.show()
+            if show_plot:
+                # mlab.view(*view)
+                mlab.show()
 
 
 
