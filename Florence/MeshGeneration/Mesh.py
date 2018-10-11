@@ -1537,7 +1537,6 @@ class Mesh(object):
         return normals
 
 
-
     def Normals(self, show_plot=False):
         """Computes unit outward normals to the boundary for all element types.
             Unity and outwardness are guaranteed
@@ -1617,6 +1616,77 @@ class Mesh(object):
 
         return normals
 
+
+    def BoundingBoxes(self, show_plot=False, figure=None):
+        """Computes a bounding box for every element.
+            This method complements the Bounds method/property in that it computes
+            the bounds for every individual element
+
+            returns:
+                bboxes                      [3D array] of nelem x ndim x ndim of bounding
+                                            boxes for every element
+        """
+
+        self.__do_essential_memebers_exist__()
+
+        ndim = self.InferSpatialDimension()
+        all_elem_coords = self.points[self.elements]
+        mins = all_elem_coords.min(axis=1)
+        maxs = all_elem_coords.max(axis=1)
+        bboxes = np.zeros((2*self.nelem,self.points.shape[1]))
+        bboxes[::2] = mins
+        bboxes[1::2] = maxs
+        bboxes = bboxes.reshape(self.nelem,2,self.points.shape[1])
+
+        if ndim == 3:
+            point_generator = lambda bbox: np.array([
+                [ bbox[0,0], bbox[0,1], bbox[0,2] ],
+                [ bbox[1,0], bbox[0,1], bbox[0,2] ],
+                [ bbox[1,0], bbox[1,1], bbox[0,2] ],
+                [ bbox[0,0], bbox[1,1], bbox[0,2] ],
+                [ bbox[0,0], bbox[0,1], bbox[1,2] ],
+                [ bbox[1,0], bbox[0,1], bbox[1,2] ],
+                [ bbox[1,0], bbox[1,1], bbox[1,2] ],
+                [ bbox[0,0], bbox[1,1], bbox[1,2] ]
+                ])
+        elif ndim == 2:
+            point_generator = lambda bbox: np.array([
+                [ bbox[0,0], bbox[0,1] ],
+                [ bbox[1,0], bbox[0,1] ],
+                [ bbox[1,0], bbox[1,1] ],
+                [ bbox[0,0], bbox[1,1] ]
+                ])
+
+        nsize = 4 if ndim ==2 else 8
+        ranger = np.arange(nsize)
+        bmesh = Mesh()
+        bmesh.element_type = "quad" if ndim ==2 else "hex"
+        bmesh.elements = np.arange(self.nelem*nsize).reshape(self.nelem,nsize)
+        bmesh.points = np.zeros((self.nelem*nsize,ndim))
+        bmesh.nelem = self.nelem
+        bmesh.nnode = bmesh.points.shape[0]
+        for i in range(0,self.nelem):
+            bmesh.points[i*nsize:(i+1)*nsize,:] = point_generator(bboxes[i])
+
+        if show_plot:
+            if ndim == 2:
+                import matplotlib.pyplot as plt
+                if figure is None:
+                    figure = plt.figure()
+                self.SimplePlot(figure=figure, show_plot=False)
+                bmesh.SimplePlot(figure=figure, show_plot=False, edge_color='r')
+                plt.show()
+            else:
+                import os
+                os.environ['ETS_TOOLKIT'] = 'qt4'
+                from mayavi import mlab
+                if figure is None:
+                    figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(1000,800))
+                self.SimplePlot(figure=figure, show_plot=False)
+                bmesh.SimplePlot(figure=figure, show_plot=False, plot_faces=False, edge_color='r')
+                mlab.show()
+
+        return bboxes
 
 
     def Medians(self, geometric=True):
@@ -3353,7 +3423,7 @@ class Mesh(object):
 
 
     def SimplePlot(self, to_plot='faces', color=None, edge_color=None, point_color=None,
-        plot_points=False, plot_faces=True, plot_edges=True, point_radius=0.1,
+        plot_points=False, plot_faces=None, plot_edges=True, point_radius=None,
         save=False, filename=None, figure=None, show_plot=True, show_axis=False, grid="off"):
         """Simple mesh plot
 
@@ -3375,6 +3445,8 @@ class Mesh(object):
                 return
 
         ndim = self.InferSpatialDimension()
+        edim = self.InferElementalDimension()
+
         if color is None:
             color=(197/255.,241/255.,197/255.)
         if edge_color is None:
@@ -3383,8 +3455,12 @@ class Mesh(object):
             point_color = (0,0,0)
         if grid is None:
             grid = "off"
-        if ndim == 2:
-            point_radius = 0.75
+
+        if point_radius is None:
+            if ndim == 2:
+                point_radius = 0.75
+            else:
+                point_radius = 0.1
 
         if save:
             if filename is None:
@@ -3395,7 +3471,7 @@ class Mesh(object):
                     filename += ".png"
 
         import matplotlib as mpl
-        if self.element_type == "tri" or self.element_type == "quad":
+        if self.element_type == "tri" or self.element_type == "quad" or self.element_type == "pent":
             import matplotlib.pyplot as plt
             if figure is None:
                 figure = plt.figure()
@@ -3425,10 +3501,29 @@ class Mesh(object):
                 elif isinstance(color,str):
                     color = mpl.colors.hex2color(color)
 
+            if edge_color is not None:
+                if isinstance(edge_color,tuple):
+                    if len(edge_color) != 3:
+                        raise ValueError("Color should be given in a rgb/RGB tuple format with 3 values i.e. (x,y,z)")
+                    if edge_color[0] > 1.0 or edge_color[1] > 1.0 or edge_color[2] > 1.0:
+                        edge_color = (edge_color[0]/255.,edge_color[1]/255.,edge_color[2]/255.)
+                elif isinstance(edge_color,str):
+                    edge_color = mpl.colors.hex2color(edge_color)
+
+        if plot_faces is None:
+            if edim == 3:
+                plot_faces = True
+            else:
+                plot_faces = False
+
 
         if self.element_type == "tri":
 
             plt.triplot(self.points[:,0],self.points[:,1], self.elements[:,:3],color=edge_color)
+
+            if plot_faces:
+                plt.tricontourf(self.points[:,0], self.points[:,1], self.elements[:,:3],
+                    np.ones(self.points.shape[0]), 100, alpha=0.3)
 
             if plot_points:
                 plt.plot(self.points[:,0],self.points[:,1], "o", color=point_color, markersize=point_radius)
@@ -3443,36 +3538,6 @@ class Mesh(object):
 
         elif self.element_type == "tet":
 
-            # from mpl_toolkits.mplot3d import Axes3D
-            # import matplotlib.pyplot as plt
-            # figure = plt.figure()
-
-            # # FOR PLOTTING ELEMENTS
-            # for elem in range(self.elements.shape[0]):
-            #   coords = self.points[self.elements[elem,:],:]
-            #   plt.gca(projection='3d')
-            #   plt.plot(coords[:,0],coords[:,1],coords[:,2],'-bo')
-
-            # # FOR PLOTTING ONLY BOUNDARY FACES - MATPLOTLIB SOLUTION
-            # if self.faces.shape[1] == 3:
-            #     for face in range(self.faces.shape[0]):
-            #         coords = self.points[self.faces[face,:3],:]
-            #         plt.gca(projection='3d')
-            #         plt.plot(coords[:,0],coords[:,1],coords[:,2],'-ko')
-            # else:
-            #     for face in range(self.faces.shape[0]):
-            #         coords = self.points[self.faces[face,:3],:]
-            #         coords_all = self.points[self.faces[face,:],:]
-            #         plt.gca(projection='3d')
-            #         plt.plot(coords[:,0],coords[:,1],coords[:,2],'-k')
-            #         plt.plot(coords_all[:,0],coords_all[:,1],coords_all[:,2],'ko')
-
-            # plt.axis("equal")
-            # plt.show()
-            # return
-
-
-            # MAYAVI.MLAB SOLUTION
             if plot_faces:
                 mlab.triangular_mesh(self.points[:,0],self.points[:,1],
                     self.points[:,2],faces[:,:3],color=color)
@@ -3523,6 +3588,12 @@ class Mesh(object):
 
             if plot_points:
                 plt.plot(self.points[:,0],self.points[:,1], "o", color=point_color, markersize=point_radius)
+
+            if plot_faces:
+                plt.tricontourf(self.points[:,0], self.points[:,1], self.elements[:,:3],
+                    np.ones(self.points.shape[0]), 100, alpha=0.3)
+                plt.tricontourf(self.points[:,0], self.points[:,1], self.elements[:,[0,2,3]],
+                    np.ones(self.points.shape[0]), 100, alpha=0.3)
 
             plt.axis('equal')
             if not show_axis:

@@ -147,6 +147,7 @@ def test_mesh_postprocess_material():
         mesh.Medians()
         mesh.LargestSegment()
         mesh.CheckNodeNumbering()
+        mesh.BoundingBoxes()
 
         pp = PostProcess(2,2)
         pp.SetMesh(mesh)
@@ -288,6 +289,7 @@ def test_mesh_postprocess_material():
         mesh.Medians()
         mesh.LargestSegment()
         mesh.CheckNodeNumbering()
+        mesh.BoundingBoxes()
 
         pp = PostProcess(3,3)
         pp.SetMesh(mesh)
