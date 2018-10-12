@@ -121,6 +121,8 @@ def SubdivisionCircle(center=(0.,0.), radius=1., nrad=16, ncirc=40,
     nx = int(ncirc/4.)
     ny = int(nrad/2.)
 
+    if nx < 3:
+        warn("Number of division in circumferential direction too low")
 
     mesh = Mesh()
     mesh.Rectangle(element_type="quad", lower_left_point=(-1.,-1.),
@@ -174,9 +176,11 @@ def SubdivisionCircle(center=(0.,0.), radius=1., nrad=16, ncirc=40,
         val = (uv[3,:] - uv[2,:])*np.linalg.norm(interp_p[i,:] - interp_p[i-1,:])/L + last_uv
         last_uv = np.copy(val)
         interp_uv.append(val)
+    interp_uv = np.array(interp_uv)
 
     new_uv = np.array(new_uv)
-    new_uv = np.vstack((new_uv,np.array(interp_uv)))
+    if interp_uv.shape[0] !=0:
+        new_uv = np.vstack((new_uv,interp_uv))
     new_uv = np.vstack((new_uv,uv[3,:]))
 
     from Florence.FunctionSpace import MeanValueCoordinateMapping

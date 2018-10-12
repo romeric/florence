@@ -1638,37 +1638,37 @@ class Mesh(object):
         bboxes[1::2] = maxs
         bboxes = bboxes.reshape(self.nelem,2,self.points.shape[1])
 
-        if ndim == 3:
-            point_generator = lambda bbox: np.array([
-                [ bbox[0,0], bbox[0,1], bbox[0,2] ],
-                [ bbox[1,0], bbox[0,1], bbox[0,2] ],
-                [ bbox[1,0], bbox[1,1], bbox[0,2] ],
-                [ bbox[0,0], bbox[1,1], bbox[0,2] ],
-                [ bbox[0,0], bbox[0,1], bbox[1,2] ],
-                [ bbox[1,0], bbox[0,1], bbox[1,2] ],
-                [ bbox[1,0], bbox[1,1], bbox[1,2] ],
-                [ bbox[0,0], bbox[1,1], bbox[1,2] ]
-                ])
-        elif ndim == 2:
-            point_generator = lambda bbox: np.array([
-                [ bbox[0,0], bbox[0,1] ],
-                [ bbox[1,0], bbox[0,1] ],
-                [ bbox[1,0], bbox[1,1] ],
-                [ bbox[0,0], bbox[1,1] ]
-                ])
-
-        nsize = 4 if ndim ==2 else 8
-        ranger = np.arange(nsize)
-        bmesh = Mesh()
-        bmesh.element_type = "quad" if ndim ==2 else "hex"
-        bmesh.elements = np.arange(self.nelem*nsize).reshape(self.nelem,nsize)
-        bmesh.points = np.zeros((self.nelem*nsize,ndim))
-        bmesh.nelem = self.nelem
-        bmesh.nnode = bmesh.points.shape[0]
-        for i in range(0,self.nelem):
-            bmesh.points[i*nsize:(i+1)*nsize,:] = point_generator(bboxes[i])
-
         if show_plot:
+            if ndim == 3:
+                point_generator = lambda bbox: np.array([
+                    [ bbox[0,0], bbox[0,1], bbox[0,2] ],
+                    [ bbox[1,0], bbox[0,1], bbox[0,2] ],
+                    [ bbox[1,0], bbox[1,1], bbox[0,2] ],
+                    [ bbox[0,0], bbox[1,1], bbox[0,2] ],
+                    [ bbox[0,0], bbox[0,1], bbox[1,2] ],
+                    [ bbox[1,0], bbox[0,1], bbox[1,2] ],
+                    [ bbox[1,0], bbox[1,1], bbox[1,2] ],
+                    [ bbox[0,0], bbox[1,1], bbox[1,2] ]
+                    ])
+            elif ndim == 2:
+                point_generator = lambda bbox: np.array([
+                    [ bbox[0,0], bbox[0,1] ],
+                    [ bbox[1,0], bbox[0,1] ],
+                    [ bbox[1,0], bbox[1,1] ],
+                    [ bbox[0,0], bbox[1,1] ]
+                    ])
+
+            nsize = 4 if ndim ==2 else 8
+            ranger = np.arange(nsize)
+            bmesh = Mesh()
+            bmesh.element_type = "quad" if ndim ==2 else "hex"
+            bmesh.elements = np.arange(self.nelem*nsize).reshape(self.nelem,nsize)
+            bmesh.points = np.zeros((self.nelem*nsize,ndim))
+            bmesh.nelem = self.nelem
+            bmesh.nnode = bmesh.points.shape[0]
+            for i in range(0,self.nelem):
+                bmesh.points[i*nsize:(i+1)*nsize,:] = point_generator(bboxes[i])
+
             if ndim == 2:
                 import matplotlib.pyplot as plt
                 if figure is None:
