@@ -6983,7 +6983,7 @@ class Mesh(object):
             lmesh.elements = lmesh.elements[1:,:]
 
         else:
-            raise NotImplementedError("Converting to linear mesh with not implemented yet")
+            raise NotImplementedError("Converting to linear mesh with {} elements not implemented yet".format(self.element_type))
 
 
         lmesh.elements = np.ascontiguousarray(lmesh.elements,dtype=np.int64)
