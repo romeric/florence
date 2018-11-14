@@ -1,5 +1,5 @@
 from __future__ import print_function
-import os, platform, sys, subprocess, imp
+import os, platform, sys, subprocess
 
 __all__ = ['AOTConfigure','AOTClean']
 
