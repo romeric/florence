@@ -1,10 +1,11 @@
 PYTHON_VERSION = python2.7
+PYTHON_LANG_LEVEL = 2
 PYTHON_INCLUDE_PATH = /usr/include/python2.7/
 PYTHON_LD_PATH = /usr/lib/
 EXT_POSTFIX= so
 CYTHONFLAGS = -DNPY_NO_DEPRECATED_API
 
-CYTHON = cython --cplus
+CYTHON = cython --cplus -$(PYTHON_LANG_LEVEL)
 
 ifeq ($(OS),Windows_NT)
 REMOVE = del
@@ -13,6 +14,8 @@ else
 REMOVE = rm -rf
 MOVE = mv
 endif
+
+ADDITIONAL_FLAGS =
 
 INLINE_THRESHOLD = 100000
 CXXSTD=-std=c++11
@@ -38,6 +41,8 @@ endif
 ifeq ($(OS),Windows_NT)
 CXXFLAGS += -D_hypot=hypot -m64 -Wno-format-extra-args -Wno-format
 endif
+
+CXXFLAGS += $(ADDITIONAL_FLAGS)
 
 all: build_module
 

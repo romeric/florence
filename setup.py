@@ -7,6 +7,7 @@ from distutils.extension import Extension
 from distutils.sysconfig import get_config_var, get_config_vars, get_python_inc, get_python_lib
 import fnmatch
 try:
+    import cython
     from Cython.Build import cythonize
 except ImportError:
     raise ImportError("Could not import cython. Please install cython first")
@@ -34,6 +35,9 @@ class FlorenceSetup(object):
     _os = sys.platform
 
     python_version = None
+    py_major = None
+    py_minor = None
+    py_micro = None
     python_interpreter = None
     python_implementation = None
     python_include_path = None
@@ -68,9 +72,11 @@ class FlorenceSetup(object):
     num_cpu = cpu_count()
 
     kinematics_version = "-DUSE_AVX_VERSION"
+    additional_compiler_flags = ""
 
     def __init__(self, _fc_compiler=None, _cc_compiler=None, _cxx_compiler=None,
-        _blas=None, _kinematics_version=None, _fastor_path=None, _ncpu=1):
+        _blas=None, _kinematics_version=None, _additional_compiler_flags="",
+        _fastor_path=None, _ncpu=1):
 
         # Get current working working directory
         self._pwd_ = os.path.dirname(os.path.realpath('__file__'))
@@ -85,7 +91,7 @@ class FlorenceSetup(object):
         # Get kinematics version
         self.GetKinematicsVersion(_kinematics_version)
         # Set C/Fortran/C++ compiler
-        self.SetCompiler(_fc_compiler,_cc_compiler,_cxx_compiler)
+        self.SetCompiler(_fc_compiler, _cc_compiler, _cxx_compiler, _additional_compiler_flags)
         # Set up compiler arguments for all extension modules
         self.SetCompilerArgs()
         # Collect all extension module paths
@@ -100,15 +106,15 @@ class FlorenceSetup(object):
             self._pwd_ = os.path.dirname(os.path.realpath('__file__'))
 
         # Get python version
-        python_version = sys.version_info
+        self.python_version = sys.version_info
 
-        if python_version[:2] < (2, 7) or (3, 0) <= python_version[:2] < (3, 5):
+        if self.python_version[:2] < (2, 7) or (3, 0) <= self.python_version[:2] < (3, 5):
             raise RuntimeError("Python version 2.7 or >= 3.5 required.")
 
-        py_major = python_version.major
-        py_minor = python_version.minor
-        py_micro = python_version.micro
-        self.python_interpreter  = 'python' + str(py_major) +'.' + str(py_minor)
+        self.py_major = self.python_version.major
+        self.py_minor = self.python_version.minor
+        self.py_micro = self.python_version.micro
+        self.python_interpreter  = 'python' + str(self.py_major) +'.' + str(self.py_minor)
 
         with_pymalloc = ""
         if get_config_var("ABIFLAGS") is not None:
@@ -240,7 +246,7 @@ class FlorenceSetup(object):
             self.kinematics_version = "-DUSE_AVX_VERSION"
 
 
-    def SetCompiler(self, _fc_compiler=None, _cc_compiler=None, _cxx_compiler=None):
+    def SetCompiler(self, _fc_compiler=None, _cc_compiler=None, _cxx_compiler=None, _additional_compiler_flags=""):
 
         if not "darwin" in self._os and not "linux" in self._os and not "cygwin" in self._os:
             raise RuntimeError("Florence is not yet tested on any other platform apart from Linux & macOS")
@@ -248,6 +254,7 @@ class FlorenceSetup(object):
         self.fc_compiler = _fc_compiler
         self.cc_compiler = _cc_compiler
         self.cxx_compiler = _cxx_compiler
+        self.additional_compiler_flags = _additional_compiler_flags
 
         if self.fc_compiler is None:
             self.fc_compiler = "gfortran"
@@ -286,7 +293,7 @@ class FlorenceSetup(object):
             " BLAS_LD_PATH=" + self.blas_ld_path + " EXT_POSTFIX=" + self.extension_postfix +\
             " CXXSTD=" + self.cxx_version + " KINEMATICS=" + self.kinematics_version
 
-        self.compiler_args = self.compiler_args + ' REMOVE="rm -rf" MOVE=mv '
+        self.compiler_args += ' REMOVE="rm -rf" MOVE=mv '
 
         self.fc_compiler_args = "FC=" + self.fc_compiler + " " + self.compiler_args
         self.cc_compiler_args = "CC=" + self.cc_compiler + " " + self.compiler_args
@@ -294,6 +301,17 @@ class FlorenceSetup(object):
 
         self.compiler_args = "FC=" + self.fc_compiler + " " + "CC=" + self.cc_compiler + " " +\
             "CXX=" + self.cxx_compiler + " " + self.compiler_args
+
+
+        # Get around Python 2.7 and C++17 inherent incompatibility
+        if "darwin" in self._os:
+            # print(self.additional_compiler_flags )
+            # exit()
+            self.additional_compiler_flags += "-Wno-deprecated-register"
+            self.compiler_args += " ADDITIONAL_FLAGS=" + self.additional_compiler_flags
+
+        # Set language_level directive for cython
+        self.compiler_args += " PYTHON_LANG_LEVEL=" + str(self.py_major)
 
 
 
@@ -533,13 +551,13 @@ def setup_package():
     _cxx_compiler = None
     _blas = None
     _kinematics_version = None
+    _additional_compiler_flags = ""
     _fastor_path = None
     _ncpu = cpu_count()
+    _op = None # should be either source_clean, clean or build
 
+    # Spaces between sys.argv's are not allowed
     args = sys.argv
-
-    # should be either source_clean, clean or build
-    _op = None
 
     if len(args) > 1:
         for arg in args:
@@ -555,6 +573,8 @@ def setup_package():
                 _blas = arg.split("=")[-1]
             if "KINEMATICS" in arg:
                 _kinematics_version = arg.split("=")[-1]
+            if "FLAGS" in arg:
+                _additional_compiler_flags = arg.split("=")[-1]
             if "FASTORPATH=" in arg:
                 _fastor_path = int(arg.split("=")[-1])
             if "np=" in arg:
@@ -562,7 +582,8 @@ def setup_package():
 
     setup_instance = FlorenceSetup(_fc_compiler=_fc_compiler,
         _cc_compiler=_cc_compiler, _cxx_compiler=_cxx_compiler, _blas=_blas,
-        _kinematics_version=_kinematics_version, _fastor_path=_fastor_path,_ncpu=_ncpu)
+        _kinematics_version=_kinematics_version, _additional_compiler_flags=_additional_compiler_flags,
+        _fastor_path=_fastor_path,_ncpu=_ncpu)
 
     if _op is None:
         _op = ""

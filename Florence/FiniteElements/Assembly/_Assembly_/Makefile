@@ -1,10 +1,11 @@
 PYTHON_VERSION = python2.7
+PYTHON_LANG_LEVEL = 2
 PYTHON_INCLUDE_PATH = /usr/include/python2.7/
 PYTHON_LD_PATH = /usr/lib/
 EXT_POSTFIX = so
 CYTHONFLAGS = -DNPY_NO_DEPRECATED_API
 
-CYTHON = cython --cplus
+CYTHON = cython --cplus -$(PYTHON_LANG_LEVEL)
 
 ifeq ($(OS),Windows_NT)
 REMOVE = del
@@ -15,6 +16,7 @@ MOVE = mv
 endif
 ENTER = cd
 
+ADDITIONAL_FLAGS =
 
 # ***NOTE***: For python compatibility do NOT supply FASTOR_USE_BREAKING_PERMUTATION
 FASTOR_OPTFLAGS = -DFASTOR_NO_ALIAS -DFASTOR_USE_VECTORISED_EXPR_ASSIGN -DCONTRACT_OPT=2 -DFASTOR_NO_STATIC_WARNING
@@ -73,6 +75,8 @@ CXXFLAGS += $(KINEMATICS)
 ifeq ($(OS),Windows_NT)
 CXXFLAGS += -D_hypot=hypot -m64 -Wno-format-extra-args -Wno-format
 endif
+
+CXXFLAGS += $(ADDITIONAL_FLAGS)
 
 all: build_module
 

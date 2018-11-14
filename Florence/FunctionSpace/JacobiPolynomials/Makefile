@@ -1,10 +1,11 @@
 PYTHON_VERSION = python2.7
+PYTHON_LANG_LEVEL = 2
 PYTHON_INCLUDE_PATH = /usr/include/
 PYTHON_LD_PATH = /usr/lib/
 EXT_POSTFIX= so
 CYTHONFLAGS = -DNPY_NO_DEPRECATED_API
 
-CYTHON = cython
+CYTHON = cython -$(PYTHON_LANG_LEVEL)
 
 ifeq ($(OS),Windows_NT)
 REMOVE = del
@@ -13,6 +14,8 @@ else
 REMOVE = rm -rf
 MOVE = mv
 endif
+
+ADDITIONAL_FLAGS =
 
 INLINE_THRESHOLD = 100000
 CCSTD=-std=c99
@@ -38,13 +41,15 @@ ifeq ($(OS),Windows_NT)
 CCFLAGS += -D_hypot=hypot -m64 -Wno-format-extra-args -Wno-format
 endif
 
+CCFLAGS += $(ADDITIONAL_FLAGS)
+
 all: build_module
 
-build_module: 
+build_module:
 	@echo "Building Jacobi polynomials module"
 	$(CYTHON) JacobiPolynomials.pyx
 	$(CC) $(CCSTD) $(CCFLAGS) JacobiPolynomials.c -o JacobiPolynomials.$(EXT_POSTFIX) -I. -I$(PYTHON_INCLUDE_PATH) \
-	-I$(NUMPY_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION) 
+	-I$(NUMPY_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION)
 
 clean:
 	$(REMOVE) JacobiPolynomials.c JacobiPolynomials.$(EXT_POSTFIX)
@@ -97,9 +102,9 @@ source_clean:
 
 # all: build_module
 
-# build_module: 
+# build_module:
 # 	@echo echo "Building Jacobi polynomials module"
-# 	$(CC) $(CCSTD) $(CCFLAGS) jacobi.c -o libjacobi.so 
+# 	$(CC) $(CCSTD) $(CCFLAGS) jacobi.c -o libjacobi.so
 # 	$(CYTHON) JacobiPolynomials.pyx
 # 	$(CC) $(CCSTD) $(CCFLAGS) JacobiPolynomials.c -o JacobiPolynomials.so -I. -I$(PYTHON_INCLUDE_PATH) \
 # 	-I$(NUMPY_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION) -L. -ljacobi

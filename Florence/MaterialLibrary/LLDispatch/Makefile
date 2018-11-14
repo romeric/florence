@@ -1,10 +1,11 @@
 PYTHON_VERSION = python2.7
+PYTHON_LANG_LEVEL = 2
 PYTHON_INCLUDE_PATH = /usr/include/python2.7/
 PYTHON_LD_PATH = /usr/lib/
 EXT_POSTFIX= so
 CYTHONFLAGS = -DNPY_NO_DEPRECATED_API
 
-CYTHON = cython --cplus
+CYTHON = cython --cplus -$(PYTHON_LANG_LEVEL)
 
 ifeq ($(OS),Windows_NT)
 REMOVE = del
@@ -13,6 +14,8 @@ else
 REMOVE = rm -rf
 MOVE = mv
 endif
+
+ADDITIONAL_FLAGS =
 
 # FASTOR_INCLUDE_PATH=
 # UNAME_S := $(shell uname -s)
@@ -37,7 +40,7 @@ NUMPY_INCLUDE_PATH = /usr/local/lib/python2.7/dist-packages/numpy/core/include
 ifeq ($(findstring g++,$(CXX)),g++)
 ifneq ($(findstring clang++,$(CXX)),clang++)
 CXXFLAGS += -Wno-cpp -Wno-unused-function -Wno-maybe-uninitialized -fabi-version=6
-CXXFLAGS += -march=native -ffast-math -fwrapv -funroll-loops -finline-functions -finline-limit=$(INLINE_THRESHOLD) -ffp-contract=fast 
+CXXFLAGS += -march=native -ffast-math -fwrapv -funroll-loops -finline-functions -finline-limit=$(INLINE_THRESHOLD) -ffp-contract=fast
 else
 CXXFLAGS += -Wno-uninitialized -Wno-missing-braces -Wno-#warnings
 CXXFLAGS += -march=native -ffast-math -mllvm -inline-threshold=$(INLINE_THRESHOLD) -ffp-contract=fast
@@ -64,9 +67,11 @@ ifeq ($(OS),Windows_NT)
 CXXFLAGS += -D_hypot=hypot -m64 -Wno-format-extra-args -Wno-format
 endif
 
+CXXFLAGS += $(ADDITIONAL_FLAGS)
+
 all: build_module
 
-build_module: 
+build_module:
 	@echo "Building Fastor based SIMD optimised module for material model:" $(MATERIAL)
 	$(CYTHON) CythonSource/_$(MATERIAL)_.pyx
 	$(CXX) $(CXXSTD) $(CXXFLAGS) CythonSource/_$(MATERIAL)_.cpp -o _$(MATERIAL)_.$(EXT_POSTFIX) -I. -I$(PYTHON_INCLUDE_PATH) -I$(NUMPY_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION)

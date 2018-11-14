@@ -1,10 +1,11 @@
 PYTHON_VERSION = python2.7
+PYTHON_LANG_LEVEL = 2
 PYTHON_INCLUDE_PATH = /usr/include/
 PYTHON_LD_PATH = /usr/lib/
 EXT_POSTFIX= so
 CYTHONFLAGS = -DNPY_NO_DEPRECATED_API
 
-CYTHON = cython --cplus
+CYTHON = cython --cplus -$(PYTHON_LANG_LEVEL)
 
 ifeq ($(OS),Windows_NT)
 REMOVE = del
@@ -13,6 +14,8 @@ else
 REMOVE = rm -rf
 MOVE = mv
 endif
+
+ADDITIONAL_FLAGS =
 
 INLINE_THRESHOLD = 100000
 CXXSTD=-std=c++14
@@ -25,7 +28,7 @@ NUMPY_INCLUDE_PATH = /usr/local/lib/python2.7/dist-packages/numpy/core/include
 ifeq ($(findstring g++,$(CXX)),g++)
 ifneq ($(findstring clang++,$(CXX)),clang++)
 CXXFLAGS += -Wno-cpp -Wno-unused-function -Wno-maybe-uninitialized
-CXXFLAGS += -march=native -ffast-math -fwrapv -mfpmath=sse -funroll-loops -finline-functions -finline-limit=$(INLINE_THRESHOLD) -ffp-contract=fast 
+CXXFLAGS += -march=native -ffast-math -fwrapv -mfpmath=sse -funroll-loops -finline-functions -finline-limit=$(INLINE_THRESHOLD) -ffp-contract=fast
 else
 CXXFLAGS += -Wno-uninitialized -Wno-#warnings
 CXXFLAGS += -march=native -ffast-math -mllvm -inline-threshold=$(INLINE_THRESHOLD) -ffp-contract=fast
@@ -39,9 +42,11 @@ ifeq ($(OS),Windows_NT)
 CXXFLAGS += -D_hypot=hypot -m64 -Wno-format-extra-args -Wno-format
 endif
 
+CXXFLAGS += $(ADDITIONAL_FLAGS)
+
 all: build_module
 
-build_module: 
+build_module:
 	@echo "Building Bjorck Pereyra bases module"
 	$(CYTHON) LineBP.pyx
 	$(CXX) $(CXXSTD) $(CXXFLAGS) LineBP.cpp -o LineBP.$(EXT_POSTFIX) -I. -I../../../Tensor/ -I$(PYTHON_INCLUDE_PATH) -I$(NUMPY_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION)

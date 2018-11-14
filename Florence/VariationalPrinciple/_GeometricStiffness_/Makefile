@@ -1,10 +1,11 @@
 PYTHON_VERSION = python2.7
+PYTHON_LANG_LEVEL = 2
 PYTHON_INCLUDE_PATH = /usr/include/
 PYTHON_LD_PATH = /usr/lib/
 EXT_POSTFIX= so
 CYTHONFLAGS = -DNPY_NO_DEPRECATED_API
 
-CYTHON = cython
+CYTHON = cython -$(PYTHON_LANG_LEVEL)
 
 ifeq ($(OS),Windows_NT)
 REMOVE = del
@@ -13,6 +14,8 @@ else
 REMOVE = rm -rf
 MOVE = mv
 endif
+
+ADDITIONAL_FLAGS =
 
 INLINE_THRESHOLD = 100000
 CCSTD=-std=c99
@@ -23,7 +26,7 @@ CCFLAGS= -fPIC -shared -pthread -Wall $(CYTHONFLAGS) $(OPTFLAGS)
 NUMPY_INCLUDE_PATH = /usr/local/lib/python2.7/dist-packages/numpy/core/include
 
 ifeq ($(findstring gcc,$(CC)),gcc)
-CCFLAGS += -Wno-cpp -Wno-unused-function -Wno-maybe-uninitialized 
+CCFLAGS += -Wno-cpp -Wno-unused-function -Wno-maybe-uninitialized
 CCFLAGS += -march=native -ffast-math -fwrapv -mfpmath=sse -funroll-loops -finline-functions -finline-limit=$(INLINE_THRESHOLD) -ffp-contract=fast
 endif
 ifeq ($(findstring clang,$(CC)),clang)
@@ -38,9 +41,11 @@ ifeq ($(OS),Windows_NT)
 CCFLAGS += -D_hypot=hypot -m64 -Wno-format-extra-args -Wno-format
 endif
 
+CCFLAGS += $(ADDITIONAL_FLAGS)
+
 all: build_module
 
-build_module: 
+build_module:
 	@echo "Building low level geometric stiffness dispatcher module"
 	$(CYTHON) _GeometricStiffness_.pyx
 	$(CC) $(CCSTD) $(CCFLAGS) _GeometricStiffness_.c -o _GeometricStiffness_.$(EXT_POSTFIX) -I. -I$(PYTHON_INCLUDE_PATH) -I$(NUMPY_INCLUDE_PATH) -L$(PYTHON_LD_PATH) -l$(PYTHON_VERSION)
