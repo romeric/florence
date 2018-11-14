@@ -2,7 +2,7 @@ nose2
 coverage
 python-coveralls
 cython
-numpy>=1.10
+numpy>=1.14
 scipy
 scikit-umfpack
 pyamg
