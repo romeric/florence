@@ -1347,7 +1347,6 @@ class PostProcess(object):
             from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
 
 
-            from mpl_toolkits.mplot3d import Axes3D
             import matplotlib as mpl
             import matplotlib.pyplot as plt
             import matplotlib.tri as mtri
@@ -1656,7 +1655,6 @@ class PostProcess(object):
 
             from copy import deepcopy
             import matplotlib as mpl
-            from mpl_toolkits.mplot3d import Axes3D
             from matplotlib.colors import LightSource
             import matplotlib.pyplot as plt
             import matplotlib.tri as mtri
@@ -2091,7 +2089,6 @@ class PostProcess(object):
 
             from copy import deepcopy
             import matplotlib as mpl
-            from mpl_toolkits.mplot3d import Axes3D
             from matplotlib.colors import LightSource
             import matplotlib.pyplot as plt
             import matplotlib.tri as mtri
@@ -2497,7 +2494,6 @@ class PostProcess(object):
 
         from copy import deepcopy
         from scipy.spatial import Delaunay
-        from mpl_toolkits.mplot3d import Axes3D
         from matplotlib.colors import LightSource
         import matplotlib as mpl
         import matplotlib.pyplot as plt
@@ -2735,7 +2731,6 @@ class PostProcess(object):
 
         from copy import deepcopy
         from scipy.spatial import Delaunay
-        from mpl_toolkits.mplot3d import Axes3D
         from matplotlib.colors import LightSource
         import matplotlib as mpl
         import matplotlib.pyplot as plt
@@ -3053,7 +3048,6 @@ class PostProcess(object):
 
         from copy import deepcopy
         from scipy.spatial import Delaunay
-        from mpl_toolkits.mplot3d import Axes3D
         import matplotlib as mpl
         import matplotlib.pyplot as plt
         import matplotlib.tri as mtri
@@ -3183,7 +3177,6 @@ class PostProcess(object):
 
         from copy import deepcopy
         from scipy.spatial import Delaunay
-        from mpl_toolkits.mplot3d import Axes3D
         from matplotlib.colors import LightSource
         import matplotlib as mpl
         import matplotlib.pyplot as plt
