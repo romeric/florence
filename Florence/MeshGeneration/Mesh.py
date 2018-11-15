@@ -4364,7 +4364,8 @@ class Mesh(object):
 
 
     def Arc(self, center=(0.,0.), radius=1., nrad=16, ncirc=40,
-        start_angle=0., end_angle=np.pi/2., element_type="tri", refinement=False, refinement_level=2):
+        start_angle=0., end_angle=np.pi/2., element_type="tri",
+        refinement=False, refinement_level=2, algorithm="standard"):
         """Creates a structured quad/tri mesh on an arc
 
             input:
@@ -4396,6 +4397,15 @@ class Mesh(object):
             raise ValueError("The center of the arc should be given in a tuple with two elements (x,y)")
 
         self.__reset__()
+
+        if algorithm == "midpoint_subdivision":
+            from Florence.MeshGeneration.CustomMesher import SubdivisionArc
+            mesh = SubdivisionArc(center=center, radius=radius, nrad=nrad, ncirc=ncirc,
+                start_angle=start_angle, end_angle=end_angle,
+                element_type=element_type, refinement=refinement, refinement_level=refinement_level)
+            self.__update__(mesh)
+            return
+
 
         if refinement:
             ndivider = refinement_level
@@ -5116,7 +5126,8 @@ class Mesh(object):
 
 
     def SphericalArc(self, center=(0.,0.,0.), inner_radius=9., outer_radius=10.,
-        start_angle=0., end_angle=np.pi/2., ncirc=5, nrad=5, nthick=1, element_type="hex"):
+        start_angle=0., end_angle=np.pi/2., ncirc=5, nrad=5, nthick=1, element_type="hex",
+        algorithm="standard"):
 
         from Florence.Tensor import makezero, itemfreq
 
@@ -5129,7 +5140,7 @@ class Mesh(object):
         self.__reset__()
 
         self.Arc(radius=outer_radius, element_type="quad",start_angle=start_angle,
-            end_angle=end_angle,nrad=nrad,ncirc=ncirc)
+            end_angle=end_angle,nrad=nrad,ncirc=ncirc, algorithm=algorithm)
         self.Extrude(length=outer_radius-inner_radius,nlong=nthick)
 
         points = np.copy(self.points)

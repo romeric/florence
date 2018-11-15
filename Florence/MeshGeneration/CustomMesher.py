@@ -4,10 +4,10 @@ from copy import deepcopy
 from warnings import warn
 from .Mesh import Mesh
 from .GeometricPath import *
-from Florence.Tensor import totuple
+from Florence.Tensor import totuple, unique2d
 
 
-__all__ = ['HarvesterPatch', 'SubdivisionCircle']
+__all__ = ['HarvesterPatch', 'SubdivisionArc', 'SubdivisionCircle']
 
 """
 A series of custom meshes
@@ -103,6 +103,121 @@ def CurvedPlate(ncirc=2, nlong=20, show_plot=False):
 
     if show_plot:
         mesh.SimplePlot()
+
+    return mesh
+
+
+
+def SubdivisionArc(center=(0.,0.), radius=1., nrad=16, ncirc=40,
+        start_angle=0., end_angle=np.pi/2., element_type="tri", refinement=False, refinement_level=2):
+    """Creating a mesh on circle using midpoint subdivision.
+        This function is internally called from Mesh.Circle if
+        'midpoint_subdivision' algorithm is selected
+    """
+
+    if start_angle!=0. and end_angle!=np.pi/2.:
+        raise ValueError("Subdivision based arc only produces meshes for a quarter-circle arc for now")
+
+    r = float(radius)
+    h_r = float(radius)/2.
+    nx = int(ncirc/4.)
+    ny = int(nrad/2.)
+
+    if nx < 3:
+        warn("Number of division in circumferential direction too low")
+
+    mesh = Mesh()
+    mesh.Rectangle(element_type="quad", lower_left_point=(-1.,-1.),
+        upper_right_point=(1.,1.), nx=nx, ny=ny)
+
+    uv = np.array([
+        [-1.,-1],
+        [1.,-1],
+        [1.,1],
+        [-1.,1],
+        ])
+
+    t = np.pi/4.
+    end_points = np.array([
+        [0.,h_r*np.sin(t)],
+        [h_r*np.cos(t),h_r*np.sin(t)],
+        [r*np.cos(t),r*np.sin(t)],
+        [0.,radius],
+        ])
+
+    edge_points = mesh.points[np.unique(mesh.edges),:]
+
+    new_end_points = []
+    new_end_points.append(end_points[0,:])
+    new_end_points.append(end_points[1,:])
+    new_end_points.append(end_points[2,:])
+
+    tt = np.linspace(np.pi/4,np.pi/2,nx)
+    x = r*np.cos(tt)
+    y = r*np.sin(tt)
+    interp_p = np.vstack((x,y)).T
+
+
+    for i in range(1,len(x)-1):
+        new_end_points.append([x[i], y[i]])
+    new_end_points.append(end_points[3,:])
+    new_end_points = np.array(new_end_points)
+
+    new_uv = []
+    new_uv.append(uv[0,:])
+    new_uv.append(uv[1,:])
+    new_uv.append(uv[2,:])
+
+    L = 0.
+    for i in range(1,interp_p.shape[0]):
+        L += np.linalg.norm(interp_p[i,:] - interp_p[i-1,:])
+
+    interp_uv = []
+    last_uv = uv[2,:]
+    for i in range(1,interp_p.shape[0]-1):
+        val = (uv[3,:] - uv[2,:])*np.linalg.norm(interp_p[i,:] - interp_p[i-1,:])/L + last_uv
+        last_uv = np.copy(val)
+        interp_uv.append(val)
+    interp_uv = np.array(interp_uv)
+
+    new_uv = np.array(new_uv)
+    if interp_uv.shape[0] !=0:
+        new_uv = np.vstack((new_uv,interp_uv))
+    new_uv = np.vstack((new_uv,uv[3,:]))
+
+    from Florence.FunctionSpace import MeanValueCoordinateMapping
+    new_points = np.zeros_like(mesh.points)
+    for i in range(mesh.nnode):
+        point = MeanValueCoordinateMapping(mesh.points[i,:], new_uv, new_end_points)
+        new_points[i,:] = point
+    mesh.points = new_points
+
+    rmesh = deepcopy(mesh)
+    rmesh.points = mesh.Rotate(angle=-np.pi/2., copy=True)
+    rmesh.points[:,1] *= -1.
+    mesh += rmesh
+
+    mesh.LaplacianSmoothing(niter=10)
+    qmesh = Mesh()
+    qmesh.Rectangle(element_type="quad", lower_left_point=(0.0,0.0),
+        upper_right_point=(h_r*np.cos(t),h_r*np.sin(t)),
+        nx=nx,
+        ny=nx)
+    mesh += qmesh
+
+    # mesh.LaplacianSmoothing(niter=20)
+    NodeSliderSmootherArc(mesh, niter=20)
+
+    mesh.points[:,0] += center[0]
+    mesh.points[:,1] += center[1]
+
+    if refinement:
+        mesh.Refine(level=refinement_level)
+
+    if element_type == "tri":
+        sys.stdout = open(os.devnull, "w")
+        mesh.ConvertQuadsToTris()
+        sys.stdout = sys.__stdout__
 
     return mesh
 
@@ -309,3 +424,37 @@ def Torus(show_plot=False):
         mesh.SimplePlot()
 
     return mesh
+
+
+
+
+
+
+
+
+
+def NodeSliderSmootherArc(mesh, niter=10):
+    """This is less than half-baked node slider smoother that only works
+        for arc type meshes
+    """
+
+    if mesh.element_type != "quad":
+        raise RuntimeError("Only implemented for quads")
+
+    un_edges = np.unique(mesh.edges)
+    points = mesh.points[un_edges,:]
+
+    radius = mesh.Bounds[1,1]
+
+    # For all x==0
+    idx = np.where(np.isclose(mesh.points[:,0], 0.0)==True)[0]
+    idx_sort = np.lexsort((mesh.points[idx,1],mesh.points[idx,0]))
+    mesh.points[idx[idx_sort],1] = np.linspace(0.,radius, idx_sort.shape[0])
+
+    # For all y==0
+    idx = np.where(np.isclose(mesh.points[:,1], 0.0)==True)[0]
+    idx_sort = np.lexsort((mesh.points[idx,0],mesh.points[idx,1]))
+    mesh.points[idx[idx_sort],0] = np.linspace(0.,radius, idx_sort.shape[0])
+
+    mesh.LaplacianSmoothing(niter)
+
