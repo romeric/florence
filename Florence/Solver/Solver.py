@@ -73,7 +73,8 @@ class LinearSolver(object):
         self.has_umfpack = True
         try:
             from scikits.umfpack import spsolve
-        except (ImportError, AttributeError) as umfpack_error:
+        # except (ImportError, AttributeError) as umfpack_error:
+        except ImportError:
             self.has_umfpack = False
 
         self.has_mumps = False
