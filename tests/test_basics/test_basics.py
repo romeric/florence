@@ -118,7 +118,7 @@ def test_mesh_postprocess_material():
     for etype in etypes:
 
         mesh = Mesh()
-        mesh.Square(element_type=etype, nx=5,ny=5)
+        mesh.Square(element_type=etype, nx=3,ny=3)
         mesh.GetEdges()
         mesh.GetInteriorEdges()
         mesh.GetBoundaryEdges()
@@ -145,7 +145,7 @@ def test_mesh_postprocess_material():
         mesh.EdgeLengths()
         mesh.AspectRatios()
         mesh.Medians()
-        mesh.LargestSegment()
+        mesh.LargestSegment(nsamples=10)
         mesh.CheckNodeNumbering()
         mesh.BoundingBoxes()
 
@@ -261,7 +261,7 @@ def test_mesh_postprocess_material():
     for etype in etypes:
 
         mesh = Mesh()
-        mesh.Cube(element_type=etype, nx=5,ny=5,nz=5)
+        mesh.Cube(element_type=etype, nx=3,ny=3,nz=3)
         mesh.Refine()
         mesh.GetFaces()
         mesh.GetInteriorFaces()
@@ -287,7 +287,7 @@ def test_mesh_postprocess_material():
         mesh.EdgeLengths()
         mesh.AspectRatios()
         mesh.Medians()
-        mesh.LargestSegment()
+        mesh.LargestSegment(nsamples=10)
         mesh.CheckNodeNumbering()
         mesh.BoundingBoxes()
 

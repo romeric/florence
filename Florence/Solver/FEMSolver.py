@@ -80,7 +80,8 @@ class FEMSolver(object):
         activate_explicit_multigrid=False,
         recompute_sparsity_pattern=True,
         squeeze_sparsity_pattern=False,
-        ensure_structured_grid=False):
+        ensure_structured_grid=False,
+        do_not_reset=True):
 
         # ASSUME TRUE IF AT LEAST ONE IS TRUE
         if has_low_level_dispatcher != optimise:
@@ -169,7 +170,7 @@ class FEMSolver(object):
         # STORE A COPY OF SELF AT THE START TO RESET TO AT THE END
         self.__save_state__()
         # FOR INTERNAL PURPOSES WHEN WE DO NOT WANT TO REST
-        self.do_not_reset = False
+        self.do_not_reset = do_not_reset
 
 
     def __save_state__(self):

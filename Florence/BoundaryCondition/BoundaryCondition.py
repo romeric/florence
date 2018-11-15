@@ -95,7 +95,7 @@ class BoundaryCondition(object):
         # STORE A COPY OF SELF AT THE START TO RESET TO AT THE END
         self.__save_state__()
         # FOR INTERNAL PURPOSES WHEN WE DO NOT WANT TO REST
-        self.do_not_reset = False
+        self.do_not_reset = True
 
 
     def __save_state__(self):

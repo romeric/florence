@@ -1984,7 +1984,7 @@ class Mesh(object):
 
 
 
-    def LargestSegment(self, smallest_element=True, nsamples=50,
+    def LargestSegment(self, smallest_element=True, nsamples=30,
         plot_segment=False, plot_element=False, figure=None, save=False, filename=None):
         """Finds the largest segment that can fit in an element. For curvilinear elements
             this measure can be used as (h) for h-refinement studies
@@ -2081,21 +2081,11 @@ class Mesh(object):
                             figure=figure, interpolation_degree=nsamples, show_plot=False)
 
                 tmesh.SimplePlot(figure=figure,show_plot=False)
-                # plt.plot(tmesh.x_edges,tmesh.y_edges,'-o',color="#FF6347")
-                # plt.plot(segment_coords[:,0],segment_coords[:,1],'-o',color="#E34234", linewidth=3)
-
-                # fl = "/home/roman/Dropbox/2016_Linearised_Electromechanics_Paper/figures/hp_Benchmark/"
-                # plt.savefig(fl+"ElementSizeTri.eps", bbox_inches="tight",dpi=300)
-                # plt.savefig(fl+"ElementSizeTri_Segment.eps", bbox_inches="tight",dpi=300)
-                # plt.savefig(fl+"ElementSizeTri_Tessellation.eps", bbox_inches="tight",pad_inches=0,dpi=300)
-                # plt.savefig(fl+"ElementSizeQuad.eps", bbox_inches="tight",dpi=300)
-                # plt.savefig(fl+"ElementSizeQuad_Tessellation.eps", bbox_inches="tight",pad_inches=0,dpi=300)
-                # plt.savefig(fl+"ElementSizeQuad_Segment.eps", bbox_inches="tight",dpi=300)
 
                 if save:
                     plt.savefig(filename,bbox_inches="tight",dpi=300)
 
-                # plt.show()
+                plt.show()
 
             elif ndim==3:
 

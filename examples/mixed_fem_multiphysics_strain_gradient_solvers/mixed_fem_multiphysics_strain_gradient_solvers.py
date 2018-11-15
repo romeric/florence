@@ -56,7 +56,8 @@ def strain_gradient_elastodynamics():
         print_incremental_log=True,
         include_physical_damping=True,
         damping_factor=2.,
-        break_at_increment=400)
+        break_at_increment=400,
+        do_not_reset=False)
 
 
     penalty_results = fem_solver.Solve(formulation=penalty_strain_gradient, mesh=mesh,
@@ -142,7 +143,8 @@ def strain_gradient_electroelastodynamics():
         print_incremental_log=True,
         include_physical_damping=True,
         damping_factor=2.,
-        break_at_increment=100)
+        break_at_increment=100,
+        do_not_reset=False)
 
 
     penalty_results = fem_solver.Solve(formulation=penalty_strain_gradient, mesh=mesh,
