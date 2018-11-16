@@ -6945,6 +6945,9 @@ class Mesh(object):
         self.__do_essential_memebers_exist__()
         p = self.InferPolynomialDegree()
 
+        if p <= 1:
+            return self
+
         if self.element_type == "hex":
             if p!=2:
                 raise NotImplementedError("Converting to linear mesh for hexahedral mesh with p/q>2 not implemented yet")
