@@ -1330,6 +1330,11 @@ class FEMSolver(object):
                 self.is_sparsity_pattern_computed = True
                 print("Computed sparsity pattern for the mesh. Time elapsed is {} seconds".format(time()-t_sp))
 
+            else:
+                self.indices, self.indptr, self.data_local_indices,\
+                self.data_global_indices = np.array([0],dtype=np.int32), np.array([0],dtype=np.int32),\
+                np.array([0],dtype=np.int32), np.array([0],dtype=np.int32)
+
 
     def LaunchDaskDistributedClient(self, scheduler_ip=None, scheduler_port=None):
 
