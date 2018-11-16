@@ -5461,7 +5461,7 @@ class Mesh(object):
             self.GetBoundaryEdges()
 
 
-    def RemoveElements(self, xyz_min_max, element_removal_criterion="all", keep_boundary_only=False, return_removed_mesh=False,
+    def RemoveElements(self, xyz_min_max=None, element_removal_criterion="all", keep_boundary_only=False, return_removed_mesh=False,
             compute_edges=True, compute_faces=True, plot_new_mesh=False):
         """Removes elements from the mesh given some specified criteria
 
@@ -5489,6 +5489,12 @@ class Mesh(object):
         """
 
         self.__do_memebers_exist__()
+
+        if xyz_min_max is None and keep_boundary_only is False:
+            raise ValueError("Please specify lower and upper bounds of the cut mesh or supply keep_boundary_only=True or both")
+        if keep_boundary_only is True:
+            if xyz_min_max is None:
+                xyz_min_max = self.Bounds*10.
 
         ndim = self.InferSpatialDimension()
         if isinstance(xyz_min_max,tuple):
