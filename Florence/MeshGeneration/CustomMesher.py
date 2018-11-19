@@ -187,9 +187,16 @@ def SubdivisionArc(center=(0.,0.), radius=1., nrad=16, ncirc=40,
 
     from Florence.FunctionSpace import MeanValueCoordinateMapping
     new_points = np.zeros_like(mesh.points)
-    for i in range(mesh.nnode):
+    # All nodes barring the ones lying on the arc
+    for i in range(mesh.nnode - nx - 1):
         point = MeanValueCoordinateMapping(mesh.points[i,:], new_uv, new_end_points)
         new_points[i,:] = point
+    # The nodes on the arc are not exactly on the arc
+    # so they need to be snapped/clipped
+    tt = np.linspace(np.pi/4,np.pi/2,nx+1)[::-1]
+    x = r*np.cos(tt)
+    y = r*np.sin(tt)
+    new_points[mesh.nnode-nx-1:,:] = np.vstack((x,y)).T
     mesh.points = new_points
 
     rmesh = deepcopy(mesh)

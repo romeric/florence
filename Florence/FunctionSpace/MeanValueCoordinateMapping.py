@@ -13,7 +13,7 @@ def MeanValueCoordinateMapping(dpoint, uv, physical_points):
     counter = 0
     cp = False
     for i, p in enumerate(uv):
-        if np.abs(norm(p-dpoint)) < 1e-10:
+        if np.abs(norm(p-dpoint)) < 1e-9:
             counter = i
             cp = True
             break
