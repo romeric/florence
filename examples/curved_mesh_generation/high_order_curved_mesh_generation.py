@@ -28,7 +28,7 @@ def high_order_curved_mesh_generation(p=2, analysis_nature="linear",
         scale=scale,condition=condition, project_on_curves=True, solve_for_planar_faces=True)
     boundary_condition.GetProjectionCriteria(mesh)
 
-    solver = LinearSolver(linear_solver="multigrid", linear_solver_type="amg", iterative_solver_tolerance=5.0e-07)
+    solver = LinearSolver(linear_solver="amg", linear_solver_type="cg", iterative_solver_tolerance=5.0e-07)
     formulation = DisplacementFormulation(mesh)
     fem_solver = FEMSolver(number_of_load_increments=2,
         analysis_nature=analysis_nature,

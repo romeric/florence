@@ -23,7 +23,7 @@ class LinearSolver(object):
 
             input:
                 linear_solver:          [str] type of solver either "direct",
-                                        "iterative" or "multigrid"
+                                        "iterative", "petsc" or "amg"
 
                 linear_solver_type      [str] type of direct or linear solver to
                                         use, for instance "umfpack", "superlu" or
@@ -108,7 +108,7 @@ class LinearSolver(object):
 
             input:
                 linear_solver:          [str] type of solver either "direct",
-                                        "iterative" or "multigrid"
+                                        "iterative", "petsc" or "amg"
 
                 linear_solver_type      [str] type of direct or linear solver to
                                         use, for instance "umfpack", "superlu" or
@@ -146,7 +146,7 @@ class LinearSolver(object):
     def WhichLinearSolvers(self):
         return {"direct":["superlu","umfpack","mumps"],
             "iterative":["cg","bicg","cgstab","bicgstab"
-            "gmres","lgmres"],"multigrid":["amg"]}
+            "gmres","lgmres"],"amg":["gmres"]}
 
 
     def GetPreconditioner(self,A, type="amg_smoothed_aggregation"):
@@ -221,8 +221,8 @@ class LinearSolver(object):
                 self.solver_type = "direct"
                 self.solver_subtype = "mumps"
             elif b.shape[0] > 100000 and self.has_amg_solver:
-                self.solver_type = "multigrid"
-                self.solver_subtype = "amg"
+                self.solver_type = "amg"
+                self.solver_subtype = "gmres"
                 print('Large system of equations. Switching to algebraic multigrid solver')
                 self.switcher_message = True
             # elif mesh.points.shape[0]*MainData.nvar > 50000 and MainData.C < 4:
@@ -230,8 +230,8 @@ class LinearSolver(object):
                 # self.solver_subtype = "MUMPS"
                 # print 'Large system of equations. Switching to MUMPS solver'
             elif b.shape[0] > 70000 and self.geometric_discretisation=="hex" and self.has_amg_solver:
-                self.solver_type = "multigrid"
-                self.solver_subtype = "amg"
+                self.solver_type = "amg"
+                self.solver_subtype = "gmres"
                 print('Large system of equations. Switching to algebraic multigrid solver')
                 self.switcher_message = True
             else:
@@ -328,9 +328,9 @@ class LinearSolver(object):
             # M = LinearOperator((n * m, n * m), M_x)
             # sol = cg(A, b, tol=self.iterative_solver_tolerance, M=M)[0]
 
-        elif self.solver_type == "multigrid":
+        elif self.solver_type == "amg":
             if self.has_amg_solver is False:
-                raise ImportError('A multigrid solver was not found')
+                raise ImportError('Algebraic multigrid solver was not found. Please install it using "pip install pyamg"')
             from pyamg import ruge_stuben_solver, rootnode_solver, smoothed_aggregation_solver
 
             if A.dtype != b.dtype:
@@ -378,7 +378,7 @@ class LinearSolver(object):
 
             # IMPLICIT CALL TO KYROLOV SOLVERS WITH AMG PRECONDITIONER
             residuals = []
-            sol = ml.solve(b, tol=self.iterative_solver_tolerance, accel='cg', residuals=residuals)
+            sol = ml.solve(b, tol=self.iterative_solver_tolerance, accel=self.solver_subtype, residuals=residuals)
 
             print("AMG solver time is {}".format(time() - t_solve))
 
