@@ -925,7 +925,7 @@ class PostProcess(object):
 
 
     def WriteVTK(self,filename=None, quantity="all", configuration="deformed", steps=None, write_curved_mesh=True,
-        interpolation_degree=10, ProjectionFlags=None, fmt="binary"):
+        interpolation_degree=10, ProjectionFlags=None, fmt="binary", equally_spaced=False):
         """Writes results to a VTK file for Paraview
 
             quantity = "all" means write all solution fields, otherwise specific quantities
@@ -1043,21 +1043,23 @@ class PostProcess(object):
                 cellflag = 5
                 tmesh = PostProcess.TessellateTets(self.mesh, np.zeros_like(self.mesh.points),
                     QuantityToPlot=self.sol[:,0,0], plot_on_faces=False, plot_points=True,
-                    interpolation_degree=interpolation_degree, ProjectionFlags=ProjectionFlags)
+                    interpolation_degree=interpolation_degree, ProjectionFlags=ProjectionFlags,
+                    EquallySpacedPoints=equally_spaced)
             elif lmesh.element_type =='hex':
                 cellflag = 5
                 tmesh = PostProcess.TessellateHexes(self.mesh, np.zeros_like(self.mesh.points),
                     QuantityToPlot=self.sol[:,0,0], plot_on_faces=False, plot_points=True,
-                    interpolation_degree=interpolation_degree, ProjectionFlags=ProjectionFlags)
+                    interpolation_degree=interpolation_degree, ProjectionFlags=ProjectionFlags,
+                    EquallySpacedPoints=equally_spaced)
             elif lmesh.element_type =='quad':
                 cellflag = 5
                 tmesh = PostProcess.TessellateQuads(self.mesh, np.zeros_like(self.mesh.points),
-                    QuantityToPlot=self.sol[:,0,0], plot_points=True,
+                    QuantityToPlot=self.sol[:,0,0], plot_points=True, EquallySpacedPoints=equally_spaced,
                     interpolation_degree=interpolation_degree, ProjectionFlags=ProjectionFlags)
             elif lmesh.element_type =='tri':
                 cellflag = 5
                 tmesh = PostProcess.TessellateTris(self.mesh, np.zeros_like(self.mesh.points),
-                    QuantityToPlot=self.sol[:,0,0], plot_points=True,
+                    QuantityToPlot=self.sol[:,0,0], plot_points=True, EquallySpacedPoints=equally_spaced,
                     interpolation_degree=interpolation_degree, ProjectionFlags=ProjectionFlags)
             else:
                 raise ValueError('Element type not understood')
