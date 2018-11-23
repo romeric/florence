@@ -3617,6 +3617,7 @@ class PostProcess(object):
 
         from Florence.QuadratureRules.GaussLobattoPoints import GaussLobattoPointsQuad
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
+        from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints
         from Florence.MeshGeneration.NodeArrangement import NodeArrangementQuad
         from Florence.FunctionSpace import Quad
         from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
@@ -3634,6 +3635,8 @@ class PostProcess(object):
         nsize_2 = int((CActual+2)**ndim)
 
         GaussLobattoPoints = GaussLobattoPointsQuad(C)
+        if EquallySpacedPoints:
+            GaussLobattoPoints = EquallySpacedPoints(ndim,C)
 
         # BUILD DELAUNAY TRIANGULATION OF REFERENCE ELEMENTS
         TrianglesFunc = Delaunay(GaussLobattoPoints)
@@ -3641,6 +3644,8 @@ class PostProcess(object):
 
         # GET EQUALLY-SPACED/GAUSS-LOBATTO POINTS FOR THE EDGES
         GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0].flatten()
+        if EquallySpacedPoints:
+            GaussLobattoPointsOneD = EquallySpacedPoints(ndim-1, C).flatten()
 
         BasesQuad = np.zeros((nsize_2,GaussLobattoPoints.shape[0]),dtype=np.float64)
         hpBases = Quad.LagrangeGaussLobatto
@@ -3957,6 +3962,7 @@ class PostProcess(object):
 
         from Florence.QuadratureRules import GaussLobattoPointsQuad
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
+        from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints
         from Florence.MeshGeneration.NodeArrangement import NodeArrangementQuad
         from Florence.FunctionSpace import Quad
         from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
@@ -3976,6 +3982,8 @@ class PostProcess(object):
         nsize_2 = int((CActual+2)**2)
 
         GaussLobattoPoints = GaussLobattoPointsQuad(C)
+        if EquallySpacedPoints:
+            GaussLobattoPoints = EquallySpacedPoints(ndim,C)
 
         # BUILD DELAUNAY TRIANGULATION OF REFERENCE ELEMENTS
         TrianglesFunc = Delaunay(GaussLobattoPoints)
@@ -3983,6 +3991,8 @@ class PostProcess(object):
 
         # GET EQUALLY-SPACED/GAUSS-LOBATTO POINTS FOR THE EDGES
         GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0].flatten()
+        if EquallySpacedPoints:
+            GaussLobattoPointsOneD = EquallySpacedPoints(ndim-1, C).flatten()
 
         BasesQuad = np.zeros((nsize_2,GaussLobattoPoints.shape[0]),dtype=np.float64)
         hpBases = Quad.LagrangeGaussLobatto
