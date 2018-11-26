@@ -1125,6 +1125,8 @@ class PostProcess(object):
 
         if write_curved_mesh is False:
             parallelise = False
+        if len(increments) == 1:
+            parallelise = False
 
         # PARALLEL MODE
         if parallelise:
