@@ -1272,7 +1272,8 @@ class PostProcess(object):
                         tmesh.y_edges.T.copy().flatten()[:,None], np.zeros_like(tmesh.y_edges.T.copy().flatten()[:,None])),axis=1)
                     svpoints = np.concatenate((svpoints, np.zeros((svpoints.shape[0],1))),axis=1)
 
-                if formatter is "xml":
+                if formatter == "xml":
+
                     vtk_writer.write_vtu(Verts=edge_coords,
                         Cells={3:tmesh.connections},
                         fname=filename.split('.')[0]+'_curved_lines_increment_'+str(Increment)+'.vtu')
@@ -1286,7 +1287,7 @@ class PostProcess(object):
                             Cells={cellflag:tmesh.elements}, pdata=extrapolated_sol[:,quant],
                             fname=filename.split('.')[0]+'_curved_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu')
 
-                elif formatter is "binary":
+                elif formatter == "binary":
 
                     unstructuredGridToVTK(filename.split('.')[0]+'_curved_lines_increment_'+str(Increment),
                         np.ascontiguousarray(edge_coords[:,0]), np.ascontiguousarray(edge_coords[:,1]), np.ascontiguousarray(edge_coords[:,2]),
@@ -1313,12 +1314,12 @@ class PostProcess(object):
 
             if configuration == "original":
                 for Increment in increments:
-                    if formatter is "xml":
+                    if formatter == "xml":
                         for quant in iterator:
                             vtk_writer.write_vtu(Verts=lmesh.points,
                                 Cells={cellflag:lmesh.elements}, pdata=sol[:,quant,Increment],
                                 fname=filename.split('.')[0]+'_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu')
-                    elif formatter is "binary":
+                    elif formatter == "binary":
                         # points = lmesh.points
                         if lmesh.InferSpatialDimension() == 2:
                             points = np.zeros((lmesh.points.shape[0],3))
@@ -1334,12 +1335,12 @@ class PostProcess(object):
 
             elif configuration == "deformed":
                 for Increment in increments:
-                    if formatter is "xml":
+                    if formatter == "xml":
                         for quant in iterator:
                             vtk_writer.write_vtu(Verts=lmesh.points+sol[:,:ndim,Increment],
                                 Cells={cellflag:lmesh.elements}, pdata=sol[:,quant,Increment],
                                 fname=filename.split('.')[0]+'_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu')
-                    elif formatter is "binary":
+                    elif formatter == "binary":
                         if lmesh.InferSpatialDimension() == 2:
                             points = np.zeros((lmesh.points.shape[0],3))
                             points[:,:2] = lmesh.points + sol[:,:ndim,Increment]
