@@ -457,6 +457,8 @@ class PostProcess(object):
             from contextlib import closing
             if self.ncpu is None:
                 self.ncpu = cpu_count()
+            if parallel_model is None:
+                parallel_model = "pool"
 
             if steps is not None:
                 increments = steps
@@ -473,21 +475,27 @@ class PostProcess(object):
                     steps=partitioned_steps[ip], average_derived_quantities=average_derived_quantities)
                 pps.append(zipper_object)
 
+            # Pool
+            if parallel_model == "pool":
+                with closing(Pool(self.ncpu)) as pool:
+                    res = pool.map(ParallelGetAugmentedSolution,pps)
+                    pool.terminate()
+
+            # Thread Pool
+            elif parallel_model == "thread_pool":
+                import multiprocessing.dummy
+                with closing(multiprocessing.dummy.Pool(self.ncpu)) as pool:
+                    res = pool.map(ParallelGetAugmentedSolution,pps)
+                    pool.terminate()
+
+            else:
+                raise ValueError("Parallel model not understood")
+
             # Serial
             # res = []
             # for ip in range(len(partitioned_steps)):
             #     res.append(ParallelGetAugmentedSolution(pps[ip]))
 
-            # Thread Pool
-            # import multiprocessing.dummy
-            # with closing(multiprocessing.dummy.Pool(self.ncpu)) as pool:
-            #     res = pool.map(ParallelGetAugmentedSolution,pps)
-            #     pool.terminate()
-
-            # Pool
-            with closing(Pool(self.ncpu)) as pool:
-                res = pool.map(ParallelGetAugmentedSolution,pps)
-                pool.terminate()
 
             ndim = self.formulation.ndim
             fields = self.formulation.fields
@@ -1324,14 +1332,14 @@ class PostProcess(object):
 
         if compute_recovered_fields is False:
             MainDict = {}
-            MainDict['Solution'] = self.sol
+            MainDict['solution'] = self.sol
             savemat(filename,MainDict, do_compression=do_compression)
         else:
             if dict_wise:
                 MainDict = self.recovered_fields
             else:
                 MainDict = {}
-            MainDict['Solution'] = self.sol
+            MainDict['solution'] = self.sol
             savemat(filename,MainDict, do_compression=do_compression)
 
 
