@@ -194,7 +194,7 @@ def test_mesh_postprocess_material():
         pp.GetAugmentedSolution()
         pp.SetSolution(np.zeros_like(mesh.points))
         pp.SetMaterial(NearlyIncompressibleNeoHookean(2,mu=1.,pressure=np.zeros(mesh.nelem)))
-        pp.GetAugmentedSolution()
+        pp.GetAugmentedSolution(parallelise=True)
 
         pp = PostProcess(2,3)
         pp.SetMesh(mesh)
@@ -239,7 +239,7 @@ def test_mesh_postprocess_material():
         pp.SetSolution(np.zeros((mesh.nnode,3)))
         pp.SetMaterial(Piezoelectric_100(2,mu1=1.,mu2=2.,mu3=0.5,lamb=10.,eps_1=1e-5,eps_2=1e-5,eps_3=1e-7,
             anisotropic_orientations=np.zeros((mesh.nelem,2))))
-        pp.GetAugmentedSolution()
+        pp.GetAugmentedSolution(parallelise=True)
         mesh.__reset__()
 
 
@@ -358,7 +358,7 @@ def test_mesh_postprocess_material():
         pp.GetAugmentedSolution()
         pp.SetSolution(np.zeros_like(mesh.points))
         pp.SetMaterial(NearlyIncompressibleNeoHookean(3,mu=1.,pressure=np.zeros(mesh.nelem)))
-        pp.GetAugmentedSolution()
+        pp.GetAugmentedSolution(parallelise=True)
 
         pp = PostProcess(3,4)
         pp.SetMesh(mesh)
@@ -403,7 +403,7 @@ def test_mesh_postprocess_material():
         pp.SetSolution(np.zeros((mesh.nnode,4)))
         pp.SetMaterial(Piezoelectric_100(3,mu1=1.,mu2=2.,mu3=0.5,lamb=10.,eps_1=1e-5,eps_2=1e-5,eps_3=1e-7,
             anisotropic_orientations=np.zeros((mesh.nelem,3))))
-        pp.GetAugmentedSolution()
+        pp.GetAugmentedSolution(parallelise=True)
         mesh.__reset__()
 
 

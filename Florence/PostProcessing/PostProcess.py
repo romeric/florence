@@ -51,6 +51,9 @@ class PostProcess(object):
         self.material = None
         self.fem_solver = None
 
+        self.parallel_model = None
+        self.ncpu = None
+
 
     def SetBases(self,domain=None,postdomain=None,boundary=None):
         """Sets bases for all integration points for 'domain', 'postdomain' or 'boundary'
@@ -88,6 +91,10 @@ class PostProcess(object):
 
     def SetAnisotropicOrientations(self,Directions):
         self.directions = Directions
+
+    def SetParallelModel(model="pool", ncpu=None):
+        self.parallel_model = model
+        self.ncpu = ncpu
 
     def GetSolutionVectors(self):
         if self.sol is None:
@@ -136,62 +143,56 @@ class PostProcess(object):
         if self.sol.shape[1] > self.nvar:
             return
 
+        det = np.linalg.det
+        inv = np.linalg.inv
+
         mesh = self.mesh
+        fem_solver = self.fem_solver
+        formulation = self.formulation
+        material = self.material
 
         # GET THE UNDERLYING LINEAR MESH
         # lmesh = mesh.GetLinearMesh()
         C = mesh.InferPolynomialDegree() - 1
         ndim = mesh.InferSpatialDimension()
 
+        elements = mesh.elements
+        points = mesh.points
+        nelem = elements.shape[0]; npoint = points.shape[0]
+        nodeperelem = elements.shape[1]
 
-         # GET QUADRATURE
+        # GET QUADRATURE
         norder = 2*C
         if norder == 0:
             norder=1
         # quadrature = QuadratureRule(qtype="gauss", norder=norder, mesh_type=mesh.element_type, optimal=3)
         # Domain = FunctionSpace(mesh, quadrature, p=C+1)
         Domain = FunctionSpace(mesh, p=C+1, evaluate_at_nodes=True)
-
-        fem_solver = self.fem_solver
-        formulation = self.formulation
-        material = self.material
-
-        det = np.linalg.det
-        inv = np.linalg.inv
         Jm = Domain.Jm
         AllGauss = Domain.AllGauss
 
-
-        elements = mesh.elements
-        points = mesh.points
-        nelem = elements.shape[0]; npoint = points.shape[0]
-        nodeperelem = elements.shape[1]
         # requires_geometry_update = fem_solver.requires_geometry_update
         requires_geometry_update = True # ALWAYS TRUE FOR THIS ROUTINE
         TotalDisp = self.sol[:,:]
 
-        LoadIncrement = fem_solver.number_of_load_increments
+        if hasattr(self,"number_of_load_increments"):
+            LoadIncrement = self.number_of_load_increments
+        else:
+            LoadIncrement = fem_solver.number_of_load_increments
         increments = range(LoadIncrement)
-        if steps!=None:
+        if steps is not None:
             LoadIncrement = len(steps)
             increments = steps
 
         # COMPUTE THE COMMON/NEIGHBOUR NODES ONCE
         all_nodes = np.unique(elements)
-        # Elss, Poss = [], []
-        # for inode in all_nodes:
-        #     Els, Pos = np.where(elements==inode)
-        #     Elss.append(Els)
-        #     Poss.append(Pos)
         Elss, Poss = mesh.GetNodeCommonality()[:2]
-
 
         F = np.zeros((nelem,nodeperelem,ndim,ndim))
         CauchyStressTensor = np.zeros((nelem,nodeperelem,ndim,ndim))
         # DEFINE FOR MECH AND ELECTROMECH FORMULATIONS
         ElectricFieldx = np.zeros((nelem,nodeperelem,ndim))
         ElectricDisplacementx = np.zeros((nelem,nodeperelem,ndim))
-
 
         MainDict = {}
         MainDict['F'] = np.zeros((LoadIncrement,npoint,ndim,ndim))
@@ -314,7 +315,7 @@ class PostProcess(object):
         return
 
 
-    def GetAugmentedSolution(self, steps=None, average_derived_quantities=True):
+    def GetAugmentedSolution(self, steps=None, average_derived_quantities=True, parallelise=False):
         """Computes all recovered variable and puts them in one big nd.array including with primary variables
             The following numbering convention is used for storing variables:
 
@@ -436,22 +437,98 @@ class PostProcess(object):
         if self.sol.shape[1] > self.nvar:
             return self.sol
 
-        print("Computing recovered quantities. This is going to take some time...")
+        import inspect
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)[1][3]
+        if calframe != "ParallelGetAugmentedSolution":
+            print("Computing recovered quantities. This is going to take some time...")
+
+        if self.fem_solver is None:
+            raise ValueError("FEM solver not set for post-processing")
+        if steps is None:
+            if self.fem_solver.number_of_load_increments == 1:
+                parallelise = False
+        else:
+            if len(steps) == 1:
+                parallelise = False
+
+        if parallelise:
+            from multiprocessing import Pool, cpu_count
+            from contextlib import closing
+            if self.ncpu is None:
+                self.ncpu = cpu_count()
+
+            if steps is not None:
+                increments = steps
+            else:
+                increments = range(self.fem_solver.number_of_load_increments)
+            increments = np.array(increments).flatten()
+            partitioned_steps = np.array_split(increments,self.ncpu)
+
+            pps = []
+            for ip in range(len(partitioned_steps)):
+                pp = deepcopy(self)
+                pp.number_of_load_increments = len(partitioned_steps[ip])
+                zipper_object = ParallelGetAugmentedSolutionZipper(pp,
+                    steps=partitioned_steps[ip], average_derived_quantities=average_derived_quantities)
+                pps.append(zipper_object)
+
+            # Serial
+            # res = []
+            # for ip in range(len(partitioned_steps)):
+            #     res.append(ParallelGetAugmentedSolution(pps[ip]))
+
+            # Thread Pool
+            # import multiprocessing.dummy
+            # with closing(multiprocessing.dummy.Pool(self.ncpu)) as pool:
+            #     res = pool.map(ParallelGetAugmentedSolution,pps)
+            #     pool.terminate()
+
+            # Pool
+            with closing(Pool(self.ncpu)) as pool:
+                res = pool.map(ParallelGetAugmentedSolution,pps)
+                pool.terminate()
+
+            ndim = self.formulation.ndim
+            fields = self.formulation.fields
+            nnode = self.mesh.points.shape[0]
+            if fields == "mechanics" and ndim == 2:
+                augmented_sol = np.zeros((nnode,22,len(increments)),dtype=np.float64)
+            elif fields == "mechanics" and ndim == 3:
+                augmented_sol = np.zeros((nnode,42,len(increments)),dtype=np.float64)
+            elif fields == "electro_mechanics" and ndim == 2:
+                augmented_sol = np.zeros((nnode,27,len(increments)),dtype=np.float64)
+            elif fields == "electro_mechanics" and ndim == 3:
+                augmented_sol = np.zeros((nnode,49,len(increments)),dtype=np.float64)
+
+            for ip in range(len(partitioned_steps)):
+                augmented_sol[:,:,partitioned_steps[ip]] = res[ip]
+
+            self.sol = augmented_sol
+            return augmented_sol
+
+
+
+
         # GET RECOVERED VARIABLES ALL VARIABLE CHECKS ARE DONE IN STRESS RECOVERY
-        self.StressRecovery(steps=steps,average_derived_quantities=average_derived_quantities)
+        self.StressRecovery(steps=steps, average_derived_quantities=average_derived_quantities)
 
         ndim = self.formulation.ndim
         fields = self.formulation.fields
         nnode = self.mesh.points.shape[0]
-        if self.sol.ndim == 3:
-            increments = self.sol.shape[2]
+        if hasattr(self, "number_of_load_increments"):
+            increments = self.number_of_load_increments
         else:
-            increments = 1
-        if steps != None:
-            increments = len(steps)
-        else:
-            if increments != self.fem_solver.number_of_load_increments:
-                raise ValueError("Incosistent number of load increments between FEMSolver and provided solution")
+            if self.sol.ndim == 3:
+                increments = self.sol.shape[2]
+            else:
+                increments = 1
+            if steps is not None:
+                increments = len(steps)
+            else:
+                if increments != self.fem_solver.number_of_load_increments:
+                    raise ValueError("Incosistent number of load increments between FEMSolver and provided solution")
+
 
         F = self.recovered_fields['F']
         J = np.linalg.det(F)
@@ -925,7 +1002,7 @@ class PostProcess(object):
 
 
     def WriteVTK(self,filename=None, quantity="all", configuration="deformed", steps=None, write_curved_mesh=True,
-        interpolation_degree=10, ProjectionFlags=None, fmt="binary", equally_spaced=False):
+        interpolation_degree=10, ProjectionFlags=None, fmt="binary", equally_spaced=False,  parallelise=False):
         """Writes results to a VTK file for Paraview
 
             quantity = "all" means write all solution fields, otherwise specific quantities
@@ -965,13 +1042,13 @@ class PostProcess(object):
 
         if isinstance(quantity,int):
             if quantity>=self.sol.shape[1]:
-                self.GetAugmentedSolution()
+                self.GetAugmentedSolution(parallelise=parallelise)
                 if quantity >= self.sol.shape[1]:
                     raise ValueError('Plotting quantity not understood')
             iterator = range(quantity,quantity+1)
         elif isinstance(quantity,str):
             if quantity=="all":
-                self.GetAugmentedSolution()
+                self.GetAugmentedSolution(parallelise=parallelise)
                 iterator = range(self.sol.shape[1])
             else:
                 raise ValueError('Plotting quantity not understood')
@@ -982,10 +1059,10 @@ class PostProcess(object):
                     requires_augmented_solution = True
                     break
             if requires_augmented_solution:
-                self.GetAugmentedSolution()
+                self.GetAugmentedSolution(parallelise=parallelise)
             iterator = quantity
         else:
-            raise ValueError('Plotting quantity not understood')
+            raise ValueError('Writing quantity not understood')
 
         if filename is None:
             warn("file name not specified. I am going to write in the current directory")
@@ -1101,7 +1178,7 @@ class PostProcess(object):
                 warn("Something went wrong with mesh tessellation for VTK writer. I will proceed anyway")
 
             increments = range(LoadIncrement)
-            if steps!=None:
+            if steps is not None:
                 increments = steps
 
             for Increment in increments:
@@ -1174,7 +1251,7 @@ class PostProcess(object):
         else:
 
             increments = range(LoadIncrement)
-            if steps!=None:
+            if steps is not None:
                 increments = steps
 
             if configuration == "original":
@@ -1222,7 +1299,8 @@ class PostProcess(object):
         return
 
 
-    def WriteHDF5(self, filename=None, compute_recovered_fields=True, dict_wise=False, do_compression=True):
+    def WriteHDF5(self, filename=None, compute_recovered_fields=True, dict_wise=False, do_compression=True,
+        parallelise=False):
         """Writes the solution data to a HDF5 file. Give the extension name while providing filename
 
             Input:
@@ -1234,7 +1312,7 @@ class PostProcess(object):
         """
 
         if compute_recovered_fields:
-            self.GetAugmentedSolution()
+            self.GetAugmentedSolution(parallelise=parallelise)
         if filename is None:
             warn("file name not specified. I am going to write in the current directory")
             filename = PWD(__file__) + '/output.mat'
@@ -3617,7 +3695,7 @@ class PostProcess(object):
 
         from Florence.QuadratureRules.GaussLobattoPoints import GaussLobattoPointsQuad
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
-        from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints
+        from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints as EquallySpacedPointsnD
         from Florence.MeshGeneration.NodeArrangement import NodeArrangementQuad
         from Florence.FunctionSpace import Quad
         from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
@@ -3636,7 +3714,7 @@ class PostProcess(object):
 
         GaussLobattoPoints = GaussLobattoPointsQuad(C)
         if EquallySpacedPoints:
-            GaussLobattoPoints = EquallySpacedPoints(ndim,C)
+            GaussLobattoPoints = EquallySpacedPointsnD(ndim,C)
 
         # BUILD DELAUNAY TRIANGULATION OF REFERENCE ELEMENTS
         TrianglesFunc = Delaunay(GaussLobattoPoints)
@@ -3645,7 +3723,7 @@ class PostProcess(object):
         # GET EQUALLY-SPACED/GAUSS-LOBATTO POINTS FOR THE EDGES
         GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0].flatten()
         if EquallySpacedPoints:
-            GaussLobattoPointsOneD = EquallySpacedPoints(ndim-1, C).flatten()
+            GaussLobattoPointsOneD = EquallySpacedPointsnD(ndim-1, C).flatten()
 
         BasesQuad = np.zeros((nsize_2,GaussLobattoPoints.shape[0]),dtype=np.float64)
         hpBases = Quad.LagrangeGaussLobatto
@@ -3962,7 +4040,7 @@ class PostProcess(object):
 
         from Florence.QuadratureRules import GaussLobattoPointsQuad
         from Florence.QuadratureRules.NumericIntegrator import GaussLobattoQuadrature
-        from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints
+        from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints as EquallySpacedPointsnD
         from Florence.MeshGeneration.NodeArrangement import NodeArrangementQuad
         from Florence.FunctionSpace import Quad
         from Florence.FunctionSpace.OneDimensional.Line import LagrangeGaussLobatto, Lagrange
@@ -3983,7 +4061,7 @@ class PostProcess(object):
 
         GaussLobattoPoints = GaussLobattoPointsQuad(C)
         if EquallySpacedPoints:
-            GaussLobattoPoints = EquallySpacedPoints(ndim,C)
+            GaussLobattoPoints = EquallySpacedPointsnD(ndim,C)
 
         # BUILD DELAUNAY TRIANGULATION OF REFERENCE ELEMENTS
         TrianglesFunc = Delaunay(GaussLobattoPoints)
@@ -3992,7 +4070,7 @@ class PostProcess(object):
         # GET EQUALLY-SPACED/GAUSS-LOBATTO POINTS FOR THE EDGES
         GaussLobattoPointsOneD = GaussLobattoQuadrature(C+2)[0].flatten()
         if EquallySpacedPoints:
-            GaussLobattoPointsOneD = EquallySpacedPoints(ndim-1, C).flatten()
+            GaussLobattoPointsOneD = EquallySpacedPointsnD(ndim-1, C).flatten()
 
         BasesQuad = np.zeros((nsize_2,GaussLobattoPoints.shape[0]),dtype=np.float64)
         hpBases = Quad.LagrangeGaussLobatto
@@ -4155,54 +4233,6 @@ class PostProcess(object):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     ###################################################################################
     ###################################################################################
 
@@ -4265,3 +4295,18 @@ class PostProcess(object):
         # ax = plt.gca()
         # PCM=ax.get_children()[2]
         # plt.colorbar(afig)
+
+
+
+###################################################################################
+###################################################################################
+
+class ParallelGetAugmentedSolutionZipper(object):
+    def __init__(self, post_process, steps=None, average_derived_quantities=None):
+        self.post_process = post_process
+        self.steps = steps
+        self.average_derived_quantities = average_derived_quantities
+
+def ParallelGetAugmentedSolution(zipper_object):
+    return zipper_object.post_process.GetAugmentedSolution(steps=zipper_object.steps,
+        average_derived_quantities=zipper_object.average_derived_quantities)
