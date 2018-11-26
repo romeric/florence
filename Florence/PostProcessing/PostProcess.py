@@ -457,8 +457,8 @@ class PostProcess(object):
             from contextlib import closing
             if self.ncpu is None:
                 self.ncpu = cpu_count()
-            if parallel_model is None:
-                parallel_model = "pool"
+            if self.parallel_model is None:
+                self.parallel_model = "pool"
 
             if steps is not None:
                 increments = steps
@@ -476,13 +476,13 @@ class PostProcess(object):
                 pps.append(zipper_object)
 
             # Pool
-            if parallel_model == "pool":
+            if self.parallel_model == "pool":
                 with closing(Pool(self.ncpu)) as pool:
                     res = pool.map(ParallelGetAugmentedSolution,pps)
                     pool.terminate()
 
             # Thread Pool
-            elif parallel_model == "thread_pool":
+            elif self.parallel_model == "thread_pool":
                 import multiprocessing.dummy
                 with closing(multiprocessing.dummy.Pool(self.ncpu)) as pool:
                     res = pool.map(ParallelGetAugmentedSolution,pps)
@@ -1010,7 +1010,7 @@ class PostProcess(object):
 
 
     def WriteVTK(self,filename=None, quantity="all", configuration="deformed", steps=None, write_curved_mesh=True,
-        interpolation_degree=10, ProjectionFlags=None, fmt="binary", equally_spaced=False,  parallelise=False):
+        interpolation_degree=10, ProjectionFlags=None, fmt="binary", equally_spaced=False, parallelise=False):
         """Writes results to a VTK file for Paraview
 
             quantity = "all" means write all solution fields, otherwise specific quantities
@@ -1023,10 +1023,9 @@ class PostProcess(object):
                                         typically greater than 2GB whereas "binary" files can.  Also "xml" writer is
                                         in-built whereas "binary" writer depends on evtk/pyevtk module
         """
-
-        if fmt is "xml":
+        if fmt == "xml":
             pass
-        elif fmt is "binary":
+        elif fmt == "binary":
             try:
                 from pyevtk.hl import pointsToVTK, linesToVTK, gridToVTK, unstructuredGridToVTK
                 from pyevtk.vtk import VtkVertex, VtkLine, VtkTriangle, VtkQuad, VtkTetra, VtkPyramid, VtkHexahedron
@@ -1120,6 +1119,61 @@ class PostProcess(object):
 
         LoadIncrement = self.sol.shape[2]
 
+        increments = range(LoadIncrement)
+        if steps is not None:
+            increments = steps
+
+        if write_curved_mesh is False:
+            parallelise = False
+
+        # PARALLEL MODE
+        if parallelise:
+            from multiprocessing import Pool, cpu_count
+            from contextlib import closing
+            if self.ncpu is None:
+                self.ncpu = cpu_count()
+            if self.parallel_model is None:
+                self.parallel_model = "pool"
+
+            increments = np.array(increments).flatten()
+            partitioned_steps = np.array_split(increments,self.ncpu)
+
+            pps = []
+            for ip in range(len(partitioned_steps)):
+                pp = deepcopy(self)
+                # pp.sol = self.sol[:,:,partitioned_steps[ip]]
+                pp.number_of_load_increments = len(partitioned_steps[ip])
+                zipper_object = ParallelVTKWriterZipper(pp,
+                    filename=filename, quantity=quantity, configuration=configuration,
+                    steps=partitioned_steps[ip], write_curved_mesh=write_curved_mesh,
+                    interpolation_degree=interpolation_degree,
+                    ProjectionFlags=ProjectionFlags, fmt=fmt,
+                    equally_spaced=equally_spaced)
+                pps.append(zipper_object)
+
+            # Pool
+            if self.parallel_model == "pool":
+                with closing(Pool(self.ncpu)) as pool:
+                    res = pool.map(ParallelWriteVTK,pps)
+                    pool.terminate()
+
+            # Thread Pool
+            elif self.parallel_model == "thread_pool":
+                import multiprocessing.dummy
+                with closing(multiprocessing.dummy.Pool(self.ncpu)) as pool:
+                    res = pool.map(ParallelWriteVTK,pps)
+                    pool.terminate()
+
+            else:
+                raise ValueError("Parallel model not understood")
+
+
+            # # Serial
+            # for ip in range(len(partitioned_steps)):
+            #     ParallelWriteVTK(pps[ip])
+
+            return
+
 
 
         if write_curved_mesh:
@@ -1185,9 +1239,6 @@ class PostProcess(object):
                 fail_flag = True
                 warn("Something went wrong with mesh tessellation for VTK writer. I will proceed anyway")
 
-            increments = range(LoadIncrement)
-            if steps is not None:
-                increments = steps
 
             for Increment in increments:
 
@@ -1257,10 +1308,6 @@ class PostProcess(object):
                             pointData={q_names[counter]: np.ascontiguousarray(extrapolated_sol[:,quant])})
 
         else:
-
-            increments = range(LoadIncrement)
-            if steps is not None:
-                increments = steps
 
             if configuration == "original":
                 for Increment in increments:
@@ -4318,3 +4365,32 @@ class ParallelGetAugmentedSolutionZipper(object):
 def ParallelGetAugmentedSolution(zipper_object):
     return zipper_object.post_process.GetAugmentedSolution(steps=zipper_object.steps,
         average_derived_quantities=zipper_object.average_derived_quantities)
+
+
+
+
+class ParallelVTKWriterZipper(object):
+    def __init__(self, post_process, filename=None, quantity="all", configuration="deformed",
+        steps=None, write_curved_mesh=True, interpolation_degree=10,
+        ProjectionFlags=None, fmt="binary", equally_spaced=False):
+
+        self.post_process = post_process
+        self.filename = filename
+        self.quantity = quantity
+        self.configuration = configuration
+        self.steps = steps
+        self.write_curved_mesh = write_curved_mesh
+        self.interpolation_degree = interpolation_degree
+        self.ProjectionFlags = ProjectionFlags
+        self.fmt = fmt
+        self.equally_spaced = equally_spaced
+
+def ParallelWriteVTK(zipper_object):
+
+    zipper_object.post_process.WriteVTK(filename=zipper_object.filename, quantity=zipper_object.quantity,
+        configuration=zipper_object.configuration,
+        steps=zipper_object.steps, write_curved_mesh=zipper_object.write_curved_mesh,
+        interpolation_degree=zipper_object.interpolation_degree,
+        ProjectionFlags=zipper_object.ProjectionFlags, fmt=zipper_object.fmt,
+        equally_spaced=zipper_object.equally_spaced)
+
