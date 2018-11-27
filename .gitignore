@@ -63,7 +63,8 @@
 *Florence.egg-info
 
 # test suite dummy files
-dummy
+*dummy*
+dummy.*
 
 # example files not to ignore
 !examples/curved_mesh_generation/Hollow_Cylinder.*

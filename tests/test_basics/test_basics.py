@@ -1,4 +1,5 @@
 import numpy as np
+import os
 from Florence import *
 from Florence.MeshGeneration.CustomMesher import SubdivisionArc, SubdivisionCircle, HarvesterPatch
 
@@ -582,18 +583,32 @@ def test_mesh_postprocess_material():
     mesh.Arc(algorithm="midpoint_subdivision")
 
     try:
-        mesh.WriteGmsh("dummy")
+        mesh.WriteGmsh("dummy.txt")
     except:
         pass
     try:
-        mesh.WriteOBJ("dummy")
+        mesh.WriteOBJ("dummy.txt")
     except:
         pass
     try:
-        mesh.WriteMFEM("dummy")
+        mesh.WriteMFEM("dummy.txt")
     except:
         pass
 
+    try:
+        os.remove("dummy.txt")
+        os.remove("dummy.vtu")
+        os.remove("dummy.mat")
+    except:
+        pass
+
+    try:
+        dummy_files = os.listdir(os.getcwd())
+        for file in dummy_files:
+            if "dummy" in file:
+                os.remove(file)
+    except:
+        pass
 
     print("Successfully finished running tests on Mesh, PostProcess and Material modules\n")
 
