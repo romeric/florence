@@ -241,8 +241,17 @@ def test_mesh_postprocess_material():
             anisotropic_orientations=np.zeros((mesh.nelem,2))))
         pp.GetAugmentedSolution(parallelise=True)
 
+        mesh = mesh.GetLinearMesh(remap=True)
         try:
-            pp.SimplePlot(show_plot=False)
+            mesh.SimplePlot(show_plot=False)
+        except:
+            pass
+        try:
+            mesh.WriteVTK("dummy")
+        except:
+            pass
+        try:
+            pp.WriteHDF5("dummy")
         except:
             pass
 
@@ -251,11 +260,19 @@ def test_mesh_postprocess_material():
         except:
             pass
         try:
-            pp.Plot(show_plot=False)
+            pp.Animate(show_plot=False)
         except:
             pass
         try:
-            pp.WriteVTK("dummy")
+            pp.CurvilinearPlot(show_plot=False)
+        except:
+            pass
+        try:
+            pp.WriteVTK("dummy", fmt="xml")
+        except:
+            pass
+        try:
+            pp.WriteVTK("dummy", fmt="binary")
         except:
             pass
         try:
@@ -428,8 +445,17 @@ def test_mesh_postprocess_material():
             anisotropic_orientations=np.zeros((mesh.nelem,3))))
         pp.GetAugmentedSolution(parallelise=True)
 
+        mesh = mesh.GetLinearMesh(remap=True)
         try:
-            pp.SimplePlot(show_plot=False)
+            mesh.SimplePlot(show_plot=False)
+        except:
+            pass
+        try:
+            mesh.WriteVTK("dummy")
+        except:
+            pass
+        try:
+            pp.WriteHDF5("dummy")
         except:
             pass
 
@@ -438,11 +464,19 @@ def test_mesh_postprocess_material():
         except:
             pass
         try:
-            pp.Plot(show_plot=False)
+            pp.Animate(show_plot=False)
         except:
             pass
         try:
-            pp.WriteVTK("dummy")
+            pp.CurvilinearPlot(show_plot=False)
+        except:
+            pass
+        try:
+            pp.WriteVTK("dummy", fmt="xml")
+        except:
+            pass
+        try:
+            pp.WriteVTK("dummy", fmt="binary")
         except:
             pass
         try:
