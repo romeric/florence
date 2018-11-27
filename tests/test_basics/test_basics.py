@@ -548,11 +548,29 @@ def test_mesh_postprocess_material():
 
     try:
         mesh.ReadDCM("None",element_type="tri")
+    except:
+        pass
+    try:
         mesh.ReadFRO("None",element_type="tri")
+    except:
+        pass
+    try:
         mesh.ReadGIDMesh("None",element_type="tri")
+    except:
+        pass
+    try:
         mesh.ReadOBJ("None",element_type="tri")
+    except:
+        pass
+    try:
         mesh.ReadGmsh("None",element_type="tri")
+    except:
+        pass
+    try:
         mesh.ReadSalome("None",element_type="tri")
+    except:
+        pass
+    try:
         mesh.ReadUNV("None",element_type="tri")
     except:
         pass
@@ -562,6 +580,19 @@ def test_mesh_postprocess_material():
     mesh.Circle(algorithm="midpoint_subdivision")
     mesh = SubdivisionArc(element_type="quad")
     mesh.Arc(algorithm="midpoint_subdivision")
+
+    try:
+        mesh.WriteGmsh("dummy")
+    except:
+        pass
+    try:
+        mesh.WriteOBJ("dummy")
+    except:
+        pass
+    try:
+        mesh.WriteMFEM("dummy")
+    except:
+        pass
 
 
     print("Successfully finished running tests on Mesh, PostProcess and Material modules\n")

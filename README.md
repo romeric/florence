@@ -11,13 +11,13 @@ A non-exhaustive list of core features:
 - Poisson, electrostatic and heat transfer solvers
 - Linear, geometrically linearised and fully nonlinear solid/structural mechanics solvers
 - Linear, geometrically linearised and fully nonlinear electromechanics solvers
-- Implicit and explicit dynamic solver with contact formulation
+- Implicit and explicit dynamic solvers with contact formulation
 - Generic monolithic, staggered and multigrid solvers for coupled multiphysics driven problems
 - Strain gradient and micropolar elasticity and electro-elasticty solvers
 - A suite of advanced hyperelastic, electrostatic and electro-hyperelastic material models
 - Ability to read/write mesh/simulation data to/from gmsh, Salome, GID, Tetgen, obj, FRO, VTK and HDF5
 - Support for heterogeneous computing using SIMD, shared parallelism, cloud-based parallelism and cluster-based parallelism
-- Interfaces to a suite of sparse direct and iterative solvers including MUMPS, Pardiso & Petsc and hypre
+- Interfaces to a suite of sparse direct and iterative solvers including MUMPS, Pardiso, Petsc and hypre
 
 In addition, the framework also provides Python interfaces to many low-level numerical subroutines written in C, C++ and Cython.
 
