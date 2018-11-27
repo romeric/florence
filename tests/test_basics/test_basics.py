@@ -240,6 +240,29 @@ def test_mesh_postprocess_material():
         pp.SetMaterial(Piezoelectric_100(2,mu1=1.,mu2=2.,mu3=0.5,lamb=10.,eps_1=1e-5,eps_2=1e-5,eps_3=1e-7,
             anisotropic_orientations=np.zeros((mesh.nelem,2))))
         pp.GetAugmentedSolution(parallelise=True)
+
+        try:
+            pp.SimplePlot(show_plot=False)
+        except:
+            pass
+
+        try:
+            pp.Plot(show_plot=False)
+        except:
+            pass
+        try:
+            pp.Plot(show_plot=False)
+        except:
+            pass
+        try:
+            pp.WriteVTK("dummy")
+        except:
+            pass
+        try:
+            pp.WriteHDF5("dummy")
+        except:
+            pass
+
         mesh.__reset__()
 
 
@@ -404,6 +427,29 @@ def test_mesh_postprocess_material():
         pp.SetMaterial(Piezoelectric_100(3,mu1=1.,mu2=2.,mu3=0.5,lamb=10.,eps_1=1e-5,eps_2=1e-5,eps_3=1e-7,
             anisotropic_orientations=np.zeros((mesh.nelem,3))))
         pp.GetAugmentedSolution(parallelise=True)
+
+        try:
+            pp.SimplePlot(show_plot=False)
+        except:
+            pass
+
+        try:
+            pp.Plot(show_plot=False)
+        except:
+            pass
+        try:
+            pp.Plot(show_plot=False)
+        except:
+            pass
+        try:
+            pp.WriteVTK("dummy")
+        except:
+            pass
+        try:
+            pp.WriteHDF5("dummy")
+        except:
+            pass
+
         mesh.__reset__()
 
 
