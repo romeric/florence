@@ -3260,6 +3260,10 @@ class Mesh(object):
             nsize = 3
         elif element_type == "quad":
             nsize = 4
+        elif element_type == "tet":
+            nsize = 4
+        elif element_type == "hex":
+            nsize = 8
 
         points = np.zeros(( int((elem_counter-2)/2)-1, 3), dtype=np.float64)
         elements = np.zeros(( int((line_counter - elem_counter)/2), nsize),dtype=np.uint64)
@@ -4013,6 +4017,11 @@ class Mesh(object):
 
         elements = np.copy(mesh.elements).astype(np.int64)
         points = mesh.points[np.unique(elements),:]
+
+        # Take care of a corner case where nnode != points.shape[0]
+        if mesh.nnode != points.shape[0]:
+            mesh.nnode = points.shape[0]
+
         if points.shape[1] == 2:
             points = np.hstack((points,np.zeros((points.shape[0],1))))
 
