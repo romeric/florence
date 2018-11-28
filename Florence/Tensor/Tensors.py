@@ -4,7 +4,8 @@ from .Numeric import tovoigt, tovoigt3
 
 
 __all__ = ['unique2d','in2d','intersect2d','in2d_unsorted','shuffle_along_axis',
-'itemfreq','SecondTensor2Vector','Voigt','UnVoigt', 'remove_duplicates_2D','totuple']
+'shuffle_along_axis_bothway','shuffle_along_axis_robust','itemfreq',
+'SecondTensor2Vector','Voigt','UnVoigt','remove_duplicates_2D','totuple']
 
 
 #-------------------------------------------------------------------------#
@@ -277,7 +278,8 @@ def in2d_unsorted(arr1, arr2, axis=1, consider_sort=False):
 
 def shuffle_along_axis(A,B,axis=1,consider_sort=False):
     """Given two equal (but shuffled) 2D arrays A and B, shuffles B along an specified
-        axis (rows or columns) such that B==A
+        axis (rows or columns) such that B==A. This function fails if arrays are not meant
+        to be equal after shuffling
 
         input:
             A:
@@ -328,8 +330,68 @@ def shuffle_along_axis(A,B,axis=1,consider_sort=False):
 
     As_to_B = a[A_to_As].searchsorted(b)
     A_to_B = A_to_As[As_to_B]
+    # As_to_B = a.searchsorted(b, sorter=A_to_As)
+    # A_to_B = A_to_As.take(As_to_B)
 
     return A_to_B
+
+
+
+def shuffle_along_axis_bothway(a, b, axis=1, consider_sort=False):
+    """Given two 2D numpy arrays returns mapping indices idx_a and idx_b
+        such that a[idx_a] = b[idx_b]
+
+        This function is similar to shuffle_along_axis but returns
+        both way indices, hence two index arrays are needed to arrange
+        a and b to become equal. This function returns even if arrays
+        are not meant to be equal after shuffling
+        """
+
+    assert a.dtype == b.dtype
+    assert a.shape == b.shape
+
+    if axis == 0:
+        A = np.copy(A.T,order='C')
+        B = np.copy(B.T,order='C')
+
+    c = np.concatenate((a,b))
+    _, inv = unique2d(c, consider_sort=consider_sort, return_inverse=True)
+    mapper_a = inv[:b.shape[0]]
+    mapper_b = inv[b.shape[0]:]
+
+    return np.argsort(mapper_a), np.argsort(mapper_b)
+
+
+
+def shuffle_along_axis_robust(A, B, tol=1e-9):
+    """Given two 2D numpy arrays returns mapping index array idx
+        such that A[idx] == B. This function is identical to shuffle_along_axis
+        with the advantage that it can deal with floating point arrays which are
+        approximately equal after shuffling. However it is very-very-very slow
+    """
+
+
+    idx = np.zeros((A.shape[0]), dtype=np.int64)
+    counter = 0
+    if A.shape[1] == 3:
+        for i in range(A.shape[0]):
+            for j in range(B.shape[0]):
+                if np.abs(A[j,0] - B[i,0]) < tol and np.abs(A[j,1] - B[i,1]) < tol \
+                    and np.abs(A[j,2] - B[i,2]) < tol:
+                    idx[counter] = j
+                    counter += 1
+                    break
+    elif A.shape[1] == 2:
+        for i in range(A.shape[0]):
+            for j in range(B.shape[0]):
+                if np.abs(A[j,0] - B[i,0]) < tol and np.abs(A[j,1] - B[i,1]) < tol:
+                    idx[counter] = j
+                    counter += 1
+                    break
+    else:
+        raise ValueError("Array dimension not understood")
+
+    return idx
 
 
 

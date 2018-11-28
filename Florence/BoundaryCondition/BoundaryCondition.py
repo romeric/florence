@@ -591,7 +591,11 @@ class BoundaryCondition(object):
             # GET DIRICHLET DATA
             nodesDBC, Dirichlet = curvilinear_mesh.GetDirichletData()
             # GET DIRICHLET FACES (IF REQUIRED)
-            dirichlet_faces = curvilinear_mesh.GetDirichletFaces()
+            can_get_dirichlet_faces = True
+            try:
+                dirichlet_faces = curvilinear_mesh.GetDirichletFaces()
+            except ValueError:
+                can_get_dirichlet_faces = False
 
             # FOR GEOMETRIES CONTAINING PLANAR SURFACES
             planar_mesh_faces = curvilinear_mesh.GetMeshFacesOnPlanarSurfaces()
@@ -599,9 +603,15 @@ class BoundaryCondition(object):
 
             if self.save_nurbs_data:
                 from scipy.io import savemat
-                nurbs_dict = {'nodesDBC':nodesDBC,
-                    'Dirichlet':Dirichlet,
-                    'dirichlet_faces':dirichlet_faces}
+                if can_get_dirichlet_faces:
+                    nurbs_dict = {'nodesDBC':nodesDBC,
+                        'Dirichlet':Dirichlet,
+                        'dirichlet_faces':dirichlet_faces}
+                else:
+                    warn("dirichlet_faces can be computed properly")
+                    nurbs_dict = {'nodesDBC':nodesDBC,
+                        'Dirichlet':Dirichlet,
+                        'dirichlet_faces':np.array([])}
                 savemat(self.filename, nurbs_dict, do_compression=True)
 
             print("3D multi-level projection (excluding mesh deformation) took {} seconds".format(time()-t_all_proj))

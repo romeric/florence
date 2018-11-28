@@ -6950,7 +6950,7 @@ class Mesh(object):
 
         if self.element_type == "hex":
             if p!=2:
-                raise NotImplementedError("Converting to linear mesh for hexahedral mesh with p/q>2 not implemented yet")
+                raise NotImplementedError("Converting to linear mesh for hexahedral mesh with p>2 not implemented yet")
 
         lmesh = Mesh()
         elements = np.copy(self.elements)
