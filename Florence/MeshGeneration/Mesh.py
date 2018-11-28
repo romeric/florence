@@ -3798,11 +3798,11 @@ class Mesh(object):
             #     mlab.text3d(x_avg,y_avg,z_avg,str(i),color=(0,0,0.),scale=2)
 
             # POINT NUMBERING
-            for i in range(self.faces.shape[0]):
-                for j in range(self.faces.shape[1]):
-                    if self.points[self.faces[i,j],2] < 30:
-                        text_obj = mlab.text3d(self.points[self.faces[i,j],0],
-                            self.points[self.faces[i,j],1],self.points[self.faces[i,j],2],str(self.faces[i,j]),color=(0,0,0.),scale=0.05)
+            for i in range(self.elements.shape[0]):
+                for j in range(self.elements.shape[1]):
+                    text_obj = mlab.text3d(self.points[self.elements[i,j],0],
+                        self.points[self.elements[i,j],1],self.points[self.elements[i,j],2],str(self.elements[i,j]),
+                        color=(0,0,0.),scale=0.05)
 
 
             figure.scene.disable_render = False
