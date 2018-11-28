@@ -3763,18 +3763,29 @@ class Mesh(object):
 
             linewidth = 3.
             # trimesh_h = mlab.triangular_mesh(self.points[:,0],
-                # self.points[:,1], self.points[:,2], self.faces[:,:3],
-                # line_width=linewidth,tube_radius=linewidth,color=(0,0.6,0.4),
-                # representation='surface') # representation='surface'
-            trimesh_h = mlab.triangular_mesh(self.points[:,0],
-                self.points[:,1], self.points[:,2], self.faces[:,:3],
-                line_width=linewidth,tube_radius=linewidth,color=(0,0.6,0.4),
-                representation='wireframe') # representation='surface'
+            #     self.points[:,1], self.points[:,2], self.faces[:,:3],
+            #     line_width=linewidth,tube_radius=linewidth,color=(0,0.6,0.4),
+            #     representation='wireframe') # representation='surface'
 
-            # CHANGE LIGHTING OPTION
-            trimesh_h.actor.property.interpolation = 'phong'
-            trimesh_h.actor.property.specular = 0.1
-            trimesh_h.actor.property.specular_power = 5
+            # # CHANGE LIGHTING OPTION
+            # trimesh_h.actor.property.interpolation = 'phong'
+            # trimesh_h.actor.property.specular = 0.1
+            # trimesh_h.actor.property.specular_power = 5
+
+            # PLOTTING EDGES
+            from Florence.PostProcessing import PostProcess
+            tmesh = PostProcess(3,3).Tessellate(self, np.zeros_like(self.points), interpolation_degree=0,
+                plot_points=True, plot_edges=True, plot_surfaces=False)
+
+            x_edges = tmesh.x_edges
+            y_edges = tmesh.y_edges
+            z_edges = tmesh.z_edges
+            connections = tmesh.connections
+
+            src = mlab.pipeline.scalar_scatter(x_edges.T.copy().flatten(), y_edges.T.copy().flatten(), z_edges.T.copy().flatten())
+            src.mlab_source.dataset.lines = connections
+            lines = mlab.pipeline.stripper(src)
+            h_edges = mlab.pipeline.surface(lines, color = (0,0.6,0.4), line_width=linewidth)
 
             # ELEMENT NUMBERING
             # for i in range(0,self.elements.shape[0]):

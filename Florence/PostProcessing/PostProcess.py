@@ -4056,17 +4056,21 @@ class PostProcess(object):
         # THIS IS NOT A FLORENCE MESH COMPLIANT MESH
         tmesh = Mesh()
         tmesh.element_type = "tri"
-        tmesh.elements = Tplot
-        tmesh.points = Xplot
-        tmesh.nelem = nelem
-        tmesh.nnode = nnode
+
+        if plot_surfaces:
+            tmesh.elements = Tplot
+            tmesh.points = Xplot
+            tmesh.quantity = Uplot
+            tmesh.nelem = nelem
+            tmesh.nnode = nnode
+            tmesh.nface = nface
         tmesh.nsize = nsize
         tmesh.bases_1 = BasesOneD
         tmesh.bases_2 = BasesTri.T
 
-        tmesh.nface = nface
         tmesh.smesh = smesh
         tmesh.faces_to_plot = faces_to_plot
+        tmesh.svpoints = svpoints
 
         if QuantityToPlot is not None:
             tmesh.quantity = Uplot
