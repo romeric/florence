@@ -1,7 +1,7 @@
 import numpy as np
 import os
 from Florence import *
-from Florence.MeshGeneration.CustomMesher import SubdivisionArc, SubdivisionCircle, HarvesterPatch
+from Florence.MeshGeneration.CustomMesher import SubdivisionArc, SubdivisionCircle, HarvesterPatch, QuadBall
 
 
 def test_quadrature_functionspace():
@@ -577,6 +577,8 @@ def test_mesh_postprocess_material():
         pass
 
     mesh = HarvesterPatch()
+    for n in range(11):
+        mesh = QuadBall(n=n)
     mesh = SubdivisionCircle(element_type="quad")
     mesh.Circle(algorithm="midpoint_subdivision")
     mesh = SubdivisionArc(element_type="quad")
