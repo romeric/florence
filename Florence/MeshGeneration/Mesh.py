@@ -6969,33 +6969,111 @@ class Mesh(object):
             return self
 
         if self.element_type == "hex":
-            if p!=2:
-                raise NotImplementedError("Converting to linear mesh for hexahedral mesh with p>2 not implemented yet")
+            if p>8 and p!=16 and p!=32:
+                raise NotImplementedError("Converting to linear mesh for hexahedral mesh with p>8 not implemented yet")
 
         lmesh = Mesh()
         elements = np.copy(self.elements)
 
         if self.element_type == "hex":
 
-            a1 = [ 0,  8, 10,  9, 13, 17, 19, 18]
-            a2 = [13, 17, 19, 18,  4, 22, 24, 23]
-            a3 = [ 8,  1, 11, 10, 17, 14, 20, 19]
-            a4 = [17, 14, 20, 19, 22,  5, 25, 24]
-            a5 = [ 9, 10, 12,  3, 18, 19, 21, 16]
-            a6 = [18, 19, 21, 16, 23, 24, 26,  7]
-            a7 = [10, 11,  2, 12, 19, 20, 15, 21]
-            a8 = [19, 20, 15, 21, 24, 25,  6, 26]
+            if p == 2:
 
-            lmesh.elements = np.concatenate(
-               (elements[:,a1],
-                elements[:,a2],
-                elements[:,a3],
-                elements[:,a4],
-                elements[:,a5],
-                elements[:,a6],
-                elements[:,a7],
-                elements[:,a8]
-                ))
+                a1 = [ 0,  8, 10,  9, 13, 17, 19, 18]
+                a2 = [13, 17, 19, 18,  4, 22, 24, 23]
+                a3 = [ 8,  1, 11, 10, 17, 14, 20, 19]
+                a4 = [17, 14, 20, 19, 22,  5, 25, 24]
+                a5 = [ 9, 10, 12,  3, 18, 19, 21, 16]
+                a6 = [18, 19, 21, 16, 23, 24, 26,  7]
+                a7 = [10, 11,  2, 12, 19, 20, 15, 21]
+                a8 = [19, 20, 15, 21, 24, 25,  6, 26]
+
+                lmesh.elements = np.concatenate(
+                   (elements[:,a1],
+                    elements[:,a2],
+                    elements[:,a3],
+                    elements[:,a4],
+                    elements[:,a5],
+                    elements[:,a6],
+                    elements[:,a7],
+                    elements[:,a8]
+                    ))
+
+            else:
+
+                # Create a dummy hex mesh with 1 element for indexing
+                mesh = Mesh()
+                mesh.Cube(n=1, element_type="hex")
+                mesh.GetHighOrderMesh(p=p, equally_spaced=True)
+                # Create the mapping indices from the high order mesh
+                mapper = []
+                for i in range(mesh.elements.shape[1]):
+                    x = np.where(mesh.elements.ravel()==i)[0][0]
+                    mapper.append(x)
+                mapper = np.array(mapper).ravel()
+
+                # This is an aranger for internal use -  use PlotMeshNumbering
+                # to understand the remainder of this algorithm
+                if p == 2:
+                    aranger = [0, 1, 2]
+                elif p == 3:
+                    aranger = [0, 3, 2, 1]
+                elif p == 4:
+                    aranger = [0, 1, 2, 3, 4]
+                elif p == 5:
+                    aranger = [0, 3, 4, 2, 5, 1]
+                elif p == 6:
+                    aranger = [0, 3, 6, 1, 5, 4, 2]
+                elif p == 7:
+                    aranger = [0, 3, 7, 5, 2, 4, 6, 1]
+                elif p == 8:
+                    aranger = range(9)
+                elif p == 16:
+                    aranger = range(17)
+                elif p == 32:
+                    aranger = range(33)
+
+                # Create layers
+                layer0 = []
+                for j in range(p+1):
+                    l0 = np.linspace(0,p*(p+1), p+1).astype(np.int64) + j*(p+1)**2
+                    layer0.append(l0)
+
+                layers = [layer0]
+                for j in range(1, p+1):
+                    layers.append([layer+j for layer in layer0])
+                # This layers values can be used in conjunction
+                # with mesh.PlotMeshNumbering() to get aranger values for other ps
+                layers = np.array(layers)
+
+                layers = layers[:,:,aranger]
+                layers = layers[:,aranger,:]
+                layers = layers[aranger,:,:]
+
+
+                # Create connectivity from layers now
+                indexer = []
+                for i in range(p):
+                    for j in range(p):
+                        for k in range(p):
+                            indexer.append(
+                                np.hstack((
+                                    layers[i,j:j+2,k:k+2].ravel()[[0,2,3,1]],
+                                    layers[i+1,j:j+2,k:k+2].ravel()[[0,2,3,1]]
+                                )))
+                indexer = np.array(indexer)
+
+                # Create the final mapp from high to linear mesh.
+                # This is equivalent to p==2 for all a1, a2 ... arrays
+                a_s = mapper.ravel()[indexer].reshape(indexer.shape)
+
+                lmesh.elements = np.zeros((1,8), dtype=np.int64)
+                for counter, a in enumerate(a_s):
+                     lmesh.elements = np.concatenate((
+                        lmesh.elements, elements[:,a]
+                        ))
+                lmesh.elements = lmesh.elements[1:,:].astype(np.int64)
+
 
         elif self.element_type == "tet":
 
