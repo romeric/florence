@@ -346,6 +346,183 @@ def SubdivisionCircle(center=(0.,0.), radius=1., nrad=16, ncirc=40,
 
 
 
+
+def QuadBall(center=(0.,0.,0.), radius=1., n=10, element_type="hex"):
+    """Creates a fully hexahedral mesh on sphere using midpoint subdivision algorithm
+        by creating a cube and spherifying it using PostMesh's projection schemes
+
+        inputs:
+
+            n:                          [int] number of divsion in every direction.
+                                        Given that this implementation is based on
+                                        high order bases
+    """
+
+    try:
+        from Florence import Mesh, BoundaryCondition, DisplacementFormulation, FEMSolver, LinearSolver
+        from Florence import LinearElastic, NeoHookean
+        from Florence.Tensor import prime_number_factorisation
+    except ImportError:
+        raise ImportError("This function needs Florence's core support")
+
+    n = int(n)
+    if n > 50:
+        # Values beyond this result in >1M DoFs due to internal prime factoristaion splitting
+        raise ValueError("The value of n={} (division in each direction) is too high".format(str(n)))
+
+    if not isinstance(center,tuple):
+        raise ValueError("The center of the circle should be given in a tuple with two elements (x,y,z)")
+    if len(center) != 3:
+        raise ValueError("The center of the circle should be given in a tuple with two elements (x,y,z)")
+
+    if n == 2 or n==3 or n==5 or n==7:
+        ps = [n]
+    else:
+        def factorise_all(n):
+            if n < 2:
+                n = 2
+            factors = prime_number_factorisation(n)
+            if len(factors) == 1 and n > 2:
+                n += 1
+                factors = prime_number_factorisation(n)
+            return factors
+
+        factors = factorise_all(n)
+        ps = []
+        for factor in factors:
+            ps +=factorise_all(factor)
+
+    # Do high ps first
+    ps = np.sort(ps)[::-1].tolist()
+    niter = len(ps)
+
+
+
+    # IGS file for sphere with radius 1000.
+    sphere_igs_file_content ="""
+                                                                        S0000001
+,,31HOpen CASCADE IGES processor 6.7,13HFilename.iges,                  G0000001
+16HOpen CASCADE 6.7,31HOpen CASCADE IGES processor 6.7,32,308,15,308,15,G0000002
+,1.,6,1HM,1,0.00001,15H20150628.043945,1E-07,1.007104,5Hroman,,11,0,    G0000003
+15H20150628.043945,;                                                    G0000004
+     186       1       0       0       0       0       0       000000000D0000001
+     186       0       0       1       0                               0D0000002
+     514       2       0       0       0       0       0       000010000D0000003
+     514       0       0       1       1                               0D0000004
+     510       3       0       0       0       0       0       000010000D0000005
+     510       0       0       1       1                               0D0000006
+     196       4       0       0       0       0       0       000010000D0000007
+     196       0       0       1       1                               0D0000008
+     116       5       0       0       0       0       0       000010400D0000009
+     116       0       0       1       0                               0D0000010
+     123       6       0       0       0       0       0       000010200D0000011
+     123       0       0       1       0                               0D0000012
+     123       7       0       0       0       0       0       000010200D0000013
+     123       0       0       1       0                               0D0000014
+     508       8       0       0       0       0       0       000010000D0000015
+     508       0       0       2       1                               0D0000016
+     502      10       0       0       0       0       0       000010000D0000017
+     502       0       0       2       1                               0D0000018
+     110      12       0       0       0       0       0       000010000D0000019
+     110       0       0       1       0                               0D0000020
+     504      13       0       0       0       0       0       000010001D0000021
+     504       0       0       1       1                               0D0000022
+     100      14       0       0       0       0      25       000010000D0000023
+     100       0       0       1       0                               0D0000024
+     124      15       0       0       0       0       0       000000000D0000025
+     124       0       0       2       0                               0D0000026
+     110      17       0       0       0       0       0       000010000D0000027
+     110       0       0       1       0                               0D0000028
+     110      18       0       0       0       0       0       000010000D0000029
+     110       0       0       1       0                               0D0000030
+     110      19       0       0       0       0       0       000010000D0000031
+     110       0       0       1       0                               0D0000032
+186,3,1,0;                                                       0000001P0000001
+514,1,5,1;                                                       0000003P0000002
+510,7,1,1,15;                                                    0000005P0000003
+196,9,1.,11,13;                                                  0000007P0000004
+116,0.,0.,0.,0;                                                  0000009P0000005
+123,0.,0.,1.;                                                    0000011P0000006
+123,1.,0.,-0.;                                                   0000013P0000007
+508,4,1,17,1,0,1,0,19,0,21,1,0,1,0,27,1,17,2,1,1,0,29,0,21,1,1,  0000015P0000008
+1,0,31;                                                          0000015P0000009
+502,2,6.123233996E-17,-1.499759783E-32,1.,6.123233996E-17,       0000017P0000010
+-1.499759783E-32,-1.;                                            0000017P0000011
+110,360.,90.,0.,0.,90.,0.;                                       0000019P0000012
+504,1,23,17,2,17,1;                                              0000021P0000013
+100,0.,0.,0.,-1.836970199E-16,-1.,3.061616998E-16,1.;            0000023P0000014
+124,1.,0.,-2.449293598E-16,0.,-2.449293598E-16,0.,-1.,0.,0.,1.,  0000025P0000015
+0.,0.;                                                           0000025P0000016
+110,0.,90.,-0.,0.,-90.,-0.;                                      0000027P0000017
+110,0.,-90.,0.,360.,-90.,0.;                                     0000029P0000018
+110,360.,-90.,0.,360.,90.,0.;                                    0000031P0000019
+S      1G      4D     32P     19                                        T0000001
+    """
+
+    with open("sphere_cad_file.igs", "w") as f:
+        f.write(sphere_igs_file_content)
+
+
+    ndim = 3
+    scale = 1000.
+    condition = 1.e020
+
+    mesh = Mesh()
+    material = LinearElastic(ndim, mu=1., lamb=4.)
+    # Keep the solver iterative for low memory consumption. All boundary points are Dirichlet BCs
+    # so they will be exact anyway
+    solver = LinearSolver(linear_solver="iterative", linear_solver_type="cg",
+        dont_switch_solver=True, iterative_solver_tolerance=1e-9)
+
+    for it in range(niter):
+
+        if it == 0:
+            mesh.Parallelepiped(element_type="hex", nx=1, ny=1, nz=1, lower_left_rear_point=(-0.5,-0.5,-0.5),
+                upper_right_front_point=(0.5,0.5,0.5))
+        mesh.GetHighOrderMesh(p=ps[it], equally_spaced=True)
+
+        boundary_condition = BoundaryCondition()
+        boundary_condition.SetCADProjectionParameters(
+            "sphere_cad_file.igs",
+            scale=scale,condition=condition, project_on_curves=True, solve_for_planar_faces=True,
+            modify_linear_mesh_on_projection=True, fix_dof_elsewhere=False
+            )
+        boundary_condition.GetProjectionCriteria(mesh)
+
+        formulation = DisplacementFormulation(mesh)
+        fem_solver = FEMSolver(
+            number_of_load_increments=1,
+            analysis_nature="linear",
+            force_not_computing_mesh_qualities=True,
+            optimise=True)
+
+        solution = fem_solver.Solve(formulation=formulation, mesh=mesh,
+                material=material, boundary_condition=boundary_condition, solver=solver)
+
+        mesh.points += solution.sol[:,:,-1]
+        mesh = mesh.ConvertToLinearMesh()
+
+    os.remove("sphere_cad_file.igs")
+
+
+    if not np.isclose(radius,1):
+        mesh.points *= radius
+
+    mesh.points[:,0] += center[0]
+    mesh.points[:,1] += center[1]
+    mesh.points[:,2] += center[2]
+
+    if element_type == "tet":
+        sys.stdout = open(os.devnull, "w")
+        self.ConvertHexesToTets()
+        sys.stdout = sys.__stdout__
+
+    return mesh
+
+
+
+
+
 def Torus(show_plot=False):
     """Custom mesh for torus
     """

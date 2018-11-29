@@ -5,7 +5,8 @@ from .Numeric import tovoigt, tovoigt3
 
 __all__ = ['unique2d','in2d','intersect2d','in2d_unsorted','shuffle_along_axis',
 'shuffle_along_axis_bothway','shuffle_along_axis_robust','itemfreq',
-'SecondTensor2Vector','Voigt','UnVoigt','remove_duplicates_2D','totuple']
+'SecondTensor2Vector','Voigt','UnVoigt','remove_duplicates_2D','totuple',
+'prime_number_factorisation']
 
 
 #-------------------------------------------------------------------------#
@@ -742,4 +743,17 @@ def UiAjk(U,A):
 
 
 
-
+def prime_number_factorisation(n):
+    if n < 2:
+        return [n]
+    i = 2
+    factors = []
+    while i * i <= n:
+        if n % i:
+            i += 1
+        else:
+            n //= i
+            factors.append(i)
+    if n > 1:
+        factors.append(n)
+    return factors

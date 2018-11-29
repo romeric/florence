@@ -53,6 +53,7 @@ class FEMSolver(object):
         add_self_weight=False,
         mass_type=None,
         compute_mesh_qualities=False,
+        force_not_computing_mesh_qualities=False,
         parallelise=False,
         ncpu=None,
         parallel_model=None,
@@ -131,6 +132,7 @@ class FEMSolver(object):
         self.compute_linear_momentum_dissipation = compute_linear_momentum_dissipation
 
         self.compute_mesh_qualities = compute_mesh_qualities
+        self.force_not_computing_mesh_qualities = force_not_computing_mesh_qualities
         self.is_scaled_jacobian_computed = False
 
         self.vectorise = True
@@ -331,8 +333,9 @@ class FEMSolver(object):
         ##############################################################################
 
         ##############################################################################
-        if boundary_condition.boundary_type == "nurbs":
-            self.compute_mesh_qualities = True
+        if not self.force_not_computing_mesh_qualities:
+            if boundary_condition.boundary_type == "nurbs":
+                self.compute_mesh_qualities = True
         ##############################################################################
 
         ##############################################################################
