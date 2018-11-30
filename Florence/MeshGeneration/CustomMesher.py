@@ -524,9 +524,17 @@ S      1G      4D     32P     19                                        T0000001
 
 
 
-def QuadBallHollowArc(center=(0.,0.,0.), inner_radius=9., outer_radius=10., n=10, element_type="hex"):
-    """Similar to QuadBall but hollow and creates only 1/8th of the arc. starting and ending angles
-        are not supported
+def QuadBallHollowArc(center=(0.,0.,0.), inner_radius=9., outer_radius=10., n=10,
+    element_type="hex", cut_threshold=None, portion=1./8.):
+    """Similar to QuadBall but hollow and creates only 1/8th or 1/4th or 1/2th of the sphere.
+        starting and ending angles are not supported. Radial division (nrad) is also not supported
+
+        input:
+            cut_threshold               [float] cutting threshold for element removal since this function is based
+                                        QuadBall. Ideal value is zero, so prescribe a value as close to zero
+                                        as possible, however that might not always be possible as the cut
+                                        might take remove some wanted elements [default = -0.1]
+            portion                     [float] portion of the sphere to take. Can only be 1/8., 1/4., 1/2.
     """
 
     assert inner_radius < outer_radius
@@ -543,8 +551,19 @@ def QuadBallHollowArc(center=(0.,0.,0.), inner_radius=9., outer_radius=10., n=10
     mm2 = mesh2.CreateSurface2DMeshfrom3DMesh()
 
     offset = outer_radius*2.
-    mm1.RemoveElements(np.array([ [ -0.1, -0.1, -0.1], [ offset, offset,  offset]]))
-    mm2.RemoveElements(np.array([ [ -0.1, -0.1, -0.1], [ offset, offset,  offset]]))
+    if cut_threshold is None:
+        cut_threshold = -0.1
+    if portion == 1./8.:
+        mm1.RemoveElements(np.array([ [ cut_threshold, cut_threshold, cut_threshold], [ offset, offset,  offset]]))
+        mm2.RemoveElements(np.array([ [ cut_threshold, cut_threshold, cut_threshold], [ offset, offset,  offset]]))
+    elif portion == 1./4.:
+        mm1.RemoveElements(np.array([ [ cut_threshold, cut_threshold, -offset], [ offset, offset,  offset]]))
+        mm2.RemoveElements(np.array([ [ cut_threshold, cut_threshold, -offset], [ offset, offset,  offset]]))
+    elif portion == 1./2.:
+        mm1.RemoveElements(np.array([ [ cut_threshold, -offset, -offset], [ offset, offset,  offset]]))
+        mm2.RemoveElements(np.array([ [ cut_threshold, -offset, -offset], [ offset, offset,  offset]]))
+    else:
+        raise ValueError("The value of portion can only be 1/8., 1/4. or 1/2.")
 
     mesh = Mesh()
     mesh.element_type = "hex"

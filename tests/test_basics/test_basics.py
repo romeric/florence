@@ -581,6 +581,8 @@ def test_mesh_postprocess_material():
     for n in range(11):
         mesh = QuadBall(n=n)
     mesh = QuadBallHollowArc()
+    mesh = QuadBallHollowArc(portion=0.25)
+    mesh = QuadBallHollowArc(portion=0.5)
     mesh = mesh.CreateSurface2DMeshfrom3DMesh()
     mesh = mesh.CreateDummy3DMeshfrom2DMesh()
     mesh = SubdivisionCircle(element_type="quad")
