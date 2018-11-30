@@ -5512,11 +5512,23 @@ class Mesh(object):
 
         if xyz_min_max is None and keep_boundary_only is False:
             raise ValueError("Please specify lower and upper bounds of the cut mesh or supply keep_boundary_only=True or both")
-        if keep_boundary_only is True:
-            if xyz_min_max is None:
-                xyz_min_max = self.Bounds*10.
 
         ndim = self.InferSpatialDimension()
+        edim = self.InferElementalDimension()
+
+        if keep_boundary_only is True:
+            if xyz_min_max is None:
+                # 3D surface meshes are all boundary so just return in case only
+                # keep_boundary_only==True and xyz_min_max is None
+                if edim == 2 and ndim == 3:
+                    if return_removed_mesh:
+                        return np.unique(self.elements), np.arange(self.nelem), Mesh()
+                    else:
+                        return np.unique(self.elements), np.arange(self.nelem)
+
+                # We need to set this regardless
+                xyz_min_max = self.Bounds*10.
+
         if isinstance(xyz_min_max,tuple):
             if ndim==2:
                 assert len(xyz_min_max)==4
@@ -5588,9 +5600,9 @@ class Mesh(object):
 
         boundary_elements = np.arange(self.nelem)
         if keep_boundary_only == True:
-            if ndim==2:
+            if edim==2:
                 boundary_elements = self.GetElementsWithBoundaryEdges()
-            elif ndim==3:
+            elif edim==3:
                 boundary_elements = self.GetElementsWithBoundaryFaces()
             cond_boundary = np.zeros(all_nelems,dtype=bool)
             cond_boundary[boundary_elements[:,0]] = True
@@ -5613,6 +5625,7 @@ class Mesh(object):
         self.nelem = self.elements.shape[0]
         nodal_map, inv_elements =  np.unique(self.elements,return_inverse=True)
         self.points = new_points[nodal_map,:]
+        self.nnode = self.points.shape[0]
         # RE-ORDER ELEMENT CONNECTIVITY
         remap_elements =  np.arange(self.points.shape[0])
         self.elements = remap_elements[inv_elements].reshape(self.nelem,self.elements.shape[1])
@@ -5643,6 +5656,7 @@ class Mesh(object):
             mesh.nelem = mesh.elements.shape[0]
             unique_elements_inv, inv_elements =  np.unique(mesh.elements,return_inverse=True)
             mesh.points = new_points[unique_elements_inv,:]
+            mesh.nnode = mesh.points.shape[0]
             # RE-ORDER ELEMENT CONNECTIVITY
             remap_elements =  np.arange(mesh.points.shape[0])
             mesh.elements = remap_elements[inv_elements].reshape(mesh.nelem,mesh.elements.shape[1])

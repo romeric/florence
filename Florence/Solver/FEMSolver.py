@@ -82,7 +82,8 @@ class FEMSolver(object):
         recompute_sparsity_pattern=True,
         squeeze_sparsity_pattern=False,
         ensure_structured_grid=False,
-        do_not_reset=True):
+        do_not_reset=True,
+        report_log_level=2):
 
         # ASSUME TRUE IF AT LEAST ONE IS TRUE
         if has_low_level_dispatcher != optimise:
@@ -168,6 +169,7 @@ class FEMSolver(object):
         if self.newton_raphson_solution_tolerance is None:
             self.newton_raphson_solution_tolerance = 10.*self.newton_raphson_tolerance
 
+        self.report_log_level = report_log_level
 
         # STORE A COPY OF SELF AT THE START TO RESET TO AT THE END
         self.__save_state__()
@@ -495,6 +497,9 @@ class FEMSolver(object):
         Eulerx=None, Eulerp=None):
         """Main solution routine for FEMSolver """
 
+        # LOG LEVEL CONTROLLER
+        if self.report_log_level == 0:
+            sys.stdout = open(os.devnull, "w")
 
         # CHECK DATA CONSISTENCY
         #---------------------------------------------------------------------------#
@@ -670,6 +675,10 @@ class FEMSolver(object):
             # TotalDisp = StaticSolverDisplacementControl(self,function_spaces, formulation, solver,
             #     K,NeumannForces,NodalForces,Residual,
             #     mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition)
+
+        # LOG LEVEL CONTROLLER
+        if self.report_log_level == 0:
+            sys.stdout = sys.__stdout__
 
         return self.__makeoutput__(mesh, TotalDisp, formulation, function_spaces, material)
 

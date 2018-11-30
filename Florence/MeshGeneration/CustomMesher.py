@@ -7,7 +7,8 @@ from .GeometricPath import *
 from Florence.Tensor import totuple, unique2d
 
 
-__all__ = ['HarvesterPatch', 'SubdivisionArc', 'SubdivisionCircle']
+__all__ = ['HarvesterPatch', 'SubdivisionArc', 'SubdivisionCircle', 'QuadBall',
+'QuadBallHollowArc']
 
 """
 A series of custom meshes
@@ -462,6 +463,7 @@ S      1G      4D     32P     19                                        T0000001
     with open("sphere_cad_file.igs", "w") as f:
         f.write(sphere_igs_file_content)
 
+    sys.stdout = open(os.devnull, "w")
 
     ndim = 3
     scale = 1000.
@@ -471,7 +473,7 @@ S      1G      4D     32P     19                                        T0000001
     material = LinearElastic(ndim, mu=1., lamb=4.)
     # Keep the solver iterative for low memory consumption. All boundary points are Dirichlet BCs
     # so they will be exact anyway
-    solver = LinearSolver(linear_solver="iterative", linear_solver_type="cg",
+    solver = LinearSolver(linear_solver="iterative", linear_solver_type="cg2",
         dont_switch_solver=True, iterative_solver_tolerance=1e-9)
 
     for it in range(niter):
@@ -494,6 +496,7 @@ S      1G      4D     32P     19                                        T0000001
             number_of_load_increments=1,
             analysis_nature="linear",
             force_not_computing_mesh_qualities=True,
+            report_log_level=0,
             optimise=True)
 
         solution = fem_solver.Solve(formulation=formulation, mesh=mesh,
@@ -513,13 +516,51 @@ S      1G      4D     32P     19                                        T0000001
     mesh.points[:,2] += center[2]
 
     if element_type == "tet":
-        sys.stdout = open(os.devnull, "w")
         mesh.ConvertHexesToTets()
-        sys.stdout = sys.__stdout__
+
+    sys.stdout = sys.__stdout__
 
     return mesh
 
 
+
+def QuadBallHollowArc(center=(0.,0.,0.), inner_radius=9., outer_radius=10., n=10, element_type="hex"):
+    """Similar to QuadBall but hollow and creates only 1/8th of the arc. starting and ending angles
+        are not supported
+    """
+
+    assert inner_radius < outer_radius
+
+    mesh1 = QuadBall(n=n, element_type=element_type)
+    mesh2 = deepcopy(mesh1)
+
+    if not np.isclose(inner_radius,1):
+        mesh1.points *= inner_radius
+    if not np.isclose(outer_radius,1):
+        mesh2.points *= outer_radius
+
+    mm1 = mesh1.CreateSurface2DMeshfrom3DMesh()
+    mm2 = mesh2.CreateSurface2DMeshfrom3DMesh()
+
+    offset = outer_radius*2.
+    mm1.RemoveElements(np.array([ [ -0.1, -0.1, -0.1], [ offset, offset,  offset]]))
+    mm2.RemoveElements(np.array([ [ -0.1, -0.1, -0.1], [ offset, offset,  offset]]))
+
+    mesh = Mesh()
+    mesh.element_type = "hex"
+    mesh.elements = np.hstack((mm1.elements, mm1.nnode + mm2.elements)).astype(np.int64)
+    mesh.points   = np.vstack((mm1.points, mm2.points))
+    mesh.nelem = mesh.elements.shape[0]
+    mesh.nnode = mesh.points.shape[0]
+    mesh.GetBoundaryFaces()
+    mesh.GetBoundaryEdges()
+
+    mesh.points[:,0] += center[0]
+    mesh.points[:,1] += center[1]
+    mesh.points[:,2] += center[2]
+
+
+    return mesh
 
 
 
