@@ -533,7 +533,7 @@ def QuadBallHollowArc(center=(0.,0.,0.), inner_radius=9., outer_radius=10., n=10
             cut_threshold               [float] cutting threshold for element removal since this function is based
                                         QuadBall. Ideal value is zero, so prescribe a value as close to zero
                                         as possible, however that might not always be possible as the cut
-                                        might take remove some wanted elements [default = -0.1]
+                                        might take remove some wanted elements [default = -0.01]
             portion                     [float] portion of the sphere to take. Can only be 1/8., 1/4., 1/2.
     """
 
@@ -552,7 +552,7 @@ def QuadBallHollowArc(center=(0.,0.,0.), inner_radius=9., outer_radius=10., n=10
 
     offset = outer_radius*2.
     if cut_threshold is None:
-        cut_threshold = -0.1
+        cut_threshold = -0.01
     if portion == 1./8.:
         mm1.RemoveElements(np.array([ [ cut_threshold, cut_threshold, cut_threshold], [ offset, offset,  offset]]))
         mm2.RemoveElements(np.array([ [ cut_threshold, cut_threshold, cut_threshold], [ offset, offset,  offset]]))
