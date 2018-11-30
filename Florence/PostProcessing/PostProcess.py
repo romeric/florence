@@ -4060,7 +4060,8 @@ class PostProcess(object):
         if plot_surfaces:
             tmesh.elements = Tplot
             tmesh.points = Xplot
-            tmesh.quantity = Uplot
+            if QuantityToPlot is not None:
+                tmesh.quantity = Uplot
             tmesh.nelem = nelem
             tmesh.nnode = nnode
             tmesh.nface = nface
@@ -4071,9 +4072,6 @@ class PostProcess(object):
         tmesh.smesh = smesh
         tmesh.faces_to_plot = faces_to_plot
         tmesh.svpoints = svpoints
-
-        if QuantityToPlot is not None:
-            tmesh.quantity = Uplot
 
         if plot_edges:
             tmesh.x_edges = x_edges
@@ -4239,7 +4237,6 @@ class PostProcess(object):
 
             Xplot = np.zeros((nnode,3),dtype=np.float64)
             Tplot = np.zeros((nelem,3),dtype=np.int64)
-            Uplot = np.zeros(nnode,dtype=np.float64)
 
             # FOR CURVED ELEMENTS
             for ielem in range(nface):
@@ -4247,6 +4244,7 @@ class PostProcess(object):
                 Tplot[ielem*TrianglesFunc.nsimplex:(ielem+1)*TrianglesFunc.nsimplex,:] = Triangles + ielem*nsize
 
             if QuantityToPlot is not None:
+                Uplot = np.zeros(nnode,dtype=np.float64)
                 if plot_on_faces:
                     # for ielem in range(nface):
                     #     Uplot[ielem*nsize:(ielem+1)*nsize] = quantity_to_plot[ielem]
@@ -4268,7 +4266,8 @@ class PostProcess(object):
         if plot_surfaces:
             tmesh.elements = Tplot
             tmesh.points = Xplot
-            tmesh.quantity = Uplot
+            if QuantityToPlot is not None:
+                tmesh.quantity = Uplot
             tmesh.nelem = nelem
             tmesh.nnode = nnode
             tmesh.nface = nface

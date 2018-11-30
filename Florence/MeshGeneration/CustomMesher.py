@@ -514,7 +514,7 @@ S      1G      4D     32P     19                                        T0000001
 
     if element_type == "tet":
         sys.stdout = open(os.devnull, "w")
-        self.ConvertHexesToTets()
+        mesh.ConvertHexesToTets()
         sys.stdout = sys.__stdout__
 
     return mesh

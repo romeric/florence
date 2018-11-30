@@ -579,6 +579,8 @@ def test_mesh_postprocess_material():
     mesh = HarvesterPatch()
     for n in range(11):
         mesh = QuadBall(n=n)
+    mesh = mesh.CreateSurface2DMeshfrom3DMesh()
+    mesh = mesh.CreateDummy3DMeshfrom2DMesh()
     mesh = SubdivisionCircle(element_type="quad")
     mesh.Circle(algorithm="midpoint_subdivision")
     mesh = SubdivisionArc(element_type="quad")

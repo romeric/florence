@@ -7460,6 +7460,8 @@ class Mesh(object):
             This is used for plotting and generating curvilinear elements for surface mesh using florence
         """
 
+        self.__do_memebers_exist__()
+
         sys.stdout = open(os.devnull, "w")
 
         p = self.InferPolynomialDegree()
@@ -7470,14 +7472,45 @@ class Mesh(object):
         elif self.element_type == "tri":
             mm.element_type = "tet"
             mm.elements = np.zeros((1,int((p+1)*(p+2)*(p+3)/6))).astype(np.int64)
+        else:
+            raise ValueError("Cannot make a 3D mesh from the 2D mesh of type {}".format(self.element_type))
+
         mm.edges = np.zeros((1,p+1)).astype(np.int64)
-        mm.nelem = 1
         mm.points = np.copy(self.points)
+        mm.nelem = 1
+        mm.nnode = mm.points.shape[0]
         mm.faces = np.copy(self.elements)
         mm.boundary_face_to_element = np.zeros((mm.faces.shape[0],2)).astype(np.int64)
         mm.boundary_face_to_element[:,0] = 1
 
         sys.stdout = sys.__stdout__
+
+        return mm
+
+
+    def CreateSurface2DMeshfrom3DMesh(self):
+        """Create a surface 2D mesh from a 3D mesh. In essence the mesh is not dummy
+        """
+
+        self.__do_memebers_exist__()
+
+        p = self.InferPolynomialDegree()
+        mm = Mesh()
+        if self.element_type == "hex":
+            mm.element_type = "quad"
+        elif self.element_type == "tet":
+            mm.element_type = "tri"
+        else:
+            raise ValueError("Cannot make a 2D mesh from the 3D mesh of type {}".format(self.element_type))
+
+        unique_faces, inv_faces = np.unique(self.faces,return_inverse=True)
+        mm.points = self.points[unique_faces,:]
+        mm.nnode = mm.points.shape[0]
+        aranger = np.arange(mm.nnode)
+        mm.elements = aranger[inv_faces].reshape(self.faces.shape)
+        mm.nelem = mm.elements.shape[0]
+        mm.faces = np.copy(self.elements)
+        mm.GetBoundaryEdges()
 
         return mm
 
