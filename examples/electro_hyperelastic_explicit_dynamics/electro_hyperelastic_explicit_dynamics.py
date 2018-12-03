@@ -50,7 +50,7 @@ def electro_hyperelastic_explicit_dynamics(recompute_sparsity_pattern=True, sque
         activate_explicit_multigrid=True,
         recompute_sparsity_pattern=recompute_sparsity_pattern,
         squeeze_sparsity_pattern=squeeze_sparsity_pattern,
-        save_frequency=5)
+        memory_store_frequency=5)
 
     results = fem_solver.Solve(formulation=formulation, material=material, mesh=mesh,
         boundary_condition=boundary_condition)

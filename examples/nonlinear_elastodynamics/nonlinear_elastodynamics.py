@@ -82,9 +82,9 @@ def nonlinear_elastodynamics(optimise=True):
 
     norm = lambda s: np.linalg.norm(s)
 
-    assert norm(s1[:,:,-1]) > 3.
-    assert norm(s2[:,:,-1]) > 3.
-    assert norm(s3[:,:,-1]) > 3.
+    assert norm(s1[:,:,-1]) > 2.7
+    assert norm(s2[:,:,-1]) > 2.7
+    assert norm(s3[:,:,-1]) > 2.7
     assert norm(s1[:,:,-1]) < 3.3
     assert norm(s2[:,:,-1]) < 3.3
     assert norm(s3[:,:,-1]) < 3.3

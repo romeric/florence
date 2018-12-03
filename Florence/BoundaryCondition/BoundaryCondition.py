@@ -253,7 +253,6 @@ class BoundaryCondition(object):
         ndim = formulation.ndim
         self.columns_in, self.applied_dirichlet = [], []
 
-
         #----------------------------------------------------------------------------------------------------#
         #-------------------------------------- NURBS BASED SOLUTION ----------------------------------------#
         #----------------------------------------------------------------------------------------------------#
@@ -326,6 +325,7 @@ class BoundaryCondition(object):
                         for step in range(self.dirichlet_flags.shape[2]):
                             flat_dirich = self.dirichlet_flags[:,:,step].ravel()
                             self.applied_dirichlet[:,step] = flat_dirich[~np.isnan(flat_dirich)]
+
                     elif self.dirichlet_flags.ndim == 2:
                         flat_dirich = self.dirichlet_flags.ravel()
                         self.columns_out = np.arange(self.dirichlet_flags.size)[~np.isnan(flat_dirich)]
@@ -358,30 +358,41 @@ class BoundaryCondition(object):
         if self.analysis_type == "dynamic":
             # AVOID ZERO DIVISION FOR RAMP (LINSPACE TYPE) LOADING
             nincr_last = float(nincr-1) if nincr !=1 else 1
-            if self.boundary_type != "nurbs":
-                if self.dirichlet_flags is not None:
-                    if self.dirichlet_flags.ndim == 2:
-                        dum = np.zeros((self.dirichlet_flags.shape[0],self.dirichlet_flags.shape[1],nincr))
-                        for incr in range(nincr):
-                            if self.make_loading == "constant":
-                                dum[:,:,incr] = self.dirichlet_flags/float(nincr)
-                            else:
-                                dum[:,:,incr] = incr*self.dirichlet_flags/nincr_last
-                        self.dirichlet_flags = np.copy(dum)
-                    else:
-                        return
-            else:
-                if self.applied_dirichlet is not None:
-                    if self.applied_dirichlet.ndim == 1:
-                        dum = np.zeros((self.applied_dirichlet.shape[0],nincr))
-                        for incr in range(nincr):
-                            if self.make_loading == "constant":
-                                dum[:,incr] = self.applied_dirichlet/float(nincr)
-                            else:
-                                dum[:,incr] = incr*self.applied_dirichlet/nincr_last
-                        self.applied_dirichlet = np.copy(dum)
-                    else:
-                        return
+            if self.applied_dirichlet is not None:
+                if self.applied_dirichlet.ndim == 1:
+                    dum = np.zeros((self.applied_dirichlet.shape[0],nincr))
+                    for incr in range(nincr):
+                        if self.make_loading == "constant":
+                            dum[:,incr] = self.applied_dirichlet/float(nincr)
+                        else:
+                            dum[:,incr] = incr*self.applied_dirichlet/nincr_last
+                    self.applied_dirichlet = np.copy(dum)
+                else:
+                    return
+            # if self.boundary_type != "nurbs":
+            #     if self.dirichlet_flags is not None:
+            #         if self.dirichlet_flags.ndim == 2:
+            #             dum = np.zeros((self.dirichlet_flags.shape[0],self.dirichlet_flags.shape[1],nincr))
+            #             for incr in range(nincr):
+            #                 if self.make_loading == "constant":
+            #                     dum[:,:,incr] = self.dirichlet_flags/float(nincr)
+            #                 else:
+            #                     dum[:,:,incr] = incr*self.dirichlet_flags/nincr_last
+            #             self.dirichlet_flags = np.copy(dum)
+            #         else:
+            #             return
+            # else:
+            #     if self.applied_dirichlet is not None:
+            #         if self.applied_dirichlet.ndim == 1:
+            #             dum = np.zeros((self.applied_dirichlet.shape[0],nincr))
+            #             for incr in range(nincr):
+            #                 if self.make_loading == "constant":
+            #                     dum[:,incr] = self.applied_dirichlet/float(nincr)
+            #                 else:
+            #                     dum[:,incr] = incr*self.applied_dirichlet/nincr_last
+            #             self.applied_dirichlet = np.copy(dum)
+            #         else:
+            #             return
 
 
             if self.neumann_flags is not None:

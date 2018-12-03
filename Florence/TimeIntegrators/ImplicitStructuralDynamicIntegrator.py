@@ -50,7 +50,11 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
         accelerations  = np.zeros((mesh.points.shape[0],formulation.ndim))
 
         # COMPUTE INITIAL ACCELERATION FOR TIME STEP 0
-        InitResidual = Residual - NeumannForces[:,0][:,None]
+        if NeumannForces.ndim == 2 and NeumannForces.shape[1]>1:
+            InitResidual = Residual - NeumannForces[:,0][:,None]
+        else:
+            InitResidual = Residual
+
         if formulation.fields == "electro_mechanics":
             accelerations[:,:] = solver.Solve(M_mech, -InitResidual[self.mechanical_dofs].ravel()
                 ).reshape(mesh.points.shape[0],formulation.ndim)
@@ -62,28 +66,36 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
         LoadFactor = fem_solver.total_time/LoadIncrement
         AppliedDirichletInc = np.zeros(boundary_condition.applied_dirichlet.shape[0],dtype=np.float64)
 
-        if NeumannForces.ndim == 2 and NeumannForces.shape[1]==1:
-            tmp = np.zeros((NeumannForces.shape[0],LoadIncrement))
-            tmp[:,0] = NeumannForces[:,0]
-            NeumannForces = tmp
-
-
+        save_counter = 1
+        nincr_last = float(LoadIncrement-1) if LoadIncrement !=1 else 1
         # TIME LOOP
         for Increment in range(1,LoadIncrement):
 
             t_increment = time()
 
+            # GET THE INCREMENTAL DIRICHLET
+            if boundary_condition.applied_dirichlet.ndim == 2:
+                AppliedDirichletInc = boundary_condition.applied_dirichlet[:,Increment]
+            else:
+                if boundary_condition.make_loading == "ramp":
+                    AppliedDirichletInc = boundary_condition.applied_dirichlet*(1.*Increment/LoadIncrement)
+                else:
+                    AppliedDirichletInc = boundary_condition.applied_dirichlet/nincr_last
+
             # APPLY NEUMANN BOUNDARY CONDITIONS
-            DeltaF = NeumannForces[:,Increment][:,None]
+            if NeumannForces.ndim == 2 and NeumannForces.shape[1]>1:
+                DeltaF = NeumannForces[:,Increment][:,None]
+            else:
+                if boundary_condition.make_loading == "ramp":
+                    DeltaF = (NeumannForces.ravel()*(1.*Increment/LoadIncrement))[:,None]
+                else:
+                    DeltaF = (NeumannForces.ravel()/nincr_last)[:,None]
             NodalForces = DeltaF
 
             # OBRTAIN INCREMENTAL RESIDUAL - CONTRIBUTION FROM BOTH NEUMANN AND DIRICHLET
             Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
-                boundary_condition.applied_dirichlet[:,Increment],LoadFactor=1.0,mass=M,only_residual=True)
+                AppliedDirichletInc,LoadFactor=1.0,mass=M,only_residual=True)
             Residual -= DeltaF
-            # Residual = -DeltaF
-            # GET THE INCREMENTAL DIRICHLET
-            AppliedDirichletInc = boundary_condition.applied_dirichlet[:,Increment]
 
             # COMPUTE INITIAL ACCELERATION - ONLY NEEDED IN CASES OF PRESTRETCHED CONFIGURATIONS
             # accelerations[:,:] = solver.Solve(M, Residual.ravel() - \
@@ -105,14 +117,22 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
                 material,boundary_condition,AppliedDirichletInc, fem_solver, velocities, accelerations)
 
             # UPDATE DISPLACEMENTS FOR THE CURRENT LOAD INCREMENT
-            TotalDisp[:,:formulation.ndim,Increment] = Eulerx - mesh.points
+            U = np.zeros((mesh.points.shape[0], formulation.nvar))
+            U[:,:formulation.ndim] = Eulerx - mesh.points
             if formulation.fields == "electro_mechanics":
-                TotalDisp[:,-1,Increment] = Eulerp
+                U[:,-1] = Eulerp
+
+            # SAVE RESULTS
+            if Increment % fem_solver.save_frequency == 0 or\
+                (Increment == LoadIncrement - 1 and save_counter<TotalDisp.shape[2]):
+                TotalDisp[:,:,save_counter] = U
+                save_counter += 1
+
 
             # COMPUTE DISSIPATION OF ENERGY THROUGH TIME
             if fem_solver.compute_energy_dissipation:
                 energy_info = self.ComputeEnergyDissipation(function_spaces[0], mesh, material, formulation, fem_solver,
-                    Eulerx, TotalDisp[:,:,Increment], NodalForces, M, velocities)
+                    Eulerx, U, NodalForces, M, velocities)
                 formulation.energy_dissipation.append(energy_info[0])
                 formulation.internal_energy.append(energy_info[1])
                 formulation.kinetic_energy.append(energy_info[2])
@@ -120,34 +140,15 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
             # COMPUTE DISSIPATION OF LINEAR MOMENTUM THROUGH TIME
             if fem_solver.compute_linear_momentum_dissipation:
                 power_info = self.ComputePowerDissipation(function_spaces[0], mesh, material, formulation, fem_solver,
-                    Eulerx, TotalDisp[:,:,Increment], NodalForces, M, velocities, accelerations)
+                    Eulerx, U, NodalForces, M, velocities, accelerations)
                 formulation.power_dissipation.append(power_info[0])
                 formulation.internal_power.append(power_info[1])
                 formulation.kinetic_power.append(power_info[2])
                 formulation.external_power.append(power_info[3])
 
 
-            # PRINT LOG IF ASKED FOR
-            if fem_solver.print_incremental_log:
-                dmesh = Mesh()
-                dmesh.points = TotalDisp[:,:formulation.ndim,Increment]
-                dmesh_bounds = dmesh.Bounds
-                if formulation.fields == "electro_mechanics":
-                    _bounds = np.zeros((2,formulation.nvar))
-                    _bounds[:,:formulation.ndim] = dmesh_bounds
-                    _bounds[:,-1] = [TotalDisp[:,-1,Increment].min(),TotalDisp[:,-1,Increment].max()]
-                    print("\nMinimum and maximum incremental solution values at increment {} are \n".format(Increment),_bounds)
-                else:
-                    print("\nMinimum and maximum incremental solution values at increment {} are \n".format(Increment),dmesh_bounds)
-
-            # SAVE INCREMENTAL SOLUTION IF ASKED FOR
-            if fem_solver.save_incremental_solution:
-                from scipy.io import savemat
-                if fem_solver.incremental_solution_filename is not None:
-                    savemat(fem_solver.incremental_solution_filename+"_"+str(Increment),{'solution':TotalDisp[:,:,Increment]},do_compression=True)
-                else:
-                    raise ValueError("No file name provided to save incremental solution")
-
+            # LOG IF ASKED FOR
+            self.LogSave(fem_solver, formulation, U[:,:formulation.ndim], Eulerp, Increment)
 
             print('\nFinished Load increment', Increment, 'in', time()-t_increment, 'seconds')
 
@@ -160,8 +161,8 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
             # STORE THE INFORMATION IF NEWTON-RAPHSON FAILS
             if fem_solver.newton_raphson_failed_to_converge:
                 solver.condA = np.NAN
-                TotalDisp = TotalDisp[:,:,:Increment-1]
-                fem_solver.number_of_load_increments = Increment - 1
+                TotalDisp = TotalDisp[:,:,:save_counter-1]
+                fem_solver.number_of_load_increments = save_counter - 1
                 break
 
             # BREAK AT A SPECIFICED LOAD INCREMENT IF ASKED FOR
@@ -169,9 +170,18 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
                 if fem_solver.break_at_increment == Increment:
                     if fem_solver.break_at_increment < LoadIncrement - 1:
                         print("\nStopping at increment {} as specified\n\n".format(Increment))
-                        TotalDisp = TotalDisp[:,:,:Increment]
-                        fem_solver.number_of_load_increments = Increment
+                        TotalDisp = TotalDisp[:,:,:save_counter]
+                        fem_solver.number_of_load_increments = save_counter
                     break
+
+
+        if fem_solver.save_frequency != 1:
+            if TotalDisp.shape[2] > save_counter:
+                # IN CASE SOLVER BLEW UP
+                TotalDisp = TotalDisp[:,:,:save_counter]
+                fem_solver.number_of_load_increments = TotalDisp.shape[2]
+            else:
+                fem_solver.number_of_load_increments = save_counter
 
         return TotalDisp
 

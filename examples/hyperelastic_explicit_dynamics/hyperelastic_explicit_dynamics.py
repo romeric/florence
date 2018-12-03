@@ -53,7 +53,7 @@ def explicit_dynamics_mechanics():
                             mass_type="lumped",
                             optimise=True,
                             print_incremental_log=True,
-                            save_frequency=10)
+                            memory_store_frequency=10)
 
     solution = fem_solver.Solve(formulation=formulation, mesh=mesh,
             material=material, boundary_condition=boundary_condition)

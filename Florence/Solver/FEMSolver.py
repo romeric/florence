@@ -75,7 +75,6 @@ class FEMSolver(object):
         user_defined_break_func=None,
         user_defined_stop_func=None,
         save_results=True,
-        save_frequency=1,
         memory_store_frequency=1,
         has_contact=False,
         activate_explicit_multigrid=False,
@@ -106,14 +105,8 @@ class FEMSolver(object):
         self.total_time = float(total_time)
         self.save_results = save_results
         # SAVE AT EVERY N TIME STEP WHERE N=save_frequency
-        self.save_frequency = int(save_frequency)
+        self.save_frequency = int(memory_store_frequency)
         self.incremental_solution_save_frequency = incremental_solution_save_frequency
-        if save_frequency != 1:
-            warn("save_frequency keyword is deprecated. Please use memory_store_fequency instead")
-        if save_frequency !=1 and memory_store_frequency !=1:
-            raise ValueError("Please use either save_frequency or memory_store_fequency, but not both")
-        if memory_store_frequency != 1:
-            self.save_frequency = int(memory_store_frequency)
 
         self.number_of_load_increments = number_of_load_increments
         self.load_factor = load_factor
@@ -288,11 +281,11 @@ class FEMSolver(object):
             if self.save_frequency != 1:
                 warn("memory_store_frequency must be one")
                 self.save_frequency = 1
-        if self.analysis_type == "dynamic" and self.analysis_subtype=="implicit":
+        if self.analysis_type == "dynamic" and self.analysis_subtype=="implicit" and self.analysis_nature=="linear":
             if self.save_frequency != 1:
                 warn("memory_store_frequency must be one")
                 self.save_frequency = 1
-        if self.analysis_type == "dynamic" and self.analysis_subtype == "explicit":
+        if self.analysis_type == "dynamic":
             if self.number_of_load_increments < self.save_frequency:
                 raise ValueError("Number of load increments cannot be less than memory store frequency")
             if self.number_of_load_increments < 3:
@@ -388,7 +381,8 @@ class FEMSolver(object):
         boundary_condition.analysis_type = self.analysis_type
         boundary_condition.analysis_nature = self.analysis_nature
         ##############################################################################
-        if self.analysis_type == "dynamic" and self.analysis_subtype != "explicit":
+        if self.analysis_type == "dynamic" and self.analysis_subtype != "explicit" and\
+            self.analysis_nature == "linear":
             boundary_condition.ConvertStaticsToDynamics(mesh, self.number_of_load_increments)
         ##############################################################################
 
@@ -570,7 +564,6 @@ class FEMSolver(object):
                 boundary_condition.ConvertStaticsToDynamics(mesh, self.number_of_load_increments)
 
 
-
         # INITIATE DATA FOR THE ANALYSIS
         NodalForces, Residual = np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64), \
             np.zeros((mesh.points.shape[0]*formulation.nvar,1),dtype=np.float64)
@@ -639,13 +632,13 @@ class FEMSolver(object):
 
         if self.analysis_type != 'static':
             if self.analysis_subtype != "explicit":
-                boundary_condition.ConvertStaticsToDynamics(mesh, self.number_of_load_increments)
                 if self.analysis_nature == "nonlinear":
                     structural_integrator = NonlinearImplicitStructuralDynamicIntegrator()
                     TotalDisp = structural_integrator.Solver(function_spaces, formulation, solver,
                         K, M, NeumannForces, NodalForces, Residual,
                         mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition, self)
                 elif self.analysis_nature == "linear":
+                    boundary_condition.ConvertStaticsToDynamics(mesh, self.number_of_load_increments)
                     structural_integrator = LinearImplicitStructuralDynamicIntegrator()
                     TotalDisp = structural_integrator.Solver(function_spaces, formulation, solver,
                         K, M, NeumannForces, NodalForces, Residual,

@@ -105,6 +105,7 @@ class ExplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
             self.SetupElectrostaticsImplicit(mesh, formulation, boundary_condition, material, fem_solver, solver, Eulerx, 0)
 
         save_counter = 2 if fem_solver.save_frequency == 1 else 1
+        nincr_last = float(LoadIncrement-1) if LoadIncrement !=1 else 1
         # TIME LOOP
         for Increment in range(2,LoadIncrement):
 
@@ -113,15 +114,19 @@ class ExplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
             if boundary_condition.applied_dirichlet.ndim == 2:
                 AppliedDirichletInc = boundary_condition.applied_dirichlet[:,Increment-1]
             else:
-                # RAMP TYPE LOAD
-                AppliedDirichletInc = boundary_condition.applied_dirichlet*(1.*Increment/LoadIncrement)
+                if boundary_condition.make_loading == "ramp":
+                    AppliedDirichletInc = boundary_condition.applied_dirichlet*(1.*Increment/LoadIncrement)
+                else:
+                    AppliedDirichletInc = boundary_condition.applied_dirichlet/nincr_last
 
             # APPLY NEUMANN BOUNDARY CONDITIONS
             if NeumannForces.ndim == 2 and NeumannForces.shape[1]>1:
                 NodalForces = NeumannForces[:,Increment-1]
             else:
-                # RAMP TYPE LOAD
-                NodalForces = NeumannForces.ravel()*(1.*Increment/LoadIncrement)
+                if boundary_condition.make_loading == "ramp":
+                    NodalForces = (NeumannForces.ravel()*(1.*Increment/LoadIncrement))
+                else:
+                    NodalForces = NeumannForces.ravel()/nincr_last
 
             # Residual[:] = NodalForces - TractionForces
             Residual = NodalForces - TractionForces
