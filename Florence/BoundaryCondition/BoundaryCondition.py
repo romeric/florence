@@ -239,7 +239,6 @@ class BoundaryCondition(object):
             return self.neumann_flags
         else:
             self.neumann_data_applied_at == "face"
-            tups = func(*args, **kwargs)
             if len(tups) !=2:
                 raise ValueError("User-defined Neumann criterion function {} should return one flag and one data array".format(func.__name__))
             self.neumann_flags = tups[0]

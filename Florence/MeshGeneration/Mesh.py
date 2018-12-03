@@ -1220,7 +1220,7 @@ class Mesh(object):
 
     def Areas(self, with_sign=False, gpoints=None):
         """Find areas of all 2D elements [tris, quads].
-            For 3D elements returns surface areas of faces
+            For 3D elements returns surface areas of all faces
 
             input:
                 with_sign:              [str] compute with/without sign
