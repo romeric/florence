@@ -580,6 +580,7 @@ def test_mesh_postprocess_material():
     mesh = HarvesterPatch()
     for n in range(11):
         mesh = QuadBall(n=n)
+        mesh = QuadBallHollowArc(n=n)
     mesh = QuadBallHollowArc()
     mesh = QuadBallHollowArc(portion=0.25)
     mesh = QuadBallHollowArc(portion=0.5)

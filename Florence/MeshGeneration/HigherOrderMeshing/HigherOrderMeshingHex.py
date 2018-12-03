@@ -145,7 +145,6 @@ def HighOrderMeshHex(C, mesh, Decimals=10, equally_spaced=False, check_duplicate
         # BUILD FACES NOW
         tfaces = time()
         # USE ALTERNATIVE APPROACH TO GET MESH EDGES AND FACES
-        reedges = np.zeros((mesh.edges.shape[0],C+2))
         fsize = int((C+2.)*(C+3.)/2.)
         refaces = np.zeros((mesh.faces.shape[0],fsize),dtype=mesh.faces.dtype)
 

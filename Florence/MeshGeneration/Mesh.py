@@ -3473,6 +3473,7 @@ class Mesh(object):
         elif self.element_type == "tet" or self.element_type == "hex":
             import os
             os.environ['ETS_TOOLKIT'] = 'qt4'
+            # os.environ['ETS_TOOLKIT'] = 'wx'
             from mayavi import mlab
 
             if to_plot == 'all_faces':
@@ -6982,14 +6983,90 @@ class Mesh(object):
         if p <= 1:
             return self
 
-        if self.element_type == "hex":
-            if p>8 and p!=16 and p!=32:
-                raise NotImplementedError("Converting to linear mesh for hexahedral mesh with p>8 not implemented yet")
+        if self.element_type == "quad" or self.element_type == "hex":
+            if p>12 and p!=16 and p!=32:
+                raise NotImplementedError("Cannot convert p>8 {} mesh to linear mesh".format(self.element_type))
 
         lmesh = Mesh()
         elements = np.copy(self.elements)
 
-        if self.element_type == "hex":
+        if self.element_type == "quad" or self.element_type == "hex":
+            # This is an aranger for internal use -  use PlotMeshNumbering
+            # to understand the remainder of this algorithm
+            if p == 2:
+                aranger = [0, 1, 2]
+            elif p == 3:
+                aranger = [0, 3, 2, 1]
+            elif p == 4:
+                aranger = [0, 1, 2, 3, 4]
+            elif p == 5:
+                aranger = [0, 3, 4, 2, 5, 1]
+            elif p == 6:
+                aranger = [0, 3, 6, 1, 5, 4, 2]
+            elif p == 7:
+                aranger = [0, 3, 7, 5, 2, 4, 6, 1]
+            elif p == 8:
+                aranger = range(9)
+            elif p == 9:
+                aranger = [0, 2, 3, 8, 4, 5, 6, 7, 9, 1]
+            elif p == 10:
+                aranger = [0, 6, 7, 3, 8, 1, 4, 5, 9, 10, 2]
+            elif p == 11:
+                aranger = [0, 9, 10, 6, 11, 2, 3, 4, 5, 7,  8,  1]
+            elif p == 12:
+                aranger = [0, 7, 6, 1, 12, 5, 2, 8, 10, 3, 9, 11, 4]
+            elif p == 16:
+                aranger = range(17)
+            elif p == 32:
+                aranger = range(33)
+
+
+        if self.element_type == "quad":
+            # Create a dummy hex mesh with 1 element for indexing
+            mesh = Mesh()
+            mesh.Square(n=1, element_type="quad")
+            mesh.GetHighOrderMesh(p=p, equally_spaced=True)
+            # Create the mapping indices from the high order mesh
+            mapper = []
+            for i in range(mesh.elements.shape[1]):
+                x = np.where(mesh.elements.ravel()==i)[0][0]
+                mapper.append(x)
+            mapper = np.array(mapper).ravel()
+
+            # Create layers
+            layer0 = []
+            for j in range(p+1):
+                l0 = np.linspace(0,p*(p+1), p+1).astype(np.int64) + j#*(p+1)**2
+                layer0.append(l0)
+            # This layers values can be used in conjunction
+            # with mesh.PlotMeshNumbering() to get aranger values for other ps
+            layers2d = np.array(layer0)
+            # print(layers2d)
+            # mesh.PlotMeshNumbering()
+
+            layers2d = layers2d[:,aranger]
+            layers2d = layers2d[aranger,:]
+
+            # Create connectivity from layers now
+            indexer = []
+            for j in range(p):
+                for k in range(p):
+                    indexer.append(layers2d[j:j+2,k:k+2].ravel()[[0,2,3,1]])
+            indexer = np.array(indexer)
+
+            # Create the final mapp from high to linear mesh.
+            # This is equivalent to p==2 for all a1, a2 ... arrays
+            a_s = mapper.ravel()[indexer].reshape(indexer.shape)
+
+            lmesh.elements = np.zeros((1,4), dtype=np.int64)
+            for counter, a in enumerate(a_s):
+                lmesh.elements = np.concatenate((
+                    lmesh.elements, elements[:,a]
+                    ))
+            lmesh.elements = lmesh.elements[1:,:].astype(np.int64)
+
+
+        elif self.element_type == "hex":
 
             if p == 2:
 
@@ -7025,27 +7102,6 @@ class Mesh(object):
                     x = np.where(mesh.elements.ravel()==i)[0][0]
                     mapper.append(x)
                 mapper = np.array(mapper).ravel()
-
-                # This is an aranger for internal use -  use PlotMeshNumbering
-                # to understand the remainder of this algorithm
-                if p == 2:
-                    aranger = [0, 1, 2]
-                elif p == 3:
-                    aranger = [0, 3, 2, 1]
-                elif p == 4:
-                    aranger = [0, 1, 2, 3, 4]
-                elif p == 5:
-                    aranger = [0, 3, 4, 2, 5, 1]
-                elif p == 6:
-                    aranger = [0, 3, 6, 1, 5, 4, 2]
-                elif p == 7:
-                    aranger = [0, 3, 7, 5, 2, 4, 6, 1]
-                elif p == 8:
-                    aranger = range(9)
-                elif p == 16:
-                    aranger = range(17)
-                elif p == 32:
-                    aranger = range(33)
 
                 # Create layers
                 layer0 = []
@@ -7104,6 +7160,21 @@ class Mesh(object):
                 lmesh.elements = np.concatenate((lmesh.elements,elements[:,simplex[i,:]]))
             lmesh.elements = lmesh.elements[1:,:]
 
+        elif self.element_type == "tri":
+
+            from Florence.QuadratureRules.FeketePointsTri import FeketePointsTri
+            from scipy.spatial import Delaunay
+
+            # BUILD DELAUNAY TRIANGULATION OF REFERENCE ELEMENTS
+            gpoints = FeketePointsTri(p-1)
+            Tfunc = Delaunay(gpoints)
+            simplex = Tfunc.simplices.copy()
+
+            lmesh.elements = np.zeros((1,3))
+            for i in range(Tfunc.nsimplex):
+                lmesh.elements = np.concatenate((lmesh.elements,elements[:,simplex[i,:]]))
+            lmesh.elements = lmesh.elements[1:,:]
+
         else:
             raise NotImplementedError("Converting to linear mesh with {} elements not implemented yet".format(self.element_type))
 
@@ -7114,8 +7185,12 @@ class Mesh(object):
         lmesh.element_type = self.element_type
         lmesh.nelem = lmesh.elements.shape[0]
         lmesh.nnode = lmesh.points.shape[0]
-        lmesh.GetBoundaryFaces()
-        lmesh.GetBoundaryEdges()
+        edim = self.InferElementalDimension()
+        if edim == 3:
+            lmesh.GetBoundaryFaces()
+            lmesh.GetBoundaryEdges()
+        elif edim == 2:
+            lmesh.GetBoundaryEdges()
 
         return lmesh
 
@@ -7470,7 +7545,7 @@ class Mesh(object):
 
 
     def CreateDummy3DMeshfrom2DMesh(self):
-        """Create a dummy 3D mesh from the surfaces of 2D mesh. No volume elements are generated
+        """Create a dummy 3D mesh from the elements of 2D mesh as its surface. No volume elements are generated
             This is used for plotting and generating curvilinear elements for surface mesh using florence
         """
 
@@ -7482,14 +7557,14 @@ class Mesh(object):
         mm = Mesh()
         if self.element_type == "quad":
             mm.element_type = "hex"
-            mm.elements = np.zeros((1,int((p+1)**3))).astype(np.int64)
+            mm.elements = np.zeros((1,int((p+1)**3))).astype(np.uint64)
         elif self.element_type == "tri":
             mm.element_type = "tet"
-            mm.elements = np.zeros((1,int((p+1)*(p+2)*(p+3)/6))).astype(np.int64)
+            mm.elements = np.zeros((1,int((p+1)*(p+2)*(p+3)/6))).astype(np.uint64)
         else:
             raise ValueError("Cannot make a 3D mesh from the 2D mesh of type {}".format(self.element_type))
 
-        mm.edges = np.zeros((1,p+1)).astype(np.int64)
+        mm.edges = np.zeros((1,p+1)).astype(np.uint64)
         mm.points = np.copy(self.points)
         mm.nelem = 1
         mm.nnode = mm.points.shape[0]
@@ -7523,7 +7598,6 @@ class Mesh(object):
         aranger = np.arange(mm.nnode)
         mm.elements = aranger[inv_faces].reshape(self.faces.shape)
         mm.nelem = mm.elements.shape[0]
-        mm.faces = np.copy(self.elements)
         mm.GetBoundaryEdges()
 
         return mm
