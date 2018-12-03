@@ -6984,7 +6984,7 @@ class Mesh(object):
             return self
 
         if self.element_type == "quad" or self.element_type == "hex":
-            if p>12 and p!=16 and p!=32:
+            if p>13 and p!=16 and p!=32:
                 raise NotImplementedError("Cannot convert p>8 {} mesh to linear mesh".format(self.element_type))
 
         lmesh = Mesh()
@@ -7015,10 +7015,17 @@ class Mesh(object):
                 aranger = [0, 9, 10, 6, 11, 2, 3, 4, 5, 7,  8,  1]
             elif p == 12:
                 aranger = [0, 7, 6, 1, 12, 5, 2, 8, 10, 3, 9, 11, 4]
+            elif p == 13:
+                aranger = [0, 13, 6, 2, 7, 5, 3, 9, 8, 12, 11, 10, 4, 1]
             elif p == 16:
                 aranger = range(17)
             elif p == 32:
                 aranger = range(33)
+            else:
+                # This seemingly works fine for quads for some reason, so
+                # quads essentially don't need an aranger and can accomdate
+                # arbitrary p
+                aranger = range(p+1)
 
 
         if self.element_type == "quad":
