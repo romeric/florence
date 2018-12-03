@@ -24,18 +24,14 @@ __all__ = ['Assemble', 'AssembleForces', 'AssembleExplicit', 'AssembleMass', 'As
 
 def Assemble(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
 
-    if fem_solver.memory_model == "shared" or fem_solver.memory_model is None:
-        if not fem_solver.has_low_level_dispatcher:
-            if mesh.nelem <= 600000:
-                return AssemblySmall(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
-            elif mesh.nelem > 600000:
-                print("Larger than memory system. Dask on disk parallel assembly is turned on")
-                return OutofCoreAssembly(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
-        else:
-            return LowLevelAssembly(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
-
-    elif fem_solver.memory_model == "distributed":
-        raise RuntimeError("This memory model is not used anymore, not even under MPI. Use memory_model='shared' instead")
+    if fem_solver.has_low_level_dispatcher:
+        return LowLevelAssembly(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
+    else:
+        if mesh.nelem <= 600000:
+            return AssemblySmall(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
+        elif mesh.nelem > 600000:
+            print("Larger than memory system. Dask on disk parallel assembly is turned on")
+            return OutofCoreAssembly(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp)
 
 
 def LowLevelAssembly(fem_solver, function_space, formulation, mesh, material, Eulerx, Eulerp):
