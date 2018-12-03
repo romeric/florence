@@ -573,10 +573,10 @@ def QuadBallSurface(center=(0.,0.,0.), radius=1., n=10, element_type="quad"):
 
 
 
-def QuadBallHollowArc(center=(0.,0.,0.), inner_radius=9., outer_radius=10., n=10,
+def QuadBallHollowArc(center=(0.,0.,0.), inner_radius=9., outer_radius=10., n=10, nrad=1,
     element_type="hex", cut_threshold=None, portion=1./8.):
     """Similar to QuadBall but hollow and creates only 1/8th or 1/4th or 1/2th of the sphere.
-        starting and ending angles are not supported. Radial division (nrad) is also not supported
+        Starting and ending angles are not supported. Radial division (nrad) is supported
 
         input:
             cut_threshold               [float] cutting threshold for element removal since this function is based
@@ -588,33 +588,47 @@ def QuadBallHollowArc(center=(0.,0.,0.), inner_radius=9., outer_radius=10., n=10
 
     assert inner_radius < outer_radius
 
-    mm1 = QuadBallSurface(n=n, element_type=element_type)
-    mm2 = deepcopy(mm1)
+    mm = QuadBallSurface(n=n, element_type=element_type)
 
     offset = outer_radius*2.
     if cut_threshold is None:
         cut_threshold = -0.01
     if portion == 1./8.:
-        mm1.RemoveElements(np.array([ [ cut_threshold, cut_threshold, cut_threshold], [ offset, offset,  offset]]))
-        mm2.RemoveElements(np.array([ [ cut_threshold, cut_threshold, cut_threshold], [ offset, offset,  offset]]))
+        mm.RemoveElements(np.array([ [ cut_threshold, cut_threshold, cut_threshold], [ offset, offset,  offset]]))
     elif portion == 1./4.:
-        mm1.RemoveElements(np.array([ [ cut_threshold, cut_threshold, -offset], [ offset, offset,  offset]]))
-        mm2.RemoveElements(np.array([ [ cut_threshold, cut_threshold, -offset], [ offset, offset,  offset]]))
+        mm.RemoveElements(np.array([ [ cut_threshold, cut_threshold, -offset], [ offset, offset,  offset]]))
     elif portion == 1./2.:
-        mm1.RemoveElements(np.array([ [ cut_threshold, -offset, -offset], [ offset, offset,  offset]]))
-        mm2.RemoveElements(np.array([ [ cut_threshold, -offset, -offset], [ offset, offset,  offset]]))
+        mm.RemoveElements(np.array([ [ cut_threshold, -offset, -offset], [ offset, offset,  offset]]))
     else:
         raise ValueError("The value of portion can only be 1/8., 1/4. or 1/2.")
 
-    if not np.isclose(inner_radius,1):
-        mm1.points *= inner_radius
-    if not np.isclose(outer_radius,1):
-        mm2.points *= outer_radius
+    radii = np.linspace(inner_radius, outer_radius, nrad+1)
 
     mesh = Mesh()
     mesh.element_type = "hex"
-    mesh.elements = np.hstack((mm1.elements, mm1.nnode + mm2.elements)).astype(np.int64)
-    mesh.points   = np.vstack((mm1.points, mm2.points))
+    mesh.nelem = 0
+    mesh.nnode = 0
+
+    for i in range(nrad):
+        mm1, mm2 = deepcopy(mm), deepcopy(mm)
+        if not np.isclose(radii[i],1):
+            mm1.points *= radii[i]
+        if not np.isclose(radii[i+1],1):
+            mm2.points *= radii[i+1]
+
+        if i == 0:
+            elements = np.hstack((mm1.elements, mm1.nnode + mm2.elements)).astype(np.int64)
+            mesh.elements = np.copy(elements)
+            mesh.points = np.vstack((mm1.points, mm2.points))
+        else:
+            elements = np.hstack((mesh.elements[(i-1)*mm2.nelem:i*mm2.nelem,4:],
+                mesh.nnode + mm2.elements)).astype(np.int64)
+            mesh.elements = np.vstack((mesh.elements, elements))
+            mesh.points = np.vstack((mesh.points, mm2.points))
+        mesh.nelem = mesh.elements.shape[0]
+        mesh.nnode = mesh.points.shape[0]
+
+    mesh.elements = np.ascontiguousarray(mesh.elements, dtype=np.int64)
     mesh.nelem = mesh.elements.shape[0]
     mesh.nnode = mesh.points.shape[0]
     mesh.GetBoundaryFaces()
