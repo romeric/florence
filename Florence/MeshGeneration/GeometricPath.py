@@ -11,8 +11,10 @@ class GeometricPath(object):
     def __init__(self):
         pass
 
-    def ComputeExtrusion(self,base_mesh):
-        pass
+    def ComputeExtrusion(self, base_mesh, user_extrusion_func=None):
+
+        if user_extrusion_func != None:
+            return user_extrusion_func(base_mesh)
 
 
 
@@ -21,23 +23,23 @@ class GeometricPath(object):
 class GeometricLine(GeometricPath):
 
     def __init__(self, start=(0.,0.,0.), end=(1.,2.,3)):
-        """Constructs a line given the start and ending points 
+        """Constructs a line given the start and ending points
         """
 
         self.start = np.array(start)
         self.end = np.array(end)
         self.length = np.linalg.norm(self.start - self.end)
 
-    
+
     def ComputeExtrusion(self, nlong=10):
-        """Computes extrusion of base_mesh along the self (line)
-            using equal spacing 
+        """Computes extrusion of base_mesh along self (line)
+            using equal spacing
 
             input:
                 nlong:                      [int] number of discretisation along
-                                            the arc
+                                            the line
             returns:
-                points:                     [1D array] of discretisation along arc
+                points:                     [1D array] of discretisation along line
         """
 
 
@@ -66,7 +68,7 @@ class GeometricArc(GeometricPath):
         """Constructs an arc given the center of the arc and start
             and ending points of the arc
         """
-        
+
         from numpy.linalg import norm
 
         self.center = np.array(center)

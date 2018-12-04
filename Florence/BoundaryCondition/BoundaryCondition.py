@@ -449,6 +449,7 @@ class BoundaryCondition(object):
         from Florence.FunctionSpace import Tri
 
         C = mesh.InferPolynomialDegree() - 1
+        mesh.ChangeType()
 
         if formulation.ndim == 2:
 
