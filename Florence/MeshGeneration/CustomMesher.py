@@ -8,7 +8,7 @@ from Florence.Tensor import totuple, unique2d
 
 
 __all__ = ['HarvesterPatch', 'SubdivisionArc', 'SubdivisionCircle', 'QuadBall',
-'QuadBallHollowArc']
+'QuadBallSphericalArc']
 
 """
 A series of custom meshes
@@ -573,10 +573,11 @@ def QuadBallSurface(center=(0.,0.,0.), radius=1., n=10, element_type="quad"):
 
 
 
-def QuadBallHollowArc(center=(0.,0.,0.), inner_radius=9., outer_radius=10., n=10, nrad=1,
+def QuadBallSphericalArc(center=(0.,0.,0.), inner_radius=9., outer_radius=10., n=10, nthick=1,
     element_type="hex", cut_threshold=None, portion=1./8.):
     """Similar to QuadBall but hollow and creates only 1/8th or 1/4th or 1/2th of the sphere.
-        Starting and ending angles are not supported. Radial division (nrad) is supported
+        Starting and ending angles are not supported. Radial division (nthick: to be consistent
+        with SphericalArc method of Mesh class) is supported
 
         input:
             cut_threshold               [float] cutting threshold for element removal since this function is based
@@ -602,14 +603,14 @@ def QuadBallHollowArc(center=(0.,0.,0.), inner_radius=9., outer_radius=10., n=10
     else:
         raise ValueError("The value of portion can only be 1/8., 1/4. or 1/2.")
 
-    radii = np.linspace(inner_radius, outer_radius, nrad+1)
+    radii = np.linspace(inner_radius, outer_radius, nthick+1)
 
     mesh = Mesh()
     mesh.element_type = "hex"
     mesh.nelem = 0
     mesh.nnode = 0
 
-    for i in range(nrad):
+    for i in range(nthick):
         mm1, mm2 = deepcopy(mm), deepcopy(mm)
         if not np.isclose(radii[i],1):
             mm1.points *= radii[i]

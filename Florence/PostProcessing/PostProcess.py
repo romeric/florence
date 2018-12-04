@@ -3344,7 +3344,8 @@ class PostProcess(object):
         svpoints = tmesh.svpoints
 
         if plot_surfaces:
-            Uplot = tmesh.quantity
+            if QuantityToPlot is not None:
+                Uplot = tmesh.quantity
             Xplot = tmesh.points
             Tplot = tmesh.elements
 
