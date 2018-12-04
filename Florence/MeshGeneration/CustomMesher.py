@@ -543,8 +543,11 @@ def QuadBallSurface(center=(0.,0.,0.), radius=1., n=10, element_type="quad"):
         boundary_condition = BoundaryCondition()
         boundary_condition.SetCADProjectionParameters(
             "sphere_cad_file.igs",
-            scale=scale,condition=condition, project_on_curves=True, solve_for_planar_faces=True,
-            modify_linear_mesh_on_projection=True, fix_dof_elsewhere=False
+            scale=scale,condition=condition,
+            project_on_curves=True,
+            solve_for_planar_faces=True,
+            modify_linear_mesh_on_projection=True,
+            fix_dof_elsewhere=False
             )
         boundary_condition.GetProjectionCriteria(mesh)
         nodesDBC, Dirichlet = boundary_condition.PostMeshWrapper(formulation, mesh, None, None, FEMSolver())
