@@ -26,8 +26,38 @@ class StructuralDynamicIntegrator(object):
         self.beta    = 0.25
         self.lump_rhs = False
 
+        self.electric_dofs = None
+        self.mechanical_dofs = None
+        self.columns_in_mech = None
+        self.columns_in_electric = None
 
-    def GetBoundaryInfo(self, mesh, formulation, boundary_condition):
+        # NEEDS TO BE SET FOR EVERY STEP/INCREMENT
+        self.bc_changed_at_this_step = False
+
+
+    def GetBoundaryInfo(self, mesh, formulation, boundary_condition, increment=0):
+
+        # Do not compute for steps at which BC does not change
+        if increment != 0:
+            if formulation.fields == "electro_mechanics":
+                if self.columns_in_mech is not None:
+                    test_dofs_m = np.intersect1d(boundary_condition.columns_in,self.mechanical_dofs)
+                    test_dofs_e = np.intersect1d(boundary_condition.columns_in,self.electric_dofs)
+                    if np.array_equal(test_dofs_m, self.columns_in_mech) and\
+                        np.array_equal(test_dofs_e, self.columns_in_electric):
+                        self.bc_changed_at_this_step = False
+                        return
+                    else:
+                        self.bc_changed_at_this_step = True
+
+            elif formulation.fields == "mechanics":
+                if self.columns_in_mech is not None:
+                    if np.array_equal(self.columns_out_mech, boundary_condition.columns_out):
+                        self.bc_changed_at_this_step = False
+                        return
+                    else:
+                        self.bc_changed_at_this_step = True
+
 
         all_dofs = np.arange(mesh.points.shape[0]*formulation.nvar)
         if formulation.fields == "electro_mechanics":
@@ -82,6 +112,28 @@ class StructuralDynamicIntegrator(object):
             self.applied_dirichlet_mech = boundary_condition.applied_dirichlet
 
 
+    def ComputeMassMatrixInfo(self, M, formulation, fem_solver):
+        """Computes the inverse of lumped mass matrix and so on
+        """
+
+        invM = None
+        if formulation.fields == "electro_mechanics":
+            if fem_solver.mass_type == "lumped":
+                M = M.ravel()
+                invM = np.zeros_like(M)
+                invM[self.mechanical_dofs] = np.reciprocal(M[self.mechanical_dofs])
+                M_mech = M[self.mechanical_dofs]
+            else:
+                M_mech = M[self.mechanical_dofs,:][:,self.mechanical_dofs]
+        else:
+            if fem_solver.mass_type == "lumped":
+                M = M.ravel()
+                M_mech = M
+                invM = np.reciprocal(M)
+            else:
+                M_mech = M
+
+        return M_mech, invM
 
 
 

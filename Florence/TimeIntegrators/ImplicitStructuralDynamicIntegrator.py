@@ -39,7 +39,7 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
             D = fem_solver.damping_factor*M
 
         # GET BOUNDARY CONDITIONS INFROMATION
-        self.GetBoundaryInfo(mesh, formulation,boundary_condition)
+        self.GetBoundaryInfo(mesh, formulation, boundary_condition)
         if formulation.fields == "electro_mechanics":
             M_mech = M[self.mechanical_dofs,:][:,self.mechanical_dofs]
             if fem_solver.include_physical_damping:
@@ -73,16 +73,21 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
 
             t_increment = time()
 
-            # GET THE INCREMENTAL DIRICHLET
-            if boundary_condition.applied_dirichlet.ndim == 2:
-                AppliedDirichletInc = boundary_condition.applied_dirichlet[:,Increment]
-            else:
-                if boundary_condition.make_loading == "ramp":
-                    AppliedDirichletInc = boundary_condition.applied_dirichlet*(1.*Increment/LoadIncrement)
+            # GET INCREMENTAL DIRICHLET BC
+            if not boundary_condition.has_step_wise_dirichlet_loading:
+                if boundary_condition.applied_dirichlet.ndim == 2:
+                    AppliedDirichletInc = boundary_condition.applied_dirichlet[:,Increment]
                 else:
-                    AppliedDirichletInc = boundary_condition.applied_dirichlet/nincr_last
+                    if boundary_condition.make_loading == "ramp":
+                        AppliedDirichletInc = boundary_condition.applied_dirichlet*(1.*Increment/LoadIncrement)
+                    else:
+                        AppliedDirichletInc = boundary_condition.applied_dirichlet/nincr_last
+            else:
+                boundary_condition.ApplyStepWiseDirichletFunc(formulation, mesh, increment=Increment)
+                self.GetBoundaryInfo(mesh, formulation, boundary_condition, increment=Increment)
+                AppliedDirichletInc = boundary_condition.applied_dirichlet
 
-            # APPLY NEUMANN BOUNDARY CONDITIONS
+            # GET INCREMENTAL NEUMANN DIRICHLET BC
             if NeumannForces.ndim == 2 and NeumannForces.shape[1]>1:
                 DeltaF = NeumannForces[:,Increment][:,None]
             else:

@@ -35,24 +35,8 @@ class ExplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
 
         # GET BOUNDARY CONDITIONS INFROMATION
         self.GetBoundaryInfo(mesh, formulation, boundary_condition)
-
-        # COMPUTE INVERSE OF LUMPED MASS MATRIX
-        if formulation.fields == "electro_mechanics":
-            if fem_solver.mass_type == "lumped":
-                M = M.ravel()
-                invM = np.zeros_like(M)
-                invM[self.mechanical_dofs] = np.reciprocal(M[self.mechanical_dofs])
-                # M_mech = M[self.mechanical_dofs]
-                M_mech = M[self.mechanical_dofs]
-            else:
-                M_mech = M[self.mechanical_dofs,:][:,self.mechanical_dofs]
-        else:
-            if fem_solver.mass_type == "lumped":
-                M = M.ravel()
-                M_mech = M
-                invM = np.reciprocal(M)
-            else:
-                M_mech = M
+        # GET MASS MATRIX INFROMATION
+        M_mech, invM = self.ComputeMassMatrixInfo(M, formulation, fem_solver)
 
         # COMPUTE DAMPING MATRIX BASED ON MASS
         if fem_solver.include_physical_damping:
@@ -111,15 +95,21 @@ class ExplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
 
             t_increment = time()
 
-            if boundary_condition.applied_dirichlet.ndim == 2:
-                AppliedDirichletInc = boundary_condition.applied_dirichlet[:,Increment-1]
-            else:
-                if boundary_condition.make_loading == "ramp":
-                    AppliedDirichletInc = boundary_condition.applied_dirichlet*(1.*Increment/LoadIncrement)
+            # GET INCREMENTAL DIRICHLET BC
+            if not boundary_condition.has_step_wise_dirichlet_loading:
+                if boundary_condition.applied_dirichlet.ndim == 2:
+                    AppliedDirichletInc = boundary_condition.applied_dirichlet[:,Increment-1]
                 else:
-                    AppliedDirichletInc = boundary_condition.applied_dirichlet/nincr_last
+                    if boundary_condition.make_loading == "ramp":
+                        AppliedDirichletInc = boundary_condition.applied_dirichlet*(1.*Increment/LoadIncrement)
+                    else:
+                        AppliedDirichletInc = boundary_condition.applied_dirichlet/nincr_last
+            else:
+                boundary_condition.ApplyStepWiseDirichletFunc(formulation, mesh, increment=Increment)
+                self.GetBoundaryInfo(mesh, formulation, boundary_condition, increment=Increment)
+                AppliedDirichletInc = boundary_condition.applied_dirichlet
 
-            # APPLY NEUMANN BOUNDARY CONDITIONS
+            # GET INCREMENTAL NEUMANN DIRICHLET BC
             if NeumannForces.ndim == 2 and NeumannForces.shape[1]>1:
                 NodalForces = NeumannForces[:,Increment-1]
             else:
@@ -159,7 +149,8 @@ class ExplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
 
             # SOLVE ELECTROSTATICS PROBLEM
             if formulation.fields == "electro_mechanics":
-                Eulerp[:] = self.SolveElectrostaticsImplicit(mesh, formulation, boundary_condition, material, fem_solver, solver, Eulerx, Increment)
+                Eulerp[:] = self.SolveElectrostaticsImplicit(mesh, formulation,
+                    boundary_condition, material, fem_solver, solver, Eulerx, Increment)
 
             # SAVE RESULTS
             if Increment % fem_solver.save_frequency == 0 or\
@@ -298,15 +289,24 @@ class ExplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
             if self.applied_dirichlet_electric.ndim == 2:
                 return self.applied_dirichlet_electric[:,Increment]
             else:
-                # RAMP TYPE
-                return self.applied_dirichlet_electric*(1.*Increment/LoadIncrement)
+                if boundary_condition.make_loading == "ramp":
+                    return self.applied_dirichlet_electric*(1.*Increment/LoadIncrement)
+                else:
+                    return self.applied_dirichlet_electric/LoadIncrement
 
-        # GET BOUNDARY CONDITIONS
-        if boundary_condition.dirichlet_flags.ndim==3:
-            self.eboundary_condition.dirichlet_flags = boundary_condition.dirichlet_flags[:,-1,Increment]
+        # GET DIRICHLET BOUNDARY CONDITIONS
+        if not boundary_condition.has_step_wise_dirichlet_loading:
+            if boundary_condition.dirichlet_flags.ndim==3:
+                self.eboundary_condition.dirichlet_flags = boundary_condition.dirichlet_flags[:,-1,Increment]
+            else:
+                if boundary_condition.make_loading == "ramp":
+                    self.eboundary_condition.dirichlet_flags = boundary_condition.dirichlet_flags[:,-1]*(1.*Increment/LoadIncrement)
+                else:
+                    self.eboundary_condition.dirichlet_flags = boundary_condition.dirichlet_flags[:,-1]/LoadIncrement
         else:
-            # RAMP TYPE
-            self.eboundary_condition.dirichlet_flags = boundary_condition.dirichlet_flags[:,-1]*(1.*Increment/LoadIncrement)
+            self.eboundary_condition.dirichlet_flags = boundary_condition.dirichlet_flags[:,-1]
+
+        # GET NEUMANN BOUNDARY CONDITIONS
         if boundary_condition.neumann_flags is not None:
             if boundary_condition.neumann_data_applied_at == "node":
                 if boundary_condition.neumann_flags.ndim==3:

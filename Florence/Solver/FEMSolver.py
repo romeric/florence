@@ -399,6 +399,15 @@ class FEMSolver(object):
             elif formulation.fields == "electro_mechanics":
                 if boundary_condition.dirichlet_flags.shape[1] != ndim+1:
                     raise ValueError("Essential boundary conditions are not imposed correctly")
+
+            if boundary_condition.has_step_wise_dirichlet_loading or \
+                boundary_condition.has_step_wise_neumann_loading:
+                if self.analysis_type != "dynamic":
+                    raise ValueError("User defined step loading only applies for dynamic problems")
+                if formulation.fields != "mechanics" and formulation.fields != "electro_mechanics":
+                    raise NotImplementedError("User defined step loading under this setting is not supported")
+                if self.analysis_nature == "linear":
+                    raise NotImplementedError("User defined step loading under this setting is not supported")
         ##############################################################################
 
         return function_spaces, solver

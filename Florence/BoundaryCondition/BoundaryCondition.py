@@ -79,7 +79,10 @@ class BoundaryCondition(object):
         self.is_body_force_shape_functions_computed = False
 
         self.make_loading = make_loading # "ramp" or "constant"
-        self.has_step_wise_user_loading = False
+        self.has_step_wise_dirichlet_loading = False
+        self.step_wise_dirichlet_data = None
+        self.has_step_wise_neumann_loading = False
+        self.step_wise_neumann_data = None
 
         # NODAL FORCES GENERATED BASED ON DIRICHLET OR NEUMANN ARE NOT
         # IMPLEMENTED AS PART OF BOUNDARY CONDITION YET. THIS ESSENTIALLY
@@ -233,7 +236,8 @@ class BoundaryCondition(object):
 
         if "apply" in kwargs.keys():
             del kwargs["apply"]
-            self.has_step_wise_user_loading = True
+            self.has_step_wise_dirichlet_loading = True
+            self.step_wise_dirichlet_data = {'func':func, 'args': args, 'kwargs': kwargs}
             self.dirichlet_flags = func(0, *args, **kwargs)
             return self.dirichlet_flags
 
@@ -247,7 +251,8 @@ class BoundaryCondition(object):
 
         if "apply" in kwargs.keys():
             del kwargs["apply"]
-            self.has_step_wise_user_loading = True
+            self.has_step_wise_neumann_loading = True
+            self.step_wise_neumann_data = {'func':func, 'args': args, 'kwargs': kwargs}
 
         tups = func(*args, **kwargs)
         if not isinstance(tups,tuple) and self.neumann_data_applied_at == "node":
@@ -260,6 +265,22 @@ class BoundaryCondition(object):
             self.neumann_flags = tups[0]
             self.applied_neumann = tups[1]
             return tups
+
+
+    def ApplyStepWiseDirichletFunc(self, formulation, mesh, increment=0):
+
+        self.dirichlet_flags = self.step_wise_dirichlet_data['func'](increment,
+            *self.step_wise_dirichlet_data['args'], **self.step_wise_dirichlet_data['kwargs'])
+        self.analysis_type = "static"
+        self.GetDirichletBoundaryConditions(formulation, mesh)
+        self.analysis_type = "dynamic"
+
+
+    def ApplyStepWiseNeumannFunc(self, formulation, mesh, increment=0):
+
+        self.neumann_flags = self.step_wise_neumann_data['func'](increment,
+            *self.step_wise_neumann_data['args'], **self.step_wise_neumann_data['kwargs'])
+        raise NotImplementedError("Not fully implemented for Neumann")
 
 
     def GetDirichletBoundaryConditions(self, formulation, mesh, material=None, solver=None, fem_solver=None):
