@@ -144,9 +144,10 @@ class LinearSolver(object):
 
     @property
     def WhichLinearSolvers(self):
-        return {"direct":["superlu","umfpack","mumps"],
-            "iterative":["cg","bicg","cgstab","bicgstab"
-            "gmres","lgmres"],"amg":["gmres"]}
+        return {"direct":["superlu", "umfpack", "mumps", "pardiso"],
+                "iterative":["cg", "bicg", "cgstab", "bicgstab", "gmres", "lgmres"],
+                "amg":["cg", "bicg", "cgstab", "bicgstab", "gmres", "lgmres"],
+                "petsc":["cg", "bicgstab", "gmres"]}
 
 
     def GetPreconditioner(self,A, type="amg_smoothed_aggregation"):
@@ -206,6 +207,14 @@ class LinearSolver(object):
 
     def Solve(self, A, b, reuse_factorisation=False):
         """Solves the linear system of equations"""
+
+        if not issparse(A):
+            raise ValueError("Linear system is not of sparse type")
+
+        if A.shape == (0,0) and b.shape[0] == 0:
+            warn("Empty linear system!!! Nothing to solve!!!")
+            return np.copy(b)
+
 
         self.reuse_factorisation = reuse_factorisation
         if self.solver_type != "direct" and self.reuse_factorisation is True:

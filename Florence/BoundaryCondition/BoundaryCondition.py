@@ -79,7 +79,7 @@ class BoundaryCondition(object):
         self.is_body_force_shape_functions_computed = False
 
         self.make_loading = make_loading # "ramp" or "constant"
-
+        self.has_step_wise_user_loading = False
 
         # NODAL FORCES GENERATED BASED ON DIRICHLET OR NEUMANN ARE NOT
         # IMPLEMENTED AS PART OF BOUNDARY CONDITION YET. THIS ESSENTIALLY
@@ -228,11 +228,27 @@ class BoundaryCondition(object):
 
 
     def SetDirichletCriteria(self, func, *args, **kwargs):
+        """Applies user defined Dirichlet data to self
+        """
+
+        if "apply" in kwargs.keys():
+            del kwargs["apply"]
+            self.has_step_wise_user_loading = True
+            self.dirichlet_flags = func(0, *args, **kwargs)
+            return self.dirichlet_flags
+
         self.dirichlet_flags = func(*args, **kwargs)
         return self.dirichlet_flags
 
 
     def SetNeumannCriteria(self, func, *args, **kwargs):
+        """Applies user defined Neumann data to self
+        """
+
+        if "apply" in kwargs.keys():
+            del kwargs["apply"]
+            self.has_step_wise_user_loading = True
+
         tups = func(*args, **kwargs)
         if not isinstance(tups,tuple) and self.neumann_data_applied_at == "node":
             self.neumann_flags = tups
@@ -296,8 +312,8 @@ class BoundaryCondition(object):
             else:
 
                 end = -3
-                self.applied_dirichlet = np.loadtxt(mesh.filename.split(".")[0][:end]+"_Dirichlet_"+"P"+str(MainData.C+1)+".dat",dtype=np.float64)
-                self.columns_out = np.loadtxt(mesh.filename.split(".")[0][:end]+"_ColumnsOut_"+"P"+str(MainData.C+1)+".dat")
+                self.applied_dirichlet = np.loadtxt(mesh.filename.split(".")[0][:end]+"_dirichlet.dat",  dtype=np.float64)
+                self.columns_out = np.loadtxt(mesh.filename.split(".")[0][:end]+"_columns_out.dat")
 
                 print('Finished identifying Dirichlet boundary conditions from CAD geometry.',
                     ' Time taken', time()-tCAD, 'seconds')
@@ -340,6 +356,11 @@ class BoundaryCondition(object):
         # GENERAL PROCEDURE - GET REDUCED MATRICES FOR FINAL SOLUTION
         self.columns_out = self.columns_out.astype(np.int64)
         self.columns_in = np.delete(np.arange(0,nvar*mesh.points.shape[0]),self.columns_out)
+
+        if self.columns_in.shape[0] == 0:
+            warn("Dirichlet boundary conditions have been applied on the entire mesh")
+        if self.columns_in.shape[0] == 0:
+            warn("No Dirichlet boundary conditions have been applied. The system is unconstrained")
 
         if self.save_dirichlet_data:
             from scipy.io import savemat
