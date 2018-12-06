@@ -253,15 +253,18 @@ class BoundaryCondition(object):
             del kwargs["apply"]
             self.has_step_wise_neumann_loading = True
             self.step_wise_neumann_data = {'func':func, 'args': args, 'kwargs': kwargs}
+            tups = func(0, *args, **kwargs)
+        else:
+            tups = func(*args, **kwargs)
 
-        tups = func(*args, **kwargs)
         if not isinstance(tups,tuple) and self.neumann_data_applied_at == "node":
             self.neumann_flags = tups
             return self.neumann_flags
         else:
             self.neumann_data_applied_at == "face"
             if len(tups) !=2:
-                raise ValueError("User-defined Neumann criterion function {} should return one flag and one data array".format(func.__name__))
+                raise ValueError("User-defined Neumann criterion function {} "
+                    "should return one flag and one data array".format(func.__name__))
             self.neumann_flags = tups[0]
             self.applied_neumann = tups[1]
             return tups
@@ -276,11 +279,25 @@ class BoundaryCondition(object):
         self.analysis_type = "dynamic"
 
 
-    def ApplyStepWiseNeumannFunc(self, formulation, mesh, increment=0):
+    def ApplyStepWiseNeumannFunc(self, formulation, mesh, material, increment=0):
 
-        self.neumann_flags = self.step_wise_neumann_data['func'](increment,
+        tups = self.step_wise_neumann_data['func'](increment,
             *self.step_wise_neumann_data['args'], **self.step_wise_neumann_data['kwargs'])
-        raise NotImplementedError("Not fully implemented for Neumann")
+
+        if not isinstance(tups,tuple) and self.neumann_data_applied_at == "node":
+            self.neumann_flags = tups
+        else:
+            self.neumann_data_applied_at == "face"
+            if len(tups) !=2:
+                raise ValueError("User-defined Neumann criterion function {} "
+                    "should return one flag and one data array".format(func.__name__))
+            self.neumann_flags = tups[0]
+            self.applied_neumann = tups[1]
+
+        self.analysis_type = "static"
+        F = self.ComputeNeumannForces(mesh, material, formulation.function_spaces)
+        self.analysis_type = "dynamic"
+        return F
 
 
     def GetDirichletBoundaryConditions(self, formulation, mesh, material=None, solver=None, fem_solver=None):
@@ -727,25 +744,12 @@ class BoundaryCondition(object):
             pmesh.nelem = np.int64(surface_flags[niter,1])
             pmesh.GetBoundaryEdges()
             unique_edges = np.unique(pmesh.edges).astype(nodesDBC.dtype)
-            # Dirichlet2D = np.zeros((unique_edges.shape[0],3))
-            # nodesDBC2D = np.zeros(unique_edges.shape[0]).astype(np.int64)
 
             unique_elements, inv  = np.unique(pmesh.elements, return_inverse=True)
             unique_elements = unique_elements.astype(nodesDBC.dtype)
             aranger = np.arange(unique_elements.shape[0],dtype=np.uint64)
             pmesh.elements = aranger[inv].reshape(pmesh.elements.shape)
 
-            # counter = 0
-            # for i in unique_edges:
-            #     nodesDBC2D[counter] = np.where(nodesDBC==i)[0][0]
-            #     Dirichlet2D[counter,:] = Dirichlet[nodesDBC2D[counter],:]
-            #     counter += 1
-            # nodesDBC2D = nodesDBC2D.astype(np.int64)
-
-            # temp_dict = []
-            # for i in nodesDBC[nodesDBC2D].flatten():
-            #     temp_dict.append(np.where(unique_elements==i)[0][0])
-            # nodesDBC2D = np.array(temp_dict,copy=False)
             dirichlet_edges = in2d_unsorted(nodesDBC,unique_edges[:,None]).flatten()
             nodesDBC2D = in2d_unsorted(unique_elements.astype(nodesDBC.dtype)[:,None],nodesDBC[dirichlet_edges]).flatten()
             Dirichlet2D = Dirichlet[dirichlet_edges,:]
@@ -816,9 +820,6 @@ class BoundaryCondition(object):
             Disp = np.zeros((TotalDisp.shape[0],3))
             Disp[:,:2] = TotalDisp[:,:,-1]
 
-            # temp_dict = []
-            # for i in unique_elements:
-            #     temp_dict.append(np.where(nodesDBC==i)[0][0])
             temp_dict = in2d_unsorted(nodesDBC,unique_elements[:,None]).flatten()
             Dirichlet[temp_dict,:] = np.dot(Disp,Q)
 
@@ -828,17 +829,6 @@ class BoundaryCondition(object):
                     QuantityToPlot=solution.ScaledJacobian, interpolation_degree=40)
                 import matplotlib.pyplot as plt
                 plt.show()
-
-
-            # import matplotlib.pyplot as plt
-            # figure = plt.figure(figsize=(8, 8))
-            # TotalDisp = np.zeros_like(TotalDisp)
-            # TotalDisp[pboundary_condition.nodesDBC,:,-1] = Dirichlet2D[:,:,None].reshape(36,1,2)
-            # figure=None
-            # post_process = PostProcess(2,2)
-            # post_process.CurvilinearPlot(pmesh, TotalDisp, interpolation_degree=40,
-            # figure=figure, color="#E3A933", plot_points=True, point_radius=2.0)
-            # plt.show()
 
             del pmesh, pboundary_condition
 
@@ -960,7 +950,7 @@ class BoundaryCondition(object):
     def SetNURBSCondition(self,nurbs_func,*args):
         self.nurbs_condition = nurbs_func(*args)
 
-        # dynamic_step=0
+
     def ComputeNeumannForces(self, mesh, material, function_spaces, compute_traction_forces=True, compute_body_forces=False):
         """Compute/assemble traction and body forces"""
 

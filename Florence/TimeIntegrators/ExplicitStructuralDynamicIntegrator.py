@@ -65,7 +65,6 @@ class ExplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
             # A0[:] = (NeumannForces[:,0] - TractionForces).ravel()*invM
             A0[:] = InitResidual[self.mechanical_dofs]*invM[self.mechanical_dofs]
         else:
-            #
             if formulation.fields == "electro_mechanics":
                 M_b, F_b = M_mech[self.mech_in,:][:,self.mech_in], InitResidual[:,None][self.mech_in,0]
                 sola = solver.Solve(M_b,F_b)
@@ -110,13 +109,18 @@ class ExplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
                 AppliedDirichletInc = boundary_condition.applied_dirichlet
 
             # GET INCREMENTAL NEUMANN DIRICHLET BC
-            if NeumannForces.ndim == 2 and NeumannForces.shape[1]>1:
-                NodalForces = NeumannForces[:,Increment-1]
-            else:
-                if boundary_condition.make_loading == "ramp":
-                    NodalForces = (NeumannForces.ravel()*(1.*Increment/LoadIncrement))
+            if not boundary_condition.has_step_wise_neumann_loading:
+                if NeumannForces.ndim == 2 and NeumannForces.shape[1]>1:
+                    NodalForces = NeumannForces[:,Increment-1]
                 else:
-                    NodalForces = NeumannForces.ravel()/nincr_last
+                    if boundary_condition.make_loading == "ramp":
+                        NodalForces = (NeumannForces.ravel()*(1.*Increment/LoadIncrement))
+                    else:
+                        NodalForces = NeumannForces.ravel()/nincr_last
+            else:
+                NodalForces = boundary_condition.ApplyStepWiseNeumannFunc(formulation, mesh,
+                    material, increment=Increment).ravel()
+
 
             # Residual[:] = NodalForces - TractionForces
             Residual = NodalForces - TractionForces
@@ -284,6 +288,8 @@ class ExplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
         """
 
         LoadIncrement = fem_solver.number_of_load_increments
+        nincr_last = float(LoadIncrement-1) if LoadIncrement !=1 else 1
+
         # IF ALL ELECTRIC DoFs ARE FIXED
         if mesh.points.shape[0] == self.electric_out.shape[0]:
             if self.applied_dirichlet_electric.ndim == 2:
@@ -292,7 +298,7 @@ class ExplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
                 if boundary_condition.make_loading == "ramp":
                     return self.applied_dirichlet_electric*(1.*Increment/LoadIncrement)
                 else:
-                    return self.applied_dirichlet_electric/LoadIncrement
+                    return self.applied_dirichlet_electric/nincr_last
 
         # GET DIRICHLET BOUNDARY CONDITIONS
         if not boundary_condition.has_step_wise_dirichlet_loading:
@@ -302,28 +308,44 @@ class ExplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
                 if boundary_condition.make_loading == "ramp":
                     self.eboundary_condition.dirichlet_flags = boundary_condition.dirichlet_flags[:,-1]*(1.*Increment/LoadIncrement)
                 else:
-                    self.eboundary_condition.dirichlet_flags = boundary_condition.dirichlet_flags[:,-1]/LoadIncrement
+                    self.eboundary_condition.dirichlet_flags = boundary_condition.dirichlet_flags[:,-1]/nincr_last
         else:
             self.eboundary_condition.dirichlet_flags = boundary_condition.dirichlet_flags[:,-1]
 
         # GET NEUMANN BOUNDARY CONDITIONS
-        if boundary_condition.neumann_flags is not None:
-            if boundary_condition.neumann_data_applied_at == "node":
-                if boundary_condition.neumann_flags.ndim==3:
-                    self.eboundary_condition.neumann_flags = boundary_condition.neumann_flags[:,-1, Increment]
-                else:
-                    # RAMP TYPE
-                    self.eboundary_condition.neumann_flags = boundary_condition.neumann_flags[:,-1]*(1.*Increment/LoadIncrement)
-            if boundary_condition.neumann_data_applied_at == "face":
-                if boundary_condition.neumann_flags.ndim==2:
-                    self.eboundary_condition.neumann_flags = boundary_condition.neumann_flags[:,Increment]
-                    self.eboundary_condition.applied_neumann = boundary_condition.applied_neumann[:,-1, Increment]
-                    self.eboundary_condition.applied_neumann = self.eboundary_condition.applied_neumann[:,None]
-                else:
-                    # RAMP TYPE
+        if not boundary_condition.has_step_wise_neumann_loading:
+            if boundary_condition.neumann_flags is not None:
+                if boundary_condition.neumann_data_applied_at == "node":
+                    if boundary_condition.neumann_flags.ndim==3:
+                        self.eboundary_condition.neumann_flags = boundary_condition.neumann_flags[:,-1, Increment]
+                    else:
+                        if boundary_condition.make_loading == "ramp":
+                            self.eboundary_condition.neumann_flags = boundary_condition.neumann_flags[:,-1]*(1.*Increment/LoadIncrement)
+                        else:
+                            self.eboundary_condition.neumann_flags = boundary_condition.neumann_flags[:,-1]/nincr_last
+                elif boundary_condition.neumann_data_applied_at == "face":
+                    if boundary_condition.neumann_flags.ndim==2:
+                        self.eboundary_condition.neumann_flags = boundary_condition.neumann_flags[:,Increment]
+                        self.eboundary_condition.applied_neumann = boundary_condition.applied_neumann[:,-1, Increment]
+                        self.eboundary_condition.applied_neumann = self.eboundary_condition.applied_neumann[:,None]
+                    else:
+                        if boundary_condition.make_loading == "ramp":
+                            self.eboundary_condition.neumann_flags = boundary_condition.neumann_flags[:]
+                            self.eboundary_condition.applied_neumann = boundary_condition.applied_neumann[:,-1]*(1.*Increment/LoadIncrement)
+                            self.eboundary_condition.applied_neumann = self.eboundary_condition.applied_neumann[:,None]
+                        else:
+                            self.eboundary_condition.neumann_flags = boundary_condition.neumann_flags[:]
+                            self.eboundary_condition.applied_neumann = boundary_condition.applied_neumann[:,-1]/nincr_last
+                            self.eboundary_condition.applied_neumann = self.eboundary_condition.applied_neumann[:,None]
+        else:
+            if boundary_condition.neumann_flags is not None:
+                if boundary_condition.neumann_data_applied_at == "node":
+                    self.eboundary_condition.neumann_flags = boundary_condition.neumann_flags[:,-1]
+                elif boundary_condition.neumann_data_applied_at == "face":
                     self.eboundary_condition.neumann_flags = boundary_condition.neumann_flags[:]
-                    self.eboundary_condition.applied_neumann = boundary_condition.applied_neumann[:,-1]*(1.*Increment/LoadIncrement)
+                    self.eboundary_condition.applied_neumann = boundary_condition.applied_neumann[:,-1]
                     self.eboundary_condition.applied_neumann = self.eboundary_condition.applied_neumann[:,None]
+
 
         # FILTER OUT CASES WHERE BOUNDARY CONDITION IS APPLIED BUT IS ZERO - RELEASE LOAD CYCLE IN DYNAMICS
         if np.allclose(self.eboundary_condition.dirichlet_flags[~np.isnan(self.eboundary_condition.dirichlet_flags)],0.):

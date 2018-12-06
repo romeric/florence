@@ -88,19 +88,23 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
                 AppliedDirichletInc = boundary_condition.applied_dirichlet
 
             # GET INCREMENTAL NEUMANN DIRICHLET BC
-            if NeumannForces.ndim == 2 and NeumannForces.shape[1]>1:
-                DeltaF = NeumannForces[:,Increment][:,None]
-            else:
-                if boundary_condition.make_loading == "ramp":
-                    DeltaF = (NeumannForces.ravel()*(1.*Increment/LoadIncrement))[:,None]
+            if not boundary_condition.has_step_wise_neumann_loading:
+                if NeumannForces.ndim == 2 and NeumannForces.shape[1]>1:
+                    NodalForces = NeumannForces[:,Increment][:,None]
                 else:
-                    DeltaF = (NeumannForces.ravel()/nincr_last)[:,None]
-            NodalForces = DeltaF
+                    if boundary_condition.make_loading == "ramp":
+                        NodalForces = NeumannForces*(1.*Increment/LoadIncrement)
+                    else:
+                        NodalForces = NeumannForces.ravel()/nincr_last
+            else:
+                NodalForces = boundary_condition.ApplyStepWiseNeumannFunc(formulation, mesh,
+                    material, increment=Increment)
+
 
             # OBRTAIN INCREMENTAL RESIDUAL - CONTRIBUTION FROM BOTH NEUMANN AND DIRICHLET
             Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
                 AppliedDirichletInc,LoadFactor=1.0,mass=M,only_residual=True)
-            Residual -= DeltaF
+            Residual -= NodalForces
 
             # COMPUTE INITIAL ACCELERATION - ONLY NEEDED IN CASES OF PRESTRETCHED CONFIGURATIONS
             # accelerations[:,:] = solver.Solve(M, Residual.ravel() - \
