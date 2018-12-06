@@ -294,9 +294,13 @@ class LinearSolver(object):
             elif self.solver_subtype == "pardiso" and self.has_pardiso:
                 # NOTE THAT THIS PARDISO SOLVER AUTOMATICALLY SAVES THE RIGHT FACTORISATION
                 import pypardiso
+                from pypardiso.scipy_aliases import pypardiso_solver as ps
                 A = A.tocsr()
                 t_solve = time()
                 sol = pypardiso.spsolve(A,b)
+                if self.reuse_factorisation is False:
+                    ps.remove_stored_factorization()
+                    ps.free_memory()
                 print("Pardiso solver time is {}".format(time() - t_solve))
 
 
