@@ -95,11 +95,11 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
                     if boundary_condition.make_loading == "ramp":
                         NodalForces = NeumannForces*(1.*Increment/LoadIncrement)
                     else:
-                        NodalForces = NeumannForces.ravel()/nincr_last
+                        NodalForces = NeumannForces/nincr_last
             else:
                 NodalForces = boundary_condition.ApplyStepWiseNeumannFunc(formulation, mesh,
                     material, increment=Increment)
-
+            NodalForces = NodalForces.ravel()[:,None]
 
             # OBRTAIN INCREMENTAL RESIDUAL - CONTRIBUTION FROM BOTH NEUMANN AND DIRICHLET
             Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
