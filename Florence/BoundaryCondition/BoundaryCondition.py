@@ -24,7 +24,8 @@ class BoundaryCondition(object):
         save_nurbs_data=False,
         filename=None,
         read_dirichlet_from_file=False,
-        make_loading="ramp"
+        make_loading="ramp",
+        compound_dirichlet_bcs=False
         ):
 
         # TYPE OF BOUNDARY: straight or nurbs
@@ -83,6 +84,8 @@ class BoundaryCondition(object):
         self.step_wise_dirichlet_data = None
         self.has_step_wise_neumann_loading = False
         self.step_wise_neumann_data = None
+
+        self.compound_dirichlet_bcs = compound_dirichlet_bcs
 
         # NODAL FORCES GENERATED BASED ON DIRICHLET OR NEUMANN ARE NOT
         # IMPLEMENTED AS PART OF BOUNDARY CONDITION YET. THIS ESSENTIALLY

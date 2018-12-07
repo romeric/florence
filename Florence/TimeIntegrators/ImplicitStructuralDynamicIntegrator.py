@@ -68,6 +68,8 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
 
         save_counter = 1
         nincr_last = float(LoadIncrement-1) if LoadIncrement !=1 else 1
+        if boundary_condition.compound_dirichlet_bcs:
+            ChangedTotalDisp = np.zeros((mesh.nnode, formulation.nvar))
         # TIME LOOP
         for Increment in range(1,LoadIncrement):
 
@@ -86,6 +88,8 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
                 boundary_condition.ApplyStepWiseDirichletFunc(formulation, mesh, increment=Increment)
                 self.GetBoundaryInfo(mesh, formulation, boundary_condition, increment=Increment)
                 AppliedDirichletInc = boundary_condition.applied_dirichlet
+                if self.bc_changed_at_this_step and boundary_condition.compound_dirichlet_bcs:
+                    ChangedTotalDisp = np.copy(U)
 
             # GET INCREMENTAL NEUMANN DIRICHLET BC
             if not boundary_condition.has_step_wise_neumann_loading:
@@ -135,6 +139,8 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
             if Increment % fem_solver.save_frequency == 0 or\
                 (Increment == LoadIncrement - 1 and save_counter<TotalDisp.shape[2]):
                 TotalDisp[:,:,save_counter] = U
+                if boundary_condition.compound_dirichlet_bcs:
+                    TotalDisp[:,:,save_counter] += ChangedTotalDisp
                 save_counter += 1
 
 
@@ -203,6 +209,7 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
         LoadIncrement = fem_solver.number_of_load_increments
         LoadFactor = fem_solver.total_time/fem_solver.number_of_load_increments
         Iter = 0
+        self.iterative_norm_history = []
 
         # EulerxPrev = np.copy(Eulerx)
         # EulerVPrev = np.copy(velocities[:,:,Increment-1])
@@ -295,7 +302,7 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
 
 
             # SAVE THE NORM
-            self.rel_norm_residual = la.norm(Residual[boundary_condition.columns_in])
+            self.abs_norm_residual = la.norm(Residual[boundary_condition.columns_in])
             if Iter==0:
                 self.NormForces = la.norm(Residual[boundary_condition.columns_in])
             self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)
@@ -305,11 +312,11 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
                 self.norm_residual)
 
             print("Iteration {} for increment {}.".format(Iter, Increment) +\
-                " Residual (abs) {0:>16.7g}".format(self.rel_norm_residual),
+                " Residual (abs) {0:>16.7g}".format(self.abs_norm_residual),
                 "\t Residual (rel) {0:>16.7g}".format(self.norm_residual))
 
             # BREAK BASED ON RELATIVE NORM
-            if np.abs(self.rel_norm_residual) < Tolerance:
+            if np.abs(self.abs_norm_residual) < Tolerance:
                 break
 
             # BREAK BASED ON INCREMENTAL SOLUTION - KEEP IT AFTER UPDATE
@@ -331,14 +338,21 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
                 fem_solver.newton_raphson_failed_to_converge = True
                 break
 
+            # IF BREAK WHEN NEWTON RAPHSON STAGNATES IS ACTIVATED
+            if fem_solver.break_at_stagnation:
+                self.iterative_norm_history.append(self.norm_residual)
+                if Iter >= 5 and self.abs_norm_residual<1e06:
+                    if np.mean(self.iterative_norm_history) < 1.:
+                        break
+
             # USER DEFINED CRITERIA TO BREAK OUT OF NEWTON-RAPHSON
             if fem_solver.user_defined_break_func != None:
-                if fem_solver.user_defined_break_func(Increment,Iter,self.norm_residual,self.rel_norm_residual, Tolerance):
+                if fem_solver.user_defined_break_func(Increment,Iter,self.norm_residual,self.abs_norm_residual, Tolerance):
                     break
 
             # USER DEFINED CRITERIA TO STOP NEWTON-RAPHSON AND THE WHOLE ANALYSIS
             if fem_solver.user_defined_stop_func != None:
-                if fem_solver.user_defined_stop_func(Increment,Iter,self.norm_residual,self.rel_norm_residual, Tolerance):
+                if fem_solver.user_defined_stop_func(Increment,Iter,self.norm_residual,self.abs_norm_residual, Tolerance):
                     fem_solver.newton_raphson_failed_to_converge = True
                     break
 

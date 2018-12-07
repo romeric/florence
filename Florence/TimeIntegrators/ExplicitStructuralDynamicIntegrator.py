@@ -89,6 +89,8 @@ class ExplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
 
         save_counter = 2 if fem_solver.save_frequency == 1 else 1
         nincr_last = float(LoadIncrement-1) if LoadIncrement !=1 else 1
+        if boundary_condition.compound_dirichlet_bcs:
+            ChangedTotalDisp = np.zeros((mesh.nnode, formulation.nvar))
         # TIME LOOP
         for Increment in range(2,LoadIncrement):
 
@@ -107,6 +109,9 @@ class ExplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
                 boundary_condition.ApplyStepWiseDirichletFunc(formulation, mesh, increment=Increment)
                 self.GetBoundaryInfo(mesh, formulation, boundary_condition, increment=Increment)
                 AppliedDirichletInc = boundary_condition.applied_dirichlet
+                if self.bc_changed_at_this_step and boundary_condition.compound_dirichlet_bcs:
+                    ChangedTotalDisp[:,:formulation.ndim] = U[:,:formulation.ndim] + IncDirichlet[:,:formulation.ndim]
+                    ChangedTotalDisp[:,-1] = np.copy(Eulerp.ravel())
 
             # GET INCREMENTAL NEUMANN DIRICHLET BC
             if not boundary_condition.has_step_wise_neumann_loading:
@@ -162,6 +167,8 @@ class ExplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
                 TotalDisp[:,:formulation.ndim,save_counter] = Eulerx - mesh.points
                 if formulation.fields == "electro_mechanics":
                     TotalDisp[:,-1,save_counter] = Eulerp.ravel()
+                if boundary_condition.compound_dirichlet_bcs:
+                    TotalDisp[:,:,save_counter] += ChangedTotalDisp
                 save_counter += 1
 
             # STORE THE INFORMATION IF EXPLICIT BLOWS UP

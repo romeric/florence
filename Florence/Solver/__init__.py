@@ -1,4 +1,4 @@
-from .Solver import LinearSolver
+from .LinearSolver import LinearSolver
 from .FEMSolver import FEMSolver
 from .LaplacianSolver import LaplacianSolver
 from .TractionBasedStaggeredSolver import TractionBasedStaggeredSolver

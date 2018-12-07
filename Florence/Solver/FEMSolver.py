@@ -935,7 +935,7 @@ class FEMSolver(object):
                 NodalForces[boundary_condition.columns_in]
 
             # SAVE THE NORM
-            self.rel_norm_residual = la.norm(Residual[boundary_condition.columns_in])
+            self.abs_norm_residual = la.norm(Residual[boundary_condition.columns_in])
             if Iter==0:
                 self.NormForces = la.norm(Residual[boundary_condition.columns_in])
             self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)
@@ -945,11 +945,11 @@ class FEMSolver(object):
                 self.norm_residual)
 
             print("Iteration {} for increment {}.".format(Iter, Increment) +\
-                " Residual (abs) {0:>16.7g}".format(self.rel_norm_residual),
+                " Residual (abs) {0:>16.7g}".format(self.abs_norm_residual),
                 "\t Residual (rel) {0:>16.7g}".format(self.norm_residual))
 
             # BREAK BASED ON RELATIVE NORM
-            if np.abs(self.rel_norm_residual) < Tolerance:
+            if np.abs(self.abs_norm_residual) < Tolerance:
                 break
 
             # BREAK BASED ON INCREMENTAL SOLUTION - KEEP IT AFTER UPDATE
@@ -982,12 +982,12 @@ class FEMSolver(object):
 
             # USER DEFINED CRITERIA TO BREAK OUT OF NEWTON-RAPHSON
             if self.user_defined_break_func != None:
-                if self.user_defined_break_func(Increment,Iter,self.norm_residual,self.rel_norm_residual, Tolerance):
+                if self.user_defined_break_func(Increment,Iter,self.norm_residual,self.abs_norm_residual, Tolerance):
                     break
 
             # USER DEFINED CRITERIA TO STOP NEWTON-RAPHSON AND THE WHOLE ANALYSIS
             if self.user_defined_stop_func != None:
-                if self.user_defined_stop_func(Increment,Iter,self.norm_residual,self.rel_norm_residual, Tolerance):
+                if self.user_defined_stop_func(Increment,Iter,self.norm_residual,self.abs_norm_residual, Tolerance):
                     self.newton_raphson_failed_to_converge = True
                     break
 
@@ -1045,7 +1045,7 @@ class FEMSolver(object):
                 NodalForces[boundary_condition.columns_in]
 
             # SAVE THE NORM
-            self.rel_norm_residual = la.norm(Residual[boundary_condition.columns_in])
+            self.abs_norm_residual = la.norm(Residual[boundary_condition.columns_in])
             if Iter==0:
                 self.NormForces = la.norm(Residual[boundary_condition.columns_in])
             self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)
@@ -1055,11 +1055,11 @@ class FEMSolver(object):
                 self.norm_residual)
 
             print("Iteration {} for increment {}.".format(Iter, Increment) +\
-                " Residual (abs) {0:>16.7g}".format(self.rel_norm_residual),
+                " Residual (abs) {0:>16.7g}".format(self.abs_norm_residual),
                 "\t Residual (rel) {0:>16.7g}".format(self.norm_residual))
 
             # BREAK BASED ON RELATIVE NORM
-            if np.abs(self.rel_norm_residual) < Tolerance:
+            if np.abs(self.abs_norm_residual) < Tolerance:
                 break
 
             # BREAK BASED ON INCREMENTAL SOLUTION - KEEP IT AFTER UPDATE
@@ -1085,12 +1085,12 @@ class FEMSolver(object):
 
             # USER DEFINED CRITERIA TO BREAK OUT OF NEWTON-RAPHSON
             if self.user_defined_break_func != None:
-                if self.user_defined_break_func(Increment,Iter,self.norm_residual,self.rel_norm_residual, Tolerance):
+                if self.user_defined_break_func(Increment,Iter,self.norm_residual,self.abs_norm_residual, Tolerance):
                     break
 
             # USER DEFINED CRITERIA TO STOP NEWTON-RAPHSON AND THE WHOLE ANALYSIS
             if self.user_defined_stop_func != None:
-                if self.user_defined_stop_func(Increment,Iter,self.norm_residual,self.rel_norm_residual, Tolerance):
+                if self.user_defined_stop_func(Increment,Iter,self.norm_residual,self.abs_norm_residual, Tolerance):
                     self.newton_raphson_failed_to_converge = True
                     break
 
@@ -1173,7 +1173,7 @@ class FEMSolver(object):
             # print(norm(R1-R0))
 
             # SAVE THE NORM
-            self.rel_norm_residual = la.norm(Residual[boundary_condition.columns_in])
+            self.abs_norm_residual = la.norm(Residual[boundary_condition.columns_in])
             if Iter==0:
                 self.NormForces = la.norm(Residual[boundary_condition.columns_in])
             self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)
@@ -1183,10 +1183,10 @@ class FEMSolver(object):
                 self.norm_residual)
 
             print("Iteration {} for increment {}.".format(Iter, Increment) +\
-                " Residual (abs) {0:>16.7g}".format(self.rel_norm_residual),
+                " Residual (abs) {0:>16.7g}".format(self.abs_norm_residual),
                 "\t Residual (rel) {0:>16.7g}".format(self.norm_residual))
 
-            if np.abs(self.rel_norm_residual) < Tolerance:
+            if np.abs(self.abs_norm_residual) < Tolerance:
                 break
 
             # UPDATE ITERATION NUMBER
@@ -1207,12 +1207,12 @@ class FEMSolver(object):
 
             # USER DEFINED CRITERIA TO BREAK OUT OF NEWTON-RAPHSON
             if self.user_defined_break_func != None:
-                if self.user_defined_break_func(Increment,Iter,self.norm_residual,self.rel_norm_residual, Tolerance):
+                if self.user_defined_break_func(Increment,Iter,self.norm_residual,self.abs_norm_residual, Tolerance):
                     break
 
             # USER DEFINED CRITERIA TO STOP NEWTON-RAPHSON AND THE WHOLE ANALYSIS
             if self.user_defined_stop_func != None:
-                if self.user_defined_stop_func(Increment,Iter,self.norm_residual,self.rel_norm_residual, Tolerance):
+                if self.user_defined_stop_func(Increment,Iter,self.norm_residual,self.abs_norm_residual, Tolerance):
                     self.newton_raphson_failed_to_converge = True
                     break
 
