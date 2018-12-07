@@ -89,7 +89,7 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
                 self.GetBoundaryInfo(mesh, formulation, boundary_condition, increment=Increment)
                 AppliedDirichletInc = boundary_condition.applied_dirichlet
                 if self.bc_changed_at_this_step and boundary_condition.compound_dirichlet_bcs:
-                    ChangedTotalDisp = np.copy(U)
+                    ChangedTotalDisp += np.copy(U)
 
             # GET INCREMENTAL NEUMANN DIRICHLET BC
             if not boundary_condition.has_step_wise_neumann_loading:

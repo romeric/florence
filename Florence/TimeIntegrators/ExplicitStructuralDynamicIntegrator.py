@@ -110,8 +110,8 @@ class ExplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
                 self.GetBoundaryInfo(mesh, formulation, boundary_condition, increment=Increment)
                 AppliedDirichletInc = boundary_condition.applied_dirichlet
                 if self.bc_changed_at_this_step and boundary_condition.compound_dirichlet_bcs:
-                    ChangedTotalDisp[:,:formulation.ndim] = U[:,:formulation.ndim] + IncDirichlet[:,:formulation.ndim]
-                    ChangedTotalDisp[:,-1] = np.copy(Eulerp.ravel())
+                    ChangedTotalDisp[:,:formulation.ndim] += U[:,:formulation.ndim] + IncDirichlet[:,:formulation.ndim]
+                    ChangedTotalDisp[:,-1] += np.copy(Eulerp.ravel())
 
             # GET INCREMENTAL NEUMANN DIRICHLET BC
             if not boundary_condition.has_step_wise_neumann_loading:
