@@ -29,7 +29,9 @@ class StructuralDynamicIntegrator(object):
         self.electric_dofs = None
         self.mechanical_dofs = None
         self.columns_in_mech = None
+        self.columns_out_mech = None
         self.columns_in_electric = None
+        self.columns_out_electric = None
 
         # NEEDS TO BE SET FOR EVERY STEP/INCREMENT
         self.bc_changed_at_this_step = False
@@ -51,7 +53,7 @@ class StructuralDynamicIntegrator(object):
                         self.bc_changed_at_this_step = True
 
             elif formulation.fields == "mechanics":
-                if self.columns_in_mech is not None:
+                if self.columns_out_mech is not None:
                     if np.array_equal(self.columns_out_mech, boundary_condition.columns_out):
                         self.bc_changed_at_this_step = False
                         return
