@@ -106,7 +106,12 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
             NodalForces = NodalForces.ravel()[:,None]
 
             # OBRTAIN INCREMENTAL RESIDUAL - CONTRIBUTION FROM BOTH NEUMANN AND DIRICHLET
-            Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
+            # OLD WAY - RESIDUAL WAS GETTING CARRIED OVER FROM PREV NR STEP BUT AT THIS
+            # POINT IT WAS TINY (AS NR HAD CONVERGED) THAT IT DIDN'T MATTER AND WORKED AS EXPECTED
+            # Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
+            #     AppliedDirichletInc,LoadFactor=1.0,mass=M,only_residual=True)
+            # ACTUAL WAY
+            Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,np.zeros_like(Residual),
                 AppliedDirichletInc,LoadFactor=1.0,mass=M,only_residual=True)
             Residual -= NodalForces
 
