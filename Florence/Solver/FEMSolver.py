@@ -827,7 +827,7 @@ class FEMSolver(object):
             DeltaF = LoadFactor*NeumannForces
             NodalForces += DeltaF
             # OBRTAIN INCREMENTAL RESIDUAL - CONTRIBUTION FROM BOTH NEUMANN AND DIRICHLET
-            Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,Residual,
+            Residual = -boundary_condition.ApplyDirichletGetReducedMatrices(K,np.zeros_like(Residual),
                 boundary_condition.applied_dirichlet,LoadFactor=LoadFactor,only_residual=True)
             Residual -= DeltaF
             # GET THE INCREMENTAL DISPLACEMENT
