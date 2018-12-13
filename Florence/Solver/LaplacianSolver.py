@@ -95,7 +95,8 @@ class LaplacianSolver(object):
         if self.analysis_type != 'static':
             pass
         else:
-            if self.iterative_technique == "newton_raphson" or self.iterative_technique == "modified_newton_raphson":
+            if self.nonlinear_iterative_technique == "newton_raphson" or \
+                self.nonlinear_iterative_technique == "modified_newton_raphson":
                 TotalDisp = self.StaticSolver(function_spaces, formulation, solver,
                     K,NeumannForces,NodalForces,Residual,
                     mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition)
@@ -142,11 +143,11 @@ class LaplacianSolver(object):
 
             self.norm_residual = np.linalg.norm(Residual)/self.NormForces
 
-            if self.iterative_technique == "newton_raphson":
+            if self.nonlinear_iterative_technique == "newton_raphson":
                 Eulerx, Eulerp, K, Residual = self.NewtonRaphson(function_spaces, formulation, solver,
                     Increment, K, NodalForces, Residual, mesh, Eulerx, Eulerp,
                     material, boundary_condition, AppliedDirichletInc)
-            elif self.iterative_technique == "modified_newton_raphson":
+            elif self.nonlinear_iterative_technique == "modified_newton_raphson":
                 Eulerx, Eulerp, K, Residual = self.ModifiedNewtonRaphson(function_spaces, formulation, solver,
                     Increment, K, NodalForces, Residual, mesh, Eulerx, Eulerp,
                     material, boundary_condition, AppliedDirichletInc)
