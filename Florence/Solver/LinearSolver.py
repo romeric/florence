@@ -254,11 +254,17 @@ class LinearSolver(object):
                 if A.dtype != np.float64:
                     A = A.astype(np.float64)
 
+                t_solve = time()
                 if self.solver_context_manager is None:
                     if self.reuse_factorisation is False:
                         sol = spsolve(A,b,permc_spec='MMD_AT_PLUS_A',use_umfpack=True)
                         # from scikits import umfpack
                         # sol = umfpack.spsolve(A, b)
+
+                        # SuperLU
+                        # from scipy.sparse.linalg import splu
+                        # lu = splu(A.tocsc())
+                        # sol = lu.solve(b)
                     else:
                         from scikits import umfpack
                         lu = umfpack.splu(A)
@@ -266,6 +272,8 @@ class LinearSolver(object):
                         self.solver_context_manager = lu
                 else:
                     sol = self.solver_context_manager.solve(b)
+
+                # print("UmfPack solver time is {}".format(time() - t_solve))
 
 
             elif self.solver_subtype=='mumps' and self.has_mumps:
