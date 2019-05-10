@@ -568,7 +568,7 @@ def QuadBallSurface(center=(0.,0.,0.), radius=1., n=10, element_type="quad"):
     mesh.points[:,2] += center[2]
 
     if element_type == "tri":
-        mesh.ConvertHexesToTets()
+        mesh.ConvertQuadsToTris()
 
     sys.stdout = sys.__stdout__
 
