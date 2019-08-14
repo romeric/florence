@@ -375,7 +375,7 @@ class Mesh(object):
 
             returns:
 
-                interior_faces          ndarray of interior edges
+                interior_edges          ndarray of interior edges
                 edge_flags              ndarray of edge flags: 0 for interior and 1 for boundary
 
         """
