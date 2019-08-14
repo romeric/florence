@@ -5530,6 +5530,9 @@ class Mesh(object):
                 # We need to set this regardless
                 xyz_min_max = self.Bounds*10.
 
+        if isinstance(xyz_min_max,list):
+            xyz_min_max = np.array(xyz_min_max)
+
         if isinstance(xyz_min_max,tuple):
             if ndim==2:
                 assert len(xyz_min_max)==4
