@@ -140,20 +140,17 @@ class BoundaryCondition(object):
         self.scale_mesh_on_projection = True
         self.scale_value_on_projection = 1.0*scale
         self.condition_for_projection = 1.0*condition
-        self.project_on_curves = project_on_curves
+        self.project_on_curves = int(project_on_curves)
         self.has_planar_surfaces = has_planar_surfaces
         self.solve_for_planar_faces = solve_for_planar_faces
         self.projection_flags = projection_flags
         self.fix_dof_elsewhere = fix_dof_elsewhere
         self.orthogonal_fallback_tolerance = orthogonal_fallback_tolerance
         self.surface_identification_algorithm = surface_identification_algorithm
-        self.modify_linear_mesh_on_projection = modify_linear_mesh_on_projection
+        self.modify_linear_mesh_on_projection = int(modify_linear_mesh_on_projection)
         self.nodal_spacing_for_cad = nodal_spacing
         self.activate_bounding_box = activate_bounding_box
         self.bounding_box_padding = float(bounding_box_padding)
-
-        self.project_on_curves = int(self.project_on_curves)
-        self.modify_linear_mesh_on_projection = int(self.modify_linear_mesh_on_projection)
 
 
     def SetProjectionCriteria(self, proj_func, mesh, *args, **kwargs):

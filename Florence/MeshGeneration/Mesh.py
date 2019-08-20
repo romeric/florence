@@ -3001,16 +3001,17 @@ class Mesh(object):
                 rem_nelem = line_counter+1
                 var = 1
                 continue
+            # COMMENTED PARTS FOR GMSH VERSION > 4
             if rem_nnode == line_counter:
-                self.nnode = int(plist[0])
+                self.nnode = int(plist[0]) #if len(plist)==1 else int(plist[1])
             if rem_faces == line_counter:
-                face_counter = int(plist[0])
+                face_counter = int(plist[0]) #if len(plist)==1 else int(plist[1])
             if rem_nelem == line_counter:
-                self.nelem = int(plist[0])
+                self.nelem = int(plist[0]) #if len(plist)==1 else int(plist[1])
                 break
 
         ns = self.InferNumberOfNodesPerElement(p=1,element_type=element_type)
-        # Re-read
+        # RE-READ
         points, elements, faces, face_to_surface = [],[], [], []
         for line_counter, line in enumerate(open(filename)):
             item = line.rstrip()
@@ -3028,7 +3029,7 @@ class Mesh(object):
                         # elements.append([int(i) for i in plist[5:]])
                         elements.append([int(i) for i in plist[-ns:]])
 
-                    # WRITE SURFACE INFO - CERTAINLY ONLY IF ELEMENT TYPE IS QUADS/TRIS
+                    # READ SURFACE INFO - CERTAINLY ONLY IF SURFACE ELEMENT TYPE IS QUADS/TRIS
                     if read_surface_info:
                         if int(plist[1]) == bel:
                             faces.append([int(i) for i in plist[5:]])
