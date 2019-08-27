@@ -331,6 +331,7 @@ class LinearSolver(object):
 
 
         elif self.solver_type == "iterative":
+            t_solve = time()
             # CALL ITERATIVE SOLVER
             if self.solver_subtype == "gmres":
                 sol = gmres(A,b,tol=self.iterative_solver_tolerance)[0]
@@ -348,6 +349,7 @@ class LinearSolver(object):
             # n = A.shape[0]
             # M = LinearOperator((n * m, n * m), M_x)
             # sol = cg(A, b, tol=self.iterative_solver_tolerance, M=M)[0]
+            print("Iterative solver time is {}".format(time() - t_solve))
 
         elif self.solver_type == "amg":
             if self.has_amg_solver is False:
