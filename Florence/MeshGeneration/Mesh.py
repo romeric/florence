@@ -2957,9 +2957,9 @@ class Mesh(object):
         if "MeshFormat" in fid.readline():
             msh_version = int(np.floor(float(fid.readline().split(" ")[0])))
             if 4 != msh_version and 2 != msh_version:
-                raise IOError("Only ASCII version 2 and 4 .msh file formats are supported")
+                raise IOError("Only ASCII version 2 and 4 (>=4.1) .msh file formats are supported")
         if 4 != msh_version and 2 != msh_version:
-            raise IOError("Only ASCII version 2 and 4 .msh file formats are supported")
+            raise IOError("Only ASCII version 2 and 4 (>=4.1) .msh file formats are supported")
         fid.close()
 
         if self.elements is not None and self.points is not None:
@@ -3062,16 +3062,18 @@ class Mesh(object):
             content = fid.readlines()
 
             # READ NODES
-            nodes_content = content[rem_nnode+1:self.nnode+node_blocks+rem_nnode+1]
+            nodes_content = content[rem_nnode+1:2*self.nnode+node_blocks+rem_nnode+1]
             incrementer, line_number = 0, 0
             # LOOP OVER BLOCKS
             for i in range(node_blocks):
                 incrementer = int(nodes_content[line_number].rstrip().split()[3])
                 # LOOP OVER NODES OF EACH BLOCK
-                for j in range(line_number+1, line_number+incrementer+1):
+                for j in range(line_number+1, line_number+2*incrementer+1):
                     plist = nodes_content[j].rstrip().split()
-                    points.append([float(plist[k]) for k in range(1,len(plist))])
-                line_number += incrementer + 1
+                    if len(plist) == 1:
+                        continue
+                    points.append([float(plist[k]) for k in range(0,len(plist))])
+                line_number += 2*incrementer + 1
 
             # READ ELEMENTS
             elems_content = content[rem_nelem+1:self.nelem+elem_blocks+rem_nelem+1]
