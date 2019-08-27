@@ -2952,6 +2952,16 @@ class Mesh(object):
             print("File '%s' not found." % (filename))
             sys.exit()
 
+        msh_version = None
+        # CHECK MSH FILE VERSION
+        if "MeshFormat" in fid.readline():
+            msh_version = int(np.floor(float(fid.readline().split(" ")[0])))
+            if 4 != msh_version and 2 != msh_version:
+                raise IOError("Only ASCII version 2 and 4 .msh file formats are supported")
+        if 4 != msh_version and 2 != msh_version:
+            raise IOError("Only ASCII version 2 and 4 .msh file formats are supported")
+        fid.close()
+
         if self.elements is not None and self.points is not None:
             self.__reset__()
 
@@ -2978,6 +2988,7 @@ class Mesh(object):
 
         # NEW FAST READER
         var = 0 # for old gmsh versions - needs checks
+        node_blocks, elem_blocks, face_blocks = None, None, None
         rem_nnode, rem_nelem, rem_faces = int(1e09), int(1e09), int(1e09)
         face_counter = 0
         for line_counter, line in enumerate(open(filename)):
@@ -3001,39 +3012,95 @@ class Mesh(object):
                 rem_nelem = line_counter+1
                 var = 1
                 continue
-            # COMMENTED PARTS FOR GMSH VERSION > 4
-            if rem_nnode == line_counter:
-                self.nnode = int(plist[0]) #if len(plist)==1 else int(plist[1])
-            if rem_faces == line_counter:
-                face_counter = int(plist[0]) #if len(plist)==1 else int(plist[1])
-            if rem_nelem == line_counter:
-                self.nelem = int(plist[0]) #if len(plist)==1 else int(plist[1])
-                break
 
-        ns = self.InferNumberOfNodesPerElement(p=1,element_type=element_type)
-        # RE-READ
+            if msh_version == 2:
+                if rem_nnode == line_counter:
+                    self.nnode = int(plist[0])
+                if rem_faces == line_counter:
+                    face_counter = int(plist[0])
+                if rem_nelem == line_counter:
+                    self.nelem = int(plist[0])
+                    break
+            else:
+                if rem_nnode == line_counter:
+                    node_blocks, self.nnode = int(plist[0]), int(plist[1])
+                if rem_faces == line_counter:
+                    face_blocks, face_counter = int(plist[0]), int(plist[1])
+                if rem_nelem == line_counter:
+                    elem_blocks, self.nelem = int(plist[0]), int(plist[1])
+                    break
+
         points, elements, faces, face_to_surface = [],[], [], []
-        for line_counter, line in enumerate(open(filename)):
-            item = line.rstrip()
-            plist = item.split()
-            if var == 0:
-                if line_counter > rem_nnode and line_counter < self.nnode+rem_nnode+1:
-                    points.append([float(i) for i in plist[:3]])
-                if line_counter > rem_nelem and line_counter < self.nelem+rem_nelem+1:
-                    elements.append([int(i) for i in plist[:4]])
-            elif var == 1:
-                if line_counter > rem_nnode and line_counter < self.nnode+rem_nnode+1:
-                    points.append([float(i) for i in plist[1:]])
-                if line_counter > rem_nelem and line_counter < self.nelem+rem_nelem+1:
-                    if int(plist[1]) == el:
-                        # elements.append([int(i) for i in plist[5:]])
-                        elements.append([int(i) for i in plist[-ns:]])
+        if msh_version == 2:
+            # RE-READ
+            ns = self.InferNumberOfNodesPerElement(p=1,element_type=element_type)
+            for line_counter, line in enumerate(open(filename)):
+                item = line.rstrip()
+                plist = item.split()
+                if var == 0:
+                    if line_counter > rem_nnode and line_counter < self.nnode+rem_nnode+1:
+                        points.append([float(i) for i in plist[:3]])
+                    if line_counter > rem_nelem and line_counter < self.nelem+rem_nelem+1:
+                        elements.append([int(i) for i in plist[:4]])
+                elif var == 1:
+                    if line_counter > rem_nnode and line_counter < self.nnode+rem_nnode+1:
+                        points.append([float(i) for i in plist[1:]])
+                    if line_counter > rem_nelem and line_counter < self.nelem+rem_nelem+1:
+                        if int(plist[1]) == el:
+                            elements.append([int(i) for i in plist[-ns:]])
 
-                    # READ SURFACE INFO - CERTAINLY ONLY IF SURFACE ELEMENT TYPE IS QUADS/TRIS
-                    if read_surface_info:
-                        if int(plist[1]) == bel:
-                            faces.append([int(i) for i in plist[5:]])
-                            face_to_surface.append(int(plist[4]))
+                        # READ SURFACE INFO - CERTAINLY ONLY IF SURFACE ELEMENT TYPE IS QUADS/TRIS
+                        if read_surface_info:
+                            if int(plist[1]) == bel:
+                                faces.append([int(i) for i in plist[5:]])
+                                face_to_surface.append(int(plist[4]))
+
+
+        elif msh_version == 4:
+            # RE-READ
+            fid = open(filename)
+            content = fid.readlines()
+
+            # READ NODES
+            nodes_content = content[rem_nnode+1:self.nnode+node_blocks+rem_nnode+1]
+            incrementer, line_number = 0, 0
+            # LOOP OVER BLOCKS
+            for i in range(node_blocks):
+                incrementer = int(nodes_content[line_number].rstrip().split()[3])
+                # LOOP OVER NODES OF EACH BLOCK
+                for j in range(line_number+1, line_number+incrementer+1):
+                    plist = nodes_content[j].rstrip().split()
+                    points.append([float(plist[k]) for k in range(1,len(plist))])
+                line_number += incrementer + 1
+
+            # READ ELEMENTS
+            elems_content = content[rem_nelem+1:self.nelem+elem_blocks+rem_nelem+1]
+            incrementer, line_number = 0, 0
+            # LOOP OVER BLOCKS
+            for i in range(elem_blocks):
+                incrementer = int(elems_content[line_number].rstrip().split()[3])
+                if el == int(elems_content[line_number].rstrip().split()[2]):
+                    # LOOP OVER ELEMENTS OF EACH BLOCK
+                    for j in range(line_number+1, line_number+incrementer+1):
+                        plist = elems_content[j].rstrip().split()
+                        elements.append([int(plist[k]) for k in range(1,len(plist))])
+                line_number += incrementer + 1
+
+            if read_surface_info:
+                # READ FACES
+                incrementer, line_number = 0, 0
+                # LOOP OVER BLOCKS
+                for i in range(elem_blocks):
+                    incrementer = int(elems_content[line_number].rstrip().split()[3])
+                    surface_tag = int(elems_content[line_number].rstrip().split()[1])
+                    if bel == int(elems_content[line_number].rstrip().split()[2]):
+                        # LOOP OVER FACES OF EACH BLOCK
+                        for j in range(line_number+1, line_number+incrementer+1):
+                            plist = elems_content[j].rstrip().split()
+                            faces.append([int(plist[k]) for k in range(1,len(plist))])
+                            face_to_surface.append(surface_tag)
+                    line_number += incrementer + 1
+
 
         self.points = np.array(points,copy=True)
         self.elements = np.array(elements,copy=True) - 1
