@@ -3092,7 +3092,7 @@ class Mesh(object):
                 # LOOP OVER BLOCKS
                 for i in range(elem_blocks):
                     incrementer = int(elems_content[line_number].rstrip().split()[3])
-                    surface_tag = int(elems_content[line_number].rstrip().split()[1])
+                    surface_tag = int(elems_content[line_number].rstrip().split()[0])
                     if bel == int(elems_content[line_number].rstrip().split()[2]):
                         # LOOP OVER FACES OF EACH BLOCK
                         for j in range(line_number+1, line_number+incrementer+1):
