@@ -8,8 +8,8 @@ def QuadraturePointsWeightsTri(C,Opt=1):
     # Opt IS FOR TYPE OF QUADTRATURE
     # Opt=0 IS FOR GAUSSIAN QUADRATURE TECHNIQUE
     # Opt=1 IS FOR OPTIMUM QUADRATURE (WILLIAM-SHUNNS) TECHNIQUE (DEFAULT)
-    # Opt=2 IS FOR SYMMETRIC OPTIMUM QUADRATURE (WITHERDEN-VINCENT) TECHNIQUE 
-    # Opt=3 IS FOR OPTIMUM QUADRATURE (WILLIAM-SHUNNS) TECHNIQUE (ERRORNEOUS) 
+    # Opt=2 IS FOR SYMMETRIC OPTIMUM QUADRATURE (WITHERDEN-VINCENT) TECHNIQUE
+    # Opt=3 IS FOR OPTIMUM QUADRATURE (WILLIAM-SHUNNS) TECHNIQUE (ERRORNEOUS)
 
     zw = []
 
@@ -25,7 +25,7 @@ def QuadraturePointsWeightsTri(C,Opt=1):
         for i in range(w1D.shape[0]):
             for j in range(0,w1D.shape[0]):
                 zw[counter,2] = w1D[i]*w1D[j]*(1. - z1D[j])/2.
-                zw[counter,0] = z1D[i] 
+                zw[counter,0] = z1D[i]
                 zw[counter,1] = z1D[j]
 
                 counter +=1
@@ -40,7 +40,7 @@ def QuadraturePointsWeightsTri(C,Opt=1):
             d = 4
         elif p==3:
             d = 7
-        elif p==4: 
+        elif p==4:
             d = 8
         elif p==5:
             d = 10
@@ -51,7 +51,7 @@ def QuadraturePointsWeightsTri(C,Opt=1):
 
         if d==0:
             raise ValueError('Quadrature rule does not exist. Try QuadratureOpt = 3 for more points')
-        
+
         for i in os.listdir(path):
             if 'williams-shunn-n' in i:
                 if 'd'+str(d) in i:
@@ -71,7 +71,7 @@ def QuadraturePointsWeightsTri(C,Opt=1):
 
 
     elif Opt==3:
-        # # AVOID INACCURATE QUADRATURE POINTS 
+        # # AVOID INACCURATE QUADRATURE POINTS
         # if C==4:
         #   C = 6
         # if C==5:
