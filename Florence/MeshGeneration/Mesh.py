@@ -1617,6 +1617,60 @@ class Mesh(object):
         return normals
 
 
+    def Angles(self, degrees=True):
+        """Compute angles of 2D meshes. Strictly 2D meshes and linear elements.
+            If the mesh is curved the angles would be inaccurate
+
+            input:
+                degrees                 [bool] if True returns angles in degrees
+                                        otherwise in radians
+            returns:
+                angles                  [2D array] of angles per element. Angles are
+                                        computed per element so every element will
+                                        have as many angles as it's nodes
+        """
+
+        self.__do_essential_memebers_exist__()
+        if self.InferElementalDimension() != 2:
+            raise ValueError("Angles can be computed only for 2D elements")
+        if self.InferSpatialDimension() != 2:
+            raise ValueError("Angles can be computed only in 2-dimensional plane")
+
+        nodeperelem = self.InferNumberOfNodesPerLinearElement()
+        angles = np.zeros((self.nelem, nodeperelem))
+
+        norm = lambda x: np.linalg.norm(x,axis=1)
+
+        edge_coords = self.points[self.elements[:,:],:]
+        if self.element_type == "tri":
+            AB = edge_coords[:,1,:] - edge_coords[:,0,:]
+            AC = edge_coords[:,2,:] - edge_coords[:,0,:]
+            BC = edge_coords[:,2,:] - edge_coords[:,1,:]
+
+            angles[:,0] = np.einsum("ij,ij->i",AB,AC) / (norm(AB)*norm(AC))
+            angles[:,1] = np.einsum("ij,ij->i",AC,BC) / (norm(AC)*norm(BC))
+            angles[:,2] = np.einsum("ij,ij->i",BC,-AB)/ (norm(BC)*norm(AB))
+            angles = np.arccos(angles)
+
+        elif self.element_type == "quad":
+            AB = edge_coords[:,1,:] - edge_coords[:,0,:]
+            BC = edge_coords[:,2,:] - edge_coords[:,1,:]
+            CD = edge_coords[:,3,:] - edge_coords[:,2,:]
+            DA = edge_coords[:,0,:] - edge_coords[:,3,:]
+
+            angles[:,0] = np.einsum("ij,ij->i",AB,BC) / (norm(AB)*norm(BC))
+            angles[:,1] = np.einsum("ij,ij->i",BC,CD) / (norm(BC)*norm(CD))
+            angles[:,2] = np.einsum("ij,ij->i",CD,DA) / (norm(CD)*norm(DA))
+            angles[:,3] = np.einsum("ij,ij->i",DA,-AB)/ (norm(DA)*norm(AB))
+            angles = np.arccos(angles)
+
+        if degrees:
+            angles *= 180/np.pi
+
+        return angles
+
+
+
     def BoundingBoxes(self, show_plot=False, figure=None):
         """Computes a bounding box for every element.
             This method complements the Bounds method/property in that it computes
@@ -5887,15 +5941,20 @@ class Mesh(object):
 
 
     def LaplacianSmoothing(self, niter=1, algorithm="jacobi", smart=False, quality_assessor=None,
-        pnodes_movement=None, show_plot=False):
+        pnodes_movement=None, acceptance_factor=0.2, show_plot=False):
         """Standard Laplacian smoothing
 
             input:
-                pnodes_movement:                [str] either "laplacian" or "interpolation"
+                pnodes_movement:                [str] either "laplacian" or "interpolation".
+                                                For higher order only
                 algorithm:                      [str] either "jacobi" or "gauss_seidal"
                 smart:                          [bool] wether to use smart Laplacian or not
                 quality_assessor:               [str] quality evaluator for smart Laplacian.
                                                 default is size (area/volume) based
+                acceptance_factor               [float] This is a ratio essentially in that it implies what
+                                                percentage of node movement is acceptable
+                                                based on quality_assessor. If the quality deteriorates
+                                                beyond this ratio the node position won't be updated
         """
 
         self.__do_memebers_exist__()
@@ -5953,6 +6012,8 @@ class Mesh(object):
                     quality_func = lambda mesh: mesh.Lengths()
             elif quality_assessor == "aspect_ratio":
                 quality_assessor = lambda mesh: mesh.AspectRatios()
+            elif quality_assessor == "angle":
+                quality_func = lambda mesh: mesh.Angles()
             else:
                 raise ValueError('quality_assessor not undersood')
 
@@ -5975,7 +6036,7 @@ class Mesh(object):
                         pmesh = mmesh.GetLocalisedMesh(element_valency[i])
                         sizes = quality_func(pmesh)
                         crit_after = sizes.min()/sizes.max()
-                        if crit_before/crit_after > 0.8 and crit_before/crit_after < 1.2:
+                        if crit_before/crit_after > 1 - acceptance_factor and crit_before/crit_after < 1 + acceptance_factor:
                             lmesh.points[i,:] = mmesh.points[i,:]
 
                 lmesh.points[un_boundary,:] = plot_mesh.points[un_boundary,:]
@@ -5998,7 +6059,7 @@ class Mesh(object):
                         sizes = quality_func(pmesh)
                         crit_after = sizes.min()/sizes.max()
                         mmesh.points = np.copy(lmesh.points)
-                        if crit_before/crit_after < 0.8 or crit_before/crit_after > 1.2:
+                        if crit_before/crit_after < 1 - acceptance_factor or crit_before/crit_after > 1 + acceptance_factor:
                             new_points[i,:] = lmesh.points[i,:]
 
                 new_points[un_boundary,:] = lmesh.points[un_boundary,:]
