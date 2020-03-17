@@ -1,7 +1,7 @@
 #ifndef __MATMUL__H
 #define __MATMUL__H
 
-#include <Fastor.h>
+#include <Fastor/Fastor.h>
 
 using Fastor::SIMDVector;
 

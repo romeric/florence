@@ -1,5 +1,5 @@
 #include <cstdint>
-#include <Fastor.h>
+#include <Fastor/Fastor.h>
 
 #ifndef LL_TYPES
 #define LL_TYPES
