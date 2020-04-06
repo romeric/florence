@@ -1,5 +1,8 @@
 #include <cstdint>
-#include <Fastor.h>
+#include "Fastor/Fastor.h"
+
+using Fastor::_mm_loadul3_ps;
+using Fastor::_mm256_loadul3_pd;
 
 #ifndef LL_TYPES
 #define LL_TYPES
@@ -49,7 +52,7 @@ FASTOR_INLINE void _SIMD_BDB_Integrator_DF_2D_(
     int ndof = nvar*noderpelem;
 
 
-    using VEC = Fastor::SIMDVector<Real,256>;
+    using VEC = Fastor::SIMDVector<Real>;
     constexpr int Size = VEC::Size;
     int ROUND_AVX = ROUND_DOWN(noderpelem,Size);
 

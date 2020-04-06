@@ -1,25 +1,25 @@
 #ifndef _HELPER__H
 #define _HELPER__H
 
-#include <Fastor.h>
+#include "Fastor/Fastor.h"
 #include <tuple>
 using namespace Fastor;
 
 typedef double Real;
 
-enum 
+enum
 {
     i,j,k,l,m,n,o,p,q,r
 };
 
-template<typename T, size_t ... Dims> 
+template<typename T, size_t ... Dims>
 FASTOR_INLINE
 void copy_numpy(Tensor<T,Dims...> &A, const T* A_np, size_t offset=0) {
     std::copy(A_np,A_np+A.size(),A.data());
 }
 
 
-template<typename T, size_t ... Dims> 
+template<typename T, size_t ... Dims>
 FASTOR_INLINE
 void copy_fastor(T* A_np, const Tensor<T,Dims...> &A, size_t offset=0) {
     std::copy(A.data(),A.data()+A.size(),A_np+offset);
@@ -65,11 +65,11 @@ struct PoissonHessianType<T,3> {
 
 
 
-template<typename T, size_t M, size_t N> 
-FASTOR_INLINE 
+template<typename T, size_t M, size_t N>
+FASTOR_INLINE
 typename ElectroMechanicsHessianType<T,N>::return_type
 make_electromechanical_hessian(Tensor<T,M,M> elasticity, Tensor<T,M,N> coupling, Tensor<T,N,N> dielectric) {
-    
+
     using ret_type = typename ElectroMechanicsHessianType<T,N>::return_type;
     ret_type hessian;
 
@@ -99,7 +99,7 @@ make_electromechanical_hessian(Tensor<T,M,M> elasticity, Tensor<T,M,N> coupling,
 
     /*
     // View based NumPy style vectorised version
-    // The above for loop style code is more efficient as 
+    // The above for loop style code is more efficient as
     // the compiler completely optimises that away, whereas
     // in the following transpose makes a copy
     hessian(fseq<0,M>(),fseq<0,M>()) = elasticity;
