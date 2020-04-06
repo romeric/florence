@@ -42,6 +42,13 @@ ifeq ($(OS),Windows_NT)
 CXXFLAGS += -D_hypot=hypot -m64 -Wno-format-extra-args -Wno-format
 endif
 
+# On some architectures -march=native does not define -mfma
+HAS_FMA := $(shell $(CXX) -march=native -dM -E - < /dev/null | egrep "AVX2" | sort)
+ifeq ($(HAS_FMA),)
+else
+CXX_FLAGS += -mfma
+endif
+
 CXXFLAGS += $(ADDITIONAL_FLAGS)
 
 all: build_module
