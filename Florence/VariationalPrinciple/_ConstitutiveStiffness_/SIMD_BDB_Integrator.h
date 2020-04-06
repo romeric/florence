@@ -1,8 +1,10 @@
 #include <cstdint>
+
 #include "Fastor/Fastor.h"
 
 using Fastor::_mm_loadul3_ps;
 using Fastor::_mm256_loadul3_pd;
+
 
 #ifndef LL_TYPES
 #define LL_TYPES

@@ -144,6 +144,93 @@ void _matmul_3k3(size_t K, const float * FASTOR_RESTRICT a, const float * FASTOR
     _mm_storeu_ps(out+6,out_row2);
 }
 
+
+
+// (2x2) x (2xn) matrices
+template<typename T>
+FASTOR_INLINE
+void _matmul_22k(size_t N, const T* FASTOR_RESTRICT a, const T* FASTOR_RESTRICT b, T* FASTOR_RESTRICT out) {
+
+
+    using V = SIMDVector<T>;
+    constexpr size_t M = 2;
+
+    constexpr size_t SIZE_AVX = V::Size;
+    const size_t ROUND_AVX = ROUND_DOWN(N,SIZE_AVX);
+
+    size_t k=0;
+    for (; k<ROUND_AVX; k+=SIZE_AVX) {
+        V out_row0, out_row1, vec_a0, vec_a1;
+        for (size_t i=0; i<2; ++i) {
+            V brow(&b[i*N+k],false);
+            vec_a0.set(a[i]);
+            vec_a1.set(a[i+M]);
+            out_row0 = fmadd(vec_a0,brow,out_row0);
+            out_row1 = fmadd(vec_a1,brow,out_row1);
+        }
+        out_row0.store(out+k,false);
+        out_row1.store(out+N+k,false);
+    }
+
+    for (; k<N; k++) {
+        T out_row0=0., out_row1=0.;
+        for (size_t i=0; i<2; ++i) {
+            T brow = b[i*N+k];
+            out_row0 += a[i]*brow;
+            out_row1 += a[i+M]*brow;
+        }
+        out[k] = out_row0;
+        out[N+k] = out_row1;
+    }
+}
+
+
+// (3x3) x (3xn) matrices
+template<typename T>
+FASTOR_INLINE
+void _matmul_33k(size_t N, const T* FASTOR_RESTRICT a, const T* FASTOR_RESTRICT b, T* FASTOR_RESTRICT out) {
+
+
+    using V = SIMDVector<T>;
+    constexpr size_t M = 3;
+
+    constexpr size_t SIZE_AVX = V::Size;
+    const size_t ROUND_AVX = ROUND_DOWN(N,SIZE_AVX);
+
+    size_t k=0;
+    for (; k<ROUND_AVX; k+=SIZE_AVX) {
+        V out_row0, out_row1, out_row2, vec_a0, vec_a1, vec_a2;
+        for (size_t i=0; i<3; ++i) {
+            V brow(&b[i*N+k],false);
+            vec_a0.set(a[i]);
+            vec_a1.set(a[i+M]);
+            vec_a2.set(a[i+2*M]);
+
+            out_row0 = fmadd(vec_a0,brow,out_row0);
+            out_row1 = fmadd(vec_a1,brow,out_row1);
+            out_row2 = fmadd(vec_a2,brow,out_row2);
+        }
+        out_row0.store(out+k,false);
+        out_row1.store(out+N+k,false);
+        out_row2.store(out+2*N+k,false);
+    }
+
+    for (; k<N; k++) {
+        T out_row0=0., out_row1=0., out_row2=0.;
+        for (size_t i=0; i<3; ++i) {
+            T brow = b[i*N+k];
+            out_row0 += a[i]*brow;
+            out_row1 += a[i+M]*brow;
+            out_row2 += a[i+2*M]*brow;
+        }
+        out[k] = out_row0;
+        out[N+k] = out_row1;
+        out[2*N+k] = out_row2;
+    }
+}
+
+
+
 #endif
 
 
@@ -159,6 +246,16 @@ void _matmul_(size_t M, size_t N, size_t K, const T * FASTOR_RESTRICT a, const T
     }
     else if (M==2 && N==2 && N!=K) {
         _matmul_2k2(K,a,b,out);
+        return;
+    }
+    // The following specialisations don't make much of a difference (at least for SP)
+    // Need thorough performance checks
+    if (M==3 && K==3 && N!=K) {
+        _matmul_33k(N,a,b,out);
+        return;
+    }
+    else if (M==2 && K==2 && N!=K) {
+        _matmul_22k(N,a,b,out);
         return;
     }
 #endif

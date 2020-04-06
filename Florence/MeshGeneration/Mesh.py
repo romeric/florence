@@ -2338,6 +2338,9 @@ class Mesh(object):
 
         """
 
+        if self.boundary_face_to_element is not None:
+            return self.boundary_face_to_element
+
         # DO NOT COMPUTE FACES AND RAISE BECAUSE OF CYCLIC DEPENDENCIES
         assert self.elements is not None
         assert self.faces is not None
@@ -3998,7 +4001,7 @@ class Mesh(object):
 
         if filename is None:
             warn('File name not specified. I am going to write one in the current directory')
-            filename = PWD(__file__) + "/output.vtu"
+            filename = os.path.join(PWD(__file__), "output.vtu")
         if ".vtu" in filename and fmt is "binary":
             filename  = filename.split('.')[0]
         if ".vtu" not in filename and fmt is "xml":
