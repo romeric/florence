@@ -46,7 +46,7 @@ endif
 HAS_FMA := $(shell $(CXX) -march=native -dM -E - < /dev/null | egrep "AVX2" | sort)
 ifeq ($(HAS_FMA),)
 else
-CXX_FLAGS += -mfma
+CXXFLAGS += -mfma
 endif
 
 CXXFLAGS += $(ADDITIONAL_FLAGS)
