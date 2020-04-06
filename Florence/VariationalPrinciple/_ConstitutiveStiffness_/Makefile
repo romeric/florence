@@ -58,7 +58,7 @@ endif
 HAS_FMA := $(shell $(CXX) -march=native -dM -E - < /dev/null | egrep "AVX2" | sort)
 ifeq ($(HAS_FMA),)
 else
-CXX_FLAGS += -mfma
+CXXFLAGS += -mfma
 endif
 
 FASTOR_OPTFLAGS = -DFASTOR_NO_ALIAS -DFASTOR_USE_VECTORISED_EXPR_ASSIGN -DFASTOR_DISPATCH_DIV_TO_MUL_EXPR -DFASTOR_NO_STATIC_WARNING
