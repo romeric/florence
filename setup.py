@@ -279,10 +279,7 @@ class FlorenceSetup(object):
 
     def SetCompilerArgs(self):
 
-        if "darwin" in self._os:
-            self.cxx_version = "-std=c++14"
-        else:
-            self.cxx_version = "-std=c++11"
+        self.cxx_version = "-std=c++14"
 
         # Generic compiler arguments
         self.compiler_args = "PYTHON_VERSION=" + self.python_interpreter + " PYTHON_INCLUDE_PATH=" + \

@@ -18,7 +18,7 @@ endif
 ADDITIONAL_FLAGS =
 
 INLINE_THRESHOLD = 100000
-CXXSTD=-std=c++11
+CXXSTD=-std=c++14
 OPTFLAGS= -O3 -fno-strict-aliasing -DNDEBUG
 CXXFLAGS= -fPIC -shared -pthread -Wall $(CYTHONFLAGS) $(OPTFLAGS)
 
