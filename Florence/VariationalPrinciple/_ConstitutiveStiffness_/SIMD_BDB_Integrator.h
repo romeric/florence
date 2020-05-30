@@ -18,7 +18,9 @@ using UInteger = std::uint64_t;
 #define CUSTOM_ALLOCATION_
 template<typename T>
 FASTOR_INLINE T *allocate(Integer size) {
-#if defined(__AVX__)
+#if defined(__AVX512F__)
+    T *out = (T*)_mm_malloc(sizeof(T)*size,64);
+#elif defined(__AVX__)
     T *out = (T*)_mm_malloc(sizeof(T)*size,32);
 #elif defined(__SSE__)
     T *out = (T*)_mm_malloc(sizeof(T)*size,16);
@@ -30,7 +32,7 @@ FASTOR_INLINE T *allocate(Integer size) {
 
 template<typename T>
 FASTOR_INLINE void deallocate(T *a) {
-#if defined(__SSE__)
+#if defined(__SSE__) || defined(__AVX__) || defined(__AVX512F__)
     _mm_free(a);
 #else
     free(a);
@@ -54,7 +56,7 @@ FASTOR_INLINE void _SIMD_BDB_Integrator_DF_2D_(
     int ndof = nvar*noderpelem;
 
 
-    using VEC = Fastor::SIMDVector<Real>;
+    using VEC = Fastor::SIMDVector<Real,simd_abi::avx>;
     constexpr int Size = VEC::Size;
     int ROUND_AVX = ROUND_DOWN(noderpelem,Size);
 
