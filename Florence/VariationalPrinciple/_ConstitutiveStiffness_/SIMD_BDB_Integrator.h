@@ -56,7 +56,7 @@ FASTOR_INLINE void _SIMD_BDB_Integrator_DF_2D_(
     int ndof = nvar*noderpelem;
 
 
-    using VEC = Fastor::SIMDVector<Real,simd_abi::avx>;
+    using VEC = Fastor::SIMDVector<Real,Fastor::simd_abi::avx>;
     constexpr int Size = VEC::Size;
     int ROUND_AVX = ROUND_DOWN(noderpelem,Size);
 
