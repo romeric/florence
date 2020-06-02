@@ -199,7 +199,7 @@ void _matmul_33k(size_t N, const T* FASTOR_RESTRICT a, const T* FASTOR_RESTRICT 
     const size_t ROUND_ = ROUND_DOWN(N,V::Size);
 
     size_t k=0;
-    for (; k<ROUND_AVX; k+=V::Size) {
+    for (; k<ROUND_; k+=V::Size) {
         V out_row0, out_row1, out_row2, vec_a0, vec_a1, vec_a2;
         for (size_t i=0; i<3; ++i) {
             V brow(&b[i*N+k],false);
