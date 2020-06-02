@@ -6,6 +6,8 @@
 using Fastor::SIMDVector;
 using Fastor::_mm_loadul3_ps;
 using Fastor::_mm256_loadul3_pd;
+using Fastor::_mm_storeul3_ps;
+using Fastor::_mm256_storeul3_pd;
 
 #ifdef __AVX__
 
@@ -34,7 +36,7 @@ void _matmul_2k2(size_t K, const double * FASTOR_RESTRICT a, const double * FAST
         out_row1 = _mm_fmadd_pd(a_vec1,brow,out_row1);
 #endif
     }
-    _mm_store_pd(out,out_row0);
+    _mm_storeu_pd(out,out_row0);
     _mm_storeu_pd(out+2,out_row1);
 }
 
@@ -64,7 +66,7 @@ void _matmul_2k2(size_t K, const float * FASTOR_RESTRICT a, const float * FASTOR
         out_row1 = _mm_fmadd_ps(a_vec1,brow,out_row1);
 #endif
     }
-    _mm_store_ps(out,_mm_shuffle_ps(out_row0,out_row1,_MM_SHUFFLE(1,0,1,0)));
+    _mm_storeu_ps(out,_mm_shuffle_ps(out_row0,out_row1,_MM_SHUFFLE(1,0,1,0)));
 }
 
 
@@ -100,9 +102,9 @@ void _matmul_3k3(size_t K, const double * FASTOR_RESTRICT a, const double * FAST
         out_row2 = _mm256_fmadd_pd(a_vec2,brow,out_row2);
 #endif
     }
-    _mm256_store_pd(out,out_row0);
-    _mm256_storeu_pd(out+3,out_row1);
-    _mm256_storeu_pd(out+6,out_row2);
+    _mm256_storeu_pd  (out,out_row0);
+    _mm256_storeu_pd  (out+3,out_row1);
+    _mm256_storeul3_pd(out+6,out_row2);
 }
 
 
@@ -139,9 +141,9 @@ void _matmul_3k3(size_t K, const float * FASTOR_RESTRICT a, const float * FASTOR
 #endif
 
     }
-    _mm_store_ps(out,out_row0);
-    _mm_storeu_ps(out+3,out_row1);
-    _mm_storeu_ps(out+6,out_row2);
+    _mm_storeu_ps  (out    , out_row0);
+    _mm_storeu_ps  (&out[3], out_row1);
+    _mm_storeul3_ps(&out[6], out_row2);
 }
 
 
@@ -194,11 +196,10 @@ void _matmul_33k(size_t N, const T* FASTOR_RESTRICT a, const T* FASTOR_RESTRICT 
     using V = SIMDVector<T>;
     constexpr size_t M = 3;
 
-    constexpr size_t SIZE_AVX = V::Size;
-    const size_t ROUND_AVX = ROUND_DOWN(N,SIZE_AVX);
+    const size_t ROUND_ = ROUND_DOWN(N,V::Size);
 
     size_t k=0;
-    for (; k<ROUND_AVX; k+=SIZE_AVX) {
+    for (; k<ROUND_AVX; k+=V::Size) {
         V out_row0, out_row1, out_row2, vec_a0, vec_a1, vec_a2;
         for (size_t i=0; i<3; ++i) {
             V brow(&b[i*N+k],false);
@@ -223,8 +224,8 @@ void _matmul_33k(size_t N, const T* FASTOR_RESTRICT a, const T* FASTOR_RESTRICT 
             out_row1 += a[i+M]*brow;
             out_row2 += a[i+2*M]*brow;
         }
-        out[k] = out_row0;
-        out[N+k] = out_row1;
+        out[k]     = out_row0;
+        out[N+k]   = out_row1;
         out[2*N+k] = out_row2;
     }
 }
