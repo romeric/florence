@@ -41,7 +41,7 @@ public:
             tre += 1.;
         }
 
-        Tensor<T,ndim,ndim> stress = 2*mu*strain + lamb*tre*I; 
+        Tensor<T,ndim,ndim> stress = 2*mu*strain + lamb*tre*I;
 
         // FIND ELASTICITY TENSOR
         auto II_ijkl = einsum<Index<i,j>,Index<k,l>>(I,I);
@@ -68,7 +68,6 @@ void _LinearElastic_<Real>::KineticMeasures<Real>(Real *Snp, Real* Hnp,
     int ndim, int ngauss, const Real *Fnp) {
 
     if (ndim==3) {
-        Tensor<Real,3> D;
         Tensor<Real,3,3> stress;
         Tensor<Real,6,6> hessian;
         for (int g=0; g<ngauss; ++g) {
@@ -78,7 +77,6 @@ void _LinearElastic_<Real>::KineticMeasures<Real>(Real *Snp, Real* Hnp,
         }
     }
     else if (ndim==2) {
-        Tensor<Real,2> D;
         Tensor<Real,2,2> stress;
         Tensor<Real,3,3> hessian;
         for (int g=0; g<ngauss; ++g) {

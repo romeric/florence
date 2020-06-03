@@ -1,7 +1,7 @@
 from __future__ import print_function
 from setuptools import setup
 from setuptools import find_packages
-import os, platform, sys, subprocess, imp
+import os, platform, sys, subprocess
 from distutils.command.clean import clean
 from distutils.extension import Extension
 from distutils.sysconfig import get_config_var, get_config_vars, get_python_inc, get_python_lib

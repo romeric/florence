@@ -81,7 +81,6 @@ void _MooneyRivlin_<Real>::KineticMeasures<Real>(Real *Snp, Real* Hnp,
     int ndim, int ngauss, const Real *Fnp) {
 
     if (ndim==3) {
-        Tensor<Real,3> D;
         Tensor<Real,3,3> stress;
         Tensor<Real,6,6> hessian;
         for (int g=0; g<ngauss; ++g) {
@@ -91,7 +90,6 @@ void _MooneyRivlin_<Real>::KineticMeasures<Real>(Real *Snp, Real* Hnp,
         }
     }
     else if (ndim==2) {
-        Tensor<Real,2> D;
         Tensor<Real,2,2> stress;
         Tensor<Real,3,3> hessian;
         for (int g=0; g<ngauss; ++g) {
