@@ -413,8 +413,8 @@ void _GlobalAssemblyExplicit_DF_DPF_<2>(const Real *points,
             int ROUND_ = ROUND_DOWN(ndof,Vsize);
             int i=0;
             for (; i<ROUND_; i+=Vsize) {
-                _va.load(&local_traction[i]);
-                _vout.load(&traction[i]);
+                _va.load(&local_traction[i],false);
+                _vout.load(&traction[i],false);
 #ifdef __FMA__
                 _vout = fmadd(_va,_vb,_vout);
 #else
@@ -675,8 +675,8 @@ void _GlobalAssemblyExplicit_DF_DPF_<3>(const Real *points,
             int ROUND_ = ROUND_DOWN(ndof,Vsize);
             int i=0;
             for (; i<ROUND_; i+=Vsize) {
-                _va.load(&local_traction[i]);
-                _vout.load(&traction[i]);
+                _va.load(&local_traction[i],false);
+                _vout.load(&traction[i],false);
 #ifdef __FMA__
                 _vout = fmadd(_va,_vb,_vout);
 #else
