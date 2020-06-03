@@ -154,7 +154,7 @@ FASTOR_INLINE
 void _matmul_22k(size_t N, const T* FASTOR_RESTRICT a, const T* FASTOR_RESTRICT b, T* FASTOR_RESTRICT out) {
 
 
-    using V = SIMDVector<T>;
+    using V = SIMDVector<T,Fastor::simd_abi::avx>;
     constexpr size_t M = 2;
 
     constexpr size_t SIZE_AVX = V::Size;
@@ -193,7 +193,7 @@ FASTOR_INLINE
 void _matmul_33k(size_t N, const T* FASTOR_RESTRICT a, const T* FASTOR_RESTRICT b, T* FASTOR_RESTRICT out) {
 
 
-    using V = SIMDVector<T>;
+    using V = SIMDVector<T,Fastor::simd_abi::avx>;
     constexpr size_t M = 3;
 
     const size_t ROUND_ = ROUND_DOWN(N,V::Size);
@@ -261,7 +261,7 @@ void _matmul_(size_t M, size_t N, size_t K, const T * FASTOR_RESTRICT a, const T
     }
 #endif
 
-    using V = SIMDVector<T>;
+    using V = SIMDVector<T,Fastor::simd_abi::avx>;
     constexpr size_t SIZE_AVX = V::Size;
     const size_t N0 = ROUND_DOWN(N,SIZE_AVX);
 
