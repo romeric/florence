@@ -42,8 +42,8 @@ FASTOR_INLINE void KinematicMeasures__(Real *MaterialGradient, Real &detJ,
     const Real *current_Jm, Real AllGauss_, const Real *LagrangeElemCoords_,
     int nodeperelem)  {
 
-    Real FASTOR_ALIGN ParentGradientX[ndim*ndim];
-    Real FASTOR_ALIGN invParentGradientX[ndim*ndim];
+    FASTOR_ALIGN Real ParentGradientX[ndim*ndim];
+    FASTOR_ALIGN Real invParentGradientX[ndim*ndim];
 
     std::fill_n(ParentGradientX,ndim*ndim,0.);
     std::fill_n(invParentGradientX,ndim*ndim,0.);
@@ -60,8 +60,8 @@ FASTOR_INLINE void KinematicMeasures__(Real *MaterialGradient, Real &detJ,
     const Real *current_Jm, Real AllGauss_, const Real *LagrangeElemCoords_,
     int nodeperelem)  {
 
-    Real FASTOR_ALIGN ParentGradientX[ndim*ndim];
-    Real FASTOR_ALIGN invParentGradientX[ndim*ndim];
+    FASTOR_ALIGN Real ParentGradientX[ndim*ndim];
+    FASTOR_ALIGN Real invParentGradientX[ndim*ndim];
 
     std::fill_n(ParentGradientX,ndim*ndim,0.);
     std::fill_n(invParentGradientX,ndim*ndim,0.);
@@ -449,8 +449,8 @@ FASTOR_INLINE void KinematicMeasures__(Real *MaterialGradient, Real &detJ,
     const Real *current_Jm, Real AllGauss_, const Real *LagrangeElemCoords_,
     int nodeperelem)  {
 
-    Real FASTOR_ALIGN ParentGradientX[ndim*ndim];
-    Real FASTOR_ALIGN invParentGradientX[ndim*ndim];
+    FASTOR_ALIGN Real ParentGradientX[ndim*ndim];
+    FASTOR_ALIGN Real invParentGradientX[ndim*ndim];
 
     _matmul_(ndim,ndim,nodeperelem,current_Jm,LagrangeElemCoords_,ParentGradientX);
     const Real detX = invdet2x2(ParentGradientX,invParentGradientX);
@@ -463,8 +463,8 @@ FASTOR_INLINE void KinematicMeasures__(Real *MaterialGradient, Real &detJ,
     const Real *current_Jm, Real AllGauss_, const Real *LagrangeElemCoords_,
     int nodeperelem)  {
 
-    Real FASTOR_ALIGN ParentGradientX[ndim*ndim];
-    Real FASTOR_ALIGN invParentGradientX[ndim*ndim];
+    FASTOR_ALIGN Real ParentGradientX[ndim*ndim];
+    FASTOR_ALIGN Real invParentGradientX[ndim*ndim];
 
     _matmul_(ndim,ndim,nodeperelem,current_Jm,LagrangeElemCoords_,ParentGradientX);
     const Real detX = invdet3x3(ParentGradientX,invParentGradientX);

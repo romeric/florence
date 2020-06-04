@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.com/romeric/florence.svg?token=HFW6d19YsYpKDNwvtqDr&branch=master)](https://travis-ci.com/romeric/florence)
 [![Coverage Status](https://coveralls.io/repos/github/romeric/florence/badge.svg?branch=master&service=github)](https://coveralls.io/github/romeric/florence?branch=master)
 
-**Florence** is a Python-based computational framework for multi-physics simulations using the finite element and boundary element methods.
+**Florence** is a Python-based computational framework for the numerical simulations of multi-physics problems using the finite element methods.
 
 # Features
 A non-exhaustive list of core features:

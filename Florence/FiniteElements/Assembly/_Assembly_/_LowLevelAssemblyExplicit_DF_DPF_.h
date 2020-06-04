@@ -36,11 +36,11 @@ FASTOR_INLINE void KinematicMeasures__(
     int nodeperelem,
     int update)  {
 
-    Real FASTOR_ALIGN ParentGradientX[ndim*ndim];
-    Real FASTOR_ALIGN invParentGradientX[ndim*ndim];
-    Real FASTOR_ALIGN ParentGradientx[ndim*ndim];
-    Real FASTOR_ALIGN invParentGradientx[ndim*ndim];
-    Real FASTOR_ALIGN current_Ft[ndim*ndim];
+    FASTOR_ALIGN Real ParentGradientX[ndim*ndim];
+    FASTOR_ALIGN Real invParentGradientX[ndim*ndim];
+    FASTOR_ALIGN Real ParentGradientx[ndim*ndim];
+    FASTOR_ALIGN Real invParentGradientx[ndim*ndim];
+    FASTOR_ALIGN Real current_Ft[ndim*ndim];
 
     // USING A STL BASED FILLER REMOVES THE ANNOYING BUG
     std::fill_n(ParentGradientX,ndim*ndim,0.);
@@ -76,12 +76,11 @@ FASTOR_INLINE void KinematicMeasures__(
     int nodeperelem,
     int update)  {
 
-
-    Real FASTOR_ALIGN ParentGradientX[ndim*ndim];
-    Real FASTOR_ALIGN invParentGradientX[ndim*ndim];
-    Real FASTOR_ALIGN ParentGradientx[ndim*ndim];
-    Real FASTOR_ALIGN invParentGradientx[ndim*ndim];
-    Real FASTOR_ALIGN current_Ft[ndim*ndim];
+    FASTOR_ALIGN Real ParentGradientX[ndim*ndim];
+    FASTOR_ALIGN Real invParentGradientX[ndim*ndim];
+    FASTOR_ALIGN Real ParentGradientx[ndim*ndim];
+    FASTOR_ALIGN Real invParentGradientx[ndim*ndim];
+    FASTOR_ALIGN Real current_Ft[ndim*ndim];
 
     // USING A STL BASED FILLER REMOVES THE ANNOYING BUG
     std::fill_n(ParentGradientX,ndim*ndim,0.);
@@ -115,11 +114,11 @@ FASTOR_INLINE void KinematicMeasures__(Real *MaterialGradient, Real *current_sp,
     const Real *current_Jm, Real AllGauss_, const Real *LagrangeElemCoords_, const Real *EulerElemCoords_,
     int nodeperelem, int update)  {
 
-    Real FASTOR_ALIGN ParentGradientX[ndim*ndim];
-    Real FASTOR_ALIGN invParentGradientX[ndim*ndim];
-    Real FASTOR_ALIGN ParentGradientx[ndim*ndim];
-    Real FASTOR_ALIGN invParentGradientx[ndim*ndim];
-    Real FASTOR_ALIGN current_Ft[ndim*ndim];
+    FASTOR_ALIGN Real ParentGradientX[ndim*ndim];
+    FASTOR_ALIGN Real invParentGradientX[ndim*ndim];
+    FASTOR_ALIGN Real ParentGradientx[ndim*ndim];
+    FASTOR_ALIGN Real invParentGradientx[ndim*ndim];
+    FASTOR_ALIGN Real current_Ft[ndim*ndim];
 
     // USING A STL BASED FILLER REMOVES THE ANNOYING BUG
     std::fill_n(ParentGradientX,ndim*ndim,0.);
@@ -147,11 +146,11 @@ FASTOR_INLINE void KinematicMeasures__(Real *MaterialGradient, Real *current_sp,
     const Real *current_Jm, Real AllGauss_, const Real *LagrangeElemCoords_, const Real *EulerElemCoords_,
     int nodeperelem, int update)  {
 
-    Real FASTOR_ALIGN ParentGradientX[ndim*ndim];
-    Real FASTOR_ALIGN invParentGradientX[ndim*ndim];
-    Real FASTOR_ALIGN ParentGradientx[ndim*ndim];
-    Real FASTOR_ALIGN invParentGradientx[ndim*ndim];
-    Real FASTOR_ALIGN current_Ft[ndim*ndim];
+    FASTOR_ALIGN Real ParentGradientX[ndim*ndim];
+    FASTOR_ALIGN Real invParentGradientX[ndim*ndim];
+    FASTOR_ALIGN Real ParentGradientx[ndim*ndim];
+    FASTOR_ALIGN Real invParentGradientx[ndim*ndim];
+    FASTOR_ALIGN Real current_Ft[ndim*ndim];
 
     // USING A STL BASED FILLER REMOVES THE ANNOYING BUG
     std::fill_n(ParentGradientX,ndim*ndim,0.);
@@ -255,8 +254,8 @@ void _GlobalAssemblyExplicit_DF_DPF_<2>(const Real *points,
     Real *SpatialGradient           = allocate<Real>(nodeperelem*ndim);
     Real detJ                       = 0;
 
-    Real FASTOR_ALIGN F[ndim*ndim];
-    Real FASTOR_ALIGN ElectricFieldx[ndim]; std::fill_n(ElectricFieldx,ndim,0.);
+    FASTOR_ALIGN Real F[ndim*ndim];
+    FASTOR_ALIGN Real ElectricFieldx[ndim]; std::fill_n(ElectricFieldx,ndim,0.);
     Tensor<Real,ndim> D;
     Tensor<Real,ndim,ndim> stress;
 
@@ -498,8 +497,8 @@ void _GlobalAssemblyExplicit_DF_DPF_<3>(const Real *points,
     Real *SpatialGradient           = allocate<Real>(nodeperelem*ndim);
     Real detJ                       = 0;
 
-    Real FASTOR_ALIGN F[ndim*ndim];
-    Real FASTOR_ALIGN ElectricFieldx[ndim]; std::fill_n(ElectricFieldx,ndim,0.);
+    FASTOR_ALIGN Real F[ndim*ndim];
+    FASTOR_ALIGN Real ElectricFieldx[ndim]; std::fill_n(ElectricFieldx,ndim,0.);
     Tensor<Real,ndim> D;
     Tensor<Real,ndim,ndim> stress;
 
