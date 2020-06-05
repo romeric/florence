@@ -59,7 +59,7 @@ def linear_elastic_dynamics():
 
     # Get underlying solution vectors
     solution_1 = implicit_fem_solver_results_1.GetSolutionVectors()
-    solution_2 = implicit_fem_solver_results_1.GetSolutionVectors()
+    solution_2 = implicit_fem_solver_results_2.GetSolutionVectors()
 
     assert np.isclose(np.linalg.norm(solution_1),np.linalg.norm(solution_2), rtol=1e-5, atol=1e-5)
 
