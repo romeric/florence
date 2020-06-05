@@ -51,7 +51,7 @@ def linear_elastic_dynamics():
         number_of_load_increments=time_step,
         analysis_nature="linear",
         analysis_type="dynamic",
-        optimise=False,
+        optimise=True,
         print_incremental_log=True)
 
     implicit_fem_solver_results_2 = implicit_fem_solver_2.Solve(formulation=formulation, mesh=mesh,
