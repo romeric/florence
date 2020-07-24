@@ -3244,7 +3244,7 @@ class Mesh(object):
             if plist[0] == 'f' and len(plist) > el:
                 for i in range(1,el+1):
                     if "/" in plist[i]:
-                        plist[i] = plist[i].split("//")[0]
+                        plist[i] = plist[i].split("/")[0]
                 elements.append([int(i) for i in plist[1:el+1]])
             if plist[0] == 'vn':
                 vertex_normal.append([float(i) for i in plist[1:4]])
