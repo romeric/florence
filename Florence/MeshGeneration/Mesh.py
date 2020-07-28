@@ -3372,7 +3372,7 @@ class Mesh(object):
         fid = open(filename, 'r')
         for line_counter, line in enumerate(fid):
             plist = line.rstrip().split()
-            if len(plist) > 0:
+            if len(plist) == 1:
                 if plist[0] == '2411':
                     point_counter = line_counter
                 if plist[0] == '2412':
@@ -3398,7 +3398,7 @@ class Mesh(object):
         fid = open(filename, 'r')
         for line_counter, line in enumerate(fid):
             plist = line.rstrip().split()
-            if len(plist) > 0:
+            if len(plist) == 1:
                 if plist[0] == '2411':
                     reached_points = True
                 if plist[0] == '2412':
@@ -3406,13 +3406,14 @@ class Mesh(object):
                 if plist[0] == '2477':
                     reached_end = True
 
-                if reached_points and not reached_elements and len(plist) > 1:
+            if len(plist) > 1:
+                if reached_points and not reached_elements:
                     if (line_counter - point_counter + 1) % 2:
                         cpoints = [float(i.replace('D', 'E')) for i in plist]
                         points[pcounter,:] = cpoints
                         pcounter += 1
 
-                elif reached_elements and len(plist) > 1:
+                elif reached_elements:
                     if (line_counter - elem_counter + 1) % 2:
                         celems = [int(i)-1 for i in plist]
                         elements[ecounter,:] = celems
