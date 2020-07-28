@@ -3369,11 +3369,12 @@ class Mesh(object):
 
 
     def ReadUNV(self, filename, element_type="tri"):
-        """Read I-DEAS unv files
+        """Read I-DEAS universal files
         """
 
         try:
             fid = open(filename, "r")
+            fid.close()
         except IOError:
             print("File '%s' not found." % (filename))
             sys.exit()
@@ -3382,24 +3383,6 @@ class Mesh(object):
             self.__reset__()
 
         self.filename = filename
-
-        elem_counter, point_counter = None, None
-        ecounter, pcounter = 0, 0
-        points, elements = [], []
-
-        fid = open(filename, 'r')
-        for line_counter, line in enumerate(fid):
-            plist = line.rstrip().split()
-            if len(plist) == 1:
-                if plist[0] == '2411':
-                    point_counter = line_counter
-                if plist[0] == '2412':
-                    elem_counter = line_counter
-        fid.close()
-
-        reached_elements = False
-        reached_points = False
-        reached_end = False
 
         if element_type == "tri":
             nsize = 3
@@ -3410,46 +3393,40 @@ class Mesh(object):
         elif element_type == "hex":
             nsize = 8
 
-        points = np.zeros(( int((elem_counter-2)/2)-1, 3), dtype=np.float64)
-        elements = np.zeros(( int((line_counter - elem_counter)/2), nsize),dtype=np.uint64)
+        with open(filename, 'r') as fid:
+            file_content = fid.readlines()
 
-        fid = open(filename, 'r')
-        for line_counter, line in enumerate(fid):
-            plist = line.rstrip().split()
-            if len(plist) == 1:
-                if plist[0] == '2411':
-                    reached_points = True
-                if plist[0] == '2412':
-                    reached_elements = True
-                if plist[0] == '2477':
-                    reached_end = True
+        points, elements = [], []
+        is_point_line, is_element_line = False, False
+        for counter, line in enumerate(file_content):
+            sline = line.rstrip().split()
+            # Read points
+            if len(sline) == 1 and sline[0] == "2411":
+                is_point_line = True
+                is_element_line = False
+            if len(sline) == 1 and sline[0] == "2412":
+                is_point_line = False
+                is_element_line = True
 
-            if len(plist) > 1:
-                if reached_points and not reached_elements:
-                    if (line_counter - point_counter + 1) % 2:
-                        cpoints = [float(i.replace('D', 'E')) for i in plist]
-                        points[pcounter,:] = cpoints
-                        pcounter += 1
+            if is_point_line and len(sline) == 3:
+                cpoints = [float(i.replace('D', 'E')) for i in sline]
+                points.append(cpoints)
 
-                elif reached_elements:
-                    if (line_counter - elem_counter + 1) % 2:
-                        celems = [int(i)-1 for i in plist]
-                        elements[ecounter,:] = celems
-                        ecounter += 1
-        fid.close()
-
-
-        while True:
-            if np.allclose(elements[-1,:],0.):
-                elements = elements[:-1, :]
-            else:
-                break
+            if is_element_line and len(sline) == nsize:
+                celems = [int(i)-1 for i in sline]
+                elements.append(celems)
 
         self.points = np.copy(points)
         self.elements = np.copy(elements)
         self.element_type = element_type
         self.nelem = self.elements.shape[0]
         self.nnode = self.points.shape[0]
+
+        while True:
+            if np.allclose(self.elements[-1,:],0.):
+                self.elements = self.elements[:-1, :]
+            else:
+                break
 
         if self.points.shape[1] == 3:
             if np.allclose(self.points[:,2],0.):
