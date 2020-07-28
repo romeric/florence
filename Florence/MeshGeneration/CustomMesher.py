@@ -234,7 +234,7 @@ def SubdivisionArc(center=(0.,0.), radius=1., nrad=16, ncirc=40,
 
 def SubdivisionCircle(center=(0.,0.), radius=1., nrad=16, ncirc=40,
         element_type="tri", refinement=False, refinement_level=2):
-    """Creating a mesh on circle using midpoint subdivision.
+    """Creates a mesh on circle using midpoint subdivision.
         This function is internally called from Mesh.Circle if
         'midpoint_subdivision' algorithm is selected
     """
