@@ -16,7 +16,7 @@ A series of custom meshes
 
 
 def HarvesterPatch(ndisc=20, nradial=4, show_plot=False):
-    """A custom mesh for an energy harvester patch. [Not to be modified]
+    """Creates a custom mesh for an energy harvester patch. [Not to be modified]
         ndisc:              [int] number of discretisation in c
         ndradial:           [int] number of discretisation in radial directions for different
                             components of harevester
@@ -66,7 +66,7 @@ def HarvesterPatch(ndisc=20, nradial=4, show_plot=False):
 
 
 def CurvedPlate(ncirc=2, nlong=20, show_plot=False):
-    """Custom mesh for plate with curved edges
+    """Creates custom mesh for plate with curved edges
         ncirc           discretisation around circular fillets
         nlong           discretisation along the length - X
     """
@@ -111,7 +111,7 @@ def CurvedPlate(ncirc=2, nlong=20, show_plot=False):
 
 def SubdivisionArc(center=(0.,0.), radius=1., nrad=16, ncirc=40,
         start_angle=0., end_angle=np.pi/2., element_type="tri", refinement=False, refinement_level=2):
-    """Creating a mesh on circle using midpoint subdivision.
+    """Creates a mesh on circle using midpoint subdivision.
         This function is internally called from Mesh.Circle if
         'midpoint_subdivision' algorithm is selected
     """
