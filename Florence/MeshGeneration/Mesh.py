@@ -3232,8 +3232,12 @@ class Mesh(object):
 
         # Read
         points, elements, faces = [],[], []
-        vertex_normal, vertex_texture = [], []
-        for line_counter, line in enumerate(open(filename)):
+        # Normal and texture coordinates
+        normals, textures = [], []
+        # Connectivity for texture
+        telements = []
+
+        for line_counter, line in enumerate(open(filename,'r')):
             item = line.rstrip()
             plist = item.split()
             if not plist:
@@ -3242,18 +3246,32 @@ class Mesh(object):
             if plist[0] == 'v':
                 points.append([float(i) for i in plist[1:4]])
             if plist[0] == 'f' and len(plist) > el:
+                cplist = deepcopy(plist)
                 for i in range(1,el+1):
                     if "/" in plist[i]:
                         plist[i] = plist[i].split("/")[0]
                 elements.append([int(i) for i in plist[1:el+1]])
+                plist = cplist
+                has_texture = False
+                for i in range(1,el+1):
+                    if "/" in plist[i]:
+                        has_texture = True
+                        plist[i] = plist[i].split("/")[1]
+                if has_texture:
+                    telements.append([int(i) for i in plist[1:el+1]])
             if plist[0] == 'vn':
-                vertex_normal.append([float(i) for i in plist[1:4]])
-
+                normals.append([float(i) for i in plist[1:4]])
+            if plist[0] == 'vt':
+                textures.append([float(i) for i in plist[1:4]])
 
         self.points = np.array(points,copy=True)
         self.elements = np.array(elements,copy=True) - 1
-        if not vertex_normal:
-            self.vertex_normal = np.array(vertex_normal,copy=True)
+        if normals:
+            self.normals = np.array(normals,copy=True)
+        if textures:
+            self.textures = np.array(textures,copy=True)
+        if telements:
+            self.telements = np.array(telements,copy=True) - 1
 
         # CORRECT
         self.nelem = self.elements.shape[0]
