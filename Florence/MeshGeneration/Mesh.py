@@ -6010,7 +6010,7 @@ class Mesh(object):
                 else:
                     quality_func = lambda mesh: mesh.Lengths()
             elif quality_assessor == "aspect_ratio":
-                quality_assessor = lambda mesh: mesh.AspectRatios()
+                quality_func = lambda mesh: mesh.AspectRatios()
             elif quality_assessor == "angle":
                 quality_func = lambda mesh: mesh.Angles()
             else:
