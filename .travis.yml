@@ -29,7 +29,7 @@ before_install:
   - travis_wait 50 pip install -r "requirements.txt"
   # Install Eigen
   - cd ~
-  - curl https://gitlab.com/libeigen/eigen/-/archive/3.3.8/eigen-3.3.8.tar.bz2
+  - curl https://gitlab.com/libeigen/eigen/-/archive/3.3.8/eigen-3.3.8.tar.bz2 -o eigen-3.3.8.tar.bz2
   - tar -xvf eigen-3.3.8.tar.bz2 -C eigen
   - sudo mv eigen /usr/local/include/eigen/
   # Install OpenCascade
