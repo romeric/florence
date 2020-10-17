@@ -31,8 +31,8 @@ before_install:
   - EIGENVERSION=eigen-3.3.8.tar.bz2
   - cd ~
   - curl https://gitlab.com/libeigen/eigen/-/archive/3.3.8/$EIGENVERSION -o $EIGENVERSION
-  - tar -xvf $$EIGENVERSION
-  - sudo mv $$EIGENVERSION /usr/local/include/eigen/
+  - tar -xvf $EIGENVERSION
+  - sudo mv $EIGENVERSION /usr/local/include/eigen/
   # Install OpenCascade
   - echo -ne '\n' | sudo apt-get install liboce-*
   # PostMesh
