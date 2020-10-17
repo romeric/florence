@@ -28,10 +28,10 @@ before_install:
   - cd $FLORENCEPATH
   - travis_wait 50 pip install -r "requirements.txt"
   # Install Eigen
-  - EIGENVERSION=eigen-3.3.8.tar.bz2
+  - EIGENVERSION=eigen-3.3.8
   - cd ~
-  - curl https://gitlab.com/libeigen/eigen/-/archive/3.3.8/$EIGENVERSION -o $EIGENVERSION
-  - tar -xvf $EIGENVERSION
+  - curl https://gitlab.com/libeigen/eigen/-/archive/3.3.8/$EIGENVERSION.tar.bz2 -o $EIGENVERSION.tar.bz2
+  - tar -xvf $EIGENVERSION.tar.bz2
   - sudo mv $EIGENVERSION /usr/local/include/eigen/
   # Install OpenCascade
   - echo -ne '\n' | sudo apt-get install liboce-*
