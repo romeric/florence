@@ -21,6 +21,7 @@ before_install:
   - FLORENCEPATH=$(pwd)
   - echo $FLORENCEPATH
   - sudo apt-get update --fix-missing
+  - sudo apt-get install curl
   # Install BLAS libraries
   - echo -ne '\n' | sudo apt-get install gfortran libblas-dev liblapack-dev libatlas-base-dev libopenblas-* libsuitesparse-dev swig
   # pypi packages - install before installing PostMesh
@@ -28,7 +29,7 @@ before_install:
   - travis_wait 50 pip install -r "requirements.txt"
   # Install Eigen
   - cd ~
-  - wget https://gitlab.com/libeigen/eigen/-/archive/3.3.8/eigen-3.3.8.tar.bz2
+  - curl https://gitlab.com/libeigen/eigen/-/archive/3.3.8/eigen-3.3.8.tar.bz2
   - tar -xvf eigen-3.3.8.tar.bz2 -C eigen
   - sudo mv eigen /usr/local/include/eigen/
   # Install OpenCascade
