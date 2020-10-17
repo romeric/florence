@@ -3404,6 +3404,11 @@ class Mesh(object):
 
         points, elements = [], []
         is_point_line, is_element_line = False, False
+        is_point_record_line, is_element_record_line = True, True
+        celems, cpoints = [], []
+        first_point_line, first_element_line = True, True
+        read_element_type = element_type
+        point_ids, element_ids = [], []
         for counter, line in enumerate(file_content):
             sline = line.rstrip().split()
             # Read points
@@ -3414,19 +3419,64 @@ class Mesh(object):
                 is_point_line = False
                 is_element_line = True
 
-            if is_point_line and len(sline) == 3:
-                cpoints = [float(i.replace('D', 'E')) for i in sline]
-                points.append(cpoints)
+            if is_point_line:
+                if first_point_line or sline[0] == "-1":
+                    first_point_line = False
+                    continue
+                if is_point_record_line:
+                    point_id = int(sline[0])
+                    point_ids.append(point_id)
+                    is_point_record_line = False
+                else:
+                    cpoints = [float(i.replace('D', 'E')) for i in sline]
+                    points.append(cpoints)
+                    is_point_record_line = True
 
-            if is_element_line and len(sline) == nsize:
-                celems = [int(i)-1 for i in sline]
-                elements.append(celems)
+            if is_element_line:
+                if first_element_line or sline[0] == "-1":
+                    first_element_line = False
+                    continue
+                if is_element_record_line:
+                    # Get number of nodes for this element from the record line
+                    nnode = int(sline[5])
+                    # Read element type
+                    read_element_type = sline[1]
+                    # Set record line to False
+                    is_element_record_line = False
+                else:
+                    # If it is not a record line then read elements
+                    for i in sline:
+                        celems.append(int(i) - 1)
+                    # If all elements are read set record line to True else False
+                    if len(celems) == nnode:
+                        is_element_record_line = True
+                    else:
+                        is_element_record_line = False
+                if is_element_record_line:
+                    elements.append(celems)
+                    celems = []
 
         self.points = np.copy(points)
         self.elements = np.copy(elements)
+
+        # MAP POINTS TO GROUND
+        point_ids = np.copy(point_ids)
+        sorter = np.argsort(point_ids)
+        self.points = self.points[sorter,:]
+
+        # MAP TO GROUND
+        unique_elements, inv_elements = np.unique(self.elements, return_inverse=True)
+        aranger = np.arange(self.points.shape[0])
+        self.elements = aranger[inv_elements].reshape(self.elements.shape[0],self.elements.shape[1])
+
         self.element_type = element_type
+        if read_element_type == "118":
+            element_type = "tet"
+            self.elements = self.elements[:,[0,2,4,9,1,5,3,6,7,8]]
+            self.degree = 2
         self.nelem = self.elements.shape[0]
         self.nnode = self.points.shape[0]
+
 
         while True:
             if np.allclose(self.elements[-1,:],0.):
@@ -6007,7 +6057,6 @@ class Mesh(object):
 
         if smart:
             mmesh = deepcopy(lmesh)
-            # quality_func = lambda mesh: mesh.Sizes()
             if quality_assessor is None or quality_assessor == "size":
                 if edim== 3:
                     quality_func = lambda mesh: mesh.Volumes()
@@ -6015,6 +6064,7 @@ class Mesh(object):
                     quality_func = lambda mesh: mesh.Areas()
                 else:
                     quality_func = lambda mesh: mesh.Lengths()
+                # quality_func = lambda mesh: mesh.Sizes()
             elif quality_assessor == "aspect_ratio":
                 quality_func = lambda mesh: mesh.AspectRatios()
             elif quality_assessor == "angle":
