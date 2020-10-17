@@ -30,7 +30,7 @@ before_install:
   # Install Eigen
   - EIGENVERSION=3.3.8
   - cd ~
-  - curl https://gitlab.com/libeigen/eigen/-/archive/eigen-$EIGENVERSION/eigen-$EIGENVERSION.tar.bz2 -o $eigen-EIGENVERSION.tar.bz2
+  - curl https://gitlab.com/libeigen/eigen/-/archive/eigen-$EIGENVERSION/eigen-$EIGENVERSION.tar.bz2 -o eigen-$EIGENVERSION.tar.bz2
   - tar -xvf eigen-$EIGENVERSION.tar.bz2
   - sudo mv eigen-$EIGENVERSION /usr/local/include/eigen/
   # Install OpenCascade
