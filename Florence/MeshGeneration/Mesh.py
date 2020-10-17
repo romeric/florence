@@ -1365,7 +1365,7 @@ class Mesh(object):
         return volume
 
 
-    def Sizes(self):
+    def Sizes(self, with_sign=False):
         """Computes the size of elements for all element types.
             This is a generic method that for 1D=lengths, for 2D=areas and for 3D=volumes.
             It works for planar and curved elements
@@ -1382,10 +1382,16 @@ class Mesh(object):
             # FOR LINE ELEMENTS THIS APPROACH DOES NOT WORK AS JACOBIAN IS NOT WELL DEFINED
             formulation = DisplacementFormulation(self)
             sizes = np.zeros(self.nelem)
-            for elem in range(self.nelem):
-                LagrangeElemCoords = self.points[self.elements[elem,:],:]
-                sizes[elem] = formulation.GetVolume(formulation.function_spaces[0],
-                    LagrangeElemCoords, LagrangeElemCoords, False, elem=elem)
+            if not with_sign:
+                for elem in range(self.nelem):
+                    LagrangeElemCoords = self.points[self.elements[elem,:],:]
+                    sizes[elem] = formulation.GetVolume(formulation.function_spaces[0],
+                        LagrangeElemCoords, LagrangeElemCoords, False, elem=elem)
+            else:
+                for elem in range(self.nelem):
+                    LagrangeElemCoords = self.points[self.elements[elem,:],:]
+                    sizes[elem] = formulation.GetSignedVolume(formulation.function_spaces[0],
+                        LagrangeElemCoords, LagrangeElemCoords, False, elem=elem)
             return sizes
 
         else:

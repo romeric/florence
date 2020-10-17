@@ -4,6 +4,7 @@ import multiprocessing
 from copy import deepcopy
 from warnings import warn
 from time import time
+import inspect
 import numpy as np
 from numpy.linalg import norm
 import scipy as sp
@@ -168,6 +169,11 @@ class FEMSolver(object):
         self.__save_state__()
         # FOR INTERNAL PURPOSES WHEN WE DO NOT WANT TO REST
         self.do_not_reset = do_not_reset
+
+        # GET CALLER
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)[1][3]
+        self.caller = calframe
 
 
     def __save_state__(self):
@@ -1286,6 +1292,7 @@ class FEMSolver(object):
 
     def PrintPreAnalysisInfo(self, mesh, formulation):
 
+        print("Running analysis for the problem defined in your main routine: ", self.caller)
         print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation info etc...')
         print('Number of nodes is',mesh.points.shape[0], 'number of DoFs is', mesh.points.shape[0]*formulation.nvar)
         if formulation.ndim==2:

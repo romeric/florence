@@ -1,5 +1,6 @@
 import numpy as np
 from Florence import QuadratureRule, FunctionSpace, Mesh
+from Florence.FiniteElements.LocalAssembly.KinematicMeasures import KinematicMeasures
 from Florence.FiniteElements.LocalAssembly._KinematicMeasures_ import _KinematicMeasures_
 from Florence.VariationalPrinciple._GeometricStiffness_ import GeometricStiffnessIntegrand as GetGeomStiffness
 from .DisplacementApproachIndices import FillGeometricB
@@ -153,6 +154,34 @@ class VariationalPrinciple(object):
         # return volume
 
         return detJ.sum()
+
+    def GetSignedVolume(self, function_space, LagrangeElemCoords, EulerELemCoords, requires_geometry_update, elem=0):
+        """ Find the signed volume (area in 2D) of element [could be curved or straight]
+        """
+
+        det = np.linalg.det
+        inv = np.linalg.inv
+        Jm = function_space.Jm
+        AllGauss = function_space.AllGauss
+
+        # COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
+        # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+        ParentGradientX = np.einsum('ijk,jl->kil', Jm, LagrangeElemCoords)
+        # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
+        MaterialGradient = np.einsum('ijk,kli->ijl', inv(ParentGradientX), Jm)
+        # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
+        F = np.einsum('ij,kli->kjl', EulerELemCoords, MaterialGradient)
+
+        # COMPUTE REMAINING KINEMATIC MEASURES
+        StrainTensors = KinematicMeasures(F)
+
+        # SPATIAL GRADIENT AND MATERIAL GRADIENT TENSORS ARE EQUAL
+        SpatialGradient = np.einsum('ikj',MaterialGradient)
+        # COMPUTE ONCE detJ
+        detJ = np.einsum('i,i->i',AllGauss[:,0],det(ParentGradientX))
+
+        return detJ.sum()
+
 
 
     def ConstitutiveStiffnessIntegrand(self, B, SpatialGradient, CauchyStressTensor, H_Voigt,
