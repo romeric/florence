@@ -1292,7 +1292,7 @@ class FEMSolver(object):
 
     def PrintPreAnalysisInfo(self, mesh, formulation):
 
-        print("Running analysis for the problem defined in your main routine: ", self.caller)
+        print("Running analysis for the problem defined in the routine:", self.caller)
         print('Pre-processing the information. Getting paths, solution parameters, mesh info, interpolation info etc...')
         print('Number of nodes is',mesh.points.shape[0], 'number of DoFs is', mesh.points.shape[0]*formulation.nvar)
         if formulation.ndim==2:
