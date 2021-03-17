@@ -195,7 +195,7 @@ def test_mesh_postprocess_material():
         pp.SetMaterial(NearlyIncompressibleMooneyRivlin(2,mu=1.,lamb=10.))
         pp.GetAugmentedSolution()
         pp.SetSolution(np.zeros_like(mesh.points))
-        pp.SetMaterial(NearlyIncompressibleNeoHookean(2,mu=1.,pressure=np.zeros(mesh.nelem)))
+        pp.SetMaterial(NearlyIncompressibleNeoHookean(2,mu=1.,lamb=10.))
         pp.GetAugmentedSolution(parallelise=True)
 
         pp = PostProcess(2,3)
@@ -402,7 +402,7 @@ def test_mesh_postprocess_material():
         pp.SetMaterial(NearlyIncompressibleMooneyRivlin(3,mu=1.,lamb=10.))
         pp.GetAugmentedSolution()
         pp.SetSolution(np.zeros_like(mesh.points))
-        pp.SetMaterial(NearlyIncompressibleNeoHookean(3,mu=1.,pressure=np.zeros(mesh.nelem)))
+        pp.SetMaterial(NearlyIncompressibleNeoHookean(3,mu=1.,lamb=10.))
         pp.GetAugmentedSolution(parallelise=True)
 
         pp = PostProcess(3,4)
