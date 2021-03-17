@@ -881,6 +881,11 @@ class PostProcess(object):
 
         """
 
+        # post_function_space = FunctionSpace(mesh, evaluate_at_nodes=True, p=mesh.InferPolynomialDegree(), equally_spaced=True)
+        # post_function_space = FunctionSpace(mesh, p=mesh.InferPolynomialDegree(), equally_spaced=True)
+        # self.postdomain_bases = post_function_space
+
+
         if self.is_scaledjacobian_computed is None:
             self.is_scaledjacobian_computed = False
         if self.is_material_anisotropic is None:
@@ -905,6 +910,7 @@ class PostProcess(object):
         elements = mesh.elements
 
         ScaledJacobian = np.zeros(elements.shape[0])
+        ScaledJacobianF = np.zeros(elements.shape[0])
         ScaledFF = np.zeros(elements.shape[0])
         ScaledHH = np.zeros(elements.shape[0])
 
@@ -915,9 +921,11 @@ class PostProcess(object):
             ScaledCNCN = np.zeros(elements.shape[0])
 
         JMax =[]; JMin=[]
+        invalidElements = []
         for elem in range(mesh.nelem):
             LagrangeElemCoords = mesh.points[elements[elem,:],:]
             EulerElemCoords = vpoints[elements[elem,:],:]
+            # EulerElemCoords = LagrangeElemCoords
 
             # COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
             # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
@@ -935,10 +943,13 @@ class PostProcess(object):
 
             # FIND JACOBIAN OF SPATIAL GRADIENT
             # USING ISOPARAMETRIC
-            Jacobian = np.abs(np.linalg.det(ParentGradientx))
+            # Jacobian = np.abs(np.linalg.det(ParentGradientx))
+            Jacobian = np.linalg.det(ParentGradientx)
             # USING DETERMINANT OF DEFORMATION GRADIENT TENSOR
             # THIS GIVES A RESULT MUCH CLOSER TO ONE
-            Jacobian = detF
+            JacobianF = detF
+            if np.any(Jacobian < 0):
+                invalidElements.append(elem)
             # USING INVARIANT F:F
             Q1 = np.sqrt(np.abs(np.einsum('kij,lij->kl',F,F))).diagonal()
             # USING INVARIANT H:H
@@ -954,7 +965,9 @@ class PostProcess(object):
 
             # FIND MIN AND MAX VALUES
             JMin = np.min(Jacobian); JMax = np.max(Jacobian)
+            JFMin = np.min(JacobianF); JFMax = np.max(JacobianF)
             ScaledJacobian[elem] = 1.0*JMin/JMax
+            ScaledJacobianF[elem] = 1.0*JFMin/JFMax
             ScaledFF[elem] = 1.0*np.min(Q1)/np.max(Q1)
             ScaledHH[elem] = 1.0*np.min(Q2)/np.max(Q2)
             # Jacobian[elem] = np.min(detF)
@@ -965,13 +978,16 @@ class PostProcess(object):
                 ScaledCNCN[elem] = 1.0*np.min(Q5)/np.max(Q5)
 
         if np.isnan(ScaledJacobian).any():
-            warn("Jacobian of mapping is close to zero")
+            warn("Jacobian of mapping is close to zero or nan")
 
         print('Minimum scaled F:F value is', ScaledFF.min(), \
         'corresponding to element', ScaledFF.argmin())
 
         print('Minimum scaled H:H value is', ScaledHH.min(), \
         'corresponding to element', ScaledHH.argmin())
+
+        print('Minimum scaled det(F) value is', ScaledJacobianF.min(), \
+        'corresponding to element', ScaledJacobianF.argmin())
 
         print('Minimum scaled Jacobian value is', ScaledJacobian.min(), \
         'corresponding to element', ScaledJacobian.argmin())
@@ -983,6 +999,7 @@ class PostProcess(object):
             print('Minimum scaled CN.CN value is', ScaledCNCN.min(), \
             'corresponding to element', ScaledCNCN.argmin())
 
+        print('Number of Invalid elements:', len(invalidElements), ":", invalidElements)
 
         if plot:
             import matplotlib.pyplot as plt
@@ -997,13 +1014,14 @@ class PostProcess(object):
         self.is_scaledjacobian_computed = True
         self.AverageJacobian = AverageJacobian
         self.ScaledJacobian = ScaledJacobian
+        self.ScaledJacobianF = ScaledJacobianF
         self.ScaledFF = ScaledFF
         self.ScaledHH = ScaledHH
 
         if not self.is_material_anisotropic:
-            return self.is_scaledjacobian_computed, ScaledFF, ScaledHH, ScaledJacobian
+            return self.is_scaledjacobian_computed, ScaledFF, ScaledHH, ScaledJacobianF, ScaledJacobian
         else:
-            return self.is_scaledjacobian_computed, ScaledFF, ScaledHH, ScaledJacobian, ScaledFNFN, ScaledCNCN
+            return self.is_scaledjacobian_computed, ScaledFF, ScaledHH, ScaledJacobianF, ScaledJacobian, ScaledFNFN, ScaledCNCN
 
 
 
@@ -2607,7 +2625,7 @@ class PostProcess(object):
     @staticmethod
     def CurvilinearPlotTri(mesh, TotalDisp=None, QuantityToPlot=None,
         ProjectionFlags=None, interpolation_degree=30, EquallySpacedPoints=False,
-        TriSurf=False, colorbar=False, PlotActualCurve=False, point_radius = 3, color="#C5F1C5",
+        TriSurf=False, colorbar=False, PlotActualCurve=False, point_radius = 3, color="#C5F1C5", edge_color="k",
         plot_points=False, plot_edges=True, save=False, filename=None, figure=None, show_plot=True,
         save_tessellation=False, plot_surfaces=True):
 
@@ -2734,7 +2752,7 @@ class PostProcess(object):
 
         if plot_edges:
             # PLOT CURVED EDGES
-            h_edges = ax.plot(x_edges,y_edges,'k')
+            h_edges = ax.plot(x_edges, y_edges, edge_color)
 
         if plot_surfaces:
             mesh.nelem = int(mesh.nelem)
@@ -3657,6 +3675,8 @@ class PostProcess(object):
         smesh.points = mesh.points[:nmax,:]
         smesh.GetEdgesTri()
         edge_elements = smesh.GetElementsEdgeNumberingTri()
+        # smesh.GetBoundaryEdgesTri()
+        # edge_elements = smesh.boundary_edge_to_element
 
 
         # GET EDGE ORDERING IN THE REFERENCE ELEMENT
@@ -3678,6 +3698,7 @@ class PostProcess(object):
             z_edges = np.zeros((C+2,smesh.all_edges.shape[0]))
 
             for iedge in range(smesh.all_edges.shape[0]):
+            # for iedge in range(smesh.edges.shape[0]):
                 ielem = edge_elements[iedge,0]
                 edge = mesh.elements[ielem,reference_edges[edge_elements[iedge,1],:]]
                 coord_edge = vpoints[edge,:]

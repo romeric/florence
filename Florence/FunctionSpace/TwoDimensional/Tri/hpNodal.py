@@ -1,5 +1,5 @@
 from __future__ import print_function
-import numpy as np 
+import numpy as np
 from Florence.QuadratureRules.FeketePointsTri import *
 from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPointsTri
 from Florence.FunctionSpace.JacobiPolynomials.JacobiPolynomials import *
@@ -14,7 +14,33 @@ def hpBases(C, xi, eta, Transform=0, EvalOpt=0, equally_spaced=False):
     eps = FeketePointsTri(C)
     if equally_spaced:
         eps = EquallySpacedPointsTri(C)
-        
+
+    # eps = np.array([
+    #     [0., 0],
+    #     [1., 0],
+    #     [0.,1],
+    #     [0.5, 0.],
+    #     [0., 0.5],
+    #     [0.5, 0.5],
+    #     ])
+
+    # eps = np.array([
+    #     [-0.5, 0],
+    #     [ 0.5, 0],
+    #     [0., np.sqrt(3.)/2.]
+    #     ])
+
+    # eps = np.array([
+    #     [-0.5, 0],
+    #     [ 0.5, 0],
+    #     [0., np.sqrt(3.)/2.],
+    #     [0., 0.],
+    #     [-0.25, np.sqrt(3)/4.],
+    #     [0.25, np.sqrt(3)/4.],
+    #     ])
+
+    # xi, eta = eps[5,:]
+
     N = eps.shape[0]
     # Make the Vandermonde matrix
     V = np.zeros((N,N),dtype=np.float64)
@@ -43,6 +69,7 @@ def hpBases(C, xi, eta, Transform=0, EvalOpt=0, equally_spaced=False):
     Bases = np.linalg.solve(V.T,p)
     gBases[:,0] = np.linalg.solve(V.T,dp_dxi)
     gBases[:,1] = np.linalg.solve(V.T,dp_deta)
+
 
     return Bases, gBases
 

@@ -469,7 +469,12 @@ class Mesh(object):
 
 
         # FIRST GET BOUNDARY FACES
-        if not isinstance(self.all_faces,np.ndarray):
+        if isinstance(self.all_faces,np.ndarray):
+            if self.all_faces.shape[0] > 1:
+                # IF LINEAR VERSION IS COMPUTED, DO COMPUTE HIGHER VERSION
+                if self.all_faces.shape[1] == 3 and p > 1:
+                    self.GetFacesTet()
+        else:
             self.GetFacesTet()
 
         # BUILD A 2D MESH
@@ -1145,7 +1150,7 @@ class Mesh(object):
             nmesh = HighOrderMeshTet_SEMISTABLE(C,self,**kwargs)
         elif self.element_type == 'quad':
             if self.edges is None:
-                self.GetBoundaryEdgesTri()
+                self.GetBoundaryEdgesQuad()
             nmesh = HighOrderMeshQuad(C,self,**kwargs)
         elif self.element_type == 'hex':
             nmesh = HighOrderMeshHex(C,self,**kwargs)
@@ -3006,7 +3011,7 @@ class Mesh(object):
         return
 
 
-    def ReadGmsh(self, filename, element_type, read_surface_info=False):
+    def ReadGmsh(self, filename, element_type, p=1, read_surface_info=False):
         """Read gmsh (.msh) file"""
 
         try:
@@ -3034,14 +3039,22 @@ class Mesh(object):
         if element_type == "line":
             el = 1
         elif element_type == "tri":
-            el = 2
-            bel = 2
+            if p == 1:
+                el = 2
+                bel = 1
+            elif p == 2:
+                el = 9
+                bel = 8
         elif element_type == "quad":
             el = 3
-            bel = 3
+            bel = 1
         elif element_type == "tet":
-            el = 4
-            bel = 2
+            if p == 1:
+                el = 4
+                bel = 2
+            elif p == 2:
+                el = 11
+                bel = 9
         elif element_type == "hex":
             el = 5
             bel = 3
@@ -3096,7 +3109,7 @@ class Mesh(object):
         points, elements, faces, face_to_surface = [],[], [], []
         if msh_version == 2:
             # RE-READ
-            ns = self.InferNumberOfNodesPerElement(p=1,element_type=element_type)
+            ns = self.InferNumberOfNodesPerElement(p=p,element_type=element_type)
             for line_counter, line in enumerate(open(filename)):
                 item = line.rstrip()
                 plist = item.split()
@@ -3169,6 +3182,13 @@ class Mesh(object):
 
         self.points = np.array(points,copy=True)
         self.elements = np.array(elements,copy=True) - 1
+        # REORDER CONNECTIVITY
+        if p == 2:
+            # TRI6
+            if el == 9:
+                self.elements = self.elements[:,[0,1,2,3,5,4]]
+            elif el == 11:
+                self.elements = self.elements[:,[0,1,2,3,4,6,5,7,9,8]]
         # CORRECT
         self.nelem = self.elements.shape[0]
         self.nnode = self.points.shape[0]
@@ -3390,15 +3410,6 @@ class Mesh(object):
 
         self.filename = filename
 
-        if element_type == "tri":
-            nsize = 3
-        elif element_type == "quad":
-            nsize = 4
-        elif element_type == "tet":
-            nsize = 4
-        elif element_type == "hex":
-            nsize = 8
-
         with open(filename, 'r') as fid:
             file_content = fid.readlines()
 
@@ -3418,6 +3429,11 @@ class Mesh(object):
             if len(sline) == 1 and sline[0] == "2412":
                 is_point_line = False
                 is_element_line = True
+            if len(sline) == 1 and sline[0] == "2477":
+                is_point_line = False
+                is_element_line = False
+                is_point_line = False
+                is_element_line = False
 
             if is_point_line:
                 if first_point_line or sline[0] == "-1":
@@ -3470,7 +3486,11 @@ class Mesh(object):
         self.elements = aranger[inv_elements].reshape(self.elements.shape[0],self.elements.shape[1])
 
         self.element_type = element_type
-        if read_element_type == "118":
+        if read_element_type == "92":
+            element_type = "tri"
+            self.elements = self.elements[:,[0,2,4,1,5,3]]
+            self.degree = 2
+        elif read_element_type == "118":
             element_type = "tet"
             self.elements = self.elements[:,[0,2,4,9,1,5,3,6,7,8]]
             self.degree = 2
@@ -4179,8 +4199,8 @@ class Mesh(object):
         mesh = deepcopy(self)
         p = self.InferPolynomialDegree()
 
-        if p > 1:
-            mesh = self.GetLinearMesh(remap=True)
+        # if p > 1:
+            # mesh = self.GetLinearMesh(remap=True)
 
 
         element_type = mesh.element_type
@@ -4191,8 +4211,12 @@ class Mesh(object):
         if element_type == "line":
             el = 1
         elif element_type == "tri":
-            el = 2
-            bel = 1
+            if p == 1:
+                el = 2
+                bel = 1
+            else:
+                el = 9
+                bel = 8
         elif element_type == "quad":
             el = 3
             bel = 1
@@ -4208,6 +4232,9 @@ class Mesh(object):
 
         elements = np.copy(mesh.elements).astype(np.int64)
         points = mesh.points[np.unique(elements),:]
+
+        if el == 9:
+            elements = elements[:,[0,1,2,3,5,4]]
 
         # Take care of a corner case where nnode != points.shape[0]
         if mesh.nnode != points.shape[0]:

@@ -41,8 +41,8 @@ def high_order_curved_mesh_generation(p=2, analysis_nature="linear",
             material=material, boundary_condition=boundary_condition)
 
     # check mesh quality
-    assert solution.ScaledJacobian.min() > 0.2
-    assert solution.ScaledJacobian.min() < 0.3
+    assert solution.ScaledJacobianF.min() > 0.2
+    assert solution.ScaledJacobianF.min() < 0.4
     assert solution.ScaledHH.min() > 0.35
     assert solution.ScaledHH.min() < 0.55
     assert solution.ScaledFF.min() > 0.45

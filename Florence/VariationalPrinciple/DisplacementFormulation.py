@@ -104,7 +104,7 @@ class DisplacementFormulation(VariationalPrinciple):
 
 
 
-    def GetLocalStiffness(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem=0):
+    def GetLocalStiffness(self, function_space, material, LagrangeElemCoords, EulerElemCoords, fem_solver, elem=0):
         """Get stiffness matrix of the system"""
 
         nvar = self.nvar
@@ -127,7 +127,7 @@ class DisplacementFormulation(VariationalPrinciple):
         # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
         MaterialGradient = np.einsum('ijk,kli->ijl', inv(ParentGradientX), Jm)
         # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
-        F = np.einsum('ij,kli->kjl', EulerELemCoords, MaterialGradient)
+        F = np.einsum('ij,kli->kjl', EulerElemCoords, MaterialGradient)
 
         # COMPUTE REMAINING KINEMATIC MEASURES
         StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
@@ -135,16 +135,18 @@ class DisplacementFormulation(VariationalPrinciple):
         # UPDATE/NO-UPDATE GEOMETRY
         if fem_solver.requires_geometry_update:
             # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-            ParentGradientx = np.einsum('ijk,jl->kil',Jm, EulerELemCoords)
+            ParentGradientx = np.einsum('ijk,jl->kil',Jm, EulerElemCoords)
             # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
             SpatialGradient = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Jm)
             # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
-            detJ = np.einsum('i,i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)),np.abs(StrainTensors['J']))
+            # detJ = np.einsum('i,i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)),np.abs(StrainTensors['J']))
+            detJ = np.einsum('i,i,i->i',AllGauss[:,0],det(ParentGradientX),StrainTensors['J'])
         else:
             # SPATIAL GRADIENT AND MATERIAL GRADIENT TENSORS ARE EQUAL
             SpatialGradient = np.einsum('ikj',MaterialGradient)
             # COMPUTE ONCE detJ
-            detJ = np.einsum('i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)))
+            # detJ = np.einsum('i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)))
+            detJ = np.einsum('i,i->i',AllGauss[:,0],det(ParentGradientX))
 
 
         # LOOP OVER GAUSS POINTS
@@ -172,17 +174,18 @@ class DisplacementFormulation(VariationalPrinciple):
             # INTEGRATE STIFFNESS
             stiffness += BDB_1*detJ[counter]
 
-
+        from Florence.Tensor import makezero
+        makezero(stiffness, 1e-12)
         return stiffness, tractionforce
 
 
 
-    def __GetLocalStiffness__(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem=0):
+    def __GetLocalStiffness__(self, function_space, material, LagrangeElemCoords, EulerElemCoords, fem_solver, elem=0):
         """Get stiffness matrix of the system"""
 
         # GET LOCAL KINEMATICS
         SpatialGradient, F, detJ = _KinematicMeasures_(function_space.Jm, function_space.AllGauss[:,0],
-            LagrangeElemCoords, EulerELemCoords, fem_solver.requires_geometry_update)
+            LagrangeElemCoords, EulerElemCoords, fem_solver.requires_geometry_update)
         # COMPUTE WORK-CONJUGATES AND HESSIAN AT THIS GAUSS POINT
         CauchyStressTensor, H_Voigt = material.KineticMeasures(F,elem=elem)
         # COMPUTE LOCAL CONSTITUTIVE STIFFNESS AND TRACTION
@@ -212,7 +215,7 @@ class DisplacementFormulation(VariationalPrinciple):
         return BDB, t
 
 
-    def GetLocalTraction(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem=0):
+    def GetLocalTraction(self, function_space, material, LagrangeElemCoords, EulerElemCoords, fem_solver, elem=0):
         """Get traction vector of the system"""
 
         nvar = self.nvar
@@ -234,7 +237,7 @@ class DisplacementFormulation(VariationalPrinciple):
         # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
         MaterialGradient = np.einsum('ijk,kli->ijl', inv(ParentGradientX), Jm)
         # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
-        F = np.einsum('ij,kli->kjl', EulerELemCoords, MaterialGradient)
+        F = np.einsum('ij,kli->kjl', EulerElemCoords, MaterialGradient)
 
         # COMPUTE REMAINING KINEMATIC MEASURES
         StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
@@ -242,7 +245,7 @@ class DisplacementFormulation(VariationalPrinciple):
         # UPDATE/NO-UPDATE GEOMETRY
         if fem_solver.requires_geometry_update:
             # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-            ParentGradientx = np.einsum('ijk,jl->kil',Jm, EulerELemCoords)
+            ParentGradientx = np.einsum('ijk,jl->kil',Jm, EulerElemCoords)
             # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
             SpatialGradient = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Jm)
             # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
@@ -275,12 +278,12 @@ class DisplacementFormulation(VariationalPrinciple):
 
 
 
-    def __GetLocalTraction__(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem=0):
+    def __GetLocalTraction__(self, function_space, material, LagrangeElemCoords, EulerElemCoords, fem_solver, elem=0):
         """Get traction vector of the system"""
 
         # GET LOCAL KINEMATICS
         SpatialGradient, F, detJ = _KinematicMeasures_(function_space.Jm, function_space.AllGauss[:,0],
-            LagrangeElemCoords, EulerELemCoords, fem_solver.requires_geometry_update)
+            LagrangeElemCoords, EulerElemCoords, fem_solver.requires_geometry_update)
         # COMPUTE WORK-CONJUGATES AND HESSIAN AT THIS GAUSS POINT
         CauchyStressTensor, _ = material.KineticMeasures(F,elem=elem)
         # COMPUTE LOCAL CONSTITUTIVE STIFFNESS AND TRACTION
@@ -311,7 +314,7 @@ class DisplacementFormulation(VariationalPrinciple):
 
 
 
-    def GetEnergy(self, function_space, material, LagrangeElemCoords, EulerELemCoords, fem_solver, elem=0):
+    def GetEnergy(self, function_space, material, LagrangeElemCoords, EulerElemCoords, fem_solver, elem=0):
         """Get virtual energy of the system. For dynamic analysis this is handy for computing conservation of energy.
             The routine computes the global form of virtual internal energy i.e. integral of "W(C,G,C)"". This can be
             computed purely in a Lagrangian configuration.
@@ -334,13 +337,13 @@ class DisplacementFormulation(VariationalPrinciple):
         # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
         MaterialGradient = np.einsum('ijk,kli->ijl', inv(ParentGradientX), Jm)
         # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
-        F = np.einsum('ij,kli->kjl', EulerELemCoords, MaterialGradient)
+        F = np.einsum('ij,kli->kjl', EulerElemCoords, MaterialGradient)
 
         # COMPUTE REMAINING KINEMATIC MEASURES
         StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
 
         # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-        ParentGradientx = np.einsum('ijk,jl->kil',Jm, EulerELemCoords)
+        ParentGradientx = np.einsum('ijk,jl->kil',Jm, EulerElemCoords)
         # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
         SpatialGradient = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Jm)
         # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
@@ -358,7 +361,7 @@ class DisplacementFormulation(VariationalPrinciple):
 
 
 
-    def GetLinearMomentum(self, function_space, material, LagrangeElemCoords, EulerELemCoords, VelocityElem, fem_solver, elem=0):
+    def GetLinearMomentum(self, function_space, material, LagrangeElemCoords, EulerElemCoords, VelocityElem, fem_solver, elem=0):
         """Get linear momentum or virtual power of the system. For dynamic analysis this is handy for computing conservation of linear momentum.
             The routine computes the global form of virtual power i.e. integral of "P:Grad_0(V)"" where P is first Piola-Kirchhoff
             stress tensor and Grad_0(V) is the material gradient of velocity. Alternatively in update Lagrangian format this could be
@@ -383,14 +386,14 @@ class DisplacementFormulation(VariationalPrinciple):
         # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
         MaterialGradient = np.einsum('ijk,kli->ijl', inv(ParentGradientX), Jm)
         # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
-        F = np.einsum('ij,kli->kjl', EulerELemCoords, MaterialGradient)
+        F = np.einsum('ij,kli->kjl', EulerElemCoords, MaterialGradient)
         # TIME DERIVATIVE OF F
         Fdot = np.einsum('ij,kli->kjl', VelocityElem, MaterialGradient)
 
         # COMPUTE REMAINING KINEMATIC MEASURES
         StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
         # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-        ParentGradientx = np.einsum('ijk,jl->kil',Jm, EulerELemCoords)
+        ParentGradientx = np.einsum('ijk,jl->kil',Jm, EulerElemCoords)
         # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
         SpatialGradient = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Jm)
         # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)

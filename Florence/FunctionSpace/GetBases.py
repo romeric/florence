@@ -99,6 +99,36 @@ def GetBases2D(C, Quadrature, info, bases_type="nodal", equally_spaced=False, is
 
     elif info == 'tri':
         hpBases = Tri.hpNodal.hpBases
+
+        # U = np.array([
+        #     [-1,-1,1],
+        #     [ 1,-1,1],
+        #     [-1, 1,1]
+        #     ])
+        # U = U.T
+        # # V = np.array([
+        # #     [-0.5, 0, 1],
+        # #     [ 0.5, 0, 1],
+        # #     [ 0., np.sqrt(3.)/2., 1]
+        # #     ])
+        # V = np.array([
+        #     [0., 0, 1],
+        #     [1., 0, 1],
+        #     [0., 1, 1]
+        #     ])
+        # V = V.T
+
+        # T = np.dot(V,np.linalg.inv(U))
+        # # print(T)
+        # zz = np.zeros((z.shape[0],3))
+        # zz[:,:2] = z
+        # zz[:,2] = 1
+        # zz = np.dot(T,zz.T).T
+        # z = zz[:,:2]
+        # # print(z)
+        # exit()
+
+
         for i in range(0,w.shape[0]):
             # Better convergence for curved meshes when Quadrature.optimal!=0
             ndummy, dummy = hpBases(C,z[i,0],z[i,1], Quadrature.optimal, equally_spaced=equally_spaced)

@@ -8,10 +8,13 @@ from .TranservselyIsotropicLinearElastic import *
 from .NeoHookean import *
 from .NeoHookean_1 import *
 from .NeoHookeanCoercive import *
+from .NeoHookeanBSmith import *
 from .NearlyIncompressibleNeoHookean import *
 from .MooneyRivlin import *
 from .MooneyRivlin_1 import *
 from .NearlyIncompressibleMooneyRivlin import *
+from .DistortionModel import *
+from .ARAP import *
 
 # REGULARISED MATERIAL MODELS
 from .RegularisedNeoHookean import *
