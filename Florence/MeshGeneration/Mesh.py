@@ -2744,23 +2744,23 @@ class Mesh(object):
         self.reader_type_format = reader_type_format
         self.reader_type_version = reader_type_version
 
-        if self.reader_type is 'salome':
+        if self.reader_type == 'salome':
             self.ReadSalome(filename, element_type=element_type, read_surface_info=read_surface_info)
-        elif reader_type is 'GID':
+        elif reader_type == 'GID':
             self.ReadGIDMesh(filename, element_type, order)
-        elif self.reader_type is 'gmsh':
+        elif self.reader_type == 'gmsh':
             self.ReadGmsh(filename, element_type=element_type, read_surface_info=read_surface_info)
-        elif self.reader_type is 'obj':
+        elif self.reader_type == 'obj':
             self.ReadOBJ(filename, element_type=element_type, read_surface_info=read_surface_info)
-        elif self.reader_type is 'fenics':
+        elif self.reader_type == 'fenics':
             self.ReadFenics(filename, element_type)
-        elif self.reader_type is 'vtu':
+        elif self.reader_type == 'vtu':
             self.ReadVTK(filename)
-        elif self.reader_type is 'unv':
+        elif self.reader_type == 'unv':
             self.ReadUNV(filename, element_type)
-        elif self.reader_type is 'fro':
+        elif self.reader_type == 'fro':
             self.ReadFRO(filename, element_type)
-        elif self.reader_type is 'read_separate':
+        elif self.reader_type == 'read_separate':
             # READ MESH FROM SEPARATE FILES FOR CONNECTIVITY AND COORDINATES
             from Florence.Utils import insensitive
             # return insensitive(kwargs.keys())
@@ -2773,7 +2773,7 @@ class Mesh(object):
 
             self.ReadSeparate(connectivity_file,coordinates_file,element_type,
                 delimiter_connectivity=',',delimiter_coordinates=',')
-        elif self.reader_type is 'ReadHDF5':
+        elif self.reader_type == 'ReadHDF5':
             self.ReadHDF5(filename)
 
         self.nnode = self.points.shape[0]
@@ -4026,9 +4026,9 @@ class Mesh(object):
 
         self.__do_essential_memebers_exist__()
 
-        if fmt is "xml":
+        if fmt == "xml":
             pass
-        elif fmt is "binary":
+        elif fmt == "binary":
             try:
                 from pyevtk.hl import pointsToVTK, linesToVTK, gridToVTK, unstructuredGridToVTK
                 from pyevtk.vtk import VtkVertex, VtkLine, VtkTriangle, VtkQuad, VtkTetra, VtkPyramid, VtkHexahedron
@@ -4074,9 +4074,9 @@ class Mesh(object):
         if filename is None:
             warn('File name not specified. I am going to write one in the current directory')
             filename = os.path.join(PWD(__file__), "output.vtu")
-        if ".vtu" in filename and fmt is "binary":
+        if ".vtu" in filename and fmt == "binary":
             filename  = filename.split('.')[0]
-        if ".vtu" not in filename and fmt is "xml":
+        if ".vtu" not in filename and fmt == "xml":
             filename  = filename + ".vtu"
 
 
@@ -4109,9 +4109,9 @@ class Mesh(object):
             points = self.points
 
         if result is None:
-            if fmt is "xml":
+            if fmt == "xml":
                 write_vtu(Verts=self.points, Cells={cellflag:elements},fname=filename)
-            elif fmt is "binary":
+            elif fmt == "binary":
                 unstructuredGridToVTK(filename,
                     np.ascontiguousarray(points[:,0]),np.ascontiguousarray(points[:,1]),
                     np.ascontiguousarray(points[:,2]), np.ascontiguousarray(elements.ravel()),
@@ -4122,7 +4122,7 @@ class Mesh(object):
                     if result.size == result.shape[0]:
                         result = result.flatten()
 
-                if fmt is "xml":
+                if fmt == "xml":
                     if result.ndim > 1:
                         if result.shape[0] == self.nelem:
                             write_vtu(Verts=self.points, Cells={cellflag:elements},
@@ -4135,7 +4135,7 @@ class Mesh(object):
                             write_vtu(Verts=self.points, Cells={cellflag:elements},cdata=result,fname=filename)
                         elif result.shape[0] == self.points.shape[0]:
                             write_vtu(Verts=self.points, Cells={cellflag:elements},pdata=result,fname=filename)
-                elif fmt is "binary":
+                elif fmt == "binary":
                     if result.ndim <= 1:
                         if result.shape[0] == self.nelem:
                             unstructuredGridToVTK(filename,
