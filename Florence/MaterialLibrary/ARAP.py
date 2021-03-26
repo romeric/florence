@@ -1,9 +1,49 @@
 import numpy as np
 from numpy import einsum
-from Florence.Tensor import trace, Voigt
+from Florence.Tensor import trace, Voigt, makezero
 from .MaterialBase import Material
 from Florence.LegendreTransform import LegendreTransform
 from scipy.linalg import polar
+
+
+def svd_rv(F, full_matrices=True):
+
+    det = np.linalg.det
+
+    if F.shape[0] == 3:
+        U, Sigma, V = np.linalg.svd(F, full_matrices=True)
+        # reflection matrix
+        L = np.eye(3,3);
+        L[2,2] = det(np.dot(U, V.T))
+
+        # see where to pull the reflection out of
+        detU = det(U);
+        detV = det(V);
+        if (detU < 0 and detV > 0):
+          U = np.dot(U, L)
+        elif (detU > 0 and detV < 0):
+          V = np.dot(V, L)
+
+        # push the reflection to the diagonal
+        Sigma = np.dot(Sigma, L)
+        return U, Sigma, V
+    else:
+        U, Sigma, V = np.linalg.svd(F, full_matrices=True)
+        # reflection matrix
+        L = np.eye(2,2);
+        L[1,1] = det(np.dot(U, V.T))
+
+        # see where to pull the reflection out of
+        detU = det(U);
+        detV = det(V);
+        if (detU < 0 and detV > 0):
+          U = np.dot(U, L)
+        elif (detU > 0 and detV < 0):
+          V = np.dot(V, L)
+
+        # push the reflection to the diagonal
+        Sigma = np.dot(Sigma, L)
+        return U, Sigma, V
 
 
 class ARAP(Material):
@@ -48,7 +88,12 @@ class ARAP(Material):
         J = StrainTensors['J'][gcounter]
         b = StrainTensors['b'][gcounter]
 
-        u, s, vh = np.linalg.svd(F, full_matrices=True)
+        det = np.linalg.det
+        # svd = np.linalg.svd
+        svd = svd_rv
+        u, s, vh = svd(F, full_matrices=True)
+        # print(det(u),det(vh))
+        # exit()
         if self.ndim == 2:
             s1 = s[0]
             s2 = s[1]
@@ -75,12 +120,12 @@ class ARAP(Material):
             s1s2 = s1 + s2
             s1s3 = s1 + s3
             s2s3 = s2 + s3
-            # if (s1s2 < 2.0):
-            #     s1s2 = 2.0
-            # if (s1s3 < 2.0):
-            #     s1s3 = 2.0
-            # if (s2s3 < 2.0):
-            #     s2s3 = 2.0
+            if (s1s2 < 2.0):
+                s1s2 = 2.0
+            if (s1s3 < 2.0):
+                s1s3 = 2.0
+            if (s2s3 < 2.0):
+                s2s3 = 2.0
             lamb1 = 2. / (s1s2)
             lamb2 = 2. / (s1s3)
             lamb3 = 2. / (s2s3)
@@ -119,6 +164,7 @@ class ARAP(Material):
             # C_Voigt = np.ascontiguousarray(C_Voigt)
 
         C_Voigt = Voigt(C_Voigt,1)
+        makezero(C_Voigt)
 
         # C_Voigt += 0.95*self.vIikIjl
         # print(C_Voigt)
@@ -140,8 +186,9 @@ class ARAP(Material):
         J = StrainTensors['J'][gcounter]
         b = StrainTensors['b'][gcounter]
 
-
-        u, s, vh = np.linalg.svd(F, full_matrices=True)
+        # svd = np.linalg.svd
+        svd = svd_rv
+        u, s, vh = svd(F, full_matrices=True)
         R = u.dot(vh)
         # s1 = s[0]
         # s2 = s[1]

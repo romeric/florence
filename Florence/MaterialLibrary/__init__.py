@@ -6,14 +6,15 @@ from .IncrementalLinearElastic import *
 from .TranservselyIsotropicLinearElastic import *
 # NONLINEAR MATERIAL MODELS
 from .NeoHookean import *
-from .NeoHookean_1 import *
 from .NeoHookeanCoercive import *
 from .NeoHookeanBSmith import *
+from .PixarNeoHookean import *
 from .NearlyIncompressibleNeoHookean import *
 from .MooneyRivlin import *
 from .MooneyRivlin_1 import *
 from .NearlyIncompressibleMooneyRivlin import *
 from .DistortionModel import *
+from .StVenantKirchhoff import *
 from .ARAP import *
 
 # REGULARISED MATERIAL MODELS

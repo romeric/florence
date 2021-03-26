@@ -3,7 +3,7 @@ from .MaterialBase import Material
 from Florence.Tensor import trace, Voigt
 
 class NeoHookean(Material):
-    """The fundamental Neo-Hookean internal energy, described in Bonet et. al.
+    """The fundamental Neo-Hookean internal energy, described in Ogden et. al.
 
         W(C) = mu/2*(C:I-3)- mu*lnJ + lamb/2*(J-1)**2
 
@@ -44,11 +44,17 @@ class NeoHookean(Material):
 
         mu2 = self.mu/J- self.lamb*(J-1.0)
         lamb2 = self.lamb*(2*J-1.0)
-        H_Voigt = lamb2*self.vIijIkl+mu2*self.vIikIjl
+        C_Voigt = lamb2*self.vIijIkl+mu2*self.vIikIjl
 
-        self.H_VoigtSize = H_Voigt.shape[0]
+        # mu = self.mu
+        # lamb = self.lamb
+        # Bonet NeoHookean
+        # C_Voigt = lamb/J * np.einsum("ij,kl",I,I) + 1./J * (mu - lamb*np.log(J)) * (np.einsum("ik,jl",I,I) + np.einsum("il,jk",I,I))
+        # C_Voigt = Voigt(C_Voigt,1)
 
-        return H_Voigt
+        self.H_VoigtSize = C_Voigt.shape[0]
+
+        return C_Voigt
 
     def CauchyStress(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
 
@@ -58,12 +64,13 @@ class NeoHookean(Material):
 
         if np.isclose(J, 0) or J < 0:
             delta = np.sqrt(0.04 * J * J + 1e-8);
-            J += np.sqrt(J**2 + 4 *delta**2)
             J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
 
         mu = self.mu
         lamb = self.lamb
         stress = 1.0*mu/J*b + (lamb*(J-1.0)-mu/J)*I
+        # Bonet
+        # stress = mu/J*(b-I) + lamb/J*np.log(J)*I
 
         return stress
 

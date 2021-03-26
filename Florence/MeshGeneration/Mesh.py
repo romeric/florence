@@ -4202,7 +4202,6 @@ class Mesh(object):
         # if p > 1:
             # mesh = self.GetLinearMesh(remap=True)
 
-
         element_type = mesh.element_type
         edim = mesh.InferElementalDimension()
 
@@ -4221,8 +4220,12 @@ class Mesh(object):
             el = 3
             bel = 1
         elif element_type == "tet":
-            el = 4
-            bel = 2
+            if p == 1:
+                el = 4
+                bel = 2
+            elif p == 2:
+                el = 11
+                bel = 9
         elif element_type == "hex":
             el = 5
             bel = 3
@@ -4235,6 +4238,8 @@ class Mesh(object):
 
         if el == 9:
             elements = elements[:,[0,1,2,3,5,4]]
+        elif el == 11:
+            elements = elements[:,[0,1,2,3,4,6,5,7,9,8]]
 
         # Take care of a corner case where nnode != points.shape[0]
         if mesh.nnode != points.shape[0]:

@@ -887,8 +887,10 @@ class FEMSolver(object):
 
             # STORE THE INFORMATION IF NEWTON-RAPHSON FAILS
             if self.newton_raphson_failed_to_converge:
+                if Increment == 0:
+                    break
                 solver.condA = np.NAN
-                Increment = Increment if Increment!=0 else 1
+                # Increment = Increment if Increment!=0 else 1
                 TotalDisp = TotalDisp[:,:,:Increment]
                 self.number_of_load_increments = Increment
                 break
@@ -935,9 +937,9 @@ class FEMSolver(object):
 
             # # COMPUTE STEP SIZE
             # alpha = self.LineSearch(function_spaces[0], formulation, mesh, material, boundary_condition,
-            #     NodalForces, dU, Residual, Eulerx, Eulerp)
-            # print(alpha)
+                # NodalForces, dU, Residual, Eulerx, Eulerp)
             alpha=1.
+            # print(alpha)
 
             # UPDATE THE EULERIAN COMPONENTS
             # UPDATE THE GEOMETRY
@@ -1000,7 +1002,7 @@ class FEMSolver(object):
             if self.break_at_stagnation:
                 self.iterative_norm_history.append(self.norm_residual)
                 if Iter >= 6:
-                    if np.mean(self.iterative_norm_history) < 1. and self.abs_norm_residual < 0.01:
+                    if np.mean(self.iterative_norm_history) < 1. and self.abs_norm_residual < 0.0001:
                         break
 
             # USER DEFINED CRITERIA TO BREAK OUT OF NEWTON-RAPHSON
@@ -1169,12 +1171,14 @@ class FEMSolver(object):
         ResidualCopy[boundary_condition.columns_in] = TractionForces[boundary_condition.columns_in] -\
             NodalForces[boundary_condition.columns_in]
         R1 = np.dot(dU[:,:formulation.ndim].flatten().T,ResidualCopy).item()
+        if np.isclose(R1, 0.):
+            R1 = 1e-14
 
-        alpha = R0 / R1
         eta = 1.
         Rf = (1 - eta) * R0 + R1 * eta**2
 
         Iter = 0
+        alpha = R0 / R1
         while np.abs(Rf) > rho * np.abs(R0) and Iter < 25:
             if alpha < 0.:
                 eta = alpha / 2. + np.sqrt((alpha/2)**2 - alpha)
@@ -1185,15 +1189,15 @@ class FEMSolver(object):
             else:
                 eta = alpha / 2.
 
-            newXCopy = Eulerx + eta * dU[:,:formulation.ndim]
+            # newXCopy = Eulerx + eta * dU[:,:formulation.ndim]
 
-            # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
-            TractionForces = AssembleInternalTractionForces(self, function_space, formulation, mesh, material,
-                newXCopy, newPCopy + dU[:,-1])
-            # FIND THE RESIDUAL
-            ResidualCopy[boundary_condition.columns_in] = TractionForces[boundary_condition.columns_in] -\
-                NodalForces[boundary_condition.columns_in]
-            Rf = np.dot(dU[:,:formulation.ndim].flatten().T,ResidualCopy).item()
+            # # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
+            # TractionForces = AssembleInternalTractionForces(self, function_space, formulation, mesh, material,
+            #     newXCopy, newPCopy + dU[:,-1])
+            # # FIND THE RESIDUAL
+            # ResidualCopy[boundary_condition.columns_in] = TractionForces[boundary_condition.columns_in] -\
+            #     NodalForces[boundary_condition.columns_in]
+            # Rf = np.dot(dU[:,:formulation.ndim].flatten().T,ResidualCopy).item()
 
             # alpha = R0 / Rf
             Rf = (1 - eta) * R0 + R1 * eta**2
