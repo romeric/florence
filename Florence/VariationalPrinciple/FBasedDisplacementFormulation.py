@@ -5,6 +5,7 @@ from Florence import QuadratureRule, FunctionSpace
 from Florence.FiniteElements.LocalAssembly.KinematicMeasures import *
 from Florence.FiniteElements.LocalAssembly._KinematicMeasures_ import _KinematicMeasures_
 from Florence.Tensor import issymetric
+from Florence.Tensor import makezero
 
 
 def vec(H):
@@ -14,7 +15,7 @@ def vec(H):
         # H = np.einsum("ijlk",H)
         x = H.flatten().reshape(ndim**2,ndim**2)
         # H1 = np.random.rand(2,2,2,2)
-        # print(H1)
+        # print(x)
         # print()
         # HH = np.zeros((ndim**2,ndim**2))
         # for i in range(H.ndim):
@@ -22,8 +23,8 @@ def vec(H):
             # print(H[:,:,:,i])
         # print(H.flatten())
         # makezero(x)
-        x += x.T
-        x /= 2.
+        # x += x.T
+        # x /= 2.
         # print(H)
         # s = np.linalg.svd(x)[1]
         # print(s)
@@ -31,25 +32,31 @@ def vec(H):
         return x
         # return H.flatten().reshape(ndim**2,ndim**2)
     else:
-        return H.flatten()
+        # return H.flatten()
+        return H.T.flatten() # careful - ARAP needs this
 
 
-def FillConstitutiveBF(B,SpatialGradient,ndim,nvar):
-    # print(SpatialGradient)
-    # print(B.shape)
-    # B[::ndim,0] = SpatialGradient[0,:]
-    # B[::ndim,2] = SpatialGradient[0,:]
-    # B[1::ndim,1] = SpatialGradient[1,:]
-    # B[1::ndim,3] = SpatialGradient[1,:]
+def FillConstitutiveBF(B,SpatialGradient,F,ndim,nvar):
+
+    # SpatialGradient = np.dot(F,SpatialGradient)
 
     if ndim == 2:
         B[::ndim,0] = SpatialGradient[0,:]
         B[::ndim,2] = SpatialGradient[1,:]
         B[1::ndim,1] = SpatialGradient[0,:]
         B[1::ndim,3] = SpatialGradient[1,:]
-        # print(B)
-        # exit()
+    else:
+        B[::ndim,0] = SpatialGradient[0,:]
+        B[::ndim,3] = SpatialGradient[1,:]
+        B[::ndim,6] = SpatialGradient[2,:]
 
+        B[1::ndim,1] = SpatialGradient[0,:]
+        B[1::ndim,4] = SpatialGradient[1,:]
+        B[1::ndim,7] = SpatialGradient[2,:]
+
+        B[2::ndim,2] = SpatialGradient[0,:]
+        B[2::ndim,5] = SpatialGradient[1,:]
+        B[2::ndim,8] = SpatialGradient[2,:]
 
 import numpy as np
 from numpy import einsum
@@ -91,10 +98,11 @@ class NeoHookeanF(Material):
         I = StrainTensors['I']
         J = StrainTensors['J'][gcounter]
         F = StrainTensors['F'][gcounter]
+        b = StrainTensors['b'][gcounter]
 
         if np.isclose(J, 0) or J < 0:
             delta = np.sqrt(0.04 * J * J + 1e-8);
-            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
+            J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
 
         mu = self.mu
         lamb = self.lamb
@@ -102,25 +110,38 @@ class NeoHookeanF(Material):
         invF = np.linalg.inv(F)
         invFt = invF.T.copy()
 
-        H = mu * np.einsum("ij,kl", I, I) + lamb * np.einsum("ij,kl", invFt, invFt) +\
-            (mu-lamb*np.log(J)) * np.einsum("ik,jl", invFt, invFt)
+        # BECAREFUL IJKL OF F,F or invF,invF is not symmetric
+
+        # H = mu * np.einsum("ik,jl", I, I) + lamb * np.einsum("ij,kl", invFt, invFt) +\
+        #     (mu-lamb*np.log(J)) * np.einsum("ik,jl", invFt, invFt)
+
+        # This symmetrisation is wrong perhaps
+        # dum = 0.25 * (lamb * np.einsum("ij,kl", invFt, invFt) + lamb * np.einsum("ij,lk", invFt, invFt) +\
+        #     lamb * np.einsum("ji,kl", invFt, invFt) + lamb * np.einsum("ji,lk", invFt, invFt) )
+
+        dum = lamb * np.einsum("ij,kl", invFt, invFt)
+        H = mu * 0.5 * (np.einsum("ik,jl", I, I) + np.einsum("il,jk", I, I)) + dum +\
+            (mu-lamb*np.log(J)) * 0.5 * (np.einsum("ik,jl", invFt, invFt) + np.einsum("il,jk", invFt, invFt))
+            # (mu-lamb*np.log(J)) * 0.5 * (np.einsum("ik,jl->ijkl", invFt, invFt) + np.einsum("il,jk->ijkl", invFt, invFt))
+
+        # C_Voigt = lamb/J * np.einsum("ij,kl",I,I) + 1./J * (mu - lamb*np.log(J)) * (np.einsum("ik,jl",I,I) + np.einsum("il,jk",I,I))
+        # stress = mu/J*(b-I) + lamb/J*np.log(J)*I
+        # C_Voigt = (lamb * (2*J-1) - mu) * np.einsum("ij,kl",I,I) + (mu - lamb * (J-1))  * (np.einsum("ik,jl",I,I) + np.einsum("il,jk",I,I))
+        # stress = 1.0*mu/J*b + (lamb*(J-1) - mu)*I
+        # H = J * np.einsum("Jj,ijkl,Ll->iJkL",invF,(C_Voigt + np.einsum("ij,kl",stress,I)),invF)
+
+        # H = mu * np.einsum("ij,kl", I, I) + lamb * np.einsum("ij,kl", invFt, invFt) +\
+        #     (mu-lamb*np.log(J)) * np.einsum("ik,jl", invFt, invFt)
             # (mu-lamb*np.log(J)) * 1*(np.einsum("ik,jl", invFt, invFt) + np.einsum("il,jk", invFt, invFt)) # indefinite
-        # print(H)
-        # exit()
+
+        # For F based formulation we need to bring everything to reference domain, partial pull back
+
+        H = np.einsum("klij",H) # this symmetry should be preserved anyway
+        H = np.einsum("ijlk",H)
+
         H = vec(H)
-
-        # H = mu * np.einsum("i,j", vec(I), vec(I)) + lamb * np.einsum("i,j", vec(invFt), vec(invFt)) +\
-        #     (mu-lamb*np.log(J)) * np.einsum("i,j", vec(invFt), vec(invFt))
-
-        # print(np.einsum("i,j", vec(I), vec(I)) )
-        # print(H)
-        # s = np.linalg.svd(H)[1]
-        # print(s)
-        # if np.min(s) < 0:
-            # print(s)
-        # print()
-        # print(vec(I))
-        # exit()
+        # H += H.T
+        # H /= 2.
 
         self.H_VoigtSize = H.shape[0]
 
@@ -134,17 +155,16 @@ class NeoHookeanF(Material):
 
         if np.isclose(J, 0) or J < 0:
             delta = np.sqrt(0.04 * J * J + 1e-8);
-            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
+            J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
 
         mu = self.mu
         lamb = self.lamb
         invF = np.linalg.inv(F)
         invFt = invF.T.copy()
-        # print(F,invFt)
 
         stress = mu*F - (mu-lamb*np.log(J)) * invFt
 
-        return stress
+        return stress.T # careful
 
 
     def InternalEnergy(self,StrainTensors,elem=0,gcounter=0):
@@ -205,6 +225,9 @@ def svd_rv(F, full_matrices=True):
         return U, Sigma, V
 
 
+
+# svd = np.linalg.svd
+svd = svd_rv
 class ARAPF(Material):
     """The fundamental ARAP model
 
@@ -245,97 +268,65 @@ class ARAPF(Material):
         J = StrainTensors['J'][gcounter]
 
         det = np.linalg.det
-        # svd = np.linalg.svd
-        svd = svd_rv
         u, s, vh = svd(F, full_matrices=True)
-        # print(det(u),det(vh))
+        vh = vh.T
+        # print(u,s,vh)
         # exit()
         if self.ndim == 2:
             s1 = s[0]
             s2 = s[1]
             T = np.array([[0.,-1],[1,0.]])
             T = 1./np.sqrt(2) * np.dot(u, np.dot(T, vh.T))
-            # s1s2 = s1 + s2
-            # if (s1s2 < 2.0):
-            #     s1s2 = 2.0
-            # lamb = 2. / (s1s2)
-            # C_Voigt = 1.0 * ( einsum("ik,jl",I,I)+einsum("il,jk",I,I) ) - 2. * lamb * np.einsum("ij,kl", T, T)
-            # C_Voigt = einsum("il,jk",I,I) - 2. * lamb * np.einsum("ij,kl", T, T)
-            # C_Voigt = vec(C_Voigt)
-            # makezero(C_Voigt)
-
             t =  vec(T)
             H = np.eye(4,4)
             I_1 = s.sum()
-            filtered = 2.0 / I_1 if I_1 >= 2.0 else 1.0
-            # filtered = 1.0
-            # print(I_1,filtered)
+            # filtered = 2.0 / I_1 if I_1 >= 2.0 else 1.0
+            filtered = 1.0
             H -= filtered * np.outer(t,t)
             H *= 2.
-            # print(np.outer(t,t))
-            # print(H)
-            # print(s)
-            # exit()
-            C_Voigt = H
+
 
         elif self.ndim == 3:
-            s1 = s[0]
-            s2 = s[1]
-            s3 = s[2]
-            T1 = np.array([[0.,0.,0.],[0.,0.,-1],[0.,1.,0.]])
+            s0 = s[0]
+            s1 = s[1]
+            s2 = s[2]
+            T1 = np.array([[0.,-1.,0.],[1.,0.,0],[0.,0.,0.]])
             T1 = 1./np.sqrt(2) * np.dot(u, np.dot(T1, vh.T))
-            T2 = np.array([[0.,0.,-1],[0.,0.,0.],[1.,0.,0.]])
+            T2 = np.array([[0.,0.,0.],[0.,0., 1],[0.,-1.,0.]])
             T2 = 1./np.sqrt(2) * np.dot(u, np.dot(T2, vh.T))
-            T3 = np.array([[0.,-1,0.],[1.,0.,0.],[0.,0.,0.]])
+            T3 = np.array([[0.,0.,1.],[0.,0.,0.],[-1,0.,0.]])
             T3 = 1./np.sqrt(2) * np.dot(u, np.dot(T3, vh.T))
-            s1s2 = s1 + s2
-            s1s3 = s1 + s3
-            s2s3 = s2 + s3
-            if (s1s2 < 2.0):
-                s1s2 = 2.0
-            if (s1s3 < 2.0):
-                s1s3 = 2.0
-            if (s2s3 < 2.0):
-                s2s3 = 2.0
-            lamb1 = 2. / (s1s2)
-            lamb2 = 2. / (s1s3)
-            lamb3 = 2. / (s2s3)
-
-            C_Voigt = 1.0 * ( einsum("ik,jl",I,I)+einsum("il,jk",I,I) ) - 2. * lamb3 * np.einsum("ij,kl", T1, T1) - \
-                - 2. * lamb2 * np.einsum("ij,kl", T2, T2) - 2. * lamb1 * np.einsum("ij,kl", T3, T3)
-
-
-            # s1 = s[0]
-            # s2 = s[1]
-            # s3 = s[2]
-            # T1 = np.array([[0.,-1.,0.],[1.,0.,0],[0.,0.,0.]])
-            # T1 = 1./np.sqrt(2) * np.dot(u, np.dot(T1, vh.T))
-            # T2 = np.array([[0.,0.,0.],[0.,0., 1],[0.,-1,0.]])
-            # T2 = 1./np.sqrt(2) * np.dot(u, np.dot(T2, vh.T))
-            # T3 = np.array([[0.,0.,1.],[0.,0.,0.],[-1,0.,0.]])
-            # T3 = 1./np.sqrt(2) * np.dot(u, np.dot(T3, vh.T))
             # s1s2 = s1 + s2
             # s1s3 = s1 + s3
             # s2s3 = s2 + s3
-            # # if (s1s2 < 2.0):
-            # #     s1s2 = 2.0
-            # # if (s1s3 < 2.0):
-            # #     s1s3 = 2.0
-            # # if (s2s3 < 2.0):
-            # #     s2s3 = 2.0
+            # if (s1s2 < 2.0):
+            #     s1s2 = 2.0
+            # if (s1s3 < 2.0):
+            #     s1s3 = 2.0
+            # if (s2s3 < 2.0):
+            #     s2s3 = 2.0
             # lamb1 = 2. / (s1s2)
             # lamb2 = 2. / (s1s3)
             # lamb3 = 2. / (s2s3)
 
-            # C_Voigt = 1.0 * ( einsum("ik,jl",I,I)+einsum("il,jk",I,I) ) - 2. * lamb1 * np.einsum("ij,kl", T1, T1) - \
-            #     - 2. * lamb3 * np.einsum("ij,kl", T2, T2) - 2. * lamb2 * np.einsum("ij,kl", T3, T3)
+            t1 = vec(T1)
+            t2 = vec(T2)
+            t3 = vec(T3)
 
-        s = np.linalg.svd(C_Voigt)[1]
+            H = 2. * np.eye(9,9);
+            H = H - (4. / (s0 + s1)) * np.outer(t1 , t1);
+            H = H - (4. / (s1 + s2)) * np.outer(t2 , t2);
+            H = H - (4. / (s0 + s2)) * np.outer(t3 , t3);
+
+            # print(H)
+            # exit()
+
+        # s = np.linalg.svd(C_Voigt)[1]
         # print(s)
         # exit()
 
-        # C_Voigt += 0.95*self.vIikIjl
-        # print(C_Voigt)
+        C_Voigt = H
+        self.H_VoigtSize = H.shape[0]
 
         return C_Voigt
 
@@ -352,18 +343,13 @@ class ARAPF(Material):
         J = StrainTensors['J'][gcounter]
         b = StrainTensors['b'][gcounter]
 
-        # svd = np.linalg.svd
-        svd = svd_rv
         u, s, vh = svd(F, full_matrices=True)
-        R = u.dot(vh)
-        # s1 = s[0]
-        # s2 = s[1]
+        vh = vh.T
+        R = u.dot(vh.T)
 
-        # R,U = polar(F)
         sigma = 2. * (F - R)
-
-
-        # sigma += 0.95/J*(b - I)
+        # print(sigma)
+        # exit()
 
         return sigma
 
@@ -376,10 +362,10 @@ class ARAPF(Material):
         J = StrainTensors['J'][gcounter]
         F = StrainTensors['F'][gcounter]
 
-        # R,U = polar(F)
-        u, s, vh = np.linalg.svd(F, full_matrices=True)
-        R = u.dot(vh)
-        # energy  = einsum("ij,ij",F - R,F - R)
+        u, s, vh = svd(F, full_matrices=True)
+        vh = vh.T
+        R = u.dot(vh.T)
+        energy  = einsum("ij,ij",F - R,F - R)
 
         return energy
 
@@ -496,6 +482,7 @@ class FBasedDisplacementFormulation(VariationalPrinciple):
         # COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
         # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
         ParentGradientX = np.einsum('ijk,jl->kil', Jm, LagrangeElemCoords)
+        # ParentGradientX = [np.eye(3,3)]
         # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
         MaterialGradient = np.einsum('ijk,kli->ijl', inv(ParentGradientX), Jm)
         # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
@@ -503,23 +490,6 @@ class FBasedDisplacementFormulation(VariationalPrinciple):
 
         # COMPUTE REMAINING KINEMATIC MEASURES
         StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
-
-        # # UPDATE/NO-UPDATE GEOMETRY
-        # if fem_solver.requires_geometry_update:
-        #     # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-        #     ParentGradientx = np.einsum('ijk,jl->kil',Jm, EulerElemCoords)
-        #     # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
-        #     SpatialGradient = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Jm)
-        #     # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
-        #     # detJ = np.einsum('i,i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)),np.abs(StrainTensors['J']))
-        #     detJ = np.einsum('i,i,i->i',AllGauss[:,0],det(ParentGradientX),StrainTensors['J'])
-        # else:
-        #     # SPATIAL GRADIENT AND MATERIAL GRADIENT TENSORS ARE EQUAL
-        #     SpatialGradient = np.einsum('ikj',MaterialGradient)
-        #     # COMPUTE ONCE detJ
-        #     # detJ = np.einsum('i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)))
-        #     detJ = np.einsum('i,i->i',AllGauss[:,0],det(ParentGradientX))
-
 
         # SPATIAL GRADIENT AND MATERIAL GRADIENT TENSORS ARE EQUAL
         SpatialGradient = np.einsum('ikj',MaterialGradient)
@@ -540,12 +510,9 @@ class FBasedDisplacementFormulation(VariationalPrinciple):
                 CauchyStressTensor = material.CauchyStress(StrainTensors,None,elem,counter)
 
             # COMPUTE THE TANGENT STIFFNESS MATRIX
-            BDB_1, t = self.ConstitutiveStiffnessIntegrand(B, SpatialGradient[counter,:,:],
+            BDB_1, t = self.ConstitutiveStiffnessIntegrand(B, SpatialGradient[counter,:,:], StrainTensors['F'][counter],
                 CauchyStressTensor, H_Voigt, requires_geometry_update=fem_solver.requires_geometry_update)
 
-            # COMPUTE GEOMETRIC STIFFNESS MATRIX
-            # if material.nature != "linear":
-                # BDB_1 += self.GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],CauchyStressTensor)
             # INTEGRATE TRACTION FORCE
             if fem_solver.requires_geometry_update:
                 tractionforce += t*detJ[counter]
@@ -553,20 +520,19 @@ class FBasedDisplacementFormulation(VariationalPrinciple):
             # INTEGRATE STIFFNESS
             stiffness += BDB_1*detJ[counter]
 
-        from Florence.Tensor import makezero
         makezero(stiffness, 1e-12)
         # print(stiffness)
-        # print(det(stiffness))
+        # print(tractionforce)
         # exit()
         return stiffness, tractionforce
 
 
-    def ConstitutiveStiffnessIntegrand(self, B, SpatialGradient, CauchyStressTensor, H_Voigt,
+    def ConstitutiveStiffnessIntegrand(self, B, SpatialGradient, F, CauchyStressTensor, H_Voigt,
         requires_geometry_update=True):
         """Applies to displacement based formulation"""
 
         SpatialGradient = SpatialGradient.T.copy()
-        FillConstitutiveBF(B,SpatialGradient,self.ndim,self.nvar)
+        FillConstitutiveBF(B,SpatialGradient,F,self.ndim,self.nvar)
 
         BDB = B.dot(H_Voigt.dot(B.T))
 
@@ -574,127 +540,7 @@ class FBasedDisplacementFormulation(VariationalPrinciple):
         if requires_geometry_update:
             # TotalTraction = GetTotalTraction(CauchyStressTensor)
             TotalTraction = vec(CauchyStressTensor)
+            # TotalTraction = vec(CauchyStressTensor.T)
             t = np.dot(B,TotalTraction)[:,None]
 
         return BDB, t
-
-
-    # def GetLocalTraction(self, function_space, material, LagrangeElemCoords, EulerElemCoords, fem_solver, elem=0):
-    #     """Get traction vector of the system"""
-
-    #     nvar = self.nvar
-    #     ndim = self.ndim
-    #     nodeperelem = function_space.Bases.shape[0]
-
-    #     det = np.linalg.det
-    #     inv = np.linalg.inv
-    #     Jm = function_space.Jm
-    #     AllGauss = function_space.AllGauss
-
-    #     # ALLOCATE
-    #     tractionforce = np.zeros((nodeperelem*nvar,1),dtype=np.float64)
-    #     B = np.zeros((nodeperelem*nvar,material.H_VoigtSize),dtype=np.float64)
-
-    #     # COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
-    #     # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-    #     ParentGradientX = np.einsum('ijk,jl->kil', Jm, LagrangeElemCoords)
-    #     # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
-    #     MaterialGradient = np.einsum('ijk,kli->ijl', inv(ParentGradientX), Jm)
-    #     # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
-    #     F = np.einsum('ij,kli->kjl', EulerElemCoords, MaterialGradient)
-
-    #     # COMPUTE REMAINING KINEMATIC MEASURES
-    #     StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
-
-    #     # UPDATE/NO-UPDATE GEOMETRY
-    #     if fem_solver.requires_geometry_update:
-    #         # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-    #         ParentGradientx = np.einsum('ijk,jl->kil',Jm, EulerElemCoords)
-    #         # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
-    #         SpatialGradient = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Jm)
-    #         # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
-    #         detJ = np.einsum('i,i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)),np.abs(StrainTensors['J']))
-    #     else:
-    #         # SPATIAL GRADIENT AND MATERIAL GRADIENT TENSORS ARE EQUAL
-    #         SpatialGradient = np.einsum('ikj',MaterialGradient)
-    #         # COMPUTE ONCE detJ
-    #         detJ = np.einsum('i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)))
-
-
-    #     # LOOP OVER GAUSS POINTS
-    #     for counter in range(AllGauss.shape[0]):
-
-    #         # COMPUTE CAUCHY STRESS TENSOR
-    #         CauchyStressTensor = []
-    #         if fem_solver.requires_geometry_update:
-    #             CauchyStressTensor = material.CauchyStress(StrainTensors,None,elem,counter)
-
-    #         # COMPUTE THE TANGENT STIFFNESS MATRIX
-    #         t = self.TractionIntegrand(B, SpatialGradient[counter,:,:],
-    #             CauchyStressTensor, requires_geometry_update=fem_solver.requires_geometry_update)
-
-    #         if fem_solver.requires_geometry_update:
-    #             # INTEGRATE TRACTION FORCE
-    #             tractionforce += t*detJ[counter]
-
-
-    #     return tractionforce
-
-
-    # def TractionIntegrand(self, B, SpatialGradient, CauchyStressTensor,
-    #     requires_geometry_update=True):
-    #     """Applies to displacement based formulation"""
-
-    #     SpatialGradient = SpatialGradient.T.copy()
-    #     FillConstitutiveBF(B,SpatialGradient,self.ndim,self.nvar)
-
-    #     t=np.zeros((B.shape[0],1))
-    #     if requires_geometry_update:
-    #         TotalTraction = GetTotalTraction(CauchyStressTensor)
-    #         t = np.dot(B,TotalTraction)
-
-    #     return t
-
-    # def GetEnergy(self, function_space, material, LagrangeElemCoords, EulerElemCoords, fem_solver, elem=0):
-    #     """Get virtual energy of the system. For dynamic analysis this is handy for computing conservation of energy.
-    #         The routine computes the global form of virtual internal energy i.e. integral of "W(C,G,C)"". This can be
-    #         computed purely in a Lagrangian configuration.
-    #     """
-
-    #     nvar = self.nvar
-    #     ndim = self.ndim
-    #     nodeperelem = function_space.Bases.shape[0]
-
-    #     det = np.linalg.det
-    #     inv = np.linalg.inv
-    #     Jm = function_space.Jm
-    #     AllGauss = function_space.AllGauss
-
-    #     internal_energy = 0.
-
-    #     # COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
-    #     # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-    #     ParentGradientX = np.einsum('ijk,jl->kil', Jm, LagrangeElemCoords)
-    #     # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
-    #     MaterialGradient = np.einsum('ijk,kli->ijl', inv(ParentGradientX), Jm)
-    #     # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
-    #     F = np.einsum('ij,kli->kjl', EulerElemCoords, MaterialGradient)
-
-    #     # COMPUTE REMAINING KINEMATIC MEASURES
-    #     StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
-
-    #     # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
-    #     ParentGradientx = np.einsum('ijk,jl->kil',Jm, EulerElemCoords)
-    #     # SPATIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla (N)]
-    #     SpatialGradient = np.einsum('ijk,kli->ilj',inv(ParentGradientx),Jm)
-    #     # COMPUTE ONCE detJ (GOOD SPEEDUP COMPARED TO COMPUTING TWICE)
-    #     detJ = np.einsum('i,i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)),np.abs(StrainTensors['J']))
-
-    #     # LOOP OVER GAUSS POINTS
-    #     for counter in range(AllGauss.shape[0]):
-    #         # COMPUTE THE INTERNAL ENERGY AT THIS GAUSS POINT
-    #         energy = material.InternalEnergy(StrainTensors,elem,counter)
-    #         # INTEGRATE INTERNAL ENERGY
-    #         internal_energy += energy*detJ[counter]
-
-    #     return internal_energy

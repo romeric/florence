@@ -55,7 +55,7 @@ class NeoHookeanBSmith(Material):
 
         self.H_VoigtSize = C_Voigt.shape[0]
 
-        return H_Voigt
+        return C_Voigt
 
     def CauchyStress(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
 

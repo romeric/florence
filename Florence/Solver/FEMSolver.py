@@ -40,8 +40,8 @@ class FEMSolver(object):
         linearised_electromechanics_solver="traction_based",
         is_geometrically_linearised=False,
         requires_geometry_update=True,
-        requires_line_search=False,
-        requires_arc_length=False,
+        activate_line_search=False,
+        activate_arc_length=False,
         has_moving_boundary=False,
         has_prestress=True,
         number_of_load_increments=1,
@@ -97,8 +97,8 @@ class FEMSolver(object):
         self.linearised_electromechanics_solver=linearised_electromechanics_solver # "traction_based" or "potential_based"
         self.is_geometrically_linearised = is_geometrically_linearised
         self.requires_geometry_update = requires_geometry_update
-        self.requires_line_search = requires_line_search
-        self.requires_arc_length = requires_arc_length
+        self.activate_line_search = activate_line_search
+        self.activate_arc_length = activate_arc_length
         self.has_moving_boundary = has_moving_boundary
         self.has_prestress = has_prestress
         self.is_mass_computed = False
@@ -864,7 +864,8 @@ class FEMSolver(object):
                     Increment, K, NodalForces, Residual, mesh, Eulerx, Eulerp,
                     material, boundary_condition, AppliedDirichletInc)
             elif self.nonlinear_iterative_technique == "line_search_newton_raphson":
-                Eulerx, Eulerp, K, Residual = self.NewtonRaphsonLineSearch(function_spaces, formulation, solver,
+                self.activate_line_search = True
+                Eulerx, Eulerp, K, Residual = self.NewtonRaphson(function_spaces, formulation, solver,
                     Increment, K, NodalForces, Residual, mesh, Eulerx, Eulerp,
                     material, boundary_condition, AppliedDirichletInc)
             else:
@@ -915,8 +916,8 @@ class FEMSolver(object):
         Tolerance = self.newton_raphson_tolerance
         LoadIncrement = self.number_of_load_increments
         Iter = 0
+        alpha = 1.0
         self.iterative_norm_history = []
-
 
         # APPLY INCREMENTAL DIRICHLET PER LOAD STEP (THIS IS INCREMENTAL NOT ACCUMULATIVE)
         IncDirichlet = boundary_condition.UpdateFixDoFs(AppliedDirichletInc,
@@ -935,20 +936,15 @@ class FEMSolver(object):
             # GET ITERATIVE SOLUTION
             dU = boundary_condition.UpdateFreeDoFs(sol,K.shape[0],formulation.nvar)
 
-            # # COMPUTE STEP SIZE
-            # alpha = self.LineSearch(function_spaces[0], formulation, mesh, material, boundary_condition,
-                # NodalForces, dU, Residual, Eulerx, Eulerp)
-            alpha=1.
-            # print(alpha)
+            # COMPUTE STEP SIZE
+            if self.activate_line_search:
+                alpha = self.LineSearch(function_spaces[0], formulation, mesh, material, boundary_condition,
+                    NodalForces, dU, Residual, Eulerx, Eulerp)
 
-            # UPDATE THE EULERIAN COMPONENTS
-            # UPDATE THE GEOMETRY
-            # Eulerx += dU[:,:formulation.ndim]
-            # # GET ITERATIVE ELECTRIC POTENTIAL
-            # Eulerp += dU[:,-1]
-            Eulerx += alpha*dU[:,:formulation.ndim]
+            # UPDATE THE EULERIAN COMPONENTS - THE GEOMETRY
+            Eulerx += alpha * dU[:,:formulation.ndim]
             # GET ITERATIVE ELECTRIC POTENTIAL
-            Eulerp += alpha*dU[:,-1]
+            Eulerp += alpha * dU[:,-1]
 
             # RE-ASSEMBLE - COMPUTE STIFFNESS AND INTERNAL TRACTION FORCES
             K, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material,
@@ -1129,6 +1125,9 @@ class FEMSolver(object):
         return Eulerx, Eulerp, K, Residual
 
 
+
+
+
     def LineSearch(self, function_space, formulation, mesh, material, boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp):
 
         rho = 0.5
@@ -1152,8 +1151,6 @@ class FEMSolver(object):
         #     if alpha < alpha_tol:
         #         break
         # return alpha
-
-
 
         from Florence.FiniteElements.Assembly import AssembleInternalTractionForces
         # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
@@ -1189,16 +1186,6 @@ class FEMSolver(object):
             else:
                 eta = alpha / 2.
 
-            # newXCopy = Eulerx + eta * dU[:,:formulation.ndim]
-
-            # # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
-            # TractionForces = AssembleInternalTractionForces(self, function_space, formulation, mesh, material,
-            #     newXCopy, newPCopy + dU[:,-1])
-            # # FIND THE RESIDUAL
-            # ResidualCopy[boundary_condition.columns_in] = TractionForces[boundary_condition.columns_in] -\
-            #     NodalForces[boundary_condition.columns_in]
-            # Rf = np.dot(dU[:,:formulation.ndim].flatten().T,ResidualCopy).item()
-
             # alpha = R0 / Rf
             Rf = (1 - eta) * R0 + R1 * eta**2
             # print(eta, alpha, np.abs(Rf), rho * np.abs(R0))
@@ -1208,153 +1195,6 @@ class FEMSolver(object):
         if eta > 1.:
             eta = 1.
         return eta
-
-
-
-    def NewtonRaphsonLineSearch(self, function_spaces, formulation, solver,
-        Increment, K, NodalForces, Residual, mesh, Eulerx, Eulerp, material,
-        boundary_condition, AppliedDirichletInc):
-
-        Tolerance = self.newton_raphson_tolerance
-        LoadIncrement = self.number_of_load_increments
-        Iter = 0
-
-        raise NotImplementedError("NewtonRaphsonLineSearch not fully implemented yet")
-
-        # APPLY INCREMENTAL DIRICHLET PER LOAD STEP (THIS IS INCREMENTAL NOT ACCUMULATIVE)
-        IncDirichlet = boundary_condition.UpdateFixDoFs(AppliedDirichletInc, K.shape[0], formulation.nvar)
-        # UPDATE EULERIAN COORDINATE
-        Eulerx += IncDirichlet[:,:formulation.ndim]
-        Eulerp += IncDirichlet[:,-1]
-
-        eta = 1.
-        accumulative_eta = 0.
-
-        def GetAccumulatedU(Eulerx, Eulerp):
-            dU = np.zeros((mesh.points.shape[0],formulation.nvar))
-            dU[:,:formulation.ndim] = Eulerx
-            if formulation.fields == "electro_mechanics":
-                dU[:,-1] = Eulerp
-            return dU
-
-        # R0 = np.dot(Residual.ravel(),GetIAccumulatedU(Eulerx, Eulerp).ravel())
-
-        while self.norm_residual > Tolerance or Iter==0:
-            # GET THE REDUCED SYSTEM OF EQUATIONS
-            K_b, F_b = boundary_condition.GetReducedMatrices(K,Residual)[:2]
-
-            # SOLVE THE SYSTEM
-            sol = solver.Solve(K_b,-F_b)
-
-            R0 = np.dot(Residual.ravel(),GetAccumulatedU(Eulerx, Eulerp).ravel())
-
-            # GET ITERATIVE SOLUTION
-            dU = boundary_condition.UpdateFreeDoFs(sol,K.shape[0],formulation.nvar)
-
-            # UPDATE THE EULERIAN COMPONENTS
-            # print(eta)
-            Eulerx += eta*dU[:,:formulation.ndim]
-            Eulerp += eta*dU[:,-1]
-
-            self.is_mass_computed = True
-            TractionForces = AssembleExplicit(self, function_spaces[0], formulation, mesh, material, Eulerx, Eulerp)[0]
-
-            # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
-            # K, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material, Eulerx, Eulerp)[:2]
-
-            # print(Residual.shape,dU.shape)
-            # R0 = np.dot(Residual.ravel(),dU.ravel())
-
-            # FIND THE RESIDUAL
-            Residual[boundary_condition.columns_in] = TractionForces[boundary_condition.columns_in] -\
-                NodalForces[boundary_condition.columns_in]
-
-            # R1 = np.dot(Residual.ravel(),dU.ravel())
-            R1 = np.dot(Residual.ravel(),GetAccumulatedU(Eulerx,Eulerp).ravel())
-            alpha = R0/R1
-            # print(norm(dU))
-            # print(R0, R1, alpha)
-            rho = 0.5
-
-            if alpha < 0.:
-                eta = alpha/2. + np.sqrt((alpha/2.)**2. - alpha)
-            else:
-                eta = alpha/2.
-
-            def func(x):
-                return (1-x)*R0 + R1*x**2
-            def dfunc(x):
-                return -R0 + 2.*R1*x
-
-            # from scipy.optimize import newton
-            # print(eta, R0, R1)
-            # etaa = newton(func, 1.0, fprime=dfunc, tol=1e-05, maxiter=500)
-            # # print(eta, etaa)
-            # exit()
-
-            # if np.abs(func(eta)) < np.abs(rho*func(0)):
-            #     eta = func(eta)
-            # else:
-            #     eta = 1.
-            print(eta)
-            # exit()
-            # print(norm(R1-R0))
-
-            # SAVE THE NORM
-            self.abs_norm_residual = la.norm(Residual[boundary_condition.columns_in])
-            if Iter==0:
-                self.NormForces = la.norm(Residual[boundary_condition.columns_in])
-            self.norm_residual = np.abs(la.norm(Residual[boundary_condition.columns_in])/self.NormForces)
-
-            # SAVE THE NORM
-            self.NRConvergence['Increment_'+str(Increment)] = np.append(self.NRConvergence['Increment_'+str(Increment)],\
-                self.norm_residual)
-
-            print("Iteration {} for increment {}.".format(Iter, Increment) +\
-                " Residual (abs) {0:>16.7g}".format(self.abs_norm_residual),
-                "\t Residual (rel) {0:>16.7g}".format(self.norm_residual))
-
-            if np.abs(self.abs_norm_residual) < Tolerance:
-                break
-
-            # UPDATE ITERATION NUMBER
-            Iter +=1
-
-            if Iter==self.maximum_iteration_for_newton_raphson and formulation.fields == "electro_mechanics":
-                # raise StopIteration("\n\nNewton Raphson did not converge! Maximum number of iterations reached.")
-                warn("\n\nNewton Raphson did not converge! Maximum number of iterations reached.")
-                self.newton_raphson_failed_to_converge = True
-                break
-
-            if Iter==self.maximum_iteration_for_newton_raphson:
-                self.newton_raphson_failed_to_converge = True
-                break
-            if np.isnan(self.norm_residual) or self.norm_residual>1e06:
-                self.newton_raphson_failed_to_converge = True
-                break
-
-            # IF BREAK WHEN NEWTON RAPHSON STAGNATES IS ACTIVATED
-            if self.break_at_stagnation:
-                self.iterative_norm_history.append(self.norm_residual)
-                if Iter >= 5:
-                    if np.mean(self.iterative_norm_history) < 1.:
-                        break
-
-            # USER DEFINED CRITERIA TO BREAK OUT OF NEWTON-RAPHSON
-            if self.user_defined_break_func != None:
-                if self.user_defined_break_func(Increment,Iter,self.norm_residual,self.abs_norm_residual, Tolerance):
-                    break
-
-            # USER DEFINED CRITERIA TO STOP NEWTON-RAPHSON AND THE WHOLE ANALYSIS
-            if self.user_defined_stop_func != None:
-                if self.user_defined_stop_func(Increment,Iter,self.norm_residual,self.abs_norm_residual, Tolerance):
-                    self.newton_raphson_failed_to_converge = True
-                    break
-
-
-        return Eulerx, Eulerp, K, Residual
-
-
 
 
 

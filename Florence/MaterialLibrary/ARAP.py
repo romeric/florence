@@ -46,6 +46,9 @@ def svd_rv(F, full_matrices=True):
         return U, Sigma, V
 
 
+# svd = np.linalg.svd
+svd = svd_rv
+
 class ARAP(Material):
     """The fundamental ARAP model
 
@@ -78,8 +81,6 @@ class ARAP(Material):
     def Hessian(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
 
         mu = self.mu
-        mu1 = self.mu1
-        mu2 = self.mu2
         lamb = self.lamb
         d = self.ndim
 
@@ -89,9 +90,8 @@ class ARAP(Material):
         b = StrainTensors['b'][gcounter]
 
         det = np.linalg.det
-        # svd = np.linalg.svd
-        svd = svd_rv
         u, s, vh = svd(F, full_matrices=True)
+        vh = vh.T
         # print(det(u),det(vh))
         # exit()
         if self.ndim == 2:
@@ -103,8 +103,23 @@ class ARAP(Material):
                 s1s2 = 2.0
             lamb = 2. / (s1s2)
             T = 1./np.sqrt(2) * np.dot(u, np.dot(T, vh.T))
-            C_Voigt = 1.0 * ( einsum("ik,jl",I,I)+einsum("il,jk",I,I) ) - 2. * lamb * np.einsum("ij,kl", T, T)
-            C_Voigt = 1./ J * np.einsum("kI,lJ,iIjJ->iklj", F, F, C_Voigt)
+            # C_Voigt = 1.0 * ( einsum("ik,jl",I,I)+einsum("il,jk",I,I) ) - 2. * lamb * np.einsum("ij,kl", T, T)
+            # C_Voigt = 1./ J * np.einsum("kI,lJ,iIjJ->iklj", F, F, C_Voigt)
+
+            C_Voigt = 2.0 * ( einsum("ik,jl",I,I)) - 2. * lamb * np.einsum("ij,kl", T, T)
+            # C_Voigt = 2.0 * ( einsum("ij,kl",I,I)) - 2. * lamb * np.einsum("ij,kl", T, T)
+            C_Voigt = 1./ J * np.einsum("jJ,iJkL,lL->ijkl", F, C_Voigt, F)
+            # Exclude the stress term from this
+            R = u.dot(vh.T)
+            sigma = 2. * (F - R)
+            sigma = 1./J * np.dot(sigma, F.T)
+            C_Voigt -= np.einsum("ij,kl", sigma, I)
+            # print(C_Voigt)
+            # print(np.linalg.norm(T.flatten()))
+            # print(Voigt(np.einsum("ij,kl", T, T),1))
+            # print(np.einsum("ij,kl", T, T))
+            # exit()
+
             C_Voigt = np.ascontiguousarray(C_Voigt)
 
         elif self.ndim == 3:
@@ -130,10 +145,20 @@ class ARAP(Material):
             lamb2 = 2. / (s1s3)
             lamb3 = 2. / (s2s3)
 
-            C_Voigt = 1.0 * ( einsum("ik,jl",I,I)+einsum("il,jk",I,I) ) - 2. * lamb3 * np.einsum("ij,kl", T1, T1) - \
+            # C_Voigt = 1.0 * ( einsum("ik,jl",I,I)+einsum("il,jk",I,I) ) - 2. * lamb3 * np.einsum("ij,kl", T1, T1) - \
+            #     - 2. * lamb2 * np.einsum("ij,kl", T2, T2) - 2. * lamb1 * np.einsum("ij,kl", T3, T3)
+            # C_Voigt = 1./ J * np.einsum("kI,lJ,iIjJ->iklj", F, F, C_Voigt)
+            # C_Voigt = np.ascontiguousarray(C_Voigt)
+
+            C_Voigt = 2.0 * ( einsum("ik,jl",I,I)) - 2. * lamb3 * np.einsum("ij,kl", T1, T1) - \
                 - 2. * lamb2 * np.einsum("ij,kl", T2, T2) - 2. * lamb1 * np.einsum("ij,kl", T3, T3)
-            C_Voigt = 1./ J * np.einsum("kI,lJ,iIjJ->iklj", F, F, C_Voigt)
+            C_Voigt = 1./ J * np.einsum("jJ,iJkL,lL->ijkl", F, C_Voigt, F)
             C_Voigt = np.ascontiguousarray(C_Voigt)
+
+            R = u.dot(vh.T)
+            sigma = 2. * (F - R)
+            sigma = 1./J * np.dot(sigma, F.T)
+            C_Voigt -= np.einsum("ij,kl",sigma,I)
 
 
             # s1 = s[0]
@@ -158,16 +183,32 @@ class ARAP(Material):
             # lamb2 = 2. / (s1s3)
             # lamb3 = 2. / (s2s3)
 
-            # C_Voigt = 1.0 * ( einsum("ik,jl",I,I)+einsum("il,jk",I,I) ) - 2. * lamb1 * np.einsum("ij,kl", T1, T1) - \
+            # # C_Voigt = 1.0 * ( einsum("ik,jl",I,I)+einsum("il,jk",I,I) ) - 2. * lamb1 * np.einsum("ij,kl", T1, T1) - \
+            # #     - 2. * lamb3 * np.einsum("ij,kl", T2, T2) - 2. * lamb2 * np.einsum("ij,kl", T3, T3)
+            # # C_Voigt = 1./ J * np.einsum("kI,lJ,iIjJ->iklj", F, F, C_Voigt)
+            # # C_Voigt = np.ascontiguousarray(C_Voigt)
+
+
+            # C_Voigt = 2.0 * ( einsum("ik,jl",I,I)) - 2. * lamb1 * np.einsum("ij,kl", T1, T1) - \
             #     - 2. * lamb3 * np.einsum("ij,kl", T2, T2) - 2. * lamb2 * np.einsum("ij,kl", T3, T3)
             # C_Voigt = 1./ J * np.einsum("kI,lJ,iIjJ->iklj", F, F, C_Voigt)
             # C_Voigt = np.ascontiguousarray(C_Voigt)
 
+            # R = u.dot(vh.T)
+            # sigma = 2. * (F - R)
+            # sigma = 1./J * np.dot(sigma, F.T)
+            # C_Voigt -= np.einsum("ij,kl",sigma,I)
+
+
         C_Voigt = Voigt(C_Voigt,1)
         makezero(C_Voigt)
 
+        # C_Voigt = np.eye(3,3)*2
+
         # C_Voigt += 0.95*self.vIikIjl
         # print(C_Voigt)
+        # s = svd(C_Voigt)[1]
+        # print(s)
 
         return C_Voigt
 
@@ -176,8 +217,6 @@ class ARAP(Material):
     def CauchyStress(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
 
         mu = self.mu
-        mu1 = self.mu1
-        mu2 = self.mu2
         lamb = self.lamb
         d = self.ndim
 
@@ -186,12 +225,12 @@ class ARAP(Material):
         J = StrainTensors['J'][gcounter]
         b = StrainTensors['b'][gcounter]
 
-        # svd = np.linalg.svd
-        svd = svd_rv
         u, s, vh = svd(F, full_matrices=True)
-        R = u.dot(vh)
+        vh = vh.T
+        R = u.dot(vh.T)
         # s1 = s[0]
         # s2 = s[1]
+        # print(F)
 
         # R,U = polar(F)
         sigma = 2. * (F - R)
@@ -213,8 +252,9 @@ class ARAP(Material):
         F = StrainTensors['F'][gcounter]
 
         # R,U = polar(F)
-        u, s, vh = np.linalg.svd(F, full_matrices=True)
-        R = u.dot(vh)
+        u, s, vh = svd(F, full_matrices=True)
+        vh = vh.T
+        R = u.dot(vh.T)
         energy  = einsum("ij,ij",F - R,F - R)
 
         return energy

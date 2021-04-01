@@ -152,6 +152,7 @@ def GetBases2D(C, Quadrature, info, bases_type="nodal", equally_spaced=False, is
 
 def GetBases3D(C, Quadrature, info, bases_type="nodal", equally_spaced=False, is_flattened=True):
 
+    from Florence.Tensor import makezero
     ndim = 3
 
     w = Quadrature.weights
@@ -216,6 +217,8 @@ def GetBases3D(C, Quadrature, info, bases_type="nodal", equally_spaced=False, is
             # Better convergence for curved meshes when Quadrature.optimal!=0
             ndummy, dummy = hpBases(C,z[i,0],z[i,1],z[i,2],Quadrature.optimal, equally_spaced=equally_spaced)
             # ndummy, dummy = Tet.hpBases(C,z[i,0],z[i,1],z[i,2])
+            # makezero(ndummy)
+            makezero(dummy)
             Basis[:,i] = ndummy
             gBasisx[:,i] = dummy[:,0]
             gBasisy[:,i] = dummy[:,1]

@@ -51,10 +51,6 @@ class PixarNeoHookean(Material):
         lamb = self.lamb
         C_Voigt = (lamb * (2*J-1) - mu) * np.einsum("ij,kl",I,I) + (mu - lamb * (J-1))  * (np.einsum("ik,jl",I,I) + np.einsum("il,jk",I,I))
         C_Voigt = Voigt(C_Voigt,1)
-        # C_Voigt[0,0]=2.
-        # C_Voigt[1,1]=2.
-        # C_Voigt[2,2]=2.
-        # print(C_Voigt)
 
 
         self.H_VoigtSize = C_Voigt.shape[0]
