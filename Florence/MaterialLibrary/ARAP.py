@@ -205,7 +205,7 @@ class ARAP(Material):
 
         # C_Voigt = np.eye(3,3)*2
 
-        # C_Voigt += 0.95*self.vIikIjl
+        # C_Voigt += 0.05*self.vIikIjl
         # print(C_Voigt)
         # s = svd(C_Voigt)[1]
         # print(s)
@@ -238,7 +238,7 @@ class ARAP(Material):
         # print(sigma)
 
 
-        # sigma += 0.95/J*(b - I)
+        # sigma += 0.05/J*(b - I)
 
         return sigma
 

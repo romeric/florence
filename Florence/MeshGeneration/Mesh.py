@@ -267,7 +267,7 @@ class Mesh(object):
 
 
     def GetEdgesTri(self):
-        """Find the all edges of a triangular mesh.
+        """Find all edges of a triangular mesh.
             Sets all_edges property and returns it
 
         returns:
@@ -622,6 +622,7 @@ class Mesh(object):
         edge_flags[edge_flags==False] = 0
         interior_edges = self.all_edges[edge_flags==False,:]
 
+        self.interior_edges = interior_edges
         return interior_edges, edge_flags
 
 
@@ -2712,10 +2713,7 @@ class Mesh(object):
         reader_type_version=None, order=0, read_surface_info=False, **kwargs):
         """Convenience mesh reader method to dispatch call to subsequent apporpriate methods"""
 
-        if not isinstance(filename,str):
-            raise ValueError("filename must be a string")
-            return
-        if reader_type is not None:
+        if reader_type != 'read_separate':
             if not isinstance(filename,str):
                 raise ValueError("filename must be a string")
                 return
@@ -3046,8 +3044,12 @@ class Mesh(object):
                 el = 9
                 bel = 8
         elif element_type == "quad":
-            el = 3
-            bel = 1
+            if p == 1:
+                el = 3
+                bel = 1
+            elif p == 2:
+                el = 10
+                bel = 8
         elif element_type == "tet":
             if p == 1:
                 el = 4
@@ -3187,6 +3189,8 @@ class Mesh(object):
             # TRI6
             if el == 9:
                 self.elements = self.elements[:,[0,1,2,3,5,4]]
+            elif el == 10:
+                self.elements = self.elements[:,[0, 1, 2, 3, 4, 7, 8, 5, 6]]
             elif el == 11:
                 self.elements = self.elements[:,[0,1,2,3,4,6,5,7,9,8]]
         # CORRECT

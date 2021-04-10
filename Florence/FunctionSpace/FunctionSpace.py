@@ -29,8 +29,9 @@ class FunctionSpace(object):
         from Florence.FunctionSpace.GetBases import GetBases1D, GetBases2D, GetBases3D, GetBoundaryBases, GetBasesAtNodes
 
         ndim = mesh.InferSpatialDimension()
-        self.element_type = mesh.element_type
         self.ndim = ndim
+        self.element_type = mesh.element_type
+        self.degree = mesh.InferPolynomialDegree()
 
         QuadratureOpt=3
 

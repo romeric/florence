@@ -63,6 +63,21 @@ from numpy import einsum
 from Florence.MaterialLibrary.MaterialBase import Material
 from Florence.Tensor import trace, Voigt, makezero
 
+
+def DJDF(F):
+    if F.shape[0] == 2:
+        return np.array([ [F[1,1], -F[1,0]], [-F[0,1], F[0,0]] ])
+    else:
+        f0 = F[:,0]
+        f1 = F[:,1]
+        f2 = F[:,2]
+        final = np.zeros((3,3))
+        final[:,0] = np.cross(f1,f2);
+        final[:,1] = np.cross(f2,f0);
+        final[:,2] = np.cross(f0,f1);
+        makezero(final)
+        return final
+
 class NeoHookeanF(Material):
     """The fundamental Neo-Hookean internal energy, described in Ogden et. al.
 
@@ -115,10 +130,7 @@ class NeoHookeanF(Material):
         # H = mu * np.einsum("ik,jl", I, I) + lamb * np.einsum("ij,kl", invFt, invFt) +\
         #     (mu-lamb*np.log(J)) * np.einsum("ik,jl", invFt, invFt)
 
-        # This symmetrisation is wrong perhaps
-        # dum = 0.25 * (lamb * np.einsum("ij,kl", invFt, invFt) + lamb * np.einsum("ij,lk", invFt, invFt) +\
-        #     lamb * np.einsum("ji,kl", invFt, invFt) + lamb * np.einsum("ji,lk", invFt, invFt) )
-
+        # what has been working together with reordering
         dum = lamb * np.einsum("ij,kl", invFt, invFt)
         H = mu * 0.5 * (np.einsum("ik,jl", I, I) + np.einsum("il,jk", I, I)) + dum +\
             (mu-lamb*np.log(J)) * 0.5 * (np.einsum("ik,jl", invFt, invFt) + np.einsum("il,jk", invFt, invFt))
@@ -136,16 +148,31 @@ class NeoHookeanF(Material):
 
         # For F based formulation we need to bring everything to reference domain, partial pull back
 
+        # reordnig mildly working
         H = np.einsum("klij",H) # this symmetry should be preserved anyway
         H = np.einsum("ijlk",H)
 
         H = vec(H)
-        # H += H.T
-        # H /= 2.
+        # print(H)
+
+        # H = mu * np.einsum("ik,jl", I, I) - (mu - lamb*np.log(J)) * ()
+        # print(vec(H))
+        # print(vec(  np.einsum("ij,kl", I, I) - np.einsum("il,jk", I, I) ))
+        # print(np.einsum("ij,kl", I, I ))
+
+        # gJ = np.array([ [F[1,1], -F[1,0]], [-F[0,1], F[0,0]] ])
+        gJ = np.array([ F[1,1], -F[1,0], -F[0,1], F[0,0] ])
+        gJt = np.array([ F[1,1], -F[0,1], -F[1,0], F[0,0] ])
+        HJ = np.eye(4,4); HJ = np.fliplr(HJ); HJ[1,2] = -1; HJ[2,1] = -1;
+        # print(HJ)
+        H = mu * np.eye(4,4) + (mu + lamb * (1. - np.log(J)))/J**2 * np.outer(gJ,gJt) + (lamb * np.log(J) - mu) / J * HJ
+        # print(H)
+        # exit()
 
         self.H_VoigtSize = H.shape[0]
 
         return H
+
 
     def CauchyStress(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
 
@@ -164,7 +191,11 @@ class NeoHookeanF(Material):
 
         stress = mu*F - (mu-lamb*np.log(J)) * invFt
 
+        # gJ = np.array([ [F[1,1], -F[1,0]], [-F[0,1], F[0,0]] ])
+        # stress = mu*F + (lamb*np.log(J) - mu) * gJ.T / J
+
         return stress.T # careful
+        # return stress # careful
 
 
     def InternalEnergy(self,StrainTensors,elem=0,gcounter=0):
@@ -228,6 +259,9 @@ def svd_rv(F, full_matrices=True):
 
 # svd = np.linalg.svd
 svd = svd_rv
+
+
+
 class ARAPF(Material):
     """The fundamental ARAP model
 
@@ -270,18 +304,20 @@ class ARAPF(Material):
         det = np.linalg.det
         u, s, vh = svd(F, full_matrices=True)
         vh = vh.T
+
+        # s = np.dot(vh, np.dot(np.diag(s), vh.T))
         # print(u,s,vh)
         # exit()
         if self.ndim == 2:
             s1 = s[0]
             s2 = s[1]
             T = np.array([[0.,-1],[1,0.]])
-            T = 1./np.sqrt(2) * np.dot(u, np.dot(T, vh.T))
+            T = 1./np.sqrt(2.) * np.dot(u, np.dot(T, vh.T))
             t =  vec(T)
             H = np.eye(4,4)
             I_1 = s.sum()
-            # filtered = 2.0 / I_1 if I_1 >= 2.0 else 1.0
-            filtered = 1.0
+            filtered = 2.0 / I_1 if I_1 >= 2.0 else 1.0
+            # filtered = 1.0
             H -= filtered * np.outer(t,t)
             H *= 2.
 
@@ -296,27 +332,32 @@ class ARAPF(Material):
             T2 = 1./np.sqrt(2) * np.dot(u, np.dot(T2, vh.T))
             T3 = np.array([[0.,0.,1.],[0.,0.,0.],[-1,0.,0.]])
             T3 = 1./np.sqrt(2) * np.dot(u, np.dot(T3, vh.T))
-            # s1s2 = s1 + s2
-            # s1s3 = s1 + s3
-            # s2s3 = s2 + s3
-            # if (s1s2 < 2.0):
-            #     s1s2 = 2.0
-            # if (s1s3 < 2.0):
-            #     s1s3 = 2.0
-            # if (s2s3 < 2.0):
-            #     s2s3 = 2.0
-            # lamb1 = 2. / (s1s2)
-            # lamb2 = 2. / (s1s3)
-            # lamb3 = 2. / (s2s3)
+
+            s0s1 = s0 + s1
+            s0s2 = s0 + s2
+            s1s2 = s1 + s2
+            if (s0s1 < 2.0):
+                s0s1 = 2.0
+            if (s0s2 < 2.0):
+                s0s2 = 2.0
+            if (s1s2 < 2.0):
+                s1s2 = 2.0
+            lamb1 = 2. / (s0s1)
+            lamb2 = 2. / (s0s2)
+            lamb3 = 2. / (s1s2)
 
             t1 = vec(T1)
             t2 = vec(T2)
             t3 = vec(T3)
 
             H = 2. * np.eye(9,9);
-            H = H - (4. / (s0 + s1)) * np.outer(t1 , t1);
-            H = H - (4. / (s1 + s2)) * np.outer(t2 , t2);
-            H = H - (4. / (s0 + s2)) * np.outer(t3 , t3);
+            # H = H - (4. / (s0 + s1)) * np.outer(t1 , t1);
+            # H = H - (4. / (s1 + s2)) * np.outer(t2 , t2);
+            # H = H - (4. / (s0 + s2)) * np.outer(t3 , t3);
+
+            H = H - (2 * lamb1) * np.outer(t1 , t1);
+            H = H - (2 * lamb3) * np.outer(t2 , t2);
+            H = H - (2 * lamb2) * np.outer(t3 , t3);
 
             # print(H)
             # exit()
@@ -348,6 +389,9 @@ class ARAPF(Material):
         R = u.dot(vh.T)
 
         sigma = 2. * (F - R)
+
+        # S = np.dot(vh, np.dot(np.diag(s), vh.T))
+        # sigma = 2. * R.dot(S - I)
         # print(sigma)
         # exit()
 
@@ -368,6 +412,318 @@ class ARAPF(Material):
         energy  = einsum("ij,ij",F - R,F - R)
 
         return energy
+
+
+
+
+class SymmetricARAPF(Material):
+    """The fundamental ARAP model
+
+        W_arap(F) = (F - R)**2
+
+    """
+
+    def __init__(self, ndim, **kwargs):
+        mtype = type(self).__name__
+        super(SymmetricARAPF, self).__init__(mtype, ndim, **kwargs)
+        self.is_transversely_isotropic = False
+        self.energy_type = "internal_energy"
+        self.nature = "nonlinear"
+        self.fields = "mechanics"
+
+        if self.ndim==3:
+            self.H_VoigtSize = 9
+        elif self.ndim==2:
+            self.H_VoigtSize = 4
+
+        # LOW LEVEL DISPATCHER
+        # self.has_low_level_dispatcher = True
+        self.has_low_level_dispatcher = False
+
+    def KineticMeasures(self,F,ElectricFieldx=0, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._MooneyRivlin_ import KineticMeasures
+        return KineticMeasures(self,F)
+
+
+    def Hessian(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
+
+        mu = self.mu
+        lamb = self.lamb
+        d = self.ndim
+
+        I = StrainTensors['I']
+        F = StrainTensors['F'][gcounter]
+        J = StrainTensors['J'][gcounter]
+        b = StrainTensors['b'][gcounter]
+
+        det = np.linalg.det
+        u, s, vh = svd(F, full_matrices=True)
+        vh = vh.T
+
+        R = u.dot(vh.T)
+        S = np.dot(vh, np.dot(np.diag(s), vh.T))
+        g = vec(DJDF(F))
+
+        if self.ndim == 2:
+            f = vec(F)
+            r = vec(R)
+
+            J2 = J**2
+            J3 = J**3
+
+            HJ = np.eye(4,4); HJ = np.fliplr(HJ); HJ[1,2] = -1; HJ[2,1] = -1;
+            I1 = trace(S)
+            I2 = trace(b)
+
+            T = np.array([[0.,-1],[1,0.]])
+            T = 1./np.sqrt(2.) * np.dot(u, np.dot(T, vh.T))
+            t =  vec(T)
+
+            H = 2. * (1 + 1 / J2) * np.eye(4,4)
+            H -= 4. / J3 * (np.outer(g,f) + np.outer(f,g))
+            H += 2. / J2 * (np.outer(g,r) + np.outer(r,g))
+            H += 2. / J2 * (I1 - I2 / J) * HJ
+            H += 2. / J3 * (3. * I2 / J - 2. * I1) * np.outer(g,g)
+            H -= 4. / I1 * (1. + 1. / J) * np.outer(t,t)
+
+
+        elif self.ndim == 3:
+            C = F.T.dot(F)
+            IC = trace(b)
+            IIC = trace(C.T.dot(C))
+            IIStarC = 0.5 * (IC**2 - IIC)
+            dIIStarC = 2 * IC * F - 2 * np.dot(F,np.dot(F.T,F))
+            t = vec(dIIStarC)
+
+
+            s0 = s[0]
+            s1 = s[1]
+            s2 = s[2]
+            T1 = np.array([[0.,-1.,0.],[1.,0.,0],[0.,0.,0.]])
+            T1 = 1./np.sqrt(2) * np.dot(u, np.dot(T1, vh.T))
+            T2 = np.array([[0.,0.,0.],[0.,0., 1],[0.,-1.,0.]])
+            T2 = 1./np.sqrt(2) * np.dot(u, np.dot(T2, vh.T))
+            T3 = np.array([[0.,0.,1.],[0.,0.,0.],[-1,0.,0.]])
+            T3 = 1./np.sqrt(2) * np.dot(u, np.dot(T3, vh.T))
+
+            s0s1 = s0 + s1
+            s0s2 = s0 + s2
+            s1s2 = s1 + s2
+            if (s0s1 < 2.0):
+                s0s1 = 2.0
+            if (s0s2 < 2.0):
+                s0s2 = 2.0
+            if (s1s2 < 2.0):
+                s1s2 = 2.0
+            lamb1 = 2. / (s0s1)
+            lamb2 = 2. / (s0s2)
+            lamb3 = 2. / (s1s2)
+
+            t1 = vec(T1)
+            t2 = vec(T2)
+            t3 = vec(T3)
+
+            H = 2. * np.eye(9,9);
+            # H = H - (4. / (s0 + s1)) * np.outer(t1 , t1);
+            # H = H - (4. / (s1 + s2)) * np.outer(t2 , t2);
+            # H = H - (4. / (s0 + s2)) * np.outer(t3 , t3);
+
+            H = H - (2 * lamb1) * np.outer(t1 , t1);
+            H = H - (2 * lamb3) * np.outer(t2 , t2);
+            H = H - (2 * lamb2) * np.outer(t3 , t3);
+
+            # print(H)
+            # exit()
+
+        # s = np.linalg.svd(C_Voigt)[1]
+        # print(s)
+        # exit()
+
+        C_Voigt = H
+        self.H_VoigtSize = H.shape[0]
+
+        return C_Voigt
+
+
+
+    def CauchyStress(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
+
+        mu = self.mu
+        lamb = self.lamb
+        d = self.ndim
+
+        I = StrainTensors['I']
+        F = StrainTensors['F'][gcounter]
+        J = StrainTensors['J'][gcounter]
+        b = StrainTensors['b'][gcounter]
+
+        u, s, vh = svd(F, full_matrices=True)
+        vh = vh.T
+        R = u.dot(vh.T)
+        S = np.dot(vh, np.dot(np.diag(s), vh.T))
+
+        J2 = J**2
+        J3 = J**3
+
+        I1 = trace(S)
+        I2 = trace(b)
+
+        sigma = 2. * (1. + 1. / J2) * F - 2. * (1. + 1. / J) * R + (2. / J2) * (I1 - I2 / J) * DJDF(F)
+
+        return sigma
+
+
+
+
+class Corotational(Material):
+    """The fundamental ARAP model
+
+        W_arap(F) = (F - R)**2
+
+    """
+
+    def __init__(self, ndim, **kwargs):
+        mtype = type(self).__name__
+        super(Corotational, self).__init__(mtype, ndim, **kwargs)
+        self.is_transversely_isotropic = False
+        self.energy_type = "internal_energy"
+        self.nature = "nonlinear"
+        self.fields = "mechanics"
+
+        if self.ndim==3:
+            self.H_VoigtSize = 9
+        elif self.ndim==2:
+            self.H_VoigtSize = 4
+
+        # LOW LEVEL DISPATCHER
+        # self.has_low_level_dispatcher = True
+        self.has_low_level_dispatcher = False
+
+    def KineticMeasures(self,F,ElectricFieldx=0, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._MooneyRivlin_ import KineticMeasures
+        return KineticMeasures(self,F)
+
+
+    def Hessian(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
+
+        mu = self.mu
+        lamb = self.lamb
+        d = self.ndim
+
+        I = StrainTensors['I']
+        F = StrainTensors['F'][gcounter]
+        J = StrainTensors['J'][gcounter]
+
+        det = np.linalg.det
+        u, s, vh = svd(F, full_matrices=True)
+        vh = vh.T
+
+
+        R = u.dot(vh.T)
+        S = np.dot(vh, np.dot(np.diag(s), vh.T))
+        # print()
+        IS = trace(S)
+        kterm = IS - self.ndim
+        if self.ndim == 2:
+            r = 1./np.sqrt(2) * vec(R)
+            s1 = s[0]
+            s2 = s[1]
+            T = np.array([[0.,-1],[1,0.]])
+            T = 1./np.sqrt(2) * np.dot(u, np.dot(T, vh.T))
+            t =  vec(T)
+            L = np.array([[0.,1],[1,0.]])
+            L = 1./np.sqrt(2) * np.dot(u, np.dot(L, vh.T))
+            l = vec(L)
+            P = np.array([[1.,0],[0,-1.]])
+            P = 1./np.sqrt(2) * np.dot(u, np.dot(P, vh.T))
+            p = vec(P)
+
+            H = 2. * np.eye(4,4)
+            H += 2. * (kterm - 2) / (s1 + s2) * np.outer(t,t)
+            H += 2 * np.outer(r,r)
+
+
+            # # I_1 = S.sum()
+            # I_1 = s1 + s2
+            # H = 2. * mu * np.eye(4,4)
+            # # H = 2. * mu * np.outer(p,p)
+            # # H += 2. * mu * np.outer(l,l)
+            # # print(H)
+            # # exit()
+            # H += (0. * mu + 2 * lamb * (I_1 - 2 - 2 * mu) / I_1) * np.outer(t,t)
+            # H += (0. * mu + 2 * lamb) * np.outer(r,r)
+            # # print(H)
+            # # exit()
+
+
+        elif self.ndim == 3:
+            r = 1./np.sqrt(3) * vec(R)
+            s0 = s[0]
+            s1 = s[1]
+            s2 = s[2]
+            T1 = np.array([[0.,-1.,0.],[1.,0.,0],[0.,0.,0.]])
+            T1 = 1./np.sqrt(2) * np.dot(u, np.dot(T1, vh.T))
+            T2 = np.array([[0.,0.,0.],[0.,0., 1],[0.,-1.,0.]])
+            T2 = 1./np.sqrt(2) * np.dot(u, np.dot(T2, vh.T))
+            T3 = np.array([[0.,0.,1.],[0.,0.,0.],[-1,0.,0.]])
+            T3 = 1./np.sqrt(2) * np.dot(u, np.dot(T3, vh.T))
+
+            s0s1 = s0 + s1
+            s0s2 = s0 + s2
+            s1s2 = s1 + s2
+            if (s0s1 < 2.0):
+                s0s1 = 2.0
+            if (s0s2 < 2.0):
+                s0s2 = 2.0
+            if (s1s2 < 2.0):
+                s1s2 = 2.0
+            lamb1 = 2. / (s0s1)
+            lamb2 = 2. / (s0s2)
+            lamb3 = 2. / (s1s2)
+
+            t1 = vec(T1)
+            t2 = vec(T2)
+            t3 = vec(T3)
+
+            H = 2. * np.eye(9,9)
+            H += 2. * (kterm - 2) / (s0s1) * np.outer(t1,t1)
+            H += 2. * (kterm - 2) / (s1s2) * np.outer(t2,t2)
+            H += 2. * (kterm - 2) / (s0s2) * np.outer(t3,t3)
+            H += 3 * np.outer(r,r)
+
+
+        C_Voigt = H
+        self.H_VoigtSize = H.shape[0]
+
+        return C_Voigt
+
+
+
+    def CauchyStress(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
+
+        mu = self.mu
+        lamb = self.lamb
+        d = self.ndim
+
+        I = StrainTensors['I']
+        F = StrainTensors['F'][gcounter]
+        J = StrainTensors['J'][gcounter]
+        b = StrainTensors['b'][gcounter]
+
+        u, s, vh = svd(F, full_matrices=True)
+        vh = vh.T
+        R = u.dot(vh.T)
+        S = np.dot(vh, np.dot(np.diag(s), vh.T))
+        IS = trace(S)
+
+        sigma = 2. * (F - R) + (IS - self.ndim) * R
+        # sigma = 2. * mu * (F - R) + 1 * lamb * (IS - 2) * R
+        # print(sigma)
+        # exit()
+
+        return sigma
+
+
 
 
 
@@ -412,6 +768,9 @@ class FBasedDisplacementFormulation(VariationalPrinciple):
         # GET THE FIELDS AT THE ELEMENT LEVEL
         LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
         EulerElemCoords = Eulerx[mesh.elements[elem,:],:]
+
+        if False:
+            LagrangeElemCoords = self.GetIdealElement(elem, function_space, LagrangeElemCoords)
 
         # COMPUTE THE STIFFNESS MATRIX
         stiffnessel, t = self.GetLocalStiffness(function_space,material,

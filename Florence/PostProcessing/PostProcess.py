@@ -899,6 +899,7 @@ class PostProcess(object):
             raise ValueError("Function spaces/bases not set for post-processing")
 
         ndim = mesh.InferSpatialDimension()
+        edim = mesh.InferElementalDimension()
         vpoints = mesh.points
         if TotalDisp.ndim == 3:
             vpoints = vpoints + TotalDisp[:,:ndim,-1]
@@ -941,10 +942,12 @@ class PostProcess(object):
             # COFACTOR OF DEFORMATION GRADIENT TENSOR
             H = np.einsum('ijk,k->ijk',np.linalg.inv(F).T,detF)
 
+
             # FIND JACOBIAN OF SPATIAL GRADIENT
             # USING ISOPARAMETRIC
-            # Jacobian = np.abs(np.linalg.det(ParentGradientx))
             Jacobian = np.linalg.det(ParentGradientx)
+            # DISTORTION METRIC
+            # Jacobian = Jacobian**(-1.)/edim * np.sqrt(np.abs(np.einsum('kij,lij->kl',F,F))).diagonal()
             # USING DETERMINANT OF DEFORMATION GRADIENT TENSOR
             # THIS GIVES A RESULT MUCH CLOSER TO ONE
             JacobianF = detF
@@ -2800,12 +2803,13 @@ class PostProcess(object):
 
         if plot_surfaces:
             if colorbar is True:
-                ax_cbar = mpl.colorbar.make_axes(plt.gca(), shrink=1.0)[0]
-                cbar = mpl.colorbar.ColorbarBase(ax_cbar, cmap=cm.viridis,
-                                   norm=mpl.colors.Normalize(vmin=-0, vmax=1))
-                cbar.set_clim(0, 1)
-                divider = make_axes_locatable(ax_cbar)
-                cax = divider.append_axes("right", size="1%", pad=0.005)
+                plt.colorbar()
+                # ax_cbar = mpl.colorbar.make_axes(plt.gca(), shrink=1.0)[0]
+                # cbar = mpl.colorbar.ColorbarBase(ax_cbar, cmap=cm.viridis,
+                #                    norm=mpl.colors.Normalize(vmin=np.min(quantity_to_plot), vmax=np.max(quantity_to_plot)))
+                # cbar.set_clim(np.min(quantity_to_plot), np.max(quantity_to_plot))
+                # divider = make_axes_locatable(ax_cbar)
+                # cax = divider.append_axes("right", size="1%", pad=0.005)
 
         if PlotActualCurve is True:
             if ActualCurve is not None:
@@ -3044,8 +3048,9 @@ class PostProcess(object):
 
             src = mlab.pipeline.scalar_scatter(x_edges.T.copy().flatten(), y_edges.T.copy().flatten(), z_edges.T.copy().flatten())
             src.mlab_source.dataset.lines = connections
-            lines = mlab.pipeline.stripper(src)
-            h_edges = mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
+            h_edges = mlab.pipeline.surface(src, color = (0,0,0), line_width=2)
+            # lines = mlab.pipeline.stripper(src) # this line gives a lot of warning
+            # h_edges = mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
             # h_edges = mlab.pipeline.surface(lines, color = (0,0,0), line_width=1)
             # mlab.pipeline.surface(lines, color = (0.72,0.72,0.72), line_width=2)
             os.dup2(oldstdout_fno, 1)
@@ -3277,12 +3282,13 @@ class PostProcess(object):
 
             if colorbar is True:
                 if plot_on_faces:
-                    ax_cbar = mpl.colorbar.make_axes(plt.gca(), shrink=1.0)[0]
-                    cbar = mpl.colorbar.ColorbarBase(ax_cbar, cmap=cm.viridis,
-                                       norm=mpl.colors.Normalize(vmin=-0, vmax=1))
-                    cbar.set_clim(0, 1)
-                    divider = make_axes_locatable(ax_cbar)
-                    cax = divider.append_axes("right", size="1%", pad=0.005)
+                    # ax_cbar = mpl.colorbar.make_axes(plt.gca(), shrink=1.0)[0]
+                    # cbar = mpl.colorbar.ColorbarBase(ax_cbar, cmap=cm.viridis,
+                    #                    norm=mpl.colors.Normalize(vmin=-0, vmax=1))
+                    # cbar.set_clim(0, 1)
+                    # divider = make_axes_locatable(ax_cbar)
+                    # cax = divider.append_axes("right", size="1%", pad=0.005)
+                    plt.colorbar(shrink=0.5,orientation="vertical")
                 else:
                     plt.colorbar(shrink=0.5,orientation="vertical")
 

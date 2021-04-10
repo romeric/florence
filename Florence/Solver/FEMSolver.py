@@ -619,6 +619,7 @@ class FEMSolver(object):
 
 
         # ASSEMBLE STIFFNESS MATRIX AND TRACTION FORCES FOR THE FIRST TIME
+        self.current_increment = 0
         if self.analysis_type == "static":
             K, TractionForces, _, _ = Assemble(self, function_spaces[0], formulation, mesh, material,
                 Eulerx, Eulerp)
@@ -828,6 +829,7 @@ class FEMSolver(object):
 
         for Increment in range(LoadIncrement):
 
+            self.current_increment = Increment
             # CHECK ADAPTIVE LOAD FACTOR
             if self.load_factor is not None:
                 LoadFactor = self.load_factor[Increment]
@@ -973,9 +975,10 @@ class FEMSolver(object):
                 break
 
             # BREAK BASED ON INCREMENTAL SOLUTION - KEEP IT AFTER UPDATE
-            if norm(dU) <=  self.newton_raphson_solution_tolerance:
-                print("Incremental solution within tolerance i.e. norm(dU): {}".format(norm(dU)))
-                break
+            if Iter > 0:
+                if norm(dU) <=  self.newton_raphson_solution_tolerance:
+                    print("Incremental solution within tolerance i.e. norm(dU): {}".format(norm(dU)))
+                    break
 
             # UPDATE ITERATION NUMBER
             Iter +=1
@@ -1084,9 +1087,10 @@ class FEMSolver(object):
                 break
 
             # BREAK BASED ON INCREMENTAL SOLUTION - KEEP IT AFTER UPDATE
-            if norm(dU) <=  self.newton_raphson_solution_tolerance:
-                print("Incremental solution within tolerance i.e. norm(dU): {}".format(norm(dU)))
-                break
+            if Iter > 0:
+                if norm(dU) <=  self.newton_raphson_solution_tolerance:
+                    print("Incremental solution within tolerance i.e. norm(dU): {}".format(norm(dU)))
+                    break
 
             # UPDATE ITERATION NUMBER
             Iter +=1
@@ -1141,13 +1145,13 @@ class FEMSolver(object):
         #     newXCopy + dU[:,:formulation.ndim], Eulerp + dU[:,-1])[0]
 
         # pkX = np.dot(dU[:,:formulation.ndim].flatten().T,Residual).item()
-        # alpha, alpha_tol, c = 1., 1e-8, 1e-4
+        # alpha, alpha_tol, c = 1.0, 1e-4, 1e-4
         # while EXf > EX0 + c * alpha * pkX:
         #     newXCopy = Eulerx + alpha * dU[:,:formulation.ndim]
         #     # newPCopy = Eulerp + alpha * dU[:,-1]
         #     EXf = self.ComputeEnergy(function_space, mesh, material, formulation, newXCopy, newPCopy)[0]
         #     alpha *= rho
-        #     print(alpha, EXf, EX0 + c * alpha * pkX)
+        #     # print(alpha, EXf, EX0 + c * alpha * pkX)
         #     if alpha < alpha_tol:
         #         break
         # return alpha

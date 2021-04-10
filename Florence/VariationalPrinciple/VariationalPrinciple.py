@@ -379,6 +379,56 @@ class VariationalPrinciple(object):
         return self.nvar
 
 
+    def GetIdealElement(self, elem, function_space, LagrangeElemCoords):
+        """Retrieves ideal element/domain
+        """
+
+        from Florence.Tensor import makezero
+        from Florence.FunctionSpace import Tri, Tet, Quad
+        from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints, EquallySpacedPointsTri, EquallySpacedPointsTet
+        sqrt = np.sqrt
+        if function_space.element_type == "tri":
+            nodeperlinearelem = 3
+            eps = EquallySpacedPointsTri(function_space.degree - 1)
+            hpBases = Tri.hpNodal.hpBases
+            Neval = np.zeros((nodeperlinearelem,eps.shape[0]),dtype=np.float64)
+            for i in range(0,eps.shape[0]):
+                Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],Transform=1,EvalOpt=1,equally_spaced=True)[0]
+            xycoord = LagrangeElemCoords[:nodeperlinearelem,:]
+            xycoord = np.array([ [-0.5, 0], [ 0.5, 0], [0., np.sqrt(3.)/2.]])
+            # xycoord = fem_solver.imesh.points[fem_solver.imesh.elements[elem,:],:]
+            # xycoord = fem_solver.imesh.points[elem,:]
+
+        elif function_space.element_type == "quad":
+            nodeperlinearelem = 4
+            eps = EquallySpacedPoints(3, function_space.degree - 1)
+            hpBases = Quad.LagrangeGaussLobatto
+            Neval = np.zeros((nodeperlinearelem,eps.shape[0]),dtype=np.float64)
+            for i in range(0,eps.shape[0]):
+                Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],arrange=1)[:,0]
+            xycoord = LagrangeElemCoords[:nodeperlinearelem,:]
+            xycoord = np.array([ [0., 0], [ 1., 0], [ 1., 1.], [0., 1.]])
+
+        elif function_space.element_type == "tet":
+            nodeperlinearelem = 4
+            eps = EquallySpacedPointsTet(function_space.degree - 1)
+            hpBases = Tet.hpNodal.hpBases
+            Neval = np.zeros((nodeperlinearelem,eps.shape[0]),dtype=np.float64)
+            for i in range(0,eps.shape[0]):
+                Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],eps[i,2],Transform=1,EvalOpt=1,equally_spaced=True)[0]
+            xycoord = LagrangeElemCoords[:nodeperlinearelem,:]
+            xycoord = np.array([ [sqrt(8./9.), 0, -1/3.], [-sqrt(2./9.), sqrt(2./3.), -1/3.], [-sqrt(2./9.), -sqrt(2./3.), -1/3.], [0., 0, 1.]])
+
+        makezero(Neval)
+        xycoord_higher = np.copy(LagrangeElemCoords)
+        xycoord_higher[:nodeperlinearelem,:]     = xycoord
+        if function_space.degree > 1:
+            xycoord_higher[nodeperlinearelem:,:] = np.dot(Neval[:,nodeperlinearelem:].T,xycoord)
+        LagrangeElemCoords = xycoord_higher
+
+        return LagrangeElemCoords
+
+
     def __call__(self,*args,**kwargs):
         """This is purely to get around pickling while parallelising"""
         return self.GetElementalMatrices(*args,**kwargs)

@@ -39,19 +39,14 @@ class PixarNeoHookean(Material):
         F = StrainTensors['F'][gcounter]
         b = StrainTensors['b'][gcounter]
 
-        # alpha = 1e-1
-        # F += alpha * np.eye(self.ndim, self.ndim)
-        # J = np.linalg.det(F)
-
         if np.isclose(J, 0) or J < 0:
             delta = np.sqrt(0.04 * J * J + 1e-8);
-            J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
+            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
 
         mu = self.mu
         lamb = self.lamb
         C_Voigt = (lamb * (2*J-1) - mu) * np.einsum("ij,kl",I,I) + (mu - lamb * (J-1))  * (np.einsum("ik,jl",I,I) + np.einsum("il,jk",I,I))
         C_Voigt = Voigt(C_Voigt,1)
-
 
         self.H_VoigtSize = C_Voigt.shape[0]
 
@@ -64,13 +59,9 @@ class PixarNeoHookean(Material):
         F = StrainTensors['F'][gcounter]
         b = StrainTensors['b'][gcounter]
 
-        # alpha = 1e-1
-        # F += alpha * np.eye(self.ndim, self.ndim)
-        # J = np.linalg.det(F)
-
         if np.isclose(J, 0) or J < 0:
             delta = np.sqrt(0.04 * J * J + 1e-8);
-            J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
+            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
 
         mu = self.mu
         lamb = self.lamb
@@ -91,7 +82,7 @@ class PixarNeoHookean(Material):
 
         if np.isclose(J, 0) or J < 0:
             delta = np.sqrt(0.04 * J * J + 1e-8);
-            J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
+            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
 
         energy  = mu/2.*(trace(C) - 3.) - mu*(J-1) + lamb/2.*(J-1.)**2
 

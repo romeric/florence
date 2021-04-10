@@ -39,7 +39,7 @@ class NeoHookeanBSmith(Material):
 
         if np.isclose(J, 0) or J < 0:
             delta = np.sqrt(0.04 * J * J + 1e-8);
-            J += np.sqrt(J**2 + 4 *delta**2)
+            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
 
         mu = self.mu
         lamb = self.lamb
@@ -65,7 +65,7 @@ class NeoHookeanBSmith(Material):
 
         if np.isclose(J, 0) or J < 0:
             delta = np.sqrt(0.04 * J * J + 1e-8);
-            J += np.sqrt(J**2 + 4 *delta**2)
+            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
 
         mu = self.mu
         lamb = self.lamb
@@ -84,6 +84,10 @@ class NeoHookeanBSmith(Material):
 
         mu = self.mu
         lamb = self.lamb
+
+        if np.isclose(J, 0) or J < 0:
+            delta = np.sqrt(0.04 * J * J + 1e-8);
+            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
 
         I = StrainTensors['I']
         J = StrainTensors['J'][gcounter]

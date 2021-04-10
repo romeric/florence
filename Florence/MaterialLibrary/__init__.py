@@ -19,6 +19,7 @@ from .ARAP import *
 
 # REGULARISED MATERIAL MODELS
 from .RegularisedNeoHookean import *
+from .RegularisedPixarNeoHookean import *
 
 # ANISOTROPIC MODELS
 from .TranservselyIsotropicHyperElastic import *
