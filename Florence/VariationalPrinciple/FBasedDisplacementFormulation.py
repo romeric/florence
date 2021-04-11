@@ -1,11 +1,11 @@
 import numpy as np
+from numpy import einsum
 from Florence.VariationalPrinciple import VariationalPrinciple
 from Florence import QuadratureRule, FunctionSpace
-
 from Florence.FiniteElements.LocalAssembly.KinematicMeasures import *
 from Florence.FiniteElements.LocalAssembly._KinematicMeasures_ import _KinematicMeasures_
-from Florence.Tensor import issymetric
-from Florence.Tensor import makezero
+from Florence.MaterialLibrary.MaterialBase import Material
+from Florence.Tensor import trace, Voigt, makezero, issymetric
 
 
 def vec(H):
@@ -14,26 +14,54 @@ def vec(H):
         # print(H.shape)
         # H = np.einsum("ijlk",H)
         x = H.flatten().reshape(ndim**2,ndim**2)
-        # H1 = np.random.rand(2,2,2,2)
-        # print(x)
-        # print()
-        # HH = np.zeros((ndim**2,ndim**2))
-        # for i in range(H.ndim):
-            # HH[:,i] = H[i,:,:,:]
-            # print(H[:,:,:,i])
-        # print(H.flatten())
-        # makezero(x)
-        # x += x.T
-        # x /= 2.
-        # print(H)
-        # s = np.linalg.svd(x)[1]
-        # print(s)
-        # exit()
         return x
-        # return H.flatten().reshape(ndim**2,ndim**2)
     else:
         # return H.flatten()
         return H.T.flatten() # careful - ARAP needs this
+
+
+
+def svd_rv(F, full_matrices=True):
+
+    det = np.linalg.det
+
+    if F.shape[0] == 3:
+        U, Sigma, V = np.linalg.svd(F, full_matrices=True)
+        # reflection matrix
+        L = np.eye(3,3);
+        L[2,2] = det(np.dot(U, V.T))
+
+        # see where to pull the reflection out of
+        detU = det(U);
+        detV = det(V);
+        if (detU < 0 and detV > 0):
+          U = np.dot(U, L)
+        elif (detU > 0 and detV < 0):
+          V = np.dot(V, L)
+
+        # push the reflection to the diagonal
+        Sigma = np.dot(Sigma, L)
+        return U, Sigma, V
+    else:
+        U, Sigma, V = np.linalg.svd(F, full_matrices=True)
+        # reflection matrix
+        L = np.eye(2,2);
+        L[1,1] = det(np.dot(U, V.T))
+
+        # see where to pull the reflection out of
+        detU = det(U);
+        detV = det(V);
+        if (detU < 0 and detV > 0):
+          U = np.dot(U, L)
+        elif (detU > 0 and detV < 0):
+          V = np.dot(V, L)
+
+        # push the reflection to the diagonal
+        Sigma = np.dot(Sigma, L)
+        return U, Sigma, V
+
+# svd = np.linalg.svd
+svd = svd_rv
 
 
 def FillConstitutiveBF(B,SpatialGradient,F,ndim,nvar):
@@ -58,13 +86,8 @@ def FillConstitutiveBF(B,SpatialGradient,F,ndim,nvar):
         B[2::ndim,5] = SpatialGradient[1,:]
         B[2::ndim,8] = SpatialGradient[2,:]
 
-import numpy as np
-from numpy import einsum
-from Florence.MaterialLibrary.MaterialBase import Material
-from Florence.Tensor import trace, Voigt, makezero
 
-
-def DJDF(F):
+def dJdF(F):
     if F.shape[0] == 2:
         return np.array([ [F[1,1], -F[1,0]], [-F[0,1], F[0,0]] ])
     else:
@@ -77,6 +100,39 @@ def DJDF(F):
         final[:,2] = np.cross(f0,f1);
         makezero(final)
         return final
+
+def d2JdFdF(F):
+    if F.shape[0] == 2:
+        H = np.eye(4,4); H = np.fliplr(H); H[1,2] = -1; H[2,1] = -1;
+        return H
+    else:
+        f0 = F[:,0]
+        f1 = F[:,1]
+        f2 = F[:,2]
+
+        F0 = np.array([
+            [     0  , -f0[2],   f0[1]],
+            [  f0[2] ,      0,  -f0[0]],
+            [  -f0[1],  f0[0],      0]])
+
+        F1 = np.array([
+            [     0, -f1[2],  f1[1]],
+            [f1[2] ,     0 , -f1[0]],
+            [-f1[1],  f1[0],      0]])
+
+        F2 = np.array([
+            [     0, -f2[2],  f2[1]],
+            [f2[2] ,     0 , -f2[0]],
+            [-f2[1],  f2[0],      0]])
+
+        Z = np.zeros((3,3))
+        H = np.vstack((
+                np.hstack((Z,-F2,F1)),
+                np.hstack((F2,Z,-F0)),
+                np.hstack((-F1,F0,Z))
+            ))
+        return H
+
 
 class NeoHookeanF(Material):
     """The fundamental Neo-Hookean internal energy, described in Ogden et. al.
@@ -122,35 +178,14 @@ class NeoHookeanF(Material):
         mu = self.mu
         lamb = self.lamb
 
-
         # BECAREFUL IJKL OF F,F or invF,invF is not symmetric
         # For F based formulation do we need to bring everything to reference domain, partial pull back?
-        # invF = np.linalg.inv(F)
-        # invFt = invF.T.copy()
 
-        # # H = mu * np.einsum("ik,jl", I, I) + lamb * np.einsum("ij,kl", invFt, invFt) +\
-        # #     (mu-lamb*np.log(J)) * np.einsum("ik,jl", invFt, invFt)
-
-        # # what has been working together with reordering
-        # dum = lamb * np.einsum("ij,kl", invFt, invFt)
-        # H = mu * 0.5 * (np.einsum("ik,jl", I, I) + np.einsum("il,jk", I, I)) + dum +\
-        #     (mu-lamb*np.log(J)) * 0.5 * (np.einsum("ik,jl", invFt, invFt) + np.einsum("il,jk", invFt, invFt))
-        #     # (mu-lamb*np.log(J)) * 0.5 * (np.einsum("ik,jl->ijkl", invFt, invFt) + np.einsum("il,jk->ijkl", invFt, invFt))
-
-        # # C_Voigt = lamb/J * np.einsum("ij,kl",I,I) + 1./J * (mu - lamb*np.log(J)) * (np.einsum("ik,jl",I,I) + np.einsum("il,jk",I,I))
-        # # stress = mu/J*(b-I) + lamb/J*np.log(J)*I
-        # # C_Voigt = (lamb * (2*J-1) - mu) * np.einsum("ij,kl",I,I) + (mu - lamb * (J-1))  * (np.einsum("ik,jl",I,I) + np.einsum("il,jk",I,I))
-        # # stress = 1.0*mu/J*b + (lamb*(J-1) - mu)*I
-        # # H = J * np.einsum("Jj,ijkl,Ll->iJkL",invF,(C_Voigt + np.einsum("ij,kl",stress,I)),invF)
-
-        # # reordnig mildly working
-        # H = np.einsum("klij",H) # this symmetry should be preserved anyway
-        # H = np.einsum("ijlk",H)
-        # H = vec(H)
-
-        gJ = vec(DJDF(F))
-        HJ = np.eye(4,4); HJ = np.fliplr(HJ); HJ[1,2] = -1; HJ[2,1] = -1;
-        H = mu * np.eye(4,4) + (mu + lamb * (1. - np.log(J)))/J**2 * np.outer(gJ,gJ) + (lamb * np.log(J) - mu) / J * HJ
+        # Symmetric formulation based on K. Theodore arrangements
+        gJ = vec(dJdF(F))
+        HJ = d2JdFdF(F)
+        d2 = self.ndim**2
+        H = mu * np.eye(d2,d2) + (mu + lamb * (1. - np.log(J)))/J**2 * np.outer(gJ,gJ) + (lamb * np.log(J) - mu) / J * HJ
 
         self.H_VoigtSize = H.shape[0]
 
@@ -169,21 +204,43 @@ class NeoHookeanF(Material):
 
         mu = self.mu
         lamb = self.lamb
-
-        # invF = np.linalg.inv(F)
-        # invFt = invF.T.copy()
-        # stress = mu*F - (mu-lamb*np.log(J)) * invFt
-        # return stress.T # careful
-
-        stress = mu*F + (lamb*np.log(J) - mu) * DJDF(F) / J
+        stress = mu*F + (lamb*np.log(J) - mu) * dJdF(F) / J
 
         return stress
 
 
-    def InternalEnergy(self,StrainTensors,elem=0,gcounter=0):
 
-        mu = self.mu
-        lamb = self.lamb
+class PixarNeoHookeanF(Material):
+    """The Neo-Hookean internal energy, described in Smith et. al.
+
+        W(C) = mu/2*(C:I-3)- mu*(J-1) + lamb/2*(J-1)**2
+
+    """
+
+    def __init__(self, ndim, **kwargs):
+        mtype = type(self).__name__
+        super(PixarNeoHookeanF, self).__init__(mtype, ndim, **kwargs)
+
+        self.is_transversely_isotropic = False
+        self.energy_type = "internal_energy"
+        self.nature = "nonlinear"
+        self.fields = "mechanics"
+
+        if self.ndim==3:
+            self.H_VoigtSize = 9
+        elif self.ndim==2:
+            self.H_VoigtSize = 4
+
+        # LOW LEVEL DISPATCHER
+        # self.has_low_level_dispatcher = True
+        self.has_low_level_dispatcher = False
+
+    def KineticMeasures(self,F,ElectricFieldx=0, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._NeoHookean_ import KineticMeasures
+        return KineticMeasures(self,F)
+
+
+    def Hessian(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
 
         I = StrainTensors['I']
         J = StrainTensors['J'][gcounter]
@@ -191,56 +248,37 @@ class NeoHookeanF(Material):
 
         if np.isclose(J, 0) or J < 0:
             delta = np.sqrt(0.04 * J * J + 1e-8);
-            J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
+            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
 
-        # energy  = mu/2.*(trace(C) - 3.) - mu*np.log(J) + lamb/2.*(J-1.)**2
+        mu = self.mu
+        lamb = self.lamb
+        # Symmetric formulation based on K. Theodore arrangements
+        gJ = vec(dJdF(F))
+        HJ = d2JdFdF(F)
 
-        return energy
+        d2 = self.ndim**2
+        H = mu * np.eye(d2,d2) + lamb * np.outer(gJ,gJ) + (lamb * (J-1) - mu) * HJ
 
+        self.H_VoigtSize = H.shape[0]
 
-def svd_rv(F, full_matrices=True):
-
-    det = np.linalg.det
-
-    if F.shape[0] == 3:
-        U, Sigma, V = np.linalg.svd(F, full_matrices=True)
-        # reflection matrix
-        L = np.eye(3,3);
-        L[2,2] = det(np.dot(U, V.T))
-
-        # see where to pull the reflection out of
-        detU = det(U);
-        detV = det(V);
-        if (detU < 0 and detV > 0):
-          U = np.dot(U, L)
-        elif (detU > 0 and detV < 0):
-          V = np.dot(V, L)
-
-        # push the reflection to the diagonal
-        Sigma = np.dot(Sigma, L)
-        return U, Sigma, V
-    else:
-        U, Sigma, V = np.linalg.svd(F, full_matrices=True)
-        # reflection matrix
-        L = np.eye(2,2);
-        L[1,1] = det(np.dot(U, V.T))
-
-        # see where to pull the reflection out of
-        detU = det(U);
-        detV = det(V);
-        if (detU < 0 and detV > 0):
-          U = np.dot(U, L)
-        elif (detU > 0 and detV < 0):
-          V = np.dot(V, L)
-
-        # push the reflection to the diagonal
-        Sigma = np.dot(Sigma, L)
-        return U, Sigma, V
+        return H
 
 
+    def CauchyStress(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
 
-# svd = np.linalg.svd
-svd = svd_rv
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        if np.isclose(J, 0) or J < 0:
+            delta = np.sqrt(0.04 * J * J + 1e-8);
+            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
+
+        mu = self.mu
+        lamb = self.lamb
+        stress = mu*F + (lamb*(J-1) - mu) * dJdF(F)
+
+        return stress
 
 
 
@@ -444,7 +482,7 @@ class SymmetricARAPF(Material):
 
         R = u.dot(vh.T)
         S = np.dot(vh, np.dot(np.diag(s), vh.T))
-        g = vec(DJDF(F))
+        g = vec(dJdF(F))
 
         if self.ndim == 2:
             f = vec(F)
@@ -550,7 +588,7 @@ class SymmetricARAPF(Material):
         I1 = trace(S)
         I2 = trace(b)
 
-        sigma = 2. * (1. + 1. / J2) * F - 2. * (1. + 1. / J) * R + (2. / J2) * (I1 - I2 / J) * DJDF(F)
+        sigma = 2. * (1. + 1. / J2) * F - 2. * (1. + 1. / J) * R + (2. / J2) * (I1 - I2 / J) * dJdF(F)
 
         return sigma
 
