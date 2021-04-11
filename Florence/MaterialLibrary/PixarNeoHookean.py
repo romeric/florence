@@ -5,7 +5,7 @@ from Florence.Tensor import trace, Voigt
 class PixarNeoHookean(Material):
     """The Neo-Hookean internal energy, used in production in Pixar.
 
-        W(C) = mu/2*(C:I-3) - mu*(J-1) + lamb/2*(J-1)**2
+        W(C) = mu/2*(C:I-3) - mu*(J-a) + lamb/2*(J-a)**2
 
     """
 
@@ -22,6 +22,9 @@ class PixarNeoHookean(Material):
             self.H_VoigtSize = 6
         elif self.ndim==2:
             self.H_VoigtSize = 3
+
+        if not hasattr(self, "alpha"):
+            self.alpha = 1.0
 
         # LOW LEVEL DISPATCHER
         # self.has_low_level_dispatcher = True
@@ -45,7 +48,8 @@ class PixarNeoHookean(Material):
 
         mu = self.mu
         lamb = self.lamb
-        C_Voigt = (lamb * (2*J-1) - mu) * np.einsum("ij,kl",I,I) + (mu - lamb * (J-1))  * (np.einsum("ik,jl",I,I) + np.einsum("il,jk",I,I))
+        alpha = self.alpha
+        C_Voigt = (lamb * (2*J-alpha) - mu) * np.einsum("ij,kl",I,I) + (mu - lamb * (J-alpha))  * (np.einsum("ik,jl",I,I) + np.einsum("il,jk",I,I))
         C_Voigt = Voigt(C_Voigt,1)
 
         self.H_VoigtSize = C_Voigt.shape[0]
@@ -65,7 +69,8 @@ class PixarNeoHookean(Material):
 
         mu = self.mu
         lamb = self.lamb
-        stress = 1.0*mu/J*b + (lamb*(J-1) - mu)*I
+        alpha = self.alpha
+        stress = mu/J*b + (lamb*(J - alpha) - mu)*I
 
         return stress
 

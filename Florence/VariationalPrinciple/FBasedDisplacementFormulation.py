@@ -117,57 +117,40 @@ class NeoHookeanF(Material):
 
         if np.isclose(J, 0) or J < 0:
             delta = np.sqrt(0.04 * J * J + 1e-8);
-            J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
+            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
 
         mu = self.mu
         lamb = self.lamb
 
-        invF = np.linalg.inv(F)
-        invFt = invF.T.copy()
 
         # BECAREFUL IJKL OF F,F or invF,invF is not symmetric
+        # For F based formulation do we need to bring everything to reference domain, partial pull back?
+        # invF = np.linalg.inv(F)
+        # invFt = invF.T.copy()
 
-        # H = mu * np.einsum("ik,jl", I, I) + lamb * np.einsum("ij,kl", invFt, invFt) +\
-        #     (mu-lamb*np.log(J)) * np.einsum("ik,jl", invFt, invFt)
+        # # H = mu * np.einsum("ik,jl", I, I) + lamb * np.einsum("ij,kl", invFt, invFt) +\
+        # #     (mu-lamb*np.log(J)) * np.einsum("ik,jl", invFt, invFt)
 
-        # what has been working together with reordering
-        dum = lamb * np.einsum("ij,kl", invFt, invFt)
-        H = mu * 0.5 * (np.einsum("ik,jl", I, I) + np.einsum("il,jk", I, I)) + dum +\
-            (mu-lamb*np.log(J)) * 0.5 * (np.einsum("ik,jl", invFt, invFt) + np.einsum("il,jk", invFt, invFt))
-            # (mu-lamb*np.log(J)) * 0.5 * (np.einsum("ik,jl->ijkl", invFt, invFt) + np.einsum("il,jk->ijkl", invFt, invFt))
+        # # what has been working together with reordering
+        # dum = lamb * np.einsum("ij,kl", invFt, invFt)
+        # H = mu * 0.5 * (np.einsum("ik,jl", I, I) + np.einsum("il,jk", I, I)) + dum +\
+        #     (mu-lamb*np.log(J)) * 0.5 * (np.einsum("ik,jl", invFt, invFt) + np.einsum("il,jk", invFt, invFt))
+        #     # (mu-lamb*np.log(J)) * 0.5 * (np.einsum("ik,jl->ijkl", invFt, invFt) + np.einsum("il,jk->ijkl", invFt, invFt))
 
-        # C_Voigt = lamb/J * np.einsum("ij,kl",I,I) + 1./J * (mu - lamb*np.log(J)) * (np.einsum("ik,jl",I,I) + np.einsum("il,jk",I,I))
-        # stress = mu/J*(b-I) + lamb/J*np.log(J)*I
-        # C_Voigt = (lamb * (2*J-1) - mu) * np.einsum("ij,kl",I,I) + (mu - lamb * (J-1))  * (np.einsum("ik,jl",I,I) + np.einsum("il,jk",I,I))
-        # stress = 1.0*mu/J*b + (lamb*(J-1) - mu)*I
-        # H = J * np.einsum("Jj,ijkl,Ll->iJkL",invF,(C_Voigt + np.einsum("ij,kl",stress,I)),invF)
+        # # C_Voigt = lamb/J * np.einsum("ij,kl",I,I) + 1./J * (mu - lamb*np.log(J)) * (np.einsum("ik,jl",I,I) + np.einsum("il,jk",I,I))
+        # # stress = mu/J*(b-I) + lamb/J*np.log(J)*I
+        # # C_Voigt = (lamb * (2*J-1) - mu) * np.einsum("ij,kl",I,I) + (mu - lamb * (J-1))  * (np.einsum("ik,jl",I,I) + np.einsum("il,jk",I,I))
+        # # stress = 1.0*mu/J*b + (lamb*(J-1) - mu)*I
+        # # H = J * np.einsum("Jj,ijkl,Ll->iJkL",invF,(C_Voigt + np.einsum("ij,kl",stress,I)),invF)
 
-        # H = mu * np.einsum("ij,kl", I, I) + lamb * np.einsum("ij,kl", invFt, invFt) +\
-        #     (mu-lamb*np.log(J)) * np.einsum("ik,jl", invFt, invFt)
-            # (mu-lamb*np.log(J)) * 1*(np.einsum("ik,jl", invFt, invFt) + np.einsum("il,jk", invFt, invFt)) # indefinite
+        # # reordnig mildly working
+        # H = np.einsum("klij",H) # this symmetry should be preserved anyway
+        # H = np.einsum("ijlk",H)
+        # H = vec(H)
 
-        # For F based formulation we need to bring everything to reference domain, partial pull back
-
-        # reordnig mildly working
-        H = np.einsum("klij",H) # this symmetry should be preserved anyway
-        H = np.einsum("ijlk",H)
-
-        H = vec(H)
-        # print(H)
-
-        # H = mu * np.einsum("ik,jl", I, I) - (mu - lamb*np.log(J)) * ()
-        # print(vec(H))
-        # print(vec(  np.einsum("ij,kl", I, I) - np.einsum("il,jk", I, I) ))
-        # print(np.einsum("ij,kl", I, I ))
-
-        # gJ = np.array([ [F[1,1], -F[1,0]], [-F[0,1], F[0,0]] ])
-        gJ = np.array([ F[1,1], -F[1,0], -F[0,1], F[0,0] ])
-        gJt = np.array([ F[1,1], -F[0,1], -F[1,0], F[0,0] ])
+        gJ = vec(DJDF(F))
         HJ = np.eye(4,4); HJ = np.fliplr(HJ); HJ[1,2] = -1; HJ[2,1] = -1;
-        # print(HJ)
-        H = mu * np.eye(4,4) + (mu + lamb * (1. - np.log(J)))/J**2 * np.outer(gJ,gJt) + (lamb * np.log(J) - mu) / J * HJ
-        # print(H)
-        # exit()
+        H = mu * np.eye(4,4) + (mu + lamb * (1. - np.log(J)))/J**2 * np.outer(gJ,gJ) + (lamb * np.log(J) - mu) / J * HJ
 
         self.H_VoigtSize = H.shape[0]
 
@@ -182,20 +165,19 @@ class NeoHookeanF(Material):
 
         if np.isclose(J, 0) or J < 0:
             delta = np.sqrt(0.04 * J * J + 1e-8);
-            J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
+            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
 
         mu = self.mu
         lamb = self.lamb
-        invF = np.linalg.inv(F)
-        invFt = invF.T.copy()
 
-        stress = mu*F - (mu-lamb*np.log(J)) * invFt
+        # invF = np.linalg.inv(F)
+        # invFt = invF.T.copy()
+        # stress = mu*F - (mu-lamb*np.log(J)) * invFt
+        # return stress.T # careful
 
-        # gJ = np.array([ [F[1,1], -F[1,0]], [-F[0,1], F[0,0]] ])
-        # stress = mu*F + (lamb*np.log(J) - mu) * gJ.T / J
+        stress = mu*F + (lamb*np.log(J) - mu) * DJDF(F) / J
 
-        return stress.T # careful
-        # return stress # careful
+        return stress
 
 
     def InternalEnergy(self,StrainTensors,elem=0,gcounter=0):
@@ -769,6 +751,7 @@ class FBasedDisplacementFormulation(VariationalPrinciple):
         LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
         EulerElemCoords = Eulerx[mesh.elements[elem,:],:]
 
+        # if True:
         if False:
             LagrangeElemCoords = self.GetIdealElement(elem, function_space, LagrangeElemCoords)
 

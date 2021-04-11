@@ -137,6 +137,15 @@ class VariationalPrinciple(object):
         self.local_size_m = local_size_m
 
 
+    def GetAverageJacobian(self, function_space, LagrangeElemCoords, EulerELemCoords, requires_geometry_update, elem=0):
+        """ Find the average Jacobian of element [could be curved or straight]
+        """
+
+        # GET LOCAL KINEMATICS
+        detJ = _KinematicMeasures_(function_space.Jm, function_space.AllGauss[:,0],
+            LagrangeElemCoords, EulerELemCoords, requires_geometry_update)[2]
+        return detJ.mean()
+
 
     def GetVolume(self, function_space, LagrangeElemCoords, EulerELemCoords, requires_geometry_update, elem=0):
         """ Find the volume (area in 2D) of element [could be curved or straight]

@@ -46,6 +46,7 @@ class DisplacementFormulation(VariationalPrinciple):
         LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
         EulerElemCoords = Eulerx[mesh.elements[elem,:],:]
 
+        # if True:
         if False:
             LagrangeElemCoords = self.GetIdealElement(elem, function_space, LagrangeElemCoords)
 

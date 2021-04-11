@@ -46,9 +46,9 @@ class NeoHookean(Material):
         lamb2 = self.lamb*(2*J-1.0)
         C_Voigt = lamb2*self.vIijIkl+mu2*self.vIikIjl
 
+        # # Bonet NeoHookean
         # mu = self.mu
         # lamb = self.lamb
-        # Bonet NeoHookean
         # C_Voigt = lamb/J * np.einsum("ij,kl",I,I) + 1./J * (mu - lamb*np.log(J)) * (np.einsum("ik,jl",I,I) + np.einsum("il,jk",I,I))
         # C_Voigt = Voigt(C_Voigt,1)
 

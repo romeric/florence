@@ -2050,6 +2050,34 @@ class Mesh(object):
 
 
 
+    def AverageJacobian(self):
+        """Computes average Jacobian of elements for all element types over a mesh
+            This is a generic method that for 1D=lengths, for 2D=areas and for 3D=volumes.
+            It works for planar and curved elements
+        """
+
+        self.__do_essential_memebers_exist__()
+
+        try:
+            from Florence import DisplacementFormulation
+        except ImportError:
+            raise ValueError("This functionality requires Florence's support")
+
+        if self.element_type != "line":
+            # FOR LINE ELEMENTS THIS APPROACH DOES NOT WORK AS JACOBIAN IS NOT WELL DEFINED
+            formulation = DisplacementFormulation(self)
+            sizes = np.zeros(self.nelem)
+            for elem in range(self.nelem):
+                LagrangeElemCoords = self.points[self.elements[elem,:],:]
+                sizes[elem] = formulation.GetVolume(formulation.function_spaces[0],
+                     LagrangeElemCoords, LagrangeElemCoords, False, elem=elem)
+            return sizes.mean()
+
+        else:
+            raise ValueError("Not implemented for 1D elements")
+
+
+
     def LargestSegment(self, smallest_element=True, nsamples=30,
         plot_segment=False, plot_element=False, figure=None, save=False, filename=None):
         """Finds the largest segment that can fit in an element. For curvilinear elements
