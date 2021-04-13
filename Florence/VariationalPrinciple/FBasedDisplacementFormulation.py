@@ -27,6 +27,7 @@ def svd_rv(F, full_matrices=True):
 
     if F.shape[0] == 3:
         U, Sigma, V = np.linalg.svd(F, full_matrices=True)
+        V = V.T
         # reflection matrix
         L = np.eye(3,3);
         L[2,2] = det(np.dot(U, V.T))
@@ -41,9 +42,10 @@ def svd_rv(F, full_matrices=True):
 
         # push the reflection to the diagonal
         Sigma = np.dot(Sigma, L)
-        return U, Sigma, V
+        return U, Sigma, V.T # for sym ARAP
     else:
         U, Sigma, V = np.linalg.svd(F, full_matrices=True)
+        V = V.T
         # reflection matrix
         L = np.eye(2,2);
         L[1,1] = det(np.dot(U, V.T))
@@ -58,7 +60,8 @@ def svd_rv(F, full_matrices=True):
 
         # push the reflection to the diagonal
         Sigma = np.dot(Sigma, L)
-        return U, Sigma, V
+        return U, Sigma, V.T
+        # return U, Sigma, V
 
 # svd = np.linalg.svd
 svd = svd_rv
@@ -132,6 +135,16 @@ def d2JdFdF(F):
                 np.hstack((-F1,F0,Z))
             ))
         return H
+
+
+def LocallyInjectiveGradient(J, gJ):
+    return 3.*(-J**2 + 2*J - 1)/(J**2*(J**2 - 3*J + 3)**2) * gJ
+
+def LocallyInjectiveHessian(J, gJ, HJ):
+    H1 = 6.*(2*J**4 - 8*J**3 + 12*J**2 - 9*J + 3)/(J**3*(J**6 - 9*J**5 + 36*J**4 - 81*J**3 + 108*J**2 - 81*J + 27)) * np.outer(gJ,gJ)
+    H1 += 3.*(-J**2 + 2*J - 1)/(J**2*(J**2 - 3*J + 3)**2) * HJ
+    makezero(H1, 1e-12)
+    return H1
 
 
 class NeoHookeanF(Material):
@@ -259,6 +272,8 @@ class PixarNeoHookeanF(Material):
         d2 = self.ndim**2
         H = mu * np.eye(d2,d2) + lamb * np.outer(gJ,gJ) + (lamb * (J-1) - mu) * HJ
 
+        # H += 0.8 * LocallyInjectiveHessian(J, gJ, HJ)
+
         self.H_VoigtSize = H.shape[0]
 
         return H
@@ -276,7 +291,9 @@ class PixarNeoHookeanF(Material):
 
         mu = self.mu
         lamb = self.lamb
-        stress = mu*F + (lamb*(J-1) - mu) * dJdF(F)
+        stress = mu*F + (lamb*(J - 1.) - mu) * dJdF(F)
+
+        # stress += 0.8 * LocallyInjectiveGradient(J, dJdF(F))
 
         return stress
 
@@ -382,6 +399,8 @@ class ARAPF(Material):
             # print(H)
             # exit()
 
+        # H += 0.001 * LocallyInjectiveHessian(J, vec(dJdF(F)), d2JdFdF(F))
+
         # s = np.linalg.svd(C_Voigt)[1]
         # print(s)
         # exit()
@@ -414,6 +433,8 @@ class ARAPF(Material):
         # sigma = 2. * R.dot(S - I)
         # print(sigma)
         # exit()
+
+        # sigma += 0.001 * LocallyInjectiveGradient(J, dJdF(F))
 
         return sigma
 
@@ -478,20 +499,28 @@ class SymmetricARAPF(Material):
 
         det = np.linalg.det
         u, s, vh = svd(F, full_matrices=True)
+        # u, s, vh = np.linalg.svd(F, full_matrices=True)
         vh = vh.T
+        # print(u)
+        # print(s)
+        # print(vh)
+        # exit()
 
         R = u.dot(vh.T)
         S = np.dot(vh, np.dot(np.diag(s), vh.T))
         g = vec(dJdF(F))
 
+        J2 = J**2
+        J3 = J**3
+        J4 = J**4
+
+        f = vec(F)
+        r = vec(R)
+        HJ = d2JdFdF(F)
+
         if self.ndim == 2:
-            f = vec(F)
-            r = vec(R)
 
-            J2 = J**2
-            J3 = J**3
-
-            HJ = np.eye(4,4); HJ = np.fliplr(HJ); HJ[1,2] = -1; HJ[2,1] = -1;
+            # HJ = np.eye(4,4); HJ = np.fliplr(HJ); HJ[1,2] = -1; HJ[2,1] = -1;
             I1 = trace(S)
             I2 = trace(b)
 
@@ -508,17 +537,124 @@ class SymmetricARAPF(Material):
 
 
         elif self.ndim == 3:
+
+            # sigma0 = S[0,0]
+            # sigma1 = S[1,1]
+            # sigma2 = S[2,2]
+
+            # sigma0 = s[0]
+            # sigma1 = s[1]
+            # sigma2 = s[2]
+
+            # sqrt = np.sqrt
+            # # def sqrt(x): return x
+
+            # lambdas = [
+            #     (sigma0 ** 4 * sigma1 ** 3 + sigma0 ** 3 * sigma1 ** 4 - 2 * sigma0 ** 3 * sigma1 ** 3 + sigma0 ** 3 * sigma1 - sigma0 ** 3 + sigma0 * sigma1 ** 3 - sigma1 ** 3) / (sigma0 ** 3 * sigma1 ** 3 * (sigma0 + sigma1)),
+            #     (sigma1 ** 4 * sigma2 ** 3 + sigma1 ** 3 * sigma2 ** 4 - 2 * sigma1 ** 3 * sigma2 ** 3 + sigma1 ** 3 * sigma2 - sigma1 ** 3 + sigma1 * sigma2 ** 3 - sigma2 ** 3) / (sigma1 ** 3 * sigma2 ** 3 * (sigma1 + sigma2)),
+            #     (sigma0 ** 4 * sigma2 ** 3 + sigma0 ** 3 * sigma2 ** 4 - 2 * sigma0 ** 3 * sigma2 ** 3 + sigma0 ** 3 * sigma2 - sigma0 ** 3 + sigma0 * sigma2 ** 3 - sigma2 ** 3) / (sigma0 ** 3 * sigma2 ** 3 * (sigma0 + sigma2)),
+            #     (sigma0 ** 3 * sigma1 ** 3 - sigma0 ** 2 * sigma1 + sigma0 ** 2 - sigma0 * sigma1 ** 2 + sigma0 * sigma1 + sigma1 ** 2) / (sigma0 ** 3 * sigma1 ** 3),
+            #     (sigma1 ** 3 * sigma2 ** 3 - sigma1 ** 2 * sigma2 + sigma1 ** 2 - sigma1 * sigma2 ** 2 + sigma1 * sigma2 + sigma2 ** 2) / (sigma1 ** 3 * sigma2 ** 3),
+            #     (sigma0 ** 3 * sigma2 ** 3 - sigma0 ** 2 * sigma2 + sigma0 ** 2 - sigma0 * sigma2 ** 2 + sigma0 * sigma2 + sigma2 ** 2) / (sigma0 ** 3 * sigma2 ** 3),
+            #     (sigma0 ** 4 - 2 * sigma0 + 3) / sigma0 ** 4,
+            #     (sigma1 ** 4 - 2 * sigma1 + 3) / sigma1 ** 4,
+            #     (sigma2 ** 4 - 2 * sigma2 + 3) / sigma2 ** 4
+            #     ]
+
+            # qs = [[0, 0, 0, 0, 0, 0, 1, 0, 0],
+            #     [sqrt(2) / 2, 0, 0, sqrt(2) / 2, 0, 0, 0, 0, 0],
+            #     [0, 0, -sqrt(2) / 2, 0, 0, sqrt(2) / 2, 0, 0, 0],
+            #     [-sqrt(2) / 2, 0, 0, sqrt(2) / 2, 0, 0, 0, 0, 0],
+            #     [0, 0, 0, 0, 0, 0, 0, 1, 0],
+            #     [0, -sqrt(2) / 2, 0, 0, sqrt(2) / 2, 0, 0, 0, 0],
+            #     [0, 0, sqrt(2) / 2, 0, 0, sqrt(2) / 2, 0, 0, 0],
+            #     [0, sqrt(2) / 2, 0, 0, sqrt(2) / 2, 0, 0, 0, 0],
+            #     [0, 0, 0, 0, 0, 0, 0, 0, 1]
+            #     ]
+            # qs = np.array(qs).T
+
+            # H = np.zeros((9,9))
+            # # mm = 1./np.sqrt(2.)
+            # mm=1.
+            # for i in range(9):
+            #     # Qi = qs[i].reshape(3,3)
+            #     # Qi = mm * np.dot(u, np.dot(Qi, vh.T))
+            #     # qi = vec(Qi)
+            #     qi = qs[i]
+            #     # print(lambdas[i])
+            #     H += lambdas[i] * np.outer(qi,qi)
+            #     # H += np.max([lambdas[i], 0.]) * np.outer(qi,qi)
+            # # print(H)
+            # return H
+
+
+            def DFDF(index):
+              # i = np.mod(index - 1, 3);
+              # j = np.floor((index - 1) / 3);
+              i = np.mod(index, 3);
+              j = np.floor((index) / 3);
+              i = int(i)
+              j = int(j)
+
+              DF = np.zeros((3,3));
+              DF[i,j] = 1;
+              return DF
+
+            def IIC_Hessian(F):
+                H = np.zeros((9,9))
+                for i in range(9):
+                    DF = DFDF(i);
+                    # print(DF)
+                    # exit()
+                    # A = 4 * (DF * F' * F + F * F' * DF + F * DF' * F);
+                    A = 4 * (DF.dot(F.T.dot(F)) + F.dot(F.T.dot(DF)) + F.dot(DF.T.dot(F)))
+                    # print(A)
+                    column = A.T.reshape(9);
+                    H[:,i] = column;
+                return H
+
+            def IIC_Star_Hessian(F):
+                IC = np.trace(F.T.dot(F))
+                H = 2 * IC * np.eye(9,9);
+                f = vec(F);
+                H = H + 4 * np.outer(f,f);
+                # print(H)
+
+                IIC_H = IIC_Hessian(F);
+                H = H - 2 * (IIC_H / 4.);
+                return H
+
+
+            # F = np.arange(9) + 1; F = F.reshape(3,3).T; F[2,2] = 50; F=F.astype(float)
+            # # print(F)
+            # xx = IIC_Star_Hessian(F)
+            # # xx = IIC_Hessian(F)
+            # # xx = IIC_Hessian(F)
+            # print(xx)
+            # exit()
+
+
             C = F.T.dot(F)
-            IC = trace(b)
-            IIC = trace(C.T.dot(C))
+            IC = trace(C)
+            IIC = trace(C.dot(C))
             IIStarC = 0.5 * (IC**2 - IIC)
             dIIStarC = 2 * IC * F - 2 * np.dot(F,np.dot(F.T,F))
             t = vec(dIIStarC)
+            d2IIStarC = IIC_Star_Hessian(F)
 
+            H  = 2. * np.eye(9,9)
+            H -= 2. / J3 * (np.outer(g,t) + np.outer(t,g))
+            H += 6. * IIStarC / J4 * np.outer(g,g)
+            H += 1. / J2 * d2IIStarC
+            H -= 2. * IIStarC / J3 * d2JdFdF(F)
+            # print(H)
 
             s0 = s[0]
             s1 = s[1]
             s2 = s[2]
+            # s0 = S[0,0]
+            # s1 = S[1,1]
+            # s2 = S[2,2]
             T1 = np.array([[0.,-1.,0.],[1.,0.,0],[0.,0.,0.]])
             T1 = 1./np.sqrt(2) * np.dot(u, np.dot(T1, vh.T))
             T2 = np.array([[0.,0.,0.],[0.,0., 1],[0.,-1.,0.]])
@@ -529,12 +665,12 @@ class SymmetricARAPF(Material):
             s0s1 = s0 + s1
             s0s2 = s0 + s2
             s1s2 = s1 + s2
-            if (s0s1 < 2.0):
-                s0s1 = 2.0
-            if (s0s2 < 2.0):
-                s0s2 = 2.0
-            if (s1s2 < 2.0):
-                s1s2 = 2.0
+            # if (s0s1 < 2.0):
+            #     s0s1 = 2.0
+            # if (s0s2 < 2.0):
+            #     s0s2 = 2.0
+            # if (s1s2 < 2.0):
+            #     s1s2 = 2.0
             lamb1 = 2. / (s0s1)
             lamb2 = 2. / (s0s2)
             lamb3 = 2. / (s1s2)
@@ -543,14 +679,24 @@ class SymmetricARAPF(Material):
             t2 = vec(T2)
             t3 = vec(T3)
 
-            H = 2. * np.eye(9,9);
-            # H = H - (4. / (s0 + s1)) * np.outer(t1 , t1);
-            # H = H - (4. / (s1 + s2)) * np.outer(t2 , t2);
-            # H = H - (4. / (s0 + s2)) * np.outer(t3 , t3);
+            dRdF  = (lamb1) * np.outer(t1 , t1);
+            dRdF += (lamb3) * np.outer(t2 , t2);
+            dRdF += (lamb2) * np.outer(t3 , t3);
+            # print(dRdF)
 
-            H = H - (2 * lamb1) * np.outer(t1 , t1);
-            H = H - (2 * lamb3) * np.outer(t2 , t2);
-            H = H - (2 * lamb2) * np.outer(t3 , t3);
+            IS  = trace(S)
+            IIS = trace(b)
+            IIStarS = 0.5 * (IS*IS - IIS)
+
+            newH = (1 + IS / J) * dRdF + (1 / J) * np.outer(r,r)
+            newH = newH - (IS / J2) * (np.outer(g,r) + np.outer(r,g))
+            newH = newH + (2.0 * IIStarS / J3) * np.outer(g,g)
+            newH = newH - (IIStarS / J2) * HJ
+            newH = newH + (1 / J2) * (np.outer(g,f) + np.outer(f,g))
+            newH = newH - (1/J) * np.eye(9,9);
+            H = H - 2.0 * newH
+            H = H / 2.
+            makezero(H)
 
             # print(H)
             # exit()
@@ -588,7 +734,27 @@ class SymmetricARAPF(Material):
         I1 = trace(S)
         I2 = trace(b)
 
-        sigma = 2. * (1. + 1. / J2) * F - 2. * (1. + 1. / J) * R + (2. / J2) * (I1 - I2 / J) * dJdF(F)
+        if self.ndim == 2:
+            sigma = 2. * (1. + 1. / J2) * F - 2. * (1. + 1. / J) * R + (2. / J2) * (I1 - I2 / J) * dJdF(F)
+        else:
+            djdf = dJdF(F)
+            C = np.dot(F.T,F)
+            IC = trace(C);
+            IIC = trace(C.dot(C));
+            IIStarC = 0.5 * (IC*IC - IIC);
+            IS = trace(S);
+            # IIS = trace(S.dot(S));
+            IIS = I2
+            IIStarS = 0.5 * (IS*IS - IIS);
+
+            # % here's symmetric dirichlet
+            dIIStarC = 2 * IC * F - 2. * b.dot(F)
+            P = 2 * F + dIIStarC / J2 - (2. / J3) * IIStarC * djdf;
+            P = P - 2 * ((1 + IS / J) * R - (IIStarS / J2) * djdf - (1. / J) * F);
+            P = P/2.;
+            sigma = P
+            makezero(sigma,1e-12)
+            # print(sigma)
 
         return sigma
 
@@ -791,7 +957,7 @@ class FBasedDisplacementFormulation(VariationalPrinciple):
 
         # if True:
         if False:
-            LagrangeElemCoords = self.GetIdealElement(elem, function_space, LagrangeElemCoords)
+            LagrangeElemCoords = self.GetIdealElement(elem, fem_solver, function_space, LagrangeElemCoords)
 
         # COMPUTE THE STIFFNESS MATRIX
         stiffnessel, t = self.GetLocalStiffness(function_space,material,

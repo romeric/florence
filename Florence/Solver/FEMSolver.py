@@ -50,6 +50,7 @@ class FEMSolver(object):
         newton_raphson_solution_tolerance=None,
         maximum_iteration_for_newton_raphson=50,
         nonlinear_iterative_technique="newton_raphson",
+        regularise_global_system=False,
         reduce_quadrature_for_quads_hexes=True,
         add_self_weight=False,
         mass_type=None,
@@ -117,6 +118,7 @@ class FEMSolver(object):
         self.newton_raphson_failed_to_converge = False
         self.NRConvergence = None
         self.nonlinear_iterative_technique = nonlinear_iterative_technique
+        self.regularise_global_system = regularise_global_system
         self.include_physical_damping = include_physical_damping
         self.damping_factor = damping_factor
         self.add_self_weight = add_self_weight

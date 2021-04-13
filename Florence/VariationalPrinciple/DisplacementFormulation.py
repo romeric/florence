@@ -48,7 +48,7 @@ class DisplacementFormulation(VariationalPrinciple):
 
         # if True:
         if False:
-            LagrangeElemCoords = self.GetIdealElement(elem, function_space, LagrangeElemCoords)
+            LagrangeElemCoords = self.GetIdealElement(elem, fem_solver, function_space, LagrangeElemCoords)
 
         # COMPUTE THE STIFFNESS MATRIX
         if material.has_low_level_dispatcher:

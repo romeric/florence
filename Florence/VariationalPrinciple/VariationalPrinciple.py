@@ -388,7 +388,7 @@ class VariationalPrinciple(object):
         return self.nvar
 
 
-    def GetIdealElement(self, elem, function_space, LagrangeElemCoords):
+    def GetIdealElement(self, elem, fem_solver, function_space, LagrangeElemCoords):
         """Retrieves ideal element/domain
         """
 

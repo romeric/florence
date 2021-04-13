@@ -207,6 +207,9 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
         stiffness = coo_matrix((V_stiffness,(I_stiffness,J_stiffness)),
             shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64).tocsr()
 
+        if fem_solver.regularise_global_system:
+            stiffness.setdiag(stiffness.diagonal(k=0) + 1e-10)
+
         # GET STORAGE/MEMORY DETAILS
         fem_solver.spmat = stiffness.data.nbytes/1024./1024.
         fem_solver.ijv = (I_stiffness.nbytes + J_stiffness.nbytes + V_stiffness.nbytes)/1024./1024.
@@ -223,6 +226,9 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
     else:
         stiffness = csr_matrix((V_stiffness,indices,indptr),
             shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])))
+
+        if fem_solver.regularise_global_system:
+            stiffness.setdiag(stiffness.diagonal(k=0) + 1e-10)
 
         # GET STORAGE/MEMORY DETAILS
         fem_solver.spmat = stiffness.data.nbytes/1024./1024.
