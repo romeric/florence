@@ -5,16 +5,16 @@ from .MaterialBase import Material
 from Florence.LegendreTransform import LegendreTransform
 
 
-class DistortionModel(Material):
+class ConstrainedDistortionModel(Material):
     """The fundamental DistortionModel model
 
-        W_(C) = F:F / d / J**(2/d)
+        W_mn(C) = u1*C:I+u2*G:I - 2*(u1+2*u2)*lnJ + lamb/2*(J-1)**2
 
     """
 
     def __init__(self, ndim, **kwargs):
         mtype = type(self).__name__
-        super(DistortionModel, self).__init__(mtype, ndim, **kwargs)
+        super(ConstrainedDistortionModel, self).__init__(mtype, ndim, **kwargs)
         self.is_transversely_isotropic = False
         self.energy_type = "internal_energy"
         self.nature = "nonlinear"
@@ -36,6 +36,10 @@ class DistortionModel(Material):
 
     def Hessian(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
 
+        mu = self.mu
+        mu1 = self.mu1
+        mu2 = self.mu2
+        lamb = self.lamb
         d = self.ndim
 
         I = StrainTensors['I']
@@ -43,25 +47,24 @@ class DistortionModel(Material):
         J = StrainTensors['J'][gcounter]
         b = StrainTensors['b'][gcounter]
 
-        if np.isclose(J, 0) or J < 0:
-            delta = np.sqrt(0.04 * J * J + 1e-8)
-            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
-            # J = 1.
-
         trb = trace(b) + 0
 
-        C_Voigt = 4./d * J**(-1) * einsum("ij,kl", (-1./d * trb * I + b), (-1./d) * J**(-2./d) * I ) +\
+        C_Voigt0 = 4./d * J**(-1) * einsum("ij,kl", (-1./d * trb * I + b), (-1./d) * J**(-2./d) * I ) +\
             4./d**2 * J**(-1) * J**(-2./d) * (-einsum("ij,kl", I, b) + 0.5 * trb * (einsum("ik,jl",I,I)+einsum("il,jk",I,I)) )
+        C_Voigt0 *= (1./d * J**(-2/d) * trb - 1)
+        sigma = 2./d * J**(-2./d - 1.) * (-1./d * trb * I + b)
+        C_Voigt1 = einsum("ij,kl", sigma, sigma)
+        C_Voigt = C_Voigt0 + C_Voigt1
+        # C_Voigt = C_Voigt0
 
-        # factor = np.exp(1./d * J**(-2./d) * trb - 1.)
-        # sigma = 2./d * J**(-2./d - 1.) * (-1./d * trb * I + b)
-        # C_Voigt = factor * (np.einsum("ij,kl", sigma, sigma) + C_Voigt)
+        C_Voigt = mu * C_Voigt
+
+        C_Voigt += 2.*mu2/J*(2*einsum('ij,kl',b,b) - einsum('ik,jl',b,b) - einsum('il,jk',b,b)) +\
+            2.*(mu1+2.*mu2)/J*( einsum("ik,jl",I,I)+einsum("il,jk",I,I) ) + \
+            lamb*(2.*J-1.)*einsum("ij,kl",I,I) - lamb*(J-1)*( einsum("ik,jl",I,I)+einsum("il,jk",I,I) )
 
         C_Voigt = Voigt(C_Voigt,1)
 
-        # s = np.linalg.svd(C_Voigt)[1]
-        # if np.any(s < 0):
-        #     print(s)
 
         return C_Voigt
 
@@ -69,6 +72,10 @@ class DistortionModel(Material):
 
     def CauchyStress(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
 
+        mu = self.mu
+        mu1 = self.mu1
+        mu2 = self.mu2
+        lamb = self.lamb
         d = self.ndim
 
         I = StrainTensors['I']
@@ -76,34 +83,37 @@ class DistortionModel(Material):
         J = StrainTensors['J'][gcounter]
         b = StrainTensors['b'][gcounter]
 
-        if np.isclose(J, 0) or J < 0:
-            delta = np.sqrt(0.04 * J * J + 1e-8);
-            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
-            # J = 1.
-
         trb = trace(b) + 0
 
         sigma = 2./d * J**(-2./d - 1.) * (-1./d * trb * I + b)
-        # sigma *= np.exp(1./d * J**(-2./d) * trb - 1)
-        # print(F)
-        # exit()
+        sigma *= (1./d * J**(-2/d) * trb - 1)
+        sigma = mu * sigma
+
+        sigma += 2.0*mu1/J*b + \
+            2.0*mu2/J*(trb*b - np.dot(b,b)) -\
+            2.0*(mu1+2*mu2)/J*I +\
+            lamb*(J-1)*I
 
         return sigma
 
 
     def InternalEnergy(self,StrainTensors,elem=0,gcounter=0):
 
+        mu = self.mu
+        mu1 = self.mu1
+        mu2 = self.mu2
+        lamb = self.lamb
         d = self.ndim
 
         I = StrainTensors['I']
         J = StrainTensors['J'][gcounter]
         F = StrainTensors['F'][gcounter]
-        b = StrainTensors['b'][gcounter]
+        H = J*np.linalg.inv(F).T
+        C = np.dot(F.T,F)
+        G = np.dot(H.T,H)
+        d = self.ndim
 
-        if np.isclose(J, 0) or J < 0:
-            delta = np.sqrt(0.04 * J * J + 1e-8);
-            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
-
-        energy  = (1./d * J**(-2./d) * trace(b) - 1.)
+        energy  = mu*(1./d * J**(-2./d) * einsum('ij,ij',C,I) - 1.) + mu1*(einsum('ij,ij',C,I) - 3.) +\
+            mu2*(einsum('ij,ij',G,I) - 3.) - 2.*(mu1+2.*mu2)*np.log(J) + lamb/2.*(J-1)**2
 
         return energy

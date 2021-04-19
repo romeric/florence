@@ -873,7 +873,7 @@ class PostProcess(object):
 
 
 
-    def MeshQualityMeasures(self, mesh, TotalDisp, plot=False, show_plot=False):
+    def MeshQualityMeasures(self, mesh, TotalDisp=None, plot=False, show_plot=False, print_log=True):
         """Computes mesh quality measures, Q_1, Q_2, Q_3 [edge distortion, face distortion, Jacobian]
 
             input:
@@ -895,12 +895,15 @@ class PostProcess(object):
             raise AssertionError('Scaled Jacobian seems to have been already computed. Re-computing it may return incorrect results')
 
         PostDomain = self.postdomain_bases
+        # PostDomain = self.domain_bases
         if self.postdomain_bases is None:
             raise ValueError("Function spaces/bases not set for post-processing")
 
         ndim = mesh.InferSpatialDimension()
         edim = mesh.InferElementalDimension()
         vpoints = mesh.points
+        if TotalDisp is None:
+            TotalDisp = np.zeros((mesh.nnode, mesh.points.shape[1]))
         if TotalDisp.ndim == 3:
             vpoints = vpoints + TotalDisp[:,:ndim,-1]
         elif TotalDisp.ndim == 2:
@@ -910,6 +913,7 @@ class PostProcess(object):
 
         elements = mesh.elements
 
+        minJ = 1e+307
         ScaledJacobian = np.zeros(elements.shape[0])
         ScaledJacobianF = np.zeros(elements.shape[0])
         ScaledFF = np.zeros(elements.shape[0])
@@ -969,6 +973,7 @@ class PostProcess(object):
             # FIND MIN AND MAX VALUES
             JMin = np.min(Jacobian); JMax = np.max(Jacobian)
             JFMin = np.min(JacobianF); JFMax = np.max(JacobianF)
+            minJ = np.min([minJ, np.min(Jacobian)])
             ScaledJacobian[elem] = 1.0*JMin/JMax
             ScaledJacobianF[elem] = 1.0*JFMin/JFMax
             ScaledFF[elem] = 1.0*np.min(Q1)/np.max(Q1)
@@ -983,26 +988,30 @@ class PostProcess(object):
         if np.isnan(ScaledJacobian).any():
             warn("Jacobian of mapping is close to zero or nan")
 
-        print('Minimum scaled F:F value is', ScaledFF.min(), \
-        'corresponding to element', ScaledFF.argmin())
+        if print_log:
+            print('Minimum scaled F:F value is', ScaledFF.min(), \
+            'corresponding to element', ScaledFF.argmin())
 
-        print('Minimum scaled H:H value is', ScaledHH.min(), \
-        'corresponding to element', ScaledHH.argmin())
+            print('Minimum scaled H:H value is', ScaledHH.min(), \
+            'corresponding to element', ScaledHH.argmin())
 
-        print('Minimum scaled det(F) value is', ScaledJacobianF.min(), \
-        'corresponding to element', ScaledJacobianF.argmin())
+            print('Minimum scaled det(F) value is', ScaledJacobianF.min(), \
+            'corresponding to element', ScaledJacobianF.argmin())
 
-        print('Minimum scaled Jacobian value is', ScaledJacobian.min(), \
-        'corresponding to element', ScaledJacobian.argmin())
+            print('Minimum Jacobian value is', minJ.min(), \
+            'corresponding to element', minJ.argmin())
 
-        if self.is_material_anisotropic:
-            print('Minimum scaled FN.FN value is', ScaledFNFN.min(), \
-            'corresponding to element', ScaledFNFN.argmin())
+            print('Minimum scaled Jacobian value is', ScaledJacobian.min(), \
+            'corresponding to element', ScaledJacobian.argmin())
 
-            print('Minimum scaled CN.CN value is', ScaledCNCN.min(), \
-            'corresponding to element', ScaledCNCN.argmin())
+            if self.is_material_anisotropic:
+                print('Minimum scaled FN.FN value is', ScaledFNFN.min(), \
+                'corresponding to element', ScaledFNFN.argmin())
 
-        print('Number of Invalid elements:', len(invalidElements), ":", invalidElements)
+                print('Minimum scaled CN.CN value is', ScaledCNCN.min(), \
+                'corresponding to element', ScaledCNCN.argmin())
+
+            print('Number of Invalid elements:', len(invalidElements), ":", invalidElements)
 
         if plot:
             import matplotlib.pyplot as plt
@@ -1016,6 +1025,7 @@ class PostProcess(object):
         # SET COMPUTED TO TRUE
         self.is_scaledjacobian_computed = True
         self.AverageJacobian = AverageJacobian
+        self.minJ = minJ
         self.ScaledJacobian = ScaledJacobian
         self.ScaledJacobianF = ScaledJacobianF
         self.ScaledFF = ScaledFF

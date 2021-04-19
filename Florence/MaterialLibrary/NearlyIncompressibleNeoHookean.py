@@ -47,7 +47,7 @@ class NearlyIncompressibleNeoHookean(Material):
 
         if np.isclose(J, 0) or J < 0:
             delta = np.sqrt(0.04 * J * J + 1e-8);
-            J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
+            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
 
         mu = self.mu
 
@@ -78,7 +78,7 @@ class NearlyIncompressibleNeoHookean(Material):
 
         if np.isclose(J, 0) or J < 0:
             delta = np.sqrt(0.04 * J * J + 1e-8);
-            J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
+            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
 
         trb = trace(b)
         if self.ndim == 2:
@@ -90,3 +90,28 @@ class NearlyIncompressibleNeoHookean(Material):
         stress += self.lamb * (J - 1) * I
 
         return stress
+
+
+    def InternalEnergy(self,StrainTensors,elem=0,gcounter=0):
+
+        mu = self.mu
+        lamb = self.lamb
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+        b = StrainTensors['b'][gcounter]
+
+        if np.isclose(J, 0) or J < 0:
+            delta = np.sqrt(0.04 * J * J + 1e-8);
+            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
+
+        trb = trace(b)
+        if self.ndim == 2:
+            trb += 1.
+
+        energy  = mu*J**(-2./3.) * trb  - 3. + lamb / 2. * (J-1)**2
+
+        return energy
+
+

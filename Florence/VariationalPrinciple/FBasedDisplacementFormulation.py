@@ -137,6 +137,27 @@ def d2JdFdF(F):
         return H
 
 
+# delta = 1e-3
+# def Jr(J):
+#     return 0.5 * (J + np.sqrt(J**2 + delta**2))
+
+# def dJrdF(F):
+#     J = np.linalg.det(F)
+#     return 0.5 * (1. + J / np.sqrt(J**2 + delta**2)) * dJdF(F)
+
+# def d2JrdFdF(F):
+#     J = np.linalg.det(F)
+#     djdf = dJdF(F)
+#     gJ = vec(djdf)
+#     dJrdF = 0.5 * (1. + J / np.sqrt(J**2 + delta**2)) * djdf
+#     gJr = vec(dJrdF)
+#     HJr = 0.5 * (1 + J / np.sqrt(J**2 + delta**2)) * d2JdFdF(F) + 0.5 * (delta**2 / (J**2 + delta**2)**(3./2.)) * np.outer(gJ,gJ)
+#     return HJr
+
+
+def LocallyInjectiveFunction(J):
+    return 1. / (J**3 - 3 * J**2 + 3 * J)
+
 def LocallyInjectiveGradient(J, gJ):
     return 3.*(-J**2 + 2*J - 1)/(J**2*(J**2 - 3*J + 3)**2) * gJ
 
@@ -244,6 +265,7 @@ class PixarNeoHookeanF(Material):
         elif self.ndim==2:
             self.H_VoigtSize = 4
 
+
         # LOW LEVEL DISPATCHER
         # self.has_low_level_dispatcher = True
         self.has_low_level_dispatcher = False
@@ -269,10 +291,19 @@ class PixarNeoHookeanF(Material):
         gJ = vec(dJdF(F))
         HJ = d2JdFdF(F)
 
+        # gJ = vec(dJrdF(F))
+        # HJ = d2JrdFdF(F)
+
         d2 = self.ndim**2
         H = mu * np.eye(d2,d2) + lamb * np.outer(gJ,gJ) + (lamb * (J-1) - mu) * HJ
 
-        # H += 0.8 * LocallyInjectiveHessian(J, gJ, HJ)
+        # H += 0.28 * LocallyInjectiveHessian(J, gJ, HJ)
+
+        # H += (1 - J**(-2)) * HJ + 2. / J**(3) * np.outer(gJ,gJ)
+
+        # s = np.linalg.svd(H)[1]
+        # if np.any(s < 0):
+        #     print(s)
 
         self.H_VoigtSize = H.shape[0]
 
@@ -289,13 +320,189 @@ class PixarNeoHookeanF(Material):
             delta = np.sqrt(0.04 * J * J + 1e-8);
             # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
 
+
+        djdf = dJdF(F)
+        # djdf = dJrdF(F)
+
         mu = self.mu
         lamb = self.lamb
-        stress = mu*F + (lamb*(J - 1.) - mu) * dJdF(F)
+        stress = mu*F + (lamb*(J - 1.) - mu) * djdf
 
-        # stress += 0.8 * LocallyInjectiveGradient(J, dJdF(F))
+        # stress += 0.28 * LocallyInjectiveGradient(J, dJdF(F))
+
+        # stress += (1 - J**(-2)) * dJdF(F)
 
         return stress
+
+
+    def InternalEnergy(self,StrainTensors,elem=0,gcounter=0):
+
+        mu = self.mu
+        lamb = self.lamb
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+        C = np.dot(F.T,F)
+
+        if np.isclose(J, 0) or J < 0:
+            delta = np.sqrt(0.04 * J * J + 1e-8);
+            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
+
+        # J = Jr(J)
+
+        energy  = mu/2.*(trace(C) - 3.) - mu*(J-1) + lamb/2.*(J-1.)**2
+
+        return energy
+
+
+
+class MIPSF(Material):
+    """The Neo-Hookean internal energy, described in Smith et. al.
+
+        W(C) = mu/2*(C:I-3)- mu*(J-1) + lamb/2*(J-1)**2
+
+    """
+
+    def __init__(self, ndim, **kwargs):
+        mtype = type(self).__name__
+        super(MIPSF, self).__init__(mtype, ndim, **kwargs)
+
+        self.is_transversely_isotropic = False
+        self.energy_type = "internal_energy"
+        self.nature = "nonlinear"
+        self.fields = "mechanics"
+
+        if self.ndim==3:
+            self.H_VoigtSize = 9
+        elif self.ndim==2:
+            self.H_VoigtSize = 4
+
+        # the smaller minJ the more chance to untangle something
+        # self.delta = 1e-3
+        # self.minJ = minJ
+        minJ = self.minJ
+        self.delta = np.sqrt(1e-8 + min(minJ, 0.)**2 * 0.04)
+        # self.delta = np.sqrt(1e-8 + min(minJ, 0.)**2 * 0.04)
+        # print(self.delta)
+
+        # LOW LEVEL DISPATCHER
+        # self.has_low_level_dispatcher = True
+        self.has_low_level_dispatcher = False
+
+    def KineticMeasures(self,F,ElectricFieldx=0, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._NeoHookean_ import KineticMeasures
+        return KineticMeasures(self,F)
+
+
+    def Hessian(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        trc = trace(F.T.dot(F))
+
+        # self.delta = np.sqrt(1e-8 + min(self.minJ, 0.)**2 * 0.04)
+        d = self.ndim
+        delta = self.delta
+
+        Jr = 0.5 * (J + np.sqrt(J**2 + delta**2))
+        if np.isclose(Jr, 0):
+            Jr = 1e-10
+
+        # Symmetric formulation based on K. Theodore arrangements
+        gJ = vec(dJdF(F))
+        HJ = d2JdFdF(F)
+        f = vec(F)
+
+        dJrdF = 0.5 * (1. + J / np.sqrt(J**2 + delta**2)) * dJdF(F)
+        gJr = vec(dJrdF)
+        HJr = 0.5 * (1 + J / np.sqrt(J**2 + delta**2)) * HJ + 0.5 * (delta**2 / (J**2 + delta**2)**(3./2.)) * np.outer(gJ,gJ)
+
+        d2 = self.ndim**2
+        H = 2. / d / Jr**(2./d) * np.eye(d2,d2) - 4. / d**2 * Jr**(-2./d-1.) * (np.outer(gJr,f) + np.outer(f,gJr)) +\
+            2. * trc / d**2 * (2./d + 1.) * Jr**(-2./d - 2.) * np.outer(gJr,gJr) -\
+            2. * trc / d**2 * Jr**(-2./d-1.) * HJr
+
+        # Neffs
+        # H += (0.4*Jr**10 + 0.6)/Jr**7 * np.outer(gJr,gJr) + 0.1*(Jr**10 - 1)/Jr**6 * HJr
+        # Garanzha
+        # H += (1.0/Jr**3 * np.outer(gJr,gJr) + (0.5 - 0.5/Jr**2) * HJr) * self.lamb
+        # standard
+        # H += self.lamb * (np.outer(gJr,gJr) + (Jr - 1.) * HJr)
+
+        H += self.lamb * LocallyInjectiveHessian(Jr, gJr, HJr)
+
+        # s = np.linalg.svd(H)[1]
+        # if np.any(s < 0):
+        #     print(s)
+
+        self.H_VoigtSize = H.shape[0]
+
+        return H
+
+
+    def CauchyStress(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        trc = trace(F.T.dot(F))
+
+        # self.delta = np.sqrt(1e-8 + min(self.minJ, 0.)**2 * 0.04)
+        d = self.ndim
+        delta = self.delta
+
+        Jr = 0.5 * (J + np.sqrt(J**2 + delta**2))
+        if np.isclose(Jr, 0):
+            # print("Small Jr", J, Jr)
+            Jr = 1e-10
+
+        dJrdF = 0.5 * (1. + J / np.sqrt(J**2 + delta**2)) * dJdF(F)
+
+        stress = 2. / d / Jr**(2./d) * F - 2. * trc / d**2 * Jr**(-2./d-1.)  * dJrdF
+
+        # Neffs
+        # stress += 0.1*(Jr**10 - 1)/Jr**6 * dJrdF
+        # Garanzha
+        # stress += self.lamb * (0.5 - 0.5/Jr**2) * dJrdF
+        # standard
+        # stress += self.lamb * (Jr - 1.) * dJrdF
+
+        stress += self.lamb * LocallyInjectiveGradient(Jr, dJrdF)
+
+        return stress
+
+
+    def InternalEnergy(self,StrainTensors,elem=0,gcounter=0):
+
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        trc = trace(F.T.dot(F))
+
+        # self.delta = np.sqrt(1e-8 + min(self.minJ, 0.)**2 * 0.04)
+        d = self.ndim
+        delta = self.delta
+
+        Jr = 0.5 * (J + np.sqrt(J**2 + delta**2))
+        if np.isclose(Jr, 0):
+            Jr = 1e-10
+
+        energy  = (1./d * Jr**(-2./d) * trc - 1.)
+
+        # Neffs
+        # energy += 0.02*(Jr**5 + 1./Jr**5 - 2.)
+        # Garanzha
+        # energy += (0.5*Jr - 1.0 + 0.5/Jr) * self.lamb
+        # standard
+        # energy += self.lamb * 0.5 * (Jr - 1.)**2
+
+        energy += self.lamb * LocallyInjectiveFunction(Jr)
+
+        return energy
 
 
 
@@ -399,7 +606,7 @@ class ARAPF(Material):
             # print(H)
             # exit()
 
-        # H += 0.001 * LocallyInjectiveHessian(J, vec(dJdF(F)), d2JdFdF(F))
+        # H += 0.1 * LocallyInjectiveHessian(J, vec(dJdF(F)), d2JdFdF(F))
 
         # s = np.linalg.svd(C_Voigt)[1]
         # print(s)
@@ -434,7 +641,7 @@ class ARAPF(Material):
         # print(sigma)
         # exit()
 
-        # sigma += 0.001 * LocallyInjectiveGradient(J, dJdF(F))
+        # sigma += 0.1 * LocallyInjectiveGradient(J, dJdF(F))
 
         return sigma
 
@@ -1038,11 +1245,10 @@ class FBasedDisplacementFormulation(VariationalPrinciple):
         StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
 
         # SPATIAL GRADIENT AND MATERIAL GRADIENT TENSORS ARE EQUAL
-        SpatialGradient = np.einsum('ikj',MaterialGradient)
+        SpatialGradient = np.einsum('ikj', MaterialGradient)
         # COMPUTE ONCE detJ
-        # detJ = np.einsum('i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)))
-        detJ = np.einsum('i,i->i',AllGauss[:,0],det(ParentGradientX))
-        # detJ = np.einsum('i,i,i->i',AllGauss[:,0],np.abs(det(ParentGradientX)),np.abs(StrainTensors['J']))
+        detJ = np.einsum('i,i->i', AllGauss[:,0], det(ParentGradientX))
+        # detJ = np.einsum('i,i,i->i', AllGauss[:,0], det(ParentGradientX), StrainTensors['J'])
 
         # LOOP OVER GAUSS POINTS
         for counter in range(AllGauss.shape[0]):
@@ -1090,3 +1296,47 @@ class FBasedDisplacementFormulation(VariationalPrinciple):
             t = np.dot(B,TotalTraction)[:,None]
 
         return BDB, t
+
+
+    def GetEnergy(self, function_space, material, LagrangeElemCoords, EulerElemCoords, fem_solver, elem=0):
+        """Get virtual energy of the system. For dynamic analysis this is handy for computing conservation of energy.
+            The routine computes the global form of virtual internal energy i.e. integral of "W(C,G,C)"". This can be
+            computed purely in a Lagrangian configuration.
+        """
+
+        if True:
+        # if False:
+            LagrangeElemCoords = self.GetIdealElement(elem, fem_solver, function_space, LagrangeElemCoords)
+
+        nvar = self.nvar
+        ndim = self.ndim
+        nodeperelem = function_space.Bases.shape[0]
+
+        det = np.linalg.det
+        inv = np.linalg.inv
+        Jm = function_space.Jm
+        AllGauss = function_space.AllGauss
+
+        internal_energy = 0.
+
+        # COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
+        # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+        ParentGradientX = np.einsum('ijk,jl->kil', Jm, LagrangeElemCoords)
+        # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
+        MaterialGradient = np.einsum('ijk,kli->ijl', inv(ParentGradientX), Jm)
+        # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
+        F = np.einsum('ij,kli->kjl', EulerElemCoords, MaterialGradient)
+
+        # COMPUTE REMAINING KINEMATIC MEASURES
+        StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
+
+        detJ = np.einsum('i,i->i', AllGauss[:,0], det(ParentGradientX))
+
+        # LOOP OVER GAUSS POINTS
+        for counter in range(AllGauss.shape[0]):
+            # COMPUTE THE INTERNAL ENERGY AT THIS GAUSS POINT
+            energy = material.InternalEnergy(StrainTensors,elem,counter)
+            # INTEGRATE INTERNAL ENERGY
+            internal_energy += energy*detJ[counter]
+
+        return internal_energy

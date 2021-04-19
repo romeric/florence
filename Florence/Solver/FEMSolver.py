@@ -50,6 +50,7 @@ class FEMSolver(object):
         newton_raphson_solution_tolerance=None,
         maximum_iteration_for_newton_raphson=50,
         nonlinear_iterative_technique="newton_raphson",
+        line_search_technique="goldstein",
         regularise_global_system=False,
         reduce_quadrature_for_quads_hexes=True,
         add_self_weight=False,
@@ -118,6 +119,7 @@ class FEMSolver(object):
         self.newton_raphson_failed_to_converge = False
         self.NRConvergence = None
         self.nonlinear_iterative_technique = nonlinear_iterative_technique
+        self.line_search_technique = line_search_technique
         self.regularise_global_system = regularise_global_system
         self.include_physical_damping = include_physical_damping
         self.damping_factor = damping_factor
@@ -495,8 +497,7 @@ class FEMSolver(object):
     @property
     def WhichFEMSolvers():
         solvers = ["LinearElasticity","IncrementalLinearElasticitySolver",
-            "NewtonRaphson","ModifiedNewtonRaphson",
-            "NewtonRaphsonLineSearch","NewtonRaphsonArchLength",
+            "NewtonRaphson","QuasiNewtonRaphson","NewtonRaphsonArchLength",
             "StructuralDynamicIntegrator", "ExplicitStructuralDynamicIntegrator"]
         print(solvers)
         return solvers
@@ -670,8 +671,7 @@ class FEMSolver(object):
 
         else:
             if self.nonlinear_iterative_technique == "newton_raphson" or \
-                self.nonlinear_iterative_technique == "modified_newton_raphson" or \
-                self.nonlinear_iterative_technique == "line_search_newton_raphson" or \
+                self.nonlinear_iterative_technique == "quasi_newton_raphson" or \
                 self.nonlinear_iterative_technique == "snes":
                 TotalDisp = self.StaticSolver(function_spaces, formulation, solver,
                     K,NeumannForces,NodalForces,Residual,
@@ -863,13 +863,8 @@ class FEMSolver(object):
                 Eulerx, Eulerp, K, Residual = self.NewtonRaphson(function_spaces, formulation, solver,
                     Increment, K, NodalForces, Residual, mesh, Eulerx, Eulerp,
                     material, boundary_condition, AppliedDirichletInc)
-            elif self.nonlinear_iterative_technique == "modified_newton_raphson":
-                Eulerx, Eulerp, K, Residual = self.ModifiedNewtonRaphson(function_spaces, formulation, solver,
-                    Increment, K, NodalForces, Residual, mesh, Eulerx, Eulerp,
-                    material, boundary_condition, AppliedDirichletInc)
-            elif self.nonlinear_iterative_technique == "line_search_newton_raphson":
-                self.activate_line_search = True
-                Eulerx, Eulerp, K, Residual = self.NewtonRaphson(function_spaces, formulation, solver,
+            elif self.nonlinear_iterative_technique == "quasi_newton_raphson":
+                Eulerx, Eulerp, K, Residual = self.QuasiNewtonRaphson(function_spaces, formulation, solver,
                     Increment, K, NodalForces, Residual, mesh, Eulerx, Eulerp,
                     material, boundary_condition, AppliedDirichletInc)
             else:
@@ -1024,7 +1019,7 @@ class FEMSolver(object):
 
 
 
-    def ModifiedNewtonRaphson(self, function_spaces, formulation, solver,
+    def QuasiNewtonRaphson(self, function_spaces, formulation, solver,
         Increment, K, NodalForces, Residual, mesh, Eulerx, Eulerp, material,
         boundary_condition, AppliedDirichletInc):
 
@@ -1033,6 +1028,8 @@ class FEMSolver(object):
         Tolerance = self.newton_raphson_tolerance
         LoadIncrement = self.number_of_load_increments
         Iter = 0
+        self.iterative_norm_history = []
+        alpha = 1.0
 
 
         # APPLY INCREMENTAL DIRICHLET PER LOAD STEP (THIS IS INCREMENTAL NOT ACCUMULATIVE)
@@ -1056,15 +1053,23 @@ class FEMSolver(object):
             # GET ITERATIVE SOLUTION
             dU = boundary_condition.UpdateFreeDoFs(sol,K.shape[0],formulation.nvar)
 
-            # UPDATE THE EULERIAN COMPONENTS
-            # UPDATE THE GEOMETRY
-            Eulerx += dU[:,:formulation.ndim]
-            # GET ITERATIVE ELECTRIC POTENTIAL
-            Eulerp += dU[:,-1]
+            # COMPUTE STEP SIZE
+            if self.activate_line_search:
+                alpha = self.LineSearch(function_spaces[0], formulation, mesh, material, boundary_condition,
+                    NodalForces, dU, Residual, Eulerx, Eulerp)
 
-            # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
-            TractionForces = AssembleInternalTractionForces(self, function_spaces[0], formulation, mesh, material,
-                Eulerx,Eulerp)
+            # UPDATE THE EULERIAN COMPONENTS - THE GEOMETRY
+            Eulerx += alpha * dU[:,:formulation.ndim]
+            # GET ITERATIVE ELECTRIC POTENTIAL
+            Eulerp += alpha * dU[:,-1]
+
+            # RE-ASSEMBLE - COMPUTE STIFFNESS AND INTERNAL TRACTION FORCES
+            if Iter % 10 == 0:
+                K, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material,
+                    Eulerx,Eulerp)[:2]
+            else:
+                TractionForces = AssembleInternalTractionForces(self, function_spaces[0], formulation, mesh, material,
+                    Eulerx,Eulerp)
 
             # FIND THE RESIDUAL
             Residual[boundary_condition.columns_in] = TractionForces[boundary_condition.columns_in] -\
@@ -1106,6 +1111,7 @@ class FEMSolver(object):
             if Iter==self.maximum_iteration_for_newton_raphson:
                 self.newton_raphson_failed_to_converge = True
                 break
+
             if np.isnan(self.norm_residual) or self.norm_residual>1e06:
                 self.newton_raphson_failed_to_converge = True
                 break
@@ -1113,8 +1119,8 @@ class FEMSolver(object):
             # IF BREAK WHEN NEWTON RAPHSON STAGNATES IS ACTIVATED
             if self.break_at_stagnation:
                 self.iterative_norm_history.append(self.norm_residual)
-                if Iter >= 5:
-                    if np.mean(self.iterative_norm_history) < 1.:
+                if Iter >= 6:
+                    if np.mean(self.iterative_norm_history) < 1. and self.abs_norm_residual < 0.0001:
                         break
 
             # USER DEFINED CRITERIA TO BREAK OUT OF NEWTON-RAPHSON
@@ -1133,32 +1139,28 @@ class FEMSolver(object):
 
 
 
-
     def LineSearch(self, function_space, formulation, mesh, material, boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp):
 
+        if self.line_search_technique == "goldstein":
+                return self.GoldsteinLineSearch(function_space, formulation, mesh, material,
+                    boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp)
+        elif self.line_search_technique == "wolfe":
+            return self.WolfeLineSearch(function_space, formulation, mesh, material,
+                boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp)
+        else:
+            return self.BackTrackingLineSearch(function_space, formulation, mesh, material,
+                boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp)
+
+
+
+    def GoldsteinLineSearch(self, function_space, formulation, mesh, material, boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp):
+
+        from Florence.FiniteElements.Assembly import AssembleInternalTractionForces
         rho = 0.5
         newXCopy = np.copy(Eulerx)
         newPCopy = np.copy(Eulerp)
         ResidualCopy = np.copy(Residual)
 
-        # EX0 = self.ComputeEnergy(function_space, mesh, material, formulation,
-        #     newXCopy, Eulerp)[0]
-        # EXf = self.ComputeEnergy(function_space, mesh, material, formulation,
-        #     newXCopy + dU[:,:formulation.ndim], Eulerp + dU[:,-1])[0]
-
-        # pkX = np.dot(dU[:,:formulation.ndim].flatten().T,Residual).item()
-        # alpha, alpha_tol, c = 1.0, 1e-4, 1e-4
-        # while EXf > EX0 + c * alpha * pkX:
-        #     newXCopy = Eulerx + alpha * dU[:,:formulation.ndim]
-        #     # newPCopy = Eulerp + alpha * dU[:,-1]
-        #     EXf = self.ComputeEnergy(function_space, mesh, material, formulation, newXCopy, newPCopy)[0]
-        #     alpha *= rho
-        #     # print(alpha, EXf, EX0 + c * alpha * pkX)
-        #     if alpha < alpha_tol:
-        #         break
-        # return alpha
-
-        from Florence.FiniteElements.Assembly import AssembleInternalTractionForces
         # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
         TractionForces = AssembleInternalTractionForces(self, function_space, formulation, mesh, material,
             newXCopy, newPCopy)
@@ -1182,6 +1184,7 @@ class FEMSolver(object):
 
         Iter = 0
         alpha = R0 / R1
+        too_small = False
         while np.abs(Rf) > rho * np.abs(R0) and Iter < 25:
             if alpha < 0.:
                 eta = alpha / 2. + np.sqrt((alpha/2)**2 - alpha)
@@ -1192,15 +1195,110 @@ class FEMSolver(object):
             else:
                 eta = alpha / 2.
 
-            # alpha = R0 / Rf
+            # if eta < 1e-3:
+            if False:
+                too_small = True
+                break
+
             Rf = (1 - eta) * R0 + R1 * eta**2
-            # print(eta, alpha, np.abs(Rf), rho * np.abs(R0))
-            # print(eta)
             Iter += 1
+
+        if too_small:
+            # return self.WolfeLineSearch(function_space, formulation, mesh, material,
+                # boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp)
+            return self.BackTrackingLineSearch(function_space, formulation, mesh, material,
+                boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp)
 
         if eta > 1.:
             eta = 1.
+        elif eta < 1e-4:
+            eta = 1e-4
         return eta
+
+
+    def WolfeLineSearch(self, function_space, formulation, mesh, material, boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp):
+
+        from Florence.FiniteElements.Assembly import AssembleInternalTractionForces
+        rho = 0.5
+        newXCopy = np.copy(Eulerx)
+        newPCopy = np.copy(Eulerp)
+        ResidualCopy = np.copy(Residual)
+
+        EX0 = self.ComputeEnergy(function_space, mesh, material, formulation,
+            newXCopy, Eulerp)[0]
+        EXf = self.ComputeEnergy(function_space, mesh, material, formulation,
+            newXCopy + dU[:,:formulation.ndim], Eulerp + dU[:,-1])[0]
+
+        pkX = np.dot(dU[:,:formulation.ndim].flatten().T,Residual).item()
+        alpha, alpha_tol, c = 1.0, 1e-6, 1e-3
+        c2 = 0.9
+        while EXf > EX0 + c * alpha * pkX and np.linalg.norm(np.dot(dU.flatten().T,ResidualCopy).item()) > c2 * np.linalg.norm(pkX):
+
+            # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
+            TractionForces = AssembleInternalTractionForces(self, function_space, formulation, mesh, material,
+                newXCopy + dU[:,:formulation.ndim], newPCopy + dU[:,-1])
+            # FIND THE RESIDUAL
+            ResidualCopy[boundary_condition.columns_in] = TractionForces[boundary_condition.columns_in] -\
+                NodalForces[boundary_condition.columns_in]
+
+            newXCopy = Eulerx + alpha * dU[:,:formulation.ndim]
+            # newPCopy = Eulerp + alpha * dU[:,-1]
+            EXf = self.ComputeEnergy(function_space, mesh, material, formulation, newXCopy, newPCopy)[0]
+            alpha *= rho
+            # print(alpha, EXf, EX0 + c * alpha * pkX)
+
+            # # DECIDE BASED ON RATIO TO NOT ALLOW TOO SMALL VALUES OF ALPHA
+            # E0 = (EX0 + c * alpha * pkX)
+            # if np.isclose(E0, 0):
+            #     E0 = 1e-14
+            # # print(EXf / E0)
+            # # print(np.linalg.norm(np.dot(dU.flatten().T,ResidualCopy).item()) / np.linalg.norm(pkX))
+            # # if np.isclose(EXf / E0, 1., rtol=1e-3, atol=1e-3):
+            # if np.isclose(EXf / E0, 1., rtol=1e-2, atol=1e-2):
+            #     break
+
+            if alpha < alpha_tol:
+                break
+        return alpha
+
+
+    def BackTrackingLineSearch(self, function_space, formulation, mesh, material, boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp):
+
+        from Florence.FiniteElements.Assembly import AssembleInternalTractionForces
+        rho = 0.5
+        newXCopy = np.copy(Eulerx)
+        newPCopy = np.copy(Eulerp)
+        ResidualCopy = np.copy(Residual)
+
+        EX0 = self.ComputeEnergy(function_space, mesh, material, formulation,
+            newXCopy, Eulerp)[0]
+        EXf = self.ComputeEnergy(function_space, mesh, material, formulation,
+            newXCopy + dU[:,:formulation.ndim], Eulerp + dU[:,-1])[0]
+
+        pkX = np.dot(dU[:,:formulation.ndim].flatten().T,Residual).item()
+        alpha, alpha_tol, c = 1.0, 1e-6, 1e-3
+        while EXf > EX0 + c * alpha * pkX:
+
+            newXCopy = Eulerx + alpha * dU[:,:formulation.ndim]
+            # newPCopy = Eulerp + alpha * dU[:,-1]
+            EXf = self.ComputeEnergy(function_space, mesh, material, formulation, newXCopy, newPCopy)[0]
+            alpha *= rho
+            # print(alpha, EXf, EX0 + c * alpha * pkX)
+
+            # DECIDE BASED ON RATIO TO NOT ALLOW TOO SMALL VALUES OF ALPHA
+            E0 = (EX0 + c * alpha * pkX)
+            if np.isclose(E0, 0):
+                E0 = 1e-14
+            # print(EXf / E0)
+            # if np.isclose(EXf / E0, 1., rtol=1e-3, atol=1e-3):
+            if np.isclose(EXf / E0, 1., rtol=1e-2, atol=1e-2):
+            # if np.isclose(EXf / E0, 1., rtol=1e-1, atol=1e-1):
+                break
+
+            if alpha < alpha_tol:
+                break
+
+        return alpha
 
 
 

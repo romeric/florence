@@ -14,6 +14,7 @@ from .MooneyRivlin import *
 from .MooneyRivlin_1 import *
 from .NearlyIncompressibleMooneyRivlin import *
 from .DistortionModel import *
+from .ConstrainedDistortionModel import *
 from .StVenantKirchhoff import *
 from .ARAP import *
 

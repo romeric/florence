@@ -959,6 +959,7 @@ class Mesh(object):
         edge_flags[edge_flags==True] = 1
         edge_flags[edge_flags==False] = 0
         interior_edges = self.all_edges[edge_flags==False,:]
+        self.interior_edges = interior_edges
 
         return interior_edges, edge_flags
 
@@ -3217,8 +3218,10 @@ class Mesh(object):
             # TRI6
             if el == 9:
                 self.elements = self.elements[:,[0,1,2,3,5,4]]
+            # QUAD9
             elif el == 10:
                 self.elements = self.elements[:,[0, 1, 2, 3, 4, 7, 8, 5, 6]]
+            # TET10
             elif el == 11:
                 self.elements = self.elements[:,[0,1,2,3,4,6,5,7,9,8]]
         # CORRECT
@@ -3854,8 +3857,10 @@ class Mesh(object):
                 src = mlab.pipeline.scalar_scatter(tmesh.x_edges.T.copy().flatten(),
                     tmesh.y_edges.T.copy().flatten(), tmesh.z_edges.T.copy().flatten())
                 src.mlab_source.dataset.lines = tmesh.connections
-                lines = mlab.pipeline.stripper(src)
-                h_edges = mlab.pipeline.surface(lines, color = edge_color, line_width=3)
+                h_edges = mlab.pipeline.surface(src, color = edge_color, line_width=3)
+                # AVOID WARNINGS
+                # lines = mlab.pipeline.stripper(src)
+                # h_edges = mlab.pipeline.surface(lines, color = edge_color, line_width=3)
 
             # mlab.view(azimuth=135, elevation=45, distance=7, focalpoint=None,
                 # roll=0, reset_roll=True, figure=None)
@@ -4249,8 +4254,12 @@ class Mesh(object):
                 el = 9
                 bel = 8
         elif element_type == "quad":
-            el = 3
-            bel = 1
+            if p == 1:
+                el = 3
+                bel = 1
+            elif p == 2:
+                el = 10
+                bel = 8
         elif element_type == "tet":
             if p == 1:
                 el = 4
@@ -4270,6 +4279,8 @@ class Mesh(object):
 
         if el == 9:
             elements = elements[:,[0,1,2,3,5,4]]
+        elif el == 10:
+            elements = elements[:,[0, 1, 2, 3, 4, 7, 8, 5, 6]]
         elif el == 11:
             elements = elements[:,[0,1,2,3,4,6,5,7,9,8]]
 
@@ -5040,7 +5051,7 @@ class Mesh(object):
 
 
     def InverseArc(self, radius=10, start_angle=0, end_angle=np.pi/2., ncirc=3, element_type="tri"):
-        """Generate inverse arc (concave arc with the upper portion being meshed).
+        """Generates inverse arc (concave arc with the upper portion being meshed).
             Note that this routine does not generate CAD-conformal meshes, that is not all the points
             on the arc would be on the arc
         """
@@ -5101,7 +5112,7 @@ class Mesh(object):
 
     def CircularArcPlate(self, side_length=15, radius=10, center=(0.,0.),
         start_angle=0., end_angle=np.pi/4., ncirc=5, nrad=2, element_type="tri"):
-        """Create an arc hole out-boxed by a squared geometry
+        """Creates an arc hole out-boxed by a squared geometry
         """
 
         if np.allclose(radius,0):
@@ -5200,7 +5211,7 @@ class Mesh(object):
 
 
     def CircularPlate(self, side_length=30, radius=10, center=(0.,0.), ncirc=5, nrad=5, element_type="tri"):
-        """Create a plate with hole
+        """Creates a plate with hole
         """
 
         self.CircularArcPlate(side_length=side_length, radius=radius, center=(0,0),
@@ -5625,7 +5636,7 @@ class Mesh(object):
         nnode = (nlong + 1 + nlong*(nlayer-1))*mesh.points.shape[0]
         nnode_2D = mesh.points.shape[0]
 
-        nelem= nlong*mesh.nelem
+        nelem = nlong*mesh.nelem
         nelem_2D = mesh.nelem
         nsize_2d = int((mp+1)**2)
         nsize = int((mp+1)**3)
@@ -5693,7 +5704,7 @@ class Mesh(object):
 
 
     def RemoveDuplicateNodes(self, deci=8, tol=1e-08):
-        """Remove duplicate points in the mesh
+        """Removes duplicate points in the mesh
         """
 
         self.__do_essential_memebers_exist__()

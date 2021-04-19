@@ -2,6 +2,7 @@ from __future__ import print_function
 import numpy as np
 from Florence.Utils import insensitive
 from warnings import warn
+from copy import deepcopy
 
 # BASE CLASS FOR ALL MATERIAL MODELS - SHOULD NOT BE USED DIRECTLY
 class Material(object):
@@ -425,6 +426,12 @@ class Material(object):
 
 
 
-
+    def __add__(self, other):
+        """Add self with other without modifying self"""
+        material = deepcopy(self)
+        material.Hessian = lambda *args, **kw : self.Hessian(*args, **kw) + other.Hessian(*args, **kw)
+        material.CauchyStress = lambda *args, **kw : self.CauchyStress(*args, **kw) + other.CauchyStress(*args, **kw)
+        material.InternalEnergy = lambda *args, **kw : self.InternalEnergy(*args, **kw) + other.InternalEnergy(*args, **kw)
+        return material
 
 

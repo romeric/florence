@@ -393,7 +393,7 @@ class VariationalPrinciple(object):
         """
 
         from Florence.Tensor import makezero
-        from Florence.FunctionSpace import Tri, Tet, Quad
+        from Florence.FunctionSpace import Tri, Tet, Quad, Hex
         from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints, EquallySpacedPointsTri, EquallySpacedPointsTet
         sqrt = np.sqrt
         if function_space.element_type == "tri":
@@ -405,7 +405,7 @@ class VariationalPrinciple(object):
                 Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],Transform=1,EvalOpt=1,equally_spaced=True)[0]
             xycoord = LagrangeElemCoords[:nodeperlinearelem,:]
             xycoord = np.array([ [-0.5, 0], [ 0.5, 0], [0., np.sqrt(3.)/2.]])
-            # xycoord = fem_solver.imesh.points[fem_solver.imesh.elements[elem,:],:]
+            # xycoord = eps[:nodeperlinearelem,:]
             # xycoord = fem_solver.imesh.points[elem,:]
 
         elif function_space.element_type == "quad":
@@ -417,6 +417,7 @@ class VariationalPrinciple(object):
                 Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],arrange=1)[:,0]
             xycoord = LagrangeElemCoords[:nodeperlinearelem,:]
             xycoord = np.array([ [0., 0], [ 1., 0], [ 1., 1.], [0., 1.]])
+            xycoord = eps[:nodeperlinearelem,:]
 
         elif function_space.element_type == "tet":
             nodeperlinearelem = 4
@@ -427,6 +428,16 @@ class VariationalPrinciple(object):
                 Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],eps[i,2],Transform=1,EvalOpt=1,equally_spaced=True)[0]
             xycoord = LagrangeElemCoords[:nodeperlinearelem,:]
             xycoord = np.array([ [sqrt(8./9.), 0, -1/3.], [-sqrt(2./9.), sqrt(2./3.), -1/3.], [-sqrt(2./9.), -sqrt(2./3.), -1/3.], [0., 0, 1.]])
+
+        elif function_space.element_type == "hex":
+            nodeperlinearelem = 8
+            eps = EquallySpacedPoints(4, function_space.degree - 1)
+            hpBases = Hex.LagrangeGaussLobatto
+            Neval = np.zeros((nodeperlinearelem,eps.shape[0]),dtype=np.float64)
+            for i in range(0,eps.shape[0]):
+                Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],eps[i,2],arrange=1)[:,0]
+            xycoord = LagrangeElemCoords[:nodeperlinearelem,:]
+            xycoord = eps[:nodeperlinearelem,:]
 
         makezero(Neval)
         xycoord_higher = np.copy(LagrangeElemCoords)

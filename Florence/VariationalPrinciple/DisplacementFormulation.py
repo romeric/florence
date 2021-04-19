@@ -132,8 +132,6 @@ class DisplacementFormulation(VariationalPrinciple):
         MaterialGradient = np.einsum('ijk,kli->ijl', inv(ParentGradientX), Jm)
         # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
         F = np.einsum('ij,kli->kjl', EulerElemCoords, MaterialGradient)
-        # print(F)
-        # exit()
 
         # COMPUTE REMAINING KINEMATIC MEASURES
         StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
