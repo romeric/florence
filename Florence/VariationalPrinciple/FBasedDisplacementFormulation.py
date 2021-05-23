@@ -11,14 +11,10 @@ from Florence.Tensor import trace, Voigt, makezero, issymetric
 def vec(H):
     ndim = H.shape[0]
     if H.ndim == 4:
-        # print(H.shape)
-        # H = np.einsum("ijlk",H)
         x = H.flatten().reshape(ndim**2,ndim**2)
         return x
     else:
-        # return H.flatten()
         return H.T.flatten() # careful - ARAP needs this
-
 
 
 def svd_rv(F, full_matrices=True):
@@ -65,29 +61,6 @@ def svd_rv(F, full_matrices=True):
 
 # svd = np.linalg.svd
 svd = svd_rv
-
-
-def FillConstitutiveBF(B,SpatialGradient,F,ndim,nvar):
-
-    # SpatialGradient = np.dot(F,SpatialGradient)
-
-    if ndim == 2:
-        B[::ndim,0] = SpatialGradient[0,:]
-        B[::ndim,2] = SpatialGradient[1,:]
-        B[1::ndim,1] = SpatialGradient[0,:]
-        B[1::ndim,3] = SpatialGradient[1,:]
-    else:
-        B[::ndim,0] = SpatialGradient[0,:]
-        B[::ndim,3] = SpatialGradient[1,:]
-        B[::ndim,6] = SpatialGradient[2,:]
-
-        B[1::ndim,1] = SpatialGradient[0,:]
-        B[1::ndim,4] = SpatialGradient[1,:]
-        B[1::ndim,7] = SpatialGradient[2,:]
-
-        B[2::ndim,2] = SpatialGradient[0,:]
-        B[2::ndim,5] = SpatialGradient[1,:]
-        B[2::ndim,8] = SpatialGradient[2,:]
 
 
 def dJdF(F):
@@ -137,6 +110,60 @@ def d2JdFdF(F):
         return H
 
 
+def dRdF(u, s, vh, regularise=False):
+
+    ndim = u.shape[0]
+
+    if ndim == 3:
+
+        s0 = s[0]
+        s1 = s[1]
+        s2 = s[2]
+        T1 = np.array([[0.,-1.,0.],[1.,0.,0],[0.,0.,0.]])
+        T1 = 1./np.sqrt(2) * np.dot(u, np.dot(T1, vh.T))
+        T2 = np.array([[0.,0.,0.],[0.,0., 1],[0.,-1.,0.]])
+        T2 = 1./np.sqrt(2) * np.dot(u, np.dot(T2, vh.T))
+        T3 = np.array([[0.,0.,1.],[0.,0.,0.],[-1,0.,0.]])
+        T3 = 1./np.sqrt(2) * np.dot(u, np.dot(T3, vh.T))
+
+        s0s1 = s0 + s1
+        s0s2 = s0 + s2
+        s1s2 = s1 + s2
+        if regularise:
+            if (s0s1 < 2.0):
+                s0s1 = 2.0
+            if (s0s2 < 2.0):
+                s0s2 = 2.0
+            if (s1s2 < 2.0):
+                s1s2 = 2.0
+        lamb1 = 2. / (s0s1)
+        lamb2 = 2. / (s0s2)
+        lamb3 = 2. / (s1s2)
+
+        t1 = vec(T1)
+        t2 = vec(T2)
+        t3 = vec(T3)
+
+        gR  = (lamb1) * np.outer(t1 , t1)
+        gR += (lamb3) * np.outer(t2 , t2)
+        gR += (lamb2) * np.outer(t3 , t3)
+
+    elif ndim == 2:
+
+        s1 = s[0]
+        s2 = s[1]
+        T = np.array([[0.,-1],[1,0.]])
+        T = 1./np.sqrt(2.) * np.dot(u, np.dot(T, vh.T))
+        t =  vec(T)
+        I_1 = s.sum()
+        filtered = 2.0 / I_1
+        if regularise:
+            filtered = 2.0 / I_1 if I_1 >= 2.0 else 1.0
+        gR = filtered * np.outer(t,t)
+
+    return gR
+
+
 # delta = 1e-3
 # def Jr(J):
 #     return 0.5 * (J + np.sqrt(J**2 + delta**2))
@@ -166,6 +193,28 @@ def LocallyInjectiveHessian(J, gJ, HJ):
     H1 += 3.*(-J**2 + 2*J - 1)/(J**2*(J**2 - 3*J + 3)**2) * HJ
     makezero(H1, 1e-12)
     return H1
+
+
+
+def FillConstitutiveBF(B,SpatialGradient,ndim,nvar):
+
+    if ndim == 2:
+        B[::ndim,0] = SpatialGradient[0,:]
+        B[::ndim,2] = SpatialGradient[1,:]
+        B[1::ndim,1] = SpatialGradient[0,:]
+        B[1::ndim,3] = SpatialGradient[1,:]
+    else:
+        B[::ndim,0] = SpatialGradient[0,:]
+        B[::ndim,3] = SpatialGradient[1,:]
+        B[::ndim,6] = SpatialGradient[2,:]
+
+        B[1::ndim,1] = SpatialGradient[0,:]
+        B[1::ndim,4] = SpatialGradient[1,:]
+        B[1::ndim,7] = SpatialGradient[2,:]
+
+        B[2::ndim,2] = SpatialGradient[0,:]
+        B[2::ndim,5] = SpatialGradient[1,:]
+        B[2::ndim,8] = SpatialGradient[2,:]
 
 
 class NeoHookeanF(Material):
@@ -243,6 +292,25 @@ class NeoHookeanF(Material):
         return stress
 
 
+    def InternalEnergy(self,StrainTensors,elem=0,gcounter=0):
+
+        mu = self.mu
+        lamb = self.lamb
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+        C = np.dot(F.T,F)
+
+        if np.isclose(J, 0) or J < 0:
+            delta = np.sqrt(0.04 * J * J + 1e-8);
+            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
+
+        energy  = mu/2.*(trace(C) - 3.) - mu*np.log(J) + lamb/2.*np.log(J)**2
+
+        return energy
+
+
 
 class PixarNeoHookeanF(Material):
     """The Neo-Hookean internal energy, described in Smith et. al.
@@ -291,19 +359,8 @@ class PixarNeoHookeanF(Material):
         gJ = vec(dJdF(F))
         HJ = d2JdFdF(F)
 
-        # gJ = vec(dJrdF(F))
-        # HJ = d2JrdFdF(F)
-
         d2 = self.ndim**2
         H = mu * np.eye(d2,d2) + lamb * np.outer(gJ,gJ) + (lamb * (J-1) - mu) * HJ
-
-        # H += 0.28 * LocallyInjectiveHessian(J, gJ, HJ)
-
-        # H += (1 - J**(-2)) * HJ + 2. / J**(3) * np.outer(gJ,gJ)
-
-        # s = np.linalg.svd(H)[1]
-        # if np.any(s < 0):
-        #     print(s)
 
         self.H_VoigtSize = H.shape[0]
 
@@ -320,17 +377,11 @@ class PixarNeoHookeanF(Material):
             delta = np.sqrt(0.04 * J * J + 1e-8);
             # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
 
-
-        djdf = dJdF(F)
-        # djdf = dJrdF(F)
-
         mu = self.mu
         lamb = self.lamb
+
+        djdf = dJdF(F)
         stress = mu*F + (lamb*(J - 1.) - mu) * djdf
-
-        # stress += 0.28 * LocallyInjectiveGradient(J, dJdF(F))
-
-        # stress += (1 - J**(-2)) * dJdF(F)
 
         return stress
 
@@ -348,8 +399,6 @@ class PixarNeoHookeanF(Material):
         if np.isclose(J, 0) or J < 0:
             delta = np.sqrt(0.04 * J * J + 1e-8);
             # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
-
-        # J = Jr(J)
 
         energy  = mu/2.*(trace(C) - 3.) - mu*(J-1) + lamb/2.*(J-1.)**2
 
@@ -379,12 +428,11 @@ class MIPSF(Material):
             self.H_VoigtSize = 4
 
         # the smaller minJ the more chance to untangle something
-        # self.delta = 1e-3
-        # self.minJ = minJ
         minJ = self.minJ
+        # self.delta = np.sqrt(1e-12 + min(minJ, 0.)**2 * 0.04)
         self.delta = np.sqrt(1e-8 + min(minJ, 0.)**2 * 0.04)
-        # self.delta = np.sqrt(1e-8 + min(minJ, 0.)**2 * 0.04)
-        # print(self.delta)
+        # self.delta = np.sqrt(1e-8 + min(minJ, 0.)**2 * 0.04) * 2. # embed factot 4 in the definition of delta
+        # self.delta = np.sqrt(1e-8 + min(minJ, 0.)**2) # superbad it seems like
 
         # LOW LEVEL DISPATCHER
         # self.has_low_level_dispatcher = True
@@ -408,8 +456,9 @@ class MIPSF(Material):
         delta = self.delta
 
         Jr = 0.5 * (J + np.sqrt(J**2 + delta**2))
+        # Jr = J if J >= 0 else 1e-8 * J**2 / (J**2 + delta**2)**(1./2.)
         if np.isclose(Jr, 0):
-            Jr = 1e-10
+            Jr = max(1e-8, Jr)
 
         # Symmetric formulation based on K. Theodore arrangements
         gJ = vec(dJdF(F))
@@ -420,19 +469,29 @@ class MIPSF(Material):
         gJr = vec(dJrdF)
         HJr = 0.5 * (1 + J / np.sqrt(J**2 + delta**2)) * HJ + 0.5 * (delta**2 / (J**2 + delta**2)**(3./2.)) * np.outer(gJ,gJ)
 
+        # if J < 0:
+        #     dJrdF = 1e-8 * (J**3 + 2*J*delta**2) / (J**2 + delta**2)**(3./2.) * dJdF(F)
+        #     gJr = vec(dJrdF)
+        #     HJr = (J**3 + 2*J*delta**2) / (J**2 + delta**2)**(3./2.) * HJ + (2*delta**4 - J**2 * delta**2) / (J**2 + delta**2)**(3./2.) * np.outer(gJ,gJ)
+        #     HJr *= 1e-8
+
         d2 = self.ndim**2
         H = 2. / d / Jr**(2./d) * np.eye(d2,d2) - 4. / d**2 * Jr**(-2./d-1.) * (np.outer(gJr,f) + np.outer(f,gJr)) +\
             2. * trc / d**2 * (2./d + 1.) * Jr**(-2./d - 2.) * np.outer(gJr,gJr) -\
             2. * trc / d**2 * Jr**(-2./d-1.) * HJr
 
+        # stress = 2. / d / Jr**(2./d) * F - 2. * trc / d**2 * Jr**(-2./d-1.)  * dJrdF
+        # H1 = np.exp(1./d * Jr**(-2./d) * trc) * np.outer(vec(stress), vec(stress))
+        # H  = np.exp(1./d * Jr**(-2./d) * trc) * H + H1
+
         # Neffs
-        # H += (0.4*Jr**10 + 0.6)/Jr**7 * np.outer(gJr,gJr) + 0.1*(Jr**10 - 1)/Jr**6 * HJr
+        # H += self.lamb * ((0.4*Jr**10 + 0.6)/Jr**7 * np.outer(gJr,gJr) + 0.1*(Jr**10 - 1)/Jr**6 * HJr)
         # Garanzha
-        # H += (1.0/Jr**3 * np.outer(gJr,gJr) + (0.5 - 0.5/Jr**2) * HJr) * self.lamb
+        H += (1.0/Jr**3 * np.outer(gJr,gJr) + (0.5 - 0.5/Jr**2) * HJr) * self.lamb
         # standard
         # H += self.lamb * (np.outer(gJr,gJr) + (Jr - 1.) * HJr)
 
-        H += self.lamb * LocallyInjectiveHessian(Jr, gJr, HJr)
+        # H += self.lamb * LocallyInjectiveHessian(Jr, gJr, HJr)
 
         # s = np.linalg.svd(H)[1]
         # if np.any(s < 0):
@@ -456,22 +515,26 @@ class MIPSF(Material):
         delta = self.delta
 
         Jr = 0.5 * (J + np.sqrt(J**2 + delta**2))
+        # Jr = J if J >= 0 else 1e-8 * J**2 / (J**2 + delta**2)**(1./2.)
         if np.isclose(Jr, 0):
-            # print("Small Jr", J, Jr)
-            Jr = 1e-10
+            print("Small Jr", J, Jr)
+            Jr = max(1e-8, Jr)
 
         dJrdF = 0.5 * (1. + J / np.sqrt(J**2 + delta**2)) * dJdF(F)
+        # if J < 0:
+        #     dJrdF = 1e-8 * (J**3 + 2*J*delta**2) / (J**2 + delta**2)**(3./2.) * dJdF(F)
 
         stress = 2. / d / Jr**(2./d) * F - 2. * trc / d**2 * Jr**(-2./d-1.)  * dJrdF
+        # stress *= np.exp(1./d * Jr**(-2./d) * trc)
 
         # Neffs
-        # stress += 0.1*(Jr**10 - 1)/Jr**6 * dJrdF
+        # stress += self.lamb * 0.1 * (Jr**10 - 1)/Jr**6 * dJrdF
         # Garanzha
-        # stress += self.lamb * (0.5 - 0.5/Jr**2) * dJrdF
+        stress += self.lamb * (0.5 - 0.5/Jr**2) * dJrdF
         # standard
         # stress += self.lamb * (Jr - 1.) * dJrdF
 
-        stress += self.lamb * LocallyInjectiveGradient(Jr, dJrdF)
+        # stress += self.lamb * LocallyInjectiveGradient(Jr, dJrdF)
 
         return stress
 
@@ -488,21 +551,241 @@ class MIPSF(Material):
         delta = self.delta
 
         Jr = 0.5 * (J + np.sqrt(J**2 + delta**2))
+        # Jr = J if J >= 0 else 1e-8 * J**2 / (J**2 + delta**2)**(1./2.)
         if np.isclose(Jr, 0):
-            Jr = 1e-10
+            Jr = max(1e-8, Jr)
 
-        energy  = (1./d * Jr**(-2./d) * trc - 1.)
+        # energy  = (1./d * Jr**(-2./d) * trc - 1.)
+        energy  = (1./d * Jr**(-2./d) * trc) # avoid sign switches
+        # energy  = np.exp(1./d * Jr**(-2./d) * trc)
 
         # Neffs
-        # energy += 0.02*(Jr**5 + 1./Jr**5 - 2.)
+        # energy += self.lamb * 0.02 * (Jr**5 + 1./Jr**5 - 2.)
         # Garanzha
-        # energy += (0.5*Jr - 1.0 + 0.5/Jr) * self.lamb
+        # energy += 0.5 * (Jr + 1./Jr - 2.) * self.lamb
+        energy += 0.5 * (Jr + 1./Jr) * self.lamb  # avoid sign switches
         # standard
         # energy += self.lamb * 0.5 * (Jr - 1.)**2
 
-        energy += self.lamb * LocallyInjectiveFunction(Jr)
+        # energy += self.lamb * LocallyInjectiveFunction(Jr)
+        # if (energy <= 0.):
+            # print(energy)
 
         return energy
+
+
+
+
+
+class SymmetricDirichlet(Material):
+    """ Symmetric Dirichlet model
+
+        W(F) = 1/2*(F:F) + 1/2*(F**(-1):F**(-1))
+
+    """
+
+    def __init__(self, ndim, **kwargs):
+        mtype = type(self).__name__
+        super(SymmetricDirichlet, self).__init__(mtype, ndim, **kwargs)
+
+        self.is_transversely_isotropic = False
+        self.energy_type = "internal_energy"
+        self.nature = "nonlinear"
+        self.fields = "mechanics"
+
+        if self.ndim==3:
+            self.H_VoigtSize = 9
+        elif self.ndim==2:
+            self.H_VoigtSize = 4
+
+        # the smaller minJ the more chance to untangle
+        minJ = self.minJ
+        self.delta = np.sqrt(1e-8 + min(minJ, 0.)**2 * 0.04)
+        # LOW LEVEL DISPATCHER
+        # self.has_low_level_dispatcher = True
+        self.has_low_level_dispatcher = False
+
+    def KineticMeasures(self,F,ElectricFieldx=0, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._NeoHookean_ import KineticMeasures
+        return KineticMeasures(self,F)
+
+
+    def Hessian(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        trc = trace(F.T.dot(F))
+
+        delta = self.delta
+        Jr = 0.5 * (J + np.sqrt(J**2 + delta**2))
+        if np.isclose(Jr, 0):
+            Jr = max(1e-8, Jr)
+
+        gJ = vec(dJdF(F))
+        HJ = d2JdFdF(F)
+        f = vec(F)
+
+        dJrdF = 0.5 * (1. + J / np.sqrt(J**2 + delta**2)) * dJdF(F)
+        gJr = vec(dJrdF)
+        HJr = 0.5 * (1 + J / np.sqrt(J**2 + delta**2)) * HJ + 0.5 * (delta**2 / (J**2 + delta**2)**(3./2.)) * np.outer(gJ,gJ)
+
+        d2 = self.ndim**2
+        if self.ndim == 2:
+            H = (1 + 1 / Jr**2) * np.eye(d2,d2) - 2 / Jr**3 * (np.outer(f,gJr) + np.outer(gJr,f)) + 3 * trc / Jr**4 * np.outer(gJr,gJr) -\
+                trc / Jr**3 * HJr
+        else:
+
+            u, s, vh = svd(F, full_matrices=True)
+            vh = vh.T
+            R = u.dot(vh.T)
+            S = np.dot(vh, np.dot(np.diag(s), vh.T))
+            r = vec(R)
+            I1 = trace(S)
+            Is = (I1**2 - trc) / Jr
+            dIsdF = 2/Jr * (I1 * R - F) - Is / Jr * dJrdF
+
+            gR = dRdF(u, s, vh, False)
+
+            d2IsdFdF = 2. / Jr * (np.outer(r,r) + I1 * gR - np.eye(d2,d2)) - 2. / Jr**2 * np.outer(I1 * r - f, gJr) -\
+                1 / Jr * np.outer(gJr,vec(dIsdF)) + Is / Jr**2 * np.outer(gJr,gJr) - Is / Jr * HJr
+
+            H  = np.eye(d2,d2) + 1 / 4. * np.outer(vec(dIsdF),vec(dIsdF)) + Is / 4. * d2IsdFdF - 1 / Jr * gR + 1 / Jr**2 * np.outer(r, gJr) +\
+                1/Jr**2 * np.outer(gJr, r) - 2 * I1 / Jr**3 * np.outer(gJr, gJr) + I1 / Jr**2 * HJr
+
+
+        # if self.ndim == 2:
+        #     # // Compute the rotation variant SVD of F
+        #     u, s, vh = svd(F, full_matrices=True)
+        #     vh = vh.T
+        #     # R = u.dot(vh.T)
+        #     # S = np.dot(vh, np.dot(np.diag(s), vh.T))
+        #     S = np.dot(u, np.dot(np.diag(s), vh.T))
+        #     I1 = trace(S)
+
+        #     # // Complete eigensystem for Hessian
+        #     # // Twist modes
+        #     T = np.array([[0.,-1],[1,0.]])
+        #     T = 1./np.sqrt(2.) * np.dot(u, np.dot(T, vh.T))
+        #     t = vec(T)
+
+        #     # // Flip modes
+        #     # RealSMatrix<N,N> L; L << 0.,  1., 1., 0.;
+        #     L = np.array([[0.,1],[1,0.]])
+        #     L = 1./np.sqrt(2.) * np.dot(u, np.dot(L, vh.T))
+        #     l = vec(L)
+
+        #     # // Scale modes
+        #     # mm = 1./np.sqrt(2.)
+        #     mm=1
+        #     # RealSMatrix<N,N> D1; D1 << 1.,  0., 0., 0.;
+        #     D1 = np.array([[1.,0],[0,0.]])
+        #     D1 = mm * np.dot(u, np.dot(D1, vh.T))
+        #     d1 = vec(D1);
+
+        #     # RealSMatrix<N,N> D2; D2 << 0.,  0., 0., 1.;
+        #     D2 = np.array([[0.,0],[0,1.]])
+        #     D2 = mm * np.dot(u, np.dot(D2, vh.T))
+        #     d2 = vec(D2);
+
+        #     # s1 = S[0, 0];
+        #     # s2 = S[1, 1];
+        #     s1 = s[0];
+        #     s2 = s[1];
+        #     if s1 > 0 and s2 > 0:
+        #         return stress
+        #     elif s1 < 0 and s2 < 0:
+        #         return stress
+        #     elif s1 < 0 and s2 > 0:
+        #         s1 = Jr / s2
+        #     elif s1 > 0 and s2 < 0:
+        #         s2 = Jr / s1
+
+        #     print(s1,s2, s1*s2, J)
+
+        #     J2 = J * J;
+        #     I2 = trc;
+
+        #     lamb1 =  3*I2*s2**2/J**4 + 1 - 3/J**2 ;
+        #     lamb2 =  3*I2*s1**2/J**4 + 1 - 3/J**2 ;
+        #     lamb3 =  (I2 + J**3 + J)/J**3 ;
+        #     lamb4 =  (-I2 + J**3 + J)/J**3 ;
+
+        #     # lamb1 = 1 + 3. / s1**4
+        #     # lamb2 = 1 + 3. / s2**4
+        #     # lamb3 = 1 + 1. / J**2 + I2/J**3
+        #     # lamb4 = 1 + 1. / J**2 - I2/J**3
+
+        #     H = lamb1 * np.outer(d1, d1) + lamb2 * np.outer(d2, d2) + lamb3 * np.outer(l, l) + lamb4 * np.outer(t, t);
+
+        #     print(H)
+        #     exit()
+
+        self.H_VoigtSize = H.shape[0]
+
+        return H
+
+
+    def CauchyStress(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        trc = trace(F.T.dot(F))
+
+        delta = self.delta
+        posJ = np.sqrt(J**2 + delta**2)
+        Jr = 0.5 * (J + posJ)
+        if np.isclose(Jr, 0):
+            print("Small Jr", J, Jr)
+            Jr = max(1e-8, Jr)
+
+        dJrdF = 0.5 * (1. + J / np.sqrt(J**2 + delta**2)) * dJdF(F)
+
+        if self.ndim == 2:
+            stress = (1. + 1 / Jr**2) * F - trc / Jr**3 * dJrdF
+        else:
+            u, s, vh = svd(F, full_matrices=True)
+            vh = vh.T
+            R = u.dot(vh.T)
+            S = np.dot(vh, np.dot(np.diag(s), vh.T))
+            I1 = trace(S)
+            Is = (I1**2 - trc) / Jr
+            dIsdF = 2 / Jr * (I1 * R - F) - Is / Jr * dJrdF
+
+            stress = F + Is / 4. * dIsdF - 1/Jr * R + I1/Jr**2 * dJrdF
+
+        return stress
+
+
+    def InternalEnergy(self,StrainTensors,elem=0,gcounter=0):
+
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        trc = trace(F.T.dot(F))
+
+        delta = self.delta
+        Jr = 0.5 * (J + np.sqrt(J**2 + delta**2))
+        if np.isclose(Jr, 0):
+            Jr = max(1e-8, Jr)
+
+        if self.ndim == 2:
+            energy  = 0.5 * (1. + 1 / Jr**2) * trc
+        elif self.ndim == 3:
+            u, s, vh = svd(F, full_matrices=True)
+            vh = vh.T
+            R = u.dot(vh.T)
+            S = np.dot(vh, np.dot(np.diag(s), vh.T))
+            I1 = trace(S)
+            Is = (I1**2 - trc) / Jr
+
+            energy  = 0.5 * trc + 1. / 8. * Is**2  / Jr - I1 / Jr
+
+        return energy
+
 
 
 
@@ -540,6 +823,7 @@ class ARAPF(Material):
         mu = self.mu
         lamb = self.lamb
         d = self.ndim
+        d2 = d * d
 
         I = StrainTensors['I']
         F = StrainTensors['F'][gcounter]
@@ -549,62 +833,10 @@ class ARAPF(Material):
         u, s, vh = svd(F, full_matrices=True)
         vh = vh.T
 
-        # s = np.dot(vh, np.dot(np.diag(s), vh.T))
-        # print(u,s,vh)
-        # exit()
-        if self.ndim == 2:
-            s1 = s[0]
-            s2 = s[1]
-            T = np.array([[0.,-1],[1,0.]])
-            T = 1./np.sqrt(2.) * np.dot(u, np.dot(T, vh.T))
-            t =  vec(T)
-            H = np.eye(4,4)
-            I_1 = s.sum()
-            filtered = 2.0 / I_1 if I_1 >= 2.0 else 1.0
-            # filtered = 1.0
-            H -= filtered * np.outer(t,t)
-            H *= 2.
+        gR = dRdF(u, s, vh, True)
 
-
-        elif self.ndim == 3:
-            s0 = s[0]
-            s1 = s[1]
-            s2 = s[2]
-            T1 = np.array([[0.,-1.,0.],[1.,0.,0],[0.,0.,0.]])
-            T1 = 1./np.sqrt(2) * np.dot(u, np.dot(T1, vh.T))
-            T2 = np.array([[0.,0.,0.],[0.,0., 1],[0.,-1.,0.]])
-            T2 = 1./np.sqrt(2) * np.dot(u, np.dot(T2, vh.T))
-            T3 = np.array([[0.,0.,1.],[0.,0.,0.],[-1,0.,0.]])
-            T3 = 1./np.sqrt(2) * np.dot(u, np.dot(T3, vh.T))
-
-            s0s1 = s0 + s1
-            s0s2 = s0 + s2
-            s1s2 = s1 + s2
-            if (s0s1 < 2.0):
-                s0s1 = 2.0
-            if (s0s2 < 2.0):
-                s0s2 = 2.0
-            if (s1s2 < 2.0):
-                s1s2 = 2.0
-            lamb1 = 2. / (s0s1)
-            lamb2 = 2. / (s0s2)
-            lamb3 = 2. / (s1s2)
-
-            t1 = vec(T1)
-            t2 = vec(T2)
-            t3 = vec(T3)
-
-            H = 2. * np.eye(9,9);
-            # H = H - (4. / (s0 + s1)) * np.outer(t1 , t1);
-            # H = H - (4. / (s1 + s2)) * np.outer(t2 , t2);
-            # H = H - (4. / (s0 + s2)) * np.outer(t3 , t3);
-
-            H = H - (2 * lamb1) * np.outer(t1 , t1);
-            H = H - (2 * lamb3) * np.outer(t2 , t2);
-            H = H - (2 * lamb2) * np.outer(t3 , t3);
-
-            # print(H)
-            # exit()
+        H = np.eye(d2,d2) - gR
+        H *= 2.
 
         # H += 0.1 * LocallyInjectiveHessian(J, vec(dJdF(F)), d2JdFdF(F))
 
@@ -635,13 +867,6 @@ class ARAPF(Material):
         R = u.dot(vh.T)
 
         sigma = 2. * (F - R)
-
-        # S = np.dot(vh, np.dot(np.diag(s), vh.T))
-        # sigma = 2. * R.dot(S - I)
-        # print(sigma)
-        # exit()
-
-        # sigma += 0.1 * LocallyInjectiveGradient(J, dJdF(F))
 
         return sigma
 
@@ -742,7 +967,6 @@ class SymmetricARAPF(Material):
             H += 2. / J3 * (3. * I2 / J - 2. * I1) * np.outer(g,g)
             H -= 4. / I1 * (1. + 1. / J) * np.outer(t,t)
 
-
         elif self.ndim == 3:
 
             # sigma0 = S[0,0]
@@ -811,8 +1035,6 @@ class SymmetricARAPF(Material):
                 H = np.zeros((9,9))
                 for i in range(9):
                     DF = DFDF(i);
-                    # print(DF)
-                    # exit()
                     # A = 4 * (DF * F' * F + F * F' * DF + F * DF' * F);
                     A = 4 * (DF.dot(F.T.dot(F)) + F.dot(F.T.dot(DF)) + F.dot(DF.T.dot(F)))
                     # print(A)
@@ -831,16 +1053,6 @@ class SymmetricARAPF(Material):
                 H = H - 2 * (IIC_H / 4.);
                 return H
 
-
-            # F = np.arange(9) + 1; F = F.reshape(3,3).T; F[2,2] = 50; F=F.astype(float)
-            # # print(F)
-            # xx = IIC_Star_Hessian(F)
-            # # xx = IIC_Hessian(F)
-            # # xx = IIC_Hessian(F)
-            # print(xx)
-            # exit()
-
-
             C = F.T.dot(F)
             IC = trace(C)
             IIC = trace(C.dot(C))
@@ -856,46 +1068,13 @@ class SymmetricARAPF(Material):
             H -= 2. * IIStarC / J3 * d2JdFdF(F)
             # print(H)
 
-            s0 = s[0]
-            s1 = s[1]
-            s2 = s[2]
-            # s0 = S[0,0]
-            # s1 = S[1,1]
-            # s2 = S[2,2]
-            T1 = np.array([[0.,-1.,0.],[1.,0.,0],[0.,0.,0.]])
-            T1 = 1./np.sqrt(2) * np.dot(u, np.dot(T1, vh.T))
-            T2 = np.array([[0.,0.,0.],[0.,0., 1],[0.,-1.,0.]])
-            T2 = 1./np.sqrt(2) * np.dot(u, np.dot(T2, vh.T))
-            T3 = np.array([[0.,0.,1.],[0.,0.,0.],[-1,0.,0.]])
-            T3 = 1./np.sqrt(2) * np.dot(u, np.dot(T3, vh.T))
-
-            s0s1 = s0 + s1
-            s0s2 = s0 + s2
-            s1s2 = s1 + s2
-            # if (s0s1 < 2.0):
-            #     s0s1 = 2.0
-            # if (s0s2 < 2.0):
-            #     s0s2 = 2.0
-            # if (s1s2 < 2.0):
-            #     s1s2 = 2.0
-            lamb1 = 2. / (s0s1)
-            lamb2 = 2. / (s0s2)
-            lamb3 = 2. / (s1s2)
-
-            t1 = vec(T1)
-            t2 = vec(T2)
-            t3 = vec(T3)
-
-            dRdF  = (lamb1) * np.outer(t1 , t1);
-            dRdF += (lamb3) * np.outer(t2 , t2);
-            dRdF += (lamb2) * np.outer(t3 , t3);
-            # print(dRdF)
+            gR = dRdF(u, s, vh, False)
 
             IS  = trace(S)
             IIS = trace(b)
             IIStarS = 0.5 * (IS*IS - IIS)
 
-            newH = (1 + IS / J) * dRdF + (1 / J) * np.outer(r,r)
+            newH = (1 + IS / J) * gR + (1 / J) * np.outer(r,r)
             newH = newH - (IS / J2) * (np.outer(g,r) + np.outer(r,g))
             newH = newH + (2.0 * IIStarS / J3) * np.outer(g,g)
             newH = newH - (IIStarS / J2) * HJ
@@ -964,6 +1143,25 @@ class SymmetricARAPF(Material):
             # print(sigma)
 
         return sigma
+
+
+    def InternalEnergy(self,StrainTensors,elem=0,gcounter=0):
+
+        mu = self.mu
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        u, s, vh = svd(F, full_matrices=True)
+        vh = vh.T
+        R = u.dot(vh.T)
+        invF = np.linalg.inv(F)
+        invR = np.linalg.inv(R)
+        # not sure about 1/2, check
+        energy  = einsum("ij,ij",F - R,F - R) + einsum("ij,ij",invF - invR, invF - invR)
+
+        return energy
 
 
 
@@ -1162,8 +1360,7 @@ class FBasedDisplacementFormulation(VariationalPrinciple):
         LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
         EulerElemCoords = Eulerx[mesh.elements[elem,:],:]
 
-        # if True:
-        if False:
+        if fem_solver.use_ideal_element:
             LagrangeElemCoords = self.GetIdealElement(elem, fem_solver, function_space, LagrangeElemCoords)
 
         # COMPUTE THE STIFFNESS MATRIX
@@ -1262,7 +1459,7 @@ class FBasedDisplacementFormulation(VariationalPrinciple):
                 CauchyStressTensor = material.CauchyStress(StrainTensors,None,elem,counter)
 
             # COMPUTE THE TANGENT STIFFNESS MATRIX
-            BDB_1, t = self.ConstitutiveStiffnessIntegrand(B, SpatialGradient[counter,:,:], StrainTensors['F'][counter],
+            BDB_1, t = self.ConstitutiveStiffnessIntegrand(B, SpatialGradient[counter,:,:],
                 CauchyStressTensor, H_Voigt, requires_geometry_update=fem_solver.requires_geometry_update)
 
             # INTEGRATE TRACTION FORCE
@@ -1279,23 +1476,90 @@ class FBasedDisplacementFormulation(VariationalPrinciple):
         return stiffness, tractionforce
 
 
-    def ConstitutiveStiffnessIntegrand(self, B, SpatialGradient, F, CauchyStressTensor, H_Voigt,
+    def ConstitutiveStiffnessIntegrand(self, B, SpatialGradient, CauchyStressTensor, H_Voigt,
         requires_geometry_update=True):
         """Applies to displacement based formulation"""
 
         SpatialGradient = SpatialGradient.T.copy()
-        FillConstitutiveBF(B,SpatialGradient,F,self.ndim,self.nvar)
+        FillConstitutiveBF(B,SpatialGradient,self.ndim,self.nvar)
 
         BDB = B.dot(H_Voigt.dot(B.T))
 
         t=np.zeros((B.shape[0],1))
         if requires_geometry_update:
-            # TotalTraction = GetTotalTraction(CauchyStressTensor)
             TotalTraction = vec(CauchyStressTensor)
-            # TotalTraction = vec(CauchyStressTensor.T)
             t = np.dot(B,TotalTraction)[:,None]
 
         return BDB, t
+
+
+    def GetLocalTraction(self, function_space, material, LagrangeElemCoords, EulerElemCoords, fem_solver, elem=0):
+        """Get traction vector of the system"""
+
+        nvar = self.nvar
+        ndim = self.ndim
+        nodeperelem = function_space.Bases.shape[0]
+
+        det = np.linalg.det
+        inv = np.linalg.inv
+        Jm = function_space.Jm
+        AllGauss = function_space.AllGauss
+
+        # ALLOCATE
+        stiffness = np.zeros((nodeperelem*nvar,nodeperelem*nvar),dtype=np.float64)
+        tractionforce = np.zeros((nodeperelem*nvar,1),dtype=np.float64)
+        B = np.zeros((nodeperelem*nvar,material.H_VoigtSize),dtype=np.float64)
+
+        # COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
+        # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+        ParentGradientX = np.einsum('ijk,jl->kil', Jm, LagrangeElemCoords)
+        # ParentGradientX = [np.eye(3,3)]
+        # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
+        MaterialGradient = np.einsum('ijk,kli->ijl', inv(ParentGradientX), Jm)
+        # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
+        F = np.einsum('ij,kli->kjl', EulerElemCoords, MaterialGradient)
+
+        # COMPUTE REMAINING KINEMATIC MEASURES
+        StrainTensors = KinematicMeasures(F, fem_solver.analysis_nature)
+
+        # SPATIAL GRADIENT AND MATERIAL GRADIENT TENSORS ARE EQUAL
+        SpatialGradient = np.einsum('ikj', MaterialGradient)
+        # COMPUTE ONCE detJ
+        detJ = np.einsum('i,i->i', AllGauss[:,0], det(ParentGradientX))
+        # detJ = np.einsum('i,i,i->i', AllGauss[:,0], det(ParentGradientX), StrainTensors['J'])
+
+        # LOOP OVER GAUSS POINTS
+        for counter in range(AllGauss.shape[0]):
+
+            # COMPUTE CAUCHY STRESS TENSOR
+            CauchyStressTensor = []
+            if fem_solver.requires_geometry_update:
+                CauchyStressTensor = material.CauchyStress(StrainTensors,None,elem,counter)
+
+            # COMPUTE THE TANGENT STIFFNESS MATRIX
+            t = self.TractionIntegrand(B, SpatialGradient[counter,:,:],
+                CauchyStressTensor, requires_geometry_update=fem_solver.requires_geometry_update)
+
+            # INTEGRATE TRACTION FORCE
+            if fem_solver.requires_geometry_update:
+                tractionforce += t*detJ[counter]
+
+        return tractionforce
+
+
+    def TractionIntegrand(self, B, SpatialGradient, CauchyStressTensor,
+        requires_geometry_update=True):
+        """Applies to displacement based formulation"""
+
+        SpatialGradient = SpatialGradient.T.copy()
+        FillConstitutiveBF(B,SpatialGradient,self.ndim,self.nvar)
+
+        t=np.zeros((B.shape[0],1))
+        if requires_geometry_update:
+            TotalTraction = vec(CauchyStressTensor)
+            t = np.dot(B,TotalTraction)[:,None]
+
+        return t
 
 
     def GetEnergy(self, function_space, material, LagrangeElemCoords, EulerElemCoords, fem_solver, elem=0):
@@ -1304,8 +1568,7 @@ class FBasedDisplacementFormulation(VariationalPrinciple):
             computed purely in a Lagrangian configuration.
         """
 
-        if True:
-        # if False:
+        if fem_solver.use_ideal_element:
             LagrangeElemCoords = self.GetIdealElement(elem, fem_solver, function_space, LagrangeElemCoords)
 
         nvar = self.nvar

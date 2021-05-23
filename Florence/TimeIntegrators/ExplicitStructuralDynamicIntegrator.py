@@ -185,7 +185,7 @@ class ExplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
 
             # ASSEMBLE INTERNAL TRACTION FORCES
             t_assembly = time()
-            TractionForces = AssembleExplicit(fem_solver,function_spaces[0], formulation, mesh, material,
+            TractionForces = AssembleExplicit(fem_solver,function_spaces[1], formulation, mesh, material,
                 Eulerx, Eulerp)[0].ravel()
             # CHECK CONTACT AND ASSEMBLE IF DETECTED
             if fem_solver.has_contact:

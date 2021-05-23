@@ -46,7 +46,7 @@ class DistortionModel(Material):
         if np.isclose(J, 0) or J < 0:
             delta = np.sqrt(0.04 * J * J + 1e-8)
             # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
-            # J = 1.
+            # J = .1
 
         trb = trace(b) + 0
 
@@ -79,14 +79,12 @@ class DistortionModel(Material):
         if np.isclose(J, 0) or J < 0:
             delta = np.sqrt(0.04 * J * J + 1e-8);
             # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
-            # J = 1.
+            # J = .1
 
         trb = trace(b) + 0
 
         sigma = 2./d * J**(-2./d - 1.) * (-1./d * trb * I + b)
         # sigma *= np.exp(1./d * J**(-2./d) * trb - 1)
-        # print(F)
-        # exit()
 
         return sigma
 
@@ -103,7 +101,12 @@ class DistortionModel(Material):
         if np.isclose(J, 0) or J < 0:
             delta = np.sqrt(0.04 * J * J + 1e-8);
             # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
+            # J = .1
 
-        energy  = (1./d * J**(-2./d) * trace(b) - 1.)
+        # Adding a dummy term to energy to disallow sign switch in backtracking linesearch
+        # This energy is negative iff J is negative
+        # energy  = (1./d * J**(-2./d) * trace(b) - 1.)
+        # energy  = (1./d * J**(-2./d) * trace(b) - 0.) #+ 1e1
+        energy  = (1./d * J**(-2./d) * trace(b)) + 1.
 
         return energy

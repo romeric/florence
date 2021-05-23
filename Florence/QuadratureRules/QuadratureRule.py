@@ -5,6 +5,8 @@ from Florence.QuadratureRules import QuadraturePointsWeightsTet
 from Florence.QuadratureRules import QuadraturePointsWeightsTri
 from Florence.QuadratureRules import WVQuadraturePointsWeightsQuad
 from Florence.QuadratureRules import WVQuadraturePointsWeightsHex
+from Florence.QuadratureRules import AlphaQuadraturePointsWeightsQuad
+from Florence.QuadratureRules import AlphaQuadraturePointsWeightsHex
 
 
 class QuadratureRule(object):
@@ -37,14 +39,22 @@ class QuadratureRule(object):
         z=[]; w=[];
 
         if mesh_type == "hex":
+            # self.optimal=5
             if self.optimal==4:
                 zw = WVQuadraturePointsWeightsHex.WVQuadraturePointsWeightsHex(self.norder)
+                z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
+            elif self.optimal==5:
+                zw = AlphaQuadraturePointsWeightsHex.AlphaQuadraturePointsWeightsHex(self.norder)
                 z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
             else:
                 z, w = GaussQuadrature(self.norder,-1.,1.)
         elif mesh_type == "quad":
+            # self.optimal=5
             if self.optimal==4:
                 zw = WVQuadraturePointsWeightsQuad.WVQuadraturePointsWeightsQuad(self.norder)
+                z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
+            elif self.optimal==5:
+                zw = AlphaQuadraturePointsWeightsQuad.AlphaQuadraturePointsWeightsQuad(self.norder)
                 z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
             else:
                 z, w = GaussQuadrature(self.norder,-1.,1.)

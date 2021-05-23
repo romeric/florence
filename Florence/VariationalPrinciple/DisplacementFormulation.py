@@ -46,8 +46,7 @@ class DisplacementFormulation(VariationalPrinciple):
         LagrangeElemCoords = mesh.points[mesh.elements[elem,:],:]
         EulerElemCoords = Eulerx[mesh.elements[elem,:],:]
 
-        # if True:
-        if False:
+        if fem_solver.use_ideal_element:
             LagrangeElemCoords = self.GetIdealElement(elem, fem_solver, function_space, LagrangeElemCoords)
 
         # COMPUTE THE STIFFNESS MATRIX
@@ -322,6 +321,9 @@ class DisplacementFormulation(VariationalPrinciple):
             The routine computes the global form of virtual internal energy i.e. integral of "W(C,G,C)"". This can be
             computed purely in a Lagrangian configuration.
         """
+
+        if fem_solver.use_ideal_element:
+            LagrangeElemCoords = self.GetIdealElement(elem, fem_solver, function_space, LagrangeElemCoords)
 
         nvar = self.nvar
         ndim = self.ndim

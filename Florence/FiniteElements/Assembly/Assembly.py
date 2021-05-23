@@ -240,6 +240,7 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
 
             fem_solver.is_mass_computed = True
 
+    fem_solver.has_computed_ideal_elements = True
     fem_solver.assembly_time = time() - t_assembly
 
     return stiffness, T, F, mass
@@ -383,6 +384,8 @@ def OutofCoreAssembly(fem_solver, function_space, formulation, mesh, material,
 
     hdf_file.close()
 
+    fem_solver.has_computed_ideal_elements = True
+
     return stiffness, T, F, mass
 
 
@@ -414,7 +417,7 @@ def AssembleInternalTractionForces(fem_solver, function_space, formulation, mesh
             # T[mesh.elements[elem,:]*nvar+iterator,0]+=t[iterator::nvar,0]
         RHSAssemblyNative(T,t,elem,nvar,nodeperelem,mesh.elements)
 
-
+    fem_solver.has_computed_ideal_elements = True
     return T
 
 

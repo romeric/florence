@@ -946,7 +946,6 @@ class PostProcess(object):
             # COFACTOR OF DEFORMATION GRADIENT TENSOR
             H = np.einsum('ijk,k->ijk',np.linalg.inv(F).T,detF)
 
-
             # FIND JACOBIAN OF SPATIAL GRADIENT
             # USING ISOPARAMETRIC
             Jacobian = np.linalg.det(ParentGradientx)
@@ -2809,7 +2808,7 @@ class PostProcess(object):
         if QuantityToPlot is not None:
             plt.set_cmap('viridis')
             # plt.set_cmap('viridis_r')
-            plt.clim(0,1)
+            # plt.clim(0,1)
 
         if plot_surfaces:
             if colorbar is True:

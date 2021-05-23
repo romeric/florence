@@ -2070,7 +2070,7 @@ class Mesh(object):
             sizes = np.zeros(self.nelem)
             for elem in range(self.nelem):
                 LagrangeElemCoords = self.points[self.elements[elem,:],:]
-                sizes[elem] = formulation.GetVolume(formulation.function_spaces[0],
+                sizes[elem] = formulation.GetAverageJacobian(formulation.function_spaces[0],
                      LagrangeElemCoords, LagrangeElemCoords, False, elem=elem)
             return sizes.mean()
 
@@ -3087,8 +3087,12 @@ class Mesh(object):
                 el = 11
                 bel = 9
         elif element_type == "hex":
-            el = 5
-            bel = 3
+            if p == 1:
+                el = 5
+                bel = 3
+            elif p == 2:
+                el = 12
+                bel = 10
         else:
             raise ValueError("Element type not understood")
 
@@ -4021,8 +4025,10 @@ class Mesh(object):
 
             src = mlab.pipeline.scalar_scatter(x_edges.T.copy().flatten(), y_edges.T.copy().flatten(), z_edges.T.copy().flatten())
             src.mlab_source.dataset.lines = connections
-            lines = mlab.pipeline.stripper(src)
-            h_edges = mlab.pipeline.surface(lines, color = (0,0.6,0.4), line_width=linewidth)
+            h_edges = mlab.pipeline.surface(src, color = (0,0.6,0.4), line_width=linewidth)
+            # AVOID WARNINGS
+            # lines = mlab.pipeline.stripper(src)
+            # h_edges = mlab.pipeline.surface(lines, color = (0,0.6,0.4), line_width=linewidth)
 
             # ELEMENT NUMBERING
             # for i in range(0,self.elements.shape[0]):
@@ -4372,23 +4378,22 @@ class Mesh(object):
             points = np.hstack((points,np.zeros((points.shape[0],1))))
 
         points_repr = np.zeros((points.shape[0],points.shape[1]+1), dtype=object)
-        points_repr[:,0] = "v "
+        points_repr[:,0] = "v"
         points_repr[:,1:] = points
 
         elements_repr = np.zeros((elements.shape[0],elements.shape[1]+1), dtype=object)
-        elements_repr[:,0] = "f "
+        elements_repr[:,0] = "f"
         elements_repr[:,1:] = elements + 1
 
         with open(filename, "w") as f:
-            f.write("# "+ str(mesh.nnode))
-            f.write('\n')
-            f.write("# "+ str(mesh.nelem))
-            f.write('\n')
+            # f.write("# "+ str(mesh.nnode))
+            # f.write('\n')
+            # f.write("# "+ str(mesh.nelem))
+            # f.write('\n')
 
             np.savetxt(f, points_repr, fmt="%s")
             f.write('\n')
             np.savetxt(f, elements_repr, fmt="%s")
-            f.write('\n')
 
 
 
@@ -5512,7 +5517,7 @@ class Mesh(object):
             raise ValueError('element type not suppported')
 
 
-    def Cylinder(self, center=(0.,0.,0.), radius=1., length=10., nrad=16, ncirc=40, nlong=50, element_type="hex"):
+    def Cylinder(self, center=(0.,0.,0.), radius=1., length=10., nrad=16, ncirc=40, nlong=50, element_type="hex", algorithm="standard"):
         """Creates a structured hexahedral mesh on cylinder. The base of cylinder is always in the (X,Y)
             plane
         """
@@ -5530,7 +5535,7 @@ class Mesh(object):
             nlong = 1
 
         mesh = Mesh()
-        mesh.Circle(center=(center[0],center[1]), radius=radius, nrad=nrad, ncirc=ncirc, element_type="quad")
+        mesh.Circle(center=(center[0],center[1]), radius=radius, nrad=nrad, ncirc=ncirc, element_type="quad", algorithm=algorithm)
 
         self.Extrude(base_mesh=mesh, length=length, nlong=nlong)
         self.points += center[2]
@@ -5737,7 +5742,7 @@ class Mesh(object):
 
 
     def RemoveElements(self, xyz_min_max=None, element_removal_criterion="all", keep_boundary_only=False, return_removed_mesh=False,
-            compute_edges=True, compute_faces=True, plot_new_mesh=False):
+            compute_edges=True, compute_faces=True, show_plot=False):
         """Removes elements from the mesh given some specified criteria
 
         input:
@@ -5930,9 +5935,8 @@ class Mesh(object):
                 mesh.GetBoundaryEdges()
 
 
-
         # PLOT THE NEW MESH
-        if plot_new_mesh == True:
+        if show_plot == True:
             self.SimplePlot()
 
         aranger = np.arange(all_nelems)
@@ -7165,6 +7169,7 @@ class Mesh(object):
                 aranger = np.arange(lmesh.nelem*nodeperelem)
                 lmesh.elements = inv[aranger].reshape(lmesh.nelem,nodeperelem)
                 lmesh.points = self.points[unnodes,:]
+                lmesh.nnode = lmesh.points.shape[0]
                 if lmesh.element_type == "hex" or lmesh.element_type == "tet":
                     lmesh.GetBoundaryFaces()
                     lmesh.GetBoundaryEdges()
@@ -7849,7 +7854,7 @@ class Mesh(object):
 
 
     def CreateSurface2DMeshfrom3DMesh(self):
-        """Create a surface 2D mesh from a 3D mesh. In essence the mesh is not dummy
+        """Create a surface 2D mesh from a 3D mesh
         """
 
         self.__do_memebers_exist__()
@@ -7870,6 +7875,25 @@ class Mesh(object):
         mm.elements = aranger[inv_faces].reshape(self.faces.shape)
         mm.nelem = mm.elements.shape[0]
         mm.GetBoundaryEdges()
+
+        return mm
+
+
+    def CreateCurve1DMeshfrom2DMesh(self):
+        """Create a curve 1D mesh from a 2D or 3D mesh
+        """
+
+        self.__do_memebers_exist__()
+
+        p = self.InferPolynomialDegree()
+        mm = Mesh()
+        unique_edges, inv_edges = np.unique(self.edges,return_inverse=True)
+        mm.points = self.points[unique_edges,:]
+        mm.nnode = mm.points.shape[0]
+        aranger = np.arange(mm.nnode)
+        mm.elements = aranger[inv_edges].reshape(self.edges.shape)
+        mm.nelem = mm.elements.shape[0]
+        mm.element_type = "line"
 
         return mm
 

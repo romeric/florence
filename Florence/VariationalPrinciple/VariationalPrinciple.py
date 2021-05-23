@@ -392,6 +392,9 @@ class VariationalPrinciple(object):
         """Retrieves ideal element/domain
         """
 
+        if fem_solver.has_computed_ideal_elements:
+            return fem_solver.ideal_elements[elem]
+
         from Florence.Tensor import makezero
         from Florence.FunctionSpace import Tri, Tet, Quad, Hex
         from Florence.QuadratureRules.EquallySpacedPoints import EquallySpacedPoints, EquallySpacedPointsTri, EquallySpacedPointsTet
@@ -403,10 +406,13 @@ class VariationalPrinciple(object):
             Neval = np.zeros((nodeperlinearelem,eps.shape[0]),dtype=np.float64)
             for i in range(0,eps.shape[0]):
                 Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],Transform=1,EvalOpt=1,equally_spaced=True)[0]
+            makezero(Neval)
             xycoord = LagrangeElemCoords[:nodeperlinearelem,:]
             xycoord = np.array([ [-0.5, 0], [ 0.5, 0], [0., np.sqrt(3.)/2.]])
             # xycoord = eps[:nodeperlinearelem,:]
             # xycoord = fem_solver.imesh.points[elem,:]
+            # xycoord = fem_solver.imesh.points[fem_solver.imesh.elements[elem,:nodeperlinearelem],:]
+
 
         elif function_space.element_type == "quad":
             nodeperlinearelem = 4
@@ -415,6 +421,7 @@ class VariationalPrinciple(object):
             Neval = np.zeros((nodeperlinearelem,eps.shape[0]),dtype=np.float64)
             for i in range(0,eps.shape[0]):
                 Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],arrange=1)[:,0]
+            makezero(Neval)
             xycoord = LagrangeElemCoords[:nodeperlinearelem,:]
             xycoord = np.array([ [0., 0], [ 1., 0], [ 1., 1.], [0., 1.]])
             xycoord = eps[:nodeperlinearelem,:]
@@ -426,8 +433,10 @@ class VariationalPrinciple(object):
             Neval = np.zeros((nodeperlinearelem,eps.shape[0]),dtype=np.float64)
             for i in range(0,eps.shape[0]):
                 Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],eps[i,2],Transform=1,EvalOpt=1,equally_spaced=True)[0]
+            makezero(Neval)
             xycoord = LagrangeElemCoords[:nodeperlinearelem,:]
             xycoord = np.array([ [sqrt(8./9.), 0, -1/3.], [-sqrt(2./9.), sqrt(2./3.), -1/3.], [-sqrt(2./9.), -sqrt(2./3.), -1/3.], [0., 0, 1.]])
+            # xycoord = fem_solver.imesh.points[fem_solver.imesh.elements[elem,:nodeperlinearelem],:]
 
         elif function_space.element_type == "hex":
             nodeperlinearelem = 8
@@ -436,15 +445,18 @@ class VariationalPrinciple(object):
             Neval = np.zeros((nodeperlinearelem,eps.shape[0]),dtype=np.float64)
             for i in range(0,eps.shape[0]):
                 Neval[:,i]  = hpBases(0,eps[i,0],eps[i,1],eps[i,2],arrange=1)[:,0]
+            makezero(Neval)
             xycoord = LagrangeElemCoords[:nodeperlinearelem,:]
             xycoord = eps[:nodeperlinearelem,:]
 
-        makezero(Neval)
         xycoord_higher = np.copy(LagrangeElemCoords)
         xycoord_higher[:nodeperlinearelem,:]     = xycoord
         if function_space.degree > 1:
             xycoord_higher[nodeperlinearelem:,:] = np.dot(Neval[:,nodeperlinearelem:].T,xycoord)
         LagrangeElemCoords = xycoord_higher
+
+        if not fem_solver.has_computed_ideal_elements:
+            fem_solver.ideal_elements.append(LagrangeElemCoords)
 
         return LagrangeElemCoords
 

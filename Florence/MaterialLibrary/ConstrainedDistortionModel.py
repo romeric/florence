@@ -108,12 +108,14 @@ class ConstrainedDistortionModel(Material):
         I = StrainTensors['I']
         J = StrainTensors['J'][gcounter]
         F = StrainTensors['F'][gcounter]
+        b = StrainTensors['b'][gcounter]
+
         H = J*np.linalg.inv(F).T
         C = np.dot(F.T,F)
         G = np.dot(H.T,H)
-        d = self.ndim
+        trb = trace(b) + 0
 
-        energy  = mu*(1./d * J**(-2./d) * einsum('ij,ij',C,I) - 1.) + mu1*(einsum('ij,ij',C,I) - 3.) +\
-            mu2*(einsum('ij,ij',G,I) - 3.) - 2.*(mu1+2.*mu2)*np.log(J) + lamb/2.*(J-1)**2
+        energy  = mu*(1./d * J**(-2./d) * trb - 1.)**2 + mu1*(trb - 2.) +\
+            mu2*(einsum('ij,ij',G,I) - 2.) - 2.*(mu1+2.*mu2)*np.log(J) + lamb/2.*(J-1)**2
 
         return energy

@@ -214,6 +214,7 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
         LoadIncrement = fem_solver.number_of_load_increments
         LoadFactor = fem_solver.total_time/fem_solver.number_of_load_increments
         Iter = 0
+        alpha = 1.0
         self.iterative_norm_history = []
 
         # EulerxPrev = np.copy(Eulerx)
@@ -264,15 +265,19 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
             # GET ITERATIVE SOLUTION
             dU = boundary_condition.UpdateFreeDoFs(sol,K.shape[0],formulation.nvar)
 
-            # UPDATE THE EULERIAN COMPONENTS
-            # UPDATE THE GEOMETRY
-            Eulerx += dU[:,:formulation.ndim]
+            # COMPUTE STEP SIZE
+            if fem_solver.activate_line_search:
+                alpha = fem_solver.LineSearch(function_spaces[0], formulation, mesh, material, boundary_condition,
+                    NodalForces, dU, Residual, Eulerx, Eulerp)
+
+            # UPDATE THE EULERIAN COMPONENTS - THE GEOMETRY
+            Eulerx += alpha * dU[:,:formulation.ndim]
             # GET ITERATIVE ELECTRIC POTENTIAL
-            Eulerp += dU[:,-1]
+            Eulerp += alpha * dU[:,-1]
 
             # UPDATE VELOCITY AND ACCELERATION
-            velocities    += self.gamma/self.beta/LoadFactor*dU[:,:formulation.ndim]
-            accelerations += 1./self.beta/LoadFactor**2*dU[:,:formulation.ndim]
+            velocities    += self.gamma/self.beta/LoadFactor * alpha * dU[:,:formulation.ndim]
+            accelerations += 1./self.beta/LoadFactor**2 * alpha * dU[:,:formulation.ndim]
 
             # OR ALTERNATIVELY
             # dumA = 1./self.beta/LoadFactor**2*(Eulerx - EulerxPrev) -\
@@ -325,9 +330,10 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
                 break
 
             # BREAK BASED ON INCREMENTAL SOLUTION - KEEP IT AFTER UPDATE
-            if norm(dU) <=  fem_solver.newton_raphson_solution_tolerance:
-                print("Incremental solution within tolerance i.e. norm(dU): {}".format(norm(dU)))
-                break
+            if Iter > 0:
+                if norm(dU) <=  fem_solver.newton_raphson_solution_tolerance:
+                    print("Incremental solution within tolerance i.e. norm(dU): {}".format(norm(dU)))
+                    break
 
             # UPDATE ITERATION NUMBER
             Iter +=1
@@ -343,11 +349,11 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
                 fem_solver.newton_raphson_failed_to_converge = True
                 break
 
-            # IF BREAK WHEN NEWTON RAPHSON STAGNATES IS ACTIVATED
+            # BREAK WHEN NEWTON RAPHSON STAGNATES IS ACTIVATED
             if fem_solver.break_at_stagnation:
                 self.iterative_norm_history.append(self.norm_residual)
-                if Iter >= 5 and self.abs_norm_residual<1e06:
-                    if np.mean(self.iterative_norm_history) < 1.:
+                if Iter >= 6:
+                    if np.mean(self.iterative_norm_history) < 1. and self.abs_norm_residual < 0.0001:
                         break
 
             # USER DEFINED CRITERIA TO BREAK OUT OF NEWTON-RAPHSON

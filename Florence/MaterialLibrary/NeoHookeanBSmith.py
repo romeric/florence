@@ -85,14 +85,14 @@ class NeoHookeanBSmith(Material):
         mu = self.mu
         lamb = self.lamb
 
-        if np.isclose(J, 0) or J < 0:
-            delta = np.sqrt(0.04 * J * J + 1e-8);
-            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
-
         I = StrainTensors['I']
         J = StrainTensors['J'][gcounter]
         F = StrainTensors['F'][gcounter]
         C = np.dot(F.T,F)
+
+        if np.isclose(J, 0) or J < 0:
+            delta = np.sqrt(0.04 * J * J + 1e-8);
+            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
 
         alpha = 1 + 3./4. * mu / lamb
         energy  = mu/2.*(trace(C) - 3.) - mu/2.*np.log(trace(C) + 1) + lamb/2.*(J-alpha)**2
