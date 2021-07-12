@@ -639,7 +639,6 @@ def test_material():
                         "LinearElastic",
                         "IncrementalLinearElastic",
                         "NeoHookean",
-                        "NeoHookean_1",
                         "RegularisedNeoHookean",
                         "NeoHookeanCoercive",
                         "MooneyRivlin",

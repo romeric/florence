@@ -873,7 +873,7 @@ class PostProcess(object):
 
 
 
-    def MeshQualityMeasures(self, mesh, TotalDisp=None, plot=False, show_plot=False, print_log=True):
+    def MeshQualityMeasures(self, mesh, TotalDisp=None, plot=False, show_plot=False, print_log=True, ideal_mesh=None):
         """Computes mesh quality measures, Q_1, Q_2, Q_3 [edge distortion, face distortion, Jacobian]
 
             input:
@@ -895,7 +895,7 @@ class PostProcess(object):
             raise AssertionError('Scaled Jacobian seems to have been already computed. Re-computing it may return incorrect results')
 
         PostDomain = self.postdomain_bases
-        # PostDomain = self.domain_bases
+        PostDomain = self.domain_bases
         if self.postdomain_bases is None:
             raise ValueError("Function spaces/bases not set for post-processing")
 
@@ -913,11 +913,12 @@ class PostProcess(object):
 
         elements = mesh.elements
 
-        minJ = 1e+307
+        minJ, minJF = 1e+307, 1e+307
         ScaledJacobian = np.zeros(elements.shape[0])
         ScaledJacobianF = np.zeros(elements.shape[0])
         ScaledFF = np.zeros(elements.shape[0])
         ScaledHH = np.zeros(elements.shape[0])
+        confMax = np.zeros(elements.shape[0])
 
         AverageJacobian = np.zeros(elements.shape[0])
 
@@ -928,7 +929,11 @@ class PostProcess(object):
         JMax =[]; JMin=[]
         invalidElements = []
         for elem in range(mesh.nelem):
-            LagrangeElemCoords = mesh.points[elements[elem,:],:]
+            if ideal_mesh is None:
+                LagrangeElemCoords = mesh.points[elements[elem,:],:]
+            else:
+                LagrangeElemCoords = ideal_mesh.points[ideal_mesh.elements[elem,:],:]
+                # LagrangeElemCoords = np.array([ [-0.5, 0], [ 0.5, 0], [0., np.sqrt(3.)/2.]])
             EulerElemCoords = vpoints[elements[elem,:],:]
             # EulerElemCoords = LagrangeElemCoords
 
@@ -969,15 +974,27 @@ class PostProcess(object):
                 Q5 = np.einsum('ijk,k',C,self.directions[elem,:])
                 Q5 = np.sqrt(np.dot(Q5,Q5.T)).diagonal()
 
+            # COMPUTE WORST CONFORMAL MAP - RATIO OF LARGEST TO SMALLEST
+            # EIGENVALUES OF F
+            # Sigmas = np.linalg.svd(ParentGradientx, full_matrices=True)[1]
+            Sigmas = np.linalg.svd(F, full_matrices=True)[1]
+            if edim == 2:
+                confMax[elem] = np.max(Sigmas[:,0] / Sigmas[:,1])
+            elif edim == 3:
+                confMax[elem] = np.max(Sigmas[:,0] / Sigmas[:,2])
+
             # FIND MIN AND MAX VALUES
             JMin = np.min(Jacobian); JMax = np.max(Jacobian)
             JFMin = np.min(JacobianF); JFMax = np.max(JacobianF)
             minJ = np.min([minJ, np.min(Jacobian)])
+            minJF = np.min([minJF, np.min(JacobianF)])
             ScaledJacobian[elem] = 1.0*JMin/JMax
-            ScaledJacobianF[elem] = 1.0*JFMin/JFMax
-            ScaledFF[elem] = 1.0*np.min(Q1)/np.max(Q1)
+            # ScaledJacobian[elem] = JMin # for paper
+            # ScaledJacobianF[elem] = 1.0*JFMin/JFMax
+            ScaledJacobianF[elem] = JFMin # for paper
+            # ScaledFF[elem] = 1.0*np.min(Q1)/np.max(Q1)
+            ScaledFF[elem] = np.min(Q1)
             ScaledHH[elem] = 1.0*np.min(Q2)/np.max(Q2)
-            # Jacobian[elem] = np.min(detF)
             AverageJacobian[elem] = np.mean(Jacobian)
 
             if self.is_material_anisotropic:
@@ -1000,6 +1017,9 @@ class PostProcess(object):
             print('Minimum Jacobian value is', minJ.min(), \
             'corresponding to element', minJ.argmin())
 
+            print('Minimum JacobianF value is', minJF.min(), \
+            'corresponding to element', minJF.argmin())
+
             print('Minimum scaled Jacobian value is', ScaledJacobian.min(), \
             'corresponding to element', ScaledJacobian.argmin())
 
@@ -1010,7 +1030,11 @@ class PostProcess(object):
                 print('Minimum scaled CN.CN value is', ScaledCNCN.min(), \
                 'corresponding to element', ScaledCNCN.argmin())
 
-            print('Number of Invalid elements:', len(invalidElements), ":", invalidElements)
+            print('Maximum conformal distortion is', confMax.max(), \
+            'corresponding to element', confMax.argmax())
+
+            # print('Number of Invalid elements:', len(invalidElements), ":", invalidElements)
+            print('Number of Invalid elements:', len(invalidElements))
 
         if plot:
             import matplotlib.pyplot as plt
@@ -1025,10 +1049,13 @@ class PostProcess(object):
         self.is_scaledjacobian_computed = True
         self.AverageJacobian = AverageJacobian
         self.minJ = minJ
+        self.minJF = minJF
         self.ScaledJacobian = ScaledJacobian
         self.ScaledJacobianF = ScaledJacobianF
         self.ScaledFF = ScaledFF
         self.ScaledHH = ScaledHH
+        self.confMax = confMax
+        self.invalidElements = invalidElements
 
         if not self.is_material_anisotropic:
             return self.is_scaledjacobian_computed, ScaledFF, ScaledHH, ScaledJacobianF, ScaledJacobian

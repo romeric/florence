@@ -951,13 +951,13 @@ class FEMSolver(object):
             # COMPUTE STEP SIZE
             if self.activate_line_search:
                 alpha = self.LineSearch(function_spaces[0], formulation, mesh, material, boundary_condition,
-                    NodalForces, dU, Residual, Eulerx, Eulerp)
+                    NodalForces, dU, Residual, Eulerx, Eulerp, alpha)
 
             # UPDATE THE EULERIAN COMPONENTS - THE GEOMETRY
             Eulerx += alpha * dU[:,:formulation.ndim]
             # GET ITERATIVE ELECTRIC POTENTIAL
             Eulerp += alpha * dU[:,-1]
-            # self.xx.append(alpha * dU[:,:formulation.ndim])
+            self.xx.append(alpha * dU[:,:formulation.ndim])
 
             # RE-ASSEMBLE - COMPUTE STIFFNESS AND INTERNAL TRACTION FORCES
             K, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material,
@@ -1072,7 +1072,7 @@ class FEMSolver(object):
             # COMPUTE STEP SIZE
             if self.activate_line_search:
                 alpha = self.LineSearch(function_spaces[0], formulation, mesh, material, boundary_condition,
-                    NodalForces, dU, Residual, Eulerx, Eulerp)
+                    NodalForces, dU, Residual, Eulerx, Eulerp, alpha)
 
             # UPDATE THE EULERIAN COMPONENTS - THE GEOMETRY
             Eulerx += alpha * dU[:,:formulation.ndim]
@@ -1197,7 +1197,7 @@ class FEMSolver(object):
             # COMPUTE STEP SIZE
             if self.activate_line_search:
                 alpha = self.LineSearch(function_spaces[0], formulation, mesh, material, boundary_condition,
-                    NodalForces, dU, Residual, Eulerx, Eulerp)
+                    NodalForces, dU, Residual, Eulerx, Eulerp, alpha)
 
             # UPDATE THE EULERIAN COMPONENTS - THE GEOMETRY
             Eulerx += alpha * dU[:,:formulation.ndim]
@@ -1286,21 +1286,23 @@ class FEMSolver(object):
 
 
 
-    def LineSearch(self, function_space, formulation, mesh, material, boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp):
+    def LineSearch(self, function_space, formulation, mesh, material,
+        boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp, alpha):
 
         if self.line_search_technique == "goldstein":
                 return self.GoldsteinLineSearch(function_space, formulation, mesh, material,
-                    boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp)
+                    boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp, alpha)
         elif self.line_search_technique == "wolfe":
             return self.WolfeLineSearch(function_space, formulation, mesh, material,
-                boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp)
+                boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp, alpha)
         else:
             return self.BackTrackingLineSearch(function_space, formulation, mesh, material,
-                boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp)
+                boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp, alpha)
 
 
 
-    def GoldsteinLineSearch(self, function_space, formulation, mesh, material, boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp):
+    def GoldsteinLineSearch(self, function_space, formulation, mesh, material,
+        boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp, alpha):
 
         from Florence.FiniteElements.Assembly import AssembleInternalTractionForces
         rho = 0.5
@@ -1364,7 +1366,8 @@ class FEMSolver(object):
         return eta
 
 
-    def WolfeLineSearch(self, function_space, formulation, mesh, material, boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp):
+    def WolfeLineSearch(self, function_space, formulation, mesh, material,
+        boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp, alpha):
 
         from Florence.FiniteElements.Assembly import AssembleInternalTractionForces
         rho = 0.5
@@ -1378,8 +1381,9 @@ class FEMSolver(object):
         EXf = self.ComputeEnergy(function_space, mesh, material, formulation,
             newXCopy + dU[:,:formulation.ndim], Eulerp + dU[:,-1])[0]
 
-        alpha, alpha_tol, c = 1.0, 1e-6, 1e-3
-        c2 = 0.9
+        alpha, alpha_tol, c = 1.0, 1e-5, 1e-5
+        c2 = 0.99
+        energyRatio = 1e-2
         while EXf > EX0 + c * alpha * pkX and np.linalg.norm(np.dot(dU.flatten().T,ResidualCopy).item()) > c2 * np.linalg.norm(pkX):
 
             newXCopy = Eulerx + alpha * dU[:,:formulation.ndim]
@@ -1402,8 +1406,7 @@ class FEMSolver(object):
                 E0 = 1e-14
             # print(EXf / E0)
             # print(np.linalg.norm(np.dot(dU.flatten().T,ResidualCopy).item()) / np.linalg.norm(pkX))
-            # if np.isclose(EXf / E0, 1., rtol=1e-3, atol=1e-3):
-            if np.isclose(EXf / E0, 1., rtol=1e-2, atol=1e-2):
+            if np.isclose(EXf / E0, 1., rtol=energyRatio, atol=energyRatio):
                 break
 
             if alpha < alpha_tol:
@@ -1411,7 +1414,8 @@ class FEMSolver(object):
         return alpha
 
 
-    def BackTrackingLineSearch(self, function_space, formulation, mesh, material, boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp):
+    def BackTrackingLineSearch(self, function_space, formulation, mesh, material,
+        boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp, alpha):
 
         from Florence.FiniteElements.Assembly import AssembleInternalTractionForces
         rho = 0.5
@@ -1424,18 +1428,19 @@ class FEMSolver(object):
             newXCopy + dU[:,:formulation.ndim], Eulerp + dU[:,-1])[0]
 
         pkX = np.dot(dU[:,:formulation.ndim].flatten().T,Residual).item()
-        alpha, alpha_tol, c = 1.0, 1e-6, 1e-3
+        alpha, alpha_tol, c = 1.0, 1e-5, 1e-4
 
         # DECIDE BASED ON RATIO TO NOT ALLOW TOO SMALL VALUES OF ALPHA
         E0 = (EX0 + c * alpha * pkX)
+        energyRatio = 1e-2
         if np.isclose(E0, 0):
             E0 = 1e-14
-        if np.isclose(EXf / E0, 1., rtol=1e-2, atol=1e-2):
+        if np.isclose(EXf / E0, 1., rtol=energyRatio, atol=energyRatio):
             return alpha
 
         while EXf > EX0 + c * alpha * pkX:
             newXCopy = Eulerx + alpha * dU[:,:formulation.ndim]
-            # newPCopy = Eulerp + alpha * dU[:,-1]
+            newPCopy = Eulerp + alpha * dU[:,-1]
             EXf = self.ComputeEnergy(function_space, mesh, material, formulation, newXCopy, newPCopy)[0]
             alpha *= rho
             # print(alpha, EXf, EX0 + c * alpha * pkX)
@@ -1445,8 +1450,7 @@ class FEMSolver(object):
             if np.isclose(E0, 0):
                 E0 = 1e-14
             # print(EXf / E0)
-            # if np.isclose(EXf / E0, 1., rtol=1e-3, atol=1e-3):
-            if np.isclose(EXf / E0, 1., rtol=1e-2, atol=1e-2):
+            if np.isclose(EXf / E0, 1., rtol=energyRatio, atol=energyRatio):
                 break
 
             if alpha < alpha_tol:
@@ -1455,8 +1459,30 @@ class FEMSolver(object):
         return alpha
 
 
+        # Reverse backtracking - start with last alpha and double up step size if smaller
+        # If the problem is severly nonlinear this should cut the number of fn evaluation
+        # EX0 = self.ComputeEnergy(function_space, mesh, material, formulation,
+        #     newXCopy, Eulerp)[0]
+        # EXf = self.ComputeEnergy(function_space, mesh, material, formulation,
+        #     newXCopy + alpha * dU[:,:formulation.ndim], Eulerp + alpha * dU[:,-1])[0]
 
-    def ComputeEnergy(self,function_space,mesh,material,formulation,Eulerx,Eulerp):
+        # pkX = np.dot(dU[:,:formulation.ndim].flatten().T,Residual).item()
+
+        # alpha_tol, c = 1e-5, 1e-4
+        # print(alpha, EXf , EX0 + c * alpha * pkX)
+        # while EXf > EX0 + c * alpha * pkX:
+        #     newXCopy = Eulerx + alpha * dU[:,:formulation.ndim]
+        #     newPCopy = Eulerp + alpha * dU[:,-1]
+        #     EXf = self.ComputeEnergy(function_space, mesh, material, formulation, newXCopy, newPCopy)[0]
+        #     alpha *= rho # we should keep increasing
+        #     if alpha < alpha_tol:
+        #         break
+
+        return alpha
+
+
+
+    def ComputeEnergy(self, function_space, mesh, material, formulation, Eulerx, Eulerp):
 
         strain_energy = 0.
         electrical_energy = 0.

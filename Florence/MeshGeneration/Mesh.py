@@ -4352,7 +4352,7 @@ class Mesh(object):
 
 
 
-    def WriteOBJ(self, filename):
+    def WriteOBJ(self, filename, write_texture=False):
         """Write mesh to an obj file. For 3D elements writes the faces only
         """
 
@@ -4385,6 +4385,22 @@ class Mesh(object):
         elements_repr[:,0] = "f"
         elements_repr[:,1:] = elements + 1
 
+        if write_texture:
+            textures = mesh.textures[np.unique(elements),:]
+
+            textures_repr = np.zeros((textures.shape[0],textures.shape[1]+1), dtype=object)
+            textures_repr[:,0] = "vt"
+            textures_repr[:,1:] = textures
+
+            elements_repr = np.zeros((mesh.telements.shape[0],mesh.telements.shape[1]+1), dtype=object)
+            elements_repr[:,0] = "f"
+            # elements_repr[:,1:] = telements + 1
+            counter = 0
+            for i, j in zip(elements,mesh.telements):
+                curr_row = [str(ii+1)+"/"+str(jj+1) for ii,jj in zip(i,j)]
+                elements_repr[counter,1:] = curr_row
+                counter += 1
+
         with open(filename, "w") as f:
             # f.write("# "+ str(mesh.nnode))
             # f.write('\n')
@@ -4392,6 +4408,8 @@ class Mesh(object):
             # f.write('\n')
 
             np.savetxt(f, points_repr, fmt="%s")
+            if write_texture:
+                np.savetxt(f, textures_repr, fmt="%s")
             f.write('\n')
             np.savetxt(f, elements_repr, fmt="%s")
 

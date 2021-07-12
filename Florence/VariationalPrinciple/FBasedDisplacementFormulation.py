@@ -1,12 +1,15 @@
 import numpy as np
 from numpy import einsum
+import scipy as sp
 from Florence.VariationalPrinciple import VariationalPrinciple
 from Florence import QuadratureRule, FunctionSpace
 from Florence.FiniteElements.LocalAssembly.KinematicMeasures import *
 from Florence.FiniteElements.LocalAssembly._KinematicMeasures_ import _KinematicMeasures_
 from Florence.MaterialLibrary.MaterialBase import Material
 from Florence.Tensor import trace, Voigt, makezero, issymetric
-
+norm = np.linalg.norm
+# from numba import jit
+# np.set_printoptions(precision=16)
 
 def vec(H):
     ndim = H.shape[0]
@@ -16,7 +19,7 @@ def vec(H):
     else:
         return H.T.flatten() # careful - ARAP needs this
 
-
+# @jit(nopython=True)
 def svd_rv(F, full_matrices=True):
 
     det = np.linalg.det
@@ -193,7 +196,6 @@ def LocallyInjectiveHessian(J, gJ, HJ):
     H1 += 3.*(-J**2 + 2*J - 1)/(J**2*(J**2 - 3*J + 3)**2) * HJ
     makezero(H1, 1e-12)
     return H1
-
 
 
 def FillConstitutiveBF(B,SpatialGradient,ndim,nvar):
@@ -407,9 +409,9 @@ class PixarNeoHookeanF(Material):
 
 
 class MIPSF(Material):
-    """The Neo-Hookean internal energy, described in Smith et. al.
+    """The MIPS energy
 
-        W(C) = mu/2*(C:I-3)- mu*(J-1) + lamb/2*(J-1)**2
+        W(F) = F:F/d/Jr^(2/d)
 
     """
 
@@ -433,6 +435,7 @@ class MIPSF(Material):
         self.delta = np.sqrt(1e-8 + min(minJ, 0.)**2 * 0.04)
         # self.delta = np.sqrt(1e-8 + min(minJ, 0.)**2 * 0.04) * 2. # embed factot 4 in the definition of delta
         # self.delta = np.sqrt(1e-8 + min(minJ, 0.)**2) # superbad it seems like
+        # self.delta = 0.
 
         # LOW LEVEL DISPATCHER
         # self.has_low_level_dispatcher = True
@@ -442,20 +445,25 @@ class MIPSF(Material):
         from Florence.MaterialLibrary.LLDispatch._NeoHookean_ import KineticMeasures
         return KineticMeasures(self,F)
 
-
     def Hessian(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
 
         I = StrainTensors['I']
         J = StrainTensors['J'][gcounter]
         F = StrainTensors['F'][gcounter]
 
-        trc = trace(F.T.dot(F))
+        # F = np.array([[5.,1],[2.,3.]])
+        # J = np.linalg.det(F)
+        # print(J)
+
+
+        trc = np.trace(F.T.dot(F))
 
         # self.delta = np.sqrt(1e-8 + min(self.minJ, 0.)**2 * 0.04)
         d = self.ndim
         delta = self.delta
 
-        Jr = 0.5 * (J + np.sqrt(J**2 + delta**2))
+        posJ = np.sqrt(J**2 + delta**2)
+        Jr = 0.5 * (J + posJ)
         # Jr = J if J >= 0 else 1e-8 * J**2 / (J**2 + delta**2)**(1./2.)
         if np.isclose(Jr, 0):
             Jr = max(1e-8, Jr)
@@ -468,12 +476,6 @@ class MIPSF(Material):
         dJrdF = 0.5 * (1. + J / np.sqrt(J**2 + delta**2)) * dJdF(F)
         gJr = vec(dJrdF)
         HJr = 0.5 * (1 + J / np.sqrt(J**2 + delta**2)) * HJ + 0.5 * (delta**2 / (J**2 + delta**2)**(3./2.)) * np.outer(gJ,gJ)
-
-        # if J < 0:
-        #     dJrdF = 1e-8 * (J**3 + 2*J*delta**2) / (J**2 + delta**2)**(3./2.) * dJdF(F)
-        #     gJr = vec(dJrdF)
-        #     HJr = (J**3 + 2*J*delta**2) / (J**2 + delta**2)**(3./2.) * HJ + (2*delta**4 - J**2 * delta**2) / (J**2 + delta**2)**(3./2.) * np.outer(gJ,gJ)
-        #     HJr *= 1e-8
 
         d2 = self.ndim**2
         H = 2. / d / Jr**(2./d) * np.eye(d2,d2) - 4. / d**2 * Jr**(-2./d-1.) * (np.outer(gJr,f) + np.outer(f,gJr)) +\
@@ -493,9 +495,353 @@ class MIPSF(Material):
 
         # H += self.lamb * LocallyInjectiveHessian(Jr, gJr, HJr)
 
-        # s = np.linalg.svd(H)[1]
-        # if np.any(s < 0):
-        #     print(s)
+        # if True:
+        if False:
+            if self.ndim == 2:
+
+                I2 = trc;
+                I3 = J
+
+                # Compute the rotation variant SVD of F
+                u, s, vh = svd(F, full_matrices=True)
+                vh = vh.T
+                # R = u.dot(vh.T)
+                # S = np.dot(vh, np.dot(np.diag(s), vh.T))
+                S = np.dot(u, np.dot(np.diag(s), vh.T))
+                I1 = trace(S)
+
+                s1 = s[0]
+                s2 = s[1]
+
+                # Complete eigensystem for Hessian
+                # Twist modes
+                T = np.array([[0.,-1],[1,0.]])
+                T = 1./np.sqrt(2.) * np.dot(u, np.dot(T, vh.T))
+                t = vec(T)
+
+                # Flip modes
+                L = np.array([[0.,1],[1,0.]])
+                L = 1./np.sqrt(2.) * np.dot(u, np.dot(L, vh.T))
+                l = vec(L)
+
+                # Scale modes
+                # mm = 1./np.sqrt(2.)
+                mm=1
+                D1 = np.array([[1.,0],[0,0.]])
+                D1 = mm * np.dot(u, np.dot(D1, vh.T))
+                d1 = vec(D1)
+
+                D2 = np.array([[0.,0],[0,1.]])
+                D2 = mm * np.dot(u, np.dot(D2, vh.T))
+                d2 = vec(D2)
+
+                # # These are eigenvalues of MIPS for when J=Jr (no regularisation)
+                # lamb1 =  -1. / I3 + I2 * (I2 - alpha) / 2. / I3**3
+                # lamb2 =  -1. / I3 + I2 * (I2 + alpha) / 2. / I3**3
+                # lamb3 =   1. / I3 + I2 / 2. / I3**2
+                # lamb4 =   1. / I3 - I2 / 2. / I3**2
+
+                # alpha  = np.sqrt(I2**2 - 3*I3**2)
+                # beta  = (s1**2 - s2**2 + alpha)/I3
+
+                # When J != Jr (regularisation)
+                sqrt = np.sqrt
+                delta2 = delta**2
+                s = posJ
+                lamb1 =  (I2*J*s1**2 + I2*J*s2**2 + I2*s*s1**2 + I2*s*s2**2 - I2*sqrt(4*J**4 + 8*J**3*s - 20*J**2*s**2 + J**2*s1**4 - 2*J**2*s1**2*s2**2 + J**2*s2**4 - 24*J*s**3 + 2*J*s*s1**4 - 4*J*s*s1**2*s2**2 + 2*J*s*s2**4 + 36*s**4 + s**2*s1**4 - 2*s**2*s1**2*s2**2 + s**2*s2**4) - 8*J*s**2 + 4*s**3)/(2*s**3*(J + s))
+                lamb2 =  (I2*J*s1**2 + I2*J*s2**2 + I2*s*s1**2 + I2*s*s2**2 + I2*sqrt(4*J**4 + 8*J**3*s - 20*J**2*s**2 + J**2*s1**4 - 2*J**2*s1**2*s2**2 + J**2*s2**4 - 24*J*s**3 + 2*J*s*s1**4 - 4*J*s*s1**2*s2**2 + 2*J*s*s2**4 + 36*s**4 + s**2*s1**4 - 2*s**2*s1**2*s2**2 + s**2*s2**4) - 8*J*s**2 + 4*s**3)/(2*s**3*(J + s))
+                lamb3 =  (I2 + 2*s)/(s*(J + s))
+                lamb4 =  (-I2 + 2*s)/(s*(J + s))
+
+                beta =  (I3*s1**2 - I3*s2**2 + s*s1**2 - s*s2**2 + sqrt(4*I3**4 + 8*I3**3*s - 20*I3**2*s**2 + I3**2*s1**4 - 2*I3**2*s1**2*s2**2 + I3**2*s2**4 - 24*I3*s**3 + 2*I3*s*s1**4 - 4*I3*s*s1**2*s2**2 + 2*I3*s*s2**4 + 36*s**4 + s**2*s1**4 - 2*s**2*s1**2*s2**2 + s**2*s2**4))/(2*(-I3**2 - I3*s + 3*s**2))
+
+                # print(lamb2)
+                kk=0.
+                lamb1 = max(lamb1, kk)
+                lamb2 = max(lamb2, kk)
+                lamb3 = max(lamb3, kk)
+                lamb4 = max(lamb4, kk)
+
+                # Scaling modes do not decouple for MIPS
+                gamma  = np.sqrt(1. + beta**2) # normaliser
+
+                # Coupled scaling modes
+                e1 = 1. / gamma * (beta * d1 + d2)
+                e2 = 1. / gamma * (d1 - beta * d2)
+
+                d1 = e1
+                d2 = e2
+
+                H = lamb1 * np.outer(d1, d1) + lamb2 * np.outer(d2, d2) + lamb3 * np.outer(l, l) + lamb4 * np.outer(t, t)
+
+                # print(H)
+                # print(H1)
+                # exit()
+
+                # if J < 0:
+                #     H = 1. / delta * np.eye(4,4)
+                #     # H = delta * np.eye(4,4)
+
+
+            else:
+                outer = np.outer
+
+                I2 = trc
+                I3 = J
+
+                # Compute the rotation variant SVD of F
+                u, s, vh = svd(F, full_matrices=True)
+                vh = vh.T
+                # R = u.dot(vh.T)
+                # S = np.dot(vh, np.dot(np.diag(s), vh.T))
+                S = np.dot(u, np.dot(np.diag(s), vh.T))
+                I1 = trace(S)
+
+                s1 = s[0]
+                s2 = s[1]
+                s3 = s[2]
+                # s1 = S[0,0]
+                # s2 = S[1,1]
+                # s3 = S[2,2]
+
+                T1 = np.array([[0.,-1.,0.],[1.,0.,0],[0.,0.,0.]])
+                T1 = 1./np.sqrt(2) * np.dot(u, np.dot(T1, vh.T))
+                t1 = vec(T1)
+                T2 = np.array([[0.,0.,0.],[0.,0., 1],[0.,-1.,0.]])
+                T2 = 1./np.sqrt(2) * np.dot(u, np.dot(T2, vh.T))
+                t2 = vec(T2)
+                T3 = np.array([[0.,0.,1.],[0.,0.,0.],[-1,0.,0.]])
+                T3 = 1./np.sqrt(2) * np.dot(u, np.dot(T3, vh.T))
+                t3 = vec(T3)
+
+                L1 = np.array([[0.,1.,0.],[1.,0.,0],[0.,0.,0.]])
+                L1 = 1./np.sqrt(2) * np.dot(u, np.dot(L1, vh.T))
+                l1 = vec(L1)
+                L2 = np.array([[0.,0.,0.],[0.,0.,1],[0.,1.,0.]])
+                L2 = 1./np.sqrt(2) * np.dot(u, np.dot(L2, vh.T))
+                l2 = vec(L2)
+                L3 = np.array([[0.,0.,1.],[0.,0.,0.],[1,0.,0.]])
+                L3 = 1./np.sqrt(2) * np.dot(u, np.dot(L3, vh.T))
+                l3 = vec(L3)
+
+                D1 = np.array([[1.,0,0],[0,0,0],[0,0,0]])
+                D1 = np.dot(u, np.dot(D1, vh.T))
+                d1 = vec(D1)
+                D2 = np.array([[0.,0,0],[0,1.,0],[0.,0,0]])
+                D2 = np.dot(u, np.dot(D2, vh.T))
+                d2 = vec(D2)
+                D3 = np.array([[0.,0,0],[0,0.,0],[0,0,1.]])
+                D3 = np.dot(u, np.dot(D3, vh.T))
+                d3 = vec(D3)
+
+                # A = np.array([
+                #     [2.*(5*I2 - 3*s1**2)/(27*J**(2./3.)*s1**2), (-8*I2*s3 + 12*s3**3)/(27*J**(5./3.)), (-8*I2*s2 + 12*s2**3)/(27*J**(5./3.))],
+                #     [(-8.*I2*s3 + 12*s3**3)/(27*J**(5./3.)), 2*(5*I2 - 3*s2**2)/(27*J**(2/3)*s2**2), (-8*I2*s1 + 12*s1**3)/(27*J**(5./3.))],
+                #     [(-8.*I2*s2 + 12*s2**3)/(27*J**(5./3.)), (-8*I2*s1 + 12*s1**3)/(27*J**(5./3.)), 2*(5*I2 - 3*s3**2)/(27*J**(2./3.)*s3**2)]
+                # ])
+                A = np.array([[2.*(2*s1**2 + 5*s2**2 + 5*s3**2)/(27*J**(2/3)*s1**2), -4*s3*(2*s1**2 + 2*s2**2 - s3**2)/(27*J**(5/3)), -4*s2*(2*s1**2 - s2**2 + 2*s3**2)/(27*J**(5/3))],
+                    [-4*s3*(2*s1**2 + 2*s2**2 - s3**2)/(27*J**(5/3)), 2*(5*s1**2 + 2*s2**2 + 5*s3**2)/(27*J**(2/3)*s2**2), 4*s1*(s1**2 - 2*s2**2 - 2*s3**2)/(27*J**(5/3))],
+                    [-4*s2*(2*s1**2 - s2**2 + 2*s3**2)/(27*J**(5/3)), 4*s1*(s1**2 - 2*s2**2 - 2*s3**2)/(27*J**(5/3)), 2*(5*s1**2 + 5*s2**2 + 2*s3**2)/(27*J**(2/3)*s3**2)]])
+
+                # print(A)
+                print(repr(A.T.flatten()))
+                eigs, vecs = sp.linalg.eigh(A)
+                vec1 = vecs[:,0]
+                vec2 = vecs[:,1]
+                vec3 = vecs[:,2]
+                # eigs = np.linalg.eigvals(A)
+                print(eigs)
+                print(vecs)
+                # ivecs = np.linalg.inv(vecs)
+                # print(norm(vec1))
+                # exit()
+                # eigs.sort()
+                # eigs = eigs[::-1]
+                # print(eigs)
+                lamb1 = eigs[0]
+                lamb2 = eigs[1]
+                lamb3 = eigs[2]
+
+                # vec1 = A[:,0]
+                # vec2 = A[:,1]
+                # vec3 = A[:,2]
+                # print(vec2)
+
+                # ua, sa, vha = svd_rv(A)
+                # vha = vha.T
+                # sa[sa < 0] == 0.
+                # # print(sa)
+                # rA = np.dot(ua, np.dot(np.diag(sa), vha.T))
+                # # print(rA)
+
+                # lamb1 = eigs[0]
+                # lamb2 = eigs[1]
+                # lamb3 = eigs[2]
+
+                # exit()
+
+                # sqrt = np.sqrt
+                # I = 1j
+                # lamb1 =  (-(-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**2/(729*J**(16/3)) + (36*I2**2*J**2*s1**2 + 36*I2**2*J**2*s2**2 + 36*I2**2*J**2*s3**2 + 192*I2*J**2*s1**4 - 120*I2*J**2*s1**2*s2**2 - 120*I2*J**2*s1**2*s3**2 + 192*I2*J**2*s2**4 - 120*I2*J**2*s2**2*s3**2 + 192*I2*J**2*s3**4 + 108*J**4 - 144*J**2*s1**6 - 144*J**2*s2**6 - 144*J**2*s3**6)/(243*J**(16/3)))/(3*(-1/2 + sqrt(3)*I/2)*(sqrt(-4*((-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**2/(729*J**(16/3)) + (-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(243*J**(16/3)))**3 + ((1944*I2**3*J**3 - 3240*I2**2*J**3*s1**2 - 3240*I2**2*J**3*s2**2 - 3240*I2**2*J**3*s3**2 + 2592*I2*J**3*s1**4 + 1944*I2*J**3*s1**2*s2**2 + 1944*I2*J**3*s1**2*s3**2 + 2592*I2*J**3*s2**4 + 1944*I2*J**3*s2**2*s3**2 + 2592*I2*J**3*s3**4 - 3240*J**5 - 864*J**3*s1**6 - 864*J**3*s2**6 - 864*J**3*s3**6)/(729*J**7) + 2*(-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**3/(19683*J**8) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)*(-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(2187*J**8))**2)/2 + (1944*I2**3*J**3 - 3240*I2**2*J**3*s1**2 - 3240*I2**2*J**3*s2**2 - 3240*I2**2*J**3*s3**2 + 2592*I2*J**3*s1**4 + 1944*I2*J**3*s1**2*s2**2 + 1944*I2*J**3*s1**2*s3**2 + 2592*I2*J**3*s2**4 + 1944*I2*J**3*s2**2*s3**2 + 2592*I2*J**3*s3**4 - 3240*J**5 - 864*J**3*s1**6 - 864*J**3*s2**6 - 864*J**3*s3**6)/(1458*J**7) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**3/(19683*J**8) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)*(-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(4374*J**8))**(1/3)) - (-1/2 + sqrt(3)*I/2)*(sqrt(-4*((-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**2/(729*J**(16/3)) + (-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(243*J**(16/3)))**3 + ((1944*I2**3*J**3 - 3240*I2**2*J**3*s1**2 - 3240*I2**2*J**3*s2**2 - 3240*I2**2*J**3*s3**2 + 2592*I2*J**3*s1**4 + 1944*I2*J**3*s1**2*s2**2 + 1944*I2*J**3*s1**2*s3**2 + 2592*I2*J**3*s2**4 + 1944*I2*J**3*s2**2*s3**2 + 2592*I2*J**3*s3**4 - 3240*J**5 - 864*J**3*s1**6 - 864*J**3*s2**6 - 864*J**3*s3**6)/(729*J**7) + 2*(-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**3/(19683*J**8) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)*(-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(2187*J**8))**2)/2 + (1944*I2**3*J**3 - 3240*I2**2*J**3*s1**2 - 3240*I2**2*J**3*s2**2 - 3240*I2**2*J**3*s3**2 + 2592*I2*J**3*s1**4 + 1944*I2*J**3*s1**2*s2**2 + 1944*I2*J**3*s1**2*s3**2 + 2592*I2*J**3*s2**4 + 1944*I2*J**3*s2**2*s3**2 + 2592*I2*J**3*s3**4 - 3240*J**5 - 864*J**3*s1**6 - 864*J**3*s2**6 - 864*J**3*s3**6)/(1458*J**7) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**3/(19683*J**8) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)*(-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(4374*J**8))**(1/3)/3 + (10*I2*s1**2*s2**2 + 10*I2*s1**2*s3**2 + 10*I2*s2**2*s3**2 - 18*J**2)/(81*J**(8/3))
+                # lamb2 =  (-(-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**2/(729*J**(16/3)) + (36*I2**2*J**2*s1**2 + 36*I2**2*J**2*s2**2 + 36*I2**2*J**2*s3**2 + 192*I2*J**2*s1**4 - 120*I2*J**2*s1**2*s2**2 - 120*I2*J**2*s1**2*s3**2 + 192*I2*J**2*s2**4 - 120*I2*J**2*s2**2*s3**2 + 192*I2*J**2*s3**4 + 108*J**4 - 144*J**2*s1**6 - 144*J**2*s2**6 - 144*J**2*s3**6)/(243*J**(16/3)))/(3*(-1/2 - sqrt(3)*I/2)*(sqrt(-4*((-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**2/(729*J**(16/3)) + (-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(243*J**(16/3)))**3 + ((1944*I2**3*J**3 - 3240*I2**2*J**3*s1**2 - 3240*I2**2*J**3*s2**2 - 3240*I2**2*J**3*s3**2 + 2592*I2*J**3*s1**4 + 1944*I2*J**3*s1**2*s2**2 + 1944*I2*J**3*s1**2*s3**2 + 2592*I2*J**3*s2**4 + 1944*I2*J**3*s2**2*s3**2 + 2592*I2*J**3*s3**4 - 3240*J**5 - 864*J**3*s1**6 - 864*J**3*s2**6 - 864*J**3*s3**6)/(729*J**7) + 2*(-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**3/(19683*J**8) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)*(-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(2187*J**8))**2)/2 + (1944*I2**3*J**3 - 3240*I2**2*J**3*s1**2 - 3240*I2**2*J**3*s2**2 - 3240*I2**2*J**3*s3**2 + 2592*I2*J**3*s1**4 + 1944*I2*J**3*s1**2*s2**2 + 1944*I2*J**3*s1**2*s3**2 + 2592*I2*J**3*s2**4 + 1944*I2*J**3*s2**2*s3**2 + 2592*I2*J**3*s3**4 - 3240*J**5 - 864*J**3*s1**6 - 864*J**3*s2**6 - 864*J**3*s3**6)/(1458*J**7) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**3/(19683*J**8) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)*(-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(4374*J**8))**(1/3)) - (-1/2 - sqrt(3)*I/2)*(sqrt(-4*((-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**2/(729*J**(16/3)) + (-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(243*J**(16/3)))**3 + ((1944*I2**3*J**3 - 3240*I2**2*J**3*s1**2 - 3240*I2**2*J**3*s2**2 - 3240*I2**2*J**3*s3**2 + 2592*I2*J**3*s1**4 + 1944*I2*J**3*s1**2*s2**2 + 1944*I2*J**3*s1**2*s3**2 + 2592*I2*J**3*s2**4 + 1944*I2*J**3*s2**2*s3**2 + 2592*I2*J**3*s3**4 - 3240*J**5 - 864*J**3*s1**6 - 864*J**3*s2**6 - 864*J**3*s3**6)/(729*J**7) + 2*(-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**3/(19683*J**8) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)*(-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(2187*J**8))**2)/2 + (1944*I2**3*J**3 - 3240*I2**2*J**3*s1**2 - 3240*I2**2*J**3*s2**2 - 3240*I2**2*J**3*s3**2 + 2592*I2*J**3*s1**4 + 1944*I2*J**3*s1**2*s2**2 + 1944*I2*J**3*s1**2*s3**2 + 2592*I2*J**3*s2**4 + 1944*I2*J**3*s2**2*s3**2 + 2592*I2*J**3*s3**4 - 3240*J**5 - 864*J**3*s1**6 - 864*J**3*s2**6 - 864*J**3*s3**6)/(1458*J**7) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**3/(19683*J**8) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)*(-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(4374*J**8))**(1/3)/3 + (10*I2*s1**2*s2**2 + 10*I2*s1**2*s3**2 + 10*I2*s2**2*s3**2 - 18*J**2)/(81*J**(8/3))
+                # lamb3 =  (-(-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**2/(729*J**(16/3)) + (36*I2**2*J**2*s1**2 + 36*I2**2*J**2*s2**2 + 36*I2**2*J**2*s3**2 + 192*I2*J**2*s1**4 - 120*I2*J**2*s1**2*s2**2 - 120*I2*J**2*s1**2*s3**2 + 192*I2*J**2*s2**4 - 120*I2*J**2*s2**2*s3**2 + 192*I2*J**2*s3**4 + 108*J**4 - 144*J**2*s1**6 - 144*J**2*s2**6 - 144*J**2*s3**6)/(243*J**(16/3)))/(3*(sqrt(-4*((-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**2/(729*J**(16/3)) + (-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(243*J**(16/3)))**3 + ((1944*I2**3*J**3 - 3240*I2**2*J**3*s1**2 - 3240*I2**2*J**3*s2**2 - 3240*I2**2*J**3*s3**2 + 2592*I2*J**3*s1**4 + 1944*I2*J**3*s1**2*s2**2 + 1944*I2*J**3*s1**2*s3**2 + 2592*I2*J**3*s2**4 + 1944*I2*J**3*s2**2*s3**2 + 2592*I2*J**3*s3**4 - 3240*J**5 - 864*J**3*s1**6 - 864*J**3*s2**6 - 864*J**3*s3**6)/(729*J**7) + 2*(-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**3/(19683*J**8) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)*(-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(2187*J**8))**2)/2 + (1944*I2**3*J**3 - 3240*I2**2*J**3*s1**2 - 3240*I2**2*J**3*s2**2 - 3240*I2**2*J**3*s3**2 + 2592*I2*J**3*s1**4 + 1944*I2*J**3*s1**2*s2**2 + 1944*I2*J**3*s1**2*s3**2 + 2592*I2*J**3*s2**4 + 1944*I2*J**3*s2**2*s3**2 + 2592*I2*J**3*s3**4 - 3240*J**5 - 864*J**3*s1**6 - 864*J**3*s2**6 - 864*J**3*s3**6)/(1458*J**7) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**3/(19683*J**8) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)*(-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(4374*J**8))**(1/3)) - (sqrt(-4*((-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**2/(729*J**(16/3)) + (-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(243*J**(16/3)))**3 + ((1944*I2**3*J**3 - 3240*I2**2*J**3*s1**2 - 3240*I2**2*J**3*s2**2 - 3240*I2**2*J**3*s3**2 + 2592*I2*J**3*s1**4 + 1944*I2*J**3*s1**2*s2**2 + 1944*I2*J**3*s1**2*s3**2 + 2592*I2*J**3*s2**4 + 1944*I2*J**3*s2**2*s3**2 + 2592*I2*J**3*s3**4 - 3240*J**5 - 864*J**3*s1**6 - 864*J**3*s2**6 - 864*J**3*s3**6)/(729*J**7) + 2*(-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**3/(19683*J**8) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)*(-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(2187*J**8))**2)/2 + (1944*I2**3*J**3 - 3240*I2**2*J**3*s1**2 - 3240*I2**2*J**3*s2**2 - 3240*I2**2*J**3*s3**2 + 2592*I2*J**3*s1**4 + 1944*I2*J**3*s1**2*s2**2 + 1944*I2*J**3*s1**2*s3**2 + 2592*I2*J**3*s2**4 + 1944*I2*J**3*s2**2*s3**2 + 2592*I2*J**3*s3**4 - 3240*J**5 - 864*J**3*s1**6 - 864*J**3*s2**6 - 864*J**3*s3**6)/(1458*J**7) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**3/(19683*J**8) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)*(-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(4374*J**8))**(1/3)/3 + (10*I2*s1**2*s2**2 + 10*I2*s1**2*s3**2 + 10*I2*s2**2*s3**2 - 18*J**2)/(81*J**(8/3))
+
+                # x = J**(5./3.)
+                lamb4 =  -2*I2*s1/(9*J**(5/3.)) + 2./(3*J**(2/3.))
+                lamb5 =  -2*I2*s2/(9*J**(5/3.)) + 2./(3*J**(2/3.))
+                lamb6 =  -2*I2*s3/(9*J**(5/3.)) + 2./(3*J**(2/3.))
+                lamb7 =  2*I2*s3/(9*J**(5/3.)) + 2./(3*J**(2/3.))
+                lamb8 =  2*I2*s1/(9*J**(5/3.)) + 2./(3*J**(2/3.))
+                lamb9 =  2*I2*s2/(9*J**(5/3.)) + 2./(3*J**(2/3.))
+
+                # lamb4 =  -2.*I2*s1/(9*J**(5/3)) + 2./(3*J**(2/3))
+                # lamb5 =  -2.*I2*s2/(9*J**(5/3)) + 2./(3*J**(2/3))
+                # lamb6 =  -2.*I2*s3/(9*J**(5/3)) + 2./(3*J**(2/3))
+                # lamb7 =  2.*I2*s3/(9*J**(5/3)) + 2./(3*J**(2/3))
+                # lamb8 =  2.*I2*s1/(9*J**(5/3)) + 2./(3*J**(2/3))
+                # lamb9 =  2.*I2*s2/(9*J**(5/3)) + 2./(3*J**(2/3))
+                # print(J, x, np.cbrt(J)**5.)
+
+                # lamb4 =  2*s1*(-s1**2 - s2**2 + 3*s2*s3 - s3**2)/(9*(s1*s2*s3)**(5/3))
+                # lamb5 =  2*s2*(-s1**2 + 3*s1*s3 - s2**2 - s3**2)/(9*(s1*s2*s3)**(5/3))
+                # lamb6 =  2*s3*(-s1**2 + 3*s1*s2 - s2**2 - s3**2)/(9*(s1*s2*s3)**(5/3))
+                # lamb7 =  2*s3*(s1**2 + 3*s1*s2 + s2**2 + s3**2)/(9*(s1*s2*s3)**(5/3))
+                # lamb8 =  2*s1*(s1**2 + s2**2 + 3*s2*s3 + s3**2)/(9*(s1*s2*s3)**(5/3))
+                # lamb9 =  2*s2*(s1**2 + 3*s1*s3 + s2**2 + s3**2)/(9*(s1*s2*s3)**(5/3))
+
+                # print(s1,s2,s3,I2,J,lamb2)
+
+                # print(eigs[0] * outer(vec1,vec1) + eigs[1] * outer(vec2,vec2) + eigs[2] * outer(vec3,vec3))
+                # print(eigs[0] * outer(vec1,ivecs[:,0]) + eigs[1] * outer(vec2,ivecs[:,1]) + eigs[2] * outer(vec3,ivecs[:,2]))
+                # print(np.dot(vecs, np.dot(np.diag(eigs), ivecs)))
+                # print(np.dot(u, np.dot(A, vh.T)))
+                # exit()
+
+                # # scaling modes do not decouple
+                # def GetZs(s1, s2, s3, lamb_):
+                #     z1 = s1 * s3 + s2 * lamb_
+                #     z2 = s2 * s3 + s1 * lamb_
+                #     z3 = lamb_**2 - s3**2
+                #     # z3 = s1 * s2 + s3 * lamb_
+                #     return np.array([z1, z2, z3])
+
+                # zs_1 = GetZs(s1, s2, s3, lamb1)
+                # zs_2 = GetZs(s1, s2, s3, lamb2)
+                # zs_3 = GetZs(s1, s2, s3, lamb3)
+
+                # zs_1 /= np.linalg.norm(zs_1)
+                # zs_2 /= np.linalg.norm(zs_2)
+                # zs_3 /= np.linalg.norm(zs_3)
+
+                # e1 = zs_1[0] * d1 + zs_1[1] * d2 + zs_1[2] * d3
+                # e2 = zs_2[0] * d1 + zs_2[1] * d2 + zs_2[2] * d3
+                # e3 = zs_3[0] * d1 + zs_3[1] * d2 + zs_3[2] * d3
+                # print(zs_1,zs_2,zs_3)
+
+                # e1 *= 1. / np.sqrt(1 + np.linalg.norm(zs_1)**2)
+                # e2 *= 1. / np.sqrt(1 + np.linalg.norm(zs_2)**2)
+                # e3 *= 1. / np.sqrt(1 + np.linalg.norm(zs_3)**2)
+                # e1 /= np.linalg.norm(zs_1)
+                # e2 /= np.linalg.norm(zs_2)
+                # e3 /= np.linalg.norm(zs_3)
+
+                # e1 = vec(lamb1 * np.dot(u,  vh.T))
+                # e1 /= np.linalg.norm(e1)
+                # e2 = vec(lamb2 * np.dot(u,  vh.T))
+                # e2 /= np.linalg.norm(e2)
+                # e3 = vec(lamb3 * np.dot(u,  vh.T))
+                # e3 /= np.linalg.norm(e3)
+                # print(lamb1,lamb2,lamb3)
+                # print(e1,e2,e3)
+                # e1 = lamb1 * d1 + lamb2 * d2
+                # e2 = lamb2 * d2
+                # e3 = lamb3 * d3
+
+                # print(vecs[1][0])
+                # print(vecs[1])
+                # print(vecs)
+                e1 = vec1[0] * d1 + vec1[1] * d2 + vec1[2] * d3
+                e2 = vec2[0] * d1 + vec2[1] * d2 + vec2[2] * d3
+                e3 = vec3[0] * d1 + vec3[1] * d2 + vec3[2] * d3
+
+                # e1 = vec1[0] * d1 + vec2[1] * d2 + vec3[2] * d3
+                # e2 = vec1[0] * d1 + vec2[1] * d2 + vec3[2] * d3
+                # e3 = vec1[0] * d1 + vec2[1] * d2 + vec3[2] * d3
+
+                # e1 = vecs[0][0] * d1 + vecs[1][0] * d2 + vecs[2][0] * d3
+                # e2 = vecs[0][1] * d1 + vecs[1][1] * d2 + vecs[2][1] * d3
+                # e3 = vecs[0][2] * d1 + vecs[1][2] * d2 + vecs[2][2] * d3
+
+
+
+                e1 /= np.linalg.norm(e1)
+                e2 /= np.linalg.norm(e2)
+                e3 /= np.linalg.norm(e3)
+
+                # es = np.dot(u, np.dot(A, vh.T))
+                # np.dot(u, rA.dot(vh.T))
+                # e1 = np.dot(rA, D1)
+                # e2 = np.dot(rA, D2)
+                # e3 = np.dot(rA, D3)
+
+                e1 = np.dot(u, np.dot(np.diag(vec1),vh.T))
+                e2 = np.dot(u, np.dot(np.diag(vec2),vh.T))
+                e3 = np.dot(u, np.dot(np.diag(vec3),vh.T))
+
+                e1 = vec(e1)
+                e2 = vec(e2)
+                e3 = vec(e3)
+
+                # e1 /= np.linalg.norm(e1)
+                # e2 /= np.linalg.norm(e2)
+                # e3 /= np.linalg.norm(e3)
+                # print(e1)
+
+                # D1 = np.array([[1.,0,0],[0,0,0],[0,0,0]])
+                # D2 = np.array([[0.,0,0],[0,1.,0],[0,0,0.]])
+                # # x = ua.dot( u.dot(D1.dot(vh.T.dot(vha.T))))
+                # x = sa[0] * u.dot( ua.dot(D1.dot(vha.T.dot(vh.T))))
+                # x += sa[1] * u.dot( ua.dot(D2.dot(vha.T.dot(vh.T))))
+                # print(ua)
+                # print(x)
+                # exit()
+
+                # e1 = es[:,0]
+                # e2 = es[:,1]
+                # e3 = es[:,2]
+
+
+                # print(d1)
+                # print(norm(vec3))
+                # print(lamb1 * outer(e1,e1) )
+                # print(lamb3 * outer(e3,e3) )
+                # print(lamb1 * outer(e1,e1) + lamb2 * outer(e2,e2) + lamb3 * outer(e3,e3))
+                # print(rA)
+                # print(H)
+                # exit()
+
+                # print(np.dot(u, np.dot(vecs.T, vh.T)))
+
+                H1 = lamb1 * outer(e1,e1) + lamb2 * outer(e2,e2) + lamb3 * outer(e3,e3) +\
+                    lamb4 * outer(t1,t1) + lamb5 * outer(t2,t2) + lamb6 * outer(t3,t3) +\
+                    lamb7 * outer(l1,l1) + lamb8 * outer(l2,l2) + lamb9 * outer(l3,l3)
+
+                # H1 =  outer(e1,e1) + outer(e2,e2) + outer(e3,e3) +\
+                #     lamb4 * outer(t1,t1) + lamb5 * outer(t2,t2) + lamb6 * outer(t3,t3) +\
+                #     lamb7 * outer(l1,l1) + lamb8 * outer(l2,l2) + lamb9 * outer(l3,l3)
+                # a,b,c = np.linalg.svd(H)
+                # b[b<0] = 0.
+                # print(np.diag(b))
+                # H1 = np.dot(a, np.dot(np.diag(b),c))
+                makezero(H1)
+                makezero(H)
+                # print(H1)
+                # print()
+                # print(H)
+                H = H1
+
+                # exit()
+
 
         self.H_VoigtSize = H.shape[0]
 
@@ -517,7 +863,7 @@ class MIPSF(Material):
         Jr = 0.5 * (J + np.sqrt(J**2 + delta**2))
         # Jr = J if J >= 0 else 1e-8 * J**2 / (J**2 + delta**2)**(1./2.)
         if np.isclose(Jr, 0):
-            print("Small Jr", J, Jr)
+            # print("Small Jr", J, Jr)
             Jr = max(1e-8, Jr)
 
         dJrdF = 0.5 * (1. + J / np.sqrt(J**2 + delta**2)) * dJdF(F)
@@ -535,6 +881,11 @@ class MIPSF(Material):
         # stress += self.lamb * (Jr - 1.) * dJrdF
 
         # stress += self.lamb * LocallyInjectiveGradient(Jr, dJrdF)
+
+        # if J < 0:
+        #     stress = 1. / delta * F
+        #     # stress = delta * F
+        #     # print(delta)
 
         return stress
 
@@ -571,7 +922,251 @@ class MIPSF(Material):
         # if (energy <= 0.):
             # print(energy)
 
+        # if J < 0:
+        #     energy = trc / 2. / delta
+        #     # energy = trc / 2. * delta
+
         return energy
+
+
+
+
+
+class MIPSF2(Material):
+    """The MIPS energy
+
+        W(F) = Fr:Fr/d/Jr^(2/d)
+
+    """
+
+    def __init__(self, ndim, **kwargs):
+        mtype = type(self).__name__
+        super(MIPSF2, self).__init__(mtype, ndim, **kwargs)
+
+        self.is_transversely_isotropic = False
+        self.energy_type = "internal_energy"
+        self.nature = "nonlinear"
+        self.fields = "mechanics"
+
+        if self.ndim==3:
+            self.H_VoigtSize = 9
+        elif self.ndim==2:
+            self.H_VoigtSize = 4
+
+        # the smaller minJ the more chance to untangle something
+        minJ = self.minJ
+        # self.delta = np.sqrt(1e-12 + min(minJ, 0.)**2 * 0.04)
+        self.delta = np.sqrt(1e-8 + min(minJ, 0.)**2 * 0.04)
+        # self.delta = np.sqrt(1e-8 + min(minJ, 0.)**2 * 0.04) * 2. # embed factot 4 in the definition of delta
+        # self.delta = np.sqrt(1e-8 + min(minJ, 0.)**2) # superbad it seems like
+        # self.delta = .7
+
+        # LOW LEVEL DISPATCHER
+        # self.has_low_level_dispatcher = True
+        self.has_low_level_dispatcher = False
+
+    def KineticMeasures(self,F,ElectricFieldx=0, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._NeoHookean_ import KineticMeasures
+        return KineticMeasures(self,F)
+
+
+    def Hessian(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        trc = trace(F.T.dot(F))
+
+        # self.delta = np.sqrt(1e-8 + min(self.minJ, 0.)**2 * 0.04)
+        d = self.ndim
+        delta = self.delta
+
+        posJ = np.sqrt(J**2 + delta**2)
+        Jr = 0.5 * (J + posJ)
+        if np.isclose(Jr, 0):
+            Jr = max(1e-8, Jr)
+
+        # # Symmetric formulation based on K. Theodore arrangements
+        # gJ = vec(dJdF(F))
+        # HJ = d2JdFdF(F)
+        # f = vec(F)
+
+        # dJrdF = 0.5 * (1. + J / np.sqrt(J**2 + delta**2)) * dJdF(F)
+        # gJr = vec(dJrdF)
+        # HJr = 0.5 * (1 + J / np.sqrt(J**2 + delta**2)) * HJ + 0.5 * (delta**2 / (J**2 + delta**2)**(3./2.)) * np.outer(gJ,gJ)
+
+        # d2 = self.ndim**2
+        # H = 2. / d / Jr**(2./d) * np.eye(d2,d2) - 4. / d**2 * Jr**(-2./d-1.) * (np.outer(gJr,f) + np.outer(f,gJr)) +\
+        #     2. * trc / d**2 * (2./d + 1.) * Jr**(-2./d - 2.) * np.outer(gJr,gJr) -\
+        #     2. * trc / d**2 * Jr**(-2./d-1.) * HJr
+
+        # H1 = J / Jr**2 * HJr - 2. * J / Jr**3 * np.outer(gJr,gJr) - 1. / Jr * HJ + 1. / Jr**2 * (np.outer(gJ,gJr) + np.outer(gJr,gJ))
+        # H1 *= 2.
+        # H += H1
+
+        # if self.ndim == 2 and False:
+        if self.ndim == 2 and True:
+
+            I2 = trc
+            I3 = J
+
+            # Compute the rotation variant SVD of F
+            u, s, vh = svd(F, full_matrices=True)
+            vh = vh.T
+            # R = u.dot(vh.T)
+            # S = np.dot(vh, np.dot(np.diag(s), vh.T))
+            S = np.dot(u, np.dot(np.diag(s), vh.T))
+            I1 = trace(S)
+
+            # s1 = S[0, 0];
+            # s2 = S[1, 1];
+            s1 = s[0]
+            s2 = s[1]
+
+            # Complete eigensystem for Hessian
+            # Twist modes
+            T = np.array([[0.,-1],[1,0.]])
+            T = 1./np.sqrt(2.) * np.dot(u, np.dot(T, vh.T))
+            t = vec(T)
+
+            # // Flip modes
+            L = np.array([[0.,1],[1,0.]])
+            L = 1./np.sqrt(2.) * np.dot(u, np.dot(L, vh.T))
+            l = vec(L)
+
+            # Scale modes
+            # mm = 1./np.sqrt(2.)
+            mm=1
+            D1 = np.array([[1.,0],[0,0.]])
+            D1 = mm * np.dot(u, np.dot(D1, vh.T))
+            d1 = vec(D1)
+
+            D2 = np.array([[0.,0],[0,1.]])
+            D2 = mm * np.dot(u, np.dot(D2, vh.T))
+            d2 = vec(D2)
+
+
+            sqrt = np.sqrt
+            delta2 = delta**2
+            s = posJ
+            II_F = I2
+            # beta =  (I2*I3*s1**2/2 - I2*I3*s2**2/2 + I2*s*s1**2/2 - I2*s*s2**2/2 - I3**2*s1**2 + I3**2*s2**2 - I3*s*s1**2 + I3*s*s2**2 + 2*s**2*s1**2 - 2*s**2*s2**2 - sqrt(4*I2**2*I3**4 + 8*I2**2*I3**3*s - 20*I2**2*I3**2*s**2 + I2**2*I3**2*s1**4 - 2*I2**2*I3**2*s1**2*s2**2 + I2**2*I3**2*s2**4 - 24*I2**2*I3*s**3 + 2*I2**2*I3*s*s1**4 - 4*I2**2*I3*s*s1**2*s2**2 + 2*I2**2*I3*s*s2**4 + 36*I2**2*s**4 + I2**2*s**2*s1**4 - 2*I2**2*s**2*s1**2*s2**2 + I2**2*s**2*s2**4 - 16*I2*I3**5 - 32*I2*I3**4*s + 80*I2*I3**3*s**2 - 4*I2*I3**3*s1**4 + 8*I2*I3**3*s1**2*s2**2 - 4*I2*I3**3*s2**4 + 80*I2*I3**2*s**3 - 8*I2*I3**2*s*s1**4 + 16*I2*I3**2*s*s1**2*s2**2 - 8*I2*I3**2*s*s2**4 - 160*I2*I3*s**4 + 4*I2*I3*s**2*s1**4 - 8*I2*I3*s**2*s1**2*s2**2 + 4*I2*I3*s**2*s2**4 + 48*I2*s**5 + 8*I2*s**3*s1**4 - 16*I2*s**3*s1**2*s2**2 + 8*I2*s**3*s2**4 + 16*I3**6 + 32*I3**5*s - 80*I3**4*s**2 + 4*I3**4*s1**4 - 8*I3**4*s1**2*s2**2 + 4*I3**4*s2**4 - 64*I3**3*s**3 + 8*I3**3*s*s1**4 - 16*I3**3*s*s1**2*s2**2 + 8*I3**3*s*s2**4 + 176*I3**2*s**4 - 12*I3**2*s**2*s1**4 + 24*I3**2*s**2*s1**2*s2**2 - 12*I3**2*s**2*s2**4 - 96*I3*s**5 - 16*I3*s**3*s1**4 + 32*I3*s**3*s1**2*s2**2 - 16*I3*s**3*s2**4 + 16*s**6 + 16*s**4*s1**4 - 32*s**4*s1**2*s2**2 + 16*s**4*s2**4)/2)/(-I2*I3**2 - I2*I3*s + 3*I2*s**2 + 2*I3**3 + 2*I3**2*s - 6*I3*s**2 + 2*s**3)
+            # lamb1 =  (I2*J*s1**2 + I2*J*s2**2 + I2*s*s1**2 + I2*s*s2**2 - 2*J**2*s1**2 - 2*J**2*s2**2 - 8*J*s**2 - 2*J*s*s1**2 - 2*J*s*s2**2 + 4*s**3 + 4*s**2*s1**2 + 4*s**2*s2**2 + sqrt(4*I2**2*J**4 + 8*I2**2*J**3*s - 20*I2**2*J**2*s**2 + I2**2*J**2*s1**4 - 2*I2**2*J**2*s1**2*s2**2 + I2**2*J**2*s2**4 - 24*I2**2*J*s**3 + 2*I2**2*J*s*s1**4 - 4*I2**2*J*s*s1**2*s2**2 + 2*I2**2*J*s*s2**4 + 36*I2**2*s**4 + I2**2*s**2*s1**4 - 2*I2**2*s**2*s1**2*s2**2 + I2**2*s**2*s2**4 - 16*I2*J**5 - 32*I2*J**4*s + 80*I2*J**3*s**2 - 4*I2*J**3*s1**4 + 8*I2*J**3*s1**2*s2**2 - 4*I2*J**3*s2**4 + 80*I2*J**2*s**3 - 8*I2*J**2*s*s1**4 + 16*I2*J**2*s*s1**2*s2**2 - 8*I2*J**2*s*s2**4 - 160*I2*J*s**4 + 4*I2*J*s**2*s1**4 - 8*I2*J*s**2*s1**2*s2**2 + 4*I2*J*s**2*s2**4 + 48*I2*s**5 + 8*I2*s**3*s1**4 - 16*I2*s**3*s1**2*s2**2 + 8*I2*s**3*s2**4 + 16*J**6 + 32*J**5*s - 80*J**4*s**2 + 4*J**4*s1**4 - 8*J**4*s1**2*s2**2 + 4*J**4*s2**4 - 64*J**3*s**3 + 8*J**3*s*s1**4 - 16*J**3*s*s1**2*s2**2 + 8*J**3*s*s2**4 + 176*J**2*s**4 - 12*J**2*s**2*s1**4 + 24*J**2*s**2*s1**2*s2**2 - 12*J**2*s**2*s2**4 - 96*J*s**5 - 16*J*s**3*s1**4 + 32*J*s**3*s1**2*s2**2 - 16*J*s**3*s2**4 + 16*s**6 + 16*s**4*s1**4 - 32*s**4*s1**2*s2**2 + 16*s**4*s2**4))/(2*s**3*(J + s))
+            # lamb2 =  (I2*J*s1**2 + I2*J*s2**2 + I2*s*s1**2 + I2*s*s2**2 - 2*J**2*s1**2 - 2*J**2*s2**2 - 8*J*s**2 - 2*J*s*s1**2 - 2*J*s*s2**2 + 4*s**3 + 4*s**2*s1**2 + 4*s**2*s2**2 - sqrt(4*I2**2*J**4 + 8*I2**2*J**3*s - 20*I2**2*J**2*s**2 + I2**2*J**2*s1**4 - 2*I2**2*J**2*s1**2*s2**2 + I2**2*J**2*s2**4 - 24*I2**2*J*s**3 + 2*I2**2*J*s*s1**4 - 4*I2**2*J*s*s1**2*s2**2 + 2*I2**2*J*s*s2**4 + 36*I2**2*s**4 + I2**2*s**2*s1**4 - 2*I2**2*s**2*s1**2*s2**2 + I2**2*s**2*s2**4 - 16*I2*J**5 - 32*I2*J**4*s + 80*I2*J**3*s**2 - 4*I2*J**3*s1**4 + 8*I2*J**3*s1**2*s2**2 - 4*I2*J**3*s2**4 + 80*I2*J**2*s**3 - 8*I2*J**2*s*s1**4 + 16*I2*J**2*s*s1**2*s2**2 - 8*I2*J**2*s*s2**4 - 160*I2*J*s**4 + 4*I2*J*s**2*s1**4 - 8*I2*J*s**2*s1**2*s2**2 + 4*I2*J*s**2*s2**4 + 48*I2*s**5 + 8*I2*s**3*s1**4 - 16*I2*s**3*s1**2*s2**2 + 8*I2*s**3*s2**4 + 16*J**6 + 32*J**5*s - 80*J**4*s**2 + 4*J**4*s1**4 - 8*J**4*s1**2*s2**2 + 4*J**4*s2**4 - 64*J**3*s**3 + 8*J**3*s*s1**4 - 16*J**3*s*s1**2*s2**2 + 8*J**3*s*s2**4 + 176*J**2*s**4 - 12*J**2*s**2*s1**4 + 24*J**2*s**2*s1**2*s2**2 - 12*J**2*s**2*s2**4 - 96*J*s**5 - 16*J*s**3*s1**4 + 32*J*s**3*s1**2*s2**2 - 16*J*s**3*s2**4 + 16*s**6 + 16*s**4*s1**4 - 32*s**4*s1**2*s2**2 + 16*s**4*s2**4))/(2*s**3*(J + s))
+            # lamb3 =  (I2 - 2*J + 4*s)/(s*(J + s))
+            # lamb4 =  (-I2 + 2*J)/(s*(J + s))
+
+            # beta =  (I3*s1**2 - I3*s2**2 + s*s1**2 - s*s2**2 + sqrt(4*I3**4 + 8*I3**3*s - 20*I3**2*s**2 + I3**2*s1**4 - 2*I3**2*s1**2*s2**2 + I3**2*s2**4 - 24*I3*s**3 + 2*I3*s*s1**4 - 4*I3*s*s1**2*s2**2 + 2*I3*s*s2**4 + 36*s**4 + s**2*s1**4 - 2*s**2*s1**2*s2**2 + s**2*s2**4))/(2*(-I3**2 - I3*s + 3*s**2))
+            # lamb1 =  (I2*J*s1**2 + I2*J*s2**2 + I2*s*s1**2 + I2*s*s2**2 - I2*sqrt(2*J**4 + 4*J**3*s - 22*J**2*s**2 + J**2*s1**4 + J**2*s2**4 - 24*J*s**3 + 2*J*s*s1**4 + 2*J*s*s2**4 + 36*s**4 + s**2*s1**4 + s**2*s2**4) - 8*J*s**2 + 4*s**3)/(2*s**3*(J + s))
+            # lamb2 =  (I2*J*s1**2 + I2*J*s2**2 + I2*s*s1**2 + I2*s*s2**2 + I2*sqrt(2*J**4 + 4*J**3*s - 22*J**2*s**2 + J**2*s1**4 + J**2*s2**4 - 24*J*s**3 + 2*J*s*s1**4 + 2*J*s*s2**4 + 36*s**4 + s**2*s1**4 + s**2*s2**4) - 8*J*s**2 + 4*s**3)/(2*s**3*(J + s))
+            # lamb3 =  (I2 + 2*s)/(s*(J + s))
+            # lamb4 =  (-I2 + 2*s)/(s*(J + s))
+
+            # alpha = sqrt(2*(J**4 + 2*J**3*s - 11*J**2*s**2 - 12*J*s**3 + 18*s**4) + 4* Jr**2 * (I2**2 - 2*J**2))
+            # beta = (2 * Jr * (s1**2 - s2**2) + alpha)/(2*(3*s**2 - 2*J*Jr))
+
+            # lamb1 =  1. / Jr + (2 * I2**2 * Jr - 8*J*s**2 - I2 * alpha) / (4 * Jr * s**3)
+            # lamb2 =  1. / Jr + (2 * I2**2 * Jr - 8*J*s**2 + I2 * alpha) / (4 * Jr * s**3)
+            # lamb3 =  1. / Jr + I2 / (2 * Jr * s)
+            # lamb4 =  1. / Jr - I2 / (2 * Jr * s)
+
+            # beta =  (I2*J*s1**2 - I2*J*s2**2 + I2*s*s1**2 - I2*s*s2**2 - 2*J**2*s1**2 + 2*J**2*s2**2 - 2*J*s*s1**2 + 2*J*s*s2**2 + 4*s**2*s1**2 - 4*s**2*s2**2 - sqrt(2*I2**2*J**4 + 4*I2**2*J**3*s - 22*I2**2*J**2*s**2 + I2**2*J**2*s1**4 + I2**2*J**2*s2**4 - 24*I2**2*J*s**3 + 2*I2**2*J*s*s1**4 + 2*I2**2*J*s*s2**4 + 36*I2**2*s**4 + I2**2*s**2*s1**4 + I2**2*s**2*s2**4 - 8*I2*J**5 - 16*I2*J**4*s + 72*I2*J**3*s**2 - 4*I2*J**3*s1**4 - 4*I2*J**3*s2**4 + 64*I2*J**2*s**3 - 8*I2*J**2*s*s1**4 - 8*I2*J**2*s*s2**4 - 160*I2*J*s**4 + 4*I2*J*s**2*s1**4 + 4*I2*J*s**2*s2**4 + 48*I2*s**5 + 8*I2*s**3*s1**4 + 8*I2*s**3*s2**4 + 8*J**6 + 16*J**5*s - 56*J**4*s**2 + 4*J**4*s1**4 + 4*J**4*s2**4 - 32*J**3*s**3 + 8*J**3*s*s1**4 + 8*J**3*s*s2**4 + 144*J**2*s**4 - 12*J**2*s**2*s1**4 - 12*J**2*s**2*s2**4 - 96*J*s**5 - 16*J*s**3*s1**4 - 16*J*s**3*s2**4 + 16*s**6 + 16*s**4*s1**4 + 16*s**4*s2**4))/(2*(-I2*J**2 - I2*J*s + 3*I2*s**2 + 2*J**3 + 2*J**2*s - 6*J*s**2 + 2*s**3))
+            # lamb1 =  (I2*J*s1**2 + I2*J*s2**2 + I2*s*s1**2 + I2*s*s2**2 - 2*J**2*s1**2 - 2*J**2*s2**2 - 8*J*s**2 - 2*J*s*s1**2 - 2*J*s*s2**2 + 4*s**3 + 4*s**2*s1**2 + 4*s**2*s2**2 + sqrt(2*I2**2*J**4 + 4*I2**2*J**3*s - 22*I2**2*J**2*s**2 + I2**2*J**2*s1**4 + I2**2*J**2*s2**4 - 24*I2**2*J*s**3 + 2*I2**2*J*s*s1**4 + 2*I2**2*J*s*s2**4 + 36*I2**2*s**4 + I2**2*s**2*s1**4 + I2**2*s**2*s2**4 - 8*I2*J**5 - 16*I2*J**4*s + 72*I2*J**3*s**2 - 4*I2*J**3*s1**4 - 4*I2*J**3*s2**4 + 64*I2*J**2*s**3 - 8*I2*J**2*s*s1**4 - 8*I2*J**2*s*s2**4 - 160*I2*J*s**4 + 4*I2*J*s**2*s1**4 + 4*I2*J*s**2*s2**4 + 48*I2*s**5 + 8*I2*s**3*s1**4 + 8*I2*s**3*s2**4 + 8*J**6 + 16*J**5*s - 56*J**4*s**2 + 4*J**4*s1**4 + 4*J**4*s2**4 - 32*J**3*s**3 + 8*J**3*s*s1**4 + 8*J**3*s*s2**4 + 144*J**2*s**4 - 12*J**2*s**2*s1**4 - 12*J**2*s**2*s2**4 - 96*J*s**5 - 16*J*s**3*s1**4 - 16*J*s**3*s2**4 + 16*s**6 + 16*s**4*s1**4 + 16*s**4*s2**4))/(2*s**3*(J + s))
+            # lamb2 =  (I2*J*s1**2 + I2*J*s2**2 + I2*s*s1**2 + I2*s*s2**2 - 2*J**2*s1**2 - 2*J**2*s2**2 - 8*J*s**2 - 2*J*s*s1**2 - 2*J*s*s2**2 + 4*s**3 + 4*s**2*s1**2 + 4*s**2*s2**2 - sqrt(2*I2**2*J**4 + 4*I2**2*J**3*s - 22*I2**2*J**2*s**2 + I2**2*J**2*s1**4 + I2**2*J**2*s2**4 - 24*I2**2*J*s**3 + 2*I2**2*J*s*s1**4 + 2*I2**2*J*s*s2**4 + 36*I2**2*s**4 + I2**2*s**2*s1**4 + I2**2*s**2*s2**4 - 8*I2*J**5 - 16*I2*J**4*s + 72*I2*J**3*s**2 - 4*I2*J**3*s1**4 - 4*I2*J**3*s2**4 + 64*I2*J**2*s**3 - 8*I2*J**2*s*s1**4 - 8*I2*J**2*s*s2**4 - 160*I2*J*s**4 + 4*I2*J*s**2*s1**4 + 4*I2*J*s**2*s2**4 + 48*I2*s**5 + 8*I2*s**3*s1**4 + 8*I2*s**3*s2**4 + 8*J**6 + 16*J**5*s - 56*J**4*s**2 + 4*J**4*s1**4 + 4*J**4*s2**4 - 32*J**3*s**3 + 8*J**3*s*s1**4 + 8*J**3*s*s2**4 + 144*J**2*s**4 - 12*J**2*s**2*s1**4 - 12*J**2*s**2*s2**4 - 96*J*s**5 - 16*J*s**3*s1**4 - 16*J*s**3*s2**4 + 16*s**6 + 16*s**4*s1**4 + 16*s**4*s2**4))/(2*s**3*(J + s))
+            # lamb3 =  (I2 - 2*J + 4*s)/(s*(J + s))
+            # lamb4 =  (-I2 + 2*J)/(s*(J + s))
+
+            a = 2*(J**4 + 2*J**3*s - 11*J**2*s**2 - 12*J*s**3 + 18*s**4) + 4*Jr**2*(I2**2 - 2*J**2)
+            alpha = sqrt(I2**2*a - 8*I2*J**5 - 16*I2*J**4*s + 72*I2*J**3*s**2 - 4*I2*J**3*s1**4 - 4*I2*J**3*s2**4 + 64*I2*J**2*s**3 - 8*I2*J**2*s*s1**4 - 8*I2*J**2*s*s2**4 - 160*I2*J*s**4 + 4*I2*J*s**2*s1**4 + 4*I2*J*s**2*s2**4 + 48*I2*s**5 + 8*I2*s**3*s1**4 + 8*I2*s**3*s2**4 + 8*J**6 + 16*J**5*s - 56*J**4*s**2 + 4*J**4*s1**4 + 4*J**4*s2**4 - 32*J**3*s**3 + 8*J**3*s*s1**4 + 8*J**3*s*s2**4 + 144*J**2*s**4 - 12*J**2*s**2*s1**4 - 12*J**2*s**2*s2**4 - 96*J*s**5 - 16*J*s**3*s1**4 - 16*J*s**3*s2**4 + 16*s**6 + 16*s**4*s1**4 + 16*s**4*s2**4)
+
+            beta =  (2*(I2*Jr - J**2 - J * s + 2 * s**2) * (s1**2 - s2**2) - alpha)/(2*((I2*(3*s**2 - J*s - J**2) + 2*(J**3 + J**2*s - 3*J*s**2 + s**3))))
+
+            lamb1 = 1. / Jr + (2 * (I2 * Jr + 2*s**2) * (I2 - 2 * J) + alpha) / (4 * s**3 * Jr)
+            lamb2 = 1. / Jr + (2 * (I2 * Jr + 2*s**2) * (I2 - 2 * J) - alpha) / (4 * s**3 * Jr)
+            lamb3 = 2. / Jr + ( I2 - 2 * J)/(2 * s * Jr)
+            lamb4 =           (-I2 + 2 * J)/(2 * s * Jr)
+
+            # print(lamb1)
+            kk=0.
+            lamb1 = max(lamb1, kk)
+            lamb2 = max(lamb2, kk)
+            lamb3 = max(lamb3, kk)
+            lamb4 = max(lamb4, kk)
+
+            # Scaling modes do not decouple for MIPS
+            gamma  = np.sqrt(1. + beta**2) # normaliser
+
+            # Coupled scaling modes
+            e1 = 1. / gamma * (beta * d1 + d2)
+            e2 = 1. / gamma * (d1 - beta * d2)
+
+            d1 = e1
+            d2 = e2
+
+            H = lamb1 * np.outer(d1, d1) + lamb2 * np.outer(d2, d2) + lamb3 * np.outer(l, l) + lamb4 * np.outer(t, t)
+
+
+        # stress +=  2. * J / Jr**2 * dJrdF - 2. / Jr * dJdF(F)
+
+        self.H_VoigtSize = H.shape[0]
+
+        return H
+
+
+    def CauchyStress(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        s = np.sqrt(J**2 + self.delta**2)
+        Jr = 0.5 * (J + s)
+        if np.isclose(Jr, 0):
+            Jr = max(1e-8, Jr)
+        d = self.ndim
+
+        delta = self.delta
+        I2 = trace(F.T.dot(F))
+        dJrdF = 0.5 * (1. + J / np.sqrt(J**2 + delta**2)) * dJdF(F)
+        stress = 2. / d / Jr**(2./d) * F - 2. * I2 / d**2 * Jr**(-2./d-1.)  * dJrdF
+
+        # stress += 2. * (J * dJrdJ - Jr) / Jr**2 * dJdF(F)
+        # stress +=  2. * J / Jr**2 * dJrdF - 2. / Jr * dJdF(F)
+        stress +=  J / Jr**2 * dJrdF - 1. / Jr * dJdF(F)
+        # stress /= 2.
+
+        H = dJdF(F)
+        stress = 1. / Jr * (F - H) + 1. / Jr / s * (J - I2 / 2.) * H
+
+        return stress
+
+
+    def InternalEnergy(self,StrainTensors,elem=0,gcounter=0):
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        d = self.ndim
+        delta = self.delta
+        s = np.sqrt(J**2 + self.delta**2)
+        Jr = 0.5 * (J + s)
+        if np.isclose(Jr, 0):
+            Jr = max(1e-8, Jr)
+        # IIFr = trace(Fr.T.dot(Fr))
+        I2 = trace(F.T.dot(F))
+
+        # energy  = (1./d * Jr**(-2./d) * IIFr)
+        # energy  = (1./d * Jr**(-2./d) * I2) + 2. * (1 - J / Jr)
+        # energy  = (1./d * Jr**(-2./d) * I2) - 2. * J / Jr + 2.
+        energy  = (1./d * Jr**(-2./d) * I2) + 1 - J / Jr
+
+
+        return energy
+
+
+
 
 
 
@@ -601,6 +1196,7 @@ class SymmetricDirichlet(Material):
         # the smaller minJ the more chance to untangle
         minJ = self.minJ
         self.delta = np.sqrt(1e-8 + min(minJ, 0.)**2 * 0.04)
+        # self.delta = 0.
         # LOW LEVEL DISPATCHER
         # self.has_low_level_dispatcher = True
         self.has_low_level_dispatcher = False
@@ -619,7 +1215,8 @@ class SymmetricDirichlet(Material):
         trc = trace(F.T.dot(F))
 
         delta = self.delta
-        Jr = 0.5 * (J + np.sqrt(J**2 + delta**2))
+        posJ = np.sqrt(J**2 + delta**2)
+        Jr = 0.5 * (J + posJ)
         if np.isclose(Jr, 0):
             Jr = max(1e-8, Jr)
 
@@ -655,72 +1252,169 @@ class SymmetricDirichlet(Material):
                 1/Jr**2 * np.outer(gJr, r) - 2 * I1 / Jr**3 * np.outer(gJr, gJr) + I1 / Jr**2 * HJr
 
 
-        # if self.ndim == 2:
-        #     # // Compute the rotation variant SVD of F
-        #     u, s, vh = svd(F, full_matrices=True)
-        #     vh = vh.T
-        #     # R = u.dot(vh.T)
-        #     # S = np.dot(vh, np.dot(np.diag(s), vh.T))
-        #     S = np.dot(u, np.dot(np.diag(s), vh.T))
-        #     I1 = trace(S)
+        if True:
+            if self.ndim == 2:
+                # Compute the rotation variant SVD of F
+                u, s, vh = svd(F, full_matrices=True)
+                vh = vh.T
+                # R = u.dot(vh.T)
+                # S = np.dot(vh, np.dot(np.diag(s), vh.T))
+                S = np.dot(u, np.dot(np.diag(s), vh.T))
+                I1 = trace(S)
 
-        #     # // Complete eigensystem for Hessian
-        #     # // Twist modes
-        #     T = np.array([[0.,-1],[1,0.]])
-        #     T = 1./np.sqrt(2.) * np.dot(u, np.dot(T, vh.T))
-        #     t = vec(T)
+                # // Complete eigensystem for Hessian
+                # // Twist modes
+                T = np.array([[0.,-1],[1,0.]])
+                T = 1./np.sqrt(2.) * np.dot(u, np.dot(T, vh.T))
+                t = vec(T)
 
-        #     # // Flip modes
-        #     # RealSMatrix<N,N> L; L << 0.,  1., 1., 0.;
-        #     L = np.array([[0.,1],[1,0.]])
-        #     L = 1./np.sqrt(2.) * np.dot(u, np.dot(L, vh.T))
-        #     l = vec(L)
+                # // Flip modes
+                L = np.array([[0.,1],[1,0.]])
+                L = 1./np.sqrt(2.) * np.dot(u, np.dot(L, vh.T))
+                l = vec(L)
 
-        #     # // Scale modes
-        #     # mm = 1./np.sqrt(2.)
-        #     mm=1
-        #     # RealSMatrix<N,N> D1; D1 << 1.,  0., 0., 0.;
-        #     D1 = np.array([[1.,0],[0,0.]])
-        #     D1 = mm * np.dot(u, np.dot(D1, vh.T))
-        #     d1 = vec(D1);
+                # // Scale modes
+                # mm = 1./np.sqrt(2.)
+                mm=1
+                D1 = np.array([[1.,0],[0,0.]])
+                D1 = mm * np.dot(u, np.dot(D1, vh.T))
+                d1 = vec(D1);
 
-        #     # RealSMatrix<N,N> D2; D2 << 0.,  0., 0., 1.;
-        #     D2 = np.array([[0.,0],[0,1.]])
-        #     D2 = mm * np.dot(u, np.dot(D2, vh.T))
-        #     d2 = vec(D2);
+                D2 = np.array([[0.,0],[0,1.]])
+                D2 = mm * np.dot(u, np.dot(D2, vh.T))
+                d2 = vec(D2);
 
-        #     # s1 = S[0, 0];
-        #     # s2 = S[1, 1];
-        #     s1 = s[0];
-        #     s2 = s[1];
-        #     if s1 > 0 and s2 > 0:
-        #         return stress
-        #     elif s1 < 0 and s2 < 0:
-        #         return stress
-        #     elif s1 < 0 and s2 > 0:
-        #         s1 = Jr / s2
-        #     elif s1 > 0 and s2 < 0:
-        #         s2 = Jr / s1
+                # s1 = S[0, 0];
+                # s2 = S[1, 1];
+                s1 = s[0];
+                s2 = s[1];
+                # print(s1,s2, s1*s2, J)
 
-        #     print(s1,s2, s1*s2, J)
+                # a = np.sqrt(0.5 * (1 + np.sqrt(1 + delta**2/J**2) ) )
+                # # if elem == 20: print(a)
+                # # print(a)
+                # s1 *=a
+                # s2 *=a
 
-        #     J2 = J * J;
-        #     I2 = trc;
+                I2 = trc;
+                # lamb1 =  3*I2*s2**2/J**4 + 1 - 3/J**2 ;
+                # lamb2 =  3*I2*s1**2/J**4 + 1 - 3/J**2 ;
+                # lamb3 =  (I2 + J**3 + J)/J**3 ;
+                # lamb4 =  (-I2 + J**3 + J)/J**3 ;
 
-        #     lamb1 =  3*I2*s2**2/J**4 + 1 - 3/J**2 ;
-        #     lamb2 =  3*I2*s1**2/J**4 + 1 - 3/J**2 ;
-        #     lamb3 =  (I2 + J**3 + J)/J**3 ;
-        #     lamb4 =  (-I2 + J**3 + J)/J**3 ;
+                # lamb1 = 1 + 3. / s1**4
+                # lamb2 = 1 + 3. / s2**4
+                # lamb3 = 1 + 1. / J**2 + I2/J**3
+                # lamb4 = 1 + 1. / J**2 - I2/J**3
 
-        #     # lamb1 = 1 + 3. / s1**4
-        #     # lamb2 = 1 + 3. / s2**4
-        #     # lamb3 = 1 + 1. / J**2 + I2/J**3
-        #     # lamb4 = 1 + 1. / J**2 - I2/J**3
+                lamb1 =  (4*I2*s2**2*(J**2 - posJ**2 + 3*posJ*(J + posJ)) - 16*J*posJ**2*(J + posJ) + posJ**3*(J + posJ)**3 + 4*posJ**3*(J + posJ))/(posJ**3*(J + posJ)**3)
+                lamb2 =  (4*I2*s1**2*(J**2 - posJ**2 + 3*posJ*(J + posJ)) - 16*J*posJ**2*(J + posJ) + posJ**3*(J + posJ)**3 + 4*posJ**3*(J + posJ))/(posJ**3*(J + posJ)**3)
+                lamb3 =  4*I2/(posJ*(J + posJ)**2) + 1 + 4/(J + posJ)**2
+                lamb4 =  -4*I2/(posJ*(J + posJ)**2) + 1 + 4/(J + posJ)**2
 
-        #     H = lamb1 * np.outer(d1, d1) + lamb2 * np.outer(d2, d2) + lamb3 * np.outer(l, l) + lamb4 * np.outer(t, t);
+                kk=0.
+                lamb1 = max(lamb1, kk)
+                lamb2 = max(lamb2, kk)
+                lamb3 = max(lamb3, kk)
+                lamb4 = max(lamb4, kk)
 
-        #     print(H)
-        #     exit()
+                H = lamb1 * np.outer(d1, d1) + lamb2 * np.outer(d2, d2) + lamb3 * np.outer(l, l) + lamb4 * np.outer(t, t);
+
+                # print(H)
+                # exit()
+
+            else:
+                outer = np.outer
+
+                I2 = trc
+                I3 = J
+
+                # Compute the rotation variant SVD of F
+                u, s, vh = svd(F, full_matrices=True)
+                vh = vh.T
+                S = np.dot(u, np.dot(np.diag(s), vh.T))
+                I1 = trace(S)
+
+                s1 = s[0]
+                s2 = s[1]
+                s3 = s[2]
+
+                T1 = np.array([[0.,-1.,0.],[1.,0.,0],[0.,0.,0.]])
+                T1 = 1./np.sqrt(2) * np.dot(u, np.dot(T1, vh.T))
+                t1 = vec(T1)
+                T2 = np.array([[0.,0.,0.],[0.,0., 1],[0.,-1.,0.]])
+                T2 = 1./np.sqrt(2) * np.dot(u, np.dot(T2, vh.T))
+                t2 = vec(T2)
+                T3 = np.array([[0.,0.,1.],[0.,0.,0.],[-1,0.,0.]])
+                T3 = 1./np.sqrt(2) * np.dot(u, np.dot(T3, vh.T))
+                t3 = vec(T3)
+
+                L1 = np.array([[0.,1.,0.],[1.,0.,0],[0.,0.,0.]])
+                L1 = 1./np.sqrt(2) * np.dot(u, np.dot(L1, vh.T))
+                l1 = vec(L1)
+                L2 = np.array([[0.,0.,0.],[0.,0.,1],[0.,1.,0.]])
+                L2 = 1./np.sqrt(2) * np.dot(u, np.dot(L2, vh.T))
+                l2 = vec(L2)
+                L3 = np.array([[0.,0.,1.],[0.,0.,0.],[1,0.,0.]])
+                L3 = 1./np.sqrt(2) * np.dot(u, np.dot(L3, vh.T))
+                l3 = vec(L3)
+
+                D1 = np.array([[1.,0,0],[0,0,0],[0,0,0]])
+                D1 = np.dot(u, np.dot(D1, vh.T))
+                d1 = vec(D1)
+                D2 = np.array([[0.,0,0],[0,1.,0],[0.,0,0]])
+                D2 = np.dot(u, np.dot(D2, vh.T))
+                d2 = vec(D2)
+                D3 = np.array([[0.,0,0],[0,0.,0],[0,0,1.]])
+                D3 = np.dot(u, np.dot(D3, vh.T))
+                d3 = vec(D3)
+
+                # A = np.array([[1 + 3/s1**4, 0, 0], [0, 1 + 3/s2**4, 0], [0, 0, 1 + 3/s3**4]])
+                # eigs, vecs = sp.linalg.eigh(A)
+                # vec1 = vecs[:,0]
+                # vec2 = vecs[:,1]
+                # vec3 = vecs[:,2]
+                # lamb1 = eigs[0]
+                # lamb2 = eigs[1]
+                # lamb3 = eigs[2]
+                # e1 = vec1[0] * d1 + vec1[1] * d2 + vec1[2] * d3
+                # e2 = vec2[0] * d1 + vec2[1] * d2 + vec2[2] * d3
+                # e3 = vec3[0] * d1 + vec3[1] * d2 + vec3[2] * d3
+
+                # e1 /= np.linalg.norm(e1)
+                # e2 /= np.linalg.norm(e2)
+                # e3 /= np.linalg.norm(e3)
+
+                lamb1 =  1 + 3/s1**4
+                lamb2 =  1 + 3/s2**4
+                lamb3 =  1 + 3/s3**4
+                lamb4 =  (s2**3*s3**3 - s2**2 + s2*s3 - s3**2)/(s2**3*s3**3)
+                lamb5 =  (s1**3*s3**3 - s1**2 + s1*s3 - s3**2)/(s1**3*s3**3)
+                lamb6 =  (s1**3*s2**3 - s1**2 + s1*s2 - s2**2)/(s1**3*s2**3)
+                lamb7 =  (s1**3*s2**3 + s1**2 + s1*s2 + s2**2)/(s1**3*s2**3)
+                lamb8 =  (s2**3*s3**3 + s2**2 + s2*s3 + s3**2)/(s2**3*s3**3)
+                lamb9 =  (s1**3*s3**3 + s1**2 + s1*s3 + s3**2)/(s1**3*s3**3)
+
+                e1 = d1
+                e2 = d2
+                e3 = d3
+
+                H1 = lamb1 * outer(e1,e1) + lamb2 * outer(e2,e2) + lamb3 * outer(e3,e3) +\
+                    lamb4 * outer(t1,t1) + lamb5 * outer(t2,t2) + lamb6 * outer(t3,t3) +\
+                    lamb7 * outer(l1,l1) + lamb8 * outer(l2,l2) + lamb9 * outer(l3,l3)
+
+                # a,b,c = np.linalg.svd(H)
+                # b[b<0] = 0.
+                # # print(np.diag(b))
+                # H1 = np.dot(a, np.dot(np.diag(b),c))
+                # makezero(H1, tol=1e-6)
+                # makezero(H, tol=1e-6)
+                # print(H1)
+                # print()
+                # print(H)
+                H = H1
+
+                # exit()
 
         self.H_VoigtSize = H.shape[0]
 
@@ -757,6 +1451,15 @@ class SymmetricDirichlet(Material):
 
             stress = F + Is / 4. * dIsdF - 1/Jr * R + I1/Jr**2 * dJrdF
 
+
+        gJ = vec(dJdF(F))
+        HJ = d2JdFdF(F)
+        f = vec(F)
+
+        dJrdF = 0.5 * (1. + J / np.sqrt(J**2 + delta**2)) * dJdF(F)
+        gJr = vec(dJrdF)
+        HJr = 0.5 * (1 + J / np.sqrt(J**2 + delta**2)) * HJ + 0.5 * (delta**2 / (J**2 + delta**2)**(3./2.)) * np.outer(gJ,gJ)
+
         return stress
 
 
@@ -782,7 +1485,8 @@ class SymmetricDirichlet(Material):
             I1 = trace(S)
             Is = (I1**2 - trc) / Jr
 
-            energy  = 0.5 * trc + 1. / 8. * Is**2  / Jr - I1 / Jr
+            # energy  = 0.5 * trc + 1. / 8. * Is**2  / Jr - I1 / Jr
+            energy  = 0.5 * trc + 1. / 8. * Is**2 - I1 / Jr
 
         return energy
 
@@ -827,21 +1531,24 @@ class ARAPF(Material):
 
         I = StrainTensors['I']
         F = StrainTensors['F'][gcounter]
-        J = StrainTensors['J'][gcounter]
+        # F = np.array([[1,-7.],[15,3.]])
 
-        det = np.linalg.det
         u, s, vh = svd(F, full_matrices=True)
         vh = vh.T
 
         gR = dRdF(u, s, vh, True)
+        # gR = dRdF(u, s, vh, False)
 
         H = np.eye(d2,d2) - gR
         H *= 2.
 
+        # J = StrainTensors['J'][gcounter]
         # H += 0.1 * LocallyInjectiveHessian(J, vec(dJdF(F)), d2JdFdF(F))
 
-        # s = np.linalg.svd(C_Voigt)[1]
+        # s = np.linalg.svd(H)[1]
         # print(s)
+        # print(F)
+        # print(H)
         # exit()
 
         C_Voigt = H
