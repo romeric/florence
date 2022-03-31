@@ -994,7 +994,8 @@ class PostProcess(object):
             ScaledJacobianF[elem] = JFMin # for paper
             # ScaledFF[elem] = 1.0*np.min(Q1)/np.max(Q1)
             ScaledFF[elem] = np.min(Q1)
-            ScaledHH[elem] = 1.0*np.min(Q2)/np.max(Q2)
+            # ScaledHH[elem] = 1.0*np.min(Q2)/np.max(Q2)
+            ScaledHH[elem] = np.min(Q2)
             AverageJacobian[elem] = np.mean(Jacobian)
 
             if self.is_material_anisotropic:
@@ -1062,6 +1063,113 @@ class PostProcess(object):
         else:
             return self.is_scaledjacobian_computed, ScaledFF, ScaledHH, ScaledJacobianF, ScaledJacobian, ScaledFNFN, ScaledCNCN
 
+
+
+    def ComputeBetaMax(self, mesh, eps, TotalDisp=None, print_log=True, ideal_mesh=None):
+        """Computes max beta regularisation value
+        """
+
+        # post_function_space = FunctionSpace(mesh, evaluate_at_nodes=True, p=mesh.InferPolynomialDegree(), equally_spaced=True)
+        # post_function_space = FunctionSpace(mesh, p=mesh.InferPolynomialDegree(), equally_spaced=True)
+        # self.postdomain_bases = post_function_space
+
+        from Florence.Tensor import ssvd
+
+        PostDomain = self.postdomain_bases
+        PostDomain = self.domain_bases
+        if self.postdomain_bases is None:
+            raise ValueError("Function spaces/bases not set for post-processing")
+
+        ndim = mesh.InferSpatialDimension()
+        edim = mesh.InferElementalDimension()
+        vpoints = mesh.points
+        if TotalDisp is None:
+            TotalDisp = np.zeros((mesh.nnode, mesh.points.shape[1]))
+        if TotalDisp.ndim == 3:
+            vpoints = vpoints + TotalDisp[:,:ndim,-1]
+        elif TotalDisp.ndim == 2:
+            vpoints = vpoints + TotalDisp[:,:ndim]
+        else:
+            raise AssertionError("mesh points and displacment arrays are incompatible")
+
+        elements = mesh.elements
+
+        minJ = self.minJ
+        # minJ = self.minJF
+        delta = np.sqrt( minJ * minJ * 0.04 + eps * eps)
+        maxBeta = -1.e307
+        for elem in range(mesh.nelem):
+            if ideal_mesh is None:
+                LagrangeElemCoords = mesh.points[elements[elem,:],:]
+            else:
+                LagrangeElemCoords = ideal_mesh.points[ideal_mesh.elements[elem,:],:]
+                # LagrangeElemCoords = np.array([ [-0.5, 0], [ 0.5, 0], [0., np.sqrt(3.)/2.]])
+            EulerElemCoords = vpoints[elements[elem,:],:]
+            # EulerElemCoords = LagrangeElemCoords
+
+            # COMPUTE KINEMATIC MEASURES AT ALL INTEGRATION POINTS USING EINSUM (AVOIDING THE FOR LOOP)
+            # MAPPING TENSOR [\partial\vec{X}/ \partial\vec{\varepsilon} (ndim x ndim)]
+            ParentGradientX = np.einsum('ijk,jl->kil',PostDomain.Jm,LagrangeElemCoords)
+            # MAPPING TENSOR [\partial\vec{x}/ \partial\vec{\varepsilon} (ndim x ndim)]
+            ParentGradientx = np.einsum('ijk,jl->kil',PostDomain.Jm,EulerElemCoords)
+            # MATERIAL GRADIENT TENSOR IN PHYSICAL ELEMENT [\nabla_0 (N)]
+            MaterialGradient = np.einsum('ijk,kli->ijl',la.inv(ParentGradientX),PostDomain.Jm)
+            # DEFORMATION GRADIENT TENSOR [\vec{x} \otimes \nabla_0 (N)]
+            F = np.einsum('ij,kli->kjl',EulerElemCoords,MaterialGradient)
+            # F = F[0]
+            # print(F[0])
+            # F[0] += 0.59*np.eye(3,3)
+            # JACOBIAN OF DEFORMATION GRADIENT TENSOR
+            detF = np.abs(np.linalg.det(F))
+            # COFACTOR OF DEFORMATION GRADIENT TENSOR
+            H = np.einsum('ijk,k->ijk',np.linalg.inv(F).T,detF)
+
+            # COMPUTE WORST CONFORMAL MAP - RATIO OF LARGEST TO SMALLEST
+            # EIGENVALUES OF F
+            Sigmas = ssvd(F[0], full_matrices=True)[1]
+            # Sigmas = np.linalg.svd(F, full_matrices=True)[1]
+            # print(Sigmas)
+            I_F = Sigmas.sum()
+            # FIND JACOBIAN OF SPATIAL GRADIENT
+            # USING ISOPARAMETRIC
+            Jacobian = np.linalg.det(ParentGradientx)
+            # DISTORTION METRIC
+            # Jacobian = Jacobian**(-1.)/edim * np.sqrt(np.abs(np.einsum('kij,lij->kl',F,F))).diagonal()
+            # USING DETERMINANT OF DEFORMATION GRADIENT TENSOR
+            # THIS GIVES A RESULT MUCH CLOSER TO ONE
+            JacobianF = detF
+            # print(JacobianF[0])
+            if Jacobian > 0:
+                continue
+
+            # USING INVARIANT F:F
+            II_F = np.sqrt(np.abs(np.einsum('kij,lij->kl',F,F))).diagonal()
+            # USING INVARIANT H:H
+            II_H = np.sqrt(np.abs(np.einsum('ijk,ijl->kl',H,H))).diagonal()
+            # USING INVARIANT H:I
+            I_H = 0.5 * (I_F**2 - II_F[0])
+
+            J = JacobianF[0]
+            Jr = 0.5 * (J + np.sqrt( J**2 + delta**2))
+
+            if edim == 3:
+                # p = [1., I_F, I_H, minJ]
+                p = [1., I_F, I_H, -(Jr - J)]
+            elif edim == 2:
+                p = [1., I_F, -(Jr - J)]
+                # print(self.minJ, Jr)
+
+            roots = np.roots(p)
+            # root = np.real(roots[~np.iscomplex(roots)])
+            root = np.max(np.real(roots[~np.iscomplex(roots)]))
+            # print(I_F, I_H, root)
+            # print(I_F, I_H, J, roots)
+            # print(I_F, J, root, roots)
+            maxBeta = max(root, maxBeta)
+
+        self.maxBeta = maxBeta
+        # print(maxBeta)
+        return maxBeta
 
 
 

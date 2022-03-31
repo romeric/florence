@@ -199,7 +199,6 @@ def LocallyInjectiveHessian(J, gJ, HJ):
 
 
 def FillConstitutiveBF(B,SpatialGradient,ndim,nvar):
-
     if ndim == 2:
         B[::ndim,0] = SpatialGradient[0,:]
         B[::ndim,2] = SpatialGradient[1,:]
@@ -435,7 +434,7 @@ class MIPSF(Material):
         self.delta = np.sqrt(1e-8 + min(minJ, 0.)**2 * 0.04)
         # self.delta = np.sqrt(1e-8 + min(minJ, 0.)**2 * 0.04) * 2. # embed factot 4 in the definition of delta
         # self.delta = np.sqrt(1e-8 + min(minJ, 0.)**2) # superbad it seems like
-        # self.delta = 0.
+        self.delta = 0.
 
         # LOW LEVEL DISPATCHER
         # self.has_low_level_dispatcher = True
@@ -489,14 +488,15 @@ class MIPSF(Material):
         # Neffs
         # H += self.lamb * ((0.4*Jr**10 + 0.6)/Jr**7 * np.outer(gJr,gJr) + 0.1*(Jr**10 - 1)/Jr**6 * HJr)
         # Garanzha
+        # print(self.lamb,self.delta)
         H += (1.0/Jr**3 * np.outer(gJr,gJr) + (0.5 - 0.5/Jr**2) * HJr) * self.lamb
         # standard
         # H += self.lamb * (np.outer(gJr,gJr) + (Jr - 1.) * HJr)
 
         # H += self.lamb * LocallyInjectiveHessian(Jr, gJr, HJr)
 
-        # if True:
-        if False:
+        if True:
+        # if False:
             if self.ndim == 2:
 
                 I2 = trc;
@@ -595,7 +595,8 @@ class MIPSF(Material):
                 # R = u.dot(vh.T)
                 # S = np.dot(vh, np.dot(np.diag(s), vh.T))
                 S = np.dot(u, np.dot(np.diag(s), vh.T))
-                I1 = trace(S)
+                # I1 = trace(S)
+                I1 = np.sum(s)
 
                 s1 = s[0]
                 s2 = s[1]
@@ -603,6 +604,8 @@ class MIPSF(Material):
                 # s1 = S[0,0]
                 # s2 = S[1,1]
                 # s3 = S[2,2]
+                # if s3 < 0:
+                #     s3 = 1e-3
 
                 T1 = np.array([[0.,-1.,0.],[1.,0.,0],[0.,0.,0.]])
                 T1 = 1./np.sqrt(2) * np.dot(u, np.dot(T1, vh.T))
@@ -634,26 +637,29 @@ class MIPSF(Material):
                 D3 = np.dot(u, np.dot(D3, vh.T))
                 d3 = vec(D3)
 
-                # A = np.array([
-                #     [2.*(5*I2 - 3*s1**2)/(27*J**(2./3.)*s1**2), (-8*I2*s3 + 12*s3**3)/(27*J**(5./3.)), (-8*I2*s2 + 12*s2**3)/(27*J**(5./3.))],
-                #     [(-8.*I2*s3 + 12*s3**3)/(27*J**(5./3.)), 2*(5*I2 - 3*s2**2)/(27*J**(2/3)*s2**2), (-8*I2*s1 + 12*s1**3)/(27*J**(5./3.))],
-                #     [(-8.*I2*s2 + 12*s2**3)/(27*J**(5./3.)), (-8*I2*s1 + 12*s1**3)/(27*J**(5./3.)), 2*(5*I2 - 3*s3**2)/(27*J**(2./3.)*s3**2)]
-                # ])
-                A = np.array([[2.*(2*s1**2 + 5*s2**2 + 5*s3**2)/(27*J**(2/3)*s1**2), -4*s3*(2*s1**2 + 2*s2**2 - s3**2)/(27*J**(5/3)), -4*s2*(2*s1**2 - s2**2 + 2*s3**2)/(27*J**(5/3))],
-                    [-4*s3*(2*s1**2 + 2*s2**2 - s3**2)/(27*J**(5/3)), 2*(5*s1**2 + 2*s2**2 + 5*s3**2)/(27*J**(2/3)*s2**2), 4*s1*(s1**2 - 2*s2**2 - 2*s3**2)/(27*J**(5/3))],
-                    [-4*s2*(2*s1**2 - s2**2 + 2*s3**2)/(27*J**(5/3)), 4*s1*(s1**2 - 2*s2**2 - 2*s3**2)/(27*J**(5/3)), 2*(5*s1**2 + 5*s2**2 + 2*s3**2)/(27*J**(2/3)*s3**2)]])
+                # A = np.array([[2.*(2*s1**2 + 5*s2**2 + 5*s3**2)/(27*J**(2/3)*s1**2), -4*s3*(2*s1**2 + 2*s2**2 - s3**2)/(27*J**(5/3)), -4*s2*(2*s1**2 - s2**2 + 2*s3**2)/(27*J**(5/3))],
+                #     [-4*s3*(2*s1**2 + 2*s2**2 - s3**2)/(27*J**(5/3)), 2*(5*s1**2 + 2*s2**2 + 5*s3**2)/(27*J**(2/3)*s2**2), 4*s1*(s1**2 - 2*s2**2 - 2*s3**2)/(27*J**(5/3))],
+                #     [-4*s2*(2*s1**2 - s2**2 + 2*s3**2)/(27*J**(5/3)), 4*s1*(s1**2 - 2*s2**2 - 2*s3**2)/(27*J**(5/3)), 2*(5*s1**2 + 5*s2**2 + 2*s3**2)/(27*J**(2/3)*s3**2)]])
 
+                A = np.array([[2.*(2*s1**2 + 5*s2**2 + 5*s3**2)/(27.*s1**2*(s1*s2*s3)**(2/3)), 4*s3*(-2*s1**2 - 2.*s2**2 + s3**2)/(27.*(s1*s2*s3)**(5/3)), 4*s2*(-2*s1**2 + s2**2 - 2*s3**2)/(27.*(s1*s2*s3)**(5/3))],
+                    [4*s3*(-2*s1**2 - 2*s2**2 + s3**2)/(27.*(s1*s2*s3)**(5/3)), 2*(5*s1**2 + 2*s2**2 + 5*s3**2)/(27.*s2**2*(s1*s2*s3)**(2/3)), 4*s1*(s1**2 - 2*s2**2 - 2*s3**2)/(27.*(s1*s2*s3)**(5/3))],
+                    [4*s2*(-2*s1**2 + s2**2 - 2*s3**2)/(27.*(s1*s2*s3)**(5/3)), 4*s1*(s1**2 - 2*s2**2 - 2*s3**2)/(27.*(s1*s2*s3)**(5/3)), 2*(5*s1**2 + 5*s2**2 + 2*s3**2)/(27.*s3**2*(s1*s2*s3)**(2/3))]])
                 # print(A)
-                print(repr(A.T.flatten()))
+                # print(repr(A.T.flatten()))
                 eigs, vecs = sp.linalg.eigh(A)
+                # eigs, vecs = sp.linalg.eigh(A, driver="syev")
+                # vecs = vecs.T
                 vec1 = vecs[:,0]
                 vec2 = vecs[:,1]
                 vec3 = vecs[:,2]
                 # eigs = np.linalg.eigvals(A)
-                print(eigs)
-                print(vecs)
+                # print(eigs)
+                # print(vecs)
+                # print(np.flipud(vecs))
                 # ivecs = np.linalg.inv(vecs)
                 # print(norm(vec1))
+                # print(repr(A))
+                vecs = np.flipud(vecs)
                 # exit()
                 # eigs.sort()
                 # eigs = eigs[::-1]
@@ -666,6 +672,13 @@ class MIPSF(Material):
                 # vec2 = A[:,1]
                 # vec3 = A[:,2]
                 # print(vec2)
+
+                # if s3 < 0:
+                #     print(repr(A.T.flatten()))
+                #     print(A)
+                #     print(eigs)
+                #     print(vecs)
+                #     exit()
 
                 # ua, sa, vha = svd_rv(A)
                 # vha = vha.T
@@ -687,29 +700,22 @@ class MIPSF(Material):
                 # lamb3 =  (-(-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**2/(729*J**(16/3)) + (36*I2**2*J**2*s1**2 + 36*I2**2*J**2*s2**2 + 36*I2**2*J**2*s3**2 + 192*I2*J**2*s1**4 - 120*I2*J**2*s1**2*s2**2 - 120*I2*J**2*s1**2*s3**2 + 192*I2*J**2*s2**4 - 120*I2*J**2*s2**2*s3**2 + 192*I2*J**2*s3**4 + 108*J**4 - 144*J**2*s1**6 - 144*J**2*s2**6 - 144*J**2*s3**6)/(243*J**(16/3)))/(3*(sqrt(-4*((-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**2/(729*J**(16/3)) + (-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(243*J**(16/3)))**3 + ((1944*I2**3*J**3 - 3240*I2**2*J**3*s1**2 - 3240*I2**2*J**3*s2**2 - 3240*I2**2*J**3*s3**2 + 2592*I2*J**3*s1**4 + 1944*I2*J**3*s1**2*s2**2 + 1944*I2*J**3*s1**2*s3**2 + 2592*I2*J**3*s2**4 + 1944*I2*J**3*s2**2*s3**2 + 2592*I2*J**3*s3**4 - 3240*J**5 - 864*J**3*s1**6 - 864*J**3*s2**6 - 864*J**3*s3**6)/(729*J**7) + 2*(-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**3/(19683*J**8) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)*(-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(2187*J**8))**2)/2 + (1944*I2**3*J**3 - 3240*I2**2*J**3*s1**2 - 3240*I2**2*J**3*s2**2 - 3240*I2**2*J**3*s3**2 + 2592*I2*J**3*s1**4 + 1944*I2*J**3*s1**2*s2**2 + 1944*I2*J**3*s1**2*s3**2 + 2592*I2*J**3*s2**4 + 1944*I2*J**3*s2**2*s3**2 + 2592*I2*J**3*s3**4 - 3240*J**5 - 864*J**3*s1**6 - 864*J**3*s2**6 - 864*J**3*s3**6)/(1458*J**7) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**3/(19683*J**8) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)*(-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(4374*J**8))**(1/3)) - (sqrt(-4*((-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**2/(729*J**(16/3)) + (-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(243*J**(16/3)))**3 + ((1944*I2**3*J**3 - 3240*I2**2*J**3*s1**2 - 3240*I2**2*J**3*s2**2 - 3240*I2**2*J**3*s3**2 + 2592*I2*J**3*s1**4 + 1944*I2*J**3*s1**2*s2**2 + 1944*I2*J**3*s1**2*s3**2 + 2592*I2*J**3*s2**4 + 1944*I2*J**3*s2**2*s3**2 + 2592*I2*J**3*s3**4 - 3240*J**5 - 864*J**3*s1**6 - 864*J**3*s2**6 - 864*J**3*s3**6)/(729*J**7) + 2*(-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**3/(19683*J**8) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)*(-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(2187*J**8))**2)/2 + (1944*I2**3*J**3 - 3240*I2**2*J**3*s1**2 - 3240*I2**2*J**3*s2**2 - 3240*I2**2*J**3*s3**2 + 2592*I2*J**3*s1**4 + 1944*I2*J**3*s1**2*s2**2 + 1944*I2*J**3*s1**2*s3**2 + 2592*I2*J**3*s2**4 + 1944*I2*J**3*s2**2*s3**2 + 2592*I2*J**3*s3**4 - 3240*J**5 - 864*J**3*s1**6 - 864*J**3*s2**6 - 864*J**3*s3**6)/(1458*J**7) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)**3/(19683*J**8) + (-10*I2*s1**2*s2**2 - 10*I2*s1**2*s3**2 - 10*I2*s2**2*s3**2 + 18*J**2)*(-36*I2**2*J**2*s1**2 - 36*I2**2*J**2*s2**2 - 36*I2**2*J**2*s3**2 - 192*I2*J**2*s1**4 + 120*I2*J**2*s1**2*s2**2 + 120*I2*J**2*s1**2*s3**2 - 192*I2*J**2*s2**4 + 120*I2*J**2*s2**2*s3**2 - 192*I2*J**2*s3**4 - 108*J**4 + 144*J**2*s1**6 + 144*J**2*s2**6 + 144*J**2*s3**6)/(4374*J**8))**(1/3)/3 + (10*I2*s1**2*s2**2 + 10*I2*s1**2*s3**2 + 10*I2*s2**2*s3**2 - 18*J**2)/(81*J**(8/3))
 
                 # x = J**(5./3.)
-                lamb4 =  -2*I2*s1/(9*J**(5/3.)) + 2./(3*J**(2/3.))
-                lamb5 =  -2*I2*s2/(9*J**(5/3.)) + 2./(3*J**(2/3.))
-                lamb6 =  -2*I2*s3/(9*J**(5/3.)) + 2./(3*J**(2/3.))
-                lamb7 =  2*I2*s3/(9*J**(5/3.)) + 2./(3*J**(2/3.))
-                lamb8 =  2*I2*s1/(9*J**(5/3.)) + 2./(3*J**(2/3.))
-                lamb9 =  2*I2*s2/(9*J**(5/3.)) + 2./(3*J**(2/3.))
+                # lamb4 =  -2*I2*s1/(9*J**(5/3.)) + 2./(3*J**(2/3.))
+                # lamb5 =  -2*I2*s2/(9*J**(5/3.)) + 2./(3*J**(2/3.))
+                # lamb6 =  -2*I2*s3/(9*J**(5/3.)) + 2./(3*J**(2/3.))
+                # lamb7 =  2*I2*s3/(9*J**(5/3.)) + 2./(3*J**(2/3.))
+                # lamb8 =  2*I2*s1/(9*J**(5/3.)) + 2./(3*J**(2/3.))
+                # lamb9 =  2*I2*s2/(9*J**(5/3.)) + 2./(3*J**(2/3.))
 
-                # lamb4 =  -2.*I2*s1/(9*J**(5/3)) + 2./(3*J**(2/3))
-                # lamb5 =  -2.*I2*s2/(9*J**(5/3)) + 2./(3*J**(2/3))
-                # lamb6 =  -2.*I2*s3/(9*J**(5/3)) + 2./(3*J**(2/3))
-                # lamb7 =  2.*I2*s3/(9*J**(5/3)) + 2./(3*J**(2/3))
-                # lamb8 =  2.*I2*s1/(9*J**(5/3)) + 2./(3*J**(2/3))
-                # lamb9 =  2.*I2*s2/(9*J**(5/3)) + 2./(3*J**(2/3))
-                # print(J, x, np.cbrt(J)**5.)
+                lamb4 =  2.*s1*(-s1**2 -   s2**2 + 3*s2*s3 - s3**2)/(9.*(s1*s2*s3)**(5/3))
+                lamb5 =  2.*s2*(-s1**2 + 3*s1*s3 -   s2**2 - s3**2)/(9.*(s1*s2*s3)**(5/3))
+                lamb6 =  2.*s3*(-s1**2 + 3*s1*s2 -   s2**2 - s3**2)/(9.*(s1*s2*s3)**(5/3))
+                lamb7 =  2.*s3*( s1**2 + 3*s1*s2 +   s2**2 + s3**2)/(9.*(s1*s2*s3)**(5/3))
+                lamb8 =  2.*s1*( s1**2 +   s2**2 + 3*s2*s3 + s3**2)/(9.*(s1*s2*s3)**(5/3))
+                lamb9 =  2.*s2*( s1**2 + 3*s1*s3 +   s2**2 + s3**2)/(9.*(s1*s2*s3)**(5/3))
 
-                # lamb4 =  2*s1*(-s1**2 - s2**2 + 3*s2*s3 - s3**2)/(9*(s1*s2*s3)**(5/3))
-                # lamb5 =  2*s2*(-s1**2 + 3*s1*s3 - s2**2 - s3**2)/(9*(s1*s2*s3)**(5/3))
-                # lamb6 =  2*s3*(-s1**2 + 3*s1*s2 - s2**2 - s3**2)/(9*(s1*s2*s3)**(5/3))
-                # lamb7 =  2*s3*(s1**2 + 3*s1*s2 + s2**2 + s3**2)/(9*(s1*s2*s3)**(5/3))
-                # lamb8 =  2*s1*(s1**2 + s2**2 + 3*s2*s3 + s3**2)/(9*(s1*s2*s3)**(5/3))
-                # lamb9 =  2*s2*(s1**2 + 3*s1*s3 + s2**2 + s3**2)/(9*(s1*s2*s3)**(5/3))
-
-                # print(s1,s2,s3,I2,J,lamb2)
+                # if s3 < 0:
+                    # print(s1,s2,s3,I2,J,lamb2)
 
                 # print(eigs[0] * outer(vec1,vec1) + eigs[1] * outer(vec2,vec2) + eigs[2] * outer(vec3,vec3))
                 # print(eigs[0] * outer(vec1,ivecs[:,0]) + eigs[1] * outer(vec2,ivecs[:,1]) + eigs[2] * outer(vec3,ivecs[:,2]))
@@ -772,11 +778,9 @@ class MIPSF(Material):
                 # e2 = vecs[0][1] * d1 + vecs[1][1] * d2 + vecs[2][1] * d3
                 # e3 = vecs[0][2] * d1 + vecs[1][2] * d2 + vecs[2][2] * d3
 
-
-
-                e1 /= np.linalg.norm(e1)
-                e2 /= np.linalg.norm(e2)
-                e3 /= np.linalg.norm(e3)
+                # e1 /= np.linalg.norm(e1)
+                # e2 /= np.linalg.norm(e2)
+                # e3 /= np.linalg.norm(e3)
 
                 # es = np.dot(u, np.dot(A, vh.T))
                 # np.dot(u, rA.dot(vh.T))
@@ -820,8 +824,18 @@ class MIPSF(Material):
                 # print(H)
                 # exit()
 
-                # print(np.dot(u, np.dot(vecs.T, vh.T)))
+                # kk=0.
+                # lamb1 = max(lamb1, kk)
+                # lamb2 = max(lamb2, kk)
+                # lamb3 = max(lamb3, kk)
+                # lamb4 = max(lamb4, kk)
+                # lamb5 = max(lamb5, kk)
+                # lamb6 = max(lamb6, kk)
+                # lamb7 = max(lamb7, kk)
+                # lamb8 = max(lamb8, kk)
+                # lamb9 = max(lamb9, kk)
 
+                # print(np.dot(u, np.dot(vecs.T, vh.T)))
                 H1 = lamb1 * outer(e1,e1) + lamb2 * outer(e2,e2) + lamb3 * outer(e3,e3) +\
                     lamb4 * outer(t1,t1) + lamb5 * outer(t2,t2) + lamb6 * outer(t3,t3) +\
                     lamb7 * outer(l1,l1) + lamb8 * outer(l2,l2) + lamb9 * outer(l3,l3)
@@ -833,15 +847,30 @@ class MIPSF(Material):
                 # b[b<0] = 0.
                 # print(np.diag(b))
                 # H1 = np.dot(a, np.dot(np.diag(b),c))
+                # print(J - Jr)
                 makezero(H1)
                 makezero(H)
                 # print(H1)
                 # print()
                 # print(H)
-                H = H1
+                # print(norm(H - H1))
+                # H = H1
 
                 # exit()
 
+        # xx = np.linalg.svd(HJ)[1]
+        vals, v = np.linalg.eigh(H)
+        # print(np.min(vals))
+        vals[vals < 0.] = 0.
+        H = np.dot(v, np.dot(np.diag(vals),np.linalg.inv(v)))
+        # print(H)
+
+        # I3 = J
+        # sqrt = np.sqrt
+        # delta2 = delta**2
+        # freg = (-2*(I3 + sqrt(I3**2 + delta2))*(I3**2 + delta2)**(15/2)*(-I3*(I3 + sqrt(I3**2 + delta2))**2*(I3**2 + delta2) + 8*(-2*I3 + 1)*(I3**2 + delta2) + (I3 + sqrt(I3**2 + delta2))**2*(I3**2 + delta2)**(3/2) + 4*(I3 + sqrt(I3**2 + delta2))*(I3**2 + delta2) + 8*(I3**2 + delta2)**(3/2))**2 + (I3**2 + delta2)**3*(-4*I3 + (I3 + sqrt(I3**2 + delta2))**2*(-I3 + sqrt(I3**2 + delta2) + 1) + 4*sqrt(I3**2 + delta2) + 4)*(-I3**2*(I3 + sqrt(I3**2 + delta2))**3*(I3**2 + delta2)**6 - 4*delta2*(I3 + sqrt(I3**2 + delta2))*(I3**2 + delta2)**6 + 8*delta2*(2*I3 - 1)*(I3**2 + delta2)**6 + 24*(-2*I3 + 1)*(I3 + sqrt(I3**2 + delta2))*(I3**2 + delta2)**(13/2) + (I3 + sqrt(I3**2 + delta2))**3*(I3**2 + delta2)**7 + 8*(I3 + sqrt(I3**2 + delta2))**2*(I3**2 + delta2)**(13/2) + 32*(I3 + sqrt(I3**2 + delta2))*(I3**2 + delta2)**7))/(4*(I3 + sqrt(I3**2 + delta2))**5*(I3**2 + delta2)**(21/2))
+        # jreg = 2*(-16*(I3 + sqrt(I3**2 + delta2))*(I3**2 + delta2)**(5/2) + (I3**2 + delta2)*(-delta2*(I3**2 + delta2) + 3*(I3 + sqrt(I3**2 + delta2))*(I3**2 + delta2)**(3/2))*((I3 + sqrt(I3**2 + delta2))**2 + 4))/((I3 + sqrt(I3**2 + delta2))**5*(I3**2 + delta2)**(7/2))
+        # print(jreg, freg)
 
         self.H_VoigtSize = H.shape[0]
 
@@ -857,7 +886,7 @@ class MIPSF(Material):
         trc = trace(F.T.dot(F))
 
         # self.delta = np.sqrt(1e-8 + min(self.minJ, 0.)**2 * 0.04)
-        d = self.ndim
+        d = float(self.ndim)
         delta = self.delta
 
         Jr = 0.5 * (J + np.sqrt(J**2 + delta**2))
@@ -1087,7 +1116,8 @@ class MIPSF2(Material):
             lamb3 = 2. / Jr + ( I2 - 2 * J)/(2 * s * Jr)
             lamb4 =           (-I2 + 2 * J)/(2 * s * Jr)
 
-            # print(lamb1)
+            # print(lamb1, lamb2, lamb3, lamb4)
+            # print(np.min([lamb1, lamb2, lamb3, lamb4]))
             kk=0.
             lamb1 = max(lamb1, kk)
             lamb2 = max(lamb2, kk)
@@ -1164,6 +1194,207 @@ class MIPSF2(Material):
 
 
         return energy
+
+
+
+
+
+
+class MIPSF3(Material):
+    """The MIPS energy
+
+        W(F) = Fr:Fr/d/Jr^(2/d)
+
+    """
+
+    def __init__(self, ndim, **kwargs):
+        mtype = type(self).__name__
+        super(MIPSF3, self).__init__(mtype, ndim, **kwargs)
+
+        self.is_transversely_isotropic = False
+        self.energy_type = "internal_energy"
+        self.nature = "nonlinear"
+        self.fields = "mechanics"
+
+        if self.ndim==3:
+            self.H_VoigtSize = 9
+        elif self.ndim==2:
+            self.H_VoigtSize = 4
+
+        # the smaller minJ the more chance to untangle something
+        minJ = self.minJ
+        # self.delta = np.sqrt(1e-12 + min(minJ, 0.)**2 * 0.04)
+        self.delta = np.sqrt(1e-8 + min(minJ, 0.)**2 * 0.04)
+        # self.delta = np.sqrt(1e-8 + min(minJ, 0.)**2 * 0.04) * 2. # embed factot 4 in the definition of delta
+        # self.delta = np.sqrt(1e-8 + min(minJ, 0.)**2) # superbad it seems like
+        # self.delta = .7
+        # self.maxBeta = self.maxBeta
+
+        # LOW LEVEL DISPATCHER
+        # self.has_low_level_dispatcher = True
+        self.has_low_level_dispatcher = False
+
+    def KineticMeasures(self,F,ElectricFieldx=0, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._NeoHookean_ import KineticMeasures
+        return KineticMeasures(self,F)
+
+
+    def Hessian(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        # self.delta = np.sqrt(1e-8 + min(self.minJ, 0.)**2 * 0.04)
+        d = self.ndim
+        # delta = self.delta
+        beta = self.maxBeta
+
+        II_F = trace(F.T.dot(F))
+
+        # Compute the rotation variant SVD of F
+        u, s, vh = svd(F, full_matrices=True)
+        vh = vh.T
+        S = np.dot(u, np.dot(np.diag(s), vh.T))
+        # I1 = trace(S)
+        I1 = s.sum()
+
+
+        Jr = J + I1 * beta + beta**2
+        if np.isclose(Jr, 0) or Jr < 0.:
+            Jr = max(1e-8, Jr)
+        # if Jr < 0:
+            # print(Jr, beta)
+
+        # if self.ndim == 2 and False:
+        if self.ndim == 2 and True:
+
+            I2 = II_F
+            I3 = J
+
+            # s1 = S[0, 0];
+            # s2 = S[1, 1];
+            s1 = s[0]
+            s2 = s[1]
+
+            # Complete eigensystem for Hessian
+            # Twist modes
+            T = np.array([[0.,-1],[1,0.]])
+            T = 1./np.sqrt(2.) * np.dot(u, np.dot(T, vh.T))
+            t = vec(T)
+
+            # // Flip modes
+            L = np.array([[0.,1],[1,0.]])
+            L = 1./np.sqrt(2.) * np.dot(u, np.dot(L, vh.T))
+            l = vec(L)
+
+            # Scale modes
+            # mm = 1./np.sqrt(2.)
+            mm=1
+            D1 = np.array([[1.,0],[0,0.]])
+            D1 = mm * np.dot(u, np.dot(D1, vh.T))
+            d1 = vec(D1)
+
+            D2 = np.array([[0.,0],[0,1.]])
+            D2 = mm * np.dot(u, np.dot(D2, vh.T))
+            d2 = vec(D2)
+
+            sqrt = np.sqrt
+            tau =  (2*beta*s1 - 2*beta*s2 + s1**2 - s2**2 + sqrt(I1**2*beta**2 + 2*I1*J*beta + 2*I1*beta**3 - J**2 - 6*J*beta**2 - 4*J*beta*s1 - 4*J*beta*s2 + beta**4 + 4*beta**2*s1**2 + 4*beta**2*s2**2 + 4*beta*s1**3 + 4*beta*s2**3 + s1**4 + s2**4))/(I1*beta + J + beta**2)
+
+            lamb1 =  (I1**2*beta**2 + 2*I1*beta**3 + I1*beta*s1**2 + I1*beta*s2**2 - I1*beta*sqrt(I1**2*beta**2 + 2*I1*J*beta + 2*I1*beta**3 - J**2 - 6*J*beta**2 - 4*J*beta*s1 - 4*J*beta*s2 + beta**4 + 4*beta**2*s1**2 + 4*beta**2*s2**2 + 4*beta*s1**3 + 4*beta*s2**3 + s1**4 + s2**4) + I2*beta**2 + I2*beta*s1 + I2*beta*s2 + I2*s1**2/2 + I2*s2**2/2 - I2*sqrt(I1**2*beta**2 + 2*I1*J*beta + 2*I1*beta**3 - J**2 - 6*J*beta**2 - 4*J*beta*s1 - 4*J*beta*s2 + beta**4 + 4*beta**2*s1**2 + 4*beta**2*s2**2 + 4*beta*s1**3 + 4*beta*s2**3 + s1**4 + s2**4)/2 - J**2 - 2*J*beta**2 - 2*J*beta*s1 - 2*J*beta*s2 + beta**4 + beta**2*s1**2 + beta**2*s2**2 - beta**2*sqrt(I1**2*beta**2 + 2*I1*J*beta + 2*I1*beta**3 - J**2 - 6*J*beta**2 - 4*J*beta*s1 - 4*J*beta*s2 + beta**4 + 4*beta**2*s1**2 + 4*beta**2*s2**2 + 4*beta*s1**3 + 4*beta*s2**3 + s1**4 + s2**4))/(I1**3*beta**3 + 3*I1**2*J*beta**2 + 3*I1**2*beta**4 + 3*I1*J**2*beta + 6*I1*J*beta**3 + 3*I1*beta**5 + J**3 + 3*J**2*beta**2 + 3*J*beta**4 + beta**6)
+            lamb2 =  (I1**2*beta**2 + 2*I1*beta**3 + I1*beta*s1**2 + I1*beta*s2**2 + I1*beta*sqrt(I1**2*beta**2 + 2*I1*J*beta + 2*I1*beta**3 - J**2 - 6*J*beta**2 - 4*J*beta*s1 - 4*J*beta*s2 + beta**4 + 4*beta**2*s1**2 + 4*beta**2*s2**2 + 4*beta*s1**3 + 4*beta*s2**3 + s1**4 + s2**4) + I2*beta**2 + I2*beta*s1 + I2*beta*s2 + I2*s1**2/2 + I2*s2**2/2 + I2*sqrt(I1**2*beta**2 + 2*I1*J*beta + 2*I1*beta**3 - J**2 - 6*J*beta**2 - 4*J*beta*s1 - 4*J*beta*s2 + beta**4 + 4*beta**2*s1**2 + 4*beta**2*s2**2 + 4*beta*s1**3 + 4*beta*s2**3 + s1**4 + s2**4)/2 - J**2 - 2*J*beta**2 - 2*J*beta*s1 - 2*J*beta*s2 + beta**4 + beta**2*s1**2 + beta**2*s2**2 + beta**2*sqrt(I1**2*beta**2 + 2*I1*J*beta + 2*I1*beta**3 - J**2 - 6*J*beta**2 - 4*J*beta*s1 - 4*J*beta*s2 + beta**4 + 4*beta**2*s1**2 + 4*beta**2*s2**2 + 4*beta*s1**3 + 4*beta*s2**3 + s1**4 + s2**4))/(I1**3*beta**3 + 3*I1**2*J*beta**2 + 3*I1**2*beta**4 + 3*I1*J**2*beta + 6*I1*J*beta**3 + 3*I1*beta**5 + J**3 + 3*J**2*beta**2 + 3*J*beta**4 + beta**6)
+            lamb3 =  (2*I1*beta + I2/2 + J + 2*beta**2)/(I1*beta + J + beta**2)**2
+            lamb4 =  (I1 + 2*beta)*(-I2 + 2*J)/(2*I1*(I1*beta + J + beta**2)**2)
+
+            kk=0.
+            lamb1 = max(lamb1, kk)
+            lamb2 = max(lamb2, kk)
+            lamb3 = max(lamb3, kk)
+            lamb4 = max(lamb4, kk)
+
+            # Scaling modes do not decouple for MIPS
+            gamma  = np.sqrt(1. + tau**2) # normaliser
+
+            # Coupled scaling modes
+            e1 = 1. / gamma * (tau * d1 + d2)
+            e2 = 1. / gamma * (d1 - tau * d2)
+
+            d1 = e1
+            d2 = e2
+
+            H = lamb1 * np.outer(d1, d1) + lamb2 * np.outer(d2, d2) + lamb3 * np.outer(l, l) + lamb4 * np.outer(t, t)
+
+
+        # stress +=  2. * J / Jr**2 * dJrdF - 2. / Jr * dJdF(F)
+
+        self.H_VoigtSize = H.shape[0]
+
+        return H
+
+
+    def CauchyStress(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        d = self.ndim
+        # delta = self.delta
+        beta = self.maxBeta
+
+        # Compute the rotation variant SVD of F
+        u, s, vh = svd(F, full_matrices=True)
+        vh = vh.T
+        R = u.dot(vh.T)
+        S = np.dot(u, np.dot(np.diag(s), vh.T))
+        # I1 = trace(S)
+        I1 = s.sum()
+
+        Jr = J + I1 * beta + beta**2
+        if np.isclose(Jr, 0) or Jr < 0.:
+            Jr = max(1e-8, Jr)
+
+        I2 = trace(F.T.dot(F))
+
+        H = dJdF(F)
+        stress = 1. / Jr * (F - H) + 1. / Jr**2 * (J - I2 / 2.) * (H + beta * R)
+        # stress = 1. / Jr * (F - H) + 1. / Jr**2 * (J - I2 / 2.) * (H + 0. * R)
+
+        return stress
+
+
+    def InternalEnergy(self,StrainTensors,elem=0,gcounter=0):
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        d = self.ndim
+        delta = self.delta
+        beta = self.maxBeta
+
+        # Compute the rotation variant SVD of F
+        u, s, vh = svd(F, full_matrices=True)
+        vh = vh.T
+        S = np.dot(u, np.dot(np.diag(s), vh.T))
+        # I1 = trace(S)
+        I1 = s.sum()
+        Jr = J + I1 * beta + beta**2
+
+        if np.isclose(Jr, 0) or Jr < 0.:
+            Jr = max(1e-8, Jr)
+        # IIFr = trace(Fr.T.dot(Fr))
+        I2 = trace(F.T.dot(F))
+
+        energy  = (1./d * Jr**(-2./d) * I2) + 1 - J / Jr
+
+
+        return energy
+
+
+
+
 
 
 
@@ -1255,15 +1486,16 @@ class SymmetricDirichlet(Material):
         if True:
             if self.ndim == 2:
                 # Compute the rotation variant SVD of F
-                u, s, vh = svd(F, full_matrices=True)
+                u, s, vh = svd_rv(F, full_matrices=True)
                 vh = vh.T
                 # R = u.dot(vh.T)
                 # S = np.dot(vh, np.dot(np.diag(s), vh.T))
                 S = np.dot(u, np.dot(np.diag(s), vh.T))
-                I1 = trace(S)
+                # I1 = trace(S)
+                I1 = s.sum()
 
-                # // Complete eigensystem for Hessian
-                # // Twist modes
+                # Complete eigensystem for Hessian
+                # Twist modes
                 T = np.array([[0.,-1],[1,0.]])
                 T = 1./np.sqrt(2.) * np.dot(u, np.dot(T, vh.T))
                 t = vec(T)
@@ -1339,6 +1571,15 @@ class SymmetricDirichlet(Material):
                 s2 = s[1]
                 s3 = s[2]
 
+                # product these does not equal J
+                # s1 = S[0,0]
+                # s2 = S[1,1]
+                # s3 = S[2,2]
+
+                if np.abs(s1*s2*s3-J) > 1e-6:
+                    print(s1*s2*s3-J)
+
+
                 T1 = np.array([[0.,-1.,0.],[1.,0.,0],[0.,0.,0.]])
                 T1 = 1./np.sqrt(2) * np.dot(u, np.dot(T1, vh.T))
                 t1 = vec(T1)
@@ -1369,6 +1610,10 @@ class SymmetricDirichlet(Material):
                 D3 = np.dot(u, np.dot(D3, vh.T))
                 d3 = vec(D3)
 
+                e1 = d1
+                e2 = d2
+                e3 = d3
+
                 # A = np.array([[1 + 3/s1**4, 0, 0], [0, 1 + 3/s2**4, 0], [0, 0, 1 + 3/s3**4]])
                 # eigs, vecs = sp.linalg.eigh(A)
                 # vec1 = vecs[:,0]
@@ -1377,13 +1622,24 @@ class SymmetricDirichlet(Material):
                 # lamb1 = eigs[0]
                 # lamb2 = eigs[1]
                 # lamb3 = eigs[2]
-                # e1 = vec1[0] * d1 + vec1[1] * d2 + vec1[2] * d3
-                # e2 = vec2[0] * d1 + vec2[1] * d2 + vec2[2] * d3
-                # e3 = vec3[0] * d1 + vec3[1] * d2 + vec3[2] * d3
+                # # e1 = vec1[0] * d1 + vec1[1] * d2 + vec1[2] * d3
+                # # e2 = vec2[0] * d1 + vec2[1] * d2 + vec2[2] * d3
+                # # e3 = vec3[0] * d1 + vec3[1] * d2 + vec3[2] * d3
 
-                # e1 /= np.linalg.norm(e1)
-                # e2 /= np.linalg.norm(e2)
-                # e3 /= np.linalg.norm(e3)
+                # # e1 /= np.linalg.norm(e1)
+                # # e2 /= np.linalg.norm(e2)
+                # # e3 /= np.linalg.norm(e3)
+
+                # # print(vec1,vec2,vec3)
+                # # exit()
+
+                # e1 = np.dot(u, np.dot(np.diag(vec1),vh.T))
+                # e2 = np.dot(u, np.dot(np.diag(vec2),vh.T))
+                # e3 = np.dot(u, np.dot(np.diag(vec3),vh.T))
+
+                # e1 = vec(e1)
+                # e2 = vec(e2)
+                # e3 = vec(e3)
 
                 lamb1 =  1 + 3/s1**4
                 lamb2 =  1 + 3/s2**4
@@ -1395,9 +1651,15 @@ class SymmetricDirichlet(Material):
                 lamb8 =  (s2**3*s3**3 + s2**2 + s2*s3 + s3**2)/(s2**3*s3**3)
                 lamb9 =  (s1**3*s3**3 + s1**2 + s1*s3 + s3**2)/(s1**3*s3**3)
 
-                e1 = d1
-                e2 = d2
-                e3 = d3
+                # lamb1 =  (4*J**4 + 4*J**2*(3*I1**2 - 2*I1*s1 - 2*I2 + s1**2) - 8*J*s2*s3*(I1*(I1**2 - I2) - J) + s2**2*s3**2*(-8*I1*J + 3*(I1**2 - I2)**2))/(4*J**4)
+                # lamb2 =  (4*J**4 + 4*J**2*(3*I1**2 - 2*I1*s2 - 2*I2 + s2**2) - 8*J*s1*s3*(I1*(I1**2 - I2) - J) + s1**2*s3**2*(-8*I1*J + 3*(I1**2 - I2)**2))/(4*J**4)
+                # lamb3 =  (4*J**4 + 4*J**2*(3*I1**2 - 2*I1*s3 - 2*I2 + s3**2) - 8*J*s1*s2*(I1*(I1**2 - I2) - J) + s1**2*s2**2*(-8*I1*J + 3*(I1**2 - I2)**2))/(4*J**4)
+                # lamb4 =  (4*J**3*(s2 + s3) + 2*J*(-I1**2 + I2)*(s2 + s3) + 4*J*(I1*(I1**2 - I2) - 2*J) - s1*(s2 + s3)*(-4*I1*J + (I1**2 - I2)**2))/(4*J**3*(s2 + s3))
+                # lamb5 =  (4*J**3*(s1 + s3) + 2*J*(-I1**2 + I2)*(s1 + s3) + 4*J*(I1*(I1**2 - I2) - 2*J) - s2*(s1 + s3)*(-4*I1*J + (I1**2 - I2)**2))/(4*J**3*(s1 + s3))
+                # lamb6 =  (4*J**3*(s1 + s2) + 2*J*(-I1**2 + I2)*(s1 + s2) + 4*J*(I1*(I1**2 - I2) - 2*J) - s3*(s1 + s2)*(-4*I1*J + (I1**2 - I2)**2))/(4*J**3*(s1 + s2))
+                # lamb7 =  (J**3 + J*(-I1**2 + I2)/2 + s3*(-4*I1*J + (I1**2 - I2)**2)/4)/J**3
+                # lamb8 =  (J**3 + J*(-I1**2 + I2)/2 + s1*(-4*I1*J + (I1**2 - I2)**2)/4)/J**3
+                # lamb9 =  (J**3 + J*(-I1**2 + I2)/2 + s2*(-4*I1*J + (I1**2 - I2)**2)/4)/J**3
 
                 H1 = lamb1 * outer(e1,e1) + lamb2 * outer(e2,e2) + lamb3 * outer(e3,e3) +\
                     lamb4 * outer(t1,t1) + lamb5 * outer(t2,t2) + lamb6 * outer(t3,t3) +\
@@ -1412,6 +1674,7 @@ class SymmetricDirichlet(Material):
                 # print(H1)
                 # print()
                 # print(H)
+                # print(norm(H - H1))
                 H = H1
 
                 # exit()

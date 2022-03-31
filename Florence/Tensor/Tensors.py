@@ -6,7 +6,7 @@ from .Numeric import tovoigt, tovoigt3
 __all__ = ['unique2d','in2d','intersect2d','in2d_unsorted','shuffle_along_axis',
 'shuffle_along_axis_bothway','shuffle_along_axis_robust','itemfreq',
 'SecondTensor2Vector','Voigt','UnVoigt','remove_duplicates_2D','totuple',
-'prime_number_factorisation']
+'prime_number_factorisation', 'ssvd']
 
 
 #-------------------------------------------------------------------------#
@@ -441,6 +441,50 @@ def remove_duplicates_2D(A, decimals=10):
 
     return A, idx_repoints, inv_repoints
 
+
+
+def ssvd(F, full_matrices=True):
+    """Signed singular value decomposition for 2x2/3x3 matrices
+    """
+
+    det = np.linalg.det
+
+    if F.shape[0] == 3:
+        U, Sigma, V = np.linalg.svd(F, full_matrices=True)
+        V = V.T
+        # Reflection matrix
+        L = np.eye(3,3);
+        L[2,2] = det(np.dot(U, V.T))
+
+        # See where to pull the reflection out of
+        detU = det(U);
+        detV = det(V);
+        if (detU < 0 and detV > 0):
+          U = np.dot(U, L)
+        elif (detU > 0 and detV < 0):
+          V = np.dot(V, L)
+
+        # Push the reflection to the diagonal
+        Sigma = np.dot(Sigma, L)
+        return U, Sigma, V
+    else:
+        U, Sigma, V = np.linalg.svd(F, full_matrices=True)
+        V = V.T
+        # Reflection matrix
+        L = np.eye(2,2);
+        L[1,1] = det(np.dot(U, V.T))
+
+        # See where to pull the reflection out of
+        detU = det(U);
+        detV = det(V);
+        if (detU < 0 and detV > 0):
+          U = np.dot(U, L)
+        elif (detU > 0 and detV < 0):
+          V = np.dot(V, L)
+
+        # Push the reflection to the diagonal
+        Sigma = np.dot(Sigma, L)
+        return U, Sigma, V
 
 
 

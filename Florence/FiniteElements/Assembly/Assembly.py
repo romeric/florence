@@ -240,6 +240,8 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
 
             fem_solver.is_mass_computed = True
 
+    T = AssembleFirstOderSmithSchaeferContact(fem_solver, mesh, Eulerx, T)
+
     fem_solver.has_computed_ideal_elements = True
     fem_solver.assembly_time = time() - t_assembly
 
@@ -416,6 +418,9 @@ def AssembleInternalTractionForces(fem_solver, function_space, formulation, mesh
         # for iterator in range(0,nvar):
             # T[mesh.elements[elem,:]*nvar+iterator,0]+=t[iterator::nvar,0]
         RHSAssemblyNative(T,t,elem,nvar,nodeperelem,mesh.elements)
+
+
+    T = AssembleFirstOderSmithSchaeferContact(fem_solver, mesh, Eulerx, T)
 
     fem_solver.has_computed_ideal_elements = True
     return T
@@ -708,6 +713,136 @@ def AssembleExplicit(fem_solver, function_space, formulation, mesh, material, Eu
 
 
 
+def AssembleFirstOderSmithSchaeferContact(fem_solver, mesh, Eulerx, T):
+
+    return T
+    nvar = 2
+    # Node-to-Edge
+
+    un_edges = np.unique(mesh.edges)
+    # print(mesh.points[43,:])
+    # print(mesh.points[83,:])
+    # print(mesh.points[84,:])
+    eps = 5e-1
+    for edge in mesh.edges:
+        j1 = int(edge[0])
+        j2 = int(edge[1])
+        coord_j1 = mesh.points[j1,:]
+        coord_j2 = mesh.points[j2,:]
+        for i in un_edges:
+            i = int(i)
+            if i == j1 or i == j2:
+                continue
+            coord_i = mesh.points[i,:]
+
+            l1 = np.linalg.norm(coord_j1 - coord_i)
+            l2 = np.linalg.norm(coord_j2 - coord_i)
+            l3 = np.linalg.norm(coord_j2 - coord_j1)
+            dist = l1 + l2 - l3
+
+            # if dist < eps:
+                # print(i, j1, j2)
+            # if j2 == 83 and j1 == 84 and i == 43:
+            #     print(l1,l2,l3, dist)
+            # if j2 == 43 and j1 == 47 and i == 84:
+            #     print(l1,l2,l3, dist)
+
+            if dist < eps:
+                alpha = 5e-5
+                # alpha = 1e-6
+                if np.abs(dist) < 1e-14:
+                    dist = 1e-8
+
+                # denom = dist**2 * (1 - eps / dist)
+                denom = dist*dist * (1. - eps / dist)
+                if np.abs(denom) < 1e-14:
+                    # print(denom)
+                    denom = 1e-8
+                mm = alpha * 2. / denom
+                T[nvar*j1    ] += mm*((coord_j1[0] - coord_i[0]) + (coord_j2[0] - coord_i[0]) + (coord_j1[0] - coord_j2[0]))
+                T[nvar*j1 + 1] += mm*((coord_j1[1] - coord_i[1]) + (coord_j2[1] - coord_i[1]) + (coord_j1[1] - coord_j2[1]))
+
+                T[nvar*j2    ] += mm*((coord_j1[0] - coord_i[0]) + (coord_j2[0] - coord_i[0]) - (coord_j1[0] - coord_j2[0]))
+                T[nvar*j2 + 1] += mm*((coord_j1[1] - coord_i[1]) + (coord_j2[1] - coord_i[1]) - (coord_j1[1] - coord_j2[1]))
+
+
+    mesh2 = deepcopy(mesh)
+    mesh2.points = Eulerx
+    # mesh2.WriteVTK("/Users/roman/Dropbox/zHandies_Docs/solver_unit_2/sambytag_"+str(fem_solver.Iter), fmt="xml")
+    # if fem_solver.Iter == 10:
+        # print(fem_solver.Iter)
+        # pass
+        # mesh2.WriteGmsh("/Users/roman/Dropbox/zHandies_Docs/solver_unit_2/sambytag.msh")
+    # mesh2.SimplePlot()
+
+    # exit()
+
+    # # Node-to-Node
+    # eps = 6e-2
+    # # print(mesh.nnode*nvar, T.shape)
+    # un_edges = np.unique(mesh.edges)
+    # # print(mesh.edges)
+    # # for counter, i in enumerate(un_edges):
+    # for i in [43,84]:
+    #     i = int(i)
+    #     # print(type(i))
+    #     this_coord = mesh.points[i,:]
+    #     xx = np.tile(this_coord, (len(un_edges), 1))
+    #     yy = xx - mesh.points[un_edges]
+    #     # print(mesh.points[un_edges])
+    #     d = np.linalg.norm(yy, axis=1)
+    #     # print(d)
+    #     # exit()
+    #     zz = np.where(d < eps)[0]
+    #     # print(np.where(un_edges==43))
+    #     zz = [45] if i==43 else [20]
+
+    #     # print(zz)
+    #     # print(d[zz[0]])
+    #     # if un_edges[zz[0]] != i:
+    #     if d[zz[0]] != 0.:
+    #         # print(d)
+    #         # mm=2.2e-3
+    #         mm = 1e-2
+    #         # print(i,d[zz[0]])
+    #         mm = d[zz[0]] + 4e-3
+    #         T[int(nvar*i)]   += -2.*(mm/d[zz[0]] - 1) * mm / d[zz[0]]**3 * (this_coord[0] - mesh.points[un_edges[zz[0]],0])
+    #         T[int(nvar*i+1)] += -2.*(mm/d[zz[0]] - 1) * mm / d[zz[0]]**3 * (this_coord[1] - mesh.points[un_edges[zz[0]],1])
+    #         # T[int(nvar*i)]   -= 3e-3 * 1. / d[zz[0]] * (this_coord[0] - mesh.points[un_edges[zz[0]],0])
+    #         # T[int(nvar*i+1)] -= 3e-3 * 1. / d[zz[0]] * (this_coord[1] - mesh.points[un_edges[zz[0]],1])
+    #     # exit()
+    #     # print(i, zz)
+    #     # if un_edges[zz[0]] != i:
+    #     #     # print([un_edges[zz[0]], i])
+    #     #     for j in mesh.edges:
+    #     #         if j[0] == i and j[1] == un_edges[zz[0]]:
+    #     #             # print("yes")
+    #     #             pass
+    #     #         if j[1] == i and j[0] == un_edges[zz[0]]:
+    #     #             # print("yes")
+    #     #             pass
+    #     #         else:
+    #     #             print(i)
+    #     #             T[int(nvar*i)]   += 1. / d[zz[0]] * (this_coord[0] - mesh.points[un_edges[zz[0]],0])
+    #     #             T[int(nvar*i+1)] += 1. / d[zz[0]] * (this_coord[1] - mesh.points[un_edges[zz[0]],1])
+
+    #             # print(j)
+    #         # exit()
+    #         # if d[zz[0]] !=0.:
+    #         # print(d[zz[0]])
+    #         # print(i)
+    #         # print(this_coord[0] - mesh.points[un_edges[zz[0]],0])
+    #         # print(this_coord[1] - mesh.points[un_edges[zz[0]],1])
+    #         # print(d[zz[0]])
+
+    # mesh2 = deepcopy(mesh)
+    # mesh2.points = Eulerx
+    # mesh2.WriteVTK("/Users/roman/Dropbox/zHandies_Docs/solver_unit_2/sambytag_"+str(fem_solver.Iter), fmt="xml")
+    # # mesh2.WriteGmsh("/Users/roman/Dropbox/zHandies_Docs/solver_unit_2/sambytag.msh")
+    # # mesh2.SimplePlot()
+    # # exit()
+
+    return T
 
 
 #---------------------------------------- PARALLEL ASSEMBLY ROUTINES --------------------------------------------#

@@ -957,9 +957,10 @@ class FEMSolver(object):
             Eulerx += alpha * dU[:,:formulation.ndim]
             # GET ITERATIVE ELECTRIC POTENTIAL
             Eulerp += alpha * dU[:,-1]
-            self.xx.append(alpha * dU[:,:formulation.ndim])
+            # self.xx.append(alpha * dU[:,:formulation.ndim])
 
             # RE-ASSEMBLE - COMPUTE STIFFNESS AND INTERNAL TRACTION FORCES
+            self.Iter = Iter
             K, TractionForces = Assemble(self, function_spaces[0], formulation, mesh, material,
                 Eulerx,Eulerp)[:2]
 

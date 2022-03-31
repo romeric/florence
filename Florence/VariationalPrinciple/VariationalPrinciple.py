@@ -411,7 +411,7 @@ class VariationalPrinciple(object):
             xycoord = np.array([ [-0.5, 0], [ 0.5, 0], [0., np.sqrt(3.)/2.]])
             # xycoord = eps[:nodeperlinearelem,:]
             # xycoord = fem_solver.imesh.points[elem,:]
-            # xycoord = fem_solver.imesh.points[fem_solver.imesh.elements[elem,:nodeperlinearelem],:]
+            xycoord = fem_solver.imesh.points[fem_solver.imesh.elements[elem,:nodeperlinearelem],:]
 
 
         elif function_space.element_type == "quad":

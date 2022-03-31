@@ -3321,7 +3321,7 @@ class Mesh(object):
                 for i in range(1,el+1):
                     if "/" in plist[i]:
                         has_texture = True
-                        plist[i] = plist[i].split("/")[1]
+                        plist[i] = plist[i].split("/")[-1]
                 if has_texture:
                     telements.append([int(i) for i in plist[1:el+1]])
             if plist[0] == 'vn':
@@ -4352,7 +4352,7 @@ class Mesh(object):
 
 
 
-    def WriteOBJ(self, filename, write_texture=False):
+    def WriteOBJ(self, filename, write_texture=False, write_normal=False):
         """Write mesh to an obj file. For 3D elements writes the faces only
         """
 
@@ -4410,6 +4410,20 @@ class Mesh(object):
             np.savetxt(f, points_repr, fmt="%s")
             if write_texture:
                 np.savetxt(f, textures_repr, fmt="%s")
+
+            if write_normal:
+                if self.normals is None:
+                    enormals = self.Normals()
+                    els = self.GetNodeCommonality()[0]
+                    self.normals = np.zeros((self.nnode, 3))
+                    for counter, el in enumerate(els):
+                        self.normals[counter] = np.sum(enormals[el], axis=0) / enormals[el].shape[0]
+
+                normals_repr = np.zeros((self.normals.shape[0], self.normals.shape[1]+1), dtype=object)
+                normals_repr[:,0] = "vn"
+                normals_repr[:,1:] = self.normals
+                np.savetxt(f, normals_repr, fmt="%s")
+
             f.write('\n')
             np.savetxt(f, elements_repr, fmt="%s")
 

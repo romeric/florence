@@ -176,7 +176,7 @@ def write_vtu(Verts, Cells, pdata=None, pvdata=None, cdata=None, cvdata=None, fn
     # check cdata
     # must be NCells x n_cdata for each key
     n_cdata = 0
-    if cdata !=None:
+    if cdata is not None:
         for key in Cells:   # all valid now
             if numpy.ndim(cdata[key])>1:
                 if n_cdata==0:
@@ -228,13 +228,13 @@ def write_vtu(Verts, Cells, pdata=None, pvdata=None, cdata=None, cvdata=None, fn
             cell_offset = numpy.hstack((cell_offset,offset*numpy.ones((sz,),dtype='uint8')))
             cell_type   = numpy.hstack((cell_type,key*numpy.ones((sz,),dtype='uint8')))
 
-            if cdata != None:
+            if cdata is not None:
                 if cdata_all==None:
                     cdata_all=cdata[key]
                 else:
                     cdata_all = numpy.vstack((cdata_all,cdata[key]))
 
-            if cvdata != None:
+            if cvdata is not None:
                 if cvdata_all==None:
                     cvdata_all=cvdata[key]
                 else:
