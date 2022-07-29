@@ -58,6 +58,7 @@ class FEMSolver(object):
         compute_mesh_qualities=False,
         force_not_computing_mesh_qualities=False,
         use_ideal_element=False,
+        use_smith_schaefer_contact=False,
         parallelise=False,
         ncpu=None,
         parallel_model=None,
@@ -135,6 +136,7 @@ class FEMSolver(object):
         self.force_not_computing_mesh_qualities = force_not_computing_mesh_qualities
         self.is_scaled_jacobian_computed = False
         self.use_ideal_element = use_ideal_element
+        self.use_smith_schaefer_contact = use_smith_schaefer_contact
 
         self.vectorise = True
         self.parallel = parallelise
@@ -1015,7 +1017,7 @@ class FEMSolver(object):
             if self.break_at_stagnation:
                 self.iterative_norm_history.append(self.norm_residual)
                 if Iter >= 6:
-                    if np.mean(self.iterative_norm_history) < 1. and self.abs_norm_residual < 0.0001:
+                    if np.mean(self.iterative_norm_history) < 1. and self.abs_norm_residual < 0.001:
                         break
 
             # USER DEFINED CRITERIA TO BREAK OUT OF NEWTON-RAPHSON

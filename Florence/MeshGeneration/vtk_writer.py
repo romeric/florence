@@ -188,7 +188,7 @@ def write_vtu(Verts, Cells, pdata=None, pvdata=None, cdata=None, cvdata=None, fn
                 cdata[key] = cdata[key].reshape((cdata[key].size,1))
             if cdata[key].shape[0]!=Cells[key].shape[0]:
                 raise ValueError('size mismatch with cdata %d and Cells %d'%(cdata[key].shape[0],Cells[key].shape[0]))
-            if cdata[key] == None:
+            if cdata[key] is None:
                 raise ValueError('cdata array cannot be empty for key %d'%(key))
 
     # check cvdata

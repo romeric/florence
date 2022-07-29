@@ -1207,7 +1207,7 @@ class Mesh(object):
         return lengths
 
 
-    def Lengths(self,):
+    def Lengths(self):
         """Computes length of all types of elements
         """
 
@@ -1217,8 +1217,8 @@ class Mesh(object):
             coords = self.points[self.elements[:,:2],:]
             lengths = np.linalg.norm(coords[:,1,:] - coords[:,0,:],axis=1)
         else:
-            self.GetEdges()
-            coord = self.all_edges
+            # self.GetEdges()
+            # coords = self.points[self.all_edges,:]
             coords = self.points[self.elements[:,:2],:]
             lengths = np.linalg.norm(coords[:,1,:] - coords[:,0,:],axis=1)
 
@@ -4130,7 +4130,7 @@ class Mesh(object):
             except ImportError:
                 raise RuntimeError("Writing high order elements to VTK is not supported yet")
             if result is not None and result.ndim > 1:
-                raise NotImplementedError("Writing multliple or vector/tensor valued results to binary vtk not supported yet")
+                raise NotImplementedError("Writing vector/tensor valued results to binary vtk not supported yet")
                 return
             else:
                 if result is None:
@@ -4193,7 +4193,25 @@ class Mesh(object):
                                 np.arange(0,offset*self.nelem,offset)+offset, np.ones(self.nelem)*cellflag,
                                 pointData={'result':np.ascontiguousarray(result.ravel())})
                     else:
-                        raise NotImplementedError("Writing multliple or vector/tensor valued results to binary vtk not supported yet")
+                        if result.shape[1] == 3:
+                            result_data = {'result':tuple(( np.ascontiguousarray(result[:,0]), np.ascontiguousarray(result[:,1]), np.ascontiguousarray(result[:,2]) ))}
+                        elif result.shape[1] == 2:
+                            result_data = {'result':tuple(( np.ascontiguousarray(result[:,0]), np.ascontiguousarray(result[:,1]) ))}
+                        else:
+                            raise NotImplementedError("Writing vector/tensor valued results > 3 to binary vtk not supported yet")
+
+                        if result.shape[0] == self.nelem:
+                            unstructuredGridToVTK(filename,
+                                np.ascontiguousarray(points[:,0]),np.ascontiguousarray(points[:,1]),
+                                np.ascontiguousarray(points[:,2]), np.ascontiguousarray(elements.ravel()),
+                                np.arange(0,offset*self.nelem,offset)+offset, np.ones(self.nelem)*cellflag,
+                                cellData=result_data)
+                        elif result.shape[0] == self.points.shape[0]:
+                            unstructuredGridToVTK(filename,
+                                np.ascontiguousarray(points[:,0]),np.ascontiguousarray(points[:,1]),
+                                np.ascontiguousarray(points[:,2]), np.ascontiguousarray(elements.ravel()),
+                                np.arange(0,offset*self.nelem,offset)+offset, np.ones(self.nelem)*cellflag,
+                                pointData=result_data)
 
 
 
@@ -6046,6 +6064,52 @@ class Mesh(object):
                     solution = solution[idx_mpoints,:]
 
             return solution
+
+
+    def ProjectToPlane(self):
+        """Projects every triangle to plane individually and creates a non-conformal mesh.
+            Returns a projected mesh
+        """
+
+        self.__do_essential_memebers_exist__()
+        if self.element_type != "tri":
+            raise ValueError("Project to plane is only applicable to triangles")
+
+        imesh = deepcopy(self)
+        coordinates = []
+        connectivities = []
+        for counter, elem in enumerate(imesh.elements):
+
+            elementCoordinates = imesh.points[elem,:]
+
+            A = elementCoordinates[0,:]
+            B = elementCoordinates[1,:]
+            C = elementCoordinates[2,:]
+
+            X = (B - A); X /= np.linalg.norm(X)
+            Z = np.cross(X, C - A); Z /= np.linalg.norm(Z)
+            Y = np.cross(Z, X)
+
+            # PROJECT THE TRIANGLE TO THIS BASES
+            a = [0., 0.]
+            b = [np.linalg.norm((B - A)), 0.]
+            c = [(C - A).dot(X), (C - A).dot(Y)]
+
+            coordinates.append(a)
+            coordinates.append(b)
+            coordinates.append(c)
+
+            elementConnectivity = [3 * counter, 3 * counter + 1, 3 * counter + 2]
+            connectivities.append(elementConnectivity)
+
+        coordinates = np.array(coordinates)
+        connectivities = np.array(connectivities)
+        imesh.points = coordinates
+        imesh.elements = connectivities
+        imesh.nelem = imesh.elements.shape[0]
+        imesh.nnode = imesh.points.shape[0]
+
+        return imesh
 
 
     def Smooth(self, criteria={'aspect_ratio':3}):
