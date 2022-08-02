@@ -17,7 +17,7 @@ class LaplacianFormulation(VariationalPrinciple):
         equally_spaced_bases=False, quadrature_degree=None):
 
         if mesh.element_type != "tet" and mesh.element_type != "tri" and \
-            mesh.element_type != "quad" and mesh.element_type != "hex":
+            mesh.element_type != "quad" and mesh.element_type != "hex" and mesh.element_type != "line":
             raise NotImplementedError( type(self).__name__, "has not been implemented for", mesh.element_type, "elements")
 
         if isinstance(variables_order,int):

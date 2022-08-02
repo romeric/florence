@@ -66,6 +66,9 @@ class QuadratureRule(object):
             z = zw[:,:-1]; z=z.reshape(z.shape[0],z.shape[1]); w=zw[:,-1]
         elif mesh_type == "line":
             z, w = GaussQuadrature(self.norder,-1.,1.)
+        elif mesh_type == "point":
+            z = np.array([0.])
+            w = np.array([1.])
 
         self.points = z
         self.weights = w

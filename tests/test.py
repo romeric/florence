@@ -203,28 +203,29 @@ def test_examples():
     simple_laplace(optimise=True, recompute_sparsity_pattern=False, squeeze_sparsity_pattern=False)
     simple_laplace(optimise=True, recompute_sparsity_pattern=False, squeeze_sparsity_pattern=True)
 
-    high_order_curved_mesh_generation(p=2, analysis_nature="linear", optimise=True)
-    high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=True)
-    high_order_curved_mesh_generation(p=2, analysis_nature="linear", optimise=True,
-        recompute_sparsity_pattern=False)
-    high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=True,
-        recompute_sparsity_pattern=False)
-    high_order_curved_mesh_generation(p=2, analysis_nature="linear", optimise=True,
-        recompute_sparsity_pattern=False, squeeze_sparsity_pattern=True)
-    high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=True,
-        recompute_sparsity_pattern=False, squeeze_sparsity_pattern=True)
-    high_order_curved_mesh_generation(p=2, analysis_nature="linear", optimise=False)
-    high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=False)
-    high_order_curved_mesh_generation(p=2, analysis_nature="linear", optimise=False,
-        recompute_sparsity_pattern=False)
-    high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=False,
-        recompute_sparsity_pattern=False)
-    high_order_curved_mesh_generation(p=2, analysis_nature="linear", optimise=False,
-        recompute_sparsity_pattern=False, squeeze_sparsity_pattern=True)
-    high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=False,
-        recompute_sparsity_pattern=False, squeeze_sparsity_pattern=True)
-    high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=False, parallelise=True)
-    high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=True, parallelise=True)
+    if False:
+        high_order_curved_mesh_generation(p=2, analysis_nature="linear", optimise=True)
+        high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=True)
+        high_order_curved_mesh_generation(p=2, analysis_nature="linear", optimise=True,
+            recompute_sparsity_pattern=False)
+        high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=True,
+            recompute_sparsity_pattern=False)
+        high_order_curved_mesh_generation(p=2, analysis_nature="linear", optimise=True,
+            recompute_sparsity_pattern=False, squeeze_sparsity_pattern=True)
+        high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=True,
+            recompute_sparsity_pattern=False, squeeze_sparsity_pattern=True)
+        high_order_curved_mesh_generation(p=2, analysis_nature="linear", optimise=False)
+        high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=False)
+        high_order_curved_mesh_generation(p=2, analysis_nature="linear", optimise=False,
+            recompute_sparsity_pattern=False)
+        high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=False,
+            recompute_sparsity_pattern=False)
+        high_order_curved_mesh_generation(p=2, analysis_nature="linear", optimise=False,
+            recompute_sparsity_pattern=False, squeeze_sparsity_pattern=True)
+        high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=False,
+            recompute_sparsity_pattern=False, squeeze_sparsity_pattern=True)
+        high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=False, parallelise=True)
+        high_order_curved_mesh_generation(p=2, analysis_nature="nonlinear", optimise=True, parallelise=True)
 
     linear_elastic_dynamics()
     crash_analysis()

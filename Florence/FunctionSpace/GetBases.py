@@ -16,6 +16,22 @@ from Florence.QuadratureRules.GaussLobattoPoints import *
 from Florence.QuadratureRules.EquallySpacedPoints import *
 
 
+def GetBases0D(C, Quadrature, info=None, bases_type="nodal", equally_spaced=False, is_flattened=False):
+
+    w = Quadrature.weights
+    z = Quadrature.points
+
+    ns = 1
+    Basis = np.ones((ns,z.shape[0]),dtype=np.float64)
+    class Domain(object):
+        Bases = Basis
+        gBasesx = np.zeros(Basis.shape)
+        gBasesy = np.zeros(Basis.shape)
+        gBasesz = np.zeros(Basis.shape)
+
+
+    return Domain
+
 def GetBases1D(C, Quadrature, info=None, bases_type="nodal", equally_spaced=False, is_flattened=False):
 
     w = Quadrature.weights

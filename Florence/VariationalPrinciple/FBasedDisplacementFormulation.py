@@ -1498,6 +1498,18 @@ class SymmetricDirichlet(Material):
                 lamb8 =  (s1**3*s3**3 + s1**2 + s1*s3 + s3**2)/(s1**3*s3**3)
                 lamb9 =  (s1**3*s2**3 + s1**2 + s1*s2 + s2**2)/(s1**3*s2**3)
 
+                # Project to SPD if needed
+                kk=0.
+                lamb1 = max(lamb1, kk)
+                lamb2 = max(lamb2, kk)
+                lamb3 = max(lamb3, kk)
+                lamb4 = max(lamb4, kk)
+                lamb5 = max(lamb5, kk)
+                lamb6 = max(lamb6, kk)
+                lamb7 = max(lamb7, kk)
+                lamb8 = max(lamb8, kk)
+                lamb9 = max(lamb9, kk)
+
                 H1 = lamb1 * outer(e1,e1) + lamb2 * outer(e2,e2) + lamb3 * outer(e3,e3) +\
                     lamb4 * outer(t1,t1) + lamb5 * outer(t2,t2) + lamb6 * outer(t3,t3) +\
                     lamb7 * outer(l1,l1) + lamb8 * outer(l2,l2) + lamb9 * outer(l3,l3)

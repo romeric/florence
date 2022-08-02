@@ -1367,6 +1367,11 @@ class PostProcess(object):
                 tmesh = PostProcess.TessellateTris(self.mesh, np.zeros_like(self.mesh.points),
                     QuantityToPlot=self.sol[:,0,0], plot_points=True, EquallySpacedPoints=equally_spaced,
                     interpolation_degree=interpolation_degree, ProjectionFlags=ProjectionFlags)
+            elif lmesh.element_type =='line':
+                cellflag = 5
+                tmesh = PostProcess.TessellateLines(self.mesh, np.zeros_like(self.mesh.points),
+                    QuantityToPlot=self.sol[:,0,0], plot_points=True, EquallySpacedPoints=equally_spaced,
+                    interpolation_degree=interpolation_degree, ProjectionFlags=ProjectionFlags)
             else:
                 raise ValueError('Element type not understood')
 
@@ -1378,7 +1383,12 @@ class PostProcess(object):
                 tmesh.smesh = self.mesh
                 tmesh.faces_to_plot = tmesh.smesh.elements
                 nface = tmesh.smesh.elements.shape[0]
-                tmesh.smesh.GetEdges()
+                if tmesh.smesh.element_type == "point":
+                    pass
+                elif tmesh.smesh.element_type == "line":
+                    tmesh.smesh.all_edges = tmesh.smesh.elements
+                else:
+                    tmesh.smesh.GetEdges()
 
                 connections_elements = np.arange(tmesh.x_edges.size).reshape(tmesh.x_edges.shape[1],tmesh.x_edges.shape[0])
                 connections = np.zeros((tmesh.x_edges.size,2),dtype=np.int64)
@@ -1410,9 +1420,10 @@ class PostProcess(object):
             for Increment in increments:
 
                 extrapolated_sol = np.zeros((tmesh.points.shape[0], self.sol.shape[1]))
-                for ielem in range(nface):
-                    extrapolated_sol[ielem*nsize:(ielem+1)*nsize,:] = np.dot(tmesh.bases_2,
-                        ssol[tmesh.smesh.elements[ielem,:],:, Increment])
+                if tmesh.smesh.element_type != "point" and tmesh.smesh.element_type != "line":
+                    for ielem in range(nface):
+                        extrapolated_sol[ielem*nsize:(ielem+1)*nsize,:] = np.dot(tmesh.bases_2,
+                            ssol[tmesh.smesh.elements[ielem,:],:, Increment])
 
                 if not fail_flag:
                     svpoints = self.mesh.points[np.unique(tmesh.faces_to_plot),:] + ssol[:,:tmesh.points.shape[1],Increment]
@@ -1447,10 +1458,11 @@ class PostProcess(object):
                         Cells={1:np.arange(svpoints.shape[0])},
                         fname=filename.split('.')[0]+'_curved_points_increment_'+str(Increment)+'.vtu')
 
-                    for quant in iterator:
-                        vtk_writer.write_vtu(Verts=tmesh.points+extrapolated_sol[:,:ndim],
-                            Cells={cellflag:tmesh.elements}, pdata=extrapolated_sol[:,quant],
-                            fname=filename.split('.')[0]+'_curved_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu')
+                    if tmesh.smesh.element_type != "point" and tmesh.smesh.element_type != "line":
+                        for quant in iterator:
+                            vtk_writer.write_vtu(Verts=tmesh.points+extrapolated_sol[:,:ndim],
+                                Cells={cellflag:tmesh.elements}, pdata=extrapolated_sol[:,quant],
+                                fname=filename.split('.')[0]+'_curved_quantity_'+str(quant)+'_increment_'+str(Increment)+'.vtu')
 
                 elif formatter == "binary":
 
@@ -1463,17 +1475,18 @@ class PostProcess(object):
                         np.ascontiguousarray(svpoints[:,0]), np.ascontiguousarray(svpoints[:,1]), np.ascontiguousarray(svpoints[:,2]),
                         data=None)
 
-                    if tmesh.points.shape[1] == 2:
-                        points = np.zeros((tmesh.points.shape[0],3))
-                        points[:,:2] = tmesh.points+extrapolated_sol[:,:ndim]
-                    else:
-                        points = tmesh.points+extrapolated_sol[:,:ndim]
-                    for counter, quant in enumerate(iterator):
-                        unstructuredGridToVTK(filename.split('.')[0]+'_curved_quantity_'+str(quant)+'_increment_'+str(Increment),
-                            np.ascontiguousarray(points[:,0]), np.ascontiguousarray(points[:,1]), np.ascontiguousarray(points[:,2]),
-                            np.ascontiguousarray(tmesh.elements.ravel()), np.arange(0,3*tmesh.elements.shape[0],3)+3,
-                            np.ones(tmesh.elements.shape[0])*cellflag,
-                            pointData={q_names[counter]: np.ascontiguousarray(extrapolated_sol[:,quant])})
+                    if tmesh.smesh.element_type != "point" and tmesh.smesh.element_type != "line":
+                        if tmesh.points.shape[1] == 2:
+                            points = np.zeros((tmesh.points.shape[0],3))
+                            points[:,:2] = tmesh.points+extrapolated_sol[:,:ndim]
+                        else:
+                            points = tmesh.points+extrapolated_sol[:,:ndim]
+                        for counter, quant in enumerate(iterator):
+                            unstructuredGridToVTK(filename.split('.')[0]+'_curved_quantity_'+str(quant)+'_increment_'+str(Increment),
+                                np.ascontiguousarray(points[:,0]), np.ascontiguousarray(points[:,1]), np.ascontiguousarray(points[:,2]),
+                                np.ascontiguousarray(tmesh.elements.ravel()), np.arange(0,3*tmesh.elements.shape[0],3)+3,
+                                np.ones(tmesh.elements.shape[0])*cellflag,
+                                pointData={q_names[counter]: np.ascontiguousarray(extrapolated_sol[:,quant])})
 
         else:
 
@@ -3754,8 +3767,9 @@ class PostProcess(object):
             tmesh.x_edges = x_edges
             tmesh.y_edges = y_edges
             tmesh.z_edges = z_edges
-            tmesh.edge_elements = mesh.elements
-            tmesh.reference_edges = np.array([[0,1]])
+            tmesh.edge_elements = np.zeros((tmesh.nelem,2), dtype=np.int64)
+            tmesh.edge_elements[:,0] = np.arange(tmesh.nelem)
+            tmesh.reference_edges = np.arange(CActual+2)[None,:]
 
             return tmesh
 

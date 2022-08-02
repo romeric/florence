@@ -26,7 +26,7 @@ class FunctionSpace(object):
         """
 
         # from Florence import QuadratureRule
-        from Florence.FunctionSpace.GetBases import GetBases1D, GetBases2D, GetBases3D, GetBoundaryBases, GetBasesAtNodes
+        from Florence.FunctionSpace.GetBases import GetBases0D, GetBases1D, GetBases2D, GetBases3D, GetBoundaryBases, GetBasesAtNodes
 
         ndim = mesh.InferSpatialDimension()
         self.ndim = ndim
@@ -36,8 +36,9 @@ class FunctionSpace(object):
         QuadratureOpt=3
 
         C = p - 1
-        if mesh.InferPolynomialDegree() - 1 != C:
-            raise ValueError("Function space of the polynomial does not match element type")
+        if mesh.element_type != "point":
+            if mesh.InferPolynomialDegree() - 1 != C:
+                raise ValueError("Function space of the polynomial does not match element type")
 
         if evaluate_at_nodes is False:
             if quadrature is None:
@@ -56,6 +57,9 @@ class FunctionSpace(object):
             elif mesh.element_type == 'line':
                 # GET BASES AT ALL INTEGRATION POINTS (LINE)
                 Domain = GetBases1D(C,quadrature,mesh.element_type,equally_spaced=equally_spaced)
+            elif mesh.element_type == 'point':
+                # GET BASES AT ALL INTEGRATION POINTS (LINE)
+                Domain = GetBases0D(C,quadrature,mesh.element_type,equally_spaced=equally_spaced)
             # Boundary = []
             # # PUT QUADRATURE NONE AS BASES QUADRATURE RULE IS DIFFERENT
             # Boundary = GetBoundaryBases(C,None,mesh.boundary_element_type,equally_spaced=equally_spaced)

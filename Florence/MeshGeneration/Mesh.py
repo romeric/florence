@@ -6833,6 +6833,9 @@ class Mesh(object):
             else:
                 raise NotImplementedError("High order pentagonal elements are not supported yet")
 
+        elif self.element_type == "point":
+            p = 1
+
         self.degree = p
         return p
 
@@ -7888,6 +7891,13 @@ class Mesh(object):
             mesh.GetHighOrderMesh(p=p)
         elif self.element_type == "tri" or self.element_type == "quad":
             mesh.Line(n=1, p=p)
+        elif self.element_type == "line":
+            mesh.element_type = "point"
+            mesh.nelem = 1
+            mesh.nnode = 1
+            mesh.degree = p
+            mesh.elements = np.array([[0]])
+            mesh.points = np.array([[0.,0.,0.]])
         sys.stdout = sys.__stdout__
 
         return mesh
