@@ -8,13 +8,24 @@ from copy import deepcopy
 class Material(object):
     """Base class for all material models"""
 
-    def __init__(self, mtype, ndim, energy_type="internal_energy",
+    def __init__(self, mtype, ndim, energy_type="internal_energy", invariant_formulation="e",
         lame_parameter_1=None, lame_parameter_2=None, poissons_ratio=None, youngs_modulus=None,
         shear_modulus=None, transverse_iso_youngs_modulus=None, transverse_iso_shear_modulus=None,
         bulk_modulus=None, density=None, permittivity=None, permeability=None,
         is_compressible=True, is_incompressible=False, is_nearly_incompressible=False,
         is_nonisotropic=True,is_anisotropic=False,is_transversely_isotropic=False, anisotropic_orientations=None,
+        stabilise_tangents=False,
         **kwargs):
+        """
+            input:      all derived material arguments given by the user is going to be set here
+
+                        invariant_formulation:
+                            "e"   Updated Lagrangian formulation with epsilon (strain) as invariant and cauchy stress as conjugate
+                            "C"   Total Lagrangian formulation with C as invariant and PK2 (S) as conjugate
+                            "F"   Total Lagrangian formulation with F as invariant and PK1 (P) as conjugate
+                            "ps"  Total Lagrangian formulation in principal stretches
+        """
+
 
 
         # SAFETY CHECKS
@@ -24,6 +35,9 @@ class Material(object):
             raise TypeError("Material energy can either be 'internal_energy' or 'enthalpy'")
 
         self.energy_type = energy_type
+        self.invariant_formulation = invariant_formulation
+        self.stabilise_tangents = False
+        self.tangent_stabiliser_value = 1e-8
 
         # MATERIAL CONSTANTS
         self.mu = lame_parameter_1

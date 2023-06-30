@@ -234,6 +234,65 @@ class Mesh(object):
         return self.boundary_face_to_element
 
 
+    def GetBoundaryLoops(self):
+        """Computes boundary loops (internal and external) for 2D tri/quad meshes
+        """
+
+        self.__do_essential_memebers_exist__()
+
+        if self.InferBoundaryElementType() != "line":
+            raise NotImplementedError("Computing boundary loops is only supported for tri/quad meshes for now")
+
+        self.GetEdges()
+
+        # First create a node to neighbour map i.e. node as key and its two neighbouring nodes as value
+        nodeToNeighboursMap = dict()
+        for i in range(self.edges.shape[0]):
+
+            if self.edges[i,0] not in nodeToNeighboursMap:
+                nodeToNeighboursMap[self.edges[i,0]] = [self.edges[i,1],-1]
+            else:
+                nodeToNeighboursMap[self.edges[i,0]][1] = self.edges[i,1]
+
+            if self.edges[i,1] not in nodeToNeighboursMap:
+                nodeToNeighboursMap[self.edges[i,1]] = [self.edges[i,0],-1]
+            else:
+                nodeToNeighboursMap[self.edges[i,1]][1] = self.edges[i,0]
+
+        # Now create a vector of face loops
+        faceLoops = []
+        while nodeToNeighboursMap:
+            # Insert the first node from node to edge map and its two neighbours in order and erase it from the map
+            faceLoop = []
+            mapBegin = next(iter(nodeToNeighboursMap))
+            faceLoop.append(nodeToNeighboursMap[mapBegin][0])
+            faceLoop.append(mapBegin)
+            faceLoop.append(nodeToNeighboursMap[mapBegin][1])
+            nodeToNeighboursMap.pop(mapBegin, None)
+
+            while True:
+                # Pick the last node in the current face loop and find its neighbours
+                if faceLoop[-1] in nodeToNeighboursMap:
+                    tmp = faceLoop[-1]
+                    mapIter = nodeToNeighboursMap[faceLoop[-1]]
+                    # Check if we have not reached the end of the loop i.e. the first element
+                    if mapIter[0] != faceLoop[0] and mapIter[1] != faceLoop[0]:
+                        if mapIter[0] == faceLoop[-2]:
+                            faceLoop.append(mapIter[1])
+                        elif mapIter[1] == faceLoop[-2]:
+                            faceLoop.append(mapIter[0])
+                    else:
+                        nodeToNeighboursMap.pop(faceLoop[0], None)
+
+                    nodeToNeighboursMap.pop(tmp, None)
+                else:
+                    faceLoop = np.array(faceLoop)
+                    faceLoops.append(faceLoop)
+                    break
+
+        return faceLoops
+
+
     @property
     def Bounds(self):
         """Returns bounds of a mesh i.e. the minimum and maximum coordinate values
@@ -1503,11 +1562,10 @@ class Mesh(object):
     def FaceNormals(self):
         """Computes outward unit normals on faces.
             This is a generic method for all element types apart from lines. If the mesh is in 2D plane
-            then the unit outward normals will point in Z direction. If the mesh is quad or tri type but
-            in 3D plane, this will still compute the correct unit outward normals. outwardness can only
-            be guaranteed for volume meshes.
-            This method is different from the method self.Normals() as the latter can compute normals
-            for 1D/2D elements in-plane
+            then the unit outward normals will point (out-of-plane) in Z direction. If the mesh is quad or tri type but
+            in 3D, this will still compute the correct unit outward normals. "True" outwardness can only
+            be guaranteed for volume (closed) meshes otherwise depdends on the connectivity of the mesh.
+            This method is different from self.Normals() as the latter can compute normals for 1D/2D elements in-plane
         """
 
         self.__do_memebers_exist__()
@@ -1555,8 +1613,12 @@ class Mesh(object):
             Unity and outwardness are guaranteed
         """
 
-        self.__do_memebers_exist__()
         ndim = self.InferSpatialDimension()
+        if self.element_type == "tet" or self.element_type == "hex":
+            self.GetBoundaryFaces()
+            self.GetBoundaryEdges()
+        elif self.element_type == "tri" or self.element_type == "quad":
+            self.GetBoundaryEdges()
 
         if self.element_type == "tet" or self.element_type == "hex":
             normals = self.FaceNormals()
@@ -1611,7 +1673,10 @@ class Mesh(object):
 
 
             elif ndim == 3:
-                mid_face_coords = np.sum(self.points[self.faces,:3],axis=1)/self.faces.shape[1]
+                faces = self.faces
+                if self.element_type == "tri" or self.element_type == "quad":
+                    faces = self.elements
+                mid_face_coords = np.sum(self.points[faces,:3],axis=1)/faces.shape[1]
 
                 import os
                 os.environ['ETS_TOOLKIT'] = 'qt4'
@@ -1623,8 +1688,7 @@ class Mesh(object):
 
                 mlab.quiver3d(mid_face_coords[:,0], mid_face_coords[:,1], mid_face_coords[:,2],
                     normals[:,0], normals[:,1], normals[:,2],
-                    color=(0.,128./255,128./255),line_width=2)
-
+                    color=(0.,128./255,128./255),line_width=5)
                 mlab.show()
 
         return normals
@@ -2269,11 +2333,11 @@ class Mesh(object):
             elif change_order_to == 'anti-clockwise':
                 self.elements[quantity<0,:] = np.fliplr(self.elements[quantity<0,:])
 
-
-        if original_order == 'anti-clockwise':
-            print(u'\u2713'.encode('utf8')+b' : ','Imported mesh has',original_order,'node ordering')
-        else:
-            print(u'\u2717'.encode('utf8')+b' : ','Imported mesh has',original_order,'node ordering')
+        if verbose:
+            if original_order == 'anti-clockwise':
+                print(u'\u2713'.encode('utf8')+b' : ','Imported mesh has',original_order,'node ordering')
+            else:
+                print(u'\u2717'.encode('utf8')+b' : ','Imported mesh has',original_order,'node ordering')
 
         return original_order
 
@@ -3227,7 +3291,11 @@ class Mesh(object):
                 self.elements = self.elements[:,[0, 1, 2, 3, 4, 7, 8, 5, 6]]
             # TET10
             elif el == 11:
-                self.elements = self.elements[:,[0,1,2,3,4,6,5,7,9,8]]
+                self.elements = self.elements[:,[0, 1, 2, 3, 4, 6, 5, 7, 9, 8]]
+            elif el == 12:
+                # This ordering is different from writer
+                self.elements = self.elements[:,[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 20, 11, 13, 10, 12, 14, 15, 21, 22, 26, 23, 24, 16, 17, 25, 18, 19]]
+
         # CORRECT
         self.nelem = self.elements.shape[0]
         self.nnode = self.points.shape[0]
@@ -4274,9 +4342,12 @@ class Mesh(object):
             if p == 1:
                 el = 2
                 bel = 1
-            else:
+            elif p == 2:
                 el = 9
                 bel = 8
+            else:
+                el = 21
+                bel = 26
         elif element_type == "quad":
             if p == 1:
                 el = 3
@@ -4292,8 +4363,12 @@ class Mesh(object):
                 el = 11
                 bel = 9
         elif element_type == "hex":
-            el = 5
-            bel = 3
+            if p == 1:
+                el = 5
+                bel = 3
+            else:
+                el = 12
+                bel = 10
         else:
             raise ValueError("Element type not understood")
 
@@ -4302,11 +4377,17 @@ class Mesh(object):
         points = mesh.points[np.unique(elements),:]
 
         if el == 9:
-            elements = elements[:,[0,1,2,3,5,4]]
+            elements = elements[:,[0, 1, 2, 3, 5, 4]]
         elif el == 10:
             elements = elements[:,[0, 1, 2, 3, 4, 7, 8, 5, 6]]
+        elif el == 21:
+            # Tri p = 3 - this ordering is different from reader
+            elements = elements[:,[0, 1, 2, 3, 4, 7, 9, 8, 5, 6]]
         elif el == 11:
-            elements = elements[:,[0,1,2,3,4,6,5,7,9,8]]
+            elements = elements[:,[0, 1, 2, 3, 4, 6, 5, 7, 9, 8]]
+        elif el == 12:
+            # This ordering is different from reader
+            elements = elements[:,[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 11, 14, 12, 15, 16, 22, 23, 25, 26, 10, 17, 18, 20, 21, 24, 19]]
 
         # Take care of a corner case where nnode != points.shape[0]
         if mesh.nnode != points.shape[0]:
@@ -5003,6 +5084,7 @@ class Mesh(object):
             sys.stdout = open(os.devnull, "w")
             self.ConvertQuadsToTris()
             sys.stdout = sys.__stdout__
+            self.CheckNodeNumbering(change_order_to="anti-clockwise", verbose=False)
 
         self.points = np.ascontiguousarray(self.points)
 
@@ -5274,35 +5356,24 @@ class Mesh(object):
             nrad=nrad, element_type=element_type)
 
         # First mirror the points along 45 degree axis
-        # new_points   = np.copy(self.points)
-        # new_elements = np.copy(self.elements)
-        # self.__reset__()
-
-        # self.element_type = element_type
-
-        # dpoints  = np.zeros((2*new_points.shape[0]-1,2))
-        # dpoints[:new_points.shape[0],:] = new_points
-        # dpoints[new_points.shape[0]:,0] = new_points[:-1,1][::-1]
-        # dpoints[new_points.shape[0]:,1] = new_points[:-1,0][::-1]
-
-        # self.points = dpoints
-        # self.elements = np.vstack((new_elements,new_elements+new_elements.max()))
-
         self.elements = np.fliplr(self.elements)
         mmesh = deepcopy(self)
         mmesh.points[:,0] = self.points[:,1][::-1]
         mmesh.points[:,1] = self.points[:,0][::-1]
         mmesh.elements = np.fliplr(mmesh.elements)
         self += mmesh
+        self.CheckNodeNumbering(change_order_to="anti-clockwise", verbose=False)
 
         # Mirror along Y axis
         nmesh = deepcopy(self)
         nmesh.points[:,0] *= -1.
+        nmesh.CheckNodeNumbering(change_order_to="anti-clockwise", verbose=False)
         self += nmesh
 
         # Mirror along X axis
         nmesh = deepcopy(self)
         nmesh.points[:,1] *= -1.
+        nmesh.CheckNodeNumbering(change_order_to="anti-clockwise", verbose=False)
         self += nmesh
 
         # This needs to be done here
@@ -5513,10 +5584,10 @@ class Mesh(object):
 
 
     def HollowSphere(self, inner_radius=9., outer_radius=10.,
-        ncirc=5, nrad=5, nthick=1, element_type="hex"):
+        ncirc=5, nrad=5, nthick=1, element_type="hex", algorithm="standard"):
 
         self.SphericalArc(inner_radius=inner_radius, outer_radius=outer_radius,
-            ncirc=ncirc, nrad=nrad, nthick=nthick, element_type=element_type)
+            ncirc=ncirc, nrad=nrad, nthick=nthick, element_type=element_type, algorithm=algorithm)
 
         # Mirror self in X, Y & Z
         for i in range(2):
@@ -5813,7 +5884,7 @@ class Mesh(object):
             idx_kept_elements:                          [1D array] indices of kept element
             removed_mesh:                               [Mesh] an instance of removed mesh, returned only if return_removed_mesh=True
 
-        1. Note that this method computes a new mesh without maintaining a copy of the original
+        1. Note that this method overrides the mesh without maintaining a copy of the original
         2. Different criteria can be mixed for instance removing all elements in the mesh apart from the ones
         in the boundary which are within a box
         """
@@ -6316,7 +6387,7 @@ class Mesh(object):
         """Refines a given mesh (self) to specified level uniformly.
 
             Note that uniform refinement implies two things:
-            1. "ALL" elements will refinement, otherwise non-conformal elements will be created
+            1. "ALL" elements will be refined, otherwise non-conformal elements will be created
             2. Equal refinement takes place in every direction
         """
 
@@ -7960,7 +8031,7 @@ class Mesh(object):
 
 
     def CreateSurface2DMeshfrom3DMesh(self):
-        """Create a surface 2D mesh from a 3D mesh
+        """Create a surface 2D mesh from the boundary of 3D mesh
         """
 
         self.__do_memebers_exist__()
@@ -7986,7 +8057,7 @@ class Mesh(object):
 
 
     def CreateCurve1DMeshfrom2DMesh(self):
-        """Create a curve 1D mesh from a 2D or 3D mesh
+        """Create a curve 1D mesh from the boundary of 2D or 3D mesh
         """
 
         self.__do_memebers_exist__()

@@ -51,7 +51,8 @@ class FEMSolver(object):
         maximum_iteration_for_newton_raphson=50,
         nonlinear_iterative_technique="newton_raphson",
         line_search_technique="goldstein",
-        regularise_global_system=False,
+        stabilise_local_system=False,
+        stabilise_global_system=False,
         reduce_quadrature_for_quads_hexes=True,
         add_self_weight=False,
         mass_type=None,
@@ -122,7 +123,8 @@ class FEMSolver(object):
         self.NRConvergence = None
         self.nonlinear_iterative_technique = nonlinear_iterative_technique
         self.line_search_technique = line_search_technique
-        self.regularise_global_system = regularise_global_system
+        self.stabilise_local_system = stabilise_local_system
+        self.stabilise_global_system = stabilise_global_system
         self.include_physical_damping = include_physical_damping
         self.damping_factor = damping_factor
         self.add_self_weight = add_self_weight
@@ -342,6 +344,9 @@ class FEMSolver(object):
         if material.is_transversely_isotropic or material.is_anisotropic:
             if material.anisotropic_orientations is None:
                 material.GetFibresOrientation(mesh)
+
+        if self.stabilise_local_system:
+            material.stabilise_tangents = True
         ##############################################################################
 
         ##############################################################################
@@ -1295,6 +1300,9 @@ class FEMSolver(object):
         if self.line_search_technique == "goldstein":
                 return self.GoldsteinLineSearch(function_space, formulation, mesh, material,
                     boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp, alpha)
+        if self.line_search_technique == "curvature":
+                return self.CurvatureLineSearch(function_space, formulation, mesh, material,
+                    boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp, alpha)
         elif self.line_search_technique == "wolfe":
             return self.WolfeLineSearch(function_space, formulation, mesh, material,
                 boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp, alpha)
@@ -1302,6 +1310,36 @@ class FEMSolver(object):
             return self.BackTrackingLineSearch(function_space, formulation, mesh, material,
                 boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp, alpha)
 
+
+    def CurvatureLineSearch(self, function_space, formulation, mesh, material,
+        boundary_condition, NodalForces, dU, Residual, Eulerx, Eulerp, alpha):
+
+        from Florence.FiniteElements.Assembly import AssembleInternalTractionForces
+        rho = 0.5
+        newXCopy = np.copy(Eulerx)
+        newPCopy = np.copy(Eulerp)
+        ResidualCopy = np.copy(Residual)
+        R0 = np.dot(dU.flatten().T,Residual).item()
+
+        alpha, alpha_tol, c = 1.0, 1e-5, 1e-5
+        c2 = 0.99
+        energyRatio = 1e-2
+        while np.linalg.norm(np.dot(dU.flatten().T,ResidualCopy).item()) > c2 * np.linalg.norm(R0):
+
+            newXCopy = Eulerx + alpha * dU[:,:formulation.ndim]
+            newPCopy = Eulerp + alpha * dU[:,-1]
+
+            # RE-ASSEMBLE - COMPUTE INTERNAL TRACTION FORCES
+            TractionForces = AssembleInternalTractionForces(self, function_space, formulation, mesh, material, newXCopy, newPCopy)
+            # FIND THE RESIDUAL
+            ResidualCopy[boundary_condition.columns_in] = TractionForces[boundary_condition.columns_in] -\
+                NodalForces[boundary_condition.columns_in]
+
+            alpha *= rho
+
+            if alpha < alpha_tol:
+                break
+        return alpha
 
 
     def GoldsteinLineSearch(self, function_space, formulation, mesh, material,
@@ -1377,7 +1415,7 @@ class FEMSolver(object):
         newXCopy = np.copy(Eulerx)
         newPCopy = np.copy(Eulerp)
         ResidualCopy = np.copy(Residual)
-        pkX = np.dot(dU[:,:formulation.ndim].flatten().T,Residual).item()
+        pkX = np.dot(dU.flatten().T,Residual).item()
 
         EX0 = self.ComputeEnergy(function_space, mesh, material, formulation,
             newXCopy, Eulerp)[0]
@@ -1430,7 +1468,7 @@ class FEMSolver(object):
         EXf = self.ComputeEnergy(function_space, mesh, material, formulation,
             newXCopy + dU[:,:formulation.ndim], Eulerp + dU[:,-1])[0]
 
-        pkX = np.dot(dU[:,:formulation.ndim].flatten().T,Residual).item()
+        pkX = np.dot(dU.flatten().T,Residual).item()
         alpha, alpha_tol, c = 1.0, 1e-5, 1e-4
 
         # DECIDE BASED ON RATIO TO NOT ALLOW TOO SMALL VALUES OF ALPHA
@@ -1497,9 +1535,10 @@ class FEMSolver(object):
             if formulation.fields == "electro_mechanics":
                 ElectricPotentialElem = Eulerp[mesh.elements[elem,:]]
                 energy = formulation.GetEnergy(function_space, material,
-                    LagrangeElemCoords, EulerElemCoords, ElectricPotentialElem, ElectricPotentialElem, self, elem)
-                strain_energy += energy[0]
-                electrical_energy += energy[1]
+                    LagrangeElemCoords, EulerElemCoords, ElectricPotentialElem, self, elem)
+                # strain_energy += energy[0]
+                # electrical_energy += energy[1]
+                strain_energy += energy
             else:
                 energy = formulation.GetEnergy(function_space, material,
                     LagrangeElemCoords, EulerElemCoords, self, elem)

@@ -268,7 +268,7 @@ class NonlinearImplicitStructuralDynamicIntegrator(StructuralDynamicIntegrator):
             # COMPUTE STEP SIZE
             if fem_solver.activate_line_search:
                 alpha = fem_solver.LineSearch(function_spaces[0], formulation, mesh, material, boundary_condition,
-                    NodalForces, dU, Residual, Eulerx, Eulerp)
+                    NodalForces, dU, Residual, Eulerx, Eulerp, alpha)
 
             # UPDATE THE EULERIAN COMPONENTS - THE GEOMETRY
             Eulerx += alpha * dU[:,:formulation.ndim]

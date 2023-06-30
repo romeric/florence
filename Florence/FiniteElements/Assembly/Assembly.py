@@ -207,7 +207,7 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
         stiffness = coo_matrix((V_stiffness,(I_stiffness,J_stiffness)),
             shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])),dtype=np.float64).tocsr()
 
-        if fem_solver.regularise_global_system:
+        if fem_solver.stabilise_global_system:
             stiffness.setdiag(stiffness.diagonal(k=0) + 1e-10)
 
         # GET STORAGE/MEMORY DETAILS
@@ -227,7 +227,7 @@ def AssemblySmall(fem_solver, function_space, formulation, mesh, material, Euler
         stiffness = csr_matrix((V_stiffness,indices,indptr),
             shape=((nvar*mesh.points.shape[0],nvar*mesh.points.shape[0])))
 
-        if fem_solver.regularise_global_system:
+        if fem_solver.stabilise_global_system:
             stiffness.setdiag(stiffness.diagonal(k=0) + 1e-10)
 
         # GET STORAGE/MEMORY DETAILS
