@@ -344,7 +344,6 @@ def GetInitialStiffnessPolyconvex(sigmaH, sigmaJ, F, stabilise=False, eps=1e-6):
         lamb7 =  sigmaJ * s1
         lamb8 =  sigmaJ * s2
         lamb9 =  sigmaJ * s3
-        # print(lamb4, lamb5, lamb6, lamb7, lamb8, lamb9)
 
         lamb1 = eigs[0]
         lamb2 = eigs[1]
@@ -360,26 +359,23 @@ def GetInitialStiffnessPolyconvex(sigmaH, sigmaJ, F, stabilise=False, eps=1e-6):
         lamb8 = max(lamb8, eps)
         lamb9 = max(lamb9, eps)
 
-        vec1 = vecs[:,0]
-        vec2 = vecs[:,1]
-        vec3 = vecs[:,2]
-        e1 = vec1[0] * d1 + vec1[1] * d2 + vec1[2] * d3
-        e2 = vec2[0] * d1 + vec2[1] * d2 + vec2[2] * d3
-        e3 = vec3[0] * d1 + vec3[1] * d2 + vec3[2] * d3
-
         # Build sigmaJ * IxF
-        # Numpy unlike eigen does not work for this due to different alignment of eigenvectors
-        # eigs[eigs < 0] = eps
-        # HwSPD = vecs.dot(np.diag(eigs).dot(vecs.T))
-        # d1d2d3 = np.hstack((d1[:,None], d2[:,None], d3[:,None]))
-
-        # sigmaJIxF = sigmaJ * d1d2d3.dot(HwSPD).dot(d1d2d3.T) +\
-        #     lamb4 * outer(l1,l1) + lamb5 * outer(l2,l2) + lamb6 * outer(l3,l3) +\
-        #     lamb7 * outer(t1,t1) + lamb8 * outer(t2,t2) + lamb9 * outer(t3,t3)
-
-        sigmaJIxF = lamb1 * outer(e1,e1) + lamb2 * outer(e2,e2) + lamb3 * outer(e3,e3) +\
+        ds = np.array([d1,d2,d3]).T
+        HwSPD = lamb1 * vecs[:,0][None,:].T.dot(vecs[:,0][None,:]) + lamb2 * vecs[:,1][None,:].T.dot(vecs[:,1][None,:]) +\
+            + lamb3 * vecs[:,2][None,:].T.dot(vecs[:,2][None,:])
+        sigmaJIxF = ds.dot(HwSPD.dot(ds.T)) + \
             lamb4 * outer(l1,l1) + lamb5 * outer(l2,l2) + lamb6 * outer(l3,l3) +\
             lamb7 * outer(t1,t1) + lamb8 * outer(t2,t2) + lamb9 * outer(t3,t3)
+
+        # vec1 = vecs[:,0]
+        # vec2 = vecs[:,1]
+        # vec3 = vecs[:,2]
+        # e1 = vec1[0] * d1 + vec1[1] * d2 + vec1[2] * d3
+        # e2 = vec2[0] * d1 + vec2[1] * d2 + vec2[2] * d3
+        # e3 = vec3[0] * d1 + vec3[1] * d2 + vec3[2] * d3
+        # sigmaJIxF = lamb1 * outer(e1,e1) + lamb2 * outer(e2,e2) + lamb3 * outer(e3,e3) +\
+        #     lamb4 * outer(l1,l1) + lamb5 * outer(l2,l2) + lamb6 * outer(l3,l3) +\
+        #     lamb7 * outer(t1,t1) + lamb8 * outer(t2,t2) + lamb9 * outer(t3,t3)
 
         # Get SVD of sigmaH
         [U, S, Vh] = svd(sigmaH, full_matrices=True); V = Vh.T
@@ -398,16 +394,15 @@ def GetInitialStiffnessPolyconvex(sigmaH, sigmaJ, F, stabilise=False, eps=1e-6):
             ])
         eigs, vecs = sp.linalg.eigh(Hw)
 
+        lamb1 = eigs[0]
+        lamb2 = eigs[1]
+        lamb3 = eigs[2]
         lamb4 = -s1
         lamb5 = -s2
         lamb6 = -s3
         lamb7 =  s1
         lamb8 =  s2
         lamb9 =  s3
-
-        lamb1 = eigs[0]
-        lamb2 = eigs[1]
-        lamb3 = eigs[2]
 
         lamb1 = max(lamb1, eps)
         lamb2 = max(lamb2, eps)
@@ -420,28 +415,23 @@ def GetInitialStiffnessPolyconvex(sigmaH, sigmaJ, F, stabilise=False, eps=1e-6):
         lamb9 = max(lamb9, eps)
 
         # Build IxsigmaH
-        # Numpy unlike eigen does not work for this due to different alignment of eigenvectors
-        # eigs[eigs < 0] = eps
-        # HwSPD = vecs.dot(np.diag(eigs).dot(vecs.T))
-        # d1d2d3 = np.hstack((d1[:,None], d2[:,None], d3[:,None]))
-
-        # IxsigmaH = d1d2d3.dot(HwSPD).dot(d1d2d3.T) +\
-        #     lamb4 * outer(l1,l1) + lamb5 * outer(l2,l2) + lamb6 * outer(l3,l3) +\
-        #     lamb7 * outer(t1,t1) + lamb8 * outer(t2,t2) + lamb9 * outer(t3,t3)
-
-        vec1 = vecs[:,0]
-        vec2 = vecs[:,1]
-        vec3 = vecs[:,2]
-        lamb1 = eigs[0]
-        lamb2 = eigs[1]
-        lamb3 = eigs[2]
-        e1 = vec1[0] * d1 + vec1[1] * d2 + vec1[2] * d3
-        e2 = vec2[0] * d1 + vec2[1] * d2 + vec2[2] * d3
-        e3 = vec3[0] * d1 + vec3[1] * d2 + vec3[2] * d3
-
-        IxsigmaH = lamb1 * outer(e1,e1) + lamb2 * outer(e2,e2) + lamb3 * outer(e3,e3) +\
+        ds = np.array([d1,d2,d3]).T
+        HwSPD = lamb1 * vecs[:,0][None,:].T.dot(vecs[:,0][None,:]) + lamb2 * vecs[:,1][None,:].T.dot(vecs[:,1][None,:]) +\
+            + lamb3 * vecs[:,2][None,:].T.dot(vecs[:,2][None,:])
+        IxsigmaH = ds.dot(HwSPD.dot(ds.T)) + \
             lamb4 * outer(l1,l1) + lamb5 * outer(l2,l2) + lamb6 * outer(l3,l3) +\
             lamb7 * outer(t1,t1) + lamb8 * outer(t2,t2) + lamb9 * outer(t3,t3)
+
+        # vec1 = vecs[:,0]
+        # vec2 = vecs[:,1]
+        # vec3 = vecs[:,2]
+        # e1 = vec1[0] * d1 + vec1[1] * d2 + vec1[2] * d3
+        # e2 = vec2[0] * d1 + vec2[1] * d2 + vec2[2] * d3
+        # e3 = vec3[0] * d1 + vec3[1] * d2 + vec3[2] * d3
+
+        # IxsigmaH = lamb1 * outer(e1,e1) + lamb2 * outer(e2,e2) + lamb3 * outer(e3,e3) +\
+        #     lamb4 * outer(l1,l1) + lamb5 * outer(l2,l2) + lamb6 * outer(l3,l3) +\
+        #     lamb7 * outer(t1,t1) + lamb8 * outer(t2,t2) + lamb9 * outer(t3,t3)
 
         # Sum the two
         initial_stiffness = sigmaJIxF + IxsigmaH

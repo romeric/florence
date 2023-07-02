@@ -341,11 +341,10 @@ class OgdenNeoHookeanC(Material):
                     lamb6 = max(lamb6, hessian_eps)
 
                 ds = np.array([d1,d2,d3]).T
-                recA = lamb1 * vecs[:,0][None,:].T.dot(vecs[:,0][None,:]) + lamb2 * vecs[:,1][None,:].T.dot(vecs[:,1][None,:]) +\
+                HwSPD = lamb1 * vecs[:,0][None,:].T.dot(vecs[:,0][None,:]) + lamb2 * vecs[:,1][None,:].T.dot(vecs[:,1][None,:]) +\
                     + lamb3 * vecs[:,2][None,:].T.dot(vecs[:,2][None,:])
 
-                Hw = ds.dot(recA.dot(ds.T))
-                H = Hw + lamb4 * np.outer(l1,l1) + lamb5 * np.outer(l2,l2) + lamb6 * np.outer(l3,l3)
+                H = ds.dot(HwSPD.dot(ds.T)) + lamb4 * np.outer(l1,l1) + lamb5 * np.outer(l2,l2) + lamb6 * np.outer(l3,l3)
                 # print(H_Voigt)
                 H_Voigt = GetVoigtHessian(H)
                 # print(H_Voigt)
