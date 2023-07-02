@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 #
-# EVERYTHING HERE IS EXPERMENTAL - JUST UGLY PROTOTYPES
+# EVERYTHING HERE IS EXPERMENTAL AND NOT FULLY PART OF FLORENCE - JUST ACADEMIC PROTOTYPES
 #
 import numpy as np
 from numpy import einsum
 import scipy as sp
+import itertools
 from Florence.VariationalPrinciple import VariationalPrinciple
 from Florence import QuadratureRule, FunctionSpace
 from Florence.FiniteElements.LocalAssembly.KinematicMeasures import *
@@ -21,6 +23,63 @@ def vec(H):
         return x
     else:
         return H.T.flatten() # careful - ARAP needs this
+
+
+def cross(A, B) :
+    C = np.zeros((3 ,3))
+
+    C[0 ,0] = A[1 ,1]*B[2 ,2] - A[1 ,2]*B[2 ,1] - A[2 ,1]*B[1 ,2] + A [2 ,2]* B[1 ,1]
+    C[0 ,1] = A[1 ,2]*B[2 ,0] - A[1 ,0]*B[2 ,2] + A[2 ,0]*B[1 ,2] - A [2 ,2]* B[1 ,0]
+    C[0 ,2] = A[1 ,0]*B[2 ,1] - A[1 ,1]*B[2 ,0] - A[2 ,0]*B[1 ,1] + A [2 ,1]* B[1 ,0]
+    C[1 ,0] = A[0 ,2]*B[2 ,1] - A[0 ,1]*B[2 ,2] + A[2 ,1]*B[0 ,2] - A [2 ,2]* B[0 ,1]
+    C[1 ,1] = A[0 ,0]*B[2 ,2] - A[0 ,2]*B[2 ,0] - A[2 ,0]*B[0 ,2] + A [2 ,2]* B[0 ,0]
+    C[1 ,2] = A[0 ,1]*B[2 ,0] - A[0 ,0]*B[2 ,1] + A[2 ,0]*B[0 ,1] - A [2 ,1]* B[0 ,0]
+    C[2 ,0] = A[0 ,1]*B[1 ,2] - A[0 ,2]*B[1 ,1] - A[1 ,1]*B[0 ,2] + A [1 ,2]* B[0 ,1]
+    C[2 ,1] = A[0 ,2]*B[1 ,0] - A[0 ,0]*B[1 ,2] + A[1 ,0]*B[0 ,2] - A [1 ,2]* B[0 ,0]
+    C[2 ,2] = A[0 ,0]*B[1 ,1] - A[0 ,1]*B[1 ,0] - A[1 ,0]*B[0 ,1] + A [1 ,1]* B[0 ,0]
+
+    return C
+
+
+
+def levi_civita(dim):
+    arr=np.zeros(tuple([dim for _ in range(dim)]))
+    for x in itertools.permutations(tuple(range(dim))):
+        mat = np.zeros((dim, dim))
+        for i, j in zip(range(dim), x):
+            mat[i, j] = 1
+        arr[x] = np.linalg.det(mat)
+    return arr
+
+
+
+def Get_FxIxF(F):
+    # This is not the same as what appears in SIGGRAPH paper supplemental
+    # This is same as Fastor only last minute (the last einsum indices change from iIjJ to IiJj)
+    # to make it compatible with the vec function
+    ndim = F.shape[0]
+    E = levi_civita(ndim)
+
+    # For I, both iiIjJ and IiJj flatten to diagonal matrix
+    I = einsum("ij,IJ->iIjJ", np.eye(ndim), np.eye(ndim))
+
+    # Note that if we did this that is iIjJ to IiJj then IxF would be the same as d2JdFdF
+    # IxF = einsum("jpq,JPQ,iIpP,qQ->IiJj", E, E, I_, F)
+
+    IxF = einsum("jpq,JPQ,iIpP,qQ->iIjJ", E, E, I, F)
+    FxIxF = einsum("ipq,IPQ,qQjJ,pP->IiJj", E, E, IxF, F) # only this changes from Fastor style iIjJ to IiJj
+    fxIxf = vec(FxIxF) # to make this work as expected
+
+    return fxIxf
+
+
+def cbrts(z):
+    # Get all 3 cube roots of a function
+    z = complex(z)
+    x = z.real
+    y = z.imag
+    resArg = [ (np.arctan2(y,x)+2*np.pi*n)/3. for n in range(1,4) ]
+    return np.array([  abs(z)**(1./3) * (np.cos(a) + np.sin(a)*1j) for a in resArg ])
 
 # @jit(nopython=True)
 def svd_rv(F, full_matrices=True):
@@ -170,35 +229,227 @@ def dRdF(u, s, vh, regularise=False):
     return gR
 
 
-# delta = 1e-3
-# def Jr(J):
-#     return 0.5 * (J + np.sqrt(J**2 + delta**2))
 
-# def dJrdF(F):
-#     J = np.linalg.det(F)
-#     return 0.5 * (1. + J / np.sqrt(J**2 + delta**2)) * dJdF(F)
+def GetEigenMatrices(u, vh):
 
-# def d2JrdFdF(F):
-#     J = np.linalg.det(F)
-#     djdf = dJdF(F)
-#     gJ = vec(djdf)
-#     dJrdF = 0.5 * (1. + J / np.sqrt(J**2 + delta**2)) * djdf
-#     gJr = vec(dJrdF)
-#     HJr = 0.5 * (1 + J / np.sqrt(J**2 + delta**2)) * d2JdFdF(F) + 0.5 * (delta**2 / (J**2 + delta**2)**(3./2.)) * np.outer(gJ,gJ)
-#     return HJr
+    ndim = u.shape[0]
+
+    if ndim == 3:
+        # Scale modes
+        D1 = np.array([[1.,0,0],[0,0,0],[0,0,0]])
+        D1 = np.dot(u, np.dot(D1, vh.T))
+        d1 = vec(D1)
+        D2 = np.array([[0.,0,0],[0,1.,0],[0.,0,0]])
+        D2 = np.dot(u, np.dot(D2, vh.T))
+        d2 = vec(D2)
+        D3 = np.array([[0.,0,0],[0,0.,0],[0,0,1.]])
+        D3 = np.dot(u, np.dot(D3, vh.T))
+        d3 = vec(D3)
+
+        # Flip modes
+        L1 = np.array([[0.,0.,0.],[0.,0.,1.],[0.,1.,0.]])
+        L1 = 1./np.sqrt(2) * np.dot(u, np.dot(L1, vh.T))
+        l1 = vec(L1)
+        L2 = np.array([[0.,0.,1.],[0.,0., 0],[1.,0.,0.]])
+        L2 = 1./np.sqrt(2) * np.dot(u, np.dot(L2, vh.T))
+        l2 = vec(L2)
+        L3 = np.array([[0.,1.,0.],[1.,0.,0.],[0,0.,0.]])
+        L3 = 1./np.sqrt(2) * np.dot(u, np.dot(L3, vh.T))
+        l3 = vec(L3)
+
+        # Twist modes
+        T1 = np.array([[0.,0.,0.],[0.,0.,-1.],[0.,1.,0.]])
+        T1 = 1./np.sqrt(2) * np.dot(u, np.dot(T1, vh.T))
+        t1 = vec(T1)
+        T2 = np.array([[0.,0.,-1.],[0.,0., 0],[1.,0.,0.]])
+        T2 = 1./np.sqrt(2) * np.dot(u, np.dot(T2, vh.T))
+        t2 = vec(T2)
+        T3 = np.array([[0.,-1.,0.],[1.,0.,0.],[0,0.,0.]])
+        T3 = 1./np.sqrt(2) * np.dot(u, np.dot(T3, vh.T))
+        t3 = vec(T3)
+
+        return d1, d2, d3, l1, l2, l3, t1, t2, t3
+
+    elif ndim == 2:
+
+        # Scale modes
+        D1 = np.array([[1.,0],[0,0.]])
+        D1 = np.dot(u, np.dot(D1, vh.T))
+        d1 = vec(D1)
+
+        D2 = np.array([[0.,0],[0,1.]])
+        D2 = np.dot(u, np.dot(D2, vh.T))
+        d2 = vec(D2)
+
+        # Flip mode
+        L = np.array([[0.,1],[1,0.]])
+        L = 1./np.sqrt(2.) * np.dot(u, np.dot(L, vh.T))
+        l = vec(L)
+
+        # Twist mode
+        T = np.array([[0.,-1],[1,0.]])
+        T = 1./np.sqrt(2.) * np.dot(u, np.dot(T, vh.T))
+        t = vec(T)
+
+        return d1, d2, l, t
 
 
-def LocallyInjectiveFunction(J):
-    return 1. / (J**3 - 3 * J**2 + 3 * J)
+def GetInitialStiffnessPolyconvex(sigmaH, sigmaJ, F, stabilise=False, eps=1e-6):
 
-def LocallyInjectiveGradient(J, gJ):
-    return 3.*(-J**2 + 2*J - 1)/(J**2*(J**2 - 3*J + 3)**2) * gJ
+    if not stabilise:
+        return d2JdFdF(sigmaH + sigmaJ * F)
+    else:
+        # eigs, vecs = sp.linalg.eigh(d2JdFdF(sigmaH + sigmaJ * F))
+        # eigs[eigs < 0] = eps
+        # xx = vecs.dot(np.diag(eigs).dot(vecs.T))
+        # return xx
 
-def LocallyInjectiveHessian(J, gJ, HJ):
-    H1 = 6.*(2*J**4 - 8*J**3 + 12*J**2 - 9*J + 3)/(J**3*(J**6 - 9*J**5 + 36*J**4 - 81*J**3 + 108*J**2 - 81*J + 27)) * np.outer(gJ,gJ)
-    H1 += 3.*(-J**2 + 2*J - 1)/(J**2*(J**2 - 3*J + 3)**2) * HJ
-    makezero(H1, 1e-12)
-    return H1
+        outer = np.outer
+
+        # Get SVD of F
+        [U, S, Vh] = svd(F, full_matrices=True); V = Vh.T
+
+        s1 = S[0]
+        s2 = S[1]
+        s3 = S[2]
+
+        [d1, d2, d3, l1, l2, l3, t1, t2, t3] = GetEigenMatrices(U, V)
+
+        # Get eigenvalues of the following matrix
+        Hw = sigmaJ * np.array([
+            [0 , s3,  s2],
+            [s3,  0,  s1],
+            [s2, s1,   0],
+            ])
+        eigs, vecs = sp.linalg.eigh(Hw)
+
+        # # Alternatively the 3 roots can be obtained as:
+        # tt = complex(J**2 - I2**3 / 27., 0)
+        # tt = np.sqrt(tt)
+        # u = cbrts(J + tt); u.sort()
+        # v = cbrts(J - tt); v.sort()
+        # roots = (u + v).real
+        # # Or through numpy polynomial
+        # # import numpy.polynomial.polynomial as poly
+        # # roots = poly.polyroots((2. * J, -I2, 0., 1.))
+        # # the following does not work as python only returns principal root
+        # # cbrt = lambda x: x**(1./3.)
+        # # x1 = cbrt(J + tt) + cbrt(J - tt)
+        # # x2 = x1 * complex(-1., -np.sqrt(3.)) / 2.
+        # # x3 = x1 * complex(-1.,  np.sqrt(3.)) / 2.
+
+        lamb4 = -sigmaJ * s1
+        lamb5 = -sigmaJ * s2
+        lamb6 = -sigmaJ * s3
+        lamb7 =  sigmaJ * s1
+        lamb8 =  sigmaJ * s2
+        lamb9 =  sigmaJ * s3
+        # print(lamb4, lamb5, lamb6, lamb7, lamb8, lamb9)
+
+        lamb1 = eigs[0]
+        lamb2 = eigs[1]
+        lamb3 = eigs[2]
+
+        lamb1 = max(lamb1, eps)
+        lamb2 = max(lamb2, eps)
+        lamb3 = max(lamb3, eps)
+        lamb4 = max(lamb4, eps)
+        lamb5 = max(lamb5, eps)
+        lamb6 = max(lamb6, eps)
+        lamb7 = max(lamb7, eps)
+        lamb8 = max(lamb8, eps)
+        lamb9 = max(lamb9, eps)
+
+        vec1 = vecs[:,0]
+        vec2 = vecs[:,1]
+        vec3 = vecs[:,2]
+        e1 = vec1[0] * d1 + vec1[1] * d2 + vec1[2] * d3
+        e2 = vec2[0] * d1 + vec2[1] * d2 + vec2[2] * d3
+        e3 = vec3[0] * d1 + vec3[1] * d2 + vec3[2] * d3
+
+        # Build sigmaJ * IxF
+        # Numpy unlike eigen does not work for this due to different alignment of eigenvectors
+        # eigs[eigs < 0] = eps
+        # HwSPD = vecs.dot(np.diag(eigs).dot(vecs.T))
+        # d1d2d3 = np.hstack((d1[:,None], d2[:,None], d3[:,None]))
+
+        # sigmaJIxF = sigmaJ * d1d2d3.dot(HwSPD).dot(d1d2d3.T) +\
+        #     lamb4 * outer(l1,l1) + lamb5 * outer(l2,l2) + lamb6 * outer(l3,l3) +\
+        #     lamb7 * outer(t1,t1) + lamb8 * outer(t2,t2) + lamb9 * outer(t3,t3)
+
+        sigmaJIxF = lamb1 * outer(e1,e1) + lamb2 * outer(e2,e2) + lamb3 * outer(e3,e3) +\
+            lamb4 * outer(l1,l1) + lamb5 * outer(l2,l2) + lamb6 * outer(l3,l3) +\
+            lamb7 * outer(t1,t1) + lamb8 * outer(t2,t2) + lamb9 * outer(t3,t3)
+
+        # Get SVD of sigmaH
+        [U, S, Vh] = svd(sigmaH, full_matrices=True); V = Vh.T
+
+        s1 = S[0]
+        s2 = S[1]
+        s3 = S[2]
+
+        [d1, d2, d3, l1, l2, l3, t1, t2, t3] = GetEigenMatrices(U, V)
+
+        # Get eigenvalues of the following matrix
+        Hw = np.array([
+            [0 , s3,  s2],
+            [s3,  0,  s1],
+            [s2, s1,   0],
+            ])
+        eigs, vecs = sp.linalg.eigh(Hw)
+
+        lamb4 = -s1
+        lamb5 = -s2
+        lamb6 = -s3
+        lamb7 =  s1
+        lamb8 =  s2
+        lamb9 =  s3
+
+        lamb1 = eigs[0]
+        lamb2 = eigs[1]
+        lamb3 = eigs[2]
+
+        lamb1 = max(lamb1, eps)
+        lamb2 = max(lamb2, eps)
+        lamb3 = max(lamb3, eps)
+        lamb4 = max(lamb4, eps)
+        lamb5 = max(lamb5, eps)
+        lamb6 = max(lamb6, eps)
+        lamb7 = max(lamb7, eps)
+        lamb8 = max(lamb8, eps)
+        lamb9 = max(lamb9, eps)
+
+        # Build IxsigmaH
+        # Numpy unlike eigen does not work for this due to different alignment of eigenvectors
+        # eigs[eigs < 0] = eps
+        # HwSPD = vecs.dot(np.diag(eigs).dot(vecs.T))
+        # d1d2d3 = np.hstack((d1[:,None], d2[:,None], d3[:,None]))
+
+        # IxsigmaH = d1d2d3.dot(HwSPD).dot(d1d2d3.T) +\
+        #     lamb4 * outer(l1,l1) + lamb5 * outer(l2,l2) + lamb6 * outer(l3,l3) +\
+        #     lamb7 * outer(t1,t1) + lamb8 * outer(t2,t2) + lamb9 * outer(t3,t3)
+
+        vec1 = vecs[:,0]
+        vec2 = vecs[:,1]
+        vec3 = vecs[:,2]
+        lamb1 = eigs[0]
+        lamb2 = eigs[1]
+        lamb3 = eigs[2]
+        e1 = vec1[0] * d1 + vec1[1] * d2 + vec1[2] * d3
+        e2 = vec2[0] * d1 + vec2[1] * d2 + vec2[2] * d3
+        e3 = vec3[0] * d1 + vec3[1] * d2 + vec3[2] * d3
+
+        IxsigmaH = lamb1 * outer(e1,e1) + lamb2 * outer(e2,e2) + lamb3 * outer(e3,e3) +\
+            lamb4 * outer(l1,l1) + lamb5 * outer(l2,l2) + lamb6 * outer(l3,l3) +\
+            lamb7 * outer(t1,t1) + lamb8 * outer(t2,t2) + lamb9 * outer(t3,t3)
+
+        # Sum the two
+        initial_stiffness = sigmaJIxF + IxsigmaH
+
+        return initial_stiffness
+
+
+
 
 
 def FillConstitutiveBF(B,SpatialGradient,ndim,nvar):
@@ -219,6 +470,10 @@ def FillConstitutiveBF(B,SpatialGradient,ndim,nvar):
         B[2::ndim,2] = SpatialGradient[0,:]
         B[2::ndim,5] = SpatialGradient[1,:]
         B[2::ndim,8] = SpatialGradient[2,:]
+
+
+
+
 
 
 class NeoHookeanF(Material):
@@ -258,17 +513,12 @@ class NeoHookeanF(Material):
         F = StrainTensors['F'][gcounter]
         b = StrainTensors['b'][gcounter]
 
-        if np.isclose(J, 0) or J < 0:
-            delta = np.sqrt(0.04 * J * J + 1e-8);
-            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
-
         mu = self.mu
         lamb = self.lamb
 
         # BECAREFUL IJKL OF F,F or invF,invF is not symmetric
         # For F based formulation do we need to bring everything to reference domain, partial pull back?
 
-        # Symmetric formulation based on K. Theodore arrangements
         gJ = vec(dJdF(F))
         HJ = d2JdFdF(F)
         d2 = self.ndim**2
@@ -284,10 +534,6 @@ class NeoHookeanF(Material):
         I = StrainTensors['I']
         J = StrainTensors['J'][gcounter]
         F = StrainTensors['F'][gcounter]
-
-        if np.isclose(J, 0) or J < 0:
-            delta = np.sqrt(0.04 * J * J + 1e-8);
-            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
 
         mu = self.mu
         lamb = self.lamb
@@ -305,10 +551,6 @@ class NeoHookeanF(Material):
         J = StrainTensors['J'][gcounter]
         F = StrainTensors['F'][gcounter]
         C = np.dot(F.T,F)
-
-        if np.isclose(J, 0) or J < 0:
-            delta = np.sqrt(0.04 * J * J + 1e-8);
-            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
 
         energy  = mu/2.*(trace(C) - 3.) - mu*np.log(J) + lamb/2.*np.log(J)**2
 
@@ -453,11 +695,6 @@ class MIPSF(Material):
         J = StrainTensors['J'][gcounter]
         F = StrainTensors['F'][gcounter]
 
-        # F = np.array([[5.,1],[2.,3.]])
-        # J = np.linalg.det(F)
-        # print(J)
-
-
         trc = np.trace(F.T.dot(F))
 
         # self.delta = np.sqrt(1e-8 + min(self.minJ, 0.)**2 * 0.04)
@@ -516,25 +753,7 @@ class MIPSF(Material):
                 s1 = s[0]
                 s2 = s[1]
 
-                # Complete eigensystem for Hessian
-                # Twist modes
-                T = np.array([[0.,-1],[1,0.]])
-                T = 1./np.sqrt(2.) * np.dot(u, np.dot(T, vh.T))
-                t = vec(T)
-
-                # Flip modes
-                L = np.array([[0.,1],[1,0.]])
-                L = 1./np.sqrt(2.) * np.dot(u, np.dot(L, vh.T))
-                l = vec(L)
-
-                # Scale modes
-                D1 = np.array([[1.,0],[0,0.]])
-                D1 = np.dot(u, np.dot(D1, vh.T))
-                d1 = vec(D1)
-
-                D2 = np.array([[0.,0],[0,1.]])
-                D2 = np.dot(u, np.dot(D2, vh.T))
-                d2 = vec(D2)
+                [d1, d2, l, t] = GetEigenMatrices(u, vh)
 
                 # # These are eigenvalues of MIPS for when J=Jr (no regularisation)
                 # lamb1 =  -1. / I3 + I2 * (I2 - alpha) / 2. / I3**3
@@ -556,11 +775,13 @@ class MIPSF(Material):
 
                 beta =  (I3*s1**2 - I3*s2**2 + s*s1**2 - s*s2**2 + sqrt(4*I3**4 + 8*I3**3*s - 20*I3**2*s**2 + I3**2*s1**4 - 2*I3**2*s1**2*s2**2 + I3**2*s2**4 - 24*I3*s**3 + 2*I3*s*s1**4 - 4*I3*s*s1**2*s2**2 + 2*I3*s*s2**4 + 36*s**4 + s**2*s1**4 - 2*s**2*s1**2*s2**2 + s**2*s2**4))/(2*(-I3**2 - I3*s + 3*s**2))
 
-                kk=0.
-                lamb1 = max(lamb1, kk)
-                lamb2 = max(lamb2, kk)
-                lamb3 = max(lamb3, kk)
-                lamb4 = max(lamb4, kk)
+                # Project to SPD if needed
+                if self.stabilise_tangents:
+                    eps = self.tangent_stabiliser_value
+                    lamb1 = max(lamb1, eps)
+                    lamb2 = max(lamb2, eps)
+                    lamb3 = max(lamb3, eps)
+                    lamb4 = max(lamb4, eps)
 
                 # Scaling modes do not decouple for MIPS
                 gamma  = np.sqrt(1. + beta**2) # normaliser
@@ -594,39 +815,7 @@ class MIPSF(Material):
                 s2 = s[1]
                 s3 = s[2]
 
-                # Ts and Ls seem to be clearly this [for SD they work out exact]
-                # Ts and Ls as they appear in main paper of BSmith
-                # Note that Ts and their transpose do not matter as we always need outer(t,t)
-                # which comes out the same
-                T1 = np.array([[0.,0.,0.],[0.,0.,-1.],[0.,1.,0.]])
-                T1 = 1./np.sqrt(2) * np.dot(u, np.dot(T1, vh.T))
-                t1 = vec(T1)
-                T2 = np.array([[0.,0.,-1.],[0.,0., 0],[1.,0.,0.]])
-                T2 = 1./np.sqrt(2) * np.dot(u, np.dot(T2, vh.T))
-                t2 = vec(T2)
-                T3 = np.array([[0.,-1.,0.],[1.,0.,0.],[0,0.,0.]])
-                T3 = 1./np.sqrt(2) * np.dot(u, np.dot(T3, vh.T))
-                t3 = vec(T3)
-
-                L1 = np.array([[0.,0.,0.],[0.,0.,1.],[0.,1.,0.]])
-                L1 = 1./np.sqrt(2) * np.dot(u, np.dot(L1, vh.T))
-                l1 = vec(L1)
-                L2 = np.array([[0.,0.,1.],[0.,0., 0],[1.,0.,0.]])
-                L2 = 1./np.sqrt(2) * np.dot(u, np.dot(L2, vh.T))
-                l2 = vec(L2)
-                L3 = np.array([[0.,1.,0.],[1.,0.,0.],[0,0.,0.]])
-                L3 = 1./np.sqrt(2) * np.dot(u, np.dot(L3, vh.T))
-                l3 = vec(L3)
-
-                D1 = np.array([[1.,0,0],[0,0,0],[0,0,0]])
-                D1 = np.dot(u, np.dot(D1, vh.T))
-                d1 = vec(D1)
-                D2 = np.array([[0.,0,0],[0,1.,0],[0.,0,0]])
-                D2 = np.dot(u, np.dot(D2, vh.T))
-                d2 = vec(D2)
-                D3 = np.array([[0.,0,0],[0,0.,0],[0,0,1.]])
-                D3 = np.dot(u, np.dot(D3, vh.T))
-                d3 = vec(D3)
+                [d1, d2, d3, l1, l2, l3, t1, t2, t3] = GetEigenMatrices(u, vh)
 
                 # Note: fractional powers work different - if negative base (J) is encountered they explode
                 # But make sure symbolically generated values are fractionalsed i.e. add dots(.)
@@ -686,27 +875,22 @@ class MIPSF(Material):
                 # e3 /= np.linalg.norm(e3)
 
                 # Project to SPD if needed
-                # kk=0.
-                # lamb1 = max(lamb1, kk)
-                # lamb2 = max(lamb2, kk)
-                # lamb3 = max(lamb3, kk)
-                # lamb4 = max(lamb4, kk)
-                # lamb5 = max(lamb5, kk)
-                # lamb6 = max(lamb6, kk)
-                # lamb7 = max(lamb7, kk)
-                # lamb8 = max(lamb8, kk)
-                # lamb9 = max(lamb9, kk)
+                if self.stabilise_tangents:
+                    eps = self.tangent_stabiliser_value
+                    lamb1 = max(lamb1, eps)
+                    lamb2 = max(lamb2, eps)
+                    lamb3 = max(lamb3, eps)
+                    lamb4 = max(lamb4, eps)
+                    lamb5 = max(lamb5, eps)
+                    lamb6 = max(lamb6, eps)
+                    lamb7 = max(lamb7, eps)
+                    lamb8 = max(lamb8, eps)
+                    lamb9 = max(lamb9, eps)
 
                 H1 = lamb1 * outer(e1,e1) + lamb2 * outer(e2,e2) + lamb3 * outer(e3,e3) +\
                     lamb4 * outer(t1,t1) + lamb5 * outer(t2,t2) + lamb6 * outer(t3,t3) +\
                     lamb7 * outer(l1,l1) + lamb8 * outer(l2,l2) + lamb9 * outer(l3,l3)
 
-                # makezero(H1)
-                # makezero(H)
-                # print(H1)
-                # print()
-                # print(H)
-                # print(norm(H - H1))
                 H = H1
 
         # Numerically project to SPD
@@ -859,7 +1043,6 @@ class MIPSF2(Material):
         if np.isclose(Jr, 0):
             Jr = max(1e-8, Jr)
 
-        # # Symmetric formulation based on K. Theodore arrangements
         # gJ = vec(dJdF(F))
         # HJ = d2JdFdF(F)
         # f = vec(F)
@@ -891,60 +1074,15 @@ class MIPSF2(Material):
             S = np.dot(u, np.dot(np.diag(s), vh.T))
             I1 = trace(S)
 
-            # s1 = S[0, 0];
-            # s2 = S[1, 1];
             s1 = s[0]
             s2 = s[1]
 
-            # Complete eigensystem for Hessian
-            # Twist modes
-            T = np.array([[0.,-1],[1,0.]])
-            T = 1./np.sqrt(2.) * np.dot(u, np.dot(T, vh.T))
-            t = vec(T)
-
-            # // Flip modes
-            L = np.array([[0.,1],[1,0.]])
-            L = 1./np.sqrt(2.) * np.dot(u, np.dot(L, vh.T))
-            l = vec(L)
-
-            # Scale modes
-            D1 = np.array([[1.,0],[0,0.]])
-            D1 = np.dot(u, np.dot(D1, vh.T))
-            d1 = vec(D1)
-
-            D2 = np.array([[0.,0],[0,1.]])
-            D2 = np.dot(u, np.dot(D2, vh.T))
-            d2 = vec(D2)
+            [d1, d2, l, t] = GetEigenMatrices(u, vh)
 
             sqrt = np.sqrt
             delta2 = delta**2
             s = posJ
             II_F = I2
-            # beta =  (I2*I3*s1**2/2 - I2*I3*s2**2/2 + I2*s*s1**2/2 - I2*s*s2**2/2 - I3**2*s1**2 + I3**2*s2**2 - I3*s*s1**2 + I3*s*s2**2 + 2*s**2*s1**2 - 2*s**2*s2**2 - sqrt(4*I2**2*I3**4 + 8*I2**2*I3**3*s - 20*I2**2*I3**2*s**2 + I2**2*I3**2*s1**4 - 2*I2**2*I3**2*s1**2*s2**2 + I2**2*I3**2*s2**4 - 24*I2**2*I3*s**3 + 2*I2**2*I3*s*s1**4 - 4*I2**2*I3*s*s1**2*s2**2 + 2*I2**2*I3*s*s2**4 + 36*I2**2*s**4 + I2**2*s**2*s1**4 - 2*I2**2*s**2*s1**2*s2**2 + I2**2*s**2*s2**4 - 16*I2*I3**5 - 32*I2*I3**4*s + 80*I2*I3**3*s**2 - 4*I2*I3**3*s1**4 + 8*I2*I3**3*s1**2*s2**2 - 4*I2*I3**3*s2**4 + 80*I2*I3**2*s**3 - 8*I2*I3**2*s*s1**4 + 16*I2*I3**2*s*s1**2*s2**2 - 8*I2*I3**2*s*s2**4 - 160*I2*I3*s**4 + 4*I2*I3*s**2*s1**4 - 8*I2*I3*s**2*s1**2*s2**2 + 4*I2*I3*s**2*s2**4 + 48*I2*s**5 + 8*I2*s**3*s1**4 - 16*I2*s**3*s1**2*s2**2 + 8*I2*s**3*s2**4 + 16*I3**6 + 32*I3**5*s - 80*I3**4*s**2 + 4*I3**4*s1**4 - 8*I3**4*s1**2*s2**2 + 4*I3**4*s2**4 - 64*I3**3*s**3 + 8*I3**3*s*s1**4 - 16*I3**3*s*s1**2*s2**2 + 8*I3**3*s*s2**4 + 176*I3**2*s**4 - 12*I3**2*s**2*s1**4 + 24*I3**2*s**2*s1**2*s2**2 - 12*I3**2*s**2*s2**4 - 96*I3*s**5 - 16*I3*s**3*s1**4 + 32*I3*s**3*s1**2*s2**2 - 16*I3*s**3*s2**4 + 16*s**6 + 16*s**4*s1**4 - 32*s**4*s1**2*s2**2 + 16*s**4*s2**4)/2)/(-I2*I3**2 - I2*I3*s + 3*I2*s**2 + 2*I3**3 + 2*I3**2*s - 6*I3*s**2 + 2*s**3)
-            # lamb1 =  (I2*J*s1**2 + I2*J*s2**2 + I2*s*s1**2 + I2*s*s2**2 - 2*J**2*s1**2 - 2*J**2*s2**2 - 8*J*s**2 - 2*J*s*s1**2 - 2*J*s*s2**2 + 4*s**3 + 4*s**2*s1**2 + 4*s**2*s2**2 + sqrt(4*I2**2*J**4 + 8*I2**2*J**3*s - 20*I2**2*J**2*s**2 + I2**2*J**2*s1**4 - 2*I2**2*J**2*s1**2*s2**2 + I2**2*J**2*s2**4 - 24*I2**2*J*s**3 + 2*I2**2*J*s*s1**4 - 4*I2**2*J*s*s1**2*s2**2 + 2*I2**2*J*s*s2**4 + 36*I2**2*s**4 + I2**2*s**2*s1**4 - 2*I2**2*s**2*s1**2*s2**2 + I2**2*s**2*s2**4 - 16*I2*J**5 - 32*I2*J**4*s + 80*I2*J**3*s**2 - 4*I2*J**3*s1**4 + 8*I2*J**3*s1**2*s2**2 - 4*I2*J**3*s2**4 + 80*I2*J**2*s**3 - 8*I2*J**2*s*s1**4 + 16*I2*J**2*s*s1**2*s2**2 - 8*I2*J**2*s*s2**4 - 160*I2*J*s**4 + 4*I2*J*s**2*s1**4 - 8*I2*J*s**2*s1**2*s2**2 + 4*I2*J*s**2*s2**4 + 48*I2*s**5 + 8*I2*s**3*s1**4 - 16*I2*s**3*s1**2*s2**2 + 8*I2*s**3*s2**4 + 16*J**6 + 32*J**5*s - 80*J**4*s**2 + 4*J**4*s1**4 - 8*J**4*s1**2*s2**2 + 4*J**4*s2**4 - 64*J**3*s**3 + 8*J**3*s*s1**4 - 16*J**3*s*s1**2*s2**2 + 8*J**3*s*s2**4 + 176*J**2*s**4 - 12*J**2*s**2*s1**4 + 24*J**2*s**2*s1**2*s2**2 - 12*J**2*s**2*s2**4 - 96*J*s**5 - 16*J*s**3*s1**4 + 32*J*s**3*s1**2*s2**2 - 16*J*s**3*s2**4 + 16*s**6 + 16*s**4*s1**4 - 32*s**4*s1**2*s2**2 + 16*s**4*s2**4))/(2*s**3*(J + s))
-            # lamb2 =  (I2*J*s1**2 + I2*J*s2**2 + I2*s*s1**2 + I2*s*s2**2 - 2*J**2*s1**2 - 2*J**2*s2**2 - 8*J*s**2 - 2*J*s*s1**2 - 2*J*s*s2**2 + 4*s**3 + 4*s**2*s1**2 + 4*s**2*s2**2 - sqrt(4*I2**2*J**4 + 8*I2**2*J**3*s - 20*I2**2*J**2*s**2 + I2**2*J**2*s1**4 - 2*I2**2*J**2*s1**2*s2**2 + I2**2*J**2*s2**4 - 24*I2**2*J*s**3 + 2*I2**2*J*s*s1**4 - 4*I2**2*J*s*s1**2*s2**2 + 2*I2**2*J*s*s2**4 + 36*I2**2*s**4 + I2**2*s**2*s1**4 - 2*I2**2*s**2*s1**2*s2**2 + I2**2*s**2*s2**4 - 16*I2*J**5 - 32*I2*J**4*s + 80*I2*J**3*s**2 - 4*I2*J**3*s1**4 + 8*I2*J**3*s1**2*s2**2 - 4*I2*J**3*s2**4 + 80*I2*J**2*s**3 - 8*I2*J**2*s*s1**4 + 16*I2*J**2*s*s1**2*s2**2 - 8*I2*J**2*s*s2**4 - 160*I2*J*s**4 + 4*I2*J*s**2*s1**4 - 8*I2*J*s**2*s1**2*s2**2 + 4*I2*J*s**2*s2**4 + 48*I2*s**5 + 8*I2*s**3*s1**4 - 16*I2*s**3*s1**2*s2**2 + 8*I2*s**3*s2**4 + 16*J**6 + 32*J**5*s - 80*J**4*s**2 + 4*J**4*s1**4 - 8*J**4*s1**2*s2**2 + 4*J**4*s2**4 - 64*J**3*s**3 + 8*J**3*s*s1**4 - 16*J**3*s*s1**2*s2**2 + 8*J**3*s*s2**4 + 176*J**2*s**4 - 12*J**2*s**2*s1**4 + 24*J**2*s**2*s1**2*s2**2 - 12*J**2*s**2*s2**4 - 96*J*s**5 - 16*J*s**3*s1**4 + 32*J*s**3*s1**2*s2**2 - 16*J*s**3*s2**4 + 16*s**6 + 16*s**4*s1**4 - 32*s**4*s1**2*s2**2 + 16*s**4*s2**4))/(2*s**3*(J + s))
-            # lamb3 =  (I2 - 2*J + 4*s)/(s*(J + s))
-            # lamb4 =  (-I2 + 2*J)/(s*(J + s))
-
-            # beta =  (I3*s1**2 - I3*s2**2 + s*s1**2 - s*s2**2 + sqrt(4*I3**4 + 8*I3**3*s - 20*I3**2*s**2 + I3**2*s1**4 - 2*I3**2*s1**2*s2**2 + I3**2*s2**4 - 24*I3*s**3 + 2*I3*s*s1**4 - 4*I3*s*s1**2*s2**2 + 2*I3*s*s2**4 + 36*s**4 + s**2*s1**4 - 2*s**2*s1**2*s2**2 + s**2*s2**4))/(2*(-I3**2 - I3*s + 3*s**2))
-            # lamb1 =  (I2*J*s1**2 + I2*J*s2**2 + I2*s*s1**2 + I2*s*s2**2 - I2*sqrt(2*J**4 + 4*J**3*s - 22*J**2*s**2 + J**2*s1**4 + J**2*s2**4 - 24*J*s**3 + 2*J*s*s1**4 + 2*J*s*s2**4 + 36*s**4 + s**2*s1**4 + s**2*s2**4) - 8*J*s**2 + 4*s**3)/(2*s**3*(J + s))
-            # lamb2 =  (I2*J*s1**2 + I2*J*s2**2 + I2*s*s1**2 + I2*s*s2**2 + I2*sqrt(2*J**4 + 4*J**3*s - 22*J**2*s**2 + J**2*s1**4 + J**2*s2**4 - 24*J*s**3 + 2*J*s*s1**4 + 2*J*s*s2**4 + 36*s**4 + s**2*s1**4 + s**2*s2**4) - 8*J*s**2 + 4*s**3)/(2*s**3*(J + s))
-            # lamb3 =  (I2 + 2*s)/(s*(J + s))
-            # lamb4 =  (-I2 + 2*s)/(s*(J + s))
-
-            # alpha = sqrt(2*(J**4 + 2*J**3*s - 11*J**2*s**2 - 12*J*s**3 + 18*s**4) + 4* Jr**2 * (I2**2 - 2*J**2))
-            # beta = (2 * Jr * (s1**2 - s2**2) + alpha)/(2*(3*s**2 - 2*J*Jr))
-
-            # lamb1 =  1. / Jr + (2 * I2**2 * Jr - 8*J*s**2 - I2 * alpha) / (4 * Jr * s**3)
-            # lamb2 =  1. / Jr + (2 * I2**2 * Jr - 8*J*s**2 + I2 * alpha) / (4 * Jr * s**3)
-            # lamb3 =  1. / Jr + I2 / (2 * Jr * s)
-            # lamb4 =  1. / Jr - I2 / (2 * Jr * s)
-
-            # beta =  (I2*J*s1**2 - I2*J*s2**2 + I2*s*s1**2 - I2*s*s2**2 - 2*J**2*s1**2 + 2*J**2*s2**2 - 2*J*s*s1**2 + 2*J*s*s2**2 + 4*s**2*s1**2 - 4*s**2*s2**2 - sqrt(2*I2**2*J**4 + 4*I2**2*J**3*s - 22*I2**2*J**2*s**2 + I2**2*J**2*s1**4 + I2**2*J**2*s2**4 - 24*I2**2*J*s**3 + 2*I2**2*J*s*s1**4 + 2*I2**2*J*s*s2**4 + 36*I2**2*s**4 + I2**2*s**2*s1**4 + I2**2*s**2*s2**4 - 8*I2*J**5 - 16*I2*J**4*s + 72*I2*J**3*s**2 - 4*I2*J**3*s1**4 - 4*I2*J**3*s2**4 + 64*I2*J**2*s**3 - 8*I2*J**2*s*s1**4 - 8*I2*J**2*s*s2**4 - 160*I2*J*s**4 + 4*I2*J*s**2*s1**4 + 4*I2*J*s**2*s2**4 + 48*I2*s**5 + 8*I2*s**3*s1**4 + 8*I2*s**3*s2**4 + 8*J**6 + 16*J**5*s - 56*J**4*s**2 + 4*J**4*s1**4 + 4*J**4*s2**4 - 32*J**3*s**3 + 8*J**3*s*s1**4 + 8*J**3*s*s2**4 + 144*J**2*s**4 - 12*J**2*s**2*s1**4 - 12*J**2*s**2*s2**4 - 96*J*s**5 - 16*J*s**3*s1**4 - 16*J*s**3*s2**4 + 16*s**6 + 16*s**4*s1**4 + 16*s**4*s2**4))/(2*(-I2*J**2 - I2*J*s + 3*I2*s**2 + 2*J**3 + 2*J**2*s - 6*J*s**2 + 2*s**3))
-            # lamb1 =  (I2*J*s1**2 + I2*J*s2**2 + I2*s*s1**2 + I2*s*s2**2 - 2*J**2*s1**2 - 2*J**2*s2**2 - 8*J*s**2 - 2*J*s*s1**2 - 2*J*s*s2**2 + 4*s**3 + 4*s**2*s1**2 + 4*s**2*s2**2 + sqrt(2*I2**2*J**4 + 4*I2**2*J**3*s - 22*I2**2*J**2*s**2 + I2**2*J**2*s1**4 + I2**2*J**2*s2**4 - 24*I2**2*J*s**3 + 2*I2**2*J*s*s1**4 + 2*I2**2*J*s*s2**4 + 36*I2**2*s**4 + I2**2*s**2*s1**4 + I2**2*s**2*s2**4 - 8*I2*J**5 - 16*I2*J**4*s + 72*I2*J**3*s**2 - 4*I2*J**3*s1**4 - 4*I2*J**3*s2**4 + 64*I2*J**2*s**3 - 8*I2*J**2*s*s1**4 - 8*I2*J**2*s*s2**4 - 160*I2*J*s**4 + 4*I2*J*s**2*s1**4 + 4*I2*J*s**2*s2**4 + 48*I2*s**5 + 8*I2*s**3*s1**4 + 8*I2*s**3*s2**4 + 8*J**6 + 16*J**5*s - 56*J**4*s**2 + 4*J**4*s1**4 + 4*J**4*s2**4 - 32*J**3*s**3 + 8*J**3*s*s1**4 + 8*J**3*s*s2**4 + 144*J**2*s**4 - 12*J**2*s**2*s1**4 - 12*J**2*s**2*s2**4 - 96*J*s**5 - 16*J*s**3*s1**4 - 16*J*s**3*s2**4 + 16*s**6 + 16*s**4*s1**4 + 16*s**4*s2**4))/(2*s**3*(J + s))
-            # lamb2 =  (I2*J*s1**2 + I2*J*s2**2 + I2*s*s1**2 + I2*s*s2**2 - 2*J**2*s1**2 - 2*J**2*s2**2 - 8*J*s**2 - 2*J*s*s1**2 - 2*J*s*s2**2 + 4*s**3 + 4*s**2*s1**2 + 4*s**2*s2**2 - sqrt(2*I2**2*J**4 + 4*I2**2*J**3*s - 22*I2**2*J**2*s**2 + I2**2*J**2*s1**4 + I2**2*J**2*s2**4 - 24*I2**2*J*s**3 + 2*I2**2*J*s*s1**4 + 2*I2**2*J*s*s2**4 + 36*I2**2*s**4 + I2**2*s**2*s1**4 + I2**2*s**2*s2**4 - 8*I2*J**5 - 16*I2*J**4*s + 72*I2*J**3*s**2 - 4*I2*J**3*s1**4 - 4*I2*J**3*s2**4 + 64*I2*J**2*s**3 - 8*I2*J**2*s*s1**4 - 8*I2*J**2*s*s2**4 - 160*I2*J*s**4 + 4*I2*J*s**2*s1**4 + 4*I2*J*s**2*s2**4 + 48*I2*s**5 + 8*I2*s**3*s1**4 + 8*I2*s**3*s2**4 + 8*J**6 + 16*J**5*s - 56*J**4*s**2 + 4*J**4*s1**4 + 4*J**4*s2**4 - 32*J**3*s**3 + 8*J**3*s*s1**4 + 8*J**3*s*s2**4 + 144*J**2*s**4 - 12*J**2*s**2*s1**4 - 12*J**2*s**2*s2**4 - 96*J*s**5 - 16*J*s**3*s1**4 - 16*J*s**3*s2**4 + 16*s**6 + 16*s**4*s1**4 + 16*s**4*s2**4))/(2*s**3*(J + s))
-            # lamb3 =  (I2 - 2*J + 4*s)/(s*(J + s))
-            # lamb4 =  (-I2 + 2*J)/(s*(J + s))
 
             a = 2*(J**4 + 2*J**3*s - 11*J**2*s**2 - 12*J*s**3 + 18*s**4) + 4*Jr**2*(I2**2 - 2*J**2)
             alpha = sqrt(I2**2*a - 8*I2*J**5 - 16*I2*J**4*s + 72*I2*J**3*s**2 - 4*I2*J**3*s1**4 - 4*I2*J**3*s2**4 + 64*I2*J**2*s**3 - 8*I2*J**2*s*s1**4 - 8*I2*J**2*s*s2**4 - 160*I2*J*s**4 + 4*I2*J*s**2*s1**4 + 4*I2*J*s**2*s2**4 + 48*I2*s**5 + 8*I2*s**3*s1**4 + 8*I2*s**3*s2**4 + 8*J**6 + 16*J**5*s - 56*J**4*s**2 + 4*J**4*s1**4 + 4*J**4*s2**4 - 32*J**3*s**3 + 8*J**3*s*s1**4 + 8*J**3*s*s2**4 + 144*J**2*s**4 - 12*J**2*s**2*s1**4 - 12*J**2*s**2*s2**4 - 96*J*s**5 - 16*J*s**3*s1**4 - 16*J*s**3*s2**4 + 16*s**6 + 16*s**4*s1**4 + 16*s**4*s2**4)
@@ -956,13 +1094,13 @@ class MIPSF2(Material):
             lamb3 = 2. / Jr + ( I2 - 2 * J)/(2 * s * Jr)
             lamb4 =           (-I2 + 2 * J)/(2 * s * Jr)
 
-            # print(lamb1, lamb2, lamb3, lamb4)
-            # print(np.min([lamb1, lamb2, lamb3, lamb4]))
-            kk=0.
-            lamb1 = max(lamb1, kk)
-            lamb2 = max(lamb2, kk)
-            lamb3 = max(lamb3, kk)
-            lamb4 = max(lamb4, kk)
+            # Project to SPD if needed
+            if self.stabilise_tangents:
+                eps = self.tangent_stabiliser_value
+                lamb1 = max(lamb1, eps)
+                lamb2 = max(lamb2, eps)
+                lamb3 = max(lamb3, eps)
+                lamb4 = max(lamb4, eps)
 
             # Scaling modes do not decouple for MIPS
             gamma  = np.sqrt(1. + beta**2) # normaliser
@@ -975,9 +1113,6 @@ class MIPSF2(Material):
             d2 = e2
 
             H = lamb1 * np.outer(d1, d1) + lamb2 * np.outer(d2, d2) + lamb3 * np.outer(l, l) + lamb4 * np.outer(t, t)
-
-
-        # stress +=  2. * J / Jr**2 * dJrdF - 2. / Jr * dJdF(F)
 
         self.H_VoigtSize = H.shape[0]
 
@@ -1112,30 +1247,10 @@ class MIPSF3(Material):
             I2 = II_F
             I3 = J
 
-            # s1 = S[0, 0];
-            # s2 = S[1, 1];
             s1 = s[0]
             s2 = s[1]
 
-            # Complete eigensystem for Hessian
-            # Twist modes
-            T = np.array([[0.,-1],[1,0.]])
-            T = 1./np.sqrt(2.) * np.dot(u, np.dot(T, vh.T))
-            t = vec(T)
-
-            # // Flip modes
-            L = np.array([[0.,1],[1,0.]])
-            L = 1./np.sqrt(2.) * np.dot(u, np.dot(L, vh.T))
-            l = vec(L)
-
-            # Scale modes
-            D1 = np.array([[1.,0],[0,0.]])
-            D1 = p.dot(u, np.dot(D1, vh.T))
-            d1 = vec(D1)
-
-            D2 = np.array([[0.,0],[0,1.]])
-            D2 = np.dot(u, np.dot(D2, vh.T))
-            d2 = vec(D2)
+            [d1, d2, l, t] = GetEigenMatrices(u, vh)
 
             sqrt = np.sqrt
             tau =  (2*beta*s1 - 2*beta*s2 + s1**2 - s2**2 + sqrt(I1**2*beta**2 + 2*I1*J*beta + 2*I1*beta**3 - J**2 - 6*J*beta**2 - 4*J*beta*s1 - 4*J*beta*s2 + beta**4 + 4*beta**2*s1**2 + 4*beta**2*s2**2 + 4*beta*s1**3 + 4*beta*s2**3 + s1**4 + s2**4))/(I1*beta + J + beta**2)
@@ -1145,11 +1260,13 @@ class MIPSF3(Material):
             lamb3 =  (2*I1*beta + I2/2 + J + 2*beta**2)/(I1*beta + J + beta**2)**2
             lamb4 =  (I1 + 2*beta)*(-I2 + 2*J)/(2*I1*(I1*beta + J + beta**2)**2)
 
-            kk=0.
-            lamb1 = max(lamb1, kk)
-            lamb2 = max(lamb2, kk)
-            lamb3 = max(lamb3, kk)
-            lamb4 = max(lamb4, kk)
+            # Project to SPD if needed
+            if self.stabilise_tangents:
+                eps = self.tangent_stabiliser_value
+                lamb1 = max(lamb1, eps)
+                lamb2 = max(lamb2, eps)
+                lamb3 = max(lamb3, eps)
+                lamb4 = max(lamb4, eps)
 
             # Scaling modes do not decouple for MIPS
             gamma  = np.sqrt(1. + tau**2) # normaliser
@@ -1162,9 +1279,6 @@ class MIPSF3(Material):
             d2 = e2
 
             H = lamb1 * np.outer(d1, d1) + lamb2 * np.outer(d2, d2) + lamb3 * np.outer(l, l) + lamb4 * np.outer(t, t)
-
-
-        # stress +=  2. * J / Jr**2 * dJrdF - 2. / Jr * dJdF(F)
 
         self.H_VoigtSize = H.shape[0]
 
@@ -1320,7 +1434,6 @@ class SymmetricDirichlet(Material):
             H  = np.eye(d2,d2) + 1 / 4. * np.outer(vec(dIsdF),vec(dIsdF)) + Is / 4. * d2IsdFdF - 1 / Jr * gR + 1 / Jr**2 * np.outer(r, gJr) +\
                 1/Jr**2 * np.outer(gJr, r) - 2 * I1 / Jr**3 * np.outer(gJr, gJr) + I1 / Jr**2 * HJr
 
-
         if True:
         # if False:
             if self.ndim == 2:
@@ -1333,28 +1446,8 @@ class SymmetricDirichlet(Material):
                 # I1 = trace(S)
                 I1 = s.sum()
 
-                # Complete eigensystem for Hessian
-                # Twist modes
-                T = np.array([[0.,-1],[1,0.]])
-                T = 1./np.sqrt(2.) * np.dot(u, np.dot(T, vh.T))
-                t = vec(T)
+                [d1, d2, l, t] = GetEigenMatrices(u, vh)
 
-                # // Flip modes
-                L = np.array([[0.,1],[1,0.]])
-                L = 1./np.sqrt(2.) * np.dot(u, np.dot(L, vh.T))
-                l = vec(L)
-
-                # Scale modes
-                D1 = np.array([[1.,0],[0,0.]])
-                D1 = np.dot(u, np.dot(D1, vh.T))
-                d1 = vec(D1);
-
-                D2 = np.array([[0.,0],[0,1.]])
-                D2 = np.dot(u, np.dot(D2, vh.T))
-                d2 = vec(D2);
-
-                # s1 = S[0, 0];
-                # s2 = S[1, 1];
                 s1 = s[0];
                 s2 = s[1];
 
@@ -1374,11 +1467,13 @@ class SymmetricDirichlet(Material):
                 lamb3 =  4*I2/(posJ*(J + posJ)**2) + 1 + 4/(J + posJ)**2
                 lamb4 =  -4*I2/(posJ*(J + posJ)**2) + 1 + 4/(J + posJ)**2
 
-                kk=0.
-                lamb1 = max(lamb1, kk)
-                lamb2 = max(lamb2, kk)
-                lamb3 = max(lamb3, kk)
-                lamb4 = max(lamb4, kk)
+                # Project to SPD if needed
+                if self.stabilise_tangents:
+                    eps = self.tangent_stabiliser_value
+                    lamb1 = max(lamb1, eps)
+                    lamb2 = max(lamb2, eps)
+                    lamb3 = max(lamb3, eps)
+                    lamb4 = max(lamb4, eps)
 
                 H = lamb1 * np.outer(d1, d1) + lamb2 * np.outer(d2, d2) + lamb3 * np.outer(l, l) + lamb4 * np.outer(t, t)
 
@@ -1398,71 +1493,15 @@ class SymmetricDirichlet(Material):
                 s2 = s[1]
                 s3 = s[2]
 
-                # product these does not equal J
-                # s1 = S[0,0]
-                # s2 = S[1,1]
-                # s3 = S[2,2]
-
                 if np.abs(s1*s2*s3-J) > 1e-6:
                     print(s1*s2*s3-J)
                 # print(s1*s2*s3-J)
 
-                # Ts and Ls as they appear in supplement of BSmith
-                # T1 = np.array([[0.,-1.,0.],[1.,0.,0],[0.,0.,0.]])
-                # T1 = 1./np.sqrt(2) * np.dot(u, np.dot(T1, vh.T))
-                # t1 = vec(T1)
-                # T2 = np.array([[0.,0.,0.],[0.,0., 1],[0.,-1.,0.]])
-                # T2 = 1./np.sqrt(2) * np.dot(u, np.dot(T2, vh.T))
-                # t2 = vec(T2)
-                # T3 = np.array([[0.,0.,1.],[0.,0.,0.],[-1,0.,0.]])
-                # T3 = 1./np.sqrt(2) * np.dot(u, np.dot(T3, vh.T))
-                # t3 = vec(T3)
-
-                # L1 = np.array([[0.,1.,0.],[1.,0.,0],[0.,0.,0.]])
-                # L1 = 1./np.sqrt(2) * np.dot(u, np.dot(L1, vh.T))
-                # l1 = vec(L1)
-                # L2 = np.array([[0.,0.,0.],[0.,0.,1],[0.,1.,0.]])
-                # L2 = 1./np.sqrt(2) * np.dot(u, np.dot(L2, vh.T))
-                # l2 = vec(L2)
-                # L3 = np.array([[0.,0.,1.],[0.,0.,0.],[1,0.,0.]])
-                # L3 = 1./np.sqrt(2) * np.dot(u, np.dot(L3, vh.T))
-                # l3 = vec(L3)
-
-                # Ts and Ls as they appear in main paper of BSmith
-                T1 = np.array([[0.,0.,0.],[0.,0.,-1.],[0.,1.,0.]])
-                T1 = 1./np.sqrt(2) * np.dot(u, np.dot(T1, vh.T))
-                t1 = vec(T1)
-                T2 = np.array([[0.,0.,-1.],[0.,0., 0],[1.,0.,0.]])
-                T2 = 1./np.sqrt(2) * np.dot(u, np.dot(T2, vh.T))
-                t2 = vec(T2)
-                T3 = np.array([[0.,-1.,0.],[1.,0.,0.],[0,0.,0.]])
-                T3 = 1./np.sqrt(2) * np.dot(u, np.dot(T3, vh.T))
-                t3 = vec(T3)
-
-                L1 = np.array([[0.,0.,0.],[0.,0.,1.],[0.,1.,0.]])
-                L1 = 1./np.sqrt(2) * np.dot(u, np.dot(L1, vh.T))
-                l1 = vec(L1)
-                L2 = np.array([[0.,0.,1.],[0.,0., 0],[1.,0.,0.]])
-                L2 = 1./np.sqrt(2) * np.dot(u, np.dot(L2, vh.T))
-                l2 = vec(L2)
-                L3 = np.array([[0.,1.,0.],[1.,0.,0.],[0,0.,0.]])
-                L3 = 1./np.sqrt(2) * np.dot(u, np.dot(L3, vh.T))
-                l3 = vec(L3)
-
-                D1 = np.array([[1.,0,0],[0,0,0],[0,0,0]])
-                D1 = np.dot(u, np.dot(D1, vh.T))
-                d1 = vec(D1)
-                D2 = np.array([[0.,0,0],[0,1.,0],[0.,0,0]])
-                D2 = np.dot(u, np.dot(D2, vh.T))
-                d2 = vec(D2)
-                D3 = np.array([[0.,0,0],[0,0.,0],[0,0,1.]])
-                D3 = np.dot(u, np.dot(D3, vh.T))
-                d3 = vec(D3)
+                [d1, d2, d3, l1, l2, l3, t1, t2, t3] = GetEigenMatrices(u, vh)
 
                 e1 = d1
                 e2 = d2
                 e3 = d3
-
 
                 # Original SD exactly as they appear in BSmith et. al. 2019
                 # [this gives the exact same hessian H=H1 if used with Ts/Ls from main paper]
@@ -1476,40 +1515,23 @@ class SymmetricDirichlet(Material):
                 lamb8 =  1. + s2**2/J**2 + (I2 - s2**2)*s2**3/J**3
                 lamb9 =  1. + s3**2/J**2 + (I2 - s3**2)*s3**3/J**3
 
-                # Original SD symbolically generated in terms of singular-values only - gives the same result as above
-                # [this gives the exact same hessian H=H1 if used with Ts/Ls from main paper]
-                lamb1 =  1. + 3./s1**4
-                lamb2 =  1. + 3./s2**4
-                lamb3 =  1. + 3./s3**4
-                lamb4 =  (s2**3*s3**3 - s2**2 + s2*s3 - s3**2)/(s2**3*s3**3)
-                lamb5 =  (s1**3*s3**3 - s1**2 + s1*s3 - s3**2)/(s1**3*s3**3)
-                lamb6 =  (s1**3*s2**3 - s1**2 + s1*s2 - s2**2)/(s1**3*s2**3)
-                lamb7 =  (s2**3*s3**3 + s2**2 + s2*s3 + s3**2)/(s2**3*s3**3)
-                lamb8 =  (s1**3*s3**3 + s1**2 + s1*s3 + s3**2)/(s1**3*s3**3)
-                lamb9 =  (s1**3*s2**3 + s1**2 + s1*s2 + s2**2)/(s1**3*s2**3)
-
                 # Project to SPD if needed
-                kk=0.
-                lamb1 = max(lamb1, kk)
-                lamb2 = max(lamb2, kk)
-                lamb3 = max(lamb3, kk)
-                lamb4 = max(lamb4, kk)
-                lamb5 = max(lamb5, kk)
-                lamb6 = max(lamb6, kk)
-                lamb7 = max(lamb7, kk)
-                lamb8 = max(lamb8, kk)
-                lamb9 = max(lamb9, kk)
+                if self.stabilise_tangents:
+                    eps = self.tangent_stabiliser_value
+                    lamb1 = max(lamb1, eps)
+                    lamb2 = max(lamb2, eps)
+                    lamb3 = max(lamb3, eps)
+                    lamb4 = max(lamb4, eps)
+                    lamb5 = max(lamb5, eps)
+                    lamb6 = max(lamb6, eps)
+                    lamb7 = max(lamb7, eps)
+                    lamb8 = max(lamb8, eps)
+                    lamb9 = max(lamb9, eps)
 
                 H1 = lamb1 * outer(e1,e1) + lamb2 * outer(e2,e2) + lamb3 * outer(e3,e3) +\
                     lamb4 * outer(t1,t1) + lamb5 * outer(t2,t2) + lamb6 * outer(t3,t3) +\
                     lamb7 * outer(l1,l1) + lamb8 * outer(l2,l2) + lamb9 * outer(l3,l3)
 
-                # makezero(H1, tol=1e-6)
-                # makezero(H, tol=1e-6)
-                # print(H1)
-                # print()
-                # print(H)
-                # print(norm(H - H1))
                 H = H1
 
         self.H_VoigtSize = H.shape[0]
@@ -1627,11 +1649,6 @@ class ARAPF(Material):
 
         H = np.eye(d2,d2) - gR
         H *= 2.
-
-        # J = StrainTensors['J'][gcounter]
-        # H += 0.1 * LocallyInjectiveHessian(J, vec(dJdF(F)), d2JdFdF(F))
-        # print(H)
-        # exit()
 
         C_Voigt = H
         self.H_VoigtSize = H.shape[0]
@@ -1898,145 +1915,6 @@ class SymmetricARAPF(Material):
 
 
 
-class Corotational(Material):
-    """The fundamental ARAP model
-
-        W_arap(F) = (F - R)**2
-
-    """
-
-    def __init__(self, ndim, **kwargs):
-        mtype = type(self).__name__
-        super(Corotational, self).__init__(mtype, ndim, **kwargs)
-        self.is_transversely_isotropic = False
-        self.energy_type = "internal_energy"
-        self.nature = "nonlinear"
-        self.fields = "mechanics"
-
-        if self.ndim==3:
-            self.H_VoigtSize = 9
-        elif self.ndim==2:
-            self.H_VoigtSize = 4
-
-        # LOW LEVEL DISPATCHER
-        # self.has_low_level_dispatcher = True
-        self.has_low_level_dispatcher = False
-
-    def KineticMeasures(self,F,ElectricFieldx=0, elem=0):
-        from Florence.MaterialLibrary.LLDispatch._MooneyRivlin_ import KineticMeasures
-        return KineticMeasures(self,F)
-
-
-    def Hessian(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
-
-        mu = self.mu
-        lamb = self.lamb
-        d = self.ndim
-
-        I = StrainTensors['I']
-        F = StrainTensors['F'][gcounter]
-        J = StrainTensors['J'][gcounter]
-
-        det = np.linalg.det
-        u, s, vh = svd(F, full_matrices=True)
-        vh = vh.T
-
-
-        R = u.dot(vh.T)
-        S = np.dot(vh, np.dot(np.diag(s), vh.T))
-        # print()
-        IS = trace(S)
-        kterm = IS - self.ndim
-        if self.ndim == 2:
-            r = 1./np.sqrt(2) * vec(R)
-            s1 = s[0]
-            s2 = s[1]
-            T = np.array([[0.,-1],[1,0.]])
-            T = 1./np.sqrt(2) * np.dot(u, np.dot(T, vh.T))
-            t =  vec(T)
-            L = np.array([[0.,1],[1,0.]])
-            L = 1./np.sqrt(2) * np.dot(u, np.dot(L, vh.T))
-            l = vec(L)
-            P = np.array([[1.,0],[0,-1.]])
-            P = 1./np.sqrt(2) * np.dot(u, np.dot(P, vh.T))
-            p = vec(P)
-
-            H = 2. * np.eye(4,4)
-            H += 2. * (kterm - 2) / (s1 + s2) * np.outer(t,t)
-            H += 2 * np.outer(r,r)
-
-
-        elif self.ndim == 3:
-            r = 1./np.sqrt(3) * vec(R)
-            s0 = s[0]
-            s1 = s[1]
-            s2 = s[2]
-            T1 = np.array([[0.,-1.,0.],[1.,0.,0],[0.,0.,0.]])
-            T1 = 1./np.sqrt(2) * np.dot(u, np.dot(T1, vh.T))
-            T2 = np.array([[0.,0.,0.],[0.,0., 1],[0.,-1.,0.]])
-            T2 = 1./np.sqrt(2) * np.dot(u, np.dot(T2, vh.T))
-            T3 = np.array([[0.,0.,1.],[0.,0.,0.],[-1,0.,0.]])
-            T3 = 1./np.sqrt(2) * np.dot(u, np.dot(T3, vh.T))
-
-            s0s1 = s0 + s1
-            s0s2 = s0 + s2
-            s1s2 = s1 + s2
-            if (s0s1 < 2.0):
-                s0s1 = 2.0
-            if (s0s2 < 2.0):
-                s0s2 = 2.0
-            if (s1s2 < 2.0):
-                s1s2 = 2.0
-            lamb1 = 2. / (s0s1)
-            lamb2 = 2. / (s0s2)
-            lamb3 = 2. / (s1s2)
-
-            t1 = vec(T1)
-            t2 = vec(T2)
-            t3 = vec(T3)
-
-            H = 2. * np.eye(9,9)
-            H += 2. * (kterm - 2) / (s0s1) * np.outer(t1,t1)
-            H += 2. * (kterm - 2) / (s1s2) * np.outer(t2,t2)
-            H += 2. * (kterm - 2) / (s0s2) * np.outer(t3,t3)
-            H += 3 * np.outer(r,r)
-
-
-        C_Voigt = H
-        self.H_VoigtSize = H.shape[0]
-
-        return C_Voigt
-
-
-
-    def CauchyStress(self,StrainTensors,ElectricDisplacementx,elem=0,gcounter=0):
-
-        mu = self.mu
-        lamb = self.lamb
-        d = self.ndim
-
-        I = StrainTensors['I']
-        F = StrainTensors['F'][gcounter]
-        J = StrainTensors['J'][gcounter]
-        b = StrainTensors['b'][gcounter]
-
-        u, s, vh = svd(F, full_matrices=True)
-        vh = vh.T
-        R = u.dot(vh.T)
-        S = np.dot(vh, np.dot(np.diag(s), vh.T))
-        IS = trace(S)
-
-        sigma = 2. * (F - R) + (IS - self.ndim) * R
-        # sigma = 2. * mu * (F - R) + 1 * lamb * (IS - 2) * R
-        # print(sigma)
-        # exit()
-
-        return sigma
-
-
-
-
-
 
 class OgdenNeoHookeanF(Material):
     """ Ogden neoHookean model
@@ -2081,7 +1959,6 @@ class OgdenNeoHookeanF(Material):
         lamb = self.lamb
 
         I2 = trace(F.T.dot(F))
-        self.ndim=2
 
         if self.ndim == 3:
             outer = np.outer
@@ -2097,36 +1974,7 @@ class OgdenNeoHookeanF(Material):
             s2 = s[1]
             s3 = s[2]
 
-            # Ts and Ls as they appear in main paper of BSmith
-            T1 = np.array([[0.,0.,0.],[0.,0.,-1.],[0.,1.,0.]])
-            T1 = 1./np.sqrt(2) * np.dot(u, np.dot(T1, vh.T))
-            t1 = vec(T1)
-            T2 = np.array([[0.,0.,-1.],[0.,0., 0],[1.,0.,0.]])
-            T2 = 1./np.sqrt(2) * np.dot(u, np.dot(T2, vh.T))
-            t2 = vec(T2)
-            T3 = np.array([[0.,-1.,0.],[1.,0.,0.],[0,0.,0.]])
-            T3 = 1./np.sqrt(2) * np.dot(u, np.dot(T3, vh.T))
-            t3 = vec(T3)
-
-            L1 = np.array([[0.,0.,0.],[0.,0.,1.],[0.,1.,0.]])
-            L1 = 1./np.sqrt(2) * np.dot(u, np.dot(L1, vh.T))
-            l1 = vec(L1)
-            L2 = np.array([[0.,0.,1.],[0.,0., 0],[1.,0.,0.]])
-            L2 = 1./np.sqrt(2) * np.dot(u, np.dot(L2, vh.T))
-            l2 = vec(L2)
-            L3 = np.array([[0.,1.,0.],[1.,0.,0.],[0,0.,0.]])
-            L3 = 1./np.sqrt(2) * np.dot(u, np.dot(L3, vh.T))
-            l3 = vec(L3)
-
-            D1 = np.array([[1.,0,0],[0,0,0],[0,0,0]])
-            D1 = np.dot(u, np.dot(D1, vh.T))
-            d1 = vec(D1)
-            D2 = np.array([[0.,0,0],[0,1.,0],[0.,0,0]])
-            D2 = np.dot(u, np.dot(D2, vh.T))
-            d2 = vec(D2)
-            D3 = np.array([[0.,0,0],[0,0.,0],[0,0,1.]])
-            D3 = np.dot(u, np.dot(D3, vh.T))
-            d3 = vec(D3)
+            [d1, d2, d3, l1, l2, l3, t1, t2, t3] = GetEigenMatrices(u, vh)
 
             m_mu = self.mu
             m_lambda = self.lamb
@@ -2160,21 +2008,21 @@ class OgdenNeoHookeanF(Material):
             lamb9 =  m_mu - s3*(m_lambda*(2*J - 2)/2. - m_mu/J)
 
             # Project to SPD if needed
-            kk=0.
-            lamb1 = max(lamb1, kk)
-            lamb2 = max(lamb2, kk)
-            lamb3 = max(lamb3, kk)
-            lamb4 = max(lamb4, kk)
-            lamb5 = max(lamb5, kk)
-            lamb6 = max(lamb6, kk)
-            lamb7 = max(lamb7, kk)
-            lamb8 = max(lamb8, kk)
-            lamb9 = max(lamb9, kk)
+            if self.stabilise_tangents:
+                eps = self.tangent_stabiliser_value
+                lamb1 = max(lamb1, eps)
+                lamb2 = max(lamb2, eps)
+                lamb3 = max(lamb3, eps)
+                lamb4 = max(lamb4, eps)
+                lamb5 = max(lamb5, eps)
+                lamb6 = max(lamb6, eps)
+                lamb7 = max(lamb7, eps)
+                lamb8 = max(lamb8, eps)
+                lamb9 = max(lamb9, eps)
 
             e1 = vec1[0] * d1 + vec1[1] * d2 + vec1[2] * d3
             e2 = vec2[0] * d1 + vec2[1] * d2 + vec2[2] * d3
             e3 = vec3[0] * d1 + vec3[1] * d2 + vec3[2] * d3
-
 
             H1 = lamb1 * outer(e1,e1) + lamb2 * outer(e2,e2) + lamb3 * outer(e3,e3) +\
                 lamb4 * outer(t1,t1) + lamb5 * outer(t2,t2) + lamb6 * outer(t3,t3) +\
@@ -2183,9 +2031,8 @@ class OgdenNeoHookeanF(Material):
             H = H1
 
         elif self.ndim == 2:
-            # F = np.zeros((2,2)); F[0,0]=5.; F[1,1] = 3.; J=15
             outer = np.outer
-            I3 = J
+            sqrt = np.sqrt
 
             # Compute the rotation variant SVD of F
             u, s, vh = svd(F, full_matrices=True)
@@ -2196,27 +2043,8 @@ class OgdenNeoHookeanF(Material):
             s1 = s[0]
             s2 = s[1]
 
-            # Complete eigensystem for Hessian
-            # Twist modes
-            T = np.array([[0.,-1],[1,0.]])
-            T = 1./np.sqrt(2.) * np.dot(u, np.dot(T, vh.T))
-            t = vec(T)
+            [d1, d2, l, t] = GetEigenMatrices(u, vh)
 
-            # Flip modes
-            L = np.array([[0.,1],[1,0.]])
-            L = 1./np.sqrt(2.) * np.dot(u, np.dot(L, vh.T))
-            l = vec(L)
-
-            # Scale modes
-            D1 = np.array([[1.,0],[0,0.]])
-            D1 = np.dot(u, np.dot(D1, vh.T))
-            d1 = vec(D1)
-
-            D2 = np.array([[0.,0],[0,1.]])
-            D2 = np.dot(u, np.dot(D2, vh.T))
-            d2 = vec(D2)
-
-            sqrt = np.sqrt
             tau =  -(J**2*lamb*s1**2 - J**2*lamb*s2**2 + mu*s1**2 - mu*s2**2 + sqrt(14*J**6*lamb**2 - 16*J**5*lamb**2 + J**4*lamb**2*s1**4 + J**4*lamb**2*s2**4 + 4*J**4*lamb**2 - 4*J**4*lamb*mu + 2*J**2*lamb*mu*s1**4 + 2*J**2*lamb*mu*s2**4 - 2*J**2*mu**2 + mu**2*s1**4 + mu**2*s2**4))/(2*J**2*lamb*(2*J - 1))
 
             lamb1 =  (J**2*lamb*s1**2 + J**2*lamb*s2**2 + 2*J**2*mu + mu*s1**2 + mu*s2**2 - sqrt(14*J**6*lamb**2 - 16*J**5*lamb**2 + J**4*lamb**2*s1**4 + J**4*lamb**2*s2**4 + 4*J**4*lamb**2 - 4*J**4*lamb*mu + 2*J**2*lamb*mu*s1**4 + 2*J**2*lamb*mu*s2**4 - 2*J**2*mu**2 + mu**2*s1**4 + mu**2*s2**4))/(2*J**2)
@@ -2224,12 +2052,13 @@ class OgdenNeoHookeanF(Material):
             lamb3 =  -J*lamb + lamb + mu + mu/J
             lamb4 =  J*lamb - lamb + mu - mu/J
 
-            # kk=0.
-            # lamb1 = max(lamb1, kk)
-            # lamb2 = max(lamb2, kk)
-            # lamb3 = max(lamb3, kk)
-            # lamb4 = max(lamb4, kk)
-
+            # Project to SPD if needed
+            if self.stabilise_tangents:
+                eps = self.tangent_stabiliser_value
+                lamb1 = max(lamb1, eps)
+                lamb2 = max(lamb2, eps)
+                lamb3 = max(lamb3, eps)
+                lamb4 = max(lamb4, eps)
 
             # Scaling modes do not decouple
             gamma  = np.sqrt(1. + tau**2) # normaliser
@@ -2276,6 +2105,122 @@ class OgdenNeoHookeanF(Material):
         energy  = 0.5 * mu * I2 - mu * np.log(J) + lamb / 2. * (J-1)**2
 
         return energy
+
+
+
+
+
+class MooneyRivlinF(Material):
+    """ Polyconvex Mooney Rivlin model: this implementation uses polyconvex formulation of Bonet et. al. 2014
+
+        W(F) = mu1 * (II_F - N) + mu2 * (II_H - N) - (2 * mu1 + 4 * mu2) * log(J) + lambda / 2 * (J - 1)**2
+
+    """
+
+    def __init__(self, ndim, **kwargs):
+        mtype = type(self).__name__
+        super(MooneyRivlinF, self).__init__(mtype, ndim, **kwargs)
+
+        self.is_transversely_isotropic = False
+        self.energy_type = "internal_energy"
+        self.nature = "nonlinear"
+        self.fields = "mechanics"
+
+        if self.ndim==3:
+            self.H_VoigtSize = 9
+        elif self.ndim==2:
+            self.H_VoigtSize = 4
+
+        minJ = self.minJ
+        self.delta = np.sqrt(1e-8 + min(minJ, 0.)**2 * 0.04)
+        # self.delta = 0.
+        # LOW LEVEL DISPATCHER
+        # self.has_low_level_dispatcher = True
+        self.has_low_level_dispatcher = False
+
+    def KineticMeasures(self,F,ElectricFieldx=0, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._NeoHookean_ import KineticMeasures
+        return KineticMeasures(self,F)
+
+
+    def Hessian(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
+
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        mu1 = self.mu1
+        mu2 = self.mu2
+        lamb = self.lamb
+
+        ndim = self.ndim
+        I = np.eye(ndim*ndim,ndim*ndim)
+
+        H = dJdF(F)
+        hessianJ = d2JdFdF(F)
+        h = vec(H)
+
+        sigmaH = 2. * mu2 * H
+        sigmaJ = -(2. * mu1 + 4. * mu2) / J + lamb * (J - 1.)
+
+        WJJ = (2. * mu1 + 4. * mu2) / J**2 + lamb
+
+        fxIxf = Get_FxIxF(F)
+
+        # Constitutive
+        hessian = 2. * mu1 * I + 2. * mu2 * fxIxf + WJJ * np.outer(h, h)
+        # Initail stiffness component
+        # initial_stiffness = d2JdFdF(sigmaH + sigmaJ * F)
+        initial_stiffness = GetInitialStiffnessPolyconvex(sigmaH, sigmaJ, F,
+            stabilise=self.stabilise_tangents,
+            # stabilise=False,
+            eps=self.tangent_stabiliser_value
+            )
+        hessian += initial_stiffness
+
+
+        self.H_VoigtSize = hessian.shape[0]
+
+        return hessian
+
+
+    def CauchyStress(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
+
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        mu1 = self.mu1
+        mu2 = self.mu2
+        lamb = self.lamb
+
+        H = dJdF(F)
+
+        sigmaF = 2. * mu1 * F
+        sigmaH = 2. * mu2 * H
+        sigmaJ = -(2. * mu1 + 4. * mu2) / J + lamb * (J - 1)
+
+        P = sigmaF + cross(sigmaH, F) + sigmaJ * H
+
+        return P
+
+
+    def InternalEnergy(self,StrainTensors,elem=0,gcounter=0):
+
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        mu1 = self.mu1
+        mu2 = self.mu2
+        lamb = self.lamb
+
+        II_F = trace(F.T.dot(F))
+        H = dJdF(F)
+        II_H = trace(H.T.dot(H))
+
+        energy = mu1 * (II_F - N) + mu2 * (II_H - N) - (2. * mu1 + 4. * mu2) * np.log(J) + lamb / 2. * (J - 1)**2
+
+        return energy
+
+
 
 
 
