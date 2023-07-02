@@ -112,6 +112,94 @@ def FillConstitutiveBC(B,SpatialGradient,F,ndim,nvar):
         B[2::ndim, 5] = F[2,1] * SpatialGradient[2,:] + F[2,2] * SpatialGradient[1,:]
 
 
+
+
+
+
+class StVenantKirchhoffC(Material):
+    """The fundamental StVenantKirchhoff internal energy
+
+        W(C) = mu/4*(C-I):(C-I) + lamb/4 tr(C-I)**2
+
+    """
+
+    def __init__(self, ndim, **kwargs):
+        mtype = type(self).__name__
+        super(StVenantKirchhoffC, self).__init__(mtype, ndim, **kwargs)
+
+        self.is_transversely_isotropic = False
+        self.energy_type = "internal_energy"
+        self.nature = "nonlinear"
+        self.fields = "mechanics"
+
+        if self.ndim==3:
+            self.H_VoigtSize = 6
+        elif self.ndim==2:
+            self.H_VoigtSize = 3
+
+        # LOW LEVEL DISPATCHER
+        # self.has_low_level_dispatcher = True
+        self.has_low_level_dispatcher = False
+
+    def KineticMeasures(self,F,ElectricFieldx=0, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._NeoHookean_ import KineticMeasures
+        return KineticMeasures(self,F)
+
+
+    def Hessian(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        b = StrainTensors['b'][gcounter]
+        F = StrainTensors['F'][gcounter]
+        C = np.dot(F.T,F)
+
+        mu = self.mu
+        lamb = self.lamb
+        # This is SPD
+        C_Voigt = lamb * np.einsum("ij,kl",I,I) + mu * (np.einsum("ik,jl",I,I) + np.einsum("il,jk",I,I))
+        C_Voigt = Voigt(C_Voigt,1)
+
+        self.H_VoigtSize = C_Voigt.shape[0]
+
+        return C_Voigt
+
+    def CauchyStress(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        b = StrainTensors['b'][gcounter]
+        F = StrainTensors['F'][gcounter]
+        C = np.dot(F.T,F)
+
+        mu = self.mu
+        lamb = self.lamb
+        E = 0.5 * (C - I)
+        stress = lamb * trace(E) * I + 2. * mu * E
+
+        return stress
+
+
+    def InternalEnergy(self,StrainTensors,elem=0,gcounter=0):
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+        C = np.dot(F.T,F)
+
+        mu = self.mu
+        lamb = self.lamb
+
+        energy  = mu/4*np.einsum("ij,ij",C-I,C-I) + lamb/8 * trace(C-I)**2
+
+        return energy
+
+
+
+
+
+
+
 class OgdenNeoHookeanC(Material):
     """The fundamental Neo-Hookean internal energy, described in Ogden et. al.
 
@@ -148,14 +236,6 @@ class OgdenNeoHookeanC(Material):
         J = StrainTensors['J'][gcounter]
         F = StrainTensors['F'][gcounter]
 
-        # F = np.eye(3,3)
-        # # F[0,0] = 3.
-        # F[0,1] = .1
-        # F[0,2] = .2
-        # F[1,2] = .3
-        # # F[0,1] = 1.
-        # J=np.linalg.det(F)
-
         mu = self.mu
         lamb = self.lamb
 
@@ -170,23 +250,18 @@ class OgdenNeoHookeanC(Material):
         # H += lamb * (2. * c - J) * np.einsum("ij,kl", invC, invC)
         # H_Voigt = GetVoigtHessian(H)
         # # makezero(H_Voigt)
-        # # print(H_Voigt)
-        # # print(H)
 
         if self.invariant_formulation == "C":
             H  = 2. * (mu - lamb * (c - J)) * ( np.einsum("ik,jl", invC, invC) + np.einsum("il,jk", invC, invC) ) * 0.5
             H += lamb * (2. * c - J) * np.einsum("ij,kl", invC, invC)
             H_Voigt = GetVoigtHessian(H)
-            # print(H_Voigt)
-            # H_Voigt = Voigt(H,1)
+
 
         elif self.invariant_formulation == "ps":
 
             [U, S, V] = ssvd(F)
 
             if self.ndim == 2:
-                # [U, S, V] = np.linalg.svd(F); V = V.T
-                # [U, S, V] = svd_rv(F)
                 s1 = S[0]
                 s2 = S[1]
 
@@ -345,12 +420,7 @@ class OgdenNeoHookeanC(Material):
                     + lamb3 * vecs[:,2][None,:].T.dot(vecs[:,2][None,:])
 
                 H = ds.dot(HwSPD.dot(ds.T)) + lamb4 * np.outer(l1,l1) + lamb5 * np.outer(l2,l2) + lamb6 * np.outer(l3,l3)
-                # print(H_Voigt)
                 H_Voigt = GetVoigtHessian(H)
-                # print(H_Voigt)
-                # print(H_Voigt - H_Voigt2)
-                # exit()
-
 
         self.H_VoigtSize = H_Voigt.shape[0]
 
@@ -387,13 +457,10 @@ class OgdenNeoHookeanC(Material):
             # sigmaS[2] =  (lamb*s1*s2*(J - 1) + mu*s3 - mu/s3)/s3
 
             # stress2 = V.dot(np.diag(sigmaS).dot(V.T))
-            # # print(stress2 - stress)
 
         elif self.invariant_formulation == "ps":
 
             [U, S, V] = ssvd(F)
-            # [U, S, V] = np.linalg.svd(F); V = V.T
-            # [U, S, V] = svd_rv(F) # gives incorrect results
 
             if self.ndim == 2:
 

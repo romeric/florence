@@ -40,16 +40,12 @@ class StVenantKirchhoff(Material):
         F = StrainTensors['F'][gcounter]
         C = np.dot(F.T,F)
 
-        if np.isclose(J, 0) or J < 0:
-            delta = np.sqrt(0.04 * J * J + 1e-8);
-            J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
-
         mu = self.mu
         lamb = self.lamb
-        E = 0.5 * (C - I)
+
         C_Voigt = lamb * np.einsum("ij,kl",I,I) + mu * (np.einsum("ik,jl",I,I) + np.einsum("il,jk",I,I))
         C_Voigt = 1./J * np.einsum("iI,jJ,kK,lL,IJKL",F,F,F,F,C_Voigt)
-        # same here
+        # Same here
         # C_Voigt = lamb/J * np.einsum("ij,kl",b,b) + mu/J * (np.einsum("ik,jl",b,b) + np.einsum("il,jk",b,b))
         C_Voigt = Voigt(C_Voigt,1)
 
@@ -65,17 +61,11 @@ class StVenantKirchhoff(Material):
         F = StrainTensors['F'][gcounter]
         C = np.dot(F.T,F)
 
-        if np.isclose(J, 0) or J < 0:
-            delta = np.sqrt(0.04 * J * J + 1e-8);
-            J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
-
         mu = self.mu
         lamb = self.lamb
         E = 0.5 * (C - I)
         stress = lamb * trace(E) * I + 2. * mu * E
         stress = 1./J * np.dot(F,np.dot(stress,F.T))
-        # buggy
-        # stress = mu/J*np.dot((b - I),b) + lamb/2./J * trace(b - I)*I
 
         return stress
 
@@ -87,13 +77,9 @@ class StVenantKirchhoff(Material):
         F = StrainTensors['F'][gcounter]
         C = np.dot(F.T,F)
 
-        if np.isclose(J, 0) or J < 0:
-            delta = np.sqrt(0.04 * J * J + 1e-8);
-            J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
-
         mu = self.mu
         lamb = self.lamb
 
-        energy  = mu/4*np.einsum("ik,jl",C-I,C-I) + lamb/4 * trace(C-I)**2
+        energy  = mu/4*np.einsum("ij,ij",C-I,C-I) + lamb/8 * trace(C-I)**2
 
         return energy
