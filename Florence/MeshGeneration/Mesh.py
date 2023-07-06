@@ -3136,6 +3136,12 @@ class Mesh(object):
             elif p == 2:
                 el = 9
                 bel = 8
+            elif p == 3:
+                el = 21
+                bel = 26
+            elif p == 4:
+                el = 23
+                bel = 27
         elif element_type == "quad":
             if p == 1:
                 el = 3
@@ -3143,6 +3149,12 @@ class Mesh(object):
             elif p == 2:
                 el = 10
                 bel = 8
+            elif p == 3:
+                el = 36
+                bel = 26
+            elif p == 4:
+                el = 37
+                bel = 27
         elif element_type == "tet":
             if p == 1:
                 el = 4
@@ -3282,18 +3294,31 @@ class Mesh(object):
         self.points = np.array(points,copy=True)
         self.elements = np.array(elements,copy=True) - 1
         # REORDER CONNECTIVITY
-        if p == 2:
+        # READER ORDERING IS SAME AS SYMFE
+        if p > 1:
             # TRI6
             if el == 9:
-                self.elements = self.elements[:,[0,1,2,3,5,4]]
+                self.elements = self.elements[:,[0, 1, 2, 3, 5, 4]]
+            # TRI10
+            elif el == 21:
+                self.elements = self.elements[:,[0, 1, 2, 3, 4, 8, 9, 5, 7, 6]]
+            # TRI15
+            elif el == 23:
+                self.elements = self.elements[:,[0, 1, 2, 3, 4, 5, 11, 12, 13, 6, 10, 14, 7, 9, 8]]
             # QUAD9
             elif el == 10:
                 self.elements = self.elements[:,[0, 1, 2, 3, 4, 7, 8, 5, 6]]
+            # QUAD16
+            elif el == 36:
+                self.elements = self.elements[:,[0, 1, 2, 3, 4, 5, 11, 12, 13, 6, 10, 15, 14, 7, 9, 8]]
+            # QUAD25
+            elif el == 37:
+                self.elements = self.elements[:,[0, 1, 2, 3, 4, 5, 6, 15, 16, 17, 18, 7, 14, 23, 24, 19, 8, 13, 22, 21, 20, 9, 12, 11, 10]]
             # TET10
             elif el == 11:
                 self.elements = self.elements[:,[0, 1, 2, 3, 4, 6, 5, 7, 9, 8]]
+            # HEX27
             elif el == 12:
-                # This ordering is different from writer
                 self.elements = self.elements[:,[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 20, 11, 13, 10, 12, 14, 15, 21, 22, 26, 23, 24, 16, 17, 25, 18, 19]]
 
         # CORRECT
@@ -4345,9 +4370,12 @@ class Mesh(object):
             elif p == 2:
                 el = 9
                 bel = 8
-            else:
+            elif p == 3:
                 el = 21
                 bel = 26
+            elif p == 4:
+                el = 23
+                bel = 27
         elif element_type == "quad":
             if p == 1:
                 el = 3
@@ -4355,6 +4383,12 @@ class Mesh(object):
             elif p == 2:
                 el = 10
                 bel = 8
+            elif p == 3:
+                el = 36
+                bel = 26
+            elif p == 4:
+                el = 37
+                bel = 27
         elif element_type == "tet":
             if p == 1:
                 el = 4
@@ -4376,17 +4410,30 @@ class Mesh(object):
         elements = np.copy(mesh.elements).astype(np.int64)
         points = mesh.points[np.unique(elements),:]
 
+        # TRI6
         if el == 9:
             elements = elements[:,[0, 1, 2, 3, 5, 4]]
+        # TRI10
+        elif el == 21:
+            elements = elements[:,[0, 1, 2, 3, 4, 7, 9, 8, 5, 6]]
+        # TRI15
+        elif el == 23:
+            elements = elements[:,[0, 1, 2, 3, 4, 5, 9, 12, 14, 13, 10, 6, 7, 8, 11]]
+        # QUAD9
         elif el == 10:
             elements = elements[:,[0, 1, 2, 3, 4, 7, 8, 5, 6]]
-        elif el == 21:
-            # Tri p = 3 - this ordering is different from reader
-            elements = elements[:,[0, 1, 2, 3, 4, 7, 9, 8, 5, 6]]
+        # QUAD16
+        elif el == 36:
+            elements = elements[:,[0, 1, 2, 3, 4, 5, 9, 13, 15, 14, 10, 6, 7, 8, 12, 11]]
+        # QUAD25
+        elif el == 37:
+            elements = elements[:,[0, 1, 2, 3, 4, 5, 6, 11, 16, 21, 24, 23, 22, 17, 12, 7, 8, 9, 10, 15, 20, 19, 18, 13, 14]]
+        # TET10
         elif el == 11:
+            # Tet 2
             elements = elements[:,[0, 1, 2, 3, 4, 6, 5, 7, 9, 8]]
+        # HEX27
         elif el == 12:
-            # This ordering is different from reader
             elements = elements[:,[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 11, 14, 12, 15, 16, 22, 23, 25, 26, 10, 17, 18, 20, 21, 24, 19]]
 
         # Take care of a corner case where nnode != points.shape[0]
