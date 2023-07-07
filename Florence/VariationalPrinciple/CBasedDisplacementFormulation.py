@@ -50,7 +50,6 @@ def GetVoigtHessian(H):
                 [H[0,1], H[1,3],H[1,1]]
                 ])
         if edim == 9:
-            # print(H)
             H_Voigt = np.array([
                 [H[0,0], H[0,4],H[0,8],H[0,1],H[0,2],H[0,5]],
                 [H[4,0], H[4,4],H[4,8],H[1,4],H[4,6],H[4,5]],
@@ -59,9 +58,106 @@ def GetVoigtHessian(H):
                 [H[0,2], H[4,6],H[2,8],H[1,2],H[2,2],H[2,7]],
                 [H[0,5], H[4,5],H[7,8],H[1,5],H[2,7],H[7,7]]
                 ])
-            # print(H_Voigt)
     makezero(H_Voigt, 1e-10)
     return H_Voigt
+
+
+
+def GetEigenMatrices(U, V):
+    """ Eigenmatrices for C-based formulations
+    """
+
+    ndim = U.shape[0]
+
+    if ndim == 3:
+        D1 = np.array([[1.,0,0],[0,0,0],[0,0,0]])
+        D1 = np.dot(V, np.dot(D1, V.T))
+        d1 = vec(D1)
+        D2 = np.array([[0.,0,0],[0,1.,0],[0.,0,0]])
+        D2 = np.dot(V, np.dot(D2, V.T))
+        d2 = vec(D2)
+        D3 = np.array([[0.,0,0],[0,0.,0],[0,0,1.]])
+        D3 = np.dot(V, np.dot(D3, V.T))
+        d3 = vec(D3)
+
+        L1 = np.array([[0.,0.,0.],[0.,0.,1.],[0.,1.,0.]])
+        L1 = np.dot(V, np.dot(L1, V.T))
+        l1 = vec(L1)
+        L2 = np.array([[0.,0.,1.],[0.,0., 0],[1.,0.,0.]])
+        L2 = np.dot(V, np.dot(L2, V.T))
+        l2 = vec(L2)
+        L3 = np.array([[0.,1.,0.],[1.,0.,0.],[0,0.,0.]])
+        L3 = np.dot(V, np.dot(L3, V.T))
+        l3 = vec(L3)
+
+        return d1, d2, d3, l1, l2, l3
+
+    elif ndim == 2:
+        # Scale modes
+        D1 = np.array([[1.,0],[0,0.]])
+        D1 = np.dot(V, np.dot(D1, V.T))
+        d1 = vec(D1)
+
+        D2 = np.array([[0.,0],[0,1.]])
+        D2 = np.dot(V, np.dot(D2, V.T))
+        d2 = vec(D2)
+
+        # Flip modes
+        L = np.array([[0.,1],[1,0.]])
+        L = np.dot(V, np.dot(L, V.T))
+        l = vec(L)
+
+        return d1, d2, l
+
+
+
+def GetEigenMatrices_UL(U, V):
+    """ Eigenmatrices for C-based formulations
+    """
+
+    ndim = U.shape[0]
+
+    if ndim == 3:
+        D1 = np.array([[1.,0,0],[0,0,0],[0,0,0]])
+        D1 = np.dot(U, np.dot(D1, U.T))
+        d1 = vec(D1)
+        D2 = np.array([[0.,0,0],[0,1.,0],[0.,0,0]])
+        D2 = np.dot(U, np.dot(D2, U.T))
+        d2 = vec(D2)
+        D3 = np.array([[0.,0,0],[0,0.,0],[0,0,1.]])
+        D3 = np.dot(U, np.dot(D3, U.T))
+        d3 = vec(D3)
+
+        L1 = np.array([[0.,0.,0.],[0.,0.,1.],[0.,1.,0.]])
+        L1 = np.dot(U, np.dot(L1, U.T))
+        l1 = vec(L1)
+        L2 = np.array([[0.,0.,1.],[0.,0., 0],[1.,0.,0.]])
+        L2 = np.dot(U, np.dot(L2, U.T))
+        l2 = vec(L2)
+        L3 = np.array([[0.,1.,0.],[1.,0.,0.],[0,0.,0.]])
+        L3 = np.dot(U, np.dot(L3, U.T))
+        l3 = vec(L3)
+
+        return d1, d2, d3, l1, l2, l3
+
+    elif ndim == 2:
+        # Scale modes
+        D1 = np.array([[1.,0],[0,0.]])
+        D1 = np.dot(U, np.dot(D1, U.T))
+        d1 = vec(D1)
+
+        D2 = np.array([[0.,0],[0,1.]])
+        D2 = np.dot(U, np.dot(D2, U.T))
+        d2 = vec(D2)
+
+        # Flip modes
+        L = np.array([[0.,1],[1,0.]])
+        L = np.dot(U, np.dot(L, U.T))
+        l = vec(L)
+
+        return d1, d2, l
+
+
 
 
 def FillConstitutiveBC(B,SpatialGradient,F,ndim,nvar):
@@ -243,7 +339,7 @@ class OgdenNeoHookeanC(Material):
         invC = np.linalg.inv(C)
         c = J*J
 
-        if self.invariant_formulation != "C" and self.invariant_formulation != "ps":
+        if self.formulation_style != "C" and self.formulation_style != "ps":
             raise ValueError("Material does not support this invariant formulation")
 
         # H  = 2. * (mu - lamb * (c - J)) * ( np.einsum("ik,jl", invC, invC) + np.einsum("il,jk", invC, invC) ) * 0.5
@@ -251,13 +347,13 @@ class OgdenNeoHookeanC(Material):
         # H_Voigt = GetVoigtHessian(H)
         # # makezero(H_Voigt)
 
-        if self.invariant_formulation == "C":
+        if self.formulation_style == "C":
             H  = 2. * (mu - lamb * (c - J)) * ( np.einsum("ik,jl", invC, invC) + np.einsum("il,jk", invC, invC) ) * 0.5
             H += lamb * (2. * c - J) * np.einsum("ij,kl", invC, invC)
             H_Voigt = GetVoigtHessian(H)
 
 
-        elif self.invariant_formulation == "ps":
+        elif self.formulation_style == "ps":
 
             [U, S, V] = ssvd(F)
 
@@ -265,25 +361,13 @@ class OgdenNeoHookeanC(Material):
                 s1 = S[0]
                 s2 = S[1]
 
-                # Flip modes
-                L = np.array([[0.,1],[1,0.]])
-                L = np.dot(V, np.dot(L, V.T))
-                l = vec(L)
-
-                # Scale modes
-                D1 = np.array([[1.,0],[0,0.]])
-                D1 = np.dot(V, np.dot(D1, V.T))
-                d1 = vec(D1)
-
-                D2 = np.array([[0.,0],[0,1.]])
-                D2 = np.dot(V, np.dot(D2, V.T))
-                d2 = vec(D2)
+                [d1, d2, l] = GetEigenMatrices(U, V)
 
                 a11 =  (lamb*s2**2 + mu + mu/s1**2)/s1**2 + (-lamb*s2*(J - 1) - mu*s1 + mu/s1)/s1**3
                 a22 =  (lamb*s1**2 + mu + mu/s2**2)/s2**2 + (-lamb*s1*(J - 1) - mu*s2 + mu/s2)/s2**3
                 a12 =  (J*lamb + lamb*(J - 1))/J
 
-                A = np.array([
+                Hw = np.array([
                     [a11,a12],
                     [a12,a22],
                     ])
@@ -303,7 +387,7 @@ class OgdenNeoHookeanC(Material):
                 # H = lamb1 * np.outer(e1,e1) + lamb2 * np.outer(e2,e2) + lamb3 * np.outer(l,l)
 
 
-                eigs, vecs = sp.linalg.eigh(A)
+                eigs, vecs = sp.linalg.eigh(Hw)
                 lamb1 = eigs[0]
                 lamb2 = eigs[1]
                 lamb3 =  (-J*lamb*s1*s2 + lamb*s1*s2 + mu)/J**2
@@ -365,25 +449,7 @@ class OgdenNeoHookeanC(Material):
                 s2 = S[1]
                 s3 = S[2]
 
-                L1 = np.array([[0.,0.,0.],[0.,0.,1.],[0.,1.,0.]])
-                L1 = np.dot(V, np.dot(L1, V.T))
-                l1 = vec(L1)
-                L2 = np.array([[0.,0.,1.],[0.,0., 0],[1.,0.,0.]])
-                L2 = np.dot(V, np.dot(L2, V.T))
-                l2 = vec(L2)
-                L3 = np.array([[0.,1.,0.],[1.,0.,0.],[0,0.,0.]])
-                L3 = np.dot(V, np.dot(L3, V.T))
-                l3 = vec(L3)
-
-                D1 = np.array([[1.,0,0],[0,0,0],[0,0,0]])
-                D1 = np.dot(V, np.dot(D1, V.T))
-                d1 = vec(D1)
-                D2 = np.array([[0.,0,0],[0,1.,0],[0.,0,0]])
-                D2 = np.dot(V, np.dot(D2, V.T))
-                d2 = vec(D2)
-                D3 = np.array([[0.,0,0],[0,0.,0],[0,0,1.]])
-                D3 = np.dot(V, np.dot(D3, V.T))
-                d3 = vec(D3)
+                [d1, d2, d3, l1, l2, l3] = GetEigenMatrices(U, V)
 
                 a11 =  (lamb*s2**2*s3**2 + mu + mu/s1**2)/s1**2 + (-lamb*s2*s3*(J - 1) - mu*s1 + mu/s1)/s1**3
                 a22 =  (lamb*s1**2*s3**2 + mu + mu/s2**2)/s2**2 + (-lamb*s1*s3*(J - 1) - mu*s2 + mu/s2)/s2**3
@@ -392,13 +458,13 @@ class OgdenNeoHookeanC(Material):
                 a13 =  (J*lamb*s2 + lamb*s2*(J - 1))/(s1*s3)
                 a23 =  (J*lamb*s1 + lamb*s1*(J - 1))/(s2*s3)
 
-                A = np.array([
+                Hw = np.array([
                     [a11,a12,a13],
                     [a12,a22,a23],
                     [a13,a23,a33]
                     ])
 
-                eigs, vecs = sp.linalg.eigh(A)
+                eigs, vecs = sp.linalg.eigh(Hw)
                 lamb1 = eigs[0]
                 lamb2 = eigs[1]
                 lamb3 = eigs[2]
@@ -442,7 +508,7 @@ class OgdenNeoHookeanC(Material):
 
         stress_stab = 0.
 
-        if self.invariant_formulation == "C":
+        if self.formulation_style == "C":
             stress = mu*I - mu * invC + lamb * (c - J) * invC
             stress_stab = stress
 
@@ -458,7 +524,7 @@ class OgdenNeoHookeanC(Material):
 
             # stress2 = V.dot(np.diag(sigmaS).dot(V.T))
 
-        elif self.invariant_formulation == "ps":
+        elif self.formulation_style == "ps":
 
             [U, S, V] = ssvd(F)
 
@@ -501,6 +567,497 @@ class OgdenNeoHookeanC(Material):
         energy  = 0.5 * mu * I2 - mu * np.log(J) + lamb / 2. * (J-1)**2
 
         return energy
+
+
+
+
+
+
+
+
+
+class MIPS_C(Material):
+    """
+        W(F) = mu * II_F / d / J**(2/d) + lambda * (J + J**(-1) - 2)
+    """
+
+    def __init__(self, ndim, **kwargs):
+        mtype = type(self).__name__
+        super(MIPS_C, self).__init__(mtype, ndim, **kwargs)
+
+        self.is_transversely_isotropic = False
+        self.energy_type = "internal_energy"
+        self.nature = "nonlinear"
+        self.fields = "mechanics"
+
+        if self.ndim==3:
+            self.H_VoigtSize = 6
+        elif self.ndim==2:
+            self.H_VoigtSize = 3
+
+        # LOW LEVEL DISPATCHER
+        # self.has_low_level_dispatcher = True
+        self.has_low_level_dispatcher = False
+
+    def KineticMeasures(self,F,ElectricFieldx=0, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._NeoHookean_ import KineticMeasures
+        return KineticMeasures(self,F)
+
+
+    def Hessian(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        mu = self.mu
+        lamb = self.lamb
+        d = self.ndim
+
+        C = F.T.dot(F)
+        c = J*J
+        trC = trace(C)
+
+        if self.formulation_style != "classic" and self.formulation_style != "ps":
+            raise ValueError("Invalid invariant formulation for this material model")
+
+        if self.formulation_style == "classic":
+
+            d2 = d * d
+            d3 = d2 * d
+            tmp1 = J**(2. / d)
+            invC = np.linalg.inv(C)
+
+            H  = (lamb * (J + 1. / J) + 4. * mu * trC / d3 / tmp1) * np.einsum("ij,kl", invC, invC) +\
+                (-2 * lamb * (J - 1. / J) + 4. * mu * trC / d2 / tmp1) * ( np.einsum("ik,jl", invC, invC) + np.einsum("il,jk", invC, invC) ) * 0.5 -\
+                4. * mu / d2 / tmp1 * ( np.einsum("ij,kl", I, invC) + np.einsum("ij,kl", invC, I) )
+
+            H_Voigt = GetVoigtHessian(H)
+
+
+        elif self.formulation_style == "ps":
+
+            [U, S, V] = ssvd(F)
+
+            if self.ndim == 2:
+                s1 = S[0]
+                s2 = S[1]
+
+
+                a11 = (3. * trC * mu) / 2. / J / s1**4 - 2. * mu / J / s1**2  - lamb / s1**4 * ( J - 3. / J)
+                a22 = (3. * trC * mu) / 2. / J / s2**4 - 2. * mu / J / s2**2  - lamb / s2**4 * ( J - 3. / J)
+                a12 =  lamb * (1. / J + 1. / J**3) - trC * mu / 2. / J**3
+
+                Hw = np.array([
+                    [a11,a12],
+                    [a12,a22],
+                    ])
+
+                eigs, vecs = sp.linalg.eigh(Hw)
+                lamb1 = eigs[0]
+                lamb2 = eigs[1]
+                lamb3 =  trC * mu / 2. / J**3 - lamb * (J**2 - 1) / J**3
+
+                if self.stabilise_tangents:
+                    hessian_eps = self.tangent_stabiliser_value
+                    lamb1 = max(lamb1, hessian_eps)
+                    lamb2 = max(lamb2, hessian_eps)
+                    lamb3 = max(lamb3, hessian_eps)
+
+                [d1, d2, l] = GetEigenMatrices(U, V)
+                ds = np.array([d1,d2]).T
+                HwSPD = lamb1 * vecs[:,0][None,:].T.dot(vecs[:,0][None,:]) + lamb2 * vecs[:,1][None,:].T.dot(vecs[:,1][None,:])
+                H = ds.dot(HwSPD.dot(ds.T)) + lamb3 * np.outer(l,l)
+
+                H_Voigt = GetVoigtHessian(H)
+
+
+            elif self.ndim == 3:
+
+                s1 = S[0]
+                s2 = S[1]
+                s3 = S[2]
+
+                I2 = trC
+                a11 =  (10*I2*mu/(27*J**(2./3)*s1**2) + 2*lamb/(J*s1**2) - 2*mu/(9*J**(2./3)))/s1**2 + (2*I2*mu/(9*J**(2./3)*s1) - lamb*(s2*s3 - 1/(J*s1)) - 2*mu*s1/(3*J**(2./3)))/s1**3
+                a22 =  (10*I2*mu/(27*J**(2./3)*s2**2) + 2*lamb/(J*s2**2) - 2*mu/(9*J**(2./3)))/s2**2 + (2*I2*mu/(9*J**(2./3)*s2) - lamb*(s1*s3 - 1/(J*s2)) - 2*mu*s2/(3*J**(2./3)))/s2**3
+                a33 =  (10*I2*mu/(27*J**(2./3)*s3**2) + 2*lamb/(J*s3**2) - 2*mu/(9*J**(2./3)))/s3**2 + (2*I2*mu/(9*J**(2./3)*s3) - lamb*(s1*s2 - 1/(J*s3)) - 2*mu*s3/(3*J**(2./3)))/s3**3
+                a12 =  (4*I2*mu/(27*J**(2./3)*s1*s2) + lamb*(s3 + 1/(J*s1*s2)) - 4*mu*s1/(9*J**(2./3)*s2) - 4*mu*s2/(9*J**(2./3)*s1))/(s1*s2)
+                a13 =  (4*I2*mu/(27*J**(2./3)*s1*s3) + lamb*(s2 + 1/(J*s1*s3)) - 4*mu*s1/(9*J**(2./3)*s3) - 4*mu*s3/(9*J**(2./3)*s1))/(s1*s3)
+                a23 =  (4*I2*mu/(27*J**(2./3)*s2*s3) + lamb*(s1 + 1/(J*s2*s3)) - 4*mu*s2/(9*J**(2./3)*s3) - 4*mu*s3/(9*J**(2./3)*s2))/(s2*s3)
+
+                Hw = np.array([
+                    [a11,a12,a13],
+                    [a12,a22,a23],
+                    [a13,a23,a33]
+                    ])
+
+                eigs, vecs = sp.linalg.eigh(Hw)
+                lamb1 = eigs[0]
+                lamb2 = eigs[1]
+                lamb3 = eigs[2]
+                lamb4 =  (2*I2*J**(1./3)*mu/9 + 2*J**(1./3)*mu*s3**2/9. - J*lamb*s1*s2*s3 + lamb)/(J*s2**2*s3**2)
+                lamb5 =  (2*I2*J**(1./3)*mu/9 + 2*J**(1./3)*mu*s3**2/9. - J*lamb*s1*s2*s3 + lamb)/(J*s1**2*s3**2)
+                lamb6 =  (2*I2*J**(1./3)*mu/9 + 2*J**(1./3)*mu*s3**2/9. - J*lamb*s1*s2*s3 + lamb)/(J*s1**2*s2**2)
+
+                if self.stabilise_tangents:
+                    hessian_eps = self.tangent_stabiliser_value
+                    lamb1 = max(lamb1, hessian_eps)
+                    lamb2 = max(lamb2, hessian_eps)
+                    lamb3 = max(lamb3, hessian_eps)
+                    lamb4 = max(lamb4, hessian_eps)
+                    lamb5 = max(lamb5, hessian_eps)
+                    lamb6 = max(lamb6, hessian_eps)
+
+                [d1, d2, d3, l1, l2, l3] = GetEigenMatrices(U, V)
+                ds = np.array([d1,d2,d3]).T
+                HwSPD = lamb1 * vecs[:,0][None,:].T.dot(vecs[:,0][None,:]) + lamb2 * vecs[:,1][None,:].T.dot(vecs[:,1][None,:]) +\
+                    + lamb3 * vecs[:,2][None,:].T.dot(vecs[:,2][None,:])
+
+                H = ds.dot(HwSPD.dot(ds.T)) + lamb4 * np.outer(l1,l1) + lamb5 * np.outer(l2,l2) + lamb6 * np.outer(l3,l3)
+                H_Voigt = GetVoigtHessian(H)
+
+        self.H_VoigtSize = H_Voigt.shape[0]
+
+        return H_Voigt
+
+
+    def CauchyStress(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
+
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+        I = StrainTensors['I']
+
+        mu = self.mu
+        lamb = self.lamb
+        ndim = self.ndim
+
+        C = F.T.dot(F)
+        trC = trace(C)
+
+        if self.formulation_style == "classic":
+
+            d = self.ndim
+            d2 = d * d
+            invC = np.linalg.inv(C)
+
+            tmp1 = J**(2. / d)
+            tmp2 = 1. / (tmp1 * J)
+
+            S = 2. * mu / d / tmp1 * I + ( lamb * (J - 1. / J) - 2. * mu * trC / d2 / tmp1) * invC
+
+        elif self.formulation_style == "ps":
+
+            [U, S, V] = ssvd(F)
+
+            if ndim == 2:
+                s1 = S[0]
+                s2 = S[1]
+
+                sigmaS = np.zeros(ndim)
+                sigmaS[0] = mu / J - trC * mu / 2. / J / s1**2 + lamb / s1**2 * (J - 1. / J)
+                sigmaS[1] = mu / J - trC * mu / 2. / J / s2**2 + lamb / s2**2 * (J - 1. / J)
+
+                S = V.dot(np.diag(sigmaS).dot(V.T))
+
+            elif ndim == 3:
+                s1 = S[0]
+                s2 = S[1]
+                s3 = S[2]
+
+                sigmaS = np.zeros(ndim)
+                I2 = trC
+                sigmaS[0] =  (lamb*(s2*s3 - 1/(J*s1)) + 2*mu*s1/(3*J**(2./3)) - 2*mu*(I2 + s3**2)/(9*J**(2./3)*s1))/s1
+                sigmaS[1] =  (lamb*(s1*s3 - 1/(J*s2)) + 2*mu*s2/(3*J**(2./3)) - 2*mu*(I2 + s3**2)/(9*J**(2./3)*s2))/s2
+                sigmaS[2] =  (lamb*(s1*s2 - 1/(J*s3)) + 2*mu*s3/(3*J**(2./3)) - 2*mu*(I2 + s3**2)/(9*J**(2./3)*s3))/s3
+
+                S = V.dot(np.diag(sigmaS).dot(V.T))
+
+        return S
+
+
+    def InternalEnergy(self,StrainTensors,elem=0,gcounter=0):
+
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        mu = self.mu
+        lamb = self.lamb
+        d = self.ndim
+
+        trb = trace(F.T.dot(F))
+
+        energy = mu * trb / d / J**(2/d) + lamb * (J + 1./J - 2)
+
+        return energy
+
+
+
+
+
+
+
+
+class MIPS_b(Material):
+    """
+        W(F) = mu * II_F / d / J**(2/d) + lambda * (J + J**(-1) - 2)
+    """
+
+    def __init__(self, ndim, **kwargs):
+        mtype = type(self).__name__
+        super(MIPS_b, self).__init__(mtype, ndim, **kwargs)
+
+        self.is_transversely_isotropic = False
+        self.energy_type = "internal_energy"
+        self.nature = "nonlinear"
+        self.fields = "mechanics"
+
+        if self.ndim==3:
+            self.H_VoigtSize = 6
+        elif self.ndim==2:
+            self.H_VoigtSize = 3
+
+        # LOW LEVEL DISPATCHER
+        # self.has_low_level_dispatcher = True
+        self.has_low_level_dispatcher = False
+
+    def KineticMeasures(self,F,ElectricFieldx=0, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._NeoHookean_ import KineticMeasures
+        return KineticMeasures(self,F)
+
+
+    def Hessian(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
+
+        I = StrainTensors['I']
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        mu = self.mu
+        lamb = self.lamb
+        d = self.ndim
+
+        C = F.T.dot(F)
+        c = J*J
+        trC = trace(C)
+
+        if self.formulation_style != "classic" and self.formulation_style != "ps":
+            raise ValueError("Invalid invariant formulation for this material model")
+
+
+        if self.formulation_style == "classic":
+
+            d2 = d * d
+            d3 = d2 * d
+            tmp1 = J**(2. / d)
+            invC = np.linalg.inv(C)
+
+            H  = (lamb * (J + 1. / J) + 4. * mu * trC / d3 / tmp1) * np.einsum("ij,kl", invC, invC) +\
+                (-2 * lamb * (J - 1. / J) + 4. * mu * trC / d2 / tmp1) * ( np.einsum("ik,jl", invC, invC) + np.einsum("il,jk", invC, invC) ) * 0.5 -\
+                4. * mu / d2 / tmp1 * ( np.einsum("ij,kl", I, invC) + np.einsum("ij,kl", invC, I) )
+
+            H = 1./J * np.einsum("iI,jJ,kK,lL,IJKL",F,F,F,F,H)
+            H_Voigt = Voigt(H,1)
+
+
+        elif self.formulation_style == "ps":
+
+            [U, S, V] = ssvd(F)
+
+            if self.ndim == 2:
+
+                s1 = S[0]
+                s2 = S[1]
+
+                a11 = (3. * trC * mu) / 2. / J / s1**4 - 2. * mu / J / s1**2  - lamb / s1**4 * ( J - 3. / J)
+                a22 = (3. * trC * mu) / 2. / J / s2**4 - 2. * mu / J / s2**2  - lamb / s2**4 * ( J - 3. / J)
+                a12 =  lamb * (1. / J + 1. / J**3) - trC * mu / 2. / J**3
+
+                Hw = np.array([
+                    [a11,a12],
+                    [a12,a22],
+                    ])
+                # Build spatial Hessian
+                S2 = np.diag(S).dot(np.diag(S))
+                Hw = S2.dot(Hw.dot(S2))
+
+                eigs, vecs = sp.linalg.eigh(Hw)
+                lamb1 = eigs[0]
+                lamb2 = eigs[1]
+                lamb3 =  trC * mu / 2. / J**3 - lamb * (J**2 - 1) / J**3
+
+                if self.stabilise_tangents:
+                    hessian_eps = self.tangent_stabiliser_value
+                    lamb1 = max(lamb1, hessian_eps)
+                    lamb2 = max(lamb2, hessian_eps)
+                    lamb3 = max(lamb3, hessian_eps)
+
+                # Push-forward flip eigenvalues
+                lamb3 *= (s1*s2)**2
+
+                [d1, d2, l] = GetEigenMatrices_UL(U, V)
+                ds = np.array([d1,d2]).T
+                HwSPD = lamb1 * vecs[:,0][None,:].T.dot(vecs[:,0][None,:]) + lamb2 * vecs[:,1][None,:].T.dot(vecs[:,1][None,:])
+                H = ds.dot(HwSPD.dot(ds.T)) + lamb3 * np.outer(l,l)
+                H /= J
+
+                H_Voigt = GetVoigtHessian(H)
+
+            elif self.ndim == 3:
+
+                s1 = S[0]
+                s2 = S[1]
+                s3 = S[2]
+
+                I2 = trC
+                a11 =  (10*I2*mu/(27*J**(2./3)*s1**2) + 2*lamb/(J*s1**2) - 2*mu/(9*J**(2./3)))/s1**2 + (2*I2*mu/(9*J**(2./3)*s1) - lamb*(s2*s3 - 1/(J*s1)) - 2*mu*s1/(3*J**(2./3)))/s1**3
+                a22 =  (10*I2*mu/(27*J**(2./3)*s2**2) + 2*lamb/(J*s2**2) - 2*mu/(9*J**(2./3)))/s2**2 + (2*I2*mu/(9*J**(2./3)*s2) - lamb*(s1*s3 - 1/(J*s2)) - 2*mu*s2/(3*J**(2./3)))/s2**3
+                a33 =  (10*I2*mu/(27*J**(2./3)*s3**2) + 2*lamb/(J*s3**2) - 2*mu/(9*J**(2./3)))/s3**2 + (2*I2*mu/(9*J**(2./3)*s3) - lamb*(s1*s2 - 1/(J*s3)) - 2*mu*s3/(3*J**(2./3)))/s3**3
+                a12 =  (4*I2*mu/(27*J**(2./3)*s1*s2) + lamb*(s3 + 1/(J*s1*s2)) - 4*mu*s1/(9*J**(2./3)*s2) - 4*mu*s2/(9*J**(2./3)*s1))/(s1*s2)
+                a13 =  (4*I2*mu/(27*J**(2./3)*s1*s3) + lamb*(s2 + 1/(J*s1*s3)) - 4*mu*s1/(9*J**(2./3)*s3) - 4*mu*s3/(9*J**(2./3)*s1))/(s1*s3)
+                a23 =  (4*I2*mu/(27*J**(2./3)*s2*s3) + lamb*(s1 + 1/(J*s2*s3)) - 4*mu*s2/(9*J**(2./3)*s3) - 4*mu*s3/(9*J**(2./3)*s2))/(s2*s3)
+
+                Hw = np.array([
+                    [a11,a12,a13],
+                    [a12,a22,a23],
+                    [a13,a23,a33]
+                    ])
+                # Build spatial Hessian
+                S2 = np.diag(S).dot(np.diag(S))
+                Hw = S2.dot(Hw.dot(S2))
+
+                eigs, vecs = sp.linalg.eigh(Hw)
+                lamb1 = eigs[0]
+                lamb2 = eigs[1]
+                lamb3 = eigs[2]
+                lamb4 =  (2*I2*J**(1./3)*mu/9 + 2*J**(1./3)*mu*s3**2/9. - J*lamb*s1*s2*s3 + lamb)/(J*s2**2*s3**2)
+                lamb5 =  (2*I2*J**(1./3)*mu/9 + 2*J**(1./3)*mu*s3**2/9. - J*lamb*s1*s2*s3 + lamb)/(J*s1**2*s3**2)
+                lamb6 =  (2*I2*J**(1./3)*mu/9 + 2*J**(1./3)*mu*s3**2/9. - J*lamb*s1*s2*s3 + lamb)/(J*s1**2*s2**2)
+
+                if self.stabilise_tangents:
+                    hessian_eps = self.tangent_stabiliser_value
+                    lamb1 = max(lamb1, hessian_eps)
+                    lamb2 = max(lamb2, hessian_eps)
+                    lamb3 = max(lamb3, hessian_eps)
+                    lamb4 = max(lamb4, hessian_eps)
+                    lamb5 = max(lamb5, hessian_eps)
+                    lamb6 = max(lamb6, hessian_eps)
+
+                # Push-forward flip eigenvalues
+                lamb4 *= (s2*s3)**2
+                lamb5 *= (s1*s3)**2
+                lamb6 *= (s1*s2)**2
+
+                [d1, d2, d3, l1, l2, l3] = GetEigenMatrices_UL(U, V)
+                ds = np.array([d1,d2,d3]).T
+                HwSPD = lamb1 * vecs[:,0][None,:].T.dot(vecs[:,0][None,:]) + lamb2 * vecs[:,1][None,:].T.dot(vecs[:,1][None,:]) +\
+                    + lamb3 * vecs[:,2][None,:].T.dot(vecs[:,2][None,:])
+
+                H = ds.dot(HwSPD.dot(ds.T)) + lamb4 * np.outer(l1,l1) + lamb5 * np.outer(l2,l2) + lamb6 * np.outer(l3,l3)
+                H_Voigt = GetVoigtHessian(H)
+
+        self.H_VoigtSize = H_Voigt.shape[0]
+
+        return H_Voigt
+
+
+    def CauchyStress(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
+
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+        I = StrainTensors['I']
+
+        mu = self.mu
+        lamb = self.lamb
+        ndim = self.ndim
+
+        C = F.T.dot(F)
+        trC = trace(C)
+
+        if self.formulation_style == "classic":
+
+            d = self.ndim
+            d2 = d * d
+            invC = np.linalg.inv(C)
+
+            tmp1 = J**(2. / d)
+            tmp2 = 1. / (tmp1 * J)
+
+            S = 2. * mu / d / tmp1 * I + ( lamb * (J - 1. / J) - 2. * mu * trC / d2 / tmp1) * invC
+
+            cauchy = 1./J * np.dot(F,np.dot(S,F.T))
+
+
+        elif self.formulation_style == "ps":
+
+            [U, S, V] = ssvd(F)
+
+            if ndim == 2:
+                s1 = S[0]
+                s2 = S[1]
+
+                cauchyS = np.zeros(ndim)
+                cauchyS[0] = mu / J - trC * mu / 2. / J / s1**2 + lamb / s1**2 * (J - 1. / J)
+                cauchyS[1] = mu / J - trC * mu / 2. / J / s2**2 + lamb / s2**2 * (J - 1. / J)
+
+                cauchyS[0] *= s1**2
+                cauchyS[1] *= s2**2
+                cauchyS /= J
+
+                cauchy = U.dot(np.diag(cauchyS).dot(U.T))
+
+            elif ndim == 3:
+                s1 = S[0]
+                s2 = S[1]
+                s3 = S[2]
+
+                cauchyS = np.zeros(ndim)
+                I2 = trC
+                cauchyS[0] =  (lamb*(s2*s3 - 1/(J*s1)) + 2*mu*s1/(3*J**(2./3)) - 2*mu*(I2 + s3**2)/(9*J**(2./3)*s1))/s1
+                cauchyS[1] =  (lamb*(s1*s3 - 1/(J*s2)) + 2*mu*s2/(3*J**(2./3)) - 2*mu*(I2 + s3**2)/(9*J**(2./3)*s2))/s2
+                cauchyS[2] =  (lamb*(s1*s2 - 1/(J*s3)) + 2*mu*s3/(3*J**(2./3)) - 2*mu*(I2 + s3**2)/(9*J**(2./3)*s3))/s3
+
+                cauchyS[0] *= s1**2
+                cauchyS[1] *= s2**2
+                cauchyS[2] *= s3**2
+                cauchyS /= J
+
+                cauchy = U.dot(np.diag(cauchyS).dot(U.T))
+
+        return cauchy
+
+
+    def InternalEnergy(self,StrainTensors,elem=0,gcounter=0):
+
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        mu = self.mu
+        lamb = self.lamb
+        d = self.ndim
+
+        trb = trace(F.T.dot(F))
+
+        energy = mu * trb / d / J**(2/d) + lamb * (J + 1./J - 2)
+
+        return energy
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -231,6 +231,8 @@ def dRdF(u, s, vh, regularise=False):
 
 
 def GetEigenMatrices(u, vh):
+    """ Eigenmatrices for F-based formulations
+    """
 
     ndim = u.shape[0]
 
@@ -296,8 +298,14 @@ def GetEigenMatrices(u, vh):
 
 def GetInitialStiffnessPolyconvex(sigmaH, sigmaJ, F, stabilise=False, eps=1e-6):
 
+    ndim = F.shape[0]
     if not stabilise:
-        return d2JdFdF(sigmaH + sigmaJ * F)
+        if ndim == 3:
+            return d2JdFdF(sigmaH + sigmaJ * F)
+        elif ndim == 2:
+            if np.linalg.norm(sigmaH) > 1e-6:
+                raise NotImplementedError("Polyconvex initial stiffness for 2D in this format not yet implemented")
+            return sigmaJ * d2JdFdF(F)
     else:
         # eigs, vecs = sp.linalg.eigh(d2JdFdF(sigmaH + sigmaJ * F))
         # eigs[eigs < 0] = eps
@@ -306,138 +314,203 @@ def GetInitialStiffnessPolyconvex(sigmaH, sigmaJ, F, stabilise=False, eps=1e-6):
 
         outer = np.outer
 
-        # Get SVD of F
-        [U, S, Vh] = svd(F, full_matrices=True); V = Vh.T
+        if ndim == 3:
 
-        s1 = S[0]
-        s2 = S[1]
-        s3 = S[2]
+            # Get SVD of F
+            [U, S, Vh] = svd(F, full_matrices=True); V = Vh.T
+            s1 = S[0]
+            s2 = S[1]
+            s3 = S[2]
 
-        [d1, d2, d3, l1, l2, l3, t1, t2, t3] = GetEigenMatrices(U, V)
+            [d1, d2, d3, l1, l2, l3, t1, t2, t3] = GetEigenMatrices(U, V)
 
-        # Get eigenvalues of the following matrix
-        Hw = sigmaJ * np.array([
-            [0 , s3,  s2],
-            [s3,  0,  s1],
-            [s2, s1,   0],
-            ])
-        eigs, vecs = sp.linalg.eigh(Hw)
+            # Get eigenvalues of the following matrix
+            Hw = sigmaJ * np.array([
+                [0 , s3,  s2],
+                [s3,  0,  s1],
+                [s2, s1,   0],
+                ])
+            eigs, vecs = sp.linalg.eigh(Hw)
 
-        # # Alternatively the 3 roots can be obtained as:
-        # tt = complex(J**2 - I2**3 / 27., 0)
-        # tt = np.sqrt(tt)
-        # u = cbrts(J + tt); u.sort()
-        # v = cbrts(J - tt); v.sort()
-        # roots = (u + v).real
-        # # Or through numpy polynomial
-        # # import numpy.polynomial.polynomial as poly
-        # # roots = poly.polyroots((2. * J, -I2, 0., 1.))
-        # # the following does not work as python only returns principal root
-        # # cbrt = lambda x: x**(1./3.)
-        # # x1 = cbrt(J + tt) + cbrt(J - tt)
-        # # x2 = x1 * complex(-1., -np.sqrt(3.)) / 2.
-        # # x3 = x1 * complex(-1.,  np.sqrt(3.)) / 2.
+            # # Alternatively the 3 roots can be obtained as:
+            # tt = complex(J**2 - I2**3 / 27., 0)
+            # tt = np.sqrt(tt)
+            # u = cbrts(J + tt); u.sort()
+            # v = cbrts(J - tt); v.sort()
+            # roots = (u + v).real
+            # # Or through numpy polynomial
+            # # import numpy.polynomial.polynomial as poly
+            # # roots = poly.polyroots((2. * J, -I2, 0., 1.))
+            # # the following does not work as python only returns principal root
+            # # cbrt = lambda x: x**(1./3.)
+            # # x1 = cbrt(J + tt) + cbrt(J - tt)
+            # # x2 = x1 * complex(-1., -np.sqrt(3.)) / 2.
+            # # x3 = x1 * complex(-1.,  np.sqrt(3.)) / 2.
 
-        lamb4 = -sigmaJ * s1
-        lamb5 = -sigmaJ * s2
-        lamb6 = -sigmaJ * s3
-        lamb7 =  sigmaJ * s1
-        lamb8 =  sigmaJ * s2
-        lamb9 =  sigmaJ * s3
+            lamb4 = -sigmaJ * s1
+            lamb5 = -sigmaJ * s2
+            lamb6 = -sigmaJ * s3
+            lamb7 =  sigmaJ * s1
+            lamb8 =  sigmaJ * s2
+            lamb9 =  sigmaJ * s3
 
-        lamb1 = eigs[0]
-        lamb2 = eigs[1]
-        lamb3 = eigs[2]
+            lamb1 = eigs[0]
+            lamb2 = eigs[1]
+            lamb3 = eigs[2]
 
-        lamb1 = max(lamb1, eps)
-        lamb2 = max(lamb2, eps)
-        lamb3 = max(lamb3, eps)
-        lamb4 = max(lamb4, eps)
-        lamb5 = max(lamb5, eps)
-        lamb6 = max(lamb6, eps)
-        lamb7 = max(lamb7, eps)
-        lamb8 = max(lamb8, eps)
-        lamb9 = max(lamb9, eps)
+            lamb1 = max(lamb1, eps)
+            lamb2 = max(lamb2, eps)
+            lamb3 = max(lamb3, eps)
+            lamb4 = max(lamb4, eps)
+            lamb5 = max(lamb5, eps)
+            lamb6 = max(lamb6, eps)
+            lamb7 = max(lamb7, eps)
+            lamb8 = max(lamb8, eps)
+            lamb9 = max(lamb9, eps)
 
-        # Build sigmaJ * IxF
-        ds = np.array([d1,d2,d3]).T
-        HwSPD = lamb1 * vecs[:,0][None,:].T.dot(vecs[:,0][None,:]) + lamb2 * vecs[:,1][None,:].T.dot(vecs[:,1][None,:]) +\
-            + lamb3 * vecs[:,2][None,:].T.dot(vecs[:,2][None,:])
-        sigmaJIxF = ds.dot(HwSPD.dot(ds.T)) + \
-            lamb4 * outer(l1,l1) + lamb5 * outer(l2,l2) + lamb6 * outer(l3,l3) +\
-            lamb7 * outer(t1,t1) + lamb8 * outer(t2,t2) + lamb9 * outer(t3,t3)
+            # Build sigmaJ * IxF
+            ds = np.array([d1,d2,d3]).T
+            HwSPD = lamb1 * vecs[:,0][None,:].T.dot(vecs[:,0][None,:]) + lamb2 * vecs[:,1][None,:].T.dot(vecs[:,1][None,:]) +\
+                + lamb3 * vecs[:,2][None,:].T.dot(vecs[:,2][None,:])
+            sigmaJIxF = ds.dot(HwSPD.dot(ds.T)) + \
+                lamb4 * outer(l1,l1) + lamb5 * outer(l2,l2) + lamb6 * outer(l3,l3) +\
+                lamb7 * outer(t1,t1) + lamb8 * outer(t2,t2) + lamb9 * outer(t3,t3)
 
-        # vec1 = vecs[:,0]
-        # vec2 = vecs[:,1]
-        # vec3 = vecs[:,2]
-        # e1 = vec1[0] * d1 + vec1[1] * d2 + vec1[2] * d3
-        # e2 = vec2[0] * d1 + vec2[1] * d2 + vec2[2] * d3
-        # e3 = vec3[0] * d1 + vec3[1] * d2 + vec3[2] * d3
-        # sigmaJIxF = lamb1 * outer(e1,e1) + lamb2 * outer(e2,e2) + lamb3 * outer(e3,e3) +\
-        #     lamb4 * outer(l1,l1) + lamb5 * outer(l2,l2) + lamb6 * outer(l3,l3) +\
-        #     lamb7 * outer(t1,t1) + lamb8 * outer(t2,t2) + lamb9 * outer(t3,t3)
+            # vec1 = vecs[:,0]
+            # vec2 = vecs[:,1]
+            # vec3 = vecs[:,2]
+            # e1 = vec1[0] * d1 + vec1[1] * d2 + vec1[2] * d3
+            # e2 = vec2[0] * d1 + vec2[1] * d2 + vec2[2] * d3
+            # e3 = vec3[0] * d1 + vec3[1] * d2 + vec3[2] * d3
+            # sigmaJIxF = lamb1 * outer(e1,e1) + lamb2 * outer(e2,e2) + lamb3 * outer(e3,e3) +\
+            #     lamb4 * outer(l1,l1) + lamb5 * outer(l2,l2) + lamb6 * outer(l3,l3) +\
+            #     lamb7 * outer(t1,t1) + lamb8 * outer(t2,t2) + lamb9 * outer(t3,t3)
 
-        # Get SVD of sigmaH
-        [U, S, Vh] = svd(sigmaH, full_matrices=True); V = Vh.T
+            # Get SVD of sigmaH
+            [U, S, Vh] = svd(sigmaH, full_matrices=True); V = Vh.T
 
-        s1 = S[0]
-        s2 = S[1]
-        s3 = S[2]
+            s1 = S[0]
+            s2 = S[1]
+            s3 = S[2]
 
-        [d1, d2, d3, l1, l2, l3, t1, t2, t3] = GetEigenMatrices(U, V)
+            [d1, d2, d3, l1, l2, l3, t1, t2, t3] = GetEigenMatrices(U, V)
 
-        # Get eigenvalues of the following matrix
-        Hw = np.array([
-            [0 , s3,  s2],
-            [s3,  0,  s1],
-            [s2, s1,   0],
-            ])
-        eigs, vecs = sp.linalg.eigh(Hw)
+            # Get eigenvalues of the following matrix
+            Hw = np.array([
+                [0 , s3,  s2],
+                [s3,  0,  s1],
+                [s2, s1,   0],
+                ])
+            eigs, vecs = sp.linalg.eigh(Hw)
 
-        lamb1 = eigs[0]
-        lamb2 = eigs[1]
-        lamb3 = eigs[2]
-        lamb4 = -s1
-        lamb5 = -s2
-        lamb6 = -s3
-        lamb7 =  s1
-        lamb8 =  s2
-        lamb9 =  s3
+            lamb1 = eigs[0]
+            lamb2 = eigs[1]
+            lamb3 = eigs[2]
+            lamb4 = -s1
+            lamb5 = -s2
+            lamb6 = -s3
+            lamb7 =  s1
+            lamb8 =  s2
+            lamb9 =  s3
 
-        lamb1 = max(lamb1, eps)
-        lamb2 = max(lamb2, eps)
-        lamb3 = max(lamb3, eps)
-        lamb4 = max(lamb4, eps)
-        lamb5 = max(lamb5, eps)
-        lamb6 = max(lamb6, eps)
-        lamb7 = max(lamb7, eps)
-        lamb8 = max(lamb8, eps)
-        lamb9 = max(lamb9, eps)
+            lamb1 = max(lamb1, eps)
+            lamb2 = max(lamb2, eps)
+            lamb3 = max(lamb3, eps)
+            lamb4 = max(lamb4, eps)
+            lamb5 = max(lamb5, eps)
+            lamb6 = max(lamb6, eps)
+            lamb7 = max(lamb7, eps)
+            lamb8 = max(lamb8, eps)
+            lamb9 = max(lamb9, eps)
 
-        # Build IxsigmaH
-        ds = np.array([d1,d2,d3]).T
-        HwSPD = lamb1 * vecs[:,0][None,:].T.dot(vecs[:,0][None,:]) + lamb2 * vecs[:,1][None,:].T.dot(vecs[:,1][None,:]) +\
-            + lamb3 * vecs[:,2][None,:].T.dot(vecs[:,2][None,:])
-        IxsigmaH = ds.dot(HwSPD.dot(ds.T)) + \
-            lamb4 * outer(l1,l1) + lamb5 * outer(l2,l2) + lamb6 * outer(l3,l3) +\
-            lamb7 * outer(t1,t1) + lamb8 * outer(t2,t2) + lamb9 * outer(t3,t3)
+            # Build IxsigmaH
+            ds = np.array([d1,d2,d3]).T
+            HwSPD = lamb1 * vecs[:,0][None,:].T.dot(vecs[:,0][None,:]) + lamb2 * vecs[:,1][None,:].T.dot(vecs[:,1][None,:]) +\
+                + lamb3 * vecs[:,2][None,:].T.dot(vecs[:,2][None,:])
+            IxsigmaH = ds.dot(HwSPD.dot(ds.T)) + \
+                lamb4 * outer(l1,l1) + lamb5 * outer(l2,l2) + lamb6 * outer(l3,l3) +\
+                lamb7 * outer(t1,t1) + lamb8 * outer(t2,t2) + lamb9 * outer(t3,t3)
 
-        # vec1 = vecs[:,0]
-        # vec2 = vecs[:,1]
-        # vec3 = vecs[:,2]
-        # e1 = vec1[0] * d1 + vec1[1] * d2 + vec1[2] * d3
-        # e2 = vec2[0] * d1 + vec2[1] * d2 + vec2[2] * d3
-        # e3 = vec3[0] * d1 + vec3[1] * d2 + vec3[2] * d3
+            # vec1 = vecs[:,0]
+            # vec2 = vecs[:,1]
+            # vec3 = vecs[:,2]
+            # e1 = vec1[0] * d1 + vec1[1] * d2 + vec1[2] * d3
+            # e2 = vec2[0] * d1 + vec2[1] * d2 + vec2[2] * d3
+            # e3 = vec3[0] * d1 + vec3[1] * d2 + vec3[2] * d3
 
-        # IxsigmaH = lamb1 * outer(e1,e1) + lamb2 * outer(e2,e2) + lamb3 * outer(e3,e3) +\
-        #     lamb4 * outer(l1,l1) + lamb5 * outer(l2,l2) + lamb6 * outer(l3,l3) +\
-        #     lamb7 * outer(t1,t1) + lamb8 * outer(t2,t2) + lamb9 * outer(t3,t3)
+            # IxsigmaH = lamb1 * outer(e1,e1) + lamb2 * outer(e2,e2) + lamb3 * outer(e3,e3) +\
+            #     lamb4 * outer(l1,l1) + lamb5 * outer(l2,l2) + lamb6 * outer(l3,l3) +\
+            #     lamb7 * outer(t1,t1) + lamb8 * outer(t2,t2) + lamb9 * outer(t3,t3)
 
-        # Sum the two
-        initial_stiffness = sigmaJIxF + IxsigmaH
+            # Sum the two
+            initial_stiffness = sigmaJIxF + IxsigmaH
 
-        return initial_stiffness
+            return initial_stiffness
 
+        elif ndim == 2:
+
+            # Get SVD of F
+            [U, S, Vh] = svd(F, full_matrices=True); V = Vh.T
+            s1 = S[0]
+            s2 = S[1]
+
+            [d1, d2, l, t] = GetEigenMatrices(U, V)
+
+            # Or alternatively
+            # Hw = np.array([
+            #     [0 , 1],
+            #     [1,  0],
+            #     ])
+            # eigs, vecs = sp.linalg.eigh(Hw)
+
+            vecs = 1./np.sqrt(2.) * np.array([[1.,-1.],[1.,1.]])
+
+            lamb1 =  sigmaJ
+            lamb2 = -sigmaJ
+            lamb3 = -sigmaJ
+            lamb4 =  sigmaJ
+
+            lamb1 = max(lamb1, eps)
+            lamb2 = max(lamb2, eps)
+            lamb3 = max(lamb3, eps)
+            lamb4 = max(lamb4, eps)
+
+            # Build sigmaJ * IxF
+            ds = np.array([d1,d2]).T
+            HwSPD = lamb1 * vecs[:,0][None,:].T.dot(vecs[:,0][None,:]) + lamb2 * vecs[:,1][None,:].T.dot(vecs[:,1][None,:])
+            sigmaJIxF = ds.dot(HwSPD.dot(ds.T)) + lamb3 * outer(l,l) +  lamb4 * outer(t,t)
+
+            # Get SVD of sigmaH
+            if np.linalg.norm(sigmaH) > 1e-10:
+                [U, S, Vh] = svd(sigmaH, full_matrices=True); V = Vh.T
+                s1 = S[0]
+                s2 = S[1]
+
+                [d1, d2, l, t] = GetEigenMatrices(U, V)
+
+                vecs = 1./np.sqrt(2.) * np.array([[1.,-1.],[1.,1.]])
+
+                lamb1 =  1.
+                lamb2 = -1.
+                lamb3 = -1.
+                lamb4 =  1.
+
+                lamb1 = max(lamb1, eps)
+                lamb2 = max(lamb2, eps)
+                lamb3 = max(lamb3, eps)
+                lamb4 = max(lamb4, eps)
+
+                # Build sigmaJ * IxF
+                ds = np.array([d1,d2]).T
+                HwSPD = lamb1 * vecs[:,0][None,:].T.dot(vecs[:,0][None,:]) + lamb2 * vecs[:,1][None,:].T.dot(vecs[:,1][None,:])
+                IxsigmaH = ds.dot(HwSPD.dot(ds.T)) + lamb3 * outer(l,l) +  lamb4 * outer(t,t)
+
+                # Sum the two
+                initial_stiffness = sigmaJIxF + IxsigmaH
+
+            initial_stiffness = sigmaJIxF
+
+            return initial_stiffness
 
 
 
@@ -2095,6 +2168,158 @@ class OgdenNeoHookeanF(Material):
         energy  = 0.5 * mu * I2 - mu * np.log(J) + lamb / 2. * (J-1)**2
 
         return energy
+
+
+
+
+class MIPS_F(Material):
+    """
+        W(F) = mu * II_F / d / J**(2/d) + lambda * (J + J**(-1) - 2)
+    """
+
+    def __init__(self, ndim, **kwargs):
+        mtype = type(self).__name__
+        super(MIPS_F, self).__init__(mtype, ndim, **kwargs)
+
+        self.is_transversely_isotropic = False
+        self.energy_type = "internal_energy"
+        self.nature = "nonlinear"
+        self.fields = "mechanics"
+
+        if self.ndim==3:
+            self.H_VoigtSize = 9
+        elif self.ndim==2:
+            self.H_VoigtSize = 4
+
+        minJ = self.minJ
+        self.delta = np.sqrt(1e-8 + min(minJ, 0.)**2 * 0.04)
+        # self.delta = 0.
+        # LOW LEVEL DISPATCHER
+        # self.has_low_level_dispatcher = True
+        self.has_low_level_dispatcher = False
+
+    def KineticMeasures(self,F,ElectricFieldx=0, elem=0):
+        from Florence.MaterialLibrary.LLDispatch._NeoHookean_ import KineticMeasures
+        return KineticMeasures(self,F)
+
+
+    def Hessian(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
+
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        mu = self.mu
+        lamb = self.lamb
+        ndim = self.ndim
+        d = self.ndim
+        d2 = d * d
+
+        trb = trace(F.T.dot(F))
+
+        if self.formulation_style == "classic":
+            H = dJdF(F)
+            f = vec(F)
+            h = vec(H)
+
+            tmp1 = J**(2. / d)
+            tmp2 = 1. / (tmp1 * J)
+            tmp3 = tmp2 / J
+
+            hessian = mu * (2. / d / tmp1 * np.eye(ndim*ndim) - 4. / d2 * tmp2 * (np.outer(h,f) + np.outer(f, h)) +\
+                2. * trb / d2 * (2. / d + 1.) * tmp3 * np.outer(h, h)) + lamb * (2. / J / J / J) * np.outer(h, h)
+
+            # Ixf = d2JdFdF(F)
+            # initial_stiffness = (lamb * (1. - 1. / J / J) - mu * (2. * trb / d2 * tmp2)) * Ixf
+
+            sigmaH = np.zeros((ndim, ndim))
+            sigmaJ = lamb * (1. - 1. / J / J) - mu * (2. * trb / d2 * tmp2)
+
+            # Initail stiffness component
+            initial_stiffness = GetInitialStiffnessPolyconvex(sigmaH, sigmaJ, F,
+                stabilise=self.stabilise_tangents,
+                eps=self.tangent_stabiliser_value
+                )
+            hessian += initial_stiffness
+
+        elif self.formulation_style == "ps":
+            I2 = trb
+            if ndim == 2:
+                # Get SVD of F
+                [U, S, Vh] = svd(F, full_matrices=True); V = Vh.T
+                s1 = S[0]
+                s2 = S[1]
+
+                [d1, d2, l, t] = GetEigenMatrices(U, V)
+
+                a11 =  (I2*mu/s1**2 + 2*lamb/s1**2 - mu)/J
+                a22 =  (I2*mu/s2**2 + 2*lamb/s2**2 - mu)/J
+                a12 =  I2*mu/(2*J**2) + lamb*(1 + J**(-2)) - mu/s2**2 - mu/s1**2
+
+                Hw = np.array([[a11,a12],[a12, a22]])
+
+                eigs, vecs = sp.linalg.eigh(Hw)
+                lamb1 = eigs[0]
+                lamb2 = eigs[1]
+                lamb3 =  -lamb + lamb/(s1**2*s2**2) + mu/(2*s2**2) + mu/(s1*s2) + mu/(2*s1**2)
+                lamb4 =   lamb - lamb/(s1**2*s2**2) - mu/(2*s2**2) + mu/(s1*s2) - mu/(2*s1**2)
+
+                if self.stabilise_tangents:
+                    eps = self.tangent_stabiliser_value
+                    lamb1 = max(lamb1, eps)
+                    lamb2 = max(lamb2, eps)
+                    lamb3 = max(lamb3, eps)
+                    lamb4 = max(lamb4, eps)
+
+            # Build sigmaJ * IxF
+            ds = np.array([d1,d2]).T
+            HwSPD = lamb1 * vecs[:,0][None,:].T.dot(vecs[:,0][None,:]) + lamb2 * vecs[:,1][None,:].T.dot(vecs[:,1][None,:])
+            hessian = ds.dot(HwSPD.dot(ds.T)) + lamb3 * np.outer(l,l) + lamb4 * np.outer(t,t)
+
+
+        self.H_VoigtSize = hessian.shape[0]
+
+        return hessian
+
+
+    def CauchyStress(self,StrainTensors,ElectricFieldx=None,elem=0,gcounter=0):
+
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        mu = self.mu
+        lamb = self.lamb
+
+        d = self.ndim
+        d2 = d * d
+
+        tmp1 = J**(2. / d)
+        tmp2 = 1. / (tmp1 * J)
+
+        trb = trace(F.T.dot(F))
+        H = dJdF(F)
+
+        sigmaF = 2. * mu / d / tmp1 * F
+        sigmaJ = lamb * (1. - 1. / J / J) - 2. * mu * trb / d2 * tmp2
+        P = sigmaF + sigmaJ * H
+
+        return P
+
+
+    def InternalEnergy(self,StrainTensors,elem=0,gcounter=0):
+
+        J = StrainTensors['J'][gcounter]
+        F = StrainTensors['F'][gcounter]
+
+        mu = self.mu
+        lamb = self.lamb
+        d = self.ndim
+
+        trb = trace(F.T.dot(F))
+
+        energy = mu * trb / d / J**(2/d) + lamb * (J + 1./J - 2)
+
+        return energy
+
 
 
 
