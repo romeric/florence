@@ -13,7 +13,7 @@ from Florence.FiniteElements.LocalAssembly._KinematicMeasures_ import _Kinematic
 from Florence.MaterialLibrary.MaterialBase import Material
 from Florence.Tensor import trace, Voigt, makezero, issymetric
 norm = np.linalg.norm
-# from numba import jit
+outer = np.outer
 # np.set_printoptions(precision=16)
 
 def vec(H):
@@ -311,8 +311,6 @@ def GetInitialStiffnessPolyconvex(sigmaH, sigmaJ, F, stabilise=False, eps=1e-6):
         # eigs[eigs < 0] = eps
         # xx = vecs.dot(np.diag(eigs).dot(vecs.T))
         # return xx
-
-        outer = np.outer
 
         if ndim == 3:
 
@@ -863,7 +861,6 @@ class MIPSF(Material):
                 # exit()
 
             else:
-                outer = np.outer
 
                 I2 = trc
                 I3 = J
@@ -1541,7 +1538,6 @@ class SymmetricDirichlet(Material):
                 H = lamb1 * np.outer(d1, d1) + lamb2 * np.outer(d2, d2) + lamb3 * np.outer(l, l) + lamb4 * np.outer(t, t)
 
             else:
-                outer = np.outer
 
                 I2 = trc
                 I3 = J
@@ -2024,8 +2020,9 @@ class OgdenNeoHookeanF(Material):
         I2 = trace(F.T.dot(F))
 
         if self.ndim == 3:
-            outer = np.outer
             I3 = J
+            m_mu = self.mu
+            m_lambda = self.lamb
 
             # Compute the rotation variant SVD of F
             u, s, vh = svd(F, full_matrices=True)
@@ -2037,11 +2034,6 @@ class OgdenNeoHookeanF(Material):
             s2 = s[1]
             s3 = s[2]
 
-            [d1, d2, d3, l1, l2, l3, t1, t2, t3] = GetEigenMatrices(u, vh)
-
-            m_mu = self.mu
-            m_lambda = self.lamb
-
             a11 =  J**2*(m_lambda + m_mu/J**2)/s1**2 + m_mu
             a12 =  J*s3*(m_lambda + m_mu/J**2) + s3*(m_lambda*(2*J - 2)/2 - m_mu/J)
             a13 =  J*s2*(m_lambda + m_mu/J**2) + s2*(m_lambda*(2*J - 2)/2 - m_mu/J)
@@ -2049,13 +2041,13 @@ class OgdenNeoHookeanF(Material):
             a23 =  J*s1*(m_lambda + m_mu/J**2) + s1*(m_lambda*(2*J - 2)/2 - m_mu/J)
             a33 =  J**2*(m_lambda + m_mu/J**2)/s3**2 + m_mu
 
-            A = np.array([
+            Hw = np.array([
                 [a11,a12,a13],
                 [a12,a22,a23],
                 [a13,a23,a33],
                 ])
 
-            eigs, vecs = sp.linalg.eigh(A)
+            eigs, vecs = sp.linalg.eigh(Hw)
             vec1 = vecs[:,0]
             vec2 = vecs[:,1]
             vec3 = vecs[:,2]
@@ -2083,18 +2075,16 @@ class OgdenNeoHookeanF(Material):
                 lamb8 = max(lamb8, eps)
                 lamb9 = max(lamb9, eps)
 
+            [d1, d2, d3, l1, l2, l3, t1, t2, t3] = GetEigenMatrices(u, vh)
             e1 = vec1[0] * d1 + vec1[1] * d2 + vec1[2] * d3
             e2 = vec2[0] * d1 + vec2[1] * d2 + vec2[2] * d3
             e3 = vec3[0] * d1 + vec3[1] * d2 + vec3[2] * d3
 
-            H1 = lamb1 * outer(e1,e1) + lamb2 * outer(e2,e2) + lamb3 * outer(e3,e3) +\
+            H = lamb1 * outer(e1,e1) + lamb2 * outer(e2,e2) + lamb3 * outer(e3,e3) +\
                 lamb4 * outer(t1,t1) + lamb5 * outer(t2,t2) + lamb6 * outer(t3,t3) +\
                 lamb7 * outer(l1,l1) + lamb8 * outer(l2,l2) + lamb9 * outer(l3,l3)
 
-            H = H1
-
         elif self.ndim == 2:
-            outer = np.outer
             sqrt = np.sqrt
 
             # Compute the rotation variant SVD of F
@@ -2216,12 +2206,13 @@ class MIPS_F(Material):
 
         trb = trace(F.T.dot(F))
 
+        tmp1 = J if ndim == 2 else (J**2.)**(1./3.)
+
         if self.formulation_style == "classic":
             H = dJdF(F)
             f = vec(F)
             h = vec(H)
 
-            tmp1 = J**(2. / d)
             tmp2 = 1. / (tmp1 * J)
             tmp3 = tmp2 / J
 
@@ -2270,11 +2261,73 @@ class MIPS_F(Material):
                     lamb3 = max(lamb3, eps)
                     lamb4 = max(lamb4, eps)
 
-            # Build sigmaJ * IxF
-            ds = np.array([d1,d2]).T
-            HwSPD = lamb1 * vecs[:,0][None,:].T.dot(vecs[:,0][None,:]) + lamb2 * vecs[:,1][None,:].T.dot(vecs[:,1][None,:])
-            hessian = ds.dot(HwSPD.dot(ds.T)) + lamb3 * np.outer(l,l) + lamb4 * np.outer(t,t)
+                # Build Hessian
+                ds = np.array([d1,d2]).T
+                HwSPD = lamb1 * vecs[:,0][None,:].T.dot(vecs[:,0][None,:]) + lamb2 * vecs[:,1][None,:].T.dot(vecs[:,1][None,:])
+                hessian = ds.dot(HwSPD.dot(ds.T)) + lamb3 * np.outer(l,l) + lamb4 * np.outer(t,t)
 
+            elif ndim == 3:
+
+                m_mu = self.mu
+                m_lambda = self.lamb
+                I2 = trb
+
+                # Get SVD of F
+                [U, S, Vh] = svd(F, full_matrices=True); V = Vh.T
+                s1 = S[0]
+                s2 = S[1]
+                s3 = S[2]
+
+                a11 =  10*I2*m_mu/(27*tmp1*s1**2) + 2*m_lambda/(J*s1**2) - 2*m_mu/(9*tmp1)
+                a22 =  10*I2*m_mu/(27*tmp1*s2**2) + 2*m_lambda/(J*s2**2) - 2*m_mu/(9*tmp1)
+                a33 =  10*I2*m_mu/(27*tmp1*s3**2) + 2*m_lambda/(J*s3**2) - 2*m_mu/(9*tmp1)
+                a12 =  4*I2*m_mu/(27*tmp1*s1*s2) + m_lambda*(s3 + 1/(J*s1*s2)) - 4*m_mu*s1/(9*tmp1*s2) - 4*m_mu*s2/(9*tmp1*s1)
+                a13 =  4*I2*m_mu/(27*tmp1*s1*s3) + m_lambda*(s2 + 1/(J*s1*s3)) - 4*m_mu*s1/(9*tmp1*s3) - 4*m_mu*s3/(9*tmp1*s1)
+                a23 =  4*I2*m_mu/(27*tmp1*s2*s3) + m_lambda*(s1 + 1/(J*s2*s3)) - 4*m_mu*s2/(9*tmp1*s3) - 4*m_mu*s3/(9*tmp1*s2)
+
+                Hw = np.array([
+                    [a11,a12,a13],
+                    [a12,a22,a23],
+                    [a13,a23,a33],
+                    ])
+
+                eigs, vecs = sp.linalg.eigh(Hw)
+                vec1 = vecs[:,0]
+                vec2 = vecs[:,1]
+                vec3 = vecs[:,2]
+
+                lamb1 = eigs[0]
+                lamb2 = eigs[1]
+                lamb3 = eigs[2]
+                lamb4 =  2*I2*m_mu/(9*tmp1*s2*s3) - m_lambda*s1 + m_lambda/(J*s2*s3) + 2*m_mu/(3*tmp1)
+                lamb5 =  2*I2*m_mu/(9*tmp1*s1*s3) - m_lambda*s2 + m_lambda/(J*s1*s3) + 2*m_mu/(3*tmp1)
+                lamb6 =  2*I2*m_mu/(9*tmp1*s1*s2) - m_lambda*s3 + m_lambda/(J*s1*s2) + 2*m_mu/(3*tmp1)
+                lamb7 =  -2*I2*m_mu/(9*tmp1*s2*s3) + m_lambda*s1 - m_lambda/(J*s2*s3) + 2*m_mu/(3*tmp1)
+                lamb8 =  -2*I2*m_mu/(9*tmp1*s1*s3) + m_lambda*s2 - m_lambda/(J*s1*s3) + 2*m_mu/(3*tmp1)
+                lamb9 =  -2*I2*m_mu/(9*tmp1*s1*s2) + m_lambda*s3 - m_lambda/(J*s1*s2) + 2*m_mu/(3*tmp1)
+
+                # Project to SPD if needed
+                if self.stabilise_tangents:
+                    eps = self.tangent_stabiliser_value
+                    lamb1 = max(lamb1, eps)
+                    lamb2 = max(lamb2, eps)
+                    lamb3 = max(lamb3, eps)
+                    lamb4 = max(lamb4, eps)
+                    lamb5 = max(lamb5, eps)
+                    lamb6 = max(lamb6, eps)
+                    lamb7 = max(lamb7, eps)
+                    lamb8 = max(lamb8, eps)
+                    lamb9 = max(lamb9, eps)
+
+                [d1, d2, d3, l1, l2, l3, t1, t2, t3] = GetEigenMatrices(U, V)
+
+                # Build Hessian
+                ds = np.array([d1,d2,d3]).T
+                HwSPD = lamb1 * vecs[:,0][None,:].T.dot(vecs[:,0][None,:]) + lamb2 * vecs[:,1][None,:].T.dot(vecs[:,1][None,:]) +\
+                    lamb3 * vecs[:,2][None,:].T.dot(vecs[:,2][None,:])
+                hessian = ds.dot(HwSPD.dot(ds.T)) +\
+                    lamb4 * outer(l1,l1) + lamb5 * outer(l2,l2) + lamb6 * outer(l3,l3) +\
+                    lamb7 * outer(t1,t1) + lamb8 * outer(t2,t2) + lamb9 * outer(t3,t3)
 
         self.H_VoigtSize = hessian.shape[0]
 
@@ -2288,11 +2341,13 @@ class MIPS_F(Material):
 
         mu = self.mu
         lamb = self.lamb
+        ndim = self.ndim
 
         d = self.ndim
         d2 = d * d
 
-        tmp1 = J**(2. / d)
+        # tmp1 = J**(2. / d)
+        tmp1 = J if ndim == 2 else (J**2.)**(1./3.)
         tmp2 = 1. / (tmp1 * J)
 
         trb = trace(F.T.dot(F))
