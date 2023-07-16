@@ -23,19 +23,26 @@ def write_eigensystem(A, wtype, formulation="F", fmt="python"):
         if wtype == "g":
             if A.shape[0] == 3:
                 print("PK1 principal components:")
-                if fmt == "python" or fmt == "cxx":
+                if fmt == "python":
                     print("sigmaP[0] = ", writefunc(A[0]))
                     print("sigmaP[1] = ", writefunc(A[1]))
                     print("sigmaP[2] = ", writefunc(A[2]))
+                elif fmt == "cxx":
+                    print("const Real sigmaP1 = ", writefunc(A[0]), ";")
+                    print("const Real sigmaP2 = ", writefunc(A[1]), ";")
+                    print("const Real sigmaP3 = ", writefunc(A[2]), ";")
                 else:
                     print("\\lambda_{P_{11}} = ", writefunc(A[0]))
                     print("\\lambda_{P_{22}} = ", writefunc(A[1]))
                     print("\\lambda_{P_{33}} = ", writefunc(A[2]))
             if A.shape[0] == 2:
                 print("PK1 principal components:")
-                if fmt == "python" or fmt == "cxx":
+                if fmt == "python":
                     print("sigmaP[0] = ", writefunc(A[0]))
                     print("sigmaP[1] = ", writefunc(A[1]))
+                elif fmt == "cxx":
+                    print("const Real sigmaP1 = ", writefunc(A[0]), ";")
+                    print("const Real sigmaP2 = ", writefunc(A[1]), ";")
                 else:
                     print("\\lambda_{P_{11}} = ", writefunc(A[0]))
                     print("\\lambda_{P_{22}} = ", writefunc(A[1]))
@@ -77,7 +84,7 @@ def write_eigensystem(A, wtype, formulation="F", fmt="python"):
                     if fmt == "python":
                         print("lamb"+str(i+1)+" = ", writefunc(A[i]))
                     if fmt == "cxx":
-                        print("lambda_"+str(i+1)+" = ", writefunc(A[i]))
+                        print("Real lambda"+str(i+1)+" = ", writefunc(A[i]), ";")
                     if fmt == "latex":
                         print("\\lambda_"+str(i+1)+" = ", writefunc(A[i]))
 
@@ -89,7 +96,7 @@ def write_eigensystem(A, wtype, formulation="F", fmt="python"):
                     if fmt == "python":
                         print("lamb"+str(i+offset)+" = ", writefunc(A[i]))
                     if fmt == "cxx":
-                        print("lambda_"+str(i+offset)+" = ", writefunc(A[i]))
+                        print("Real lambda"+str(i+offset)+" = ", writefunc(A[i]), ";")
                     if fmt == "latex":
                         print("\\lambda_"+str(i+offset)+" = ", writefunc(A[i]))
 
@@ -98,19 +105,26 @@ def write_eigensystem(A, wtype, formulation="F", fmt="python"):
         if wtype == "g":
             if A.shape[0] == 3:
                 print("PK2 principal components:")
-                if fmt == "python" or fmt == "cxx":
+                if fmt == "python":
                     print("sigmaS[0] = ", writefunc(A[0]))
                     print("sigmaS[1] = ", writefunc(A[1]))
                     print("sigmaS[2] = ", writefunc(A[2]))
+                elif fmt == "cxx":
+                    print("const Real sigmaS1 = ", writefunc(A[0]), ";")
+                    print("const Real sigmaS2 = ", writefunc(A[1]), ";")
+                    print("const Real sigmaS3 = ", writefunc(A[2]), ";")
                 else:
                     print("\\lambda_{S_{11}} = ", writefunc(A[0]))
                     print("\\lambda_{S_{22}} = ", writefunc(A[1]))
                     print("\\lambda_{S_{33}} = ", writefunc(A[2]))
             if A.shape[0] == 2:
                 print("PK2 principal components:")
-                if fmt == "python" or fmt == "cxx":
+                if fmt == "python":
                     print("sigmaS[0] = ", writefunc(A[0]))
                     print("sigmaS[1] = ", writefunc(A[1]))
+                elif fmt == "cxx":
+                    print("const Real sigmaS1 = ", writefunc(A[0]), ";")
+                    print("const Real sigmaS2 = ", writefunc(A[1]), ";")
                 else:
                     print("\\lambda_{S_{11}} = ", writefunc(A[0]))
                     print("\\lambda_{S_{22}} = ", writefunc(A[1]))
@@ -152,7 +166,7 @@ def write_eigensystem(A, wtype, formulation="F", fmt="python"):
                     if fmt == "python":
                         print("lamb"+str(i+offset)+" = ", writefunc(A[i]))
                     elif fmt == "cxx":
-                        print("lambda_"+str(i+offset)+" = ", writefunc(A[i]))
+                        print("Real lambda"+str(i+offset)+" = ", writefunc(A[i]), ";")
                     elif fmt == "latex":
                         print("\\lambda_"+str(i+offset)+" = ", writefunc(A[i]))
 

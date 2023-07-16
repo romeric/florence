@@ -38,10 +38,6 @@ class NeoHookean(Material):
         J = StrainTensors['J'][gcounter]
         b = StrainTensors['b'][gcounter]
 
-        if np.isclose(J, 0) or J < 0:
-            delta = np.sqrt(0.04 * J * J + 1e-8);
-            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
-
         mu2 = self.mu/J- self.lamb*(J-1.0)
         lamb2 = self.lamb*(2*J-1.0)
         C_Voigt = lamb2*self.vIijIkl+mu2*self.vIikIjl
@@ -62,10 +58,6 @@ class NeoHookean(Material):
         J = StrainTensors['J'][gcounter]
         b = StrainTensors['b'][gcounter]
 
-        if np.isclose(J, 0) or J < 0:
-            delta = np.sqrt(0.04 * J * J + 1e-8);
-            # J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
-
         mu = self.mu
         lamb = self.lamb
         stress = 1.0*mu/J*b + (lamb*(J-1.0)-mu/J)*I
@@ -85,10 +77,8 @@ class NeoHookean(Material):
         F = StrainTensors['F'][gcounter]
         C = np.dot(F.T,F)
 
-        if np.isclose(J, 0) or J < 0:
-            delta = np.sqrt(0.04 * J * J + 1e-8);
-            J = 0.5 * (J + np.sqrt(J**2 + 4 *delta**2))
-
-        energy  = mu/2.*(trace(C) - 3.) - mu*np.log(J) + lamb/2.*(J-1.)**2
+        energy  = mu/2.*(trace(C) - self.ndim) - mu*np.log(J) + lamb/2.*(J-1.)**2
+        # Bonet
+        # energy  = mu/2.*(trace(C) - self.ndim) - mu*np.log(J) + lamb/2.*np.log(J)**2
 
         return energy

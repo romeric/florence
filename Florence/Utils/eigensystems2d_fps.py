@@ -7,7 +7,7 @@ def get_analytic_eigensystem2d_fps(Psi, fmt="python"):
     I1, I2, I3, J = symbols("I1 I2 I3 J")
     s1, s2 = symbols("s1 s2")
 
-    Psi = Psi.subs(I1, s1 + s2)
+    # Psi = Psi.subs(I1, s1 + s2)
     Psi = Psi.subs(I2, s1**2 + s2**2)
     Psi = Psi.subs(I3, s1 * s2)
     Psi = Psi.subs(J, s1 * s2)
@@ -53,19 +53,17 @@ def get_analytic_eigensystem2d_fps(Psi, fmt="python"):
     lambdas[1] = Hw[1,1]
     # ------------------------------------------------------------------#
 
-    # Hw = Hw.subs(I3, J)
-    # Hw = Hw.subs(s1*s2, I3)
+    # Hw = Hw.subs(s1+s2, I1)
     Hw = Hw.subs(s1*s2, J)
-    Hw = Hw.subs(s1+s2, I1)
     Hw = Hw.subs(s1**2+s2**2, I2)
     # A = simplify(A) # this is on but commented for complex beta
 
     # Get compact expressions for the eigenvalues
     if Hw[0,1] == 0:
         for i in range(0,4):
-            lambdas[i] = lambdas[i].subs(s1*s2, J)
-            lambdas[i] = lambdas[i].subs(s1+s2, I1)
+            # lambdas[i] = lambdas[i].subs(s1+s2, I1)
             lambdas[i] = lambdas[i].subs(s1**2+s2**2, I2)
+            lambdas[i] = lambdas[i].subs(s1*s2, J)
             lambdas[i] = simplify(lambdas[i])
 
         write_eigensystem(lambdas, "full", "F", fmt=fmt)
@@ -87,8 +85,8 @@ def get_analytic_eigensystem2d_fps(Psi, fmt="python"):
         # ------------------------------------------------------------------#
         for i in range(2, 4):
 
+            # lambdas[i] = lambdas[i].subs(s1+s2, I1)
             lambdas[i] = lambdas[i].subs(s1*s2, J)
-            lambdas[i] = lambdas[i].subs(s1+s2, I1)
             lambdas[i] = lambdas[i].subs(s1**2+s2**2, I2)
 
             lambdas[i] = simplify(lambdas[i])
