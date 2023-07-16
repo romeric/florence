@@ -631,7 +631,7 @@ class MIPS_C(Material):
 
             d2 = d * d
             d3 = d2 * d
-            tmp1 = J**(2. / d)
+            tmp1 = (J**2)**(1. / d)
             invC = np.linalg.inv(C)
 
             H  = (lamb * (J + 1. / J) + 4. * mu * trC / d3 / tmp1) * np.einsum("ij,kl", invC, invC) +\
@@ -745,6 +745,7 @@ class MIPS_C(Material):
 
         C = F.T.dot(F)
         trC = trace(C)
+        S_stab = []
 
         if self.formulation_style == "classic":
 
@@ -752,7 +753,7 @@ class MIPS_C(Material):
             d2 = d * d
             invC = np.linalg.inv(C)
 
-            tmp1 = J**(2. / d)
+            tmp1 = (J**2)**(1. / d)
             tmp2 = 1. / (tmp1 * J)
 
             S = 2. * mu / d / tmp1 * I + ( lamb * (J - 1. / J) - 2. * mu * trC / d2 / tmp1) * invC
@@ -770,6 +771,10 @@ class MIPS_C(Material):
                 sigmaS[1] = mu / J - trC * mu / 2. / J / s2**2 + lamb / s2**2 * (J - 1. / J)
 
                 S = V.dot(np.diag(sigmaS).dot(V.T))
+
+                if self.stabilise_tangents:
+                    sigmaS[sigmaS<0] = self.tangent_stabiliser_value
+                    S_stab = V.dot(np.diag(sigmaS).dot(V.T))
 
             elif ndim == 3:
 
@@ -789,7 +794,11 @@ class MIPS_C(Material):
 
                 S = V.dot(np.diag(sigmaS).dot(V.T))
 
-        return S
+                if self.stabilise_tangents:
+                    sigmaS[sigmaS<0] = self.tangent_stabiliser_value
+                    S_stab = V.dot(np.diag(sigmaS).dot(V.T))
+
+        return S, S_stab
 
 
     def InternalEnergy(self,StrainTensors,elem=0,gcounter=0):
@@ -803,7 +812,7 @@ class MIPS_C(Material):
 
         trb = trace(F.T.dot(F))
 
-        energy = mu * trb / d / J**(2/d) + lamb * (J + 1./J - 2)
+        energy = mu * trb / d / (J**2)**(1. / d) + lamb * (J + 1./J - 2)
 
         return energy
 
@@ -864,7 +873,7 @@ class MIPS_b(Material):
 
             d2 = d * d
             d3 = d2 * d
-            tmp1 = J**(2. / d)
+            tmp1 = (J**2)**(1. / d)
             invC = np.linalg.inv(C)
 
             H  = (lamb * (J + 1. / J) + 4. * mu * trC / d3 / tmp1) * np.einsum("ij,kl", invC, invC) +\
@@ -930,9 +939,9 @@ class MIPS_b(Material):
                 I2 = trC
                 tmp1 = (J**2.)**(1./3.)
 
-                a11 =  (10*I2*m_mu/(27*tmp1*s1**2) + 2*m_lambda/(J*s1**2) - 2*m_mu/(9*J**(2/3)))/s1**2 + (2*I2*m_mu/(9*tmp1*s1) - m_lambda*(s2*s3 - 1/(J*s1)) - 2*m_mu*s1/(3*tmp1))/s1**3
-                a22 =  (10*I2*m_mu/(27*tmp1*s2**2) + 2*m_lambda/(J*s2**2) - 2*m_mu/(9*J**(2/3)))/s2**2 + (2*I2*m_mu/(9*tmp1*s2) - m_lambda*(s1*s3 - 1/(J*s2)) - 2*m_mu*s2/(3*tmp1))/s2**3
-                a33 =  (10*I2*m_mu/(27*tmp1*s3**2) + 2*m_lambda/(J*s3**2) - 2*m_mu/(9*J**(2/3)))/s3**2 + (2*I2*m_mu/(9*tmp1*s3) - m_lambda*(s1*s2 - 1/(J*s3)) - 2*m_mu*s3/(3*tmp1))/s3**3
+                a11 =  (10*I2*m_mu/(27*tmp1*s1**2) + 2*m_lambda/(J*s1**2) - 2*m_mu/(9*J**(2/3)))/s1**2 + (2*I2*m_mu/(9*tmp1*s1) - m_lambda*(s2*s3 - 1./(J*s1)) - 2*m_mu*s1/(3*tmp1))/s1**3
+                a22 =  (10*I2*m_mu/(27*tmp1*s2**2) + 2*m_lambda/(J*s2**2) - 2*m_mu/(9*J**(2/3)))/s2**2 + (2*I2*m_mu/(9*tmp1*s2) - m_lambda*(s1*s3 - 1./(J*s2)) - 2*m_mu*s2/(3*tmp1))/s2**3
+                a33 =  (10*I2*m_mu/(27*tmp1*s3**2) + 2*m_lambda/(J*s3**2) - 2*m_mu/(9*J**(2/3)))/s3**2 + (2*I2*m_mu/(9*tmp1*s3) - m_lambda*(s1*s2 - 1./(J*s3)) - 2*m_mu*s3/(3*tmp1))/s3**3
                 a12 =  (4*I2*m_mu/(27*tmp1*s1*s2) + m_lambda*(s3 + 1/(J*s1*s2)) - 4*m_mu*s1/(9*J**(2/3)*s2) - 4*m_mu*s2/(9*tmp1*s1))/(s1*s2)
                 a13 =  (4*I2*m_mu/(27*tmp1*s1*s3) + m_lambda*(s2 + 1/(J*s1*s3)) - 4*m_mu*s1/(9*J**(2/3)*s3) - 4*m_mu*s3/(9*tmp1*s1))/(s1*s3)
                 a23 =  (4*I2*m_mu/(27*tmp1*s2*s3) + m_lambda*(s1 + 1/(J*s2*s3)) - 4*m_mu*s2/(9*J**(2/3)*s3) - 4*m_mu*s3/(9*tmp1*s2))/(s2*s3)
@@ -994,13 +1003,15 @@ class MIPS_b(Material):
         C = F.T.dot(F)
         trC = trace(C)
 
+        cauchy_stab = []
+
         if self.formulation_style == "classic":
 
             d = self.ndim
             d2 = d * d
             invC = np.linalg.inv(C)
 
-            tmp1 = J**(2. / d)
+            tmp1 = (J**2)**(1. / d) #J**(2. / d)
             tmp2 = 1. / (tmp1 * J)
 
             S = 2. * mu / d / tmp1 * I + ( lamb * (J - 1. / J) - 2. * mu * trC / d2 / tmp1) * invC
@@ -1026,6 +1037,11 @@ class MIPS_b(Material):
 
                 cauchy = U.dot(np.diag(cauchyS).dot(U.T))
 
+                if self.stabilise_tangents:
+                    cauchyS[cauchyS<0] = self.tangent_stabiliser_value
+                    cauchy_stab = U.dot(np.diag(cauchyS).dot(U.T))
+
+
             elif ndim == 3:
                 s1 = S[0]
                 s2 = S[1]
@@ -1048,7 +1064,12 @@ class MIPS_b(Material):
 
                 cauchy = U.dot(np.diag(cauchyS).dot(U.T))
 
-        return cauchy
+                if self.stabilise_tangents:
+                    cauchyS[cauchyS<0] = self.tangent_stabiliser_value
+                    cauchy_stab = U.dot(np.diag(cauchyS).dot(U.T))
+
+
+        return cauchy, cauchy_stab
 
 
     def InternalEnergy(self,StrainTensors,elem=0,gcounter=0):
@@ -1189,10 +1210,12 @@ class CBasedDisplacementFormulation(VariationalPrinciple):
             # COMPUTE THE HESSIAN AT THIS GAUSS POINT
             H_Voigt = material.Hessian(StrainTensors,None,elem,counter)
 
-            # COMPUTE CAUCHY STRESS TENSOR
-            CauchyStressTensor = []
+            CauchyStressTensor = []; stabilised_conjugate = []
             if fem_solver.requires_geometry_update:
                 CauchyStressTensor = material.CauchyStress(StrainTensors,None,elem,counter)
+                if isinstance(CauchyStressTensor, tuple):
+                    stabilised_conjugate = CauchyStressTensor[1]
+                    CauchyStressTensor = CauchyStressTensor[0]
 
             # COMPUTE THE TANGENT STIFFNESS MATRIX
             BDB_1, t = self.ConstitutiveStiffnessIntegrand(B, SpatialGradient[counter, :, :], F[counter, :, :],
@@ -1201,12 +1224,8 @@ class CBasedDisplacementFormulation(VariationalPrinciple):
             # COMPUTE GEOMETRIC STIFFNESS MATRIX
             if material.nature != "linear":
                 # DO NOT DO OVERRIDE ACTUAL STRESSES HERE AS TRACTIONS ARE MISCALCULATED
-                stabilised_conjugate = CauchyStressTensor
-                if material.stabilise_tangents:
-                    # THIS SEEMS LESS ACCURATE THAN GETTING SVD OF F
-                    [U, sigmaS, V] = ssvd(CauchyStressTensor)
-                    sigmaS[sigmaS < 0] = material.tangent_stabiliser_value
-                    stabilised_conjugate = V.dot(np.diag(sigmaS).dot(V.T))
+                if not material.stabilise_tangents:
+                    stabilised_conjugate = CauchyStressTensor
 
                 BDB_1 += self.GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],stabilised_conjugate)
 

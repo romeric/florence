@@ -7,7 +7,7 @@ from Florence.FiniteElements.LocalAssembly._KinematicMeasures_ import _Kinematic
 from .DisplacementApproachIndices import *
 from ._ConstitutiveStiffnessDF_ import __ConstitutiveStiffnessIntegrandDF__
 from ._TractionDF_ import __TractionIntegrandDF__
-from Florence.Tensor import issymetric, makezero
+from Florence.Tensor import issymetric, makezero, ssvd
 
 __all__ = ["DisplacementFormulation"]
 
@@ -159,9 +159,12 @@ class DisplacementFormulation(VariationalPrinciple):
             H_Voigt = material.Hessian(StrainTensors, None, elem, counter)
 
             # COMPUTE CAUCHY STRESS TENSOR
-            CauchyStressTensor = []
+            CauchyStressTensor = []; stabilised_conjugate = []
             if fem_solver.requires_geometry_update:
                 CauchyStressTensor = material.CauchyStress(StrainTensors,None,elem,counter)
+                if isinstance(CauchyStressTensor, tuple):
+                    stabilised_conjugate = CauchyStressTensor[1]
+                    CauchyStressTensor = CauchyStressTensor[0]
 
             # COMPUTE THE TANGENT STIFFNESS MATRIX
             BDB_1, t = self.ConstitutiveStiffnessIntegrand(B, SpatialGradient[counter,:,:],
@@ -169,7 +172,11 @@ class DisplacementFormulation(VariationalPrinciple):
 
             # COMPUTE GEOMETRIC STIFFNESS MATRIX
             if material.nature != "linear":
-                BDB_1 += self.GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],CauchyStressTensor)
+                # DO NOT DO OVERRIDE ACTUAL STRESSES HERE AS TRACTIONS ARE MISCALCULATED
+                if not material.stabilise_tangents:
+                    stabilised_conjugate = CauchyStressTensor
+
+                BDB_1 += self.GeometricStiffnessIntegrand(SpatialGradient[counter,:,:],stabilised_conjugate)
             # INTEGRATE TRACTION FORCE
             if fem_solver.requires_geometry_update:
                 tractionforce += t*detJ[counter]

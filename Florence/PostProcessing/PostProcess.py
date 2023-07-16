@@ -271,13 +271,21 @@ class PostProcess(object):
 
                         if material.energy_type == "enthalpy":
                             # COMPUTE CAUCHY STRESS TENSOR
-                            CauchyStressTensor[elem,counter,:] = material.CauchyStress(StrainTensors,
+                            retVal = material.CauchyStress(StrainTensors,
                                 ElectricFieldx[elem,counter,:],elem,counter)
+                            if isinstance(retVal, tuple):
+                                CauchyStressTensor[elem,counter,:] = retVal[0]
+                            else:
+                                CauchyStressTensor[elem,counter,:] = retVal
 
                         elif material.energy_type == "internal_energy":
                             # COMPUTE CAUCHY STRESS TENSOR
-                            CauchyStressTensor[elem,counter,:] = material.CauchyStress(StrainTensors,
+                            retVal = material.CauchyStress(StrainTensors,
                                 ElectricDisplacementx[elem,counter,:],elem,counter)
+                            if isinstance(retVal, tuple):
+                                CauchyStressTensor[elem,counter,:] = retVal[0]
+                            else:
+                                CauchyStressTensor[elem,counter,:] = retVal
 
             if average_derived_quantities:
                 for inode in all_nodes:
