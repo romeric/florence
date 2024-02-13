@@ -58,17 +58,22 @@ def Get_FxIxF(F):
     # This is same as Fastor only last minute (the last einsum indices change from iIjJ to IiJj)
     # to make it compatible with the vec function
     ndim = F.shape[0]
-    E = levi_civita(ndim)
 
-    # For I, both iiIjJ and IiJj flatten to diagonal matrix
-    I = einsum("ij,IJ->iIjJ", np.eye(ndim), np.eye(ndim))
+    if ndim == 3:
+        E = levi_civita(ndim)
 
-    # Note that if we did this that is iIjJ to IiJj then IxF would be the same as d2JdFdF
-    # IxF = einsum("jpq,JPQ,iIpP,qQ->IiJj", E, E, I_, F)
+        # For I, both iiIjJ and IiJj flatten to diagonal matrix
+        I = einsum("ij,IJ->iIjJ", np.eye(ndim), np.eye(ndim))
 
-    IxF = einsum("jpq,JPQ,iIpP,qQ->iIjJ", E, E, I, F)
-    FxIxF = einsum("ipq,IPQ,qQjJ,pP->IiJj", E, E, IxF, F) # only this changes from Fastor style iIjJ to IiJj
-    fxIxf = vec(FxIxF) # to make this work as expected
+        # Note that if we did this that is iIjJ to IiJj then IxF would be the same as d2JdFdF
+        # IxF = einsum("jpq,JPQ,iIpP,qQ->IiJj", E, E, I_, F)
+
+        IxF = einsum("jpq,JPQ,iIpP,qQ->iIjJ", E, E, I, F)
+        FxIxF = einsum("ipq,IPQ,qQjJ,pP->IiJj", E, E, IxF, F) # only this changes from Fastor style iIjJ to IiJj
+        fxIxf = vec(FxIxF) # to make this work as expected
+    else:
+        # H:H = F:F in 2D, but check this
+        fxIxf = np.eye(ndim * ndim)
 
     return fxIxf
 
@@ -2425,28 +2430,51 @@ class MooneyRivlinF(Material):
         ndim = self.ndim
         I = np.eye(ndim*ndim,ndim*ndim)
 
-        H = dJdF(F)
-        hessianJ = d2JdFdF(F)
-        h = vec(H)
+        if ndim == 3:
 
-        sigmaH = 2. * mu2 * H
-        sigmaJ = -(2. * mu1 + 4. * mu2) / J + lamb * (J - 1.)
+            H = dJdF(F)
+            hessianJ = d2JdFdF(F)
+            h = vec(H)
 
-        WJJ = (2. * mu1 + 4. * mu2) / J**2 + lamb
+            sigmaH = 2. * mu2 * H
+            sigmaJ = -(2. * mu1 + 4. * mu2) / J + lamb * (J - 1.)
 
-        fxIxf = Get_FxIxF(F)
+            WJJ = (2. * mu1 + 4. * mu2) / J**2 + lamb
 
-        # Constitutive
-        hessian = 2. * mu1 * I + 2. * mu2 * fxIxf + WJJ * np.outer(h, h)
-        # Initail stiffness component
-        # initial_stiffness = d2JdFdF(sigmaH + sigmaJ * F)
-        initial_stiffness = GetInitialStiffnessPolyconvex(sigmaH, sigmaJ, F,
-            stabilise=self.stabilise_tangents,
-            # stabilise=False,
-            eps=self.tangent_stabiliser_value
-            )
-        hessian += initial_stiffness
+            fxIxf = Get_FxIxF(F)
 
+            # Constitutive
+            hessian = 2. * mu1 * I + 2. * mu2 * fxIxf + WJJ * np.outer(h, h)
+            # Initail stiffness component
+            # initial_stiffness = d2JdFdF(sigmaH + sigmaJ * F)
+            initial_stiffness = GetInitialStiffnessPolyconvex(sigmaH, sigmaJ, F,
+                stabilise=self.stabilise_tangents,
+                # stabilise=False,
+                eps=self.tangent_stabiliser_value
+                )
+            hessian += initial_stiffness
+
+        elif ndim == 2:
+
+            H = dJdF(F)
+            hessianJ = d2JdFdF(F)
+            h = vec(H)
+
+            sigmaH = np.zeros((ndim, ndim))
+            sigmaJ = -(2. * mu1 + 4. * mu2) / J + lamb * (J - 1.)
+
+            WJJ = (2. * mu1 + 4. * mu2) / J**2 + lamb
+
+            # Constitutive
+            mu = mu1 + 2. * mu2
+            hessian = 2. * mu * I + WJJ * np.outer(h, h)
+            # Initail stiffness component
+            initial_stiffness = GetInitialStiffnessPolyconvex(sigmaH, sigmaJ, F,
+                stabilise=self.stabilise_tangents,
+                # stabilise=False,
+                eps=self.tangent_stabiliser_value
+                )
+            hessian += initial_stiffness
 
         self.H_VoigtSize = hessian.shape[0]
 
@@ -2458,17 +2486,29 @@ class MooneyRivlinF(Material):
         J = StrainTensors['J'][gcounter]
         F = StrainTensors['F'][gcounter]
 
+        ndim = self.ndim
         mu1 = self.mu1
         mu2 = self.mu2
         lamb = self.lamb
 
-        H = dJdF(F)
+        if ndim == 3:
 
-        sigmaF = 2. * mu1 * F
-        sigmaH = 2. * mu2 * H
-        sigmaJ = -(2. * mu1 + 4. * mu2) / J + lamb * (J - 1)
+            H = dJdF(F)
 
-        P = sigmaF + cross(sigmaH, F) + sigmaJ * H
+            sigmaF = 2. * mu1 * F
+            sigmaH = 2. * mu2 * H
+            sigmaJ = -(2. * mu1 + 4. * mu2) / J + lamb * (J - 1)
+
+            P = sigmaF + cross(sigmaH, F) + sigmaJ * H
+
+        else:
+
+            H = dJdF(F)
+
+            sigmaF = 2. * (mu1 + 2. * mu2) * F
+            sigmaJ = -(2. * mu1 + 4. * mu2) / J + lamb * (J - 1)
+
+            P = sigmaF + sigmaJ * H
 
         return P
 

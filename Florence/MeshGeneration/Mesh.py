@@ -4403,6 +4403,28 @@ class Mesh(object):
             else:
                 el = 12
                 bel = 10
+        elif element_type == "pyr":
+            if p == 1:
+                el = 7
+                bel = 2 # both tri(2) and quad(3)
+            elif p == 2:
+                el = 14
+                bel = 9 # both tri(9) and quad(10)
+        elif element_type == "pri":
+            if p == 1:
+                el = 6
+                bel = 2 # both tri(2) and quad(3)
+            else:
+                el = 13
+                bel = 10 # both tri(9) and quad(10)
+        elif element_type == "pyr13":
+            if p == 2:
+                el = 19
+                bel = 9 # both tri(9) and quad(16)
+        elif element_type == "pri15":
+            if p == 2:
+                el = 18
+                bel = 9 # both tri(9) and quad(16)
         else:
             raise ValueError("Element type not understood")
 
@@ -4430,11 +4452,19 @@ class Mesh(object):
             elements = elements[:,[0, 1, 2, 3, 4, 5, 6, 11, 16, 21, 24, 23, 22, 17, 12, 7, 8, 9, 10, 15, 20, 19, 18, 13, 14]]
         # TET10
         elif el == 11:
-            # Tet 2
             elements = elements[:,[0, 1, 2, 3, 4, 6, 5, 7, 9, 8]]
         # HEX27
         elif el == 12:
             elements = elements[:,[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 11, 14, 12, 15, 16, 22, 23, 25, 26, 10, 17, 18, 20, 21, 24, 19]]
+        # PYR13
+        elif el == 19:
+            elements = elements[:,[0, 1, 2, 3, 4, 5, 6, 9, 7, 10, 8, 11, 12]]
+        # PYR14
+        elif el == 14:
+            elements = elements[:,[0, 1, 2, 3, 4, 5, 6, 10, 8, 11, 9, 12, 13, 7]]
+        # PRI15
+        elif el == 18:
+            elements = elements[:,[0, 1, 2, 3, 4, 5, 6, 7, 9, 8, 10, 11, 12, 13, 14]]
 
         # Take care of a corner case where nnode != points.shape[0]
         if mesh.nnode != points.shape[0]:
@@ -5876,6 +5906,47 @@ class Mesh(object):
             return points
 
 
+    def ExtrudeShell(self, thickness = 0.01):
+        """Extrude a 3D shell mesh along the node normals to create volumetric elements (prisms, hexes).
+            This function is different from "Extrude" in that extrude works on planar 2D meshes and can extrude to potentially
+            arbitrary dimensions with specificied number of layers. This function only extrudes 3D shell (tri/quad) meshes along the normal.
+
+            At the moment it extrudes to only a single layer. Meshes can be written to gmsh and visualised
+
+            Returns: a new volumetric mesh
+        """
+
+        self.__do_essential_memebers_exist__()
+
+        normals = self.Normals()
+        els, pos, _ = self.GetNodeCommonality()
+
+        # GET AVERAGED OUT NORMALS AT NODES
+        avg_node_normals = np.zeros((self.nnode, 3))
+        for i, node_els in enumerate(els):
+            for el in node_els:
+                avg_node_normals[i] += normals[el]
+            avg_node_normals[i] /= np.linalg.norm(avg_node_normals[i])
+
+        # NOW EXTRUDE ALONG NORMALS
+        th = thickness
+        new_points = np.zeros((self.nnode, 3))
+        for i in range(self.nnode):
+            new_points[i] = self.points[i] + avg_node_normals[i] * th
+
+        all_points = np.vstack((self.points, new_points))
+        all_elements = np.hstack((self.elements, self.elements + self.nnode)).astype(int)
+
+        vmesh = Mesh()
+        vmesh.element_type = "pri"
+        vmesh.elements = all_elements
+        vmesh.points = all_points
+        vmesh.nelem = vmesh.elements.shape[0]
+        vmesh.nnode = vmesh.points.shape[0]
+
+        return vmesh
+
+
     def RemoveDuplicateNodes(self, deci=8, tol=1e-08):
         """Removes duplicate points in the mesh
         """
@@ -6951,6 +7022,30 @@ class Mesh(object):
             else:
                 raise NotImplementedError("High order pentagonal elements are not supported yet")
 
+        elif self.element_type == "pyr":
+            if 5==self.elements.shape[1]:
+                p = 1
+            elif 14==self.elements.shape[1]:
+                p = 2
+            else:
+                raise NotImplementedError("High order pyramid elements are not supported yet")
+
+        elif self.element_type == "pri":
+            if 6==self.elements.shape[1]:
+                p = 1
+            elif 18==self.elements.shape[1]:
+                p = 2
+            else:
+                raise NotImplementedError("High order prism elements are not supported yet")
+
+        elif self.element_type == "pyr13":
+            if 13==self.elements.shape[1]:
+                p = 2
+
+        elif self.element_type == "pri15":
+            if 15==self.elements.shape[1]:
+                p = 2
+
         elif self.element_type == "point":
             p = 1
 
@@ -7185,7 +7280,8 @@ class Mesh(object):
 
         assert self.element_type is not None
 
-        if self.element_type == "tet" or self.element_type == "hex":
+        if self.element_type == "tet" or self.element_type == "hex" or self.element_type == "pyr" or self.element_type == "pyr13" or \
+            self.element_type == "pri" or self.element_type == "pri15":
             self.edim = 3
         elif self.element_type == "tri" or self.element_type == "quad" or self.element_type == "pent":
             self.edim = 2

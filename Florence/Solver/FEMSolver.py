@@ -648,15 +648,17 @@ class FEMSolver(object):
             # COMPUTE CONSTANT PART OF MASS MATRIX
             formulation.GetConstantMassIntegrand(fspace, material)
 
-            if self.analysis_subtype != "explicit":
-                # COMPUTE BOTH STIFFNESS AND MASS USING HIGHER QUADRATURE RULE
-                K, TractionForces, _, M = Assemble(self, fspace, formulation, mesh, material,
-                    Eulerx, Eulerp)
-            else:
-                # lmesh = mesh.ConvertToLinearMesh()
-                # COMPUTE BOTH STIFFNESS AND MASS USING HIGHER QUADRATURE RULE
-                TractionForces, _, M = AssembleExplicit(self, fspace, formulation, mesh, material,
-                    Eulerx, Eulerp)
+            if self.analysis_type == "dynamic":
+                if self.analysis_subtype != "explicit":
+                    # COMPUTE BOTH STIFFNESS AND MASS USING HIGHER QUADRATURE RULE
+                    K, TractionForces, _, M = Assemble(self, fspace, formulation, mesh, material,
+                        Eulerx, Eulerp)
+                else:
+                    # COMPUTE BOTH STIFFNESS AND MASS USING HIGHER QUADRATURE RULE
+                    TractionForces, _, M = AssembleExplicit(self, fspace, formulation, mesh, material,
+                        Eulerx, Eulerp)
+            elif self.analysis_type == "modal":
+                TotalDisp = self.LinearModelAnalysis(fspace, formulation, mesh, material, boundary_condition, Eulerx, Eulerp, Residual)
 
         if self.analysis_nature == 'nonlinear':
             print('Finished all pre-processing stage. Time elapsed was', time()-tAssembly, 'seconds')
@@ -664,7 +666,7 @@ class FEMSolver(object):
             print('Finished the assembly stage. Time elapsed was', time()-tAssembly, 'seconds')
 
 
-        if self.analysis_type != 'static':
+        if self.analysis_type == 'dynamic':
             if self.analysis_subtype != "explicit":
                 if self.analysis_nature == "nonlinear":
                     structural_integrator = NonlinearImplicitStructuralDynamicIntegrator()
@@ -683,7 +685,7 @@ class FEMSolver(object):
                     TractionForces, M, NeumannForces, NodalForces, Residual,
                     mesh, TotalDisp, Eulerx, Eulerp, material, boundary_condition, self)
 
-        else:
+        elif self.analysis_type == 'static':
             if self.nonlinear_iterative_technique == "newton_raphson" or \
                 self.nonlinear_iterative_technique == "quasi_newton_raphson" or \
                 self.nonlinear_iterative_technique == "lbfgs" or \
@@ -1546,6 +1548,36 @@ class FEMSolver(object):
 
         return strain_energy, electrical_energy
 
+
+
+
+    def LinearModelAnalysis(self, fspace, formulation, mesh, material, boundary_condition,  Eulerx, Eulerp, Residual):
+
+        number_of_modes = 3
+        amplification_factor = -100.
+        TotalDisp = np.zeros((mesh.points.shape[0], formulation.nvar, number_of_modes),dtype=np.float64)
+
+        # COMPUTE BOTH STIFFNESS AND MASS USING HIGHER QUADRATURE RULE
+        K, TractionForces, _, M = Assemble(self, fspace, formulation, mesh, material,
+            Eulerx, Eulerp)
+
+        from scipy.sparse.linalg import inv as spinv
+        from scipy.sparse.linalg import eigsh as speigsh
+        K_b, _, _ = boundary_condition.GetReducedMatrices(K,Residual)
+        M_b, _, _ = boundary_condition.GetReducedMatrices(M,Residual)
+        # w, v = speigsh(K_b, M=M_b, k=number_of_modes, which="SM")
+        w, v = speigsh(K_b, M=M_b, k=number_of_modes, which="SM", v0=np.ones(K_b.shape[0]))
+        # w = w[::-1]
+        # v = v[:,::-1]
+        for i in range(number_of_modes):
+            print(w[i])
+            dU = boundary_condition.UpdateFreeDoFs(v[:,i],K.shape[0],formulation.nvar)
+            # mesh.points += amplification_factor / w[i] * dU
+            # mesh.SimplePlot()
+            TotalDisp[:,:formulation.ndim,i] = amplification_factor * 8 * (i+1) / w[i] * dU[:,:formulation.ndim]
+            # TotalDisp[:,-1,i] = amplification_factor / w[i] * dU[:,-1]
+
+        return TotalDisp
 
 
 
