@@ -290,6 +290,11 @@ class Mesh(object):
                     faceLoops.append(faceLoop)
                     break
 
+        for faceLoop in faceLoops:
+            for nodeId in faceLoop:
+                if nodeId == -1:
+                    warn("Invalid or self-intersecting loop detected")
+
         return faceLoops
 
 
