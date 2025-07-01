@@ -246,7 +246,10 @@ class Mesh(object):
         self.GetEdges()
 
         # First create a node to neighbour map i.e. node as key and its two neighbouring nodes as value
-        nodeToNeighboursMap = dict()
+        # nodeToNeighboursMap = dict()
+        # Use ordered dict since for Python < 3.7 dict does not preserve insertion order
+        from collections import OrderedDict
+        nodeToNeighboursMap = OrderedDict()
         for i in range(self.edges.shape[0]):
 
             if self.edges[i,0] not in nodeToNeighboursMap:
@@ -261,6 +264,7 @@ class Mesh(object):
 
         # Now create a vector of face loops
         faceLoops = []
+        swapOrder = False
         while nodeToNeighboursMap:
             # Insert the first node from node to edge map and its two neighbours in order and erase it from the map
             faceLoop = []
@@ -268,6 +272,12 @@ class Mesh(object):
             faceLoop.append(nodeToNeighboursMap[mapBegin][0])
             faceLoop.append(mapBegin)
             faceLoop.append(nodeToNeighboursMap[mapBegin][1])
+
+            if nodeToNeighboursMap[mapBegin][0] < nodeToNeighboursMap[mapBegin][1]:
+                if not swapOrder:
+                    swapOrder = True
+
+            # Pop now
             nodeToNeighboursMap.pop(mapBegin, None)
 
             while True:
@@ -286,14 +296,29 @@ class Mesh(object):
 
                     nodeToNeighboursMap.pop(tmp, None)
                 else:
-                    faceLoop = np.array(faceLoop)
+                    # faceLoop = np.array(faceLoop)
                     faceLoops.append(faceLoop)
                     break
 
         for faceLoop in faceLoops:
             for nodeId in faceLoop:
                 if nodeId == -1:
-                    warn("Invalid or self-intersecting loop detected")
+                    raise RuntimeError("Invalid or self-intersecting loop detected")
+
+        if swapOrder:
+            for i in range(len(faceLoops)):
+                faceLoops[i] = faceLoops[i][::-1]
+
+        # Now reorder the loop such that the starting (the we got from the first element self.edges) comes first/last
+        # instead of second from beginning/end
+        for i in range(len(faceLoops)):
+            # Insert the last element into first
+            faceLoops[i].insert(0, faceLoops[i][-1])
+            # Remove the last element
+            faceLoops[i].pop()
+
+        for i in range(len(faceLoops)):
+            faceLoops[i] = np.array(faceLoops[i])
 
         return faceLoops
 
