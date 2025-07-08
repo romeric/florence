@@ -299,12 +299,11 @@ class FlorenceSetup(object):
         self.compiler_args = "FC=" + self.fc_compiler + " " + "CC=" + self.cc_compiler + " " +\
             "CXX=" + self.cxx_compiler + " " + self.compiler_args
 
+        self.additional_compiler_flags += "'-Wno-unused-variable "
 
         # Get around Python 2.7 and C++17 inherent incompatibility
         if "darwin" in self._os:
-            # print(self.additional_compiler_flags )
-            # exit()
-            self.additional_compiler_flags += "-Wno-deprecated-register"
+            self.additional_compiler_flags += "-Wno-deprecated-register '"
             self.compiler_args += " ADDITIONAL_FLAGS=" + self.additional_compiler_flags
 
         # Set language_level directive for cython
@@ -331,6 +330,7 @@ class FlorenceSetup(object):
             km_path,gm_path,cm_path,tm_path,mm_path,material_path,assemble_path]
         # self.extension_paths = [mm_path]
         # self.extension_paths = [assemble_path]
+        # self.extension_paths = [tensor_path]
 
     def SetParallelism(self,_ncpu=1):
         if _ncpu > 1:
@@ -411,6 +411,7 @@ class FlorenceSetup(object):
 
         if self.parallel == False:
             for _path in self.extension_paths:
+                # All other modules: Tensor, Jacobi, kinematics etc
                 if "LLDispatch" not in _path and "_Assembly_" not in _path:
                     execute('cd '+_path+' && make ' + self.compiler_args)
                 if "LLDispatch" in _path:
