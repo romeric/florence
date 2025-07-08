@@ -1,5 +1,5 @@
 from __future__ import print_function
-import os, sys, imp
+import os, sys
 from time import time
 import multiprocessing as MP
 import numpy as np
