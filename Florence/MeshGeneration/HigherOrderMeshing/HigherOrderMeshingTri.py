@@ -2,7 +2,6 @@ from time import time
 import numpy as np
 from warnings import warn
 import multiprocessing as MP
-import imp
 
 from .GetInteriorCoordinates import GetInteriorNodesCoordinates
 import Florence.ParallelProcessing.parmap as parmap

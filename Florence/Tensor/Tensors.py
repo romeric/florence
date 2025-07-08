@@ -419,7 +419,7 @@ def itemfreq(arr=None,un_arr=None,inv_arr=None,decimals=None):
 
     unf_arr = np.zeros((un_arr.shape[0],2),dtype=dtype)
     unf_arr[:,0] = un_arr
-    unf_arr[:,1] = np.bincount(inv_arr)
+    unf_arr[:,1] = np.bincount(inv_arr.flatten())
 
     return unf_arr
 

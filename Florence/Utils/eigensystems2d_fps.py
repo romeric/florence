@@ -1,6 +1,6 @@
 from __future__ import print_function
+from .write_eigensystems import write_eigensystem
 from sympy import *
-from write_eigensystems import write_eigensystem
 
 def get_analytic_eigensystem2d_fps(Psi, fmt="python"):
 

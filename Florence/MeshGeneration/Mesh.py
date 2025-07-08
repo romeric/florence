@@ -3572,6 +3572,7 @@ class Mesh(object):
 
         self.filename = filename
 
+        file_content = []
         with open(filename, 'r') as fid:
             file_content = fid.readlines()
 
@@ -3645,7 +3646,7 @@ class Mesh(object):
         # MAP TO GROUND
         unique_elements, inv_elements = np.unique(self.elements, return_inverse=True)
         aranger = np.arange(self.points.shape[0])
-        self.elements = aranger[inv_elements].reshape(self.elements.shape[0],self.elements.shape[1])
+        self.elements = aranger[inv_elements].reshape(self.elements.shape[0], self.elements.shape[1])
 
         self.element_type = element_type
         if read_element_type == "92":

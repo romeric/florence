@@ -1,4 +1,3 @@
-import os, imp
 import numpy as np
 from Florence.FunctionSpace.JacobiPolynomials import *
 
@@ -8,7 +7,7 @@ def hpBases(C,r,s):
 	order = -1
 
 	P1=C+1
-	P2=C+1 
+	P2=C+1
 	# Size of bases is (for equal order interpolation)
 	nsize = int((P1+1.)*(P1+2.)/2.)
 
@@ -51,7 +50,7 @@ def hpBases(C,r,s):
 
 	elif C<0 or isinstance(C,float):
 		raise ValueError('Order of interpolation degree should a non-negative integer')
-	
+
 	return Bases
 
 
@@ -64,7 +63,7 @@ def GradhpBases(C,r,s):
 	order = -1
 
 	P1=C+1
-	P2=C+1 
+	P2=C+1
 	# Size of bases is (for equal order interpolation)
 	nsize = int((P1+1.)*(P1+2.)/2.)
 
@@ -99,7 +98,7 @@ def GradhpBases(C,r,s):
 		((1.-a)/2.)*0.5*JacobiPolynomials(p-1,a,1.,1.)*((1.-b)/2.)**(p+1) +\
 		((1.-a)/2.)*((1.+a)/2.)*DiffJacobiPolynomials(p-1,a,1.,1.,1)*((1.-b)/2.)**(p+1)
 
-		de2dx = -0.5*((1.-b)/2.)*((1.+b)/2.)*JacobiPolynomials(q-1,b,1.,1.) 
+		de2dx = -0.5*((1.-b)/2.)*((1.+b)/2.)*JacobiPolynomials(q-1,b,1.,1.)
 
 		de3dx = 0.5*((1.-b)/2.)*((1.+b)/2.)*JacobiPolynomials(q-1,b,1.,1.)
 
@@ -126,7 +125,7 @@ def GradhpBases(C,r,s):
 					# dN/dx = dN/da (a being the triangular coordinate)
 					didx = -0.5*((1.+a)/2.)*JacobiPolynomials(p-1,a,1.,1.)[order]*((1.-b)/2.)**(p+1)*((1.+b)/2.)*JacobiPolynomials(q-1,b,2.*p+1.,1.)[order] +\
 					((1.-a)/2.)*0.5*JacobiPolynomials(p-1,a,1.,1.)[order]*((1.-b)/2.)**(p+1)*((1.+b)/2.)*JacobiPolynomials(q-1,b,2.*p+1.,1.)[order] +\
-					((1.-a)/2.)*((1.+a)/2.)*DiffJacobiPolynomials(p-1,a,1.,1.,1)[order]*((1.-b)/2.)**(p+1)*((1.+b)/2.)*JacobiPolynomials(q-1,b,2.*p+1.,1.)[order] 
+					((1.-a)/2.)*((1.+a)/2.)*DiffJacobiPolynomials(p-1,a,1.,1.,1)[order]*((1.-b)/2.)**(p+1)*((1.+b)/2.)*JacobiPolynomials(q-1,b,2.*p+1.,1.)[order]
 
 					dinteriordx = np.append(dinteriordx,didx)
 
@@ -143,5 +142,5 @@ def GradhpBases(C,r,s):
 
 	elif C<0 or isinstance(C,float):
 		raise ValueError('Order of interpolation degree should a non-negative integer')
-	
+
 	return GradBases

@@ -26,7 +26,7 @@ CXXSTD=-std=c++14
 OPTFLAGS= -O3 -fno-strict-aliasing -DNDEBUG
 CXXFLAGS= -fPIC -shared -pthread -Wall $(CYTHONFLAGS) $(OPTFLAGS)
 
-NUMPY_INCLUDE_PATH = /usr/local/lib/python2.7/dist-packages/numpy/core/include
+# NUMPY_INCLUDE_PATH = /usr/local/lib/python2.7/dist-packages/numpy/core/include
 
 ifeq ($(findstring g++,$(CXX)),g++)
 ifneq ($(findstring clang++,$(CXX)),clang++)

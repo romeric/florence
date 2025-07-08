@@ -23,7 +23,7 @@ OPTFLAGS= -O3 -fno-strict-aliasing -DNDEBUG
 CCFLAGS= -fPIC -shared -pthread -Wall $(CYTHONFLAGS) $(OPTFLAGS) -lm -flto
 
 # NUMPY_INCLUDE_PATH=python -c "import numpy; print numpy.get_include()"
-NUMPY_INCLUDE_PATH = /usr/local/lib/python2.7/dist-packages/numpy/core/include
+# NUMPY_INCLUDE_PATH = /usr/local/lib/python2.7/dist-packages/numpy/core/include
 
 ifeq ($(findstring gcc,$(CC)),gcc)
 CCFLAGS += -Wno-cpp -Wno-unused-function -Wno-maybe-uninitialized

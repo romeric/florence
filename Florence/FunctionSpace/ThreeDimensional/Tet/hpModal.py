@@ -1,11 +1,10 @@
-import imp, os
-import numpy as np 
+import numpy as np
 from Florence.FunctionSpace.JacobiPolynomials import *
 
 
 def hpBases(C,r0,s,t):
 
-	# The input argument r is changed to r0, because r is used as the polynomial degree in the 3rd (z) direction	
+	# The input argument r is changed to r0, because r is used as the polynomial degree in the 3rd (z) direction
 	# Coordinate transformation for tetrahedrals
 	a = 2.0*(1.+r0)/(-s-t) -1.
 	b = 2.0*(1.+s)/(1.-t) - 1.
@@ -14,7 +13,7 @@ def hpBases(C,r0,s,t):
 	order = -1
 
 	P1=C+1
-	P2=C+1 
+	P2=C+1
 	P3=C+1
 	# Size of bases is (for equal order interpolation)
 	nsize = int((P1+1.)*(P1+2.)*(P1+3.)/6.)
@@ -34,12 +33,12 @@ def hpBases(C,r0,s,t):
 	# Vertices
 	va = ((1.-a)/2.)*((1.-b)/2.)*((1.-c)/2.)
 	vb = ((1.+a)/2.)*((1.-b)/2.)*((1.-c)/2.)
-	vc = ((1.-a)/2.)*((1.+b)/2.)*((1.-c)/2.)  # vc = ((1.+b)/2.)*((1.-c)/2.) 
+	vc = ((1.-a)/2.)*((1.+b)/2.)*((1.-c)/2.)  # vc = ((1.+b)/2.)*((1.-c)/2.)
 	vd = (1.+c)/2.
 
 	Bases[:4] = np.array([va,vb,vc,vd])
 
-	
+
 	if C > 0:
 		p = P1-1; 	q = P2-1; 	r = P3-1
 		# Edges
@@ -88,7 +87,7 @@ def hpBases(C,r0,s,t):
 def GradhpBases(C,r0,s,t):
 
 
-	# The input argument r is changed to r0, because r is used as the polynomial degree in the 3rd (z) direction	
+	# The input argument r is changed to r0, because r is used as the polynomial degree in the 3rd (z) direction
 	# Coordinate transformation for tetrahedrals
 	a = 2.0*(1.+r0)/(-s-t) -1.
 	b = 2.0*(1.+s)/(1.-t) - 1.
@@ -97,10 +96,10 @@ def GradhpBases(C,r0,s,t):
 	order = -1
 
 	P1=C+1
-	P2=C+1 
+	P2=C+1
 	P3=C+1
 	# Size of bases is (for equal order interpolation)
-	nsize = int((P1+1.)*(P1+2.)*(P1+3.)/6.); 
+	nsize = int((P1+1.)*(P1+2.)*(P1+3.)/6.);
 	vsize = 4; esize = 6*C; fsize = 2*C*(C-1); isize = int(C*(C-1)*(C-2)/6.)
 
 	# Allocate
@@ -117,13 +116,13 @@ def GradhpBases(C,r0,s,t):
 	# dN/dy = dN/db (b being the tetrahedral coordinate)
 	dvady = ((1.-a)/2.)*(-0.5)*((1.-c)/2.)
 	dvbdy = ((1.+a)/2.)*(-0.5)*((1.-c)/2.)
-	dvcdy = ((1.-a)/2.)*(0.5)*((1.-c)/2.)  # dvcdx = (0.5)*((1.-c)/2.) 
+	dvcdy = ((1.-a)/2.)*(0.5)*((1.-c)/2.)  # dvcdx = (0.5)*((1.-c)/2.)
 	dvddy = 0.
 
 	# dN/dz = dN/dc (c being the tetrahedral coordinate)
 	dvadz = ((1.-a)/2.)*((1.-b)/2.)*(-0.5)
 	dvbdz = ((1.+a)/2.)*((1.-b)/2.)*(-0.5)
-	dvcdz = ((1.-a)/2.)*((1.+b)/2.)*(-0.5)  # dvcdx = ((1.+b)/2.)*(-0.5) 
+	dvcdz = ((1.-a)/2.)*((1.+b)/2.)*(-0.5)  # dvcdx = ((1.+b)/2.)*(-0.5)
 	dvddz = 0.5
 
 	GradBases[:4,:] = np.array([
@@ -139,9 +138,9 @@ def GradhpBases(C,r0,s,t):
 		# dN/dx = dN/da (a being the tetrahedral coordinate)
 		de1dx = (-0.5)*((1.+a)/2.)*JacobiPolynomials(p-1,a,1.,1.)[:,0]*((1.-b)/2.)**(p+1)*((1.-c)/2.)**(p+1) +\
 		((1.-a)/2.)*(0.5)*JacobiPolynomials(p-1,a,1.,1.)[:,0]*((1.-b)/2.)**(p+1)*((1.-c)/2.)**(p+1) +\
-		((1.-a)/2.)*((1.+a)/2.)*DiffJacobiPolynomials(p-1,a,1.,1.,1)[:,0]*((1.-b)/2.)**(p+1)*((1.-c)/2.)**(p+1)		
+		((1.-a)/2.)*((1.+a)/2.)*DiffJacobiPolynomials(p-1,a,1.,1.,1)[:,0]*((1.-b)/2.)**(p+1)*((1.-c)/2.)**(p+1)
 
-		de2dx = (-0.5)*((1.-b)/2.)*((1.+b)/2.)*JacobiPolynomials(q-1,b,1.,1.)[:,0]*((1.-c)/2.)**(q+1) 
+		de2dx = (-0.5)*((1.-b)/2.)*((1.+b)/2.)*JacobiPolynomials(q-1,b,1.,1.)[:,0]*((1.-c)/2.)**(q+1)
 
 		de3dx = (0.5)*((1.-b)/2.)*((1.+b)/2.)*JacobiPolynomials(q-1,b,1.,1.)[:,0]*((1.-c)/2.)**(q+1)
 
@@ -226,7 +225,7 @@ def GradhpBases(C,r0,s,t):
 
 					dface2dx = np.append(dface2dx,df2dx)
 
-					df2dy = ((1.-a)/2.)*((1.+a)/2.)*JacobiPolynomials(p-1,a,1.,1.)[-1]*(p+1)*((1.-b)/2.)**(p)*(-0.5)*((1.-c)/2.)**(p+1)*((1.+c)/2.)*JacobiPolynomials(r-1,c,2.*p+1.,1.)[-1] 
+					df2dy = ((1.-a)/2.)*((1.+a)/2.)*JacobiPolynomials(p-1,a,1.,1.)[-1]*(p+1)*((1.-b)/2.)**(p)*(-0.5)*((1.-c)/2.)**(p+1)*((1.+c)/2.)*JacobiPolynomials(r-1,c,2.*p+1.,1.)[-1]
 
 					dface2dy = np.append(dface2dy,df2dy)
 
@@ -241,7 +240,7 @@ def GradhpBases(C,r0,s,t):
 		for q in range(1,P2):
 			for r in range(1,P3):
 				if q+r < P3:
-					df3dx = (-0.5)*((1.-b)/2.)*((1.+b)/2.)*JacobiPolynomials(q-1,b,1.,1.)[-1]*((1.-c)/2.)**(q+1)*((1.+c)/2.)*JacobiPolynomials(r-1,c,2.*q+1.,1.)[-1] 
+					df3dx = (-0.5)*((1.-b)/2.)*((1.+b)/2.)*JacobiPolynomials(q-1,b,1.,1.)[-1]*((1.-c)/2.)**(q+1)*((1.+c)/2.)*JacobiPolynomials(r-1,c,2.*q+1.,1.)[-1]
 
 					dface3dx = np.append(dface3dx,df3dx)
 
@@ -258,7 +257,7 @@ def GradhpBases(C,r0,s,t):
 					dface3dz = np.append(dface3dz,df3dz)
 
 
-					df4dx = (0.5)*((1.-b)/2.)*((1.+b)/2.)*JacobiPolynomials(q-1,b,1.,1.)[-1]*((1.-c)/2.)**(q+1)*((1.+c)/2.)*JacobiPolynomials(r-1,c,2.*q+1.,1.)[-1] 
+					df4dx = (0.5)*((1.-b)/2.)*((1.+b)/2.)*JacobiPolynomials(q-1,b,1.,1.)[-1]*((1.-c)/2.)**(q+1)*((1.+c)/2.)*JacobiPolynomials(r-1,c,2.*q+1.,1.)[-1]
 
 					dface4dx = np.append(dface4dx,df4dx)
 
@@ -301,7 +300,7 @@ def GradhpBases(C,r0,s,t):
 
 						didz = ((1.-a)/2.)*((1.+a)/2.)*JacobiPolynomials(p-1,a,1.,1.)[-1]*((1.-b)/2.)**(p+1)*((1.+b)/2.)*JacobiPolynomials(q-1,b,2.*p+1.,1.)[-1]*(p+q+1)*((1.-c)/2.)**(p+q)*(-0.5)*((1.+c)/2.)*JacobiPolynomials(r-1,c,2.*p+2.*q+1.,1.)[-1] +\
 						((1.-a)/2.)*((1.+a)/2.)*JacobiPolynomials(p-1,a,1.,1.)[-1]*((1.-b)/2.)**(p+1)*((1.+b)/2.)*JacobiPolynomials(q-1,b,2.*p+1.,1.)[-1]*((1.-c)/2.)**(p+q+1)*(0.5)*JacobiPolynomials(r-1,c,2.*p+2.*q+1.,1.)[-1] +\
-						((1.-a)/2.)*((1.+a)/2.)*JacobiPolynomials(p-1,a,1.,1.)[-1]*((1.-b)/2.)**(p+1)*((1.+b)/2.)*JacobiPolynomials(q-1,b,2.*p+1.,1.)[-1]*((1.-c)/2.)**(p+q+1)*((1.+c)/2.)*DiffJacobiPolynomials(r-1,c,2.*p+2.*q+1.,1.,1)[-1]	
+						((1.-a)/2.)*((1.+a)/2.)*JacobiPolynomials(p-1,a,1.,1.)[-1]*((1.-b)/2.)**(p+1)*((1.+b)/2.)*JacobiPolynomials(q-1,b,2.*p+1.,1.)[-1]*((1.-c)/2.)**(p+q+1)*((1.+c)/2.)*DiffJacobiPolynomials(r-1,c,2.*p+2.*q+1.,1.,1)[-1]
 
 						dinteriordz = np.append(dinteriordz,didz)
 

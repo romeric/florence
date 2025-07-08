@@ -131,13 +131,13 @@ class FlorenceSetup(object):
         # Get python lib path
         # Note that we need the actual ld path where libpython.so/dylib/dll resides
         # and this seems like the only portable way at the moment
-        lib_postfix = ".so"
+        lib_suffix = ".so"
         if "darwin" in self._os:
-            lib_postfix = ".dylib"
+            lib_suffix = ".dylib"
 
         # The following search is split into two searches for /usr/lib and /usr/local
         # for speed purposes
-        libpython = "lib"+self.python_interpreter+lib_postfix
+        libpython = "lib"+self.python_interpreter+lib_suffix
         for root, _, filenames in os.walk('/usr/lib/'):
             for filename in fnmatch.filter(filenames, libpython):
                 self.python_ld_path = os.path.join(root, filename).rsplit(libpython)[0]
@@ -162,7 +162,8 @@ class FlorenceSetup(object):
 
         # Get suffix for extensions [it may not be .so/.dylib/.dll but something else]
         try:
-            self.extension_suffix = get_config_vars()['SO'][1:]
+            # self.extension_suffix = get_config_vars()['SO'][1:]
+            self.extension_suffix = get_config_vars()['EXT_SUFFIX'][1:]
         except:
             warn("Cannot detect extension suffix!")
         if self.extension_suffix is None:
@@ -199,9 +200,9 @@ class FlorenceSetup(object):
         if _blas is not None:
             self.blas_version = _blas
 
-        lib_postfix = ".so"
+        lib_suffix = ".so"
         if "darwin" in self._os:
-            lib_postfix = ".dylib"
+            lib_suffix = ".dylib"
 
         if self.blas_version == "openblas":
 
@@ -209,11 +210,11 @@ class FlorenceSetup(object):
             aux_path = "/usr/local/Cellar/openblas"
             if os.path.isdir(aux_path):
                 files = os.listdir(aux_path)
-                if self.blas_version+lib_postfix not in files:
+                if self.blas_version+lib_suffix not in files:
                     for d in files:
                         if os.path.isdir(os.path.join(aux_path,d)):
                             files2 = os.listdir(os.path.join(aux_path,d))
-                            if self.blas_version+lib_postfix not in files:
+                            if self.blas_version+lib_suffix not in files:
                                 if os.path.isdir(os.path.join(aux_path,d,"lib")):
                                     dirs.append(os.path.join(aux_path,d,"lib"))
 
@@ -222,7 +223,7 @@ class FlorenceSetup(object):
                 if os.path.isdir(d):
                     libs = os.listdir(d)
                     for blas in libs:
-                        if self.blas_version+lib_postfix in blas:
+                        if self.blas_version+lib_suffix in blas:
                             self.blas_ld_path = d
                             self.blas_include_path = d.replace("lib","include")
                             found_blas = True
