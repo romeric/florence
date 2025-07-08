@@ -8,7 +8,7 @@ from cython cimport double, sizeof, boundscheck, wraparound
 #             const double a, const double b, const unsigned short opt, double *dP)
 
 
-cdef inline void jacobi(const unsigned short n, const double xi, const double a, const double b, double *P) nogil:
+cdef inline void jacobi(const unsigned short n, const double xi, const double a, const double b, double *P) noexcept nogil:
     cdef double a1n,a2n,a3n,a4n;
     cdef unsigned short p;
 
@@ -25,7 +25,7 @@ cdef inline void jacobi(const unsigned short n, const double xi, const double a,
             P[p+1] = ((a2n+a3n*xi)*P[p]-a4n*P[p-1])/a1n
 
 
-cdef inline void diffjacobi(const unsigned short n, const double xi, const double a, const double b, const unsigned short opt, double *dP) nogil:
+cdef inline void diffjacobi(const unsigned short n, const double xi, const double a, const double b, const unsigned short opt, double *dP) noexcept nogil:
     cdef unsigned short p
     cdef double *P = <double*>malloc( (n+1)*sizeof(double))
     if opt==1:
