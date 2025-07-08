@@ -17,6 +17,7 @@ except ImportError:
     raise ImportError("Could not import numpy. Please install numpy first")
 
 from multiprocessing import Pool, cpu_count
+from warnings import warn
 
 
 try:
@@ -66,7 +67,7 @@ class FlorenceSetup(object):
     cxx_version = None
 
     extension_paths = None
-    extension_postfix = None
+    extension_suffix = None
 
     parallel = True
     num_cpu = cpu_count()
@@ -159,13 +160,16 @@ class FlorenceSetup(object):
                 raise RuntimeError("Could not find libpython")
 
 
-        # Get postfix for extensions
-        self.extension_postfix = get_config_vars()['SO'][1:]
-        if self.extension_postfix is None:
+        # Get suffix for extensions [it may not be .so/.dylib/.dll but something else]
+        try:
+            self.extension_suffix = get_config_vars()['SO'][1:]
+        except:
+            warn("Cannot detect extension suffix!")
+        if self.extension_suffix is None:
             if "darwin" in self._os:
-                self.extension_postfix = "dylib"
+                self.extension_suffix = "dylib"
             else:
-                self.extension_postfix = "so"
+                self.extension_suffix = "so"
 
 
     def GetNumPyPath(self):
@@ -287,7 +291,7 @@ class FlorenceSetup(object):
             " NUMPY_INCLUDE_PATH=" + self.numpy_include_path + \
             " FASTOR_INCLUDE_PATH=" + self.fastor_include_path +\
             " BLAS_VERSION=" + self.blas_version + " BLAS_INCLUDE_PATH="+ self.blas_include_path + \
-            " BLAS_LD_PATH=" + self.blas_ld_path + " EXT_POSTFIX=" + self.extension_postfix +\
+            " BLAS_LD_PATH=" + self.blas_ld_path + " EXT_POSTFIX=" + self.extension_suffix +\
             " CXXSTD=" + self.cxx_version + " KINEMATICS=" + self.kinematics_version
 
         self.compiler_args += ' REMOVE="rm -rf" MOVE=mv '
@@ -363,15 +367,15 @@ class FlorenceSetup(object):
         clean_cmd = 'make clean ' + self.compiler_args
         for _path in self.extension_paths:
             if "LLDispatch" not in _path:
-                execute('cd '+_path+' && echo rm -rf *.'+self.extension_postfix+' && '+
-                    clean_cmd+' && rm -rf *.'+self.extension_postfix)
+                execute('cd '+_path+' && echo rm -rf *.'+self.extension_suffix+' && '+
+                    clean_cmd+' && rm -rf *.'+self.extension_suffix)
             elif "LLDispatch" in _path:
                 execute('cd '+_path+
-                    ' && echo rm -rf *.'+self.extension_postfix+' CythonSource/*.'+self.extension_postfix
-                    +' && rm -rf *.'+self.extension_postfix+' CythonSource/*.'+
-                    self.extension_postfix)
+                    ' && echo rm -rf *.'+self.extension_suffix+' CythonSource/*.'+self.extension_suffix
+                    +' && rm -rf *.'+self.extension_suffix+' CythonSource/*.'+
+                    self.extension_suffix)
             else:
-                execute('cd '+_path+' && echo rm -rf *.'+self.extension_postfix+' && rm -rf *.'+self.extension_postfix)
+                execute('cd '+_path+' && echo rm -rf *.'+self.extension_suffix+' && rm -rf *.'+self.extension_suffix)
 
         # # clean all crude and ext libs if any - this is dangerous if setup.py is ever invoked from outside the directory
         # # which is certainly never the case
