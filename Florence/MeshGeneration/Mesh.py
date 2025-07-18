@@ -4118,7 +4118,10 @@ class Mesh(object):
             if ndim == 2:
                 plt.savefig(filename,format="png",dpi=300)
             else:
-                mlab.savefig(filename,dpi=300)
+                if backend == "mayavi":
+                    mlab.savefig(filename,dpi=300)
+                else:
+                    figure.screenshot(filename)
 
 
 
