@@ -3780,12 +3780,20 @@ class Mesh(object):
 
     def SimplePlot(self, to_plot='faces', color=None, edge_color=None, point_color=None,
         plot_points=False, plot_faces=None, plot_edges=True, point_radius=None,
-        save=False, filename=None, figure=None, show_plot=True, show_axis=False, grid="off"):
+        save=False, filename=None, figure=None, show_plot=True, show_axis=False, grid="off",
+        backend="mayavi"):
         """Simple mesh plot
 
             to_plot:        [str] only for 3D. 'faces' to plot only boundary faces
                             or 'all_faces' to plot all faces
+            color:          [str] color of elements
+            edge_color:     [str] color of element edges
+            point_color:    [str] color of points
+            plot_points:    [bool] if True plots points
+            plot_faces:     [bool] if True plots faces
+            plot_edges:     [bool] if True plots edges
             grid:           [str] None, "on" or "off"
+            backend         [str] only for 3D (2D always uses matplotlib) either mayavi or pyvista backend
             """
 
         self.__do_essential_memebers_exist__()
@@ -3834,9 +3842,20 @@ class Mesh(object):
 
         elif self.element_type == "tet" or self.element_type == "hex":
             import os
-            os.environ['ETS_TOOLKIT'] = 'qt4'
-            # os.environ['ETS_TOOLKIT'] = 'wx'
-            from mayavi import mlab
+
+            if backend == "mayavi":
+                os.environ['ETS_TOOLKIT'] = 'qt4'
+                # os.environ['ETS_TOOLKIT'] = 'wx'
+                from mayavi import mlab
+                if figure is None:
+                    figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(1000,800))
+
+            elif backend == "pyvista":
+                import pyvista as pv
+                if figure is None:
+                    figure = pv.Plotter(window_size=(2000, 1600))
+                    figure.background_color = (1, 1, 1)
+                    figure.set_background('white')
 
             if to_plot == 'all_faces':
                 if self.all_faces is None:
@@ -3846,8 +3865,7 @@ class Mesh(object):
                 if self.faces is None:
                     self.GetBoundaryFaces()
                 faces = self.faces
-            if figure is None:
-                figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(1000,800))
+
 
             if color is not None:
                 if isinstance(color,tuple):
@@ -3895,27 +3913,52 @@ class Mesh(object):
 
         elif self.element_type == "tet":
 
-            if plot_faces:
-                mlab.triangular_mesh(self.points[:,0],self.points[:,1],
-                    self.points[:,2],faces[:,:3],color=color)
-            radius = 1e-00
-            if plot_edges:
-                mlab.triangular_mesh(self.points[:,0],self.points[:,1],self.points[:,2], faces[:,:3],
-                    line_width=radius,tube_radius=radius,color=edge_color,
-                    representation='wireframe')
+            if backend == "mayavi":
+                radius = 1e-00
+                if plot_faces:
+                    mlab.triangular_mesh(self.points[:,0],self.points[:,1],
+                        self.points[:,2],faces[:,:3],color=color)
+                if plot_edges:
+                    mlab.triangular_mesh(self.points[:,0],self.points[:,1],self.points[:,2], faces[:,:3],
+                        line_width=radius,tube_radius=radius,color=edge_color,
+                        representation='wireframe')
 
-            if plot_points:
-                mlab.points3d(self.points[:,0],self.points[:,1],self.points[:,2],
-                    color=point_color,mode='sphere',scale_factor=point_radius)
+                if plot_points:
+                    mlab.points3d(self.points[:,0],self.points[:,1],self.points[:,2],
+                        color=point_color,mode='sphere',scale_factor=point_radius)
 
-            # svpoints = self.points[np.unique(self.faces),:]
-            # mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=0.005)
+                # svpoints = self.points[np.unique(self.faces),:]
+                # mlab.points3d(svpoints[:,0],svpoints[:,1],svpoints[:,2],color=(0,0,0),mode='sphere',scale_factor=0.005)
 
-            # mlab.view(azimuth=135, elevation=45, distance=7, focalpoint=None,
-            #     roll=0, reset_roll=True, figure=None)
+                # mlab.view(azimuth=135, elevation=45, distance=7, focalpoint=None,
+                #     roll=0, reset_roll=True, figure=None)
 
-            if show_plot:
-                mlab.show()
+                if show_plot:
+                    mlab.show()
+
+            elif backend == "pyvista":
+                radius = 3.
+                # PyVista expects faces with a padding value (number of points per face - as the first column)
+                npoints = faces.shape[1]
+                padded_faces = np.hstack([np.full((faces.shape[0], 1), npoints), faces[:, :3]]).astype(int)
+
+                # Create a PolyData object for the mesh
+                pvmesh = pv.PolyData(self.points, faces=padded_faces.flatten())
+
+                if plot_faces:
+                    figure.add_mesh(pvmesh, color=color, show_edges=False, lighting=True,
+                                     diffuse=0.7, specular=0.3, ambient=0.2)
+
+                if plot_edges:
+                    figure.add_mesh(pvmesh, color=edge_color, style='wireframe', line_width=radius)
+
+                if plot_points:
+                    point_cloud = pv.PolyData(self.points)
+                    figure.add_points(point_cloud, color=point_color, point_size=point_radius * 100., render_points_as_spheres=True)
+
+                if show_plot:
+                    figure.show()
+
 
         elif self.element_type=="quad":
 
