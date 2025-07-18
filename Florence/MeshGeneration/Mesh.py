@@ -3856,6 +3856,8 @@ class Mesh(object):
                     figure = pv.Plotter(window_size=(2000, 1600))
                     figure.background_color = (1, 1, 1)
                     figure.set_background('white')
+            else:
+                raise ValueError("Unsupported backend for plotting")
 
             if to_plot == 'all_faces':
                 if self.all_faces is None:
@@ -4020,28 +4022,60 @@ class Mesh(object):
             # color=(197/255.,241/255.,197/255.)
             point_line_width = .002
 
-            if plot_faces:
-                trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot,
-                        line_width=point_line_width,color=color)
+            if backend == "mayavi":
+                if plot_faces:
+                    trimesh_h = mlab.triangular_mesh(Xplot[:,0], Xplot[:,1], Xplot[:,2], Tplot,
+                            line_width=point_line_width,color=color)
 
-            if plot_edges:
-                src = mlab.pipeline.scalar_scatter(tmesh.x_edges.T.copy().flatten(),
-                    tmesh.y_edges.T.copy().flatten(), tmesh.z_edges.T.copy().flatten())
-                src.mlab_source.dataset.lines = tmesh.connections
-                h_edges = mlab.pipeline.surface(src, color = edge_color, line_width=3)
-                # AVOID WARNINGS
-                # lines = mlab.pipeline.stripper(src)
-                # h_edges = mlab.pipeline.surface(lines, color = edge_color, line_width=3)
+                if plot_edges:
+                    src = mlab.pipeline.scalar_scatter(tmesh.x_edges.T.copy().flatten(),
+                        tmesh.y_edges.T.copy().flatten(), tmesh.z_edges.T.copy().flatten())
+                    src.mlab_source.dataset.lines = tmesh.connections
+                    h_edges = mlab.pipeline.surface(src, color = edge_color, line_width=3)
+                    # AVOID WARNINGS
+                    # lines = mlab.pipeline.stripper(src)
+                    # h_edges = mlab.pipeline.surface(lines, color = edge_color, line_width=3)
 
-            # mlab.view(azimuth=135, elevation=45, distance=7, focalpoint=None,
-                # roll=0, reset_roll=True, figure=None)
+                # mlab.view(azimuth=135, elevation=45, distance=7, focalpoint=None,
+                    # roll=0, reset_roll=True, figure=None)
 
-            if plot_points:
-                mlab.points3d(self.points[:,0],self.points[:,1],self.points[:,2],
-                    color=point_color,mode='sphere',scale_factor=point_radius)
+                if plot_points:
+                    mlab.points3d(self.points[:,0],self.points[:,1],self.points[:,2],
+                        color=point_color,mode='sphere',scale_factor=point_radius)
 
-            if show_plot:
-                mlab.show()
+                if show_plot:
+                    mlab.show()
+
+            elif backend == "pyvista":
+
+                radius = 3.
+                # PyVista expects faces with a padding value (number of points per face - as the first column)
+                npoints = Tplot.shape[1]
+                padded_faces = np.hstack([np.full((Tplot.shape[0], 1), npoints), Tplot[:, :3]]).astype(int)
+
+                # Create a PolyData object for the mesh
+                pvmesh = pv.PolyData(Xplot, faces=padded_faces.flatten())
+
+                if plot_faces:
+                    figure.add_mesh(pvmesh, color=color, show_edges=False)
+
+                if plot_edges:
+                    edge_points = np.zeros((tmesh.x_edges.T.flatten().shape[0], 3))
+                    edge_points[:,0] = tmesh.x_edges.T.copy().flatten()
+                    edge_points[:,1] = tmesh.y_edges.T.copy().flatten()
+                    edge_points[:,2] = tmesh.z_edges.T.copy().flatten()
+
+                    edge_connections = np.hstack([np.full((tmesh.connections.shape[0], 1), tmesh.connections.shape[1]), tmesh.connections[:, :2]]).astype(int)
+                    # Create a PolyData object for the mesh edges
+                    pvmesh_e = pv.PolyData(edge_points, faces=edge_connections.flatten())
+                    figure.add_mesh(pvmesh_e, color=edge_color, style='wireframe', line_width=radius)
+
+                if plot_points:
+                    point_cloud = pv.PolyData(Xplot)
+                    figure.add_points(point_cloud, color=point_color, point_size=point_radius * 100., render_points_as_spheres=True)
+
+                if show_plot:
+                    figure.show()
 
         elif self.element_type == "line":
 
