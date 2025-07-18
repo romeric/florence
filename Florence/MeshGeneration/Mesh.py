@@ -6366,14 +6366,14 @@ class Mesh(object):
             return solution
 
 
-    def ProjectToPlane(self):
+    def FlattenToNonconformal2DMesh(self):
         """Projects every triangle to plane individually and creates a non-conformal mesh.
             Returns a projected mesh
         """
 
         self.__do_essential_memebers_exist__()
         if self.element_type != "tri":
-            raise ValueError("Project to plane is only applicable to triangles")
+            raise ValueError("FlattenToNonconformal2DMesh is only applicable to triangles")
 
         imesh = deepcopy(self)
         coordinates = []
@@ -6410,6 +6410,59 @@ class Mesh(object):
         imesh.nnode = imesh.points.shape[0]
 
         return imesh
+
+
+    def CreateNonconformalMeshWithGap(self, gap=0.1):
+        """Splits the 3D mesh into individual/non-conformal elements with a gap between each element.
+        Mainly used for visualisation purposes
+
+        Input:
+            gap: The gap between adjacent elements
+
+        Returns:
+            disjoint_mesh: The new mesh with spaced-out (disjoint) elements.
+        """
+
+        self.__do_essential_memebers_exist__()
+        if self.element_type != "tri":
+            raise ValueError("CreateNonconformalMeshWithGap is only applicable to triangles")
+
+        meds = self.Medians()
+        normals = self.Normals()
+
+        faces = self.elements
+        points = self.points
+
+        # Initialize list to store new points and faces
+        disjoint_points = []
+        disjoint_faces = []
+
+        # Iterate through each face (each triangle)
+        for i in range(len(faces)):
+            # Extract the coordinates of the triangle's vertices
+            face_points = points[faces[i],:]
+            # Move the triangle by a small gap along the normal vector
+            displacement = normals[i] * gap
+            # Apply the displacement to the vertices of the triangle
+            displaced_points = face_points + displacement
+            # Add displaced points to the new points list
+            disjoint_points.extend(displaced_points)
+            elementConnectivity = [3 * i, 3 * i + 1, 3 * i + 2]
+            disjoint_faces.append(elementConnectivity)
+
+        disjoint_points = np.array(disjoint_points)
+        disjoint_faces = np.array(disjoint_faces)
+
+        # Create the new disjoint mesh
+        dmesh = Mesh()
+        dmesh.element_type = self.element_type
+        dmesh.points = disjoint_points
+        dmesh.elements = disjoint_faces
+        dmesh.nelem = dmesh.elements.shape[0]
+        dmesh.nnode = dmesh.points.shape[0]
+        dmesh.GetBoundaryEdges()
+
+        return dmesh
 
 
     def Smooth(self, criteria={'aspect_ratio':3}):
