@@ -3805,7 +3805,7 @@ class Mesh(object):
                 mesh.SimplePlot(to_plot=to_plot, color=color, plot_points=plot_points,
                     plot_edges=plot_edges, point_radius=point_radius,
                     save=save, filename=filename, figure=figure, show_plot=show_plot,
-                    show_axis=show_axis, grid=grid)
+                    show_axis=show_axis, grid=grid, backend=backend)
                 return
 
         ndim = self.InferSpatialDimension()
