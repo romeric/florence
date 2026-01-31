@@ -3207,9 +3207,8 @@ class Mesh(object):
             self.GetBoundaryEdgesTet()
 
 
-
     def ReadVTK(self, filename, element_type=None):
-        """Read mesh from a vtu file"""
+        """Read mesh from a vtu file - not vtk"""
 
         try:
             import vtkInterface as vtki
@@ -3267,6 +3266,53 @@ class Mesh(object):
             self.GetBoundaryEdges()
 
         return
+
+
+    def ReadVTK_ASCII(self, fname, element_type):
+        """Reads ASCII vtk files
+        """
+
+        isPointLine = False
+        isCellLine = False
+        points = []
+        elements = []
+        with open(fname, "r") as f:
+            content = f.readlines()
+
+        for line in content:
+            if "POINTS" in line:
+                isPointLine = True
+                isCellLine = False
+                continue
+            if "CELLS" in line:
+                isPointLine = False
+                isCellLine = True
+                continue
+            if "CELL_TYPES" in line or "CONNECTIVITY" in line:
+                isPointLine = False
+                isCellLine = False
+                continue
+
+            if isPointLine:
+                sline = line.split(" ")
+                if sline[-1] == "\n":
+                    sline = sline[:-1]
+                # print(sline)
+                point = [float(i.strip()) for i in sline]
+                # print(point)
+                points.append(point)
+
+            if isCellLine:
+                sline = line.split(" ")
+                element = [int(i.strip()) for i in sline]
+                elements.append(element[1:])
+
+        self.element_type = element_type
+        self.elements = np.array(elements)
+        # self.elements = self.elements.reshape(self.elements.shape[0]/ 3, 3)
+        self.nelem = self.elements.shape[0]
+        self.points = np.array(points)
+        self.nnode = self.points.shape[0]
 
 
     def ReadGmsh(self, filename, element_type, p=1, read_surface_info=False):
@@ -4610,7 +4656,6 @@ class Mesh(object):
                                 np.ascontiguousarray(points[:,2]), np.ascontiguousarray(elements.ravel()),
                                 np.arange(0,offset*self.nelem,offset)+offset, np.ones(self.nelem)*cellflag,
                                 pointData=result_data)
-
 
 
 
