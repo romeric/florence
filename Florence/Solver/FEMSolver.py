@@ -910,7 +910,7 @@ class FEMSolver(object):
             if self.newton_raphson_failed_to_converge:
                 if Increment == 0:
                     break
-                solver.condA = np.NAN
+                solver.condA = np.nan
                 # Increment = Increment if Increment!=0 else 1
                 TotalDisp = TotalDisp[:,:,:Increment]
                 self.number_of_load_increments = Increment

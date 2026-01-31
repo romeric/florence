@@ -246,81 +246,198 @@ class Mesh(object):
         self.GetEdges()
 
         # First create a node to neighbour map i.e. node as key and its two neighbouring nodes as value
-        # nodeToNeighboursMap = dict()
+        # node_to_neighbours = dict()
         # Use ordered dict since for Python < 3.7 dict does not preserve insertion order
         from collections import OrderedDict
-        nodeToNeighboursMap = OrderedDict()
+        node_to_neighbours = OrderedDict()
         for i in range(self.edges.shape[0]):
+            n1, n2 = self.edges[i, 0], self.edges[i, 1]
 
-            if self.edges[i,0] not in nodeToNeighboursMap:
-                nodeToNeighboursMap[self.edges[i,0]] = [self.edges[i,1],-1]
+            if n1 not in node_to_neighbours:
+                node_to_neighbours[n1] = [n2]
             else:
-                nodeToNeighboursMap[self.edges[i,0]][1] = self.edges[i,1]
+                node_to_neighbours[n1].append(n2)
 
-            if self.edges[i,1] not in nodeToNeighboursMap:
-                nodeToNeighboursMap[self.edges[i,1]] = [self.edges[i,0],-1]
+            if n2 not in node_to_neighbours:
+                node_to_neighbours[n2] = [n1]
             else:
-                nodeToNeighboursMap[self.edges[i,1]][1] = self.edges[i,0]
+                node_to_neighbours[n2].append(n1)
 
-        # Now create a vector of face loops
-        faceLoops = []
+        node_to_neighbours_copy = deepcopy(node_to_neighbours)
+
+        # # Now create a vector of face loops
+        # boundary_loops = []
+        # swapOrder = False
+        # while node_to_neighbours:
+        #     # Insert the first node from node to edge map and its two neighbours in order and erase it from the map
+        #     boundary_loop = []
+        #     mapBegin = next(iter(node_to_neighbours))
+        #     boundary_loop.append(node_to_neighbours[mapBegin][0])
+        #     boundary_loop.append(mapBegin)
+        #     boundary_loop.append(node_to_neighbours[mapBegin][1])
+
+        #     if node_to_neighbours[mapBegin][0] < node_to_neighbours[mapBegin][1]:
+        #         if not swapOrder:
+        #             swapOrder = True
+
+        #     # Pop now
+        #     node_to_neighbours.pop(mapBegin, None)
+
+        #     while True:
+        #         # Pick the last node in the current face loop and find its neighbours
+        #         if boundary_loop[-1] in node_to_neighbours:
+        #             tmp = boundary_loop[-1]
+        #             mapIter = node_to_neighbours[boundary_loop[-1]]
+        #             # Check if we have not reached the end of the loop i.e. the first element
+        #             if mapIter[0] != boundary_loop[0] and mapIter[1] != boundary_loop[0]:
+        #                 if mapIter[0] == boundary_loop[-2]:
+        #                     boundary_loop.append(mapIter[1])
+        #                 elif mapIter[1] == boundary_loop[-2]:
+        #                     boundary_loop.append(mapIter[0])
+        #             else:
+        #                 node_to_neighbours.pop(boundary_loop[0], None)
+
+        #             node_to_neighbours.pop(tmp, None)
+        #         else:
+        #             # boundary_loop = np.array(boundary_loop)
+        #             boundary_loops.append(boundary_loop)
+        #             break
+
+
+        boundary_loops = []
         swapOrder = False
-        while nodeToNeighboursMap:
-            # Insert the first node from node to edge map and its two neighbours in order and erase it from the map
-            faceLoop = []
-            mapBegin = next(iter(nodeToNeighboursMap))
-            faceLoop.append(nodeToNeighboursMap[mapBegin][0])
-            faceLoop.append(mapBegin)
-            faceLoop.append(nodeToNeighboursMap[mapBegin][1])
+        while node_to_neighbours:
+            # Start new loop
+            loop = []
 
-            if nodeToNeighboursMap[mapBegin][0] < nodeToNeighboursMap[mapBegin][1]:
-                if not swapOrder:
-                    swapOrder = True
+            # Take an arbitrary start node
+            start, neighbours = next(iter(node_to_neighbours.items()))
 
-            # Pop now
-            nodeToNeighboursMap.pop(mapBegin, None)
+            if len(neighbours) != 2:
+                # T-junction or invalid mesh
+                raise RuntimeError("T-junctions in the mesh")
+                return None
 
-            while True:
-                # Pick the last node in the current face loop and find its neighbours
-                if faceLoop[-1] in nodeToNeighboursMap:
-                    tmp = faceLoop[-1]
-                    mapIter = nodeToNeighboursMap[faceLoop[-1]]
-                    # Check if we have not reached the end of the loop i.e. the first element
-                    if mapIter[0] != faceLoop[0] and mapIter[1] != faceLoop[0]:
-                        if mapIter[0] == faceLoop[-2]:
-                            faceLoop.append(mapIter[1])
-                        elif mapIter[1] == faceLoop[-2]:
-                            faceLoop.append(mapIter[0])
+            prev = neighbours[0]
+            curr = start
+            next_ = neighbours[1]
+
+            # if prev < next_:
+            #     if not swapOrder:
+            #         swapOrder = True
+
+            # Remove start
+            node_to_neighbours.pop(start)
+
+            loop.append(prev)
+            loop.append(curr)
+
+            # Traverse forward
+            while next_ != start:
+                # If next loops back incorrectly
+                if next_ == prev:
+                    if next_ not in node_to_neighbours:
+                        raise RuntimeError("Invalid mesh encountered")
+                        return None
                     else:
-                        nodeToNeighboursMap.pop(faceLoop[0], None)
+                        node_to_neighbours.pop(next_)
+                        break
 
-                    nodeToNeighboursMap.pop(tmp, None)
-                else:
-                    # faceLoop = np.array(faceLoop)
-                    faceLoops.append(faceLoop)
+                # Push next
+                loop.append(next_)
+
+                if next_ not in node_to_neighbours:
+                    return None  # broken chain
+
+                n0, n1 = node_to_neighbours[next_]
+
+                # Choose neighbor that is not the current node
+                chosen = n0 if n0 != curr else n1
+
+                if chosen == curr:
+                    return None  # both neighbors the same: invalid
+
+                # Check if loop closes back to first node in loop
+                if next_ == loop[0]:
+                    node_to_neighbours.pop(next_)
                     break
 
-        for faceLoop in faceLoops:
+                # Move forward
+                curr = next_
+                next_ = chosen
+
+                node_to_neighbours.pop(curr, None)
+
+            boundary_loops.append(loop)
+
+
+        for faceLoop in boundary_loops:
             for nodeId in faceLoop:
                 if nodeId == -1:
                     raise RuntimeError("Invalid or self-intersecting loop detected")
 
-        if swapOrder:
-            for i in range(len(faceLoops)):
-                faceLoops[i] = faceLoops[i][::-1]
+        # if swapOrder:
+        #     for i in range(len(boundary_loops)):
+        #         boundary_loops[i] = boundary_loops[i][::-1]
 
         # Now reorder the loop such that the starting (the we got from the first element self.edges) comes first/last
         # instead of second from beginning/end
-        for i in range(len(faceLoops)):
+        for i in range(len(boundary_loops)):
             # Insert the last element into first
-            faceLoops[i].insert(0, faceLoops[i][-1])
+            boundary_loops[i].insert(0, boundary_loops[i][-1])
             # Remove the last element
-            faceLoops[i].pop()
+            boundary_loops[i].pop()
 
-        for i in range(len(faceLoops)):
-            faceLoops[i] = np.array(faceLoops[i])
+        for i in range(len(boundary_loops)):
+            boundary_loops[i] = np.array(boundary_loops[i])
 
-        return faceLoops
+        # Reassign
+        node_to_neighbours = node_to_neighbours_copy
+
+        # # Detect multiple equal loops
+        # if len(boundary_loops) > 1:
+        #     # Get number of closed loops
+        #     closed_boundary_loop_indices = []
+        #     for i, loop in enumerate(boundary_loops):
+        #         loop = boundary_loops[i]
+        #         n0, n1 = node_to_neighbours[loop[0]]
+        #         if n0 == loop[-1] or n1 == loop[-1]:
+        #             closed_boundary_loop_indices.append(i)
+
+        #     # Now check if any of these closed loops have nearly equal loop lengths
+        #     loop_lengths = []
+        #     for loop in boundary_loops:
+        #         coords_loop = self.points[loop, :]
+        #         diffs = coords_loop - np.roll(coords_loop, -1, axis=0)
+        #         perim = np.linalg.norm(diffs, axis=1).sum()
+        #         loop_lengths.append(perim)
+
+        #     # Groups boundary loops into clusters where lengths differ
+        #     # by at most rel_tol fraction (default 5%)
+        #     rel_tol = 0.05
+        #     n = len(loop_lengths)
+        #     used = [False] * n
+        #     loop_groups = []
+
+        #     for i in range(n):
+        #         if used[i]:
+        #             continue
+        #         group = [i]
+        #         used[i] = True
+
+        #         for j in range(i+1, n):
+        #             if used[j]:
+        #                 continue
+        #             L1 = loop_lengths[i]
+        #             L2 = loop_lengths[j]
+        #             # relative difference <= 5%
+        #             if abs(L1 - L2) <= rel_tol * max(L1, L2):
+        #                 group.append(j)
+        #                 used[j] = True
+
+        #         loop_groups.append(group)
+
+        return boundary_loops
 
 
     @property
@@ -331,19 +448,17 @@ class Mesh(object):
         assert self.points is not None
 
         if self.points.shape[1] == 3:
-            bounds = np.array([[np.min(self.points[:,0]),
-                        np.min(self.points[:,1]),
-                        np.min(self.points[:,2])],
-                        [np.max(self.points[:,0]),
-                        np.max(self.points[:,1]),
-                        np.max(self.points[:,2])]])
+            bounds = np.array([
+                [np.min(self.points[:,0]), np.min(self.points[:,1]), np.min(self.points[:,2])],
+                [np.max(self.points[:,0]), np.max(self.points[:,1]), np.max(self.points[:,2])]
+                ])
             makezero(bounds)
             return bounds
         elif self.points.shape[1] == 2:
-            bounds = np.array([[np.min(self.points[:,0]),
-                        np.min(self.points[:,1])],
-                        [np.max(self.points[:,0]),
-                        np.max(self.points[:,1])]])
+            bounds = np.array([
+                [np.min(self.points[:,0]), np.min(self.points[:,1])],
+                [np.max(self.points[:,0]), np.max(self.points[:,1])]
+                ])
             makezero(bounds)
             return bounds
         elif self.points.shape[1] == 1:
@@ -1464,7 +1579,7 @@ class Mesh(object):
     def Sizes(self, with_sign=False):
         """Computes the size of elements for all element types.
             This is a generic method that for 1D=lengths, for 2D=areas and for 3D=volumes.
-            It works for planar and curved elements
+            It works for linear and high order curved elements
         """
 
         self.__do_essential_memebers_exist__()
@@ -1638,7 +1753,7 @@ class Mesh(object):
         return normals
 
 
-    def Normals(self, show_plot=False):
+    def Normals(self, show_plot=False, backend="pyvista"):
         """Computes unit outward normals to the boundary for all element types.
             Unity and outwardness are guaranteed
         """
@@ -1708,18 +1823,40 @@ class Mesh(object):
                     faces = self.elements
                 mid_face_coords = np.sum(self.points[faces,:3],axis=1)/faces.shape[1]
 
-                import os
-                os.environ['ETS_TOOLKIT'] = 'qt4'
-                from mayavi import mlab
+                if backend == "mayavi":
+                    import os
+                    os.environ['ETS_TOOLKIT'] = 'qt4'
+                    from mayavi import mlab
 
-                figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(1000,800))
+                    figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(1000,800))
 
-                self.SimplePlot(figure=figure, show_plot=False)
+                    self.SimplePlot(figure=figure, show_plot=False, backend=backend)
 
-                mlab.quiver3d(mid_face_coords[:,0], mid_face_coords[:,1], mid_face_coords[:,2],
-                    normals[:,0], normals[:,1], normals[:,2],
-                    color=(0.,128./255,128./255),line_width=5)
-                mlab.show()
+                    mlab.quiver3d(mid_face_coords[:,0], mid_face_coords[:,1], mid_face_coords[:,2],
+                        normals[:,0], normals[:,1], normals[:,2],
+                        color=(0.,128./255,128./255),line_width=5)
+                    mlab.show()
+
+                elif backend == "pyvista":
+                    import pyvista as pv
+                    figure = pv.Plotter(window_size=(2000, 1600))
+                    figure.background_color = (1, 1, 1)
+                    figure.set_background('white')
+
+                    self.SimplePlot(figure=figure, show_plot=False, backend=backend)
+
+                    # Create a PolyData object of arrow origins
+                    points = pv.PolyData(mid_face_coords)
+                    points["normals"] = normals
+                    mesh_size = np.linalg.norm(np.ptp(self.points, axis=0))
+                    arrow_length = mesh_size * 0.025  # 0.25% of mesh size
+
+                    # Generate glyphs (arrows) oriented by the "normals" vector field
+                    arrows = points.glyph(orient="normals", scale=False, factor=arrow_length)
+
+                    figure.add_mesh(arrows, color=(0, 128/255, 128/255))
+
+                    figure.show()
 
         return normals
 
@@ -2365,9 +2502,9 @@ class Mesh(object):
 
         if verbose:
             if original_order == 'anti-clockwise':
-                print(u'\u2713'.encode('utf8')+b' : ','Imported mesh has',original_order,'node ordering')
+                print(u'\u2713 Imported mesh has',original_order,'node ordering')
             else:
-                print(u'\u2717'.encode('utf8')+b' : ','Imported mesh has',original_order,'node ordering')
+                print(u'\u2717 Imported mesh has',original_order,'node ordering')
 
         return original_order
 
@@ -3255,13 +3392,23 @@ class Mesh(object):
                 item = line.rstrip()
                 plist = item.split()
                 if var == 0:
+                    # if line_counter > rem_nnode and line_counter < self.nnode+rem_nnode+1:
+                    #     points.append([float(i) for i in plist[:3]])
                     if line_counter > rem_nnode and line_counter < self.nnode+rem_nnode+1:
-                        points.append([float(i) for i in plist[:3]])
+                        # Include node ID
+                        node_id = int(plist[0])
+                        coords = [float(i) for i in plist[1:4]]
+                        points.append((node_id, coords))
+
                     if line_counter > rem_nelem and line_counter < self.nelem+rem_nelem+1:
                         elements.append([int(i) for i in plist[:4]])
                 elif var == 1:
+                    # if line_counter > rem_nnode and line_counter < self.nnode+rem_nnode+1:
+                        # points.append([float(i) for i in plist[1:]])
                     if line_counter > rem_nnode and line_counter < self.nnode+rem_nnode+1:
-                        points.append([float(i) for i in plist[1:]])
+                        node_id = int(plist[0])
+                        coords = [float(i) for i in plist[1:4]]
+                        points.append((node_id, coords))
                     if line_counter > rem_nelem and line_counter < self.nelem+rem_nelem+1:
                         if int(plist[1]) == el:
                             elements.append([int(i) for i in plist[-ns:]])
@@ -3320,9 +3467,31 @@ class Mesh(object):
                             face_to_surface.append(surface_tag)
                     line_number += incrementer + 1
 
+        # Old
+        # self.points = np.array(points,copy=True)
+        # self.elements = np.array(elements,copy=True) - 1
 
-        self.points = np.array(points,copy=True)
-        self.elements = np.array(elements,copy=True) - 1
+        n_nodes = len(points)
+        used_nodes = np.unique(elements)   # all node indices that appear in elements
+        all_nodes = np.arange(n_nodes)
+
+        # nodes that are not referenced by any element
+        unreferenced_nodes = np.setdiff1d(all_nodes, used_nodes)
+        # print(unreferenced_nodes)
+
+        # New - works for reading only one type of elements
+        # Step 1: Unique global node IDs used by filtered elements
+        used_global_node_ids = sorted(set(i for elem in elements for i in elem))
+        # Step 2: Map from global node ID → local index (0-based)
+        global_to_local = {gid: idx for idx, gid in enumerate(used_global_node_ids)}
+        # Step 3: Build filtered points array using node ID lookup
+        # Build a dictionary: node_id → coordinates
+        point_dict = {node_id: coords for (node_id, coords) in points}
+        # Now filter and order
+        self.points = np.array([point_dict[gid] for gid in used_global_node_ids], copy=True)
+        # Step 4: Remap elements from global node IDs to local indices
+        self.elements = np.array([[global_to_local[gid] for gid in elem] for elem in elements], dtype=int)
+
         # REORDER CONNECTIVITY
         # READER ORDERING IS SAME AS SYMFE
         if p > 1:
@@ -3781,7 +3950,7 @@ class Mesh(object):
     def SimplePlot(self, to_plot='faces', color=None, edge_color=None, point_color=None,
         plot_points=False, plot_faces=None, plot_edges=True, point_radius=None,
         save=False, filename=None, figure=None, show_plot=True, show_axis=False, grid="off",
-        backend="mayavi"):
+        backend="pyvista"):
         """Simple mesh plot
 
             to_plot:        [str] only for 3D. 'faces' to plot only boundary faces
@@ -4079,13 +4248,6 @@ class Mesh(object):
 
         elif self.element_type == "line":
 
-            import os
-            os.environ['ETS_TOOLKIT'] = 'qt4'
-            from mayavi import mlab
-
-            if figure is None:
-                figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(1000,800))
-
             if self.points.ndim == 1:
                 self.points = self.points[:,None]
 
@@ -4097,17 +4259,49 @@ class Mesh(object):
             elif self.points.shape[1] == 3:
                 points = np.copy(self.points)
 
-            if plot_edges:
-                src = mlab.pipeline.scalar_scatter(points[:,0],points[:,1],points[:,2])
-                src.mlab_source.dataset.lines = self.elements[:,:2]
-                lines = mlab.pipeline.stripper(src)
-                h_edges = mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
 
-            if plot_points:
-                h_points = mlab.points3d(points[:,0],points[:,1],points[:,2],color=(0,0,0),mode='sphere',scale_factor=point_radius)
+            if backend == "mayavi":
+                import os
+                os.environ['ETS_TOOLKIT'] = 'qt4'
+                from mayavi import mlab
 
-            if show_plot:
-                mlab.show()
+                if figure is None:
+                    figure = mlab.figure(bgcolor=(1,1,1),fgcolor=(1,1,1),size=(1000,800))
+
+                if plot_edges:
+                    src = mlab.pipeline.scalar_scatter(points[:,0],points[:,1],points[:,2])
+                    src.mlab_source.dataset.lines = self.elements[:,:2]
+                    lines = mlab.pipeline.stripper(src)
+                    h_edges = mlab.pipeline.surface(lines, color = (0,0,0), line_width=2)
+
+                if plot_points:
+                    h_points = mlab.points3d(points[:,0],points[:,1],points[:,2],color=(0,0,0),mode='sphere',scale_factor=point_radius)
+
+                if show_plot:
+                    mlab.show()
+
+            elif backend == "pyvista":
+
+                import pyvista as pv
+                if figure is None:
+                    figure = pv.Plotter(window_size=(2000, 1600))
+                    figure.background_color = (1, 1, 1)
+                    figure.set_background('white')
+
+                if plot_edges and hasattr(self, "elements"):
+                    # Create line cells
+                    n_lines = self.elements.shape[0]
+                    cells = np.hstack([[2, *line] for line in self.elements[:, :2]])  # [2, i, j, 2, i, j, ...]
+                    cell_types = np.full(n_lines, pv.CellType.LINE, dtype=np.uint8)
+                    line_mesh = pv.UnstructuredGrid(cells, cell_types, points)
+                    figure.add_mesh(line_mesh, color="black", line_width=2)
+
+                if plot_points:
+                    point_cloud = pv.PolyData(points)
+                    figure.add_mesh(point_cloud, color="black", point_size=point_radius * 10, render_points_as_spheres=True)
+
+                if show_plot:
+                    figure.show()
 
         else:
             raise NotImplementedError("SimplePlot for {} not implemented yet".format(self.element_type))
@@ -6375,41 +6569,347 @@ class Mesh(object):
         if self.element_type != "tri":
             raise ValueError("FlattenToNonconformal2DMesh is only applicable to triangles")
 
+        # imesh = deepcopy(self)
+        # coordinates = []
+        # connectivities = []
+        # for counter, elem in enumerate(imesh.elements):
+
+        #     elementCoordinates = imesh.points[elem,:]
+
+        #     A = elementCoordinates[0,:]
+        #     B = elementCoordinates[1,:]
+        #     C = elementCoordinates[2,:]
+
+        #     X = (B - A); X /= np.linalg.norm(X)
+        #     Z = np.cross(X, C - A); Z /= np.linalg.norm(Z)
+        #     Y = np.cross(Z, X)
+
+        #     # PROJECT THE TRIANGLE TO THIS BASES
+        #     a = [0., 0.]
+        #     b = [np.linalg.norm((B - A)), 0.]
+        #     c = [(C - A).dot(X), (C - A).dot(Y)]
+
+        #     coordinates.append(a)
+        #     coordinates.append(b)
+        #     coordinates.append(c)
+
+        #     elementConnectivity = [3 * counter, 3 * counter + 1, 3 * counter + 2]
+        #     connectivities.append(elementConnectivity)
+
+        # coordinates = np.array(coordinates)
+        # connectivities = np.array(connectivities)
+        # imesh.points = coordinates
+        # imesh.elements = connectivities
+        # imesh.nelem = imesh.elements.shape[0]
+        # imesh.nnode = imesh.points.shape[0]
+
+        # return imesh
+
+
+        # VECTORISED APPROACH - MUCH FASTER BUT NOT NUMERICAALLY MIGHT BE SLIGHTLY DIFFERENT
         imesh = deepcopy(self)
-        coordinates = []
-        connectivities = []
-        for counter, elem in enumerate(imesh.elements):
+        nelem = imesh.elements.shape[0]
+        # Extract coordinates for all triangles
+        # Shape: (nelem, 3, 3) where 3 is for vertices A, B, C, each with 3D coordinates
+        elementCoordinates = imesh.points[imesh.elements, :]  # Broadcasting indices
 
-            elementCoordinates = imesh.points[elem,:]
+        # Extract vertices A, B, C for all triangles
+        A = elementCoordinates[:, 0, :]  # Shape: (nelem, 3)
+        B = elementCoordinates[:, 1, :]  # Shape: (nelem, 3)
+        C = elementCoordinates[:, 2, :]  # Shape: (nelem, 3)
 
-            A = elementCoordinates[0,:]
-            B = elementCoordinates[1,:]
-            C = elementCoordinates[2,:]
+        # Compute orthonormal basis
+        # X = (B - A) / ||B - A||
+        X = B - A
+        X_norm = np.sqrt(np.sum(X**2, axis=1, keepdims=True))  # Shape: (nelem, 1)
+        X = X / X_norm  # Shape: (nelem, 3)
 
-            X = (B - A); X /= np.linalg.norm(X)
-            Z = np.cross(X, C - A); Z /= np.linalg.norm(Z)
-            Y = np.cross(Z, X)
+        # Z = cross(X, C - A) / ||cross(X, C - A)||
+        CA = C - A
+        Z = np.cross(X, CA)  # Shape: (nelem, 3)
+        Z_norm = np.sqrt(np.sum(Z**2, axis=1, keepdims=True))  # Shape: (nelem, 1)
+        Z = Z / Z_norm  # Shape: (nelem, 3)
 
-            # PROJECT THE TRIANGLE TO THIS BASES
-            a = [0., 0.]
-            b = [np.linalg.norm((B - A)), 0.]
-            c = [(C - A).dot(X), (C - A).dot(Y)]
+        # Y = cross(Z, X)
+        Y = np.cross(Z, X)  # Shape: (nelem, 3)
 
-            coordinates.append(a)
-            coordinates.append(b)
-            coordinates.append(c)
+        # Project vertices to 2D plane
+        # a = (0, 0) for all triangles
+        a = np.zeros((nelem, 2))  # Shape: (nelem, 2)
 
-            elementConnectivity = [3 * counter, 3 * counter + 1, 3 * counter + 2]
-            connectivities.append(elementConnectivity)
+        # b = (||B - A||, 0) for all triangles
+        b = np.column_stack((X_norm[:, 0], np.zeros(nelem)))  # Shape: (nelem, 2)
 
-        coordinates = np.array(coordinates)
-        connectivities = np.array(connectivities)
+        # c = ((C - A)·X, (C - A)·Y)
+        c_x = np.sum((C - A) * X, axis=1)  # Dot product for all triangles
+        c_y = np.sum((C - A) * Y, axis=1)  # Dot product for all triangles
+        c = np.column_stack((c_x, c_y))  # Shape: (nelem, 2)
+
+        # Stack coordinates: [a, b, c] for all triangles
+        coordinates = np.stack((a, b, c), axis=1)  # Shape: (nelem, 3, 2)
+        coordinates = coordinates.reshape(-1, 2)  # Shape: (3*nelem, 2)
+
+        # Generate connectivity indices
+        connectivities = np.arange(3 * nelem).reshape(nelem, 3)  # Shape: (nelem, 3)
+
+        # Update mesh
         imesh.points = coordinates
         imesh.elements = connectivities
-        imesh.nelem = imesh.elements.shape[0]
-        imesh.nnode = imesh.points.shape[0]
+        imesh.nelem = nelem
+        imesh.nnode = coordinates.shape[0]
 
         return imesh
+
+
+    def ScaffoldTutte(self, uvs, loop, r, tight=True):
+        """Creates a scaffold around a circular mesh around Tutte embedding
+
+            input:
+                uvs -  uv coordinates of Tutte embedding
+                loop - the outer loop indices of Tutte
+                r - radius of Tutte circle
+                tight - if tight is True then creates a a tight circular scaffold otherwise a bigger box
+            returns:
+                target_mesh - scaffolded mesh
+                source_mesh - corresponding source mesh
+        """
+
+        tt = time()
+
+        if tight:
+            # Get number of points on the outer loop
+            num_max_points = 200 if loop.shape[0] < 100000 else 300
+            num_outer_boundary_points = max(int(loop.shape[0] / 10), 12)
+            num_outer_boundary_points = min(num_max_points, num_outer_boundary_points)
+
+            outer_radius = 1.05 * r
+            ts = np.linspace(0., 1., num_outer_boundary_points + 1) * 2. * np.pi
+            spoints = np.zeros((num_outer_boundary_points, 2))
+            # Non-vectorised
+            # for i in range(0, num_outer_boundary_points):
+            #     spoints[i,0] = outer_radius * np.cos(ts[i])
+            #     spoints[i,1] = outer_radius * np.sin(ts[i])
+            # Vectorised
+            spoints[:, 0] = outer_radius * np.cos(ts[:num_outer_boundary_points])
+            spoints[:, 1] = outer_radius * np.sin(ts[:num_outer_boundary_points])
+
+            pts = uvs[loop, :]
+            pts = np.vstack((pts, spoints))
+
+            num_inner_boundary_pts = loop.shape[0]
+            segs = np.zeros((num_inner_boundary_pts,2))
+            segs[:,0] = np.arange(num_inner_boundary_pts)
+            segs[:,1] = np.arange(num_inner_boundary_pts) + 1
+            segs[-1,-1] = 0
+
+            segs2 = np.zeros((num_outer_boundary_points,2))
+            segs2[:,0] = np.arange(num_outer_boundary_points)
+            segs2[:,1] = np.arange(num_outer_boundary_points) + 1
+            segs2[-1,-1] = 0
+            segs2 += num_inner_boundary_pts
+
+            segs = np.vstack((segs, segs2)).astype(int)
+
+            # Map
+            node_map = dict()
+            for i in range(0,loop.shape[0]):
+                node_map[i] = loop[i]
+
+            # Uses the following fork of triangle library: https://github.com/drufat/triangle
+            # Or this one: https://github.com/romeric/triangle
+            # To install:
+            #   git clone --recurse-submodules https://github.com/romeric/triangle
+            #   cd triangle && python setup.py build_ext
+            #   pip install .
+            #   cd .. && rm -rf triangle
+            import triangle as tr
+            inVT = dict(vertices=pts, segments=segs, holes=[[0, 0]])
+            if pts.shape[0] < 10000:
+                outVT = tr.triangulate(inVT, 'qYYQpz')
+            else:
+                outVT = tr.triangulate(inVT, 'YYQpz')
+            points = outVT['vertices']
+            elements = outVT['triangles']
+
+            # import matplotlib.pyplot as plt
+            # tr.compare(plt, inVT, outVT)
+            # plt.show()
+            new_elements = np.copy(elements)
+            for i in range(elements.shape[0]):
+                for j in range(elements.shape[1]):
+                    if elements[i,j] in node_map:
+                        new_elements[i,j] = node_map[elements[i,j]]
+                    else:
+                        new_elements[i,j] += uvs.shape[0] - num_inner_boundary_pts
+
+            # Tight scaffold mesh
+            smesh = Mesh()
+            smesh.element_type = "tri"
+            smesh.elements = np.vstack((self.elements, new_elements)).astype(int)
+            smesh.points = np.vstack((uvs, points[num_inner_boundary_pts:,:]))
+            smesh.nelem = smesh.elements.shape[0]
+            smesh.nnode = smesh.points.shape[0]
+
+            # Create expanded source mesh
+            source_mesh = self.FlattenToNonconformal2DMesh()
+            source_mesh2 = Mesh()
+            source_mesh2.element_type = "tri"
+            source_mesh2.points = np.zeros((points.shape[0],3))
+            source_mesh2.points[:,:2] = points
+            source_mesh2.elements = elements
+            source_mesh2 = source_mesh2.FlattenToNonconformal2DMesh()
+
+            # Rest shape does not really matter
+            # # Use ideal triangle as source mesh for scaffold rest shape
+            # areas = source_mesh2.Areas()
+            # for i in range(source_mesh2.nelem):
+            #     coord_ids = source_mesh2.elements[i,:]
+            #     source_mesh2.points[coord_ids,:] = areas[i] * np.array([
+            #         [-0.5,                 0.],
+            #         [ 0.5,                 0.],
+            #         [ 0. , 0.8660254037844386]
+            #         ])
+
+            # source_mesh.elements = np.vstack((source_mesh.elements, source_mesh2.elements)).astype(int) # we had this bug for a long time - restarting connectivitys
+            source_mesh.elements = np.vstack((source_mesh.elements, source_mesh2.elements + source_mesh.nnode)).astype(int)
+            source_mesh.points = np.vstack((source_mesh.points, source_mesh2.points))
+            source_mesh.nelem = source_mesh.elements.shape[0]
+            source_mesh.nnode = source_mesh.points.shape[0]
+
+        else:
+            # Create the loop of vertices of engulfing box
+            outer_radius = 3.5 * r;
+            x1 = np.linspace(-outer_radius,outer_radius, 20)
+            spoints = np.zeros((x1.shape[0],2))
+            spoints[:,0] = x1
+            spoints[:,1] = -outer_radius
+
+            spoints2 = np.zeros((x1.shape[0],2))
+            spoints2[:,0] = outer_radius
+            spoints2[:,1] = x1
+            spoints = np.vstack((spoints,spoints2[1:,]))
+
+            spoints2[:,0] = x1[::-1]
+            spoints2[:,1] = outer_radius
+            spoints = np.vstack((spoints,spoints2[1:,]))
+
+            spoints2[:,0] = -outer_radius
+            spoints2[:,1] = x1[::-1]
+            spoints = np.vstack((spoints,spoints2[1:-1,]))
+
+            segs = np.zeros((len(spoints),2))
+            segs[:,0] = np.arange(len(spoints))
+            segs[:,1] = np.arange(len(spoints)) + 1
+            segs[-1,-1] = 0
+            segs = segs + mesh.nnode
+            segs = segs.astype(int)
+
+            pts = np.vstack((uvs, spoints))
+            segs = np.vstack((mesh.edges, segs)).astype(int)
+
+            import triangle as tr
+            inVT = dict(vertices=pts, segments=segs, holes=[[0, 0]]),
+            outVT = tr.triangulate(inVT, 'qYYQpz')
+
+            # TODO
+            # merge back triangle mesh and tutte mesh
+
+        tt = time() - tt
+        print("Elapsed time for scaffolding is:", tt)
+
+        return smesh, source_mesh
+
+
+
+
+    def ComputeFlatteningScore(self, smesh, elmarker = int(-1)):
+        """Computes flattening or parametrisation score of a triangular mesh
+            i.e. given a self as a 2D mesh and smesh as 3D mesh computes a weighted
+            area ratio 2D/3D
+
+            input:
+                smesh - source mesh
+                elmarker - element number marker i.e. to compare upto which element
+            returns:
+                the flattening score
+        """
+
+        if smesh.nelem != self.nelem:
+            raise RuntimeError("Source and target mesh are incompatible")
+
+        if self.element_type != "tri":
+            raise RuntimeError("Only triangular meshes are supported")
+
+        flatteningScore = 0.
+        totalArea = 0.0
+        areas3D = None
+
+        if elmarker == -1:
+            elmarker = smesh.nelem
+
+        areas2D = self.Areas(with_sign=True)
+
+        sndim = smesh.InferSpatialDimension()
+        if sndim == 3:
+            # Compute areas
+            AB = smesh.points[smesh.elements[:,0]] - smesh.points[smesh.elements[:,1]]
+            AC = smesh.points[smesh.elements[:,0]] - smesh.points[smesh.elements[:,2]]
+            areas3D = 0.5 * np.linalg.norm(np.cross(AB, AC), axis=1)
+            totalArea = np.sum(areas3D[:smesh.nelem])
+        elif sndim == 2:
+            areas3D = smesh.Areas()
+            totalArea = np.sum(areas3D[:smesh.nelem])
+
+        areaUse = (totalArea / elmarker) * 0.1
+
+        worstRatio = 1.0
+        totalScore = 0.0
+        minRatio = 0.0
+        weight = 0.0
+        counter = 0
+        for iElem in range(self.nelem):
+            # Skip flattening score computation for scaffold elements
+            if iElem >= elmarker:
+                continue
+
+            # Get 2D area of triangle [target mesh]
+            area2D = areas2D[iElem]
+
+            # Get 3D area of triangle [source mesh] - 3D areas assumed positive
+            area3D = areas3D[iElem]
+
+            if area3D < np.finfo(float).eps:
+                continue
+            if area2D < 0.0:
+                counter += 1
+                continue
+
+            ratio = 0.0;
+            if area2D > area3D:
+                ratio = area3D / area2D
+            else:
+                ratio = area2D / area3D
+
+            if ratio < minRatio:
+                minRatio = ratio
+
+            weight = area3D / totalArea
+            if area3D > areaUse:
+                if ratio < worstRatio:
+                    worstRatio = ratio
+
+            totalScore += ratio * ratio * weight
+
+        if weight >= 0.0:
+            flatteningScore = totalScore * worstRatio
+        else:
+            flatteningScore = 0.0
+
+        if counter > 0:
+            flatteningScore -= 1.0
+
+        return flatteningScore
+
 
 
     def CreateNonconformalMeshWithGap(self, gap=0.1):
@@ -7391,7 +7891,7 @@ class Mesh(object):
         return is_equally_spaced
 
 
-    def IsSimilar(self,other):
+    def IsSimilar(self, other):
         """Checks if two meshes are similar.
             Similarity is established in terms of element type.
             This is not a property, since property methods can
@@ -7402,7 +7902,7 @@ class Mesh(object):
         return self.element_type == other.element_type
 
 
-    def IsEqualOrder(self,other):
+    def IsEqualOrder(self, other):
         """Checks if two meshes are equal order.
             This is not a property, since property methods can
             take variables
@@ -7686,12 +8186,16 @@ class Mesh(object):
         nodeperelem = self.elements.shape[1]
         tmesh = Mesh()
         tmesh.element_type = self.element_type
-        unnodes, inv = np.unique(self.elements[elements,:nodeperelem], return_inverse=True)
+        unnodes, inv = np.unique(np.ravel(self.elements[elements,:nodeperelem]), return_inverse=True)
         aranger = np.arange(elements.shape[0]*nodeperelem)
         tmesh.elements = inv[aranger].reshape(elements.shape[0],nodeperelem)
         tmesh.points = self.points[unnodes,:]
         tmesh.nelem = tmesh.elements.shape[0]
         tmesh.nnode = tmesh.points.shape[0]
+
+        # RETURN IF EMPTY - DO NOT COMPUTE BOUNDARY INFO
+        if tmesh.nelem == 0:
+            return tmesh
 
         if compute_boundary_info:
             if tmesh.element_type == "hex" or tmesh.element_type == "tet":
@@ -7699,6 +8203,11 @@ class Mesh(object):
                 tmesh.GetBoundaryEdges()
             elif tmesh.element_type == "quad" or tmesh.element_type == "tri":
                 tmesh.GetBoundaryEdges()
+
+        if self.telements is not None:
+            tmesh.telements = self.telements[:tmesh.nelem,:]
+        if self.textures is not None:
+            tmesh.textures = self.textures[:tmesh.nnode,:]
 
         if solution is not None:
             if self.nelem != solution.shape[0]:
@@ -8140,9 +8649,6 @@ class Mesh(object):
         self.GetBoundaryEdgesHex()
 
         print("Tetrahedral to hexahedral mesh conversion took", time() - tconv, "seconds")
-
-
-
 
 
     def ConvertQuadsToTris(self):
