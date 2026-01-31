@@ -59,6 +59,7 @@ class Mesh(object):
         self.edges = None
         self.faces = None
         self.element_type = element_type
+        self.loops = None
 
         self.face_to_element = None
         self.edge_to_element = None
@@ -265,45 +266,6 @@ class Mesh(object):
 
         node_to_neighbours_copy = deepcopy(node_to_neighbours)
 
-        # # Now create a vector of face loops
-        # boundary_loops = []
-        # swapOrder = False
-        # while node_to_neighbours:
-        #     # Insert the first node from node to edge map and its two neighbours in order and erase it from the map
-        #     boundary_loop = []
-        #     mapBegin = next(iter(node_to_neighbours))
-        #     boundary_loop.append(node_to_neighbours[mapBegin][0])
-        #     boundary_loop.append(mapBegin)
-        #     boundary_loop.append(node_to_neighbours[mapBegin][1])
-
-        #     if node_to_neighbours[mapBegin][0] < node_to_neighbours[mapBegin][1]:
-        #         if not swapOrder:
-        #             swapOrder = True
-
-        #     # Pop now
-        #     node_to_neighbours.pop(mapBegin, None)
-
-        #     while True:
-        #         # Pick the last node in the current face loop and find its neighbours
-        #         if boundary_loop[-1] in node_to_neighbours:
-        #             tmp = boundary_loop[-1]
-        #             mapIter = node_to_neighbours[boundary_loop[-1]]
-        #             # Check if we have not reached the end of the loop i.e. the first element
-        #             if mapIter[0] != boundary_loop[0] and mapIter[1] != boundary_loop[0]:
-        #                 if mapIter[0] == boundary_loop[-2]:
-        #                     boundary_loop.append(mapIter[1])
-        #                 elif mapIter[1] == boundary_loop[-2]:
-        #                     boundary_loop.append(mapIter[0])
-        #             else:
-        #                 node_to_neighbours.pop(boundary_loop[0], None)
-
-        #             node_to_neighbours.pop(tmp, None)
-        #         else:
-        #             # boundary_loop = np.array(boundary_loop)
-        #             boundary_loops.append(boundary_loop)
-        #             break
-
-
         boundary_loops = []
         swapOrder = False
         while node_to_neighbours:
@@ -394,50 +356,115 @@ class Mesh(object):
         # Reassign
         node_to_neighbours = node_to_neighbours_copy
 
-        # # Detect multiple equal loops
-        # if len(boundary_loops) > 1:
-        #     # Get number of closed loops
-        #     closed_boundary_loop_indices = []
-        #     for i, loop in enumerate(boundary_loops):
-        #         loop = boundary_loops[i]
-        #         n0, n1 = node_to_neighbours[loop[0]]
-        #         if n0 == loop[-1] or n1 == loop[-1]:
-        #             closed_boundary_loop_indices.append(i)
-
-        #     # Now check if any of these closed loops have nearly equal loop lengths
-        #     loop_lengths = []
-        #     for loop in boundary_loops:
-        #         coords_loop = self.points[loop, :]
-        #         diffs = coords_loop - np.roll(coords_loop, -1, axis=0)
-        #         perim = np.linalg.norm(diffs, axis=1).sum()
-        #         loop_lengths.append(perim)
-
-        #     # Groups boundary loops into clusters where lengths differ
-        #     # by at most rel_tol fraction (default 5%)
-        #     rel_tol = 0.05
-        #     n = len(loop_lengths)
-        #     used = [False] * n
-        #     loop_groups = []
-
-        #     for i in range(n):
-        #         if used[i]:
-        #             continue
-        #         group = [i]
-        #         used[i] = True
-
-        #         for j in range(i+1, n):
-        #             if used[j]:
-        #                 continue
-        #             L1 = loop_lengths[i]
-        #             L2 = loop_lengths[j]
-        #             # relative difference <= 5%
-        #             if abs(L1 - L2) <= rel_tol * max(L1, L2):
-        #                 group.append(j)
-        #                 used[j] = True
-
-        #         loop_groups.append(group)
-
+        self.loops = boundary_loops
         return boundary_loops
+
+
+    def FindLongestLoop(self, plot=False):
+        """Finds the longest loop using Newell's method and falls back to extrema method
+            if Newell projected loop is intersecting
+
+            input:
+                plot - plots if intersecting loop is found
+            returns:
+                index of the longest loop in self.loops
+        """
+
+        # Find outer loop using Newell's method
+        from shapely.geometry import LinearRing, Polygon
+
+        def polygon_area_normal(points):
+            """
+            Compute absolute area of a polygon using Newell's method.
+            """
+            n = len(points)
+            nx = ny = nz = 0.0
+            for i in range(n):
+                p0 = points[i]
+                p1 = points[(i + 1) % n]
+                nx += (p0[1] - p1[1]) * (p0[2] + p1[2])
+                ny += (p0[2] - p1[2]) * (p0[0] + p1[0])
+                nz += (p0[0] - p1[0]) * (p0[1] + p1[1])
+            normal = np.array([nx, ny, nz])
+            return normal, 0.5 * np.linalg.norm(normal)
+
+        areas = []
+        outer_loop_index = None
+        loop = None
+        does_intersect = False
+        for loop in self.loops:
+            coords_loop = self.points[loop]
+            normal, area = polygon_area_normal(coords_loop)
+            areas.append(area)
+
+            # Get dominant axis
+            ax = np.argmax(np.abs(normal))
+            if ax == 0:      # drop X -> project to YZ
+                coords_loop = coords_loop[:, [1, 2]]
+            elif ax == 1:    # drop Y -> project to XZ
+                coords_loop = coords_loop[:, [0, 2]]
+            else:            # drop Z -> project to XY
+                coords_loop = coords_loop[:, [0, 1]]
+
+            poly = Polygon(coords_loop)
+            # poly = LinearRing(coords_loop)
+            if not poly.is_simple:
+                print(u'\u2717 2D Newell projected loop self intersects')
+                does_intersect = True
+
+                if plot:
+                    lmesh = Mesh()
+                    lmesh.element_type="line"
+                    lmesh.elements = np.zeros((len(loop), 2), dtype=int)
+                    for i in range(len(loop)):
+                        if i != len(loop) - 1:
+                            lmesh.elements[i] = [i, i + 1]
+                        else:
+                            lmesh.elements[i] = [i, 0]
+                    # lmesh.points = mesh.points[loop,:]
+                    lmesh.points = coords_loop
+                    lmesh.nelem = lmesh.elements.shape[0]
+                    lmesh.nnode = lmesh.points.shape[0]
+
+                    lmesh.SimplePlot()
+
+                break
+
+
+        if not does_intersect:
+            outer_loop_index = np.argmax(areas)
+        else:
+            # Robustly determine outer loop:
+            # Find the boundary vertex with the smallest x-coordinate (tie-break by y, then z)—this extreme
+            # vertex is always on the outer loop due to the convex hull. Then identify the loop containing it
+            if outer_loop_index is None:
+                # Collect all boundary vertices
+                boundary_vert_set = set()
+                for loop in self.loops:
+                    boundary_vert_set.update(loop)
+
+                boundary_indices = np.array(list(boundary_vert_set))
+                boundary_pts = self.points[boundary_indices]
+
+                if len(boundary_pts) == 0:
+                    raise RuntimeError("No boundary vertices found.")
+
+                # Lexicographically smallest point: min x, then min y, then min z
+                lex_order = np.lexsort((boundary_pts[:, 2], boundary_pts[:, 1], boundary_pts[:, 0]))
+                min_local_idx = lex_order[0]
+                extreme_vert_idx = boundary_indices[min_local_idx]
+
+                # Find which loop contains this extreme vertex
+                outer_loop_index = None
+                for i, loop in enumerate(self.loops):
+                    if np.isin(extreme_vert_idx, loop):
+                        outer_loop_index = i
+                        break
+
+                if outer_loop_index is None:
+                    raise RuntimeError("Could not identify outer loop.")
+
+        return outer_loop_index
 
 
     @property
@@ -6719,8 +6746,6 @@ class Mesh(object):
                 source_mesh - corresponding source mesh
         """
 
-        tt = time()
-
         if tight:
             # Get number of points on the outer loop
             num_max_points = 200 if loop.shape[0] < 100000 else 300
@@ -6858,9 +6883,6 @@ class Mesh(object):
 
             # TODO
             # merge back triangle mesh and tutte mesh
-
-        tt = time() - tt
-        print("Elapsed time for scaffolding is:", tt)
 
         return smesh, source_mesh
 
